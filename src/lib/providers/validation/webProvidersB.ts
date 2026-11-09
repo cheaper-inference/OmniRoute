@@ -1,0 +1,859 @@
+// Web-cookie provider key validators (part B): muse-spark-web, adapta-web, claude-web, gemini-web,
+// copilot-web, t3-web, jules, devin (cloud-agent), inner-ai. Extracted from validation.ts (god-file
+// decomposition) — top-level functions with no dispatcher-state captures; behavior is byte-identical
+// to the inline defs.
+import { spawn } from "child_process";
+import { applyCustomUserAgent } from "./headers";
+import {
+  isSecurityBlockError,
+  toValidationErrorResult,
+  validationRead,
+  validationWrite,
+} from "./transport";
+import { SafeOutboundFetchError } from "@/shared/network/safeOutboundFetch";
+import { normalizeSessionCookieHeader } from "@/lib/providers/webCookieAuth";
+import { parseM365PastedCredential } from "@omniroute/open-sse/utils/m365Credentials.ts";
+import {
+  currentM365AccessToken,
+  decodeJwtClaims,
+} from "@omniroute/open-sse/executors/copilot-m365-connection.ts";
+import { normalizeGeminiValidationCookie } from "@omniroute/open-sse/utils/geminiCookies.ts";
+import {
+  looksLikeJwt,
+  resolveSyntxToken,
+  syntxAuthHeaders,
+} from "@omniroute/open-sse/services/syntxAuth.ts";
+import { SYNTX_MODELS_URL } from "@omniroute/open-sse/services/syntxModels.ts";
+import { buildJulesApiUrl } from "@/lib/cloudAgent/julesApi.ts";
+import {
+  META_AI_ASBD_ID,
+  META_AI_FRIENDLY_NAME,
+  META_AI_REQUEST_ANALYTICS_TAGS,
+  META_AI_USER_AGENT,
+  buildMetaAiValidationBody,
+} from "./metaAi";
+
+export async function validateMuseSparkWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const cookieHeader = normalizeSessionCookieHeader(apiKey, "ecto_1_sess");
+    const response = await validationWrite("https://www.meta.ai/api/graphql", {
+      method: "POST",
+      headers: applyCustomUserAgent(
+        {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          "Accept-Language": "en-US,en;q=0.9",
+          Cookie: cookieHeader,
+          Origin: "https://www.meta.ai",
+          Referer: "https://www.meta.ai/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-origin",
+          "User-Agent": META_AI_USER_AGENT,
+          "X-ASBD-ID": META_AI_ASBD_ID,
+          "X-FB-Friendly-Name": META_AI_FRIENDLY_NAME,
+          "X-FB-Request-Analytics-Tags": META_AI_REQUEST_ANALYTICS_TAGS,
+        },
+        providerSpecificData
+      ),
+      body: JSON.stringify(buildMetaAiValidationBody()),
+    });
+
+    const responseText = await response.text();
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid Meta AI session cookie — re-paste ecto_1_sess from meta.ai",
+      };
+    }
+
+    if (/authentication required to send messages|login is required|sign in/i.test(responseText)) {
+      return {
+        valid: false,
+        error: "Invalid Meta AI session cookie — re-paste ecto_1_sess from meta.ai",
+      };
+    }
+
+    if (
+      response.status === 429 ||
+      /limit exceeded|rate limit|too many requests/i.test(responseText)
+    ) {
+      return {
+        valid: false,
+        error: "Meta AI rate limited (429) — wait before retrying",
+      };
+    }
+
+    if (response.ok) {
+      return { valid: true, error: null };
+    }
+
+    if (response.status >= 500) {
+      return { valid: false, error: `Meta AI unavailable (${response.status})` };
+    }
+
+    return { valid: false, error: `Validation failed: ${response.status}` };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateAdaptaWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = typeof apiKey === "string" ? apiKey.trim() : "";
+    if (!raw)
+      return { valid: false, error: "Paste your __client cookie from .clerk.agent.adapta.one" };
+    const eqIdx = raw.indexOf("=");
+    const clientJwt = eqIdx > 0 && !raw.startsWith("eyJ") ? raw.slice(eqIdx + 1).trim() : raw;
+
+    const response = await validationRead("https://clerk.agent.adapta.one/v1/client", {
+      headers: applyCustomUserAgent(
+        {
+          Cookie: `__client=${clientJwt}`,
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+          Origin: "https://agent.adapta.one",
+        },
+        providerSpecificData
+      ),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid or expired __client cookie — re-paste from .clerk.agent.adapta.one",
+      };
+    }
+
+    if (!response.ok) {
+      return { valid: false, error: `Adapta Clerk returned HTTP ${response.status}` };
+    }
+
+    const body = await response.json().catch(() => null);
+    const sessions: Array<{ id: string; status: string }> = body?.response?.sessions ?? [];
+    const hasActive = sessions.some((s) => s.status === "active");
+    if (!hasActive) {
+      return {
+        valid: false,
+        error: "No active Adapta session — your __client cookie may be expired",
+      };
+    }
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateClaudeWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const cookieHeader = normalizeSessionCookieHeader(String(apiKey || ""), "sessionKey");
+    if (!cookieHeader) {
+      return { valid: false, error: "Paste your sessionKey cookie from claude.ai" };
+    }
+
+    const { tlsFetchClaude, TlsClientUnavailableError } =
+      await import("@omniroute/open-sse/services/claudeTlsClient.ts");
+
+    let response: { status: number; text: string | null };
+    try {
+      response = await tlsFetchClaude("https://claude.ai/api/organizations", {
+        method: "GET",
+        headers: applyCustomUserAgent(
+          {
+            Accept: "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "no-cache",
+            Cookie: cookieHeader,
+            Origin: "https://claude.ai",
+            Pragma: "no-cache",
+            Referer: "https://claude.ai/new",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "anthropic-client-platform": "web_claude_ai",
+          },
+          providerSpecificData
+        ),
+        timeoutMs: 30_000,
+      });
+    } catch (err: any) {
+      if (err instanceof TlsClientUnavailableError) {
+        return {
+          valid: false,
+          error: `${err.message} (claude-web requires this — without it, Cloudflare blocks every request)`,
+        };
+      }
+      throw err;
+    }
+
+    if (response.status === 200) {
+      return { valid: true, error: null };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error:
+          "Invalid or expired session cookie — re-paste sessionKey from claude.ai DevTools → Cookies",
+      };
+    }
+
+    if (response.status === 429) {
+      return {
+        valid: false,
+        error: "Claude Web API rate limited (429) — wait before retrying",
+      };
+    }
+
+    if (response.status >= 500) {
+      return { valid: false, error: `Claude.ai unavailable (${response.status})` };
+    }
+
+    return { valid: false, error: `Claude.ai validation failed (${response.status})` };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+// ── Gemini Web cookie validator ──
+export async function validateGeminiWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = String(apiKey || "").trim();
+    if (!raw) {
+      return { valid: false, error: "Paste your __Secure-1PSID cookie from gemini.google.com" };
+    }
+
+    // Accept full cookie blob, bare value, or browser-export JSON.
+    // #15387: reject credentials without a __Secure-1PSID cookie before any network call.
+    const cookieHeader = normalizeGeminiValidationCookie(raw);
+    if (!cookieHeader) {
+      return {
+        valid: false,
+        error:
+          "No __Secure-1PSID cookie found — paste it from gemini.google.com DevTools → Cookies",
+      };
+    }
+
+    const response = await validationRead("https://gemini.google.com/app", {
+      headers: applyCustomUserAgent(
+        {
+          Accept: "text/html,application/xhtml+xml",
+          Cookie: cookieHeader,
+          Origin: "https://gemini.google.com",
+          Referer: "https://gemini.google.com/",
+        },
+        providerSpecificData
+      ),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error:
+          "Invalid or expired __Secure-1PSID cookie — re-paste from gemini.google.com DevTools → Cookies",
+      };
+    }
+
+    // #15387: a 200 is only a signed-in session when the page carries the SNlM0e token;
+    // a signed-out landing page also answers 200 for any junk cookie value.
+    if (response.status === 200) {
+      const body = await response.text().catch(() => "");
+      if (/"SNlM0e"\s*:\s*"[^"]+"/.test(body)) return { valid: true, error: null };
+      return {
+        valid: false,
+        error:
+          "Not signed in — the cookie was not accepted by gemini.google.com. Re-paste __Secure-1PSID from DevTools → Cookies",
+      };
+    }
+    if (response.status < 500) {
+      return { valid: true, error: null };
+    }
+
+    return { valid: false, error: `Gemini validation failed (${response.status})` };
+  } catch (error: any) {
+    // #7859: gemini.google.com/app answers EVERY session probe (valid or not) with a
+    // 302 redirect (typically onward to accounts.google.com). validationRead() uses the
+    // no-redirect preset, so safeOutboundFetch throws REDIRECT_BLOCKED before the
+    // "200/302 = valid" status check above ever runs. A redirect to a PUBLIC host means
+    // the redirect was never followed (no SSRF) and is exactly what a valid Gemini
+    // session looks like here, so treat it as success. A redirect to a private/internal
+    // host is a genuine SSRF signal and must stay invalid — isSecurityBlockError()
+    // already makes that distinction.
+    //
+    // #9407: EXPIRED gemini sessions redirect to accounts.google.com/ServiceLogin,
+    // which is a PUBLIC redirect (not SSRF) but represents a dead session. Inspect
+    // the redirect target to distinguish between:
+    //   - accounts.google.com/ServiceLogin — expired session → valid:false
+    //   - other accounts.google.com paths — ambiguous, warn but treat as valid
+    //   - non-Google redirects (e.g. gemini.google.com redirect loop) — valid
+    if (
+      error instanceof SafeOutboundFetchError &&
+      error.code === "REDIRECT_BLOCKED" &&
+      !isSecurityBlockError(error)
+    ) {
+      const location = error.location ?? "";
+      if (/accounts\.google\.com\/.*ServiceLogin/i.test(location)) {
+        return {
+          valid: false,
+          error:
+            "Session expired — re-paste __Secure-1PSID from gemini.google.com DevTools → Cookies",
+        };
+      }
+      if (/accounts\.google\.com/i.test(location)) {
+        return {
+          valid: true,
+          error: null,
+          warning: "Cookie accepted. Full verification requires browser test on first chat.",
+        };
+      }
+      // #15387: only Google-owned redirect targets are acceptable; anything else is not a
+      // Gemini session signal.
+      if (/^https:\/\/([a-z0-9-]+\.)*google\.com(\/|$)/i.test(location)) {
+        return { valid: true, error: null };
+      }
+      return {
+        valid: false,
+        error: "Unexpected redirect from gemini.google.com — cookie not verified",
+      };
+    }
+    return toValidationErrorResult(error);
+  }
+}
+
+// ── Copilot Web token validator ──
+export async function validateCopilotWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = String(apiKey || "").trim();
+    if (!raw) {
+      return {
+        valid: false,
+        error:
+          "Paste your access_token from an authenticated copilot.microsoft.com request (DevTools → Network → Authorization)",
+      };
+    }
+
+    // Extract token — may be bare JWT, cookie string with access_token=, or Bearer prefix
+    const { extractAccessToken } = await import("@omniroute/open-sse/executors/copilot-web.ts");
+    const token = extractAccessToken(raw);
+    if (!token) {
+      return { valid: false, error: "Could not extract access_token from input" };
+    }
+
+    // Probe Copilot's conversation API to verify token
+    const response = await validationWrite(
+      "https://copilot.microsoft.com/c/api/conversations?language=en",
+      {
+        method: "GET",
+        headers: applyCustomUserAgent(
+          {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+            Origin: "https://copilot.microsoft.com",
+            Referer: "https://copilot.microsoft.com/",
+          },
+          providerSpecificData
+        ),
+      }
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error:
+          "Invalid or expired access_token — capture a fresh Authorization bearer token from copilot.microsoft.com DevTools → Network",
+      };
+    }
+
+    if (response.status >= 500) {
+      return { valid: false, error: `Copilot unavailable (${response.status})` };
+    }
+
+    // 200, 400, 404 etc. all indicate the token was accepted
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export function extractM365CredentialParts(
+  raw: string,
+  providerSpecificData: Record<string, unknown>
+) {
+  const parts = parseM365PastedCredential(raw);
+
+  return {
+    accessToken:
+      parts.accessToken ||
+      (typeof providerSpecificData.access_token === "string"
+        ? providerSpecificData.access_token
+        : "") ||
+      (typeof providerSpecificData.accessToken === "string"
+        ? providerSpecificData.accessToken
+        : ""),
+    chathubPath:
+      parts.chathubPath ||
+      (typeof providerSpecificData.chathubPath === "string"
+        ? providerSpecificData.chathubPath
+        : "") ||
+      (typeof providerSpecificData.userTenant === "string" ? providerSpecificData.userTenant : ""),
+  };
+}
+
+// ── Microsoft 365 Copilot Web token validator ──
+/**
+ * When the sign-in the executor would use has provably expired and nothing can refresh it,
+ * the ISO time it expired; otherwise null. Uses the executor's own token precedence (the
+ * connection's token column, then the pasted credential), so a refreshed connection is
+ * judged by its current token, never by the stale paste.
+ */
+function m365SignInExpiredAt(
+  apiKey: string,
+  providerSpecificData: Record<string, unknown>,
+  credentials: { accessToken?: unknown; refreshToken?: unknown }
+): string | null {
+  const refreshable =
+    (typeof credentials.refreshToken === "string" && credentials.refreshToken) ||
+    (typeof providerSpecificData.refreshToken === "string" && providerSpecificData.refreshToken);
+  if (refreshable) return null;
+  const token = currentM365AccessToken({
+    apiKey,
+    accessToken: typeof credentials.accessToken === "string" ? credentials.accessToken : undefined,
+    providerSpecificData,
+  });
+  const exp = decodeJwtClaims(token)?.exp;
+  return typeof exp === "number" && Number.isFinite(exp) && exp * 1000 <= Date.now()
+    ? new Date(exp * 1000).toISOString()
+    : null;
+}
+
+export async function validateCopilotM365WebProvider({
+  apiKey,
+  providerSpecificData = {},
+  credentials = {},
+}: any) {
+  const { accessToken, chathubPath } = extractM365CredentialParts(
+    String(apiKey || ""),
+    providerSpecificData
+  );
+
+  if (!accessToken) {
+    return {
+      valid: false,
+      error: "Could not extract access_token from the Microsoft 365 Copilot credential",
+    };
+  }
+
+  if (!chathubPath || !chathubPath.includes("@")) {
+    return {
+      valid: false,
+      error: "Could not extract the account-specific Chathub path from the credential",
+    };
+  }
+
+  const expiredAt = m365SignInExpiredAt(String(apiKey || ""), providerSpecificData, credentials);
+  if (expiredAt) {
+    return {
+      valid: false,
+      error: `The Microsoft 365 Copilot sign-in expired at ${expiredAt}. Sign in again with Microsoft.`,
+    };
+  }
+
+  // The live provider uses a SignalR WebSocket. The generic web-cookie /models
+  // probe builds an invalid wss://.../models URL, so validation here confirms
+  // the captured credential shape and lets the executor perform the live check.
+  return {
+    valid: true,
+    error: null,
+    warning: "Credential format accepted. The session is verified when the provider sends a chat.",
+  };
+}
+
+// ── t3.chat Web cookie validator ──
+export async function validateT3WebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = String(apiKey || "").trim();
+    if (!raw) {
+      return {
+        valid: false,
+        error: "Paste your Cookie header and convex-session-id from t3.chat",
+      };
+    }
+
+    // The cookie field may contain "cookies=<Cookie header>\nconvexSessionId=<id>"
+    // or just the Cookie header value. Try to parse.
+    let cookieHeader = raw;
+    let convexSessionId = "";
+
+    if (raw.includes("convexSessionId") || raw.includes("convex-session-id")) {
+      // Structured format: "cookies=...; convexSessionId=..."
+      const parts = raw.split(/[,;\n]/).map((s: string) => s.trim());
+      const cookieParts: string[] = [];
+      for (const part of parts) {
+        if (part.startsWith("convexSessionId=") || part.startsWith("convex-session-id=")) {
+          convexSessionId = part.split("=").slice(1).join("=");
+        } else if (part.startsWith("cookies=")) {
+          cookieParts.push(part.slice("cookies=".length));
+        } else if (part.includes("=")) {
+          cookieParts.push(part);
+        }
+      }
+      if (cookieParts.length) cookieHeader = cookieParts.join("; ");
+    }
+
+    // Build final cookie with convex-session-id if found
+    const finalCookie = convexSessionId
+      ? `${cookieHeader}; convex-session-id=${convexSessionId}`
+      : cookieHeader;
+
+    const response = await validationRead("https://t3.chat", {
+      headers: applyCustomUserAgent(
+        {
+          Accept: "text/html",
+          Cookie: finalCookie,
+        },
+        providerSpecificData
+      ),
+    });
+
+    // t3.chat returns 200/302/404 for valid sessions, 5xx for down
+    if (response.status >= 500) {
+      return { valid: false, error: `t3.chat unavailable (${response.status})` };
+    }
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+/** Jules API — GET /v1alpha/sources with X-Goog-Api-Key (see developers.google.com/jules/api). */
+export async function validateJulesProvider({ apiKey }: { apiKey: string }) {
+  try {
+    const response = await validationWrite(buildJulesApiUrl("/sources"), {
+      method: "GET",
+      headers: {
+        "X-Goog-Api-Key": apiKey,
+      },
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
+
+    if (response.ok) {
+      return { valid: true, error: null };
+    }
+
+    const errorText = await response.text().catch(() => "");
+    return {
+      valid: false,
+      error: errorText.trim() || `Jules API returned ${response.status}`,
+    };
+  } catch (error: unknown) {
+    return toValidationErrorResult(error);
+  }
+}
+
+/**
+ * #devin-cli-key: fallback validator for CLI-format Devin keys.
+ *
+ * The devin provider's actual routing path (open-sse/executors/devin-cli.ts)
+ * shells out to the Devin CLI binary and passes the connection's apiKey as
+ * WINDSURF_API_KEY — never touching api.devin.ai. CLI keys (apk_user_…) are
+ * rejected by the HTTP API, so a 401 from the HTTP probe is NOT evidence the
+ * connection is broken. This runs the same probe the executor uses:
+ * `devin acp --agent-type summarizer` with the key in the environment
+ * (`devin models list` does NOT honor WINDSURF_API_KEY). Exit 0 = key works.
+ */
+async function validateDevinCliKeyFallback(
+  apiKey: unknown
+): Promise<{ valid: boolean; error: string | null }> {
+  const bin = process.env.CLI_DEVIN_BIN?.trim() || "devin";
+  return new Promise((resolve) => {
+    try {
+      const child = spawn(bin, ["acp", "--agent-type", "summarizer"], {
+        env: { ...process.env, WINDSURF_API_KEY: String(apiKey || "") },
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 30_000,
+      });
+      child.on("error", () =>
+        resolve({ valid: false, error: "Devin CLI not available for fallback validation" })
+      );
+      child.on("close", (code) => {
+        if (code === 0) resolve({ valid: true, error: null });
+        else resolve({ valid: false, error: `Devin CLI key check failed (exit ${code})` });
+      });
+    } catch {
+      resolve({ valid: false, error: "Devin CLI fallback spawn failed" });
+    }
+  });
+}
+
+/**
+ * Devin cloud-agent (Cognition) — GET /v1/sessions with Bearer auth
+ * (see docs.devin.ai/api-reference/sessions/list-sessions). Distinct from the
+ * "devin-cli" LLM provider (ACP), which is already wired via providerRegistry.
+ */
+export async function validateDevinCloudAgentProvider({
+  apiKey,
+  allowLocalSpawn = true,
+}: {
+  apiKey: string;
+  /**
+   * S-01 (#15159): whether this caller may cause the local Devin CLI fallback to
+   * spawn. Defaults to permissive because the direct callers (credential-health
+   * scheduler, VNC harvest — the latter is already loopback-gated) are internal.
+   * Remote-reachable routes MUST pass `false` for non-loopback callers: the
+   * fallback is `spawn(bin, ["acp","--agent-type","summarizer"])`, and Hard Rules
+   * #15/#17 require loopback enforcement before any auth check so a leaked JWT via
+   * tunnel cannot trigger process spawning.
+   */
+  allowLocalSpawn?: boolean;
+}): Promise<{ valid: boolean; error: string | null; warning?: string }> {
+  try {
+    const response = await validationWrite("https://api.devin.ai/v1/sessions?limit=1", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      // #devin-cli-key: CLI-format keys (apk_user_…) are rejected by the HTTP API
+      // but are exactly what the devin-cli executor authenticates with (via
+      // WINDSURF_API_KEY). Fall back to probing the CLI itself — the real
+      // routing path — before declaring the key invalid.
+      //
+      // S-01 (#15159): that fallback spawns a child process, so it is skipped
+      // entirely for callers that are not loopback. The HTTP verdict below is
+      // unchanged — a rejected key is still invalid, just not re-probed on the
+      // host on behalf of a remote caller.
+      if (!allowLocalSpawn) {
+        return { valid: false, error: "Invalid API key" };
+      }
+      const cliCheck = await validateDevinCliKeyFallback(apiKey);
+      if (cliCheck.valid) {
+        return {
+          valid: true,
+          error: null,
+          warning: "HTTP API rejected this key; validated via Devin CLI instead",
+        };
+      }
+      return { valid: false, error: "Invalid API key" };
+    }
+
+    if (response.ok) {
+      return { valid: true, error: null };
+    }
+
+    const errorText = await response.text().catch(() => "");
+    return {
+      valid: false,
+      error: errorText.trim() || `Devin API returned ${response.status}`,
+    };
+  } catch (error: unknown) {
+    return toValidationErrorResult(error);
+  }
+}
+
+// ── Notion AI Web (Unofficial/Experimental) cookie validator ──
+// #6758: no public Notion inference API exists; validate by probing a stable,
+// low-privilege authenticated Notion endpoint (getSpaces) with the session
+// cookie rather than the experimental runInferenceTranscript endpoint itself
+// (a live inference call is expensive and unnecessary just to confirm the
+// session is valid).
+export async function validateNotionWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = String(apiKey || "").trim();
+    if (!raw) {
+      return { valid: false, error: "Paste your token_v2 cookie value from notion.so" };
+    }
+
+    const cookieHeader = raw.includes("=") ? raw : `token_v2=${raw}`;
+
+    const response = await validationWrite("https://www.notion.so/api/v3/getSpaces", {
+      method: "POST",
+      headers: applyCustomUserAgent(
+        {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Cookie: cookieHeader,
+          Origin: "https://www.notion.so",
+          Referer: "https://www.notion.so/",
+        },
+        providerSpecificData
+      ),
+      body: "{}",
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid or expired token_v2 cookie — re-paste from notion.so DevTools → Cookies",
+      };
+    }
+
+    if (response.status >= 500) {
+      return { valid: false, error: `Notion unavailable (${response.status})` };
+    }
+
+    if (response.ok) {
+      return { valid: true, error: null };
+    }
+
+    return { valid: false, error: `Notion validation failed (${response.status})` };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateInnerAiProvider({ apiKey }: any) {
+  try {
+    const raw = typeof apiKey === "string" ? apiKey.trim() : "";
+    if (!raw) {
+      return {
+        valid: false,
+        error: "Paste your token cookie and email — format: eyJ... user@example.com",
+      };
+    }
+
+    // Parse token and optional email (format: "TOKEN EMAIL")
+    const eqIdx = raw.indexOf("=");
+    const stripped = eqIdx > 0 && !raw.startsWith("eyJ") ? raw.slice(eqIdx + 1).trim() : raw;
+    const lastSpace = stripped.lastIndexOf(" ");
+    let token = stripped;
+    let credEmail = "";
+    if (lastSpace > 0) {
+      const possibleEmail = stripped.slice(lastSpace + 1).trim();
+      if (possibleEmail.includes("@")) {
+        token = stripped.slice(0, lastSpace).trim();
+        credEmail = possibleEmail;
+      }
+    }
+
+    if (!credEmail) {
+      return {
+        valid: false,
+        error:
+          "Email is required — paste token followed by a space and your email: eyJ... user@example.com",
+      };
+    }
+
+    // Validate JWT structure (3 parts separated by dots)
+    const parts = token.split(".");
+    if (parts.length < 3) {
+      return {
+        valid: false,
+        error:
+          "Invalid token format — paste only the token cookie value from .innerai.com (starts with eyJ…)",
+      };
+    }
+
+    // Decode payload and check expiry
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    let payload: Record<string, unknown> = {};
+    try {
+      payload = JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
+    } catch {
+      return { valid: false, error: "Could not parse Inner.ai token — re-paste from DevTools" };
+    }
+
+    if (typeof payload.exp === "number" && payload.exp * 1000 < Date.now()) {
+      return {
+        valid: false,
+        error:
+          "Inner.ai token has expired — re-login at app.innerai.com and re-paste the token cookie",
+      };
+    }
+
+    // Verify the token carries at least one known Inner.ai identity field
+    const hasIdentity =
+      payload.device_id ??
+      payload.deviceId ??
+      payload["device-id"] ??
+      payload.did ??
+      payload.user_id ??
+      payload.userId ??
+      payload.sub;
+    if (!hasIdentity) {
+      return {
+        valid: false,
+        error:
+          "Token does not look like an Inner.ai session token — re-paste from DevTools → Cookies → .innerai.com",
+      };
+    }
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateTinyCmsWebProvider({ apiKey, providerSpecificData = {} }: any) {
+  try {
+    const raw = typeof apiKey === "string" ? apiKey.trim() : "";
+    if (!raw || !raw.startsWith("R")) {
+      return { valid: false, error: "TinyCMS UUID must start with 'R'" };
+    }
+
+    const response = await validationRead("https://gov.freegpt.win/api/challenge", {
+      headers: applyCustomUserAgent(
+        {
+          uuid: raw,
+          "x-origin": "https://gov.freegpt.win",
+          Accept: "application/json",
+        },
+        providerSpecificData
+      ),
+    });
+
+    if (!response.ok) {
+      return {
+        valid: false,
+        error: `TinyCMS UUID validation status: ${response.status} (invalid/expired UUID)`,
+      };
+    }
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateSyntxProvider({
+  apiKey,
+  providerSpecificData = {},
+  accessToken,
+}: any) {
+  try {
+    const token = resolveSyntxToken({ apiKey, accessToken, providerSpecificData });
+    if (!looksLikeJwt(token)) {
+      return {
+        valid: false,
+        error: "Paste your SYNTX.ai Bearer JWT from syntx.ai DevTools -> Network -> api.syntx.ai",
+      };
+    }
+
+    const response = await validationRead(SYNTX_MODELS_URL, {
+      method: "GET",
+      headers: applyCustomUserAgent(syntxAuthHeaders(token), providerSpecificData),
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        valid: false,
+        error: "Invalid or expired SYNTX JWT — re-paste Authorization Bearer from syntx.ai",
+      };
+    }
+    if (response.status >= 500) {
+      return { valid: false, error: `SYNTX unavailable (${response.status})` };
+    }
+    if (response.ok) return { valid: true, error: null };
+    return { valid: false, error: `SYNTX validation failed (${response.status})` };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}

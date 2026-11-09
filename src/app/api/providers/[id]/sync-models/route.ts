@@ -1,0 +1,876 @@
+import { NextResponse } from "next/server";
+import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
+import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import {
+  deleteImportedCustomModels,
+  deleteSyncedAvailableModelsForProvider,
+  getSyncedAvailableModelsForConnection,
+} from "@/lib/db/models";
+import { selectModelsForImport } from "@/shared/utils/freeModels";
+import { resolveEffectiveAvailableModels } from "@/shared/utils/modelListResolution";
+import {
+  importManagedModels,
+  type ManagedModelImportMode,
+} from "@/lib/providerModels/managedModelImport";
+import { createModelSyncTimings } from "@/lib/providerModels/modelSyncTimings";
+import { saveCallLog } from "@/lib/usage/callLogs";
+import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
+import {
+  buildModelSyncInternalHeaders,
+  fetchModelSyncInternal,
+  getModelSyncInternalBaseUrl,
+  isModelSyncInternalRequest,
+  isModelSyncLocalSpawnDenied,
+} from "@/shared/services/modelSyncScheduler";
+import { autoSyncCodexProfilesFromLiveCatalog } from "@/lib/cli-helper/codexProfileAutoSync";
+import { autoSyncClaudeProfilesFromLiveCatalog } from "@/lib/cli-helper/claudeProfileAutoSync";
+import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
+import { providerUsesCuratedModelsOnly } from "@/lib/providers/modelListingCapability";
+import {
+  fetchVolcPlanModels,
+  providerToVolcPlanKind,
+} from "@/lib/providers/volcenginePlanModelDiscovery";
+import { replaceSyncedAvailableModelsForConnection } from "@/lib/db/models";
+import { GET as getProviderModels } from "../models/route";
+import { isDegradedDiscovery } from "./degradedLocalCatalog";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { findStaleComboModelRefs, type StaleComboModelRef } from "@/lib/combos/staleModelRefs";
+import {
+  isStaleComboAutoPruneEnabled,
+  pruneStaleComboModelRefs,
+} from "@/lib/combos/staleModelPrune";
+import { logAuditEvent } from "@/lib/compliance/index";
+
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function toNonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function normalizeModelForComparison(model: unknown) {
+  const record = asRecord(model);
+  const id = toNonEmptyString(record.id) || "";
+  const name = toNonEmptyString(record.name) || id;
+  const rawSource = toNonEmptyString(record.source)?.toLowerCase();
+  const source =
+    rawSource === "api-sync" || rawSource === "auto-sync" || rawSource === "imported"
+      ? "imported"
+      : rawSource || "manual";
+  const apiFormat = toNonEmptyString(record.apiFormat) || "chat-completions";
+  const supportedEndpoints = Array.isArray(record.supportedEndpoints)
+    ? Array.from(
+        new Set(
+          record.supportedEndpoints
+            .map((endpoint) => toNonEmptyString(endpoint))
+            .filter((endpoint): endpoint is string => Boolean(endpoint))
+        )
+      ).sort()
+    : ["chat"];
+
+  return {
+    id,
+    name,
+    source,
+    apiFormat,
+    supportedEndpoints,
+  };
+}
+
+function isManagedSyncedModel(model: unknown) {
+  const record = asRecord(model);
+  const source = toNonEmptyString(record.source)?.toLowerCase();
+  return source === "api-sync" || source === "auto-sync" || source === "imported";
+}
+
+function getErrorMessageFromPayload(payload: JsonRecord): string | null {
+  const error = payload.error;
+  if (typeof error === "string" && error.trim().length > 0) {
+    return error.trim();
+  }
+
+  const errorRecord = asRecord(error);
+  return toNonEmptyString(errorRecord.message) || toNonEmptyString(payload.message);
+}
+
+async function readJsonResponse(response: Response): Promise<{
+  data: JsonRecord;
+  parseError: string | null;
+}> {
+  const body = await response.text();
+  if (!body.trim()) {
+    return {
+      data: {},
+      parseError: "Empty response body from /models",
+    };
+  }
+
+  try {
+    return {
+      data: asRecord(JSON.parse(body)),
+      parseError: null,
+    };
+  } catch {
+    return {
+      data: {},
+      parseError: "Invalid JSON response from /models",
+    };
+  }
+}
+
+function summarizeModelChanges(previousModels: unknown, nextModels: unknown) {
+  const previousList = Array.isArray(previousModels) ? previousModels : [];
+  const nextList = Array.isArray(nextModels) ? nextModels : [];
+
+  const previousMap = new Map(
+    previousList
+      .map((model) => normalizeModelForComparison(model))
+      .filter((model) => model.id)
+      .map((model) => [model.id, JSON.stringify(model)])
+  );
+  const nextMap = new Map(
+    nextList
+      .map((model) => normalizeModelForComparison(model))
+      .filter((model) => model.id)
+      .map((model) => [model.id, JSON.stringify(model)])
+  );
+
+  let added = 0;
+  let removed = 0;
+  let updated = 0;
+
+  for (const [id, nextValue] of nextMap.entries()) {
+    const previousValue = previousMap.get(id);
+    if (!previousValue) {
+      added += 1;
+      continue;
+    }
+    if (previousValue !== nextValue) {
+      updated += 1;
+    }
+  }
+
+  for (const id of previousMap.keys()) {
+    if (!nextMap.has(id)) {
+      removed += 1;
+    }
+  }
+
+  return {
+    added,
+    removed,
+    updated,
+    total: added + removed + updated,
+  };
+}
+
+function getModelSyncChannelLabel(connection: unknown) {
+  const record = asRecord(connection);
+  const providerSpecificData = asRecord(record.providerSpecificData);
+
+  return (
+    toNonEmptyString(record.displayName) ||
+    toNonEmptyString(record.email) ||
+    toNonEmptyString(providerSpecificData.tag) ||
+    toNonEmptyString(record.name) ||
+    toNonEmptyString(record.provider) ||
+    (toNonEmptyString(record.id) ? `connection:${String(record.id).slice(0, 8)}` : null) ||
+    "unknown"
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Shared loopback readiness gate — eliminates 17× retry amplification at boot
+// ---------------------------------------------------------------------------
+
+// Module-level shared promise: gates all selfFetchWithRetry callers behind a
+// single readiness probe. The 17 connections that fire ModelSync at boot all
+// await the same promise; the underlying HTTP probe runs exactly once per
+// process. Resolves on first HTTP response (any status — even 4xx confirms the
+// server is up); rejects only if maxWaitMs elapses with consistent network
+// errors. On rejection the promise is NOT memorized: the gate re-probes for the
+// next caller after the retry window, so a boot-time failure cannot condemn the
+// process to the in-process fallback for its whole lifetime.
+let __loopbackReadyPromise: Promise<void> | null = null;
+let __loopbackLastFailureAt = 0;
+
+/** Anti-storm bound: minimum interval between two probes after a failure. */
+const LOOPBACK_RETRY_MIN_INTERVAL_MS = 30_000;
+
+export type EnsureReadyOptions = {
+  fetch?: typeof fetch;
+  maxWaitMs?: number;
+  pollMs?: number;
+  /** Minimum interval between two probes after a failure (anti-storm). */
+  minRetryIntervalMs?: number;
+};
+
+export async function ensureLoopbackServerReady(opts: EnsureReadyOptions = {}): Promise<void> {
+  if (__loopbackReadyPromise != null) return __loopbackReadyPromise;
+  const minRetryIntervalMs = opts.minRetryIntervalMs ?? LOOPBACK_RETRY_MIN_INTERVAL_MS;
+  if (Date.now() - __loopbackLastFailureAt < minRetryIntervalMs) {
+    // Anti-storm window: reject immediately without re-probing — callers in the
+    // same burst all fall back to the in-process route.
+    throw new Error(
+      `loopback server not ready (probe failed ${Date.now() - __loopbackLastFailureAt}ms ago; retry after ${minRetryIntervalMs}ms)`
+    );
+  }
+  __loopbackReadyPromise = (async () => {
+    const f = opts.fetch ?? fetchModelSyncInternal;
+    const maxWaitMs = opts.maxWaitMs ?? 30_000;
+    const pollMs = opts.pollMs ?? 250;
+    const deadline = Date.now() + maxWaitMs;
+    let lastErr: unknown;
+    while (Date.now() < deadline) {
+      try {
+        // Hit a stable endpoint; any HTTP status (200/404/etc) confirms
+        // readiness — we only care that the dispatcher succeeds (no
+        // ECONNREFUSED). Using a synthetic connection id so no real DB lookup
+        // is needed; the 404 is sufficient proof the server is dispatching.
+        const res = await f(
+          `${getModelSyncInternalBaseUrl()}/api/providers/__readiness_probe__/models`,
+          {
+            redirect: "error",
+            signal: AbortSignal.timeout(2_000),
+          }
+        );
+        if (res.status >= 200 && res.status < 600) return;
+      } catch (err) {
+        lastErr = err;
+      }
+      await new Promise((r) => setTimeout(r, pollMs));
+    }
+    throw new Error(`loopback server not ready within ${maxWaitMs}ms: ${String(lastErr)}`);
+  })();
+  void __loopbackReadyPromise.catch((err) => {
+    // Memorize success only: release the gate for the next probe, bounded by
+    // the anti-storm window. The handler does not reject — callers receive the
+    // rejection of the original promise.
+    __loopbackLastFailureAt = Date.now();
+    __loopbackReadyPromise = null;
+    console.warn(
+      `[ModelSync] Loopback server readiness probe failed; falling back to in-process route: ${String(err)}`
+    );
+  });
+  return __loopbackReadyPromise;
+}
+
+/** Test helper: reset the cached promise so tests can re-exercise the probe. */
+export function __resetLoopbackReadinessForTests(): void {
+  __loopbackReadyPromise = null;
+  __loopbackLastFailureAt = 0;
+}
+
+// ---------------------------------------------------------------------------
+// selfFetchWithRetry — exported for unit testing
+// ---------------------------------------------------------------------------
+
+export type SelfFetchWithRetryOptions = {
+  /** Injectable fetch implementation; defaults to global fetch. */
+  fetch?: typeof fetch;
+  /** Maximum number of HTTP attempts before falling back. Default: 3. */
+  maxRetries?: number;
+  /**
+   * Base backoff in ms. Each attempt waits backoffMs * (attempt + 1) before
+   * the next try (linear growth: 200 ms, 400 ms, 600 ms, ... at default 200 ms).
+   * Default: 200.
+   */
+  backoffMs?: number;
+  /** Connection ID used only for the warning log message. Optional. */
+  connectionId?: string;
+  /**
+   * Called as last-resort fallback after all retries are exhausted.
+   * Must return a Response. If omitted, returns a synthetic 503.
+   */
+  inProcessFallback?: () => Promise<Response>;
+  /**
+   * Skip the shared readiness gate. Use in tests that exercise the retry
+   * loop in isolation without needing a live loopback server.
+   * Default: false.
+   */
+  skipReadinessGate?: boolean;
+};
+
+/**
+ * Wraps a single loopback self-fetch URL with linear-backoff retry logic.
+ *
+ * Motivation: at container boot, ModelSync fires up to 17 concurrent
+ * self-fetches against http://127.0.0.1:PORT before the in-process HTTP
+ * listener is fully accepting connections. A shared readiness gate
+ * (ensureLoopbackServerReady) now serialises the boot race — all 17 callers
+ * await the same promise, so only one probe sequence runs. Retries here are
+ * a last-resort for transient failures AFTER the server is confirmed up.
+ *
+ * Retry contract:
+ * - Network errors (fetch failed, ECONNREFUSED): retry up to `maxRetries`.
+ * - Any HTTP response (2xx/4xx/5xx): returned as-is — the server is up, so the
+ *   caller (route handler) handles status interpretation. Retries are only
+ *   for network-level failures, not for HTTP errors.
+ */
+export async function selfFetchWithRetry(
+  url: string,
+  opts: SelfFetchWithRetryOptions = {}
+): Promise<Response> {
+  const f = opts.fetch ?? fetchModelSyncInternal;
+  // Reduced from 5 to 3: the readiness gate now handles the boot race.
+  // Retries here are only for transient failures after server is confirmed up.
+  const maxRetries = opts.maxRetries ?? 3;
+  const backoffMs = opts.backoffMs ?? 200;
+  const connLabel = opts.connectionId ? opts.connectionId.slice(0, 8) : url.slice(-8);
+
+  // Wait for the loopback server to be ready before firing. All concurrent
+  // callers share the same readiness promise — exactly ONE probe runs per
+  // process, eliminating the 17× retry amplification observed at boot.
+  if (opts.skipReadinessGate !== true) {
+    try {
+      await ensureLoopbackServerReady({ fetch: f });
+    } catch {
+      // Readiness probe timed out — fall straight through to in-process fallback.
+      // The transition is logged once by the gate itself (per probe, not per caller).
+      if (opts.inProcessFallback) {
+        return opts.inProcessFallback();
+      }
+      return new Response(JSON.stringify({ error: "self-fetch unavailable" }), { status: 503 });
+    }
+  }
+
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const res = await f(url, { method: "GET" });
+      // Any HTTP response (2xx, 4xx, 5xx) means the server is up — return as-is.
+      // We only retry on network-level failures (ECONNREFUSED, "fetch failed")
+      // which indicate the loopback listener is not yet accepting connections.
+      return res;
+    } catch (err) {
+      lastErr = err;
+    }
+    if (attempt < maxRetries - 1) {
+      await new Promise<void>((r) => setTimeout(r, backoffMs * (attempt + 1)));
+    }
+  }
+
+  // All retries exhausted (network-level failures only) — fall back to in-process route
+  console.warn(
+    `[ModelSync] Internal /models self-fetch failed for ${connLabel} after ${maxRetries} attempt(s); falling back to in-process route (last err: ${String(lastErr)})`
+  );
+
+  if (opts.inProcessFallback) {
+    return opts.inProcessFallback();
+  }
+  return new Response(JSON.stringify({ error: "self-fetch unavailable" }), { status: 503 });
+}
+
+// ---------------------------------------------------------------------------
+// fetchProviderModelsForSync — private orchestrator (uses selfFetchWithRetry)
+// ---------------------------------------------------------------------------
+
+async function fetchProviderModelsForSync(request: Request, connectionId: string) {
+  const safeOrigin = getModelSyncInternalBaseUrl();
+  const modelsPath =
+    `/api/providers/${encodeURIComponent(connectionId)}/models` +
+    "?refresh=true&excludeCustom=true";
+  const peerLocality = request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || "remote";
+  const denyLocalSpawn = peerLocality !== "loopback" || isModelSyncLocalSpawnDenied(request);
+  const headers = {
+    cookie: request.headers.get("cookie") || "",
+    "x-omniroute-model-surface": "chat",
+    ...buildModelSyncInternalHeaders({ denyLocalSpawn }),
+  };
+
+  const targetUrl = `${safeOrigin}${modelsPath}`;
+
+  // Wrap fetch so it forwards the required headers on every retry attempt.
+  const fetchWithHeaders: typeof fetch = (input, init) =>
+    fetchModelSyncInternal(input, { ...init, headers, redirect: "error" });
+
+  return selfFetchWithRetry(targetUrl, {
+    fetch: fetchWithHeaders,
+    connectionId,
+    inProcessFallback: () =>
+      getProviderModels(
+        new Request(new URL(modelsPath, "http://localhost").href, {
+          method: "GET",
+          // This direct call bypasses the pipeline that normally stamps trusted locality.
+          headers: { ...headers, [AUTHZ_HEADER_PEER_LOCALITY]: peerLocality },
+        }),
+        { params: { id: connectionId } }
+      ),
+  });
+}
+
+/**
+ * POST /api/providers/[id]/sync-models
+ *
+ * Fetches the model list from a provider's /models endpoint, stores discovered
+ * models in the per-connection available-model cache, and removes matching
+ * upstream-discovered rows from the provider's custom model list. Successful
+ * syncs only write a call log when the fetched channel or custom model cleanup
+ * changes stored model state.
+ *
+ * Used by:
+ * - modelSyncScheduler (auto-sync on interval)
+ * - Manual trigger from UI
+ */
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const start = Date.now();
+  const timings = createModelSyncTimings();
+  const saveTimedCallLog = (entry: Parameters<typeof saveCallLog>[0]) =>
+    timings.measure("call-log", () => saveCallLog(entry));
+  const { id } = await params;
+  const requestUrl = new URL(request.url);
+  const mode = (
+    requestUrl.searchParams.get("mode") === "import" ? "merge" : "sync"
+  ) as ManagedModelImportMode;
+  // quiet=1: boot revalidation path — skip chatty ModelSync console lines
+  const quiet = requestUrl.searchParams.get("quiet") === "1";
+  let logProvider = "unknown";
+  let channelLabel: string | null = null;
+
+  try {
+    if (!(await isAuthenticated(request)) && !isModelSyncInternalRequest(request)) {
+      return NextResponse.json(
+        { error: { message: "Authentication required", type: "invalid_api_key" } },
+        { status: 401 }
+      );
+    }
+
+    const connection = await getCachedProviderConnectionById(id);
+    if (!connection) {
+      return NextResponse.json({ error: "Connection not found" }, { status: 404 });
+    }
+
+    logProvider = toNonEmptyString(connection.provider) || "unknown";
+    channelLabel = getModelSyncChannelLabel(connection);
+
+    // Volcano Ark plan providers: discover models live from the console API
+    // (cookie+csrf captured at bind time). The chat API has no /models
+    // endpoint, so the default discovery path below cannot serve them.
+    const volcPlanKind = providerToVolcPlanKind(logProvider);
+    if (volcPlanKind) {
+      const psd =
+        connection.providerSpecificData && typeof connection.providerSpecificData === "object"
+          ? (connection.providerSpecificData as JsonRecord)
+          : {};
+      const cookie = toNonEmptyString(psd.volcConsoleCookie) || "";
+      const csrf = toNonEmptyString(psd.volcCsrfToken) || "";
+      const duration = Date.now() - start;
+      let discovered;
+      try {
+        discovered = await fetchVolcPlanModels(volcPlanKind, cookie, csrf);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        await saveTimedCallLog({
+          method: "POST",
+          path: `/api/providers/${id}/sync-models`,
+          status: 401,
+          model: "model-sync",
+          provider: logProvider,
+          sourceFormat: "-",
+          connectionId: id,
+          duration,
+          error: message,
+          requestType: "model-sync",
+          ...(channelLabel ? { responseBody: { channel: channelLabel } } : {}),
+        }).catch(() => undefined);
+        return NextResponse.json(
+          { error: sanitizeErrorMessage(message) || "Volcano plan discovery failed" },
+          { status: 401 }
+        );
+      }
+      const previous = await getSyncedAvailableModelsForConnection(logProvider, id);
+      const synced = await replaceSyncedAvailableModelsForConnection(logProvider, id, discovered);
+      const prevIds = new Set(previous.map((m) => String(m.id)));
+      const added = synced.filter((m) => !prevIds.has(String(m.id))).length;
+      const removed = previous.filter(
+        (m) => !synced.some((n) => String(n.id) === String(m.id))
+      ).length;
+      await saveTimedCallLog({
+        method: "GET",
+        path: `/api/providers/${id}/models`,
+        status: 200,
+        model: "model-sync",
+        provider: logProvider,
+        sourceFormat: "console-discovery",
+        connectionId: id,
+        duration: Date.now() - start,
+        requestType: "model-sync",
+        responseBody: {
+          source: "volcengine-plan-console-discovery",
+          plan: volcPlanKind,
+          syncedModels: synced.length,
+          added,
+          removed,
+          provider: logProvider,
+          channel: channelLabel,
+          mode,
+        },
+      }).catch(() => undefined);
+      return NextResponse.json({
+        ok: true,
+        provider: logProvider,
+        connectionId: id,
+        source: "volcengine-plan-console-discovery",
+        plan: volcPlanKind,
+        mode,
+        syncedModels: synced.length,
+        availableModelsCount: synced.length,
+        modelChanges: { added, removed, total: added + removed },
+        models: synced,
+      });
+    }
+
+    const isSearchProvider = getSearchProvider(logProvider) !== null;
+    if (providerUsesCuratedModelsOnly(logProvider) || isSearchProvider) {
+      const [removedSyncedLists, removedImportedModelIds] = await Promise.all([
+        deleteSyncedAvailableModelsForProvider(logProvider),
+        deleteImportedCustomModels(logProvider),
+      ]);
+      return NextResponse.json({
+        provider: logProvider,
+        connectionId: id,
+        source: isSearchProvider ? "search" : "curated",
+        skipped: isSearchProvider ? "search-provider" : "curated-models-only",
+        syncedModels: 0,
+        availableModelsCount: 0,
+        models: [],
+        cleanup: {
+          removedSyncedLists,
+          removedImportedModels: removedImportedModelIds.length,
+        },
+      });
+    }
+    const previousSyncedAvailableModelsForConnection = await getSyncedAvailableModelsForConnection(
+      logProvider,
+      id
+    );
+
+    const modelsRes = await timings.measure("discovery", () =>
+      fetchProviderModelsForSync(request, id)
+    );
+
+    const duration = Date.now() - start;
+    const { data: modelsData, parseError } = await timings.measure("discovery-body", () =>
+      readJsonResponse(modelsRes)
+    );
+    const payloadError = getErrorMessageFromPayload(modelsData);
+
+    if (!modelsRes.ok || parseError) {
+      const responseStatus = modelsRes.ok ? 502 : modelsRes.status;
+      const logError = payloadError || parseError || `HTTP ${modelsRes.status}`;
+      const responseError = payloadError || parseError || "Failed to fetch models";
+      // Log the failed attempt
+      await saveTimedCallLog({
+        method: "GET",
+        path: `/api/providers/${id}/models`,
+        status: modelsRes.status,
+        model: "model-sync",
+        provider: logProvider,
+        sourceFormat: "-",
+        connectionId: id,
+        duration,
+        error: logError,
+        requestType: "model-sync",
+        ...(parseError
+          ? {
+              responseBody: {
+                upstreamStatus: modelsRes.status,
+                parseError,
+              },
+            }
+          : {}),
+      });
+
+      return NextResponse.json(
+        {
+          error: responseError,
+          ...(parseError ? { upstreamStatus: modelsRes.status } : {}),
+        },
+        { status: responseStatus }
+      );
+    }
+
+    const modelSource = toNonEmptyString(modelsData.source)?.toLowerCase() || "unknown";
+    const modelWarning = toNonEmptyString(modelsData.warning);
+    // The reason of the failed discovery travels with the refusal: the operator
+    // sees WHY the catalog could not be synced, not only that it was not.
+    const modelCause = toNonEmptyString(modelsData.error);
+    const discoveryFailure = asRecord(modelsData.discoveryFailure);
+    const hasDiscoveryFailure = Object.keys(discoveryFailure).length > 0;
+    if (isDegradedDiscovery(modelsData)) {
+      const responseError =
+        modelCause || modelWarning || "Remote model discovery failed; catalog fallback not synced";
+      await saveTimedCallLog({
+        method: "GET",
+        path: `/api/providers/${id}/models`,
+        status: 502,
+        model: "model-sync",
+        provider: logProvider,
+        sourceFormat: "-",
+        connectionId: id,
+        duration,
+        error: responseError,
+        requestType: "model-sync",
+        responseBody: {
+          source: modelSource,
+          warning: modelWarning,
+          ...(hasDiscoveryFailure ? { discoveryFailure } : {}),
+          provider: logProvider,
+          channel: channelLabel,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          error: responseError,
+          source: modelSource,
+          ...(modelWarning ? { warning: modelWarning } : {}),
+          ...(hasDiscoveryFailure ? { discoveryFailure } : {}),
+        },
+        { status: 502 }
+      );
+    }
+
+    const allFetchedModels = modelsData.models || [];
+    const importFreeOnly = Boolean(
+      (connection.providerSpecificData as Record<string, unknown> | undefined)?.importFreeModelsOnly
+    );
+    const { models: fetchedModels, freeFilterEmpty } = selectModelsForImport(
+      logProvider,
+      allFetchedModels,
+      importFreeOnly
+    );
+    const {
+      previousModels,
+      previousSyncedAvailableModels,
+      persistedModels,
+      importedModels,
+      discoveredModels,
+      syncedAvailableModels,
+      syncedAliases,
+      importedChanges,
+    } = await timings.measure("managed-import", () =>
+      importManagedModels({
+        providerId: logProvider,
+        connectionId: id,
+        fetchedModels,
+        mode,
+        previousSyncedAvailableModels: previousSyncedAvailableModelsForConnection,
+      })
+    );
+
+    const effectiveAvailableModels = resolveEffectiveAvailableModels(
+      freeFilterEmpty,
+      discoveredModels,
+      syncedAvailableModels
+    );
+    if (freeFilterEmpty) {
+      log.warn(
+        "SYNC",
+        `freeFilterEmpty: ${Array.isArray(allFetchedModels) ? allFetchedModels.length : 0} fetched, 0 free — not falling back to stale syncedAvailableModels (${logProvider})`
+      );
+    }
+    const modelChanges = summarizeModelChanges(
+      previousSyncedAvailableModels,
+      effectiveAvailableModels
+    );
+    const customModelChanges = summarizeModelChanges(previousModels, persistedModels);
+    const syncedModelsCount = freeFilterEmpty
+      ? 0
+      : effectiveAvailableModels.length > 0
+        ? effectiveAvailableModels.length
+        : persistedModels.filter((model) => isManagedSyncedModel(model)).length;
+    const availableModelsCount = new Set(
+      [...persistedModels, ...effectiveAvailableModels]
+        .map((model) => toNonEmptyString(asRecord(model).id))
+        .filter((modelId): modelId is string => Boolean(modelId))
+    ).size;
+    const importedCount = importedChanges.added;
+    const updatedCount = importedChanges.updated;
+    const shouldLog = modelChanges.total > 0 || customModelChanges.total > 0;
+
+    if (shouldLog && !quiet) {
+      void autoSyncCodexProfilesFromLiveCatalog(request, `model-sync:${logProvider}`)
+        .then((syncResult) => {
+          if (syncResult.ok) {
+            console.log(
+              `[ModelSync] Codex profile auto-sync wrote ${syncResult.written} profile(s), skipped ${syncResult.skipped} (${logProvider})`
+            );
+          } else {
+            console.log(
+              `[ModelSync] Codex profile auto-sync skipped for ${logProvider}: ${syncResult.reason}`
+            );
+          }
+        })
+        .catch((err) => {
+          console.log(
+            `[ModelSync] Codex profile auto-sync failed for ${logProvider}:`,
+            err?.message || err
+          );
+        });
+
+      void autoSyncClaudeProfilesFromLiveCatalog(request, `model-sync:${logProvider}`)
+        .then((syncResult) => {
+          if (syncResult.ok) {
+            console.log(
+              `[ModelSync] Claude profile auto-sync wrote ${syncResult.written} profile(s), skipped ${syncResult.skipped} (${logProvider})`
+            );
+          } else {
+            console.log(
+              `[ModelSync] Claude profile auto-sync skipped for ${logProvider}: ${syncResult.reason}`
+            );
+          }
+        })
+        .catch((err) => {
+          console.log(
+            `[ModelSync] Claude profile auto-sync failed for ${logProvider}:`,
+            err?.message || err
+          );
+        });
+    } else if (shouldLog && quiet) {
+      // Still update profiles; suppress console noise from boot revalidation.
+      void autoSyncCodexProfilesFromLiveCatalog(request, `model-sync:${logProvider}`).catch(
+        () => undefined
+      );
+      void autoSyncClaudeProfilesFromLiveCatalog(request, `model-sync:${logProvider}`).catch(
+        () => undefined
+      );
+    }
+
+    // #13505: flag combo steps pinned to models this sync dropped. Failed and
+    // degraded syncs returned above; a free-only import is a deliberate subset,
+    // so it never prunes. Errors must not fail the sync, so they are swallowed.
+    let staleComboRefs: StaleComboModelRef[] = [];
+    let prunedComboRefs: StaleComboModelRef[] = [];
+    try {
+      staleComboRefs = await timings.measure("stale-combo", () =>
+        findStaleComboModelRefs(logProvider)
+      );
+      if (
+        staleComboRefs.length > 0 &&
+        !importFreeOnly &&
+        !freeFilterEmpty &&
+        isStaleComboAutoPruneEnabled()
+      ) {
+        prunedComboRefs = await timings.measure("stale-combo-prune", () =>
+          pruneStaleComboModelRefs(staleComboRefs)
+        );
+        for (const ref of prunedComboRefs) {
+          logAuditEvent({
+            action: "combo.stale_model_ref.pruned",
+            actor: "system",
+            target: ref.comboName,
+            resourceType: "combo",
+            details: { connectionId: id, provider: logProvider, ...ref },
+          });
+        }
+        staleComboRefs = staleComboRefs.filter((ref) => !prunedComboRefs.includes(ref));
+      }
+      if (staleComboRefs.length > 0) {
+        if (!quiet) {
+          log.warn(
+            "SYNC",
+            `${staleComboRefs.length} combo step(s) pin models missing from the ${logProvider} catalog: ${staleComboRefs.map((ref) => `${ref.comboName} -> ${ref.model}`).join(", ")}`
+          );
+        }
+        // Audit only when the catalog changed, so periodic syncs don't repeat it.
+        if (shouldLog) {
+          logAuditEvent({
+            action: "combo.stale_model_refs.flagged",
+            actor: "system",
+            target: logProvider,
+            resourceType: "combo",
+            details: { connectionId: id, staleComboRefs },
+          });
+        }
+      }
+    } catch (error) {
+      if (!quiet) {
+        log.warn("SYNC", `stale combo ref check failed for ${logProvider}: ${String(error)}`);
+      }
+    }
+
+    if (shouldLog) {
+      await saveTimedCallLog({
+        method: "GET",
+        path: `/api/providers/${id}/models`,
+        status: 200,
+        model: "model-sync",
+        provider: logProvider,
+        sourceFormat: "-",
+        connectionId: id,
+        duration: Date.now() - start,
+        requestType: "model-sync",
+        responseBody: {
+          syncedModels: syncedModelsCount,
+          availableModelsCount,
+          syncedAliases,
+          provider: logProvider,
+          channel: channelLabel,
+          modelChanges,
+          customModelChanges,
+          importedCount,
+          updatedCount,
+          mode,
+        },
+      });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      provider: logProvider,
+      mode,
+      importFreeOnly,
+      freeFilterEmpty,
+      syncedModels: syncedModelsCount,
+      availableModelsCount,
+      syncedAliases,
+      modelChanges,
+      customModelChanges,
+      importedCount,
+      updatedCount,
+      importedChanges,
+      logged: shouldLog,
+      models: persistedModels,
+      importedModels,
+      staleComboRefs,
+      prunedComboRefs,
+    });
+  } catch (error: any) {
+    // Keep the audit sink explicit for the call-scoped error-helper gate.
+    await timings
+      .measure("call-log", () =>
+        saveCallLog({
+          method: "POST",
+          path: `/api/providers/${id}/sync-models`,
+          status: 500,
+          model: "model-sync",
+          provider: logProvider,
+          sourceFormat: "-",
+          connectionId: id,
+          duration: Date.now() - start,
+          error: error.message || "Sync failed",
+          requestType: "model-sync",
+          ...(channelLabel
+            ? {
+                responseBody: {
+                  channel: channelLabel,
+                },
+              }
+            : {}),
+        })
+      )
+      .catch(() => {});
+
+    return NextResponse.json(
+      { error: sanitizeErrorMessage(error) || "Failed to sync models" },
+      { status: 500 }
+    );
+  } finally {
+    timings.finish();
+  }
+}

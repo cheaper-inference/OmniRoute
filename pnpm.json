@@ -1,0 +1,16 @@
+{
+  "onlyBuiltDependencies": [
+    "@parcel/watcher",
+    "@swc/core",
+    "better-sqlite3",
+    "core-js",
+    "esbuild",
+    "keytar",
+    "libxmljs2",
+    "omniroute",
+    "onnxruntime-node",
+    "protobufjs",
+    "sharp",
+    "unrs-resolver"
+  ]
+}

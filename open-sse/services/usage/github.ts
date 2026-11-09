@@ -1,0 +1,310 @@
+/**
+ * usage/github.ts — GitHub Copilot usage fetcher + quota/plan helpers.
+ *
+ * Extracted from services/usage.ts (god-file decomposition): the GitHub family —
+ * the copilot_internal/user fetcher (getGitHubUsage), the paid/limited quota
+ * snapshot formatter (formatGitHubQuotaSnapshot), the plan-name inference
+ * (inferGitHubPlanName), and the display gate (shouldDisplayGitHubQuota).
+ * Depends only on the sibling scalar/quota leaves + the GitHub internal-user
+ * header profile — no host coupling — so it lives as a co-located provider leaf.
+ * usage.ts imports getGitHubUsage (dispatcher) + re-exports the helpers via
+ * __testing (existing usage-utils / usage-service-hardening suites read them
+ * from there). Behavior-preserving move.
+ */
+
+import { getGitHubCopilotInternalUserHeaders } from "../../config/providerHeaderProfiles.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
+import { toRecord, toNumber, getFieldValue, clampPercentage, toDisplayLabel } from "./scalars.ts";
+import { type UsageQuota, parseResetTime } from "./quota.ts";
+import {
+  GITHUB_AI_CREDITS_QUOTA_KEY,
+  parseGitHubCreditsUsed,
+  readGitHubCreditLimit,
+} from "../githubCreditLimit.ts";
+
+type JsonRecord = Record<string, unknown>;
+
+export function shouldDisplayGitHubQuota(quota: UsageQuota | null): quota is UsageQuota {
+  if (!quota) return false;
+  if (quota.unlimited && quota.total <= 0) return false;
+  return quota.total > 0 || quota.remainingPercentage !== undefined;
+}
+
+/** Paid plan format (`quota_snapshots`), including the optional AI Credits quota. */
+function buildPaidPlanUsage(dataRecord: JsonRecord, providerSpecificData?: JsonRecord) {
+  const snapshots = toRecord(dataRecord.quota_snapshots);
+  const resetAt = parseResetTime(getFieldValue(dataRecord, "quota_reset_date", "quotaResetDate"));
+  const premiumSnapshot = toRecord(snapshots.premium_interactions);
+  const creditsUsed = parseGitHubCreditsUsed(premiumSnapshot.credits_used);
+  const premiumQuota = isUnallocatedGitHubQuota(premiumSnapshot, creditsUsed)
+    ? null
+    : formatGitHubQuotaSnapshot(snapshots.premium_interactions, resetAt);
+  const chatQuota = formatGitHubQuotaSnapshot(snapshots.chat, resetAt);
+  const completionsQuota = formatGitHubQuotaSnapshot(snapshots.completions, resetAt);
+  const quotas: Record<string, UsageQuota> = {};
+
+  if (shouldDisplayGitHubQuota(premiumQuota)) {
+    quotas.premium_interactions = premiumQuota;
+  }
+  if (shouldDisplayGitHubQuota(chatQuota)) {
+    quotas.chat = chatQuota;
+  }
+  if (shouldDisplayGitHubQuota(completionsQuota)) {
+    quotas.completions = completionsQuota;
+  }
+  if (creditsUsed !== undefined) {
+    quotas[GITHUB_AI_CREDITS_QUOTA_KEY] = buildGitHubAiCreditsQuota(
+      creditsUsed,
+      readGitHubCreditLimit(providerSpecificData),
+      parseResetTime(premiumSnapshot.quota_reset_at) || resetAt
+    );
+  }
+
+  return {
+    plan: inferGitHubPlanName(dataRecord, premiumQuota),
+    tokenBasedBilling: dataRecord.token_based_billing === true,
+    resetDate: getFieldValue(dataRecord, "quota_reset_date", "quotaResetDate"),
+    quotas,
+  };
+}
+
+/**
+ * GitHub Copilot Usage
+ * Uses GitHub accessToken (not copilotToken) to call copilot_internal/user API
+ */
+export async function getGitHubUsage(
+  accessToken?: string,
+  providerSpecificData?: JsonRecord,
+  connectionId?: string
+) {
+  try {
+    if (!accessToken) {
+      throw new Error("No GitHub access token available. Please re-authorize the connection.");
+    }
+
+    // copilot_internal/user API requires GitHub OAuth token, not copilotToken
+    const response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          "https://api.github.com/copilot_internal/user",
+          {
+            headers: getGitHubCopilotInternalUserHeaders(`token ${accessToken}`),
+          }
+        )
+      : await globalThis.fetch("https://api.github.com/copilot_internal/user", {
+          headers: getGitHubCopilotInternalUserHeaders(`token ${accessToken}`),
+        });
+    if (!response) {
+      return { message: "GitHub Copilot connected. Unable to parse quota data." };
+    }
+
+    if (!response.ok) {
+      const error = await response.text();
+      if (response.status === 401 || response.status === 403) {
+        return {
+          message: `GitHub token expired or permission denied. Please re-authenticate the connection.`,
+        };
+      }
+      throw new Error(`GitHub API error: ${error}`);
+    }
+
+    const data = await response.json();
+    const dataRecord = toRecord(data);
+
+    // Handle different response formats (paid vs free)
+    if (dataRecord.quota_snapshots) {
+      return buildPaidPlanUsage(dataRecord, providerSpecificData);
+    } else if (dataRecord.monthly_quotas || dataRecord.limited_user_quotas) {
+      // Free/limited plan format. NOTE (#2876): the upstream field
+      // `limited_user_quotas[name]` is the *remaining* count for the month
+      // (it counts down toward 0 and resets on `limited_user_reset_date`),
+      // NOT the used count. The pre-3.8.6 implementation inverted this and
+      // showed "0% when not used / 100% when fully used" on the dashboard.
+      // Confirmed against three independent upstream parsers:
+      //   - robinebers/openusage  (upstream docs/providers/copilot.md Free Tier table)
+      //   - raycast/extensions    agent-usage/src/copilot/fetcher.ts (inline comment)
+      //   - looplj/axonhub        frontend/src/components/quota-badges.tsx
+      const monthlyQuotas = toRecord(dataRecord.monthly_quotas);
+      const remainingQuotas = toRecord(dataRecord.limited_user_quotas);
+      const resetDate = getFieldValue(
+        dataRecord,
+        "limited_user_reset_date",
+        "limitedUserResetDate"
+      );
+      const resetAt = parseResetTime(resetDate);
+      const quotas: Record<string, UsageQuota> = {};
+
+      const addLimitedQuota = (name: string) => {
+        const total = toNumber(getFieldValue(monthlyQuotas, name, name), 0);
+        if (total <= 0) return null;
+        const remainingRaw = Math.max(0, toNumber(getFieldValue(remainingQuotas, name, name), 0));
+        const remaining = Math.min(remainingRaw, total);
+        const used = Math.max(total - remaining, 0);
+        quotas[name] = {
+          used,
+          total,
+          remaining,
+          remainingPercentage: clampPercentage((remaining / total) * 100),
+          unlimited: false,
+          resetAt,
+        };
+        return quotas[name];
+      };
+
+      const premiumQuota = addLimitedQuota("premium_interactions");
+      addLimitedQuota("chat");
+      addLimitedQuota("completions");
+
+      return {
+        plan: inferGitHubPlanName(dataRecord, premiumQuota),
+        resetDate,
+        quotas,
+      };
+    }
+
+    return { message: "GitHub Copilot connected. Unable to parse quota data." };
+  } catch (error) {
+    throw new Error(`Failed to fetch GitHub usage: ${error.message}`);
+  }
+}
+
+export function formatGitHubQuotaSnapshot(
+  quota: unknown,
+  resetAt: string | null = null
+): UsageQuota | null {
+  const source = toRecord(quota);
+  if (Object.keys(source).length === 0) return null;
+
+  const unlimited = source.unlimited === true;
+  const entitlement = toNumber(source.entitlement, Number.NaN);
+  const totalValue = toNumber(source.total, Number.NaN);
+  const remainingValue = toNumber(source.remaining, Number.NaN);
+  const usedValue = toNumber(source.used, Number.NaN);
+  const percentRemainingValue = toNumber(
+    getFieldValue(source, "percent_remaining", "percentRemaining"),
+    Number.NaN
+  );
+
+  let total = Number.isFinite(totalValue)
+    ? Math.max(0, totalValue)
+    : Number.isFinite(entitlement)
+      ? Math.max(0, entitlement)
+      : 0;
+  let remaining = Number.isFinite(remainingValue) ? Math.max(0, remainingValue) : undefined;
+  let used = Number.isFinite(usedValue) ? Math.max(0, usedValue) : undefined;
+  let remainingPercentage = Number.isFinite(percentRemainingValue)
+    ? clampPercentage(percentRemainingValue)
+    : undefined;
+
+  if (used === undefined && total > 0 && remaining !== undefined) {
+    used = Math.max(total - remaining, 0);
+  }
+
+  if (remaining === undefined && total > 0 && used !== undefined) {
+    remaining = Math.max(total - used, 0);
+  }
+
+  if (remainingPercentage === undefined && total > 0 && remaining !== undefined) {
+    remainingPercentage = clampPercentage((remaining / total) * 100);
+  }
+
+  if (total <= 0 && remainingPercentage !== undefined) {
+    total = 100;
+    used = 100 - remainingPercentage;
+    remaining = remainingPercentage;
+  }
+
+  return {
+    used: Math.max(0, used ?? 0),
+    total,
+    remaining,
+    remainingPercentage,
+    resetAt,
+    unlimited,
+  };
+}
+
+/**
+ * A premium quota GitHub allocated nothing to (zero allowance, no credits used)
+ * is not an exhausted quota — hide it instead of rendering a red 0% row.
+ */
+function isUnallocatedGitHubQuota(snapshot: JsonRecord, creditsUsed: number | undefined): boolean {
+  if (Object.keys(snapshot).length === 0 || snapshot.unlimited === true) return false;
+  return toNumber(snapshot.entitlement, Number.NaN) === 0 && (creditsUsed ?? 0) === 0;
+}
+
+/**
+ * AI Credits row: `credits_used` as reported by GitHub. Bounded by the local
+ * per-connection limit when one is set, otherwise an unbounded informational row.
+ * Marked `fractionReported: false` so the quota cache treats it as telemetry —
+ * it never exhausts the account on its own; the local cutoff is applied by the
+ * account-selection policy (githubCreditLimit.ts) against the live limit.
+ */
+function buildGitHubAiCreditsQuota(
+  creditsUsed: number,
+  limit: number | null,
+  resetAt: string | null
+): UsageQuota {
+  if (limit === null) {
+    return {
+      used: creditsUsed,
+      total: 0,
+      unlimited: true,
+      resetAt,
+      displayName: "AI Credits",
+      creditsUsed,
+      fractionReported: false,
+    };
+  }
+  return {
+    used: creditsUsed,
+    total: limit,
+    remaining: Math.max(limit - creditsUsed, 0),
+    remainingPercentage: limit > 0 ? clampPercentage((1 - creditsUsed / limit) * 100) : 0,
+    unlimited: false,
+    resetAt,
+    displayName: "AI Credits (local limit)",
+    creditsUsed,
+    fractionReported: false,
+  };
+}
+
+export function inferGitHubPlanName(data: JsonRecord, premiumQuota: UsageQuota | null): string {
+  const rawPlan = getFieldValue(data, "copilot_plan", "copilotPlan");
+  const rawSku = getFieldValue(data, "access_type_sku", "accessTypeSku");
+  const planText = typeof rawPlan === "string" ? rawPlan.trim() : "";
+  const skuText = typeof rawSku === "string" ? rawSku.trim() : "";
+  const combined = `${skuText} ${planText}`.trim().toUpperCase();
+  const monthlyQuotas = toRecord(getFieldValue(data, "monthly_quotas", "monthlyQuotas"));
+  const premiumTotal =
+    premiumQuota?.total ||
+    toNumber(getFieldValue(monthlyQuotas, "premium_interactions", "premiumInteractions"), 0);
+  const chatTotal = toNumber(getFieldValue(monthlyQuotas, "chat", "chat"), 0);
+
+  if (combined.includes("PRO+") || combined.includes("PRO_PLUS") || combined.includes("PROPLUS")) {
+    return "Copilot Pro+";
+  }
+  if (combined.includes("ENTERPRISE")) return "Copilot Enterprise";
+  if (combined.includes("BUSINESS")) return "Copilot Business";
+  if (combined.includes("STUDENT")) return "Copilot Student";
+  if (combined.includes("FREE")) return "Copilot Free";
+  if (combined.includes("PRO")) return "Copilot Pro";
+
+  if (premiumTotal >= 1400) return "Copilot Pro+";
+  if (premiumTotal >= 900) return "Copilot Enterprise";
+  if (premiumTotal >= 250) {
+    if (combined.includes("INDIVIDUAL")) return "Copilot Pro";
+    return "Copilot Business";
+  }
+  if (premiumTotal > 0 || chatTotal === 50) return "Copilot Free";
+
+  if (skuText) {
+    const label = toDisplayLabel(skuText);
+    return label ? `Copilot ${label}` : "GitHub Copilot";
+  }
+  if (planText) {
+    const label = toDisplayLabel(planText);
+    return label ? `Copilot ${label}` : "GitHub Copilot";
+  }
+  return "GitHub Copilot";
+}

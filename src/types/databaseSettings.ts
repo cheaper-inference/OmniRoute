@@ -1,0 +1,183 @@
+/**
+ * Database performance optimization settings stored in SQLite key-value pairs.
+ * User-configurable aggregation, retention, and optimization settings.
+ */
+
+export interface DatabaseSettings {
+  /** 1. Location (read-only display) */
+  location: {
+    databasePath: string;
+    dataDir: string;
+    walSizeBytes: number;
+    schemaVersion: number;
+  };
+
+  /** 2. Logs (what gets captured) */
+  logs: {
+    detailedLogsEnabled: boolean;
+    callLogPipelineEnabled: boolean;
+    maxDetailSizeKb: number;
+    ringBufferSize: number;
+  };
+
+  /** 3. Backup (backup/restore/import/export) */
+  backup: {
+    autoBackupEnabled: boolean;
+    autoBackupFrequency: "never" | "daily" | "weekly" | "monthly";
+    keepLastNBackups: number;
+  };
+
+  /** 4. Cache (moved from CacheSettingsTab) */
+  cache: {
+    semanticCacheEnabled: boolean;
+    semanticCacheMaxSize: number;
+    semanticCacheTTL: number;
+    /**
+     * Opt-in for the dual-layer vector-similarity cache (#14159). Off by default:
+     * it makes an embedding call per cacheable request, so it must never be on
+     * for an operator who only enabled the legacy exact-match cache.
+     */
+    semanticCacheVectorEnabled?: boolean;
+    semanticCacheBackend?: "memory" | "redis";
+    semanticCacheThreshold?: number;
+    semanticCacheEmbeddingProvider?: string;
+    semanticCacheEmbeddingModel?: string;
+    semanticCacheEmbeddingDimension?: number;
+    semanticCacheEmbeddingBaseUrl?: string;
+    semanticCacheEmbeddingApiKey?: string;
+    semanticCacheRedisUrl?: string;
+    semanticCacheRedisPrefix?: string;
+    semanticCacheRequireZeroTemp?: boolean;
+    promptCacheEnabled: boolean;
+    promptCacheStrategy: "auto" | "system-only" | "manual";
+    alwaysPreserveClientCache: "auto" | "always" | "never";
+    /** Model catalog /v1/models response cache TTL in milliseconds. */
+    modelCatalogCacheTtlMs: number;
+  };
+
+  /** 5. Retention (per-table cleanup policies) */
+  retention: {
+    quotaSnapshots: number;
+    compressionAnalytics: number;
+    mcpAudit: number;
+    configAudit: number;
+    a2aEvents: number;
+    callLogs: number;
+    conversationTurnNodes: number;
+    usageHistory: number;
+    memoryEntries: number;
+    domainCostHistory: number;
+    compressionCacheStats: number;
+    xpAuditLog: number;
+    compressionRunTelemetry: number;
+    autoCleanupEnabled: boolean;
+  };
+
+  /** 6. Compression (aggregation) */
+  aggregation: {
+    enabled: boolean;
+    rawDataRetentionDays: number;
+    granularity: "hourly" | "daily" | "weekly";
+  };
+
+  /** 7. Optimization (auto_vacuum, VACUUM, page/cache) */
+  optimization: {
+    autoVacuumMode: "NONE" | "FULL" | "INCREMENTAL";
+    scheduledVacuum: "never" | "daily" | "weekly" | "monthly";
+    vacuumHour: number;
+    pageSize: number;
+    cacheSize: number;
+    optimizeOnStartup: boolean;
+  };
+
+  /** Read-only stats */
+  stats: {
+    databaseSizeBytes: number;
+    pageCount: number;
+    freelistCount: number;
+    lastVacuumAt: string | null;
+    lastOptimizationAt: string | null;
+    integrityCheck: "ok" | "error" | null;
+    lastIntegrityCheckAt: string | null;
+    /**
+     * #13432 — non-null while the configured `optimization.autoVacuumMode`
+     * has not yet been applied to the live SQLite file. Cleared once the
+     * vacuum scheduler's next scheduled run reconciles it.
+     */
+    autoVacuumDrift: { configured: string; live: string } | null;
+    /** Pages freed by the most recent bounded `PRAGMA incremental_vacuum` batch, or null. */
+    lastReclaimedPages: number | null;
+  };
+}
+
+/** Default database settings */
+export const DEFAULT_DATABASE_SETTINGS: Omit<DatabaseSettings, "location" | "stats"> = {
+  logs: {
+    detailedLogsEnabled: false,
+    callLogPipelineEnabled: false,
+    maxDetailSizeKb: 10,
+    ringBufferSize: 500,
+  },
+  backup: {
+    autoBackupEnabled: false,
+    autoBackupFrequency: "never",
+    keepLastNBackups: 5,
+  },
+  cache: {
+    semanticCacheEnabled: true,
+    semanticCacheMaxSize: 1000,
+    semanticCacheTTL: 1800000,
+    semanticCacheVectorEnabled: false,
+    semanticCacheBackend: "memory",
+    semanticCacheThreshold: 0.8,
+    semanticCacheEmbeddingProvider: "lemonade",
+    semanticCacheEmbeddingModel: "harrier-oss-v1-0.6b",
+    semanticCacheEmbeddingDimension: 1024,
+    semanticCacheEmbeddingBaseUrl: "",
+    semanticCacheEmbeddingApiKey: "",
+    semanticCacheRedisUrl: "",
+    semanticCacheRedisPrefix: "omniroute:semcache:",
+    semanticCacheRequireZeroTemp: true,
+    promptCacheEnabled: true,
+    promptCacheStrategy: "auto",
+    alwaysPreserveClientCache: "auto",
+    // Keep in sync with CATALOG_CACHE_TTL_MS_DEFAULT
+    // (src/app/api/v1/models/catalogCache.ts) — this value is what actually takes
+    // effect, since catalog.ts reads it as `dbSettings.cache?.modelCatalogCacheTtlMs
+    // ?? CATALOG_CACHE_TTL_MS_DEFAULT` and the `??` never falls through while a
+    // default is declared here. Guarded by tests/unit/v1-models-catalog-ttl.test.ts.
+    modelCatalogCacheTtlMs: 60_000,
+  },
+  retention: {
+    quotaSnapshots: 7,
+    compressionAnalytics: 30,
+    mcpAudit: 30,
+    configAudit: 30,
+    a2aEvents: 30,
+    callLogs: 30,
+    // Default matches callLogs (30) so merging this knob changes no behavior for
+    // existing installs — operators can lower it independently if they want a
+    // shorter reconnect-anchor window than their call-log retention (#12453).
+    conversationTurnNodes: 30,
+    usageHistory: 30,
+    memoryEntries: 30,
+    domainCostHistory: 30,
+    compressionCacheStats: 30,
+    xpAuditLog: 30,
+    compressionRunTelemetry: 30,
+    autoCleanupEnabled: true,
+  },
+  aggregation: {
+    enabled: true,
+    rawDataRetentionDays: 30,
+    granularity: "daily",
+  },
+  optimization: {
+    autoVacuumMode: "FULL",
+    scheduledVacuum: "weekly",
+    vacuumHour: 2,
+    pageSize: 4096,
+    cacheSize: 65536,
+    optimizeOnStartup: true,
+  },
+};

@@ -1,0 +1,1153 @@
+/**
+ * Context Manager — Phase 4
+ *
+ * Pre-flight context compression to prevent "prompt too long" errors.
+ * 3 layers: trim tool messages, compress structured thinking, aggressive purification.
+ */
+
+import { REGISTRY } from "../config/providerRegistry.ts";
+import {
+  getModelContextLimit,
+  type ModelCapabilityResolutionSnapshot,
+} from "../../src/lib/modelCapabilities.ts";
+import { parseModel } from "./model.ts";
+import { encodedStringLength, jsonLength } from "../utils/jsonSize.ts";
+
+// Default token limits per provider (fallbacks when not in registry)
+const DEFAULT_LIMITS: Record<string, number> = {
+  claude: 200000,
+  openai: 128000,
+  gemini: 1000000,
+  codex: 400000,
+  // HyperAgent Claude-family agents (fable/opus/sonnet) — 1M default; was falling
+  // through to 128k and blocking normal agentic tool loops with huge catalogs.
+  hyperagent: 1_000_000,
+  ha: 1_000_000,
+  default: 128000,
+};
+
+// Environment variable overrides (highest priority)
+function getEnvOverride(provider: string): number | null {
+  const envKey = `CONTEXT_LENGTH_${provider.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`;
+  const envValue = process.env[envKey];
+  if (envValue) {
+    const parsed = parseInt(envValue, 10);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  // Global override
+  const globalValue = process.env.CONTEXT_LENGTH_DEFAULT;
+  if (globalValue) {
+    const parsed = parseInt(globalValue, 10);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+}
+
+/**
+ * True when the operator set a positive `CONTEXT_LENGTH_<PROVIDER>` /
+ * `CONTEXT_LENGTH_DEFAULT` override. `resolveTokenLimit` treats it as a sourced
+ * limit, so callers that gate on "has limit evidence" (combo catalog, #18609) must too.
+ */
+export function hasContextLengthEnvOverride(provider: string): boolean {
+  return getEnvOverride(provider) !== null;
+}
+
+// Reserve tokens override from environment variable
+function getReserveTokensOverride(): number | null {
+  const envValue = process.env.CONTEXT_RESERVE_TOKENS;
+  if (envValue) {
+    const parsed = parseInt(envValue, 10);
+    if (!isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+}
+
+// How many of the newest inline images to keep when pruning older ones (#8560).
+function getKeepLatestImagesOverride(): number | null {
+  const envValue = process.env.CONTEXT_KEEP_LATEST_IMAGES;
+  if (envValue) {
+    const parsed = parseInt(envValue, 10);
+    if (!isNaN(parsed) && parsed >= 0) return parsed;
+  }
+  return null;
+}
+
+const DEFAULT_KEEP_LATEST_IMAGES = 2;
+const IMAGE_REMOVED_PLACEHOLDER = "[Earlier image removed to fit context window]";
+
+// Rough chars-per-token ratio for quick estimation
+const CHARS_PER_TOKEN = 4;
+
+// Bounded per-image token budget used in place of measuring the raw base64
+// payload as text. In line with the owner's PoC (~1052 total for prompt +
+// 1 image) and litellm's calculate_img_tokens() default-count fast-path —
+// see #8368 research notes.
+const IMAGE_TOKEN_ESTIMATE = 1200;
+
+// #10840: same budget, deliberately. The Gemini `inlineData` matcher does not
+// inspect media type, so a base64 PDF arriving in that shape is ALREADY measured
+// at IMAGE_TOKEN_ESTIMATE today. Reusing it makes the OpenAI `file` and Claude
+// `document` shapes agree with the estimate the same document already receives,
+// rather than introducing a second constant with no grounding in this repo.
+const DOCUMENT_TOKEN_ESTIMATE = IMAGE_TOKEN_ESTIMATE;
+
+// Matches inline base64 data URLs, e.g. "data:image/png;base64,AAAA...".
+// Deliberately scoped to `data:image/...;base64,` so remote (http/https)
+// URLs and generic long base64 text strings stay on the text-estimation path.
+const INLINE_BASE64_IMAGE_RE = /^data:image\/[a-zA-Z0-9.+-]+;base64,/;
+
+function isInlineBase64ImageUrl(value: unknown): boolean {
+  return typeof value === "string" && INLINE_BASE64_IMAGE_RE.test(value);
+}
+
+// OpenAI chat.completions: { type: 'image_url', image_url: { url: 'data:...' } | 'data:...' }
+function matchesOpenAIImageUrlShape(node: Record<string, unknown>): boolean {
+  const imageUrl = node.image_url;
+  if (isInlineBase64ImageUrl(imageUrl)) return true;
+  return (
+    !!imageUrl &&
+    typeof imageUrl === "object" &&
+    isInlineBase64ImageUrl((imageUrl as Record<string, unknown>).url)
+  );
+}
+
+// AI SDK: { type: 'image', image: 'data:...' } (also covers Responses API's
+// { type: 'input_image', image_url: 'data:...' } via matchesOpenAIImageUrlShape above).
+function matchesAiSdkImageShape(node: Record<string, unknown>): boolean {
+  return node.type === "image" && isInlineBase64ImageUrl(node.image);
+}
+
+// Claude: { type: 'image', source: { type: 'base64', data: '...' } }
+function matchesClaudeSourceShape(node: Record<string, unknown>): boolean {
+  if (node.type !== "image") return false;
+  const source = node.source;
+  if (!source || typeof source !== "object") return false;
+  const src = source as Record<string, unknown>;
+  return src.type === "base64" && typeof src.data === "string";
+}
+
+// Gemini: { inlineData: { data: '...' } } | { inline_data: { data: '...' } }
+function matchesGeminiInlineDataShape(node: Record<string, unknown>): boolean {
+  const inlineData = node.inlineData ?? node.inline_data;
+  if (!inlineData || typeof inlineData !== "object") return false;
+  return typeof (inlineData as Record<string, unknown>).data === "string";
+}
+
+// Any inline base64 data URL, regardless of media type — file parts legitimately
+// carry application/pdf, text/csv, and so on.
+const INLINE_BASE64_DATA_RE = /^data:[^;,]+;base64,/;
+
+function isInlineBase64DataUrl(value: unknown): boolean {
+  return typeof value === "string" && INLINE_BASE64_DATA_RE.test(value);
+}
+
+// OpenAI chat.completions: { type: 'file', file: { file_data | data: 'data:...;base64,...' } }
+// Responses API:          { type: 'input_file', file_data: 'data:...;base64,...' }
+// Shapes mirror services/ccOpenAiMediaBlocks.ts::convertOpenAiMediaBlock.
+function matchesOpenAIFileShape(node: Record<string, unknown>): boolean {
+  if (node.type === "input_file") return isInlineBase64DataUrl(node.file_data);
+  if (node.type !== "file") return false;
+  const file = node.file;
+  if (!file || typeof file !== "object") return false;
+  const f = file as Record<string, unknown>;
+  return isInlineBase64DataUrl(f.file_data) || isInlineBase64DataUrl(f.data);
+}
+
+// Claude: { type: 'document', source: { type: 'base64', data: '...' } }
+function matchesClaudeDocumentShape(node: Record<string, unknown>): boolean {
+  if (node.type !== "document") return false;
+  const source = node.source;
+  if (!source || typeof source !== "object") return false;
+  const src = source as Record<string, unknown>;
+  return src.type === "base64" && typeof src.data === "string";
+}
+
+/**
+ * Detect inline-base64 *document* blocks (#10840). Deliberately separate from
+ * {@link isInlineBase64ImageBlock}: that predicate also drives
+ * pruneOlderInlineImages, and dropping a user's attached PDF is not the same
+ * decision as dropping an old screenshot. This one only feeds token estimation.
+ */
+export function isInlineBase64DocumentBlock(node: Record<string, unknown>): boolean {
+  return matchesOpenAIFileShape(node) || matchesClaudeDocumentShape(node);
+}
+
+/** Binary audio/video is not millions of text tokens of base64 encoding. */
+function isInlineAudioVideoBlock(node: Record<string, unknown>): boolean {
+  const audio = node.input_audio;
+  if (node.type === "input_audio" && audio && typeof audio === "object") {
+    return typeof (audio as Record<string, unknown>).data === "string";
+  }
+  const carrier = node.video_url ?? node.input_video ?? node.audio_url;
+  const url =
+    typeof carrier === "string"
+      ? carrier
+      : carrier && typeof carrier === "object"
+        ? (carrier as Record<string, unknown>).url
+        : null;
+  return typeof url === "string" && /^data:(?:audio|video)\/[a-z0-9.+-]{1,64};base64,/i.test(url);
+}
+
+/** Recognize Gemini audio/video bytes that must not enter image pruning. */
+function isNonImageGeminiMedia(node: Record<string, unknown>): boolean {
+  const data = node.inlineData ?? node.inline_data;
+  if (!data || typeof data !== "object") return false;
+  const record = data as Record<string, unknown>;
+  const mime = record.mimeType ?? record.mime_type;
+  return typeof mime === "string" && !mime.toLowerCase().startsWith("image/");
+}
+
+/**
+ * Detect the 5 documented inline-base64 image content-block shapes (see the
+ * shape-specific matchers above).
+ */
+export function isInlineBase64ImageBlock(node: Record<string, unknown>): boolean {
+  return (
+    matchesOpenAIImageUrlShape(node) ||
+    matchesAiSdkImageShape(node) ||
+    matchesClaudeSourceShape(node) ||
+    matchesGeminiInlineDataShape(node)
+  );
+}
+
+function replaceImageBlockWithPlaceholder(block: Record<string, unknown>): Record<string, unknown> {
+  // Responses API parts use input_text / input_image — keep that family so restore
+  // does not rewrite a chat-completions-shaped part into a Responses input item.
+  if (block.type === "input_image") {
+    return { type: "input_text", text: IMAGE_REMOVED_PLACEHOLDER };
+  }
+  if (block.inlineData || block.inline_data) {
+    return { text: IMAGE_REMOVED_PLACEHOLDER };
+  }
+  return { type: "text", text: IMAGE_REMOVED_PLACEHOLDER };
+}
+
+/**
+ * Replace oldest inline base64 image blocks with short text placeholders while
+ * keeping the newest `keepLatest` images intact. Vision models still receive
+ * recent screenshots; older ones are dropped so multi-turn Codex/Responses
+ * sessions can fit the concrete input cap (#8560).
+ */
+export function pruneOlderInlineImages(
+  messages: Record<string, unknown>[],
+  options: { keepLatest?: number; targetTokens?: number } = {}
+): { messages: Record<string, unknown>[]; pruned: number } {
+  const keepLatest =
+    options.keepLatest ?? getKeepLatestImagesOverride() ?? DEFAULT_KEEP_LATEST_IMAGES;
+  const targetTokens = options.targetTokens;
+
+  const locations: Array<{ messageIndex: number; contentIndex: number }> = [];
+  for (let messageIndex = 0; messageIndex < messages.length; messageIndex++) {
+    const content = messages[messageIndex]?.content;
+    if (!Array.isArray(content)) continue;
+    for (let contentIndex = 0; contentIndex < content.length; contentIndex++) {
+      const part = content[contentIndex];
+      if (
+        part &&
+        typeof part === "object" &&
+        !Array.isArray(part) &&
+        isInlineBase64ImageBlock(part as Record<string, unknown>) &&
+        !isNonImageGeminiMedia(part as Record<string, unknown>)
+      ) {
+        locations.push({ messageIndex, contentIndex });
+      }
+    }
+  }
+
+  if (locations.length <= keepLatest) {
+    return { messages, pruned: 0 };
+  }
+
+  const prunable = locations.slice(0, Math.max(0, locations.length - keepLatest));
+  const next = messages.map((message) => {
+    if (!Array.isArray(message.content)) return message;
+    return { ...message, content: [...message.content] };
+  });
+  let pruned = 0;
+
+  if (targetTokens != null) {
+    // One full virtual measurement, then exact pre-rounding deltas per removal
+    // instead of a full history re-scan per removed image. Valid only when the
+    // walk saw no revisited object: JSON-parsed bodies are alias-free trees, so
+    // every prunable slot's block contributed exactly its placeholder chars +
+    // media budget. Any aliasing (programmatic input) falls back to the
+    // original full-recount loop, which is alias-agnostic.
+    const flags: MeasureFlags = {};
+    const measure = measureVirtual(next, new Set(), flags);
+    if (!flags.aliasedObject) {
+      let chars = measure.chars;
+      let mediaTokens = measure.mediaTokens;
+      for (const location of prunable) {
+        if (Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens <= targetTokens) break;
+        const content = next[location.messageIndex].content as unknown[];
+        const block = content[location.contentIndex] as Record<string, unknown>;
+        const replacement = replaceImageBlockWithPlaceholder(block);
+        content[location.contentIndex] = replacement;
+        // Exact delta in the pre-rounding measure space: the substituted block
+        // cost its placeholder serialization + budget; the plain replacement
+        // costs its own serialization. Rounding happens once per comparison.
+        chars += jsonLength(replacement) - IMAGE_PLACEHOLDER_CHARS;
+        mediaTokens -= IMAGE_TOKEN_ESTIMATE;
+        pruned += 1;
+      }
+      return { messages: next, pruned };
+    }
+  }
+
+  for (const location of prunable) {
+    if (targetTokens != null && estimateTokens(next) <= targetTokens) break;
+    const content = next[location.messageIndex].content as unknown[];
+    const block = content[location.contentIndex] as Record<string, unknown>;
+    content[location.contentIndex] = replaceImageBlockWithPlaceholder(block);
+    pruned += 1;
+  }
+
+  return { messages: next, pruned };
+}
+
+/**
+ * Fused form of the former `extractImageTokens` + `jsonLength(node)` pipeline:
+ * one walk that returns the serialized character count of the
+ * media-substituted tree plus the accumulated media token budgets, WITHOUT
+ * materializing that tree. On a multi-megabyte agent body the old path
+ * allocated a full placeholder copy of the structure only to measure it.
+ *
+ * Semantics are frozen by tests/unit/context-manager-estimation-parity.test.ts
+ * against the pre-optimization implementation
+ * (tests/helpers/context-estimation-reference.ts), including its quirks:
+ * - a node matching a media shape collapses entirely to its placeholder
+ *   serialization + budget (other fields of that node are not measured); at
+ *   ARRAY-ITEM positions this applies at every occurrence, seen or not (the
+ *   old walk's pre-recursion fast path, kept exactly);
+ * - objects are measured over own enumerable string keys — no `toJSON`, no
+ *   symbol keys, prototypes ignored (the old rebuild normalized them away);
+ * - a revisited container reached through recursion (object value / nested
+ *   position) is measured raw via `jsonLength`, with no media substitution
+ *   and no budgets — exactly what the old walk produced at repeat positions;
+ * - BigInt throws and circular structures throw, as before;
+ * - omitted values (undefined/function/symbol) render as `null` inside arrays
+ *   and disappear from objects.
+ *
+ * Two intentional deltas from the old implementation, pinned by
+ * context-manager-estimation-parity.test.ts ("intentional deltas" section):
+ * an own `__proto__` key is now measured as a normal key (the old rebuild's
+ * assignment swallowed it, undercounting bodies JSON.parse can produce), and
+ * an own enumerable `toJSON` function is skipped rather than invoked
+ * (unreachable from JSON.parse; functions cannot survive it).
+ */
+type VirtualMeasure = { chars: number; mediaTokens: number };
+type MeasureFlags = { aliasedObject?: boolean };
+
+const IMAGE_PLACEHOLDER_CHARS = JSON.stringify({
+  __image_token_estimate__: IMAGE_TOKEN_ESTIMATE,
+}).length;
+const DOCUMENT_PLACEHOLDER_CHARS = JSON.stringify({
+  __document_token_estimate__: DOCUMENT_TOKEN_ESTIMATE,
+}).length;
+
+function isOmittedValue(value: unknown): boolean {
+  return value === undefined || typeof value === "function" || typeof value === "symbol";
+}
+
+/** Estimate context text while excluding opaque attachment bytes from token accounting. */
+function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
+  if (node === null) return { chars: 4, mediaTokens: 0 };
+  const type = typeof node;
+  if (type === "string") return { chars: encodedStringLength(node as string), mediaTokens: 0 };
+  if (type === "boolean") return { chars: node ? 4 : 5, mediaTokens: 0 };
+  if (type === "number") {
+    return {
+      chars: Number.isFinite(node as number) ? String(node).length : 4,
+      mediaTokens: 0,
+    };
+  }
+  if (type === "bigint") {
+    // Match JSON.stringify, which throws rather than guessing an encoding.
+    throw new TypeError("Do not know how to serialize a BigInt");
+  }
+  if (type !== "object") return { chars: 0, mediaTokens: 0 };
+
+  const obj = node as object;
+  if (seen.has(obj)) {
+    // Repeat occurrence: the old walk re-inserted the original subtree here,
+    // so it was measured raw — no substitution, no budgets. Any aliasing makes
+    // per-slot deltas unsound, so pruning callers fall back to recounting.
+    if (flags) flags.aliasedObject = true;
+    return { chars: jsonLength(obj), mediaTokens: 0 };
+  }
+  seen.add(obj);
+
+  if (Array.isArray(obj)) {
+    let chars = 2;
+    let mediaTokens = 0;
+    for (let i = 0; i < obj.length; i++) {
+      if (i > 0) chars += 1;
+      const item = obj[i];
+      // Media fast path BEFORE any seen consultation, mirroring the old walk's
+      // array loop exactly: a revisited media block at an array-item position
+      // is re-priced placeholder + budget at every occurrence (aliased blocks
+      // shared between content slots must not fall to the raw path below).
+      if (item && typeof item === "object" && !Array.isArray(item)) {
+        const record = item as Record<string, unknown>;
+        if (isInlineBase64ImageBlock(record)) {
+          chars += IMAGE_PLACEHOLDER_CHARS;
+          mediaTokens += IMAGE_TOKEN_ESTIMATE;
+          continue;
+        }
+        if (isInlineBase64DocumentBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
+        if (isInlineAudioVideoBlock(record)) {
+          chars += DOCUMENT_PLACEHOLDER_CHARS;
+          mediaTokens += DOCUMENT_TOKEN_ESTIMATE;
+          continue;
+        }
+      }
+      if (isOmittedValue(item)) {
+        chars += 4; // omitted values render as null inside arrays
+        continue;
+      }
+      const result = measureVirtual(item, seen, flags);
+      chars += result.chars;
+      mediaTokens += result.mediaTokens;
+    }
+    return { chars, mediaTokens };
+  }
+
+  const record = obj as Record<string, unknown>;
+  if (isInlineBase64ImageBlock(record)) {
+    return { chars: IMAGE_PLACEHOLDER_CHARS, mediaTokens: IMAGE_TOKEN_ESTIMATE };
+  }
+  if (isInlineBase64DocumentBlock(record)) {
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
+  }
+  if (isInlineAudioVideoBlock(record)) {
+    return { chars: DOCUMENT_PLACEHOLDER_CHARS, mediaTokens: DOCUMENT_TOKEN_ESTIMATE };
+  }
+
+  let chars = 2;
+  let mediaTokens = 0;
+  let first = true;
+  for (const [key, value] of Object.entries(record)) {
+    if (isOmittedValue(value)) continue; // the whole entry disappears
+    if (!first) chars += 1;
+    first = false;
+    const result = measureVirtual(value, seen, flags);
+    chars += encodedStringLength(key) + 1 + result.chars;
+    mediaTokens += result.mediaTokens;
+  }
+  return { chars, mediaTokens };
+}
+
+/**
+ * Estimate token count from text length.
+ *
+ * Structured input is measured in its media-substituted serialized form (#8368):
+ * each recognized image/document block is priced at a bounded per-media token
+ * budget instead of measuring its base64 payload as raw text, then the
+ * remainder of the structure is measured normally via the char/4 heuristic —
+ * all in one pass, without building the substituted tree.
+ */
+export function estimateTokens(text: unknown): number {
+  if (!text) return 0;
+  if (typeof text === "string") {
+    return Math.ceil(text.length / CHARS_PER_TOKEN);
+  }
+  const { chars, mediaTokens } = measureVirtual(text, new Set());
+  return Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens;
+}
+
+/**
+ * Get token limit for a provider/model combination
+ * Priority: Env override > models.dev DB > Registry defaultContextLength > DEFAULT_LIMITS
+ */
+export function getTokenLimit(
+  provider: string,
+  model: string | null = null,
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): number {
+  return resolveTokenLimit(provider, model, snapshot).limit;
+}
+
+/**
+ * Context window from a known source only: an explicit canonical window, or a
+ * provider/model-specific `resolveTokenLimit` result. The generic 128000
+ * catch-all (`specific: false`) is treated as unknown so combo `min()` does
+ * not advertise 128k when every real member is larger (#10734).
+ */
+export function getSourcedTokenLimit(
+  provider: string,
+  model: string | null = null,
+  canonicalWindow?: unknown,
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): number | undefined {
+  if (
+    typeof canonicalWindow === "number" &&
+    Number.isFinite(canonicalWindow) &&
+    canonicalWindow > 0
+  ) {
+    return canonicalWindow;
+  }
+  const resolved = resolveTokenLimit(provider, model, snapshot);
+  return resolved.specific ? resolved.limit : undefined;
+}
+
+/**
+ * Resolve a combo target's token limit without crashing when `parseModel(modelStr)`
+ * returns `provider: null` (model id with no `provider/` prefix).
+ *
+ * `ResolvedComboTarget.provider` is populated independently of `modelStr`, so fall
+ * back to it before calling `getTokenLimit` (#8716).
+ *
+ * Known sources only (#14931): a target whose window resolves solely to the
+ * generic catch-all default returns `undefined` instead of that guess, so the
+ * runtime combo `Math.min()` in `resolveComboContextLimit` drops it — the
+ * sibling-side counterpart of the #10734 rule `getSourcedTokenLimit` already
+ * applies to advertised combos. An uncataloged member must not clamp the whole
+ * combo to a 128000 it may not have; when every member is unknown the resolver
+ * still falls back to the generic default on its own (source=fallback).
+ */
+export function getComboTargetTokenLimit(options: {
+  modelStr?: string | null;
+  provider?: string | null;
+  parsedProvider?: string | null;
+  parsedModel?: string | null;
+  targetProvider?: string | null;
+}): number | undefined {
+  let parsedProvider = options.parsedProvider;
+  let parsedModel = options.parsedModel;
+  if (
+    (parsedProvider === undefined || parsedModel === undefined) &&
+    Object.prototype.hasOwnProperty.call(options, "modelStr")
+  ) {
+    const parsed = parseModel(options.modelStr);
+    if (parsedProvider === undefined) parsedProvider = parsed.provider;
+    if (parsedModel === undefined) parsedModel = parsed.model;
+  }
+  const provider = parsedProvider ?? options.targetProvider ?? options.provider ?? "unknown";
+  return getSourcedTokenLimit(provider, parsedModel ?? null);
+}
+
+/**
+ * Same chain as getTokenLimit, but also reports whether the limit came from
+ * a provider/model-specific source (env override, synced DB, registry,
+ * name heuristic, curated per-provider default) or only from the generic
+ * catch-all default.
+ */
+export function resolveTokenLimit(
+  provider: string,
+  model: string | null = null,
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): { limit: number; specific: boolean } {
+  // 1. Check environment variable override first
+  const envOverride = getEnvOverride(provider);
+  if (envOverride) return { limit: envOverride, specific: true };
+
+  const lowerModel = (model || "").toLowerCase();
+
+  // 2. Check models.dev synced DB for per-model context limit
+  if (model) {
+    const dbLimit = getModelContextLimit(provider, model, snapshot);
+    if (dbLimit && dbLimit > 0) return { limit: dbLimit, specific: true };
+  }
+
+  // 3. Check registry for provider default
+  const registryEntry = REGISTRY[provider];
+  if (registryEntry?.defaultContextLength) {
+    return { limit: registryEntry.defaultContextLength, specific: true };
+  }
+
+  // 4. Check if model name hints at a known limit
+  if (model) {
+    if (lowerModel.includes("claude")) return { limit: DEFAULT_LIMITS.claude, specific: true };
+    if (lowerModel.includes("gemini")) return { limit: DEFAULT_LIMITS.gemini, specific: true };
+    if (
+      lowerModel.includes("gpt") ||
+      lowerModel.includes("o1") ||
+      lowerModel.includes("o3") ||
+      lowerModel.includes("o4") ||
+      lowerModel.includes("codex")
+    )
+      return { limit: DEFAULT_LIMITS.codex, specific: true };
+  }
+
+  // 5. Fallback to DEFAULT_LIMITS or default
+  if (DEFAULT_LIMITS[provider]) return { limit: DEFAULT_LIMITS[provider], specific: true };
+  return { limit: DEFAULT_LIMITS.default, specific: false };
+}
+
+// Combo context-limit resolution lives in ./comboContextLimit.ts; re-exported
+// here so existing importers keep working.
+export { resolveComboContextLimit } from "./comboContextLimit.ts";
+export type { ComboContextLimitSource } from "./comboContextLimit.ts";
+
+/**
+ * Apply context compression to request body.
+ * Operates in layers of increasing aggressiveness:
+ *
+ * Layer 1: Trim tool_result messages (truncate long outputs)
+ * Layer 1.5: Prune older inline images (keep latest N — #8560)
+ * Layer 2: Compress structured thinking blocks (remove from history, keep last)
+ * Layer 3: Aggressive purification (drop old messages until fitting)
+ *
+ * Callers with OpenAI Responses `input[]` (Codex) must adapt via
+ * `adaptBodyForCompression` before calling and `restore()` after — this helper
+ * is message-centric by design.
+ *
+ * @param {object} body - Request body with messages[]
+ * @param {object} options - { provider?, model?, maxTokens?, reserveTokens?, keepLatestImages? }
+ * @returns {{ body: object, compressed: boolean, stats: object }}
+ */
+export function compressContext(
+  body: Record<string, unknown> | null | undefined,
+  options: {
+    provider?: string;
+    model?: string;
+    maxTokens?: number;
+    reserveTokens?: number;
+    keepLatestImages?: number;
+  } = {}
+) {
+  if (!body || !body.messages || !Array.isArray(body.messages)) {
+    return { body, compressed: false, stats: {} };
+  }
+
+  const provider = options.provider || "default";
+  const maxTokens =
+    options.maxTokens || getTokenLimit(provider, (body.model as string) || options.model || null);
+  const defaultReserveTokens = Math.min(16000, Math.max(256, Math.floor(maxTokens * 0.15)));
+  const reserveTokens = Math.min(
+    options.reserveTokens ?? getReserveTokensOverride() ?? defaultReserveTokens,
+    Math.max(0, maxTokens - 1)
+  );
+  const targetTokens = Math.max(0, maxTokens - reserveTokens);
+
+  let messages = [...(body.messages as Record<string, unknown>[])];
+  // #8594: pass the structured messages array directly — estimateTokens walks it for
+  // inline base64 image blocks (#8368) and substitutes a bounded per-image estimate.
+  // JSON.stringify()-ing first forces the char/4 text path and mis-measures a ~500KB
+  // image as ~125k tokens, triggering needless compression / context loss.
+  let currentTokens = estimateTokens(messages);
+  const stats = { original: currentTokens, layers: [] as { name: string; tokens: number }[] };
+
+  // Already fits
+  if (currentTokens <= targetTokens) {
+    return { body, compressed: false, stats: { original: currentTokens, final: currentTokens } };
+  }
+
+  // Layer 1: Trim tool_result/tool messages
+  messages = trimToolMessages(messages, 2000); // Max 2000 chars per tool result
+  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  stats.layers.push({ name: "trim_tools", tokens: currentTokens });
+
+  if (currentTokens <= targetTokens) {
+    return {
+      body: { ...body, messages },
+      compressed: true,
+      stats: { ...stats, final: currentTokens },
+    };
+  }
+
+  // Layer 1.5: Drop oldest inline images while keeping the newest ones (#8560).
+  const imagePrune = pruneOlderInlineImages(messages, {
+    keepLatest: options.keepLatestImages,
+    targetTokens,
+  });
+  if (imagePrune.pruned > 0) {
+    messages = imagePrune.messages;
+    currentTokens = estimateTokens(messages);
+    stats.layers.push({ name: "prune_images", tokens: currentTokens });
+    if (currentTokens <= targetTokens) {
+      return {
+        body: { ...body, messages },
+        compressed: true,
+        stats: { ...stats, final: currentTokens },
+      };
+    }
+  }
+
+  // Layer 2: Compress structured thinking blocks (remove from non-last assistant messages)
+  messages = compressThinking(messages);
+  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  stats.layers.push({ name: "compress_thinking", tokens: currentTokens });
+
+  if (currentTokens <= targetTokens) {
+    return {
+      body: { ...body, messages },
+      compressed: true,
+      stats: { ...stats, final: currentTokens },
+    };
+  }
+
+  // Layer 3: Aggressive purification — drop oldest messages keeping system + last N pairs
+  messages = purifyHistory(messages, targetTokens);
+  currentTokens = estimateTokens(messages); // #8594: object-path keeps the #8368 image estimate
+  stats.layers.push({ name: "purify_history", tokens: currentTokens });
+
+  return {
+    body: { ...body, messages },
+    compressed: true,
+    stats: { ...stats, final: currentTokens },
+  };
+}
+
+// ─── Layer 1: Trim Tool Messages ────────────────────────────────────────────
+
+function trimToolMessages(messages: Record<string, unknown>[], maxChars: number) {
+  return messages.map((msg) => {
+    if (msg.role === "tool" && typeof msg.content === "string" && msg.content.length > maxChars) {
+      return {
+        ...msg,
+        content: msg.content.slice(0, maxChars) + "\n... [truncated]",
+      };
+    }
+    // Handle array content (Claude format with tool_result blocks)
+    if (msg.role === "user" && Array.isArray(msg.content)) {
+      return {
+        ...msg,
+        content: msg.content.map((block) => {
+          if (
+            block.type === "tool_result" &&
+            typeof block.content === "string" &&
+            block.content.length > maxChars
+          ) {
+            return { ...block, content: block.content.slice(0, maxChars) + "\n... [truncated]" };
+          }
+          return block;
+        }),
+      };
+    }
+    return msg;
+  });
+}
+
+// ─── Layer 2: Compress Structured Thinking Blocks ───────────────────────────
+
+function compressThinking(messages: Record<string, unknown>[]) {
+  // Find last assistant message index
+  let lastAssistantIdx = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === "assistant") {
+      lastAssistantIdx = i;
+      break;
+    }
+  }
+
+  return messages.map((msg, i) => {
+    if (msg.role !== "assistant") return msg;
+    if (i === lastAssistantIdx) return msg; // Keep thinking in last assistant msg
+
+    // Remove thinking blocks from content array
+    if (Array.isArray(msg.content)) {
+      const filtered = msg.content.filter((block) => block.type !== "thinking");
+      if (filtered.length === 0) {
+        return { ...msg, content: "[thinking compressed]" };
+      }
+      return { ...msg, content: filtered };
+    }
+
+    return msg;
+  });
+}
+
+// ─── Layer 3: Aggressive Purification ───────────────────────────────────────
+
+function purifyHistory(messages: Record<string, unknown>[], targetTokens: number) {
+  // Keep system message(s) and the last N message pairs
+  const system = messages.filter((m) => m.role === "system" || m.role === "developer");
+  const nonSystem = messages.filter((m) => m.role !== "system" && m.role !== "developer");
+
+  // Agentic sessions are one user task plus many assistant/tool pairs, so the kept
+  // tail can hold no user turn at all. vLLM chat templates (Qwen) reject that with
+  // HTTP 400 "No user query found in messages", so re-anchor the newest real user
+  // query (not a tool_result carrier) right after the system message.
+  let lastUserIdx = -1;
+  for (let i = nonSystem.length - 1; i >= 0; i--) {
+    const m = nonSystem[i];
+    if (
+      m.role === "user" &&
+      (!Array.isArray(m.content) ||
+        (m.content as Record<string, unknown>[]).some((b) => b?.type !== "tool_result"))
+    ) {
+      lastUserIdx = i;
+      break;
+    }
+  }
+
+  const build = (k: number) => {
+    const anchor =
+      lastUserIdx >= 0 && lastUserIdx < nonSystem.length - k ? [nonSystem[lastUserIdx]] : [];
+    let candidate = [...system, ...anchor, ...nonSystem.slice(-k)];
+    candidate = fixToolPairs(candidate);
+    candidate = fixToolAdjacency(candidate);
+    // Re-run pair fix: fixToolAdjacency may have stripped tool_use blocks, leaving
+    // orphan tool_results that Claude rejects ("tool_result without preceding tool_use",
+    // discussion #2410 — orphan tool_result -> upstream 400).
+    candidate = fixToolPairs(candidate);
+    return stripTrailingAssistantOrphanToolUse(candidate);
+  };
+
+  // Binary search for how many messages to keep from the end
+  let keep = nonSystem.length;
+  while (keep > 2) {
+    // #8594: measure the candidate structure directly so image-bearing turns are not
+    // over-counted and pruned during the binary search.
+    const tokens = estimateTokens(build(keep));
+    if (tokens <= targetTokens) break;
+    keep = Math.max(2, Math.floor(keep * 0.7)); // Drop 30% each iteration
+  }
+
+  const result = build(keep);
+
+  // Add summary of dropped messages. Merge the notice INTO the leading
+  // system/developer message instead of splicing a second system-role message
+  // mid-array: strict gateways (TokenRouter confirmed live 2026-08-22, see the
+  // PROVIDERS_SYSTEM_MUST_BE_FIRST list in src/lib/memory/injection.ts) reject
+  // any system message at index > 0 with HTTP 400 "System message must be at
+  // the beginning". When there is no leading system message, prepend one --
+  // index 0 is accepted by every provider (same slot the old splice used when
+  // system[] was empty).
+  if (keep < nonSystem.length) {
+    // Byte-stable: no interpolated drop count. A per-request count here
+    // changes messages[0] on nearly every request over a growing
+    // conversation, busting the upstream provider's prefix cache anchored
+    // at index 0 (issue #14600).
+    const droppedNotice = "[Context compressed: earlier messages removed to fit context window]";
+    const first = result[0];
+    if (first && (first.role === "system" || first.role === "developer")) {
+      if (typeof first.content === "string") {
+        result[0] = {
+          ...first,
+          content: first.content ? `${droppedNotice}\n${first.content}` : droppedNotice,
+        };
+      } else if (Array.isArray(first.content)) {
+        result[0] = {
+          ...first,
+          content: [{ type: "text", text: droppedNotice }, ...(first.content as unknown[])],
+        };
+      } else {
+        result[0] = { ...first, content: droppedNotice };
+      }
+    } else {
+      result.unshift({ role: "system", content: droppedNotice });
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Remove orphaned tool_result messages whose preceding tool_use was dropped.
+ * Also removes orphaned tool_use messages without a corresponding tool_result.
+ *
+ * When purifyHistory() drops oldest messages, it can split tool_use/tool_result
+ * pairs — keeping the tool_result but dropping the tool_use that initiated it.
+ * This causes upstream providers to reject the request with errors like:
+ *   - Claude: "tool_result message must be preceded by a tool_use message"
+ *   - OpenAI: "Invalid message format"
+ *   - Gemini: "Function response without function call"
+ */
+export function fixToolPairs(messages: Record<string, unknown>[]) {
+  // Pass 1: Collect all tool_result IDs from user/tool messages
+  const toolResultIds = new Set();
+  for (const msg of messages) {
+    if (msg.role === "tool" && msg.tool_call_id) {
+      toolResultIds.add(msg.tool_call_id);
+    }
+    if (msg.role === "user" && Array.isArray(msg.content)) {
+      for (const block of msg.content) {
+        if (block.type === "tool_result" && block.tool_use_id) {
+          toolResultIds.add(block.tool_use_id);
+        }
+      }
+    }
+  }
+
+  // Pass 2: Filter assistant messages to remove tool_use without tool_result
+  // (Exception: keep tool_use if the assistant message is the last message)
+  const isLastMessage = (idx: number) => idx === messages.length - 1;
+  const filteredMessages = messages.map((msg, idx) => {
+    if (msg.role === "assistant" && !isLastMessage(idx)) {
+      let modified = false;
+      const newMsg = { ...msg };
+
+      if (Array.isArray(newMsg.tool_calls)) {
+        const filteredToolCalls = newMsg.tool_calls.filter(
+          (tc: Record<string, unknown>) => !tc.id || toolResultIds.has(tc.id)
+        );
+        if (filteredToolCalls.length !== newMsg.tool_calls.length) {
+          newMsg.tool_calls = filteredToolCalls;
+          modified = true;
+        }
+      }
+
+      if (Array.isArray(newMsg.content)) {
+        const filteredContent = newMsg.content.filter(
+          (block: Record<string, unknown>) =>
+            block.type !== "tool_use" || !block.id || toolResultIds.has(block.id)
+        );
+        if (filteredContent.length !== newMsg.content.length) {
+          newMsg.content = filteredContent;
+          modified = true;
+        }
+      }
+
+      return modified ? newMsg : msg;
+    }
+    return msg;
+  });
+
+  // Pass 3: Collect all remaining tool_use IDs from assistant messages
+  const toolCallIds = new Set();
+  for (const msg of filteredMessages) {
+    if (msg.role === "assistant") {
+      if (Array.isArray(msg.tool_calls)) {
+        for (const tc of msg.tool_calls) {
+          if (tc.id) toolCallIds.add(tc.id);
+        }
+      }
+      if (Array.isArray(msg.content)) {
+        for (const block of msg.content) {
+          if (block.type === "tool_use" && block.id) {
+            toolCallIds.add(block.id);
+          }
+        }
+      }
+    }
+  }
+
+  // Pass 4: Filter user/tool messages to remove tool_result without tool_use
+  return filteredMessages
+    .map((msg) => {
+      if (msg.role === "tool" && msg.tool_call_id) {
+        if (!toolCallIds.has(msg.tool_call_id)) return null;
+      }
+
+      if (msg.role === "user" && Array.isArray(msg.content)) {
+        const filteredContent = msg.content.filter(
+          (block: Record<string, unknown>) =>
+            block.type !== "tool_result" || !block.tool_use_id || toolCallIds.has(block.tool_use_id)
+        );
+        if (filteredContent.length !== msg.content.length) {
+          if (filteredContent.length === 0) return null;
+          return { ...msg, content: filteredContent };
+        }
+      }
+
+      // Drop assistant messages if their content AND tool_calls became empty
+      if (msg.role === "assistant") {
+        const hasContent =
+          typeof msg.content === "string"
+            ? msg.content.trim().length > 0
+            : Array.isArray(msg.content) && msg.content.length > 0;
+        const hasToolCalls = Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
+        if (!hasContent && !hasToolCalls) {
+          return null;
+        }
+      }
+
+      return msg;
+    })
+    .filter(Boolean) as Record<string, unknown>[];
+}
+
+/**
+ * Adjacency guard: Claude requires `tool_result` in the IMMEDIATELY NEXT
+ * message after `tool_use`, not just somewhere later in the array.
+ *
+ * `fixToolPairs` checks global ID presence but not adjacency. This function
+ * runs after `fixToolPairs` and removes `tool_use` blocks from assistant
+ * messages where the next message does not contain a matching `tool_result`.
+ */
+export function fixToolAdjacency(messages: Record<string, unknown>[]): Record<string, unknown>[] {
+  if (messages.length <= 1) return messages;
+
+  const result: Record<string, unknown>[] = [];
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const nextMsg = messages[i + 1];
+
+    if (msg.role !== "assistant" || !nextMsg) {
+      result.push(msg);
+      continue;
+    }
+
+    // Collect tool_result IDs from the NEXT message only
+    const nextToolResultIds = new Set<string>();
+    if (nextMsg.role === "tool" && nextMsg.tool_call_id) {
+      nextToolResultIds.add(String(nextMsg.tool_call_id));
+    }
+    if (nextMsg.role === "user" && Array.isArray(nextMsg.content)) {
+      for (const block of nextMsg.content as Record<string, unknown>[]) {
+        if (block.type === "tool_result" && block.tool_use_id) {
+          nextToolResultIds.add(String(block.tool_use_id));
+        }
+      }
+    }
+
+    let modified = false;
+    const newMsg: Record<string, unknown> = { ...msg };
+
+    // Filter tool_use blocks in content array (Claude format)
+    if (Array.isArray(newMsg.content)) {
+      const filteredContent = (newMsg.content as Record<string, unknown>[]).filter(
+        (block) => block.type !== "tool_use" || !block.id || nextToolResultIds.has(String(block.id))
+      );
+      if (filteredContent.length !== (newMsg.content as unknown[]).length) {
+        newMsg.content = filteredContent;
+        modified = true;
+      }
+    }
+
+    // Filter tool_calls array (OpenAI format) — independently of content
+    if (Array.isArray(newMsg.tool_calls)) {
+      const filteredToolCalls = (newMsg.tool_calls as Record<string, unknown>[]).filter(
+        (tc: Record<string, unknown>) => !tc.id || nextToolResultIds.has(String(tc.id))
+      );
+      if (filteredToolCalls.length !== (newMsg.tool_calls as unknown[]).length) {
+        newMsg.tool_calls = filteredToolCalls;
+        modified = true;
+      }
+    }
+
+    if (modified) {
+      // Drop assistant message if it became empty
+      const hasContent =
+        typeof newMsg.content === "string"
+          ? (newMsg.content as string).trim().length > 0
+          : Array.isArray(newMsg.content) && (newMsg.content as unknown[]).length > 0;
+      const hasToolCalls = Array.isArray(newMsg.tool_calls) && newMsg.tool_calls.length > 0;
+      if (!hasContent && !hasToolCalls) continue;
+      result.push(newMsg);
+    } else {
+      result.push(msg);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Upstream-send guard: after `fixToolPairs`, strip a trailing assistant
+ * message whose only/remaining content is an orphan `tool_use` block.
+ *
+ * `fixToolPairs` intentionally preserves a final-message `tool_use` because
+ * during context pruning the client is still waiting on the matching
+ * `tool_result` — dropping it there would lose state. But on the
+ * upstream-send path the request body must end on a user turn; a trailing
+ * `assistant(tool_use)` triggers the same Anthropic 400 the guard is
+ * trying to prevent:
+ *   messages.N: `tool_use` ids were found without `tool_result` blocks
+ *   immediately after: toolu_...
+ *
+ * Behavior:
+ *  - If the last message is `assistant` and contains any `tool_use` block,
+ *    those blocks are removed.
+ *  - If removal leaves the message with no content / tool_calls at all, the
+ *    message itself is dropped.
+ *  - Idempotent on clean histories (trailing user, trailing assistant with
+ *    only text/thinking, etc.).
+ */
+export function stripTrailingAssistantOrphanToolUse(
+  messages: Record<string, unknown>[]
+): Record<string, unknown>[] {
+  if (!Array.isArray(messages) || messages.length === 0) return messages;
+
+  const lastIdx = messages.length - 1;
+  const last = messages[lastIdx];
+  if (!last || last.role !== "assistant") return messages;
+
+  let modified = false;
+  const newLast: Record<string, unknown> = { ...last };
+
+  if (Array.isArray(newLast.tool_calls)) {
+    const filteredCalls = (newLast.tool_calls as Record<string, unknown>[]).filter(
+      () => false // remove all trailing tool_calls (none can be paired by definition)
+    );
+    if (filteredCalls.length !== (newLast.tool_calls as unknown[]).length) {
+      newLast.tool_calls = filteredCalls;
+      modified = true;
+    }
+  }
+
+  if (Array.isArray(newLast.content)) {
+    const filteredContent = (newLast.content as Record<string, unknown>[]).filter(
+      (block) => block.type !== "tool_use"
+    );
+    if (filteredContent.length !== (newLast.content as unknown[]).length) {
+      newLast.content = filteredContent;
+      modified = true;
+    }
+  }
+
+  if (!modified) return messages;
+
+  // If the last message is now empty, drop it.
+  const hasContent =
+    typeof newLast.content === "string"
+      ? (newLast.content as string).trim().length > 0
+      : Array.isArray(newLast.content) && (newLast.content as unknown[]).length > 0;
+  const hasToolCalls =
+    Array.isArray(newLast.tool_calls) && (newLast.tool_calls as unknown[]).length > 0;
+
+  const result = messages.slice(0, lastIdx);
+  if (hasContent || hasToolCalls) result.push(newLast);
+  return result;
+}
+
+/**
+ * Some providers reject a trailing text-only assistant turn.
+ * Mistral: "Expected last role User or Tool but got assistant" (#3396).
+ * Official Claude OAuth: "This model does not support assistant message
+ * prefill. The conversation must end with a user message." (live 2026-09-13
+ * on claude/claude-opus-5).
+ */
+const PROVIDERS_REQUIRING_USER_LAST_MESSAGE = new Set(["mistral", "claude"]);
+
+/**
+ * Strip a trailing `assistant` message that contains ONLY plain text (no
+ * `tool_use` / `tool_calls`) for providers that mandate user-last format.
+ *
+ * Call this AFTER `stripTrailingAssistantOrphanToolUse` on the upstream-send
+ * path so `tool_use` orphans are already removed before this check runs.
+ */
+export function stripTrailingAssistantForProvider(
+  messages: Record<string, unknown>[],
+  provider: string
+): Record<string, unknown>[] {
+  if (!PROVIDERS_REQUIRING_USER_LAST_MESSAGE.has(provider)) return messages;
+  if (!Array.isArray(messages) || messages.length === 0) return messages;
+
+  const last = messages[messages.length - 1];
+  if (!last || last.role !== "assistant") return messages;
+
+  // Only strip when the message has NO tool_use / tool_calls (those are
+  // handled by stripTrailingAssistantOrphanToolUse upstream of this call).
+  const hasToolUse =
+    Array.isArray(last.content) &&
+    (last.content as Record<string, unknown>[]).some((b) => b.type === "tool_use");
+  const hasToolCalls = Array.isArray(last.tool_calls) && (last.tool_calls as unknown[]).length > 0;
+  if (hasToolUse || hasToolCalls) return messages;
+
+  return messages.slice(0, messages.length - 1);
+}
+
+/**
+ * The same rule for a Responses `input` array, where tool calls are items of their own: only a
+ * trailing assistant message is dropped, with the reasoning items of that turn.
+ */
+export function stripTrailingAssistantInputForProvider<T>(input: T, provider: string): T {
+  if (!PROVIDERS_REQUIRING_USER_LAST_MESSAGE.has(provider) || !Array.isArray(input)) return input;
+
+  const items = input as Record<string, unknown>[];
+  const last = items[items.length - 1];
+  const isMessage = last?.type === undefined || last.type === "message";
+  if (last?.role !== "assistant" || !isMessage) return input;
+
+  let end = items.length - 1;
+  while (end > 0 && items[end - 1]?.type === "reasoning") end--;
+  return items.slice(0, end) as T;
+}

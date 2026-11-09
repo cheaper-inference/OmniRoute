@@ -1,0 +1,366 @@
+import { resolveStreamIndices } from "./streamIndices";
+import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
+import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
+import {
+  bufferField,
+  flushOpenAiTextBuffers,
+  type BufferedField,
+  type TextBuffers,
+} from "./sseTextBuffers";
+
+const RECORD_STATS = { recordStats: true } as const;
+
+export interface PiiTransformOptions {
+  windowSize?: number;
+}
+
+export function createPiiSseTransform(options?: PiiTransformOptions): TransformStream {
+  const choiceBuffers = new Map<string, TextBuffers>();
+
+  const getBuffers = (index: string | number): TextBuffers => {
+    const key = String(index);
+    let buf = choiceBuffers.get(key);
+    if (!buf) {
+      buf = {
+        content: "",
+        reasoning: "",
+        reasoning_content: "",
+        toolArgs: "",
+        partialJson: "",
+      };
+      choiceBuffers.set(key, buf);
+    }
+    return buf;
+  };
+
+  let windowSize = Math.max(
+    200,
+    options?.windowSize ?? (parseInt(process.env.PII_WINDOW_SIZE || "", 10) || 200)
+  );
+  if (options?.windowSize !== undefined && process.env.PII_TEST_BYPASS_MIN_WINDOW === "true") {
+    windowSize = options.windowSize;
+  }
+  const W = windowSize;
+
+  const processor = (
+    text: string,
+    category: FieldCategory,
+    isStopSignal = false,
+    index: string | number = "0_0",
+    isSnapshot = false,
+    fieldName?: string
+  ): string => {
+    const field = bufferField(category, fieldName);
+    if (field === "toolArgs" || field === "partialJson") {
+      return text;
+    }
+    // warn/off never mutate the payload: detect-only, emit the original bytes immediately
+    // (no sliding-window buffering/re-chunking) so the stream stays byte-identical (#15507).
+    const mode = getPiiResponseMode();
+    if (mode === "warn" || mode === "off") {
+      if (mode === "warn") sanitizePII(text);
+      return text;
+    }
+    if (isSnapshot) {
+      return sanitizePII(text, false, RECORD_STATS).text;
+    }
+    const buffers = getBuffers(index);
+    buffers[field] += text;
+    const { text: sanitized, endMatchIndex } = sanitizePII(
+      buffers[field],
+      !isStopSignal,
+      RECORD_STATS
+    );
+    let emitLength = isStopSignal ? sanitized.length : Math.max(0, sanitized.length - W);
+
+    // Cap emitLength at the start of any PII that touched the end of the buffer
+    if (!isStopSignal && endMatchIndex !== undefined && emitLength > endMatchIndex) {
+      emitLength = endMatchIndex;
+    }
+
+    // Prevent slicing in the middle of a UTF-16 surrogate pair (e.g. emojis)
+    if (emitLength > 0 && emitLength < sanitized.length) {
+      const charCode = sanitized.charCodeAt(emitLength - 1);
+      // High surrogate range is 0xD800 - 0xDBFF
+      if (charCode >= 0xd800 && charCode <= 0xdbff) {
+        emitLength -= 1;
+      }
+    }
+
+    const toEmit = sanitized.slice(0, emitLength);
+    buffers[field] = sanitized.slice(emitLength);
+    return toEmit;
+  };
+
+  const onFlush = (lastJson: any, isJsonStream = false, lastContentJson: any = null): any => {
+    // Force final redaction on all buffers
+    for (const [index, buffers] of choiceBuffers.entries()) {
+      for (const key of Object.keys(buffers)) {
+        const field = key as BufferedField;
+        if (buffers[field]) {
+          buffers[field] = sanitizePII(buffers[field], false, RECORD_STATS).text;
+        }
+      }
+    }
+
+    let hasRemaining = false;
+    for (const buffers of choiceBuffers.values()) {
+      for (const key of Object.keys(buffers)) {
+        if (buffers[key as BufferedField].length > 0) {
+          hasRemaining = true;
+        }
+      }
+    }
+    if (!hasRemaining) {
+      return null;
+    }
+
+    if (!lastJson) {
+      const buffers = getBuffers("0_0");
+      if (buffers.content) {
+        const remaining = buffers.content;
+        buffers.content = "";
+
+        if (isJsonStream) {
+          // Wrap in a safe default OpenAI format to prevent client-side SDK crashes
+          return {
+            choices: [
+              {
+                delta: {
+                  content: remaining,
+                },
+              },
+            ],
+          };
+        } else {
+          return remaining;
+        }
+      }
+      return null;
+    }
+
+    // 1. Claude format: one correctly typed delta per held-back field, per content block.
+    // Every stop signal (and the end of the stream) drains every block still holding a
+    // tail, in block order. A trailing `ping` is still a Claude stream.
+    if (
+      typeof lastJson.type === "string" &&
+      (lastJson.type.startsWith("message") ||
+        lastJson.type.startsWith("content_block") ||
+        lastJson.type === "ping")
+    ) {
+      const frames: any[] = [];
+      const drainBlock = (index: number, buffers: TextBuffers) => {
+        if (buffers.content) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "text_delta", text: buffers.content },
+          });
+          buffers.content = "";
+        }
+        const thinking = buffers.reasoning + buffers.reasoning_content;
+        if (thinking) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "thinking_delta", thinking },
+          });
+          buffers.reasoning = "";
+          buffers.reasoning_content = "";
+        }
+        if (buffers.partialJson) {
+          frames.push({
+            type: "content_block_delta",
+            index,
+            delta: { type: "input_json_delta", partial_json: buffers.partialJson },
+          });
+          buffers.partialJson = "";
+        }
+      };
+      // Blocks stream one after another, so draining every block that still holds a
+      // tail is exact for the block being closed and also covers a block whose
+      // content_block_stop never arrived.
+      const entries = Array.from(choiceBuffers.entries())
+        .map(([key, buffers]) => [parseInt(key.split("_")[0] || "0", 10), buffers] as const)
+        .sort((a, b) => a[0] - b[0]);
+      for (const [index, buffers] of entries) drainBlock(index, buffers);
+      if (!frames.length) return null;
+      return frames.length === 1 ? frames[0] : frames;
+    }
+
+    // 2. OpenAI Chat Completions
+    if (lastJson.choices && Array.isArray(lastJson.choices)) {
+      return flushOpenAiTextBuffers(
+        { get: getBuffers, takeAll: () => Array.from(choiceBuffers) },
+        lastJson
+      );
+    }
+
+    // 3. Responses API
+    if (typeof lastJson.type === "string" && lastJson.type.startsWith("response.")) {
+      const idx = typeof lastJson.output_index === "number" ? lastJson.output_index : 0;
+      const buffers = getBuffers(`${idx}_0`);
+      // Never clone a terminal event (output_item.done etc.) — that replays it with the same
+      // sequence_number (#15507). Emit the buffered text as a fresh text delta instead.
+      if (!lastJson.type.endsWith(".delta")) {
+        if (!buffers.content) return null;
+        const delta = buffers.content;
+        buffers.content = "";
+        return { type: "response.output_text.delta", output_index: idx, delta };
+      }
+      const finalJson = JSON.parse(JSON.stringify(lastJson));
+      if (buffers.content) {
+        finalJson.delta = buffers.content;
+        buffers.content = "";
+      }
+      if (buffers.toolArgs) {
+        finalJson.item = {
+          arguments: buffers.toolArgs,
+        };
+        buffers.toolArgs = "";
+      }
+      return finalJson;
+    }
+
+    // 4. Gemini format
+    if (Array.isArray(lastJson.candidates)) {
+      const finalJson = JSON.parse(JSON.stringify(lastJson));
+      for (const cand of finalJson.candidates) {
+        const idx = typeof cand.index === "number" ? cand.index : 0;
+        const buffers = getBuffers(`${idx}_0`);
+        if (!cand.content) cand.content = {};
+        cand.content.parts = [];
+
+        if (buffers.content) {
+          cand.content.parts.push({ text: buffers.content });
+          buffers.content = "";
+        }
+      }
+      return finalJson;
+    }
+
+    // 5. Generic fallback
+    const templateJson = lastContentJson || lastJson;
+    const finalJson = JSON.parse(JSON.stringify(templateJson));
+    // Skip recognized system metadata (same `classifyField`/METADATA_KEYS as sanitizeObject
+    // in sseTextTransform.ts) — fields like `provider` or `native_finish_reason` must never
+    // be cleared to "" or refilled with buffered answer text here either. See #13488.
+    const clearDeltas = (obj: any, parentKey = "") => {
+      if (!obj || typeof obj !== "object") return;
+      const isArray = Array.isArray(obj);
+      for (const key of Object.keys(obj)) {
+        if (typeof obj[key] === "string") {
+          if (classifyField(key, parentKey) === null) {
+            continue;
+          }
+          obj[key] = "";
+        } else if (typeof obj[key] === "object") {
+          clearDeltas(obj[key], isArray ? parentKey : key);
+        }
+      }
+    };
+    clearDeltas(finalJson);
+
+    const populateRemaining = (
+      obj: any,
+      currentChoiceIdx = 0,
+      currentToolIdx = 0,
+      parentKey = ""
+    ) => {
+      if (!obj || typeof obj !== "object") return;
+
+      const { choiceIdx, toolIdx } = resolveStreamIndices(obj, currentChoiceIdx, currentToolIdx);
+
+      const compositeKey = `${choiceIdx}_${toolIdx}`;
+      const isArray = Array.isArray(obj);
+
+      for (const key of Object.keys(obj)) {
+        if (typeof obj[key] === "string") {
+          const field = classifyField(key, parentKey);
+          if (field === null) {
+            continue;
+          }
+          const choiceBuf = getBuffers(compositeKey);
+          if (choiceBuf[field]) {
+            obj[key] = (obj[key] || "") + choiceBuf[field];
+            choiceBuf[field] = "";
+          }
+        } else if (typeof obj[key] === "object") {
+          populateRemaining(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
+        }
+      }
+    };
+
+    populateRemaining(finalJson, 0, 0);
+
+    // Clear all buffers
+    for (const buffers of choiceBuffers.values()) {
+      buffers.content = "";
+      buffers.reasoning = "";
+      buffers.reasoning_content = "";
+      buffers.toolArgs = "";
+      buffers.partialJson = "";
+    }
+
+    return finalJson;
+  };
+
+  return createSseTextTransform(processor, onFlush);
+}
+
+/**
+ * Per-request gate for the streaming PII transform. Same truth as the
+ * non-streaming post-call guardrail: `pii-masker` in the disabled list
+ * skips the transform so bytes pass through untouched.
+ */
+export interface PiiGate {
+  piiDisabledGuardrails: string[];
+}
+
+/**
+ * Decide whether the PII transform joins the chain. Pure: the list comes
+ * from the resolver, already normalized (`pii_masker` reads as
+ * `pii-masker`).
+ */
+export function isPiiTransformEnabled(gate: PiiGate): boolean {
+  return !gate.piiDisabledGuardrails.includes("pii-masker");
+}
+
+/**
+ * Resolve the per-request gate from injected readers.
+ * `resolveDisabledGuardrails` defaults to the production reader; tests
+ * inject fakes. Fail-open to the historical behavior on reader errors.
+ */
+export async function resolvePiiGate(args: {
+  resolveDisabledGuardrails?: (input: {
+    apiKeyInfo?: unknown;
+    body?: unknown;
+    headers?: unknown;
+  }) => string[];
+  apiKeyInfo?: unknown;
+  body?: unknown;
+  headers?: unknown;
+}): Promise<PiiGate> {
+  let disabled: string[] = [];
+  try {
+    if (args.resolveDisabledGuardrails) {
+      disabled =
+        args.resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo,
+          body: args.body,
+          headers: args.headers,
+        }) ?? [];
+    } else {
+      const { resolveDisabledGuardrails } = await import("./guardrails");
+      disabled =
+        resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo as Record<string, unknown> | null | undefined,
+          body: args.body,
+          headers: args.headers as Headers | Record<string, unknown> | null | undefined,
+        }) ?? [];
+    }
+  } catch {
+    disabled = [];
+  }
+  return { piiDisabledGuardrails: disabled };
+}

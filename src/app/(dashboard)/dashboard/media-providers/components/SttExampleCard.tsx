@@ -1,0 +1,194 @@
+"use client";
+
+import { useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Button from "@/shared/components/Button";
+import Select from "@/shared/components/Select";
+import { useApiKey } from "../../providers/hooks/useApiKey";
+import { useProviderModels } from "../../providers/hooks/useProviderModels";
+import { PlaygroundCard } from "./PlaygroundCard";
+import { buildCurl } from "../../providers/utils/buildCurl";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
+
+interface Props {
+  providerId: string;
+}
+
+const ENDPOINT_PATH = "/api/v1/audio/transcriptions";
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+
+function extractError(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+  const err = d.error as Record<string, unknown> | undefined;
+  if (err?.message) return String(err.message);
+  if (typeof d.message === "string") return d.message;
+  return null;
+}
+
+function SttResultRenderer(data: unknown) {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+  const text = typeof d.text === "string" ? d.text : null;
+  if (text !== null) {
+    return (
+      <div className="p-3">
+        <p className="text-sm text-text-main whitespace-pre-wrap">{text}</p>
+      </div>
+    );
+  }
+  return <pre className="text-xs p-3 text-text-main">{JSON.stringify(data, null, 2)}</pre>;
+}
+
+export function SttExampleCard({ providerId }: Props) {
+  const t = useTranslations("miniPlayground");
+  const fileInputId = useId();
+  const { apiKey, keys } = useApiKey();
+  const { models } = useProviderModels(providerId);
+
+  // Show only speech-to-text models. Providers like OpenRouter expose a large
+  // chat catalog on the same connection, so narrow to transcription entries
+  // (type "audio" / subtype "transcription"). A no-op for audio-only STT
+  // providers, whose models are all transcription.
+  const sttModels = models.filter((m) => m.type === "audio" && m.subtype === "transcription");
+
+  const firstModel = sttModels[0]?.id ?? "whisper-1";
+  const [model, setModel] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [running, setRunning] = useState<boolean>(false);
+  const [result, setResult] = useState<{ data: unknown; latencyMs: number } | undefined>();
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const effectiveModel = model || firstModel;
+
+  // The transcription route resolves the provider from the leading segment of
+  // the submitted model id, so a bare id (e.g. "deepgram/nova-3" for the
+  // OpenRouter connection) would misroute. Qualify it with this connection's
+  // provider id at submit time. Single-token ids (e.g. "whisper-1") already
+  // lack a slash and pass through unchanged once prefixed.
+  const qualify = (id: string) => (id.startsWith(`${providerId}/`) ? id : `${providerId}/${id}`);
+
+  // cURL is multipart — show a representative snippet
+  const curlSnippet = buildCurl({
+    endpoint:
+      (typeof window !== "undefined" ? window.location.origin : "http://localhost:20128") +
+      ENDPOINT_PATH,
+    headers: {
+      Authorization: "Bearer <your-api-key>",
+    },
+    body: {
+      model: qualify(effectiveModel),
+      file: "<path/to/audio.mp3>",
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] ?? null;
+    setFileError(null);
+    if (selected && selected.size > MAX_FILE_SIZE_BYTES) {
+      setFileError(t("fileTooLarge25Mb"));
+      setFile(null);
+      return;
+    }
+    setFile(selected);
+  };
+
+  const handleRun = async () => {
+    if (!file) {
+      setError(t("selectAudioFirst"));
+      return;
+    }
+    setRunning(true);
+    setError(null);
+    setResult(undefined);
+    const t0 = performance.now();
+    try {
+      const formData = new FormData();
+      formData.append("model", qualify(effectiveModel));
+      formData.append("file", file);
+
+      // Authenticate via the dashboard session cookie — never send the masked
+      // apiKey as a Bearer token (it is not a real credential; see #9935).
+      const headers: Record<string, string> = { "x-connection-id": providerId };
+      const playgroundKeyId = resolvePlaygroundKeyId(apiKey, keys);
+      if (playgroundKeyId) headers[PLAYGROUND_KEY_ID_HEADER] = playgroundKeyId;
+      const res = await fetch(ENDPOINT_PATH, {
+        method: "POST",
+        credentials: "same-origin",
+        headers,
+        body: formData,
+      });
+      const data: unknown = await res.json();
+      const latencyMs = performance.now() - t0;
+      const errMsg = extractError(data);
+      if (!res.ok || errMsg) {
+        setError(errMsg ?? `HTTP ${res.status}`);
+      } else {
+        setResult({ data, latencyMs });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("requestFailed"));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const modelOptions = sttModels.length > 0 ? sttModels : [{ id: "whisper-1" }];
+
+  return (
+    <PlaygroundCard
+      kindLabel={t("speechToText")}
+      apiEndpoint={ENDPOINT_PATH}
+      onRun={handleRun}
+      curlSnippet={curlSnippet}
+      running={running}
+      result={result}
+      error={error}
+      resultRenderer={SttResultRenderer}
+    >
+      {/* Model */}
+      <Select
+        label={t("model")}
+        value={model || firstModel}
+        onChange={(e) => setModel(e.target.value)}
+        options={modelOptions.map((m) => ({ value: m.id, label: m.id }))}
+      />
+      {/* File upload */}
+      <Field
+        label={t("audioFile")}
+        htmlFor={fileInputId}
+        hint={t("audioFormats25Mb")}
+        error={fileError || undefined}
+      >
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            icon="upload_file"
+            onClick={() => inputRef.current?.click()}
+          >
+            {file ? file.name : t("chooseFile")}
+          </Button>
+          {file && (
+            <span className="text-xs text-text-muted">{Math.round(file.size / 1024)}KB</span>
+          )}
+        </div>
+        {/* kit-exception: The native picker stays hidden behind the kit Button above (it opens it). */}
+        <input
+          ref={inputRef}
+          id={fileInputId}
+          type="file"
+          accept="audio/mp3,audio/wav,audio/m4a,audio/ogg,audio/flac,audio/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </Field>
+    </PlaygroundCard>
+  );
+}

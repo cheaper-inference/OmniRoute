@@ -1,0 +1,476 @@
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
+import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
+import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+
+import type { SqliteAdapter } from "./adapters/types";
+import { getDbInstance } from "./core";
+import {
+  getAutoVacuumModeForDb,
+  setAutoVacuumForDb,
+  type AutoVacuumDrift,
+} from "./optimizationSettings";
+// Direct `key_value` access — the existing `keyValueStore` helpers only exist
+// in test fixtures; the 3 production call sites (pricingSync, jsonMigration,
+// serviceModels) all use `getDbInstance().prepare(...).run()` directly. We
+// follow the same convention to avoid introducing a new abstraction.
+const READ_KV_SQL = "SELECT value FROM key_value WHERE namespace = ? AND key = ? LIMIT 1";
+// The key_value table is (namespace, key, value) — no updated_at column
+// (see migrations/001_initial_schema.sql). Match the canonical write shape
+// used by serviceModels.ts / jsonMigration.ts.
+const WRITE_KV_SQL = "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)";
+
+function setKeyValue(namespace: string, key: string, value: string): void {
+  const db = getDbInstance();
+  db.prepare(WRITE_KV_SQL).run(namespace, key, value);
+}
+
+function getKeyValue(namespace: string, key: string): string | null {
+  const db = getDbInstance();
+  const row = db.prepare(READ_KV_SQL).get(namespace, key) as { value: string } | undefined;
+  return row?.value ?? null;
+}
+
+/**
+ * Persisted scheduler state for the SQLite VACUUM loop.
+ *
+ * SQLite's `auto_vacuum` pragma controls page reclamation behavior
+ * inside SQLite itself; it does not schedule full VACUUM runs. This
+ * module is the app-level scheduler for full VACUUM: it follows the
+ * Storage page's scheduledVacuum / vacuumHour settings, persists the
+ * result to the `key_value` table, and exposes a getState() / runNow() /
+ * stop() surface for the API + UI.
+ *
+ * The previous `compressionScheduler.ts` was orphaned dead code that
+ * read the wrong settings namespace (`compression.*` instead of
+ * `optimization.scheduledVacuum`); see issue #4437.
+ */
+
+export interface VacuumSchedulerState {
+  enabled: boolean;
+  intervalMs: number;
+  lastRunAt: number | null;
+  lastError: string | null;
+  lastDurationMs: number | null;
+  isRunning: boolean;
+  nextRunAt: number | null;
+  /**
+   * Set when another subsystem decided a full VACUUM is warranted but deferred
+   * it to this scheduler's configured window instead of running it inline
+   * (e.g. `cleanup.ts` on an `auto_vacuum = NONE` database, where
+   * `incremental_vacuum` cannot reclaim anything — see #12821). Cleared by the
+   * next successful run. Persisted so the request survives restarts.
+   */
+  fullVacuumRequestedAt: number | null;
+  fullVacuumRequestReason: string | null;
+  /** #13432 — configured vs live auto_vacuum mismatch pending reconcile, or null once reconciled. */
+  autoVacuumDrift: AutoVacuumDrift | null;
+  /** Pages freed by the most recent bounded `PRAGMA incremental_vacuum` batch, or null if the last run was a full VACUUM / drift reconcile. */
+  lastReclaimedPages: number | null;
+}
+
+export type ScheduledVacuum = (typeof DEFAULT_DATABASE_SETTINGS)["optimization"]["scheduledVacuum"];
+export type VacuumScheduleSettings = {
+  scheduledVacuum: ScheduledVacuum;
+  vacuumHour: number;
+};
+
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const NOMINAL_INTERVAL_MS: Record<ScheduledVacuum, number> = {
+  never: 0,
+  daily: DAY_MS,
+  weekly: 7 * DAY_MS,
+  monthly: 30 * DAY_MS,
+};
+const VALID_SCHEDULES = new Set<ScheduledVacuum>(["never", "daily", "weekly", "monthly"]);
+const KEY_VALUE_NAMESPACE = "scheduler";
+const KEY_VALUE_KEY = "vacuum";
+const STATE_DEFAULTS: VacuumSchedulerState = {
+  enabled: false,
+  intervalMs: 0,
+  lastRunAt: null,
+  lastError: null,
+  lastDurationMs: null,
+  isRunning: false,
+  nextRunAt: null,
+  fullVacuumRequestedAt: null,
+  fullVacuumRequestReason: null,
+  autoVacuumDrift: null,
+  lastReclaimedPages: null,
+};
+
+// Shared key_value coordinate with optimizationSettings.ts, which writes the
+// initial drift record at boot (see AUTO_VACUUM_DRIFT_NAMESPACE/KEY there).
+const AUTO_VACUUM_DRIFT_NAMESPACE = "scheduler";
+const AUTO_VACUUM_DRIFT_KEY = "vacuumDrift";
+
+// Bounded per-run reclaim so a scheduled vacuum on a multi-GB INCREMENTAL
+// database never blocks for as long as a full VACUUM would (#13432 fix #2).
+const INCREMENTAL_VACUUM_BATCH_PAGES = 2000;
+
+let timer: ReturnType<typeof setTimeout> | null = null;
+let hydrated = false;
+let currentState: VacuumSchedulerState = { ...STATE_DEFAULTS };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function parseJsonSafe(raw: string | null): unknown {
+  if (raw === null) return undefined;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+function readNamespace(namespace: string): Record<string, unknown> {
+  const db = getDbInstance();
+  const rows = db
+    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
+    .all(namespace) as Array<{ key: string; value: string | null }>;
+  const values: Record<string, unknown> = {};
+  for (const row of rows) values[row.key] = parseJsonSafe(row.value);
+  return values;
+}
+
+function normalizeSchedule(value: unknown, fallback: ScheduledVacuum): ScheduledVacuum {
+  return typeof value === "string" && VALID_SCHEDULES.has(value as ScheduledVacuum)
+    ? (value as ScheduledVacuum)
+    : fallback;
+}
+
+function normalizeVacuumHour(value: unknown, fallback: number): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(23, Math.max(0, Math.floor(numeric)));
+}
+
+function mergeOptimization(target: VacuumScheduleSettings, value: unknown): VacuumScheduleSettings {
+  if (!isRecord(value)) return target;
+  return {
+    scheduledVacuum: normalizeSchedule(value.scheduledVacuum, target.scheduledVacuum),
+    vacuumHour: normalizeVacuumHour(value.vacuumHour, target.vacuumHour),
+  };
+}
+
+function readScheduleSettings(): VacuumScheduleSettings {
+  let settings: VacuumScheduleSettings = {
+    scheduledVacuum: DEFAULT_DATABASE_SETTINGS.optimization.scheduledVacuum,
+    vacuumHour: DEFAULT_DATABASE_SETTINGS.optimization.vacuumHour,
+  };
+
+  const mainSettings = readNamespace("settings");
+  const databaseSettingsValue = mainSettings.databaseSettings;
+  if (isRecord(databaseSettingsValue)) {
+    settings = mergeOptimization(settings, databaseSettingsValue.optimization);
+  }
+  settings = mergeOptimization(settings, mainSettings.optimization);
+
+  const databaseSettings = readNamespace("databaseSettings");
+  settings = mergeOptimization(settings, databaseSettings.optimization);
+  settings = {
+    scheduledVacuum: normalizeSchedule(
+      databaseSettings["optimization.scheduledVacuum"] ?? databaseSettings.scheduledVacuum,
+      settings.scheduledVacuum
+    ),
+    vacuumHour: normalizeVacuumHour(
+      databaseSettings["optimization.vacuumHour"] ?? databaseSettings.vacuumHour,
+      settings.vacuumHour
+    ),
+  };
+
+  return settings;
+}
+
+function atVacuumHour(timestamp: number, hour: number): Date {
+  const date = new Date(timestamp);
+  date.setHours(hour, 0, 0, 0);
+  return date;
+}
+
+function addFrequency(date: Date, frequency: Exclude<ScheduledVacuum, "never">): Date {
+  const next = new Date(date.getTime());
+  if (frequency === "daily") next.setDate(next.getDate() + 1);
+  else if (frequency === "weekly") next.setDate(next.getDate() + 7);
+  else next.setMonth(next.getMonth() + 1);
+  return next;
+}
+
+export function resolveNextRunAt(
+  settings: VacuumScheduleSettings,
+  lastRunAt: number | null,
+  now: number = Date.now()
+): number | null {
+  const frequency = settings.scheduledVacuum;
+  if (frequency === "never") return null;
+
+  const hour = normalizeVacuumHour(
+    settings.vacuumHour,
+    DEFAULT_DATABASE_SETTINGS.optimization.vacuumHour
+  );
+  let candidate: Date;
+  if (typeof lastRunAt === "number" && Number.isFinite(lastRunAt) && lastRunAt > 0) {
+    candidate = atVacuumHour(lastRunAt, hour);
+    if (candidate.getTime() <= lastRunAt) candidate = addFrequency(candidate, frequency);
+  } else {
+    candidate = atVacuumHour(now, hour);
+    if (candidate.getTime() <= now) candidate = addFrequency(candidate, "daily");
+  }
+
+  while (candidate.getTime() <= now) {
+    candidate = addFrequency(candidate, frequency);
+  }
+
+  return candidate.getTime();
+}
+
+function applySchedule(now: number = Date.now(), anchorLastRunAt = currentState.lastRunAt): void {
+  const settings = readScheduleSettings();
+  currentState.enabled = settings.scheduledVacuum !== "never";
+  currentState.intervalMs = NOMINAL_INTERVAL_MS[settings.scheduledVacuum];
+  currentState.nextRunAt = resolveNextRunAt(settings, anchorLastRunAt, now);
+}
+
+function armTimer(): void {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  // The flag is checked here because refresh() also runs from the settings API and after a manual
+  // VACUUM, and either of those would otherwise re-arm the timer.
+  if (
+    !currentState.enabled ||
+    currentState.nextRunAt === null ||
+    currentState.isRunning ||
+    isBackgroundServicesDisabled()
+  ) {
+    currentState.nextRunAt = null;
+    return;
+  }
+
+  const delayMs = Math.max(0, currentState.nextRunAt - Date.now());
+  timer = setTimeout(
+    () => {
+      if (currentState.nextRunAt !== null && currentState.nextRunAt > Date.now()) {
+        armTimer();
+        return;
+      }
+      void runNow().catch((err) => {
+        currentState.lastError = err instanceof Error ? err.message : String(err);
+      });
+    },
+    Math.min(delayMs, MAX_TIMER_TIMEOUT_MS)
+  );
+  // Don't keep the event loop alive just for vacuum
+  if (typeof timer.unref === "function") timer.unref();
+}
+
+function persistState(): void {
+  setKeyValue(KEY_VALUE_NAMESPACE, KEY_VALUE_KEY, JSON.stringify(currentState));
+}
+
+function isAutoVacuumDrift(value: unknown): value is AutoVacuumDrift {
+  return isRecord(value) && typeof value.configured === "string" && typeof value.live === "string";
+}
+
+function loadAutoVacuumDrift(): AutoVacuumDrift | null {
+  const raw = getKeyValue(AUTO_VACUUM_DRIFT_NAMESPACE, AUTO_VACUUM_DRIFT_KEY);
+  if (!raw) return null;
+  const parsed = parseJsonSafe(raw);
+  return isAutoVacuumDrift(parsed) ? parsed : null;
+}
+
+function clearAutoVacuumDrift(): void {
+  setKeyValue(AUTO_VACUUM_DRIFT_NAMESPACE, AUTO_VACUUM_DRIFT_KEY, JSON.stringify(null));
+}
+
+/**
+ * Bounded reclaim step for a database already running `auto_vacuum=INCREMENTAL`:
+ * frees at most `INCREMENTAL_VACUUM_BATCH_PAGES` pages per scheduled run
+ * instead of the unconditional full `VACUUM` this scheduler used to always
+ * issue (#13432 fix #2 / reporter's suggested fix #2). Returns the number of
+ * freelist pages actually reclaimed by this batch.
+ */
+function runBoundedIncrementalVacuum(db: SqliteAdapter): number {
+  const before = Number(db.pragma("freelist_count", { simple: true }) ?? 0);
+  db.pragma(`incremental_vacuum(${INCREMENTAL_VACUUM_BATCH_PAGES})`);
+  const after = Number(db.pragma("freelist_count", { simple: true }) ?? 0);
+  return Math.max(0, before - after);
+}
+
+function loadPersistedState(): Partial<VacuumSchedulerState> {
+  const raw = getKeyValue(KEY_VALUE_NAMESPACE, KEY_VALUE_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as Partial<VacuumSchedulerState>;
+    return parsed;
+  } catch {
+    return {};
+  }
+}
+
+export function getState(): VacuumSchedulerState {
+  return { ...currentState };
+}
+
+export function refresh(): VacuumSchedulerState {
+  applySchedule();
+  persistState();
+  armTimer();
+  return getState();
+}
+
+export async function runNow(): Promise<{
+  success: boolean;
+  durationMs: number;
+  error?: string;
+  reclaimedPages?: number;
+}> {
+  if (currentState.isRunning) {
+    return { success: false, durationMs: 0, error: "already_running" };
+  }
+  currentState.isRunning = true;
+  persistState();
+
+  const start = Date.now();
+  try {
+    const db = getDbInstance();
+    let reclaimedPages: number | null = null;
+
+    // #13432: reconcile a configured-vs-live auto_vacuum drift first, out of
+    // request handling, on this bounded/observable scheduled path — never
+    // synchronously at startup (see optimizationSettings.ts::applyStoredDatabaseOptimizationSettings).
+    const drift = loadAutoVacuumDrift();
+    if (drift) {
+      console.log(
+        `[DB] Reconciling auto_vacuum drift (configured=${drift.configured}, live=${drift.live}): ` +
+          `running one-time conversion VACUUM to apply the configured mode to the database file.`
+      );
+      setAutoVacuumForDb(db, drift.configured);
+      clearAutoVacuumDrift();
+    } else if (getAutoVacuumModeForDb(db) === "INCREMENTAL") {
+      reclaimedPages = runBoundedIncrementalVacuum(db);
+    } else {
+      db.exec("VACUUM");
+    }
+
+    const duration = Date.now() - start;
+    currentState.lastRunAt = start;
+    currentState.lastError = null;
+    currentState.lastDurationMs = duration;
+    currentState.lastReclaimedPages = reclaimedPages;
+    currentState.autoVacuumDrift = loadAutoVacuumDrift();
+    currentState.isRunning = false;
+    // A full rebuild just happened — any deferred request is satisfied.
+    currentState.fullVacuumRequestedAt = null;
+    currentState.fullVacuumRequestReason = null;
+    refresh(); // reset the next-run clock from this successful run
+    return { success: true, durationMs: duration, reclaimedPages: reclaimedPages ?? undefined };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    currentState.lastError = message;
+    currentState.lastDurationMs = Date.now() - start;
+    currentState.isRunning = false;
+    applySchedule(Date.now(), Date.now());
+    persistState();
+    armTimer();
+    return { success: false, durationMs: currentState.lastDurationMs, error: message };
+  }
+}
+
+/**
+ * Merge the persisted blob into `currentState` once per process. `init()` does
+ * this too; having it here means an early `requestFullVacuum()` (before
+ * `init()`, e.g. when init failed non-fatally) cannot overwrite a persisted
+ * `lastRunAt` with the in-memory default and pull the next run forward.
+ */
+function hydrateFromPersistedState(): void {
+  if (hydrated) return;
+  hydrated = true;
+  const persisted = loadPersistedState();
+  currentState = {
+    ...STATE_DEFAULTS,
+    ...persisted,
+    isRunning: false, // never resume a "running" state across restarts
+    nextRunAt: null, // recomputed by refresh()
+    // Always reload from the drift record's own key_value entry rather than
+    // trusting a stale copy embedded in the scheduler state blob — it is the
+    // source of truth optimizationSettings.ts writes at every boot.
+    autoVacuumDrift: loadAutoVacuumDrift(),
+  };
+}
+
+/**
+ * Record that a full VACUUM is warranted without running it now (#12821).
+ *
+ * Contract: the first request's timestamp is kept (so the UI can show how long
+ * it has been pending), the reason is overwritten with the latest one, and the
+ * request is cleared by the next successful `runNow()` — scheduled or manual.
+ * `scheduledVacuum = never` is honored: the request stays visible in
+ * `getState()`, nothing runs automatically.
+ */
+export function requestFullVacuum(reason: string): VacuumSchedulerState {
+  hydrateFromPersistedState();
+  const firstRequest = currentState.fullVacuumRequestedAt === null;
+  if (firstRequest) currentState.fullVacuumRequestedAt = Date.now();
+  currentState.fullVacuumRequestReason = reason;
+  persistState();
+
+  if (firstRequest) {
+    let when: string;
+    if (readScheduleSettings().scheduledVacuum === "never") {
+      when = "scheduledVacuum is 'never' — run it manually from the Storage page when convenient";
+    } else if (currentState.nextRunAt !== null) {
+      when = `deferred to the scheduled run at ${new Date(currentState.nextRunAt).toISOString()}`;
+    } else {
+      when = "deferred to the next scheduled run";
+    }
+    console.log(`[VacuumScheduler] Full VACUUM requested (${reason}); ${when}.`);
+  }
+  return getState();
+}
+
+/**
+ * Initialize the scheduler. Called once from the Next.js
+ * `instrumentation-node.ts` register() hook. Safe to call multiple
+ * times — the second call is a no-op.
+ */
+export function init(): VacuumSchedulerState {
+  if (timer) return getState();
+
+  if (isBackgroundServicesDisabled()) {
+    console.log("[STARTUP] Vacuum scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)");
+  }
+
+  hydrated = false; // an explicit init() always re-reads the persisted blob
+  hydrateFromPersistedState();
+  return refresh();
+}
+
+export const initVacuumScheduler = init;
+export const refreshVacuumScheduler = refresh;
+
+/**
+ * Stop the scheduler. Called from `closeDbInstance()` so we don't
+ * leak a setTimeout handle across DB reconnects. Idempotent.
+ */
+export function stop(): void {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  currentState.nextRunAt = null;
+  currentState.isRunning = false;
+  persistState();
+}
+
+/**
+ * Test-only: reset all module state. Do not call from production.
+ */
+export function __resetForTests(): void {
+  stop();
+  hydrated = false;
+  currentState = { ...STATE_DEFAULTS };
+}

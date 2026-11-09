@@ -1,0 +1,759 @@
+import {
+  TRANSPORT_ERROR_LABEL,
+  NO_RESPONSE_LABEL,
+  type HttpAttemptRecord,
+} from "../../utils/upstreamHttp.ts";
+import type {
+  HttpAttemptCollector,
+  HttpAttemptSelection,
+} from "../../utils/providerHttpAttempts.ts";
+/**
+ * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
+ * decomposition, #3501).
+ *
+ * Extracted from handleChatCore: persists one attempt's call log. Emits a provider.warning audit
+ * event when the provider response carries warnings, fills the detailed pipeline payloads (when
+ * detailed logging is on), and writes the bounded/truncated call-log row (request/response bodies
+ * with the Claude prompt-cache meta attached). Best-effort: the saveCallLog write swallows its own
+ * errors. The per-request context (provider/model/ids/combo/etc.) is threaded via `ctx` so the 16
+ * call sites in the handler stay byte-identical; behaviour is unchanged.
+ */
+
+import { extractProviderWarnings } from "@/lib/compliance/providerAudit";
+import { logAuditEvent } from "@/lib/compliance";
+import { emit } from "@/lib/events/eventBus";
+import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
+import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
+import { saveCallLog, saveUpstreamHttpAttempt } from "@/lib/usageDb";
+import { captureReasoningSnapshotMeta } from "@/lib/usage/callLogs";
+import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
+import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
+import { FORMATS } from "../../translator/formats.ts";
+import { takeEarlyKeepaliveBytes } from "../../utils/earlyKeepaliveByteBuffer.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { isEstimatedUsage } from "../../utils/usageTracking.ts";
+import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
+import { attachLogMeta } from "./cacheUsageMeta.ts";
+import {
+  readAddedWait,
+  readUpstreamDispatchedAt,
+  queueWaitMsFromDispatch,
+} from "../../utils/proxyFetch.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
+
+const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
+
+interface VideoLogCloneState {
+  source: Record<string, unknown>;
+  rootClone: Record<string, unknown> | null;
+  containers: Map<string, unknown[]>;
+  messages: Map<string, Record<string, unknown>>;
+}
+
+function mutableVideoLogMessage(
+  state: VideoLogCloneState,
+  container: string,
+  messageIndex: number,
+  originalContainer: unknown[],
+  originalMessage: Record<string, unknown>,
+  originalContent: unknown
+): Record<string, unknown> {
+  if (!state.rootClone) state.rootClone = { ...state.source };
+  let containerClone = state.containers.get(container);
+  if (!containerClone) {
+    containerClone = [...originalContainer];
+    state.containers.set(container, containerClone);
+    state.rootClone[container] = containerClone;
+  }
+  const messageKey = `${container}:${messageIndex}`;
+  let messageClone = state.messages.get(messageKey);
+  if (!messageClone) {
+    messageClone = { ...originalMessage };
+    if (Array.isArray(originalContent)) messageClone.content = [...originalContent];
+    state.messages.set(messageKey, messageClone);
+    containerClone[messageIndex] = messageClone;
+  }
+  return messageClone;
+}
+
+/**
+ * Apply the video-bridge redaction shadow (P1a's `meta.videoBridgeLogRedaction`,
+ * threaded here via `PersistAttemptLogsContext.videoBridgeLogRedaction`) to a
+ * CLONE of `body` before it is serialized into the persisted call log (#12150
+ * surface 1).
+ *
+ * `body` itself is NEVER mutated: by the time an attempt is logged, this same
+ * `body` reference has already been sent upstream (the model path), so
+ * mutating it here would be both unsafe and pointless. Shadow replacement
+ * clones only the containers on the path to each redacted part (container
+ * array -> message -> content array -> part). With failClosedOnMiss enabled,
+ * the final structural redactor also clones the result to protect raw video
+ * siblings. The common non-video path still returns `body` unchanged (same
+ * reference, no allocation) when there is nothing to redact.
+ *
+ * #12150 fix round 1 (adversarial review, CRITICAL): matches by CONTENT
+ * (`entry.fullText === part.text`), never by `entry.messageIndex`/
+ * `entry.partIndex`. Those positions are computed by the guardrail's preCall,
+ * but request-mutation stages that run AFTER it and BEFORE this log write —
+ * `injectSystemPrompt` (prepends a message when no system/developer message
+ * exists), context-relay handoff injection, reasoning-rule body rewrites —
+ * can prepend or splice the message array, silently invalidating any
+ * positional index. A stale index either misses the real part (the
+ * transcript is logged unredacted) or, worse, lands on and overwrites an
+ * unrelated legitimate message. Scanning every part in the named container
+ * for an exact text match finds the video part wherever it ended up and
+ * never touches a part whose text differs — see
+ * `tests/unit/video-bridge-log-redaction.test.ts`'s "Scenario A" test for the
+ * reproduction this fixes.
+ *
+ * #12430 item 4 (P2c): a message's `content` can also be a plain STRING that
+ * embeds `fullText` as a SUBSTRING rather than an exact array part — derived
+ * dispatches (pipeline-strategy stages, smart-auto-pipeline, context-handoff
+ * summaries) all interpolate the transcript blob into a larger rendered
+ * prompt string before calling `handleSingleModel`. That string branch is
+ * mutually exclusive with the array branch (a message's `content` is one or
+ * the other, never both) and uses `String.prototype.replaceAll` against the
+ * trusted `fullText` literal to swap every occurrence — see
+ * `tests/unit/video-bridge-derived-prompt-redaction.test.ts`.
+ * When persisting an observed video request, every shadow entry must match:
+ * a partial match can otherwise leave another video's transcript in the log.
+ */
+export function applyVideoBridgeLogRedaction(
+  body: unknown,
+  redaction: VideoBridgeLogRedactionEntry[] | null | undefined,
+  failClosedOnMiss = false
+): unknown {
+  if (!redaction || redaction.length === 0) {
+    return failClosedOnMiss ? OMITTED_VIDEO_TRANSCRIPT_REQUEST : body;
+  }
+  if (!body || typeof body !== "object") {
+    return failClosedOnMiss ? OMITTED_VIDEO_TRANSCRIPT_REQUEST : body;
+  }
+
+  const source = body as Record<string, unknown>;
+  const cloneState: VideoLogCloneState = {
+    source,
+    rootClone: null,
+    containers: new Map(),
+    messages: new Map(),
+  };
+  let redacted = false;
+
+  for (const entry of redaction) {
+    const { container, fullText, redactedText } = entry;
+    if (typeof fullText !== "string" || fullText.length === 0) {
+      if (failClosedOnMiss) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
+      continue;
+    }
+    const originalContainer = source[container];
+    if (!Array.isArray(originalContainer)) {
+      if (failClosedOnMiss) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
+      continue;
+    }
+    let matchedEntry = false;
+    // Mirrors the exact `type` replaceVideoParts() writes for this container
+    // (videoBridgeHelpers.ts) — a stronger anchor than a loose "text-like"
+    // check, at zero extra cost.
+    const expectedPartType = container === "input" ? "input_text" : "text";
+
+    for (let messageIndex = 0; messageIndex < originalContainer.length; messageIndex++) {
+      const originalMessage = originalContainer[messageIndex];
+      if (!originalMessage || typeof originalMessage !== "object") continue;
+      const originalContent = (originalMessage as Record<string, unknown>).content;
+
+      // Derived-prompt dispatches (pipeline-strategy stages, smart-auto-pipeline,
+      // context-handoff summaries — #12430 item 4) embed the transcript as a
+      // SUBSTRING of a plain string `content`, e.g. a rendered stage prompt or a
+      // `{HISTORY}`-interpolated handoff summary, never as an exact array part.
+      // Mutually exclusive with the array branch below: a message's `content`
+      // is either a string or an array, never both, so this and the
+      // `Array.isArray` check never both match the same message.
+      if (typeof originalContent === "string") {
+        if (!originalContent.includes(fullText)) continue;
+
+        // Same lazy clone-on-write as the array branch: root -> container
+        // array -> this message. Siblings keep referencing the originals.
+        const messageClone = mutableVideoLogMessage(
+          cloneState,
+          container,
+          messageIndex,
+          originalContainer,
+          originalMessage as Record<string, unknown>,
+          originalContent
+        );
+
+        // Re-read from the (possibly already-cloned) message so a second
+        // redaction entry matching the same string content composes with the
+        // first instead of clobbering it. `fullText` is a trusted literal
+        // (the `[Video description:...]` blob), so replaceAll(string, string)
+        // needs no regex and is safe. replaceAll (not replace): a stage/summary
+        // prompt can quote the transcript back more than once.
+        const currentText =
+          typeof messageClone.content === "string" ? messageClone.content : originalContent;
+        messageClone.content = currentText.replaceAll(fullText, redactedText);
+        redacted = true;
+        matchedEntry = true;
+        continue;
+      }
+      if (!Array.isArray(originalContent)) continue;
+
+      for (let partIndex = 0; partIndex < originalContent.length; partIndex++) {
+        const originalPart = originalContent[partIndex];
+        if (!originalPart || typeof originalPart !== "object") continue;
+        const partRecord = originalPart as Record<string, unknown>;
+        if (partRecord.type !== expectedPartType) continue;
+        if (partRecord.text !== fullText) continue;
+
+        // Content-address match — clone the path down to this part lazily
+        // (root -> container array -> this message -> its content array),
+        // leaving every other sibling on the original references.
+        const messageClone = mutableVideoLogMessage(
+          cloneState,
+          container,
+          messageIndex,
+          originalContainer,
+          originalMessage as Record<string, unknown>,
+          originalContent
+        );
+
+        const contentClone = messageClone.content as unknown[];
+        contentClone[partIndex] = { ...partRecord, text: redactedText };
+        redacted = true;
+        matchedEntry = true;
+      }
+    }
+    if (failClosedOnMiss && !matchedEntry) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
+  }
+
+  const result = redacted && cloneState.rootClone ? cloneState.rootClone : body;
+  // A matched description shadow does not cover raw video siblings left by a
+  // failed description or maxVideos. Redact their fields on the retained copy.
+  return failClosedOnMiss ? redactVideoTranscriptFieldsForLog(result) : result;
+}
+
+/**
+ * Extract the OpenAI Responses API response id this attempt produced, so it
+ * can be indexed for OmniRoute-native `previous_response_id` continuation
+ * (see src/lib/db/responsesContinuationStore.ts). Only meaningful when the
+ * client actually used the Responses endpoint -- a Chat Completions
+ * `chatcmpl-*` id must never be mistaken for a Responses response id.
+ *
+ * A non-streaming clientResponse carries `id` directly. A streaming one goes
+ * through clientPayloadCollector.build(), which always nests the caller's
+ * summary under `.summary` (see createStructuredSSECollector in
+ * streamPayloadCollector.ts) -- check both shapes rather than assuming one.
+ */
+export function extractResponsesId(sourceFormat: unknown, clientResponse: unknown): string | null {
+  if (sourceFormat !== FORMATS.OPENAI_RESPONSES) return null;
+  if (!clientResponse || typeof clientResponse !== "object") return null;
+  const record = clientResponse as { id?: unknown; summary?: unknown };
+  const directId = record.id;
+  if (typeof directId === "string" && directId.length > 0) return directId;
+  const summary = record.summary;
+  if (summary && typeof summary === "object") {
+    const summaryId = (summary as { id?: unknown }).id;
+    if (typeof summaryId === "string" && summaryId.length > 0) return summaryId;
+  }
+  return null;
+}
+
+export type PersistAttemptLogsArgs = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
+  status: number;
+  tokens?: unknown;
+  usageEstimated?: boolean | null;
+  responseBody?: unknown;
+  error?: string | null;
+  providerRequest?: unknown;
+  providerResponse?: unknown;
+  clientResponse?: unknown;
+  claudeCacheMeta?: Record<string, unknown>;
+  claudeCacheUsageMeta?: Record<string, unknown>;
+  geminiPromptCache?: Record<string, unknown> | null;
+  cacheSource?: "upstream" | "semantic";
+  /**
+   * #13130: time to the first forwarded stream chunk (ms), as measured by
+   * streamTiming for THIS attempt. Persisted to call_logs.ttft_ms so the
+   * dashboard TPS divides by generation time (duration - TTFT). Streaming
+   * completions pass it; non-streaming paths leave it undefined (column NULL).
+   */
+  ttft?: number | null;
+  /**
+   * Encrypted-reasoning observation from the stream loops (flag + wall-clock
+   * duration only). Efforts are read at the sink from the request bodies.
+   */
+  reasoningMeta?: {
+    encryptedSeen: boolean;
+    durationMs: number | null;
+  } | null;
+};
+
+export type PersistAttemptLogsContext = {
+  httpAttempts?: HttpAttemptCollector;
+  /** Per-attempt trace id — MUST match the id emitted in `request.started` so the live
+   * dashboard can pair the terminal event and clear the topology node's active pulse. */
+  traceId: string;
+  provider: string | null | undefined;
+  connectionId: string | null | undefined;
+  model: string | null | undefined;
+  skillRequestId: string;
+  detailedLoggingEnabled: boolean;
+  reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
+  pendingRequestId: unknown;
+  pendingRequestGeneration?: string;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
+  requestedModel: unknown;
+  credentials: { connectionId?: string } | null | undefined;
+  startTime: number;
+  body: unknown;
+  sourceFormat: unknown;
+  targetFormat: unknown;
+  comboName: unknown;
+  comboStepId: unknown;
+  comboExecutionKey: unknown;
+  tokensCompressed: unknown;
+  apiKeyInfo: { id?: string | null; name?: string | null } | null | undefined;
+  noLogEnabled: unknown;
+  correlationId?: string | null;
+  modelPinned?: boolean;
+  /** #8249: caller-supplied X-OmniRoute-Session-Id header, only set when the header was
+   * explicitly present (never synthesized from skillRequestId) — persisted as call_logs.session_tag
+   * for per-session cost attribution. */
+  sessionTag?: string | null;
+  /**
+   * #12150 P1b: video-bridge structured-redaction shadow (P1a's
+   * `meta.videoBridgeLogRedaction`), threaded from chat.ts's
+   * `preCallGuardrails.results` down through handleChatCore. When present,
+   * `applyVideoBridgeLogRedaction` swaps each mapped part's text for the
+   * placeholder in the CLONE that gets persisted — `body` itself (the model
+   * path) is never touched. Omitted/empty for every non-video request.
+   */
+  videoBridgeLogRedaction?: VideoBridgeLogRedactionEntry[];
+  /**
+   * #12150 P2 surface 2: true when the video-bridge guardrail observed and
+   * rewrote video parts on this request, so the persisted client snapshot had
+   * its transcript cues structurally redacted (videoBridgeObserved in
+   * chatCore.ts). Written to the `call_logs.video_content_removed` marker so
+   * `resolvePreviousResponseState` refuses to rehydrate this row as continuation
+   * history. Omitted/false for every non-video request.
+   */
+  videoContentRemoved?: boolean;
+};
+
+function toConnectionId(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function buildAccountRotationMeta(
+  provider: string | null | undefined,
+  initialConnectionId: string | null,
+  finalConnectionId: string | null
+) {
+  if (provider !== "codex" || !initialConnectionId || !finalConnectionId) return null;
+  if (initialConnectionId === finalConnectionId) return null;
+
+  return {
+    codexAccountRotation: {
+      initialConnectionId,
+      finalConnectionId,
+    },
+  };
+}
+
+/**
+ * Pure resolver for the terminal request-lifecycle dashboard event. Extracted so the
+ * "stuck green" latch fix (emitting request.completed/failed to clear the live topology
+ * node) is unit-testable without the DB write in persistAttemptLogs. A 2xx/3xx status
+ * with no error is a completion; everything else (including a missing/odd status) is a
+ * failure. `id` mirrors the `traceId` used by the paired `request.started`.
+ */
+export function resolveRequestLifecycleEvent(input: {
+  traceId: string;
+  status: number;
+  error?: string | null;
+  model?: string | null;
+  provider?: string | null;
+  comboName?: unknown;
+  tokens?: unknown;
+  latencyMs: number;
+}):
+  | { name: "request.completed"; payload: RequestCompletedPayload }
+  | { name: "request.failed"; payload: RequestFailedPayload } {
+  const { traceId, status, error, model, provider, comboName, tokens, latencyMs } = input;
+  const succeeded = typeof status === "number" && status >= 200 && status < 400 && !error;
+  const resolvedComboName = typeof comboName === "string" && comboName ? comboName : undefined;
+  if (succeeded) {
+    const tokenBag = (tokens && typeof tokens === "object" ? tokens : {}) as Record<
+      string,
+      unknown
+    >;
+    const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+    return {
+      name: "request.completed",
+      payload: {
+        id: traceId,
+        status: "success",
+        model: model || "unknown",
+        provider: provider || "unknown",
+        tokensInput: num(tokenBag.input ?? tokenBag.prompt_tokens ?? tokenBag.inputTokens),
+        tokensOutput: num(tokenBag.output ?? tokenBag.completion_tokens ?? tokenBag.outputTokens),
+        latencyMs,
+        comboName: resolvedComboName,
+      },
+    };
+  }
+  return {
+    name: "request.failed",
+    payload: {
+      id: traceId,
+      // Dashboard listeners and event history cross a public WebSocket boundary. Keep the raw
+      // diagnostic in the call log/pipeline above, but expose only the canonical safe projection.
+      error: sanitizeErrorMessage(error || `HTTP ${status}`),
+      statusCode: typeof status === "number" ? status : undefined,
+      latencyMs,
+      model: model || undefined,
+      provider: provider || undefined,
+    },
+  };
+}
+
+type HttpAttemptLogContext = Pick<
+  PersistAttemptLogsContext,
+  "httpAttempts" | "correlationId" | "traceId" | "noLogEnabled" | "apiKeyInfo" | "comboName"
+>;
+
+function toUpstreamHttpAttemptLog(
+  send: HttpAttemptRecord,
+  groupId: string,
+  ctx: HttpAttemptLogContext
+): Parameters<typeof saveUpstreamHttpAttempt>[0] {
+  return {
+    timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
+    method: send.method,
+    path: send.endpoint,
+    status: send.status ?? 0,
+    model: send.model,
+    provider: send.provider,
+    connectionId: send.connectionId,
+    duration: send.durationMs ?? 0,
+    error:
+      send.outcome === "transport_error"
+        ? TRANSPORT_ERROR_LABEL
+        : send.outcome === "no_response_observed"
+          ? NO_RESPONSE_LABEL
+          : null,
+    correlationId: ctx.correlationId || ctx.traceId,
+    noLog: Boolean(ctx.noLogEnabled),
+    apiKeyId: ctx.apiKeyInfo?.id,
+    apiKeyName: ctx.apiKeyInfo?.name,
+    comboName: ctx.comboName,
+    upstreamHttp: { version: 1, groupId, role: "attempt", send },
+  };
+}
+
+/** One synchronous seal shared by terminal logging and exits before stream handoff. */
+export function drainUpstreamHttpAttempts(
+  ctx: HttpAttemptLogContext,
+  args?: Pick<PersistAttemptLogsArgs, "upstreamHttpSelection" | "status" | "error">
+) {
+  try {
+    const observed = ctx.httpAttempts?.drain(
+      args?.upstreamHttpSelection ?? null,
+      args?.status,
+      args?.error
+    );
+    if (observed) {
+      for (const send of observed.records) {
+        if (send.id === observed.summary.send?.id) continue;
+        try {
+          saveUpstreamHttpAttempt(
+            toUpstreamHttpAttemptLog(send, observed.summary.groupId, ctx)
+          ).catch(() => {});
+        } catch {}
+      }
+    }
+    return observed?.summary;
+  } catch {
+    return undefined;
+  }
+}
+
+export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAttemptLogsContext) {
+  const upstreamHttp = drainUpstreamHttpAttempts(ctx, args);
+  const {
+    status,
+    tokens,
+    responseBody,
+    error,
+    providerRequest,
+    providerResponse,
+    clientResponse,
+    claudeCacheMeta,
+    claudeCacheUsageMeta,
+    geminiPromptCache,
+    cacheSource,
+    ttft,
+  } = args;
+  const {
+    traceId,
+    provider,
+    connectionId,
+    model,
+    skillRequestId,
+    detailedLoggingEnabled,
+    reqLogger,
+    clientRawRequest,
+    requestedModel,
+    credentials,
+    startTime,
+    body,
+    sourceFormat,
+    targetFormat,
+    comboName,
+    comboStepId,
+    comboExecutionKey,
+    tokensCompressed,
+    apiKeyInfo,
+    noLogEnabled,
+    correlationId,
+    modelPinned,
+    sessionTag,
+    videoBridgeLogRedaction,
+    videoContentRemoved,
+  } = ctx;
+  const initialConnectionId = toConnectionId(connectionId);
+  const finalConnectionId = toConnectionId(credentials?.connectionId) || initialConnectionId;
+  const accountRotationMeta = buildAccountRotationMeta(
+    provider,
+    initialConnectionId,
+    finalConnectionId
+  );
+
+  // The upstream response can quote a video transcript in arbitrary prose,
+  // including errors and SSE chunks. There is no trustworthy structured
+  // response-side cue boundary to redact, so retained copies are omitted as
+  // a whole. The provider response and client-visible reply remain unchanged.
+  const redactedRequest = applyVideoBridgeLogRedaction(
+    body,
+    videoBridgeLogRedaction,
+    videoContentRemoved
+  );
+  // The observed signal and its per-part shadow normally arrive together.
+  // If the shadow is missing or even one entry fails to match after request
+  // mutations, do not retain a partially redacted transcript. The identity
+  // fallback also covers an unchanged body with no applicable entries.
+  const retainedRequest =
+    videoContentRemoved && redactedRequest === body
+      ? OMITTED_VIDEO_TRANSCRIPT_REQUEST
+      : redactedRequest;
+  const retainedResponse = videoContentRemoved
+    ? { _omniroute_omitted: "video-transcript" }
+    : (responseBody ?? (status >= 400 ? providerResponse : undefined));
+  const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
+  // Keep reasoning observability even though no-log policy discards all
+  // request/response payloads. Only source and character-count scalars survive.
+  const noLogReasoningSnapshot = noLogEnabled
+    ? captureReasoningSnapshotMeta(retainedResponse)
+    : null;
+
+  const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
+  if (providerWarnings.length > 0) {
+    logAuditEvent({
+      action: "provider.warning",
+      actor: "system",
+      target: [provider, finalConnectionId].filter(Boolean).join(":") || provider || model,
+      resourceType: "provider_warning",
+      status: "warning",
+      requestId: skillRequestId,
+      details: {
+        provider,
+        model,
+        connectionId: finalConnectionId,
+        httpStatus: status,
+        warnings: videoContentRemoved
+          ? providerWarnings.map(() => "[omitted: video transcript]")
+          : providerWarnings,
+      },
+    });
+  }
+
+  // Detect against the live response, but omit provider-supplied tool names
+  // from the durable audit detail when they might echo a video transcript.
+  maybeLogToolCallSpecViolation({
+    responseBody,
+    provider,
+    model,
+    connectionId: finalConnectionId,
+    httpStatus: status,
+    requestId: skillRequestId,
+    redactViolationDetail: videoContentRemoved,
+  });
+
+  // The detailed artifact mixes provider/client responses, raw wire chunks
+  // and transformed requests. None is safe to persist for observed video.
+  const capturedPipeline = videoContentRemoved
+    ? null
+    : (reqLogger?.getPipelinePayloads?.() ?? null);
+  const pipelinePayloads = videoContentRemoved
+    ? null
+    : detailedLoggingEnabled
+      ? (capturedPipeline ?? {})
+      : capturedPipeline?.routeDecision
+        ? { routeDecision: capturedPipeline.routeDecision }
+        : null;
+
+  // The external keepalive buffer can contain error frames that quote a
+  // transcript. Since this attempt omits the pipeline artifact, drop those
+  // buffered bytes now instead of keeping them until the TTL expires.
+  if (videoContentRemoved && correlationId) {
+    takeEarlyKeepaliveBytes(correlationId);
+  }
+
+  if (pipelinePayloads) {
+    if (providerRequest !== undefined && !pipelinePayloads.providerRequest) {
+      pipelinePayloads.providerRequest = providerRequest as Record<string, unknown>;
+    }
+    if (providerResponse !== undefined && !pipelinePayloads.providerResponse) {
+      pipelinePayloads.providerResponse = providerResponse as Record<string, unknown>;
+    }
+    if (clientResponse !== undefined) {
+      pipelinePayloads.clientResponse = clientResponse as Record<string, unknown>;
+    }
+    if (retainedError) {
+      pipelinePayloads.error = {
+        ...(typeof pipelinePayloads.error === "object" && pipelinePayloads.error
+          ? (pipelinePayloads.error as Record<string, unknown>)
+          : {}),
+        message: retainedError,
+      };
+    }
+    // withEarlyStreamKeepalive writes keepalive/startup/error frames directly
+    // to the client from OUTSIDE this handler's own reqLogger, so they never
+    // reach reqLogger.appendConvertedChunk. correlationId is the only thing
+    // both sides share (see earlyKeepaliveByteBuffer.ts's file doc for why);
+    // merge here, once, right before persistence, prepended in send order.
+    if (detailedLoggingEnabled && correlationId) {
+      const earlyClientBytes = takeEarlyKeepaliveBytes(correlationId);
+      if (earlyClientBytes.length > 0) {
+        const existingStreamChunks =
+          (pipelinePayloads.streamChunks as { client?: string[] } | undefined) ?? {};
+        pipelinePayloads.streamChunks = {
+          ...existingStreamChunks,
+          client: [...earlyClientBytes, ...(existingStreamChunks.client ?? [])],
+        };
+      }
+    }
+  }
+
+  // Primary key is a fresh UUID from saveCallLog, not traceId. Attempts share
+  // pendingRequestId and must not share the row key. correlationId still
+  // pairs the row with request.started. pendingRequestId is NOT the row key: it only
+  // routes token usage and generation-checked persistence linkage to the live preview.
+  // Late read of the per-request added wait published on the ALS
+  // capture sink by the executor. Fail-soft: null outside a capture or when
+  // nothing was published — the row stores NULL (no wait), never throws.
+  const addedWait = readAddedWait();
+  // First-upstream-dispatch stamp for queue_wait_ms: how long this execution
+  // waited inside OmniRoute (scheduling, translation, parking) before the
+  // first byte left for the provider. Null when nothing was dispatched
+  // (rejected before egress) — mirrors the addedWait late-read above.
+  const upstreamDispatchedAt = readUpstreamDispatchedAt();
+  saveCallLog({
+    upstreamHttp: upstreamHttp?.total ? upstreamHttp : null,
+    pendingRequestId: ctx.pendingRequestId,
+    pendingRequestGeneration: ctx.pendingRequestGeneration,
+    method: "POST",
+    path: clientRawRequest?.endpoint || "/v1/chat/completions",
+    status,
+    model,
+    requestedModel,
+    provider,
+    connectionId: finalConnectionId || undefined,
+    duration: Date.now() - startTime,
+    ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
+    tokens: tokens || {},
+    // Estimated-token flag, computed here where tokens still carry the marker
+    // (it does not survive spreads or JSON round-trips to the sink).
+    usageEstimated: args.usageEstimated ?? (isEstimatedUsage(tokens) ? true : null),
+    // Encrypted-reasoning observation: stream-side flag plus duration, and
+    // the two request bodies so the sink can read effort values
+    // (requested from the client body, upstream from the post-strip body).
+    reasoningMeta: noLogReasoningSnapshot
+      ? { ...(args.reasoningMeta ?? {}), ...noLogReasoningSnapshot }
+      : (args.reasoningMeta ?? null),
+    clientRequestBody: body ?? null,
+    upstreamRequestBody: providerRequest ?? null,
+    requestBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta,
+            geminiPromptCache,
+          })
+        ),
+    responseBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta
+              ? {
+                  applied: claudeCacheMeta.applied,
+                  totalBreakpoints: claudeCacheMeta.totalBreakpoints,
+                  anthropicBeta: claudeCacheMeta.anthropicBeta,
+                }
+              : null,
+            claudePromptCacheUsage: claudeCacheUsageMeta,
+            geminiPromptCache,
+            // Operators can tell estimated token counts (and the cost derived from them)
+            // apart from provider-reported ones. Log-only: billing is unchanged.
+            usageEstimated: isEstimatedUsage(tokens) ? true : null,
+          })
+        ),
+    error: retainedError || null,
+    sourceFormat,
+    targetFormat,
+    comboName,
+    comboStepId,
+    comboExecutionKey,
+    tokensCompressed,
+    cacheSource: cacheSource === "semantic" ? "semantic" : "upstream",
+    apiKeyId: apiKeyInfo?.id || null,
+    apiKeyName: apiKeyInfo?.name || null,
+    noLog: noLogEnabled,
+    pipelinePayloads,
+    correlationId: correlationId || traceId,
+    modelPinned: modelPinned || false,
+    sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
+    responseId: extractResponsesId(sourceFormat, clientResponse),
+    videoContentRemoved: videoContentRemoved || false,
+    addedWaitMs: addedWait?.ms ?? null,
+    queueWaitMs: queueWaitMsFromDispatch(upstreamDispatchedAt, startTime),
+    addedWaitCause: addedWait?.cause ?? null,
+  }).catch(() => {});
+
+  // Emit the terminal request-lifecycle event to the live dashboard bus. `request.started`
+  // is emitted in chatCore with this same `traceId`; without a matching completed/failed the
+  // client's active-request map never drains, so the topology node stays green forever (the
+  // "stuck green" latch — request.completed/failed were declared + consumed but never emitted).
+  // Deferred via setImmediate to keep it off the response hot path, mirroring request.started.
+  setImmediate(() => {
+    const lifecycle = resolveRequestLifecycleEvent({
+      traceId,
+      status,
+      error: retainedError,
+      model,
+      provider,
+      comboName,
+      tokens,
+      latencyMs: Date.now() - startTime,
+    });
+    if (lifecycle.name === "request.completed") {
+      emit("request.completed", lifecycle.payload);
+    } else {
+      emit("request.failed", lifecycle.payload);
+    }
+  });
+}

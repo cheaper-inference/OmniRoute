@@ -1,0 +1,115 @@
+---
+title: "SQLite Runtime Resolution"
+---
+
+# SQLite Runtime Resolution
+
+OmniRoute resolves its SQLite driver at startup through a 5-step fallback chain:
+
+1. **Bundled `better-sqlite3`** (via `dependencies` in `package.json`)
+   — fastest, native binary, installed by `npm install` when build tools are present.
+
+2. **Runtime-installed `better-sqlite3`** (in `~/.omniroute/runtime/`)
+   — installed lazily on first run **OR** by `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Validates native `.node` magic bytes (ELF / Mach-O / PE) before loading
+   to guard against corrupt or wrong-platform binaries.
+
+3. **`node:sqlite`** (Node ≥22.5 stdlib) — no native build needed; used when
+   both better-sqlite3 paths fail. Limited feature set.
+
+4. **`sql.js`** (WASM) — final fallback. Works everywhere but is slower
+   and writes data on an interval rather than synchronously.
+
+## Why this complexity?
+
+- **Windows EBUSY**: `npm install -g omniroute@latest` can fail if the previous
+  version's `better_sqlite3.node` is locked by a running process. The runtime
+  install in `~/.omniroute/runtime/` sidesteps the global npm cache.
+- **No build tools**: Some environments (corporate Windows without VS Build
+  Tools, minimal Docker images) cannot compile `better-sqlite3`. The runtime
+  installer resolves a pre-built binary from the npm registry; the fallback
+  drivers ensure OmniRoute still boots even if that fails.
+- **Air-gapped systems**: If the npm registry is unreachable, `node:sqlite`
+  or `sql.js` guarantee baseline functionality.
+
+## Magic-byte validation
+
+Before loading a runtime-installed `.node` file, OmniRoute reads the first 8
+bytes and matches against known platform magics:
+
+| Platform              | Bytes (hex)   | Label       |
+| --------------------- | ------------- | ----------- |
+| Linux                 | `7F 45 4C 46` | `elf`       |
+| macOS 64-bit BE       | `FE ED FA CF` | `macho`     |
+| macOS 64-bit LE       | `CF FA ED FE` | `macho-le`  |
+| macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
+| Windows               | `4D 5A` (MZ)  | `pe`        |
+
+A mismatched magic → file is ignored, fallback continues to the next step.
+
+## Checking the active driver
+
+```typescript
+import { getDriverInfo } from "@/lib/db/core";
+
+const info = getDriverInfo();
+// { source: "bundled" | "runtime" | "runtime-installed-now" | "node-sqlite" | "sql-js",
+//   kind: "better-sqlite3" | "node-sqlite" | "sql-js" }
+```
+
+## Manual control
+
+```bash
+# Skip postinstall warm-up (for fast CI installs)
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
+
+# Force-reinstall runtime better-sqlite3
+rm -rf ~/.omniroute/runtime
+omniroute  # will reinstall on next start
+
+# Check what driver is active
+omniroute config db-info  # (if CLI command exists)
+```
+
+## Diagnosing synchronous stalls
+
+With `better-sqlite3`, set `OMNIROUTE_SQLITE_SLOW_MS=200` before startup to opt
+into synchronous adapter timing. The default is off. A completed operation taking
+at least that many milliseconds emits a `[SQLITE-SLOW]` warning, at most once per
+ten seconds per adapter. The warning contains only the driver, operation class
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaction or maintenance), and
+elapsed milliseconds: no SQL, bindings, rows, paths or exception text.
+
+This is a diagnostic aid, not a timeout or query optimization. It cannot report
+an operation that never returns, distinguish CPU work from disk waits, identify
+the exact SQL, or observe operations performed through the raw driver handle.
+Async backup duration is deliberately excluded; other SQLite drivers are not
+instrumented by this opt-in. Disabling the variable restores the original adapter
+without timing wrappers. No database schema or stored configuration changes.
+
+The `/healthz` lag warning reports the event-loop peak since the previous sample,
+not the lifetime average. Correlate its timestamps with slow-operation warnings
+and host/storage metrics before attributing a stall to SQLite or disk failure.
+
+## Reference
+
+Implementation:
+
+- `bin/cli/runtime/magicBytes.mjs` — binary magic-byte validation helpers
+- `bin/cli/runtime/sqliteRuntime.mjs` — 5-step runtime resolver + lazy installer
+- `bin/cli/runtime/index.mjs` — startup orchestrator (`warmUpRuntimes()`)
+- `scripts/postinstall.mjs` — npm post-install hook (non-fatal warm-up)
+- `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` exports
+
+## Single-writer topology (HA unsupported)
+
+The driver fallback chain above still runs in **one process**. Default SQLite
+OmniRoute is a **single writer**:
+
+- Do not attach two OmniRoute replicas to the same `storage.sqlite` file.
+- A container restart, Recreate deploy, OOM kill, or HEALTHCHECK restart drops
+  every in-flight SSE session. There is no session drain on the stock path.
+- Orchestrator liveness that treats a slow `/healthz` as dead will kill the only
+  replica. Prefer TCP liveness + HTTP `/healthz` readiness. See
+  [Docker Guide — availability](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
+  and [Kubernetes probe recommendations](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

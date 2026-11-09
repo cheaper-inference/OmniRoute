@@ -1,0 +1,668 @@
+/**
+ * Translator: OpenAI Chat Completions -> OpenAI Responses API
+ *
+ * Extracted verbatim from openai-responses.ts. Registration stays in the host.
+ */
+import { isOpenAIResponsesStoreEnabled } from "@/lib/providers/requestDefaults";
+import {
+  isInternalReasoningPlaceholder,
+  requiresReasoningContentPresence,
+} from "../../../utils/reasoningPlaceholder.ts";
+import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
+import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
+import {
+  coerceHistoricalToolCallArguments,
+  coerceToolCallArguments,
+  createToolHistoryError,
+} from "../../helpers/toolArguments.ts";
+import {
+  isStrictResponsesToolHistoryEnabled,
+  requireResponsesCallId,
+} from "../../helpers/responsesToolHistory.ts";
+import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
+import {
+  JsonRecord,
+  RESPONSES_STORE_MARKER,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
+  toRecord,
+  toArray,
+  toString,
+  clampCallId,
+  imageUrlToText,
+  normalizeVerbosity,
+  normalizeResponsesReasoningEffort,
+} from "./helpers.ts";
+
+// A Chat-Completions client can only express reasoning via the top-level
+// `reasoning_effort` hint; it has no way to request a reasoning summary. When we
+// promote that hint to the Responses API's `reasoning.effort`, default the
+// summary (plus the encrypted-content include that actually streams it) so a
+// downstream chat client still sees a thinking stream instead of an empty
+// summary. Mirrors the Codex executor's `ensureCodexReasoningSummary`. An
+// explicit `reasoning` object from a Responses-shaped client is preserved as-is.
+const DEFAULT_RESPONSES_REASONING_SUMMARY = "auto";
+const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_content";
+
+// Preserve the client's effort-only request shape for the listed model families
+// during Chat-to-Responses translation (optional `codex/` or `cx/` routing prefix,
+// optional effort suffix). Do not add a default summary or encrypted-content
+// include on this path. This compatibility policy makes no claim about the cause
+// or resolution of upstream safety rejections.
+const CODEX_MODEL_PATTERN =
+  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+function isCodexModel(model: unknown): boolean {
+  if (typeof model !== "string") return false;
+  return CODEX_MODEL_PATTERN.test(model.trim().toLowerCase());
+}
+
+// Chat Completions JSON `response_format` → Responses API `text.format`.
+// Merges into any existing `result.text` (e.g. verbosity) so structured-output schemas from
+// Chat clients survive the translation to the Responses/Codex upstream (#5933).
+function mapChatResponseFormatToResponsesText(body: JsonRecord, result: JsonRecord): void {
+  const responseFormat = toRecord(body.response_format);
+  if (responseFormat.type === "json_object") {
+    result.text = { ...toRecord(result.text), format: { type: "json_object" } };
+    return;
+  }
+  if (responseFormat.type !== "json_schema") return;
+
+  const jsonSchema = toRecord(responseFormat.json_schema);
+  if (jsonSchema.schema === undefined) return;
+
+  const existingText = toRecord(result.text);
+  const format: JsonRecord = {
+    type: "json_schema",
+    name: toString(jsonSchema.name, "codex_output_schema"),
+    schema: jsonSchema.schema,
+  };
+  if (jsonSchema.description !== undefined) format.description = jsonSchema.description;
+  if (jsonSchema.strict !== undefined) format.strict = jsonSchema.strict;
+
+  result.text = { ...existingText, format };
+}
+
+// The Responses API rejects text.format json_object with 400 "Response input
+// messages must contain the word 'json'" unless an `input` message says "json";
+// `instructions` does not count. Chat Completions counts the system prompt, and
+// this translator hoists that prompt into `instructions`, so a request that was
+// valid as Chat (JSON asked for only in the system prompt) failed upstream.
+// Prepend a constant developer hint in that case: a fixed prefix keeps
+// the prompt-cache prefix stable across turns.
+const JSON_OBJECT_INPUT_HINT = "Respond with a valid JSON object.";
+
+function ensureJsonObjectInputHint(result: JsonRecord): void {
+  if (toRecord(toRecord(result.text).format).type !== "json_object") return;
+  if (!Array.isArray(result.input)) return;
+  const input = result.input as JsonRecord[];
+  const mentionsJson = input.some((item) => {
+    if (item.type !== "message") return false;
+    if (typeof item.content === "string") return /json/i.test(item.content);
+    return toArray(item.content).some((part) => /json/i.test(toString(toRecord(part).text)));
+  });
+  if (mentionsJson) return;
+  input.unshift({
+    type: "message",
+    role: "developer",
+    content: [{ type: "input_text", text: JSON_OBJECT_INPUT_HINT }],
+  });
+}
+
+// Flatten a Chat-Completions content block into the single string the Responses
+// API `instructions` field takes. `instructions` is a string, not a part array,
+// so the text parts are joined; anything non-textual has no representation there
+// and is dropped, exactly as a string-only client would have sent it.
+function buildInstructionsText(content: unknown): string {
+  if (typeof content === "string") {
+    return content;
+  }
+  return buildResponsesTextParts(content)
+    .map((partValue) => toString(toRecord(partValue).text))
+    .filter((text) => text.length > 0)
+    .join("\n\n");
+}
+
+// Convert a Chat-Completions content block (string or text-part array) into the
+// Responses API `input_text` part array used by message input items.
+function buildResponsesTextParts(content: unknown): unknown[] {
+  if (typeof content === "string") {
+    return [{ type: "input_text", text: content }];
+  }
+  if (Array.isArray(content)) {
+    const parts: unknown[] = [];
+    for (const partValue of content) {
+      // A bare string inside the content array is a real text instruction
+      // (e.g. a harness-injected system reminder), not a structured part.
+      // Silently dropping it lost the instruction (#6954 follow-up).
+      if (typeof partValue === "string") {
+        parts.push({ type: "input_text", text: partValue });
+        continue;
+      }
+      const part = toRecord(partValue);
+      if (part.type === "text" || typeof part.text === "string") {
+        parts.push({ type: "input_text", text: toString(part.text) });
+      }
+    }
+    return parts.length > 0 ? parts : [{ type: "input_text", text: "" }];
+  }
+  return [{ type: "input_text", text: "" }];
+}
+
+type ToolHistoryEncoding = {
+  toolCallId: (value: unknown) => string;
+  outputCallId: (value: unknown) => string;
+  namedCallId: (value: string) => string;
+  toolArguments: (value: unknown) => string;
+  finishInput: (input: JsonRecord[], root: JsonRecord) => JsonRecord[];
+};
+
+/**
+ * Drop outputs with no matching call, then pair every unanswered call with an empty output.
+ * Claude Code compaction removes messages but leaves tool results; a truncated history or a
+ * client crash mid-tool-loop leaves a call with no output, which strict Responses upstreams
+ * reject with 400 "No tool output found for function call <id>" (#15216). The call stays, so
+ * the model still sees that it happened.
+ */
+function repairToolHistory(input: JsonRecord[]): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call" && item.call_id).map((i) => i.call_id)
+  );
+  const kept = input.filter(
+    (item) =>
+      item.type !== "function_call_output" || !item.call_id || knownCallIds.has(item.call_id)
+  );
+  const pairedCallIds = new Set(
+    kept
+      .filter((item) => item.type === "function_call_output" && item.call_id)
+      .map((i) => i.call_id)
+  );
+  const paired: JsonRecord[] = [];
+  for (const item of kept) {
+    paired.push(item);
+    if (item.type === "function_call" && item.call_id && !pairedCallIds.has(item.call_id)) {
+      paired.push({
+        type: "function_call_output",
+        call_id: item.call_id,
+        output: "",
+        status: "completed",
+      });
+      pairedCallIds.add(item.call_id);
+    }
+  }
+  return paired;
+}
+
+/**
+ * Strict mode: a compacted orphan is still supplied history, so reject it even alongside a valid
+ * local pair. Pending calls stay as they are; the handler validates complete history after
+ * continuation policy has selected the actual wire body.
+ */
+function rejectOrphanToolOutputs(input: JsonRecord[], root: JsonRecord): JsonRecord[] {
+  const knownCallIds = new Set(
+    input.filter((item) => item.type === "function_call").map((item) => item.call_id)
+  );
+  const hasPreviousResponse =
+    typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
+  for (const item of input) {
+    if (
+      item.type === "function_call_output" &&
+      !knownCallIds.has(item.call_id) &&
+      !hasPreviousResponse
+    ) {
+      throw createToolHistoryError(
+        "Tool output does not match a local tool call",
+        "invalid_tool_call_output"
+      );
+    }
+  }
+  return input;
+}
+
+// The Responses API rejects call_id values over 64 characters, so the default encoding clamps
+// them identically on a call and its output; strict mode refuses them instead.
+const REPAIRING_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: (value) => clampCallId(toString(value).trim() || generateToolCallId()),
+  outputCallId: (value) => clampCallId(toString(value).trim()),
+  namedCallId: clampCallId,
+  toolArguments: coerceToolCallArguments,
+  finishInput: repairToolHistory,
+};
+
+const STRICT_TOOL_HISTORY: ToolHistoryEncoding = {
+  toolCallId: requireResponsesCallId,
+  outputCallId: requireResponsesCallId,
+  namedCallId: requireResponsesCallId,
+  toolArguments: (value) => coerceHistoricalToolCallArguments(value, ""),
+  finishInput: rejectOrphanToolOutputs,
+};
+
+/** Encode Chat history as Responses input, repairing or rejecting inconsistent tool history. */
+export function openaiToOpenAIResponsesRequest(
+  model: unknown,
+  body: unknown,
+  stream: unknown,
+  credentials: unknown
+): unknown {
+  void stream;
+
+  const root = toRecord(body);
+  const credentialRecord = toRecord(credentials);
+  const storeEnabled = isOpenAIResponsesStoreEnabled(credentialRecord.providerSpecificData);
+  const result: JsonRecord = {
+    model,
+    input: [],
+    stream: true,
+  };
+  if (!storeEnabled) {
+    result.store = false;
+  }
+
+  const input = result.input as JsonRecord[];
+  const toolHistory = isStrictResponsesToolHistoryEnabled()
+    ? STRICT_TOOL_HISTORY
+    : REPAIRING_TOOL_HISTORY;
+
+  // Extract first system message as instructions
+  let hasSystemMessage = false;
+  const messages = toArray(root.messages);
+
+  for (const messageValue of messages) {
+    const msg = toRecord(messageValue);
+    const role = toString(msg.role);
+
+    if (role === "system" || role === "developer") {
+      if (!hasSystemMessage) {
+        // A content-part array is valid Chat Completions for `system` too, and
+        // clients that cache their prompt (Anthropic `cache_control`) always
+        // send that shape. Reading only the string case turned the entire
+        // system prompt into "" — accepted upstream, so the model answered
+        // with no instructions at all and nothing in the response said so.
+        result.instructions = buildInstructionsText(msg.content);
+        hasSystemMessage = true;
+        continue;
+      }
+      // Mid-conversation system/developer turns (e.g. harness-injected reminders
+      // from Claude Code) must survive as developer-role input items. The
+      // Responses API supports the `developer` role for exactly this; mapping
+      // them to `assistant` misattributes harness instructions as model output,
+      // and silently dropping them loses them entirely (#6954).
+      input.push({
+        type: "message",
+        role: "developer",
+        content: buildResponsesTextParts(msg.content),
+        status: "completed",
+      });
+      continue;
+    }
+
+    // Convert user messages
+    if (role === "user") {
+      const content =
+        typeof msg.content === "string"
+          ? [{ type: "input_text", text: msg.content }]
+          : Array.isArray(msg.content)
+            ? msg.content.map((contentValue) => {
+                const contentItem = toRecord(contentValue);
+                if (contentItem.type === "text") {
+                  return { type: "input_text", text: toString(contentItem.text) };
+                }
+                if (contentItem.type === "image_url") {
+                  const imgUrl = contentItem.image_url as
+                    string | { url?: string; detail?: string };
+                  const imgResult: JsonRecord = {
+                    type: "input_image",
+                    image_url: typeof imgUrl === "string" ? imgUrl : imgUrl?.url || "",
+                  };
+                  if (typeof imgUrl === "object" && imgUrl?.detail !== undefined) {
+                    imgResult.detail = imgUrl.detail;
+                  }
+                  return imgResult;
+                }
+                if (
+                  contentItem.type === "image" &&
+                  typeof contentItem.image === "string" &&
+                  /^data:([^;]+);base64,(.+)$/.test(contentItem.image)
+                ) {
+                  // AI SDK-style image part: { type: "image", image: "data:...;base64,..." } (#1330)
+                  const imgResult: JsonRecord = {
+                    type: "input_image",
+                    image_url: contentItem.image,
+                    detail: contentItem.detail !== undefined ? contentItem.detail : "auto",
+                  };
+                  return imgResult;
+                }
+                if (contentItem.type === "file" || contentItem.type === "document") {
+                  // Accept both the OpenAI `file` shape and the Gemini-style `document` shape,
+                  // and map the bare `data`/`url` fields too, so a PDF reaches Codex/Responses
+                  // regardless of which content-part name the client used (#2515).
+                  const file = toRecord(
+                    contentItem.type === "document" ? contentItem.document : contentItem.file
+                  );
+                  const fileResult: JsonRecord = { type: "input_file" };
+                  if (file.file_data !== undefined) fileResult.file_data = file.file_data;
+                  else if (file.data !== undefined) fileResult.file_data = file.data;
+                  if (file.file_id !== undefined) fileResult.file_id = file.file_id;
+                  if (file.file_url !== undefined) fileResult.file_url = file.file_url;
+                  else if (file.url !== undefined) fileResult.file_url = file.url;
+                  if (file.filename !== undefined) fileResult.filename = file.filename;
+                  else if (file.name !== undefined) fileResult.filename = file.name;
+                  return fileResult;
+                }
+                return contentValue;
+              })
+            : [{ type: "input_text", text: "" }];
+
+      input.push({
+        type: "message",
+        role: "user",
+        content,
+        status: "completed",
+      });
+    }
+
+    // Convert assistant messages
+    if (role === "assistant") {
+      const reasoning = getReadableReasoningValue(msg).trim();
+      if (reasoning && !isInternalReasoningPlaceholder(reasoning)) {
+        // Compatibility is decided before protocol translation; this adapter
+        // only encodes the surviving portable plaintext state.
+        input.push({
+          type: "reasoning",
+          content: [{ type: "reasoning_text", text: reasoning }],
+          // Strict Responses-API upstreams (e.g. opencode/zen) require `summary`
+          // on every `input[]` item of type "reasoning", plaintext or opaque —
+          // omitting it rejects the request with `input[N] missing required
+          // field summary`. This item is always freshly built from a chat
+          // client's plaintext reasoning, so there is no source summary to
+          // preserve; default to an empty array like the replay sanitizer does
+          // for opaque items in reasoningInputPolicy.ts (#11108).
+          summary: [],
+        });
+      } else if (
+        isInternalReasoningPlaceholder(reasoning) &&
+        requiresReasoningContentPresence(credentialRecord._provider, model)
+      ) {
+        // Reasoning-presence validation on strict Responses upstreams (opencode
+        // console gateways) rejects thinking-mode history whose assistant turns
+        // lack a reasoning_text item — even when OmniRoute's replay cache missed
+        // and the history only carries the internal sentinel (see
+        // replayOpenAIReasoningMessage's requiresExplicitReasoningReplay branch).
+        // Emit the sentinel text: it satisfies presence validation, and the
+        // response translators suppress the sentinel again on echo (#9573).
+        // Gated to presence-enforcing upstreams only: everywhere else (e.g.
+        // DeepSeek) the sentinel is never promoted, since models echo it as
+        // their own reasoning and stop (#9573/#9610).
+        input.push({
+          type: "reasoning",
+          content: [{ type: "reasoning_text", text: reasoning }],
+          summary: [],
+        });
+      }
+
+      // Thinking blocks remain display-only here. They do not prove that the
+      // selected target accepts their provider-specific replay representation.
+      // Build assistant output content
+      const outputContent: unknown[] = [];
+      if (typeof msg.content === "string" && msg.content) {
+        outputContent.push({ type: "output_text", text: msg.content });
+      } else if (Array.isArray(msg.content)) {
+        for (const contentValue of msg.content) {
+          const contentItem = toRecord(contentValue);
+          if (contentItem.type === "text") {
+            outputContent.push({ type: "output_text", text: toString(contentItem.text) });
+          } else if (contentItem.type === "image_url") {
+            const url = imageUrlToText(contentItem.image_url);
+            outputContent.push({ type: "output_text", text: url ? `[Image: ${url}]` : "[Image]" });
+          } else if (contentItem.type === "thinking" || contentItem.type === "redacted_thinking") {
+            // Reasoning already moved above
+            continue;
+          } else {
+            outputContent.push(contentValue);
+          }
+        }
+      }
+
+      // Only add assistant message if content exists
+      if (outputContent.length > 0) {
+        input.push({
+          type: "message",
+          role: "assistant",
+          content: outputContent,
+          status: "completed",
+        });
+      }
+
+      // Convert tool_calls to function_call items
+      if (Array.isArray(msg.tool_calls)) {
+        for (const toolCallValue of msg.tool_calls) {
+          const toolCall = toRecord(toolCallValue);
+          const fn = toRecord(toolCall.function);
+          // Skip tool calls with empty names to avoid infinite placeholder_tool loops
+          const fnName = toString(fn.name).trim();
+          if (!fnName) {
+            continue;
+          }
+          input.push({
+            type: "function_call",
+            call_id: toolHistory.toolCallId(toolCall.id),
+            name: fnName,
+            arguments: toolHistory.toolArguments(fn.arguments),
+            status: "completed",
+          });
+        }
+      }
+
+      // Handle deprecated function_call field (pre-tool_calls API)
+      if (msg.function_call && !msg.tool_calls) {
+        const fc = toRecord(msg.function_call);
+        const fnName = toString(fc.name).trim();
+        if (fnName) {
+          input.push({
+            type: "function_call",
+            call_id: toolHistory.namedCallId(`call_${fnName}`),
+            name: fnName,
+            arguments: toolHistory.toolArguments(fc.arguments),
+            status: "completed",
+          });
+        }
+      }
+    }
+
+    // Convert tool results
+    if (role === "tool") {
+      input.push({
+        type: "function_call_output",
+        call_id: toolHistory.outputCallId(msg.tool_call_id),
+        output:
+          typeof msg.content === "string"
+            ? msg.content
+            : Array.isArray(msg.content)
+              ? msg.content.map((c) => {
+                  const part = toRecord(c);
+                  if (part.type === "text")
+                    return { type: "input_text", text: toString(part.text) };
+                  return c;
+                })
+              : String(msg.content ?? ""),
+        status: "completed",
+      });
+    }
+
+    // Handle deprecated function role messages
+    if (role === "function") {
+      input.push({
+        type: "function_call_output",
+        call_id: toolHistory.namedCallId(`call_${toString(msg.name).trim()}`),
+        output: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
+        status: "completed",
+      });
+    }
+  }
+
+  result.input = toolHistory.finishInput(input, root);
+
+  // If no system message, keep empty instructions
+  if (!hasSystemMessage) {
+    result.instructions = "";
+  }
+
+  // Convert tools format
+  if (Array.isArray(root.tools)) {
+    result.tools = root.tools.map((toolValue) => {
+      const tool = toRecord(toolValue);
+      if (tool.type === "function") {
+        const fn = toRecord(tool.function);
+        const name = toString(fn.name);
+        return {
+          type: "function",
+          name,
+          description: toString(fn.description),
+          parameters: fn.parameters,
+          // Omitted strict is non-strict on Chat but strict-normalized on Responses.
+          strict: chatStrictForResponses(fn),
+          ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"
+            ? { defer_loading: fn.defer_loading }
+            : {}),
+        };
+      }
+      return toolValue;
+    });
+  }
+
+  // Translate tool_choice: Chat {type,function:{name}} → Responses {type,name}
+  if (root.tool_choice !== undefined) {
+    if (typeof root.tool_choice === "string") {
+      result.tool_choice = root.tool_choice;
+    } else if (typeof root.tool_choice === "object" && !Array.isArray(root.tool_choice)) {
+      const tc = toRecord(root.tool_choice);
+      if (tc.type === "function" && tc.function) {
+        const fn = toRecord(tc.function);
+        result.tool_choice = { type: "function", name: fn.name };
+      } else {
+        result.tool_choice = root.tool_choice;
+      }
+    } else {
+      result.tool_choice = root.tool_choice;
+    }
+  }
+
+  // Pass through relevant fields
+  if (root.previous_response_id !== undefined) {
+    result.previous_response_id = root.previous_response_id;
+  }
+  if (root.prompt_cache_key !== undefined) {
+    result.prompt_cache_key = root.prompt_cache_key;
+  }
+  if (root.session_id !== undefined) {
+    result.session_id = root.session_id;
+  }
+  if (root.conversation_id !== undefined) {
+    result.conversation_id = root.conversation_id;
+  }
+
+  // GitHub Copilot /responses (and OpenAI) reject a body that has neither a
+  // non-empty `input` nor previous_response_id / prompt / conversation:
+  //   400 One of "input" or "previous_response_id" or 'prompt' or 'conversation'
+  //       must be provided.
+  // System-only turns, empty messages, and orphan-filtered tool results can all
+  // leave input:[] here. Inject a placeholder user item unless a continuity
+  // field already satisfies the validator (mirrors the reverse direction in
+  // openai-responses.ts — 9router#419).
+  if (Array.isArray(result.input) && result.input.length === 0) {
+    const hasContinuity =
+      (typeof result.previous_response_id === "string" && result.previous_response_id.length > 0) ||
+      (typeof result.conversation_id === "string" && result.conversation_id.length > 0) ||
+      (typeof result.prompt === "string" && result.prompt.length > 0);
+    if (!hasContinuity) {
+      result.input = [
+        {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "..." }],
+        },
+      ];
+    }
+  }
+  // Only Codex accepts this Responses extension; direct Zed translation shares this helper.
+  const summaryDelivery = toRecord(root.stream_options).reasoning_summary_delivery;
+  if (credentialRecord._provider === "codex" && summaryDelivery !== undefined) {
+    result.stream_options = { reasoning_summary_delivery: summaryDelivery };
+  }
+  if (root.service_tier !== undefined) result.service_tier = root.service_tier;
+  if (root.temperature !== undefined) result.temperature = root.temperature;
+  // Translate max_tokens / max_completion_tokens → max_output_tokens for Responses API.
+  // The Responses API does not accept max_tokens or max_completion_tokens; it requires
+  // max_output_tokens. max_completion_tokens takes priority as the newer Chat Completions field.
+  if (root.max_output_tokens !== undefined) {
+    result.max_output_tokens = root.max_output_tokens;
+  } else if (root.max_completion_tokens !== undefined) {
+    result.max_output_tokens = root.max_completion_tokens;
+  } else if (root.max_tokens !== undefined) {
+    result.max_output_tokens = root.max_tokens;
+  }
+  if (root.top_p !== undefined) result.top_p = root.top_p;
+  // A client's explicit tool-parallelism choice is a request control, not a Chat-only field.
+  if (typeof root.parallel_tool_calls === "boolean") {
+    result.parallel_tool_calls = root.parallel_tool_calls;
+  }
+  mapChatResponseFormatToResponsesText(root, result);
+  ensureJsonObjectInputHint(result);
+  // GPT-5 verbosity: Chat Completions `verbosity` → Responses `text.verbosity`.
+  const chatVerbosity = normalizeVerbosity(root.verbosity);
+  if (chatVerbosity) {
+    result.text = { ...toRecord(result.text), verbosity: chatVerbosity };
+  }
+  let defaultedReasoningSummary = false;
+  if (root.reasoning !== undefined) {
+    result.reasoning = root.reasoning;
+  } else if (root.reasoning_effort !== undefined) {
+    const effort = normalizeResponsesReasoningEffort(root.reasoning_effort, model ?? root.model);
+    if (effort && effort !== "none") {
+      // Effort-only chat request: default a reasoning summary so the upstream
+      // streams thinking back (see the constant's note above). For Codex-family
+      // models, preserve the effort-only request shape rather
+      // than adding an inferred summary and encrypted-content include. This
+      // compatibility path applies only to Chat-to-Responses translation.
+      if (isCodexModel(model ?? root.model)) {
+        result.reasoning = { effort };
+        // Tell the Codex executor not to re-add the defaults on the wire. Native
+        // Responses clients never carry this marker, so they keep their
+        // encrypted-reasoning continuity.
+        result[REASONING_SUMMARY_OPT_OUT_MARKER] = true;
+      } else if (credentialRecord._provider === "mistral") {
+        // Effort is all the chat client asked for, and the defaults below are
+        // OpenAI extras that nothing shows Mistral's preview endpoint accepts.
+        result.reasoning = { effort };
+      } else {
+        result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
+        defaultedReasoningSummary = true;
+      }
+    } else if (effort) {
+      result.reasoning = { effort };
+    }
+  }
+
+  // Propagate Responses-API-only fields when a chat client sent them.
+  // Without this, e.g. `include: ["reasoning.encrypted_content"]` is lost on
+  // the way upstream and Codex returns an empty reasoning summary, so clients
+  // (OpenCode, Cursor, etc.) see no thinking stream.
+  if (Array.isArray(root.include) && root.include.length > 0) {
+    result.include = root.include;
+  }
+  // When we defaulted a reasoning summary above, also request the encrypted
+  // reasoning content so the summary actually streams back to the chat client.
+  if (defaultedReasoningSummary) {
+    const include = Array.isArray(result.include) ? (result.include as unknown[]) : [];
+    if (!include.includes(RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE)) {
+      result.include = [...include, RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE];
+    }
+  }
+  if (storeEnabled) {
+    if (root[RESPONSES_STORE_MARKER] !== undefined) {
+      result.store = root[RESPONSES_STORE_MARKER];
+    } else if (root.store !== undefined) {
+      result.store = root.store;
+    }
+  }
+
+  return result;
+}

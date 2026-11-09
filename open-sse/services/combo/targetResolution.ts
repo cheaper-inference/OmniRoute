@@ -1,0 +1,966 @@
+/**
+ * resolveComboTargetPipeline — the target-resolution phase of handleComboChat (combo.ts).
+ *
+ * Sits between the dispatch prelude (pinned model / fusion / chaos / pipeline / nested
+ * execute-mode / round-robin) and the attempt loop. It turns the raw combo definition
+ * into the final `orderedTargets` array the attempt loop iterates, in this order:
+ *
+ *   1. provider-wildcard expansion of the combo + the combos collection (#2562)
+ *   2. weighted step-group resolution + sticky-weighted eligibility
+ *   3. request-tag routing
+ *   4. smart/pipeline-enabled dispatch (auto strategy)
+ *   5. auto-strategy candidate build / scoring / ordering, or per-strategy ordering
+ *   6. prompt-cache strategy affinity, session stickiness, eval scores,
+ *      request compatibility, context requirements
+ *   7. task-aware reordering
+ *   8. prompt-cache affinity application
+ *   9. the parallel pre-screen (priority strategy only)
+ *
+ * Behaviour is byte-identical to the inline block it replaces — pipeline dispatch and
+ * auto-strategy `earlyResponse` become an `{ earlyResponse }` result so the host decides
+ * to return them, and the values the attempt loop still consumes (`orderedTargets`,
+ * `stickyWeightedLimit`, `getWeightedStepKeyForTarget`, `sticky`, `preScreenMap`) are
+ * returned instead of closed over.
+ *
+ * See _tasks/quality/2026-06-19-DESIGN-godfiles-decomposition.md §4.
+ */
+import { getModelLockoutInfo, isModelLocked } from "../accountFallback.ts";
+import { parseAutoPrefix } from "../autoCombo/autoPrefix.ts";
+import { handlePipelineCombo, buildPipelineResponse } from "../autoCombo/pipelineRouter.ts";
+import type { resolveComboSetupConfig } from "../comboConfig.ts";
+import { orderTargetsByEvalScores } from "../evalRouting.ts";
+import { parseModel } from "../model.ts";
+import { getRemainingCooldownMs, isProviderInCooldown } from "../providerCooldownTracker.ts";
+import { orderAccountPreferences } from "./accountPreferences.ts";
+import { parseAutoConfig } from "./autoConfig.ts";
+import {
+  classifyTask,
+  getConversationCacheKey,
+  isTaskRoutingStrategy,
+  reorderByTaskWeight,
+} from "../taskAwareRouting.ts";
+import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
+import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
+import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import { applyStrategyOrdering } from "./applyStrategyOrdering.ts";
+import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
+import { clampComboDepth } from "./comboPredicates.ts";
+import {
+  computeCompatRejectedTargets,
+  describeCapabilityFilterExhaustion,
+  filterTargetsByRequestCompatibility,
+  resolveComboTargets,
+  resolveWeightedStepGroups,
+  resolveWeightedTargets,
+} from "./comboStructure.ts";
+import { applyContextRequirements } from "./contextRequirements.ts";
+import { recordComboFailure } from "./failureTracker.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
+import {
+  buildAllTargetsCoolingDownResponse,
+  buildEmptyComboTargetsPayload,
+  buildRecoveryHint,
+  formatPreDispatchExclusions,
+  type PreDispatchExclusion,
+} from "./pinRecovery.ts";
+import {
+  applyPromptCacheAffinity,
+  expandPromptCacheAffinityTargets,
+  resolvePromptCacheAffinityKey,
+  shouldProtectOriginalFirst,
+} from "./promptCacheAffinity.ts";
+import {
+  expandProviderWildcardsInCombo,
+  expandProviderWildcardsInCollection,
+} from "./providerWildcard.ts";
+import { preScreenTargets, type PreScreenResult } from "./quotaStrategies.ts";
+import { incrementInflight, decrementInflight } from "./quotaShareInflight.ts";
+import { resolveAutoStrategyOrder, type ResolveAutoStrategyDeps } from "./resolveAutoStrategy.ts";
+import {
+  MAX_RR_COUNTERS,
+  clampStickyWeightedTargetLimit,
+  getStickyWeightedExecutionKey,
+  weightedStickyTargets,
+} from "./rrState.ts";
+import {
+  applySessionStickiness,
+  clearStickyBindingsForCombo,
+  normalizeStickinessMessages,
+  resolveDisableSessionStickiness,
+  type ApplyStickinessResult,
+} from "./sessionStickiness.ts";
+import { applyRequestTagRouting } from "./autoStrategy.ts";
+import { getStrategyTraits, type StrategyTraits } from "./strategyRegistry.ts";
+import type {
+  ComboCollectionLike,
+  ComboLike,
+  ComboLogger,
+  ComboRelayOptions,
+  ComboRuntimeStep,
+  HandleSingleModel,
+  IsModelAvailable,
+  HiddenModelsByProvider,
+  ResolvedComboTarget,
+} from "./types.ts";
+
+export interface ResolveComboTargetPipelineDeps {
+  body: Record<string, unknown>;
+  combo: ComboLike;
+  strategy: string;
+  config: ReturnType<typeof resolveComboSetupConfig>;
+  settings?: Record<string, unknown> | null;
+  allCombos?: ComboCollectionLike;
+  relayOptions?: ComboRelayOptions | null;
+  signal?: AbortSignal | null;
+  apiKeyAllowedConnections: string[] | null;
+  log: ComboLogger;
+  resilienceSettings: ResilienceSettings;
+  isModelAvailable?: IsModelAvailable;
+  /** handleSingleModel already wrapped by buildTargetTimeoutRunner. */
+  handleSingleModelWithTimeout: HandleSingleModel;
+  /**
+   * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
+   * this leaf), so importing it directly would create an import cycle.
+   */
+  buildAutoCandidates: ResolveAutoStrategyDeps["buildAutoCandidates"];
+  hiddenModelsByProvider?: HiddenModelsByProvider;
+}
+
+export interface ResolvedComboTargetPipeline {
+  orderedTargets: ResolvedComboTarget[];
+  /** Sticky-weighted target limit — the attempt loop records sticky success with it. */
+  stickyWeightedLimit: number;
+  /** Maps an attempted target back to its weighted step key (sticky-weighted write-back). */
+  getWeightedStepKeyForTarget: (target: ResolvedComboTarget) => string | null;
+  /** Session-stickiness result — the attempt loop reads `.messageHash` on success/failure. */
+  sticky: ApplyStickinessResult;
+  preScreenMap: Map<string, PreScreenResult>;
+  /**
+   * Idempotent release for the in-flight slot reserved for the winner.
+   * Non-null for `quota-share` (reserved inside selectQuotaShareTarget) and for
+   * `quota-weighted` (reserved in the orderer on the draw). Stickiness/cache may
+   * still move [0]; this pipeline transfers the slot onto the dispatched account
+   * for both strategies. The host MUST invoke it when the request settles; this
+   * pipeline already releases it on any earlyResponse it produces after selection.
+   */
+  quotaShareRelease: (() => void) | null;
+  /**
+   * #6238 last-resort tier: the targets the compat pre-filter rejected, bounded
+   * by the pre-filter pool. The dispatch loop probes this set when every
+   * compat-kept target was skipped without a single real attempt.
+   */
+  compatRejectedTargets: ResolvedComboTarget[];
+}
+
+export type ResolveComboTargetPipelineResult =
+  { earlyResponse: Response } | ResolvedComboTargetPipeline;
+
+type WeightedResolution = ReturnType<typeof resolveWeightedTargets> | null;
+
+type WeightedStepGroups =
+  Array<{ step: ComboRuntimeStep; targets: ResolvedComboTarget[] }> | undefined;
+
+/**
+ * Weighted-strategy eligibility predicate: a step counts as selectable only when at
+ * least one of its targets clears the provider breaker, the connection cooldown, the
+ * per-model lockout and the caller's availability probe. Returns `null` for a
+ * selectable target, otherwise which gate excluded it and — for the resilience
+ * gates — how long it stays excluded, so an emptied pool can be reported as
+ * "cooling down" instead of the silent drop that used to end as a 404.
+ */
+async function describeWeightedExclusion(
+  target: ResolvedComboTarget,
+  resilienceSettings: ResilienceSettings,
+  isModelAvailable?: IsModelAvailable
+): Promise<PreDispatchExclusion | null> {
+  const rawModel = parseModel(target.modelStr).model || target.modelStr;
+  const exclude = (
+    reason: PreDispatchExclusion["reason"],
+    retryAfterMs: number | null = null
+  ): PreDispatchExclusion => ({ provider: target.provider, model: rawModel, reason, retryAfterMs });
+  if (target.provider) {
+    const breaker = getCircuitBreaker(target.provider).getStatus();
+    if (breaker.state === "OPEN") return exclude("circuit_open", breaker.retryAfterMs);
+  }
+  if (
+    resilienceSettings.providerCooldown.enabled &&
+    Boolean(target.provider && target.provider !== "unknown") &&
+    isProviderInCooldown(target.provider, target.connectionId ?? undefined, resilienceSettings)
+  ) {
+    return exclude(
+      "provider_cooldown",
+      getRemainingCooldownMs(target.provider, target.connectionId ?? undefined, resilienceSettings)
+    );
+  }
+  if (
+    target.provider &&
+    rawModel &&
+    isModelLocked(target.provider, target.connectionId || "", rawModel)
+  ) {
+    return exclude(
+      "model_lockout",
+      getModelLockoutInfo(target.provider, target.connectionId || "", rawModel)?.remainingMs ?? null
+    );
+  }
+  if (target.provider && rawModel && target.connectionId) {
+    const { isAlibabaFreeTierModelRoutable } = await import("../alibabaFreeTier.ts");
+    if (!(await isAlibabaFreeTierModelRoutable(target.provider, target.connectionId, rawModel))) {
+      return exclude("free_tier_drained");
+    }
+  }
+  if (isModelAvailable) {
+    const availability = await isModelAvailable(target.modelStr, target);
+    if (typeof availability === "object" && availability?.reason === "connection_cooldown") {
+      return exclude("connection_cooldown", availability.retryAfterMs);
+    }
+    if (availability !== true) return exclude("unavailable");
+  }
+  return null;
+}
+
+/**
+ * #2562: Expand provider-wildcard steps (e.g. `fta/*`, `openai/gpt-4*`) into
+ * concrete model entries sourced from the live synced-models catalog + registry.
+ * Must run before any step-group / target resolution so that wildcard-originated
+ * steps are treated identically to hand-authored entries by all downstream logic
+ * (including the sticky-weighted eligibility pass below).
+ */
+async function expandComboWildcards(
+  combo: ComboLike,
+  allCombos: ComboCollectionLike
+): Promise<{ expandedCombo: ComboLike; expandedAllCombos: ComboCollectionLike }> {
+  const expandedCombo = await expandProviderWildcardsInCombo(combo);
+  const expandedAllCombos = allCombos
+    ? Array.isArray(allCombos)
+      ? await expandProviderWildcardsInCollection(allCombos as ComboLike[])
+      : {
+          ...allCombos,
+          combos: await expandProviderWildcardsInCollection(
+            ((allCombos as { combos?: ComboLike[] }).combos || []) as ComboLike[]
+          ),
+        }
+    : allCombos;
+  return { expandedCombo, expandedAllCombos };
+}
+
+/** LRU-evict the oldest sticky-weighted entry once the counter map is at capacity. */
+function evictOldestWeightedSticky(strategy: string, comboName: string): void {
+  if (
+    getStrategyTraits(strategy).stickyPin === "weighted" &&
+    !weightedStickyTargets.has(comboName) &&
+    weightedStickyTargets.size >= MAX_RR_COUNTERS
+  ) {
+    const oldest = weightedStickyTargets.keys().next().value;
+    if (oldest !== undefined) weightedStickyTargets.delete(oldest);
+  }
+}
+
+/** Resolve the weighted step groups and the subset whose targets are still selectable. */
+async function collectWeightedEligibility(
+  expandedCombo: ComboLike,
+  expandedAllCombos: ComboCollectionLike,
+  resilienceSettings: ResilienceSettings,
+  isModelAvailable?: IsModelAvailable,
+  hiddenModelsByProvider?: HiddenModelsByProvider
+): Promise<{
+  stepGroups: WeightedStepGroups;
+  weightedEligibleKeys: Set<string>;
+  /** Targets of the steps that had no selectable target — why, and for how long. */
+  exclusions: PreDispatchExclusion[];
+}> {
+  const weightedEligibleKeys = new Set<string>();
+  const exclusions: PreDispatchExclusion[] = [];
+  const stepGroups = resolveWeightedStepGroups(
+    expandedCombo,
+    expandedAllCombos,
+    hiddenModelsByProvider
+  );
+  for (const group of stepGroups) {
+    const verdicts = await Promise.all(
+      group.targets.map((target) =>
+        describeWeightedExclusion(target, resilienceSettings, isModelAvailable)
+      )
+    );
+    if (verdicts.some((verdict) => verdict === null)) {
+      weightedEligibleKeys.add(group.step.executionKey);
+    } else {
+      for (const verdict of verdicts) if (verdict) exclusions.push(verdict);
+    }
+  }
+  return { stepGroups, weightedEligibleKeys, exclusions };
+}
+
+/**
+ * Honor the persisted sticky-weighted pin only while its step is still eligible;
+ * drop the stored pin otherwise (and whenever stickiness is off for this combo).
+ */
+function resolveStickyWeightedKey(
+  strategy: string,
+  comboName: string,
+  stickyWeightedLimit: number,
+  weightedEligibleKeys: Set<string>
+): string | null {
+  const pinsWeighted = getStrategyTraits(strategy).stickyPin === "weighted";
+  const rawStickyWeightedKey = pinsWeighted
+    ? getStickyWeightedExecutionKey(comboName, stickyWeightedLimit)
+    : null;
+  const stickyWeightedKey =
+    rawStickyWeightedKey && weightedEligibleKeys.has(rawStickyWeightedKey)
+      ? rawStickyWeightedKey
+      : null;
+  if (!pinsWeighted || stickyWeightedLimit <= 1) {
+    weightedStickyTargets.delete(comboName);
+  } else if (rawStickyWeightedKey && !stickyWeightedKey) {
+    weightedStickyTargets.delete(comboName);
+  }
+  return stickyWeightedKey;
+}
+
+/** Full weighted-strategy resolution: eviction → eligibility → sticky pin → ordering. */
+async function resolveWeightedSelection(
+  deps: ResolveComboTargetPipelineDeps,
+  expandedCombo: ComboLike,
+  expandedAllCombos: ComboCollectionLike,
+  stickyWeightedLimit: number
+): Promise<{
+  weightedResolution: WeightedResolution;
+  stickyWeightedKey: string | null;
+  exclusions: PreDispatchExclusion[];
+}> {
+  const { strategy } = deps;
+  const { weightedSteps } = getStrategyTraits(strategy);
+  const comboName = deps.combo.name;
+  evictOldestWeightedSticky(strategy, comboName);
+  let stepGroups: WeightedStepGroups;
+  let weightedEligibleKeys = new Set<string>();
+  let exclusions: PreDispatchExclusion[] = [];
+  if (weightedSteps) {
+    const eligibility = await collectWeightedEligibility(
+      expandedCombo,
+      expandedAllCombos,
+      deps.resilienceSettings,
+      deps.isModelAvailable,
+      deps.hiddenModelsByProvider
+    );
+    stepGroups = eligibility.stepGroups;
+    weightedEligibleKeys = eligibility.weightedEligibleKeys;
+    exclusions = eligibility.exclusions;
+  }
+  const stickyWeightedKey = resolveStickyWeightedKey(
+    strategy,
+    comboName,
+    stickyWeightedLimit,
+    weightedEligibleKeys
+  );
+  const weightedResolution = weightedSteps
+    ? resolveWeightedTargets(
+        expandedCombo,
+        expandedAllCombos,
+        stickyWeightedKey,
+        weightedEligibleKeys,
+        stepGroups
+      )
+    : null;
+  return { weightedResolution, stickyWeightedKey, exclusions };
+}
+
+/** Maps an attempted target back to the weighted step it came from (sticky write-back). */
+function buildWeightedStepKeyMapper(
+  weightedResolution: WeightedResolution
+): (target: ResolvedComboTarget) => string | null {
+  return (target: ResolvedComboTarget): string | null => {
+    if (!weightedResolution?.orderedSteps) return null;
+    const step = weightedResolution.orderedSteps.find(
+      (entry) =>
+        target.executionKey === entry.executionKey ||
+        target.executionKey.startsWith(entry.executionKey + ">")
+    );
+    return step?.executionKey || null;
+  };
+}
+
+function logTargetPoolSize(
+  strategy: string,
+  allCombos: ComboCollectionLike,
+  orderedTargets: ResolvedComboTarget[],
+  stickyWeightedKey: string | null,
+  log: ComboLogger
+): void {
+  if (getStrategyTraits(strategy).weightedSteps) {
+    log.info(
+      "COMBO",
+      `Weighted selection${stickyWeightedKey ? " (sticky)" : ""}${allCombos ? " with nested resolution" : ""}: ${orderedTargets.length} total targets`
+    );
+  } else if (allCombos) {
+    log.info("COMBO", `${strategy} with nested resolution: ${orderedTargets.length} total targets`);
+  }
+}
+
+/**
+ * Pipeline dispatch: route smart/pipeline-enabled combos through the multi-stage
+ * pipeline. Returns the finished Response, or null to fall through to standard
+ * auto routing (pipeline disabled, below token threshold, or dispatch failure).
+ */
+async function dispatchSmartPipeline(
+  deps: ResolveComboTargetPipelineDeps,
+  availableModels: readonly string[]
+): Promise<Response | null> {
+  const { body, combo, strategy, config, settings, signal, log } = deps;
+  if (!getStrategyTraits(strategy).smartPipeline) return null;
+  // The smart pipeline dispatches model strings, not concrete accounts.
+  if (Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0) return null;
+  const autoParsed = parseAutoPrefix(combo.name);
+  const autoVariant = autoParsed.valid ? autoParsed.variant : undefined;
+  if (autoVariant !== "smart" && !config.pipeline_enabled) return null;
+  try {
+    const pipelineRaw = await handlePipelineCombo({
+      body,
+      combo,
+      availableModels,
+      handleChatCore: deps.handleSingleModelWithTimeout,
+      log: {
+        info: log.info,
+        warn: log.warn,
+        error: log.error ?? log.warn,
+      },
+      settings: settings ?? {},
+      signal: signal ?? undefined,
+    });
+    // handlePipelineCombo resolves to a PipelineResult (buffered text) or,
+    // in the streaming-final-stage case, a Response. Callers downstream
+    // (chat.ts → withSessionHeader) require a Response, so adapt the
+    // PipelineResult here instead of leaking the raw object.
+    return pipelineRaw instanceof Response ? pipelineRaw : buildPipelineResponse(pipelineRaw, body);
+  } catch (pipelineErr) {
+    logPipelineFallthrough(pipelineErr, log);
+    return null;
+  }
+}
+
+function logPipelineFallthrough(pipelineErr: unknown, log: ComboLogger): void {
+  const pipelineMsg = pipelineErr instanceof Error ? pipelineErr.message : "";
+  if (pipelineMsg === "PIPELINE_DISABLED") {
+    log.info("COMBO", "Pipeline disabled, falling through to standard auto routing");
+  } else if (pipelineMsg === "PIPELINE_TOKEN_THRESHOLD") {
+    log.info(
+      "COMBO",
+      "Pipeline skipped (prompt below token threshold), falling through to standard auto routing"
+    );
+  } else {
+    log.warn("COMBO", "Pipeline dispatch failed, falling through to standard auto routing", {
+      err: pipelineErr,
+    });
+  }
+}
+
+/**
+ * Strategy ordering: the `auto` router for auto combos, the per-strategy chain for
+ * everything else. `autoUsedExplicitRouter` is the #4945 guard — when an explicit
+ * router (lkgp/cost/…) pinned orderedTargets[0], task-aware reordering below must
+ * refine only the fallback order, never override the router's primary choice.
+ */
+async function orderByStrategy(
+  deps: ResolveComboTargetPipelineDeps,
+  initialOrderedTargets: ResolvedComboTarget[],
+  exclusions: PreDispatchExclusion[]
+): Promise<
+  | { earlyResponse: Response }
+  | {
+      orderedTargets: ResolvedComboTarget[];
+      autoUsedExplicitRouter: boolean;
+      quotaShareRelease: (() => void) | null;
+    }
+> {
+  const { strategy, body, combo, settings, config, log } = deps;
+  if (getStrategyTraits(strategy).ordering === "auto") {
+    const autoResult = await resolveAutoStrategyOrder({
+      orderedTargets: initialOrderedTargets,
+      body,
+      combo,
+      settings,
+      config,
+      relayOptions: deps.relayOptions,
+      resilienceSettings: deps.resilienceSettings,
+      log,
+      buildAutoCandidates: deps.buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
+    });
+    if ("earlyResponse" in autoResult) return { earlyResponse: autoResult.earlyResponse };
+    return {
+      orderedTargets: autoResult.orderedTargets,
+      autoUsedExplicitRouter: autoResult.autoUsedExplicitRouter,
+      quotaShareRelease: null,
+    };
+  }
+  const { orderedTargets, quotaShareRelease } = await applyStrategyOrdering(
+    strategy,
+    initialOrderedTargets,
+    {
+      combo,
+      config,
+      body,
+      log,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
+      sessionKey: deps.relayOptions?.sessionId,
+      exclusions,
+    }
+  );
+  return { orderedTargets, autoUsedExplicitRouter: false, quotaShareRelease };
+}
+
+/**
+ * Continuity + eligibility filters: cache-strategy affinity, session stickiness,
+ * eval-score ordering, request compatibility and per-combo context requirements.
+ *
+ * May return `{ earlyResponse }` when hard capability filters (#8488 / #8494) empty
+ * the pool — tools / vision / structured_output fail closed as 400 capability_mismatch
+ * unless `compatFilterFailOpen` is set on the combo config or settings.
+ * Also returns `{ earlyResponse }` for #8786 when context requirements leave no
+ * survivors (`context_requirements_exhausted`).
+ */
+async function applyContinuityFilters(
+  deps: ResolveComboTargetPipelineDeps,
+  initialOrderedTargets: ResolvedComboTarget[]
+): Promise<
+  | {
+      orderedTargets: ResolvedComboTarget[];
+      sticky: ApplyStickinessResult;
+      compatRejectedTargets: ResolvedComboTarget[];
+    }
+  | { earlyResponse: Response }
+> {
+  const { strategy, body, combo, config, settings, log, relayOptions } = deps;
+  const traits = getStrategyTraits(strategy);
+  // An explicit cache-optimized combo outranks the global cache-affinity default,
+  // but only protects its ordering when this request actually produced a reusable
+  // cache key. Cache misses retain the normal session/eval routing behavior.
+  const cacheStrategyAffinityApplied =
+    traits.cacheAffinityOwnsOrdering &&
+    applyPromptCacheAffinity(initialOrderedTargets, body).applied;
+  // #6168: session stickiness opt-out. Per-combo `config.disableSessionStickiness`
+  // overrides the global `settings.disableSessionStickiness` fallback (default false,
+  // preserving the #3825 prompt-cache/504 fix). When disabled, skip the reorder and
+  // treat the result as a no-op so the recordStickyBinding write-back below is skipped.
+  const disableSessionStickiness =
+    cacheStrategyAffinityApplied ||
+    resolveDisableSessionStickiness(
+      config as Record<string, unknown> | null | undefined,
+      settings as Record<string, unknown> | null | undefined
+    );
+  // Evict any in-memory sticky bindings this combo still owns when stickiness is
+  // disabled. Disabling stops NEW bindings, but a binding recorded while it was
+  // enabled would otherwise keep re-promoting the old connection for the rest of
+  // the 15-minute TTL — silently defeating the combo's priority order until the
+  // binding ages out or the process restarts (user report: disabling stickiness
+  // on orchestrator still pinned opencode-go/mimo-v2.5-max first).
+  if (disableSessionStickiness) {
+    clearStickyBindingsForCombo(combo.name);
+  }
+  const sticky: ApplyStickinessResult = disableSessionStickiness
+    ? { targets: initialOrderedTargets, messageHash: null, stuck: false }
+    : await applySessionStickiness(
+        initialOrderedTargets,
+        // #7270: normalize both wire shapes (.messages / Responses-API .input) so the
+        // stickiness key is derivable on the /v1/responses surface, not just Chat Completions.
+        normalizeStickinessMessages(body as { messages?: unknown; input?: unknown }),
+        combo.name,
+        // #15241: priority is an operator-declared failover order. A mid-list
+        // success must not silently become runtime try-slot #1 while the stored
+        // hop list still names another head. Other strategies keep their existing
+        // session-stickiness behavior.
+        { respectDeclaredOrder: traits.stickinessRespectsDeclaredOrder }
+      );
+  let orderedTargets = sticky.targets;
+  if (!cacheStrategyAffinityApplied) {
+    orderedTargets = orderTargetsByEvalScores(orderedTargets, config.evalRouting, log);
+  }
+  // #8488 / #8494: fail closed when hard capability filters empty the pool.
+  // Opt-in escape hatch: combo.config.compatFilterFailOpen OR settings.compatFilterFailOpen.
+  const compatFilterFailOpen =
+    (config as { compatFilterFailOpen?: unknown }).compatFilterFailOpen === true ||
+    (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
+      true;
+  const outputLimitAdvisory =
+    (config as { outputLimitAdvisory?: unknown }).outputLimitAdvisory === true ||
+    (settings as { outputLimitAdvisory?: unknown } | null | undefined)?.outputLimitAdvisory ===
+      true;
+  const preCompatTargets = orderedTargets;
+  orderedTargets = filterTargetsByRequestCompatibility(orderedTargets, body, log, undefined, {
+    failOpen: compatFilterFailOpen,
+    outputLimitAdvisory,
+  });
+  // #6238: keep the targets the compat pre-filter rejected so the dispatch loop
+  // can probe them as a last-resort fallback tier when every compat-kept target
+  // later turns out runtime-unavailable (mirrors the round-robin path).
+  const compatRejectedTargets = computeCompatRejectedTargets(
+    preCompatTargets,
+    orderedTargets,
+    body
+  );
+  if (orderedTargets.length === 0 && preCompatTargets.length > 0) {
+    const exhaustion = describeCapabilityFilterExhaustion(preCompatTargets, body, combo.name);
+    if (exhaustion) {
+      // Match handleComboChat: only track failures under context-cache protection pins.
+      const effectiveSessionId: string | null = combo.context_cache_protection
+        ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
+        : null;
+      recordComboFailure(effectiveSessionId, combo.name);
+      return {
+        earlyResponse: errorResponseWithComboDiagnostics(
+          400,
+          exhaustion.message,
+          {
+            poolSize: preCompatTargets.length,
+            attempted: 0,
+            excluded: exhaustion.excluded,
+            attemptOrder: [],
+            terminalReason: exhaustion.terminalReason,
+            recovery: buildRecoveryHint("no_executable_targets"),
+          },
+          { code: "capability_mismatch", type: "invalid_request_error" }
+        ),
+      };
+    }
+  }
+  // #8786: capture pre-filter pool so a strict/minContextWindow wipe can
+  // surface context_requirements_exhausted instead of a generic 404.
+  const preContextTargets = orderedTargets;
+  orderedTargets = applyContextRequirements(orderedTargets, config.contextRequirements, log);
+  if (orderedTargets.length === 0 && preContextTargets.length > 0) {
+    const effectiveSessionId: string | null = combo.context_cache_protection
+      ? scopeHandoffSessionId(relayOptions?.sessionId, relayOptions?.apiKeyId)
+      : null;
+    recordComboFailure(effectiveSessionId, combo.name);
+    const { message, diagnostics } = buildEmptyComboTargetsPayload(
+      preContextTargets,
+      config.contextRequirements?.minContextWindow
+    );
+    return {
+      earlyResponse: errorResponseWithComboDiagnostics(404, message, diagnostics, {
+        code: "model_not_found",
+        type: "invalid_request_error",
+      }),
+    };
+  }
+  return { orderedTargets, sticky, compatRejectedTargets };
+}
+
+/**
+ * Task-aware reordering: only active for strategies
+ * ["smart","task","task-aware","task_aware","auto"]. Additive — does not affect any
+ * of the other 15 strategies.
+ */
+function applyTaskAwareOrdering(
+  deps: ResolveComboTargetPipelineDeps,
+  orderedTargets: ResolvedComboTarget[],
+  autoUsedExplicitRouter: boolean
+): ResolvedComboTarget[] {
+  const { strategy, body, log } = deps;
+  if (!isTaskRoutingStrategy(strategy)) return orderedTargets;
+  const task = classifyTask(body);
+  const conversationCacheKey = getConversationCacheKey(body);
+  const taskReordered = reorderByTaskWeight(orderedTargets, task);
+  // #4945 regression guard: when an explicit auto router (lkgp/cost/…) pinned
+  // orderedTargets[0], keep that primary choice and let task-aware refine only
+  // the fallback tail — otherwise task weighting silently defeats the operator's
+  // chosen LKGP/cost selection. reorderByTaskWeight returns the same target
+  // objects (no clone), so identity filtering is safe.
+  const pinnedFirst = autoUsedExplicitRouter ? orderedTargets[0] : undefined;
+  const nextOrder = pinnedFirst
+    ? [pinnedFirst, ...taskReordered.filter((t) => t !== pinnedFirst)]
+    : taskReordered;
+  if (nextOrder[0]?.modelStr !== orderedTargets[0]?.modelStr) {
+    const reasons =
+      Array.isArray(task.reasons) && task.reasons.length > 0 ? ` (${task.reasons.join(",")})` : "";
+    log.info(
+      "COMBO",
+      `task-route task=${task.level}${reasons} cacheKey=${conversationCacheKey ?? "none"} → ${nextOrder[0]?.modelStr}`
+    );
+  }
+  return nextOrder;
+}
+
+/**
+ * Prompt-cache affinity is skipped when the auto scorer already weights cacheAffinity
+ * itself — otherwise the same signal would be applied twice.
+ */
+function isPromptCacheAffinityEnabled(
+  strategy: string,
+  combo: ComboLike,
+  config: ReturnType<typeof resolveComboSetupConfig>,
+  settings?: Record<string, unknown> | null
+): boolean {
+  const autoConfigForCacheWeight = getStrategyTraits(strategy).autoWeightsCacheAffinity
+    ? ((combo.autoConfig ||
+        ((config as Record<string, unknown>).auto &&
+        typeof (config as Record<string, unknown>).auto === "object"
+          ? (config as Record<string, unknown>).auto
+          : null) ||
+        config) as Record<string, unknown>)
+    : null;
+  const autoWeightsForCache =
+    autoConfigForCacheWeight?.weights && typeof autoConfigForCacheWeight.weights === "object"
+      ? (autoConfigForCacheWeight.weights as Record<string, unknown>)
+      : null;
+  const autoUsesCacheScore = Number(autoWeightsForCache?.cacheAffinity) > 0;
+  return settings?.promptCacheAffinityEnabled !== false && !autoUsesCacheScore;
+}
+
+/**
+ * Keep the stronger continuity decision (session pin / explicit auto-router pin) at
+ * the head of the cache-affinity ordering rather than letting affinity override it.
+ */
+function protectFirstTarget(
+  affinityTargets: ResolvedComboTarget[],
+  protectedOriginal: ResolvedComboTarget | false | undefined
+): ResolvedComboTarget[] {
+  const protectedFirst = protectedOriginal
+    ? (affinityTargets.find(
+        (target) =>
+          target === protectedOriginal ||
+          target.executionKey === protectedOriginal.executionKey ||
+          target.executionKey.startsWith(`${protectedOriginal.executionKey}@`)
+      ) ?? protectedOriginal)
+    : null;
+  return protectedFirst
+    ? [protectedFirst, ...affinityTargets.filter((target) => target !== protectedFirst)]
+    : affinityTargets;
+}
+
+/**
+ * Prompt-cache locality is applied after request eligibility and task routing.
+ * Session stickiness and explicit auto-router pins remain stronger continuity
+ * decisions; quota, health, and circuit-breaker gates still run per attempt.
+ */
+async function applyPromptCacheStage(
+  deps: ResolveComboTargetPipelineDeps,
+  orderedTargets: ResolvedComboTarget[],
+  stickyStuck: boolean,
+  autoUsedExplicitRouter: boolean
+): Promise<ResolvedComboTarget[]> {
+  const { strategy, body, combo, config, settings, log } = deps;
+  const promptCacheAffinityEnabled = isPromptCacheAffinityEnabled(
+    strategy,
+    combo,
+    config,
+    settings
+  );
+  const promptCacheAffinityTargets =
+    promptCacheAffinityEnabled && resolvePromptCacheAffinityKey(body)
+      ? await expandPromptCacheAffinityTargets(orderedTargets)
+      : orderedTargets;
+
+  // Determine affinity scope: restrict to model-level for deterministic strategies
+  // to preserve operator-defined model order; keep global for cross-model
+  // strategies. Per #8370, lkgp/auto/cache-optimized explicitly support promoting
+  // a previously-successful model ahead of the declared order, so they must stay
+  // cross-model ("global") rather than be locked into a single model step.
+  // The model-order-preserving set (priority / weighted / fill-first / quota-share) is
+  // the `promptCacheAffinityScope: "model"` trait in the strategy registry.
+  const promptCacheAffinity = applyPromptCacheAffinity(
+    promptCacheAffinityTargets,
+    body,
+    promptCacheAffinityEnabled,
+    getStrategyTraits(strategy).promptCacheAffinityScope,
+    deps.relayOptions?.sessionId
+  );
+  if (!promptCacheAffinity.applied) return orderedTargets;
+  const protectedOriginal =
+    shouldProtectOriginalFirst(stickyStuck, autoUsedExplicitRouter, strategy) && orderedTargets[0];
+  const nextTargets = protectFirstTarget(promptCacheAffinity.targets, protectedOriginal);
+  log.debug?.("COMBO", "Prompt-cache affinity applied", {
+    source: promptCacheAffinity.source,
+    fingerprint: promptCacheAffinity.fingerprint,
+    targetCount: nextTargets.length,
+  });
+  return nextTargets;
+}
+
+function buildWeightedExhaustionResponse(
+  deps: ResolveComboTargetPipelineDeps,
+  weightedResolution: WeightedResolution,
+  exclusions: PreDispatchExclusion[]
+): Response | null {
+  if (
+    !getStrategyTraits(deps.strategy).weightedSteps ||
+    (weightedResolution?.orderedTargets.length ?? 0) > 0
+  ) {
+    return null;
+  }
+  // Every step was excluded before dispatch. When a resilience timer (model
+  // lockout, open breaker, provider cooldown) did it, the pool is configured and
+  // connected and merely cooling down: answer 503 + Retry-After with the
+  // excluded targets, not the host's 404 "no executable targets / switch combo".
+  const coolingDown = buildAllTargetsCoolingDownResponse(exclusions);
+  if (!coolingDown) return null;
+  deps.log.warn(
+    "COMBO",
+    `Weighted selection: every target excluded before dispatch — ${formatPreDispatchExclusions(exclusions)}`
+  );
+  recordComboFailure(
+    deps.combo.context_cache_protection
+      ? scopeHandoffSessionId(deps.relayOptions?.sessionId, deps.relayOptions?.apiKeyId)
+      : null,
+    deps.combo.name
+  );
+  return coolingDown;
+}
+
+/** Reserve an in-flight slot for `connectionId`, returning its idempotent release. */
+function reserveInflightSlot(connectionId: string): () => void {
+  incrementInflight(connectionId);
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    decrementInflight(connectionId);
+  };
+}
+
+/**
+ * quota-weighted reserves the draw inside the orderer (same synchronous turn as the
+ * pick). quota-share reserves inside selectQuotaShareTarget. Stickiness / prompt-cache
+ * may still move [0]; transfer the slot so the reserved account is the one that will be
+ * dispatched. The empty-id fallback (drawn target had no connectionId, later filters put
+ * a real id in [0]) is quota-weighted only — quota-share always hands back a release,
+ * even a no-op, and inventing a slot here would double-count.
+ */
+function transferInflightReservation(
+  reservation: StrategyTraits["inflightReservation"],
+  quotaShareRelease: (() => void) | null,
+  drawnId: string,
+  finalId: string
+): (() => void) | null {
+  if (reservation === "none") return quotaShareRelease;
+  if (quotaShareRelease && drawnId && finalId && finalId !== drawnId) {
+    quotaShareRelease();
+    return reserveInflightSlot(finalId);
+  }
+  if (reservation === "quota-weighted" && !quotaShareRelease && finalId) {
+    return reserveInflightSlot(finalId);
+  }
+  return quotaShareRelease;
+}
+
+export async function resolveComboTargetPipeline(
+  deps: ResolveComboTargetPipelineDeps
+): Promise<ResolveComboTargetPipelineResult> {
+  const { body, combo, strategy, config, allCombos, log, isModelAvailable, settings } = deps;
+  const traits = getStrategyTraits(strategy);
+
+  const { expandedCombo, expandedAllCombos } = await expandComboWildcards(combo, allCombos);
+  const stickyWeightedLimit = clampStickyWeightedTargetLimit(
+    (config as Record<string, unknown>).stickyWeightedLimit
+  );
+  const { weightedResolution, stickyWeightedKey, exclusions } = await resolveWeightedSelection(
+    deps,
+    expandedCombo,
+    expandedAllCombos,
+    stickyWeightedLimit
+  );
+  const getWeightedStepKeyForTarget = buildWeightedStepKeyMapper(weightedResolution);
+  const weightedExhaustion = buildWeightedExhaustionResponse(deps, weightedResolution, exclusions);
+  if (weightedExhaustion) return { earlyResponse: weightedExhaustion };
+  let orderedTargets = traits.weightedSteps
+    ? weightedResolution?.orderedTargets || []
+    : resolveComboTargets(
+        expandedCombo,
+        expandedAllCombos,
+        clampComboDepth(config.maxComboDepth),
+        deps.hiddenModelsByProvider
+      );
+
+  orderedTargets = await applyRequestTagRouting(orderedTargets, body, log);
+
+  // Connection-aware expansion for group-B strategies is opt-in. Runs
+  // BEFORE orderByStrategy so every downstream consumer (strategy ordering,
+  // continuity/stickiness, prompt-cache stage) sees per-connection targets.
+  // Stickiness is applied later inside applyContinuityFilters, so its pin key
+  // naturally matches the expanded connectionId targets.
+  const expansionExclusions: PreDispatchExclusion[] = [];
+  orderedTargets = await expandTargetsForAllStrategies({
+    strategy,
+    targets: orderedTargets,
+    comboName: combo.name,
+    config: combo.config,
+    settings: settings as Record<string, unknown> | null | undefined,
+    log,
+    apiKeyAllowedConnectionIds: deps.apiKeyAllowedConnections,
+    exclusions: expansionExclusions,
+  });
+  // Classify at the expansion boundary: later filters may empty a surviving
+  // pool for unrelated reasons and must retain their own error contracts.
+  if (orderedTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) return { earlyResponse: coolingDown };
+  }
+
+  logTargetPoolSize(strategy, allCombos, orderedTargets, stickyWeightedKey, log);
+
+  const pipelineResponse = await dispatchSmartPipeline(
+    deps,
+    orderedTargets.map((target) => target.modelStr)
+  );
+  if (pipelineResponse) return { earlyResponse: pipelineResponse };
+
+  const ordering = await orderByStrategy(deps, orderedTargets, expansionExclusions);
+  if ("earlyResponse" in ordering) return ordering;
+  if (ordering.orderedTargets.length === 0) {
+    const coolingDown = buildAllTargetsCoolingDownResponse(expansionExclusions);
+    if (coolingDown) {
+      ordering.quotaShareRelease?.();
+      return { earlyResponse: coolingDown };
+    }
+  }
+  const { autoUsedExplicitRouter } = ordering;
+  let { quotaShareRelease } = ordering;
+  const drawnId = ordering.orderedTargets[0]?.connectionId ?? "";
+
+  const continuity = await applyContinuityFilters(deps, ordering.orderedTargets);
+  if ("earlyResponse" in continuity) {
+    // #11371: selection already reserved the winner's in-flight slot; a hard
+    // filter exhausting the pool must not leak it.
+    quotaShareRelease?.();
+    return continuity;
+  }
+  orderedTargets = applyTaskAwareOrdering(deps, continuity.orderedTargets, autoUsedExplicitRouter);
+  orderedTargets = await applyPromptCacheStage(
+    deps,
+    orderedTargets,
+    continuity.sticky.stuck,
+    autoUsedExplicitRouter
+  );
+
+  if (strategy === "auto") {
+    orderedTargets = orderAccountPreferences(
+      orderedTargets,
+      parseAutoConfig(combo, orderedTargets).accountPreferences,
+      continuity.sticky.stuck
+    );
+  }
+
+  quotaShareRelease = transferInflightReservation(
+    traits.inflightReservation,
+    quotaShareRelease,
+    drawnId,
+    orderedTargets[0]?.connectionId ?? ""
+  );
+
+  // Parallel pre-screen: check provider profiles and model availability for all targets
+  // Only runs for priority strategy where sequential checking causes latency
+  const preScreenMap = traits.preScreensTargets
+    ? await preScreenTargets(orderedTargets, isModelAvailable).catch(
+        () => new Map<string, PreScreenResult>()
+      )
+    : new Map<string, PreScreenResult>();
+
+  return {
+    orderedTargets,
+    stickyWeightedLimit,
+    getWeightedStepKeyForTarget,
+    sticky: continuity.sticky,
+    preScreenMap,
+    quotaShareRelease,
+    compatRejectedTargets: continuity.compatRejectedTargets,
+  };
+}

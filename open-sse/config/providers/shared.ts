@@ -1,0 +1,984 @@
+/**
+ * Provider Registry — Single source of truth for all provider configuration.
+ *
+ * Adding a new provider? Just add an entry here. Everything else
+ * (PROVIDERS, PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS, executor lookup)
+ * is auto-generated from this registry.
+ */
+
+import {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+} from "../antigravityUpstream.ts";
+import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
+import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
+import {
+  ANTHROPIC_BETA_API_KEY,
+  ANTHROPIC_BETA_CLAUDE_OAUTH,
+  ANTHROPIC_VERSION_HEADER,
+  CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
+  CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
+  CLAUDE_CLI_USER_AGENT,
+  getClaudeCodeUserAgent,
+} from "../anthropicHeaders.ts";
+import { getCodexDefaultHeaders } from "../codexClient.ts";
+import {
+  GLM_REQUEST_DEFAULTS,
+  GLMT_REQUEST_DEFAULTS,
+  GLM_TIMEOUT_MS,
+  GLMT_TIMEOUT_MS,
+  GLM_SHARED_MODELS,
+} from "../glmProvider.ts";
+import { OPENCODE_ZEN_GO_SHARED_MODELS } from "../opencodeZenGoSharedModels.ts";
+import { MARITALK_DEFAULT_BASE_URL } from "../maritalk.ts";
+import {
+  CURSOR_REGISTRY_VERSION,
+  getAntigravityProviderHeaders,
+  getCursorRegistryHeaders,
+  getGitHubCopilotChatHeaders,
+  getKiroServiceHeaders,
+  getQoderDefaultHeaders,
+  getRuntimePlatform,
+  getRuntimeArch,
+} from "../providerHeaderProfiles.ts";
+import type { ProviderRequestDefaults } from "../../services/providerRequestDefaults.ts";
+import { resolvePublicCred } from "../../utils/publicCreds.ts";
+import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "@/lib/oauth/gitlab";
+
+// ── Types ─────────────────────────────────────────────────────────────────
+
+export interface RegistryModel {
+  id: string;
+  name: string;
+  aliases?: readonly string[];
+  /**
+   * Upstream model IDs that prove this static model is live when the provider
+   * has an authoritative synchronized catalog. Needed for curated IDs whose
+   * public name differs from the ID sent to the upstream service.
+   */
+  liveCatalogIds?: readonly string[];
+  /**
+   * Reachable only as `<provider>/<id>`: a bare id never infers this provider. For route labels
+   * that reuse a generic word or another vendor's model name.
+   */
+  requiresProviderPrefix?: boolean;
+  toolCalling?: boolean;
+  supportsReasoning?: boolean;
+  /**
+   * Model reasons unconditionally (always-on reasoning). When true,
+   * ensureThinkingBudget treats it as implicit reasoning opt-in so a tiny
+   * caller max_tokens gets the 4096 floor even without explicit thinking
+   * settings (#13198).
+   */
+  alwaysReasons?: boolean;
+  supportedThinkingEfforts?: readonly string[];
+  /**
+   * Effort suffixes that must fold onto this base model even when the live
+   * catalog lists `<id>-<effort>` as its own model. Use only when that catalog
+   * id is a different billed SKU, not the reasoning tier clients expect.
+   */
+  effortSuffixesThatFoldDespiteLiveCatalog?: readonly string[];
+  supportsVision?: boolean;
+  supportsAudio?: boolean;
+  supportsVideo?: boolean;
+  supportsXHighEffort?: boolean;
+  maxOutputTokens?: number;
+  targetFormat?: string;
+  strip?: readonly string[];
+  unsupportedParams?: readonly string[];
+  /** Maximum context window in tokens */
+  contextLength?: number;
+  /**
+   * Explicit maximum input-token budget, when it is smaller than the full
+   * context window (e.g. OAuth backends that reserve part of the window for
+   * output). When set, catalog/capability builders prefer this over deriving
+   * max_input_tokens from contextLength (#6191).
+   */
+  maxInputTokens?: number;
+  /**
+   * Interleaved-reasoning signal, mirroring models.dev's `interleaved_field`.
+   * Set to "reasoning_content" for models whose upstream runs DeepSeek thinking
+   * mode (e.g. OpenCode `big-pickle`) so follow-up/tool-use turns replay
+   * reasoning_content instead of failing with a DeepSeek 400 (#2900).
+   */
+  interleavedField?: string;
+  /** Per-model upstream header-response timeout override — precedes
+   *  `RegistryEntry.timeoutMs` and the global `FETCH_TIMEOUT_MS` (#6354). */
+  timeoutMs?: number;
+  /**
+   * Id whose QUALITY scores (task fitness / arena / user overrides) this id
+   * inherits (#11489). Operational fields (timeoutMs, cost, context) stay on
+   * this entry. One hop only; the target must itself be a catalog id.
+   *
+   * Only for relations suffix-stripping cannot express: forward vendor aliases
+   * (`gpt-5.6` → `gpt-5.6-sol`) and cross-provider spellings of the same model
+   * (cursor's `claude-4.6-opus-high` → `claude-opus-4-6`). Plain effort/`-free`
+   * variants are derived by `resolveScoresAs` and need no entry here.
+   */
+  scoresAs?: string;
+}
+
+// Reasoning models reject temperature, top_p, penalties, logprobs, n.
+// Frozen to prevent accidental mutation (shared across all model entries).
+export const REASONING_UNSUPPORTED: readonly string[] = Object.freeze([
+  "temperature",
+  "top_p",
+  "frequency_penalty",
+  "presence_penalty",
+  "logprobs",
+  "top_logprobs",
+  "n",
+]);
+
+export interface RegistryOAuth {
+  clientIdEnv?: string;
+  clientIdDefault?: string;
+  clientSecretEnv?: string;
+  clientSecretDefault?: string;
+  tokenUrl?: string;
+  refreshUrl?: string;
+  authUrl?: string;
+  initiateUrl?: string;
+  pollUrlBase?: string;
+}
+
+export type ReasoningTransport = "plaintext" | "opaque" | "none";
+
+export interface RegistryEntry {
+  id: string;
+  alias?: string;
+  format: string;
+  executor: string;
+  baseUrl?: string;
+  baseUrls?: string[];
+  /** Override base URL used only for API key validation (e.g., opencode-go validates on zen/v1) */
+  testKeyBaseUrl?: string;
+  /** Override models URL used only for API key validation, not catalog discovery. */
+  testKeyModelsUrl?: string;
+  responsesBaseUrl?: string;
+  /** Provider-bound replay format; omitted providers accept portable plaintext reasoning. */
+  reasoningTransport?: ReasoningTransport;
+  /**
+   * Thinking-mode upstreams proxied by this provider require the assistant's
+   * prior-turn `reasoning_content` to be echoed back on every follow-up request
+   * (e.g. DeepSeek-reselling gateways such as `bai`). Standard OpenAI-shaped
+   * clients do not preserve that field when replaying history, so when this is
+   * `true`, DefaultExecutor injects a placeholder via
+   * `open-sse/utils/reasoningContentInjector.ts` for model ids matching
+   * `isThinkingMessageModel()`. See issue #13599.
+   */
+  requiresReasoningContentEcho?: boolean;
+  /** Anthropic-native /v1/messages endpoint (e.g. GitHub Copilot's shim) used
+   *  for models tagged `targetFormat: "claude"` on an otherwise openai-format
+   *  provider — see registry/github/index.ts. */
+  messagesUrl?: string;
+  urlSuffix?: string;
+  urlBuilder?: (base: string, model: string, stream: boolean) => string;
+  authType: string;
+  authHeader: string;
+  authPrefix?: string;
+  headers?: Record<string, string>;
+  extraHeaders?: Record<string, string>;
+  requestDefaults?: ProviderRequestDefaults;
+  oauth?: RegistryOAuth;
+  models: RegistryModel[];
+  /**
+   * Opt-in for unionRegistryDispatchModels: targetFormat-tagged models join
+   * authoritative live catalogs (dispatch AND listing) when this provider's
+   * discovery surface is known to under-report — z.ai's Anthropic-compat
+   * /models omitting the coding-plan glm-5.3-flash family is the motivating
+   * case. Providers whose discovery omissions instead mean per-account
+   * entitlement must NOT opt in: their #12137-style gating would be bypassed.
+   */
+  registryDispatchUnion?: boolean;
+  /** Provider-native reasoning vocabulary for reasoning-capable passthrough models
+   * that do not have an explicit per-model declaration. */
+  defaultSupportedThinkingEfforts?: readonly string[];
+  modelsUrl?: string;
+  /** Prefix to prepend to model IDs before upstream API calls (e.g. "accounts/fireworks/models/") */
+  modelIdPrefix?: string;
+  /**
+   * Additional already-qualified model ID prefixes that must NOT receive `modelIdPrefix`
+   * (e.g. Fireworks router IDs "accounts/fireworks/routers/"). Prevents double-prefixing
+   * fully-qualified IDs that legitimately differ from `modelIdPrefix`. See issue #3133.
+   */
+  acceptedModelIdPrefixes?: string[];
+  chatPath?: string;
+  clientVersion?: string;
+  timeoutMs?: number;
+  /** Headers-wait ceiling override for streaming requests (#11526). Gateways
+   *  that buffer entire generations (Console Go / Command Code) need this well
+   *  above the 110s global cap — generateLegacyProviders() copies it into the
+   *  executor's LegacyProvider config. */
+  fetchStartTimeoutCapMs?: number;
+  passthroughModels?: boolean;
+  /**
+   * Whether a non-empty synchronized live model list is exhaustive enough
+   * to reject static registry IDs that it omits.
+   *
+   * Defaults to true. Set this explicitly to false for providers whose
+   * discovery endpoint is known to return only a partial subset of the models
+   * that the provider can route.
+   */
+  liveCatalogAuthoritative?: boolean;
+  /** Default context window for all models in this provider (can be overridden per-model) */
+  defaultContextLength?: number;
+  /** Maximum OpenAI-compatible function name length accepted by this provider. */
+  toolNameMaxLength?: number;
+  /** Optional session pool config for rate limit management */
+  poolConfig?: Record<string, unknown>;
+  /**
+   * When true, the provider rejects non-streaming requests (HTTP 400).
+   * resolveStreamFlag will keep streaming even when the client requests JSON;
+   * OmniRoute accumulates the stream and converts it to a JSON body for the client. (#2081)
+   */
+  forceStream?: boolean;
+  /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
+  /**
+   * Literal API key sent as the bearer token when the request has no real
+   * credential (synthetic noauth fallback). Lets a primarily-authenticated
+   * provider expose its free tier anonymously: e.g. Kilo's gateway accepts
+   * `Authorization: Bearer anonymous` for its free models (#4019). Only the
+   * DefaultExecutor honors it, and only when no effectiveKey/accessToken exists,
+   * so the authenticated path is never affected.
+   */
+  anonymousApiKey?: string;
+  /**
+   * Provider-wide fallback for `RegistryModel.unsupportedParams`, applied when a
+   * model has no per-model override AND (for `passthroughModels: true`
+   * providers) isn't one of the few models statically listed here at all —
+   * e.g. AI Horde's live-discovered models change as workers come and go, and
+   * every one of them shares the same hard limitation ("the workers run raw
+   * text-completion backends" — no tool calling on any model, not just the
+   * 3 statically catalogued ones). Checked by `getUnsupportedParams()` after
+   * the per-model lookup misses.
+   */
+  unsupportedParams?: readonly string[];
+  /**
+   * True for strict/naive OpenAI-compatible backends that reject a single-text-part
+   * content array (`[{ type: "text", text }]`) and only accept the equivalent plain
+   * string. Used by the Responses→Chat translator to collapse single-part text
+   * content down to a string for this provider only, leaving every other provider's
+   * standard OpenAI array-shaped content untouched (see openai-responses.ts).
+   */
+  requiresPlainStringContent?: boolean;
+  /**
+   * True for upstreams that accept a single-turn request but reject the
+   * replayed history an agent client sends from turn two on. Set this when the
+   * upstream reports a broken tool-call sequence or a missing reasoning
+   * passthrough for a history that is structurally valid Chat Completions.
+   *
+   * The repair, in `utils/strictChatHistory.ts`, coalesces a split assistant
+   * turn, keeps one result per tool call in call order, merges neighbouring
+   * user turns (upstreams that collapse them keep only the text, which silently
+   * drops a lifted image), and folds a trailing assistant message back onto the
+   * turn's tool results. Every step is a no-op on a body that already satisfies
+   * the shape, so this is safe to enable for any provider that needs one of them.
+   *
+   * WorkBuddy is the reference case: `11148 tool_call_sequence_broken` and
+   * `11155 reasoning content from the previous turn must be passed back`.
+   */
+  strictChatHistory?: boolean;
+  /**
+   * Literal string replacements applied to every string value in the outgoing
+   * request body, for upstreams that reject a request naming a competing client
+   * rather than rejecting a specific field. Keys, numbers, and structure are
+   * never touched.
+   *
+   * Order matters: list longer needles first so a shorter one cannot match
+   * inside them. WorkBuddy answers `11128 Illegal API invocation from an
+   * unapproved channel` for a body naming another agent client.
+   */
+  bodyStringReplacements?: ReadonlyArray<readonly [string, string]>;
+  /**
+   * Anthropic-compatible providers that omit the required `signature` field
+   * from streamed thinking block starts. The passthrough stream adds only an
+   * empty placeholder; later provider `signature_delta` events remain intact.
+   */
+  ensureThinkingSignature?: boolean;
+  /**
+   * Timezone offset to assume for zone-less (naive) reset timestamps in 429 error bodies
+   * (e.g. "+08:00" for Z.AI/GLM which outputs local Asia/Shanghai time).
+   * Defaults to "Z" (UTC).
+   */
+  naiveResetTimezone?: string;
+  /**
+   * Protocolos alternativos que este provedor aceita (ex.: um endpoint
+   * Anthropic-compatible alem do OpenAI-compatible padrao). A conexao escolhe
+   * via providerSpecificData.targetFormat; ver config/providers/alternateFormats.ts.
+   */
+  alternateFormats?: import("./alternateFormats.ts").AlternateFormat[];
+}
+
+/**
+ * Build a standard OpenAI-compatible provider registry entry.
+ * Eliminates the 4-field boilerplate (format, executor, authType, authHeader)
+ * repeated across 40+ provider files.
+ */
+export function buildOpenAiCompatibleRegistryEntry(
+  overrides: Pick<RegistryEntry, "id"> &
+    Partial<Omit<RegistryEntry, "id" | "format" | "executor" | "authType" | "authHeader">>
+): RegistryEntry {
+  return {
+    format: "openai",
+    executor: "default",
+    authType: "apikey",
+    authHeader: "bearer",
+    ...overrides,
+  } as RegistryEntry;
+}
+
+export interface LegacyProvider {
+  format: string;
+  baseUrl?: string;
+  baseUrls?: string[];
+  responsesBaseUrl?: string;
+  messagesUrl?: string;
+  headers?: Record<string, string>;
+  requestDefaults?: ProviderRequestDefaults;
+  clientId?: string;
+  clientSecret?: string;
+  tokenUrl?: string;
+  refreshUrl?: string;
+  authUrl?: string;
+  chatPath?: string;
+  clientVersion?: string;
+  timeoutMs?: number;
+  fetchStartTimeoutCapMs?: number;
+}
+
+export const buildModels = (ids: readonly string[]): RegistryModel[] =>
+  ids.map((id) => ({ id, name: id }));
+
+export const GPT_5_5_CONTEXT_LENGTH = 1050000;
+export const GPT_5_5_CODEX_CAPABILITIES = {
+  targetFormat: "openai-responses",
+  toolCalling: true,
+  supportsReasoning: true,
+  supportsVision: true,
+  supportsXHighEffort: true,
+  contextLength: GPT_5_5_CONTEXT_LENGTH,
+} as const;
+
+// Public OpenAI API limits. These differ from the Codex OAuth catalog limits below.
+// Upstream port (decolua/9router#2547, closes #2540): OpenAI's Chat Completions
+// endpoint rejects GPT-5.6 requests that combine function tools with an active
+// reasoning_effort ("Function tools with reasoning_effort are not supported for
+// <model> in /v1/chat/completions. Please use /v1/responses instead."). Tag the
+// whole public GPT-5.6 family with the existing generic targetFormat override
+// (the same mechanism already routes gpt-5.5-pro / gpt-5.4-pro, #5842) so both
+// the outbound URL (DefaultExecutor.buildUrl) and the body translation
+// (chatCore's resolveChatCoreTargetFormat) go through api.openai.com/v1/responses.
+export const GPT_5_6_API_CAPABILITIES = {
+  targetFormat: "openai-responses",
+  toolCalling: true,
+  supportsReasoning: true,
+  supportsVision: true,
+  supportsXHighEffort: true,
+  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+  contextLength: 1050000,
+  maxInputTokens: 922000,
+  maxOutputTokens: 128000,
+} as const;
+
+// Codex OAuth catalog limits. The live OAuth `/codex/models` endpoint reports
+// `context_window` (~272K, the first pricing tier) alongside
+// `max_context_window` (~872K, the real usable window); requests past the
+// pricing tier succeed upstream (verified: gpt-5.6-luna-xhigh served 380-390K
+// input tokens with HTTP 200). The static catalog must advertise the usable
+// window so the conservative discovery merge (`Math.min`) does not cap the
+// live value at the pricing tier.
+export const GPT_5_6_CODEX_CAPABILITIES = {
+  targetFormat: "openai-responses",
+  toolCalling: true,
+  supportsReasoning: true,
+  supportsVision: true,
+  supportsXHighEffort: true,
+  contextLength: 872000,
+  maxInputTokens: 872000,
+  maxOutputTokens: 128000,
+} as const;
+
+export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
+  deepinfra: buildModels([
+    "anthropic/claude-4-opus",
+    "anthropic/claude-4-sonnet",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "google/gemma-4-31B-it",
+    "google/gemma-4-26B-A4B-it",
+    "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning",
+    "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "NousResearch/Hermes-3-Llama-3.1-405B",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "deepseek-ai/DeepSeek-V4-Flash",
+    "zai-org/GLM-5.1",
+    "moonshotai/Kimi-K2.6",
+    "MiniMaxAI/MiniMax-M2.5",
+    "Qwen/Qwen3.6-35B-A3B",
+    "Qwen/Qwen3.5-397B-A17B",
+    "Qwen/Qwen3.5-122B-A10B",
+    "XiaomiMiMo/MiMo-V2.5-Pro",
+    "XiaomiMiMo/MiMo-V2.5",
+  ]),
+  "vercel-ai-gateway": buildModels([
+    "openai/gpt-4.1",
+    "anthropic/claude-4-sonnet",
+    "google/gemini-2.5-pro",
+    "moonshotai/kimi-k2",
+    "vercel/v0-1.5-md",
+  ]),
+  "lambda-ai": buildModels([
+    "deepseek-r1-671b",
+    "llama3.3-70b-instruct-fp8",
+    "qwen25-coder-32b-instruct",
+  ]),
+  runcrate: buildModels([
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+    "zai-org/GLM-5.3",
+    "zai-org/GLM-5.3-Flash",
+    "Qwen/Qwen3.8-Flash",
+    "openai/gpt-oss-120b",
+  ]),
+  sambanova: buildModels([
+    "MiniMax-M2.7",
+    "DeepSeek-V3.2",
+    "Llama-4-Maverick-17B-128E-Instruct",
+    "Meta-Llama-3.3-70B-Instruct",
+    "gpt-oss-120b",
+    "DeepSeek-V3.1",
+    "gemma-4-31B-it",
+  ]),
+  nscale: buildModels([
+    "moonshotai/Kimi-K2.5",
+    "Qwen/Qwen3-235B-A22B-Instruct-2507",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    "meta-llama/Llama-3.3-70B-Instruct",
+  ]),
+  ovhcloud: buildModels([
+    "Meta-Llama-3_3-70B-Instruct",
+    "Qwen2.5-Coder-32B-Instruct",
+    "Mistral-Small-3.2-24B-Instruct-2506",
+  ]),
+  // Offline seed from Baseten's supported-models table; live discovery is authoritative.
+  baseten: [
+    { id: "zai-org/GLM-5.3", name: "GLM 5.3", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Fast", name: "GLM 5.3 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.3-Flash", name: "GLM 5.3 Flash", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2", name: "GLM 5.2", contextLength: 1048576 },
+    { id: "zai-org/GLM-5.2-Fast", name: "GLM 5.2 Fast", contextLength: 1048576 },
+    { id: "zai-org/GLM-4.7", name: "GLM 4.7", contextLength: 200000 },
+    { id: "deepseek-ai/DeepSeek-V4-Pro", name: "DeepSeek V4 Pro", contextLength: 1048576 },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Pro-0813",
+      name: "DeepSeek V4 Pro 0813",
+      contextLength: 1048576,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Flash-0731",
+      name: "DeepSeek V4 Flash 0731",
+      contextLength: 1048576,
+    },
+    { id: "moonshotai/Kimi-K3", name: "Kimi K3", contextLength: 1048576 },
+    { id: "moonshotai/Kimi-K2.6", name: "Kimi K2.6", contextLength: 262144 },
+    { id: "moonshotai/Kimi-K2.7-Code", name: "Kimi K2.7 Code", contextLength: 262144 },
+    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", contextLength: 131072 },
+    {
+      id: "nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B",
+      name: "Nemotron 3 Ultra",
+      contextLength: 202000,
+    },
+    { id: "thinkingmachines/inkling", name: "Inkling", contextLength: 1048576 },
+    { id: "thinkingmachines/inkling-small", name: "Inkling Small", contextLength: 1048576 },
+  ],
+  publicai: buildModels([
+    "swiss-ai/apertus-70b-instruct",
+    "swiss-ai/Apertus-8B-Instruct-2509",
+    "aisingapore/Qwen-SEA-LION-v4-32B-IT",
+    "aisingapore/Gemma-SEA-LION-v4-27B-IT",
+    "allenai/Olmo-3-32B-Think",
+    "allenai/Olmo-3-7B-Instruct",
+    "utter-project/EuroLLM-22B-Instruct-2512",
+  ]),
+  "meta-llama": buildModels([
+    "Llama-4-Maverick-17B-128E-Instruct-FP8",
+    "Llama-4-Scout-17B-16E-Instruct-FP8",
+    "Llama-3.3-70B-Instruct",
+    "Llama-3.3-8B-Instruct",
+  ]),
+  "v0-vercel": buildModels(["v0-1.0-md", "v0-1.5-lg", "v0-1.5-md"]),
+  morph: [
+    ...buildModels(["morph-v3-large", "morph-v3-fast"]),
+    { id: "morph-glm52-744b", name: "GLM-5.2 744B (Morph)", contextLength: 1048576 },
+    { id: "morph-qwen35-397b", name: "Qwen 3.5 397B (Morph)", contextLength: 262144 },
+    { id: "morph-qwen36-27b", name: "Qwen 3.6 27B (Morph)", contextLength: 131072 },
+    { id: "morph-minimax3-428b", name: "MiniMax M3 (Morph)", contextLength: 262144 },
+    { id: "morph-dsv4flash", name: "DeepSeek V4 Flash (Morph)", contextLength: 1048576 },
+  ],
+  "featherless-ai": buildModels(["featherless-ai/Qwerky-72B", "featherless-ai/Qwerky-QwQ-32B"]),
+  friendliai: buildModels(["meta-llama-3.1-70b-instruct", "meta-llama-3.1-8b-instruct"]),
+  llamagate: buildModels(["qwen2.5-coder-7b", "deepseek-coder-6.7b", "qwen3-vl-8b"]),
+  heroku: buildModels([
+    "claude-opus-4-7",
+    "claude-4-6-sonnet",
+    "claude-4-5-haiku",
+    "glm-4-7",
+    "kimi-k2-5",
+    "minimax-m2-1",
+    "deepseek-v3-2",
+    "qwen3-coder-480b",
+    "qwen3-235b",
+    "gpt-oss-120b",
+    "nova-pro",
+    "nova-2-lite",
+  ]),
+  galadriel: buildModels(["galadriel-latest"]),
+  databricks: buildModels([
+    "databricks-gpt-5",
+    "databricks-meta-llama-3-3-70b-instruct",
+    "databricks-claude-sonnet-4",
+    "databricks-gemini-2-5-pro",
+  ]),
+  snowflake: buildModels(["llama3.1-70b", "llama3.3-70b", "deepseek-r1", "claude-3-5-sonnet"]),
+  wandb: buildModels([
+    "openai/gpt-oss-120b",
+    "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+    "deepseek-ai/DeepSeek-V3.1",
+  ]),
+  volcengine: buildModels([
+    "deepseek-v3-2-251201",
+    "doubao-seed-2-0-pro-260215",
+    "doubao-seed-2-0-code-preview-260215",
+    // Sweep 2026-06-19: kimi-k2-thinking-251104 retired on Ark (volcengine official
+    // notices); replaced by kimi-k2-5-260127.
+    "kimi-k2-5-260127",
+    "glm-4-7-251222",
+    // DeepSeek V4 models available on Volcengine Ark (port from upstream PR #1473)
+    "DeepSeek-V4-Flash",
+    "DeepSeek-V4-Pro",
+  ]),
+  ai21: buildModels(["jamba-large-1.7", "jamba-mini-2"]),
+  gigachat: buildModels(["GigaChat-2-Max", "GigaChat-2-Pro", "GigaChat-2-Lite"]),
+  venice: buildModels(["venice-latest"]),
+  // Sweep 2026-06-19: codestral-2405 retired 2025-06-16 (Mistral official docs) — dropped
+  // from the menu; old refs auto-forward via the codestral-2405 deprecation alias.
+  codestral: buildModels(["codestral-2508", "codestral-latest"]),
+  upstage: buildModels(["solar-pro3", "solar-mini"]),
+  maritalk: buildModels(["sabia-4", "sabia-4-thinking", "sabiazinho-4"]),
+  "xiaomi-mimo": [
+    { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
+  ],
+  "xiaomi-mimo-token-plan": [
+    { id: "mimo-v2.6-pro", name: "MiMo-V2.6-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    {
+      id: "mimo-v2.6-flash",
+      name: "MiMo-V2.6-Flash",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
+  ],
+  gitlawb: [
+    { id: "mimo-v2.5-pro", name: "MiMo-V2.5-Pro", contextLength: 1048576, maxOutputTokens: 131072 },
+    { id: "mimo-v2.5", name: "MiMo-V2.5", contextLength: 1048576, maxOutputTokens: 131072 },
+    { id: "mimo-v2-pro", name: "MiMo-V2-Pro", contextLength: 262144, maxOutputTokens: 131072 },
+    { id: "mimo-v2-omni", name: "MiMo-V2-Omni", contextLength: 262144, maxOutputTokens: 131072 },
+    { id: "mimo-v2-flash", name: "MiMo-V2-Flash", contextLength: 262144, maxOutputTokens: 65536 },
+  ],
+  "gitlawb-gmi": [
+    {
+      id: "XiaomiMiMo/MiMo-V2.5-Pro",
+      name: "MiMo-V2.5-Pro (GMI)",
+      contextLength: 1050000,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "XiaomiMiMo/MiMo-V2.5",
+      name: "MiMo-V2.5 (GMI)",
+      contextLength: 1050000,
+      maxOutputTokens: 131072,
+    },
+    { id: "openai/gpt-5.5", name: "GPT-5.5", contextLength: 1050000, maxOutputTokens: 131072 },
+    {
+      id: "openai/gpt-5.4-pro",
+      name: "GPT-5.4 Pro",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+    },
+    { id: "openai/gpt-5.4", name: "GPT-5.4", contextLength: 409600, maxOutputTokens: 131072 },
+    {
+      id: "openai/gpt-5.4-mini",
+      name: "GPT-5.4 Mini",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "openai/gpt-5.4-nano",
+      name: "GPT-5.4 Nano",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "openai/gpt-5.3-codex",
+      name: "GPT-5.3 Codex",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "openai/gpt-5.2-codex",
+      name: "GPT-5.2 Codex",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+    },
+    { id: "openai/gpt-5.2", name: "GPT-5.2", contextLength: 409600, maxOutputTokens: 131072 },
+    { id: "openai/gpt-5.1", name: "GPT-5.1", contextLength: 409600, maxOutputTokens: 131072 },
+    { id: "openai/gpt-5", name: "GPT-5", contextLength: 409600, maxOutputTokens: 131072 },
+    { id: "openai/gpt-4o", name: "GPT-4o", contextLength: 131072, maxOutputTokens: 16384 },
+    {
+      id: "openai/gpt-4o-mini",
+      name: "GPT-4o Mini",
+      contextLength: 131072,
+      maxOutputTokens: 16384,
+    },
+    {
+      id: "anthropic/claude-opus-4.7",
+      name: "Claude Opus 4.7",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-opus-4.6",
+      name: "Claude Opus 4.6",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-opus-4.5",
+      name: "Claude Opus 4.5",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-opus-4.1",
+      name: "Claude Opus 4.1",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-sonnet-4.6",
+      name: "Claude Sonnet 4.6",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-sonnet-4.5",
+      name: "Claude Sonnet 4.5",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-sonnet-4",
+      name: "Claude Sonnet 4",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "anthropic/claude-haiku-4.5",
+      name: "Claude Haiku 4.5",
+      contextLength: 409600,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Pro",
+      name: "DeepSeek V4 Pro",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V4-Flash",
+      name: "DeepSeek V4 Flash",
+      contextLength: 1048575,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-R1-0528",
+      name: "DeepSeek R1",
+      contextLength: 163840,
+      maxOutputTokens: 131072,
+      supportsReasoning: true,
+    },
+    {
+      id: "deepseek-ai/DeepSeek-V3.2",
+      name: "DeepSeek V3.2",
+      contextLength: 163840,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "google/gemini-3.1-pro-preview",
+      name: "Gemini 3.1 Pro",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "google/gemini-3.1-flash-lite-preview",
+      name: "Gemini 3.1 Flash Lite",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "google/gemini-3-flash-preview",
+      name: "Gemini 3 Flash",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    { id: "zai-org/GLM-5.1-FP8", name: "GLM-5.1", contextLength: 202752, maxOutputTokens: 131072 },
+    { id: "zai-org/GLM-5-FP8", name: "GLM-5", contextLength: 202752, maxOutputTokens: 131072 },
+    {
+      id: "moonshotai/Kimi-K2.6",
+      name: "Kimi K2.6",
+      contextLength: 65536,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "moonshotai/Kimi-K2.5",
+      name: "Kimi K2.5",
+      contextLength: 262144,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "MiniMaxAI/MiniMax-M2.7",
+      name: "MiniMax M2.7",
+      contextLength: 196608,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "MiniMaxAI/MiniMax-M2.5",
+      name: "MiniMax M2.5",
+      contextLength: 196608,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "Qwen/Qwen3.6-Max-Preview",
+      name: "Qwen3.6 Max",
+      contextLength: 262144,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "Qwen/Qwen3.6-Plus",
+      name: "Qwen3.6 Plus",
+      contextLength: 262144,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "Qwen/Qwen3.5-397B-A17B",
+      name: "Qwen3.5 397B",
+      contextLength: 262144,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "Qwen/Qwen3-Coder-480B-A35B-Instruct-FP8",
+      name: "Qwen3 Coder 480B",
+      contextLength: 262128,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "nvidia/NVIDIA-Nemotron-3-Nano-Omni",
+      name: "Nemotron 3 Nano",
+      contextLength: 262144,
+      maxOutputTokens: 131072,
+    },
+  ],
+  "inference-net": buildModels([
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "deepseek-ai/DeepSeek-R1",
+    "Qwen/Qwen2.5-72B-Instruct",
+  ]),
+  nanogpt: buildModels(["chatgpt-4o-latest", "claude-3.5-sonnet", "gpt-4o-mini"]),
+  // Seed catalog mirrors apmix.ai/models (2026-09-25). The catalog is
+  // plan-scoped per key — live discovery via GET https://api.apmix.ai/v1/models
+  // serves what the key can actually reach; this list is the union fallback.
+  apmix: [
+    ...buildModels([
+      "claude-haiku-4-5",
+      "claude-sonnet-5",
+      "claude-opus-5",
+      "claude-opus-4-8",
+      "claude-opus-4-7",
+      "claude-opus-4-6",
+      "claude-fable-5",
+      "claude-sonnet-4-6",
+      "gpt-5.6-terra",
+      "gpt-5.6-sol",
+      "gpt-5.6-luna",
+      "gpt-5.5",
+      "gpt-6-astra",
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-6-luna-free",
+      "gemini-3.8-flash",
+      "gemini-3.7-flash",
+      "gemini-3.6-flash",
+      "gemini-3.1-pro",
+      "grok-4.5",
+      "grok-4.6",
+      "grok-4.7",
+      "deepseek-v4-pro",
+      "deepseek-v4-flash",
+      "deepseek-v4.1-flash",
+      "deepseek-v4-flash-free",
+      "qwen3.8-flash",
+      "qwen3.8-max",
+      "glm-5.3-flash",
+      "glm-5.3",
+      "glm-5.2",
+      "glm-5-turbo",
+      "kimi-k2.7-code",
+      "kimi-k3",
+      "mimo-v2.5-pro",
+      "mimo-v2.5",
+      "hy4-preview",
+      "composer-2.5-fast",
+    ]),
+    // MiniMax M3 is multimodal (bazaarlink entry shape) — LEDGER-4 requires
+    // every seeded minimax-m3 outside promptql to carry supportsVision: true.
+    { id: "minimax-m3", name: "MiniMax M3", contextLength: 1048576, supportsVision: true },
+    ...buildModels(["muse-spark-1.3"]),
+  ],
+  predibase: buildModels(["llama-3.3-70b"]),
+  bytez: buildModels([
+    "meta-llama/Llama-3.3-70B-Instruct",
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "Qwen/Qwen2.5-72B-Instruct",
+  ]),
+};
+
+export function mapStainlessOs() {
+  switch (getRuntimePlatform()) {
+    case "darwin":
+      return "MacOS";
+    case "win32":
+      return "Windows";
+    case "linux":
+      return "Linux";
+    default:
+      return `Other::${getRuntimePlatform()}`;
+  }
+}
+
+export function mapStainlessArch() {
+  switch (getRuntimeArch()) {
+    case "x64":
+      return "x64";
+    case "arm64":
+      return "arm64";
+    case "ia32":
+      return "x86";
+    default:
+      return `other::${getRuntimeArch()}`;
+  }
+}
+
+// ── Registry ──────────────────────────────────────────────────────────────
+
+export {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+  ANTIGRAVITY_PUBLIC_MODELS,
+  AGY_PUBLIC_MODELS,
+  ANTHROPIC_BETA_API_KEY,
+  ANTHROPIC_BETA_CLAUDE_OAUTH,
+  ANTHROPIC_VERSION_HEADER,
+  CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
+  CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
+  CLAUDE_CLI_USER_AGENT,
+  getCodexDefaultHeaders,
+  GLM_REQUEST_DEFAULTS,
+  GLMT_REQUEST_DEFAULTS,
+  GLM_TIMEOUT_MS,
+  GLMT_TIMEOUT_MS,
+  GLM_SHARED_MODELS,
+  OPENCODE_ZEN_GO_SHARED_MODELS,
+  MARITALK_DEFAULT_BASE_URL,
+  CURSOR_REGISTRY_VERSION,
+  getAntigravityProviderHeaders,
+  getCursorRegistryHeaders,
+  getGitHubCopilotChatHeaders,
+  getKiroServiceHeaders,
+  getQoderDefaultHeaders,
+  getRuntimePlatform,
+  getRuntimeArch,
+  resolvePublicCred,
+  buildGitLabOAuthEndpoints,
+  GITLAB_DUO_DEFAULT_BASE_URL,
+};
+
+export function getClaudeCliHeaders(): Record<string, string> {
+  return {
+    "Anthropic-Version": ANTHROPIC_VERSION_HEADER,
+    "Anthropic-Beta": ANTHROPIC_BETA_CLAUDE_OAUTH,
+    "Anthropic-Dangerous-Direct-Browser-Access": "true",
+    "User-Agent": getClaudeCodeUserAgent("cli"),
+    "X-App": "cli",
+    "X-Stainless-Helper-Method": "stream",
+    "X-Stainless-Retry-Count": "0",
+    "X-Stainless-Runtime-Version": CLAUDE_CLI_STAINLESS_RUNTIME_VERSION,
+    "X-Stainless-Package-Version": CLAUDE_CLI_STAINLESS_PACKAGE_VERSION,
+    "X-Stainless-Runtime": "node",
+    "X-Stainless-Lang": "js",
+    "X-Stainless-Arch": mapStainlessArch(),
+    "X-Stainless-Os": mapStainlessOs(),
+    "X-Stainless-Timeout": "600",
+  };
+}
+
+export function getAnthropicCompatHeaders(): Record<string, string> {
+  return {
+    "Anthropic-Version": ANTHROPIC_VERSION_HEADER,
+  };
+}
+
+export function buildAntigravityUrl(base: string, model: string, stream: boolean): string {
+  const path = stream ? "/v1internal:streamGenerateContent?alt=sse" : "/v1internal:generateContent";
+  return `${base}${path}`;
+}
+
+/**
+ * Gemini protocol `generateContent` route: the model goes in the path, not the body.
+ *
+ * Shared because the format has two consumers: the native `gemini` provider
+ * (RegistryEntry.urlBuilder) and gateways that expose Gemini as an alternate
+ * protocol (AlternateFormat.urlBuilder, see alternateFormats.ts). One copy per
+ * consumer would leave the streaming `?alt=sse` suffix free to diverge.
+ */
+export function buildGeminiGenerateContentUrl(
+  base: string,
+  model: string,
+  stream: boolean
+): string {
+  const action = stream ? "streamGenerateContent?alt=sse" : "generateContent";
+  return `${base}/${model}:${action}`;
+}

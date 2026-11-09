@@ -1,0 +1,442 @@
+/**
+ * Proxy Pipeline Integration Tests — T-3
+ *
+ * Tests the proxy pipeline wiring: format detection, credential retry loop,
+ * circuit breaker integration, and the new Phase 2 modules (DI container,
+ * prompt versioning, plugin architecture, eval cleanup).
+ *
+ * @module tests/integration/proxy-pipeline.test.ts
+ */
+
+import { describe, it, before, after, beforeEach, afterEach } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createChatPipelineHarness } from "./_chatPipelineHarness.ts";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..", "..");
+
+function readSrc(relPath) {
+  const full = join(ROOT, "src", relPath);
+  if (!existsSync(full)) return null;
+  return readFileSync(full, "utf8");
+}
+
+// ═══════════════════════════════════════════════════
+// 1. Chat Handler Pipeline Wiring
+// ═══════════════════════════════════════════════════
+
+describe("Chat Pipeline — handleSingleModelChat decomposition", () => {
+  const src = readSrc("sse/handlers/chat.ts");
+  const helpersSrc = readSrc("sse/handlers/chatHelpers.ts");
+  const dispatchSrc = readSrc("sse/handlers/chatDispatch.ts");
+
+  it("should define resolveModelOrError helper", () => {
+    assert.ok(helpersSrc, "chatHelpers.ts should exist");
+    assert.match(helpersSrc, /function\s+resolveModelOrError/);
+  });
+
+  it("should define checkPipelineGates helper", () => {
+    assert.match(helpersSrc, /function\s+checkPipelineGates/);
+  });
+
+  it("should define executeChatWithBreaker helper", () => {
+    assert.match(helpersSrc, /function\s+executeChatWithBreaker/);
+  });
+
+  it("handleSingleModelChat should use resolveModelOrError", () => {
+    // Extract handleSingleModelChat body
+    assert.match(src, /resolveModelOrError\(\s*modelStr/);
+  });
+
+  it("handleSingleModelChat should use checkPipelineGates", () => {
+    assert.match(src, /checkPipelineGates\(provider/);
+  });
+
+  // O breaker deixou de ser chamado direto por handleSingleModelChat: a chamada foi
+  // extraida para o seam chatDispatch.ts (dispatchChatWithAffinityEviction). O
+  // invariante que este teste protege continua o mesmo — todo dispatch de chat passa
+  // pelo circuit breaker — mas agora precisa ser verificado nos DOIS saltos, senao a
+  // extracao poderia remover o breaker do caminho sem nenhum teste reclamar.
+  it("handleSingleModelChat should dispatch through the breaker seam", () => {
+    assert.match(src, /dispatchChatWithAffinityEviction\(/);
+    assert.ok(dispatchSrc, "src/sse/handlers/chatDispatch.ts should exist");
+    assert.match(dispatchSrc, /executeChatWithBreaker\(/);
+  });
+});
+
+describe("Chat Pipeline — cost accounting", () => {
+  let harness: Awaited<ReturnType<typeof createChatPipelineHarness>>;
+  let costRules: typeof import("../../src/domain/costRules.ts");
+  const originalFetch = globalThis.fetch;
+
+  before(async () => {
+    globalThis.fetch = async () => {
+      throw new Error("Unexpected network request in cost accounting test");
+    };
+    harness = await createChatPipelineHarness("proxy-cost-accounting");
+    costRules = await import("../../src/domain/costRules.ts");
+    await harness.seedConnection("openai");
+  });
+
+  after(async () => {
+    try {
+      if (harness) {
+        const { flushProxyLogsSync } = await import("../../src/lib/proxyLogger.ts");
+        flushProxyLogsSync();
+        await harness.cleanup();
+      }
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  for (const stream of [false, true]) {
+    it(`records exactly one positive cost for a completed ${stream ? "SSE" : "JSON"} chat`, async (t) => {
+      const key = await harness.seedApiKey({ name: `cost-${stream ? "sse" : "json"}` });
+      const usage = { prompt_tokens: 100, completion_tokens: 50, total_tokens: 150 };
+      t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+        const url = new URL(input instanceof Request ? input.url : String(input));
+        assert.equal(url.origin, "https://api.openai.com");
+        assert.equal(url.pathname, "/v1/chat/completions");
+        if (!stream) return harness.buildOpenAIResponse("cost recorded", "gpt-4o-mini", usage);
+        const chunk = {
+          id: "chatcmpl-cost-stream",
+          object: "chat.completion.chunk",
+          model: "gpt-4o-mini",
+          choices: [{ index: 0, delta: { content: "cost recorded" }, finish_reason: null }],
+        };
+        const final = {
+          ...chunk,
+          choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+          usage,
+        };
+        return new Response(
+          `data: ${JSON.stringify(chunk)}\n\ndata: ${JSON.stringify(final)}\n\ndata: [DONE]\n\n`,
+          { headers: { "Content-Type": "text/event-stream" } }
+        );
+      });
+      const response = await harness.handleChat(
+        harness.buildRequest({
+          authKey: key.key,
+          body: {
+            model: "openai/gpt-4o-mini",
+            messages: [{ role: "user", content: `account this ${stream ? "stream" : "response"}` }],
+            stream,
+          },
+        })
+      );
+      assert.equal(response.status, 200);
+      assert.match(await response.text(), /cost recorded/);
+      const summary = await harness.waitFor(() => {
+        const current = costRules.getCostSummary(key.id);
+        return current.totalEntries > 0 ? current : null;
+      });
+      assert.ok(summary, "completed chat must appear in the key's public cost summary");
+      assert.equal(summary.totalEntries, 1, "one completion must not be billed twice");
+      assert.ok(summary.dailyTotal > 0, "nonzero usage must carry a positive cost");
+    });
+  }
+});
+
+describe("Chat Pipeline — combo fallback support", () => {
+  const src = readSrc("sse/handlers/chat.ts");
+
+  it("should import handleComboChat", () => {
+    assert.ok(src, "chat.ts should exist");
+    assert.match(src, /handleComboChat/);
+  });
+
+  it("should delegate to handleSingleModelChat for each combo model", () => {
+    assert.match(src, /handleSingleModel.*handleSingleModelChat/s);
+  });
+
+  it("should preflight provider credentials before attempting combo models", () => {
+    assert.match(src, /getProviderCredentialsWithQuotaPreflight/);
+  });
+});
+
+describe("Chat Pipeline — circuit breaker integration", () => {
+  const helpersSrc = readSrc("sse/handlers/chatHelpers.ts");
+
+  it("should import providerCircuitOpenResponse", () => {
+    assert.ok(helpersSrc, "chatHelpers.ts should exist");
+    assert.match(helpersSrc, /providerCircuitOpenResponse/);
+  });
+
+  it("should handle circuit-open responses with retry-after", () => {
+    assert.match(helpersSrc, /retryAfterMs/);
+  });
+
+  it("should reject requests when circuit is open via structured provider breaker response", () => {
+    // #15001 (#14960) added a third argument — the breaker's classified failure kind —
+    // so the call is now `providerCircuitOpenResponse(provider, retryAfterSec, <kind>)`.
+    assert.match(helpersSrc, /providerCircuitOpenResponse\(provider,\s*retryAfterSec[,)]/);
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 2. DI Container (A-5)
+// ═══════════════════════════════════════════════════
+
+describe("DI Container — container.ts", () => {
+  let container;
+
+  beforeEach(async () => {
+    const mod = await import("../../src/lib/container.ts");
+    container = mod.container;
+  });
+
+  afterEach(() => {
+    // Don't reset — keep default registrations
+  });
+
+  it("should export a container singleton", () => {
+    assert.ok(container);
+    assert.equal(typeof container.register, "function");
+    assert.equal(typeof container.resolve, "function");
+    assert.equal(typeof container.has, "function");
+  });
+
+  it("should register and resolve a custom service", () => {
+    container.register("testService", () => ({ greeting: "hello" }));
+    const svc = container.resolve("testService");
+    assert.deepEqual(svc, { greeting: "hello" });
+  });
+
+  it("should return cached singleton on repeated resolve", () => {
+    let count = 0;
+    container.register("counterService", () => ({ value: ++count }));
+    const a = container.resolve("counterService");
+    const b = container.resolve("counterService");
+    assert.strictEqual(a, b);
+    assert.equal(a.value, 1);
+  });
+
+  it("should throw on resolving unregistered service", () => {
+    assert.throws(() => container.resolve("nonExistent"), /No factory registered/);
+  });
+
+  it("should have default registrations", () => {
+    const names = container.list();
+    assert.ok(names.includes("settings"), "should have settings");
+    assert.ok(names.includes("db"), "should have db");
+    assert.ok(names.includes("encryption"), "should have encryption");
+    assert.ok(names.includes("policyEngine"), "should have policyEngine");
+    assert.ok(names.includes("circuitBreaker"), "should have circuitBreaker");
+    assert.ok(names.includes("telemetry"), "should have telemetry");
+  });
+
+  it("should support re-registration (overwrite)", () => {
+    container.register("testOverwrite", () => "v1");
+    assert.equal(container.resolve("testOverwrite"), "v1");
+    container.register("testOverwrite", () => "v2");
+    assert.equal(container.resolve("testOverwrite"), "v2");
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 3. Plugin Architecture (L-8) — hooks.ts registry
+// ═══════════════════════════════════════════════════
+
+describe("Plugin Architecture — plugins/hooks.ts", () => {
+  let hooks;
+
+  beforeEach(async () => {
+    hooks = await import("../../src/lib/plugins/hooks.ts");
+    hooks.resetHooks();
+  });
+
+  afterEach(() => {
+    hooks.resetHooks();
+  });
+
+  it("should register hooks for events", () => {
+    hooks.registerHook("onRequest", "test-logger", () => {}, 10);
+    const list = hooks.getHooks("onRequest");
+    assert.equal(list.length, 1);
+    assert.equal(list[0].pluginName, "test-logger");
+    assert.equal(list[0].priority, 10);
+  });
+
+  it("should sort hooks by priority", () => {
+    hooks.registerHook("onRequest", "low", () => {}, 200);
+    hooks.registerHook("onRequest", "high", () => {}, 1);
+    hooks.registerHook("onRequest", "mid", () => {}, 50);
+
+    const list = hooks.getHooks("onRequest");
+    assert.deepEqual(
+      list.map((r) => r.pluginName),
+      ["high", "mid", "low"]
+    );
+  });
+
+  it("should run onRequest hooks in priority order", async () => {
+    const order = [];
+    hooks.registerHook(
+      "onRequest",
+      "first",
+      () => {
+        order.push("first");
+      },
+      1
+    );
+    hooks.registerHook(
+      "onRequest",
+      "second",
+      () => {
+        order.push("second");
+      },
+      2
+    );
+
+    const ctx = { requestId: "r1", body: {}, model: "test", metadata: {} };
+    await hooks.runOnRequest(ctx);
+    assert.deepEqual(order, ["first", "second"]);
+  });
+
+  it("should support request blocking via emitHookBlocking", async () => {
+    hooks.registerHook(
+      "onRequest",
+      "blocker",
+      () => ({
+        blocked: true,
+        response: { error: "denied" },
+      }),
+      1
+    );
+    hooks.registerHook(
+      "onRequest",
+      "never-runs",
+      () => {
+        throw new Error("should not run");
+      },
+      2
+    );
+
+    const ctx = { requestId: "r2", body: {}, model: "test", metadata: {} };
+    const result = await hooks.emitHookBlocking("onRequest", ctx);
+    assert.equal(result.blocked, true);
+    assert.deepEqual(result.response, { error: "denied" });
+  });
+
+  it("should unregister all hooks for a plugin", () => {
+    hooks.registerHook("onRequest", "removable", () => {});
+    hooks.registerHook("onResponse", "removable", () => {});
+    assert.equal(hooks.getHooks("onRequest").length, 1);
+    hooks.unregisterHooks("removable");
+    assert.equal(hooks.getHooks("onRequest").length, 0);
+    assert.equal(hooks.getHooks("onResponse").length, 0);
+  });
+
+  it("should run onResponse hooks", async () => {
+    hooks.registerHook("onResponse", "response-modifier", (payload) => ({
+      response: { ...payload.response, modified: true },
+    }));
+
+    const ctx = { requestId: "r3", body: {}, model: "test", metadata: {} };
+    const result = await hooks.runOnResponse(ctx, { data: "original" });
+    assert.equal(result.modified, true);
+    assert.equal(result.data, "original");
+  });
+
+  it("should fire onError hooks", async () => {
+    let caught = false;
+    hooks.registerHook("onError", "error-handler", () => {
+      caught = true;
+    });
+
+    const ctx = { requestId: "r4", body: {}, model: "test", metadata: {} };
+    await hooks.runOnError(ctx, new Error("test error"));
+    assert.equal(caught, true);
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 4. Prompt Template Versioning (L-6)
+// ═══════════════════════════════════════════════════
+
+describe("Prompt Template Versioning — prompts.ts module existence", () => {
+  it("prompts.ts should exist", () => {
+    const full = join(ROOT, "src", "lib", "db", "prompts.ts");
+    assert.ok(existsSync(full), "prompts.ts should exist");
+  });
+
+  it("should export CRUD functions", () => {
+    const src = readFileSync(join(ROOT, "src", "lib", "db", "prompts.ts"), "utf8");
+    assert.match(src, /export function savePrompt/);
+    assert.match(src, /export function getActivePrompt/);
+    assert.match(src, /export function getPromptVersion/);
+    assert.match(src, /export function listPromptVersions/);
+    assert.match(src, /export function listPrompts/);
+    assert.match(src, /export function rollbackPrompt/);
+    assert.match(src, /export function renderPrompt/);
+  });
+
+  it("should define PromptTemplate interface", () => {
+    const src = readFileSync(join(ROOT, "src", "lib", "db", "prompts.ts"), "utf8");
+    assert.match(src, /export interface PromptTemplate/);
+  });
+
+  it("should use content hashing for deduplication", () => {
+    const src = readFileSync(join(ROOT, "src", "lib", "db", "prompts.ts"), "utf8");
+    assert.match(src, /content_hash/);
+    assert.match(src, /sha256/);
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 5. Eval cleanup (Task 28)
+// ═══════════════════════════════════════════════════
+
+describe("Eval cleanup — orphaned scheduler module", () => {
+  it("scheduler.ts should remain deleted", () => {
+    const full = join(ROOT, "src", "lib", "evals", "scheduler.ts");
+    assert.equal(existsSync(full), false, "scheduler.ts should stay removed");
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 6. Migration Runner (E-5)
+// ═══════════════════════════════════════════════════
+
+describe("Migration System — files exist", () => {
+  it("migrationRunner.ts should exist", () => {
+    const full = join(ROOT, "src", "lib", "db", "migrationRunner.ts");
+    assert.ok(existsSync(full), "migrationRunner.ts should exist");
+  });
+
+  it("001_initial_schema.sql should exist", () => {
+    const full = join(ROOT, "src", "lib", "db", "migrations", "001_initial_schema.sql");
+    assert.ok(existsSync(full), "001_initial_schema.sql should exist");
+  });
+
+  it("core.ts should reference migration runner", () => {
+    const src = readSrc("lib/db/core.ts");
+    assert.ok(src);
+    assert.match(src, /runMigrations/);
+    assert.match(src, /_omniroute_migrations/);
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// 7. CORS Configuration (L-5)
+// ═══════════════════════════════════════════════════
+
+describe("CORS — centralized configuration", () => {
+  it("shared/utils/cors.ts should exist", () => {
+    const full = join(ROOT, "src", "shared", "utils", "cors.ts");
+    assert.ok(existsSync(full), "shared/utils/cors.ts should exist");
+  });
+
+  it("should export CORS_HEADERS without a wildcard origin", () => {
+    const src = readSrc("shared/utils/cors.ts");
+    assert.match(src, /CORS_HEADERS/);
+    // Extract the CORS_HEADERS object body (between { and }) to avoid matching JSDoc comments
+    const objMatch = src.match(/CORS_HEADERS\s*=\s*\{([^}]+)\}/);
+    assert.ok(objMatch, "CORS_HEADERS object should be found");
+    assert.doesNotMatch(objMatch[1], /Access-Control-Allow-Origin/);
+  });
+});

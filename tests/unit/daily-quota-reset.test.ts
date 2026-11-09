@@ -1,0 +1,94 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  calendarWeekWindowMs,
+  isValidIanaTimeZone,
+  isValidResetHour,
+  nodeDailyResetConfigured,
+  nextDailyResetAtMs,
+  parseTpdLimitFromText,
+} from "../../open-sse/services/dailyQuotaReset.ts";
+
+test("IANA: Asia/Shanghai ok, garbage rejected", () => {
+  assert.equal(isValidIanaTimeZone("Asia/Shanghai"), true);
+  assert.equal(isValidIanaTimeZone("America/New_York"), true);
+  assert.equal(isValidIanaTimeZone("Not/AZone"), false);
+  assert.equal(isValidIanaTimeZone(""), false);
+});
+
+test("isValidResetHour accepts 0-23 integers only", () => {
+  assert.equal(isValidResetHour(0), true);
+  assert.equal(isValidResetHour(23), true);
+  assert.equal(isValidResetHour(24), false);
+  assert.equal(isValidResetHour(-1), false);
+  assert.equal(isValidResetHour(1.5), false);
+  assert.equal(isValidResetHour(null), false);
+});
+
+test("nodeDailyResetConfigured requires both fields", () => {
+  assert.equal(nodeDailyResetConfigured("Asia/Shanghai", 0), true);
+  assert.equal(nodeDailyResetConfigured("Asia/Shanghai", null), false);
+  assert.equal(nodeDailyResetConfigured(null, 0), false);
+  assert.equal(nodeDailyResetConfigured("Not/AZone", 0), false);
+  assert.equal(nodeDailyResetConfigured("Asia/Shanghai", 24), false);
+});
+
+test("nextDailyResetAtMs locks to next local hour:00", () => {
+  // 2026-09-02 15:30 in Asia/Shanghai = 2026-09-02 07:30 UTC
+  const now = Date.parse("2026-09-02T07:30:00Z");
+  const next = nextDailyResetAtMs("Asia/Shanghai", 0, now);
+  // next calendar day 00:00 Shanghai = 2026-09-02 16:00 UTC
+  assert.equal(next, Date.parse("2026-09-02T16:00:00Z"));
+});
+
+test("nextDailyResetAtMs at exact reset instant returns the following cycle", () => {
+  const exactly = Date.parse("2026-09-02T16:00:00Z"); // 00:00 Shanghai
+  const next = nextDailyResetAtMs("Asia/Shanghai", 0, exactly);
+  assert.equal(next, Date.parse("2026-09-03T16:00:00Z"));
+});
+
+test("parseTpdLimitFromText reads limit: from live body", () => {
+  const body = "request reached organization TPD rate limit, current: 1537190, limit: 1500000";
+  assert.equal(parseTpdLimitFromText(body), 1_500_000);
+  assert.equal(parseTpdLimitFromText("no numbers"), null);
+});
+
+test("calendarWeekWindowMs: Monday 00:00 local, across the UTC day boundary", () => {
+  const iso = (w: { startMs: number; resetMs: number }) => [
+    new Date(w.startMs).toISOString(),
+    new Date(w.resetMs).toISOString(),
+  ];
+  // Sunday 23:59 in Shanghai is still the previous week.
+  assert.deepEqual(iso(calendarWeekWindowMs("Asia/Shanghai", Date.parse("2026-09-20T15:59:00Z"))), [
+    "2026-09-13T16:00:00.000Z",
+    "2026-09-20T16:00:00.000Z",
+  ]);
+  // Monday 00:00 in Shanghai (Sunday 16:00 UTC) starts the new week.
+  assert.deepEqual(iso(calendarWeekWindowMs("Asia/Shanghai", Date.parse("2026-09-20T16:00:00Z"))), [
+    "2026-09-20T16:00:00.000Z",
+    "2026-09-27T16:00:00.000Z",
+  ]);
+  // Same instant in UTC is still Sunday, so the week started a week earlier.
+  assert.deepEqual(iso(calendarWeekWindowMs("UTC", Date.parse("2026-09-20T16:00:00Z"))), [
+    "2026-09-14T00:00:00.000Z",
+    "2026-09-21T00:00:00.000Z",
+  ]);
+});
+
+test("calendarWeekWindowMs follows DST: the spring-forward week is 167 hours", () => {
+  // US DST starts Sunday 2026-03-08; Monday 03-02 is EST (-5), Monday 03-09 is EDT (-4).
+  const week = calendarWeekWindowMs("America/New_York", Date.parse("2026-03-06T12:00:00Z"));
+  assert.equal(new Date(week.startMs).toISOString(), "2026-03-02T05:00:00.000Z");
+  assert.equal(new Date(week.resetMs).toISOString(), "2026-03-09T04:00:00.000Z");
+  assert.equal((week.resetMs - week.startMs) / 3_600_000, 167);
+});
+
+test("calendarWeekWindowMs chooses the first occurrence of an ambiguous local midnight", () => {
+  // Antarctica/Vostok moved its offset at midnight on 2023-12-18. At this instant
+  // local time is already Monday 00:30, so the containing week must have started
+  // no later than the first Monday midnight occurrence.
+  const now = Date.parse("2023-12-17T17:30:00Z");
+  const week = calendarWeekWindowMs("Antarctica/Vostok", now);
+  assert.equal(new Date(week.startMs).toISOString(), "2023-12-17T17:00:00.000Z");
+  assert.ok(week.startMs <= now);
+});

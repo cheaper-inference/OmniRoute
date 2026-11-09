@@ -1,0 +1,440 @@
+# Contributing to OmniRoute (Norsk)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Thank you for your interest in contributing! This guide covers everything you need to get started.
+
+---
+
+## Utviklingsoppsett
+
+### Forutsetninger
+
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (anbefalt: 24 LTS)
+- **npm** 10+
+
+> **Windows med Node 24:** bruk den gjeldende 24 LTS-oppdateringen (minst 24.20.0).
+> Tidligere versjoner kan avslutte etter vellykkede tester når `--test-force-exit` lukker
+> prosessen. Node sin [Windows libuv-fiks](https://github.com/nodejs/node/pull/61999) løser
+> dette kjøretidskrasjet; behold testpåstandene og kontrollene av avslutning av testkjøreren aktivert.
+
+> **Brukere av npm v11+ (Node 24+):** Etter `npm install` må du kontrollere at native moduler ble installert:
+> `node -e "require('better-sqlite3')"`. Hvis dette mislykkes med `MODULE_NOT_FOUND`,
+> kjør `npm approve-scripts better-sqlite3 && npm install`. Se
+> [Feilsøking](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### Kloning og installasjon
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### Miljøvariabler
+
+```bash
+# Opprett .env fra malen
+cp .env.example .env
+
+# Generer nødvendige hemmeligheter
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+Viktige variabler for utvikling:
+
+| Variabel               | Standard for utvikling   | Beskrivelse                   |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Serverport                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Basis-URL for frontend        |
+| `JWT_SECRET`           | (generer ovenfor)        | Hemmelighet for JWT-signering |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Passord ved første pålogging  |
+| `APP_LOG_LEVEL`        | `info`                   | Detaljnivå for logger         |
+
+### Innstillinger for kontrollpanelet
+
+Kontrollpanelet tilbyr UI-brytere for funksjoner som også kan konfigureres via miljøvariabler:
+
+| Plassering i innstillinger | Bryter                   | Beskrivelse                                     |
+| -------------------------- | ------------------------ | ----------------------------------------------- |
+| Innstillinger → Avansert   | Feilsøkingsmodus         | Aktiver feilsøkingslogger for forespørsler (UI) |
+| Innstillinger → Generelt   | Synlighet for sidestolpe | Vis/skjul deler av sidestolpen                  |
+
+Disse innstillingene lagres i databasen og beholdes på tvers av omstarter. Når de er angitt,
+overstyrer de standardverdiene for miljøvariablene.
+
+### Kjøre lokalt
+
+```bash
+# Utviklingsmodus (automatisk omlasting)
+npm run dev
+
+# Produksjonsbygg
+npm run build    # next build → .build/next/ og deretter assembleStandalone → dist/
+npm run start
+
+# Rask backend-/API-kompilering for bidragsyterendringer
+npm run build:contributor
+
+# Bygg for utgivelse (ren ombygging + HEAD-markør — nødvendig for utrulling)
+npm run build:release   # rm -rf .build dist og bygg + skriver dist/BUILD_SHA
+
+# Vanlig portkonfigurasjon
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Bidragsyterbygget utfører validering som bare omfatter kompilering: Det setter ikke sammen
+den frittstående distribusjonen og bygger ikke valgfrie native pakkeressurser. Bruk det
+vanlige produksjonsbygget når du må validere pakken som skal distribueres.
+
+### Struktur for byggeutdata
+
+| Katalog   | Innhold                                                                              | Sporingsstatus |
+| --------- | ------------------------------------------------------------------------------------ | -------------- |
+| `src/`    | Kildekode for applikasjonen (TypeScript / TSX)                                       | Ja             |
+| `.build/` | Mellomliggende filer — utdata fra `next build` (gitignored, `distDir = .build/next`) | Nei            |
+| `dist/`   | Pakke klar for distribusjon — satt sammen av `assembleStandalone` (gitignored)       | Nei            |
+
+Byggeprosessen består av én gjennomgang:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierer standalone + static + public + native assets)
+       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` rydder i tillegg begge katalogene først og skriver
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetsmarkør for utrulling.
+
+`npm run build:contributor` bruker byggeprofilen som bare omfatter backend. Den erstatter
+midlertidig UI-filer for kontrollpanelet med stubber under byggingen, beholder
+API-rutebehandlerne og gjenoppretter originalfilene etter bygget. Bruk `npm run build`
+for endringer som påvirker UI-et i kontrollpanelet, eller for full validering av utgivelsen;
+bidragsyterprofilen er ikke en erstatning for bygget for utgivelse.
+
+> **Merknad om VPS-utrulling:** den eksterne bildeklatalogen `/usr/lib/node_modules/omniroute/app/`
+> er uendret. Utrullingsferdighetene rsync-er innholdet i `dist/` til den.
+> Bare utdatastien for bygging i repositoriet er flyttet (`app/` → `dist/`).
+
+Standard-URL-er:
+
+- **Kontrollpanel**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Git-arbeidsflyt
+
+> ⚠️ **Commit ALDRI direkte til `main`.** Bruk alltid funksjonsgrener.
+>
+> **PR-base:** Bruk den aktive `release/vX.Y.Z`-grenen som mål (ikke `main`). Se
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md) for modellen med
+> én gren per utgivelse + tagging ved lansering.
+
+```bash
+# Opprett en gren fra spissen av den aktive utgivelsesgrenen (eksempel: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... gjør endringer ...
+git commit -m "feat: beskriv endringen din"
+git push -u origin feat/your-feature-name
+# Åpne en pull-forespørsel med base = release/v3.8.49
+```
+
+### Navngivning av grener
+
+| Prefiks     | Formål                     |
+| ----------- | -------------------------- |
+| `feat/`     | Nye funksjoner             |
+| `fix/`      | Feilrettinger              |
+| `refactor/` | Omstrukturering av kode    |
+| `docs/`     | Dokumentasjonsendringer    |
+| `test/`     | Nye/rettede tester         |
+| `chore/`    | Verktøy, CI, avhengigheter |
+
+### Commit-meldinger
+
+Følg [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: legg til effektbryter for leverandørkall
+fix: løs kanttilfelle ved validering av JWT-hemmelighet
+docs: oppdater SECURITY.md med beskyttelse av PII
+test: legg til enhetstester for observerbarhet
+refactor(db): slå sammen tabeller for hastighetsbegrensning
+```
+
+Omfang (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## Kjøre tester
+
+```bash
+# Alle tester (enhet + vitest + økosystem + e2e)
+npm run test:all
+
+# Én enkelt testfil (Node.js sin innebygde testkjører — de fleste tester bruker denne)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# Bare enhetstestene som påvirkes av endringen din (samme TIA-velger som CI-kontrollen, #8084)
+npm run test:scoped            # endringer i siste commit (eller arbeidstreet)
+npm run test:scoped:staged     # bare klargjorte endringer — passer godt med en pre-commit-kjøring
+npm run test:scoped:full       # bygg kartet over importgrafen på nytt først (etter å ha lagt til/flyttet filer)
+# Exit 1 + «kjør hele testpakken» betyr at en sentral fil (tsconfig, package.json, …) eller en
+# ikke-kartlagt kilde ble endret — velgeren feiler sikkert og hopper aldri over noe uten varsel.
+
+# Vitest (MCP-server, autoCombo, hurtigbuffer)
+npm run test:vitest
+
+# E2E-tester (krever Playwright)
+npm run test:e2e
+
+# E2E for protokollklienter (MCP-transporter, A2A)
+npm run test:protocols:e2e
+
+# Kompatibilitetstester for økosystemet
+npm run test:ecosystem
+
+# Dekningskrav: 60 % setninger/linjer/funksjoner/grener
+npm run test:coverage
+npm run coverage:report
+
+# Kontroll av linting + formatering
+npm run lint
+npm run check
+
+# Kontrollert smoke-test av kombinasjoner mot reelle oppstrømstjenester (krever VPS-tilgang + kreditter hos reelle leverandører)
+# Kaller REELLE leverandører — koster litt. Kjører ALDRI i CI. Hoppes problemfritt over uten kontrollvariabelen.
+# Krever: tilgang med ssh root@192.168.0.15 (henter et skrivebeskyttet DB-øyeblikksbilde fra VPS-en).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Fase 3-smoke-test direkte mot VPS — vanlige Node ESM-skript som kaller den aktive .15-serveren direkte.
+# Krever: tilgang med ssh root@192.168.0.15 (kombinasjoner opprettes/fjernes via SSH sqlite).
+# Kaller REELLE leverandører (liten kostnad). Oppretter/sletter bare __live_test__*-kombinasjoner. Kjører ALDRI i CI.
+# REQUIRE_API_KEY=false på .15, så ingen API-nøkkel er nødvendig, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteres hvis de er angitt.
+npm run test:combo:live:vps              # 7 HTTP-scenarioer (priority/round-robin/weighted/cost/fusion/auto + helsesjekk)
+npm run test:combo:live:vps:failover     # legger til et reelt failover-scenario på tvers av leverandører (totalt 8)
+```
+
+Merknader om dekning:
+
+- `npm run test:coverage` måler kodedekningen for hovedpakken med enhetstester, utelater `tests/**` og inkluderer `open-sse/**`
+- Pull requests må holde dekningskravet på **60 %+** for setninger/linjer/funksjoner/grener
+- Hvis en PR endrer produksjonskode i `src/`, `open-sse/`, `electron/` eller `bin/`, må den legge til eller oppdatere automatiserte tester i samme PR
+- `npm run coverage:report` skriver ut den detaljerte rapporten fil for fil fra den siste dekningskjøringen
+- `npm run test:coverage:legacy` bevarer den eldre målemetoden for historisk sammenligning
+- Se `docs/ops/COVERAGE_PLAN.md` for den trinnvise planen for forbedring av kodedekningen
+
+### Krav til pull requests
+
+Før du åpner en PR, bruk
+[den anbefalte bidragsflyten](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) til å kjøre den fokuserte løkken for
+det du har endret. Hele enhetstestpakken (4 CI-deler), Vitest, dekningskravet på **60 %+** og
+produksjonsbygget er CI-systemets ansvar — lokal kjøring av disse gir ingen informasjon som PR-
+kontrollene ikke allerede vil gi deg, og på mindre maskiner kan det overbelaste verten (#8084):
+
+- Kjør testfilene som dekker endringen din: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Kjør `npm run lint`
+- Inkluder eller oppdater automatiserte tester i samme PR hver gang produksjonskoden endres
+- I `node:test`-filer må alle `await` på toppnivå (som `await import(...)`) plasseres før den første `test()` / `describe()`: med `--test-force-exit` kan tester som registreres etter dette, i stillhet aldri bli kjørt (#18045; håndheves av `npm run check:test-tla-order`)
+- Inkluder de endrede eller nye testfilene i PR-beskrivelsen når produksjonskoden er endret
+- Kontroller SonarQube-resultatet for PR-en når prosjektets hemmeligheter er konfigurert i CI
+
+Gjeldende teststatus: **122 enhetstestfiler** som dekker:
+
+- Leverandøroversettere og formatkonvertering
+- Hastighetsbegrensning, circuit breaker og robusthet
+- Semantisk hurtigbuffer, idempotens og fremdriftssporing
+- Databaseoperasjoner og skjema (21 DB-moduler)
+- OAuth-flyter og autentisering
+- Validering av API-endepunkter (Zod v4)
+- Verktøy for MCP-serveren og håndheving av scopes
+- Minne- og ferdighetssystemer
+
+---
+
+## Kodestil
+
+- **ESLint** — Kjør `npm run lint` før du committer
+- **Prettier** — Formateres automatisk via `lint-staged` ved commit (2 mellomrom, semikolon, doble anførselstegn, linjebredde på 100 tegn, avsluttende kommaer i es5-stil)
+- **TypeScript** — All kode i `src/` bruker `.ts`/`.tsx`; `open-sse/` bruker `.ts`/`.js`; dokumenter med TSDoc (`@param`, `@returns`, `@throws`)
+- **Ingen `eval()`** — ESLint håndhever `no-eval`, `no-implied-eval`, `no-new-func`
+- **Zod-validering** — Bruk Zod v4-skjemaer for all validering av API-inndata
+- **Navngivning**: Filer = camelCase/kebab-case, komponenter = PascalCase, konstanter = UPPER_SNAKE
+
+### Feilhåndtering / tomme catch-blokker
+
+La aldri en `catch` være uforklart. Klassifiser den i én av to kategorier (dette gjør
+den absolutte regelen «aldri ignorer feil i SSE-strømmer i stillhet» operativ):
+
+- **Tilsiktet (vår egen best-effort-opprydding/-telemetri)** — en feil her er forventet og
+  ufarlig; legg til en begrunnende kommentar på én linje, uten logging (logging for hver forespørsel er
+  støyen denne konvensjonen unngår).
+
+  ```ts
+  } catch {} // det er forventet at en allerede lukket kontroller lukkes etter at klienten kobler fra
+  ```
+
+- **Skal logges (ekstern kode / kode levert av kalleren, eller ignoreringen endrer kontrollflyten)** — behold
+  catch-blokken (la den aldri bryte strømmen), men skriv en kontekstuell melding med `console.debug`/`warn`, slik at
+  feilen kan oppdages.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] feil i onFailure-tilbakekall:", e);
+  }
+  ```
+
+Se `open-sse/utils/stream.ts` og `open-sse/utils/streamHandler.ts` for anvendte eksempler.
+
+---
+
+## Prosjektstruktur
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard-sider (23 seksjoner)
+│   ├── api/                # API-ruter (51 kataloger)
+│   └── login/              # Autentiseringssider (.tsx)
+├── domain/                 # Regelmotor (policyEngine, comboResolver, costRules osv.)
+├── lib/                    # Kjerneforretningslogikk (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3-protokollserver
+│   ├── acp/                # Agent Communication Protocol-register
+│   ├── compliance/         # Regelmotor for etterlevelse
+│   ├── db/                 # SQLite-domenemoduler + 130 migreringer
+│   ├── memory/             # Vedvarende samtaleminne
+│   ├── oauth/              # OAuth-leverandører, -tjenester og -verktøy
+│   ├── skills/             # Utvidbart ferdighetsrammeverk
+│   ├── usage/              # Brukssporing og kostnadsberegning
+│   └── localDb.ts          # Kun reeksportlag — legg aldri til logikk her
+├── middleware/              # Mellomvare for forespørsler (promptInjectionGuard)
+├── mitm/                   # MITM-proxy (sertifikat, DNS, målruting)
+├── shared/
+│   ├── components/         # React-komponenter (.tsx)
+│   ├── constants/          # Leverandørdefinisjoner (329), MCP-omfang, 20 rutingsstrategier
+│   ├── utils/              # Kretsbryter, rensing, autentiseringshjelpere
+│   └── validation/         # Zod v4-skjemaer
+└── sse/                    # SSE-proxypipeline
+
+open-sse/                   # @omniroute/open-sse-arbeidsområde
+├── executors/              # 150 eksekveringsmoduler (eksekveringsklasser + hjelpere per leverandør)
+├── handlers/               # 11 forespørselsbehandlere (chat, responses, embeddings, images osv.)
+├── mcp-server/             # MCP-server (110 unike verktøy, 3 transporter, 33 omfang)
+├── services/               # 178 tjenester på toppnivå (combo, autoCombo, rateLimitManager osv.)
+├── translator/             # Formatoversettere (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformer for Responses API
+└── utils/                  # 22 verktøymoduler (strømming, TLS, proxy, logging)
+
+electron/                   # Electron-skrivebordsapp (plattformuavhengig)
+
+tests/
+├── unit/                   # Node.js-testkjører (1 574 testfiler)
+├── integration/            # Integrasjonstester
+├── e2e/                    # Playwright-tester
+├── security/               # Sikkerhetstester
+├── translator/             # Oversetterspesifikke tester
+└── load/                   # Belastningstester
+
+docs/
+├── adr/                     # Logger over arkitekturbeslutninger
+├── architecture/            # Systemarkitektur og robusthet
+├── comparison/              # OmniRoute kontra alternativer
+├── compression/             # Veiledninger og regler for komprimering
+├── dev/                     # Utviklingsveiledninger
+├── diagrams/                # Arkitekturdiagrammer
+├── frameworks/              # MCP, A2A, OpenCode, minne, ferdigheter
+├── guides/                  # Brukerveiledning, Docker, oppsett, feilsøking
+├── i18n/                    # Internasjonaliserte README-oversettelser
+├── marketing/               # Markedsføringsmateriell
+├── ops/                     # Utrulling, proxy, dekning, utgivelser
+├── providers/               # Leverandørspesifikk dokumentasjon
+├── reference/               # API-referanse, miljøvariabler, CLI-verktøy, gratisnivåer
+├── releases/                # Versjonsmerknader
+├── routing/                 # Automatisk kombinasjonsmotor, avspilling av resonnering
+├── screenshots/             # Skjermbilder av dashboardet
+├── security/                # Sikkerhetsmekanismer, etterlevelse, stealth, tokener
+└── specs/                   # Designspesifikasjoner
+```
+
+---
+
+## Legge til en ny leverandør
+
+### Trinn 1: Registrer leverandørkonstanter
+
+Legg til i `src/shared/constants/providers.ts` — Zod-validert ved modulinnlasting.
+
+### Trinn 2: Legg til en eksekutor (hvis egendefinert logikk er nødvendig)
+
+Opprett en eksekutor i `open-sse/executors/your-provider.ts` som utvider basiseksekutoren.
+
+### Trinn 3: Legg til en oversetter (hvis formatet ikke er OpenAI)
+
+Opprett oversettere for forespørsler/svar i `open-sse/translator/`.
+
+### Trinn 4: Legg til OAuth-konfigurasjon (hvis OAuth-basert)
+
+Legg til OAuth-legitimasjon i `src/lib/oauth/constants/oauth.ts` og en tjeneste i `src/lib/oauth/services/`.
+
+Hvis oppstrømsleverandøren distribuerer en offentlig OAuth `client_id`/hemmelighet eller Firebase Web API-nøkkel i sin offentlige CLI-/nettleserpakke, skal den **ikke** bygges inn som en strengliteral. Bruk `resolvePublicCred()` fra `open-sse/utils/publicCreds.ts`, og legg til en maskert byteoppføring i `EMBEDDED_DEFAULTS`. Den fullstendige obligatoriske arbeidsflyten er dokumentert i [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md).
+
+I handlere/eksekutorer må feilmeldinger som når klienten, gå gjennom `buildErrorBody()` / `sanitizeErrorMessage()` fra `open-sse/utils/error.ts` — legg aldri rå `err.stack` eller `err.message` i en Response-kropp. Se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
+
+### Trinn 5: Registrer modeller
+
+Legg til modelldefinisjoner i `open-sse/config/providerRegistry.ts`.
+
+### Trinn 6: Legg til tester
+
+Skriv enhetstester i `tests/unit/` som minst dekker:
+
+- Registrering av leverandør
+- Oversettelse av forespørsler/svar
+- Feilhåndtering
+
+---
+
+## Sjekkliste for pull request
+
+- [ ] Tester består (`npm test`)
+- [ ] Linting består (`npm run lint`)
+- [ ] Bygging fullføres (`npm run build`)
+- [ ] TypeScript-typer er lagt til for nye offentlige funksjoner og grensesnitt
+- [ ] Ingen hardkodede hemmeligheter eller reserveverdier
+- [ ] Offentlig tilgjengelig påloggingsinformasjon for oppstrømstjenester bygges inn via `resolvePublicCred()` (se [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), aldri som litteraler
+- [ ] Feilsvar går gjennom `buildErrorBody()` / `sanitizeErrorMessage()` — ingen rå stakksporinger i svarinnhold (se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Skallkommandoer (`exec` / `spawn`) sender kjøretidsverdier via `env`, ikke via strenginterpolasjon
+- [ ] Alle inndata valideres med Zod-skjemaer
+- [ ] En **fragmentfil** for endringsloggen er lagt til under `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` for brukersynlige endringer (se [`changelog.d/README.md`](./changelog.d/README.md)) — rediger **ikke** `CHANGELOG.md` direkte; fragmentene samles ved utgivelse og skaper aldri konflikter mellom pull request-er
+- [ ] Dokumentasjonen er oppdatert (hvis aktuelt)
+- [ ] Ingen nye CodeQL-/Secret-Scanning-varsler er opprettet, eller hvert varsel er avvist med en teknisk begrunnelse som henviser til det relevante dokumentet under `docs/security/`
+- [ ] Ruter som starter underprosesser (`/api/mcp/`, `/api/cli-tools/runtime/`), er klassifisert som `isLocalOnlyPath()` i `src/server/authz/routeGuard.ts` — se [ufravikelig regel nr. 15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Ingen AI-/bot-`Co-authored-by`-trailere i commit-meldinger (ufravikelig regel nr. 16) — menneskelige samarbeidspartnere hvis arbeid gjenbrukes, krediteres med standardtrailere av typen `Co-authored-by: Name <email>`
+
+---
+
+## Publisering
+
+Publiseringer administreres via arbeidsflyten `/generate-release`. Når en ny GitHub-utgivelse opprettes, blir pakken **automatisk publisert til npm** via GitHub Actions.
+
+For distribusjon til VPS-er bruker du `npm run build:release` (ikke `npm run build`) — den utfører en ren
+ombygging, setter sammen pakken i `dist/` og skriver markørfilen `dist/BUILD_SHA`.
+Bruk deretter `/deploy-vps-*-cc`-ferdighetene, som synkroniserer `dist/` til den eksterne `app/`-katalogen med rsync.
+
+---
+
+## Få hjelp
+
+- **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API-referanse**: Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Sikkerhetsdokumentasjon**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Driftsdokumentasjon**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Problemer**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

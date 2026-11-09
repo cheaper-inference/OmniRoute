@@ -1,0 +1,312 @@
+import { isHttpLogError } from "@/shared/utils/upstreamHttp";
+import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { getCallLogs } from "@/lib/usageDb";
+import { getCompletedDetails, getPendingById } from "@/lib/usage/usageHistory";
+import { getProviderConnections } from "@/lib/db/providers";
+import { getProviderNodes } from "@/models";
+import { matchesSearch } from "@/shared/utils/turkishText";
+
+type CallLogListRowsInput = {
+  logs: any[];
+  connections: any[];
+  providerDisplayNames?: Map<string, string>;
+  pendingDetails: Iterable<any>;
+  completedDetails: Iterable<any>;
+  now?: number;
+};
+
+function rowTimestampMs(row: any): number {
+  const value = Date.parse(String(row?.timestamp || ""));
+  return Number.isFinite(value) ? value : 0;
+}
+
+function rowPriority(row: any): number {
+  if (row?.active) return 0;
+  if (row?.completed) return 1;
+  return 2;
+}
+
+/**
+ * Applies the active filter predicates to a single merged call-log row.
+ *
+ * `getCallLogs()` already filters the persisted DB rows server-side, but the
+ * in-memory entries (active/pending + recently-completed) are merged in by
+ * `buildCallLogListRows()` and would otherwise bypass every filter except
+ * `correlationId`. Running the same predicates over the merged rows closes that
+ * gap. It is idempotent for DB rows (they already satisfy the predicate) while
+ * correctly excluding in-memory rows that do not match.
+ *
+ * That idempotence is the contract, and it is only worth as much as the two
+ * predicates agree: a row the SQL WHERE accepted must survive this function, so
+ * every clause here has to be at least as wide as its counterpart in
+ * `buildCallLogFilterSql()` (src/lib/usage/callLogs.ts). Where it was narrower,
+ * the query returned the right rows and this pass deleted them again with nothing
+ * logged -- see the apiKey and combo clauses below.
+ */
+export function rowMatchesFilter(row: any, filter: Record<string, any>): boolean {
+  if (!filter) return true;
+
+  if (filter.status === "error") {
+    if (!isHttpLogError(row)) return false;
+  } else if (filter.status === "ok") {
+    if (!(Number(row?.status) >= 200 && Number(row?.status) < 300)) return false;
+  } else if (
+    typeof filter.status === "number" ||
+    (typeof filter.status === "string" && !isNaN(Number(filter.status)))
+  ) {
+    if (Number(row?.status) !== Number(filter.status)) return false;
+  }
+
+  if (
+    filter.model &&
+    !matchesSearch(row?.model || "", String(filter.model)) &&
+    !matchesSearch(row?.requestedModel || "", String(filter.model))
+  ) {
+    return false;
+  }
+  if (filter.provider && !matchesSearch(row?.provider || "", String(filter.provider))) {
+    return false;
+  }
+  if (filter.account && !matchesSearch(row?.account || "", String(filter.account))) {
+    return false;
+  }
+  if (
+    filter.apiKey &&
+    !matchesSearch(row?.apiKeyName || "", String(filter.apiKey)) &&
+    !matchesSearch(row?.apiKeyId || "", String(filter.apiKey))
+  ) {
+    return false;
+  }
+  if (filter.combo && row?.comboName == null) {
+    return false;
+  }
+  if (
+    filter.correlationId &&
+    !matchesSearch(row?.correlationId || "", String(filter.correlationId))
+  ) {
+    return false;
+  }
+  if (filter.search) {
+    const term = String(filter.search);
+    const haystack = [
+      row?.model,
+      row?.requestedModel,
+      row?.provider,
+      row?.providerDisplay,
+      row?.account,
+      row?.apiKeyName,
+      row?.apiKeyId,
+      row?.comboName,
+      row?.comboStepId,
+      row?.comboExecutionKey,
+      row?.correlationId,
+      row?.error,
+      row?.path,
+      row?.status == null ? null : String(row.status),
+    ]
+      .filter(Boolean)
+      .join(" ");
+    if (!matchesSearch(haystack, term)) return false;
+  }
+
+  return true;
+}
+
+export function buildCallLogListRows({
+  logs,
+  connections,
+  providerDisplayNames = new Map<string, string>(),
+  pendingDetails,
+  completedDetails,
+  now = Date.now(),
+}: CallLogListRowsInput): any[] {
+  const connectionNames = new Map(
+    connections.map((connection: any) => [
+      connection.id,
+      connection.displayName || connection.name || connection.email || connection.id,
+    ])
+  );
+  const getProviderDisplay = (providerId: unknown): string | null => {
+    if (typeof providerId !== "string" || providerId.length === 0) return null;
+    return providerDisplayNames.get(providerId) || null;
+  };
+
+  // Include active (in-flight) requests from the pending-by-id map
+  // so they appear in the logs grid alongside persisted entries.
+  const activeEntries: any[] = [];
+  const activePersistedIds = new Set<string>();
+  const persistedById = new Map(logs.map((log) => [log.id, log]));
+  const persistedIds = new Set(logs.map((log: any) => log.id).filter(Boolean));
+
+  for (const detail of pendingDetails) {
+    const persisted = persistedById.get(detail.persistedLogId);
+    if (persisted) activePersistedIds.add(persisted.id);
+    activeEntries.push({
+      id: detail.id,
+      timestamp: new Date(detail.startedAt).toISOString(),
+      method: "",
+      path: detail.clientEndpoint || "",
+      status: 0,
+      model: detail.model,
+      requestedModel: null,
+      provider: detail.provider,
+      providerDisplay: getProviderDisplay(detail.provider),
+      account: connectionNames.get(detail.connectionId || "") || detail.connectionId || "unknown",
+      connectionId: detail.connectionId,
+      duration: Math.max(0, now - detail.startedAt),
+      tokens: detail.tokens || { in: 0, out: 0 },
+      // In-memory details carry no added wait yet — null like "no wait".
+      addedWaitMs: null,
+      addedWaitCause: null,
+      cacheSource: null,
+      sourceFormat: null,
+      targetFormat: null,
+      apiKeyId: null,
+      apiKeyName: null,
+      comboName: null,
+      error: null,
+      correlationId: detail.correlationId || null,
+      active: true,
+      // Retain DB filter metadata while the exact attempt is still active.
+      ...(persisted
+        ? {
+            ...persisted,
+            id: detail.id,
+            timestamp: new Date(detail.startedAt).toISOString(),
+            duration: Math.max(0, now - detail.startedAt),
+            active: true,
+          }
+        : {}),
+      ...(detail.stale
+        ? {
+            stale: true,
+            sweptAt:
+              typeof detail.sweptAt === "number" ? new Date(detail.sweptAt).toISOString() : null,
+          }
+        : {}),
+    });
+  }
+
+  const pendingIds = new Set(activeEntries.map((entry) => entry.id));
+  const completedEntries: any[] = [];
+  for (const detail of completedDetails) {
+    if (
+      persistedIds.has(detail.persistedLogId) ||
+      // Only legacy previews can use their public ID as the durable row identity.
+      (!detail.attemptGeneration && persistedIds.has(detail.id)) ||
+      pendingIds.has(detail.id)
+    )
+      continue;
+    const completedAt = typeof detail.completedAt === "number" ? detail.completedAt : null;
+    const duration =
+      typeof detail.durationMs === "number" && Number.isFinite(detail.durationMs)
+        ? detail.durationMs
+        : Math.max(0, (completedAt ?? now) - detail.startedAt);
+    completedEntries.push({
+      id: detail.id,
+      timestamp: new Date(detail.startedAt).toISOString(),
+      method: "",
+      path: detail.clientEndpoint || "",
+      status: typeof detail.status === "number" ? detail.status : detail.error ? 502 : 200,
+      model: detail.model,
+      requestedModel: null,
+      provider: detail.provider,
+      providerDisplay: getProviderDisplay(detail.provider),
+      account: connectionNames.get(detail.connectionId || "") || detail.connectionId || "unknown",
+      connectionId: detail.connectionId,
+      duration,
+      tokens: detail.tokens || { in: 0, out: 0 },
+      // In-memory details carry no added wait yet — null like "no wait".
+      addedWaitMs: null,
+      addedWaitCause: null,
+      cacheSource: null,
+      sourceFormat: null,
+      targetFormat: null,
+      apiKeyId: null,
+      apiKeyName: null,
+      comboName: null,
+      error: detail.error || null,
+      correlationId: detail.correlationId || null,
+      active: false,
+      completed: true,
+      completedAt: completedAt ? new Date(completedAt).toISOString() : null,
+      detailState: "in-memory",
+    });
+  }
+
+  return [
+    ...activeEntries,
+    ...completedEntries,
+    ...logs.filter((log) => !activePersistedIds.has(log.id)),
+  ].sort((a, b) => {
+    // Active requests always on top
+    const pa = rowPriority(a);
+    const pb = rowPriority(b);
+    if (pa !== pb) return pa - pb;
+    // Within same priority, newest first
+    return rowTimestampMs(b) - rowTimestampMs(a);
+  });
+}
+
+export async function GET(request: Request) {
+  try {
+    const authError = await requireManagementAuth(request);
+    if (authError) return authError;
+
+    const { searchParams } = new URL(request.url);
+
+    const filter: Record<string, any> = {};
+    if (searchParams.get("status")) filter.status = searchParams.get("status");
+    if (searchParams.get("model")) filter.model = searchParams.get("model");
+    if (searchParams.get("provider")) filter.provider = searchParams.get("provider");
+    if (searchParams.get("account")) filter.account = searchParams.get("account");
+    if (searchParams.get("apiKey")) filter.apiKey = searchParams.get("apiKey");
+    if (searchParams.get("combo")) filter.combo = searchParams.get("combo");
+    if (searchParams.get("search")) filter.search = searchParams.get("search");
+    if (searchParams.get("correlationId")) filter.correlationId = searchParams.get("correlationId");
+    if (searchParams.get("limit")) filter.limit = parseInt(searchParams.get("limit"));
+    if (searchParams.get("offset")) filter.offset = parseInt(searchParams.get("offset"));
+    // Home Recent Requests feed sets excludeTests=1 so connection-test probe rows
+    // are dropped at the SQL layer (before LIMIT), not client-side after slicing.
+    if (searchParams.get("excludeTests") === "1") filter.excludeTests = true;
+
+    // This endpoint is polled every 2-10s by the logs dashboard. A full
+    // `getProviderConnections()` read wraps every row in a lazy-decrypt proxy
+    // over all columns; the rows are only used for connectionId → display
+    // name mapping, so request just those columns (projected reads skip the
+    // raw-row cache by design — see providers.ts getProviderConnections).
+    const [logs, connections, providerNodes] = await Promise.all([
+      getCallLogs(filter),
+      getProviderConnections({}, undefined, undefined, ["id", "name", "display_name", "email"]),
+      getProviderNodes(),
+    ]);
+    const providerDisplayNames = new Map<string, string>(
+      (Array.isArray(providerNodes) ? providerNodes : []).flatMap((node: any) => {
+        if (typeof node?.id !== "string" || node.id.length === 0) return [];
+        const label =
+          (typeof node?.name === "string" && node.name.trim().length > 0
+            ? node.name.trim()
+            : typeof node?.prefix === "string" && node.prefix.trim().length > 0
+              ? node.prefix.trim()
+              : "") || null;
+        return label ? [[node.id, label] as const] : [];
+      })
+    );
+
+    const rows = buildCallLogListRows({
+      logs: logs.filter((row) => rowMatchesFilter(row, filter)),
+      connections,
+      providerDisplayNames,
+      pendingDetails: getPendingById().values(),
+      completedDetails: getCompletedDetails().values(),
+    });
+
+    const filtered = rows.filter((r: any) => rowMatchesFilter(r, filter));
+    return NextResponse.json(filtered);
+  } catch (error) {
+    console.error("[API ERROR] /api/usage/call-logs failed:", error);
+    return NextResponse.json({ error: "Failed to fetch call logs" }, { status: 500 });
+  }
+}

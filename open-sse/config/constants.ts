@@ -1,0 +1,439 @@
+import {
+  getUpstreamTimeoutConfig,
+  readStreamActiveTimeoutOverrideMs,
+} from "@/shared/utils/runtimeTimeouts";
+import { resolvePublicCred } from "../utils/publicCreds.ts";
+import type { LegacyProvider } from "./providerRegistry.ts";
+import { loadProviderCredentials } from "./credentialLoader.ts";
+import { generateLegacyProviders } from "./providerRegistry.ts";
+
+const upstreamTimeouts = getUpstreamTimeoutConfig(process.env, (message) => {
+  console.warn(`[open-sse] ${message}`);
+});
+
+// Timeout for receiving the initial upstream response (ms).
+// After headers arrive, active SSE streams are governed by STREAM_IDLE_TIMEOUT_MS
+// and Undici's bodyTimeout instead of this one-shot startup timer.
+export const FETCH_TIMEOUT_MS = upstreamTimeouts.fetchTimeoutMs;
+
+// Idle timeout for SSE streams (ms). Before a stream is accepted, the same
+// budget is used to wait for the first useful event so HTTP 200 zombie streams
+// can fail fast and trigger fallback. After startup, it closes streams that go
+// idle for this duration. Override with STREAM_IDLE_TIMEOUT_MS env var.
+export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
+
+// Grace period (ms) a client-disconnect finalization waits for the stream's own
+// completion bookkeeping to land before persisting a 499. See #9653 — a client
+// that closes right after reading a fully-completed SSE stream can otherwise
+// race OmniRoute's own completion callback, resulting in a false 499 with zero
+// token usage for a request that actually delivered its full response. Set
+// STREAM_DISCONNECT_GRACE_PERIOD_MS=0 to disable and restore the old
+// immediate-fail behavior.
+export const STREAM_DISCONNECT_GRACE_PERIOD_MS = upstreamTimeouts.streamDisconnectGracePeriodMs;
+
+// Hard cap for a connected upstream stream. This timer never resets on
+// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Left unset,
+// a target that declares a longer budget raises its own cap above the default
+// (resolveStreamActiveTimeoutMs). A positive STREAM_ACTIVE_TIMEOUT_MS is a hard
+// cap for every target; 0 disables it.
+export const STREAM_ACTIVE_TIMEOUT_MS = upstreamTimeouts.streamActiveTimeoutMs;
+// The operator's own value, or undefined when unset (see readStreamActiveTimeoutOverrideMs).
+export const STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS = readStreamActiveTimeoutOverrideMs(process.env);
+// Re-exported so the engine reads them through this module instead of importing src.
+export {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
+} from "@/shared/utils/runtimeTimeouts";
+
+// Timeout for the first non-ping SSE event. Inherits REQUEST_TIMEOUT_MS when
+// set, unless STREAM_READINESS_TIMEOUT_MS is specified directly. This must stay
+// conservative for large prompts and slow first-byte reasoning providers.
+export const STREAM_READINESS_TIMEOUT_MS = upstreamTimeouts.streamReadinessTimeoutMs;
+
+// Upper bound for adaptive stream readiness extensions (large histories,
+// tool-heavy requests, high-reasoning Codex targets). Override with
+// STREAM_READINESS_MAX_TIMEOUT_MS when an operator needs longer first-event
+// windows for slow-thinking agent workloads.
+export const STREAM_READINESS_MAX_TIMEOUT_MS = upstreamTimeouts.streamReadinessMaxTimeoutMs;
+
+// Error code used when an upstream Antigravity request stalls before response
+// headers are returned. Keep it shared so executor, core normalization and
+// account fallback detection cannot drift.
+export const ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE = "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT";
+
+// Heartbeat interval for synthetic SSE keepalive emission toward the downstream
+// client (Capy, Claude Code, OpenAI SDK, etc). Keeps strict proxies from
+// dropping the connection during long upstream thinking phases. Set to 0 to
+// disable. Override with SSE_HEARTBEAT_INTERVAL_MS env var.
+export const SSE_HEARTBEAT_INTERVAL_MS = upstreamTimeouts.sseHeartbeatIntervalMs;
+
+// Timeout for reading the full response body after headers arrive (ms).
+// Prevents indefinite hangs when the upstream sends headers but stalls on the body.
+// Defaults to FETCH_TIMEOUT_MS. Override with FETCH_BODY_TIMEOUT_MS env var.
+export const FETCH_BODY_TIMEOUT_MS = upstreamTimeouts.fetchBodyTimeoutMs;
+
+// Hard byte cap on the HuggingChat NDJSON body accumulated by
+// open-sse/executors/huggingchat/jsonlStream.ts. Prevents a stalled/hostile upstream that
+// never emits a terminal `finalAnswer` / `status: finished` marker from buffering
+// indefinitely (#12577). Sized generously for legitimate long completions while staying
+// well below a heap-exhausting size — mirrors the readCappedBuffer/readBodyCapped pattern
+// already used by veoaifree-web.ts and context7-fetch.ts.
+export const HUGGINGCHAT_MAX_BODY_BYTES = 4 * 1024 * 1024;
+
+// Provider configurations
+// OAuth credentials read from env vars with hardcoded fallbacks for backward compatibility.
+// Use provider-credentials.json or env vars to override in production.
+// Lazy PROVIDERS: deferred until first property access to speed up startup.
+// The Proxy defers `generateLegacyProviders()` + `loadProviderCredentials()`
+// from module-evaluation time to the first read of any provider property.
+let _providers: Record<string, LegacyProvider> | null = null;
+function initProviders(): Record<string, LegacyProvider> {
+  if (!_providers) {
+    const p = generateLegacyProviders();
+    loadProviderCredentials(p);
+    _providers = p;
+  }
+  return _providers;
+}
+
+export const PROVIDERS: Record<string, LegacyProvider> = new Proxy(
+  {} as Record<string, LegacyProvider>,
+  {
+    get(_, prop) {
+      if (typeof prop === "symbol") return undefined;
+      return Reflect.get(initProviders(), prop, _providers);
+    },
+    has(_, prop) {
+      if (typeof prop === "symbol") return false;
+      return Reflect.has(initProviders(), prop);
+    },
+    ownKeys() {
+      return Reflect.ownKeys(initProviders());
+    },
+    getOwnPropertyDescriptor(_, prop) {
+      if (typeof prop === "symbol") return undefined;
+      return Object.getOwnPropertyDescriptor(initProviders(), prop);
+    },
+    set(_, prop, value) {
+      if (typeof prop === "symbol") return false;
+      (initProviders() as Record<string, LegacyProvider>)[prop] = value;
+      return true;
+    },
+    deleteProperty(_, prop) {
+      if (typeof prop === "symbol") return false;
+      return Reflect.deleteProperty(initProviders(), prop);
+    },
+  }
+);
+
+// Claude system prompt
+export const CLAUDE_SYSTEM_PROMPT = "You are Claude Code, Anthropic's official CLI for Claude.";
+
+// Antigravity default system prompt (required for API to work)
+export const ANTIGRAVITY_DEFAULT_SYSTEM =
+  "You are Antigravity, a powerful agentic AI coding assistant designed by the Google Deepmind team working on Advanced Agentic Coding.\n" +
+  "You are pair programming with a USER to solve their coding task. The task may require creating a new codebase, modifying or debugging an existing codebase, or simply answering a question.\n" +
+  "**Absolute paths only**\n" +
+  "**Proactiveness**";
+
+// OAuth endpoints
+export const OAUTH_ENDPOINTS = {
+  google: {
+    token: "https://oauth2.googleapis.com/token",
+    auth: "https://accounts.google.com/o/oauth2/auth",
+  },
+  openai: {
+    token: "https://auth.openai.com/oauth/token",
+    auth: "https://auth.openai.com/oauth/authorize",
+  },
+  anthropic: {
+    token: "https://api.anthropic.com/v1/oauth/token",
+    auth: "https://api.anthropic.com/v1/oauth/authorize",
+  },
+  qoder: {
+    token: process.env.QODER_OAUTH_TOKEN_URL || "",
+    auth: process.env.QODER_OAUTH_AUTHORIZE_URL || "",
+  },
+  github: {
+    token: "https://github.com/login/oauth/access_token",
+    auth: "https://github.com/login/oauth/authorize",
+    deviceCode: "https://github.com/login/device/code",
+  },
+  openference: {
+    token: "https://openference.com/oauth/token",
+    auth: "https://openference.com/app/oauth/authorize",
+    clientId: resolvePublicCred("openference_id"),
+  },
+};
+
+// Cache TTLs (seconds)
+export const CACHE_TTL = {
+  userInfo: 300, // 5 minutes
+  modelAlias: 3600, // 1 hour
+};
+
+// Default max tokens
+export const DEFAULT_MAX_TOKENS = 64000;
+
+// Minimum max tokens for tool calling (to prevent truncated arguments)
+export const DEFAULT_MIN_TOKENS = 32000;
+
+export const PROVIDER_MAX_TOKENS: Record<string, number> = {
+  groq: 16384, // Groq strict per-model enforcement
+  openai: 16384, // GPT-4/4o standard
+  anthropic: 65536, // Claude models
+  gemini: 65536, // Gemini Studio
+  sensenova: 65536, // SenseNova Token Plan rejects MaxTokens outside [1, 65536]
+};
+
+export const DEFAULT_PROVIDER_MAX_TOKENS = 32000;
+
+// HTTP status codes
+export const HTTP_STATUS = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  PAYMENT_REQUIRED: 402,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  NOT_ACCEPTABLE: 406,
+  UNPROCESSABLE_ENTITY: 422,
+  REQUEST_TIMEOUT: 408,
+  GONE: 410,
+  PAYLOAD_TOO_LARGE: 413,
+  RATE_LIMITED: 429,
+  PLAN_LIMIT_EXCEEDED: 432,
+  SERVER_ERROR: 500,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+};
+
+/**
+ * #10360 — stable error code for an INTERNAL violation of the executor
+ * `execute()` result contract (`normalizeExecutorResult` received something
+ * that is neither a Response nor `{ response: Response }`).
+ *
+ * This is our own bug, never a provider/account health signal, so every
+ * resilience layer must treat it as request-scoped and terminal: no connection
+ * cooldown, no provider circuit-breaker trip, no retry. It rides on the error's
+ * `.code` (read by `getUpstreamErrorIdentifier`) and therefore reaches
+ * `checkFallbackError` as `structuredError.code` and the chat/combo predicates
+ * as `result.errorCode`.
+ *
+ * Lives here (leaf config module) so both `open-sse/handlers/` and
+ * `open-sse/services/` can import it without creating a cycle.
+ */
+export const EXECUTOR_CONTRACT_VIOLATION_CODE = "executor_contract_violation";
+
+/**
+ * #18019: a local executor refusing to start because its operator configuration is
+ * missing or unsafe (the Devin agentic bridge with DEVIN_AGENTIC_HOME unset or outside
+ * the sandbox). Decided before any spawn and identical on every retry until the operator
+ * fixes the env and restarts, so it must not cool the shared no-auth connection, trip the
+ * provider breaker, or be replayed on the same account; a combo just moves on.
+ */
+export const DEVIN_BRIDGE_NOT_CONFIGURED_CODE = "devin_bridge_not_configured";
+export const UNSAFE_DEVIN_HOME_CODE = "unsafe_devin_home";
+export const LOCAL_CONFIGURATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  DEVIN_BRIDGE_NOT_CONFIGURED_CODE,
+  UNSAFE_DEVIN_HOME_CODE,
+]);
+
+export {
+  BACKOFF_CONFIG,
+  COOLDOWN_MS,
+  DEFAULT_ERROR_MESSAGES,
+  ERROR_RULES,
+  ERROR_TYPES,
+  TRANSIENT_COOLDOWN_MS,
+  calculateBackoffCooldown,
+  findMatchingErrorRule,
+  getDefaultErrorMessage,
+  getErrorInfo,
+  matchErrorRuleByStatus,
+  matchErrorRuleByText,
+} from "./errorConfig.ts";
+
+// Configurable backoff steps for rate limits (Phase 1 — enhanced rate limiting)
+// Used for per-model lockouts with increasing severity
+export const BACKOFF_STEPS_MS = [60_000, 120_000, 300_000, 600_000, 1_200_000];
+// 1min → 2min → 5min → 10min → 20min
+
+// Structured error classification for rate limiting decisions
+export const RateLimitReason = {
+  QUOTA_EXHAUSTED: "quota_exhausted", // Daily/monthly quota depleted
+  RATE_LIMIT_EXCEEDED: "rate_limit_exceeded", // RPM/RPD limits hit
+  MODEL_CAPACITY: "model_capacity", // Model overloaded (529, 503)
+  SERVER_ERROR: "server_error", // 5xx errors
+  AUTH_ERROR: "auth_error", // 401, 403
+  UNKNOWN: "unknown",
+};
+
+// ─── Provider Resilience Profiles ───────────────────────────────────────────
+// Separate behavior for OAuth (low-limit, session-based) vs API Key (high-limit, metered)
+// Circuit-breaker thresholds and reset windows are overridable via
+// OMNIROUTE_CIRCUIT_BREAKER_* env vars so operators can dampen or harden
+// behavior without recompiling.
+function envInt(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === null || raw === "") return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+export const PROVIDER_PROFILES = {
+  oauth: {
+    transientCooldown: 5000, // 5s (session tokens — short recovery)
+    rateLimitCooldown: 60000, // 60s default when no retry-after header
+    maxBackoffLevel: 8, // Higher ceiling (sessions may stay bad longer)
+    circuitBreakerThreshold: envInt("OMNIROUTE_CIRCUIT_BREAKER_OAUTH_THRESHOLD", 8),
+    circuitBreakerReset: envInt("OMNIROUTE_CIRCUIT_BREAKER_OAUTH_RESET_MS", 60000),
+    // Provider-level circuit breaker (entire provider cooldown after repeated failures)
+    providerFailureThreshold: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_FAILURE_THRESHOLD", 10), // Scaled for 500+ connections (was 3)
+    providerFailureWindowMs: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_FAILURE_WINDOW_MS", 900000), // 15min window (was 10min)
+    providerCooldownMs: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_COOLDOWN_MS", 300000), // 5min cooldown when threshold reached
+    // Adaptive circuit breaker v2 settings
+    degradationThreshold: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_DEGRADATION_THRESHOLD", 5), // Enter DEGRADED at this many failures
+    maxBackoffMultiplier: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_MAX_BACKOFF_MULTIPLIER", 8), // Max 8x resetTimeout escalation
+    backoffEscalationCount: envInt("OMNIROUTE_PROVIDER_BREAKER_OAUTH_BACKOFF_ESCALATION_COUNT", 2), // Escalate after 2 open cycles
+  },
+  apikey: {
+    transientCooldown: 3000, // 3s (API providers recover faster)
+    rateLimitCooldown: 0, // 0 = respect retry-after header from provider
+    maxBackoffLevel: 5, // Lower ceiling (API quotas reset at known intervals)
+    circuitBreakerThreshold: envInt("OMNIROUTE_CIRCUIT_BREAKER_API_KEY_THRESHOLD", 12),
+    circuitBreakerReset: envInt("OMNIROUTE_CIRCUIT_BREAKER_API_KEY_RESET_MS", 30000),
+    // Provider-level circuit breaker (entire provider cooldown after repeated failures)
+    providerFailureThreshold: envInt("OMNIROUTE_PROVIDER_BREAKER_API_KEY_FAILURE_THRESHOLD", 15), // Scaled for 500+ connections (was 5)
+    providerFailureWindowMs: envInt(
+      "OMNIROUTE_PROVIDER_BREAKER_API_KEY_FAILURE_WINDOW_MS",
+      1800000
+    ), // 30min window (was 20min)
+    providerCooldownMs: envInt("OMNIROUTE_PROVIDER_BREAKER_API_KEY_COOLDOWN_MS", 600000), // 10min cooldown when threshold reached
+    degradationThreshold: envInt("OMNIROUTE_PROVIDER_BREAKER_API_KEY_DEGRADATION_THRESHOLD", 7),
+    maxBackoffMultiplier: envInt("OMNIROUTE_PROVIDER_BREAKER_API_KEY_MAX_BACKOFF_MULTIPLIER", 4),
+    backoffEscalationCount: envInt(
+      "OMNIROUTE_PROVIDER_BREAKER_API_KEY_BACKOFF_ESCALATION_COUNT",
+      3
+    ),
+  },
+  // Local providers (localhost inference backends like Ollama, LM Studio, oMLX).
+  // Not yet wired into getProviderProfile() — will be used when local provider_nodes
+  // are integrated into the resilience layer. Kept here to avoid a second constants change.
+  local: {
+    transientCooldown: 2000, // 2s (local — very fast recovery)
+    rateLimitCooldown: 5000, // 5s (local — no real rate limits)
+    maxBackoffLevel: 3, // Low ceiling (local either works or doesn't)
+    circuitBreakerThreshold: envInt("OMNIROUTE_CIRCUIT_BREAKER_LOCAL_THRESHOLD", 2),
+    circuitBreakerReset: envInt("OMNIROUTE_CIRCUIT_BREAKER_LOCAL_RESET_MS", 15000),
+    // Provider-level circuit breaker (entire provider cooldown after repeated failures)
+    providerFailureThreshold: envInt("OMNIROUTE_PROVIDER_BREAKER_LOCAL_FAILURE_THRESHOLD", 2), // 2 failures trigger provider cooldown
+    providerFailureWindowMs: envInt("OMNIROUTE_PROVIDER_BREAKER_LOCAL_FAILURE_WINDOW_MS", 300000), // 5min window for counting failures
+    providerCooldownMs: envInt("OMNIROUTE_PROVIDER_BREAKER_LOCAL_COOLDOWN_MS", 60000), // 1min cooldown when threshold reached
+  },
+};
+
+// Default rate limit values for API Key providers (auto-enabled safety net)
+// These are intentionally HIGH — they won't restrict normal usage.
+// Real limits are learned from provider response headers.
+export const DEFAULT_API_LIMITS = {
+  requestsPerMinute: 60, // 60 RPM (reduced from 100 — saves Bottleneck queue memory)
+  minTimeBetweenRequests: 350, // 350ms minimum gap (increased from 200)
+  concurrentRequests: 6, // Max 6 parallel per provider (reduced from 10)
+};
+
+// Skip patterns - requests containing these texts will bypass provider
+export const SKIP_PATTERNS = ["Please write a 5-10 word title for the following conversation:"];
+
+// Default maximum number of tools allowed in a request (OpenAI default).
+// Override with OMNIROUTE_MAX_TOOLS_LIMIT (positive integers only); any other
+// value (zero, negative, fractional, non-numeric) falls back to 128.
+const maxToolsLimitOverride = envInt("OMNIROUTE_MAX_TOOLS_LIMIT", 128);
+export const MAX_TOOLS_LIMIT =
+  Number.isInteger(maxToolsLimitOverride) && maxToolsLimitOverride > 0
+    ? maxToolsLimitOverride
+    : 128;
+
+// ── Credential Health Check ────────────────────────────────────────
+
+/**
+ * Interval (ms) for the background credential health check scheduler.
+ * Default: 3600000 (60 minutes). Minimum: 10000 (10 seconds).
+ */
+export const CREDENTIAL_HEALTH_CHECK_INTERVAL = (() => {
+  const raw = process.env.CREDENTIAL_HEALTH_CHECK_INTERVAL;
+  if (raw) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed >= 10_000) return parsed;
+  }
+  return 3_600_000;
+})();
+
+/**
+ * TTL (ms) for cached credential health status.
+ * After this time, the cache entry expires and the next request will
+ * re-check. Default: 300000 (5 minutes).
+ */
+export const CREDENTIAL_HEALTH_CACHE_TTL = (() => {
+  const raw = process.env.CREDENTIAL_HEALTH_CACHE_TTL;
+  if (raw) {
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed >= 10_000) return parsed;
+  }
+  return 300_000;
+})();
+
+/**
+ * Stream-recovery tuning (opt-in, see ResilienceSettings.streamRecovery).
+ *
+ * Ported from free-claude-code's always-on recovery (`core/anthropic/stream_recovery.py`).
+ * In OmniRoute the holdback is disabled by default because buffering the opening
+ * window adds up to HOLDBACK_MS of time-to-first-token latency on every stream;
+ * operators opt in via STREAM_RECOVERY_ENABLED / the resilience settings.
+ *
+ * - HOLDBACK_MS: how long the opening SSE window is held so an early truncation
+ *   can be retried transparently before any byte reaches the client.
+ * - BUFFER_MAX_BYTES: hard cap on the held window — commit (flush + passthrough)
+ *   as soon as this many bytes accumulate, regardless of the timer.
+ * - EARLY_RETRY_MAX: max transparent re-opens of the upstream stream while the
+ *   holdback is still uncommitted (free-claude-code uses 5 total attempts = 4 retries).
+ * - EMPTY_TURN_RETRY_MAX: max bounded retries of a translated stream turn that ends
+ *   with no usable content (same family: bounded retries of a failing stream
+ *   before anything is exposed to the client).
+ */
+export const STREAM_RECOVERY = {
+  HOLDBACK_MS: 750,
+  BUFFER_MAX_BYTES: 65536,
+  EARLY_RETRY_MAX: 4,
+  EMPTY_TURN_RETRY_MAX: 4,
+  /**
+   * Minimum character overlap `trimContinuationOverlap` must find between the
+   * already-emitted text and a mid-stream continuation for the continuation to be
+   * accepted as a real resume, rather than an unrelated restart the model produced after
+   * ignoring the assistant-prefill.
+   *
+   * This is a DOCUMENTED TRADE-OFF, not a solved distinction: a model that continues
+   * cleanly with fewer than this many echoed characters (a legitimate, even preferred,
+   * outcome — there was nothing to de-duplicate) is indistinguishable, from string data
+   * alone, from a model that silently restarted on an unrelated sentence. Both produce a
+   * low/zero overlap. Rejecting below this threshold trades some false-positive rejections
+   * of legitimate low-overlap continuations (bounded retry, then a clean close — no data
+   * loss beyond that retry) against not silently gluing two unrelated fragments into one
+   * corrupted, unrecoverable answer. It does not eliminate the residual false negative
+   * either (an accidental coincidence at or above this many characters is still accepted).
+   */
+  MIN_CONTINUATION_OVERLAP_CHARS: 8,
+} as const;
+
+/**
+ * Active-stream quality watchdog defaults (#9709). This is separate from the
+ * idle timeout (no chunks) and the absolute upstream-attempt deadline: it only
+ * evaluates useful assistant output after warm-up plus one complete window.
+ */
+export const STREAM_THROUGHPUT_WATCHDOG = {
+  WARMUP_MS: 30_000,
+  WINDOW_MS: 30_000,
+  MIN_USEFUL_BYTES_PER_SECOND: 4,
+  MIN_USEFUL_BYTES: 1,
+} as const;

@@ -1,0 +1,761 @@
+/**
+ * Settings-specific Zod schemas.
+ *
+ * Extracted from schemas.ts to work around the webpack barrel-file
+ * optimization bug that makes large schema barrel exports `undefined`
+ * at runtime (see: https://github.com/vercel/next.js/issues/12557).
+ */
+import { z } from "zod";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
+import { CONNECTION_TEST_PROMPT_MAX_LENGTH } from "@/shared/constants/connectionTest";
+import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
+import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
+import {
+  PROXY_BULK_IMPORT_LIMIT_MAX,
+  PROXY_BULK_IMPORT_LIMIT_MIN,
+} from "@/shared/constants/proxyBulkImport";
+import { HIDEABLE_SIDEBAR_GROUP_IDS } from "@/shared/constants/sidebarGroupVisibility";
+import { HIDEABLE_SIDEBAR_ITEM_IDS, SIDEBAR_SECTIONS } from "@/shared/constants/sidebarVisibility";
+import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
+import { RESPONSES_PREVIOUS_RESPONSE_ID_MODES } from "@/shared/constants/responsesPreviousResponseId";
+import {
+  VIDEO_BRIDGE_TIMEOUT_MAX_MS,
+  VIDEO_BRIDGE_TIMEOUT_MIN_MS,
+} from "@/shared/constants/modalityBridgeDefaults";
+// Import from the server-free constants leaf, NOT from `@/server/authz/routeGuard`:
+// this schema is reachable from client components (dashboard onboarding wizard), and
+// routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import { isHttpUrl } from "@/shared/validation/schemas/misc";
+
+const signatureCacheModeValues = ["enabled", "bypass", "bypass-strict"] as const;
+
+// Legacy account "weighted" always ran fill-first; accept old settings without offering it.
+const accountFallbackStrategySchema = z
+  .enum([...ACCOUNT_FALLBACK_STRATEGY_VALUES, "weighted"])
+  .transform((value) => (value === "weighted" ? "fill-first" : value));
+
+const transformDropParagraphIfContainsSchema = z.object({
+  kind: z.literal("drop_paragraph_if_contains"),
+  needles: z.array(z.string().max(500)).max(50),
+  caseSensitive: z.boolean().optional(),
+});
+
+const transformDropParagraphIfStartsWithSchema = z.object({
+  kind: z.literal("drop_paragraph_if_starts_with"),
+  prefixes: z.array(z.string().max(500)).max(50),
+  caseSensitive: z.boolean().optional(),
+});
+
+const transformReplaceTextSchema = z.object({
+  kind: z.literal("replace_text"),
+  match: z.string().min(1).max(500),
+  replacement: z.string().max(500),
+  allOccurrences: z.boolean().optional(),
+});
+
+const transformReplaceRegexSchema = z.object({
+  kind: z.literal("replace_regex"),
+  pattern: z.string().min(1).max(500),
+  flags: z.string().max(10).optional(),
+  replacement: z.string().max(500),
+});
+
+const transformDropBlockIfContainsSchema = z.object({
+  kind: z.literal("drop_block_if_contains"),
+  needles: z.array(z.string().max(500)).max(50),
+});
+
+const transformPrependSystemBlockSchema = z.object({
+  kind: z.literal("prepend_system_block"),
+  text: z.string().min(1).max(2000),
+  idempotencyKey: z.string().max(100).optional(),
+});
+
+const transformAppendSystemBlockSchema = z.object({
+  kind: z.literal("append_system_block"),
+  text: z.string().min(1).max(2000),
+  idempotencyKey: z.string().max(100).optional(),
+});
+
+const transformInjectBillingHeaderSchema = z.object({
+  kind: z.literal("inject_billing_header"),
+  entrypoint: z.string().min(1).max(50),
+  versionFormat: z.enum(["ex-machina", "omniroute-daystamp"]),
+  cchAlgo: z.enum(["sha256-first-user", "xxhash64-body", "static-zero"]),
+  version: z.string().max(50).optional(),
+  buildRevision: z.string().min(1).max(20).optional(),
+});
+
+const commonSystemTransformOperationSchemas = [
+  transformDropParagraphIfContainsSchema,
+  transformDropParagraphIfStartsWithSchema,
+  transformReplaceTextSchema,
+  transformReplaceRegexSchema,
+  transformDropBlockIfContainsSchema,
+  transformPrependSystemBlockSchema,
+  transformAppendSystemBlockSchema,
+  transformInjectBillingHeaderSchema,
+] as const;
+
+const transformObfuscateWordsSchema = z.object({
+  kind: z.literal("obfuscate_words"),
+  words: z.array(z.string().max(100)).max(200),
+  targets: z
+    .array(z.enum(["system", "messages", "tools"]))
+    .max(3)
+    .optional(),
+});
+
+/** Operator error rules accept a custom cooldown of up to 30 days. */
+const OPERATOR_ERROR_MAX_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const operatorErrorScopeSchema = z.enum(["model", "provider", "connection"]);
+const operatorErrorReasonSchema = z.enum([
+  "auth_error",
+  "quota_exhausted",
+  "rate_limit_exceeded",
+  "model_capacity",
+  "server_error",
+  "unknown",
+]);
+
+export const updateSettingsSchema = z.object({
+  connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
+  /** #13917: per-request proxy bulk-import ceiling; resolved by resolveProxyBulkImportLimit. */
+  proxyBulkImportLimit: z
+    .number()
+    .int()
+    .min(PROXY_BULK_IMPORT_LIMIT_MIN)
+    .max(PROXY_BULK_IMPORT_LIMIT_MAX)
+    .optional(),
+  /** #7784: opt-in optimistic concurrency — must match GET settingsRevision / ETag. */
+  expectedRevision: z.number().int().nonnegative().optional(),
+  newPassword: z.string().min(1).max(200).optional(),
+  currentPassword: z.string().max(200).optional(),
+  credentialRedactionEnabled: z.boolean().optional(),
+  theme: z.string().max(50).optional(),
+  language: z.string().max(10).optional(),
+  requireLogin: z.boolean().optional(),
+  oidcEnabled: z.boolean().optional(),
+  oidcDisablePasswordLogin: z.boolean().optional(),
+  oidcIssuer: z.string().max(500).optional(),
+  oidcClientId: z.string().max(200).optional(),
+  oidcClientSecret: z.string().max(500).optional(),
+  oidcScopes: z.array(z.string().max(100)).optional(),
+  oidcRedirectPath: z.string().max(500).optional(),
+  oidcAllowedSubjects: z.array(z.string().max(200)).optional(),
+  oidcAdmissionClaim: oidcAdmissionClaimSchema.nullable().optional(),
+  // Entra ID SSO for /v1/*. Separate from the oidc* block above: that gates the
+  // dashboard with an id_token audienced to the client_id, this gates the API
+  // with an access token audienced to a custom scope. See docs/security/ENTRA_SSO.md.
+  entraSsoEnabled: z.boolean().optional(),
+  /** Authority origin. Defaults to the commercial cloud; sovereign clouds differ. */
+  entraAuthorityHost: z.string().max(300).optional(),
+  entraTenantId: z.string().max(100).optional(),
+  entraClientId: z.string().max(200).optional(),
+  entraApiAudience: z.string().max(300).optional(),
+  /** Entra security-group objectId → OmniRoute key_groups.id. */
+  entraGroupMappings: z
+    .array(
+      z.object({
+        groupId: z.string().min(1).max(100),
+        keyGroupId: z.string().min(1).max(100),
+      })
+    )
+    .max(500)
+    .optional(),
+  /** Key group for users matching no mapping. Empty/absent = deny. */
+  entraDefaultKeyGroupId: z.string().max(100).nullable().optional(),
+  /** Resolve users whose `groups` claim overflowed (>150 groups) via Graph. */
+  entraGraphFallbackEnabled: z.boolean().optional(),
+  /** Encrypted at rest. Only needed for the Graph fallback. */
+  entraGraphClientSecret: z.string().max(500).optional(),
+  enableSocks5Proxy: z.boolean().optional(),
+  instanceName: z.string().max(100).optional(),
+  customLogoUrl: z.string().max(2000).optional(),
+  customLogoBase64: z.string().max(100000).optional(),
+  customFaviconUrl: z.string().max(2000).optional(),
+  customFaviconBase64: z.string().max(50000).optional(),
+  corsOrigins: z.string().max(500).optional(),
+  cloudUrl: z.string().max(500).optional(),
+  baseUrl: z.string().max(500).optional(),
+  setupComplete: z.boolean().optional(),
+  blockedProviders: z.array(z.string().max(100)).optional(),
+  noAuthFallbackDisabledProviders: z.array(z.string().max(100)).optional(),
+  hidePaidModels: z.boolean().optional(),
+  // #9418/#13562: catalog/auto-combo already consume both flags (open-sse
+  // autoCombo + /v1/models catalog), but neither was ever added here — Zod
+  // silently strips unknown keys on a plain z.object, so PATCH /api/settings
+  // answered 200 while dropping both before they reached the DB.
+  hideAutoCombos: z.boolean().optional(),
+  hideNoThinkVariants: z.boolean().optional(),
+  exposeCombosOnly: z.boolean().optional(),
+  // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
+  // candidate must be keyless (no credential exists, so no request against it
+  // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
+  // check, per candidate, before ranking/dispatch. See
+  // open-sse/services/autoCombo/strictZeroCostFilter.ts.
+  freeAccessPolicy: z.enum(["off", "strict"]).optional(),
+  // Separate from freeAccessPolicy on purpose: excludes candidates whose
+  // curated `tos` verdict is "avoid" (proxy/self-hosted use conflicts with the
+  // provider's own terms) — a contractual concern, not an economic one.
+  excludeTosAvoid: z.boolean().optional(),
+  // #11481: Opt-in explicit model exposure allow/deny list for `/v1/models` AND
+  // the `auto/*` combo candidate pool (mirror in
+  // open-sse/services/autoCombo/modelExposureFilter.ts — #6512 already proved a
+  // catalog-only filter still leaks into combo routing). Entries are exact
+  // "provider/model" (or bare "model") ids, or a glob pattern via the shared
+  // globToRegex matcher (src/shared/utils/modelExposureList.ts). Independent of
+  // hidePaidModels — this is operator curation, not a cost signal. Default
+  // empty arrays = no-op (Hard Rule #20 spirit).
+  modelVisibilityAllowlist: z.array(z.string().max(200)).max(500).optional(),
+  modelVisibilityDenylist: z.array(z.string().max(200)).max(500).optional(),
+  // Subscription-first routing tuning (`auto/subscription`, `auto/thrifty`).
+  // TUNING ONLY — there is deliberately no `enabled` flag: both ids are opt-in
+  // by being requested, and a toggle able to switch them off would leave
+  // `auto/subscription` silently serving paid capacity under a name that
+  // promises the opposite. See open-sse/services/autoCombo/subscriptionLadder.ts.
+  subscriptionLadder: z
+    .object({
+      // Remaining-% at or below which a plan-included connection counts as
+      // exhausted. Matches quotaPreflight.defaultThresholdPercent's default.
+      exitCutoffPercent: z.number().min(0).max(100).optional(),
+      // Remaining-% a connection must EXCEED to be re-admitted after having
+      // been exhausted. The gap above exitCutoffPercent is the hysteresis band
+      // that stops a connection hovering at the cutoff from oscillating.
+      reentryMinRemainingPercent: z.number().min(0).max(100).optional(),
+      // Per-rung spend ceiling in USD. 0 disables a rung outright.
+      rungBudgetUsd: z.record(z.string().max(32), z.number().min(0)).optional(),
+    })
+    .optional(),
+  hideHealthCheckLogs: z.boolean().optional(),
+  hideEndpointCloudflaredTunnel: z.boolean().optional(),
+  hideEndpointTailscaleFunnel: z.boolean().optional(),
+  hideEndpointNgrokTunnel: z.boolean().optional(),
+  preferClaudeCodeForUnprefixedClaudeModels: z.boolean().optional(),
+  // Opt-in (default "off"): short-circuits Claude Code's `--permission-mode auto`
+  // internal security-classifier request with a synthetic ALLOW response instead of
+  // calling the upstream provider. "auto" only fires on detected classifier requests;
+  // "always" applies the short-circuit to every Claude-format request.
+  claudeClassifierCompat: z.enum(["off", "auto", "always"]).optional(),
+  autoRefreshProviderQuota: z.boolean().optional(),
+  autoRefreshProviderQuotaInterval: z.number().int().min(10).max(3600).optional(),
+  pinProviderQuotaToHome: z.boolean().optional(),
+  showQuickStartOnHome: z.boolean().optional(),
+  showProviderTopologyOnHome: z.boolean().optional(),
+  localOnlyManageScopeBypassEnabled: z.boolean().optional(),
+  // Layer 1 of the spawn-capable guard (Hard Rules #15/#17): reject any bypass
+  // prefix that overlaps a SPAWN_CAPABLE_PREFIXES path or a
+  // SPAWN_CAPABLE_PATTERN_ANCESTORS ancestor (e.g. /api/providers/, the
+  // shared ancestor of the dynamic-segment routes in SPAWN_CAPABLE_PATTERNS
+  // such as /login and /refresh-cursor) — as a child OR as a covering parent —
+  // at PATCH time, with the BYPASS_PREFIX_NOT_ALLOWED code the settings route
+  // handler translates. Same predicate as the runtime layers
+  // (isSpawnCapableBypassPrefix), so the three checks cannot drift apart.
+  // Layer 2 (isLocalOnlyBypassableByManageScope) still refuses spawn paths at
+  // runtime even if a malformed DB row claims otherwise. This refine was in the
+  // routeGuard.ts contract docs but missing from the live schema — restored by
+  // the 6A.1 orphan-test re-wire (AC-8 / AC-10c, 2026-06-09).
+  localOnlyManageScopeBypassPrefixes: z
+    .array(
+      z
+        .string()
+        .max(200)
+        .refine((prefix) => !isSpawnCapableBypassPrefix(prefix.trim()), {
+          message:
+            "BYPASS_PREFIX_NOT_ALLOWED: spawn-capable prefixes cannot be added to the manage-scope bypass list",
+        })
+    )
+    .optional(),
+  customBannedSignals: z.array(z.string().max(200)).optional(),
+  customSystemPromptEnabled: z.boolean().optional(),
+  customSystemPrompt: z.string().max(10000).optional(),
+  // #9817: opt-in (default off) — lets a probe-origin (model test-all)
+  // failure deactivate a connection like real traffic. Off by default:
+  // probe failures are recorded but never mutate routing state.
+  probeCanDisable: z.boolean().optional(),
+  debugMode: z.boolean().optional(),
+  logToolSources: z.boolean().optional(),
+  // Opt-in (absent = off): keep only the `maxTools` client tools most relevant to the
+  // current user turn (BM25) before the provider tool cap. See open-sse/utils/toolDisclosure.ts.
+  toolDisclosure: z
+    .object({
+      enabled: z.boolean(),
+      maxTools: z.number().int().min(1).max(500).optional(),
+      alwaysInclude: z.array(z.string().min(1).max(256)).max(500).optional(),
+      // "zeroOverlap" drops only tools sharing no word with recent messages (bounded below).
+      mode: z.enum(["topK", "zeroOverlap"]).optional(),
+      minTools: z.number().int().min(1).max(500).optional(),
+      keepRatio: z.number().min(0).max(1).optional(),
+      dropCap: z.number().min(0).max(1).optional(),
+    })
+    .strict()
+    .optional(),
+  hiddenSidebarItems: z.array(z.enum(HIDEABLE_SIDEBAR_ITEM_IDS)).optional(),
+  hiddenSidebarSections: z
+    .array(z.enum(SIDEBAR_SECTIONS.map((s) => s.id) as [string, ...string[]]))
+    .optional(),
+  hiddenSidebarGroupLabels: z.array(z.enum(HIDEABLE_SIDEBAR_GROUP_IDS)).optional(),
+  sidebarSectionOrder: z
+    .array(z.enum(SIDEBAR_SECTIONS.map((s) => s.id) as [string, ...string[]]))
+    .optional(),
+  sidebarItemOrder: z.record(z.string(), z.array(z.string().max(100))).optional(),
+  sidebarActivePreset: z
+    .enum(["all", "essentials", "minimal", "developer", "admin"])
+    .nullable()
+    .optional(),
+  comboConfigMode: z.enum(COMBO_CONFIG_MODES).optional(),
+  // Opt-in combo sticky promote (#4852). Stored/read by getSettings + autoPromote.ts,
+  // but was never listed here — Zod silently strips unknown keys on PATCH /api/settings,
+  // so clients got HTTP 200 while comboAutoPromoteEnabled never persisted (same class of
+  // bug as hideAutoCombos in #13562 / #13800). Without this, operators cannot turn the
+  // flag off via API once it is true, and priority combos keep promoting last-success to #1.
+  comboAutoPromoteEnabled: z.boolean().optional(),
+  codexServiceTier: z
+    .object({
+      enabled: z.boolean().optional(),
+      tier: z.enum(["default", "priority", "flex"]).optional(),
+      supportedModels: z.array(z.string().max(200)).max(200).optional(),
+    })
+    .optional(),
+  // Claude Fast Mode: opt-in toggle that asks a paired CLIProxyAPI build
+  // (claude-fastmode-spoof) to rewrite SDK-shaped entrypoints so requests can
+  // reach Anthropic Fast Mode (speed:"fast"). Default off; only the listed
+  // Opus models are gated by the Anthropic binary KT() check. Schema is
+  // intentionally permissive on supportedModels so additional eligible model
+  // ids can be enabled without a schema bump.
+  claudeFastMode: z
+    .object({
+      enabled: z.boolean().optional(),
+      supportedModels: z.array(z.string().max(200)).max(200).optional(),
+    })
+    .optional(),
+  // #7274: renamed from codexSessionAffinityTtlMs — applies to any provider now.
+  // The old key is still accepted (read-only legacy alias) so pre-migration
+  // clients / cached UI bundles that still PATCH the old field name don't 400;
+  // `resolveSessionAffinityTtlMs` prefers the new key when both are present.
+  sessionAffinityTtlMs: z.number().int().min(0).max(86_400_000).optional(),
+  codexSessionAffinityTtlMs: z.number().int().min(0).max(86_400_000).optional(),
+  // #6977: opt-in per-connection Codex quota auto-ping. `connections` maps a
+  // provider_connections id -> enabled; default is an empty map (off for everyone)
+  // until the operator flips a specific OAuth connection on from the settings UI.
+  codexAutoPing: z
+    .object({
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
+  // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
+  // master switch (default false in src/lib/db/settings.ts); `connections` narrows
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
+  // `horizonHours` sets how close to expiry a credit must be to be spendable.
+  codexSpendExpiringResetCredits: z
+    .object({
+      enabled: z.boolean().optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
+      maxPerDay: z.number().int().min(1).max(50).optional(),
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
+  // #8848: opt-in per-connection Claude proactive warmup. `connections` maps a
+  // provider_connections id -> enabled; default is an empty map (off for everyone)
+  // until the operator flips a specific OAuth connection on from the settings UI.
+  claudeWarmup: z
+    .object({
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
+  responsesPreviousResponseIdMode: z.enum(RESPONSES_PREVIOUS_RESPONSE_ID_MODES).optional(),
+  // Routing settings (#134)
+  fallbackStrategy: accountFallbackStrategySchema.optional(),
+  wildcardAliases: z.array(z.object({ pattern: z.string(), target: z.string() })).optional(),
+  stickyRoundRobinLimit: z.number().int().min(0).max(1000).optional(),
+  /** 9router parity: global combo expansion strategy (fallback vs round-robin). */
+  comboStrategy: z.enum(["fallback", "round-robin"]).optional(),
+  comboStickyRoundRobinLimit: z.number().int().min(1).max(1000).nullable().optional(),
+  providerStrategies: z
+    .record(
+      z.string().trim().min(1),
+      z.object({
+        fallbackStrategy: accountFallbackStrategySchema.optional(),
+        stickyRoundRobinLimit: z.number().int().min(1).max(1000).optional(),
+        planWeights: z
+          .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
+          .optional(),
+      })
+    )
+    .optional(),
+  /**
+   * Operator-declared per-provider error rules. Consulted BEFORE the built-in
+   * `providerRuleRegistry` in open-sse/config/providerErrorRules.ts so an
+   * operator can add a scope/cooldown/reason override for a provider without
+   * editing the catalog. Matches are plain case-insensitive SUBSTRINGS of the
+   * error body (never RegExp) to keep the classification hot path ReDoS-safe.
+   * Bounded to 50 rules total so a misconfigured setting cannot blow up the
+   * matcher. `status` and `match` are each optional (omitted = any) but a rule
+   * must set at least one of them; when both are set, both must match.
+   */
+  providerErrorRules: z
+    .record(
+      z.string().trim().min(1).max(100),
+      z.array(
+        z
+          .object({
+            status: z.number().int().min(100).max(599).optional(),
+            match: z.string().min(1).max(200).optional(),
+            scope: operatorErrorScopeSchema,
+            reason: operatorErrorReasonSchema.optional(),
+            cooldownMs: z.number().int().min(0).max(OPERATOR_ERROR_MAX_COOLDOWN_MS).optional(),
+          })
+          .refine((rule) => rule.status !== undefined || rule.match !== undefined, {
+            message: "providerErrorRules: each rule needs a status, a match, or both",
+          })
+      )
+    )
+    .optional()
+    .superRefine((value, ctx) => {
+      if (!value) return;
+      const total = Object.values(value).reduce((n, rules) => n + rules.length, 0);
+      if (total > 50) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `providerErrorRules: at most 50 rules total, got ${total}`,
+        });
+      }
+    }),
+  /**
+   * Opt-in per-provider catch-all cooldown for failures no operator rule and no
+   * built-in rule matched. Applies to 402/403/408/429/5xx only — request-shape
+   * 4xx errors and bare 401s keep their own handling. Absent = current behavior.
+   */
+  providerErrorDefaults: z
+    .record(
+      z.string().trim().min(1).max(100),
+      z.object({
+        cooldownMs: z.number().int().min(60_000).max(OPERATOR_ERROR_MAX_COOLDOWN_MS),
+        scope: operatorErrorScopeSchema.optional(),
+        reason: operatorErrorReasonSchema.optional(),
+      })
+    )
+    .optional()
+    .refine((value) => !value || Object.keys(value).length <= 100, {
+      message: "providerErrorDefaults: at most 100 providers",
+    }),
+  // #6168: global session-stickiness opt-out (per-combo config overrides this).
+  disableSessionStickiness: z.boolean().optional(),
+  // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
+  connectionAwareExpansion: z.boolean().optional(),
+  // Global cap on per-target expansion; the per-combo value wins when set.
+  connectionAwareExpansionMaxPerTarget: z.coerce.number().int().min(1).max(64).optional(),
+  /**
+   * Keep combo targets whose known output ceiling sits below the request's
+   * max_tokens instead of dropping them. The combo resolver already honours this
+   * key; without it in the schema the only way to set it was per combo.
+   */
+  outputLimitAdvisory: z.boolean().optional(),
+  /** Keep eligible combo targets close to the provider-side prompt cache. */
+  promptCacheAffinityEnabled: z.boolean().optional(),
+  /**
+   * Per-operator quota row visibility on the usage dashboard, keyed by
+   * provider id. Independent of the model catalog's isHidden flag.
+   * Ported from upstream decolua/9router#2371.
+   */
+  quotaVisibility: z
+    .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
+    .optional(),
+  requestRetry: z.number().int().min(0).max(10).optional(),
+  maxRetryIntervalSec: z.number().int().min(0).max(300).optional(),
+  maxBodySizeMb: z
+    .number()
+    .int()
+    .min(MIN_REQUEST_BODY_LIMIT_MB)
+    .max(MAX_REQUEST_BODY_LIMIT_MB)
+    .optional(),
+  // Auto intent classifier settings (multilingual routing)
+  intentDetectionEnabled: z.boolean().optional(),
+  intentSimpleMaxWords: z.number().int().min(1).max(500).optional(),
+  intentExtraCodeKeywords: z.array(z.string().max(100)).optional(),
+  intentExtraReasoningKeywords: z.array(z.string().max(100)).optional(),
+  intentExtraSimpleKeywords: z.array(z.string().max(100)).optional(),
+  // Protocol toggles (default: disabled)
+  mcpEnabled: z.boolean().optional(),
+  mcpTransport: z.enum(["stdio", "sse", "streamable-http"]).optional(),
+  a2aEnabled: z.boolean().optional(),
+  wsAuth: z.boolean().optional(),
+  // CLI Fingerprint compatibility (per-provider)
+  cliCompatProviders: z.array(z.string().max(100)).optional(),
+  // CC bridge transforms (issue #2260): config-driven pipeline that normalizes
+  // system blocks at the Claude Code bridge so any client (OpenCode, Cline,
+  // Cursor, Continue, raw API) ends up with classifier-correct structure.
+  ccBridgeTransforms: z
+    .object({
+      enabled: z.boolean(),
+      pipeline: z
+        .array(z.discriminatedUnion("kind", commonSystemTransformOperationSchemas))
+        .max(50),
+    })
+    .optional(),
+  // System Transforms (issue #2260 v2): generic per-provider DSL covering
+  // native `claude`, `anthropic-compatible-cc-*` bridge, and any other
+  // provider key. Adds `obfuscate_words` op kind on top of the base set.
+  systemTransforms: z
+    .object({
+      providers: z.record(
+        z.string().max(100),
+        z.object({
+          enabled: z.boolean(),
+          pipeline: z
+            .array(
+              z.discriminatedUnion("kind", [
+                ...commonSystemTransformOperationSchemas,
+                transformObfuscateWordsSchema,
+              ])
+            )
+            .max(50),
+        })
+      ),
+    })
+    .optional(),
+  // Strip provider/model prefix at proxy layer (e.g. "openai/gpt-4" → "gpt-4")
+  stripModelPrefix: z.boolean().optional(),
+  // Cache control preservation mode
+  alwaysPreserveClientCache: z.enum(["auto", "always", "never"]).optional(),
+  // Gemini through Antigravity only; default off and no explicit cache resources.
+  geminiPromptCacheMode: z.enum(["off", "implicit"]).optional(),
+  antigravitySignatureCacheMode: z.enum(signatureCacheModeValues).optional(),
+  // Adaptive Volume Routing
+  adaptiveVolumeRouting: z.boolean().optional(),
+  // Usage token buffer — safety margin added to reported prompt/input token counts.
+  // Prevents CLI tools from overrunning context windows. Set to 0 to disable.
+  usageTokenBuffer: z.number().int().min(0).max(50000).optional(),
+  // Custom CLI agent definitions for ACP
+  customAgents: z
+    .array(
+      z.object({
+        id: z.string().max(50),
+        name: z.string().max(100),
+        binary: z.string().max(200),
+        versionCommand: z.string().max(300),
+        providerAlias: z.string().max(50),
+        spawnArgs: z.array(z.string().max(200)),
+        protocol: z.enum(["stdio", "http"]),
+      })
+    )
+    .optional(),
+  // SkillsMP marketplace API key
+  skillsmpApiKey: z.string().max(200).optional(),
+  // Active skills provider (single source of truth for skills page)
+  skillsProvider: z.enum(["skillsmp", "skillssh"]).optional(),
+  // models.dev sync settings
+  modelsDevSyncEnabled: z.boolean().optional(),
+  modelsDevSyncInterval: z.number().int().min(3600000).max(604800000).optional(),
+  // Vision Bridge settings
+  visionBridgeEnabled: z.boolean().optional(),
+  visionBridgeModel: z.string().max(200).optional(),
+  visionBridgePrompt: z.string().max(5000).optional(),
+  visionBridgeTimeout: z.number().int().min(1000).max(300000).optional(),
+  visionBridgeMaxImages: z.number().int().min(1).max(20).optional(),
+  // Modality Bridge settings (new schema — visionBridge* keys above are the
+  // deprecated legacy aliases, kept accepted for one release cycle)
+  modalityBridgeVisionEnabled: z.boolean().optional(),
+  modalityBridgeVisionMode: z.enum(["auto", "describe", "reroute"]).optional(),
+  modalityBridgeVisionModel: z.string().max(200).optional(),
+  modalityBridgeVisionTaskAware: z.boolean().optional(),
+  modalityBridgeVisionPrompt: z.string().max(5000).optional(),
+  modalityBridgeVisionTimeout: z.number().int().min(1000).max(300000).optional(),
+  modalityBridgeVisionMaxImages: z.number().int().min(1).max(20).optional(),
+  modalityBridgeVisionMaxChars: z
+    .union([z.literal(0), z.number().int().min(100).max(50000)])
+    .optional(),
+  modalityBridgeAudioEnabled: z.boolean().optional(),
+  modalityBridgeAudioModel: z.string().max(200).optional(),
+  modalityBridgeAudioTimeout: z.number().int().min(1000).max(300000).optional(),
+  modalityBridgeAudioMaxClips: z.number().int().min(1).max(10).optional(),
+  modalityBridgeVideoEnabled: z.boolean().optional(),
+  modalityBridgeVideoAnalysisMode: z.enum(["full", "focused"]).optional(),
+  modalityBridgeVideoModel: z.string().max(200).optional(),
+  modalityBridgeVideoFrameCount: z.number().int().min(1).max(16).optional(),
+  modalityBridgeVideoSamplingPolicy: z.enum(["uniform", "scene_aware", "segment_aware"]).optional(),
+  modalityBridgeVideoMaxVideos: z.number().int().min(1).max(4).optional(),
+  modalityBridgeVideoTimeout: z
+    .number()
+    .int()
+    .min(VIDEO_BRIDGE_TIMEOUT_MIN_MS)
+    .max(VIDEO_BRIDGE_TIMEOUT_MAX_MS)
+    .optional(),
+  // Operator half of the FU-06 dual opt-in (#11654) for server-orchestrated
+  // Audio Bridge STT over Video Bridge audio extraction — defaults false
+  // (Hard Rule #20). A request-side opt-in is required in addition to this.
+  modalityBridgeVideoAudioTranscriptionEnabled: z.boolean().optional(),
+  // Independent retention and remote-read consent; both are off unless explicitly enabled.
+  modalityBridgeVideoDrilldownEnabled: z.boolean().optional(),
+  modalityBridgeVideoDrilldownRemoteEnabled: z.boolean().optional(),
+  modalityBridgeCacheEnabled: z.boolean().optional(),
+  modalityBridgeCacheTtlMinutes: z.number().int().min(1).max(1440).optional(),
+  modalityBridgeCacheMaxEntries: z.number().int().min(10).max(5000).optional(),
+  visionBridgeRerouteTextOnly: z.boolean().optional(),
+  // Missing settings
+  lkgpEnabled: z.boolean().optional(),
+  // #1311: echo the requested alias/combo name in the response model field (opt-in)
+  echoRequestedModelName: z.boolean().optional(),
+  // #4481 layer 2: CCR-style Router.webSearch — when a request carries a native
+  // web_search server tool, route the whole request to this model/provider instead of
+  // the default (for providers that don't implement Anthropic's web_search server tool).
+  // Empty/unset = disabled. Value is a model string ("provider,model" / alias / combo).
+  webSearchRouteModel: z.string().max(200).optional(),
+  // Whole-request budget for /v1/search, in ms. Unset keeps the 15s constant.
+  // The floor matches the handler's minimum; the ceiling stops a typo from
+  // holding a worker for hours.
+  searchTimeoutMs: z.number().int().min(1_000).max(120_000).optional(),
+  // Per-provider timeout overrides in ms, keyed by search provider id.
+  searchProviderTimeoutsMs: z
+    .record(z.string().max(60), z.number().int().min(1).max(120_000))
+    .optional(),
+  backgroundDegradation: z.unknown().optional(),
+  bruteForceProtection: z.boolean().optional(),
+  // Auto-routing settings
+  autoRoutingEnabled: z.boolean().optional(),
+  autoRoutingDefaultVariant: z
+    .enum(["lkgp", "coding", "fast", "cheap", "offline", "smart"])
+    .optional(),
+  proxyEnabled: z.boolean().optional(),
+  perKeyProxyEnabled: z.boolean().optional(),
+  defaultNewConnectionProxyEnabled: z.boolean().optional(),
+  // CLIProxyAPI connection settings
+  cliproxyapi_fallback_enabled: z.boolean().optional(),
+  cliproxyapi_url: z.string().url().max(500).optional(),
+  // #12306: external Headroom proxy URL. Empty = fall back to HEADROOM_URL / localhost:8787.
+  // Status/start already read this key; without the schema field PATCH strips it.
+  // Trim first so a padded URL matches the client (isValidHeadroomUrl trims)
+  // and whitespace-only becomes the empty fallback, not "Invalid URL".
+  // z.string().url() also accepts javascript:/data:/file:. probeProxyRunning
+  // interpolates this into fetch(`${url}/health`), so restrict to http(s).
+  headroomUrl: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .url()
+          .max(500)
+          .refine((value) => isHttpUrl(value), "must be an http(s) URL"),
+      ])
+    )
+    .optional(),
+  cliproxyapi_fallback_codes: z.string().max(200).optional(),
+  // #7645: dedicated CLIProxyAPI credential. CLIProxyAPI requires its own
+  // separately-configured `api-keys:` credential and rejects any other token
+  // with 401 — without this field, the fallback/passthrough legs had no way
+  // to authenticate except by reusing the (incompatible) native provider key.
+  cliproxyapi_api_key: z.string().max(500).optional(),
+  // CLIProxyAPI model mapping (Record<string, string>)
+  cliproxyapi_model_mapping: z.record(z.string(), z.string()).optional(),
+  // Model lockout settings
+  modelLockout: z
+    .object({
+      enabled: z.boolean().optional(),
+      errorCodes: z.array(z.number().int().min(100).max(599)).min(0).max(20).optional(),
+      baseCooldownMs: z
+        .number()
+        .int()
+        .min(5000, "Must be at least 5,000ms")
+        .max(600000, "Must be at most 600,000ms (10 min)")
+        .optional(),
+      maxCooldownMs: z
+        .number()
+        .int()
+        .min(5000, "Must be at least 5,000ms")
+        .max(3600000, "Must be at most 3,600,000ms (1 h)")
+        .optional(),
+      maxBackoffSteps: z
+        .number()
+        .int()
+        .min(0, "Must be at least 0")
+        .max(20, "Must be at most 20")
+        .optional(),
+      useExponentialBackoff: z.boolean().optional(),
+    })
+    .optional(),
+});
+
+export const databaseSettingsSchema = z
+  .object({
+    // Logs settings
+    logs: z.object({
+      detailedLogsEnabled: z.boolean(),
+      callLogPipelineEnabled: z.boolean(),
+      maxDetailSizeKb: z.number().int().nonnegative(),
+      ringBufferSize: z.number().int().min(100).max(10000),
+    }),
+
+    // Backup settings
+    backup: z.object({
+      autoBackupEnabled: z.boolean(),
+      autoBackupFrequency: z
+        .literal("never")
+        .or(z.literal("daily"))
+        .or(z.literal("weekly"))
+        .or(z.literal("monthly")),
+      keepLastNBackups: z.number().int().min(1).max(100),
+    }),
+
+    // Cache settings
+    cache: z.object({
+      semanticCacheEnabled: z.boolean(),
+      semanticCacheMaxSize: z.number().int().min(10).max(1000),
+      semanticCacheTTL: z.number().int().min(60000),
+      promptCacheEnabled: z.boolean(),
+      promptCacheStrategy: z.literal("auto").or(z.literal("system-only")).or(z.literal("manual")),
+      alwaysPreserveClientCache: z.literal("auto").or(z.literal("always")).or(z.literal("never")),
+      modelCatalogCacheTtlMs: z.number().int().min(500).max(60000),
+    }),
+
+    // Retention settings
+    retention: z.object({
+      quotaSnapshots: z.number().int().min(1).max(3650), // Max 10 years
+      compressionAnalytics: z.number().int().min(1).max(365),
+      mcpAudit: z.number().int().min(1).max(365),
+      configAudit: z.number().int().min(1).max(365).optional(),
+      a2aEvents: z.number().int().min(1).max(365),
+      callLogs: z.number().int().min(1).max(3650),
+      conversationTurnNodes: z.number().int().min(1).max(3650).optional(),
+      usageHistory: z.number().int().min(1).max(3650),
+      memoryEntries: z.number().int().min(1).max(3650),
+      domainCostHistory: z.number().int().min(1).max(365).optional(),
+      compressionCacheStats: z.number().int().min(1).max(365).optional(),
+      xpAuditLog: z.number().int().min(1).max(365),
+      compressionRunTelemetry: z.number().int().min(1).max(365).optional(),
+      autoCleanupEnabled: z.boolean(),
+    }),
+
+    // Aggregation settings
+    aggregation: z.object({
+      enabled: z.boolean(),
+      rawDataRetentionDays: z.number().int().min(1).max(3650),
+      granularity: z.literal("hourly").or(z.literal("daily")).or(z.literal("weekly")),
+    }),
+
+    // Optimization settings
+    optimization: z.object({
+      autoVacuumMode: z.literal("NONE").or(z.literal("FULL")).or(z.literal("INCREMENTAL")),
+      scheduledVacuum: z
+        .literal("never")
+        .or(z.literal("daily"))
+        .or(z.literal("weekly"))
+        .or(z.literal("monthly")),
+      vacuumHour: z.number().int().min(0).max(23),
+      pageSize: z.number().multipleOf(512).min(512).max(65536),
+      cacheSize: z.number().int().positive().max(1000000),
+      optimizeOnStartup: z.boolean(),
+    }),
+
+    // Skip location and stats as they're read-only
+  })
+  .strict();

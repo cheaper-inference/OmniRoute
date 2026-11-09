@@ -1,0 +1,575 @@
+import { execFile, spawn } from "node:child_process";
+import { closeSync, mkdirSync, openSync, existsSync, readFileSync } from "node:fs";
+import { access } from "node:fs/promises";
+import path from "node:path";
+import { promisify } from "node:util";
+import { homedir } from "node:os";
+import { resolveDataDir } from "@/lib/dataPaths";
+import { isRunningInContainer } from "@/shared/utils/containerEnv";
+import {
+  buildDockerImageUpdateCommand,
+  isDockerTriggerPathInside,
+  isTriggerDirWritable,
+  writeDockerUpdateRequest,
+} from "./dockerUpdateTrigger";
+
+const execFileAsync = promisify(execFile);
+
+/**
+ * Check whether a directory's package.json is a valid project-root marker by
+ * requiring a non-empty `name` field.  The Next.js standalone build writes a
+ * synthetic `.build/next/package.json` = `{"type":"commonjs"}` that should not
+ * be mistaken for the real project root.
+ *
+ * Swallows read / parse errors (missing file, invalid JSON) and returns false
+ * so the walk-up continues.
+ *
+ * @internal — exported for testability.
+ */
+export function isValidPackageMarker(dir: string): boolean {
+  try {
+    const content = readFileSync(path.join(dir, "package.json"), "utf-8");
+    const pkg = JSON.parse(content);
+    return typeof pkg.name === "string" && pkg.name.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** @internal — exported for testability. */
+export function resolveProjectRoot(
+  fallback: string,
+  startDir: string = typeof __dirname !== "undefined" ? __dirname : process.cwd()
+): string {
+  let dir = path.resolve(startDir);
+  while (true) {
+    if (existsSync(path.join(dir, ".git"))) return dir;
+    if (existsSync(path.join(dir, "package.json")) && isValidPackageMarker(dir)) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return fallback;
+}
+
+const FALLBACK_CWD = process.env.HOME || homedir() || "/tmp";
+export const PROJECT_ROOT: string = resolveProjectRoot(FALLBACK_CWD);
+
+type ComposeCommand = "docker compose" | "docker-compose";
+/**
+ * `docker-image` / `docker-trigger` are never set explicitly: they are detected for a published
+ * image container (no `.git`, not under `node_modules`). See `./dockerUpdateTrigger.ts`.
+ */
+export type AutoUpdateMode =
+  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger";
+
+type ExecFileLike = typeof execFileAsync;
+type SpawnLike = typeof spawn;
+
+export type AutoUpdateConfig = {
+  mode: AutoUpdateMode;
+  repoDir: string;
+  composeFile: string;
+  composeProfile: string;
+  composeService: string;
+  gitRemote: string;
+  patchCommits: string[];
+  logPath: string;
+  /** Data directory the Docker trigger file must live in. */
+  dataDir: string;
+  /** Absolute `DOCKER_UPDATE_TRIGGER_FILE` (relative values resolve against `dataDir`). */
+  dockerTriggerFile: string | null;
+  /** Host-side compose command shown to the operator in `docker-image` mode. */
+  manualUpdateCommand: string | null;
+};
+
+export type AutoUpdateValidation = {
+  supported: boolean;
+  reason: string | null;
+  composeCommand: ComposeCommand | null;
+};
+
+export type AutoUpdateLaunchResult = {
+  started: boolean;
+  channel: AutoUpdateMode;
+  logPath: string;
+  composeCommand: ComposeCommand | null;
+  error?: string;
+};
+
+function normalizeMode(raw: string | undefined): AutoUpdateMode {
+  if (raw === "docker-compose" || raw === "source") {
+    return raw;
+  }
+  return "npm";
+}
+
+/**
+ * Match `node_modules` as a real path **segment**, not a substring — a folder literally named
+ * "my-node_modules-backup" must NOT count as an installed-package location. Operates on a local
+ * filesystem path (`__dirname`), never untrusted input; the pattern is linear (ReDoS-safe).
+ *
+ * @internal — exported for testability.
+ */
+export function isUnderNodeModules(dir: string): boolean {
+  return /(^|[/\\])node_modules([/\\]|$)/.test(dir);
+}
+
+/**
+ * Match an installed `omniroute` package directory as a path segment (`.../node_modules/omniroute/...`),
+ * on both separators. Covers npm global installs and pnpm's `.pnpm/omniroute@x/node_modules/omniroute`.
+ */
+const OMNIROUTE_PACKAGE_SEGMENT = /(^|[/\\])node_modules[/\\]omniroute([/\\]|$)/;
+
+/**
+ * Directory used to tell an npm install from a source checkout at runtime.
+ *
+ * `__dirname` cannot be trusted on its own: inside the Next.js server bundle Turbopack replaces it
+ * at build time with a virtual path (`"/ROOT/src/lib/system"`) that does not exist on disk and never
+ * contains `node_modules`, so every global npm install was classified as "source" and the dashboard
+ * showed "Not a git repository" instead of offering the npm update.
+ *
+ * - `compiledDir` is used when it exists on disk (unbundled/dev runs keep the previous behavior).
+ * - Otherwise the first entry script that lives inside an installed `omniroute` package wins:
+ *   `process.argv[1]` for `omniroute serve` / `node .../dist/server-ws.mjs`, and
+ *   `process.env.pm_exec_path` because under pm2 `argv[1]` is pm2's own ProcessContainerFork.js.
+ *   A source checkout started via `node_modules/.bin/next` does not match, so it stays "source".
+ * - Anything else returns `compiledDir`, or `""` when there is none; neither sits under
+ *   `node_modules`, so the result is "source", same as before this fix.
+ *
+ * The directory is cut with a separator-agnostic regex instead of `path.dirname`, so a Windows
+ * path is handled the same on every platform (`argv[1]` is always absolute).
+ *
+ * @internal — exported for testability.
+ */
+export function resolveRuntimeModuleDir(
+  compiledDir: string | undefined = typeof __dirname !== "undefined" ? __dirname : undefined,
+  entryScripts: ReadonlyArray<string | undefined> = [process.argv[1], process.env.pm_exec_path],
+  exists: (target: string) => boolean = existsSync
+): string {
+  if (compiledDir && exists(compiledDir)) return compiledDir;
+  for (const entry of entryScripts) {
+    if (!entry) continue;
+    const entryDir = entry.replace(/[/\\][^/\\]*$/, "");
+    if (OMNIROUTE_PACKAGE_SEGMENT.test(entryDir)) return entryDir;
+  }
+  return compiledDir ?? "";
+}
+
+/**
+ * Decide the effective auto-update channel when the operator left it at the default ("npm").
+ *
+ * - A source checkout (`.git` present) always self-updates via git, even if it also lives under a
+ *   `node_modules` path.
+ * - Otherwise "npm" mode only makes sense when the running module sits under a real
+ *   `node_modules/` path segment (a global or local package install). Anything else — a downloaded
+ *   build/zip with no `.git` — is treated as source.
+ *
+ * Behavior matches the previous inline heuristic for every realistic path; it only tightens the
+ * pathological case where "node_modules" appeared as a substring but not a path segment (Bug 1,
+ * security-report v3.8.15). Pure + injectable so the branch logic is unit-testable.
+ *
+ * @internal — exported for testability.
+ */
+export function resolveAutoUpdateMode(
+  rawMode: AutoUpdateMode,
+  detection: {
+    isGitRepo: boolean;
+    currentDir: string;
+    isContainer?: boolean;
+    hasTriggerFile?: boolean;
+  }
+): AutoUpdateMode {
+  if (rawMode !== "npm") return rawMode;
+  if (detection.isGitRepo) return "source";
+  // A container cannot update itself in place: a configured host trigger file wins, and a
+  // published image (not an npm install) gets the manual host compose command.
+  if (detection.isContainer && detection.hasTriggerFile) return "docker-trigger";
+  if (isUnderNodeModules(detection.currentDir)) return "npm";
+  return detection.isContainer ? "docker-image" : "source";
+}
+
+async function pathExists(targetPath: string): Promise<boolean> {
+  try {
+    await access(targetPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'"'"'`)}'`;
+}
+
+function parsePatchCommits(raw: string | undefined): string[] {
+  return (raw || "")
+    .split(/[\s,]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Runtime probes for {@link getAutoUpdateConfig}. Production callers omit it; tests inject a bundled
+ * `compiledDir`, entry scripts and `exists` to exercise the npm-vs-source wiring end to end.
+ *
+ * @internal
+ */
+export type AutoUpdateRuntimeProbe = {
+  compiledDir?: string;
+  entryScripts?: ReadonlyArray<string | undefined>;
+  exists?: (target: string) => boolean;
+  isContainer?: () => boolean;
+};
+
+export function getAutoUpdateConfig(
+  env: NodeJS.ProcessEnv = process.env,
+  runtime: AutoUpdateRuntimeProbe = {}
+): AutoUpdateConfig {
+  const dataDir = env.DATA_DIR || "/tmp/omniroute";
+  const repoDir = env.AUTO_UPDATE_REPO_DIR || "/workspace/omniroute";
+
+  const triggerDataDir = env.DATA_DIR?.trim() ? path.resolve(env.DATA_DIR) : resolveDataDir();
+  const rawTrigger = env.DOCKER_UPDATE_TRIGGER_FILE?.trim();
+  const dockerTriggerFile = rawTrigger ? path.resolve(triggerDataDir, rawTrigger) : null;
+
+  let mode = normalizeMode(env.AUTO_UPDATE_MODE);
+  if (mode === "npm") {
+    const exists = runtime.exists ?? existsSync;
+    const isGitRepo = exists(path.join(PROJECT_ROOT, ".git"));
+    const currentDir = resolveRuntimeModuleDir(runtime.compiledDir, runtime.entryScripts, exists);
+    const isContainer = runtime.isContainer
+      ? runtime.isContainer()
+      : isRunningInContainer({
+          existsSync: exists,
+          readFileSync: (target, encoding) =>
+            readFileSync(target, encoding as BufferEncoding) as string,
+          env,
+        });
+    mode = resolveAutoUpdateMode(mode, {
+      isGitRepo,
+      currentDir,
+      isContainer,
+      hasTriggerFile: dockerTriggerFile !== null,
+    });
+  }
+
+  return {
+    mode,
+    repoDir,
+    composeFile: env.AUTO_UPDATE_COMPOSE_FILE || path.join(repoDir, "docker-compose.yml"),
+    composeProfile: env.AUTO_UPDATE_COMPOSE_PROFILE || "cli",
+    composeService: env.AUTO_UPDATE_SERVICE || "omniroute-cli",
+    gitRemote: env.AUTO_UPDATE_GIT_REMOTE || "origin",
+    patchCommits: parsePatchCommits(env.AUTO_UPDATE_PATCH_COMMITS),
+    logPath: env.AUTO_UPDATE_LOG_PATH || path.join(dataDir, "logs", "auto-update.log"),
+    dataDir: triggerDataDir,
+    dockerTriggerFile,
+    manualUpdateCommand:
+      mode === "docker-image" ? buildDockerImageUpdateCommand(env.AUTO_UPDATE_SERVICE) : null,
+  };
+}
+
+export async function detectComposeCommand(
+  execFileImpl: ExecFileLike = execFileAsync
+): Promise<ComposeCommand | null> {
+  try {
+    await execFileImpl("docker", ["compose", "version"], { timeout: 10_000 });
+    return "docker compose";
+  } catch {
+    // Fall through.
+  }
+
+  try {
+    await execFileImpl("docker-compose", ["version"], { timeout: 10_000 });
+    return "docker-compose";
+  } catch {
+    return null;
+  }
+}
+
+export async function validateAutoUpdateRuntime(
+  config: AutoUpdateConfig,
+  execFileImpl: ExecFileLike = execFileAsync,
+  existsImpl: (targetPath: string) => Promise<boolean> = pathExists
+): Promise<AutoUpdateValidation> {
+  if (config.mode === "source") {
+    const gitDir = path.join(PROJECT_ROOT, ".git");
+    if (!(await existsImpl(gitDir))) {
+      return {
+        supported: false,
+        reason: "Not a git repository. Download source or use npm install -g.",
+        composeCommand: null,
+      };
+    }
+
+    try {
+      await execFileImpl("git", ["--version"], { timeout: 10_000 });
+    } catch {
+      return {
+        supported: false,
+        reason: "git is not available. Install git to enable auto-update.",
+        composeCommand: null,
+      };
+    }
+
+    return {
+      supported: true,
+      reason: null,
+      composeCommand: null,
+    };
+  }
+
+  if (config.mode === "docker-image") {
+    return {
+      supported: false,
+      reason:
+        `Running inside a Docker container. Update from the host: ${config.manualUpdateCommand}. ` +
+        "To update from the dashboard, set DOCKER_UPDATE_TRIGGER_FILE and run a host watcher (see the Docker guide).",
+      composeCommand: null,
+    };
+  }
+
+  if (config.mode === "docker-trigger") {
+    const triggerFile = config.dockerTriggerFile;
+    if (!triggerFile || !isDockerTriggerPathInside(config.dataDir, triggerFile)) {
+      return {
+        supported: false,
+        reason: `DOCKER_UPDATE_TRIGGER_FILE must point to a file inside DATA_DIR (${config.dataDir}).`,
+        composeCommand: null,
+      };
+    }
+    if (!(await isTriggerDirWritable(config.dataDir, triggerFile))) {
+      return {
+        supported: false,
+        reason: "The DOCKER_UPDATE_TRIGGER_FILE directory is not writable by OmniRoute.",
+        composeCommand: null,
+      };
+    }
+    return { supported: true, reason: null, composeCommand: null };
+  }
+
+  if (config.mode !== "docker-compose") {
+    return { supported: true, reason: null, composeCommand: null };
+  }
+
+  if (!(await existsImpl(config.repoDir))) {
+    return {
+      supported: false,
+      reason: `Repository directory not found: ${config.repoDir}`,
+      composeCommand: null,
+    };
+  }
+
+  if (!(await existsImpl(config.composeFile))) {
+    return {
+      supported: false,
+      reason: `Compose file not found: ${config.composeFile}`,
+      composeCommand: null,
+    };
+  }
+
+  if (!(await existsImpl("/var/run/docker.sock"))) {
+    return {
+      supported: false,
+      reason: "Docker socket is not mounted into the OmniRoute container.",
+      composeCommand: null,
+    };
+  }
+
+  try {
+    await execFileImpl("git", ["--version"], { timeout: 10_000 });
+  } catch {
+    return {
+      supported: false,
+      reason: "git is not available inside the OmniRoute container.",
+      composeCommand: null,
+    };
+  }
+
+  const composeCommand = await detectComposeCommand(execFileImpl);
+  if (!composeCommand) {
+    return {
+      supported: false,
+      reason:
+        "Neither docker compose nor docker-compose is available inside the OmniRoute container.",
+      composeCommand: null,
+    };
+  }
+
+  return { supported: true, reason: null, composeCommand };
+}
+
+export async function ensureGitTagExists(
+  targetTag: string,
+  execFileImpl: ExecFileLike = execFileAsync,
+  cwd = PROJECT_ROOT
+): Promise<void> {
+  try {
+    await execFileImpl("git", ["rev-parse", "-q", "--verify", `refs/tags/${targetTag}`], {
+      timeout: 10_000,
+      cwd,
+    });
+  } catch {
+    throw new Error(`Git tag not found: ${targetTag}`);
+  }
+}
+
+export function buildNpmUpdateScript(latest: string): string {
+  return [
+    "set -eu",
+    // --include=optional keeps the optionalDependencies (better-sqlite3, keytar,
+    // tls-client, and the llmlingua SLM stack) installed on every update so an
+    // `omit=optional` config / .npmrc cannot silently drop them.
+    `npm install -g omniroute@${latest} --include=optional --ignore-scripts --legacy-peer-deps`,
+    "if command -v pm2 >/dev/null 2>&1; then",
+    "  pm2 restart omniroute || true",
+    "fi",
+    `echo \"[AutoUpdate] Successfully updated to v${latest}.\"`,
+  ].join("\n");
+}
+
+export function buildSourceUpdateScript(latest: string, gitRemote = "origin"): string {
+  const targetTag = latest.startsWith("v") ? latest : `v${latest}`;
+
+  return [
+    "set -eu",
+    "git stash --include-untracked 2>/dev/null || true",
+    `git fetch --tags ${shellQuote(gitRemote)}`,
+    `if ! git rev-parse -q --verify "refs/tags/${targetTag}" >/dev/null 2>&1; then`,
+    `  echo "[AutoUpdate] Tag ${targetTag} not found." >&2`,
+    "  exit 1",
+    "fi",
+    'backup_branch="pre-update/$(git rev-parse --short HEAD)-$(date +%Y%m%d-%H%M%S)"',
+    'git branch "$backup_branch" 2>/dev/null || true',
+    `git checkout "${targetTag}"`,
+    "npm install --include=optional --legacy-peer-deps",
+    "node scripts/dev/sync-env.mjs 2>/dev/null || true",
+    "npm run build",
+    "if command -v pm2 >/dev/null 2>&1; then",
+    "  pm2 restart omniroute --update-env || true",
+    "fi",
+    `echo "[AutoUpdate] Successfully updated to ${targetTag}."`,
+  ].join("\n");
+}
+
+export function buildDockerComposeUpdateScript({
+  latest,
+  config,
+  composeCommand,
+}: {
+  latest: string;
+  config: AutoUpdateConfig;
+  composeCommand: ComposeCommand;
+}): string {
+  const targetTag = latest.startsWith("v") ? latest : `v${latest}`;
+  const composeInvocation =
+    composeCommand === "docker compose"
+      ? 'docker compose -f "$COMPOSE_FILE" up -d --build "$SERVICE"'
+      : 'docker-compose -f "$COMPOSE_FILE" up -d --build "$SERVICE"';
+  const patchLines = config.patchCommits.length
+    ? [`git cherry-pick --keep-redundant-commits ${config.patchCommits.map(shellQuote).join(" ")}`]
+    : [];
+
+  return [
+    "set -eu",
+    'export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"',
+    `REPO_DIR=${shellQuote(config.repoDir)}`,
+    `COMPOSE_FILE=${shellQuote(config.composeFile)}`,
+    `PROFILE=${shellQuote(config.composeProfile)}`,
+    `SERVICE=${shellQuote(config.composeService)}`,
+    `REMOTE=${shellQuote(config.gitRemote)}`,
+    `TARGET_TAG=${shellQuote(targetTag)}`,
+    'cd "$REPO_DIR"',
+    'git config --global --add safe.directory "$REPO_DIR" >/dev/null 2>&1 || true',
+    'if [ -n "$(git status --porcelain)" ]; then',
+    '  echo "[AutoUpdate] Refusing update: git worktree has local changes." >&2',
+    "  exit 1",
+    "fi",
+    'git fetch --tags "$REMOTE"',
+    'if ! git rev-parse -q --verify "refs/tags/$TARGET_TAG" >/dev/null 2>&1; then',
+    '  echo "[AutoUpdate] Tag $TARGET_TAG not found on remote $REMOTE." >&2',
+    "  exit 1",
+    "fi",
+    'backup_branch="autoupdate/pre-${TARGET_TAG#v}-$(date +%Y%m%d-%H%M%S)"',
+    'git branch "$backup_branch" >/dev/null 2>&1 || true',
+    'git checkout -B "autoupdate/${TARGET_TAG#v}" "$TARGET_TAG"',
+    ...patchLines,
+    'export COMPOSE_PROFILES="$PROFILE"',
+    composeInvocation,
+    `echo "[AutoUpdate] Successfully switched to ${targetTag} via ${composeCommand}."`,
+  ].join("\n");
+}
+
+export async function launchAutoUpdate({
+  latest,
+  env = process.env,
+  execFileImpl = execFileAsync,
+  spawnImpl = spawn,
+  existsImpl = pathExists,
+  runtime = {},
+}: {
+  latest: string;
+  env?: NodeJS.ProcessEnv;
+  execFileImpl?: ExecFileLike;
+  spawnImpl?: SpawnLike;
+  existsImpl?: (targetPath: string) => Promise<boolean>;
+  runtime?: AutoUpdateRuntimeProbe;
+}): Promise<AutoUpdateLaunchResult> {
+  const config = getAutoUpdateConfig(env, runtime);
+  const validation = await validateAutoUpdateRuntime(config, execFileImpl, existsImpl);
+
+  if (!validation.supported) {
+    return {
+      started: false,
+      channel: config.mode,
+      logPath: config.logPath,
+      composeCommand: validation.composeCommand,
+      error: validation.reason || "Auto-update runtime is not available.",
+    };
+  }
+
+  if (config.mode === "docker-trigger" && config.dockerTriggerFile) {
+    // The host watcher does the pull/recreate; OmniRoute only drops a request file (no shell).
+    const written = await writeDockerUpdateRequest(
+      config.dataDir,
+      config.dockerTriggerFile,
+      latest
+    );
+    return {
+      started: written.ok,
+      channel: config.mode,
+      logPath: config.logPath,
+      composeCommand: null,
+      ...(written.ok === false ? { error: written.error } : {}),
+    };
+  }
+
+  const script =
+    config.mode === "docker-compose"
+      ? buildDockerComposeUpdateScript({
+          latest,
+          config,
+          composeCommand: validation.composeCommand || "docker-compose",
+        })
+      : config.mode === "source"
+        ? buildSourceUpdateScript(latest, config.gitRemote)
+        : buildNpmUpdateScript(latest);
+
+  mkdirSync(path.dirname(config.logPath), { recursive: true });
+  const logFd = openSync(config.logPath, "a");
+  const child = spawnImpl("sh", ["-lc", script], {
+    detached: true,
+    stdio: ["ignore", logFd, logFd],
+    env: { ...process.env, ...env },
+  });
+  closeSync(logFd);
+  child.unref();
+
+  return {
+    started: true,
+    channel: config.mode,
+    logPath: config.logPath,
+    composeCommand: validation.composeCommand,
+  };
+}

@@ -1,0 +1,477 @@
+/**
+ * @file runtimeUnits.ts
+ * @description Nested combo runtime unit execution — see combo.ts for integration.
+ *
+ * @changes
+ * - [2026-07-24] [Composer] - Skip execute-mode units at concurrency cap before dispatch
+ */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
+import { errorResponse } from "../../utils/error.ts";
+import { resolveResilienceSettings } from "../../../src/lib/resilience/settings";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
+import { buildContextBudgetResponse, readBudgetFailure } from "./budgetExhaustion.ts";
+import type { ComboDiagnostics } from "../../utils/error.ts";
+import { recordComboRequest } from "../comboMetrics.ts";
+import {
+  resolveDelayMs,
+  requestScopedReplayKey,
+  isLocalProcessPressureResponse,
+} from "./comboPredicates.ts";
+import { readAttemptFailure } from "./attemptFailure.ts";
+import {
+  isProviderSafetyStreamFailure,
+  qualityValidationFailure,
+} from "./executeTargetClassify.ts";
+import { isSafetyRejection } from "./safetyStopLatch.ts";
+import { isRuntimeUnitAtConcurrencyCap } from "./runtimeUnitCapacity.ts";
+import { isQuotaExhaustionResponse, withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
+import {
+  validateResponseQuality,
+  releaseQualityClone,
+  releaseRejectedQualityResponse,
+} from "./validateQuality.ts";
+import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import type { ResponseValidationConfig } from "./responseValidation.ts";
+import { getStrategyTraits } from "./strategyRegistry.ts";
+import type {
+  ComboCollectionLike,
+  ComboLike,
+  ComboLogger,
+  ComboNestingContext,
+  HandleComboChatOptions,
+  HandleSingleModel,
+  HiddenModelsByProvider,
+  IsModelAvailable,
+  ResolvedComboRefTarget,
+  ResolvedComboUnit,
+} from "./types.ts";
+
+export type RuntimeUnitExecutionResult = {
+  response: Response;
+  unit: ResolvedComboUnit | null;
+};
+
+type RuntimeUnitRunner = (options: HandleComboChatOptions) => Promise<Response>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function getCombosList(allCombos: ComboCollectionLike): ComboLike[] {
+  const combos = Array.isArray(allCombos) ? allCombos : allCombos?.combos || [];
+  return combos.filter(
+    (combo): combo is ComboLike => isRecord(combo) && typeof combo.name === "string"
+  );
+}
+
+function findComboByName(allCombos: ComboCollectionLike, name: string): ComboLike | null {
+  return getCombosList(allCombos).find((combo) => combo.name === name) || null;
+}
+
+function unitDisplayName(unit: ResolvedComboUnit): string {
+  return unit.kind === "combo-ref" ? `combo:${unit.comboName}` : unit.modelStr;
+}
+
+function shuffleUnits(units: ResolvedComboUnit[]): ResolvedComboUnit[] {
+  const result = [...units];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
+function selectWeightedUnit(units: ResolvedComboUnit[]): ResolvedComboUnit | null {
+  const total = units.reduce((sum, unit) => sum + Math.max(0, Number(unit.weight) || 0), 0);
+  if (total <= 0) return units[0] || null;
+  let draw = Math.random() * total;
+  for (const unit of units) {
+    draw -= Math.max(0, Number(unit.weight) || 0);
+    if (draw <= 0) return unit;
+  }
+  return units[units.length - 1] || null;
+}
+
+async function executeModelUnit(args: {
+  body: Record<string, unknown>;
+  unit: Extract<ResolvedComboUnit, { kind: "model" }>;
+  handleSingleModel: HandleSingleModel;
+  isModelAvailable?: IsModelAvailable;
+  failoverBeforeRetry: unknown;
+  effectiveComboStrategy: string;
+  fallbackAttempts: number;
+}): Promise<Response> {
+  if (args.isModelAvailable) {
+    const available = await args.isModelAvailable(args.unit.modelStr, args.unit);
+    if (available !== true) return errorResponse(503, `Model ${args.unit.modelStr} is unavailable`);
+  }
+  return args.handleSingleModel(args.body, args.unit.modelStr, {
+    ...args.unit,
+    effectiveComboStrategy: args.effectiveComboStrategy,
+    failoverBeforeRetry: args.failoverBeforeRetry,
+    fallbackAttempts: args.fallbackAttempts,
+  });
+}
+
+function buildChildNestingContext(args: {
+  context: ComboNestingContext;
+  childComboName: string;
+}): ComboNestingContext | Response {
+  if (args.context.depth >= args.context.maxDepth) {
+    return errorResponse(503, `Max combo nesting depth (${args.context.maxDepth}) exceeded`);
+  }
+  if (args.context.visitedComboNames.includes(args.childComboName)) {
+    return errorResponse(503, `Circular combo reference detected: ${args.childComboName}`);
+  }
+  return {
+    ...args.context,
+    depth: args.context.depth + 1,
+    visitedComboNames: [...args.context.visitedComboNames, args.childComboName],
+  };
+}
+
+export async function executeComboRefUnit(args: {
+  body: Record<string, unknown>;
+  unit: ResolvedComboRefTarget;
+  allCombos: ComboCollectionLike;
+  runCombo: RuntimeUnitRunner;
+  baseOptions: HandleComboChatOptions;
+  nesting: ComboNestingContext;
+}): Promise<Response> {
+  const childCombo = findComboByName(args.allCombos, args.unit.comboName);
+  if (!childCombo) return errorResponse(503, `Nested combo "${args.unit.comboName}" not found`);
+  const childNesting = buildChildNestingContext({
+    context: args.nesting,
+    childComboName: childCombo.name,
+  });
+  if (childNesting instanceof Response) return childNesting;
+  return args.runCombo({
+    ...args.baseOptions,
+    body: args.body,
+    combo: childCombo,
+    nesting: childNesting,
+  });
+}
+
+async function executeRuntimeUnit(args: {
+  body: Record<string, unknown>;
+  unit: ResolvedComboUnit;
+  allCombos: ComboCollectionLike;
+  handleSingleModel: HandleSingleModel;
+  isModelAvailable?: IsModelAvailable;
+  runCombo: RuntimeUnitRunner;
+  baseOptions: HandleComboChatOptions;
+  nesting: ComboNestingContext;
+  failoverBeforeRetry: unknown;
+  effectiveComboStrategy: string;
+  fallbackAttempts: number;
+}): Promise<Response> {
+  if (args.unit.kind === "model") {
+    return executeModelUnit({
+      body: args.body,
+      unit: args.unit,
+      handleSingleModel: args.handleSingleModel,
+      isModelAvailable: args.isModelAvailable,
+      failoverBeforeRetry: args.failoverBeforeRetry,
+      effectiveComboStrategy: args.effectiveComboStrategy,
+      fallbackAttempts: args.fallbackAttempts,
+    });
+  }
+  return executeComboRefUnit({
+    body: args.body,
+    unit: args.unit,
+    allCombos: args.allCombos,
+    runCombo: args.runCombo,
+    baseOptions: args.baseOptions,
+    nesting: args.nesting,
+  });
+}
+
+function orderUnitsForStrategy(strategy: string, units: ResolvedComboUnit[]): ResolvedComboUnit[] {
+  const { unitExecutionOrder } = getStrategyTraits(strategy);
+  if (unitExecutionOrder === "shuffle") return shuffleUnits(units);
+  if (unitExecutionOrder === "weighted-pick") {
+    const selected = selectWeightedUnit(units);
+    if (!selected) return units;
+    return [selected, ...units.filter((unit) => unit.executionKey !== selected.executionKey)];
+  }
+  return units;
+}
+
+/**
+ * Runs strategy-ordered model and nested-combo units within the shared attempt budget.
+ * Returns the serving or terminal unit and response, or a final failure with no unit.
+ */
+export async function executeRuntimeUnitCombo(args: {
+  body: Record<string, unknown>;
+  combo: ComboLike;
+  strategy: string;
+  effectiveComboStrategy?: string;
+  units: ResolvedComboUnit[];
+  handleSingleModel: HandleSingleModel;
+  isModelAvailable?: IsModelAvailable;
+  log: ComboLogger;
+  config: Record<string, unknown>;
+  settings?: Record<string, unknown> | null;
+  allCombos: ComboCollectionLike;
+  signal?: AbortSignal | null;
+  nesting: ComboNestingContext;
+  baseOptions: HandleComboChatOptions;
+  runCombo: RuntimeUnitRunner;
+  hiddenModelsByProvider?: HiddenModelsByProvider;
+}): Promise<RuntimeUnitExecutionResult> {
+  const maxRetries = Number(args.config.maxRetries ?? 1);
+  const retryDelayMs = resolveDelayMs(args.config.retryDelayMs, 2000);
+  const orderedUnits = orderUnitsForStrategy(args.strategy, args.units);
+  // A request-scoped refusal repeats identically for every account of the same
+  // model, so later units of that model are skipped rather than replayed.
+  const rejectedModelKeys = new Set<string>();
+  const clientRequestedStream = args.body?.stream === true;
+  const preContentTransportRecovery =
+    clientRequestedStream &&
+    resolveResilienceSettings(args.settings).streamRecovery.enabled === true;
+  const guardedHandleSingleModel: HandleSingleModel = preContentTransportRecovery
+    ? async (...dispatchArgs) =>
+        args.signal?.aborted
+          ? errorResponse(499, "Client disconnected")
+          : args.handleSingleModel(...dispatchArgs)
+    : args.handleSingleModel;
+  let encounteredTransportReadFailure = false;
+  const startTime = Date.now();
+  const effectiveStrategy = args.effectiveComboStrategy ?? args.strategy;
+  const { honorsFallbackOnlyTargets } = getStrategyTraits(effectiveStrategy);
+  let lastResponse: Response | null = null;
+  let fallbackCount = 0;
+  let observedFailure = false;
+  let allObservedFailuresQuota = true;
+  const budgetFailures: Array<Awaited<ReturnType<typeof readBudgetFailure>>> = [];
+  const targetFailureTrust = new Map<
+    string,
+    { observedFailure: boolean; allObservedFailuresQuota: boolean }
+  >();
+  const observeFailure = async (response: Response, unit: ResolvedComboUnit): Promise<boolean> => {
+    budgetFailures.push(await readBudgetFailure(response));
+    const quotaExhausted = await isQuotaExhaustionResponse(
+      response,
+      unit.kind === "model" ? unit.provider : null,
+      unit.kind === "model" ? unit.modelStr : null
+    );
+    observedFailure = true;
+    allObservedFailuresQuota &&= quotaExhausted;
+    return quotaExhausted;
+  };
+  const finalFailure = (response: Response): Response =>
+    withQuotaExhaustionClassification(response, observedFailure ? allObservedFailuresQuota : null);
+  // #11462: attempts already made this loop, tracked for the attempt-budget-exceeded
+  // diagnostics trace below (mirrors the poolSize/attemptOrder shape combo.ts already
+  // attaches for the priority/round-robin strategies).
+  const attemptedUnits: Array<{ provider: string; model: string }> = [];
+  const buildAttemptBudgetDiag = (): ComboDiagnostics => ({
+    poolSize: orderedUnits.length,
+    attempted: args.nesting.attemptBudget.count,
+    excluded: [],
+    attemptOrder: attemptedUnits,
+    terminalReason: "max_attempts_exceeded",
+  });
+
+  for (const unit of orderedUnits) {
+    const protectedPriorityUnit =
+      honorsFallbackOnlyTargets && unit.fallbackOnlyOnQuotaExhaustion === true;
+    if (unit.kind === "model" && rejectedModelKeys.has(requestScopedReplayKey(unit.modelStr))) {
+      args.log.info(
+        "COMBO",
+        `Skipping model ${unit.modelStr} — same request already refused as request-scoped`
+      );
+      fallbackCount += 1;
+      continue;
+    }
+    const atCapacity = await isRuntimeUnitAtConcurrencyCap(
+      unit,
+      args.allCombos,
+      undefined,
+      args.hiddenModelsByProvider
+    );
+    if (preContentTransportRecovery && args.signal?.aborted)
+      return { response: errorResponse(499, "Client disconnected"), unit };
+    if (atCapacity) {
+      args.log.info(
+        "COMBO",
+        `Skipping ${unit.kind} ${unitDisplayName(unit)} — concurrency cap reached`
+      );
+      lastResponse = errorResponse(503, `${unitDisplayName(unit)} is at concurrency capacity`);
+      await observeFailure(lastResponse, unit);
+      if (protectedPriorityUnit) return { response: finalFailure(lastResponse), unit };
+      fallbackCount += 1;
+      continue;
+    }
+
+    for (let retry = 0; retry <= maxRetries; retry += 1) {
+      if (args.signal?.aborted) {
+        if (preContentTransportRecovery)
+          return { response: errorResponse(499, "Client disconnected"), unit };
+        lastResponse = errorResponse(499, "Client disconnected");
+        await observeFailure(lastResponse, unit);
+        return { response: finalFailure(lastResponse), unit };
+      }
+      args.nesting.attemptBudget.count += 1;
+      if (args.nesting.attemptBudget.count > args.nesting.attemptBudget.limit) {
+        lastResponse = buildContextBudgetResponse(
+          budgetFailures.at(-1)?.error,
+          budgetFailures,
+          buildAttemptBudgetDiag()
+        );
+        await observeFailure(lastResponse, unit);
+        return { response: finalFailure(lastResponse), unit };
+      }
+      if (retry > 0) {
+        if (encounteredTransportReadFailure) {
+          await waitForCooldownAwareRetry(retryDelayMs, args.signal);
+          if (args.signal?.aborted)
+            return { response: errorResponse(499, "Client disconnected"), unit };
+        } else await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      }
+      attemptedUnits.push({
+        provider: unit.kind === "model" ? unit.provider : "combo-ref",
+        model: unitDisplayName(unit),
+      });
+      args.log.info(
+        "COMBO",
+        `Trying ${unit.kind} ${unitDisplayName(unit)}${retry > 0 ? ` (retry ${retry})` : ""}`
+      );
+      let qualityRetryable: boolean | null = null;
+      const response = await executeRuntimeUnit({
+        body: args.body,
+        unit,
+        allCombos: args.allCombos,
+        handleSingleModel: guardedHandleSingleModel,
+        isModelAvailable: args.isModelAvailable,
+        runCombo: args.runCombo,
+        baseOptions: args.baseOptions,
+        nesting: args.nesting,
+        failoverBeforeRetry: args.config.failoverBeforeRetry,
+        effectiveComboStrategy: effectiveStrategy,
+        fallbackAttempts: fallbackCount,
+      });
+      if (preContentTransportRecovery && args.signal?.aborted) {
+        releaseRejectedQualityResponse(response, response);
+        return { response: errorResponse(499, "Client disconnected"), unit };
+      }
+      // #17049: a nested child combo already ended on a provider safety stop (HTTP-level or
+      // classified in-stream); the parent must not replace it with a sibling unit.
+      if (unit.kind === "combo-ref" && (await isSafetyRejection(response))) {
+        recordComboRequest(args.combo.name, null, {
+          success: false,
+          latencyMs: Date.now() - startTime,
+          fallbackCount,
+          strategy: effectiveStrategy,
+          target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+        });
+        return { response, unit };
+      }
+      if (
+        response.status === 503 &&
+        isLocalProcessPressureResponse(response, (await readAttemptFailure(response)).errorBody)
+      ) {
+        // Do not replay a shed child or replace its response with an aggregate.
+        return { response, unit };
+      }
+      lastResponse = response;
+      if (response.ok) {
+        if (unit.kind === "combo-ref") {
+          recordComboRequest(args.combo.name, null, {
+            success: true,
+            latencyMs: Date.now() - startTime,
+            fallbackCount,
+            strategy: effectiveStrategy,
+            target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+          });
+          return { response, unit };
+        }
+        const unitClone = cloneForQuality(response);
+        const quality = await validateResponseQuality(
+          unitClone,
+          clientRequestedStream,
+          args.log,
+          args.config.responseValidation as ResponseValidationConfig | undefined,
+          args.signal,
+          unit.kind === "model" &&
+            (await isTrustedEmptyTurn(unit.provider, response, unit.connectionId)),
+          preContentTransportRecovery
+        );
+        releaseQualityClone(unitClone, response, quality);
+        if (preContentTransportRecovery && args.signal?.aborted) {
+          void quality.clonedResponse?.body?.cancel().catch(() => {});
+          releaseRejectedQualityResponse(unitClone, response);
+          return { response: errorResponse(499, "Client disconnected"), unit };
+        }
+        encounteredTransportReadFailure ||= quality.upstreamFailure?.transportReadFailure === true;
+        if (quality.valid) {
+          recordComboRequest(args.combo.name, unit.modelStr, {
+            success: true,
+            latencyMs: Date.now() - startTime,
+            fallbackCount,
+            strategy: effectiveStrategy,
+            target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+          });
+          return { response, unit };
+        }
+        releaseRejectedQualityResponse(unitClone, response);
+        // #17049: an in-stream provider safety stop ends the nested combo immediately.
+        if (isProviderSafetyStreamFailure(quality)) {
+          recordComboRequest(args.combo.name, unit.modelStr, {
+            success: false,
+            latencyMs: Date.now() - startTime,
+            fallbackCount,
+            strategy: effectiveStrategy,
+            target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+          });
+          return { response: qualityValidationFailure(quality).response, unit };
+        }
+        qualityRetryable = quality.upstreamFailure?.retryable ?? false;
+        if (quality.upstreamFailure?.requestScoped)
+          rejectedModelKeys.add(requestScopedReplayKey(unit.modelStr));
+        lastResponse = qualityValidationFailure(quality).response;
+      }
+      if (lastResponse) {
+        const quotaExhausted = await observeFailure(lastResponse, unit);
+        if (protectedPriorityUnit) {
+          const trust = targetFailureTrust.get(unit.executionKey) ?? {
+            observedFailure: false,
+            allObservedFailuresQuota: true,
+          };
+          trust.observedFailure = true;
+          trust.allObservedFailuresQuota &&= quotaExhausted;
+          targetFailureTrust.set(unit.executionKey, trust);
+        }
+      }
+      if (
+        ![408, 429, 500, 502, 503, 504].includes(lastResponse.status) ||
+        qualityRetryable === false
+      ) {
+        break;
+      }
+    }
+    const protectedTargetTrust = targetFailureTrust.get(unit.executionKey);
+    if (
+      protectedPriorityUnit &&
+      protectedTargetTrust?.observedFailure &&
+      !protectedTargetTrust.allObservedFailuresQuota &&
+      lastResponse
+    ) {
+      return { response: finalFailure(lastResponse), unit };
+    }
+    fallbackCount += 1;
+  }
+  recordComboRequest(args.combo.name, null, {
+    success: false,
+    latencyMs: Date.now() - startTime,
+    fallbackCount,
+    strategy: effectiveStrategy,
+  });
+  return {
+    response: finalFailure(
+      lastResponse || errorResponse(503, "All nested combo units unavailable")
+    ),
+    unit: null,
+  };
+}

@@ -1,0 +1,556 @@
+#!/usr/bin/env node
+/**
+ * Strict environment variable contract checker.
+ *
+ * Enforces that every env var referenced in OmniRoute source code appears in
+ * both `.env.example` and `docs/reference/ENVIRONMENT.md`, and that the two files agree
+ * on the documented var set. Falls back to a small allowlist for variables
+ * that are intentionally documented but not literally referenced (legacy
+ * aliases, future-supported hooks) or vice versa.
+ *
+ *  Usage:
+ *    node scripts/check/check-env-doc-sync.mjs           # strict (CI mode)
+ *    node scripts/check/check-env-doc-sync.mjs --lenient # legacy report-only mode
+ *
+ * Strict mode exits non-zero if any of these are non-empty:
+ *  - vars in code but missing from .env.example
+ *  - vars in .env.example but missing from ENVIRONMENT.md
+ *  - vars in ENVIRONMENT.md but missing from .env.example
+ *
+ * Programmatic API:
+ *  Other Node tests can `import { runEnvDocSync } from "./check-env-doc-sync.mjs"`
+ *  and pass `{ root, envExample, envDoc, codeVars, ignore, docOnlyAllowlist,
+ *  envOnlyAllowlist }` to drive the checker against fixtures.
+ */
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
+
+// ─── Allowlists ────────────────────────────────────────────────────────────
+// Env vars referenced in code that should NOT trigger documentation drift.
+// These are usually system/process vars or harness-only knobs.
+const IGNORE_FROM_CODE = new Set([
+  "NODE_ENV",
+  "PATH",
+  "HOME",
+  "USER",
+  "LOGNAME",
+  "XDG_CURRENT_DESKTOP",
+  "PWD",
+  "SHELL",
+  "TERM",
+  "TZ",
+  "LANG",
+  "LC_ALL",
+  "LC_MESSAGES",
+  "CI",
+  "GITHUB_ACTIONS",
+  "RUNNER_OS",
+  // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
+  "ESLINT_RESULTS_JSON",
+  "COMPLEXITY_ESLINT_REPORT",
+  // Back-off unit (ms) between `docker buildx imagetools inspect` retries in
+  // scripts/ci/docker-image-complete.mjs (#18749). Lets tests set 0; a CI-script tuning knob
+  // with a built-in default, never OmniRoute runtime config.
+  "DOCKER_IMAGE_COMPLETE_RETRY_DELAY_MS",
+  // Agent environment / system execution paths.
+  "PROJECT_ROOT",
+  "ARTIFACTS_DIR",
+  // OS / Node internals frequently surfaced by indirect dependencies.
+  "APPDATA",
+  "LOCALAPPDATA",
+  "PROGRAMFILES",
+  "XDG_CONFIG_HOME",
+  // Codex-owned task/runtime locations and child-process markers. OmniRoute reads
+  // them as external execution context, not as product configuration.
+  "CODEX_HOME",
+  "CODEX_CHATGPT_WEB_BROWSER_HELPER_PROCESS",
+  // Claude Code's own config-root variable: the CLI only SETS it for the child `claude`
+  // process (bin/cli/commands/launch.mjs, setup-claude hint, #12161) — never product config.
+  "CLAUDE_CONFIG_DIR",
+  // systemd-injected notify socket path (sd_notify protocol, see
+  // scripts/dev/systemd-notify.mjs) — set by systemd only when running under
+  // a unit, never user config.
+  "NOTIFY_SOCKET",
+  // XDG Base Directory cache root — read (never defined by OmniRoute) so the
+  // Android/Termux serve path can honor an operator-set cache location (#8519).
+  "XDG_CACHE_HOME",
+  "USERPROFILE",
+  "PREFIX",
+  // X11 display server — set by the OS/session manager, not OmniRoute config.
+  "DISPLAY",
+  // POSIX session vars surfaced by cloudflaredTunnel.ts (env passthrough).
+  "LOGNAME",
+  "XDG_CURRENT_DESKTOP",
+  // Next.js / Node test runners — these are framework-managed.
+  "NEXT_DIST_DIR",
+  "NEXT_PHASE",
+  "NEXT_RUNTIME",
+  // Set/read by Next.js's own dev server (next-dev-server.js) when the turbopack
+  // bundler is active — framework-internal. The OmniRoute-facing knob is
+  // OMNIROUTE_USE_TURBOPACK (scripts/dev/run-next.mjs), which IS documented.
+  "TURBOPACK",
+  // Electron sets this on its embedded Node server; children must preserve Node mode.
+  // Runtime-owned context, never a user-facing OmniRoute setting (#16454).
+  "ELECTRON_RUN_AS_NODE",
+  "NODE_TEST_CONTEXT",
+  "VITEST",
+  // Instruction snippet shown to users (Traffic Inspector HttpProxySnippetCard) — not OmniRoute config.
+  "NODE_TLS_REJECT_UNAUTHORIZED",
+  // Claude Code's own auth env var — read from the CLI environment to detect
+  // existing auth and written into the generated Claude Code settings (so the CLI
+  // points at OmniRoute). A downstream client-tool var, not an OmniRoute server
+  // input (src/shared/services/claudeCliConfig.ts, api/cli-tools/claude-settings).
+  "ANTHROPIC_AUTH_TOKEN",
+  // CI providers (set by the runner).
+  "GITHUB_BASE_REF",
+  "GITHUB_BASE_SHA",
+  // Actions-owned output file used by scripts/ci/release-green-result.mjs.
+  // A runner protocol path, not user-configurable OmniRoute environment.
+  "GITHUB_OUTPUT",
+  // check-ai-attribution.mjs reads the PR of the Actions event payload when run without args (#14436)
+  "GITHUB_EVENT_PATH",
+  // Actions-owned output file used by scripts/ci/release-green-result.mjs.
+  // A runner protocol path, not user-configurable OmniRoute environment.
+  "GITHUB_OUTPUT",
+  // Runner-owned identity/event context and same-run job results consumed by
+  // scripts/quality/admission-verdict.mjs; never application .env settings.
+  "GITHUB_EVENT_NAME",
+  "GITHUB_RUN_ATTEMPT",
+  "GITHUB_RUN_ID",
+  "GITHUB_SHA",
+  "NEEDS_JSON",
+  // Set by the Actions runner; the ts7 ratchet appends its job summary there
+  // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).
+  "GITHUB_STEP_SUMMARY",
+  // Same class as BASE_REF: CI passes the PR base ref to the ts7 diagnostics ratchet
+  // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — a check signal, not runtime config (#9985).
+  "TS7_BASE_REF",
+  // CI passes BASE_REF=${{ github.base_ref }} to the OpenAPI breaking-change gate
+  // (scripts/check/check-openapi-breaking.mjs) — a build/check signal, not OmniRoute runtime config.
+  "BASE_REF",
+  // Same class as BASE_REF above: the `changes` job passes these four to the
+  // self-targeting-PR guard (scripts/check/check-pr-self-target.mjs) so it can compare a PR's
+  // head against its base. CI-only signals from github.head_ref / github.base_ref /
+  // pull_request.{head,base}.sha — never OmniRoute runtime config, and meaningless in a .env.
+  "HEAD_REF",
+  "HEAD_SHA",
+  "BASE_SHA",
+  // Escape hatch for the test-masking gate's release-scale skip
+  // (scripts/check/check-test-masking.mjs): above ~300 changed test files the per-file diff
+  // subchecks are skipped, and this raises that cap for anyone who wants the full pass anyway.
+  // A gate tuning knob, not application configuration.
+  "TEST_MASKING_MAX_CHANGED_TESTS",
+  // PR body injected by GitHub Actions into the pr-evidence gate (github.event.pull_request.body);
+  // a CI-only signal, never an OmniRoute runtime config (Phase 7.10).
+  "PR_BODY",
+  // CLI machine-id token opt-out (server-side flag; not user-configurable via .env).
+  "OMNIROUTE_DISABLE_CLI_TOKEN",
+  // Gated combo live-smoke harness (scripts/test/_vpsClient.mjs) — override the VPS HTTP
+  // smoke target host/key. Test/CI-only signals with safe defaults
+  // ("http://192.168.0.15:20128" / null), never OmniRoute runtime config (#5151).
+  "COMBO_LIVE_BASE_URL",
+  "COMBO_LIVE_API_KEY",
+  // Ad-hoc mesh/coverage scripts under scripts/ad-hoc/*.mjs (mesh-send, mesh-run,
+  // verify-coverage). Operator-supplied script secrets, not OmniRoute runtime config.
+  "BOT_TOKEN",
+  "BOT_URL",
+  // Homologation E2E suite (npm run homolog) vars — configured via the dedicated
+  // .env.homolog file (template: .env.homolog.example), never in the runtime .env.
+  // Test/ops-only signals against the homologation VPS, same class as COMBO_LIVE_*.
+  // See docs/ops/HOMOLOGATION.md.
+  "HOMOLOG_BASE_URL",
+  "HOMOLOG_ADMIN_PASSWORD",
+  "HOMOLOG_API_KEY",
+  "HOMOLOG_CRITICAL_PROVIDERS",
+  "HOMOLOG_EXPECT_VERSION",
+  // update-notifier opt-out for the CLI binary.
+  "OMNIROUTE_NO_UPDATE_NOTIFIER",
+  // Headless CLI execution flag for Electron.
+  "OMNIROUTE_HEADLESS",
+  // Platform / OS detection vars read by CLI environment helper (bin/cli/utils/environment.mjs).
+  // These are external signals set by the host OS or cloud provider — not OmniRoute config.
+  "CODESPACES",
+  "GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN",
+  "GITPOD_WORKSPACE_ID",
+  "NO_COLOR",
+  "REPL_ID",
+  "REPL_SLUG",
+  "WSL_DISTRO_NAME",
+  "WSL_INTEROP",
+  // X11/Wayland display server vars used by tray heuristic (isTraySupported).
+  "DISPLAY",
+  "WAYLAND_DISPLAY",
+  // Build-time overrides for generate-api-commands.mjs (spec input / commands output dir).
+  // OPENAPI_OUT_DIR exists so tests/unit/cli-api-generator-ref-params.test.ts can regenerate
+  // into a scratch dir instead of the real bin/cli/api-commands/ tree.
+  "OPENAPI_SPEC",
+  "OPENAPI_OUT_DIR",
+  // Aliases for documented vars handled via fallback ordering.
+  "API_KEY",
+  "APP_URL",
+  "PUBLIC_URL",
+  "ANTHROPIC_API_URL",
+  "OPENAI_API_URL",
+  "LOG_LEVEL",
+  // Internal QA helpers used only by scripts/ and Playwright.
+  "QA_BASE_URL",
+  "QA_LOCALES",
+  "QA_REPORT_SUFFIX",
+  "QA_ROUTES",
+  // Post-publish verifier (scripts/release/verify-published.mjs): env passed INTO the
+  // clean Docker container script (Hard Rule #13 env-option pattern) — release tooling
+  // internals, never OmniRoute runtime config.
+  "VERIFY_DEADLINE_S",
+  "VERIFY_PORT",
+  "VERIFY_VERSION",
+  // Doctor diagnostic flags (no runtime behavior yet — placeholders).
+  "OMNIROUTE_DOCTOR_HOST",
+  "OMNIROUTE_DOCTOR_LIVENESS_URL",
+  "OMNIROUTE_PROVIDER_CATALOG_PATH",
+  "OMNIROUTE_PROVIDER_TEST_MODEL",
+  // Test-only opt-out: instructs bin/omniroute.mjs to skip auto-loading the
+  // repository .env so isolation tests get a deterministic environment.
+  "OMNIROUTE_CLI_SKIP_REPO_ENV",
+  // Eval-harness only: operator-supplied provider credentials JSON read by the
+  // opt-in `npm run eval:compression` CLI (scripts/compression-eval/index.ts).
+  // A dev/ops measurement tool, never OmniRoute runtime config.
+  "OMNIROUTE_EVAL_CREDENTIALS",
+  // Build-time only: set by `build:release` (git short SHA) and read by
+  // write-build-sha.mjs to stamp dist/BUILD_SHA — injected by the build, never
+  // configured by users in .env.
+  "OMNIROUTE_BUILD_SHA",
+  // Listener-owned self-fetch transport signal. The HTTP/HTTPS launchers set
+  // this before application imports; it is not user-configurable product env.
+  "OMNIROUTE_INTERNAL_SCHEME",
+  // Runner-owned bind-host signal. scripts/dev/run-next.mjs publishes the
+  // interface it actually binds so the in-process startup guard can name it
+  // (#13695); operators configure HOST / HOSTNAME, never this.
+  "OMNIROUTE_BOUND_HOST",
+  // Source typo / placeholder.
+  "OMNIROUT",
+  // Static config alias path (the canonical var is OMNIROUTE_PAYLOAD_RULES_PATH).
+  "PAYLOAD_RULES_PATH",
+  // Node.js module resolution path — OS/Node internal, not an OmniRoute config var.
+  // Referenced in resolveSpawnArgs (ninerouter) to pass bundled native modules to subprocess.
+  "NODE_PATH",
+  // NVIDIA diagnostic/test helpers used only by ad-hoc scripts.
+  "NVIDIA_BASE_URL",
+  "NVIDIA_MODEL",
+  // Live smoke check for the claude-mem memory backend (scripts/ad-hoc/claude-mem-live-check.ts,
+  // #15425) — port of the operator's local claude-mem worker. The backend itself is configured
+  // through settings.backendConfigs["claude-mem"].port, never this env var.
+  "CLAUDE_MEM_PORT",
+  // Lemonade embedding-provider integration test (tests/integration/semantic-cache-lemonade.test.ts)
+  // — points the gated live test at an operator's local Lemonade server; the test skips itself
+  // when the endpoint is unreachable, never OmniRoute runtime config.
+  "LEMONADE_URL",
+  "LEMONADE_KEY",
+  "LEMONADE_MODEL",
+  // Discord integration ad-hoc script (scripts/ad-hoc/mesh-send.mjs) —
+  // operator-supplied bot credentials, not user-facing OmniRoute config.
+  "BOT_TOKEN",
+  "BOT_URL",
+  // XDG standard data directory — set by OS/desktop session, not OmniRoute config.
+  // Read by setup-open-code.mjs to locate platform-specific OpenCode data dir.
+  "XDG_DATA_HOME",
+  // Test-only override: points setup-open-code.mjs at a fixture plugin dir without
+  // requiring the real bundled plugin to be built.
+  "OMNIROUTE_OPENCODE_PLUGIN_DIR",
+  // Test-only escape hatch: makes getMachineIdRaw() skip the macOS ioreg strategy so
+  // machineId tests reach the fallback strategies on darwin (#13539). Not user config.
+  "DISABLE_IOREG_STRATEGY",
+  // Next.js-internal switch, not OmniRoute config: scripts/dev/standalone-server-ws.mjs sets it
+  // so Next skips its own SIGINT/SIGTERM handlers and the wrapper owns shutdown.
+  "NEXT_MANUAL_SIG_HANDLE",
+]);
+
+// Vars documented in ENVIRONMENT.md but intentionally absent from .env.example.
+// Used for past-tense documentation (Audit / Dead vars section), legacy aliases
+// with no runtime hook, and section anchors that look like vars to the regex.
+const DOC_ONLY_ALLOWLIST = new Set([
+  // Audit history (Removed / Dead Variables section).
+  "CEREBRAS_API_KEY",
+  "COHERE_API_KEY",
+  "FIREWORKS_API_KEY",
+  "GROQ_API_KEY",
+  "MISTRAL_API_KEY",
+  "NEBIUS_API_KEY",
+  "PERPLEXITY_API_KEY",
+  "TOGETHER_API_KEY",
+  "XAI_API_KEY",
+  "QIANFAN_API_KEY",
+  "CURSOR_PROTOBUF_DEBUG",
+  "CLI_COMPAT_KIRO",
+  "CLI_KIMI_CODING_BIN",
+  "CLI_ROO_BIN",
+  "IFLOW_OAUTH_CLIENT_ID",
+  "IFLOW_OAUTH_CLIENT_SECRET",
+  // Source-code constants accidentally captured by the doc regex.
+  "CLI_COMPAT_OMITTED_PROVIDER_IDS",
+  // The stream-recovery tuning object in open-sse/config/constants.ts (`STREAM_RECOVERY.HOLDBACK_MS`
+  // etc.) — documented for reference; the real operator-facing env vars are STREAM_RECOVERY_ENABLED /
+  // STREAM_RECOVERY_MIDSTREAM_ENABLED (both in .env.example). The bare prefix is not an env var.
+  "STREAM_RECOVERY",
+  // Sample default values that look like SHOUTY_NAMES (not env vars).
+  "CHANGEME",
+  // Legacy aliases — present in docs as "would be aliases" but read-only
+  // through their canonical names today.
+  "OMNIROUTE_CRYPT_KEY",
+  "OMNIROUTE_API_KEY_BASE64",
+  // Future-supported hooks: documented but currently hardcoded constants.
+  "MAX_RETRY_INTERVAL_SEC",
+  "REQUEST_RETRY",
+  "SKILLS_EXECUTION_TIMEOUT_MS",
+  "SKILLS_SANDBOX_DOCKER_IMAGE",
+  // Source-code constants referenced in the docs narrative for the local
+  // endpoints / route-guard classification (PR-3 in #3932).
+  "LOCAL_ONLY_API_PREFIXES",
+  // SQL keyword mentioned in the new VACUUM scheduler docs (#4437).
+  // The check's regex picks up the bare word in description text.
+  "VACUUM",
+  // Source-code constant (open-sse/services/combo/comboPredicates.ts:35 —
+  // `export const COMBO_LOOP_SAFETY_TIMEOUT_MS = 10 * 60 * 1000`), cited in the
+  // comboTimeoutMs narrative added by #13857. Not operator-configurable.
+  "COMBO_LOOP_SAFETY_TIMEOUT_MS",
+]);
+
+// Vars present in .env.example but intentionally absent from ENVIRONMENT.md.
+// Empty today — kept for forward compatibility / explicit exemption.
+const ENV_ONLY_ALLOWLIST = new Set([
+  // Documented in .env.example but not yet in docs/reference/ENVIRONMENT.md
+  "CODEX_REFRESH_SPACING_MS",
+  "DEBUG",
+  "HEAP_PRESSURE_THRESHOLD_MB",
+  "OMNIROUTE_TRACE",
+  "PII_TEST_BYPASS_MIN_WINDOW",
+  "PII_WINDOW_SIZE",
+  "TRAE_STREAM_TIMEOUT_MS",
+  "TRAE_TOKEN",
+  // #12190: Trae host/Origin override. ENVIRONMENT.md documents no Trae variable at
+  // all; this joins its two siblings above under the same .env.example-only tier.
+  "TRAE_WEB_ORIGIN",
+]);
+
+// ─── Parsing helpers ───────────────────────────────────────────────────────
+
+/**
+ * Extract VAR= entries from a `.env`-style file (handles commented examples).
+ */
+export function parseEnvExampleVars(text) {
+  const vars = new Set();
+  for (const line of String(text ?? "").split("\n")) {
+    const m = line.match(/^#?\s*([A-Z][A-Z0-9_]+)\s*=/);
+    if (m) vars.add(m[1]);
+  }
+  return vars;
+}
+
+/**
+ * Extract `VARNAME` tokens from a markdown doc — matches anything in backticks
+ * that looks like an env var (uppercase + digit + underscore).
+ */
+export function parseEnvDocVars(text) {
+  const vars = new Set();
+  for (const m of String(text ?? "").matchAll(/`([A-Z][A-Z0-9_]{2,})`/g)) {
+    vars.add(m[1]);
+  }
+  return vars;
+}
+
+/** Roots scanned for `process.env.X` references, relative to the repo root. */
+export const CODE_SCAN_ROOTS = [
+  "src",
+  "open-sse",
+  "bin",
+  "scripts",
+  "electron/main.js",
+  "electron/preload.js",
+];
+
+const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
+
+/**
+ * Collect environment variable references in source code.
+ *
+ * Pure Node on purpose. This used to shell out to
+ * `grep -rhoE … 2>/dev/null || true`; on Windows that line runs through cmd.exe,
+ * where `2>/dev/null` is an invalid path, so the command printed an error,
+ * `|| true` swallowed it, and the scan returned ZERO variables — the
+ * "in code but missing from .env.example" check then passed vacuously.
+ *
+ * Mirrors the grep it replaces: recursive, symlinks not followed, files that
+ * contain a NUL byte (binary) skipped, missing roots ignored.
+ *
+ * @param {{ cwd?: string, roots?: readonly string[] }} [options]
+ * @returns {Set<string>}
+ */
+export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
+  const repoRoot = cwd ?? REPO_ROOT;
+  const vars = new Set();
+  const scanFile = (file) => {
+    let text;
+    try {
+      text = fs.readFileSync(file, "utf8");
+    } catch {
+      return;
+    }
+    if (text.includes("\0")) return;
+    for (const m of text.matchAll(CODE_ENV_REF)) vars.add(m[1]);
+  };
+  const walk = (dir) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile()) scanFile(full);
+    }
+  };
+  for (const root of roots) {
+    const full = path.join(repoRoot, root);
+    let stat;
+    try {
+      stat = fs.lstatSync(full);
+    } catch {
+      continue;
+    }
+    if (stat.isDirectory()) walk(full);
+    else if (stat.isFile()) scanFile(full);
+  }
+  return vars;
+}
+
+/**
+ * Diff helper.
+ */
+function diff(set, against) {
+  return [...set].filter((v) => !against.has(v)).sort((a, b) => a.localeCompare(b));
+}
+
+// ─── Programmatic entry point ──────────────────────────────────────────────
+
+/**
+ * Run the contract checker. All inputs are overridable for tests.
+ *
+ * Returns `{ ok: boolean, summary, problems: { codeMissingEnv, envMissingDoc,
+ *   docMissingEnv } }`.
+ */
+export function runEnvDocSync(options = {}) {
+  const ignore = options.ignore ?? IGNORE_FROM_CODE;
+  const docOnly = options.docOnlyAllowlist ?? DOC_ONLY_ALLOWLIST;
+  const envOnly = options.envOnlyAllowlist ?? ENV_ONLY_ALLOWLIST;
+
+  const envExampleText =
+    options.envExampleText ??
+    (options.envExamplePath
+      ? fs.readFileSync(options.envExamplePath, "utf8")
+      : fs.readFileSync(path.join(REPO_ROOT, ".env.example"), "utf8"));
+  const envDocText =
+    options.envDocText ??
+    (options.envDocPath
+      ? fs.readFileSync(options.envDocPath, "utf8")
+      : fs.readFileSync(path.join(REPO_ROOT, "docs", "reference", "ENVIRONMENT.md"), "utf8"));
+
+  const envVars = parseEnvExampleVars(envExampleText);
+  const docVars = parseEnvDocVars(envDocText);
+
+  const codeVars = new Set(
+    [...(options.codeVars ?? scanCodeVars({ cwd: options.root }))].filter((v) => !ignore.has(v))
+  );
+
+  const codeMissingEnv = diff(codeVars, envVars);
+  const envMissingDoc = diff(envVars, docVars).filter((v) => !envOnly.has(v));
+  const docMissingEnv = diff(docVars, envVars).filter((v) => !docOnly.has(v));
+
+  const ok =
+    codeMissingEnv.length === 0 && envMissingDoc.length === 0 && docMissingEnv.length === 0;
+
+  return {
+    ok,
+    summary: {
+      code: codeVars.size,
+      envExample: envVars.size,
+      doc: docVars.size,
+    },
+    problems: {
+      codeMissingEnv,
+      envMissingDoc,
+      docMissingEnv,
+    },
+  };
+}
+
+// ─── CLI ───────────────────────────────────────────────────────────────────
+
+function printList(label, list, marker) {
+  if (list.length === 0) {
+    console.log(`  ${marker || "✓"} ${label}: none`);
+    return;
+  }
+  console.log(`  ✗ ${label}: ${list.length}`);
+  for (const v of list.slice(0, 50)) console.log(`     - ${v}`);
+  if (list.length > 50) console.log(`     ... and ${list.length - 50} more`);
+}
+
+function main() {
+  const lenient = process.argv.includes("--lenient");
+  const result = runEnvDocSync();
+
+  console.log("Env var contract sync report");
+  console.log("============================");
+  console.log(`Code references:          ${result.summary.code} unique vars`);
+  console.log(`In .env.example:          ${result.summary.envExample} unique vars`);
+  console.log(`In docs/reference/ENVIRONMENT.md: ${result.summary.doc} unique vars`);
+  console.log();
+
+  printList("In code but missing from .env.example", result.problems.codeMissingEnv);
+  printList("In .env.example but missing from ENVIRONMENT.md", result.problems.envMissingDoc);
+  printList("In ENVIRONMENT.md but missing from .env.example", result.problems.docMissingEnv);
+
+  if (result.ok) {
+    console.log("\n✓ Env / docs contract is in sync.");
+    process.exit(0);
+  }
+
+  if (lenient) {
+    console.log("\n⚠ Drift detected (lenient mode — exit 0).");
+    process.exit(0);
+  }
+
+  console.log(
+    "\n✗ Env / docs contract is out of sync. Update .env.example, docs/reference/ENVIRONMENT.md,"
+  );
+  console.log("  or the allowlists in scripts/check/check-env-doc-sync.mjs and try again.");
+  process.exit(1);
+}
+
+/**
+ * True when this module was launched directly as the Node entry point.
+ *
+ * `process.argv[1]` is an absolute filesystem path while `import.meta.url` is a
+ * file URL, so the two only match when encoded through `pathToFileURL`. A raw
+ * `file://${argv[1]}` comparison silently never matches when the checkout path
+ * contains characters the URL form percent-encodes (e.g. a space), which made
+ * the CLI exit 0 without running anything.
+ */
+export function isMainEntry(argv1, moduleUrl) {
+  if (!argv1) return false;
+  try {
+    return pathToFileURL(argv1).href === moduleUrl;
+  } catch {
+    return false;
+  }
+}
+
+if (isMainEntry(process.argv[1], import.meta.url)) {
+  main();
+}

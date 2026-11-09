@@ -1,0 +1,607 @@
+"use client";
+
+import Icon from "@/shared/components/Icon";
+
+/**
+ * ProviderModelsSection — Issue #3501 Phase 1m
+ *
+ * Extracted from the renderModelsSection() inline function in
+ * ProviderDetailPageClient. Receives all model/compat state + handlers
+ * as props (from useModelImportHandlers, useModelVisibilityHandlers,
+ * useModelCompatState, useProviderModels).
+ *
+ * Cycle-safe: no import from ProviderDetailPageClient.
+ */
+
+import { useState } from "react";
+import { ActionBar, AutoGrid, Button } from "@/shared/components";
+import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
+import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
+import {
+  getDisplayModelAlias,
+  providerText,
+  type ProviderMessageTranslator,
+} from "../providerPageHelpers";
+import ModelRow, { ModelVisibilityToolbar } from "./ModelRow";
+import PassthroughModelsSection from "./PassthroughModelsSection";
+import CompatibleModelsSection from "./CompatibleModelsSection";
+import { useProviderContextOverrides } from "../hooks/useProviderContextOverrides";
+import type { ModelCompatSavePatch } from "../hooks/useModelVisibilityHandlers";
+
+export interface ProviderModelsSectionProps {
+  // Provider identity
+  providerId: string;
+  providerAlias: string;
+  providerStorageAlias: string;
+  providerDisplayAlias: string;
+  providerInfo: {
+    name?: string;
+    passthroughModels?: boolean;
+  } | null;
+
+  // Provider-type flags
+  isCcCompatible: boolean;
+  isAnthropicCompatible: boolean;
+  isAnthropicProtocolCompatible: boolean;
+  isManagedAvailableModelsProvider: boolean;
+  compatibleSupportsModelImport: boolean;
+  allowModelImport: boolean;
+
+  // Models data
+  models: Array<{
+    id: string;
+    name?: string;
+    source?: string;
+    supportedEndpoints?: string[];
+    endpointCapabilitySource?: string;
+  }>;
+  modelMeta: {
+    customModels: any[];
+    modelCompatOverrides?: any[];
+    endpointAdapters?: Record<string, "available" | "unavailable" | "unknown">;
+  };
+  modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
+  syncedAvailableModels: any[];
+  syncedCatalogAuthoritative?: boolean;
+  compatibleFallbackModels: any[];
+
+  // Clipboard
+  copied: string | null;
+  onCopy: (text: string) => void;
+
+  // Model alias handlers
+  onSetAlias: (modelId: string, alias: string, providerAlias: string) => Promise<void>;
+  onDeleteAlias: (alias: string) => Promise<void>;
+  fetchProviderModelMeta: () => Promise<void>;
+
+  // Connections
+  connections: any[];
+  selectedConnection: any;
+
+  // Phase 1k: import handlers
+  canImportModels: boolean;
+  importingModels: boolean;
+  handleImportModels: () => Promise<void>;
+  isAutoSyncEnabled: boolean;
+  togglingAutoSync: boolean;
+  handleToggleAutoSync: () => Promise<void>;
+  isAutoFetchModelsEnabled: boolean;
+  togglingAutoFetchModels: boolean;
+  handleToggleAutoFetchModels: () => Promise<void>;
+  handleCompatibleImportWithProgress: (connectionId: string) => Promise<void>;
+
+  // Phase 1l: visibility handlers
+  compatSavingModelId: string | null;
+  togglingModelId: string | null;
+  bulkVisibilityAction: "select" | "deselect" | null;
+  clearingModels: boolean;
+  modelFilter: string;
+  testingModelId: string | null;
+  modelTestStatus: Record<string, "ok" | "error" | "quota">;
+  onModelTestStatusChange: (modelId: string, status: "ok" | "error") => void;
+  testingAll: boolean;
+  testProgress: { done: number; total: number } | null;
+  autoHideFailed: boolean;
+  visibilityFilter: "all" | "visible" | "hidden";
+  providerAliasEntries: [string, string][];
+  setModelFilter: (v: string) => void;
+  setAutoHideFailed: (v: boolean) => void;
+  setVisibilityFilter: (v: "all" | "visible" | "hidden") => void;
+  saveModelCompatFlags: (modelId: string, patch: ModelCompatSavePatch) => Promise<void>;
+  handleToggleModelHidden: (providerKey: string, modelId: string, hidden: boolean) => Promise<void>;
+  handleBulkToggleModelHidden: (
+    providerKey: string,
+    modelIds: string[],
+    hidden: boolean
+  ) => Promise<void>;
+  handleClearAllModels: () => Promise<void>;
+  onTestModel: (modelId: string, fullModel: string) => Promise<void>;
+  handleTestAll: (targets: Array<{ modelId: string; fullModel: string }>) => Promise<void>;
+
+  // Compat state (from useModelCompatState)
+  effectiveModelNormalize: (modelId: string, protocol?: string) => boolean;
+  effectiveModelPreserveDeveloper: (modelId: string, protocol?: string) => boolean;
+  effectiveModelHidden: (modelId: string) => boolean;
+  getUpstreamHeadersRecordForModel: (modelId: string, protocol: string) => Record<string, string>;
+
+  // Translation
+  t: ProviderMessageTranslator;
+}
+
+export default function ProviderModelsSection({
+  providerId,
+  providerAlias,
+  providerStorageAlias,
+  providerDisplayAlias,
+  providerInfo,
+  isCcCompatible,
+  isAnthropicCompatible,
+  isAnthropicProtocolCompatible,
+  isManagedAvailableModelsProvider,
+  compatibleSupportsModelImport,
+  allowModelImport,
+  models,
+  modelMeta,
+  modelAliases,
+  comboUsage,
+  syncedAvailableModels,
+  syncedCatalogAuthoritative = false,
+  compatibleFallbackModels,
+  copied,
+  onCopy,
+  onSetAlias,
+  onDeleteAlias,
+  fetchProviderModelMeta,
+  connections,
+  selectedConnection,
+  canImportModels,
+  importingModels,
+  handleImportModels,
+  isAutoSyncEnabled,
+  togglingAutoSync,
+  handleToggleAutoSync,
+  isAutoFetchModelsEnabled,
+  togglingAutoFetchModels,
+  handleToggleAutoFetchModels,
+  handleCompatibleImportWithProgress,
+  compatSavingModelId,
+  togglingModelId,
+  bulkVisibilityAction,
+  clearingModels,
+  modelFilter,
+  testingModelId,
+  modelTestStatus,
+  onModelTestStatusChange,
+  testingAll,
+  testProgress,
+  autoHideFailed,
+  visibilityFilter,
+  providerAliasEntries,
+  setModelFilter,
+  setAutoHideFailed,
+  setVisibilityFilter,
+  saveModelCompatFlags,
+  handleToggleModelHidden,
+  handleBulkToggleModelHidden,
+  handleClearAllModels,
+  onTestModel,
+  handleTestAll,
+  effectiveModelNormalize,
+  effectiveModelPreserveDeveloper,
+  effectiveModelHidden,
+  getUpstreamHeadersRecordForModel,
+  t,
+}: ProviderModelsSectionProps) {
+  const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
+  const [sortFreeFirst, setSortFreeFirst] = useState(false);
+  // Catalog rows only: the compatible/passthrough branches mount their own copy of
+  // the hook, so skip the duplicate fetch here. The key is the CANONICAL provider
+  // id — the one the capability resolver reads model_context_overrides by and the
+  // PUT guard validates — not the storage alias.
+  const isCatalogBranch = !isManagedAvailableModelsProvider && !providerInfo?.passthroughModels;
+  const { contextOverrides, savingContextModelId, saveContextWindowOverride } =
+    useProviderContextOverrides(providerId, t, { enabled: isCatalogBranch });
+  const canConfigureAutoFetchModels = connections.some(
+    (connection) => connection.isActive !== false && typeof connection.id === "string"
+  );
+  const autoFetchModelsToggle = canConfigureAutoFetchModels && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={handleToggleAutoFetchModels}
+      disabled={togglingAutoFetchModels}
+      aria-pressed={isAutoFetchModelsEnabled}
+      className="text-[12px]"
+      title={providerText(
+        t,
+        "autoFetchModelsTooltip",
+        "Fetch and cache upstream models when needed"
+      )}
+    >
+      <Icon
+        name={isAutoFetchModelsEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoFetchModelsEnabled ? "text-success" : "text-text-muted"}
+      />
+      <span className="text-text-main">
+        {providerText(t, "autoFetchModels", "Auto-fetch upstream models")}
+      </span>
+    </Button>
+  );
+  const autoSyncToggle = allowModelImport && compatibleSupportsModelImport && canImportModels && (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={handleToggleAutoSync}
+      disabled={togglingAutoSync}
+      aria-pressed={isAutoSyncEnabled}
+      className="text-[12px]"
+      title={t("autoSyncTooltip")}
+    >
+      <Icon
+        name={isAutoSyncEnabled ? "toggle_on" : "toggle_off"}
+        size={16}
+        className={isAutoSyncEnabled ? "text-success" : "text-text-muted"}
+      />
+      <span className="text-text-main">{t("autoSync")}</span>
+    </Button>
+  );
+  const modelDiscoveryControls = (
+    <>
+      {autoFetchModelsToggle}
+      {autoSyncToggle}
+    </>
+  );
+
+  const clearAllButton = (modelMeta.customModels.length > 0 ||
+    providerAliasEntries.length > 0 ||
+    syncedAvailableModels.length > 0 ||
+    (modelMeta.modelCompatOverrides?.length ?? 0) > 0) && (
+    <Button
+      size="sm"
+      variant="danger"
+      icon="delete_sweep"
+      onClick={handleClearAllModels}
+      disabled={clearingModels}
+      title={t("clearAllModels")}
+      className="text-[12px]"
+    >
+      <span>{t("clearAllModels")}</span>
+    </Button>
+  );
+
+  if (isManagedAvailableModelsProvider) {
+    const description =
+      providerId === "openrouter"
+        ? t("openRouterAnyModelHint")
+        : isCcCompatible
+          ? t("ccCompatibleModelsDescription")
+          : t("compatibleModelsDescription", {
+              type: isAnthropicCompatible ? t("anthropic") : t("openai"),
+            });
+    const inputLabel = providerId === "openrouter" ? t("modelIdFromOpenRouter") : t("modelId");
+    const inputPlaceholder =
+      providerId === "openrouter"
+        ? t("openRouterModelPlaceholder")
+        : isCcCompatible
+          ? "claude-sonnet-4-6"
+          : isAnthropicCompatible
+            ? t("anthropicCompatibleModelPlaceholder")
+            : t("openaiCompatibleModelPlaceholder");
+
+    return (
+      <div>
+        <ActionBar align="start" className="mb-4">
+          {modelDiscoveryControls}
+          {clearAllButton}
+        </ActionBar>
+        <CompatibleModelsSection
+          providerStorageAlias={providerStorageAlias}
+          providerDisplayAlias={providerDisplayAlias}
+          modelAliases={modelAliases}
+          comboUsage={comboUsage}
+          availableModels={syncedAvailableModels}
+          syncedCatalogAuthoritative={syncedCatalogAuthoritative}
+          customModels={modelMeta.customModels}
+          fallbackModels={compatibleFallbackModels}
+          endpointAdapters={modelMeta.endpointAdapters ?? {}}
+          description={description}
+          inputLabel={inputLabel}
+          inputPlaceholder={inputPlaceholder}
+          copied={copied}
+          onCopy={onCopy}
+          onSetAlias={onSetAlias}
+          onDeleteAlias={onDeleteAlias}
+          connections={connections}
+          isAnthropic={isAnthropicProtocolCompatible}
+          onImportWithProgress={handleCompatibleImportWithProgress}
+          t={t}
+          effectiveModelNormalize={effectiveModelNormalize}
+          effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
+          getUpstreamHeadersRecord={getUpstreamHeadersRecordForModel}
+          saveModelCompatFlags={saveModelCompatFlags}
+          compatSavingModelId={compatSavingModelId}
+          onModelsChanged={fetchProviderModelMeta}
+          allowImport={allowModelImport && compatibleSupportsModelImport}
+          isModelHidden={effectiveModelHidden}
+          onToggleHidden={(modelId, hidden) => handleToggleModelHidden(providerId, modelId, hidden)}
+          onBulkToggleHidden={(modelIds, hidden) =>
+            handleBulkToggleModelHidden(providerId, modelIds, hidden)
+          }
+          bulkTogglePending={bulkVisibilityAction !== null}
+          togglingModelId={togglingModelId}
+          onTestModel={onTestModel}
+          modelTestStatus={modelTestStatus}
+          testingModelId={testingModelId}
+          onTestAll={handleTestAll}
+          testingAll={testingAll}
+          testProgress={testProgress}
+          autoHideFailed={autoHideFailed}
+          onAutoHideFailedChange={setAutoHideFailed}
+        />
+      </div>
+    );
+  }
+
+  if (providerInfo?.passthroughModels) {
+    const passthroughDescription =
+      providerId === "openrouter"
+        ? t("openRouterAnyModelHint")
+        : providerId === "bedrock"
+          ? t("bedrockModelsDescription")
+          : t("passthroughModelsDescription", { provider: providerInfo?.name || providerId });
+    const passthroughInputLabel =
+      providerId === "openrouter" ? t("modelIdFromOpenRouter") : t("modelId");
+    const passthroughInputPlaceholder =
+      providerId === "openrouter"
+        ? t("openRouterModelPlaceholder")
+        : providerId === "bedrock"
+          ? t("bedrockModelPlaceholder")
+          : t("openaiCompatibleModelPlaceholder");
+
+    return (
+      <div>
+        <ActionBar align="start" className="mb-4">
+          {allowModelImport && (
+            <Button
+              size="sm"
+              variant="secondary"
+              icon="download"
+              onClick={handleImportModels}
+              disabled={!canImportModels || importingModels}
+            >
+              {importingModels ? t("importingModels") : t("importFromModels")}
+            </Button>
+          )}
+          {modelDiscoveryControls}
+          {clearAllButton}
+          {allowModelImport && !canImportModels && (
+            <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
+          )}
+        </ActionBar>
+        <PassthroughModelsSection
+          providerAlias={providerAlias}
+          modelAliases={modelAliases}
+          comboUsage={comboUsage}
+          catalogModels={models}
+          syncedCatalogAuthoritative={syncedCatalogAuthoritative}
+          availableModels={syncedAvailableModels}
+          customModels={modelMeta.customModels}
+          endpointAdapters={modelMeta.endpointAdapters ?? {}}
+          description={passthroughDescription}
+          inputLabel={passthroughInputLabel}
+          inputPlaceholder={passthroughInputPlaceholder}
+          copied={copied}
+          onCopy={onCopy}
+          onSetAlias={onSetAlias}
+          onDeleteAlias={onDeleteAlias}
+          t={t}
+          effectiveModelNormalize={effectiveModelNormalize}
+          effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
+          getUpstreamHeadersRecord={getUpstreamHeadersRecordForModel}
+          saveModelCompatFlags={saveModelCompatFlags}
+          compatSavingModelId={compatSavingModelId}
+          isModelHidden={effectiveModelHidden}
+          onToggleHidden={(modelId, hidden) => handleToggleModelHidden(providerId, modelId, hidden)}
+          onBulkToggleHidden={(modelIds, hidden) =>
+            handleBulkToggleModelHidden(providerId, modelIds, hidden)
+          }
+          bulkTogglePending={bulkVisibilityAction !== null}
+          togglingModelId={togglingModelId}
+          onTestModel={onTestModel}
+          onModelsChanged={fetchProviderModelMeta}
+          modelTestStatus={modelTestStatus}
+          onModelTestStatusChange={onModelTestStatusChange}
+          testingModelId={testingModelId}
+          providerId={providerId}
+          connectionId={selectedConnection?.id ?? ""}
+          autoHideFailed={autoHideFailed}
+          onAutoHideFailedChange={setAutoHideFailed}
+        />
+      </div>
+    );
+  }
+
+  const importButton =
+    allowModelImport || clearAllButton ? (
+      <ActionBar align="start" className="mb-4">
+        {allowModelImport && (
+          <Button
+            size="sm"
+            variant="secondary"
+            icon="download"
+            onClick={handleImportModels}
+            disabled={!canImportModels || importingModels}
+          >
+            {importingModels ? t("importingModels") : t("importFromModels")}
+          </Button>
+        )}
+        {allowModelImport && modelDiscoveryControls}
+        {clearAllButton}
+        {allowModelImport && !canImportModels && (
+          <span className="text-xs text-text-muted">{t("addConnectionToImport")}</span>
+        )}
+      </ActionBar>
+    ) : null;
+
+  if (models.length === 0) {
+    return (
+      <div>
+        {importButton}
+        <p className="text-sm text-text-muted">{t("noModelsConfigured")}</p>
+      </div>
+    );
+  }
+
+  const aliasByModelId = Object.entries(modelAliases).reduce<Record<string, string>>(
+    (acc, [alias, fullModel]) => {
+      const prefix = `${providerDisplayAlias}/`;
+      if (fullModel.startsWith(prefix)) {
+        const modelId = fullModel.slice(prefix.length);
+        const displayAlias = getDisplayModelAlias(modelId, alias);
+        if (displayAlias) acc[modelId] = displayAlias;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  const modelsWithVisibility = models.map((model) => ({
+    ...model,
+    isHidden: effectiveModelHidden(model.id),
+    isFree: isFreeModel(providerId, { id: model.id, isFree: (model as any).isFree }),
+  }));
+  const filteredModels = modelsWithVisibility.filter((model) => {
+    const matchesQuery = matchesModelCatalogQuery(modelFilter, {
+      modelId: model.id,
+      modelName: model.name,
+      source: model.source,
+    });
+    const matchesVisibility =
+      visibilityFilter === "all"
+        ? true
+        : visibilityFilter === "visible"
+          ? !model.isHidden
+          : model.isHidden;
+    const matchesFreeFilter =
+      freeFilter === "all" ? true : freeFilter === "free" ? model.isFree : !model.isFree;
+    return matchesQuery && matchesVisibility && matchesFreeFilter;
+  });
+  const displayModels = sortFreeFirst
+    ? sortModelsFreeFirst(filteredModels, { isFree: (m) => m.isFree, key: (m) => m.id })
+    : filteredModels;
+  const activeCount = modelsWithVisibility.filter((m) => !m.isHidden).length;
+  const hiddenFilteredCount = filteredModels.filter((m) => m.isHidden).length;
+  const visibleFilteredCount = filteredModels.length - hiddenFilteredCount;
+  const testAllTargets = filteredModels
+    .filter((m) => !m.isHidden)
+    .map((m) => ({ modelId: m.id, fullModel: `${providerDisplayAlias}/${m.id}` }));
+
+  return (
+    <div>
+      {importButton}
+      {modelsWithVisibility.length > 0 && (
+        <ModelVisibilityToolbar
+          t={t}
+          filterValue={modelFilter}
+          onFilterChange={setModelFilter}
+          activeCount={activeCount}
+          totalCount={modelsWithVisibility.length}
+          onSelectAll={() =>
+            handleBulkToggleModelHidden(
+              providerId,
+              filteredModels.map((model) => model.id),
+              false
+            )
+          }
+          onDeselectAll={() =>
+            handleBulkToggleModelHidden(
+              providerId,
+              filteredModels.map((model) => model.id),
+              true
+            )
+          }
+          selectAllDisabled={hiddenFilteredCount === 0 || bulkVisibilityAction !== null}
+          deselectAllDisabled={visibleFilteredCount === 0 || bulkVisibilityAction !== null}
+          onTestAll={() => handleTestAll(testAllTargets)}
+          testingAll={testingAll}
+          testProgress={testProgress}
+          visibilityFilter={visibilityFilter}
+          onVisibilityFilterChange={setVisibilityFilter}
+          autoHideFailed={autoHideFailed}
+          onAutoHideFailedChange={setAutoHideFailed}
+          freeFilter={freeFilter}
+          onFreeFilterChange={setFreeFilter}
+          sortFreeFirst={sortFreeFirst}
+          onSortFreeFirstChange={setSortFreeFirst}
+        />
+      )}
+      <AutoGrid>
+        {displayModels.map((model) => {
+          return (
+            <ModelRow
+              key={model.id}
+              model={model}
+              endpointInfo={(() => {
+                const discovered = syncedAvailableModels.find((row) => row.id === model.id);
+                const operator = modelMeta.customModels.find((row) => row.id === model.id);
+                return {
+                  supportedEndpoints:
+                    operator?.supportedEndpoints ??
+                    model.supportedEndpoints ??
+                    discovered?.supportedEndpoints,
+                  endpointCapabilitySource:
+                    operator?.endpointCapabilitySource ??
+                    model.endpointCapabilitySource ??
+                    discovered?.endpointCapabilitySource,
+                  discoveredEndpoints: discovered?.supportedEndpoints,
+                  resettable: Boolean(
+                    discovered && operator?.endpointCapabilitySource === "operator"
+                  ),
+                  onChanged: fetchProviderModelMeta,
+                  adapterStatuses: modelMeta.endpointAdapters ?? {},
+                };
+              })()}
+              fullModel={`${providerDisplayAlias}/${model.id}`}
+              provider={providerId}
+              alias={aliasByModelId[model.id]}
+              combos={comboUsage?.[model.id]}
+              copied={copied}
+              onCopy={onCopy}
+              onSetAlias={(a) => onSetAlias(model.id, a, providerDisplayAlias)}
+              onDeleteAlias={
+                aliasByModelId[model.id] ? () => onDeleteAlias(aliasByModelId[model.id]) : undefined
+              }
+              t={t}
+              showDeveloperToggle
+              effectiveModelNormalize={effectiveModelNormalize}
+              effectiveModelPreserveDeveloper={effectiveModelPreserveDeveloper}
+              getUpstreamHeadersRecord={(p) => getUpstreamHeadersRecordForModel(model.id, p)}
+              saveModelCompatFlags={saveModelCompatFlags}
+              compatDisabled={compatSavingModelId === model.id}
+              onToggleHidden={(modelId, hidden) =>
+                handleToggleModelHidden(providerId, modelId, hidden)
+              }
+              togglingHidden={togglingModelId === model.id}
+              onTestModel={onTestModel}
+              testStatus={modelTestStatus[model.id] || null}
+              testingModel={testingModelId === model.id}
+              contextWindowOverride={contextOverrides[model.id] ?? null}
+              onSaveContextWindowOverride={saveContextWindowOverride}
+              savingContextOverride={savingContextModelId === model.id}
+            />
+          );
+        })}
+        {filteredModels.length === 0 && modelFilter && (
+          <p className="col-span-full text-sm text-text-muted py-2">
+            {providerText(t, "noModelsMatch", `No models match "${modelFilter}"`, {
+              filter: modelFilter,
+            })}
+          </p>
+        )}
+      </AutoGrid>
+    </div>
+  );
+}

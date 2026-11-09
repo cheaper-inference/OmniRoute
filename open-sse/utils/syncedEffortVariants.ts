@@ -1,0 +1,171 @@
+/**
+ * Synced-model reasoning-effort catalog variants (#7694).
+ *
+ * Generic OpenAI-compatible model discovery (`src/lib/providerModels/modelDiscovery.ts`)
+ * captures upstream `reasoning.supported_efforts` (or OmniRoute's own flat
+ * `supportedThinkingEfforts` import field) into `SyncedAvailableModel.supportedThinkingEfforts`,
+ * and the catalog builder (`src/app/api/v1/models/catalog.ts`) surfaces it as
+ * `capabilities.effort_tiers`. Catalog-only clients (OpenCode, plain OpenAI-SDK model
+ * pickers) can only choose a model by its `id`, so — mirroring `claudeEffortVariants.ts`'s
+ * `<provider>/<model>-<level>` pattern for Claude — this module synthesizes one catalog
+ * entry per declared tier:
+ *
+ *     <provider>/<model>-<tier>     e.g. myprovider/my-model-high
+ *
+ * The gateway already resolves these ids at request time
+ * (`splitSyncedEffortSuffix` in `open-sse/services/model.ts`, wired through
+ * `src/sse/services/model.ts`'s synced-metadata lookup): it strips the `-<tier>` suffix
+ * back to the real base model and surfaces the tier as `reasoning_effort` before dispatch,
+ * only when the base model's own `supportedThinkingEfforts` actually declares that tier —
+ * never a blind string match.
+ *
+ * Skipped entirely for `kimi`-owned, and GLM (`glm`, `glm-cn`, `glmt`) models:
+ * they already own conflicting `-{effort}` aliases (`getKimiCodeStaticThinkingPolicy`, or `GlmExecutor::parseGlmEffortTier`), so generating
+ * another layer here would create invalid nested ids. Other providers skip model ids that
+ * already end in a canonical effort token (`-low`, `-high`, `-max`, …). That check does
+ * not include `-ultra`: a non-Codex id such as nemotron-ultra still exposes its variants.
+ * Codex `-ultra` aliases are already an effort tier and must not grow a second suffix.
+ * Exact discovered Codex ids ending in `-high` or `-max` still expose their own variants
+ * when no unsuffixed sibling stem is in the catalog (#13224). When that stem is present,
+ * the suffixed row is an alias and is left as it is.
+ */
+import { getCodexWireEfforts } from "@/shared/reasoning/codexEfforts.ts";
+import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization.ts";
+import { isDevinLiteralModelIdProvider } from "./devinLiteralModelIds.ts";
+
+/** Provider ids with dedicated `-{effort}` aliases — never synthesize another suffix layer. */
+export const SYNCED_EFFORT_SKIP_PROVIDERS = new Set(["glm", "glm-cn", "glmt"]);
+/** Provider-id prefixes covering that mechanism's multiple connection variants (kimi-coding, kimi-coding-apikey). */
+const SYNCED_EFFORT_SKIP_PROVIDER_PREFIXES = ["kimi"];
+
+/** Whether `ownedBy` already owns its own `-{effort}` suffix mechanism (never synthesize/expose another). */
+export function isSkippedEffortProvider(ownedBy: string): boolean {
+  return (
+    SYNCED_EFFORT_SKIP_PROVIDERS.has(ownedBy) ||
+    SYNCED_EFFORT_SKIP_PROVIDER_PREFIXES.some((prefix) => ownedBy.startsWith(prefix)) ||
+    // Devin CLI catalogs (devin-cli / devin-cli-agentic / devin-desktop, aliases
+    // dv / dva) embed the tier in the id itself — no variant layer on top.
+    isDevinLiteralModelIdProvider(ownedBy)
+  );
+}
+
+interface CatalogModelEntry {
+  id?: unknown;
+  owned_by?: unknown;
+  root?: unknown;
+  name?: unknown;
+  capabilities?: { effort_tiers?: unknown; [key: string]: unknown };
+  [key: string]: unknown;
+}
+
+function endsWithKnownEffortToken(id: string): boolean {
+  return CANONICAL_EFFORT_VALUES.some((value) => id.endsWith(`-${value}`));
+}
+
+/** Longest first so `-xhigh` is not read as `-high`. */
+const CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST: readonly string[] = [
+  ...CANONICAL_EFFORT_VALUES,
+].sort((a, b) => b.length - a.length);
+
+function canonicalEffortSuffixStem(id: string): string | null {
+  for (const value of CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST) {
+    const suffix = `-${value}`;
+    if (id.endsWith(suffix) && id.length > suffix.length) return id.slice(0, -suffix.length);
+  }
+  return null;
+}
+
+/** True when this Codex id is an alias of a bare stem already present in the catalog. */
+function codexAliasHasSiblingStem(id: string, ids: ReadonlySet<unknown>): boolean {
+  const stem = canonicalEffortSuffixStem(id);
+  return stem !== null && ids.has(stem);
+}
+
+function extractEffortTiers(model: CatalogModelEntry): string[] {
+  const tiers =
+    model.capabilities?.effort_tiers ??
+    (model.owned_by === "codex" ? model.supportedThinkingEfforts : undefined);
+  if (!Array.isArray(tiers)) return [];
+  const values = tiers.filter(
+    (tier): tier is string => typeof tier === "string" && tier.length > 0
+  );
+  return model.owned_by === "codex" ? getCodexWireEfforts(values) : values;
+}
+
+/**
+ * Whether the catalog should advertise reasoning-effort variants for this entry.
+ *
+ * Rule: a synced model that declares effort tiers, is not owned by a provider that
+ * already owns its own suffix mechanism, is not a virtual combo entry, and — except
+ * exact Codex ids — does not already end in a canonical effort token. Codex `-ultra`
+ * aliases never grow another suffix. Codex `-high`/`-max` ids stay eligible here;
+ * `appendSyncedEffortVariants` skips those only when the unsuffixed sibling stem is
+ * already in the same catalog (#13224).
+ */
+export function shouldExposeSyncedEffortVariants(
+  model: CatalogModelEntry
+): model is CatalogModelEntry & { id: string } {
+  if (!model || typeof model !== "object") return false;
+  const id = model.id;
+  if (typeof id !== "string" || id.length === 0) return false;
+  if (model.owned_by === "combo") return false;
+  if (typeof model.owned_by === "string" && isSkippedEffortProvider(model.owned_by)) {
+    return false;
+  }
+  // `-ultra` is not canonical. Only Codex treats it as an alias suffix, so a
+  // non-Codex id such as nemotron-ultra still exposes its variants.
+  if (model.owned_by === "codex") {
+    if (id.endsWith("-ultra")) return false;
+  } else if (endsWithKnownEffortToken(id)) {
+    return false;
+  }
+  return extractEffortTiers(model).length > 0;
+}
+
+/** Codex variants advertise their own label and drop tiers so clients never append a 2nd suffix. */
+function codexVariantOverrides(model: CatalogModelEntry, tier: string): Partial<CatalogModelEntry> {
+  if (model.owned_by !== "codex") return {};
+  return {
+    name: `${typeof model.name === "string" ? model.name : model.id} (${tier})`,
+    supportedThinkingEfforts: undefined,
+    capabilities: { ...model.capabilities, effort_tiers: undefined },
+  };
+}
+
+/**
+ * Append reasoning-effort variants for every eligible synced model. Returns the original
+ * array reference unchanged when nothing is eligible (no allocation in the common case).
+ * Derived from the already key-filtered/hidden-filtered catalog list, so a variant's base
+ * fields (visibility, capabilities, pricing) are inherited by spreading the base entry
+ * rather than re-running any filter — an alias never bypasses a filter the base model was
+ * already subject to.
+ */
+export function appendSyncedEffortVariants<T extends CatalogModelEntry>(models: T[]): T[] {
+  if (!Array.isArray(models)) return models;
+  const variants: T[] = [];
+  const existingIds = new Set(models.map((model) => model.id));
+
+  for (const model of models) {
+    if (!shouldExposeSyncedEffortVariants(model)) continue;
+    // Discovered Codex `*-high`/`*-max` ids stay when no bare stem exists (#13224).
+    // A suffixed row next to that stem is an alias and must not grow another tier.
+    if (model.owned_by === "codex" && codexAliasHasSiblingStem(model.id, existingIds)) {
+      continue;
+    }
+    const baseRoot = typeof model.root === "string" && model.root ? model.root : model.id;
+
+    for (const tier of extractEffortTiers(model)) {
+      const variantId = `${model.id}-${tier}`;
+      if (existingIds.has(variantId)) continue;
+      existingIds.add(variantId);
+      variants.push({
+        ...model,
+        id: variantId,
+        root: `${baseRoot}-${tier}`,
+        ...codexVariantOverrides(model, tier),
+      });
+    }
+  }
+
+  return variants.length > 0 ? [...models, ...variants] : models;
+}

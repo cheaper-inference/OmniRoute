@@ -1,0 +1,377 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-virtual-auto-"));
+const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
+
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
+const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
+const noAuthReadiness = await import("../../open-sse/services/autoCombo/noAuthReadiness.ts");
+
+// devin-cli-agentic is admitted to auto/* only once its app-layer readiness probe
+// (`devin auth status`, registered at boot) confirms the login — #15446, covered in
+// noauth-autocombo-allowlist.test.ts. Stub that probe as "logged in" here so this file
+// keeps asserting the full emulated-tool-calling membership, Devin included.
+noAuthReadiness.registerNoAuthReadiness("devin-cli-agentic", () => true);
+
+type VirtualComboResult = Awaited<ReturnType<typeof virtualFactory.createVirtualAutoCombo>>;
+
+// No-auth pool membership, mirrored from tests/unit/noauth-autocombo-allowlist.test.ts
+// (the dedicated guard). Kept explicit here on purpose: adding `toolCalling: "emulated"`
+// to a NOAUTH_PROVIDERS entry must show up as a deliberate, reviewed diff in both files.
+const ALLOWED_NOAUTH_PROVIDERS = [
+  "cloudflare-playground",
+  "devin-cli-agentic",
+  "duckduckgo-web",
+  "uncloseai",
+];
+const EXCLUDED_NOAUTH_PROVIDERS = [
+  "aihorde",
+  "auggie",
+  "codex-app-server",
+  "veoaifree-web",
+  "zcode",
+];
+
+async function resetStorage() {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+}
+
+test.beforeEach(async () => {
+  await resetStorage();
+});
+
+test.after(async () => {
+  await resetStorage();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+
+  if (ORIGINAL_DATA_DIR === undefined) {
+    delete process.env.DATA_DIR;
+  } else {
+    process.env.DATA_DIR = ORIGINAL_DATA_DIR;
+  }
+});
+
+test("createVirtualAutoCombo returns an executable auto combo for API-key connections", async () => {
+  await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "OpenAI",
+    apiKey: "sk-test-openai",
+    defaultModel: "gpt-4o-mini",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("fast");
+
+  assert.equal(combo.strategy, "auto");
+  assert.ok(combo.models.length >= 1);
+  const openaiModel = combo.models.find(
+    (model) => model.providerId === "openai" && model.model === "openai/gpt-4o-mini"
+  );
+  assert.ok(openaiModel, "the configured default must remain among registry candidates");
+  assert.equal(openaiModel.kind, "model");
+  assert.equal(combo.autoConfig.routerStrategy, "lkgp");
+  assert.ok(combo.autoConfig.candidatePool.includes("openai"));
+});
+
+test("createVirtualAutoCombo includes OAuth accessToken connections with real expiry fields", async () => {
+  await providersDb.createProviderConnection({
+    provider: "anthropic",
+    authType: "oauth",
+    email: "oauth@example.com",
+    accessToken: "oauth-access-token",
+    tokenExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+    defaultModel: "claude-sonnet-4-5",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.equal(combo.strategy, "auto");
+  assert.ok(combo.models.length >= 1);
+  assert.ok(
+    combo.models.some(
+      (model) => model.providerId === "anthropic" && model.model === "anthropic/claude-sonnet-4-5"
+    ),
+    "the configured default must remain among registry candidates"
+  );
+  assert.ok(combo.autoConfig.candidatePool.includes("anthropic"));
+});
+
+test("createVirtualAutoCombo includes configured web-session providers without apiKey fields", async () => {
+  await providersDb.createProviderConnection({
+    provider: "kimi-web",
+    authType: "apikey",
+    name: "Kimi Web Session",
+    providerSpecificData: { token: "kimi-web-session-token" },
+    defaultModel: "k3",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  const kimiWeb = combo.models.find(
+    (model) => model.providerId === "kimi-web" && model.model === "kimi-web/k3"
+  );
+  assert.ok(kimiWeb, "the configured web-session model should be an auto candidate");
+  assert.ok(combo.autoConfig.candidatePool.includes("kimi-web"));
+});
+
+test("createVirtualAutoCombo excludes web-session providers with empty required token data", async () => {
+  await providersDb.createProviderConnection({
+    provider: "kimi-web",
+    authType: "apikey",
+    name: "Kimi Web Empty Session",
+    providerSpecificData: { token: "   " },
+    defaultModel: "k3",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.equal(
+    combo.models.some((model) => model.providerId === "kimi-web"),
+    false,
+    "web-session providers with empty required token data must not be auto-combo candidates"
+  );
+  assert.equal(combo.autoConfig.candidatePool.includes("kimi-web"), false);
+});
+
+test("createVirtualAutoCombo excludes web-session providers with irrelevant providerSpecificData", async () => {
+  await providersDb.createProviderConnection({
+    provider: "perplexity-web",
+    authType: "apikey",
+    name: "Perplexity Web Invalid Session",
+    providerSpecificData: { unrelated: "value" },
+    defaultModel: "pplx-auto",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.equal(
+    combo.models.some((model) => model.providerId === "perplexity-web"),
+    false,
+    "web-session providers with irrelevant providerSpecificData must not be auto-combo candidates"
+  );
+  assert.equal(combo.autoConfig.candidatePool.includes("perplexity-web"), false);
+});
+
+test("createVirtualAutoCombo groups same-provider web sessions behind one logical model", async () => {
+  const connA = await providersDb.createProviderConnection({
+    provider: "kimi-web",
+    authType: "apikey",
+    name: "Kimi Web Session A",
+    providerSpecificData: { token: "kimi-web-session-token-a" },
+    defaultModel: "k3",
+  });
+  const connB = await providersDb.createProviderConnection({
+    provider: "kimi-web",
+    authType: "apikey",
+    name: "Kimi Web Session B",
+    providerSpecificData: { token: "kimi-web-session-token-b" },
+    defaultModel: "k3",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  const kimiWebModel = combo.models.find(
+    (model) => model.providerId === "kimi-web" && model.model === "kimi-web/k3"
+  );
+  assert.ok(kimiWebModel, "the provider model should remain in the candidate pool");
+  assert.equal(kimiWebModel.connectionId, null);
+  assert.deepEqual(
+    new Set(kimiWebModel.allowedConnectionIds),
+    new Set([connA.id, connB.id]),
+    "same-provider web sessions should remain available as account fallbacks"
+  );
+  assert.equal(
+    combo.autoConfig.candidatePool.filter((provider) => provider === "kimi-web").length,
+    1,
+    "provider pool remains provider-scoped while model entries preserve connection identity"
+  );
+});
+
+test("createVirtualAutoCombo excludes trigger-bypassed retired Qwen rows", async () => {
+  const db = core.getDbInstance();
+  db.exec(`
+    DROP TRIGGER provider_connections_retire_qwen_web_insert;
+    DROP TRIGGER provider_connections_retire_qwen_web_update;
+  `);
+
+  await providersDb.createProviderConnection({
+    provider: "qwen-web",
+    authType: "apikey",
+    name: "Retired Qwen Web",
+    apiKey: "retired-qwen-web-key",
+    defaultModel: "qwen3.8-max",
+  });
+  await providersDb.createProviderConnection({
+    provider: "qw",
+    authType: "apikey",
+    name: "Retired Qwen Web Alias",
+    apiKey: "retired-qw-key",
+    defaultModel: "qwen3.8-max",
+  });
+  await providersDb.createProviderConnection({
+    provider: "qwen-cloud",
+    authType: "apikey",
+    name: "Qwen Cloud Control",
+    apiKey: "qwen-cloud-key",
+    defaultModel: "qwen3.8-max",
+  });
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.equal(
+    combo.models.some((model) => model.providerId === "qwen-web"),
+    false
+  );
+  assert.equal(
+    combo.models.some((model) => model.providerId === "qw"),
+    false
+  );
+  assert.equal(combo.autoConfig.candidatePool.includes("qwen-web"), false);
+  assert.equal(combo.autoConfig.candidatePool.includes("qw"), false);
+  assert.ok(combo.autoConfig.candidatePool.includes("qwen-cloud"));
+});
+
+test("createVirtualAutoCombo includes clean-room ChatGPT Web and excludes its legacy alias", async () => {
+  const db = core.getDbInstance();
+  db.exec(`
+    DROP TRIGGER IF EXISTS provider_connections_retire_chatgpt_web_insert;
+    DROP TRIGGER IF EXISTS provider_connections_retire_chatgpt_web_update;
+  `);
+  for (const provider of ["chatgpt-web", "cgpt-web"]) {
+    const model = provider === "chatgpt-web" ? "gpt-5-5-thinking" : "gpt-5.5";
+    const credential =
+      provider === "chatgpt-web"
+        ? JSON.stringify({
+            cookies: [
+              {
+                name: "session",
+                value: "fixture",
+                domain: ".chatgpt.com",
+                path: "/",
+                expires: -1,
+                httpOnly: true,
+                secure: true,
+                sameSite: "Lax",
+              },
+            ],
+            origins: [],
+          })
+        : `sk-${provider}-restored-auto`;
+    db.prepare(
+      "INSERT INTO provider_connections " +
+        "(id, provider, auth_type, name, api_key, default_model, is_active, test_status, " +
+        "created_at, updated_at) VALUES (?, ?, 'apikey', ?, ?, ?, 1, 'active', " +
+        "datetime('now'), datetime('now'))"
+    ).run(`${provider}-restored-auto`, provider, `${provider} restored auto`, credential, model);
+  }
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.ok(combo.models.some((model) => model.providerId === "chatgpt-web"));
+  assert.ok(combo.autoConfig.candidatePool.includes("chatgpt-web"));
+  assert.equal(
+    combo.models.some((model) => model.providerId === "cgpt-web"),
+    false
+  );
+  assert.equal(combo.autoConfig.candidatePool.includes("cgpt-web"), false);
+});
+
+test("createVirtualAutoCombo restricts the no-auth pool to the emulated-tool-calling providers", async () => {
+  // Policy: the no-auth (keyless) auto-combo pool is built from the NOAUTH_PROVIDERS
+  // entries that opted into prompt-emulated tool calling (`toolCalling: "emulated"`),
+  // discovered at startup by
+  // open-sse/services/autoCombo/emulatedNoAuthAllowlist.ts::getEmulatedToolCallingNoAuthProviders().
+  // The admitted set is cloudflare-playground, devin-cli-agentic, duckduckgo-web,
+  // opencode, and uncloseai — duckduckgo-web is included, not excluded. The others
+  // stay usable via direct `<alias>/<model>` calls but must NOT be auto-routed to.
+  // Dedicated guard: tests/unit/noauth-autocombo-allowlist.test.ts.
+  // contract changed by #15979 (on top of #15839): `excludeTosAvoid` is ON by default and
+  // uncataloged models now inherit the provider's curated `tos: "avoid"` verdict, so every
+  // opencode model is ToS-filtered out by default. Opt out explicitly so this test keeps
+  // asserting the no-auth pool membership, not the ToS filter (covered by
+  // tests/unit/issue-15059-tos-avoid-auto-default.test.ts and tos-provider-alias-15059).
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("fast");
+
+  for (const allowed of ALLOWED_NOAUTH_PROVIDERS) {
+    const models = combo.models.filter((m) => m.providerId === allowed);
+    assert.ok(models.length >= 1, `${allowed} should have at least one model`);
+    assert.ok(
+      models.every((m) => m.connectionId === "noauth"),
+      `all ${allowed} models should use noauth connection`
+    );
+  }
+
+  for (const excluded of EXCLUDED_NOAUTH_PROVIDERS) {
+    assert.equal(
+      combo.models.some((model) => model.providerId === excluded),
+      false,
+      `no-auth provider "${excluded}" must be excluded from the auto-combo pool (no toolCalling: "emulated" opt-in)`
+    );
+  }
+
+  assert.equal(
+    combo.models.some((model) => model.providerId === "veoaifree-web"),
+    false,
+    "video-only no-auth providers must not be inserted into chat auto-combos"
+  );
+});
+
+test("createVirtualAutoCombo keeps credential-required providers out when disconnected", async () => {
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("fast");
+
+  assert.equal(
+    combo.models.some((model) => model.providerId === "openai"),
+    false,
+    "OpenAI should still require a real active connection"
+  );
+});
+
+test("createVirtualAutoCombo excludes trigger-bypassed Microsoft Designer connections exactly", async () => {
+  await core.ensureDbInitialized();
+  const db = core.getDbInstance();
+  db.exec("DROP TRIGGER IF EXISTS trg_retire_microsoft_designer_web_provider_insert");
+  db.exec("DROP TRIGGER IF EXISTS trg_retire_microsoft_designer_web_provider_update");
+
+  for (const [provider, model] of [
+    ["microsoft-designer-web", "dall-e-3"],
+    ["msdesigner", "dall-e-3"],
+    ["microsoft-designer-web-preview", "preview-model"],
+  ] as const) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: `${provider}-trigger-bypass`,
+      apiKey: `sk-${provider}-test`,
+      providerSpecificData: { accessToken: `${provider}-token` },
+      defaultModel: model,
+      isActive: true,
+    });
+  }
+
+  const combo: VirtualComboResult = await virtualFactory.createVirtualAutoCombo("coding");
+
+  assert.equal(
+    combo.models.some((model) =>
+      ["microsoft-designer-web", "msdesigner"].includes(model.providerId)
+    ),
+    false
+  );
+  assert.equal(combo.autoConfig.candidatePool.includes("microsoft-designer-web"), false);
+  assert.equal(combo.autoConfig.candidatePool.includes("msdesigner"), false);
+  assert.equal(
+    combo.models.some((model) => model.providerId === "microsoft-designer-web-preview"),
+    true,
+    "a merely similar provider ID must remain eligible"
+  );
+});

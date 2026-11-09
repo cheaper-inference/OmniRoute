@@ -1,0 +1,517 @@
+type JsonRecord = Record<string, unknown>;
+const CLAUDE_CODE_COMPATIBLE_PROVIDER_PREFIX = "anthropic-compatible-cc-";
+
+import { normalizeExcludedModelPatterns } from "@/domain/connectionModelRules";
+import { normalizeRoutingTags } from "@/domain/tagRouter";
+import { normalizeOpenRouterPreset } from "@/shared/constants/openRouterPreset";
+import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection";
+import { normalizeDetectedReasoningControl } from "@/shared/reasoning/reasoningControl";
+import {
+  PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS,
+  providerSpecificSecretKeysIn,
+} from "@/lib/db/providers/providerSpecificDataSecrets";
+import { maskStoredApiKey } from "@/shared/utils/apiKeyMask";
+
+export const CODEX_REASONING_EFFORT_VALUES = [
+  "none",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+] as const;
+
+export type CodexReasoningEffort = (typeof CODEX_REASONING_EFFORT_VALUES)[number];
+
+const CODEX_REASONING_EFFORT_SET = new Set<string>(CODEX_REASONING_EFFORT_VALUES);
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function normalizeString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return normalized || undefined;
+}
+
+const BEDROCK_REGION_PATTERN = /^[a-z]{2}(?:-gov)?-[a-z]+-\d+$/i;
+
+function normalizeAwsRegion(value: unknown): string | undefined {
+  const normalized = normalizeString(value);
+  if (!normalized || !BEDROCK_REGION_PATTERN.test(normalized)) return undefined;
+  return normalized;
+}
+
+function hasNonEmptyString(value: unknown): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isClaudeCodeCompatibleProvider(provider: string | null | undefined): boolean {
+  return (
+    typeof provider === "string" && provider.startsWith(CLAUDE_CODE_COMPATIBLE_PROVIDER_PREFIX)
+  );
+}
+
+export function normalizeCodexReasoningEffort(value: unknown): CodexReasoningEffort | undefined {
+  const normalized = normalizeString(value);
+  if (!normalized || !CODEX_REASONING_EFFORT_SET.has(normalized)) {
+    return undefined;
+  }
+  return normalized as CodexReasoningEffort;
+}
+
+export type CodexServiceTier = "default" | "priority" | "flex";
+
+export function normalizeCodexServiceTier(value: unknown): CodexServiceTier | undefined {
+  const normalized = normalizeString(value);
+  if (!normalized) return undefined;
+  if (normalized === "fast" || normalized === "priority") return "priority";
+  if (normalized === "default" || normalized === "flex") return normalized;
+  return undefined;
+}
+
+export function normalizeClaudeCodeCompatibleContext1m(value: unknown): true | undefined {
+  return value === true ? true : undefined;
+}
+
+export function normalizeClaudeCodeCompatibleRedactThinking(value: unknown): true | undefined {
+  return value === true ? true : undefined;
+}
+
+export function normalizeClaudeCodeCompatibleSummarizeThinking(value: unknown): true | undefined {
+  return value === true ? true : undefined;
+}
+
+export function normalizeRequestDefaults(
+  provider: string | null | undefined,
+  value: unknown
+): JsonRecord | undefined {
+  const record = asRecord(value);
+  if (Object.keys(record).length === 0) return undefined;
+
+  const normalized: JsonRecord = { ...record };
+
+  if (provider === "codex") {
+    const reasoningEffort = normalizeCodexReasoningEffort(record.reasoningEffort);
+    if (reasoningEffort) {
+      normalized.reasoningEffort = reasoningEffort;
+    } else {
+      delete normalized.reasoningEffort;
+    }
+
+    const serviceTier = normalizeCodexServiceTier(record.serviceTier);
+    if (serviceTier) {
+      normalized.serviceTier = serviceTier;
+    } else {
+      delete normalized.serviceTier;
+    }
+  }
+
+  if (isClaudeCodeCompatibleProvider(provider)) {
+    const context1m = normalizeClaudeCodeCompatibleContext1m(record.context1m);
+    if (context1m) {
+      normalized.context1m = true;
+    } else {
+      delete normalized.context1m;
+    }
+
+    const redactThinking = normalizeClaudeCodeCompatibleRedactThinking(record.redactThinking);
+    if (redactThinking) {
+      normalized.redactThinking = true;
+    } else {
+      delete normalized.redactThinking;
+    }
+
+    const summarizeThinking = normalizeClaudeCodeCompatibleSummarizeThinking(
+      record.summarizeThinking
+    );
+    if (summarizeThinking) {
+      normalized.summarizeThinking = true;
+    } else {
+      delete normalized.summarizeThinking;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
+
+// #6880 — per-connection prompt-cache capability override: strip unknown keys / invalid
+// types, drop the sub-object entirely when nothing valid survives.
+export function normalizeCacheOverride(value: unknown): JsonRecord | undefined {
+  const record = asRecord(value);
+  if (Object.keys(record).length === 0) return undefined;
+
+  const normalized: JsonRecord = {};
+  if (typeof record.supportsPromptCaching === "boolean") {
+    normalized.supportsPromptCaching = record.supportsPromptCaching;
+  }
+  if (
+    typeof record.cacheControlPassthrough === "string" &&
+    CACHE_PASSTHROUGH_VALUES.has(record.cacheControlPassthrough)
+  ) {
+    normalized.cacheControlPassthrough = record.cacheControlPassthrough;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+// #6880 — extracted so normalizeProviderSpecificData() stays under the
+// max-lines-per-function gate: normalizes the two nested-object sub-fields
+// (requestDefaults, cache) in one pass.
+function normalizeNestedSubObjects(
+  provider: string | null | undefined,
+  normalized: JsonRecord
+): void {
+  if ("requestDefaults" in normalized) {
+    const requestDefaults = normalizeRequestDefaults(provider, normalized.requestDefaults);
+    if (requestDefaults) {
+      normalized.requestDefaults = requestDefaults;
+    } else {
+      delete normalized.requestDefaults;
+    }
+  }
+
+  if ("cache" in normalized) {
+    const cache = normalizeCacheOverride(normalized.cache);
+    if (cache) {
+      normalized.cache = cache;
+    } else {
+      delete normalized.cache;
+    }
+  }
+}
+
+export function normalizeProviderSpecificData(
+  provider: string | null | undefined,
+  value: unknown
+): JsonRecord | undefined {
+  const record = asRecord(value);
+  if (Object.keys(record).length === 0) return undefined;
+
+  const normalized: JsonRecord = { ...record };
+
+  normalizeNestedSubObjects(provider, normalized);
+
+  if (
+    normalized.reasoningControl !== undefined &&
+    normalized.reasoningControl !== null &&
+    normalized.reasoningControl !== "chat-template" &&
+    normalized.reasoningControl !== "openai"
+  ) {
+    delete normalized.reasoningControl;
+  }
+  const hasExplicitReasoningControl =
+    normalized.reasoningControl === "chat-template" || normalized.reasoningControl === "openai";
+  if (hasExplicitReasoningControl) {
+    delete normalized.detectedReasoningControl;
+  } else if ("detectedReasoningControl" in normalized) {
+    const detected = normalizeDetectedReasoningControl(normalized.detectedReasoningControl);
+    if (detected) normalized.detectedReasoningControl = detected;
+    else delete normalized.detectedReasoningControl;
+  }
+
+  if ("openaiStoreEnabled" in normalized && typeof normalized.openaiStoreEnabled !== "boolean") {
+    delete normalized.openaiStoreEnabled;
+  }
+
+  if (provider === "codex") {
+    if (normalized.codexFingerprintMode === null) delete normalized.codexFingerprintMode;
+    if (normalized.codex_fingerprint_mode === null) delete normalized.codex_fingerprint_mode;
+    if (normalized.codexPromptCacheKeyScope === null) delete normalized.codexPromptCacheKeyScope;
+  }
+
+  // Hugging Face Bill-To account (X-HF-Bill-To header source): the edit modal
+  // sends explicit `null` to clear a previously-saved value (the PUT route
+  // merges { ...existing, ...incoming }, so omitting the key would keep it).
+  // Only a non-empty string survives normalization.
+  if ("billTo" in normalized) {
+    if (typeof normalized.billTo === "string" && normalized.billTo.trim()) {
+      normalized.billTo = normalized.billTo.trim();
+    } else {
+      delete normalized.billTo;
+    }
+  }
+
+  if (
+    "preserveEncryptedReasoning" in normalized &&
+    typeof normalized.preserveEncryptedReasoning !== "boolean"
+  ) {
+    delete normalized.preserveEncryptedReasoning;
+  }
+
+  if ("blockExtraUsage" in normalized && typeof normalized.blockExtraUsage !== "boolean") {
+    delete normalized.blockExtraUsage;
+  }
+  if ("allowPaidCredits" in normalized && typeof normalized.allowPaidCredits !== "boolean") {
+    delete normalized.allowPaidCredits;
+  }
+
+  // #2997: per-connection transient-cooldown opt-out — only persist a real boolean.
+  if ("disableCooling" in normalized && typeof normalized.disableCooling !== "boolean") {
+    delete normalized.disableCooling;
+  }
+
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
+  // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
+  if (
+    "keepMidConversationSystem" in normalized &&
+    typeof normalized.keepMidConversationSystem !== "boolean"
+  ) {
+    delete normalized.keepMidConversationSystem;
+  }
+
+  // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
+  // persist real booleans; both default to off when absent.
+  if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {
+    delete normalized.lowPriorityMode;
+  }
+  if ("autoLimitReset" in normalized && typeof normalized.autoLimitReset !== "boolean") {
+    delete normalized.autoLimitReset;
+  }
+
+  if ("peakHourProtection" in normalized) {
+    const peakHourProtection = normalizePeakHourProtection(normalized.peakHourProtection);
+    if (peakHourProtection) {
+      normalized.peakHourProtection = peakHourProtection;
+    } else {
+      delete normalized.peakHourProtection;
+    }
+  }
+
+  if ("autoFetchModels" in normalized && typeof normalized.autoFetchModels !== "boolean") {
+    delete normalized.autoFetchModels;
+  }
+
+  // Per-connection operator timeout — only persist a real integer.
+  if (
+    "timeoutMs" in normalized &&
+    (typeof normalized.timeoutMs !== "number" || !Number.isInteger(normalized.timeoutMs))
+  ) {
+    delete normalized.timeoutMs;
+  }
+
+  if ("preset" in normalized) {
+    const preset = provider === "openrouter" ? normalizeOpenRouterPreset(normalized.preset) : null;
+    if (preset) {
+      normalized.preset = preset;
+    } else {
+      delete normalized.preset;
+    }
+  }
+
+  if (provider === "bedrock" && "region" in normalized) {
+    const region = normalizeAwsRegion(normalized.region);
+    if (region) {
+      normalized.region = region;
+    } else {
+      delete normalized.region;
+    }
+  }
+
+  if ("tag" in normalized) {
+    if (typeof normalized.tag === "string") {
+      const trimmedTag = normalized.tag.trim();
+      if (trimmedTag) {
+        normalized.tag = trimmedTag;
+      } else {
+        delete normalized.tag;
+      }
+    } else {
+      delete normalized.tag;
+    }
+  }
+
+  if ("tags" in normalized) {
+    const tags = normalizeRoutingTags(normalized.tags);
+    if (tags.length > 0) {
+      normalized.tags = tags;
+    } else {
+      delete normalized.tags;
+    }
+  }
+
+  if ("excludedModels" in normalized || "excluded_models" in normalized) {
+    const excludedModels = normalizeExcludedModelPatterns(
+      normalized.excludedModels ?? normalized.excluded_models
+    );
+    if (excludedModels.length > 0) {
+      normalized.excludedModels = excludedModels;
+    } else {
+      delete normalized.excludedModels;
+    }
+    delete normalized.excluded_models;
+  }
+
+  // #8369: connection-level custom upstream headers — sanitize each key against the
+  // forbidden-header denylist and drop entries with non-string or empty values.
+  if ("customHeaders" in normalized) {
+    const raw = normalized.customHeaders;
+    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+      const cleaned: Record<string, string> = {};
+      for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+        const trimmedKey = key.trim();
+        if (!trimmedKey) continue;
+        if (isForbiddenCustomHeaderName(trimmedKey)) continue;
+        if (typeof value === "string" && value.trim().length > 0) {
+          cleaned[trimmedKey] = value.trim();
+        }
+      }
+      if (Object.keys(cleaned).length > 0) {
+        normalized.customHeaders = cleaned;
+      } else {
+        delete normalized.customHeaders;
+      }
+    } else {
+      delete normalized.customHeaders;
+    }
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : undefined;
+}
+
+/**
+ * Declared secret fields (PROVIDER_SPECIFIC_SECRET_FIELDS) the dashboard still shows and
+ * edits: the key-rotation pool. Each entry is returned masked exactly like `apiKey`
+ * (`revealKeys` mirrors the apiKey reveal switch) and the update route maps the echoed
+ * placeholders back to the stored tokens (reconcileMaskedExtraApiKeys).
+ */
+export const PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS = ["extraApiKeys"] as const;
+
+const MASKED_LIST_FIELD_SET: ReadonlySet<string> = new Set(
+  PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS
+);
+
+/**
+ * Strip credential-bearing providerSpecificData fields from an API response.
+ *
+ * The denylist is the shared PROVIDER_SPECIFIC_SECRET_FIELDS — the very list the DB layer
+ * encrypts at rest, so the two cannot drift — plus the response-only Codex handles.
+ * Stripped keys are safe to drop because the edit modal spreads the response back into
+ * its PUT and the server-side merge preserves keys the client did not send. The masked
+ * list fields are the exception: the dashboard shows and edits the rotation pool, so each
+ * entry comes back masked like `apiKey`.
+ */
+export function sanitizeProviderSpecificDataForResponse(
+  value: unknown,
+  options: { revealKeys?: boolean } = {}
+): JsonRecord | undefined {
+  const record = asRecord(value);
+  if (Object.keys(record).length === 0) return undefined;
+
+  const sanitized: JsonRecord = { ...record };
+  for (const key of providerSpecificSecretKeysIn(record)) {
+    if (!MASKED_LIST_FIELD_SET.has(key)) delete sanitized[key];
+  }
+  for (const key of PROVIDER_SPECIFIC_RESPONSE_ONLY_FIELDS) {
+    delete sanitized[key];
+  }
+  for (const key of PROVIDER_SPECIFIC_DATA_MASKED_LIST_FIELDS) {
+    if (!(key in sanitized)) continue;
+    const list = sanitized[key];
+    if (!Array.isArray(list)) {
+      delete sanitized[key];
+      continue;
+    }
+    sanitized[key] = list
+      .filter((entry): entry is string => typeof entry === "string")
+      .map((entry) => (options.revealKeys ? entry : maskStoredApiKey(entry)));
+  }
+  if (sanitized.browserCdpEndpoint) sanitized.browserCdpEndpoint = "configured";
+  return sanitized;
+}
+
+export function isOpenAIResponsesStoreEnabled(providerSpecificData: unknown): boolean {
+  return asRecord(providerSpecificData).openaiStoreEnabled === true;
+}
+
+export function buildOpenAIStoreSessionId(sessionId: unknown): string | undefined {
+  if (!hasNonEmptyString(sessionId)) return undefined;
+
+  const normalized = String(sessionId)
+    .trim()
+    .replace(/^ext:/i, "")
+    .replace(/[^a-zA-Z0-9._:-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 96);
+
+  if (!normalized) return undefined;
+  return `omniroute-session-${normalized}`;
+}
+
+export function ensureOpenAIStoreSessionFallback(
+  body: Record<string, unknown>,
+  sessionId: unknown
+): Record<string, unknown> {
+  const explicitSessionId = body.session_id;
+  const explicitConversationId = body.conversation_id;
+  const promptCacheKey = body.prompt_cache_key ?? body.promptCacheKey;
+
+  if (
+    hasNonEmptyString(explicitSessionId) ||
+    hasNonEmptyString(explicitConversationId) ||
+    hasNonEmptyString(promptCacheKey)
+  ) {
+    return body;
+  }
+
+  const fallbackSessionId = buildOpenAIStoreSessionId(sessionId);
+  if (!fallbackSessionId) return body;
+
+  return {
+    ...body,
+    session_id: fallbackSessionId,
+  };
+}
+
+export function getProviderRequestDefaults(
+  provider: string | null | undefined,
+  providerSpecificData: unknown
+): JsonRecord {
+  return normalizeRequestDefaults(provider, asRecord(providerSpecificData).requestDefaults) || {};
+}
+
+export function getCodexRequestDefaults(providerSpecificData: unknown): {
+  reasoningEffort?: CodexReasoningEffort;
+  serviceTier?: CodexServiceTier;
+} {
+  const defaults = getProviderRequestDefaults("codex", providerSpecificData);
+  const reasoningEffort = normalizeCodexReasoningEffort(defaults.reasoningEffort);
+  const serviceTier = normalizeCodexServiceTier(defaults.serviceTier);
+  return {
+    ...(reasoningEffort ? { reasoningEffort } : {}),
+    ...(serviceTier ? { serviceTier } : {}),
+  };
+}
+
+export function getClaudeCodeCompatibleRequestDefaults(providerSpecificData: unknown): {
+  context1m?: true;
+  redactThinking?: true;
+  summarizeThinking?: true;
+} {
+  const defaults = getProviderRequestDefaults(
+    "anthropic-compatible-cc-default",
+    providerSpecificData
+  );
+  const context1m = normalizeClaudeCodeCompatibleContext1m(defaults.context1m);
+  const redactThinking = normalizeClaudeCodeCompatibleRedactThinking(defaults.redactThinking);
+  const summarizeThinking = normalizeClaudeCodeCompatibleSummarizeThinking(
+    defaults.summarizeThinking
+  );
+  return {
+    ...(context1m ? { context1m } : {}),
+    ...(redactThinking ? { redactThinking } : {}),
+    ...(summarizeThinking ? { summarizeThinking } : {}),
+  };
+}

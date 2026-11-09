@@ -1,0 +1,111 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
+import {
+  executeWithAnthropicThinkingSignatureRecovery,
+  isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
+} from "./passthroughHelpers.ts";
+
+type ProviderExecution = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
+  response: Response;
+  url?: string;
+  headers?: Headers | Record<string, string>;
+  transformedBody?: unknown;
+  /** Internal-only upstream failure classification carried by the retried execution (#3229). */
+  upstreamDiagnostic?: Record<string, unknown>;
+};
+
+type ParsedError = {
+  statusCode: number;
+  message: string;
+  retryAfterMs: number | null;
+  responseBody: unknown;
+  errorCode?: unknown;
+  errorType?: unknown;
+};
+
+export type ThinkingSignatureRecoveryResult = {
+  attempted: boolean;
+  succeeded: boolean;
+  execution: ProviderExecution | null;
+  error: ParsedError | null;
+  recoveryBody: unknown | null;
+};
+
+/**
+ * Retry exactly once after one of the two Anthropic thinking-block
+ * validation errors this module understands: the explicit signature
+ * rejection, or the separate "latest assistant message cannot be modified"
+ * error (#17324). The caller keeps all connection/provider resilience state
+ * untouched until this request-scoped recovery has finished.
+ */
+export async function recoverAnthropicThinkingSignature(args: {
+  provider?: string | null;
+  model?: string | null;
+  statusCode: number;
+  message: string;
+  body: unknown;
+  execute: (body: unknown) => Promise<ProviderExecution>;
+  parseError: (response: Response) => Promise<ParsedError>;
+}): Promise<ThinkingSignatureRecoveryResult> {
+  const errorArgs = {
+    provider: args.provider,
+    model: args.model,
+    status: args.statusCode,
+    message: args.message,
+  };
+  if (
+    !isAnthropicThinkingSignatureError(errorArgs) &&
+    !isAnthropicThinkingModifiedError(errorArgs)
+  ) {
+    return {
+      attempted: false,
+      succeeded: false,
+      execution: null,
+      error: null,
+      recoveryBody: null,
+    };
+  }
+
+  const firstFailure = {
+    response: new Response(null, { status: args.statusCode }),
+    status: args.statusCode,
+    message: args.message,
+  };
+  const recovery = await executeWithAnthropicThinkingSignatureRecovery({
+    provider: args.provider,
+    model: args.model,
+    body: args.body,
+    execute: async (requestBody) => {
+      if (requestBody === args.body) return firstFailure;
+      return args.execute(requestBody);
+    },
+    getError: async (result) => {
+      if (result === firstFailure) {
+        return { status: firstFailure.status, message: firstFailure.message };
+      }
+      if (result.response.ok) return null;
+      const details = await args.parseError(result.response.clone());
+      return { status: details.statusCode, message: details.message };
+    },
+  });
+
+  if (!recovery.retried) {
+    return {
+      attempted: false,
+      succeeded: false,
+      execution: null,
+      error: null,
+      recoveryBody: null,
+    };
+  }
+
+  const execution = recovery.result as ProviderExecution;
+  return {
+    attempted: true,
+    succeeded: execution.response.ok,
+    execution,
+    error: execution.response.ok ? null : await args.parseError(execution.response),
+    recoveryBody: recovery.recoveryBody,
+  };
+}

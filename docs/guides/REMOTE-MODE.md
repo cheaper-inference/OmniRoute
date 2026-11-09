@@ -1,0 +1,489 @@
+---
+title: "Remote Mode — Drive a remote OmniRoute from your laptop"
+version: 3.8.50
+lastUpdated: 2026-08-18
+---
+
+# Remote Mode
+
+Run the `omniroute` CLI on your laptop while OmniRoute itself runs somewhere else
+(a VPS, a home server, another machine on your Tailnet). You log in once with
+`omniroute connect`, and from then on **every** CLI command targets that remote
+server — same commands, same output, just executed against the remote.
+
+There is no second tool to install: remote mode is the regular `omniroute` CLI
+plus scoped **access tokens**.
+
+```bash
+npm install -g omniroute                 # the normal CLI
+omniroute connect 192.168.0.15           # log in (password → scoped token)
+omniroute models list                    # ← now lists the REMOTE server's models
+omniroute configure codex                # ← writes a local Codex profile from the remote catalog
+```
+
+---
+
+## How it works
+
+```
+your laptop                              remote OmniRoute (VPS)
+┌────────────────────┐                   ┌───────────────────────────────┐
+│ omniroute CLI      │  POST /api/cli/connect  (password → token)         │
+│  context: vps      │ ───────────────►  │ mints a scoped access token    │
+│  baseUrl, token    │  Authorization: Bearer oma_live_…                  │
+│                    │ ───────────────►  │ every management route, scope- │
+│ writes configs     │ ◄───────────────  │ checked per the token's scope  │
+│ LOCALLY            │                   └───────────────────────────────┘
+└────────────────────┘
+```
+
+- **Contexts** store one server each (`~/.omniroute/config.json`, `chmod 600`).
+  `omniroute contexts use <name>` switches the active server; `default` is local.
+- **Access tokens** (`oma_live_…`) authorize management commands. They are
+  distinct from inference API keys (`sk-…`, used for `/v1/chat/completions`).
+- Only the SHA-256 hash of a token is stored server-side. The plaintext is shown
+  **once**, at creation.
+
+---
+
+## Connecting
+
+### With the management password (bootstrap)
+
+```bash
+omniroute connect 192.168.0.15
+# Management password for http://192.168.0.15:20128: ********
+# ✔ Connected to http://192.168.0.15:20128 — context '192.168.0.15' (scope: admin)
+```
+
+The password flow mints an **admin** token by default (you hold the password, so
+you already have full control). Downscope with `--scope`:
+
+```bash
+omniroute connect 192.168.0.15 --scope write
+```
+
+Options: `--port <p>` (when the host has none), `--name <ctx>` (context name),
+`--scope read|write|admin`. A full URL is honoured as-is:
+`omniroute connect https://omni.example.com`.
+
+When the server has dashboard two-factor authentication enabled (Settings →
+Security), the password alone is refused: the CLI then asks for the code from the
+authenticator app (or a recovery code). Pass it up front with `--totp <code>` for
+non-interactive use.
+
+### With a pre-generated token
+
+Generate a scoped token in the dashboard (or with `omniroute tokens create`) and
+paste it — no password needed:
+
+```bash
+omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
+```
+
+The CLI validates it via `GET /api/cli/whoami` and saves it as the active context.
+
+---
+
+## Scopes
+
+Three levels, hierarchical (`admin ⊃ write ⊃ read`):
+
+| Scope   | Can do                                                                       |
+| ------- | ---------------------------------------------------------------------------- |
+| `read`  | list/inspect — `models list`, `providers status`, `logs`, `usage`, `cost`    |
+| `write` | read **+** configure/apply — `setup-codex`, `keys add`, `config set`, combos |
+| `admin` | write **+** manage — `tokens` CRUD, add providers, services, policy, oauth   |
+
+The server infers the scope each route requires from the HTTP method
+(`GET`→read, mutations→write) plus an admin allowlist for sensitive surfaces
+(`/api/cli/tokens`, `/api/providers` mutations, `/api/oauth`, `/api/services`, …).
+A token with insufficient scope gets `403` with a clear message.
+
+> Routes that spawn processes (`/api/services/*`, `/api/mcp/*`, …) stay
+> **loopback-only** — a remote token can never reach them, regardless of scope.
+
+---
+
+## Connecting Antigravity on a remote install
+
+Antigravity uses Google's firstparty/nativeapp consent screen. Google only
+releases the authorization code when the **loopback redirect**
+(`http://127.0.0.1:<port>/callback`) is **reachable from the browser that
+approves the sign-in**. On a remote VPS install that loopback lives on the
+server, not on your machine, so the consent screen **hangs forever and never
+emits a code** — the normal "paste the callback URL" fallback has nothing to
+paste. (This is a Google-side constraint: the same hang happens in any proxy
+that uses the bundled Antigravity desktop client, not just OmniRoute.)
+
+The dashboard detects this before you get stuck: opening **Providers → Antigravity →
+Connect** from a non-localhost address replaces the generic "copy the callback URL"
+notice with the two remedies below, each with your host and port already filled in.
+(A LAN address counts — `192.168.x.x` is not localhost as far as this callback is
+concerned.)
+
+There are two supported ways to connect Antigravity to a remote OmniRoute.
+
+### Option A — local login helper (recommended)
+
+Run the OAuth on **your own computer**, where `127.0.0.1` is reachable. The helper
+talks to Google directly, so the consent completes where the dashboard's version
+cannot.
+
+**If you are already connected** (`omniroute connect <host>`), there is nothing to
+copy — the helper delivers the credential to that install for you:
+
+```bash
+# On your LOCAL machine (needs Node.js + a browser):
+omniroute connect 192.168.0.15        # once — mints an admin-scoped context token
+npx omniroute login antigravity
+#   ↳ opens the Google consent, captures the callback on a local loopback port,
+#     exchanges it, and POSTs the credential to the active context:
+#
+#   Antigravity connected on http://192.168.0.15:20128 (connection abc123).
+#   Nothing to paste — you can close this terminal.
+```
+
+The push happens automatically whenever the active context points at another
+machine. Force it either way with `--push` / `--no-push`, or aim at a specific
+context with `--context <name>`.
+
+**If your machine cannot reach the VPS** (firewalled, no SSH, air-gapped desk), the
+helper still works — it only ever _needs_ Google. Use `--no-push`, or just let the
+push fail: it falls back to printing the blob rather than discarding an
+authorization you already completed.
+
+```bash
+npx omniroute login antigravity --no-push
+#   omniroute-cred-v1.eyJ2IjoxLCJ...
+```
+
+Then, in the **remote** dashboard: **Providers → Antigravity → Connect**, and paste
+the `omniroute-cred-v1.…` blob into the **Step 2** field (it accepts either a
+callback URL or a credential blob). OmniRoute decodes it, runs the Cloud Code
+onboarding server-side, and persists the connection.
+
+> The blob contains a refresh token — treat it like a password. On the push path it
+> is sent once over your context's authenticated connection; on the paste path, over
+> your dashboard connection. Either way it is stored encrypted at rest, and a
+> successful push never prints it to your terminal.
+
+Flags: `--no-browser` (print the URL instead of auto-opening), `--port <n>`
+(pin the loopback port), `--timeout <ms>`, `--push` / `--no-push` (override the
+automatic delivery), `--context <name>` (target a specific context).
+
+### Option B — SSH local-forward tunnel
+
+If you have SSH access to the VPS, forward the dashboard port so that the
+loopback callback resolves back to the server through the tunnel:
+
+```bash
+# On your LOCAL machine:
+ssh -L 20128:127.0.0.1:20128 user@your-vps
+# then open http://localhost:20128 in your LOCAL browser and connect Antigravity
+# normally — the 127.0.0.1:20128/callback redirect now reaches the VPS via SSH.
+```
+
+Because you reach the dashboard as `localhost:20128`, the Google consent
+completes and the callback is delivered to the server through the same tunnel —
+no blob needed. Keep the tunnel open until the connection shows as active.
+
+Unlike the fixed-loopback providers below, **one forward is enough** here: the
+Antigravity callback rides the dashboard port itself, so there is no second
+provider-specific port to tunnel.
+
+> A fully headless alternative (no helper, no tunnel) is to configure your **own**
+> Google OAuth web credentials + a public base URL; see the provider's OAuth
+> environment variables. The two options above need no extra Google setup.
+
+---
+
+## Connecting Codex / Grok on a remote install (fixed-loopback providers)
+
+Codex, xAI (`xai-oauth`) and Grok CLI (`grok-cli`) register a **fixed** loopback
+`redirect_uri` with their upstream OAuth app. OmniRoute cannot change it — the
+provider always sends the browser back to the same hardcoded address:
+
+| Provider    | Fixed callback the provider redirects to |
+| ----------- | ---------------------------------------- |
+| `codex`     | `http://localhost:1455/auth/callback`    |
+| `xai-oauth` | `http://127.0.0.1:56121/callback`        |
+| `grok-cli`  | `http://127.0.0.1:56122/callback`        |
+
+`localhost` there means **the machine running the browser**, while OmniRoute's PKCE
+callback server listens on the **server's** loopback. Open the dashboard at a LAN
+address like `http://192.168.0.15:20128` and the two never meet: the authorization
+code is delivered to your own laptop's `localhost:1455`, where nothing is listening,
+and the provider fails the sign-in without surfacing an error.
+
+The dashboard detects this before opening the popup and shows the tunnel command
+instead of letting the login fail silently (#8046).
+
+### Fix — forward **both** ports
+
+```bash
+# On the machine running the BROWSER:
+ssh -L 20128:127.0.0.1:20128 -L 1455:127.0.0.1:1455 <user>@192.168.0.15
+# then browse to http://localhost:20128 and connect Codex from there
+```
+
+Two forwards are required, and forwarding only one still fails:
+
+- **`20128`** (the dashboard port) makes the origin true-localhost, which is what
+  makes OmniRoute start the PKCE callback server at all — a LAN origin never
+  reaches that branch.
+- **`1455`** (the provider's fixed callback port) is where the browser is sent back
+  to; it has to tunnel through to the server's loopback.
+
+Swap `1455` for `56121`/`56122` when connecting xAI or Grok CLI, and `20128` for
+your actual dashboard port. Keep the tunnel open until the connection shows as
+active.
+
+> **No SSH access?** Codex and Grok CLI also accept a pasted token — the **Paste API
+> Key** / **Import auth.json** tab on the connect dialog. That path has no loopback
+> callback, so it works from any origin. Codex additionally accepts a bare access
+> token or a `~/.codex/auth.json` session blob.
+
+---
+
+## Managing tokens
+
+```bash
+omniroute tokens create --name "laptop" --scope write [--expires 30]
+#   ↳ prints the secret ONCE — copy it now
+omniroute tokens list                 # masked: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # revoke immediately
+omniroute tokens scopes               # explain the three scopes
+```
+
+`tokens` commands require an **admin** credential. You can also manage tokens in
+the dashboard under **Settings → Access Tokens** (create, revoke, copy-once).
+
+A token can never be minted with more privilege than its creator holds. An
+`admin` token can only be created by the operator — the dashboard session, the
+local CLI on the server itself, or `omniroute connect` with the password.
+Machine credentials (an `admin` access token, or an API key with the
+`manage`/`admin` scope) can mint `write` and `read` tokens only; asking them
+for `--scope admin` returns `403`. Disabling login does not open minting: an
+access token of any scope is a credential the always-authenticated routes
+accept, so an anonymous call gets `401` at any scope.
+
+---
+
+## Configuring a coding CLI from the remote catalog
+
+`omniroute configure` reads the **active server's** live model catalog and writes
+a config on **your** machine.
+
+```bash
+omniroute configure codex
+#   Providers: glm, kmc, ollamacloud, opencode-go, …
+#   Provider: glm
+#   Model id: glm/glm-5.2
+#   ✔ Wrote ~/.codex/glm52.config.toml
+#   Use it:  codex --profile glm52
+
+# non-interactive
+omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
+
+# keep a frequently used model at the top of the interactive picker
+omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
+```
+
+The picker keeps only model IDs (never URLs or credentials) in the local
+`model-preferences.json` file, scoped by context and CLI target. Favorites are
+shown before recent selections; use `--unfavorite` to remove a selected model
+from that context/target list.
+
+The written profile references the inference key by env var
+(`OMNIROUTE_API_KEY`) — the secret is never written to disk. For the one-time
+base Codex setup (the `[model_providers.omniroute]` block), see
+[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+
+### Launching a CLI against the remote (no config written)
+
+`omniroute run <target>` also honours the active context: the remote base URL
+and the context credential are injected into the spawned process only.
+
+```bash
+omniroute connect 192.168.0.15
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
+omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
+omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
+
+# Preview exactly what would be spawned (env KEY NAMES only, never values):
+omniroute run codex --dry-run --json
+```
+
+Targets: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
+(single source: `bin/cli/cli-manifest.mjs`). Qwen and Gemini run with a
+temporary isolated home that is removed on exit, so the launch never touches —
+or leaks into — your personal tool configuration.
+
+### Per-CLI setup commands
+
+Each supported CLI has a remote-aware setup command (all honour the active
+context, or `--remote <url> --api-key <key>`):
+
+| CLI         | Command                    | What it writes                                                                                                                                                       |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profiles (per model)                                                                                                                   |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (per model)                                                                                                                |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — the `omniroute` openai-compatible provider with every catalog model (run `opencode -m omniroute/<model>`)                       |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mode) + prints the VS Code extension settings to paste (OpenAI-compatible, Base URL **without** `/v1`)               |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` settings — OpenAI-compatible, Base URL **with** `/v1`                                                   |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **with** `/v1`, key via `${{ secrets.OMNIROUTE_API_KEY }}`                  |
+| Cursor      | `omniroute setup-cursor`   | prints the in-app steps (Settings → Models → Override OpenAI Base URL **with** `/v1` + key + model). Cursor config is opaque SQLite — chat panel only                |
+| Roo Code    | `omniroute setup-roo`      | writes a Roo import JSON (`~/.omniroute/roo-settings.json`) + sets `roo-cline.autoImportSettingsPath` + prints UI steps (OpenAI-compatible, Base URL **with** `/v1`) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provider, `base_url` **with** `/v1`, key via `$OMNIROUTE_API_KEY`                                                     |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **with** `/v1`, key read by Zed from `$OMNIROUTE_API_KEY` (never written)   |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **without** `/v1` + `GOOSE_MODEL`) + env recipe                                               |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **without** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                              |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` entry + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                     |
+
+```bash
+# OpenCode (openai-compatible provider, all catalog models, remote VPS)
+omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
+omniroute setup-opencode --only glm,kimi        # keep only matching models
+opencode -m omniroute/glm/glm-5.2 "..."          # export OMNIROUTE_API_KEY first
+```
+
+> OpenCode also has a richer **plugin** integration: `omniroute setup opencode`
+> (now remote-aware via `--remote`) installs `@omniroute/opencode-plugin`.
+> `setup-opencode` is the lightweight openai-compatible alternative. The API key
+> is referenced via `{env:OMNIROUTE_API_KEY}` — never written to disk.
+>
+> On OpenCode v2, use `@omniroute/opencode-plugin-v2` instead: same catalog,
+> different loader contract. It reads the key from OpenCode's own credential
+> store when the integration is connected, so a remote gateway needs no key in
+> `opencode.json` at all.
+
+---
+
+## Managing contexts (switch between servers)
+
+A **context** is a saved server (baseUrl + credential + scope). `omniroute connect`
+creates one and makes it active; from then on every command targets it. Manage and
+switch between them with `omniroute contexts`:
+
+```bash
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
+```
+
+```text
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
+```
+
+**Switch servers** — every subsequent command follows the active context:
+
+```bash
+omniroute contexts use vps         # → all commands now hit the remote VPS
+omniroute tokens list              #   (runs against the VPS)
+
+omniroute contexts use default     # → back to localhost
+omniroute tokens list              #   (runs against the local server)
+```
+
+**Add a context manually** (instead of `connect`), inspect, or rename:
+
+```bash
+omniroute contexts add staging --url https://staging.example.com:20128 \
+  --access-token oma_live_xxxx --scope write --description "staging box"
+omniroute contexts show staging    # full details for one context
+omniroute contexts rename staging stg
+```
+
+**Remove a context** — prompts for confirmation; pass `--yes` to skip it
+(required for scripts / non-interactive shells, which otherwise decline safely):
+
+```bash
+omniroute contexts remove stg --yes
+```
+
+> `default` (localhost) cannot be removed. Removing the active context falls back
+> to `default`. Tip: removing a context only drops the **local** saved credential —
+> revoke the token on the server with `omniroute tokens revoke <id>` to actually
+> kill access.
+
+**Export / import** contexts (e.g. to move them between machines). Exports omit
+credentials by default, including credentials stored by the file fallback. Use
+`--include-secrets` explicitly when a portable credential-bearing backup is needed:
+
+```bash
+omniroute contexts export --out contexts.json     # redacted; default destination: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # overwrite; --merge to keep existing
+omniroute contexts migrate --yes                  # move legacy plaintext tokens to keychain
+```
+
+`--include-secrets` resolves keychain references before exporting and fails if any
+referenced credential cannot be read. `--no-secrets` always takes precedence.
+Export files are written atomically with mode `0600`. Treat an explicit
+secret-bearing export as secret material. On headless systems without a usable OS
+keychain, the CLI falls back to `config.json` with mode `0600` and prints a
+one-time warning; a default export remains redacted in this mode.
+
+---
+
+## Quick end-to-end check
+
+A copy-paste lifecycle to verify a remote setup from scratch — connect, mint a
+scoped token, route a command, switch back, and tear down. Replace
+`192.168.0.15` with your server's host/IP (Tailscale, LAN, or a public
+`https://…` URL).
+
+```bash
+# 1. Connect (password → admin token, saved as a context that becomes active)
+omniroute connect 192.168.0.15                 # or: --key oma_live_xxxx  (no password)
+omniroute contexts current                     # shows the remote server + scope
+
+# 2. Use it — management commands now run against the remote
+omniroute tokens create --name laptop --scope read   # mint a narrower token
+omniroute tokens list                                 # masked list, from the remote
+
+# 3. Switch back and forth
+omniroute contexts use default                 # → local
+omniroute contexts use 192-168-0-15            # → remote again (name from `contexts list`)
+
+# 4. Tear down. NOTE: `contexts remove` only deletes the LOCAL credential —
+#    it does NOT revoke the token on the server. Revoke server-side first if you
+#    want to actually kill access.
+omniroute tokens revoke <id|prefix>            # kills access on the server
+omniroute contexts remove 192-168-0-15 --yes   # drop the local context (even if active → falls back to default), no prompt
+```
+
+> `--yes` makes `contexts remove` non-interactive (required in scripts/CI; without
+> it, a non-interactive shell declines safely instead of hanging). Removing the
+> **active** context falls back to `default` automatically.
+
+---
+
+## Security notes
+
+- Token plaintext is shown once; only the SHA-256 hash is persisted (same as API keys).
+- `omniroute connect` reuses the login brute-force lockout + audit logging.
+- Prefer HTTPS or a Tailnet for the transport; a bare host defaults to `http://`
+  for LAN/Tailscale convenience — pass a full `https://…` URL for TLS.
+- The preferred local context file is `~/.omniroute/config.json` (`chmod 600`)
+  containing only a `credentialRef`; the token itself is stored in the OS
+  keychain (`keytar`) and is never printed in logs. Headless installs without a
+  working native keychain use the same `0600` file as an explicit fallback and
+  emit a warning once. Use `omniroute contexts migrate --yes` after installing a
+  keychain backend.
+
+---
+
+## API endpoints (reference)
+
+| Method | Route                 | Auth                | Scope                      |
+| ------ | --------------------- | ------------------- | -------------------------- |
+| POST   | `/api/cli/connect`    | password; 2FA if on | — (public, password-gated) |
+| GET    | `/api/cli/whoami`     | access token        | read                       |
+| GET    | `/api/cli/tokens`     | access token        | admin                      |
+| POST   | `/api/cli/tokens`     | access token        | admin                      |
+| DELETE | `/api/cli/tokens/:id` | access token        | admin                      |
+
+See [openapi.yaml](../openapi.yaml) for full schemas.

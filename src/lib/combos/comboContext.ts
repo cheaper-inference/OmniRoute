@@ -1,0 +1,147 @@
+/**
+ * Combo context-length computation.
+ *
+ * Computes the effective context_window for a combo from canonical model
+ * metadata, which already applies persisted overrides and source precedence.
+ *
+ * Only models that are registered in at least one data source (provider registry,
+ * static specs, or synced capabilities) contribute to the result — matching the
+ * catalog's `minKnownNumber` semantics that excludes unsourced models.
+ */
+
+import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
+import { getCanonicalModelMetadata } from "@/lib/modelMetadataRegistry";
+import { getSourcedTokenLimit } from "@omniroute/open-sse/services/contextManager";
+import { buildAliasMaps, getComboTargetModelId } from "@/app/api/v1/models/catalogProviderMaps";
+import type { AliasMaps } from "@/app/api/v1/models/catalogProviderMaps";
+
+/* ─── helpers ───────────────────────────────────────────────── */
+
+function isPositiveFiniteNumber(v: unknown): v is number {
+  return typeof v === "number" && Number.isFinite(v) && v > 0;
+}
+
+/** Minimum of known (positively finite) values; undefined when none. */
+function minKnownNumber(values: Array<number | undefined>): number | undefined {
+  const known = values.filter(isPositiveFiniteNumber);
+  return known.length > 0 ? Math.min(...known) : undefined;
+}
+
+/* ─── public API ────────────────────────────────────────────── */
+
+/**
+ * Per-request resolution state for combo context computation.
+ *
+ * Created once per list request and passed to every
+ * `computeComboContextLength()` call: the alias tables are built a single
+ * time and each resolved model's window is remembered for the request.
+ * The state is dropped at the end of the request, so a model synced between
+ * two calls is always seen fresh. Only successful resolutions are kept;
+ * unknown targets are recomputed on every call.
+ */
+export type ComboContextResolution = {
+  getAliasMaps: () => AliasMaps;
+  resolvedWindows: Map<string, number>;
+};
+
+export function createComboContextResolution(
+  buildMaps: () => AliasMaps = buildAliasMaps
+): ComboContextResolution {
+  let cached: AliasMaps | undefined;
+  return {
+    getAliasMaps: () => (cached ??= buildMaps()),
+    resolvedWindows: new Map(),
+  };
+}
+
+/**
+ * Compute the effective context-length for a combo.
+ *
+ * Resolution order:
+ * 1. Explicit `context_length` on the combo record itself.
+ * 2. Minimum of member-model effective context windows from canonical metadata,
+ *    only counting members that exist in at least one known data source
+ *    (matching the catalog behavior).
+ *
+ * Returns `undefined` when no known context window can be determined.
+ *
+ * When `resolution` is given, its alias tables are reused and each resolved
+ * model's window is remembered for the life of the object. Without it the
+ * tables are built for the single call, exactly as before.
+ */
+export function computeComboContextLength(
+  combo: {
+    models?: unknown[];
+    context_length?: number;
+    name?: string;
+  },
+  allCombos: Array<{ models?: unknown[]; name?: string }>,
+  resolution?: ComboContextResolution
+): number | undefined {
+  // 1. Explicit context_length wins (user can override with a manual value).
+  if (isPositiveFiniteNumber(combo.context_length)) {
+    return combo.context_length;
+  }
+
+  // 2. Resolve nested combo-refs into a flat list of (provider, model) targets.
+  const targets = resolveNestedComboTargets(
+    combo as Parameters<typeof resolveNestedComboTargets>[0],
+    allCombos as Parameters<typeof resolveNestedComboTargets>[1]
+  );
+
+  if (!Array.isArray(targets) || targets.length === 0) return undefined;
+
+  // 3. Per-target context resolution from canonical metadata, matching the
+  //    catalog's `getComboTargetCatalogMetadata`.
+  const contextValues: number[] = [];
+  const aliasMaps = resolution ? resolution.getAliasMaps() : buildAliasMaps();
+
+  for (const target of targets) {
+    // 3a. Strip the provider/alias prefix off `modelStr` BEFORE the canonical
+    //     lookup. resolveNestedComboTargets() returns modelStr in "provider/model"
+    //     form (e.g. "glm/glm-5.2"), but getCanonicalModelMetadata()'s alias
+    //     lookup is keyed by the BARE registry id — passing the qualified string
+    //     straight through only matched the ~47 models with a curated
+    //     "provider/model" MODEL_SPECS alias, silently excluding the other
+    //     ~1,650 registry-only models from the min() calc below. Reusing the
+    //     catalog's own getComboTargetModelId() (catalogProviderMaps.ts) keeps
+    //     this resolution in lockstep with getComboTargetCatalogMetadata().
+    const resolvedTarget = getComboTargetModelId(aliasMaps, target);
+    if (!resolvedTarget) continue;
+
+    // 3b. Source check — only count models that exist in at least one
+    //     known data source (provider registry, static spec, synced capability).
+    //     This matches the catalog's filter that excludes unregistered models
+    //     from combo calculations.
+    const canonicalMeta = getCanonicalModelMetadata({
+      provider: resolvedTarget.providerId,
+      model: resolvedTarget.modelId,
+    });
+    if (!canonicalMeta) continue;
+
+    const source = canonicalMeta.metadata?.source;
+    if (!source?.providerRegistry && !source?.staticSpec && !source?.syncedCapability) {
+      continue;
+    }
+
+    const providerId = canonicalMeta.provider || resolvedTarget.providerId;
+    const modelId = canonicalMeta.model || resolvedTarget.modelId;
+
+    const cacheKey = `${providerId}\0${modelId}`;
+    const cached = resolution?.resolvedWindows.get(cacheKey);
+    if (cached !== undefined) {
+      contextValues.push(cached);
+      continue;
+    }
+
+    const targetCtx = getSourcedTokenLimit(providerId, modelId, canonicalMeta.limits.contextWindow);
+
+    if (isPositiveFiniteNumber(targetCtx)) {
+      resolution?.resolvedWindows.set(cacheKey, targetCtx);
+      contextValues.push(targetCtx);
+    }
+  }
+
+  // 4. Minimum of all known context values (matching minKnownNumber semantics).
+  return minKnownNumber(contextValues);
+}

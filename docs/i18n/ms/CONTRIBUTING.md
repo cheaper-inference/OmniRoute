@@ -1,0 +1,436 @@
+# Contributing to OmniRoute (Bahasa Melayu)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Thank you for your interest in contributing! This guide covers everything you need to get started.
+
+---
+
+## Persediaan Pembangunan
+
+### Prasyarat
+
+- **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disyorkan: 24 LTS)
+- **npm** 10+
+
+> **Windows dengan Node 24:** gunakan keluaran tampalan 24 LTS semasa (sekurang-kurangnya 24.20.0).
+> Keluaran terdahulu boleh berhenti selepas ujian berjaya apabila `--test-force-exit` menutup
+> proses. [Pembetulan libuv Windows](https://github.com/nodejs/node/pull/61999) Node menangani
+> ranap masa jalan ini; kekalkan penegasan ujian dan pemeriksaan keluar pelaksana didayakan.
+
+> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan modul natif telah dipasang:
+> `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
+> jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
+> [Penyelesaian Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### Klon & Pasang
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### Pemboleh Ubah Persekitaran
+
+```bash
+# Cipta .env anda daripada templat
+cp .env.example .env
+
+# Jana rahsia yang diperlukan
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+Pemboleh ubah utama untuk pembangunan:
+
+| Pemboleh ubah          | Lalai Pembangunan        | Perihalan                     |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Port pelayan                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk frontend       |
+| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama |
+| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log      |
+
+### Tetapan Papan Pemuka
+
+Papan pemuka menyediakan togol UI untuk ciri yang juga boleh dikonfigurasikan melalui pemboleh ubah persekitaran:
+
+| Lokasi Tetapan      | Togol              | Perihalan                               |
+| ------------------- | ------------------ | --------------------------------------- |
+| Settings → Advanced | Debug Mode         | Dayakan log permintaan nyahpepijat (UI) |
+| Settings → General  | Sidebar Visibility | Tunjukkan/sembunyikan bahagian bar sisi |
+
+Tetapan ini disimpan dalam pangkalan data dan kekal selepas mula semula, mengatasi lalai pemboleh ubah persekitaran apabila ditetapkan.
+
+### Menjalankan Secara Tempatan
+
+```bash
+# Mod pembangunan (muat semula panas)
+npm run dev
+
+# Binaan pengeluaran
+npm run build    # next build → .build/next/ kemudian assembleStandalone → dist/
+npm run start
+
+# Kompilasi backend/API sahaja yang pantas untuk perubahan penyumbang
+npm run build:contributor
+
+# Binaan keluaran (binaan semula bersih + sentinel HEAD — diperlukan untuk penggunaan)
+npm run build:release   # rm -rf .build dist kemudian bina + tulis dist/BUILD_SHA
+
+# Konfigurasi port biasa
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Binaan penyumbang melaksanakan pengesahan kompilasi sahaja: ia tidak memasang edaran kendiri
+atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
+anda perlu mengesahkan pakej yang sedia dihantar.
+
+### Susun Atur Output Binaan
+
+| Direktori | Kandungan                                                               | Dijejaki |
+| --------- | ----------------------------------------------------------------------- | -------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                      | Ya       |
+| `.build/` | Perantaraan — output `next build` (gitignored, `distDir = .build/next`) | Tidak    |
+| `dist/`   | Pakej sedia dihantar — dipasang oleh `assembleStandalone` (gitignored)  | Tidak    |
+
+Saluran binaan ialah satu laluan:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` turut membersihkan kedua-dua direktori terlebih dahulu dan menulis
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integriti penggunaan.
+
+`npm run build:contributor` menggunakan profil binaan backend sahaja. Ia mengstup fail UI
+papan pemuka buat sementara semasa membina, mengekalkan pengendali laluan API, dan memulihkan fail asal
+selepas binaan. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau untuk
+pengesahan keluaran penuh; profil penyumbang bukan pengganti binaan keluaran.
+
+> **Nota penggunaan VPS:** direktori imej jauh `/usr/lib/node_modules/omniroute/app/`
+> tidak berubah. Kemahiran penggunaan menyegerakkan kandungan `dist/` ke dalamnya.
+> Hanya laluan output binaan dalam repositori berubah (`app/` → `dist/`).
+
+URL lalai:
+
+- **Papan pemuka**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Aliran Kerja Git
+
+> ⚠️ **JANGAN SEKALI-KALI membuat commit terus ke `main`.** Sentiasa gunakan cabang ciri.
+>
+> **Asas PR:** sasarkan cabang `release/vX.Y.Z` yang aktif (bukan `main`). Lihat
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md) untuk model
+> satu keluaran bagi setiap cabang + tag semasa pelancaran.
+
+```bash
+# Cipta cabang daripada hujung keluaran aktif (contoh: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... buat perubahan ...
+git commit -m "feat: terangkan perubahan anda"
+git push -u origin feat/your-feature-name
+# Buka Pull Request dengan base = release/v3.8.49
+```
+
+### Penamaan Cabang
+
+| Awalan      | Tujuan                        |
+| ----------- | ----------------------------- |
+| `feat/`     | Ciri baharu                   |
+| `fix/`      | Pembaikan pepijat             |
+| `refactor/` | Penstrukturan semula kod      |
+| `docs/`     | Perubahan dokumentasi         |
+| `test/`     | Penambahan/pembaikan ujian    |
+| `chore/`    | Peralatan, CI, kebergantungan |
+
+### Mesej Commit
+
+Ikuti [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: tambah pemutus litar untuk panggilan penyedia
+fix: selesaikan kes pinggir pengesahan rahsia JWT
+docs: kemas kini SECURITY.md dengan perlindungan PII
+test: tambah ujian unit kebolehcerapan
+refactor(db): satukan jadual had kadar
+```
+
+Skop (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## Menjalankan Ujian
+
+```bash
+# Semua ujian (unit + vitest + ekosistem + e2e)
+npm run test:all
+
+# Fail ujian tunggal (pelaksana ujian asli Node.js — kebanyakan ujian menggunakan ini)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# Hanya ujian unit yang terjejas oleh perubahan anda (pemilih TIA yang sama seperti get CI, #8084)
+npm run test:scoped            # perubahan dalam komit terakhir (atau pepohon kerja)
+npm run test:scoped:staged     # perubahan yang dipentaskan sahaja — sesuai digandingkan dengan pelaksanaan prakomit
+npm run test:scoped:full       # bina semula peta graf import terlebih dahulu (selepas menambah/mengalihkan fail)
+# Keluar dengan 1 + "jalankan seluruh suit" bermaksud fail hab (tsconfig, package.json, …) atau sumber
+# yang tidak dipetakan telah berubah — pemilih gagal secara selamat dan tidak pernah melangkau secara senyap.
+
+# Vitest (pelayan MCP, autoCombo, cache)
+npm run test:vitest
+
+# Ujian E2E (memerlukan Playwright)
+npm run test:e2e
+
+# E2E klien protokol (pengangkutan MCP, A2A)
+npm run test:protocols:e2e
+
+# Ujian keserasian ekosistem
+npm run test:ecosystem
+
+# Get liputan: 60% pernyataan/baris/fungsi/cabang
+npm run test:coverage
+npm run coverage:report
+
+# Semakan lint + format
+npm run lint
+npm run check
+
+# Ujian ringkas kombo huluan sebenar berpagar (memerlukan akses VPS + kredit penyedia sebenar)
+# Mengakses penyedia SEBENAR — melibatkan sedikit kos. TIDAK PERNAH dijalankan dalam CI. Dilangkau dengan lancar tanpa get.
+# Memerlukan: akses ssh root@192.168.0.15 (mendapatkan petikan DB baca sahaja daripada VPS).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Ujian ringkas langsung VPS fasa 3 — skrip ESM Node biasa, mengakses pelayan .15 langsung.
+# Memerlukan: akses ssh root@192.168.0.15 (kombo dicipta/dihapuskan melalui SSH sqlite).
+# Mengakses penyedia SEBENAR (kos kecil). Mencipta/memadamkan kombo __live_test__* sahaja. TIDAK PERNAH dijalankan dalam CI.
+# REQUIRE_API_KEY=false pada .15, jadi kunci API tidak diperlukan, tetapi menghormati COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
+npm run test:combo:live:vps              # 7 senario HTTP (keutamaan/round-robin/berwajaran/kos/gabungan/auto + kesihatan)
+npm run test:combo:live:vps:failover     # menambah senario failover rentas penyedia sebenar (jumlah 8)
+```
+
+Nota liputan:
+
+- `npm run test:coverage` mengukur liputan sumber bagi suit ujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
+- Pull request mesti mengekalkan get liputan pada **60%+** bagi pernyataan/baris/fungsi/cabang
+- Jika PR mengubah kod produksi dalam `src/`, `open-sse/`, `electron/`, atau `bin/`, PR yang sama mesti menambah atau mengemas kini ujian automatik
+- `npm run coverage:report` mencetak laporan terperinci fail demi fail daripada pelaksanaan liputan terkini
+- `npm run test:coverage:legacy` mengekalkan metrik lama untuk perbandingan sejarah
+- Lihat `docs/ops/COVERAGE_PLAN.md` untuk pelan hala tuju peningkatan liputan berfasa
+
+### Keperluan Pull Request
+
+Sebelum membuka PR, gunakan
+[Laluan Emas Sumbangan](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan gelung berfokus bagi
+perkara yang anda ubah. Suit unit penuh (4 serpihan CI), Vitest, get liputan **60%+**, dan
+binaan produksi merupakan tanggungjawab CI — menjalankannya secara setempat tidak memberikan sebarang maklumat tambahan yang belum
+diberikan oleh semakan PR, dan pada mesin yang lebih kecil, tindakan ini boleh menepukan hos (#8084):
+
+- Jalankan fail ujian yang meliputi perubahan anda: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Jalankan `npm run lint`
+- Sertakan atau kemas kini ujian automatik dalam PR yang sama apabila kod produksi berubah
+- Dalam fail `node:test`, letakkan setiap `await` peringkat teratas (seperti `await import(...)`) sebelum `test()` / `describe()` yang pertama: di bawah `--test-force-exit`, ujian yang didaftarkan selepasnya mungkin tidak akan dijalankan secara senyap (#18045; dikuatkuasakan oleh `npm run check:test-tla-order`)
+- Sertakan fail ujian yang diubah atau ditambah dalam perihalan PR apabila kod produksi berubah
+- Semak hasil SonarQube pada PR apabila rahsia projek dikonfigurasikan dalam CI
+
+Status ujian semasa: **122 fail ujian unit** yang meliputi:
+
+- Penterjemah penyedia dan penukaran format
+- Pengehadan kadar, pemutus litar, dan daya tahan
+- Cache semantik, keidempotenan, penjejakan kemajuan
+- Operasi dan skema pangkalan data (21 modul DB)
+- Aliran OAuth dan pengesahan
+- Pengesahan titik akhir API (Zod v4)
+- Alat pelayan MCP dan penguatkuasaan skop
+- Sistem Memori dan Kemahiran
+
+---
+
+## Gaya Kod
+
+- **ESLint** — Jalankan `npm run lint` sebelum melakukan komit
+- **Prettier** — Diformat secara automatik melalui `lint-staged` semasa komit (2 ruang, koma bertitik, petikan berganda, lebar 100 aksara, koma di penghujung es5)
+- **TypeScript** — Semua kod `src/` menggunakan `.ts`/`.tsx`; `open-sse/` menggunakan `.ts`/`.js`; dokumentasikan dengan TSDoc (`@param`, `@returns`, `@throws`)
+- **Tiada `eval()`** — ESLint menguatkuasakan `no-eval`, `no-implied-eval`, `no-new-func`
+- **Pengesahan Zod** — Gunakan skema Zod v4 untuk semua pengesahan input API
+- **Penamaan**: Fail = camelCase/kebab-case, komponen = PascalCase, pemalar = UPPER_SNAKE
+
+### Pengendalian ralat / blok catch kosong
+
+Jangan sekali-kali membiarkan `catch` tanpa penjelasan. Kelaskannya kepada salah satu daripada dua kategori (melaksanakan peraturan tegas "jangan sekali-kali mengabaikan ralat secara senyap dalam strim SSE"):
+
+- **Disengajakan (pembersihan/telemetri usaha terbaik kita sendiri)** — kegagalan di sini dijangka dan
+  tidak berbahaya; tambahkan komen rasional satu baris, tanpa pengelogan (pengelogan pada setiap permintaan ialah
+  hingar yang cuba dielakkan oleh konvensyen ini).
+
+  ```ts
+  } catch {} // penutupan pengawal yang sudah ditutup selepas klien terputus adalah dijangka
+  ```
+
+- **Perlu dilog (kod luaran/dibekalkan oleh pemanggil, atau pengabaian mengubah aliran kawalan)** — kekalkan
+  `catch` tersebut (jangan sekali-kali membiarkannya memutuskan strim) tetapi hasilkan `console.debug`/`warn` berkonteks supaya
+  kegagalan itu dapat dikesan.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] ralat panggil balik onFailure:", e);
+  }
+  ```
+
+Lihat `open-sse/utils/stream.ts` dan `open-sse/utils/streamHandler.ts` untuk contoh penggunaan.
+
+---
+
+## Struktur Projek
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Halaman papan pemuka (23 bahagian)
+│   ├── api/                # Laluan API (51 direktori)
+│   └── login/              # Halaman pengesahan (.tsx)
+├── domain/                 # Enjin dasar (policyEngine, comboResolver, costRules, dll.)
+├── lib/                    # Logik perniagaan teras (.ts)
+│   ├── a2a/                # Pelayan protokol Agent-to-Agent v0.3
+│   ├── acp/                # Daftar Agent Communication Protocol
+│   ├── compliance/         # Enjin dasar pematuhan
+│   ├── db/                 # Modul domain SQLite + 130 migrasi
+│   ├── memory/             # Memori perbualan kekal
+│   ├── oauth/              # Penyedia, perkhidmatan dan utiliti OAuth
+│   ├── skills/             # Rangka kerja kemahiran yang boleh diperluas
+│   ├── usage/              # Penjejakan penggunaan dan pengiraan kos
+│   └── localDb.ts          # Lapisan eksport semula sahaja — jangan sekali-kali tambah logik di sini
+├── middleware/              # Perisian tengah permintaan (promptInjectionGuard)
+├── mitm/                   # Proksi MITM (sijil, DNS, penghalaan sasaran)
+├── shared/
+│   ├── components/         # Komponen React (.tsx)
+│   ├── constants/          # Takrif penyedia (329), skop MCP, 20 strategi penghalaan
+│   ├── utils/              # Pemutus litar, pensanitasi, pembantu pengesahan
+│   └── validation/         # Skema Zod v4
+└── sse/                    # Talian paip proksi SSE
+
+open-sse/                   # Ruang kerja @omniroute/open-sse
+├── executors/              # 150 modul pelaksana (kelas pelaksana + pembantu bagi setiap penyedia)
+├── handlers/               # 11 pengendali permintaan (sembang, respons, pembenaman, imej, dll.)
+├── mcp-server/             # Pelayan MCP (110 alat unik, 3 pengangkutan, 33 skop)
+├── services/               # 178 perkhidmatan peringkat teratas (combo, autoCombo, rateLimitManager, dll.)
+├── translator/             # Penterjemah format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Pengubah Responses API
+└── utils/                  # 22 modul utiliti (strim, TLS, proksi, pengelogan)
+
+electron/                   # Aplikasi desktop Electron (merentas platform)
+
+tests/
+├── unit/                   # Pelaksana ujian Node.js (1,574 fail ujian)
+├── integration/            # Ujian integrasi
+├── e2e/                    # Ujian Playwright
+├── security/               # Ujian keselamatan
+├── translator/             # Ujian khusus penterjemah
+└── load/                   # Ujian beban
+
+docs/
+├── adr/                     # Rekod Keputusan Seni Bina
+├── architecture/            # Seni bina dan daya tahan sistem
+├── comparison/              # OmniRoute berbanding alternatif
+├── compression/             # Panduan dan peraturan pemampatan
+├── dev/                     # Panduan pembangunan
+├── diagrams/                # Rajah seni bina
+├── frameworks/              # MCP, A2A, OpenCode, Memori, Kemahiran
+├── guides/                  # Panduan pengguna, Docker, persediaan, penyelesaian masalah
+├── i18n/                    # Terjemahan README yang diantarabangsakan
+├── marketing/               # Bahan pemasaran
+├── ops/                     # Penggunaan, proksi, liputan, keluaran
+├── providers/               # Dokumentasi khusus penyedia
+├── reference/               # Rujukan API, pemboleh ubah persekitaran, alat CLI, peringkat percuma
+├── releases/                # Nota keluaran
+├── routing/                 # Enjin auto-combo, main semula penaakulan
+├── screenshots/             # Tangkapan skrin papan pemuka
+├── security/                # Pagar keselamatan, pematuhan, mod senyap, token
+└── specs/                   # Spesifikasi reka bentuk
+```
+
+---
+
+## Menambah Penyedia Baharu
+
+### Langkah 1: Daftarkan Pemalar Penyedia
+
+Tambahkan pada `src/shared/constants/providers.ts` — disahkan oleh Zod semasa modul dimuatkan.
+
+### Langkah 2: Tambahkan Pelaksana (jika logik tersuai diperlukan)
+
+Cipta pelaksana dalam `open-sse/executors/your-provider.ts` yang melanjutkan pelaksana asas.
+
+### Langkah 3: Tambahkan Penterjemah (jika format bukan OpenAI)
+
+Cipta penterjemah permintaan/respons dalam `open-sse/translator/`.
+
+### Langkah 4: Tambahkan Konfigurasi OAuth (jika berasaskan OAuth)
+
+Tambahkan kelayakan OAuth dalam `src/lib/oauth/constants/oauth.ts` dan perkhidmatan dalam `src/lib/oauth/services/`.
+
+Jika penyedia huluan mengedarkan `client_id`/rahsia OAuth awam atau kunci API Web Firebase dalam CLI awam / berkas penyemak imbasnya, **jangan** benamkannya sebagai literal rentetan. Gunakan `resolvePublicCred()` daripada `open-sse/utils/publicCreds.ts` dan tambahkan entri bait bertopeng pada `EMBEDDED_DEFAULTS`. Aliran kerja mandatori yang lengkap didokumentasikan dalam [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md).
+
+Dalam pengendali/pelaksana, mesej ralat yang dihantar kepada klien mesti melalui `buildErrorBody()` / `sanitizeErrorMessage()` daripada `open-sse/utils/error.ts` — jangan sekali-kali letakkan `err.stack` atau `err.message` mentah dalam isi Respons. Lihat [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
+
+### Langkah 5: Daftarkan Model
+
+Tambahkan takrif model dalam `open-sse/config/providerRegistry.ts`.
+
+### Langkah 6: Tambahkan Ujian
+
+Tulis ujian unit dalam `tests/unit/` yang sekurang-kurangnya merangkumi:
+
+- Pendaftaran penyedia
+- Penterjemahan permintaan/respons
+- Pengendalian ralat
+
+---
+
+## Senarai Semak Pull Request
+
+- [ ] Ujian lulus (`npm test`)
+- [ ] Pelintan lulus (`npm run lint`)
+- [ ] Binaan berjaya (`npm run build`)
+- [ ] Jenis TypeScript ditambahkan untuk fungsi dan antara muka awam baharu
+- [ ] Tiada rahsia atau nilai sandaran yang dikod keras
+- [ ] Kelayakan huluan awam dibenamkan melalui `resolvePublicCred()` (lihat [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), bukan sebagai literal
+- [ ] Respons ralat disalurkan melalui `buildErrorBody()` / `sanitizeErrorMessage()` — tiada surih tindanan mentah dalam badan respons (lihat [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Perintah shell (`exec` / `spawn`) menghantar nilai masa jalan melalui `env`, bukan melalui interpolasi rentetan
+- [ ] Semua input disahkan dengan skema Zod
+- [ ] **Fragmen** log perubahan ditambahkan di bawah `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` untuk perubahan yang memberi kesan kepada pengguna (lihat [`changelog.d/README.md`](./changelog.d/README.md)) — **jangan** edit `CHANGELOG.md` secara langsung; fragmen digabungkan semasa keluaran dan tidak pernah bercanggah antara PR
+- [ ] Dokumentasi dikemas kini (jika berkenaan)
+- [ ] Tiada amaran CodeQL / Secret-Scanning baharu dibuka, atau setiap satunya ditolak dengan justifikasi teknikal yang merujuk dokumen `docs/security/` yang berkaitan
+- [ ] Laluan yang mencetuskan proses anak (`/api/mcp/`, `/api/cli-tools/runtime/`) diklasifikasikan sebagai `isLocalOnlyPath()` dalam `src/server/authz/routeGuard.ts` — lihat [Peraturan Tegas #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Tiada treler `Co-authored-by` AI/bot dalam mesej komit (Peraturan Tegas #16) — kolaborator manusia yang hasil kerja mereka digunakan semula diberi penghargaan dengan treler standard `Co-authored-by: Name <email>`
+
+---
+
+## Pengeluaran
+
+Pengeluaran diurus melalui aliran kerja `/generate-release`. Apabila GitHub Release baharu dicipta, pakej tersebut **diterbitkan secara automatik ke npm** melalui GitHub Actions.
+
+Untuk penggunaan VPS, gunakan `npm run build:release` (bukan `npm run build`) — arahan ini menjalankan binaan semula yang bersih, menghimpunkan berkas ke dalam `dist/`, dan menulis penanda `dist/BUILD_SHA`.
+Kemudian gunakan kemahiran `/deploy-vps-*-cc` yang menyegerakkan `dist/` melalui rsync ke direktori `app/` jauh.
+
+---
+
+## Mendapatkan Bantuan
+
+- **Seni bina**: Lihat [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Rujukan API**: Lihat [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Dokumentasi keselamatan**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Dokumentasi operasi**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Isu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

@@ -1,0 +1,150 @@
+"use client";
+
+/**
+ * Session Info Card — P-3
+ *
+ * Displays current session details and provides session management
+ * controls (logout, clear sessions) within the Security settings tab.
+ */
+
+import { useState, useEffect } from "react";
+import { Card, Button, Skeleton } from "@/shared/components";
+import { useTranslations } from "next-intl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+
+interface SessionInfo {
+  authenticated: boolean;
+  loginTime: string | null;
+  sessionAge: string;
+  ipAddress: string;
+  userAgent: string;
+}
+
+export default function SessionInfoCard() {
+  const [session, setSession] = useState<SessionInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const t = useTranslations("settings");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSession() {
+      // Build session info from client-side data
+      const loginTime = sessionStorage.getItem("omniroute_login_time");
+      const now = Date.now();
+
+      let sessionAge = t("unknown");
+      if (loginTime) {
+        const elapsed = now - parseInt(loginTime, 10);
+        const hours = Math.floor(elapsed / 3600000);
+        const minutes = Math.floor((elapsed % 3600000) / 60000);
+        sessionAge = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+      }
+
+      let authenticated = false;
+      try {
+        const res = await fetch("/api/auth/status", {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          authenticated = data.authenticated === true;
+        }
+      } catch {
+        // Keep unauthenticated fallback on network errors.
+      }
+
+      if (cancelled) return;
+
+      setSession({
+        authenticated,
+        loginTime: loginTime ? new Date(parseInt(loginTime, 10)).toLocaleString() : null,
+        sessionAge,
+        ipAddress: "—", // Server-side only
+        userAgent: navigator.userAgent.split(" ").slice(-2).join(" ") || t("unknown"),
+      });
+      setLoading(false);
+    }
+
+    void (async () => {
+      await loadSession();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      sessionStorage.removeItem("omniroute_login_time");
+      window.location.href = "/";
+    } catch {
+      window.location.href = "/";
+    }
+  };
+
+  const handleClearStorage = async () => {
+    if (await requestConfirm(t("clearLocalDataConfirm"))) {
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.reload();
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <Skeleton className="h-32 w-full" />
+      </Card>
+    );
+  }
+
+  return (
+    <Card title={t("session")} icon="person">
+      <div className="flex flex-col gap-3" role="list" aria-label={t("sessionDetailsAria")}>
+        <div className="flex justify-between items-center text-sm" role="listitem">
+          <span className="text-text-muted">{t("status")}</span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`w-2 h-2 rounded-full ${session?.authenticated ? "bg-success" : "bg-warning"}`}
+              aria-hidden="true"
+            />
+            {session?.authenticated ? t("authenticated") : t("guest")}
+          </span>
+        </div>
+
+        {session?.loginTime && (
+          <div className="flex justify-between items-center text-sm" role="listitem">
+            <span className="text-text-muted">{t("loginTime")}</span>
+            <span className="font-mono text-xs">{session.loginTime}</span>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center text-sm" role="listitem">
+          <span className="text-text-muted">{t("sessionAge")}</span>
+          <span className="font-mono text-xs">{session?.sessionAge}</span>
+        </div>
+
+        <div className="flex justify-between items-center text-sm" role="listitem">
+          <span className="text-text-muted">{t("browser")}</span>
+          <span className="font-mono text-xs truncate max-w-[200px]">{session?.userAgent}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-border">
+        <Button variant="secondary" onClick={handleClearStorage}>
+          {t("clearLocalData")}
+        </Button>
+        {session?.authenticated && (
+          <Button variant="danger" onClick={handleLogout}>
+            {t("logout")}
+          </Button>
+        )}
+      </div>
+      {confirmDialog}
+    </Card>
+  );
+}

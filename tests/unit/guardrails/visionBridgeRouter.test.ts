@@ -1,0 +1,499 @@
+/**
+ * Vision Bridge Auto-Router Tests
+ *
+ * Moved from visionBridgeRouter.test.tsx (which was only collected by the
+ * advisory `test:vitest:ui` script, never by the blocking `test:unit` /
+ * `test:vitest` gates — see tests/unit/guardrails/*.test.ts glob in
+ * package.json vs the `.tsx`-only include in vitest.config.ts). This file
+ * has no JSX and needs no jsdom environment, so it belongs under node:test.
+ *
+ * Credential-usability checks are exercised via the `deps.hasUsableCredentials`
+ * injection point on getBestVisionModel()/getFallbackModels() rather than by
+ * mocking the `@/lib/db/providers` module: this project's Node native test
+ * runner (`node:test`) has no supported ESM module-mocking mechanism (see
+ * the "mock.module() is unavailable" notes across tests/unit/*.test.ts).
+ */
+
+import test from "node:test";
+import assert from "node:assert/strict";
+
+const {
+  getBestVisionModel,
+  getFallbackModels,
+  recordLatency,
+  clearSelectionCache,
+  getLatencyStats,
+} = await import("../../../src/lib/guardrails/visionBridgeRouter.ts");
+const { PROVIDER_MODELS } = await import("../../../open-sse/config/providerModels.ts");
+const { lockModel, clearAllModelLockouts, isModelLocked } =
+  await import("../../../open-sse/services/accountFallback.ts");
+const { createProviderConnection, deleteProviderConnectionsByProvider } =
+  await import("../../../src/lib/db/providers.ts");
+type VisionBridgeRouterDepsT =
+  import("../../../src/lib/guardrails/visionBridgeRouter.ts").VisionBridgeRouterDeps;
+
+function authoritativeCatalogDeps(
+  provider: string,
+  modelIds: () => string[]
+): VisionBridgeRouterDepsT {
+  return {
+    hasUsableCredentials: async (fullModelId) => fullModelId.startsWith(`${provider}/`),
+    getActiveSyncedCatalog: async (providerAlias) => ({
+      authoritative: providerAlias === provider,
+      models: providerAlias === provider ? modelIds().map((id) => ({ id })) : [],
+    }),
+  };
+}
+
+// Fail-open default: credential store "unreadable" (indeterminate `null`),
+// matching hasUsableCredentialsForModel's real behavior when the DB call
+// throws. This mirrors pre-existing test expectations — every catalog
+// candidate is still eligible when the credential store can't be checked.
+const FAIL_OPEN_DEPS: VisionBridgeRouterDepsT = {
+  hasUsableCredentials: async () => null,
+  getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+};
+
+test.beforeEach(() => {
+  clearSelectionCache();
+});
+
+// ── getBestVisionModel ──────────────────────────────────────────────────────
+
+test("getBestVisionModel — should return a vision-capable model", async () => {
+  const model = await getBestVisionModel({}, FAIL_OPEN_DEPS);
+  assert.ok(model);
+  assert.equal(typeof model, "string");
+});
+
+test("getBestVisionModel — should respect fixed model override", async () => {
+  const fixedModel = "openai/gpt-4o-mini";
+  const model = await getBestVisionModel({ fixedModel }, FAIL_OPEN_DEPS);
+  assert.equal(model, fixedModel);
+});
+
+test("getBestVisionModel — should exclude specified models", async () => {
+  const model = await getBestVisionModel(
+    { excludedModels: ["openai/gpt-4o-mini", "openai/gpt-4o"] },
+    FAIL_OPEN_DEPS
+  );
+  assert.notEqual(model, "openai/gpt-4o-mini");
+  assert.notEqual(model, "openai/gpt-4o");
+});
+
+test("getBestVisionModel — excludes a candidate with no usable active connection", async () => {
+  // Every candidate reports a confirmed-unusable connection (`false`) ->
+  // no candidate survives -> returns null instead of an unreachable default.
+  const model = await getBestVisionModel({}, { hasUsableCredentials: async () => false });
+  assert.equal(model, null);
+});
+
+// `auto` / `auto/*` ids are VIRTUAL combos: there is no provider row for
+// "auto", so hasUsableCredentialsForModel reports a confirmed `false` for the
+// combo id itself while the pool members remain usable (indeterminate here).
+const virtualComboOnlyUnusable = async (fullModelId: string) =>
+  fullModelId === "auto" || fullModelId.startsWith("auto/") ? false : null;
+
+test("getBestVisionModel — keeps an auto/* virtual-combo fixedModel when its credential check is false (#12237)", async () => {
+  // The #8430 short-circuit must not discard the combo — member credentials
+  // are enforced downstream when the combo dispatches (same exemption as the
+  // reroute guard in visionBridge.ts).
+  const fixedModel = "auto/vision";
+  const model = await getBestVisionModel(
+    { fixedModel },
+    { hasUsableCredentials: virtualComboOnlyUnusable }
+  );
+  assert.equal(model, fixedModel);
+});
+
+test('getBestVisionModel — keeps a bare "auto" fixedModel when its credential check is false (#12237)', async () => {
+  const model = await getBestVisionModel(
+    { fixedModel: "auto" },
+    { hasUsableCredentials: virtualComboOnlyUnusable }
+  );
+  assert.equal(model, "auto");
+});
+
+test("getBestVisionModel — keeps an auto/* virtual-combo fixedModel on a cached pool selection (#12237)", async () => {
+  // Warm the selection cache with a pool pick, then ask for the combo: the
+  // cache-hit branch must still hand back the combo, not the cached member.
+  const warm = await getBestVisionModel({}, { hasUsableCredentials: virtualComboOnlyUnusable });
+  assert.ok(warm);
+  const model = await getBestVisionModel(
+    { fixedModel: "auto/vision" },
+    { hasUsableCredentials: virtualComboOnlyUnusable }
+  );
+  assert.equal(model, "auto/vision");
+});
+
+test("getBestVisionModel — discards an auto/* virtual-combo fixedModel when the ENTIRE vision pool is unusable (#8430)", async () => {
+  // The exemption only bypasses the credential check on the virtual id. With
+  // no usable vision-capable member anywhere, the combo has nothing to
+  // dispatch to and must fall through to `null` so the caller describes
+  // instead of forwarding a raw image to a text-only backend.
+  const model = await getBestVisionModel(
+    { fixedModel: "auto/vision" },
+    { hasUsableCredentials: async () => false }
+  );
+  assert.equal(model, null);
+});
+
+test("getBestVisionModel — still falls through when a concrete fixedModel has no usable credentials (#8430)", async () => {
+  // Regression guard for the exemption above: a non-virtual fixedModel with
+  // a confirmed-unusable credential check must still be discarded.
+  const model = await getBestVisionModel(
+    { fixedModel: "openai/gpt-4o-mini" },
+    { hasUsableCredentials: async () => false }
+  );
+  assert.equal(model, null);
+});
+
+test("getBestVisionModel — does not query live catalogs for providers without usable credentials", async () => {
+  let catalogCalls = 0;
+
+  const model = await getBestVisionModel(
+    {},
+    {
+      hasUsableCredentials: async () => false,
+      getActiveSyncedCatalog: async () => {
+        catalogCalls += 1;
+        return { authoritative: false, models: [] };
+      },
+    }
+  );
+
+  assert.equal(model, null);
+  assert.equal(catalogCalls, 0);
+});
+
+test("getBestVisionModel — selects a credentialed candidate over an uncredentialed higher-priority one", async () => {
+  // openai (priority 50, would normally win) has no usable connection;
+  // every other vision-capable provider does.
+  const model = await getBestVisionModel(
+    {},
+    {
+      hasUsableCredentials: async (fullModelId) => fullModelId.split("/")[0] !== "openai",
+    }
+  );
+  assert.equal(model.startsWith("openai/"), false);
+});
+
+test("getBestVisionModel — excludes static models missing from an authoritative live catalog", async () => {
+  const model = await getBestVisionModel(
+    {},
+    authoritativeCatalogDeps("gemini", () => ["gemini-2.5-flash"])
+  );
+
+  assert.equal(model, "gemini/gemini-2.5-flash");
+});
+
+test("getBestVisionModel — revalidates a cached model against the current live catalog", async () => {
+  let liveModelIds = ["gemini-3.7-flash"];
+  const deps = authoritativeCatalogDeps("gemini", () => liveModelIds);
+
+  assert.equal(await getBestVisionModel({}, deps), "gemini/gemini-3.7-flash");
+
+  liveModelIds = ["gemini-2.5-flash"];
+  assert.equal(await getBestVisionModel({}, deps), "gemini/gemini-2.5-flash");
+});
+
+test("getBestVisionModel — accepts a registry model whose liveCatalogIds match upstream", async () => {
+  // #11754 retired the legacy ChatGPT Web implementation after this test was authored — it was the
+  // only registry provider populating `liveCatalogIds` (curated ids whose public name
+  // differs from the id sent upstream). No live provider currently uses that field, so
+  // this exercises the same production predicate (createCatalogModelPredicate's
+  // `model.liveCatalogIds?.some(...)` branch in visionBridgeRouter.ts) against a
+  // synthetic registry entry instead of trusting stale fixture data. PROVIDER_MODELS is
+  // a mutable Proxy over a lazily-generated object (open-sse/config/providerModels.ts),
+  // so direct assignment is safe and reverted in `finally`.
+  const testProvider = "__vision-bridge-live-catalog-test__";
+  PROVIDER_MODELS[testProvider] = [
+    {
+      id: "synthetic-vision-model-xhigh",
+      name: "Synthetic Vision Model (XHigh)",
+      liveCatalogIds: ["synthetic-live-id"],
+      supportsVision: true,
+    },
+  ];
+
+  try {
+    const model = await getBestVisionModel(
+      {},
+      authoritativeCatalogDeps(testProvider, () => ["synthetic-live-id"])
+    );
+
+    assert.equal(model, `${testProvider}/synthetic-vision-model-xhigh`);
+  } finally {
+    delete PROVIDER_MODELS[testProvider];
+  }
+});
+
+// ── getFallbackModels ───────────────────────────────────────────────────────
+
+test("getFallbackModels — should return fallback models excluding the primary", async () => {
+  const primary = "openai/gpt-4o-mini";
+  const fallbacks = await getFallbackModels(primary, {}, FAIL_OPEN_DEPS);
+  assert.ok(!fallbacks.includes(primary));
+  assert.ok(fallbacks.length > 0);
+});
+
+test("getFallbackModels — should respect max fallback attempts", async () => {
+  const fallbacks = await getFallbackModels(
+    "openai/gpt-4o-mini",
+    { maxFallbackAttempts: 2 },
+    FAIL_OPEN_DEPS
+  );
+  assert.ok(fallbacks.length <= 2);
+});
+
+test("getFallbackModels — does not include candidates with a confirmed-unusable connection", async () => {
+  const fallbacks = await getFallbackModels(
+    "openai/gpt-4o-mini",
+    {},
+    { hasUsableCredentials: async (fullModelId) => fullModelId.split("/")[0] !== "anthropic" }
+  );
+  assert.ok(!fallbacks.some((m) => m.startsWith("anthropic/")));
+});
+
+test("getFallbackModels — excludes fallbacks missing from an authoritative live catalog", async () => {
+  const fallbacks = await getFallbackModels(
+    "gemini/gemini-2.5-flash",
+    {},
+    authoritativeCatalogDeps("gemini", () => ["gemini-2.5-pro", "gemini-2.5-flash"])
+  );
+
+  assert.deepEqual(fallbacks, ["gemini/gemini-2.5-pro"]);
+});
+
+test("getFallbackModels — keeps registered effort variants backed by a live base model", async () => {
+  const fallbacks = await getFallbackModels(
+    "cu/claude-fable-5-1-thinking-max",
+    { maxFallbackAttempts: 6 },
+    authoritativeCatalogDeps("cu", () => ["claude-fable-5-1"])
+  );
+
+  assert.ok(fallbacks.includes("cu/claude-fable-5-1-thinking-high"));
+});
+
+// ── recordLatency / getLatencyStats ─────────────────────────────────────────
+
+test("recordLatency — should record latency measurements", () => {
+  recordLatency("test-model", 100, true);
+  recordLatency("test-model", 150, true);
+  recordLatency("test-model", 200, false);
+
+  const stats = getLatencyStats();
+  assert.ok(stats["test-model"]);
+  assert.equal(stats["test-model"].samples, 3);
+});
+
+test("getLatencyStats — should return latency statistics", () => {
+  recordLatency("model-a", 100, true);
+  recordLatency("model-a", 120, true);
+  recordLatency("model-b", 200, true);
+
+  const stats = getLatencyStats();
+  assert.ok(stats["model-a"]);
+  assert.ok(stats["model-b"]);
+  assert.equal(stats["model-a"].avg, 110);
+  assert.equal(stats["model-a"].successRate, 1);
+});
+
+// ── model-lockout exclusion (#12111) ────────────────────────────────────────
+// getVisionCapableModels() must consult accountFallback's per-connection
+// model lockout (set by chatCore.ts on a 404) in addition to the credential
+// check, and drop a model only when every usable connection has it locked —
+// see tests/unit/guardrails/visionBridge12111Repro.test.ts for the original
+// end-to-end reproduction against the exact reporter setup. These cases
+// exercise the same production code path (getBestVisionModel →
+// getVisionCapableModels → isModelUsableGivenLockouts) with a synthetic
+// registry entry, following the pattern in "accepts a registry model whose
+// liveCatalogIds match upstream" above.
+
+test("getBestVisionModel — excludes a model locked on its only usable connection (#12111)", async () => {
+  const provider = "__vision-bridge-lockout-test-1__";
+  const connectionId = "conn-1";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+  clearAllModelLockouts();
+  lockModel(provider, connectionId, modelId, "not_found", 120_000);
+
+  try {
+    const model = await getBestVisionModel(
+      {},
+      { hasUsableCredentials: async (id) => id.startsWith(`${provider}/`) }
+    );
+    assert.notEqual(model, `${provider}/${modelId}`);
+  } finally {
+    delete PROVIDER_MODELS[provider];
+    clearAllModelLockouts();
+  }
+});
+
+test("getBestVisionModel — keeps a model locked on one connection while a second connection stays usable (#12111)", async () => {
+  const provider = "__vision-bridge-lockout-test-2__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+  clearAllModelLockouts();
+
+  const lockedConn = await createProviderConnection({
+    provider,
+    authType: "apikey",
+    apiKey: "sk-test-locked",
+  });
+  const openConn = await createProviderConnection({
+    provider,
+    authType: "apikey",
+    apiKey: "sk-test-open",
+  });
+  lockModel(provider, (lockedConn as { id: string }).id, modelId, "not_found", 120_000);
+  // Sanity: the OTHER connection must not itself be locked.
+  assert.equal(isModelLocked(provider, (openConn as { id: string }).id, modelId), false);
+
+  try {
+    const model = await getBestVisionModel(
+      {},
+      { hasUsableCredentials: async (id) => id.startsWith(`${provider}/`) }
+    );
+    assert.equal(
+      model,
+      `${provider}/${modelId}`,
+      "a model locked on only ONE of two usable connections must stay selectable"
+    );
+  } finally {
+    delete PROVIDER_MODELS[provider];
+    clearAllModelLockouts();
+    await deleteProviderConnectionsByProvider(provider);
+  }
+});
+
+test("getBestVisionModel — drops a cached selection once it becomes locked mid-window (#12111)", async () => {
+  const provider = "__vision-bridge-lockout-test-3__";
+  const connectionId = "conn-1";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+  clearAllModelLockouts();
+  const deps = { hasUsableCredentials: async (id: string) => id.startsWith(`${provider}/`) };
+
+  try {
+    // First call populates the 60s selection cache with the only candidate.
+    assert.equal(await getBestVisionModel({}, deps), `${provider}/${modelId}`);
+
+    // The model 404s and gets locked mid-cache-window, exactly like chatCore.ts.
+    lockModel(provider, connectionId, modelId, "not_found", 120_000);
+
+    // A cache hit that never re-validates lockouts would keep returning the
+    // now-locked model for up to 60s of further failing requests (the
+    // reporter's complaint); it must fall through to "no usable candidate".
+    assert.equal(await getBestVisionModel({}, deps), null);
+  } finally {
+    delete PROVIDER_MODELS[provider];
+    clearAllModelLockouts();
+    clearSelectionCache();
+  }
+});
+
+// ── blocked no-auth provider exclusion ──────────────────────────────────────
+// Dispatch refuses a no-auth provider listed in blockedProviders BEFORE any
+// credential path, so a blocked provider that wins pool selection turns the
+// operator's block into a late 401 provider_not_configured instead of a
+// reroute. getVisionCapableModels() must skip such providers before the
+// per-model fan-out, via the deps.isBlockedNoAuthProvider injection point
+// (same DI rationale as hasUsableCredentials above).
+
+test("getBestVisionModel — drops a blocked no-auth provider even when its models look credentialed", async () => {
+  const provider = "__vision-bridge-blocked-test-1__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+
+  try {
+    const model = await getBestVisionModel(
+      {},
+      {
+        // The blocked provider's models pass the credential check — the
+        // blocked check must exclude them anyway, because dispatch would
+        // refuse the provider outright.
+        hasUsableCredentials: async (id) => id.startsWith(`${provider}/`),
+        isBlockedNoAuthProvider: async (candidate) => candidate === provider,
+        getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+      }
+    );
+    assert.equal(model, null, "a fully blocked pool must yield no candidate, not a blocked one");
+  } finally {
+    delete PROVIDER_MODELS[provider];
+  }
+});
+
+test("getBestVisionModel — picks an unblocked provider over a blocked one and never probes the blocked one's credentials", async () => {
+  const blockedProvider = "__vision-bridge-blocked-test-2__";
+  const openProvider = "__vision-bridge-blocked-test-3__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[blockedProvider] = [
+    { id: modelId, name: "Blocked Vision Model", supportsVision: true },
+  ];
+  PROVIDER_MODELS[openProvider] = [
+    { id: modelId, name: "Open Vision Model", supportsVision: true },
+  ];
+
+  const credentialedModels: string[] = [];
+  try {
+    const model = await getBestVisionModel(
+      {},
+      {
+        hasUsableCredentials: async (id) => {
+          credentialedModels.push(id);
+          return id.startsWith(`${blockedProvider}/`) || id.startsWith(`${openProvider}/`);
+        },
+        isBlockedNoAuthProvider: async (candidate) => candidate === blockedProvider,
+        getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+      }
+    );
+    assert.equal(model, `${openProvider}/${modelId}`);
+    assert.ok(
+      !credentialedModels.some((id) => id.startsWith(`${blockedProvider}/`)),
+      "the blocked provider must be skipped before the per-model credential fan-out"
+    );
+  } finally {
+    delete PROVIDER_MODELS[blockedProvider];
+    delete PROVIDER_MODELS[openProvider];
+  }
+});
+
+test("getBestVisionModel — drops a cached selection once its provider becomes blocked", async () => {
+  // The pick was cached while the provider was enabled; blocking mid-cache-
+  // window must invalidate it on revalidation, not keep serving it for the
+  // 60s selection TTL (a blocked pick re-creates the misleading 401 this
+  // suite exists to remove). Mirrors chatCore.ts's mid-window lockout flow.
+  const provider = "__vision-bridge-blocked-cache-test__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+  let blocked = false;
+  const deps = {
+    hasUsableCredentials: async (id: string) => id.startsWith(`${provider}/`),
+    isBlockedNoAuthProvider: async () => blocked,
+    getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+  };
+
+  try {
+    assert.equal(await getBestVisionModel({}, deps), `${provider}/${modelId}`);
+    blocked = true;
+    assert.equal(
+      await getBestVisionModel({}, deps),
+      null,
+      "a pick cached before the block must not survive cache revalidation"
+    );
+  } finally {
+    delete PROVIDER_MODELS[provider];
+    clearSelectionCache();
+  }
+});

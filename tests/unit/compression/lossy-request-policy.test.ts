@@ -1,0 +1,193 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  applyLossyRequestPolicy,
+  SAFE_DEFAULT_PIPELINE,
+} from "../../../open-sse/services/compression/lossyRequestPolicy.ts";
+import type { DerivedPlan } from "../../../open-sse/services/compression/deriveDefaultPlan.ts";
+import type { CompressionPipelineStep } from "../../../open-sse/services/compression/types.ts";
+
+const lossyProfile: DerivedPlan = {
+  mode: "stacked",
+  source: "active-profile",
+  stackedPipeline: [
+    { engine: "rtk", intensity: "standard" },
+    { engine: "caveman", intensity: "full" },
+  ],
+};
+
+test("default path replaces a lossy profile with dedup and whitespace folding", () => {
+  const plan = applyLossyRequestPolicy(lossyProfile, null);
+  assert.equal(plan.mode, "stacked");
+  assert.deepEqual(plan.stackedPipeline, [
+    { engine: "session-dedup" },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
+});
+
+test("allow-lossy keeps the operator profile for this request", () => {
+  const plan = applyLossyRequestPolicy(lossyProfile, "allow-lossy");
+  assert.deepEqual(plan.stackedPipeline, lossyProfile.stackedPipeline);
+});
+
+test("engine header is the opt-in for that engine", () => {
+  const plan = applyLossyRequestPolicy(
+    {
+      mode: "rtk",
+      source: "request-header",
+      stackedPipeline: [],
+    },
+    "engine:rtk"
+  );
+  assert.equal(plan.mode, "rtk");
+});
+
+const LOSSLESS_LITE = {
+  engine: "lite",
+  config: { compressToolResults: false, preserveToolWhitespace: true },
+};
+
+test("a safe stacked plan keeps its steps but lite stops truncating tool results", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }, { engine: "lite" }, { engine: "headroom" }],
+  };
+  const plan = applyLossyRequestPolicy(safe, null);
+  assert.deepEqual(plan.stackedPipeline, [
+    { engine: "session-dedup" },
+    LOSSLESS_LITE,
+    { engine: "headroom" },
+  ]);
+});
+
+test("a plan without a lite step is left as-is", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }],
+  };
+  assert.equal(applyLossyRequestPolicy(safe, null), safe);
+});
+
+test("a safe stacked plan scopes Lite without mutating the stored plan", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "lite" }],
+  };
+  assert.deepEqual(applyLossyRequestPolicy(safe, null), {
+    ...safe,
+    stackedPipeline: [LOSSLESS_LITE],
+  });
+  assert.deepEqual(safe.stackedPipeline, [{ engine: "lite" }]);
+});
+
+test("lite mode is scoped to a tool-preserving Lite step on the default path", () => {
+  const lite: DerivedPlan = { mode: "lite", source: "default", stackedPipeline: [] };
+  assert.deepEqual(applyLossyRequestPolicy(lite, null), {
+    ...lite,
+    mode: "stacked",
+    stackedPipeline: [LOSSLESS_LITE],
+    // Analytics keeps reporting the configured mode, not the stacked wrapper.
+    reportedMode: "lite",
+  });
+  assert.equal(applyLossyRequestPolicy(lite, "allow-lossy"), lite);
+});
+
+test("only the lite wrapper carries a reportedMode", () => {
+  const stacked: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }],
+  };
+  assert.equal("reportedMode" in applyLossyRequestPolicy(stacked, null), false);
+});
+
+test("allow-lossy keeps lite tool-result truncation as configured", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "lite" }],
+  };
+  assert.equal(applyLossyRequestPolicy(safe, "allow-lossy"), safe);
+});
+
+test("lossy single mode retains the configured safe subset", () => {
+  const configured = [
+    { engine: "session-dedup" },
+    { engine: "rtk", intensity: "standard" },
+    { engine: "lite" },
+    { engine: "headroom", config: { minRows: 20 } },
+  ] satisfies CompressionPipelineStep[];
+  const plan = applyLossyRequestPolicy(
+    { mode: "aggressive", source: "auto-trigger", stackedPipeline: [] },
+    null,
+    configured
+  );
+  assert.equal(plan.mode, "stacked");
+  assert.deepEqual(plan.stackedPipeline, [configured[0], configured[2], configured[3]]);
+});
+
+test("lossy single mode uses the historical fallback when no safe configured step survives", () => {
+  const allLossy = [
+    { engine: "rtk", intensity: "standard" },
+    { engine: "caveman", intensity: "full" },
+  ] satisfies CompressionPipelineStep[];
+  const base: DerivedPlan = {
+    mode: "aggressive",
+    source: "auto-trigger",
+    stackedPipeline: [],
+  };
+
+  assert.deepEqual(applyLossyRequestPolicy(base, null, []), {
+    ...base,
+    mode: "stacked",
+    stackedPipeline: SAFE_DEFAULT_PIPELINE,
+  });
+  assert.deepEqual(applyLossyRequestPolicy(base, null, allLossy), {
+    ...base,
+    mode: "stacked",
+    stackedPipeline: SAFE_DEFAULT_PIPELINE,
+  });
+
+  const unknownConfigured = [{ engine: "unknown-engine" }];
+  // @ts-expect-error Runtime configuration can contain an unrecognized engine ID.
+  const unknownPlan = applyLossyRequestPolicy(base, null, unknownConfigured);
+  assert.deepEqual(unknownPlan, {
+    ...base,
+    mode: "stacked",
+    stackedPipeline: SAFE_DEFAULT_PIPELINE,
+  });
+});
+
+test("stacked mode filters its own pipeline instead of the configured default", () => {
+  const headroom = {
+    engine: "headroom",
+    config: { minRows: 20 },
+  } satisfies CompressionPipelineStep;
+  const plan = applyLossyRequestPolicy(
+    {
+      mode: "stacked",
+      source: "active-profile",
+      stackedPipeline: [{ engine: "rtk", intensity: "standard" }, headroom],
+    },
+    null,
+    [{ engine: "lite" }]
+  );
+
+  assert.deepEqual(plan.stackedPipeline, [headroom]);
+});
+
+test("allow-lossy returns a lossy single plan unchanged", () => {
+  const lossySingle: DerivedPlan = {
+    mode: "aggressive",
+    source: "auto-trigger",
+    stackedPipeline: [],
+  };
+
+  assert.equal(
+    applyLossyRequestPolicy(lossySingle, "allow-lossy", [{ engine: "headroom" }]),
+    lossySingle
+  );
+});

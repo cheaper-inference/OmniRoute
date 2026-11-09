@@ -1,0 +1,342 @@
+"use client";
+
+import { useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Modal from "./Modal";
+import Button from "./Button";
+import Input from "./Input";
+import Textarea from "./Textarea";
+import { requestTraeAuthorizeState } from "@/shared/utils/traeAuthorizeState";
+
+const TRAE_CLIENT_ID = "en1oxy7wnw8j9n";
+
+function randomHex(bytes: number): string {
+  const buf = new Uint8Array(bytes);
+  (globalThis.crypto || (globalThis as any).crypto).getRandomValues(buf);
+  return Array.from(buf, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function randomDigits(n: number): string {
+  let s = "";
+  while (s.length < n) s += Math.floor(Math.random() * 1e10).toString();
+  return s.slice(0, n);
+}
+
+function buildTraeAuthorizeUrl(callbackUrl: string, traceId: string): string {
+  // Per-attempt machine/device IDs — Trae doesn't tie tokens to a specific
+  // machine_id, but the field is required and is echoed into provider metadata.
+  const machineId = randomHex(32);
+  const deviceId = randomDigits(19);
+  const params = new URLSearchParams({
+    login_version: "1",
+    auth_from: "solo",
+    login_channel: "native_ide",
+    plugin_version: "2.3.24254",
+    auth_type: "local",
+    client_id: TRAE_CLIENT_ID,
+    redirect: "0",
+    login_trace_id: traceId,
+    auth_callback_url: callbackUrl,
+    machine_id: machineId,
+    device_id: deviceId,
+    x_device_id: deviceId,
+    x_machine_id: machineId,
+    x_device_brand: "Mac14,7",
+    x_device_type: "mac",
+    x_os_version: "macOS 26.4.1",
+    x_env: "",
+    x_app_version: "0.1.7",
+    x_app_type: "stable",
+    // Match what the SOLO desktop client sends: hide_saas_login=true. With
+    // auth_from=solo, trae.ai's authorize page is *only* a confirmation gate
+    // for an already-cookied session — so leaving the SaaS sign-in surface
+    // visible (false) causes the server to short-circuit to "Login Failed".
+    // The user must be signed in on trae.ai in the same browser; we surface
+    // that in the modal copy and provide an "Open solo.trae.ai" button.
+    hide_saas_login: "true",
+  });
+  return `https://www.trae.ai/authorization?${params.toString()}`;
+}
+
+type TraeAuthModalProps = {
+  isOpen: boolean;
+  onSuccess?: () => void;
+  onClose: () => void;
+  reauthConnection?: unknown;
+};
+
+/**
+ * Trae SOLO Auth Modal — paste the Cloud-IDE-JWT from solo.trae.ai.
+ *
+ * Trae has no public OAuth or local credential store like Cursor: the user
+ * signs in to solo.trae.ai in a browser, copies the JWT sent in the
+ * Authorization header (Cloud-IDE-JWT scheme), and pastes it here. JWT
+ * lifetime is ~14 days; re-import on expiry.
+ */
+export default function TraeAuthModal({
+  isOpen,
+  onSuccess,
+  onClose,
+  reauthConnection: _,
+}: TraeAuthModalProps) {
+  const t = useTranslations("traeAuthModal");
+  const [accessToken, setAccessToken] = useState("");
+  const accessTokenId = useId();
+  const [webId, setWebId] = useState("");
+  const [bizUserId, setBizUserId] = useState("");
+  const [userUniqueId, setUserUniqueId] = useState("");
+  const [scope, setScope] = useState("marscode-us");
+  const [tenant, setTenant] = useState("marscode");
+  const [region, setRegion] = useState("US-East");
+  const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [authorizing, setAuthorizing] = useState(false);
+  const popupRef = useRef<Window | null>(null);
+  const traceIdRef = useRef<string | null>(null);
+
+  // Listen for postMessage from the callback page (window.opener.postMessage).
+  // Only act on messages with our type tag, and verify the loginTraceId matches
+  // the one we sent in the authorize URL — protects against unrelated postMessages.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onMessage = (ev: MessageEvent) => {
+      const m = ev.data as {
+        type?: string;
+        success?: boolean;
+        error?: string;
+        loginTraceId?: string;
+      } | null;
+      if (!m || m.type !== "trae-oauth-callback") return;
+      // Accept this window's origin OR the sibling loopback host: the dashboard
+      // usually runs on localhost while Trae forces the callback onto 127.0.0.1,
+      // so they are different origins by design. Restrict to that known pair
+      // (never wildcard), then rely on the random loginTraceId for CSRF.
+      const here = window.location;
+      const altHost =
+        here.hostname === "127.0.0.1"
+          ? "localhost"
+          : here.hostname === "localhost"
+            ? "127.0.0.1"
+            : null;
+      const allowedOrigins = new Set([here.origin]);
+      if (altHost)
+        allowedOrigins.add(`${here.protocol}//${altHost}${here.port ? `:${here.port}` : ""}`);
+      if (!allowedOrigins.has(ev.origin)) return;
+      if (!traceIdRef.current || m.loginTraceId !== traceIdRef.current) return;
+      setAuthorizing(false);
+      if (m.success) {
+        onSuccess?.();
+        onClose();
+      } else {
+        setError(m.error || t("errorAuthorizationFailed"));
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [isOpen, onSuccess, onClose, t]);
+
+  const handleAuthorizeWithBrowser = async () => {
+    setError(null);
+    setAuthorizing(true);
+    // Open the popup before the network call so the browser still ties it to the click.
+    const w = window.open("", "trae-oauth", "width=520,height=720");
+    if (!w) {
+      setAuthorizing(false);
+      setError(t("errorPopupBlocked"));
+      return;
+    }
+    popupRef.current = w;
+    // The callback at /authorize only saves a connection for a state issued by the server.
+    const stateResult = await requestTraeAuthorizeState();
+    if (stateResult.ok === false) {
+      w.close();
+      setAuthorizing(false);
+      setError(stateResult.message || t("errorAuthorizationFailed"));
+      return;
+    }
+    const traceId = stateResult.state;
+    traceIdRef.current = traceId;
+    // Trae's authorize endpoint validates two things about auth_callback_url:
+    //  1. host must be a loopback IP (127.0.0.1) — "localhost" hostname gets
+    //     rejected with "Login Failed".
+    //  2. path must end with `/authorize` — any other path (e.g. our earlier
+    //     "/api/oauth/trae/callback") also short-circuits to "Login Failed".
+    // The receiving handler therefore lives at the app root (src/app/authorize).
+    const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
+    const callbackUrl = `http://127.0.0.1:${port}/authorize`;
+    w.location.href = buildTraeAuthorizeUrl(callbackUrl, traceId);
+    // If the user closes the popup without completing, drop the spinner.
+    const poll = setInterval(() => {
+      if (w.closed) {
+        clearInterval(poll);
+        setAuthorizing((prev) => {
+          if (prev) setError(t("errorPopupClosed"));
+          return false;
+        });
+      }
+    }, 700);
+  };
+
+  const handleImportToken = async () => {
+    if (!accessToken.trim()) {
+      setError(t("errorAccessTokenRequired"));
+      return;
+    }
+    setImporting(true);
+    setError(null);
+    try {
+      const body: Record<string, string> = { accessToken: accessToken.trim() };
+      if (webId.trim()) body.webId = webId.trim();
+      if (bizUserId.trim()) body.bizUserId = bizUserId.trim();
+      if (userUniqueId.trim()) body.userUniqueId = userUniqueId.trim();
+      if (scope.trim()) body.scope = scope.trim();
+      if (tenant.trim()) body.tenant = tenant.trim();
+      if (region.trim()) body.region = region.trim();
+
+      const res = await fetch("/api/oauth/trae/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          typeof data.error === "string"
+            ? data.error
+            : data.error?.message || t("errorImportFailed")
+        );
+      }
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} title={t("title")} onClose={onClose}>
+      <div className="flex flex-col gap-4">
+        {/* Primary path: browser-based OAuth via trae.ai/authorization */}
+        <div className="bg-success/10 p-4 rounded-lg border border-success/30">
+          <p className="text-sm text-success mb-2">
+            {t.rich("authorizeDescription", {
+              code: (chunks) => <span className="font-mono">{chunks}</span>,
+            })}
+          </p>
+          <p className="text-xs text-success mb-3">
+            {t.rich("authorizeImportant", {
+              strong: (chunks) => <strong>{chunks}</strong>,
+              code: (chunks) => <span className="font-mono">{chunks}</span>,
+              em: (chunks) => <em>{chunks}</em>,
+            })}
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={handleAuthorizeWithBrowser} disabled={authorizing} fullWidth>
+              {authorizing ? t("waitingForAuthorization") : t("authorizeWithBrowser")}
+            </Button>
+            <Button
+              onClick={() => window.open("https://solo.trae.ai/", "_blank", "noopener,noreferrer")}
+              variant="ghost"
+              fullWidth
+            >
+              {t("openSoloTrae")}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs text-text-muted">
+          <span className="flex-1 border-t border-border" />
+          {t("orPasteManually")}
+          <span className="flex-1 border-t border-border" />
+        </div>
+
+        <div className="bg-info/10 p-3 rounded-lg border border-info/30">
+          <p className="text-sm text-info">
+            {t.rich("manualInstructions", {
+              code: (chunks) => <span className="font-mono">{chunks}</span>,
+              tokenPlaceholder: "<token>",
+            })}
+          </p>
+        </div>
+
+        <Field
+          htmlFor={accessTokenId}
+          label={
+            <>
+              {t("accessTokenLabel")}
+              <span className="ci-field__required" aria-hidden="true">
+                *
+              </span>
+            </>
+          }
+        >
+          <Textarea
+            id={accessTokenId}
+            value={accessToken}
+            onChange={(e) => setAccessToken(e.target.value)}
+            placeholder="eyJhbGciOiJSUzI1NiIs..."
+            rows={3}
+            className="resize-none font-mono text-sm"
+          />
+        </Field>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Input
+            label={
+              <>
+                {t("webId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={webId}
+            onChange={(e) => setWebId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input
+            label={
+              <>
+                {t("bizUserId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={bizUserId}
+            onChange={(e) => setBizUserId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input
+            label={
+              <>
+                {t("userUniqueId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+              </>
+            }
+            value={userUniqueId}
+            onChange={(e) => setUserUniqueId(e.target.value)}
+            placeholder="76428..."
+            inputClassName="font-mono text-sm"
+          />
+          <Input label={t("scope")} value={scope} onChange={(e) => setScope(e.target.value)} />
+          <Input label={t("tenant")} value={tenant} onChange={(e) => setTenant(e.target.value)} />
+          <Input label={t("region")} value={region} onChange={(e) => setRegion(e.target.value)} />
+        </div>
+
+        {error && (
+          <div className="bg-error/10 p-3 rounded-lg border border-error/30">
+            <p className="text-sm text-error">{error}</p>
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Button onClick={handleImportToken} fullWidth disabled={importing || !accessToken.trim()}>
+            {importing ? t("importing") : t("importToken")}
+          </Button>
+          <Button onClick={onClose} variant="ghost" fullWidth>
+            {t("cancel")}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}

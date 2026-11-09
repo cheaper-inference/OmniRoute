@@ -1,0 +1,371 @@
+/**
+ * POST /v1/web/fetch
+ *
+ * Extract content from a URL using a configured web-fetch provider.
+ * Supports Firecrawl, Jina Reader, Tavily Extract, and TinyFish Fetch.
+ *
+ * Request: { url, provider?, format?, depth?, wait_for_selector?, include_metadata? }
+ * Response: { provider, url, content, links, metadata, screenshot_url }
+ *
+ * Quota-aware fallback (#8297): when no explicit provider is requested, the
+ * pool is walked in fixed priority order (fill-first) — a rate-limited or
+ * quota-exhausted provider is skipped instead of short-circuiting the whole
+ * request. When an explicit provider is requested, no silent fallback is
+ * performed — a rate-limited/failing explicit provider surfaces its own error.
+ */
+
+import { errorResponse, unavailableResponse } from "@omniroute/open-sse/utils/error.ts";
+import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import {
+  handleWebFetch,
+  type WebFetchCredentials,
+  type WebFetchResult,
+  WEB_FETCH_PROVIDERS as SHARED_WEB_FETCH_PROVIDERS,
+  EXPLICIT_ONLY_WEB_FETCH_PROVIDERS,
+  ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS,
+  type WebFetchProviderId,
+} from "@omniroute/open-sse/handlers/webFetch.ts";
+import * as log from "@/sse/utils/logger";
+import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
+import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
+import {
+  keyAdmitsKeylessProviders,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
+import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { v1WebFetchSchema } from "@/shared/validation/schemas";
+import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import {
+  isAllRateLimitedCredentials,
+  rateLimitedProviderResponse,
+  type RateLimitedCredentials,
+} from "@/app/api/v1/_shared/rateLimit";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+};
+
+const WEB_FETCH_PROVIDERS = SHARED_WEB_FETCH_PROVIDERS;
+
+// Providers that only understand their own URL shape (context7 takes a library
+// reference like context7.com/reactjs/react.dev, not a generic web URL). They
+// must be requested explicitly and never win auto-selection for arbitrary URLs.
+const EXPLICIT_ONLY_PROVIDERS = EXPLICIT_ONLY_WEB_FETCH_PROVIDERS;
+
+// Providers whose upstream serves an anonymous tier without a key. When no
+// connection is configured they resolve to empty credentials instead of a 400.
+const ANONYMOUS_CAPABLE_PROVIDERS = ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS;
+
+// Providers whose free/low tiers surface quota exhaustion as 402/403 instead
+// of (or in addition to) 429. Jina uses 402 for insufficient balance, but
+// its 403 remains an authorization failure and must not trigger fallback.
+const QUOTA_STATUS_PROVIDERS = new Set<WebFetchProviderId>([
+  "firecrawl",
+  "tavily-search",
+  "tinyfish",
+]);
+
+type CredentialsLookup = WebFetchCredentials | RateLimitedCredentials | null;
+
+export async function OPTIONS() {
+  return new Response(null, { headers: CORS_HEADERS });
+}
+
+/**
+ * Resolve credentials for a web-fetch provider (may be a rate-limited stub,
+ * real credentials, or null when unconfigured). GHSA-3w2r: bounded by the
+ * caller key's connection scope (`allowedConnections`, null = unscoped); a
+ * provider whose connections are all outside it counts as unconfigured.
+ */
+async function resolveCredentials(
+  providerId: WebFetchProviderId,
+  allowedConnections: string[] | null
+): Promise<CredentialsLookup> {
+  try {
+    const creds = withoutKeyScopeBlocked(
+      await getProviderCredentialsWithQuotaPreflight(providerId, null, allowedConnections)
+    );
+    return (creds as CredentialsLookup) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** A request-time upstream status that means "try the next provider" instead of giving up. */
+function isRetryableWebFetchStatus(providerId: WebFetchProviderId, status?: number): boolean {
+  if (status === HTTP_STATUS.RATE_LIMITED) return true;
+  if (providerId === "jina-reader" && status === HTTP_STATUS.PAYMENT_REQUIRED) return true;
+  if (status === HTTP_STATUS.PAYMENT_REQUIRED || status === HTTP_STATUS.FORBIDDEN) {
+    return QUOTA_STATUS_PROVIDERS.has(providerId);
+  }
+  return false;
+}
+
+/** Find the next untried, non-rate-limited, credentialed provider in pool order. */
+async function findNextFallbackProvider(
+  tried: Set<WebFetchProviderId>,
+  allowedConnections: string[] | null
+): Promise<{ providerId: WebFetchProviderId; credentials: WebFetchCredentials } | null> {
+  for (const pid of WEB_FETCH_PROVIDERS) {
+    if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    if (tried.has(pid)) continue;
+    const creds = await resolveCredentials(pid, allowedConnections);
+    tried.add(pid);
+    if (creds && !isAllRateLimitedCredentials(creds)) {
+      return { providerId: pid, credentials: creds };
+    }
+  }
+  return null;
+}
+
+interface WebFetchExecutionInput {
+  url: string;
+  format: "markdown" | "html" | "links" | "screenshot";
+  depth: 0 | 1 | 2;
+  wait_for_selector?: string;
+  include_metadata?: boolean;
+}
+
+interface WebFetchExecutionResult {
+  result: WebFetchResult;
+  provider: WebFetchProviderId;
+  poolExhausted: boolean;
+}
+
+/**
+ * Execute the web-fetch request. When `allowFallback` is true (auto-select),
+ * a retryable/quota upstream failure walks the remaining pool in order
+ * before giving up. Explicit-provider requests never fall back.
+ */
+async function executeWithFallback(
+  reqBody: WebFetchExecutionInput,
+  startProvider: WebFetchProviderId,
+  startCredentials: WebFetchCredentials,
+  allowFallback: boolean,
+  triedProviders: Set<WebFetchProviderId>,
+  allowedConnections: string[] | null
+): Promise<WebFetchExecutionResult> {
+  let provider = startProvider;
+  let credentials = startCredentials;
+  let result = await handleWebFetch(reqBody, credentials, provider);
+
+  if (!allowFallback) {
+    return { result, provider, poolExhausted: false };
+  }
+
+  while (!result.success && isRetryableWebFetchStatus(provider, result.status)) {
+    const next = await findNextFallbackProvider(triedProviders, allowedConnections);
+    if (!next) {
+      return { result, provider, poolExhausted: true };
+    }
+    provider = next.providerId;
+    credentials = next.credentials;
+    result = await handleWebFetch(reqBody, credentials, provider);
+  }
+
+  return { result, provider, poolExhausted: false };
+}
+
+type ResolvedWebFetchTarget =
+  | {
+      ok: true;
+      provider: WebFetchProviderId;
+      credentials: WebFetchCredentials;
+      tried: Set<WebFetchProviderId>;
+      isExplicit: boolean;
+    }
+  | { ok: false; response: Response };
+
+/** Resolve credentials for an explicitly requested provider (no fallback allowed). */
+async function resolveExplicitTarget(
+  providerId: WebFetchProviderId,
+  allowedConnections: string[] | null
+): Promise<ResolvedWebFetchTarget> {
+  const creds = await resolveCredentials(providerId, allowedConnections);
+  // Anonymous-capable providers never hard-fail on credential problems: the
+  // anonymous tier does not consume key quota, so a rate-limited (or absent)
+  // key degrades to an anonymous attempt instead of a 429/400.
+  // GHSA-3w2r: the anonymous tier sends the URL to a party the key's
+  // connection allowlist did not approve, so a connection-scoped key uses it
+  // only when the allowlist names `noauth` (chat's #9057 rule).
+  if (
+    ANONYMOUS_CAPABLE_PROVIDERS.has(providerId) &&
+    (keyAdmitsKeylessProviders(allowedConnections) ||
+      (creds && !isAllRateLimitedCredentials(creds)))
+  ) {
+    return {
+      ok: true,
+      provider: providerId,
+      credentials: creds && !isAllRateLimitedCredentials(creds) ? creds : {},
+      tried: new Set([providerId]),
+      isExplicit: true,
+    };
+  }
+  if (isAllRateLimitedCredentials(creds)) {
+    return { ok: false, response: rateLimitedProviderResponse(providerId, creds) };
+  }
+  if (!creds) {
+    return {
+      ok: false,
+      response: errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No credentials configured for web-fetch provider: ${providerId}. ` +
+          `Add an API key for "${providerId}" in the dashboard.`
+      ),
+    };
+  }
+  return {
+    ok: true,
+    provider: providerId,
+    credentials: creds,
+    tried: new Set([providerId]),
+    isExplicit: true,
+  };
+}
+
+/**
+ * Auto-select: walk the pool in fixed priority order (fill-first), skipping
+ * rate-limited stubs instead of letting them short-circuit the loop (#8297).
+ */
+async function resolveAutoSelectTarget(
+  allowedConnections: string[] | null
+): Promise<ResolvedWebFetchTarget> {
+  let firstRateLimited: {
+    providerId: WebFetchProviderId;
+    credentials: RateLimitedCredentials;
+  } | null = null;
+
+  for (const pid of WEB_FETCH_PROVIDERS) {
+    if (EXPLICIT_ONLY_PROVIDERS.has(pid)) continue;
+    const creds = await resolveCredentials(pid, allowedConnections);
+    if (isAllRateLimitedCredentials(creds)) {
+      firstRateLimited ??= { providerId: pid, credentials: creds };
+      continue;
+    }
+    if (creds) {
+      return {
+        ok: true,
+        provider: pid,
+        credentials: creds,
+        tried: new Set([pid]),
+        isExplicit: false,
+      };
+    }
+  }
+
+  if (firstRateLimited) {
+    return {
+      ok: false,
+      response: rateLimitedProviderResponse(
+        firstRateLimited.providerId,
+        firstRateLimited.credentials
+      ),
+    };
+  }
+  return {
+    ok: false,
+    response: errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `No credentials configured for any web-fetch provider. ` +
+        `Add an API key for one of: ${WEB_FETCH_PROVIDERS.join(", ")}.`
+    ),
+  };
+}
+
+/** Resolve the provider + credentials to use for this request (explicit or auto-select). */
+async function resolveWebFetchTarget(
+  requestedProvider: string | undefined,
+  allowedConnections: string[] | null
+): Promise<ResolvedWebFetchTarget> {
+  if (requestedProvider) {
+    return resolveExplicitTarget(requestedProvider as WebFetchProviderId, allowedConnections);
+  }
+  return resolveAutoSelectTarget(allowedConnections);
+}
+
+export async function POST(request: Request) {
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    log.warn("WEB_FETCH", "Invalid JSON body");
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid JSON body");
+  }
+
+  const validation = validateBody(v1WebFetchSchema, rawBody);
+  if (isValidationFailure(validation)) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, validation.error.message);
+  }
+  const body = validation.data;
+
+  // Optional auth check — when REQUIRE_API_KEY=false, ignore presented
+  // invalid keys so anonymous access works the same as all other client
+  // APIs (#7785).
+  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
+  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
+    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
+  }
+  if (isRequireApiKeyEnabled() && apiKeyRaw && !apiKeyValid) {
+    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
+  }
+
+  // Enforce API key policies. GHSA-3w2r: provider credentials (and the
+  // fallback walk) stay inside the key's connection scope, as in chat.
+  const scope = await enforceApiKeyPolicyWithScope(request, "web-fetch");
+  if (scope.rejection) return scope.rejection;
+
+  // Resolve provider + credentials (explicit provider never falls back; #8297)
+  const target = await resolveWebFetchTarget(body.provider, scope.allowedConnections);
+  if (!target.ok) return target.response;
+
+  log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);
+
+  const {
+    result,
+    provider: finalProvider,
+    poolExhausted,
+  } = await executeWithFallback(
+    {
+      url: body.url,
+      format: body.format,
+      depth: body.depth as 0 | 1 | 2,
+      wait_for_selector: body.wait_for_selector,
+      include_metadata: body.include_metadata,
+    },
+    target.provider,
+    target.credentials,
+    !target.isExplicit,
+    target.tried,
+    scope.allowedConnections
+  );
+
+  if (poolExhausted) {
+    return unavailableResponse(
+      HTTP_STATUS.RATE_LIMITED,
+      "All configured web-fetch providers are rate limited or quota-exhausted"
+    );
+  }
+
+  if (!result.success) {
+    return new Response(
+      JSON.stringify({
+        error: { message: result.error ?? "Web fetch failed", type: "web_fetch_error" },
+      }),
+      {
+        status: result.status ?? 502,
+        headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+      }
+    );
+  }
+
+  if (finalProvider !== target.provider) {
+    log.info("WEB_FETCH", `Fell back from ${target.provider} to ${finalProvider}`);
+  }
+
+  return new Response(JSON.stringify(result.data), {
+    status: 200,
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+  });
+}

@@ -1,0 +1,232 @@
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
+import { createFile, listFiles, formatFileResponse, countFiles } from "@/lib/db/files";
+import { NextResponse } from "next/server";
+import {
+  getApiKeyRequestScope,
+  resolveListScope,
+  resolveEffectiveApiKeyId,
+} from "@/app/api/v1/_helpers/apiKeyScope";
+import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+
+export async function OPTIONS() {
+  return handleCorsOptions();
+}
+
+const DEFAULT_LIST_LIMIT = 20;
+const MAX_LIST_LIMIT = 10000;
+
+export function parseFilesListQuery(searchParams: URLSearchParams):
+  | {
+      ok: true;
+      limit: number;
+      after: string | undefined;
+      order: "asc" | "desc";
+      purpose: string | undefined;
+    }
+  | { ok: false; response: Response } {
+  const rawLimit = searchParams.get("limit");
+  let limit = DEFAULT_LIST_LIMIT;
+
+  if (rawLimit !== null) {
+    if (!/^\d+$/.test(rawLimit)) {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          { error: { message: "limit must be a positive integer", type: "invalid_request_error" } },
+          { status: 400, headers: CORS_HEADERS }
+        ),
+      };
+    }
+
+    limit = Number.parseInt(rawLimit, 10);
+    if (limit < 1 || limit > MAX_LIST_LIMIT) {
+      return {
+        ok: false,
+        response: NextResponse.json(
+          {
+            error: {
+              message: `limit must be between 1 and ${MAX_LIST_LIMIT}`,
+              type: "invalid_request_error",
+            },
+          },
+          { status: 400, headers: CORS_HEADERS }
+        ),
+      };
+    }
+  }
+
+  const orderParam = searchParams.get("order");
+  const order = orderParam === "asc" ? "asc" : "desc";
+
+  return {
+    ok: true,
+    limit,
+    after: searchParams.get("after") || undefined,
+    order,
+    purpose: searchParams.get("purpose") || undefined,
+  };
+}
+
+export async function POST(request: Request) {
+  const scope = await getApiKeyRequestScope(request);
+  if (scope.rejection) return scope.rejection;
+
+  // Fail closed on an unresolvable OR invalid credential — the same 401 fold
+  // `getApiKeyRequestScope` already applies (`apiKeyId: null` for a
+  // revoked/expired/banned/deactivated/unresolvable key, #13881) — so the
+  // per-key policy check below never has to special-case that status itself.
+  if (scope.apiKey && !scope.apiKeyId) {
+    return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
+      status: 401,
+      headers: credentialRejectionHeaders(request),
+    });
+  }
+
+  // per-key operator policy (endpoint allowlist, schedule, usage cap, rate
+  // limit) — LEDGER-2 of the omni-code-sec 2026-09-21 run / #14481. Called
+  // UNCONDITIONALLY, exactly like batches/delete-completed/route.ts: a bare
+  // `x-api-key`/`x-goog-api-key` credential (no anthropic-version, non-Claude
+  // UA) is accepted by the CLIENT_API auth layer but ignored by
+  // getApiKeyRequestScope's extractApiKey() (scope.apiKeyId stays null for
+  // it) — enforceApiKeyPolicy resolves it independently via
+  // extractUngatedClientApiKey() (GHSA-2phc-xp22-9f56), so gating this call
+  // on scope.apiKeyId let that transport skip the endpoint allowlist,
+  // schedule, usage cap, rate limit and key quota entirely (round-2 PoC
+  // against e543b64). A keyless caller (session/anonymous) is a no-op here.
+  const policy = await enforceApiKeyPolicy(request, null);
+  if (policy.rejection) return policy.rejection;
+
+  // A key resolved only via the ungated x-api-key/x-goog-api-key transport
+  // never sets scope.apiKeyId (see the comment above) — fall back to the id
+  // enforceApiKeyPolicy() independently resolved, so the upload is not
+  // attributed to nobody (LEDGER-27, omni-code-sec round 3).
+  const apiKeyId = resolveEffectiveApiKeyId(scope, policy.apiKeyInfo);
+
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+    const purpose = formData.get("purpose") as string;
+    const expiresAfterAnchor = formData.get("expires_after[anchor]") as string;
+    const expiresAfterSeconds = formData.get("expires_after[seconds]") as string;
+
+    if (!file || !purpose) {
+      return NextResponse.json(
+        { error: { message: "Missing file or purpose", type: "invalid_request_error" } },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    const MAX_FILE_BYTES = 512 * 1024 * 1024; // 512 MB
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "File exceeds maximum allowed size of 512 MB",
+            type: "invalid_request_error",
+          },
+        },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    const bytes = file.size;
+    const filename = file.name;
+    const mimeType = file.type;
+    const content = Buffer.from(await file.arrayBuffer());
+
+    let expiresAt: number | undefined;
+    if (expiresAfterAnchor === "created_at" && expiresAfterSeconds) {
+      const seconds = Number.parseInt(expiresAfterSeconds);
+      if (!Number.isNaN(seconds)) {
+        expiresAt = Math.floor(Date.now() / 1000) + seconds;
+      }
+    }
+
+    const record = createFile({
+      bytes,
+      filename,
+      purpose,
+      content,
+      mimeType,
+      apiKeyId,
+      expiresAt,
+    });
+
+    return NextResponse.json(formatFileResponse(record), { headers: CORS_HEADERS });
+  } catch (error) {
+    console.error("[FILES] Upload failed:", error);
+    return NextResponse.json(
+      { error: { message: "Upload failed", type: "server_error" } },
+      { status: 500, headers: CORS_HEADERS }
+    );
+  }
+}
+
+export async function GET(request: Request) {
+  const scope = await getApiKeyRequestScope(request);
+  if (scope.rejection) return scope.rejection;
+
+  // Fail closed on an unresolvable OR invalid credential — the same 401 fold
+  // `getApiKeyRequestScope` already applies (`apiKeyId: null` for a
+  // revoked/expired/banned/deactivated/unresolvable key, #13881) — so the
+  // per-key policy check below never has to special-case that status itself.
+  if (scope.apiKey && !scope.apiKeyId) {
+    return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
+      status: 401,
+      headers: credentialRejectionHeaders(request),
+    });
+  }
+
+  // per-key operator policy (endpoint allowlist, schedule, usage cap, rate
+  // limit) — LEDGER-2 of the omni-code-sec 2026-09-21 run / #14481. Called
+  // UNCONDITIONALLY, exactly like batches/delete-completed/route.ts: a bare
+  // `x-api-key`/`x-goog-api-key` credential (no anthropic-version, non-Claude
+  // UA) is accepted by the CLIENT_API auth layer but ignored by
+  // getApiKeyRequestScope's extractApiKey() (scope.apiKeyId stays null for
+  // it) — enforceApiKeyPolicy resolves it independently via
+  // extractUngatedClientApiKey() (GHSA-2phc-xp22-9f56), so gating this call
+  // on scope.apiKeyId let that transport skip the endpoint allowlist,
+  // schedule, usage cap, rate limit and key quota entirely (round-2 PoC
+  // against e543b64). A keyless caller (session/anonymous) is a no-op here.
+  const policy = await enforceApiKeyPolicy(request, null);
+  if (policy.rejection) return policy.rejection;
+
+  // Key → own files only; dashboard session without a key → instance-wide;
+  // anonymous / unresolvable bearer → 401. `listFiles`/`countFiles` read an
+  // absent owner as "every tenant", so the widening must be an explicit
+  // decision here, never a fallback (GHSA-m3hp-hq9g-fpmv).
+  const listScope = resolveListScope(scope, policy, request);
+  if (listScope.mode === "rejected") return listScope.response;
+  const ownerFilter = listScope.mode === "api_key" ? listScope.apiKeyId : undefined;
+
+  const { searchParams } = new URL(request.url);
+  const parsed = parseFilesListQuery(searchParams);
+  if (!parsed.ok) return parsed.response;
+  const { limit, after, order, purpose } = parsed;
+
+  // We fetch limit + 1 to check if there are more items
+  const files = listFiles({
+    apiKeyId: ownerFilter,
+    purpose,
+    limit: limit + 1,
+    after,
+    order,
+  });
+
+  const hasMore = files.length > limit;
+  const data = files.slice(0, limit);
+  const totalCount = countFiles({ apiKeyId: ownerFilter, purpose });
+
+  return NextResponse.json(
+    {
+      object: "list",
+      data: data.map((f) => formatFileResponse(f)),
+      first_id: data.length > 0 ? data[0].id : null,
+      last_id: data.length > 0 ? data.at(-1).id : null,
+      has_more: hasMore,
+      total_count: totalCount,
+    },
+    { headers: CORS_HEADERS }
+  );
+}

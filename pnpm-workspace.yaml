@@ -1,0 +1,32 @@
+packages:
+  - "packages/*"
+  - "open-sse"
+# Match `.npmrc`'s legacy-peer-deps posture. OmniRoute imports only the deep
+# icon modules from @lobehub/icons; auto-installing its unused @lobehub/ui peer
+# pulls a large UI subtree (including packages without distributable licenses).
+autoInstallPeers: false
+allowBuilds:
+  "@parcel/watcher": true
+  "@swc/core": true
+  better-sqlite3: true
+  core-js: true
+  esbuild: true
+  keytar: true
+  libxmljs2: true
+  onnxruntime-node: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+onlyBuiltDependencies:
+  - "@parcel/watcher"
+  - "@swc/core"
+  - "better-sqlite3"
+  - "core-js"
+  - "esbuild"
+  - "keytar"
+  - "libxmljs2"
+  - "onnxruntime-node"
+  - "omniroute"
+  - "protobufjs"
+  - "sharp"
+  - "unrs-resolver"

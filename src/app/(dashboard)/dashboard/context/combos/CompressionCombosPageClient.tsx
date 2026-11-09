@@ -1,0 +1,511 @@
+"use client";
+
+// Combos screen = Compression Hub (top) + named-combos manager (below).
+//
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { STACKED_PIPELINE_ENGINE_INTENSITIES } from "@/shared/validation/compressionConfigSchemas";
+import { CompressionPipelineEditor } from "@/shared/components/compression/CompressionPipelineEditor";
+import {
+  OUTPUT_STYLE_IDS,
+  outputStyleMeta,
+} from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
+import { buildOutputStylesInstruction } from "../../../../../../open-sse/services/compression/outputStyles/apply.ts";
+import { ComboCompressionModeSelect } from "@/shared/components/compression/ComboCompressionModeSelect";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Checkbox from "@/shared/components/Checkbox";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import CompressionHub from "./CompressionHub";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+
+type PipelineStep = { engine: string; intensity?: string };
+type OutputStyleSelection = { id: string; level: "lite" | "full" | "ultra" };
+type CompressionCombo = {
+  id: string;
+  name: string;
+  description: string;
+  pipeline: PipelineStep[];
+  languagePacks: string[];
+  outputMode: boolean;
+  outputModeIntensity: string;
+  outputStyles: OutputStyleSelection[];
+  isDefault: boolean;
+};
+type RoutingCombo = {
+  id?: string;
+  name?: string;
+  config?: { compressionMode?: string } | null;
+};
+type LanguagePack = { language: string; ruleCount: number };
+
+const EMPTY_PIPELINE: PipelineStep[] = [
+  { engine: "rtk", intensity: "standard" },
+  { engine: "caveman", intensity: "full" },
+];
+
+// Engine list is sourced from the API schema so the dropdown can never offer an engine
+// the `PUT /api/context/combos/[id]` route would reject with HTTP 400 (#4955).
+const ENGINE_INTENSITIES: Record<string, readonly string[]> = STACKED_PIPELINE_ENGINE_INTENSITIES;
+
+function NamedCombosManager() {
+  const t = useTranslations("contextCombos");
+  const tSettings = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
+  const [combos, setCombos] = useState<CompressionCombo[]>([]);
+  const [routingCombos, setRoutingCombos] = useState<RoutingCombo[]>([]);
+  const [languagePacks, setLanguagePacks] = useState<LanguagePack[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [pipeline, setPipeline] = useState<PipelineStep[]>(EMPTY_PIPELINE);
+  const [selectedPacks, setSelectedPacks] = useState<string[]>(["en"]);
+  const [outputMode, setOutputMode] = useState(false);
+  const [outputModeIntensity, setOutputModeIntensity] = useState("full");
+  const [outputStyles, setOutputStyles] = useState<OutputStyleSelection[]>([]);
+  const [assignmentIds, setAssignmentIds] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [activeComboId, setActiveComboId] = useState<string | null>(null);
+  const [compressionEnabled, setCompressionEnabled] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // The defaults (activeComboId null, compressionEnabled false) suppress the
+  // master-switch warning, hide the Active badge and disable the override selects,
+  // so a failed settings GET must show a retry instead. A retry re-runs the loads;
+  // answers that arrive for the run it replaced are ignored.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+
+  const refresh = () => {
+    fetch("/api/context/combos")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setCombos(Array.isArray(data?.combos) ? data.combos : []))
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    let ignore = false;
+    refresh();
+    fetch("/api/combos")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore) setRoutingCombos(Array.isArray(data?.combos) ? data.combos : []);
+      })
+      .catch(() => {});
+    fetch("/api/compression/language-packs")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!ignore) setLanguagePacks(Array.isArray(data?.packs) ? data.packs : []);
+      })
+      .catch(() => {});
+    fetch("/api/settings/compression")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (ignore) return;
+        if (data) {
+          setActiveComboId(data.activeComboId ?? null);
+          setCompressionEnabled(Boolean(data.enabled));
+        }
+        setLoadFailed(!data);
+      })
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [loadAttempt]);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setDescription("");
+    setPipeline(EMPTY_PIPELINE);
+    setSelectedPacks(["en"]);
+    setOutputMode(false);
+    setOutputModeIntensity("full");
+    setOutputStyles([]);
+    setAssignmentIds([]);
+    setError(null);
+  };
+
+  const loadAssignments = async (id: string) => {
+    const res = await fetch(`/api/context/combos/${id}/assignments`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data?.assignments)
+      ? data.assignments.map((item: { routingComboId: string }) => item.routingComboId)
+      : [];
+  };
+
+  const editCombo = async (combo: CompressionCombo) => {
+    setEditingId(combo.id);
+    setName(combo.name);
+    setDescription(combo.description ?? "");
+    setPipeline(combo.pipeline.length > 0 ? combo.pipeline : EMPTY_PIPELINE);
+    setSelectedPacks(combo.languagePacks?.length ? combo.languagePacks : ["en"]);
+    setOutputMode(Boolean(combo.outputMode));
+    setOutputModeIntensity(combo.outputModeIntensity ?? "full");
+    setOutputStyles((combo.outputStyles ?? []) as OutputStyleSelection[]);
+    setAssignmentIds(await loadAssignments(combo.id));
+  };
+
+  const saveCombo = async () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setError(t("nameRequired"));
+      return;
+    }
+    if (pipeline.length === 0) {
+      setError(t("pipelineRequired"));
+      return;
+    }
+    setError(null);
+    setSaving(true);
+    try {
+      const payload = {
+        name: trimmed,
+        description,
+        pipeline,
+        languagePacks: selectedPacks,
+        outputMode,
+        outputModeIntensity,
+        outputStyles,
+      };
+      const res = await fetch(
+        editingId ? `/api/context/combos/${editingId}` : "/api/context/combos",
+        {
+          method: editingId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error || t("saveComboFailed", { status: res.status }));
+        return;
+      }
+      const combo = await res.json();
+      await fetch(`/api/context/combos/${combo.id}/assignments`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ routingComboIds: assignmentIds }),
+      });
+      resetForm();
+      refresh();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteCombo = async (combo: CompressionCombo) => {
+    if (!(await requestConfirm(t("deleteNamedConfirm", { name: combo.name })))) return;
+    const res = await fetch(`/api/context/combos/${combo.id}`, { method: "DELETE" });
+    if (res.ok) refresh();
+  };
+
+  // Output styles supersede the legacy terse toggle above; an empty selection inherits
+  // the global Compression Engine panel, matching the API/DB semantics.
+  const setOutputStyle = (
+    id: string,
+    patch: { enabled?: boolean; level?: OutputStyleSelection["level"] }
+  ) => {
+    setOutputStyles((current) => {
+      const existing = current.find((style) => style.id === id);
+      if (patch.enabled === false) return current.filter((style) => style.id !== id);
+      if (existing) {
+        return current.map((style) =>
+          style.id === id ? { ...style, level: patch.level ?? style.level } : style
+        );
+      }
+      return [...current, { id, level: patch.level ?? "full" }];
+    });
+  };
+
+  const togglePack = (language: string, enabled: boolean) => {
+    setSelectedPacks((current) =>
+      enabled
+        ? [...new Set([...current, language])]
+        : current.filter((item) => item !== language && item !== "en")
+    );
+  };
+
+  const toggleAssignment = (id: string, enabled: boolean) => {
+    setAssignmentIds((current) =>
+      enabled ? [...new Set([...current, id])] : current.filter((item) => item !== id)
+    );
+  };
+
+  if (loadFailed) {
+    return (
+      <Card padding="sm" className="flex items-center justify-between gap-4">
+        <p role="alert" className="text-sm text-error">
+          {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+          className="shrink-0"
+        >
+          {tSettings("retry")}
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <SectionHeader title={t("namedCombos")} description={t("namedCombosDescription")} />
+
+      {/* #12063: the master "Prompt Compression" switch (Settings page) is a hard kill that
+          runs BEFORE an active profile is even considered (strategySelector.ts resolveBasePlan).
+          Surface that dependency here so a selected profile is never silently inert. */}
+      {!compressionEnabled && activeComboId && (
+        <Alert
+          variant="warning"
+          role="alert"
+          data-testid="compression-master-switch-warning"
+          dismissible={false}
+        >
+          {t("activeProfileMasterSwitchOffWarning")}{" "}
+          <Link href="/dashboard/context/settings" className="font-medium underline">
+            {t("activeProfileMasterSwitchOffCta")}
+          </Link>
+        </Alert>
+      )}
+
+      <Card padding="sm">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Input
+            label={t("name")}
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder={t("comboNamePlaceholder")}
+          />
+          <Input
+            label={t("descriptionField")}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder={t("descriptionPlaceholder")}
+          />
+        </div>
+
+        <div className="mt-4">
+          <CompressionPipelineEditor
+            steps={pipeline}
+            onChange={setPipeline}
+            engineIntensities={ENGINE_INTENSITIES}
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-text-main">{t("languagePacks")}</h3>
+            <div className="space-y-2 text-sm text-text-main">
+              {languagePacks.map((pack) => (
+                <Checkbox
+                  key={pack.language}
+                  label={`${pack.language} (${pack.ruleCount})`}
+                  checked={selectedPacks.includes(pack.language)}
+                  disabled={pack.language === "en"}
+                  onChange={(event) => togglePack(pack.language, event.target.checked)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2 text-sm text-text-main">
+            <h3 className="text-sm font-semibold text-text-main">{t("outputMode")}</h3>
+            <Checkbox
+              label={t("enabled")}
+              checked={outputMode}
+              onChange={(event) => setOutputMode(event.target.checked)}
+            />
+            <Select
+              aria-label={t("intensity")}
+              value={outputModeIntensity}
+              onChange={(event) => setOutputModeIntensity(event.target.value)}
+            >
+              <option value="lite">{t("intensityLite")}</option>
+              <option value="full">{t("intensityFull")}</option>
+              <option value="ultra">{t("intensityUltra")}</option>
+            </Select>
+          </div>
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-text-main">{t("assignToRouting")}</h3>
+            <div className="max-h-44 space-y-2 overflow-auto text-sm text-text-main">
+              {routingCombos.length === 0 ? (
+                <p className="text-xs text-text-muted">{t("noAssignments")}</p>
+              ) : (
+                routingCombos.map((combo) => {
+                  const id = combo.id ?? combo.name ?? "";
+                  if (!id) return null;
+                  return (
+                    <div key={id} className="flex items-center justify-between gap-2">
+                      <Checkbox
+                        className="min-w-0 flex-1"
+                        label={<span className="truncate">{combo.name ?? id}</span>}
+                        checked={assignmentIds.includes(id)}
+                        onChange={(event) => toggleAssignment(id, event.target.checked)}
+                      />
+                      <ComboCompressionModeSelect
+                        combo={{ id, config: combo.config }}
+                        disabled={!compressionEnabled}
+                        title={t("compressionOverride")}
+                        className="w-24 shrink-0 text-xs"
+                      />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-border/30 pt-4">
+          <h3 className="text-sm font-semibold text-text-main">
+            {tSettings("compressionSettingsOutputStyles")}
+          </h3>
+          <p className="mt-1 text-xs text-text-muted">
+            {tSettings("compressionOutputStylesDescription")}
+          </p>
+          <div className="mt-3 flex flex-col gap-2">
+            {OUTPUT_STYLE_IDS.filter((id) => {
+              const meta = outputStyleMeta(id);
+              return !meta.locale || selectedPacks.includes(meta.locale);
+            }).map((id) => {
+              const styleLabel = tSettings(`compressionOutputStyle.${id}.label`);
+              const selected = outputStyles.find((style) => style.id === id);
+              return (
+                <div key={id} className="flex items-center justify-between gap-2">
+                  <Checkbox
+                    className="min-w-0 flex-1"
+                    data-testid={`combo-output-style-toggle-${id}`}
+                    label={<span className="truncate">{styleLabel}</span>}
+                    checked={Boolean(selected)}
+                    onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
+                  />
+                  <Select
+                    compact
+                    className="w-24 shrink-0"
+                    selectClassName="text-xs"
+                    value={selected?.level ?? "full"}
+                    aria-label={`${styleLabel} level`}
+                    disabled={!selected}
+                    onChange={(event) =>
+                      setOutputStyle(id, {
+                        enabled: true,
+                        level: event.target.value as OutputStyleSelection["level"],
+                      })
+                    }
+                  >
+                    <option value="lite">{tSettings("compressionLevel.lite")}</option>
+                    <option value="full">{tSettings("compressionLevel.full")}</option>
+                    <option value="ultra">{tSettings("compressionLevel.ultra")}</option>
+                  </Select>
+                </div>
+              );
+            })}
+          </div>
+          {outputStyles.length > 0 && (
+            <>
+              <pre
+                data-testid="combo-output-styles-preview"
+                className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-bg p-2 font-mono text-[11px] text-text-muted"
+              >
+                {/* One block per selected pack: the runtime language is detected per request,
+                    so a zh pack must show its 文言 text instead of packs[0] only. */}
+                {[...new Set(selectedPacks.length ? selectedPacks : ["en"])]
+                  .map((pack) => buildOutputStylesInstruction(outputStyles, pack))
+                  .filter(Boolean)
+                  .join("\n\n")}
+              </pre>
+              {selectedPacks.length > 1 && (
+                <p className="mt-1 text-xs text-text-muted">
+                  {tSettings("compressionOutputStylesPreviewNote")}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        {error && (
+          <p className="mt-4 text-sm text-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button onClick={saveCombo} loading={saving} disabled={saving}>
+            {editingId ? t("save") : t("createCombo")}
+          </Button>
+          {editingId && (
+            <Button variant="ghost" onClick={resetForm}>
+              {t("cancel")}
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {combos.map((combo) => (
+          <Card key={combo.id} padding="sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-semibold text-text-main">{combo.name}</h3>
+                <p className="mt-1 text-sm text-text-muted">{combo.description}</p>
+              </div>
+              {combo.id === activeComboId && (
+                <Badge data-testid={`active-badge-${combo.id}`} variant="success" dot>
+                  {t("active")}
+                </Badge>
+              )}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {combo.pipeline.map((step, index) => (
+                <Badge key={`${combo.id}-${index}`} size="sm" className="font-mono">
+                  {index + 1}. {step.engine}
+                  {step.intensity ? `:${step.intensity}` : ""}
+                </Badge>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-text-muted">
+              {t("languagePacksList", { packs: combo.languagePacks.join(", ") })}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" icon="edit" onClick={() => editCombo(combo)}>
+                {t("editCombo")}
+              </Button>
+              {!combo.isDefault && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon="delete"
+                  onClick={() => deleteCombo(combo)}
+                  className="border-error/40 text-error hover:bg-error/10"
+                >
+                  {t("deleteCombo")}
+                </Button>
+              )}
+            </div>
+          </Card>
+        ))}
+      </section>
+      {confirmDialog}
+    </div>
+  );
+}
+
+export default function CompressionCombosPageClient() {
+  return (
+    <div className="flex flex-col gap-8">
+      <CompressionHub />
+      <NamedCombosManager />
+    </div>
+  );
+}

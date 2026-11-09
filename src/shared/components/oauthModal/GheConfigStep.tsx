@@ -1,0 +1,56 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+
+type GheConfigStepProps = {
+  gheUrl: string;
+  setGheUrl: (value: string) => void;
+  /** Rendered inline below the form; `unknown` is not a valid ReactNode. */
+  error?: string | null;
+  setError: (value: string) => void;
+  startOAuthFlow: () => void;
+};
+
+/** GHE Copilot: collect the GitHub Enterprise base URL before starting the OAuth flow. */
+export default function GheConfigStep({
+  gheUrl,
+  setGheUrl,
+  error,
+  setError,
+  startOAuthFlow,
+}: GheConfigStepProps) {
+  const t = useTranslations("oauthModal");
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-text-muted">
+        {t.rich("gheDescription", {
+          code: (chunks) => <code className="font-mono">{chunks}</code>,
+        })}
+      </p>
+      <Input
+        value={gheUrl}
+        onChange={(e) => setGheUrl(e.target.value)}
+        placeholder={t("gheUrlPlaceholder")}
+        label={t("gheUrlLabel")}
+        type="url"
+      />
+      <Button
+        onClick={() => {
+          if (!gheUrl.trim()) {
+            setError(t("gheUrlRequired"));
+            return;
+          }
+          startOAuthFlow();
+        }}
+        fullWidth
+        disabled={!gheUrl.trim()}
+      >
+        {t("connect")}
+      </Button>
+      {error && <p className="text-sm text-error">{error}</p>}
+    </div>
+  );
+}

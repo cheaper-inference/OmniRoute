@@ -1,0 +1,195 @@
+"use client";
+
+import { useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import { Slider } from "@omniroute/ui-kit/slider";
+import { Field } from "@omniroute/ui-kit/field";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+import { useApiKey } from "../../providers/hooks/useApiKey";
+import { useProviderModels } from "../../providers/hooks/useProviderModels";
+import { buildCurl } from "../../providers/utils/buildCurl";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
+import { PlaygroundCard } from "./PlaygroundCard";
+
+interface Props {
+  providerId: string;
+}
+
+const ENDPOINT_PATH = "/api/v1/audio/speech";
+
+const VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer", "rachel", "bella", "adam"];
+
+function extractError(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+  const err = d.error as Record<string, unknown> | undefined;
+  if (err?.message) return String(err.message);
+  if (typeof d.message === "string") return d.message;
+  return null;
+}
+
+export function TtsExampleCard({ providerId }: Props) {
+  const t = useTranslations("miniPlayground");
+  const textareaId = useId();
+  const { apiKey, keys } = useApiKey();
+  const { models } = useProviderModels(providerId);
+
+  const firstModel = models[0]?.id ?? "tts-1";
+  const [model, setModel] = useState<string>("");
+  const [voice, setVoice] = useState<string>("alloy");
+  const [speed, setSpeed] = useState<string>("1.0");
+  const [inputText, setInputText] = useState<string>(() => t("ttsSample"));
+  const [running, setRunning] = useState<boolean>(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioSize, setAudioSize] = useState<number | null>(null);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const audioBlobRef = useRef<Blob | null>(null);
+
+  const effectiveModel = model || firstModel;
+  const buildBody = () => ({
+    model: effectiveModel,
+    voice,
+    input: inputText,
+    speed: parseFloat(speed) || 1.0,
+  });
+
+  const curlSnippet = buildCurl({
+    endpoint:
+      (typeof window !== "undefined" ? window.location.origin : "http://localhost:20128") +
+      ENDPOINT_PATH,
+    headers: {
+      Authorization: "Bearer <your-api-key>",
+      "Content-Type": "application/json",
+    },
+    body: buildBody(),
+  });
+
+  const handleRun = async () => {
+    setRunning(true);
+    setError(null);
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
+    const t0 = performance.now();
+    try {
+      // Authenticate via the dashboard session cookie — never send the masked
+      // apiKey as a Bearer token (it is not a real credential; see #9935).
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "x-connection-id": providerId,
+      };
+      const playgroundKeyId = resolvePlaygroundKeyId(apiKey, keys);
+      if (playgroundKeyId) headers[PLAYGROUND_KEY_ID_HEADER] = playgroundKeyId;
+      const res = await fetch(ENDPOINT_PATH, {
+        method: "POST",
+        credentials: "same-origin",
+        headers,
+        body: JSON.stringify(buildBody()),
+      });
+      const elapsed = performance.now() - t0;
+
+      if (!res.ok) {
+        const data: unknown = await res.json().catch(() => null);
+        setError(extractError(data) ?? `HTTP ${res.status}`);
+        return;
+      }
+
+      const blob = await res.blob();
+      audioBlobRef.current = blob;
+      setAudioUrl(URL.createObjectURL(blob));
+      setAudioSize(blob.size);
+      setLatencyMs(elapsed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("requestFailed"));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!audioBlobRef.current) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(audioBlobRef.current);
+    a.download = `tts-${Date.now()}.mp3`;
+    a.click();
+  };
+
+  const audioResult = audioUrl
+    ? { data: { audioUrl, sizeBytes: audioSize }, latencyMs: latencyMs ?? 0 }
+    : undefined;
+
+  const renderAudio = () => (
+    <div className="p-3 flex flex-col gap-2">
+      <audio controls src={audioUrl!} className="w-full">
+        {t("browserAudioUnsupported")}
+      </audio>
+      <div className="flex items-center gap-2">
+        {audioSize !== null && (
+          <span className="text-xs text-text-muted">{Math.round(audioSize / 1024)}KB</span>
+        )}
+        <Button variant="ghost" size="sm" icon="download" onClick={handleDownload}>
+          {t("download")} .mp3
+        </Button>
+      </div>
+    </div>
+  );
+
+  const modelOptions = models.length > 0 ? models : [{ id: "tts-1" }];
+
+  return (
+    <PlaygroundCard
+      kindLabel={t("textToSpeech")}
+      apiEndpoint={ENDPOINT_PATH}
+      onRun={handleRun}
+      curlSnippet={curlSnippet}
+      running={running}
+      result={audioResult}
+      error={error}
+      resultRenderer={renderAudio}
+    >
+      {/* Model + Voice row */}
+      <div className="grid grid-cols-2 gap-2">
+        <Select
+          label={t("model")}
+          value={model || firstModel}
+          onChange={(e) => setModel(e.target.value)}
+          options={modelOptions.map((m) => ({ value: m.id, label: m.id }))}
+        />
+        <Select
+          label={t("voice")}
+          value={voice}
+          onChange={(e) => setVoice(e.target.value)}
+          options={VOICES.map((v) => ({ value: v, label: v }))}
+        />
+      </div>
+      {/* Speed */}
+      <Slider
+        label={t("speed")}
+        min={0.25}
+        max={4.0}
+        step={0.25}
+        value={Number(speed)}
+        onValueChange={(next) => setSpeed(String(next))}
+        formatValue={(next) => `${next}×`}
+      />
+      {/* Input */}
+      <Field label={t("input")} htmlFor={textareaId}>
+        <Textarea
+          id={textareaId}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          rows={2}
+          placeholder={t("ttsSample")}
+          className="resize-none"
+        />
+      </Field>
+    </PlaygroundCard>
+  );
+}

@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "scope": "Per-workflow candidate admission. Both named verdicts are required; neither alone certifies release publication or deployment.",
+  "profiles": {
+    "ci": {
+      "checkName": "Gate / CI",
+      "jobs": {
+        "changes": {
+          "when": "always",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "lint": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "quality-gate": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "quality-extended": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "docs-sync-strict": {
+          "when": "code-or-docs",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "docs-lint": {
+          "when": "docs",
+          "disposition": "advisory",
+          "reason": "Existing prose lint is advisory; strict documentation checks remain required.",
+          "domains": ["docs"]
+        },
+        "i18n-ui-coverage": {
+          "when": "code-or-i18n",
+          "disposition": "required",
+          "domains": ["build", "cli", "i18n", "tests", "ui"]
+        },
+        "i18n-glossary-zhcn": {
+          "when": "code-or-i18n",
+          "disposition": "required",
+          "domains": ["i18n", "tests"]
+        },
+        "i18n": {
+          "when": "i18n",
+          "disposition": "advisory",
+          "reason": "Existing untranslated-catalog report; UI coverage and glossary are required.",
+          "domains": ["build", "cli", "i18n", "tests", "ui"]
+        },
+        "pr-test-policy": {
+          "when": "pr",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "build": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "package-artifact": {
+          "when": "full-code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "electron-package-smoke": {
+          "when": "full-code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-unit": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-bun-sqlite": {
+          "when": "full-code",
+          "disposition": "required",
+          "domains": ["build", "db", "tests"]
+        },
+        "test-vitest": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-coverage": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-e2e": {
+          "when": "full-code-e2e",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-integration": {
+          "when": "full-code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-security": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-ecosystem": {
+          "when": "full-code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "test-protocols-e2e": {
+          "when": "full-code",
+          "disposition": "advisory",
+          "reason": "Existing protocol E2E advisory policy, issue #10049; not counted as required PASS.",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "sonarqube": {
+          "when": "code",
+          "disposition": "advisory",
+          "reason": "Optional external service, governed by SONARQUBE_ENABLED and service credentials.",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "coverage-pr-comment": {
+          "when": "pr",
+          "disposition": "advisory",
+          "reason": "Presentation only; test-coverage is the required result.",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        }
+      }
+    },
+    "quality": {
+      "checkName": "Gate / Quality",
+      "jobs": {
+        "changes": {
+          "when": "always",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "docs-gates": {
+          "when": "code-or-docs",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "fast-gates": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "lint-guard": {
+          "when": "code",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
+        "merge-integrity": {
+          "when": "always",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        }
+      }
+    }
+  },
+  "domainScope": "Declarative protection domains for existing indivisible job groups. Legacy when/disposition still decide admission; domains do not select or skip jobs yet. Core/workflow full-selection belongs to the future shadow policy."
+}

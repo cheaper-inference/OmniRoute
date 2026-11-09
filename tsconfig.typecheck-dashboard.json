@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo-typecheck-dashboard"
+  },
+  "include": ["src/app/(dashboard)/**/*.ts", "src/app/(dashboard)/**/*.tsx"]
+}

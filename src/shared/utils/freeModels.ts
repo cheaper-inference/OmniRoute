@@ -1,0 +1,335 @@
+import { FREE_MODEL_BUDGETS, grantsFreeAccess } from "@omniroute/open-sse/config/freeModelCatalog";
+import {
+  getProviderById,
+  isAnthropicCompatibleProvider,
+  isClaudeCodeCompatibleProvider,
+  isOpenAICompatibleProvider,
+  resolveProviderId,
+} from "@/shared/constants/providers";
+import { globToRegex } from "@/shared/utils/globPattern";
+import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
+import { AI_MODELS } from "@/shared/constants/models";
+
+/**
+ * Free-model detection shared between the "import only free models" connection
+ * option (Add API Key modal) and the model-sync import filter.
+ *
+ * Two regimes answer "is it free?", on purpose, from different sources:
+ *
+ *  - **Counting / displaying** (free-token totals, dashboards) MAY use the
+ *    resolved catalog: the shipped baseline overlaid by the Radar feed
+ *    (`getRadarCatalog` in `src/lib/radar/index.ts`). Totals are
+ *    informational and may improve when a feed is available.
+ *
+ *  - **Deciding** (is this provider/model free? should it be imported? should
+ *    `auto/*` route to it? should it appear in `GET /v1/models`?) reads ONLY
+ *    the shipped catalog `FREE_MODEL_BUDGETS`
+ *    (`open-sse/config/freeModelCatalog.data.ts`) plus the local heuristics
+ *    below. It must never reach `getRadarCatalog` / `getRadarCache`.
+ *
+ * Why deciding stays on the shipped catalog: the answer is then identical in
+ * the browser and on the server, reproducible offline from the release
+ * artifact, and unit-testable without seeding a database. This module runs in
+ * both — six `"use client"` components import it — so a DB-backed read here
+ * would also drag the SQLite driver into the client bundle. Splitting it
+ * instead (server reads the feed, browser keeps the baseline) would make the
+ * import modal's preview disagree with the import route that runs on click.
+ *
+ * A provider is considered to "have free models" when it appears in the
+ * documented free-tier catalog (`FREE_MODEL_BUDGETS`). A single model is considered free when — for a provider with a documented
+ * free tier — its id carries the OpenRouter-style `:free` suffix or both its
+ * prompt and completion prices are zero (guarded heuristics), or when its id
+ * is listed as a free model for that provider in the shipped catalog.
+ *
+ * The catalog also records the regime of every entry via `freeType`
+ * (`FreeModelFreeType`). A regime can retire a free tier behind a paid key
+ * (`discontinued`); `grantsFreeAccess` is the single predicate that decides
+ * whether a regime still grants free access, and the two structures below are
+ * derived only from entries whose regime grants it — so a `discontinued` entry
+ * is never reported free, and a future regime that forgets to be classified
+ * fails to compile rather than defaulting silently.
+ */
+
+/** Catalogued entries whose regime still grants free access. */
+const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType));
+
+/** Provider ids that have at least one documented free model. */
+// SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
+// was actually billable (#17028). Accept only verified per-model live evidence.
+const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
+  ...FREE_BUDGETS.map((m) => m.provider),
+  ...LIVE_EVIDENCE_ONLY_PROVIDERS,
+]);
+
+const FREE_MODEL_IDS_BY_PROVIDER: Map<string, Set<string>> = (() => {
+  const map = new Map<string, Set<string>>();
+  for (const m of FREE_BUDGETS) {
+    let set = map.get(m.provider);
+    if (!set) {
+      set = new Set<string>();
+      map.set(m.provider, set);
+    }
+    set.add(m.modelId);
+  }
+  return map;
+})();
+
+/** Whether the given provider exposes any documented free models. Accepts a provider id or alias. */
+export function providerHasFreeModels(providerId: string | undefined | null): boolean {
+  if (typeof providerId !== "string") return false;
+  return (
+    PROVIDERS_WITH_FREE_MODELS.has(providerId) ||
+    PROVIDERS_WITH_FREE_MODELS.has(resolveProviderId(providerId))
+  );
+}
+
+export interface FreeModelCandidate {
+  id?: string;
+  /** Raw `pricing` object from the provider's /models entry (any shape). */
+  pricing?: unknown;
+  isFree?: boolean;
+  is_free?: unknown;
+  free?: unknown;
+  tags?: unknown;
+  /** Some aggregators label a model with `tier: "free" | "paid"`; only `paid` is read (a veto). */
+  tier?: unknown;
+}
+
+/** Shipped-catalog entry for this provider (id or alias): trusted on its own. */
+export function isCatalogFreeModel(provider: string, modelId: unknown): boolean {
+  if (typeof modelId !== "string") return false;
+  return (
+    FREE_MODEL_IDS_BY_PROVIDER.get(provider)?.has(modelId) === true ||
+    FREE_MODEL_IDS_BY_PROVIDER.get(resolveProviderId(provider))?.has(modelId) === true
+  );
+}
+
+/**
+ * Whether a single fetched model qualifies as free for the given provider (id or alias): a
+ * shipped-catalog entry, or a payload signal on a provider with a documented free tier.
+ */
+export function isFreeModel(provider: string, model: FreeModelCandidate): boolean {
+  // Live paid evidence overrides catalog entries and optimistic free markers (#17028).
+  if (hasPayloadPaidEvidence(model)) return false;
+  // SiliconFlow requires affirmative live evidence; catalog membership is insufficient.
+  if (resolveProviderId(provider) === "siliconflow") {
+    return hasPayloadFreeEvidence(model);
+  }
+  if (isCatalogFreeModel(provider, model.id)) return true;
+  return providerHasFreeModels(provider) && hasPayloadFreeEvidence(model);
+}
+
+/** Reusable free predicate for fetched payloads — provider must have a documented free tier. */
+export function isFreeForProvider(provider: string, model: FreeModelCandidate): boolean {
+  return providerHasFreeModels(provider) && isFreeModel(provider, model);
+}
+
+/** Model row fields the provider-page "Free" badge looks at. */
+export interface FreeBadgeCandidate {
+  id: string;
+  name?: string | null;
+  free?: unknown;
+  isFree?: unknown;
+  is_free?: unknown;
+  pricing?: unknown;
+  tags?: unknown;
+}
+
+function toFreeModelCandidate(model: FreeBadgeCandidate): FreeModelCandidate {
+  return {
+    ...model,
+    isFree: typeof model.isFree === "boolean" ? model.isFree : undefined,
+  };
+}
+
+/** Public client-restricted offers and paid payloads cannot justify a Free badge. */
+function hasFreeBadgeVeto(provider: string, model: FreeBadgeCandidate): boolean {
+  return resolveProviderId(provider) === "opencode-zen" || hasPayloadPaidEvidence(model);
+}
+
+/** Feature flag that turns on the stricter badge rule (default off). */
+export const FREE_BADGE_STRICT_FLAG = "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER";
+
+/**
+ * Whether the provider-page model list shows the "Free" badge for a model row.
+ * OpenCode Zen public hints are excluded in both modes: its free offers require its client.
+ *
+ * Default (`strict: false`) is the historical rule: any truthy `free` field, an explicit
+ * `isFree === true` (discovery evidence, subject to the eligibility veto in both modes),
+ * a `:free` id suffix, "free"/"grátis" in the display name, or `isFreeModel`.
+ *
+ * With `strict: true` (feature flag FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER) only badges
+ * that cannot be right are removed:
+ *  - the display-name heuristic ("Free" in a name is not a pricing signal);
+ *  - a truthy-but-not-`true` `free` field (e.g. `free: "false"`);
+ *  - a `:free` suffix on a REGISTERED provider without a documented free tier — the
+ *    suffix is an OpenRouter convention that such a provider does not implement.
+ * Kept: catalogued free models, explicit `free`/`isFree === true`, and `:free` on
+ * free-tier providers (OpenRouter…) and on compatible/custom nodes, whose upstream may
+ * well be OpenRouter-compatible and honor the suffix.
+ */
+export function isModelFreeBadge(
+  provider: string,
+  model: FreeBadgeCandidate,
+  options: { strict?: boolean } = {}
+): boolean {
+  // Both badge modes honor client eligibility and the free-only import paid veto.
+  if (hasFreeBadgeVeto(provider, model)) return false;
+  const candidate = toFreeModelCandidate(model);
+  if (resolveProviderId(provider) === "siliconflow") {
+    return isFreeModel(provider, candidate);
+  }
+  if (!options.strict) {
+    return (
+      Boolean(model.free) ||
+      model.isFree === true ||
+      model.id.endsWith(":free") ||
+      /\bgr[aá]tis\b|\bfree\b/i.test(model.name || "") ||
+      isFreeModel(provider, candidate)
+    );
+  }
+  const explicit = model.isFree === true || model.free === true;
+  if (explicit || isFreeModel(provider, candidate)) return true;
+  if (!model.id.endsWith(":free")) return false;
+  const registered = getProviderById(resolveProviderId(provider)) != null;
+  return !registered || providerHasFreeModels(provider);
+}
+
+export interface SelectModelsForImportResult<T extends FreeModelCandidate> {
+  models: T[];
+  /**
+   * True when the caller asked for free-only, models were fetched, but none of
+   * them qualified as free — so nothing will be imported. Lets the UI show a
+   * clear "no free models found" message instead of a silent empty import.
+   */
+  freeFilterEmpty: boolean;
+}
+
+/**
+ * Stable "free first" sort: free models before paid, ties broken alphabetically
+ * by a caller-supplied key so the order stays deterministic across re-renders and
+ * data refetches (e.g. while "Test all" runs). Returns a new array; does not mutate.
+ */
+export function sortModelsFreeFirst<T>(
+  items: T[],
+  opts: { isFree: (item: T) => boolean; key: (item: T) => string }
+): T[] {
+  return [...items].sort((a, b) => {
+    const fa = opts.isFree(a);
+    const fb = opts.isFree(b);
+    if (fa !== fb) return fa ? -1 : 1;
+    return opts.key(a).localeCompare(opts.key(b));
+  });
+}
+
+/**
+ * OpenAI-/Anthropic-compatible custom nodes have no documented free tier, but the
+ * endpoint behind them (an OpenRouter-like aggregator) may list free models in its own
+ * `/models` payload. Claude Code-compatible nodes are excluded: they expose no listing.
+ */
+export function isCompatibleFreeImportProvider(provider: string | undefined | null): boolean {
+  return (
+    (isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider)) &&
+    !isClaudeCodeCompatibleProvider(provider)
+  );
+}
+
+/** Whether the "import only free models" connection option applies to this provider. */
+export function providerSupportsFreeOnlyImport(provider: string | undefined | null): boolean {
+  return providerHasFreeModels(provider) || isCompatibleFreeImportProvider(provider);
+}
+
+/** `providers.*` i18n key for the toggle hint: compatible nodes explain the payload rule. */
+export function freeOnlyImportHintKey(
+  provider: string | undefined | null
+): "importFreeModelsOnlyHint" | "importFreeModelsOnlyCompatibleHint" {
+  return isCompatibleFreeImportProvider(provider)
+    ? "importFreeModelsOnlyCompatibleHint"
+    : "importFreeModelsOnlyHint";
+}
+
+/**
+ * Import-time free verdict for a compatible node, read from the payload alone. Conservative
+ * on purpose: free evidence is required AND any paid signal (positive price, explicit
+ * `free: false`, `tier: "paid"`) vetoes it, so unknown pricing is never imported as free.
+ */
+function isFreeForCompatibleImport(model: FreeModelCandidate): boolean {
+  if (typeof model.tier === "string" && model.tier.trim().toLowerCase() === "paid") return false;
+  return hasPayloadFreeEvidence(model) && !hasPayloadPaidEvidence(model);
+}
+
+/**
+ * Decide which fetched models to import. When `importFreeOnly` is false the list
+ * passes through unchanged. When true, only free models are kept. Compatible nodes are
+ * judged by their payload evidence only; enabling their import option does not grant
+ * them a documented provider free tier for routing.
+ */
+export function selectModelsForImport<T extends FreeModelCandidate>(
+  provider: string,
+  fetchedModels: T[],
+  importFreeOnly: boolean
+): SelectModelsForImportResult<T> {
+  if (!importFreeOnly) {
+    return { models: fetchedModels, freeFilterEmpty: false };
+  }
+  const isFree = isCompatibleFreeImportProvider(provider)
+    ? isFreeForCompatibleImport
+    : (m: T) => isFreeModel(provider, m);
+  const models = fetchedModels.filter((m) => isFree(m));
+  const freeFilterEmpty = fetchedModels.length > 0 && models.length === 0;
+  return { models, freeFilterEmpty };
+}
+
+// ──────────────────────────────────────────────────────────
+// hidePaidModels save-time validation (#6540)
+// ──────────────────────────────────────────────────────────
+
+export type PaidModelTargetVerdict = "paid" | "free" | "unknown";
+
+/**
+ * Classify a settings-style model string ("provider/model" or
+ * "provider,model") as paid/free/unknown against the documented free
+ * catalog. Fails open ("unknown") for anything that doesn't cleanly parse
+ * into a (provider, model) pair, or whose provider isn't in the free
+ * catalog at all — this covers aliases, combo names, and custom/synced
+ * rows, mirroring the exemptions `catalog.ts`'s `shouldHidePaid` already
+ * makes for those row types.
+ */
+export function isPaidModelTarget(value: string): PaidModelTargetVerdict {
+  if (typeof value !== "string" || value.trim() === "") return "unknown";
+  const separator = value.includes("/") ? "/" : value.includes(",") ? "," : null;
+  if (!separator) return "unknown";
+  const [provider, ...rest] = value.split(separator);
+  const model = rest.join(separator);
+  if (!provider || !model) return "unknown";
+  if (!providerHasFreeModels(provider)) return "unknown";
+  return isFreeModel(provider, { id: model }) ? "free" : "paid";
+}
+
+/**
+ * Whether a glob `pattern` (as used by `ModelRoutingSection`'s per-model
+ * combo mappings) resolves ONLY to paid models in the catalog. Fails open
+ * (returns `false`) when the pattern matches nothing recognizable, or when
+ * at least one match is free — only an all-paid match set is flagged, so a
+ * mixed-catalog pattern is never blocked.
+ */
+export function matchesOnlyPaidModels(pattern: string): boolean {
+  if (typeof pattern !== "string" || pattern.trim() === "") return false;
+  let regex: RegExp;
+  try {
+    regex = globToRegex(pattern);
+  } catch {
+    return false;
+  }
+  let matched = false;
+  for (const m of AI_MODELS) {
+    const fullId = `${m.provider}/${m.model}`;
+    if (!regex.test(fullId)) continue;
+    // Client-restricted OpenCode offers are unknown here, not proven paid.
+    if (resolveProviderId(m.provider) === "opencode-zen") return false;
+    matched = true;
+    if (isFreeForProvider(m.provider, { id: m.model })) return false;
+  }
+  return matched;
+}

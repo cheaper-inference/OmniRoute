@@ -1,0 +1,374 @@
+/**
+ * Credential Health Cache
+ *
+ * In-memory cache for provider credential health status.
+ * Follows the same pattern as localHealthCheck.ts — globalThis singleton
+ * survives HMR re-evaluation.
+ *
+ * Tracks testStatus, lastError, lastTested per connectionId with
+ * configurable TTL. Auto-expiry on read for stale entries.
+ */
+import { redactSecrets } from "@/shared/utils/logRedaction";
+import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge";
+
+export interface CredentialHealthStatus {
+  connectionId: string;
+  provider: string;
+  /** "active" | "error" | "unknown" — mirrors testStatus from provider_connections */
+  status: "active" | "error" | "unknown";
+  lastTested: Date;
+  lastError?: string;
+  lastErrorType?: string;
+  lastErrorSource?: string;
+  /** Consecutive failures since last success */
+  consecutiveFailures: number;
+  /** Response time of the last test in ms */
+  responseTimeMs?: number;
+}
+
+export interface CredentialCacheEntry {
+  status: CredentialHealthStatus;
+  /** Expiry timestamp (epoch ms) */
+  expiresAt: number;
+}
+
+// ── Config ────────────────────────────────────────────────────────────────
+
+const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const STALE_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes — considered stale
+const MAX_ENTRIES = 500;
+/** Bound the monitoring-health failed list so huge fleets stay scrape-safe. */
+export const CREDENTIAL_HEALTH_FAILED_LIST_CAP = 32;
+const FAILED_ERROR_MAX_LEN = 200;
+
+// ── State (globalThis singleton) ──────────────────────────────────────────
+
+declare global {
+  var __omnirouteCredentialCache:
+    | {
+        initialized: boolean;
+        cache: Map<string, CredentialCacheEntry>;
+      }
+    | undefined;
+}
+
+function getCacheState() {
+  if (!globalThis.__omnirouteCredentialCache) {
+    globalThis.__omnirouteCredentialCache = {
+      initialized: false,
+      cache: new Map(),
+    };
+  }
+  return globalThis.__omnirouteCredentialCache;
+}
+
+// ── Public API ────────────────────────────────────────────────────────────
+
+/**
+ * Get cached credential health for a connection.
+ * Returns undefined if not cached or expired.
+ */
+export function getCredentialHealth(connectionId: string): CredentialHealthStatus | undefined {
+  const state = getCacheState();
+  const entry = state.cache.get(connectionId);
+
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) {
+    // Expired — remove and return undefined
+    state.cache.delete(connectionId);
+    return undefined;
+  }
+
+  return entry.status;
+}
+
+/**
+ * Diagnoses that prove the credential itself is bad. `token_refresh_failed` belongs here:
+ * it is only emitted when the access token is already expired AND the refresh was
+ * rejected (dominantly `invalid_grant`), so dispatching the connection cannot succeed.
+ */
+export const INVALID_CREDENTIAL_DIAGNOSES: ReadonlySet<string> = new Set([
+  "upstream_auth_error",
+  "auth_missing",
+  "token_expired",
+  "token_refresh_failed",
+  "reauth_required",
+  "account_deactivated",
+  "auth_required",
+]);
+
+/**
+ * Transport failures do not provide evidence about credential validity.
+ * Even the legacy gate must never reject a connection based on these statuses.
+ * Other inconclusive diagnoses still follow the operator's feature flag.
+ */
+export const NON_CREDENTIAL_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
+  "network_error",
+  "upstream_unavailable",
+  "upstream_rate_limited",
+]);
+
+/**
+ * Default-off flag: when on, only a cached `error` carrying one of the
+ * INVALID_CREDENTIAL_DIAGNOSES blocks dispatch; inconclusive failures (timeouts, quota,
+ * outages, and the scheduler's untyped catch-path errors) fall through as "unknown".
+ * Off (default): other cached `error` diagnoses block, except known transport
+ * failures which never prove bad credentials (#18037).
+ */
+export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
+
+function isAuthDiagnosesOnlyGateEnabled(): boolean {
+  try {
+    return resolveRegisteredFeatureFlag(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
+  } catch {
+    return false; // fail closed for non-transport probe errors
+  }
+}
+
+/**
+ * Check if a connection's credential health is "active" (recently tested and passing).
+ * Returns:
+ *   - true  → healthy, proceed
+ *   - false → blocked (confirmed bad auth or legacy strict mode)
+ *   - undefined → unknown / not cached (proceed but mark as unchecked)
+ */
+export function isCredentialHealthy(connectionId: string): boolean | undefined {
+  const status = getCredentialHealth(connectionId);
+  if (!status) return undefined;
+
+  if (status.status === "active") return true;
+  if (status.status === "error") {
+    // Network failures, outages and upstream throttling cannot establish that a
+    // credential is invalid, irrespective of the legacy gate flag (#18037).
+    if (
+      typeof status.lastErrorType === "string" &&
+      NON_CREDENTIAL_PROBE_DIAGNOSES.has(status.lastErrorType)
+    ) {
+      return undefined;
+    }
+    if (!isAuthDiagnosesOnlyGateEnabled()) return false;
+    // All remaining inconclusive diagnoses are controlled by the feature flag.
+    if (
+      typeof status.lastErrorType === "string" &&
+      INVALID_CREDENTIAL_DIAGNOSES.has(status.lastErrorType)
+    )
+      return false;
+  }
+
+  return undefined;
+}
+
+/**
+ * Check if a connection's credential status is stale (not tested recently).
+ */
+export function isCredentialStale(connectionId: string): boolean {
+  const status = getCredentialHealth(connectionId);
+  if (!status) return true; // Not cached = stale
+
+  const age = Date.now() - status.lastTested.getTime();
+  return age > STALE_THRESHOLD_MS;
+}
+
+/**
+ * Update the cached health status for a connection.
+ */
+export function setCredentialHealth(
+  connectionId: string,
+  provider: string,
+  status: "active" | "error" | "unknown",
+  lastError?: string,
+  lastErrorType?: string,
+  lastErrorSource?: string,
+  responseTimeMs?: number
+): void {
+  const state = getCacheState();
+
+  // Enforce max entries (evict oldest if full)
+  if (state.cache.size >= MAX_ENTRIES) {
+    const oldest = state.cache.entries().next().value;
+    if (oldest) state.cache.delete(oldest[0]);
+  }
+
+  const prev = state.cache.get(connectionId);
+  const consecutiveFailures =
+    status === "error"
+      ? (prev?.status.consecutiveFailures ?? 0) + 1
+      : status === "active"
+        ? 0
+        : (prev?.status.consecutiveFailures ?? 0);
+
+  state.cache.set(connectionId, {
+    status: {
+      connectionId,
+      provider,
+      status,
+      lastTested: new Date(),
+      lastError,
+      lastErrorType,
+      lastErrorSource,
+      consecutiveFailures,
+      responseTimeMs,
+    },
+    expiresAt: Date.now() + DEFAULT_TTL_MS,
+  });
+}
+
+/**
+ * Remove a connection from the cache (e.g., connection deleted).
+ */
+export function removeCredentialHealth(connectionId: string): void {
+  const state = getCacheState();
+  state.cache.delete(connectionId);
+}
+
+/**
+ * Get all cached credential health statuses (for monitoring API).
+ */
+export function getAllCredentialHealth(): Record<string, CredentialHealthStatus> {
+  const state = getCacheState();
+  const result: Record<string, CredentialHealthStatus> = {};
+
+  for (const [id, entry] of state.cache.entries()) {
+    if (Date.now() <= entry.expiresAt) {
+      result[id] = entry.status;
+    } else {
+      state.cache.delete(id); // Clean expired on read
+    }
+  }
+
+  return result;
+}
+
+export interface CredentialHealthFailedConnection {
+  connectionId: string;
+  status: "error";
+  lastError?: string;
+  lastErrorType?: string;
+}
+
+export interface CredentialHealthSummary {
+  total: number;
+  healthy: number;
+  failed: number;
+  unknown: number;
+  stale: number;
+  /**
+   * Probe-cache rows with status=error. Present only when failed>0.
+   * Capped at CREDENTIAL_HEALTH_FAILED_LIST_CAP; see failedOmitted.
+   */
+  failedConnections?: CredentialHealthFailedConnection[];
+  /** Failed rows omitted because the list was capped. */
+  failedOmitted?: number;
+}
+
+/** Sanitize a cached lastError for the public monitoring health payload. */
+export function sanitizeCredentialHealthLastError(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const collapsed = raw.replace(/\s+/g, " ").trim();
+  if (!collapsed) return undefined;
+  const redacted = redactSecrets(collapsed);
+  if (!redacted) return undefined;
+  return redacted.length > FAILED_ERROR_MAX_LEN
+    ? `${redacted.slice(0, FAILED_ERROR_MAX_LEN)}...`
+    : redacted;
+}
+
+/**
+ * Snapshot credential health for GET /api/monitoring/health.
+ *
+ * Never probes upstream and never expires entries on read. Expired / old
+ * rows stay in the counts so a scrape can return immediately while the
+ * background scheduler refreshes them (#12532).
+ */
+export function getCachedCredentialHealthSummary(): CredentialHealthSummary {
+  const state = getCacheState();
+  const now = Date.now();
+  let total = 0;
+  let healthy = 0;
+  let failed = 0;
+  let unknown = 0;
+  let stale = 0;
+  const failedEntries: Array<CredentialHealthFailedConnection & { lastTestedMs: number }> = [];
+
+  for (const entry of state.cache.values()) {
+    total += 1;
+    if (entry.status.status === "active") healthy += 1;
+    else if (entry.status.status === "error") {
+      failed += 1;
+      const lastError = sanitizeCredentialHealthLastError(entry.status.lastError);
+      const lastErrorType =
+        typeof entry.status.lastErrorType === "string" && entry.status.lastErrorType.trim()
+          ? entry.status.lastErrorType.trim()
+          : undefined;
+      failedEntries.push({
+        connectionId: entry.status.connectionId,
+        status: "error",
+        ...(lastError ? { lastError } : {}),
+        ...(lastErrorType ? { lastErrorType } : {}),
+        lastTestedMs: entry.status.lastTested.getTime(),
+      });
+    } else unknown += 1;
+    if (now - entry.status.lastTested.getTime() > STALE_THRESHOLD_MS || now > entry.expiresAt) {
+      stale += 1;
+    }
+  }
+
+  const summary: CredentialHealthSummary = { total, healthy, failed, unknown, stale };
+  if (failed > 0) {
+    failedEntries.sort((left, right) => right.lastTestedMs - left.lastTestedMs);
+    const omitted = Math.max(0, failedEntries.length - CREDENTIAL_HEALTH_FAILED_LIST_CAP);
+    summary.failedConnections = failedEntries
+      .slice(0, CREDENTIAL_HEALTH_FAILED_LIST_CAP)
+      .map(({ lastTestedMs: _lastTestedMs, ...row }) => row);
+    if (omitted > 0) summary.failedOmitted = omitted;
+  }
+  return summary;
+}
+
+/**
+ * Get cache summary stats for health API.
+ * Monitoring scrapes must use the stale-safe snapshot (no live probes).
+ */
+export function getCredentialHealthSummary(): CredentialHealthSummary {
+  return getCachedCredentialHealthSummary();
+}
+
+/** Test-only: drop every cached credential-health row. */
+export function __test_resetCredentialHealthCache(): void {
+  globalThis.__omnirouteCredentialCache = {
+    initialized: false,
+    cache: new Map(),
+  };
+}
+
+/** Test-only: insert a cache row, including expired / stale timestamps. */
+export function __test_putCredentialHealth(entry: {
+  connectionId: string;
+  provider: string;
+  status: "active" | "error" | "unknown";
+  lastTested: Date;
+  expiresAt?: number;
+  lastError?: string;
+  lastErrorType?: string;
+}): void {
+  const state = getCacheState();
+  state.cache.set(entry.connectionId, {
+    status: {
+      connectionId: entry.connectionId,
+      provider: entry.provider,
+      status: entry.status,
+      lastTested: entry.lastTested,
+      lastError: entry.lastError,
+      lastErrorType: entry.lastErrorType,
+      consecutiveFailures: 0,
+    },
+    expiresAt: entry.expiresAt ?? Date.now() + DEFAULT_TTL_MS,
+  });
+}
+
+/**
+ * Mark cache as initialized (called by scheduler on startup).
+ */
+export function initCredentialCache(): void {
+  getCacheState().initialized = true;
+}

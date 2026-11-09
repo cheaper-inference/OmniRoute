@@ -1,0 +1,845 @@
+@import "tailwindcss" source(none);
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+/* Keak type ramp: the vendored kit self-hosts Switzer (packages/ui-kit/src/ci-fonts.css, imported by
+   ci-tokens.css) for UI, display and code text. No CDN (Google Fonts is unreachable in some regions,
+   #3695). */
+/* CI UI Kit — vendored snapshot (packages/ui-kit, see UPSTREAM.md). Declares the same
+   `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
+   legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
+   wins over the preflight because of selector specificity. */
+@import "../../packages/ui-kit/src/ci-styles.css";
+/* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
+   no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
+   fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+/* Vazirmatn: Arabic-script typeface for the RTL locales (fa, ar, ur), which neither Switzer nor
+   Inter cover. Declared globally but only NAMED by the `html[dir="rtl"]` rule below, and its arabic
+   face carries a unicode-range, so an LTR page never fetches it (tests/unit/rtl-font-stack.test.ts). */
+@import "@fontsource/vazirmatn/400.css";
+@import "@fontsource/vazirmatn/500.css";
+@import "@fontsource/vazirmatn/600.css";
+@import "@fontsource/vazirmatn/700.css";
+
+:root,
+.ci-theme {
+  /* Switzer first; Inter only for the scripts Switzer lacks (see the @import above) */
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  /* Code, keys, IDs, JSON and logs need a real monospace face: kit 0.0.66 points --ci-font-mono at
+     Switzer, and upstream 0.0.76 adds --ci-font-code for exactly this, so the name is reused and
+     the next kit sync makes this line redundant instead of conflicting. */
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* the kit also exposes --font-mono at runtime (ci-tokens.css): keep raw var() users monospace */
+  --font-mono: var(--ci-font-code);
+}
+@source "../../node_modules/fumadocs-ui/css/generated/*.css";
+
+/* Keep Tailwind v4 from scanning the entire repository. The UI lives in the
+   App Router and shared component trees; third-party Fumadocs sources remain
+   explicit because node_modules is ignored by automatic detection. */
+@source "../app";
+@source "../shared";
+@source "../../node_modules/fumadocs-ui/dist/**/*.js";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Fumadocs sidebar width override */
+:root {
+  --fd-sidebar-width: 220px;
+}
+
+/* ── Token bridge → CI UI Kit ──────────────────────────────────────────────────────────
+   Every OmniRoute token keeps its NAME (hundreds of `var(--color-*)` and Tailwind utilities
+   depend on it) but now points to the kit token. The kit flips the `--ci-*` values itself via
+   `data-theme="dark"` (set by themeStore next to the `.dark` class), so light and dark share
+   this single block. Values are never hex here — see tests/unit/design-kit-bridge.test.ts. */
+:root {
+  --desktop-safe-top: 0px;
+  --desktop-safe-bottom: 0px;
+  color-scheme: light;
+
+  /* Brand accent — the active palette's (Editions copper by default, Classic lime as the
+     option; src/shared/constants/appearancePalette.ts). Presets were retired (spec D4). */
+  --color-primary: var(--ci-color-accent);
+  --color-primary-hover: var(--ci-color-accent-hover);
+  /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): the accent is a
+     surface that carries dark ink, never ink on light (Classic lime-400 on the background
+     ≈ 1.1:1, Editions copper ≈ 1.8:1). The kit has no accent-ink token yet (pendência), so
+     Classic light uses its lime-800 (≈ 7.1:1) and dark flips back to the lime below; Editions
+     reads its own accent-active (block after the dark one). */
+  --color-primary-ink: var(--ci-lime-800);
+  --color-accent: var(--ci-color-accent);
+  --color-accent-light: var(--ci-color-accent-surface-strong);
+  --color-accent-foreground: var(--ci-color-accent-foreground);
+
+  /* Semantic */
+  --color-error: var(--ci-color-danger);
+  --color-error-bg: var(--ci-color-danger-bg);
+  --color-success: var(--ci-color-success);
+  --color-success-bg: var(--ci-color-success-bg);
+  --color-warning: var(--ci-color-warning);
+  --color-warning-bg: var(--ci-color-warning-bg);
+  --color-info: var(--ci-color-info);
+  --color-info-bg: var(--ci-color-info-bg);
+
+  /* Orchestration status tokens (flow edges, badges, cockpit) */
+  --orch-status-success: var(--ci-color-success);
+  --orch-status-warning: var(--ci-color-warning);
+  --orch-status-error: var(--ci-color-danger);
+  --orch-status-muted: var(--ci-color-text-muted);
+  --orch-status-approval: var(--ci-chart-3);
+
+  /* Surfaces & text */
+  --color-bg: var(--ci-color-background);
+  --color-bg-alt: var(--ci-color-surface-subtle);
+  --color-bg-primary: var(--ci-color-background);
+  --color-bg-subtle: var(--ci-color-surface-subtle);
+  --color-surface: var(--ci-color-surface);
+  /* Secondary/muted panel tints (`bg-surface-secondary/30`, `bg-muted/50`): kit subtle and
+     muted surfaces — the kit flips both under data-theme="dark". */
+  --color-surface-secondary: var(--ci-color-surface-subtle);
+  --color-muted: var(--ci-color-surface-muted);
+  --color-card: var(--ci-color-surface);
+  --color-sidebar: var(--ci-color-surface);
+  --surface-2: var(--ci-color-surface-muted);
+  --color-border: var(--ci-color-border-subtle);
+  --color-border-strong: var(--ci-color-border);
+  --color-text-main: var(--ci-color-foreground);
+  --color-text-primary: var(--ci-color-foreground);
+  --color-text-muted: var(--ci-color-text-muted);
+  --color-heading: var(--ci-color-heading);
+
+  /* Charts (categorical) */
+  --color-chart-1: var(--ci-chart-1);
+  --color-chart-2: var(--ci-chart-2);
+  --color-chart-3: var(--ci-chart-3);
+  --color-chart-4: var(--ci-chart-4);
+  --color-chart-5: var(--ci-chart-5);
+  --color-chart-6: var(--ci-chart-6);
+  --color-chart-7: var(--ci-chart-7);
+  --color-chart-8: var(--ci-chart-8);
+  /* Text-safe ink and opaque chip tint per chart token (the kit flips both in dark). */
+  --color-chart-1-ink: var(--ci-chart-1-ink);
+  --color-chart-2-ink: var(--ci-chart-2-ink);
+  --color-chart-3-ink: var(--ci-chart-3-ink);
+  --color-chart-4-ink: var(--ci-chart-4-ink);
+  --color-chart-5-ink: var(--ci-chart-5-ink);
+  --color-chart-6-ink: var(--ci-chart-6-ink);
+  --color-chart-7-ink: var(--ci-chart-7-ink);
+  --color-chart-8-ink: var(--ci-chart-8-ink);
+  --color-chart-1-subtle: var(--ci-chart-1-subtle);
+  --color-chart-2-subtle: var(--ci-chart-2-subtle);
+  --color-chart-3-subtle: var(--ci-chart-3-subtle);
+  --color-chart-4-subtle: var(--ci-chart-4-subtle);
+  --color-chart-5-subtle: var(--ci-chart-5-subtle);
+  --color-chart-6-subtle: var(--ci-chart-6-subtle);
+  --color-chart-7-subtle: var(--ci-chart-7-subtle);
+  --color-chart-8-subtle: var(--ci-chart-8-subtle);
+
+  /* Fumadocs (/docs) */
+  --color-fd-background: var(--ci-color-background);
+  --color-fd-foreground: var(--ci-color-foreground);
+  --color-fd-muted: var(--ci-color-surface-subtle);
+  --color-fd-muted-foreground: var(--ci-color-text-muted);
+  --color-fd-popover: var(--ci-color-surface);
+  --color-fd-popover-foreground: var(--ci-color-foreground);
+  --color-fd-card: var(--ci-color-surface);
+  --color-fd-card-foreground: var(--ci-color-foreground);
+  --color-fd-border: var(--ci-color-border-subtle);
+  --color-fd-primary: var(--ci-color-accent);
+  --color-fd-primary-foreground: var(--ci-color-accent-foreground);
+  --color-fd-secondary: var(--ci-color-surface-subtle);
+  --color-fd-secondary-foreground: var(--ci-color-foreground);
+  --color-fd-accent: var(--ci-color-accent-surface-subtle);
+  --color-fd-accent-foreground: var(--ci-color-foreground);
+  --color-fd-ring: var(--ci-color-focus-ring);
+
+  /* Shadows (kit has no shadow scale; keep ours, neutral-only) */
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 12px rgba(0, 0, 0, 0.015);
+  --shadow-warm: 0 2px 12px -2px rgba(0, 0, 0, 0.08);
+  --shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.06);
+
+  /* Radius scale → kit (surface 0.25rem, control 0.5rem). The kit's `:root, .ci-theme` block
+     also sets `--radius` (unlayered, = --ci-radius-md); ours wins by source order because this
+     block comes after the kit @import — keep it that way. */
+  --radius: var(--ci-radius-surface);
+  --radius-control: var(--ci-radius-control);
+
+  /* Data-table surfaces */
+  --table-header-bg: var(--ci-color-surface-muted);
+}
+
+/* Classic dark: lime reads on the dark background (≈ 17:1), so the primary ink is the accent
+   itself. Same `data-theme="dark"` hook the kit flips on. */
+:root[data-theme="dark"] {
+  --color-primary-ink: var(--ci-color-accent);
+}
+
+/* Editions (default palette, packages/ui-kit/src/ci-editions.css): the primary ink is the kit's
+   --ci-color-accent-active — the deep copper #99562f in light (≈ 5.0:1 on the background) and
+   the copper accent #e5ac82 in dark (≈ 9.5:1), both flipped by the kit itself. `html:root[…]`
+   outranks the `:root[data-theme="dark"]` rule above, so Classic keeps its two values. */
+html:root[data-ci-appearance="editions"] {
+  --color-primary-ink: var(--ci-color-accent-active);
+}
+
+/* Inside a brand tint the kit moves secondary text to the brand ink, the only ink it guarantees on
+   an arbitrary tint. The alias above resolved on .ci-theme and would keep the neutral, so
+   `text-text-muted` is pointed back at the tinted value here. */
+.ci-brand-tint {
+  --color-text-muted: var(--ci-color-text-muted);
+}
+
+/* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
+   Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
+   tinted background, the canvas and the surface, so the alias is just the kit value. */
+:root {
+  --color-warning-ink: var(--ci-color-warning);
+}
+
+/* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the
+   class). Only what the kit does not own stays here. */
+.dark {
+  color-scheme: dark;
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-warm: 0 2px 12px -2px rgba(0, 0, 0, 0.25);
+  --shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.3);
+}
+
+@theme inline {
+  /* Primary */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  /* `text-*` reads --text-color-* before --color-*: text-primary → readable ink, while
+     bg-/border-/ring-primary keep the accent above. */
+  --text-color-primary: var(--color-primary-ink);
+  /* --color-accent is the same kit accent (var(--ci-color-accent)), so text-accent gets the ink. */
+  --text-color-accent: var(--color-primary-ink);
+  /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
+  --text-color-warning: var(--color-warning-ink);
+
+  /* Accent */
+  --color-accent: var(--color-accent);
+  --color-accent-light: var(--color-accent-light);
+
+  /* Semantic */
+  --color-error: var(--color-error);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error-bg: var(--color-error-bg);
+  --color-success-bg: var(--color-success-bg);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-info: var(--color-info);
+  --color-info-bg: var(--color-info-bg);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-border-strong: var(--color-border-strong);
+  --color-heading: var(--color-heading);
+  --color-chart-1: var(--color-chart-1);
+  --color-chart-2: var(--color-chart-2);
+  --color-chart-3: var(--color-chart-3);
+  --color-chart-4: var(--color-chart-4);
+  --color-chart-5: var(--color-chart-5);
+  --color-chart-6: var(--color-chart-6);
+  --color-chart-7: var(--color-chart-7);
+  --color-chart-8: var(--color-chart-8);
+  --color-chart-1-ink: var(--color-chart-1-ink);
+  --color-chart-2-ink: var(--color-chart-2-ink);
+  --color-chart-3-ink: var(--color-chart-3-ink);
+  --color-chart-4-ink: var(--color-chart-4-ink);
+  --color-chart-5-ink: var(--color-chart-5-ink);
+  --color-chart-6-ink: var(--color-chart-6-ink);
+  --color-chart-7-ink: var(--color-chart-7-ink);
+  --color-chart-8-ink: var(--color-chart-8-ink);
+  --color-chart-1-subtle: var(--color-chart-1-subtle);
+  --color-chart-2-subtle: var(--color-chart-2-subtle);
+  --color-chart-3-subtle: var(--color-chart-3-subtle);
+  --color-chart-4-subtle: var(--color-chart-4-subtle);
+  --color-chart-5-subtle: var(--color-chart-5-subtle);
+  --color-chart-6-subtle: var(--color-chart-6-subtle);
+  --color-chart-7-subtle: var(--color-chart-7-subtle);
+  --color-chart-8-subtle: var(--color-chart-8-subtle);
+
+  /* Auto-switch colors (use CSS variables from :root/.dark) */
+  --color-bg: var(--color-bg);
+  --color-bg-primary: var(--color-bg-primary);
+  /* bg-alt / muted / surface-secondary had a :root value but no @theme entry, so their
+     utilities (41× bg-bg-alt, bg-muted/50, bg-surface-secondary/30) generated nothing
+     (KEA-7886 P4 — tests/unit/design-kit-bridge.test.ts pins these three). */
+  --color-bg-alt: var(--color-bg-alt);
+  --color-bg-subtle: var(--color-bg-subtle);
+  --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-muted: var(--color-muted);
+  --color-card: var(--color-card);
+  --color-sidebar: var(--color-sidebar);
+  --color-border: var(--color-border);
+  --color-text-main: var(--color-text-main);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-muted: var(--color-text-muted);
+
+  /* Shadows */
+  --shadow-soft: var(--shadow-soft);
+  --shadow-warm: var(--shadow-warm);
+  --shadow-elevated: var(--shadow-elevated);
+
+  /* Keak type ramp (kit tokens): Switzer for sans and display; a monospace stack for code */
+  --font-sans: var(--ci-font-ui);
+  --font-mono: var(--ci-font-code);
+  --font-display: var(--ci-font-display);
+
+  /* Nested surface (enables bg-surface-2) */
+  --color-surface-2: var(--surface-2);
+
+  /* Semantic radius scale → rounded-card (surfaces, --ci-radius-surface) / rounded-control
+     (controls, --ci-radius-control). Custom names so the default rounded-* utilities stay. */
+  --radius-card: var(--radius);
+  --radius-control: var(--radius-control);
+}
+
+/* ── Focus Indicators (U-3) ── kept in @layer base so kit components (which style their own
+   :focus-visible in @layer components) win; legacy screens still get this ring. The generic
+   rule is an OUTLINE on purpose: a box-shadow here would lose the cascade to any Tailwind
+   `shadow-*` utility (layer utilities) while `outline: none` still applied — no visible focus
+   on every legacy <Button> with shadow-sm. Outline is never clobbered by a utility. */
+:root {
+  --focus-ring: 0 0 0 2px var(--ci-color-background), 0 0 0 4px var(--ci-color-focus-ring);
+}
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--ci-color-focus-ring);
+    outline-offset: 2px;
+  }
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.electron-macos {
+  --desktop-safe-top: 30px;
+  --desktop-safe-bottom: 8px;
+}
+
+/* iOS standalone PWA safe-area — keeps dashboard below the status bar */
+@media (display-mode: standalone) {
+  @supports (padding-top: env(safe-area-inset-top)) {
+    :root {
+      --ios-safe-top: env(safe-area-inset-top);
+      --ios-safe-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}
+
+/* Selection — accent tint (color-mix() is baseline in every supported browser) */
+::selection {
+  background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  color: var(--color-primary-ink);
+}
+
+/* Global custom scrollbar — thin, minimal, theme-aware */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.2);
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.45);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Dark theme scrollbar — slightly brighter thumb */
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+/* Keep .custom-scrollbar alias for backward compatibility */
+.custom-scrollbar {
+  scrollbar-width: thin;
+}
+
+/* Hero gradient — kit surface tokens (the kit flips them in dark, no .dark override needed) */
+.bg-hero-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--ci-color-surface-subtle) 0%,
+    var(--ci-color-background) 100%
+  );
+}
+
+/* Phones: any wrapping row of 3+ buttons, and any row made only of 3+ buttons (tabs,
+   filters, toolbars), stretches its buttons to fill each line instead of leaving a ragged
+   gap on the right. Same behaviour as the shared ActionBar / FilterPills; a component
+   opts out with `grow-0` on the button. Kit elements (`ci-*`) are excluded: same
+   `@layer components` as the kit, so source order would otherwise override them. */
+@layer components {
+  @media (max-width: 639px) {
+    main .flex-wrap:has(> button:nth-of-type(3)) > button:not([class*="ci-"]),
+    main .flex:has(> button:nth-of-type(3)):not(:has(> :not(button))) > button:not([class*="ci-"]) {
+      flex-grow: 1;
+      justify-content: center;
+    }
+  }
+}
+
+/* Phones: page and section titles stay on one line (ellipsis instead of wrapping), and a
+   header row that starts with the title drops its actions to the line below instead of
+   squeezing (or overlapping) the title. */
+@layer components {
+  @media (max-width: 639px) {
+    main :is(h1, h2):not([class*="ci-"]) {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    main
+      .flex:not(.flex-col):has(
+        > :is(h1, h2):first-child,
+        > div:first-child > :is(h1, h2):first-child
+      ) {
+      flex-wrap: wrap;
+    }
+    main .flex:not(.flex-col) > :is(h1, h2):first-child:not([class*="ci-"]),
+    main .flex:not(.flex-col) > div:first-child:has(> :is(h1, h2):first-child):not([class*="ci-"]) {
+      /* important: a `flex-1` (basis 0) on the title would otherwise squeeze it to nothing */
+      flex-basis: 100% !important;
+      min-width: 0;
+    }
+  }
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Fix for native dropdown options visibility in dark mode */
+select option {
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+}
+
+/* React Flow loads its component stylesheet after this global file in some
+   bundles, so direct background/fill declarations can lose to its shorthand
+   rules. Override the supported theme variables on our canvas instead. */
+.react-flow.omniroute-flow {
+  --xy-controls-button-background-color: var(--color-surface);
+  --xy-controls-button-background-color-hover: var(--color-bg-subtle);
+  --xy-controls-button-color: var(--color-text-main);
+  --xy-controls-button-color-hover: var(--color-text-main);
+  --xy-controls-button-border-color: var(--color-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RTL (Right-to-Left) Compatibility — fixes #7680
+   ═══════════════════════════════════════════════════════════════ */
+/* Arabic-script typography: neither Switzer (Latin only) nor Inter has Arabic glyphs, so fa/ar/ur
+   used to fall back to whatever the OS had. Order is the same as on LTR pages with Vazirmatn added:
+   Switzer keeps Latin model ids and labels, Inter still catches the scripts Switzer lacks, and
+   Arabic script falls through to Vazirmatn. Redefined on `.ci-theme` too because the kit sets
+   `--ci-font-ui` there. Keep every Vazirmatn reference under `html[dir="rtl"]` — never `:lang()`,
+   which also matches the language switcher's native names on LTR pages.
+   Zero tracking: letter-spacing breaks Arabic-script joining, and kit controls and Tailwind
+   `tracking-*` set their own value instead of inheriting, so their tokens are reset here too. */
+html[dir="rtl"],
+html[dir="rtl"] .ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial,
+    sans-serif;
+  --font-sans: var(--ci-font-ui);
+  --ci-letter-spacing-display: 0;
+  --ci-letter-spacing-ui: 0;
+  --ci-letter-spacing-caps: 0;
+  --ci-type-heading-tracking: 0;
+  --ci-type-control-tracking: 0;
+  --ci-type-caption-tracking: 0;
+  --ci-type-metric-tracking: 0;
+  --tracking-tighter: 0;
+  --tracking-tight: 0;
+  --tracking-wide: 0;
+  --tracking-wider: 0;
+  --tracking-widest: 0;
+  letter-spacing: 0;
+}
+html[dir="rtl"] .text-left {
+  text-align: start;
+}
+html[dir="rtl"] .text-right {
+  text-align: end;
+}
+html[dir="rtl"] .ml-0 {
+  --rtl-ms: 0;
+}
+html[dir="rtl"] .ml-0\.5 {
+  --rtl-ms: 0.5;
+}
+html[dir="rtl"] .ml-1 {
+  --rtl-ms: 1;
+}
+html[dir="rtl"] .ml-1\.5 {
+  --rtl-ms: 1.5;
+}
+html[dir="rtl"] .ml-2 {
+  --rtl-ms: 2;
+}
+html[dir="rtl"] .ml-3 {
+  --rtl-ms: 3;
+}
+html[dir="rtl"] .ml-4 {
+  --rtl-ms: 4;
+}
+html[dir="rtl"] .ml-5 {
+  --rtl-ms: 5;
+}
+html[dir="rtl"] .ml-6 {
+  --rtl-ms: 6;
+}
+html[dir="rtl"] .ml-7 {
+  --rtl-ms: 7;
+}
+html[dir="rtl"] :is(.ml-0, .ml-0\.5, .ml-1, .ml-1\.5, .ml-2, .ml-3, .ml-4, .ml-5, .ml-6, .ml-7) {
+  margin-left: 0;
+  margin-inline-start: calc(var(--spacing) * var(--rtl-ms));
+}
+html[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-inline-start: auto;
+}
+html[dir="rtl"] .mr-0\.5 {
+  --rtl-me: 0.5;
+}
+html[dir="rtl"] .mr-1 {
+  --rtl-me: 1;
+}
+html[dir="rtl"] .mr-1\.5 {
+  --rtl-me: 1.5;
+}
+html[dir="rtl"] .mr-2 {
+  --rtl-me: 2;
+}
+html[dir="rtl"] .mr-3 {
+  --rtl-me: 3;
+}
+html[dir="rtl"] :is(.mr-0\.5, .mr-1, .mr-1\.5, .mr-2, .mr-3) {
+  margin-right: 0;
+  margin-inline-end: calc(var(--spacing) * var(--rtl-me));
+}
+html[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-inline-end: auto;
+}
+html[dir="rtl"] .pl-1 {
+  --rtl-ps: 1;
+}
+html[dir="rtl"] .pl-2 {
+  --rtl-ps: 2;
+}
+html[dir="rtl"] .pl-3 {
+  --rtl-ps: 3;
+}
+html[dir="rtl"] .pl-4 {
+  --rtl-ps: 4;
+}
+html[dir="rtl"] .pl-5 {
+  --rtl-ps: 5;
+}
+html[dir="rtl"] .pl-6 {
+  --rtl-ps: 6;
+}
+html[dir="rtl"] .pl-7 {
+  --rtl-ps: 7;
+}
+html[dir="rtl"] .pl-8 {
+  --rtl-ps: 8;
+}
+html[dir="rtl"] .pl-9 {
+  --rtl-ps: 9;
+}
+html[dir="rtl"] .pl-10 {
+  --rtl-ps: 10;
+}
+html[dir="rtl"] .pl-12 {
+  --rtl-ps: 12;
+}
+html[dir="rtl"] :is(.pl-1, .pl-2, .pl-3, .pl-4, .pl-5, .pl-6, .pl-7, .pl-8, .pl-9, .pl-10, .pl-12) {
+  padding-left: 0;
+  padding-inline-start: calc(var(--spacing) * var(--rtl-ps));
+}
+html[dir="rtl"] .pr-1 {
+  --rtl-pe: 1;
+}
+html[dir="rtl"] .pr-2 {
+  --rtl-pe: 2;
+}
+html[dir="rtl"] .pr-2\.5 {
+  --rtl-pe: 2.5;
+}
+html[dir="rtl"] .pr-3 {
+  --rtl-pe: 3;
+}
+html[dir="rtl"] .pr-4 {
+  --rtl-pe: 4;
+}
+html[dir="rtl"] .pr-9 {
+  --rtl-pe: 9;
+}
+html[dir="rtl"] .pr-10 {
+  --rtl-pe: 10;
+}
+html[dir="rtl"] :is(.pr-1, .pr-2, .pr-2\.5, .pr-3, .pr-4, .pr-9, .pr-10) {
+  padding-right: 0;
+  padding-inline-end: calc(var(--spacing) * var(--rtl-pe));
+}
+html[dir="rtl"] .left-0 {
+  --rtl-is: 0;
+}
+html[dir="rtl"] .left-0\.5 {
+  --rtl-is: calc(var(--spacing) * 0.5);
+}
+html[dir="rtl"] .left-1 {
+  --rtl-is: calc(var(--spacing) * 1);
+}
+html[dir="rtl"] .left-1\.5 {
+  --rtl-is: calc(var(--spacing) * 1.5);
+}
+html[dir="rtl"] .left-2 {
+  --rtl-is: calc(var(--spacing) * 2);
+}
+html[dir="rtl"] .left-2\.5 {
+  --rtl-is: calc(var(--spacing) * 2.5);
+}
+html[dir="rtl"] .left-3 {
+  --rtl-is: calc(var(--spacing) * 3);
+}
+html[dir="rtl"] .left-5 {
+  --rtl-is: calc(var(--spacing) * 5);
+}
+html[dir="rtl"] .left-1\/4 {
+  --rtl-is: 25%;
+}
+html[dir="rtl"] .left-1\/2 {
+  --rtl-is: 50%;
+}
+html[dir="rtl"] .left-\[16\%\] {
+  --rtl-is: 16%;
+}
+html[dir="rtl"]
+  :is(
+    .left-0,
+    .left-0\.5,
+    .left-1,
+    .left-1\.5,
+    .left-2,
+    .left-2\.5,
+    .left-3,
+    .left-5,
+    .left-1\/4,
+    .left-1\/2,
+    .left-\[16\%\]
+  ) {
+  left: auto;
+  inset-inline-start: var(--rtl-is);
+}
+html[dir="rtl"] .right-0 {
+  --rtl-ie: 0;
+}
+html[dir="rtl"] .right-1 {
+  --rtl-ie: calc(var(--spacing) * 1);
+}
+html[dir="rtl"] .right-2 {
+  --rtl-ie: calc(var(--spacing) * 2);
+}
+html[dir="rtl"] .right-3 {
+  --rtl-ie: calc(var(--spacing) * 3);
+}
+html[dir="rtl"] .right-4 {
+  --rtl-ie: calc(var(--spacing) * 4);
+}
+html[dir="rtl"] .right-1\/4 {
+  --rtl-ie: 25%;
+}
+html[dir="rtl"] .right-\[16\%\] {
+  --rtl-ie: 16%;
+}
+html[dir="rtl"] .-right-2\.5 {
+  --rtl-ie: calc(var(--spacing) * -2.5);
+}
+html[dir="rtl"] .-right-20 {
+  --rtl-ie: calc(var(--spacing) * -20);
+}
+html[dir="rtl"]
+  :is(
+    .right-0,
+    .right-1,
+    .right-2,
+    .right-3,
+    .right-4,
+    .right-1\/4,
+    .right-\[16\%\],
+    .-right-2\.5,
+    .-right-20
+  ) {
+  right: auto;
+  inset-inline-end: var(--rtl-ie);
+}
+html[dir="rtl"] .border-l-2 {
+  --rtl-bw: 2px;
+}
+html[dir="rtl"] .border-l-4 {
+  --rtl-bw: 4px;
+}
+html[dir="rtl"] .border-l-\[3px\] {
+  --rtl-bw: 3px;
+}
+html[dir="rtl"] :is(.border-l-2, .border-l-4, .border-l-\[3px\]) {
+  border-left-width: 0;
+  border-inline-start-width: var(--rtl-bw);
+}
+html[dir="rtl"] .border-l-primary {
+  border-left-color: var(--color-border);
+  border-inline-start-color: var(--color-primary);
+}
+html[dir="rtl"] .border-r {
+  border-right-width: 0;
+  border-inline-end-width: 1px;
+}
+html[dir="rtl"] .last\:border-r-0:last-child {
+  border-left-width: 0;
+}
+html[dir="rtl"] .rounded-r-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-start-end-radius: var(--radius-lg);
+  border-end-end-radius: var(--radius-lg);
+}
+html[dir="rtl"] .translate-x-0\.5 {
+  --rtl-tx: -0.5;
+}
+html[dir="rtl"] .translate-x-1 {
+  --rtl-tx: -1;
+}
+html[dir="rtl"] .translate-x-4 {
+  --rtl-tx: -4;
+}
+html[dir="rtl"] .translate-x-5 {
+  --rtl-tx: -5;
+}
+html[dir="rtl"] .translate-x-6 {
+  --rtl-tx: -6;
+}
+html[dir="rtl"]
+  :is(.translate-x-0\.5, .translate-x-1, .translate-x-4, .translate-x-5, .translate-x-6) {
+  translate: calc(var(--spacing) * var(--rtl-tx)) var(--tw-translate-y);
+}
+html[dir="rtl"] .-translate-x-1\/2 {
+  translate: 50% var(--tw-translate-y);
+}
+html[dir="rtl"] .-translate-x-full {
+  translate: 100% var(--tw-translate-y);
+}
+html[dir="rtl"] .translate-x-full {
+  translate: -100% var(--tw-translate-y);
+}
+@media (min-width: 48rem) {
+  html[dir="rtl"] .md\:ml-2 {
+    margin-left: 0;
+    margin-inline-start: calc(var(--spacing) * 2);
+  }
+  html[dir="rtl"] .md\:ml-auto {
+    margin-left: 0;
+    margin-inline-start: auto;
+  }
+  html[dir="rtl"] .md\:pl-6 {
+    padding-left: 0;
+    padding-inline-start: calc(var(--spacing) * 6);
+  }
+}
+html[dir="rtl"] :where(code, pre, kbd, samp, input[type="email"], input[type="url"]) {
+  direction: ltr;
+  text-align: left;
+}
+html[dir="rtl"] :where(.react-flow) {
+  direction: ltr;
+}
+
+/* Orchestration Canvas: honor prefers-reduced-motion (spec §6). Scoped so the
+   other xyflow surfaces keep their current behavior until elevation #4 lands. */
+@media (prefers-reduced-motion: reduce) {
+  .orchestration-canvas .animate-ping {
+    animation: none;
+  }
+  .orchestration-canvas .react-flow__edge.animated path {
+    animation: none;
+    stroke-dasharray: none;
+  }
+  .orchestration-canvas .orch-edge-particle {
+    display: none;
+  }
+}

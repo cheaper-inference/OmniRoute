@@ -1,0 +1,435 @@
+# Contributing to OmniRoute (اردو)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Thank you for your interest in contributing! This guide covers everything you need to get started.
+
+---
+
+## ڈیولپمنٹ سیٹ اپ
+
+### پیشگی تقاضے
+
+- **Node.js** `>=22.22.2 <23`، یا `>=24.0.0 <27` (تجویز کردہ: 24 LTS)
+- **npm** 10+
+
+> **Node 24 کے ساتھ Windows:** موجودہ 24 LTS پیچ ریلیز (کم از کم 24.20.0) استعمال کریں۔
+> اس سے پہلے کی ریلیزز `--test-force-exit` کے ذریعے عمل ختم ہونے پر کامیاب ٹیسٹس کے بعد ختم ہو سکتی ہیں۔
+> Node کا [Windows libuv حل](https://github.com/nodejs/node/pull/61999) اس رن ٹائم کریش کو حل کرتا ہے؛
+> ٹیسٹ assertions اور رنر کے exit checks فعال رکھیں۔
+
+> **npm v11+ صارفین (Node 24+):** `npm install` کے بعد تصدیق کریں کہ native modules انسٹال ہو گئے ہیں:
+> `node -e "require('better-sqlite3')"`۔ اگر یہ `MODULE_NOT_FOUND` کے ساتھ ناکام ہو،
+> تو `npm approve-scripts better-sqlite3 && npm install` چلائیں۔ [مسائل کے حل](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) دیکھیں۔
+
+- **Git**
+
+### کلون اور انسٹالیشن
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### ماحول کے متغیرات
+
+```bash
+# اپنے ٹیمپلیٹ سے .env بنائیں
+cp .env.example .env
+
+# مطلوبہ secrets تیار کریں
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+ڈیولپمنٹ کے لیے اہم متغیرات:
+
+| متغیر                  | ڈیولپمنٹ ڈیفالٹ          | وضاحت                   |
+| ---------------------- | ------------------------ | ----------------------- |
+| `PORT`                 | `20128`                  | سرور پورٹ               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | فرنٹ اینڈ کا بنیادی URL |
+| `JWT_SECRET`           | (اوپر تیار کریں)         | JWT signing secret      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | پہلی لاگ اِن کا پاس ورڈ |
+| `APP_LOG_LEVEL`        | `info`                   | لاگ کی تفصیل کی سطح     |
+
+### ڈیش بورڈ کی ترتیبات
+
+ڈیش بورڈ ان خصوصیات کے لیے UI ٹوگلز فراہم کرتا ہے جنہیں ماحول کے متغیرات کے ذریعے بھی ترتیب دیا جا سکتا ہے:
+
+| ترتیبات کا مقام     | ٹوگل               | وضاحت                            |
+| ------------------- | ------------------ | -------------------------------- |
+| Settings → Advanced | Debug Mode         | ڈیبگ ریکوئسٹ لاگز فعال کریں (UI) |
+| Settings → General  | Sidebar Visibility | سائڈبار کے حصے دکھائیں/چھپائیں   |
+
+یہ ترتیبات ڈیٹابیس میں محفوظ ہوتی ہیں اور ری اسٹارٹس کے بعد بھی برقرار رہتی ہیں، اور سیٹ کیے جانے پر env var defaults کو اوور رائڈ کرتی ہیں۔
+
+### مقامی طور پر چلانا
+
+```bash
+# ڈیولپمنٹ موڈ (hot reload)
+npm run dev
+
+# پروڈکشن بلڈ
+npm run build    # next build → .build/next/ پھر assembleStandalone → dist/
+npm run start
+
+# contributors کی تبدیلیوں کے لیے تیز backend/API-only compile
+npm run build:contributor
+
+# ریلیز بلڈ (صاف rebuild + HEAD sentinel — deploy کے لیے ضروری)
+npm run build:release   # rm -rf .build dist پھر build + dist/BUILD_SHA لکھتا ہے
+
+# عام پورٹ کی ترتیب
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Contributor build صرف compile-only validation انجام دیتا ہے: یہ standalone distribution کو assemble نہیں کرتا اور optional native packaging assets بھی build نہیں کرتا۔ جب آپ کو shippable bundle کی توثیق کرنی ہو تو معمول کا production build استعمال کریں۔
+
+### بلڈ آؤٹ پٹ کا لے آؤٹ
+
+| ڈائریکٹری | مواد                                                                               | ٹریک شدہ |
+| --------- | ---------------------------------------------------------------------------------- | -------- |
+| `src/`    | ایپلیکیشن کا source (TypeScript / TSX)                                             | ہاں      |
+| `.build/` | درمیانی فائلیں — `next build` کا output (gitignored, `distDir = .build/next`)      | نہیں     |
+| `dist/`   | Shippable bundle — `assembleStandalone` کے ذریعے assemble کیا جاتا ہے (gitignored) | نہیں     |
+
+بلڈ پائپ لائن ایک ہی مرحلے میں مکمل ہوتی ہے:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (standalone + static + public + native assets کاپی کرتا ہے)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` اضافی طور پر پہلے دونوں ڈائریکٹریز کو صاف کرتا ہے اور
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) کو deploy integrity sentinel کے طور پر لکھتا ہے۔
+
+`npm run build:contributor` backend-only build profile استعمال کرتا ہے۔ یہ build کے دوران
+dashboard UI فائلوں کو عارضی طور پر stub کرتا ہے، API route handlers برقرار رکھتا ہے، اور
+build کے بعد اصل فائلیں بحال کر دیتا ہے۔ ایسی تبدیلیوں کے لیے `npm run build` استعمال کریں
+جو dashboard UI کو متاثر کرتی ہوں، یا مکمل release validation کے لیے؛ contributor profile
+release build کا متبادل نہیں ہے۔
+
+> **VPS deploy نوٹ:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> میں کوئی تبدیلی نہیں کی جاتی۔ deploy skills، `dist/` کے مواد کو اس میں rsync کرتی ہیں۔
+> صرف in-repo build output path تبدیل ہوا ہے (`app/` → `dist/`)۔
+
+ڈیفالٹ URLs:
+
+- **ڈیش بورڈ**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Git ورک فلو
+
+> ⚠️ **کبھی بھی براہِ راست `main` میں commit نہ کریں۔** ہمیشہ feature branches استعمال کریں۔
+>
+> **PR کی بنیاد:** فعال `release/vX.Y.Z` برانچ کو ہدف بنائیں (`main` کو نہیں)۔ ہر ریلیز کے لیے علیحدہ برانچ + شپ کرتے وقت tag کے ماڈل کے لیے
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md) دیکھیں۔
+
+```bash
+# فعال ریلیز کے تازہ ترین سرے سے برانچ بنائیں (مثال: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... تبدیلیاں کریں ...
+git commit -m "feat: describe your change"
+git push -u origin feat/your-feature-name
+# base = release/v3.8.49 کے ساتھ Pull Request کھولیں
+```
+
+### برانچ کا نام رکھنا
+
+| سابقہ       | مقصد                    |
+| ----------- | ----------------------- |
+| `feat/`     | نئی خصوصیات             |
+| `fix/`      | بگ کی اصلاحات           |
+| `refactor/` | کوڈ کی تنظیمِ نو        |
+| `docs/`     | دستاویزات میں تبدیلیاں  |
+| `test/`     | ٹیسٹس میں اضافے/اصلاحات |
+| `chore/`    | ٹولنگ، CI، dependencies |
+
+### Commit پیغامات
+
+[Conventional Commits](https://www.conventionalcommits.org/) کی پیروی کریں:
+
+```
+feat: add circuit breaker for provider calls
+fix: resolve JWT secret validation edge case
+docs: update SECURITY.md with PII protection
+test: add observability unit tests
+refactor(db): consolidate rate limit tables
+```
+
+دائرۂ کار (v3.8): `db`، `sse`، `oauth`، `dashboard`، `api`، `cli`، `docker`، `ci`، `mcp`، `a2a`، `memory`، `skills`، `cloud-agent`، `guardrails`، `compression`، `auto-combo`، `resilience`، `providers`، `executors`، `translator`، `domain`، `authz`۔
+
+---
+
+## ٹیسٹس چلانا
+
+```bash
+# تمام ٹیسٹس (یونٹ + vitest + ایکوسسٹم + e2e)
+npm run test:all
+
+# واحد ٹیسٹ فائل (Node.js کا مقامی ٹیسٹ رنر — زیادہ تر ٹیسٹس یہی استعمال کرتے ہیں)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# صرف وہ یونٹ ٹیسٹس جو آپ کی تبدیلی سے متاثر ہوئے ہیں (وہی TIA سلیکٹر جو CI گیٹ میں ہے، #8084)
+npm run test:scoped            # آخری کمٹ (یا ورکنگ ٹری) میں ہونے والی تبدیلیاں
+npm run test:scoped:staged     # صرف اسٹیج کی گئی تبدیلیاں — پری کمٹ رن کے ساتھ موزوں
+npm run test:scoped:full       # پہلے امپورٹ گراف میپ دوبارہ بنائیں (فائلیں شامل/منتقل کرنے کے بعد)
+# Exit 1 + "مکمل سوٹ چلائیں" کا مطلب ہے کہ کوئی مرکزی فائل (tsconfig، package.json، …) یا کوئی
+# غیر میپ شدہ سورس تبدیل ہوا ہے — سلیکٹر محفوظ انداز میں ناکام ہوتا ہے، یہ کبھی خاموشی سے ٹیسٹس نہیں چھوڑتا۔
+
+# Vitest (MCP سرور، autoCombo، کیش)
+npm run test:vitest
+
+# E2E ٹیسٹس (Playwright درکار ہے)
+npm run test:e2e
+
+# پروٹوکول کلائنٹس کے E2E ٹیسٹس (MCP ٹرانسپورٹس، A2A)
+npm run test:protocols:e2e
+
+# ایکوسسٹم مطابقت کے ٹیسٹس
+npm run test:ecosystem
+
+# کوریج گیٹ: اسٹیٹمنٹس/لائنز/فنکشنز/برانچز کا 60%
+npm run test:coverage
+npm run coverage:report
+
+# لنٹ + فارمیٹ کی جانچ
+npm run lint
+npm run check
+
+# گیٹ شدہ حقیقی اپ اسٹریم کومبو اسموک (VPS رسائی + حقیقی فراہم کنندہ کریڈٹس درکار ہیں)
+# حقیقی فراہم کنندگان کو استعمال کرتا ہے — معمولی لاگت آتی ہے۔ CI میں کبھی نہیں چلتا۔ گیٹ کے بغیر صاف طور پر چھوڑ دیا جاتا ہے۔
+# درکار: ssh root@192.168.0.15 رسائی (VPS سے صرف پڑھنے کے قابل DB اسنیپ شاٹ حاصل کرتا ہے)۔
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Phase-3 VPS لائیو اسموک — سادہ Node ESM اسکرپٹس، براہِ راست لائیو .15 سرور کو استعمال کرتے ہیں۔
+# درکار: ssh root@192.168.0.15 رسائی (کومبوز SSH sqlite کے ذریعے بنائے/ختم کیے جاتے ہیں)۔
+# حقیقی فراہم کنندگان کو استعمال کرتا ہے (معمولی لاگت)۔ صرف __live_test__* کومبوز بناتا/حذف کرتا ہے۔ CI میں کبھی نہیں چلتا۔
+# .15 پر REQUIRE_API_KEY=false ہے، اس لیے کسی API کلید کی ضرورت نہیں، لیکن سیٹ ہونے کی صورت میں COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY کا لحاظ رکھتا ہے۔
+npm run test:combo:live:vps              # 7 HTTP منظرنامے (priority/round-robin/weighted/cost/fusion/auto + صحت)
+npm run test:combo:live:vps:failover     # ایک حقیقی کراس پرووائیڈر فیل اوور منظرنامہ شامل کرتا ہے (کل 8)
+```
+
+کوریج کے نوٹس:
+
+- `npm run test:coverage` مرکزی یونٹ ٹیسٹ سوٹ کی سورس کوریج ناپتا ہے، `tests/**` کو خارج کرتا ہے، اور `open-sse/**` کو شامل کرتا ہے
+- پل ریکوئسٹس کے لیے اسٹیٹمنٹس/لائنز/فنکشنز/برانچز کا کوریج گیٹ **60%+** برقرار رکھنا ضروری ہے
+- اگر کوئی PR، `src/`، `open-sse/`، `electron/`، یا `bin/` میں پروڈکشن کوڈ تبدیل کرتا ہے، تو اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کرنا ضروری ہے
+- `npm run coverage:report` تازہ ترین کوریج رن کی تفصیلی فائل بہ فائل رپورٹ پرنٹ کرتا ہے
+- `npm run test:coverage:legacy` تاریخی موازنے کے لیے پرانی میٹرک محفوظ رکھتا ہے
+- کوریج میں مرحلہ وار بہتری کے روڈمیپ کے لیے `docs/ops/COVERAGE_PLAN.md` دیکھیں
+
+### پل ریکوئسٹ کے تقاضے
+
+PR کھولنے سے پہلے، اپنی تبدیلی کے لیے مرکوز عمل چلانے کی خاطر
+[شراکت کا معیاری راستہ](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) استعمال کریں۔ مکمل یونٹ سوٹ (4 CI شارڈز)، Vitest، **60%+** کوریج گیٹ، اور
+پروڈکشن بلڈ CI کی ذمہ داری ہیں — انہیں مقامی طور پر چلانے سے ایسی کوئی اضافی معلومات حاصل نہیں ہوتیں جو PR
+چیکس پہلے ہی فراہم نہ کریں، اور چھوٹی مشینوں پر یہ ہوسٹ کے وسائل کو مکمل طور پر مصروف کر سکتا ہے (#8084):
+
+- اپنی تبدیلی کا احاطہ کرنے والی ٹیسٹ فائلیں چلائیں: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- `npm run lint` چلائیں
+- جب بھی پروڈکشن کوڈ تبدیل ہو، اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کریں
+- `node:test` فائلوں میں، ہر اعلیٰ سطحی `await` (جیسے `await import(...)`) کو پہلے `test()` / `describe()` سے پہلے رکھیں: `--test-force-exit` کے تحت، اس کے بعد رجسٹر ہونے والے ٹیسٹس خاموشی سے کبھی نہ چلنے کا امکان رکھتے ہیں (#18045؛ `npm run check:test-tla-order` کے ذریعے نافذ)
+- جب پروڈکشن کوڈ تبدیل ہوا ہو تو تبدیل یا شامل کی گئی ٹیسٹ فائلیں PR کی تفصیل میں شامل کریں
+- جب پروجیکٹ سیکرٹس CI میں کنفیگر کیے گئے ہوں تو PR پر SonarQube کا نتیجہ چیک کریں
+
+ٹیسٹس کی موجودہ حالت: **122 یونٹ ٹیسٹ فائلیں**، جو درج ذیل کا احاطہ کرتی ہیں:
+
+- فراہم کنندہ ٹرانسلیٹرز اور فارمیٹ کی تبدیلی
+- ریٹ لمٹنگ، سرکٹ بریکر، اور لچک پذیری
+- سیمنٹک کیش، آئیڈیمپوٹینسی، پیش رفت کی ٹریکنگ
+- ڈیٹابیس آپریشنز اور اسکیما (21 DB ماڈیولز)
+- OAuth فلوز اور توثیق
+- API اینڈ پوائنٹ کی توثیق (Zod v4)
+- MCP سرور ٹولز اور اسکوپ کا نفاذ
+- میموری اور اسکلز سسٹمز
+
+---
+
+## کوڈ کا انداز
+
+- **ESLint** — commit کرنے سے پہلے `npm run lint` چلائیں
+- **Prettier** — commit کے وقت `lint-staged` کے ذریعے خودکار طور پر فارمیٹ کیا جاتا ہے (2 spaces، semicolons، double quotes، 100 حروف کی چوڑائی، es5 trailing commas)
+- **TypeScript** — تمام `src/` کوڈ `.ts`/`.tsx` استعمال کرتا ہے؛ `open-sse/` میں `.ts`/`.js` استعمال ہوتے ہیں؛ TSDoc (`@param`، `@returns`، `@throws`) کے ساتھ دستاویز کریں
+- **`eval()` ممنوع ہے** — ESLint، `no-eval`، `no-implied-eval`، `no-new-func` نافذ کرتا ہے
+- **Zod validation** — تمام API input validation کے لیے Zod v4 schemas استعمال کریں
+- **نام رکھنے کا طریقہ**: فائلیں = camelCase/kebab-case، components = PascalCase، constants = UPPER_SNAKE
+
+### خرابیوں کو سنبھالنا / خالی catch blocks
+
+کبھی بھی کسی `catch` کو بغیر وضاحت کے نہ چھوڑیں۔ اسے درج ذیل دو اقسام میں سے کسی ایک میں
+درجہ بند کریں (یہ سخت اصول "SSE streams میں خرابیوں کو کبھی خاموشی سے نظر انداز نہ کریں"
+کو عملی شکل دیتا ہے):
+
+- **دانستہ (ہماری اپنی best-effort cleanup/telemetry)** — یہاں ناکامی متوقع اور بے ضرر
+  ہے؛ وجہ بتانے کے لیے ایک سطری comment شامل کریں، logging نہ کریں (ہر request پر logging سے پیدا
+  ہونے والے شور سے یہ اصول بچاتا ہے)۔
+
+  ```ts
+  } catch {} // کلائنٹ کے منقطع ہونے کے بعد پہلے سے بند controller کو بند کرنا متوقع ہے
+  ```
+
+- **لاگ ہونا چاہیے (بیرونی/caller کی فراہم کردہ code، یا نظر انداز کرنے سے control flow تبدیل ہوتا ہو)** — `catch`
+  برقرار رکھیں (اسے کبھی stream میں خلل نہ ڈالنے دیں)، لیکن سیاق و سباق کے ساتھ `console.debug`/`warn` جاری کریں تاکہ
+  ناکامی کا پتا چل سکے۔
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] onFailure callback میں خرابی:", e);
+  }
+  ```
+
+عملی مثالوں کے لیے `open-sse/utils/stream.ts` اور `open-sse/utils/streamHandler.ts` دیکھیں۔
+
+---
+
+## پروجیکٹ کی ساخت
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # ڈیش بورڈ کے صفحات (23 حصے)
+│   ├── api/                # API روٹس (51 ڈائریکٹریاں)
+│   └── login/              # توثیقی صفحات (.tsx)
+├── domain/                 # پالیسی انجن (policyEngine, comboResolver, costRules وغیرہ)
+├── lib/                    # بنیادی کاروباری منطق (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 پروٹوکول سرور
+│   ├── acp/                # Agent Communication Protocol رجسٹری
+│   ├── compliance/         # تعمیل کا پالیسی انجن
+│   ├── db/                 # SQLite ڈومین ماڈیولز + 130 مائیگریشنز
+│   ├── memory/             # مستقل مکالماتی میموری
+│   ├── oauth/              # OAuth فراہم کنندگان، سروسز، اور سہولیات
+│   ├── skills/             # قابلِ توسیع مہارتوں کا فریم ورک
+│   ├── usage/              # استعمال کی ٹریکنگ اور لاگت کا حساب
+│   └── localDb.ts          # صرف دوبارہ برآمد کی تہہ — یہاں کبھی منطق شامل نہ کریں
+├── middleware/              # درخواست کا مڈل ویئر (promptInjectionGuard)
+├── mitm/                   # MITM پراکسی (سرٹیفکیٹ، DNS، ہدف کی روٹنگ)
+├── shared/
+│   ├── components/         # React اجزا (.tsx)
+│   ├── constants/          # فراہم کنندگان کی تعریفیں (329)، MCP اسکوپس، روٹنگ کی 20 حکمتِ عملیاں
+│   ├── utils/              # سرکٹ بریکر، سینیٹائزر، توثیقی معاون افعال
+│   └── validation/         # Zod v4 اسکیماز
+└── sse/                    # SSE پراکسی پائپ لائن
+
+open-sse/                   # @omniroute/open-sse ورک اسپیس
+├── executors/              # 150 ایگزیکیوٹر ماڈیولز (ایگزیکیوٹر کلاسز + ہر فراہم کنندہ کے معاون افعال)
+├── handlers/               # درخواستوں کے 11 ہینڈلرز (چیٹ، جوابات، ایمبیڈنگز، تصاویر وغیرہ)
+├── mcp-server/             # MCP سرور (110 منفرد ٹولز، 3 ٹرانسپورٹس، 33 اسکوپس)
+├── services/               # 178 اعلیٰ سطحی سروسز (combo, autoCombo, rateLimitManager وغیرہ)
+├── translator/             # فارمیٹ مترجم (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ٹرانسفارمر
+└── utils/                  # 22 یوٹیلیٹی ماڈیولز (اسٹریم، TLS، پراکسی، لاگنگ)
+
+electron/                   # Electron ڈیسک ٹاپ ایپ (کراس پلیٹ فارم)
+
+tests/
+├── unit/                   # Node.js ٹیسٹ رنر (1,574 ٹیسٹ فائلیں)
+├── integration/            # انٹیگریشن ٹیسٹس
+├── e2e/                    # Playwright ٹیسٹس
+├── security/               # سیکیورٹی ٹیسٹس
+├── translator/             # مترجم سے مخصوص ٹیسٹس
+└── load/                   # لوڈ ٹیسٹس
+
+docs/
+├── adr/                     # تعمیراتی فیصلوں کے ریکارڈز
+├── architecture/            # سسٹم کا فنِ تعمیر اور لچک
+├── comparison/              # OmniRoute بمقابلہ متبادل
+├── compression/             # کمپریشن گائیڈز اور قواعد
+├── dev/                     # ڈیولپمنٹ گائیڈز
+├── diagrams/                # تعمیراتی خاکے
+├── frameworks/              # MCP، A2A، OpenCode، میموری، مہارتیں
+├── guides/                  # صارف گائیڈ، Docker، سیٹ اپ، خرابیوں کا ازالہ
+├── i18n/                    # README کے بین الاقوامی تراجم
+├── marketing/               # مارکیٹنگ کا مواد
+├── ops/                     # تعیناتی، پراکسی، کوریج، ریلیزز
+├── providers/               # فراہم کنندہ سے مخصوص دستاویزات
+├── reference/               # API حوالہ، ماحولیاتی متغیرات، CLI ٹولز، مفت درجے
+├── releases/                # ریلیز نوٹس
+├── routing/                 # آٹو کومبو انجن، استدلال کی دوبارہ کارگزاری
+├── screenshots/             # ڈیش بورڈ کے اسکرین شاٹس
+├── security/                # حفاظتی حدود، تعمیل، پوشیدگی، ٹوکنز
+└── specs/                   # ڈیزائن کی وضاحتیں
+```
+
+---
+
+## نیا پرووائیڈر شامل کرنا
+
+### مرحلہ 1: پرووائیڈر کانسٹینٹس رجسٹر کریں
+
+`src/shared/constants/providers.ts` میں شامل کریں — ماڈیول لوڈ ہوتے وقت Zod کے ذریعے توثیق کی جاتی ہے۔
+
+### مرحلہ 2: ایگزیکیوٹر شامل کریں (اگر حسبِ ضرورت منطق درکار ہو)
+
+بنیادی ایگزیکیوٹر کو وسعت دیتے ہوئے `open-sse/executors/your-provider.ts` میں ایگزیکیوٹر بنائیں۔
+
+### مرحلہ 3: ٹرانسلیٹر شامل کریں (اگر فارمیٹ OpenAI کا نہ ہو)
+
+`open-sse/translator/` میں درخواست/جواب کے ٹرانسلیٹر بنائیں۔
+
+### مرحلہ 4: OAuth کنفیگریشن شامل کریں (اگر OAuth پر مبنی ہو)
+
+OAuth اسناد `src/lib/oauth/constants/oauth.ts` میں اور سروس `src/lib/oauth/services/` میں شامل کریں۔
+
+اگر اپ اسٹریم پرووائیڈر اپنے عوامی CLI / براؤزر بنڈل میں عوامی OAuth `client_id`/سیکرٹ یا Firebase Web API کلید تقسیم کرتا ہے، تو اسے اسٹرنگ لٹرل کے طور پر **ہرگز** شامل نہ کریں۔ `open-sse/utils/publicCreds.ts` سے `resolvePublicCred()` استعمال کریں اور `EMBEDDED_DEFAULTS` میں ماسک شدہ بائٹ اندراج شامل کریں۔ مکمل لازمی طریقۂ کار کی دستاویز [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) میں موجود ہے۔
+
+ہینڈلرز/ایگزیکیوٹرز کے اندر، کلائنٹ تک پہنچنے والے خرابی کے پیغامات کو `open-sse/utils/error.ts` سے `buildErrorBody()` / `sanitizeErrorMessage()` کے ذریعے گزارنا لازمی ہے — خام `err.stack` یا `err.message` کو کبھی بھی Response باڈی میں شامل نہ کریں۔ [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) دیکھیں۔
+
+### مرحلہ 5: ماڈلز رجسٹر کریں
+
+`open-sse/config/providerRegistry.ts` میں ماڈل کی تعریفیں شامل کریں۔
+
+### مرحلہ 6: ٹیسٹس شامل کریں
+
+`tests/unit/` میں یونٹ ٹیسٹس لکھیں جو کم از کم درج ذیل کا احاطہ کریں:
+
+- پرووائیڈر کی رجسٹریشن
+- درخواست/جواب کی ترجمانی
+- خرابیوں سے نمٹنا
+
+---
+
+## پُل ریکویسٹ چیک لسٹ
+
+- [ ] ٹیسٹس کامیاب ہوں (`npm test`)
+- [ ] لِنٹنگ کامیاب ہو (`npm run lint`)
+- [ ] بِلڈ کامیاب ہو (`npm run build`)
+- [ ] نئے عوامی فنکشنز اور انٹرفیسز کے لیے TypeScript ٹائپس شامل کی گئی ہوں
+- [ ] کوئی ہارڈ کوڈ شدہ راز یا فال بیک اقدار نہ ہوں
+- [ ] عوامی اپ اسٹریم اسناد `resolvePublicCred()` کے ذریعے شامل کی گئی ہوں ([`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) دیکھیں)، کبھی بھی لِٹرلز کے طور پر نہیں
+- [ ] خرابی کے جوابات `buildErrorBody()` / `sanitizeErrorMessage()` کے ذریعے بھیجے جائیں — جوابی باڈیز میں خام اسٹیک ٹریسز نہ ہوں ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) دیکھیں)
+- [ ] شیل کمانڈز (`exec` / `spawn`) رن ٹائم اقدار کو اسٹرنگ انٹرپولیشن کے بجائے `env` کے ذریعے منتقل کریں
+- [ ] تمام اِن پٹس کی Zod اسکیماؤں کے ذریعے توثیق کی گئی ہو
+- [ ] صارف کو نظر آنے والی تبدیلیوں کے لیے `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` کے تحت چینج لاگ **فریگمنٹ** شامل کیا گیا ہو ([`changelog.d/README.md`](./changelog.d/README.md) دیکھیں) — `CHANGELOG.md` میں براہِ راست ترمیم **نہ** کریں؛ فریگمنٹس کو ریلیز کے وقت یکجا کیا جاتا ہے اور ان میں مختلف پُل ریکویسٹس کے درمیان کبھی تنازع نہیں ہوتا
+- [ ] دستاویزات اپ ڈیٹ کی گئی ہوں (اگر قابلِ اطلاق ہو)
+- [ ] کوئی نیا CodeQL / Secret-Scanning الرٹ نہ کھلا ہو، یا ہر الرٹ کو متعلقہ `docs/security/` دستاویز کا حوالہ دیتے ہوئے تکنیکی جواز کے ساتھ مسترد کیا گیا ہو
+- [ ] چائلڈ پراسیسز شروع کرنے والے روٹس (`/api/mcp/`، `/api/cli-tools/runtime/`) کو `src/server/authz/routeGuard.ts` میں `isLocalOnlyPath()` کے طور پر درجہ بند کیا گیا ہو — [سخت اصول #15](docs/security/ROUTE_GUARD_TIERS.md) دیکھیں
+- [ ] کمٹ پیغامات میں AI/بوٹ کے `Co-authored-by` ٹریلرز نہ ہوں (سخت اصول #16) — جن انسانی معاونین کا کام دوبارہ استعمال کیا گیا ہو، انہیں معیاری `Co-authored-by: Name <email>` ٹریلرز کے ذریعے کریڈٹ دیا جائے
+
+---
+
+## ریلیز کرنا
+
+ریلیزز کا انتظام `/generate-release` ورک فلو کے ذریعے کیا جاتا ہے۔ جب نئی GitHub Release بنائی جاتی ہے، تو پیکیج GitHub Actions کے ذریعے **خودکار طور پر npm پر شائع ہو جاتا ہے**۔
+
+VPS پر ڈیپلائمنٹ کے لیے، `npm run build` کے بجائے `npm run build:release` استعمال کریں — یہ مکمل طور پر نئے سرے سے
+بلڈ کرتا ہے، بنڈل کو `dist/` میں مرتب کرتا ہے، اور `dist/BUILD_SHA` سینٹینل لکھتا ہے۔
+پھر `/deploy-vps-*-cc` اسکلز استعمال کریں، جو `dist/` کو rsync کے ذریعے ریموٹ `app/` ڈائریکٹری میں منتقل کرتی ہیں۔
+
+---
+
+## مدد حاصل کرنا
+
+- **آرکیٹیکچر**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) دیکھیں
+- **API حوالہ**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) دیکھیں
+- **سیکیورٹی دستاویزات**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md)، [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md)، [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md)، [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **آپریشنز دستاویزات**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **مسائل**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

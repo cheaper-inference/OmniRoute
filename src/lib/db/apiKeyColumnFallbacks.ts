@@ -1,0 +1,102 @@
+export const API_KEY_COLUMN_FALLBACKS = [
+  {
+    name: "codex_service_mode",
+    definition:
+      "codex_service_mode TEXT NOT NULL DEFAULT 'inherit' CHECK (codex_service_mode IN ('inherit', 'default', 'priority', 'flex'))",
+  },
+  { name: "allowed_models", definition: "allowed_models TEXT" },
+  {
+    name: "model_access_mode",
+    definition:
+      "model_access_mode TEXT NOT NULL DEFAULT 'all' CHECK (model_access_mode IN ('all', 'restricted'))",
+  },
+  { name: "blocked_models", definition: "blocked_models TEXT" },
+  { name: "allowed_combos", definition: "allowed_combos TEXT" },
+  { name: "no_log", definition: "no_log INTEGER NOT NULL DEFAULT 0" },
+  { name: "allowed_connections", definition: "allowed_connections TEXT" },
+  { name: "preferred_connections", definition: "preferred_connections TEXT" },
+  { name: "auto_resolve", definition: "auto_resolve INTEGER NOT NULL DEFAULT 0" },
+  { name: "is_active", definition: "is_active INTEGER NOT NULL DEFAULT 1" },
+  { name: "access_schedule", definition: "access_schedule TEXT" },
+  { name: "max_requests_per_day", definition: "max_requests_per_day INTEGER" },
+  { name: "max_requests_per_minute", definition: "max_requests_per_minute INTEGER" },
+  { name: "throttle_delay_ms", definition: "throttle_delay_ms INTEGER" },
+  { name: "max_sessions", definition: "max_sessions INTEGER NOT NULL DEFAULT 0" },
+  { name: "revoked_at", definition: "revoked_at TEXT" },
+  { name: "expires_at", definition: "expires_at TEXT" },
+  { name: "last_used_at", definition: "last_used_at TEXT" },
+  { name: "key_prefix", definition: "key_prefix TEXT" },
+  { name: "ip_allowlist", definition: "ip_allowlist TEXT" },
+  { name: "scopes", definition: "scopes TEXT" },
+  { name: "rate_limits", definition: "rate_limits TEXT" },
+  { name: "is_banned", definition: "is_banned INTEGER NOT NULL DEFAULT 0" },
+  { name: "key_hash", definition: "key_hash TEXT" },
+  { name: "proxy_id", definition: "proxy_id TEXT" },
+  { name: "allowed_endpoints", definition: "allowed_endpoints TEXT" },
+  { name: "allowed_quotas", definition: "allowed_quotas TEXT NOT NULL DEFAULT '[]'" },
+  { name: "stream_default_mode", definition: "stream_default_mode TEXT NOT NULL DEFAULT 'legacy'" },
+  { name: "cache_default_mode", definition: "cache_default_mode TEXT NOT NULL DEFAULT 'legacy'" },
+  {
+    name: "disable_non_public_models",
+    definition: "disable_non_public_models INTEGER NOT NULL DEFAULT 0",
+  },
+  {
+    name: "allow_usage_command",
+    definition: "allow_usage_command INTEGER NOT NULL DEFAULT 0",
+  },
+  {
+    name: "usage_limit_enabled",
+    definition: "usage_limit_enabled INTEGER NOT NULL DEFAULT 0",
+  },
+  {
+    name: "daily_usage_limit_usd",
+    definition: "daily_usage_limit_usd REAL",
+  },
+  {
+    name: "weekly_usage_limit_usd",
+    definition: "weekly_usage_limit_usd REAL",
+  },
+  {
+    name: "chaos_mode_enabled",
+    definition: "chaos_mode_enabled INTEGER NOT NULL DEFAULT 0",
+  },
+  {
+    name: "compression_enabled",
+    definition: "compression_enabled INTEGER NOT NULL DEFAULT 1",
+  },
+  {
+    name: "allow_auto_combos",
+    definition: "allow_auto_combos INTEGER NOT NULL DEFAULT 1",
+  },
+  {
+    name: "allow_cc_discovery_aliases",
+    definition: "allow_cc_discovery_aliases INTEGER NOT NULL DEFAULT 1",
+  },
+  {
+    name: "catalog_scope",
+    definition:
+      "catalog_scope TEXT NOT NULL DEFAULT 'all' CHECK (catalog_scope IN ('all', 'combos', 'models'))",
+  },
+  // Per-key enforced routing target (NULL = not pinned). See resolveApiKeyForcedModel.
+  { name: "forced_model", definition: "forced_model TEXT" },
+] as const;
+
+interface ApiKeySchemaDb {
+  prepare: (sql: string) => { all: (...params: unknown[]) => unknown[] };
+  exec: (sql: string) => void;
+}
+
+/**
+ * Adds every api_keys column from API_KEY_COLUMN_FALLBACKS that the table still lacks.
+ * Shared by the api-keys module and the JSON backup import, which must see the full
+ * column set before restoring rows (a missing `is_banned` would drop a ban on restore).
+ */
+export function ensureApiKeyFallbackColumns(db: ApiKeySchemaDb): void {
+  const columns = db.prepare("PRAGMA table_info(api_keys)").all() as Array<{ name?: unknown }>;
+  const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
+  for (const column of API_KEY_COLUMN_FALLBACKS) {
+    if (columnNames.has(column.name)) continue;
+    db.exec(`ALTER TABLE api_keys ADD COLUMN ${column.definition}`);
+    console.log(`[DB] Added api_keys.${column.name} column`);
+  }
+}

@@ -1,0 +1,764 @@
+/**
+ * db/backup.js — Database backup/restore operations.
+ */
+
+import path from "path";
+import fs from "fs";
+import {
+  getDbInstance,
+  resetDbInstance,
+  isBuildPhase,
+  isCloud,
+  SQLITE_FILE,
+  DB_BACKUPS_DIR,
+  DATA_DIR,
+} from "./core";
+import { listBackupIds, resolveBackupFile } from "./backupPaths";
+import { chmodQuiet, DB_SECRET_DIR_MODE, DB_SECRET_FILE_MODE } from "./filePermissions";
+import { resetAllDbModuleState } from "./stateReset";
+import {
+  DB_BACKUP_SETTINGS_NAMESPACE,
+  DB_BACKUP_MAX_FILES_KEY,
+  DB_BACKUP_RETENTION_DAYS_KEY,
+  pruneBackupDirectory,
+  resolveDbBackupRetention,
+} from "./backupRetention";
+import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+
+type CountRow = { cnt?: number };
+
+// ──────────────── Backup Config ────────────────
+
+let _lastBackupAt = 0;
+const BACKUP_THROTTLE_MS = 60 * 60 * 1000; // 60 minutes — high-churn pre-write (models.dev pricing) must not copy the whole SQLite file every call (#10351)
+const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
+
+function setStoredDbBackupInteger(key: string, value: number, options: { min: number }): void {
+  if (!Number.isInteger(value) || value < options.min) return;
+  const db = getDbInstance();
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    DB_BACKUP_SETTINGS_NAMESPACE,
+    key,
+    JSON.stringify(value)
+  );
+}
+
+/** Persist the operator-chosen "keep latest backups" retention count (#3834). */
+export function setDbBackupMaxFiles(value: number): void {
+  setStoredDbBackupInteger(DB_BACKUP_MAX_FILES_KEY, value, { min: 1 });
+}
+
+export function getDbBackupMaxFiles() {
+  return resolveDbBackupRetention(getDbInstance()).maxFiles;
+}
+
+/** Persist the operator-chosen age-based backup retention window. */
+export function setDbBackupRetentionDays(value: number): void {
+  setStoredDbBackupInteger(DB_BACKUP_RETENTION_DAYS_KEY, value, { min: 0 });
+}
+
+export function getDbBackupRetentionDays() {
+  return resolveDbBackupRetention(getDbInstance()).retentionDays;
+}
+
+function getBackupDir() {
+  return DB_BACKUPS_DIR || path.join(DATA_DIR, "db_backups");
+}
+
+function listBackupFilesNewestFirst(backupDir: string) {
+  return listBackupIds(backupDir)
+    .flatMap((filename) => {
+      try {
+        return [{ filename, stat: fs.statSync(resolveBackupFile(backupDir, filename)) }];
+      } catch {
+        // A concurrent retention pass may remove an entry after readdir.
+        return [];
+      }
+    })
+    .sort(
+      (left, right) =>
+        right.stat.mtimeMs - left.stat.mtimeMs || right.filename.localeCompare(left.filename)
+    );
+}
+
+export function cleanupDbBackups(options?: {
+  maxFiles?: number;
+  retentionDays?: number;
+  backupDir?: string;
+}) {
+  const backupDir = options?.backupDir ?? getBackupDir();
+  const maxFiles = options?.maxFiles ?? getDbBackupMaxFiles();
+  const retentionDays = options?.retentionDays ?? getDbBackupRetentionDays();
+
+  return pruneBackupDirectory({ backupDir, maxFiles, retentionDays });
+}
+
+function coerceBoolean(value: unknown): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const v = value.trim().toLowerCase();
+    if (v === "true" || v === "1") return true;
+    if (v === "false" || v === "0") return false;
+  }
+  return null;
+}
+
+function parseStoredJson(value: string | undefined): unknown {
+  if (value === undefined) return undefined;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * #5871: resolve the persisted `backup.autoBackupEnabled` dashboard setting.
+ *
+ * This mirrors the precedence used by `databaseSettings.getUserDatabaseSettings()`
+ * (default `false` → `settings.databaseSettings.backup` → `settings.backup` →
+ * `databaseSettings` namespace, last wins) but reads `key_value` rows directly so
+ * `backup.ts` does not create a static import cycle with `databaseSettings.ts`
+ * (which imports `backupDbFile` at module load). Returns `true` when auto backups
+ * are explicitly disabled by the operator, so callers can skip non-manual backups.
+ */
+export function isAutoBackupDisabledBySetting(): boolean {
+  try {
+    const db = getDbInstance();
+    const rows = db
+      .prepare("SELECT namespace, key, value FROM key_value WHERE namespace IN (?, ?)")
+      .all("settings", "databaseSettings") as Array<{
+      namespace: string;
+      key: string;
+      value: string;
+    }>;
+
+    // Candidate values by source, resolved regardless of DB row iteration order.
+    // Precedence (lowest → highest, last wins), mirroring getUserDatabaseSettings():
+    //   settings.databaseSettings.backup → settings.backup → databaseSettings namespace.
+    let fromSettingsNested: boolean | null = null; // settings.databaseSettings.backup.autoBackupEnabled
+    let fromSettingsBackup: boolean | null = null; // settings.backup.autoBackupEnabled
+    let fromDbFlat: boolean | null = null; // databaseSettings namespace flat alias "autoBackupEnabled"
+    let fromDbNested: boolean | null = null; // databaseSettings namespace nested "backup.autoBackupEnabled"
+
+    for (const row of rows) {
+      const parsed = parseStoredJson(row.value);
+
+      if (row.namespace === "settings") {
+        if (row.key === "databaseSettings" && isPlainObject(parsed)) {
+          const backup = (parsed as Record<string, unknown>).backup;
+          if (isPlainObject(backup)) {
+            const b = coerceBoolean((backup as Record<string, unknown>).autoBackupEnabled);
+            if (b !== null) fromSettingsNested = b;
+          }
+        } else if (row.key === "backup" && isPlainObject(parsed)) {
+          const b = coerceBoolean((parsed as Record<string, unknown>).autoBackupEnabled);
+          if (b !== null) fromSettingsBackup = b;
+        }
+      } else if (row.namespace === "databaseSettings") {
+        if (row.key === "autoBackupEnabled") {
+          const b = coerceBoolean(parsed);
+          if (b !== null) fromDbFlat = b;
+        } else if (row.key === "backup.autoBackupEnabled") {
+          const b = coerceBoolean(parsed);
+          if (b !== null) fromDbNested = b;
+        }
+      }
+    }
+
+    // Apply precedence: last non-null wins (mirrors getUserDatabaseSettings — flat alias
+    // first, then nested key). Default (no persisted value) → not disabled.
+    let enabled: boolean | null = null;
+    for (const candidate of [fromSettingsNested, fromSettingsBackup, fromDbFlat, fromDbNested]) {
+      if (candidate !== null) enabled = candidate;
+    }
+
+    return enabled === false;
+  } catch {
+    // If the setting cannot be read (e.g. DB not ready), do not block backups.
+    return false;
+  }
+}
+
+export type AutoBackupFrequency = "never" | "daily" | "weekly" | "monthly";
+
+function coerceFrequency(value: unknown): AutoBackupFrequency | null {
+  if (typeof value === "string") {
+    const v = value.trim().toLowerCase();
+    if (v === "never" || v === "daily" || v === "weekly" || v === "monthly") {
+      return v;
+    }
+  }
+  return null;
+}
+
+/**
+ * #15550: resolve the persisted `backup.autoBackupFrequency` dashboard setting.
+ * Mirrors the precedence used by `databaseSettings.getUserDatabaseSettings()`
+ * while reading `key_value` rows directly to avoid a circular dependency with
+ * `databaseSettings.ts`.
+ */
+export function getAutoBackupFrequencySetting(): AutoBackupFrequency | null {
+  try {
+    const db = getDbInstance();
+    const rows = db
+      .prepare("SELECT namespace, key, value FROM key_value WHERE namespace IN (?, ?)")
+      .all("settings", "databaseSettings") as Array<{
+      namespace: string;
+      key: string;
+      value: string;
+    }>;
+
+    let fromSettingsNested: AutoBackupFrequency | null = null;
+    let fromSettingsBackup: AutoBackupFrequency | null = null;
+    let fromDbFlat: AutoBackupFrequency | null = null;
+    let fromDbNested: AutoBackupFrequency | null = null;
+
+    for (const row of rows) {
+      const parsed = parseStoredJson(row.value);
+
+      if (row.namespace === "settings") {
+        if (row.key === "databaseSettings" && isPlainObject(parsed)) {
+          const backup = (parsed as Record<string, unknown>).backup;
+          if (isPlainObject(backup)) {
+            const f = coerceFrequency((backup as Record<string, unknown>).autoBackupFrequency);
+            if (f !== null) fromSettingsNested = f;
+          }
+        } else if (row.key === "backup" && isPlainObject(parsed)) {
+          const f = coerceFrequency((parsed as Record<string, unknown>).autoBackupFrequency);
+          if (f !== null) fromSettingsBackup = f;
+        }
+      } else if (row.namespace === "databaseSettings") {
+        if (row.key === "autoBackupFrequency") {
+          const f = coerceFrequency(parsed);
+          if (f !== null) fromDbFlat = f;
+        } else if (row.key === "backup.autoBackupFrequency") {
+          const f = coerceFrequency(parsed);
+          if (f !== null) fromDbNested = f;
+        }
+      }
+    }
+
+    let frequency: AutoBackupFrequency | null = null;
+    for (const candidate of [fromSettingsNested, fromSettingsBackup, fromDbFlat, fromDbNested]) {
+      if (candidate !== null) frequency = candidate;
+    }
+
+    return frequency;
+  } catch {
+    return null;
+  }
+}
+
+export function getAutoBackupFrequencyIntervalMs(
+  frequency: AutoBackupFrequency | null
+): number | null {
+  // Explicit "never" is the only value that disables automatic backups.
+  // An absent setting keeps the pre-#15550 hourly throttle instead of
+  // treating unset as off.
+  if (frequency === "never") return null;
+  if (!frequency) return BACKUP_THROTTLE_MS;
+  switch (frequency) {
+    case "daily":
+      return 24 * 60 * 60 * 1000;
+    case "weekly":
+      return 7 * 24 * 60 * 60 * 1000;
+    case "monthly":
+      return 30 * 24 * 60 * 60 * 1000;
+    default:
+      return BACKUP_THROTTLE_MS;
+  }
+}
+
+/**
+ * #15550: determine whether an automatic backup is due based on configured frequency
+ * and the persistent timestamp (mtime) of the newest valid backup on disk.
+ */
+export function isAutoBackupDueByFrequency(options?: {
+  backupDir?: string;
+  now?: number;
+}): boolean {
+  const frequency = getAutoBackupFrequencySetting();
+  const intervalMs = getAutoBackupFrequencyIntervalMs(frequency);
+  if (intervalMs === null) return false;
+
+  const backupDir = options?.backupDir ?? getBackupDir();
+  if (!fs.existsSync(backupDir)) return true;
+
+  const now = options?.now ?? Date.now();
+  const entries = listBackupFilesNewestFirst(backupDir);
+
+  for (const { stat } of entries) {
+    if (stat.size >= 4096) {
+      return now - stat.mtimeMs >= intervalMs;
+    }
+  }
+
+  return true;
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isSqliteAutoBackupDisabled() {
+  if (isAutomatedTestProcess()) return true;
+
+  const value = process.env.DISABLE_SQLITE_AUTO_BACKUP;
+  if (!value) return false;
+  return TRUE_ENV_VALUES.has(value.trim().toLowerCase());
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function unlinkFileWithRetry(
+  filePath: string,
+  options?: { maxAttempts?: number; retryableCodes?: string[]; baseDelayMs?: number }
+) {
+  const maxAttempts = Math.max(1, options?.maxAttempts ?? 10);
+  const retryableCodes = new Set(options?.retryableCodes ?? ["EBUSY", "EPERM"]);
+  const baseDelayMs = Math.max(0, options?.baseDelayMs ?? 100);
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      return;
+    } catch (err: unknown) {
+      const code =
+        err && typeof err === "object" && "code" in err ? (err as NodeJS.ErrnoException).code : "";
+      if (code === "ENOENT") return;
+      if (retryableCodes.has(String(code)) && attempt < maxAttempts - 1) {
+        await sleep(baseDelayMs * (attempt + 1));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+// ──────────────── Backup ────────────────
+
+export function backupDbFile(reason = "auto") {
+  try {
+    if (isBuildPhase || isCloud) return null;
+    if (!SQLITE_FILE || !fs.existsSync(SQLITE_FILE)) return null;
+    if (reason !== "manual" && reason !== "pre-restore" && isSqliteAutoBackupDisabled())
+      return null;
+    // #5871: honor the persisted `backup.autoBackupEnabled` dashboard toggle. Only
+    // manual and pre-restore backups bypass this gate; automatic + pre-write safety
+    // snapshots must stop firing once the operator disables auto-backup in the UI.
+    if (reason !== "manual" && reason !== "pre-restore" && isAutoBackupDisabledBySetting())
+      return null;
+
+    const stat = fs.statSync(SQLITE_FILE);
+    if (stat.size < 4096) {
+      console.warn(`[DB] Backup SKIPPED — DB too small (${stat.size}B)`);
+      return null;
+    }
+
+    // Throttle
+    const now = Date.now();
+    if (reason !== "manual" && reason !== "pre-restore" && now - _lastBackupAt < BACKUP_THROTTLE_MS)
+      return null;
+
+    // #15550: honor the persisted `backup.autoBackupFrequency` setting against the
+    // newest valid backup on disk.
+    if (reason !== "manual" && reason !== "pre-restore") {
+      if (!isAutoBackupDueByFrequency({ backupDir: getBackupDir(), now })) return null;
+    }
+
+    _lastBackupAt = now;
+
+    const backupDir = getBackupDir();
+    if (!fs.existsSync(backupDir))
+      fs.mkdirSync(backupDir, { recursive: true, mode: DB_SECRET_DIR_MODE });
+
+    if (reason !== "manual" && reason !== "pre-restore") {
+      // Shrink detection is useful for automatic safety backups, but it should
+      // never block an explicit operator action like manual backup or pre-restore.
+      // Only timestamp-named automatic/manual backups are shrink baselines. The
+      // content-addressed migration snapshots are restore points, not periodic size
+      // samples; excluding them also keeps this lookup to names only with a single stat
+      // even in legacy directories containing tens of thousands of timestamp backups.
+      const existingBackups = fs
+        .readdirSync(backupDir)
+        .filter((filename) => /^db_\d{4}-.*\.sqlite$/.test(filename))
+        .sort();
+      if (existingBackups.length > 0) {
+        const latestBackup = existingBackups.at(-1)!;
+        try {
+          const latestStat = fs.statSync(path.join(backupDir, latestBackup));
+          if (latestStat.size > 4096 && stat.size < latestStat.size * 0.5) {
+            console.warn(
+              `[DB] Backup SKIPPED — DB shrank from ${latestStat.size}B to ${stat.size}B`
+            );
+            return null;
+          }
+        } catch (error: unknown) {
+          if ((error as NodeJS.ErrnoException | null)?.code !== "ENOENT") throw error;
+        }
+      }
+    }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const backupFile = path.join(backupDir, `db_${timestamp}_${reason}.sqlite`);
+
+    // Use native SQLite backup API for consistency
+    const db = getDbInstance();
+    db.backup(backupFile)
+      .then(() => {
+        chmodQuiet(backupFile, DB_SECRET_FILE_MODE);
+        console.log(`[DB] Backup created: ${backupFile} (${stat.size} bytes)`);
+        cleanupDbBackups();
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("[DB] Backup failed:", message);
+      });
+
+    return { filename: path.basename(backupFile), size: stat.size };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[DB] Backup failed:", message);
+    return null;
+  }
+}
+
+// ──────────────── List Backups ────────────────
+
+export async function listDbBackups() {
+  const backupDir = getBackupDir();
+  try {
+    if (!fs.existsSync(backupDir)) return [];
+
+    const entries = listBackupFilesNewestFirst(backupDir);
+
+    const { tryOpenSync } = await import("@/lib/db/adapters/driverFactory");
+    return entries.map(({ filename, stat }) => {
+      const filePath = resolveBackupFile(backupDir, filename);
+      const match = filename.match(/^db_(.+?)_([^.]+)\.sqlite$/);
+      const reason = match ? match[2] : "unknown";
+
+      let connectionCount = 0;
+      try {
+        const backupDb = tryOpenSync(filePath, { readonly: true });
+        if (backupDb) {
+          try {
+            const row = backupDb
+              .prepare("SELECT COUNT(*) as cnt FROM provider_connections")
+              .get() as CountRow | undefined;
+            connectionCount = Number(row?.cnt ?? 0);
+          } finally {
+            backupDb.close();
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+
+      return {
+        id: filename,
+        filename,
+        createdAt: stat.mtime.toISOString(),
+        size: stat.size,
+        reason,
+        connectionCount,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+// ──────────────── Restore Backup ────────────────
+
+export async function restoreDbBackup(backupId: string) {
+  const backupDir = getBackupDir();
+
+  // Validate format: must be db_<timestamp>_<reason>.sqlite, no path separators
+  if (
+    !backupId.startsWith("db_") ||
+    !backupId.endsWith(".sqlite") ||
+    backupId.includes(path.sep) ||
+    backupId.includes("/")
+  ) {
+    throw new Error("Invalid backup ID");
+  }
+
+  const backupPath = path.resolve(resolveBackupFile(backupDir, backupId));
+  // Prevent path traversal: resolved path must stay within backupDir
+  if (
+    !backupPath.startsWith(path.resolve(backupDir) + path.sep) &&
+    backupPath !== path.resolve(backupDir)
+  ) {
+    throw new Error("Invalid backup ID: path traversal detected");
+  }
+
+  if (!fs.existsSync(backupPath)) {
+    throw new Error(`Backup not found: ${backupId}`);
+  }
+
+  // Validate backup integrity
+  try {
+    const { tryOpenSync } = await import("@/lib/db/adapters/driverFactory");
+    const testDb = tryOpenSync(backupPath, { readonly: true });
+    if (!testDb) {
+      throw new Error("Backup file is corrupt: could not open");
+    }
+    let result: Array<{ integrity_check?: string }>;
+    try {
+      result = testDb.pragma("integrity_check") as Array<{ integrity_check?: string }>;
+    } finally {
+      testDb.close();
+    }
+    if (result[0]?.integrity_check !== "ok") {
+      throw new Error("Backup integrity check failed");
+    }
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "Backup integrity check failed") throw e;
+    const message = e instanceof Error ? e.message : String(e);
+    throw new Error(`Backup file is corrupt: ${message}`);
+  }
+
+  // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs
+  if (!isSqliteAutoBackupDisabled()) {
+    _lastBackupAt = 0;
+    const backupDirForPre = getBackupDir();
+    if (SQLITE_FILE && fs.existsSync(SQLITE_FILE)) {
+      const stat = fs.statSync(SQLITE_FILE);
+      if (stat.size >= 4096) {
+        if (!fs.existsSync(backupDirForPre))
+          fs.mkdirSync(backupDirForPre, { recursive: true, mode: DB_SECRET_DIR_MODE });
+        const preBackupPath = path.join(
+          backupDirForPre,
+          `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
+        );
+        const dbForBackup = getDbInstance();
+        await dbForBackup.backup(preBackupPath);
+        chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);
+        _lastBackupAt = Date.now();
+      }
+    }
+  }
+
+  // Close and reset current connection
+  resetDbInstance();
+
+  // Clear all cached prepared statements and other state bound to the old connection
+  resetAllDbModuleState();
+
+  const sqliteFile = SQLITE_FILE;
+  if (!sqliteFile) {
+    throw new Error("SQLITE_FILE is unavailable in local backup restore");
+  }
+
+  // On Windows, the file handle may be released asynchronously after close; give it a moment.
+  await sleep(500);
+
+  // Remove main file and WAL sidecars to avoid stale frame replay after restore.
+  // Retry unlink on EBUSY/EPERM (Windows may hold the handle briefly).
+  const sqliteFilesToReplace = [
+    sqliteFile,
+    `${sqliteFile}-wal`,
+    `${sqliteFile}-shm`,
+    `${sqliteFile}-journal`,
+  ];
+  for (const filePath of sqliteFilesToReplace) {
+    if (!filePath) continue;
+    await unlinkFileWithRetry(filePath);
+  }
+
+  // Copy backup over current DB
+  fs.copyFileSync(backupPath, sqliteFile);
+
+  // Reopen
+  const db = getDbInstance();
+  const connCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM provider_connections").get() as CountRow | undefined)
+      ?.cnt || 0;
+  const nodeCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM provider_nodes").get() as CountRow | undefined)?.cnt ||
+    0;
+  const comboCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM combos").get() as CountRow | undefined)?.cnt || 0;
+  const keyCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM api_keys").get() as CountRow | undefined)?.cnt || 0;
+
+  console.log(`[DB] Restored backup: ${backupId} (${connCount} connections)`);
+
+  return {
+    restored: true,
+    backupId,
+    connectionCount: connCount,
+    nodeCount,
+    comboCount,
+    apiKeyCount: keyCount,
+  };
+}
+
+// ──────────────── Export-All helpers (for /api/db-backups/exportAll) ────────────────
+
+export interface ExportAllRows {
+  settings: Record<string, string>;
+  combos: unknown[];
+  providers: unknown[];
+  apiKeys: unknown[];
+  reasoningRoutingRules: unknown[];
+}
+
+/**
+ * Reads summary rows used by the exportAll backup route.
+ *
+ * - settings:  full key_value table (key → value map)
+ * - combos:    full combos table
+ * - providers: provider_connections rows, **excluding sensitive credentials**
+ *              (id, provider, name, auth_type, is_active, email, created_at only)
+ * - apiKeys:   api_keys rows with masked prefix
+ *              (id, name, first 8 chars of key, machine_id, created_at)
+ *
+ * Each category is wrapped in a try/catch so a missing table never aborts the
+ * entire export — consistent with the original inline behaviour.
+ */
+export function exportAllSummaryRows(): ExportAllRows {
+  const db = getDbInstance();
+
+  const settings: Record<string, string> = {};
+  try {
+    const rows = db.prepare("SELECT key, value FROM key_value").all() as {
+      key: string;
+      value: string;
+    }[];
+    for (const row of rows) {
+      settings[row.key] = row.value;
+    }
+  } catch {
+    // key_value table might not exist
+  }
+
+  const combos: unknown[] = [];
+  try {
+    combos.push(...db.prepare("SELECT * FROM combos").all());
+  } catch {
+    // combos table might not exist
+  }
+
+  const providers: unknown[] = [];
+  try {
+    providers.push(
+      ...db
+        .prepare(
+          "SELECT id, provider, name, auth_type, is_active, email, created_at FROM provider_connections"
+        )
+        .all()
+    );
+  } catch {
+    // provider_connections table might not exist
+  }
+
+  const apiKeys: unknown[] = [];
+  try {
+    apiKeys.push(
+      ...db
+        .prepare(
+          "SELECT id, name, substr(key, 1, 8) as prefix, machine_id, created_at FROM api_keys"
+        )
+        .all()
+    );
+  } catch {
+    // api_keys table might not exist
+  }
+
+  const reasoningRoutingRules: unknown[] = [];
+  try {
+    reasoningRoutingRules.push(...db.prepare("SELECT * FROM reasoning_routing_rules").all());
+  } catch {
+    // reasoning_routing_rules table might not exist in an older backup
+  }
+
+  return { settings, combos, providers, apiKeys, reasoningRoutingRules };
+}
+
+// ──────────────── Import validation helpers (for /api/db-backups/import) ────────────────
+
+/**
+ * Queries an **already-opened** SQLite adapter for the list of table names.
+ *
+ * Used by the import route to validate that a candidate database contains the
+ * required OmniRoute tables before replacing the live database.
+ *
+ * Accepting an adapter as a parameter (rather than calling getDbInstance()) is
+ * intentional: the import route opens a *temporary* database for validation,
+ * not the live one.
+ */
+export function getTableNamesFromAdapter(adapter: {
+  prepare: (sql: string) => { all: () => unknown[] };
+}): string[] {
+  const rows = adapter.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{
+    name: string;
+  }>;
+  return rows.map((r) => r.name);
+}
+
+/**
+ * Counts rows in a set of tables from the **live** database (post-import).
+ * Returns an object keyed by table name with the row count as value.
+ */
+export function countImportedRows(): {
+  connCount: number;
+  nodeCount: number;
+  comboCount: number;
+  keyCount: number;
+} {
+  const db = getDbInstance();
+  const connCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM provider_connections").get() as any)?.cnt || 0;
+  const nodeCount =
+    (db.prepare("SELECT COUNT(*) as cnt FROM provider_nodes").get() as any)?.cnt || 0;
+  const comboCount = (db.prepare("SELECT COUNT(*) as cnt FROM combos").get() as any)?.cnt || 0;
+  const keyCount = (db.prepare("SELECT COUNT(*) as cnt FROM api_keys").get() as any)?.cnt || 0;
+  return { connCount, nodeCount, comboCount, keyCount };
+}
+
+type ReadonlyAdapterLike = {
+  prepare: (sql: string) => { get: () => unknown };
+};
+
+function countTableFromAdapter(adapter: ReadonlyAdapterLike, table: string): number {
+  return (adapter.prepare(`SELECT COUNT(*) as cnt FROM ${table}`).get() as CountRow)?.cnt || 0;
+}
+
+/**
+ * Summarizes an **already-opened** candidate database (not the live one) for the import
+ * dry run: the row counts a real import would load, plus the newest applied migration
+ * version (`null` when the backup predates migration tracking). Callers must have
+ * validated that the four required tables exist first.
+ */
+export function summarizeImportCandidate(
+  adapter: ReadonlyAdapterLike,
+  tableNames: string[]
+): {
+  connCount: number;
+  nodeCount: number;
+  comboCount: number;
+  keyCount: number;
+  schemaVersion: string | null;
+} {
+  let schemaVersion: string | null = null;
+  if (tableNames.includes("_omniroute_migrations")) {
+    const row = adapter
+      .prepare(
+        "SELECT version FROM _omniroute_migrations ORDER BY CAST(version AS INTEGER) DESC, version DESC LIMIT 1"
+      )
+      .get() as { version?: string } | undefined;
+    schemaVersion = row?.version ?? null;
+  }
+  return {
+    connCount: countTableFromAdapter(adapter, "provider_connections"),
+    nodeCount: countTableFromAdapter(adapter, "provider_nodes"),
+    comboCount: countTableFromAdapter(adapter, "combos"),
+    keyCount: countTableFromAdapter(adapter, "api_keys"),
+    schemaVersion,
+  };
+}

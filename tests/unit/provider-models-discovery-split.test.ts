@@ -1,0 +1,1021 @@
+// Split-guard for the provider-models discovery route decomposition
+// (refactor: extract 4 pure leaves — helpers / normalizers / providerModelsConfig /
+// providerSets — out of src/app/api/providers/[id]/models/route.ts). The leaves are
+// DB-free and state-free; this guard pins their public surface and the host wiring
+// so a future edit that silently breaks the split fails.
+
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+
+import {
+  asRecord,
+  toNonEmptyString,
+  buildOptionalBearerHeaders,
+  buildNamedOpenAiStyleHeaders,
+  isLocalOpenAIStyleProvider,
+  mergeLocalCatalogModels,
+  getAzureOpenAIApiVersion,
+} from "../../src/app/api/providers/[id]/models/discovery/helpers.ts";
+import { normalizeOpenAiLikeModelsResponse } from "../../src/app/api/providers/[id]/models/discovery/normalizers.ts";
+import {
+  NAMED_OPENAI_STYLE_PROVIDERS,
+  isNamedOpenAIStyleProvider,
+} from "../../src/app/api/providers/[id]/models/discovery/providerSets.ts";
+import { PROVIDER_MODELS_CONFIG } from "../../src/app/api/providers/[id]/models/discovery/providerModelsConfig.ts";
+import {
+  classifyCodexDiscoveryModel,
+  getCodexDiscoveryMode,
+  isCodexDiscoveryModelExcluded as isSharedCodexDiscoveryModelExcluded,
+} from "../../src/shared/services/codexDiscoveryPolicy.ts";
+import {
+  applyCodexDiscoveryFilters,
+  buildCodexDiscoveryCatalog,
+  buildCodexModelsUrl,
+  CODEX_GITHUB_MODELS_URL,
+  CODEX_MODELS_URL,
+  clearCodexGithubCatalogCacheForTests,
+  enrichCodexModelsFromGithubCatalog,
+  fetchCodexDiscoveryModels,
+  fetchCodexGithubCatalogModels,
+  isCodexDiscoveryModelExcluded,
+  mergeCodexLiveModelsWithLocalCatalog,
+  normalizeCodexGithubCatalogResponse,
+  normalizeCodexModelsResponse,
+  reconcileCodexDiscoveryCatalog,
+  reconcileCuratedCodexCatalog,
+} from "../../src/app/api/providers/[id]/models/discovery/codex.ts";
+
+// ── helpers leaf ─────────────────────────────────────────────────────────────
+
+test("helpers.asRecord returns plain objects untouched, non-objects as {}", () => {
+  assert.deepEqual(asRecord({ a: 1 }), { a: 1 });
+  assert.deepEqual(asRecord([1, 2]), {});
+  assert.deepEqual(asRecord(null), {});
+  assert.deepEqual(asRecord("x"), {});
+});
+
+test("helpers.toNonEmptyString trims and rejects blanks/non-strings", () => {
+  assert.equal(toNonEmptyString("  hi  "), "hi");
+  assert.equal(toNonEmptyString("   "), null);
+  assert.equal(toNonEmptyString(7), null);
+});
+
+test("helpers.buildOptionalBearerHeaders only adds Authorization when a token is present", () => {
+  assert.deepEqual(buildOptionalBearerHeaders("tok"), {
+    "Content-Type": "application/json",
+    Authorization: "Bearer tok",
+  });
+  assert.deepEqual(buildOptionalBearerHeaders(null), { "Content-Type": "application/json" });
+});
+
+test("helpers.buildNamedOpenAiStyleHeaders adds the reka X-Api-Key only for reka", () => {
+  assert.equal(buildNamedOpenAiStyleHeaders("reka", "tok")["X-Api-Key"], "tok");
+  assert.equal(buildNamedOpenAiStyleHeaders("openai", "tok")["X-Api-Key"], undefined);
+});
+
+test("helpers.mergeLocalCatalogModels dedupes by id, registry wins", () => {
+  const merged = mergeLocalCatalogModels(
+    [{ id: "a", name: "A" }],
+    [
+      { id: "a", name: "dup" },
+      { id: "b", name: "B" },
+    ]
+  );
+  assert.deepEqual(
+    merged.map((m) => m.id),
+    ["a", "b"]
+  );
+  assert.equal(merged.find((m) => m.id === "a")?.name, "A");
+});
+
+test("helpers.getAzureOpenAIApiVersion falls back to the pinned default", () => {
+  assert.equal(getAzureOpenAIApiVersion({}), "2024-12-01-preview");
+  assert.equal(getAzureOpenAIApiVersion({ apiVersion: "2025-01-01" }), "2025-01-01");
+});
+
+test("helpers.isLocalOpenAIStyleProvider is false for a hosted provider", () => {
+  assert.equal(isLocalOpenAIStyleProvider("openai"), false);
+});
+
+// ── normalizers leaf ─────────────────────────────────────────────────────────
+
+test("normalizers.normalizeOpenAiLikeModelsResponse maps ids and applies the fallback owner", () => {
+  const out = normalizeOpenAiLikeModelsResponse(
+    { data: [{ id: "m1" }, { id: "m2", display_name: "M2", owned_by: "x" }] },
+    "acme"
+  );
+  assert.deepEqual(out, [
+    { id: "m1", name: "m1", owned_by: "acme" },
+    { id: "m2", name: "M2", owned_by: "x" },
+  ]);
+});
+
+test("normalizers.normalizeOpenAiLikeModelsResponse drops entries without an id", () => {
+  const out = normalizeOpenAiLikeModelsResponse({ data: [{}, { id: "ok" }] }, "acme");
+  assert.deepEqual(
+    out.map((m) => m.id),
+    ["ok"]
+  );
+});
+
+// ── providerSets leaf ────────────────────────────────────────────────────────
+
+test("providerSets.NAMED_OPENAI_STYLE_PROVIDERS is a populated Set with known members", () => {
+  assert.ok(NAMED_OPENAI_STYLE_PROVIDERS instanceof Set);
+  assert.ok(NAMED_OPENAI_STYLE_PROVIDERS.size >= 30);
+  for (const p of ["zenmux", "api-airforce", "together", "reka"]) {
+    assert.ok(NAMED_OPENAI_STYLE_PROVIDERS.has(p), `${p} must be a named OpenAI-style provider`);
+  }
+});
+
+test("providerSets.isNamedOpenAIStyleProvider matches Set membership", () => {
+  assert.equal(isNamedOpenAIStyleProvider("zenmux"), true);
+  assert.equal(isNamedOpenAIStyleProvider("definitely-not-a-provider"), false);
+});
+
+// ── providerModelsConfig leaf ────────────────────────────────────────────────
+
+test("providerModelsConfig.PROVIDER_MODELS_CONFIG keeps core provider entries", () => {
+  assert.equal(PROVIDER_MODELS_CONFIG.claude.url, "https://api.anthropic.com/v1/models?limit=1000");
+  assert.equal(PROVIDER_MODELS_CONFIG["qwen-web"], undefined);
+  assert.ok(PROVIDER_MODELS_CONFIG["qwen-cloud"]);
+});
+
+test("providerModelsConfig keeps the aimlapi live catalog entry", () => {
+  assert.equal(PROVIDER_MODELS_CONFIG.aimlapi.url, "https://api.aimlapi.com/models");
+});
+
+// RED before the fix: the live endpoint answers with the OpenAI-style envelope
+// `{ object: "list", data: [...] }`, so `Array.isArray(data)` was false and the
+// parser returned [] for every real response — the whole provider degraded to its
+// static seed. The old test only ever fed it a bare array, which is why a green
+// suite coexisted with a provider that discovered nothing.
+test("providerModelsConfig aimlapi.parseResponse unwraps the { object, data } catalog envelope", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "openai/gpt-5", type: "openai/chat-completions", info: { name: "GPT-5" } },
+      { id: "flux/flux-pro", type: "openai/image-generations", info: { name: "FLUX Pro" } },
+    ],
+  });
+  assert.deepEqual(parsed, [{ id: "openai/gpt-5", name: "GPT-5" }]);
+});
+
+// RED before the fix: `chat-completion` matched 0 of the 936 live catalog rows —
+// the vocabulary is `openai/chat-completions`. Both spellings stay accepted so a
+// rename in either direction degrades to "some models missing" rather than "the
+// provider has no models".
+test("providerModelsConfig aimlapi.parseResponse accepts both chat type spellings", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "current", type: "openai/chat-completions", info: { name: "Current" } },
+      { id: "legacy", type: "chat-completion", info: { name: "Legacy" } },
+    ],
+  });
+  assert.deepEqual(parsed, [
+    { id: "current", name: "Current" },
+    { id: "legacy", name: "Legacy" },
+  ]);
+});
+
+test("providerModelsConfig aimlapi.parseResponse still accepts a bare array", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse([
+    { id: "chat-1", type: "chat-completion", info: { name: "Chat 1" } },
+    { id: "img-1", type: "image" },
+  ]);
+  assert.deepEqual(parsed, [{ id: "chat-1", name: "Chat 1" }]);
+});
+
+// The old parser fell through to `all` when the chat filter matched nothing, which
+// would have published 583 video/image/TTS/batch ids into a chat model picker and
+// masked the broken type filter. An unrecognised catalog must yield nothing.
+test("providerModelsConfig aimlapi.parseResponse never falls back to non-chat rows", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "veo/veo-3", type: "internal/video-generations/submit" },
+      { id: "eleven/tts", type: "internal/text-to-speech" },
+      { id: "anthropic/claude-opus-5", type: "anthropic/messages" },
+    ],
+  });
+  assert.deepEqual(parsed, []);
+});
+
+test("providerModelsConfig grok-cli.parseResponse preserves exact supported reasoning efforts", () => {
+  const parsed = PROVIDER_MODELS_CONFIG["grok-cli"].parseResponse({
+    models: [
+      {
+        id: "grok-4.6",
+        api_backend: "responses",
+        supports_reasoning_effort: true,
+        reasoning_efforts: [" high ", "low", "medium", "xhigh", "low"],
+      },
+      {
+        id: "grok-4.7",
+        api_backend: "responses",
+        supports_reasoning_effort: true,
+      },
+      {
+        id: "grok-4.8",
+        api_backend: "responses",
+        supports_reasoning_effort: true,
+        reasoning_efforts: ["xhigh", "unknown"],
+      },
+    ],
+  });
+
+  assert.deepEqual(parsed[0].supportedThinkingEfforts, ["high", "low", "medium", "xhigh"]);
+  assert.deepEqual(parsed[1].supportedThinkingEfforts, ["low", "medium", "high"]);
+  assert.equal(parsed[2].supportsThinking, true);
+  assert.deepEqual(parsed[2].supportedThinkingEfforts, ["xhigh"]);
+});
+
+test("providerModelsConfig openrouter.parseResponse keeps the full catalog (LLMs not filtered out)", () => {
+  // Generic OpenRouter discovery must stay unfiltered so sync/import/pickers
+  // and /v1/models keep every LLM. STT narrowing lives on the STT card, not here.
+  const data = {
+    data: [
+      { id: "openai/gpt-4o", architecture: { modality: "text->text" } },
+      {
+        id: "openai/whisper-1",
+        architecture: { modality: "audio->transcription" },
+      },
+    ],
+  };
+  const parsed = PROVIDER_MODELS_CONFIG.openrouter.parseResponse(data);
+  assert.deepEqual(
+    parsed.map((m: { id: string }) => m.id),
+    ["openai/gpt-4o", "openai/whisper-1"]
+  );
+});
+
+// ── codex discovery leaf ────────────────────────────────────────────────────
+
+test.beforeEach(() => {
+  clearCodexGithubCatalogCacheForTests();
+});
+
+test("codex.normalizeCodexModelsResponse maps data/models/map payloads to response models", () => {
+  assert.deepEqual(normalizeCodexModelsResponse({ data: [{ id: "gpt-5.5", name: "GPT 5.5" }] }), [
+    {
+      id: "gpt-5.5",
+      name: "GPT 5.5",
+      owned_by: "codex",
+      apiFormat: "responses",
+      supportedEndpoints: ["responses"],
+    },
+  ]);
+
+  assert.deepEqual(
+    normalizeCodexModelsResponse({
+      "gpt-5.4": { title: "GPT 5.4" },
+      invalid: null,
+    }).map((m) => ({ id: m.id, name: m.name })),
+    [{ id: "gpt-5.4", name: "GPT 5.4" }]
+  );
+});
+
+test("codex.normalizeCodexModelsResponse parses the Codex live catalog shape", () => {
+  const parsed = normalizeCodexModelsResponse({
+    models: [
+      {
+        slug: "codex-auto-review",
+        display_name: "Codex Auto Review",
+        visibility: "hide",
+        supported_in_api: true,
+      },
+      {
+        slug: "gpt-5.4",
+        display_name: "GPT-5.4",
+        visibility: "list",
+        supported_in_api: true,
+        context_length: 400000,
+        max_output_tokens: 128000,
+        service_tiers: [{ id: "priority", name: "Fast" }],
+        additional_speed_tiers: ["fast"],
+      },
+      {
+        slug: "gpt-5.5",
+        display_name: "GPT-5.5",
+        visibility: "list",
+        supported_in_api: true,
+        max_input_tokens: 272000,
+        top_provider: { max_completion_tokens: 64000 },
+      },
+      {
+        slug: "internal-only",
+        display_name: "Internal Only",
+        visibility: "list",
+        supported_in_api: false,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    parsed.map((m) => ({ id: m.id, name: m.name })),
+    [
+      { id: "codex-auto-review", name: "Codex Auto Review" },
+      { id: "gpt-5.4", name: "GPT-5.4" },
+      { id: "gpt-5.5", name: "GPT-5.5" },
+    ]
+  );
+  assert.equal(parsed.find((model) => model.id === "gpt-5.4")?.inputTokenLimit, 400000);
+  assert.equal(parsed.find((model) => model.id === "gpt-5.4")?.outputTokenLimit, 128000);
+  assert.equal(parsed.find((model) => model.id === "gpt-5.5")?.inputTokenLimit, 272000);
+  assert.equal(parsed.find((model) => model.id === "gpt-5.5")?.outputTokenLimit, 64000);
+});
+
+test("codex safe discovery classifies public metadata before activating it", () => {
+  assert.deepEqual(
+    classifyCodexDiscoveryModel(
+      { id: "future-codex", visibility: "list", supportedInApi: true },
+      { source: "github", mode: "safe", implementedClientVersion: "0.153.4" }
+    ),
+    { status: "active" }
+  );
+  assert.deepEqual(
+    classifyCodexDiscoveryModel(
+      { id: "future-codex" },
+      { source: "github", mode: "safe", implementedClientVersion: "0.153.4" }
+    ),
+    { status: "candidate", reason: "missing-explicit-list-visibility" }
+  );
+  assert.deepEqual(
+    classifyCodexDiscoveryModel(
+      { id: "future-codex", minimalClientVersion: "invalid" },
+      { source: "live", mode: "safe", implementedClientVersion: "0.153.4" }
+    ),
+    { status: "candidate", reason: "invalid-minimal-client-version" }
+  );
+  assert.deepEqual(
+    classifyCodexDiscoveryModel(
+      { id: "gpt-5.4-high", visibility: "list", supportedInApi: true },
+      { source: "live", mode: "safe", implementedClientVersion: "0.153.4" }
+    ),
+    { status: "retired", reason: "denylisted" }
+  );
+});
+
+test("codex retired ids stay out of the discovery catalog", () => {
+  for (const id of ["gpt-5.3-codex-spark"]) {
+    assert.equal(isCodexDiscoveryModelExcluded({ id }), true);
+    assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), true);
+    assert.deepEqual(
+      classifyCodexDiscoveryModel(
+        { id, visibility: "list", supportedInApi: true },
+        { source: "live", mode: "all", implementedClientVersion: "0.157.1" }
+      ),
+      { status: "retired", reason: "denylisted" }
+    );
+  }
+
+  const catalog = buildCodexDiscoveryCatalog(
+    [
+      {
+        id: "gpt-5.3-codex-spark",
+        name: "GPT 5.3 Codex Spark",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "codex-auto-review",
+        name: "Codex Auto Review",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-6-sol",
+        name: "GPT-6-Sol",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+    ],
+    []
+  );
+  assert.deepEqual(
+    catalog.map((model) => model.id),
+    ["codex-auto-review", "gpt-6-sol"]
+  );
+});
+
+test("the codex registry no longer advertises the retired spark id", async () => {
+  const { codexProvider } = await import("../../open-sse/config/providers/registry/codex/index.ts");
+  assert.equal(
+    codexProvider.models?.some((model) => model.id === "gpt-5.3-codex-spark"),
+    false
+  );
+});
+
+test("codex discovery mode preserves the legacy opt-in", () => {
+  assert.equal(getCodexDiscoveryMode({}), "off");
+  assert.equal(getCodexDiscoveryMode({ autoFetchModels: true }), "safe");
+  assert.equal(getCodexDiscoveryMode({ codexDiscoveryMode: "all" }), "all");
+});
+
+test("codex reconciliation keeps candidates out of the active catalog", () => {
+  const catalog = reconcileCodexDiscoveryCatalog(
+    [
+      {
+        id: "future-codex",
+        name: "Future Codex",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        discoverySource: "github",
+      },
+    ],
+    [],
+    "safe",
+    "0.153.4"
+  );
+  assert.deepEqual(catalog.activeModels, []);
+  assert.deepEqual(
+    catalog.candidateModels.map(({ id, discoveryStatus, compatibilityReason }) => ({
+      id,
+      discoveryStatus,
+      compatibilityReason,
+    })),
+    [
+      {
+        id: "future-codex",
+        discoveryStatus: "candidate",
+        compatibilityReason: "missing-explicit-list-visibility",
+      },
+    ]
+  );
+});
+
+test("codex.normalizeCodexModelsResponse preserves compatibility metadata and reasoning efforts", () => {
+  assert.deepEqual(
+    normalizeCodexGithubCatalogResponse({
+      models: [
+        {
+          slug: "future-codex",
+          visibility: "list",
+          supported_in_api: true,
+          minimal_client_version: "0.153.4",
+          supported_reasoning_levels: ["low", "high", "xhigh"],
+        },
+      ],
+    })[0],
+    {
+      id: "future-codex",
+      name: "future-codex",
+      owned_by: "codex",
+      apiFormat: "responses",
+      supportedEndpoints: ["responses"],
+      discoverySource: "github",
+      visibility: "list",
+      supportedInApi: true,
+      minimalClientVersion: "0.153.4",
+      supportsThinking: true,
+      supportedThinkingEfforts: ["low", "high", "xhigh"],
+    }
+  );
+});
+
+test("codex.normalizeCodexModelsResponse prefers max_context_window over the context_window pricing tier", () => {
+  // The live Codex OAuth catalog reports BOTH fields: `context_window` is the
+  // first pricing tier (~272K) while `max_context_window` is the real usable
+  // window (~872K). Requests well above 272K succeed upstream (verified:
+  // gpt-5.6-luna-xhigh served 380-390K input tokens with HTTP 200), so the
+  // usable window must win when both are present.
+  const parsed = normalizeCodexModelsResponse({
+    models: [
+      {
+        slug: "gpt-5.6-luna",
+        display_name: "GPT 5.6 Luna",
+        visibility: "list",
+        supported_in_api: true,
+        context_window: 272000,
+        max_context_window: 872000,
+      },
+      {
+        slug: "gpt-5.4",
+        display_name: "GPT-5.4",
+        visibility: "list",
+        supported_in_api: true,
+        context_window: 272000,
+        max_context_window: 1000000,
+      },
+    ],
+  });
+
+  assert.equal(parsed.find((model) => model.id === "gpt-5.6-luna")?.inputTokenLimit, 872000);
+  assert.equal(parsed.find((model) => model.id === "gpt-5.4")?.inputTokenLimit, 1000000);
+});
+
+test("codex.normalizeCodexGithubCatalogResponse parses current client catalog metadata", () => {
+  const parsed = normalizeCodexGithubCatalogResponse({
+    models: [
+      {
+        slug: "gpt-5.6-sol",
+        display_name: "GPT-5.6-Sol",
+        description: "Latest frontier agentic coding model.",
+        visibility: "list",
+        supported_in_api: true,
+        minimal_client_version: "0.144.0",
+        context_window: 372000,
+        input_modalities: ["text", "image"],
+        supported_reasoning_levels: [{ effort: "low" }, { effort: "ultra" }],
+      },
+      {
+        slug: "future-model",
+        display_name: "Future Model",
+        visibility: "list",
+        supported_in_api: true,
+        minimal_client_version: "999.0.0",
+      },
+      {
+        slug: "codex-auto-review",
+        display_name: "Codex Auto Review",
+        visibility: "hide",
+        supported_in_api: true,
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    parsed.map((model) => model.id),
+    ["gpt-5.6-sol", "future-model", "codex-auto-review"]
+  );
+  assert.equal(parsed[0]?.description, "Latest frontier agentic coding model.");
+  assert.equal(parsed[0]?.inputTokenLimit, 372000);
+  assert.equal(parsed[0]?.supportsThinking, true);
+  assert.equal(parsed[0]?.supportsVision, true);
+});
+
+test("codex catalog keeps reasoning tiers when upstream sends objects", () => {
+  const parsed = normalizeCodexModelsResponse({
+    models: [
+      {
+        slug: "gpt-6-sol",
+        display_name: "GPT 6 Sol",
+        visibility: "list",
+        supported_in_api: true,
+        supported_reasoning_levels: [
+          { effort: "low" },
+          { effort: "medium" },
+          { effort: "high" },
+          { effort: "xhigh" },
+          { effort: "max" },
+          { effort: "ultra" },
+          { effort: "" },
+          { value: "high" },
+        ],
+      },
+    ],
+  });
+
+  assert.equal(parsed[0]?.supportsThinking, true);
+  assert.deepEqual(parsed[0]?.supportedThinkingEfforts, [
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max",
+    "ultra",
+  ]);
+});
+
+test("codex catalog ignores non-object reasoning entries", () => {
+  const parsed = normalizeCodexModelsResponse({
+    models: [
+      {
+        slug: "gpt-6-sol",
+        display_name: "GPT 6 Sol",
+        visibility: "list",
+        supported_in_api: true,
+        supported_reasoning_levels: [1, null, { effort: "high" }],
+      },
+    ],
+  });
+
+  assert.deepEqual(parsed[0]?.supportedThinkingEfforts, ["high"]);
+});
+
+test("codex.enrichCodexModelsFromGithubCatalog keeps live entitlement list authoritative", () => {
+  const enriched = enrichCodexModelsFromGithubCatalog(
+    [
+      {
+        id: "gpt-5.6-sol",
+        name: "Live Sol",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+    ],
+    [
+      {
+        id: "gpt-5.6-sol",
+        name: "GitHub Sol",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        inputTokenLimit: 372000,
+        supportsVision: true,
+      },
+      {
+        id: "gpt-5.6-luna",
+        name: "GitHub Luna",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+    ]
+  );
+
+  assert.deepEqual(
+    enriched.map((model) => model.id),
+    ["gpt-5.6-sol"]
+  );
+  assert.equal(enriched[0]?.name, "Live Sol");
+  assert.equal(enriched[0]?.inputTokenLimit, 372000);
+  assert.equal(enriched[0]?.supportsVision, true);
+});
+
+test("codex.enrichCodexModelsFromGithubCatalog uses the GitHub catalog when there is no live list", () => {
+  const catalog = enrichCodexModelsFromGithubCatalog(
+    [],
+    [
+      {
+        id: "gpt-5.6-luna",
+        name: "GitHub Luna",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-5.6-terra",
+        name: "GitHub Terra",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        inputTokenLimit: 272000,
+      },
+    ]
+  );
+
+  assert.deepEqual(
+    catalog.map((model) => model.id),
+    ["gpt-5.6-luna", "gpt-5.6-terra"]
+  );
+  assert.equal(catalog[0]?.name, "GitHub Luna");
+  assert.equal(catalog[1]?.inputTokenLimit, 272000);
+});
+
+test("codex.mergeCodexLiveModelsWithLocalCatalog merges capacity limits conservatively (smaller wins)", () => {
+  const merged = mergeCodexLiveModelsWithLocalCatalog(
+    [
+      {
+        id: "future-codex-model",
+        name: "Future Codex Model",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-5.6-sol",
+        name: "Live Sol",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        inputTokenLimit: 272000,
+        supportsVision: true,
+      },
+      {
+        id: "gpt-5.5",
+        name: "Live GPT 5.5",
+        inputTokenLimit: 300000,
+      },
+    ],
+    [
+      {
+        id: "gpt-5.6-sol",
+        name: "GPT 5.6 Sol",
+        contextLength: 372000,
+        maxInputTokens: 372000,
+        maxOutputTokens: 128000,
+      },
+      { id: "gpt-5.6-sol-low", name: "GPT 5.6 Sol (Low)", contextLength: 372000 },
+      { id: "gpt-5.5", name: "GPT 5.5", maxInputTokens: 272000 },
+    ]
+  );
+
+  const ids = merged.map((model) => model.id);
+  assert.ok(ids.includes("future-codex-model"));
+  assert.ok(ids.includes("gpt-5.6-sol"));
+  assert.ok(!ids.includes("gpt-5.6-sol-low"));
+  const sol = merged.find((model) => model.id === "gpt-5.6-sol");
+  assert.equal(sol?.name, "Live Sol");
+  // Live (272000) is SMALLER than the pinned contract (372000) here — the
+  // smaller value wins so OmniRoute never promises more context than the
+  // live account can actually serve (#7012).
+  assert.equal(sol?.inputTokenLimit, 272000);
+  assert.equal(sol?.supportsVision, true);
+  // Output limit is pinned-only (live has none) — passes through unchanged.
+  assert.equal(sol?.outputTokenLimit, 128000);
+  assert.equal(
+    merged.find((model) => model.id === "gpt-5.5")?.inputTokenLimit,
+    272000,
+    "capacity limits merge conservatively for all Codex models, not only the pinned GPT-5.6 ids — the smaller of live (300000) vs. pinned (272000) wins"
+  );
+});
+
+test("codex discovery filters drop the GPT-5.4 family but keep other remote models", () => {
+  assert.equal(isCodexDiscoveryModelExcluded({ id: "gpt-5.4", name: "x" }), true);
+  assert.equal(isCodexDiscoveryModelExcluded({ id: "gpt-5.4-mini", name: "x" }), true);
+  assert.equal(isCodexDiscoveryModelExcluded({ id: "gpt-5.6-sol", name: "x" }), false);
+
+  const filtered = applyCodexDiscoveryFilters([
+    { id: "gpt-5.4", name: "Retired" },
+    { id: "gpt-5.4-pro", name: "Retired Pro" },
+    { id: "future-codex-model", name: "Future" },
+    { id: "gpt-5.6-sol", name: "Sol" },
+  ]);
+  assert.deepEqual(
+    filtered.map((model) => model.id),
+    ["future-codex-model", "gpt-5.6-sol"]
+  );
+});
+
+test("shared Codex discovery policy only matches explicit GPT-5.4 family boundaries", () => {
+  for (const id of ["GPT-5.4", "gpt-5.4-mini", "gpt-5.4_preview", "gpt-5.4.1"]) {
+    assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), true, id);
+  }
+  for (const id of ["gpt-5.40", "gpt-5.4x", "future-codex-model"]) {
+    assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), false, id);
+  }
+});
+
+test("codex.buildCodexDiscoveryCatalog merges then filters in one step", () => {
+  const catalog = buildCodexDiscoveryCatalog(
+    [
+      { id: "gpt-5.4", name: "Retired Live" },
+      { id: "brand-new-codex", name: "Brand New" },
+      {
+        id: "gpt-5.6-sol",
+        name: "Live Sol",
+        inputTokenLimit: 111,
+        supportsVision: true,
+      },
+    ],
+    [
+      {
+        id: "gpt-5.6-sol",
+        name: "GPT 5.6 Sol",
+        maxInputTokens: 372000,
+        maxOutputTokens: 128000,
+      },
+      { id: "gpt-5.6-sol-max", name: "GPT 5.6 Sol Max" },
+    ]
+  );
+  const ids = catalog.map((model) => model.id);
+  assert.ok(ids.includes("brand-new-codex"));
+  assert.ok(ids.includes("gpt-5.6-sol"));
+  assert.ok(!ids.includes("gpt-5.6-sol-max"));
+  assert.equal(
+    ids.some((id) => String(id).startsWith("gpt-5.4")),
+    false
+  );
+
+  // Optional curated helper still available for diagnostics only.
+  const curated = reconcileCuratedCodexCatalog(
+    [{ id: "brand-new-codex", name: "Brand New" }],
+    [{ id: "gpt-5.6-sol", name: "GPT 5.6 Sol" }]
+  );
+  assert.deepEqual(
+    curated.models.map((model) => model.id),
+    ["gpt-5.6-sol"]
+  );
+  assert.deepEqual(
+    curated.candidateModels.map((model) => model.id),
+    ["brand-new-codex"]
+  );
+});
+
+test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
+  const parsed = normalizeCodexModelsResponse({ models: [{ name: "" }, { model: "gpt-5.4" }] });
+  assert.deepEqual(
+    parsed.map((m) => m.id),
+    ["gpt-5.4"]
+  );
+});
+
+// Contract: a recognised empty list (`{data: []}`, `{models: []}`, `[]`) is a
+// successful answer with nothing to discover, reported as EMPTY_CATALOG. Every
+// other body that yields no models is a failure that carries no such code, so
+// callers keep telling "answered with nothing" from "did not answer" and keep
+// warning about both.
+test("codex.fetchCodexDiscoveryModels reports why it found no model: missing token, auth failure, empty, unreadable, or network error", async () => {
+  const missingToken = await fetchCodexDiscoveryModels({
+    accessToken: null,
+    fetchImpl: async () => Response.json({ data: [{ id: "never-called" }] }),
+  });
+  assert.deepEqual(missingToken.models, []);
+  assert.deepEqual(missingToken.failure, { code: "NO_CREDENTIAL" });
+
+  const authFailure = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => new Response("unauthorized", { status: 401 }),
+  });
+  assert.deepEqual(authFailure.models, []);
+  assert.deepEqual(authFailure.failure, { status: 401 });
+
+  for (const emptyList of [{ data: [] }, { models: [] }, []]) {
+    const empty = await fetchCodexDiscoveryModels({
+      accessToken: "tok",
+      fetchImpl: async () => Response.json(emptyList),
+    });
+    assert.deepEqual(empty.models, [], `${JSON.stringify(emptyList)} is an empty catalog`);
+    assert.deepEqual(empty.failure, { code: "EMPTY_CATALOG" });
+  }
+
+  for (const notAList of [
+    { error: { message: "quota exhausted", type: "insufficient_quota" } },
+    { error: "bad", models: [] },
+    { detail: "Unauthorized" },
+    { status: "ok" },
+    {},
+    null,
+  ]) {
+    const failed = await fetchCodexDiscoveryModels({
+      accessToken: "tok",
+      fetchImpl: async () => Response.json(notAList),
+    });
+    assert.deepEqual(failed.models, []);
+    assert.deepEqual(
+      failed.failure,
+      {},
+      `${JSON.stringify(notAList)} is a failure, not an empty catalog`
+    );
+  }
+
+  const unparseable = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => new Response("<html>bad gateway</html>", { status: 200 }),
+  });
+  assert.deepEqual(unparseable.models, []);
+  assert.deepEqual(unparseable.failure, {}, "an unparseable 200 body is a failure");
+
+  const networkError = await fetchCodexDiscoveryModels({
+    accessToken: "tok",
+    fetchImpl: async () => {
+      throw new Error("network down");
+    },
+  });
+  assert.deepEqual(networkError.models, []);
+  assert.deepEqual(networkError.failure, {});
+});
+
+test("codex.fetchCodexDiscoveryModels calls the Codex models endpoint with Codex bearer headers", async () => {
+  let seenUrl = "";
+  let seenAuthorization = "";
+  let seenWorkspace = "";
+  let seenOriginator = "";
+  const models = await fetchCodexDiscoveryModels({
+    accessToken: "codex-access",
+    providerSpecificData: { chatgptAccountId: "account-123" },
+    fetchImpl: async (url, init) => {
+      seenUrl = url;
+      seenAuthorization = init.headers.Authorization;
+      seenWorkspace = init.headers["chatgpt-account-id"];
+      seenOriginator = init.headers.originator;
+      return Response.json({ models: [{ slug: "gpt-5.6", display_name: "GPT 5.6" }] });
+    },
+  });
+
+  assert.equal(CODEX_MODELS_URL, "https://chatgpt.com/backend-api/codex/models");
+  assert.equal(seenUrl, buildCodexModelsUrl());
+  assert.equal(seenAuthorization, "Bearer codex-access");
+  assert.equal(seenWorkspace, "account-123");
+  assert.equal(seenOriginator, "codex_cli_rs");
+  assert.deepEqual(
+    models.models.map((m) => m.id),
+    ["gpt-5.6"]
+  );
+  assert.equal(models.failure, undefined);
+});
+
+test("codex.fetchCodexGithubCatalogModels fetches the OpenAI Codex repo catalog", async () => {
+  let seenUrl = "";
+  const models = await fetchCodexGithubCatalogModels({
+    fetchImpl: async (url) => {
+      seenUrl = url;
+      return Response.json({
+        models: [
+          {
+            slug: "gpt-5.6-terra",
+            display_name: "GPT-5.6-Terra",
+            visibility: "list",
+            supported_in_api: true,
+            minimal_client_version: "0.144.0",
+          },
+        ],
+      });
+    },
+  });
+
+  assert.equal(
+    CODEX_GITHUB_MODELS_URL,
+    "https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/models-manager/models.json"
+  );
+  assert.equal(seenUrl, CODEX_GITHUB_MODELS_URL);
+  assert.deepEqual(
+    models.models.map((model) => model.id),
+    ["gpt-5.6-terra"]
+  );
+  assert.equal(models.failure, undefined);
+});
+
+test("codex.fetchCodexGithubCatalogModels reuses cached catalog with ETags", async () => {
+  const calls: Array<{ url: string; ifNoneMatch?: string }> = [];
+  const first = await fetchCodexGithubCatalogModels({
+    now: 1000,
+    cacheTtlMs: 100,
+    fetchImpl: async (url, init) => {
+      calls.push({ url, ifNoneMatch: init.headers["If-None-Match"] });
+      return Response.json(
+        {
+          models: [
+            {
+              slug: "gpt-5.6-luna",
+              display_name: "GPT-5.6-Luna",
+              visibility: "list",
+              supported_in_api: true,
+              minimal_client_version: "0.144.0",
+            },
+          ],
+        },
+        { headers: { etag: "catalog-v1" } }
+      );
+    },
+  });
+  const second = await fetchCodexGithubCatalogModels({
+    now: 1050,
+    cacheTtlMs: 100,
+    fetchImpl: async () => {
+      throw new Error("cache hit should not fetch");
+    },
+  });
+  const third = await fetchCodexGithubCatalogModels({
+    now: 1200,
+    cacheTtlMs: 100,
+    fetchImpl: async (url, init) => {
+      calls.push({ url, ifNoneMatch: init.headers["If-None-Match"] });
+      return new Response(null, { status: 304 });
+    },
+  });
+
+  assert.deepEqual(
+    first.models.map((model) => model.id),
+    ["gpt-5.6-luna"]
+  );
+  assert.deepEqual(
+    second.models.map((model) => model.id),
+    ["gpt-5.6-luna"]
+  );
+  assert.deepEqual(
+    third.models.map((model) => model.id),
+    ["gpt-5.6-luna"]
+  );
+  assert.equal(first.failure, undefined);
+  assert.equal(second.failure, undefined);
+  assert.equal(third.failure, undefined);
+  assert.deepEqual(calls, [
+    { url: CODEX_GITHUB_MODELS_URL, ifNoneMatch: undefined },
+    { url: CODEX_GITHUB_MODELS_URL, ifNoneMatch: "catalog-v1" },
+  ]);
+});
+
+// ── host wiring guard ────────────────────────────────────────────────────────
+
+test("route.ts imports the discovery leaves and no longer declares the moved consts", () => {
+  const route = fs.readFileSync(
+    path.join("src", "app", "api", "providers", "[id]", "models", "route.ts"),
+    "utf-8"
+  );
+  for (const leaf of ["helpers", "normalizers", "providerSets", "providerModelsConfig", "codex"]) {
+    assert.match(
+      route,
+      new RegExp(`from "\\./discovery/${leaf}"`),
+      `route must import ./discovery/${leaf}`
+    );
+  }
+  assert.doesNotMatch(
+    route,
+    /const PROVIDER_MODELS_CONFIG\s*:/,
+    "PROVIDER_MODELS_CONFIG must live in the leaf, not route.ts"
+  );
+  assert.doesNotMatch(
+    route,
+    /const NAMED_OPENAI_STYLE_PROVIDERS\s*=/,
+    "NAMED_OPENAI_STYLE_PROVIDERS must live in the leaf, not route.ts"
+  );
+});

@@ -1,0 +1,474 @@
+#!/usr/bin/env node
+/**
+ * OmniRoute — Zero-Config Bootstrap
+ *
+ * Auto-generates required secrets (JWT_SECRET, STORAGE_ENCRYPTION_KEY) if
+ * missing or empty, persists them to {DATA_DIR}/server.env so they survive
+ * restarts, Docker volume remounts, and upgrades.
+ *
+ * Works across all deployment modes:
+ *   - npm / app runners:  called from run-standalone.mjs and run-next.mjs
+ *   - Docker:     same, secrets persisted in mounted volume
+ *   - Electron:   called from main.js startup, persisted in DATA_DIR
+ *
+ * Priority (lowest → highest):
+ *   1. Auto-generated defaults
+ *   2. {DATA_DIR}/server.env  (persisted on first boot)
+ *   3. Preferred config .env  (DATA_DIR/.env -> ~/.omniroute/.env -> ./.env)
+ *   4. process.env            (shell / Docker -e flags, highest priority)
+ */
+
+import { randomBytes, createDecipheriv, scryptSync, createHash } from "node:crypto";
+import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
+
+const require = createRequire(import.meta.url);
+
+// ── OAuth secrets that are optional but warn if missing ─────────────────────
+const OPTIONAL_OAUTH_SECRETS = [
+  { keys: ["ANTIGRAVITY_OAUTH_CLIENT_SECRET"], label: "Antigravity OAuth" },
+  { keys: ["QODER_OAUTH_CLIENT_SECRET"], label: "Qoder OAuth" },
+];
+
+// ── Resolve DATA_DIR (mirrors src/lib/dataPaths.ts::getDefaultDataDir) ─────────
+// Kept self-contained on purpose: assembleStandalone.mjs copies this file alone into the
+// standalone build, so it cannot import src/lib/dataPaths.ts or bin/cli/data-dir.mjs. The
+// order MUST stay identical to those two: explicit DATA_DIR → an EXISTING legacy
+// ~/.omniroute → %APPDATA% (Windows) → $XDG_CONFIG_HOME (when set) → ~/.omniroute.
+// Skipping the legacy check made a machine with XDG_CONFIG_HOME exported persist
+// server.env (incl. STORAGE_ENCRYPTION_KEY) under ~/.config/omniroute while the app opened
+// ~/.omniroute/storage.sqlite and the CLI read ~/.omniroute/.env — two keys, one database.
+export function resolveDataDir(overridePath, env = process.env) {
+  if (overridePath?.trim()) return resolve(overridePath);
+
+  const configured = env.DATA_DIR?.trim();
+  if (configured) return resolve(configured);
+
+  // Preserve an existing legacy dir so an upgrade never splits secrets from the database.
+  const legacyDir = join(homedir(), ".omniroute");
+  try {
+    if (statSync(legacyDir).isDirectory()) return legacyDir;
+  } catch {
+    // absent or unreadable — fall through to the platform default
+  }
+
+  if (process.platform === "win32") {
+    const appData = env.APPDATA || join(homedir(), "AppData", "Roaming");
+    return join(appData, "omniroute");
+  }
+
+  const xdg = env.XDG_CONFIG_HOME?.trim();
+  if (xdg) return join(resolve(xdg), "omniroute");
+
+  return legacyDir;
+}
+
+function getPreferredEnvFilePath(env = process.env) {
+  const candidates = [];
+
+  if (env.DATA_DIR?.trim()) {
+    candidates.push(join(resolve(env.DATA_DIR.trim()), ".env"));
+  }
+
+  candidates.push(join(resolveDataDir(null, env), ".env"));
+  candidates.push(join(process.cwd(), ".env"));
+
+  return candidates.find((filePath) => existsSync(filePath)) ?? null;
+}
+
+function isNativeSqliteLoadError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
+
+  // Deliberately narrower than src/lib/db/sqliteLoadError.ts. There, a
+  // non-callable export means "fall back to another driver". Here, the only
+  // consumer treats a match as "no encrypted credentials exist", which lets
+  // STORAGE_ENCRYPTION_KEY be regenerated over a database that still holds
+  // enc:v1: rows. A generic TypeError must stay loud on this path.
+  return (
+    message.includes("Module did not self-register") ||
+    message.includes("NODE_MODULE_VERSION") ||
+    message.includes("ERR_DLOPEN_FAILED") ||
+    message.includes("Could not locate the bindings file") ||
+    message.includes("Cannot find module 'better-sqlite3'") ||
+    code === "ERR_DLOPEN_FAILED" ||
+    code === "MODULE_NOT_FOUND"
+  );
+}
+
+function isLikelyBrokenNativeBinding(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("is not a function") || message.includes("is not a constructor");
+}
+
+function hasEncryptedCredentials(dataDir) {
+  const dbPath = join(dataDir, "storage.sqlite");
+  if (!existsSync(dbPath)) return false;
+
+  if (process.versions.bun) {
+    try {
+      const { Database } = require("bun:sqlite");
+      const db = new Database(dbPath, { readonly: true, create: false });
+      try {
+        const row = db
+          .query(
+            `SELECT 1
+               FROM provider_connections
+              WHERE access_token LIKE 'enc:v1:%'
+                 OR refresh_token LIKE 'enc:v1:%'
+                 OR api_key LIKE 'enc:v1:%'
+                 OR id_token LIKE 'enc:v1:%'
+              LIMIT 1`
+          )
+          .get();
+        return !!row;
+      } finally {
+        db.close();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Unable to inspect existing database at ${dbPath}: ${message}`);
+    }
+  }
+
+  try {
+    const Database = require("better-sqlite3");
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
+    try {
+      const row = db
+        .prepare(
+          `SELECT 1
+             FROM provider_connections
+            WHERE access_token LIKE 'enc:v1:%'
+               OR refresh_token LIKE 'enc:v1:%'
+               OR api_key LIKE 'enc:v1:%'
+               OR id_token LIKE 'enc:v1:%'
+            LIMIT 1`
+        )
+        .get();
+      return !!row;
+    } finally {
+      db.close();
+    }
+  } catch (error) {
+    if (isNativeSqliteLoadError(error)) {
+      return false;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    const hint = isLikelyBrokenNativeBinding(error)
+      ? " The better-sqlite3 native binding loaded but did not expose a usable constructor; try `npm rebuild better-sqlite3`."
+      : "";
+    throw new Error(`Unable to inspect existing database at ${dbPath}: ${message}${hint}`);
+  }
+}
+
+// ── Parse a simple KEY=VALUE env file ───────────────────────────────────────
+function parseEnvFile(filePath) {
+  if (!existsSync(filePath)) return {};
+  const env = {};
+  const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx < 1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = parseEnvValue(trimmed.slice(eqIdx + 1));
+    env[key] = val;
+  }
+  return env;
+}
+
+// Mirrors bin/cli/utils/parseEnvValue.mjs so Docker boot reads the same value as
+// the command-line reader: a `#` preceded by whitespace outside quotes starts a
+// comment, while a `#` inside quotes or without preceding whitespace is data. A
+// value holding only a comment maps to an empty string so the existing
+// empty-value filter drops it instead of persisting the comment text.
+function parseEnvValue(raw) {
+  const value = String(raw).trim();
+  if (!value) return "";
+  if (value.startsWith("#")) return "";
+  const quoted = value.match(/^(['"])([\s\S]*)\1\s*(?:#.*)?$/);
+  if (quoted) return quoted[2];
+  const commentIdx = value.search(/\s#/);
+  return (commentIdx === -1 ? value : value.slice(0, commentIdx)).trim();
+}
+
+// ── Write a simple KEY=VALUE env file ───────────────────────────────────────
+function writeEnvFile(filePath, env) {
+  const lines = [
+    "# Auto-generated by OmniRoute bootstrap — do not delete",
+    `# Created: ${new Date().toISOString()}`,
+    "",
+    ...Object.entries(env).map(([k, v]) => `${k}=${v}`),
+    "",
+  ];
+  writeFileSync(filePath, lines.join("\n"), { encoding: "utf8", mode: 0o600 });
+  // `mode` only applies when the file is created; an existing 0644 file keeps its bits.
+  chmodQuietly(filePath, 0o600);
+}
+
+// ── Private modes for the secrets (GHSA-mh4f-3xj9-4gc4) ───────────────────────
+// server.env holds JWT_SECRET, STORAGE_ENCRYPTION_KEY and API_KEY_SECRET. Without an
+// explicit mode the umask decides (0644 / 0755 under the usual 022), which leaves them
+// readable by other local accounts. Same contract as bin/cli/privateDataDir.mjs
+// (GHSA-2pg2-xm9r-8544). chmod is best-effort: a no-op on Windows, and a DATA_DIR owned
+// by someone else (a bind mount) must not stop the server from starting.
+function chmodQuietly(path, fileMode) {
+  try {
+    chmodSync(path, fileMode);
+  } catch {
+    /* best-effort — see above */
+  }
+}
+
+function ensurePrivateDataDir(dataDir) {
+  if (existsSync(dataDir)) return;
+  mkdirSync(dataDir, { recursive: true, mode: 0o700 });
+  chmodQuietly(dataDir, 0o700);
+}
+
+/** Repair an install an earlier version left world-readable. Never throws. */
+function tightenServerEnv(dataDir, serverEnvPath) {
+  try {
+    if (existsSync(dataDir)) {
+      const current = statSync(dataDir).mode & 0o777;
+      if (current & 0o007) chmodQuietly(dataDir, current & ~0o007);
+    }
+    if (existsSync(serverEnvPath)) chmodQuietly(serverEnvPath, 0o600);
+  } catch {
+    /* best-effort — see above */
+  }
+}
+
+// ── Main bootstrap function ──────────────────────────────────────────────────
+/**
+ * @param {{ dataDirOverride?: string; quiet?: boolean }} options
+ * @returns {Record<string, string>} merged env to pass to child process
+ */
+export function bootstrapEnv({ dataDirOverride, quiet = false } = {}) {
+  const log = quiet ? () => {} : (msg) => process.stderr.write(`[bootstrap] ${msg}\n`);
+
+  const preferredEnvPath = getPreferredEnvFilePath(process.env);
+  const preferredEnv = preferredEnvPath ? parseEnvFile(preferredEnvPath) : {};
+  const dataDir = resolveDataDir(dataDirOverride, { ...preferredEnv, ...process.env });
+  const serverEnvPath = join(dataDir, "server.env");
+
+  // ── Layer 1: Load persisted server.env ────────────────────────────────────
+  tightenServerEnv(dataDir, serverEnvPath);
+  let persisted = parseEnvFile(serverEnvPath);
+
+  // ── Layer 2: Load the same preferred .env that the CLI wrapper uses ───────
+  // This keeps run-next / run-standalone consistent with `bin/omniroute.mjs`.
+  //
+  // We strip empty values from preferredEnv so an empty placeholder
+  // (e.g. `STORAGE_ENCRYPTION_KEY=` in the project .env template) does not
+  // override the real value persisted in server.env. Only the .env entries
+  // that the operator actually set should win.
+  const preferredEnvFiltered = Object.fromEntries(
+    Object.entries(preferredEnv).filter(([, v]) => typeof v === "string" && v.length > 0)
+  );
+  // Filter empty strings from process.env so that Docker `-e KEY=` (which sets an
+  // empty string) does not override real values persisted in server.env or set
+  // in .env. Only shell/Docker vars that the operator actually set should win.
+  // Mirrors the filtering already applied to preferredEnv above. (fixes #6824)
+  const processEnvFiltered = Object.fromEntries(
+    Object.entries(process.env).filter(([, v]) => typeof v === "string" && v.length > 0)
+  );
+  const merged = { ...persisted, ...preferredEnvFiltered, ...processEnvFiltered };
+
+  // ── Auto-generate required secrets ────────────────────────────────────────
+  let needsPersist = false;
+
+  if (!merged.JWT_SECRET?.trim()) {
+    persisted.JWT_SECRET = randomBytes(64).toString("hex");
+    merged.JWT_SECRET = persisted.JWT_SECRET;
+    needsPersist = true;
+    log("✨ JWT_SECRET auto-generated (first run)");
+  }
+
+  if (!merged.STORAGE_ENCRYPTION_KEY?.trim()) {
+    if (hasEncryptedCredentials(dataDir)) {
+      throw new Error(
+        `Refusing to auto-generate STORAGE_ENCRYPTION_KEY: encrypted credentials already exist in ${join(
+          dataDir,
+          "storage.sqlite"
+        )}. Restore the key via ${preferredEnvPath ?? "an appropriate .env file"}, ${serverEnvPath}, or process.env.`
+      );
+    }
+    persisted.STORAGE_ENCRYPTION_KEY = randomBytes(32).toString("hex");
+    merged.STORAGE_ENCRYPTION_KEY = persisted.STORAGE_ENCRYPTION_KEY;
+    needsPersist = true;
+    log("✨ STORAGE_ENCRYPTION_KEY auto-generated (first run)");
+  }
+
+  if (!merged.STORAGE_ENCRYPTION_KEY_VERSION?.trim()) {
+    persisted.STORAGE_ENCRYPTION_KEY_VERSION = "v1";
+    merged.STORAGE_ENCRYPTION_KEY_VERSION = persisted.STORAGE_ENCRYPTION_KEY_VERSION;
+    needsPersist = true;
+  }
+
+  if (!merged.API_KEY_SECRET?.trim()) {
+    persisted.API_KEY_SECRET = randomBytes(32).toString("hex");
+    merged.API_KEY_SECRET = persisted.API_KEY_SECRET;
+    needsPersist = true;
+    log("✨ API_KEY_SECRET auto-generated (first run)");
+  }
+
+  // ── Persist new secrets ────────────────────────────────────────────────────
+  if (needsPersist) {
+    try {
+      ensurePrivateDataDir(dataDir);
+      // Only persist keys that we auto-generated (not .env or process.env vals)
+      writeEnvFile(serverEnvPath, persisted);
+      log(`📁 Secrets persisted to: ${serverEnvPath}`);
+    } catch (e) {
+      log(`⚠️  Could not persist secrets to ${serverEnvPath}: ${e.message}`);
+    }
+  }
+
+  // ── Mark as bootstrapped ───────────────────────────────────────────────────
+  if (needsPersist) {
+    merged.OMNIROUTE_BOOTSTRAPPED = "true";
+  }
+
+  // ── Warn about missing optional OAuth secrets ──────────────────────────────
+  const missingOauth = OPTIONAL_OAUTH_SECRETS.filter(
+    ({ keys }) => !keys.some((key) => merged[key]?.trim())
+  );
+  if (missingOauth.length > 0) {
+    log("ℹ️  The following OAuth integrations are not configured:");
+    for (const { keys, label } of missingOauth) {
+      log(`   • ${label} (${keys.join(" or ")}) — set in .env or ${serverEnvPath}`);
+    }
+    log("   These providers will not work until configured.");
+  }
+
+  // ── Warn about the initial dashboard password ──────────────────────────────
+  // Bootstrap reads process.env, one .env file, and server.env. Next.js can still fill
+  // an unset INITIAL_PASSWORD from its own .env files, so the unset notice hedges.
+  const initialPassword = merged.INITIAL_PASSWORD;
+  // Placeholder variants (" changeme ", "Changeme") become equally guessable passwords,
+  // so the comparison normalizes case and surrounding whitespace.
+  const isPlaceholderLike =
+    typeof initialPassword === "string" && initialPassword.trim().toUpperCase() === "CHANGEME";
+  if (isPlaceholderLike) {
+    log("⚠️  INITIAL_PASSWORD matches the .env.example placeholder 'CHANGEME', a publicly known");
+    log("   password. If no dashboard password is saved yet, that value becomes the password.");
+    log("   Set your own INITIAL_PASSWORD before first boot. In Docker, do it before the");
+    log("   container's first start: a host browser reaches the container as a remote client,");
+    log("   and the login refuses the exact placeholder CHANGEME from remote clients (case or");
+    log("   whitespace variants are not refused remotely). Elsewhere, change the password");
+    log("   right away: sign in from localhost and use Dashboard → Settings → Security, or run");
+    log("   `omniroute reset-password` (`node bin/reset-password.mjs` in a source checkout)");
+    log("   with DATA_DIR set to this server's data directory.");
+  } else if (!initialPassword) {
+    log("ℹ️  INITIAL_PASSWORD is unset here. Unless a .env file that Next.js loads sets it,");
+    log("   a fresh install asks you to create the dashboard password in the onboarding wizard.");
+  } else if (!initialPassword.trim()) {
+    log("⚠️  INITIAL_PASSWORD is only whitespace. If no dashboard password is saved yet, that");
+    log("   whitespace becomes the password, and it works from any address. Set a real");
+    log("   INITIAL_PASSWORD before first boot, or change the password right away in");
+    log("   Dashboard → Settings → Security.");
+  }
+
+  // ── Decrypt-probe: verify STORAGE_ENCRYPTION_KEY matches encrypted data (#1622) ─
+  if (merged.STORAGE_ENCRYPTION_KEY?.trim() && hasEncryptedCredentials(dataDir)) {
+    try {
+      const Database = require("better-sqlite3");
+      const db = new Database(join(dataDir, "storage.sqlite"), {
+        readonly: true,
+        fileMustExist: true,
+      });
+      try {
+        const row = db
+          .prepare(
+            `SELECT api_key, access_token, refresh_token, id_token
+               FROM provider_connections
+              WHERE api_key LIKE 'enc:v1:%'
+                 OR access_token LIKE 'enc:v1:%'
+                 OR refresh_token LIKE 'enc:v1:%'
+                 OR id_token LIKE 'enc:v1:%'
+              LIMIT 1`
+          )
+          .get();
+        if (row) {
+          const ciphertext = row.api_key || row.access_token || row.refresh_token || row.id_token;
+          if (ciphertext?.startsWith("enc:v1:")) {
+            const parts = ciphertext.split(":");
+            // enc:v1:<iv>:<ct>:<tag>
+            if (parts.length >= 5) {
+              const iv = Buffer.from(parts[2], "hex");
+              const ct = Buffer.from(parts[3], "hex");
+              const tag = Buffer.from(parts[4], "hex");
+
+              // Try decrypting with both key derivation methods matching encryption.ts
+              const tryDecrypt = (derivedKey) => {
+                const decipher = createDecipheriv("aes-256-gcm", derivedKey, iv);
+                decipher.setAuthTag(tag);
+                decipher.update(ct);
+                decipher.final();
+              };
+
+              // Dynamic salt (current): scryptSync(secret, sha256(secret).slice(0,16), 32)
+              const dynamicSalt = createHash("sha256")
+                .update(merged.STORAGE_ENCRYPTION_KEY)
+                .digest()
+                .slice(0, 16);
+              const dynamicKey = scryptSync(merged.STORAGE_ENCRYPTION_KEY, dynamicSalt, 32);
+
+              // Legacy salt (fallback): scryptSync(secret, "omniroute-field-encryption-v1", 32)
+              const legacySalt = "omniroute-field-encryption-v1";
+              const legacyKey = scryptSync(merged.STORAGE_ENCRYPTION_KEY, legacySalt, 32);
+
+              let keyMatched = false;
+              try {
+                tryDecrypt(dynamicKey);
+                keyMatched = true;
+              } catch {
+                // Try legacy key as fallback
+                try {
+                  tryDecrypt(legacyKey);
+                  keyMatched = true;
+                } catch {
+                  // Both failed — key truly doesn't match
+                }
+              }
+
+              if (!keyMatched) {
+                log(
+                  "⛔ STORAGE_ENCRYPTION_KEY does not match the key used to encrypt your stored credentials."
+                );
+                log(
+                  "   Either restore your previous key via ~/.omniroute/server.env or ~/.omniroute/.env,"
+                );
+                log(
+                  "   or run: omniroute reset-encrypted-columns --force  (wipes credentials, keeps provider config)"
+                );
+              }
+            }
+          }
+        }
+      } finally {
+        db.close();
+      }
+    } catch {
+      // Non-fatal — probe is best-effort
+    }
+  }
+
+  return merged;
+}
+
+// ── CLI usage: node scripts/build/bootstrap-env.mjs ──────────────────────────────
+if (process.argv[1] && process.argv[1].endsWith("bootstrap-env.mjs")) {
+  const env = bootstrapEnv();
+  process.stderr.write(`[bootstrap] Done. DATA_DIR resolved to: ${resolveDataDir()}\n`);
+  process.stderr.write(`[bootstrap] JWT_SECRET length: ${env.JWT_SECRET?.length ?? 0}\n`);
+  process.stderr.write(
+    `[bootstrap] STORAGE_ENCRYPTION_KEY length: ${env.STORAGE_ENCRYPTION_KEY?.length ?? 0}\n`
+  );
+}

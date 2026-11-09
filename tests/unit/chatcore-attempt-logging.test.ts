@@ -1,0 +1,398 @@
+// tests/unit/chatcore-attempt-logging.test.ts
+// Characterization of persistAttemptLogs — the per-attempt call-log persistence extracted from
+// handleChatCore (chatCore god-file decomposition, #3501). Uses a real temp DB and polls the
+// persisted row (saveCallLog is async + fire-and-forget). Locks: the field mapping, the
+// cacheSource semantic/upstream normalization, final credentials.connectionId attribution,
+// credentials fallback, and error persistence.
+import { test, before, after } from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
+
+const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-test-"));
+process.env.DATA_DIR = testDataDir;
+
+const coreDb = await import("../../src/lib/db/core.ts");
+const { getCallLogById, getCallLogs, waitForCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
+const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
+const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
+
+type CallLogEnvelope = {
+  _omniroute?: {
+    codexAccountRotation?: {
+      initialConnectionId: unknown;
+      finalConnectionId: unknown;
+    };
+    geminiPromptCache?: Record<string, unknown>;
+  };
+};
+
+function baseCtx(overrides: Record<string, unknown> = {}) {
+  // #13481: traceId defaults to pendingRequestId so existing tests (which poll
+  // by pendingRequestId) continue to work. Combo tests set both explicitly.
+  const pendingRequestId = (overrides.pendingRequestId as string) ?? "REPLACE";
+  return {
+    traceId: overrides.traceId ?? pendingRequestId,
+    provider: "openai",
+    connectionId: "conn-1",
+    model: "gpt-x",
+    skillRequestId: "skill-1",
+    detailedLoggingEnabled: false,
+    reqLogger: null,
+    pendingRequestId: "REPLACE",
+    clientRawRequest: { endpoint: "/v1/chat/completions" },
+    requestedModel: "gpt-x-requested",
+    credentials: { connectionId: "cred-conn" },
+    startTime: Date.now(),
+    body: { messages: [{ role: "user", content: "hi" }] },
+    sourceFormat: "openai",
+    targetFormat: "openai",
+    comboName: null,
+    comboStepId: null,
+    comboExecutionKey: null,
+    tokensCompressed: 0,
+    apiKeyInfo: { id: "key-1", name: "Key One" },
+    noLogEnabled: false,
+    ...overrides,
+  } as Parameters<typeof persistAttemptLogs>[1];
+}
+
+async function pollForCallLog(traceId: string, timeoutMs = CALL_LOG_SETTLE_TIMEOUT_MS) {
+  // #14451: call_logs.id is a fresh UUID. The dashboard traceId is stored on
+  // correlation_id so a test can still find the attempt without sharing a PK.
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+    if (rows[0]?.id && rows[0].detailState === "ready") {
+      const row = await getCallLogById(rows[0].id);
+      if (row) return row as Record<string, unknown>;
+    }
+    await new Promise((r) => setTimeout(r, 20));
+  }
+  return null;
+}
+
+function getOmniRouteMeta(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  return (value as CallLogEnvelope)._omniroute;
+}
+
+function getCodexAccountRotation(value: unknown) {
+  return getOmniRouteMeta(value)?.codexAccountRotation;
+}
+
+before(async () => {
+  await coreDb.ensureDbInitialized();
+});
+
+after(() => {
+  coreDb.resetDbInstance();
+  fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("persists a call log row with the mapped fields (default cacheSource=upstream)", async () => {
+  const id = "attempt-basic-1";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 1, output: 2 } },
+    baseCtx({ pendingRequestId: id, credentials: { connectionId: "conn-1" } })
+  );
+  const row = await pollForCallLog(id);
+  assert.ok(row, "call log row should be persisted");
+  assert.equal(row.status, 200);
+  assert.equal(row.model, "gpt-x");
+  assert.equal(row.provider, "openai");
+  assert.equal(row.requestedModel, "gpt-x-requested");
+  assert.equal(row.connectionId, "conn-1");
+  assert.equal(row.cacheSource, "upstream");
+});
+
+test("uses final credentials connectionId when Codex failover rotates the account", async () => {
+  const id = "attempt-codex-rotation-1";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 1, output: 2 }, responseBody: { id: "response-1" } },
+    baseCtx({
+      pendingRequestId: id,
+      provider: "codex",
+      connectionId: "initial-conn",
+      credentials: { connectionId: "final-conn" },
+    })
+  );
+
+  const row = await pollForCallLog(id);
+  assert.ok(row);
+  assert.equal(row.connectionId, "final-conn");
+  assert.deepEqual(getCodexAccountRotation(row.requestBody), {
+    initialConnectionId: "initial-conn",
+    finalConnectionId: "final-conn",
+  });
+  assert.deepEqual(getCodexAccountRotation(row.responseBody), {
+    initialConnectionId: "initial-conn",
+    finalConnectionId: "final-conn",
+  });
+});
+
+test("cacheSource 'semantic' is preserved", async () => {
+  const id = "attempt-semantic-1";
+  persistAttemptLogs({ status: 200, cacheSource: "semantic" }, baseCtx({ pendingRequestId: id }));
+  const row = await pollForCallLog(id);
+  assert.ok(row);
+  assert.equal(row.cacheSource, "semantic");
+});
+
+test("persists bounded Gemini cache evidence under request and response _omniroute metadata", async () => {
+  const id = "attempt-gemini-cache-1";
+  const geminiPromptCache = {
+    schemaVersion: 1,
+    mode: "implicit",
+    evidence: "hit",
+    providerCounters: { cachedContentTokenCount: 40_929 },
+    prefixBoundary: "unknown",
+    prefixMethod: "unavailable",
+  };
+
+  persistAttemptLogs(
+    {
+      status: 200,
+      tokens: { prompt_tokens: 46_212, cached_tokens: 40_929 },
+      responseBody: { candidates: [] },
+      geminiPromptCache,
+    },
+    baseCtx({
+      pendingRequestId: id,
+      provider: "antigravity",
+      model: "gemini-3.7-flash-tiered",
+    })
+  );
+
+  const row = await pollForCallLog(id);
+  assert.ok(row, "call log row should be persisted");
+  assert.deepEqual(getOmniRouteMeta(row.requestBody)?.geminiPromptCache, geminiPromptCache);
+  assert.deepEqual(getOmniRouteMeta(row.responseBody)?.geminiPromptCache, geminiPromptCache);
+});
+
+test("connectionId falls back to credentials.connectionId when null, and error is persisted", async () => {
+  const id = "attempt-fallback-1";
+  persistAttemptLogs(
+    { status: 502, error: "upstream boom" },
+    baseCtx({ pendingRequestId: id, connectionId: null })
+  );
+  const row = await pollForCallLog(id);
+  assert.ok(row);
+  assert.equal(row.connectionId, "cred-conn");
+  assert.equal(row.status, 502);
+  assert.match(String(row.error ?? ""), /upstream boom/);
+});
+
+function duplicateHeartbeatBody() {
+  return {
+    choices: [
+      {
+        message: {
+          tool_calls: [
+            { function: { name: "heartbeat_respond", arguments: "{}" } },
+            { function: { name: "heartbeat_respond", arguments: "{}" } },
+          ],
+        },
+      },
+    ],
+  };
+}
+
+test("duplicate tool_calls in the assembled body writes provider.spec_violation audit", () => {
+  persistAttemptLogs(
+    { status: 200, responseBody: duplicateHeartbeatBody() },
+    baseCtx({ pendingRequestId: "attempt-spec-violation-1", skillRequestId: "skill-spec-1" })
+  );
+  // logAuditEvent is synchronous; do not wait on the fire-and-forget saveCallLog.
+  const rows = getAuditLog({ action: "provider.spec_violation", requestId: "skill-spec-1" });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.resourceType, "provider_spec_violation");
+  const details = rows[0]?.details;
+  assert.ok(details && typeof details === "object");
+  assert.equal(
+    (details as { violation?: string }).violation,
+    'duplicate tool_calls entry for "heartbeat_respond"'
+  );
+});
+
+test("video-observed duplicate tool calls retain an audit verdict without retaining the tool name", () => {
+  const privateName = "PRIVATE_VIDEO_TRANSCRIPT_IN_TOOL_NAME";
+  persistAttemptLogs(
+    {
+      status: 200,
+      responseBody: {
+        choices: [
+          {
+            message: {
+              tool_calls: [
+                { function: { name: privateName, arguments: "{}" } },
+                { function: { name: privateName, arguments: "{}" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    baseCtx({
+      pendingRequestId: "attempt-spec-video-1",
+      skillRequestId: "skill-spec-video-1",
+      videoContentRemoved: true,
+    })
+  );
+  const rows = getAuditLog({ action: "provider.spec_violation", requestId: "skill-spec-video-1" });
+  assert.equal(rows.length, 1);
+  const details = rows[0]?.details;
+  assert.ok(details && typeof details === "object");
+  assert.equal((details as { violation?: string }).violation, "duplicate tool_calls entry");
+  assert.equal(JSON.stringify(rows).includes(privateName), false);
+});
+
+test("unique tool_calls do not write provider.spec_violation audit", () => {
+  persistAttemptLogs(
+    {
+      status: 200,
+      responseBody: {
+        choices: [
+          {
+            message: {
+              tool_calls: [
+                { function: { name: "heartbeat_respond", arguments: "{}" } },
+                { function: { name: "other_tool", arguments: "{}" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    baseCtx({ pendingRequestId: "attempt-spec-clean-1", skillRequestId: "skill-spec-clean-1" })
+  );
+  const rows = getAuditLog({
+    action: "provider.spec_violation",
+    requestId: "skill-spec-clean-1",
+  });
+  assert.equal(rows.length, 0);
+});
+
+// #13481: combo attempts share pendingRequestId and must still land as separate
+// rows. #14451: those rows are no longer keyed by traceId (a short prefix
+// collided, and a reused id overwrites the artifact file). The dashboard token
+// is stored on correlation_id; the SQLite primary key is a generated UUID.
+test("combo attempts that share pendingRequestId both land, keyed independently of traceId", async () => {
+  const traceId = "combo-trace-attempt-2";
+  const pendingRequestId = "combo-shared-request-id";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 10, output: 20 } },
+    baseCtx({
+      traceId,
+      pendingRequestId,
+      comboName: "my-combo",
+      comboStepId: "my-combo-model-2",
+    })
+  );
+  const row = await pollForCallLog(traceId);
+  assert.ok(row, "call log row should be persisted for this attempt");
+  assert.notEqual(row.id, traceId);
+  assert.equal(row.correlationId, traceId);
+  assert.equal(row.status, 200);
+  assert.equal(row.comboStepId, "my-combo-model-2");
+
+  // A second attempt with the same pendingRequestId but different traceId
+  const traceId2 = "combo-trace-attempt-3";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 30, output: 40 } },
+    baseCtx({
+      traceId: traceId2,
+      pendingRequestId,
+      comboName: "my-combo",
+      comboStepId: "my-combo-model-3",
+    })
+  );
+  const row2 = await pollForCallLog(traceId2);
+  assert.ok(row2, "second combo attempt should also be persisted");
+  assert.notEqual(row2.id, row.id);
+  assert.equal(row2.correlationId, traceId2);
+  assert.equal(row2.comboStepId, "my-combo-model-3");
+});
+
+test("no-log attempt skips traversing request and response bodies while retaining usage counters", async () => {
+  const traceId = "no-log-heap-protection";
+  const body: Record<string, unknown> = {};
+  Object.defineProperty(body, "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("no-log body must not be cloned");
+    },
+  });
+  // Below the provider-warning walk's depth cap, which reads the live response on
+  // every attempt, and within the log clone's depth cap, so only a clone reaches it.
+  const expensive: Record<string, unknown> = {};
+  Object.defineProperty(expensive, "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("no-log response must not be cloned");
+    },
+  });
+  let nested = expensive;
+  for (let level = 0; level < 8; level += 1) nested = { nested };
+  const responseBody = { choices: [], nested };
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 125_000, output: 2 }, responseBody },
+    baseCtx({ pendingRequestId: traceId, body, noLogEnabled: true })
+  );
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.status, 200);
+  assert.equal(rows[0]?.detailState, "none");
+  assert.equal(rows[0]?.tokens.in, 125_000);
+});
+
+test("no-log responses preserve scalar reasoning observations without storing response bodies", async () => {
+  for (const [suffix, responseBody, expectedSource, expectedChars] of [
+    [
+      "content",
+      { choices: [{ message: { reasoning_content: "private thoughts" } }] },
+      "content",
+      16,
+    ],
+    [
+      "encrypted",
+      { output: [{ type: "reasoning", encrypted_content: "private opaque blob" }] },
+      "encrypted",
+      null,
+    ],
+    ["think", { choices: [{ message: { content: "<think>private</think>answer" } }] }, "think", 7],
+  ] as const) {
+    const id = `no-log-reasoning-${suffix}`;
+    persistAttemptLogs(
+      { status: 200, tokens: { input: 4, output: 2 }, responseBody },
+      baseCtx({ pendingRequestId: id, noLogEnabled: true })
+    );
+    assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+    const rows = await getCallLogs({ correlationId: id, limit: 5 });
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0]?.detailState, "none");
+    assert.equal(rows[0]?.hasResponseBody, false);
+    assert.equal(rows[0]?.reasoningSource, expectedSource);
+    assert.equal(rows[0]?.reasoningChars, expectedChars);
+  }
+});
+
+test("no-log reasoning capture survives a live response with more items than a spread can take", async () => {
+  // The no-log capture reads the live body, which has no 1000-item tail cap.
+  const output: unknown[] = new Array(200_000).fill({ type: "message" });
+  output.push({ type: "reasoning", encrypted_content: "private opaque blob" });
+  const traceId = "no-log-reasoning-wide-output";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 4, output: 2 }, responseBody: { output } },
+    baseCtx({ pendingRequestId: traceId, noLogEnabled: true })
+  );
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.hasResponseBody, false);
+  assert.equal(rows[0]?.reasoningSource, "encrypted");
+});

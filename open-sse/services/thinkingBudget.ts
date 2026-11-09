@@ -1,0 +1,518 @@
+/**
+ * Thinking Budget Control — Phase 2
+ *
+ * Proxy-level control of **client thinking/reasoning request fields**
+ * (`reasoning`, `reasoning_effort`, Claude `thinking`, Gemini thinking_config).
+ *
+ * Modes (see Dashboard → Settings → AI → Thinking Budget):
+ * - passthrough: leave client fields unchanged (required for Codex visible thinking)
+ * - auto: STRIP all thinking/reasoning fields before upstream (not “auto-show thinking”)
+ * - custom: force a fixed token budget on every request
+ * - adaptive: preserve explicit effort; otherwise scale budget by request complexity
+ *
+ * Independent of compression, prompt cache, combo routing, and API-key token limits.
+ * Does **not** decrypt OpenAI/Codex `encrypted_content` reasoning blobs.
+ */
+
+// Thinking budget modes
+export const ThinkingMode = {
+  AUTO: "auto", // Strip all client thinking/reasoning fields (provider invents defaults)
+  PASSTHROUGH: "passthrough", // No changes — client fully controls thinking
+  CUSTOM: "custom", // Set fixed budget
+  ADAPTIVE: "adaptive", // Scale based on request complexity
+};
+export type ThinkingModeValue = (typeof ThinkingMode)[keyof typeof ThinkingMode];
+
+type JsonRecord = Record<string, unknown>;
+type ThinkingBudgetConfig = {
+  mode: ThinkingModeValue;
+  customBudget: number;
+  effortLevel: string;
+};
+
+import {
+  capThinkingBudget,
+  getDefaultThinkingBudget,
+  getResolvedModelCapabilities,
+  supportsReasoning,
+} from "@/lib/modelCapabilities";
+import {
+  jsonLengthStrippingBase64DataUris,
+  rawLengthStrippingBase64DataUris,
+} from "../utils/jsonSize.ts";
+
+// Effort → budget token mapping
+export const EFFORT_BUDGETS: Record<string, number> = {
+  none: 0,
+  low: 1024,
+  medium: 10240,
+  high: 131072, // Handled globally by capThinkingBudget later
+  max: 131072, // T11: Claude "max" / "xhigh" — full budget
+  xhigh: 131072, // T11: explicit alias used internally
+};
+
+// thinkingLevel string → budget token mapping
+// Used when clients send string-based thinking levels (e.g., VS Code Copilot)
+export const THINKING_LEVEL_MAP: Record<string, number> = {
+  none: 0,
+  low: 4096,
+  medium: 8192,
+  high: 24576,
+  max: 131072, // T11: max = full Claude budget (sub2api: xhigh)
+  xhigh: 131072, // T11: explicit xhigh alias
+};
+
+export type Gemini38ThinkingLevel = "low" | "medium" | "high";
+
+/**
+ * Gemini 3.8 Flash and every major version >= 4 (Gemini 4 Argon, future 5/6/10) speak
+ * thinkingLevel; major versions <= 3 only know the numeric thinkingBudget. Provider
+ * prefixes (vertex/, zed-hosted/) are fine; gemma-4-* is not a gemini- id, so it never matches.
+ */
+export function isGeminiThinkingLevelModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:3\.8|[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
+}
+
+/** Gemini major version >= 4 — these reject the numeric thinkingBudget off-switch (#18910). */
+export function isGemini4PlusModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
+}
+
+/** @deprecated Pre-rename name of {@link isGeminiThinkingLevelModel}; kept for existing tests. */
+export const isGemini38Model = isGeminiThinkingLevelModel;
+
+export function gemini38ThinkingLevelFromBudget(
+  model: string,
+  budget: number
+): Gemini38ThinkingLevel {
+  const resolved = getResolvedModelCapabilities(model);
+  const cap = resolved.thinkingBudgetCap ?? 24576;
+  const medium = resolved.defaultThinkingBudget || 8192;
+  if (budget <= 0) {
+    throw new RangeError(
+      "gemini38ThinkingLevelFromBudget: budget must be > 0; use gemini38ThinkingConfig for the off-switch"
+    );
+  }
+  if (budget >= cap) return "high";
+  if (budget <= 1024) return "low";
+  if (budget <= medium) return "medium";
+  return "high";
+}
+
+function clientAskedForThoughts(body: Record<string, unknown>): boolean {
+  return body.includeThoughts === true || body.include_thoughts === true;
+}
+
+/**
+ * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
+ * Gemini 4+ rejects the numeric budget off-switch, so there it becomes thinkingLevel "low";
+ * versions <= 3 keep { thinkingBudget: 0, includeThoughts: false }.
+ * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
+ */
+export function gemini38ThinkingConfig(
+  model: string,
+  budget: number,
+  body: Record<string, unknown>
+):
+  | { thinkingLevel: Gemini38ThinkingLevel; includeThoughts?: boolean }
+  | { thinkingBudget: number; includeThoughts: boolean } {
+  if (budget <= 0) {
+    if (isGemini4PlusModel(model)) {
+      return { thinkingLevel: "low" };
+    }
+    return { thinkingBudget: 0, includeThoughts: false };
+  }
+  const thinkingConfig: {
+    thinkingLevel: Gemini38ThinkingLevel;
+    includeThoughts?: boolean;
+  } = {
+    thinkingLevel: gemini38ThinkingLevelFromBudget(model, budget),
+  };
+  if (clientAskedForThoughts(body)) {
+    thinkingConfig.includeThoughts = true;
+  }
+  return thinkingConfig;
+}
+
+// Default config (passthrough = backward compatible)
+export const DEFAULT_THINKING_CONFIG = {
+  mode: ThinkingMode.PASSTHROUGH,
+  customBudget: 10240,
+  effortLevel: "medium",
+} satisfies ThinkingBudgetConfig;
+
+// In-memory config (loaded from DB on startup, or default).
+//
+// Backed by globalThis so the singleton is shared across the SEPARATE webpack
+// module graphs Next.js builds for `instrumentation.ts` (boot-time hydration via
+// hydrateThinkingBudgetConfig) and the app-route / open-sse executors (per-request
+// reads in base.ts). A plain module-level `let` is DUPLICATED per graph, so the
+// boot hydration would land on the instrumentation graph's copy and never reach
+// base.ts — exactly the #5312 fix-A break proven on the VPS. Mirrors the same
+// globalThis pattern systemPrompt.ts already uses for the Global System Prompt (#2470).
+const GLOBAL_KEY = "__omniroute_thinkingBudget_config__";
+const _store = globalThis as unknown as Record<string, ThinkingBudgetConfig | undefined>;
+
+function getConfig(): ThinkingBudgetConfig {
+  if (!_store[GLOBAL_KEY]) {
+    _store[GLOBAL_KEY] = { ...DEFAULT_THINKING_CONFIG };
+  }
+  return _store[GLOBAL_KEY]!;
+}
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function getStringField(record: JsonRecord, key: string): string {
+  const value = record[key];
+  return typeof value === "string" ? value : "";
+}
+
+/**
+ * Set the thinking budget config (called from settings API or startup)
+ */
+export function setThinkingBudgetConfig(config: Partial<ThinkingBudgetConfig>) {
+  _store[GLOBAL_KEY] = { ...DEFAULT_THINKING_CONFIG, ...config };
+}
+
+/**
+ * Get current thinking budget config
+ */
+export function getThinkingBudgetConfig() {
+  return { ...getConfig() };
+}
+
+/**
+ * Startup hydration (#5312 RC-A): the dashboard Thinking-Budget setting is persisted
+ * under `settings.thinkingBudget`, but nothing read it back at boot, so `_config`
+ * reset to DEFAULT (passthrough) on every restart. Call this once during server
+ * bootstrap with the loaded settings object to restore the operator's choice.
+ * Returns true when a valid config was applied, false otherwise (zero behavior
+ * change when the setting is unset).
+ */
+export function hydrateThinkingBudgetConfig(settings: unknown): boolean {
+  const tb = toRecord(settings).thinkingBudget;
+  if (tb && typeof tb === "object" && !Array.isArray(tb)) {
+    setThinkingBudgetConfig(tb as Partial<ThinkingBudgetConfig>);
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Normalize thinkingLevel string fields into numeric budget.
+ * Handles: body.thinkingLevel, body.thinking_level,
+ * and Gemini's generationConfig.thinkingConfig.thinkingLevel
+ *
+ * @param {object} body - Request body
+ * @returns {object} Body with string thinkingLevel converted to numeric budget
+ */
+export function normalizeThinkingLevel(body: unknown) {
+  if (!body || typeof body !== "object") return body;
+  const result: JsonRecord = { ...(body as JsonRecord) };
+
+  // Handle top-level thinkingLevel or thinking_level string fields
+  const levelStr = result.thinkingLevel || result.thinking_level;
+  if (typeof levelStr === "string" && THINKING_LEVEL_MAP[levelStr.toLowerCase()] !== undefined) {
+    const rawBudget = THINKING_LEVEL_MAP[levelStr.toLowerCase()];
+    const budget = capThinkingBudget(getStringField(result, "model"), rawBudget);
+    // Convert to Claude thinking format as canonical representation
+    result.thinking = {
+      type: budget > 0 ? "enabled" : "disabled",
+      budget_tokens: budget,
+    };
+    delete result.thinkingLevel;
+    delete result.thinking_level;
+  }
+
+  // Handle Gemini's generationConfig.thinkingConfig.thinkingLevel
+  const generationConfig = toRecord(result.generationConfig);
+  const thinkingConfig = toRecord(generationConfig.thinkingConfig);
+  const thinkingConfigSnake = toRecord(generationConfig.thinking_config);
+  const geminiLevel = thinkingConfig.thinkingLevel || thinkingConfigSnake.thinkingLevel;
+  if (
+    typeof geminiLevel === "string" &&
+    THINKING_LEVEL_MAP[geminiLevel.toLowerCase()] !== undefined
+  ) {
+    const rawBudget = THINKING_LEVEL_MAP[geminiLevel.toLowerCase()];
+    const budget = capThinkingBudget(getStringField(result, "model"), rawBudget);
+    result.generationConfig = {
+      ...generationConfig,
+      thinkingConfig: { ...thinkingConfig, thinkingBudget: budget },
+    };
+    // Clean up string variants
+    const nextGenerationConfig = result.generationConfig as JsonRecord;
+    const nextThinkingConfig = toRecord(nextGenerationConfig.thinkingConfig);
+    if (Object.keys(nextThinkingConfig).length > 0) {
+      delete nextThinkingConfig.thinkingLevel;
+      nextGenerationConfig.thinkingConfig = nextThinkingConfig;
+    }
+    if ("thinking_config" in nextGenerationConfig) {
+      delete nextGenerationConfig.thinking_config;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Ensure models with -thinking suffix have thinking config injected.
+ * Prevents 400 errors from Claude API when thinking params are missing.
+ *
+ * @param {object} body - Request body
+ * @returns {object} Body with thinking config auto-injected if needed
+ */
+export function ensureThinkingConfig(body: unknown) {
+  if (!body || typeof body !== "object") return body;
+  const bodyRecord = body as JsonRecord;
+  const model = getStringField(bodyRecord, "model");
+
+  // Only auto-inject for models with -thinking suffix
+  if (!model.endsWith("-thinking")) return body;
+
+  // If thinking config already present, don't override
+  if (bodyRecord.thinking) return body;
+
+  const result: JsonRecord = { ...bodyRecord };
+  result.thinking = {
+    type: "enabled",
+    budget_tokens: getDefaultThinkingBudget(model) || EFFORT_BUDGETS.medium,
+  };
+  return result;
+}
+
+/**
+ * Apply thinking budget control to a request body.
+ * Called before format-specific translation.
+ *
+ * Pipeline: normalizeThinkingLevel → ensureThinkingConfig → mode processing
+ *
+ * @param {object} body - Request body (supported formats)
+ * @param {object} [config] - Override config (defaults to stored config)
+ * @returns {object} Modified body
+ */
+export function applyThinkingBudget(
+  body: unknown,
+  config: Partial<ThinkingBudgetConfig> | null = null
+) {
+  const cfg = config || getConfig();
+  if (!body || typeof body !== "object") return body;
+
+  // Early exit: strip ALL reasoning/thinking params for models that don't support them.
+  // Provider-specific Cloud Code restrictions should be handled at the executor boundary.
+  const bodyRecord = body as JsonRecord;
+  const modelStr = typeof bodyRecord.model === "string" ? bodyRecord.model : "";
+  if (modelStr && !supportsReasoning(modelStr)) {
+    return stripThinkingConfig(body);
+  }
+
+  // Pre-processing: convert string thinkingLevel to numeric budget
+  let processed = normalizeThinkingLevel(body);
+
+  // Pre-processing: auto-inject thinking config for -thinking suffix models
+  processed = ensureThinkingConfig(processed);
+
+  switch (cfg.mode) {
+    case ThinkingMode.AUTO:
+      return stripThinkingConfig(processed);
+
+    case ThinkingMode.PASSTHROUGH:
+      return processed;
+
+    case ThinkingMode.CUSTOM:
+      return setCustomBudget(processed, cfg.customBudget ?? DEFAULT_THINKING_CONFIG.customBudget);
+
+    case ThinkingMode.ADAPTIVE:
+      return hasExplicitReasoningEffort(body) ? processed : applyAdaptiveBudget(processed, cfg);
+
+    default:
+      return processed;
+  }
+}
+
+/**
+ * AUTO mode: strip all thinking/reasoning configuration from the request body.
+ * Upstream then runs without client-requested effort/summary — this can hide
+ * thinking panels in Codex/Desktop and is the opposite of “show thinking”.
+ */
+function stripThinkingConfig(body: unknown) {
+  const result: JsonRecord = { ...toRecord(body) };
+
+  // Claude format
+  delete result.thinking;
+
+  // OpenAI format
+  delete result.reasoning_effort;
+  delete result.reasoning;
+
+  // Claude Code output_config.effort — strip the effort hint too, otherwise the
+  // claude→openai translator re-injects reasoning_effort downstream (#3258).
+  if (result.output_config && typeof result.output_config === "object") {
+    const outputConfig = { ...toRecord(result.output_config) };
+    delete outputConfig.effort;
+    if (Object.keys(outputConfig).length === 0) {
+      delete result.output_config;
+    } else {
+      result.output_config = outputConfig;
+    }
+  }
+
+  // Gemini format
+  if (result.generationConfig) {
+    const generationConfig = { ...toRecord(result.generationConfig) };
+    delete generationConfig.thinking_config;
+    delete generationConfig.thinkingConfig;
+    result.generationConfig = generationConfig;
+  }
+
+  return result;
+}
+
+/**
+ * CUSTOM mode: set exact budget tokens
+ */
+function setCustomBudget(body: unknown, budget: number) {
+  const result: JsonRecord = { ...toRecord(body) };
+
+  // If body already has thinking config in Claude format, update it
+  if (result.thinking || hasThinkingCapableModel(result)) {
+    result.thinking = {
+      type: budget > 0 ? "enabled" : "disabled",
+      budget_tokens: budget,
+    };
+  }
+
+  // OpenAI reasoning_effort mapping.
+  // GPT-5/Codex accepts xhigh for the top tier; keep full budget aligned.
+  if (result.reasoning_effort !== undefined || result.reasoning !== undefined) {
+    if (budget <= 0) {
+      delete result.reasoning_effort;
+      delete result.reasoning;
+    } else if (budget <= 1024) {
+      result.reasoning_effort = "low";
+    } else if (budget <= 10240) {
+      result.reasoning_effort = "medium";
+    } else if (budget < 131072) {
+      result.reasoning_effort = "high";
+    } else {
+      result.reasoning_effort = "xhigh";
+    }
+  }
+
+  // Gemini thinking_config
+  const generationConfig = toRecord(result.generationConfig);
+  if (generationConfig.thinking_config || generationConfig.thinkingConfig) {
+    result.generationConfig = {
+      ...generationConfig,
+      thinking_config: { thinking_budget: budget },
+    };
+  }
+
+  return result;
+}
+
+// Inspect original carriers before normalizeThinkingLevel converts discrete levels
+// into numeric budgets. Provider capability validation remains at the executor.
+function hasExplicitReasoningEffort(body: unknown): boolean {
+  const record = toRecord(body);
+  const generationConfig = toRecord(record.generationConfig);
+  const nativeEffort = toRecord(record.output_config).effort;
+  // Match the normalizer's precedence: a shadowed alias is not the chosen level.
+  const levels = [
+    record.thinkingLevel || record.thinking_level,
+    toRecord(generationConfig.thinkingConfig).thinkingLevel ||
+      toRecord(generationConfig.thinking_config).thinkingLevel,
+  ];
+  return (
+    typeof record.reasoning_effort === "string" ||
+    typeof toRecord(record.reasoning).effort === "string" ||
+    (typeof nativeEffort === "string" && nativeEffort.length > 0) ||
+    levels.some(
+      (level) => typeof level === "string" && Object.hasOwn(THINKING_LEVEL_MAP, level.toLowerCase())
+    )
+  );
+}
+
+/** ADAPTIVE mode without explicit effort: scale budget by request complexity. */
+function applyAdaptiveBudget(body: unknown, cfg: Partial<ThinkingBudgetConfig>) {
+  const bodyRecord = toRecord(body);
+  const messages = Array.isArray(bodyRecord.messages)
+    ? bodyRecord.messages
+    : Array.isArray(bodyRecord.input)
+      ? bodyRecord.input
+      : [];
+  const messageCount = messages.length;
+  const tools = Array.isArray(bodyRecord.tools) ? bodyRecord.tools : [];
+  const toolCount = tools.length;
+
+  // Get last user message length. Strip base64 data URIs so an inline image in the prompt
+  // doesn't inflate lastMsgLength and silently bump the complexity multiplier.
+  let lastMsgLength = 0;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    const msgRecord = toRecord(msg);
+    if (msgRecord.role === "user") {
+      lastMsgLength =
+        typeof msgRecord.content === "string"
+          ? rawLengthStrippingBase64DataUris(msgRecord.content)
+          : jsonLengthStrippingBase64DataUris(msgRecord.content || "");
+      break;
+    }
+  }
+
+  // Calculate multiplier
+  let multiplier = 1.0;
+  if (messageCount > 10) multiplier += 0.5;
+  if (toolCount > 3) multiplier += 0.5;
+  if (lastMsgLength > 2000) multiplier += 0.3;
+
+  const baseBudget =
+    EFFORT_BUDGETS[typeof cfg.effortLevel === "string" ? cfg.effortLevel : "medium"] ||
+    getDefaultThinkingBudget(getStringField(bodyRecord, "model")) ||
+    EFFORT_BUDGETS.medium;
+  const scaledBudget = Math.ceil(baseBudget * multiplier);
+  const budget = capThinkingBudget(getStringField(bodyRecord, "model"), scaledBudget);
+
+  // The effort→budget table collapses high, xhigh and max onto the same number,
+  // and setCustomBudget then reads any budget at that ceiling back as xhigh.
+  // Keep the configured effort when the multiplier did not raise the budget.
+  // Compare the pre-cap value: a model
+  // cap that pulls a genuinely scaled budget back under the ceiling is not the
+  // same as "the request was not complex". Only pin efforts below the ceiling:
+  // "max"/"xhigh" already read back as "xhigh", and writing "max" verbatim as
+  // reasoning_effort would be rejected by OpenAI/Codex.
+  const result = setCustomBudget(body, budget);
+  const selected = typeof cfg.effortLevel === "string" ? cfg.effortLevel : "";
+  const selectedBudget = EFFORT_BUDGETS[selected];
+  if (
+    selected &&
+    selected !== "max" &&
+    selected !== "xhigh" &&
+    selectedBudget !== undefined &&
+    scaledBudget <= selectedBudget &&
+    result.reasoning_effort !== undefined
+  ) {
+    result.reasoning_effort = selected;
+  }
+  return result;
+}
+
+/**
+ * Check if model name suggests thinking capability
+ */
+export function hasThinkingCapableModel(body: unknown) {
+  const model = getStringField(toRecord(body), "model");
+  const resolved = getResolvedModelCapabilities(model);
+  if (resolved.supportsThinking === true) return true;
+  if (resolved.supportsThinking === false) return false;
+  return (
+    model.includes("claude") ||
+    model.includes("o1") ||
+    model.includes("o3") ||
+    model.includes("o4") ||
+    model.includes("gemini") ||
+    model.endsWith("-thinking") ||
+    model.includes("thinking")
+  );
+}

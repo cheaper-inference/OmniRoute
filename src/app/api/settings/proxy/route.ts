@@ -1,0 +1,337 @@
+import {
+  getProxyConfig,
+  setProxyConfig,
+  getProxyForLevel,
+  deleteProxyForLevel,
+  resolveProxyForConnection,
+} from "@/lib/db/settings";
+import { getProxyAssignments, getProxyById } from "@/lib/db/proxies";
+import {
+  clearDispatcherCache,
+  isSocks5ProxyEnabled,
+} from "@omniroute/open-sse/utils/proxyDispatcher";
+import { updateProxyConfigSchema } from "@/shared/validation/schemas";
+import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import {
+  createErrorResponse,
+  createErrorResponseFromUnknown,
+  type ApiErrorType,
+} from "@/lib/api/errorResponse";
+import type { z } from "zod";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+
+const BASE_SUPPORTED_PROXY_TYPES = new Set(["http", "https"]);
+type UpdateProxyConfigInput = z.infer<typeof updateProxyConfigSchema>;
+type ProxyConfigInput = NonNullable<UpdateProxyConfigInput["proxy"]>;
+type ProxyMapInput = Record<string, ProxyConfigInput | null>;
+type ApiRouteError = Error & { status?: number; type?: string };
+const PROXY_LEVEL_TO_REGISTRY_SCOPE = {
+  global: "global",
+  provider: "provider",
+  combo: "combo",
+  key: "account",
+} as const;
+
+function getSupportedProxyTypes() {
+  if (isSocks5ProxyEnabled()) {
+    return new Set([...BASE_SUPPORTED_PROXY_TYPES, "socks5"]);
+  }
+  return BASE_SUPPORTED_PROXY_TYPES;
+}
+
+function supportedTypesMessage() {
+  return isSocks5ProxyEnabled() ? "http, https, or socks5" : "http or https";
+}
+
+function createInvalidProxyError(message: string): ApiRouteError {
+  const error = new Error(message) as ApiRouteError;
+  error.status = 400;
+  error.type = "invalid_request";
+  return error;
+}
+
+function toApiRouteError(error: unknown): ApiRouteError {
+  if (error instanceof Error) {
+    return error as ApiRouteError;
+  }
+  return new Error("Unexpected error") as ApiRouteError;
+}
+
+function getRegistryScopeForLevel(
+  level: string
+): "global" | "provider" | "combo" | "account" | undefined {
+  if (!Object.prototype.hasOwnProperty.call(PROXY_LEVEL_TO_REGISTRY_SCOPE, level)) {
+    return undefined;
+  }
+
+  return PROXY_LEVEL_TO_REGISTRY_SCOPE[level as keyof typeof PROXY_LEVEL_TO_REGISTRY_SCOPE];
+}
+
+async function getRegistryProxyForLevel(level: string, id: string | null) {
+  const scope = getRegistryScopeForLevel(level);
+  if (!scope) return null;
+  if (scope !== "global" && !id) return null;
+
+  const assignments = await getProxyAssignments({ scope });
+  const assignment =
+    scope === "global" ? assignments[0] : assignments.find((entry) => entry.scopeId === id);
+  if (!assignment?.proxyId) return null;
+
+  return getProxyById(assignment.proxyId, { includeSecrets: true });
+}
+
+function toProxyConfig(proxyData: NonNullable<Awaited<ReturnType<typeof getProxyById>>>) {
+  return {
+    type: proxyData.type,
+    host: proxyData.host,
+    port: proxyData.port,
+    username: proxyData.username,
+    password: proxyData.password,
+    name: proxyData.name,
+  };
+}
+
+function normalizeAndValidateProxy(
+  proxy: ProxyConfigInput | null | undefined,
+  pathLabel: string
+): ProxyConfigInput | null | undefined {
+  if (proxy === null || proxy === undefined) return proxy;
+  if (typeof proxy !== "object" || Array.isArray(proxy)) {
+    throw createInvalidProxyError(`${pathLabel} must be an object`);
+  }
+
+  const type = String(proxy.type || "http").toLowerCase() as NonNullable<ProxyConfigInput["type"]>;
+  if (type === "socks5" && !isSocks5ProxyEnabled()) {
+    throw createInvalidProxyError(
+      "SOCKS5 proxy is disabled (remove ENABLE_SOCKS5_PROXY=false to enable — it is ON by default)"
+    );
+  }
+  if (type.startsWith("socks") && type !== "socks5") {
+    throw createInvalidProxyError(`${pathLabel}.type must be ${supportedTypesMessage()}`);
+  }
+  if (!getSupportedProxyTypes().has(type)) {
+    throw createInvalidProxyError(`${pathLabel}.type must be ${supportedTypesMessage()}`);
+  }
+
+  return { ...proxy, type } as ProxyConfigInput;
+}
+
+function normalizeAndValidateProxyMap(
+  proxyMap: ProxyMapInput | undefined,
+  mapName: string
+): ProxyMapInput | undefined {
+  if (proxyMap === undefined) return undefined;
+  if (proxyMap === null || typeof proxyMap !== "object" || Array.isArray(proxyMap)) {
+    throw createInvalidProxyError(`${mapName} must be an object`);
+  }
+
+  const normalizedMap: ProxyMapInput = { ...proxyMap };
+  for (const [id, proxy] of Object.entries(proxyMap) as Array<[string, ProxyConfigInput | null]>) {
+    const normalizedProxy = normalizeAndValidateProxy(proxy, `${mapName}.${id}`);
+    normalizedMap[id] = normalizedProxy ?? null;
+  }
+  return normalizedMap;
+}
+
+function normalizeProxyPayload(body: UpdateProxyConfigInput): UpdateProxyConfigInput {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw createInvalidProxyError("Request body must be an object");
+  }
+
+  const normalized = { ...body };
+  if (Object.prototype.hasOwnProperty.call(body, "proxy")) {
+    normalized.proxy = normalizeAndValidateProxy(body.proxy, "proxy");
+  }
+  if (Object.prototype.hasOwnProperty.call(body, "global")) {
+    normalized.global = normalizeAndValidateProxy(body.global, "global");
+  }
+  for (const key of ["providers", "combos", "keys"]) {
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      normalized[key] = normalizeAndValidateProxyMap(body[key], key);
+    }
+  }
+  return normalized;
+}
+
+/** Cap on `?resolveIds=` entries: bounds one request's resolve fan-out. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * Parse the comma-separated `resolveIds` query value into a de-duplicated,
+ * capped id list. Returns null when the parameter is absent or empty so the
+ * request falls through to the existing single-resolve/full-config branches.
+ */
+function parseResolveIds(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const ids = [
+    ...new Set(
+      raw
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    ),
+  ];
+  if (ids.length === 0) return null;
+  return ids.slice(0, MAX_RESOLVE_IDS);
+}
+
+/** Resolve every requested connection, mapping failures to `null`. */
+async function resolveProxyBatch(ids: string[]): Promise<Response> {
+  const results = await Promise.all(
+    ids.map(async (connectionId) => {
+      try {
+        const resolved = await resolveProxyForConnection(connectionId);
+        return [connectionId, resolved?.proxy ? resolved : null] as const;
+      } catch {
+        return [connectionId, null] as const;
+      }
+    })
+  );
+  return Response.json({ results: Object.fromEntries(results) });
+}
+
+/**
+ * GET /api/settings/proxy — get proxy configuration
+ * Optional query params: ?level=global|provider|combo|key&id=xxx
+ * Or: ?resolve=connectionId to resolve effective proxy
+ * Or: ?resolveIds=id1,id2,... to resolve effective proxies for many connections
+ */
+export async function GET(request: Request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
+  // Batch resolution runs before the config path so the dashboard can refresh
+  // every connection's badge in one request instead of one request per
+  // connection (that burst slowed both the UI and the shared proxy process).
+  const resolveIds = parseResolveIds(new URL(request.url).searchParams.get("resolveIds"));
+  if (resolveIds) return resolveProxyBatch(resolveIds);
+
+  return readProxyConfig(request);
+}
+
+/** Single-resolve, level-scoped and full-config reads. */
+async function readProxyConfig(request: Request): Promise<Response> {
+  try {
+    const { searchParams } = new URL(request.url);
+    const level = searchParams.get("level");
+    const id = searchParams.get("id");
+    const resolveId = searchParams.get("resolve");
+
+    // Resolve effective proxy for a connection
+    if (resolveId) {
+      const result = await resolveProxyForConnection(resolveId);
+      return Response.json(result);
+    }
+
+    if (level) {
+      const proxyData = await getRegistryProxyForLevel(level, id);
+      if (proxyData) {
+        return Response.json({
+          level,
+          id: level === "global" ? null : id,
+          proxy: toProxyConfig(proxyData),
+        });
+      }
+
+      const proxy = await getProxyForLevel(level, id);
+      return Response.json({ level, id, proxy });
+    }
+
+    // Get full config
+    const config = await getProxyConfig();
+    const providerAssignments = await getProxyAssignments({ scope: "provider" });
+    if (providerAssignments.length > 0) {
+      config.providers = { ...(config.providers || {}) };
+      const providerProxyResults = await Promise.all(
+        providerAssignments.map(async (assignment) => {
+          if (!assignment.scopeId || !assignment.proxyId) {
+            return null;
+          }
+          const proxyData = await getProxyById(assignment.proxyId, { includeSecrets: true });
+          if (!proxyData) return null;
+          return { scopeId: assignment.scopeId, proxyData };
+        })
+      );
+
+      for (const result of providerProxyResults) {
+        if (!result) continue;
+        config.providers[result.scopeId] = toProxyConfig(result.proxyData);
+      }
+    }
+    return Response.json(config);
+  } catch (error) {
+    return createErrorResponseFromUnknown(error, "Failed to load proxy config");
+  }
+}
+
+/**
+ * PUT /api/settings/proxy — update proxy configuration
+ * Body: { level, id?, proxy } or legacy { global?, providers? }
+ */
+export async function PUT(request: Request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return createErrorResponse({
+      status: 400,
+      message: "Invalid JSON body",
+      type: "invalid_request",
+    });
+  }
+
+  try {
+    const validation = validateBody(updateProxyConfigSchema, rawBody);
+    if (isValidationFailure(validation)) {
+      return createErrorResponse({
+        status: 400,
+        message: validation.error.message,
+        details: validation.error.details,
+        type: "invalid_request",
+      });
+    }
+    const body = validation.data;
+    const normalizedBody = normalizeProxyPayload(body);
+    const updated = await setProxyConfig(normalizedBody);
+    clearDispatcherCache();
+    return Response.json(updated);
+  } catch (error) {
+    const routeError = toApiRouteError(error);
+    const status = Number(routeError.status) || 500;
+    const type = (routeError.type ||
+      (status === 400 ? "invalid_request" : "server_error")) as ApiErrorType;
+    return createErrorResponse({ status, message: routeError.message, type });
+  }
+}
+
+/**
+ * DELETE /api/settings/proxy — remove proxy at a level
+ * Query: ?level=provider&id=xxx
+ */
+export async function DELETE(request: Request) {
+  const authError = await requireManagementAuth(request);
+  if (authError) return authError;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const level = searchParams.get("level");
+    const id = searchParams.get("id");
+
+    if (!level) {
+      return createErrorResponse({
+        status: 400,
+        message: "level is required",
+        type: "invalid_request",
+      });
+    }
+
+    const updated = await deleteProxyForLevel(level, id);
+    clearDispatcherCache();
+    return Response.json(updated);
+  } catch (error) {
+    return createErrorResponseFromUnknown(error, "Failed to delete proxy");
+  }
+}

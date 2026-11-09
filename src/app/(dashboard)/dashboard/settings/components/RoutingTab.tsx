@@ -1,0 +1,1603 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import { Field } from "@omniroute/ui-kit/field";
+import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Button, Card, Collapsible, Input, Select, Textarea, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import ModelSelectField from "@/shared/components/ModelSelectField";
+import { useNotificationStore } from "@/store/notificationStore";
+import {
+  CLI_COMPAT_PROVIDER_DISPLAY,
+  CLI_COMPAT_TOGGLE_IDS,
+  normalizeCliCompatProviderId,
+} from "@/shared/constants/cliCompatProviders";
+import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { getClaudeCodeClientBuildRevision } from "@/shared/constants/claudeCodeClient";
+import { compareTr } from "@/shared/utils/turkishText";
+import { HERMES } from "./systemTransformsHermesDefaults";
+
+// Provider keys (mirror of open-sse/services/systemTransforms.ts).
+const PROVIDER_CLAUDE = "claude";
+const PROVIDER_CC_BRIDGE = "anthropic-compatible-cc";
+const BUILTIN_PROVIDERS = new Set([PROVIDER_CLAUDE, PROVIDER_CC_BRIDGE]);
+
+// Canonical provider catalog for the "Add provider" dropdown. Pulled from the
+// shared AI_PROVIDERS registry so the UI stays in sync with backend provider
+// definitions. We add the CC bridge synthetic ID (no AI_PROVIDERS entry — it's
+// a relay surface, not an upstream provider). Sorted by display name.
+type ProviderCatalogEntry = { id: string; name: string };
+const PROVIDER_CATALOG: ProviderCatalogEntry[] = (() => {
+  const entries: ProviderCatalogEntry[] = Object.values(AI_PROVIDERS).map((p) => ({
+    id: p.id,
+    name: p.name ?? p.id,
+  }));
+  entries.push({ id: PROVIDER_CC_BRIDGE, name: "Anthropic-compatible CC bridge" });
+  entries.sort((a, b) => compareTr(a.name, b.name));
+  return entries;
+})();
+
+const OPENWEBUI_PARAGRAPH_ANCHORS = [
+  "github.com/open-webui/open-webui",
+  "openwebui.com",
+  "docs.openwebui.com",
+];
+
+// Mirrors of ccBridgeTransforms.ts constants used by the native `claude` and
+// CC-bridge default pipelines.
+const DEFAULT_PARAGRAPH_REMOVAL_ANCHORS = [
+  "github.com/anomalyco/opencode",
+  "opencode.ai/docs",
+  "github.com/cline/cline",
+  "github.com/getcursor/cursor",
+  "continue.dev",
+];
+
+const PI_PARAGRAPH_ANCHORS = [
+  "@earendil-works/pi-coding-agent",
+  "/.pi/",
+  "Pi documentation (read only when the user asks about pi itself",
+];
+
+const DEFAULT_IDENTITY_PREFIXES = ["You are OpenCode"];
+
+const DEFAULT_TEXT_REPLACEMENTS = [
+  { match: "if OpenCode honestly", replacement: "if the assistant honestly" },
+  {
+    match: "Here is some useful information about the environment you are running in:",
+    replacement: "Environment context you are running in:",
+  },
+];
+
+const DEFAULT_OBFUSCATE_WORDS = [
+  "opencode",
+  "open-code",
+  "cline",
+  "roo-cline",
+  "roo_cline",
+  "cursor",
+  "windsurf",
+  "aider",
+  "continue.dev",
+  "copilot",
+  "avante",
+  "codecompanion",
+  "openwebui",
+  "open-webui",
+];
+
+// Mirror of DEFAULT_SYSTEM_TRANSFORMS_CONFIG from open-sse/services/systemTransforms.ts.
+// Kept client-side so the UI can render + reset to defaults without a server roundtrip.
+// Server remains the source of truth — UI just lets the user inspect, edit, and reset.
+const DEFAULT_SYSTEM_TRANSFORMS_CLIENT = {
+  providers: {
+    [PROVIDER_CLAUDE]: {
+      enabled: true,
+      pipeline: [
+        {
+          kind: "drop_paragraph_if_contains",
+          needles: [
+            ...DEFAULT_PARAGRAPH_REMOVAL_ANCHORS,
+            ...OPENWEBUI_PARAGRAPH_ANCHORS,
+            ...PI_PARAGRAPH_ANCHORS,
+            ...HERMES.anchors,
+          ],
+        },
+        {
+          kind: "drop_paragraph_if_starts_with",
+          prefixes: [...DEFAULT_IDENTITY_PREFIXES, "You are Open WebUI", ...HERMES.prefixes],
+        },
+        ...DEFAULT_TEXT_REPLACEMENTS.map((r) => ({
+          kind: "replace_text" as const,
+          match: r.match,
+          replacement: r.replacement,
+          allOccurrences: true,
+        })),
+        {
+          kind: "obfuscate_words",
+          words: [...DEFAULT_OBFUSCATE_WORDS],
+          targets: ["system", "messages", "tools"],
+        },
+      ],
+    },
+    [PROVIDER_CC_BRIDGE]: {
+      enabled: true,
+      pipeline: [
+        {
+          kind: "drop_paragraph_if_contains",
+          needles: [...OPENWEBUI_PARAGRAPH_ANCHORS],
+        },
+        {
+          kind: "drop_paragraph_if_starts_with",
+          prefixes: ["You are Open WebUI"],
+        },
+        {
+          kind: "obfuscate_words",
+          words: ["openwebui", "open-webui"],
+          targets: ["system", "messages", "tools"],
+        },
+        {
+          kind: "drop_paragraph_if_contains",
+          needles: [
+            "github.com/anomalyco/opencode",
+            "opencode.ai/docs",
+            "github.com/cline/cline",
+            "github.com/getcursor/cursor",
+            "continue.dev",
+          ],
+        },
+        {
+          kind: "drop_paragraph_if_starts_with",
+          prefixes: ["You are OpenCode"],
+        },
+        {
+          kind: "replace_text",
+          match: "if OpenCode honestly",
+          replacement: "if the assistant honestly",
+          allOccurrences: true,
+        },
+        {
+          kind: "replace_text",
+          match: "Here is some useful information about the environment you are running in:",
+          replacement: "Environment context you are running in:",
+          allOccurrences: true,
+        },
+        {
+          kind: "prepend_system_block",
+          text: "You are a Claude agent, built on Anthropic's Claude Agent SDK.",
+          idempotencyKey: "claude-agent-sdk-identity",
+        },
+        {
+          kind: "inject_billing_header",
+          entrypoint: "sdk-cli",
+          versionFormat: "ex-machina",
+          cchAlgo: "sha256-first-user",
+          buildRevision: getClaudeCodeClientBuildRevision(),
+        },
+      ],
+    },
+  },
+} as const;
+
+const PROVIDER_TILE_DISPLAY: Record<
+  string,
+  { nameKey: string; descriptionKey: string; icon: string; tone: string }
+> = {
+  [PROVIDER_CLAUDE]: {
+    nameKey: "routingClaudeProviderName",
+    descriptionKey: "routingClaudeProviderDescription",
+    icon: "anthropic",
+    tone: "indigo",
+  },
+  [PROVIDER_CC_BRIDGE]: {
+    nameKey: "routingCcBridgeName",
+    descriptionKey: "routingCcBridgeDescription",
+    icon: "hub",
+    tone: "purple",
+  },
+};
+
+type TransformOpKind =
+  | "drop_paragraph_if_contains"
+  | "drop_paragraph_if_starts_with"
+  | "replace_text"
+  | "replace_regex"
+  | "drop_block_if_contains"
+  | "prepend_system_block"
+  | "append_system_block"
+  | "inject_billing_header"
+  | "obfuscate_words";
+
+const OP_KIND_LABELS: Record<TransformOpKind, string> = {
+  drop_paragraph_if_contains: "routingOpDropParagraphContainsLabel",
+  drop_paragraph_if_starts_with: "routingOpDropParagraphStartsWithLabel",
+  replace_text: "routingOpReplaceTextLabel",
+  replace_regex: "routingOpReplaceRegexLabel",
+  drop_block_if_contains: "routingOpDropBlockContainsLabel",
+  prepend_system_block: "routingOpPrependSystemBlockLabel",
+  append_system_block: "routingOpAppendSystemBlockLabel",
+  inject_billing_header: "routingOpInjectBillingHeaderLabel",
+  obfuscate_words: "routingOpObfuscateWordsLabel",
+};
+
+// Human-readable description shown above each op's editor. Explains in one
+// sentence what the op DOES (transformation effect) and one sentence WHEN
+// to use it (the typical fingerprint-sanitization use-case).
+const OP_KIND_DESCRIPTIONS: Record<TransformOpKind, string> = {
+  drop_paragraph_if_contains: "routingOpDropParagraphContainsDesc",
+  drop_paragraph_if_starts_with: "routingOpDropParagraphStartsWithDesc",
+  replace_text: "routingOpReplaceTextDesc",
+  replace_regex: "routingOpReplaceRegexDesc",
+  drop_block_if_contains: "routingOpDropBlockContainsDesc",
+  prepend_system_block: "routingOpPrependSystemBlockDesc",
+  append_system_block: "routingOpAppendSystemBlockDesc",
+  inject_billing_header: "routingOpInjectBillingHeaderDesc",
+  obfuscate_words: "routingOpObfuscateWordsDesc",
+};
+
+// Per-field hints rendered under each Input/Select/Toggle inside the
+// editor. Short, plain-English. Keep under ~120 chars each.
+const FIELD_HINTS = {
+  needles: "routingNeedlesHint",
+  prefixes: "routingPrefixesHint",
+  caseSensitive: "routingCaseSensitiveHint",
+  matchLiteral: "routingMatchLiteralHint",
+  replacementText: "routingReplacementTextHint",
+  allOccurrences: "routingAllOccurrencesHint",
+  pattern: "routingPatternHint",
+  regexFlags: "routingRegexFlagsHint",
+  blockText: "routingBlockTextHint",
+  idempotencyKey: "routingIdempotencyKeyHint",
+  billingEntrypoint: "routingBillingEntrypointHint",
+  billingVersionFormat: "routingBillingVersionFormatHint",
+  billingCchAlgo: "routingBillingCchAlgoHint",
+  obfuscateWords: "routingObfuscateWordsHint",
+  obfuscateTargets: "routingObfuscateTargetsHint",
+};
+
+function makeDefaultOp(kind: TransformOpKind): any {
+  switch (kind) {
+    case "drop_paragraph_if_contains":
+      return { kind, needles: [""] };
+    case "drop_paragraph_if_starts_with":
+      return { kind, prefixes: [""] };
+    case "replace_text":
+      return { kind, match: "", replacement: "", allOccurrences: true };
+    case "replace_regex":
+      return { kind, pattern: "", flags: "g", replacement: "" };
+    case "drop_block_if_contains":
+      return { kind, needles: [""] };
+    case "prepend_system_block":
+      return { kind, text: "", idempotencyKey: "" };
+    case "append_system_block":
+      return { kind, text: "", idempotencyKey: "" };
+    case "inject_billing_header":
+      return {
+        kind,
+        entrypoint: "sdk-cli",
+        versionFormat: "ex-machina",
+        cchAlgo: "sha256-first-user",
+      };
+    case "obfuscate_words":
+      return { kind, words: [""], targets: ["system", "messages", "tools"] };
+  }
+}
+
+function StringListEditor({
+  label,
+  hint,
+  items,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  hint?: string;
+  items: string[];
+  onChange: (next: string[]) => void;
+  disabled?: boolean;
+}) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-text-main">{label}</span>
+      {hint && <p className="text-xs text-text-muted">{hint}</p>}
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          <Input
+            className="flex-1"
+            aria-label={`${label} ${idx + 1}`}
+            value={item}
+            disabled={disabled}
+            onChange={(e) => {
+              const next = [...items];
+              next[idx] = e.target.value;
+              onChange(next);
+            }}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="close"
+            disabled={disabled}
+            aria-label={t("routingRemoveEntry")}
+            onClick={() => {
+              const next = [...items];
+              next.splice(idx, 1);
+              onChange(next);
+            }}
+          />
+        </div>
+      ))}
+      <Button
+        variant="ghost"
+        size="sm"
+        icon="add"
+        disabled={disabled}
+        onClick={() => onChange([...items, ""])}
+        className="self-start"
+      >
+        {t("routingAddEntry")}
+      </Button>
+    </div>
+  );
+}
+
+function OpEditor({
+  op,
+  onChange,
+  disabled,
+}: {
+  op: any;
+  onChange: (next: any) => void;
+  disabled?: boolean;
+}) {
+  const t = useTranslations("settings");
+  const updateField = (field: string, value: any) => onChange({ ...op, [field]: value });
+  const kind = op?.kind as TransformOpKind | undefined;
+  const opDescription = kind ? t(OP_KIND_DESCRIPTIONS[kind]) : null;
+
+  const wrap = (body: React.ReactNode) => (
+    <div className="flex flex-col gap-3">
+      {opDescription && (
+        <p className="text-[11px] leading-relaxed text-text-muted border-l-2 border-primary/30 pl-2 italic">
+          {opDescription}
+        </p>
+      )}
+      {body}
+    </div>
+  );
+
+  switch (op?.kind) {
+    case "drop_paragraph_if_contains":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <StringListEditor
+            label={t("routingNeedlesSubstrings")}
+            hint={t(FIELD_HINTS.needles)}
+            items={op.needles || []}
+            onChange={(next) => updateField("needles", next)}
+            disabled={disabled}
+          />
+          <Toggle
+            label={t("routingCaseSensitive")}
+            description={t(FIELD_HINTS.caseSensitive)}
+            checked={op.caseSensitive !== false}
+            onChange={(c) => updateField("caseSensitive", c)}
+            size="sm"
+            disabled={disabled}
+          />
+        </div>
+      );
+    case "drop_paragraph_if_starts_with":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <StringListEditor
+            label={t("routingPrefixes")}
+            hint={t(FIELD_HINTS.prefixes)}
+            items={op.prefixes || []}
+            onChange={(next) => updateField("prefixes", next)}
+            disabled={disabled}
+          />
+          <Toggle
+            label={t("routingCaseSensitive")}
+            description={t(FIELD_HINTS.caseSensitive)}
+            checked={op.caseSensitive !== false}
+            onChange={(c) => updateField("caseSensitive", c)}
+            size="sm"
+            disabled={disabled}
+          />
+        </div>
+      );
+    case "replace_text":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <Input
+            label={t("routingMatch")}
+            hint={t(FIELD_HINTS.matchLiteral)}
+            value={op.match || ""}
+            disabled={disabled}
+            onChange={(e) => updateField("match", e.target.value)}
+          />
+          <Input
+            label={t("routingReplacement")}
+            hint={t(FIELD_HINTS.replacementText)}
+            value={op.replacement || ""}
+            disabled={disabled}
+            onChange={(e) => updateField("replacement", e.target.value)}
+          />
+          <Toggle
+            label={t("routingReplaceAllOccurrences")}
+            description={t(FIELD_HINTS.allOccurrences)}
+            checked={op.allOccurrences !== false}
+            onChange={(c) => updateField("allOccurrences", c)}
+            size="sm"
+            disabled={disabled}
+          />
+        </div>
+      );
+    case "replace_regex":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <Input
+            label={t("routingPatternRegex")}
+            hint={t(FIELD_HINTS.pattern)}
+            value={op.pattern || ""}
+            disabled={disabled}
+            onChange={(e) => updateField("pattern", e.target.value)}
+          />
+          <Input
+            label={t("routingFlags")}
+            hint={t(FIELD_HINTS.regexFlags)}
+            value={op.flags || "g"}
+            disabled={disabled}
+            onChange={(e) => updateField("flags", e.target.value)}
+          />
+          <Input
+            label={t("routingReplacement")}
+            hint={t(FIELD_HINTS.replacementText)}
+            value={op.replacement || ""}
+            disabled={disabled}
+            onChange={(e) => updateField("replacement", e.target.value)}
+          />
+        </div>
+      );
+    case "drop_block_if_contains":
+      return wrap(
+        <StringListEditor
+          label={t("routingNeedles")}
+          hint={t(FIELD_HINTS.needles)}
+          items={op.needles || []}
+          onChange={(next) => updateField("needles", next)}
+          disabled={disabled}
+        />
+      );
+    case "prepend_system_block":
+    case "append_system_block":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <Field
+            label={t("routingBlockText")}
+            hint={t(FIELD_HINTS.blockText)}
+            htmlFor={`routing-block-text-${op.kind}`}
+          >
+            <Textarea
+              id={`routing-block-text-${op.kind}`}
+              rows={3}
+              value={op.text || ""}
+              disabled={disabled}
+              onChange={(e) => updateField("text", e.target.value)}
+              className="font-mono"
+            />
+          </Field>
+          <Input
+            label={t("routingIdempotencyKey")}
+            hint={t(FIELD_HINTS.idempotencyKey)}
+            value={op.idempotencyKey || ""}
+            disabled={disabled}
+            onChange={(e) => updateField("idempotencyKey", e.target.value)}
+          />
+        </div>
+      );
+    case "inject_billing_header":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <Input
+            label={t("routingEntrypoint")}
+            hint={t(FIELD_HINTS.billingEntrypoint)}
+            value={op.entrypoint || "sdk-cli"}
+            disabled={disabled}
+            onChange={(e) => updateField("entrypoint", e.target.value)}
+          />
+          <Select
+            label={t("routingVersionFormat")}
+            hint={t(FIELD_HINTS.billingVersionFormat)}
+            value={op.versionFormat || "ex-machina"}
+            disabled={disabled}
+            onChange={(e) => updateField("versionFormat", e.target.value)}
+            options={[
+              { value: "ex-machina", label: "ex-machina (sha256 per-msg suffix)" },
+              { value: "omniroute-daystamp", label: "omniroute-daystamp (sha256 day+version)" },
+            ]}
+          />
+          <Select
+            label={t("routingCchAlgorithm")}
+            hint={t(FIELD_HINTS.billingCchAlgo)}
+            value={op.cchAlgo || "sha256-first-user"}
+            disabled={disabled}
+            onChange={(e) => updateField("cchAlgo", e.target.value)}
+            options={[
+              { value: "sha256-first-user", label: "sha256-first-user (ex-machina style)" },
+              { value: "xxhash64-body", label: "xxhash64-body (body-level signing)" },
+              { value: "static-zero", label: "static-zero (00000 placeholder)" },
+            ]}
+          />
+        </div>
+      );
+    case "obfuscate_words":
+      return wrap(
+        <div className="flex flex-col gap-2">
+          <StringListEditor
+            label={t("routingWordsToObfuscate")}
+            hint={t(FIELD_HINTS.obfuscateWords)}
+            items={op.words || []}
+            onChange={(next) => updateField("words", next)}
+            disabled={disabled}
+          />
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-text-main">
+              {t("routingObfuscateTargetsLabel")}
+            </span>
+            <p className="text-xs text-text-muted">{t(FIELD_HINTS.obfuscateTargets)}</p>
+            <div className="flex flex-wrap gap-4">
+              {(["system", "messages", "tools"] as const).map((target) => {
+                const targets: string[] = op.targets || ["system", "messages", "tools"];
+                const checked = targets.includes(target);
+                return (
+                  <Toggle
+                    key={target}
+                    label={target}
+                    checked={checked}
+                    size="sm"
+                    disabled={disabled}
+                    onChange={(c) => {
+                      const next = c ? [...targets, target] : targets.filter((x) => x !== target);
+                      updateField("targets", next);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    default:
+      return (
+        <p className="text-xs text-text-muted">
+          {t("routingUnknownOpKind", { kind: String(op?.kind ?? "") })}
+        </p>
+      );
+  }
+}
+
+function summarizeTransformOp(op: any, t: any): string {
+  switch (op?.kind) {
+    case "drop_paragraph_if_contains":
+      return t("routingSummarizeDropParagraphContains", {
+        items:
+          (op.needles || []).slice(0, 3).join(", ") + ((op.needles || []).length > 3 ? "…" : ""),
+      });
+    case "drop_paragraph_if_starts_with":
+      return t("routingSummarizeDropParagraphStartsWith", {
+        items:
+          (op.prefixes || []).slice(0, 3).join(", ") + ((op.prefixes || []).length > 3 ? "…" : ""),
+      });
+    case "replace_text":
+      return t("routingSummarizeReplaceText", {
+        match: (op.match || "").slice(0, 40) + ((op.match || "").length > 40 ? "…" : ""),
+        replacement:
+          (op.replacement || "").slice(0, 40) + ((op.replacement || "").length > 40 ? "…" : ""),
+      });
+    case "replace_regex":
+      return t("routingSummarizeReplaceRegex", {
+        pattern: op.pattern,
+        flags: op.flags || "",
+        replacement: (op.replacement || "").slice(0, 40),
+      });
+    case "drop_block_if_contains":
+      return t("routingSummarizeDropBlockContains", {
+        items: (op.needles || []).slice(0, 3).join(", "),
+      });
+    case "prepend_system_block":
+      return t("routingSummarizePrependSystemBlock", {
+        text: (op.text || "").slice(0, 60) + ((op.text || "").length > 60 ? "…" : ""),
+      });
+    case "append_system_block":
+      return t("routingSummarizeAppendSystemBlock", {
+        text: (op.text || "").slice(0, 60) + ((op.text || "").length > 60 ? "…" : ""),
+      });
+    case "inject_billing_header":
+      return t("routingSummarizeInjectBillingHeader", {
+        entrypoint: op.entrypoint,
+        versionFormat: op.versionFormat,
+        cchAlgo: op.cchAlgo,
+      });
+    case "obfuscate_words":
+      return t("routingSummarizeObfuscateWords", {
+        count: (op.words || []).length,
+        targets: (op.targets || ["system", "messages", "tools"]).join("+"),
+      });
+    default:
+      return JSON.stringify(op);
+  }
+}
+
+// Client-side validator — light shape check before we PATCH; the server
+// re-validates with the full zod schema in settingsSchemas.ts.
+function validateProviderTransformsConfig(value: unknown, t: any): string | null {
+  if (!value || typeof value !== "object") return t("routingConfigMustBeObject");
+  const cfg = value as { enabled?: unknown; pipeline?: unknown };
+  if (typeof cfg.enabled !== "boolean") return t("routingEnabledMustBeBoolean");
+  if (!Array.isArray(cfg.pipeline)) return t("routingPipelineMustBeArray");
+  if (cfg.pipeline.length > 50) return t("routingPipelineTooLong");
+  for (let i = 0; i < cfg.pipeline.length; i++) {
+    const op = cfg.pipeline[i] as { kind?: unknown };
+    if (!op || typeof op !== "object" || typeof op.kind !== "string") {
+      return t("routingOpMissingKind", { index: i + 1 });
+    }
+    const validKinds = [
+      "drop_paragraph_if_contains",
+      "drop_paragraph_if_starts_with",
+      "replace_text",
+      "replace_regex",
+      "drop_block_if_contains",
+      "prepend_system_block",
+      "append_system_block",
+      "inject_billing_header",
+      "obfuscate_words",
+    ];
+    if (!validKinds.includes(op.kind)) {
+      return t("routingOpUnknownKind", { index: i + 1, kind: op.kind });
+    }
+  }
+  return null;
+}
+
+export default function RoutingTab() {
+  const [settings, setSettings] = useState<any>({
+    alwaysPreserveClientCache: "auto",
+    antigravitySignatureCacheMode: "enabled",
+    cliCompatProviders: [],
+    autoRoutingEnabled: true,
+    autoRoutingDefaultVariant: "lkgp",
+    systemTransforms: DEFAULT_SYSTEM_TRANSFORMS_CLIENT,
+  });
+  // Per-provider JSON draft + error state for the system-transforms editor.
+  // Map keyed by provider id; values track the textarea content + last
+  // validation error string (null when valid). Synced from settings via
+  // effect so server-side values flow into the editor.
+  const [jsonDrafts, setJsonDrafts] = useState<Record<string, string>>({});
+  const [jsonErrors, setJsonErrors] = useState<Record<string, string | null>>({});
+  // Save-state messages for the per-op structured editor (separate from
+  // jsonErrors which belongs to the JSON textarea). Cleared when the user
+  // makes a fresh edit; populated when the server rejects a PATCH.
+  const [providerSaveErrors, setProviderSaveErrors] = useState<Record<string, string | null>>({});
+  const [showJsonEditor, setShowJsonEditor] = useState<Record<string, boolean>>({});
+  const [addOpKind, setAddOpKind] = useState<Record<string, TransformOpKind>>({});
+  const [newProviderId, setNewProviderId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [lkgpCacheLoading, setLkgpCacheLoading] = useState(false);
+  const [lkgpCacheStatus, setLkgpCacheStatus] = useState({ type: "", message: "" });
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const notify = useNotificationStore();
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        setSettings(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // Optimistic update: apply the patch to local state FIRST so the UI never
+  // appears to drop the user's edit, then PATCH the server. If the server
+  // rejects (e.g. blank required field on a freshly-added op), surface the
+  // error to the caller via onError so the editor can render it inline. Local
+  // state is intentionally NOT rolled back — the user keeps editing and
+  // re-saves once the validation passes.
+  const updateSetting = async (patch: Record<string, unknown>, onError?: (msg: string) => void) => {
+    setSettings((prev: any) => ({ ...prev, ...patch }));
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) {
+        let serverMsg = `HTTP ${res.status}`;
+        try {
+          const body = await res.json();
+          const details = Array.isArray(body?.error?.details)
+            ? body.error.details
+                .map((d: { field?: string; message?: string }) =>
+                  d.field ? `${d.field}: ${d.message ?? "invalid"}` : d.message
+                )
+                .filter(Boolean)
+                .join("; ")
+            : null;
+          serverMsg = details || body?.error?.message || serverMsg;
+        } catch {
+          // body wasn't JSON — keep the HTTP status fallback
+        }
+        notify.error(t("saveFailed"), serverMsg);
+        if (onError) onError(serverMsg);
+        else console.error("Failed to update settings:", serverMsg);
+      } else {
+        notify.success(t("savedSuccessfully"));
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      notify.error(t("saveFailed"), msg);
+      if (onError) onError(msg);
+      else console.error("Failed to update settings:", msg);
+    }
+  };
+
+  const cliCompatProviders = useMemo(
+    () =>
+      Array.isArray(settings.cliCompatProviders)
+        ? settings.cliCompatProviders.map((providerId: string) =>
+            normalizeCliCompatProviderId(providerId)
+          )
+        : [],
+    [settings.cliCompatProviders]
+  );
+  const cliCompatProviderSet = useMemo(() => new Set(cliCompatProviders), [cliCompatProviders]);
+
+  // Normalize the server snapshot into a per-provider map. Legacy v1
+  // `ccBridgeTransforms` payloads from Phase 2 are migrated client-side
+  // into providers[PROVIDER_CC_BRIDGE] so the editor never breaks.
+  const systemTransforms = useMemo(() => {
+    const raw = settings.systemTransforms;
+    if (raw && typeof raw === "object" && raw.providers && typeof raw.providers === "object") {
+      return raw as { providers: Record<string, { enabled: boolean; pipeline: any[] }> };
+    }
+    // Legacy migration shim: { enabled, pipeline } → providers[CC_BRIDGE].
+    const legacy = settings.ccBridgeTransforms;
+    if (legacy && typeof legacy === "object" && Array.isArray(legacy.pipeline)) {
+      return {
+        providers: {
+          ...DEFAULT_SYSTEM_TRANSFORMS_CLIENT.providers,
+          [PROVIDER_CC_BRIDGE]: {
+            enabled: legacy.enabled !== false,
+            pipeline: legacy.pipeline,
+          },
+        },
+      };
+    }
+    return DEFAULT_SYSTEM_TRANSFORMS_CLIENT;
+  }, [settings.systemTransforms, settings.ccBridgeTransforms]);
+
+  // Sync JSON drafts from settings whenever the server snapshot changes.
+  useEffect(() => {
+    const nextDrafts: Record<string, string> = {};
+    for (const [providerId, providerCfg] of Object.entries(systemTransforms.providers)) {
+      nextDrafts[providerId] = JSON.stringify(providerCfg, null, 2);
+    }
+    setJsonDrafts(nextDrafts);
+    setJsonErrors({});
+  }, [systemTransforms]);
+
+  const updateProviderTransforms = (
+    providerId: string,
+    next: { enabled: boolean; pipeline: any[] }
+  ) => {
+    const merged = {
+      providers: {
+        ...systemTransforms.providers,
+        [providerId]: next,
+      },
+    };
+    // Clear any prior save error for this provider so the user sees a fresh
+    // state. If the server rejects, the callback below will repopulate it.
+    setProviderSaveErrors((prev) => ({ ...prev, [providerId]: null }));
+    updateSetting({ systemTransforms: merged }, (msg) =>
+      setProviderSaveErrors((prev) => ({ ...prev, [providerId]: msg }))
+    );
+  };
+
+  const toggleProviderEnabled = (providerId: string, enabled: boolean) => {
+    const current = systemTransforms.providers[providerId] ?? { enabled: false, pipeline: [] };
+    updateProviderTransforms(providerId, { enabled, pipeline: current.pipeline });
+  };
+
+  const applyProviderJson = (providerId: string) => {
+    const raw = jsonDrafts[providerId] ?? "";
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      setJsonErrors((prev) => ({
+        ...prev,
+        [providerId]: t("routingInvalidJson", { error: (err as Error).message }),
+      }));
+      return;
+    }
+    const validationError = validateProviderTransformsConfig(parsed, t);
+    if (validationError) {
+      setJsonErrors((prev) => ({ ...prev, [providerId]: validationError }));
+      return;
+    }
+    setJsonErrors((prev) => ({ ...prev, [providerId]: null }));
+    updateProviderTransforms(providerId, parsed as { enabled: boolean; pipeline: any[] });
+  };
+
+  const resetProviderTransforms = (providerId: string) => {
+    const def = (DEFAULT_SYSTEM_TRANSFORMS_CLIENT.providers as Record<string, any>)[providerId];
+    if (!def) return;
+    setJsonErrors((prev) => ({ ...prev, [providerId]: null }));
+    updateProviderTransforms(providerId, {
+      enabled: def.enabled,
+      pipeline: def.pipeline.map((op: any) => ({ ...op })),
+    });
+  };
+
+  const updateOp = (providerId: string, opIndex: number, next: any) => {
+    const current = systemTransforms.providers[providerId] ?? { enabled: false, pipeline: [] };
+    const pipeline = [...(current.pipeline as any[])];
+    pipeline[opIndex] = next;
+    updateProviderTransforms(providerId, { enabled: current.enabled, pipeline });
+  };
+
+  const deleteOp = (providerId: string, opIndex: number) => {
+    const current = systemTransforms.providers[providerId] ?? { enabled: false, pipeline: [] };
+    const pipeline = (current.pipeline as any[]).filter((_, i) => i !== opIndex);
+    updateProviderTransforms(providerId, { enabled: current.enabled, pipeline });
+  };
+
+  const moveOp = (providerId: string, opIndex: number, direction: -1 | 1) => {
+    const current = systemTransforms.providers[providerId] ?? { enabled: false, pipeline: [] };
+    const pipeline = [...(current.pipeline as any[])];
+    const target = opIndex + direction;
+    if (target < 0 || target >= pipeline.length) return;
+    [pipeline[opIndex], pipeline[target]] = [pipeline[target], pipeline[opIndex]];
+    updateProviderTransforms(providerId, { enabled: current.enabled, pipeline });
+  };
+
+  const addOp = (providerId: string) => {
+    const kind = addOpKind[providerId] ?? "drop_paragraph_if_contains";
+    const current = systemTransforms.providers[providerId] ?? { enabled: false, pipeline: [] };
+    const pipeline = [...(current.pipeline as any[]), makeDefaultOp(kind)];
+    updateProviderTransforms(providerId, { enabled: current.enabled, pipeline });
+  };
+
+  const availableProvidersToAdd = useMemo(
+    () => PROVIDER_CATALOG.filter((p) => !systemTransforms.providers[p.id]),
+    [systemTransforms.providers]
+  );
+
+  const addProvider = () => {
+    const id = newProviderId;
+    if (!id || systemTransforms.providers[id]) return;
+    updateProviderTransforms(id, { enabled: false, pipeline: [] });
+    setNewProviderId("");
+  };
+
+  const removeProvider = (providerId: string) => {
+    if (BUILTIN_PROVIDERS.has(providerId)) return;
+    const providers = systemTransforms.providers as Record<string, unknown>;
+    const { [providerId]: _removed, ...rest } = providers;
+    updateSetting({ systemTransforms: { providers: rest } });
+  };
+
+  const toggleCliCompatProvider = (providerId: string, enabled: boolean) => {
+    const normalizedProviderId = normalizeCliCompatProviderId(providerId);
+    const nextProviders = new Set(cliCompatProviders);
+    if (enabled) {
+      nextProviders.add(normalizedProviderId);
+    } else {
+      nextProviders.delete(normalizedProviderId);
+    }
+    updateSetting({ cliCompatProviders: Array.from(nextProviders) });
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex gap-3">
+            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+              <Icon name="auto_awesome" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">{t("routingZeroConfigTitle")}</h3>
+              <p className="text-sm text-text-muted mt-1">{t("routingZeroConfigDesc")}</p>
+            </div>
+          </div>
+          <div className="pt-1">
+            <Toggle
+              checked={settings.autoRoutingEnabled !== false}
+              onChange={(checked) => updateSetting({ autoRoutingEnabled: checked })}
+              disabled={loading}
+              ariaLabel={t("routingZeroConfigTitle")}
+            />
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-border/30">
+          <RadioGroup
+            label={t("routingDefaultAutoVariant")}
+            orientation="horizontal"
+            value={settings.autoRoutingDefaultVariant}
+            onValueChange={(next) => updateSetting({ autoRoutingDefaultVariant: next })}
+            disabled={loading}
+          >
+            {[
+              {
+                value: "lkgp",
+                label: t("routingDefaultAutoVariantLKGP"),
+                desc: t("routingDefaultAutoVariantLKGPDesc"),
+              },
+              {
+                value: "coding",
+                label: t("routingDefaultAutoVariantCoding"),
+                desc: t("routingDefaultAutoVariantCodingDesc"),
+              },
+              {
+                value: "fast",
+                label: t("routingDefaultAutoVariantFast"),
+                desc: t("routingDefaultAutoVariantFastDesc"),
+              },
+              {
+                value: "cheap",
+                label: t("routingDefaultAutoVariantCheap"),
+                desc: t("routingDefaultAutoVariantCheapDesc"),
+              },
+              {
+                value: "offline",
+                label: t("routingDefaultAutoVariantOffline"),
+                desc: t("routingDefaultAutoVariantOfflineDesc"),
+              },
+              {
+                value: "smart",
+                label: t("routingDefaultAutoVariantSmart"),
+                desc: t("routingDefaultAutoVariantSmartDesc"),
+              },
+            ].map((option) => (
+              <RadioGroupItem
+                key={option.value}
+                card
+                value={option.value}
+                label={option.label}
+                description={option.desc}
+              />
+            ))}
+          </RadioGroup>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <Icon name="tune" size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{t("systemTransforms")}</h3>
+            <p className="text-sm text-text-muted mt-1">{t("systemTransformsDesc")}</p>
+          </div>
+        </div>
+
+        {/* Add provider — moved to TOP per UX brief. */}
+        <div className="mb-4 flex items-end gap-2 rounded-lg border border-dashed border-border/40 bg-surface/30 p-3">
+          <Select
+            label={t("systemTransformsAddProvider")}
+            value={newProviderId}
+            disabled={loading || availableProvidersToAdd.length === 0}
+            onChange={(e) => setNewProviderId(e.target.value)}
+            className="flex-1"
+          >
+            <option value="">
+              {availableProvidersToAdd.length === 0
+                ? t("systemTransformsAddProviderAllConfigured")
+                : t("systemTransformsAddProviderPlaceholder")}
+            </option>
+            {availableProvidersToAdd.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.id === PROVIDER_CC_BRIDGE ? t("routingCcBridgeCatalogName") : p.name} ({p.id})
+              </option>
+            ))}
+          </Select>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="add"
+            disabled={loading || !newProviderId || !!systemTransforms.providers[newProviderId]}
+            onClick={addProvider}
+          >
+            {t("systemTransformsAddProvider")}
+          </Button>
+        </div>
+
+        {Object.keys(systemTransforms.providers).length === 0 && (
+          <p className="text-sm text-text-muted py-2">{t("systemTransformsNoProviders")}</p>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {Object.entries(systemTransforms.providers).map(([providerId, providerCfg]) => {
+            const isBuiltin = BUILTIN_PROVIDERS.has(providerId);
+            const display = PROVIDER_TILE_DISPLAY[providerId];
+            const displayName = display ? t(display.nameKey) : providerId;
+            const displayDescription = display
+              ? t(display.descriptionKey)
+              : t("routingCustomProviderDescription");
+            const draft = jsonDrafts[providerId] ?? JSON.stringify(providerCfg, null, 2);
+            const errorMsg = jsonErrors[providerId] ?? null;
+            const opCount = Array.isArray(providerCfg.pipeline) ? providerCfg.pipeline.length : 0;
+            const hasDefault = Boolean(
+              (DEFAULT_SYSTEM_TRANSFORMS_CLIENT.providers as Record<string, unknown>)[providerId]
+            );
+            const isJsonOpen = showJsonEditor[providerId] ?? false;
+            const enabled = providerCfg.enabled !== false;
+            const selectedKind =
+              (addOpKind[providerId] as TransformOpKind | undefined) ??
+              "drop_paragraph_if_contains";
+
+            return (
+              <Collapsible
+                key={providerId}
+                defaultOpen={false}
+                title={
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <code className="text-xs font-mono rounded bg-surface px-1.5 py-0.5">
+                      {providerId}
+                    </code>
+                    <span className="text-sm font-medium">{displayName}</span>
+                  </div>
+                }
+                subtitle={
+                  t("routingOpSummaryCount", { count: opCount }) +
+                  t("routingOpStatusSeparator") +
+                  (enabled ? t("routingOpEnabled") : t("routingOpDisabled"))
+                }
+                trailing={
+                  <>
+                    <Toggle
+                      checked={enabled}
+                      onChange={(checked) => toggleProviderEnabled(providerId, checked)}
+                      disabled={loading}
+                      ariaLabel={
+                        tCommon("enable") + " " + displayName + " " + t("systemTransforms")
+                      }
+                    />
+                    {!isBuiltin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon="delete"
+                        disabled={loading}
+                        aria-label={t("systemTransformsRemoveProvider")}
+                        title={t("systemTransformsRemoveProvider")}
+                        onClick={() => removeProvider(providerId)}
+                      />
+                    )}
+                  </>
+                }
+              >
+                <p className="text-xs text-text-muted mb-3">{displayDescription}</p>
+                {providerSaveErrors[providerId] && (
+                  <div
+                    role="alert"
+                    className="mb-3 rounded border border-error/40 bg-error/10 p-2 text-xs text-error"
+                  >
+                    <span className="font-medium">{t("routingServerRejectedSave")}</span>{" "}
+                    <span className="break-words font-mono">{providerSaveErrors[providerId]}</span>
+                    <p className="mt-1 text-[11px] text-error">{tCommon("error")}</p>
+                  </div>
+                )}
+
+                {/* Pipeline op list — each op is itself collapsible. */}
+                {opCount > 0 && (
+                  <ol className="flex flex-col gap-2 mb-3">
+                    {(providerCfg.pipeline as any[]).map((op, index) => (
+                      <li key={index}>
+                        <Collapsible
+                          variant="inline"
+                          defaultOpen={false}
+                          title={
+                            <div className="flex items-center gap-2">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                                {index + 1}
+                              </span>
+                              <span className="font-mono text-primary text-xs">
+                                {t(OP_KIND_LABELS[op?.kind as TransformOpKind] || op?.kind)}
+                              </span>
+                            </div>
+                          }
+                          subtitle={summarizeTransformOp(op, t)}
+                          trailing={
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon="keyboard_arrow_up"
+                                disabled={loading || index === 0}
+                                aria-label={t("systemTransformsOpMoveUp")}
+                                title={t("systemTransformsOpMoveUp")}
+                                onClick={() => moveOp(providerId, index, -1)}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon="keyboard_arrow_down"
+                                disabled={loading || index === opCount - 1}
+                                aria-label={t("systemTransformsOpMoveDown")}
+                                title={t("systemTransformsOpMoveDown")}
+                                onClick={() => moveOp(providerId, index, 1)}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon="delete"
+                                disabled={loading}
+                                aria-label={t("systemTransformsOpDelete")}
+                                title={t("systemTransformsOpDelete")}
+                                onClick={() => deleteOp(providerId, index)}
+                              />
+                            </>
+                          }
+                        >
+                          <OpEditor
+                            op={op}
+                            disabled={loading}
+                            onChange={(next) => updateOp(providerId, index, next)}
+                          />
+                        </Collapsible>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+
+                {/* Add op row */}
+                <div className="flex items-end gap-2 mb-3">
+                  <Select
+                    label={t("routingAddTransformOp")}
+                    className="flex-1"
+                    value={selectedKind}
+                    onChange={(e) =>
+                      setAddOpKind((prev) => ({
+                        ...prev,
+                        [providerId]: e.target.value as TransformOpKind,
+                      }))
+                    }
+                    disabled={loading}
+                    options={(Object.keys(OP_KIND_LABELS) as TransformOpKind[]).map((kind) => ({
+                      value: kind,
+                      label: t(OP_KIND_LABELS[kind]),
+                    }))}
+                  />
+                  <Button
+                    onClick={() => addOp(providerId)}
+                    disabled={loading}
+                    variant="secondary"
+                    size="sm"
+                    icon="add"
+                  >
+                    {tCommon("add")}
+                  </Button>
+                </div>
+
+                {/* JSON import section (collapsible) */}
+                <div className="border-t border-border/20 pt-2 mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={isJsonOpen ? "expand_more" : "chevron_right"}
+                    aria-expanded={isJsonOpen}
+                    onClick={() =>
+                      setShowJsonEditor((prev) => ({ ...prev, [providerId]: !isJsonOpen }))
+                    }
+                    className="text-primary"
+                  >
+                    {isJsonOpen ? t("routingJsonEditorHide") : t("routingJsonEditorImportExport")}
+                  </Button>
+                  {isJsonOpen && (
+                    <div className="mt-2">
+                      <Field
+                        label={t("routingJsonEditorLabel")}
+                        htmlFor={`routing-json-editor-${providerId}`}
+                        error={
+                          errorMsg ? (
+                            <span
+                              id={`routing-json-editor-${providerId}-error`}
+                              role="alert"
+                              className="break-words"
+                            >
+                              ⚠ {errorMsg}
+                            </span>
+                          ) : undefined
+                        }
+                      >
+                        <Textarea
+                          id={`routing-json-editor-${providerId}`}
+                          value={draft}
+                          onChange={(e) =>
+                            setJsonDrafts((prev) => ({ ...prev, [providerId]: e.target.value }))
+                          }
+                          rows={Math.min(40, Math.max(6, draft.split("\n").length))}
+                          disabled={loading}
+                          spellCheck={false}
+                          error={Boolean(errorMsg)}
+                          aria-describedby={
+                            errorMsg ? `routing-json-editor-${providerId}-error` : undefined
+                          }
+                          className="resize-y font-mono text-[11px]"
+                        />
+                      </Field>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <Button
+                          onClick={() => applyProviderJson(providerId)}
+                          disabled={loading}
+                          variant="secondary"
+                          size="sm"
+                          icon="check"
+                        >
+                          {t("routingApplyJson")}
+                        </Button>
+                        {hasDefault && (
+                          <Button
+                            onClick={() => resetProviderTransforms(providerId)}
+                            disabled={loading}
+                            variant="ghost"
+                            size="sm"
+                            icon="restart_alt"
+                          >
+                            {tCommon("reset")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Collapsible>
+            );
+          })}
+        </div>
+
+        <p className="mt-3 text-[11px] text-text-muted">{t("routingTransformsFootnote")}</p>
+      </Card>
+
+      <Card>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <Icon name="security" size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{t("cliFingerprint")}</h3>
+            <p className="text-sm text-text-muted mt-1">{t("cliFingerprintDesc")}</p>
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <h4 className="text-sm font-semibold mb-2">{t("routingHeaderFingerprintTitle")}</h4>
+          <p className="text-xs text-text-muted mb-2">
+            {t("cliFingerprintEnabled", { count: cliCompatProviderSet.size })}
+          </p>
+          <CheckboxGroup aria-label={t("routingHeaderFingerprintTitle")}>
+            {CLI_COMPAT_TOGGLE_IDS.map((providerId) => {
+              const normalizedProviderId = normalizeCliCompatProviderId(providerId);
+              const providerDisplay = CLI_COMPAT_PROVIDER_DISPLAY[providerId];
+              const checked = cliCompatProviderSet.has(normalizedProviderId);
+              const label = providerDisplay?.name || providerId;
+              const description = providerDisplay?.description || providerId;
+              const titleText = checked
+                ? t("disableFingerprintTitle", { provider: label })
+                : t("enableFingerprintTitle", { provider: label });
+
+              return (
+                <Checkbox
+                  key={providerId}
+                  card
+                  checked={checked}
+                  onChange={() => toggleCliCompatProvider(providerId, !checked)}
+                  disabled={loading}
+                  title={titleText}
+                  label={label}
+                  description={description}
+                />
+              );
+            })}
+          </CheckboxGroup>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <Icon name="cached" size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{t("routingClientCacheControlTitle")}</h3>
+            <p className="text-sm text-text-muted">{t("routingClientCacheControlDesc")}</p>
+          </div>
+        </div>
+
+        <RadioGroup
+          aria-label={t("routingClientCacheControlTitle")}
+          value={settings.alwaysPreserveClientCache}
+          onValueChange={(next) => updateSetting({ alwaysPreserveClientCache: next })}
+          disabled={loading}
+        >
+          {[
+            {
+              value: "auto",
+              label: tCommon("auto") + " (" + tCommon("recommended") + ")",
+              desc: t("routingClientCacheControlAutoDesc"),
+            },
+            {
+              value: "always",
+              label: t("routingClientCacheControlAlwaysLabel"),
+              desc: t("routingClientCacheControlAlwaysDesc"),
+            },
+            {
+              value: "never",
+              label: t("routingClientCacheControlNeverLabel"),
+              desc: t("routingClientCacheControlNeverDesc"),
+            },
+          ].map((option) => (
+            <RadioGroupItem
+              key={option.value}
+              card
+              value={option.value}
+              label={option.label}
+              description={option.desc}
+            />
+          ))}
+        </RadioGroup>
+      </Card>
+
+      <Card>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <Icon name="fingerprint" size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{t("routingAntigravitySignatureTitle")}</h3>
+            <p className="text-sm text-text-muted">{t("routingAntigravitySignatureDesc")}</p>
+          </div>
+        </div>
+
+        <RadioGroup
+          aria-label={t("routingAntigravitySignatureTitle")}
+          value={settings.antigravitySignatureCacheMode}
+          onValueChange={(next) => updateSetting({ antigravitySignatureCacheMode: next })}
+          disabled={loading}
+        >
+          {[
+            {
+              value: "enabled",
+              label: t("routingAntigravitySignatureEnabledLabel"),
+              desc: t("routingAntigravitySignatureEnabledDesc"),
+            },
+            {
+              value: "bypass",
+              label: t("routingAntigravitySignatureBypassLabel"),
+              desc: t("routingAntigravitySignatureBypassDesc"),
+            },
+            {
+              value: "bypass-strict",
+              label: t("routingAntigravitySignatureBypassStrictLabel"),
+              desc: t("routingAntigravitySignatureBypassStrictDesc"),
+            },
+          ].map((option) => (
+            <RadioGroupItem
+              key={option.value}
+              card
+              value={option.value}
+              label={option.label}
+              description={option.desc}
+            />
+          ))}
+        </RadioGroup>
+      </Card>
+
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex gap-3">
+            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+              <Icon name="badge" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">{t("echoRequestedModelTitle")}</h3>
+              <p className="text-sm text-text-muted mt-1">{t("echoRequestedModelDesc")}</p>
+            </div>
+          </div>
+          <div className="pt-1">
+            <Toggle
+              checked={settings.echoRequestedModelName === true}
+              onChange={(checked) => updateSetting({ echoRequestedModelName: checked })}
+              disabled={loading}
+              ariaLabel={t("echoRequestedModelTitle")}
+            />
+          </div>
+        </div>
+      </Card>
+
+      {/* #4481 layer 2 — Web-Search Routing (CCR-style Router.webSearch) */}
+      <Card>
+        <div className="flex gap-3">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <Icon name="travel_explore" size={20} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold">{t("webSearchRouteTitle")}</h3>
+            <p className="text-sm text-text-muted mt-1">{t("webSearchRouteDesc")}</p>
+            <div className="mt-3">
+              <ModelSelectField
+                value={String(settings.webSearchRouteModel ?? "")}
+                onChange={(v) => updateSetting({ webSearchRouteModel: v })}
+                placeholder={t("webSearchRoutePlaceholder")}
+                // The setting is documented as "leave blank to disable", but without
+                // `allowEmpty` the <Select> renders its placeholder as `disabled`
+                // (ModelSelectField -> Select `placeholderDisabled={!allowEmpty}`), so
+                // once a model was picked the override could never be cleared from the
+                // dashboard again — every web_search request stayed pinned to it
+                // (webSearchRouting.ts resolveWebSearchRouteOverride). `allowCustomInput`
+                // additionally exposes the free-text field so an unlisted/self-hosted
+                // target can be typed and blanked, matching the Modality Bridge pickers.
+                allowEmpty
+                allowCustomInput
+                testId="web-search-route-model"
+                disabled={loading}
+                ariaLabel={t("webSearchRouteTitle")}
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex gap-3">
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+            <Icon name="timer" size={20} />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold">Search timeouts</h3>
+            <p className="text-sm text-text-muted mt-1">
+              How long a search waits before it is cut off. Leave a field empty to keep the default:
+              15 seconds overall, and each provider&apos;s own limit.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Input
+                label="Overall budget (ms)"
+                type="number"
+                min={1000}
+                max={120000}
+                defaultValue={settings.searchTimeoutMs ?? ""}
+                placeholder="15000"
+                onBlur={(e) => {
+                  const raw = e.target.value.trim();
+                  const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
+                  if (parsed !== undefined && Number.isNaN(parsed)) return;
+                  updateSetting({ searchTimeoutMs: parsed });
+                }}
+                className="w-32 shrink-0"
+              />
+              {["exa-search", "tavily-search", "firecrawl", "context7", "jina-search"].map((id) => (
+                <Input
+                  key={id}
+                  label={`${id} (ms)`}
+                  type="number"
+                  min={1}
+                  max={120000}
+                  defaultValue={settings.searchProviderTimeoutsMs?.[id] ?? ""}
+                  placeholder="default"
+                  onBlur={(e) => {
+                    const raw = e.target.value.trim();
+                    const parsed = raw === "" ? undefined : Number.parseInt(raw, 10);
+                    if (parsed !== undefined && Number.isNaN(parsed)) return;
+                    const next = { ...(settings.searchProviderTimeoutsMs ?? {}) };
+                    if (parsed === undefined) delete next[id];
+                    else next[id] = parsed;
+                    updateSetting({ searchProviderTimeoutsMs: next });
+                  }}
+                  className="w-32 shrink-0"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex gap-3">
+            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+              <Icon name="verified" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">{t("lkgpToggleTitle")}</h3>
+              <p className="text-sm text-text-muted mt-1">{t("lkgpToggleDesc")}</p>
+            </div>
+          </div>
+          <div className="pt-1">
+            <Toggle
+              checked={settings.lkgpEnabled !== false}
+              onChange={(checked) => updateSetting({ lkgpEnabled: checked })}
+              disabled={loading}
+              ariaLabel={t("lkgpToggleTitle")}
+            />
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-border/30 flex items-center gap-2">
+          <Button
+            icon="delete_sweep"
+            variant="outline"
+            size="sm"
+            loading={lkgpCacheLoading}
+            onClick={async () => {
+              setLkgpCacheLoading(true);
+              setLkgpCacheStatus({ type: "", message: "" });
+              try {
+                const res = await fetch("/api/settings/lkgp-cache", { method: "DELETE" });
+                const data = await res.json();
+                if (res.ok) {
+                  setLkgpCacheStatus({
+                    type: "success",
+                    message: t("lkgpCacheCleared"),
+                  });
+                } else {
+                  setLkgpCacheStatus({
+                    type: "error",
+                    message: data.error || t("lkgpCacheClearFailed"),
+                  });
+                }
+              } catch {
+                setLkgpCacheStatus({
+                  type: "error",
+                  message: t("errorOccurred"),
+                });
+              } finally {
+                setLkgpCacheLoading(false);
+              }
+            }}
+          >
+            {t("clearLkgpCache")}
+          </Button>
+          {lkgpCacheStatus.message && (
+            <span
+              className={`text-xs ${lkgpCacheStatus.type === "success" ? "text-success" : "text-error"}`}
+            >
+              {lkgpCacheStatus.message}
+            </span>
+          )}
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex gap-3">
+            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted h-fit">
+              <Icon name="network_ping" size={20} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">{t("adaptiveVolumeRouting")}</h3>
+              <p className="text-sm text-text-muted mt-1">{t("adaptiveVolumeRoutingDesc")}</p>
+            </div>
+          </div>
+          <div className="pt-1">
+            <Toggle
+              checked={!!settings.adaptiveVolumeRouting}
+              onChange={(checked) => updateSetting({ adaptiveVolumeRouting: checked })}
+              disabled={loading}
+              ariaLabel={t("adaptiveVolumeRouting")}
+            />
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}

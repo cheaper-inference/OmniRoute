@@ -1,0 +1,112 @@
+{
+  "language": "fr",
+  "category": "ultra",
+  "rules": [
+    {
+      "name": "fr_articles",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:[Ll]e|[Ll]a|[Ll]es|[Uu]n|[Uu]ne|[Dd]es|[Dd]u)\\s+(?=[a-zàâçéèêëîïôûùüÿœ])",
+      "flags": "gu",
+      "replacement": "",
+      "context": "all",
+      "category": "terse",
+      "minIntensity": "full"
+    },
+    {
+      "name": "fr_leader_phrases",
+      "pattern": "^(?:je vais|je peux|nous allons|nous pouvons|laisse-moi|on peut)\\s+(?=[a-zàâçéèêëîïôûùüÿœ])",
+      "replacement": "",
+      "context": "all",
+      "category": "terse",
+      "minIntensity": "full"
+    },
+    {
+      "name": "fr_ultra_database_abbreviation",
+      "pattern": "(?<![\\p{L}\\p{N}_])base de données(?![\\p{L}\\p{N}_])",
+      "replacement": "BD",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_ultra_config_abbreviation",
+      "pattern": "\\bconfiguration\\b",
+      "replacement": "config",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra"
+    },
+    {
+      "name": "fr_ultra_function_abbreviation",
+      "pattern": "\\bfonction\\b",
+      "replacement": "fn",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra"
+    },
+    {
+      "name": "fr_ultra_request_abbreviation",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:requête|demande)(?![\\p{L}\\p{N}_])",
+      "replacement": "req",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_ultra_response_abbreviation",
+      "pattern": "(?<![\\p{L}\\p{N}_])réponse(?![\\p{L}\\p{N}_])",
+      "replacement": "rép",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_ultra_implementation_abbreviation",
+      "pattern": "(?<![\\p{L}\\p{N}_])implémentation(?![\\p{L}\\p{N}_])",
+      "replacement": "impl",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_ultra_authentication_abbreviation",
+      "pattern": "\\bauthentification\\b",
+      "replacement": "auth",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra"
+    },
+    {
+      "name": "fr_ultra_authorization_abbreviation",
+      "pattern": "\\bautorisation\\b",
+      "replacement": "authz",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra"
+    },
+    {
+      "name": "fr_ultra_application_abbreviation",
+      "pattern": "\\bapplication\\b",
+      "replacement": "app",
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra"
+    },
+    {
+      "name": "fr_ultra_dependency_abbreviation",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:dépendance|dépendances)(?![\\p{L}\\p{N}_])",
+      "replacement": "dép",
+      "replacementMap": {
+        "dépendance": "dép",
+        "dépendances": "déps"
+      },
+      "context": "all",
+      "category": "ultra",
+      "minIntensity": "ultra",
+      "flags": "giu"
+    }
+  ]
+}

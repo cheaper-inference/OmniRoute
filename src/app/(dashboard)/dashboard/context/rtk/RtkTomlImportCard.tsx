@@ -1,0 +1,248 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Checkbox from "@/shared/components/Checkbox";
+import { FileInput } from "@/shared/components/FileInput";
+import Textarea from "@/shared/components/Textarea";
+
+const RTK_TOML_MAX_BYTES = 1024 * 1024;
+
+interface ImportFilterSummary {
+  id: string;
+  description: string;
+  category: string;
+  commandPatterns: string[];
+  testCount: number;
+}
+
+interface ImportTestOutcome {
+  filterId: string;
+  testName: string;
+  passed: boolean;
+}
+
+interface ImportResult {
+  sha256: string;
+  passed: boolean;
+  filters: ImportFilterSummary[];
+  outcomes: ImportTestOutcome[];
+  warnings: string[];
+  installedPath?: string;
+  backupCreated?: boolean;
+}
+
+interface RtkTomlImportCardProps {
+  onInstalled?: () => void | Promise<void>;
+}
+
+interface RtkTomlEditorProps {
+  content: string;
+  processing: "validate" | "install" | null;
+  overwrite: boolean;
+  onContentChange: (content: string) => void;
+  onFileChange: (file: File | undefined) => void;
+  onFileRejected: () => void;
+  onProcess: (action: "validate" | "install") => void;
+  onOverwriteChange: (overwrite: boolean) => void;
+}
+
+async function readErrorMessage(response: Response): Promise<string | null> {
+  try {
+    const body = (await response.json()) as { error?: { message?: unknown } };
+    return typeof body.error?.message === "string" ? body.error.message : null;
+  } catch {
+    return null;
+  }
+}
+
+function RtkTomlEditor({
+  content,
+  processing,
+  overwrite,
+  onContentChange,
+  onFileChange,
+  onFileRejected,
+  onProcess,
+  onOverwriteChange,
+}: RtkTomlEditorProps) {
+  const t = useTranslations("contextRtk");
+  return (
+    <>
+      <div className="mt-3 flex flex-col gap-3">
+        <FileInput
+          accept=".toml,text/plain,application/toml"
+          chooseLabel={t("tomlChooseFile")}
+          onFilesChange={(files) => onFileChange(files[0])}
+          onFilesRejected={onFileRejected}
+          data-testid="rtk-toml-file"
+        />
+        <Textarea
+          value={content}
+          onChange={(event) => onContentChange(event.target.value)}
+          placeholder={t("tomlImportPlaceholder")}
+          aria-label={t("tomlImportTitle")}
+          data-testid="rtk-toml-content"
+          className="h-56 w-full font-mono text-xs"
+        />
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onProcess("validate")}
+          disabled={processing !== null || !content.trim()}
+          data-testid="rtk-toml-validate"
+        >
+          {processing === "validate" ? t("tomlValidating") : t("tomlValidate")}
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => onProcess("install")}
+          disabled={processing !== null || !content.trim()}
+          data-testid="rtk-toml-install"
+        >
+          {processing === "install" ? t("tomlInstalling") : t("tomlInstall")}
+        </Button>
+        <Checkbox
+          label={t("tomlConfirmOverwrite")}
+          checked={overwrite}
+          onChange={(event) => onOverwriteChange(event.target.checked)}
+          data-testid="rtk-toml-overwrite"
+        />
+      </div>
+    </>
+  );
+}
+
+function RtkTomlResult({ result }: { result: ImportResult }) {
+  const t = useTranslations("contextRtk");
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-bg p-3" data-testid="rtk-toml-result">
+      <p className="text-xs font-medium text-text-main">
+        {result.installedPath
+          ? t("tomlInstalled", { path: result.installedPath })
+          : result.passed
+            ? t("tomlValidationPassed")
+            : t("tomlValidationFailed")}
+      </p>
+      <p className="mt-1 text-[11px] text-text-muted">
+        {t("tomlValidationSummary", {
+          filters: result.filters.length,
+          tests: result.outcomes.length,
+        })}
+      </p>
+      {result.backupCreated && (
+        <p className="mt-1 text-[11px] text-text-muted">{t("tomlBackupCreated")}</p>
+      )}
+      {result.filters.length > 0 && (
+        <ul className="mt-2 space-y-1 text-[11px] text-text-main">
+          {result.filters.map((filter) => (
+            <li key={filter.id}>
+              <code>{filter.id}</code> · {filter.category} ·{" "}
+              {t("tomlTestCount", { count: filter.testCount })}
+            </li>
+          ))}
+        </ul>
+      )}
+      {result.outcomes.length > 0 && (
+        <ul className="mt-2 space-y-1 text-[11px] text-text-main">
+          {result.outcomes.map((outcome) => (
+            <li key={`${outcome.filterId}:${outcome.testName}`}>
+              <span className={outcome.passed ? "text-success" : "text-error"}>
+                {outcome.passed ? t("tomlTestPassed") : t("tomlTestFailed")}
+              </span>{" "}
+              · <code>{outcome.filterId}</code> · {outcome.testName}
+            </li>
+          ))}
+        </ul>
+      )}
+      {result.warnings.length > 0 && (
+        <ul className="mt-2 space-y-1 text-[11px] text-warning">
+          {result.warnings.map((warning) => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default function RtkTomlImportCard({ onInstalled }: RtkTomlImportCardProps) {
+  const t = useTranslations("contextRtk");
+  const [content, setContent] = useState("");
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<"validate" | "install" | null>(null);
+  const [overwrite, setOverwrite] = useState(false);
+
+  async function processImport(action: "validate" | "install") {
+    if (!content.trim()) return;
+    setProcessing(action);
+    setError(null);
+    try {
+      const response = await fetch("/api/context/rtk/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, content, overwrite: action === "install" && overwrite }),
+      });
+      if (!response.ok) {
+        throw new Error((await readErrorMessage(response)) ?? t("tomlImportError"));
+      }
+      const nextResult = (await response.json()) as ImportResult;
+      setResult(nextResult);
+      if (action === "install") await onInstalled?.();
+    } catch (caught) {
+      setResult(null);
+      setError(caught instanceof Error ? caught.message : t("tomlImportError"));
+    } finally {
+      setProcessing(null);
+    }
+  }
+
+  async function loadFile(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    if (file.size > RTK_TOML_MAX_BYTES) {
+      setError(t("tomlFileReadError"));
+      return;
+    }
+    try {
+      setContent(await file.text());
+      setResult(null);
+    } catch {
+      setError(t("tomlFileReadError"));
+    }
+  }
+
+  return (
+    <Card padding="sm" data-testid="rtk-toml-import">
+      <SectionHeader title={t("tomlImportTitle")} description={t("tomlImportDesc")} />
+      <RtkTomlEditor
+        content={content}
+        processing={processing}
+        overwrite={overwrite}
+        onContentChange={(nextContent) => {
+          setContent(nextContent);
+          setResult(null);
+        }}
+        onFileChange={(file) => void loadFile(file)}
+        onFileRejected={() => setError(t("tomlFileReadError"))}
+        onProcess={(action) => void processImport(action)}
+        onOverwriteChange={setOverwrite}
+      />
+
+      {error && (
+        <p className="mt-3 text-xs text-error" role="alert" data-testid="rtk-toml-error">
+          {error}
+        </p>
+      )}
+
+      {result && <RtkTomlResult result={result} />}
+    </Card>
+  );
+}

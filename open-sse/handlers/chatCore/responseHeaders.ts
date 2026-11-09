@@ -1,0 +1,411 @@
+import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import {
+  attachOmniRouteMetaHeaders,
+  buildOmniRouteResponseMetaHeaders,
+} from "@/domain/omnirouteResponseMeta";
+import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
+import { defaultLogger } from "@omniroute/open-sse/utils/logger";
+
+const STREAMING_RESPONSE_HEADER_DENYLIST = new Set([
+  "content-type",
+  "content-encoding",
+  "content-length",
+  "transfer-encoding",
+  "cache-control",
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailer",
+  "upgrade",
+  "authorization",
+  "authentication-info",
+  "cookie",
+  "set-cookie",
+  "set-cookie2",
+  "www-authenticate",
+  "x-api-key",
+  "x-amz-security-token",
+  "x-auth-token",
+  "x-accel-buffering",
+]);
+
+/**
+ * `x-codex-turn-state` is forwarded verbatim and EXEMPT from the forwarding
+ * budget. The real Codex client captures this ~314-byte blob from /responses
+ * (and echoes it back within the same turn), so dropping it breaks the
+ * protocol chain — but naively counting it against the budget used to evict
+ * the x-codex-*-used-percent quota headers (the reason it was denylisted
+ * under #10315-era budgeting). Carving it out keeps both.
+ */
+const CODEX_TURN_STATE_RESPONSE_HEADER = "x-codex-turn-state";
+
+/**
+ * #13601: when upstream headers exceed the forwarding budget, the drop is
+ * surfaced to the caller with this count header instead of staying log-only.
+ * Diagnostic headers already win the budget via getForwardingPriority; this
+ * covers the remainder so no drop is ever silent to the client.
+ */
+export const DROPPED_UPSTREAM_HEADERS_RESPONSE_HEADER = "X-OmniRoute-Dropped-Upstream-Headers";
+
+const DEFAULT_FORWARDED_HEADER_BUDGET_BYTES = 768;
+
+/**
+ * Resolve the forwarded upstream response-header budget from an optional string value
+ * (typically `process.env.OMNIROUTE_FORWARDING_HEADER_BUDGET_BYTES`). Returns the
+ * default of 768 when the input is unset, empty, or non-positive.
+ * Extracted as a pure function so unit tests can pass values directly without
+ * module-cache manipulation.
+ */
+export function resolveForwardedHeaderBudget(env?: string): number {
+  const parsed = Number.parseInt(
+    String(env ?? process.env.OMNIROUTE_FORWARDING_HEADER_BUDGET_BYTES),
+    10
+  );
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_FORWARDED_HEADER_BUDGET_BYTES;
+}
+
+/**
+ * Keep upstream-derived headers comfortably below common reverse-proxy response-header limits.
+ * This budget includes each header name, separator, value, and trailing CRLF. OmniRoute's own
+ * response metadata and framework/security headers are added separately.
+ * Override with `OMNIROUTE_FORWARDING_HEADER_BUDGET_BYTES`.
+ */
+export const MAX_FORWARDED_UPSTREAM_RESPONSE_HEADER_BYTES = resolveForwardedHeaderBudget();
+const MAX_LOGGED_DROPPED_RESPONSE_HEADERS = 20;
+const responseHeaderEncoder = new TextEncoder();
+
+type ResponseHeaderLogger = {
+  warn?: (tag: string, message: string, data?: Record<string, unknown>) => void;
+  debug?: (tag: string, message: string, data?: Record<string, unknown>) => void;
+} | null;
+
+/**
+ * #10315: the dropped-header set is usually identical across responses from the
+ * same upstream, so warn once per unique drop fingerprint per process, then log
+ * at debug level — a per-SSE-response warn storm buries real errors and adds
+ * event-loop serialization work. Fingerprints are dropped-header-name sets, so
+ * the set stays bounded by the distinct upstream header shapes in practice.
+ */
+const DROPPED_HEADER_WARN_FINGERPRINT_LIMIT = 1000;
+const droppedHeaderWarnFingerprints = new Set<string>();
+
+export function fingerprintDroppedHeaders(dropped: Array<{ name: string; bytes: number }>): string {
+  return dropped
+    .map((header) => header.name.toLowerCase())
+    .sort()
+    .join(",");
+}
+
+/** Test hook: forget already-warned drop fingerprints. */
+export function resetDroppedHeaderWarnFingerprints(): void {
+  droppedHeaderWarnFingerprints.clear();
+}
+
+function responseHeaderWireBytes(name: string, value: string): number {
+  return responseHeaderEncoder.encode(`${name}: ${value}\r\n`).byteLength;
+}
+
+function isOmniRouteInternalHeader(headerName: string): boolean {
+  return headerName.toLowerCase().startsWith("x-omniroute-");
+}
+
+/**
+ * #14116: true when `headerName` is one of the Codex per-account quota /
+ * reset / credits / plan-type response headers (x-codex-*-used-percent,
+ * -reset, -window, -credits, -plan-type, -over-secondary). Extracted so both
+ * the forwarding-priority boost above and the foreign-combo-account strip in
+ * {@link buildStreamingResponseHeaders} share one definition.
+ */
+export function isCodexAccountQuotaHeader(headerName: string): boolean {
+  const normalized = headerName.toLowerCase();
+  return (
+    normalized.startsWith("x-codex-") &&
+    (normalized.includes("used-percent") ||
+      normalized.includes("reset") ||
+      normalized.includes("window") ||
+      normalized.includes("credits") ||
+      normalized.includes("over-secondary") ||
+      normalized.includes("plan-type"))
+  );
+}
+
+function getForwardingPriority(headerName: string): number {
+  const normalized = headerName.toLowerCase();
+  if (
+    normalized === "x-request-id" ||
+    normalized === "request-id" ||
+    normalized === "x-correlation-id" ||
+    normalized === "traceparent" ||
+    normalized === "traceresponse"
+  ) {
+    return 0;
+  }
+  if (normalized === "retry-after") return 1;
+  if (normalized.includes("ratelimit") || normalized.includes("rate-limit")) return 2;
+  // Codex quota / reset / credits do not contain "ratelimit" in the name,
+  // so they used to fall through to priority 3 and lose to date/csp/cf-ray.
+  if (isCodexAccountQuotaHeader(normalized)) {
+    return 2;
+  }
+  if (
+    normalized === "date" ||
+    normalized === "vary" ||
+    normalized === "x-robots-tag" ||
+    normalized === "content-security-policy" ||
+    normalized.startsWith("cf-") ||
+    normalized.endsWith("-organization-id") ||
+    normalized.endsWith("-workspace-id")
+  ) {
+    return 4;
+  }
+  return 3;
+}
+
+/**
+ * Prefix of Next.js internal middleware control headers.
+ *
+ * When an upstream provider is itself hosted behind a Next.js middleware
+ * (e.g. synthetic.new), a perfectly successful `200 OK` response can still
+ * carry Next's own control headers such as `x-middleware-rewrite`,
+ * `x-middleware-next`, `x-middleware-override-headers`,
+ * `x-middleware-set-cookie`, and the `x-middleware-request-*` family.
+ *
+ * If OmniRoute re-emits those headers from an App Router route handler, Next
+ * 16's `app-route` runtime
+ * interprets `x-middleware-rewrite` as a `NextResponse.rewrite()` call and
+ * throws `NextResponse.rewrite() was used in a app route handler` — turning a
+ * successful upstream call into a 500. This is provider-agnostic proxy
+ * hygiene: any upstream behind Next middleware can leak these headers.
+ *
+ * See issue #5849.
+ */
+const NEXTJS_MIDDLEWARE_HEADER_PREFIX = "x-middleware-";
+
+/**
+ * True when `headerName` is a Next.js internal middleware control header that
+ * must never be forwarded from a proxied upstream response.
+ */
+export function isNextMiddlewareControlHeader(headerName: string): boolean {
+  return headerName.toLowerCase().startsWith(NEXTJS_MIDDLEWARE_HEADER_PREFIX);
+}
+
+/**
+ * Strip the whole `x-middleware-*` family (see {@link isNextMiddlewareControlHeader})
+ * from a `Headers` instance. Used on the non-streaming JSON path alongside
+ * {@link stripStaleForwardingHeaders}.
+ */
+export function stripNextMiddlewareControlHeaders(headers: Headers): void {
+  const toDelete: string[] = [];
+  headers.forEach((_value, key) => {
+    if (isNextMiddlewareControlHeader(key)) {
+      toDelete.push(key);
+    }
+  });
+  for (const key of toDelete) {
+    headers.delete(key);
+  }
+}
+
+/**
+ * #14116: the `meta` accepted by {@link buildStreamingResponseHeaders} carries
+ * the same fields as `buildOmniRouteResponseMetaHeaders`'s options PLUS the
+ * combo/pool account-identity triple needed to detect a foreign-account
+ * response. All three are optional so every existing call site (direct path,
+ * no combo) keeps behaving exactly as before.
+ */
+export type StreamingResponseHeadersMeta = Parameters<
+  typeof buildOmniRouteResponseMetaHeaders
+>[0] & {
+  /** Whether this request was served through combo/pool routing. */
+  isCombo?: boolean;
+  /** The connection the caller pinned/requested, if any (e.g. `x-omniroute-connection`, a combo step's forced connectionId, or a sticky session-affinity pin). */
+  requestedConnectionId?: string | null;
+  /** The connection that ACTUALLY served this response (`credentials.connectionId`). */
+  selectedConnectionId?: string | null;
+};
+
+/**
+ * #14116: true when combo/pool routing served this response through a
+ * connection other than the one the caller pinned/requested — i.e. the
+ * response's account-scoped quota headers describe a foreign account's
+ * quota, not the caller's own, and must not be forwarded. False on the
+ * direct path (no combo) and whenever no requested connection is known, so
+ * unpinned combo responses keep today's forwarding behavior.
+ */
+function isForeignComboAccountResponse(meta: StreamingResponseHeadersMeta): boolean {
+  return Boolean(
+    meta.isCombo &&
+    meta.requestedConnectionId &&
+    meta.selectedConnectionId &&
+    meta.requestedConnectionId !== meta.selectedConnectionId
+  );
+}
+
+export function buildStreamingResponseHeaders(
+  providerHeaders: Headers,
+  meta: StreamingResponseHeadersMeta,
+  log: ResponseHeaderLogger = defaultLogger
+): Record<string, string> {
+  const foreignAccount = isForeignComboAccountResponse(meta);
+  const connectionScopedHeaders = new Set(
+    (providerHeaders.get("connection") || "")
+      .split(",")
+      .map((name) => name.trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const candidates: Array<{
+    key: string;
+    value: string;
+    bytes: number;
+    priority: number;
+    position: number;
+  }> = [];
+  let position = 0;
+
+  providerHeaders.forEach((value, key) => {
+    const normalized = key.toLowerCase();
+    if (
+      STREAMING_RESPONSE_HEADER_DENYLIST.has(normalized) ||
+      connectionScopedHeaders.has(normalized) ||
+      isNextMiddlewareControlHeader(normalized) ||
+      isOmniRouteInternalHeader(normalized) ||
+      // Forwarded separately below, outside the byte budget.
+      normalized === CODEX_TURN_STATE_RESPONSE_HEADER ||
+      // #14116: this response was served by a combo/pool sibling account
+      // other than the one the caller pinned/requested — its quota headers
+      // describe THAT account, not the caller's own, so never forward them.
+      (foreignAccount && isCodexAccountQuotaHeader(normalized))
+    ) {
+      return;
+    }
+    candidates.push({
+      key,
+      value,
+      bytes: responseHeaderWireBytes(key, value),
+      priority: getForwardingPriority(key),
+      position: position++,
+    });
+  });
+
+  candidates.sort((a, b) => a.priority - b.priority || a.position - b.position);
+
+  const forwardedHeaders: [string, string][] = [];
+  const droppedHeaders: Array<{ name: string; bytes: number }> = [];
+  let forwardedBytes = 0;
+
+  for (const candidate of candidates) {
+    if (forwardedBytes + candidate.bytes <= MAX_FORWARDED_UPSTREAM_RESPONSE_HEADER_BYTES) {
+      forwardedHeaders.push([candidate.key, candidate.value]);
+      forwardedBytes += candidate.bytes;
+    } else {
+      droppedHeaders.push({ name: candidate.key, bytes: candidate.bytes });
+    }
+  }
+
+  if (droppedHeaders.length > 0) {
+    const dropPayload = {
+      budgetBytes: MAX_FORWARDED_UPSTREAM_RESPONSE_HEADER_BYTES,
+      forwardedBytes,
+      droppedCount: droppedHeaders.length,
+      droppedHeaders: droppedHeaders.slice(0, MAX_LOGGED_DROPPED_RESPONSE_HEADERS),
+    };
+    const fingerprint = fingerprintDroppedHeaders(droppedHeaders);
+    if (droppedHeaderWarnFingerprints.has(fingerprint)) {
+      log?.debug?.(
+        "HTTP",
+        "Dropped upstream response headers that exceeded forwarding budget (already warned once for this drop set)",
+        dropPayload
+      );
+    } else {
+      if (droppedHeaderWarnFingerprints.size >= DROPPED_HEADER_WARN_FINGERPRINT_LIMIT) {
+        droppedHeaderWarnFingerprints.clear();
+      }
+      droppedHeaderWarnFingerprints.add(fingerprint);
+      log?.warn?.(
+        "HTTP",
+        "Dropped upstream response headers that exceeded forwarding budget",
+        dropPayload
+      );
+    }
+  }
+
+  const responseHeaders: Record<string, string> = {
+    ...Object.fromEntries(forwardedHeaders),
+    // #13601: surface the drop to the caller so it is never silent. Only
+    // present when at least one header was dropped; absent otherwise.
+    ...(droppedHeaders.length > 0
+      ? { [DROPPED_UPSTREAM_HEADERS_RESPONSE_HEADER]: String(droppedHeaders.length) }
+      : {}),
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+    [OMNIROUTE_RESPONSE_HEADERS.cache]: "MISS",
+  };
+  const codexTurnState = providerHeaders.get(CODEX_TURN_STATE_RESPONSE_HEADER)?.trim();
+  if (codexTurnState) {
+    responseHeaders[CODEX_TURN_STATE_RESPONSE_HEADER] = codexTurnState;
+  }
+  attachOmniRouteMetaHeaders(responseHeaders, meta);
+  return responseHeaders;
+}
+
+export function materializeDeduplicatedExecutionResult<T extends Record<string, unknown>>(
+  result: T
+): T {
+  const snapshot =
+    result && typeof result === "object"
+      ? ((result as Record<string, unknown>)._dedupSnapshot as
+          | {
+              status: number;
+              statusText: string;
+              headers: [string, string][];
+              payload: string;
+            }
+          | undefined)
+      : undefined;
+
+  if (!snapshot) return result;
+
+  return {
+    ...result,
+    response: inheritEmptyTurnPolicy(
+      result.response as Response,
+      new Response(snapshot.payload, {
+        status: snapshot.status,
+        statusText: snapshot.statusText,
+        headers: snapshot.headers,
+      })
+    ),
+  } as T;
+}
+
+/**
+ * Strip hop-by-hop headers that describe the upstream wire encoding.
+ *
+ * `readNonStreamingResponseBody` reads (and, for compressed responses, also
+ * decompresses via fetch's auto-decoder) the full upstream body into a JS
+ * string before we re-emit it to the client. Once that happens, the original
+ * `Content-Encoding`, `Content-Length`, and `Transfer-Encoding` all describe
+ * a payload that no longer exists:
+ *
+ *   - `Content-Length` is the *compressed* byte count, so clients honoring it
+ *     read only the first N bytes of the decompressed JSON and surface
+ *     "Unterminated string in JSON at position …" parse failures (observed
+ *     on gzipped Gemini responses).
+ *   - `Content-Encoding` advertises a compression we have already undone.
+ *   - `Transfer-Encoding` is hop-by-hop per RFC 7230 §6.1 and must not be
+ *     forwarded across a buffering proxy — its presence alongside a
+ *     re-emitted body is undefined behavior.
+ *
+ * Deleting all three lets the response framework set a fresh, correct
+ * `Content-Length` (or fall back to `Transfer-Encoding: chunked`) for the
+ * payload we are actually sending.
+ */
+export function stripStaleForwardingHeaders(headers: Headers): void {
+  headers.delete("content-encoding");
+  headers.delete("content-length");
+  headers.delete("transfer-encoding");
+}

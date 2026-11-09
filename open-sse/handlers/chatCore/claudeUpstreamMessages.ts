@@ -1,0 +1,176 @@
+/**
+ * chatCore Claude upstream-message transforms (Quality Gate v2 / Fase 9 — chatCore god-file
+ * decomposition, #3501).
+ *
+ * Extracted from handleChatCore. `extractSystemMessagesToBody` lifts system/developer role messages
+ * into the top-level `system` parameter (Anthropic rejects those roles inside messages[]).
+ * `normalizeClaudeUpstreamMessages` prepares a native Claude Messages payload: lifts system roles,
+ * drops empty text blocks, inlines unsupported file/document parts as text, collapses tool_result
+ * blocks to text (unless preserved), drops unsupported parts, and moves stray tool_result blocks out
+ * of assistant messages (#2815). Both mutate the payload in place; behaviour is byte-identical to the
+ * previous inline closures (normalize captured only `log`).
+ */
+
+import type { ClaudeContentBlock, ClaudeMessage } from "./claudeMessageTypes.ts";
+import { liftSystemRoleMessages, relocateHoistedCacheBoundary } from "./claudeSystemRole.ts";
+import type { SystemRoleRoute } from "./claudeSystemRole.ts";
+import { splitMisplacedToolResults } from "../../translator/helpers/claudeHelper.ts";
+
+type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
+
+/**
+ * Carries a replaced block's `cache_control` onto its substitute. Rewriting a marked block into a
+ * plain text block would otherwise drop the breakpoint the client (or the #9436 hoist) put there.
+ */
+function withCacheControl(
+  replacement: ClaudeContentBlock,
+  original: ClaudeContentBlock
+): ClaudeContentBlock {
+  if (original.cache_control != null) replacement.cache_control = original.cache_control;
+  return replacement;
+}
+
+export function extractSystemMessagesToBody(payload: Record<string, unknown>) {
+  if (!Array.isArray(payload.messages)) return;
+  const messages = payload.messages as ClaudeMessage[];
+  const isSystemRole = (role: unknown): boolean => {
+    const normalized = String(role || "").toLowerCase();
+    return normalized === "system" || normalized === "developer";
+  };
+  const systemMessages = messages.filter((m) => isSystemRole(m.role));
+  if (systemMessages.length === 0) return;
+  const extraBlocks: ClaudeContentBlock[] = [];
+  // Same in-order walk as extractSystemRoleMessages: re-anchoring a hoisted `cache_control`
+  // needs the messages that precede it and stay behind (#9436).
+  const preceding: ClaudeMessage[] = [];
+  for (const sm of messages) {
+    if (!isSystemRole(sm.role)) {
+      preceding.push(sm);
+      continue;
+    }
+    if (typeof sm.content === "string" && sm.content.length > 0) {
+      extraBlocks.push({ type: "text", text: sm.content });
+    } else if (Array.isArray(sm.content)) {
+      for (const block of sm.content as ClaudeContentBlock[]) {
+        if (block?.type === "text" && typeof block.text === "string" && block.text.length > 0) {
+          // Blocks are pushed by reference here (the sibling implementation spreads them), so
+          // only a block whose marker actually moves is copied.
+          if (
+            block.cache_control != null &&
+            relocateHoistedCacheBoundary(block.cache_control, preceding) !== "kept"
+          ) {
+            const withoutMarker: ClaudeContentBlock = { ...block };
+            delete withoutMarker.cache_control;
+            extraBlocks.push(withoutMarker);
+          } else {
+            extraBlocks.push(block);
+          }
+        }
+      }
+    }
+  }
+  if (extraBlocks.length > 0) {
+    const existingSystem = payload.system;
+    if (typeof existingSystem === "string" && existingSystem.length > 0) {
+      payload.system = [{ type: "text", text: existingSystem }, ...extraBlocks];
+    } else if (Array.isArray(existingSystem)) {
+      payload.system = [...(existingSystem as ClaudeContentBlock[]), ...extraBlocks];
+    } else {
+      payload.system = extraBlocks;
+    }
+  }
+  payload.messages = messages.filter((m) => !isSystemRole(m.role));
+}
+
+function isNonEmptyTextOrOther(block: ClaudeContentBlock): boolean {
+  return block.type !== "text" || (typeof block.text === "string" && block.text.length > 0);
+}
+
+export function normalizeClaudeUpstreamMessages(
+  payload: Record<string, unknown>,
+  options?: { preserveToolResultBlocks?: boolean } & SystemRoleRoute,
+  log?: LoggerLike
+) {
+  const preserveToolResultBlocks = options?.preserveToolResultBlocks === true;
+  if (!Array.isArray(payload.messages)) return;
+
+  // Lift system/developer role messages into the top-level system parameter.
+  liftSystemRoleMessages(payload, options);
+  const messages = payload.messages as ClaudeMessage[];
+
+  // Anthropic rejects empty text blocks in native Messages payloads.
+  for (const msg of messages) {
+    if (Array.isArray(msg.content)) msg.content = msg.content.filter(isNonEmptyTextOrOther);
+  }
+
+  // Normalize unsupported content types without reintroducing the Claude -> OpenAI round-trip.
+  for (const msg of messages) {
+    if (msg.role !== "user" || !Array.isArray(msg.content)) continue;
+    msg.content = (msg.content as ClaudeContentBlock[]).flatMap((block: ClaudeContentBlock) => {
+      if (
+        block.type === "text" ||
+        block.type === "image_url" ||
+        block.type === "image" ||
+        block.type === "file_url" ||
+        block.type === "file" ||
+        block.type === "document"
+      ) {
+        const fileData = (block.file_url ?? block.file ?? block.document) as
+          Record<string, unknown> | undefined;
+        if (
+          (block.type === "file" || block.type === "document") &&
+          !fileData?.url &&
+          !fileData?.data
+        ) {
+          const fileContent =
+            (block.file as ClaudeContentBlock)?.content ??
+            (block.file as ClaudeContentBlock)?.text ??
+            block.content ??
+            block.text;
+          const fileName =
+            (block.file as Record<string, unknown>)?.name ?? block.name ?? "attachment";
+          if (typeof fileContent === "string" && fileContent.length > 0) {
+            return [
+              withCacheControl({ type: "text", text: `[${fileName}]\n${fileContent}` }, block),
+            ];
+          }
+        }
+        return [block];
+      }
+
+      if (block.type === "tool_result") {
+        if (preserveToolResultBlocks) {
+          return [block];
+        }
+        const toolId = block.tool_use_id ?? block.id ?? "unknown";
+        const resultContent = block.content ?? block.text ?? block.output ?? "";
+        const resultText =
+          typeof resultContent === "string"
+            ? resultContent
+            : Array.isArray(resultContent)
+              ? resultContent
+                  .filter((c: Record<string, unknown>) => c.type === "text")
+                  .map((c: Record<string, unknown>) => c.text)
+                  .join("\n")
+              : JSON.stringify(resultContent);
+        if (resultText.length > 0) {
+          return [
+            withCacheControl(
+              { type: "text", text: `[Tool Result: ${toolId}]\n${resultText}` },
+              block
+            ),
+          ];
+        }
+        return [];
+      }
+
+      log?.debug?.("CONTENT", `Dropped unsupported content part type="${block.type}"`);
+      return [];
+    });
+  }
+
+  // #2815: move stray tool_result blocks out of assistant messages.
+  payload.messages = splitMisplacedToolResults(
+    payload.messages as ClaudeMessage[]
+  ) as unknown as Record<string, unknown>[];
+}

@@ -1,0 +1,1893 @@
+name: CI
+
+on:
+  push:
+    # Pushes to release/** no longer start this matrix (2026-10-18). Every change that
+    # reaches a release branch already ran it on its own PR, and the merged COMBINATION
+    # is validated by Release-Green (nightly-release-green.yml: --quick on every push to
+    # release/v*, full sweep 3×/day on its own runner slot). With ~10 merges/hour the push
+    # runs here were cancelled by the next push before finishing (24 of 24 in one day) while
+    # each held up to 30 of the account's 40 hosted job slots — the queue that made PR
+    # checks wait for hours. `main` keeps it: the release squash is the one push that
+    # lands code nobody validated as a PR into main.
+    branches: [main]
+  pull_request:
+    branches: [main, "release/**"]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
+  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
+  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
+  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # CI must never mutate the runner's OS trust store (2026-07-05: a cert-flow
+  # test installed a fake PEM on a persistent self-hosted runner and broke all
+  # system TLS). Belt-and-suspenders with tests/_setup/isolateDataDir.ts.
+  OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
+  CI_NODE_VERSION: "24"
+  CI_NODE_24_VERSION: "24"
+  CI_NODE_26_VERSION: "26"
+
+jobs:
+  changes:
+    name: Change Classification
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    runs-on: ubuntu-latest
+    outputs:
+      # Match the official Mergify App and both repository IDs from GitHub's
+      # event. A contributor-controlled branch prefix alone grants no exception.
+      queueCandidate: >-
+        ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+            github.event.pull_request.user.id == 37929162 &&
+            github.event.pull_request.user.login == 'mergify[bot]' &&
+            github.event.pull_request.user.type == 'Bot' &&
+            startsWith(github.head_ref, 'mergify/merge-queue/') &&
+            github.event.repository.id > 0 &&
+            github.event.pull_request.head.repo.id == github.event.repository.id &&
+            github.event.pull_request.base.repo.id == github.event.repository.id }}
+      code: ${{ steps.classify.outputs.code }}
+      docs: ${{ steps.classify.outputs.docs }}
+      i18n: ${{ steps.classify.outputs.i18n }}
+      workflow: ${{ steps.classify.outputs.workflow }}
+      testsOnly: ${{ steps.classify.outputs.testsOnly }}
+      # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
+      domains: ${{ steps.classify.outputs.domains }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - name: Validate gate inventory
+        run: npm run check:gate-manifest
+      - name: Validate recurring free catalog evidence
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: npm run check:free-catalog-evidence
+
+      # Refuse a PR that targets its own head branch before spending anything on it. #8912 has
+      # head == base == release/v3.8.50: no diff, can never merge, and it sits in the queue with
+      # a full check board attached on every push to that branch. One field comparison.
+      - name: Reject a PR that targets its own branch
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/check/check-pr-self-target.mjs
+
+      - id: classify
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Single source of truth: scripts/quality/classify-pr-changes.mjs
+          # (unit-tested). Push/dispatch always enable every lane.
+          if [ "$EVENT_NAME" != "pull_request" ]; then
+            {
+              echo "code=true"
+              echo "docs=true"
+              echo "i18n=true"
+              echo "workflow=true"
+              echo "testsOnly=false"
+              echo "domains=build,catalog,cli,core,db,docs,i18n,provider,routing,tests,ui,workflow"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > changed-files.txt
+          node scripts/quality/classify-pr-changes.mjs changed-files.txt >> "$GITHUB_OUTPUT"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # Path filter: pure docs / pure message-catalog PRs skip the code lint bag + typecheck.
+    # Existence reason of this job is code regression; docs/i18n have dedicated jobs.
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
+    env:
+      # tsx gates below (known-symbols, route-guard-membership) import modules that
+      # open SQLite on load; provide DB env so a fresh CI DB initializes cleanly.
+      JWT_SECRET: ci-lint-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-lint-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - run: npm run audit:deps
+      - name: Restore ESLint file cache
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            .eslintcache
+            .eslintcache-complexity
+          key: eslint-${{ runner.os }}-${{ hashFiles('eslint.config.mjs', 'eslint.complexity-ratchets.config.mjs', 'config/quality/eslint-suppressions.json', 'package-lock.json') }}
+          # No restore-keys fallback on purpose (#11600, P-II.1 of the v3.8.50 postmortem): a
+          # cache built under a different suppressions file / lint config / lockfile reports
+          # stale per-file verdicts, which is exactly how 215 pre-existing errors stayed
+          # invisible for a whole cycle. Exact key or a cold full lint (~13 min) — never a
+          # partial cache from another configuration.
+      # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
+      # a second cold full-tree pass for eslintWarnings ratchet counts.
+      - name: ESLint (JSON report)
+        run: npm run lint:json
+      - name: Upload ESLint results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: eslint-results
+          path: .artifacts/eslint-results.json
+          if-no-files-found: warn
+          retention-days: 7
+      - run: npm run check:cycles:ratchet
+      # open-sse → src edge ceiling (metrics.boundaryOpenSseToSrc). On PRs it is base-relative
+      # like check:file-size (#8522): max(ceiling, edges on the PR base), so drift other merges
+      # added after the seed does not red an innocent PR. push → main stays absolute.
+      - name: Boundary ratchet (open-sse → src)
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "${PR_BASE_SHA:-}" ]; then
+            npm run check:boundary:ratchet -- --base-ref "$PR_BASE_SHA"
+          else
+            npm run check:boundary:ratchet
+          fi
+      - run: npm run check:route-validation:t06
+      - run: npm run check:any-budget:t11
+      - run: npm run check:provider-consistency
+      - run: npm run check:model-lifecycle
+      - run: npm run check:provider-asset-provenance
+      - run: npm run check:fetch-targets
+      - run: npm run check:deps
+      - run: npm run check:file-size
+      - run: npm run check:error-helper
+      - run: npm run check:migration-numbering
+      - run: npm run check:public-creds
+      - run: npm run check:db-rules
+      - run: npm run check:known-symbols
+      - run: npm run check:route-guard-membership
+      - run: npm run check:test-discovery
+      - run: npm run check:test-tla-order
+      - run: npm run check:radar-sentinels
+      - run: npm run check:tracked-artifacts
+      - name: AI attribution in commit / PR metadata (Hard Rule #16)
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
+          npm run check:ai-attribution -- --range "$PR_BASE_SHA..$PR_HEAD_SHA" --pr-title "$PR_TITLE" --pr-body-file "$RUNNER_TEMP/pr-body.md"
+      # A test parked in vitest.config.ts's exclude list does not run, and looks like
+      # coverage to whoever reads the tree. 62 files accumulated behind a comment pointing
+      # at #8618 — closed in August while the list grew to 62; 51 of them passed when
+      # finally measured (#13204). This gate requires every exclusion to name a tracker and
+      # to appear in config/quality/vitest-exclusions.json, so the debt stays reviewable.
+      - run: npm run check:vitest-exclusions
+      # (gap 30) Also lives in quality.yml's PR-only "Merge integrity" job — because the
+      # CHANGELOG half of that job needs a base to diff against. This half does NOT: the
+      # generator either reproduces the committed SKILL.md files or it does not.
+      #
+      # Keeping it PR-only left a real hole. This cycle's merge trains landed in batches with
+      # `--admin`, which bypasses required checks, so three SKILL.md files drifted from the route
+      # catalog, rode the release squash into `main`, and the next cycle's sync-back turned them
+      # into a base-red that blocked EVERY PR into release/v3.8.50 until #8954. Running it here
+      # means a push to `main` catches the drift at the source instead of the next cycle
+      # inheriting it.
+      - run: npm run check:agent-skills-sync
+      # WS1.7 (v3.8.49 plan): Dockerfile lint (hadolint, pinned by digest).
+      # failure-threshold=error keeps the 5 pre-existing warnings (DL3008/DL3003/
+      # DL3016 version pinning / WORKDIR) visible without blocking; any ERROR fails.
+      - name: hadolint (Dockerfile)
+        run: docker run --rm -i hadolint/hadolint@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e hadolint --failure-threshold error - < Dockerfile
+      - run: npm run check:lockfile
+      - run: npm run check:licenses
+      # check:docs-sync is run by the docs-sync-strict job (via check:docs-all) and the
+      # husky pre-commit hook; the standalone copy here was redundant (ROI dedup).
+      - run: npm run typecheck:core
+      # #7033: typecheck:core's curated file allowlist does not cover
+      # src/app/(dashboard) TSX (and next.config.mjs sets ignoreBuildErrors:
+      # true, so `next build` never type-checks it either) — orphaned
+      # identifiers there (see #6625/#6909) were invisible to CI. This gate
+      # runs tsc scoped to the dashboard tree against a frozen baseline of
+      # pre-existing errors; only NEW errors fail it.
+      - run: npm run check:dashboard-typecheck
+      # The rest of the app surface — src/lib, src/shared, bin, packages and the
+      # Electron types — had no type gate: next build ignores type errors and
+      # the root tsconfig cannot finish. API routes are covered separately by
+      # api-route-typecheck.yml, so this is not "everything else was unchecked".
+      # This runs the production-only program against a frozen per-(file, code)
+      # count baseline, so a new error anywhere in that surface fails the job
+      # while the pre-existing debt stays visible and cannot grow.
+      - run: npm run check:build-typecheck
+        timeout-minutes: 5
+      # typecheck:noimplicit:core dropped from this job (2026-07 optimize):
+      # it was advisory (continue-on-error) and largely subsumed by the blocking
+      # check:type-coverage ratchet in quality-gate. Local: npm run typecheck:noimplicit:core.
+
+  quality-gate:
+    name: Quality Ratchet
+    runs-on: ubuntu-latest
+    # needs lint so eslint-results artifact is available (same inventory as the
+    # blocking lint step). Allow lint failure so other ratchets still run.
+    needs: [changes, test-coverage, lint]
+    # Run even when test-coverage was SKIPPED/FAILED (e.g. a single flaky Coverage
+    # Shard breaks the shard→coverage→ratchet chain). The DETERMINISTIC ratchets
+    # (eslint / complexity / cognitive-complexity / duplication / codeql) do NOT need
+    # the coverage artifact and MUST still run so cycle drift is measured on the
+    # release PR — otherwise a flake silently skips the whole gate (incident: v3.8.36
+    # release PR #4854, where the drift cascade only surfaced post-merge in #5029).
+    # The coverage.* metrics degrade gracefully: the download is continue-on-error and
+    # the ratchet runs with --allow-missing, so absent coverage is skipped, not failed.
+    # Path filter: code-only — pure docs/i18n PRs have nothing for these ratchets to guard.
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true' && (needs.lint.result == 'success' || needs.lint.result == 'failure'))) }}
+    # security-events: read lets the CodeQL ratchet read open code-scanning alerts
+    # via `gh api .../code-scanning/alerts`. contents: read keeps checkout working.
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - name: Restore ESLint file cache
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            .eslintcache
+            .eslintcache-complexity
+          key: eslint-${{ runner.os }}-${{ hashFiles('eslint.config.mjs', 'eslint.complexity-ratchets.config.mjs', 'config/quality/eslint-suppressions.json', 'package-lock.json') }}
+          # No restore-keys fallback on purpose (#11600, P-II.1 of the v3.8.50 postmortem): a
+          # cache built under a different suppressions file / lint config / lockfile reports
+          # stale per-file verdicts, which is exactly how 215 pre-existing errors stayed
+          # invisible for a whole cycle. Exact key or a cold full lint (~13 min) — never a
+          # partial cache from another configuration.
+      # Coverage mergeada (coverage-summary.json) p/ o ratchet de cobertura.
+      # continue-on-error: o artifact pode não existir se a job test-coverage foi
+      # SKIPPED (shard flaky). Nesse caso collect-metrics pula coverage.* (ausente sem
+      # erro) e o ratchet roda com --allow-missing — as métricas determinísticas
+      # (eslint/complexity/cognitive) seguem BLOQUEANTES.
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: coverage-report
+          path: coverage/
+      # Prefer lint job's ESLint JSON (one inventory, two consumers).
+      - name: Download ESLint results
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: eslint-results
+          path: .artifacts/
+      - run: npm run quality:collect
+      # Catraca: falha se qualquer métrica regredir vs quality-baseline.json (commitado).
+      # Hoje: contagem de warnings do ESLint. Fase 4 estende com cobertura (lida do
+      # coverage mergeado). Tamanho de arquivo e duplicação têm gates dedicados.
+      # --allow-missing: pula métricas do baseline ausentes do collect (coverage.* quando
+      # o artifact não veio) em vez de falhar — mantém os gates determinísticos ativos.
+      - name: Ratchet check
+        run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --summary .artifacts/quality-ratchet.md
+      # Fase 6A.5: require-tighten — BLOQUEANTE (promovido de advisory no fim do ciclo
+      # v3.8.27). Falha quando uma métrica MELHOROU sem o baseline ter sido apertado no
+      # mesmo PR (força capturar ganhos permanentes). As métricas coverage.* carregam
+      # tightenSlack para o gap anti-flake (CI mergeado > baseline) não disparar falso-
+      # positivo. Verificado limpo (exit 0) no tip de release/v3.8.27 com a cobertura
+      # mergeada == baseline (ver a nota _require_tighten_flip_blocking em
+      # config/quality/quality-baseline.json).
+      - name: Require-tighten (blocking)
+        run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --require-tighten
+      # Catraca de duplicação (jscpd@4 sobre src+open-sse). Roda neste job (paralelo)
+      # para não pesar no caminho crítico do lint.
+      - name: Duplication ratchet
+        run: npm run check:duplication
+      # Complexity + cognitive: one ESLint walk, two independent baselines (by ruleId).
+      - name: Complexity + cognitive ratchets
+        run: npm run check:complexity-ratchets
+      # Fase 7 INT: dead-code, type-coverage promovidos de advisory (quality-extended)
+      # para BLOQUEANTES aqui. cognitive-complexity is folded into the step above.
+      - name: Dead-code ratchet (knip)
+        run: npm run check:dead-code
+      - name: Type coverage ratchet
+        run: npm run check:type-coverage
+      - name: Compression budget ratchet (F2.4 / N4)
+        run: npm run check:compression-budget
+      # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
+      # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
+      # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)
+      # é skip gracioso com exit 0 — security-events:read no job-level permissions.
+      - name: CodeQL alerts ratchet (blocking)
+        run: npm run check:codeql-ratchet
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Append summary
+        if: always()
+        run: cat .artifacts/quality-ratchet.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload ratchet report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quality-ratchet
+          path: .artifacts/quality-ratchet.md
+          if-no-files-found: warn
+
+  # Phase 7/8 extended quality gates — MIXED (Etapa 2, v3.8.26). The job no longer
+  # carries a job-level continue-on-error: the three ratchet-blocking steps below
+  # (Secret scan / Workflow lint / Bundle size, all passing --ratchet) FAIL the job
+  # on a measured regression vs config/quality/quality-baseline.json. The remaining
+  # steps stay ADVISORY via step-level continue-on-error (scanner install,
+  # vuln/osv ratchet, OpenAPI/oasdiff breaking-change, circular-deps/dpdm): they
+  # depend on external binaries/state that may legitimately self-skip, so they must
+  # never block. The blocking gates themselves SKIP (exit 0) when their binary/plugin
+  # is absent — only a measured regression on the SAME metric the baseline froze
+  # blocks. The CodeQL ratchet was PROMOTED to the quality-gate job (v3.8.26).
+  # SonarQube needs SONAR_TOKEN/SONAR_HOST_URL secrets.
+  quality-extended:
+    name: Quality Gates (Extended)
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # Path filter: code-only (scanners/ratchets target production surface).
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
+    steps:
+      # fetch-depth: 0 — the OpenAPI breaking-change gate (oasdiff) reads the base
+      # spec via `git show <base_ref>:docs/openapi.yaml`; a shallow clone
+      # would lack the base ref and the gate would self-skip (base-unresolved).
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      # Dead-code, cognitive-complexity, type-coverage foram promovidos ao job
+      # quality-gate (bloqueante) na Fase 7 INT — não rodam aqui para evitar duplo custo.
+      - name: Circular deps (dpdm; advisory)
+        continue-on-error: true
+        run: npm run check:circular-deps
+      # BLOCKING ratchet (Etapa 2): bundleSize must not regress vs the baseline
+      # (gzip via @size-limit/file, installed by `npm ci`). --ratchet exits 1 on a
+      # measured regression AND on an unmeasurable one (#15159 G-04): "could not
+      # measure" is not "no regression". A missing @size-limit/file or a missing
+      # CLI entrypoint now fails loudly here instead of reporting a silent pass.
+      - name: Bundle size (ratchet, blocking)
+        run: npm run check:bundle-size -- --ratchet
+      # CodeQL ratchet foi PROMOVIDO a BLOQUEANTE no job quality-gate (v3.8.26) —
+      # não roda aqui para evitar duplo run/duplo report.
+      # Install the advisory security scanners so the gates below actually run
+      # (they self-skip when the binaries are absent). Robustness lessons baked in:
+      #   • `go install …/gitleaks/v8@latest` produces a binary WITHOUT the version
+      #     ldflags gitleaks needs (and often fails) — avoided.
+      #   • `curl …api.github.com/…/releases/latest` is UNAUTHENTICATED and
+      #     rate-limited to 60 req/hr/IP; when throttled it returns an empty body,
+      #     so the asset URL resolves to nothing and the install silently no-ops —
+      #     every gate then self-skips and the metric is never produced. We instead
+      #     use `gh release download`, which is preinstalled on GitHub runners and
+      #     authenticated via GITHUB_TOKEN (5000 req/hr) — robust under load.
+      #   • actionlint keeps its official download script; zizmor stays on pipx.
+      # We `set +e` (no single failure aborts the step), ALWAYS export $GITHUB_PATH
+      # at the end, and print diagnostics so the next CI run proves exactly what
+      # installed. The job is continue-on-error too, so an install hiccup never
+      # blocks the build.
+      - name: Install advisory security scanners (gitleaks/osv/actionlint/zizmor)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          mkdir -p "$HOME/.local/bin"
+          # gitleaks — download latest linux x64 tarball via gh (authed), extract binary
+          rm -rf /tmp/gl && mkdir -p /tmp/gl
+          gh release download --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
+          tar -xzf /tmp/gl/*linux_x64.tar.gz -C "$HOME/.local/bin" gitleaks
+          # osv-scanner — download latest linux amd64 bare binary via gh (authed)
+          rm -rf /tmp/osv && mkdir -p /tmp/osv
+          gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
+          install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
+          # actionlint — official download script
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest "$HOME/.local/bin"
+          # zizmor — PyPI (pipx preferred, pip --user fallback); lands in ~/.local/bin.
+          # PINNED on purpose. Unpinned, the runner installed whatever PyPI served that day and
+          # measured 1 finding MORE than the devbox on the identical commit (190 vs 189) during
+          # the v3.8.49 cycle — which cost a second rebaseline push per release, chasing a
+          # number that was never the code's. The ratchet compares counts across machines, so
+          # the auditor version has to be the same on both. Bump this deliberately, and
+          # rebaseline in the same commit: check-workflows.mjs now prints `zizmorVersion=` next
+          # to the count so the new number is traceable to the tool that produced it.
+          ZIZMOR_VERSION=1.25.2
+          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
+          # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
+          rm -rf /tmp/oasd && mkdir -p /tmp/oasd
+          gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
+          tar -xzf /tmp/oasd/*linux_amd64.tar.gz -C "$HOME/.local/bin" oasdiff
+          # ALWAYS export the bin dir (even if any step above failed)
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          # diagnostics — prove what installed on the next CI run
+          ls -la "$HOME/.local/bin"
+          "$HOME/.local/bin/gitleaks" version || true
+          "$HOME/.local/bin/actionlint" -version || true
+          "$HOME/.local/bin/osv-scanner" --version || true
+          "$HOME/.local/bin/oasdiff" --version || true
+          zizmor --version || true
+      # BLOCKING ratchet (Etapa 2): secretFindings must not regress vs the baseline.
+      # --ratchet exits 1 on a measured regression; it SKIPs (exit 0) when gitleaks
+      # is absent (a missing binary never blocks).
+      - name: Secret scan (gitleaks, ratchet, blocking)
+        run: npm run check:secrets -- --ratchet
+      # BLOCKING ratchet (v3.8.27 cycle-end): vulnCount must not regress vs the
+      # baseline. --ratchet exits 1 on a measured regression (measured > baseline);
+      # it SKIPs (exit 0) when osv-scanner is absent or osv.dev is unreachable (a
+      # missing/failed measurement never blocks). See the CVE-variance note in
+      # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
+      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
+      - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
+        run: npm run check:vuln-ratchet -- --ratchet
+      # BLOCKING ratchet (Etapa 2): zizmorFindings must not regress vs the baseline.
+      # ONLY zizmor is ratcheted — actionlint findings are reported, not blocking.
+      # Both tools must complete with valid reports. Missing/broken scanners or
+      # an absent baseline are INCOMPLETE, never zero findings or acceptance.
+      - name: Workflow lint (actionlint+zizmor, ratchet, blocking)
+        run: npm run check:workflows -- --ratchet
+      # OpenAPI breaking-change detection (oasdiff). Diffs the PR's public API
+      # contract (docs/openapi.yaml) against the base branch's spec.
+      # BLOCKING ratchet (Fase 9 Onda 0): reads metrics.openapiBreaking.value and
+      # exits 1 ONLY on a measured regression (count > baseline). It SKIPs (exit 0)
+      # when oasdiff is absent or the base spec can't be resolved — a missing
+      # measurement never blocks. BASE_REF is read by the script from the env
+      # (never interpolated into a shell body) — workflow-injection-safe.
+      - name: OpenAPI breaking-change (oasdiff, ratchet, blocking)
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: npm run check:openapi-breaking -- --ratchet
+
+  docs-sync-strict:
+    name: Docs Sync (Strict)
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # Run when docs OR code change: API/route code can break doc/OpenAPI contract gates.
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:docs-all
+      # Previously-orphaned contract gates (existed as files, never wired anywhere).
+      # All exit 0 today: cli-i18n is a hard gate, openapi-coverage is a ratchet
+      # (floor ~36), openapi-security-tiers is advisory (Hard Rules #15/#17).
+      - name: CLI i18n consistency
+        run: npm run check:cli-i18n
+      - name: OpenAPI route coverage (ratchet)
+        run: npm run check:openapi-coverage
+      - name: OpenAPI security-tier consistency (advisory)
+        run: npm run check:openapi-security-tiers
+      # One FS inventory of src/app/api for both anti-hallucination directions.
+      - name: API docs refs (openapi + prose → routes)
+        run: npm run check:api-docs-refs
+      # Blocking since the 2026-09 docs re-sync: a core doc edited without `npm run i18n:run
+      # --files=<doc>` (or `--adopt` for a mechanical edit) leaves 65 stale mirrors behind;
+      # the run only retranslates the `## ` sections whose text changed, so it is cheap.
+      #
+      # PR-scoped since 2026-10-20: on a pull request the gate compares against the BASE
+      # checkout and fails only on drift this PR introduces. Drift the base already carried
+      # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
+      # is printed as inherited — the branch's own push run and the nightly Release-Green keep
+      # the full strict verdict, so the debt stays visible without painting every PR red.
+      #
+      # Advisory on pull requests since 2026-10-28: an English doc edit no longer has to ship
+      # its 66 mirrors in the same PR. Per-PR translation serialised every doc PR behind one
+      # translation backend (a 6-day quota outage froze 8 PRs; one doc took 6.6 h of retries)
+      # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
+      # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
+      # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
+      - name: Base checkout for the i18n drift baseline (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .i18n-base
+          persist-credentials: false
+      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          set -euo pipefail
+          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json --warn | tee /tmp/i18n-pr-drift.txt
+          if grep -q "WARN — drift detected" /tmp/i18n-pr-drift.txt; then
+            echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
+          fi
+      - name: i18n docs drift (sources changed since their translation)
+        if: ${{ github.event_name != 'pull_request' }}
+        run: node scripts/i18n/check-translation-drift.mjs
+
+  docs-lint:
+    name: Docs Lint (prose — advisory)
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # Prose/markdown only — skip when the PR has no doc surface.
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.docs == 'true') }}
+    # Advisory (warning-first): prose/markdown style must not block merges while the
+    # existing doc corpus is brought up to style. Promote to blocking once it converges.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - name: markdownlint (docs + root, advisory)
+        run: npx --yes markdownlint-cli2 "docs/**/*.md" "*.md" "!docs/i18n" "!docs/research" || true
+      - name: Vale prose lint (Microsoft style, advisory)
+        # Non-fatal: a Vale/reviewdog setup error must not turn this advisory job red.
+        continue-on-error: true
+        uses: errata-ai/vale-action@reviewdog
+        with:
+          files: docs
+          fail_on_error: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  i18n-ui-coverage:
+    name: i18n UI Coverage
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # UI keys move with dashboard code OR message catalogs.
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
+    steps:
+      # fetch-depth: 0 — the value-drift gate diffs en.json against the merge base to
+      # find rewritten English strings. On a shallow clone the base ref is missing and
+      # the gate self-skips (base-unresolved), so it would never actually run.
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: node scripts/i18n/check-ui-keys-coverage.mjs --threshold=65
+      - name: i18n ICU compilation (all UI catalogs)
+        run: npm run check:ui-icu
+      # Real-translation ratchet: a leaf copied verbatim from en.json passes key
+      # parity above but is still English to the user (es shipped 55% English).
+      # Blocking since PR-4 retranslated the verbatim-English backlog: the share of
+      # untranslated leaves per locale may only fall (ratchet baseline in
+      # config/quality/i18n-translation-baseline.json; `npm run i18n:check-ratio:update`).
+      - name: i18n real-translation ratio
+        run: node scripts/i18n/check-translation-ratio.mjs
+      # #8463: a rewritten English value used to leave its 39 translations behind
+      # silently (googleOAuthWarning shipped wrong copy in 39 locales for months).
+      # Key parity above cannot see it — a stale translation counts as covered.
+      - name: i18n UI value drift (stale translations)
+        env:
+          BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+        run: node scripts/i18n/check-ui-value-drift.mjs
+      # Sibling of the drift gate above. That one catches an English value that was
+      # REWRITTEN; this one catches an English key that was ADDED while some locales never
+      # got it. The coverage gate at the top of this job cannot: it is a percentage per
+      # locale, and 11 absent keys out of ~13,000 leaves coverage at 99.9%. Incident: the
+      # Phase 3 canvas keys were translated across the 42 locales that existed, then the EU
+      # batch (#13044) took the repo to 51 and the nine newcomers shipped untranslated.
+      - name: i18n new-key coverage (a new key must reach every locale)
+        env:
+          BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+        run: node scripts/i18n/check-new-key-coverage.mjs
+      # Absolute complement of the two gates above: every locale must carry exactly the key
+      # set of en.json, whatever the age of the key. A locale batch is generated from the
+      # en.json of the day the branch is cut and translates for days while the base keeps
+      # adding keys — the batch PR adds no key itself, so the new-key gate stays silent and
+      # 43 absent keys out of ~13,000 still read 99.7 % coverage. Incident 2026-09-15:
+      # batch 1 (#13044) landed 43 keys short in nine locales, batch 2 (#13660) 10 keys short
+      # in eight. Fix is `sync-ui-keys --locale=<codes> --translate-markers`.
+      - name: i18n key completeness (every locale carries every en.json key)
+        run: node scripts/i18n/check-key-completeness.mjs
+      # Same gate for the CLI catalogs (bin/cli/locales). check:cli-i18n only compares
+      # pt-BR / zh-CN / zh-TW; 38 locales shipped with 1–24 of 830 keys for months
+      # (audit 2026-09-16) and the CLI silently fell back to English for them.
+      - name: i18n key completeness (CLI catalogs)
+        run: node scripts/i18n/check-key-completeness.mjs --catalog=cli
+
+  # #8038: cheap glossary/protected-terms consistency gate —
+  # complements i18n-ui-coverage (key parity) and the ICU `i18n` job below
+  # without needing app-boot/Playwright infra. Same gating as i18n-ui-coverage.
+  # ko added after the #8224 ko.json mistranslation cleanup so the fixed
+  # terminology cannot silently regress on the next machine-translation run.
+  i18n-glossary-zhcn:
+    name: i18n Glossary (zh-CN, ko)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: node scripts/i18n/check-glossary-consistency.mjs --locale=zh-CN
+      - run: node scripts/i18n/check-glossary-consistency.mjs --locale=zh-TW
+
+  # D4 (plano mestre testes+CI): a matrix de ~40 jobs de <1min por idioma saturava sozinha
+  # a concorrência de jobs da conta (Free = 20 slots, compartilhados entre TODOS os repos)
+  # e pagava spin-up + arredondamento de billing por idioma. Um único job itera os idiomas
+  # (mesmo script), com grupo de log por idioma e artifact único de resultados nomeados por
+  # idioma (a matrix antiga subia 40 artifacts cujo result.txt colidia no merge-multiple).
+  i18n:
+    name: i18n Validation (all languages)
+    runs-on: ubuntu-latest
+    needs: changes
+    # P3 (plano mestre): a release-PR viva fica DRAFT o ciclo inteiro — jobs pesados pulam
+    # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
+    # Message-catalog / i18n-tooling only — pure code without i18n surface skips this lane.
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.i18n == 'true') }}
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Validate all languages
+        run: |
+          set -uo pipefail
+          mkdir -p i18n-results
+          FAIL=0
+          for f in src/i18n/messages/*.json; do
+            lang=$(basename "$f" .json)
+            [ "$lang" = "en" ] && continue
+            echo "::group::i18n $lang"
+            if python3 scripts/i18n/validate_translation.py quick -l "$lang" > "i18n-results/$lang.txt" 2>&1; then
+              echo "OK $lang"
+            else
+              FAIL=1
+              echo "FAIL $lang"
+              cat "i18n-results/$lang.txt"
+            fi
+            echo "::endgroup::"
+          done
+          exit "$FAIL"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: i18n-results
+          path: i18n-results/
+
+  pr-test-policy:
+    name: PR Test Policy
+    needs: changes
+    if: ${{ github.event_name == 'pull_request' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - name: Fetch base branch
+        run: git fetch --no-tags origin "${GITHUB_BASE_REF}"
+      - name: Validate source changes include tests
+        run: node scripts/check/check-pr-test-policy.mjs --summary-file .artifacts/pr-test-policy.md
+      # Anti test-masking: flag net assert removal / new assert.ok(true) in changed tests.
+      - name: Detect test-masking (weakened assertions)
+        run: npm run check:test-masking
+      # Evidence-in-PR-body (Hard Rule #18 mechanized): claims of "tests pass" must carry output.
+      - name: Require evidence in PR body
+        run: npm run check:pr-evidence
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+      - name: Publish PR test policy summary
+        if: always()
+        run: |
+          if [ -f .artifacts/pr-test-policy.md ]; then
+            cat .artifacts/pr-test-policy.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  build:
+    name: Build
+    # Dynamic runner: when the release captain flips the USE_VPS_RUNNER repo var to
+    # 'true' (scripts/vps/release-runner-up.sh does it after the self-hosted VM is
+    # online), push Builds (main only: release/** pushes stopped running this workflow
+    # in #17092) and workflow_dispatch Builds run on the .113 build slot (label
+    # omni-build) with the Turbopack bundler that npm-publish ships.
+    # Pull requests (own-origin and forks) and merge_group always build on the hosted
+    # pool with webpack (2026-10-18): the slot is ONE runner and a Turbopack Build holds
+    # it 29-58 min, so with every own-origin PR routed there 18 Builds queued for up to
+    # 18 h, and the release line's own push Build got the slot once in 40 jobs. Hosted,
+    # the same PR Build takes 8-12 min next to the PR's other jobs. Safety: no PR code
+    # reaches the self-hosted runner (push / dispatch events are own-origin by
+    # definition). Any failure path (VM down, var unset/false) also falls back to
+    # ubuntu-latest.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    needs: changes
+    # Capacity is owned by the ONE omni-build runner slot (#12048), also used by
+    # Docker amd64. Do not add another worker with that label on the same host
+    # without reviewing its memory budget (a Turbopack next-build holds ~40 GB in the
+    # compile phase alone and peaked at 49 GB uncapped; docs/ops/RUNNER_BOX.md).
+    # A shared PR concurrency group is not a queue: GitHub's default one-pending
+    # limit replaces unrelated waiting PRs even with cancel-in-progress: false.
+    # Isolate candidate refs; the runner slot still serializes self-hosted builds.
+    # Keep main's group unchanged because docker-publish shares heavy-build-main.
+    concurrency:
+      group: heavy-build-${{ github.ref == 'refs/heads/main' && 'main' || github.ref }}
+      cancel-in-progress: false
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      # Use the existing webpack fallback on hosted runners, matching limited Docker builders.
+      # Keep the benchmarked Turbopack build on the dedicated omni-build runner.
+      # Both produce the standalone artifact consumed by downstream smoke checks.
+      # 2026-10-16: Turbopack only on the self-hosted build slot, webpack everywhere else.
+      # Measured on the 32-vCPU .113 (cgroup cap, swap off): the Turbopack build of this
+      # tree peaks at ~36 GB under the cap (49 GB uncapped; compile ~21 GB + 31 static-
+      # generation workers 17-21 GB), so it did not fit the 48 GB box next to the three
+      # omni-light runners (~200 red Builds 10-06..10-16). The VM now has 64 GB and the
+      # build passed there in 23 min with three lint jobs alongside; the 16 GB hosted
+      # runners cannot hold it and build with webpack (14 GB). Next 16.4.x regresses
+      # (33 GB in the compile phase alone) - re-measure before bumping. Guarded by
+      # tests/unit/ci-build-bundler-webpack.test.ts and heavy-build-queue.test.ts.
+      - run: npm run build
+        env:
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && '1' || '0' }}
+      - name: Verify colocated compression worker
+        run: node --import tsx/esm --test tests/integration/compression-worker-standalone.int.test.ts
+        env:
+          RUN_STANDALONE_INT: "1"
+      - name: Verify colocated LLMLingua worker
+        # Starts the optional ONNX worker from the standalone artifact and asserts its
+        # dependency closure resolves inside standalone/node_modules (#12796).
+        run: node --import tsx/esm --test tests/integration/llmlingua-worker-standalone.int.test.ts
+        env:
+          RUN_STANDALONE_INT: "1"
+      - name: Archive Next.js build for downstream jobs
+        # Use tar so the archive preserves paths relative to CWD (.build/next/...).
+        # upload-artifact path-stripping is ambiguous when exclude patterns are used;
+        # an explicit tar avoids the double-nesting issue (.build/next/next/...).
+        # Keep standalone/node_modules intact: package/electron jobs consume the
+        # Next-traced standalone tree and must not replace it with root node_modules.
+        run: |
+          tar -czf "$RUNNER_TEMP/e2e-build.tar.gz" \
+            --exclude='.build/next/cache' \
+            .build/next
+      - name: Upload Next.js build for downstream jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: next-build
+          path: ${{ runner.temp }}/e2e-build.tar.gz
+          retention-days: 1
+
+  package-artifact:
+    name: Package Artifact
+    runs-on: ubuntu-latest
+    needs: [build, changes]
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true' }}
+    env:
+      JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - name: Download Next.js build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: next-build
+          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
+          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
+          # #11896's first cut broke the Electron smoke on exactly that. A relative path
+          # works in bash and pwsh alike; hosted workspaces are ephemeral.
+          path: next-build-artifact
+      - name: Extract Next.js build artifact
+        run: |
+          tar -xzf next-build-artifact/e2e-build.tar.gz
+      # build:cli consumes the downloaded .build/next standalone artifact and assembles dist/;
+      # it only rebuilds if the downloaded standalone artifact is missing.
+      - run: npm run build:cli
+      - name: Assert dist/server.js exists
+        run: test -f dist/server.js || (echo "dist/server.js missing — build:cli did not assemble correctly" && exit 1)
+      # `build:cli` monta dist/ mas NAO grava dist/BUILD_SHA — so `build:release` faz
+      # isso, chamando write-build-sha.mjs. O guard de proveniencia do #10427, dentro
+      # de check:pack-artifact, rejeita um artefato sem SHA (e rejeita mesmo com
+      # OMNIROUTE_ALLOW_CANARY_BUILD=1: o que nao da para identificar nao da para
+      # vouchear). Sem este passo o par build+validate deste job e estruturalmente
+      # incompativel e falha 100% das vezes.
+      - name: Stamp dist/BUILD_SHA for the provenance guard (#10427)
+        # O SHA TEM de vir do head da PR, nao de `git rev-parse HEAD`. Este workflow
+        # roda em `pull_request`, entao o checkout e o MERGE COMMIT efemero que o
+        # GitHub cria — um commit que nao existe em branch nenhuma e portanto nunca e
+        # ancestral da release. O guard de proveniencia (#10427) rejeita exatamente
+        # isso, e com razao: um artefato carimbado com o merge commit nao pode ser
+        # rastreado ate codigo que passou pelos gates.
+        env:
+          OMNIROUTE_BUILD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          export OMNIROUTE_BUILD_SHA="${OMNIROUTE_BUILD_SHA:0:7}"
+          node scripts/build/write-build-sha.mjs
+      # O guard de proveniencia checa ancestralidade contra `origin/main` por padrao.
+      # Esse e o ref certo na PUBLICACAO (npm-publish.yml roda em main), mas em
+      # `pull_request` e estruturalmente impossivel: enquanto a PR esta aberta o head
+      # dela NUNCA e ancestral de main — e o checkout raso nem traz `origin/main` para
+      # o grafo local, entao a sonda responde `false` de qualquer jeito. Resultado: o
+      # gate falhava 100% das vezes em PR. Pre-merge o unico invariante checavel e "o
+      # stamp corresponde a branch sob teste", entao apontamos o ref para o head da PR.
+      # Usamos `refs/pull/<N>/head` e nao `head.ref` porque aquele existe no PROPRIO
+      # origin mesmo quando a PR vem de um fork; `head.ref` so existe no repo do autor.
+      - name: Resolve the provenance ref for the pack gate (#10427)
+        id: provenance-ref
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ -n "$PR_NUMBER" ]; then
+            git fetch --no-tags --depth=50 origin \
+              "+refs/pull/$PR_NUMBER/head:refs/remotes/origin/pr-head"
+            echo "ref=origin/pr-head" >> "$GITHUB_OUTPUT"
+          else
+            git fetch --no-tags --depth=50 origin \
+              "+refs/heads/$GITHUB_REF_NAME:refs/remotes/origin/$GITHUB_REF_NAME"
+            echo "ref=origin/$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm run check:pack-artifact
+        env:
+          OMNIROUTE_RELEASE_REF: ${{ steps.provenance-ref.outputs.ref }}
+      # WS1.2 (#7065 class): pack the real tarball, install it into a clean prefix and
+      # BOOT it to a healthy /api/monitoring/health — the gate that structure checks
+      # cannot provide (3 releases shipped boot-crashing tarballs with green lists).
+      - name: Boot-smoke the packed tarball
+        run: npm run check:pack-boot
+
+  electron-package-smoke:
+    name: Electron Package Smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    needs: [build, changes]
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true' }}
+    # WS1.5 (v3.8.49 plan): the Electron native-module path previously executed for
+    # the FIRST time on the release tag — the v3.8.48 Windows bug (npx.cmd spawned
+    # without shell, CVE-2024-27980 behavior change) could only surface at release.
+    # windows-latest runs prepare:bundle (better-sqlite3 prebuild verification since
+    # v13 — the node-gyp rebuild is gone) per release PR; ubuntu keeps the full
+    # pack + headless smoke.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - name: Download Next.js build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: next-build
+          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
+          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
+          # #11896's first cut broke the Electron smoke on exactly that. A relative path
+          # works in bash and pwsh alike; hosted workspaces are ephemeral.
+          path: next-build-artifact
+      - name: Extract Next.js build artifact
+        run: |
+          tar -xzf next-build-artifact/e2e-build.tar.gz
+      - name: Install Electron dependencies
+        working-directory: electron
+        run: npm install --no-audit --no-fund
+      - name: Pack Electron app
+        if: runner.os == 'Linux'
+        working-directory: electron
+        run: npm run pack
+      # ADVISORY while the new Windows leg matures (repo convention, dast-smoke
+      # precedent): its first-ever real run (2026-07-15, run 29457533565) died in
+      # 0.7s with the error swallowed by pwsh — bash shell captures stderr and
+      # continue-on-error keeps the heavy gate green while we harden it (#7336).
+      - name: Prepare Electron standalone (Windows prebuild verification)
+        if: runner.os == 'Windows'
+        working-directory: electron
+        continue-on-error: true
+        shell: bash
+        run: npm run prepare:bundle 2>&1
+      - name: Smoke packaged Electron app
+        if: runner.os == 'Linux'
+        env:
+          ELECTRON_SMOKE_TIMEOUT_MS: 60000
+        run: xvfb-run -a npm run electron:smoke:packaged
+
+  test-unit:
+    name: Unit Tests (${{ matrix.shard }}/8)
+    # Same dynamic-runner rule as Build (own-origin only; fallback ubuntu-latest).
+    # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
+    # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
+    # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
+    # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
+    timeout-minutes: 25
+    # needs: changes (not build) — this job never downloads the next-build artifact;
+    # gating it on Build only serialized ~20min of wall-clock for nothing. Jobs that
+    # DO consume the artifact (e2e, package-artifact, electron-package-smoke) keep
+    # needs: build. The `if` mirrors Build's own skip condition so docs-only PRs
+    # still skip the suite.
+    needs: changes
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      # Raw V8 coverage filled the hosted runner disk on 2026-11-02: the job died with
+      # "No space left on device" and a log with no test summary, which reads as a flake.
+      # Hosted only: this must never delete anything on the self-hosted slots.
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      # QW-d (plano mestre): fonte única — o MESMO npm script dos runs locais (adiciona o
+      # setupPolyfill que o comando inline omitia; o glob canônico vive só no package.json).
+      # D3 (plano mestre): a coverage é coletada NESTE mesmo run (c8/NODE_V8_COVERAGE propaga
+      # aos filhos através do npm) — elimina a matrix Coverage Shard ×8, que re-executava a
+      # suíte inteira só para medir o gate. Padrão usado pelo CI do próprio nodejs/node.
+      # Heap: os shards rodam sob instrumentacao de cobertura do V8, que retem muito
+      # mais memoria que a suite crua. Com o teto antigo de 4096 MB os shards passaram
+      # a abortar com SIGABRT (exit 134, "Ineffective mark-compacts near heap limit")
+      # ao redor de 4086 MB conforme o catalogo de providers cresceu no ciclo v3.8.50 —
+      # todos os testes passavam e o processo morria no fim, o que le como falha de
+      # teste sem ser. O teto vive em `test:unit:ci:shard` (package.json) e agora
+      # acompanha os 8192 MB ja usados pelas variantes nao-shardadas; os runners
+      # GitHub-hosted tem 16 GB.
+      - name: Unit tests (shard ${{ matrix.shard }}/8) with V8 coverage
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/8
+          # NODE_OPTIONS (nao so o flag em test:unit:ci:shard) porque quem estoura o
+          # heap e o processo `c8` que embrulha a suite — ele agrega ~577 MB de JSON
+          # de cobertura bruta. Subir o teto so no node filho deixa o pai no default
+          # do V8 (~4 GB) e o OOM continua igual, em ~4083 MB. Mesmo padrao ja usado
+          # pelo job de merge de cobertura mais abaixo.
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          rm -rf coverage-shard coverage-shard-report
+          npx c8 --merge-async \
+            --temp-directory=coverage-shard \
+            --reports-dir=coverage-shard-report \
+            --reporter=json \
+            --exclude=tests/** \
+            --exclude=**/*.test.* \
+            npm run test:unit:ci:shard
+      - name: Upload raw shard coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-shard-${{ matrix.shard }}
+          path: coverage-shard/*.json
+          if-no-files-found: error
+
+  test-bun-sqlite:
+    name: Bun SQLite Compatibility
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    timeout-minutes: 10
+    needs: changes
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - name: Install Bun (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          powershell -c "iwr bun.sh/install.ps1 -useb | iex"
+          echo "$env:USERPROFILE\.bun\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+      - name: Install Bun (non-Windows)
+        if: runner.os != 'Windows'
+        run: npm install -g bun
+      - run: npm run test:bun:db
+
+  test-vitest:
+    name: Vitest (MCP / autoCombo / UI components)
+    # Same dynamic-runner rule as Build (own-origin only; fallback ubuntu-latest).
+    # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
+    # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
+    # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
+    # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    # needs: changes (not build) — no artifact consumed; see test-unit note.
+    needs: changes
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      # The second test runner (CLAUDE.md: "Both test runners must pass") — was never
+      # wired into CI until the 2026-06-09 quality audit (Fase 6A.2).
+      # WS5.2/5.3 (v3.8.49 plan): JUnit output feeds Trunk Flaky Tests (advisory upload
+      # below). node:test stays OUT of the first wave (fd1-sensitive reporter stream).
+      - run: npm run test:vitest -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-mcp.xml
+      # vitest:ui went back to 870/870 green in the v3.8.49 quality plan (WS6.1,
+      # PR #7127 — 69 fails triaged: matchMedia polyfill, node:test→vitest migration,
+      # CompareTab D22 cap). Promoted to BLOCKING per the plan's post-merge step.
+      - run: npm run test:vitest:ui -- --reporter=default --reporter=junit --outputFile.junit=trunk-junit/vitest-ui.xml
+      # Trunk Flaky Tests upload — advisory (never blocks), own-origin only (fork PRs
+      # have no TRUNK_TOKEN). Pinned by SHA (tag v2.1.2).
+      - name: Upload test results to Trunk (advisory)
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
+        with:
+          junit-paths: trunk-junit/**/*.xml
+          org-slug: omniroute
+          token: ${{ secrets.TRUNK_TOKEN }}
+
+  # Node 24/26 compatibility matrices moved to .github/workflows/nightly-compat.yml
+  # (plano mestre testes+CI, Eixo D2 — they cost ~28% of every heavy run to catch a
+  # failure class that rarely originates in a PR; nightly catches it within 24h and
+  # the release gate can still exercise them via workflow_dispatch when needed).
+  test-coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    # 10min was sized before #7114 added the lcov reporter (Codecov/Sonar need it);
+    # merging 8 shard JSONs + text+json+lcov now takes ~10-12min — three consecutive
+    # release-tip runs died at exactly 10m as job-timeout "cancelled" (2026-07-15/16).
+    # 30, not 20 (2026-08-29): the informational Codecov upload below hung for the rest of
+    # the budget on two consecutive main runs (33207760653, 33215115341); the job ended
+    # `cancelled` and dragged the whole run's conclusion to `cancelled` although every
+    # blocking job was green. The upload step now has its own ceiling; this is headroom.
+    # 45, not 30 (2026-10-20): the budget was eaten by growth — on six PRs the job took
+    # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
+    # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
+    # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
+    timeout-minutes: 45
+    needs: test-unit
+    if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+    steps:
+      # Same disk exhaustion as the unit shards: merging the 8 raw shard JSONs filled the
+      # hosted runner disk on 2026-11-03 (job 125909618697, "No space left on device").
+      - name: Free hosted runner disk
+        if: ${{ runner.environment == 'github-hosted' }}
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - name: Download all shard coverage
+        uses: actions/download-artifact@v8
+        with:
+          pattern: coverage-shard-*
+          path: coverage-shards/
+          merge-multiple: true
+      - name: Merge + report + gate
+        # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
+        # keeps the V8 coverage merge incremental instead of loading every raw
+        # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
+        # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
+        # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
+        # on a measured PR against the org's 20-job hosted cap.
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          LCOV_REPORTER=()
+          if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
+          mkdir -p coverage
+          first_coverage_file=""
+          if [ -d coverage-shards ]; then
+            first_coverage_file="$(find coverage-shards -maxdepth 1 -type f -name '*.json' -print -quit)"
+          fi
+          if [ -z "$first_coverage_file" ]; then
+            echo "::error::No raw coverage shard data was downloaded."
+            find . -maxdepth 3 -type f | sort
+            exit 1
+          fi
+          # Gate aligned to the project's local coverage bar: `npm run test:coverage`
+          # gates at 60/60/60/60, so CI must match it (the previous CI floor of 40
+          # silently undershot the local bar — a real drift). Real merged coverage is
+          # ~79/79/82/75, so 60 is a conservative floor with headroom; the Fase-4
+          # coverage ratchet (quality-baseline.json) layers "must not drop vs baseline"
+          # on top of this floor.
+          npx c8 report \
+            --temp-directory coverage-shards \
+            --reports-dir coverage \
+            --merge-async \
+            --reporter=text-summary \
+            --reporter=json-summary \
+            "${LCOV_REPORTER[@]}" \
+            --exclude=tests/** \
+            --exclude=**/*.test.* \
+            --check-coverage \
+            --statements 60 --lines 60 --functions 60 --branches 60
+      - name: Build coverage summary
+        if: always()
+        run: |
+          mkdir -p coverage
+          if [ -f coverage/coverage-summary.json ]; then
+            node scripts/check/test-report-summary.mjs \
+              --input coverage/coverage-summary.json \
+              --output coverage/coverage-report.md \
+              --threshold 60
+          else
+            printf '%s\n' \
+              '# Coverage Report' \
+              '' \
+              'Coverage summary JSON was not generated. Inspect the Coverage job logs.' \
+              > coverage/coverage-report.md
+          fi
+          cat coverage/coverage-report.md >> "$GITHUB_STEP_SUMMARY"
+      # WS5.6 (D7, v3.8.49 plan): patch coverage on the PR diff via Codecov —
+      # informational during calibration (codecov.yml sets informational: true);
+      # promote to blocking only after ~2 weeks without false blocks. The lcov
+      # reporter above also fixes coverage/lcov.info being silently absent
+      # (if-no-files-found: warn) — Sonar consumes the same file.
+      - name: Upload coverage to Codecov (informational)
+        # Push/merge-queue only: on a PR it cost ~5 min of the job for an informational
+        # patch-coverage note, and the PR no longer writes lcov.info (see the merge step).
+        if: ${{ always() && github.event_name != 'pull_request' }}
+        # Informational means informational: its own ceiling and continue-on-error, so a
+        # stalled upload can neither eat the job's budget nor turn a green job cancelled.
+        timeout-minutes: 5
+        continue-on-error: true
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage/lcov.info
+          # `files` does not stop the uploader from also searching the workspace: on the
+          # v3.8.53 release push (run 42180292091) it found the 22207 per-shard JSON files
+          # under coverage-shards/, hit the 5-minute ceiling and never uploaded anything,
+          # while continue-on-error kept the step green. lcov.info is the only report.
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            coverage/coverage-summary.json
+            coverage/coverage-report.md
+            coverage/lcov.info
+          if-no-files-found: warn
+
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    needs: test-coverage
+    # Temporarily opt-in: the private project currently has no Sonar quota.
+    # Re-enable without another code change by setting the repository Actions
+    # variable SONARQUBE_ENABLED=true after quota/project access is restored.
+    if: ${{ vars.SONARQUBE_ENABLED == 'true' && !cancelled() && needs.test-coverage.result == 'success' }}
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      # The upload strips the common `coverage/` prefix, so the artifact root holds
+      # lcov.info directly — download into coverage/ so it lands at coverage/lcov.info,
+      # where sonar.javascript.lcov.reportPaths expects it (path: . left the Sonar
+      # new-code coverage at 0% every scan).
+      - uses: actions/download-artifact@v8
+        with:
+          name: coverage-report
+          path: coverage/
+      - name: Explain SonarQube skip
+        if: ${{ github.event_name != 'pull_request' || env.SONAR_TOKEN == '' || env.SONAR_HOST_URL == '' }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "SonarQube scan skipped on non-PR events to keep main pushes governed by repository CI gates." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "SonarQube scan skipped because SONAR_TOKEN or SONAR_HOST_URL is not configured." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Read project version
+        if: ${{ github.event_name == 'pull_request' && env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
+        id: pkg
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          # Harden against output injection: only accept a plain semver-ish string.
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid package.json version: $VERSION" >&2; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: SonarQube Scan
+        if: ${{ github.event_name == 'pull_request' && env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          # sonar.projectVersion advances the "previous_version" new-code baseline at
+          # each release; without it the baseline never moves (it stays pinned to the
+          # analysis where the version last changed) and legacy issues pile up as
+          # "new code" in the quality gate.
+          args: -Dsonar.projectVersion=${{ steps.pkg.outputs.version }}
+
+  coverage-pr-comment:
+    name: PR Coverage Comment
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.fork == false && needs.changes.outputs.code == 'true' }}
+    needs:
+      - changes
+      - pr-test-policy
+      - test-coverage
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Download coverage artifact
+        if: ${{ needs.test-coverage.result != 'cancelled' }}
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          name: coverage-report
+          path: .
+      - name: Prepare PR coverage comment
+        env:
+          COVERAGE_RESULT: ${{ needs.test-coverage.result }}
+          POLICY_RESULT: ${{ needs.pr-test-policy.result }}
+        run: |
+          mkdir -p .artifacts
+          {
+            echo "<!-- omniroute-coverage-report -->"
+            echo "## CI Coverage Report"
+            echo ""
+            echo "- Coverage job: \`${COVERAGE_RESULT}\`"
+            echo "- PR test policy: \`${POLICY_RESULT}\`"
+            echo ""
+            if [ -f coverage/coverage-report.md ]; then
+              cat coverage/coverage-report.md
+            else
+              echo "Coverage artifact was not available for this run."
+            fi
+            if [ "${POLICY_RESULT}" = "failure" ]; then
+              echo ""
+              echo "## PR Test Policy"
+              echo ""
+              echo "This PR changes production code in \`src/\`, \`open-sse/\`, \`electron/\`, or \`bin/\` without accompanying automated tests."
+            fi
+          } > .artifacts/pr-coverage-comment.md
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require("fs");
+            const marker = "<!-- omniroute-coverage-report -->";
+            const body = fs.readFileSync(".artifacts/pr-coverage-comment.md", "utf8");
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
+
+  test-e2e:
+    name: E2E Tests (${{ matrix.shard }}/9)
+    runs-on: ubuntu-latest
+    # Build artifact from the `build` job is downloaded instead of rebuilding
+    # (~5min saved per shard). 9 shards (up from 6) reduces tests per shard by
+    # ~33%. Playwright browser is cached across runs (~1.5min saved per shard).
+    # Heavy shard target: ≤20min (was ~40min). Timeout 45min to cover slow runners.
+    timeout-minutes: 45
+    needs: [build, changes]
+    # Tests-only diffs outside tests/e2e/ cannot change the served app. A hotfix
+    # label is not evidence for this candidate and cannot waive required tests.
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ needs.changes.outputs.testsOnly != 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+      OMNIROUTE_PLAYWRIGHT_SKIP_BUILD: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - name: Cache Playwright browsers
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: playwright-chromium-${{ runner.os }}-
+      - run: npx playwright install --with-deps chromium
+      - name: Download Next.js build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: next-build
+          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
+          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
+          # #11896's first cut broke the Electron smoke on exactly that. A relative path
+          # works in bash and pwsh alike; hosted workspaces are ephemeral.
+          path: next-build-artifact
+      - name: Extract Next.js build artifact
+        run: |
+          tar -xzf next-build-artifact/e2e-build.tar.gz
+      # WS4.1: duration-balanced shards (LPT over config/quality/e2e-timings.json).
+      # Measured skew of plain --shard was 14× (24m47s vs 1m47s) — E2E was the CI
+      # critical path. The balancer self-verifies completeness and exits non-zero on
+      # any inconsistency, falling back to plain --shard (never fewer specs).
+      - name: Run E2E tests (duration-balanced shard)
+        env:
+          SHARD: ${{ matrix.shard }}
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME: junit-e2e-results.xml
+        run: |
+          if FILES=$(node scripts/quality/balance-e2e-shards.mjs "$SHARD" 9); then
+            if [ -z "$FILES" ]; then echo "[e2e-balance] shard $SHARD has no files"; exit 0; fi
+            echo "[e2e-balance] shard $SHARD runs:"; echo "$FILES"
+            # FILES is our own newline-separated path list, so word-splitting is intended
+            # shellcheck disable=SC2086,SC2046
+            npx playwright test $(echo "$FILES" | tr '\n' ' ') --reporter=line,junit
+          else
+            echo "[e2e-balance] balancer unavailable — plain --shard fallback"
+            npx playwright test tests/e2e/*.spec.ts --shard="$SHARD"/9 --reporter=line,junit
+          fi
+      # WS5.2/5.3: Trunk Flaky Tests upload — advisory, own-origin only, SHA-pinned.
+      - name: Upload test results to Trunk (advisory)
+        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
+        with:
+          junit-paths: junit-e2e-results.xml
+          org-slug: omniroute
+          token: ${{ secrets.TRUNK_TOKEN }}
+
+  test-integration:
+    name: Integration Tests (${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # needs: changes (not build) — no artifact consumed; see test-unit note.
+    needs: changes
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      INITIAL_PASSWORD: ci-test-password-for-integration
+      DATA_DIR: /tmp/omniroute-ci-${{ matrix.shard }}
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - name: Integration tests (shard ${{ matrix.shard }}/2)
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/2
+        run: npm run test:integration:ci
+
+  test-security:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    # needs: changes (not build) — no artifact consumed; see test-unit note.
+    needs: changes
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - run: npm run test:security
+
+  # Live-server E2E. Both suites boot a real OmniRoute via their own runner and
+  # drive it over HTTP; neither needs provider credentials. They were documented in
+  # AGENTS.md's test matrix but wired to NO workflow, and had additionally been
+  # unrunnable (vitest.config.ts excluded the very files their runners passed as a
+  # positional filter) — so nothing had executed them for as long as that was true.
+  test-ecosystem:
+    name: Ecosystem E2E (live server)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # needs: changes (not build) — the runner boots its own dev server.
+    needs: changes
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - run: npm run test:ecosystem
+
+  test-protocols-e2e:
+    name: Protocol Clients E2E (live server, advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: changes
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
+    # ADVISORY until #10049 is resolved. Restoring this suite immediately surfaced a
+    # real discrepancy that had been invisible while it could not run: GET
+    # /api/mcp/audit answers 403 over loopback where the suite expects 200|401. That
+    # is a pre-existing contract question, not a defect introduced by wiring the job
+    # up, so it must not block every PR in the meantime. Flip to blocking (drop this
+    # continue-on-error) the moment #10049 lands.
+    continue-on-error: true
+    env:
+      JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-test-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - uses: ./.github/actions/npm-ci-retry
+        with:
+          # PR acceleration is not release-candidate provenance.
+          cache: ${{ github.event_name == 'pull_request' }}
+      - run: npm run check:node-runtime
+      - run: npm run test:protocols:e2e
+
+  admission-verdict:
+    # A queue-draft edit run must not leave a check named "Gate / CI" on the draft: Mergify
+    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
+    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || 'Gate / CI' }}
+    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
+    # workflow concurrency note): that draft is never what branch protection merges.
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - changes
+      - lint
+      - quality-gate
+      - quality-extended
+      - docs-sync-strict
+      - docs-lint
+      - i18n-ui-coverage
+      - i18n-glossary-zhcn
+      - i18n
+      - pr-test-policy
+      - build
+      - package-artifact
+      - electron-package-smoke
+      - test-unit
+      - test-bun-sqlite
+      - test-vitest
+      - test-coverage
+      - test-e2e
+      - test-integration
+      - test-security
+      - test-ecosystem
+      - test-protocols-e2e
+      - sonarqube
+      - coverage-pr-comment
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      - name: Evaluate exact-candidate admission
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node scripts/quality/admission-verdict.mjs ci
+      - name: Retain admission receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ci-admission-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .artifacts/ci-admission.json
+          if-no-files-found: error
+          retention-days: 14
+
+  ci-summary:
+    name: CI Dashboard
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    needs:
+      - changes
+      - lint
+      - docs-sync-strict
+      - i18n-ui-coverage
+      - i18n-glossary-zhcn
+      - i18n
+      - pr-test-policy
+      - build
+      - package-artifact
+      - electron-package-smoke
+      - test-unit
+      - test-coverage
+      - sonarqube
+      - coverage-pr-comment
+      - test-e2e
+      - test-integration
+      - test-security
+      - test-ecosystem
+      - test-protocols-e2e
+    steps:
+      - name: Download i18n results
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          pattern: i18n-*
+          path: results
+          merge-multiple: true
+
+      - name: Generate dashboard
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          # Workflow-controlled data (job results), not user input — safe to read here.
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          status() {
+            case "$1" in
+              success) echo "🟢 PASS" ;;
+              failure) echo "🔴 FAIL" ;;
+              cancelled) echo "⚫ CANCELLED" ;;
+              skipped) echo "⚪ SKIPPED" ;;
+              *) echo "🟡 UNKNOWN" ;;
+            esac
+          }
+
+          {
+            echo "# 🚀 CI Dashboard"
+            echo ""
+
+            # (gap 12) A cancelled job never reported a verdict, and in a long table that reads the
+            # same as a green one. `cancel-in-progress` plus incremental fixing cancels jobs on every
+            # push, and this cycle the Vitest job was cancelled in rounds 1, 2 and 3 — it only ran to
+            # completion in round 4, where it revealed a suite that had been broken the whole cycle
+            # plus two production bugs. A gate that never finishes is indistinguishable from one that
+            # passes, so name them at the TOP instead of leaving them to be spotted mid-table.
+            CANCELLED_JOBS=$(printf '%s' "$NEEDS_JSON" \
+              | jq -r 'to_entries | map(select(.value.result == "cancelled")) | .[].key' 2>/dev/null \
+              | sort | paste -sd", " -) || CANCELLED_JOBS=""
+            if [ -n "$CANCELLED_JOBS" ]; then
+              {
+                echo "> ### ⚫ Cancelled — no verdict was reported"
+                echo ">"
+                echo "> \`$CANCELLED_JOBS\`"
+                echo ">"
+                echo "> These did not fail; they never finished, so nothing was checked. Treat this"
+                echo "> run as INCOMPLETE for those gates. If the cancellation came from"
+                echo "> \`cancel-in-progress\` on a newer push, the newer run covers it — otherwise"
+                echo "> re-run them before reading this dashboard as green."
+                echo ""
+              }
+            fi
+
+            echo "## 🧱 Core Checks"
+            echo "| Job | Status |"
+            echo "|-----|--------|"
+            echo "| Change Classification | $(status '${{ needs.changes.result }}') |"
+            echo "| Lint | $(status '${{ needs.lint.result }}') |"
+            echo "| Docs Sync (Strict) | $(status '${{ needs.docs-sync-strict.result }}') |"
+            echo "| i18n UI Coverage | $(status '${{ needs.i18n-ui-coverage.result }}') |"
+            echo "| i18n Glossary (zh-CN, ko) | $(status '${{ needs.i18n-glossary-zhcn.result }}') |"
+            echo "| PR Test Policy | $(status '${{ needs.pr-test-policy.result }}') |"
+            echo "| SonarQube (opt-in; disabled without SONARQUBE_ENABLED=true) | $(status '${{ needs.sonarqube.result }}') |"
+
+            echo ""
+            echo "## 🏗️ Build"
+            echo "| Job | Status |"
+            echo "|-----|--------|"
+            echo "| Build Matrix | $(status '${{ needs.build.result }}') |"
+            echo "| Package Artifact | $(status '${{ needs.package-artifact.result }}') |"
+            echo "| Electron Package Smoke | $(status '${{ needs.electron-package-smoke.result }}') |"
+
+            echo ""
+            echo "## 🧪 Tests"
+            echo "| Suite | Status |"
+            echo "|-------|--------|"
+            echo "| Unit | $(status '${{ needs.test-unit.result }}') |"
+            echo "| Coverage | $(status '${{ needs.test-coverage.result }}') |"
+            echo "| PR Coverage Comment | $(status '${{ needs.coverage-pr-comment.result }}') |"
+            echo "| E2E | $(status '${{ needs.test-e2e.result }}') |"
+            echo "| Integration | $(status '${{ needs.test-integration.result }}') |"
+            echo "| Security Tests | $(status '${{ needs.test-security.result }}') |"
+            echo "| Ecosystem E2E | $(status '${{ needs.test-ecosystem.result }}') |"
+            echo "| Protocol Clients E2E (advisory, #10049) | $(status '${{ needs.test-protocols-e2e.result }}') |"
+
+            echo ""
+            echo "## 🌍 Translations"
+
+            total=0
+            langs=0
+
+            if [ -d results ]; then
+              for file in results/*.txt; do
+                [ -f "$file" ] || continue
+                val=$(sed -r 's/\x1B\[[0-9;]*[mK]//g' "$file" | grep "Untranslated:" | awk '{print $2}')
+                val=${val:-0}
+                total=$((total + val))
+                langs=$((langs + 1))
+              done
+            fi
+
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|------|"
+            echo "| Languages checked | $langs |"
+            echo "| Total untranslated | $total |"
+
+            if [ "$total" -gt 0 ]; then
+              echo ""
+              echo "⚠️ **Translations need attention**"
+            else
+              echo ""
+              echo "✅ **All translations complete**"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

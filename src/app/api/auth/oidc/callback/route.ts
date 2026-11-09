@@ -1,0 +1,299 @@
+import { NextResponse } from "next/server";
+import { getCachedSettings } from "@/lib/db/readCache";
+import { updateSettings } from "@/lib/db/settings";
+import { jwtVerify, createRemoteJWKSet } from "jose";
+import { cookies } from "next/headers";
+import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
+import {
+  matchesOidcAdmissionClaim,
+  oidcAdmissionClaimSchema,
+} from "@/shared/utils/oidcAdmissionClaim";
+import {
+  getDashboardJwtSecret,
+  mintDashboardSessionToken,
+} from "@/shared/utils/dashboardSessionToken";
+// Test seam (static) — allows tests to inject a cookie store and capture the minted auth_token.
+// Mirrors the pattern in src/app/api/auth/login/route.ts
+export const oidcCallbackInternals = {
+  getCookieStore: cookies,
+  clearJwksCache() {
+    for (const k of Object.keys(jwksClientsCache)) {
+      delete jwksClientsCache[k];
+    }
+  },
+};
+// Cache JWKS clients globally to reuse retrieved keys and avoid fetching JWKS on every login request.
+const jwksClientsCache: Record<string, ReturnType<typeof createRemoteJWKSet>> = {};
+
+function getJwksClient(jwksUri: string) {
+  let client = jwksClientsCache[jwksUri];
+  if (!client) {
+    client = createRemoteJWKSet(new URL(jwksUri));
+    jwksClientsCache[jwksUri] = client;
+  }
+  return client;
+}
+
+/**
+ * GET /api/auth/oidc/callback
+ * Completes OIDC login for the dashboard admin gate.
+ * Exchanges authorization code, validates ID token, issues the exact same
+ * 30-day auth_token JWT used by the password login, sets the cookie, and
+ * redirects to the dashboard. Password login remains available as fallback.
+ */
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  const returnedState = url.searchParams.get("state");
+  // Compute origin early so ALL redirects (including error cases) are absolute.
+  // Required by Next.js 16 in some test/runtime contexts and keeps behavior consistent with success path.
+  const forwardedProtoEarly = (request.headers.get("x-forwarded-proto") || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+  const reqUrlEarly = new URL(request.url);
+  const schemeEarly =
+    forwardedProtoEarly === "https" || reqUrlEarly.protocol === "https:" ? "https" : "http";
+  const hostEarly = request.headers.get("host") || request.headers.get("Host") || reqUrlEarly.host;
+  const originEarly = `${schemeEarly}://${hostEarly}`;
+
+  if (!code || !returnedState) {
+    return NextResponse.redirect(new URL("/login?oidc_error=missing_code", originEarly));
+  }
+
+  // Validate state from cookie (via seam so tests can capture)
+  const cookieStore = await oidcCallbackInternals.getCookieStore();
+  const storedState = cookieStore.get("oidc_state")?.value;
+  // Constant-time: `!==` short-circuits on the first differing byte, so
+  // rejection time correlates with matching-prefix length (GHSA-7434-6q4c-33fh).
+  // The sibling OAuth callback already compares `state` this way.
+  if (!storedState || !timingSafeCompare(storedState, returnedState)) {
+    return NextResponse.redirect(new URL("/login?oidc_error=invalid_state", originEarly));
+  }
+
+  // Clear state cookie
+  cookieStore.set("oidc_state", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  const settings = await getCachedSettings();
+
+  const enabled = settings.oidcEnabled === true;
+  const rawIssuer = typeof settings.oidcIssuer === "string" ? settings.oidcIssuer.trim() : "";
+  const issuerBase = rawIssuer.replace(/\/+$/, "");
+  const clientId = typeof settings.oidcClientId === "string" ? settings.oidcClientId.trim() : "";
+  const clientSecret =
+    typeof settings.oidcClientSecret === "string" ? settings.oidcClientSecret.trim() : "";
+  const redirectPath =
+    typeof settings.oidcRedirectPath === "string" && settings.oidcRedirectPath.length > 0
+      ? settings.oidcRedirectPath
+      : "/api/auth/oidc/callback";
+
+  // Without an allowlist every account at the identity provider would be let in as the
+  // dashboard admin, so an empty list counts as not configured.
+  const allowed = Array.isArray(settings.oidcAllowedSubjects)
+    ? settings.oidcAllowedSubjects.filter((v: unknown) => typeof v === "string" && v.trim() !== "")
+    : [];
+
+  const rawAdmissionClaim = settings.oidcAdmissionClaim;
+  const admissionClaim =
+    rawAdmissionClaim == null ? null : oidcAdmissionClaimSchema.safeParse(rawAdmissionClaim);
+  if (
+    !enabled ||
+    !rawIssuer ||
+    !clientId ||
+    !clientSecret ||
+    (rawAdmissionClaim != null && !admissionClaim?.success) ||
+    (allowed.length === 0 && !admissionClaim)
+  ) {
+    return NextResponse.redirect(new URL("/login?oidc_error=not_configured", originEarly));
+  }
+
+  // Compute absolute redirect_uri matching what we sent
+  const forwardedProto = (request.headers.get("x-forwarded-proto") || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
+  const reqUrl = new URL(request.url);
+  const scheme = forwardedProto === "https" || reqUrl.protocol === "https:" ? "https" : "http";
+  const host = request.headers.get("host") || request.headers.get("Host") || reqUrl.host;
+  const origin = `${scheme}://${host}`;
+  const redirectUri = `${origin}${redirectPath}`;
+
+  // Discover endpoints
+  let tokenEndpoint = `${issuerBase}/token`;
+  let jwksUri = `${issuerBase}/jwks`;
+  let discoveredIssuer: string | undefined;
+  try {
+    const wellKnownResp = await fetch(`${issuerBase}/.well-known/openid-configuration`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (wellKnownResp.ok) {
+      const data: unknown = await wellKnownResp.json();
+      if (data && typeof data === "object") {
+        const rec = data as Record<string, unknown>;
+        if (typeof rec.token_endpoint === "string" && rec.token_endpoint.length > 0) {
+          tokenEndpoint = rec.token_endpoint;
+        }
+        if (typeof rec.jwks_uri === "string" && rec.jwks_uri.length > 0) {
+          jwksUri = rec.jwks_uri;
+        }
+        if (typeof rec.issuer === "string" && rec.issuer.trim().length > 0) {
+          discoveredIssuer = rec.issuer.trim();
+        }
+      }
+    }
+  } catch {
+    // use conventional endpoints
+  }
+
+  // PKCE: the verifier is only sent when this browser started the flow with a challenge.
+  const codeVerifier = cookieStore.get("oidc_pkce_verifier")?.value;
+
+  // Exchange code for tokens (form post)
+  const tokenParams = new URLSearchParams({
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: redirectUri,
+    client_id: clientId,
+    client_secret: clientSecret,
+  });
+  if (codeVerifier) {
+    tokenParams.set("code_verifier", codeVerifier);
+  }
+
+  let tokenResp: Response;
+  try {
+    tokenResp = await fetch(tokenEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: tokenParams.toString(),
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    return NextResponse.redirect(new URL("/login?oidc_error=token_exchange", originEarly));
+  }
+
+  if (!tokenResp.ok) {
+    return NextResponse.redirect(new URL("/login?oidc_error=token_exchange", originEarly));
+  }
+
+  let tokenData: unknown;
+  try {
+    tokenData = await tokenResp.json();
+  } catch {
+    return NextResponse.redirect(new URL("/login?oidc_error=token_response", originEarly));
+  }
+
+  if (!tokenData || typeof tokenData !== "object") {
+    return NextResponse.redirect(new URL("/login?oidc_error=token_response", originEarly));
+  }
+
+  const td = tokenData as Record<string, unknown>;
+  const idToken = typeof td.id_token === "string" ? td.id_token : undefined;
+  if (!idToken) {
+    return NextResponse.redirect(new URL("/login?oidc_error=no_id_token", originEarly));
+  }
+
+  // Validate ID token
+  try {
+    const expectedIssuers = Array.from(
+      new Set(
+        [
+          rawIssuer,
+          issuerBase,
+          `${issuerBase}/`,
+          discoveredIssuer,
+          discoveredIssuer ? discoveredIssuer.replace(/\/+$/, "") : undefined,
+          discoveredIssuer ? `${discoveredIssuer.replace(/\/+$/, "")}/` : undefined,
+        ].filter((s): s is string => typeof s === "string" && s.length > 0)
+      )
+    );
+
+    const JWKS = getJwksClient(jwksUri);
+    const { payload } = await jwtVerify(idToken, JWKS, {
+      issuer: expectedIssuers.length === 1 ? expectedIssuers[0] : expectedIssuers,
+      audience: clientId,
+    });
+
+    // The id_token must echo the nonce sent in the authorization URL. The
+    // browser-bound cookie is required: an id_token replayed without the nonce
+    // must not mint a session.
+    const expectedNonce = cookieStore.get("oidc_nonce")?.value;
+    const tokenNonce = (payload as Record<string, unknown>).nonce;
+    if (
+      !expectedNonce ||
+      typeof tokenNonce !== "string" ||
+      !timingSafeCompare(expectedNonce, tokenNonce)
+    ) {
+      return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));
+    }
+
+    const sub = typeof payload.sub === "string" ? payload.sub : "";
+    const emailVerified = (payload as Record<string, unknown>).email_verified === true;
+    const email =
+      emailVerified && typeof (payload as Record<string, unknown>).email === "string"
+        ? ((payload as Record<string, unknown>).email as string).toLowerCase()
+        : "";
+    const ok = allowed.some((v: string) => {
+      if (v === sub) return true;
+      return email !== "" && v.toLowerCase() === email;
+    });
+    if (allowed.length > 0 && !ok) {
+      return NextResponse.redirect(new URL("/login?oidc_error=subject_not_allowed", originEarly));
+    }
+    if (admissionClaim?.success && !matchesOidcAdmissionClaim(payload, admissionClaim.data)) {
+      return NextResponse.redirect(new URL("/login?oidc_error=role_not_allowed", originEarly));
+    }
+  } catch {
+    return NextResponse.redirect(new URL("/login?oidc_error=id_token_invalid", originEarly));
+  }
+  // First successful OIDC login marks setupComplete (like password bootstrap).
+  try {
+    await updateSettings({ setupComplete: true });
+  } catch {
+    // non-fatal — login can still proceed
+  }
+  // Mint the exact same dashboard session JWT as password login
+  const secret = getDashboardJwtSecret();
+  if (!secret) {
+    return NextResponse.redirect(new URL("/login?oidc_error=server_misconfigured", originEarly));
+  }
+
+  const forceSecureCookie = process.env.AUTH_COOKIE_SECURE === "true";
+  const forwardedProtoHeader = request.headers.get("x-forwarded-proto") || "";
+  const fp = forwardedProtoHeader.split(",")[0].trim().toLowerCase();
+  const isHttpsRequest = fp === "https" || reqUrl.protocol === "https:";
+  const useSecureCookie = forceSecureCookie || isHttpsRequest;
+
+  const jwt = await mintDashboardSessionToken(secret);
+
+  const store = await oidcCallbackInternals.getCookieStore();
+  store.set("auth_token", jwt, {
+    httpOnly: true,
+    secure: useSecureCookie,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+
+  // Single-use PKCE material: clear it once the session is minted.
+  store.set("oidc_pkce_verifier", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+  store.set("oidc_nonce", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+
+  // Success — go to dashboard
+  return NextResponse.redirect(`${origin}/dashboard`);
+}

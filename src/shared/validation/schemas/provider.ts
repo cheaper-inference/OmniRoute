@@ -1,0 +1,822 @@
+import { z } from "zod";
+import {
+  MODEL_SUPPORTED_ENDPOINT_VALUES,
+  normalizeModelSupportedEndpoints,
+} from "@/shared/constants/modelSupportedEndpoints";
+import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
+import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
+import {
+  isReservedProviderPrefix,
+  reservedProviderPrefixMessage,
+} from "@/shared/constants/reservedProviderPrefixes";
+import {
+  isValidIanaTimeZone,
+  isValidResetHour,
+} from "@omniroute/open-sse/services/dailyQuotaReset.ts";
+import {
+  upstreamHeadersRecordSchema,
+  modelCompatPerProtocolSchema,
+  customHeadersSchema,
+} from "./misc.ts";
+import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import { THINKING_REPLAY_MODES } from "@/shared/constants/modelCompat";
+import {
+  MODEL_CONCURRENCY_MAX_CAP,
+  MODEL_CONCURRENCY_MAX_KEY_LENGTH,
+} from "@/shared/constants/modelConcurrency";
+
+export { validateProviderSpecificData };
+
+// Nullable as well as optional, to match dailyQuotaResetHourSchema below. The
+// dashboard sends both fields as null when they are left blank, and the two
+// schemas disagreeing about that meant an edit touching neither of them still
+// failed validation on this one (#13066). The storage layer already coerces to
+// null (`data.dailyQuotaResetTimezone || null` in db/providers/nodes.ts), so
+// accepting null here changes nothing downstream.
+const dailyQuotaResetTimezoneSchema = z
+  .string()
+  .trim()
+  .optional()
+  .nullable()
+  .or(z.literal(""))
+  .refine((value) => !value || isValidIanaTimeZone(value), {
+    message: "Unknown IANA timezone",
+  });
+
+const dailyQuotaResetHourSchema = z
+  .number()
+  .int()
+  .optional()
+  .nullable()
+  .refine((value) => value == null || isValidResetHour(value), {
+    message: "Hour must be 0-23",
+  });
+
+// ──── Provider Schemas ────
+
+// #2166 + data-URL support: shared optional remote icon URL for compatible provider
+// nodes. Empty string is accepted as "no custom icon". Accepts http(s) URLs AND
+// valid `data:image/*;base64,...` data URLs; rejects malformed/unsafe schemes. The
+// validator lives in src/shared/validation/iconUrl.ts so UI and API never diverge.
+const providerNodeIconUrlSchema = z
+  .string()
+  .trim()
+  .refine((value) => isValidProviderIconUrl(value), {
+    message: "Icon URL must be a valid http(s) or data:image/*;base64 URL",
+  })
+  .optional();
+
+// #6715: the `apiKey` field is reused as the raw `Cookie:` header value for
+// cookie-based web providers (Gemini Business, Copilot M365, ChatGPT Web (Codex),
+// Claude Web, …). Real multi-cookie session headers (many `__Secure-*` entries,
+// large session tokens) legitimately exceed the old 10,000-char cap, so saving
+// a cookie that the provider's own `validate` check (validateProviderApiKeySchema,
+// uncapped) had already accepted failed with HTTP 400 "Too big …<=10000". Raised
+// to a still-bounded ceiling — well under the 10 MB default request-body limit and
+// the unconstrained SQLite TEXT column — so garbage input is still rejected.
+// Same fix shape as #6562 (priority cap raised to 100_000).
+export const MAX_PROVIDER_CREDENTIAL_LENGTH = 100_000;
+
+// #15930: credentials arriving with this prefix are encrypted envelopes produced by a
+// credential store. `encrypt()` deliberately skips re-encrypting values that already
+// carry it, so an envelope would be stored verbatim, fail to decrypt at runtime, and
+// surface only as a misleading "Missing API key" on the connection test. Plaintext
+// keys from every provider (sk-…, tvly-…, JWTs, cookie headers, JSON storage state)
+// start with something else, so rejecting at validation time is near-zero-false-positive.
+// Checked inline rather than via lib/db/encryption's looksEncrypted() because this
+// schema is imported by client-side dashboard code and must stay free of node:crypto.
+const ENCRYPTED_ENVELOPE_PREFIX = "enc:v1:";
+
+export const createProviderSchema = z
+  .object({
+    provider: z.string().min(1).max(100),
+    proxyEnabled: z.boolean().optional(),
+    apiKey: z.string().max(MAX_PROVIDER_CREDENTIAL_LENGTH).optional(),
+    name: z.string().min(1).max(200),
+    priority: z.number().int().min(1).max(100).optional(),
+    globalPriority: z.number().int().min(1).max(100).nullable().optional(),
+    defaultModel: z.string().max(200).nullable().optional(),
+    testStatus: z.string().max(50).optional(),
+    allowNoCredential: z.literal(true).optional(),
+    providerSpecificData: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .superRefine((data, ctx) => {
+        validateProviderSpecificData(data, ctx);
+      }),
+  })
+  .superRefine((data, ctx) => {
+    const apiKey = typeof data.apiKey === "string" ? data.apiKey.trim() : "";
+    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(resolveProviderId(data.provider));
+    if (data.allowNoCredential === true && !catalogAllowsOptionalKey) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "This provider does not allow a connection without a credential",
+        path: ["allowNoCredential"],
+      });
+    }
+    if (!catalogAllowsOptionalKey && apiKey.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "API key is required",
+        path: ["apiKey"],
+      });
+    }
+    if (apiKey.startsWith(ENCRYPTED_ENVELOPE_PREFIX)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "apiKey looks like an encrypted envelope from a credential store, not a plaintext key — store the plaintext API key",
+        path: ["apiKey"],
+      });
+    }
+
+    const cx =
+      data.providerSpecificData && typeof data.providerSpecificData === "object"
+        ? (data.providerSpecificData as Record<string, unknown>).cx
+        : undefined;
+    if (
+      data.provider === "google-pse-search" &&
+      (typeof cx !== "string" || cx.trim().length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Programmable Search Engine ID (cx) is required",
+        path: ["providerSpecificData", "cx"],
+      });
+    }
+
+    const gheUrl =
+      data.providerSpecificData && typeof data.providerSpecificData === "object"
+        ? (data.providerSpecificData as Record<string, unknown>).gheUrl
+        : undefined;
+    if (
+      data.provider === "ghe-copilot" &&
+      (typeof gheUrl !== "string" || gheUrl.trim().length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "GitHub Enterprise URL (gheUrl) is required",
+        path: ["providerSpecificData", "gheUrl"],
+      });
+    }
+  });
+
+export const bulkCreateProviderSchema = z
+  .object({
+    provider: z.string().min(1).max(100),
+    entries: z
+      .array(
+        z.object({
+          name: z.string().min(1).max(200),
+          apiKey: z.string().min(1).max(MAX_PROVIDER_CREDENTIAL_LENGTH),
+          // Per-key account id — required for cloudflare-ai (enforced in superRefine below).
+          accountId: z.string().min(1).max(200).optional(),
+        })
+      )
+      .min(1, "entries must contain at least 1 item")
+      .max(200, "entries must contain at most 200 items"),
+    priority: z.number().int().min(1).max(100).optional(),
+    globalPriority: z.number().int().min(1).max(100).nullable().optional(),
+    providerSpecificData: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .superRefine((data, ctx) => {
+        validateProviderSpecificData(data, ctx);
+      }),
+    validateKeys: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.provider === "google-pse-search") {
+      const cx =
+        data.providerSpecificData && typeof data.providerSpecificData === "object"
+          ? (data.providerSpecificData as Record<string, unknown>).cx
+          : undefined;
+      if (typeof cx !== "string" || cx.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Programmable Search Engine ID (cx) is required",
+          path: ["providerSpecificData", "cx"],
+        });
+      }
+    }
+    if (data.provider === "ghe-copilot") {
+      const gheUrl =
+        data.providerSpecificData && typeof data.providerSpecificData === "object"
+          ? (data.providerSpecificData as Record<string, unknown>).gheUrl
+          : undefined;
+      if (typeof gheUrl !== "string" || gheUrl.trim().length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "GitHub Enterprise URL (gheUrl) is required",
+          path: ["providerSpecificData", "gheUrl"],
+        });
+      }
+    }
+    if (data.provider === "cloudflare-ai") {
+      // Cloudflare Workers AI builds its per-connection URL from accountId, so every
+      // bulk entry must carry its own non-empty account id (name|accountId|apiKey).
+      data.entries.forEach((entry, index) => {
+        if (typeof entry.accountId !== "string" || entry.accountId.trim().length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "accountId is required for cloudflare-ai entries",
+            path: ["entries", index, "accountId"],
+          });
+        }
+      });
+    }
+  });
+
+// ──── Heterogeneous Provider Import Schema (#6836) ────
+
+// #6836: unlike `bulkCreateProviderSchema` (many keys, ONE provider type per request),
+// this schema backs a file (CSV/JSON) import of a heterogeneous LIST of providers —
+// each entry carries its OWN `provider` id, validated individually here so the route
+// can return per-row partial-failure results (same contract as /api/providers/bulk).
+export const bulkImportProviderSchema = z.object({
+  entries: z
+    .array(
+      z.object({
+        // Provider-existence is validated server-side per-row in the import route's
+        // importOneEntry (isManagedProviderConnectionId lives in the server-only
+        // provider catalog, which must NOT be value-imported into a client-reachable
+        // validation schema — it drags the server runtime into the browser/CLI bundle).
+        provider: z.string().min(1, "provider is required").max(100),
+        name: z.string().min(1, "name is required").max(200),
+        apiKey: z.string().min(1, "apiKey is required").max(MAX_PROVIDER_CREDENTIAL_LENGTH),
+        baseUrl: z.string().trim().max(2000).optional(),
+        priority: z.number().int().min(1).max(100).optional(),
+      })
+    )
+    .min(1, "entries must contain at least 1 item")
+    .max(200, "entries must contain at most 200 items"),
+  validateKeys: z.boolean().optional(),
+});
+
+// ──── Bulk Web-Session Import Schema ────
+
+export const bulkWebSessionImportSchema = z.object({
+  provider: z.string().min(1).max(100),
+  entries: z
+    .array(
+      z.object({
+        name: z.string().min(1).max(200),
+        credential: z
+          .string()
+          .min(1)
+          .max(64 * 1024, "Credential must be under 64 KB"),
+      })
+    )
+    .min(1, "entries must contain at least 1 item")
+    .max(50, "entries must contain at most 50 items"),
+  priority: z.number().int().min(1).max(100).optional(),
+  globalPriority: z.number().int().min(1).max(100).nullable().optional(),
+});
+
+export const providerModelMutationSchema = z.object({
+  provider: z.string().trim().min(1, "provider is required").max(120),
+  modelId: z.string().trim().min(1, "modelId is required").max(240),
+  modelName: z.string().trim().max(240).optional(),
+  source: z.string().trim().max(80).optional(),
+  apiFormat: z
+    .enum([
+      "chat-completions",
+      "responses",
+      "embeddings",
+      "rerank",
+      "audio-transcriptions",
+      "audio-speech",
+      "images-generations",
+      "video",
+    ])
+    .default("chat-completions"),
+  supportedEndpoints: z
+    .array(z.enum(MODEL_SUPPORTED_ENDPOINT_VALUES))
+    .transform(normalizeModelSupportedEndpoints)
+    .default(["chat"]),
+  endpointCapabilitySource: z.enum(["declared", "inferred", "defaulted", "operator"]).optional(),
+  // #2905: optional per-model wire format override for custom models (e.g. a
+  // custom opencode-go model that must use the Anthropic Messages shape).
+  targetFormat: z
+    .enum(["openai", "openai-responses", "claude", "gemini", "antigravity"])
+    .optional(),
+  // #1294: optional token limits set in the "add custom model" form. The wire
+  // shape uses max_input_tokens / max_output_tokens (mirrors the /v1/models
+  // catalog); they persist as inputTokenLimit / outputTokenLimit.
+  max_input_tokens: z.number().int().positive().optional(),
+  max_output_tokens: z.number().int().positive().optional(),
+  // #4125: manual context-window override for a specific provider/model. Persisted
+  // via the Feature-5004 `model_context_overrides` table (source="manual") so it wins
+  // over the auto-discovery/static-catalog context window in `getModelContextLimit()`
+  // — fixes the "provider misreports context length" combo-drop case. `null` clears
+  // a previously set override.
+  maxOutputTokenOverride: z.number().int().positive().nullable().optional(),
+  contextWindowOverride: z.number().int().positive().nullable().optional(),
+  // #1904: manual vision-capability override for custom OpenAI-compatible models whose
+  // upstream discovery metadata does not self-report an image input modality (many
+  // self-hosted/local backends). Mirrors the auto-discovery `supportsVision` field so
+  // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
+  // catalog. `null` clears a manual override back to the id-based heuristic.
+  supportsVision: z.boolean().nullable().optional(),
+  // #18739: per-node thinking-replay contract persisted on the modelCompatOverrides
+  // entry (see open-sse/translator/helpers/thinkingReplayMode.ts). `null` unsets it
+  // back to the default provider-derived handling.
+  thinkingReplay: z.enum(THINKING_REPLAY_MODES).nullable().optional(),
+  dimensions: z.number().int().positive().nullable().optional(),
+  supportedInputTypes: z.array(z.string()).optional(),
+  modelType: z.enum(["chat", "embedding", "image", "rerank"]).optional(),
+  isFree: z.boolean().nullable().optional(),
+  normalizeToolCallId: z.boolean().optional(),
+  preserveOpenAIDeveloperRole: z.boolean().nullable().optional(),
+  upstreamHeaders: upstreamHeadersRecordSchema.nullable().optional(),
+  /** Zod 4: `z.record(z.enum([...]), …)` requires every enum key; use `partialRecord` for sparse patches. */
+  compatByProtocol: z
+    .partialRecord(z.enum(["openai", "openai-responses", "claude"]), modelCompatPerProtocolSchema)
+    .optional(),
+  // #9820: optional async video-generation job preset for a custom
+  // OpenAI-compatible provider whose /videos surface is a submit→poll API
+  // (agnes-video-job, agnes-video-2.5-job, muapi-video-job, sora-job). Persisted on the custom model
+  // row; the /v1/videos/generations handler branches on it between the
+  // synchronous OpenAI-compatible path and the job/poll path. `"openai-video"`
+  // is a legacy no-op value that keeps the sync handler selected.
+  generationConfig: z
+    .object({
+      preset: z.enum([
+        "agnes-video-job",
+        "agnes-video-2.5-job",
+        "muapi-video-job",
+        "sora-job",
+        "openai-video",
+      ]),
+    })
+    .optional(),
+});
+
+export const updateModelAliasesSchema = z.object({
+  aliases: z.record(z.string().trim().min(1), z.string().trim().min(1)),
+});
+
+export const addModelAliasSchema = z.object({
+  from: z.string().trim().min(1),
+  to: z.string().trim().min(1),
+});
+
+export const removeModelAliasSchema = z.object({
+  from: z.string().trim().min(1),
+});
+
+// Optional custom suffix for a compatible node's generated id
+// (`openai-compatible-<apiType>-<suffix>` / `anthropic-compatible[-cc]-<suffix>`); blank
+// keeps the random UUID. Restricted charset (no path/URL metacharacters) because the id
+// flows into URLs, logs, usage rows and combo targets.
+const providerIdSuffixSchema = z
+  .string()
+  .trim()
+  .max(64, "Provider ID suffix must be at most 64 characters")
+  .regex(
+    /^(?:[A-Za-z0-9][A-Za-z0-9_.-]*)?$/,
+    "Provider ID suffix can only contain letters, numbers, -, _ and . and must start with a letter or number"
+  )
+  .optional()
+  .nullable();
+
+export const createProviderNodeSchema = z
+  .object({
+    // #6874: name/prefix are required in general, but a `preset` (e.g.
+    // "vibeproxy-openai") supplies both — enforced conditionally below
+    // instead of unconditionally here.
+    name: z.string().trim().optional().or(z.literal("")),
+    prefix: z.string().trim().optional().or(z.literal("")),
+    apiType: z
+      .enum([
+        "chat",
+        "responses",
+        "embeddings",
+        "audio-transcriptions",
+        "audio-speech",
+        "images-generations",
+      ])
+      .optional(),
+    baseUrl: z.string().trim().min(1).optional(),
+    type: z.enum(["openai-compatible", "anthropic-compatible"]).optional(),
+    compatMode: z.enum(["cc"]).optional(),
+    // #6874: named presets fill in name/prefix/apiType for well-known
+    // OpenAI-compatible local gateways so the operator only has to paste
+    // a baseUrl. Currently just VibeProxy (github.com/automazeio/vibeproxy).
+    preset: z.enum(["vibeproxy-openai"]).optional(),
+    chatPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+    modelsPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+    // #2166: optional operator-supplied remote icon URL for the provider node. Empty
+    // string is accepted so callers can explicitly submit "no custom icon" (falls back
+    // to the built-in @lobehub/static resolution). Length/scheme limits live in
+    // isValidProviderIconUrl (2000 chars for http(s), 256 KiB for data:image).
+    iconUrl: providerNodeIconUrlSchema,
+    customHeaders: customHeadersSchema,
+    dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
+    dailyQuotaResetHour: dailyQuotaResetHourSchema,
+    providerIdSuffix: providerIdSuffixSchema,
+  })
+  .superRefine((value, ctx) => {
+    const nodeType = value.type || "openai-compatible";
+    if (
+      nodeType === "anthropic-compatible" &&
+      value.compatMode !== "cc" &&
+      /^cc-/i.test(value.providerIdSuffix || "")
+    ) {
+      // `anthropic-compatible-cc-` is the Claude Code compatible marker: a plain
+      // anthropic node with this suffix would be detected as CC-compatible at runtime.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Provider ID suffix cannot start with "cc-" for Anthropic compatible nodes',
+        path: ["providerIdSuffix"],
+      });
+    }
+    const normalizedPrefix = value.prefix?.trim();
+    if (normalizedPrefix && isReservedProviderPrefix(normalizedPrefix)) {
+      // Validate caller-supplied prefixes before preset handling. Presets may
+      // provide a default, but the route preserves an explicit prefix; an early
+      // return here used to let retired identities create unreachable nodes.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: reservedProviderPrefixMessage(normalizedPrefix),
+        path: ["prefix"],
+      });
+    }
+    if (value.preset === "vibeproxy-openai") {
+      // Preset supplies name/prefix/apiType — but baseUrl is still mandatory
+      // (a local proxy's host/port is operator-specific, unlike the generic
+      // openai-compatible fallback-to-api.openai.com default).
+      if (!value.baseUrl || !value.baseUrl.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Base URL is required for the VibeProxy preset",
+          path: ["baseUrl"],
+        });
+      }
+      return;
+    }
+    if (!value.name || !value.name.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Name is required",
+        path: ["name"],
+      });
+    }
+    if (!value.prefix || !value.prefix.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Prefix is required",
+        path: ["prefix"],
+      });
+    } else if (isReservedProviderPrefix(value.prefix.trim())) {
+      // Reserved-prefix guard (tokenrouter bug): the runtime model resolver skips
+      // compatible-node lookup for built-in registry ids/aliases, so a node
+      // created with such a prefix could never be reached by it and silently
+      // routed requests to the built-in provider instead. Reject at the write
+      // path. Case-sensitive to match the runtime guard exactly.
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: reservedProviderPrefixMessage(value.prefix.trim()),
+        path: ["prefix"],
+      });
+    }
+    if (nodeType === "openai-compatible" && !value.apiType) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid OpenAI compatible API type",
+        path: ["apiType"],
+      });
+    }
+  });
+
+export const updateProviderNodeSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required"),
+    prefix: z.string().trim().min(1, "Prefix is required"),
+    apiType: z
+      .enum([
+        "chat",
+        "responses",
+        "embeddings",
+        "audio-transcriptions",
+        "audio-speech",
+        "images-generations",
+      ])
+      .optional(),
+    baseUrl: z.string().trim().min(1, "Base URL is required"),
+    chatPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+    modelsPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+    // #2166: same optional remote icon URL as createProviderNodeSchema — empty string
+    // clears a previously stored custom icon.
+    iconUrl: providerNodeIconUrlSchema,
+    customHeaders: customHeadersSchema,
+    dailyQuotaResetTimezone: dailyQuotaResetTimezoneSchema,
+    dailyQuotaResetHour: dailyQuotaResetHourSchema,
+  })
+  .superRefine((value, ctx) => {
+    // Reserved-prefix guard (tokenrouter bug) — same rationale as the guard in
+    // createProviderNodeSchema: renaming a node's prefix onto a built-in
+    // registry id/alias would make it unreachable via that prefix.
+    if (isReservedProviderPrefix(value.prefix)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: reservedProviderPrefixMessage(value.prefix),
+        path: ["prefix"],
+      });
+    }
+  });
+
+export const providerNodeValidateSchema = z.object({
+  baseUrl: z.string().trim().min(1, "Base URL and API key required"),
+  apiKey: z.string().trim().optional(),
+  type: z.enum(["openai-compatible", "anthropic-compatible"]).optional(),
+  compatMode: z.enum(["cc"]).optional(),
+  apiType: z
+    .enum([
+      "chat",
+      "responses",
+      "embeddings",
+      "rerank",
+      "audio-transcriptions",
+      "audio-speech",
+      "images-generations",
+    ])
+    .optional(),
+  chatPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+  modelsPath: z.string().trim().startsWith("/").max(500).optional().or(z.literal("")),
+  modelId: z.string().trim().max(200).optional().or(z.literal("")),
+});
+
+// rate-limit override numeric fields must reject operator intent loss.
+// `z.coerce.number()` silently turns "" into 0 and "60abc" into NaN, which
+// would drop or distort the value instead of rejecting it. Preprocess first so
+// an empty/non-numeric string fails validation (surfaced as a 400), while still
+// coercing legit numeric strings like "60".
+function rateLimitOverrideNumber(max: number) {
+  return z.preprocess((raw) => {
+    if (typeof raw === "string") {
+      if (raw.trim() === "") return NaN;
+      const parsed = Number(raw);
+      return Number.isNaN(parsed) ? raw : parsed;
+    }
+    return raw;
+  }, z.coerce.number().int().min(0).max(max));
+}
+
+// Per-model concurrency ceilings inside `rateLimitOverrides.modelConcurrency`.
+// Unlike the scalar fields above, a cap of 0 is meaningless (it would bypass
+// the gate), so values are positive integers (1..MODEL_CONCURRENCY_MAX_CAP).
+// Keys are exact upstream model ids, bounded to MODEL_CONCURRENCY_MAX_KEY_LENGTH
+// chars. `null` normalizes to absent so a dashboard save can clear just the
+// map; `{}` is accepted and normalized away at the DB sanitizer.
+function modelConcurrencyMap() {
+  return z.preprocess(
+    (raw) => (raw === null ? undefined : raw),
+    z
+      .record(
+        z.string().min(1).max(MODEL_CONCURRENCY_MAX_KEY_LENGTH),
+        rateLimitOverridePositiveInt(MODEL_CONCURRENCY_MAX_CAP)
+      )
+      .optional()
+  );
+}
+
+function rateLimitOverridePositiveInt(max: number) {
+  return z.preprocess((raw) => {
+    if (typeof raw === "string") {
+      if (raw.trim() === "") return NaN;
+      const parsed = Number(raw);
+      return Number.isNaN(parsed) ? raw : parsed;
+    }
+    return raw;
+  }, z.coerce.number().int().min(1).max(max));
+}
+
+export const updateProviderConnectionSchema = z
+  .object({
+    name: z.string().max(200).optional(),
+    // #6562: `priority` is auto-incremented on connection creation
+    // (src/lib/db/providers.ts::createProviderConnection — `MAX(priority)+1` per
+    // provider, unbounded) and the edit UI always round-trips the connection's
+    // current priority unchanged. Providers whose accounts are commonly rotated
+    // in bulk (e.g. Codex OAuth import-bulk, up to 50 entries per call, repeatable)
+    // routinely exceed 100 connections, so a `max(100)` UI-only ceiling here
+    // rejected re-saving an already-valid, already-persisted priority with
+    // "Invalid request" on every edit. Bounded well above any realistic
+    // connection count (still rejects garbage input) rather than removed.
+    priority: z.coerce.number().int().min(1).max(100_000).optional(),
+    globalPriority: z.union([z.coerce.number().int().min(1).max(100_000), z.null()]).optional(),
+    defaultModel: z.union([z.string().max(200), z.null()]).optional(),
+    isActive: z.boolean().optional(),
+    apiKey: z.string().max(MAX_PROVIDER_CREDENTIAL_LENGTH).optional(),
+    testStatus: z.string().max(50).optional(),
+    lastError: z.union([z.string(), z.null()]).optional(),
+    lastErrorAt: z.union([z.string(), z.null()]).optional(),
+    lastErrorType: z.union([z.string(), z.null()]).optional(),
+    lastErrorSource: z.union([z.string(), z.null()]).optional(),
+    errorCode: z.union([z.string(), z.null()]).optional(),
+    rateLimitedUntil: z.union([z.string(), z.null()]).optional(),
+    lastTested: z.union([z.string(), z.null()]).optional(),
+    healthCheckInterval: z.union([z.null(), z.coerce.number().int().min(0).max(1440)]).optional(),
+    group: z.union([z.string().max(100), z.null()]).optional(),
+    maxConcurrent: z.union([z.null(), z.coerce.number().int().min(0)]).optional(),
+    // Per-window quota cutoffs. Map keys are window names (e.g. "window5h",
+    // "window7d"); values are 0-100 integers, or null to clear that window's
+    // override (the API route merges this into the existing map and prunes
+    // null entries before persisting). The whole field set to null clears
+    // every override on the connection.
+    quotaWindowThresholds: z
+      .union([
+        z.null(),
+        z.record(
+          // Window keys mirror the quota names from getUsageForProvider —
+          // bound for defense-in-depth so a malicious payload can't ship
+          // megabyte-long keys that would bloat the DB row.
+          z.string().min(1).max(64),
+          z.union([z.null(), z.coerce.number().int().min(0).max(100)])
+        ),
+      ])
+      .optional(),
+    projectId: z.union([z.string(), z.null()]).optional(),
+    // Per-connection rate limit overrides — overrides the global RequestQueueSettings
+    // for this connection. Set to null to clear all overrides.
+    // Per-connection rate limit overrides — overrides the global
+    // RequestQueueSettings for this connection. Set to null to clear all
+    // overrides. `.strict()` rejects unknown keys (e.g. a typo'd `tmp`) with a
+    // 400 instead of silently stripping them: the operator's intent is
+    // never dropped without an error. `.nullable()` (rather than a
+    // `z.union([z.null(), …])`) keeps the `unrecognized_keys` issue at the top
+    // level so the rejected key name survives into the 400 response.
+    rateLimitOverrides: z
+      .object({
+        rpm: rateLimitOverrideNumber(1_000_000).optional(),
+        rpd: rateLimitOverrideNumber(10_000_000).optional(),
+        tpm: rateLimitOverrideNumber(100_000_000).optional(),
+        tpd: rateLimitOverrideNumber(10_000_000_000).optional(),
+        minTime: rateLimitOverrideNumber(60_000).optional(),
+        maxConcurrent: rateLimitOverrideNumber(10_000).optional(),
+        maxWaitMs: rateLimitOverrideNumber(120_000).optional(),
+        executionMaxWaitMs: rateLimitOverrideNumber(600_000).optional(),
+        modelConcurrency: modelConcurrencyMap(),
+      })
+      .partial()
+      .strict()
+      .nullable()
+      .optional(),
+    proxyEnabled: z.boolean().optional(),
+    perKeyProxyEnabled: z.boolean().optional(),
+    quotaVisible: z.boolean().optional(),
+    // Partial patch of per-connection provider-specific settings (e.g. quota toggles)
+    providerSpecificData: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .superRefine((data, ctx) => {
+        validateProviderSpecificData(data, ctx);
+      }),
+  })
+  .superRefine((value, ctx) => {
+    if (Object.keys(value).length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "No valid fields to update",
+        path: [],
+      });
+    }
+    const apiKey = typeof value.apiKey === "string" ? value.apiKey.trim() : "";
+    if (apiKey.startsWith(ENCRYPTED_ENVELOPE_PREFIX)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "apiKey looks like an encrypted envelope from a credential store, not a plaintext key — store the plaintext API key",
+        path: ["apiKey"],
+      });
+    }
+  });
+
+export const providersBatchTestSchema = z
+  .object({
+    mode: z.enum([
+      "provider",
+      "oauth",
+      "free",
+      "no-auth",
+      "apikey",
+      "compatible",
+      "all",
+      "web-cookie",
+      "search",
+      "audio",
+      "local",
+      "upstream-proxy",
+      "cloud-agent",
+      "ide",
+      "selected",
+    ]),
+    // Frontend may send null when mode != 'provider' — accept and treat as missing
+    providerId: z.string().trim().min(1).nullable().optional(),
+    // Explicit connection IDs to test — required when mode=selected
+    connectionIds: z.array(z.string().trim().min(1)).max(100).nullable().optional(),
+  })
+  .superRefine((value, ctx) => {
+    // Treat null same as undefined
+    const pid = value.providerId ?? null;
+    if (value.mode === "provider" && !pid) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "providerId is required when mode=provider",
+        path: ["providerId"],
+      });
+    }
+    const ids = value.connectionIds ?? null;
+    if (value.mode === "selected" && (!ids || ids.length === 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "connectionIds is required when mode=selected",
+        path: ["connectionIds"],
+      });
+    }
+  });
+
+// PATCH /api/providers — bulk activate/deactivate selected connections
+export const batchUpdateProviderConnectionsSchema = z.object({
+  ids: z.array(z.string().trim().min(1)).min(1).max(100),
+  isActive: z.boolean(),
+});
+
+// PUT /api/providers/[id]/param-filters — upsert provider/model param filter config
+const paramFilterListSchema = z.array(z.string().trim().min(1).max(200)).max(500);
+
+const modelParamFilterSchema = z.object({
+  block: paramFilterListSchema.optional(),
+  allow: paramFilterListSchema.optional(),
+});
+
+export const updateParamFilterConfigSchema = z.object({
+  block: paramFilterListSchema.optional(),
+  allow: paramFilterListSchema.optional(),
+  models: z.record(z.string().trim().min(1).max(200), modelParamFilterSchema).optional(),
+  autoLearn: z.boolean().optional(),
+});
+
+// PUT /api/providers/[id]/interception-rules — upsert provider/model web
+// search/fetch interception rules (#3384/#7339)
+const fetchInterceptionBackendSchema = z.enum(["firecrawl", "jina", "tavily"]);
+
+const modelInterceptionRuleSchema = z.object({
+  interceptSearch: z.boolean().optional(),
+  interceptFetch: z.boolean().optional(),
+  fetchBackend: fetchInterceptionBackendSchema.optional(),
+  fetchProxyUrl: z.string().trim().url().max(2000).optional(),
+});
+
+export const updateInterceptionRulesSchema = z.object({
+  interceptSearch: z.boolean().optional(),
+  interceptFetch: z.boolean().optional(),
+  fetchBackend: fetchInterceptionBackendSchema.optional(),
+  fetchProxyUrl: z.string().trim().url().max(2000).optional(),
+  models: z.record(z.string().trim().min(1).max(200), modelInterceptionRuleSchema).optional(),
+});
+
+// PUT /api/providers/[id]/cc-alias — Claude Code discovery-alias gate override
+// (provider-level or per-model). `value: null` clears the override (inherit).
+const ccAliasSettingValueSchema = z.enum(["on", "off"]).nullable();
+
+export const updateCcAliasSettingSchema = z.discriminatedUnion("scope", [
+  z.object({
+    scope: z.literal("provider"),
+    value: ccAliasSettingValueSchema,
+  }),
+  z.object({
+    scope: z.literal("model"),
+    modelId: z.string().trim().min(1).max(200),
+    value: ccAliasSettingValueSchema,
+  }),
+]);
+
+export const validateProviderApiKeySchema = z
+  .object({
+    provider: z.string().trim().min(1, "Provider and API key required"),
+    apiKey: z.string().trim().optional(),
+    validationModelId: z.string().trim().optional(),
+    customUserAgent: z.string().trim().max(500).optional(),
+    baseUrl: z.string().trim().url().optional(),
+    region: z.string().trim().max(64).optional(),
+    accessKeyId: z.string().trim().max(500).optional(),
+    sessionToken: z.string().trim().max(5000).optional(),
+    cx: z.string().trim().max(500).optional(),
+    runtimeKey: z.string().trim().max(65_536).optional(),
+    tunnelId: z.string().trim().max(128).optional(),
+    connectorName: z.string().trim().max(200).optional(),
+    // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
+    zdrEnabled: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.provider === "google-pse-search" && !data.cx) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Programmable Search Engine ID (cx) is required",
+        path: ["cx"],
+      });
+    }
+  });

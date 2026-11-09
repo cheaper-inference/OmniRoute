@@ -1,0 +1,72 @@
+name: Build App
+
+# Manual-only since #11946. The hosted 7 GB runner can no longer build this tree — 19 of
+# the last 30 runs died with "The runner has received a shutdown signal" (VM out of
+# memory) ~8 min into `next build`, release/v3.8.51 itself included, even with the 10 GB
+# swapfile below. Triggered on `push: branches: ["**"]` it painted every branch and every
+# PR red while producing an artefact nothing downloads. The bundle is validated where a
+# build actually fits:
+#   - main:       ci.yml `Build` (self-hosted omni-build pool) on every merge
+#   - release/**: nightly-release-green.yml (same pool, continuous)
+# Dispatch this workflow by hand when a hosted build artefact is genuinely needed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Fast Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Expand Virtual Memory (Native 10GB Swap)
+        run: |
+          sudo swapoff -a || true
+          sudo rm -f /mnt/swapfile /swapfile
+          sudo fallocate -l 10G /mnt/swapfile || sudo dd if=/dev/zero of=/mnt/swapfile bs=1M count=10240
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
+
+      - name: Build Next.js app & CLI bundle
+        run: |
+          npm run build:release
+        env:
+          # Hosted artifact builds run with less memory than the opt-in 64 GB
+          # CI build slot. Keep Webpack here without overriding the latter's
+          # separately measured Turbopack policy (#16169). Validated 2026-10-18 on the
+          # hosted runner (run 39151150605): webpack compiled in 7.1 min, job 17 min.
+          # This is the floor docker-publish.yml must not go below
+          # (tests/unit/docker-publish-build-heap-14325.test.ts).
+          NODE_OPTIONS: "--max-old-space-size=10240"
+          OMNIROUTE_BUILD_MEMORY_MB: "10240"
+          OMNIROUTE_USE_TURBOPACK: "0"
+
+      - name: Archive build outputs
+        run: |
+          tar -czf omniroute-build.tar.gz .build dist
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: omniroute-build
+          path: omniroute-build.tar.gz
+          retention-days: 7

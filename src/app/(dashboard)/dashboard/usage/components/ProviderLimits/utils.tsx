@@ -1,0 +1,868 @@
+export { parseQuotaData } from "./quotaParsing";
+import { hasFixedQuotaOrder, hasCanonicalWindowOrder, sortQuotasByWindow } from "./quotaParsing";
+
+const PROVIDER_PLAN_FALLBACKS = new Set([
+  "claude code",
+  "kimi coding",
+  "kiro",
+  "amazon q",
+  "openai codex",
+  "codex",
+  "github copilot",
+]);
+
+const QUOTA_LABEL_MAP: Record<string, string> = {
+  chat: "Chat",
+  completions: "Completions",
+  premium_interactions: "Premium",
+  session: "Session",
+  weekly: "Weekly",
+  code_review: "Code Review",
+  code_review_weekly: "Code Review Weekly",
+  gpt_5_3_codex_spark_session: "GPT-5.3-Codex-Spark Session",
+  gpt_5_3_codex_spark_weekly: "GPT-5.3-Codex-Spark Weekly",
+  agentic_request: "Agentic",
+  agentic_request_freetrial: "Agentic (Trial)",
+  credits: "AI Credits",
+  models: "Models",
+  mcp_monthly: "Monthly",
+  "search-prime": "Web Search",
+  "web-reader": "Web Reader",
+  zread: "Zread",
+  "5 Hours Quota": "5 Hours",
+  "Weekly Quota": "Weekly",
+  "Monthly Tools": "Monthly Tools",
+  tokens: "Tokens",
+  time_limit: "Time Limit",
+  banked_reset_credits: "Banked Reset Credits",
+  gemini_weekly: "Gemini Weekly",
+  claude_gpt_weekly: "Claude & GPT Weekly",
+};
+
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function isClaudeOrganizationTypeLabel(value: string) {
+  return /^default_claude(?:_ai)?$/i.test(value.trim());
+}
+
+function normalizePlanCandidate(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.toLowerCase() === "unknown") return null;
+  if (PROVIDER_PLAN_FALLBACKS.has(trimmed.toLowerCase())) return null;
+  if (isClaudeOrganizationTypeLabel(trimmed)) return null;
+  return trimmed;
+}
+
+function escapeRegExpToken(token: string): string {
+  return token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Match tier tokens as whole words (avoids MINIMAX → Max, APPROVE → Pro, etc.). */
+function hasTierToken(upper: string, token: string): boolean {
+  const escaped = escapeRegExpToken(token.toUpperCase());
+  const pattern = new RegExp(`(?:^|[^A-Z])${escaped}(?:[^A-Z]|$)`);
+  return pattern.test(upper);
+}
+
+function toTitleCaseWords(value: string) {
+  return value
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export function formatQuotaLabel(name: string) {
+  const trimmed = typeof name === "string" ? name.trim() : "";
+  if (!trimmed) return "";
+
+  const mapped = QUOTA_LABEL_MAP[trimmed];
+  if (mapped) return mapped;
+
+  if (/^session\s*\(\d+[hm]\)$/i.test(trimmed)) {
+    return "Session";
+  }
+
+  if (/^weekly\s*\(\d+d\)$/i.test(trimmed)) {
+    return "Weekly";
+  }
+
+  const weeklyModelMatch = trimmed.match(/^weekly\s+(.+?)\s*\(\d+d\)$/i);
+  if (weeklyModelMatch) {
+    return `Weekly ${toTitleCaseWords(weeklyModelMatch[1])}`;
+  }
+
+  return toTitleCaseWords(trimmed.replace(/_/g, " "));
+}
+
+/**
+ * Format ISO date string to countdown format (inspired by vscode-antigravity-cockpit)
+ * @param {string|Date} date - ISO date string or Date object
+ * @returns {string} Formatted countdown (e.g., "2d 5h 30m", "4h 40m", "15m") or "-"
+ */
+export function formatResetTime(date) {
+  if (!date) return "-";
+
+  try {
+    const resetDate = typeof date === "string" ? new Date(date) : date;
+    const now = new Date();
+    const diffMs = (resetDate as any) - (now as any);
+
+    if (diffMs <= 0) return "-";
+
+    const totalMinutes = Math.ceil(diffMs / (1000 * 60));
+
+    // < 60 minutes: show only minutes
+    if (totalMinutes < 60) {
+      return `${totalMinutes}m`;
+    }
+
+    const totalHours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+
+    // < 24 hours: show hours and minutes
+    if (totalHours < 24) {
+      return `${totalHours}h ${remainingMinutes}m`;
+    }
+
+    // >= 24 hours: show days, hours, and minutes
+    const days = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
+    return `${days}d ${remainingHours}h ${remainingMinutes}m`;
+  } catch (error) {
+    return "-";
+  }
+}
+
+/**
+ * Calculate remaining percentage
+ * @param {number} used - Used amount
+ * @param {number} total - Total amount
+ * @returns {number} Remaining percentage (0-100)
+ */
+export function calculatePercentage(used, total) {
+  if (!total || total === 0) return 0;
+  if (!used || used < 0) return 100;
+  if (used >= total) return 0;
+
+  return Math.round(((total - used) / total) * 100);
+}
+
+/**
+ * Resolve the best available plan label using live usage first, then persisted
+ * provider-specific connection metadata.
+ */
+export function resolvePlanValue(plan, providerSpecificData, providerId) {
+  const livePlan = normalizePlanCandidate(plan);
+  if (String(providerId || "").toLowerCase() === "grok-cli") return livePlan || null;
+
+  const psd = toRecord(providerSpecificData);
+  const persistedCandidates = [
+    psd.workspacePlanType,
+    psd.plan,
+    psd.subscriptionTier,
+    psd.subscription,
+    psd.tier,
+    psd.accountTier,
+    // Claude OAuth bootstrap: rate_limit_tier has the Max 5x/20x multiplier.
+    // The account's own (seat) tier first: a Team org's base tier is not the seat's.
+    psd.rateLimitTier,
+    psd.organizationRateLimitTier,
+    psd.organizationType,
+    // Codex OAuth bootstrap: chatgpt_plan_type is captured at import time
+    // (src/lib/oauth/services/codexImport.ts) and is the only source of the
+    // plan when the live Codex usage endpoint omits plan_type/planType (the
+    // usage service then reports the literal string "unknown" — see
+    // open-sse/services/usage/codex.ts).
+    psd.chatgptPlanType,
+  ];
+
+  if (livePlan && normalizePlanTier(livePlan).key !== "free") {
+    return livePlan;
+  }
+
+  for (const candidate of persistedCandidates) {
+    const normalized = normalizePlanCandidate(candidate);
+    if (normalized) return normalized;
+  }
+
+  return livePlan || null;
+}
+
+/**
+ * Page-level Provider Limits plan map used by tier stats/filters.
+ * Always passes provider so grok-cli never classifies from persisted PSD tiers.
+ */
+export function buildProviderLimitsResolvedPlans(
+  connections: Array<{
+    id: string;
+    provider?: string | null;
+    providerSpecificData?: unknown;
+  }>,
+  quotaData: Record<string, { plan?: unknown } | null | undefined>
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const conn of connections) {
+    out[conn.id] = resolvePlanValue(
+      quotaData[conn.id]?.plan,
+      conn.providerSpecificData,
+      conn.provider
+    );
+  }
+  return out;
+}
+
+function unknownPlanTier(raw: string | null = null) {
+  return { key: "unknown", label: "Unknown", variant: "default", rank: 0, raw };
+}
+
+function formatUnknownPlanLabel(raw: string) {
+  return raw
+    .toLowerCase()
+    .split(/[\s_-]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function matchCodexPlanTier(raw: string, upper: string) {
+  if (upper === "PROLITE") {
+    return { key: "pro", label: "Pro Standard", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PRO" || upper === "PROEXTRA" || upper === "PRO_EXTRA") {
+    return { key: "pro", label: "Pro Extra", variant: "success", rank: 3, raw };
+  }
+  if (upper === "PROMAX" || upper === "PRO_MAX") {
+    return { key: "pro", label: "Pro Max", variant: "success", rank: 3, raw };
+  }
+  return null;
+}
+
+function matchClaudePlanTier(raw: string, upper: string) {
+  const match = upper.match(/(?:DEFAULT_)?CLAUDE_(MAX|PRO|TEAM|ENTERPRISE|FREE)(?:_(\d+X))?/);
+  if (!match) return null;
+
+  const multiplier = match[2] ? ` ${match[2].toLowerCase()}` : "";
+  const tiers = {
+    MAX: { key: "ultra", label: `Max${multiplier}`, variant: "success", rank: 4, raw },
+    PRO: { key: "pro", label: "Pro", variant: "success", rank: 3, raw },
+    TEAM: { key: "team", label: "Team", variant: "info", rank: 6, raw },
+    ENTERPRISE: { key: "enterprise", label: "Enterprise", variant: "info", rank: 7, raw },
+    FREE: { key: "free", label: "Free", variant: "default", rank: 1, raw },
+  };
+  return tiers[match[1]];
+}
+
+function matchKeywordPlanTier(raw: string, upper: string) {
+  if (upper.includes("PRO+") || upper.includes("PRO PLUS") || upper.includes("PROPLUS"))
+    return { key: "plus", label: "Pro+", variant: "success", rank: 4, raw };
+  if (upper.includes("ENTERPRISE") || upper.includes("CORP") || upper.includes("ORG"))
+    return { key: "enterprise", label: "Enterprise", variant: "info", rank: 7, raw };
+  if (upper.includes("TEAM") || upper.includes("CHATGPTTEAM"))
+    return { key: "team", label: "Team", variant: "info", rank: 6, raw };
+  if (upper.includes("BUSINESS") || upper.includes("STANDARD") || upper.includes("BIZ"))
+    return { key: "business", label: "Business", variant: "warning", rank: 5, raw };
+  if (upper.includes("STUDENT"))
+    return { key: "pro", label: "Student", variant: "success", rank: 3, raw };
+  if (upper.includes("ULTRA"))
+    return { key: "ultra", label: "Ultra", variant: "success", rank: 4, raw };
+  return null;
+}
+
+function matchTokenPlanTier(raw: string, upper: string) {
+  if (hasTierToken(upper, "MAX"))
+    return { key: "ultra", label: "Max", variant: "success", rank: 4, raw };
+  if (hasTierToken(upper, "PRO") || hasTierToken(upper, "PREMIUM"))
+    return { key: "pro", label: "Pro", variant: "success", rank: 3, raw };
+  if (hasTierToken(upper, "STARTER"))
+    return { key: "lite", label: "Starter", variant: "primary", rank: 2, raw };
+  if (hasTierToken(upper, "LITE") || hasTierToken(upper, "LIGHT"))
+    return { key: "lite", label: "Lite", variant: "primary", rank: 2, raw };
+  if (hasTierToken(upper, "PLUS") || hasTierToken(upper, "PAID"))
+    return { key: "plus", label: "Plus", variant: "success", rank: 2, raw };
+  return null;
+}
+
+function matchFreePlanTier(raw: string, upper: string) {
+  return upper.includes("FREE") ||
+    upper.includes("BASIC") ||
+    upper.includes("TRIAL") ||
+    upper.includes("LEGACY")
+    ? { key: "free", label: "Free", variant: "default", rank: 1, raw }
+    : null;
+}
+
+/**
+ * Normalize provider-specific plan labels into a shared tier taxonomy.
+ * Supported tiers: enterprise, business, team, ultra, pro, plus, lite, free, unknown.
+ * Codex's Pro Standard/Extra/Max variants are only recognized when `provider === "codex"`;
+ * a plain "Pro" of any other provider keeps the generic "Pro" label.
+ */
+export function normalizePlanTier(plan, provider?: string | null) {
+  const raw = typeof plan === "string" ? plan.trim() : "";
+  if (!raw) return unknownPlanTier(null);
+
+  const upper = raw.toUpperCase();
+
+  // Provider names that are not real plan tiers — treat as unknown
+  if (PROVIDER_PLAN_FALLBACKS.has(raw.toLowerCase())) return unknownPlanTier(raw);
+
+  // Match Anthropic bootstrap strings (claude_max, default_claude_max_20x, etc.)
+  // before the generic PRO/TEAM checks so underscored values don't fall through.
+  const matched =
+    (provider === "codex" ? matchCodexPlanTier(raw, upper) : null) ||
+    matchClaudePlanTier(raw, upper) ||
+    matchKeywordPlanTier(raw, upper) ||
+    matchTokenPlanTier(raw, upper) ||
+    matchFreePlanTier(raw, upper);
+  return matched || { ...unknownPlanTier(raw), label: formatUnknownPlanLabel(raw) || "Unknown" };
+}
+
+// === Card Grid Helpers (T7) =================================================
+
+// Card action-availability derivations. Extracted from QuotaCard so its
+// `.some(...)` predicate branches don't count against the component's
+// cyclomatic-complexity budget.
+export function computeCanEditCutoff(quotas: any[]): boolean {
+  return quotas.some((q: any) => q && typeof q.name === "string" && !q.isCredits);
+}
+
+/**
+ * Providers that can redeem a banked reset credit: Codex reset credits and the GLM
+ * Coding Plan Reset Cards, which share the list/redeem contract behind different routes.
+ */
+export const RESET_CREDIT_PROVIDERS = [
+  "codex",
+  // grok-cli redeems through the same codex-reset-credit endpoint (tip of
+  // release/v3.8.51); kept here so the generalized gate below covers it.
+  "grok-cli",
+  "claude",
+  "glm",
+  "glm-cn",
+  "glmt",
+  "zai",
+] as const;
+
+/** The redemption API backing a provider's reset credits, if supported. */
+export function getResetCreditEndpoint(provider: string): string | null {
+  if (provider === "codex" || provider === "grok-cli" || provider === "claude") {
+    return "/api/usage/codex-reset-credit";
+  }
+  if (["glm", "glm-cn", "glmt", "zai"].includes(provider)) {
+    return "/api/usage/glm-reset-card";
+  }
+  return null;
+}
+
+export function canProviderRedeemResetCredit(provider: string): boolean {
+  return (RESET_CREDIT_PROVIDERS as readonly string[]).includes(provider);
+}
+
+export interface ResetCreditGateContext {
+  /** The raw usage payload behind the card (carries `bankedResetCredits` when known). */
+  raw?: unknown;
+  authType?: string;
+}
+
+/**
+ * The regular Claude usage poll cannot see banked reset credits; only the reset-credit list
+ * (opened by the user) or the opt-in auto-reset learns the count. Until then the count is
+ * unknown and a Claude OAuth card keeps its entry point — only an authoritative 0 hides it.
+ */
+function isClaudeResetCreditCountUnknown(
+  provider: string,
+  context?: ResetCreditGateContext
+): boolean {
+  if (provider !== "claude" || context?.authType !== "oauth") return false;
+  const raw =
+    context.raw && typeof context.raw === "object"
+      ? (context.raw as Record<string, unknown>)
+      : null;
+  return typeof raw?.bankedResetCredits !== "number";
+}
+
+export function computeCanRedeemResetCredit(
+  provider: string,
+  quotas: any[],
+  context?: ResetCreditGateContext
+): boolean {
+  if (!canProviderRedeemResetCredit(provider)) return false;
+  if (quotas.some((q: any) => q?.isResetCredits && Number(q.creditCount ?? q.remaining ?? 0) > 0)) {
+    return true;
+  }
+  return isClaudeResetCreditCountUnknown(provider, context);
+}
+
+export function hasQuotaCutoffOverrides(connection: any): boolean {
+  const overrides = (connection.quotaWindowThresholds as Record<string, number> | null) || null;
+  return !!overrides && Object.keys(overrides).length > 0;
+}
+
+export const STATUS_EMOJI = {
+  critical: "🔴",
+  alert: "🟡",
+  ok: "🟢",
+  empty: "⚪",
+} as const;
+
+export type CardStatus = keyof typeof STATUS_EMOJI;
+
+/** Remaining % strictly above this is healthy (green). */
+export const QUOTA_STATUS_HEALTHY_ABOVE = 50;
+/** Remaining % at or below this is critical (red); in between is an alert (yellow). */
+export const QUOTA_STATUS_CRITICAL_AT_OR_BELOW = 20;
+
+export type QuotaStatusLevel = "critical" | "alert" | "ok";
+
+/** Single source of the quota colour policy — every bar, tone and card status maps from it. */
+export function quotaStatusLevel(remainingPercentage: number): QuotaStatusLevel {
+  if (remainingPercentage <= QUOTA_STATUS_CRITICAL_AT_OR_BELOW) return "critical";
+  if (remainingPercentage <= QUOTA_STATUS_HEALTHY_ABOVE) return "alert";
+  return "ok";
+}
+
+function quotaRemainingPercent(q: any): number {
+  return getQuotaRemainingPercentage(q);
+}
+
+function quotaStatus(q: any): QuotaStatusLevel {
+  return quotaStatusLevel(quotaRemainingPercent(q));
+}
+
+export function worstStatus(quotas: any[] | undefined): CardStatus {
+  if (!quotas || quotas.length === 0) return "empty";
+  let worst: "ok" | "alert" = "ok";
+  for (const q of quotas) {
+    const s = quotaStatus(q);
+    if (s === "critical") return "critical";
+    if (s === "alert" && worst === "ok") worst = "alert";
+  }
+  return worst;
+}
+
+const STATUS_ORDER: Record<"critical" | "alert" | "ok", number> = {
+  critical: 0,
+  alert: 1,
+  ok: 2,
+};
+
+export function topQuotas(quotas: any[], n = 3, providerId?: string): any[] {
+  const filtered = quotas.filter(Boolean);
+
+  // Providers with a deterministic fixed-window order (Codex, GLM family,
+  // Kimi Coding — see quotaParsing.ts) must keep the order
+  // parseQuotaData() already established rather than being re-sorted by
+  // status/remaining-%, which would undo it (#6687's collapsed-card sibling, #7764).
+  if (hasFixedQuotaOrder(providerId)) {
+    return filtered.slice(0, n);
+  }
+
+  // #7764 residual: any OTHER provider reporting rolling time windows (claude,
+  // minimax, zai, command-code, ...) has an equally inherent session→weekly→
+  // monthly order. Re-sorting those by remaining % makes two accounts of the
+  // same provider render the bars in opposite positions. Detected from the
+  // quota keys, so a new provider needs no list update.
+  if (hasCanonicalWindowOrder(filtered)) {
+    return sortQuotasByWindow(filtered).slice(0, n);
+  }
+
+  return [...filtered]
+    .sort((a, b) => {
+      const sa = STATUS_ORDER[quotaStatus(a)];
+      const sb = STATUS_ORDER[quotaStatus(b)];
+      if (sa !== sb) return sa - sb;
+      return quotaRemainingPercent(a) - quotaRemainingPercent(b);
+    })
+    .slice(0, n);
+}
+
+export function getQuotaRemainingPercentage(q: any): number {
+  if (q?.unlimited) return 100;
+  if (q?.remainingPercentage !== undefined) return Number(q.remainingPercentage);
+  return calculatePercentage(q?.used, q?.total);
+}
+
+export function isPercentageOnlyQuota(q: any): boolean {
+  return q?.isPercentageOnly === true || q?.fractionReported === true;
+}
+
+export function shouldShowQuotaUsageCount(q: any): boolean {
+  const total = Number(q?.total || 0);
+  return total > 0 && q?.unlimited !== true && !isPercentageOnlyQuota(q);
+}
+
+export function getBarColor(remainingPercentage: number): {
+  bar: string;
+  text: string;
+  bg: string;
+} {
+  // A non-numeric value has always rendered red here (the old `>` checks both failed).
+  const level = Number.isNaN(remainingPercentage)
+    ? "critical"
+    : quotaStatusLevel(remainingPercentage);
+  if (level === "ok") {
+    return {
+      bar: "var(--color-success)",
+      text: "var(--color-success)",
+      bg: "color-mix(in srgb, var(--color-success) 12%, transparent)",
+    };
+  }
+  if (level === "alert") {
+    return {
+      bar: "var(--color-warning)",
+      text: "var(--color-warning)",
+      bg: "color-mix(in srgb, var(--color-warning) 12%, transparent)",
+    };
+  }
+  return {
+    bar: "var(--color-error)",
+    text: "var(--color-error)",
+    bg: "color-mix(in srgb, var(--color-error) 12%, transparent)",
+  };
+}
+
+export function formatCountdown(resetAt: string | null | undefined): string | null {
+  if (!resetAt) return null;
+  try {
+    const diff = new Date(resetAt).getTime() - Date.now();
+    if (diff <= 0) return null;
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    if (h >= 24) {
+      const d = Math.floor(h / 24);
+      return `${d}d ${h % 24}h ${m}m`;
+    }
+    return `${h}h ${m}m`;
+  } catch {
+    return null;
+  }
+}
+
+export function getNextResetSummary(quotas: any[] | undefined): string | null {
+  if (!quotas || quotas.length === 0) return null;
+  const now = Date.now();
+  let soonest = Number.POSITIVE_INFINITY;
+  let soonestIso: string | null = null;
+  for (const q of quotas) {
+    if (!q?.resetAt) continue;
+    const ts = new Date(q.resetAt).getTime();
+    if (!Number.isFinite(ts) || ts <= now) continue;
+    if (ts < soonest) {
+      soonest = ts;
+      soonestIso = typeof q.resetAt === "string" ? q.resetAt : new Date(ts).toISOString();
+    }
+  }
+  return soonestIso ? formatCountdown(soonestIso) : null;
+}
+
+function addQuotaModelIdVariants(out: Set<string>, provider: string, modelId: string) {
+  const raw = modelId.trim().toLowerCase();
+  const providerId = provider.trim().toLowerCase();
+  if (!raw) return;
+  out.add(raw);
+  if (!providerId) return;
+
+  const prefix = `${providerId}/`;
+  if (raw.startsWith(prefix)) {
+    const stripped = raw.slice(prefix.length);
+    if (stripped) out.add(stripped);
+  } else {
+    out.add(`${providerId}/${raw}`);
+  }
+}
+
+export function collectHiddenQuotaModelIds(provider: string, payload: unknown): string[] {
+  const hidden = new Set<string>();
+  const data = toRecord(payload);
+  const collect = (entries: unknown) => {
+    if (!Array.isArray(entries)) return;
+    for (const entry of entries) {
+      const record = toRecord(entry);
+      if (record.isHidden !== true) continue;
+      if (typeof record.id === "string") addQuotaModelIdVariants(hidden, provider, record.id);
+    }
+  };
+
+  collect(data.models);
+  collect(data.modelCompatOverrides);
+  return Array.from(hidden);
+}
+
+export function filterHiddenModelQuotas(
+  provider: string,
+  quotas: any[] | undefined,
+  hiddenModelIds: string[] | undefined
+): any[] {
+  if (!Array.isArray(quotas)) return [];
+  if (!hiddenModelIds || hiddenModelIds.length === 0) return quotas;
+
+  const hidden = new Set(
+    hiddenModelIds.map((id) => id.trim().toLowerCase()).filter((id) => id.length > 0)
+  );
+  if (hidden.size === 0) return quotas;
+
+  return quotas.filter((quota) => {
+    if (!quota || quota.isCredits) return true;
+    const modelId =
+      typeof quota.modelKey === "string"
+        ? quota.modelKey
+        : typeof quota.modelId === "string"
+          ? quota.modelId
+          : "";
+    if (!modelId) return true;
+
+    const candidates = new Set<string>();
+    addQuotaModelIdVariants(candidates, provider, modelId);
+    return !Array.from(candidates).some((candidate) => hidden.has(candidate));
+  });
+}
+
+// --- Per-user quota row visibility (upstream 9router#2371 port) ---------
+// Distinct from collectHiddenQuotaModelIds()/filterHiddenModelQuotas() above:
+// those hide rows for models the ADMIN hid in the model catalog. These hide rows
+// the OPERATOR clicked "hide" on for their own view (persisted per-account in
+// settings.quotaVisibility), independent of model catalog state — e.g.
+// temporarily decluttering a quota card without editing the catalog.
+
+/** Stable identity for a quota row: prefer modelKey (survives displayName i18n), fall back to name. */
+export function getQuotaVisibilityKey(quota: any): string {
+  if (!quota || typeof quota !== "object") return "";
+  return String(quota.modelKey || quota.name || "").trim();
+}
+
+export type QuotaVisibilityMap = Record<string, { hidden?: string[] }>;
+
+/**
+ * Which visibility entry applies to a quota card. Rows are hidden PER ACCOUNT
+ * (connection id) so two accounts of the same provider with identically named
+ * rows (e.g. "Bonus Pack 1") stay independent (upstream 9router#4767). The
+ * provider id is only a legacy read fallback for preferences saved before the
+ * per-account keying. A bare string is treated as a legacy provider-only scope.
+ */
+export type QuotaVisibilityScope =
+  string | { connectionId?: string | null; provider?: string | null };
+
+function normalizeVisibilityScope(scope: QuotaVisibilityScope): {
+  connectionId: string;
+  provider: string;
+} {
+  if (typeof scope === "string") return { connectionId: "", provider: scope };
+  return {
+    connectionId: String(scope?.connectionId || "").trim(),
+    provider: String(scope?.provider || "").trim(),
+  };
+}
+
+/** Hidden row keys for `scope`: the account's own entry wins; else the legacy provider entry. */
+function getHiddenQuotaSet(
+  scope: QuotaVisibilityScope,
+  quotaVisibility: QuotaVisibilityMap | undefined
+): Set<string> {
+  const { connectionId, provider } = normalizeVisibilityScope(scope);
+  const entry =
+    (connectionId && quotaVisibility?.[connectionId]) ||
+    (provider && quotaVisibility?.[provider]) ||
+    undefined;
+  const hidden = entry?.hidden;
+  return new Set(Array.isArray(hidden) ? hidden.map(String) : []);
+}
+
+/**
+ * Returns the next visibility map after hiding/showing `key` for `scope`. Writes
+ * go to the account (connection id) entry, seeded from whatever currently
+ * applies (incl. the legacy provider entry) so the account's view does not jump,
+ * while other accounts keep reading the untouched legacy entry.
+ */
+export function buildNextQuotaVisibility(
+  quotaVisibility: QuotaVisibilityMap,
+  scope: QuotaVisibilityScope,
+  key: string,
+  hide: boolean
+): QuotaVisibilityMap {
+  const { connectionId, provider } = normalizeVisibilityScope(scope);
+  const targetKey = connectionId || provider;
+  if (!targetKey || !key) return quotaVisibility;
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
+  if (hide) hidden.add(key);
+  else hidden.delete(key);
+  return {
+    ...quotaVisibility,
+    [targetKey]: { ...(quotaVisibility?.[targetKey] || {}), hidden: [...hidden] },
+  };
+}
+
+/** Returns quotas for `scope` with any operator-hidden rows removed. */
+export function filterQuotasByVisibility(
+  scope: QuotaVisibilityScope,
+  quotas: any[] = [],
+  quotaVisibility: QuotaVisibilityMap = {}
+): any[] {
+  if (!Array.isArray(quotas) || quotas.length === 0) return [];
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
+  if (hidden.size === 0) return quotas;
+  return quotas.filter((quota) => !hidden.has(getQuotaVisibilityKey(quota)));
+}
+
+/** Returns the subset of `quotas` for `scope` the operator hid (for the "Hidden: …" chip row). */
+export function getHiddenQuotaRows(
+  scope: QuotaVisibilityScope,
+  quotas: any[] = [],
+  quotaVisibility: QuotaVisibilityMap = {}
+): any[] {
+  if (!Array.isArray(quotas) || quotas.length === 0) return [];
+  const hidden = getHiddenQuotaSet(scope, quotaVisibility);
+  if (hidden.size === 0) return [];
+  return quotas.filter((quota) => hidden.has(getQuotaVisibilityKey(quota)));
+}
+
+// --- Provider dropdown filter (PR #769 port) -----------------------------
+// Pure helpers extracted from <ProviderLimits/> so the filter+dropdown logic
+// can be exercised by unit tests without rendering React. Keep them free of
+// browser-only globals so Node's native test runner can import them directly.
+
+/**
+ * Returns true when `connection` should be visible under the selected
+ * `providerFilter`. The sentinel `"all"` matches every connection; any other
+ * value must equal the connection's `provider` key exactly. Connections with a
+ * missing/non-string provider are filtered out when a specific provider is
+ * selected (defensive — the live route only emits string provider keys).
+ */
+export function matchesProviderFilter(
+  connection: { provider?: unknown } | null | undefined,
+  providerFilter: string
+): boolean {
+  if (!providerFilter || providerFilter === "all") return true;
+  if (!connection || typeof connection.provider !== "string") return false;
+  return connection.provider === providerFilter;
+}
+
+/**
+ * Distinct provider keys present in `connections`, optionally sorted with the
+ * supplied `compare` function (defaults to `String.prototype.localeCompare` so
+ * tests get deterministic output without depending on the i18n-aware
+ * `compareTr` helper). Empty / non-string provider values are skipped.
+ */
+export function buildProviderOptions(
+  connections: ReadonlyArray<{ provider?: unknown }>,
+  compare: (a: string, b: string) => number = (a, b) => a.localeCompare(b)
+): string[] {
+  const seen = new Set<string>();
+  for (const conn of connections) {
+    if (conn && typeof conn.provider === "string" && conn.provider) {
+      seen.add(conn.provider);
+    }
+  }
+  return Array.from(seen).sort(compare);
+}
+
+// --- Deterministic quota-card ordering -------------------------------------
+// Mirrors the dashboard/providers rule (`providerPageUtils.ts::
+// sortProviderEntriesByName`): every level of ordering must end in a stable,
+// data-independent tiebreak so cards never re-flow between refreshes.
+//
+// Before this, `visibleConnections` globally sorted ALL connections by
+// status then soonest reset, and QuotaCardGrid grouped by first-appearance —
+// so each provider group's position was decided by whichever of its accounts
+// happened to sort first (status/reset change every refresh → groups
+// shuffled). Provider rank is now a sort key again, so a group's position is
+// fixed by PROVIDER_ORDER and account status/reset only orders accounts
+// inside their own group.
+
+export interface QuotaOrderConnection {
+  id?: unknown;
+  provider?: unknown;
+  name?: unknown;
+  email?: unknown;
+  displayName?: unknown;
+}
+
+/** Label/name key: providers-page `getProviderSortLabel` — case-insensitive display name. */
+function quotaConnLabel(conn: QuotaOrderConnection): string {
+  const name = typeof conn.name === "string" ? conn.name : "";
+  const provider = typeof conn.provider === "string" ? conn.provider : "";
+  return (name || provider).toLowerCase();
+}
+
+/** Technical tiebreak key: providers-page `providerId.localeCompare(...)` — ASCII on purpose. */
+function quotaConnTiebreak(conn: QuotaOrderConnection): string {
+  const email = typeof conn.email === "string" ? conn.email : "";
+  const id = typeof conn.id === "string" ? conn.id : String(conn.id ?? "");
+  return email || id;
+}
+
+function providerRank(provider: unknown, providerOrder: Record<string, number>): number {
+  const key = typeof provider === "string" ? provider : "";
+  return providerOrder[key] ?? 99;
+}
+
+/**
+ * Order connections for the quota card grid. Levels (first non-zero wins):
+ *   1. `PROVIDER_ORDER` rank — keeps each provider group glued to its fixed slot.
+ *   2. Provider label (locale-aware, case-insensitive) — orders unranked providers.
+ *   3. Provider key ASCII — deterministic tiebreak between aliased/equal labels.
+ *   4. `accountCompare` (optional) — in-group intent (critical-first, soonest reset).
+ *   5. Account label, then email/id ASCII — so equal-status accounts never shuffle.
+ */
+export function compareQuotaConnections<T extends QuotaOrderConnection>(
+  a: T,
+  b: T,
+  opts: {
+    providerOrder: Record<string, number>;
+    providerLabels?: Record<string, string>;
+    accountCompare?: (a: T, b: T) => number;
+    compare?: (a: string, b: string) => number;
+  }
+): number {
+  const cmp = opts.compare ?? ((x: string, y: string) => x.localeCompare(y));
+  const labels = opts.providerLabels ?? {};
+
+  const ra = providerRank(a.provider, opts.providerOrder);
+  const rb = providerRank(b.provider, opts.providerOrder);
+  if (ra !== rb) return ra - rb;
+
+  const pa = typeof a.provider === "string" ? a.provider : "";
+  const pb = typeof b.provider === "string" ? b.provider : "";
+  const providerLabelCmp = cmp(labels[pa] ?? pa, labels[pb] ?? pb);
+  if (providerLabelCmp !== 0) return providerLabelCmp;
+  if (pa !== pb) return pa < pb ? -1 : 1;
+
+  if (opts.accountCompare) {
+    const acc = opts.accountCompare(a, b);
+    if (acc !== 0) return acc;
+  }
+
+  const accountLabelCmp = cmp(quotaConnLabel(a), quotaConnLabel(b));
+  if (accountLabelCmp !== 0) return accountLabelCmp;
+  const ta = quotaConnTiebreak(a);
+  const tb = quotaConnTiebreak(b);
+  return ta < tb ? -1 : ta > tb ? 1 : 0;
+}
+
+/**
+ * Order provider group keys for rendering. Same provider-level rule as
+ * `compareQuotaConnections` (rank → label → key), used by QuotaCardGrid to
+ * place group headers deterministically.
+ */
+export function compareProviderGroups(
+  a: string,
+  b: string,
+  opts: {
+    providerOrder: Record<string, number>;
+    providerLabels?: Record<string, string>;
+    compare?: (a: string, b: string) => number;
+  }
+): number {
+  const cmp = opts.compare ?? ((x: string, y: string) => x.localeCompare(y));
+  const labels = opts.providerLabels ?? {};
+  const ra = providerRank(a, opts.providerOrder);
+  const rb = providerRank(b, opts.providerOrder);
+  if (ra !== rb) return ra - rb;
+  const labelCmp = cmp(labels[a] ?? a, labels[b] ?? b);
+  if (labelCmp !== 0) return labelCmp;
+  return a < b ? -1 : a > b ? 1 : 0;
+}

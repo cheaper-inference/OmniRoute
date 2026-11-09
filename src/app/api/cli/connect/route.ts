@@ -1,0 +1,272 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
+import { getCachedSettings } from "@/lib/db/readCache";
+import {
+  ensurePersistentManagementPasswordHash,
+  getStoredManagementPassword,
+  isKnownInsecureManagementPassword,
+  verifyManagementPassword,
+} from "@/lib/auth/managementPassword";
+import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import {
+  beginLoginAttempt,
+  clearLoginAttempts,
+  endLoginAttempt,
+  recordLoginFailure,
+} from "@/server/auth/loginGuard";
+import {
+  getLoginLockoutKey,
+  getLoginSourceScope,
+  isHostOperatorRequest,
+} from "@/server/auth/loginPeer";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { createAccessToken } from "@/lib/db/accessTokens";
+import { isMfaRequiredForRequest, verifyDashboardSecondFactor } from "@/server/auth/dashboardMfa";
+import { ACCESS_SCOPES } from "@/lib/accessTokens/scopes";
+
+/**
+ * POST /api/cli/connect — remote-mode bootstrap.
+ *
+ * Exchange the management password for a scoped CLI access token. Public route
+ * (no token exists yet) that does its OWN password verification + brute-force
+ * lockout, mirroring /api/auth/login — but mints an `oma_` access token instead
+ * of a dashboard JWT cookie. The plaintext token is returned exactly once.
+ *
+ * Default scope is `admin`: the password holder is the owner and can already do
+ * anything; the first token should be able to mint narrower tokens for other
+ * machines. Pass `scope` to downscope (e.g. a read-only CI token).
+ */
+
+const connectSchema = z.object({
+  password: z.string().min(1),
+  name: z.string().min(1).max(100).optional(),
+  scope: z.enum(ACCESS_SCOPES).optional(),
+  expiresInDays: z.number().int().positive().max(3650).optional(),
+  // Required while dashboard two-factor login is on: a 6-digit TOTP or a recovery code.
+  totp: z.string().trim().min(1).max(64).optional(),
+});
+
+export async function POST(request: Request) {
+  const auditContext = getAuditRequestContext(request);
+  // The guard reserves a failure slot while the password is being verified; release it on
+  // every exit so an aborted request cannot leak budget.
+  let heldSlotKey: string | null | undefined;
+  let holdsSlot = false;
+
+  try {
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const validation = validateBody(connectSchema, rawBody);
+    if (isValidationFailure(validation)) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+    const { password, name, scope, expiresInDays, totp } = validation.data;
+
+    const settings = await getCachedSettings();
+    const bruteForceEnabled = settings.bruteForceProtection !== false;
+    const clientIp = auditContext.ipAddress || null;
+    // Key the lockout on the socket peer the authz pipeline stamped: any value
+    // taken from forwarding headers is chosen by the caller, so rotating it
+    // would hand out a fresh attempt budget on every request.
+    const lockoutKey = getLoginLockoutKey(request, clientIp);
+
+    const guardCheck = beginLoginAttempt(lockoutKey, { enabled: bruteForceEnabled });
+    if (!guardCheck.allowed) {
+      logAuditEvent({
+        action: "cli.connect.locked",
+        actor: "anonymous",
+        target: "cli-access-token",
+        resourceType: "auth_session",
+        status: "failed",
+        ipAddress: clientIp || undefined,
+        requestId: auditContext.requestId,
+        metadata: { retryAfterSeconds: guardCheck.retryAfterSeconds || 0 },
+      });
+      return NextResponse.json(
+        { error: "Too many failed attempts. Try again later." },
+        {
+          status: 429,
+          headers: guardCheck.retryAfterSeconds
+            ? { "Retry-After": String(guardCheck.retryAfterSeconds) }
+            : {},
+        }
+      );
+    }
+
+    holdsSlot = true;
+    heldSlotKey = lockoutKey;
+
+    const passwordState = await ensurePersistentManagementPasswordHash({
+      settings,
+      source: "cli.connect",
+    });
+    const storedHash = getStoredManagementPassword(passwordState.settings);
+    if (!storedHash) {
+      return NextResponse.json(
+        { error: "No password configured. Complete onboarding first.", needsSetup: true },
+        { status: 403 }
+      );
+    }
+
+    const isValid = await verifyManagementPassword(password, storedHash);
+    if (!isValid) {
+      const failureDecision = recordLoginFailure(lockoutKey, { enabled: bruteForceEnabled });
+      logAuditEvent({
+        action: "cli.connect.failed",
+        actor: "anonymous",
+        target: "cli-access-token",
+        resourceType: "auth_session",
+        status: "failed",
+        ipAddress: clientIp || undefined,
+        requestId: auditContext.requestId,
+        metadata: { reason: "invalid_password", lockedOut: failureDecision.allowed === false },
+      });
+      if (!failureDecision.allowed) {
+        return NextResponse.json(
+          { error: "Too many failed attempts. Try again later." },
+          {
+            status: 429,
+            headers: failureDecision.retryAfterSeconds
+              ? { "Retry-After": String(failureDecision.retryAfterSeconds) }
+              : {},
+          }
+        );
+      }
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    }
+
+    // #14486: /api/auth/login refuses the well-known INITIAL_PASSWORD placeholder
+    // from off-loopback since #13679, but this route verifies the SAME password and
+    // mints an admin-scoped `oma_` token, and it is not loopback-only. A fresh
+    // install carries `INITIAL_PASSWORD=CHANGEME` (scripts/dev/sync-env.mjs copies
+    // .env.example), so without this gate the public default is exchangeable for
+    // admin from anywhere the port is reachable. Pair from a local console first,
+    // then rotate.
+    if (isKnownInsecureManagementPassword(password) && !isHostOperatorRequest(request)) {
+      logAuditEvent({
+        action: "cli.connect.insecure_default_blocked",
+        actor: "anonymous",
+        target: "cli-access-token",
+        resourceType: "auth_session",
+        status: "failed",
+        ipAddress: clientIp || undefined,
+        requestId: auditContext.requestId,
+        metadata: {
+          reason: "well_known_default_password_non_loopback",
+          sourceScope: getLoginSourceScope(request, clientIp),
+          peerLocality: getRequestPeerLocality(request),
+        },
+      });
+      return NextResponse.json(
+        {
+          error:
+            "The management password is still set to the well-known default. " +
+            "Pair the CLI from the host itself (loopback) and rotate the password first.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Opt-in TOTP: with two-factor login on, the password alone must not mint an admin
+    // token either — otherwise this route is a way around the dashboard's second factor.
+    if (isMfaRequiredForRequest(request)) {
+      if (!totp) {
+        logAuditEvent({
+          action: "cli.connect.mfa_required",
+          actor: "anonymous",
+          target: "cli-access-token",
+          resourceType: "auth_session",
+          status: "failed",
+          ipAddress: clientIp || undefined,
+          requestId: auditContext.requestId,
+          metadata: { reason: "missing_second_factor" },
+        });
+        return NextResponse.json(
+          {
+            error: "Two-factor authentication is enabled. Provide a verification code (totp).",
+            mfaRequired: true,
+          },
+          { status: 401 }
+        );
+      }
+      const secondFactor = await verifyDashboardSecondFactor(totp);
+      if (!secondFactor.ok) {
+        const failureDecision = recordLoginFailure(lockoutKey, { enabled: bruteForceEnabled });
+        logAuditEvent({
+          action: "cli.connect.failed",
+          actor: "anonymous",
+          target: "cli-access-token",
+          resourceType: "auth_session",
+          status: "failed",
+          ipAddress: clientIp || undefined,
+          requestId: auditContext.requestId,
+          metadata: {
+            reason: "invalid_second_factor",
+            lockedOut: failureDecision.allowed === false,
+          },
+        });
+        if (!failureDecision.allowed) {
+          return NextResponse.json(
+            { error: "Too many failed attempts. Try again later." },
+            {
+              status: 429,
+              headers: failureDecision.retryAfterSeconds
+                ? { "Retry-After": String(failureDecision.retryAfterSeconds) }
+                : {},
+            }
+          );
+        }
+        return NextResponse.json(
+          { error: "Invalid verification code", mfaRequired: true },
+          { status: 401 }
+        );
+      }
+    }
+
+    clearLoginAttempts(lockoutKey);
+
+    const tokenScope = scope ?? "admin";
+    const tokenName = (name ?? "remote-cli").trim() || "remote-cli";
+    const expiresAt =
+      typeof expiresInDays === "number"
+        ? new Date(Date.now() + expiresInDays * 86_400_000).toISOString()
+        : null;
+
+    const { record, secret } = createAccessToken({
+      name: tokenName,
+      scope: tokenScope,
+      expiresAt,
+    });
+
+    logAuditEvent({
+      action: "cli.connect.success",
+      actor: "admin",
+      target: "cli-access-token",
+      resourceType: "auth_session",
+      status: "success",
+      ipAddress: clientIp || undefined,
+      requestId: auditContext.requestId,
+      metadata: { tokenId: record.id, scope: tokenScope },
+    });
+
+    return NextResponse.json({
+      success: true,
+      token: secret,
+      id: record.id,
+      name: record.name,
+      scope: record.scope,
+      expiresAt: record.expiresAt,
+    });
+  } catch (error) {
+    console.error("[CLI] connect failed:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } finally {
+    if (holdsSlot) endLoginAttempt(heldSlotKey);
+  }
+}

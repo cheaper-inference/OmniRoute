@@ -1,0 +1,74 @@
+{
+  "language": "fr",
+  "category": "filler",
+  "rules": [
+    {
+      "name": "fr_polite_framing",
+      "pattern": "\\b(?:s'il vous plait|s'il te plait|peux tu|pourrais tu|je voudrais que|j'ai besoin que)\\b\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "fr_pleasantries",
+      "pattern": "\\b(?:bonjour|salut|bonsoir|merci|merci beaucoup)\\b[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "fr_hedging",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:je pense que|je crois que|il semble que|peut etre|peut-être|probablement|possiblement)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_filler_adverbs",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:fondamentalement|essentiellement|en fait|litteralement|littéralement|simplement)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_self_reference",
+      "pattern": "^(?:j'essaie de|je veux|je voudrais|j'ai besoin de)\\b\\s*",
+      "replacement": "",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "fr_verbose_request",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:peux tu expliquer|pourrais tu expliquer|peux tu detailler|peux tu détailler)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "Explique ",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_qualifiers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:un peu|en quelque sorte|plus ou moins|d'une certaine maniere|d'une certaine manière)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "fr_softeners",
+      "pattern": "\\b(?:si possible|quand tu peux|sans urgence|je voulais juste)\\b[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+import { getAnthropicCompatHeaders, type RegistryEntry } from "../../shared.ts";
+
+export const deepseekProvider: RegistryEntry = {
+  id: "deepseek",
+  alias: "ds",
+  format: "openai",
+  executor: "default",
+  baseUrl: "https://api.deepseek.com/chat/completions",
+  authType: "apikey",
+  defaultContextLength: 1_000_000,
+  authHeader: "bearer",
+  alternateFormats: [
+    {
+      format: "openai-responses",
+      baseUrl: "https://api.deepseek.com/responses",
+      authHeader: "bearer",
+      label: "Responses-compatible",
+    },
+    {
+      format: "claude",
+      baseUrl: "https://api.deepseek.com/anthropic/v1/messages",
+      authHeader: "x-api-key",
+      headers: getAnthropicCompatHeaders(),
+      label: "Anthropic-compatible",
+    },
+  ],
+  models: [
+    {
+      id: "deepseek-v4-pro",
+      name: "DeepSeek V4 Pro (0813)",
+      contextLength: 1_000_000,
+      maxOutputTokens: 384_000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      toolCalling: true,
+    },
+    {
+      id: "deepseek-v4-flash",
+      name: "DeepSeek V4 Flash (0731)",
+      contextLength: 1_000_000,
+      maxOutputTokens: 384_000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      toolCalling: true,
+      // Flash reads images on the official API; v4-pro stays text-only.
+      supportsVision: true,
+    },
+    {
+      id: "deepseek-flash",
+      name: "DeepSeek V4.1 Flash",
+      aliases: ["deepseek-v4.1-flash", "deepseek-4.1-flash"],
+      contextLength: 1_000_000,
+      maxOutputTokens: 384_000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["none", "low", "high", "max"],
+      toolCalling: true,
+      supportsVision: true,
+    },
+  ],
+};

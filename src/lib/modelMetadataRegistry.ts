@@ -1,0 +1,907 @@
+import { randomUUID } from "node:crypto";
+import { isTextOnlyChatTransport } from "@/shared/constants/visionModels";
+import { parseModel } from "@omniroute/open-sse/services/model.ts";
+import { getModelInfo } from "@/sse/services/model";
+import { getModelAliases } from "@/lib/db/models";
+import {
+  getResolvedModelCapabilities,
+  getResolvedModelContextOverride,
+  isNonChatCatalogSurface,
+} from "@/lib/modelCapabilities";
+import { getModelCapabilityOverride } from "@/lib/db/modelCapabilityOverrides";
+import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
+import {
+  getAuthoritativeContextWindow,
+  getAuthoritativeProviderContextWindow,
+  getModelSpec,
+  resolveModelAlias as resolveStaticModelAlias,
+} from "@/shared/constants/modelSpecs";
+import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { PROVIDER_ID_TO_ALIAS, PROVIDER_MODELS } from "@/shared/constants/models";
+import {
+  getSyncStatus,
+  getSyncedCapability,
+  getModelsDevPricing,
+  type PricingByProvider,
+} from "@/lib/modelsDevSync";
+import { getSyncedPricing } from "@/lib/pricingSync";
+import {
+  lookupUserCatalogPricing,
+  readUserPricingMemoized,
+  type UserPricingByProvider,
+} from "@/lib/catalogUserPricing";
+import { getPricingForModel as getDefaultPricingForModel } from "@/shared/constants/pricing";
+import {
+  CANONICAL_EFFORT_VALUES,
+  extendCodexGpt56EffortValues,
+} from "@/shared/reasoning/effortStandardization";
+
+const MODEL_METADATA_SCHEMA_VERSION = "model-metadata-v1";
+
+export const MODEL_ALIAS_AMBIGUOUS = "MODEL_ALIAS_AMBIGUOUS";
+export const MODEL_NOT_MAPPED = "MODEL_NOT_MAPPED";
+export const INTERNAL_PROXY_ERROR = "INTERNAL_PROXY_ERROR";
+
+type JsonRecord = Record<string, unknown>;
+
+export interface CatalogEnrichmentSnapshot {
+  modelsDevPricing: PricingByProvider | null;
+  /** #15528: bulk-loaded user `pricing` namespace (PATCH /api/pricing overrides). */
+  userPricing?: UserPricingByProvider | null;
+  providerNodeIdsByPrefix?: Readonly<Record<string, string>>;
+  /** #9147: build-local bulk load of synced capabilities + token/context overrides
+   * so per-entry enrichment never hits SQLite again (see catalogResponse.ts). */
+  capabilityResolutionSnapshot?: ModelCapabilityResolutionSnapshot | null;
+}
+
+interface CatalogDiagnosticsOptions {
+  request?: Request | null;
+  requestId?: string | null;
+  resolvedAlias?: string | null;
+}
+
+export interface CanonicalModelMetadata {
+  provider: string | null;
+  providerAlias: string | null;
+  providerLabel: string | null;
+  model: string;
+  qualifiedId: string | null;
+  displayName: string;
+  aliases: string[];
+  capabilities: {
+    toolCalling: boolean;
+    reasoning: boolean;
+    supportsThinking: boolean | null;
+    supportedThinkingEfforts: readonly string[] | null;
+    supportsTools: boolean | null;
+    vision: boolean | null;
+    attachment: boolean | null;
+    structuredOutput: boolean | null;
+    temperature: boolean | null;
+  };
+  limits: {
+    contextWindow: number | null;
+    maxInputTokens: number | null;
+    maxOutputTokens: number;
+    defaultThinkingBudget: number;
+    thinkingBudgetCap: number | null;
+    thinkingOverhead: number | null;
+    adaptiveMaxTokens: number | null;
+  };
+  metadata: {
+    family: string | null;
+    status: string | null;
+    knowledgeCutoff: string | null;
+    releaseDate: string | null;
+    lastUpdated: string | null;
+    openWeights: boolean | null;
+    source: {
+      providerRegistry: boolean;
+      staticSpec: boolean;
+      syncedCapability: boolean;
+      reasoningEffortsOverride: boolean;
+    };
+  };
+  modalities: {
+    input: string[];
+    output: string[];
+    interleavedField: string | null;
+  };
+}
+
+export interface ResolvedAliasLookup {
+  alias: string;
+  resolvedAlias: string;
+  source: "stored_alias" | "direct_model" | "catalog_match";
+  provider: string;
+  providerAlias: string;
+  model: string;
+  target: unknown;
+  metadata: CanonicalModelMetadata;
+}
+
+export interface AliasResolutionError {
+  status: number;
+  code: string;
+  message: string;
+  candidates?: string[];
+}
+
+function asNonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function uniqueStrings(values: Array<string | null | undefined>) {
+  return [
+    ...new Set(values.filter((value): value is string => Boolean(value && value.length > 0))),
+  ];
+}
+
+export function isGlmFamilyModel(modelId: string, displayName = ""): boolean {
+  const glmFamilyPattern = /(?:^|[/@:_. -])glm(?=$|[-._ /@:](?:z)?\d|\d)/i;
+  return glmFamilyPattern.test(modelId) || glmFamilyPattern.test(displayName);
+}
+
+function toQualifiedId(
+  providerAlias: string | null,
+  provider: string | null,
+  model: string | null
+) {
+  if (!model) return null;
+  if (providerAlias) return `${providerAlias}/${model}`;
+  if (provider) return `${provider}/${model}`;
+  return model;
+}
+
+function getRegistryModel(providerOrAlias: string | null, modelId: string | null) {
+  if (!providerOrAlias || !modelId) return null;
+  const alias = PROVIDER_ID_TO_ALIAS[providerOrAlias] || providerOrAlias;
+  const models = PROVIDER_MODELS[alias] || PROVIDER_MODELS[providerOrAlias] || [];
+  return models.find((entry) => entry?.id === modelId) || null;
+}
+
+function buildModalities(
+  input: string[],
+  output: string[],
+  supportsVision: boolean | null
+): { input: string[]; output: string[] } {
+  if (input.length > 0 || output.length > 0) {
+    return { input, output };
+  }
+  if (supportsVision) {
+    return { input: ["text", "image"], output: ["text"] };
+  }
+  return { input: [], output: [] };
+}
+
+function extractCandidateMatches(modelId: string) {
+  const matches: Array<{ provider: string; providerAlias: string; model: string }> = [];
+  for (const [providerAlias, models] of Object.entries(PROVIDER_MODELS)) {
+    for (const entry of models || []) {
+      if (entry?.id !== modelId) continue;
+      const providerId =
+        Object.entries(PROVIDER_ID_TO_ALIAS).find(([, alias]) => alias === providerAlias)?.[0] ||
+        providerAlias;
+      matches.push({
+        provider: providerId,
+        providerAlias: PROVIDER_ID_TO_ALIAS[providerId] || providerAlias,
+        model: entry.id,
+      });
+    }
+  }
+  return matches;
+}
+
+function getResolvedRequestId(request?: Request | null, requestId?: string | null) {
+  const incomingId =
+    asNonEmptyString(requestId) || asNonEmptyString(request?.headers.get("x-request-id"));
+  return incomingId || randomUUID();
+}
+
+export function getModelCatalogVersion() {
+  const syncStatus = getSyncStatus();
+  return syncStatus.lastSync
+    ? `${MODEL_METADATA_SCHEMA_VERSION}:${syncStatus.lastSync}`
+    : `${MODEL_METADATA_SCHEMA_VERSION}:static`;
+}
+
+export function getCatalogDiagnosticsHeaders(
+  options: CatalogDiagnosticsOptions = {}
+): Record<string, string> {
+  const resolvedRequestId = getResolvedRequestId(options.request, options.requestId);
+  return {
+    "X-Request-Id": resolvedRequestId,
+    "X-Model-Catalog-Version": getModelCatalogVersion(),
+    ...(options.resolvedAlias ? { "X-Model-Alias-Resolved": options.resolvedAlias } : {}),
+  };
+}
+
+export function getCanonicalModelMetadata(input: {
+  provider?: string | null;
+  model?: string | null;
+  snapshot?: ModelCapabilityResolutionSnapshot | null;
+}): CanonicalModelMetadata | null {
+  const modelId = asNonEmptyString(input.model);
+  if (!modelId) return null;
+
+  const resolved = getResolvedModelCapabilities(
+    {
+      provider: input.provider || null,
+      model: modelId,
+    },
+    undefined,
+    input.snapshot || null
+  );
+  const provider = resolved.provider;
+  const providerAlias = provider ? PROVIDER_ID_TO_ALIAS[provider] || provider : null;
+  const registryModel = getRegistryModel(providerAlias || provider, resolved.model || modelId);
+  const staticSpec = getModelSpec(resolved.model || modelId);
+  const syncedCapability =
+    provider && resolved.model
+      ? getSyncedCapability(provider, resolved.model, input.snapshot?.synced ?? null)
+      : null;
+  const canonicalStaticAlias = resolveStaticModelAlias(resolved.model || modelId);
+  const modalities = buildModalities(
+    resolved.modalitiesInput,
+    resolved.modalitiesOutput,
+    resolved.supportsVision
+  );
+
+  return {
+    provider,
+    providerAlias,
+    providerLabel:
+      (provider && (AI_PROVIDERS as Record<string, JsonRecord>)[provider]?.name?.toString()) ||
+      null,
+    model: resolved.model || modelId,
+    qualifiedId: toQualifiedId(providerAlias, provider, resolved.model || modelId),
+    displayName: registryModel?.name || resolved.model || modelId,
+    aliases: uniqueStrings([
+      canonicalStaticAlias !== (resolved.model || modelId) ? canonicalStaticAlias : null,
+      ...(staticSpec?.aliases || []),
+    ]),
+    capabilities: {
+      toolCalling: resolved.toolCalling,
+      reasoning: resolved.reasoning,
+      supportsThinking: resolved.supportsThinking,
+      supportedThinkingEfforts: resolved.supportedThinkingEfforts,
+      supportsTools: resolved.supportsTools,
+      vision: resolved.supportsVision,
+      attachment: resolved.attachment,
+      structuredOutput: resolved.structuredOutput,
+      temperature: resolved.temperature,
+    },
+    limits: {
+      contextWindow: resolved.contextWindow,
+      maxInputTokens: resolved.maxInputTokens,
+      maxOutputTokens: resolved.maxOutputTokens,
+      defaultThinkingBudget: resolved.defaultThinkingBudget,
+      thinkingBudgetCap: resolved.thinkingBudgetCap,
+      thinkingOverhead: resolved.thinkingOverhead,
+      adaptiveMaxTokens: resolved.adaptiveMaxTokens,
+    },
+    metadata: {
+      family: resolved.family,
+      status: resolved.status,
+      knowledgeCutoff: resolved.knowledgeCutoff,
+      releaseDate: resolved.releaseDate,
+      lastUpdated: resolved.lastUpdated,
+      openWeights: resolved.openWeights,
+      source: {
+        providerRegistry: Boolean(registryModel),
+        staticSpec: Boolean(staticSpec),
+        syncedCapability: Boolean(syncedCapability),
+        reasoningEffortsOverride: resolved.reasoningEffortsOverride,
+      },
+    },
+    modalities: {
+      input: modalities.input,
+      output: modalities.output,
+      interleavedField: resolved.interleavedField,
+    },
+  };
+}
+
+// #8697 second bottleneck (after getModelsDevPricing memoization above): findInsensitive
+// rebuilt a full Object.entries() scan on every miss, twice per model (provider lookup +
+// model lookup) — ~6091 models × ~180-210 entries ≈ 1.2-1.3M allocations per catalog
+// rebuild. Replaced with a lowercase-key index built once per distinct object and cached
+// by identity (WeakMap) — getModelsDevPricing() returns the same object reference while
+// its cache is warm, so the index is reused across every resolveCatalogPricing() call in
+// a rebuild instead of rebuilt per lookup.
+const lowercaseIndexCache = new WeakMap<object, Map<string, unknown>>();
+
+/** Colliding keys named in the aggregated collision warning before it truncates. */
+const COLLISION_SAMPLE_SIZE = 5;
+
+/** Test hook (#13601): exercised directly by the collision-naming unit test. */
+export function findInsensitive<T>(
+  obj: Record<string, T> | null | undefined,
+  key: string
+): T | undefined {
+  if (!obj || !key) return undefined;
+  if (key in obj) return obj[key];
+  let index = lowercaseIndexCache.get(obj);
+  if (!index) {
+    index = new Map();
+    const collisions: string[] = [];
+    const firstKeyByLower = new Map<string, string>();
+    for (const [k, v] of Object.entries(obj)) {
+      const lowerKey = k.toLowerCase();
+      // Collisions are a real data-quality signal from an upstream sync (e.g.
+      // models.dev returning both "OpenAI" and "openai" as distinct provider
+      // keys), so they are surfaced rather than swallowed — first-seen-wins,
+      // matching the pre-#8697 scan's behavior. Each collision is recorded with
+      // BOTH spellings (#13601) so the operator can tell which entries clash;
+      // they are reported together once the index finishes building.
+      const firstKey = firstKeyByLower.get(lowerKey);
+      if (firstKey !== undefined) {
+        collisions.push(`"${lowerKey}" ("${firstKey}" vs "${k}")`);
+        continue;
+      }
+      firstKeyByLower.set(lowerKey, k);
+      index.set(lowerKey, v);
+    }
+    // Aggregate into ONE line per index build. Warning per colliding key made
+    // the signal unreadable and expensive: a real catalog collides on hundreds
+    // of keys, and a production log carried 27,296 of these lines (40% of the
+    // file, ~500/sec bursts) driving 52 MB rotations. The count plus a bounded
+    // sample keeps the diagnostic without the flood.
+    if (collisions.length > 0) {
+      const sample = collisions.slice(0, COLLISION_SAMPLE_SIZE).join(", ");
+      const more = collisions.length > COLLISION_SAMPLE_SIZE ? ", …" : "";
+      console.warn(
+        `[modelMetadataRegistry] findInsensitive: ${collisions.length} case-insensitive key collision(s) — keeping first-seen value, later ones discarded. Keys: ${sample}${more}`
+      );
+    }
+    lowercaseIndexCache.set(obj, index);
+  }
+  return index.get(key.toLowerCase()) as T | undefined;
+}
+
+function resolveCatalogPricing(
+  provider: string | null,
+  model: string | null,
+  snapshot?: CatalogEnrichmentSnapshot
+): Record<string, number> | null {
+  if (!provider || !model) return null;
+  const base = resolveBaseCatalogPricing(provider, model, snapshot);
+  // #15528: user overrides win per-field over models.dev / LiteLLM / defaults.
+  const user = lookupUserCatalogPricing(
+    snapshot?.userPricing !== undefined ? snapshot.userPricing : readUserPricingMemoized(),
+    provider,
+    model,
+    findInsensitive
+  );
+  return user ? { ...(base || {}), ...user } : base;
+}
+
+function lookupCatalogPricing(
+  source: Record<string, Record<string, Record<string, number>>>,
+  provider: string,
+  model: string
+): Record<string, number> | null {
+  const providerPricing =
+    findInsensitive(source, provider) || findInsensitive(source, provider.replace(/-cn$/, ""));
+  if (providerPricing) {
+    const modelPricing =
+      findInsensitive(providerPricing, model) ||
+      findInsensitive(providerPricing, model.replace(/\./g, "-")) ||
+      findInsensitive(
+        providerPricing,
+        model.includes("/") ? model.split("/").pop() || model : model
+      );
+    if (modelPricing && typeof modelPricing === "object") {
+      const input = modelPricing.input;
+      const output = modelPricing.output;
+      if (typeof input === "number" || typeof output === "number") {
+        const pricing: Record<string, number> = {};
+        if (typeof input === "number") pricing.input = input;
+        if (typeof output === "number") pricing.output = output;
+        if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
+        if (typeof modelPricing.cache_creation === "number") {
+          pricing.cache_creation = modelPricing.cache_creation;
+        }
+        return pricing;
+      }
+    }
+  }
+  return null;
+}
+
+function resolveBaseCatalogPricing(
+  provider: string,
+  model: string,
+  snapshot?: CatalogEnrichmentSnapshot
+): Record<string, number> | null {
+  // Prefer models.dev synced pricing when present; fall back to hardcoded defaults.
+  try {
+    const modelsDev = (
+      snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
+    ) as Record<string, Record<string, Record<string, number>>>;
+    const pricing = lookupCatalogPricing(modelsDev, provider, model);
+    if (pricing) return pricing;
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  // LiteLLM-synced pricing (`pricing_synced` namespace) — Layer 3 in the
+  // documented resolution order (user > models.dev > LiteLLM > defaults).
+  // Consulted only when models.dev returned nothing, matching the order
+  // already implemented in db/settings/pricing.ts::getPricing().
+  try {
+    const litellm = getSyncedPricing() as unknown as Record<
+      string,
+      Record<string, Record<string, number>>
+    >;
+    const pricing = lookupCatalogPricing(litellm, provider, model);
+    if (pricing) return pricing;
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  try {
+    const defaults = getDefaultPricingForModel(provider, model) as Record<string, number> | null;
+    if (defaults && (typeof defaults.input === "number" || typeof defaults.output === "number")) {
+      return defaults;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/** Expose normalized capability and input-modality metadata to model-list clients. */
+export function enrichCatalogModelEntry<T extends JsonRecord>(
+  entry: T,
+  input?: { provider?: string | null; model?: string | null },
+  snapshot?: CatalogEnrichmentSnapshot
+): T {
+  const publicProvider =
+    input?.provider ||
+    (typeof entry.owned_by === "string" && entry.owned_by !== "combo" ? entry.owned_by : null);
+  const provider =
+    (publicProvider && snapshot?.providerNodeIdsByPrefix?.[publicProvider]) || publicProvider;
+  const model =
+    input?.model ||
+    asNonEmptyString(entry.root) ||
+    (() => {
+      const id = asNonEmptyString(entry.id);
+      if (!id) return null;
+      if (id.includes("/")) return id.slice(id.indexOf("/") + 1);
+      return id;
+    })();
+
+  const metadata = getCanonicalModelMetadata({
+    provider,
+    model,
+    snapshot: snapshot?.capabilityResolutionSnapshot ?? null,
+  });
+  if (!metadata) return entry;
+
+  const nextEntry: JsonRecord = { ...entry };
+  const existingName = asNonEmptyString(entry.name);
+  const authoritativeContextWindow =
+    getAuthoritativeProviderContextWindow(metadata.provider, metadata.model) ??
+    getAuthoritativeProviderContextWindow(provider, model) ??
+    getAuthoritativeProviderContextWindow(publicProvider, model) ??
+    getAuthoritativeContextWindow(metadata.model) ??
+    getAuthoritativeContextWindow(model);
+  const specialtySurface = isNonChatCatalogSurface(entry.type);
+  const capabilitySnapshot = snapshot?.capabilityResolutionSnapshot ?? null;
+  const persistedContextWindow = getResolvedModelContextOverride(
+    { provider, model },
+    capabilitySnapshot
+  );
+  const existingCapabilities =
+    entry.capabilities && typeof entry.capabilities === "object"
+      ? (entry.capabilities as JsonRecord)
+      : {};
+  const declaredEffortTiers = Array.isArray(existingCapabilities.effort_tiers)
+    ? existingCapabilities.effort_tiers.filter(
+        (effort): effort is string => typeof effort === "string" && effort.length > 0
+      )
+    : [];
+  const sourceDeclaresThinking =
+    typeof existingCapabilities.thinking === "boolean" ||
+    typeof existingCapabilities.supportsThinking === "boolean";
+  const effortTiers =
+    metadata.capabilities.supportedThinkingEfforts &&
+    metadata.capabilities.supportedThinkingEfforts.length > 0
+      ? [...metadata.capabilities.supportedThinkingEfforts]
+      : declaredEffortTiers.length > 0
+        ? declaredEffortTiers
+        : sourceDeclaresThinking
+          ? undefined
+          : // #10963: GLM-family models never inherit generic OpenAI tiers — an
+            // explicit empty list is authoritative unless a provider-declared
+            // contract exists (handled by declaredEffortTiers above).
+            isGlmFamilyModel(metadata.model, metadata.displayName)
+            ? []
+            : extendCodexGpt56EffortValues(
+                metadata.provider,
+                metadata.model,
+                CANONICAL_EFFORT_VALUES
+              );
+  const capabilityFields = {
+    ...(typeof metadata.capabilities.vision === "boolean"
+      ? { vision: metadata.capabilities.vision }
+      : {}),
+    // #8016: never invent chat tool/reasoning defaults onto specialty surfaces.
+    // Only copy boolean true when authoritative metadata says so; specialty rows
+    // default to false instead of optimistic chat heuristics.
+    tool_calling: specialtySurface
+      ? metadata.capabilities.supportsTools === true || metadata.capabilities.toolCalling === true
+        ? true
+        : false
+      : metadata.capabilities.toolCalling,
+    reasoning: specialtySurface
+      ? metadata.capabilities.supportsThinking === true || metadata.capabilities.reasoning === true
+        ? true
+        : false
+      : metadata.capabilities.reasoning,
+    // #6241: surface thinking support + the canonical effort tiers so the frontend can
+    // render the effort/thinking toggles. `thinking` is kept for back-compat; `supportsThinking`
+    // is the explicit flag and `effort_tiers` lists the selectable reasoning levels
+    // (only when the model actually supports thinking). An explicit empty registry list
+    // is authoritative; GLM models also require a provider-declared contract instead of
+    // inheriting generic OpenAI effort tiers.
+    ...(typeof metadata.capabilities.supportsThinking === "boolean"
+      ? {
+          thinking: metadata.capabilities.supportsThinking,
+          supportsThinking: metadata.capabilities.supportsThinking,
+          ...(metadata.capabilities.supportsThinking && effortTiers
+            ? { effort_tiers: effortTiers }
+            : {}),
+        }
+      : {}),
+    ...(typeof metadata.capabilities.attachment === "boolean"
+      ? { attachment: metadata.capabilities.attachment }
+      : {}),
+    ...(typeof metadata.capabilities.structuredOutput === "boolean"
+      ? { structured_output: metadata.capabilities.structuredOutput }
+      : {}),
+    ...(typeof metadata.capabilities.temperature === "boolean"
+      ? { temperature: metadata.capabilities.temperature }
+      : {}),
+  };
+
+  nextEntry.capabilities = {
+    ...existingCapabilities,
+    ...capabilityFields,
+    ...(metadata.modalities.input.length > 0
+      ? {
+          audio_input: metadata.modalities.input.includes("audio"),
+          video_input: metadata.modalities.input.includes("video"),
+          file_input:
+            metadata.modalities.input.includes("pdf") || metadata.modalities.input.includes("file"),
+        }
+      : {}),
+  };
+
+  if (isTextOnlyChatTransport(metadata.provider)) {
+    // Correct stale/synced image declarations as well as the capability flag.
+    nextEntry.input_modalities = ["text"];
+    nextEntry.output_modalities = ["text"];
+  } else if (
+    (!Array.isArray(entry.input_modalities) ||
+      metadata.provider === "cheaperinference" ||
+      metadata.provider === "cinf") &&
+    metadata.modalities.input.length > 0
+  ) {
+    nextEntry.input_modalities = metadata.modalities.input;
+  }
+
+  if (!Array.isArray(entry.output_modalities) && metadata.modalities.output.length > 0) {
+    nextEntry.output_modalities = metadata.modalities.output;
+  }
+
+  if (
+    !specialtySurface &&
+    (typeof nextEntry.context_length !== "number" ||
+      authoritativeContextWindow !== null ||
+      persistedContextWindow !== null) &&
+    typeof metadata.limits.contextWindow === "number"
+  ) {
+    nextEntry.context_length = metadata.limits.contextWindow;
+  } else if (specialtySurface && persistedContextWindow !== null) {
+    // Exact persisted overrides are authoritative for every surface of the model.
+    nextEntry.context_length = persistedContextWindow;
+  } else if (
+    specialtySurface &&
+    authoritativeContextWindow !== null &&
+    typeof authoritativeContextWindow === "number"
+  ) {
+    // Only authoritative static windows may otherwise decorate specialty rows.
+    nextEntry.context_length = authoritativeContextWindow;
+  } else if (specialtySurface && typeof nextEntry.context_length === "number") {
+    // Keep an explicit source-provided context if the emitter already set one.
+  } else if (specialtySurface) {
+    delete nextEntry.context_length;
+  }
+
+  const persistedOutputLimit =
+    getModelCapabilityOverride(
+      provider,
+      model,
+      "max_output_tokens",
+      capabilitySnapshot?.maxTokenOverrides
+    ) ??
+    getModelCapabilityOverride(
+      provider,
+      model,
+      "max_token",
+      capabilitySnapshot?.maxTokenOverrides
+    ) ??
+    getModelCapabilityOverride(
+      publicProvider,
+      model,
+      "max_output_tokens",
+      capabilitySnapshot?.maxTokenOverrides
+    ) ??
+    getModelCapabilityOverride(
+      publicProvider,
+      model,
+      "max_token",
+      capabilitySnapshot?.maxTokenOverrides
+    );
+  if (persistedOutputLimit !== null) {
+    nextEntry.max_output_tokens = persistedOutputLimit;
+  } else if (
+    // #16579: these OpenCode Go imports can carry a stale generic 32K output
+    // ceiling. For the three upstream-verified models use the resolved model
+    // metadata instead, which still honors a synced limit if one is present.
+    // Do not rewrite other providers' explicit advertised output limits.
+    (typeof nextEntry.max_output_tokens !== "number" ||
+      (metadata.provider === "opencode-go" &&
+        (model === "deepseek-v4.1-flash" ||
+          model === "deepseek-flash" ||
+          model === "minimax-m2.5"))) &&
+    typeof metadata.limits.maxOutputTokens === "number" &&
+    metadata.limits.maxOutputTokens > 0
+  ) {
+    nextEntry.max_output_tokens = metadata.limits.maxOutputTokens;
+  }
+
+  if (
+    typeof metadata.limits.maxInputTokens === "number" &&
+    (typeof nextEntry.max_input_tokens !== "number" ||
+      authoritativeContextWindow !== null ||
+      persistedContextWindow !== null)
+  ) {
+    nextEntry.max_input_tokens = metadata.limits.maxInputTokens;
+  }
+
+  if (metadata.metadata.family) nextEntry.family = metadata.metadata.family;
+  if (metadata.metadata.status) nextEntry.status = metadata.metadata.status;
+  if (metadata.metadata.knowledgeCutoff)
+    nextEntry.knowledge_cutoff = metadata.metadata.knowledgeCutoff;
+  if (metadata.metadata.releaseDate) nextEntry.release_date = metadata.metadata.releaseDate;
+  if (metadata.metadata.lastUpdated) nextEntry.last_updated = metadata.metadata.lastUpdated;
+  if (typeof metadata.metadata.openWeights === "boolean") {
+    nextEntry.open_weights = metadata.metadata.openWeights;
+  }
+  if (!existingName && metadata.displayName) {
+    nextEntry.name = metadata.displayName;
+  }
+
+  if (nextEntry.pricing == null) {
+    const pricing = resolveCatalogPricing(provider, model, snapshot);
+    if (pricing) nextEntry.pricing = pricing;
+  }
+
+  return nextEntry as T;
+}
+
+function buildAliasCandidates(alias: string) {
+  const parsed = parseModel(alias);
+  const modelId = asNonEmptyString(parsed.model) || asNonEmptyString(alias);
+  if (!modelId) return [];
+  const canonicalModel = resolveStaticModelAlias(modelId);
+  const candidateModelIds = uniqueStrings([modelId, canonicalModel]);
+  const candidates = new Map<string, { provider: string; providerAlias: string; model: string }>();
+
+  for (const candidateModelId of candidateModelIds) {
+    for (const match of extractCandidateMatches(candidateModelId)) {
+      candidates.set(`${match.provider}/${match.model}`, match);
+    }
+  }
+
+  return [...candidates.values()];
+}
+
+function normalizeAliasCandidates(candidates: string[] | undefined) {
+  return uniqueStrings(
+    (candidates || []).map((candidate) => {
+      const parsed = parseModel(candidate);
+      if (!parsed.provider || !parsed.model) return candidate;
+      const providerAlias = PROVIDER_ID_TO_ALIAS[parsed.provider] || parsed.provider;
+      return `${providerAlias}/${parsed.model}`;
+    })
+  );
+}
+
+export async function resolveModelAliasLookup(
+  alias: string
+): Promise<{ ok: true; value: ResolvedAliasLookup } | { ok: false; error: AliasResolutionError }> {
+  const normalizedAlias = asNonEmptyString(alias);
+  if (!normalizedAlias) {
+    return {
+      ok: false,
+      error: {
+        status: 400,
+        code: MODEL_NOT_MAPPED,
+        message: "Alias is required",
+      },
+    };
+  }
+
+  const aliases = await getModelAliases();
+  const explicitTarget = aliases[normalizedAlias];
+
+  if (explicitTarget !== undefined) {
+    const modelInfo = await getModelInfo(normalizedAlias);
+    if (!modelInfo.provider || !modelInfo.model) {
+      const candidates = normalizeAliasCandidates(
+        (modelInfo as JsonRecord).candidateAliases as string[]
+      );
+      return {
+        ok: false,
+        error: {
+          status: 409,
+          code: MODEL_ALIAS_AMBIGUOUS,
+          message:
+            (modelInfo as JsonRecord).errorMessage?.toString() ||
+            `Alias '${normalizedAlias}' is ambiguous.`,
+          ...(candidates.length > 0 ? { candidates } : {}),
+        },
+      };
+    }
+
+    const providerAlias = PROVIDER_ID_TO_ALIAS[modelInfo.provider] || modelInfo.provider;
+    return {
+      ok: true,
+      value: {
+        alias: normalizedAlias,
+        resolvedAlias: `${providerAlias}/${modelInfo.model}`,
+        source: "stored_alias",
+        provider: modelInfo.provider,
+        providerAlias,
+        model: modelInfo.model,
+        target: explicitTarget,
+        metadata: getCanonicalModelMetadata({
+          provider: modelInfo.provider,
+          model: modelInfo.model,
+        })!,
+      },
+    };
+  }
+
+  const parsed = parseModel(normalizedAlias);
+  if (parsed.provider && parsed.model) {
+    const modelInfo = await getModelInfo(normalizedAlias);
+    if (!modelInfo.provider || !modelInfo.model) {
+      return {
+        ok: false,
+        error: {
+          status: 404,
+          code: MODEL_NOT_MAPPED,
+          message: `Model '${normalizedAlias}' is not mapped.`,
+        },
+      };
+    }
+
+    const providerAlias = PROVIDER_ID_TO_ALIAS[modelInfo.provider] || modelInfo.provider;
+    return {
+      ok: true,
+      value: {
+        alias: normalizedAlias,
+        resolvedAlias: `${providerAlias}/${modelInfo.model}`,
+        source: "direct_model",
+        provider: modelInfo.provider,
+        providerAlias,
+        model: modelInfo.model,
+        target: `${providerAlias}/${modelInfo.model}`,
+        metadata: getCanonicalModelMetadata({
+          provider: modelInfo.provider,
+          model: modelInfo.model,
+        })!,
+      },
+    };
+  }
+
+  const candidates = buildAliasCandidates(normalizedAlias);
+  if (candidates.length === 0) {
+    return {
+      ok: false,
+      error: {
+        status: 404,
+        code: MODEL_NOT_MAPPED,
+        message: `Alias '${normalizedAlias}' is not mapped.`,
+      },
+    };
+  }
+
+  if (candidates.length > 1) {
+    return {
+      ok: false,
+      error: {
+        status: 409,
+        code: MODEL_ALIAS_AMBIGUOUS,
+        message: `Alias '${normalizedAlias}' is ambiguous. Use provider/model prefix.`,
+        candidates: candidates.map((candidate) => `${candidate.providerAlias}/${candidate.model}`),
+      },
+    };
+  }
+
+  const match = candidates[0];
+  const metadata = getCanonicalModelMetadata({
+    provider: match.provider,
+    model: match.model,
+  });
+
+  return {
+    ok: true,
+    value: {
+      alias: normalizedAlias,
+      resolvedAlias: `${match.providerAlias}/${match.model}`,
+      source: "catalog_match",
+      provider: match.provider,
+      providerAlias: match.providerAlias,
+      model: match.model,
+      target: `${match.providerAlias}/${match.model}`,
+      metadata: metadata!,
+    },
+  };
+}
+
+/**
+ * Qualify duplicate model display names with a provider prefix so users can
+ * distinguish between providers that serve the same model.
+ *
+ * Problem: when multiple providers (e.g. `gh`, `cx`, `opencode-zen`) all serve
+ * `gpt-5.5`, each catalog entry gets `name: "GPT-5.5"`. A client like OpenCode
+ * that renders the `name` field (src/plugin.ts: `name: model.name || model.id`)
+ * shows an identical "GPT-5.5" for every provider variant, giving the user no
+ * way to know which provider they are selecting.
+ *
+ * Fix: make a single O(n) pass over the enriched catalog. For any base name that
+ * appears on entries from two or more distinct providers, replace each entry's
+ * `name` with `<providerPrefix>/<baseName>` (e.g. "gh/GPT-5.5", "cx/GPT-5.5").
+ * Entries with a unique name are left untouched, preserving the clean display for
+ * the common single-provider case. The provider prefix is the first segment of
+ * the model id (e.g. `gh` from `gh/gpt-5.5`).
+ *
+ * The modification is purely cosmetic — it only affects the catalog `name` field
+ * used for display. Model IDs, routing, and request parsing are unchanged.
+ */
+export function disambiguateCatalogModelNames<T extends JsonRecord>(models: T[]): T[] {
+  // Count how many distinct provider prefixes use each display name.
+  const nameToProviders = new Map<string, Set<string>>();
+  for (const model of models) {
+    const name = asNonEmptyString(model.name);
+    if (!name) continue;
+    const id = asNonEmptyString(model.id);
+    const prefix = id && id.includes("/") ? id.slice(0, id.indexOf("/")) : null;
+    if (!prefix) continue;
+    const existing = nameToProviders.get(name) || new Set<string>();
+    existing.add(prefix);
+    nameToProviders.set(name, existing);
+  }
+
+  // Only rewrite names that are shared across 2+ providers.
+  const ambiguous = new Set<string>();
+  for (const [name, providers] of nameToProviders) {
+    if (providers.size > 1) ambiguous.add(name);
+  }
+  if (ambiguous.size === 0) return models;
+
+  return models.map((model) => {
+    const name = asNonEmptyString(model.name);
+    if (!name || !ambiguous.has(name)) return model;
+    const id = asNonEmptyString(model.id);
+    const prefix = id && id.includes("/") ? id.slice(0, id.indexOf("/")) : null;
+    if (!prefix) return model;
+    return { ...model, name: `${prefix}/${name}` };
+  });
+}

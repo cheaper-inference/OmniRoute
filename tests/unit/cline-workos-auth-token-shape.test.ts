@@ -1,0 +1,217 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  applyClineProtocolHeaders,
+  buildClineHeaders,
+  buildClinepassHeaders,
+  getClineAccessToken,
+  getClineAuthorizationHeader,
+  resolveClineTaskId,
+} from "../../src/shared/utils/clineAuth.ts";
+import { buildProviderHeaders } from "../../open-sse/services/provider.ts";
+import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+
+test("getClineAccessToken prefixes the token with workos:", () => {
+  assert.equal(getClineAccessToken("abc123"), "workos:abc123");
+});
+
+test("getClineAccessToken is idempotent when already prefixed", () => {
+  assert.equal(getClineAccessToken("workos:abc123"), "workos:abc123");
+});
+
+test("getClineAccessToken trims and rejects empty / non-string input", () => {
+  assert.equal(getClineAccessToken("  abc123  "), "workos:abc123");
+  assert.equal(getClineAccessToken("   "), "");
+  assert.equal(getClineAccessToken(""), "");
+  assert.equal(getClineAccessToken(undefined), "");
+  assert.equal(getClineAccessToken(null), "");
+  assert.equal(getClineAccessToken(42), "");
+});
+
+test("getClineAuthorizationHeader builds a workos-prefixed bearer header", () => {
+  assert.equal(getClineAuthorizationHeader("abc123"), "Bearer workos:abc123");
+  assert.equal(getClineAuthorizationHeader(""), "");
+});
+
+test("buildClineHeaders emits the full cline client header set", () => {
+  const headers = buildClineHeaders("abc123", {}, { taskId: "task-123" });
+  assert.equal(headers.Authorization, "Bearer workos:abc123");
+  assert.equal(headers["HTTP-Referer"], "https://cline.bot");
+  assert.equal(headers["X-Title"], "Cline");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+  assert.equal(headers["X-Task-ID"], "task-123");
+  assert.equal(headers["X-IS-MULTIROOT"], "false");
+  assert.ok(/^Cline\//.test(headers["User-Agent"]));
+  assert.ok(!/9router/i.test(JSON.stringify(headers)));
+});
+
+test("buildClineHeaders merges extra headers and omits Authorization with no token", () => {
+  const headers = buildClineHeaders("", {
+    Accept: "application/json",
+    "x-task-id": "configured-task-must-not-leak",
+  });
+  assert.equal(headers.Accept, "application/json");
+  assert.ok(!("Authorization" in headers));
+  assert.ok(!("X-Task-ID" in headers));
+  assert.ok(!("x-task-id" in headers));
+  // Client-identification headers are still present even without a token.
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+});
+
+test("resolveClineTaskId forwards client task identity but does not invent one", () => {
+  assert.equal(resolveClineTaskId({ "x-task-id": "client-task-123" }), "client-task-123");
+  assert.equal(resolveClineTaskId({}), undefined);
+  assert.equal(resolveClineTaskId(null), undefined);
+});
+
+test("required Cline protocol headers override conflicting configured casing", () => {
+  const headers = applyClineProtocolHeaders(
+    {
+      "user-agent": "other-client/1",
+      "x-client-type": "other-client",
+      "x-task-id": "stored-task",
+    },
+    { clientVersion: "3.8.49", taskId: "request-task" }
+  );
+
+  assert.equal(headers["User-Agent"], "Cline/3.8.49");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+  assert.equal(headers["X-Task-ID"], "request-task");
+  assert.ok(!("user-agent" in headers));
+  assert.ok(!("x-client-type" in headers));
+  assert.ok(!("x-task-id" in headers));
+});
+
+test("ClinePass BYOK and OAuth auth modes both carry the full protocol headers", () => {
+  const byok = buildClinepassHeaders({ apiKey: "sk-pass" }, undefined, {
+    taskId: "task-byok",
+  });
+  assert.equal(byok.Authorization, "Bearer sk-pass");
+  assert.equal(byok["X-Task-ID"], "task-byok");
+  assert.equal(byok["X-CLIENT-TYPE"], "omniroute");
+
+  const oauth = buildClinepassHeaders({ accessToken: "oauth-token" }, undefined, {
+    taskId: "task-oauth",
+  });
+  assert.equal(oauth.Authorization, "Bearer workos:oauth-token");
+  assert.equal(oauth["X-Task-ID"], "task-oauth");
+  assert.equal(oauth["X-CLIENT-TYPE"], "omniroute");
+});
+
+test("buildProviderHeaders uses the cline workos auth token shape for an OAuth credential", () => {
+  // OAuth credential: the WorkOS token lives in `accessToken` and MUST be sent
+  // as `Bearer workos:<token>`.
+  const headers = buildProviderHeaders("cline", { accessToken: "tok-abc" }, true);
+  assert.equal(headers.Authorization, "Bearer workos:tok-abc");
+  assert.equal(headers["HTTP-Referer"], "https://cline.bot");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+});
+
+test("buildProviderHeaders sends a Cline BYOK api key as a plain bearer token", () => {
+  // BYOK credential (#16298): the `sk_...` key lives in `apiKey` and must NOT be
+  // `workos:`-prefixed — Cline rejects the prefixed form for BYOK keys.
+  //
+  // The previous expectation here was `Bearer workos:tok-abc` for an apiKey-only
+  // credential. That came from b9fdcfc006 (#4787), written when Cline was OAuth-only
+  // and had no BYOK path; the `credentials.apiKey || credentials.accessToken` order it
+  // introduced was copied generic boilerplate, not a claim that an OAuth token is
+  // stored in `apiKey` (every Cline OAuth write site persists to `accessToken`).
+  //
+  // TDD guard: tests/unit/refactor-buildHeaders-cline.test.ts asserts the same
+  // dual-auth split on the executor path.
+  const headers = buildProviderHeaders("cline", { apiKey: "tok-abc" }, true);
+  assert.equal(headers.Authorization, "Bearer tok-abc");
+  assert.equal(headers["HTTP-Referer"], "https://cline.bot");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+});
+
+test("buildProviderHeaders honors an accessToken for cline", () => {
+  const headers = buildProviderHeaders("cline", { accessToken: "acc-xyz" }, false);
+  assert.equal(headers.Authorization, "Bearer workos:acc-xyz");
+});
+
+test("DefaultExecutor.buildHeaders uses the cline workos auth token shape for an OAuth credential", () => {
+  const executor = new DefaultExecutor("cline");
+  const headers = executor.buildHeaders({ accessToken: "tok-abc" }, true, {
+    "X-Task-ID": "task-from-client",
+  });
+  assert.equal(headers.Authorization, "Bearer workos:tok-abc");
+  assert.equal(headers["HTTP-Referer"], "https://cline.bot");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+  assert.equal(headers["X-Title"], "Cline");
+  assert.equal(headers["X-Task-ID"], "task-from-client");
+
+  const withoutTaskId = executor.buildHeaders({ accessToken: "tok-abc" }, true, {});
+  assert.ok(!("X-Task-ID" in withoutTaskId));
+});
+
+test("DefaultExecutor.buildHeaders sends a Cline BYOK api key as a plain bearer token", () => {
+  // BYOK credential (#16298): an `sk_...` key in `apiKey` must be sent as a plain
+  // `Bearer <key>` — the `workos:` prefix is reserved for OAuth tokens and is
+  // rejected upstream for BYOK keys. The OAuth case above keeps the `workos:` shape.
+  //
+  // TDD guard: tests/unit/refactor-buildHeaders-cline.test.ts asserts the same
+  // dual-auth split (and the authType-omitted variant) on the executor path.
+  const executor = new DefaultExecutor("cline");
+  const headers = executor.buildHeaders({ apiKey: "tok-abc" }, true, {
+    "X-Task-ID": "task-from-client",
+  });
+  assert.equal(headers.Authorization, "Bearer tok-abc");
+  assert.equal(headers["HTTP-Referer"], "https://cline.bot");
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
+  assert.equal(headers["X-Title"], "Cline");
+  assert.equal(headers["X-Task-ID"], "task-from-client");
+});
+
+test("DefaultExecutor labels internal health checks separately from user traffic", () => {
+  const executor = new DefaultExecutor("cline");
+  const headers = executor.buildHeaders({ apiKey: "tok-abc" }, true, {
+    "X-Internal-Test": "combo-health-check",
+  });
+
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute-internal-health-check");
+
+  // BaseExecutor reapplies the required protocol headers immediately before dispatch.
+  applyClineProtocolHeaders(headers, { taskId: headers["X-Task-ID"] });
+  assert.equal(headers["X-CLIENT-TYPE"], "omniroute-internal-health-check");
+});
+
+test("DefaultExecutor handles dual-auth logging for clinepass provider", () => {
+  const executor = new DefaultExecutor("clinepass");
+
+  // API key auth mode
+  const apiKeyHeaders = executor.buildHeaders(
+    { apiKey: "sk-cline-123", authType: "apikey" },
+    true,
+    {}
+  );
+  assert.equal(apiKeyHeaders["Authorization"], "Bearer sk-cline-123");
+
+  // OAuth token auth mode — real OAuth credential shape (accessToken, not apiKey;
+  // see #11828 review) so this exercises the effectiveKey || credentials?.accessToken
+  // fallback that actually runs in production.
+  const oauthHeaders = executor.buildHeaders(
+    { accessToken: "workos_tok_456", authType: "oauth" },
+    true,
+    {}
+  );
+  assert.equal(oauthHeaders["Authorization"], "Bearer workos:workos_tok_456");
+});
+
+test("DefaultExecutor clinepass authType branch matches buildClinepassHeaders() directly (parity)", () => {
+  const executor = new DefaultExecutor("clinepass");
+
+  const apiKeyCredentials = { apiKey: "sk-cline-789", authType: "apikey" };
+  const oauthCredentials = { accessToken: "workos_tok_789", authType: "oauth" };
+
+  for (const credentials of [apiKeyCredentials, oauthCredentials]) {
+    const viaExecutor = executor.buildHeaders(credentials, true, {});
+    const viaDirectCall = buildClinepassHeaders(credentials, credentials.apiKey);
+    assert.equal(
+      viaExecutor["Authorization"],
+      viaDirectCall["Authorization"],
+      `Authorization mismatch for ${JSON.stringify(credentials)}`
+    );
+  }
+});

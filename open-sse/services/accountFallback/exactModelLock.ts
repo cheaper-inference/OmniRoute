@@ -1,0 +1,244 @@
+/**
+ * accountFallback/exactModelLock.ts — exact-model (non-family-scoped) lockout key + entry math.
+ *
+ * Extracted from services/accountFallback.ts (file-size gate, #8630): pure helpers for the
+ * opt-in "exact model" lockout scope introduced for Antigravity — a confirmed exhaustion on
+ * one specific model (e.g. one Claude model) must not lock the whole quota family (Gemini or
+ * other Claude models on the same account). Pure w.r.t. module state — accountFallback.ts
+ * still owns the modelLockouts/modelFailureState maps, canonical-provider resolution, and the
+ * cleanup timer; it calls into these with its own map instances.
+ */
+
+import type { ModelLockoutEntry, ModelFailureState } from "../accountFallback.ts";
+import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.ts";
+
+/**
+ * Antigravity serves one model under several ids, so a lock written under one must be seen
+ * under the others. This runs without the account catalog, so it can only apply the static
+ * alias table: `gemini-3.7-flash-{high,medium,low}` share one key even on an account whose
+ * catalog lists them as separate wire models (`cleanModelName` sends those verbatim). An exact
+ * cooldown on one tier then covers its siblings too, the same collapse the account lease makes
+ * in `canonicalizeAntigravityExactModel`.
+ */
+export function canonicalizeExactModel(provider: string, model: string): string {
+  const normalized = model.trim().toLowerCase();
+  if (provider === "antigravity" || provider === "agy" || provider === "ag") {
+    const bareModel = normalized.replace(/^(?:antigravity|ag|agy)\//, "");
+    return resolveAntigravityModelId(bareModel).trim().toLowerCase();
+  }
+  return normalized;
+}
+
+/** Build the "exact" scoped lockout key — a distinct namespace from the quota-family key. */
+export function buildExactModelLockKey(
+  canonicalProvider: string,
+  connectionId: string,
+  model: string
+): string {
+  return `${canonicalProvider}:${connectionId}:exact:${canonicalizeExactModel(canonicalProvider, model)}`;
+}
+
+/** Dedupe the 3 lockout key shapes callers must check: quota-family, #8050 not_found, exact. */
+export function collectModelLockKeys(
+  familyKey: string,
+  notFoundKey: string,
+  exactKey: string
+): string[] {
+  return Array.from(new Set([familyKey, notFoundKey, exactKey]));
+}
+
+/**
+ * DI factory for `getModelLockKeys` — accountFallback.ts's own `getModelLockKey` (quota-family
+ * scoping) and `getCanonicalLockProvider` (alias resolution) are private, so this closes over
+ * them here rather than duplicating that logic in the leaf.
+ */
+export function createGetModelLockKeys(
+  getModelLockKey: (
+    provider: string,
+    connectionId: string,
+    model: string,
+    reason?: string | null,
+    status?: number | null
+  ) => string,
+  getCanonicalLockProvider: (provider: string) => string
+) {
+  return function getModelLockKeys(provider: string, connectionId: string, model: string) {
+    return collectModelLockKeys(
+      getModelLockKey(provider, connectionId, model),
+      getModelLockKey(provider, connectionId, model, "not_found", 404),
+      buildExactModelLockKey(getCanonicalLockProvider(provider), connectionId, model)
+    );
+  };
+}
+
+/**
+ * Compute the next ModelLockoutEntry for an exact-model lock, merging with any existing entry
+ * the same way lockModel() does (extend failureCount on a shorter re-lock instead of shrinking
+ * the remaining cooldown). Returns null when the caller should leave state untouched.
+ */
+export function computeExactModelLockEntry(
+  existing: ModelLockoutEntry | undefined,
+  reason: string,
+  cooldownMs: number,
+  metadata: Partial<ModelLockoutEntry>
+): ModelLockoutEntry | null {
+  const now = Date.now();
+  const newUntil = now + cooldownMs;
+  if (existing && existing.until > newUntil) {
+    if (!metadata.failureCount || metadata.failureCount <= existing.failureCount) return null;
+    return {
+      ...existing,
+      failureCount: metadata.failureCount,
+      lastFailureAt: metadata.lastFailureAt ?? existing.lastFailureAt,
+      resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
+    };
+  }
+  return {
+    reason,
+    until: newUntil,
+    lockedAt: now,
+    failureCount: metadata.failureCount ?? existing?.failureCount ?? 1,
+    lastFailureAt: metadata.lastFailureAt ?? now,
+    resetAfterMs: metadata.resetAfterMs ?? existing?.resetAfterMs ?? 0,
+  };
+}
+
+/**
+ * Delete every one of the 3 lockout key shapes from both maps — a success on any one
+ * of them must clear the lock regardless of which reason originally wrote it.
+ */
+export function clearMultiKeyLock(
+  modelLockouts: Map<string, ModelLockoutEntry>,
+  modelFailureState: Map<string, ModelFailureState>,
+  keys: string[]
+): boolean {
+  let cleared = false;
+  for (const key of keys) {
+    cleared = modelLockouts.delete(key) || cleared;
+    cleared = modelFailureState.delete(key) || cleared;
+  }
+  return cleared;
+}
+
+/** True when any of the 3 lockout key shapes is currently active (post-cleanup). */
+export function isAnyKeyLocked(
+  modelLockouts: Map<string, ModelLockoutEntry>,
+  cleanup: (key: string) => void,
+  keys: string[]
+): boolean {
+  return keys.some((key) => {
+    cleanup(key);
+    return modelLockouts.has(key);
+  });
+}
+
+/** The active entry with the most remaining time across the 3 lockout key shapes. */
+export function findLatestLockEntry(
+  modelLockouts: Map<string, ModelLockoutEntry>,
+  cleanup: (key: string) => void,
+  keys: string[]
+): ModelLockoutEntry | undefined {
+  return keys
+    .map((key) => {
+      cleanup(key);
+      return modelLockouts.get(key);
+    })
+    .filter((value): value is ModelLockoutEntry => Boolean(value))
+    .sort((a, b) => b.until - a.until)[0];
+}
+
+/**
+ * DI factory for the exported `lockExactModel` — accountFallback.ts owns the
+ * modelLockouts map + cleanup timer/key private functions and closes over them here so
+ * the full lock-only-this-exact-tuple implementation lives in this leaf, not the god-file.
+ */
+export function createLockExactModel(
+  modelLockouts: Map<string, ModelLockoutEntry>,
+  ensureCleanupTimer: () => void,
+  cleanupModelLockKey: (key: string) => void,
+  getCanonicalLockProvider: (provider: string) => string
+) {
+  return function lockExactModel(
+    provider: string,
+    connectionId: string,
+    model: string | null | undefined,
+    reason: string,
+    cooldownMs: number,
+    metadata: Partial<ModelLockoutEntry> = {}
+  ): void {
+    if (!model) return;
+    ensureCleanupTimer();
+    const key = buildExactModelLockKey(getCanonicalLockProvider(provider), connectionId, model);
+    cleanupModelLockKey(key);
+    const next = computeExactModelLockEntry(modelLockouts.get(key), reason, cooldownMs, metadata);
+    if (next) modelLockouts.set(key, next);
+  };
+}
+
+/** Which key namespace a lockout writes to — see resolveLockoutScope(). */
+export type LockoutScope = "exact" | "quota_family";
+
+/**
+ * Statuses that are evidence about the account's quota / entitlement and therefore
+ * lock the quota family (codex: the whole `codex` / `spark` scope; other providers:
+ * getQuotaScopedModelForProvider). 404 stays on this side only because
+ * getModelLockKey() already narrows a not_found lock to the bare model.
+ */
+const QUOTA_FAMILY_LOCKOUT_STATUSES: ReadonlySet<number> = new Set([402, 403, 404, 429]);
+
+/**
+ * A 5xx — a transport failure (`terminated`, EHOSTUNREACH, connect timeout), an
+ * upstream server error, or OmniRoute's own synthesized 502 from quality
+ * validation — says something about one model endpoint at that moment, not about
+ * the account's quota family. Locking the family on it let a single empty stream
+ * on one `gpt-5.6-*` model remove every `gpt-5*` model of the codex connection
+ * from routing for 2–30 min (escalating) while its quota was untouched. Such
+ * failures lock the exact provider/connection/model tuple instead. A caller's
+ * explicit `scope` always wins (Antigravity passes "exact" for its own reasons).
+ */
+export function resolveLockoutScope(status: number, explicit?: LockoutScope): LockoutScope {
+  if (explicit) return explicit;
+  return QUOTA_FAMILY_LOCKOUT_STATUSES.has(status) ? "quota_family" : "exact";
+}
+
+/** Split a `provider:connectionId:[exact:]model` key back into the parts the dashboard lists. */
+export function parseModelLockKey(key: string): {
+  provider: string;
+  connectionId: string;
+  model: string;
+  scope: LockoutScope;
+} {
+  const [provider, connectionId, ...modelParts] = key.split(":");
+  const scope: LockoutScope = modelParts[0] === "exact" ? "exact" : "quota_family";
+  const model = (scope === "exact" ? modelParts.slice(1) : modelParts).join(":");
+  return { provider, connectionId, model, scope };
+}
+
+/**
+ * Success-decay across every key shape (quota-family, not_found, exact): halve each
+ * stored failureCount, dropping the entry once it reaches 0. `cleared` is true only
+ * when every entry that existed was dropped; `newFailureCount` is the largest count
+ * still stored.
+ */
+export function decayFailureCounts(
+  modelFailureState: Map<string, ModelFailureState>,
+  keys: string[]
+): { cleared: boolean; newFailureCount: number } {
+  let seen = 0;
+  let dropped = 0;
+  let newFailureCount = 0;
+  for (const key of keys) {
+    const failure = modelFailureState.get(key);
+    if (!failure) continue;
+    seen += 1;
+    const next = Math.floor(failure.failureCount / 2);
+    if (next === 0) {
+      modelFailureState.delete(key);
+      dropped += 1;
+    } else {
+      modelFailureState.set(key, { ...failure, failureCount: next });
+      newFailureCount = Math.max(newFailureCount, next);
+    }
+  }
+  return { cleared: seen > 0 && dropped === seen, newFailureCount };
+}

@@ -1,0 +1,246 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import Icon from "./Icon";
+import { Spinner } from "./Loading";
+import Modal from "./Modal";
+import Button from "./Button";
+import { copyToClipboard } from "@/shared/utils/clipboard";
+import { getNextKiroSocialPollInterval } from "@/lib/oauth/kiroSocialPoll";
+import { errorMessageFromBody } from "@/shared/utils/fetchError";
+
+type KiroSocialOAuthModalProps = {
+  isOpen: boolean;
+  provider: "google" | "github";
+  targetProvider?: string;
+  providerLabel?: string;
+  onSuccess?: () => void;
+  onClose: () => void;
+};
+
+export default function KiroSocialOAuthModal({
+  isOpen,
+  provider,
+  targetProvider,
+  providerLabel = "Kiro",
+  onSuccess,
+  onClose,
+}: KiroSocialOAuthModalProps) {
+  const t = useTranslations("kiroSocialOAuthModal");
+  const [step, setStep] = useState<"loading" | "polling" | "success" | "error">("loading");
+  const [error, setError] = useState<string | null>(null);
+  const [userCode, setUserCode] = useState("");
+  const [authUrl, setAuthUrl] = useState("");
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSuccessRef = useRef(onSuccess);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  useEffect(() => {
+    if (!isOpen || !provider) return;
+    let cancelled = false;
+
+    const stopPolling = () => {
+      if (pollRef.current) clearTimeout(pollRef.current);
+      pollRef.current = null;
+    };
+
+    const fail = (message: string) => {
+      stopPolling();
+      if (cancelled) return;
+      setError(message);
+      setStep("error");
+    };
+
+    const initAuth = async () => {
+      try {
+        setError(null);
+        setStep("loading");
+
+        const res = await fetch(`/api/oauth/kiro/social-authorize?provider=${provider}`);
+        const data = await res.json();
+        if (cancelled) return;
+
+        if (!res.ok) {
+          throw new Error(errorMessageFromBody(data, t("errorStartAuthorization")));
+        }
+
+        setUserCode(data.userCode || "");
+        setAuthUrl(data.authUrl || "");
+        setStep("polling");
+
+        const baseIntervalMs = Math.max(1, Number(data.interval) || 5) * 1000;
+        let currentIntervalMs = baseIntervalMs;
+        const expiresAt = Date.now() + Math.max(1, Number(data.expiresIn) || 300) * 1000;
+
+        const schedule = (delayMs: number) => {
+          if (cancelled) return;
+          pollRef.current = setTimeout(poll, delayMs);
+        };
+
+        const poll = async () => {
+          pollRef.current = null;
+          if (cancelled) return;
+          if (Date.now() >= expiresAt) {
+            fail(t("errorAuthorizationExpired"));
+            return;
+          }
+
+          try {
+            const pollRes = await fetch("/api/oauth/kiro/social-exchange", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ deviceCode: data.deviceCode, provider, targetProvider }),
+            });
+            const pollData = await pollRes.json();
+            if (cancelled) return;
+
+            if (pollData.success) {
+              stopPolling();
+              setStep("success");
+              onSuccessRef.current?.();
+              return;
+            }
+
+            if (!pollData.pending) {
+              fail(errorMessageFromBody(pollData, t("errorAuthorizationFailed")));
+              return;
+            }
+
+            currentIntervalMs = getNextKiroSocialPollInterval(currentIntervalMs, pollData.error);
+            schedule(currentIntervalMs);
+          } catch {
+            schedule(currentIntervalMs);
+          }
+        };
+
+        schedule(baseIntervalMs);
+      } catch (err: any) {
+        fail(err.message);
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      cancelled = true;
+      stopPolling();
+    };
+  }, [isOpen, provider, targetProvider, t]);
+
+  const handleClose = () => {
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
+    onClose();
+  };
+
+  const providerName = provider === "google" ? "Google" : "GitHub";
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      title={t("title", { providerLabel, providerName })}
+      onClose={handleClose}
+      size="lg"
+    >
+      <div className="flex flex-col gap-4">
+        {step === "loading" && (
+          <div className="text-center py-6">
+            <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Spinner size="lg" label={t("initializing")} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{t("initializing")}</h3>
+            <p className="text-sm text-text-muted">{t("settingUp", { providerName })}</p>
+          </div>
+        )}
+
+        {step === "polling" && (
+          <div className="text-center py-6">
+            <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Icon name="open_in_browser" size={30} className="text-primary animate-pulse" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{t("openIncognito")}</h3>
+            <p className="text-sm text-text-muted mb-3">{t("incognitoDescription")}</p>
+            {authUrl && (
+              <div className="mb-4">
+                <div className="flex items-center gap-2 justify-center">
+                  <a
+                    href={authUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-mono text-primary underline break-all max-w-md inline-block"
+                  >
+                    {authUrl.length > 80 ? authUrl.slice(0, 80) + "..." : authUrl}
+                  </a>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => copyToClipboard(authUrl)}
+                    className="shrink-0"
+                    title={t("copyLink")}
+                    aria-label={t("copyLink")}
+                  >
+                    <Icon name="content_copy" size={16} />
+                  </Button>
+                </div>
+              </div>
+            )}
+            {userCode && (
+              <div className="mb-4">
+                <p className="text-xs text-text-muted mb-1">{t("verificationCode")}</p>
+                <p className="font-mono text-2xl font-bold tracking-widest">{userCode}</p>
+              </div>
+            )}
+            <div
+              role="status"
+              className="flex items-center justify-center gap-2 text-sm text-text-muted"
+            >
+              <Spinner decorative size="sm" />
+              {t("waiting")}
+            </div>
+            <div className="mt-6">
+              <Button onClick={handleClose} variant="ghost" fullWidth>
+                {t("cancel")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {step === "success" && (
+          <div className="text-center py-6">
+            <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+              <Icon name="check_circle" size={30} className="text-success" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{t("successTitle")}</h3>
+            <p className="text-sm text-text-muted mb-4">
+              {t("successMessage", { providerLabel, providerName })}
+            </p>
+            <Button onClick={handleClose} fullWidth>
+              {t("done")}
+            </Button>
+          </div>
+        )}
+
+        {step === "error" && (
+          <div className="text-center py-6">
+            <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
+              <Icon name="error" size={30} className="text-error" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">{t("errorTitle")}</h3>
+            <p className="text-sm text-error mb-4">{error}</p>
+            <div className="flex gap-2">
+              <Button onClick={handleClose} variant="ghost" fullWidth>
+                {t("close")}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}

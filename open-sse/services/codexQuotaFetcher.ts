@@ -1,0 +1,376 @@
+/**
+ * codexQuotaFetcher.ts — Codex Dual-Window Quota Fetcher
+ *
+ * Implements QuotaFetcher for the Codex provider (quotaPreflight.ts + quotaMonitor.ts).
+ *
+ * Codex may report independent 5h and 7d windows in either upstream position.
+ * Their explicit duration determines identity; primary may be weekly-only.
+ *
+ * We return percentUsed = max(5h%, 7d%) so the system switches accounts when
+ * EITHER window approaches exhaustion (95% threshold).
+ *
+ * Cache: in-memory TTL (60s) to avoid hammering the usage API on every request.
+ * The connection pool is keyed by connectionId (providerConnection.id from DB).
+ *
+ * Registration: call registerCodexQuotaFetcher() once at server startup.
+ */
+
+import {
+  CODEX_SPARK_QUOTA_SESSION,
+  CODEX_SPARK_QUOTA_WEEKLY,
+  getCodexModelScope,
+} from "../config/codexQuotaScopes.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
+import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
+import { getCodexBackendIdentityHeaders } from "../config/codexClient.ts";
+import {
+  parseCodexUsageResponse,
+  CODEX_WINDOW_SESSION,
+  CODEX_WINDOW_WEEKLY,
+} from "./codexQuotaParser.ts";
+export {
+  parseCodexUsageResponse,
+  CODEX_WINDOW_SESSION,
+  CODEX_WINDOW_WEEKLY,
+} from "./codexQuotaParser.ts";
+
+// Codex usage endpoint (same as usage.ts CODEX_CONFIG)
+const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
+
+// Cache TTL — short enough to be reactive, long enough to avoid rate limits
+const CACHE_TTL_MS = 60_000; // 60 seconds
+
+// Max age for reusing a cached snapshot when a refresh fails or times out
+const MAX_STALE_CACHE_MS = 15 * 60_000; // 15 minutes
+
+// The preflight awaits this fetch on the request path, so the default stays short.
+const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
+
+// Largest delay a Node timer honors; AbortSignal.timeout also rejects fractions.
+const MAX_REQUEST_TIMEOUT_MS = 2_147_483_647;
+
+export function getCodexQuotaFetchTimeoutMs(): number {
+  const raw = process.env.CODEX_QUOTA_FETCH_TIMEOUT_MS?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_REQUEST_TIMEOUT_MS
+    ? parsed
+    : DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
+// Per-account quota window info; structural slots exist only for known durations.
+export interface CodexDualWindowQuota extends QuotaInfo {
+  window5h?: { percentUsed: number; resetAt: string | null };
+  window7d?: { percentUsed: number; resetAt: string | null };
+  limitReached: boolean;
+  /** All known Codex quota windows, including Spark when the upstream exposes it. */
+  allWindows?: Record<string, { percentUsed: number; resetAt: string | null }>;
+  /**
+   * Banked reset credits available on the account (display-only, issue #5199).
+   * Eligibility-gated: absent for most accounts. Never throws when missing.
+   */
+  bankedResetCredits?: number;
+  /** Which window is currently reported as blocking, when the upstream exposes it. */
+  rateLimitReachedType?: string;
+}
+
+interface CacheEntry {
+  quota: CodexDualWindowQuota;
+  fetchedAt: number;
+}
+
+// In-memory cache: connectionId → { quota, fetchedAt }
+const quotaCache = new Map<string, CacheEntry>();
+
+function sweepQuotaCache(): void {
+  const now = Date.now();
+  for (const [key, entry] of quotaCache) {
+    if (now - entry.fetchedAt > MAX_STALE_CACHE_MS) {
+      quotaCache.delete(key);
+    }
+  }
+}
+
+// Auto-cleanup stale entries every 5 minutes
+const _cacheCleanup = setInterval(sweepQuotaCache, 5 * 60_000);
+
+if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
+  (_cacheCleanup as { unref?: () => void }).unref?.();
+}
+
+// ─── Connection registry ─────────────────────────────────────────────────────
+// We need the accessToken + workspaceId to call the API.
+// chatCore.ts registers connection metadata here before requests.
+
+interface CodexConnectionMeta {
+  accessToken: string;
+  workspaceId?: string;
+}
+
+const MAX_CONNECTIONS = 100;
+const connectionRegistry = new Map<string, CodexConnectionMeta>();
+const MAX_QUOTA_CACHE_ENTRIES = 200;
+
+/**
+ * Register Codex connection metadata for quota fetching.
+ * Called by chatCore.ts when a Codex connection is resolved.
+ *
+ * @param connectionId - The connection ID from the DB (providerConnection.id)
+ * @param meta - Access token and optional workspace ID
+ */
+export function registerCodexConnection(connectionId: string, meta: CodexConnectionMeta): void {
+  if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
+    const oldestKey = connectionRegistry.keys().next().value;
+    if (oldestKey !== undefined) {
+      deleteQuotaCacheForConnection(oldestKey);
+      connectionRegistry.delete(oldestKey);
+    }
+  }
+  connectionRegistry.set(connectionId, meta);
+}
+
+function getQuotaCacheKey(connectionId: string, requestedModel?: string | null): string {
+  return `${connectionId}:${getCodexModelScope(requestedModel)}`;
+}
+
+function deleteQuotaCacheForConnection(connectionId: string): void {
+  quotaCache.delete(connectionId);
+  const scopedKeys = Array.from(quotaCache.keys()).filter((key) =>
+    key.startsWith(`${connectionId}:`)
+  );
+  for (const key of scopedKeys) quotaCache.delete(key);
+}
+
+export function unregisterCodexConnection(connectionId: string): void {
+  deleteQuotaCacheForConnection(connectionId);
+  connectionRegistry.delete(connectionId);
+}
+
+function getRequestedModel(connection?: Record<string, unknown>): string | null {
+  if (!connection || typeof connection !== "object") return null;
+  const directModel = connection.requestedModel ?? connection.model;
+  return typeof directModel === "string" && directModel.trim().length > 0
+    ? directModel.trim()
+    : null;
+}
+
+function getCodexConnectionMeta(
+  connectionId: string,
+  connection?: Record<string, unknown>
+): CodexConnectionMeta | null {
+  if (connection && typeof connection === "object") {
+    const providerSpecificData =
+      connection.providerSpecificData &&
+      typeof connection.providerSpecificData === "object" &&
+      !Array.isArray(connection.providerSpecificData)
+        ? (connection.providerSpecificData as Record<string, unknown>)
+        : {};
+    const accessToken =
+      typeof connection.accessToken === "string" && connection.accessToken.trim().length > 0
+        ? connection.accessToken
+        : null;
+    const workspaceId =
+      typeof providerSpecificData.workspaceId === "string" &&
+      providerSpecificData.workspaceId.trim().length > 0
+        ? providerSpecificData.workspaceId
+        : undefined;
+
+    if (accessToken) {
+      const meta = { accessToken, ...(workspaceId ? { workspaceId } : {}) };
+      if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
+        const oldestKey = connectionRegistry.keys().next().value;
+        if (oldestKey !== undefined) {
+          deleteQuotaCacheForConnection(oldestKey);
+          connectionRegistry.delete(oldestKey);
+        }
+      }
+      connectionRegistry.set(connectionId, meta);
+      return meta;
+    }
+  }
+
+  return connectionRegistry.get(connectionId) || null;
+}
+
+// ─── Core Fetcher ────────────────────────────────────────────────────────────
+
+/**
+ * The snapshot a failed refresh may fall back to. A spent window can have been
+ * reset upstream and a window past its resetAt no longer says anything, so
+ * either one leaves the account unknown (null), as if nothing had been cached.
+ * The `stale` mark lets the cutoff apply the connection's own thresholds.
+ */
+function getUsableCachedQuota(cached: CacheEntry | undefined): CodexDualWindowQuota | null {
+  if (!cached || Date.now() - cached.fetchedAt >= MAX_STALE_CACHE_MS) return null;
+  const { quota } = cached;
+  if (quota.limitReached) return null;
+  const now = Date.now();
+  const outdated = Object.values(quota.windows ?? {}).some(
+    ({ percentUsed, resetAt }) =>
+      percentUsed >= 1 || (resetAt ? new Date(resetAt).getTime() <= now : false)
+  );
+  return outdated ? null : { ...quota, stale: true };
+}
+
+/**
+ * Fetch current quota for a Codex connection.
+ * Returns percentUsed = max(5h%, 7d%) — worst-case across both windows.
+ *
+ * @param connectionId - Connection ID from the DB (used to look up credentials)
+ * @returns QuotaInfo, a usable stale snapshot if the refresh fails, or null when
+ *   the quota is unknown (no credentials, or a failed fetch with no usable snapshot)
+ */
+export async function fetchCodexQuota(
+  connectionId: string,
+  connection?: Record<string, unknown>
+): Promise<CodexDualWindowQuota | null> {
+  const requestedModel = getRequestedModel(connection);
+  const cacheKey = getQuotaCacheKey(connectionId, requestedModel);
+
+  // Check cache first
+  const cached = quotaCache.get(cacheKey);
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.quota;
+  }
+
+  // Look up credentials
+  const meta = getCodexConnectionMeta(connectionId, connection);
+  if (!meta?.accessToken) {
+    // No credentials registered — skip preflight gracefully
+    return null;
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${meta.accessToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      // Canonical Codex backend identity (UA + originator + version), same
+      // chain as inference — see getCodexUsage.
+      ...getCodexBackendIdentityHeaders(),
+    };
+
+    if (meta.workspaceId) {
+      headers["chatgpt-account-id"] = meta.workspaceId;
+    }
+
+    // #6009: space concurrent upstream quota fetches so N accounts on one IP do
+    // not all hit the provider in the same second (anti-fingerprint / avoids the
+    // Codex OAuth revocation reported in router-for-me/CLIProxyAPI#2385). Cache
+    // hits above never reach here; this only paces genuine network calls and is
+    // configurable (OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS, 0 = disabled).
+    await throttleQuotaFetch();
+
+    const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
+      method: "GET",
+      headers,
+      signal: AbortSignal.timeout(getCodexQuotaFetchTimeoutMs()),
+    });
+    if (!response) return getUsableCachedQuota(cached);
+
+    if (!response.ok) {
+      // Non-2xx: could be token expired or quota API down.
+      // Keep a usable snapshot, otherwise null: an API error is not exhaustion.
+      if (response.status === 401 || response.status === 403) {
+        // Token expired — remove from cache so next call re-fetches
+        deleteQuotaCacheForConnection(connectionId);
+        connectionRegistry.delete(connectionId);
+        return null;
+      }
+      return getUsableCachedQuota(cached);
+    }
+
+    const data = await response.json();
+    const quota = parseCodexUsageResponse(data, requestedModel);
+
+    if (!quota) return getUsableCachedQuota(cached);
+
+    // Store in cache
+    if (!quotaCache.has(cacheKey) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
+      const oldestCacheKey = quotaCache.keys().next().value;
+      if (oldestCacheKey !== undefined) quotaCache.delete(oldestCacheKey);
+    }
+    quotaCache.set(cacheKey, { quota, fetchedAt: Date.now() });
+    return quota;
+  } catch {
+    // Network error, timeout, etc. — same fallback as a non-2xx response
+    return getUsableCachedQuota(cached);
+  }
+}
+
+// ─── Quota-Aware Reset Time ───────────────────────────────────────────────────
+
+/**
+ * Get the cooldown duration (ms) for a Codex account based on its quota state.
+ *
+ * Logic:
+ *   - If 7d window >= threshold → cooldown until 7d reset (longer)
+ *   - If 5h window >= threshold → cooldown until 5h reset (shorter)
+ *   - Otherwise → 0 (no cooldown)
+ *
+ * @param quota - The dual-window quota snapshot
+ * @param threshold - The fraction (0-1) that triggers a switch (default: 0.95)
+ * @returns Cooldown duration in milliseconds
+ */
+export function getCodexQuotaCooldownMs(quota: CodexDualWindowQuota, threshold = 0.95): number {
+  const now = Date.now();
+
+  // 7d window takes priority (if exhausted, must wait longer)
+  if (quota.window7d && quota.window7d.percentUsed >= threshold && quota.window7d.resetAt) {
+    const resetTime = new Date(quota.window7d.resetAt).getTime();
+    if (resetTime > now) return resetTime - now;
+  }
+
+  // 5h window
+  if (quota.window5h && quota.window5h.percentUsed >= threshold && quota.window5h.resetAt) {
+    const resetTime = new Date(quota.window5h.resetAt).getTime();
+    if (resetTime > now) return resetTime - now;
+  }
+
+  return 0;
+}
+
+// ─── Invalidation ────────────────────────────────────────────────────────────
+
+/**
+ * Force-invalidate the cache for a connection (e.g., after receiving quota headers).
+ * Ensures the next preflight call fetches fresh data.
+ */
+export function invalidateCodexQuotaCache(connectionId: string): void {
+  deleteQuotaCacheForConnection(connectionId);
+}
+
+// ─── Registration ─────────────────────────────────────────────────────────────
+
+/**
+ * Register the Codex quota fetcher with the preflight and monitor systems.
+ * Call this once at server startup (in chatCore.ts or app entry point).
+ */
+export function registerCodexQuotaFetcher(): void {
+  registerQuotaFetcher("codex", fetchCodexQuota);
+  registerQuotaCacheInvalidator("codex", invalidateCodexQuotaCache);
+  registerMonitorFetcher("codex", fetchCodexQuota);
+  registerQuotaWindows("codex", [
+    CODEX_WINDOW_SESSION,
+    CODEX_WINDOW_WEEKLY,
+    CODEX_SPARK_QUOTA_SESSION,
+    CODEX_SPARK_QUOTA_WEEKLY,
+  ]);
+}
+
+export const __testing = {
+  sweepQuotaCache,
+  ageCacheEntry(connectionIdOrKey: string, ageMs: number): void {
+    for (const [key, entry] of quotaCache) {
+      if (key === connectionIdOrKey || key.startsWith(`${connectionIdOrKey}:`)) {
+        quotaCache.set(key, { ...entry, fetchedAt: Date.now() - ageMs });
+      }
+    }
+  },
+};

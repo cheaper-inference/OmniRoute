@@ -1,0 +1,136 @@
+import {
+  verifyDashboardSessionToken,
+  getDashboardJwtSecret,
+  DASHBOARD_SESSION_COOKIE,
+} from "@/shared/utils/dashboardSessionToken";
+import { getSettings } from "@/lib/db/settings";
+import { validateApiKey } from "@/lib/db/apiKeys";
+
+export const DEFAULT_WS_PATH = "/v1/ws";
+const WS_QUERY_TOKEN_KEYS = ["api_key", "token", "access_token"];
+
+export type WsAuthType = "none" | "api_key" | "session";
+
+export interface WsRuntimeConfig {
+  wsAuth: boolean;
+  wsPath: string;
+}
+
+export interface WsHandshakeAuthResult extends WsRuntimeConfig {
+  authorized: boolean;
+  authenticated: boolean;
+  authType: WsAuthType;
+  hasCredential: boolean;
+}
+
+function getCookieValue(cookieHeader: string | null, cookieName: string): string | null {
+  if (typeof cookieHeader !== "string" || cookieHeader.trim().length === 0) {
+    return null;
+  }
+
+  for (const part of cookieHeader.split(";")) {
+    const [rawName, ...rest] = part.trim().split("=");
+    if (rawName === cookieName) {
+      const value = rest.join("=").trim();
+      return value || null;
+    }
+  }
+
+  return null;
+}
+
+async function hasValidSessionCookie(request: Request): Promise<boolean> {
+  const secret = getDashboardJwtSecret();
+  if (!secret) return false;
+
+  const token = getCookieValue(request.headers.get("cookie"), DASHBOARD_SESSION_COOKIE);
+  if (!token) return false;
+
+  return (await verifyDashboardSessionToken(token, secret)) !== null;
+}
+
+export function extractWsTokenFromUrl(input: string | URL): string | null {
+  const url = input instanceof URL ? input : new URL(input);
+  for (const key of WS_QUERY_TOKEN_KEYS) {
+    const value = url.searchParams.get(key);
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+export function extractWsTokenFromRequest(request: Request): string | null {
+  const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
+  if (typeof authHeader === "string" && authHeader.trim().toLowerCase().startsWith("bearer ")) {
+    const token = authHeader.slice(7).trim();
+    if (token) return token;
+  }
+
+  return extractWsTokenFromUrl(request.url);
+}
+
+export async function getWsRuntimeConfig(): Promise<WsRuntimeConfig> {
+  const settings = await getSettings().catch(() => ({}));
+  return {
+    wsAuth: settings.wsAuth === true,
+    wsPath: DEFAULT_WS_PATH,
+  };
+}
+
+export interface WsHandshakeAuthOptions {
+  /**
+   * Require a valid API key or dashboard session even when the `wsAuth` setting is off.
+   * WebSocket transports that serve inference pass `isRequireApiKeyEnabled()` here so they
+   * honour `REQUIRE_API_KEY` like the HTTP `clientApiPolicy` does.
+   */
+  requireAuth?: boolean;
+}
+
+export async function authorizeWebSocketHandshake(
+  request: Request,
+  options: WsHandshakeAuthOptions = {}
+): Promise<WsHandshakeAuthResult> {
+  const config = await getWsRuntimeConfig();
+  const token = extractWsTokenFromRequest(request);
+  const hasCredential = typeof token === "string" && token.length > 0;
+  const validApiKey = hasCredential ? await validateApiKey(token) : false;
+
+  if (!config.wsAuth && options.requireAuth !== true) {
+    return {
+      ...config,
+      authorized: true,
+      authenticated: validApiKey,
+      authType: validApiKey ? "api_key" : "none",
+      hasCredential,
+    };
+  }
+
+  if (validApiKey) {
+    return {
+      ...config,
+      authorized: true,
+      authenticated: true,
+      authType: "api_key",
+      hasCredential: true,
+    };
+  }
+
+  if (await hasValidSessionCookie(request)) {
+    return {
+      ...config,
+      authorized: true,
+      authenticated: true,
+      authType: "session",
+      hasCredential,
+    };
+  }
+
+  return {
+    ...config,
+    authorized: false,
+    authenticated: false,
+    authType: "none",
+    hasCredential,
+  };
+}

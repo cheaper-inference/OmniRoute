@@ -1,0 +1,392 @@
+"use client";
+
+// OmniglyphContextPageClient — the dedicated detail screen for the "omniglyph"
+// context-as-image compression engine. Four sections: economics (measured savings),
+// a real before→after (dense text vs the rendered PNG page), the fail-closed gate
+// flow, and the enable control (wired to /api/settings/compression, preview engine).
+//
+// The sample in ./sampleData.ts is a REAL render from the omniglyph package, not a mockup.
+//
+// Card/Toggle are imported from their direct module paths (not the @/shared/components
+// barrel) — the barrel pulls a Node-only module that hangs vitest/jsdom.
+import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
+import Toggle from "@/shared/components/Toggle";
+import Button from "@/shared/components/Button";
+import Badge from "@/shared/components/Badge";
+import Select from "@/shared/components/Select";
+import { PageHeader as KitPageHeader } from "@omniroute/ui-kit/page-header";
+import { SAMPLE_BEFORE_TEXT, SAMPLE_PAGE_PNG_DATA_URI, SAMPLE_METRICS } from "./sampleData";
+
+interface CompressionConfigLite {
+  engines?: Record<string, { enabled: boolean; level?: string }>;
+  omniglyph?: { profile?: string };
+}
+
+/** Perfis do pacote, na ordem do mais permissivo ao mais restrito. O primeiro é
+ *  o default: a política que os recibos publicados mediram. */
+const PROFILES = [
+  { id: "aggressive", key: "aggressive" },
+  { id: "balanced", key: "balanced" },
+  { id: "coding-safe", key: "codingSafe" },
+  { id: "passthrough", key: "passthrough" },
+] as const;
+
+type ProfileId = (typeof PROFILES)[number]["id"];
+
+/** The measured fail-closed gate chain, in evaluation order. Every no-op is telemetered
+ *  as `skip:<reason>`; the engine only fires when all pass. */
+const GATES = [
+  {
+    id: "model",
+  },
+  {
+    id: "transport",
+  },
+  {
+    id: "format",
+  },
+  {
+    id: "profitable",
+  },
+] as const;
+
+const ECONOMICS = [
+  { value: "~10×", id: "fewerTokens" },
+  { value: "59–70%", id: "savings" },
+  { value: "1456", id: "imageTokens" },
+  { value: "100%", id: "accuracy" },
+] as const;
+
+// Section components are split out of the page component so each function stays
+// under the complexity gate's 80-line cap; the page composes them.
+
+function PageHeader() {
+  const t = useTranslations("omniglyph");
+  return (
+    <KitPageHeader
+      compact
+      title={
+        <span className="flex items-center gap-3">
+          {t("title")}
+          <Badge variant="warning">{t("preview")}</Badge>
+        </span>
+      }
+      description={t("description")}
+    />
+  );
+}
+
+function EconomicsCard() {
+  const t = useTranslations("omniglyph");
+  return (
+    <Card className="p-6">
+      <h2 className="mb-4 text-lg font-semibold">{t("economicsTitle")}</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {ECONOMICS.map((e) => (
+          <div key={e.id} className="flex flex-col gap-1">
+            <span className="text-2xl font-semibold tabular-nums">{e.value}</span>
+            <span className="text-xs text-text-muted">{t(`economics.${e.id}`)}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function BeforeAfterCard() {
+  const t = useTranslations("omniglyph");
+  return (
+    <Card className="p-6">
+      <div className="mb-1 flex items-baseline justify-between">
+        <h2 className="text-lg font-semibold">{t("beforeAfterTitle")}</h2>
+        <span className="text-sm font-medium text-success">
+          {t("blockSavings", { percent: SAMPLE_METRICS.savingsPct })}
+        </span>
+      </div>
+      <p className="mb-4 text-xs text-text-muted">
+        {t("realRender", { characters: SAMPLE_METRICS.beforeChars })}
+      </p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+            {t("textTokens", { tokens: SAMPLE_METRICS.textTokens })}
+          </span>
+          <pre className="max-h-60 overflow-auto rounded border border-border bg-bg-subtle p-3 text-[11px] leading-relaxed">
+            {SAMPLE_BEFORE_TEXT}
+          </pre>
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
+            {t("renderedTokens", { tokens: SAMPLE_METRICS.imageTokens })}
+          </span>
+          {/* White paper behind the rendered page image (its own background), in both themes. */}
+          <div className="overflow-auto rounded border border-border bg-white p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- data URI, no loader needed */}
+            <img
+              src={SAMPLE_PAGE_PNG_DATA_URI}
+              alt={t("renderedImageAlt", {
+                width: SAMPLE_METRICS.pageWidth,
+                height: SAMPLE_METRICS.pageHeight,
+              })}
+              width={SAMPLE_METRICS.pageWidth}
+              height={SAMPLE_METRICS.pageHeight}
+              className="max-w-full"
+            />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function GatesCard() {
+  const t = useTranslations("omniglyph");
+  return (
+    <Card className="p-6">
+      <h2 className="mb-1 text-lg font-semibold">{t("gatesTitle")}</h2>
+      <p className="mb-4 text-xs text-text-muted">
+        {t.rich("gatesDescription", {
+          code: (chunks) => <code>{chunks}</code>,
+        })}
+      </p>
+      <ol className="flex flex-col gap-3">
+        {GATES.map((g, i) => (
+          <li key={g.id} className="flex gap-3">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-bg-subtle text-xs font-semibold tabular-nums">
+              {i + 1}
+            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">
+                {t(`gates.${g.id}.label`)} —{" "}
+                <span className="text-success">{t(`gates.${g.id}.pass`)}</span>
+              </span>
+              <span className="text-xs text-text-muted">{t(`gates.${g.id}.why`)}</span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Card>
+  );
+}
+
+function ProfileCard(props: {
+  profile: ProfileId;
+  disabled: boolean;
+  onChange: (next: ProfileId) => void;
+}) {
+  const t = useTranslations("omniglyph");
+  const selected = PROFILES.find((p) => p.id === props.profile) ?? PROFILES[0];
+  return (
+    <Card className="p-6">
+      <div className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold">{t("profileTitle")}</h2>
+        <p className="max-w-xl text-sm text-text-muted">{t("profileDescription")}</p>
+        <Select
+          className="w-full max-w-sm"
+          value={props.profile}
+          disabled={props.disabled}
+          aria-label={t("profileAria")}
+          data-testid="omniglyph-profile-select"
+          onChange={(e) => props.onChange(e.target.value as ProfileId)}
+        >
+          {PROFILES.map((p) => (
+            <option key={p.id} value={p.id}>
+              {t(`profiles.${p.key}.label`)}
+            </option>
+          ))}
+        </Select>
+        <span className="max-w-xl text-xs text-text-muted">
+          {t(`profiles.${selected.key}.description`)}
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+function EnableCard(props: {
+  enabled: boolean;
+  disabled: boolean;
+  status: "" | "saved" | "error";
+  onToggle: (next: boolean) => void;
+}) {
+  const t = useTranslations("omniglyph");
+  return (
+    <Card className="p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold">{t("enableTitle")}</h2>
+          <p className="max-w-xl text-sm text-text-muted">
+            {t.rich("enableDescription", {
+              code: (chunks) => <code>{chunks}</code>,
+            })}
+          </p>
+          <span className="mt-1 h-4 text-xs text-text-muted" aria-live="polite">
+            {props.status === "saved"
+              ? t("saved")
+              : props.status === "error"
+                ? t("saveFailed")
+                : ""}
+          </span>
+        </div>
+        <span data-testid="omniglyph-enable-toggle">
+          <Toggle
+            size="md"
+            checked={props.enabled}
+            onChange={props.onToggle}
+            disabled={props.disabled}
+            ariaLabel={t("enableAria")}
+          />
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+// Shown in place of the controls while the settings load has failed: a save built from the
+// defaults would write over the stored engines row.
+function LoadErrorCard(props: { onRetry: () => void }) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between gap-4">
+        <p role="alert" className="text-sm text-error">
+          {t("compressionTitle")}: {tCommon("failedToLoad")}
+        </p>
+        <Button size="sm" variant="secondary" onClick={props.onRetry}>
+          {t("retry")}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+export default function OmniglyphContextPageClient() {
+  const [enabled, setEnabled] = useState(false);
+  const [profile, setProfile] = useState<ProfileId>("aggressive");
+  const [loading, setLoading] = useState(true);
+  // The defaults above are not the stored engines, so the controls wait for a GET that
+  // succeeds. A failed load shows a retry, which bumps loadAttempt to re-run the load.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<"" | "saved" | "error">("");
+  const saveGenRef = useRef(0);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (saveTimerRef.current !== null) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // A retry re-runs the load; answers that arrive for the run it replaced are rejected
+    // here and dropped by the catch, so they never reach the state setters.
+    let ignore = false;
+    fetch("/api/settings/compression")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: CompressionConfigLite | null) =>
+        ignore ? Promise.reject(new Error("load superseded")) : data
+      )
+      .then((data: CompressionConfigLite | null) => {
+        setEnabled(data?.engines?.omniglyph?.enabled === true);
+        const stored = data?.omniglyph?.profile;
+        if (PROFILES.some((p) => p.id === stored)) setProfile(stored as ProfileId);
+        setLoadFailed(!data);
+      })
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [loadAttempt]);
+
+  // PUT one settings patch; a failed save runs `rollback`. The saved status clears after 2s
+  // unless a later save has started since, so it never clears that save's error.
+  const save = async (body: Record<string, unknown>, rollback: () => void) => {
+    const gen = ++saveGenRef.current;
+    if (saveTimerRef.current !== null) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    setSaving(true);
+    setStatus("");
+    let ok = false;
+    try {
+      const res = await fetch("/api/settings/compression", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      ok = res.ok;
+    } catch {
+      // A network failure is a failed save.
+    }
+    if (!mountedRef.current) return;
+    setSaving(false);
+    if (!ok) {
+      rollback();
+      setStatus("error");
+      return;
+    }
+    setStatus("saved");
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null;
+      if (gen === saveGenRef.current) setStatus("");
+    }, 2000);
+  };
+
+  // The server merges `engines` by engine id, so the toggle sends only the omniglyph entry.
+  const toggle = (next: boolean) => {
+    const previous = enabled;
+    setEnabled(next);
+    void save({ engines: { omniglyph: { enabled: next } } }, () => setEnabled(previous));
+  };
+
+  // O perfil vive na config do engine (não no mapa `engines`), então vai num PUT próprio.
+  const changeProfile = (next: ProfileId) => {
+    const previous = profile;
+    setProfile(next);
+    void save({ omniglyph: { profile: next } }, () => setProfile(previous));
+  };
+
+  if (loadFailed) {
+    return (
+      <LoadErrorCard
+        onRetry={() => {
+          setLoading(true);
+          setLoadAttempt((attempt) => attempt + 1);
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6" data-testid="omniglyph-page">
+      <PageHeader />
+      <EconomicsCard />
+      <BeforeAfterCard />
+      <GatesCard />
+      <ProfileCard profile={profile} disabled={loading || saving} onChange={changeProfile} />
+      <EnableCard
+        enabled={enabled}
+        disabled={loading || saving}
+        status={status}
+        onToggle={toggle}
+      />
+    </div>
+  );
+}

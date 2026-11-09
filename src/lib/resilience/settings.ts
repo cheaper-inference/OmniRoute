@@ -1,0 +1,547 @@
+import {
+  DEFAULT_API_LIMITS,
+  PROVIDER_PROFILES,
+  STREAM_THROUGHPUT_WATCHDOG,
+} from "@omniroute/open-sse/config/constants";
+
+import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
+import {
+  asRecord,
+  toBoolean,
+  toInteger,
+  resolveStreamRecoveryDefaults,
+  normalizeLegacyConnectionCooldownProfile,
+  normalizeRequestQueueSettings,
+  normalizeConnectionCooldownProfile,
+  normalizeProviderBreakerProfile,
+  normalizeTokenRefreshBreakerSettings,
+  normalizeWaitForCooldownSettings,
+  normalizeComboCooldownWaitSettings,
+  normalizeQuotaShareConcurrencyLimitSettings,
+  normalizeStreamStallCooldownSettings,
+  normalizeP2CLatencySettings,
+  normalizeProviderCooldownSettings,
+  normalizeQuotaPreflightSettings,
+  normalizeStreamRecoverySettings,
+  normalizeProviderQuotaOverrides,
+  normalizeCredentialHealthCheckSettings,
+  pruneResilienceSettingsToProvided,
+} from "./settings/normalize";
+
+export { pruneResilienceSettingsToProvided };
+
+// Memoization cache for resolveResilienceSettings: keyed by the settings object
+// reference returned by getCachedSettings(). The TTLCache in readCache.ts returns
+// the same object identity within its 5s window, so this cache is naturally
+// invalidated when settings are updated (the old object is evicted and a new one
+// is created). WeakMap avoids holding onto stale settings objects.
+// Env-derived defaults (RATE_LIMIT_*, PROVIDER_COOLDOWN_*, STREAM_RECOVERY_*) are read
+// once per settings object, so they stay frozen for that object's lifetime (bounded by the
+// 5s cache TTL). The returned object is shared across callers and must be treated as read-only.
+const resolvedSettingsCache = new WeakMap<Record<string, unknown>, ResilienceSettings>();
+
+// Re-export the settings shape (moved to ./settings/types) so this module's
+// public API is unchanged.
+export type {
+  RequestQueueSettings,
+  ConnectionCooldownProfileSettings,
+  ProviderBreakerProfileSettings,
+  TokenRefreshBreakerScope,
+  TokenRefreshBreakerSettings,
+  WaitForCooldownSettings,
+  ComboCooldownWaitSettings,
+  QuotaShareConcurrencyLimitSettings,
+  ProviderCooldownSettings,
+  QuotaPreflightSettings,
+  StreamRecoverySettings,
+  StreamThroughputWatchdogSettings,
+  ProviderQuotaOverrideSettings,
+  CredentialHealthCheckSettings,
+  ResilienceSettings,
+  ResilienceSettingsPatch,
+} from "./settings/types";
+
+export const DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS = (() => {
+  const parsed = Number(process.env.RATE_LIMIT_MAX_WAIT_MS || "30000");
+  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 30000;
+})();
+
+// Limiter-managed execution backstop (Bottleneck `expiration`). Deliberately
+// separate from the queue-wait budget: non-incremental gateways (Console Go /
+// Command Code) buffer whole generations before first bytes, so legitimate
+// executions run minutes. Default 10 min; the backstop only catches executors
+// without their own upstream timeout.
+export const DEFAULT_REQUEST_QUEUE_EXECUTION_MAX_WAIT_MS = (() => {
+  const parsed = Number(process.env.RATE_LIMIT_EXECUTION_MAX_WAIT_MS || "600000");
+  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 600000;
+})();
+
+// Issue #6593: opt-in admission cap on the local rate-limit queue depth.
+// Default 0 = disabled (unbounded queue, today's behavior unchanged).
+export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
+  const parsed = Number(process.env.RATE_LIMIT_MAX_QUEUE_DEPTH || "0");
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.trunc(parsed) : 0;
+})();
+
+export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  antigravityTimingTelemetry: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY === "true",
+  },
+  requestQueue: {
+    autoEnableApiKeyProviders: true,
+    requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
+    minTimeBetweenRequestsMs: DEFAULT_API_LIMITS.minTimeBetweenRequests,
+    concurrentRequests: DEFAULT_API_LIMITS.concurrentRequests,
+    globalConcurrentRequests: 0,
+    maxWaitMs: DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS,
+    executionMaxWaitMs: DEFAULT_REQUEST_QUEUE_EXECUTION_MAX_WAIT_MS,
+    maxQueueDepth: DEFAULT_REQUEST_QUEUE_MAX_DEPTH,
+  },
+  connectionCooldown: {
+    oauth: {
+      baseCooldownMs: PROVIDER_PROFILES.oauth.transientCooldown,
+      useUpstreamRetryHints: PROVIDER_PROFILES.oauth.rateLimitCooldown === 0,
+      maxBackoffSteps: PROVIDER_PROFILES.oauth.maxBackoffLevel,
+    },
+    apikey: {
+      baseCooldownMs: PROVIDER_PROFILES.apikey.transientCooldown,
+      useUpstreamRetryHints: PROVIDER_PROFILES.apikey.rateLimitCooldown === 0,
+      maxBackoffSteps: PROVIDER_PROFILES.apikey.maxBackoffLevel,
+    },
+  },
+  providerBreaker: {
+    oauth: {
+      failureThreshold: PROVIDER_PROFILES.oauth.circuitBreakerThreshold,
+      degradationThreshold: PROVIDER_PROFILES.oauth.degradationThreshold,
+      resetTimeoutMs: PROVIDER_PROFILES.oauth.circuitBreakerReset,
+    },
+    apikey: {
+      failureThreshold: PROVIDER_PROFILES.apikey.circuitBreakerThreshold,
+      degradationThreshold: PROVIDER_PROFILES.apikey.degradationThreshold,
+      resetTimeoutMs: PROVIDER_PROFILES.apikey.circuitBreakerReset,
+    },
+  },
+  // Token-refresh breaker: provider-wide by default (current behavior), so
+  // existing installs see no change. Operators can switch to per-connection
+  // scope to isolate one dead account from healthy ones on the same provider.
+  tokenRefreshBreaker: {
+    scope: "provider",
+    failureThreshold: 5,
+    cooldownMs: 30 * 60 * 1000,
+  },
+  // Wait at most 90s for a single connection cooldown (covers Gemini-class
+  // TPM/RPM windows, which report ~60s retry-after live), at most 5 retry
+  // cycles, never more than 300s (5 min) total (#7360 follow-up — raised now
+  // that withEarlyStreamKeepalive gives streaming clients an immediate
+  // synthetic keep-alive, eliminating the client-side first-byte-timeout risk
+  // a long wait used to carry). Applies to direct (non-combo) model requests.
+  waitForCooldown: {
+    enabled: true,
+    maxRetries: 5,
+    maxRetryWaitSec: 90,
+    maxRetryWaitMs: 90000,
+    budgetMs: 300000,
+  },
+  // Wait at most 90s for a single short transient cooldown (covers Gemini-class
+  // TPM/RPM windows, which report ~60s retry-after live — #7360), at most 5
+  // redispatch cycles, never more than 300s (5 min) total. Active for every
+  // combo strategy when enabled, and only for transient (non quota_exhausted)
+  // reasons.
+  comboCooldownWait: {
+    enabled: true,
+    maxWaitMs: 90000,
+    maxAttempts: 5,
+    budgetMs: 300000,
+  },
+  // FASE 2.1: serialize concurrent quota-share requests per connection when the
+  // connection sets a max_concurrent cap, so a subscription account is not
+  // flooded past its concurrency ceiling. Kill-switch only (default on); the cap
+  // comes from each connection's max_concurrent.
+  quotaShareConcurrencyLimit: {
+    enabled: true,
+  },
+  // A stream content stall fails one request; it does not cool the account unless
+  // the operator opts in (see StreamStallCooldownSettings).
+  streamStallCooldown: {
+    enabled: false,
+  },
+  // Opt-in latency term for p2c account selection (see P2CLatencySettings). 0 = off.
+  p2cLatency: {
+    weight: 0,
+  },
+  providerCooldown: {
+    minRetryCooldownMs: Number(process.env.PROVIDER_COOLDOWN_MIN_MS || "5000"),
+    maxRetryCooldownMs: Number(process.env.PROVIDER_COOLDOWN_MAX_MS || "300000"),
+    // Opt-in (default OFF): this global cross-request cooldown overlaps the
+    // existing Connection Cooldown / Provider Circuit Breaker layers, so it is
+    // disabled by default and must be explicitly enabled by the operator until
+    // its interaction with those layers is validated in production.
+    enabled: ["true", "1", "on"].includes(
+      (process.env.PROVIDER_COOLDOWN_ENABLED || "").trim().toLowerCase()
+    ),
+  },
+  quotaPreflight: {
+    // Opt-in (default OFF): the auto-routing hard cutoff drops low-quota candidates
+    // before scoring, overlapping the existing soft quota penalty + connection
+    // cooldown, so it must be explicitly enabled by the operator until its
+    // interaction with the scorer is validated in production.
+    enabled: ["true", "1", "on"].includes(
+      (process.env.QUOTA_PREFLIGHT_CUTOFF_ENABLED || "").trim().toLowerCase()
+    ),
+    // Remaining-% semantics. 2 = "stop when only 2% remaining" (= 98% used).
+    // Uniform across all providers and windows; operators set per-window
+    // overrides per connection via the Cutoff modal in Dashboard › Limits,
+    // or per-(provider, window) globally via the providerWindowDefaults map
+    // below (no factory seeds — keep behavior consistent across providers).
+    defaultThresholdPercent: 2,
+    warnThresholdPercent: 20,
+    providerWindowDefaults: {},
+  },
+  streamRecovery: {
+    // Opt-in (default OFF): the holdback that powers transparent early-retry adds
+    // up to STREAM_RECOVERY.HOLDBACK_MS of time-to-first-token latency on every
+    // streaming request, so it must be explicitly enabled by the operator.
+    enabled: ["true", "1", "on"].includes(
+      (process.env.STREAM_RECOVERY_ENABLED || "").trim().toLowerCase()
+    ),
+    // Opt-in (default OFF): mid-stream continuation re-requests after a post-commit cut.
+    continueMidStream: ["true", "1", "on"].includes(
+      (process.env.STREAM_RECOVERY_MIDSTREAM_ENABLED || "").trim().toLowerCase()
+    ),
+    throughputWatchdog: {
+      enabled: ["true", "1", "on"].includes(
+        (process.env.STREAM_THROUGHPUT_WATCHDOG_ENABLED || "").trim().toLowerCase()
+      ),
+      warmupMs: STREAM_THROUGHPUT_WATCHDOG.WARMUP_MS,
+      windowMs: STREAM_THROUGHPUT_WATCHDOG.WINDOW_MS,
+      minUsefulBytesPerSecond: STREAM_THROUGHPUT_WATCHDOG.MIN_USEFUL_BYTES_PER_SECOND,
+      minUsefulBytes: STREAM_THROUGHPUT_WATCHDOG.MIN_USEFUL_BYTES,
+    },
+  },
+  // #6846 Phase 1: empty by default — nvidia (and any future header-less
+  // provider registered in providerDefaultRateLimit.ts) uses its static
+  // default until an operator adds an override here.
+  providerQuotaOverrides: {},
+  // Global default cadence for the background credential health check sweep.
+  // 60 minutes: the sweep makes a real upstream probe against EVERY active
+  // connection, so the previous 5-minute default cost 12 requests/hour per
+  // connection. 0 disables the sweep entirely. Per-connection overrides win.
+  credentialHealthCheck: {
+    intervalMinutes: 60,
+  },
+};
+
+// Normalize legacy and modern opt-in flags without inflating the large resolvers.
+function normalizeAntigravityToggle(
+  section: unknown,
+  legacyEnabled: unknown,
+  fallback: boolean
+): { enabled: boolean } {
+  return { enabled: toBoolean(asRecord(section).enabled, toBoolean(legacyEnabled, fallback)) };
+}
+
+function normalizeCooldownProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["connectionCooldown"]
+): ResilienceSettings["connectionCooldown"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeConnectionCooldownProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeConnectionCooldownProfile(sections.apikey, fallback.apikey),
+  };
+}
+
+function normalizeBreakerProfiles(
+  source: unknown,
+  fallback: ResilienceSettings["providerBreaker"]
+): ResilienceSettings["providerBreaker"] {
+  const sections = asRecord(source);
+  return {
+    oauth: normalizeProviderBreakerProfile(sections.oauth, fallback.oauth),
+    apikey: normalizeProviderBreakerProfile(sections.apikey, fallback.apikey),
+  };
+}
+
+function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
+  const profiles = asRecord(settings.providerProfiles);
+  const defaults = asRecord(settings.rateLimitDefaults);
+  const streamRecoveryDefaults = resolveStreamRecoveryDefaults();
+
+  const oauthLegacy = asRecord(profiles.oauth);
+  const apikeyLegacy = asRecord(profiles.apikey);
+
+  const waitMaxRetrySec = toInteger(
+    settings.maxRetryIntervalSec,
+    DEFAULT_RESILIENCE_SETTINGS.waitForCooldown.maxRetryWaitSec,
+    { min: 0, max: 300 }
+  );
+  const waitMaxRetries = toInteger(
+    settings.requestRetry,
+    DEFAULT_RESILIENCE_SETTINGS.waitForCooldown.maxRetries,
+    { min: 0, max: 10 }
+  );
+
+  return {
+    requestQueue: {
+      autoEnableApiKeyProviders: DEFAULT_RESILIENCE_SETTINGS.requestQueue.autoEnableApiKeyProviders,
+      requestsPerMinute: toInteger(
+        defaults.requestsPerMinute,
+        DEFAULT_RESILIENCE_SETTINGS.requestQueue.requestsPerMinute,
+        { min: 1, max: 1_000_000 }
+      ),
+      minTimeBetweenRequestsMs: toInteger(
+        defaults.minTimeBetweenRequests,
+        DEFAULT_RESILIENCE_SETTINGS.requestQueue.minTimeBetweenRequestsMs,
+        { min: 0, max: 60 * 60 * 1000 }
+      ),
+      concurrentRequests: toInteger(
+        defaults.concurrentRequests,
+        DEFAULT_RESILIENCE_SETTINGS.requestQueue.concurrentRequests,
+        { min: 1, max: 10_000 }
+      ),
+      globalConcurrentRequests: DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
+      maxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs,
+      executionMaxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.executionMaxWaitMs,
+      maxQueueDepth: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxQueueDepth,
+    },
+    connectionCooldown: {
+      oauth: normalizeLegacyConnectionCooldownProfile(
+        oauthLegacy,
+        DEFAULT_RESILIENCE_SETTINGS.connectionCooldown.oauth
+      ),
+      apikey: normalizeLegacyConnectionCooldownProfile(
+        apikeyLegacy,
+        DEFAULT_RESILIENCE_SETTINGS.connectionCooldown.apikey
+      ),
+    },
+    providerBreaker: {
+      oauth: {
+        failureThreshold: toInteger(
+          oauthLegacy.circuitBreakerThreshold,
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.oauth.failureThreshold,
+          { min: 1, max: 1000 }
+        ),
+        degradationThreshold:
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.oauth.degradationThreshold,
+        resetTimeoutMs: toInteger(
+          oauthLegacy.circuitBreakerReset,
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.oauth.resetTimeoutMs,
+          { min: 1000, max: 24 * 60 * 60 * 1000 }
+        ),
+      },
+      apikey: {
+        failureThreshold: toInteger(
+          apikeyLegacy.circuitBreakerThreshold,
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.apikey.failureThreshold,
+          { min: 1, max: 1000 }
+        ),
+        degradationThreshold:
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.apikey.degradationThreshold,
+        resetTimeoutMs: toInteger(
+          apikeyLegacy.circuitBreakerReset,
+          DEFAULT_RESILIENCE_SETTINGS.providerBreaker.apikey.resetTimeoutMs,
+          { min: 1000, max: 24 * 60 * 60 * 1000 }
+        ),
+      },
+    },
+    waitForCooldown: {
+      enabled: waitMaxRetries > 0 && waitMaxRetrySec > 0,
+      maxRetries: waitMaxRetries,
+      maxRetryWaitSec: waitMaxRetrySec,
+      maxRetryWaitMs: waitMaxRetrySec * 1000,
+      budgetMs: Math.max(
+        waitMaxRetrySec * 1000,
+        DEFAULT_RESILIENCE_SETTINGS.waitForCooldown.budgetMs
+      ),
+    },
+    comboCooldownWait: DEFAULT_RESILIENCE_SETTINGS.comboCooldownWait,
+    quotaShareConcurrencyLimit: DEFAULT_RESILIENCE_SETTINGS.quotaShareConcurrencyLimit,
+    streamStallCooldown: DEFAULT_RESILIENCE_SETTINGS.streamStallCooldown,
+    p2cLatency: DEFAULT_RESILIENCE_SETTINGS.p2cLatency,
+    providerCooldown: DEFAULT_RESILIENCE_SETTINGS.providerCooldown,
+    tokenRefreshBreaker: DEFAULT_RESILIENCE_SETTINGS.tokenRefreshBreaker,
+    quotaPreflight: DEFAULT_RESILIENCE_SETTINGS.quotaPreflight,
+    streamRecovery: streamRecoveryDefaults,
+    providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
+    credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    antigravityTimingTelemetry: DEFAULT_RESILIENCE_SETTINGS.antigravityTimingTelemetry,
+  };
+}
+
+/**
+ * True when the operator has an explicit stream-recovery configuration —
+ * either a DB/settings override (`resilienceSettings.streamRecovery.enabled`
+ * present as a boolean) or a non-empty `STREAM_RECOVERY_ENABLED` env var.
+ *
+ * `ResilienceSettings` has no `isExplicit`/`source` field to distinguish
+ * "default off" from "operator explicitly turned it off", so callers that
+ * need to respect an explicit operator choice (e.g. the agent-goal-policy
+ * override in chatCore.ts) must check this before layering any heuristic
+ * on top of `resolveResilienceSettings(...).streamRecovery.enabled`.
+ */
+export function isStreamRecoveryExplicitlyConfigured(
+  settings: Record<string, unknown> | null | undefined
+): boolean {
+  const record = asRecord(settings);
+  const current = asRecord(record.resilienceSettings);
+  const streamRecoveryRecord = asRecord(current.streamRecovery);
+  if (typeof streamRecoveryRecord.enabled === "boolean") {
+    return true;
+  }
+  return (process.env.STREAM_RECOVERY_ENABLED || "").trim().length > 0;
+}
+
+export function resolveResilienceSettings(
+  settings: Record<string, unknown> | null | undefined
+): ResilienceSettings {
+  const record = asRecord(settings);
+  const cacheKey = record; // the exact object reference from getCachedSettings()
+  const cached = resolvedSettingsCache.get(cacheKey);
+  if (cached) return cached;
+
+  const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
+  const fallback = buildLegacyFallback(record);
+
+  const resolved: ResilienceSettings = {
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      current.antigravityTimingTelemetry,
+      legacyAntigravitySettings.timingTelemetryEnabled,
+      fallback.antigravityTimingTelemetry.enabled
+    ),
+    requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
+    connectionCooldown: normalizeCooldownProfiles(
+      current.connectionCooldown,
+      fallback.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(current.providerBreaker, fallback.providerBreaker),
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      current.tokenRefreshBreaker,
+      fallback.tokenRefreshBreaker
+    ),
+    waitForCooldown: normalizeWaitForCooldownSettings(
+      current.waitForCooldown,
+      fallback.waitForCooldown
+    ),
+    comboCooldownWait: normalizeComboCooldownWaitSettings(
+      current.comboCooldownWait,
+      fallback.comboCooldownWait
+    ),
+    quotaShareConcurrencyLimit: normalizeQuotaShareConcurrencyLimitSettings(
+      current.quotaShareConcurrencyLimit,
+      fallback.quotaShareConcurrencyLimit
+    ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      current.streamStallCooldown,
+      fallback.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(current.p2cLatency, fallback.p2cLatency),
+    providerCooldown: normalizeProviderCooldownSettings(
+      current.providerCooldown,
+      fallback.providerCooldown
+    ),
+    quotaPreflight: normalizeQuotaPreflightSettings(
+      current.quotaPreflight,
+      fallback.quotaPreflight
+    ),
+    streamRecovery: normalizeStreamRecoverySettings(
+      current.streamRecovery,
+      fallback.streamRecovery
+    ),
+    providerQuotaOverrides: normalizeProviderQuotaOverrides(
+      current.providerQuotaOverrides,
+      fallback.providerQuotaOverrides
+    ),
+    credentialHealthCheck: normalizeCredentialHealthCheckSettings(
+      current.credentialHealthCheck,
+      fallback.credentialHealthCheck
+    ),
+  };
+
+  resolvedSettingsCache.set(cacheKey, resolved);
+  return resolved;
+}
+
+export function mergeResilienceSettings(
+  current: ResilienceSettings,
+  updates: ResilienceSettingsPatch
+): ResilienceSettings {
+  return {
+    antigravityTimingTelemetry: normalizeAntigravityToggle(
+      updates.antigravityTimingTelemetry, undefined, current.antigravityTimingTelemetry.enabled
+    ),
+    requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
+    connectionCooldown: normalizeCooldownProfiles(
+      updates.connectionCooldown,
+      current.connectionCooldown
+    ),
+    providerBreaker: normalizeBreakerProfiles(updates.providerBreaker, current.providerBreaker),
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      updates.tokenRefreshBreaker,
+      current.tokenRefreshBreaker
+    ),
+    waitForCooldown: normalizeWaitForCooldownSettings(
+      updates.waitForCooldown,
+      current.waitForCooldown
+    ),
+    comboCooldownWait: normalizeComboCooldownWaitSettings(
+      updates.comboCooldownWait,
+      current.comboCooldownWait
+    ),
+    quotaShareConcurrencyLimit: normalizeQuotaShareConcurrencyLimitSettings(
+      updates.quotaShareConcurrencyLimit,
+      current.quotaShareConcurrencyLimit
+    ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      updates.streamStallCooldown,
+      current.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(updates.p2cLatency, current.p2cLatency),
+    providerCooldown: normalizeProviderCooldownSettings(
+      updates.providerCooldown,
+      current.providerCooldown
+    ),
+    quotaPreflight: normalizeQuotaPreflightSettings(updates.quotaPreflight, current.quotaPreflight),
+    streamRecovery: normalizeStreamRecoverySettings(updates.streamRecovery, current.streamRecovery),
+    providerQuotaOverrides: normalizeProviderQuotaOverrides(
+      updates.providerQuotaOverrides,
+      current.providerQuotaOverrides
+    ),
+    credentialHealthCheck: normalizeCredentialHealthCheckSettings(
+      updates.credentialHealthCheck,
+      current.credentialHealthCheck
+    ),
+  };
+}
+
+export function buildLegacyResilienceCompat(settings: ResilienceSettings) {
+  return {
+    profiles: {
+      oauth: {
+        transientCooldown: settings.connectionCooldown.oauth.baseCooldownMs,
+        rateLimitCooldown: settings.connectionCooldown.oauth.useUpstreamRetryHints
+          ? 0
+          : settings.connectionCooldown.oauth.baseCooldownMs,
+        maxBackoffLevel: settings.connectionCooldown.oauth.maxBackoffSteps,
+        circuitBreakerThreshold: settings.providerBreaker.oauth.failureThreshold,
+        degradationThreshold: settings.providerBreaker.oauth.degradationThreshold,
+        circuitBreakerReset: settings.providerBreaker.oauth.resetTimeoutMs,
+      },
+      apikey: {
+        transientCooldown: settings.connectionCooldown.apikey.baseCooldownMs,
+        rateLimitCooldown: settings.connectionCooldown.apikey.useUpstreamRetryHints
+          ? 0
+          : settings.connectionCooldown.apikey.baseCooldownMs,
+        maxBackoffLevel: settings.connectionCooldown.apikey.maxBackoffSteps,
+        circuitBreakerThreshold: settings.providerBreaker.apikey.failureThreshold,
+        degradationThreshold: settings.providerBreaker.apikey.degradationThreshold,
+        circuitBreakerReset: settings.providerBreaker.apikey.resetTimeoutMs,
+      },
+    },
+    defaults: {
+      requestsPerMinute: settings.requestQueue.requestsPerMinute,
+      minTimeBetweenRequests: settings.requestQueue.minTimeBetweenRequestsMs,
+      concurrentRequests: settings.requestQueue.concurrentRequests,
+    },
+  };
+}

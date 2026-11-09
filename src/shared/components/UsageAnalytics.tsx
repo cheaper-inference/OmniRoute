@@ -1,0 +1,541 @@
+"use client";
+
+import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import Button from "./Button";
+import Card from "./Card";
+import Icon from "./Icon";
+import { CardSkeleton } from "./Loading";
+import AnimatedNumber from "./AnimatedNumber";
+import { fmtCompact as fmt, fmtFull, fmtCost } from "@/shared/utils/formatting";
+import { readFetchErrorMessage } from "@/shared/utils/fetchError";
+import {
+  StatCard,
+  CompactStatGrid,
+  ActivityHeatmap,
+  DailyTrendChart,
+  AccountDonut,
+  ApiKeyDonut,
+  ApiKeyTable,
+  MostActiveDay7d,
+  WeeklySquares7d,
+  ModelTable,
+  ProviderCostDonut,
+  ModelOverTimeChart,
+  ProviderTable,
+  ServiceTierBreakdown,
+  ApiKeyFilterDropdown,
+  CustomRangePicker,
+  RequestCountByProviderDateTable,
+} from "./analytics";
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+const TOKEN_DISPLAY_MODE_KEY = "omniroute:analytics-token-display-mode";
+export type TokenDisplayMode = "compact" | "exact";
+
+const tokenDisplayListeners = new Set<() => void>();
+
+function subscribeToTokenDisplayMode(listener: () => void): () => void {
+  tokenDisplayListeners.add(listener);
+  return () => {
+    tokenDisplayListeners.delete(listener);
+  };
+}
+
+function readTokenDisplayMode(): TokenDisplayMode {
+  try {
+    if (typeof window === "undefined") return "compact";
+    const saved = localStorage.getItem(TOKEN_DISPLAY_MODE_KEY);
+    if (saved === "exact" || saved === "compact") return saved;
+  } catch {}
+  return "compact";
+}
+
+function writeTokenDisplayMode(mode: TokenDisplayMode): void {
+  try {
+    localStorage.setItem(TOKEN_DISPLAY_MODE_KEY, mode);
+  } catch {}
+  for (const listener of tokenDisplayListeners) listener();
+}
+
+export default function UsageAnalytics() {
+  const locale = useLocale();
+  const t = useTranslations("analytics");
+  const tCommon = useTranslations("common");
+  const [range, setRange] = useState("30d");
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const tokenDisplayMode = useSyncExternalStore(
+    subscribeToTokenDisplayMode,
+    readTokenDisplayMode,
+    () => "compact" as TokenDisplayMode
+  );
+
+  const handleToggleDisplayMode = useCallback((mode: TokenDisplayMode) => {
+    writeTokenDisplayMode(mode);
+  }, []);
+
+  // Custom date range state
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const customPickerAnchorRef = useRef<HTMLDivElement>(null);
+
+  // API key filter state
+  const [selectedApiKeys, setSelectedApiKeys] = useState<string[]>([]);
+  const [availableApiKeys, setAvailableApiKeys] = useState<{ id: string; name: string }[]>([]);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
+      params.set("range", range);
+      // This page labels the value as an estimate, so opt into token-price
+      // equivalents for flat-rate subscriptions without changing API defaults.
+      params.set("includeFlatRateEstimates", "true");
+      if (range === "custom" && customStart && customEnd) {
+        params.set("startDate", customStart);
+        params.set("endDate", customEnd);
+      }
+      if (selectedApiKeys.length > 0) {
+        params.set("apiKeyIds", selectedApiKeys.join(","));
+      }
+      const res = await fetch(`/api/usage/analytics?${params.toString()}`);
+      if (!res.ok) throw new Error(await readFetchErrorMessage(res, tCommon("error")));
+      const data = await res.json();
+      setAnalytics(data);
+      setError(null);
+
+      // Update available keys from unfiltered data (only when no filter is active).
+      if (selectedApiKeys.length === 0 && data.byApiKey?.length > 0) {
+        const seen = new Set<string>();
+        const keys: { id: string; name: string }[] = [];
+        for (const k of data.byApiKey) {
+          const id = k.apiKeyId || k.apiKeyName || tCommon("unknownProvider");
+          const name = k.apiKeyName || k.apiKeyId || tCommon("unknownProvider");
+          if (seen.has(id)) continue;
+          seen.add(id);
+          keys.push({ id, name });
+        }
+        setAvailableApiKeys(keys);
+      }
+    } catch (err) {
+      setError((err as any).message);
+    } finally {
+      setLoading(false);
+    }
+  }, [range, customStart, customEnd, selectedApiKeys, tCommon]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchAnalytics(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchAnalytics]);
+
+  const handleRangeSelect = useCallback((value: string) => {
+    if (value === "custom") {
+      setShowCustomPicker(true);
+    } else {
+      setRange(value);
+      setShowCustomPicker(false);
+    }
+  }, []);
+
+  const handleCustomApply = useCallback((start: string, end: string) => {
+    setCustomStart(start);
+    setCustomEnd(end);
+    setRange("custom");
+    setShowCustomPicker(false);
+  }, []);
+
+  // Format custom range label for display
+  const customRangeLabel = useMemo(() => {
+    if (range !== "custom" || !customStart || !customEnd) return null;
+    const fmt = (iso: string) => {
+      const d = new Date(iso);
+      return d.toLocaleDateString(locale, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    };
+    return `${fmt(customStart)} — ${fmt(customEnd)}`;
+  }, [range, customStart, customEnd, locale]);
+
+  const ranges = [
+    { value: "1d", label: t("period1D") },
+    { value: "7d", label: t("period7D") },
+    { value: "30d", label: t("period30D") },
+    { value: "90d", label: t("period90D") },
+    { value: "ytd", label: t("periodYTD") },
+    { value: "all", label: t("periodAll") },
+  ];
+
+  const topModel = useMemo(() => {
+    const models = analytics?.byModel || [];
+    return models.length > 0 ? models[0].model : "—";
+  }, [analytics]);
+
+  const topProvider = useMemo(() => {
+    const providers = analytics?.byProvider || [];
+    return providers.length > 0 ? providers[0].provider : "—";
+  }, [analytics]);
+
+  const busiestDay = useMemo(() => {
+    const wp = analytics?.weeklyPattern || [];
+    if (!wp.length) return "—";
+    const max = wp.reduce((a, b) => (a.avgTokens > b.avgTokens ? a : b), wp[0]);
+    if (max.avgTokens <= 0) return "—";
+    const weekdayIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(max.day);
+    if (weekdayIndex < 0) return max.day;
+    return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(
+      new Date(2024, 0, 7 + weekdayIndex)
+    );
+  }, [analytics, locale]);
+
+  const providerCount = useMemo(() => {
+    return (analytics?.byProvider || []).length;
+  }, [analytics]);
+
+  const providerDiversity = useMemo(() => {
+    const providers = analytics?.byProvider || [];
+    if (providers.length <= 1) return 0;
+
+    let totalCalls = 0;
+    for (const p of providers) {
+      totalCalls += p.totalRequests || p.apiCalls || 0;
+    }
+    if (totalCalls === 0) return 0;
+
+    let h = 0;
+    for (const p of providers) {
+      const p_i = (p.totalRequests || p.apiCalls || 0) / totalCalls;
+      if (p_i > 0) h -= p_i * Math.log2(p_i);
+    }
+
+    const maxH = Math.log2(providers.length);
+    return maxH > 0 ? (h / maxH) * 100 : 0;
+  }, [analytics]);
+
+  if (loading && !analytics) return <CardSkeleton />;
+  if (error)
+    return (
+      <Card className="p-6 text-center text-error">
+        {tCommon("errorShort")}: {error}
+      </Card>
+    );
+
+  const s = analytics?.summary || {};
+
+  // ── Derived insight values ──
+  const avgTokensPerReq = s.totalRequests > 0 ? Math.round(s.totalTokens / s.totalRequests) : 0;
+  const costPerReq = s.totalRequests > 0 ? s.totalCost / s.totalRequests : 0;
+  const ioRatio = s.completionTokens > 0 ? (s.promptTokens / s.completionTokens).toFixed(1) : "—";
+
+  return (
+    <div className="flex flex-col gap-5 min-w-0">
+      {/* Header + Filters */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Icon name="analytics" size={22} className="text-primary" />
+          {t("usageAnalyticsTitle")}
+        </h2>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Token Display Mode Toggle (Compact vs Exact) */}
+          <div
+            role="radiogroup"
+            aria-label={t("tokenDisplayMode")}
+            className="flex items-center gap-0.5 bg-surface-2 rounded-lg p-1 border border-border text-xs"
+          >
+            <Button
+              size="sm"
+              variant={tokenDisplayMode === "compact" ? "secondary" : "ghost"}
+              role="radio"
+              aria-checked={tokenDisplayMode === "compact"}
+              onClick={() => handleToggleDisplayMode("compact")}
+              title={t("tokenDisplayCompact")}
+              className="h-7 min-h-7 px-2.5 text-xs"
+            >
+              {t("tokenDisplayCompact")}
+            </Button>
+            <Button
+              size="sm"
+              variant={tokenDisplayMode === "exact" ? "secondary" : "ghost"}
+              role="radio"
+              aria-checked={tokenDisplayMode === "exact"}
+              onClick={() => handleToggleDisplayMode("exact")}
+              title={t("tokenDisplayExact")}
+              className="h-7 min-h-7 px-2.5 text-xs"
+            >
+              {t("tokenDisplayExact")}
+            </Button>
+          </div>
+
+          {/* API Key Filter */}
+          <ApiKeyFilterDropdown
+            available={availableApiKeys}
+            selected={selectedApiKeys}
+            onChange={setSelectedApiKeys}
+          />
+
+          {/* Period Selector + Custom */}
+          <div
+            className="relative flex flex-wrap items-center gap-1 bg-surface-2 rounded-lg p-1 border border-border"
+            ref={customPickerAnchorRef}
+          >
+            {ranges.map((r) => (
+              <Button
+                key={r.value}
+                size="sm"
+                variant={range === r.value ? "primary" : "ghost"}
+                aria-pressed={range === r.value}
+                onClick={() => handleRangeSelect(r.value)}
+                className="h-7 min-h-7 px-3 text-xs"
+              >
+                {r.label}
+              </Button>
+            ))}
+            <Button
+              size="sm"
+              variant={range === "custom" ? "primary" : "ghost"}
+              aria-pressed={range === "custom"}
+              onClick={() => handleRangeSelect("custom")}
+              className="h-7 min-h-7 px-3 text-xs gap-1"
+            >
+              <Icon name="date_range" size={13} />
+              {customRangeLabel || t("customRange")}
+              {range === "custom" && customRangeLabel && (
+                <span
+                  role="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRange("30d");
+                    setCustomStart("");
+                    setCustomEnd("");
+                  }}
+                  className="ml-0.5 opacity-70 hover:opacity-100"
+                >
+                  <Icon name="close" size={11} />
+                </span>
+              )}
+            </Button>
+
+            {/* Custom Range Picker Popover */}
+            {showCustomPicker && (
+              <CustomRangePicker
+                start={customStart}
+                end={customEnd}
+                onApply={handleCustomApply}
+                onClose={() => setShowCustomPicker(false)}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Primary KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StatCard
+          icon="generating_tokens"
+          label={t("totalTokens")}
+          value={
+            <AnimatedNumber
+              value={s.totalTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
+          }
+          tooltip={tokenDisplayMode === "exact" ? `~${fmt(s.totalTokens)}` : fmtFull(s.totalTokens)}
+          subValue={`${fmtFull(s.totalRequests)} ${t("chartRequests")}`}
+        />
+        <StatCard
+          icon="input"
+          label={t("inputTokens")}
+          value={
+            <AnimatedNumber
+              value={s.promptTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
+          }
+          tooltip={
+            tokenDisplayMode === "exact" ? `~${fmt(s.promptTokens)}` : fmtFull(s.promptTokens)
+          }
+          color="text-primary"
+        />
+        <StatCard
+          icon="output"
+          label={t("outputTokens")}
+          value={
+            <AnimatedNumber
+              value={s.completionTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
+          }
+          tooltip={
+            tokenDisplayMode === "exact"
+              ? `~${fmt(s.completionTokens)}`
+              : fmtFull(s.completionTokens)
+          }
+          color="text-success"
+        />
+        <StatCard
+          icon="payments"
+          label={t("estCost")}
+          value={<AnimatedNumber value={s.totalCost} format={fmtCost} integer={false} />}
+          tooltip={
+            s.totalCost !== undefined && s.totalCost !== null
+              ? `$${Number(s.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
+              : undefined
+          }
+          color="text-warning"
+        />
+      </div>
+
+      {/* Secondary Metrics — compact grid with sections */}
+      <CompactStatGrid
+        sections={[
+          {
+            title: t("infraTitle"),
+            items: [
+              { icon: "group", label: t("infraAccounts"), value: s.uniqueAccounts || 0 },
+              {
+                icon: "dns",
+                label: t("infraProviders"),
+                value: providerCount,
+                color: "text-chart-2",
+              },
+              { icon: "vpn_key", label: t("infraApiKeys"), value: s.uniqueApiKeys || 0 },
+              { icon: "model_training", label: t("infraModels"), value: s.uniqueModels || 0 },
+            ],
+          },
+          {
+            title: t("perfTitle"),
+            items: [
+              {
+                icon: "speed",
+                label: t("perfAvgTokens"),
+                value:
+                  tokenDisplayMode === "exact" ? fmtFull(avgTokensPerReq) : fmt(avgTokensPerReq),
+                tooltip:
+                  tokenDisplayMode === "exact"
+                    ? `tokens : ~${fmt(avgTokensPerReq)} tokens`
+                    : `tokens : ${fmtFull(avgTokensPerReq)} tokens`,
+                color: "text-info",
+              },
+              {
+                icon: "request_quote",
+                label: t("perfCostReq"),
+                value: fmtCost(costPerReq),
+                tooltip: costPerReq
+                  ? `cost : $${Number(costPerReq).toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 })}`
+                  : undefined,
+                color: "text-warning",
+              },
+              {
+                icon: "compare_arrows",
+                label: t("perfIoRatio"),
+                value: `${ioRatio}x`,
+                color: "text-chart-3",
+              },
+              {
+                icon: "bolt",
+                label: t("perfFastReq"),
+                value:
+                  tokenDisplayMode === "exact"
+                    ? fmtFull(s.fastRequests || 0)
+                    : fmt(s.fastRequests || 0),
+                tooltip:
+                  tokenDisplayMode === "exact"
+                    ? `requests : ~${fmt(s.fastRequests || 0)} requests`
+                    : `requests : ${fmtFull(s.fastRequests || 0)} requests`,
+                color: "text-info",
+              },
+            ],
+          },
+          {
+            title: t("highlightsTitle"),
+            wideValues: true,
+            items: [
+              {
+                icon: "star",
+                label: t("highlightsTopModel"),
+                value: topModel,
+                color: "text-chart-5",
+              },
+              {
+                icon: "cloud",
+                label: t("highlightsTopProvider"),
+                value: topProvider,
+                color: "text-chart-4",
+              },
+              {
+                icon: "today",
+                label: t("highlightsBusiestDay"),
+                value: busiestDay,
+                color: "text-error",
+              },
+              {
+                icon: "network_node",
+                label: t("highlightsDiversity"),
+                value: `${providerDiversity.toFixed(1)}%`,
+                color: "text-info",
+              },
+              {
+                icon: "swap_horiz",
+                label: t("highlightsFallbackRate"),
+                value: `${Number(s.fallbackRatePct || 0).toFixed(1)}%`,
+                color: "text-warning",
+              },
+            ],
+          },
+        ]}
+      />
+
+      {/* Activity Heatmap + Weekly Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 items-stretch">
+        <ActivityHeatmap activityMap={analytics?.activityMap} />
+        <div className="flex flex-col gap-4">
+          <MostActiveDay7d activityMap={analytics?.activityMap} />
+          <WeeklySquares7d activityMap={analytics?.activityMap} />
+        </div>
+      </div>
+
+      {/* Token & Cost Trend + Provider Cost Donut */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <DailyTrendChart dailyTrend={analytics?.dailyTrend} />
+        <ProviderCostDonut byProvider={analytics?.byProvider} />
+      </div>
+
+      {/* Fast / Standard service tier split */}
+      <ServiceTierBreakdown byServiceTier={analytics?.byServiceTier} summary={s} />
+
+      {/* Model Usage Over Time (stacked area) */}
+      <ModelOverTimeChart
+        dailyByModel={analytics?.dailyByModel}
+        modelNames={analytics?.modelNames}
+      />
+
+      {/* Account Donut + API Key Donut */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <AccountDonut byAccount={analytics?.byAccount} />
+        <ApiKeyDonut byApiKey={analytics?.byApiKey} />
+      </div>
+
+      {/* Provider Breakdown Table */}
+      <ProviderTable byProvider={analytics?.byProvider} displayMode={tokenDisplayMode} />
+
+      {/* Request Count by Provider & Date — #4009 (some providers bill per-request) */}
+      <RequestCountByProviderDateTable range={range} displayMode={tokenDisplayMode} />
+
+      {/* API Key Table */}
+      <ApiKeyTable byApiKey={analytics?.byApiKey} displayMode={tokenDisplayMode} />
+
+      {/* Model Breakdown Table */}
+      <ModelTable byModel={analytics?.byModel} summary={s} displayMode={tokenDisplayMode} />
+    </div>
+  );
+}

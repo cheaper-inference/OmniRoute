@@ -1,0 +1,508 @@
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import {
+  applyLiteCompression,
+  collapseWhitespace,
+  dedupSystemPrompt,
+  compressToolResults,
+  removeRedundantContent,
+  replaceImageUrls,
+} from "../../../open-sse/services/compression/lite.ts";
+import { applyCompression } from "../../../open-sse/services/compression/strategySelector.ts";
+
+describe("collapseWhitespace", () => {
+  it("collapses 3+ newlines to 2", () => {
+    const body = { messages: [{ role: "user", content: "hello\n\n\n\nworld" }] };
+    const result = collapseWhitespace(body);
+    assert.equal(result.applied, true);
+    assert.equal(result.body.messages![0].content as string, "hello\n\nworld");
+  });
+
+  it("does not modify already-normal whitespace", () => {
+    const body = { messages: [{ role: "user", content: "hello\n\nworld" }] };
+    const result = collapseWhitespace(body);
+    assert.equal(result.applied, false);
+  });
+
+  it("trims trailing spaces", () => {
+    const body = { messages: [{ role: "user", content: "hello   " }] };
+    const result = collapseWhitespace(body);
+    assert.equal(result.applied, true);
+    assert.equal(result.body.messages![0].content as string, "hello");
+  });
+
+  it("returns unchanged when no messages", () => {
+    const body = {};
+    const result = collapseWhitespace(body);
+    assert.equal(result.applied, false);
+  });
+
+  it("skips non-string content", () => {
+    const body = { messages: [{ role: "user", content: [{ type: "text", text: "hello" }] }] };
+    const result = collapseWhitespace(body);
+    assert.equal(result.applied, false);
+  });
+});
+
+describe("dedupSystemPrompt", () => {
+  it("removes duplicate system prompts", () => {
+    const body = {
+      messages: [
+        { role: "system", content: "You are helpful." },
+        { role: "system", content: "You are helpful." },
+        { role: "user", content: "hi" },
+      ],
+    };
+    const result = dedupSystemPrompt(body);
+    assert.equal(result.applied, true);
+    assert.equal(result.body.messages!.length, 2);
+  });
+
+  it("keeps different system prompts", () => {
+    const body = {
+      messages: [
+        { role: "system", content: "You are helpful." },
+        { role: "system", content: "Be concise." },
+      ],
+    };
+    const result = dedupSystemPrompt(body);
+    assert.equal(result.applied, false);
+    assert.equal(result.body.messages!.length, 2);
+  });
+
+  it("returns unchanged when no messages", () => {
+    const result = dedupSystemPrompt({});
+    assert.equal(result.applied, false);
+  });
+});
+
+describe("compressToolResults", () => {
+  it("truncates long tool results", () => {
+    const longContent = "x".repeat(3000);
+    const body = { messages: [{ role: "tool", content: longContent }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.length < 3000);
+    assert.ok(content.includes("[truncated]"));
+  });
+
+  it("keeps short tool results unchanged", () => {
+    const body = { messages: [{ role: "tool", content: "short result" }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, false);
+  });
+
+  it("skips non-tool messages", () => {
+    const body = { messages: [{ role: "user", content: "x".repeat(3000) }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, false);
+  });
+
+  it("honors an explicit maxToolLength instead of the 2000-char default", () => {
+    const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+    const result = compressToolResults(body, { maxToolLength: 500 });
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.endsWith("\n...[truncated]"));
+    assert.ok(content.length < 800);
+    assert.ok(content.length <= 500 + "\n...[truncated]".length);
+  });
+
+  it("keeps a 1500-char tool result when maxToolLength is 4000", () => {
+    const body = { messages: [{ role: "tool", content: "x".repeat(1500) }] };
+    const result = compressToolResults(body, { maxToolLength: 4000 });
+    assert.equal(result.applied, false);
+    assert.equal(result.body.messages![0].content, "x".repeat(1500));
+  });
+  // A head-only cut deletes the lines an agent is about to edit, so it rebuilds the anchor from
+  // memory and the edit is rejected as stale.
+  it("keeps the tail of a long line-addressed tool result so its anchors survive", () => {
+    const lines = Array.from(
+      { length: 95 },
+      (_, i) => `${i + 1}:ab|export function getQueue${i + 1}(wid: string): QueuedMutation[] {`
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.includes(`${lines[0]}`), "first line must survive the cut");
+    assert.ok(content.includes(`${lines[94]}`), "last line must survive the cut");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.length < lines.join("\n").length);
+  });
+
+  // The tail must fit its share of the cap: rounding the tail start back to a newline made long
+  // lines (minified JS, JSONL, long log lines) overshoot maxToolLength by up to one whole line.
+  it("keeps a long-line tool result within the cap when it keeps the tail", () => {
+    const lines = Array.from({ length: 50 }, (_, i) =>
+      `${String(i + 1).padStart(2, "0")}:`.padEnd(200, "x")
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.length <= 2000 + 64, `output is ${content.length} chars, cap is 2000`);
+    assert.ok(content.startsWith("01:"), "the head of the result must survive the cut");
+    assert.ok(content.includes(`\n${lines[49]}\n`), "the last line survives whole");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.endsWith("...[truncated]"), "the trailing truncation marker stays");
+  });
+
+  it("falls back to the head-only cut when no complete line fits the tail budget", () => {
+    for (const [count, width] of [
+      [30, 1000],
+      [11, 20000],
+    ]) {
+      const original = Array.from({ length: count }, (_, i) => `${i + 1}:`.padEnd(width, "y"));
+      const body = { messages: [{ role: "tool", content: original.join("\n") }] };
+      const result = compressToolResults(body);
+      assert.equal(result.applied, true);
+      const content = result.body.messages![0].content as string;
+      const label = `${count} lines x ${width}`;
+      assert.ok(content.length <= 2000 + 64, `${label}: output is ${content.length} chars`);
+      assert.ok(content.startsWith("1:"), `${label}: the head must survive the cut`);
+      assert.doesNotMatch(content, /lines elided/, `${label}: no partial tail line is kept`);
+    }
+  });
+
+  it("reads OMNIROUTE_LITE_MAX_TOOL_LENGTH when no option is passed", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+      const result = compressToolResults(body);
+      assert.equal(result.applied, true);
+      const content = result.body.messages![0].content as string;
+      assert.ok(content.endsWith("\n...[truncated]"));
+      assert.ok(content.length <= 400 + "\n...[truncated]".length);
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
+
+  it("an explicit maxToolLength wins over the env fallback", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const body = { messages: [{ role: "tool", content: "x".repeat(800) }] };
+      const result = compressToolResults(body, { maxToolLength: 4000 });
+      assert.equal(result.applied, false);
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
+});
+
+describe("removeRedundantContent", () => {
+  it("removes consecutive duplicate messages", () => {
+    const body = {
+      messages: [
+        { role: "user", content: "hello" },
+        { role: "user", content: "hello" },
+      ],
+    };
+    const result = removeRedundantContent(body);
+    assert.equal(result.applied, true);
+    assert.equal(result.body.messages!.length, 1);
+  });
+
+  it("keeps non-duplicate messages", () => {
+    const body = {
+      messages: [
+        { role: "user", content: "hello" },
+        { role: "user", content: "world" },
+      ],
+    };
+    const result = removeRedundantContent(body);
+    assert.equal(result.applied, false);
+    assert.equal(result.body.messages!.length, 2);
+  });
+
+  it("only removes same-role consecutive duplicates", () => {
+    const body = {
+      messages: [
+        { role: "system", content: "hello" },
+        { role: "user", content: "hello" },
+      ],
+    };
+    const result = removeRedundantContent(body);
+    assert.equal(result.applied, false);
+  });
+});
+
+describe("replaceImageUrls", () => {
+  it("replaces base64 images for non-vision models", () => {
+    const body = {
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "image_url", image_url: { url: "data:image/png;base64,iVBOR" } }],
+        },
+      ],
+    };
+    const result = replaceImageUrls(body, "gpt-3.5-turbo");
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as Array<Record<string, unknown>>;
+    assert.equal(content[0].type, "text");
+    assert.ok((content[0].text as string).includes("[image:"));
+  });
+
+  it("keeps images for vision models", () => {
+    const body = {
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "image_url", image_url: { url: "data:image/png;base64,iVBOR" } }],
+        },
+      ],
+    };
+    const result = replaceImageUrls(body, "gpt-4o");
+    assert.equal(result.applied, false);
+  });
+
+  // #3328: MiniMax M3 is multimodal (verified: it describes a base64 image via the
+  // opencode upstream). It must not be treated as a non-vision model, or compression
+  // strips the image and the model goes "blind".
+  it("keeps images for MiniMax M3 (incl. provider-prefixed / free ids)", () => {
+    const mkBody = () => ({
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "image_url", image_url: { url: "data:image/png;base64,iVBOR" } }],
+        },
+      ],
+    });
+    for (const id of ["minimax-m3", "minimax-m3-free", "oc/minimax-m3-free"]) {
+      const result = replaceImageUrls(mkBody(), id);
+      assert.equal(result.applied, false, `expected images kept for ${id}`);
+    }
+  });
+
+  it("skips non-image content", () => {
+    const body = {
+      messages: [{ role: "user", content: "just text" }],
+    };
+    const result = replaceImageUrls(body, "gpt-3.5-turbo");
+    assert.equal(result.applied, false);
+  });
+});
+
+describe("stacked Lite precedence (global config vs explicit step)", () => {
+  const toolContent = `${"word ".repeat(500)}TAIL`;
+  const liteStep = { engine: "lite" };
+  const baseConfig = {
+    enabled: true,
+    defaultMode: "lite",
+    autoTriggerTokens: 0,
+    cacheMinutes: 5,
+    preserveSystemPrompt: true,
+    comboOverrides: {},
+    engines: {},
+    activeComboId: null,
+  };
+
+  it("global compressToolResults=false disables truncation when no step override", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [liteStep],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.ok(messages[0].content.length > 2000);
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("explicit step compressToolResults=true overrides global false", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: true } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+    assert.ok(messages[0].content.length < toolContent.length);
+    assert.ok(result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("explicit step compressToolResults=false overrides global true/default", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: true },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: false } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("non-boolean step compressToolResults falls through to global config", () => {
+    // stepConfig is Record<string, unknown> — a malformed (non-boolean) step value must
+    // not override; it falls through to global config.lite (false → no truncation).
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      {
+        config: {
+          ...baseConfig,
+          lite: { compressToolResults: false },
+          stackedPipeline: [{ engine: "lite", config: { compressToolResults: "yes" } }],
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("stacked default (no lite config) keeps truncation enabled", () => {
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "stacked",
+      { config: { ...baseConfig, stackedPipeline: [liteStep] } }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+  });
+
+  it("an out-of-range step maxToolLength does not hide a valid global cap", () => {
+    const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+    process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = "400";
+    try {
+      const longTool = "x".repeat(3000);
+      const result = applyCompression(
+        { messages: [{ role: "tool", content: longTool }] },
+        "stacked",
+        {
+          config: {
+            ...baseConfig,
+            lite: { compressToolResults: true, maxToolLength: 8000 },
+            stackedPipeline: [{ engine: "lite", config: { maxToolLength: 10 } }],
+          },
+        }
+      );
+      const messages = result.body.messages as Array<{ content: string }>;
+      assert.equal(messages[0].content, longTool);
+      assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+    } finally {
+      if (previous === undefined) delete process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;
+      else process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH = previous;
+    }
+  });
+});
+
+describe("applyLiteCompression", () => {
+  it("applies all techniques that match", () => {
+    const body = {
+      messages: [
+        { role: "system", content: "You are helpful." },
+        { role: "system", content: "You are helpful." },
+        { role: "user", content: "hello\n\n\n\nworld" },
+        { role: "user", content: "hello\n\n\n\nworld" },
+      ],
+    };
+    const result = applyLiteCompression(body);
+    assert.equal(result.compressed, true);
+    assert.ok(result.stats);
+    assert.ok(result.stats.techniquesUsed.length >= 2);
+    assert.ok(result.stats.savingsPercent > 0);
+  });
+
+  it("keeps proactive tool-result truncation enabled when Lite detail config is missing", () => {
+    const toolContent = `${"word ".repeat(500)}TAIL`;
+    const result = applyCompression({ messages: [{ role: "tool", content: toolContent }] }, "lite");
+    const messages = result.body.messages as Array<{ content: string }>;
+
+    assert.match(messages[0].content, /\.\.\.\[truncated\]$/);
+    assert.ok(messages[0].content.length < toolContent.length);
+  });
+
+  it("can disable only proactive tool-result truncation while other Lite transforms still apply", () => {
+    const toolContent = `${"word ".repeat(500)}TAIL   `;
+    const result = applyCompression(
+      { messages: [{ role: "tool", content: toolContent }] },
+      "lite",
+      {
+        config: {
+          enabled: true,
+          defaultMode: "lite",
+          autoTriggerTokens: 0,
+          cacheMinutes: 5,
+          preserveSystemPrompt: true,
+          comboOverrides: {},
+          engines: {},
+          activeComboId: null,
+          lite: { compressToolResults: false },
+        },
+      }
+    );
+    const messages = result.body.messages as Array<{ content: string }>;
+
+    assert.equal(messages[0].content, toolContent.trimEnd());
+    assert.ok(messages[0].content.length > 2000);
+    assert.doesNotMatch(messages[0].content, /\[truncated\]/);
+    assert.ok(result.stats?.techniquesUsed.includes("whitespace"));
+    assert.ok(!result.stats?.techniquesUsed.includes("tool-compress"));
+  });
+
+  it("preserves system prompt text when preserveSystemPrompt is enabled", () => {
+    const body = {
+      messages: [
+        { role: "system", content: "Policy.   Keep exact.\n\n\nDo not change." },
+        { role: "user", content: "Please   normalize this.\n\n\nThanks." },
+      ],
+    };
+    const result = applyCompression(body, "lite", {
+      config: {
+        enabled: true,
+        defaultMode: "lite",
+        autoTriggerTokens: 0,
+        cacheMinutes: 5,
+        preserveSystemPrompt: true,
+        comboOverrides: {},
+      },
+    });
+    const messages = result.body.messages as typeof body.messages;
+    assert.equal(messages[0].content, body.messages[0].content);
+    assert.notEqual(messages[1].content, body.messages[1].content);
+  });
+
+  it("returns no compression for clean input", () => {
+    const body = {
+      messages: [{ role: "user", content: "clean message" }],
+    };
+    const result = applyLiteCompression(body);
+    assert.equal(result.compressed, false);
+    assert.equal(result.stats, null);
+  });
+
+  it("handles empty messages array", () => {
+    const body = { messages: [] };
+    const result = applyLiteCompression(body);
+    assert.equal(result.compressed, false);
+  });
+});

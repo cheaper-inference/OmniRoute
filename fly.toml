@@ -1,0 +1,52 @@
+# fly.toml app configuration file generated for oroute on 2026-03-20T09:12:34Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'omniroute'
+primary_region = 'sin'
+
+[build]
+
+[processes]
+  app = 'node run-standalone.mjs'
+
+[deploy]
+#  release_command = "node ./dbsetup.js"
+
+[[mounts]]
+  source = 'data'
+  destination = '/data'
+  auto_extend_size_threshold = 80
+  auto_extend_size_increment = '1GB'
+  auto_extend_size_limit = '10GB'
+
+[http_service]
+  internal_port = 20128
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024
+
+[env]
+  TZ = "Asia/Shanghai"
+
+  # Bind to all interfaces for Fly runtime networking.
+  HOST = "0.0.0.0"
+  HOSTNAME = "0.0.0.0"
+  BIND = "0.0.0.0"
+
+  # #13679: a Fly deployment is reachable over the public internet by design
+  # (force_https + Fly's edge proxy in [http_service] above) — unlike the
+  # docker-compose path, there is no loopback-bind option here. Require an
+  # API key by default so a `fly deploy` from this manifest is never keyless
+  # AND world-reachable at once. This does not change the npm/CLI local-dev
+  # default; it is specific to this published Fly manifest.
+  REQUIRE_API_KEY = "true"

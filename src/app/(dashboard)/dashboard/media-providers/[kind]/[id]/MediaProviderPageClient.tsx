@@ -1,0 +1,225 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Icon from "@/shared/components/Icon";
+import MediaProviderHeader from "../../components/MediaProviderHeader";
+import MediaProviderKindNav from "../../components/MediaProviderKindNav";
+import type { MediaKind } from "../../components/mediaKinds";
+import { EmbeddingExampleCard } from "../../components/EmbeddingExampleCard";
+import { ImageExampleCard } from "../../components/ImageExampleCard";
+import { TtsExampleCard } from "../../components/TtsExampleCard";
+import { SttExampleCard } from "../../components/SttExampleCard";
+import { WebSearchExampleCard } from "../../components/WebSearchExampleCard";
+import { WebFetchExampleCard } from "../../components/WebFetchExampleCard";
+import { VideoExampleCard } from "../../components/VideoExampleCard";
+import { MusicExampleCard } from "../../components/MusicExampleCard";
+import { OcrExampleCard } from "../../components/OcrExampleCard";
+
+interface Connection {
+  id: string;
+  name?: string | null;
+  testStatus?: string | null;
+  isActive?: boolean;
+  lastErrorAt?: string | null;
+  lastError?: string | null;
+}
+
+interface MediaProviderPageClientProps {
+  providerId: string;
+  providerName: string;
+  providerColor?: string;
+  kindLabel: string;
+  activeKind: MediaKind;
+  website?: string;
+  hasFree?: boolean;
+  freeNote?: string;
+}
+
+function renderPlayground(
+  kind: MediaKind,
+  providerId: string,
+  bridgeCopy: {
+    imageToText: { title: string; description: React.ReactNode; cta: string };
+    sttCta: string;
+  }
+) {
+  switch (kind) {
+    case "embedding":
+      return <EmbeddingExampleCard providerId={providerId} />;
+    case "image":
+      return <ImageExampleCard providerId={providerId} />;
+    case "tts":
+      return <TtsExampleCard providerId={providerId} />;
+    case "stt":
+      return (
+        <div className="flex flex-col gap-3">
+          <SttExampleCard providerId={providerId} />
+          <Link
+            href="/dashboard/settings/modality-bridge?tab=audio"
+            className="text-xs text-primary hover:underline"
+          >
+            {bridgeCopy.sttCta}
+          </Link>
+        </div>
+      );
+    case "webSearch":
+      return <WebSearchExampleCard providerId={providerId} />;
+    case "webFetch":
+      return <WebFetchExampleCard providerId={providerId} />;
+    case "video":
+      return <VideoExampleCard providerId={providerId} />;
+    case "music":
+      return <MusicExampleCard providerId={providerId} />;
+    case "ocr":
+      return <OcrExampleCard providerId={providerId} />;
+    case "imageToText":
+      // Endpoint /api/v1/images/understanding does not exist yet — omitted.
+      return (
+        <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
+          <div className="flex items-center gap-2 text-text-muted">
+            <Icon name="image_search" size={20} />
+            <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
+          </div>
+          <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
+          <Link
+            href="/dashboard/settings/modality-bridge?tab=vision"
+            className="text-xs text-primary hover:underline"
+          >
+            {bridgeCopy.imageToText.cta}
+          </Link>
+        </div>
+      );
+    default:
+      return null;
+  }
+}
+
+export default function MediaProviderPageClient({
+  providerId,
+  providerName,
+  providerColor,
+  kindLabel,
+  activeKind,
+  website,
+  hasFree,
+  freeNote,
+}: MediaProviderPageClientProps) {
+  const t = useTranslations("media");
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchConnections = async () => {
+      try {
+        const res = await fetch(`/api/providers?provider=${encodeURIComponent(providerId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setConnections(
+            (data.connections ?? []).filter(
+              (c: Connection & { provider?: string }) => c.provider === providerId
+            )
+          );
+        }
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchConnections();
+  }, [providerId]);
+
+  const backHref = `/dashboard/media-providers/${activeKind}`;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {activeKind === "stt" && providerId === "openrouter" && (
+        <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
+          <Icon name="info" size={16} className="text-info mt-0.5" />
+          <span>
+            <strong>{t("existingConnection")}:</strong> {t("openrouterSttDescription")}
+          </span>
+        </div>
+      )}
+      <MediaProviderHeader
+        providerId={providerId}
+        providerName={providerName}
+        providerColor={providerColor}
+        kindLabel={kindLabel}
+        website={website}
+        hasFree={hasFree}
+        freeNote={freeNote}
+        backHref={backHref}
+      />
+
+      <MediaProviderKindNav activeKind={activeKind} />
+
+      {/* Connections */}
+      <div className="flex flex-col gap-3">
+        <SectionHeader
+          title={t("connections", { count: connections.length })}
+          actions={
+            <Button
+              size="sm"
+              icon="add"
+              onClick={() => {
+                window.location.href = `/dashboard/providers/${providerId}`;
+              }}
+            >
+              {t("addConnection")}
+            </Button>
+          }
+        />
+
+        {loading ? (
+          <div className="py-8 text-center text-sm text-text-muted">{t("loading")}</div>
+        ) : connections.length === 0 ? (
+          <EmptyState
+            icon="key_off"
+            title={t("noConnections")}
+            actionLabel={t("addConnection")}
+            onAction={() => {
+              window.location.href = `/dashboard/providers/${providerId}`;
+            }}
+          />
+        ) : (
+          <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
+            {connections.map((conn) => (
+              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-bg-card">
+                <span
+                  className={`size-2 rounded-full shrink-0 ${
+                    conn.testStatus === "active" || conn.testStatus === "success"
+                      ? "bg-success"
+                      : conn.testStatus === "error" || conn.testStatus === "unavailable"
+                        ? "bg-error"
+                        : "bg-text-muted"
+                  }`}
+                />
+                <span className="text-sm font-medium flex-1 truncate">{conn.name ?? conn.id}</span>
+                {conn.isActive === false && <Badge size="sm">{t("disabled")}</Badge>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Playground */}
+      {renderPlayground(activeKind, providerId, {
+        imageToText: {
+          title: t("imageToText"),
+          description: t.rich("imageToTextBridgeAvailable", {
+            code: (chunks) => <code className="rounded bg-bg-subtle px-1 font-mono">{chunks}</code>,
+          }),
+          cta: t("imageToTextBridgeCta"),
+        },
+        sttCta: t("sttBridgeCta"),
+      })}
+    </div>
+  );
+}

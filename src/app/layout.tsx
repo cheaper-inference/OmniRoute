@@ -1,0 +1,165 @@
+import "./globals.css";
+import { ThemeProvider } from "@/shared/components/ThemeProvider";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getLocale } from "next-intl/server";
+import { RTL_LOCALES } from "@/i18n/config";
+import { normalizeComplianceEventTypes } from "@/i18n/request";
+import { pickMessages } from "@/i18n/pickMessages";
+import routeNamespaces from "@/i18n/routeNamespaces.generated.json";
+import { getRootLayoutSettings } from "@/lib/db/rootLayoutSettings";
+import type { Viewport } from "next";
+import { PwaRegister } from "@/shared/components/PwaRegister";
+import { LocaleAutoDetect } from "@/shared/components/LocaleAutoDetect";
+import { HIDDEN_TAB_REVEAL_SCRIPT } from "@/shared/utils/hiddenTabReveal";
+import { BasePathNetworkProvider } from "@/shared/components/BasePathNetworkProvider";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
+import { EDITIONS_APPEARANCE_VALUE } from "@/shared/constants/appearancePalette";
+import { THEME_BOOT_SCRIPT } from "@/shared/utils/themeBootScript";
+
+export const viewport: Viewport = {
+  // Page background of the default (Editions) palette per colour scheme (pwaThemeColors.ts).
+  // THEME_BOOT_SCRIPT and the theme store rewrite these tags to the stored palette and mode.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },
+  ],
+  viewportFit: "cover",
+};
+
+export async function generateMetadata() {
+  const settings = await getRootLayoutSettings();
+  const instanceName = settings.instanceName;
+  const customFaviconUrl = settings.customFaviconUrl || settings.customFaviconBase64;
+
+  return {
+    title: `${instanceName} — AI Gateway for Multi-Provider LLMs`,
+    description:
+      "OmniRoute is an AI gateway for multi-provider LLMs. One endpoint for all your AI providers.",
+    manifest: "/manifest.webmanifest",
+    applicationName: instanceName,
+    appleWebApp: {
+      capable: true,
+      title: instanceName,
+      statusBarStyle: "black-translucent",
+    },
+    other: {
+      "mobile-web-app-capable": "yes",
+    },
+    icons: {
+      icon: customFaviconUrl
+        ? "/api/settings/favicon"
+        : [
+            { url: "/favicon.ico", sizes: "any" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
+            { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+          ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    },
+  };
+}
+
+export default async function RootLayout({ children }) {
+  const locale = await getLocale();
+  // Serialize ONLY the public-surface namespaces into the flight payload.
+  // The full merged catalog is ~664 KB across 132 namespaces and used to be
+  // embedded in every rendered page (757-865 KB HTML even for /login and
+  // 404). Dashboard sections re-scope it with their own providers via
+  // SectionI18nProvider — see scripts/i18n/generate-route-namespaces.mjs.
+  // IMPORTANT: never remove the explicit `messages` prop — next-intl then
+  // falls back to embedding the whole catalog again.
+  const messages = normalizeComplianceEventTypes(
+    pickMessages((await getMessages()) as Record<string, unknown>, routeNamespaces.root)
+  );
+  const isRtl = RTL_LOCALES.includes(locale as (typeof RTL_LOCALES)[number]);
+
+  return (
+    // `data-ci-appearance="editions"` is the default palette (the kit's Editions look), rendered
+    // by the server so the first paint has it even without JS; THEME_BOOT_SCRIPT removes it for
+    // a visitor who chose Classic, before paint.
+    <html
+      lang={locale}
+      dir={isRtl ? "rtl" : "ltr"}
+      className="ci-theme"
+      data-ci-appearance={EDITIONS_APPEARANCE_VALUE}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* #16245: seed React's $RT so Suspense reveals while the tab is hidden. */}
+        <script dangerouslySetInnerHTML={{ __html: HIDDEN_TAB_REVEAL_SCRIPT }} />
+        {/* Pre-hydration cleanup: browser extensions (Bitdefender's
+            bis_skin_checked, Grammarly's data-gr-ext-installed, LanguageTool's
+            data-lt-installed, etc.) inject attributes into the DOM after SSR
+            but before React hydrates, causing hydration mismatch warnings in
+            dev. Strip them synchronously and observe for late injections; the
+            observer auto-disconnects after 5s (well past typical hydration). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                var ATTRS = ["bis_skin_checked", "data-google-query-id", "data-new-gr-c-s-check-loaded", "data-gr-ext-installed", "data-lt-installed", "data-lt-tmp-id"];
+                function strip(el) {
+                  for (var i = 0; i < ATTRS.length; i++) {
+                    if (el.hasAttribute(ATTRS[i])) el.removeAttribute(ATTRS[i]);
+                  }
+                }
+                strip(document.documentElement);
+                if (typeof MutationObserver === "undefined") return;
+                var obs = new MutationObserver(function (muts) {
+                  for (var i = 0; i < muts.length; i++) {
+                    var m = muts[i];
+                    if (m.type === "attributes" && ATTRS.indexOf(m.attributeName) !== -1) {
+                      m.target.removeAttribute(m.attributeName);
+                    }
+                  }
+                });
+                obs.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ATTRS });
+                setTimeout(function () { obs.disconnect(); }, 5000);
+              })();
+            `,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                if (!window.crypto) {
+                  window.crypto = {};
+                }
+                if (!window.crypto.randomUUID) {
+                  window.crypto.randomUUID = function() {
+                    if (window.crypto.getRandomValues) {
+                      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = window.crypto.getRandomValues(new Uint8Array(1))[0] % 16;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                      });
+                    }
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                      const r = Math.random() * 16 | 0;
+                      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                      return v.toString(16);
+                    });
+                  };
+                }
+              }
+            `,
+          }}
+        />
+        {/* Theme + palette before paint (light/dark and Editions/Classic from the persisted
+            `theme` store), so the first frame already has the stored look. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
+      {/* No skip link here: its #main-content target exists only in the dashboard shell, which
+          renders its own skip link as the first tab stop (F4). */}
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <BasePathNetworkProvider>
+            <PwaRegister />
+            <LocaleAutoDetect />
+            <ThemeProvider>{children}</ThemeProvider>
+          </BasePathNetworkProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}

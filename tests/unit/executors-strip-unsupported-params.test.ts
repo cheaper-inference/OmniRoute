@@ -1,0 +1,359 @@
+// Unit tests for stripUnsupportedParams: per-(provider,model) strip of params
+// the upstream rejects (HTTP 400). Port from 9router#7ae9fff6 (fixes #1748).
+//
+// Rule coverage:
+//   1. claude-opus-4 series: temperature deprecated → Anthropic 400.
+//   2. github + GPT-5.4+/GPT-6.x: temperature unsupported.
+//   3. github + Claude (except opus/sonnet 4.6): thinking + reasoning_effort rejected.
+//   4. nvidia + z-ai/glm-5.2: reasoning rejected → NVIDIA 400.
+//   5. volcengine + kimi-k2-5-260127: max_tokens clamped to the Ark endpoint cap
+//      (32768), confirmed independently against two live-endpoint reports for the
+//      same Volcengine Ark Kimi coding-plan endpoint (decolua/9router#2460;
+//      NousResearch/hermes-agent#51773; MoonshotAI/kimi-cli#1124).
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import {
+  stripUnsupportedParams,
+  __STRIP_RULES_FOR_TEST,
+} from "../../open-sse/translator/paramSupport.ts";
+
+test("stripUnsupportedParams: drops temperature for claude-opus-4 models (any provider)", () => {
+  const body = { model: "claude-opus-4-20250514", temperature: 0.7, max_tokens: 100 };
+  stripUnsupportedParams("anthropic", "claude-opus-4-20250514", body);
+  assert.equal(body.temperature, undefined, "temperature must be stripped");
+  assert.equal(body.max_tokens, 100, "other params must survive");
+  assert.equal(body.model, "claude-opus-4-20250514", "model must not be touched");
+});
+
+test("stripUnsupportedParams: drops temperature for claude-opus-4-1 (case insensitive)", () => {
+  const body: Record<string, unknown> = { temperature: 0.5 };
+  stripUnsupportedParams("anthropic", "CLAUDE-OPUS-4-1-20250805", body);
+  assert.equal(body.temperature, undefined);
+});
+
+test("stripUnsupportedParams: keeps temperature for claude-sonnet-4 (only opus-4 affected)", () => {
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  stripUnsupportedParams("anthropic", "claude-sonnet-4-20250514", body);
+  assert.equal(body.temperature, 0.7, "sonnet-4 still accepts temperature");
+});
+
+test("stripUnsupportedParams: keeps temperature for claude-opus-3 (regression guard)", () => {
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  stripUnsupportedParams("anthropic", "claude-3-opus-20240229", body);
+  assert.equal(body.temperature, 0.7);
+});
+
+test("stripUnsupportedParams: github + gpt-5.4 strips temperature", () => {
+  const body: Record<string, unknown> = { temperature: 1, max_completion_tokens: 200 };
+  stripUnsupportedParams("github", "gpt-5.4", body);
+  assert.equal(body.temperature, undefined);
+  assert.equal(body.max_completion_tokens, 200);
+});
+
+test("stripUnsupportedParams: github + gpt-5 (non-5.4) keeps temperature", () => {
+  const body: Record<string, unknown> = { temperature: 1 };
+  stripUnsupportedParams("github", "gpt-5", body);
+  assert.equal(body.temperature, 1);
+});
+
+test("stripUnsupportedParams: github strips temperature for GPT-5.4+ and GPT-6.x ids", () => {
+  // Copilot 400s "Unsupported parameter: 'temperature'" for GPT-5.4 and newer GPT-5.x,
+  // plus GPT-6.x — including ids without a minor version such as gpt-6-astra.
+  for (const model of [
+    "gpt-5.4",
+    "gpt-5.4-mini",
+    "gpt-5.5",
+    "gpt-5.6-luna",
+    "gpt-5.6-sol",
+    "gpt-5.6-terra",
+    "gpt-5.9",
+    "gpt-5.10",
+    "gpt-6-astra",
+    "gpt-6.0",
+    "gpt-6.1-sol",
+    "gpt-6.1-terra",
+    "GPT-6.10",
+  ]) {
+    const body: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("github", model, body);
+    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped for github`);
+    const gheBody: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("ghe-copilot", model, gheBody);
+    assert.deepEqual(gheBody, { top_p: 1 }, `${model}: temperature must be stripped for ghe-copilot`);
+  }
+});
+
+test("stripUnsupportedParams: github keeps temperature outside the GPT-5.4+/GPT-6 range", () => {
+  for (const model of [
+    "gpt-4.1",
+    "gpt-4o",
+    "gpt-5",
+    "gpt-5-mini",
+    "gpt-5.0",
+    "gpt-5.3-codex",
+    "gpt-7.0",
+    "gpt-60",
+    "gpt-5.4invalid",
+  ]) {
+    const body: Record<string, unknown> = { temperature: 0.7 };
+    stripUnsupportedParams("github", model, body);
+    assert.equal(body.temperature, 0.7, `${model}: temperature must be preserved`);
+  }
+});
+
+test("stripUnsupportedParams: GPT-5.4+/GPT-6 temperature rule is GitHub-only", () => {
+  for (const provider of ["openai", "azure", "openrouter"]) {
+    const body: Record<string, unknown> = { temperature: 0.7 };
+    stripUnsupportedParams(provider, "gpt-6.1-sol", body);
+    assert.equal(body.temperature, 0.7, `${provider}: temperature must be preserved`);
+  }
+});
+
+test("stripUnsupportedParams: codex strips temperature and top_p (Responses 400)", () => {
+  const body: Record<string, unknown> = {
+    temperature: 0.7,
+    top_p: 0.9,
+    model: "gpt-5.6-luna-max",
+    input: [],
+  };
+  stripUnsupportedParams("codex", "gpt-5.6-sol-xhigh", body);
+  assert.equal(body.temperature, undefined, "Codex /responses rejects temperature");
+  assert.equal(body.top_p, undefined, "Codex /responses rejects top_p");
+  assert.equal(body.model, "gpt-5.6-luna-max", "other params must survive");
+});
+
+test("stripUnsupportedParams: non-codex provider keeps temperature for gpt-5.6-luna-max", () => {
+  // `openai` has its own gpt-5 sampling rule now, so use a provider with no rule
+  // to prove the codex strip itself is provider-scoped.
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  stripUnsupportedParams("openrouter", "gpt-5.6-luna-max", body);
+  assert.equal(body.temperature, 0.7, "codex sampling strip is provider-scoped");
+});
+
+test("stripUnsupportedParams: github + Claude strips thinking + reasoning_effort", () => {
+  const body: Record<string, unknown> = {
+    thinking: { type: "enabled" },
+    reasoning_effort: "high",
+    temperature: 0.5,
+  };
+  stripUnsupportedParams("github", "claude-3-5-sonnet", body);
+  assert.equal(body.thinking, undefined, "Copilot rejects Claude-style thinking");
+  assert.equal(body.reasoning_effort, undefined);
+  assert.equal(body.temperature, 0.5, "non-targeted params survive");
+});
+
+test("stripUnsupportedParams: github + claude opus 4.6 KEEPS thinking + reasoning_effort", () => {
+  const body: Record<string, unknown> = {
+    thinking: { type: "enabled" },
+    reasoning_effort: "high",
+  };
+  stripUnsupportedParams("github", "claude-opus-4.6", body);
+  assert.equal(body.reasoning_effort, "high", "opus-4.6 supports reasoning_effort");
+  // Note: thinking survives too on opus-4.6 per upstream rule.
+  assert.deepEqual(body.thinking, { type: "enabled" });
+});
+
+test("stripUnsupportedParams: github + claude sonnet 4.6 KEEPS reasoning_effort", () => {
+  const body: Record<string, unknown> = { reasoning_effort: "low" };
+  stripUnsupportedParams("github", "claude-sonnet-4.6", body);
+  assert.equal(body.reasoning_effort, "low");
+});
+
+test("stripUnsupportedParams: non-github provider + Claude does NOT strip thinking", () => {
+  // The github-Claude rule is provider-scoped.
+  const body: Record<string, unknown> = { thinking: { type: "enabled" } };
+  stripUnsupportedParams("anthropic", "claude-3-5-sonnet", body);
+  assert.deepEqual(body.thinking, { type: "enabled" });
+});
+
+test("stripUnsupportedParams: only deletes when the key is present (never adds undefined)", () => {
+  const body: Record<string, unknown> = { max_tokens: 50 };
+  stripUnsupportedParams("anthropic", "claude-opus-4", body);
+  // No `temperature` key should be introduced.
+  assert.equal("temperature" in body, false);
+});
+
+test("stripUnsupportedParams: returns the same body reference (in-place mutation)", () => {
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  const out = stripUnsupportedParams("anthropic", "claude-opus-4", body);
+  assert.equal(out, body);
+});
+
+test("stripUnsupportedParams: null/undefined body is a no-op", () => {
+  assert.equal(stripUnsupportedParams("anthropic", "claude-opus-4", null), null);
+  assert.equal(stripUnsupportedParams("anthropic", "claude-opus-4", undefined), undefined);
+});
+
+test("stripUnsupportedParams: missing model is a no-op", () => {
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  stripUnsupportedParams("anthropic", "", body);
+  assert.equal(body.temperature, 0.7);
+});
+
+test("stripUnsupportedParams: drops reasoning for nvidia z-ai/glm-5.2", () => {
+  const body: Record<string, unknown> = {
+    model: "z-ai/glm-5.2",
+    reasoning: { effort: "high" },
+    temperature: 0.7,
+  };
+  stripUnsupportedParams("nvidia", "z-ai/glm-5.2", body);
+  assert.equal(body.reasoning, undefined, "reasoning must be stripped");
+  assert.equal(body.temperature, 0.7, "other params must survive");
+  assert.equal(body.model, "z-ai/glm-5.2", "model must not be touched");
+});
+
+test("stripUnsupportedParams: drops thinking for mistral zai-glm-5-2", () => {
+  const body: Record<string, unknown> = {
+    thinking: { type: "enabled", budget_tokens: 10240 },
+    reasoning: { effort: "high" },
+  };
+  stripUnsupportedParams("mistral", "zai-glm-5-2", body);
+  assert.equal(body.thinking, undefined);
+  assert.equal(body.reasoning, undefined);
+});
+
+test("stripUnsupportedParams: nvidia z-ai/glm-5.1 keeps reasoning (rule is 5.2-only)", () => {
+  const body: Record<string, unknown> = {
+    model: "z-ai/glm-5.1",
+    reasoning: { effort: "medium" },
+    max_tokens: 100,
+  };
+  stripUnsupportedParams("nvidia", "z-ai/glm-5.1", body);
+  assert.ok(body.reasoning !== undefined, "reasoning must survive for glm-5.1");
+  assert.equal(body.max_tokens, 100, "other params must survive");
+});
+
+test("stripUnsupportedParams: nvidia glm-5 rule is provider-scoped (no-op for other providers)", () => {
+  const body: Record<string, unknown> = {
+    model: "z-ai/glm-5.2",
+    reasoning: { effort: "high" },
+  };
+  stripUnsupportedParams("openai", "z-ai/glm-5.2", body);
+  assert.ok(body.reasoning !== undefined, "reasoning must survive for non-nvidia provider");
+});
+
+test("stripUnsupportedParams: nvidia non-glm-5 model keeps reasoning", () => {
+  const body: Record<string, unknown> = {
+    model: "deepseek-ai/deepseek-v4-pro",
+    reasoning: { effort: "high" },
+  };
+  stripUnsupportedParams("nvidia", "deepseek-ai/deepseek-v4-pro", body);
+  assert.ok(body.reasoning !== undefined, "reasoning must survive for non-glm-5 nvidia model");
+});
+
+test("STRIP_RULES is non-empty and every rule has a drop list, a clamp mechanism, or a thinking-type map", () => {
+  assert.ok(__STRIP_RULES_FOR_TEST.length > 0);
+  for (const rule of __STRIP_RULES_FOR_TEST) {
+    const hasDrop = Array.isArray(rule.drop) && rule.drop.length > 0;
+    const hasDropIfNull = Array.isArray(rule.dropIfNull) && rule.dropIfNull.length > 0;
+    const hasClamp = rule.clampToModelMaxOutput === true || Number.isFinite(rule.maxOutputCap);
+    const hasThinkingMap =
+      typeof rule.mapThinkingType === "object" &&
+      rule.mapThinkingType !== null &&
+      Object.keys(rule.mapThinkingType).length > 0;
+    // Nested output_config drops (e.g. opencode-go Claude output_config.task_budget).
+    const hasOutputConfigDrop =
+      Array.isArray(rule.dropOutputConfigFields) && rule.dropOutputConfigFields.length > 0;
+    assert.ok(
+      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap || hasOutputConfigDrop,
+      "rule must either drop params (always or only when null), clamp max output, map a thinking type, or drop nested output_config fields"
+    );
+    assert.ok(typeof rule.match === "function" || rule.match instanceof RegExp);
+  }
+});
+
+test("stripUnsupportedParams: volcengine kimi-k2-5-260127 clamps max_tokens above the Ark endpoint cap (32768)", () => {
+  const body: Record<string, unknown> = { max_tokens: 65536 };
+  stripUnsupportedParams("volcengine", "kimi-k2-5-260127", body);
+  assert.equal(body.max_tokens, 32768, "oversized max_tokens must be clamped to the Ark cap");
+});
+
+test("stripUnsupportedParams: volcengine kimi-k2-5-260127 leaves max_tokens under the cap unchanged", () => {
+  const body: Record<string, unknown> = { max_tokens: 8000 };
+  stripUnsupportedParams("volcengine", "kimi-k2-5-260127", body);
+  assert.equal(body.max_tokens, 8000, "max_tokens under the cap must not be modified");
+});
+
+test("stripUnsupportedParams: volcengine kimi-k2-5-260127 also clamps max_completion_tokens/max_output_tokens", () => {
+  const body: Record<string, unknown> = {
+    max_completion_tokens: 100000,
+    max_output_tokens: 50000,
+  };
+  stripUnsupportedParams("volcengine", "kimi-k2-5-260127", body);
+  assert.equal(body.max_completion_tokens, 32768);
+  assert.equal(body.max_output_tokens, 32768);
+});
+
+test("stripUnsupportedParams: volcengine non-kimi model (glm-4-7-251222) is NOT clamped by the kimi rule", () => {
+  const body: Record<string, unknown> = { max_tokens: 65536 };
+  stripUnsupportedParams("volcengine", "glm-4-7-251222", body);
+  assert.equal(
+    body.max_tokens,
+    65536,
+    "kimi-specific cap must not apply to other volcengine models"
+  );
+});
+
+test("stripUnsupportedParams: kimi rule is provider-scoped (no-op for non-volcengine providers)", () => {
+  const body: Record<string, unknown> = { max_tokens: 65536 };
+  stripUnsupportedParams("kimi", "kimi-k2-5-260127", body);
+  assert.equal(
+    body.max_tokens,
+    65536,
+    "the Ark-specific cap must not leak to other kimi-hosting providers"
+  );
+});
+
+// OpenAI gpt-5.x reasoning models: temperature / top_p rejected with 400
+// "Unsupported parameter: 'temperature' is not supported with this model".
+test("stripUnsupportedParams: openai gpt-5.0 family drops temperature and top_p", () => {
+  for (const model of ["gpt-5", "gpt-5-mini", "gpt-5-nano", "GPT-5", "gpt-5-2025-08-07"]) {
+    const body: Record<string, unknown> = { temperature: 0.7, top_p: 0.9, max_tokens: 64 };
+    stripUnsupportedParams("openai", model, body);
+    assert.equal(body.temperature, undefined, `${model}: temperature`);
+    assert.equal(body.top_p, undefined, `${model}: top_p`);
+    assert.equal(body.max_tokens, 64, `${model}: other params survive`);
+  }
+});
+
+test("stripUnsupportedParams: openai gpt-5-chat variants and non-gpt-5 models keep sampling params", () => {
+  for (const model of ["gpt-5-chat-latest", "gpt-4o", "gpt-4.1-mini", "o3"]) {
+    const body: Record<string, unknown> = { temperature: 0.7, top_p: 0.9 };
+    stripUnsupportedParams("openai", model, body);
+    assert.equal(body.temperature, 0.7, model);
+    assert.equal(body.top_p, 0.9, model);
+  }
+});
+
+test("stripUnsupportedParams: the gpt-5 sampling rule is scoped to provider openai", () => {
+  const body: Record<string, unknown> = { temperature: 0.7 };
+  stripUnsupportedParams("azure-openai", "gpt-5.6-luna", body);
+  assert.equal(body.temperature, 0.7);
+});
+
+// GPT-5.1+ default to reasoning_effort "none", where sampling is accepted, so the
+// static rule must leave them alone; the reasoning-aware guard strips them only
+// when an active effort is present (chatcore-upstream-body / suffix-effort tests).
+test("stripUnsupportedParams: openai versioned gpt-5.1+ keep sampling for the reasoning-aware guard", async () => {
+  const { stripGpt5SamplingWhenReasoning } =
+    await import("../../open-sse/services/gpt5SamplingGuard.ts");
+  for (const model of ["gpt-5.1", "gpt-5.2", "GPT-5.4", "gpt-5.6-luna"]) {
+    const body: Record<string, unknown> = { temperature: 0.7, top_p: 0.9 };
+    stripUnsupportedParams("openai", model, body);
+    assert.equal(body.temperature, 0.7, `${model}: temperature kept with no active effort`);
+    assert.equal(body.top_p, 0.9, `${model}: top_p kept with no active effort`);
+  }
+  for (const [model, extra] of [
+    ["gpt-5.6-luna-high", {}],
+    ["gpt-5.4", { reasoning_effort: "high" }],
+  ] as const) {
+    const guarded = stripGpt5SamplingWhenReasoning(
+      { temperature: 0.7, top_p: 0.9, ...extra },
+      "openai",
+      model
+    );
+    assert.equal(guarded.temperature, undefined, `${model}: active effort strips temperature`);
+    assert.equal(guarded.top_p, undefined, `${model}: active effort strips top_p`);
+  }
+});

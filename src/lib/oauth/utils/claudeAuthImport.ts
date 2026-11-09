@@ -1,0 +1,306 @@
+import crypto from "node:crypto";
+import {
+  getProviderConnections,
+  createProviderConnection,
+  updateProviderConnection,
+} from "@/lib/db/providers";
+import { getClaudeCodeUserAgent } from "@/shared/constants/claudeCodeClient";
+import { ClaudeAuthFileError } from "@/lib/oauth/utils/claudeAuthFile";
+
+type JsonRecord = Record<string, unknown>;
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function toNonEmptyString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+// ──── Public types ────────────────────────────────────────────────────────────
+
+export interface ParsedClaudeAuth {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string | null; // ISO (converted from ms)
+  scopes: string[];
+  subscriptionType: string | null;
+  rateLimitTier: string | null;
+  email: string | null; // from bootstrap enrichment
+}
+
+export interface EnrichedClaudeAuth extends ParsedClaudeAuth {
+  accountUUID: string | null;
+  organizationUUID: string | null;
+  organizationName: string | null;
+  organizationType: string | null;
+  rateLimitTier: string | null;
+  seatTier: string | null;
+}
+
+export interface CreateConnectionOptions {
+  name?: string;
+  email?: string;
+  overwriteExisting?: boolean;
+}
+
+// ──── Parse & validate ────────────────────────────────────────────────────────
+
+export function parseAndValidateClaudeAuth(raw: unknown): ParsedClaudeAuth {
+  const doc = toRecord(raw);
+  const oauthBlock = toRecord(doc.claudeAiOauth);
+
+  const accessToken = toNonEmptyString(oauthBlock.accessToken);
+  const refreshToken = toNonEmptyString(oauthBlock.refreshToken);
+
+  if (!accessToken) {
+    throw new ClaudeAuthFileError(
+      "accessToken is missing or empty in claudeAiOauth",
+      400,
+      "missing_access_token"
+    );
+  }
+
+  if (!refreshToken) {
+    throw new ClaudeAuthFileError(
+      "refreshToken is missing or empty in claudeAiOauth",
+      400,
+      "missing_refresh_token"
+    );
+  }
+
+  // expiresAt in the file is ms epoch; store as ISO in DB
+  let expiresAt: string | null = null;
+  const rawExpiresAt = oauthBlock.expiresAt;
+  if (typeof rawExpiresAt === "number" && Number.isFinite(rawExpiresAt)) {
+    expiresAt = new Date(rawExpiresAt).toISOString();
+  } else if (typeof rawExpiresAt === "string" && rawExpiresAt.trim()) {
+    expiresAt = rawExpiresAt.trim();
+  }
+
+  const rawScopes = oauthBlock.scopes;
+  const scopes: string[] = Array.isArray(rawScopes)
+    ? rawScopes.filter((s): s is string => typeof s === "string")
+    : [];
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresAt,
+    scopes,
+    subscriptionType: toNonEmptyString(oauthBlock.subscriptionType),
+    rateLimitTier: toNonEmptyString(oauthBlock.rateLimitTier),
+    email: null,
+  };
+}
+
+// ──── Bootstrap enrichment ────────────────────────────────────────────────────
+
+// The live bootstrap nests the account under `oauth_account` (the shape
+// fetchClaudeBootstrap reads); a flat body is still accepted.
+function bootstrapAccount(raw: unknown): JsonRecord {
+  const doc = toRecord(raw);
+  return doc.oauth_account ? toRecord(doc.oauth_account) : doc;
+}
+
+// The account's own (seat) tier first: the org's base tier and the CLI file's
+// copy both differ from it once a Team admin moves seats.
+function bootstrapRateLimitTier(body: JsonRecord, fileTier: string | null): string | null {
+  return (
+    toNonEmptyString(body.user_rate_limit_tier) ||
+    toNonEmptyString(body.rate_limit_tier) ||
+    fileTier
+  );
+}
+
+export async function enrichWithBootstrap(
+  parsed: ParsedClaudeAuth,
+  // proxyConfig reserved for future authenticated-proxy support
+  proxyConfig?: null
+): Promise<EnrichedClaudeAuth> {
+  const base: EnrichedClaudeAuth = {
+    ...parsed,
+    accountUUID: null,
+    organizationUUID: null,
+    organizationName: null,
+    organizationType: null,
+    rateLimitTier: parsed.rateLimitTier,
+    seatTier: null,
+  };
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const res = await fetch("https://api.anthropic.com/api/claude_cli/bootstrap", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${parsed.accessToken}`,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+        "User-Agent": getClaudeCodeUserAgent("cli"),
+        "anthropic-beta": "oauth-2025-04-20",
+      },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      return base;
+    }
+
+    const body = bootstrapAccount(await res.json());
+
+    return {
+      ...base,
+      accountUUID: toNonEmptyString(body.account_uuid),
+      organizationUUID: toNonEmptyString(body.organization_uuid),
+      organizationName: toNonEmptyString(body.organization_name),
+      organizationType: toNonEmptyString(body.organization_type),
+      rateLimitTier: bootstrapRateLimitTier(body, parsed.rateLimitTier),
+      seatTier: toNonEmptyString(body.seat_tier),
+      email: parsed.email || toNonEmptyString(body.account_email),
+    };
+  } catch {
+    // Network error, timeout, or parse failure — best-effort; callers handle null fields
+    return base;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ──── Lookup ──────────────────────────────────────────────────────────────────
+
+export async function findExistingClaudeConnection(
+  accountUUID: string,
+  organizationUUID: string | null = null
+): Promise<JsonRecord | null> {
+  const connections = await getProviderConnections({ provider: "claude" });
+  return (
+    (connections.find((c) =>
+      isSameClaudeIdentity(
+        toRecord((c as JsonRecord).providerSpecificData),
+        accountUUID,
+        organizationUUID
+      )
+    ) as JsonRecord | undefined) ?? null
+  );
+}
+
+// One accountUUID reaches its personal workspace and every Team org it belongs
+// to; the org separates them. Like isMatchingOauthIdentity, the org decides only
+// when both sides carry it.
+function isSameClaudeIdentity(
+  psd: JsonRecord,
+  accountUUID: string,
+  organizationUUID: string | null
+): boolean {
+  const stored = toNonEmptyString(psd.accountUUID);
+  if (stored === null || stored.toLowerCase() !== accountUUID.toLowerCase()) return false;
+  const storedOrg = toNonEmptyString(psd.organizationUUID)?.toLowerCase();
+  const org = organizationUUID?.toLowerCase();
+  return !org || !storedOrg || org === storedOrg;
+}
+
+// ──── Create / update connection ──────────────────────────────────────────────
+
+// The identity and plan fields an import writes, on a new connection and over an existing one.
+function importedClaudeData(enriched: EnrichedClaudeAuth): JsonRecord {
+  return {
+    accountUUID: enriched.accountUUID,
+    organizationUUID: enriched.organizationUUID,
+    organizationName: enriched.organizationName,
+    organizationType: enriched.organizationType,
+    rateLimitTier: enriched.rateLimitTier,
+    ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
+    scopes: enriched.scopes,
+    subscriptionType: enriched.subscriptionType,
+    bootstrapEmail: enriched.email,
+    importedAt: new Date().toISOString(),
+  };
+}
+
+export async function createConnectionFromAuthFile(
+  enriched: EnrichedClaudeAuth,
+  options: CreateConnectionOptions
+): Promise<{ connection: JsonRecord; created: boolean }> {
+  // Duplicate detection by accountUUID (skipped when bootstrap failed)
+  if (enriched.accountUUID) {
+    const existing = await findExistingClaudeConnection(
+      enriched.accountUUID,
+      enriched.organizationUUID
+    );
+
+    if (existing) {
+      if (!options.overwriteExisting) {
+        throw new ClaudeAuthFileError(
+          "A Claude connection for this account already exists. Pass overwriteExisting: true to replace it.",
+          409,
+          "duplicate_account"
+        );
+      }
+
+      const updated = await updateProviderConnection(existing.id as string, {
+        accessToken: enriched.accessToken,
+        refreshToken: enriched.refreshToken,
+        expiresAt: enriched.expiresAt,
+        email:
+          options.email || enriched.email || (existing.email as string | undefined) || undefined,
+        name:
+          options.name ||
+          (existing.name as string | undefined) ||
+          options.email ||
+          enriched.email ||
+          "Claude (imported)",
+        testStatus: "active",
+        providerSpecificData: {
+          ...toRecord(existing.providerSpecificData),
+          ...importedClaudeData(enriched),
+          // #10143: preserve an already-persisted device identity across
+          // re-imports so the connection doesn't present as a new device to
+          // Anthropic on every process restart; only mint one if absent.
+          cliUserID:
+            toNonEmptyString(toRecord(existing.providerSpecificData).cliUserID) ||
+            crypto.randomBytes(32).toString("hex"),
+        },
+      });
+
+      return { connection: updated || existing, created: false };
+    }
+  }
+
+  // Identity check: when bootstrap failed and we have no email, refuse unless
+  // the caller has explicitly opted into overwrite mode (they know what they're doing).
+  if (!enriched.email && !enriched.accountUUID && !options.overwriteExisting) {
+    throw new ClaudeAuthFileError(
+      "Could not verify the account identity (bootstrap failed and no email/accountUUID available). Pass overwriteExisting: true to import anyway.",
+      409,
+      "identity_unverified"
+    );
+  }
+
+  const email = options.email || enriched.email || undefined;
+  const name = options.name || options.email || enriched.email || "Claude (imported)";
+
+  const connection = await createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name,
+    email,
+    accessToken: enriched.accessToken,
+    refreshToken: enriched.refreshToken,
+    expiresAt: enriched.expiresAt,
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {
+      ...importedClaudeData(enriched),
+      // #10143: mint a persistent device identity so this imported
+      // connection doesn't fall back to a lazy-random device id that
+      // regenerates on every process restart (see resolveCliUserID).
+      cliUserID: crypto.randomBytes(32).toString("hex"),
+    },
+  });
+
+  return { connection, created: true };
+}

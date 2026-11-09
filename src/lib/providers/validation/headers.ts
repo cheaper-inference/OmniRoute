@@ -1,0 +1,163 @@
+// Request-header builders + custom-UA handling + a direct (proxy-bypassing) HTTPS helper, extracted
+// from validation.ts (god-file decomposition). Pure header construction except directHttpsRequest,
+// which delegates to safeOutboundFetch with bypassProxyPatch. Behavior is byte-identical.
+import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { getProviderValidationGuard } from "@/shared/network/outboundUrlGuardPolicy";
+
+// Standardized desktop Chrome UA for web-cookie/no-auth session probes (minimizes anti-bot detection).
+export const STANDARD_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
+
+export function getCustomUserAgent(providerSpecificData: any = {}) {
+  if (typeof providerSpecificData?.customUserAgent !== "string") return null;
+  const customUserAgent = providerSpecificData.customUserAgent.trim();
+  return customUserAgent || null;
+}
+
+export function applyCustomUserAgent(
+  headers: Record<string, string>,
+  providerSpecificData: any = {}
+) {
+  const customUserAgent = getCustomUserAgent(providerSpecificData);
+  if (!customUserAgent) return headers;
+  headers["User-Agent"] = customUserAgent;
+  if ("user-agent" in headers) {
+    headers["user-agent"] = customUserAgent;
+  }
+  return headers;
+}
+
+export function withCustomUserAgent(init: RequestInit, providerSpecificData: any = {}) {
+  return {
+    ...init,
+    headers: applyCustomUserAgent(
+      { ...((init.headers as Record<string, string> | undefined) || {}) },
+      providerSpecificData
+    ),
+  };
+}
+
+/**
+ * Direct HTTPS request utility that bypasses the global patched fetch.
+ * Used for provider validation where the patched fetch has compatibility issues.
+ * Uses safeOutboundFetch with bypassProxyPatch to use native Node.js fetch directly.
+ *
+ * SSRF hardening: provider validation hits a caller-controllable `baseUrl`
+ * (e.g. the web-cookie `${baseUrl}/models` probe), so it MUST NOT be an open
+ * relay to cloud-metadata endpoints. We apply `getProviderValidationGuard()`
+ * (local-first default = "block-metadata": allow LAN/localhost providers but
+ * reject 169.254.169.254 / link-local IMDS; power users can opt fully out via
+ * `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`). `applyUrlGuard` only checks the
+ * INITIAL url, so `allowRedirect: false` is required too — otherwise a provider
+ * could 3xx-redirect the probe to metadata past the guard. Validation targets
+ * are concrete API endpoints (/models, /chat/completions, /v1/messages) that
+ * return direct JSON, so blocking redirects loses no legitimate provider.
+ */
+export function directHttpsRequest(
+  url: string,
+  options: { method?: string; headers?: Record<string, string>; body?: string },
+  timeoutMs: number
+): Promise<{ status: number; ok: boolean; text: () => Promise<string> }> {
+  return safeOutboundFetch(url, {
+    method: options.method || "GET",
+    headers: (options.headers || {}) as Record<string, string>,
+    body: options.body,
+    timeoutMs,
+    bypassProxyPatch: true,
+    allowRedirect: false,
+    guard: getProviderValidationGuard(),
+    retry: false,
+  }).then(async (response) => ({
+    status: response.status,
+    ok: response.ok,
+    text: async () => await response.text(),
+  }));
+}
+
+export function buildBearerHeaders(apiKey: string, providerSpecificData: any = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+  return applyCustomUserAgent(headers, providerSpecificData);
+}
+
+export function buildRekaHeaders(apiKey: string, providerSpecificData: any = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+    headers["X-Api-Key"] = apiKey;
+  }
+
+  return applyCustomUserAgent(headers, providerSpecificData);
+}
+
+export function buildClarifaiHeaders(apiKey: string, providerSpecificData: any = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (apiKey) {
+    headers.Authorization = `Key ${apiKey}`;
+  }
+
+  return applyCustomUserAgent(headers, providerSpecificData);
+}
+
+export function buildKeyHeaders(apiKey: string, providerSpecificData: any = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (apiKey) {
+    headers.Authorization = `Key ${apiKey}`;
+  }
+
+  return applyCustomUserAgent(headers, providerSpecificData);
+}
+
+export function buildTokenHeaders(apiKey: string, providerSpecificData: any = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (apiKey) {
+    headers.Authorization = `Token ${apiKey}`;
+  }
+
+  return applyCustomUserAgent(headers, providerSpecificData);
+}
+
+/**
+ * Add the connection's `providerSpecificData.customHeaders` the way the chat path does
+ * (open-sse/handlers/chatCore/upstreamExecuteHeaders.ts): auth and hop-by-hop names are
+ * skipped, CR/LF/NUL is dropped, and a header already set is never replaced.
+ */
+export function mergeConnectionCustomHeaders(
+  headers: Record<string, string>,
+  providerSpecificData: unknown
+): Record<string, string> {
+  const customHeaders =
+    providerSpecificData && typeof providerSpecificData === "object"
+      ? (providerSpecificData as { customHeaders?: unknown }).customHeaders
+      : undefined;
+  if (!customHeaders || typeof customHeaders !== "object" || Array.isArray(customHeaders)) {
+    return headers;
+  }
+  for (const [name, value] of Object.entries(customHeaders as Record<string, unknown>)) {
+    const trimmed = name.trim();
+    if (!trimmed || typeof value !== "string") continue;
+    if (isForbiddenCustomHeaderName(trimmed)) continue;
+    if (/[\r\n\0]/.test(trimmed) || /[\r\n\0]/.test(value)) continue;
+    const lower = trimmed.toLowerCase();
+    if (Object.keys(headers).some((existing) => existing.toLowerCase() === lower)) continue;
+    headers[trimmed] = value;
+  }
+  return headers;
+}

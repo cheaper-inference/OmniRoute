@@ -1,0 +1,198 @@
+import { describe, expect, it, vi } from "vitest";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+
+import { createMcpServer } from "../server.ts";
+import {
+  getMcpHttpAuthHeadersForInternalFetch,
+  withMcpHttpAuthContext,
+} from "../httpAuthContext.ts";
+
+vi.mock("../audit.ts", () => ({
+  logToolCall: vi.fn().mockResolvedValue(undefined),
+}));
+
+describe("MCP HTTP auth context", () => {
+  it("forwards bearer and cookie credentials to in-process internal fetches", async () => {
+    const request = new Request("http://localhost/api/mcp/stream", {
+      headers: {
+        Authorization: "Bearer manage-key",
+        Cookie: "auth_token=session-token",
+      },
+    });
+
+    const headers = await withMcpHttpAuthContext(request, async () =>
+      getMcpHttpAuthHeadersForInternalFetch()
+    );
+
+    expect(headers).toEqual({
+      Authorization: "Bearer manage-key",
+      Cookie: "auth_token=session-token",
+    });
+  });
+
+  it("forwards Anthropic-style x-api-key only with its contract header", async () => {
+    const request = new Request("http://localhost/api/mcp/stream", {
+      headers: {
+        "x-api-key": "manage-key",
+        "anthropic-version": "2023-06-01",
+      },
+    });
+
+    const headers = await withMcpHttpAuthContext(request, async () =>
+      getMcpHttpAuthHeadersForInternalFetch()
+    );
+
+    expect(headers).toEqual({
+      "x-api-key": "manage-key",
+      "anthropic-version": "2023-06-01",
+    });
+  });
+
+  it("does not forward bare x-api-key without anthropic-version", async () => {
+    const request = new Request("http://localhost/api/mcp/stream", {
+      headers: { "x-api-key": "placeholder" },
+    });
+
+    const headers = await withMcpHttpAuthContext(request, async () =>
+      getMcpHttpAuthHeadersForInternalFetch()
+    );
+
+    expect(headers).toEqual({});
+  });
+
+  it("does not leak auth context outside the wrapped request", async () => {
+    const request = new Request("http://localhost/api/mcp/stream", {
+      headers: { Authorization: "Bearer manage-key" },
+    });
+
+    await withMcpHttpAuthContext(request, async () => {
+      expect(getMcpHttpAuthHeadersForInternalFetch()).toEqual({
+        Authorization: "Bearer manage-key",
+      });
+    });
+
+    expect(getMcpHttpAuthHeadersForInternalFetch()).toEqual({});
+  });
+
+  it("forwards request auth through registered core tools", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ combos: [] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer();
+    await server.connect(serverTransport);
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    await client.connect(clientTransport);
+
+    try {
+      const request = new Request("http://localhost/api/mcp/stream", {
+        headers: { Authorization: "Bearer manage-key" },
+      });
+      await withMcpHttpAuthContext(request, () =>
+        client.callTool({ name: "omniroute_list_combos", arguments: {} })
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/combos"),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer manage-key" }),
+        })
+      );
+    } finally {
+      await client.close();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("forwarded caller auth wins over the OMNIROUTE_API_KEY env fallback (#5819)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ combos: [] }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubEnv("OMNIROUTE_API_KEY", "env-fallback-key");
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer();
+    await server.connect(serverTransport);
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    await client.connect(clientTransport);
+
+    try {
+      const request = new Request("http://localhost/api/mcp/stream", {
+        headers: { Authorization: "Bearer manage-key" },
+      });
+      await withMcpHttpAuthContext(request, () =>
+        client.callTool({ name: "omniroute_list_combos", arguments: {} })
+      );
+
+      // The per-caller forwarded identity must win over the static env fallback.
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/combos"),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer manage-key" }),
+        })
+      );
+      const sentHeaders = fetchMock.mock.calls[0][1].headers as Record<string, string>;
+      expect(sentHeaders.Authorization).not.toBe("Bearer env-fallback-key");
+    } finally {
+      await client.close();
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("authenticates internal hops through every MCP fetch helper", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ entries: 2, hitRate: 0.5 }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubEnv("OMNIROUTE_INTERNAL_SERVICE_TOKEN", "internal-hop-token");
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createMcpServer();
+    await server.connect(serverTransport);
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    await client.connect(clientTransport);
+
+    try {
+      const request = new Request("http://localhost/api/mcp/stream", {
+        headers: { Authorization: "Bearer manage-key" },
+      });
+      await withMcpHttpAuthContext(request, () =>
+        client.callTool({ name: "omniroute_cache_stats", arguments: {} })
+      );
+      await withMcpHttpAuthContext(request, () =>
+        client.callTool({ name: "omniroute_pick_fastest_model", arguments: {} })
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/cache"),
+        expect.anything()
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/monitoring/health"),
+        expect.anything()
+      );
+      for (const [, init] of fetchMock.mock.calls) {
+        expect(init).toEqual(
+          expect.objectContaining({
+            headers: expect.objectContaining({
+              Authorization: "Bearer manage-key",
+              "x-omniroute-internal-service-token": "internal-hop-token",
+            }),
+          })
+        );
+      }
+    } finally {
+      await client.close();
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+});

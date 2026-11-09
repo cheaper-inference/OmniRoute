@@ -1,0 +1,222 @@
+import type { RegistryEntry } from "../../shared.ts";
+
+const COMMAND_CODE_REASONING_EFFORTS = ["low", "medium", "high", "xhigh", "max"] as const;
+
+export const command_codeProvider: RegistryEntry = {
+  id: "command-code",
+  alias: "cmd",
+  format: "openai",
+  executor: "command-code",
+  baseUrl: "https://api.commandcode.ai",
+  // Chat uses the documented /provider/v1/chat/completions (OpenAI-format)
+  // endpoint — NOT the CLI-only /alpha/generate endpoint, which Command Code
+  // version-gates and proxy-blocks for external callers (#10265). Discovery
+  // already targets the sibling /provider/v1/models endpoint.
+  chatPath: "/provider/v1/chat/completions",
+  modelsUrl: "https://api.commandcode.ai/provider/v1/models",
+  // The discovery response is a partial routing catalog; static registry
+  // entries omitted from it can still be accepted by the gateway.
+  liveCatalogAuthoritative: false,
+  // Reasoning models (e.g. z-ai/glm-5.3-flash) exhaust small client budgets on
+  // thinking before emitting content; default to a reasoning-safe budget.
+  requestDefaults: { maxTokens: 16_384 },
+  // Console Go / Command Code gateways buffer entire generations — no upstream
+  // bytes flow until the model finishes thinking. Streaming needs a headers-wait
+  // ceiling well above the 110s global cap for long reasoning generations.
+  fetchStartTimeoutCapMs: 600_000,
+  authType: "apikey",
+  authHeader: "Authorization",
+  authPrefix: "Bearer ",
+  defaultContextLength: 200000,
+  models: [
+    {
+      id: "claude-opus-4-7",
+      name: "Claude Opus 4.7 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 200000,
+      maxOutputTokens: 32000,
+    },
+    {
+      id: "claude-fable-5",
+      name: "Claude Fable 5 (CC)",
+      targetFormat: "claude",
+    },
+    {
+      id: "claude-opus-4-6",
+      name: "Claude Opus 4.6 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 200000,
+      maxOutputTokens: 32000,
+    },
+    {
+      id: "claude-sonnet-5-5",
+      name: "Claude Sonnet 5.5 (CC)",
+      targetFormat: "claude",
+    },
+    {
+      id: "claude-sonnet-4-6",
+      name: "Claude Sonnet 4.6 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 200000,
+      maxOutputTokens: 16384,
+    },
+    {
+      id: "claude-haiku-4-5-20251001",
+      name: "Claude Haiku 4.5 (CC)",
+      targetFormat: "claude",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 200000,
+      maxOutputTokens: 8192,
+    },
+    {
+      id: "gpt-5.5",
+      name: "GPT-5.5 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 256000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "gpt-5.4",
+      name: "GPT-5.4 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 256000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "gpt-5.3-codex",
+      name: "GPT-5.3 Codex (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 256000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "gpt-5.4-mini",
+      name: "GPT-5.4 Mini (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 256000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "deepseek/deepseek-v4-pro",
+      name: "DeepSeek V4 Pro (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "deepseek/deepseek-v4-flash",
+      name: "DeepSeek V4 Flash (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+    },
+    // Experimental vision variant; remove if the gateway retires the `-exp` id.
+    {
+      id: "deepseek/deepseek-v4-flash-vision-exp",
+      name: "DeepSeek V4 Flash Vision (exp) (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+    },
+    // Id kept verbatim (capitalized) as advertised by /provider/v1/models; the
+    // gateway matches it case-sensitively. Vision left undeclared until probed.
+    {
+      id: "moonshotai/Kimi-K3.1-Pro",
+      name: "Kimi K3.1 Pro (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1048576,
+      maxOutputTokens: 384000,
+    },
+    {
+      id: "moonshotai/Kimi-K2.6",
+      name: "Kimi K2.6 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 262144,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "moonshotai/Kimi-K2.5",
+      name: "Kimi K2.5 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 262144,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "zai-org/GLM-5.1",
+      name: "GLM-5.1 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 200000,
+      maxOutputTokens: 32768,
+    },
+    {
+      id: "zai-org/GLM-5",
+      name: "GLM-5 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 200000,
+      maxOutputTokens: 32768,
+    },
+    {
+      id: "MiniMaxAI/MiniMax-M2.7",
+      name: "MiniMax M2.7 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1048576,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "MiniMaxAI/MiniMax-M2.5",
+      name: "MiniMax M2.5 (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1048576,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "Qwen/Qwen3.6-Max-Preview",
+      name: "Qwen 3.6 Max (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      contextLength: 1000000,
+      maxOutputTokens: 32768,
+    },
+    {
+      id: "Qwen/Qwen3.6-Plus",
+      name: "Qwen 3.6 Plus (CC)",
+      supportsReasoning: true,
+      supportedThinkingEfforts: COMMAND_CODE_REASONING_EFFORTS,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxOutputTokens: 32768,
+    },
+  ],
+};

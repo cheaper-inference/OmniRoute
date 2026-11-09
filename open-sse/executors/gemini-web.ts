@@ -1,0 +1,909 @@
+/**
+ * GeminiWebExecutor — Gemini Web Session Provider
+ *
+ * Routes requests through Google Gemini's web interface using browser
+ * cookies + Playwright automation. Translates between OpenAI chat
+ * completions format and Gemini's web UI.
+ *
+ * Auth: Cookie-based (__Secure-1PSID + __Secure-1PSIDTS from gemini.google.com)
+ * Method: Playwright browser automation
+ *
+ * Note: Streaming is pseudo-streaming — waits for full Gemini response then
+ * sends as single SSE chunk. Gemini's StreamGenerate endpoint returns complete
+ * responses, not chunked streams.
+ */
+
+import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
+import {
+  abortStatus,
+  isBrowserClosedError,
+  isSelectorFailure,
+  resolveResponseTimeoutMs,
+} from "./gemini-web/browserErrors.ts";
+import { getStableLauncher } from "./gemini-web/browserLease.ts";
+import { normalizeGeminiCookieInput } from "../utils/geminiCookies.ts";
+import { prepareToolMessages } from "../translator/webTools.ts";
+import { buildToolModeResponse } from "./chatgptWebTools.ts";
+import {
+  checkGeminiWebUnsupportedControls,
+  GEMINI_WEB_UNSUPPORTED_CONTROL_CODE,
+  isForcingToolChoice,
+  requestsThinkingBudget,
+} from "./gemini-web/capabilities.ts";
+import {
+  describeModeSelectionFailure,
+  selectGeminiExtendedThinking,
+  selectGeminiModel,
+} from "./gemini-web/modeSelection.ts";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const GEMINI_URL = "https://gemini.google.com/app";
+/** Response-label fallback when no `model` was requested at all (unchanged since pre-#13381). */
+const DEFAULT_MODEL_ID = "gemini-2.5-pro";
+
+// Re-exported for backward compatibility: some tests/callers import this classification helper
+// from gemini-web.ts, its original home (#3516). The implementation now lives in
+// browserExecutableCheck.ts so other browser-backed executors (e.g. zai-web.ts, #13232) can
+// share it without importing this whole executor module.
+export { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
+
+const GEMINI_USER_AGENT =
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface GeminiMessage {
+  role: string;
+  content: string;
+}
+
+interface GeminiRequestBody {
+  messages: GeminiMessage[];
+  model?: string;
+  stream?: boolean;
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function formatChatCompletion(content: string, model: string, finishReason = "stop") {
+  return {
+    id: `chatcmpl-${Date.now()}`,
+    object: "chat.completion",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: finishReason }],
+    usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+  };
+}
+
+function formatStreamChunk(content: string, model: string, finishReason: string | null = null) {
+  return {
+    id: `chatcmpl-${Date.now()}`,
+    object: "chat.completion.chunk",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [{ index: 0, delta: content ? { content } : {}, finish_reason: finishReason }],
+  };
+}
+
+/**
+ * Flatten the OpenAI-style multi-turn `messages[]` into the single plain-text
+ * prompt typed into the Gemini web UI (#8371).
+ *
+ * gemini-web drives a real browser page and captures only the FIRST
+ * `StreamGenerate` response, so — unlike claude-web — it has no upstream
+ * conversation id to thread across turns. It is therefore a stateless,
+ * single-turn provider: the previous code forwarded only the last user message
+ * (`messages.filter(m => m.role === "user").pop()`), so follow-up questions
+ * lost all prior context ("I am in Berlin" → "What should I wear today?" was
+ * answered without Berlin). This implements the issue's accepted fallback (b):
+ * flatten the full history into one prompt so the web UI still sees the
+ * conversation.
+ *
+ * Single-turn requests with NO system message are preserved byte-for-byte
+ * (only the final user message is returned) — the regression guard for the
+ * pre-existing no-tools path. A single-turn request that DOES carry a system
+ * message prepends it the same way the multi-turn branch does (#13380 — the
+ * old fast path silently dropped the system instruction whenever there was
+ * no prior user/assistant turn, e.g. title generation or a one-shot chat
+ * completion). Multi-turn requests emit a labeled transcript:
+ *
+ *   System:
+ *   <system text>
+ *
+ *   Previous conversation:
+ *   User: ...
+ *   Assistant: ...
+ *
+ *   Current user message:
+ *   <last user message>
+ */
+export function buildGeminiPrompt(messages: Array<{ role: string; content: unknown }>): string {
+  const textMessages = messages.filter(
+    (m) => typeof m.content === "string" && (m.content as string).trim().length > 0
+  ) as Array<{ role: string; content: string }>;
+
+  const userMessages = textMessages.filter((m) => m.role === "user");
+  const lastUser = userMessages[userMessages.length - 1];
+  const lastUserContent = lastUser?.content ?? "";
+  const lastUserIdx = lastUser ? textMessages.lastIndexOf(lastUser) : -1;
+
+  // Prior conversation = every user/assistant turn before the final user turn.
+  const priorTurns = textMessages.filter(
+    (m, i) => i < lastUserIdx && (m.role === "user" || m.role === "assistant")
+  );
+
+  const systemText = textMessages
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n\n");
+
+  // Single-turn (no earlier user/assistant turns) with no system message:
+  // byte-for-byte the original single-message derivation.
+  if (priorTurns.length === 0 && !systemText) return lastUserContent;
+
+  // Single-turn with a system message (#13380): prepend it instead of
+  // silently dropping it.
+  if (priorTurns.length === 0) return `System:\n${systemText}\n\n${lastUserContent}`;
+
+  const historyLines = priorTurns.map(
+    (m) => `${m.role === "assistant" ? "Assistant" : "User"}: ${m.content}`
+  );
+
+  const parts: string[] = [];
+  if (systemText) parts.push(`System:\n${systemText}`);
+  parts.push(`Previous conversation:\n${historyLines.join("\n\n")}`);
+  parts.push(`Current user message:\n${lastUserContent}`);
+  return parts.join("\n\n");
+}
+
+/**
+ * Build the plain-text prompt typed into the Gemini web UI when a tool
+ * contract is active — every system message (the client's own instruction(s)
+ * plus the synthetic tool contract that `prepareToolMessages()` appends last)
+ * prepended, in order, to the last user message. gemini-web only ever sends
+ * a single flat string (no native message array), so the tool contract and
+ * the user's ask are concatenated (#7286).
+ *
+ * `prepareToolMessages()` (open-sse/translator/webTools.ts) pushes the
+ * synthetic tool contract as the LAST system message so it never buries a
+ * long client system prompt. Picking only the FIRST system message
+ * (`.find()`) therefore dropped the tool contract whenever the client
+ * already sent its own system message — #13380. Joining ALL system messages
+ * in order keeps the client instruction(s) first and the tool contract last,
+ * matching that dual-placement design intent.
+ */
+export function buildGeminiToolPrompt(
+  effectiveMessages: Array<{
+    role: string;
+    content: unknown;
+    tool_calls?: unknown;
+    tool_call_id?: unknown;
+  }>
+): string {
+  const toolPrompt = effectiveMessages
+    .filter((m) => m.role === "system" && typeof m.content === "string")
+    .map((m) => m.content as string)
+    .join("\n\n");
+  const lastUserIdx = effectiveMessages.map((m) => m.role).lastIndexOf("user");
+  const lastUserMsg = lastUserIdx >= 0 ? effectiveMessages[lastUserIdx] : undefined;
+  const userText = typeof lastUserMsg?.content === "string" ? lastUserMsg.content : "";
+
+  // Everything except the current ask has to be rendered: an assistant turn that
+  // called a tool and the `role: "tool"` result for it are the only evidence
+  // Gemini Web gets that the tool already ran. Dropping them (this function used
+  // to keep only system + last user) made the model re-issue the same call with a
+  // fresh id, looping until the client's tool limit stopped it (#14368).
+  //
+  // The boundary must be the current ask itself, not "everything before it": a
+  // tool round usually arrives as `system, user, assistant(tool_calls), tool`
+  // with NO message after the result, so slicing at `lastUserIdx` threw away the
+  // very turns the fix was for (#14374 review).
+  const prior: string[] = [];
+  for (const [index, m] of effectiveMessages.entries()) {
+    if (index === lastUserIdx) continue; // rendered below as the current ask
+    if (typeof m.content === "string" && m.content.trim()) {
+      if (m.role === "user") prior.push(`User: ${m.content}`);
+      else if (m.role === "assistant") prior.push(`Assistant: ${m.content}`);
+      else if (m.role === "tool") {
+        const id = typeof m.tool_call_id === "string" ? m.tool_call_id : "";
+        prior.push(id ? `Tool result [${id}]: ${m.content}` : `Tool result: ${m.content}`);
+      }
+    }
+    const calls = Array.isArray(m.tool_calls) ? m.tool_calls : [];
+    for (const entry of calls) {
+      const call = entry as { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
+      const name = typeof call.function?.name === "string" ? call.function.name : "tool";
+      const args = typeof call.function?.arguments === "string" ? call.function.arguments : "{}";
+      const id = typeof call.id === "string" ? ` [${call.id}]` : "";
+      prior.push(`Assistant requested tool${id}: ${name}(${args})`);
+    }
+  }
+
+  // Single-turn: byte-for-byte the shape #7286 pinned.
+  if (prior.length === 0) return toolPrompt ? `${toolPrompt}\n\n${userText}` : userText;
+
+  const parts: string[] = [];
+  if (toolPrompt) parts.push(toolPrompt);
+  parts.push(`Previous conversation:\n${prior.join("\n\n")}`);
+  parts.push(`Current user message:\n${userText}`);
+  return parts.join("\n\n");
+}
+
+/**
+ * Tool mode: wrap the buffered Gemini response text in the standard OpenAI
+ * completion shape, then delegate to the shared `buildToolModeResponse()`
+ * (`chatgptWebTools.ts`) — parses `<tool>{...}</tool>` blocks out of the
+ * text into `tool_calls` (malformed JSON degrades to ordinary `content`,
+ * never throws) and replays either buffered JSON or a terminal SSE chunk
+ * depending on `stream` (#7286). Exported standalone so the branching logic
+ * is testable without a full Playwright mock.
+ */
+export async function buildGeminiToolResponse(
+  responseText: string,
+  requestedTools: unknown,
+  stream: boolean,
+  model: string,
+  cid: string,
+  created: number
+): Promise<Response> {
+  const bufferedJson = new Response(JSON.stringify(formatChatCompletion(responseText, model)), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+  return buildToolModeResponse(bufferedJson, requestedTools, stream, {
+    cid,
+    created,
+    model,
+    idSeed: "gwe",
+  });
+}
+
+/**
+ * Parse cookie string, stripping attributes (Path, Domain, Expires, etc.)
+ * Input: full browser cookie string or just "name=value; name2=value2"
+ * Output: array of { name, value } pairs
+ */
+function parseCookies(raw: string): Array<{ name: string; value: string }> {
+  return raw
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const eqIdx = part.indexOf("=");
+      if (eqIdx === -1) return null;
+      const name = part.substring(0, eqIdx).trim();
+      const value = part.substring(eqIdx + 1).trim();
+      // Skip cookie attributes that aren't name=value pairs
+      if (!name || !value) return null;
+      const lowerName = name.toLowerCase();
+      if (
+        ["path", "domain", "expires", "max-age", "secure", "httponly", "samesite"].includes(
+          lowerName
+        )
+      ) {
+        return null;
+      }
+      return { name, value };
+    })
+    .filter(Boolean) as Array<{ name: string; value: string }>;
+}
+
+/**
+ * Parse Gemini StreamGenerate response text.
+ *
+ * Response format:
+ *   )]}'
+ *   <length>
+ *   [["wrb.fr", null, "<JSON string>"]]
+ *   <length>
+ *   [["wrb.fr", null, "<JSON string>"]]
+ *
+ * The JSON string contains nested array: inner[4][0][1] = ["text chunks"].
+ * Each wrb.fr line is a CUMULATIVE snapshot of the whole answer generated so
+ * far (not an independent delta), so we keep only the text from the LAST
+ * frame that yields non-empty text instead of concatenating every frame —
+ * concatenating would reproduce the same growing text with each snapshot
+ * (see #7163).
+ */
+export function parseStreamResponse(raw: string): string {
+  const lines = raw.split("\n");
+  let lastText = "";
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line || line === ")]}'" || /^\d+$/.test(line)) continue;
+    if (!line.includes("wrb.fr")) continue;
+    try {
+      const arr = JSON.parse(line);
+      if (!Array.isArray(arr) || !Array.isArray(arr[0]) || arr[0][0] !== "wrb.fr") continue;
+      const payload = arr[0]?.[2];
+      if (typeof payload !== "string") continue;
+      const inner = JSON.parse(payload);
+      // Defensive: check each level before accessing
+      const responseArray = inner?.[4]?.[0]?.[1];
+      if (!Array.isArray(responseArray)) continue;
+      const text = responseArray.filter((c: unknown) => typeof c === "string").join("");
+      if (text) lastText = text;
+    } catch {
+      // Skip unparseable lines
+    }
+  }
+  return lastText;
+}
+
+function readCredentialString(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : "";
+}
+
+function readProviderSpecificString(
+  providerSpecificData: unknown,
+  keys: readonly string[]
+): string {
+  if (
+    !providerSpecificData ||
+    typeof providerSpecificData !== "object" ||
+    Array.isArray(providerSpecificData)
+  ) {
+    return "";
+  }
+  const data = providerSpecificData as Record<string, unknown>;
+  for (const key of keys) {
+    const value = readCredentialString(data[key]);
+    if (value) return value;
+  }
+  return "";
+}
+
+/**
+ * Merge rotated __Secure-1PSID* cookies read back from the live Playwright
+ * cookie jar into the original cookie string. Only the three long-lived
+ * Gemini auth cookies are considered — pulling in the entire jar would risk
+ * treating short-lived Google analytics/consent cookies as credentials
+ * (#7676). Cookies the jar didn't return, or that are unchanged, are left
+ * untouched in the original string.
+ */
+export function mergeRotatedGeminiCookies(
+  originalCookie: string,
+  jarCookies: Array<{ name: string; value: string }>
+): string {
+  const ROTATABLE_NAMES = ["__Secure-1PSID", "__Secure-1PSIDTS", "__Secure-1PSIDCC"];
+  const jarByName = new Map(jarCookies.map((c) => [c.name, c.value]));
+
+  const pairs = parseCookies(originalCookie);
+  const seen = new Set<string>();
+  const merged = pairs.map(({ name, value }) => {
+    seen.add(name);
+    if (ROTATABLE_NAMES.includes(name) && jarByName.has(name)) {
+      return { name, value: jarByName.get(name) as string };
+    }
+    return { name, value };
+  });
+
+  for (const name of ROTATABLE_NAMES) {
+    if (!seen.has(name) && jarByName.has(name)) {
+      merged.push({ name, value: jarByName.get(name) as string });
+    }
+  }
+
+  return merged.map(({ name, value }) => `${name}=${value}`).join("; ");
+}
+
+function resolveGeminiWebCookie(credentials: ExecuteInput["credentials"]): string {
+  const directCookie =
+    readCredentialString(credentials?.apiKey) ||
+    readCredentialString((credentials as Record<string, unknown> | undefined)?.cookie);
+  if (directCookie) return normalizeGeminiCookieInput(directCookie);
+
+  const providerSpecificData = credentials?.providerSpecificData;
+  const cookie = readProviderSpecificString(providerSpecificData, ["cookie"]);
+  if (cookie) return normalizeGeminiCookieInput(cookie);
+
+  const psid = readProviderSpecificString(providerSpecificData, ["__Secure-1PSID"]);
+  const psidts = readProviderSpecificString(providerSpecificData, ["__Secure-1PSIDTS"]);
+  return [
+    psid ? normalizeGeminiCookieInput(psid, "__Secure-1PSID") : "",
+    psidts ? normalizeGeminiCookieInput(psidts, "__Secure-1PSIDTS") : "",
+  ]
+    .filter(Boolean)
+    .join("; ");
+}
+
+// ─── Executor ───────────────────────────────────────────────────────────────
+
+export class GeminiWebExecutor extends BaseExecutor {
+  constructor() {
+    super("gemini-web", { id: "gemini-web", baseUrl: GEMINI_URL });
+  }
+
+  /**
+   * testConnection — validates the cookie format without making a network call
+   * or launching Playwright. Returns true when the cookie is non-empty and
+   * contains at least one name=value pair with a non-empty value. This is a
+   * lightweight pre-check before the browser automation path; full session
+   * validation is done by validateGeminiWebProvider in the connection test
+   * flow (#9407).
+   */
+  async testConnection(
+    credentials: Record<string, unknown>,
+    _signal?: AbortSignal
+  ): Promise<boolean> {
+    try {
+      const cookie = resolveGeminiWebCookie(credentials as unknown as ExecuteInput["credentials"]);
+      if (!cookie) return false;
+      const pairs = parseCookies(cookie);
+      return pairs.some((p) => p.value.length > 0);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Read the live Playwright cookie jar back after a successful run and, if
+   * Google rotated any of the __Secure-1PSID* cookies, forward the merged
+   * cookie string through onCredentialsRefreshed so it gets persisted to the
+   * encrypted provider_connections.api_key field. Mirrors the rotate-and-
+   * persist pattern used by other rotating-session executors. A persistence failure
+   * must never fail the user-facing response (#7676).
+   */
+  private async persistRotatedCookies(
+    context: import("playwright").BrowserContext,
+    cookie: string,
+    credentials: ExecuteInput["credentials"],
+    onCredentialsRefreshed: ExecuteInput["onCredentialsRefreshed"],
+    log: ExecuteInput["log"]
+  ): Promise<void> {
+    if (!onCredentialsRefreshed) return;
+    try {
+      const jarCookies = await context.cookies();
+      const mergedCookie = mergeRotatedGeminiCookies(cookie, jarCookies);
+      if (mergedCookie && mergedCookie !== cookie) {
+        await onCredentialsRefreshed({ ...credentials, apiKey: mergedCookie });
+      }
+    } catch (err) {
+      log?.warn?.(
+        "GEMINI-WEB",
+        `Failed to persist rotated cookie: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+
+  async execute(input: ExecuteInput) {
+    const { model, body, stream, credentials, signal, log, onCredentialsRefreshed } = input;
+    const requestBody = body as GeminiRequestBody;
+
+    // #9356: forced tool_choice is a guarantee gemini-web's prompt-emulation shim can
+    // never make — no UI control for it exists at all, on any account, so this still
+    // fails fast before the credential check and before Playwright launches. See
+    // ./gemini-web/capabilities.ts.
+    //
+    // `reasoning_effort` (Extended Thinking) is different (#13381 follow-up comment,
+    // 2026-09-11): eligible Gemini accounts DO expose a real Extended Thinking toggle
+    // in the UI, so a blanket "we can never do this" would be the same dishonesty this
+    // fix exists to remove. It is no longer rejected here — it is attempted, verified
+    // via read-back, and only THEN rejected if it cannot be confirmed. See the in-browser
+    // step below and ./gemini-web/modeSelection.ts.
+    const rawBody = body as Record<string, unknown>;
+    if (isForcingToolChoice(rawBody.tool_choice)) {
+      const violation = checkGeminiWebUnsupportedControls({ tool_choice: rawBody.tool_choice });
+      log?.warn?.(
+        "GEMINI-WEB",
+        `Rejected request: "${violation!.param}" is not supported by this provider`
+      );
+      return {
+        response: new Response(
+          JSON.stringify(
+            buildErrorBody(400, violation!.message, null, {
+              type: "invalid_request_error",
+              code: GEMINI_WEB_UNSUPPORTED_CONTROL_CODE,
+            })
+          ),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        ),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    }
+    const wantsExtendedThinking = requestsThinkingBudget(rawBody.reasoning_effort);
+
+    const cookie = resolveGeminiWebCookie(credentials);
+    if (!cookie) {
+      return {
+        response: new Response(JSON.stringify({ error: "Missing Gemini cookies" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    }
+
+    const messages = requestBody.messages || [];
+    const { hasTools, requestedTools, effectiveMessages } = prepareToolMessages(
+      body as Record<string, unknown>,
+      messages
+    );
+
+    // hasTools === false: flatten the full multi-turn history into the single
+    // prompt so gemini-web (a stateless web-cookie provider that captures only
+    // the first StreamGenerate response) preserves prior context across turns
+    // (#8371). Single-turn requests with no system message stay byte-for-byte
+    // identical to the original derivation; a single-turn system message is
+    // now prepended instead of silently dropped (#13380).
+    const prompt = hasTools
+      ? buildGeminiToolPrompt(effectiveMessages)
+      : buildGeminiPrompt(messages);
+
+    // A system-only request (no user message at all) must still 400 — since
+    // #13380 prepends the system text, `prompt` alone is no longer a
+    // reliable "no user message" signal for the no-tools path (it used to be
+    // empty for a system-only request; now it carries the system text).
+    const hasUserMessage = messages.some(
+      (m: { role: string; content: unknown }) =>
+        m.role === "user" && typeof m.content === "string" && m.content.trim().length > 0
+    );
+
+    if (!prompt || (!hasTools && !hasUserMessage)) {
+      return {
+        response: new Response(JSON.stringify({ error: "No user message found" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    }
+
+    // Resolved up front (#13381) — the pre-fix code only read `model` AFTER the
+    // response was already captured, purely to stamp it on the reply. It now also
+    // drives the in-browser mode-selection step below, before anything is typed.
+    const modelId = model || DEFAULT_MODEL_ID;
+
+    let browser: any = null;
+    let context: import("playwright").BrowserContext | null = null;
+    let abortBrowser: (() => void) | null = null;
+    try {
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
+      const { chromium } = await import("playwright");
+      const launchChromium = getStableLauncher(chromium);
+      const { acquireGeminiBrowser } = await import("./gemini-web/browserLease.ts");
+      browser = await acquireGeminiBrowser(launchChromium);
+      abortBrowser = () => {
+        void context?.close().catch(() => {});
+      };
+      signal?.addEventListener("abort", abortBrowser, { once: true });
+
+      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
+      // context so the shared leased browser needs no invalidation when the proxy changes.
+      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
+      const proxy = await resolvePlaywrightProxy("gemini-web");
+      context = await browser.newContext({
+        userAgent: GEMINI_USER_AGENT,
+        ...(proxy ? { proxy } : {}),
+      });
+
+      // Parse cookies — strips attributes like Path, Domain, Expires
+      const cookiePairs = parseCookies(cookie);
+      await context.addCookies(
+        cookiePairs.map(({ name, value }) => ({
+          name,
+          value,
+          domain: ".google.com",
+          path: "/",
+          secure: true,
+        }))
+      );
+
+      const page = await context.newPage();
+
+      // Capture first StreamGenerate response
+      let responseText = "";
+      let captured = false;
+      // #19073: remember which endpoints answered while we waited (origin + path only,
+      // never the query string), so a "No response" 502 says whether the page posted
+      // nowhere, somewhere else, or to StreamGenerate with an unreadable body. Collection
+      // starts at submission: the navigation document and page-load assets would otherwise
+      // fill the cap and make "the page never posted" impossible to read from the list.
+      const seenResponseUrls: string[] = [];
+      const MAX_SEEN_RESPONSE_URLS = 20;
+      let promptSubmitted = false;
+      const responsePromise = new Promise<void>((resolve) => {
+        page.on("response", async (resp: any) => {
+          try {
+            const seen = new URL(resp.url());
+            const bare = `${seen.origin}${seen.pathname}`;
+            if (
+              promptSubmitted &&
+              !seenResponseUrls.includes(bare) &&
+              seenResponseUrls.length < MAX_SEEN_RESPONSE_URLS
+            ) {
+              seenResponseUrls.push(bare);
+            }
+          } catch {} // a non-URL (about:blank, data:) is not worth reporting
+          if (!resp.url().includes("StreamGenerate")) return;
+          if (captured) return;
+          // Resolve even if reading the body throws, so the flow falls through
+          // to the "No response from Gemini" 502 instead of burning the full
+          // wait window.
+          captured = true;
+          try {
+            const raw = await resp.text();
+            responseText = parseStreamResponse(raw);
+          } catch {
+            /* ignore */
+          }
+          resolve();
+        });
+      });
+
+      await page.goto(GEMINI_URL, { waitUntil: "domcontentloaded", timeout: 20000 });
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
+      // #13382: the composer selector is the readiness check. A fixed 3s sleep
+      // ran even when the editor was already there, and still raced a slow load.
+      await page.waitForSelector(".ql-editor, [contenteditable='true']", { timeout: 10000 });
+
+      // #13381 (Option B): verify the requested Gemini UI mode is actually active
+      // BEFORE anything is typed. `gemini-3.1-pro` is the mode gemini.google.com/app
+      // already opens to (no interaction attempted); every other advertised model is
+      // switched to and its active-mode indicator is read back — a confirmed match is
+      // required, or the request is rejected instead of silently running the account
+      // default under the requested model's label. See ./gemini-web/modeSelection.ts
+      // for why the selectors involved are UNVALIDATED and why that is safe here.
+      if (model) {
+        const modelSelection = await selectGeminiModel(page, modelId);
+        if (!modelSelection.confirmed) {
+          log?.warn?.(
+            "GEMINI-WEB",
+            `Rejected request: could not confirm Gemini UI mode for "${modelId}" ` +
+              `(${modelSelection.reason})`
+          );
+          return {
+            response: new Response(
+              JSON.stringify(
+                buildErrorBody(
+                  400,
+                  describeModeSelectionFailure(modelId, modelSelection.reason),
+                  null,
+                  { type: "invalid_request_error", code: GEMINI_WEB_UNSUPPORTED_CONTROL_CODE }
+                )
+              ),
+              { status: 400, headers: { "Content-Type": "application/json" } }
+            ),
+            url: GEMINI_URL,
+            headers: {},
+            transformedBody: body,
+          };
+        }
+      }
+
+      // Extended Thinking (#13381 follow-up, 2026-09-11): same detect-and-verify,
+      // fail-closed pattern as model selection above — attempted only when requested
+      // (`reasoning_effort` above "minimal"), never assumed available.
+      if (wantsExtendedThinking) {
+        const thinkingSelection = await selectGeminiExtendedThinking(page);
+        if (!thinkingSelection.confirmed) {
+          log?.warn?.(
+            "GEMINI-WEB",
+            `Rejected request: could not confirm Extended Thinking is available ` +
+              `(${thinkingSelection.reason})`
+          );
+          return {
+            response: new Response(
+              JSON.stringify(
+                buildErrorBody(
+                  400,
+                  describeModeSelectionFailure("Extended Thinking", thinkingSelection.reason),
+                  null,
+                  { type: "invalid_request_error", code: GEMINI_WEB_UNSUPPORTED_CONTROL_CODE }
+                )
+              ),
+              { status: 400, headers: { "Content-Type": "application/json" } }
+            ),
+            url: GEMINI_URL,
+            headers: {},
+            transformedBody: body,
+          };
+        }
+      }
+
+      // Type and send message
+      const inputEl = await page.waitForSelector(".ql-editor, [contenteditable='true']", {
+        timeout: 10000,
+      });
+      await inputEl.click();
+      // insertText() dispatches a DOM `input` event atomically instead of a
+      // per-character keydown/keypress/keyup sequence (#13380) — an embedded
+      // `\n` in `prompt` (produced by the multi-turn transcript format above,
+      // or by any multiline system/user text) no longer fires the
+      // composer's Enter-submits-the-message handler before this function's
+      // own explicit Enter below. It also removes the fixed 10ms/char typing
+      // cost that made long prompts race the 30s response-wait timeout.
+      await page.keyboard.insertText(prompt);
+      await page.waitForTimeout(300);
+      promptSubmitted = true;
+      await page.keyboard.press("Enter");
+
+      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
+      }
+
+      if (!responseText) {
+        return {
+          response: new Response(
+            JSON.stringify({
+              error: "No response from Gemini",
+              // Distinguish a StreamGenerate body the parser could not read from no
+              // StreamGenerate response at all (#19073).
+              code: captured ? "gemini_web_unparseable_response" : "gemini_web_no_response",
+              seen_response_urls: seenResponseUrls,
+            }),
+            {
+              status: 502,
+              headers: { "Content-Type": "application/json" },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+
+      await this.persistRotatedCookies(context, cookie, credentials, onCredentialsRefreshed, log);
+
+      if (hasTools) {
+        const cid = `chatcmpl-gwe-${crypto.randomUUID().slice(0, 12)}`;
+        const created = Math.floor(Date.now() / 1000);
+        const toolResponse = await buildGeminiToolResponse(
+          responseText,
+          requestedTools,
+          Boolean(stream),
+          modelId,
+          cid,
+          created
+        );
+        return { response: toolResponse, url: GEMINI_URL, headers: {}, transformedBody: body };
+      }
+
+      if (stream) {
+        // Pseudo-streaming: send complete response as single SSE chunk
+        // Gemini's StreamGenerate returns complete responses, not chunked streams
+        const encoder = new TextEncoder();
+        const readable = new ReadableStream(
+          {
+            start(controller) {
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify(formatStreamChunk(responseText, modelId))}\n\n`
+                )
+              );
+              controller.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify(formatStreamChunk("", modelId, "stop"))}\n\n`
+                )
+              );
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            },
+          },
+          { highWaterMark: 16384 }
+        );
+        return {
+          response: new Response(readable, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              Connection: "keep-alive",
+            },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+
+      return {
+        response: new Response(JSON.stringify(formatChatCompletion(responseText, modelId)), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    } catch (error) {
+      const rawMessage = error instanceof Error ? error.message : "Unknown error";
+      // #3516: a missing Playwright browser is a host/config problem, not a transient upstream
+      // fault. Surface an actionable error and tag it with the connection-cooldown hint so
+      // accountFallback skips the provider circuit breaker and applies a short, non-exponential
+      // cooldown instead of looping on a retryable 500.
+      if (isMissingBrowserExecutable(rawMessage)) {
+        return {
+          response: new Response(
+            JSON.stringify({
+              error:
+                "Gemini Web requires the Playwright Chromium browser, which is not installed. " +
+                "Run `npx playwright install chromium` on the host (or rebuild the Docker image with browsers).",
+            }),
+            {
+              status: 503,
+              headers: {
+                "Content-Type": "application/json",
+                "X-Omni-Fallback-Hint": "connection_cooldown",
+              },
+            }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      // #9407: Playwright selector/click timeout errors are terminal — they indicate
+      // the page DOM does not match expectations (e.g. Gemini changed their UI or
+      // the session is so expired it lands on a different page). Return 400 so the
+      // account-fallback system does NOT retry this request as a transient 5xx.
+      const abortedStatus = abortStatus(signal);
+      if (abortedStatus || isBrowserClosedError(rawMessage)) {
+        return {
+          response: new Response(JSON.stringify({ error: sanitizeErrorMessage(rawMessage) }), {
+            status: abortedStatus ?? 502,
+            headers: { "Content-Type": "application/json" },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      if (error instanceof Error && isSelectorFailure(error)) {
+        return {
+          response: new Response(
+            JSON.stringify({
+              error: sanitizeErrorMessage(rawMessage),
+            }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          ),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      return {
+        response: new Response(
+          JSON.stringify({
+            error: sanitizeErrorMessage(rawMessage),
+          }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        ),
+        url: GEMINI_URL,
+        headers: {},
+        transformedBody: body,
+      };
+    } finally {
+      if (abortBrowser) signal?.removeEventListener("abort", abortBrowser);
+      // #13382: close this request's context. The Chromium process stays
+      // warm until it has been idle.
+      try {
+        await context?.close();
+      } catch {
+        /* ignore close errors */
+      }
+      if (browser) {
+        const { releaseGeminiBrowser } = await import("./gemini-web/browserLease.ts");
+        await releaseGeminiBrowser(browser);
+      }
+    }
+  }
+}

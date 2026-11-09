@@ -1,0 +1,330 @@
+"use client";
+
+import Icon from "@/shared/components/Icon";
+
+import { useMemo, useState } from "react";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import { useNotificationStore } from "@/store/notificationStore";
+import {
+  FACTOR_LABELS,
+  MODE_PACK_OPTIONS,
+  buildIntelligentProviderScores,
+  normalizeIntelligentRoutingConfig,
+} from "@/lib/combos/intelligentRouting";
+import { AI_PROVIDERS } from "@/shared/constants/providers";
+
+function getI18nOrFallback(
+  t: any,
+  key: string,
+  fallback: string,
+  values?: Record<string, unknown>
+) {
+  if (typeof t?.has === "function" && t.has(key)) return t(key, values);
+  return fallback;
+}
+
+function formatProviderLabel(providerId: string, activeProviders: any[] = []) {
+  const matchedProvider = activeProviders.find(
+    (provider) => provider?.providerId === providerId || provider?.provider === providerId
+  );
+
+  if (typeof matchedProvider?.displayName === "string" && matchedProvider.displayName.trim()) {
+    return matchedProvider.displayName.trim();
+  }
+
+  return (AI_PROVIDERS as Record<string, any>)[providerId]?.name || providerId;
+}
+
+function countProvidersInScope(activeProviders: any[] = []) {
+  const providerIds = new Set<string>();
+
+  for (const provider of activeProviders) {
+    const providerId =
+      typeof provider?.providerId === "string" && provider.providerId.trim().length > 0
+        ? provider.providerId.trim()
+        : typeof provider?.provider === "string" && provider.provider.trim().length > 0
+          ? provider.provider.trim()
+          : null;
+    if (providerId) providerIds.add(providerId);
+  }
+
+  return providerIds.size;
+}
+
+export default function IntelligentComboPanel({
+  t,
+  combo,
+  allCombos,
+  activeProviders,
+  onComboUpdated,
+}: {
+  t: any;
+  combo: any;
+  allCombos: any[];
+  activeProviders: any[];
+  onComboUpdated?: (combo: any) => void;
+}) {
+  const notify = useNotificationStore();
+  const [savingModePack, setSavingModePack] = useState<string | null>(null);
+  const normalizedConfig = useMemo(
+    () => normalizeIntelligentRoutingConfig(combo?.config),
+    [combo?.config]
+  );
+  const providerScores = useMemo(() => buildIntelligentProviderScores(combo), [combo]);
+  const providerScopeCount =
+    normalizedConfig.candidatePool.length || countProvidersInScope(activeProviders);
+
+  const handleModePackChange = async (modePackId: string) => {
+    if (!combo?.id || modePackId === normalizedConfig.modePack) return;
+    setSavingModePack(modePackId);
+
+    try {
+      const response = await fetch(`/api/combos/${combo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          config: {
+            ...(combo?.config || {}),
+            modePack: modePackId,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(
+          errorBody?.error?.message || errorBody?.error || "Failed to update mode pack"
+        );
+      }
+
+      const updatedCombo = await response.json();
+      onComboUpdated?.(updatedCombo);
+      notify.success(
+        getI18nOrFallback(t, "modePackUpdated", "Mode pack updated to {pack}.", {
+          pack: modePackId,
+        }).replace("{pack}", modePackId)
+      );
+    } catch (error: any) {
+      notify.error(error?.message || "Failed to update mode pack.");
+    } finally {
+      setSavingModePack(null);
+    }
+  };
+
+  return (
+    <Card
+      className="border-primary/10 bg-gradient-to-br from-primary/[0.04] via-transparent to-transparent"
+      padding="sm"
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Icon name="auto_awesome" size={18} className="text-primary" />
+              <h2 className="text-lg font-semibold text-text-main">
+                {getI18nOrFallback(t, "intelligentPanelTitle", "Intelligent Routing Dashboard")}
+              </h2>
+            </div>
+            <p className="text-sm text-text-muted mt-1">
+              {getI18nOrFallback(
+                t,
+                "intelligentPanelDesc",
+                "Real-time scoring and health status for this auto-routing combo."
+              )}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
+              <code className="rounded bg-bg-subtle px-2 py-1 text-text-main">{combo?.name}</code>
+              <span>{t("intelligentComboCount", { count: allCombos.length })}</span>
+              <span>{t("providersInScope", { count: providerScopeCount })}</span>
+            </div>
+          </div>
+
+          <Badge variant="info" icon="tune" className="self-start font-medium">
+            {getI18nOrFallback(t, "configOnlyStatus", "Configuration View")}
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <Card.Section>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-text-main">
+                  {getI18nOrFallback(t, "statusOverview", "Status Overview")}
+                </p>
+                <p className="text-[11px] text-text-muted mt-1">
+                  {getI18nOrFallback(
+                    t,
+                    "configOnlyHint",
+                    "This panel shows routing inputs only. Live breaker state is available on the Health page."
+                  )}
+                </p>
+              </div>
+              <div className="rounded-lg bg-bg-subtle px-3 py-2 text-right">
+                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                  {getI18nOrFallback(t, "candidatePoolLabel", "Candidate Pool")}
+                </p>
+                <p className="text-lg font-semibold text-text-main">{providerScopeCount}</p>
+              </div>
+            </div>
+          </Card.Section>
+
+          <Card.Section>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-text-main">
+                  {getI18nOrFallback(t, "activeModePack", "Active Mode Pack")}
+                </p>
+                <p className="text-[11px] text-text-muted mt-1">
+                  {getI18nOrFallback(
+                    t,
+                    "modePackHint",
+                    "Switch presets to bias the routing engine without rebuilding the combo."
+                  )}
+                </p>
+              </div>
+              {savingModePack && (
+                <span className="text-[11px] text-text-muted">
+                  {getI18nOrFallback(t, "savingModePack", "Saving {pack}…", {
+                    pack: savingModePack,
+                  }).replace("{pack}", savingModePack)}
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              {MODE_PACK_OPTIONS.map((modePack) => {
+                const isActive = normalizedConfig.modePack === modePack.id;
+                return (
+                  <Button
+                    key={modePack.id}
+                    variant={isActive ? "primary" : "secondary"}
+                    size="sm"
+                    onClick={() => handleModePackChange(modePack.id)}
+                    disabled={Boolean(savingModePack)}
+                    aria-pressed={isActive}
+                    className="!justify-start"
+                  >
+                    <Icon name={modePack.emoji} size={14} />
+                    {modePack.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </Card.Section>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <Card.Section>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-text-main">
+                  {getI18nOrFallback(t, "providerScores", "Provider Scores")}
+                </p>
+                <p className="text-[11px] text-text-muted mt-1">
+                  {normalizedConfig.candidatePool.length > 0
+                    ? `${normalizedConfig.candidatePool.length} providers currently ranked for this combo.`
+                    : getI18nOrFallback(
+                        t,
+                        "allProvidersEvaluated",
+                        "No candidate pool configured. All active providers are evaluated at runtime."
+                      )}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-2">
+              {providerScores.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border p-3 text-[11px] text-text-muted">
+                  {getI18nOrFallback(
+                    t,
+                    "allProvidersEvaluated",
+                    "No candidate pool configured. All active providers are evaluated at runtime."
+                  )}
+                </div>
+              ) : (
+                providerScores.map((entry) => {
+                  const percentage = Math.round(entry.score * 100);
+                  return (
+                    <div
+                      key={entry.provider}
+                      className="rounded-lg border border-border bg-surface p-3"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-xs font-semibold text-text-main">
+                            {formatProviderLabel(entry.provider, activeProviders)}
+                          </p>
+                          <p className="text-[11px] text-text-muted mt-0.5">{entry.model}</p>
+                        </div>
+                        <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
+                          {percentage}%
+                        </span>
+                      </div>
+
+                      <div className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-chart-2 transition-all"
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {Object.entries(entry.factors).map(([factorKey, factorValue]) => (
+                          <span
+                            key={`${entry.provider}-${factorKey}`}
+                            className="rounded-full bg-bg-subtle px-2 py-1 text-[10px] text-text-muted"
+                          >
+                            {FACTOR_LABELS[factorKey as keyof typeof FACTOR_LABELS]}{" "}
+                            {Math.round(Number(factorValue) * 100)}%
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </Card.Section>
+
+          <Card.Section>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-text-main">
+                  {getI18nOrFallback(t, "routingInputs", "Routing Inputs")}
+                </p>
+                <p className="text-[11px] text-text-muted mt-1">
+                  {getI18nOrFallback(
+                    t,
+                    "routingInputsHint",
+                    "Mode pack and weighting stay here; breaker runtime state stays on the Health page."
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="rounded-lg border border-border bg-surface p-3">
+                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+                  {t("modePack")}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-text-main">
+                  {normalizedConfig.modePack}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-surface p-3">
+                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+                  {getI18nOrFallback(t, "explorationRateLabel", "Exploration Rate")}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-text-main">
+                  {Math.round(normalizedConfig.explorationRate * 100)}%
+                </p>
+              </div>
+            </div>
+          </Card.Section>
+        </div>
+      </div>
+    </Card>
+  );
+}

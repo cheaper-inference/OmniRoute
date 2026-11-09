@@ -1,0 +1,87 @@
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import React from "react";
+import { DiscoveryPageClient } from "../DiscoveryPageClient";
+
+// The results now render in the kit Table (KEA-7886), whose persistent scrollbar measures the
+// table with ResizeObserver — jsdom does not implement it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
+
+// Stable `t` reference: useTranslations must return the SAME function across
+// renders, otherwise the `load` useCallback (dep [t]) changes every render and
+// the fetch-on-mount useEffect loops forever.
+const t = (key: string, vars?: Record<string, unknown>) =>
+  vars ? `${key}:${JSON.stringify(vars)}` : key;
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => t,
+}));
+
+function mockFetchOnce(results: unknown[]) {
+  const fetchMock = vi.fn(
+    async () =>
+      new Response(JSON.stringify({ results }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
+describe("DiscoveryPageClient", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("loads and renders discovery results from the API", async () => {
+    mockFetchOnce([
+      {
+        id: 1,
+        providerId: "huggingchat",
+        method: "free_tier",
+        authType: "none",
+        feasibility: 5,
+        riskLevel: "none",
+        status: "verified",
+        models: ["mixtral"],
+      },
+    ]);
+
+    render(<DiscoveryPageClient />);
+
+    await waitFor(() => {
+      expect(screen.getByText("huggingchat")).toBeTruthy();
+    });
+    // status + risk badges render (mocked t returns the key)
+    expect(screen.getByText("verified")).toBeTruthy();
+  });
+
+  it("shows the empty state when there are no results", async () => {
+    mockFetchOnce([]);
+
+    render(<DiscoveryPageClient />);
+
+    await waitFor(() => {
+      expect(screen.getByText("emptyTitle")).toBeTruthy();
+    });
+  });
+
+  it("calls the discovery results endpoint on mount", async () => {
+    const fetchMock = mockFetchOnce([]);
+    render(<DiscoveryPageClient />);
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/discovery/results");
+    });
+  });
+});

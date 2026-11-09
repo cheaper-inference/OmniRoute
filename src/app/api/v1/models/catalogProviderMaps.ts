@@ -1,0 +1,251 @@
+import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
+import { AI_PROVIDERS } from "@/shared/constants/providers";
+import { parseModel, resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model";
+
+// Alias <-> providerId resolution maps for the unified model catalog. Extracted
+// verbatim from ./catalog.ts. `FALLBACK_ALIAS_TO_PROVIDER` is also consumed directly by
+// the catalog host's `resolveCanonicalProviderId`, so it is exported alongside the builder.
+export const FALLBACK_ALIAS_TO_PROVIDER = {
+  ag: "antigravity",
+  cc: "claude",
+  cl: "cline",
+  cu: "cursor",
+  cx: "codex",
+  gh: "github",
+  kc: "kilocode",
+  kmc: "kimi-coding",
+  kr: "kiro",
+};
+
+export function buildAliasMaps() {
+  const aliasToProviderId: Record<string, string> = {};
+  const providerIdToAlias: Record<string, string> = {};
+
+  // Canonical source for ID/alias pairs used across dashboard/provider config.
+  for (const provider of Object.values(AI_PROVIDERS)) {
+    const providerId = provider?.id;
+    const alias = provider?.alias || providerId;
+    if (!providerId) continue;
+    aliasToProviderId[providerId] = providerId;
+    aliasToProviderId[alias] = providerId;
+    if (!providerIdToAlias[providerId]) {
+      providerIdToAlias[providerId] = alias;
+    }
+  }
+
+  for (const [left, right] of Object.entries(PROVIDER_ID_TO_ALIAS)) {
+    // Handle both possible directions:
+    // - providerId -> alias
+    // - alias -> providerId
+    if (PROVIDER_MODELS[left]) {
+      aliasToProviderId[left] = aliasToProviderId[left] || right;
+      continue;
+    }
+    if (PROVIDER_MODELS[right]) {
+      aliasToProviderId[right] = aliasToProviderId[right] || left;
+      continue;
+    }
+    aliasToProviderId[right] = aliasToProviderId[right] || left;
+  }
+
+  for (const alias of Object.keys(PROVIDER_MODELS)) {
+    if (!aliasToProviderId[alias]) {
+      aliasToProviderId[alias] = alias;
+    }
+  }
+
+  for (const [alias, providerId] of Object.entries(aliasToProviderId)) {
+    if (!providerIdToAlias[providerId]) {
+      providerIdToAlias[providerId] = alias;
+    }
+  }
+
+  // Safety net for environments where alias maps are partially loaded during
+  // module initialization/circular imports.
+  for (const [alias, providerId] of Object.entries(FALLBACK_ALIAS_TO_PROVIDER)) {
+    if (!aliasToProviderId[alias]) aliasToProviderId[alias] = providerId;
+    if (!aliasToProviderId[providerId]) aliasToProviderId[providerId] = providerId;
+    if (!providerIdToAlias[providerId]) providerIdToAlias[providerId] = alias;
+  }
+
+  return { aliasToProviderId, providerIdToAlias };
+}
+
+export type AliasMaps = ReturnType<typeof buildAliasMaps>;
+
+/** A minimal combo target shape — just enough to resolve a provider+model pair. */
+export type ProviderPrefixedTarget = {
+  modelStr?: string;
+  provider?: string | null;
+  providerId?: string | null;
+};
+
+/**
+ * Resolve an alias or providerId to its canonical providerId, matching the
+ * catalog host's local `resolveCanonicalProviderId` closure (./catalog.ts)
+ * byte-for-byte. Extracted here so every caller resolves prefixes the exact
+ * same way instead of drifting into a slightly different algorithm.
+ */
+export function resolveCanonicalProviderId(
+  aliasToProviderId: AliasMaps["aliasToProviderId"],
+  aliasOrProviderId: string,
+  fallbackProviderId?: string
+): string {
+  return (
+    aliasToProviderId[aliasOrProviderId] ||
+    (fallbackProviderId ? aliasToProviderId[fallbackProviderId] : undefined) ||
+    FALLBACK_ALIAS_TO_PROVIDER[aliasOrProviderId as keyof typeof FALLBACK_ALIAS_TO_PROVIDER] ||
+    fallbackProviderId ||
+    aliasOrProviderId
+  );
+}
+
+/**
+ * True when `${prefix}/__omniroute_probe__` parses back to the given
+ * providerId EXACTLY. Kept strict on purpose: this is the anti-collision
+ * guard (catalog.ts, #11433/7db430a3) that stops the catalog from publishing
+ * a provider-prefixed model id that would actually route to a DIFFERENT
+ * provider at request time — loosening it here would let a provider whose id
+ * collides with a manual alias override pass a check that was specifically
+ * built to fail for it (#13994).
+ */
+export function prefixRoutesToProvider(prefix: string, providerId: string): boolean {
+  const parsed = parseModel(`${prefix}/__omniroute_probe__`);
+  return parsed.provider === providerId;
+}
+
+/**
+ * Alias-aware variant of `prefixRoutesToProvider`, for the combo prefix-
+ * stripping path ONLY (`getProviderPrefixes` below). Also accepts a prefix
+ * that resolves to `providerId`'s CANONICAL routing target — e.g. an
+ * "opencode/" step canonically routes to "opencode-zen", so this recognizes
+ * "opencode" as a valid prefix for the "opencode-zen" provider even though
+ * `prefixRoutesToProvider("opencode", "opencode-zen")` is false. Never use
+ * this for the catalog.ts anti-collision guard: that check must stay strict.
+ */
+export function prefixRoutesToCanonicalProvider(prefix: string, providerId: string): boolean {
+  if (prefixRoutesToProvider(prefix, providerId)) return true;
+  const parsed = parseModel(`${prefix}/__omniroute_probe__`);
+  if (!parsed.provider) return false;
+  const canonicalTarget = resolveCanonicalProviderModel(providerId, "__omniroute_probe__");
+  return parsed.provider === canonicalTarget.provider;
+}
+
+/**
+ * Every prefix (providerId, raw alias, and any alias mapped to this providerId)
+ * that a combo `modelStr` might be qualified with for this provider — filtered
+ * to only the prefixes that `parseModel()` actually routes back to `providerId`.
+ * Extracted verbatim from the catalog host's local `getProviderPrefixes` closure.
+ */
+export function getProviderPrefixes(
+  maps: AliasMaps,
+  providerId: string,
+  rawProvider: string
+): string[] {
+  const { aliasToProviderId, providerIdToAlias } = maps;
+  const prefixes = new Set<string>([providerId, rawProvider, providerIdToAlias[providerId]]);
+  for (const [alias, mappedProviderId] of Object.entries(aliasToProviderId)) {
+    if (mappedProviderId === providerId) prefixes.add(alias);
+  }
+  return [...prefixes].filter(
+    (prefix): prefix is string =>
+      typeof prefix === "string" &&
+      prefix.length > 0 &&
+      prefixRoutesToCanonicalProvider(prefix, providerId)
+  );
+}
+
+function normalizeProviderNodeModelPrefix(
+  modelStr: string,
+  providerId: string,
+  providerNodeIdByPrefix: Record<string, string>
+): string {
+  const slashIndex = modelStr.indexOf("/");
+  if (slashIndex > 0 && providerNodeIdByPrefix[modelStr.slice(0, slashIndex)] === providerId) {
+    return `${providerId}${modelStr.slice(slashIndex)}`;
+  }
+  return modelStr;
+}
+
+/** Resolve only prefixes present in this model, avoiding a registry scan per target. */
+function matchingProviderPrefix(
+  maps: AliasMaps,
+  providerId: string,
+  rawProvider: string,
+  modelStr: string
+): string | null {
+  // Keep the explicit prefix order used by getProviderPrefixes. In particular,
+  // canonical routing validation must still reject alias collisions.
+  for (const prefix of [providerId, rawProvider, maps.providerIdToAlias[providerId]]) {
+    if (
+      prefix &&
+      modelStr.startsWith(`${prefix}/`) &&
+      prefixRoutesToCanonicalProvider(prefix, providerId)
+    ) {
+      return prefix;
+    }
+  }
+
+  let mappedPrefix: string | null = null;
+  for (let slash = modelStr.indexOf("/"); slash > 0; slash = modelStr.indexOf("/", slash + 1)) {
+    const prefix = modelStr.slice(0, slash);
+    if (maps.aliasToProviderId[prefix] !== providerId) continue;
+    if (mappedPrefix !== null) {
+      // Unusual maps may contain overlapping slash-qualified aliases. Preserve
+      // their insertion precedence instead of choosing the shortest prefix.
+      return (
+        getProviderPrefixes(maps, providerId, rawProvider).find((candidate) =>
+          modelStr.startsWith(`${candidate}/`)
+        ) ?? null
+      );
+    }
+    mappedPrefix = prefix;
+  }
+  return mappedPrefix && prefixRoutesToCanonicalProvider(mappedPrefix, providerId)
+    ? mappedPrefix
+    : null;
+}
+
+/**
+ * Strip a provider/alias prefix off a combo target's `modelStr` and resolve its
+ * canonical providerId, so downstream registry/spec/synced-capability lookups
+ * are keyed by the BARE model id (e.g. "glm-5.2") rather than a qualified
+ * "provider/model" string that only curated MODEL_SPECS aliases happen to match.
+ *
+ * Extracted verbatim from the catalog host's local `getComboTargetModelId`
+ * closure (./catalog.ts) so every combo-context consumer — the catalog's own
+ * per-target metadata AND src/lib/combos/comboContext.ts's context-length
+ * aggregation — stays in lockstep instead of re-implementing this resolution.
+ */
+export function getComboTargetModelId(
+  maps: AliasMaps,
+  target: ProviderPrefixedTarget,
+  providerNodeIdByPrefix: Record<string, string> = {}
+): { providerId: string; modelId: string } | null {
+  const rawProvider =
+    typeof target.providerId === "string"
+      ? target.providerId.trim()
+      : typeof target.provider === "string"
+        ? target.provider.trim()
+        : "";
+  let modelStr = typeof target.modelStr === "string" ? target.modelStr.trim() : "";
+  if (!rawProvider || rawProvider === "unknown" || !modelStr) return null;
+
+  // Builder steps retain the node ID for connection selection but use its public
+  // model prefix. Normalize only a prefix whose selected node matches that ID.
+  // Keep the model qualified so the existing resolver strips exactly one prefix.
+  modelStr = normalizeProviderNodeModelPrefix(modelStr, rawProvider, providerNodeIdByPrefix);
+
+  const providerId = resolveCanonicalProviderId(maps.aliasToProviderId, rawProvider);
+  if (!providerId || providerId === "unknown") return null;
+
+  let modelId = modelStr;
+  const prefix = matchingProviderPrefix(maps, providerId, rawProvider, modelStr);
+  if (prefix) modelId = modelStr.slice(prefix.length + 1).trim();
+
+  if (!modelId) return null;
+  const canonical = resolveCanonicalProviderModel(providerId, modelId);
+  return canonical.provider && canonical.model
+    ? { providerId: canonical.provider, modelId: canonical.model }
+    : null;
+}

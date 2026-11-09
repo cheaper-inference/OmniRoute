@@ -1,0 +1,132 @@
+/**
+ * Characterization + API-surface test: providerLimits.ts god-file decomposition.
+ *
+ * The pure quota-key/quota-value normalization helpers (+ the isRecord type
+ * guard they share) were extracted verbatim from src/lib/usage/providerLimits.ts
+ * into the self-contained leaf src/lib/usage/providerLimits/quotaNormalize.ts
+ * (no DB, no network — the leaf does NOT import the host, so no cycle). The sync
+ * orchestration / DB / network code stays in the host.
+ *
+ * Verifies that:
+ *   1. isRecord + isUsageQuotaKeyAllowed behave correctly (DB-free).
+ *   2. The host providerLimits.ts still exposes the FULL public API.
+ *   3. The quotaNormalize leaf exports its helpers directly.
+ *
+ * Deeper quota-sanitization behaviour is covered by the existing
+ * provider-limits-sanitize-scope-3821 / db-provider-limits suites; this test
+ * pins the extraction boundary + the simplest pure branches.
+ */
+
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+
+import {
+  isRecord,
+  isUsageQuotaKeyAllowed,
+  normalizeUsageQuotasForProvider,
+  sanitizeUsageQuotasForProvider,
+} from "../../src/lib/usage/providerLimits/quotaNormalize.ts";
+
+describe("providerLimits/quotaNormalize — isRecord", () => {
+  it("is true only for plain non-null, non-array objects", () => {
+    assert.equal(isRecord({ a: 1 }), true);
+    assert.equal(isRecord({}), true);
+    assert.equal(isRecord(null), false);
+    assert.equal(isRecord([1, 2]), false);
+    assert.equal(isRecord("x"), false);
+    assert.equal(isRecord(5), false);
+  });
+});
+
+describe("providerLimits/quotaNormalize — isUsageQuotaKeyAllowed", () => {
+  it("always allows the generic 'credits' and 'models' keys", () => {
+    assert.equal(isUsageQuotaKeyAllowed("openai", "credits"), true);
+    assert.equal(isUsageQuotaKeyAllowed("anthropic", "models"), true);
+    assert.equal(isUsageQuotaKeyAllowed("antigravity", "credits"), true);
+  });
+  it("keeps Antigravity family weekly buckets that are not model ids", () => {
+    assert.equal(isUsageQuotaKeyAllowed("antigravity", "gemini_weekly"), true);
+    assert.equal(isUsageQuotaKeyAllowed("antigravity", "claude_gpt_weekly"), true);
+    assert.equal(isUsageQuotaKeyAllowed("agy", "gemini_weekly"), true);
+    const quotas = {
+      "gemini-3.1-flash-lite": { remainingPercentage: 10, quotaSource: "retrieveUserQuota" },
+      gemini_weekly: { remainingPercentage: 40, quotaSource: "retrieveUserQuotaSummary" },
+      claude_gpt_weekly: { remainingPercentage: 20, quotaSource: "retrieveUserQuotaSummary" },
+      "not-a-model": { remainingPercentage: 1 },
+    };
+    const out = normalizeUsageQuotasForProvider("antigravity", quotas);
+    assert.equal(out.gemini_weekly.remainingPercentage, 40);
+    assert.equal(out.claude_gpt_weekly.remainingPercentage, 20);
+    assert.equal(out["not-a-model"], undefined);
+  });
+  it("keeps Antigravity family session (5-hour) buckets next to the weekly ones (#13739)", () => {
+    assert.equal(isUsageQuotaKeyAllowed("antigravity", "gemini_session"), true);
+    assert.equal(isUsageQuotaKeyAllowed("agy", "claude_gpt_session"), true);
+    const quotas = {
+      gemini_session: { remainingPercentage: 70, quotaSource: "retrieveUserQuotaSummary" },
+      gemini_weekly: { remainingPercentage: 40, quotaSource: "retrieveUserQuotaSummary" },
+      claude_gpt_session: { remainingPercentage: 55, quotaSource: "retrieveUserQuotaSummary" },
+    };
+    const out = normalizeUsageQuotasForProvider("antigravity", quotas);
+    assert.equal(out.gemini_session.remainingPercentage, 70);
+    assert.equal(out.gemini_weekly.remainingPercentage, 40);
+    assert.equal(out.claude_gpt_session.remainingPercentage, 55);
+  });
+});
+
+describe("providerLimits/quotaNormalize — sanitize/normalize are callable & pure-shaped", () => {
+  it("sanitizeUsageQuotasForProvider returns a record (no throw on a plain usage object)", () => {
+    const usage = { quotas: { credits: { used: 1, limit: 10 } } };
+    const out = sanitizeUsageQuotasForProvider("openai", usage);
+    assert.equal(isRecord(out), true);
+  });
+  it("normalizeUsageQuotasForProvider is exported and callable", () => {
+    assert.equal(typeof normalizeUsageQuotasForProvider, "function");
+  });
+});
+
+// ── host public API surface ──────────────────────────────────────────────────
+
+const host = await import("../../src/lib/usage/providerLimits.ts");
+
+describe("providerLimits.ts public API surface (13 functions)", () => {
+  const expected = [
+    "fetchAndPersistProviderLimits",
+    "fetchLiveProviderLimits",
+    "getCachedProviderLimitsMap",
+    "getLastProviderLimitsAutoSyncTime",
+    "getProviderLimitsSyncIntervalMinutes",
+    "getProviderLimitsSyncIntervalMs",
+    "getProviderLimitsSyncSpacingMs",
+    "getSanitizedCachedProviderLimitsMap",
+    "notifyProviderUsageRecorded",
+    "quotaPathShouldMarkExpired",
+    "refreshAndUpdateCredentials",
+    "shouldAttemptRotatingRefresh",
+    "syncAllProviderLimits",
+  ];
+  for (const name of expected) {
+    it(`exposes ${name} as a function`, () => {
+      assert.equal(typeof host[name], "function", `${name} must be a function on the host`);
+    });
+  }
+  it("loses no public function in the split", () => {
+    const missing = expected.filter((n) => typeof host[n] !== "function");
+    assert.deepEqual(missing, [], `missing: ${missing.join(", ")}`);
+  });
+});
+
+describe("quotaNormalize.ts exports its helpers directly", () => {
+  it("the moved helpers are functions on the leaf", async () => {
+    const qn = await import("../../src/lib/usage/providerLimits/quotaNormalize.ts");
+    for (const fn of [
+      "isRecord",
+      "isUsageQuotaKeyAllowed",
+      "normalizeUsageQuotaKey",
+      "normalizeUsageQuotasForProvider",
+      "sanitizeUsageQuotasForProvider",
+    ]) {
+      assert.equal(typeof qn[fn], "function", fn);
+    }
+  });
+});

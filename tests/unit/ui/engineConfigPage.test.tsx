@@ -1,0 +1,1125 @@
+// @vitest-environment jsdom
+import React, { act } from "react";
+import { createRoot } from "react-dom/client";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+const containers: HTMLElement[] = [];
+const roots: Array<{ unmount: () => void }> = [];
+
+function mountInContainer(ui: React.ReactElement): HTMLElement {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  containers.push(container);
+  const root = createRoot(container);
+  roots.push(root);
+  act(() => {
+    root.render(ui);
+  });
+  return container;
+}
+
+beforeEach(() => {
+  (
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true;
+});
+
+afterEach(async () => {
+  // Restore mocks first so any in-flight fetch promises settle without blocking
+  vi.restoreAllMocks();
+  await act(async () => {
+    while (roots.length > 0) {
+      roots.pop()?.unmount();
+    }
+  });
+  // Drain all remaining microtasks from effects that fired during unmount
+  for (let i = 0; i < 10; i++) {
+    await Promise.resolve();
+  }
+  while (containers.length > 0) {
+    containers.pop()?.remove();
+  }
+  document.body.innerHTML = "";
+});
+
+// ── Mock fetch ────────────────────────────────────────────────────────────
+
+const ENGINE_PAYLOAD = {
+  engines: [
+    {
+      id: "headroom",
+      name: "Headroom",
+      description: "Headroom engine description",
+      icon: "🗜️",
+      stackable: true,
+      stackPriority: 1,
+      metadata: { description: "Headroom metadata description" },
+      configSchema: [
+        {
+          key: "enabled",
+          type: "boolean",
+          label: "Enabled",
+          defaultValue: true,
+        },
+        {
+          key: "minRows",
+          type: "number",
+          label: "Min rows",
+          defaultValue: 8,
+          min: 1,
+          max: 1000,
+        },
+      ],
+    },
+  ],
+};
+
+const COMBO_PAYLOAD = {
+  id: "default",
+  name: "Default",
+  description: "Default combo",
+  pipeline: [],
+  languagePacks: [],
+  outputMode: null,
+};
+
+const ANALYTICS_PAYLOAD = {
+  engineId: "headroom",
+  runs: 0,
+  tokensSaved: 0,
+  avgSavingsPercent: 0,
+  days: 7,
+};
+
+const SETTINGS_PAYLOAD = {
+  enabled: true,
+  engines: { headroom: { enabled: true } },
+  aggressive: {
+    summarizerEnabled: true,
+    maxTokensPerMessage: 2048,
+    minSavingsThreshold: 0.05,
+  },
+};
+
+function setupFetchMock() {
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+    const url = input.toString();
+    if (url.includes("/api/compression/engines")) {
+      return new Response(JSON.stringify(ENGINE_PAYLOAD), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (url.includes("/api/settings/compression")) {
+      return new Response(JSON.stringify(SETTINGS_PAYLOAD), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (url.includes("/api/context/combos/default")) {
+      return new Response(JSON.stringify(COMBO_PAYLOAD), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (url.includes("/api/context/analytics/engine")) {
+      return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (url.includes("/api/compression/preview")) {
+      return new Response(
+        JSON.stringify({
+          original: "The original context contains duplicated details and verbose wording.",
+          compressed: "Original context, deduplicated.",
+          originalTokens: 11,
+          compressedTokens: 4,
+          savingsPct: 63.6,
+          diff: [{ type: "removed", text: "duplicated details and verbose wording" }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response(JSON.stringify({}), { status: 404 });
+  });
+}
+
+// ── Tests ─────────────────────────────────────────────────────────────────
+
+describe("EngineConfigPage", () => {
+  it("renders the engine name after fetching engine list", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    // Flush any pending microtasks from effects
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(container.textContent).toContain("Headroom");
+  });
+
+  it("does NOT render an engine on/off enable toggle (moved to the panel)", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The on/off enable control now lives only in the panel (/dashboard/context/settings).
+    expect(container.querySelector("[data-toggle='enable']")).toBeNull();
+    expect(container.textContent).not.toContain("Enable layer");
+  });
+
+  it("renders the config form field label from fetched schema (EngineConfigForm mounted)", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // EngineConfigForm prefers the i18n label (compressionEngineConfig.fields.minRows.label
+    // in en.json) over the mocked schema's own "Min rows" when a translation exists — see
+    // EngineConfigPage.tsx's `t.has(labelKey) ? t(labelKey) : field.label`.
+    expect(container.textContent).toContain("Minimum rows to compact");
+  });
+
+  it("keeps detailed config but renders no engine enable checkbox", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The on/off enable toggle (a checkbox with data-toggle="enable") is gone; the
+    // detailed config form (the schema fields minus `enabled`) still renders.
+    expect(container.querySelector("input[type='checkbox'][data-toggle='enable']")).toBeNull();
+    // See the i18n-label-override note above (compressionEngineConfig.fields.minRows.label).
+    expect(container.textContent).toContain("Minimum rows to compact");
+    expect(container.textContent).toContain("Configuration");
+  });
+
+  it("renders preview original, compressed text, and diff returned by the API", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const previewButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Preview"
+    );
+    expect(previewButton).toBeTruthy();
+
+    await act(async () => {
+      previewButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(container.textContent).toContain(
+      "The original context contains duplicated details and verbose wording."
+    );
+    expect(container.textContent).toContain("Original context, deduplicated.");
+    expect(container.textContent).toContain("Diff");
+    expect(container.textContent).toContain("duplicated details and verbose wording");
+  });
+
+  it("preview strips empty-string form values from the sent config (ultra.modelPath default '')", async () => {
+    // The engine schema seeds modelPath with defaultValue "" (ultraConfigSchema
+    // requires min(1) when present), so sending the raw form state makes the
+    // preview request 400 before dispatch — the page must omit empty values.
+    const ULTRA_PAYLOAD = {
+      engines: [
+        {
+          id: "ultra",
+          name: "Ultra",
+          description: "Ultra engine",
+          icon: "⚡",
+          stackable: true,
+          stackPriority: 40,
+          metadata: { description: "Ultra metadata" },
+          configSchema: [
+            { key: "compressionRate", type: "number", label: "Rate", defaultValue: 0.5 },
+            { key: "modelPath", type: "string", label: "Model path", defaultValue: "" },
+          ],
+        },
+      ],
+    };
+    const previewBodies: Record<string, unknown>[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/preview")) {
+          previewBodies.push(JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>);
+          return new Response(
+            JSON.stringify({
+              original: "o",
+              compressed: "c",
+              originalTokens: 1,
+              compressedTokens: 1,
+              savingsPct: 0,
+              diff: [],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/compression/engines")) {
+          return new Response(JSON.stringify(ULTRA_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/settings/compression")) {
+          return new Response(JSON.stringify({}), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="ultra" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const previewButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Preview"
+    );
+    expect(previewButton).toBeTruthy();
+
+    await act(async () => {
+      previewButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(previewBodies).toHaveLength(1);
+    const sentConfig = (previewBodies[0].config as { ultra?: Record<string, unknown> }).ultra;
+    expect(sentConfig).toBeTruthy();
+    expect(sentConfig?.modelPath).toBeUndefined();
+  });
+
+  it("save strips empty-string form values from the PUT body (ultra.modelPath default '')", async () => {
+    // Same schema constraint as the preview case: settings PUT validates the
+    // ultra sub-object with ultraConfigSchema, so a default-state save with
+    // modelPath "" would 400 before the operator changes anything.
+    const ULTRA_PAYLOAD = {
+      engines: [
+        {
+          id: "ultra",
+          name: "Ultra",
+          description: "Ultra engine",
+          icon: "⚡",
+          stackable: true,
+          stackPriority: 40,
+          metadata: { description: "Ultra metadata" },
+          configSchema: [
+            { key: "compressionRate", type: "number", label: "Rate", defaultValue: 0.5 },
+            { key: "modelPath", type: "string", label: "Model path", defaultValue: "" },
+          ],
+        },
+      ],
+    };
+    const settingsPuts: Record<string, unknown>[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(JSON.stringify({}), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/compression/engines")) {
+          return new Response(JSON.stringify(ULTRA_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="ultra" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Save") || b.textContent?.includes("Salvar")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts.length).toBeGreaterThan(0);
+    const ultraPut = settingsPuts.find((c) => typeof c.ultra === "object" && c.ultra !== null);
+    expect(ultraPut).toBeTruthy();
+    expect((ultraPut?.ultra as Record<string, unknown>).modelPath).toBeUndefined();
+  });
+
+  it("shows empty-state text when analytics returns runs=0", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Should show some "no data" copy
+    const hasEmptyState =
+      container.textContent?.includes("Sem dados") === true ||
+      container.textContent?.includes("No data") === true;
+    expect(hasEmptyState).toBe(true);
+  });
+
+  it("points to the Compression Settings panel for enabling the layer", async () => {
+    setupFetchMock();
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // The on/off + level live in the panel now; the page surfaces a link to it.
+    const settingsLink = container.querySelector('a[href="/dashboard/context/settings"]');
+    expect(settingsLink).not.toBeNull();
+    expect(container.textContent).toContain("Compression Settings");
+
+    // The pointer is permanent page guidance, so the notice offers no way to close it.
+    const notice = container
+      .querySelector('[data-testid="panel-pointer-notice"]')
+      ?.closest('[data-slot="alert"]');
+    expect(notice).toBeTruthy();
+    expect(notice!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
+  });
+
+  it("INVARIANT #1: handleSave writes the detailed sub-object to settings/compression, never PUTs combos/default", async () => {
+    const AGGRESSIVE_PAYLOAD = {
+      engines: [
+        {
+          id: "aggressive",
+          name: "Aggressive",
+          description: "Aggressive engine",
+          icon: "🗜️",
+          stackable: true,
+          stackPriority: 30,
+          metadata: { description: "Aggressive metadata" },
+          configSchema: [
+            { key: "enabled", type: "boolean", label: "Enabled", defaultValue: true },
+            {
+              key: "maxTokensPerMessage",
+              type: "number",
+              label: "Max tokens per message",
+              defaultValue: 2048,
+            },
+          ],
+        },
+      ],
+    };
+    const settingsPuts: { body: Record<string, unknown> }[] = [];
+    const comboWrites: { method: string }[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(JSON.stringify(AGGRESSIVE_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push({ body: JSON.parse(init.body as string) });
+          }
+          return new Response(
+            JSON.stringify({
+              enabled: true,
+              engines: { aggressive: { enabled: true } },
+              aggressive: { maxTokensPerMessage: 2048 },
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/context/combos/default")) {
+          // A PUT/POST here would violate INVARIANT #1 (the route is a 410 shim).
+          if (init?.method === "PUT" || init?.method === "POST") {
+            comboWrites.push({ method: init.method });
+          }
+          return new Response(JSON.stringify(COMBO_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="aggressive" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const salvarBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Save") || b.textContent?.includes("Salvar")
+    );
+    expect(salvarBtn).toBeTruthy();
+    await act(async () => {
+      salvarBtn?.click();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // INVARIANT #1: no write ever lands on the deprecated default-combo route.
+    expect(comboWrites).toHaveLength(0);
+    // The detailed config persists to the engine's sub-object on settings/compression.
+    expect(settingsPuts.length).toBeGreaterThan(0);
+    const aggressivePut = settingsPuts.find(
+      (c) => typeof c.body.aggressive === "object" && c.body.aggressive !== null
+    );
+    expect(aggressivePut).toBeDefined();
+  });
+
+  it("does not crash when all fetch calls fail (fail-soft)", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Component should still be mounted (not crashed)
+    expect(container).toBeTruthy();
+    expect(container.parentNode).toBeTruthy();
+  });
+
+  it("keeps the settings load error on screen with no dismiss control", async () => {
+    setupFetchMock();
+    const answerWithFixtures = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) =>
+      input.toString().includes("/api/settings/compression")
+        ? new Response(JSON.stringify({ error: "unavailable" }), { status: 500 })
+        : answerWithFixtures(input, init)
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // Only a successful reload may clear it: the form behind it is showing defaults.
+    const error = container.querySelector('[data-slot="alert"][data-variant="critical"]');
+    expect(error).not.toBeNull();
+    expect(error!.getAttribute("role")).toBe("alert");
+    expect(error!.textContent).toContain("Failed to load the saved settings");
+    expect(error!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
+  });
+
+  it("loads and saves the Lite proactive truncation switch with emergency-trim copy", async () => {
+    const settingsPuts: Array<Record<string, unknown>> = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(
+            JSON.stringify({
+              engines: [
+                {
+                  id: "lite",
+                  name: "Lite",
+                  description: "Lite engine",
+                  icon: "compress",
+                  stackable: true,
+                  stackPriority: 5,
+                  metadata: { description: "Lite metadata" },
+                  configSchema: [
+                    {
+                      key: "compressToolResults",
+                      type: "boolean",
+                      label: "Proactively truncate long tool results",
+                      description:
+                        "Truncates tool results over 2,000 characters during Lite compression. Emergency overflow protection may still trim content when the context exceeds the model budget.",
+                      defaultValue: true,
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(JSON.stringify({ lite: { compressToolResults: false } }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="lite" />);
+      await Promise.resolve();
+    });
+
+    const toggle = container.querySelector("input[type='checkbox']") as HTMLInputElement | null;
+    expect(toggle).not.toBeNull();
+    expect(toggle?.checked).toBe(false);
+    expect(container.textContent).toContain("Emergency overflow protection may still trim content");
+    expect(container.textContent).not.toContain("2,000 characters");
+    expect(container.textContent).toContain("Maximum tool-result length field");
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Save")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts).toContainEqual({ lite: { compressToolResults: false } });
+  });
+
+  it("saves Lite maxToolLength next to the truncation switch", async () => {
+    const settingsPuts: Array<Record<string, unknown>> = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(
+            JSON.stringify({
+              engines: [
+                {
+                  id: "lite",
+                  name: "Lite",
+                  description: "Lite engine",
+                  icon: "compress",
+                  stackable: true,
+                  stackPriority: 5,
+                  metadata: { description: "Lite metadata" },
+                  configSchema: [
+                    {
+                      key: "compressToolResults",
+                      type: "boolean",
+                      label: "Proactively truncate long tool results",
+                      defaultValue: true,
+                    },
+                    {
+                      key: "maxToolLength",
+                      type: "number",
+                      label: "Maximum tool-result length",
+                      defaultValue: 2000,
+                      min: 256,
+                      max: 1_000_000,
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(
+            JSON.stringify({ lite: { compressToolResults: true, maxToolLength: 8000 } }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="lite" />);
+      await Promise.resolve();
+    });
+
+    const numberInput = container.querySelector("input[type='number']") as HTMLInputElement | null;
+    expect(numberInput).not.toBeNull();
+    expect(numberInput?.value).toBe("8000");
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Save")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts).toContainEqual({
+      lite: { compressToolResults: true, maxToolLength: 8000 },
+    });
+  });
+
+  it("does not persist the schema default maxToolLength when settings omit it", async () => {
+    const settingsPuts: Array<Record<string, unknown>> = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(
+            JSON.stringify({
+              engines: [
+                {
+                  id: "lite",
+                  name: "Lite",
+                  description: "Lite engine",
+                  icon: "compress",
+                  stackable: true,
+                  stackPriority: 5,
+                  metadata: { description: "Lite metadata" },
+                  configSchema: [
+                    {
+                      key: "compressToolResults",
+                      type: "boolean",
+                      label: "Proactively truncate long tool results",
+                      defaultValue: true,
+                    },
+                    {
+                      key: "maxToolLength",
+                      type: "number",
+                      label: "Maximum tool-result length",
+                      defaultValue: 2000,
+                      min: 256,
+                      max: 1_000_000,
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(JSON.stringify({ lite: { compressToolResults: true } }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="lite" />);
+      await Promise.resolve();
+    });
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Save")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts).toContainEqual({ lite: { compressToolResults: true } });
+    expect(settingsPuts.some((body) => "maxToolLength" in ((body.lite as object) ?? {}))).toBe(
+      false
+    );
+  });
+
+  it("omits maxToolLength from Save when the number input is cleared", async () => {
+    const settingsPuts: Array<Record<string, unknown>> = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(
+            JSON.stringify({
+              engines: [
+                {
+                  id: "lite",
+                  name: "Lite",
+                  description: "Lite engine",
+                  icon: "compress",
+                  stackable: true,
+                  stackPriority: 5,
+                  metadata: { description: "Lite metadata" },
+                  configSchema: [
+                    {
+                      key: "compressToolResults",
+                      type: "boolean",
+                      label: "Proactively truncate long tool results",
+                      defaultValue: true,
+                    },
+                    {
+                      key: "maxToolLength",
+                      type: "number",
+                      label: "Maximum tool-result length",
+                      defaultValue: 2000,
+                      min: 256,
+                      max: 1_000_000,
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(
+            JSON.stringify({ lite: { compressToolResults: true, maxToolLength: 8000 } }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="lite" />);
+      await Promise.resolve();
+    });
+
+    const numberInput = container.querySelector("input[type='number']") as HTMLInputElement | null;
+    expect(numberInput).not.toBeNull();
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(numberInput, "");
+      numberInput!.dispatchEvent(new Event("input", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Save")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts.length).toBeGreaterThan(0);
+    const lite = settingsPuts[0]?.lite as Record<string, unknown> | undefined;
+    expect(lite).toBeTruthy();
+    expect(lite?.compressToolResults).toBe(true);
+    expect(lite?.maxToolLength).toBeNull();
+  });
+
+  it("rejects Save when maxToolLength is a finite value outside the allowed range", async () => {
+    const settingsPuts: Array<Record<string, unknown>> = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(
+            JSON.stringify({
+              engines: [
+                {
+                  id: "lite",
+                  name: "Lite",
+                  description: "Lite engine",
+                  icon: "compress",
+                  stackable: true,
+                  stackPriority: 5,
+                  metadata: { description: "Lite metadata" },
+                  configSchema: [
+                    {
+                      key: "compressToolResults",
+                      type: "boolean",
+                      label: "Proactively truncate long tool results",
+                      defaultValue: true,
+                    },
+                    {
+                      key: "maxToolLength",
+                      type: "number",
+                      label: "Maximum tool-result length",
+                      defaultValue: 2000,
+                      min: 256,
+                      max: 1_000_000,
+                    },
+                  ],
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push(JSON.parse(init.body as string) as Record<string, unknown>);
+          }
+          return new Response(
+            JSON.stringify({ lite: { compressToolResults: true, maxToolLength: 8000 } }),
+            {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="lite" />);
+      await Promise.resolve();
+    });
+
+    const numberInput = container.querySelector("input[type='number']") as HTMLInputElement | null;
+    expect(numberInput).not.toBeNull();
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(numberInput, "100");
+      numberInput!.dispatchEvent(new Event("input", { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Save")
+    );
+    expect(saveButton).toBeTruthy();
+    await act(async () => {
+      saveButton?.click();
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts).toEqual([]);
+    expect(container.textContent).toContain("Failed to save configuration.");
+  });
+
+  it("#8056: headroom minRows is persistable — Save PUTs headroom:{minRows:5}", async () => {
+    const settingsPuts: { body: Record<string, unknown> }[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input.toString();
+        if (url.includes("/api/compression/engines")) {
+          return new Response(JSON.stringify(ENGINE_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        if (url.includes("/api/settings/compression")) {
+          if (init?.method === "PUT") {
+            settingsPuts.push({ body: JSON.parse(init.body as string) });
+          }
+          return new Response(
+            JSON.stringify({
+              enabled: true,
+              engines: { headroom: { enabled: true } },
+              headroom: { minRows: 8 },
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
+        if (url.includes("/api/context/analytics/engine")) {
+          return new Response(JSON.stringify(ANALYTICS_PAYLOAD), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({}), { status: 404 });
+      }
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Persistable engines show Save (not the "no per-engine override" notice).
+    expect(container.querySelector("[data-testid='no-detail-store-notice']")).toBeNull();
+    const saveBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Save") || b.textContent?.includes("Salvar")
+    );
+    expect(saveBtn).toBeTruthy();
+
+    // Change minRows 8 → 5 in the number input (React 19 needs native setter).
+    const numberInput = container.querySelector("input[type='number']") as HTMLInputElement | null;
+    expect(numberInput).toBeTruthy();
+    await act(async () => {
+      if (!numberInput) return;
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value"
+      )?.set;
+      nativeInputValueSetter?.call(numberInput, "5");
+      numberInput.dispatchEvent(new Event("input", { bubbles: true }));
+      numberInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    await act(async () => {
+      saveBtn?.click();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(settingsPuts.length).toBeGreaterThan(0);
+    const headroomPut = settingsPuts.find(
+      (c) => typeof c.body.headroom === "object" && c.body.headroom !== null
+    );
+    expect(headroomPut).toBeDefined();
+    expect((headroomPut!.body.headroom as { minRows?: number }).minRows).toBe(5);
+  });
+});

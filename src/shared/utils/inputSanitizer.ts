@@ -1,0 +1,593 @@
+/**
+ * Input Sanitizer — FASE-01 Security Hardening
+ *
+ * Detects prompt injection patterns and redacts PII from LLM requests.
+ * Configurable via environment variables or dashboard settings.
+ *
+ * @module inputSanitizer
+ */
+
+import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
+import { parseEnvBoolean } from "@/shared/utils/envBoolean";
+import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
+import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+
+// ─── Prompt Injection Patterns ───────────────────────────────────────
+
+// #14483 building blocks for the authority/educational-framing co-occurrence rule.
+// Kept as plain alternations of fixed phrases (single-word gaps only via \s+).
+const AUTHORITY_FRAMING =
+  "(?:safe\\s+(?:educational|research)\\s+context|as\\s+an?\\s+(?:researcher|red[-\\s]?teamer)" +
+  "|for\\s+(?:testing|research|educational)\\s+purposes\\s+only|controlled\\s+test\\s+scenario)";
+const BYPASS_REQUEST =
+  "(?:(?:ignore|bypass|disable|disregard|override|drop|turn\\s+off)\\s+(?:all\\s+)?(?:of\\s+)?" +
+  "(?:your|the|any)\\s+(?:safety\\s+|ethical\\s+|content\\s+)?" +
+  "(?:guidelines|restrictions|rules|filters|guardrails|safeguards|policies|limitations)" +
+  "|uncensored\\s+(?:outputs?|responses?|answers?|replies|content|mode)" +
+  "|update\\s+your\\s+behaviou?r" +
+  "|(?:respond|answer|reply|proceed|continue|operate|act)\\s+without\\s+(?:any\\s+)?" +
+  "(?:restrictions|limits|limitations|filters|censorship|guardrails))";
+const AUTHORITY_WINDOW = 300;
+
+/** @type {Array<{name: string, pattern: RegExp, severity: string}>} */
+const INJECTION_PATTERNS = [
+  {
+    name: "system_override",
+    pattern:
+      /\b(ignore|disregard|forget)\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions?|prompts?|rules?|context)/i,
+    severity: "high",
+  },
+  {
+    name: "role_hijack",
+    pattern:
+      /\b(you\s+are\s+now|act\s+as\s+if|pretend\s+(to\s+be|you\s+are)|from\s+now\s+on\s+you\s+are)\b/i,
+    severity: "medium",
+  },
+  {
+    name: "system_prompt_leak",
+    // #4041: require a system/initial/hidden/original qualifier before prompt|instructions.
+    // The old pattern matched a bare "instructions" after reveal/show/display/etc, so it
+    // tripped `high` on essentially all coding-agent traffic ("show the instructions",
+    // "display your instructions"), making the always-on guard a hot-path false-positive.
+    // Real leak attempts ("reveal your system prompt", "print the initial prompt") still
+    // match, and qualified instruction leaks ("display your system instructions") now do too.
+    pattern:
+      /\b(reveals?|shows?|displays?|prints?|outputs?|repeats?)\s+((your|the)\s+)?(system|initial|hidden|original)\s+(prompt|instructions?)/i,
+    severity: "high",
+  },
+  {
+    name: "delimiter_injection",
+    pattern: /(\[SYSTEM\]|\[INST\]|<<SYS>>|<\|im_start\|>|<\|system\|>|<\|user\|>)/i,
+    severity: "high",
+  },
+  {
+    name: "jailbreak_dan",
+    pattern: /\b(DAN|do\s+anything\s+now|jailbreak|developer\s+mode|enable\s+developer)\b/i,
+    severity: "medium",
+  },
+  {
+    name: "encoding_evasion",
+    pattern:
+      /\b(base64\s+decode|rot13|hex\s+decode|unicode\s+escape)\b.*\b(instruction|prompt|command)\b/i,
+    severity: "medium",
+  },
+  {
+    // #14483 (LEDGER-12): "authority / educational framing" jailbreak family from the
+    // 2026-09-21 live promptfoo red-team run. Attacks claim a fictional
+    // safety/research authority ("safe educational context", "as a researcher",
+    // "for testing purposes only") AND ask the model to drop its rules
+    // ("ignore your guidelines", "uncensored outputs", "update your behavior").
+    //
+    // Either half alone is ordinary traffic ("best uncensored model?", "as a
+    // researcher, summarize this paper"), so the rule is a CO-OCCURRENCE: the
+    // framing and the bypass request must both appear, in either order, within
+    // AUTHORITY_WINDOW characters. Every alternative is a fixed phrase and the only
+    // variable-length gap is a bounded, lazy `[\s\S]{0,N}?` (ReDoS rule).
+    name: "authority_educational_framing",
+    pattern: new RegExp(
+      `\\b(?:${AUTHORITY_FRAMING}\\b[\\s\\S]{0,${AUTHORITY_WINDOW}}?\\b${BYPASS_REQUEST}` +
+        `|${BYPASS_REQUEST}\\b[\\s\\S]{0,${AUTHORITY_WINDOW}}?\\b${AUTHORITY_FRAMING})\\b`,
+      "i"
+    ),
+    severity: "medium",
+  },
+];
+
+/**
+ * Maximum number of characters scanned for prompt-injection patterns.
+ *
+ * The guard joins every message/system string into one buffer and runs several
+ * regexes over it on every chat request. With no cap that is O(body) CPU on the
+ * hot path — at high concurrency with 300 KB bodies it is a self-inflicted
+ * latency/GC source. Injection directives sit near the top of a prompt, so
+ * scanning hundreds of KB of pasted code / RAG context buys only CPU. We bound
+ * the scan to the first 16 KB (generous: real directives are far shorter) before
+ * the regex loop. The body-size caps that protect ingestion live elsewhere;
+ * this constant only bounds the regex scan. Refs #3932 / #4041.
+ */
+export const MAX_INJECTION_SCAN_BYTES = 16 * 1024;
+
+// Inserted between the two halves of a capped scan. It has to break a pattern
+// rather than blend into one: every INJECTION_PATTERN joins its words with \s+,
+// so a bare newline would let "ignore all previous" at the end of the head and
+// "instructions" at the start of the tail match across a boundary they never
+// actually shared.
+const SCAN_GAP = "\n[GAP]\n";
+
+// ─── PII Patterns ────────────────────────────────────────────────────
+
+/** @type {Array<{name: string, pattern: RegExp, replacement: string, validate?: (match: string, context: string) => boolean}>} */
+const PII_PATTERNS = [
+  {
+    name: "email",
+    // The same matches as `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`, in linear
+    // time. That form tried every word boundary inside a run like "ab-ab-ab-..." and
+    // scanned to the end of the run each time, so an 80 KB message blocked the event
+    // loop for about 4 s. A match now starts only where the old one could:
+    //  - at the first word character of a run of local-part characters, or
+    //  - right after a letter, on one of [.%+-]: where the old pattern resumed after a
+    //    match that ended inside such a run ("a@b.co-x@c.dd"). Only this case is
+    //    bounded, at 65 characters: the separator plus the RFC 5321 local-part limit
+    //    of 64. A longer glued address now matches in part or not at all, and an
+    //    address glued on after it can match from inside its domain.
+    pattern:
+      /(?:\b(?<=(?:^|[^A-Za-z0-9._%+-])[.%+-]*)[A-Za-z0-9._%+-]+|(?<=[A-Za-z])(?=[.%+-])[A-Za-z0-9._%+-]{1,65})@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    replacement: "[EMAIL_REDACTED]",
+  },
+  {
+    name: "cpf",
+    pattern: /\b\d{3}\.\d{3}\.\d{3}-\d{2}\b/g,
+    replacement: "[CPF_REDACTED]",
+  },
+  {
+    name: "cnpj",
+    pattern: /\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/g,
+    replacement: "[CNPJ_REDACTED]",
+  },
+  {
+    name: "credit_card",
+    pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
+    replacement: "[CARD_REDACTED]",
+  },
+
+  // GDPR (EU) and POPIA (ZA) identifiers, shared with the response-side sanitizer
+  // (src/shared/utils/piiPatterns.ts). Each match is redacted only when its
+  // validator accepts it, and the group sits ahead of the generic phone pattern so a
+  // validated ID keeps its own label. Order numbers, timestamps and identifiers such as
+  // `gpt4o` or `gh12abc` stay untouched.
+  ...buildGdprPopiaRules().map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+    validate: rule.validate,
+  })),
+  {
+    name: "phone_br",
+    pattern: /\b\(?\d{2}\)?\s?\d{4,5}-?\d{4}\b/g,
+    replacement: "[PHONE_REDACTED]",
+  },
+  {
+    name: "ssn_us",
+    pattern: /\b\d{3}-\d{2}-\d{4}\b/g,
+    replacement: "[SSN_REDACTED]",
+  },
+];
+
+// ─── Configuration ────────────────────────────────────────────────────
+
+/**
+ * Get sanitizer configuration. Dashboard-set DB overrides win over the env vars
+ * so the Feature Flags UI actually controls these flags (DB > ENV > default,
+ * matching resolveFeatureFlag and the INJECTION_GUARD_MODE reader in
+ * promptInjection.ts). DB-only reads here preserve the env fallback chain and
+ * defaults when no override is stored; an unavailable flag store falls back to
+ * the env-based behavior.
+ * @returns {{ enabled: boolean, mode: string, piiRedaction: boolean }}
+ */
+function getConfig() {
+  let overrides: Record<string, string | undefined> = {};
+  try {
+    overrides = {
+      enabled: getFeatureFlagOverride("INPUT_SANITIZER_ENABLED"),
+      piiRedaction: getFeatureFlagOverride("PII_REDACTION_ENABLED"),
+    };
+  } catch {
+    overrides = {};
+  }
+  return {
+    // Default ON (opt-out). Truthy/falsy parsing accepts true/1/yes/on and false/0/no/off.
+    enabled:
+      overrides.enabled !== undefined
+        ? parseEnvBoolean(overrides.enabled, true)
+        : parseEnvBoolean(process.env.INPUT_SANITIZER_ENABLED, true),
+    // INPUT_SANITIZER_MODE has no registered flag (the dashboard cannot set it),
+    // so it stays env-only. It is reserved for prompt-injection policy.
+    mode: process.env.INPUT_SANITIZER_MODE || "warn", // "warn" | "block" | "redact"
+    piiRedaction:
+      overrides.piiRedaction !== undefined
+        ? parseEnvBoolean(overrides.piiRedaction, false)
+        : parseEnvBoolean(process.env.PII_REDACTION_ENABLED, false),
+    blockThreshold: resolveBlockThreshold(),
+  };
+}
+
+// ─── Core Functions ───────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} SanitizeResult
+ * @property {boolean} blocked - Whether the request should be blocked
+ * @property {boolean} modified - Whether the content was modified (PII redacted)
+ * @property {Array<{pattern: string, severity: string, match: string}>} detections
+ * @property {Array<{type: string, count: number}>} piiDetections
+ * @property {Object} [sanitizedBody] - Modified body (if PII redaction active)
+ */
+
+/**
+ * Extract all message content strings from a chat body.
+ * Supports both `messages[]` (OpenAI/Claude) and `input[]` (Responses API).
+ * @param {Object} body
+ * @returns {string[]}
+ */
+/**
+ * Push every string a single content part carries.
+ * A part is not always `{ text }`: a `tool_result` block carries its payload on
+ * `content`, as a string or as a nested block list. redactBody() below already
+ * rewrites the string form, so the file agrees that a part can carry text there --
+ * only this extractor did not look, which left tool output unscanned.
+ * @param {*} part
+ * @param {string[]} contents
+ */
+function collectPartText(part, contents) {
+  if (typeof part === "string") {
+    contents.push(part);
+    return;
+  }
+  if (!part || typeof part !== "object") return;
+  if (typeof part.text === "string") contents.push(part.text);
+  if (typeof part.content === "string") contents.push(part.content);
+  else if (Array.isArray(part.content))
+    for (const nested of part.content) {
+      if (typeof nested === "string") contents.push(nested);
+      else if (nested && typeof nested.text === "string") contents.push(nested.text);
+    }
+}
+
+function extractMessageContents(body) {
+  const contents = [];
+
+  const messageSource = body.messages !== undefined ? body.messages : body.input;
+  const messages = Array.isArray(messageSource)
+    ? messageSource
+    : messageSource === undefined || messageSource === null
+      ? []
+      : [messageSource];
+  for (const msg of messages) {
+    if (typeof msg === "string") {
+      contents.push(msg);
+    } else if (msg && typeof msg.content === "string") {
+      contents.push(msg.content);
+    } else if (msg && Array.isArray(msg.content)) {
+      for (const part of msg.content) {
+        collectPartText(part, contents);
+      }
+    }
+  }
+
+  // Also check system prompt
+  if (typeof body.system === "string") {
+    contents.push(body.system);
+  } else if (Array.isArray(body.system)) {
+    for (const s of body.system) {
+      collectPartText(s, contents);
+    }
+  }
+
+  if (typeof body.input === "string") contents.push(body.input);
+  if (typeof body.prompt === "string") contents.push(body.prompt);
+  else if (Array.isArray(body.prompt))
+    for (const p of body.prompt) {
+      if (typeof p === "string") contents.push(p);
+    }
+  if (typeof body.instructions === "string") contents.push(body.instructions);
+  if (typeof body.query === "string") contents.push(body.query);
+  if (Array.isArray(body.documents))
+    for (const d of body.documents) {
+      if (typeof d === "string") contents.push(d);
+      else if (d && typeof d.text === "string") contents.push(d.text);
+    }
+
+  return contents;
+}
+
+/**
+ * Reduce the joined carriers to the bytes worth scanning, under the cap.
+ *
+ * The budget itself is deliberate (hot-path perf, #3932 / #4041) and is unchanged:
+ * at most MAX_INJECTION_SCAN_BYTES characters reach the pattern loop. What changes
+ * is which bytes. extractMessageContents() appends `system`, `input`, `prompt`,
+ * `instructions`, `query` and `documents` *after* the message list, so taking only
+ * a prefix meant that one long message hid all six of them -- at 30 KB of ordinary
+ * conversation the guard saw none of them, and none of the newest turns either.
+ *
+ * Take both ends instead. The tail is where content that has never been scanned
+ * before lives: the small carriers, and the turn that was just added.
+ * @param {string} text
+ * @returns {string}
+ */
+function buildInjectionScanText(text) {
+  if (text.length <= MAX_INJECTION_SCAN_BYTES) return text;
+  // The gap comes out of the budget, so the pattern loop still never sees more
+  // than MAX_INJECTION_SCAN_BYTES characters.
+  const budget = MAX_INJECTION_SCAN_BYTES - SCAN_GAP.length;
+  const head = Math.floor(budget / 2);
+  const tail = budget - head;
+  return text.slice(0, head) + SCAN_GAP + text.slice(text.length - tail);
+}
+
+/**
+ * Scan content for prompt injection patterns.
+ * @param {string} text
+ * @returns {Array<{pattern: string, severity: string, match: string}>}
+ */
+function detectInjection(text) {
+  const detections = [];
+  const scanText = buildInjectionScanText(text);
+  for (const rule of INJECTION_PATTERNS) {
+    const match = scanText.match(rule.pattern);
+    if (match) {
+      detections.push({
+        pattern: rule.name,
+        severity: rule.severity,
+        match: match[0].slice(0, 50), // truncate for logging
+      });
+    }
+  }
+  return detections;
+}
+
+/**
+ * Built-in rules narrowed to the operator's per-type selection (null = all),
+ * followed by any pre-compiled custom rules.
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options]
+ */
+function resolvePiiRules(options) {
+  const enabled = options?.enabledTypes ?? null;
+  const builtins = enabled
+    ? PII_PATTERNS.filter((rule) => enabled.has(PII_REQUEST_TYPE_ALIASES[rule.name] ?? rule.name))
+    : PII_PATTERNS;
+  const custom = (options?.customRules ?? []).map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+  }));
+  return custom.length > 0 ? [...builtins, ...custom] : builtins;
+}
+
+/**
+ * Scan and optionally redact PII from text.
+ * @param {string} text
+ * @param {boolean} redact - If true, replaces PII with placeholders
+ * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
+ * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
+ */
+function processPII(text, redact = false, options = undefined) {
+  const detections = [];
+  let processed = text;
+
+  for (const rule of resolvePiiRules(options)) {
+    if (rule.validate) {
+      const validated = redactValidatedMatches(processed, rule, redact);
+      if (validated.count > 0) {
+        detections.push({ type: rule.name, count: validated.count });
+        processed = validated.text;
+      }
+      continue;
+    }
+    const matches = text.match(rule.pattern);
+    if (matches && matches.length > 0) {
+      detections.push({ type: rule.name, count: matches.length });
+      if (redact) {
+        processed = processed.replace(rule.pattern, rule.replacement);
+      }
+    }
+  }
+
+  return { text: processed, detections };
+}
+
+/**
+ * Count (and optionally redact) only the matches the rule's validator accepts.
+ * @param {string} text
+ * @param {{ pattern: RegExp, replacement: string, validate: (match: string, context: string) => boolean }} rule
+ * @param {boolean} redact
+ * @returns {{ text: string, count: number }}
+ */
+function redactValidatedMatches(text, rule, redact) {
+  let count = 0;
+  let output = "";
+  let cursor = 0;
+  for (const match of text.matchAll(rule.pattern)) {
+    const index = match.index ?? 0;
+    if (!rule.validate(match[0], precedingContext(text, index))) continue;
+    count++;
+    output += text.slice(cursor, index) + rule.replacement;
+    cursor = index + match[0].length;
+  }
+  return { text: redact ? output + text.slice(cursor) : text, count };
+}
+
+/**
+ * Sanitize a chat request body.
+ *
+ * @param {Object} body - The chat completion request body
+ * @param {Object} [logger] - Logger instance (defaults to console)
+ * @returns {SanitizeResult}
+ */
+export function sanitizeRequest(body, logger = console) {
+  const config = getConfig();
+
+  const result = {
+    blocked: false,
+    modified: false,
+    detections: [],
+    piiDetections: [],
+    sanitizedBody: null,
+  };
+
+  if (!config.enabled) return result;
+
+  const contents = extractMessageContents(body);
+  const fullText = contents.join("\n");
+
+  // ── Prompt Injection Detection ──
+  const injections = detectInjection(fullText);
+  if (injections.length > 0) {
+    result.detections = injections;
+
+    const highSeverity = injections.filter((d) => d.severity === "high");
+    const logLevel = highSeverity.length > 0 ? "warn" : "info";
+
+    if (logger[logLevel]) {
+      logger[logLevel](
+        `[SANITIZER] Prompt injection detected: ${injections.map((d) => d.pattern).join(", ")}`
+      );
+    }
+
+    // Shared threshold policy with evaluatePromptInjection / createInjectionGuard.
+    // Default threshold is "high" (medium is observe-only unless lowered via env).
+    if (config.mode === "block" && shouldBlockDetections(injections, config.blockThreshold)) {
+      result.blocked = true;
+      return result;
+    }
+  }
+
+  // ── PII Detection / Redaction ──
+  // PII rewrite is controlled by PII_REDACTION_ENABLED only.
+  // INPUT_SANITIZER_MODE is reserved for prompt-injection policy (warn/block/log).
+  if (config.piiRedaction) {
+    const piiResult = processPII(fullText, true);
+    result.piiDetections = piiResult.detections;
+
+    if (piiResult.detections.length > 0) {
+      logger.warn?.(
+        `[SANITIZER] PII detected: ${piiResult.detections.map((d) => `${d.type}(${d.count})`).join(", ")}`
+      );
+
+      // Deep clone and replace message contents with redacted versions
+      result.sanitizedBody = redactBody(body);
+      result.modified = true;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Deep clone body and replace message contents with PII-redacted versions.
+ * @param {Object} body
+ * @returns {Object}
+ */
+function redactBody(body) {
+  // Deep clone to avoid mutating original
+  const clone = JSON.parse(JSON.stringify(body));
+  const messageSource = clone.messages !== undefined ? clone.messages : clone.input;
+  const messages = Array.isArray(messageSource)
+    ? messageSource
+    : messageSource === undefined || messageSource === null
+      ? []
+      : [messageSource];
+
+  const redactContentValue = (value) => {
+    if (typeof value === "string") {
+      return processPII(value, true).text;
+    }
+    if (Array.isArray(value)) {
+      return value.map((part) => {
+        if (typeof part === "string") {
+          return processPII(part, true).text;
+        }
+        if (part && typeof part === "object") {
+          const next = { ...part };
+          if (typeof next.text === "string") {
+            next.text = processPII(next.text, true).text;
+          }
+          if (typeof next.content === "string") {
+            next.content = processPII(next.content, true).text;
+          } else if (Array.isArray(next.content)) {
+            next.content = next.content.map((nested) => {
+              if (typeof nested === "string") return processPII(nested, true).text;
+              if (nested && typeof nested === "object" && typeof nested.text === "string") {
+                return { ...nested, text: processPII(nested.text, true).text };
+              }
+              return nested;
+            });
+          }
+          return next;
+        }
+        return part;
+      });
+    }
+    return value;
+  };
+
+  const redactedMessages = messages.map((msg) => {
+    if (typeof msg === "string") {
+      return processPII(msg, true).text;
+    }
+    if (!msg || typeof msg !== "object") {
+      return msg;
+    }
+    const next = { ...msg };
+    if ("content" in next) {
+      next.content = redactContentValue(next.content);
+    }
+    if (typeof next.text === "string") {
+      next.text = processPII(next.text, true).text;
+    }
+    return next;
+  });
+
+  if (clone.messages !== undefined) {
+    clone.messages = Array.isArray(clone.messages) ? redactedMessages : redactedMessages[0];
+  } else if (clone.input !== undefined) {
+    clone.input = Array.isArray(clone.input) ? redactedMessages : redactedMessages[0];
+  }
+
+  if (typeof clone.system === "string") {
+    clone.system = processPII(clone.system, true).text;
+  } else if (Array.isArray(clone.system)) {
+    clone.system = clone.system.map((entry) => {
+      if (typeof entry === "string") return processPII(entry, true).text;
+      if (entry && typeof entry === "object") {
+        const next = { ...entry };
+        if (typeof next.text === "string") next.text = processPII(next.text, true).text;
+        if (typeof next.content === "string") next.content = processPII(next.content, true).text;
+        return next;
+      }
+      return entry;
+    });
+  }
+
+  if (typeof clone.input === "string") {
+    clone.input = processPII(clone.input, true).text;
+  }
+  if (typeof clone.prompt === "string") {
+    clone.prompt = processPII(clone.prompt, true).text;
+  } else if (Array.isArray(clone.prompt)) {
+    clone.prompt = clone.prompt.map((entry) =>
+      typeof entry === "string" ? processPII(entry, true).text : entry
+    );
+  }
+
+  return clone;
+}
+
+export {
+  detectInjection,
+  processPII,
+  extractMessageContents,
+  buildInjectionScanText,
+  INJECTION_PATTERNS,
+  PII_PATTERNS,
+};

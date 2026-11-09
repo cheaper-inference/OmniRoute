@@ -1,0 +1,31 @@
+{
+  "title": "Frameworks",
+  "pages": [
+    "MCP-SERVER",
+    "A2A-SERVER",
+    "AGENT_PROTOCOLS_GUIDE",
+    "ACP",
+    "AGENT-SKILLS",
+    "AGENTBRIDGE",
+    "CLOUD_AGENT",
+    "EMBEDDED-SERVICES",
+    "EVALS",
+    "GAMIFICATION",
+    "LOCAL_CORPUS_CONTEXT",
+    "MEMORY",
+    "NOTION_CONTEXT",
+    "OBSIDIAN_CONTEXT",
+    "OPENCODE",
+    "OPEN_SSE_ARCHITECTURE",
+    "PLAYGROUND_STUDIO",
+    "PLUGIN_MARKETPLACE",
+    "PLUGINS",
+    "PLUGIN_SDK",
+    "RADAR",
+    "SEARCH_TOOLS_STUDIO",
+    "SKILLS",
+    "TRAFFIC_INSPECTOR",
+    "WEBHOOKS",
+    "LOG-EXPORT"
+  ]
+}

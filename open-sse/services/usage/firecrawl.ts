@@ -1,0 +1,82 @@
+/**
+ * usage/firecrawl.ts — Firecrawl team credit usage for Provider Limits.
+ *
+ * GET /v2/team/credit-usage via firecrawlQuotaFetcher; shapes remaining/plan
+ * credits into the standard `{ plan, quotas }` response.
+ */
+
+import {
+  fetchFirecrawlQuota,
+  getFirecrawlBaseUrl,
+  type FirecrawlQuota,
+} from "../firecrawlQuotaFetcher.ts";
+import { createQuotaFromUsage, parseResetTime } from "./quota.ts";
+
+function createFirecrawlPlanQuota(q: FirecrawlQuota) {
+  if (q.overPlan) {
+    return {
+      used: 0,
+      total: q.planCredits,
+      remaining: q.remainingCredits,
+      remainingPercentage: q.planCredits > 0 ? (q.remainingCredits / q.planCredits) * 100 : 100,
+      resetAt: parseResetTime(q.resetAt),
+      unlimited: false,
+      extraCreditsInferred: q.extraCreditsInferred,
+      overPlan: true,
+    };
+  }
+
+  return {
+    ...createQuotaFromUsage(q.used, q.total, q.resetAt),
+    extraCreditsInferred: 0,
+    overPlan: false,
+  };
+}
+
+export async function getFirecrawlUsage(
+  connectionId: string,
+  apiKey?: string,
+  connection?: Record<string, unknown>
+) {
+  if (!connectionId) {
+    return { message: "Firecrawl: connection id unavailable." };
+  }
+
+  const customBase = getFirecrawlBaseUrl(connection);
+  if (customBase) {
+    return {
+      plan: "Firecrawl · Self-Hosted Local",
+      quotas: {},
+      message: `Connected to self-hosted Firecrawl instance (${customBase})`,
+    };
+  }
+
+  try {
+    // The explicit `apiKey` argument was silently dropped when #91bb6aa619 moved
+    // this to fetchFirecrawlQuota(connectionId, connection): the fetcher reads the
+    // key off the connection record, so a caller that passes the key directly —
+    // without a connection carrying it — always got "API key not available".
+    const resolvedConnection = apiKey ? { ...(connection || {}), apiKey } : connection;
+    const live = await fetchFirecrawlQuota(connectionId, resolvedConnection);
+    if (!live) {
+      return { message: "Firecrawl API key not available or credit usage unavailable." };
+    }
+
+    const q = live as FirecrawlQuota;
+    const monthly = createFirecrawlPlanQuota(q);
+
+    return {
+      plan: "Firecrawl · Monthly credits",
+      quotas: {
+        monthly,
+      },
+      remainingCredits: q.remainingCredits,
+      planCredits: q.planCredits,
+      extraCreditsInferred: q.extraCreditsInferred,
+      overPlan: q.overPlan,
+      limitReached: q.limitReached,
+    };
+  } catch (error) {
+    return { message: `Firecrawl usage error: ${(error as Error).message}` };
+  }
+}

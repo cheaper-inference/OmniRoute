@@ -1,0 +1,661 @@
+/**
+ * Integration Wiring Verification Tests
+ *
+ * Validates that backend modules are correctly wired into the current
+ * OmniRoute architecture (TypeScript + App Router route.ts files).
+ */
+
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, "..", "..");
+
+function readProjectFile(relPath: string) {
+  const full = join(ROOT, relPath);
+  if (!existsSync(full)) return null;
+  return readFileSync(full, "utf8");
+}
+
+function assertFileExists(relPath: string) {
+  const full = join(ROOT, relPath);
+  assert.ok(existsSync(full), `${relPath} should exist`);
+  return full;
+}
+
+function assertRouteMethods(relPath: string, methods: string[]) {
+  const src = readProjectFile(relPath);
+  assert.ok(src, `${relPath} should exist`);
+  for (const method of methods) {
+    assert.match(src, new RegExp(`export\\s+async\\s+function\\s+${method}\\s*\\(`));
+  }
+}
+
+function listProjectFiles(relPath: string): string[] {
+  const full = join(ROOT, relPath);
+  if (!existsSync(full)) return [];
+
+  return readdirSync(full, { withFileTypes: true }).flatMap((entry) => {
+    const childRelPath = `${relPath}/${entry.name}`;
+    if (entry.isDirectory()) return listProjectFiles(childRelPath);
+    return childRelPath;
+  });
+}
+
+// ─── Pipeline Wiring ─────────────────────────────────
+//
+// src/server-init.ts was removed: it was never imported anywhere and duplicated
+// the wiring below, which is the boot path that actually runs (Next.js
+// instrumentation hook). See tests/unit/credential-health-boot-wiring.test.ts and
+// tests/unit/thinking-budget-boot-wiring-5312.test.ts for the incidents that
+// wiring into the dead module caused.
+
+describe("Pipeline Wiring — instrumentation-node.ts", () => {
+  const src = readProjectFile("src/instrumentation-node.ts");
+
+  it("should seed default model aliases during startup restore", () => {
+    assert.ok(src, "src/instrumentation-node.ts should exist");
+    assert.match(src, /seedDefaultModelAliases/);
+  });
+
+  it("should initialize Arena ELO sync on the live startup path (on by default, opt-out)", () => {
+    // The Next standalone runtime boots through instrumentation-node, NOT server-init.ts.
+    // The Arena ELO sync (which feeds the Free Provider Rankings page) must be wired here,
+    // or it never runs in production. initArenaEloSync self-gates through the feature flag
+    // resolver so ARENA_ELO_SYNC_ENABLED and dashboard overrides still apply.
+    assert.match(src, /initArenaEloSync/);
+    assert.match(src, /m\.initArenaEloSync\(\)/);
+  });
+
+  it("should initialize pricing + models.dev sync on the live startup path (self-gated, opt-in)", () => {
+    // Same dead-path bug as Arena: these were only wired into the never-executed server-init.ts
+    // (models.dev had no caller at all), so their toggles were inert. They self-gate internally
+    // (PRICING_SYNC_ENABLED / settings.modelsDevSyncEnabled), so calling them here preserves opt-in.
+    assert.match(src, /initPricingSync/);
+    assert.match(src, /initModelsDevSync/);
+  });
+});
+
+describe("Pipeline Wiring — sse chat handler", () => {
+  const src = readProjectFile("src/sse/handlers/chat.ts");
+  const coreSrc = readProjectFile("open-sse/handlers/chatCore.ts");
+  // recordCost moved with the streaming tail when handleChatCore was split into leaves.
+  const streamingTailSrc = readProjectFile("open-sse/handlers/chatCore/streamingTail.ts");
+
+  it("should import and use guardrail pre-call validation", () => {
+    assert.ok(src, "src/sse/handlers/chat.ts should exist");
+    assert.match(src, /guardrailRegistry/);
+    assert.match(src, /runPreCallHooks/);
+  });
+
+  it("should import circuit breaker integration", () => {
+    assert.match(src, /getCircuitBreaker|CircuitBreakerOpenError/);
+  });
+
+  it("should use credential preflight instead of global model quarantine gates", () => {
+    assert.match(src, /getProviderCredentialsWithQuotaPreflight/);
+  });
+
+  it("should import request telemetry integration", () => {
+    assert.match(src, /RequestTelemetry|recordTelemetry/);
+  });
+
+  it("should import request id generation", () => {
+    assert.match(src, /generateRequestId/);
+  });
+
+  it("should keep cost tracking integration in the chat pipeline", () => {
+    assert.ok(coreSrc, "open-sse/handlers/chatCore.ts should exist");
+    assert.ok(streamingTailSrc, "open-sse/handlers/chatCore/streamingTail.ts should exist");
+    assert.match(coreSrc, /calculateCost/);
+    assert.match(streamingTailSrc, /recordCost/);
+  });
+
+  it("should not track backup artifacts in the active src/sse shim", () => {
+    const trackedArtifactNames = listProjectFiles("src/sse").filter((file) =>
+      /\.(orig|bak|backup)$/i.test(file)
+    );
+
+    assert.deepEqual(trackedArtifactNames, []);
+  });
+});
+
+describe("Pipeline Wiring — middleware proxy", () => {
+  const proxySrc = readProjectFile("src/proxy.ts");
+  const pipelineSrc = readProjectFile("src/server/authz/pipeline.ts");
+
+  it("should exist and delegate to authz pipeline", () => {
+    assert.ok(proxySrc, "src/proxy.ts should exist");
+    assert.match(proxySrc, /runAuthzPipeline/);
+  });
+
+  it("should generate request id for tracing in the authz pipeline", () => {
+    assert.ok(pipelineSrc, "src/server/authz/pipeline.ts should exist");
+    assert.match(pipelineSrc, /generateRequestId|X-Request-Id/);
+  });
+
+  it("should enforce body size guard in the authz pipeline", () => {
+    assert.match(pipelineSrc, /checkBodySize|getBodySizeLimit|bodySize/i);
+  });
+
+  it("should resolve JWT secret in the authz pipeline", () => {
+    assert.match(pipelineSrc, /getJwtSecret|jwtSecret|JWT_SECRET/i);
+  });
+});
+
+// ─── API Routes ──────────────────────────────────────
+
+describe("API Routes — existence check", () => {
+  const routes = [
+    "src/app/api/cache/stats/route.ts",
+    "src/app/api/telemetry/summary/route.ts",
+    "src/app/api/usage/budget/route.ts",
+    "src/app/api/usage/quota/route.ts",
+    "src/app/api/fallback/chains/route.ts",
+    "src/app/api/compliance/audit-log/route.ts",
+    "src/app/api/evals/route.ts",
+    "src/app/api/evals/[suiteId]/route.ts",
+    "src/app/api/policies/route.ts",
+  ];
+
+  for (const route of routes) {
+    it(`route file should exist: ${route}`, () => {
+      assertFileExists(route);
+    });
+  }
+});
+
+describe("API Routes — export HTTP methods", () => {
+  it("/api/cache/stats should export GET and DELETE", () => {
+    assertRouteMethods("src/app/api/cache/stats/route.ts", ["GET", "DELETE"]);
+  });
+
+  it("/api/telemetry/summary should export GET", () => {
+    assertRouteMethods("src/app/api/telemetry/summary/route.ts", ["GET"]);
+  });
+
+  it("/api/usage/budget should export GET and POST", () => {
+    assertRouteMethods("src/app/api/usage/budget/route.ts", ["GET", "POST"]);
+  });
+
+  it("/api/usage/quota should export GET", () => {
+    assertRouteMethods("src/app/api/usage/quota/route.ts", ["GET"]);
+  });
+
+  it("/api/fallback/chains should export GET, POST, DELETE", () => {
+    assertRouteMethods("src/app/api/fallback/chains/route.ts", ["GET", "POST", "DELETE"]);
+  });
+
+  it("/api/compliance/audit-log should export GET", () => {
+    assertRouteMethods("src/app/api/compliance/audit-log/route.ts", ["GET"]);
+  });
+
+  it("/api/evals should export GET and POST", () => {
+    assertRouteMethods("src/app/api/evals/route.ts", ["GET", "POST"]);
+  });
+
+  it("/api/evals/[suiteId] should export GET", () => {
+    assertRouteMethods("src/app/api/evals/[suiteId]/route.ts", ["GET"]);
+  });
+
+  it("/api/policies should export GET and POST", () => {
+    assertRouteMethods("src/app/api/policies/route.ts", ["GET", "POST"]);
+  });
+});
+
+describe("API Routes — dashboard and tool consumers", () => {
+  it("keeps model-combo mapping APIs wired through routing settings", () => {
+    const settingsPage = readProjectFile("src/app/(dashboard)/dashboard/settings/routing/page.tsx");
+    const modelRoutingSection = readProjectFile("src/shared/components/ModelRoutingSection.tsx");
+
+    assert.ok(settingsPage, "settings page should exist");
+    assert.ok(modelRoutingSection, "ModelRoutingSection should exist");
+    assert.match(settingsPage, /ModelRoutingSection/);
+    assert.match(modelRoutingSection, /fetch\("\/api\/model-combo-mappings"\)/);
+    assert.match(modelRoutingSection, /fetch\(`\/api\/model-combo-mappings\/\$\{editingId\}`/);
+    assert.match(modelRoutingSection, /method:\s*"DELETE"/);
+    assertRouteMethods("src/app/api/model-combo-mappings/route.ts", ["GET", "POST"]);
+    assertRouteMethods("src/app/api/model-combo-mappings/[id]/route.ts", ["GET", "PUT", "DELETE"]);
+  });
+
+  it.skip("keeps log APIs wired through the consolidated logs dashboard", () => {
+    const logsPage = readProjectFile("src/app/(dashboard)/dashboard/logs/page.tsx");
+    const requestLogger = readProjectFile("src/shared/components/RequestLoggerV2.tsx");
+    const proxyLogger = readProjectFile("src/shared/components/ProxyLogger.tsx");
+    const consoleLogger = readProjectFile("src/shared/components/ConsoleLogViewer.tsx");
+
+    assert.ok(logsPage, "logs page should exist");
+    assert.ok(requestLogger, "RequestLoggerV2 should exist");
+    assert.ok(proxyLogger, "ProxyLogger should exist");
+    assert.ok(consoleLogger, "ConsoleLogViewer should exist");
+    assert.match(logsPage, /RequestLoggerV2/);
+    assert.match(logsPage, /EmailPrivacyToggle/);
+    assert.match(logsPage, /ProxyLogger/);
+    assert.match(logsPage, /ConsoleLogViewer/);
+    // AuditLogTab removed: audit moved to its own /dashboard/audit page (#2859).
+    assert.match(logsPage, /\/api\/logs\/export/);
+    assert.match(requestLogger, /\/api\/usage\/call-logs/);
+    assert.match(requestLogger, /\/api\/logs\/\$\{/);
+    assert.doesNotMatch(requestLogger, /\/api\/logs\/active/);
+    assert.match(requestLogger, /\/api\/logs\/detail/);
+    assert.match(requestLogger, /useEmailPrivacyStore/);
+    assert.match(requestLogger, /maskAccount\(log\.account, emailsVisible\)/);
+    assert.match(requestLogger, /emailsVisible=\{emailsVisible\}/);
+    assert.match(proxyLogger, /\/api\/usage\/proxy-logs/);
+    assert.match(consoleLogger, /\/api\/logs\/console/);
+    assertRouteMethods("src/app/api/logs/console/route.ts", ["GET"]);
+    assertRouteMethods("src/app/api/logs/detail/route.ts", ["GET", "POST"]);
+    assertRouteMethods("src/app/api/logs/export/route.ts", ["GET"]);
+    assertRouteMethods("src/app/api/usage/proxy-logs/route.ts", ["GET", "DELETE"]);
+    assertRouteMethods("src/app/api/usage/call-logs/route.ts", ["GET"]);
+    assertRouteMethods("src/app/api/usage/call-logs/[id]/route.ts", ["GET"]);
+  });
+
+  it("keeps request log surfaces on opaque theme colors", () => {
+    const requestLogger = readProjectFile("src/shared/components/RequestLoggerV2.tsx");
+    const globals = readProjectFile("src/app/globals.css");
+    const kitTokens = readProjectFile("packages/ui-kit/src/ci-tokens.css");
+
+    assert.ok(requestLogger, "RequestLoggerV2 should exist");
+    assert.ok(globals, "globals.css should exist");
+    assert.ok(kitTokens, "vendored CI UI Kit tokens should exist");
+    assert.match(globals, /--color-card:\s+var\(--color-card\)/);
+
+    // KEA-7886 track A replaced the :root/.dark hex values with a bridge to the CI UI Kit
+    // (`--color-card: var(--ci-…)`); the kit flips its --ci-* values on data-theme="dark".
+    // The intent is unchanged: card/surface colours resolve to an OPAQUE colour in both themes.
+    const kitCss = kitTokens.replace(/\/\*[\s\S]*?\*\//g, "");
+    const kitBlock = (selector: RegExp) => {
+      const match = selector.exec(kitCss);
+      assert.ok(match, `ci-tokens.css should declare ${selector}`);
+      const body = kitCss.slice(match.index + match[0].length, kitCss.indexOf("}", match.index));
+      return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+    };
+    const light = kitBlock(/^:root,\s*\.ci-theme\s*\{/m);
+    const dark = kitBlock(/^:root\[data-theme="dark"\][^{]*\{/m);
+    const resolveKitToken = (token: string, scopes: Map<string, string>[]) => {
+      let value = `var(${token})`;
+      for (let hops = 0; hops < 10; hops++) {
+        const ref = /^var\((--[\w-]+)\)$/.exec(value);
+        if (!ref) return value;
+        const next = scopes.map((scope) => scope.get(ref[1])).find((v) => v !== undefined);
+        assert.ok(next, `${ref[1]} should be declared in ci-tokens.css`);
+        value = next;
+      }
+      return assert.fail(`${token} does not resolve to a literal colour`);
+    };
+    const OPAQUE =
+      /^(#[0-9a-f]{3}|#[0-9a-f]{6}|rgb\(\s*\d+(\s*,\s*|\s+)\d+(\s*,\s*|\s+)\d+\s*\))$/i;
+
+    for (const bridged of ["--color-card", "--color-surface"]) {
+      const declared = [...globals.matchAll(new RegExp(`(?<![\\w-])${bridged}:\\s*([^;]+);`, "g"))];
+      for (const [, value] of declared) {
+        assert.match(value.trim(), new RegExp(`^var\\((--ci-[\\w-]+|${bridged})\\)$`));
+      }
+      const kitToken = new RegExp(`${bridged}:\\s+var\\((--ci-[\\w-]+)\\)`).exec(globals)?.[1];
+      assert.ok(kitToken, `${bridged} should bridge to a --ci-* kit token in globals.css`);
+      for (const [theme, scopes] of [
+        ["light", [light]],
+        ["dark", [dark, light]],
+      ] as const) {
+        const resolved = resolveKitToken(kitToken, [...scopes]);
+        assert.match(resolved, OPAQUE, `${bridged} → ${kitToken} must be opaque in ${theme}`);
+      }
+    }
+    // #4233 ("opaque tables D9") replaced the bg-black/5 tint — which lost to
+    // bg-surface via tailwind-merge — with the opaque bg-surface theme color.
+    // The intent here (request log surface stays opaque over theme colors) is now
+    // expressed by bg-surface itself.
+    assert.match(requestLogger, /bg-surface/);
+    assert.doesNotMatch(requestLogger, /\/api\/logs\/active/);
+  });
+
+  it("keeps usage quota wired through A2A and MCP tools", () => {
+    const quotaSkill = readProjectFile("src/lib/a2a/skills/quotaManagement.ts");
+    const mcpAdvancedTools = readProjectFile("open-sse/mcp-server/tools/advancedTools.ts");
+    const mcpOpsTools = readProjectFile("open-sse/mcp-server/tools/opsTools.ts");
+    const mcpServer = readProjectFile("open-sse/mcp-server/server.ts");
+
+    assert.ok(quotaSkill, "quotaManagement skill should exist");
+    assert.ok(mcpAdvancedTools, "advanced MCP tools should exist");
+    assert.ok(mcpOpsTools, "operational MCP tools should exist");
+    assert.ok(mcpServer, "MCP server should exist");
+    assert.match(quotaSkill, /\/api\/usage\/quota/);
+    assert.match(mcpAdvancedTools, /\/api\/usage\/quota/);
+    // The quota handler moved out of the registration module in #15159.
+    assert.match(mcpOpsTools, /["']\/api\/usage\/quota["']/);
+    assert.match(
+      mcpServer,
+      /^import\s*\{[^}]*\bhandleCheckQuota\b[^}]*\}\s*from\s*"\.\/tools\/opsTools\.ts";/m
+    );
+    assert.match(
+      mcpServer,
+      /^\s+withScopeEnforcement\("omniroute_check_quota",\s*\(args\)\s*=>\s*handleCheckQuota\(checkQuotaInput\.parse\(args\)\)\s*\)/m
+    );
+    assertRouteMethods("src/app/api/usage/quota/route.ts", ["GET"]);
+  });
+
+  it("keeps legacy usage history and raw request-log APIs explicitly classified", () => {
+    const usageStats = readProjectFile("src/shared/components/UsageStats.tsx");
+    const apiReference = readProjectFile("docs/reference/API_REFERENCE.md");
+    const openApi = readProjectFile("docs/openapi.yaml");
+
+    assert.ok(usageStats, "UsageStats compatibility component should exist");
+    assert.ok(apiReference, "API reference should exist");
+    assert.ok(openApi, "OpenAPI document should exist");
+    assert.match(usageStats, /\/api\/usage\/history/);
+    assert.match(apiReference, /\/api\/usage\/history/);
+    assert.match(apiReference, /\/api\/usage\/request-logs/);
+    assert.match(openApi, /\/api\/usage\/history:/);
+    assert.match(openApi, /\/api\/usage\/request-logs:/);
+    assertRouteMethods("src/app/api/usage/history/route.ts", ["GET"]);
+    assertRouteMethods("src/app/api/usage/request-logs/route.ts", ["GET"]);
+    assertRouteMethods("src/app/api/usage/logs/route.ts", ["GET"]);
+  });
+});
+
+describe("API Routes — T09 /v1 catalog consistency", () => {
+  const v1RouteSrc = readProjectFile("src/app/api/v1/route.ts");
+  const v1ModelsRouteSrc = readProjectFile("src/app/api/v1/models/route.ts");
+  const v1CatalogSrc = readProjectFile("src/app/api/v1/models/catalog.ts");
+
+  it("/api/v1 should delegate model catalog to unified builder", () => {
+    assert.ok(v1RouteSrc, "src/app/api/v1/route.ts should exist");
+    assert.match(v1RouteSrc, /getUnifiedModelsResponse/);
+    assert.match(v1RouteSrc, /from\s+["']\.\/models\/catalog["']/);
+    assert.doesNotMatch(v1RouteSrc, /const\s+models\s*=\s*\[/);
+  });
+
+  it("/api/v1/models route should only consume unified model catalog builder", () => {
+    assert.ok(v1ModelsRouteSrc, "src/app/api/v1/models/route.ts should exist");
+    assert.match(v1ModelsRouteSrc, /from\s+["']\.\/catalog["']/);
+    assert.doesNotMatch(
+      v1ModelsRouteSrc,
+      /export\s+async\s+function\s+getUnifiedModelsResponse\s*\(/
+    );
+  });
+
+  it("/api/v1/models/catalog should export unified model catalog builder", () => {
+    assert.ok(v1CatalogSrc, "src/app/api/v1/models/catalog.ts should exist");
+    assert.match(v1CatalogSrc, /export\s+async\s+function\s+getUnifiedModelsResponse\s*\(/);
+  });
+});
+
+describe("Dashboard Wiring — T05 payload rules", () => {
+  const settingsPageSrc = readProjectFile(
+    "src/app/(dashboard)/dashboard/settings/advanced/page.tsx"
+  );
+  const payloadRulesTabSrc = readProjectFile(
+    "src/app/(dashboard)/dashboard/settings/components/PayloadRulesTab.tsx"
+  );
+  const openapiSrc = readProjectFile("docs/openapi.yaml");
+
+  it.skip("settings page should surface payload rules inside advanced settings", () => {
+    assert.ok(settingsPageSrc, "settings page source should exist");
+    assert.match(
+      settingsPageSrc,
+      /import PayloadRulesTab from "\.\.\/components\/PayloadRulesTab"/
+    );
+    assert.match(settingsPageSrc, /<PayloadRulesTab\s*\/>/);
+  });
+
+  it("payload rules tab should read and write through the dedicated settings endpoint", () => {
+    assert.ok(payloadRulesTabSrc, "payload rules tab source should exist");
+    assert.match(payloadRulesTabSrc, /fetch\("\/api\/settings\/payload-rules"\)/);
+    assert.match(payloadRulesTabSrc, /fetch\("\/api\/settings\/payload-rules",\s*\{/);
+    assert.match(payloadRulesTabSrc, /method:\s*"PUT"/);
+    assert.match(payloadRulesTabSrc, /default-raw/);
+  });
+
+  it("openapi should document the payload rules management surface", () => {
+    assert.ok(openapiSrc, "docs/openapi.yaml should exist");
+    assert.match(openapiSrc, /\/api\/settings\/payload-rules:/);
+    assert.match(openapiSrc, /summary:\s+Get payload rules configuration/);
+    assert.match(openapiSrc, /ManagementSessionAuth:/);
+    assert.match(openapiSrc, /PayloadRulesConfig:/);
+  });
+});
+
+// ─── Barrel Exports ─────────────────────────────────
+
+describe("Barrel Exports — shared/components", () => {
+  const src = readProjectFile("src/shared/components/index.tsx");
+
+  it("should export key shared UI modules", () => {
+    assert.ok(src, "src/shared/components/index.tsx should exist");
+    for (const name of [
+      "Breadcrumbs",
+      "EmptyState",
+      "NotificationToast",
+      "FilterBar",
+      "ColumnToggle",
+      "DataTable",
+    ]) {
+      assert.match(src, new RegExp(name));
+    }
+  });
+
+  it("should re-export layouts", () => {
+    assert.match(src, /export\s+\*\s+from\s+"\.\/layouts"/);
+  });
+});
+
+describe("Barrel Exports — store", () => {
+  const src = readProjectFile("src/store/index.ts");
+
+  it("should export useNotificationStore", () => {
+    assert.ok(src, "src/store/index.ts should exist");
+    assert.match(src, /useNotificationStore/);
+  });
+});
+
+describe("Barrel Exports — shared/components/layouts", () => {
+  const src = readProjectFile("src/shared/components/layouts/index.tsx");
+
+  it("should export DashboardLayout (the orphan AuthLayout was removed, KEA-7886 P10)", () => {
+    assert.ok(src, "src/shared/components/layouts/index.tsx should exist");
+    assert.match(src, /DashboardLayout/);
+    assert.doesNotMatch(src, /AuthLayout/);
+  });
+});
+
+// ─── Layout and Page Integration ────────────────────
+
+describe("DashboardLayout Integration", () => {
+  // DashboardLayout.tsx renders the kit shell (DashboardShell), which mounts the toast system.
+  const src = readProjectFile("src/shared/components/layouts/DashboardShell.tsx");
+
+  it("should render NotificationToast globally", () => {
+    assert.ok(src, "src/shared/components/layouts/DashboardShell.tsx should exist");
+    assert.match(src, /NotificationToast/);
+    assert.match(
+      readProjectFile("src/shared/components/layouts/DashboardLayout.tsx"),
+      /<DashboardShell\b/,
+      "DashboardLayout renders the kit shell"
+    );
+  });
+
+  it.skip("should include Breadcrumbs in page wrapper", () => {
+    assert.match(src, /Breadcrumbs/);
+  });
+});
+
+describe("Page Integration — logs page wiring", () => {
+  const src = readProjectFile("src/app/(dashboard)/dashboard/logs/page.tsx");
+
+  it.skip("should wire segmented log tabs", () => {
+    assert.ok(src, "src/app/(dashboard)/dashboard/logs/page.tsx should exist");
+    assert.match(src, /SegmentedControl/);
+    assert.match(src, /RequestLoggerV2/);
+    assert.match(src, /ProxyLogger/);
+  });
+});
+
+describe("Page Integration — settings page wiring", () => {
+  const src = readProjectFile("src/app/(dashboard)/dashboard/settings/resilience/page.tsx");
+  const memorySkillsTab = readProjectFile(
+    "src/app/(dashboard)/dashboard/settings/components/MemorySkillsTab.tsx"
+  );
+
+  it("should include resilience tab in advanced settings", () => {
+    assert.ok(src, "src/app/(dashboard)/dashboard/settings/resilience/page.tsx should exist");
+    assert.match(src, /ResilienceTab/);
+  });
+
+  it("should not label the active skills settings card as a placeholder", () => {
+    assert.ok(memorySkillsTab, "MemorySkillsTab should exist");
+    assert.doesNotMatch(memorySkillsTab, /Skills Settings \(placeholder\)/);
+  });
+});
+
+describe("Page Integration — cache page wiring", () => {
+  const src = readProjectFile("src/app/(dashboard)/dashboard/cache/page.tsx");
+
+  it("should consolidate prompt cache metrics directly into cache management", () => {
+    assert.ok(src, "src/app/(dashboard)/dashboard/cache/page.tsx should exist");
+    assert.doesNotMatch(src, /CacheStatsCard/);
+  });
+});
+
+describe("Page Integration — cost explorer wiring", () => {
+  const costsPage = readProjectFile("src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx");
+  const usageAnalytics = readProjectFile("src/shared/components/UsageAnalytics.tsx");
+  const costExplorerUtils = readProjectFile(
+    "src/app/(dashboard)/dashboard/costs/costExplorerUtils.ts"
+  );
+
+  it("should expose an interactive grouped Cost Explorer on the costs dashboard", () => {
+    assert.ok(costsPage, "CostOverviewTab should exist");
+    assert.ok(costExplorerUtils, "costExplorerUtils should exist");
+    assert.match(costsPage, /CostExplorerCard/);
+    assert.match(costsPage, /EXPLORER_GROUP_OPTIONS/);
+    assert.match(costsPage, /byServiceTier/);
+    assert.match(costExplorerUtils, /buildCostExplorerRows/);
+    assert.match(costExplorerUtils, /serviceTier/);
+  });
+
+  it("should request token-price estimates for flat-rate providers", () => {
+    assert.match(costsPage, /includeFlatRateEstimates:\s*"true"/);
+    assert.match(usageAnalytics, /params\.set\("includeFlatRateEstimates",\s*"true"\)/);
+  });
+});
+
+describe("Page Integration — combos page empty state", () => {
+  const src = readProjectFile("src/app/(dashboard)/dashboard/combos/page.tsx");
+
+  it("should use EmptyState when there are no combos", () => {
+    assert.ok(src, "src/app/(dashboard)/dashboard/combos/page.tsx should exist");
+    assert.match(src, /EmptyState/);
+  });
+
+  it("should use notification store for UX feedback", () => {
+    assert.match(src, /useNotificationStore/);
+  });
+
+  it("should persist usage guide visibility and allow reopening", () => {
+    assert.match(src, /COMBO_USAGE_GUIDE_STORAGE_KEY/);
+    assert.match(src, /localStorage/);
+    assert.match(src, /handleShowUsageGuide/);
+  });
+
+  it("should expose quick templates and post-create quick test CTA", () => {
+    assert.match(src, /COMBO_TEMPLATES/);
+    assert.match(src, /applyTemplate/);
+    assert.match(src, /recentlyCreatedCombo/);
+    assert.match(src, /testNow/);
+  });
+
+  it("should include cost-optimized pricing coverage UX", () => {
+    assert.match(src, /hasPricingForModel/);
+    assert.match(src, /pricingCoveragePercent/);
+    assert.match(src, /pricingCoverage/);
+    assert.match(src, /warningCostOptimizedPartialPricing/);
+  });
+
+  it("should wire combo account labels to the global email privacy toggle", () => {
+    // #3822: the per-page EmailPrivacyToggle (and its emailVisibilityTooltip) was removed in
+    // favor of the single global switch in Settings → Appearance. The combos page still
+    // consumes the store and masks account labels via pickDisplayValue.
+    assert.match(src, /useEmailPrivacyStore/);
+    assert.match(src, /pickDisplayValue/);
+  });
+
+  it("should mask combo test result labels with the global email privacy toggle", () => {
+    assert.match(src, /function TestResultsView/);
+    // #14944: each row leads with the model id and shows the (masked) account label beneath it.
+    assert.match(src, /pickDisplayValue\(\[r\.label\], emailsVisible, r\.label\)/);
+  });
+});
+
+describe("Page Integration — provider test results privacy", () => {
+  const providersSrc = readProjectFile("src/app/(dashboard)/dashboard/providers/page.tsx");
+  const providerDetailSrc = readProjectFile(
+    "src/app/(dashboard)/dashboard/providers/[id]/ProviderDetailPageClient.tsx"
+  );
+  // #3501 strangler-fig decomposition moved the test-results masking and the upstream-proxy
+  // surface out of the page client into dedicated components.
+  const batchTestResultsSrc = readProjectFile(
+    "src/app/(dashboard)/dashboard/providers/[id]/components/BatchTestResultsModal.tsx"
+  );
+  const upstreamProxyCardSrc = readProjectFile(
+    "src/app/(dashboard)/dashboard/providers/[id]/components/UpstreamProxyCard.tsx"
+  );
+
+  it("should mask provider test batch names with the global email privacy toggle", () => {
+    assert.ok(providersSrc, "src/app/(dashboard)/dashboard/providers/page.tsx should exist");
+    assert.match(providersSrc, /useEmailPrivacyStore/);
+    assert.match(
+      providersSrc,
+      /pickDisplayValue\(\[r\.connectionName\], emailsVisible, r\.connectionName\)/
+    );
+  });
+
+  it("should mask provider detail test result names with the global email privacy toggle", () => {
+    assert.ok(
+      providerDetailSrc,
+      "src/app/(dashboard)/dashboard/providers/[id]/ProviderDetailPageClient.tsx should exist"
+    );
+    assert.match(providerDetailSrc, /const emailsVisible = useEmailPrivacyStore/);
+    // The per-connection test-result masking now lives in the decomposed BatchTestResultsModal.
+    assert.ok(batchTestResultsSrc, "BatchTestResultsModal.tsx should exist");
+    assert.match(
+      batchTestResultsSrc,
+      /pickDisplayValue\(\s*\[r\.connectionName\],\s*emailsVisible,\s*r\.connectionName\s*\)/
+    );
+  });
+
+  it("should resolve provider detail metadata through the shared dashboard catalog", () => {
+    assert.ok(
+      providerDetailSrc,
+      "src/app/(dashboard)/dashboard/providers/[id]/ProviderDetailPageClient.tsx should exist"
+    );
+    assert.match(providerDetailSrc, /resolveDashboardProviderInfo/);
+  });
+
+  it("should treat upstream proxy entries as a dedicated management surface", () => {
+    assert.ok(
+      providerDetailSrc,
+      "src/app/(dashboard)/dashboard/providers/[id]/ProviderDetailPageClient.tsx should exist"
+    );
+    assert.match(providerDetailSrc, /isUpstreamProxyProvider/);
+    // The "managed elsewhere" copy now lives in the decomposed UpstreamProxyCard component.
+    assert.ok(upstreamProxyCardSrc, "UpstreamProxyCard.tsx should exist");
+    assert.match(upstreamProxyCardSrc, /Managed via Upstream Proxy Settings/);
+  });
+});
+
+describe("Page Integration — provider create route renders the onboarding wizard (#5427)", () => {
+  const providerNewSrc = readProjectFile("src/app/(dashboard)/dashboard/providers/new/page.tsx");
+
+  it("renders ProviderOnboardingWizard instead of redirecting (#5427)", () => {
+    // #5427 reversed the earlier redirect-stub retirement: /dashboard/providers/new now
+    // renders the previously-orphaned ProviderOnboardingWizard directly (auth enforced by
+    // the (dashboard) layout). The dedicated guard is tests/unit/onboarding-wizard-route-5427.
+    assert.ok(providerNewSrc, "src/app/(dashboard)/dashboard/providers/new/page.tsx should exist");
+    assert.match(providerNewSrc, /ProviderOnboardingWizard/);
+    assert.doesNotMatch(providerNewSrc, /redirect\("\/dashboard\/providers"\)/);
+  });
+});

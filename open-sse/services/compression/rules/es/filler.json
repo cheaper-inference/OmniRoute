@@ -1,0 +1,120 @@
+{
+  "language": "es",
+  "category": "filler",
+  "rules": [
+    {
+      "name": "es_polite_framing",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:por favor|podrias|podrías|puedes|me gustaria que|me gustaría que|necesito que)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_pleasantries",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:hola|buenos dias|buenos días|buenas tardes|gracias|muchas gracias)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_hedging",
+      "pattern": "\\b(?:creo que|me parece que|parece que|tal vez|probablemente|posiblemente)\\b\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "es_filler_adverbs",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:basicamente|básicamente|esencialmente|en realidad|literalmente|simplemente)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_self_reference",
+      "pattern": "^(?:estoy intentando|quiero|necesito|me gustaria|me gustaría)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_verbose_request",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:podrias explicarme|podrías explicarme|puedes explicar|podrias detallar|podrías detallar)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "Explica ",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_qualifiers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:un poco|algo asi|algo así|mas o menos|más o menos|de alguna manera)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_softeners",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:si es posible|cuando puedas|sin prisa|solo queria|sólo quería)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_verbose_instructions",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:proporciona una explicacion detallada de|proporciona una explicación detallada de|dame una explicacion completa de|dame una explicación completa de|escribe una explicacion en profundidad de|escribe una explicación en profundidad de|crea una explicacion exhaustiva de|crea una explicación exhaustiva de|explica en detalle)(?![\\p{L}\\p{N}_])",
+      "replacement": "explica ",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_redundant_openers",
+      "pattern": "^(?:hola|buenos dias|buenos días|buenas tardes|buenas|hey)\\s*[,.!?\\s]?\\s*",
+      "replacement": "",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "es_excessive_gratitude",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:muchisimas gracias|muchísimas gracias|gracias de antemano|te lo agradezco mucho|lo agradezco mucho)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_uncertainty_fillers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:supongo que|imagino que|me da la impresion de que|me da la impresión de que|quizas|quizás)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "es_assistant_fillers",
+      "pattern": "^(?:aqui tienes|aquí tienes|debajo esta|debajo está|esto es)\\s+(?:un|una|el|la)?\\s*",
+      "replacement": "",
+      "context": "assistant",
+      "category": "filler",
+      "minIntensity": "lite"
+    }
+  ]
+}

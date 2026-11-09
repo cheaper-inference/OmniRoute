@@ -1,0 +1,453 @@
+// @vitest-environment jsdom
+import React, { act } from "react";
+import { createRoot } from "react-dom/client";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
+vi.mock("next/navigation", () => ({
+  useParams: () => ({ id: "openrouter" }),
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => key,
+}));
+
+const { default: EditConnectionModal } =
+  await import("../../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/EditConnectionModal");
+
+const FREE_TOGGLE = '[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
+
+const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
+
+function render(props: Record<string, unknown>) {
+  const el = document.createElement("div");
+  document.body.appendChild(el);
+  const root = createRoot(el);
+  act(() => {
+    root.render(
+      <EditConnectionModal
+        isOpen
+        providerId={(props.providerId as string) || "openrouter"}
+        onSave={async () => undefined}
+        onClose={() => {}}
+        {...(props as any)}
+      />
+    );
+  });
+  containers.push({ root, el });
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return document.body;
+}
+
+async function waitFor(fn: () => boolean, timeoutMs = 2000) {
+  const start = Date.now();
+  while (!fn()) {
+    if (Date.now() - start > timeoutMs) throw new Error("waitFor timed out");
+    await new Promise((r) => setTimeout(r, 20));
+  }
+}
+
+beforeEach(() => {
+  (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+  vi.clearAllMocks();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() =>
+      Promise.resolve({ ok: true, json: async () => ({}), text: async () => "" } as Response)
+    )
+  );
+  vi.stubGlobal("localStorage", {
+    getItem: () => null,
+    setItem: () => undefined,
+    removeItem: () => undefined,
+    clear: () => undefined,
+  });
+});
+
+afterEach(() => {
+  for (const { root, el } of containers.splice(0)) {
+    act(() => root.unmount());
+    el.remove();
+  }
+  vi.unstubAllGlobals();
+});
+
+describe("EditConnectionModal — import only free models", () => {
+  it("shows the free-only toggle for a connection whose provider has free models", () => {
+    const el = render({
+      connection: { id: "conn-1", provider: "openrouter", providerSpecificData: {} },
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+  });
+
+  it("hides the free-only toggle for a provider without free models", () => {
+    const el = render({
+      providerId: "anthropic",
+      connection: { id: "conn-2", provider: "anthropic", providerSpecificData: {} },
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeNull();
+  });
+
+  it("reflects the persisted flag as initially checked", () => {
+    const el = render({
+      connection: {
+        id: "conn-3",
+        provider: "openrouter",
+        providerSpecificData: { importFreeModelsOnly: true },
+      },
+    });
+    expect(el.querySelector(FREE_TOGGLE)!.getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("clears the flag (explicit false) and re-syncs when toggled off", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const onResyncModels = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      connection: {
+        id: "conn-5",
+        provider: "openrouter",
+        name: "OR",
+        providerSpecificData: { importFreeModelsOnly: true },
+      },
+      onSave,
+      onResyncModels,
+    });
+
+    const toggle = el.querySelector<HTMLButtonElement>(FREE_TOGGLE)!;
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+    act(() => {
+      toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "save"
+    )!;
+    act(() => {
+      saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await waitFor(() => onSave.mock.calls.length > 0);
+    // Must be an explicit `false`, not `undefined` — otherwise the PUT merge keeps the old `true`.
+    expect(onSave.mock.calls[0][0].providerSpecificData?.importFreeModelsOnly).toBe(false);
+    await waitFor(() => onResyncModels.mock.calls.length > 0);
+    expect(onResyncModels).toHaveBeenCalledWith("conn-5");
+  });
+
+  it("saves the flag and triggers a re-sync when toggled on", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const onResyncModels = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      connection: { id: "conn-4", provider: "openrouter", name: "OR", providerSpecificData: {} },
+      onSave,
+      onResyncModels,
+    });
+
+    const toggle = el.querySelector<HTMLButtonElement>(FREE_TOGGLE)!;
+    act(() => {
+      toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "save"
+    )!;
+    act(() => {
+      saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await waitFor(() => onSave.mock.calls.length > 0);
+    const payload = onSave.mock.calls[0][0];
+    expect(payload.providerSpecificData?.importFreeModelsOnly).toBe(true);
+
+    await waitFor(() => onResyncModels.mock.calls.length > 0);
+    expect(onResyncModels).toHaveBeenCalledWith("conn-4");
+  });
+});
+
+describe("EditConnectionModal — free-only import on compatible nodes", () => {
+  const OPENAI_NODE = "openai-compatible-12345678-1234-1234-1234-123456789abc";
+  const ANTHROPIC_NODE = "anthropic-compatible-12345678-1234-1234-1234-123456789abc";
+  const CC_NODE = "anthropic-compatible-cc-12345678-1234-1234-1234-123456789abc";
+
+  it("shows the toggle with the payload-evidence hint on an OpenAI-compatible node", () => {
+    const el = render({
+      providerId: OPENAI_NODE,
+      connection: { id: "conn-oc", provider: OPENAI_NODE, providerSpecificData: {} },
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+    expect(el.textContent).toContain("importFreeModelsOnlyCompatibleHint");
+  });
+
+  it("shows the toggle on an Anthropic-compatible node", () => {
+    const el = render({
+      providerId: ANTHROPIC_NODE,
+      connection: { id: "conn-ac", provider: ANTHROPIC_NODE, providerSpecificData: {} },
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeTruthy();
+  });
+
+  it("hides the toggle on a Claude Code-compatible node (no /models listing)", () => {
+    const el = render({
+      providerId: CC_NODE,
+      connection: { id: "conn-cc", provider: CC_NODE, providerSpecificData: {} },
+    });
+    expect(el.querySelector(FREE_TOGGLE)).toBeNull();
+  });
+
+  it("keeps the generic hint for a provider with a documented free tier", () => {
+    const el = render({
+      connection: { id: "conn-or", provider: "openrouter", providerSpecificData: {} },
+    });
+    expect(el.textContent).toContain("importFreeModelsOnlyHint");
+    expect(el.textContent).not.toContain("importFreeModelsOnlyCompatibleHint");
+  });
+
+  it("saves the flag and re-syncs a compatible node when toggled on", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const onResyncModels = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: OPENAI_NODE,
+      connection: {
+        id: "conn-oc-save",
+        provider: OPENAI_NODE,
+        name: "Aggregator",
+        authType: "apikey",
+        providerSpecificData: {},
+      },
+      onSave,
+      onResyncModels,
+    });
+
+    const toggle = el.querySelector<HTMLButtonElement>(FREE_TOGGLE)!;
+    act(() => {
+      toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "save"
+    )!;
+    act(() => {
+      saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await waitFor(() => onSave.mock.calls.length > 0);
+    expect(onSave.mock.calls[0][0].providerSpecificData?.importFreeModelsOnly).toBe(true);
+    await waitFor(() => onResyncModels.mock.calls.length > 0);
+    expect(onResyncModels).toHaveBeenCalledWith("conn-oc-save");
+  });
+});
+
+describe("EditConnectionModal — encrypted Responses reasoning", () => {
+  const PRESERVE_TOGGLE = '[role="switch"][aria-label="Preserve encrypted reasoning"]';
+
+  it("loads and saves the opt-in for an OpenAI-compatible Responses connection", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "openai-compatible-responses-12345678-1234-1234-1234-123456789abc",
+      connection: {
+        id: "conn-responses",
+        provider: "openai-compatible-responses-12345678-1234-1234-1234-123456789abc",
+        authType: "apikey",
+        providerSpecificData: { preserveEncryptedReasoning: true },
+      },
+      onSave,
+    });
+    const toggle = el.querySelector<HTMLButtonElement>(PRESERVE_TOGGLE)!;
+    expect(toggle.getAttribute("aria-checked")).toBe("true");
+    act(() => toggle.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "save"
+    )!;
+    act(() => saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    await waitFor(() => onSave.mock.calls.length > 0);
+    expect(onSave.mock.calls[0][0].providerSpecificData?.preserveEncryptedReasoning).toBe(false);
+  });
+
+  it("hides the redundant opt-in for first-party OpenAI and removes stale state on save", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "openai",
+      connection: {
+        id: "conn-openai",
+        provider: "openai",
+        authType: "apikey",
+        providerSpecificData: { preserveEncryptedReasoning: true },
+      },
+      onSave,
+    });
+    expect(el.querySelector(PRESERVE_TOGGLE)).toBeNull();
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "save"
+    )!;
+    act(() => saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    await waitFor(() => onSave.mock.calls.length > 0);
+    expect(onSave.mock.calls[0][0].providerSpecificData).not.toHaveProperty(
+      "preserveEncryptedReasoning"
+    );
+  });
+
+  it("is absent for a chat-only compatible connection", () => {
+    const el = render({
+      providerId: "openai-compatible-chat-12345678-1234-1234-1234-123456789abc",
+      connection: {
+        id: "conn-chat",
+        provider: "openai-compatible-chat-12345678-1234-1234-1234-123456789abc",
+        authType: "apikey",
+        providerSpecificData: {},
+      },
+    });
+    expect(el.querySelector(PRESERVE_TOGGLE)).toBeNull();
+  });
+
+  it("appears when a compatible connection selects the Responses target format", () => {
+    const el = render({
+      providerId: "openai-compatible-chat-12345678-1234-1234-1234-123456789abc",
+      connection: {
+        id: "conn-selected-responses",
+        provider: "openai-compatible-chat-12345678-1234-1234-1234-123456789abc",
+        authType: "apikey",
+        providerSpecificData: { targetFormat: "openai-responses" },
+      },
+    });
+    expect(el.querySelector(PRESERVE_TOGGLE)?.getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("hides the redundant opt-in for Codex while keeping its effective controls", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "codex",
+      connection: {
+        id: "conn-codex",
+        provider: "codex",
+        authType: "oauth",
+        providerSpecificData: { preserveEncryptedReasoning: true },
+      },
+      onSave,
+    });
+    expect(el.querySelector(PRESERVE_TOGGLE)).toBeNull();
+    expect(el.textContent).toContain("defaultThinkingStrengthLabel");
+    expect(
+      el.querySelector('[role="switch"][aria-label="openaiResponsesStoreLabel"]')
+    ).toBeTruthy();
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "save"
+    )!;
+    act(() => saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    await waitFor(() => onSave.mock.calls.length > 0);
+    expect(onSave.mock.calls[0][0].providerSpecificData).not.toHaveProperty(
+      "preserveEncryptedReasoning"
+    );
+  });
+});
+
+describe("EditConnectionModal — quota scraping fields", () => {
+  it("renders only the API key for OpenCode Go and saves no scraping credentials", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "opencode-go",
+      connection: {
+        id: "conn-opencode-go",
+        provider: "opencode-go",
+        name: "OpenCode Go",
+        authType: "apikey",
+        providerSpecificData: { workspaceId: "workspace-existing" },
+      },
+      onSave,
+    });
+
+    expect(el.querySelector('input[name="opencodeGoWorkspaceId"]')).toBeNull();
+    expect(el.querySelector('input[name="opencodeGoAuthCookie"]')).toBeNull();
+    expect(el.querySelector('input[placeholder="enterNewApiKey"]')).toBeTruthy();
+
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "save"
+    )!;
+    act(() => {
+      saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await waitFor(() => onSave.mock.calls.length > 0);
+    const payload = onSave.mock.calls[0][0];
+    expect(payload.providerSpecificData).not.toHaveProperty("opencodeGoWorkspaceId");
+    expect(payload.providerSpecificData).not.toHaveProperty("opencodeGoAuthCookie");
+  });
+
+  it("omits Ollama Cloud usage cookie when the edit field is left blank", async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "ollama-cloud",
+      connection: {
+        id: "conn-ollama-cloud",
+        provider: "ollama-cloud",
+        name: "Ollama Cloud",
+        authType: "apikey",
+        providerSpecificData: {},
+      },
+      onSave,
+    });
+
+    expect(el.querySelector<HTMLInputElement>('input[name="ollamaCloudUsageCookie"]')).toBeTruthy();
+
+    const saveBtn = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "save"
+    )!;
+    act(() => {
+      saveBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    await waitFor(() => onSave.mock.calls.length > 0);
+    const payload = onSave.mock.calls[0][0];
+    expect("ollamaCloudUsageCookie" in payload.providerSpecificData).toBe(false);
+  });
+});
+
+it.each([false, true])(
+  "#17028 preserves a retired free-only connection until opt-out=%s",
+  async (optOut) => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const onResyncModels = vi.fn().mockResolvedValue(undefined);
+    const el = render({
+      providerId: "opencode-zen",
+      connection: {
+        id: "legacy-opencode-free-only",
+        provider: "opencode-zen",
+        authType: "apikey",
+        name: "OpenCode",
+        providerSpecificData: { importFreeModelsOnly: true },
+      },
+      onSave,
+      onResyncModels,
+    });
+    const toggle = el.querySelector<HTMLButtonElement>(FREE_TOGGLE);
+    expect(toggle).not.toBeNull();
+    expect(toggle?.getAttribute("aria-checked")).toBe("true");
+    expect(onSave).not.toHaveBeenCalled();
+    const save = Array.from(el.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "save"
+    );
+    expect(save).toBeTruthy();
+    if (optOut) await act(async () => toggle?.click());
+    await act(async () => save?.click());
+    await waitFor(() => onSave.mock.calls.length > 0);
+    expect(onSave.mock.calls[0][0].providerSpecificData.importFreeModelsOnly).toBe(!optOut);
+    if (optOut) {
+      expect(onResyncModels).toHaveBeenCalledWith("legacy-opencode-free-only");
+    } else {
+      expect(onResyncModels).not.toHaveBeenCalled();
+    }
+  }
+);
+
+it("#17028 does not offer new free-only imports for an OpenCode connection", () => {
+  const el = render({
+    providerId: "opencode-zen",
+    connection: {
+      id: "normal-opencode",
+      provider: "opencode-zen",
+      authType: "apikey",
+      name: "OpenCode",
+      providerSpecificData: { importFreeModelsOnly: false },
+    },
+  });
+  expect(el.querySelector(FREE_TOGGLE)).toBeNull();
+});

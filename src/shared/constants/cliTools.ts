@@ -1,0 +1,1102 @@
+// CLI Tools configuration
+import { getClaudeCodeDefaultModels } from "@omniroute/open-sse/config/providerRegistry";
+import type { CliCatalogEntry } from "@/shared/schemas/cliCatalog";
+import { GROK_BUILD_CLI_TOOL } from "@/shared/constants/cliToolsGrokBuild";
+
+const _cc = getClaudeCodeDefaultModels();
+type CliModel = NonNullable<CliCatalogEntry["defaultModels"]>[number];
+const createCliModel = (id: string, name: string): CliModel => ({ id, name, alias: id });
+
+export const CLI_TOOLS: Record<string, CliCatalogEntry> = {
+  claude: {
+    id: "claude",
+    name: "Claude Code",
+    image: "/providers/claude.svg",
+    color: "#D97757",
+    description: "Anthropic Claude Code CLI — ANTHROPIC_BASE_URL points to OmniRoute",
+    docsUrl: "https://docs.anthropic.com/en/docs/claude-code/overview",
+    configType: "env",
+    category: "code",
+    vendor: "Anthropic",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    envVars: {
+      baseUrl: "ANTHROPIC_BASE_URL",
+      model: "ANTHROPIC_MODEL",
+      fableModel: "ANTHROPIC_DEFAULT_FABLE_MODEL",
+      opusModel: "ANTHROPIC_DEFAULT_OPUS_MODEL",
+      sonnetModel: "ANTHROPIC_DEFAULT_SONNET_MODEL",
+      haikuModel: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+    },
+    modelAliases: ["default", "fable", "sonnet", "opus", "haiku", "opusplan"],
+    settingsFile: "~/.claude/settings.json",
+    defaultCommand: "claude",
+    defaultModels: [
+      {
+        id: "model",
+        name: "Default Model",
+        alias: "model",
+        envKey: "ANTHROPIC_MODEL",
+        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
+        isTopLevel: true,
+      },
+      {
+        id: "fable",
+        name: "Claude Fable",
+        alias: "fable",
+        envKey: "ANTHROPIC_DEFAULT_FABLE_MODEL",
+        defaultValue: _cc.fable ? `cc/${_cc.fable}` : "cc/claude-fable-5-1",
+        isTopLevel: true,
+      },
+      {
+        id: "opus",
+        name: "Claude Opus",
+        alias: "opus",
+        envKey: "ANTHROPIC_DEFAULT_OPUS_MODEL",
+        defaultValue: _cc.opus ? `cc/${_cc.opus}` : "cc/claude-opus-4-5-20251101",
+      },
+      {
+        id: "sonnet",
+        name: "Claude Sonnet",
+        alias: "sonnet",
+        envKey: "ANTHROPIC_DEFAULT_SONNET_MODEL",
+        defaultValue: _cc.sonnet ? `cc/${_cc.sonnet}` : "cc/claude-sonnet-4-5-20250929",
+      },
+      {
+        id: "haiku",
+        name: "Claude Haiku",
+        alias: "haiku",
+        envKey: "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+        defaultValue: _cc.haiku ? `cc/${_cc.haiku}` : "cc/claude-haiku-4-5-20251001",
+      },
+    ],
+  },
+  codex: {
+    id: "codex",
+    name: "OpenAI Codex CLI",
+    image: "/providers/codex.svg",
+    color: "#10A37F",
+    description: "OpenAI Codex CLI — OpenAI-compatible base URL targets OmniRoute",
+    docsUrl: "https://github.com/openai/codex",
+    configType: "custom",
+    category: "code",
+    vendor: "OpenAI",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "codex",
+  },
+  zcode: {
+    id: "zcode",
+    name: "ZCode (GLM Coding Plan)",
+    color: "#3B82F6",
+    description: "Local ZCode app-server backend; auth remains in the user's ZCode profile",
+    docsUrl: "https://zcode.z.ai",
+    configType: "custom",
+    category: "code",
+    vendor: "Z.ai",
+    // ZCode's app-server is a native length-prefixed protocol, not ACP. The
+    // zcode provider executor owns its lifecycle instead of ACP spawning it.
+    acpSpawnable: false,
+    baseUrlSupport: "none",
+    defaultCommand: "zcode",
+    notes: [
+      {
+        type: "info",
+        text: "Uses the local ZCode app-server and its existing builtin:zai-coding-plan login.",
+      },
+      { type: "warning", text: "The response is buffered until the ZCode turn completes." },
+    ],
+  },
+  droid: {
+    id: "droid",
+    name: "Factory Droid",
+    image: "/providers/cli-generic.svg",
+    color: "#00D4FF",
+    description: "Factory AI Droid — BYOK assistant with configurable endpoint",
+    docsUrl: "/docs?section=cli-tools&tool=droid",
+    configType: "custom",
+    category: "code",
+    vendor: "Factory AI",
+    acpSpawnable: false,
+    baseUrlSupport: "partial",
+    defaultCommand: "droid",
+  },
+  openclaw: {
+    id: "openclaw",
+    name: "Open Claw",
+    image: "/providers/openclaw.svg",
+    color: "#FF6B35",
+    description: "Open Claw — open-source multi-backend agent CLI (OSS, P. Steinberger)",
+    docsUrl: "/docs?section=cli-tools&tool=openclaw",
+    configType: "custom",
+    category: "agent",
+    vendor: "OSS (P. Steinberger)",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "openclaw",
+  },
+  cursor: {
+    id: "cursor",
+    name: "Cursor",
+    image: "/providers/cursor.svg",
+    color: "#000000",
+    // Cursor App routes via its own cloud server — local base URL not supported.
+    // Use cursor-cli entry for headless/agent CLI mode with custom endpoint.
+    description: "Cursor AI Code Editor — Cloud Endpoint required (use cursor-cli for CLI mode)",
+    docsUrl: "https://docs.cursor.com/settings/models",
+    configType: "guide",
+    category: "code",
+    vendor: "Anysphere",
+    acpSpawnable: false,
+    baseUrlSupport: "none",
+    requiresCloud: true,
+    defaultCommands: ["agent", "cursor"],
+    notes: [
+      { type: "warning", text: "Requires Cursor Pro account to use this feature." },
+      {
+        type: "cloudCheck",
+        text: "Cursor routes requests through its own server, so local endpoint is not supported. Please enable Cloud Endpoint in Settings.",
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Open Settings", desc: "Go to Settings → Models" },
+      { step: 2, title: "Enable OpenAI API", desc: 'Enable "OpenAI API key" option' },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "API Key", type: "apiKeySelector" },
+      { step: 5, title: "Add Custom Model", desc: 'Click "View All Model" → "Add Custom Model"' },
+      { step: 6, title: "Select Model", type: "modelSelector" },
+    ],
+  },
+  cline: {
+    id: "cline",
+    name: "Cline",
+    image: "/providers/cline.svg",
+    color: "#00D1B2",
+    description: "Cline — open-source VS Code coding agent with OpenAI-compatible base URL",
+    docsUrl: "https://docs.cline.bot/",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "cline",
+  },
+  kilo: {
+    id: "kilo",
+    name: "Kilo Code",
+    image: "/providers/cli-generic.svg",
+    color: "#FF6B6B",
+    description: "Kilo Code — VS Code AI assistant with custom base URL support",
+    docsUrl: "/docs?section=cli-tools&tool=kilocode",
+    configType: "custom",
+    category: "code",
+    vendor: "Kilo-Org",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "kilocode",
+  },
+  continue: {
+    id: "continue",
+    name: "Continue",
+    image: "/providers/continue.svg",
+    color: "#7C3AED",
+    description: "Continue — open-source AI coding assistant with full provider config",
+    docsUrl: "https://docs.continue.dev/",
+    configType: "guide",
+    category: "code",
+    vendor: "continue.dev",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    guideSteps: [
+      { step: 1, title: "Open Config", desc: "Open Continue configuration file" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Select Model", type: "modelSelector" },
+      {
+        step: 4,
+        title: "Add Model Config",
+        desc: "Add the following configuration to your models array:",
+      },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `{
+  "apiBase": "{{baseUrl}}",
+  "title": "{{model}}",
+  "model": "{{model}}",
+  "provider": "openai",
+  "apiKey": "{{apiKey}}"
+}`,
+    },
+  },
+  antigravity: {
+    id: "antigravity",
+    name: "Antigravity",
+    color: "#4285F4",
+    description: "Google Antigravity IDE — MITM intercept required (plan 11 backlog)",
+    docsUrl: "/docs?section=cli-tools&tool=antigravity",
+    // configType:"mitm" — fluxo MITM; baseUrlSupport:"none" → excluído das listas,
+    // acessível só via legacy /[id] route após F8
+    configType: "mitm",
+    category: "code",
+    vendor: "Google",
+    acpSpawnable: false,
+    baseUrlSupport: "none",
+    modelAliases: [
+      "gemini-3.8-flash-high",
+      "gemini-3.8-flash-medium",
+      "gemini-3.8-flash-low",
+      "claude-sonnet-5-5-low",
+      "claude-sonnet-5-5-medium",
+      "claude-sonnet-5-5-high",
+      "claude-opus-5-5-low",
+      "claude-opus-5-5-medium",
+      "claude-opus-5-5-high",
+      "claude-opus-4-6-thinking",
+      "claude-sonnet-4-6",
+      "gemini-pro-agent",
+      "gemini-3.1-pro-low",
+      "gpt-oss-120b-medium",
+    ],
+    defaultModels: [
+      createCliModel("gemini-3.8-flash-high", "Gemini 3.8 Flash High"),
+      createCliModel("gemini-3.8-flash-medium", "Gemini 3.8 Flash Medium"),
+      createCliModel("gemini-3.8-flash-low", "Gemini 3.8 Flash Low"),
+      createCliModel("gemini-pro-agent", "Gemini 3.1 Pro High"),
+      createCliModel("gemini-3.1-pro-low", "Gemini 3.1 Pro Low"),
+      // Antigravity serves Claude 5.5 as one upstream id per tier — no bare `claude-*-5-5`.
+      createCliModel("claude-sonnet-5-5-low", "Claude Sonnet 5.5 Low"),
+      createCliModel("claude-sonnet-5-5-medium", "Claude Sonnet 5.5 Medium"),
+      createCliModel("claude-sonnet-5-5-high", "Claude Sonnet 5.5 High"),
+      createCliModel("claude-opus-5-5-low", "Claude Opus 5.5 Low"),
+      createCliModel("claude-opus-5-5-medium", "Claude Opus 5.5 Medium"),
+      createCliModel("claude-opus-5-5-high", "Claude Opus 5.5 High"),
+      createCliModel("claude-sonnet-4-6", "Claude Sonnet 4.6"),
+      createCliModel("claude-opus-4-6-thinking", "Claude Opus 4.6 Thinking"),
+      createCliModel("gpt-oss-120b-medium", "GPT OSS 120B Medium"),
+    ],
+  },
+  copilot: {
+    id: "copilot",
+    name: "GitHub Copilot",
+    image: "/providers/copilot.svg",
+    color: "#1F6FEB",
+    // D-nota: copilot suporta COPILOT_PROVIDER_BASE_URL desde v1.0.19+
+    description: "GitHub Copilot Chat — VS Code extension with COPILOT_PROVIDER_BASE_URL support",
+    docsUrl: "https://code.visualstudio.com/docs/copilot/overview",
+    configType: "custom",
+    category: "code",
+    vendor: "GitHub / Microsoft",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+  },
+  opencode: {
+    id: "opencode",
+    name: "OpenCode",
+    imageLight: "/providers/cli-generic.svg",
+    imageDark: "/providers/cli-generic.svg",
+    icon: "terminal",
+    color: "#FF6B35",
+    description: "OpenCode — AI coding agent CLI by Anomaly (terminal, multi-provider)",
+    docsUrl: "/docs?section=cli-tools&tool=opencode",
+    configType: "guide",
+    category: "code",
+    vendor: "Anomaly",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "opencode",
+    modelSelectionMode: "multiple",
+    hideComboModels: true,
+    previewConfigMode: "opencode",
+    notes: [
+      {
+        type: "warning",
+        text: "Config paths: ~/.config/opencode/opencode.jsonc (preferred when present) or opencode.json on all platforms (Windows: %USERPROFILE%\\\\.config\\\\opencode\\\\opencode.jsonc or opencode.json)",
+      },
+      {
+        type: "warning",
+        text: 'Thinking variant example: opencode run "implement this feature" --model omniroute/claude-sonnet-4-5-thinking --variant high',
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Install OpenCode", desc: "Install via npm: npm install -g opencode-ai" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Set Base URL", desc: "opencode config set baseUrl {{baseUrl}}" },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Use Thinking Variant",
+        desc: "For thinking models, run with --variant high/low/max (example command below).",
+      },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "omniroute": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "OmniRoute",
+      "options": {
+        "baseURL": "{{baseUrl}}",
+        "apiKey": "{{apiKey}}"
+      },
+      "models": {
+        "{{model}}": { "name": "{{model}}" },
+        "claude-sonnet-4-5-thinking": { "name": "claude-sonnet-4-5-thinking" },
+        "gemini-3.1-pro-high": { "name": "gemini-3.1-pro-high" },
+        "gemini-3-flash": { "name": "gemini-3-flash" }
+      }
+    }
+  }
+}`,
+    },
+  },
+  // hermes (simple guide) — category: "code", baseUrlSupport: "none"
+  // Excluded from the CLI Code's list (not in D15 19-entry list).
+  // The advanced multi-role agent is "hermes-agent" (category: "agent", baseUrlSupport: "full").
+  // Legacy /[id] route still renders this card after F8.
+  hermes: {
+    id: "hermes",
+    name: "Hermes",
+    icon: "terminal",
+    color: "#8B5CF6",
+    description:
+      "Nous Research Hermes — generic OpenAI-compatible setup (use hermes-agent for full agent)",
+    docsUrl: "/docs?section=cli-tools&tool=hermes",
+    configType: "guide",
+    category: "code",
+    vendor: "Nous Research",
+    acpSpawnable: false,
+    baseUrlSupport: "none",
+    defaultCommand: "hermes",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Open Hermes Config",
+        desc: "Open your Hermes configuration file or create one if this is the first run.",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Save Provider Block",
+        desc: "Use the JSON block below as the OpenAI-compatible provider definition for OmniRoute.",
+      },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `{
+  "provider": {
+    "type": "openai",
+    "baseURL": "{{baseUrl}}",
+    "apiKey": "{{apiKey}}",
+    "model": "{{model}}"
+  }
+}`,
+    },
+  },
+
+  // Rich, first-class support for the real advanced Hermes Agent (Nous Research)
+  // Separate from the original simple "Hermes" guide above.
+  "hermes-agent": {
+    id: "hermes-agent",
+    name: "Hermes Agent",
+    icon: "terminal",
+    color: "#8B5CF6",
+    description: "Hermes Agent (Nous Research) — advanced multi-role autonomous terminal AI",
+    docsUrl: "/docs?section=cli-tools&tool=hermes-agent",
+    configType: "custom",
+    category: "agent",
+    vendor: "Nous Research",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "hermes",
+  },
+  kiro: {
+    id: "kiro",
+    name: "Kiro AI",
+    image: "/providers/kiro.svg",
+    icon: "psychology_alt",
+    color: "#FF6B35",
+    description: "Amazon Kiro — AI-powered IDE with MITM intercept (plan 11 backlog)",
+    docsUrl: "/docs?section=cli-tools&tool=kiro",
+    // configType:"mitm" — fluxo MITM; baseUrlSupport:"none" → excluído das listas,
+    // acessível só via legacy /[id] route após F8
+    configType: "mitm",
+    category: "code",
+    vendor: "Amazon",
+    acpSpawnable: false,
+    baseUrlSupport: "none",
+    guideSteps: [
+      { step: 1, title: "Open Kiro Settings", desc: "Go to Settings → AI Provider" },
+      { step: 2, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 3, title: "API Key", type: "apiKeySelector" },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+  },
+  qwen: {
+    id: "qwen",
+    name: "Qwen Code",
+    image: "/providers/qwen.svg",
+    color: "#10B981",
+    description: "Qwen Code CLI — current V4 OpenAI-compatible model provider via OmniRoute",
+    docsUrl: "https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/",
+    configType: "guide",
+    category: "code",
+    vendor: "Alibaba",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "qwen",
+    previewConfigMode: "qwen",
+    notes: [
+      {
+        type: "info",
+        text: "OmniRoute is registered under modelProviders.openai using Qwen Code's current bare-array V4 format.",
+      },
+      {
+        type: "info",
+        text: "The API key is stored only as OMNIROUTE_API_KEY in ~/.qwen/.env, leaving your existing provider credentials untouched.",
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Install Qwen Code", desc: "npm install -g @qwen-code/qwen-code" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Save Config",
+        desc: "Write the modelProviders entry and dedicated .env key without replacing other Qwen Code settings.",
+      },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `{
+  "modelProviders": {
+    "openai": [
+      {
+        "id": "{{model}}",
+        "name": "{{model}} (OmniRoute)",
+        "envKey": "OMNIROUTE_API_KEY",
+        "baseUrl": "{{baseUrl}}"
+      }
+    ]
+  },
+  "security": { "auth": { "selectedType": "openai" } },
+  "model": { "name": "{{model}}", "baseUrl": "{{baseUrl}}" }
+}`,
+    },
+  },
+  custom: {
+    id: "custom",
+    name: "Custom CLI",
+    icon: "terminal",
+    color: "#10B981",
+    description: "Generic OpenAI-compatible CLI or SDK configuration generator",
+    docsUrl: "/docs?section=cli-tools",
+    configType: "custom-builder",
+    category: "code",
+    vendor: "Custom",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+  },
+  // ── Code entries — aider ──────────────────────────────────────────────────
+  aider: {
+    id: "aider",
+    name: "Aider",
+    icon: "terminal",
+    color: "#2DD4BF",
+    description: "Aider AI pair-programming CLI — OpenAI-compatible --openai-api-base flag",
+    docsUrl: "https://aider.chat/docs/config/options.html",
+    configType: "guide",
+    category: "code",
+    vendor: "OSS (P. Gauthier)",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "aider",
+    guideSteps: [
+      { step: 1, title: "Install Aider", desc: "pip install aider-chat" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "bash",
+      code: `export OPENAI_API_KEY="{{apiKey}}"
+aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
+    },
+  },
+  // ── Code entries — forge ──────────────────────────────────────────────────
+  forge: {
+    id: "forge",
+    name: "ForgeCode",
+    icon: "terminal",
+    color: "#F97316",
+    description: "ForgeCode coding agent CLI — custom provider via .forge.toml",
+    docsUrl: "https://github.com/antinomyhq/forge",
+    configType: "custom",
+    category: "code",
+    vendor: "Antinomy HQ",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "forge",
+  },
+
+  "grok-build": GROK_BUILD_CLI_TOOL,
+  // ── Code entries — cursor-cli ─────────────────────────────────────────────
+  "cursor-cli": {
+    id: "cursor-cli",
+    name: "Cursor Agent CLI",
+    image: "/providers/cursor.svg",
+    color: "#000000",
+    description: "Cursor Agent CLI — headless agent mode with custom provider endpoint",
+    docsUrl: "https://docs.cursor.com/advanced/api",
+    configType: "guide",
+    category: "code",
+    vendor: "Anysphere",
+    acpSpawnable: true,
+    baseUrlSupport: "partial",
+    defaultCommand: "cursor",
+    guideSteps: [
+      { step: 1, title: "Install Cursor CLI", desc: "Download cursor binary from cursor.com" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+  },
+
+  // ── Code entries — new ★ ──────────────────────────────────────────────────
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  roo: {
+    id: "roo",
+    name: "Roo Code",
+    image: "/providers/roocode.svg",
+    color: "#7C3AED",
+    description: "Roo Code AI Assistant — VS Code extension with OpenAI-compatible custom base URL",
+    docsUrl: "https://docs.roocode.com/",
+    configType: "guide",
+    category: "code",
+    vendor: "Roo (OSS)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    guideSteps: [
+      { step: 1, title: "Install Roo Code", desc: "Install the Roo Code VS Code extension" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+  },
+
+  // OpenClaude (Gitlawb/openclaude) — distinct from the "openclaw" entry above.
+  openclaude: {
+    id: "openclaude",
+    name: "OpenClaude",
+    image: "/providers/cli-generic.svg",
+    color: "#000000",
+    description: "OpenClaude coding agent CLI — OpenAI-compatible provider via OPENAI_BASE_URL",
+    docsUrl: "https://github.com/Gitlawb/openclaude",
+    configType: "guide",
+    category: "code",
+    vendor: "Gitlawb (OSS)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "openclaude",
+    notes: [
+      {
+        type: "warning",
+        text: 'OpenClaude needs --provider openai. Without it the env vars are ignored and it stops at "Not logged in".',
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Install", desc: "npm install -g @gitlawb/openclaude" },
+      { step: 2, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 3, title: "API Key", type: "apiKeySelector" },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Run",
+        desc: "Export the variables below, then start OpenClaude with --provider openai",
+      },
+    ],
+    codeBlock: {
+      language: "bash",
+      code: `export OPENAI_BASE_URL="{{baseUrl}}"
+export OPENAI_API_KEY="{{apiKey}}"
+export OPENAI_MODEL="{{model}}"
+openclaude --provider openai
+# Windows PowerShell:
+# $env:OPENAI_BASE_URL="{{baseUrl}}"; $env:OPENAI_API_KEY="{{apiKey}}"; $env:OPENAI_MODEL="{{model}}"
+# openclaude --provider openai`,
+    },
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  jcode: {
+    id: "jcode",
+    name: "jcode",
+    icon: "terminal",
+    color: "#10B981",
+    description: "jcode terminal coding agent — OpenAI-compatible CLI by 1jehuang",
+    docsUrl: "https://github.com/1jehuang/jcode",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (1jehuang)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "jcode",
+  },
+
+  /**
+   * ★ Added 2026-08-22 — Prime Agent (PrimeIntellect-ai/prime-agent).
+   * A self-improving RLM coding harness (TypeScript) whose LLM toolkit
+   * (prime-agent-ai) supports "any OpenAI-compatible API" + a dedicated
+   * "OpenAI Codex (ChatGPT Plus/Pro OAuth)" provider, so it can point at
+   * OmniRoute's OpenAI-compatible base URL like codex/forge. Installed via
+   * `curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh | sh`;
+   * provider chosen at first run via `/login`.
+   */
+  "prime-agent": {
+    id: "prime-agent",
+    name: "Prime Agent",
+    icon: "terminal",
+    color: "#6366F1",
+    description:
+      "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
+    docsUrl: "https://github.com/PrimeIntellect-ai/prime-agent",
+    configType: "custom",
+    category: "agent",
+    vendor: "Prime Intellect (OSS)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "prime-agent",
+  },
+
+  /**
+   * ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27
+   * Kept as a legacy/dual entry after CodeWhale (see below) took over as the
+   * actively-maintained successor. Existing users who still have DeepSeek
+   * TUI installed keep a working dashboard card; new users are steered to
+   * "codewhale" instead.
+   */
+  "deepseek-tui": {
+    id: "deepseek-tui",
+    name: "DeepSeek TUI",
+    image: "/providers/deepseek.svg",
+    color: "#4F46E5",
+    description: "DeepSeek TUI — Rust-based coding agent CLI with OPENAI_BASE_URL support",
+    docsUrl: "https://github.com/hunterbown/deepseek-tui",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (Hunter Bown)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "deepseek-tui",
+  },
+
+  /**
+   * ★ Added 2026-07-02 (dual-entry, see deepseek-tui above). CodeWhale is
+   * the actively-maintained successor to DeepSeek TUI — same author, new
+   * name. Config lives under ~/.codewhale/config.toml; the settings route
+   * also keeps ~/.deepseek/config.toml (legacy) in sync for upgrading
+   * users. Reference: https://github.com/Hmbown/CodeWhale
+   */
+  codewhale: {
+    id: "codewhale",
+    name: "CodeWhale",
+    icon: "terminal",
+    color: "#4F46E5",
+    description:
+      "CodeWhale — Rust-based coding agent CLI with OPENAI_BASE_URL support (successor to DeepSeek TUI)",
+    docsUrl: "https://github.com/Hmbown/CodeWhale",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (Hmbown)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "codewhale",
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  smelt: {
+    id: "smelt",
+    name: "Smelt",
+    icon: "terminal",
+    color: "#EF4444",
+    description: "Smelt coding agent CLI — OpenAI-compatible agent by leonardcser",
+    docsUrl: "https://github.com/leonardcser/smelt",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (leonardcser)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "smelt",
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  pi: {
+    id: "pi",
+    name: "Pi",
+    icon: "terminal",
+    color: "#F59E0B",
+    description: "Pi coding agent CLI — lightweight terminal AI by M. Zechner",
+    docsUrl: "https://github.com/badlogic/pi",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (M. Zechner)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "pi",
+    // Pi loads custom providers from <agent-dir>/models.json; agent-dir defaults
+    // to ~/.pi/agent and moves wholesale with PI_CODING_AGENT_DIR. See
+    // src/shared/services/piConfig.ts.
+    settingsFile: "~/.pi/agent/models.json",
+    // Hand-edit fallback shown by the guided card's manual-configuration block.
+    codeBlock: {
+      language: "json",
+      code: [
+        "{",
+        '  "providers": {',
+        '    "omniroute": {',
+        '      "baseUrl": "http://127.0.0.1:20128/v1",',
+        '      "api": "openai-completions",',
+        '      "apiKey": "sk_omniroute",',
+        '      "models": [',
+        '        { "id": "auto/best-coding", "name": "OmniRoute best-coding" }',
+        "      ]",
+        "    }",
+        "  }",
+        "}",
+      ].join("\n"),
+    },
+  },
+
+  /** Added — ported from upstream decolua/9router#1233 (dashboard catalog entry for Crush). */
+  crush: {
+    id: "crush",
+    name: "Crush",
+    icon: "terminal",
+    color: "#FB923C",
+    description: "Crush coding agent CLI — terminal AI agent by Charm (charmbracelet/crush)",
+    docsUrl: "https://github.com/charmbracelet/crush",
+    configType: "custom",
+    category: "code",
+    vendor: "OSS (Charm)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "crush",
+  },
+
+  /** Zed editor's built-in agent via an OpenAI-compatible provider (`omniroute setup-zed`). */
+  zed: {
+    id: "zed",
+    name: "Zed",
+    image: "/providers/zed-hosted.svg",
+    color: "#084CCF",
+    description: "Zed code editor — built-in agent through an OpenAI-compatible provider",
+    docsUrl: "https://zed.dev/docs/ai/llm-providers#openai-api-compatible",
+    configType: "guide",
+    category: "code",
+    vendor: "Zed Industries",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    guideSteps: [
+      { step: 1, title: "Install Zed", desc: "Download Zed from zed.dev" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "json",
+      code: `// ~/.config/zed/settings.json — or run: omniroute setup-zed
+{
+  "language_models": {
+    "openai_compatible": {
+      "omniroute": {
+        "api_url": "{{baseUrl}}",
+        "available_models": [
+          { "name": "{{model}}", "display_name": "{{model}}", "max_tokens": 200000 }
+        ]
+      }
+    }
+  }
+}`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "Zed reads the key from the OMNIROUTE_API_KEY environment variable and never stores it in settings.json. Export it, then start Zed from that shell.",
+      },
+    ],
+  },
+
+  // ── Agent entries ─────────────────────────────────────────────────────────
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  goose: {
+    id: "goose",
+    name: "Goose",
+    icon: "smart_toy",
+    color: "#F97316",
+    description: "Goose autonomous agent CLI — Block / Linux Foundation OSS, full base URL",
+    docsUrl: "https://block.github.io/goose/",
+    configType: "guide",
+    category: "agent",
+    vendor: "Block / Linux Foundation",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "goose",
+    guideSteps: [
+      { step: 1, title: "Install Goose", desc: "pip install goose-ai or brew install goose" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "yaml",
+      code: `# ~/.config/goose/config.yaml
+GOOSE_PROVIDER: "openai"
+GOOSE_MODEL: "{{model}}"
+OPENAI_HOST: "{{baseUrl}}"
+OPENAI_API_KEY: "{{apiKey}}"`,
+    },
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  interpreter: {
+    id: "interpreter",
+    name: "Open Interpreter",
+    icon: "smart_toy",
+    color: "#8B5CF6",
+    description: "Open Interpreter — autonomous coding agent CLI with --api_base flag",
+    docsUrl: "https://docs.openinterpreter.com/",
+    configType: "guide",
+    category: "agent",
+    vendor: "OSS",
+    acpSpawnable: true,
+    baseUrlSupport: "full",
+    defaultCommand: "interpreter",
+    guideSteps: [
+      { step: 1, title: "Install", desc: "pip install open-interpreter" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    codeBlock: {
+      language: "bash",
+      code: `interpreter --api_base "{{baseUrl}}" --api_key "{{apiKey}}" --model "{{model}}"`,
+    },
+  },
+
+  omp: {
+    id: "omp",
+    name: "Oh My Pi",
+    image: "/providers/cli-generic.svg",
+    color: "#111111",
+    docsUrl: "https://github.com/can1357/oh-my-pi",
+    description: "Oh My Pi terminal coding agent via OmniRoute",
+    configType: "custom",
+    category: "agent",
+    vendor: "OSS",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "omp",
+    notes: [
+      {
+        type: "info",
+        text: "Oh My Pi reads custom OpenAI-compatible providers from ~/.omp/agent/models.yml. OmniRoute adds itself as a provider with auto-discovery — models appear automatically in omp's /model menu.",
+      },
+      {
+        type: "warning",
+        text: "Config path: Linux/macOS ~/.omp/agent/models.yml • Windows %USERPROFILE%\\.omp\\agent\\models.yml",
+      },
+    ],
+  },
+
+  letta: {
+    id: "letta",
+    name: "Letta CLI",
+    image: "/providers/cli-generic.svg",
+    color: "#FF6B35",
+    description: "Letta CLI — AI agent with persistent memory and tool use",
+    configType: "custom",
+    category: "agent",
+    vendor: "Letta",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    docsUrl: "https://docs.letta.com",
+    notes: [
+      {
+        type: "info",
+        text: "Letta CLI uses pi-ai which sends OpenAI-compatible requests. OmniRoute configures it as an OpenAI provider with custom base URL.",
+      },
+      {
+        type: "info",
+        text: "CLI (Local Mode): OmniRoute auto-configures ~/.letta/lc-local-backend/providers/auth.json. Use 'letta --info' to check if local mode is enabled.",
+      },
+      {
+        type: "warning",
+        text: "Local mode config path: ~/.letta/lc-local-backend/providers/auth.json (CLI only)",
+      },
+    ],
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  warp: {
+    id: "warp",
+    name: "Warp AI",
+    icon: "terminal",
+    color: "#1D4ED8",
+    description: "Warp AI terminal — BYOK desktop app with partial base URL support",
+    docsUrl: "https://docs.warp.dev/",
+    configType: "guide",
+    category: "agent",
+    vendor: "Warp Inc.",
+    acpSpawnable: true,
+    baseUrlSupport: "partial",
+    guideSteps: [
+      { step: 1, title: "Install Warp", desc: "Download Warp from warp.dev (desktop app)" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Configure BYOK", desc: "Go to Settings → AI → BYOK Provider" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+    notes: [
+      {
+        type: "warning",
+        text: "Warp is a desktop app, not a CLI binary. baseUrlSupport is partial — some models may require the native Warp endpoint.",
+      },
+    ],
+  },
+
+  /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
+  "agent-deck": {
+    id: "agent-deck",
+    name: "Agent Deck",
+    icon: "device_hub",
+    color: "#0EA5E9",
+    description: "Agent Deck — multi-agent stdio backend orchestrator (OSS, asheshgoplani)",
+    docsUrl: "https://github.com/asheshgoplani/agent-deck",
+    configType: "guide",
+    category: "agent",
+    vendor: "OSS (asheshgoplani)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "agent-deck",
+    guideSteps: [
+      { step: 1, title: "Install Agent Deck", desc: "npm install -g agent-deck" },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+    ],
+  },
+
+  /** ★ 5dive agent fleets (cheaper-inference/OmniRoute#11578) — 2026-08-28 */
+  "5dive": {
+    id: "5dive",
+    name: "5dive",
+    icon: "hub",
+    color: "#7C3AED",
+    description:
+      "5dive — self-hosted fleet of long-running coding agents; one auth profile points every claude seat at OmniRoute",
+    docsUrl: "https://5dive.ai",
+    configType: "custom",
+    category: "agent",
+    vendor: "OSS (5dive-ai)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "5dive",
+    settingsFile: "/var/lib/5dive/auth-profiles/<profile>/combined.env",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Run this on the fleet host",
+        desc: "5dive's verbs act on local systemd units; there is no remote mode",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Write the profile",
+        desc: "sudo omniroute configure 5dive --model <id> --auth-profile omniroute",
+      },
+    ],
+    notes: [
+      {
+        type: "warning",
+        text: "Writing a 5dive auth profile is root-only, and each agent's own runtime model pin outranks the profile's model default — pass --agent <name> to pin the seats too.",
+      },
+    ],
+  },
+
+  /** ★ WhyCodes CLI agent (diegosouzapw/OmniRoute#14096) — 2026-09-18 */
+  whycodes: {
+    id: "whycodes",
+    name: "WhyCodes",
+    icon: "terminal",
+    color: "#2563EB",
+    description:
+      "WhyCodes — broad-purpose autonomous CLI agent (TUI, named agents, tools, memory); OpenAI-compatible base URL points at OmniRoute",
+    docsUrl: "https://github.com/whycorporation/whycodes",
+    configType: "custom",
+    category: "agent",
+    vendor: "Why Corporation",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "whycodes",
+    settingsFile: "$WHYCODES_HOME/config.toml",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Install WhyCodes",
+        desc: "Install WhyCodes with Homebrew (brew tap whycorporation/whycodes https://github.com/whycorporation/whycodes && brew install whycorporation/whycodes/whycodes), a release binary, or cargo — see https://github.com/whycorporation/whycodes#installation",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Write the provider",
+        desc: "omniroute setup-whycodes --model <id>   (or: whycodes provider add omniroute --api-key <key> --base-url <origin>/v1)",
+      },
+    ],
+    codeBlock: {
+      language: "toml",
+      code: `[providers.omniroute]
+name = "omniroute"
+base_url = "{{baseUrl}}"
+api_key = "{{apiKey}}"
+
+[default_model]
+provider_id = "omniroute"
+model_id = "{{model}}"
+supports_tools = true`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "WhyCodes talks Chat Completions at /v1/chat/completions. Config lives at $WHYCODES_HOME/config.toml, or ~/.whycodes/config.toml (%USERPROFILE%\\.whycodes on Windows); `whycodes config path` prints it.",
+      },
+      {
+        type: "warning",
+        text: "whycodes acp is not implemented — this card is not ACP-spawnable.",
+      },
+    ],
+  },
+};
+
+// ─── Registry helpers ────────────────────────────────────────────────────────
+
+export type CliToolEntry = CliCatalogEntry;
+
+/** Returns an ordered list of all registered CLI tools. */
+export function listCliTools(): CliToolEntry[] {
+  return Object.values(CLI_TOOLS);
+}
+
+/** Returns a single tool by id, or undefined if not found. */
+export function getCliTool(id: string): CliToolEntry | undefined {
+  return CLI_TOOLS[id];
+}

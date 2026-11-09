@@ -1,0 +1,1091 @@
+import { backupDbFile } from "./backup";
+import { getDefaultCompressionCombo } from "./compressionCombos";
+import { getDbInstance } from "./core";
+import { invalidateDbCache } from "./readCache";
+import {
+  ENGINE_IDS,
+  DEFAULT_AGGRESSIVE_CONFIG,
+  DEFAULT_CAVEMAN_CONFIG,
+  DEFAULT_CAVEMAN_OUTPUT_MODE_CONFIG,
+  DEFAULT_COMPRESSION_LANGUAGE_CONFIG,
+  DEFAULT_COMPRESSION_CONFIG,
+  DEFAULT_CONTEXT_EDITING_CONFIG,
+  DEFAULT_HEADROOM_CONFIG,
+  DEFAULT_MCP_ACCESSIBILITY_CONFIG,
+  DEFAULT_RTK_CONFIG,
+  DEFAULT_ULTRA_CONFIG,
+  clampMcpAccessibilityConfig,
+  type AggressiveConfig,
+  type CavemanConfig,
+  type CavemanOutputModeConfig,
+  type OutputStyleSelectionEntry,
+  type CompressionLanguageConfig,
+  type CompressionPipelineStep,
+  type CompressionConfig,
+  type CompressionMode,
+  DEFAULT_CODEX_RESPONSES_CONFIG,
+  type CodexResponsesConfig,
+  type ContextEditingConfig,
+  DEFAULT_OMNIGLYPH_CONFIG,
+  type OmniglyphConfig,
+  type EngineToggle,
+  type HeadroomConfig,
+  type McpAccessibilityConfig,
+  type RtkConfig,
+  type UltraConfig,
+} from "@omniroute/open-sse/services/compression/types.ts";
+import { normalizeCompressionExclusions } from "@omniroute/open-sse/services/compression/exclusions.ts";
+import { DEFAULT_CONTEXT_BUDGET } from "@omniroute/open-sse/services/compression/adaptiveCompression/types.ts";
+import { normalizeContextBudgetConfig } from "./compressionContextBudget";
+import {
+  isPreserveSystemPromptMode,
+  normalizePreserveSystemPromptMode,
+} from "@omniroute/open-sse/services/compression/preserveSystemPromptMode.ts";
+import { maybePrewarmUltraSlmOnConfig } from "@omniroute/open-sse/services/compression/ultra.ts";
+import { isUsableLiteMaxToolLength } from "@omniroute/open-sse/services/compression/lite.ts";
+import { applyDetailConfigUpdate, buildDetailConfigDefaults } from "./compressionDetailNormalizers";
+
+const NAMESPACE = "compression";
+const COMPRESSION_MODES = new Set<CompressionMode>([
+  "off",
+  "lite",
+  "standard",
+  "aggressive",
+  "ultra",
+  "rtk",
+  "codex-responses",
+  "stacked",
+  "omniglyph",
+]);
+
+type JsonRecord = Record<string, unknown>;
+// TTL cache for compression settings (5s)
+let compressionSettingsCache: {
+  value: CompressionConfig;
+  expiresAt: number;
+  dbRef: WeakRef<object>;
+} | null = null;
+
+// Phase 4 (B): one cold-start SLM pre-warm attempt per process. The save path fires
+// on every enable transition; this guard keeps the read path from re-warming on every
+// cache miss (the read path runs at most once per 5s, but a cold start should warm once,
+// not repeatedly). Best-effort either way (`maybePrewarmUltraSlmOnConfig` never throws).
+let _ultraSlmColdPrewarmAttempted = false;
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" ? (value as JsonRecord) : {};
+}
+
+function parseJsonSafe(raw: string | null): unknown {
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeCavemanConfig(value: unknown): CavemanConfig {
+  const record = toRecord(value);
+  const intensity =
+    record.intensity === "lite" || record.intensity === "full" || record.intensity === "ultra"
+      ? record.intensity
+      : DEFAULT_CAVEMAN_CONFIG.intensity;
+  return {
+    ...DEFAULT_CAVEMAN_CONFIG,
+    ...record,
+    compressRoles: Array.isArray(record.compressRoles)
+      ? record.compressRoles.filter(
+          (role): role is "user" | "assistant" | "system" =>
+            role === "user" || role === "assistant" || role === "system"
+        )
+      : DEFAULT_CAVEMAN_CONFIG.compressRoles,
+    skipRules: Array.isArray(record.skipRules)
+      ? record.skipRules.filter((rule): rule is string => typeof rule === "string")
+      : DEFAULT_CAVEMAN_CONFIG.skipRules,
+    minMessageLength:
+      typeof record.minMessageLength === "number" && Number.isFinite(record.minMessageLength)
+        ? Math.max(0, Math.floor(record.minMessageLength))
+        : DEFAULT_CAVEMAN_CONFIG.minMessageLength,
+    preservePatterns: Array.isArray(record.preservePatterns)
+      ? record.preservePatterns.filter((pattern): pattern is string => typeof pattern === "string")
+      : DEFAULT_CAVEMAN_CONFIG.preservePatterns,
+    intensity,
+  };
+}
+
+function normalizeCavemanOutputModeConfig(
+  value: unknown,
+  fallback: CavemanOutputModeConfig = DEFAULT_CAVEMAN_OUTPUT_MODE_CONFIG
+): CavemanOutputModeConfig {
+  const record = toRecord(value);
+  return {
+    enabled: typeof record.enabled === "boolean" ? record.enabled : fallback.enabled,
+    intensity:
+      record.intensity === "lite" || record.intensity === "full" || record.intensity === "ultra"
+        ? record.intensity
+        : fallback.intensity,
+    autoClarity:
+      typeof record.autoClarity === "boolean" ? record.autoClarity : fallback.autoClarity,
+  };
+}
+
+function normalizeOutputStyleSelection(value: unknown): OutputStyleSelectionEntry[] {
+  if (!Array.isArray(value)) return [];
+  const out: OutputStyleSelectionEntry[] = [];
+  for (const raw of value) {
+    const record = toRecord(raw);
+    const id = typeof record.id === "string" ? record.id.trim() : "";
+    const level =
+      record.level === "lite" || record.level === "full" || record.level === "ultra"
+        ? record.level
+        : null;
+    if (id && level) out.push({ id, level });
+  }
+  return out;
+}
+
+function normalizeRtkConfig(value: unknown): RtkConfig {
+  const record = toRecord(value);
+  return {
+    ...DEFAULT_RTK_CONFIG,
+    enabled: typeof record.enabled === "boolean" ? record.enabled : DEFAULT_RTK_CONFIG.enabled,
+    intensity:
+      record.intensity === "minimal" ||
+      record.intensity === "standard" ||
+      record.intensity === "aggressive"
+        ? record.intensity
+        : DEFAULT_RTK_CONFIG.intensity,
+    applyToToolResults:
+      typeof record.applyToToolResults === "boolean"
+        ? record.applyToToolResults
+        : DEFAULT_RTK_CONFIG.applyToToolResults,
+    applyToCodeBlocks:
+      typeof record.applyToCodeBlocks === "boolean"
+        ? record.applyToCodeBlocks
+        : DEFAULT_RTK_CONFIG.applyToCodeBlocks,
+    applyToAssistantMessages:
+      typeof record.applyToAssistantMessages === "boolean"
+        ? record.applyToAssistantMessages
+        : DEFAULT_RTK_CONFIG.applyToAssistantMessages,
+    enableRenderers:
+      typeof record.enableRenderers === "boolean"
+        ? record.enableRenderers
+        : (DEFAULT_RTK_CONFIG.enableRenderers ?? false),
+    enabledFilters: Array.isArray(record.enabledFilters)
+      ? record.enabledFilters.filter((filter): filter is string => typeof filter === "string")
+      : DEFAULT_RTK_CONFIG.enabledFilters,
+    disabledFilters: Array.isArray(record.disabledFilters)
+      ? record.disabledFilters.filter((filter): filter is string => typeof filter === "string")
+      : DEFAULT_RTK_CONFIG.disabledFilters,
+    maxLinesPerResult: boundedInt(
+      record.maxLinesPerResult,
+      DEFAULT_RTK_CONFIG.maxLinesPerResult,
+      0,
+      100000
+    ),
+    maxCharsPerResult: boundedInt(
+      record.maxCharsPerResult,
+      DEFAULT_RTK_CONFIG.maxCharsPerResult,
+      0,
+      1000000
+    ),
+    deduplicateThreshold: boundedInt(
+      record.deduplicateThreshold,
+      DEFAULT_RTK_CONFIG.deduplicateThreshold,
+      2,
+      100
+    ),
+    customFiltersEnabled:
+      typeof record.customFiltersEnabled === "boolean"
+        ? record.customFiltersEnabled
+        : DEFAULT_RTK_CONFIG.customFiltersEnabled,
+    trustProjectFilters:
+      typeof record.trustProjectFilters === "boolean"
+        ? record.trustProjectFilters
+        : DEFAULT_RTK_CONFIG.trustProjectFilters,
+    rawOutputRetention:
+      record.rawOutputRetention === "never" ||
+      record.rawOutputRetention === "failures" ||
+      record.rawOutputRetention === "always"
+        ? record.rawOutputRetention
+        : DEFAULT_RTK_CONFIG.rawOutputRetention,
+    rawOutputMaxBytes: boundedInt(
+      record.rawOutputMaxBytes,
+      DEFAULT_RTK_CONFIG.rawOutputMaxBytes,
+      1024,
+      10_000_000
+    ),
+    enableGrouping:
+      typeof record.enableGrouping === "boolean"
+        ? record.enableGrouping
+        : (DEFAULT_RTK_CONFIG.enableGrouping ?? false),
+    groupingThreshold: boundedInt(
+      record.groupingThreshold,
+      DEFAULT_RTK_CONFIG.groupingThreshold ?? 3,
+      2,
+      100
+    ),
+    stripCodeComments:
+      typeof record.stripCodeComments === "boolean"
+        ? record.stripCodeComments
+        : (DEFAULT_RTK_CONFIG.stripCodeComments ?? false),
+    preserveDocstrings:
+      typeof record.preserveDocstrings === "boolean"
+        ? record.preserveDocstrings
+        : (DEFAULT_RTK_CONFIG.preserveDocstrings ?? true),
+  };
+}
+
+function normalizeCodexResponsesConfig(value: unknown): CodexResponsesConfig {
+  const record = toRecord(value);
+  const preserveToolNames = Array.isArray(record.preserveToolNames)
+    ? record.preserveToolNames.filter(
+        (name): name is string => typeof name === "string" && name.trim().length > 0
+      )
+    : DEFAULT_CODEX_RESPONSES_CONFIG.preserveToolNames;
+  return {
+    ...DEFAULT_CODEX_RESPONSES_CONFIG,
+    enabled:
+      typeof record.enabled === "boolean" ? record.enabled : DEFAULT_CODEX_RESPONSES_CONFIG.enabled,
+    minBytes: boundedInt(record.minBytes, DEFAULT_CODEX_RESPONSES_CONFIG.minBytes, 0, 2_000_000),
+    maxOutputBytes: boundedInt(
+      record.maxOutputBytes,
+      DEFAULT_CODEX_RESPONSES_CONFIG.maxOutputBytes,
+      1,
+      10_000_000
+    ),
+    maxCandidateBytes: boundedInt(
+      record.maxCandidateBytes,
+      DEFAULT_CODEX_RESPONSES_CONFIG.maxCandidateBytes,
+      1,
+      2_000_000
+    ),
+    maxLines: boundedInt(record.maxLines, DEFAULT_CODEX_RESPONSES_CONFIG.maxLines, 1, 10_000),
+    minSearchMatches: boundedInt(
+      record.minSearchMatches,
+      DEFAULT_CODEX_RESPONSES_CONFIG.minSearchMatches,
+      2,
+      10_000
+    ),
+    minLogLines: boundedInt(
+      record.minLogLines,
+      DEFAULT_CODEX_RESPONSES_CONFIG.minLogLines,
+      2,
+      10_000
+    ),
+    preserveToolNames: [...new Set(preserveToolNames.map((name) => name.trim()))],
+  };
+}
+
+function normalizeLanguageConfig(value: unknown): CompressionLanguageConfig {
+  const record = toRecord(value);
+  const defaultLanguage =
+    typeof record.defaultLanguage === "string" && record.defaultLanguage.trim()
+      ? record.defaultLanguage.trim()
+      : DEFAULT_COMPRESSION_LANGUAGE_CONFIG.defaultLanguage;
+  const enabledPacks = Array.isArray(record.enabledPacks)
+    ? record.enabledPacks
+        .filter((pack): pack is string => typeof pack === "string" && pack.trim().length > 0)
+        .map((pack) => pack.trim())
+    : DEFAULT_COMPRESSION_LANGUAGE_CONFIG.enabledPacks;
+  return {
+    ...DEFAULT_COMPRESSION_LANGUAGE_CONFIG,
+    enabled:
+      typeof record.enabled === "boolean"
+        ? record.enabled
+        : DEFAULT_COMPRESSION_LANGUAGE_CONFIG.enabled,
+    defaultLanguage,
+    autoDetect:
+      typeof record.autoDetect === "boolean"
+        ? record.autoDetect
+        : DEFAULT_COMPRESSION_LANGUAGE_CONFIG.autoDetect,
+    enabledPacks: [...new Set(enabledPacks.length > 0 ? enabledPacks : ["en"])],
+  };
+}
+
+function normalizeOmniglyphConfig(value: unknown): OmniglyphConfig {
+  const record = toRecord(value);
+  const profile = record.profile;
+  // Um perfil desconhecido não pode virar "roda com a política padrão": cai para
+  // o default explícito, e o adapter ainda falha fechado se algo passar por aqui.
+  return {
+    profile:
+      profile === "coding-safe" || profile === "balanced" || profile === "passthrough"
+        ? profile
+        : DEFAULT_OMNIGLYPH_CONFIG.profile,
+  };
+}
+
+function normalizeContextEditingConfig(value: unknown): ContextEditingConfig {
+  const record = toRecord(value);
+  return {
+    ...DEFAULT_CONTEXT_EDITING_CONFIG,
+    enabled:
+      typeof record.enabled === "boolean" ? record.enabled : DEFAULT_CONTEXT_EDITING_CONFIG.enabled,
+  };
+}
+
+// Engines allowed in the global stackedPipeline setting. MUST stay in sync with the
+// compression-combo KNOWN_ENGINE_IDS (src/lib/db/compressionCombos.ts) and with
+// stackedPipelineStepSchema / ENGINE_CATALOG — otherwise the global setting silently
+// strips engines the combo path accepts (B-PIPELINE-DIVERGENCE / #6747).
+const STACKED_PIPELINE_ENGINE_IDS = new Set([
+  "lite",
+  "caveman",
+  "aggressive",
+  "ultra",
+  "rtk",
+  "codex-responses",
+  "headroom",
+  "session-dedup",
+  "ccr",
+  "llmlingua",
+  "relevance",
+  "omniglyph",
+]);
+
+export function normalizeStackedPipeline(value: unknown): CompressionPipelineStep[] {
+  const source = Array.isArray(value) ? value : (DEFAULT_COMPRESSION_CONFIG.stackedPipeline ?? []);
+  const pipeline: CompressionPipelineStep[] = [];
+  for (const entry of source) {
+    const record = toRecord(entry);
+    const engine = record.engine;
+    if (typeof engine !== "string" || !STACKED_PIPELINE_ENGINE_IDS.has(engine)) {
+      continue;
+    }
+    pipeline.push({
+      engine: engine as CompressionPipelineStep["engine"],
+      ...(typeof record.intensity === "string"
+        ? { intensity: record.intensity as CompressionPipelineStep["intensity"] }
+        : {}),
+      ...(record.config && typeof record.config === "object"
+        ? { config: record.config as Record<string, unknown> }
+        : {}),
+    });
+  }
+  return pipeline.length > 0 ? pipeline : (DEFAULT_COMPRESSION_CONFIG.stackedPipeline ?? []);
+}
+
+function boundedInt(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(value)));
+}
+
+function usableLiteMaxToolLength(value: unknown): number | undefined {
+  return isUsableLiteMaxToolLength(value) ? Math.floor(value) : undefined;
+}
+
+function boundedNumber(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizeAggressiveConfig(value: unknown): AggressiveConfig {
+  const record = toRecord(value);
+  const thresholds = toRecord(record.thresholds);
+  const toolStrategies = toRecord(record.toolStrategies);
+
+  return {
+    ...DEFAULT_AGGRESSIVE_CONFIG,
+    thresholds: {
+      fullSummary: boundedInt(
+        thresholds.fullSummary,
+        DEFAULT_AGGRESSIVE_CONFIG.thresholds.fullSummary,
+        1,
+        100
+      ),
+      moderate: boundedInt(
+        thresholds.moderate,
+        DEFAULT_AGGRESSIVE_CONFIG.thresholds.moderate,
+        1,
+        100
+      ),
+      light: boundedInt(thresholds.light, DEFAULT_AGGRESSIVE_CONFIG.thresholds.light, 1, 100),
+      verbatim: boundedInt(
+        thresholds.verbatim,
+        DEFAULT_AGGRESSIVE_CONFIG.thresholds.verbatim,
+        1,
+        100
+      ),
+    },
+    toolStrategies: {
+      fileContent:
+        typeof toolStrategies.fileContent === "boolean"
+          ? toolStrategies.fileContent
+          : DEFAULT_AGGRESSIVE_CONFIG.toolStrategies.fileContent,
+      grepSearch:
+        typeof toolStrategies.grepSearch === "boolean"
+          ? toolStrategies.grepSearch
+          : DEFAULT_AGGRESSIVE_CONFIG.toolStrategies.grepSearch,
+      shellOutput:
+        typeof toolStrategies.shellOutput === "boolean"
+          ? toolStrategies.shellOutput
+          : DEFAULT_AGGRESSIVE_CONFIG.toolStrategies.shellOutput,
+      json:
+        typeof toolStrategies.json === "boolean"
+          ? toolStrategies.json
+          : DEFAULT_AGGRESSIVE_CONFIG.toolStrategies.json,
+      errorMessage:
+        typeof toolStrategies.errorMessage === "boolean"
+          ? toolStrategies.errorMessage
+          : DEFAULT_AGGRESSIVE_CONFIG.toolStrategies.errorMessage,
+    },
+    summarizerEnabled:
+      typeof record.summarizerEnabled === "boolean"
+        ? record.summarizerEnabled
+        : DEFAULT_AGGRESSIVE_CONFIG.summarizerEnabled,
+    maxTokensPerMessage: boundedInt(
+      record.maxTokensPerMessage,
+      DEFAULT_AGGRESSIVE_CONFIG.maxTokensPerMessage,
+      256,
+      32768
+    ),
+    minSavingsThreshold: boundedNumber(
+      record.minSavingsThreshold,
+      DEFAULT_AGGRESSIVE_CONFIG.minSavingsThreshold,
+      0,
+      1
+    ),
+  };
+}
+
+function normalizeHeadroomConfig(value: unknown): HeadroomConfig {
+  const record = toRecord(value);
+  return {
+    ...DEFAULT_HEADROOM_CONFIG,
+    // Align with engine schema (min 2) and smartcrusher DEFAULT_MIN_ROWS (8).
+    minRows: boundedInt(record.minRows, DEFAULT_HEADROOM_CONFIG.minRows, 2, 10000),
+  };
+}
+
+function normalizeUltraConfig(value: unknown): UltraConfig {
+  const record = toRecord(value);
+  const modelPath = typeof record.modelPath === "string" ? record.modelPath.trim() : "";
+
+  return {
+    ...DEFAULT_ULTRA_CONFIG,
+    enabled: typeof record.enabled === "boolean" ? record.enabled : DEFAULT_ULTRA_CONFIG.enabled,
+    compressionRate: boundedNumber(
+      record.compressionRate,
+      DEFAULT_ULTRA_CONFIG.compressionRate,
+      0,
+      1
+    ),
+    minScoreThreshold: boundedNumber(
+      record.minScoreThreshold,
+      DEFAULT_ULTRA_CONFIG.minScoreThreshold,
+      0,
+      1
+    ),
+    slmFallbackToAggressive:
+      typeof record.slmFallbackToAggressive === "boolean"
+        ? record.slmFallbackToAggressive
+        : DEFAULT_ULTRA_CONFIG.slmFallbackToAggressive,
+    ...(modelPath ? { modelPath } : {}),
+    maxTokensPerMessage: boundedInt(
+      record.maxTokensPerMessage,
+      DEFAULT_ULTRA_CONFIG.maxTokensPerMessage,
+      0,
+      32768
+    ),
+  };
+}
+
+// Single-mode → engine id mapping. Mirrors deriveDefaultPlan's SINGLE_MODE_OF: a legacy
+// install whose only signal is `defaultMode` should turn on the engine that mode runs, so the
+// derived engines map matches the old behavior. Keep conservative — these are the only modes
+// that map 1:1 to a single engine.
+const SINGLE_MODE_ENGINE: Partial<Record<CompressionMode, string>> = {
+  lite: "lite",
+  standard: "caveman",
+  aggressive: "aggressive",
+  ultra: "ultra",
+  rtk: "rtk",
+  omniglyph: "omniglyph",
+  "codex-responses": "codex-responses",
+};
+
+function normalizeEngineToggle(value: unknown): EngineToggle | null {
+  const record = toRecord(value);
+  if (typeof record.enabled !== "boolean") return null;
+  return {
+    enabled: record.enabled,
+    ...(typeof record.level === "string" ? { level: record.level } : {}),
+  };
+}
+
+// Sanitize an engines map for persistence: keep only known engine ids with a well-formed
+// `{enabled, level?}` toggle. Mirrors the read-path validation so a malformed write can't poison
+// the stored row.
+function sanitizeEnginesForWrite(value: unknown): Record<string, EngineToggle> {
+  const record = toRecord(value);
+  const out: Record<string, EngineToggle> = {};
+  for (const id of ENGINE_IDS) {
+    const toggle = normalizeEngineToggle(record[id]);
+    if (toggle) out[id] = toggle;
+  }
+  return out;
+}
+
+// Partial engines writes replace the whole JSON row, and the read path turns every id missing
+// from a stored row off. Merge each written entry over the stored entry, field by field. While
+// no usable row exists, merge over `current`, the map the read path derives from legacy settings.
+function mergeEnginesForWrite(
+  db: ReturnType<typeof getDbInstance>,
+  value: unknown,
+  current: Record<string, EngineToggle>
+): Record<string, EngineToggle> {
+  const existingRow = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(NAMESPACE, "engines") as { value: unknown } | undefined;
+  // getCompressionSettings skips non-text (BLOB) rows, so treat them as absent here too.
+  const stored =
+    typeof existingRow?.value === "string"
+      ? parseStoredEnginesMap(parseJsonSafe(existingRow.value))
+      : null;
+  const base = stored ?? current;
+  const incoming = toRecord(value);
+  const merged: JsonRecord = {};
+  for (const id of ENGINE_IDS) {
+    merged[id] = Object.hasOwn(incoming, id)
+      ? { ...base[id], ...toRecord(incoming[id]) }
+      : base[id];
+  }
+  return sanitizeEnginesForWrite(merged);
+}
+
+// Partial lite writes replace the whole JSON row. Keep a stored cap unless the
+// caller sends maxToolLength: null (clear) or a new in-range integer.
+function mergeLiteSettingsForWrite(
+  db: ReturnType<typeof getDbInstance>,
+  value: unknown
+): { compressToolResults: boolean; maxToolLength?: number } {
+  const incoming = toRecord(value);
+  const existingRow = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(NAMESPACE, "lite") as { value: string } | undefined;
+  const existing = toRecord(parseJsonSafe(existingRow?.value ?? null));
+  const existingCap = usableLiteMaxToolLength(existing.maxToolLength);
+  const compressToolResults =
+    typeof incoming.compressToolResults === "boolean"
+      ? incoming.compressToolResults
+      : existing.compressToolResults !== false;
+  if (!Object.prototype.hasOwnProperty.call(incoming, "maxToolLength")) {
+    return {
+      compressToolResults,
+      ...(existingCap !== undefined ? { maxToolLength: existingCap } : {}),
+    };
+  }
+  if (incoming.maxToolLength === null) {
+    return { compressToolResults };
+  }
+  const nextCap = usableLiteMaxToolLength(incoming.maxToolLength);
+  if (nextCap !== undefined) {
+    return { compressToolResults, maxToolLength: nextCap };
+  }
+  return {
+    compressToolResults,
+    ...(existingCap !== undefined ? { maxToolLength: existingCap } : {}),
+  };
+}
+
+// Partial cavemanOutputMode writes replace the whole JSON row, and the read path fills
+// missing fields with defaults. Take each missing or invalid field from the stored row instead.
+function mergeCavemanOutputModeForWrite(
+  db: ReturnType<typeof getDbInstance>,
+  value: unknown
+): CavemanOutputModeConfig {
+  const existingRow = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(NAMESPACE, "cavemanOutputMode") as { value: unknown } | undefined;
+  // getCompressionSettings skips non-text (BLOB) rows, so treat them as absent here too.
+  const existing = normalizeCavemanOutputModeConfig(
+    typeof existingRow?.value === "string" ? parseJsonSafe(existingRow.value) : undefined
+  );
+  return normalizeCavemanOutputModeConfig(value, existing);
+}
+
+// Read the stored `engines` JSON row, keeping only well-formed `{enabled, level?}` entries for
+// known engine ids. Returns null when no usable row exists so the caller falls back to deriving
+// the map from the legacy fields (B-backfill, migration 102).
+function parseStoredEnginesMap(value: unknown): Record<string, EngineToggle> | null {
+  if (!value || typeof value !== "object") return null;
+  const out: Record<string, EngineToggle> = {};
+  let any = false;
+  for (const id of ENGINE_IDS) {
+    const toggle = normalizeEngineToggle((value as JsonRecord)[id]);
+    if (toggle) {
+      out[id] = toggle;
+      any = true;
+    }
+  }
+  return any ? out : null;
+}
+
+// Derive the per-engine toggle map from the legacy compression fields so existing installs keep
+// their behavior before they ever write an `engines` row. Single-engine modes (caveman/rtk/ultra)
+// come from their dedicated config blocks; aggressive has no enabled signal in its config and only
+// turns on via the `defaultMode` fallback below. Structural engines (lite/headroom/
+// session-dedup/ccr/llmlingua) come from the default-combo pipeline. `defaultMode` is a last-resort
+// signal that turns on its single-mode engine when nothing else already did.
+function deriveEnginesMap(config: CompressionConfig): Record<string, EngineToggle> {
+  let defaultComboEngines = new Set<string>();
+  try {
+    const combo = getDefaultCompressionCombo();
+    if (combo) {
+      defaultComboEngines = new Set(combo.pipeline.map((step) => step.engine));
+    }
+  } catch {
+    defaultComboEngines = new Set<string>();
+  }
+
+  const engines: Record<string, EngineToggle> = {};
+  for (const id of ENGINE_IDS) {
+    let enabled = false;
+    let level: string | undefined;
+    switch (id) {
+      case "caveman":
+        enabled = config.cavemanConfig?.enabled === true;
+        if (typeof config.cavemanConfig?.intensity === "string") {
+          level = config.cavemanConfig.intensity;
+        }
+        break;
+      case "rtk":
+        enabled = config.rtkConfig?.enabled === true;
+        if (typeof config.rtkConfig?.intensity === "string") {
+          level = config.rtkConfig.intensity;
+        }
+        break;
+      case "ultra":
+        enabled = config.ultra?.enabled === true;
+        break;
+      case "aggressive":
+        // No enabled signal: `normalizeAggressiveConfig` never emits one, so aggressive is off
+        // here even though the default combo may include it (dispatch reads the combo directly
+        // on the legacy path). Only the defaultMode fallback below turns it on in this map.
+        break;
+      default:
+        // Structural engines (lite/headroom/session-dedup/ccr/llmlingua): on when present in the
+        // default-combo pipeline.
+        enabled = defaultComboEngines.has(id);
+        break;
+    }
+    engines[id] = { enabled, ...(level !== undefined ? { level } : {}) };
+  }
+
+  // Last-resort defaultMode signal: if the legacy install only set defaultMode (no engine config),
+  // turn on the engine that mode actually ran so the derived default matches the old behavior.
+  const fallbackEngine = SINGLE_MODE_ENGINE[config.defaultMode];
+  if (fallbackEngine && engines[fallbackEngine] && !engines[fallbackEngine].enabled) {
+    engines[fallbackEngine] = { ...engines[fallbackEngine], enabled: true };
+  }
+
+  return engines;
+}
+
+export async function getCompressionSettings(): Promise<CompressionConfig> {
+  const db = getDbInstance();
+  if (
+    compressionSettingsCache &&
+    Date.now() < compressionSettingsCache.expiresAt &&
+    compressionSettingsCache.dbRef.deref() === db
+  ) {
+    return compressionSettingsCache.value;
+  }
+  compressionSettingsCache = null;
+
+  const rows = db.prepare("SELECT key, value FROM key_value WHERE namespace = ?").all(NAMESPACE);
+
+  // Legacy per-engine rows (aggressiveConfig/ultraConfig/headroomConfig) share their read case
+  // with the current keys. When both rows exist the current key must win, regardless of the
+  // order the storage engine happens to return them in. Presence, not usability: a corrupt
+  // current row (BLOB/unparseable JSON) also suppresses the legacy row — the engine resets to
+  // defaults and the corruption warn below is the operator's signal to re-save.
+  const rowKeys = new Set(
+    rows.map((row) => toRecord(row).key).filter((key): key is string => typeof key === "string")
+  );
+
+  const config: CompressionConfig = {
+    ...DEFAULT_COMPRESSION_CONFIG,
+    cavemanConfig: { ...DEFAULT_CAVEMAN_CONFIG },
+    cavemanOutputMode: { ...DEFAULT_CAVEMAN_OUTPUT_MODE_CONFIG },
+    outputStyles: [],
+    rtkConfig: { ...DEFAULT_RTK_CONFIG },
+    codexResponsesConfig: { ...DEFAULT_CODEX_RESPONSES_CONFIG },
+    languageConfig: { ...DEFAULT_COMPRESSION_LANGUAGE_CONFIG },
+    stackedPipeline: normalizeStackedPipeline(undefined),
+    aggressive: normalizeAggressiveConfig(undefined),
+    ultra: normalizeUltraConfig(undefined),
+    lite: { compressToolResults: true },
+    headroom: normalizeHeadroomConfig(undefined),
+    ...buildDetailConfigDefaults(),
+    contextBudget: normalizeContextBudgetConfig(undefined),
+    contextEditing: { ...DEFAULT_CONTEXT_EDITING_CONFIG },
+    omniglyph: { ...DEFAULT_OMNIGLYPH_CONFIG },
+    liveZone: { enabled: false },
+    engines: {},
+    activeComboId: null,
+    exclusions: [],
+  };
+
+  // Tracks whether a usable stored `engines` row was found. When absent (pre-migration-102 install)
+  // we derive the engines map from the legacy fields below so behavior is preserved.
+  let storedEngines: Record<string, EngineToggle> | null = null;
+
+  // Tracks whether an authoritative `preserveSystemPromptMode` row was persisted. When absent
+  // (legacy install that only stored the `preserveSystemPrompt` boolean) the mode is derived
+  // from that boolean below so it keeps its old behaviour instead of inheriting the new default.
+  let sawPreserveSystemPromptModeRow = false;
+
+  for (const row of rows) {
+    const record = toRecord(row);
+    const key = typeof record.key === "string" ? record.key : null;
+    const rawValue = typeof record.value === "string" ? record.value : null;
+    if (!key || rawValue === null) {
+      // #13456: non-string values (BLOB from backup/restore/migration tooling) are
+      // silently ignored — log so operators can diagnose config drift.
+      if (key && typeof record.value !== "string" && record.value !== null) {
+        console.warn(
+          `[COMPRESSION] Settings row '${key}' has non-string value type ` +
+            `(${typeof record.value}); skipping. This may indicate a backup/restore ` +
+            `issue — re-save the setting from the Storage panel to fix.`
+        );
+      }
+      continue;
+    }
+    const parsed = parseJsonSafe(rawValue);
+    if (parsed === undefined) {
+      // #13456: invalid JSON is also silently ignored — log it.
+      console.warn(
+        `[COMPRESSION] Settings row '${key}' has unparseable JSON value; skipping. ` +
+          `Re-save the setting from the Storage panel to fix.`
+      );
+      continue;
+    }
+
+    switch (key) {
+      case "enabled":
+        config.enabled = parsed === true;
+        break;
+      case "defaultMode":
+        if (typeof parsed === "string" && COMPRESSION_MODES.has(parsed as CompressionMode)) {
+          config.defaultMode = parsed as CompressionMode;
+        }
+        break;
+      case "autoTriggerMode":
+        if (typeof parsed === "string" && COMPRESSION_MODES.has(parsed as CompressionMode)) {
+          config.autoTriggerMode = parsed as CompressionMode;
+        }
+        break;
+      case "autoTriggerTokens":
+        config.autoTriggerTokens =
+          typeof parsed === "number" && Number.isFinite(parsed)
+            ? Math.max(0, Math.floor(parsed))
+            : 0;
+        break;
+      case "cacheMinutes":
+        config.cacheMinutes =
+          typeof parsed === "number" && Number.isFinite(parsed)
+            ? Math.max(1, Math.floor(parsed))
+            : DEFAULT_COMPRESSION_CONFIG.cacheMinutes;
+        break;
+      case "preserveSystemPrompt":
+        config.preserveSystemPrompt = parsed !== false;
+        break;
+      case "preserveSystemPromptMode":
+        // T05/C5 — authoritative intent; ignore unknown tokens (keep the default mode).
+        if (isPreserveSystemPromptMode(parsed)) {
+          config.preserveSystemPromptMode = parsed;
+          sawPreserveSystemPromptModeRow = true;
+        }
+        break;
+      case "mcpDescriptionCompressionEnabled":
+        config.mcpDescriptionCompressionEnabled = parsed !== false;
+        break;
+      case "comboOverrides":
+        if (parsed && typeof parsed === "object") {
+          const overrides: Record<string, CompressionMode> = {};
+          for (const [comboId, mode] of Object.entries(parsed as Record<string, unknown>)) {
+            if (typeof mode === "string" && COMPRESSION_MODES.has(mode as CompressionMode)) {
+              overrides[comboId] = mode as CompressionMode;
+            }
+          }
+          config.comboOverrides = overrides;
+        }
+        break;
+      case "compressionComboId":
+        config.compressionComboId =
+          typeof parsed === "string" && parsed.trim() ? parsed.trim() : null;
+        break;
+      case "stackedPipeline":
+        config.stackedPipeline = normalizeStackedPipeline(parsed);
+        break;
+      case "cavemanConfig":
+        config.cavemanConfig = normalizeCavemanConfig(parsed);
+        break;
+      case "cavemanOutputMode":
+        config.cavemanOutputMode = normalizeCavemanOutputModeConfig(parsed);
+        break;
+      case "outputStyles":
+        config.outputStyles = normalizeOutputStyleSelection(parsed);
+        break;
+      case "rtkConfig":
+        config.rtkConfig = normalizeRtkConfig(parsed);
+        break;
+      case "codexResponsesConfig":
+        config.codexResponsesConfig = normalizeCodexResponsesConfig(parsed);
+        break;
+      case "languageConfig":
+        config.languageConfig = normalizeLanguageConfig(parsed);
+        break;
+      case "aggressive":
+        config.aggressive = normalizeAggressiveConfig(parsed);
+        break;
+      case "aggressiveConfig":
+        if (!rowKeys.has("aggressive")) {
+          config.aggressive = normalizeAggressiveConfig(parsed);
+        }
+        break;
+      case "ultra":
+        config.ultra = normalizeUltraConfig(parsed);
+        break;
+      case "ultraConfig":
+        if (!rowKeys.has("ultra")) {
+          config.ultra = normalizeUltraConfig(parsed);
+        }
+        break;
+      case "lite": {
+        const liteRecord = toRecord(parsed);
+        const storedCap = usableLiteMaxToolLength(liteRecord.maxToolLength);
+        config.lite = {
+          compressToolResults: liteRecord.compressToolResults !== false,
+          ...(storedCap !== undefined ? { maxToolLength: storedCap } : {}),
+        };
+        break;
+      }
+      case "headroom":
+        config.headroom = normalizeHeadroomConfig(parsed);
+        break;
+      case "headroomConfig":
+        if (!rowKeys.has("headroom")) {
+          config.headroom = normalizeHeadroomConfig(parsed);
+        }
+        break;
+      case "sessionDedup":
+      case "ccr":
+        applyDetailConfigUpdate(config, key, parsed);
+        break;
+      case "contextBudget":
+        config.contextBudget = normalizeContextBudgetConfig(parsed);
+        break;
+      case "contextEditing":
+        config.contextEditing = normalizeContextEditingConfig(parsed);
+        break;
+      case "omniglyph":
+        config.omniglyph = normalizeOmniglyphConfig(parsed);
+        break;
+      case "liveZone":
+        config.liveZone = { enabled: toRecord(parsed).enabled === true };
+        break;
+      case "engines":
+        storedEngines = parseStoredEnginesMap(parsed);
+        // #13456: only warn when the row itself isn't a usable object — a valid object
+        // that simply yields zero toggles (e.g. `{}`, an operator deliberately disabling
+        // every engine) is legitimate config, not a parse failure, and must not warn.
+        if (storedEngines === null && (!parsed || typeof parsed !== "object")) {
+          console.warn(
+            `[COMPRESSION] 'engines' settings row is present but unreadable; ` +
+              `falling back to legacy settings. Re-save the engines map from the ` +
+              `Storage panel to fix.`
+          );
+        }
+        break;
+      case "activeComboId":
+        config.activeComboId = typeof parsed === "string" && parsed.trim() ? parsed.trim() : null;
+        break;
+      case "ultraEngine":
+        // Phase 4 (B): SLM tier selector. Only the two known values; anything else
+        // falls back to the heuristic default so a malformed row can never enable SLM.
+        config.ultraEngine = parsed === "slm" ? "slm" : "heuristic";
+        break;
+      case "ultraSlmPrewarm":
+        config.ultraSlmPrewarm = parsed === true;
+        break;
+      case "exclusions":
+        config.exclusions = normalizeCompressionExclusions(parsed);
+        break;
+    }
+  }
+
+  // T05/C5 back-compat: a legacy install persisted only the `preserveSystemPrompt` boolean and no
+  // `preserveSystemPromptMode` row. The DEFAULT spread above seeds the new `always` mode, which would
+  // otherwise shadow that boolean (an explicit mode wins in normalizePreserveSystemPromptMode) and
+  // silently flip `preserveSystemPrompt=false` installs from "compress unless cached" to "always
+  // preserve". When no mode row was stored, derive the authoritative mode from the boolean instead.
+  if (!sawPreserveSystemPromptModeRow) {
+    config.preserveSystemPromptMode = normalizePreserveSystemPromptMode({
+      preserveSystemPrompt: config.preserveSystemPrompt,
+      preserveSystemPromptMode: undefined,
+    });
+  }
+
+  // Engines map: prefer the stored row; otherwise derive from the legacy fields (migration 102
+  // backfill on the read path). Always fill EVERY id in ENGINE_IDS so the shape matches
+  // DEFAULT_COMPRESSION_CONFIG.
+  const derived = storedEngines ?? deriveEnginesMap(config);
+  const engines: Record<string, EngineToggle> = {};
+  for (const id of ENGINE_IDS) {
+    engines[id] = derived[id] ?? { enabled: false };
+  }
+  config.engines = engines;
+  // Runtime-only marker: dispatch trusts the engines map only when it was explicitly stored
+  // (panel-saved). A backfilled map (no stored row) is display-only — dispatch stays on the
+  // legacy defaultMode/default-combo path so existing installs keep their behaviour.
+  config.enginesExplicit = storedEngines !== null;
+
+  // Store in TTL cache (5s expiry)
+  compressionSettingsCache = {
+    value: config,
+    expiresAt: Date.now() + 5000,
+    dbRef: new WeakRef(db),
+  };
+
+  // Phase 4 (B): cold-restart pre-warm — when the stored config already selects the SLM
+  // tier with pre-warm on, warm the model once (best-effort, fire-and-forget, guarded so
+  // a frequently-hit read path warms at most once per process). Cache hits return above.
+  if (!_ultraSlmColdPrewarmAttempted) {
+    _ultraSlmColdPrewarmAttempted = true;
+    void maybePrewarmUltraSlmOnConfig({
+      ultraEngine: config.ultraEngine,
+      ultraSlmPrewarm: config.ultraSlmPrewarm,
+    });
+  }
+
+  return config;
+}
+
+export async function updateCompressionSettings(
+  updates: Partial<CompressionConfig>
+): Promise<CompressionConfig> {
+  const db = getDbInstance();
+  const insert = db.prepare(
+    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
+  );
+  // The engines map the read path returns now: the merge base for an engines write while no
+  // engines row exists yet.
+  const currentEngines: Record<string, EngineToggle> =
+    updates.engines === undefined ? {} : (await getCompressionSettings()).engines;
+
+  const tx = db.transaction(() => {
+    for (const [key, value] of Object.entries(updates)) {
+      if (value === undefined) continue;
+      // Persist the engines map as ONE sanitized JSON row so the read path always gets
+      // well-formed { enabled, level? } toggles for known engine ids.
+      if (key === "engines") {
+        insert.run(NAMESPACE, key, JSON.stringify(mergeEnginesForWrite(db, value, currentEngines)));
+        continue;
+      }
+      if (key === "lite") {
+        insert.run(NAMESPACE, key, JSON.stringify(mergeLiteSettingsForWrite(db, value)));
+        continue;
+      }
+      if (key === "cavemanOutputMode") {
+        insert.run(NAMESPACE, key, JSON.stringify(mergeCavemanOutputModeForWrite(db, value)));
+        continue;
+      }
+      insert.run(NAMESPACE, key, JSON.stringify(value));
+    }
+  });
+
+  tx();
+  backupDbFile("pre-write");
+  compressionSettingsCache = null;
+  invalidateDbCache();
+  const next = await getCompressionSettings();
+  // Phase 4 (B): the SAVE path covers the enable transition — if this write turns the
+  // SLM tier + pre-warm on, warm the model once (best-effort, fire-and-forget).
+  void maybePrewarmUltraSlmOnConfig({
+    ultraEngine: next.ultraEngine,
+    ultraSlmPrewarm: next.ultraSlmPrewarm,
+  });
+  return next;
+}
+
+function normalizeMcpAccessibilityConfig(value: unknown): McpAccessibilityConfig {
+  // clampMcpAccessibilityConfig (engine layer) owns the numeric floors so the DB normalizer and
+  // the live MCP-server read path agree — in particular it floors maxTextChars to a sane minimum
+  // (a value below the tail reservation would make smartFilterText truncate the whole text away).
+  return clampMcpAccessibilityConfig(value);
+}
+
+export async function getMcpAccessibilityConfig(): Promise<McpAccessibilityConfig> {
+  const db = getDbInstance();
+  const row = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(NAMESPACE, "mcpAccessibility") as { value: string } | undefined;
+  return normalizeMcpAccessibilityConfig(parseJsonSafe(row?.value ?? null));
+}
+
+export async function setMcpAccessibilityConfig(
+  value: Partial<McpAccessibilityConfig>
+): Promise<void> {
+  const next = normalizeMcpAccessibilityConfig({ ...DEFAULT_MCP_ACCESSIBILITY_CONFIG, ...value });
+  const db = getDbInstance();
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    NAMESPACE,
+    "mcpAccessibility",
+    JSON.stringify(next)
+  );
+  compressionSettingsCache = null;
+  invalidateDbCache();
+}
+
+// Proactive-compression threshold knob (livewell backport branch).
+// The ratio of the (context limit - reserved tool tokens) at which proactive
+// context compression triggers used to be a hardcoded 0.7 in open-sse/handlers/
+// chatCore.ts. That left operators no way to move compression relative to a
+// client's own compaction point — e.g. Codex Desktop self-compacts at ~0.85 of
+// its window, so a 0.7 proxy threshold always preempts the client's (correct)
+// compaction with the proxy's (lossier) one. Stored in key_value (namespace
+// 'compression', key 'proactiveConfig', JSON {"thresholdRatio": 0.7}). Lives
+// here (not in the handler) per Hard Rule #5 — no raw SQL outside src/lib/db/.
+// better-sqlite3 is synchronous so the read stays in the sync hot path. 30s
+// TTL cache keeps per-request overhead at zero while still letting a plain
+// sqlite UPDATE take effect without a restart.
+const PROACTIVE_COMPRESSION_DEFAULT_RATIO = 0.7;
+const PROACTIVE_COMPRESSION_RATIO_MIN = 0.1;
+const PROACTIVE_COMPRESSION_RATIO_MAX = 0.99;
+const PROACTIVE_COMPRESSION_CACHE_TTL_MS = 30_000;
+let proactiveRatioCache: { value: number; readAt: number } | null = null;
+
+export function getProactiveCompressionRatio(): number {
+  const now = Date.now();
+  if (
+    proactiveRatioCache &&
+    now - proactiveRatioCache.readAt < PROACTIVE_COMPRESSION_CACHE_TTL_MS
+  ) {
+    return proactiveRatioCache.value;
+  }
+  let ratio = PROACTIVE_COMPRESSION_DEFAULT_RATIO;
+  try {
+    const row = getDbInstance()
+      .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+      .get(NAMESPACE, "proactiveConfig") as { value?: string } | undefined;
+    if (row?.value) {
+      const parsed = JSON.parse(row.value) as { thresholdRatio?: unknown };
+      const candidate = Number(parsed?.thresholdRatio);
+      if (
+        Number.isFinite(candidate) &&
+        candidate >= PROACTIVE_COMPRESSION_RATIO_MIN &&
+        candidate <= PROACTIVE_COMPRESSION_RATIO_MAX
+      ) {
+        ratio = candidate;
+      }
+    }
+  } catch {
+    // Missing table/row or unparsable JSON: fall back to the shipped default.
+  }
+  proactiveRatioCache = { value: ratio, readAt: now };
+  return ratio;
+}

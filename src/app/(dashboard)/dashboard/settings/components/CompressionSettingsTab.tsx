@@ -1,0 +1,829 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Card, Button } from "@/shared/components";
+// Direct adapter imports (not the barrel): the tab's tests stub the barrel with Card/Button only.
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+import Toggle from "@/shared/components/Toggle";
+import { Tile } from "@omniroute/ui-kit/tile";
+import { useTranslations } from "next-intl";
+import CompressionTokenSaverCard, {
+  type CompressionTokenSaverConfig,
+} from "./CompressionTokenSaverCard";
+
+type CompressionMode =
+  "off" | "lite" | "standard" | "aggressive" | "ultra" | "rtk" | "codex-responses" | "stacked";
+type CavemanIntensity = "lite" | "full" | "ultra";
+type RtkIntensity = "minimal" | "standard" | "aggressive";
+
+interface CavemanConfig {
+  enabled: boolean;
+  compressRoles: ("user" | "assistant" | "system")[];
+  skipRules: string[];
+  minMessageLength: number;
+  preservePatterns: string[];
+  intensity: CavemanIntensity;
+}
+
+interface RtkConfig {
+  enabled: boolean;
+  intensity: RtkIntensity;
+}
+
+interface CodexResponsesConfig {
+  enabled: boolean;
+  minBytes: number;
+  maxOutputBytes: number;
+  maxCandidateBytes: number;
+  maxLines: number;
+  minSearchMatches: number;
+  minLogLines: number;
+  preserveToolNames: string[];
+}
+
+interface AggressiveConfig {
+  thresholds: {
+    fullSummary: number;
+    moderate: number;
+    light: number;
+    verbatim: number;
+  };
+  toolStrategies: {
+    fileContent: boolean;
+    grepSearch: boolean;
+    shellOutput: boolean;
+    json: boolean;
+    errorMessage: boolean;
+  };
+  summarizerEnabled: boolean;
+  maxTokensPerMessage: number;
+  minSavingsThreshold: number;
+}
+
+interface UltraConfig {
+  enabled: boolean;
+  compressionRate: number;
+  minScoreThreshold: number;
+  slmFallbackToAggressive: boolean;
+  modelPath?: string;
+  maxTokensPerMessage: number;
+}
+
+interface CompressionConfig extends CompressionTokenSaverConfig {
+  defaultMode: CompressionMode;
+  autoTriggerMode?: CompressionMode;
+  autoTriggerTokens: number;
+  cacheMinutes: number;
+  preserveSystemPrompt: boolean;
+  preserveSystemPromptMode?: "always" | "whenNoCache" | "never";
+  mcpDescriptionCompressionEnabled?: boolean;
+  comboOverrides: Record<string, CompressionMode>;
+  cavemanConfig?: CavemanConfig;
+  rtkConfig?: RtkConfig;
+  codexResponsesConfig?: CodexResponsesConfig;
+  aggressive?: AggressiveConfig;
+  ultra?: UltraConfig;
+}
+
+interface RuleMetadata {
+  name: string;
+  category: string;
+  context: string;
+  minIntensity: CavemanIntensity;
+  intensities?: CavemanIntensity[];
+  description: string;
+}
+
+// A save names only the fields it changes, including fields inside nested objects.
+type SettingsPatch<T> = {
+  [K in keyof T]?: T[K] extends unknown[] ? T[K] : T[K] extends object ? SettingsPatch<T[K]> : T[K];
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+function withPatch<T>(base: T, patch: unknown): T {
+  if (!isRecord(base) || !isRecord(patch)) return patch as T;
+  const merged: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(patch)) merged[key] = withPatch(base[key], value);
+  return merged as T;
+}
+
+const MODES: { value: CompressionMode; labelKey: string; descKey: string; icon: string }[] = [
+  {
+    value: "off",
+    labelKey: "compressionModeOff",
+    descKey: "compressionModeOffDesc",
+    icon: "block",
+  },
+  {
+    value: "lite",
+    labelKey: "compressionModeLite",
+    descKey: "compressionModeLiteDesc",
+    icon: "compress",
+  },
+  {
+    value: "standard",
+    labelKey: "compressionModeStandard",
+    descKey: "compressionModeStandardDesc",
+    icon: "speed",
+  },
+  {
+    value: "aggressive",
+    labelKey: "compressionModeAggressive",
+    descKey: "compressionModeAggressiveDesc",
+    icon: "bolt",
+  },
+  {
+    value: "ultra",
+    labelKey: "compressionModeUltra",
+    descKey: "compressionModeUltraDesc",
+    icon: "filter_alt",
+  },
+  {
+    value: "rtk",
+    labelKey: "compressionModeRtk",
+    descKey: "compressionModeRtkDesc",
+    icon: "filter_list",
+  },
+  {
+    value: "codex-responses",
+    labelKey: "compressionModeCodexResponses",
+    descKey: "compressionModeCodexResponsesDesc",
+    icon: "data_object",
+  },
+  {
+    value: "stacked",
+    labelKey: "compressionModeStacked",
+    descKey: "compressionModeStackedDesc",
+    icon: "hub",
+  },
+];
+
+const ROLE_OPTIONS: { value: "user" | "assistant" | "system"; labelKey: string }[] = [
+  { value: "user", labelKey: "compressionRoleUser" },
+  { value: "assistant", labelKey: "compressionRoleAssistant" },
+  { value: "system", labelKey: "compressionRoleSystem" },
+];
+
+export default function CompressionSettingsTab() {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
+  const [config, setConfig] = useState<CompressionConfig>({
+    enabled: false,
+    defaultMode: "off",
+    autoTriggerTokens: 0,
+    cacheMinutes: 5,
+    preserveSystemPrompt: true,
+    comboOverrides: {},
+    cavemanConfig: {
+      enabled: true,
+      compressRoles: ["user"],
+      skipRules: [],
+      minMessageLength: 50,
+      preservePatterns: [],
+      intensity: "full",
+    },
+    cavemanOutputMode: {
+      enabled: false,
+      intensity: "full",
+    },
+    rtkConfig: {
+      enabled: true,
+      intensity: "standard",
+    },
+    codexResponsesConfig: {
+      enabled: false,
+      minBytes: 512,
+      maxOutputBytes: 2 * 1024 * 1024,
+      maxCandidateBytes: 512 * 1024,
+      maxLines: 160,
+      minSearchMatches: 8,
+      minLogLines: 24,
+      preserveToolNames: ["Read", "Glob", "Grep", "Write", "Edit", "WebSearch", "WebFetch"],
+    },
+    aggressive: {
+      thresholds: { fullSummary: 5, moderate: 3, light: 2, verbatim: 2 },
+      toolStrategies: {
+        fileContent: true,
+        grepSearch: true,
+        shellOutput: true,
+        json: true,
+        errorMessage: true,
+      },
+      summarizerEnabled: true,
+      maxTokensPerMessage: 2048,
+      minSavingsThreshold: 0.05,
+    },
+    ultra: {
+      enabled: false,
+      compressionRate: 0.5,
+      minScoreThreshold: 0.3,
+      slmFallbackToAggressive: true,
+      maxTokensPerMessage: 0,
+    },
+  });
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  // The defaults above are not the stored settings, so the form waits for a GET that
+  // succeeds. A failed load shows a retry, which bumps loadAttempt to re-run the loads.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [status, setStatus] = useState<"" | "saved" | "error">("");
+  const [ruleMetadata, setRuleMetadata] = useState<RuleMetadata[]>([]);
+  // A save sends only the fields it changes, so it never writes back a stale copy of settings
+  // another page or tab changed after this one loaded. Saves go out one at a time and the form
+  // shows the last saved config plus the saves still queued, so a failed save rolls back only
+  // its own fields. A PUT that never settles holds up the saves queued behind it.
+  const savedRef = useRef(config);
+  const queuedRef = useRef<SettingsPatch<CompressionConfig>[]>([]);
+  const saveQueueRef = useRef(Promise.resolve());
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // The "saved" badge clears itself after 2s; a timer that outlives the tab fires into an
+  // unmounted (or torn-down) React tree.
+  useEffect(
+    () => () => {
+      if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    },
+    []
+  );
+
+  useEffect(() => {
+    // A retry re-runs these loads; answers that arrive for the run it replaced are ignored.
+    let ignore = false;
+    fetch("/api/settings/compression")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (ignore) return;
+        if (data) {
+          savedRef.current = data;
+          setConfig(data);
+        }
+        setLoadFailed(!data);
+      })
+      .catch(() => {
+        if (!ignore) setLoadFailed(true);
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    fetch("/api/compression/rules")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!ignore && Array.isArray(data?.rules)) setRuleMetadata(data.rules);
+      })
+      .catch(() => {});
+    return () => {
+      ignore = true;
+    };
+  }, [loadAttempt]);
+
+  const save = (updates: SettingsPatch<CompressionConfig>) => {
+    const showQueued = () =>
+      setConfig(
+        queuedRef.current.reduce<CompressionConfig>(
+          (shown, queued) => withPatch(shown, queued),
+          savedRef.current
+        )
+      );
+    queuedRef.current.push(updates);
+    showQueued();
+    setSaving(true);
+    setStatus("");
+    saveQueueRef.current = saveQueueRef.current.then(async () => {
+      // The server stores each nested object as one row, so a PUT carries the whole object.
+      // Its other fields come from the server's current row, not this tab's copy, so a sibling
+      // field saved elsewhere since the tab loaded is not written back.
+      const current: CompressionConfig | null = Object.values(updates).some(isRecord)
+        ? await fetch("/api/settings/compression")
+            .then((res) => (res.ok ? res.json() : null))
+            .catch(() => null)
+        : savedRef.current;
+      const merged = current && withPatch(current, updates);
+      const body =
+        merged &&
+        Object.fromEntries(
+          Object.keys(updates).map((key) => [key, merged[key as keyof CompressionConfig]])
+        );
+      const ok =
+        !!body &&
+        (await fetch("/api/settings/compression", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(
+          (res) => res.ok,
+          () => false
+        ));
+      queuedRef.current.shift();
+      if (ok) savedRef.current = { ...savedRef.current, ...body };
+      showQueued();
+      setSaving(queuedRef.current.length > 0);
+      // A failure stays on screen until the next edit, so a queued success or an earlier
+      // save's timeout cannot hide a field that just rolled back.
+      setStatus((shown) => (ok ? (shown === "error" ? shown : "saved") : "error"));
+      if (ok) {
+        if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+        statusTimerRef.current = setTimeout(
+          () => setStatus((shown) => (shown === "saved" ? "" : shown)),
+          2000
+        );
+      }
+    });
+  };
+
+  const toggleCavemanRole = (role: "user" | "assistant" | "system") => {
+    const currentRoles = config.cavemanConfig?.compressRoles ?? ["user"];
+    const newRoles = currentRoles.includes(role)
+      ? currentRoles.filter((r) => r !== role)
+      : [...currentRoles, role];
+    save({
+      cavemanConfig: { compressRoles: newRoles },
+    });
+  };
+
+  const toggleCavemanRule = (rule: string) => {
+    const currentSkip = config.cavemanConfig?.skipRules ?? [];
+    const newSkip = currentSkip.includes(rule)
+      ? currentSkip.filter((r) => r !== rule)
+      : [...currentSkip, rule];
+    save({
+      cavemanConfig: { skipRules: newSkip },
+    });
+  };
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <p className="text-sm text-text-muted">{t("loading")}</p>
+      </Card>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-between gap-4">
+          <p role="alert" className="text-sm text-error">
+            {t("compressionTitle")}: {tCommon("failedToLoad")}
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setLoading(true);
+              setLoadAttempt((attempt) => attempt + 1);
+            }}
+          >
+            {t("retry")}
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 rounded-lg bg-info/10 text-info">
+          <Icon name="compress" size={20} />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold">{t("compressionTitle")}</h3>
+          <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
+        </div>
+        {status === "saved" && (
+          <span className="ms-auto text-xs font-medium text-success flex items-center gap-1">
+            <Icon name="check_circle" size={14} /> {t("saved")}
+          </span>
+        )}
+        {status === "error" && (
+          <span className="ms-auto text-xs font-medium text-error flex items-center gap-1">
+            <Icon name="error" size={14} /> {t("saveFailed")}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        <CompressionTokenSaverCard config={config} />
+
+        {config.enabled && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-text-main">{t("compressionMode")}</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-7 gap-2">
+              {MODES.map((m) => {
+                const active = config.defaultMode === m.value;
+                return (
+                  // Kit Tile: the mode tiles keep their aria-pressed toggle semantics.
+                  <Tile
+                    key={m.value}
+                    layout="stacked"
+                    pressed={active}
+                    onClick={() => save({ defaultMode: m.value })}
+                    disabled={saving}
+                    icon={<Icon name={m.icon} />}
+                    title={t(m.labelKey)}
+                    description={t(m.descKey)}
+                    className="p-3"
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {config.enabled && (
+          <div className="space-y-3 pt-4 border-t border-border/30">
+            <h4 className="text-sm font-medium text-text-main">{t("compressionGeneral")}</h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionAutoTrigger")}
+                hint={t("tokens")}
+                type="number"
+                min={0}
+                max={100000}
+                value={config.autoTriggerTokens}
+                onChange={(e) => save({ autoTriggerTokens: parseInt(e.target.value) || 0 })}
+              />
+              <Select
+                label={t("compressionSettingsAutoTriggerMode")}
+                value={config.autoTriggerMode ?? "lite"}
+                onChange={(e) => save({ autoTriggerMode: e.target.value as CompressionMode })}
+              >
+                {MODES.filter((mode) => mode.value !== "off").map((mode) => (
+                  <option key={mode.value} value={mode.value}>
+                    {mode.value}
+                  </option>
+                ))}
+              </Select>
+              <Input
+                label={t("compressionCacheTTL")}
+                hint={t("minutes")}
+                type="number"
+                min={1}
+                max={60}
+                value={config.cacheMinutes}
+                onChange={(e) => save({ cacheMinutes: parseInt(e.target.value) || 5 })}
+              />
+              <Select
+                label={t("compressionPreserveSystem")}
+                value={
+                  config.preserveSystemPromptMode ??
+                  (config.preserveSystemPrompt === false ? "whenNoCache" : "always")
+                }
+                onChange={(e) =>
+                  save({
+                    preserveSystemPromptMode: e.target.value as "always" | "whenNoCache" | "never",
+                  })
+                }
+                data-testid="preserve-system-mode-select"
+              >
+                <option value="always">{t("compressionPreserveSystemAlways")}</option>
+                <option value="whenNoCache">{t("compressionPreserveSystemWhenNoCache")}</option>
+                <option value="never">{t("compressionPreserveSystemNever")}</option>
+              </Select>
+            </div>
+
+            <Toggle
+              label={t("compressionSettingsMcpDescriptionCompression")}
+              checked={config.mcpDescriptionCompressionEnabled !== false}
+              onChange={() =>
+                save({
+                  mcpDescriptionCompressionEnabled:
+                    config.mcpDescriptionCompressionEnabled === false,
+                })
+              }
+            />
+          </div>
+        )}
+
+        {config.enabled &&
+          config.defaultMode !== "off" &&
+          config.defaultMode !== "lite" &&
+          config.cavemanConfig && (
+            <div className="space-y-3 pt-4 border-t border-border/30">
+              {/* Engine on/off is owned by the single-source panel (/dashboard/context/settings):
+                  the panel's `engines.caveman.enabled` is authoritative (planResolution.ts). This tab
+                  keeps only the advanced caveman tuning the panel does not expose. */}
+              <div data-testid="caveman-panel-note">
+                <h4 className="text-sm font-medium text-text-main">
+                  {t("compressionCavemanConfig")}
+                </h4>
+                <p className="text-xs text-text-muted mt-0.5">
+                  {t("compressionCavemanConfigDesc")} {t("compressionCavemanPanelHint")}{" "}
+                  <code className="text-text-muted">/dashboard/context/settings</code>
+                </p>
+              </div>
+
+              <>
+                <div className="space-y-2">
+                  <p className="text-sm text-text-muted">{t("compressionRoles")}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {ROLE_OPTIONS.map((opt) => {
+                      const on = config.cavemanConfig!.compressRoles.includes(opt.value);
+                      return (
+                        <Button
+                          key={opt.value}
+                          size="sm"
+                          variant={on ? "secondary" : "ghost"}
+                          aria-pressed={on}
+                          onClick={() => toggleCavemanRole(opt.value)}
+                        >
+                          {t(opt.labelKey)}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <Input
+                  label={t("compressionMinLength")}
+                  type="number"
+                  min={0}
+                  max={100000}
+                  value={config.cavemanConfig.minMessageLength}
+                  onChange={(e) =>
+                    save({
+                      cavemanConfig: {
+                        minMessageLength: parseInt(e.target.value) || 50,
+                      },
+                    })
+                  }
+                  className="sm:max-w-xs"
+                />
+
+                {/* Caveman intensity (level) is set in the panel
+                      (/dashboard/context/settings); kept out of this tab to avoid a
+                      duplicate level control. */}
+
+                <div className="space-y-2">
+                  <p className="text-sm text-text-muted">{t("compressionSkipRules")}</p>
+                  <p className="text-xs text-text-muted">{t("compressionSkipRulesDesc")}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {ruleMetadata.map((rule) => {
+                      const skipped = config.cavemanConfig!.skipRules.includes(rule.name);
+                      return (
+                        <Button
+                          key={rule.name}
+                          size="sm"
+                          variant={skipped ? "outline" : "ghost"}
+                          aria-pressed={skipped}
+                          onClick={() => toggleCavemanRule(rule.name)}
+                          title={`${rule.category} · ${rule.context} · ${(rule.intensities ?? [rule.minIntensity]).join("/")}`}
+                          className={skipped ? "text-error line-through" : undefined}
+                        >
+                          {rule.name.replace(/_/g, " ")}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-sm text-text-muted">{t("compressionPreservePatterns")}</p>
+                  <p className="text-xs text-text-muted">{t("compressionPreservePatternsDesc")}</p>
+                  <Textarea
+                    aria-label={t("compressionPreservePatterns")}
+                    value={(config.cavemanConfig.preservePatterns ?? []).join("\n")}
+                    onChange={(e) => {
+                      const patterns = e.target.value
+                        .split("\n")
+                        .map((p) => p.trim())
+                        .filter(Boolean);
+                      save({
+                        cavemanConfig: {
+                          preservePatterns: patterns,
+                        },
+                      });
+                    }}
+                    placeholder="https?://\S+\n```[\s\S]*?```"
+                    className="w-full min-h-[80px] font-mono resize-y"
+                  />
+                </div>
+              </>
+            </div>
+          )}
+
+        {config.enabled && config.defaultMode === "aggressive" && config.aggressive && (
+          <div className="space-y-3 pt-4 border-t border-border/30">
+            <div>
+              <h4 className="text-sm font-medium text-text-main">
+                {t("compressionAggressiveConfig")}
+              </h4>
+              <p className="text-xs text-text-muted mt-0.5">
+                {t("compressionAggressiveConfigDesc")}
+              </p>
+            </div>
+
+            <Toggle
+              label={t("compressionSummarizerEnabled")}
+              checked={config.aggressive.summarizerEnabled}
+              onChange={() =>
+                save({
+                  aggressive: {
+                    summarizerEnabled: !config.aggressive!.summarizerEnabled,
+                  },
+                })
+              }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionMaxTokensPerMessage")}
+                hint={t("tokens")}
+                type="number"
+                min={256}
+                max={32768}
+                value={config.aggressive.maxTokensPerMessage}
+                onChange={(e) =>
+                  save({
+                    aggressive: {
+                      maxTokensPerMessage: parseInt(e.target.value) || 2048,
+                    },
+                  })
+                }
+              />
+              <Input
+                label={t("compressionMinSavings")}
+                hint="%"
+                type="number"
+                min={0}
+                max={1}
+                step={0.01}
+                value={config.aggressive.minSavingsThreshold}
+                onChange={(e) =>
+                  save({
+                    aggressive: {
+                      minSavingsThreshold: parseFloat(e.target.value) || 0.05,
+                    },
+                  })
+                }
+              />
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <p className="text-sm font-medium text-text-main">
+                {t("compressionAgingThresholds")}
+              </p>
+              <p className="text-xs text-text-muted">{t("compressionAgingThresholdsDesc")}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(["fullSummary", "moderate", "light", "verbatim"] as const).map((tier) => (
+                  <Input
+                    key={tier}
+                    label={tier.replace(/([A-Z])/g, " $1").trim()}
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={config.aggressive!.thresholds[tier]}
+                    onChange={(e) =>
+                      save({
+                        aggressive: {
+                          thresholds: {
+                            [tier]: parseInt(e.target.value) || 2,
+                          },
+                        },
+                      })
+                    }
+                    className="rounded border border-border/50 p-2 capitalize"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <p className="text-sm font-medium text-text-main">{t("compressionToolStrategies")}</p>
+              <p className="text-xs text-text-muted">{t("compressionToolStrategiesDesc")}</p>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  ["fileContent", "grepSearch", "shellOutput", "json", "errorMessage"] as const
+                ).map((strategy) => {
+                  const on = config.aggressive!.toolStrategies[strategy];
+                  return (
+                    <Button
+                      key={strategy}
+                      size="sm"
+                      variant={on ? "secondary" : "ghost"}
+                      aria-pressed={on}
+                      onClick={() =>
+                        save({
+                          aggressive: {
+                            toolStrategies: {
+                              [strategy]: !config.aggressive!.toolStrategies[strategy],
+                            },
+                          },
+                        })
+                      }
+                    >
+                      {strategy.replace(/([A-Z])/g, " $1").trim()}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {config.enabled && config.defaultMode === "ultra" && config.ultra && (
+          <div className="space-y-3 pt-4 border-t border-border/30">
+            <div>
+              <h4 className="text-sm font-medium text-text-main">{t("compressionUltraConfig")}</h4>
+              <p className="text-xs text-text-muted mt-0.5">{t("compressionUltraConfigDesc")}</p>
+            </div>
+
+            <Toggle
+              label={t("enabled")}
+              checked={config.ultra.enabled}
+              onChange={() =>
+                save({
+                  ultra: {
+                    enabled: !config.ultra!.enabled,
+                  },
+                })
+              }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={t("compressionUltraRate")}
+                type="number"
+                min={0}
+                max={1}
+                step={0.05}
+                value={config.ultra.compressionRate}
+                onChange={(e) =>
+                  save({
+                    ultra: {
+                      compressionRate: parseFloat(e.target.value) || 0,
+                    },
+                  })
+                }
+              />
+              <Input
+                label={t("compressionUltraMinScore")}
+                type="number"
+                min={0}
+                max={1}
+                step={0.05}
+                value={config.ultra.minScoreThreshold}
+                onChange={(e) =>
+                  save({
+                    ultra: {
+                      minScoreThreshold: parseFloat(e.target.value) || 0,
+                    },
+                  })
+                }
+              />
+              <Input
+                label={t("compressionMaxTokensPerMessage")}
+                hint={t("tokens")}
+                type="number"
+                min={0}
+                max={32768}
+                value={config.ultra.maxTokensPerMessage}
+                onChange={(e) =>
+                  save({
+                    ultra: {
+                      maxTokensPerMessage: parseInt(e.target.value) || 0,
+                    },
+                  })
+                }
+              />
+            </div>
+
+            <Toggle
+              label={t("compressionUltraSlmFallback")}
+              checked={config.ultra.slmFallbackToAggressive}
+              onChange={() =>
+                save({
+                  ultra: {
+                    slmFallbackToAggressive: !config.ultra!.slmFallbackToAggressive,
+                  },
+                })
+              }
+            />
+
+            <Input
+              label={t("compressionUltraModelPath")}
+              type="text"
+              value={config.ultra.modelPath ?? ""}
+              onChange={(e) =>
+                save({
+                  ultra: {
+                    modelPath: e.target.value.trim() || undefined,
+                  },
+                })
+              }
+              placeholder="/path/to/model.onnx"
+              inputClassName="font-mono"
+            />
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

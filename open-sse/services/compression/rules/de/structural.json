@@ -1,0 +1,32 @@
+{
+  "language": "de",
+  "category": "structural",
+  "rules": [
+    {
+      "name": "de_purpose",
+      "pattern": "\\b(?:um zu|mit dem ziel|damit ich)\\b\\s*",
+      "replacement": "um ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite"
+    },
+    {
+      "name": "de_connectors",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:ausserdem|außerdem|zusaetzlich|zusätzlich|darueber hinaus|darüber hinaus)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "auch ",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "flags": "giu"
+    },
+    {
+      "name": "de_emphasis",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:sehr|wirklich|extrem|ziemlich)\\s+(?=[a-zäöüß])",
+      "replacement": "",
+      "context": "all",
+      "category": "structural",
+      "minIntensity": "lite",
+      "flags": "giu"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "title": "Guides",
+  "description": "Technical guides for operators and developers",
+  "pages": [
+    "SETUP_GUIDE",
+    "USER_GUIDE",
+    "THINKING_BUDGET",
+    "DOCKER_GUIDE",
+    "ELECTRON_GUIDE",
+    "FEATURES",
+    "CHAOS-MODE",
+    "FREE_PROVIDER_RANKINGS",
+    "COST_TRACKING",
+    "I18N",
+    "KIRO_SETUP",
+    "ANTIGRAVITY-ONBOARDING",
+    "CLAUDE-CODE-CONFIGURATION",
+    "CODEX-CLI-CONFIGURATION",
+    "CLI-INTEGRATIONS",
+    "VSCODE-COPILOT",
+    "MANAGEMENT-AUTH",
+    "SESSION-SYNC-EXTENSION",
+    "REMOTE-MODE",
+    "HEADLESS",
+    "PWA_GUIDE",
+    "TERMUX_GUIDE",
+    "TIERS",
+    "USAGE_QUOTA_GUIDE",
+    "TROUBLESHOOTING",
+    "UNINSTALL"
+  ]
+}

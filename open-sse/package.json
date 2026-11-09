@@ -1,0 +1,7 @@
+{
+  "name": "@omniroute/open-sse",
+  "version": "3.8.54",
+  "description": "OmniRoute streaming engine — handles provider dispatch, protocol translation, and SSE streaming",
+  "type": "module",
+  "private": true
+}

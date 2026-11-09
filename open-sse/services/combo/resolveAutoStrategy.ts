@@ -1,0 +1,644 @@
+import {
+  errorResponse,
+  unavailableResponse,
+  errorResponseWithComboDiagnostics,
+} from "../../utils/error.ts";
+import { BudgetExceededError, selectProvider as selectAutoProvider } from "../autoCombo/engine.ts";
+import type { ScoringWeights } from "../autoCombo/scoring.ts";
+import {
+  resolveRequestModePack,
+  parseRequestBudgetCap,
+  parseRequestBudgetFallback,
+} from "../autoCombo/requestControls.ts";
+import { selectWithStrategyAsync } from "../autoCombo/routerStrategy.ts";
+import { buildComplexityRoutingHint } from "../autoCombo/complexityRouter";
+import { getModePack } from "../autoCombo/modePacks.ts";
+import { recordComboIntent } from "../comboMetrics.ts";
+import { estimateTokens } from "../contextManager.ts";
+import { classifyWithConfig } from "../intentClassifier.ts";
+import type { RoutingHint } from "../manifestAdapter";
+import { parseModel } from "../model.ts";
+import { supportsToolCalling } from "../modelCapabilities.ts";
+import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import { parseAutoConfig } from "./autoConfig.ts";
+import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
+import { dedupeTargetsByExecutionKey } from "./comboData.ts";
+import { restoreIncomingOrder } from "./rungOrder.ts";
+import {
+  getModelContextLimitForModelString,
+  providerSupportsEmulatedToolCalling,
+  filterTargetsByRequestCompatibility,
+  deriveRequestCompatibilityRequirements,
+} from "./comboStructure.ts";
+import { hasMediaRequirements } from "./mediaCompatibility.ts";
+import {
+  calculatePromptCacheAffinityScores,
+  promptCacheTargetIdentity,
+} from "./promptCacheAffinity.ts";
+import type { ResetWindowConfig } from "./quotaScoring.ts";
+import {
+  _registerExecutionCandidates,
+  expandAutoComboCandidatePool,
+  extractPromptForIntent,
+  getIntentConfig,
+  mapIntentToTaskType,
+  scoreAutoTargets,
+} from "./autoStrategy.ts";
+import type {
+  AutoProviderCandidate,
+  ComboLike,
+  ComboLogger,
+  ResolvedComboTarget,
+} from "./types.ts";
+import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
+import { firstAccountPreferenceTier, orderAccountPreferences } from "./accountPreferences.ts";
+
+/**
+ * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
+ * this leaf), so importing it directly would create an import cycle. Passing it
+ * through `deps` keeps this module acyclic (same pattern as `buildTargetTimeoutRunner`).
+ */
+type BuildAutoCandidates = (
+  targets: ResolvedComboTarget[],
+  comboName: string,
+  sessionId?: string | null,
+  resetWindowConfig?: ResetWindowConfig,
+  resilienceSettings?: ResilienceSettings | null,
+  apiKeyAllowedConnections?: string[] | null
+) => Promise<AutoProviderCandidate[]>;
+
+export interface ResolveAutoStrategyDeps {
+  orderedTargets: ResolvedComboTarget[];
+  body: Record<string, unknown>;
+  combo: ComboLike;
+  settings: Record<string, unknown> | null | undefined;
+  // Index signature keeps this structurally assignable from the caller's much
+  // wider `resolveComboSetupConfig()` return type — without it, TS2559 ("no
+  // properties in common") fires now that `complexityAwareRouting` (the one
+  // property the two types used to share) is gone (#13386).
+  config: { compatFilterFailOpen?: boolean } & Record<string, unknown>;
+  relayOptions?: {
+    bypassProviderQuotaPolicy?: boolean;
+    sessionId?: string | null;
+    /** Per-request X-OmniRoute-Mode value (#6024/#6025). */
+    mode?: string | null;
+    /** Per-request X-OmniRoute-Budget value in USD (#6023). */
+    budgetCap?: number | null;
+    /** Per-request X-OmniRoute-Budget-Fallback value ("cheapest" | "strict") — #3470. */
+    budgetFallback?: "cheapest" | "strict" | null;
+  } | null;
+  resilienceSettings: ResilienceSettings;
+  log: ComboLogger;
+  buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
+}
+
+export type ResolveAutoStrategyResult =
+  | { earlyResponse: Response }
+  | { orderedTargets: ResolvedComboTarget[]; autoUsedExplicitRouter: boolean };
+
+export interface EvaluateAutoCandidatesOptions {
+  targets: ResolvedComboTarget[];
+  comboName: string;
+  body: Record<string, unknown>;
+  taskType: string;
+  weights: ScoringWeights;
+  sessionId?: string | null;
+  resetWindowConfig?: ResetWindowConfig;
+  resilienceSettings?: ResilienceSettings | null;
+  manifestHint?: RoutingHint | null;
+  buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
+}
+
+export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOptions) {
+  const builtCandidates = await options.buildAutoCandidates(
+    options.targets,
+    options.comboName,
+    options.sessionId,
+    options.resetWindowConfig,
+    options.resilienceSettings,
+    options.apiKeyAllowedConnections
+  );
+  const cacheAffinityScores = calculatePromptCacheAffinityScores(
+    builtCandidates,
+    options.body,
+    options.sessionId
+  );
+  const candidates = builtCandidates.map((candidate) => ({
+    ...candidate,
+    cacheAffinity: cacheAffinityScores.get(promptCacheTargetIdentity(candidate)) ?? 0,
+  }));
+  const routableCandidates = candidates.filter(
+    (candidate) => candidate.quotaCutoffBlocked !== true
+  );
+  return {
+    sourceCandidates: builtCandidates,
+    candidates,
+    routableCandidates,
+    scoredTargets: scoreAutoTargets(
+      options.targets,
+      routableCandidates,
+      options.taskType,
+      options.weights,
+      options.manifestHint
+    ),
+  };
+}
+
+/**
+ * #14313 — an auto combo whose candidate pool is already EMPTY (every target skipped by
+ * cooldowns, lockouts or exhaustion before the tool pre-filter ran) used to fall into the
+ * tool pre-filter and answer 400 "No target in combo X supports tool calling", a
+ * capability_mismatch that describes a filter rejecting a populated pool. With the
+ * COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED flag on, the empty pool answers a truthful,
+ * retryable 503 `no_eligible_targets` instead. Off by default (client-visible status and
+ * body change); `null` keeps the legacy path.
+ */
+function emptyCandidatePoolResponse(poolSize: number, comboName: string): Response | null {
+  if (poolSize !== 0 || !isComboEmptyPoolNoEligibleTargetsEnabled()) return null;
+  return errorResponseWithComboDiagnostics(
+    503,
+    `No eligible targets in combo ${comboName}; the candidate pool is empty`,
+    {
+      poolSize: 0,
+      attempted: 0,
+      excluded: [],
+      attemptOrder: [],
+      terminalReason: "no_eligible_targets",
+    },
+    { code: "no_eligible_targets", type: "api_error" }
+  );
+}
+
+/**
+ * Resolve target ordering for the `auto` combo strategy.
+ *
+ * Extracted verbatim from `handleComboChat`'s auto-strategy branch (now selected by the
+ * `ordering: "auto"` trait in strategyRegistry.ts):
+ * tool-calling + context-window pre-filters, intent classification, candidate
+ * building (quota cutoff), explicit-router vs rules selection, complexity-aware
+ * scoring and final dedup ordering. Behavior is byte-identical to the previous
+ * inline block; the two `return unavailableResponse(...)` exits become
+ * `{ earlyResponse }` so the host can decide to return them, and the mutated
+ * `orderedTargets` / `autoUsedExplicitRouter` are returned instead of closed over.
+ */
+export async function resolveAutoStrategyOrder(
+  deps: ResolveAutoStrategyDeps
+): Promise<ResolveAutoStrategyResult> {
+  const {
+    body,
+    combo,
+    settings,
+    config,
+    relayOptions,
+    resilienceSettings,
+    log,
+    buildAutoCandidates,
+  } = deps;
+  let orderedTargets = deps.orderedTargets;
+  let autoUsedExplicitRouter = false;
+
+  const requestHasTools = Array.isArray(body?.tools) && body.tools.length > 0;
+  let eligibleTargets = [...orderedTargets];
+  const compatFilterFailOpen =
+    config?.compatFilterFailOpen === true ||
+    (settings as { compatFilterFailOpen?: unknown } | null | undefined)?.compatFilterFailOpen ===
+      true;
+
+  if (requestHasTools) {
+    // #14313 (opt-in, COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED): an empty pool is
+    // not a tool-calling mismatch. Off by default: the pool falls into the pre-filter
+    // below and answers the legacy 400 capability_mismatch exactly as before.
+    const emptyPoolResponse = emptyCandidatePoolResponse(eligibleTargets.length, combo.name);
+    if (emptyPoolResponse) return { earlyResponse: emptyPoolResponse };
+    // Keep #5240 prompt-emulation providers (toolCalling:"emulated") even when
+    // registry/capability rows honestly report toolCalling:false.
+    const filtered = eligibleTargets.filter(
+      (target) =>
+        supportsToolCalling(target.modelStr) || providerSupportsEmulatedToolCalling(target.provider)
+    );
+    if (filtered.length > 0) {
+      eligibleTargets = filtered;
+    } else if (compatFilterFailOpen) {
+      log.warn(
+        "COMBO",
+        "Auto strategy: all candidates filtered by tool-calling policy, falling back to full pool (compatFilterFailOpen)"
+      );
+    } else {
+      // #8488: fail closed with an explicit compatibility error instead of
+      // re-admitting tool-incapable targets.
+      const toolCount = Array.isArray(body.tools) ? body.tools.length : 0;
+      return {
+        earlyResponse: errorResponseWithComboDiagnostics(
+          400,
+          `No target in combo ${combo.name} supports tool calling; request carried ${toolCount} tools`,
+          {
+            poolSize: eligibleTargets.length,
+            attempted: 0,
+            excluded: eligibleTargets.map((target) => ({
+              provider: target.provider,
+              model: target.modelStr,
+              reason: "tools",
+            })),
+            attemptOrder: [],
+            terminalReason: "capability_mismatch",
+          },
+          { code: "capability_mismatch", type: "invalid_request_error" }
+        ),
+      };
+    }
+  }
+
+  // Context-window pre-filter (#1808)
+  // Estimate input tokens once; exclude candidates whose known context limit is too small.
+  // Uses the same 4-chars-per-token heuristic as contextManager.ts::compressContext().
+  // Null/unknown limits are treated as "include" to avoid incorrectly dropping valid targets.
+  const requestMessages = body.messages;
+  const estimatedInputTokens = estimateTokens(
+    typeof requestMessages === "string" ||
+      (requestMessages !== null && typeof requestMessages === "object")
+      ? requestMessages
+      : []
+  );
+  if (estimatedInputTokens > 0) {
+    const filteredByContext = eligibleTargets.filter((target) => {
+      const limit = getModelContextLimitForModelString(target.modelStr);
+      if (limit === null || limit === undefined) return true; // unknown — include to be safe
+      return limit >= estimatedInputTokens;
+    });
+    if (filteredByContext.length > 0) {
+      log.debug?.(
+        "COMBO",
+        `Auto strategy: context-window filter kept ${filteredByContext.length}/${eligibleTargets.length} candidates (est. ${estimatedInputTokens} tokens)`
+      );
+      eligibleTargets = filteredByContext;
+    } else {
+      log.warn(
+        "COMBO",
+        `Auto strategy: all candidates filtered by approximate context-window policy (est. ${estimatedInputTokens} tokens), falling back to full pool`
+      );
+    }
+
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  } else if (normalizeAutoConnectionScope(deps.apiKeyAllowedConnections)) {
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  }
+
+  // Full-catalog expansion can add targets after the initial compatibility pass.
+  // Recheck before scoring so unsupported transports cannot consume the retry
+  // budget, and retain this pool even when candidate telemetry is unavailable.
+  if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    if (eligibleTargets.length === 0) {
+      return {
+        earlyResponse: errorResponse(
+          400,
+          "No compatible media transport is available in this Auto pool",
+          {
+            code: "unsupported_media_input",
+            type: "invalid_request_error",
+          }
+        ),
+      };
+    }
+    orderedTargets = eligibleTargets;
+  }
+
+  const prompt = extractPromptForIntent(body);
+  const systemPrompt = typeof combo?.system_message === "string" ? combo.system_message : undefined;
+  const intentConfig = getIntentConfig(settings, combo);
+  const intent = classifyWithConfig(prompt, intentConfig, systemPrompt);
+  recordComboIntent(combo.name, intent);
+  const taskType = mapIntentToTaskType(intent);
+
+  const {
+    routingStrategy,
+    candidatePool,
+    weights: configWeights,
+    explorationRate,
+    budgetCap: configBudgetCap,
+    budgetFallback: configBudgetFallback,
+    modePack: configModePack,
+    resetWindowConfig,
+    slaPolicy,
+    nadirConfig,
+    accountPreferences,
+  } = parseAutoConfig(combo, eligibleTargets);
+
+  // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
+  // X-OmniRoute-Budget-Fallback and X-OmniRoute-Mode headers (threaded via
+  // relayOptions) take precedence over the combo's stored config for this single
+  // request. Unknown/garbage header values are ignored so the saved config is
+  // preserved.
+  const requestBudgetCap = parseRequestBudgetCap(relayOptions?.budgetCap);
+  const budgetCap = requestBudgetCap ?? configBudgetCap;
+  const requestBudgetFallback = parseRequestBudgetFallback(relayOptions?.budgetFallback);
+  const budgetFallback = requestBudgetFallback ?? configBudgetFallback;
+  const requestModePack = resolveRequestModePack(relayOptions?.mode);
+  const modePack = requestModePack.override ? requestModePack.modePack : configModePack;
+  // #7008: `weights` must track the *effective* (post-override) modePack, not just
+  // the combo's stored one. `selectAutoProvider()` (engine.ts) already re-derives
+  // weights internally from the `modePack` it's given, so it correctly reacts to a
+  // per-request X-OmniRoute-Mode override — but `scoreAutoTargets()` (the fallback
+  // ranking below) has no such re-derivation and only ever sees whatever `weights`
+  // it's handed. Without this recompute, a request overriding e.g. `quality-first`
+  // to `ship-fast` would select its primary target under ship-fast weights but rank
+  // every fallback under the stale quality-first weights — the same
+  // select-under-one-policy/rank-under-another bug this module's original fix
+  // (parseAutoConfig honoring the combo's own stored modePack) set out to close.
+  const weights = modePack ? getModePack(modePack) || configWeights : configWeights;
+  if (
+    requestModePack.override ||
+    requestBudgetCap !== undefined ||
+    requestBudgetFallback !== undefined
+  ) {
+    log.debug?.(
+      "COMBO",
+      `Auto strategy: per-request controls applied (mode=${
+        requestModePack.override ? (requestModePack.modePack ?? "balanced") : "—"
+      }, budgetCap=${requestBudgetCap ?? "—"}, budgetFallback=${requestBudgetFallback ?? "—"})`
+    );
+  }
+
+  let lastKnownGoodProvider: string | undefined;
+  try {
+    const { getLKGP } = await import("@/lib/db/settings");
+    const lkgp = await getLKGP(combo.name, combo.id || combo.name);
+    if (lkgp) lastKnownGoodProvider = lkgp.provider;
+  } catch (err) {
+    log.warn("COMBO", "Failed to retrieve Last Known Good Provider. This is non-fatal.", { err });
+  }
+
+  const autoCandidateResilienceSettings =
+    relayOptions?.bypassProviderQuotaPolicy === true
+      ? {
+          ...resilienceSettings,
+          quotaPreflight: {
+            ...resilienceSettings.quotaPreflight,
+            enabled: false,
+          },
+        }
+      : resilienceSettings;
+  // Complexity-aware routing: classify the request's difficulty and feed a
+  // tier hint into scoring so tierAffinity / specificityMatch favor
+  // candidates whose tier matches the request.  Always-on since #13386 — the
+  // former opt-in gate (config.complexityAwareRouting) was orphaned by
+  // migration 103 which stripped it as a legacy key, leaving the feature
+  // permanently disabled.  The classification is lightweight (regex-only, no
+  // LLM call) so always running it has negligible cost.
+  const autoManifestHint: RoutingHint | null = await buildComplexityRoutingHint(
+    eligibleTargets.filter((t) => t.kind === "model"),
+    body,
+    log
+  );
+
+  const {
+    sourceCandidates,
+    candidates,
+    routableCandidates: unfilteredCandidates,
+    scoredTargets,
+  } = await evaluateAutoCandidates({
+    targets: eligibleTargets,
+    comboName: combo.name,
+    body,
+    taskType,
+    weights,
+    sessionId: relayOptions?.sessionId,
+    resetWindowConfig,
+    resilienceSettings: autoCandidateResilienceSettings,
+    manifestHint: autoManifestHint,
+    buildAutoCandidates,
+    apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
+  });
+  for (let index = 0; index < sourceCandidates.length; index += 1) {
+    sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
+  }
+  const quotaBlockedCount = candidates.length - unfilteredCandidates.length;
+  if (quotaBlockedCount > 0) {
+    log.info(
+      "COMBO",
+      `Auto strategy: quota cutoff skipped ${quotaBlockedCount}/${candidates.length} account candidates`
+    );
+  }
+  // Checked before the account-preference filters so an all-quota-blocked pool keeps
+  // its 429 whether or not preferences are configured.
+  if (candidates.length > 0 && unfilteredCandidates.length === 0) {
+    return {
+      earlyResponse: unavailableResponse(
+        429,
+        "All auto strategy candidates are below configured quota cutoffs"
+      ),
+    };
+  }
+  const hasAccountPreferences = Object.keys(accountPreferences).length > 0;
+  let routableCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
+  if (hasAccountPreferences) {
+    const eligibleCandidates = routableCandidates.filter(
+      (candidate) =>
+        candidate.circuitBreakerState !== "OPEN" &&
+        (!candidatePool.length || candidatePool.includes(candidate.provider))
+    );
+    // A soft status penalty (#4540) is last-resort, never an exclusion: penalised
+    // accounts follow every healthy account, each group kept in tier order.
+    routableCandidates = [
+      ...eligibleCandidates.filter((candidate) => !candidate.statusPenalty),
+      ...eligibleCandidates.filter((candidate) => candidate.statusPenalty),
+    ];
+    if (budgetCap && routableCandidates.length) {
+      const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
+      const cost = (candidate: AutoProviderCandidate) =>
+        (candidate.costPer1MTokens * tokens) / 1_000_000;
+      const affordable = routableCandidates.filter((candidate) => cost(candidate) <= budgetCap);
+      if (affordable.length) {
+        routableCandidates = affordable;
+      } else if (budgetFallback === "strict") {
+        return {
+          earlyResponse: errorResponse(
+            402,
+            new BudgetExceededError(budgetCap, Math.min(...routableCandidates.map(cost))).message
+          ),
+        };
+      } else {
+        const cheapest = Math.min(...routableCandidates.map(cost));
+        routableCandidates = routableCandidates.filter((candidate) => cost(candidate) === cheapest);
+      }
+    }
+  }
+  if (hasAccountPreferences && routableCandidates.length === 0) {
+    return {
+      earlyResponse: unavailableResponse(
+        503,
+        "No eligible accounts remain for this combo's account preferences"
+      ),
+    };
+  }
+  const penalisedKeys = new Set(
+    hasAccountPreferences
+      ? routableCandidates
+          .filter((candidate) => candidate.statusPenalty)
+          .map((candidate) => candidate.executionKey)
+      : []
+  );
+  const healthyCandidates = routableCandidates.filter(
+    (candidate) => !penalisedKeys.has(candidate.executionKey)
+  );
+  const selectionCandidates = firstAccountPreferenceTier(
+    healthyCandidates.length > 0 ? healthyCandidates : routableCandidates,
+    accountPreferences
+  );
+  // G2: Register candidates so chatCore can mark quotaSoftPenalty via setCandidateQuotaSoftPenalty.
+  _registerExecutionCandidates(routableCandidates);
+  if (routableCandidates.length > 0) {
+    let selectedProvider: string | null = null;
+    let selectedModel: string | null = null;
+    let selectedConnectionId: string | null = null;
+    let selectionReason = "";
+
+    if (routingStrategy !== "rules") {
+      try {
+        const decision = await selectWithStrategyAsync(
+          selectionCandidates,
+          {
+            taskType,
+            requestHasTools,
+            lastKnownGoodProvider,
+            // #11181: the Routing tab persists an LKGP on/off toggle and
+            // LKGPStrategy guards on `context.lkgpEnabled === false`, but the
+            // field was never forwarded into this context, so the guard never
+            // saw the setting and the off-switch was unreachable.
+            lkgpEnabled: (settings as { lkgpEnabled?: unknown } | null | undefined)?.lkgpEnabled as
+              boolean | undefined,
+            estimatedInputTokens,
+            sla: slaPolicy,
+            weights,
+            explorationRate,
+            manifestHint: autoManifestHint,
+            messages: body.messages,
+            nadir: nadirConfig,
+          },
+          routingStrategy
+        );
+        selectedProvider = decision.provider;
+        selectedModel = decision.model;
+        selectedConnectionId = decision.connectionId ?? null;
+        selectionReason = decision.reason;
+        autoUsedExplicitRouter = true;
+      } catch (err) {
+        log.warn(
+          "COMBO",
+          `Auto strategy '${routingStrategy}' failed (${err?.message || "unknown"}), falling back to rules`
+        );
+      }
+    }
+
+    if (!selectedProvider || !selectedModel) {
+      let selection;
+      try {
+        selection = selectAutoProvider(
+          {
+            id: combo.id || combo.name,
+            name: combo.name,
+            type: "auto",
+            candidatePool,
+            weights,
+            modePack,
+            budgetCap,
+            budgetFallback,
+            estimatedInputTokens,
+            explorationRate,
+            manifestHint: autoManifestHint,
+          },
+          selectionCandidates,
+          taskType
+        );
+      } catch (err) {
+        // #3470: `budgetFallback: "strict"` refuses to select when every candidate
+        // exceeds `budgetCap` — surface a clear cost-exceeds-budget response
+        // instead of letting it propagate as an unhandled 500.
+        if (err instanceof BudgetExceededError) {
+          return { earlyResponse: errorResponse(402, err.message) };
+        }
+        throw err;
+      }
+      selectedProvider = selection.provider;
+      selectedModel = selection.model;
+      selectedConnectionId = selection.connectionId ?? null;
+      selectionReason = `score=${selection.score.toFixed(3)}${selection.isExploration ? " (exploration)" : ""}`;
+    }
+
+    const routableKeys = new Set(routableCandidates.map((candidate) => candidate.executionKey));
+    const rankedTargets = orderAccountPreferences(
+      scoredTargets
+        .filter((entry) => !hasAccountPreferences || routableKeys.has(entry.target.executionKey))
+        .map((entry) => entry.target),
+      accountPreferences
+    );
+    const selectedTarget =
+      rankedTargets.find((target) => {
+        const parsed = parseModel(target.modelStr);
+        const modelId = parsed.model || target.modelStr;
+        return (
+          target.provider === selectedProvider &&
+          modelId === selectedModel &&
+          (!selectedConnectionId || target.connectionId === selectedConnectionId)
+        );
+      }) ||
+      rankedTargets[0] ||
+      eligibleTargets[0];
+    if (!selectedTarget) {
+      return {
+        earlyResponse: unavailableResponse(
+          429,
+          "No auto strategy targets remained after quota cutoff filtering"
+        ),
+      };
+    }
+
+    // Keep eligibleTargets as the last-resort fallback tail: dedupe drops the
+    // routable ranked ones (and, when the cutoff is OFF, makes this identical to
+    // the pre-cutoff behavior), but a quota-blocked target still survives as a
+    // final fallback instead of vanishing — the hard cutoff only de-prioritizes.
+    const preserveRungOrder =
+      (combo as { autoConfig?: { preserveRungOrder?: unknown } })?.autoConfig?.preserveRungOrder ===
+      true;
+    const headTargets = preserveRungOrder
+      ? restoreIncomingOrder(rankedTargets, eligibleTargets)
+      : [selectedTarget, ...rankedTargets];
+    orderedTargets = dedupeTargetsByExecutionKey(
+      [...headTargets, ...(hasAccountPreferences ? [] : eligibleTargets)].filter(
+        (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
+      )
+    );
+    orderedTargets = orderAccountPreferences(orderedTargets, accountPreferences);
+    if (penalisedKeys.size > 0) {
+      orderedTargets = [
+        ...orderedTargets.filter((target) => !penalisedKeys.has(target.executionKey)),
+        ...orderedTargets.filter((target) => penalisedKeys.has(target.executionKey)),
+      ];
+    }
+    if (hasAccountPreferences) {
+      log.info(
+        "COMBO",
+        `Account preferences: ${orderedTargets.length} concrete targets ordered preferred → normal → reserve; excluded accounts removed`
+      );
+    }
+
+    log.info(
+      "COMBO",
+      `Auto selection: ${selectedTarget?.modelStr || `${selectedProvider}/${selectedModel}`} | intent=${intent} task=${taskType} | strategy=${routingStrategy} | ${selectionReason}`
+    );
+  } else {
+    log.warn("COMBO", "Auto strategy has no candidates, keeping default ordering");
+  }
+
+  return { orderedTargets, autoUsedExplicitRouter };
+}

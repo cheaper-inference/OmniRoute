@@ -1,0 +1,221 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { getEventListeners } from "node:events";
+import type { EventEmitter } from "node:events";
+
+const base = await import("../../open-sse/executors/base.ts");
+
+test("mergeUpstreamExtraHeaders skips null/undefined extra", () => {
+  const h: Record<string, string> = { Authorization: "Bearer x" };
+  base.mergeUpstreamExtraHeaders(h, null);
+  assert.deepEqual(h, { Authorization: "Bearer x" });
+  base.mergeUpstreamExtraHeaders(h, undefined);
+  assert.deepEqual(h, { Authorization: "Bearer x" });
+});
+
+test("mergeUpstreamExtraHeaders merges string key-value pairs", () => {
+  const h: Record<string, string> = {};
+  base.mergeUpstreamExtraHeaders(h, { "X-Custom": "val1", "X-Other": "val2" });
+  assert.equal(h["X-Custom"], "val1");
+  assert.equal(h["X-Other"], "val2");
+});
+
+test("mergeUpstreamExtraHeaders replaces same-name entries under any case (no comma-join)", () => {
+  // A client-forwarded lowercase attribution key plus an operator-configured
+  // variant must end as ONE entry — undici comma-joins case-duplicates.
+  const h: Record<string, string> = {
+    "http-referer": "https://client.example",
+    "x-title": "Client",
+  };
+  base.mergeUpstreamExtraHeaders(h, {
+    "HTTP-Referer": "https://configured.example",
+    "X-Title": "Operator",
+  });
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "http-referer").length, 1);
+  assert.equal(h["HTTP-Referer"], "https://configured.example");
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "x-title").length, 1);
+  assert.equal(h["X-Title"], "Operator");
+});
+
+test("mergeUpstreamExtraHeaders overrides user-agent via setUserAgentHeader", () => {
+  const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
+  base.mergeUpstreamExtraHeaders(h, { "user-agent": "new-agent" });
+  // Regression: the UA override must leave ONE entry; the old mirror kept both
+  // case variants and undici comma-joined them on the wire ("new, new").
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
+  assert.equal(h["User-Agent"], "new-agent");
+});
+
+test("setUserAgentHeader leaves exactly one entry regardless of prior case variants", () => {
+  const h: Record<string, string> = { "user-agent": "seeded-lower" };
+  base.setUserAgentHeader(h, "final/1.0");
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
+  assert.equal(h["User-Agent"], "final/1.0");
+});
+
+test("mergeUpstreamExtraHeaders skips empty keys", () => {
+  const h: Record<string, string> = {};
+  base.mergeUpstreamExtraHeaders(h, { "": "val", "X-Valid": "ok" });
+  assert.equal(h[""], undefined);
+  assert.equal(h["X-Valid"], "ok");
+});
+
+test("mergeUpstreamExtraHeaders skips non-string values", () => {
+  const h: Record<string, string> = {};
+  base.mergeUpstreamExtraHeaders(h, { "X-Num": 123 as any, "X-Bool": true as any });
+  assert.equal(h["X-Num"], undefined);
+  assert.equal(h["X-Bool"], undefined);
+});
+
+test("getCustomUserAgent returns null for null/undefined", () => {
+  assert.equal(base.getCustomUserAgent(null), null);
+  assert.equal(base.getCustomUserAgent(undefined), null);
+});
+
+test("getCustomUserAgent returns null for empty string", () => {
+  assert.equal(base.getCustomUserAgent({ customUserAgent: "" }), null);
+  assert.equal(base.getCustomUserAgent({ customUserAgent: "   " }), null);
+});
+
+test("getCustomUserAgent returns trimmed user agent", () => {
+  assert.equal(base.getCustomUserAgent({ customUserAgent: " MyAgent/1.0 " }), "MyAgent/1.0");
+});
+
+test("getCustomUserAgent returns null for non-string customUserAgent", () => {
+  assert.equal(base.getCustomUserAgent({ customUserAgent: 123 }), null);
+});
+
+test("setUserAgentHeader sets User-Agent casing", () => {
+  const h: Record<string, string> = {};
+  base.setUserAgentHeader(h, "TestAgent/1.0");
+  assert.equal(h["User-Agent"], "TestAgent/1.0");
+});
+
+test("setUserAgentHeader overwrites existing", () => {
+  const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
+  base.setUserAgentHeader(h, "NewAgent/2.0");
+  // One canonical entry: the old lowercase mirror made undici comma-join both.
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
+  assert.equal(h["User-Agent"], "NewAgent/2.0");
+});
+
+test("applyConfiguredUserAgent does nothing when no custom user agent", () => {
+  const h: Record<string, string> = { "User-Agent": "default" };
+  base.applyConfiguredUserAgent(h, null);
+  assert.equal(h["User-Agent"], "default");
+});
+
+test("applyConfiguredUserAgent applies custom user agent", () => {
+  const h: Record<string, string> = { "User-Agent": "default" };
+  base.applyConfiguredUserAgent(h, { customUserAgent: "Custom/1.0" });
+  assert.equal(h["User-Agent"], "Custom/1.0");
+});
+
+test("mergeAbortSignals returns secondary if primary already aborted", () => {
+  const c1 = new AbortController();
+  const c2 = new AbortController();
+  c1.abort(new Error("primary aborted"));
+  const merged = base.mergeAbortSignals(c1.signal, c2.signal);
+  assert.ok(merged.aborted);
+});
+
+test("mergeAbortSignals returns primary if secondary already aborted", () => {
+  const c1 = new AbortController();
+  const c2 = new AbortController();
+  c2.abort(new Error("secondary aborted"));
+  const merged = base.mergeAbortSignals(c1.signal, c2.signal);
+  assert.ok(merged.aborted);
+});
+
+test("mergeAbortSignals aborts when primary fires", () => {
+  const c1 = new AbortController();
+  const c2 = new AbortController();
+  const merged = base.mergeAbortSignals(c1.signal, c2.signal);
+  assert.ok(!merged.aborted);
+  c1.abort(new Error("primary"));
+  assert.ok(merged.aborted);
+});
+
+test("mergeAbortSignals aborts when secondary fires", () => {
+  const c1 = new AbortController();
+  const c2 = new AbortController();
+  const merged = base.mergeAbortSignals(c1.signal, c2.signal);
+  assert.ok(!merged.aborted);
+  c2.abort(new Error("secondary"));
+  assert.ok(merged.aborted);
+});
+
+// Regression: mergeAbortSignals used to attach its "abort" listeners to `primary`/
+// `secondary` and never remove them. Every executor fetch attempt calls this (once
+// per URL/retry — open-sse/executors/base.ts's fetchWithStartTimeout), so a busy
+// combo request accumulated one live listener per call on the long-lived combo/
+// client signal. Each leaked listener still fires when that signal is aborted later
+// (e.g. a hedge cancellation — COMBO_HEDGE_CANCELLED_REASON, "hedge-cancelled" —
+// arriving after this particular merge's own caller already finished), for a
+// `merged` output nothing is watching anymore. Proven here by counting real
+// listener growth (via node:events' getEventListeners) across repeated merges of
+// the SAME long-lived primary signal — exactly the fetchWithStartTimeout pattern.
+test("mergeAbortSignals removes its listeners once the merged signal settles (no leak across repeated merges)", () => {
+  const countAbortListeners = (target: AbortSignal) =>
+    getEventListeners(target as unknown as EventEmitter, "abort").length;
+
+  const longLived = new AbortController();
+  const before = countAbortListeners(longLived.signal);
+
+  for (let i = 0; i < 25; i++) {
+    const perAttempt = new AbortController();
+    const merged = base.mergeAbortSignals(longLived.signal, perAttempt.signal);
+    assert.ok(!merged.aborted);
+    // Simulate this attempt finishing on its own (its own timeout/abort fires),
+    // the way each fetchWithStartTimeout call's timeoutController does.
+    perAttempt.abort(new Error(`attempt-${i}-timeout`));
+    assert.ok(merged.aborted);
+  }
+
+  const after = countAbortListeners(longLived.signal);
+  assert.ok(
+    after <= before + 1,
+    `expected mergeAbortSignals to clean up its "abort" listener on the long-lived ` +
+      `signal after each merge settles; listener count grew from ~${before} to ${after} ` +
+      `across 25 merges (leak)`
+  );
+});
+
+test("sanitizeReasoningEffortForProvider passes through body without reasoning_effort", () => {
+  const body = { model: "gpt-4o", temperature: 0.7 };
+  const result = base.sanitizeReasoningEffortForProvider(body, "openai", "gpt-4o");
+  assert.deepEqual(result, body);
+});
+
+test("sanitizeReasoningEffortForProvider preserves xhigh unless explicitly unsupported", () => {
+  const body = { reasoning_effort: "xhigh" };
+  const result = base.sanitizeReasoningEffortForProvider(body, "openai", "gpt-4o") as any;
+  assert.equal(result.reasoning_effort, "xhigh");
+});
+
+test("sanitizeReasoningEffortForProvider preserves high effort", () => {
+  const body = { reasoning_effort: "high" };
+  const result = base.sanitizeReasoningEffortForProvider(body, "openai", "gpt-4o") as any;
+  assert.equal(result.reasoning_effort, "high");
+});
+
+test("sanitizeReasoningEffortForProvider preserves medium effort", () => {
+  const body = { reasoning_effort: "medium" };
+  const result = base.sanitizeReasoningEffortForProvider(body, "openai", "gpt-4o") as any;
+  assert.equal(result.reasoning_effort, "medium");
+});
+
+test("sanitizeReasoningEffortForProvider returns non-object body as-is", () => {
+  assert.equal(base.sanitizeReasoningEffortForProvider(null, "openai", "gpt-4o"), null);
+  assert.equal(base.sanitizeReasoningEffortForProvider("string", "openai", "gpt-4o"), "string");
+  assert.equal(base.sanitizeReasoningEffortForProvider(42, "openai", "gpt-4o"), 42);
+});

@@ -1,0 +1,641 @@
+/**
+ * Reasoning Replay Cache — In-memory + DB hybrid service.
+ *
+ * Captures reasoning_content from thinking-mode model responses (DeepSeek V4,
+ * Kimi K2, Qwen-Thinking, GLM, etc.) and re-injects it on subsequent turns
+ * when clients omit it. This prevents the DeepSeek 400 error:
+ * "The reasoning_content in the thinking mode must be passed back to the API."
+ *
+ * Architecture:
+ *   Write: memory + DB in the same process
+ *   Read:  memory first → DB fallback → miss
+ *
+ * @see Issue #1628
+ */
+
+import { createHash } from "node:crypto";
+import {
+  clearAllReasoningCache,
+  cleanupExpiredReasoning,
+  deleteReasoningCache,
+  getReasoningCache,
+  getReasoningCacheEntries,
+  getReasoningCacheStats,
+  setReasoningCache,
+} from "../../src/lib/db/reasoningCache.ts";
+import { isFeatureFlagEnabled } from "../../src/shared/utils/featureFlags.ts";
+import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
+
+// ──────────────── Provider/Model Detection ────────────────
+
+const REASONING_REPLAY_PROVIDERS = new Set([
+  "deepseek",
+  "opencode-go",
+  "siliconflow",
+  "nebius",
+  "deepinfra",
+  "sambanova",
+  "fireworks",
+  "together",
+  // Kimi Coding thinking-mode upstreams require reasoning_content replay under
+  // the same strict multi-turn contract as DeepSeek.
+  "kimi-coding",
+  "kimi-coding-apikey",
+  // Xiaomi MiMo enforces the same "pass back reasoning_content on subsequent
+  // turns" contract as DeepSeek/Kimi-thinking. Without replay the upstream
+  // 400s with "Param Incorrect: The reasoning_content in the thinking mode
+  // must be passed back to the API."
+  "xiaomi-mimo",
+  // Command Code routes upstream DeepSeek models and requires the same
+  // reasoning_content replay contract.
+  "command-code",
+]);
+
+const REASONING_REPLAY_MODEL_PATTERNS = [
+  /deepseek-r1/i,
+  /deepseek-reasoner/i,
+  /deepseek-chat/i,
+  /deepseek[-/]v4(?:[-.]\d+)?[-.](flash|pro)(-free)?/i,
+  /zen\/deepseek-v4/i,
+  // Match native kimi-kN and namespaced kimi/kN families without treating
+  // generic aliases such as kimi-latest as strict thinking models.
+  /kimi[-/]k\d/i,
+  /qwq/i,
+  /qwen.*think/i,
+  /glm.*think/i,
+  // MiMo (Xiaomi) thinking models — defensive match if a wildcard route
+  // assigns a non-`xiaomi-mimo` provider ID to a mimo-* model alias.
+  /^mimo[-.]?v\d/i,
+];
+
+const DEEPSEEK_V4_MODEL_PATTERN = /deepseek[-/]v4(?:[-.]\d+)?[-.](flash|pro)/i;
+const K3_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|[.-])/i;
+const NATIVE_K27_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)kimi-k2\.7-code(?:$|-)/i;
+
+export function isDeepSeekReasoningModel(params: {
+  provider: string;
+  model: string;
+  thinkingEnabled?: boolean;
+}): boolean {
+  if (params.thinkingEnabled !== true) return false;
+  return DEEPSEEK_V4_MODEL_PATTERN.test(params.model);
+}
+
+/**
+ * Check if a provider/model combination requires reasoning replay.
+ */
+export function requiresReasoningReplay(params: {
+  provider: string;
+  model: string;
+  thinkingEnabled?: boolean;
+  supportsReasoning?: boolean;
+  interleavedField?: string | null;
+  allowLegacyFallback?: boolean;
+}): boolean {
+  const normalizedProvider = params.provider.trim().toLowerCase();
+  const normalizedModel = params.model.trim();
+  const normalizedInterleavedField =
+    typeof params.interleavedField === "string" ? params.interleavedField.trim().toLowerCase() : "";
+
+  // Explicit model signal from models.dev (preferred source of truth).
+  if (normalizedInterleavedField === "reasoning_content") return true;
+  if (normalizedInterleavedField === "reasoning_details") return false;
+
+  if (K3_REASONING_REPLAY_MODEL_PATTERN.test(normalizedModel)) return true;
+  if (
+    (normalizedProvider === "moonshot" || normalizedProvider === "kimi") &&
+    NATIVE_K27_REASONING_REPLAY_MODEL_PATTERN.test(normalizedModel)
+  ) {
+    return true;
+  }
+
+  // DeepSeek legacy reasoner family has an inverse contract: do not replay.
+  if (/deepseek-reasoner/i.test(normalizedModel) || /deepseek-r1/i.test(normalizedModel)) {
+    return false;
+  }
+
+  // Explicit known contract: DeepSeek V4 thinking with tool calls requires replay.
+  if (isDeepSeekReasoningModel(params)) return true;
+
+  const useLegacyFallback = params.allowLegacyFallback !== false;
+  if (!useLegacyFallback) return false;
+
+  if (REASONING_REPLAY_PROVIDERS.has(normalizedProvider)) return true;
+  return REASONING_REPLAY_MODEL_PATTERNS.some((p) => p.test(normalizedModel));
+}
+
+// ──────────────── In-Memory Cache ────────────────
+
+interface MemoryCacheEntry {
+  reasoning: string;
+  provider: string;
+  model: string;
+  expiresAt: number;
+  createdAt: number;
+}
+
+type AssistantMessageLike = {
+  role?: unknown;
+  tool_calls?: unknown;
+  reasoning_content?: unknown;
+  reasoning?: unknown;
+};
+
+type AssistantMessageCacheContext = {
+  scope?: string;
+  historyMessages?: AssistantMessageLike[];
+  videoTranscriptSensitive?: boolean;
+};
+
+type ToolCallLike = {
+  id?: unknown;
+};
+
+const memoryCache = new Map<string, MemoryCacheEntry>();
+const MAX_MEMORY_ENTRIES = 200;
+const MAX_ENTRY_BYTES = 10000;
+const TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+// ──────────────── Counters ────────────────
+
+let hits = 0;
+let misses = 0;
+let replays = 0;
+
+// ──────────────── Core Operations ────────────────
+
+/**
+ * Evict the oldest entry from the memory cache when full.
+ */
+function evictOldest(): void {
+  let oldestKey: string | null = null;
+  let oldestTime = Infinity;
+  for (const [key, entry] of memoryCache) {
+    if (entry.createdAt < oldestTime) {
+      oldestTime = entry.createdAt;
+      oldestKey = key;
+    }
+  }
+  if (oldestKey) memoryCache.delete(oldestKey);
+}
+
+/**
+ * Remove expired entries from memory cache.
+ */
+function purgeExpiredMemory(): void {
+  const now = Date.now();
+  for (const [key, entry] of memoryCache) {
+    if (now >= entry.expiresAt) {
+      memoryCache.delete(key);
+    }
+  }
+}
+
+/**
+ * Cache a reasoning_content string for one tool_call ID.
+ * Writes to memory and best-effort DB persistence.
+ */
+export function cacheReasoning(
+  toolCallId: string,
+  provider: string,
+  model: string,
+  reasoning: string
+): void {
+  cacheReasoningByKey(toolCallId, provider, model, reasoning);
+}
+
+function isReasoningReplayEnabled(): boolean {
+  return isFeatureFlagEnabled("REASONING_REPLAY_ENABLED");
+}
+
+export function cacheReasoningByKey(
+  key: string,
+  provider: string,
+  model: string,
+  reasoning: string
+): void {
+  if (!isReasoningReplayEnabled() || !key || !reasoning) return;
+  // ponytail: never store the internal replay placeholder — models echo it
+  // and it poisons the cache (upstream echo loop, OmniRoute #9573).
+  if (isInternalReasoningPlaceholder(reasoning)) return;
+
+  if (reasoning.length > MAX_ENTRY_BYTES) {
+    reasoning = reasoning.slice(0, MAX_ENTRY_BYTES);
+  }
+
+  const now = Date.now();
+
+  // Memory write
+  if (memoryCache.size >= MAX_MEMORY_ENTRIES) {
+    evictOldest();
+  }
+  memoryCache.set(key, {
+    reasoning,
+    provider,
+    model,
+    expiresAt: now + TTL_MS,
+    createdAt: now,
+  });
+
+  try {
+    setReasoningCache(key, provider, model, reasoning, TTL_MS);
+  } catch {
+    // DB persistence failure is non-fatal; memory cache still serves the hot path.
+  }
+}
+
+function stableCacheValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(stableCacheValue);
+  if (!value || typeof value !== "object") return value;
+
+  const record = value as Record<string, unknown>;
+  return Object.fromEntries(
+    Object.keys(record)
+      .filter((key) => key !== "reasoning" && key !== "reasoning_content")
+      .sort()
+      .map((key) => [key, stableCacheValue(record[key])])
+  );
+}
+
+function canonicalizeMessageContent(content: unknown): unknown {
+  if (!Array.isArray(content)) return stableCacheValue(content ?? null);
+
+  const textParts: string[] = [];
+  for (const part of content) {
+    if (typeof part === "string") {
+      textParts.push(part);
+      continue;
+    }
+    if (!part || typeof part !== "object") return stableCacheValue(content);
+    const record = part as Record<string, unknown>;
+    if (
+      (record.type === "text" || record.type === "input_text" || record.type === "output_text") &&
+      typeof record.text === "string"
+    ) {
+      textParts.push(record.text);
+      continue;
+    }
+    return stableCacheValue(content);
+  }
+  return textParts.join("");
+}
+
+function canonicalizeHistoryMessage(message: AssistantMessageLike): unknown {
+  const record = message as Record<string, unknown>;
+  const toolCalls = Array.isArray(record.tool_calls)
+    ? record.tool_calls.map((toolCall) => {
+        const call = toolCall as Record<string, unknown>;
+        const fn = (call.function ?? {}) as Record<string, unknown>;
+        return stableCacheValue({
+          type: call.type,
+          function: { name: fn.name, arguments: fn.arguments },
+        });
+      })
+    : undefined;
+  return stableCacheValue({
+    role: record.role,
+    name: record.name,
+    content: canonicalizeMessageContent(record.content),
+    tool_calls: toolCalls,
+  });
+}
+
+export function buildAssistantMessageCacheKey(
+  scope: string | null | undefined,
+  messages: AssistantMessageLike[],
+  messageIndex: number
+): string {
+  const normalizedScope = scope?.trim();
+  if (!normalizedScope || !Number.isInteger(messageIndex) || messageIndex < 0) return "";
+  const message = messages[messageIndex];
+  if (!message || message.role !== "assistant") return "";
+
+  const transcript = messages.slice(0, messageIndex + 1).map(canonicalizeHistoryMessage);
+  const digest = createHash("sha256")
+    .update(normalizedScope)
+    .update("\x1f")
+    .update(JSON.stringify(transcript))
+    .digest("hex");
+  return `conversation:${digest}`;
+}
+
+/**
+ * Cache reasoning for multiple tool_call IDs (same reasoning content).
+ */
+export function cacheReasoningBatch(
+  toolCallIds: string[],
+  provider: string,
+  model: string,
+  reasoning: string
+): void {
+  for (const id of toolCallIds) {
+    if (id) cacheReasoning(id, provider, model, reasoning);
+  }
+}
+
+/**
+ * Capture reasoning_content from an assistant message.
+ * Returns the number of cache keys written.
+ */
+export function cacheReasoningFromAssistantMessage(
+  message: AssistantMessageLike | null | undefined,
+  provider: string,
+  model: string,
+  context?: AssistantMessageCacheContext
+): number {
+  if (context?.videoTranscriptSensitive) return 0;
+  if (!message || message.role !== "assistant") {
+    return 0;
+  }
+
+  const reasoning =
+    typeof message.reasoning_content === "string" && message.reasoning_content.length > 0
+      ? message.reasoning_content
+      : typeof message.reasoning === "string" && message.reasoning.length > 0
+        ? message.reasoning
+        : "";
+  if (!reasoning) return 0;
+  // ponytail: don't capture the echoed placeholder into the cache.
+  if (isInternalReasoningPlaceholder(reasoning)) return 0;
+
+  const toolCallIds = Array.isArray(message.tool_calls)
+    ? (message.tool_calls as ToolCallLike[])
+        .map((toolCall) => (typeof toolCall.id === "string" ? toolCall.id : ""))
+        .filter((id) => id.length > 0)
+    : [];
+  if (toolCallIds.length === 0) {
+    const scope = context?.scope?.trim();
+    const historyMessages = context?.historyMessages;
+    // A real request always has at least one prior message (the user turn), so an
+    // empty history means the caller could not recover the transcript the read
+    // side keys on (e.g. a Responses-shaped body with `input` and no reported
+    // pivot). Writing a one-message digest then can never match — skip it.
+    if (!scope || !Array.isArray(historyMessages) || historyMessages.length === 0) return 0;
+
+    const messages = [...historyMessages, message];
+    const cacheKey = buildAssistantMessageCacheKey(scope, messages, messages.length - 1);
+    if (!cacheKey) return 0;
+
+    cacheReasoningByKey(cacheKey, provider, model, reasoning);
+    return 1;
+  }
+
+  cacheReasoningBatch(toolCallIds, provider, model, reasoning);
+  return toolCallIds.length;
+}
+
+/**
+ * Look up cached reasoning_content by tool_call_id.
+ * Memory first → DB fallback → null (miss).
+ */
+export function lookupReasoning(toolCallId: string): string | null {
+  if (!isReasoningReplayEnabled()) return null;
+  return lookupStoredReasoning(toolCallId);
+}
+
+function lookupStoredReasoning(toolCallId: string): string | null {
+  if (!toolCallId) {
+    misses++;
+    return null;
+  }
+
+  // 1. Check memory
+  const mem = memoryCache.get(toolCallId);
+  if (mem) {
+    if (Date.now() < mem.expiresAt) {
+      // ponytail: never replay the internal placeholder from memory.
+      if (isInternalReasoningPlaceholder(mem.reasoning)) {
+        memoryCache.delete(toolCallId);
+        misses++;
+        return null;
+      }
+      hits++;
+      return mem.reasoning;
+    }
+    // Expired in memory — remove
+    memoryCache.delete(toolCallId);
+  }
+
+  // 2. Fallback to DB
+  let dbResult: { reasoning: string; provider: string; model: string; expiresAt: string } | null =
+    null;
+  try {
+    dbResult = getReasoningCache(toolCallId);
+  } catch {
+    // DB lookup failure is non-fatal; treat it as a cache miss.
+  }
+  if (dbResult) {
+    // ponytail: never promote/replay the internal placeholder from DB.
+    if (isInternalReasoningPlaceholder(dbResult.reasoning)) {
+      misses++;
+      return null;
+    }
+    const persistedExpiresAt = Date.parse(dbResult.expiresAt);
+    if (!Number.isFinite(persistedExpiresAt) || persistedExpiresAt <= Date.now()) {
+      misses++;
+      return null;
+    }
+    hits++;
+    let promotedReasoning = dbResult.reasoning;
+    if (promotedReasoning.length > MAX_ENTRY_BYTES) {
+      promotedReasoning = promotedReasoning.slice(0, MAX_ENTRY_BYTES);
+    }
+    // Promote back to memory for fast subsequent lookups
+    memoryCache.set(toolCallId, {
+      reasoning: promotedReasoning,
+      provider: dbResult.provider,
+      model: dbResult.model,
+      expiresAt: persistedExpiresAt,
+      createdAt: Date.now(),
+    });
+    return promotedReasoning;
+  }
+
+  // 3. Miss
+  misses++;
+  return null;
+}
+
+/**
+ * Record that a replay was performed (for dashboard metrics).
+ */
+export function recordReplay(): void {
+  replays++;
+}
+
+// ──────────────── Stats & Dashboard ────────────────
+
+/**
+ * Get combined stats from memory + DB + counters.
+ */
+export function getReasoningCacheServiceStats(): {
+  memoryEntries: number;
+  dbEntries: number;
+  totalEntries: number;
+  totalChars: number;
+  hits: number;
+  misses: number;
+  replays: number;
+  replayRate: string;
+  byProvider: Record<string, { entries: number; chars: number }>;
+  byModel: Record<string, { entries: number; chars: number }>;
+  oldestEntry: string | null;
+  newestEntry: string | null;
+} {
+  // Purge expired memory entries before reporting
+  purgeExpiredMemory();
+
+  let dbStats = {
+    totalEntries: 0,
+    totalChars: 0,
+    byProvider: {} as Record<string, { entries: number; chars: number }>,
+    byModel: {} as Record<string, { entries: number; chars: number }>,
+    oldestEntry: null as string | null,
+    newestEntry: null as string | null,
+  };
+  try {
+    dbStats = getReasoningCacheStats();
+  } catch {
+    // DB stats are unavailable; return memory counters with empty persisted stats.
+  }
+
+  const totalLookups = hits + misses;
+  const replayRate = totalLookups > 0 ? ((replays / totalLookups) * 100).toFixed(1) : "0.0";
+
+  return {
+    memoryEntries: memoryCache.size,
+    dbEntries: dbStats.totalEntries,
+    totalEntries: dbStats.totalEntries,
+    totalChars: dbStats.totalChars,
+    hits,
+    misses,
+    replays,
+    replayRate: `${replayRate}%`,
+    byProvider: dbStats.byProvider,
+    byModel: dbStats.byModel,
+    oldestEntry: dbStats.oldestEntry,
+    newestEntry: dbStats.newestEntry,
+  };
+}
+
+/**
+ * Get paginated entries (delegates to DB).
+ */
+export function getReasoningCacheServiceEntries(
+  opts: {
+    limit?: number;
+    offset?: number;
+    provider?: string;
+    model?: string;
+  } = {}
+): unknown[] {
+  try {
+    return getReasoningCacheEntries(opts);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Clear all reasoning cache entries (memory + DB).
+ * Returns count of DB entries removed.
+ */
+export function clearReasoningCacheAll(provider?: string): number {
+  // Clear memory
+  if (provider) {
+    for (const [key, entry] of memoryCache) {
+      if (entry.provider === provider) memoryCache.delete(key);
+    }
+  } else {
+    memoryCache.clear();
+  }
+
+  // Reset counters
+  hits = 0;
+  misses = 0;
+  replays = 0;
+
+  try {
+    return clearAllReasoningCache(provider);
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Delete one reasoning cache entry by tool_call_id from memory + DB.
+ */
+export function deleteReasoningCacheEntry(toolCallId: string): number {
+  if (!toolCallId) return 0;
+  const existedInMemory = memoryCache.delete(toolCallId);
+  let deletedFromDb = 0;
+  try {
+    deletedFromDb = deleteReasoningCache(toolCallId);
+  } catch {
+    // Memory delete already happened; DB delete can be retried by a later cleanup.
+  }
+  return deletedFromDb + (existedInMemory && deletedFromDb === 0 ? 1 : 0);
+}
+
+/**
+ * Cleanup expired entries from both memory and DB.
+ * Called periodically (e.g., every 30 min from health-check).
+ */
+export function cleanupReasoningCache(): number {
+  purgeExpiredMemory();
+  try {
+    return cleanupExpiredReasoning();
+  } catch {
+    return 0;
+  }
+}
+
+// ──────────────── Auto-start periodic cleanup ────────────────
+//
+// server-init.ts was supposed to start the cleanup job, but that module was
+// never imported anywhere (it was stranded dead code, since removed). As a
+// result, the reasoning_cache SQLite table accumulates expired entries
+// indefinitely.
+//
+// Fix: start the periodic cleanup directly from this module so it runs
+// regardless of how the server boots.  On first import we run one
+// immediate sweep, then schedule a 30-minute interval.
+//
+// See: src/lib/jobs/reasoningCacheCleanupJob.ts (the original job module).
+
+const DEFAULT_CLEANUP_INTERVAL_MS = 30 * 60 * 1000; // 30 min
+
+function getCleanupIntervalMs(): number {
+  const raw = process.env.OMNIROUTE_REASONING_CACHE_CLEANUP_INTERVAL_MS;
+  const parsed = raw ? Number(raw) : Number.NaN;
+  return Number.isFinite(parsed) && parsed >= 60_000 ? parsed : DEFAULT_CLEANUP_INTERVAL_MS;
+}
+
+function startAutoCleanup(): void {
+  // Run once immediately on boot
+  try {
+    const deleted = cleanupReasoningCache();
+    if (deleted > 0) {
+      console.log(`[ReasoningCache] boot cleanup removed ${deleted} expired entries`);
+    }
+  } catch (error) {
+    console.error("[ReasoningCache] boot cleanup failed:", error);
+  }
+
+  // Schedule periodic cleanup
+  const timer = setInterval(() => {
+    try {
+      const deleted = cleanupReasoningCache();
+      if (deleted > 0) {
+        console.log(`[ReasoningCache] periodic cleanup removed ${deleted} expired entries`);
+      }
+    } catch (error) {
+      console.error("[ReasoningCache] periodic cleanup failed:", error);
+    }
+  }, getCleanupIntervalMs());
+
+  timer.unref?.();
+}
+
+// Start on module load — every consumer of reasoning cache benefits.
+startAutoCleanup();

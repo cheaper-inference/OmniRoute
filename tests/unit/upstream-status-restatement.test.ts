@@ -1,0 +1,203 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+/**
+ * Gateways like agentrouter.org misstate TEMPORARY quota exhaustion as 403/400
+ * (Chinese body "用户额度不足"), which Claude Code treats as permanent and dies.
+ * applyStatusRestatement() rewrites such statuses to 429 (+ synthetic
+ * Retry-After) in ONE place, before fallback classification and before the
+ * status ever reaches the client. Registry-driven: future gateways with the
+ * same defect register one rule array — no pipeline changes.
+ */
+
+const { applyStatusRestatement, statusRestatementRegistry } =
+  await import("../../open-sse/config/upstreamStatusRestatement.ts");
+
+test("R1: agentrouter 403 + 用户额度不足 → 429 with synthetic Retry-After", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 403,
+    message: '{"error":{"message":"用户额度不足","type":"insufficient_user_quota"}}',
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 429);
+  assert.equal(out.fromStatus, 403);
+  assert.equal(out.ruleId, "agentrouter-quota-misstatus");
+  assert.equal(out.retryAfterMs, 60_000);
+});
+
+test("R2: agentrouter 403 + 无权访问模型 (no model access) is NOT restated", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 403,
+    message: "无权访问模型 claude-sonnet-4",
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 403);
+  assert.equal(out.ruleId, null);
+});
+
+test("R3: quota marker in body (not message) still restates", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 403,
+    message: "Forbidden",
+    body: { error: { message: "用户额度不足，请充值" } },
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 429);
+});
+
+test("R4: upstream-provided retryAfterMs wins over the synthetic default", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 403,
+    message: "用户额度不足",
+    retryAfterMs: 5_000,
+  });
+  assert.equal(out.status, 429);
+  assert.equal(out.retryAfterMs, 5_000);
+});
+
+test("R5: agentrouter 400 with quota marker also restates (gateway variant)", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 400,
+    message: "额度不足",
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 429);
+});
+
+test("R6: agentrouter 403 without quota markers is untouched (real auth error)", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 403,
+    message: "Invalid API key",
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 403);
+  assert.equal(out.ruleId, null);
+});
+
+test("R7: other providers never match agentrouter rules (registry-scoped)", () => {
+  const out = applyStatusRestatement({
+    provider: "openai",
+    status: 403,
+    message: "用户额度不足",
+    retryAfterMs: null,
+  });
+  assert.equal(out.status, 403);
+});
+
+test("R8: statuses a rule does not list pass through (already-correct 429)", () => {
+  const out = applyStatusRestatement({
+    provider: "agentrouter",
+    status: 429,
+    message: "用户额度不足",
+    retryAfterMs: 1_000,
+  });
+  assert.equal(out.status, 429);
+  assert.equal(out.ruleId, null);
+  assert.equal(out.retryAfterMs, 1_000);
+});
+
+test("R9: registry exposes agentrouter so future gateways copy the one-line recipe", () => {
+  const rules = statusRestatementRegistry.get("agentrouter");
+  assert.ok(rules && rules.length > 0);
+});
+
+test("R10: chatCore wires applyStatusRestatement into the providerFailure block", async () => {
+  // chatCore is a god-file that cannot be imported standalone in unit tests
+  // (side-effectful DB/env wiring), so the wiring contract is asserted at the
+  // source level: the hook must exist, run against the parsed error, and
+  // reassign both statusCode and retryAfterMs BEFORE classification.
+  // The classification helper stays in the barrel; the providerFailure block
+  // moved into the streaming leg with the decomposition.
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(
+    new URL("../../open-sse/handlers/chatCore.ts", import.meta.url),
+    "utf8"
+  );
+  const legSrc = await readFile(
+    new URL("../../open-sse/handlers/chatCore/streamingResponse.ts", import.meta.url),
+    "utf8"
+  );
+  assert.match(
+    legSrc,
+    /applyStatusRestatement\(/,
+    "streaming leg must call applyStatusRestatement"
+  );
+
+  const helperIndex = src.indexOf("const applyProviderFailureClassification = async (");
+  const helperEnd = src.indexOf("const streamingOutcome = await runStreamingResponse(");
+  assert.ok(
+    helperIndex > -1 && helperEnd > helperIndex,
+    "classification helper exists before streaming dispatch"
+  );
+  const classifyCalls = src.match(/classifyProviderError\(/g) ?? [];
+  assert.equal(classifyCalls.length, 1, "chatCore classifies provider errors in exactly one place");
+  const classifyIndex = src.indexOf("classifyProviderError(statusCode");
+  assert.ok(
+    classifyIndex > helperIndex && classifyIndex < helperEnd,
+    "classifyProviderError must live inside applyProviderFailureClassification"
+  );
+
+  const blockIndex = legSrc.indexOf("providerFailure: if (!providerResponse.ok)");
+  assert.ok(blockIndex > -1, "providerFailure block exists in streamingResponse.ts");
+  // Cross-file form of the original `classifyIndex < blockIndex` ordering: the classification
+  // helper (holding the single classifyProviderError call) must be defined before the dispatch
+  // that hands it to the leaf containing the providerFailure block, and the dispatch must
+  // actually pass it in.
+  const dispatchIndex = src.indexOf("await runStreamingResponse({");
+  assert.ok(dispatchIndex > -1, "streaming dispatch exists in chatCore.ts");
+  assert.ok(
+    classifyIndex < dispatchIndex,
+    "classifyProviderError must be classified-before the block: helper precedes the streaming dispatch"
+  );
+  assert.match(
+    src.slice(dispatchIndex, src.indexOf("});", dispatchIndex)),
+    /\bapplyProviderFailureClassification,/,
+    "streaming dispatch must pass applyProviderFailureClassification into the leaf"
+  );
+  assert.equal(
+    legSrc.indexOf("classifyProviderError("),
+    -1,
+    "streaming leg does not classify directly; it delegates to applyProviderFailureClassification"
+  );
+
+  const block = legSrc.slice(blockIndex);
+  const hookIndex = block.indexOf("applyStatusRestatement(");
+  const statusReassign = block.indexOf("statusCode = restatement.status;");
+  const retryReassign = block.indexOf("retryAfterMs = restatement.retryAfterMs;");
+  const classifyCallIndex = block.indexOf("await applyProviderFailureClassification(");
+  assert.ok(
+    hookIndex > -1 &&
+      statusReassign > hookIndex &&
+      retryReassign > hookIndex &&
+      classifyCallIndex > statusReassign &&
+      classifyCallIndex > retryReassign,
+    "restatement must reassign statusCode and retryAfterMs BEFORE the providerFailure block classifies"
+  );
+});
+
+test("R11: the shared provider execution pipeline restates before building the error result", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const src = await readFile(
+    new URL("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts", import.meta.url),
+    "utf8"
+  );
+  const outcomeIndex = src.indexOf("async function toOutcome(");
+  assert.ok(outcomeIndex > -1, "toOutcome exists");
+  const body = src.slice(outcomeIndex);
+  const hookIndex = body.indexOf("applyStatusRestatement(");
+  const resultIndex = body.search(/createErrorResult\(\s*restatement\.status,/);
+  assert.ok(
+    hookIndex > -1 && resultIndex > hookIndex,
+    "the non-streaming leg must surface the restated status to classification and the client"
+  );
+  assert.match(
+    body,
+    /createErrorResult\(\s*restatement\.status,\s*message,\s*restatement\.retryAfterMs/
+  );
+});

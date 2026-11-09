@@ -1,0 +1,365 @@
+import { extractUsage } from "./usageTracking.ts";
+import { parseSSEDataPayload } from "./streamHelpers.ts";
+import {
+  backfillResponsesCompletedOutput,
+  normalizeResponsesSseIds,
+  normalizeResponsesCompletedUsage,
+  pushUniqueResponsesOutputItems,
+  stringifyIdValue,
+  stripResponsesLifecycleEcho,
+} from "./responsesStreamHelpers.ts";
+import { getAnyReasoningValue } from "./reasoningFields.ts";
+import { projectStreamFailureEvent, type StreamFailurePayload } from "./streamErrorFormat.ts";
+
+type JsonRecord = Record<string, unknown>;
+
+type EventPrefixBuffer = {
+  eventType: () => string;
+  flush: () => string;
+  prefixData: (output: string, line: string) => string;
+  remember: (line: string) => void;
+};
+
+export type PassthroughTailProcessorContext = {
+  getSkipPassthroughEvent: () => boolean;
+  setSkipPassthroughEvent: (value: boolean) => void;
+  clearPendingPassthroughEvent: () => void;
+  shouldAbortOnClaudeLifecycle: (payload: unknown) => boolean;
+  emitClaudeEmptyStreamErrorAndAbort: () => void;
+  isClaudeEventPayload: (payload: unknown) => boolean;
+  updateClaudeEmptyResponseLifecycle: (payload: unknown) => void;
+  passthroughEventPrefix: EventPrefixBuffer;
+  emitConvertedOutput: (output: string) => void;
+  pushProviderPayload: (payload: unknown) => void;
+  pushClientPayload: (payload: unknown) => void;
+  sanitizeUsagePayload: (payload: unknown) => boolean;
+  setPassthroughResponsesId: (value: string) => void;
+  setUsage: (value: unknown) => void;
+  addTotalContentLength: (value: number) => void;
+  appendPassthroughContent: (value: string) => void;
+  appendPassthroughReasoning: (value: string) => void;
+  getResponsesReasoningKey: (payload: Record<string, unknown>) => string | null;
+  markResponsesReasoningSummarySeen: (key: string) => void;
+  emitSyntheticResponsesReasoningSummary: (payload: Record<string, unknown>) => void;
+  passthroughResponsesOutputItems: unknown[];
+  passthroughResponsesPendingFunctionCalls: Map<string, JsonRecord>;
+  getPassthroughResponsesCurrentFunctionCallKey: () => string | null;
+  setPassthroughResponsesCurrentFunctionCallKey: (value: string | null) => void;
+  hasPassthroughToolCalls: () => boolean;
+  toResponsesCompletedWithToolCalls: (parsed: JsonRecord) => JsonRecord;
+  restoreResponsesToolNames: (parsed: JsonRecord) => boolean;
+  restoreOpenAIToolNames: (parsed: JsonRecord) => boolean;
+  abortFailure: (failure: StreamFailurePayload, publicMessage: string) => void;
+};
+
+function asRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function getFunctionCallPendingKey(item: JsonRecord | null): string | null {
+  if (!item) return null;
+  if (typeof item.id === "string") return item.id;
+  if (typeof item.call_id === "string") return item.call_id;
+  return null;
+}
+
+function handleResponsesTailPayload(
+  parsed: JsonRecord,
+  output: string,
+  context: PassthroughTailProcessorContext
+): string {
+  const responsesIdsNormalized = normalizeResponsesSseIds(parsed);
+  const parsedResponse = asRecord(parsed.response);
+  const responseId =
+    (parsedResponse ? stringifyIdValue(parsedResponse.id) : null) ||
+    stringifyIdValue(parsed.response_id);
+  if (responseId) {
+    context.setPassthroughResponsesId(responseId);
+  }
+
+  const extracted = extractUsage(parsed);
+  if (extracted) {
+    context.setUsage(extracted);
+  }
+
+  if (typeof parsed.delta === "string") {
+    context.addTotalContentLength(parsed.delta.length);
+  }
+  if (parsed.type === "response.output_text.delta" && typeof parsed.delta === "string") {
+    context.appendPassthroughContent(parsed.delta);
+  }
+  if (
+    parsed.type === "response.reasoning_summary_text.delta" ||
+    parsed.type === "response.reasoning_summary_text.done" ||
+    parsed.type === "response.reasoning_summary_part.done"
+  ) {
+    const reasoningKey = context.getResponsesReasoningKey(parsed);
+    if (reasoningKey) {
+      context.markResponsesReasoningSummarySeen(reasoningKey);
+    }
+  }
+  if (
+    parsed.type === "response.output_item.added" &&
+    asRecord(parsed.item).type === "function_call"
+  ) {
+    const item = { ...(parsed.item as JsonRecord) };
+    // #18600 — restore the client's original tool name on the pending copy too:
+    // it is pushed into the backfill buffer at `arguments.done` / the completed
+    // merge, so a stream that never emits `output_item.done` would otherwise
+    // backfill the alias into the empty-output snapshot.
+    context.restoreResponsesToolNames([item] as unknown as JsonRecord);
+    const pendingKey = getFunctionCallPendingKey(item);
+    if (pendingKey) {
+      if (typeof item.arguments !== "string") {
+        item.arguments = "";
+      }
+      context.passthroughResponsesPendingFunctionCalls.set(pendingKey, item);
+      context.setPassthroughResponsesCurrentFunctionCallKey(pendingKey);
+    }
+  }
+  if (parsed.type === "response.function_call_arguments.delta") {
+    const pendingKey =
+      typeof parsed.item_id === "string"
+        ? parsed.item_id
+        : context.getPassthroughResponsesCurrentFunctionCallKey();
+    const pending = pendingKey
+      ? context.passthroughResponsesPendingFunctionCalls.get(pendingKey)
+      : undefined;
+    if (pending && typeof parsed.delta === "string") {
+      const previousArgs = typeof pending.arguments === "string" ? pending.arguments : "";
+      pending.arguments = previousArgs + parsed.delta;
+    }
+  }
+  if (parsed.type === "response.function_call_arguments.done") {
+    const pendingKey =
+      typeof parsed.item_id === "string"
+        ? parsed.item_id
+        : context.getPassthroughResponsesCurrentFunctionCallKey();
+    const pending = pendingKey
+      ? context.passthroughResponsesPendingFunctionCalls.get(pendingKey)
+      : undefined;
+    if (pending) {
+      if (typeof parsed.arguments === "string") {
+        pending.arguments = parsed.arguments;
+      }
+      pushUniqueResponsesOutputItems(context.passthroughResponsesOutputItems, [pending]);
+    }
+  }
+  // #18600 — restore the client's original tool name on the tail `done` item
+  // BEFORE it joins the backfill buffer, or the alias returns through the
+  // empty-output snapshot backfill below.
+  let responsesIdentityRestored = false;
+  if (parsed.type === "response.output_item.done" && parsed.item) {
+    responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
+  }
+  if (parsed.type === "response.output_item.done" && parsed.item) {
+    context.emitSyntheticResponsesReasoningSummary(parsed);
+    pushUniqueResponsesOutputItems(context.passthroughResponsesOutputItems, [parsed.item]);
+    const item = asRecord(parsed.item);
+    if (item.type === "function_call") {
+      const pendingKey = getFunctionCallPendingKey(item);
+      if (pendingKey) {
+        context.passthroughResponsesPendingFunctionCalls.delete(pendingKey);
+        if (context.getPassthroughResponsesCurrentFunctionCallKey() === pendingKey) {
+          context.setPassthroughResponsesCurrentFunctionCallKey(null);
+        }
+      }
+    }
+  }
+  if (
+    parsed.type === "response.completed" &&
+    Array.isArray(asRecord(parsed.response).output) &&
+    (asRecord(parsed.response).output as unknown[]).length > 0
+  ) {
+    // #18600 — restore the client's original tool names on the terminal
+    // snapshot BEFORE it seeds the backfill buffer, so the buffered copy
+    // matches what the client receives.
+    responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
+    pushUniqueResponsesOutputItems(
+      context.passthroughResponsesOutputItems,
+      asRecord(parsed.response).output as unknown[]
+    );
+  }
+  if (
+    parsed.type === "response.completed" &&
+    context.passthroughResponsesPendingFunctionCalls.size > 0
+  ) {
+    pushUniqueResponsesOutputItems(context.passthroughResponsesOutputItems, [
+      ...context.passthroughResponsesPendingFunctionCalls.values(),
+    ]);
+    context.passthroughResponsesPendingFunctionCalls.clear();
+    context.setPassthroughResponsesCurrentFunctionCallKey(null);
+  }
+
+  // #18600 — restore provider tool-name aliases (and #7936 identities) on the
+  // remaining tail event shapes: `output_item.added` and the
+  // `response.incomplete`/`response.failed`/`response.done` and cancellation snapshots.
+  // The output-item done and completed branches above restored their own copies.
+  if (
+    parsed.type === "response.output_item.added" ||
+    parsed.type === "response.incomplete" ||
+    parsed.type === "response.failed" ||
+    parsed.type === "response.done" ||
+    parsed.type === "response.cancelled" ||
+    parsed.type === "response.canceled"
+  ) {
+    responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
+  }
+
+  const textualToolCallBackfilled =
+    parsed.type === "response.completed" && context.hasPassthroughToolCalls();
+  const outputPayload = textualToolCallBackfilled
+    ? context.toResponsesCompletedWithToolCalls(parsed)
+    : parsed;
+  if (textualToolCallBackfilled) {
+    responsesIdentityRestored =
+      context.restoreResponsesToolNames(outputPayload) || responsesIdentityRestored;
+    // processBufferedPassthroughLine collects `parsed` after this helper returns.
+    // Keep that snapshot identical to the merged/restored bytes emitted below.
+    Object.assign(parsed, outputPayload);
+  }
+  const usageNormalized = normalizeResponsesCompletedUsage(outputPayload);
+  const stripped = stripResponsesLifecycleEcho(outputPayload);
+  const backfilled = backfillResponsesCompletedOutput(
+    outputPayload,
+    context.passthroughResponsesOutputItems
+  );
+
+  if (
+    stripped ||
+    backfilled ||
+    textualToolCallBackfilled ||
+    responsesIdsNormalized ||
+    usageNormalized ||
+    responsesIdentityRestored
+  ) {
+    output = `data: ${JSON.stringify(outputPayload)}\n\n`;
+  }
+
+  return output;
+}
+
+function handleOpenAiTailPayload(parsed: JsonRecord, context: PassthroughTailProcessorContext) {
+  const firstChoice = Array.isArray(parsed.choices)
+    ? (parsed.choices[0] as JsonRecord | undefined)
+    : undefined;
+  const delta = asRecord(firstChoice?.delta);
+  if (typeof delta.content === "string") {
+    context.appendPassthroughContent(delta.content);
+    context.addTotalContentLength(delta.content.length);
+  }
+  const reasoningDelta = getAnyReasoningValue(delta);
+  if (reasoningDelta) {
+    context.appendPassthroughReasoning(reasoningDelta);
+  }
+}
+
+export function processBufferedPassthroughLine(
+  line: string,
+  context: PassthroughTailProcessorContext
+): boolean {
+  const trimmed = line.trim();
+
+  if (context.getSkipPassthroughEvent()) {
+    if (!trimmed) {
+      context.setSkipPassthroughEvent(false);
+      context.clearPendingPassthroughEvent();
+    }
+    return false;
+  }
+
+  if (/^event:\s*keepalive\b/i.test(trimmed)) {
+    context.setSkipPassthroughEvent(true);
+    context.clearPendingPassthroughEvent();
+    return false;
+  }
+
+  if (/^event:/i.test(trimmed)) {
+    const eventType = trimmed.replace(/^event:\s*/i, "");
+    if (context.shouldAbortOnClaudeLifecycle({ type: eventType })) {
+      context.emitClaudeEmptyStreamErrorAndAbort();
+      return true;
+    }
+    context.passthroughEventPrefix.remember(line);
+    return false;
+  }
+
+  if (/^(?::|id:|retry:)/i.test(trimmed)) {
+    context.passthroughEventPrefix.remember(line);
+    return false;
+  }
+
+  if (!trimmed) {
+    const pendingOutput = context.passthroughEventPrefix.flush();
+    if (pendingOutput) {
+      context.emitConvertedOutput(pendingOutput);
+    }
+    context.clearPendingPassthroughEvent();
+    return false;
+  }
+
+  if (!trimmed.startsWith("data:")) {
+    context.passthroughEventPrefix.remember(line);
+    return false;
+  }
+
+  const parsedPassthroughData = parseSSEDataPayload(trimmed.slice(5), {
+    eventType: context.passthroughEventPrefix.eventType(),
+  });
+  if (parsedPassthroughData?.done === true) {
+    return false;
+  }
+
+  let output =
+    line.startsWith("data:") && !line.startsWith("data: ")
+      ? `data: ${line.slice(5)}\n\n`
+      : `${line}\n\n`;
+
+  if (parsedPassthroughData) {
+    context.pushProviderPayload(parsedPassthroughData);
+    if (context.shouldAbortOnClaudeLifecycle(parsedPassthroughData)) {
+      context.emitClaudeEmptyStreamErrorAndAbort();
+      return true;
+    }
+
+    if (context.isClaudeEventPayload(parsedPassthroughData)) {
+      context.updateClaudeEmptyResponseLifecycle(parsedPassthroughData);
+    }
+
+    const projectedFailure = projectStreamFailureEvent(parsedPassthroughData);
+    const parsed = projectedFailure
+      ? projectedFailure.publicPayload
+      : (parsedPassthroughData as JsonRecord);
+    if (projectedFailure) {
+      output = `data: ${JSON.stringify(parsed)}\n\n`;
+    }
+    if (context.sanitizeUsagePayload(parsed)) {
+      output = `data: ${JSON.stringify(parsed)}\n\n`;
+    }
+    const parsedType = typeof parsed.type === "string" ? parsed.type : "";
+    const isResponses = parsedType.startsWith("response.");
+    const isClaude = context.isClaudeEventPayload(parsed);
+
+    if (isResponses) {
+      output = handleResponsesTailPayload(parsed, output, context);
+    } else if (!isClaude) {
+      const restoredToolName = context.restoreOpenAIToolNames(parsed);
+      handleOpenAiTailPayload(parsed, context);
+      if (restoredToolName) output = `data: ${JSON.stringify(parsed)}\n\n`;
+    }
+
+    context.pushClientPayload(parsed);
+
+    output = context.passthroughEventPrefix.prefixData(output, line);
+    context.emitConvertedOutput(output);
+    if (projectedFailure) {
+      context.abortFailure(projectedFailure.internalFailure, projectedFailure.publicMessage);
+      return true;
+    }
+    return false;
+  }
+
+  output = context.passthroughEventPrefix.prefixData(output, line);
+  context.emitConvertedOutput(output);
+  return false;
+}

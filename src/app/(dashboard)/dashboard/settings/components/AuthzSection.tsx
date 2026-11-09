@@ -1,0 +1,485 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Badge, Button, Card, Input, Modal, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+
+type TierName = "LOCAL_ONLY" | "ALWAYS_PROTECTED" | "MANAGEMENT" | "CLIENT_API" | "PUBLIC";
+
+interface TierEntry {
+  name: TierName;
+  prefixes: string[];
+  description: string;
+  bypassable: boolean;
+}
+
+interface CorsStatus {
+  allowAll: boolean;
+  allowedOrigins: string[];
+}
+
+interface InventoryPayload {
+  tiers: TierEntry[];
+  bypassEnabled: boolean;
+  bypassPrefixes: string[];
+  spawnCapablePrefixes: string[];
+  cors?: CorsStatus;
+}
+
+interface StatusMessage {
+  type: "success" | "error";
+  message: string;
+}
+
+type ErrorCode =
+  | "PASSWORD_REQUIRED"
+  | "PASSWORD_MISMATCH"
+  | "INSUFFICIENT_SCOPE"
+  | "BYPASS_PREFIX_NOT_ALLOWED"
+  | "GENERIC";
+
+// ─── helpers ──────────────────────────────────────────────────────────────
+
+function tierBadgeVariant(
+  tier: TierName,
+  prefix: string,
+  spawnCapable: ReadonlyArray<string>,
+  bypassPrefixes: ReadonlyArray<string>,
+  bypassEnabled: boolean
+): { variant: "default" | "success" | "warning" | "error" | "info"; key: string } {
+  if (spawnCapable.some((p) => prefix === p || prefix.startsWith(p))) {
+    return { variant: "error", key: "spawn_capable" };
+  }
+  if (tier === "LOCAL_ONLY") {
+    const isLive = bypassEnabled && bypassPrefixes.some((p) => p === prefix);
+    return isLive ? { variant: "warning", key: "bypassable" } : { variant: "info", key: "strict" };
+  }
+  if (tier === "ALWAYS_PROTECTED") return { variant: "error", key: "always_protected" };
+  if (tier === "PUBLIC") return { variant: "default", key: "public" };
+  return { variant: "info", key: "auth_required" };
+}
+
+function parseErrorCode(payload: unknown): ErrorCode {
+  if (!payload || typeof payload !== "object") return "GENERIC";
+  const errorField = (payload as { error?: unknown }).error;
+  if (typeof errorField === "string") {
+    if (errorField.toLowerCase().includes("manage")) return "INSUFFICIENT_SCOPE";
+    return "GENERIC";
+  }
+  if (errorField && typeof errorField === "object") {
+    const code = (errorField as { code?: unknown }).code;
+    if (
+      code === "PASSWORD_REQUIRED" ||
+      code === "PASSWORD_MISMATCH" ||
+      code === "INSUFFICIENT_SCOPE" ||
+      code === "BYPASS_PREFIX_NOT_ALLOWED"
+    ) {
+      return code;
+    }
+    // Zod validation surface (T-011 emits BYPASS_PREFIX_NOT_ALLOWED inside
+    // `error.details[].message`).
+    const details = (errorField as { details?: unknown }).details;
+    if (Array.isArray(details)) {
+      for (const d of details) {
+        const m = (d as { message?: unknown }).message;
+        if (typeof m === "string" && m.includes("BYPASS_PREFIX_NOT_ALLOWED")) {
+          return "BYPASS_PREFIX_NOT_ALLOWED";
+        }
+      }
+    }
+  }
+  return "GENERIC";
+}
+
+// ─── component ────────────────────────────────────────────────────────────
+
+type InventoryFetchResult =
+  | { kind: "ok"; data: InventoryPayload }
+  | { kind: "http-error"; code: ErrorCode }
+  | { kind: "failed" };
+
+async function fetchInventory(): Promise<InventoryFetchResult> {
+  try {
+    const res = await fetch("/api/settings/authz-inventory", {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      return { kind: "http-error", code: parseErrorCode(await res.json().catch(() => null)) };
+    }
+    return { kind: "ok", data: (await res.json()) as InventoryPayload };
+  } catch {
+    return { kind: "failed" };
+  }
+}
+
+export default function AuthzSection() {
+  const t = useTranslations("settings");
+  const [inventory, setInventory] = useState<InventoryPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Draft state — only persisted on Save (security-impacting fields require
+  // a password re-prompt before the PATCH is fired).
+  const [draftEnabled, setDraftEnabled] = useState<boolean>(true);
+  const [draftPrefixes, setDraftPrefixes] = useState<string[]>([]);
+  const [newPrefixInput, setNewPrefixInput] = useState("");
+
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<StatusMessage | null>(null);
+
+  const applyInventoryResult = useCallback(
+    (result: InventoryFetchResult) => {
+      if (result.kind === "ok") {
+        setInventory(result.data);
+        setDraftEnabled(result.data.bypassEnabled);
+        setDraftPrefixes([...result.data.bypassPrefixes]);
+      } else if (result.kind === "http-error") {
+        setLoadError(t(`authz.error.${result.code}`));
+      } else {
+        setLoadError(t("authz.loadError"));
+      }
+      setLoading(false);
+    },
+    [t]
+  );
+
+  const loadInventory = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    applyInventoryResult(await fetchInventory());
+  }, [applyInventoryResult]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const result = await fetchInventory();
+      if (!cancelled) applyInventoryResult(result);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [applyInventoryResult]);
+
+  const dirty = useMemo(() => {
+    if (!inventory) return false;
+    if (draftEnabled !== inventory.bypassEnabled) return true;
+    if (draftPrefixes.length !== inventory.bypassPrefixes.length) return true;
+    const a = [...draftPrefixes].sort();
+    const b = [...inventory.bypassPrefixes].sort();
+    return a.some((p, i) => p !== b[i]);
+  }, [draftEnabled, draftPrefixes, inventory]);
+
+  const spawnCapable = useMemo(() => inventory?.spawnCapablePrefixes ?? [], [inventory]);
+
+  const isSpawnCapable = useCallback(
+    (prefix: string) => spawnCapable.some((p) => prefix === p || prefix.startsWith(p)),
+    [spawnCapable]
+  );
+
+  const handleAddPrefix = () => {
+    const trimmed = newPrefixInput.trim();
+    if (!trimmed) return;
+    if (draftPrefixes.includes(trimmed)) {
+      setNewPrefixInput("");
+      return;
+    }
+    setDraftPrefixes((prev) => [...prev, trimmed]);
+    setNewPrefixInput("");
+  };
+
+  const handleRemovePrefix = (prefix: string) => {
+    if (isSpawnCapable(prefix)) return;
+    setDraftPrefixes((prev) => prev.filter((p) => p !== prefix));
+  };
+
+  const handleSaveRequest = () => {
+    if (!dirty) return;
+    setCurrentPassword("");
+    setStatus(null);
+    setPasswordModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!currentPassword) {
+      setStatus({ type: "error", message: t("authz.error.PASSWORD_REQUIRED") });
+      return;
+    }
+    setSubmitting(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          localOnlyManageScopeBypassEnabled: draftEnabled,
+          localOnlyManageScopeBypassPrefixes: draftPrefixes,
+          currentPassword,
+        }),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        const code = parseErrorCode(payload);
+        setStatus({ type: "error", message: t(`authz.error.${code}`) });
+        return;
+      }
+      setStatus({ type: "success", message: t("authz.saved") });
+      setPasswordModalOpen(false);
+      setCurrentPassword("");
+      await loadInventory();
+    } catch {
+      setStatus({ type: "error", message: t("authz.error.GENERIC") });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ─── render ─────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <Card title={t("authz.title")} icon="shield_lock">
+        <p className="text-sm text-text-muted" role="status">
+          {t("authz.loading")}
+        </p>
+      </Card>
+    );
+  }
+
+  if (loadError || !inventory) {
+    return (
+      <Card title={t("authz.title")} icon="shield_lock">
+        <p className="text-sm text-error" role="alert">
+          {loadError ?? t("authz.loadError")}
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      {/* #5602: persistent wildcard-CORS warning — only visible while
+          CORS_ALLOW_ALL=true is live. See docs/security/CORS.md. */}
+      {inventory.cors?.allowAll && (
+        <div
+          data-testid="cors-wildcard-banner"
+          role="alert"
+          className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-warning"
+        >
+          <Icon name="warning" size={20} className="mt-0.5" />
+          <div className="flex flex-col gap-1">
+            <p className="font-semibold">{t("authz.cors.wildcard.title")}</p>
+            <p className="text-sm">{t("authz.cors.wildcard.desc")}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bypass policy editor */}
+      <Card title={t("authz.bypass.section")} icon="tune">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="font-medium">{t("authz.bypass.kill_switch.label")}</p>
+            <p className="text-sm text-text-muted">{t("authz.bypass.kill_switch.desc")}</p>
+          </div>
+          <Toggle
+            ariaLabel={t("authz.bypass.kill_switch.label")}
+            checked={draftEnabled}
+            onChange={() => setDraftEnabled((prev) => !prev)}
+            disabled={submitting}
+          />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <div>
+            <p className="font-medium">{t("authz.bypass.prefix.label")}</p>
+            <p className="text-sm text-text-muted">{t("authz.bypass.prefix.desc")}</p>
+          </div>
+
+          {draftPrefixes.length === 0 && (
+            <p className="text-sm text-text-muted italic">{t("authz.bypass.prefix.empty")}</p>
+          )}
+
+          <ul className="flex flex-col gap-2">
+            {draftPrefixes.map((prefix) => {
+              const locked = isSpawnCapable(prefix);
+              return (
+                <li
+                  key={prefix}
+                  className="flex items-center justify-between gap-3 rounded-md border border-border bg-bg-subtle px-3 py-2"
+                >
+                  <div className="flex flex-col">
+                    <code className="text-xs font-mono">{prefix}</code>
+                    {locked && (
+                      <span className="text-[10px] text-error mt-1">
+                        {t("authz.bypass.cli_tools_runtime_note")}
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemovePrefix(prefix)}
+                    disabled={locked || submitting}
+                  >
+                    {t("authz.remove")}
+                  </Button>
+                </li>
+              );
+            })}
+            {/* Static read-only rows for spawn-capable prefixes that are NOT
+                in the draft list — surface them so the operator understands
+                they are intentionally not toggleable. */}
+            {spawnCapable
+              .filter((p) => !draftPrefixes.includes(p))
+              .map((prefix) => (
+                <li
+                  key={`locked:${prefix}`}
+                  className="flex items-center justify-between gap-3 rounded-md border border-error/30 bg-error-bg px-3 py-2 opacity-80"
+                >
+                  <div className="flex flex-col">
+                    <code className="text-xs font-mono">{prefix}</code>
+                    <span className="text-[10px] text-error mt-1">
+                      {t("authz.bypass.cli_tools_runtime_note")}
+                    </span>
+                  </div>
+                  <Badge variant="error" size="sm">
+                    {t("authz.badge.spawn_capable")}
+                  </Badge>
+                </li>
+              ))}
+          </ul>
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-end pt-2">
+            <Input
+              className="flex-1"
+              type="text"
+              label={t("authz.bypass.prefix.add")}
+              placeholder={t("authz.bypass.prefix.placeholder")}
+              value={newPrefixInput}
+              onChange={(e) => setNewPrefixInput(e.target.value)}
+              disabled={submitting}
+            />
+            <Button
+              variant="secondary"
+              onClick={handleAddPrefix}
+              disabled={!newPrefixInput.trim() || submitting}
+            >
+              {t("authz.bypass.prefix.add")}
+            </Button>
+          </div>
+        </div>
+
+        {/* Save bar */}
+        <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t border-border">
+          <div className="text-sm">
+            {dirty && <span className="text-warning">{t("authz.pending")}</span>}
+            {status && (
+              <span
+                role={status.type === "error" ? "alert" : "status"}
+                className={`ml-3 ${status.type === "error" ? "text-error" : "text-success"}`}
+              >
+                {status.message}
+              </span>
+            )}
+          </div>
+          <Button variant="primary" onClick={handleSaveRequest} disabled={!dirty || submitting}>
+            {t("authz.save")}
+          </Button>
+        </div>
+      </Card>
+
+      {/* Authorization tier inventory */}
+      <Card title={t("authz.title")} subtitle={t("authz.description")} icon="shield_lock">
+        <div className="flex flex-col gap-4">
+          {inventory.tiers.map((tier) => (
+            <div key={tier.name} className="rounded-lg border border-border bg-bg-subtle p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <h4 className="font-semibold">{t(`authz.tier.${tier.name}`)}</h4>
+                  {tier.bypassable && (
+                    <Badge variant="warning" size="sm">
+                      {t("authz.badge.bypassable")}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <p className="text-sm text-text-muted mb-3">{tier.description}</p>
+              <ul className="flex flex-col gap-2">
+                {tier.prefixes.map((prefix) => {
+                  const badge = tierBadgeVariant(
+                    tier.name,
+                    prefix,
+                    inventory.spawnCapablePrefixes,
+                    inventory.bypassPrefixes,
+                    inventory.bypassEnabled
+                  );
+                  return (
+                    <li
+                      key={`${tier.name}:${prefix}`}
+                      className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2"
+                    >
+                      <code className="text-xs font-mono break-all">{prefix}</code>
+                      <Badge variant={badge.variant} size="sm">
+                        {t(`authz.badge.${badge.key}`)}
+                      </Badge>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Password re-auth modal — fires for every security-impacting PATCH */}
+      <Modal
+        isOpen={passwordModalOpen}
+        onClose={() => {
+          if (!submitting) {
+            setPasswordModalOpen(false);
+            setCurrentPassword("");
+          }
+        }}
+        title={t("authz.password.prompt.label")}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setPasswordModalOpen(false);
+                setCurrentPassword("");
+              }}
+              disabled={submitting}
+            >
+              {t("authz.password.cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              loading={submitting}
+              disabled={!currentPassword || submitting}
+            >
+              {t("authz.password.submit")}
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-text-muted">{t("authz.password.prompt.desc")}</p>
+          <Input
+            type="password"
+            aria-label={t("authz.password.prompt.label")}
+            placeholder={t("authz.password.placeholder")}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoFocus
+            error={status?.type === "error" ? status.message : undefined}
+          />
+        </div>
+      </Modal>
+    </>
+  );
+}

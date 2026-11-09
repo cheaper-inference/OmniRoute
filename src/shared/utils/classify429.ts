@@ -1,0 +1,537 @@
+/**
+ * 429 response classifier — distinguish rate-limit from quota-exhausted.
+ *
+ * Most LLM providers return HTTP 429 for two semantically different reasons:
+ *
+ * 1. **Rate-limit**: short transient back-off ("too many requests in
+ *    the last minute"). Fix: wait the Retry-After window and retry.
+ * 2. **Quota-exhausted**: long-period cap hit ("daily/monthly limit
+ *    reached"). Fix: wait until the period rolls over (could be hours
+ *    or days). Retrying every 60s wastes calls and burns alerts.
+ *
+ * The HTTP status alone cannot disambiguate. This helper inspects the
+ * response body and headers to return a `FailureKind` the circuit
+ * breaker can use to pick the right cooldown.
+ *
+ * Companion to OmniRoute issue #2100.
+ *
+ * @module shared/utils/classify429
+ */
+
+export type FailureKind = "rate_limit" | "quota_exhausted" | "transient";
+
+/**
+ * Heuristic regexes for "explicit quota exhausted" vs "rate-limited"
+ * detection in 429 error bodies. A 429 alone never implies quota
+ * exhausted — only an explicit keyword does.
+ *
+ * Patterns observed across OpenAI, Anthropic, Groq, Cerebras, Mistral,
+ * Google Gemini, and OpenRouter free-tier responses.
+ */
+const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
+  /daily.*limit/i,
+  /daily.*quota/i,
+  /per.?day.*limit/i,
+  /monthly.*limit/i,
+  /monthly.*quota/i,
+  /per.?month.*limit/i,
+  /(?:api\s+)?calls?\s*\/\s*month/i,
+  /requests?\s*\/\s*month/i,
+  /limited\s+to\s+[\d,]+.*(?:calls?|requests?).*per\s+month/i,
+  /quota.*exceed/i,
+  /exceed.*quota/i,
+  /insufficient.*quota/i,
+  /billing.*cap/i,
+  /credit.*exhaust/i,
+  /exhausted.*credits/i,
+  /exhausted all your credits/i,
+  /have exhausted all your credits/i,
+  /out of credits/i,
+  /hard.?limit/i,
+  /plan.*limit/i,
+
+  // Antigravity / Cloud Code quota exhaustion ("Individual quota reached.
+  // Contact your administrator to enable overages. Resets in 164h27m24s.").
+  // None of the patterns above match it, so the 429 was misclassified as a
+  // transient rate-limit and locked for only ~5s instead of the real window.
+  // Keep these specific: a bare /quota reached/ would also flag transient
+  // per-minute limits like "request quota reached, retry in 60s".
+  /individual quota reached/i,
+  /enable overages/i,
+  /INSUFFICIENT_G1_CREDITS_BALANCE/i,
+
+  // Google APIs return this generic RESOURCE_EXHAUSTED message when a
+  // billing-period quota has been consumed. Keep the reset-window qualifier
+  // so transient Google rate limits are not treated as long-term exhaustion.
+  /resource has been exhausted.*reset after/i,
+
+  // Cloudflare Workers AI daily neuron exhaustion (Issue #6980).
+  // Body: "you have used up your daily free allocation of 10,000 neurons,
+  //        please upgrade to Cloudflare's Workers Paid plan..."
+  // No existing pattern matches "daily free allocation" — without this,
+  // the 429 is misclassified as transient rate_limit and retried every
+  // ~60s against a budget that only resets at UTC midnight.
+  /daily free allocation/i,
+
+  // OmniRoute auth-layer synthetic 429 (Issue #9269).
+  // Body: "All antigravity accounts have exhausted their quota (reset after 5m)"
+  // Produced by auth.ts line 1477 when every account for a provider has
+  // exhausted its quota. Without this pattern, the message is classified as
+  // a transient rate-limit and the combo loop burns retries against the
+  // same provider instead of falling back to a healthy one.
+  /have exhausted their quota/i,
+
+  // Modal-hosted OpenAI-compatible endpoints (e.g. self-hosted Kimi K3).
+  // Body: {"error":"usage limit reached"}, no nested "message"/"quota"/
+  // "daily" wording. Without this pattern the 429 falls through to
+  // "rate_limit" (short cooldown), so combo round-robin's per-conversation
+  // session stickiness (#3825) keeps re-targeting the same exhausted
+  // connection every turn instead of a long lockout that lets the sticky
+  // target fail over to another account.
+  //
+  // Matches the "error" JSON key with "usage limit reached" as its value.
+  // Extra sibling fields (e.g. {"error":"usage limit reached", "code":"..."})
+  // still match. A different key like {"detail":"..."} or a qualified value
+  // like {"error":"Per-minute usage limit reached"} does NOT match. Bare
+  // string bodies without a JSON wrapper also do NOT match.
+  // Trailing punctuation/whitespace before the closing quote is tolerated
+  // because real API responses may include a period or trailing space.
+  /"error"\s*:\s*"usage limit reached[.\s]*"/i,
+
+  // Moonshot Open Platform organization TPD (tokens-per-day). Live body:
+  // "request reached organization TPD rate limit, current: N, limit: M".
+  // Do not use a bare /TPD/ — too wide. Limit is read from the body, never
+  // hardcoded (Tier0=1.5M, Tier1+=unlimited).
+  /organization TPD rate limit/i,
+  /\bTPD rate limit\b/i,
+  /insufficient balance/i,
+
+  // CLIProxyAPI / upstream proxy model cooldowns (Issue #6342 / #11725 follow-up).
+  // Body: {"error":{"code":"model_cooldown","message":"All credentials for model claude-opus-5 are cooling down"}}
+  // Or: "auth unavailable: N of N candidate(s) for model ... are in cooldown"
+  /all credentials for model .* are cooling down/i,
+  /model_cooldown/i,
+  /auth unavailable: .* in cooldown/i,
+
+  // xAI Grok Build free-tier per-model rolling 24h cap. Live body:
+  // "You've used all the included free usage for model grok-4.6 for now.
+  //  Usage resets over a rolling 24-hour window — tokens (actual/limit): N/M."
+  /used all the included free usage/i,
+  /resets over a rolling 24-hour window/i,
+
+  // ── CJK quota-exhaustion patterns (#13194) ────────────────────────────
+  // Chinese (simplified) providers (z.ai/GLM, Kimi/Moonshot, Qwen/DashScope,
+  // MiniMax) return 429 bodies entirely in Chinese. Without these, the
+  // classifier misclassifies them as rate_limit (6–60s retry loop) instead
+  // of quota_exhausted (long cooldown + failover).
+
+  // GLM/z.ai: "[1308][Usage limit reached for 5 hour...]" or "[1310][Weekly/Monthly Limit Exhausted...]"
+  // and CJK: "已达到 5 小时的使用上限。您的限额将在 2026-09-10 19:01:19 重置。"
+  /\[1308\]/,
+  /\[1310\]/,
+  /usage limit reached for \d+\s*hour/i,
+  /使用上限/,
+  /限额将在/,
+  /已达?到.*上限/,
+  // GLM/z.ai out of credit (code 1113): "余额不足或无可用资源包,请充值。" — a
+  // long-period signal, so apikey-category 429s keep their credits classification.
+  /\[1113\]/,
+  /余额不足/,
+  /无可用资源包/,
+
+  // Kimi/Moonshot: "您的账户额度已用尽，请充值后重试。"
+  /额度已用尽/,
+
+  // Qwen/DashScope: "当前账户的免费额度已用完，请前往控制台充值。"
+  /额度已用完/,
+
+  // MiniMax: "已达到今日调用上限，请明日再试。"
+  /今日调用上限/,
+  /调用上限/,
+
+  // Generic Chinese: "配额" (quota) + exhaustion indicators
+  /配额[已超]/,
+  /超出.*配额/,
+
+  // Japanese: "クォータに達しました" / "使用量の上限に達しました"
+  /クォータに達しました/,
+  /上限に達しました/,
+  /利用制限に達しました/,
+
+  // Korean: "할당량을 초과했습니다" / "사용 한도를 초과했습니다"
+  /할당량을 초과/,
+  /사용 한도를 초과/,
+];
+
+/**
+ * Best-effort case-insensitive header lookup.
+ */
+function getHeader(headers: Record<string, string> | undefined, name: string): string | undefined {
+  if (!headers) return undefined;
+  const target = name.toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (k.toLowerCase() === target) return v;
+  }
+  return undefined;
+}
+
+/**
+ * Coerce a body of unknown shape to a string for keyword scanning.
+ * - string: returned as-is
+ * - object: JSON-stringified (so nested error.message gets scanned)
+ * - undefined/null: empty string
+ */
+function bodyToText(body: unknown): string {
+  if (typeof body === "string") return body;
+  if (body == null) return "";
+  try {
+    return JSON.stringify(body);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Returns true if the body looks like an explicit quota-exhausted
+ * error — i.e. the upstream is telling us a long-period cap was hit.
+ */
+export function looksLikeQuotaExhausted(body: unknown): boolean {
+  const text = bodyToText(body);
+  if (!text) return false;
+  return QUOTA_PATTERNS.some((pat) => pat.test(text));
+}
+
+/**
+ * Concurrency-limit wording in 429 bodies ("too many concurrent requests").
+ * The account is healthy — it is just busy with other in-flight requests —
+ * so the right reaction is to fail over to a sibling connection, not to climb
+ * the exponential backoff ladder. Every pattern is a fixed phrase with bounded
+ * alternations only (no `.*`), per the ReDoS rule.
+ */
+const CONCURRENCY_PATTERNS: ReadonlyArray<RegExp> = [
+  /too many (?:concurrent|simultaneous|parallel) (?:requests?|connections?|sessions?|calls?)/i,
+  /concurrent (?:requests?|connections?|sessions?) limit/i,
+  /concurrency limit/i,
+  /max(?:imum)? concurrency/i,
+  /parallel requests? limit/i,
+  /simultaneous requests? limit/i,
+  /high concurrency usage/i,
+  // GLM/z.ai code 1302: "您当前使用该API的并发数过高，请降低并发…"
+  /并发数?过高/,
+];
+
+/**
+ * Returns true if a 429 body reports a CONCURRENCY limit (contention on a
+ * healthy account). An explicit quota body always wins: a body that matches
+ * any quota pattern is never treated as concurrency.
+ *
+ * Deliberately NOT a `FailureKind`: the circuit breaker's per-kind cooldowns
+ * key on `classify429`, and that contract stays unchanged (a concurrency 429
+ * still reads `rate_limit` there). Only the connection-cooldown path consumes
+ * this signal (open-sse/services/accountFallback.ts).
+ */
+export function looksLikeConcurrencyLimit(body: unknown): boolean {
+  const text = bodyToText(body);
+  if (!text) return false;
+  if (!CONCURRENCY_PATTERNS.some((pat) => pat.test(text))) return false;
+  return !looksLikeQuotaExhausted(text);
+}
+
+/**
+ * A declared upstream retry window at or beyond this is treated as
+ * long-period exhaustion. One hour mirrors the circuit breaker's
+ * `quota_exhausted` cooldown bucket (`cooldownByKind`, wired in
+ * src/sse/handlers/chat.ts, chatHelpers.ts and
+ * open-sse/services/accountFallback.ts): the long bucket is only the right
+ * lock when the upstream's own window is at least that long.
+ */
+const QUOTA_SCALE_RETRY_DELAY_SECONDS = 3600;
+
+/**
+ * Quota signals that stay terminal no matter what retry hint accompanies
+ * them. Credits/billing exhaustion does not clear on a timer, so a short
+ * upstream hint must never downgrade these to a 60s retry loop.
+ */
+const TERMINAL_QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
+  /INSUFFICIENT_G1_CREDITS_BALANCE/i,
+  /credit.*exhaust/i,
+  /exhausted.*credits/i,
+  /exhausted all your credits/i,
+  /have exhausted all your credits/i,
+  /out of credits/i,
+  /billing.*cap/i,
+  /insufficient.*quota/i,
+  /individual quota reached/i,
+  /enable overages/i,
+  /daily free allocation/i,
+  /organization TPD rate limit/i,
+  /\bTPD rate limit\b/i,
+  /insufficient balance/i,
+];
+
+// Mirror of retryAfterJson's COMPOUND_DURATION_RE ("151h58m18.015s", "2h7m",
+// "45m3s") — anchored and bounded (ReDoS rule); see parseDelaySeconds below.
+const COMPOUND_DURATION_RE =
+  /^(?:(\d{1,9})h(\d{1,9})m(?:(\d{1,9}(?:\.\d{1,12})?)s)?|(\d{1,9})h(\d{1,9}(?:\.\d{1,12})?)s|(\d{1,9})m(\d{1,9}(?:\.\d{1,12})?)s)$/i;
+
+/**
+ * Parse an upstream delay string ("38s", "26.66s", "1500ms", "2m", "1h",
+ * compound Go-style "2h7m23s", or a bare number of seconds) into seconds.
+ *
+ * Deliberately mirrors `parseDelayString` in
+ * open-sse/services/retryAfterJson.ts (#7940) rather than importing it:
+ * open-sse already imports this module (accountFallback.ts), so the
+ * reverse import would close a dependency cycle. Keep the two grammars in
+ * step when either changes.
+ */
+function parseDelaySeconds(value: unknown): number | null {
+  if (!value) return null;
+  const str = String(value).trim();
+  const ms = /^(\d+(?:\.\d+)?)\s*ms$/i.exec(str);
+  if (ms) return Number.parseFloat(ms[1]) / 1000;
+  const sec = /^(\d+(?:\.\d+)?)\s*s$/i.exec(str);
+  if (sec) return Number.parseFloat(sec[1]);
+  const min = /^(\d+(?:\.\d+)?)\s*m$/i.exec(str);
+  if (min) return Number.parseFloat(min[1]) * 60;
+  const hr = /^(\d+(?:\.\d+)?)\s*h$/i.exec(str);
+  if (hr) return Number.parseFloat(hr[1]) * 3600;
+  const compound = COMPOUND_DURATION_RE.exec(str);
+  if (compound) {
+    const hours = Number(compound[1] ?? compound[4] ?? 0);
+    const minutes = Number(compound[2] ?? compound[6] ?? 0);
+    const seconds = Number.parseFloat(compound[3] ?? compound[5] ?? compound[7] ?? "0");
+    return hours * 3600 + minutes * 60 + seconds;
+  }
+  const bare = Number.parseFloat(str);
+  return Number.isFinite(bare) ? bare : null;
+}
+
+/**
+ * Upstream-declared retry window in seconds, when the 429 carries one.
+ *
+ * Google APIs (Gemini `generativelanguage`, Vertex) attach a
+ * `google.rpc.RetryInfo` detail whose `retryDelay` Duration states exactly
+ * how long the throttle lasts, and repeat the same hint in the human
+ * message ("Please retry in 38.922534355s"). Gemini free-tier
+ * per-minute/per-token 429s open with the same "You exceeded your current
+ * quota, please check your plan and billing details" preamble as genuine
+ * long-window exhaustion, so `QUOTA_PATTERNS` cannot tell them apart —
+ * even the PerDay-named `quotaId` ships retryDelay values of ~30-50s
+ * (#9504). The declared window is the authoritative signal.
+ *
+ * Both carriers are read because the two live call paths deliver different
+ * shapes: `accountFallback` classifies the parsed body (details intact),
+ * while `chat.ts` classifies `result.rawMessage`, which
+ * `parseUpstreamError` has already reduced to `error.message` text.
+ * Structural matching keeps an unrelated `retryDelay` key from triggering
+ * the hint; the text form is anchored on Google's exact phrasing, matching
+ * the precedent in accountFallback's cooldown parser.
+ */
+function upstreamRetryDelaySeconds(body: unknown): number | null {
+  let root: unknown = body;
+  if (typeof body === "string") {
+    const phrase = /please retry in (\d+(?:\.\d+)?)\s*s/i.exec(body);
+    if (phrase) return Number.parseFloat(phrase[1]);
+    try {
+      root = JSON.parse(body);
+    } catch {
+      return null;
+    }
+  }
+  if (root === null || typeof root !== "object") return null;
+  const error = (root as { error?: unknown }).error;
+  const errorRecord =
+    error !== null && typeof error === "object" ? (error as Record<string, unknown>) : {};
+  const details = errorRecord.details ?? (root as Record<string, unknown>).details;
+  for (const detail of Array.isArray(details) ? details : []) {
+    if (detail === null || typeof detail !== "object") continue;
+    const entry = detail as Record<string, unknown>;
+    if (!String(entry["@type"] ?? "").includes("RetryInfo")) continue;
+    const seconds = parseDelaySeconds(entry.retryDelay);
+    if (seconds !== null && seconds >= 0) return seconds;
+  }
+  const message = errorRecord.message;
+  if (typeof message === "string") {
+    const phrase = /please retry in (\d+(?:\.\d+)?)\s*s/i.exec(message);
+    if (phrase) return Number.parseFloat(phrase[1]);
+  }
+  return null;
+}
+
+/**
+ * Classify a 429 (or any) response into a `FailureKind`.
+ *
+ * Decision order:
+ * 1. status !== 429 → `"transient"` (don't pretend to know more than
+ *    the caller does about non-429 failures).
+ * 2. body carries a terminal credits/billing signal → `"quota_exhausted"`
+ *    regardless of any retry hint: those do not clear on a timer.
+ * 3. body declares a sub-hour retry window → `"rate_limit"` even when
+ *    generic quota keywords match: the upstream said the throttle clears
+ *    in seconds, so the long lockout bucket would overshoot its own reset
+ *    by 60-360x (#9504).
+ * 4. body matches a quota keyword → `"quota_exhausted"`.
+ * 5. otherwise → `"rate_limit"` (default for 429 — even without
+ *    Retry-After, a 429 is per definition a rate-limit signal).
+ *
+ * @param response - the upstream response with status, optional headers,
+ *                   optional body. Headers are looked up
+ *                   case-insensitively.
+ */
+export function classify429(response: {
+  status: number;
+  headers?: Record<string, string>;
+  body?: unknown;
+}): FailureKind {
+  if (response.status < 400) return "transient";
+  const text = bodyToText(response.body);
+  if (text && TERMINAL_QUOTA_PATTERNS.some((pat) => pat.test(text))) {
+    return "quota_exhausted";
+  }
+  // Non-429 4xx/5xx responses that didn't match terminal patterns are
+  // still transient (the caller has already widened the scope from 429-only).
+  if (response.status !== 429) return "transient";
+  const declaredDelay = upstreamRetryDelaySeconds(response.body);
+  if (declaredDelay !== null && declaredDelay < QUOTA_SCALE_RETRY_DELAY_SECONDS) {
+    return "rate_limit";
+  }
+  if (looksLikeQuotaExhausted(response.body)) return "quota_exhausted";
+  return "rate_limit";
+}
+
+/**
+ * Parse a `Retry-After` header value into seconds.
+ *
+ * Accepts:
+ * - integer seconds: `"60"`
+ * - HTTP date: `"Wed, 08 May 2026 03:00:00 GMT"`
+ * - Groq-style relative: `"60s"`, `"5m"`, `"2h"`
+ *
+ * Returns `null` if unparseable.
+ *
+ * Note: integer seconds vs Groq relative units are easy to confuse —
+ * `parseInt("5m", 10)` returns `5` (parses leading digits and ignores
+ * trailing). This helper checks the relative-unit pattern FIRST.
+ */
+export function parseRetryAfter(headerValue: string | undefined): number | null {
+  if (!headerValue) return null;
+  const trimmed = headerValue.trim();
+  if (!trimmed) return null;
+
+  // Groq-style relative: must check BEFORE plain int parse.
+  const relMatch = trimmed.match(/^(\d+)([smh])$/i);
+  if (relMatch) {
+    const n = Number(relMatch[1]);
+    const unit = relMatch[2].toLowerCase();
+    if (Number.isFinite(n)) {
+      if (unit === "s") return n;
+      if (unit === "m") return n * 60;
+      if (unit === "h") return n * 3600;
+    }
+  }
+
+  // Pure integer seconds.
+  if (/^\d+$/.test(trimmed)) {
+    const n = Number(trimmed);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  // HTTP date.
+  const ts = Date.parse(trimmed);
+  if (Number.isFinite(ts)) {
+    return Math.max(0, Math.floor((ts - Date.now()) / 1000));
+  }
+
+  return null;
+}
+
+/**
+ * Convenience wrapper: pull the Retry-After from a response's headers
+ * and parse it to seconds. Returns null if absent or unparseable.
+ */
+export function retryAfterFromResponse(response: {
+  headers?: Record<string, string>;
+}): number | null {
+  return parseRetryAfter(getHeader(response.headers, "retry-after"));
+}
+
+/**
+ * Normalize an unknown headers-like value into a plain `Record<string, string>`.
+ * Native `Headers` (from `fetch`) does NOT respond to `Object.entries` — it
+ * exposes `.entries()` instead. Without this normalization, `getHeader` would
+ * silently miss every header on a Headers instance.
+ */
+function normalizeHeaders(raw: unknown): Record<string, string> | undefined {
+  if (raw === null || typeof raw !== "object") return undefined;
+  const maybeIter = (raw as { entries?: unknown }).entries;
+  if (typeof maybeIter === "function") {
+    try {
+      return Object.fromEntries((raw as { entries: () => Iterable<[string, string]> }).entries());
+    } catch {
+      // fall through to plain-object treatment
+    }
+  }
+  return raw as Record<string, string>;
+}
+
+/**
+ * Adapter that takes an error thrown by an HTTP client (fetch wrapper, axios,
+ * upstream SDK, etc.) and produces a {@link FailureKind} suitable for the
+ * `classifyError` option of the circuit breaker.
+ *
+ * Recognises the common error shapes:
+ * - `err.status` + `err.headers` + `err.body` (low-level fetch wrapper)
+ * - `err.response.status` + `err.response.headers` + `err.response.data` (axios-style)
+ * - `err.message` (last-resort body for keyword scan)
+ *
+ * Returns `undefined` when the error doesn't carry enough information to
+ * classify, so the breaker can decide what to do without a kind tag.
+ *
+ * Companion to issue #2100 follow-up.
+ */
+export function classify429FromError(err: unknown): FailureKind | undefined {
+  if (err === null || typeof err !== "object") return undefined;
+  const e = err as Record<string, unknown>;
+
+  let status: number | undefined;
+  let headers: Record<string, string> | undefined;
+  let body: unknown;
+
+  if (typeof e.status === "number") {
+    status = e.status;
+  }
+  if (typeof e.statusCode === "number" && status === undefined) {
+    status = e.statusCode;
+  }
+
+  if (e.response && typeof e.response === "object") {
+    const resp = e.response as Record<string, unknown>;
+    if (typeof resp.status === "number" && status === undefined) {
+      status = resp.status;
+    }
+    if (resp.headers && typeof resp.headers === "object") {
+      headers = normalizeHeaders(resp.headers);
+    }
+    if (resp.data !== undefined) {
+      body = resp.data;
+    } else if (typeof resp.body !== "undefined") {
+      body = resp.body;
+    }
+  }
+
+  if (headers === undefined && e.headers && typeof e.headers === "object") {
+    headers = normalizeHeaders(e.headers);
+  }
+  if (body === undefined) {
+    if (typeof e.body !== "undefined") {
+      body = e.body;
+    } else if (typeof e.error !== "undefined") {
+      body = e.error;
+    } else if (typeof e.message === "string") {
+      body = e.message;
+    }
+  }
+
+  if (typeof status !== "number") return undefined;
+  return classify429({ status, headers, body });
+}

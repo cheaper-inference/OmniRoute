@@ -1,0 +1,551 @@
+import { createHash } from "node:crypto";
+import { coerceToolCallArguments } from "./toolArguments.ts";
+
+// Tool call helper functions for translator
+
+const ALPHANUM9 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+type JsonRecord = Record<string, unknown>;
+type ToolNameAliases = Map<string, string>;
+
+interface ToolFunction extends JsonRecord {
+  name?: unknown;
+  arguments?: unknown;
+}
+
+interface ToolCallRecord extends JsonRecord {
+  id?: unknown;
+  type?: unknown;
+  function?: ToolFunction;
+}
+
+interface ToolContentBlock extends JsonRecord {
+  type?: unknown;
+  id?: unknown;
+  tool_use_id?: unknown;
+}
+
+interface ToolMessage extends JsonRecord {
+  role?: unknown;
+  tool_calls?: ToolCallRecord[];
+  tool_call_id?: unknown;
+  content?: unknown;
+}
+
+interface ToolCallBody extends JsonRecord {
+  messages?: ToolMessage[];
+}
+
+function toRecord(value: unknown): JsonRecord | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
+}
+
+function aliasOpenAIToolName(name: unknown, maxLength: number, aliases: ToolNameAliases): unknown {
+  if (typeof name !== "string" || name.length === 0) return name;
+
+  const safe = name.replace(/[^A-Za-z0-9_-]/g, "_");
+  if (safe === name && safe.length <= maxLength) return safe;
+
+  const hash = createHash("sha256").update(name).digest("hex").slice(0, 12);
+  const prefixLength = Math.max(0, maxLength - hash.length - 1);
+  const shortened =
+    prefixLength > 0 ? `${safe.slice(0, prefixLength)}_${hash}` : hash.slice(0, maxLength);
+  aliases.set(shortened, name);
+  return shortened;
+}
+
+/**
+ * Mutates an OpenAI-compatible request so every function name satisfies a
+ * provider's maximum length and `[A-Za-z0-9_-]` character constraints.
+ * Returns alias → original entries for response restoration.
+ * Rejects ambiguous aliases before changing any name in the request.
+ */
+export function normalizeOpenAIToolNames(body: unknown, maxLength: number): ToolNameAliases {
+  const aliases: ToolNameAliases = new Map();
+  const root = toRecord(body);
+  if (!root || !Number.isInteger(maxLength) || maxLength < 1) return aliases;
+
+  const updates: Array<{ target: JsonRecord; name: string }> = [];
+  const claimedNames = new Map<string, { original: string; aliased: boolean }>();
+  const planAlias = (target: JsonRecord): void => {
+    const original = target.name;
+    if (typeof original !== "string") return;
+    const name = aliasOpenAIToolName(original, maxLength, aliases);
+    if (typeof name !== "string") return;
+
+    // Response restoration also falls back to case-insensitive matching. A generated
+    // alias must not shadow another original, including an already valid short name.
+    const key = name.toLowerCase();
+    const aliased = name !== original;
+    const claimed = claimedNames.get(key);
+    if (claimed && claimed.original !== original && (claimed.aliased || aliased)) {
+      throw new Error("Tool names become ambiguous after length normalization.");
+    }
+    if (!claimed || aliased) claimedNames.set(key, { original, aliased });
+    updates.push({ target, name });
+  };
+
+  if (Array.isArray(root.tools)) {
+    for (const tool of root.tools) {
+      const fn = toRecord(toRecord(tool)?.function);
+      if (fn) planAlias(fn);
+    }
+  }
+
+  const toolChoiceFunction = toRecord(toRecord(root.tool_choice)?.function);
+  if (toolChoiceFunction) planAlias(toolChoiceFunction);
+
+  if (Array.isArray(root.messages)) {
+    for (const message of root.messages) {
+      const msg = toRecord(message);
+      if (!msg) continue;
+      if (Array.isArray(msg.tool_calls)) {
+        for (const toolCall of msg.tool_calls) {
+          const fn = toRecord(toRecord(toolCall)?.function);
+          if (fn) planAlias(fn);
+        }
+      }
+      if (msg.role === "tool") planAlias(msg);
+    }
+  }
+
+  for (const { target, name } of updates) target.name = name;
+  return aliases;
+}
+
+/**
+ * Case-insensitive fallback for tool name lookups from upstream responses.
+ *
+ * Many upstream providers/models return tool call names in lowercase (e.g., "bash")
+ * even when the tool definition used PascalCase ("Bash"). This helper tries an exact
+ * match first (fast path for well-behaved providers), then falls back to a
+ * case-insensitive scan over the map entries.
+ *
+ * Returns the mapped value on match, or `undefined` when no entry matches.
+ */
+export function caseInsensitiveToolNameLookup(
+  name: string,
+  map: Map<string, string> | null | undefined
+): string | undefined {
+  if (!map || !name) return undefined;
+
+  // Fast path: exact match (PascalCase-preserving providers)
+  const exact = map.get(name);
+  if (exact !== undefined) return exact;
+
+  // Fallback: case-insensitive scan
+  const lowerName = name.toLowerCase();
+  for (const [key, value] of map) {
+    if (key.toLowerCase() === lowerName) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+/** Restore normalized function names in OpenAI Chat Completions responses. */
+export function restoreOpenAIToolNames(body: unknown, aliases: unknown): boolean {
+  if (!(aliases instanceof Map) || aliases.size === 0) return false;
+  const root = toRecord(body);
+  if (!root || !Array.isArray(root.choices)) return false;
+
+  let changed = false;
+  const restoreCalls = (calls: unknown): void => {
+    if (!Array.isArray(calls)) return;
+    for (const toolCall of calls) {
+      const fn = toRecord(toRecord(toolCall)?.function);
+      if (!fn || typeof fn.name !== "string") continue;
+      const original = caseInsensitiveToolNameLookup(fn.name, aliases);
+      if (typeof original !== "string" || original === fn.name) continue;
+      fn.name = original;
+      changed = true;
+    }
+  };
+
+  for (const choice of root.choices) {
+    const record = toRecord(choice);
+    if (!record) continue;
+    restoreCalls(toRecord(record.delta)?.tool_calls);
+    restoreCalls(toRecord(record.message)?.tool_calls);
+  }
+
+  return changed;
+}
+
+// Fallback streaming tool_call id when a provider response omits one (index optional).
+// `call_<ts>` when no index is given; `call_<index>_<ts>` when an index is supplied.
+export function fallbackToolCallId(index?: number): string {
+  return index === undefined ? `call_${Date.now()}` : `call_${index}_${Date.now()}`;
+}
+
+// Generate unique tool call ID (default long form)
+export function generateToolCallId() {
+  return `call_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+// Generate 9-char [a-zA-Z0-9] id for providers that require it (e.g. Mistral)
+function generateToolCallId9(): string {
+  let s = "";
+  for (let i = 0; i < 9; i++) {
+    s += ALPHANUM9[Math.floor(Math.random() * ALPHANUM9.length)];
+  }
+  return s;
+}
+
+/** @param options.use9CharId - When true, normalize ids to 9-char [a-zA-Z0-9] (e.g. Mistral); when false, only fix type/arguments, leave ids as-is */
+export function ensureToolCallIds<T extends ToolCallBody>(
+  body: T,
+  options?: { use9CharId?: boolean }
+): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+
+  const use9CharId = options?.use9CharId === true;
+
+  for (let i = 0; i < body.messages.length; i++) {
+    const msg = body.messages[i];
+    if (msg.role !== "assistant" || !msg.tool_calls || !Array.isArray(msg.tool_calls)) continue;
+
+    const used9 = new Set<string>();
+    const newIdsInOrder: string[] = [];
+
+    for (const tc of msg.tool_calls) {
+      if (!tc.type) {
+        tc.type = "function";
+      }
+      // Strict upstreams require a valid JSON string even for zero-argument calls
+      // (missing/null/"" → "{}") and reject replayed partial/freeform fragments.
+      // Never fabricate a missing `function` object.
+      if (tc.function && typeof tc.function === "object") {
+        tc.function.arguments = coerceToolCallArguments(tc.function.arguments);
+      }
+      if (use9CharId) {
+        let newId: string;
+        do {
+          newId = generateToolCallId9();
+        } while (used9.has(newId));
+        used9.add(newId);
+        newIdsInOrder.push(newId);
+        tc.id = newId;
+      } else {
+        // Leave id as-is, only ensure it exists for later tool message matching
+        const id =
+          tc.id != null && String(tc.id).trim() !== "" ? String(tc.id) : generateToolCallId();
+        tc.id = id;
+        newIdsInOrder.push(id);
+      }
+    }
+
+    // Tool responses (role "tool") follow in the same order as tool_calls. Rewrite
+    // every id only when the provider requires generated 9-char ids; otherwise keep
+    // explicit client ids and fill only missing ones. Overwriting a compacted orphan's
+    // explicit id by position can make it impersonate a different parallel call.
+    // Stop at the next assistant so we only link responses belonging to this turn.
+    if (newIdsInOrder.length > 0) {
+      let idx = 0;
+      for (let j = i + 1; j < body.messages.length; j++) {
+        const later = body.messages[j];
+        if (later.role === "assistant") break;
+        if (later.role !== "tool") continue;
+        if (idx < newIdsInOrder.length) {
+          if (
+            use9CharId ||
+            later.tool_call_id == null ||
+            String(later.tool_call_id).trim() === ""
+          ) {
+            later.tool_call_id = newIdsInOrder[idx];
+          }
+          idx++;
+        }
+      }
+    }
+  }
+
+  return body;
+}
+
+// Get tool_call ids from assistant message (OpenAI format: tool_calls, Claude format: tool_use in content)
+export function getToolCallIds(msg: ToolMessage): string[] {
+  if (msg.role !== "assistant") return [];
+
+  const ids: string[] = [];
+
+  // OpenAI format: tool_calls array
+  if (msg.tool_calls && Array.isArray(msg.tool_calls)) {
+    for (const tc of msg.tool_calls) {
+      if (tc.id) ids.push(String(tc.id));
+    }
+  }
+
+  // Claude format: tool_use blocks in content
+  if (Array.isArray(msg.content)) {
+    for (const block of msg.content as ToolContentBlock[]) {
+      if (block.type === "tool_use" && block.id) {
+        ids.push(String(block.id));
+      }
+    }
+  }
+
+  return ids;
+}
+
+// Check if user message has tool_result for given ids (OpenAI format: role=tool, Claude format: tool_result in content)
+export function hasToolResults(
+  msg: ToolMessage | null | undefined,
+  toolCallIds: string[]
+): boolean {
+  if (!msg || !toolCallIds.length) return false;
+
+  // OpenAI format: role = "tool" with tool_call_id
+  if (msg.role === "tool" && msg.tool_call_id) {
+    return toolCallIds.includes(String(msg.tool_call_id));
+  }
+
+  // Claude format: tool_result blocks in user message content
+  if (msg.role === "user" && Array.isArray(msg.content)) {
+    for (const block of msg.content as ToolContentBlock[]) {
+      if (
+        block.type === "tool_result" &&
+        block.tool_use_id &&
+        toolCallIds.includes(String(block.tool_use_id))
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Ids answered by one message: OpenAI role:"tool" carries tool_call_id; a Claude
+// role:"user" message carries tool_result content blocks.
+function respondedToolIds(msg: ToolMessage): string[] {
+  if (msg.role === "tool" && msg.tool_call_id) return [String(msg.tool_call_id)];
+  if (msg.role !== "user" || !Array.isArray(msg.content)) return [];
+  const ids: string[] = [];
+  for (const block of msg.content as ToolContentBlock[]) {
+    if (block?.type === "tool_result" && block.tool_use_id) ids.push(String(block.tool_use_id));
+  }
+  return ids;
+}
+
+// The run of tool-response messages that immediately follows messages[start - 1].
+function collectToolResponseRun(
+  messages: ToolMessage[],
+  start: number
+): { responses: ToolMessage[]; respondedIds: Set<string> } {
+  const responses: ToolMessage[] = [];
+  const respondedIds = new Set<string>();
+  for (let j = start; j < messages.length; j++) {
+    const ids = respondedToolIds(messages[j]);
+    if (ids.length === 0) break;
+    responses.push(messages[j]);
+    for (const id of ids) respondedIds.add(id);
+  }
+  return { responses, respondedIds };
+}
+
+function emptyToolResultBlocks(ids: string[]): ToolContentBlock[] {
+  return ids.map((id) => ({ type: "tool_result", tool_use_id: id, content: "" }));
+}
+
+// Claude shape: Anthropic requires every tool_result in the user message right after the
+// tool_use turn, so the missing blocks join the first existing results message (after its
+// tool_result blocks, before any other block) instead of a second consecutive user message.
+// The caller's message object is copied, never mutated.
+function withClaudeMissingResults(responses: ToolMessage[], missingIds: string[]): ToolMessage[] {
+  const target = responses.findIndex((m) => m.role === "user" && Array.isArray(m.content));
+  if (target === -1) {
+    return [...responses, { role: "user", content: emptyToolResultBlocks(missingIds) }];
+  }
+  const content = [...(responses[target].content as ToolContentBlock[])];
+  let insertAt = 0;
+  content.forEach((block, idx) => {
+    if (block?.type === "tool_result") insertAt = idx + 1;
+  });
+  content.splice(insertAt, 0, ...emptyToolResultBlocks(missingIds));
+  const merged = [...responses];
+  merged[target] = { ...responses[target], content };
+  return merged;
+}
+
+// Fix missing tool responses - insert empty tool_result if assistant has tool_use but next messages lack responses for all tool_calls.
+// Inserts in the same shape as the opening assistant message: OpenAI tool_calls → role:"tool";
+// Claude tool_use blocks → tool_result content blocks merged into the following user message.
+export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+
+  const newMessages: ToolMessage[] = [];
+
+  for (let i = 0; i < body.messages.length; i++) {
+    const msg = body.messages[i];
+    newMessages.push(msg);
+
+    // Check if this is assistant with tool_calls/tool_use
+    const toolCallIds = getToolCallIds(msg);
+    if (toolCallIds.length === 0) continue;
+
+    // Collect all tool responses that immediately follow this assistant message
+    const { responses, respondedIds } = collectToolResponseRun(body.messages, i + 1);
+    i += responses.length;
+
+    // Insert empty tool responses for any tool calls that were not answered
+    const missingIds = toolCallIds.filter((id) => !respondedIds.has(id));
+    const hasOpenAIToolCalls = Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
+    if (missingIds.length === 0) {
+      newMessages.push(...responses);
+    } else if (hasOpenAIToolCalls) {
+      newMessages.push(...responses);
+      for (const id of missingIds)
+        newMessages.push({ role: "tool", tool_call_id: id, content: "" });
+    } else {
+      newMessages.push(...withClaudeMissingResults(responses, missingIds));
+    }
+  }
+
+  body.messages = newMessages;
+  return body;
+}
+
+/**
+ * Scan forward from `from` for response messages that resolve the turn's remaining calls,
+ * stopping at the next assistant message. Returns their indexes and removes the resolved ids
+ * from `openIds` (mutated in place — callers rely on that to know what is still open).
+ */
+function collectDisplacedResultIndexes(
+  messages: ToolMessage[],
+  from: number,
+  openIds: Set<string>
+): number[] {
+  const ahead: number[] = [];
+  for (let j = from; j < messages.length; j++) {
+    const later = messages[j];
+    if (later.role === "assistant") break;
+    const resolved = respondedToolIds(later).filter((id) => openIds.has(id));
+    if (resolved.length === 0) continue;
+    ahead.push(j);
+    for (const id of resolved) openIds.delete(id);
+    if (openIds.size === 0) break;
+  }
+  return ahead;
+}
+
+/** Move the messages at `indexes` (ascending, all after `target`) directly above `target`, in place. */
+function hoistMessagesAbove(messages: ToolMessage[], indexes: number[], target: number): void {
+  const hoisted = indexes.map((idx) => messages[idx]);
+  const hoistedSet = new Set(indexes);
+  const rebuilt: ToolMessage[] = [];
+  for (let j = 0; j < messages.length; j++) {
+    if (j === target) rebuilt.push(...hoisted);
+    if (!hoistedSet.has(j)) rebuilt.push(messages[j]);
+  }
+  messages.length = 0;
+  messages.push(...rebuilt);
+}
+
+/**
+ * Hoist displaced tool results back into their assistant turn's result run.
+ *
+ * Clients that steer mid-turn (queued user messages, task notifications) can
+ * interleave a non-tool message between an assistant tool_calls message and
+ * part of its results: [assistant(tc:c1,c2), tool(c1), user, tool(c2)]. Strict
+ * upstream validators (DeepSeek V4 thinking confirmed live) reject that with
+ * "insufficient tool messages following tool_calls message". The result
+ * belongs to the turn, so move it up to the end of the contiguous run.
+ * Stops at the next assistant message: a later assistant turn's own pairing
+ * must not be scrambled.
+ */
+export function repairDisplacedToolResults<T extends ToolCallBody>(body: T): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+  const messages = body.messages;
+
+  let turnIds: Set<string> | null = null;
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const ids = getToolCallIds(msg);
+    if (ids.length > 0) {
+      turnIds = new Set(ids);
+      continue;
+    }
+    if (!turnIds || turnIds.size === 0) continue;
+    // Stable non-null alias: `turnIds` is reassigned below, which defeats narrowing in callbacks.
+    const openIds: Set<string> = turnIds;
+
+    if (msg.role === "assistant") {
+      // A new assistant turn (without tool calls) ends the previous turn's window.
+      turnIds = null;
+      continue;
+    }
+    if (respondedToolIds(msg).some((id) => openIds.has(id))) {
+      // Contiguous member of the run — still fine where it is.
+      continue;
+    }
+    // Non-tool message inside the turn's window: hoist the later response messages that
+    // resolve the turn's remaining calls above this message.
+    const ahead = collectDisplacedResultIndexes(messages, i + 1, openIds);
+    if (ahead.length === 0) {
+      // Nothing ahead belongs to this turn; close the window at this boundary.
+      turnIds = null;
+      continue;
+    }
+    hoistMessagesAbove(messages, ahead, i);
+    // Re-scan from the same index: the hoisted results now precede msg.
+    i -= 1;
+  }
+
+  return body;
+}
+
+// Strip tool-result carriers whose id has no matching tool call anywhere in the
+// conversation. Mirrors fixMissingToolResponses on the result side: that helper
+// ensures every call has a result; this one ensures every result has a call.
+// Client-side history truncation/compaction can drop the assistant turn that
+// issued a tool call while leaving its stale tool result behind, which strict
+// upstream APIs reject before model execution. Handles both OpenAI-format
+// role:"tool" messages and Claude-format tool_result content blocks. Drops a
+// user message entirely if stripping empties its content array. Returns the
+// same body reference when nothing needs to change (no-op fast path).
+export function stripOrphanedToolResults<T extends ToolCallBody>(body: T): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+
+  const knownCallIds = new Set<string>();
+  for (const msg of body.messages) {
+    for (const id of getToolCallIds(msg)) {
+      knownCallIds.add(id);
+    }
+  }
+
+  let changed = false;
+  const filteredMessages: ToolMessage[] = [];
+
+  for (const msg of body.messages) {
+    if (msg.role === "tool" && msg.tool_call_id) {
+      if (knownCallIds.has(String(msg.tool_call_id))) {
+        filteredMessages.push(msg);
+      } else {
+        changed = true;
+      }
+      continue;
+    }
+
+    if (Array.isArray(msg.content)) {
+      const cleanedContent = (msg.content as ToolContentBlock[]).filter((block) => {
+        if (block?.type !== "tool_result") return true;
+        return typeof block.tool_use_id === "string" && knownCallIds.has(block.tool_use_id);
+      });
+
+      if (cleanedContent.length !== msg.content.length) {
+        changed = true;
+        if (cleanedContent.length === 0) continue;
+        msg.content = cleanedContent;
+      }
+    }
+
+    filteredMessages.push(msg);
+  }
+
+  if (!changed) return body;
+  body.messages = filteredMessages;
+  return body;
+}

@@ -1,0 +1,849 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { SignJWT } from "jose";
+import { NextRequest } from "next/server";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omr-authz-pipeline-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-secret";
+
+const core = await import("../../../src/lib/db/core.ts");
+const apiKeysDb = await import("../../../src/lib/db/apiKeys.ts");
+const settingsDb = await import("../../../src/lib/db/settings.ts");
+const pipeline = await import("../../../src/server/authz/pipeline.ts");
+const csrf = await import("../../../src/server/authz/csrf.ts");
+const dashboardCsrfConstants = await import("../../../src/shared/constants/dashboardCsrf.ts");
+
+const ORIGINAL_JWT = process.env.JWT_SECRET;
+const ORIGINAL_INITIAL = process.env.INITIAL_PASSWORD;
+const ORIGINAL_AUTH_COOKIE_SECURE = process.env.AUTH_COOKIE_SECURE;
+const ORIGINAL_REQUIRE_API_KEY = process.env.REQUIRE_API_KEY;
+const ORIGINAL_OMNIROUTE_PUBLIC_BASE_URL = process.env.OMNIROUTE_PUBLIC_BASE_URL;
+const ORIGINAL_NEXT_PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const ORIGINAL_NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+const ORIGINAL_OMNIROUTE_TRUST_PROXY = process.env.OMNIROUTE_TRUST_PROXY;
+const ORIGINAL_OMNIROUTE_PEER_STAMP_TOKEN = process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+
+function resetEnvironment() {
+  core.resetDbInstance();
+  apiKeysDb.resetApiKeyState();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+  process.env.JWT_SECRET = "pipeline-jwt-secret";
+  process.env.INITIAL_PASSWORD = "pipeline-initial-password";
+  process.env.REQUIRE_API_KEY = "true";
+  delete process.env.AUTH_COOKIE_SECURE;
+  delete process.env.OMNIROUTE_PUBLIC_BASE_URL;
+  delete process.env.NEXT_PUBLIC_BASE_URL;
+  delete process.env.NEXT_PUBLIC_APP_URL;
+  delete process.env.OMNIROUTE_TRUST_PROXY;
+  delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  globalThis.__omnirouteShutdown = { init: false, shuttingDown: false, activeRequests: 0 };
+}
+
+async function forceAuthRequired() {
+  await settingsDb.updateSettings({ requireLogin: true });
+}
+
+async function dashboardCookie(expiresIn = "1h"): Promise<string> {
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const token = await new SignJWT({ authenticated: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(expiresIn)
+    .sign(secret);
+  return `auth_token=${token}`;
+}
+
+function request(url: string, init?: RequestInit): NextRequest {
+  return new NextRequest(url, init);
+}
+
+test.beforeEach(() => {
+  resetEnvironment();
+});
+
+test.after(() => {
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (ORIGINAL_JWT === undefined) delete process.env.JWT_SECRET;
+  else process.env.JWT_SECRET = ORIGINAL_JWT;
+  if (ORIGINAL_INITIAL === undefined) delete process.env.INITIAL_PASSWORD;
+  else process.env.INITIAL_PASSWORD = ORIGINAL_INITIAL;
+  if (ORIGINAL_AUTH_COOKIE_SECURE === undefined) delete process.env.AUTH_COOKIE_SECURE;
+  else process.env.AUTH_COOKIE_SECURE = ORIGINAL_AUTH_COOKIE_SECURE;
+  if (ORIGINAL_REQUIRE_API_KEY === undefined) delete process.env.REQUIRE_API_KEY;
+  else process.env.REQUIRE_API_KEY = ORIGINAL_REQUIRE_API_KEY;
+  if (ORIGINAL_OMNIROUTE_PUBLIC_BASE_URL === undefined)
+    delete process.env.OMNIROUTE_PUBLIC_BASE_URL;
+  else process.env.OMNIROUTE_PUBLIC_BASE_URL = ORIGINAL_OMNIROUTE_PUBLIC_BASE_URL;
+  if (ORIGINAL_NEXT_PUBLIC_BASE_URL === undefined) delete process.env.NEXT_PUBLIC_BASE_URL;
+  else process.env.NEXT_PUBLIC_BASE_URL = ORIGINAL_NEXT_PUBLIC_BASE_URL;
+  if (ORIGINAL_NEXT_PUBLIC_APP_URL === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+  else process.env.NEXT_PUBLIC_APP_URL = ORIGINAL_NEXT_PUBLIC_APP_URL;
+  if (ORIGINAL_OMNIROUTE_TRUST_PROXY === undefined) delete process.env.OMNIROUTE_TRUST_PROXY;
+  else process.env.OMNIROUTE_TRUST_PROXY = ORIGINAL_OMNIROUTE_TRUST_PROXY;
+  if (ORIGINAL_OMNIROUTE_PEER_STAMP_TOKEN === undefined) {
+    delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  } else {
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN = ORIGINAL_OMNIROUTE_PEER_STAMP_TOKEN;
+  }
+  globalThis.__omnirouteShutdown = { init: false, shuttingDown: false, activeRequests: 0 };
+});
+
+test("runAuthzPipeline redirects root to dashboard before management auth", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/"), { enforce: true });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/dashboard");
+});
+
+test("runAuthzPipeline forwards zed-hosted native-app callback from root to /callback preserving the query string (#13140)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/?user_id=abc123&access_token=tok-xyz"),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 307);
+  assert.equal(
+    response.headers.get("location"),
+    "http://localhost/callback?user_id=abc123&access_token=tok-xyz"
+  );
+});
+
+test("runAuthzPipeline still redirects root to dashboard when only one native-app callback param is present (#13140)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/?user_id=abc123"), {
+    enforce: true,
+  });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/dashboard");
+});
+
+test("runAuthzPipeline redirects unauthenticated dashboard pages to login", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/dashboard"), {
+    enforce: true,
+  });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/login");
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+  assert.ok(response.headers.get("x-request-id"));
+});
+
+test("runAuthzPipeline redirects unauthenticated /home to login (#2712)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/home"), {
+    enforce: true,
+  });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/login");
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+});
+
+test("runAuthzPipeline redirects unauthenticated /home/* nested paths to login (#2712)", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/home/settings"), {
+    enforce: true,
+  });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/login");
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+});
+
+// PR #1810 (upstream 9router): reverse-proxy subpath deployment via
+// OMNIROUTE_BASE_PATH. Next.js strips the basePath from nextUrl.pathname
+// before route classification, so the redirect targets must re-add it via
+// request.nextUrl.basePath to stay inside the deployed subpath.
+test("runAuthzPipeline prefixes the root-to-dashboard redirect with basePath when set", async () => {
+  await forceAuthRequired();
+
+  const req = new NextRequest("http://localhost/omniroute/", {
+    nextConfig: { basePath: "/omniroute" },
+  });
+
+  const response = await pipeline.runAuthzPipeline(req, { enforce: true });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/omniroute/dashboard");
+});
+
+test("runAuthzPipeline prefixes the dashboard login redirect with basePath when set", async () => {
+  await forceAuthRequired();
+
+  const req = new NextRequest("http://localhost/omniroute/dashboard", {
+    nextConfig: { basePath: "/omniroute" },
+  });
+
+  const response = await pipeline.runAuthzPipeline(req, { enforce: true });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/omniroute/login");
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+});
+
+test("runAuthzPipeline leaves redirect targets unprefixed when basePath is empty", async () => {
+  await forceAuthRequired();
+
+  const req = new NextRequest("http://localhost/dashboard", {
+    nextConfig: { basePath: "" },
+  });
+
+  const response = await pipeline.runAuthzPipeline(req, { enforce: true });
+
+  assert.equal(response.status, 307);
+  assert.equal(response.headers.get("location"), "http://localhost/login");
+});
+
+test("runAuthzPipeline allows onboarding when login is required but no password exists", async () => {
+  delete process.env.INITIAL_PASSWORD;
+  await settingsDb.updateSettings({
+    requireLogin: true,
+    setupComplete: true,
+    password: "",
+  });
+
+  const response = await pipeline.runAuthzPipeline(
+    request("https://example.com/dashboard/onboarding"),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "PUBLIC");
+});
+
+test("runAuthzPipeline allows first password writes when login is required but no password exists — from the stamped loopback peer only (GHSA-7pq4-8pvv-rx7r)", async () => {
+  delete process.env.INITIAL_PASSWORD;
+  await settingsDb.updateSettings({
+    requireLogin: true,
+    setupComplete: true,
+    password: "",
+  });
+
+  // The local operator (real TCP peer 127.0.0.1, stamped by the custom server)
+  // keeps the first-password flow, whatever hostname they typed.
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
+  const local = await pipeline.runAuthzPipeline(
+    request("https://example.com/api/settings/require-login", {
+      method: "POST",
+      headers: {
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|127.0.0.1",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|0",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(local.status, 200);
+  assert.equal(local.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+
+  // A remote peer — even one spelling the URL as localhost and forging the
+  // pipeline's own locality verdict header — must not reach the anonymous write
+  // that flips requireLogin=false (the first link of the JWT_SECRET chain).
+  const spoofed = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/settings/require-login", {
+      method: "POST",
+      headers: {
+        host: "localhost",
+        "x-omniroute-peer-locality": "loopback",
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|203.0.113.9",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|0",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(spoofed.status, 401);
+  assert.equal((await spoofed.json()).error.code, "AUTH_001");
+
+  // No stamp at all (nothing trustworthy about the peer) → fail closed.
+  delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  const unstamped = await pipeline.runAuthzPipeline(
+    request("https://example.com/api/settings/require-login", { method: "POST" }),
+    { enforce: true }
+  );
+  assert.equal(unstamped.status, 401);
+});
+
+test("runAuthzPipeline keeps management API rejections as JSON", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/api/keys"), {
+    enforce: true,
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("content-type")?.includes("application/json"), true);
+  assert.equal(body.error.code, "AUTH_001");
+});
+
+test("runAuthzPipeline rejects oversized API bodies before auth", async () => {
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "content-length": String(99 * 1024 * 1024),
+        origin: "https://app.example.com",
+      },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 413);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.ok(response.headers.get("x-request-id"));
+  assert.equal(
+    response.headers.get("Access-Control-Allow-Methods"),
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+});
+
+test("runAuthzPipeline rejects oversized rewritten alias API bodies before auth", async () => {
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "content-length": String(99 * 1024 * 1024),
+        origin: "https://app.example.com",
+      },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 413);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.ok(response.headers.get("x-request-id"));
+});
+
+test("runAuthzPipeline rejects unauthenticated v1beta Gemini aliases as client API", async () => {
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1beta/models/gemini-pro:generateContent", {
+      method: "POST",
+    }),
+    { enforce: true }
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(body.error.code, "AUTH_002");
+});
+
+test("runAuthzPipeline rejects unauthenticated internal api v1beta routes as client API", async () => {
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/v1beta/models/gemini-pro:generateContent", {
+      method: "POST",
+    }),
+    { enforce: true }
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(body.error.code, "AUTH_002");
+});
+
+test("runAuthzPipeline rejects new API requests during shutdown drain", async () => {
+  globalThis.__omnirouteShutdown = { init: true, shuttingDown: true, activeRequests: 0 };
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/api/v1/models"), {
+    enforce: true,
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.equal(body.error.code, "SERVICE_UNAVAILABLE");
+  assert.equal(response.headers.get("retry-after"), "5");
+});
+
+test("runAuthzPipeline rejects rewritten API aliases during shutdown drain", async () => {
+  globalThis.__omnirouteShutdown = { init: true, shuttingDown: true, activeRequests: 0 };
+
+  const response = await pipeline.runAuthzPipeline(request("http://localhost/responses"), {
+    enforce: true,
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(body.error.code, "SERVICE_UNAVAILABLE");
+  assert.equal(response.headers.get("retry-after"), "5");
+});
+
+test("runAuthzPipeline allows dashboard sessions to read model catalog aliases", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { cookie: await dashboardCookie() },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+});
+
+test("runAuthzPipeline gates the DB health API on loopback, not on the session alone", async () => {
+  await forceAuthRequired();
+
+  // #13717 moved /api/db/health to Tier 1 LOCAL_ONLY: runManagedDbHealthCheck()
+  // forks native diagnostics into a child process (Hard Rules #15 + #17), and the
+  // route is NOT in LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES. So a dashboard session
+  // is no longer sufficient by itself — an unstamped peer fails closed, whatever the
+  // URL says, because requestPeerAddress() never reads the spoofable Host header.
+  const unstamped = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/db/health", {
+      headers: { cookie: await dashboardCookie() },
+    }),
+    { enforce: true }
+  );
+  assert.equal(unstamped.status, 403);
+
+  // The local operator — real TCP peer 127.0.0.1, stamped by the custom server —
+  // still reaches it with their session.
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
+  const loopback = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/db/health", {
+      headers: {
+        cookie: await dashboardCookie(),
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|127.0.0.1",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|0",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(loopback.status, 200);
+  assert.equal(loopback.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+});
+
+test("runAuthzPipeline accepts dashboard mutations from configured public origin", async () => {
+  await forceAuthRequired();
+  process.env.NEXT_PUBLIC_BASE_URL = "https://gateway.example.test";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://omniroute:20128/api/providers/health-autopilot/actions", {
+      method: "POST",
+      headers: {
+        cookie: await dashboardCookie(),
+        origin: "https://gateway.example.test",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+});
+
+test("runAuthzPipeline rejects dashboard mutations from dynamic public origins without CSRF", async () => {
+  await forceAuthRequired();
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://127.0.0.1:20128/api/settings", {
+      method: "PATCH",
+      headers: {
+        cookie: await dashboardCookie(),
+        host: "127.0.0.1:20128",
+        origin: "https://random-tunnel.example.test",
+        "content-type": "application/json",
+        "sec-fetch-site": "same-origin",
+      },
+      body: "{}",
+    }),
+    { enforce: true }
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 403);
+  assert.equal(body.error.code, "INVALID_ORIGIN");
+});
+
+test("runAuthzPipeline accepts dashboard mutations from dynamic public origins with CSRF", async () => {
+  await forceAuthRequired();
+
+  const cookie = await dashboardCookie();
+  const issued = csrf.issueDashboardCsrfToken(
+    request("http://127.0.0.1:20128/api/auth/csrf", {
+      headers: { cookie },
+    })
+  );
+  assert.ok(issued);
+
+  for (const [method, path] of [
+    ["POST", "/api/models/test"],
+    ["POST", "/api/keys"],
+    ["PATCH", "/api/settings"],
+    ["PUT", "/api/combos/combo-1"],
+    ["DELETE", "/api/webhooks/webhook-1"],
+  ] as const) {
+    const response = await pipeline.runAuthzPipeline(
+      request(`http://127.0.0.1:20128${path}`, {
+        method,
+        headers: {
+          cookie,
+          host: "127.0.0.1:20128",
+          origin: "https://random-tunnel.example.test",
+          "content-type": "application/json",
+          [dashboardCsrfConstants.DASHBOARD_CSRF_HEADER]: issued.token,
+          "sec-fetch-site": "same-origin",
+        },
+        body: "{}",
+      }),
+      { enforce: true }
+    );
+
+    assert.equal(response.status, 200, path);
+    assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+  }
+});
+
+test("runAuthzPipeline does not let CSRF bypass cross-site fetch metadata", async () => {
+  await forceAuthRequired();
+
+  const cookie = await dashboardCookie();
+  const issued = csrf.issueDashboardCsrfToken(
+    request("http://127.0.0.1:20128/api/auth/csrf", {
+      headers: { cookie },
+    })
+  );
+  assert.ok(issued);
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://127.0.0.1:20128/api/settings", {
+      method: "PATCH",
+      headers: {
+        cookie,
+        host: "127.0.0.1:20128",
+        origin: "https://random-tunnel.example.test",
+        "content-type": "application/json",
+        [dashboardCsrfConstants.DASHBOARD_CSRF_HEADER]: issued.token,
+        "sec-fetch-site": "cross-site",
+      },
+      body: "{}",
+    }),
+    { enforce: true }
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 403);
+  assert.equal(body.error.code, "INVALID_ORIGIN");
+});
+
+test("runAuthzPipeline rejects dashboard mutations from invalid browser origin", async () => {
+  await forceAuthRequired();
+  process.env.NEXT_PUBLIC_BASE_URL = "https://gateway.example.test";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://omniroute:20128/api/providers/health-autopilot/actions", {
+      method: "POST",
+      headers: {
+        cookie: await dashboardCookie(),
+        origin: "https://evil.example",
+        "content-type": "application/json",
+      },
+      body: "{}",
+    }),
+    { enforce: true }
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 403);
+  assert.equal(body.error.code, "INVALID_ORIGIN");
+  assert.match(body.error.message, /^Invalid request origin\./);
+  assert.match(body.error.message, /OMNIROUTE_PUBLIC_BASE_URL/);
+});
+
+test("runAuthzPipeline answers OPTIONS /v1/models preflight with Allow-Origin (#5242)", async () => {
+  // Literal Wayland AI / Electron repro: browser preflight with an Origin and
+  // no CORS_ALLOW_ALL must still receive Access-Control-Allow-Origin so the
+  // renderer is allowed to read the catalog response.
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      method: "OPTIONS",
+      headers: { origin: "http://localhost" },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "http://localhost");
+  assert.match(response.headers.get("Vary") || "", /Origin/);
+  // Token-auth surface — must NOT advertise credentials with the echoed origin.
+  assert.equal(response.headers.get("Access-Control-Allow-Credentials"), null);
+});
+
+test("runAuthzPipeline serves GET /v1/models with Allow-Origin to dashboard session (#5242)", async () => {
+  await forceAuthRequired();
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { cookie: await dashboardCookie(), origin: "http://localhost" },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "http://localhost");
+  assert.equal(response.headers.get("Access-Control-Allow-Credentials"), null);
+});
+
+test("runAuthzPipeline keeps MANAGEMENT OPTIONS fail-closed for arbitrary origin (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/api/keys", {
+      method: "OPTIONS",
+      headers: { origin: "http://localhost" },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get("x-omniroute-route-class"), "MANAGEMENT");
+  // Management surface is cookie-authed → no permissive origin echo.
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+test("runAuthzPipeline refreshes dashboard JWTs near expiry", async () => {
+  await forceAuthRequired();
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const expiringToken = await new SignJWT({ authenticated: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/dashboard", {
+      headers: { cookie: `auth_token=${expiringToken}` },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("set-cookie") || "", /auth_token=/);
+});
+
+test("runAuthzPipeline clears stale dashboard JWTs without error-stack noise", async () => {
+  await forceAuthRequired();
+  const oldSecret = new TextEncoder().encode("old-dashboard-jwt-secret");
+  const staleToken = await new SignJWT({ authenticated: true })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(oldSecret);
+
+  const errorCalls: unknown[][] = [];
+  const originalError = console.error;
+  const originalWarn = console.warn;
+  console.error = (...args: unknown[]) => {
+    errorCalls.push(args);
+  };
+  console.warn = () => {};
+
+  try {
+    const response = await pipeline.runAuthzPipeline(
+      request("http://localhost/dashboard", {
+        headers: { cookie: `auth_token=${staleToken}` },
+      }),
+      { enforce: true }
+    );
+
+    assert.equal(response.status, 307);
+    const setCookie = response.headers.get("set-cookie") || "";
+    assert.match(setCookie, /auth_token=/);
+    assert.match(setCookie, /Max-Age=0|Expires=/i);
+    assert.equal(errorCalls.length, 0);
+  } finally {
+    console.error = originalError;
+    console.warn = originalWarn;
+  }
+});
+
+test("runAuthzPipeline throttles the stale-dashboard-cookie warning to once per process, not once per request (#13684 LEDGER-12)", async () => {
+  // Auth itself must succeed on every request so refreshDashboardSessionIfNeeded runs
+  // (it only fires for a MANAGEMENT dashboard route the auth gate already allowed) —
+  // requireLogin=false makes /dashboard anonymously allowed (it is not always-protected),
+  // independent of the foreign cookie below. getSettings() force-sets requireLogin back
+  // to true on first read whenever INITIAL_PASSWORD is set and setup isn't complete yet
+  // (the headless-deploy auto-onboarding branch), so INITIAL_PASSWORD must be unset for
+  // this explicit override to stick.
+  const originalInitialPassword = process.env.INITIAL_PASSWORD;
+  delete process.env.INITIAL_PASSWORD;
+  await settingsDb.updateSettings({ requireLogin: false });
+
+  // A foreign token: signed with the SAME secret the dashboard uses (so it is not
+  // an "invalid signature" case), but missing the `authenticated: true` claim — the
+  // shape of the Cursor CLI passthrough token from #13298. `verifyDashboardSessionToken`
+  // treats this as "not a session" (returns null) on every call, which is exactly the
+  // steady-state condition (e.g. a background dashboard tab with a foreign cookie)
+  // that must not flood the log once per request.
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const foreignToken = await new SignJWT({ iss: "omniroute", aud: "cursor-cli" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(secret);
+
+  const warnCalls: unknown[][] = [];
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    warnCalls.push(args);
+  };
+
+  try {
+    for (let i = 0; i < 3; i++) {
+      const response = await pipeline.runAuthzPipeline(
+        request("http://localhost/dashboard", {
+          headers: { cookie: `auth_token=${foreignToken}` },
+        }),
+        { enforce: true }
+      );
+      assert.equal(response.status, 200);
+    }
+
+    const staleCookieWarnings = warnCalls.filter((args) =>
+      String(args[0]).includes("Dropped stale dashboard session cookie")
+    );
+    assert.equal(
+      staleCookieWarnings.length,
+      1,
+      `expected the stale-cookie warning to fire once across 3 requests, got ${staleCookieWarnings.length}`
+    );
+  } finally {
+    console.warn = originalWarn;
+    if (originalInitialPassword === undefined) delete process.env.INITIAL_PASSWORD;
+    else process.env.INITIAL_PASSWORD = originalInitialPassword;
+  }
+});
+
+test("authenticated remote dashboard page is not a login redirect that clears the session", async () => {
+  await forceAuthRequired();
+  process.env.OMNIROUTE_PEER_STAMP_TOKEN = "pipeline-test-peer-stamp-token";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://gateway.example.test/dashboard/resilience/connections", {
+      headers: {
+        cookie: await dashboardCookie(),
+        "x-omniroute-peer-ip": "pipeline-test-peer-stamp-token|203.0.113.8",
+        "x-omniroute-via-proxy": "pipeline-test-peer-stamp-token|1",
+      },
+    }),
+    { enforce: true }
+  );
+
+  assert.equal(response.status, 200);
+  const setCookie = response.headers.get("set-cookie") || "";
+  assert.doesNotMatch(setCookie, /Max-Age=0|Expires=Thu, 01 Jan 1970/i);
+  assert.equal(response.headers.get("location"), null);
+});
+
+test("runAuthzPipeline does not echo Origin for an unvalidated credential on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const junkHeaders: Record<string, string>[] = [
+    { authorization: "Bearer junk" },
+    { "x-api-key": "junk" },
+    { authorization: "Basic Zm9vOmJhcg==" },
+  ];
+  for (const headers of junkHeaders) {
+    const response = await pipeline.runAuthzPipeline(
+      request("http://localhost/v1/models", {
+        headers: { ...headers, origin: "https://evil.example" },
+      }),
+      { enforce: true }
+    );
+    assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+    // Still served anonymously (#2257), but cross-origin pages must not read it.
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  }
+});
+
+test("runAuthzPipeline still echoes Origin for a valid API key on a keyless install (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+  const created = await apiKeysDb.createApiKey("cors-valid", "0123456789abcdef");
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: `Bearer ${created.key}`, origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps a CLIENT_API auth rejection readable for browser clients (#5242)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "true";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://app.example" },
+    }),
+    { enforce: true }
+  );
+  // A fixed 401 envelope carries no data; echoing lets the client show "invalid key".
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline still answers a CLIENT_API CORS preflight on a keyless install", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/chat/completions", {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://app.example",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "authorization,content-type",
+      },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), "https://app.example");
+});
+
+test("runAuthzPipeline keeps Vary: Accept-Encoding on an anonymous CLIENT_API response (#6737)", async () => {
+  delete process.env.CORS_ALLOW_ALL;
+  delete process.env.CORS_ALLOWED_ORIGINS;
+  process.env.REQUIRE_API_KEY = "false";
+
+  const response = await pipeline.runAuthzPipeline(
+    request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk", origin: "https://evil.example" },
+    }),
+    { enforce: true }
+  );
+  assert.equal(response.headers.get("x-omniroute-route-class"), "CLIENT_API");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+  assert.match(response.headers.get("Vary") || "", /Accept-Encoding/);
+});

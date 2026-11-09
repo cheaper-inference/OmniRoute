@@ -1,0 +1,187 @@
+import type { RegistryEntry } from "../../shared.ts";
+
+export const clineProvider: RegistryEntry = {
+  id: "cline",
+  alias: "cl",
+  // #DUAL-AUTH: cline is OAuth-primary (WorkOS auth-code) but also accepts
+  // a direct Bearer API key from app.cline.bot. Both paths reuse this
+  // baseUrl + authPrefix. Direct API keys are stored as authType:"apikey"
+  // and rotated automatically. See DUAL_AUTH_PROVIDER_IDS in providers.ts.
+  format: "openai",
+  executor: "default",
+  // Cline's API only implements streaming (streamText). A non-streaming request
+  // returns "generateText is not implemented" / an empty body, so force upstream
+  // streaming and let chatCore convert the SSE back to JSON for stream:false
+  // clients (e.g. the model-test button, non-streaming API callers).
+  forceStream: true,
+  baseUrl: "https://api.cline.bot/api/v1/chat/completions",
+  authType: "oauth",
+  authHeader: "Authorization",
+  authPrefix: "Bearer ",
+  oauth: {
+    tokenUrl: "https://api.cline.bot/api/v1/auth/token",
+    refreshUrl: "https://api.cline.bot/api/v1/auth/refresh",
+    authUrl: "https://api.cline.bot/api/v1/auth/authorize",
+  },
+  extraHeaders: {
+    "HTTP-Referer": "https://cline.bot",
+    "X-Title": "Cline",
+  },
+  // Offline curated catalog: server-authored recommendations first, followed by
+  // the official free bucket and text-output models advertised as zero-cost.
+  models: [
+    {
+      id: "z-ai/glm-5.2",
+      name: "GLM 5.2",
+      toolCalling: true,
+      supportsReasoning: true,
+      contextLength: 1040000,
+      maxInputTokens: 1040000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "x-ai/grok-4.5",
+      name: "Grok 4.5",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 500000,
+      maxInputTokens: 500000,
+      maxOutputTokens: 500000,
+    },
+    {
+      id: "openai/gpt-5.6-sol",
+      name: "GPT-5.6 Sol",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 1050000,
+      maxInputTokens: 922000,
+      maxOutputTokens: 128000,
+    },
+    {
+      id: "moonshotai/kimi-k3",
+      name: "Kimi K3",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 1048576,
+      maxInputTokens: 1048576,
+      maxOutputTokens: 1048576,
+    },
+    {
+      id: "anthropic/claude-opus-4.8",
+      name: "Claude Opus 4.8",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 1000000,
+      maxInputTokens: 1000000,
+      maxOutputTokens: 128000,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+    },
+    // Cline's official free bucket (recommended-models -> free[]). These ids are a
+    // different namespace from the paid vendor ids (e.g. deepseek/deepseek-v4.1-flash
+    // bills Cline Credits and answers 402 at $0). The bucket rotates upstream.
+    {
+      id: "cline-free/deepseek-v4.1-flash",
+      name: "DeepSeek V4.1 Flash (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "cline-free/mimo-v2.6-flash",
+      name: "MiMo V2.6 Flash (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "cline-free/muse-spark-1.3-contributor",
+      name: "Muse Spark 1.3 Contributor (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "stealth/space-bunny-alpha",
+      name: "Space Bunny Alpha (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "openrouter/free",
+      name: "Free Models Router",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 200000,
+      maxInputTokens: 200000,
+    },
+    {
+      id: "deepseek/deepseek-v4-flash",
+      name: "DeepSeek V4 Flash",
+      toolCalling: true,
+      supportsReasoning: true,
+      contextLength: 1048576,
+      maxInputTokens: 1048576,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "tencent/hy3:free",
+      name: "Tencent Hy3 (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+      contextLength: 262144,
+      maxInputTokens: 262144,
+      maxOutputTokens: 262144,
+    },
+    {
+      id: "stepfun/step-3.7-flash",
+      name: "Step 3.7 Flash",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 256000,
+      maxInputTokens: 256000,
+      maxOutputTokens: 256000,
+    },
+    {
+      id: "poolside/laguna-m.1:free",
+      name: "Laguna M.1 (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+      contextLength: 262144,
+      maxInputTokens: 262144,
+      maxOutputTokens: 32768,
+    },
+    {
+      id: "google/gemma-4-31b-it:free",
+      name: "Gemma 4 31B (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 262144,
+      maxInputTokens: 262144,
+      maxOutputTokens: 32768,
+    },
+    {
+      id: "nvidia/nemotron-3-ultra-550b-a55b:free",
+      name: "Nemotron 3 Ultra (Free)",
+      toolCalling: true,
+      supportsReasoning: true,
+      contextLength: 1000000,
+      maxInputTokens: 1000000,
+      maxOutputTokens: 65536,
+    },
+    {
+      id: "minimax/minimax-m3",
+      name: "MiniMax M3",
+      toolCalling: true,
+      supportsReasoning: true,
+      supportsVision: true,
+      contextLength: 1048576,
+      maxInputTokens: 1048576,
+      maxOutputTokens: 65536,
+    },
+  ],
+  passthroughModels: true,
+};

@@ -1,0 +1,159 @@
+{
+  "language": "pt-BR",
+  "category": "filler",
+  "rules": [
+    {
+      "name": "pt_polite_framing",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:por favor|por gentileza|poderia|voce pode|você pode|eu gostaria que|preciso que)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Formal request framing — unnecessary in direct communication",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_pleasantries",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:ola|olá|oi|bom dia|boa tarde|boa noite|obrigado|obrigada|valeu|tchau|até mais)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Greetings and farewells — zero information content",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_amenities",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:claro|com certeza|fico feliz em ajudar|seria um prazer|sem problemas|fique à vontade|fique a vontade|não se preocupe|nao se preocupe)(?![\\p{L}\\p{N}_])[!,.\\s]*",
+      "replacement": "",
+      "context": "assistant",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Assistant amenities that add no technical value",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_hedging",
+      "pattern": "\\b(?:eu acho que|eu acredito que|parece que|talvez|provavelmente|possivelmente|aparentemente)\\b\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Uncertainty hedging — if uncertain, state the fact directly"
+    },
+    {
+      "name": "pt_hesitations",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:talvez valha a pena|seria interessante considerar|pode ser que|não sei se|a depender do caso)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Extended hesitation phrases common in PT-BR technical writing",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_filler_adverbs",
+      "pattern": "\\b(?:basicamente|essencialmente|na verdade|literalmente|simplesmente|atualmente|obviamente|claramente|naturalmente|certamente|definitivamente)\\b\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Filler adverbs — 'muletas' that pad without adding meaning"
+    },
+    {
+      "name": "pt_emphasis_fillers",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:vale ressaltar|vale mencionar|vale notar|vale lembrar|é importante notar que|é importante mencionar que|convém destacar que)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Emphasis markers — if it's worth noting, just note it",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_self_reference",
+      "pattern": "^(?:eu estou tentando|estou tentando|eu quero|eu preciso|gostaria de|estou precisando)\\b\\s*",
+      "replacement": "",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "User self-reference at start of sentence"
+    },
+    {
+      "name": "pt_verbose_request",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:voce poderia me explicar|você poderia me explicar|poderia detalhar|gostaria que voce explicasse|gostaria que você explicasse|me explica)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "Explique ",
+      "context": "user",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Verbose request phrasing → direct imperative",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_qualifiers",
+      "pattern": "\\b(?:um pouco|meio que|tipo assim|de certa forma|mais ou menos|de alguma forma|de alguma maneira)\\b\\s*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Vague qualifiers that weaken statements"
+    },
+    {
+      "name": "pt_softeners",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:se possivel|se possível|quando puder|sem pressa|so queria|só queria|se não for incomodo|se não for incômodo)(?![\\p{L}\\p{N}_])[,.!?\\s]*",
+      "replacement": "",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Request softeners — unnecessary in AI interaction",
+      "flags": "giu"
+    },
+    {
+      "name": "pt_redundancies",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:subir pra cima|descer pra baixo|voltar atrás|a razão é porque|o motivo é porque|entrar pra dentro|sair pra fora)(?![\\p{L}\\p{N}_])",
+      "replacement": "",
+      "replacementMap": {
+        "subir pra cima": "subir",
+        "descer pra baixo": "descer",
+        "voltar atrás": "voltar",
+        "a razão é porque": "porque",
+        "o motivo é porque": "porque",
+        "entrar pra dentro": "entrar",
+        "sair pra fora": "sair"
+      },
+      "flags": "giu",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "lite",
+      "description": "Pleonasms — redundant phrases native to PT-BR speech"
+    },
+    {
+      "name": "pt_linking_verbs",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:está sendo|foi feito|tem que ser|precisa ser|deve ser feito|foi realizado)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "replacementMap": {
+        "está sendo": "é",
+        "foi feito": "",
+        "tem que ser": "deve",
+        "precisa ser": "deve",
+        "deve ser feito": "fazer",
+        "foi realizado": ""
+      },
+      "flags": "giu",
+      "context": "all",
+      "category": "filler",
+      "minIntensity": "full",
+      "description": "Verbose linking verb constructions → compact form"
+    },
+    {
+      "name": "pt_explanation_padding",
+      "pattern": "(?<![\\p{L}\\p{N}_])(?:o que acontece é que|o que está acontecendo é que|o problema é que|a questão é que|o ponto é que)(?![\\p{L}\\p{N}_])\\s*",
+      "replacement": "",
+      "context": "assistant",
+      "category": "filler",
+      "minIntensity": "full",
+      "description": "Explanation padding before the actual content",
+      "flags": "giu"
+    }
+  ]
+}

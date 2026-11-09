@@ -1,0 +1,508 @@
+"use client";
+
+import Icon from "@/shared/components/Icon";
+
+import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import { Badge, Button, Input, Modal, Select, Toggle } from "@/shared/components";
+import { readFetchErrorMessage } from "@/shared/utils/fetchError";
+import { isValidProviderIconUrl } from "@/shared/validation/iconUrl";
+import {
+  CLIENT_IDENTITY_PROFILE_OPTIONS,
+  getClientIdentityProfileHeaders,
+} from "@/shared/constants/clientIdentityProfiles";
+import NewApiAggregatorFields from "../[id]/components/modals/NewApiAggregatorFields";
+import { providerText } from "../[id]/providerPageHelpers";
+
+type CompatibleMode = "openai" | "anthropic" | "cc";
+type CompatibleProviderNode = { id: string } & Record<string, unknown>;
+
+interface AddCompatibleProviderModalProps {
+  isOpen: boolean;
+  mode: CompatibleMode;
+  title?: string;
+  onClose: () => void;
+  onCreated: (node: CompatibleProviderNode) => void;
+}
+
+interface CompatibleFormState {
+  name: string;
+  prefix: string;
+  providerIdSuffix: string;
+  apiType: string;
+  baseUrl: string;
+  chatPath: string;
+  modelsPath: string;
+  iconUrl: string;
+  clientIdentityProfile: string;
+  newApiAggregatorBalance: boolean;
+  consoleApiKey: string;
+  newApiUserId: string;
+  quotaPerUnit: string;
+}
+
+const CC_DEFAULT_CHAT_PATH = "/v1/messages?beta=true";
+
+const MODE_DEFAULTS: Record<
+  CompatibleMode,
+  {
+    baseUrl: string;
+    type: "openai-compatible" | "anthropic-compatible";
+    compatMode?: "cc";
+    chatPath: string;
+    hasApiType: boolean;
+    hasModelsPath: boolean;
+    hasWarning: boolean;
+  }
+> = {
+  openai: {
+    baseUrl: "https://api.openai.com/v1",
+    type: "openai-compatible",
+    chatPath: "",
+    hasApiType: true,
+    hasModelsPath: true,
+    hasWarning: false,
+  },
+  anthropic: {
+    baseUrl: "https://api.anthropic.com/v1",
+    type: "anthropic-compatible",
+    chatPath: "",
+    hasApiType: false,
+    hasModelsPath: true,
+    hasWarning: false,
+  },
+  cc: {
+    baseUrl: "",
+    type: "anthropic-compatible",
+    compatMode: "cc",
+    chatPath: CC_DEFAULT_CHAT_PATH,
+    hasApiType: false,
+    hasModelsPath: false,
+    hasWarning: true,
+  },
+};
+
+function createInitialForm(mode: CompatibleMode): CompatibleFormState {
+  const defaults = MODE_DEFAULTS[mode];
+  return {
+    name: "",
+    prefix: "",
+    providerIdSuffix: "",
+    apiType: "chat",
+    baseUrl: defaults.baseUrl,
+    chatPath: defaults.chatPath,
+    modelsPath: "",
+    iconUrl: "",
+    clientIdentityProfile: "default",
+    newApiAggregatorBalance: false,
+    consoleApiKey: "",
+    newApiUserId: "",
+    quotaPerUnit: "",
+  };
+}
+
+export default function AddCompatibleProviderModal({
+  isOpen,
+  mode,
+  title,
+  onClose,
+  onCreated,
+}: AddCompatibleProviderModalProps) {
+  const t = useTranslations("providers");
+  const defaults = MODE_DEFAULTS[mode];
+  const [formData, setFormData] = useState<CompatibleFormState>(() => createInitialForm(mode));
+  const [submitting, setSubmitting] = useState(false);
+  const [checkKey, setCheckKey] = useState("");
+  const [checkModelId, setCheckModelId] = useState("");
+  const [validating, setValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<null | {
+    valid: boolean;
+    error?: string | null;
+    method?: string | null;
+  }>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [iconUrlError, setIconUrlError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const apiTypeOptions = useMemo(
+    () => [
+      { value: "chat", label: t("chatCompletions") },
+      { value: "responses", label: t("responsesApi") },
+      { value: "embeddings", label: t("embeddings") },
+      { value: "audio-transcriptions", label: t("audioTranscriptions") },
+      { value: "audio-speech", label: t("audioSpeech") },
+      { value: "images-generations", label: t("imagesGenerations") },
+    ],
+    [t]
+  );
+
+  // Fresh form on every open (and on a mode switch while open) — applied as a
+  // render-phase adjustment guarded by the previously initialized mode
+  // (react.dev "adjusting state when a prop changes") instead of a
+  // synchronous-setState effect. Closing clears the marker so the next open
+  // re-initializes again.
+  const [initializedFor, setInitializedFor] = useState<{ mode: CompatibleMode } | null>(null);
+  if (isOpen) {
+    if (initializedFor?.mode !== mode) {
+      setInitializedFor({ mode });
+      setFormData(createInitialForm(mode));
+      setValidationResult(null);
+      setCheckKey("");
+      setShowAdvanced(false);
+      setSaveError(null);
+      setIconUrlError(null);
+    }
+  } else if (initializedFor !== null) {
+    setInitializedFor(null);
+  }
+
+  const modalTitle =
+    title ||
+    (mode === "openai"
+      ? t("addOpenAICompatible")
+      : mode === "anthropic"
+        ? t("addAnthropicCompatible")
+        : t("addCcCompatible"));
+
+  const namePlaceholder =
+    mode === "cc"
+      ? t("ccCompatibleNamePlaceholder")
+      : t("compatibleProdPlaceholder", {
+          type: mode === "openai" ? t("openai") : t("anthropic"),
+        });
+  const nameHint = mode === "cc" ? t("ccCompatibleNameHint") : t("nameHint");
+  const prefixPlaceholder =
+    mode === "openai"
+      ? t("openaiPrefixPlaceholder")
+      : mode === "cc"
+        ? t("ccCompatiblePrefixPlaceholder")
+        : t("anthropicPrefixPlaceholder");
+  const prefixHint = mode === "cc" ? t("ccCompatiblePrefixHint") : t("prefixHint");
+  const baseUrlPlaceholder =
+    mode === "openai"
+      ? t("openaiBaseUrlPlaceholder")
+      : mode === "cc"
+        ? t("ccCompatibleBaseUrlPlaceholder")
+        : t("anthropicBaseUrlPlaceholder");
+  const baseUrlHint =
+    mode === "cc"
+      ? t("ccCompatibleBaseUrlHint")
+      : t("compatibleBaseUrlHint", {
+          type: mode === "openai" ? t("openai") : t("anthropic"),
+        });
+  const chatPathPlaceholder =
+    mode === "openai" ? "/v1/chat/completions" : mode === "cc" ? CC_DEFAULT_CHAT_PATH : "/messages";
+  const chatPathHint = mode === "cc" ? t("ccCompatibleChatPathHint") : t("chatPathHint");
+  const advancedId = `advanced-settings-${mode}`;
+  const hasRequiredFields = Boolean(
+    formData.name.trim() && formData.prefix.trim() && formData.baseUrl.trim()
+  );
+  const canValidate = Boolean(checkKey.trim() && formData.baseUrl.trim());
+
+  const resetAfterCreate = () => {
+    setFormData(createInitialForm(mode));
+    setCheckKey("");
+    setValidationResult(null);
+    setShowAdvanced(false);
+    setSaveError(null);
+    setIconUrlError(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!hasRequiredFields) return;
+    const iconUrl = formData.iconUrl.trim();
+    if (!isValidProviderIconUrl(iconUrl)) {
+      setIconUrlError(t("iconUrlInvalid"));
+      return;
+    }
+    setIconUrlError(null);
+    setSaveError(null);
+    setSubmitting(true);
+    try {
+      const body: Record<string, unknown> = {
+        name: formData.name,
+        prefix: formData.prefix,
+        baseUrl: formData.baseUrl,
+        type: defaults.type,
+        chatPath: formData.chatPath || (mode === "cc" ? CC_DEFAULT_CHAT_PATH : ""),
+      };
+      if (defaults.hasApiType) body.apiType = formData.apiType;
+      if (defaults.hasModelsPath) body.modelsPath = formData.modelsPath || "";
+      if (defaults.compatMode) body.compatMode = defaults.compatMode;
+      const providerIdSuffix = formData.providerIdSuffix.trim();
+      if (providerIdSuffix) body.providerIdSuffix = providerIdSuffix;
+      body.iconUrl = formData.iconUrl.trim();
+      // Merge the selected identity profile's preset headers into the SAME
+      // `customHeaders` field the node already persists (see
+      // src/lib/db/providers/nodes.ts + open-sse/executors/default.ts
+      // `applyCustomHeaders`) — no separate profile field, no new pipeline.
+      const identityHeaders = getClientIdentityProfileHeaders(formData.clientIdentityProfile);
+      if (Object.keys(identityHeaders).length > 0) body.customHeaders = identityHeaders;
+
+      // Aggregator gateway fields (#9415)
+      if (formData.newApiAggregatorBalance) {
+        body.providerSpecificData = {
+          ...(body.providerSpecificData as Record<string, unknown> | undefined),
+          newApiAggregatorBalance: true,
+        };
+        if (formData.consoleApiKey.trim()) {
+          (body.providerSpecificData as Record<string, unknown>).consoleApiKey =
+            formData.consoleApiKey.trim();
+        }
+        if (formData.newApiUserId.trim()) {
+          (body.providerSpecificData as Record<string, unknown>).newApiUserId =
+            formData.newApiUserId.trim();
+        }
+        const parsedQuotaPerUnit = parseInt(formData.quotaPerUnit, 10);
+        if (Number.isFinite(parsedQuotaPerUnit) && parsedQuotaPerUnit > 0) {
+          (body.providerSpecificData as Record<string, unknown>).quotaPerUnit = parsedQuotaPerUnit;
+        }
+      }
+
+      const res = await fetch("/api/provider-nodes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const failedCreate = providerText(t, "failedCreate", "Failed to create provider");
+      if (!res.ok) {
+        setSaveError(
+          res.status === 409
+            ? t("providerIdConflict")
+            : await readFetchErrorMessage(res, failedCreate)
+        );
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      if (data.node) {
+        onCreated(data.node);
+        resetAfterCreate();
+        return;
+      }
+      setSaveError(failedCreate);
+    } catch {
+      setSaveError(providerText(t, "networkError", "Network error"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleValidate = async () => {
+    setValidating(true);
+    try {
+      const body: Record<string, unknown> = {
+        baseUrl: formData.baseUrl,
+        apiKey: checkKey,
+        type: defaults.type,
+      };
+      if (defaults.hasApiType) body.apiType = formData.apiType;
+      if (defaults.hasModelsPath) body.modelsPath = formData.modelsPath || "";
+      if (defaults.compatMode) {
+        body.compatMode = defaults.compatMode;
+        body.chatPath = formData.chatPath || CC_DEFAULT_CHAT_PATH;
+      }
+      const trimmedModelId = checkModelId.trim();
+      if (trimmedModelId) body.modelId = trimmedModelId;
+
+      const res = await fetch("/api/provider-nodes/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      setValidationResult({
+        valid: !!data.valid,
+        error: data.error ?? null,
+        method: data.method ?? null,
+      });
+    } catch {
+      setValidationResult({
+        valid: false,
+        error: providerText(t, "networkError", "Network error"),
+      });
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} title={modalTitle} onClose={onClose}>
+      <div className="flex flex-col gap-4">
+        {defaults.hasWarning && (
+          <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
+            <div className="flex items-start gap-2">
+              <Icon name="warning" size={18} className="mt-0.5 text-warning" />
+              <p>{t("ccCompatibleValidationHint")}</p>
+            </div>
+          </div>
+        )}
+
+        <Input
+          label={t("nameLabel")}
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder={namePlaceholder}
+          hint={nameHint}
+        />
+        <Input
+          label={t("prefixLabel")}
+          value={formData.prefix}
+          onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
+          placeholder={prefixPlaceholder}
+          hint={prefixHint}
+        />
+        <Input
+          label={t("providerIdSuffixLabel")}
+          value={formData.providerIdSuffix}
+          onChange={(e) => setFormData({ ...formData, providerIdSuffix: e.target.value })}
+          placeholder="team-gateway"
+          hint={t("providerIdSuffixHint")}
+        />
+        {defaults.hasApiType && (
+          <Select
+            label={t("apiTypeLabel")}
+            options={apiTypeOptions}
+            value={formData.apiType}
+            onChange={(e) => setFormData({ ...formData, apiType: e.target.value })}
+          />
+        )}
+        <Input
+          label={t("baseUrlLabel")}
+          value={formData.baseUrl}
+          onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
+          placeholder={baseUrlPlaceholder}
+          hint={baseUrlHint}
+        />
+        <Input
+          label={t("iconUrlLabel")}
+          value={formData.iconUrl}
+          onChange={(e) => setFormData({ ...formData, iconUrl: e.target.value })}
+          placeholder="https://example.com/logo.png"
+          hint={iconUrlError ?? t("iconUrlHint")}
+        />
+
+        <Toggle
+          label={t("newApiAggregatorToggleLabel")}
+          description={t("newApiAggregatorToggleHint")}
+          checked={formData.newApiAggregatorBalance}
+          onChange={(checked: boolean) =>
+            setFormData({ ...formData, newApiAggregatorBalance: checked })
+          }
+        />
+        <NewApiAggregatorFields
+          enabled={formData.newApiAggregatorBalance}
+          values={{
+            consoleApiKey: formData.consoleApiKey,
+            newApiUserId: formData.newApiUserId,
+            quotaPerUnit: formData.quotaPerUnit,
+          }}
+          onChange={(patch) => setFormData({ ...formData, ...patch })}
+          t={t}
+        />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="self-start gap-1 px-1 text-text-muted"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          aria-expanded={showAdvanced}
+          aria-controls={advancedId}
+        >
+          <Icon
+            name="chevron_right"
+            size={14}
+            className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}
+          />
+          {t("advancedSettings")}
+        </Button>
+        {showAdvanced && (
+          <div id={advancedId} className="flex flex-col gap-3 pl-2 border-l-2 border-border">
+            <Input
+              label={t("chatPathLabel")}
+              value={formData.chatPath}
+              onChange={(e) => setFormData({ ...formData, chatPath: e.target.value })}
+              placeholder={chatPathPlaceholder}
+              hint={chatPathHint}
+            />
+            {defaults.hasModelsPath && (
+              <Input
+                label={t("modelsPathLabel")}
+                value={formData.modelsPath}
+                onChange={(e) => setFormData({ ...formData, modelsPath: e.target.value })}
+                placeholder={t("modelsPathPlaceholder")}
+                hint={t("modelsPathHint")}
+              />
+            )}
+            <Select
+              label={t("clientIdentityLabel")}
+              options={CLIENT_IDENTITY_PROFILE_OPTIONS.map((option) => ({ ...option }))}
+              value={formData.clientIdentityProfile}
+              onChange={(e) => setFormData({ ...formData, clientIdentityProfile: e.target.value })}
+              hint={t("clientIdentityHint")}
+            />
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <Input
+            label={t("apiKeyForCheck")}
+            type="password"
+            value={checkKey}
+            onChange={(e) => setCheckKey(e.target.value)}
+            className="flex-1"
+          />
+          <div className="pt-6">
+            <Button
+              onClick={handleValidate}
+              disabled={!canValidate || validating}
+              variant="secondary"
+            >
+              {validating ? t("checking") : t("check")}
+            </Button>
+          </div>
+        </div>
+        <Input
+          label={t("testModelIdLabel")}
+          value={checkModelId}
+          onChange={(e) => setCheckModelId(e.target.value)}
+          placeholder={t("testModelIdPlaceholder")}
+          hint={t("testModelIdHint")}
+        />
+        {validationResult && (
+          <div className="flex flex-col gap-1">
+            <Badge variant={validationResult.valid ? "success" : "error"}>
+              {validationResult.valid ? t("valid") : t("invalid")}
+            </Badge>
+            {validationResult.error && (
+              <span
+                className={`text-sm ${validationResult.valid ? "text-text-muted" : "text-error"}`}
+              >
+                {validationResult.error}
+              </span>
+            )}
+          </div>
+        )}
+
+        {saveError && (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2"
+          >
+            {saveError}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Button onClick={handleSubmit} fullWidth disabled={!hasRequiredFields || submitting}>
+            {submitting ? t("creating") : t("add")}
+          </Button>
+          <Button onClick={onClose} variant="ghost" fullWidth>
+            {t("cancel")}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}

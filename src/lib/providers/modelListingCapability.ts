@@ -1,0 +1,74 @@
+// #5420 — Tool-only providers (web search / web fetch) do not expose a model
+// listing; their "Import Models" button hits the `400 "does not support models
+// listing"` route. The old `-search` suffix heuristic caught `brave-search` but
+// missed tool-only providers whose id has no suffix (e.g. `firecrawl`, declared
+// `serviceKinds: ["webFetch"]`). This pure helper decides, from the provider id
+// plus its resolved serviceKinds, whether to hide model listing — without ever
+// hiding an LLM or media provider that genuinely lists models. Leaf module: it
+// imports nothing, so it cannot create an import cycle with the page.
+
+/** Service kinds that, on their own, mean the provider lists no models. */
+const TOOL_ONLY_SERVICE_KINDS = new Set<string>(["webSearch", "webFetch"]);
+
+/** Providers whose registry catalog is the complete, intentional model list.
+ *
+ * Volcano Ark plan providers (`volcengine-agent-plan` / `volcengine-coding-plan`)
+ * are intentionally NOT curated: their model list is discovered live from the
+ * console API (see volcenginePlanModelDiscovery.ts) and merged into the synced
+ * catalog, so the static registry only acts as a capability-seed fallback. */
+const CURATED_MODEL_ONLY_PROVIDERS = new Set<string>([
+  "kimi-web",
+  "zai-web",
+  // The clean-room browser integration exposes only model/effort routes
+  // observed in the first-party picker. It has no upstream model-list API.
+  "chatgpt-web",
+  // CodeBuddy Intl has no verified live model-catalog endpoint; CN discovers
+  // its authenticated, account-specific roster from /v3/config.
+  "codebuddy-intl",
+]);
+
+export function providerUsesCuratedModelsOnly(providerId: string): boolean {
+  return CURATED_MODEL_ONLY_PROVIDERS.has(providerId.trim().toLowerCase());
+}
+
+/** Custom-model sources written by a model sync/import rather than typed by the operator. */
+const DISCOVERY_IMPORTED_CUSTOM_SOURCES = new Set<string>(["imported", "api-sync", "auto-sync"]);
+
+/**
+ * True for a custom-model row that a discovery sync imported (not one the operator typed).
+ * A curated-only provider keeps operator rows (#18018) but drops these: it has no upstream
+ * catalog, so an imported row can only be a stale leftover of a retired discovery path (#8451).
+ */
+export function isDiscoveryImportedCustomSource(source: unknown): boolean {
+  const normalized = typeof source === "string" ? source.trim().toLowerCase() : "";
+  return DISCOVERY_IMPORTED_CUSTOM_SOURCES.has(normalized);
+}
+
+/**
+ * Providers whose non-empty synced AvailableModels catalog fully replaces the
+ * static registry for dashboard / `/v1/models` / Test All listing. Static rows
+ * remain offline fallback only when synced is empty.
+ *
+ * Cursor, Codex, and CodeBuddy CN inventories are account-specific.
+ * Partial-discovery providers retain coverage-style preservation (e.g.
+ * command-code uncovered static ids).
+ */
+export function providerUsesExclusiveSyncedListing(providerId: string): boolean {
+  const id = providerId.trim().toLowerCase();
+  return id === "cursor" || id === "cu" || id === "codex" || id === "cx" || id === "codebuddy-cn";
+}
+
+/**
+ * True when the provider is tool-only and therefore has no model listing:
+ *  - its id ends in `-search` (legacy search providers), OR
+ *  - it declares at least one serviceKind and EVERY declared kind is a tool-only
+ *    kind (`webSearch` / `webFetch`) — i.e. no `llm` and no media/embedding kind.
+ *
+ * Returns false for an empty `kinds` (most LLM providers declare nothing) and for
+ * any provider that has `llm`/image/video/music/tts/stt/embedding.
+ */
+export function providerLacksModelListing(providerId: string, kinds: readonly string[]): boolean {
+  if (providerId.endsWith("-search")) return true;
+  if (kinds.length === 0) return false;
+  return kinds.every((kind) => TOOL_ONLY_SERVICE_KINDS.has(kind));
+}

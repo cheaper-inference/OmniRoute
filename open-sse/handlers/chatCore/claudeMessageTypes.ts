@@ -1,0 +1,25 @@
+/**
+ * chatCore Claude message shape aliases (Quality Gate v2 / Fase 9 — chatCore god-file decomposition,
+ * #3501).
+ *
+ * Minimal structural aliases shared by the Claude upstream-message transforms (and a handful of
+ * narrowing casts left in handleChatCore). Kept intentionally loose — these mirror the permissive
+ * shapes the handler already used inline; behaviour is unchanged.
+ */
+
+export type ClaudeContentBlock = {
+  type?: string;
+  text?: string;
+  name?: string;
+  tool_use_id?: string;
+  cache_control?: unknown;
+  signature?: string;
+  thinking?: string;
+  [key: string]: unknown;
+};
+
+export type ClaudeMessage = {
+  role?: string;
+  content?: string | ClaudeContentBlock[];
+  [key: string]: unknown;
+};

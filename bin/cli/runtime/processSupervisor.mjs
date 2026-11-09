@@ -1,0 +1,321 @@
+import { spawn } from "node:child_process";
+import { mkdirSync, appendFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  writePidFile,
+  cleanupPidFile,
+  killAllSubprocesses,
+  isPidRunning,
+  clearShutdownIntent,
+  consumeShutdownIntent,
+} from "../utils/pid.mjs";
+import { resolveDataDir } from "../data-dir.mjs";
+import {
+  RESTART_RESET_MS,
+  DEFAULT_MAX_RESTARTS,
+  shouldExitInsteadOfRestart,
+  computeRestartDelayMs,
+  waitUntilPortFree,
+} from "./supervisorPolicy.mjs";
+import { buildNodeRuntimeArgs } from "../../../scripts/build/runtime-env.mjs";
+import { stopProcessGracefully } from "../../../src/shared/platform/windowsProcess.ts";
+import {
+  isFatalInstrumentationHookFailure,
+  formatAndroidInstrumentationFailureHint,
+  isFatalStartupDiagnostic,
+} from "../utils/ensureAndroidCacheDir.mjs";
+
+const CRASH_LOG_LINES = 50;
+
+// #13538: shared path resolver so `omniroute doctor` (bin/cli/commands/doctor.mjs)
+// can surface the same file persistCrashLog() writes, without duplicating the
+// `<DATA_DIR>/server/...` convention from bin/cli/utils/pid.mjs.
+export function getCrashLogPath() {
+  return join(resolveDataDir(), "server", "crash.log");
+}
+
+function persistCrashRecord(summary, lines = []) {
+  try {
+    const crashLogPath = getCrashLogPath();
+    mkdirSync(dirname(crashLogPath), { recursive: true });
+    const timestamp = new Date().toISOString();
+    const body = [`[${timestamp}] ${summary}`, ...lines, ""].join("\n");
+    appendFileSync(crashLogPath, body, "utf8");
+  } catch {
+    // Best-effort only — diagnostic writes must not prevent shutdown.
+  }
+}
+
+const TRAY_FAILURE_PHASES = new Set(["import", "constructor", "install"]);
+const TRAY_FAILURE_CODES = new Set([
+  "ERR_MODULE_NOT_FOUND",
+  "MODULE_NOT_FOUND",
+  "ERR_UNSUPPORTED_DIR_IMPORT",
+  "ERR_DLOPEN_FAILED",
+  "EACCES",
+  "EPERM",
+  "ENOENT",
+]);
+
+// Detached workers discard stderr. Use the same durable record doctor already
+// reads, with fixed categories only: upstream error messages may contain secrets.
+export function persistTrayFailure(phase, error) {
+  let category = "Error";
+  try {
+    const code = error?.code;
+    if (TRAY_FAILURE_CODES.has(code)) category = code;
+    else if (error instanceof TypeError) category = "TypeError";
+    else if (error instanceof SyntaxError) category = "SyntaxError";
+  } catch {
+    // Even hostile error getters must not break an optional tray startup.
+  }
+  const safePhase = TRAY_FAILURE_PHASES.has(phase) ? phase : "startup";
+  persistCrashRecord(`Tray startup failed during ${safePhase} (${category}).`);
+}
+
+const PACKAGE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+// Bun needs the Node-compat polyfill preloaded (#9761). The file ships at the
+// package root via package.json "files" (see scripts/build/pack-artifact-policy.ts)
+// and is never copied into dist/, so the path must resolve against the package
+// root — resolving it next to the server bundle fails with "preload not found" (#11980).
+export const BUN_PRELOAD_PATH = join(PACKAGE_ROOT, "open-sse", "utils", "setupPolyfill.ts");
+
+/**
+ * Argument vector for the server child. Kept pure so tests can assert on it
+ * directly: the bare `import { spawn }` above cannot be intercepted without
+ * --experimental-test-module-mocks (same seam as #8131).
+ */
+export function buildServerSpawnArgs(serverPath, memoryLimit, env = process.env) {
+  return process.versions.bun
+    ? ["--preload", BUN_PRELOAD_PATH, serverPath]
+    : buildNodeRuntimeArgs(env, memoryLimit, serverPath);
+}
+
+export class ServerSupervisor {
+  constructor({
+    serverPath,
+    env,
+    maxRestarts = DEFAULT_MAX_RESTARTS,
+    memoryLimit = 512,
+    onCrashCallback,
+  }) {
+    this.serverPath = serverPath;
+    this.env = env;
+    this.maxRestarts = maxRestarts;
+    this.memoryLimit = memoryLimit;
+    this.lastChildPid = null;
+    this.onCrashCallback = onCrashCallback;
+    this.restartCount = 0;
+    this.startedAt = 0;
+    this.crashLog = [];
+    this.child = null;
+    this.isShuttingDown = false;
+    this.instrumentationFailureHintPrinted = false;
+    this.fatalStartupDiagnosticPrinted = false;
+  }
+
+  start() {
+    this.startedAt = Date.now();
+    this.crashLog = [];
+    this.instrumentationFailureHintPrinted = false;
+    this.fatalStartupDiagnosticPrinted = false;
+
+    const showLog = process.env.OMNIROUTE_SHOW_LOG === "1";
+    // #6321: stdout used to be discarded (`"ignore"`) whenever `--log`/OMNIROUTE_SHOW_LOG
+    // wasn't set (the default) — any debug/pino output written to stdout vanished
+    // silently, so a boot that never becomes ready looked like a dead hang with zero
+    // output even at APP_LOG_LEVEL=debug. Pipe stdout too and buffer it alongside
+    // stderr so a readiness timeout can surface what the child actually printed.
+    // #9156: always spawn via process.execPath (absolute path to the running
+    // runtime — node or bun). Bare "node" is unresolvable under macOS launchd's
+    // minimal PATH; #9761's Bun ternary accidentally regressed the Node branch.
+    // Node args come from buildNodeRuntimeArgs (#9209 IPv4-first DNS + #5238
+    // heap flag handling); the Bun branch keeps #9761's polyfill preload —
+    // Bun does not accept the Node-only flags.
+    this.child = spawn(process.execPath, buildServerSpawnArgs(this.serverPath, this.memoryLimit), {
+      cwd: dirname(this.serverPath),
+      env: this.env,
+      stdio: showLog ? "inherit" : ["ignore", "pipe", "pipe"],
+      // Tray mode has no visible console. Keep the supervised server hidden on Windows,
+      // including when it is restarted after a crash. Without this, each supervised
+      // spawn can create a visible terminal window.
+      windowsHide: true,
+    });
+
+    this.lastChildPid = this.child?.pid ?? null;
+    // #16030: drop any intent marker left by a previous run so only THIS child's
+    // deliberate exit is honored below in handleExit().
+    clearShutdownIntent();
+    writePidFile("server", this.child.pid);
+
+    const bufferOutput = (data) => {
+      const text = data.toString();
+      const lines = text.split("\n").filter(Boolean);
+      this.crashLog.push(...lines);
+      if (this.crashLog.length > CRASH_LOG_LINES) {
+        this.crashLog = this.crashLog.slice(-CRASH_LOG_LINES);
+      }
+      // Surface Android/Termux instrumentation-hook failures even when --log is
+      // off (output is only buffered otherwise).
+      if (!this.instrumentationFailureHintPrinted && isFatalInstrumentationHookFailure(text)) {
+        this.instrumentationFailureHintPrinted = true;
+        process.stderr.write(
+          formatAndroidInstrumentationFailureHint(
+            this.env?.XDG_CACHE_HOME || process.env.XDG_CACHE_HOME
+          )
+        );
+      }
+      // #13314: surface any `[STARTUP] Fatal:`-guarded boot diagnostic
+      // immediately, even without --log — otherwise it is only buffered and
+      // reaches the operator on exit/crash, which never happens when the
+      // HTTP listener still comes up after the fatal failure (every route
+      // then 500s with zero visible diagnostic anywhere).
+      if (!this.fatalStartupDiagnosticPrinted && isFatalStartupDiagnostic(text)) {
+        this.fatalStartupDiagnosticPrinted = true;
+        process.stderr.write(text.endsWith("\n") ? text : `${text}\n`);
+      }
+    };
+
+    if (this.child.stdout) {
+      this.child.stdout.on("data", bufferOutput);
+    }
+    if (this.child.stderr) {
+      this.child.stderr.on("data", bufferOutput);
+    }
+
+    this.child.on("error", (err) => this.handleExit(-1, err));
+    this.child.on("exit", (code) => this.handleExit(code));
+
+    return this.child;
+  }
+
+  handleExit(code, err) {
+    // Node.js v24+ requires process.exit() to receive a number. Spawn-error events
+    // deliver err.code (a string like 'ENOENT') via the 'error' listener; normalise here.
+    const exitCode = typeof code === "number" ? code : null;
+    cleanupPidFile("server");
+
+    // #8091: the child's spawn 'error' listener passes `err` through as a second
+    // argument, but it used to be silently dropped — the user only ever saw the
+    // hardcoded "code=-1" with a permanently empty crash log, with no way to
+    // diagnose why the child never started (ENOENT/EACCES/bad path/etc.). Surface
+    // the real reason immediately, both on the console and in the crash-log buffer
+    // so `dumpCrashLog()` shows it too.
+    if (err) {
+      const detail = [
+        err.code && `code=${err.code}`,
+        err.syscall && `syscall=${err.syscall}`,
+        err.path && `path=${err.path}`,
+        err.message,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      const line = `⚠ Spawn error: ${detail || String(err)}`;
+      console.error(line);
+      this.crashLog.push(line);
+    }
+
+    // #4425: only exit on an intentional shutdown. A spontaneous code-0 exit (e.g. a
+    // systemd MemoryMax cgroup kill, which reports the process exited cleanly) is anomalous
+    // and must be restarted, not treated as a graceful stop that leaves the gateway dead.
+    if (shouldExitInsteadOfRestart(this.isShuttingDown)) {
+      process.exit(exitCode ?? 0);
+      return;
+    }
+
+    // #16030: the child asked to shut down (dashboard Shutdown button) and wrote an
+    // intent marker before exiting — the portable path for platforms where the
+    // child cannot verify the supervisor's identity (macOS has no /proc). Honor it
+    // and exit instead of restarting. Exits without a marker are spontaneous and
+    // still follow the restart budget below.
+    if (consumeShutdownIntent(this.lastChildPid)) {
+      console.error("\nServer requested shutdown. Exiting.");
+      process.exit(exitCode ?? 0);
+      return;
+    }
+
+    const aliveMs = Date.now() - this.startedAt;
+    if (aliveMs >= RESTART_RESET_MS) this.restartCount = 0;
+
+    if (this.restartCount >= this.maxRestarts) {
+      const summary = `Server crashed ${this.maxRestarts} times in <30s.`;
+      console.error(`\n⚠ ${summary}`);
+      if (this.onCrashCallback) {
+        const action = this.onCrashCallback(this.crashLog);
+        if (action === "disable-mitm-and-retry") {
+          console.error("⚠ Disabling MITM and retrying...\n");
+          this.restartCount = 0;
+          this.start();
+          return;
+        }
+      }
+      this.dumpCrashLog();
+      // #13538: the give-up path used to only console.error() this diagnostic.
+      // In `--tray`/`--tray-worker` mode this process is launched detached with
+      // stdio:"ignore" (bin/cli/tray/detachedTray.mjs buildTrayLaunch()), so
+      // that console output is discarded by the OS and nothing ever explains
+      // why the tray + gateway disappeared together. Best-effort persist a
+      // durable record next to the existing per-service PID file convention
+      // (bin/cli/utils/pid.mjs) so it survives the process exit below.
+      this.persistCrashLog(summary);
+      process.exit(exitCode ?? 1);
+      return;
+    }
+
+    this.restartCount++;
+    const delay = computeRestartDelayMs(this.restartCount);
+    console.error(
+      `\n⚠ Server exited (code=${code ?? "?"}). Restarting in ${delay / 1000}s... (${this.restartCount}/${this.maxRestarts})`
+    );
+    if (this.crashLog.length) this.dumpCrashLog();
+    // #4425: after a crash the OS may not have released the listen socket yet — restarting
+    // immediately produced the EADDRINUSE cascade that exhausted the restart budget. Wait
+    // (bounded) for the port to free up before respawning.
+    setTimeout(async () => {
+      await waitUntilPortFree(process.env.PORT || 20128);
+      this.start();
+    }, delay);
+  }
+
+  // #6321: exposes the buffered stdout+stderr lines so a caller (e.g. a readiness
+  // timeout) can print what the child actually said instead of silence.
+  getRecentLog() {
+    return [...this.crashLog];
+  }
+
+  dumpCrashLog() {
+    console.error("\n--- Server crash log ---");
+    this.crashLog.forEach((l) => console.error(l));
+    console.error("--- End crash log ---\n");
+  }
+
+  // #13538: best-effort append a durable crash record to
+  // `<DATA_DIR>/server/crash.log`, mirroring the `<DATA_DIR>/<service>/.pid`
+  // layout from bin/cli/utils/pid.mjs. Wrapped in try/catch — this diagnostic
+  // write must NEVER block or fail shutdown (the give-up branch always calls
+  // process.exit() right after this).
+  persistCrashLog(summary) {
+    persistCrashRecord(summary, this.crashLog);
+  }
+
+  stop() {
+    this.isShuttingDown = true;
+    if (this.child?.pid) {
+      // #8045: on win32, process.kill(pid, "SIGTERM") unconditionally force-terminates
+      // the target — it is never a real, interceptable signal there. The child already
+      // receives the real CTRL_C_EVENT/CTRL_CLOSE_EVENT independently (it shares the
+      // console) and runs its own async graceful shutdown (WAL checkpoint). Sending
+      // SIGTERM immediately on win32 races and beats that cleanup. Fire-and-forget:
+      // stop() itself stays sync so callers keep their existing control flow.
+      void stopProcessGracefully({ pid: this.child.pid, timeoutMs: 5000, isPidRunning });
+    }
+    killAllSubprocesses();
+  }
+}
+
+export function detectMitmCrash(crashLog) {
+  const text = crashLog.join("\n").toLowerCase();
+  const signals = ["mitm", "tls socket", "certificate", "hosts", "eaccess"];
+  return signals.filter((s) => text.includes(s)).length >= 2;
+}

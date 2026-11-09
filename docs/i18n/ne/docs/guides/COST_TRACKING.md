@@ -1,0 +1,255 @@
+# Cost & Spend Tracking (नेपाली)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/COST_TRACKING.md) · 🇪🇹 [am](../../../am/docs/guides/COST_TRACKING.md) · 🇸🇦 [ar](../../../ar/docs/guides/COST_TRACKING.md) · 🇦🇿 [az](../../../az/docs/guides/COST_TRACKING.md) · 🇧🇬 [bg](../../../bg/docs/guides/COST_TRACKING.md) · 🇧🇩 [bn](../../../bn/docs/guides/COST_TRACKING.md) · 🇧🇦 [bs](../../../bs/docs/guides/COST_TRACKING.md) · 🇨🇿 [cs](../../../cs/docs/guides/COST_TRACKING.md) · 🇩🇰 [da](../../../da/docs/guides/COST_TRACKING.md) · 🇩🇪 [de](../../../de/docs/guides/COST_TRACKING.md) · 🇬🇷 [el](../../../el/docs/guides/COST_TRACKING.md) · 🇪🇸 [es](../../../es/docs/guides/COST_TRACKING.md) · 🇪🇪 [et](../../../et/docs/guides/COST_TRACKING.md) · 🇮🇷 [fa](../../../fa/docs/guides/COST_TRACKING.md) · 🇫🇮 [fi](../../../fi/docs/guides/COST_TRACKING.md) · 🇫🇷 [fr](../../../fr/docs/guides/COST_TRACKING.md) · 🇮🇪 [ga](../../../ga/docs/guides/COST_TRACKING.md) · 🇮🇳 [gu](../../../gu/docs/guides/COST_TRACKING.md) · 🇳🇬 [ha](../../../ha/docs/guides/COST_TRACKING.md) · 🇮🇱 [he](../../../he/docs/guides/COST_TRACKING.md) · 🇮🇳 [hi](../../../hi/docs/guides/COST_TRACKING.md) · 🇭🇷 [hr](../../../hr/docs/guides/COST_TRACKING.md) · 🇭🇺 [hu](../../../hu/docs/guides/COST_TRACKING.md) · 🇦🇲 [hy](../../../hy/docs/guides/COST_TRACKING.md) · 🇮🇩 [id](../../../id/docs/guides/COST_TRACKING.md) · 🇳🇬 [ig](../../../ig/docs/guides/COST_TRACKING.md) · 🇮🇹 [it](../../../it/docs/guides/COST_TRACKING.md) · 🇯🇵 [ja](../../../ja/docs/guides/COST_TRACKING.md) · 🇬🇪 [ka](../../../ka/docs/guides/COST_TRACKING.md) · 🇰🇭 [km](../../../km/docs/guides/COST_TRACKING.md) · 🇮🇳 [kn](../../../kn/docs/guides/COST_TRACKING.md) · 🇰🇷 [ko](../../../ko/docs/guides/COST_TRACKING.md) · 🇱🇹 [lt](../../../lt/docs/guides/COST_TRACKING.md) · 🇱🇻 [lv](../../../lv/docs/guides/COST_TRACKING.md) · 🇮🇳 [ml](../../../ml/docs/guides/COST_TRACKING.md) · 🇮🇳 [mr](../../../mr/docs/guides/COST_TRACKING.md) · 🇲🇾 [ms](../../../ms/docs/guides/COST_TRACKING.md) · 🇲🇹 [mt](../../../mt/docs/guides/COST_TRACKING.md) · 🇲🇲 [my](../../../my/docs/guides/COST_TRACKING.md) · 🇳🇱 [nl](../../../nl/docs/guides/COST_TRACKING.md) · 🇳🇴 [no](../../../no/docs/guides/COST_TRACKING.md) · 🇮🇳 [or](../../../or/docs/guides/COST_TRACKING.md) · 🇮🇳 [pa](../../../pa/docs/guides/COST_TRACKING.md) · 🇵🇭 [phi](../../../phi/docs/guides/COST_TRACKING.md) · 🇵🇱 [pl](../../../pl/docs/guides/COST_TRACKING.md) · 🇵🇹 [pt](../../../pt/docs/guides/COST_TRACKING.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/COST_TRACKING.md) · 🇷🇴 [ro](../../../ro/docs/guides/COST_TRACKING.md) · 🇷🇺 [ru](../../../ru/docs/guides/COST_TRACKING.md) · 🇱🇰 [si](../../../si/docs/guides/COST_TRACKING.md) · 🇸🇰 [sk](../../../sk/docs/guides/COST_TRACKING.md) · 🇸🇮 [sl](../../../sl/docs/guides/COST_TRACKING.md) · 🇷🇸 [sr](../../../sr/docs/guides/COST_TRACKING.md) · 🇸🇪 [sv](../../../sv/docs/guides/COST_TRACKING.md) · 🇰🇪 [sw](../../../sw/docs/guides/COST_TRACKING.md) · 🇮🇳 [ta](../../../ta/docs/guides/COST_TRACKING.md) · 🇮🇳 [te](../../../te/docs/guides/COST_TRACKING.md) · 🇹🇭 [th](../../../th/docs/guides/COST_TRACKING.md) · 🇹🇷 [tr](../../../tr/docs/guides/COST_TRACKING.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/COST_TRACKING.md) · 🇵🇰 [ur](../../../ur/docs/guides/COST_TRACKING.md) · 🇺🇿 [uz](../../../uz/docs/guides/COST_TRACKING.md) · 🇻🇳 [vi](../../../vi/docs/guides/COST_TRACKING.md) · 🇳🇬 [yo](../../../yo/docs/guides/COST_TRACKING.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/COST_TRACKING.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/COST_TRACKING.md)
+
+---
+
+OmniRoute ले प्रत्येक अनुरोधको लागत कसरी अनुमान, अभिलेख र रिपोर्ट गर्छ — र किन
+ड्यासबोर्डमा देखिने सङ्ख्या बिल नभई **बचत ट्र्याकर** हो।
+
+यो पनि हेर्नुहोस्: [प्रयोगकर्ता मार्गदर्शिका](./USER_GUIDE.md) · [सुविधाहरूको ग्यालरी](./FEATURES.md)
+
+---
+
+## यो के हो (र के होइन)
+
+OmniRoute ले टोकन सङ्ख्यालाई मोडेलको मूल्य निर्धारण दरले गुणा गरेर प्रत्येक completion लाई
+प्रति-अनुरोध USD लागत प्रदान गर्छ। यी सङ्ख्याहरूले **लागतहरू** ड्यासबोर्ड,
+`omniroute cost` / `omniroute usage` CLI, CSV/JSON निर्यातहरू र प्रति-API-key बजेटहरूलाई
+सञ्चालन गर्छन्।
+
+> **ड्यासबोर्डको "लागत" बचत ट्र्याकर हो, बिल होइन।** OmniRoute ले तपाईंसँग कहिल्यै शुल्क
+> लिँदैन — यसले तपाईंका अनुरोधहरू तपाईंले पहिले नै जडान गरिसकेका प्रदायकहरूमा (तपाईंका आफ्नै
+> सदस्यताहरू, निःशुल्क टियरहरू र API key हरू) रुट गर्छ। पूर्ण रूपमा निःशुल्क मोडेलहरूमा
+> जम्मा भएको "$290 कुल लागत" को अर्थ लगभग **तपाईंले सशुल्क API लाई भुक्तानी _नगरेको_ $290**
+> हो। यो आँकडा समान ट्राफिकको मानक सूची मूल्यअनुसार लाग्ने लागतको _अनुमान_ हो, जसबाट तपाईं
+> आफ्नो प्रयोग कहाँ केन्द्रित छ र सस्ता/निःशुल्क प्रदायकहरूमा रुट गर्दा कति बचत भइरहेको छ
+> भनेर देख्न सक्नुहुन्छ।
+
+यो व्याख्या परियोजनाको [README](../../README.md) मा प्रत्यक्ष रूपमा उल्लेख गरिएको छ
+("ड्यासबोर्डको 'लागत' बचत ट्र्याकर हो, बिल होइन")।
+
+यो सङ्ख्या अनुमान भएकाले:
+
+- यो प्रत्येक मोडेलका लागि OmniRoute सँग भएको मूल्य निर्धारण तालिकामा निर्भर हुन्छ। मूल्य
+  प्रविष्टि नभएको मोडेलले `0` लागत योगदान गर्छ (यो एक्सप्लोररमा "Legacy / Free" पङ्क्तिका
+  रूपमा देखिन्छ)।
+- निःशुल्क-टियर र सदस्यता ट्राफिकमा पनि _अनुमानित_ लागत जम्मा हुन्छ — त्यो तपाईंले बचत
+  गरिरहनुभएको रकम हो, तिर्नुपर्ने रकम होइन।
+
+---
+
+## कसरी लागत अनुमान गरिन्छ
+
+### मूल्य निर्धारण स्रोत
+
+लागतहरू [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) मा मर्ज गरिएको मूल्य निर्धारण तालिकाबाट आउँदछ, यो प्राथमिकताको क्रममा (** उच्चतम पहिलो** ):
+
+1. **प्रयोगकर्ता ओभरराइड गर्दछ** — मूल्यहरू ड्यासबोर्डमा वा `PATCH /api/pricing` ( `pricing` नेमस्पेस) मार्फत सेट गरिएको छ।
+2. **models.dev सिंक** — मूल्य निर्धारण `https://models.dev/api.json` ( `models_dev_pricing` नेमस्पेस) बाट ल्याइयो।
+3. **LiteLLM सिंक** — मूल्यहरू LiteLLM को सार्वजनिक `model_prices_and_context_window.json` ( `pricing_synced` नेमस्पेस) बाट प्राप्त।
+4. **हार्डकोड गरिएका पूर्वनिर्धारितहरू** — दरहरू [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) मा पठाइयो।
+
+उही provider/model को लागि, उच्च प्राथमिकता तहका मानहरूले तल्लो तहहरूमा मिल्दो फिल्डहरू अधिलेखन गर्दछ; माथिल्लो तहबाट अनुपस्थित क्षेत्रहरू अझै पनि तल्लो तहबाट आउन सक्छन्। दुबै स्वतन्त्र सिंक कार्यहरू एकै समयमा चल्दा पनि क्रम निश्चित हुन्छ। `GET /api/pricing?includeSources=1` `pricing` र `sourceMap` फर्काउँछ, जसको प्रति-मोडेल लेबलहरू (`user`, `modelsDev`, `litellm`, `default`) ले त्यो मोडेल समावेश भएको उच्चतम प्राथमिकताको तह पहिचान गर्दछ।
+
+**LiteLLM सिंक** अप्ट-इन छ, पूर्वनिर्धारित रूपमा अक्षम। यसको वातावरणीय चरहरू ( [`.env.example`](../../.env.example) हेर्नुहोस्) हुन्:
+
+| Env var                 | पूर्वनिर्धारित | उद्देश्य                                                       |
+| ----------------------- | -------------- | -------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`        | पृष्ठभूमि LiteLLM मूल्य सिंक सक्षम गर्नुहोस्।                  |
+| `PRICING_SYNC_INTERVAL` | `86400`        | सेकेन्डमा सिंक अन्तराल (दैनिक)।                                |
+| `PRICING_SYNC_SOURCES`  | `litellm`      | यो सिंकको लागि मात्र स्रोत चयन; हाल `litellm` मात्र समर्थित छ। |
+
+**models.dev सिंक** यो LiteLLM सिंकबाट अलग छ र पूर्वनिर्धारित रूपमा असक्षम गरिएको छ। यसलाई सेटिङहरूमा सक्रिय गर्नुहोस् (models.dev sync) वा यी चरहरू प्रयोग गर्नुहोस्:
+
+| Env var                    | पूर्वनिर्धारित | उद्देश्य                                                                                                                     |
+| -------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(अनसेट)_      | अनसेट सेटिङ टगल पछ्याउँछ; `1/true/on/yes` बल सक्रिय हुन्छ र `0/false/off/no` बल बन्द हुन्छ (सेटिङहरूले यसलाई सक्षम गरे पनि)। |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | पूर्वनिर्धारित models.dev सेकेन्डमा सिंक अन्तराल (दैनिक)।                                                                    |
+
+`PRICING_SYNC_SOURCES` गर्छ** होइन** models.dev सक्षम गर्नुहोस्; यसले LiteLLM सिंक मात्र नियन्त्रण गर्छ। प्रयोगकर्ता ओभरराइड मेटाउँदा सिंक गरिएको नाम स्थान खाली हुँदैन; अर्को उपलब्ध मूल्य निर्धारण तह प्रभावकारी हुन्छ। एक अमूल्य मोडेलको लागि, म्यानुअल ओभरराइड थप्नु अघि दुवै सिंक सेटिङहरू र `sourceMap` जाँच गर्नुहोस्।
+
+### लागत सूत्र
+
+[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) मा टोकन गणनाहरू र प्रति-मिलियन-टोकन दरहरूबाट प्रति अनुरोधको लागत गणना गरिन्छ:
+
+- **इनपुट टोकनहरू** (माइनस क्यास रिड्स र क्यास-सिर्जन टोकनहरू) × `input` दर।
+- **क्यास-पढ्ने टोकनहरू** × `cached` दर (इनपुट दरमा फर्किन्छ)।
+- **क्यास-सिर्जना टोकनहरू** × `cache_creation` दर (इनपुट दरमा फर्किन्छ)।
+- **आउटपुट टोकनहरू** × `output` दर।
+- **तर्क टोकनहरू** × `reasoning` दर (आउटपुट दरमा फर्किन्छ)।
+
+सबै दरहरू प्रति 1,000,000 टोकनहरू USD को रूपमा व्याख्या गरिन्छ। एक Codex "छिटो"/"प्राथमिकता" वा "फ्लेक्स" सेवा टियरले लागत गुणक (`getCodexFastCostMultiplier`) — लागू गर्दछ जस्तै फ्लेक्सलाई 50% टोकन छुटमा बिल गरिन्छ, यस रूपमा देखा पर्दछ।** फ्लेक्स बचत** ड्यासबोर्डमा।
+
+मोडेल नामहरू पहिले सामान्य बनाइन्छ (प्रदायक-पथ उपसर्गहरू जस्तै `openai/` वा `accounts/fireworks/models/` हटाइन्छ) त्यसैले ऐतिहासिक पङ्क्तिहरू अझै पनि मूल्यसँग मेल खान्छ।
+
+### खर्च कसरी रेकर्ड गरिएको छ
+
+- प्रति-अनुरोध लागत प्रतिक्रिया पछि गणना गरिन्छ र रेकर्ड फायर-एन्ड-बिर्सन्छ त्यसैले यसले ग्राहकलाई विलम्बता थप्दैन। साझा-कोटा खपत [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) मार्फत अर्को घटना-लूप टिकमा निर्धारित गरिएको छ।
+- API-कुञ्जी खर्च [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (पूर्वनिर्धारित 60s फ्लश अन्तराल, 1,000-प्रविष्टि बफर) द्वारा ब्याचहरूमा बफर र फ्लस गरिएको छ। मार्फत ट्यून गर्न मिल्ने:
+
+  | Env var                             | पूर्वनिर्धारित | उद्देश्य                                |
+  | ----------------------------------- | -------------- | --------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`        | मिलिसेकेन्डमा फ्लस अन्तराल।             |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`         | फ्लश गर्नु अघि अधिकतम बफर प्रविष्टिहरू। |
+
+ड्यासबोर्डको लागत तथ्याङ्कहरू छन्** होइन** भण्डारण गरिएको प्रति-पङ्क्ति डलर रकम — बाट पढ्नुहोस् तिनीहरू टोकन गणनाहरू र एनालिटिक्स अन्तिम बिन्दु चल्दा प्रत्येक पटक हालको मूल्य निर्धारण तालिकाबाट उडानमा पुन: गणना गरिन्छ। यसको मतलब गलत मूल्य (र पुन: सिङ्किङ) लाई सुधार्नुले ऐतिहासिक लागत अनुमानहरू पूर्वव्यापी रूपमा अद्यावधिक गर्दछ।
+
+---
+
+## ड्यासबोर्ड: लागत पृष्ठ
+
+**लागत** पृष्ठ `/dashboard/costs`
+(`src/app/(dashboard)/dashboard/costs/`) मा अवस्थित छ।
+यसको मुख्य दृश्य **लागत अवलोकन** ट्याब हो
+(`src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx`),
+जसले `GET /api/usage/analytics` बाट सबै कुरा लोड गर्छ।
+
+यसले देखाउने कुराहरू:
+
+- **खर्च टाइलहरू** — _आज (1d)_, _7d_, _30d_, र चयन गरिएको
+  अवधिको अनुमानित खर्च। अवधि चयनकर्ता: `7d`, `30d`, `90d`, `all`।
+- **प्रमुख मेट्रिक्स** — अवधिभित्रका अनुरोधहरू, सक्रिय प्रदायकहरू, सक्रिय मोडेलहरू, प्रति
+  अनुरोध औसत लागत।
+- **लागत एक्सप्लोरर** — **प्रदायक**, **मोडेल**,
+  **API कुञ्जी**, **खाता**, वा **सेवा तह** अनुसार समूहबद्ध गर्न मिल्ने क्रमबद्ध/फिल्टर गर्न सकिने तालिका, जसमा लागत, अनुरोधहरू, टोकनहरू, प्रति
+  अनुरोध औसत लागत, र कुलको हिस्सा % समावेश हुन्छ।
+- **टोकन प्रयोग** — कुल / इनपुट / आउटपुट टोकनहरू र इनपुट:आउटपुट अनुपात।
+- **राउटिङ दक्षता** — फलब्याक सङ्ख्या, फलब्याक दर, र अनुरोध गरिएको मोडेलको कभरेज।
+- **मासिक पूर्वानुमान** — हालैको दैनिक औसतबाट महिनाको अन्त्यसम्मको खर्च प्रक्षेपण गर्छ।
+- **अवधि तुलना** — अवधिको पहिलो र दोस्रो आधाबीचको % परिवर्तन।
+- **चार्टहरू** — दैनिक लागत प्रवृत्ति, प्रदायक हिस्सा (पाई), शीर्ष प्रदायकहरू, शीर्ष मोडेलहरू, API
+  कुञ्जीअनुसार लागत, खाताअनुसार लागत, साप्ताहिक प्रयोग ढाँचा, र गतिविधि हिटम्याप।
+- **निर्यात** — हालको अवधिलाई **CSV** वा **JSON** का रूपमा डाउनलोड गर्नुहोस् (शून्यभन्दा बढी लागत
+  डेटा भएपछि बटनहरू देखिन्छन्)।
+
+मूल्य निर्धारण गरिएको ट्राफिक नभएको अवस्थामा, पङ्क्तिहरू `$0` को सट्टा "लेगेसी / निःशुल्क" लेबलका रूपमा रेन्डर हुन्छन्,
+जसले बचत-ट्र्याकर मोडेललाई प्रतिबिम्बित गर्छ।
+
+### लागतसँग सम्बन्धित उप-पृष्ठहरू
+
+लागत क्षेत्रले यी पृष्ठहरू पनि समेट्छ (सबै `/dashboard/costs/` अन्तर्गत):
+
+- **मूल्य निर्धारण** (`/dashboard/costs/pricing`) — प्रति-मोडेल मूल्यहरू हेर्नुहोस् र ओभरराइड गर्नुहोस् (साझा
+  मूल्य निर्धारण ट्याब रेन्डर गर्छ)।
+- **बजेट** (`/dashboard/costs/budget`) — प्रति-स्कोप खर्च सीमा सेट गर्नुहोस् (साझा
+  बजेट ट्याब रेन्डर गर्छ)।
+- **कोटा साझेदारी** (`/dashboard/costs/quota-share`) — साझा-कोटा पूलहरू र खपत-दर
+  दृश्यहरू।
+
+---
+
+## API अन्त्य बिन्दुहरू
+
+उल्लेख नगरिएसम्म यी सबैलाई व्यवस्थापन प्रमाणीकरण (loopback/JWT, `requireManagementAuth` मार्फत) आवश्यक छ।
+
+### उपयोग र लागत विश्लेषण
+
+| विधि  | अन्तिम बिन्दु            | उद्देश्य                                                                                                                                                        |
+| ----- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | पूर्ण cost/usage विश्लेषण: सारांश, दैनिक प्रवृत्ति, provider/model/API key/account/tier. क्वेरी द्वारा: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets` |
+| `GET` | `/api/usage/utilization` | समय अनुसार प्रति-प्रदायक कोटा उपयोग। प्रश्न: `range` (`1h`/`24h`/`7d`/`30d`), `provider`                                                                        |
+| `GET` | `/api/usage/history`     | कच्चा उपयोग इतिहास पङ्क्तिहरू।                                                                                                                                  |
+| `GET` | `/api/usage/call-logs`   | प्रति-अनुरोध कल लगहरू (मोडेल, टोकन, लागत, विलम्बता, स्थिति)।                                                                                                    |
+| `GET` | `/api/usage/quota`       | प्रदायक कोटा स्थिति।                                                                                                                                            |
+| `GET` | `/api/usage/proxy-logs`  | प्रोक्सी अनुरोध लगहरू।                                                                                                                                          |
+
+### बजेटहरू
+
+| विधि   | अन्तिम बिन्दु            | उद्देश्य                                                                                     |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | लागत सारांश + बजेट एक API कुञ्जीको लागि जाँच गर्नुहोस् (`apiKeyId` क्वेरी प्याराम आवश्यक छ)। |
+| `POST` | `/api/usage/budget`      | API कुञ्जीका लागि daily/weekly/monthly USD ले + चेतावनी थ्रेसहोल्ड सेट गर्नुहोस्।            |
+| `GET`  | `/api/usage/budget/bulk` | API कुञ्जीहरूमा बल्क बजेट सारांशहरू।                                                         |
+
+> बजेट API प्रति स्कोप गरिएको छ**API कुञ्जी** (`apiKeyId`)। `GET /api/usage/budget` द्वारा फिर्ता गरिएका सीमाहरूमा `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, र चलिरहेको योगहरू (`totalCostToday`, `totalCostMonth`, …) समावेश छन्।
+
+### मूल्य निर्धारण
+
+| विधि     | अन्तिम बिन्दु           | उद्देश्य                                                                                                                                                                   |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | मर्ज गरिएको चार-तह मूल्य निर्धारण (प्रयोगकर्ता, models.dev, LiteLLM, पूर्वनिर्धारितहरू)। `?includeSources=1` `pricing` + फर्काउँछ `sourceMap`                              |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` को लागि मूल्य निर्धारण ओभरराइड गर्नुहोस्।                                                                          |
+| `DELETE` | `/api/pricing`          | प्रयोगकर्ता मूल्य ओभरराइडहरू हटाउनुहोस् (वैकल्पिक रूपमा `?provider=&model=` द्वारा स्कोप गरिएको); सिंक गरिएका दरहरू वा बिल्ट-इन पूर्वनिर्धारितहरू फलब्याकको रूपमा रहन्छन्। |
+| `GET`    | `/api/pricing/defaults` | पूर्वनिर्धारित per-1M फलब्याक दरहरू देखाउनुहोस्।                                                                                                                           |
+| `GET`    | `/api/pricing/models`   | मूल्य निर्धारण मोडेल द्वारा कुञ्जी।                                                                                                                                        |
+| `POST`   | `/api/pricing/sync`     | बाह्य स्रोतहरू (LiteLLM) बाट म्यानुअल सिंक ट्रिगर गर्नुहोस्।                                                                                                               |
+| `GET`    | `/api/pricing/sync`     | हालको सिंक स्थिति।                                                                                                                                                         |
+| `DELETE` | `/api/pricing/sync`     | LiteLLM-सिंक गरिएको मूल्य निर्धारण मात्र खाली गर्नुहोस् (`pricing_synced`); models.dev डाटा अलग छ।                                                                         |
+
+### अन्य लागत-सम्बन्धित अन्तबिन्दुहरू
+
+| विधि  | अन्तिम बिन्दु                 | उद्देश्य                                                      |
+| ----- | ----------------------------- | ------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | फ्री-मोडेल टोकन कुल, प्रयोग-यो-महिना, र बाँकी निःशुल्क भत्ता। |
+| `GET` | `/api/quota/pools/[id]/usage` | साझा कोटा पूलको लागि प्रयोग।                                  |
+
+---
+
+## CLI
+
+OmniRoute को CLI ले लागत, प्रयोग र मूल्य निर्धारणसम्बन्धी आदेशहरू उपलब्ध गराउँछ (जुन
+[`bin/cli/commands/registry.mjs`](../../bin/cli/commands/registry.mjs) मा दर्ता गरिएका छन्)।
+
+### `omniroute cost`
+
+`/api/usage/analytics` बाट समुच्चय गरिएको लागत प्रतिवेदन।
+
+```bash
+omniroute cost                          # पछिल्लो 30d, प्रदायकअनुसार समूहबद्ध
+omniroute cost --period 7d              # पछिल्ला 7 दिन
+omniroute cost --group-by model         # provider | model | combo | api-key | day अनुसार समूहबद्ध गर्नुहोस्
+omniroute cost --since 2026-06-01 --until 2026-06-13
+omniroute cost --api-key <key> --limit 50
+```
+
+स्तम्भहरू: समूह, अनुरोधहरू, भित्रिने/बाहिरिने टोकनहरू, लागत (USD), र कुलको प्रतिशत। अन्त्यमा
+समग्र कुलको पङ्क्ति देखाइन्छ (`--quiet` वा `--output json` प्रयोग गर्दा देखाइँदैन)।
+
+### `omniroute usage`
+
+```bash
+omniroute usage analytics --period 30d [--provider <id>]   # प्रत्येक प्रदायकको लागत सारांश
+omniroute usage logs [--limit 100] [--follow] [--api-key <k>] [--search <q>]
+omniroute usage quota [--provider <id>] [--check]
+omniroute usage utilization [--api-key <k>]
+omniroute usage history [--limit 100]
+omniroute usage proxy-logs [--limit 100]
+
+# बजेटहरू
+omniroute usage budget list
+omniroute usage budget get [scope]
+omniroute usage budget set <amount> [--scope global] [--period monthly]
+omniroute usage budget reset [scope]
+```
+
+### `omniroute pricing`
+
+```bash
+omniroute pricing list [--provider <p>] [--model <m>] [--limit 200]
+omniroute pricing get <model>
+omniroute pricing sync [--provider <p>] [--force]   # POST /api/pricing/sync
+omniroute pricing diff [--model <m>]
+omniroute pricing defaults show
+omniroute pricing defaults set [--input <p>] [--output <p>] [--cache-read <p>] [--cache-write <p>]
+```
+
+> `pricing defaults show` ले `GET /api/pricing/defaults` पढ्छ। यसको सट्टा कुनै विशिष्ट मोडेलको
+> मूल्य सम्पादन गर्न, **मूल्य निर्धारण** ड्यासबोर्ड पृष्ठ वा `PATCH /api/pricing` प्रयोग गर्नुहोस्।
+
+---
+
+## समस्या निवारण
+
+- **सबै लागत $0 / "Legacy / Free" देखिन्छन्।** प्रयोगमा रहेका मोडेलहरूको मूल्य निर्धारण प्रविष्टि छैन।
+  बाह्य समक्रमण (`PRICING_SYNC_ENABLED=true`) सक्षम पारेर `omniroute pricing sync` चलाउनुहोस्, वा
+  मूल्य निर्धारण पृष्ठ / `PATCH /api/pricing` मार्फत मूल्यहरू म्यानुअल रूपमा सेट गर्नुहोस्।
+- **कुनै ऐतिहासिक मोडेलको मूल्य गलत छ।** मूल्य सच्याउनुहोस् (ओभरराइड वा पुनः समक्रमण गर्नुहोस्) — प्रत्येक पटक एनालिटिक्स पढ्दा
+  टोकन सङ्ख्याबाट लागत पुनः गणना गरिन्छ, त्यसैले अनुमानहरू विगतका अवधिका लागि पनि अद्यावधिक हुन्छन्।
+- **खर्चको तथ्याङ्क वास्तविक समयभन्दा पछाडि छ।** प्रत्येक कुञ्जीको खर्च ब्याचमा प्रशोधन गरिन्छ; अझ ताजा तथ्याङ्क आवश्यक भएमा
+  `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` घटाउनुहोस्।
+
+---
+
+यो व्यापक ड्यासबोर्डमा कहाँ समावेश हुन्छ भन्ने जानकारीका लागि [प्रयोगकर्ता मार्गदर्शिका](./USER_GUIDE.md) र
+[सुविधाहरूको ग्यालरी](./FEATURES.md) हेर्नुहोस्।

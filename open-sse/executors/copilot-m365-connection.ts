@@ -1,0 +1,628 @@
+/**
+ * Microsoft 365 Copilot (individual / Substrate BizChat) connection helpers.
+ *
+ * Pure URL / credential / prompt builders for the #4042 individual M365 path.
+ * Kept transport-free (no BaseExecutor import — only a type import) so they can
+ * be unit-tested without the executor's heavy runtime dependency chain. The
+ * access_token rides in the WS query string per the protocol, so any logging of
+ * the URL MUST go through redactWsUrl().
+ */
+
+import { randomUUID, randomBytes } from "node:crypto";
+import { parseM365PastedCredential } from "../utils/m365Credentials.ts";
+import { resolvePublicCred } from "../utils/publicCreds.ts";
+import { sanitizeErrorMessage } from "../utils/error.ts";
+import type { ProviderCredentials } from "./base.ts";
+
+type JsonRecord = Record<string, unknown>;
+
+/** Individual-tier defaults observed in @skyzea1's #4042 capture. */
+export const M365_INDIVIDUAL_DEFAULTS = {
+  host: "substrate.office.com",
+  source: "officeweb",
+  product: "Office",
+  agentHost: "Bizchat.FullScreen",
+  licenseType: "Starter",
+  agent: "web",
+  scenario: "OfficeWebPaidConsumerCopilot",
+} as const;
+
+/**
+ * Education "Starter / OfficeWebIncludedCopilot" tier overrides, captured from the
+ * official UI in #6210. Differs from the individual tier only by scenario + isEdu;
+ * opt-in via `providerSpecificData.tier="edu"` so the individual path is unchanged.
+ */
+export const M365_EDU_OVERRIDES = {
+  scenario: "OfficeWebIncludedCopilot",
+  isEdu: "true",
+  licenseType: "Starter",
+} as const;
+
+/**
+ * Enterprise / "work" (Microsoft 365 Copilot for work) tier overrides (#6334). Enterprise
+ * tenants ride the `agent="work"` BizChat surface with the `officeweb` scenario and a
+ * Premium license. Opt-in via `providerSpecificData.tier="enterprise"` (alias `"work"`) so
+ * the individual and EDU paths are unchanged. A raw `providerSpecificData.agent` override is
+ * also honored for tenants that need a different agent value.
+ */
+export const M365_ENTERPRISE_OVERRIDES = {
+  agent: "work",
+  scenario: "officeweb",
+  licenseType: "Premium",
+} as const;
+
+export const M365_DEFAULT_VARIANTS = [
+  "EnableMcpServerWidgets",
+  "feature.EnableMcpServerWidgets",
+  "feature.EnableLuForChatCIQ",
+  "feature.enableChatCIQPlugin",
+  "EnableRequestPlugins",
+  "feature.EnableSensitivityLabels",
+  "EnableUnsupportedUrlDetector",
+  "feature.IsCustomEngineCopilotEnabled",
+  "feature.bizchatfluxv3",
+  "feature.enablechatpages",
+  "feature.enableCodeCanvas",
+  "feature.turnOnDARecommendation",
+  "feature.IsStreamingModeInChatRequestEnabled",
+  "IncludeSourceAttributionsConcise",
+  "SkipPublishEmptyMessage",
+  "feature.EnableDeduplicatingSourceAttributions",
+  "Enable3PActionProgressMessages",
+  "feature.enableClientWebRtc",
+  "feature.EnableMeetingRecapOfSeriesMeetingWithCiq",
+  "feature.cwcfluxv3fe",
+  "feature.cwcfluxv3fem",
+  "feature.EnableReferencesListCompleteSignal",
+  "feature.StorageMessageSplitDisabled",
+  "feature.EnableCuaTakeControlApi",
+  "SingletonEnvOn",
+  "EnableComposeWidget",
+  "feature.cwcallowedos",
+  "feature.EnableMergingPureDeltas",
+  "feature.disabledisallowedmsgs",
+  "feature.enableCitationsForSynthesisData",
+  "feature.EnableConversationShareApis",
+  "feature.enableGenerateGraphicArtOptionsSet",
+  "cdximagen",
+  "feature.EnableUpdatedUXForConfirmationDialog",
+  "feature.EnableContentApiandDocTypeHtmlInRichAnswers",
+  "cdxgrounding_api_v2_rich_web_answers_reference_bottom_force",
+  "cdxenablerenderforisocomp",
+  "feature.EnableClientFileURLSupportForOfficeWebPaidCopilot",
+  "feature.EnableDesignEditorImageGrounding",
+  "feature.EnableDesignerEditor",
+  "feature.EnableSkipRehydrationForSpeCIdImages",
+  "feature.EnablePersonalizationForMSA",
+  "agt_bizchat_enableRichResponses",
+  "feature.EnableBase64DataInMessageAnnotations",
+  "feature.EnableSkipEmittingMessageOnFlush",
+  "feature.EnableRemoveEmptySourceAttributions",
+  "feature.EnableRemoveStreamingMode",
+] as const;
+
+export interface M365ConnectionParams {
+  host: string;
+  chathubPath: string; // "<user-oid>@<tenant-id>"
+  accessToken: string;
+  variants?: string;
+  /** Tier overrides — when unset, buildWsUrl falls back to the individual defaults. */
+  scenario?: string;
+  isEdu?: string;
+  licenseType?: string;
+  agent?: string;
+  /** Resolved tier name (#7870) — threads into the chat invocation payload, not just the URL. */
+  tier?: "edu" | "enterprise";
+}
+
+/** A new 32-hex chat session id (== XRoutingParameterSessionKey == clientrequestid). */
+export function newChatSessionId(): string {
+  return randomBytes(16).toString("hex");
+}
+
+/**
+ * Read the pasted credential bits. The individual access_token is opaque (JWE),
+ * so it is consumed verbatim. The Chathub path (`user@tenant`) is pasted
+ * alongside it because it is not derivable from the opaque token.
+ */
+export function resolveConnectionParams(
+  credentials: ProviderCredentials | undefined
+): M365ConnectionParams | { error: string } {
+  const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
+  const parsedApiKey =
+    typeof credentials?.apiKey === "string" ? parseM365PastedCredential(credentials.apiKey) : {};
+  const accessToken = currentM365AccessToken(credentials);
+  if (!accessToken) {
+    return { error: "Missing M365 Copilot access_token. Paste it as the provider credential." };
+  }
+  const chathubPath = currentM365ChathubPath(credentials);
+  if (!/^[\w.-]+@[\w.-]+$/.test(chathubPath)) {
+    return {
+      error:
+        "Missing M365 Chathub path. Paste the '<user-oid>@<tenant-id>' segment from the WebSocket URL.",
+    };
+  }
+  const host =
+    (typeof psd.host === "string" && psd.host) ||
+    parsedApiKey.host ||
+    M365_INDIVIDUAL_DEFAULTS.host;
+  // Validate explicit destinations with the same allowlist as pasted browser URLs.
+  if (
+    !parseM365PastedCredential(`wss://${host}/m365Copilot/Chathub/u@t?access_token=validation`)
+      .host ||
+    !/^[a-z0-9.-]+$/i.test(host)
+  ) {
+    return { error: "Invalid M365 Chathub host." };
+  }
+  const variants = typeof psd.variants === "string" && psd.variants ? psd.variants : undefined;
+
+  return { host, chathubPath, accessToken, variants, ...resolveTierOverrides(psd) };
+}
+
+/**
+ * Resolve tier overrides (opt-in). `tier="edu"|"included"` applies the EDU overrides and
+ * `tier="enterprise"|"work"` applies the enterprise/work overrides; individual fields
+ * (`scenario`/`isEdu`/`licenseType`/`agent`) can also be overridden directly via
+ * providerSpecificData. Unset fields fall back to the individual defaults in buildWsUrl.
+ * (#6210, #6334)
+ */
+function resolveTierOverrides(
+  psd: JsonRecord
+): Pick<M365ConnectionParams, "scenario" | "isEdu" | "licenseType" | "agent" | "tier"> {
+  const tier = typeof psd.tier === "string" ? psd.tier.toLowerCase() : "";
+  const isEduTier = tier === "edu" || tier === "included";
+  const isEnterpriseTier = tier === "enterprise" || tier === "work";
+  const psdIsEdu =
+    (typeof psd.isEdu === "string" && psd.isEdu) ||
+    (typeof psd.isEdu === "boolean" && String(psd.isEdu)) ||
+    undefined;
+  return {
+    scenario:
+      (typeof psd.scenario === "string" && psd.scenario) ||
+      (isEduTier ? M365_EDU_OVERRIDES.scenario : undefined) ||
+      (isEnterpriseTier ? M365_ENTERPRISE_OVERRIDES.scenario : undefined),
+    isEdu: psdIsEdu || (isEduTier ? M365_EDU_OVERRIDES.isEdu : undefined),
+    licenseType:
+      (typeof psd.licenseType === "string" && psd.licenseType) ||
+      (isEduTier ? M365_EDU_OVERRIDES.licenseType : undefined) ||
+      (isEnterpriseTier ? M365_ENTERPRISE_OVERRIDES.licenseType : undefined),
+    agent:
+      (typeof psd.agent === "string" && psd.agent) ||
+      (isEnterpriseTier ? M365_ENTERPRISE_OVERRIDES.agent : undefined),
+    tier: isEduTier ? "edu" : isEnterpriseTier ? "enterprise" : undefined,
+  };
+}
+
+/**
+ * Build the BizChat WebSocket URL. The access_token rides in the query string
+ * (per the protocol), so callers must never log the returned URL verbatim — use
+ * redactWsUrl() for any logging. Pass `conversation` to continue an existing
+ * conversation; otherwise new conversation and session ids are minted.
+ */
+export function buildWsUrl(
+  params: M365ConnectionParams,
+  conversation?: { conversationId: string; sessionId: string }
+): string {
+  const sessionKey = newChatSessionId();
+  const query = new URLSearchParams({
+    chatsessionid: sessionKey,
+    XRoutingParameterSessionKey: sessionKey,
+    clientrequestid: sessionKey,
+    "X-SessionId": conversation?.sessionId ?? randomUUID(),
+    ConversationId: conversation?.conversationId ?? randomUUID(),
+    access_token: params.accessToken,
+    variants: params.variants ?? M365_DEFAULT_VARIANTS.join(","),
+    source: M365_INDIVIDUAL_DEFAULTS.source,
+    product: M365_INDIVIDUAL_DEFAULTS.product,
+    agentHost: M365_INDIVIDUAL_DEFAULTS.agentHost,
+    licenseType: params.licenseType ?? M365_INDIVIDUAL_DEFAULTS.licenseType,
+    isEdu: params.isEdu ?? "false",
+    agent: params.agent ?? M365_INDIVIDUAL_DEFAULTS.agent,
+    scenario: params.scenario ?? M365_INDIVIDUAL_DEFAULTS.scenario,
+  });
+  return `wss://${params.host}/m365Copilot/Chathub/${params.chathubPath}?${query.toString()}`;
+}
+
+/** Strip the access_token from a WS URL so it is safe to log. */
+export function redactWsUrl(wsUrl: string): string {
+  return wsUrl.replace(/access_token=[^&]*/i, "access_token=REDACTED");
+}
+
+// ── OAuth refresh support (#10718 — client ids observed in the browser token
+// and M365-Copilot2API) ────────────────────────────────────────────────────
+//
+// The browser-issued access_token lives ~75 minutes. These helpers redeem a
+// stored refresh_token at the Microsoft identity platform (same public client
+// the m365.cloud.microsoft web app uses) so the connection self-heals instead
+// of requiring a fresh DevTools capture after every expiry.
+
+/** Public client id observed in both the browser token and M365-Copilot2API. */
+export const M365_OAUTH_CLIENT_ID = resolvePublicCred("m365_oauth_client_id");
+
+export const M365_OAUTH_SCOPE =
+  "openid profile offline_access https://substrate.office.com/sydney/M365Chat.Read " +
+  "https://substrate.office.com/sydney/sydney.readwrite";
+
+/** Refresh lead time — refresh when the current token has less than this left. */
+export const M365_REFRESH_LEAD_MS = 5 * 60 * 1000;
+
+type MinimalLog = {
+  info?: (tag: string, message: string) => void;
+  warn?: (tag: string, message: string) => void;
+};
+
+/** Decode a JWT payload WITHOUT verification — exp/tid are routing hints, never authz. */
+export function decodeJwtClaims(
+  token: string
+): { exp?: number; tid?: string; oid?: string } | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    return payload && typeof payload === "object" ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** True when the token is unreadable, already expired, or inside the refresh lead window. */
+export function tokenNeedsRefresh(token: string, leadMs = M365_REFRESH_LEAD_MS): boolean {
+  const claims = decodeJwtClaims(token);
+  if (!claims?.exp) return true;
+  return claims.exp * 1000 <= Date.now() + leadMs;
+}
+
+function pastedM365AccessToken(apiKey: string): string {
+  const parsed = parseM365PastedCredential(apiKey);
+  if (parsed.accessToken && parsed.accessToken.split(".").length === 3) return parsed.accessToken;
+  if (parsed.accessToken) return parsed.accessToken;
+  // A raw opaque token is usable; never mistake a URL or credential line for one.
+  if (apiKey && !apiKey.includes("=") && !/^[a-z][a-z\d+.-]*:\/\//i.test(apiKey.trim())) {
+    return apiKey;
+  }
+  return "";
+}
+
+/** Canonical token column wins legacy pasted credentials, including opaque tokens. */
+export function currentM365AccessToken(credentials: ProviderCredentials | undefined): string {
+  if (typeof credentials?.accessToken === "string" && credentials.accessToken) {
+    return credentials.accessToken;
+  }
+  if (typeof credentials?.apiKey === "string") {
+    const pasted = pastedM365AccessToken(credentials.apiKey);
+    if (pasted) return pasted;
+  }
+  const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
+  if (typeof psd.accessToken === "string") return psd.accessToken;
+  if (typeof psd.access_token === "string") return psd.access_token;
+  return "";
+}
+
+/** The chathub path (`<user-oid>@<tenant-id>`) from wherever it is stored. */
+export function currentM365ChathubPath(credentials: ProviderCredentials | undefined): string {
+  const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
+  // Explicit identity wins even when malformed: the caller must reject, not
+  // silently replace a bad hint with a different account from an unverified JWT.
+  for (const key of ["chathubPath", "userTenant"]) {
+    if (Object.prototype.hasOwnProperty.call(psd, key)) {
+      return typeof psd[key] === "string" ? psd[key] : "";
+    }
+  }
+  const pasted =
+    typeof credentials?.apiKey === "string"
+      ? parseM365PastedCredential(credentials.apiKey).chathubPath
+      : undefined;
+  if (pasted !== undefined) return pasted;
+  const claims = decodeJwtClaims(currentM365AccessToken(credentials));
+  return isM365Guid(claims?.oid) && isM365Guid(claims?.tid) ? `${claims.oid}@${claims.tid}` : "";
+}
+
+const M365_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isM365Guid(value: unknown): value is string {
+  return typeof value === "string" && M365_GUID.test(value);
+}
+
+export interface M365RefreshOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  /** Scopes to request; defaults to the chat scopes ({@link M365_OAUTH_SCOPE}). */
+  scope?: string;
+}
+
+/**
+ * The service behind generated-image artifacts. The chat token is refused there; the same
+ * first-party client is preauthorized for it, so the stored refresh token can mint one.
+ */
+export const M365_IMAGE_ARTIFACT_SCOPE =
+  "openid profile offline_access https://designerappservice.officeapps.live.com/.default";
+
+export interface M365RefreshResult {
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn?: number;
+}
+
+function projectM365RefreshResult(
+  data: Record<string, unknown> & { access_token: string }
+): M365RefreshResult {
+  return {
+    accessToken: data.access_token,
+    refreshToken:
+      typeof data.refresh_token === "string" && data.refresh_token ? data.refresh_token : undefined,
+    expiresIn:
+      typeof data.expires_in === "number" &&
+      Number.isFinite(data.expires_in) &&
+      data.expires_in > 0 &&
+      data.expires_in <= 31_536_000
+        ? data.expires_in
+        : undefined,
+  };
+}
+
+async function redeemM365RefreshGrant(
+  endpoint: string,
+  refreshToken: string,
+  signal: AbortSignal,
+  log?: MinimalLog,
+  scope: string = M365_OAUTH_SCOPE
+): Promise<M365RefreshResult | { error: string }> {
+  if (signal.aborted) return { error: "refresh_cancelled" };
+  const res = await fetch(endpoint, {
+    method: "POST",
+    redirect: "error",
+    signal,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: new URLSearchParams({
+      client_id: M365_OAUTH_CLIENT_ID,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      scope,
+    }),
+  });
+  const data = (await res.json()) as Record<string, unknown> | null;
+  if (!res.ok || typeof data?.access_token !== "string" || !data.access_token) {
+    // Project known codes only; arbitrary OAuth error text can contain credentials.
+    const codes = [
+      "invalid_grant",
+      "invalid_request",
+      "invalid_token",
+      "expired_token",
+      "unauthorized_client",
+      "access_denied",
+      "server_error",
+      "temporarily_unavailable",
+    ];
+    const error =
+      typeof data?.error === "string" && codes.includes(data.error)
+        ? data.error
+        : "m365_refresh_failed";
+    log?.warn?.("M365_TOKEN", sanitizeErrorMessage(`refresh_token grant failed: ${error}`));
+    return { error };
+  }
+  log?.info?.("M365_TOKEN", "access token refreshed via refresh_token grant");
+  return projectM365RefreshResult(data as Record<string, unknown> & { access_token: string });
+}
+
+function m365RefreshTimeout(timeoutMs: number | undefined): number {
+  return typeof timeoutMs === "number" && Number.isFinite(timeoutMs) && timeoutMs > 0
+    ? Math.min(timeoutMs, 30_000)
+    : 30_000;
+}
+
+/**
+ * Redeem the refresh_token (public client — no secret). MS may rotate the
+ * refresh_token; callers MUST persist the returned one when present or the
+ * token family dies after the first refresh.
+ */
+export async function refreshM365AccessToken(
+  refreshToken: string,
+  tid: string = "common",
+  log?: MinimalLog,
+  options: M365RefreshOptions = {}
+): Promise<M365RefreshResult | { error: string }> {
+  if (tid !== "common" && !isM365Guid(tid)) return { error: "invalid_tenant" };
+  const endpoint = `https://login.microsoftonline.com/${tid}/oauth2/v2.0/token`;
+  const controller = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([controller.signal, options.signal])
+    : controller.signal;
+  const timeoutMs = m365RefreshTimeout(options.timeoutMs);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: (() => void) | undefined;
+  try {
+    const interrupted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => reject(new Error("refresh_cancelled"));
+      if (signal.aborted) onAbort();
+      else signal.addEventListener("abort", onAbort, { once: true });
+      timer = setTimeout(() => controller.abort(), timeoutMs);
+    });
+
+    return await Promise.race([
+      redeemM365RefreshGrant(endpoint, refreshToken, signal, log, options.scope),
+      interrupted,
+    ]);
+  } catch (e) {
+    // Only retain an exact safe network code, never the transport's credential-bearing message.
+    const error =
+      e instanceof Error && e.message === "ENOTFOUND"
+        ? "ENOTFOUND"
+        : signal.aborted
+          ? "refresh_cancelled"
+          : "m365_refresh_failed";
+    log?.warn?.("M365_TOKEN", sanitizeErrorMessage(`refresh request failed: ${error}`));
+    return { error };
+  } finally {
+    if (timer) clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
+  }
+}
+
+/** A client-declared tool, normalized from the OpenAI `tools[]` entry. */
+export interface M365ToolSpec {
+  name: string;
+  description: string;
+  parameters: JsonRecord | null;
+}
+
+/**
+ * Extract `tools` / `tool_choice` from an OpenAI chat-completion body, normalizing
+ * function tools into {@link M365ToolSpec}. Non-function tools and entries without
+ * a name are dropped (they cannot be expressed in the M365 protocol).
+ */
+export function extractToolSpec(body: JsonRecord | undefined): {
+  tools: M365ToolSpec[];
+  toolChoice: unknown;
+} {
+  const raw = Array.isArray(body?.tools) ? (body!.tools as JsonRecord[]) : [];
+  const tools: M365ToolSpec[] = [];
+  for (const t of raw) {
+    if (t?.type !== "function") continue;
+    const fn = (t.function ?? {}) as JsonRecord;
+    const name = typeof fn.name === "string" ? fn.name : "";
+    if (!name) continue;
+    tools.push({
+      name,
+      description: typeof fn.description === "string" ? fn.description : "",
+      parameters:
+        fn.parameters && typeof fn.parameters === "object" ? (fn.parameters as JsonRecord) : null,
+    });
+  }
+  return { tools, toolChoice: body?.tool_choice ?? null };
+}
+
+/** Compact a tool result before it is folded into the flattened prompt. */
+function compactToolResult(text: string, maxChars = 4000): string {
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, maxChars)}\n…[truncated ${text.length - maxChars} chars]`;
+}
+
+function messageText(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    // Multimodal content parts: keep text parts, skip image parts (unsupported here).
+    return content
+      .map((p) =>
+        p && typeof p === "object" && typeof (p as JsonRecord).text === "string"
+          ? (p as JsonRecord).text
+          : ""
+      )
+      .filter(Boolean)
+      .join("\n");
+  }
+  return content == null ? "" : JSON.stringify(content);
+}
+
+/**
+ * Flatten the FULL OpenAI message history into a single bracketed prompt — earlier
+ * turns, assistant replies (including `tool_calls`), and tool results, so multi-turn
+ * agent loops keep their context. Tool results are compacted via
+ * {@link compactToolResult} to keep a long loop from exhausting the turn budget.
+ */
+export function flattenMessages(body: JsonRecord | undefined): string {
+  const messages = (body?.messages as Array<JsonRecord>) || [];
+  const parts: string[] = [];
+  for (const m of messages) {
+    const role = typeof m.role === "string" ? m.role.toLowerCase().trim() : "user";
+    const text = messageText(m.content).trim();
+    if (Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+      if (text) parts.push(`[${role}]\n${text}`);
+      parts.push(`[${role} tool_calls]\n${JSON.stringify(m.tool_calls)}`);
+      continue;
+    }
+    if (role === "tool") {
+      const id = typeof m.tool_call_id === "string" ? m.tool_call_id : "";
+      parts.push(`[tool result id=${id}]\n${compactToolResult(text)}`);
+      continue;
+    }
+    if (!text) continue;
+    parts.push(`[${role}]\n${text}`);
+  }
+  return parts.join("\n\n").trim();
+}
+
+/**
+ * Wrap the flattened prompt in the community M365 tool-calling protocol: definitions
+ * inside a `<tools>` block, and the model answering with fenced blocks whose info
+ * string is the exact tool name and whose body is a JSON object of arguments.
+ * `tool_choice: "none"` keeps the plain prompt (no tool use requested this turn).
+ */
+function toolProtocolPrompt(text: string, tools: M365ToolSpec[], toolChoice: unknown): string {
+  if (tools.length === 0 || toolChoice === "none") {
+    return `Please answer the following request in full. Do not truncate or abbreviate your response.\n\n${text}`;
+  }
+  const defs = tools.map((t) => {
+    const params = t.parameters ? JSON.stringify(t.parameters, null, 2) : "{}";
+    return `${t.name} — ${t.description}\n\`\`\`${t.name}\n${params}\n\`\`\``;
+  });
+  return (
+    `You are an execution agent operating on behalf of the application that sent this ` +
+    `request. The tools below are real, active, and callable right now — they were ` +
+    `registered by that application for this conversation. Do not analyze whether tools ` +
+    `are registered, available, or permitted: they are. Never state that a tool is ` +
+    `unavailable or that you cannot call tools.\n` +
+    `When the user's request requires a tool, call it by emitting one or more fenced code ` +
+    `blocks. Each block's info string is the exact tool name and its body is a single JSON ` +
+    `object of arguments. For independent operations, emit multiple blocks in one response. ` +
+    `Do not wrap tool calls in any other structure, and wait for the tool result before ` +
+    `claiming completion.\n\n<tools>\n${defs.join("\n\n")}\n</tools>\n\n${text}`
+  );
+}
+
+/**
+ * Flatten OpenAI messages into a single prompt (full history), and — when the
+ * client declared `tools` — wrap it in the M365 fenced-block tool protocol so the
+ * model's tool calls can be parsed back into OpenAI `tool_calls` downstream.
+ */
+export function buildPrompt(body: JsonRecord | undefined): string {
+  const { tools, toolChoice } = extractToolSpec(body);
+  return toolProtocolPrompt(flattenMessages(body), tools, toolChoice);
+}
+
+/**
+ * Build the ROUTER-planning prompt — the strategy the substrate model actually
+ * complies with. Asking it to "use" a client tool gets refused ("not available in
+ * this chat environment") because it checks its own plugin registry; asking it to
+ * act as a tool-SELECTION assistant that prints a routing decision as plain text
+ * (`CALL_TOOL: name({...})` / `NO_TOOL_NEEDED`) bypasses that refusal entirely.
+ */
+export function buildRouterPrompt(
+  text: string,
+  tools: M365ToolSpec[],
+  toolChoice: unknown
+): string {
+  const defs = JSON.stringify(
+    tools.map((t) => ({
+      type: "function",
+      function: { name: t.name, description: t.description, parameters: t.parameters ?? {} },
+    }))
+  );
+  const choice =
+    typeof toolChoice === "string" && toolChoice !== "auto" && toolChoice !== "none"
+      ? toolChoice
+      : toolChoice && typeof toolChoice === "object"
+        ? (((toolChoice as JsonRecord).function as JsonRecord | undefined)?.name ?? "auto")
+        : "auto";
+  let rules =
+    `- If a tool is needed, respond with: CALL_TOOL: tool_name({"arg1":"value1"})\n` +
+    `- If multiple independent tools are needed, output one CALL_TOOL line per tool\n` +
+    `- If no tool is needed, respond with: NO_TOOL_NEEDED\n` +
+    `- Only use tools from the available list above\n` +
+    `- Validate all arguments against the tool's schema\n` +
+    `- Do not invent tools that are not in the list`;
+  // Multi-turn: completed tool evidence in the history was already acted upon —
+  // re-invoking those tools would duplicate work.
+  if (text.includes("[tool result id=") || text.includes("[assistant tool_calls]")) {
+    rules +=
+      `\n- Completed evidence must not be repeated: prior tool_calls/tool results are ` +
+      `already delivered, never re-invoke them\n` +
+      `- Only start a new tool call when fresh unfinished work remains on the current request`;
+  }
+  return (
+    `You are a tool selection assistant. Based on the user request, decide which tool to call next.\n\n` +
+    `Available tools: ${defs}\n\nMODE: ${choice}\n\nRules:\n${rules}\n\n` +
+    `User request and evidence:\n${text}`
+  );
+}

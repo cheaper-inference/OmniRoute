@@ -1,0 +1,1185 @@
+"use client";
+
+import Icon from "@/shared/components/Icon";
+import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import {
+  Button,
+  Badge,
+  Checkbox,
+  Input,
+  Modal,
+  SegmentedControl,
+  Select,
+  Textarea,
+  Toggle,
+  TALL_MODAL_PROPS,
+} from "@/shared/components";
+import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
+import {
+  providerAllowsOptionalApiKey,
+  supportsBulkApiKey,
+  resolveWebProviderHost,
+} from "@/shared/constants/providers";
+import { parseBulkApiKeys } from "@/shared/utils/bulkApiKeyParser";
+import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
+import {
+  isBaseUrlConfigurableProvider,
+  getProviderBaseUrlDefault,
+  getProviderBaseUrlHint,
+  getProviderBaseUrlPlaceholder,
+  isGlmProvider,
+  getWebSessionCredentialLabel,
+  getWebSessionCredentialHint,
+  getWebSessionCredentialCheckLabel,
+  getAddCredentialModalTitle,
+  getLocalProviderMetadata,
+  normalizeAndValidateHttpBaseUrl,
+  extractCommandCodeCredentialInput,
+  combineModalCredential,
+  providerText,
+  validationBadgeProps,
+  validationErrorMessage,
+  type CommandCodeAuthFlowState,
+} from "../../providerPageHelpers";
+import { getWebSessionCredentialRequirement } from "../../webSessionCredentials";
+import { useOpenRouterPresetControl } from "../OpenRouterPresetInput";
+import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
+import HarImportButton from "../HarImportButton";
+import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
+import {
+  assignM365RefreshToken,
+  buildAddProviderSpecificData,
+} from "./connectionProviderSpecificData";
+import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
+import { getCommandCodeAuthPhaseLabel } from "./commandCodeAuthPhase";
+import { createInitialAddApiKeyFormData } from "./addApiKeyInitialFormData";
+import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
+import QuotaScrapingFields from "./QuotaScrapingFields";
+import GlmTeamQuotaFields from "./GlmTeamQuotaFields";
+import * as ProviderRegion from "./AlibabaProviderRegionField";
+export interface AddApiKeyModalProps {
+  isOpen: boolean;
+  provider?: string;
+  providerName?: string;
+  providerWebsite?: string;
+  initialBaseUrl?: string;
+  // #15006 — pass live connection NAMES (not a count): after a delete the count
+  // no longer matches the highest suffix, so a count-derived default collides
+  // with a live connection and the backend name-upsert overwrites it.
+  existingConnectionNames?: string[];
+  isCompatible?: boolean;
+  isAnthropic?: boolean;
+  isCcCompatible?: boolean;
+  isCommandCode?: boolean;
+  commandCodeAuthState?: CommandCodeAuthFlowState;
+  onStartCommandCodeAuth?: () => void;
+  onSave: (data: {
+    name: string;
+    apiKey?: string;
+    priority: number;
+    baseUrl?: string;
+    defaultModel?: string;
+    providerSpecificData?: Record<string, unknown>;
+  }) => Promise<void | unknown>;
+  onClose: () => void;
+}
+
+export default function AddApiKeyModal({
+  isOpen,
+  provider,
+  providerName,
+  providerWebsite,
+  initialBaseUrl,
+  existingConnectionNames = [],
+  isCompatible,
+  isAnthropic,
+  isCcCompatible,
+  isCommandCode,
+  commandCodeAuthState,
+  onStartCommandCodeAuth,
+  onSave,
+  onClose,
+}: AddApiKeyModalProps) {
+  const t = useTranslations("providers");
+  const showFreeModelsToggle = providerSupportsFreeOnlyImport(provider);
+  const usesBaseUrl = isBaseUrlConfigurableProvider(provider);
+  const defaultBaseUrl = getProviderBaseUrlDefault(provider);
+  const isVertex = provider === "vertex" || provider === "vertex-partner";
+  const { defaultRegion, showsRegion } = ProviderRegion.getProviderRegionConfig(provider);
+  const isModal = provider === "modal";
+  const isGlm = isGlmProvider(provider);
+  const isQoder = provider === "qoder";
+  const isFreebuff = provider === "freebuff";
+  const openRouterPreset = useOpenRouterPresetControl(provider, t);
+  const isCloudflare = provider === "cloudflare-ai";
+  const localProviderMetadata = getLocalProviderMetadata(provider);
+  const isLocalSelfHostedProvider = !!localProviderMetadata;
+  const isGooglePse = provider === "google-pse-search";
+  const isChatGptWebCodex = provider === "chatgpt-web-codex";
+  const isAwsPolly = provider === "aws-polly";
+  const webSessionCredential = getWebSessionCredentialRequirement(provider);
+  const isNoAuthWebSessionCredential = webSessionCredential?.kind === "none";
+  const isWebSessionCredential = !!webSessionCredential && webSessionCredential.kind !== "none";
+  // #6268 — for web-session providers, resolve the provider's public site so the
+  // modal can offer a prominent "Open ‹host› →" link. Gated on webSessionCredential
+  // so non-web providers never render a link.
+  const webProviderHostLink = webSessionCredential
+    ? resolveWebProviderHost(provider, defaultBaseUrl)
+    : null;
+  const providerDisplayName = providerName || provider || "";
+  const apiKeyOptional =
+    providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
+  const commandCodeAuthPhaseLabel = getCommandCodeAuthPhaseLabel(commandCodeAuthState);
+  const [formData, setFormData] = useState(() =>
+    createInitialAddApiKeyFormData({
+      provider,
+      existingConnectionNames,
+      initialBaseUrl,
+      defaultBaseUrl,
+      showsRegion,
+      defaultRegion,
+    })
+  );
+  const [validating, setValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState(null);
+  const [validationCapabilities, setValidationCapabilities] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [copiedCommandCodeField, setCopiedCommandCodeField] = useState<string | null>(null);
+  const [mode, setMode] = useState<"single" | "bulk">("single");
+  const [bulkText, setBulkText] = useState("");
+  const [bulkValidateKeys, setBulkValidateKeys] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{
+    success: number;
+    failed: number;
+    total: number;
+    errors: Array<{ index: number; name: string; message: string }>;
+  } | null>(null);
+  const [bulkWarnings, setBulkWarnings] = useState<string[]>([]);
+  const resetOpenRouterPreset = openRouterPreset.setValue;
+  const wasOpenRef = useRef(false);
+  const [previousProvider, setPreviousProvider] = useState(provider);
+  if (provider !== previousProvider) {
+    setPreviousProvider(provider);
+    setFormData((current) => ({ ...current, m365RefreshToken: "" }));
+  }
+  useEffect(() => {
+    const wasOpen = wasOpenRef.current;
+    wasOpenRef.current = isOpen;
+    if (!isOpen || wasOpen) return;
+    // On open, start from a fresh form: the modal stays mounted between opens, so
+    // without this the previous key, bulk text and tab survived a close/save. The
+    // fresh form also carries a unique default name so a second API key for the
+    // same provider doesn't reuse "main" and trigger the backend name-based upsert
+    // that would silently overwrite the first connection (#6499, #11033).
+    setFormData(
+      createInitialAddApiKeyFormData({
+        provider,
+        existingConnectionNames,
+        initialBaseUrl,
+        defaultBaseUrl,
+        showsRegion,
+        defaultRegion,
+      })
+    );
+    setValidationResult(null);
+    setValidationCapabilities(null);
+    setSaveError(null);
+    setShowAdvanced(false);
+    setMode("single");
+    setBulkText("");
+    setBulkValidateKeys(false);
+    setBulkResult(null);
+    setBulkWarnings([]);
+    resetOpenRouterPreset("");
+  }, [
+    defaultBaseUrl,
+    defaultRegion,
+    existingConnectionNames,
+    initialBaseUrl,
+    isOpen,
+    provider,
+    resetOpenRouterPreset,
+    showsRegion,
+  ]);
+  const bulkSupported = supportsBulkApiKey(provider);
+  const apiCredentialLabel = isModal
+    ? providerText(t, "modalTokenIdLabel", "Token ID")
+    : isAwsPolly
+      ? providerText(t, "awsPollySecretAccessKeyLabel", "AWS Secret Access Key")
+      : isVertex
+        ? providerText(t, "vertexCredentialLabel", "API Key or Service Account JSON")
+        : isQoder
+          ? t("personalAccessTokenLabel")
+          : webSessionCredential
+            ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
+            : apiKeyOptional
+              ? `${t("apiKeyLabel")} (${t("optional").toLowerCase()})`
+              : t("apiKeyLabel");
+  const apiCredentialPlaceholder = isModal
+    ? "ak-xxxxxxxxxxxxxxxx"
+    : isVertex
+      ? t("vertexServiceAccountPlaceholder")
+      : isWebSessionCredential
+        ? webSessionCredential.placeholder
+        : isQoder
+          ? t("qoderPatPlaceholder")
+          : isFreebuff
+            ? "Enter Freebuff / Codebuff Auth Token (e.g. 038fcdf9-...)"
+            : apiKeyOptional
+              ? t("optional")
+              : undefined;
+  const apiCredentialHint = isModal
+    ? providerText(
+        t,
+        "modalTokenIdHint",
+        "Modal auth uses a Token ID + Token Secret pair. Create one at https://modal.com/settings → API Tokens."
+      )
+    : isVertex
+      ? providerText(
+          t,
+          "vertexCredentialHint",
+          "API keys use the curated project catalog. Service Account JSON enables live Model Garden discovery."
+        )
+      : isQoder
+        ? t("qoderPatHint")
+        : isFreebuff
+          ? "Freebuff uses the auth token from `freebuff login` (or use the Sign in button for the browser login)."
+          : isWebSessionCredential
+            ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, false)
+            : isLocalSelfHostedProvider
+              ? t("localProviderApiKeyOptionalHint", {
+                  provider: localProviderMetadata?.name || providerName || provider || "",
+                })
+              : apiKeyOptional
+                ? t("apiKeyOptionalHint")
+                : undefined;
+  const credentialValidationFailedMessage = isWebSessionCredential
+    ? providerText(
+        t,
+        "webSessionCredentialValidationFailed",
+        "Session credential validation failed. Sign in again, copy a fresh credential, and try again."
+      )
+    : t("apiKeyValidationFailed");
+  const validationBadge = validationResult ? validationBadgeProps(validationResult) : null;
+  // Normalize raw credential field(s) into the single value stored as `apiKey`
+  // (#5088 command-code extract; #5446 Modal id:secret join; else verbatim).
+  const resolveCredentialInput = () =>
+    isCommandCode
+      ? extractCommandCodeCredentialInput(formData.apiKey)
+      : isModal
+        ? combineModalCredential(formData.apiKey, formData.tokenSecret)
+        : formData.apiKey;
+
+  const validateRequestBody = (apiKey: string) =>
+    JSON.stringify(
+      buildProviderValidateRequestBody({
+        provider,
+        apiKey,
+        formData,
+        isAwsPolly,
+        showsRegion,
+        defaultRegion,
+        isChatGptWebCodex,
+      })
+    );
+  const handleValidate = async () => {
+    setValidating(true);
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/providers/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: validateRequestBody(resolveCredentialInput()),
+      });
+      const data = await res.json();
+      const ok = !!data.valid;
+      const unsupported = !!data.unsupported;
+      setValidationResult(ok ? "success" : unsupported ? "unsupported" : "failed");
+      setValidationCapabilities(
+        ok && data.capabilities && typeof data.capabilities === "object" ? data.capabilities : null
+      );
+      // #5088: surface backend reason (e.g. TLS/EACCES) instead of bare "invalid".
+      const reason = validationErrorMessage(data.error);
+      if (!ok && !unsupported && reason) {
+        setSaveError(reason);
+      }
+    } catch {
+      setValidationResult("failed");
+    } finally {
+      setValidating(false);
+    }
+  };
+  const copyCommandCodeValue = async (value: string | undefined, key: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedCommandCodeField(key);
+      window.setTimeout(() => setCopiedCommandCodeField(null), 1500);
+    } catch {
+      setSaveError("Copy failed. Select the text and copy it manually.");
+    }
+  };
+
+  const handleSubmit = async () => {
+    const credentialInput = resolveCredentialInput();
+    if (
+      !provider ||
+      (!isCompatible && !apiKeyOptional && !credentialInput) ||
+      (isAwsPolly && !formData.awsAccessKeyId.trim())
+    )
+      return;
+
+    setSaving(true);
+    setSaveError(null);
+    try {
+      if (isGooglePse && !formData.cx.trim()) {
+        setSaveError(t("searchEngineIdRequired"));
+        return;
+      }
+
+      let validatedBaseUrl = null;
+      if (usesBaseUrl) {
+        const checked = normalizeAndValidateHttpBaseUrl(formData.baseUrl, defaultBaseUrl);
+        if (checked.error) {
+          setSaveError(checked.error);
+          return;
+        }
+        validatedBaseUrl = checked.value;
+      }
+
+      let isValid = Boolean(isNoAuthWebSessionCredential && !credentialInput);
+      let validationError: string | null = null;
+      let isUnsupported = false; // #5565/#5567: no live validator → save anyway
+      let validatedProviderSpecificData: Record<string, unknown> | undefined;
+      if (!isValid) {
+        try {
+          setValidating(true);
+          setValidationResult(null);
+          const res = await fetch("/api/providers/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: validateRequestBody(credentialInput),
+          });
+          const data = await res.json();
+          isValid = !!data.valid;
+          isUnsupported = !!data.unsupported;
+          const submitReason = validationErrorMessage(data.error);
+          if (!isValid && submitReason) {
+            validationError = submitReason;
+          }
+          if (
+            isValid &&
+            data.providerSpecificData &&
+            typeof data.providerSpecificData === "object"
+          ) {
+            validatedProviderSpecificData = data.providerSpecificData;
+          }
+          setValidationResult(isValid ? "success" : isUnsupported ? "unsupported" : "failed");
+        } catch {
+          setValidationResult("failed");
+        } finally {
+          setValidating(false);
+        }
+      }
+
+      if (!isValid) {
+        if (isUnsupported || (apiKeyOptional && !credentialInput)) {
+          console.debug("Validation unsupported/optional; proceeding to save as-is.");
+        } else {
+          setSaveError(validationError || credentialValidationFailedMessage);
+          return;
+        }
+      }
+
+      const providerSpecificData = buildAddProviderSpecificData({
+        provider,
+        formData,
+        openRouterPreset,
+        showFreeModelsToggle,
+        isGooglePse,
+        usesBaseUrl,
+        validatedBaseUrl,
+        showsRegion,
+        defaultRegion,
+        isGlm,
+        isCloudflare,
+        isCcCompatible,
+      });
+      const mergedProviderSpecificData = {
+        ...(providerSpecificData || {}),
+        ...(validatedProviderSpecificData || {}),
+      };
+      assignM365RefreshToken(provider, formData, mergedProviderSpecificData);
+
+      const encodedCredential = isChatGptWebCodex
+        ? JSON.stringify({
+            version: 1,
+            cookie: credentialInput.trim().replace(/^cookie\s*:\s*/i, ""),
+            runtimeKey: formData.runtimeKey.trim(),
+          })
+        : credentialInput.trim();
+      const payload = {
+        name: formData.name,
+        apiKey: encodedCredential || undefined,
+        priority: formData.priority,
+        testStatus: "active",
+        defaultModel: isCompatible ? formData.defaultModel.trim() || undefined : undefined,
+        providerSpecificData:
+          Object.keys(mergedProviderSpecificData).length > 0
+            ? mergedProviderSpecificData
+            : undefined,
+      };
+
+      const error = await onSave(payload);
+      if (error) {
+        setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBulkSubmit = async () => {
+    if (!provider) return;
+    const parsed = parseBulkApiKeys(bulkText, { withAccountId: isCloudflare });
+    setBulkWarnings(parsed.warnings);
+    if (parsed.entries.length === 0) return;
+
+    setSaving(true);
+    setBulkResult(null);
+    setSaveError(null);
+
+    try {
+      const bulkProviderSpecificData: Record<string, unknown> = {};
+      if (usesBaseUrl) {
+        const checked = normalizeAndValidateHttpBaseUrl(formData.baseUrl, defaultBaseUrl);
+        if (checked.error) {
+          setSaveError(checked.error);
+          return;
+        }
+        bulkProviderSpecificData.baseUrl = checked.value;
+      }
+      if (showsRegion) {
+        bulkProviderSpecificData.region = formData.region.trim() || defaultRegion;
+      }
+      openRouterPreset.applyTo(bulkProviderSpecificData);
+      if (showFreeModelsToggle && formData.importFreeModelsOnly) {
+        bulkProviderSpecificData.importFreeModelsOnly = true;
+      }
+      const providerSpecificData =
+        Object.keys(bulkProviderSpecificData).length > 0 ? bulkProviderSpecificData : undefined;
+
+      const res = await fetch("/api/providers/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: provider === "kimi-coding" ? "kimi-coding-apikey" : provider,
+          entries: parsed.entries.map((e) => ({
+            name: e.name,
+            apiKey: e.apiKey,
+            ...(e.accountId ? { accountId: e.accountId } : {}),
+          })),
+          priority: formData.priority || 1,
+          providerSpecificData,
+          validateKeys: bulkValidateKeys,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSaveError(typeof data?.error === "string" ? data.error : t("failedSaveConnection"));
+        return;
+      }
+      setBulkResult({
+        success: data.success || 0,
+        failed: data.failed || 0,
+        total: data.total || 0,
+        errors: Array.isArray(data.errors) ? data.errors : [],
+      });
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : t("failedSaveConnection"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const regionStep = ProviderRegion.useAlibabaProviderRegionStep({
+    isOpen,
+    provider,
+    title: `${t("addConnection")} · ${providerDisplayName}`,
+    onClose,
+    setFormData,
+  });
+
+  if (!provider) return null;
+  if (regionStep) return regionStep;
+
+  const freeModelsToggle = showFreeModelsToggle ? (
+    <Toggle
+      size="sm"
+      checked={formData.importFreeModelsOnly}
+      onChange={(checked) => setFormData({ ...formData, importFreeModelsOnly: checked })}
+      label={t("importFreeModelsOnlyLabel")}
+      description={t(freeOnlyImportHintKey(provider))}
+    />
+  ) : null;
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      title={getAddCredentialModalTitle(t, providerDisplayName, webSessionCredential)}
+      onClose={onClose}
+      size="lg"
+      {...TALL_MODAL_PROPS}
+    >
+      <div className="flex flex-col gap-4">
+        {webProviderHostLink && (
+          <a
+            href={webProviderHostLink.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+          >
+            <Icon name="open_in_new" size={18} />
+            {providerText(t, "openWebProviderSite", "Open {host}", {
+              host: webProviderHostLink.host,
+            })}
+          </a>
+        )}
+        {bulkSupported && (
+          <SegmentedControl
+            size="sm"
+            value={mode}
+            onChange={(next) => {
+              if (next === "single") {
+                setMode("single");
+                setBulkResult(null);
+                setBulkWarnings([]);
+              } else {
+                setMode("bulk");
+                setSaveError(null);
+              }
+            }}
+            options={[
+              { value: "single", label: t("bulkTabSingle") },
+              { value: "bulk", label: t("bulkTabBulkAdd") },
+            ]}
+          />
+        )}
+
+        {bulkSupported && mode === "bulk" && (
+          <div className="flex flex-col gap-3">
+            <p className="text-xs text-text-muted">
+              {isCloudflare ? t("bulkAddFormatHintCloudflare") : t("bulkAddFormatHint")}
+            </p>
+            {openRouterPreset.input}
+            {freeModelsToggle}
+            <Textarea
+              className="min-h-[140px] resize-y font-mono text-sm"
+              placeholder={
+                isCloudflare
+                  ? "name1|account-id-1|cf-token-1\nname2|account-id-2|cf-token-2"
+                  : "name1|sk-key1\nname2|sk-key2\nsk-key-only-auto-named"
+              }
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+            />
+            <div className="flex items-end gap-4 flex-wrap">
+              <Input
+                type="number"
+                label={t("priorityLabel")}
+                min={1}
+                max={100}
+                value={formData.priority}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    priority: Number.parseInt(e.target.value) || 1,
+                  })
+                }
+                className="w-auto min-w-0"
+                inputClassName="w-20"
+              />
+              <Checkbox
+                label={t("bulkValidateKeys")}
+                checked={bulkValidateKeys}
+                onChange={(e) => setBulkValidateKeys(e.target.checked)}
+              />
+            </div>
+            {bulkWarnings.length > 0 && (
+              <div className="rounded border border-warning/25 bg-warning/10 p-2 text-xs text-warning space-y-1">
+                {bulkWarnings.map((w, i) => (
+                  <div key={i}>{w}</div>
+                ))}
+              </div>
+            )}
+            {bulkResult && (
+              <div
+                className={`text-sm font-medium ${
+                  bulkResult.failed > 0 ? "text-warning" : "text-success"
+                }`}
+              >
+                {t("bulkAddedCount", { count: bulkResult.success })}
+                {bulkResult.failed > 0 && (
+                  <>, {t("bulkFailedCount", { count: bulkResult.failed })}</>
+                )}
+                {bulkResult.errors.length > 0 && (
+                  <ul className="mt-2 list-disc pl-5 text-xs text-text-muted font-normal space-y-0.5">
+                    {bulkResult.errors.slice(0, 10).map((err, i) => (
+                      <li key={i}>
+                        {err.name}: {err.message}
+                      </li>
+                    ))}
+                    {bulkResult.errors.length > 10 && (
+                      <li>… {bulkResult.errors.length - 10} more</li>
+                    )}
+                  </ul>
+                )}
+              </div>
+            )}
+            {saveError && <div className="text-sm text-error">{saveError}</div>}
+            <div className="flex gap-2">
+              <Button onClick={handleBulkSubmit} fullWidth disabled={saving || !bulkText.trim()}>
+                {saving ? t("adding") : t("bulkAddAllKeys")}
+              </Button>
+              <Button onClick={onClose} variant="ghost" fullWidth>
+                {t("cancel")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {(!bulkSupported || mode === "single") && (
+          <>
+            {isCcCompatible && (
+              <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
+                <div className="flex items-start gap-2">
+                  <Icon name="warning" size={18} className="mt-0.5 text-warning" />
+                  <p>{t("ccCompatibleValidationHint")}</p>
+                </div>
+              </div>
+            )}
+            {isCommandCode && onStartCommandCodeAuth && (
+              <div className="rounded-lg border border-info/20 bg-info/10 px-3 py-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <Icon name="open_in_new" size={18} className="mt-0.5 text-info" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-text-main">
+                      {t("providerDetailBrowserManualConnect")}
+                    </p>
+                    <p className="mt-1 text-xs text-text-muted">
+                      Open Command Code Studio, then paste the returned key/JSON/URL into the API
+                      key field below.
+                    </p>
+                    {commandCodeAuthState?.message && (
+                      <p className="mt-2 text-xs text-text-muted">
+                        {commandCodeAuthPhaseLabel}: {commandCodeAuthState.message}
+                      </p>
+                    )}
+                    {commandCodeAuthState?.authUrl && (
+                      <div className="mt-3 space-y-2">
+                        <div>
+                          <p className="mb-1 text-xs font-medium text-text-main">
+                            {t("providerDetailAuthUrl")}
+                          </p>
+                          <div className="flex gap-2">
+                            <Input
+                              value={commandCodeAuthState.authUrl}
+                              readOnly
+                              className="flex-1 font-mono text-xs"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={copiedCommandCodeField === "authUrl" ? "check" : "content_copy"}
+                              onClick={() =>
+                                copyCommandCodeValue(commandCodeAuthState.authUrl, "authUrl")
+                              }
+                            />
+                          </div>
+                        </div>
+                        {commandCodeAuthState.callbackUrl && (
+                          <div>
+                            <p className="mb-1 text-xs font-medium text-text-main">
+                              {t("providerDetailCallbackUrl")}
+                            </p>
+                            <div className="flex gap-2">
+                              <Input
+                                value={commandCodeAuthState.callbackUrl}
+                                readOnly
+                                className="flex-1 font-mono text-xs"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon={
+                                  copiedCommandCodeField === "callbackUrl"
+                                    ? "check"
+                                    : "content_copy"
+                                }
+                                onClick={() =>
+                                  copyCommandCodeValue(
+                                    commandCodeAuthState.callbackUrl,
+                                    "callbackUrl"
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    icon="open_in_new"
+                    loading={
+                      commandCodeAuthState?.phase === "starting" ||
+                      commandCodeAuthState?.phase === "polling" ||
+                      commandCodeAuthState?.phase === "applying"
+                    }
+                    onClick={onStartCommandCodeAuth}
+                  >
+                    Connect in browser
+                  </Button>
+                </div>
+              </div>
+            )}
+            <CommandCodeZdrToggle
+              provider={provider}
+              checked={formData.commandCodeZdrEnabled}
+              onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+            />
+            <Input
+              label={t("nameLabel")}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder={isQoder ? t("personalAccessTokenLabel") : t("productionKey")}
+            />
+            {webSessionCredential && (
+              <WebSessionCredentialGuide
+                requirement={webSessionCredential}
+                providerName={providerDisplayName}
+                providerWebsite={providerWebsite}
+                t={t}
+              />
+            )}
+            {provider && (
+              <HarImportButton
+                provider={provider}
+                onImport={(apiKey) => setFormData({ ...formData, apiKey })}
+              />
+            )}
+            {!isNoAuthWebSessionCredential &&
+              (() => {
+                const isCheckDisabled =
+                  (!isCompatible && !apiKeyOptional && !formData.apiKey) ||
+                  (isGooglePse && !formData.cx.trim()) ||
+                  validating ||
+                  saving;
+                return (
+                  <div className="flex gap-2">
+                    <Input
+                      label={apiCredentialLabel}
+                      type="password"
+                      value={formData.apiKey}
+                      onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !isCheckDisabled) {
+                          e.preventDefault();
+                          handleValidate();
+                        }
+                      }}
+                      className="flex-1"
+                      placeholder={apiCredentialPlaceholder}
+                      hint={apiCredentialHint}
+                      autoComplete="off"
+                      spellCheck={false}
+                      autoCapitalize="off"
+                    />
+                    <div className="pt-6">
+                      <Button
+                        onClick={handleValidate}
+                        disabled={isCheckDisabled}
+                        variant="secondary"
+                      >
+                        {validating
+                          ? t("checking")
+                          : webSessionCredential
+                            ? getWebSessionCredentialCheckLabel(t, webSessionCredential)
+                            : t("check")}
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
+            {isChatGptWebCodex && (
+              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+                <div>
+                  <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
+                  <p className="mt-1 text-xs text-text-muted">{t("codexTunnelDescription")}</p>
+                </div>
+                <Input
+                  label={t("tunnelIdLabel")}
+                  value={formData.tunnelId}
+                  onChange={(e) => setFormData({ ...formData, tunnelId: e.target.value })}
+                  placeholder="tunnel_0123456789abcdef0123456789abcdef"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <Input
+                  label={t("tunnelRuntimeKeyLabel")}
+                  type="password"
+                  value={formData.runtimeKey}
+                  onChange={(e) => setFormData({ ...formData, runtimeKey: e.target.value })}
+                  placeholder={t("tunnelRuntimeKeyPlaceholder")}
+                  hint={t("tunnelRuntimeKeyHint")}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <Input
+                  label={t("chatgptConnectorLabel")}
+                  value={formData.connectorName}
+                  onChange={(e) => setFormData({ ...formData, connectorName: e.target.value })}
+                  placeholder={CHATGPT_WEB_CODEX_CONNECTOR_NAME}
+                />
+                {validationCapabilities && (
+                  <div className="grid grid-cols-2 gap-2 text-xs text-text-muted">
+                    <div>Browser: bereit</div>
+                    <div>Storage-State: geprüft</div>
+                    <div>ChatGPT-Anmeldung: bestätigt</div>
+                    <div>Temporary Chat: bereit</div>
+                    <div>
+                      Pro:{" "}
+                      {validationCapabilities.proAvailable === true ? "verfügbar" : "nicht erkannt"}
+                    </div>
+                    <div>
+                      Toolmodus:{" "}
+                      {formData.tunnelId.trim() && formData.runtimeKey.trim()
+                        ? "konfiguriert"
+                        : "global oder read-only"}
+                    </div>
+                  </div>
+                )}
+                <div className="pt-6">
+                  <Button
+                    onClick={handleValidate}
+                    disabled={
+                      (!isCompatible && !apiKeyOptional && !formData.apiKey) ||
+                      (isAwsPolly && !formData.awsAccessKeyId.trim()) ||
+                      (isGooglePse && !formData.cx.trim()) ||
+                      validating ||
+                      saving
+                    }
+                    variant="secondary"
+                  >
+                    {validating
+                      ? t("checking")
+                      : webSessionCredential
+                        ? getWebSessionCredentialCheckLabel(t, webSessionCredential)
+                        : t("check")}
+                  </Button>
+                </div>
+              </div>
+            )}
+            {isModal && (
+              <Input
+                label={providerText(t, "modalTokenSecretLabel", "Token Secret")}
+                type="password"
+                value={formData.tokenSecret}
+                onChange={(e) => setFormData({ ...formData, tokenSecret: e.target.value })}
+                placeholder="as-xxxxxxxxxxxxxxxx"
+                hint={providerText(
+                  t,
+                  "modalTokenSecretHint",
+                  "Paired with the Token ID above; combined as Bearer <id>:<secret>."
+                )}
+                autoComplete="off"
+                spellCheck={false}
+                autoCapitalize="off"
+              />
+            )}
+            {isAwsPolly && (
+              <>
+                <Input
+                  label={providerText(t, "awsPollyAccessKeyIdLabel", "AWS Access Key ID")}
+                  value={formData.awsAccessKeyId}
+                  onChange={(e) => setFormData({ ...formData, awsAccessKeyId: e.target.value })}
+                  placeholder="AKIA..."
+                  hint={providerText(
+                    t,
+                    "awsPollyAccessKeyIdHint",
+                    "Used with the secret access key to sign Amazon Polly requests."
+                  )}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="off"
+                />
+                <Input
+                  label={providerText(t, "awsPollyRegionLabel", "AWS Region")}
+                  value={formData.region}
+                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                  placeholder="us-east-1"
+                  hint={providerText(
+                    t,
+                    "awsPollyRegionHint",
+                    "Defaults to us-east-1 when left blank."
+                  )}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="off"
+                />
+                <Input
+                  label={providerText(
+                    t,
+                    "awsPollySessionTokenLabel",
+                    "AWS Session Token (optional)"
+                  )}
+                  type="password"
+                  value={formData.awsSessionToken}
+                  onChange={(e) => setFormData({ ...formData, awsSessionToken: e.target.value })}
+                  hint={providerText(
+                    t,
+                    "awsPollySessionTokenHint",
+                    "Required only for temporary AWS credentials."
+                  )}
+                  autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="off"
+                />
+              </>
+            )}
+            {isGooglePse && (
+              <Input
+                label={t("searchEngineIdLabel")}
+                value={formData.cx}
+                onChange={(e) => setFormData({ ...formData, cx: e.target.value })}
+                placeholder="012345678901234567890:abc123xyz"
+                hint={t("searchEngineIdHint")}
+              />
+            )}
+            {validationBadge && (
+              <Badge variant={validationBadge.variant}>
+                {providerText(t, validationBadge.labelKey, validationBadge.fallback)}
+              </Badge>
+            )}
+            {saveError && (
+              <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
+                {saveError}
+              </div>
+            )}
+            {(isCcCompatible || openRouterPreset.input) && (
+              <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+                {isCcCompatible && (
+                  <CcCompatibleRequestDefaultsFields
+                    values={formData}
+                    onChange={(patch) => setFormData({ ...formData, ...patch })}
+                  />
+                )}
+                {openRouterPreset.input}
+              </div>
+            )}
+            {freeModelsToggle}
+            <QuotaScrapingFields
+              provider={provider}
+              values={formData}
+              onChange={(patch) => setFormData({ ...formData, ...patch })}
+              t={t}
+            />
+            {isCompatible && (
+              <Input
+                label={t("compatibleDefaultModelLabel")}
+                value={formData.defaultModel}
+                onChange={(e) => setFormData({ ...formData, defaultModel: e.target.value })}
+                placeholder={isAnthropic ? "claude-3-5-sonnet-latest" : "gpt-4o-mini"}
+                hint={t("compatibleDefaultModelHint")}
+                data-testid="compat-default-model-input"
+              />
+            )}
+            {isCompatible && !isCcCompatible && (
+              <p className="text-xs text-text-muted">
+                {isAnthropic
+                  ? t("validationChecksAnthropicCompatible", {
+                      provider: providerName || t("anthropicCompatibleName"),
+                    })
+                  : t("validationChecksOpenAiCompatible", {
+                      provider: providerName || t("openaiCompatibleName"),
+                    })}
+              </p>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="self-start"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              aria-expanded={showAdvanced}
+              aria-controls="add-api-key-advanced-settings"
+            >
+              <Icon
+                name="chevron_right"
+                size={14}
+                className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}
+              />
+              {t("advancedSettings")}
+            </Button>
+            {showAdvanced && (
+              <div
+                id="add-api-key-advanced-settings"
+                className="flex flex-col gap-3 pl-2 border-l-2 border-border"
+              >
+                <Input
+                  label={t("customUserAgentLabel")}
+                  value={formData.customUserAgent}
+                  onChange={(e) => setFormData({ ...formData, customUserAgent: e.target.value })}
+                  placeholder="my-app/1.0"
+                  hint={t("customUserAgentHint")}
+                />
+                {provider === "huggingface" && (
+                  <Input
+                    label={t("huggingfaceBillToLabel")}
+                    value={formData.huggingfaceBillTo}
+                    onChange={(e) =>
+                      setFormData({ ...formData, huggingfaceBillTo: e.target.value })
+                    }
+                    placeholder="account-123"
+                    hint={t("huggingfaceBillToHint")}
+                  />
+                )}
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenHint")}
+                  />
+                )}
+                <Input
+                  label={t("routingTagsLabel")}
+                  value={formData.routingTags}
+                  onChange={(e) => setFormData({ ...formData, routingTags: e.target.value })}
+                  placeholder={t("routingTagsPlaceholder")}
+                  hint={t("routingTagsHint")}
+                />
+                <Input
+                  label={t("excludedModelsLabel")}
+                  value={formData.excludedModels}
+                  onChange={(e) => setFormData({ ...formData, excludedModels: e.target.value })}
+                  placeholder={t("excludedModelsPlaceholder")}
+                  hint={t("excludedModelsHint")}
+                />
+                <Toggle
+                  size="sm"
+                  checked={formData.passthroughModels}
+                  onChange={(checked) => setFormData({ ...formData, passthroughModels: checked })}
+                  label={t("perModelQuotaLabel")}
+                  description={t("perModelQuotaDescription")}
+                />
+                {provider === "bailian-coding-plan" && (
+                  <Input
+                    label={t("consoleApiKeyOracleLabel")}
+                    value={formData.consoleApiKey}
+                    onChange={(e) => setFormData({ ...formData, consoleApiKey: e.target.value })}
+                    placeholder={t("consoleApiKeyOraclePlaceholder")}
+                    hint={t("consoleApiKeyOracleHint")}
+                    type="password"
+                  />
+                )}
+                <AgentrouterConsoleFields
+                  provider={provider}
+                  values={formData}
+                  onChange={(patch) => setFormData({ ...formData, ...patch })}
+                  t={t}
+                />
+              </div>
+            )}
+            <Input
+              label={t("validationModelIdLabel")}
+              placeholder={t("validationModelIdPlaceholder")}
+              value={formData.validationModelId}
+              onChange={(e) => setFormData({ ...formData, validationModelId: e.target.value })}
+              hint={t("validationModelIdHint")}
+            />
+            <Input
+              label={t("priorityLabel")}
+              type="number"
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({ ...formData, priority: Number.parseInt(e.target.value) || 1 })
+              }
+            />
+            {usesBaseUrl && (
+              <Input
+                label={t("baseUrlLabel")}
+                value={formData.baseUrl}
+                onChange={(e) => setFormData({ ...formData, baseUrl: e.target.value })}
+                placeholder={getProviderBaseUrlPlaceholder(provider)}
+                hint={getProviderBaseUrlHint(provider, t)}
+              />
+            )}
+            <ProviderRegion.ProviderRegionField
+              hideAlibaba
+              provider={provider}
+              value={formData.region}
+              onChange={(region) => setFormData({ ...formData, region })}
+            />
+            {isCloudflare && (
+              <Input
+                label={t("accountIdLabel")}
+                value={formData.accountId}
+                onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                placeholder={t("accountIdPlaceholder")}
+                hint={t("accountIdHint")}
+              />
+            )}
+            {isGlm && (
+              <div className="flex flex-col gap-3">
+                <Select
+                  label={t("apiRegionLabel")}
+                  hint={t("apiRegionHint")}
+                  value={formData.apiRegion}
+                  onChange={(e) => setFormData({ ...formData, apiRegion: e.target.value })}
+                  options={[
+                    { value: "international", label: t("apiRegionInternational") },
+                    { value: "china", label: t("apiRegionChina") },
+                  ]}
+                />
+                <GlmTeamQuotaFields
+                  values={formData}
+                  onChange={(patch) => setFormData({ ...formData, ...patch })}
+                  t={t}
+                />
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSubmit}
+                fullWidth
+                disabled={
+                  !formData.name ||
+                  (!isCompatible && !apiKeyOptional && !formData.apiKey) ||
+                  (isGooglePse && !formData.cx.trim()) ||
+                  saving ||
+                  (usesBaseUrl && !formData.baseUrl.trim() && !defaultBaseUrl)
+                }
+              >
+                {saving ? t("saving") : t("save")}
+              </Button>
+              <Button onClick={onClose} variant="ghost" fullWidth>
+                {t("cancel")}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </Modal>
+  );
+}

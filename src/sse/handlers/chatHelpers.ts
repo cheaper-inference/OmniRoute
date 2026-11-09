@@ -1,0 +1,1279 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
+import { credentialCooldownResponse } from "./credentialCooldownResponse";
+import {
+  getModelInfo,
+  getComboForModel,
+  getModelInfoOrRetirementResponse,
+} from "../services/model";
+import {
+  withModalityBridgeResponseHeaders,
+  type ModalityBridgeResponseHeaders,
+} from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
+import {
+  clearAccountError,
+  markAccountUnavailable,
+  buildExhaustionOptions,
+} from "../services/auth";
+import { maybeReactivateAfterExplicitProbe } from "../services/explicitInactiveProbe";
+import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
+import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/requestRejectedStreak.ts";
+import { clearAntigravityVerificationUrl } from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
+import {
+  createBuiltinAutoCombo,
+  prepareBuiltinAutoComboInputs,
+} from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
+import * as log from "../utils/logger";
+import { updateProviderCredentials } from "../services/tokenRefresh";
+import { detectFormatFromEndpoint } from "@omniroute/open-sse/services/provider.ts";
+import { resolveChatCoreTargetFormat } from "@omniroute/open-sse/handlers/chatCore/targetFormat.ts";
+import { handleChatCore } from "@omniroute/open-sse/handlers/chatCore.ts";
+import {
+  checkResourcePressureGuard,
+  type ResourcePressureGuardResult,
+} from "@omniroute/open-sse/utils/resourcePressure.ts";
+import {
+  errorResponse,
+  providerCircuitOpenResponse,
+  unavailableResponse,
+} from "@omniroute/open-sse/utils/error.ts";
+import { inheritTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors.ts";
+import { isRequestScopedUpstreamFailure } from "./comboFailureLogging";
+import { isCodexNativeResponsesRequest } from "./requestShapeGuards";
+import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
+import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { getCachedProviderNodes } from "@/lib/db/readCache";
+import {
+  runWithProxyContext,
+  runWithAppliedProxyCapture,
+  runWithTlsTracking,
+  isTlsFingerprintActive,
+  type AppliedProxySink,
+} from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { resolveProxyForConnection } from "@/lib/db/settings";
+import { hasBlockingProxyAssignment } from "@/lib/db/proxies";
+import {
+  type CircuitBreaker,
+  CircuitBreakerOpenError,
+  getCircuitBreaker,
+  isLocalStreamLifecycleError,
+} from "../../shared/utils/circuitBreaker";
+import { classify429FromError, type FailureKind } from "../../shared/utils/classify429";
+import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHints";
+import { resolveProviderId } from "../../shared/constants/providers";
+import { classifyProviderProbeResult } from "./providerProbeClassification";
+import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
+import {
+  isAutoRequestResolvedCapabilitiesEnabled,
+  isFeatureFlagEnabled,
+} from "../../shared/utils/featureFlags";
+
+import { noteProxyOutcome } from "./proxyOutcomeMemory";
+import { logProxyJournal } from "./proxyJournal";
+import type { AttemptJournalEntry } from "./proxyJournal";
+import { logTranslationEvent } from "../../lib/translatorEvents";
+import { getRuntimeProviderProfile } from "@omniroute/open-sse/services/accountFallback.ts";
+import { recordConnectionOutcome } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
+import { describeConnectionRestriction } from "../services/credentialSelectionDiagnostics.ts";
+
+// #14960: circuit-open 503 that also names the breaker's classified failure kind.
+function breakerOpenResponse(provider: string, breaker: CircuitBreaker, retryAfterSec: number) {
+  return providerCircuitOpenResponse(provider, retryAfterSec, breaker.getStatus().lastFailureKind);
+}
+
+// Models that explicitly cannot run on the codex/ChatGPT-Pro OAuth pool — when
+// a caller writes `codex/deepseek-v4-pro` we transparently reroute to the
+// canonical provider whose API key is configured. Saves callers from having
+// to know about the OAuth-vs-API-key split.
+const NON_OAUTH_MODEL_PREFIX = /^(deepseek|qwen|kimi|glm|minimax|mimo)/i;
+const PREFERRED_BY_FAMILY: Record<string, string> = {
+  deepseek: "deepseek",
+  qwen: "bailian",
+  kimi: "moonshot",
+  glm: "zhipu",
+  minimax: "minimax",
+  mimo: "moonshot",
+};
+
+const CODEX_NATIVE_RESPONSES_MODELS = new Set(["gpt-5.5"]);
+
+type TrafficType = "production" | "shadow";
+
+type ExecuteChatWithBreakerOptions = {
+  trafficType?: TrafficType;
+  [key: string]: any;
+};
+
+type ExecuteChatWithBreakerResult =
+  | { result: any; tlsFingerprintUsed: boolean; wasProviderProbe?: boolean }
+  | { localResourcePressureResult: ResourcePressureGuardResult; tlsFingerprintUsed: false };
+
+async function hasOnlyActiveCodexAccount() {
+  try {
+    const { getProviderConnections } = await import("@/lib/db/providers");
+    const connections = await getProviderConnections({ isActive: true });
+    const providers = new Set(
+      connections
+        .map((connection: any) => String(connection?.provider || "").trim())
+        .filter(Boolean)
+    );
+    return providers.size === 1 && providers.has("codex");
+  } catch {
+    return false;
+  }
+}
+
+export async function resolveModelOrError(
+  modelStr: string,
+  body: any,
+  endpointPath: string = "",
+  requestHeaders: Record<string, unknown> | null | undefined = null
+) {
+  const modelInfo = await getModelInfoOrRetirementResponse(modelStr);
+  if ("error" in modelInfo) return modelInfo;
+  const sourceFormat = detectFormatFromEndpoint(body, endpointPath);
+
+  if (
+    modelInfo.provider === "openai" &&
+    typeof modelInfo.model === "string" &&
+    CODEX_NATIVE_RESPONSES_MODELS.has(modelInfo.model) &&
+    sourceFormat === "openai-responses" &&
+    isCodexNativeResponsesRequest(body, endpointPath, requestHeaders)
+  ) {
+    log.info("ROUTING", `${modelStr} → codex/${modelInfo.model} (Codex native responses)`);
+    modelInfo.provider = "codex";
+  }
+
+  if (
+    modelInfo.provider === "openai" &&
+    modelInfo.model === "gpt-5.5" &&
+    sourceFormat === "openai-responses" &&
+    !isCodexNativeResponsesRequest(body, endpointPath, requestHeaders) &&
+    (await hasOnlyActiveCodexAccount())
+  ) {
+    // #2877: keep the bare model id (do NOT bake a `-medium` suffix). The Codex
+    // executor reads a model-name suffix as an explicit `modelEffort` that (per
+    // #2331) overrides the client's `reasoning.effort`, so injecting `-medium`
+    // here silently demoted a genuine `reasoning.effort=xhigh`. The default
+    // effort still comes from the connection fallback when the client sends none.
+    log.info("ROUTING", `${modelStr} → codex/gpt-5.5 (Codex-only active account)`);
+    modelInfo.provider = "codex";
+    modelInfo.model = "gpt-5.5";
+  }
+
+  // Forced-rewrite: codex provider doesn't serve DeepSeek/Qwen/Kimi/etc. Reroute
+  // these to their canonical native provider so the request lands on the right
+  // upstream API key instead of failing with a 400 on the OAuth account.
+  // Ambiguous candidates (e.g. deepseek-v4-pro lives on both ds + opencode-go)
+  // resolve to the model-family's native provider via NON_OAUTH_PROVIDER_BY_FAMILY.
+  if (
+    modelInfo.provider === "codex" &&
+    typeof modelInfo.model === "string" &&
+    NON_OAUTH_MODEL_PREFIX.test(modelInfo.model)
+  ) {
+    log.info(
+      "ROUTING",
+      `codex/${modelInfo.model} → re-resolving via native provider (codex OAuth does not serve this model)`
+    );
+    const rerouted = await getModelInfo(modelInfo.model);
+    if (rerouted.provider && rerouted.provider !== "codex") {
+      log.info("ROUTING", `codex/${modelInfo.model} → ${rerouted.provider}/${rerouted.model}`);
+      Object.assign(modelInfo, rerouted);
+    } else if ((rerouted as any).errorType === "ambiguous_model") {
+      const candidates: string[] = (rerouted as any).candidateProviders || [];
+      const family = modelInfo.model.match(NON_OAUTH_MODEL_PREFIX)?.[1]?.toLowerCase();
+      const pick = family && PREFERRED_BY_FAMILY[family];
+      if (pick && candidates.includes(pick)) {
+        log.info(
+          "ROUTING",
+          `codex/${modelInfo.model} → ${pick}/${modelInfo.model} (ambiguity resolved by family)`
+        );
+        modelInfo.provider = pick;
+        modelInfo.model = (rerouted as any).model;
+      }
+    }
+  }
+
+  // "auto" is a built-in virtual combo prefix, not a provider. parseModel("auto/fast")
+  // splits it into provider="auto" model="fast", so resolve it before credential lookup.
+  if (modelInfo.provider === "auto") {
+    const suffix = modelInfo.model || "";
+    const fuzzyCandidates = [`auto/best-${suffix}`, `auto/${suffix}`];
+
+    const exactCombo = await getComboForModel(modelStr);
+    if (exactCombo) {
+      log.info("ROUTING", `"auto" provider → combo "${modelStr}"`);
+      return { combo: exactCombo, provider: "auto", model: suffix };
+    }
+
+    // Preserve persisted fuzzy combo behavior before falling back to built-in virtual catalog ids.
+    for (const candidate of fuzzyCandidates) {
+      const fuzzyCombo = await getComboForModel(candidate);
+      if (fuzzyCombo) {
+        log.info("ROUTING", `"auto/${suffix}" → combo "${candidate}" (fuzzy)`);
+        return { combo: fuzzyCombo, provider: "auto", model: suffix };
+      }
+    }
+
+    // One pool preparation shared by the attempt below and the fuzzy fallbacks,
+    // built only when an id actually materializes (unknown ids never prepare).
+    // Default: the same inputs as createVirtualAutoCombo() (capabilities resolve on
+    // demand). AUTO_REQUEST_RESOLVED_CAPABILITIES (opt-in) resolves them up front,
+    // which also feeds them to the snapshot weights.
+    let prepared: Awaited<ReturnType<typeof prepareBuiltinAutoComboInputs>> | undefined;
+    const loadPrepared = async () =>
+      (prepared ??= await prepareBuiltinAutoComboInputs(undefined, {
+        includeResolvedCapabilities: isAutoRequestResolvedCapabilitiesEnabled(),
+      }));
+
+    try {
+      const virtualCombo = await createBuiltinAutoCombo(modelStr, suffix, loadPrepared);
+      const poolSize = virtualCombo.candidatePool?.length || 0;
+      log.info(
+        "AUTO",
+        `"auto" provider → built-in virtual combo "${modelStr}" (${poolSize} candidates)`
+      );
+      // #6458: fail fast instead of leaking a silent 15s upstream timeout when
+      // the category/tier filter (e.g. auto/coding:pro, auto/reasoning) matches
+      // zero connected candidates. An empty virtual combo has no targets to
+      // dispatch to, so downstream combo routing stalls on an empty set.
+      if (poolSize === 0) {
+        const msg = `No connected providers match '${modelStr}'. Connect a provider whose models satisfy this category/tier, or use a different auto combo.`;
+        log.warn("AUTO", msg, { model: modelStr });
+        return { error: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, msg) };
+      }
+      return { combo: virtualCombo, provider: "auto", model: suffix };
+    } catch (err) {
+      log.warn("CHAT", `Failed to create built-in auto combo "${modelStr}"`, { err });
+    }
+
+    // Fuzzy: "fast" → "auto/best-fast", "chat" → "auto/best-chat"
+    for (const candidate of fuzzyCandidates) {
+      try {
+        const virtualCombo = await createBuiltinAutoCombo(
+          candidate,
+          candidate.replace(/^auto\/?/, ""),
+          loadPrepared
+        );
+        log.info(
+          "AUTO",
+          `"auto/${suffix}" → built-in virtual combo "${candidate}" (fuzzy, ${virtualCombo.candidatePool?.length || 0} candidates)`
+        );
+        return { combo: virtualCombo, provider: "auto", model: suffix };
+      } catch {
+        /* Try next fuzzy candidate */
+      }
+    }
+
+    const message = `Model '${modelStr}' is not a valid combo or provider. Unknown built-in auto combo.`;
+    log.warn("CHAT", message, { model: modelStr });
+    return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+  }
+
+  if (!modelInfo.provider) {
+    // model_not_found: raised by resolveModelByProviderInference when no
+    // provider could be inferred — return a clear error instead of the
+    // misleading "openai" default that the old code silently fell back to.
+    if ((modelInfo as any).errorType === "model_not_found") {
+      const message =
+        (modelInfo as any).errorMessage ||
+        `Model '${modelStr}' could not be resolved to a known provider.`;
+      log.warn("CHAT", message, { model: modelStr });
+      return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+    }
+
+    if ((modelInfo as any).errorType === "ambiguous_model") {
+      // Family disambiguation: if the model name begins with a known
+      // non-OAuth family prefix, auto-pick the family-native provider
+      // from the candidate set instead of returning a 400. Saves callers
+      // (codex CLI, hermes, etc.) from having to guess the right alias.
+      const candidates: string[] = (modelInfo as any).candidateProviders || [];
+      const modelLower = (modelInfo.model || modelStr).toLowerCase();
+      const family = modelLower.match(NON_OAUTH_MODEL_PREFIX)?.[1];
+      const pick = family && PREFERRED_BY_FAMILY[family];
+      if (pick && candidates.includes(pick)) {
+        log.info(
+          "ROUTING",
+          `${modelStr} → ${pick}/${modelInfo.model} (ambiguity auto-resolved by family)`
+        );
+        modelInfo.provider = pick;
+      } else {
+        const message =
+          (modelInfo as any).errorMessage ||
+          `Ambiguous model '${modelStr}'. Use provider/model prefix (ex: gh/${modelStr} or cc/${modelStr}).`;
+        log.warn("CHAT", message, {
+          model: modelStr,
+          candidates:
+            (modelInfo as any).candidateAliases || (modelInfo as any).candidateProviders || [],
+        });
+        return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, message) };
+      }
+    } else {
+      log.warn("CHAT", "Invalid model format", { model: modelStr });
+      return { error: errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid model format") };
+    }
+  }
+
+  const { provider, model, extendedContext } = modelInfo;
+  // apiFormat: optional custom-model marker — see chatCore.ts for shape narrowing rationale.
+  const apiFormat: string | undefined =
+    modelInfo && typeof modelInfo === "object" && "apiFormat" in modelInfo
+      ? typeof (modelInfo as { apiFormat?: unknown }).apiFormat === "string"
+        ? ((modelInfo as { apiFormat?: string }).apiFormat as string)
+        : undefined
+      : undefined;
+  // customModelTargetFormat: #2905 per-model wire-format override for custom models,
+  // injected by getModelInfo. Must be threaded into the same resolution formula
+  // chatCore.ts uses (static registry > custom-model DB override > provider default) —
+  // a model that's ALSO a static registry entry (e.g. a Vertex Claude model with no
+  // per-model registry targetFormat) otherwise silently drops the DB override and
+  // falls through to the provider default, breaking response translation.
+  const customModelTargetFormat: string | undefined =
+    modelInfo && typeof modelInfo === "object" && "targetFormat" in modelInfo
+      ? typeof (modelInfo as { targetFormat?: unknown }).targetFormat === "string"
+        ? ((modelInfo as { targetFormat?: string }).targetFormat as string)
+        : undefined
+      : undefined;
+  const { alias: providerAlias, targetFormat } = resolveChatCoreTargetFormat({
+    provider,
+    resolvedModel: model,
+    apiFormat,
+    customModelTargetFormat,
+    providerSpecificData: undefined,
+  });
+
+  const ctxTag = extendedContext && providerAlias === "claude" ? " [1m]" : "";
+  if (modelStr !== `${provider}/${model}`) {
+    log.info("ROUTING", `${modelStr} → ${provider}/${model}${ctxTag}`);
+  } else {
+    log.info("ROUTING", `Provider: ${provider}, Model: ${model}${ctxTag}`);
+  }
+
+  return {
+    provider,
+    model,
+    sourceFormat,
+    targetFormat,
+    customModelTargetFormat,
+    extendedContext,
+    apiFormat,
+    resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
+    modelInfo,
+  };
+}
+
+// Credential-provider override for a combo target. An explicit providerId wins;
+// otherwise the target's own provider still applies (#11840: an alias-prefixed
+// passthrough target such as kilocode/cline must keep routing to that provider),
+// except the "unknown" sentinel getTargetProvider() stamps on bare model ids,
+// which must never override the provider inferred from the model (#14743).
+export function comboTargetCredentialProviderId(
+  target?: { providerId?: string | null; provider?: string | null } | null
+): string | null {
+  if (target?.providerId != null) return target.providerId;
+  const provider = target?.provider;
+  return provider && provider !== "unknown" ? provider : null;
+}
+
+export async function checkPipelineGates(
+  provider: string,
+  model: string,
+  options: {
+    ignoreCircuitBreaker?: boolean;
+    ignoreModelCooldown?: boolean;
+    bypassReason?: string;
+    providerProfile?: {
+      circuitBreakerThreshold?: number;
+      circuitBreakerReset?: number;
+      failureThreshold?: number;
+      degradationThreshold?: number;
+      resetTimeoutMs?: number;
+    } | null;
+  } = {}
+) {
+  const bypassReason = options.bypassReason || "pipeline override";
+  const providerProfile = options.providerProfile ?? (await getRuntimeProviderProfile(provider));
+  // Issue #2100 follow-up: opt-in upstream 429 hint trust per provider.
+  const useHints429 = resolveUseUpstream429BreakerHints(
+    provider,
+    (providerProfile as { useUpstream429BreakerHints?: boolean }).useUpstream429BreakerHints
+  );
+  const breaker = getCircuitBreaker(resolveProviderId(provider), {
+    failureThreshold: providerProfile.failureThreshold ?? providerProfile.circuitBreakerThreshold,
+    degradationThreshold: providerProfile.degradationThreshold,
+    resetTimeout: providerProfile.resetTimeoutMs ?? providerProfile.circuitBreakerReset,
+    // A local stream lifecycle error never reached the provider.
+    isFailure: (e) => !isLocalStreamLifecycleError(e),
+    onStateChange: (name: string, from: string, to: string) =>
+      log.info("CIRCUIT", `${name}: ${from} → ${to}`),
+    ...(useHints429
+      ? {
+          cooldownByKind: {
+            rate_limit: 60_000,
+            quota_exhausted: 3_600_000,
+          } satisfies Partial<Record<FailureKind, number>>,
+          classifyError: classify429FromError,
+        }
+      : {}),
+  });
+  if (options.ignoreCircuitBreaker && !breaker.canExecute()) {
+    log.info("CIRCUIT", `Bypassing OPEN circuit breaker for ${provider} (${bypassReason})`);
+  } else if (!breaker.canExecute()) {
+    const retryAfterMs = breaker.getRetryAfterMs();
+    const retryAfterSec = Math.max(Math.ceil(retryAfterMs / 1000), 1);
+    log.warn("CIRCUIT", `Circuit breaker OPEN for ${provider}, rejecting request`);
+    return breakerOpenResponse(provider, breaker, retryAfterSec);
+  }
+  return null;
+}
+
+export function checkResourcePressureBeforeProviderWork(): ResourcePressureGuardResult | null {
+  try {
+    return checkResourcePressureGuard();
+  } catch {
+    return null;
+  }
+}
+
+// Resolved failures are accounted by callers; acquired probes settle inside execute()'s fence.
+const chatPathOwnsBreakerAccounting = () => "ignore" as const;
+export async function executeChatWithBreaker({
+  bypassCircuitBreaker,
+  breaker,
+  body,
+  provider,
+  model,
+  refreshedCredentials,
+  proxyInfo,
+  appliedProxySink,
+  log: handlerLog,
+  clientRawRequest,
+  credentials,
+  apiKeyInfo,
+  userAgent,
+  comboName,
+  comboStrategy,
+  isCombo,
+  comboStepId,
+  comboExecutionKey,
+  extendedContext,
+  modelApiFormat,
+  modelTargetFormat,
+  runtimeModelInfo,
+  resolvedThinkingEffort,
+  providerProfile,
+  cachedSettings,
+  skipUpstreamRetry = false,
+  trafficType = "production",
+  correlationId = null,
+  conversationId = null,
+  modelPinned = false,
+  routingComboId = null,
+  reasoningTransportFallback = "drop",
+  sessionAffinityKey = null,
+  managedLease = null,
+  beforeUpstreamAttempt = undefined,
+  // #12150 P1b: additive, optional video-bridge log/Memory shadow — undefined for every
+  // non-video request. Passed straight through to handleChatCore; see its own destructure default.
+  videoBridgeLog = undefined,
+  fallbackAttempts = undefined,
+  forcedConnectionId = null,
+  allowedConnections = null,
+  // optional resume flag from a rehydrated previous_response_id —
+  // forwarded to handleChatCore, which notes it under the attempt store.
+  previousResponseResumed = undefined,
+}: ExecuteChatWithBreakerOptions): Promise<ExecuteChatWithBreakerResult> {
+  let tlsFingerprintUsed = false;
+  const normalizedTrafficType: TrafficType =
+    typeof trafficType === "string" && trafficType.trim().toLowerCase() === "shadow"
+      ? "shadow"
+      : "production";
+  const isShadowTraffic = normalizedTrafficType === "shadow";
+
+  // #5217: capture the proxy actually applied during execution so the caller can
+  // merge it into proxyInfo before the egress log (executors pinning a per-account
+  // proxy internally otherwise leave the egress log reading "direct").
+  // Pool re-selection: when the resolved egress came from a live connection pool
+  // (source "registry"), publish a resolver on the sink so the executor may ask
+  // the pool for another member after a per-address refusal (see
+  // publishPoolReselectResolver below). Anything else (direct, pinned
+  // assignment) leaves the sink without a resolver and the executor keeps its
+  // current behavior.
+  const capture = <T>(fn: () => T): T => {
+    if (!appliedProxySink) return fn();
+    publishPoolReselectResolver(appliedProxySink, proxyInfo, {
+      connectionId: credentials?.connectionId,
+      apiKeyId: (apiKeyInfo as { id?: unknown } | null)?.id,
+      provider,
+    });
+    return runWithAppliedProxyCapture(appliedProxySink, fn);
+  };
+
+  const pressureGuard = checkResourcePressureBeforeProviderWork();
+  if (pressureGuard) {
+    return { localResourcePressureResult: pressureGuard, tlsFingerprintUsed: false };
+  }
+
+  try {
+    const chatFn = () =>
+      capture(() =>
+        runWithProxyContext(proxyInfo?.proxy || null, () =>
+          (handleChatCore as any)({
+            body: { ...body, model: `${provider}/${model}` },
+            // Preserve the resolved catalog metadata and per-model wire format
+            // through the dispatch boundary, including native reasoning tiers.
+            modelInfo: {
+              ...runtimeModelInfo,
+              provider,
+              model,
+              extendedContext,
+              apiFormat: modelApiFormat,
+              targetFormat: modelTargetFormat,
+              resolvedThinkingEffort,
+            },
+            credentials: refreshedCredentials,
+            log: handlerLog,
+            clientRawRequest,
+            connectionId: credentials.connectionId,
+            apiKeyInfo,
+            userAgent,
+            comboName,
+            comboStrategy,
+            isCombo,
+            comboStepId,
+            comboExecutionKey,
+            cachedSettings,
+            skipUpstreamRetry,
+            trafficType: normalizedTrafficType,
+            correlationId,
+            conversationId,
+            modelPinned,
+            routingComboId,
+            sessionAffinityKey,
+            reasoningTransportFallback,
+            managedLease,
+            beforeUpstreamAttempt,
+            videoBridgeLog,
+            previousResponseResumed,
+            fallbackAttempts,
+            forcedConnectionId,
+            allowedConnections,
+            skipResourcePressureGuard: true,
+            onCredentialsRefreshed: async (newCreds: any) => {
+              await updateProviderCredentials(credentials.connectionId, {
+                accessToken: newCreds.accessToken,
+                refreshToken: newCreds.refreshToken,
+                expiresIn: newCreds.expiresIn,
+                expiresAt: newCreds.expiresAt,
+                providerSpecificData: newCreds.providerSpecificData,
+                // Cookie/session providers may rotate apiKey mid-request; forward it so the DB
+                // credential doesn't go stale after Set-Cookie rotation.
+                apiKey: newCreds.apiKey,
+                testStatus: newCreds.testStatus ?? "active",
+                isActive: newCreds.isActive,
+              });
+            },
+            onRequestSuccess: async () => {
+              if (isShadowTraffic) return;
+              // Only a real success ends the per-request refusal streak (#12859), and only for
+              // the model that succeeded: a sibling model's success must not reset another
+              // model's refusal count (the streak is keyed by connection + model).
+              if (credentials.connectionId) {
+                clearRequestRejectedStreak(credentials.connectionId, model);
+              }
+              await clearAccountError(credentials.connectionId, credentials);
+              await clearAntigravityVerificationUrl(
+                provider,
+                credentials.connectionId,
+                credentials.providerSpecificData
+              );
+              await maybeReactivateAfterExplicitProbe({
+                connectionId: credentials.connectionId,
+                reactivatedFromInactive: credentials.reactivatedFromInactive,
+                isShadowTraffic,
+                requestedModel: model,
+                provider,
+              });
+            },
+            onStreamFailure: async (failure: any) => {
+              if (isShadowTraffic) return;
+              if (!credentials.connectionId) return;
+              if (
+                Number(failure?.status) === 499 ||
+                failure?.code === "client_disconnected" ||
+                failure?.type === "client_disconnected" ||
+                isRequestScopedUpstreamFailure(failure) ||
+                isLocalStreamLifecycleError(failure?.message ?? failure) // client abort, #4602
+              ) {
+                return;
+              }
+              // A3: a 401 with extra keys is handled per key, not per connection.
+              const extraKeys =
+                (credentials.providerSpecificData?.extraApiKeys as string[] | undefined) ?? [];
+              const hasExtraKeys =
+                extraKeys.length > 0 || connectionHasExtraKeys(credentials.connectionId);
+              const is401 = Number(failure?.status) === 401;
+              if (is401 && hasExtraKeys) {
+                log.debug(
+                  "AUTH",
+                  `A3 guard: skipping markAccountUnavailable for 401 with extra keys on ${credentials.connectionId.slice(0, 8)}`
+                );
+                return;
+              }
+              const streamOutputEmitted = failure?.outputEmitted === true;
+              await markAccountUnavailable(
+                credentials.connectionId,
+                Number(failure?.status || HTTP_STATUS.BAD_GATEWAY),
+                String(failure?.message || failure?.code || "stream failure"),
+                provider,
+                model,
+                providerProfile,
+                buildExhaustionOptions(correlationId ?? null, { isCombo, streamOutputEmitted })
+              );
+            },
+          })
+        )
+      );
+
+    const tlsTrackingIdentity = {
+      provider,
+      sessionScope: credentials.connectionId,
+    };
+    // Track whenever direct TLS is possible. proxyFetch decides against wreq only
+    // after resolving NO_PROXY/local bypasses, so predicting from proxyInfo here
+    // would drop the account scope when a configured proxy resolves to direct.
+    const tlsFingerprintActive = isTlsFingerprintActive(provider);
+
+    if (isShadowTraffic) {
+      if (!bypassCircuitBreaker && breaker && !breaker.canExecute()) {
+        const retryAfterMs = breaker.getRetryAfterMs();
+        return {
+          result: {
+            success: false,
+            response: breakerOpenResponse(provider, breaker, Math.ceil(retryAfterMs / 1000)),
+            status: HTTP_STATUS.SERVICE_UNAVAILABLE,
+          },
+          tlsFingerprintUsed: false,
+        };
+      }
+
+      if (tlsFingerprintActive) {
+        const tracked = await runWithTlsTracking(tlsTrackingIdentity, chatFn);
+        return { result: tracked.result, tlsFingerprintUsed: tracked.tlsFingerprintUsed };
+      }
+
+      const result = await chatFn();
+      return { result, tlsFingerprintUsed: false };
+    }
+
+    if (bypassCircuitBreaker) {
+      if (tlsFingerprintActive) {
+        const tracked = await runWithTlsTracking(tlsTrackingIdentity, chatFn);
+        return { result: tracked.result, tlsFingerprintUsed: tracked.tlsFingerprintUsed };
+      }
+
+      const result = await chatFn();
+      return { result, tlsFingerprintUsed: false };
+    }
+
+    let wasProviderProbe = false;
+    const probeOptions = {
+      classifyResult: chatPathOwnsBreakerAccounting,
+      classifyProbeResult: (value: Parameters<typeof classifyProviderProbeResult>[0]) =>
+        classifyProviderProbeResult(value, provider),
+      onProbeAcquired: () => (wasProviderProbe = true),
+    };
+    const tracked = await breaker.execute(
+      () =>
+        tlsFingerprintActive
+          ? runWithTlsTracking(tlsTrackingIdentity, chatFn)
+          : chatFn().then((result: any) => ({ result, tlsFingerprintUsed: false })),
+      probeOptions
+    );
+    if (wasProviderProbe) markProviderProbeResponse(tracked.result.response);
+    return { ...tracked, wasProviderProbe };
+  } catch (cbErr: any) {
+    if (cbErr instanceof CircuitBreakerOpenError) {
+      log.warn("CIRCUIT", `${provider} circuit open during retry: ${cbErr.message}`);
+      return {
+        result: {
+          success: false,
+          response: breakerOpenResponse(provider, breaker, Math.ceil(cbErr.retryAfterMs / 1000)),
+          status: HTTP_STATUS.SERVICE_UNAVAILABLE,
+        },
+        tlsFingerprintUsed: false,
+      };
+    }
+
+    if (cbErr?.code === "PROXY_UNREACHABLE" || /proxy unreachable/i.test(cbErr?.message || "")) {
+      const detail = cbErr?.message || "Proxy unreachable";
+      log.warn("PROXY", detail);
+      return {
+        result: {
+          success: false,
+          response: unavailableResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, detail, 2),
+          status: HTTP_STATUS.SERVICE_UNAVAILABLE,
+          error: detail,
+          errorCode: "proxy_unreachable",
+        },
+        tlsFingerprintUsed: false,
+      };
+    }
+
+    throw cbErr;
+  }
+}
+
+/** A compatible provider node whose prefix is reserved by a built-in provider (#11943). */
+export interface ShadowedProviderNode {
+  id: string;
+  name: string | null;
+  prefix: string;
+}
+
+/**
+ * #11943: find a compatible provider node whose configured prefix collides with
+ * the built-in `provider` (registry id or alias). The runtime model resolver
+ * deliberately gives built-in ids/aliases precedence over user-defined node
+ * prefixes (src/sse/services/model.ts, reserved-prefix guard), so such a node is
+ * unreachable through its prefix — every `<prefix>/model` request lands on the
+ * built-in provider instead. The write-path validation rejects reserved prefixes
+ * at node creation time, but a node created BEFORE the built-in existed (the
+ * issue: an `of/` node predating the `openference` provider, alias `of`) is
+ * never re-validated. Only consulted on the credential-failure path, so the hot
+ * path is untouched; any lookup failure degrades to "no diagnostic".
+ */
+export async function findShadowedCompatibleNode(
+  provider: unknown
+): Promise<ShadowedProviderNode | null> {
+  const reservedByProvider = reservedPrefixesOf(provider);
+  if (!reservedByProvider) return null;
+
+  try {
+    const nodes = await getCachedProviderNodes();
+    for (const node of Array.isArray(nodes) ? nodes : []) {
+      const shadowed = asShadowedCompatibleNode(node, reservedByProvider);
+      if (shadowed) return shadowed;
+    }
+  } catch {
+    // Diagnostic only — never let a node lookup failure change the error path.
+  }
+  return null;
+}
+
+/** Node types whose user-configured prefix the reserved-prefix guard can shadow. */
+const SHADOWABLE_NODE_TYPES: ReadonlySet<unknown> = new Set([
+  "openai-compatible",
+  "anthropic-compatible",
+]);
+
+/**
+ * Registry id + alias that `provider` reserves, or null when it is not a
+ * built-in provider (or reserves nothing).
+ */
+function reservedPrefixesOf(provider: unknown): ReadonlySet<string> | null {
+  if (typeof provider !== "string" || provider.trim().length === 0) return null;
+  const entry = getRegistryEntry(provider) as { id?: unknown; alias?: unknown } | null;
+  if (!entry) return null;
+  const reserved = new Set<string>();
+  for (const value of [entry.id, entry.alias]) {
+    if (typeof value === "string" && value.length > 0) reserved.add(value);
+  }
+  return reserved.size > 0 ? reserved : null;
+}
+
+function trimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/** The node as a `ShadowedProviderNode` when its prefix is one of `reserved`, else null. */
+function asShadowedCompatibleNode(
+  node: unknown,
+  reserved: ReadonlySet<string>
+): ShadowedProviderNode | null {
+  if (!node || typeof node !== "object") return null;
+  const record = node as { type?: unknown; prefix?: unknown; id?: unknown; name?: unknown };
+  if (!SHADOWABLE_NODE_TYPES.has(record.type)) return null;
+  const prefix = trimmedString(record.prefix);
+  const id = trimmedString(record.id);
+  if (!id || !prefix || !reserved.has(prefix)) return null;
+  return { id, name: trimmedString(record.name) || null, prefix };
+}
+
+// The status-table defaults read as "your OmniRoute API key is invalid" (401) or
+// "unknown model" (404); the actual fix is connecting an account in the dashboard.
+// Only the code is overridden so the status/type pairing SDKs rely on is kept.
+const PROVIDER_NOT_CONFIGURED = { code: "provider_not_configured" } as const;
+
+export function handleNoCredentials(
+  credentials: any,
+  excludeConnectionId: string | null,
+  provider: string,
+  model: string,
+  lastError: string | null,
+  lastStatus: number | null,
+  candidateAliases?: readonly string[],
+  isCombo: boolean = false,
+  shadowedNode: ShadowedProviderNode | null = null,
+  correlationId?: string | null
+) {
+  if (credentials?.allRateLimited) {
+    return credentialCooldownResponse(credentials, provider, model, lastError, lastStatus);
+  }
+
+  if (lastError && lastStatus) {
+    log.warn("CHAT", "Preserving last upstream error after credential exhaustion", {
+      provider,
+      model,
+      lastStatus,
+      ...(correlationId ? { correlationId } : {}),
+    });
+    return errorResponse(lastStatus, lastError);
+  }
+  if (credentials?.allExpired) {
+    // Every connection for this provider is in a terminal state (expired,
+    // banned, or credits_exhausted). Surface expired/banned as 401 with a
+    // re-auth hint instead of the generic 400 "No credentials", so
+    // dashboards/CLIs can distinguish "never configured" from "needs to
+    // reconnect". credits_exhausted is quota (HTTP 402), not invalid
+    // credentials — see #12441.
+    const status = credentials.expiredStatus || "expired";
+    const count = credentials.expiredCount || 1;
+    const reason =
+      status === "credits_exhausted"
+        ? "credits exhausted"
+        : status === "banned"
+          ? "banned by upstream"
+          : "authentication expired";
+    const message = `[${provider}] All ${count} connection(s) ${reason} — please reconnect in the dashboard`;
+    log.warn("CHAT", message);
+    // #12441: credits_exhausted is quota, not invalid credentials. Combo
+    // dispatch treats 401 as AUTH_LEVEL skip (#8133). Surface 402 so quota
+    // exhaustion follows the #1731 path instead of "authentication expired".
+    const httpStatus =
+      status === "credits_exhausted" ? HTTP_STATUS.PAYMENT_REQUIRED : HTTP_STATUS.UNAUTHORIZED;
+    return errorResponse(httpStatus, message);
+  }
+  if (credentials?.blockedByKeyPolicy) {
+    // #15889: the effective restriction is not necessarily an API-key policy.
+    const count = credentials.blockedCount || 1;
+    const message =
+      `[${provider}] ${count} connection(s) exist but are excluded by ` +
+      `${describeConnectionRestriction(credentials.connectionRestrictionSources)} — review the connection routing constraints in the dashboard`;
+    log.warn("AUTH", message);
+    return errorResponse(HTTP_STATUS.FORBIDDEN, message);
+  }
+  if (!excludeConnectionId) {
+    // Ported from upstream decolua/9router#336 (Ibrahim Ryan): surface as 404
+    // NOT_FOUND instead of 400 BAD_REQUEST so combo routing can fall through to
+    // the next target. The combo target loop (open-sse/services/combo.ts) treats
+    // 400 as a hard stop to break body-specific infinite fallback loops
+    // (PR #4316 / issue #4279). 404 flows through checkFallbackError as
+    // `shouldFallback: true` (generic-error catch-all path in
+    // open-sse/services/accountFallback.ts), letting a combo like
+    // `antigravity/opus → github/opus` skip a provider whose credentials are
+    // all disabled. log level is `warn` rather than `error` because zero active
+    // credentials is an expected operator-driven state, not a server fault.
+    log.warn("AUTH", `No active credentials for provider: ${provider}`);
+    // #FIX: surface the candidate aliases (from resolveModelOrError) so the
+    // operator can pick a working provider/model prefix instead of guessing.
+    // Without this, "No active credentials for provider: byNara" leaves the
+    // user staring at a wall — most bugs in this area are actually "wrong
+    // provider was picked", not "the provider is broken".
+    const aliasHint =
+      Array.isArray(candidateAliases) && candidateAliases.length > 0
+        ? ` Try one of: ${candidateAliases
+            .slice(0, 3)
+            .map((a) => `${a}/${model}`)
+            .join(", ")}.`
+        : "";
+
+    // #11943: "No active credentials for provider: openference" is technically
+    // true but misleading when the operator's own compatible node carries the
+    // prefix that resolved to that built-in — the node's connections are healthy,
+    // they were simply never consulted. Say so, and name the node.
+    let shadowHint = "";
+    if (shadowedNode) {
+      const nodeLabel = shadowedNode.name
+        ? `"${shadowedNode.name}" (${shadowedNode.id})`
+        : shadowedNode.id;
+      log.warn(
+        "AUTH",
+        `Custom provider node ${nodeLabel} is shadowed: its prefix "${shadowedNode.prefix}" is reserved by built-in provider "${provider}", so "${shadowedNode.prefix}/${model}" routed to the built-in instead of the node`
+      );
+      shadowHint = ` The prefix "${shadowedNode.prefix}" is reserved by the built-in provider "${provider}", so requests using it (e.g. "${shadowedNode.prefix}/${model}") route to that built-in and never reach your custom provider node ${nodeLabel}. Rename that node's prefix to an unreserved value and update your model ids.`;
+    }
+    const hint = `${aliasHint}${shadowHint}`;
+
+    // Issue #2: for single-model (non-combo) requests, a 404 leaks a misleading
+    // "No active credentials" status to a direct API client (e.g. OpenCode) that
+    // then mis-files it as "resource not found" instead of an auth/credential
+    // failure. The 404 is only meaningful as a combo fall-through signal, so
+    // remap it to an explicit error status for single-model traffic: a 401 when
+    // the provider exists but has no usable credentials, else 503 when the
+    // provider itself is unknown/unreachable. Combo routing keeps the 404 so it
+    // can still skip past a disabled-credentials leg.
+    if (!isCombo) {
+      const singleModelStatus =
+        provider && String(provider).trim().length > 0
+          ? HTTP_STATUS.UNAUTHORIZED
+          : HTTP_STATUS.SERVICE_UNAVAILABLE;
+      return errorResponse(
+        singleModelStatus,
+        `No active credentials for provider: ${provider}.${hint}`,
+        singleModelStatus === HTTP_STATUS.UNAUTHORIZED ? PROVIDER_NOT_CONFIGURED : undefined
+      );
+    }
+
+    return errorResponse(
+      HTTP_STATUS.NOT_FOUND,
+      `No active credentials for provider: ${provider}.${hint}`,
+      PROVIDER_NOT_CONFIGURED
+    );
+  }
+  log.warn("CHAT", "No more accounts available", { provider });
+  return errorResponse(
+    lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE,
+    lastError || "All accounts unavailable"
+  );
+}
+
+/**
+ * Bug #3758 (Problem A): NVIDIA NIM (and other flaky OpenAI-compatible upstreams)
+ * intermittently send HTTP 200, then close the SSE early with zero useful frames.
+ * The readiness gate surfaces this as `STREAM_EARLY_EOF` / HTTP 502. On the
+ * single-model (non-combo) path that 502 used to be returned immediately for every
+ * provider except `antigravity`, so a transient upstream hang-up looked like a hard
+ * failure to the caller (e.g. the test-chat scenario).
+ *
+ * This decides whether a single-model request should re-attempt after an early
+ * close. It deliberately:
+ *  - retries ONLY on `STREAM_EARLY_EOF` (the strong "upstream hung up after 200"
+ *    signal) — NOT on `STREAM_READINESS_TIMEOUT` / `stream_timeout`, which is a
+ *    slow-but-alive upstream where retrying would only double latency; and
+ *  - is bounded to exactly ONE retry via the per-request `attempt` counter, so it
+ *    can never loop (the second consecutive early close surfaces the 502).
+ *
+ * Pure function (no side effects): the caller performs a plain same-connection
+ * re-attempt and must NOT mark the account unavailable for an early close — it is a
+ * transient upstream glitch, not a bad key.
+ */
+export const STREAM_EARLY_EOF_MAX_RETRIES = 1;
+
+// A genuine 0-byte upstream empty response (emitClaudeEmptyStreamErrorAndAbort,
+// code "empty_response" — call logs 1788132529140-96ef4a / 1788142914004-062cf6)
+// is the same class of transient upstream glitch as STREAM_EARLY_EOF: the
+// upstream sent HTTP 200 then closed with zero useful frames. Treat it the
+// same — ONE bounded same-connection re-attempt, never a loop.
+const RETRYABLE_STREAM_EMPTY_CODES: ReadonlySet<string> = new Set([
+  "STREAM_EARLY_EOF",
+  "empty_response",
+  "empty_content",
+]);
+
+export function shouldRetryStreamEarlyEof(
+  errorCode: string | null | undefined,
+  attempt: number
+): boolean {
+  return (
+    typeof errorCode === "string" &&
+    RETRYABLE_STREAM_EMPTY_CODES.has(errorCode) &&
+    attempt < STREAM_EARLY_EOF_MAX_RETRIES
+  );
+}
+
+export const STREAM_READINESS_TIMEOUT_MAX_RETRIES = 1;
+
+export function shouldRetryStreamReadinessTimeout(
+  errorCode: string | null | undefined,
+  attempt: number,
+  isCombo: boolean,
+  clientAborted: boolean
+): boolean {
+  return (
+    !isCombo &&
+    !clientAborted &&
+    errorCode === "STREAM_READINESS_TIMEOUT" &&
+    attempt < STREAM_READINESS_TIMEOUT_MAX_RETRIES
+  );
+}
+
+// The sibling hop widens the terminal/failover boundary, so it ships off
+// behind STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED until observed live.
+export function isEarlyEofSiblingFailoverOn(): boolean {
+  try {
+    return isFeatureFlagEnabled("STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+export function decideProxyResolutionFailure(
+  err: unknown,
+  env: { PROXY_FAIL_OPEN?: string } = process.env
+): null {
+  if ((env.PROXY_FAIL_OPEN ?? "").trim().toLowerCase() === "true") {
+    log.warn(
+      "PROXY",
+      `Proxy resolution failed — PROXY_FAIL_OPEN=true, falling back to DIRECT: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return null;
+  }
+  throw err instanceof Error ? err : new Error(String(err));
+}
+
+export async function safeResolveProxy(
+  connectionId: string,
+  apiKeyId?: string,
+  providerId?: string,
+  comboName?: string | null
+) {
+  try {
+    const resolved = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+    // #6246: a connection that resolves to DIRECT only because its assigned proxy
+    // is dead/inactive must fail closed — egressing on the real IP leaks it. Reuse
+    // the existing proxy-resolution-failure policy (blocks by default; PROXY_FAIL_OPEN
+    // opts back into direct). Explicit "proxy off" is not a leak (see the guard).
+    if (
+      !(resolved as { proxy?: unknown } | null)?.proxy &&
+      hasBlockingProxyAssignment(connectionId, providerId, comboName)
+    ) {
+      return decideProxyResolutionFailure(
+        Object.assign(
+          new Error(
+            "PROXY_ASSIGNED_UNAVAILABLE: assigned proxy is inactive/unreachable; refusing to egress on a direct connection"
+          ),
+          { code: "PROXY_ASSIGNED_UNAVAILABLE" }
+        )
+      );
+    }
+    return resolved;
+  } catch (proxyErr) {
+    return decideProxyResolutionFailure(proxyErr);
+  }
+}
+
+/**
+ * #5217: merge a proxy the executor applied internally (captured via
+ * AppliedProxySink) into the pre-execution proxyInfo so the egress logger reflects
+ * the real egress. No applied proxy → proxyInfo unchanged. A pre-existing
+ * non-direct level is preserved; otherwise reported as "account" (per-account
+ * proxy, e.g. OpenCode rotation). Pure + unit-testable.
+ */
+export function applyExecutorProxyToInfo(
+  proxyInfo: { proxy?: unknown; level?: string; levelId?: string | null } | null | undefined,
+  appliedProxy: unknown
+) {
+  if (!appliedProxy) return proxyInfo;
+  const priorLevel = proxyInfo?.level;
+  return {
+    ...(proxyInfo || {}),
+    proxy: appliedProxy,
+    level: priorLevel && priorLevel !== "direct" ? priorLevel : "account",
+  };
+}
+
+/**
+ * Carry the HTTP status the provider actually returned (captured on the applied-proxy
+ * sink around the patched fetch) into proxyInfo. Nothing received -> info unchanged.
+ * Pure + unit-testable.
+ */
+export function withUpstreamStatus<T extends object>(
+  info: T | null | undefined,
+  sink: { upstreamStatus?: number }
+) {
+  if (typeof sink.upstreamStatus !== "number") return info;
+  return { ...(info || {}), upstreamStatus: sink.upstreamStatus };
+}
+
+/**
+ * Publish a pool-member resolver on the applied-proxy capture sink when the
+ * resolved egress came from a live connection pool (source "registry"). The
+ * executor calls it after a per-address 429 to serve the next attempt from
+ * another member. The pool's own selection (round-robin advance, sticky hold,
+ * set-aside order) decides what comes back, including repeating the same
+ * member when the pool holds it — the executor treats a repeat as "nothing
+ * else to offer". Never throws, never overwrites an existing resolver.
+ */
+export function publishPoolReselectResolver(
+  sink: AppliedProxySink | null | undefined,
+  proxyInfo: { proxy?: unknown; source?: unknown } | null | undefined,
+  ids: { connectionId?: unknown; apiKeyId?: unknown; provider?: unknown }
+): void {
+  try {
+    if (!sink || proxyInfo?.source !== "registry" || proxyInfo?.proxy == null) return;
+    if (typeof (sink as { reselectPoolMember?: unknown }).reselectPoolMember === "function") {
+      return;
+    }
+    const connectionId = typeof ids.connectionId === "string" ? ids.connectionId : null;
+    if (!connectionId) return;
+    const apiKeyId = typeof ids.apiKeyId === "string" ? ids.apiKeyId : undefined;
+    const providerId = typeof ids.provider === "string" ? ids.provider : undefined;
+    (sink as { reselectPoolMember?: () => Promise<unknown> }).reselectPoolMember = async () => {
+      const next = await resolveProxyForConnection(connectionId, apiKeyId, providerId);
+      return (next as { proxy?: unknown } | null)?.proxy ?? null;
+    };
+  } catch {
+    /* resolver publication is best-effort; the executor falls back */
+  }
+}
+
+/** Merge both things the applied-proxy sink captured: the executor proxy, then the status. */
+export type { AttemptJournalEntry } from "./proxyJournal";
+export function mergeAppliedProxySink(
+  proxyInfo: { proxy?: unknown; level?: string; levelId?: string | null } | null | undefined,
+  sink: { proxy: unknown; upstreamStatus?: number; attempts?: AttemptJournalEntry[] }
+) {
+  const merged = withUpstreamStatus(applyExecutorProxyToInfo(proxyInfo, sink.proxy), sink);
+  if (sink.attempts?.length) return { ...(merged || {}), attempts: sink.attempts };
+  return merged;
+}
+
+// Async because the egress-IP lookup lazy-imports proxyEgress; callers treat
+// this as fire-and-forget logging (the internal try/catch swallows everything).
+export async function safeLogEvents({
+  result,
+  proxyInfo,
+  proxyLatency,
+  provider,
+  model,
+  sourceFormat,
+  targetFormat,
+  credentials,
+  comboName,
+  clientRawRequest,
+  tlsFingerprintUsed = false,
+  rotationAccount = null,
+  correlationId = null,
+}) {
+  // Feed the provider's real answer back to proxy selection (never result.status: some 429s
+  // are generated locally; proxyInfo carries the status captured around fetch). Must stay
+  // BEFORE the first await: callers fire-and-forget this function, and only the code ahead
+  // of that await runs synchronously at the call site, so a request picking from the same
+  // pool right after already sees a refused member set aside (#13602).
+  try {
+    noteProxyOutcome(provider, proxyInfo);
+  } catch {
+    // proxy selection feedback is best-effort; never break the request path
+  }
+  // Rolling per-connection TTFB/outcome for the opt-in p2c latency term (never throws).
+  recordConnectionOutcome(credentials?.connectionId, model, proxyLatency, result?.success === true);
+
+  try {
+    await logProxyJournal({
+      result,
+      proxyInfo,
+      proxyLatency,
+      provider,
+      model,
+      credentials,
+      comboName,
+      clientRawRequest,
+      tlsFingerprintUsed,
+      rotationAccount,
+      correlationId,
+    });
+  } catch {}
+
+  try {
+    logTranslationEvent({
+      provider,
+      model,
+      sourceFormat,
+      targetFormat,
+      status: result.success ? "success" : "error",
+      statusCode: result.success ? 200 : result.status || 500,
+      latency: proxyLatency,
+      endpoint: clientRawRequest?.endpoint || "/v1/chat/completions",
+      connectionId: credentials.connectionId || null,
+      comboName: comboName || null,
+    });
+  } catch {}
+}
+
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
+export function withSessionHeader(response: Response, sessionId: string | null): Response {
+  if (!response || !sessionId) return response;
+
+  try {
+    response.headers.set("X-OmniRoute-Session-Id", sessionId);
+    return response;
+  } catch {
+    const cloned = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+    cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
+  }
+}
+
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
+export function withCorrelationId(response: Response, correlationId: string | null): Response {
+  if (!response || !correlationId) return response;
+
+  try {
+    response.headers.set("X-Correlation-Id", correlationId);
+    return response;
+  } catch {
+    const cloned = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+    cloned.headers.set("X-Correlation-Id", correlationId);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
+  }
+}
+
+/**
+ * Modality Bridge transparency (PR-1 Task 9): stamp the
+ * `x-omniroute-modality-bridge` header on responses whose request payload was
+ * transparently transformed (e.g. image→text describe). `value` comes from
+ * buildModalityBridgeHeader(); null (untouched/rerouted request) is a no-op.
+ * Same try-set/clone-fallback shape as withSessionHeader — the clone reuses
+ * `response.body`, so SSE streams pass through untouched.
+ */
+export function withModalityBridgeHeader(
+  response: Response,
+  value: string | ModalityBridgeResponseHeaders | null
+): Response {
+  return withModalityBridgeResponseHeaders(response, value);
+}
+
+export function withConversationId(response: Response, conversationId: string | null): Response {
+  if (!response || !conversationId) return response;
+
+  try {
+    response.headers.set("X-ConversationId", conversationId);
+    return response;
+  } catch {
+    const cloned = new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    });
+    cloned.headers.set("X-ConversationId", conversationId);
+    return cloned;
+  }
+}
+
+export { withSelectedConnectionHeader } from "./chat/selectedConnectionHeader.ts";

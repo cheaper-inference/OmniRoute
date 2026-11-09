@@ -1,0 +1,338 @@
+/**
+ * Shared provider-credential checks for the Vision Bridge guardrail.
+ * Extracted from visionBridge.ts so visionBridgeRouter.ts can reuse the same
+ * "is this connection actually usable" logic without a circular import
+ * (visionBridge.ts already imports getBestVisionModel from visionBridgeRouter.ts).
+ */
+
+import { resolveProviderId } from "@/shared/constants/providers";
+import {
+  isNoAuthProviderKey,
+  isProviderBlockedByIdOrAlias,
+  isSyntheticNoAuthPathKey,
+} from "@/shared/utils/noAuthProviders";
+import { SYNTHETIC_NOAUTH_CONNECTION_ID } from "@omniroute/open-sse/services/autoCombo/resilienceCandidateFilter.ts";
+import * as log from "../../sse/utils/logger";
+
+/**
+ * True when a provider connection can actually authenticate upstream.
+ * `noauth` with no real API key is NOT usable (opencode-zen free tier often
+ * surfaces as noauth and then 401 "Missing API key").
+ */
+export type ProviderConnectionLike = {
+  authType?: string | null;
+  apiKey?: string | null;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  idToken?: string | null;
+  testStatus?: string | null;
+};
+
+const TERMINAL_CONNECTION_STATUSES = new Set(["disabled", "banned", "expired"]);
+// Free/noauth only counts when a real key is still present; apikey/cookie need the same.
+const KEY_ONLY_AUTH_TYPES = new Set(["noauth", "none", "", "apikey", "cookie"]);
+const TOKEN_AUTH_TYPES = new Set(["oauth", "access_token", "external_idp"]);
+
+function hasNonEmptyString(value: unknown): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function hasOAuthCredential(connection: ProviderConnectionLike): boolean {
+  return (
+    hasNonEmptyString(connection.refreshToken) ||
+    hasNonEmptyString(connection.accessToken) ||
+    hasNonEmptyString(connection.idToken)
+  );
+}
+
+/** True when the connection row carries a terminal status (disabled/banned/expired). */
+export function hasTerminalConnectionStatus(connection: ProviderConnectionLike): boolean {
+  const status = String(connection.testStatus || "").toLowerCase();
+  return TERMINAL_CONNECTION_STATUSES.has(status);
+}
+
+export function isProviderConnectionUsable(connection: ProviderConnectionLike): boolean {
+  if (hasTerminalConnectionStatus(connection)) {
+    return false;
+  }
+
+  const auth = String(connection.authType || "").toLowerCase();
+  const hasKey = hasNonEmptyString(connection.apiKey);
+
+  if (KEY_ONLY_AUTH_TYPES.has(auth)) {
+    return hasKey;
+  }
+  if (TOKEN_AUTH_TYPES.has(auth)) {
+    return hasOAuthCredential(connection) || hasKey;
+  }
+  return hasKey;
+}
+
+// Memoize the dynamic import itself (not just call it inline per-invocation).
+// getVisionCapableModels() fans out to this function once per vision-capable
+// catalog entry via Promise.all — tens of concurrent calls on every
+// getBestVisionModel()/getFallbackModels() invocation. Issuing a fresh
+// `await import(...)` per call means dozens of concurrent first-resolution
+// import() calls for the *same* specifier land in the module loader at once;
+// under Vitest/vite-node this observably races (some callers resolve against
+// the mocked module, others against a real one loaded via a different
+// resolution path such as readCache.ts's own relative `./providers` import —
+// see tests/unit/guardrails/visionBridgeRouter.test.tsx). Resolving the
+// import exactly once and reusing the settled module for every subsequent
+// call removes the concurrent-first-load race entirely (and is strictly
+// cheaper at runtime too — one module resolution instead of N).
+let providersModulePromise: Promise<typeof import("@/lib/db/providers")> | null = null;
+function loadProvidersModule(): Promise<typeof import("@/lib/db/providers")> {
+  if (!providersModulePromise) {
+    providersModulePromise = import("@/lib/db/providers").catch((error) => {
+      // Retry on the next call instead of caching the rejection for the
+      // process lifetime (same contract as loadReadCacheModule below).
+      providersModulePromise = null;
+      throw error;
+    });
+  }
+  return providersModulePromise;
+}
+
+// Same memoization rationale as loadProvidersModule: getVisionCapableModels()
+// fans out once per candidate model, so a bare `await import(...)` per call
+// issues dozens of concurrent first-resolutions for the same specifier.
+let readCacheModulePromise: Promise<typeof import("@/lib/db/readCache")> | null = null;
+function loadReadCacheModule(): Promise<typeof import("@/lib/db/readCache")> {
+  if (!readCacheModulePromise) {
+    readCacheModulePromise = import("@/lib/db/readCache").catch((error) => {
+      // Retry on the next call instead of caching the rejection for the
+      // process lifetime — a transient loader fault would otherwise fail the
+      // blocked check open until restart.
+      readCacheModulePromise = null;
+      throw error;
+    });
+  }
+  return readCacheModulePromise;
+}
+
+/**
+ * Credential candidate provider ids for `hasUsableCredentialsForModel`.
+ *
+ * A compatible provider node (openai-compatible-chat-<uuid>) is stored in
+ * `provider_connections` under its generated node id, while the
+ * operator-facing model id uses the node's configured public prefix
+ * (skhynix/HCP-...). Composed AFTER #10760's alias→canonical
+ * `resolveProviderId` step: the literal prefix alone misses the node row, so
+ * the prefix-index mapped node id is appended (deduped when the mapping is a
+ * no-op). Limitation: a node prefix that also collides with a catalog alias
+ * would already have been canonicalized by `resolveProviderId` and can miss
+ * here — no such collision exists in practice (reserved prefixes are
+ * filtered out of the index), noted for future maintainers.
+ */
+export function resolveProviderCredentialIds(
+  provider: string,
+  prefixToNode?: Map<string, string> | null
+): string[] {
+  const ids = [provider];
+  const mapped = prefixToNode?.get(provider);
+  // Skip when the mapping is a no-op (already the literal provider).
+  if (mapped && mapped !== provider) ids.push(mapped);
+  return ids;
+}
+
+// getBestVisionModel()/getFallbackModels() fan out to hasUsableCredentialsForModel
+// once per vision-capable catalog entry via Promise.all. The prefix index reads
+// the provider_nodes table on every call, so cache it briefly (same TTL order as
+// the router's selection cache) to avoid N concurrent table reads per request.
+let prefixIndexCache: { at: number; index: Map<string, string> } | null = null;
+const PREFIX_INDEX_TTL_MS = 60_000;
+async function getPrefixToNode(): Promise<Map<string, string> | null> {
+  try {
+    const { getProviderPrefixIndex } = await import("@/lib/providerNodePrefixes");
+    if (prefixIndexCache && Date.now() - prefixIndexCache.at < PREFIX_INDEX_TTL_MS) {
+      return prefixIndexCache.index;
+    }
+    const index = await getProviderPrefixIndex();
+    prefixIndexCache = { at: Date.now(), index: index.prefixToNode };
+    return index.prefixToNode;
+  } catch {
+    return null;
+  }
+}
+
+/** API-key connection scope as a set; null when the key is not connection-restricted. */
+function toAllowedConnectionSet(ids: string[] | null | undefined): Set<string> | null {
+  return Array.isArray(ids) && ids.length > 0 ? new Set(ids) : null;
+}
+
+function filterAllowedConnections(rows: any[], allowed: Set<string> | null): any[] {
+  return allowed ? rows.filter((c: any) => allowed.has(String(c?.id))) : rows;
+}
+
+/** The synthetic no-auth connection counts only when the key scope names it. */
+function isSyntheticNoAuthAllowed(allowed: Set<string> | null): boolean {
+  return !allowed || allowed.has(SYNTHETIC_NOAUTH_CONNECTION_ID);
+}
+
+/**
+ * True when dispatch would refuse `providerIdOrAlias` outright as a blocked
+ * no-auth provider (`blockedProviders` names it). The provider set is the same
+ * one dispatch refuses (synthetic no-auth entries, via
+ * isSyntheticNoAuthPathKey): always false for everyone else, since dispatch
+ * never consults `blockedProviders` for them, so excluding them here would
+ * shrink the bridge pool beyond what dispatch actually refuses. Fails open
+ * (false) when anything upstream throws — settings read included — matching
+ * sse/services/noAuthProviderSettings.ts, with a warn once per failure
+ * episode so a broken settings store is not silently ignored.
+ */
+let warnedSettingsReadFailure = false;
+export async function isBlockedNoAuthProvider(providerIdOrAlias: string): Promise<boolean> {
+  try {
+    const providerId = resolveProviderId(providerIdOrAlias);
+    if (!isSyntheticNoAuthPathKey(providerId)) return false;
+    const { getCachedSettings } = await loadReadCacheModule();
+    const settings = await getCachedSettings();
+    warnedSettingsReadFailure = false;
+    return isProviderBlockedByIdOrAlias(providerId, settings.blockedProviders);
+  } catch (error) {
+    // getVisionCapableModels fans out here once per candidate; warn once per
+    // failure episode instead of once per candidate.
+    if (!warnedSettingsReadFailure) {
+      warnedSettingsReadFailure = true;
+      log.warn(
+        "VISION_BRIDGE",
+        `Could not read blocked provider settings; bridge blocked-provider checks fail open: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return false;
+  }
+}
+
+/**
+ * Resolve whether `provider/model` has at least one usable active connection.
+ * Returns `null` when the credential store is unavailable (unit tests / early boot).
+ *
+ * Two-step resolve before querying `provider_connections`:
+ *   1. alias→canonical id (#10702: the column stores the id, not the alias —
+ *      an alias-keyed query returned zero rows);
+ *   2. public prefix→node id via the provider-prefix index (#re-land 932002580:
+ *      a compatible node's rows are stored under its generated
+ *      `openai-compatible-chat-<uuid>` id while the operator-facing model id
+ *      uses the node's public prefix, e.g. "skhynix" — a bare-prefix query
+ *      matched zero rows and made a credentialed, active connection report as
+ *      unusable, so the Vision Bridge discarded the configured model).
+ * Both the literal segment and the mapped node id are queried; any usable
+ * active connection wins.
+ *
+ * No-auth providers (NOAUTH_PROVIDERS) need no stored API key: their effective
+ * credential is the synthetic "noauth" connection, so an empty active set is
+ * usable for them (unlike keyed providers). A stored row with a terminal
+ * status (disabled/banned/expired) still blocks the provider; any other row
+ * is treated as usable (the key requirement does not apply — a noauth row
+ * carries no API key by design). A no-auth provider listed in
+ * `blockedProviders` is unusable outright, stored rows included: dispatch
+ * refuses it before any credential path (isBlockedNoAuthProvider, fail-open
+ * on settings-read errors).
+ */
+export async function hasUsableCredentialsForModel(
+  model: string,
+  options: {
+    /**
+     * API-key connection scope: when a non-empty list is given, only those
+     * connection ids count, and the synthetic no-auth connection only when the
+     * list names it (same rule as credential selection in chat).
+     */
+    allowedConnectionIds?: string[] | null;
+  } = {}
+): Promise<boolean | null> {
+  const rawProvider = typeof model === "string" ? model.split("/")[0]?.trim() : "";
+  if (!rawProvider) return null;
+  const provider = resolveProviderId(rawProvider);
+  const allowed = toAllowedConnectionSet(options.allowedConnectionIds);
+  const isNoAuth = isNoAuthProviderKey(rawProvider, provider);
+  // Dispatch refuses a blocked no-auth provider before any credential path —
+  // synthetic or stored rows — so the bridge must report it as definitively
+  // unusable instead of leaving it in the pool to fail at dispatch. Keyed
+  // providers are filtered inside isBlockedNoAuthProvider, and the fail-open
+  // case (settings unreadable) falls through to the checks below unchanged.
+  if (await isBlockedNoAuthProvider(provider)) return false;
+  try {
+    const { getProviderConnections } = await loadProvidersModule();
+    const prefixToNode = await getPrefixToNode();
+    const providerIds = resolveProviderCredentialIds(provider, prefixToNode);
+    let sawStoredRow = false;
+    for (const providerId of providerIds) {
+      const rows = await getProviderConnections({ provider: providerId, isActive: true });
+      if (!Array.isArray(rows)) return null;
+      const connections = filterAllowedConnections(rows, allowed);
+      // This candidate has no rows — the next candidate (mapped node id) may
+      // still hold the operator's connection.
+      if (connections.length === 0) continue;
+      sawStoredRow = true;
+      // No-auth rows store no API key (authType "noauth" + empty apiKey would
+      // fail the generic key check) — only a terminal status blocks them.
+      const usable = isNoAuth
+        ? !connections.some((c: any) => hasTerminalConnectionStatus(c))
+        : connections.some((c: any) => isProviderConnectionUsable(c));
+      if (usable) return true;
+    }
+    // No candidate has a stored row: keyed providers are definitively
+    // unusable; no-auth providers still work through the synthetic "noauth"
+    // connection (and a noauth provider with stored rows can only have been
+    // rejected via a terminal status in the loop above).
+    return isNoAuth && !sawStoredRow && isSyntheticNoAuthAllowed(allowed);
+  } catch {
+    return null;
+  }
+}
+
+/** A minimal reference to a usable provider connection, for per-connection lockout checks. */
+export interface UsableConnectionRef {
+  id: string;
+}
+
+/**
+ * Resolve the individual usable connections for `model`'s provider (#12111).
+ *
+ * `hasUsableCredentialsForModel` collapses this same data to a single
+ * boolean, which is enough to know a provider is reachable at all but not
+ * enough to know whether one *specific* model is servable: `isModelLocked`
+ * (open-sse/services/accountFallback.ts) is scoped per provider+connection+
+ * model, so callers that need to exclude a locked model must check it
+ * against each connection that could actually serve it — dropping the model
+ * only when every one of those connections has it locked (mirrors
+ * `isConnectionEligibleForModel` in
+ * open-sse/services/autoCombo/resilienceCandidateFilter.ts).
+ *
+ * Returns `null` on the same indeterminate cases as
+ * `hasUsableCredentialsForModel` (credential store unavailable) so callers
+ * can fail open identically. No-auth providers with no stored connection row
+ * resolve to the synthetic "noauth" connection id, matching the id
+ * `lockModel`/`isModelLocked` use for those providers elsewhere in the
+ * resilience layer.
+ */
+export async function getUsableConnectionsForModel(
+  model: string
+): Promise<UsableConnectionRef[] | null> {
+  const rawProvider = typeof model === "string" ? model.split("/")[0]?.trim() : "";
+  if (!rawProvider) return null;
+  const provider = resolveProviderId(rawProvider);
+  const isNoAuth = isNoAuthProviderKey(rawProvider, provider);
+  // Same dispatch refusal as in hasUsableCredentialsForModel: a blocked
+  // no-auth provider has no usable connection at all, so return the
+  // definitive empty set — the synthetic "noauth" connection must not
+  // surface for it.
+  if (await isBlockedNoAuthProvider(provider)) return [];
+  try {
+    const { getProviderConnections } = await loadProvidersModule();
+    const connections = await getProviderConnections({ provider, isActive: true });
+    if (!Array.isArray(connections)) return null;
+    if (connections.length === 0) {
+      return isNoAuth ? [{ id: SYNTHETIC_NOAUTH_CONNECTION_ID }] : [];
+    }
+    const usable = isNoAuth
+      ? connections.filter((c: any) => !hasTerminalConnectionStatus(c))
+      : connections.filter((c: any) => isProviderConnectionUsable(c));
+    return usable.map((c: any) => ({ id: String(c.id) }));
+  } catch {
+    return null;
+  }
+}

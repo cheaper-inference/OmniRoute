@@ -1,0 +1,1290 @@
+"use client";
+
+import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { Button, Card, Select } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
+import { useNotificationStore } from "@/store/notificationStore";
+import { useTranslations } from "next-intl";
+import AutoDisableCard from "./AutoDisableCard";
+import ModelLockoutCard from "./ModelLockoutCard";
+import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
+import { NumberField, BooleanField } from "./ResilienceFields";
+import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
+import AntigravityTimingTelemetryCard, {
+  type AntigravityTimingTelemetryValue,
+} from "./AntigravityTimingTelemetryCard";
+
+type RequestQueueSettings = {
+  autoEnableApiKeyProviders: boolean;
+  requestsPerMinute: number;
+  minTimeBetweenRequestsMs: number;
+  concurrentRequests: number;
+  globalConcurrentRequests: number;
+  maxWaitMs: number;
+  executionMaxWaitMs: number;
+};
+
+type CredentialHealthCheckSettings = {
+  intervalMinutes: number;
+};
+
+type ConnectionCooldownProfileSettings = {
+  baseCooldownMs: number;
+  useUpstreamRetryHints: boolean;
+  // Issue #2100 follow-up. Optional / undefined when unset; the per-provider
+  // default in src/shared/utils/providerHints.ts resolves at runtime.
+  useUpstream429BreakerHints?: boolean;
+  maxBackoffSteps: number;
+};
+
+type ProviderBreakerProfileSettings = {
+  failureThreshold: number;
+  degradationThreshold: number;
+  resetTimeoutMs: number;
+};
+
+type WaitForCooldownSettings = {
+  enabled: boolean;
+  maxRetries: number;
+  maxRetryWaitSec: number;
+};
+
+type ComboCooldownWaitSettings = {
+  enabled: boolean;
+  maxWaitMs: number;
+  maxAttempts: number;
+  budgetMs: number;
+};
+
+type QuotaShareConcurrencyLimitSettings = {
+  enabled: boolean;
+};
+
+export type ProviderCooldownSettings = {
+  enabled: boolean;
+  minRetryCooldownMs: number;
+  maxRetryCooldownMs: number;
+};
+
+type ResilienceResponse = {
+  antigravityTimingTelemetry?: AntigravityTimingTelemetryValue;
+  requestQueue: RequestQueueSettings;
+  connectionCooldown: {
+    oauth: ConnectionCooldownProfileSettings;
+    apikey: ConnectionCooldownProfileSettings;
+  };
+  providerBreaker: {
+    oauth: ProviderBreakerProfileSettings;
+    apikey: ProviderBreakerProfileSettings;
+  };
+  waitForCooldown: WaitForCooldownSettings;
+  comboCooldownWait: ComboCooldownWaitSettings;
+  quotaShareConcurrencyLimit: QuotaShareConcurrencyLimitSettings;
+  providerCooldown: ProviderCooldownSettings;
+  credentialHealthCheck?: CredentialHealthCheckSettings;
+  tokenRefreshBreaker?: TokenRefreshBreakerValue;
+};
+
+function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
+  return {
+    antigravityTimingTelemetry: json.antigravityTimingTelemetry,
+    requestQueue: json.requestQueue,
+    connectionCooldown: json.connectionCooldown,
+    providerBreaker: json.providerBreaker,
+    waitForCooldown: json.waitForCooldown,
+    comboCooldownWait: json.comboCooldownWait,
+    quotaShareConcurrencyLimit: json.quotaShareConcurrencyLimit,
+    providerCooldown: json.providerCooldown,
+    // Older servers do not send the token-refresh section; keep undefined
+    // so the card can hide itself instead of showing a bogus default.
+    tokenRefreshBreaker: json.tokenRefreshBreaker,
+    // Older servers do not send the credential-health section; keep undefined
+    // so the card can hide itself instead of showing a bogus default.
+    credentialHealthCheck: json.credentialHealthCheck,
+  };
+}
+
+function formatMs(value: number | null | undefined) {
+  if (typeof value !== "number") return "—";
+  return `${value}ms`;
+}
+
+function SectionDescription({
+  scope,
+  trigger,
+  effect,
+}: {
+  scope: string;
+  trigger: string;
+  effect: string;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <div className="grid grid-cols-1 gap-2 text-xs text-text-muted sm:grid-cols-3">
+      <div>
+        <span className="font-semibold text-text-main">{t("scopeLabel")}:</span> {scope}
+      </div>
+      <div>
+        <span className="font-semibold text-text-main">{t("triggerLabel")}:</span> {trigger}
+      </div>
+      <div>
+        <span className="font-semibold text-text-main">{t("effectLabel")}:</span> {effect}
+      </div>
+    </div>
+  );
+}
+
+function ProfileColumn({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-bg-subtle p-4">
+      <div className="mb-4 flex items-center gap-2">
+        <Icon name={icon} size={16} className="text-primary" />
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-text-main">{title}</h3>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+function ActionRow({
+  editing,
+  saving,
+  onEdit,
+  onCancel,
+  onSave,
+}: {
+  editing: boolean;
+  saving: boolean;
+  onEdit: () => void;
+  onCancel: () => void;
+  onSave: () => void;
+}) {
+  const tc = useTranslations("common");
+  if (editing) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="secondary" onClick={onCancel}>
+          {tc("cancel")}
+        </Button>
+        <Button size="sm" variant="primary" icon="save" onClick={onSave} disabled={saving}>
+          {tc("save")}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button size="sm" variant="secondary" icon="edit" onClick={onEdit}>
+      {tc("edit")}
+    </Button>
+  );
+}
+
+function RequestQueueCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: RequestQueueSettings;
+  onSave: (next: RequestQueueSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="speed" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceRequestQueueTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceRequestQueueScope")}
+            trigger={t("resilienceRequestQueueTrigger")}
+            effect={t("resilienceRequestQueueEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceRequestQueueDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {editing ? (
+          <>
+            <BooleanField
+              label={t("resilienceAutoEnableApiKeyProviders")}
+              description={t("resilienceAutoEnableApiKeyProvidersDesc")}
+              checked={draft.autoEnableApiKeyProviders}
+              onChange={(autoEnableApiKeyProviders) =>
+                setDraft((prev) => ({ ...prev, autoEnableApiKeyProviders }))
+              }
+            />
+            <NumberField
+              label={t("resilienceRequestsPerMinute")}
+              value={draft.requestsPerMinute}
+              min={1}
+              onChange={(requestsPerMinute) => setDraft((prev) => ({ ...prev, requestsPerMinute }))}
+            />
+            <NumberField
+              label={t("resilienceMinTimeBetweenRequests")}
+              value={draft.minTimeBetweenRequestsMs}
+              suffix="ms"
+              onChange={(minTimeBetweenRequestsMs) =>
+                setDraft((prev) => ({ ...prev, minTimeBetweenRequestsMs }))
+              }
+            />
+            <NumberField
+              label={t("resilienceConnectionScopeConcurrentRequests")}
+              value={draft.concurrentRequests}
+              min={1}
+              onChange={(concurrentRequests) =>
+                setDraft((prev) => ({ ...prev, concurrentRequests }))
+              }
+            />
+            <NumberField
+              label={t("resilienceGlobalConcurrentRequests")}
+              value={draft.globalConcurrentRequests}
+              min={0}
+              onChange={(globalConcurrentRequests) =>
+                setDraft((prev) => ({ ...prev, globalConcurrentRequests }))
+              }
+            />
+            <NumberField
+              label={t("resilienceMaxQueueWait")}
+              value={draft.maxWaitMs}
+              min={1}
+              suffix="ms"
+              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+            />
+            <NumberField
+              label={t("resilienceMaxExecutionWait")}
+              value={draft.executionMaxWaitMs}
+              min={1}
+              suffix="ms"
+              onChange={(executionMaxWaitMs) =>
+                setDraft((prev) => ({ ...prev, executionMaxWaitMs }))
+              }
+            />
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceAutoEnableApiKeyProviders")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.autoEnableApiKeyProviders ? t("statusEnabled") : t("statusDisabled")}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceRequestsPerMinute")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.requestsPerMinute}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMinTimeBetweenRequests")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.minTimeBetweenRequestsMs)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceConnectionScopeConcurrentRequests")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.concurrentRequests}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceGlobalConcurrentRequests")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.globalConcurrentRequests || t("statusDisabled")}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxQueueWait")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.maxWaitMs)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxExecutionWait")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.executionMaxWaitMs)}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function ConnectionCooldownCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: ResilienceResponse["connectionCooldown"];
+  onSave: (next: ResilienceResponse["connectionCooldown"]) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  const renderProfile = (key: "oauth" | "apikey", title: string, icon: string) => {
+    const current = editing ? draft[key] : value[key];
+    return (
+      <ProfileColumn title={title} icon={icon}>
+        {editing ? (
+          <>
+            <NumberField
+              label={t("resilienceBaseCooldown")}
+              value={current.baseCooldownMs}
+              min={0}
+              suffix="ms"
+              onChange={(baseCooldownMs) =>
+                setDraft((prev) => ({ ...prev, [key]: { ...prev[key], baseCooldownMs } }))
+              }
+            />
+            <BooleanField
+              label={t("resilienceUseUpstreamRetryHints")}
+              description={t("resilienceUseUpstreamRetryHintsDesc")}
+              checked={current.useUpstreamRetryHints}
+              onChange={(useUpstreamRetryHints) =>
+                setDraft((prev) => ({
+                  ...prev,
+                  [key]: { ...prev[key], useUpstreamRetryHints },
+                }))
+              }
+            />
+            <Select
+              compact
+              label={t("resilienceUseUpstream429BreakerHints")}
+              hint={t("resilienceUseUpstream429BreakerHintsDesc")}
+              value={
+                current.useUpstream429BreakerHints === true
+                  ? "on"
+                  : current.useUpstream429BreakerHints === false
+                    ? "off"
+                    : "default"
+              }
+              onChange={(e) => {
+                const v = e.target.value;
+                const next: boolean | undefined =
+                  v === "on" ? true : v === "off" ? false : undefined;
+                setDraft((prev) => {
+                  const profile = { ...prev[key] };
+                  if (next === undefined) {
+                    delete (profile as { useUpstream429BreakerHints?: boolean })
+                      .useUpstream429BreakerHints;
+                  } else {
+                    (
+                      profile as { useUpstream429BreakerHints?: boolean }
+                    ).useUpstream429BreakerHints = next;
+                  }
+                  return { ...prev, [key]: profile };
+                });
+              }}
+              options={[
+                { value: "default", label: t("resilienceDefaultPerProvider") },
+                { value: "on", label: t("resilienceAlwaysOn") },
+                { value: "off", label: t("resilienceAlwaysOff") },
+              ]}
+            />
+            <NumberField
+              label={t("resilienceMaxBackoffSteps")}
+              value={current.maxBackoffSteps}
+              min={0}
+              onChange={(maxBackoffSteps) =>
+                setDraft((prev) => ({ ...prev, [key]: { ...prev[key], maxBackoffSteps } }))
+              }
+            />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceBaseCooldown")}</span>
+              <span className="font-mono text-text-main">{formatMs(current.baseCooldownMs)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceUseUpstreamRetryHints")}</span>
+              <span className="font-mono text-text-main">
+                {current.useUpstreamRetryHints ? t("yes") : t("no")}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">
+                {t("resilienceUseUpstream429BreakerHintsShort")}
+              </span>
+              <span className="font-mono text-text-main">
+                {current.useUpstream429BreakerHints === true
+                  ? t("yes")
+                  : current.useUpstream429BreakerHints === false
+                    ? t("no")
+                    : t("resilienceDefault")}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceMaxBackoffSteps")}</span>
+              <span className="font-mono text-text-main">{current.maxBackoffSteps}</span>
+            </div>
+          </>
+        )}
+      </ProfileColumn>
+    );
+  };
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="timer_off" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceConnectionCooldownTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceConnectionCooldownScope")}
+            trigger={t("resilienceConnectionCooldownTrigger")}
+            effect={t("resilienceConnectionCooldownEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            // Build PATCH-ready payload: convert undefined useUpstream429BreakerHints
+            // to explicit null sentinel so the server treats it as unset (not as
+            // partial-merge "leave unchanged"). JSON.stringify drops undefined keys.
+            const payload = {
+              oauth: {
+                ...draft.oauth,
+                useUpstream429BreakerHints:
+                  draft.oauth.useUpstream429BreakerHints === undefined
+                    ? (null as unknown as boolean | undefined)
+                    : draft.oauth.useUpstream429BreakerHints,
+              },
+              apikey: {
+                ...draft.apikey,
+                useUpstream429BreakerHints:
+                  draft.apikey.useUpstream429BreakerHints === undefined
+                    ? (null as unknown as boolean | undefined)
+                    : draft.apikey.useUpstream429BreakerHints,
+              },
+            };
+            await onSave(payload as typeof draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceConnectionCooldownDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderProfile("oauth", "OAuth Providers", "lock")}
+        {renderProfile("apikey", "API Key Providers", "key")}
+      </div>
+    </Card>
+  );
+}
+
+function ProviderBreakerCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: ResilienceResponse["providerBreaker"];
+  onSave: (next: ResilienceResponse["providerBreaker"]) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  const renderProfile = (key: "oauth" | "apikey", title: string, icon: string) => {
+    const current = editing ? draft[key] : value[key];
+    return (
+      <ProfileColumn title={title} icon={icon}>
+        {editing ? (
+          <>
+            <NumberField
+              label={t("resilienceFailureThreshold")}
+              value={current.failureThreshold}
+              min={1}
+              onChange={(failureThreshold) =>
+                setDraft((prev) => ({ ...prev, [key]: { ...prev[key], failureThreshold } }))
+              }
+            />
+            <NumberField
+              label={t("resilienceDegradationThreshold")}
+              value={current.degradationThreshold}
+              min={1}
+              onChange={(degradationThreshold) =>
+                setDraft((prev) => ({ ...prev, [key]: { ...prev[key], degradationThreshold } }))
+              }
+            />
+            <NumberField
+              label={t("resilienceResetTime")}
+              value={current.resetTimeoutMs}
+              min={1000}
+              suffix="ms"
+              onChange={(resetTimeoutMs) =>
+                setDraft((prev) => ({ ...prev, [key]: { ...prev[key], resetTimeoutMs } }))
+              }
+            />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceFailureThreshold")}</span>
+              <span className="font-mono text-text-main">{current.failureThreshold}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceDegradationThreshold")}</span>
+              <span className="font-mono text-text-main">{current.degradationThreshold}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{t("resilienceResetTime")}</span>
+              <span className="font-mono text-text-main">{formatMs(current.resetTimeoutMs)}</span>
+            </div>
+          </>
+        )}
+      </ProfileColumn>
+    );
+  };
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="electrical_services" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceProviderBreakerTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceProviderBreakerScope")}
+            trigger={t("resilienceProviderBreakerTrigger")}
+            effect={t("resilienceProviderBreakerEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceProviderBreakerDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderProfile("oauth", "OAuth Providers", "lock")}
+        {renderProfile("apikey", "API Key Providers", "key")}
+      </div>
+    </Card>
+  );
+}
+
+function WaitForCooldownCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: WaitForCooldownSettings;
+  onSave: (next: WaitForCooldownSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="hourglass_top" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceWaitForCooldownTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceWaitForCooldownScope")}
+            trigger={t("resilienceWaitForCooldownTrigger")}
+            effect={t("resilienceWaitForCooldownEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceWaitForCooldownDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {editing ? (
+          <>
+            <BooleanField
+              label={t("resilienceEnableServerWait")}
+              description={t("resilienceEnableServerWaitDesc")}
+              checked={draft.enabled}
+              onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
+            />
+            <NumberField
+              label={t("resilienceMaxAttempts")}
+              value={draft.maxRetries}
+              min={0}
+              onChange={(maxRetries) => setDraft((prev) => ({ ...prev, maxRetries }))}
+            />
+            <NumberField
+              label={t("resilienceMaxWaitPerAttempt")}
+              value={draft.maxRetryWaitSec}
+              min={0}
+              suffix="sec"
+              onChange={(maxRetryWaitSec) => setDraft((prev) => ({ ...prev, maxRetryWaitSec }))}
+            />
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.enabled ? t("statusEnabled") : t("statusDisabled")}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">{value.maxRetries}</div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxWaitPerAttempt")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.maxRetryWaitSec}s
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function ComboCooldownWaitCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: ComboCooldownWaitSettings;
+  onSave: (next: ComboCooldownWaitSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  const title = t("resilienceComboCooldownWaitTitle");
+  const desc =
+    t("resilienceComboCooldownWaitDesc") ||
+    "For all combo strategies: wait out a short transient cooldown and re-dispatch instead of returning a 429 immediately. Never waits on quota_exhausted.";
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Icon name="timer" size={20} className="text-primary" />
+          <h2 className="text-lg font-bold">{title}</h2>
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{desc}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {editing ? (
+          <>
+            <BooleanField
+              label={t("resilienceEnableServerWait")}
+              description={
+                t("resilienceComboCooldownWaitToggleDesc") ||
+                "All combo strategies; never waits on quota_exhausted."
+              }
+              checked={draft.enabled}
+              onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
+            />
+            <NumberField
+              label={t("resilienceComboCooldownMaxWaitMs")}
+              value={draft.maxWaitMs}
+              min={0}
+              suffix="ms"
+              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+            />
+            <NumberField
+              label={t("resilienceMaxAttempts")}
+              value={draft.maxAttempts}
+              min={0}
+              onChange={(maxAttempts) => setDraft((prev) => ({ ...prev, maxAttempts }))}
+            />
+            <NumberField
+              label={t("resilienceComboCooldownBudgetMs")}
+              value={draft.budgetMs}
+              min={0}
+              suffix="ms"
+              onChange={(budgetMs) => setDraft((prev) => ({ ...prev, budgetMs }))}
+            />
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.enabled ? t("statusEnabled") : t("statusDisabled")}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceComboCooldownMaxWaitMs")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.maxWaitMs)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">{value.maxAttempts}</div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceComboCooldownBudgetMs")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.budgetMs)}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function QuotaShareConcurrencyLimitCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: QuotaShareConcurrencyLimitSettings;
+  onSave: (next: QuotaShareConcurrencyLimitSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setDraft(value);
+  }
+
+  const title = t("resilienceQuotaShareConcurrencyTitle");
+  const desc =
+    t("resilienceQuotaShareConcurrencyDesc") ||
+    "For quota-share combos only: when a connection sets a Max Concurrent cap, serialize concurrent requests to that subscription account so it is never flooded past its ceiling — excess requests wait in the queue instead of getting a 429. The cap comes from each connection's Max Concurrent field; this switch only enables/disables honoring it.";
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Icon name="filter_list" size={20} className="text-primary" />
+          <h2 className="text-lg font-bold">{title}</h2>
+        </div>
+        <ActionRow
+          editing={editing}
+          saving={saving}
+          onEdit={() => setEditing(true)}
+          onCancel={() => {
+            setDraft(value);
+            setEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(draft);
+            setEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{desc}</p>
+
+      <div className="grid grid-cols-1 gap-3">
+        {editing ? (
+          <BooleanField
+            label={t("resilienceEnableServerWait")}
+            description={
+              t("resilienceQuotaShareConcurrencyToggleDesc") ||
+              "Quota-share combos only; honors each connection's Max Concurrent cap."
+            }
+            checked={draft.enabled}
+            onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
+          />
+        ) : (
+          <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
+            <div className="mt-1 text-sm font-semibold text-text-main">
+              {value.enabled ? t("statusEnabled") : t("statusDisabled")}
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+export function ProviderCooldownCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: ProviderCooldownSettings;
+  onSave: (next: ProviderCooldownSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setEditing(value);
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="timer" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceProviderCooldownTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceProviderCooldownScope")}
+            trigger={t("resilienceProviderCooldownTrigger")}
+            effect={t("resilienceProviderCooldownEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={isEditing}
+          saving={saving}
+          onEdit={() => setIsEditing(true)}
+          onCancel={() => {
+            setEditing(value);
+            setIsEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(editing);
+            setIsEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceProviderCooldownDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {isEditing ? (
+          <>
+            <BooleanField
+              label={t("resilienceProviderCooldownEnabled")}
+              description={t("resilienceProviderCooldownEnabledDesc")}
+              checked={editing.enabled}
+              onChange={(enabled) => setEditing((prev) => ({ ...prev, enabled }))}
+            />
+            <NumberField
+              label={t("resilienceProviderCooldownMin")}
+              value={editing.minRetryCooldownMs}
+              min={0}
+              max={300000}
+              suffix="ms"
+              onChange={(minRetryCooldownMs) =>
+                setEditing((prev) => ({ ...prev, minRetryCooldownMs }))
+              }
+            />
+            <NumberField
+              label={t("resilienceProviderCooldownMax")}
+              value={editing.maxRetryCooldownMs}
+              min={0}
+              max={3600000}
+              suffix="ms"
+              onChange={(maxRetryCooldownMs) =>
+                setEditing((prev) => ({ ...prev, maxRetryCooldownMs }))
+              }
+            />
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceProviderCooldownEnabled")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {value.enabled ? t("statusEnabled") : t("statusDisabled")}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMin")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.minRetryCooldownMs)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMax")}</div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {formatMs(value.maxRetryCooldownMs)}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function CredentialHealthCheckCard({
+  value,
+  onSave,
+  saving,
+}: {
+  value: CredentialHealthCheckSettings;
+  onSave: (next: CredentialHealthCheckSettings) => Promise<void>;
+  saving: boolean;
+}) {
+  const t = useTranslations("settings");
+  const [editing, setEditing] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setEditing(value);
+  }
+
+  const disabled = editing.intervalMinutes <= 0;
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Icon name="health_and_safety" size={20} className="text-primary" />
+            <h2 className="text-lg font-bold">{t("resilienceCredentialHealthTitle")}</h2>
+          </div>
+          <SectionDescription
+            scope={t("resilienceCredentialHealthScope")}
+            trigger={t("resilienceCredentialHealthTrigger")}
+            effect={t("resilienceCredentialHealthEffect")}
+          />
+        </div>
+        <ActionRow
+          editing={isEditing}
+          saving={saving}
+          onEdit={() => setIsEditing(true)}
+          onCancel={() => {
+            setEditing(value);
+            setIsEditing(false);
+          }}
+          onSave={async () => {
+            await onSave(editing);
+            setIsEditing(false);
+          }}
+        />
+      </div>
+
+      <p className="mb-4 text-sm text-text-muted">{t("resilienceCredentialHealthDesc")}</p>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {isEditing ? (
+          <>
+            <NumberField
+              label={t("resilienceCredentialHealthInterval")}
+              value={editing.intervalMinutes}
+              min={0}
+              max={1440}
+              suffix="min"
+              onChange={(intervalMinutes) => setEditing((prev) => ({ ...prev, intervalMinutes }))}
+            />
+            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+              {t("resilienceCredentialHealthHint")}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+              <div className="text-xs text-text-muted">
+                {t("resilienceCredentialHealthInterval")}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-text-main">
+                {disabled
+                  ? t("statusDisabled")
+                  : t("resilienceCredentialHealthEveryMinutes", {
+                      minutes: value.intervalMinutes,
+                    })}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+              {t("resilienceCredentialHealthHint")}
+            </div>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+export default function ResilienceTab() {
+  const notify = useNotificationStore();
+  const t = useTranslations("settings");
+  const [data, setData] = useState<ResilienceResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingSection, setSavingSection] = useState<string | null>(null);
+  const tx = useCallback(
+    (key: string, fallback: string) => {
+      if (typeof t.has === "function" && t.has(key as never)) {
+        return t(key as never);
+      }
+      return fallback;
+    },
+    [t]
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      try {
+        const response = await fetch("/api/resilience");
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const json = await response.json();
+        if (!mounted) return;
+        setData(toResilienceResponse(json));
+      } catch (error) {
+        notify.error(
+          error instanceof Error
+            ? error.message
+            : tx("failedLoadResilience", "Failed to load resilience settings")
+        );
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    void load();
+    return () => {
+      mounted = false;
+    };
+  }, [notify, tx]);
+
+  const savePatch = async (section: string, payload: Record<string, unknown>) => {
+    setSavingSection(section);
+    try {
+      const response = await fetch("/api/resilience", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await response.json();
+      /* prettier-ignore */ throwIfResilienceSaveFailed(response.ok, json, tx("saveFailed", "Failed to save resilience settings"));
+      setData(toResilienceResponse(json));
+      notify.success(tx("savedSuccessfully", "Resilience settings updated."));
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : tx("saveFailed", "Failed to save resilience settings")
+      );
+      throw error;
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
+  if (loading && !data) {
+    return (
+      <Card className="p-6">
+        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
+          {tx("loadingResilience", "Loading resilience settings...")}
+        </div>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="p-6">
+        <p className="text-sm text-text-muted">
+          {tx("failedLoadResilience", "Unable to load resilience settings.")}
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <AutoDisableCard />
+      {data.antigravityTimingTelemetry && (
+        <AntigravityTimingTelemetryCard
+          value={data.antigravityTimingTelemetry}
+          saving={savingSection === "antigravityTimingTelemetry"}
+          onSave={(antigravityTimingTelemetry) =>
+            savePatch("antigravityTimingTelemetry", { antigravityTimingTelemetry })
+          }
+        />
+      )}
+
+      <RequestQueueCard
+        value={data.requestQueue}
+        saving={savingSection === "requestQueue"}
+        onSave={(requestQueue) => savePatch("requestQueue", { requestQueue })}
+      />
+      <ConnectionCooldownCard
+        value={data.connectionCooldown}
+        saving={savingSection === "connectionCooldown"}
+        onSave={(connectionCooldown) => savePatch("connectionCooldown", { connectionCooldown })}
+      />
+      <ProviderBreakerCard
+        value={data.providerBreaker}
+        saving={savingSection === "providerBreaker"}
+        onSave={(providerBreaker) => savePatch("providerBreaker", { providerBreaker })}
+      />
+      <WaitForCooldownCard
+        value={data.waitForCooldown}
+        saving={savingSection === "waitForCooldown"}
+        onSave={(waitForCooldown) => savePatch("waitForCooldown", { waitForCooldown })}
+      />
+      <ComboCooldownWaitCard
+        value={data.comboCooldownWait}
+        saving={savingSection === "comboCooldownWait"}
+        onSave={(comboCooldownWait) => savePatch("comboCooldownWait", { comboCooldownWait })}
+      />
+      <QuotaShareConcurrencyLimitCard
+        value={data.quotaShareConcurrencyLimit}
+        saving={savingSection === "quotaShareConcurrencyLimit"}
+        onSave={(quotaShareConcurrencyLimit) =>
+          savePatch("quotaShareConcurrencyLimit", { quotaShareConcurrencyLimit })
+        }
+      />
+      <ProviderCooldownCard
+        value={data.providerCooldown}
+        saving={savingSection === "providerCooldown"}
+        onSave={(providerCooldown) => savePatch("providerCooldown", { providerCooldown })}
+      />
+      {data.tokenRefreshBreaker && (
+        <TokenRefreshBreakerCard
+          value={data.tokenRefreshBreaker}
+          saving={savingSection === "tokenRefreshBreaker"}
+          onSave={(tokenRefreshBreaker) =>
+            savePatch("tokenRefreshBreaker", { tokenRefreshBreaker })
+          }
+        />
+      )}
+      {data.credentialHealthCheck && (
+        <CredentialHealthCheckCard
+          value={data.credentialHealthCheck}
+          saving={savingSection === "credentialHealthCheck"}
+          onSave={(credentialHealthCheck) =>
+            savePatch("credentialHealthCheck", { credentialHealthCheck })
+          }
+        />
+      )}
+      <ModelLockoutCard />
+    </div>
+  );
+}

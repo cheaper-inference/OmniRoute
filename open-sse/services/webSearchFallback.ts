@@ -1,0 +1,371 @@
+import { FORMATS } from "../translator/formats.ts";
+import { isSoleClaudeServerWebSearchTool } from "../translator/helpers/claudeServerWebSearch.ts";
+
+export const OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME = "omniroute_web_search";
+// Prefix match — Anthropic sends date-suffixed variants (web_search_20250305, …).
+// The other two detectors (openai-responses/helpers.ts, webSearchRouting.ts) already
+// use /^web_search/ prefix matching; this aligns the fallback detector with them.
+const WEB_SEARCH_TOOL_TYPES = /^web_search/;
+const SEARCH_CONTEXT_DEFAULTS: Record<string, number> = {
+  low: 5,
+  medium: 8,
+  high: 10,
+};
+
+type JsonRecord = Record<string, unknown>;
+type WebSearchFallbackBody = JsonRecord & {
+  tools?: unknown;
+  tool_choice?: unknown;
+  input?: unknown;
+};
+
+export interface WebSearchFallbackPlan {
+  enabled: boolean;
+  toolName: string | null;
+  convertedToolCount: number;
+}
+
+function toRecord(value: unknown): JsonRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function isBuiltInWebSearchTool(tool: unknown): tool is JsonRecord {
+  const toolRecord = toRecord(tool);
+  const toolType = typeof toolRecord.type === "string" ? toolRecord.type : "";
+  return WEB_SEARCH_TOOL_TYPES.test(toolType) && !toolRecord.function;
+}
+
+function isBuiltInWebSearchToolChoice(toolChoice: unknown, toolNames: Set<string>): boolean {
+  const choice = toRecord(toolChoice);
+  const toolType = typeof choice.type === "string" ? choice.type : "";
+  if (WEB_SEARCH_TOOL_TYPES.test(toolType)) return true;
+  // Anthropic names server tools via { type: "tool", name: "web_search" }.
+  // Do not steal an explicit choice of a preserved custom function with that name.
+  return (
+    !toolNames.has("web_search") &&
+    (toolType === "tool" || toolType === "function") &&
+    (choice.name === "web_search" || toRecord(choice.function).name === "web_search")
+  );
+}
+
+function buildFallbackDescription(tool: JsonRecord): string {
+  const externalWebAccess = tool.external_web_access !== false;
+  const contextSize =
+    typeof tool.search_context_size === "string"
+      ? tool.search_context_size.trim().toLowerCase()
+      : "";
+  const defaultMaxResults = SEARCH_CONTEXT_DEFAULTS[contextSize] || SEARCH_CONTEXT_DEFAULTS.medium;
+  const accessMode = externalWebAccess ? "public web" : "configured search index";
+
+  return [
+    `Search the ${accessMode} for recent, factual information and return cited results.`,
+    "Use this when the answer depends on current events, external documents, or fresh facts.",
+    `If max_results is omitted, prefer about ${defaultMaxResults} results.`,
+  ].join(" ");
+}
+
+function buildFallbackParameters(tool: JsonRecord): JsonRecord {
+  const contextSize =
+    typeof tool.search_context_size === "string"
+      ? tool.search_context_size.trim().toLowerCase()
+      : "";
+  const defaultMaxResults = SEARCH_CONTEXT_DEFAULTS[contextSize] || SEARCH_CONTEXT_DEFAULTS.medium;
+
+  return {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      query: {
+        type: "string",
+        description: "The web search query to execute.",
+      },
+      search_type: {
+        type: "string",
+        enum: ["web", "news"],
+        description: "Use 'news' for recent headlines or reporting; otherwise use 'web'.",
+      },
+      max_results: {
+        type: "integer",
+        minimum: 1,
+        maximum: 20,
+        default: defaultMaxResults,
+        description: "Maximum number of results to retrieve.",
+      },
+      country: {
+        type: "string",
+        description: "Optional 2-letter country code for localization, e.g. US or BR.",
+      },
+      language: {
+        type: "string",
+        description: "Optional language code such as en or pt-BR.",
+      },
+      time_range: {
+        type: "string",
+        enum: ["any", "day", "week", "month", "year"],
+        description: "Optional recency filter.",
+      },
+      filters: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          include_domains: {
+            type: "array",
+            items: { type: "string" },
+            description: "Optional list of domains to include.",
+          },
+          exclude_domains: {
+            type: "array",
+            items: { type: "string" },
+            description: "Optional list of domains to exclude.",
+          },
+        },
+      },
+    },
+    required: ["query"],
+  };
+}
+
+function buildFallbackTool(tool: JsonRecord, targetFormat?: string | null): JsonRecord {
+  const name = OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME;
+  const description = buildFallbackDescription(tool);
+  const parameters = buildFallbackParameters(tool);
+
+  // Responses API expects FLAT function tools ({ type, name, parameters }), whereas
+  // Chat Completions expects NESTED ({ type, function: { name, parameters } }). On the
+  // Responses→Responses passthrough path nothing flattens the injected tool, so a nested
+  // shape reaches the upstream as `tools[0].function.name` and is rejected with
+  // "Missing required parameter: 'tools[0].name'." (issue #2390).
+  if (targetFormat === FORMATS.OPENAI_RESPONSES) {
+    return { type: "function", name, description, parameters };
+  }
+
+  // Anthropic Messages targets expect FLAT Anthropic tools ({ name, input_schema }).
+  // The nested Chat Completions shape reaches the upstream as tools[0] = { type,
+  // function } with no top-level `name`/`input_schema`, and strict Anthropic-compatible
+  // upstreams (e.g. a vLLM /v1/messages) reject it with "tools.0.name missing".
+  if (targetFormat === FORMATS.CLAUDE) {
+    return { name, description, input_schema: parameters };
+  }
+
+  return {
+    type: "function",
+    function: { name, description, parameters },
+  };
+}
+
+// Providers whose endpoint advertises Claude/Anthropic format but does NOT implement
+// Anthropic's typed server tools (web_search_20250305, …). For these the Claude -> Claude
+// bypass below must NOT apply: forwarding the native server tool makes the upstream 400
+// (MiniMax returns `invalid params, function name or parameters is empty (2013)`), so the
+// built-in web-search tool has to be converted to the omniroute_web_search function
+// fallback — which these models accept as a normal function tool (#4481).
+const CLAUDE_FORMAT_PROVIDERS_WITHOUT_SERVER_TOOLS = new Set(["minimax"]);
+
+export function supportsNativeWebSearchFallbackBypass({
+  provider,
+  sourceFormat,
+  targetFormat,
+  nativeCodexPassthrough,
+  interceptSearchOverride,
+  soleClaudeServerWebSearchTool,
+}: {
+  provider?: string | null;
+  sourceFormat?: string | null;
+  targetFormat?: string | null;
+  nativeCodexPassthrough: boolean;
+  // Per-model rule (#3384) — resolveInterceptSearch() in src/lib/db/interceptionRules.ts.
+  // true = force interception (never bypass); false = force native bypass; undefined =
+  // fall through to the native-bypass defaults below.
+  interceptSearchOverride?: boolean;
+  // The Claude Code WebSearch shape: the Anthropic web_search server tool is the
+  // request's only tool. Gates the Codex Responses bypass below; computed by
+  // prepareWebSearchFallbackBody from the body it already holds.
+  soleClaudeServerWebSearchTool?: boolean;
+}): boolean {
+  if (typeof interceptSearchOverride === "boolean") {
+    return !interceptSearchOverride;
+  }
+  // Native Codex (OpenAI Responses) passthrough: the upstream runs web search itself.
+  if (nativeCodexPassthrough) return true;
+  // Gemini target: the Gemini translator maps built-in web search to googleSearch natively.
+  // Antigravity (#13447) executes through the same Gemini lane — its executor
+  // sanitizes tools via buildGeminiTools(), which maps web_search natively —
+  // so it takes the same bypass instead of being rewritten to omniroute_web_search.
+  if (
+    targetFormat === FORMATS.GEMINI ||
+    targetFormat === FORMATS.ANTIGRAVITY ||
+    provider === "antigravity"
+  )
+    return true;
+  // Claude -> Claude passthrough: the Anthropic Messages upstream (e.g. a Claude
+  // subscription driven by Claude Code) natively runs web_search_20250305. Forward the
+  // native tool untouched instead of rewriting it to omniroute_web_search. Mirrors the
+  // Codex/Gemini bypasses so every native-web-search provider is treated symmetrically.
+  if (sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE) {
+    // …except Anthropic-compatible providers that don't actually implement server tools.
+    if (provider && CLAUDE_FORMAT_PROVIDERS_WITHOUT_SERVER_TOOLS.has(provider)) return false;
+    return true;
+  }
+  // Claude -> Codex Responses (#16351 sibling): the Codex upstream implements the
+  // Responses API's hosted `web_search` server tool, and claude-to-openai.ts already
+  // emits it natively for an OPENAI_RESPONSES target (`{ type: "web_search" }`, from
+  // convertClaudeServerWebSearchTool). Rewriting it to the omniroute_web_search
+  // function fallback instead requires a configured /v1/search backend and otherwise
+  // leaves Claude Code's WebSearch with empty results.
+  //
+  // Gated two ways, conservatively:
+  //  - provider "codex" only. Other Responses-format providers are deliberately
+  //    excluded: chatgpt-web-codex drives a browser session and needs Tunnel-ID /
+  //    Runtime-Key for any tool request, codex-app-server is a local WS bridge whose
+  //    protocol has no hosted web_search, and the public "openai" provider's Responses
+  //    models are reasoning models reached with API keys, not the Codex lane. Extend
+  //    this set only for a provider whose upstream is known to run web_search itself.
+  //  - sole server tool only: a mixed request (server tool + client functions) keeps
+  //    the existing fallback conversion byte-for-byte.
+  if (
+    provider === "codex" &&
+    sourceFormat === FORMATS.CLAUDE &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    soleClaudeServerWebSearchTool === true
+  )
+    return true;
+  return false;
+}
+
+// A Responses client gets the fallback's internal round trip in the output (#12030):
+// function_call omniroute_web_search plus the executed function_call_output. Codex
+// records both, then answers the function_call itself because it never declared that
+// tool ("unsupported call: omniroute_web_search"), so its next request carries two
+// outputs for one call. Translated to Chat that is two tool messages for one tool
+// call: the model reads a failed search, and strict upstreams reject the transcript.
+// Keep one output per fallback call, the executed result when it is there.
+function isExecutedFallbackOutput(item: unknown): boolean {
+  const output = toRecord(item).output;
+  if (typeof output !== "string" || !output.trimStart().startsWith("{")) return false;
+  try {
+    const parsed: unknown = JSON.parse(output);
+    return !!parsed && typeof parsed === "object" && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
+
+function dropClientRejectionsOfFallbackCalls(input: unknown[]): unknown[] {
+  // An output answers the latest call with its id: some upstreams reuse ids per turn.
+  const latestCall = new Map<string, number>();
+  const outputsByFallbackCall = new Map<number, number[]>();
+  input.forEach((item, index) => {
+    const record = toRecord(item);
+    const callId = record.call_id;
+    if (typeof callId !== "string") return;
+    if (record.type === "function_call") {
+      latestCall.set(callId, record.name === OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME ? index : -1);
+      return;
+    }
+    const callIndex = latestCall.get(callId);
+    if (record.type !== "function_call_output" || callIndex === undefined || callIndex < 0) return;
+    outputsByFallbackCall.set(callIndex, [...(outputsByFallbackCall.get(callIndex) ?? []), index]);
+  });
+
+  const dropped = new Set<number>();
+  for (const outputs of outputsByFallbackCall.values()) {
+    if (outputs.length < 2) continue;
+    const kept = outputs.find((index) => isExecutedFallbackOutput(input[index])) ?? outputs[0];
+    for (const index of outputs) if (index !== kept) dropped.add(index);
+  }
+  return dropped.size === 0 ? input : input.filter((_, index) => !dropped.has(index));
+}
+
+export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
+  body: T,
+  options: {
+    provider?: string | null;
+    sourceFormat?: string | null;
+    targetFormat?: string | null;
+    nativeCodexPassthrough: boolean;
+    interceptSearchOverride?: boolean;
+  }
+): { body: T; fallback: WebSearchFallbackPlan } {
+  const tools = Array.isArray(body.tools) ? body.tools : null;
+  if (!tools || tools.length === 0) {
+    return {
+      body,
+      fallback: { enabled: false, toolName: null, convertedToolCount: 0 },
+    };
+  }
+
+  const builtInSearchTools = tools.filter(isBuiltInWebSearchTool);
+  if (builtInSearchTools.length === 0) {
+    return {
+      body,
+      fallback: { enabled: false, toolName: null, convertedToolCount: 0 },
+    };
+  }
+
+  if (
+    supportsNativeWebSearchFallbackBypass({
+      ...options,
+      // The "sole tool" gate for the Codex Responses bypass is derivable from the body
+      // this function already holds, so callers stay unchanged.
+      soleClaudeServerWebSearchTool: isSoleClaudeServerWebSearchTool(tools),
+    })
+  ) {
+    return {
+      body,
+      fallback: { enabled: false, toolName: null, convertedToolCount: 0 },
+    };
+  }
+
+  const toolNames = new Set<string>();
+  const preservedTools = tools.filter((tool) => {
+    if (isBuiltInWebSearchTool(tool)) return false;
+    const toolRecord = toRecord(tool);
+    const functionRecord = toRecord(toolRecord.function);
+    const name =
+      typeof functionRecord.name === "string"
+        ? functionRecord.name
+        : typeof toolRecord.name === "string"
+          ? toolRecord.name
+          : "";
+    if (name.trim().length > 0) {
+      toolNames.add(name.trim());
+    }
+    return true;
+  });
+
+  // chatCore calls this before translateRequest: injected tools must speak the
+  // client's format. Keep the target fallback for callers without source metadata.
+  const format = options.sourceFormat ?? options.targetFormat;
+
+  if (!toolNames.has(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME)) {
+    preservedTools.unshift(buildFallbackTool(toRecord(builtInSearchTools[0]), format));
+  }
+
+  const nextBody: T = {
+    ...body,
+    tools: preservedTools as T["tools"],
+  };
+  if (Array.isArray(body.input)) {
+    nextBody.input = dropClientRejectionsOfFallbackCalls(body.input) as T["input"];
+  }
+
+  if (isBuiltInWebSearchToolChoice(body.tool_choice, toolNames)) {
+    // Match the injected source-format tool so the normal translator can convert both.
+    nextBody.tool_choice = (
+      format === FORMATS.CLAUDE
+        ? { type: "tool", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+        : format === FORMATS.OPENAI_RESPONSES
+          ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+          : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
+    ) as T["tool_choice"];
+  }
+
+  return {
+    body: nextBody,
+    fallback: {
+      enabled: true,
+      toolName: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+      convertedToolCount: builtInSearchTools.length,
+    },
+  };
+}

@@ -1,0 +1,183 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import { FileDropZone, type FileRejection } from "@/shared/components/FileInput";
+import CsvMappingStep from "./CsvMappingStep";
+import type { WizardInput, WizardCsvMapping, WizardDestination } from "@/lib/batches/types";
+
+const MAX_FULL_BYTES = 5_000_000; // 5 MB — full read threshold (D7)
+const SAMPLE_HEAD_BYTES = 5_000_000;
+const SAMPLE_TAIL_BYTES = 100_000;
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+async function readFileContent(file: File): Promise<string> {
+  if (file.size <= MAX_FULL_BYTES) {
+    return await file.text();
+  }
+  // Sampling for large files (D7)
+  const headText = await file.slice(0, SAMPLE_HEAD_BYTES).text();
+  const tailText = await file.slice(file.size - SAMPLE_TAIL_BYTES).text();
+  return headText + "\n[...sample only...]\n" + tailText;
+}
+
+function getSourceContent(input: WizardInput): string | null | undefined {
+  return input.kind === "csv" ? input.csvContent : input.rawContent;
+}
+
+interface InputStepProps {
+  input: WizardInput;
+  onChange: (input: WizardInput) => void;
+  destination: WizardDestination | null;
+}
+
+export default function InputStep({ input, onChange, destination }: InputStepProps) {
+  const t = useTranslations("common");
+  const [isReading, setIsReading] = useState(false);
+  // B-2b — synchronous stale-proof guard for concurrent drops/picks in the same
+  // event-loop tick (React state lags behind dispatches within a tick).
+  const isReadingRef = useRef(false);
+  const inputRevisionRef = useRef(0);
+
+  const isJsonl = input.kind === "jsonl";
+  const isCsv = input.kind === "csv";
+
+  function handleKindChange(kind: "jsonl" | "csv") {
+    inputRevisionRef.current += 1;
+    onChange({
+      kind,
+      fileName: null,
+      rawContent: null,
+      csvMapping: kind === "csv" ? {} : undefined,
+    });
+  }
+
+  async function processFile(file: File) {
+    // B-2/B-2b race guard — ref is checked & flipped synchronously so concurrent
+    // calls in the same tick (e.g. drop + file-input-change firing back-to-back)
+    // cannot both pass. State mirror is for UI only.
+    if (isReadingRef.current) return;
+    isReadingRef.current = true;
+    const inputRevision = inputRevisionRef.current;
+    const expectedExt = isJsonl ? ".jsonl" : ".csv";
+    if (!file.name.toLowerCase().endsWith(expectedExt)) {
+      // Soft warning — don't block, let validation catch it
+    }
+    setIsReading(true);
+    if (isCsv) onChange({ ...input, rawContent: null });
+    try {
+      // CSV conversion needs every row; JSONL keeps a bounded preview (D7).
+      const content = input.kind === "csv" ? await file.text() : await readFileContent(file);
+      // A format change invalidates the pending file without skipping read cleanup.
+      if (inputRevision !== inputRevisionRef.current) return;
+      onChange({
+        kind: input.kind,
+        fileName: file.name,
+        rawContent: isCsv ? null : content,
+        csvContent: isCsv ? content : undefined,
+        originalFile: input.kind === "jsonl" ? file : undefined,
+        csvMapping: input.kind === "csv" ? (input.csvMapping ?? {}) : undefined,
+      });
+    } catch (err) {
+      console.error("[InputStep] file read error:", err);
+    } finally {
+      isReadingRef.current = false;
+      setIsReading(false);
+    }
+  }
+
+  function handleRejectedFiles(rejections: FileRejection[]) {
+    // The extension check is soft (validation flags a wrong file later), so a file the kit
+    // rejects only for its type is still read; extra files on this single-file zone are ignored.
+    // The kit reports rejections before the accepted files of the same drop: wait for the
+    // microtask so an accepted file, already reading by then, wins.
+    const wrongType = rejections.find((rejection) => rejection.reason === "type");
+    if (!wrongType) return;
+    queueMicrotask(() => {
+      if (!isReadingRef.current) void processFile(wrongType.file);
+    });
+  }
+
+  function handleCsvMappingChange(mapping: WizardCsvMapping) {
+    onChange({ ...input, rawContent: null, csvMapping: mapping });
+  }
+
+  function handleJsonlReady(jsonl: string, _rowsParsed: number, _rowsSkipped: number) {
+    // Replace rawContent with the converted JSONL so validation step gets it
+    onChange({ ...input, rawContent: jsonl, csvMapping: input.csvMapping });
+  }
+
+  const sourceContent = getSourceContent(input);
+  const isLargeFile = sourceContent != null && sourceContent.includes("[...sample only...]");
+  const hasFile = input.fileName != null && sourceContent != null;
+  const csvMappingReady = isCsv && input.rawContent != null;
+
+  // For CSV: needs mapping complete + jsonl generated to be "ready"
+  // rawContent will be updated by handleJsonlReady once mapping applied
+
+  const acceptAttr = isJsonl ? ".jsonl" : ".csv";
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Kind toggle */}
+      <SegmentedControl
+        aria-label={t("wizardStep2Input")}
+        className="self-start"
+        value={isJsonl ? "jsonl" : "csv"}
+        onChange={(next) => handleKindChange(next as "jsonl" | "csv")}
+        options={[
+          { value: "jsonl", label: t("wizardInputKindJsonl") },
+          { value: "csv", label: t("wizardInputKindCsv") },
+        ]}
+      />
+
+      {/* Drop zone — disabled while reading to prevent race (B-2) */}
+      <FileDropZone
+        accept={acceptAttr}
+        disabled={isReading}
+        className={isReading ? "cursor-wait" : undefined}
+        dropLabel={
+          isReading ? t("wizardInputReading") : hasFile ? input.fileName : t("wizardDropOrPick")
+        }
+        description={
+          !isReading && hasFile
+            ? isLargeFile
+              ? t("wizardInputLargeFileLabel")
+              : t("wizardInputReady")
+            : undefined
+        }
+        onFilesChange={(files) => void processFile(files[0])}
+        onFilesRejected={handleRejectedFiles}
+      />
+
+      {/* Large file warning */}
+      {isLargeFile && (
+        <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-xs text-warning">
+          {t("wizardInputLargeFileWarning")}
+        </div>
+      )}
+
+      {/* CSV mapping (inline step 2.5) */}
+      {isCsv && !isReading && hasFile && input.csvContent && (
+        <div className="rounded-xl border border-border p-4">
+          <CsvMappingStep
+            csvContent={input.csvContent}
+            mapping={input.csvMapping ?? {}}
+            onChange={handleCsvMappingChange}
+            destination={destination}
+            onJsonlReady={handleJsonlReady}
+          />
+          {csvMappingReady && (
+            <p className="mt-3 text-xs text-success">{t("wizardInputCsvJsonlReady")}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

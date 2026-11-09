@@ -1,0 +1,52 @@
+name: OpenSSF Scorecard
+on:
+  branch_protection_rule:
+  schedule:
+    - cron: "27 7 * * 1"
+  push:
+    # Scorecard only accepts the DEFAULT branch — here the active release/vX.Y.Z,
+    # not `main`. The job below guards on it so a push to any other branch skips.
+    branches: ["main", "release/**"]
+
+permissions: read-all
+
+# One analysis per ref at a time. The `push` trigger fires on every push to the active
+# release branch (~10/hour) and the job guard below only skips INSIDE the run, so each
+# push still queued a hosted run (20 queued on 2026-10-17 against the account's
+# concurrent-job limit). Scorecard scores repository posture, not the commit: the
+# newest push supersedes the older ones and the weekly schedule keeps its own ref.
+concurrency:
+  group: scorecard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    if: ${{ (github.event_name != 'push' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # security-events: write removed — Scorecard findings are advisory and no longer
+      # uploaded to the code-scanning Security tab (they are supply-chain/posture scores,
+      # not code vulnerabilities, and drowned out real CodeQL alerts). The run still
+      # produces the OpenSSF badge (publish_results) and a downloadable SARIF artifact.
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5

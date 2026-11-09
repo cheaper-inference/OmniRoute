@@ -1,0 +1,352 @@
+# Providers Guide: Connect AI Models to OmniRoute (한국어)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/PROVIDERS-GUIDE.md) · 🇪🇹 [am](../../../am/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇿 [az](../../../az/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇰 [da](../../../da/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇪 [de](../../../de/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇷 [el](../../../el/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇸 [es](../../../es/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇪 [et](../../../et/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇱 [he](../../../he/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇩 [id](../../../id/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇹 [it](../../../it/docs/getting-started/PROVIDERS-GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇭 [km](../../../km/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇲 [my](../../../my/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇴 [no](../../../no/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [or](../../../or/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇰 [si](../../../si/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [te](../../../te/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇭 [th](../../../th/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/PROVIDERS-GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/PROVIDERS-GUIDE.md)
+
+---
+
+> **요약**: 공급자는 AI 서비스(예: OpenAI, Anthropic, Google)에 연결하는 수단입니다. OmniRoute를 사용하려면 하나 이상의 공급자가 필요합니다.
+
+---
+
+## 제공자란 무엇인가요?
+
+제공자는 **이동통신사**와 비슷하다고 생각하면 됩니다. 전화를 걸려면 이동통신사가 필요하듯이, AI 모델을 사용하려면 AI 제공자가 필요합니다. OmniRoute는 **모든 이동통신사**와 호환되는 휴대전화와 같아서 제공자 간에 자동으로 전환할 수 있습니다.
+
+### 제공자 유형
+
+| 유형        | 설명                 | 예시                            | 비용                 |
+| ----------- | -------------------- | ------------------------------- | -------------------- |
+| **무료**    | 결제가 필요하지 않음 | Kiro, Pollinations              | $0                   |
+| **API 키**  | API 키가 필요함      | OpenAI, Anthropic, Google       | 사용량에 따라 결제   |
+| **OAuth**   | 계정으로 로그인      | Claude Code, GitHub Copilot     | 구독                 |
+| **웹 쿠키** | 브라우저 세션을 사용 | ChatGPT Web (Codex), Gemini Web | $0(사용자 계정 이용) |
+
+### 웹 쿠키 제공자
+
+일반적인 설정 방법, 제한 사항, 문제 해결 및 제공자별 인증 지침은 **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**를 참조하세요.
+---
+
+## 빠른 시작: 첫 번째 제공자 연결하기
+
+### 선택 사항: 최초 실행 시 무료 제공자 설정
+
+최초 실행 마법사에는 명시적인 **무료 제공자 설정** 카드가 표시됩니다. 이 카드는 OmniRoute의 인증 불필요 제공자 레지스트리에서 현재
+사용 가능한 목록을 가져온 다음, 확인하기 전에 각 제공자를 검토하고 선택 해제할 수 있게 해줍니다.
+OmniRoute는 제공자의 주의 사항과 해당 사이트 링크를 표시하므로 먼저 타사 약관, 개인정보 보호정책, 가용성 및 사용량 제한을
+검토할 수 있습니다.
+
+이 작업은 선택 사항입니다. 마법사를 완료해도 무료 제공자 연결이 자동으로 생성되지 않습니다.
+아직 추가되지 않은 제공자만 생성하고, 기존에 사용자 지정된 연결은
+그대로 유지하며, 생성된 제공자, 이미 구성된 제공자 및 실패한 제공자를 개별적으로 보고합니다. 일부만 처리된 경우
+실패한 항목만 안전하게 다시 시도할 수 있습니다.
+
+### 옵션 A: 무료 제공자(신용카드 불필요)
+
+1. `http://localhost:20128`에서 대시보드를 엽니다
+2. **제공자** → **제공자 추가**로 이동합니다
+3. 다음 무료 제공자 중 하나를 선택합니다:
+   - **Kiro AI** — 무료 Claude 모델(인증 불필요)
+   - **Pollinations** — 무료 GPT-5, Claude, Gemini(키 불필요)
+   - **LongCat** — 1,000만 토큰 무료(일회성 제공, 계정 + KYC 필요)
+   - **Cloudflare AI** — 50개 이상의 모델, 일일 10,000 뉴런
+   - **MLX Gemma 26B** — 로컬 Apple Silicon 모델(~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — 로컬 Apple Silicon 모델(~9.1 tok/s, ~13.1GB RAM)
+4. **연결**을 클릭합니다
+5. 완료되었습니다! 이제 AI를 무료로 사용할 수 있습니다.
+
+### 옵션 B: API 키 제공자(유료)
+
+1. 제공자 웹사이트에서 API 키를 발급받습니다:
+   - **OpenAI**: https://platform.openai.com/api-keys
+   - **Anthropic**: https://console.anthropic.com/
+   - **Google**: https://aistudio.google.com/apikey
+   - **DeepSeek**: https://platform.deepseek.com/
+   - **Groq**: https://console.groq.com/
+2. `http://localhost:20128`에서 대시보드를 엽니다
+3. **제공자** → **제공자 추가**로 이동합니다
+4. 제공자를 선택합니다
+5. API 키를 붙여넣습니다
+6. **연결**을 클릭합니다
+7. 완료되었습니다! 이제 해당 제공자의 모델을 사용할 수 있습니다.
+
+### 옵션 C: OAuth 제공자(구독)
+
+1. `http://localhost:20128`에서 대시보드를 엽니다
+2. **제공자** → **제공자 추가**로 이동합니다
+3. 제공자를 선택합니다(예: Claude Code, GitHub Copilot)
+4. **OAuth로 연결**을 클릭합니다
+5. 계정으로 로그인합니다
+6. 완료되었습니다! 이제 구독 모델을 사용할 수 있습니다.
+
+### 옵션 D: 로컬 MLX 모델(Apple Silicon)
+
+통합 메모리가 탑재된 Apple Silicon Mac의 경우, OmniRoute는 `mlx-lm.server`를 통해 실행되는 로컬 MLX 모델을 일반적인 OpenAI 호환 로컬 제공자로 연결할 수 있도록 지원합니다.
+
+#### 사전 요구 사항
+
+- 24GB 이상의 통합 메모리를 갖춘 **Apple Silicon Mac**(M1/M2/M3/M4) 권장
+- **uv** 패키지 관리자: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **mlx-lm**: `uv pip install mlx-lm`
+
+#### 빠른 시작
+
+1. **종속성 설치**:
+
+   ```bash
+   # 아직 설치하지 않았다면 uv 설치
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # mlx-lm 설치
+   uv pip install mlx-lm
+   ```
+
+2. **MLX 서버 수동 시작**(각각 별도의 터미널에서):
+
+   ```bash
+   # 터미널 1: Gemma 4 26B A4B IT-QAT(포트 11435)
+   uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
+
+   # 터미널 2: Qwen 3.8 27B MLX Mixed(포트 11436)
+   uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
+   ```
+
+3. **OmniRoute 대시보드에서 연결**:
+   - **제공자** → **제공자 추가**로 이동합니다
+   - **MLX Gemma 26B** 또는 **MLX Qwen 3.8 27B**를 선택합니다
+   - **연결**을 클릭합니다(API 키 불필요)
+
+4. **OpenCode와 함께 사용**:
+   ```bash
+   # OmniRoute를 사용하도록 OpenCode 구성
+   opencode config set api.base_url http://localhost:20128/v1
+   opencode config set api.key <your-omniroute-api-key>
+
+   # MLX 모델 사용
+   opencode run --model mlx-gemma/gemma-4-26b
+   opencode run --model mlx-qwen/qwen3.8-27b
+   ```
+
+#### 메모리 관리
+
+**중요**: 통합 메모리가 24GB인 경우 **한 번에 하나의 대형 MLX 모델만 실행할 수 있습니다**.
+
+- Gemma 26B: 최대 메모리 약 15.9GB
+- Qwen 3.8 27B: 최대 메모리 약 13.1GB
+
+다음과 같이 수동으로 관리해야 합니다:
+
+- 한 번에 하나의 MLX 서버만 실행하거나
+- 각각 별도의 머신에서 둘 다 실행하거나
+- 다른 모델을 시작하기 전에 하나를 중지합니다
+
+OmniRoute는 MLX 서버 프로세스를 자동으로 관리하지 않습니다. 구성한 OpenAI 호환 엔드포인트로 요청을 라우팅하기만 합니다.
+
+#### 도구 호출 지원
+
+두 모델 모두 OpenAI 호환 도구 호출을 지원합니다. 다음 명령으로 테스트할 수 있습니다:
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mlx-gemma/gemma-4-26b",
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+  }'
+```
+
+#### 문제 해결
+
+| 문제                 | 해결 방법                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| 서버가 시작되지 않음 | `uv run mlx_lm.server --help`를 확인하고 모델 ID를 검증하세요                       |
+| 메모리 부족          | 하나의 모델만 실행되는지 확인하고, 다른 앱을 닫은 후 Activity Monitor를 확인하세요  |
+| 연결 거부            | 서버가 올바른 포트(11435/11436)에서 실행 중인지 확인하세요                          |
+| 응답이 느림          | 첫 번째 요청 시 모델을 메모리에 로드합니다(~30-60초). 이후 요청은 빠르게 처리됩니다 |
+| 도구 호출 실패       | 모델이 도구를 지원하는지 확인하고, OmniRoute 로그에서 변환 오류를 확인하세요        |
+
+---
+
+## 최고의 무료 제공업체
+
+다음 제공업체는 신용카드 없이 **무료로 이용**할 수 있습니다:
+
+| 제공업체          | 무료 할당량       | 모델                                     | 연결 방법     |
+| ----------------- | ----------------- | ---------------------------------------- | ------------- |
+| **Kiro AI**       | 월 50 크레딧      | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | 인증 불필요   |
+| **Pollinations**  | 키 불필요         | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | 인증 불필요   |
+| **LongCat**       | 일회성 10M        | LongCat-2.0                              | API 키 + KYC  |
+| **Cloudflare AI** | 일일 10K 뉴런     | 50개 이상의 모델                         | 인증 불필요   |
+| **NVIDIA NIM**    | 약 40 RPM         | 129개 모델                               | API 키 필요   |
+| **Cerebras**      | 가입 시 $5 크레딧 | GLM 4.7, GPT-OSS 120B                    | API 키 + 카드 |
+
+**팁**: 여러 무료 제공업체를 연결하면 자동 대체 기능을 통해 **무료 AI를 무제한으로** 이용할 수 있습니다!
+
+---
+
+## 최고의 유료 제공업체
+
+다음 제공업체는 API 키를 통해 **고품질 모델**을 제공합니다:
+
+| 제공업체      | 최고의 모델                 | 비용                     | 무료 요금제            |
+| ------------- | --------------------------- | ------------------------ | ---------------------- |
+| **OpenAI**    | GPT-5, GPT-4o               | 토큰 1M개당 $2.50-$10    | 무료 크레딧 $5         |
+| **Anthropic** | Claude Opus 4.6, Sonnet 4.6 | 토큰 1M개당 $3-$15       | 무료 크레딧 $5         |
+| **Google**    | Gemini 2.5 Pro, Flash       | 토큰 1M개당 $0.075-$1.25 | 일일 요청 1,500건 무료 |
+| **DeepSeek**  | DeepSeek V4                 | 토큰 1M개당 $0.14-$0.28  | 무료 토큰 5M개         |
+| **Groq**      | Llama 4, Mixtral            | 토큰 1M개당 $0.05-$0.27  | 30 RPM 무료            |
+| **xAI**       | Grok 3                      | 토큰 1M개당 $0.30-$0.60  | —                      |
+
+---
+
+## 제공업체 연결 방법(단계별)
+
+### 1단계: 대시보드 열기
+
+브라우저에서 `http://localhost:20128`로 이동합니다.
+
+### 2단계: 제공업체로 이동
+
+사이드바에서 **제공업체**를 클릭합니다.
+
+### 3단계: 제공업체 추가 클릭
+
+**+ 제공업체 추가** 버튼을 클릭합니다.
+
+### 4단계: 제공업체 선택
+
+목록을 탐색하거나 제공업체를 검색한 후 클릭합니다.
+
+### 5단계: 인증 정보 입력
+
+- **무료 제공업체**: 인증 정보가 필요하지 않습니다. **연결**만 클릭하세요
+- **API 키 제공업체**: API 키를 붙여 넣으세요
+- **OAuth 제공업체**: **OAuth로 연결**을 클릭하고 로그인하세요
+
+### 6단계: 연결 테스트
+
+**연결 테스트**를 클릭하여 정상 작동하는지 확인합니다.
+
+### 7단계: 완료!
+
+이제 제공업체가 연결되었습니다. `model: "auto"`로 사용하거나 제공업체를 직접 지정할 수 있습니다.
+
+---
+
+## 여러 제공자 사용하기
+
+OmniRoute는 **여러 제공자**를 사용할 때 가장 효과적으로 작동합니다. 이를 통해 다음과 같은 이점을 얻을 수 있습니다.
+
+- **자동 대체** — 한 제공자에 장애가 발생하면 OmniRoute가 다음 제공자를 시도합니다
+- **비용 최적화** — OmniRoute가 각 요청에 가장 저렴한 제공자를 선택합니다
+- **속도 최적화** — OmniRoute가 각 요청에 가장 빠른 제공자를 선택합니다
+- **품질 최적화** — OmniRoute가 각 작업에 가장 적합한 제공자를 선택합니다
+
+### 권장 설정
+
+최상의 경험을 위해 최소 **3개의 제공자**를 연결하세요.
+
+1. **무료 제공자 1개** (Kiro 또는 Pollinations) — 항상 사용 가능
+2. **빠른 제공자 1개** (Groq, Cerebras) — 빠른 응답용
+3. **고품질 제공자 1개** (OpenAI, Anthropic, Google) — 복잡한 작업용
+
+그런 다음 `model: "auto"`를 사용하면 OmniRoute가 각 요청에 가장 적합한 제공자를 자동으로 선택합니다.
+
+---
+
+## 제공업체별 설정
+
+### OpenAI
+
+1. API 키 발급: https://platform.openai.com/api-keys
+2. OmniRoute에서: 제공업체 → 제공업체 추가 → OpenAI
+3. API 키 붙여넣기 → 연결
+
+### Anthropic
+
+1. API 키 발급: https://console.anthropic.com/
+2. OmniRoute에서: 제공업체 → 제공업체 추가 → Anthropic
+3. API 키 붙여넣기 → 연결
+
+### Google (Gemini)
+
+1. API 키 발급: https://aistudio.google.com/apikey
+2. OmniRoute에서: 제공업체 → 제공업체 추가 → Gemini
+3. API 키 붙여넣기 → 연결
+
+### DeepSeek
+
+1. API 키 발급: https://platform.deepseek.com/
+2. OmniRoute에서: 제공업체 → 제공업체 추가 → DeepSeek
+3. API 키 붙여넣기 → 연결
+
+### Qoder: 자격 증명 전송 방식 선택
+
+Qoder에는 자격 증명이 필요합니다. 두 가지 전송 방식은 서로 다른 기능을 제공하며, 모델 이름만으로는 특정 연결이 수행할 수 있는 작업을 식별할 수 없습니다.
+
+| 자격 증명                          | OmniRoute 전송 방식                         | 호출자 도구 호출                                  | 스트리밍                                               |
+| ---------------------------------- | ------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
+| `pt-`로 시작하는 PAT               | OmniRoute 호스트의 로컬 `qodercli` 프로세스 | 지원되지 않음                                     | 버퍼링됨: CLI가 전체 응답을 반환한 후에만 SSE가 전송됨 |
+| PAT가 아닌 액세스 토큰 또는 API 키 | DashScope OpenAI 호환 HTTP 엔드포인트       | 업스트림 모델/키의 지원 여부에 따라 그대로 전달됨 | 업스트림 HTTP/SSE 경로                                 |
+
+PAT의 경우 OmniRoute와 동일한 호스트 또는 컨테이너에 Qoder CLI를 설치하세요. 실행 파일은 `qodercli`로 검색 가능해야 하며, 그렇지 않으면 `CLI_QODER_BIN`을 해당 실행 파일 경로로 설정해야 합니다. Docker 호스트에만 설치된 CLI는 컨테이너 내부에 자동으로 존재하지 않습니다. 바이너리가 없으면 설치 또는 경로 설정을 안내하는 명시적 오류가 발생합니다.
+
+PAT 채팅 경로의 프로세스 제한 시간은 45초입니다. 대화를 하나의 프롬프트로 병합하고 비스트리밍 출력 모드로 CLI를 호출합니다. `stream: true`를 요청하면 응답 형식이 SSE로 변경되지만, 업스트림 토큰이 점진적으로 전달되지는 않습니다. CLI 검증/모델 목록 조회에는 별도의 20초 제한 시간이 적용됩니다. 이는 현재 코드의 기본값이며 대시보드에서 구성할 수 있는 설정이 아닙니다.
+
+일반 채팅에는 PAT 연결을 사용하세요. `tools` 또는 레거시 `functions`가 포함된 에이전트 요청의 경우, 고정된 콤보 대상을 포함하여 자격 증명을 선택할 때 PAT 계정이 제외됩니다. Qoder 혼합 풀에서는 여전히 HTTP 계정을 선택할 수 있습니다. PAT 실행기에 대한 직접 호출도 도구 정의를 조용히 삭제하지 않고 CLI를 실행하기 전에 명시적으로 실패합니다. 이 제한은 Qoder CLI 자체가 내부적으로 사용할 수 있는 도구가 아니라 API 호출자가 제공한 도구에 적용됩니다. HTTP 키를 사용한다고 해서 모든 모델이 도구를 지원하는 것은 아니며, 일반적인 모델 기능 검사는 계속 적용됩니다.
+
+브라우저 OAuth는 관리자가 다음 다섯 가지 설정을 모두 구성한 경우에만 사용할 수 있습니다:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, `QODER_OAUTH_CLIENT_SECRET`. 기본값은 비어 있습니다. 구성되지 않은 설치 환경에서는 브라우저 로그인 흐름을 사용할 수 있다고 가정하지 말고 지원되는 자격 증명 가져오기 방식을 사용해야 합니다.
+
+구현 참조: [Qoder 실행기](../../open-sse/executors/qoder.ts),
+[CLI 런타임](../../open-sse/services/qoderCli.ts), 및
+[OAuth 구성](../../src/lib/oauth/constants/oauth.ts). 점진적 PAT 스트리밍과 구성 가능한 제한 시간은 별도의 개선 사항이며, 이 동작은 해당 기능을 보장하지 않습니다.
+
+### Groq
+
+1. API 키 발급: https://console.groq.com/
+2. OmniRoute에서: 제공업체 → 제공업체 추가 → Groq
+3. API 키 붙여넣기 → 연결
+
+---
+
+## 자주 묻는 질문
+
+### "OmniRoute를 사용하려면 비용을 지불해야 하나요?"
+
+**아니요!** OmniRoute는 무료 오픈 소스입니다. 무료 제공업체(Kiro, Pollinations)를 비용 없이 사용할 수 있습니다. 유료 제공업체를 선택한 경우에만 비용을 지불하면 됩니다.
+
+### "어떤 제공업체로 시작하는 것이 좋나요?"
+
+**Kiro AI**로 시작하세요. 무료이고 API 키가 필요하지 않으며 Claude 모델을 사용할 수 있습니다. 이후 필요에 따라 다른 제공업체를 추가하세요.
+
+### "여러 제공업체를 동시에 사용할 수 있나요?"
+
+**네!** 이것이 바로 OmniRoute의 핵심입니다. 여러 제공업체를 연결하고 `model: "auto"`를 사용하면 OmniRoute가 각 요청에 가장 적합한 제공업체를 선택합니다.
+
+### "제공업체에 장애가 발생하면 어떻게 되나요?"
+
+OmniRoute는 장애가 발생한 제공업체를 자동으로 건너뛰고 다음 제공업체를 시도합니다. 별도로 조치할 필요가 없습니다.
+
+### "제공업체 연결을 해제하려면 어떻게 하나요?"
+
+Providers로 이동 → 제공업체 클릭 → **Disconnect**를 클릭하세요.
+
+### "기존 API 키를 사용할 수 있나요?"
+
+**네!** OpenAI, Anthropic, Google 등의 API 키를 이미 보유하고 있다면 OmniRoute에서 사용할 수 있습니다. 제공업체를 연결할 때 붙여넣기만 하면 됩니다.
+
+---
+
+## 다음 단계
+
+- **[자동 조합 가이드](./AUTO-COMBO-GUIDE.md)** — OmniRoute가 가장 적합한 AI를 선택하도록 설정하기
+- **[무료 요금제 가이드](./FREE-TIERS-GUIDE.md)** — 신용카드 없이 무료 AI 이용하기
+- **[문제 해결](../guides/TROUBLESHOOTING.md)** — 일반적인 문제 해결하기
+- **[제공업체 참조](../reference/PROVIDER_REFERENCE.md)** — 226개 제공업체 전체 목록
+
+## Cursor 이미지
+
+Cursor 요금제 이미지는 `IMAGE_PROVIDERS.cursor`(`cursor-agent-image`)를 사용합니다. [CURSOR_IMAGE.md](../providers/CURSOR_IMAGE.md)를 참조하세요.

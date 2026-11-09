@@ -1,0 +1,271 @@
+/**
+ * Hermes Agent — Rich multi-role config generator & saver
+ *
+ * This is the implementation for the advanced "Hermes Agent" (Nous Research terminal agent).
+ * It is treated completely separately from the original simple "Hermes" guide tool.
+ *
+ * Hermes Agent supports many independent model slots:
+ *   - default (main conversation)
+ *   - delegation (sub-agent orchestrator)
+ *   - auxiliary.* (vision, compression, skills_hub, approval, review, MoA, ...)
+ *
+ * The UI (HermesAgentToolCard) will offer a dropdown for EACH of these roles.
+ *
+ * Data Model (what the frontend sends and this module consumes):
+ *
+ * interface HermesAgentRoleSelection {
+ *   role: 'default' | 'delegation' | 'vision' | 'compression' | 'skills_hub' | 'approval' | ...;
+ *   model: string;                    // the model name the user chose from OmniRoute
+ * }
+ *
+ * interface HermesAgentConfigPayload {
+ *   baseUrl: string;                  // usually the OmniRoute base URL
+ *   keyId?: string | null;            // preferred: reference to a stored key
+ *   apiKey?: string | null;           // fallback plaintext key
+ *   selections: HermesAgentRoleSelection[];
+ * }
+ */
+
+import * as yaml from "js-yaml";
+import { getHermesConfigPath } from "./hermesHome.ts";
+
+export const HERMES_AGENT_ROLES = [
+  { id: "default", label: "Default (main)", description: "Primary conversation model" },
+  {
+    id: "delegation",
+    label: "Delegation (subagents)",
+    description: "Orchestrator and sub-agent spawning model",
+  },
+  { id: "vision", label: "Vision", description: "Image and screenshot understanding" },
+  { id: "compression", label: "Compression", description: "Prompt compression and summarization" },
+  { id: "skills_hub", label: "Skills Hub", description: "Skills and tool-use reasoning" },
+  { id: "approval", label: "Approval", description: "Safety and approval decisions" },
+  { id: "review", label: "Review", description: "Full subagent code review" },
+  { id: "mcp", label: "MCP", description: "MCP server tool calls" },
+  { id: "title_generation", label: "Title Generation", description: "Session title generation" },
+  {
+    id: "memory_query_rewrite",
+    label: "Memory Query Rewrite",
+    description: "Memory search query rewriting",
+  },
+  { id: "tts_audio_tags", label: "TTS Audio Tags", description: "TTS audio tag generation" },
+  {
+    id: "triage_specifier",
+    label: "Triage Specifier",
+    description: "Issue / PR triage specification",
+  },
+  {
+    id: "kanban_decomposer",
+    label: "Kanban Decomposer",
+    description: "Kanban task decomposition",
+  },
+  { id: "profile_describer", label: "Profile Describer", description: "User profile description" },
+  { id: "goal_judge", label: "Goal Judge", description: "Goal completion judging" },
+  { id: "curator", label: "Curator", description: "Skill and memory curation" },
+  { id: "monitor", label: "Monitor", description: "Background monitoring" },
+  {
+    id: "background_review",
+    label: "Background Review",
+    description: "Background code review",
+  },
+  { id: "moa_reference", label: "MoA Reference", description: "Mixture-of-Agents reference model" },
+  {
+    id: "moa_aggregator",
+    label: "MoA Aggregator",
+    description: "Mixture-of-Agents synthesis model",
+  },
+] as const;
+
+export type HermesAgentRole = (typeof HERMES_AGENT_ROLES)[number]["id"];
+
+export interface HermesAgentRoleSelection {
+  role: HermesAgentRole;
+  model: string;
+}
+
+export interface HermesAgentConfigPayload {
+  baseUrl: string;
+  keyId?: string | null;
+  apiKey?: string | null;
+  selections: HermesAgentRoleSelection[];
+}
+
+// Resolved lazily at call-time so HERMES_HOME is always honoured (#3628).
+const getConfigPath = () => getHermesConfigPath();
+
+// Build a normalized base URL for Hermes (no trailing slash, no /v1 suffix on the provider entry)
+function normalizeBaseUrl(base: string): string {
+  let b = base.trim();
+  while (b.endsWith("/")) b = b.slice(0, -1);
+  if (b.endsWith("/v1")) b = b.slice(0, -3);
+  return b;
+}
+
+/** Remove legacy per-role endpoint credentials once a role uses the shared OmniRoute provider. */
+export function sanitizeOmniRouteRoleCredentials(config: any): void {
+  const scrub = (block: any) => {
+    if (!block || typeof block !== "object" || block.provider !== "omniroute") return;
+    delete block.base_url;
+    delete block.api_key;
+  };
+
+  scrub(config.model);
+  scrub(config.delegation);
+  if (config.auxiliary && typeof config.auxiliary === "object") {
+    for (const block of Object.values(config.auxiliary)) scrub(block);
+  }
+}
+
+/**
+ * Generate the full merged YAML for Hermes Agent config.
+ * This is the core of the rich implementation.
+ */
+export async function generateHermesAgentConfig(
+  payload: HermesAgentConfigPayload
+): Promise<{ yaml: string; error?: string }> {
+  const { baseUrl, selections } = payload;
+
+  if (!baseUrl) {
+    return { yaml: "", error: "baseUrl is required" };
+  }
+
+  // Read existing config if present (non-destructive merge)
+  let existing: any = {};
+  try {
+    const fs = await import("node:fs/promises");
+    const raw = await fs.readFile(getConfigPath(), "utf-8");
+    existing = yaml.load(raw) || {};
+  } catch {
+    // no existing file — start fresh
+  }
+
+  const normalizedBase = normalizeBaseUrl(baseUrl);
+  const customProviders = Array.isArray(existing.custom_providers)
+    ? existing.custom_providers.filter(
+        (provider: unknown) =>
+          provider &&
+          typeof provider === "object" &&
+          (provider as { name?: unknown }).name !== "omniroute"
+      )
+    : [];
+  const existingOmniRoute = Array.isArray(existing.custom_providers)
+    ? existing.custom_providers.find(
+        (provider: unknown) =>
+          provider &&
+          typeof provider === "object" &&
+          (provider as { name?: unknown }).name === "omniroute"
+      )
+    : undefined;
+  const selectedModels = Object.fromEntries(
+    selections.filter((selection) => selection.model).map((selection) => [selection.model, {}])
+  );
+  const omnirouteProvider = {
+    ...(existingOmniRoute || {}),
+    name: "omniroute",
+    base_url: `${normalizedBase}/v1`,
+    key_env: "OMNIROUTE_API_KEY",
+    models: {
+      ...((existingOmniRoute as { models?: Record<string, unknown> } | undefined)?.models || {}),
+      ...selectedModels,
+    },
+  };
+  delete (omnirouteProvider as { api_key?: string }).api_key;
+
+  // Start from existing or empty
+  const next: any = {
+    ...existing,
+    custom_providers: [...customProviders, omnirouteProvider],
+  };
+  if (next.providers?.omniroute) {
+    delete next.providers.omniroute;
+    if (Object.keys(next.providers).length === 0) delete next.providers;
+  }
+
+  // Apply each role selection
+  for (const sel of selections) {
+    const { role, model } = sel;
+
+    if (role === "default") {
+      next.model = {
+        ...(existing.model || {}),
+        default: model,
+        provider: "omniroute",
+      };
+    } else if (role === "delegation") {
+      next.delegation = {
+        ...(existing.delegation || {}),
+        model,
+        provider: "omniroute",
+      };
+    } else {
+      // auxiliary.* roles
+      if (!next.auxiliary) next.auxiliary = {};
+      next.auxiliary[role] = {
+        ...(existing.auxiliary?.[role] || {}),
+        provider: "omniroute",
+        model,
+      };
+    }
+  }
+
+  sanitizeOmniRouteRoleCredentials(next);
+
+  const outputYaml = yaml.dump(next, { lineWidth: -1, noRefs: true });
+  return { yaml: outputYaml };
+}
+
+/**
+ * Read the current Hermes Agent configuration and extract the model
+ * for each supported role.
+ */
+export async function getCurrentHermesAgentRoles(): Promise<
+  Record<string, { model: string; provider?: string; base_url?: string }>
+> {
+  const fs = await import("node:fs/promises");
+  let config: any = {};
+
+  try {
+    const raw = await fs.readFile(getConfigPath(), "utf-8");
+    config = yaml.load(raw) || {};
+  } catch {
+    return {};
+  }
+
+  const result: Record<string, any> = {};
+
+  // default
+  if (config.model?.default) {
+    result.default = {
+      model: config.model.default,
+      provider: config.model.provider,
+      base_url: config.model.base_url,
+    };
+  }
+
+  // delegation
+  if (config.delegation?.model) {
+    result.delegation = {
+      model: config.delegation.model,
+      provider: config.delegation.provider,
+      base_url: config.delegation.base_url,
+    };
+  }
+
+  // Only expose roles supported by this integration. Old Hermes configs may
+  // still contain ignored auxiliary blocks such as web_extract/session_search.
+  if (config.auxiliary && typeof config.auxiliary === "object") {
+    const supported = new Set(HERMES_AGENT_ROLES.map((role) => role.id));
+    for (const [role, val] of Object.entries(config.auxiliary)) {
+      if (!supported.has(role as HermesAgentRole)) continue;
+      if (val && typeof val === "object" && (val as any).model) {
+        result[role] = {
+          model: (val as any).model,
+          provider: (val as any).provider,
+          base_url: (val as any).base_url,
+        };
+      }
+    }
+  }
+
+  return result;
+}

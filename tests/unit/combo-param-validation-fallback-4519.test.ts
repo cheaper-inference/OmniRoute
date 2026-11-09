@@ -1,0 +1,100 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+// #4519 — allow combo fallback on context-overflow / param-validation 400s and
+// preserve upstream error semantics. Three regression guards:
+//   1. accountFallback.checkFallbackError classifies param-validation 400s as
+//      fallback-worthy with zero cooldown.
+//   2. combo guard predicates (isContextOverflow400 / isParamValidation400) let
+//      those 400s fall through to the next target instead of short-circuiting.
+//   3. openai-responses.normalizeUpstreamFailure keeps context_length_exceeded as
+//      400 and rate-limit as 429 (instead of rewriting everything to 502).
+
+const { checkFallbackError } = await import("../../open-sse/services/accountFallback.ts");
+const { isRequestScoped400 } =
+  await import("../../open-sse/services/accountFallback/requestScoped400.ts");
+const { isContextOverflow400, isContextOverflowFailure, isParamValidation400, isModelScoped400 } =
+  await import("../../open-sse/services/combo.ts");
+const { normalizeUpstreamFailure } =
+  await import("../../open-sse/translator/response/openai-responses.ts");
+
+test("#4519 checkFallbackError treats per-model max_tokens 400 as fallback-worthy with zero cooldown", () => {
+  const res = checkFallbackError(
+    400,
+    "The max_tokens parameter is illegal.：限制数值范围[1,131072]"
+  );
+  assert.equal(res.shouldFallback, true);
+  assert.equal(res.cooldownMs, 0);
+});
+
+test("#4519 combo guard: context-overflow and param-validation 400 texts are recognized", () => {
+  assert.equal(isContextOverflow400("This model's context_length_exceeded for the input"), true);
+  assert.equal(isContextOverflow400("your input exceeds the allowed size"), true);
+  assert.equal(
+    isContextOverflow400(
+      "Input exceeds maximum input tokens for openai/gpt-4o-mini: estimated 168008 input tokens, max input 128000."
+    ),
+    true
+  );
+  assert.equal(isParamValidation400("max_tokens must be in range [1,131072]"), true);
+  assert.equal(isParamValidation400("The parameter is illegal"), true);
+});
+
+test("structured context overflow codes are recognized with generic or empty messages", () => {
+  assert.equal(isContextOverflowFailure("Bad Request", { code: "context_window_exceeded" }), true);
+  assert.equal(isContextOverflowFailure("", { type: "context_length_exceeded" }), true);
+  assert.equal(isContextOverflowFailure("Bad Request", { type: "context_window_exceeded" }), true);
+});
+
+test("token-rate-limit wording is not classified as context overflow", () => {
+  const samples = [
+    "input exceeds maximum input tokens per minute",
+    "Rate limit reached for tokens per minute",
+    "TPM limit exceeded",
+    "RPM quota exceeded for this key",
+  ];
+  for (const sample of samples) {
+    assert.equal(isContextOverflow400(sample), false);
+    const fallback = checkFallbackError(400, sample, 0, null, "openai");
+    assert.notEqual(fallback.reason, "MODEL_CAPACITY");
+    assert.equal(isRequestScoped400(400, sample), false);
+  }
+});
+
+test("#4519 combo guard: a genuinely body-specific 400 is NOT classified as overflow/param", () => {
+  const malformed = "Invalid JSON: unexpected token at position 12";
+  assert.equal(isContextOverflow400(malformed), false);
+  assert.equal(isParamValidation400(malformed), false);
+  assert.equal(isModelScoped400(malformed), false);
+});
+
+test("#5249 combo guard: model-not-supported is model-scoped (must advance, not stop)", () => {
+  assert.equal(isModelScoped400("requested model is not supported"), true);
+  assert.equal(
+    isModelScoped400("invalid_request_error: model claude-fable-5 is not supported"),
+    true
+  );
+  assert.equal(isModelScoped400("Bad Request: The model is not supported"), true);
+  // still not overflow/param — those are separate advance reasons
+  assert.equal(isContextOverflow400("model is not supported"), false);
+  assert.equal(isParamValidation400("model is not supported"), false);
+});
+
+test("#4519 normalizeUpstreamFailure preserves context_length_exceeded as 400", () => {
+  const out = normalizeUpstreamFailure({
+    error: { code: "context_length_exceeded", message: "too long" },
+  });
+  assert.equal(out.status, 400);
+  assert.equal(out.type, "invalid_request_error");
+});
+
+test("#4519 normalizeUpstreamFailure keeps rate-limit as 429 and unknown as 502", () => {
+  const rl = normalizeUpstreamFailure({
+    error: { code: "rate_limit_exceeded", message: "slow down" },
+  });
+  assert.equal(rl.status, 429);
+  assert.equal(rl.type, "rate_limit_error");
+
+  const unknown = normalizeUpstreamFailure({ error: { code: "weird_error", message: "boom" } });
+  assert.equal(unknown.status, 502);
+});

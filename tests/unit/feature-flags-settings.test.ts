@@ -1,0 +1,756 @@
+import { describe, it, beforeEach, after } from "node:test";
+import assert from "node:assert/strict";
+import os from "node:os";
+import path from "node:path";
+import fs from "node:fs";
+
+// Set DATA_DIR to temp dir before any imports that touch DB
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-test-flags-"));
+process.env.DATA_DIR = tmpDir;
+
+const core = await import("../../src/lib/db/core.ts");
+
+const { FEATURE_FLAG_DEFINITIONS } =
+  await import("../../src/shared/constants/featureFlagDefinitions.ts");
+const {
+  getFeatureFlagOverrides,
+  getFeatureFlagOverride,
+  setFeatureFlagOverride,
+  removeFeatureFlagOverride,
+  clearAllFeatureFlagOverrides,
+} = await import("../../src/lib/db/featureFlags.ts");
+const {
+  resolveFeatureFlag,
+  isFeatureFlagEnabled,
+  resolveAllFeatureFlags,
+  isRequireApiKeyEnabled,
+  isCcCompatibleProviderEnabled,
+  isModelCatalogNamesEnabled,
+  isArenaEloSyncEnabled,
+  isControlPlaneProxyDirectFallbackEnabled,
+  areContextWindowChecksDisabled,
+} = await import("../../src/shared/utils/featureFlags.ts");
+
+// #10889 added OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN, bumping the count to 51.
+// The codex-app-server work then added OMNIROUTE_CODEX_APP_SERVER_ENABLED
+// (feature flag gating the opt-in Codex app-server WebSocket transport),
+// bumping it from 51 to 52. NO_THINKING_ALIAS_ENABLED (master switch for the
+// no-think/<provider>/<model> gateway aliases) then bumped it from 52 to 53.
+// OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS bumped it from 53 to 54;
+// the dead ONEPROXY_ENABLED (readerless since the 1proxy purge, #12091)
+// brought it back to 53. UNIVERSAL_CONTEXT_HANDOFF_ENABLED bumped it to 54.
+// #13641 added SEARCH_STATS_HIDE_DELETED_CONNECTIONS, bumping the count to 56.
+// 893fef9c added OPENCODE_PARK_AND_RESUME (74 -> 75); FLUSH_EMPTY_RETRY_ENABLED
+// (flush empty-turn retry, default off) bumps it to 76. ROTATION_ATTRIBUTION
+// (rotation skipped/served masked ids + proxy-log request correlation, all
+// read-only diagnostics) takes it to 77. STREAM_READINESS_STALL_RETRY
+// (one bounded retry when a stream stalls before usable output, default off)
+// takes it to 78.
+// OPENCODE_POOL_RESELECT (re-select a pool member per attempt after a
+// per-address 429, default off) takes the registry to 79.
+// PROXY_POOL_SHARED_EGRESS_ORDER (shared-egress pool ordering, default off)
+// takes it to 80.
+// PROXY_OPERATOR_EGRESS_ENABLED (operator-pushed dated observed addresses per
+// pool member, default off) takes it to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799,
+// opt-in flag to count unpriced usage as $0 in USD quotas, default off) to 83;
+// REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
+// (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (one-shot Kiro
+// tool_call wrapper repair, default on) to 86.
+// OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
+// published catalog, default off) takes it to 87.
+// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 113.
+// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) takes it to 114.
+// API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, client IP + user-agent on api_key.auth.touch
+// audit rows, default off) takes it to 115.
+// CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
+// takes it to 116.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
+// keepMidConversationSystem opt-in) takes it back to 115.
+// The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
+// both default off) take it to 117.
+// OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) takes it to 118.
+// PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
+// FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) takes it to 120.
+const EXPECTED_FEATURE_FLAG_COUNT = 120;
+// tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
+// (#16571, OpenCode v2 client fingerprint, default off) to 87.
+// tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
+// (#17003, lets Claude OAuth drop the redact-thinking beta for summarized thinking,
+// default off) to 87.
+// MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) takes it to 88.
+// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
+// MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) takes it to 88.
+// default off) to 87; AUTO_REQUEST_RESOLVED_CAPABILITIES (#16419, resolved-capability
+// scoring inputs on the auto/* request path, default off) to 88.
+// default off) to 87; CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED (#16190, retest of
+// gateway-disabled connections, default off) to 88.
+// CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY (#16599, default off) to 88.
+// default off) to 87; STREAM_LATE_OUTPUT_PROBE_ENABLED
+// (#16927 late-output stream probe, default off) to 88.
+// LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
+// CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (#15917, default off) takes it to 88.
+// NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
+// COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (#16305, default off) takes it to 88.
+// CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) takes it to 112.
+// default off) to 87; QUOTA_WINDOW_BOUNDED_PARK
+// (#17000, per-window quota policy honours the bounded park, default off) to 88.
+// default off) to 87; IMAGE_GENERATION_LONG_JOBS
+// (#16260, connection image timeout + caller cancellation + Playground SSE, default off) to 88.
+// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, automatic-prefix eligibility estimate in
+// the compression cache stats, default off) takes it to 114.
+
+// ──────────────────────────────────────────────────────
+// Test group 1 — Flag definitions registry
+// ──────────────────────────────────────────────────────
+describe("featureFlagDefinitions", () => {
+  it(`has exactly ${EXPECTED_FEATURE_FLAG_COUNT} flag definitions`, () => {
+    assert.strictEqual(FEATURE_FLAG_DEFINITIONS.length, EXPECTED_FEATURE_FLAG_COUNT);
+  });
+
+  it("keeps the documented catalog total in sync with the registry", () => {
+    const catalog = fs.readFileSync(
+      new URL("../../docs/reference/FEATURE_FLAGS.md", import.meta.url),
+      "utf8"
+    );
+    const count = catalog.match(/^(\d+) flags across \d+ categories\./m);
+    assert.ok(count, "Feature Flags catalog must declare its total");
+    assert.equal(Number(count[1]), FEATURE_FLAG_DEFINITIONS.length);
+  });
+
+  it("resolves the unpriced budget policy description from every locale", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "UNPRICED_USAGE_BUDGET_POLICY");
+    assert.ok(def);
+    assert.equal(
+      def.descriptionI18nKey,
+      "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description"
+    );
+    const messagesDir = new URL("../../src/i18n/messages/", import.meta.url);
+    for (const filename of fs.readdirSync(messagesDir).filter((name) => name.endsWith(".json"))) {
+      const messages = JSON.parse(fs.readFileSync(new URL(filename, messagesDir), "utf8"));
+      const description =
+        messages.featureFlags?.definitions?.UNPRICED_USAGE_BUDGET_POLICY?.description;
+      assert.equal(typeof description, "string", `missing policy description in ${filename}`);
+      assert.ok(description.trim(), `blank policy description in ${filename}`);
+    }
+  });
+
+  it("has unique keys for all flags", () => {
+    const keys = FEATURE_FLAG_DEFINITIONS.map((d) => d.key);
+    assert.strictEqual(new Set(keys).size, EXPECTED_FEATURE_FLAG_COUNT);
+  });
+
+  it("has valid categories for all flags", () => {
+    const valid = new Set(["security", "network", "policies", "runtime", "cli", "health"]);
+    for (const d of FEATURE_FLAG_DEFINITIONS) {
+      assert.ok(valid.has(d.category), `Invalid category "${d.category}" for ${d.key}`);
+    }
+  });
+
+  it("has valid types (boolean or enum) for all flags", () => {
+    for (const d of FEATURE_FLAG_DEFINITIONS) {
+      assert.ok(d.type === "boolean" || d.type === "enum", `Invalid type for ${d.key}`);
+    }
+  });
+
+  it("has enumValues for all enum-type flags", () => {
+    const enumFlags = FEATURE_FLAG_DEFINITIONS.filter((d) => d.type === "enum");
+    assert.ok(enumFlags.length > 0, "Should have at least one enum flag");
+    for (const d of enumFlags) {
+      assert.ok(
+        Array.isArray(d.enumValues) && d.enumValues.length > 0,
+        `Missing enumValues for ${d.key}`
+      );
+    }
+  });
+
+  it("does not have enumValues for boolean-type flags", () => {
+    const boolFlags = FEATURE_FLAG_DEFINITIONS.filter((d) => d.type === "boolean");
+    for (const d of boolFlags) {
+      assert.ok(
+        !d.enumValues || d.enumValues.length === 0,
+        `Boolean flag ${d.key} should not have enumValues`
+      );
+    }
+  });
+
+  it("has warningLevel only with valid values when present", () => {
+    const valid = new Set(["info", "caution", "danger"]);
+    for (const d of FEATURE_FLAG_DEFINITIONS) {
+      if (d.warningLevel !== undefined) {
+        assert.ok(
+          valid.has(d.warningLevel),
+          `Invalid warningLevel "${d.warningLevel}" for ${d.key}`
+        );
+      }
+    }
+  });
+
+  it("defines model catalog names as a runtime boolean flag enabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "MODEL_CATALOG_INCLUDE_NAMES");
+    assert.ok(def, "MODEL_CATALOG_INCLUDE_NAMES should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines models catalog prefix mode as a runtime enum flag defaulting to dual", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "MODELS_CATALOG_PREFIX_MODE");
+    assert.ok(def, "MODELS_CATALOG_PREFIX_MODE should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "enum");
+    assert.deepStrictEqual(def.enumValues, ["dual", "alias", "canonical"]);
+    assert.strictEqual(def.defaultValue, "dual");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines Arena ELO sync as a runtime boolean flag enabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "ARENA_ELO_SYNC_ENABLED");
+    assert.ok(def, "ARENA_ELO_SYNC_ENABLED should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines emergency fallback as a runtime boolean flag enabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OMNIROUTE_EMERGENCY_FALLBACK");
+    assert.ok(def, "OMNIROUTE_EMERGENCY_FALLBACK should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines stream recovery as runtime boolean flags disabled by default", () => {
+    const early = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "STREAM_RECOVERY_ENABLED");
+    const midstream = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "STREAM_RECOVERY_MIDSTREAM_ENABLED"
+    );
+
+    assert.ok(early, "STREAM_RECOVERY_ENABLED should exist");
+    assert.strictEqual(early.category, "runtime");
+    assert.strictEqual(early.type, "boolean");
+    assert.strictEqual(early.defaultValue, "false");
+    assert.strictEqual(early.requiresRestart, false);
+    assert.strictEqual(early.warningLevel, "caution");
+
+    const orderFix = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "STREAM_RECOVERY_TOOLCALL_ORDER_FIX"
+    );
+
+    assert.ok(orderFix, "STREAM_RECOVERY_TOOLCALL_ORDER_FIX should exist");
+    assert.strictEqual(orderFix.category, "runtime");
+    assert.strictEqual(orderFix.type, "boolean");
+    assert.strictEqual(orderFix.defaultValue, "false");
+    assert.strictEqual(orderFix.requiresRestart, false);
+    assert.strictEqual(orderFix.warningLevel, "info");
+    assert.strictEqual(
+      orderFix.descriptionI18nKey,
+      "featureFlagStreamRecoveryToolcallOrderFixDescription"
+    );
+
+    assert.ok(midstream, "STREAM_RECOVERY_MIDSTREAM_ENABLED should exist");
+    assert.strictEqual(midstream.category, "runtime");
+    assert.strictEqual(midstream.type, "boolean");
+    assert.strictEqual(midstream.defaultValue, "false");
+    assert.strictEqual(midstream.requiresRestart, false);
+    assert.strictEqual(midstream.warningLevel, "danger");
+  });
+
+  it("defines early-EOF sibling failover as a runtime boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED"
+    );
+    assert.ok(def, "STREAM_EARLY_EOF_SIBLING_FAILOVER_ENABLED should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+    assert.strictEqual(def.warningLevel, "info");
+    assert.strictEqual(
+      def.descriptionI18nKey,
+      "featureFlagStreamEarlyEofSiblingFailoverEnabledDescription"
+    );
+  });
+
+  it("defines control-plane proxy direct fallback as a network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK"
+    );
+    assert.ok(def, "OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+    assert.strictEqual(def.warningLevel, "danger");
+  });
+
+  it("defines OPENCODE_RESPONSES_STALL_ROTATION as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_RESPONSES_STALL_ROTATION");
+    assert.ok(def, "OPENCODE_RESPONSES_STALL_ROTATION should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_USER_BLOCKED_ROTATION as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_USER_BLOCKED_ROTATION");
+    assert.ok(def, "OPENCODE_USER_BLOCKED_ROTATION should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_FREE_TIER_EGRESS_PROBE as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_FREE_TIER_EGRESS_PROBE");
+    assert.ok(def, "OPENCODE_FREE_TIER_EGRESS_PROBE should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_TRANSIENT_FAILOVER_BACKOFF as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "OPENCODE_TRANSIENT_FAILOVER_BACKOFF"
+    );
+    assert.ok(def, "OPENCODE_TRANSIENT_FAILOVER_BACKOFF should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT as an opt-in runtime boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT"
+    );
+    assert.ok(def, "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_RATE_LIMITED_429_EARLY_STOP as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "OPENCODE_RATE_LIMITED_429_EARLY_STOP"
+    );
+    assert.ok(def, "OPENCODE_RATE_LIMITED_429_EARLY_STOP should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines network rotation shared-egress guard as a network boolean flag enabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "NETWORK_ROTATION_SHARED_EGRESS_GUARD"
+    );
+    assert.ok(def, "NETWORK_ROTATION_SHARED_EGRESS_GUARD should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+    assert.strictEqual(def.warningLevel, "info");
+  });
+
+  it("defines skip-recently-failed proxies as a network boolean flag enabled by default", () => {
+    // Guards the routing default: with this on, pools and account rotation skip a proxy
+    // that just failed. Opt-out with PROXY_SKIP_RECENTLY_FAILED=false.
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "PROXY_SKIP_RECENTLY_FAILED");
+    assert.ok(def, "PROXY_SKIP_RECENTLY_FAILED should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines the pool egress observation as a network boolean flag disabled by default", () => {
+    // Guards the UI default: the read-only panel under a proxy pool stays hidden unless opted in.
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "PROXY_POOL_EGRESS_OBSERVATION");
+    assert.ok(def, "PROXY_POOL_EGRESS_OBSERVATION should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines the operator egress push as a network boolean flag disabled by default", () => {
+    // Guards the push default: the operator-egress route answers 404 and pool reads
+    // stay journal-only unless opted in.
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "PROXY_OPERATOR_EGRESS_ENABLED");
+    assert.ok(def, "PROXY_OPERATOR_EGRESS_ENABLED should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines blocked-resets-streak as a health boolean flag disabled by default", () => {
+    // Guards the #10654 default: a target-refused probe stays neutral unless opted in.
+    const def = FEATURE_FLAG_DEFINITIONS.find(
+      (d) => d.key === "PROXY_HEALTH_BLOCKED_RESETS_STREAK"
+    );
+    assert.ok(def, "PROXY_HEALTH_BLOCKED_RESETS_STREAK should exist");
+    assert.strictEqual(def.category, "health");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines remote audio provider nodes as a network boolean flag disabled by default", () => {
+    // Guards the egress default: with this on, /v1/audio/* may reach a provider node
+    // hosted outside localhost. It must never become an implicit default (cf. #3963).
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "AUDIO_REMOTE_PROVIDER_NODES");
+    assert.ok(def, "AUDIO_REMOTE_PROVIDER_NODES should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.warningLevel, "danger");
+  });
+
+  it("defines CC discovery aliases as a runtime boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "EXPOSE_CC_DISCOVERY_ALIASES");
+    assert.ok(def, "EXPOSE_CC_DISCOVERY_ALIASES should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines the no-thinking alias master switch as a runtime boolean enabled by default", () => {
+    // Default ON: turning the shipped no-think/ alias feature into a flag must not
+    // silently drop catalog variants operators already point their clients at.
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "NO_THINKING_ALIAS_ENABLED");
+    assert.ok(def, "NO_THINKING_ALIAS_ENABLED should exist");
+    assert.strictEqual(def.category, "runtime");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "true");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines CLI profile auto-sync flags as CLI booleans disabled by default", () => {
+    for (const key of [
+      "OMNIROUTE_AUTO_SYNC_CODEX_PROFILES",
+      "OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES",
+    ]) {
+      const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === key);
+      assert.ok(def, `${key} should exist`);
+      assert.strictEqual(def.category, "cli");
+      assert.strictEqual(def.type, "boolean");
+      assert.strictEqual(def.defaultValue, "false");
+      assert.strictEqual(def.requiresRestart, false);
+      assert.strictEqual(def.warningLevel, "caution");
+    }
+  });
+
+  it("defines context-window check bypass as a dangerous opt-in policy flag", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "DISABLE_CONTEXT_WINDOW_CHECKS");
+    assert.ok(def, "DISABLE_CONTEXT_WINDOW_CHECKS should exist");
+    assert.strictEqual(def.category, "policies");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+    assert.strictEqual(def.warningLevel, "danger");
+  });
+});
+
+// ──────────────────────────────────────────────────────
+// Test group 2 — DB module
+// ──────────────────────────────────────────────────────
+describe("featureFlags DB module", () => {
+  function resetDb() {
+    core.resetDbInstance();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+
+  beforeEach(() => {
+    resetDb();
+  });
+
+  after(() => {
+    core.resetDbInstance();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  });
+
+  it("getFeatureFlagOverrides returns empty object when no overrides", () => {
+    const overrides = getFeatureFlagOverrides();
+    assert.deepStrictEqual(overrides, {});
+  });
+
+  it("setFeatureFlagOverride stores value in key_value table", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    const overrides = getFeatureFlagOverrides();
+    assert.strictEqual(overrides["REQUIRE_API_KEY"], "true");
+  });
+
+  it("getFeatureFlagOverride returns the stored value", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    assert.strictEqual(getFeatureFlagOverride("REQUIRE_API_KEY"), "true");
+  });
+
+  it("getFeatureFlagOverride returns undefined for unset flag", () => {
+    assert.strictEqual(getFeatureFlagOverride("REQUIRE_API_KEY"), undefined);
+  });
+
+  it("removeFeatureFlagOverride deletes the override", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    removeFeatureFlagOverride("REQUIRE_API_KEY");
+    assert.strictEqual(getFeatureFlagOverride("REQUIRE_API_KEY"), undefined);
+  });
+
+  it("clearAllFeatureFlagOverrides removes all overrides", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    setFeatureFlagOverride("INPUT_SANITIZER_ENABLED", "true");
+    clearAllFeatureFlagOverrides();
+    assert.deepStrictEqual(getFeatureFlagOverrides(), {});
+  });
+
+  it("setFeatureFlagOverride overwrites existing value", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    setFeatureFlagOverride("REQUIRE_API_KEY", "false");
+    assert.strictEqual(getFeatureFlagOverride("REQUIRE_API_KEY"), "false");
+  });
+});
+
+// ──────────────────────────────────────────────────────
+// Test group 3 — Resolver
+// ──────────────────────────────────────────────────────
+describe("resolveFeatureFlag", () => {
+  function resetDb() {
+    core.resetDbInstance();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+
+  beforeEach(() => {
+    resetDb();
+    delete process.env["REQUIRE_API_KEY"];
+  });
+
+  after(() => {
+    core.resetDbInstance();
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    delete process.env["REQUIRE_API_KEY"];
+  });
+
+  it("returns DB override when set", () => {
+    setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+    assert.strictEqual(resolveFeatureFlag("REQUIRE_API_KEY"), "true");
+  });
+
+  it("falls back to ENV when no DB override", () => {
+    process.env["REQUIRE_API_KEY"] = "true";
+    assert.strictEqual(resolveFeatureFlag("REQUIRE_API_KEY"), "true");
+    delete process.env["REQUIRE_API_KEY"];
+  });
+
+  it("falls back to default when neither DB nor ENV", () => {
+    assert.strictEqual(resolveFeatureFlag("REQUIRE_API_KEY"), "false");
+  });
+
+  it("DB takes priority over ENV", () => {
+    process.env["REQUIRE_API_KEY"] = "env-value";
+    setFeatureFlagOverride("REQUIRE_API_KEY", "db-value");
+    assert.strictEqual(resolveFeatureFlag("REQUIRE_API_KEY"), "db-value");
+    delete process.env["REQUIRE_API_KEY"];
+  });
+
+  describe("isFeatureFlagEnabled", () => {
+    it("returns true for 'true'", () => {
+      setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+      assert.ok(isFeatureFlagEnabled("REQUIRE_API_KEY"));
+    });
+
+    it("returns true for '1'", () => {
+      setFeatureFlagOverride("SKILLS_SANDBOX_NETWORK_ENABLED", "1");
+      assert.ok(isFeatureFlagEnabled("SKILLS_SANDBOX_NETWORK_ENABLED"));
+    });
+
+    it("returns true for 'yes'", () => {
+      setFeatureFlagOverride("REQUIRE_API_KEY", "yes");
+      assert.ok(isFeatureFlagEnabled("REQUIRE_API_KEY"));
+    });
+
+    it("returns false for 'false'", () => {
+      assert.ok(!isFeatureFlagEnabled("REQUIRE_API_KEY"));
+    });
+
+    it("returns false for '0'", () => {
+      setFeatureFlagOverride("REQUIRE_API_KEY", "0");
+      assert.ok(!isFeatureFlagEnabled("REQUIRE_API_KEY"));
+    });
+
+    it("returns false for empty string via ENV (falls to default)", () => {
+      process.env["REQUIRE_API_KEY"] = "";
+      assert.ok(!isFeatureFlagEnabled("REQUIRE_API_KEY"));
+      delete process.env["REQUIRE_API_KEY"];
+    });
+  });
+
+  describe("resolveAllFeatureFlags", () => {
+    it(`returns all ${EXPECTED_FEATURE_FLAG_COUNT} flags`, () => {
+      const all = resolveAllFeatureFlags();
+      assert.strictEqual(all.length, EXPECTED_FEATURE_FLAG_COUNT);
+    });
+
+    it("marks DB-overridden flags with source 'db'", () => {
+      setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+      const all = resolveAllFeatureFlags();
+      const flag = all.find((f) => f.key === "REQUIRE_API_KEY");
+      assert.strictEqual(flag?.source, "db");
+    });
+
+    it("marks ENV-set flags with source 'env'", () => {
+      process.env["REQUIRE_API_KEY"] = "true";
+      const all = resolveAllFeatureFlags();
+      const flag = all.find((f) => f.key === "REQUIRE_API_KEY");
+      assert.strictEqual(flag?.source, "env");
+      delete process.env["REQUIRE_API_KEY"];
+    });
+
+    it("marks default flags with source 'default'", () => {
+      const all = resolveAllFeatureFlags();
+      const flag = all.find((f) => f.key === "REQUIRE_API_KEY");
+      assert.strictEqual(flag?.source, "default");
+    });
+  });
+
+  describe("backward compatibility", () => {
+    it("isRequireApiKeyEnabled uses the resolved REQUIRE_API_KEY flag", () => {
+      setFeatureFlagOverride("REQUIRE_API_KEY", "true");
+      assert.strictEqual(isRequireApiKeyEnabled(), true);
+    });
+
+    it("isRequireApiKeyEnabled fails closed when the flag store cannot be read", () => {
+      const originalError = console.error;
+      console.error = () => {};
+      try {
+        core.resetDbInstance();
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.mkdirSync(tmpDir, { recursive: true });
+        const blockerPath = path.join(tmpDir, "storage.sqlite");
+        fs.mkdirSync(blockerPath, { recursive: true });
+        assert.strictEqual(isRequireApiKeyEnabled(), true);
+      } finally {
+        console.error = originalError;
+        core.resetDbInstance();
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+    });
+
+    it("isCcCompatibleProviderEnabled still works", () => {
+      const result = isCcCompatibleProviderEnabled();
+      assert.strictEqual(typeof result, "boolean");
+    });
+
+    it("isModelCatalogNamesEnabled defaults on and follows overrides", () => {
+      assert.strictEqual(isModelCatalogNamesEnabled(), true);
+      try {
+        setFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES", "false");
+        assert.strictEqual(isModelCatalogNamesEnabled(), false);
+      } finally {
+        removeFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES");
+      }
+    });
+
+    it("isArenaEloSyncEnabled defaults on and follows DB overrides", () => {
+      assert.strictEqual(isArenaEloSyncEnabled(), true);
+      try {
+        setFeatureFlagOverride("ARENA_ELO_SYNC_ENABLED", "false");
+        assert.strictEqual(isArenaEloSyncEnabled(), false);
+      } finally {
+        removeFeatureFlagOverride("ARENA_ELO_SYNC_ENABLED");
+      }
+    });
+
+    it("isControlPlaneProxyDirectFallbackEnabled defaults off and follows DB overrides", () => {
+      assert.strictEqual(isControlPlaneProxyDirectFallbackEnabled(), false);
+      try {
+        setFeatureFlagOverride("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK", "true");
+        assert.strictEqual(isControlPlaneProxyDirectFallbackEnabled(), true);
+      } finally {
+        removeFeatureFlagOverride("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK");
+      }
+    });
+
+    it("areContextWindowChecksDisabled defaults off and follows DB overrides", () => {
+      assert.strictEqual(areContextWindowChecksDisabled(), false);
+      try {
+        setFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS", "true");
+        assert.strictEqual(areContextWindowChecksDisabled(), true);
+      } finally {
+        removeFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS");
+      }
+    });
+
+    it("areContextWindowChecksDisabled keeps checks enabled when the flag store is unreadable", () => {
+      const originalError = console.error;
+      console.error = () => {};
+      try {
+        core.resetDbInstance();
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.mkdirSync(tmpDir, { recursive: true });
+        const blockerPath = path.join(tmpDir, "storage.sqlite");
+        fs.mkdirSync(blockerPath, { recursive: true });
+        assert.strictEqual(areContextWindowChecksDisabled(), false);
+      } finally {
+        console.error = originalError;
+        core.resetDbInstance();
+        fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        fs.mkdirSync(tmpDir, { recursive: true });
+      }
+    });
+  });
+});
+
+// ──────────────────────────────────────────────────────
+// Test group 4 — Schema / validation logic (pure)
+// ──────────────────────────────────────────────────────
+describe("featureFlagUpdateSchema validation", () => {
+  it("rejects unknown flag keys", () => {
+    const knownKeys = new Set(FEATURE_FLAG_DEFINITIONS.map((d) => d.key));
+    assert.ok(!knownKeys.has("UNKNOWN_FLAG_XYZ"), "UNKNOWN_FLAG_XYZ should not be a known key");
+  });
+
+  it("validates that INJECTION_GUARD_MODE has known enum values", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "INJECTION_GUARD_MODE");
+    assert.ok(def, "INJECTION_GUARD_MODE should exist");
+    assert.deepStrictEqual(def.enumValues, ["off", "warn", "block", "redact"]);
+  });
+
+  it("validates that TOOL_POLICY_MODE has known enum values", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "TOOL_POLICY_MODE");
+    assert.ok(def, "TOOL_POLICY_MODE should exist");
+    assert.deepStrictEqual(def.enumValues, ["disabled", "warn", "block"]);
+  });
+
+  it("setFeatureFlagOverride throws for unknown keys", () => {
+    assert.throws(
+      () => setFeatureFlagOverride("UNKNOWN_FLAG_XYZ", "true"),
+      /Unknown feature flag key/
+    );
+  });
+
+  it("setFeatureFlagOverride throws for invalid enum value", () => {
+    assert.throws(
+      () => setFeatureFlagOverride("INJECTION_GUARD_MODE", "invalid_mode"),
+      /Invalid value/
+    );
+  });
+});
+
+describe("settings schema public surface", () => {
+  it("uses databaseSettingsSchema as the canonical database settings export", async () => {
+    const settingsSchemas = await import("../../src/shared/validation/settingsSchemas.ts");
+    assert.equal("DatabaseSettingsSchema" in settingsSchemas, false);
+    assert.equal("featureFlagUpdateSchema" in settingsSchemas, false);
+    assert.equal(typeof settingsSchemas.databaseSettingsSchema.safeParse, "function");
+  });
+});

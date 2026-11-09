@@ -1,0 +1,834 @@
+/**
+ * Circuit Breaker — FASE-04 Observability & Resilience (v2.0)
+ *
+ * Implements the circuit breaker pattern with:
+ * - States: CLOSED → DEGRADED → OPEN → HALF_OPEN → CLOSED
+ * - Adaptive backoff: resetTimeout escalates on repeated open→probe→open cycles
+ * - Failure-kind-aware thresholds: different limits per failure type
+ * - Progressive degradation: high failure rate triggers warning before full open
+ * - Transition history tracking for diagnostics
+ * - DB persistence via domainState.js
+ *
+ * States:
+ *   CLOSED    — Normal operation, requests pass through
+ *   DEGRADED  — Failure rate elevated, requests pass through but warnings logged
+ *   OPEN      — Requests are short-circuited
+ *   HALF_OPEN — Probing: limited requests allowed to test recovery
+ */
+
+import {
+  saveCircuitBreakerState,
+  loadCircuitBreakerState,
+  loadAllCircuitBreakerStates,
+  deleteCircuitBreakerState,
+  deleteAllCircuitBreakerStates,
+} from "../../lib/db/domainState";
+import type { FailureKind } from "./classify429";
+
+/**
+ * #4602 — Detect a LOCAL stream-lifecycle error that must NOT count as a
+ * whole-provider failure. The Codex WebSocket→SSE bridge can throw a bare
+ * `Invalid state: Controller is already closed` (an enqueue-after-close on our
+ * own ReadableStream controller). It carries no `statusCode`, so it defaults to
+ * HTTP 502 and would otherwise trip the provider circuit breaker — blacklisting
+ * the entire Codex provider for a bug that lives in our bridge, not upstream.
+ *
+ * The same policy applies to CLIENT-side aborts: when the caller drops the
+ * connection mid-stream (combo race loser, model switch, tab close), the
+ * in-flight leg surfaces `request_signal_aborted` / `Client disconnected` /
+ * `AbortError` with no upstream status. Counting those as provider failures
+ * cascades one user action into provider cooldowns (`lastErrorCode=null`,
+ * `lastError=undefined`) and can dead-end a combo on its last resort target.
+ *
+ * Use this with the breaker's `isFailure` option so local lifecycle errors are
+ * ignored by the provider breaker while genuine upstream 5xx failures still count.
+ */
+export function isLocalStreamLifecycleError(error: unknown): boolean {
+  if (!error) return false;
+  const errName =
+    typeof (error as { name?: unknown }).name === "string"
+      ? ((error as { name: string }).name as string)
+      : "";
+  if (errName === "AbortError") return true;
+  const message =
+    typeof error === "string"
+      ? error
+      : typeof (error as { message?: unknown }).message === "string"
+        ? ((error as { message: string }).message as string)
+        : "";
+  if (!message) return false;
+  return (
+    /controller is already closed/i.test(message) ||
+    /request_signal_aborted/i.test(message) ||
+    /client disconnected/i.test(message) ||
+    /operation was aborted/i.test(message)
+  );
+}
+
+const LOCAL_EXECUTION_CODES = new Set([
+  "ENOENT",
+  "EACCES",
+  "EPIPE",
+  "ERR_CHILD_PROCESS_STDIO_MAXBUFFER",
+]);
+
+const LOCAL_EXECUTION_PATTERNS = [
+  /\bspawn\b.*\b(ENOENT|EACCES|EPIPE)\b/i,
+  /\bcommand not found\b/i,
+  /\bis not recognized as an internal or external command\b/i,
+  /\bchild process exited with code\b/i,
+  /\blocal host execution error\b/i,
+];
+
+/**
+ * Detect a LOCAL host execution error (missing binary ENOENT, permission EACCES,
+ * broken pipe EPIPE, child process exit errors, etc.) that must NOT count as a
+ * whole-provider failure or trip remote provider circuit breakers.
+ */
+export function isLocalExecutionError(error: unknown): boolean {
+  if (!error) return false;
+  const errObj = typeof error === "object" ? (error as Record<string, unknown>) : null;
+  const code = typeof errObj?.code === "string" ? errObj.code : "";
+  if (LOCAL_EXECUTION_CODES.has(code)) return true;
+
+  const message =
+    typeof error === "string"
+      ? error
+      : typeof errObj?.message === "string"
+        ? (errObj.message as string)
+        : "";
+  if (!message) return false;
+
+  return LOCAL_EXECUTION_PATTERNS.some((p) => p.test(message));
+}
+
+/**
+ * Anthropic/Claude model-capacity overload (HTTP 529, body "Overloaded", or a
+ * STREAM_EARLY_EOF that wraps that body as 502). This is one model being
+ * capacity-throttled, not a whole-provider outage — the same account still
+ * serves sibling models. Must not trip the provider circuit breaker.
+ *
+ * Accepts an error object/string OR a numeric HTTP status (529). Callers
+ * pass both `error` and `status` at the two breaker predicates.
+ *
+ * Live incident 2026-09-03: STREAM_EARLY_EOF: Overloaded opened `claude` and
+ * a single-target combo then pre-skipped with ALL_TARGETS_SKIPPED in ~43ms.
+ */
+export function isModelCapacityOverloadError(error: unknown): boolean {
+  if (error === 529) return true;
+  if (typeof error === "number") return false;
+  if (!error) return false;
+  const errObj = typeof error === "object" ? (error as Record<string, unknown>) : null;
+  if (errObj && (errObj.status === 529 || errObj.statusCode === 529)) return true;
+  const message =
+    typeof error === "string" ? error : typeof errObj?.message === "string" ? errObj.message : "";
+  if (!message) return false;
+  return /\boverloaded(?:_error)?\b/i.test(message);
+}
+
+export const STATE = {
+  CLOSED: "CLOSED",
+  DEGRADED: "DEGRADED",
+  OPEN: "OPEN",
+  HALF_OPEN: "HALF_OPEN",
+} as const;
+
+type CircuitState = (typeof STATE)[keyof typeof STATE];
+
+/** Per-failure-kind threshold overrides */
+interface FailureKindThresholds {
+  /** Max failures of this kind before escalating to next state */
+  threshold: number;
+  /** Cooldown override for this failure kind */
+  cooldown?: number;
+  /** Whether this failure kind should trigger immediate OPEN (skip DEGRADED) */
+  immediateOpen?: boolean;
+}
+
+interface CircuitBreakerOptions {
+  failureThreshold?: number;
+  resetTimeout?: number;
+  halfOpenRequests?: number;
+  onStateChange?: ((name: string, oldState: string, newState: string) => void) | null;
+  isFailure?: (error: unknown) => boolean;
+  cooldownByKind?: Partial<Record<FailureKind, number>>;
+  classifyError?: (error: unknown) => FailureKind | undefined;
+  /**
+   * Per-failure-kind thresholds.
+   * When set, different failure types have different limits.
+   */
+  kindThresholds?: Partial<Record<FailureKind, Partial<FailureKindThresholds>>>;
+  /**
+   * Degradation threshold — failure count at which state becomes DEGRADED.
+   * Default: 60% of failureThreshold.
+   */
+  degradationThreshold?: number;
+  /**
+   * Max backoff multiplier (exponential). Default: 16x resetTimeout.
+   */
+  maxBackoffMultiplier?: number;
+  /**
+   * How many open→half_open→open cycles before escalating backoff.
+   * Default: 3.
+   */
+  backoffEscalationCount?: number;
+}
+
+/**
+ * How a RESOLVED `execute()` result is accounted (#12254). Callers such as
+ * `handleChatCore()` report most upstream failures by resolving with
+ * `{ success: false, status: 5xx }` instead of throwing, so a breaker that reads every
+ * resolution as a success never trips on that path.
+ */
+export type CircuitBreakerResultOutcome = "success" | "failure" | "ignore";
+
+export interface CircuitBreakerExecuteOptions<T> {
+  /**
+   * Classify a resolved result. Omitted: every resolution is a success (the
+   * throw-based contract every other caller relies on). Return "ignore" when the
+   * call site accounts for ordinary outcomes itself. An acquired HALF_OPEN probe
+   * can use classifyProbeResult so it settles inside execute()'s generation fence.
+   */
+  classifyResult?: (result: T) => CircuitBreakerResultOutcome;
+  /** Classify only an acquired HALF_OPEN probe, inside its generation fence. */
+  classifyProbeResult?: (result: T) => CircuitBreakerResultOutcome;
+  onProbeAcquired?: () => void;
+}
+
+export interface TransitionRecord {
+  from: string;
+  to: string;
+  timestamp: number;
+  failureCount: number;
+  reason?: string;
+}
+
+export interface CircuitBreakerStatus {
+  name: string;
+  state: string;
+  failureCount: number;
+  lastFailureTime: number | null;
+  retryAfterMs: number;
+  lastFailureKind: string | null;
+  openCycleCount: number;
+  kindFailureCounts: Record<string, number>;
+  degradationThreshold: number;
+  effectiveResetTimeout: number;
+  transitionHistory: TransitionRecord[];
+}
+
+export class CircuitBreaker {
+  name: string;
+  failureThreshold: number;
+  resetTimeout: number;
+  halfOpenRequests: number;
+  onStateChange: ((name: string, oldState: string, newState: string) => void) | null;
+  isFailure: (error: unknown) => boolean;
+  state: CircuitState;
+  failureCount: number;
+  successCount: number;
+  lastFailureTime: number | null;
+  halfOpenAllowed: number;
+  halfOpenProbeStartedAt: number | null;
+  halfOpenProbeGeneration: number;
+  cooldownByKind: Partial<Record<FailureKind, number>>;
+  classifyError: ((error: unknown) => FailureKind | undefined) | null;
+  lastFailureKind: FailureKind | null;
+  kindThresholds: Partial<Record<FailureKind, Partial<FailureKindThresholds>>>;
+  degradationThreshold: number;
+  maxBackoffMultiplier: number;
+  backoffEscalationCount: number;
+
+  /** Track failure counts per kind separately */
+  kindFailureCounts: Record<string, number>;
+  /** How many times has the breaker gone from OPEN → HALF_OPEN → OPEN */
+  openCycleCount: number;
+  /** State transition history */
+  transitionHistory: TransitionRecord[];
+  /** Max transition history entries */
+  maxTransitionHistory: number;
+
+  constructor(name: string, options: CircuitBreakerOptions = {}) {
+    this.name = name;
+    this.failureThreshold = options.failureThreshold ?? 5;
+    this.resetTimeout = options.resetTimeout ?? 30000;
+    this.halfOpenRequests = options.halfOpenRequests ?? 1;
+    this.onStateChange = options.onStateChange || null;
+    this.isFailure = options.isFailure || (() => true);
+
+    this.state = STATE.CLOSED;
+    this.failureCount = 0;
+    this.successCount = 0;
+    this.lastFailureTime = null;
+    this.halfOpenAllowed = 0;
+    this.halfOpenProbeStartedAt = null;
+    this.halfOpenProbeGeneration = 0;
+    this.cooldownByKind = options.cooldownByKind ?? {};
+    this.classifyError = options.classifyError ?? null;
+    this.lastFailureKind = null;
+    this.kindThresholds = options.kindThresholds ?? {};
+    this.degradationThreshold =
+      options.degradationThreshold ?? Math.ceil((this.failureThreshold * 60) / 100);
+    this.maxBackoffMultiplier = options.maxBackoffMultiplier ?? 16;
+    this.backoffEscalationCount = options.backoffEscalationCount ?? 3;
+
+    this.kindFailureCounts = {};
+    this.openCycleCount = 0;
+    this.transitionHistory = [];
+    this.maxTransitionHistory = 20;
+
+    this._restoreFromDb();
+  }
+
+  _restoreFromDb() {
+    try {
+      const saved = loadCircuitBreakerState(this.name);
+      if (saved) {
+        if (
+          saved.state === STATE.CLOSED ||
+          saved.state === STATE.DEGRADED ||
+          saved.state === STATE.OPEN ||
+          saved.state === STATE.HALF_OPEN
+        ) {
+          this.state = saved.state;
+        }
+        this.failureCount = saved.failureCount;
+        this.lastFailureTime = saved.lastFailureTime;
+        const savedKind = saved.options?.lastFailureKind;
+        if (
+          savedKind === "rate_limit" ||
+          savedKind === "quota_exhausted" ||
+          savedKind === "transient"
+        ) {
+          this.lastFailureKind = savedKind;
+        }
+        this.openCycleCount = (saved.options?.openCycleCount as number) ?? 0;
+        this.kindFailureCounts = (saved.options?.kindFailureCounts as Record<string, number>) ?? {};
+
+        if (this.state === STATE.HALF_OPEN) {
+          this.halfOpenAllowed = this.halfOpenRequests;
+        }
+      }
+    } catch {
+      // DB may not be ready yet (build phase)
+    }
+  }
+
+  _persistToDb() {
+    try {
+      saveCircuitBreakerState(this.name, {
+        state: this.state,
+        failureCount: this.failureCount,
+        lastFailureTime: this.lastFailureTime,
+        options: {
+          failureThreshold: this.failureThreshold,
+          resetTimeout: this.resetTimeout,
+          halfOpenRequests: this.halfOpenRequests,
+          lastFailureKind: this.lastFailureKind,
+          openCycleCount: this.openCycleCount,
+          kindFailureCounts: this.kindFailureCounts,
+        },
+      });
+    } catch {
+      // Non-critical
+    }
+  }
+
+  /**
+   * Get the effective reset timeout, escalated by open cycle count.
+   * Each open→half_open→open cycle multiplies the timeout.
+   */
+  _effectiveResetTimeout(): number {
+    if (this.openCycleCount <= this.backoffEscalationCount) {
+      return this.resetTimeout;
+    }
+    const escalationFactor = Math.pow(2, this.openCycleCount - this.backoffEscalationCount);
+    return Math.min(
+      this.resetTimeout * escalationFactor,
+      this.resetTimeout * this.maxBackoffMultiplier
+    );
+  }
+
+  async execute<T>(fn: () => Promise<T>, options?: CircuitBreakerExecuteOptions<T>): Promise<T> {
+    this._refreshOpenState();
+
+    if (this.state === STATE.OPEN) {
+      throw new CircuitBreakerOpenError(
+        `Circuit breaker "${this.name}" is OPEN. Try again later.`,
+        this.name,
+        this._timeUntilReset()
+      );
+    }
+
+    if (this.state === STATE.HALF_OPEN && this.halfOpenAllowed <= 0) {
+      throw new CircuitBreakerOpenError(
+        `Circuit breaker "${this.name}" is HALF_OPEN, no more probe requests allowed.`,
+        this.name,
+        this._timeUntilReset()
+      );
+    }
+
+    const halfOpenProbeGeneration =
+      this.state === STATE.HALF_OPEN ? this.halfOpenProbeGeneration : null;
+    if (this.state === STATE.HALF_OPEN) {
+      this.halfOpenAllowed--;
+      this.halfOpenProbeStartedAt ??= Date.now();
+      options?.onProbeAcquired?.();
+    }
+
+    try {
+      const result = await fn();
+      if (
+        halfOpenProbeGeneration === null ||
+        halfOpenProbeGeneration === this.halfOpenProbeGeneration
+      ) {
+        this._recordResolvedResult(
+          result,
+          halfOpenProbeGeneration === null
+            ? options?.classifyResult
+            : (options?.classifyProbeResult ?? options?.classifyResult)
+        );
+      }
+      return result;
+    } catch (error) {
+      if (
+        (halfOpenProbeGeneration === null ||
+          halfOpenProbeGeneration === this.halfOpenProbeGeneration) &&
+        this.isFailure(error)
+      ) {
+        let kind: FailureKind | undefined;
+        if (this.classifyError) {
+          try {
+            kind = this.classifyError(error);
+          } catch {
+            kind = undefined;
+          }
+        }
+        this._onFailure(kind);
+      }
+      throw error;
+    }
+  }
+
+  canExecute() {
+    this._refreshOpenState();
+    if (this.state === STATE.CLOSED || this.state === STATE.DEGRADED) return true;
+    if (this.state === STATE.OPEN) return false;
+    if (this.state === STATE.HALF_OPEN) return this.halfOpenAllowed > 0;
+    return false;
+  }
+
+  getStatus(): CircuitBreakerStatus {
+    this._refreshOpenState();
+    return {
+      name: this.name,
+      state: this.state,
+      failureCount: this.failureCount,
+      lastFailureTime: this.lastFailureTime,
+      retryAfterMs: this.getRetryAfterMs(),
+      lastFailureKind: this.lastFailureKind,
+      openCycleCount: this.openCycleCount,
+      kindFailureCounts: { ...this.kindFailureCounts },
+      degradationThreshold: this.degradationThreshold,
+      effectiveResetTimeout: this._effectiveResetTimeout(),
+      transitionHistory: [...this.transitionHistory],
+    };
+  }
+
+  getRetryAfterMs() {
+    this._refreshOpenState();
+    if (this.state === STATE.CLOSED || this.state === STATE.DEGRADED) return 0;
+    return this._timeUntilReset();
+  }
+
+  /**
+   * Close a DEGRADED breaker and forget its failure counts. Any other state is left alone: a
+   * CLOSED partial count still recovers one success at a time, and only an acquired probe may
+   * settle OPEN or HALF_OPEN. Returns whether the breaker closed.
+   */
+  closeDegraded(reason: string): boolean {
+    if (this.state !== STATE.DEGRADED) return false;
+    this._transition(STATE.CLOSED, reason);
+    this.failureCount = 0;
+    this.lastFailureKind = null;
+    this.kindFailureCounts = {};
+    this._persistToDb();
+    return true;
+  }
+
+  reset() {
+    this._transition(STATE.CLOSED, "manual-reset");
+    this.failureCount = 0;
+    this.successCount = 0;
+    this.lastFailureTime = null;
+    this.lastFailureKind = null;
+    this.openCycleCount = 0;
+    this.kindFailureCounts = {};
+    this._persistToDb();
+  }
+
+  // ─── Internal ─────────────────────────────────
+
+  /**
+   * Account a resolved `execute()` result exactly once. A classifier that throws
+   * falls back to the legacy "resolved = success" reading, mirroring `classifyError`.
+   */
+  _recordResolvedResult<T>(
+    result: T,
+    classifyResult?: (result: T) => CircuitBreakerResultOutcome
+  ): void {
+    let outcome: CircuitBreakerResultOutcome = "success";
+    if (classifyResult) {
+      try {
+        outcome = classifyResult(result);
+      } catch {
+        outcome = "success";
+      }
+    }
+    if (outcome === "failure") {
+      this._onFailure();
+    } else if (outcome === "success") {
+      this._onSuccess();
+    }
+  }
+
+  _onSuccess() {
+    if (this.state === STATE.OPEN) {
+      this._transition(STATE.CLOSED, "success-recovery");
+      this.failureCount = 0;
+      this.successCount = 0;
+      this.lastFailureTime = null;
+      this.lastFailureKind = null;
+      this.openCycleCount = 0;
+      this.kindFailureCounts = {};
+    } else if (this.state === STATE.HALF_OPEN) {
+      this.successCount++;
+      this._transition(STATE.CLOSED, "probe-success");
+      this.failureCount = 0;
+      this.lastFailureKind = null;
+      this.openCycleCount = 0;
+      this.kindFailureCounts = {};
+    } else {
+      // CLOSED or DEGRADED: reset counts
+      this.failureCount = Math.max(0, this.failureCount - 1); // gradual recovery
+      if (this.state === STATE.DEGRADED && this.failureCount <= this.degradationThreshold) {
+        this._transition(STATE.CLOSED, "recovery");
+      }
+    }
+    this._persistToDb();
+  }
+
+  _onFailure(kind?: FailureKind | null) {
+    this._decayStaleDegradation();
+    const failureKind = kind ?? null;
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    this.lastFailureKind = failureKind;
+
+    // Track per-kind failure counts
+    if (failureKind) {
+      this.kindFailureCounts[failureKind] = (this.kindFailureCounts[failureKind] || 0) + 1;
+    }
+
+    // Check kind-specific thresholds
+    if (failureKind) {
+      const kindConfig = this.kindThresholds[failureKind];
+      if (kindConfig) {
+        const kindCount = this.kindFailureCounts[failureKind] || 0;
+
+        // Immediate open for critical failure kinds
+        if (kindConfig.immediateOpen && kindCount >= (kindConfig.threshold || 1)) {
+          this._openCircuit(failureKind);
+          return;
+        }
+
+        // Kind-specific threshold reached
+        if (kindCount >= (kindConfig.threshold || this.failureThreshold)) {
+          this._openCircuit(failureKind);
+          return;
+        }
+      }
+    }
+
+    // State transitions based on total failure count
+    if (this.state === STATE.OPEN) {
+      // Already OPEN — just update persistence
+    } else if (this.state === STATE.HALF_OPEN) {
+      // Probe failed: OPEN with cycle count escalation
+      this.openCycleCount++;
+      this._transition(STATE.OPEN, `probe-failed (cycle ${this.openCycleCount})`);
+    } else if (this.state === STATE.DEGRADED) {
+      // Degraded → Open when threshold reached
+      if (this.failureCount >= this.failureThreshold) {
+        this._openCircuit(failureKind);
+      }
+    } else {
+      // CLOSED → DEGRADED or OPEN
+      if (this.failureCount >= this.failureThreshold) {
+        this._openCircuit(failureKind);
+      } else if (this.failureCount >= this.degradationThreshold) {
+        this._transition(
+          STATE.DEGRADED,
+          `elevated-failures (${this.failureCount}/${this.failureThreshold})`
+        );
+      }
+    }
+    this._persistToDb();
+  }
+
+  _openCircuit(kind: FailureKind | null) {
+    this._transition(STATE.OPEN, kind ? `kind:${kind}` : undefined);
+  }
+
+  _shouldAttemptReset() {
+    if (!this.lastFailureTime) return true;
+    const cooldown = this._effectiveCooldown();
+    return Date.now() - this.lastFailureTime >= cooldown;
+  }
+
+  /** Cooldown override configured for the last failure's kind, or null when there is none. */
+  _kindCooldownOverride(): number | null {
+    if (this.lastFailureKind === null) return null;
+    const override = this.cooldownByKind[this.lastFailureKind];
+    return typeof override === "number" && Number.isFinite(override) && override >= 0
+      ? override
+      : null;
+  }
+
+  _effectiveCooldown() {
+    const baseTimeout = this._effectiveResetTimeout();
+    const override = this._kindCooldownOverride();
+    if (override !== null) {
+      // #14960: the per-kind override replaces the BASE reset timeout but must
+      // still honor open-cycle escalation — otherwise a quota_exhausted
+      // provider re-probes at the same fixed interval forever while
+      // openCycleCount grows. Apply the same doubling the base timeout gets,
+      // capped at override * maxBackoffMultiplier.
+      if (this.openCycleCount <= this.backoffEscalationCount) {
+        return override;
+      }
+      const escalationFactor = Math.pow(2, this.openCycleCount - this.backoffEscalationCount);
+      return Math.min(override * escalationFactor, override * this.maxBackoffMultiplier);
+    }
+    return baseTimeout;
+  }
+
+  _timeUntilReset() {
+    if (this.state === STATE.HALF_OPEN && this.halfOpenProbeStartedAt !== null) {
+      return Math.max(0, this.resetTimeout - (Date.now() - this.halfOpenProbeStartedAt));
+    }
+    if (!this.lastFailureTime) return 0;
+    const cooldown = this._effectiveCooldown();
+    return Math.max(0, cooldown - (Date.now() - this.lastFailureTime));
+  }
+
+  /**
+   * DEGRADED is left only on a success, so a provider that stopped receiving traffic stayed
+   * DEGRADED forever. Once it has gone the longest the breaker would hold it OPEN for the same
+   * failure kind (the kind's cooldown override, else `resetTimeout`, times
+   * `maxBackoffMultiplier`, never less than one cooldown) without a new failure, forget the
+   * warning. A DEGRADED state with no recorded failure time (a persisted row with a zero
+   * timestamp) has no recent failure to keep it, so it decays at once. Lazy, like OPEN.
+   */
+  _decayStaleDegradation() {
+    if (this.state !== STATE.DEGRADED) return;
+    const cooldown = this._kindCooldownOverride() ?? this.resetTimeout;
+    const quietWindowMs = cooldown * Math.max(1, this.maxBackoffMultiplier);
+    if (this.lastFailureTime === null || Date.now() - this.lastFailureTime >= quietWindowMs) {
+      this.closeDegraded("failure-decay");
+    }
+  }
+
+  _refreshOpenState() {
+    this._decayStaleDegradation();
+    if (this.state === STATE.OPEN && this._shouldAttemptReset()) {
+      this._transition(STATE.HALF_OPEN, "timeout-elapsed");
+      this._persistToDb();
+    } else if (
+      this.state === STATE.HALF_OPEN &&
+      this.halfOpenAllowed <= 0 &&
+      this.halfOpenProbeStartedAt !== null &&
+      Date.now() - this.halfOpenProbeStartedAt >= this.resetTimeout
+    ) {
+      this.halfOpenAllowed = this.halfOpenRequests;
+      this.halfOpenProbeStartedAt = null;
+      this.halfOpenProbeGeneration++;
+    }
+  }
+
+  _transition(newState: CircuitState, reason?: string) {
+    const oldState = this.state;
+    this.state = newState;
+
+    if (newState === STATE.HALF_OPEN) {
+      this.halfOpenAllowed = this.halfOpenRequests;
+    }
+    this.halfOpenProbeGeneration++;
+    this.halfOpenProbeStartedAt = null;
+    // Record transition
+    this.transitionHistory.push({
+      from: oldState,
+      to: newState,
+      timestamp: Date.now(),
+      failureCount: this.failureCount,
+      reason,
+    });
+    if (this.transitionHistory.length > this.maxTransitionHistory) {
+      this.transitionHistory.shift();
+    }
+
+    if (this.onStateChange && oldState !== newState) {
+      this.onStateChange(this.name, oldState, newState);
+    }
+  }
+}
+
+export class CircuitBreakerOpenError extends Error {
+  circuitName: string;
+  retryAfterMs: number;
+
+  constructor(message: string, circuitName: string, retryAfterMs: number) {
+    super(message);
+    this.name = "CircuitBreakerOpenError";
+    this.circuitName = circuitName;
+    this.retryAfterMs = retryAfterMs;
+  }
+}
+
+// ─── Registry ─────────────────────────────────────
+
+const MAX_REGISTRY_SIZE = 500;
+const registry = new Map<string, CircuitBreaker>();
+
+/** Test-only: current number of registered circuit breakers. */
+export function __getCircuitRegistrySizeForTests(): number {
+  return registry.size;
+}
+
+const _registrySweep = setInterval(() => {
+  const now = Date.now();
+  for (const [name, breaker] of registry) {
+    const status = breaker.getStatus();
+    if (
+      status.state === STATE.CLOSED &&
+      status.failureCount === 0 &&
+      (!status.lastFailureTime || now - status.lastFailureTime > 30 * 60 * 1000)
+    ) {
+      registry.delete(name);
+      try {
+        deleteCircuitBreakerState(name);
+      } catch {}
+    }
+  }
+}, 5 * 60_000);
+if (typeof _registrySweep === "object" && "unref" in _registrySweep) {
+  (_registrySweep as { unref?: () => void }).unref?.();
+}
+
+/**
+ * Enforce MAX_REGISTRY_SIZE before inserting a new breaker. The cap was previously declared
+ * but never used — the only bound was the 5-min sweep, which evicts a breaker only if it is
+ * CLOSED, has zero failures, AND has been idle for >30 min. With high-cardinality breaker
+ * names that cap could be exceeded for up to 30 min. Evict idle CLOSED breakers (oldest first)
+ * to make room; never evict OPEN/HALF_OPEN breakers, since those carry meaningful state. A
+ * CLOSED breaker with zero failures is behaviorally identical to a freshly-created one, so
+ * evicting and lazily recreating it later changes nothing.
+ */
+function evictColdBreakersIfNeeded(): void {
+  if (registry.size < MAX_REGISTRY_SIZE) return;
+  const candidates: { name: string; lastFailureTime: number }[] = [];
+  for (const [name, breaker] of registry) {
+    const status = breaker.getStatus();
+    if (status.state === STATE.CLOSED && status.failureCount === 0) {
+      candidates.push({ name, lastFailureTime: status.lastFailureTime || 0 });
+    }
+  }
+  candidates.sort((a, b) => a.lastFailureTime - b.lastFailureTime);
+  const target = registry.size - MAX_REGISTRY_SIZE + 1;
+  for (let i = 0; i < candidates.length && i < target; i++) {
+    registry.delete(candidates[i].name);
+    try {
+      deleteCircuitBreakerState(candidates[i].name);
+    } catch {}
+  }
+}
+
+export function getCircuitBreaker(name: string, options?: CircuitBreakerOptions): CircuitBreaker {
+  if (!registry.has(name)) {
+    evictColdBreakersIfNeeded();
+    registry.set(name, new CircuitBreaker(name, options));
+  }
+  const breaker = registry.get(name)!;
+  if (options) {
+    if (typeof options.failureThreshold === "number") {
+      breaker.failureThreshold = options.failureThreshold;
+    }
+    if (typeof options.resetTimeout === "number") {
+      breaker.resetTimeout = options.resetTimeout;
+    }
+    if (typeof options.halfOpenRequests === "number") {
+      breaker.halfOpenRequests = options.halfOpenRequests;
+      if (breaker.state === STATE.HALF_OPEN) {
+        breaker.halfOpenAllowed = Math.min(breaker.halfOpenAllowed, breaker.halfOpenRequests);
+      }
+    }
+    if (typeof options.onStateChange === "function") {
+      breaker.onStateChange = options.onStateChange;
+    }
+    if (typeof options.isFailure === "function") {
+      breaker.isFailure = options.isFailure;
+    }
+    if (options.cooldownByKind) {
+      breaker.cooldownByKind = {
+        ...breaker.cooldownByKind,
+        ...options.cooldownByKind,
+      };
+    }
+    if (typeof options.classifyError === "function") {
+      breaker.classifyError = options.classifyError;
+    }
+    if (options.kindThresholds) {
+      breaker.kindThresholds = {
+        ...breaker.kindThresholds,
+        ...options.kindThresholds,
+      };
+    }
+    if (typeof options.degradationThreshold === "number") {
+      breaker.degradationThreshold = options.degradationThreshold;
+    }
+    if (typeof options.maxBackoffMultiplier === "number") {
+      breaker.maxBackoffMultiplier = options.maxBackoffMultiplier;
+    }
+    if (typeof options.backoffEscalationCount === "number") {
+      breaker.backoffEscalationCount = options.backoffEscalationCount;
+    }
+    breaker._persistToDb();
+  }
+  return breaker;
+}
+
+export function getAllCircuitBreakerStatuses() {
+  try {
+    const persisted = loadAllCircuitBreakerStates();
+    for (const cb of persisted) {
+      if (!registry.has(cb.name)) {
+        getCircuitBreaker(cb.name);
+      }
+    }
+  } catch {
+    // Use registry only
+  }
+  return Array.from(registry.values()).map((cb) => cb.getStatus());
+}
+
+export function resetAllCircuitBreakers() {
+  for (const cb of registry.values()) {
+    cb.reset();
+  }
+  registry.clear();
+  try {
+    deleteAllCircuitBreakerStates();
+  } catch {
+    // Non-critical
+  }
+}

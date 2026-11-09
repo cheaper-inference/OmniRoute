@@ -1,0 +1,310 @@
+import {
+  captureState,
+  dispatchContext,
+  type CaptureHolder,
+} from "./providerRequestCaptureContext.ts";
+export {
+  currentHttpAttemptCollector,
+  isProviderRequestCaptureActive,
+} from "./providerRequestCaptureContext.ts";
+export { observeProviderHttpSend } from "./providerHttpAttempts.ts";
+import { HttpAttemptCollector } from "./providerHttpAttempts.ts";
+
+import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
+
+export type ProviderRequestPrepared = {
+  url: string;
+  headers: Record<string, string>;
+  body: unknown;
+  bodyString: string;
+};
+
+export type Capture = {
+  httpAttempts?: HttpAttemptCollector;
+  capture: (request: ProviderRequestPrepared) => Promise<void> | void;
+  body: (fallback: unknown) => unknown;
+  latest?: () => ProviderRequestPrepared | null;
+};
+
+type RequestLoggerLike = {
+  logTargetRequest: (url: unknown, headers: Record<string, string>, body: unknown) => void;
+};
+
+type WarnLog = {
+  warn?: (tag: string, message: string) => void;
+};
+
+type FetchInput = Parameters<typeof fetch>[0];
+type FetchInit = Parameters<typeof fetch>[1];
+
+const BODY_METHODS = new Set(["POST", "PUT", "PATCH"]);
+const AUTH_BODY_KEYS = new Set([
+  "access_token",
+  "client_secret",
+  "grant_type",
+  "id_token",
+  "refresh_token",
+]);
+const REQUEST_BODY_KEYS = new Set([
+  "conversationId",
+  "conversation_id",
+  "contents",
+  "input",
+  "messages",
+  "model",
+  "prompt",
+  "request",
+  "tools",
+  "userSelectedModel",
+]);
+
+export function parseBody(bodyString: string): unknown {
+  try {
+    return JSON.parse(bodyString);
+  } catch {
+    return bodyString;
+  }
+}
+
+async function capturePreparedRequest(
+  requestCapture: Capture | null | undefined,
+  url: string,
+  headers: Record<string, string>,
+  body: unknown,
+  bodyString: string,
+  log?: WarnLog | null
+) {
+  if (!requestCapture) return;
+  try {
+    const headerEntries = Array.from(new Headers(headers).entries());
+    const latest = requestCapture.latest?.();
+    if (latest?.url === url && latest.bodyString === bodyString) {
+      const latestEntries = Array.from(new Headers(latest.headers).entries());
+      if (
+        headerEntries.length === latestEntries.length &&
+        headerEntries.every(
+          ([name, value], index) =>
+            name === latestEntries[index][0] && value === latestEntries[index][1]
+        )
+      ) {
+        return;
+      }
+    }
+    await requestCapture.capture({ url, headers, body, bodyString });
+  } catch {
+    // Capture hooks can fail while processing a provider payload. The thrown
+    // value may echo request content, so never copy it into application logs.
+    log?.warn?.("REQUEST_LOG", "Provider request logging hook failed");
+  }
+}
+
+export function captureCurrentProviderRequest(
+  url: string,
+  headers: Record<string, string>,
+  body: unknown,
+  bodyString: string,
+  log?: WarnLog | null
+) {
+  return capturePreparedRequest(
+    captureState.context.getStore()?.capture,
+    url,
+    headers,
+    body,
+    bodyString,
+    log
+  );
+}
+
+export function captureCurrentProviderBody(
+  url: string,
+  headers: Record<string, string>,
+  bodyString: string,
+  log?: WarnLog | null
+) {
+  return captureCurrentProviderRequest(url, headers, parseBody(bodyString), bodyString, log);
+}
+
+type DispatchStartListener = () => void;
+
+const DISPATCH_LISTENERS_KEY = Symbol.for(
+  "omniroute.providerRequestCapture.dispatchStartListeners"
+);
+
+function getDispatchStartListeners(): Set<DispatchStartListener> {
+  const scopedGlobal = globalThis as typeof globalThis & {
+    [DISPATCH_LISTENERS_KEY]?: Set<DispatchStartListener>;
+  };
+  return (scopedGlobal[DISPATCH_LISTENERS_KEY] ??= new Set<DispatchStartListener>());
+}
+
+/**
+ * Run listeners at the entry of every provider dispatch, before fn starts. A
+ * listener resolves what it needs through its own closure (usually an ALS
+ * reader), so a dispatch for another request never touches this request's
+ * state. Listeners must stay synchronous and side-effect free beyond the
+ * request's own sink.
+ */
+export function onDispatchStart(listener: DispatchStartListener): void {
+  getDispatchStartListeners().add(listener);
+}
+
+export function runWithCapture<T>(requestCapture: Capture, fn: () => Promise<T>): Promise<T> {
+  installFetchCapture();
+  const dispatch = { settled: false };
+  return dispatchContext.run(dispatch, () => {
+    for (const listener of getDispatchStartListeners()) listener();
+    const holder: CaptureHolder = { capture: requestCapture };
+    return captureState.context.run(holder, fn).finally(() => {
+      dispatch.settled = true;
+      // Detach the Capture from the ALS store as soon as the dispatch is over: the
+      // async resources that outlive the call (sockets, streams) would otherwise pin
+      // it, and its captured request body, through the store (heap leak, ~80 MB/h in
+      // prod). Late work from those resources now finds no capture at all.
+      holder.capture = null;
+    });
+  });
+}
+
+function installFetchCapture() {
+  if (globalThis.fetch === captureState.wrappedFetch) return;
+
+  captureState.wrappedInnerFetch = globalThis.fetch.bind(globalThis);
+  captureState.wrappedFetch = (async (input: FetchInput, init?: FetchInit) => {
+    const activeCapture = captureState.context.getStore()?.capture;
+    if (activeCapture) {
+      await captureFetchRequest(activeCapture, input, init);
+    }
+    return captureState.wrappedInnerFetch!(input, init);
+  }) as typeof fetch;
+  globalThis.fetch = captureState.wrappedFetch;
+}
+
+async function captureFetchRequest(requestCapture: Capture, input: FetchInput, init?: FetchInit) {
+  const method = getFetchMethod(input, init);
+  if (!BODY_METHODS.has(method)) return;
+
+  const bodyString = bodyToString(init?.body);
+  if (!bodyString) return;
+
+  const body = parseBody(bodyString);
+  if (!looksLikeProviderRequestBody(body)) return;
+
+  await capturePreparedRequest(
+    requestCapture,
+    getFetchUrl(input),
+    getFetchHeaders(input, init),
+    body,
+    bodyString
+  );
+}
+
+function getFetchMethod(input: FetchInput, init?: FetchInit) {
+  const method = init?.method || (isRequest(input) ? input.method : "GET");
+  return String(method || "GET").toUpperCase();
+}
+
+function getFetchUrl(input: FetchInput) {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.toString();
+  if (isRequest(input)) return input.url;
+  return String(input);
+}
+
+function getFetchHeaders(input: FetchInput, init?: FetchInit) {
+  const headers = new Headers(isRequest(input) ? input.headers : undefined);
+  if (init?.headers) {
+    new Headers(init.headers).forEach((value, key) => headers.set(key, value));
+  }
+
+  const result: Record<string, string> = {};
+  headers.forEach((value, key) => {
+    result[key] = value;
+  });
+  return result;
+}
+
+function bodyToString(body: BodyInit | null | undefined): string | null {
+  if (typeof body === "string") return body;
+  if (body instanceof URLSearchParams) return body.toString();
+  if (body instanceof ArrayBuffer) return new TextDecoder().decode(body);
+  if (ArrayBuffer.isView(body)) {
+    return new TextDecoder().decode(
+      body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength)
+    );
+  }
+  return null;
+}
+
+function isRequest(input: FetchInput): input is Request {
+  return typeof Request !== "undefined" && input instanceof Request;
+}
+
+function looksLikeProviderRequestBody(body: unknown) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return false;
+  const record = body as Record<string, unknown>;
+
+  if (Object.keys(record).some((key) => AUTH_BODY_KEYS.has(key))) return false;
+  if (Object.keys(record).some((key) => REQUEST_BODY_KEYS.has(key))) return true;
+
+  return (
+    typeof record.query === "string" && !!record.variables && typeof record.variables === "object"
+  );
+}
+
+export function createPreparedRequestLogger(
+  reqLogger: RequestLoggerLike,
+  scope: PendingRequestScope
+): Capture {
+  let latest: ProviderRequestPrepared | null = null;
+  return {
+    httpAttempts: new HttpAttemptCollector(),
+    capture(request) {
+      // Defense in depth: the ALS holder is already emptied when a dispatch settles, but
+      // a direct call from a settled dispatch's async resource must not overwrite the
+      // body of a fresh retry on this same Capture.
+      if (dispatchContext.getStore()?.settled) return;
+      latest = { ...request, headers: { ...request.headers } };
+      reqLogger.logTargetRequest(latest.url, latest.headers, latest.body);
+      updatePendingScope(scope, {
+        providerRequest: latest.body,
+        providerUrl: latest.url,
+        stage: "sending_to_provider",
+      });
+    },
+    body(fallback) {
+      const resolved = latest?.body ?? fallback;
+      // #4091: the captured body is rebuilt from the serialized upstream payload
+      // (the fetch-capture does `JSON.parse(JSON.stringify(...))`), which drops
+      // non-enumerable properties. The native-Claude tool-name cloak stashes its
+      // per-request alias→original map as a NON-ENUMERABLE `_toolNameMap` on the
+      // real (fallback) transformed body; without it the response-side un-cloak
+      // (`mergeResponseToolNameMap` → `remapToolNamesInResponse`) can't restore
+      // MCP / snake_case tool names, so Claude Code receives the cloaked
+      // PascalCase name and rejects every call with "No such tool available".
+      // Re-attach the map onto the resolved (captured) body — kept non-enumerable
+      // so it still never re-serializes into an upstream request.
+      if (
+        resolved !== fallback &&
+        resolved &&
+        typeof resolved === "object" &&
+        fallback &&
+        typeof fallback === "object"
+      ) {
+        const map = (fallback as Record<string, unknown>)._toolNameMap;
+        const target = resolved as Record<string, unknown>;
+        if (map instanceof Map && !(target._toolNameMap instanceof Map)) {
+          Object.defineProperty(target, "_toolNameMap", {
+            value: map,
+            enumerable: false,
+            configurable: true,
+            writable: true,
+          });
+        }
+      }
+      return resolved;
+    },
+    latest() {
+      return latest;
+    },
+  };
+}

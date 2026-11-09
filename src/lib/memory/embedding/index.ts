@@ -1,0 +1,417 @@
+import {
+  EMBEDDING_PROVIDERS,
+  getEmbeddingDimension,
+} from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import { getProviderCredentials } from "@/sse/services/auth";
+import type { MemorySettingsExtended } from "@/shared/schemas/memory";
+import {
+  getEmbeddingProvider,
+  deriveEmbeddingProviderForChatProvider,
+} from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import type {
+  EmbeddingResolution,
+  EmbeddingResult,
+  EmbeddingError,
+  EmbeddingProviderListing,
+} from "./types";
+import { embedRemote } from "./remote";
+import { embedStatic } from "./staticPotion";
+import { embedTransformers } from "./transformersLocal";
+import { buildCacheKey, get as cacheGet, set as cacheSet } from "./cache";
+import { resolveMemoryCustomEmbeddingProvider } from "./customProvider";
+import { listProviderNodeModalityListings } from "./nodeModalityListings";
+
+const STATIC_MODEL = process.env.MEMORY_STATIC_MODEL || "minishlab/potion-base-8M";
+const TRANSFORMERS_MODEL = process.env.MEMORY_TRANSFORMERS_MODEL || "Xenova/all-MiniLM-L6-v2";
+
+/** Build an EmbeddingResolution for "no source available" cases. */
+function noSource(reason: string): EmbeddingResolution {
+  return {
+    source: null,
+    model: null,
+    dimensions: null,
+    signature: "null:null:null",
+    reason,
+  };
+}
+
+/** Build a signature string. */
+function makeSignature(
+  source: "remote" | "static" | "transformers" | null,
+  model: string | null,
+  dim: number | null
+): string {
+  return `${source ?? "null"}:${model ?? "null"}:${dim ?? "null"}`;
+}
+
+/**
+ * Look up a remote model's vector size from the embedding registry.
+ * Returns null when the model is unknown / has no recorded dimensions so
+ * callers can keep the lazy-probe path (#8074).
+ */
+function resolveRemoteDimensions(model: string): number | null {
+  const dim = getEmbeddingDimension(model);
+  return typeof dim === "number" ? dim : null;
+}
+
+/**
+ * Fill in the vector width the lazy probe was waiting for.
+ *
+ * `dimensions` is null for every source the hard-coded registry does not
+ * describe — a self-hosted endpoint by definition — and the only thing that can
+ * answer it is an embedding that has actually come back. Callers that hold one
+ * pass its length here; the signature is rebuilt the same way the resolution
+ * built it, so reindex detection still sees a model change as a change. (#12154)
+ */
+export function withMeasuredDimensions(
+  resolution: EmbeddingResolution,
+  dimensions: number
+): EmbeddingResolution {
+  if (
+    resolution.dimensions !== null ||
+    !resolution.source ||
+    !Number.isInteger(dimensions) ||
+    dimensions <= 0
+  ) {
+    return resolution;
+  }
+  return {
+    ...resolution,
+    dimensions,
+    signature: makeSignature(
+      resolution.source,
+      resolution.identity ?? resolution.model,
+      dimensions
+    ),
+    reason: `${resolution.reason} [dim=${dimensions} measured]`,
+  };
+}
+
+/** Build the remote EmbeddingResolution used by both explicit + auto paths. */
+function remoteResolution(model: string, reasonPrefix: string): EmbeddingResolution {
+  const dimensions = resolveRemoteDimensions(model);
+  return {
+    source: "remote",
+    model,
+    dimensions,
+    signature: makeSignature("remote", model, dimensions),
+    reason:
+      dimensions !== null
+        ? `${reasonPrefix}: ${model} (dim=${dimensions})`
+        : `${reasonPrefix}: ${model} (dim=unknown, will probe at embed time)`,
+  };
+}
+
+function customRemoteResolution(settings: MemorySettingsExtended): EmbeddingResolution | null {
+  const customBaseUrl = settings.customBaseUrl?.trim() ?? "";
+  const customModelId = settings.customModelId?.trim() ?? "";
+  if (!customBaseUrl && !customModelId) return null;
+  if (!customBaseUrl || !customModelId) return noSource("custom embedding endpoint is incomplete");
+  const identity = `${customBaseUrl.replace(/\/+$/, "")}|${customModelId}`;
+  return {
+    source: "remote",
+    model: `memory-custom/${customModelId}`,
+    dimensions: null,
+    identity,
+    signature: makeSignature("remote", identity, null),
+    reason: "custom remote provider configured (dim=unknown, will probe at embed time)",
+  };
+}
+
+/**
+ * Resolve which embedding source is active for the given settings (D4).
+ * Pure: no heavy I/O. Provider key check done via synchronous registry lookup.
+ */
+export function resolveEmbeddingSource(settings: MemorySettingsExtended): EmbeddingResolution {
+  const source = settings.embeddingSource ?? "auto";
+
+  const customResolution = customRemoteResolution(settings);
+  if (customResolution && (source === "remote" || source === "auto")) {
+    return customResolution;
+  }
+
+  if (source === "remote") {
+    // Explicit remote — check if the configured model has a key
+    const model = settings.embeddingProviderModel ?? null;
+    if (!model) {
+      return {
+        source: null,
+        model: null,
+        dimensions: null,
+        signature: makeSignature(null, null, null),
+        reason: "no_key: embeddingProviderModel not configured",
+      };
+    }
+    // We can't do async here, so we report it as potentially available
+    // and the caller will attempt embed + get no_key error on failure.
+    // Dimensions come from the embedding registry when known so sqlite-vec
+    // can create `vec_memories` before the first embed (#8074).
+    return remoteResolution(model, "remote provider configured");
+  }
+
+  if (source === "static") {
+    if (settings.staticEnabled !== true) {
+      return {
+        source: null,
+        model: null,
+        dimensions: null,
+        signature: makeSignature(null, null, null),
+        reason: "static disabled in settings",
+      };
+    }
+    return {
+      source: "static",
+      model: STATIC_MODEL,
+      dimensions: 256,
+      signature: makeSignature("static", STATIC_MODEL, 256),
+      reason: "static (potion-base-8M) explicitly selected",
+    };
+  }
+
+  if (source === "transformers") {
+    if (settings.transformersEnabled !== true) {
+      return {
+        source: null,
+        model: null,
+        dimensions: null,
+        signature: makeSignature(null, null, null),
+        reason: "transformers disabled in settings",
+      };
+    }
+    return {
+      source: "transformers",
+      model: TRANSFORMERS_MODEL,
+      dimensions: 384,
+      signature: makeSignature("transformers", TRANSFORMERS_MODEL, 384),
+      reason: "transformers.js (MiniLM-L6-v2) explicitly selected",
+    };
+  }
+
+  // auto: (1) remote if model configured and provider has key in registry
+  // (2) static if staticEnabled
+  // (3) transformers if transformersEnabled
+  // (4) null
+  if (source === "auto") {
+    // Try remote first — check if embeddingProviderModel is set
+    const providerModel = settings.embeddingProviderModel ?? null;
+    if (providerModel) {
+      const slashIdx = providerModel.indexOf("/");
+      const providerId = slashIdx > 0 ? providerModel.slice(0, slashIdx) : null;
+      if (providerId && EMBEDDING_PROVIDERS[providerId]) {
+        // We defer the actual hasKey check to listEmbeddingProviders (async).
+        // For resolveEmbeddingSource (sync), we report "possibly remote" when model is set.
+        // If no key, embed will return EmbeddingError{reason:"no_key"}.
+        // Dimensions are resolved from the registry when known (#8074).
+        return remoteResolution(providerModel, `auto: provider ${providerId} configured`);
+      }
+    }
+
+    if (settings.staticEnabled === true) {
+      return {
+        source: "static",
+        model: STATIC_MODEL,
+        dimensions: 256,
+        signature: makeSignature("static", STATIC_MODEL, 256),
+        reason: "auto: potion-base-8M (static) available",
+      };
+    }
+
+    if (settings.transformersEnabled === true) {
+      return {
+        source: "transformers",
+        model: TRANSFORMERS_MODEL,
+        dimensions: 384,
+        signature: makeSignature("transformers", TRANSFORMERS_MODEL, 384),
+        reason: "auto: transformers.js (MiniLM-L6-v2) available",
+      };
+    }
+
+    return noSource("auto: no embedding source available");
+  }
+
+  return noSource("unknown embedding source");
+}
+
+/**
+ * Generate an embedding for the given text using the active source.
+ * Caches results in memory (D6).
+ */
+export async function embed(
+  text: string,
+  settings: MemorySettingsExtended
+): Promise<EmbeddingResult | EmbeddingError> {
+  const resolution = resolveEmbeddingSource(settings);
+
+  if (!resolution.source) {
+    return {
+      source: "remote",
+      model: null,
+      reason: "unknown",
+      message: resolution.reason,
+    };
+  }
+
+  const cacheKey = buildCacheKey(
+    resolution.source,
+    resolution.identity ?? resolution.model,
+    resolution.dimensions,
+    text
+  );
+
+  const cached = cacheGet(cacheKey);
+  if (cached) {
+    return {
+      vector: cached,
+      source: resolution.source,
+      model: resolution.model ?? "",
+      dimensions: cached.length,
+      latencyMs: 0,
+      cached: true,
+    };
+  }
+
+  let result: EmbeddingResult | EmbeddingError;
+
+  if (resolution.source === "remote") {
+    let customProvider;
+    try {
+      customProvider = resolveMemoryCustomEmbeddingProvider(settings);
+    } catch (error: unknown) {
+      return {
+        source: "remote",
+        model: resolution.model,
+        reason: "request_failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Custom embedding endpoint is invalid or blocked",
+      };
+    }
+    result = await embedRemote(text, resolution.model ?? "", customProvider);
+  } else if (resolution.source === "static") {
+    result = await embedStatic(text);
+  } else {
+    result = await embedTransformers(text);
+  }
+
+  if ("vector" in result) {
+    cacheSet(cacheKey, result.vector);
+  }
+
+  return result;
+}
+
+/**
+ * Embed with a single retry (#13601).
+ *
+ * A failed embedding write used to skip vectorization immediately — one
+ * transient failure (slow potion load, brief remote 5xx) left the memory
+ * stored but never vectorized until the next reindex sweep. The retry covers
+ * error results only; a thrown error still propagates to the caller's catch
+ * (scheduleVectorUpsert marks needs_reindex there, as before).
+ */
+export async function embedWithRetry(
+  text: string,
+  settings: MemorySettingsExtended,
+  embedFn: (
+    text: string,
+    settings: MemorySettingsExtended
+  ) => Promise<EmbeddingResult | EmbeddingError> = embed,
+  maxAttempts = 2
+): Promise<EmbeddingResult | EmbeddingError> {
+  let last: EmbeddingResult | EmbeddingError | null = null;
+  for (let attempt = 1; attempt <= Math.max(1, maxAttempts); attempt++) {
+    const result = await embedFn(text, settings);
+    if ("vector" in result) return result;
+    last = result;
+  }
+  return last as EmbeddingResult | EmbeddingError;
+}
+
+/**
+ * List providers that have embedding models, marking which ones have a configured API key.
+ * Aggregates from EMBEDDING_PROVIDERS + local provider_nodes.
+ */
+export async function listEmbeddingProviders(): Promise<EmbeddingProviderListing[]> {
+  // Local provider nodes, listed with the embedding-typed models they expose
+  // (synced + custom rows; see nodeModalityListings.ts).
+  const nodeListings = await listProviderNodeModalityListings("embeddings");
+
+  const result: EmbeddingProviderListing[] = [];
+
+  // Process hardcoded EMBEDDING_PROVIDERS
+  for (const [providerId, config] of Object.entries(EMBEDDING_PROVIDERS)) {
+    let hasKey = false;
+    try {
+      const creds = await getProviderCredentials(providerId);
+      hasKey = !!(
+        creds &&
+        !("allRateLimited" in creds && creds.allRateLimited) &&
+        (("apiKey" in creds ? !!creds.apiKey : false) ||
+          ("accessToken" in creds ? !!creds.accessToken : false))
+      );
+    } catch {
+      hasKey = false;
+    }
+
+    result.push({
+      provider: providerId,
+      hasKey,
+      models: config.models.map((m) => ({
+        id: `${providerId}/${m.id}`,
+        name: m.name,
+        dimensions: m.dimensions ?? null,
+      })),
+    });
+  }
+
+  // Local provider nodes (curated entries win on prefix collisions).
+  const curatedIds = new Set(result.map((p) => p.provider));
+  for (const listing of nodeListings) {
+    if (curatedIds.has(listing.provider)) continue;
+    curatedIds.add(listing.provider);
+    result.push(listing);
+  }
+
+  // Generic fallback: configured OpenAI-compatible chat providers without a
+  // curated embedding entry (groq, mistral, vercel-ai-gateway, ...) expose a
+  // derivable /embeddings endpoint. They appear with an empty model catalog —
+  // the UI offers free-text input for the model id. Curated + local nodes win.
+  try {
+    const { REGISTRY } = await import("@omniroute/open-sse/config/providerRegistry.ts");
+    const chatRegistry = REGISTRY as Record<string, { baseUrl?: string } | undefined>;
+    // Cheap sync pass first: which providers CAN derive an endpoint at all.
+    const derivable: string[] = [];
+    for (const id of Object.keys(chatRegistry)) {
+      if (
+        !getEmbeddingProvider(id) &&
+        deriveEmbeddingProviderForChatProvider(id, chatRegistry[id])
+      ) {
+        derivable.push(id);
+      }
+    }
+    // Credential lookups only for derivable candidates (a handful), not the
+    // whole registry.
+    for (const id of derivable) {
+      let hasKey = false;
+      try {
+        const creds = await getProviderCredentials(id);
+        hasKey = !!(
+          creds &&
+          !("allRateLimited" in creds && creds.allRateLimited) &&
+          (("apiKey" in creds ? creds.apiKey : undefined) ||
+            ("accessToken" in creds ? creds.accessToken : undefined))
+        );
+      } catch {
+        hasKey = false;
+      }
+      if (hasKey) {
+        result.push({ provider: id, hasKey: true, models: [] });
+      }
+    }
+  } catch {
+    // Listing enhancement is best-effort; never fail the endpoint.
+  }
+
+  return result;
+}

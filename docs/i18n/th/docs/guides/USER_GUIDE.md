@@ -1,0 +1,1411 @@
+# User Guide (ไทย)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/USER_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/USER_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/USER_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/USER_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/USER_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/USER_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/USER_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/USER_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/USER_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/USER_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/USER_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/USER_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/USER_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/USER_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/USER_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/USER_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/USER_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/USER_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/USER_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/USER_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/USER_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/USER_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/USER_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/USER_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/USER_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/USER_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/USER_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/USER_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/USER_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/USER_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/USER_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/USER_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/USER_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/USER_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/USER_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/USER_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/USER_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/USER_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/USER_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/USER_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/USER_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/USER_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/USER_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/USER_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/USER_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/USER_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/USER_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/USER_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/USER_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/USER_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/USER_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/USER_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/USER_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/USER_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/USER_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/USER_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/USER_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/USER_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/USER_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/USER_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/USER_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/USER_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/USER_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/USER_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/USER_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/USER_GUIDE.md)
+
+---
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/USER_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/USER_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/USER_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/USER_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/USER_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/USER_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/USER_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/USER_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/USER_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/USER_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/USER_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/USER_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/USER_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/USER_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/USER_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/USER_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/USER_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/USER_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/USER_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/USER_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/USER_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/USER_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/USER_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/USER_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/USER_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/USER_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/USER_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/USER_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/USER_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/USER_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/USER_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/USER_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/USER_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/USER_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/USER_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/USER_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/USER_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/USER_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/USER_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/USER_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/USER_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/USER_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/USER_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/USER_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/USER_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/USER_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/USER_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/USER_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/USER_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/USER_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/USER_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/USER_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/USER_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/USER_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/USER_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/USER_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/USER_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/USER_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/USER_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/USER_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/USER_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/USER_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/USER_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/USER_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/USER_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/USER_GUIDE.md)
+
+คู่มือฉบับสมบูรณ์สำหรับการกำหนดค่าผู้ให้บริการ การสร้างคอมโบ การผสานรวมเครื่องมือ CLI และการปรับใช้ OmniRoute
+
+---
+
+## สารบัญ
+
+- [ภาพรวมราคา](#-pricing-at-a-glance)
+- [กรณีการใช้งาน](#-use-cases)
+- [การตั้งค่าผู้ให้บริการ](#-provider-setup)
+- [การผสานรวม CLI](#-cli-integration)
+- [การปรับใช้](#-deployment)
+- [โมเดลที่พร้อมใช้งาน](#-available-models)
+- [ฟีเจอร์ขั้นสูง](#-advanced-features)
+- [การกำหนดเส้นทางอัตโนมัติ (ไม่ต้องกำหนดค่า)](#-auto-routing-zero-config)
+- [การผสานรวม MCP และ A2A](#-mcp--a2a-integration)
+- [ระบบทักษะ](#-skills-system)
+- [ระบบหน่วยความจำ](#-memory-system)
+- [เว็บฮุก](#-webhooks)
+- [เอเจนต์บนคลาวด์](#-cloud-agents)
+- [การจัดการด้วยโปรแกรม](#-programmatic-management)
+- [CLI ภายใน](#-internal-cli)
+- [แอปพลิเคชันเดสก์ท็อป (Electron)](#-desktop-application-electron)
+
+---
+
+## 💰 ภาพรวมราคา
+
+| ระดับ                 | ผู้ให้บริการ      | ค่าใช้จ่าย        | การรีเซ็ตโควตา                   | เหมาะที่สุดสำหรับ             |
+| --------------------- | ----------------- | ----------------- | -------------------------------- | ----------------------------- |
+| **💳 การสมัครสมาชิก** | Claude Code (Pro) | $20/เดือน         | ทุก 5 ชม. + รายสัปดาห์           | ผู้ที่สมัครสมาชิกอยู่แล้ว     |
+|                       | Codex (Plus/Pro)  | $20-200/เดือน     | ทุก 5 ชม. + รายสัปดาห์           | ผู้ใช้ OpenAI                 |
+|                       | GitHub Copilot    | $10-19/เดือน      | รายเดือน                         | ผู้ใช้ GitHub                 |
+| **🔑 คีย์ API**       | DeepSeek          | จ่ายตามการใช้งาน  | ไม่มี                            | การให้เหตุผลราคาประหยัด       |
+|                       | Groq              | จ่ายตามการใช้งาน  | ไม่มี                            | การอนุมานที่รวดเร็วเป็นพิเศษ  |
+|                       | xAI (Grok)        | จ่ายตามการใช้งาน  | ไม่มี                            | การให้เหตุผลด้วย Grok 4       |
+|                       | Mistral           | จ่ายตามการใช้งาน  | ไม่มี                            | โมเดลที่โฮสต์ในสหภาพยุโรป     |
+|                       | Perplexity        | จ่ายตามการใช้งาน  | ไม่มี                            | การทำงานที่เสริมด้วยการค้นหา  |
+|                       | Together AI       | จ่ายตามการใช้งาน  | ไม่มี                            | โมเดลโอเพนซอร์ส               |
+|                       | Fireworks AI      | จ่ายตามการใช้งาน  | ไม่มี                            | การสร้างภาพ FLUX อย่างรวดเร็ว |
+|                       | Cerebras          | จ่ายตามการใช้งาน  | ไม่มี                            | ความเร็วระดับเวเฟอร์สเกล      |
+|                       | Cohere            | จ่ายตามการใช้งาน  | ไม่มี                            | RAG ด้วย Command R+           |
+|                       | NVIDIA NIM        | จ่ายตามการใช้งาน  | ไม่มี                            | โมเดลระดับองค์กร              |
+|                       | Baidu Qianfan     | จ่ายตามการใช้งาน  | ไม่มี                            | โมเดล ERNIE                   |
+| **💰 ราคาประหยัด**    | GLM-4.7           | $0.6/1M           | ทุกวันเวลา 10:00 น.              | ตัวสำรองราคาประหยัด           |
+|                       | MiniMax M2.1      | $0.2/1M           | แบบต่อเนื่องทุก 5 ชั่วโมง        | ตัวเลือกที่ถูกที่สุด          |
+|                       | Kimi K2           | เหมาจ่าย $9/เดือน | 10M โทเค็น/เดือน                 | ค่าใช้จ่ายที่คาดการณ์ได้      |
+| **🆓 ฟรี**            | Qoder             | $0                | เป็นไปตามข้อจำกัดของผู้ให้บริการ | ตรวจสอบแค็ตตาล็อกปัจจุบัน     |
+|                       | Kiro              | $0                | ~50 เครดิต/เดือน                 | ใช้ Claude ฟรี                |
+
+---
+
+## 🎯 กรณีการใช้งาน
+
+### กรณีที่ 1: "ฉันมีการสมัครสมาชิก Claude Pro"
+
+**ปัญหา:** โควตาหมดอายุโดยไม่ได้ใช้งาน และติดข้อจำกัดอัตราการใช้งานระหว่างเขียนโค้ดหนัก
+
+```
+ชุดผสม: "maximize-claude"
+  1. cc/claude-opus-4-7        (ใช้สิทธิ์การสมัครสมาชิกอย่างเต็มที่)
+  2. glm/glm-4.7               (ตัวสำรองราคาประหยัดเมื่อโควตาหมด)
+  3. if/qwen3.8-max-preview       (ตัวสำรองฉุกเฉินฟรี)
+
+ค่าใช้จ่ายรายเดือน: $20 (ค่าสมัครสมาชิก) + ~$5 (ตัวสำรอง) = รวม $25
+เทียบกับ $20 + การติดข้อจำกัด = ความหงุดหงิด
+```
+
+### กรณีที่ 2: "ฉันไม่ต้องการเสียค่าใช้จ่ายเลย"
+
+**ปัญหา:** ไม่สามารถจ่ายค่าสมัครสมาชิกได้ แต่ต้องการ AI สำหรับเขียนโค้ดที่เชื่อถือได้
+
+```
+ชุดผสม: "zero-cost"
+  1. if/kimi-k2.7-code          (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดอัตราการใช้งาน)
+  2. kr/qwen3-coder-next        (ตัวสำรอง Kiro ฟรี)
+
+ค่าใช้จ่ายรายเดือน: $0
+คุณภาพ: ตรวจสอบโมเดล ข้อจำกัด ความเป็นส่วนตัว และ SLA ให้เหมาะกับเวิร์กโหลดของคุณ
+```
+
+### กรณีที่ 3: "ฉันต้องการเขียนโค้ดได้ตลอด 24/7 โดยไม่สะดุด"
+
+**ปัญหา:** มีเส้นตายและไม่สามารถยอมรับช่วงเวลาที่ระบบหยุดให้บริการได้
+
+```
+ชุดผสม: "always-on"
+  1. cc/claude-opus-4-7        (คุณภาพดีที่สุด)
+  2. cx/gpt-5.5                (การสมัครสมาชิกรายการที่สอง)
+  3. glm/glm-4.7               (ราคาประหยัด รีเซ็ตทุกวัน)
+  4. minimax/MiniMax-M2.1      (ถูกที่สุด รีเซ็ตทุก 5 ชม.)
+  5. if/deepseek-v4-flash       (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดอัตราการใช้งาน)
+
+ผลลัพธ์: ตัวสำรอง 5 ชั้นช่วยเพิ่มความยืดหยุ่น แต่ไม่รับประกันความพร้อมใช้งานของบริการต้นทาง
+ค่าใช้จ่ายรายเดือน: $20-200 (ค่าสมัครสมาชิก) + $10-20 (ตัวสำรอง)
+```
+
+### กรณีที่ 4: "ฉันต้องการ AI ฟรีใน OpenClaw"
+
+**ปัญหา:** ต้องการผู้ช่วย AI ในแอปรับส่งข้อความโดยไม่มีค่าใช้จ่ายใด ๆ
+
+```
+ชุดผสม: "openclaw-free"
+  1. if/qwen3.8-max-preview     (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดอัตราการใช้งาน)
+  2. if/deepseek-v4-flash       (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดอัตราการใช้งาน)
+  3. if/kimi-k2.7-code          (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดอัตราการใช้งาน)
+
+ค่าใช้จ่ายรายเดือน: $0
+เข้าถึงผ่าน: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
+```
+
+---
+
+## 📖 การตั้งค่าผู้ให้บริการ
+
+หากต้องการเพิ่มการเชื่อมต่อคีย์ API จำนวนมากจากไฟล์ CSV หรือ JSON ให้ใช้ **Dashboard → Providers → Import from file** คอลัมน์จะเรียงตามตำแหน่ง (`provider,name,apiKey,baseUrl,priority`) โดย `provider` ต้องมีอยู่แล้วในฐานะผู้ให้บริการที่จัดการได้หรือโหนดที่เข้ากันได้ ดู [นำเข้าผู้ให้บริการจากไฟล์ CSV หรือ JSON](../providers/CSV-IMPORT.md)
+
+### 🔐 ผู้ให้บริการแบบสมัครสมาชิก
+
+#### Claude Code (Pro/Max)
+
+```bash
+Dashboard → Providers → Connect Claude Code
+→ เข้าสู่ระบบ OAuth → รีเฟรชโทเค็นอัตโนมัติ
+→ ติดตามโควตา 5 ชั่วโมง + รายสัปดาห์
+
+Models:
+  cc/claude-opus-4-7
+  cc/claude-sonnet-4-6
+  cc/claude-haiku-4-5-20251001
+```
+
+**เคล็ดลับมือโปร:** ใช้ Opus สำหรับงานที่ซับซ้อน และ Sonnet หากต้องการความเร็ว OmniRoute ติดตามโควตาแยกตามโมเดล!
+
+ไม่มีเบราว์เซอร์บนโฮสต์ OmniRoute ใช่ไหม ให้เรียกใช้ `claude setup-token` ที่ใดก็ได้ที่เข้าสู่ระบบ Claude Code อยู่ แล้วนำโทเค็นอายุหนึ่งปีไปวางในแท็บ **Setup Token** ดู [Claude Code พร้อม setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md)
+
+เส้นทางที่เข้ากันได้กับ Claude และ Claude Code จะคงค่า effort การคิด `max` ไว้สำหรับโมเดล
+Opus และ Sonnet โมเดล Haiku ไม่รองรับระดับ effort `max` ดังนั้น OmniRoute จะลดระดับคำขอดังกล่าว
+เป็นงบประมาณการคิดระดับสูงก่อนส่งต่อไปยัง upstream
+
+#### OpenAI Codex (Plus/Pro)
+
+```bash
+Dashboard → Providers → Connect Codex
+→ เข้าสู่ระบบ OAuth (พอร์ต 1455)
+→ รีเซ็ตทุก 5 ชั่วโมง + รายสัปดาห์
+
+Models:
+  cx/gpt-5.5
+  cx/gpt-5.4
+  cx/gpt-5.3-codex
+  cx/gpt-5.3-codex-spark
+```
+
+#### GitHub Copilot
+
+```bash
+Dashboard → Providers → Connect GitHub
+→ OAuth ผ่าน GitHub
+→ รีเซ็ตรายเดือน (วันที่ 1 ของเดือน)
+
+Models:
+  gh/gpt-5.5
+  gh/gpt-5.4
+  gh/claude-sonnet-4.6
+  gh/claude-opus-4.7
+  gh/gemini-3.1-pro-preview
+```
+
+**เครดิต AI (การเรียกเก็บเงินตามโทเค็น)** เมื่อ GitHub รายงาน `credits_used` สำหรับบัญชี
+การ์ดขีดจำกัดผู้ให้บริการจะแสดงแถว **เครดิต AI** พร้อมจำนวนเครดิตที่ใช้ไปในรอบการเรียกเก็บเงินปัจจุบัน
+รวมถึงแผนองค์กรแบบไม่จำกัด
+
+**ขีดจำกัดเครดิต AI ภายในเครื่อง** แก้ไขการเชื่อมต่อ GitHub แล้วตั้งค่า **ขีดจำกัดเครดิต AI ต่อ
+รอบการเรียกเก็บเงิน** (`providerSpecificData.githubCreditLimit`) การเว้นว่างจะปิดใช้งาน ส่วน `0`
+จะข้ามการเชื่อมต่อนั้นเสมอ เมื่อค่าการใช้งานล่าสุดมากกว่าหรือเท่ากับขีดจำกัด
+การเลือกบัญชีจะข้ามการเชื่อมต่อนั้น และการกำหนดเส้นทางจะย้อนกลับไปใช้การเชื่อมต่ออื่นของคุณ
+เช่นเดียวกับการตัดการทำงานตามนโยบายโควตา การตรวจสอบนี้อ่านข้อมูลการใช้งานที่การรีเฟรชโควตาตามช่วงเวลา
+รวบรวมไว้อยู่แล้ว — จะไม่เรียก GitHub บนเส้นทางคำขอ — และเป็นแบบ fail open: ค่าที่ขาดหายไปหรือล้าสมัย
+(เก่ากว่า 15 นาที หรือมาจากรอบการเรียกเก็บเงินที่รีเซ็ตไปแล้ว) จะไม่บล็อกการเชื่อมต่อ ข้อจำกัดนี้เป็น
+มาตรการป้องกันภายในเครื่อง **ไม่ใช่เพดานการใช้จ่ายที่รับประกันได้**: ความล่าช้าในการรายงานของ GitHub
+ช่วงเวลารีเฟรช คำขอที่กำลังดำเนินการอยู่ และการใช้งานภายนอก OmniRoute อาจทำให้ใช้เกินขีดจำกัดได้
+โปรดใช้การควบคุมการใช้จ่ายของ GitHub เองหากต้องการกำหนดเพดานที่เข้มงวด
+
+### 💰 ผู้ให้บริการราคาประหยัด
+
+#### GLM-4.7 (รีเซ็ตรายวัน, $0.6/1M)
+
+1. สมัครใช้งาน: [Zhipu AI](https://open.bigmodel.cn)
+2. รับคีย์ API จาก Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
+
+**การใช้งาน:** `glm/glm-4.7` — **เคล็ดลับมือโปร:** Coding Plan ให้โควตา 3 เท่าในราคา 1/7! รีเซ็ตทุกวันเวลา 10:00 น.
+
+#### MiniMax M2.1 (รีเซ็ตทุก 5 ชั่วโมง, $0.20/1M)
+
+1. สมัครใช้งาน: [MiniMax](https://www.minimax.io)
+2. รับคีย์ API → Dashboard → Add API Key
+
+**การใช้งาน:** `minimax/MiniMax-M2.1` — **เคล็ดลับมือโปร:** ตัวเลือกที่ถูกที่สุดสำหรับบริบทขนาดยาว (1M โทเค็น)!
+
+#### Kimi K2 ($9/เดือนแบบเหมาจ่าย)
+
+1. สมัครสมาชิก: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. รับคีย์ API → Dashboard → Add API Key
+
+**การใช้งาน:** `kimi/kimi-k2.5` — **เคล็ดลับมือโปร:** $9/เดือนแบบคงที่สำหรับ 10M โทเค็น = ค่าใช้จ่ายจริง $0.90/1M!
+
+#### Baidu Qianfan / ERNIE
+
+1. สมัครใช้งาน: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. สร้างคีย์ API ของ Qianfan → Dashboard → Add API Key: Provider: `qianfan`
+
+**การใช้งาน:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` หรือรหัสโมเดลอื่นที่เข้ากันได้กับ OpenAI ของ Qianfan
+
+### 🆓 ผู้ให้บริการฟรี
+
+ผู้ให้บริการฟรีที่ไม่ต้องยืนยันตัวตนจะมีสวิตช์อยู่ข้าง **ไม่ต้องมีการยืนยันตัวตน** ในหน้าผู้ให้บริการ
+การปิดสวิตช์จะปิดใช้งานผู้ให้บริการนั้น นำออกจากมุมมอง Providers configured/compact
+และนำโมเดลของผู้ให้บริการนั้นออกจาก `/v1/models`
+
+#### Qoder (9 โมเดลฟรี)
+
+```bash
+Dashboard → Connect Qoder → เข้าสู่ระบบ OAuth → การเข้าถึงขึ้นอยู่กับขีดจำกัดปัจจุบันของผู้ให้บริการ
+
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+```
+
+#### Kiro (Claude ฟรี)
+
+```bash
+Dashboard → Connect Kiro → AWS Builder ID หรือ Google/GitHub → ประมาณ 50 เครดิต/เดือน
+
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+```
+
+---
+
+## 🎨 คอมโบ
+
+คุณสามารถจัดลำดับการ์ดคอมโบใหม่ได้โดยตรงใน **แดชบอร์ด → คอมโบ** ด้วยการลากจุดจับบนการ์ดแต่ละใบ ลำดับจะถูกบันทึกไว้ใน SQLite และกู้คืนเมื่อโหลดใหม่
+
+### ตัวอย่างที่ 1: ใช้การสมัครสมาชิกให้คุ้มค่าสูงสุด → ตัวสำรองราคาถูก
+
+```
+แดชบอร์ด → คอมโบ → สร้างใหม่
+
+ชื่อ: premium-coding
+โมเดล:
+  1. cc/claude-opus-4-7 (โมเดลหลักจากการสมัครสมาชิก)
+  2. glm/glm-4.7 (ตัวสำรองราคาถูก, $0.6/1M)
+  3. minimax/MiniMax-M2.7 (ตัวเลือกสำรองที่ถูกที่สุด, $0.3/1M)
+
+ใช้ใน CLI: premium-coding
+```
+
+### ตัวอย่างที่ 2: ใช้เฉพาะของฟรี (ไม่มีค่าใช้จ่าย)
+
+```
+ชื่อ: free-combo
+โมเดล:
+  1. if/kimi-k2.7-code (ระบุว่าเข้าถึงได้ฟรี แต่อาจมีข้อจำกัดจากผู้ให้บริการ)
+  2. kr/qwen3-coder-next (ตัวสำรองฟรีจาก Kiro)
+
+ค่าใช้จ่าย: ขณะนี้ระบุเป็น $0 แต่ข้อกำหนดและความพร้อมให้บริการอาจเปลี่ยนแปลงได้
+```
+
+---
+
+## 🔧 การผสานรวม CLI
+
+### Cursor IDE
+
+**การใช้ Cursor เป็นไคลเอนต์ OmniRoute** (กำหนดเส้นทางแชตของ Cursor ผ่าน OmniRoute):
+
+```
+การตั้งค่า → โมเดล → ขั้นสูง:
+  OpenAI API Base URL: http://localhost:20128/v1
+  OpenAI API Key: [จากแดชบอร์ด omniroute]
+  โมเดล: cc/claude-opus-4-7
+```
+
+**การใช้ OmniRoute เป็นผู้ให้บริการ Cursor** (OmniRoute เรียกใช้ Cursor ต้นทาง): แนะนำให้ใช้
+**แดชบอร์ด → ผู้ให้บริการ → Cursor → เข้าสู่ระบบด้วย Cursor** สำหรับ Docker โปรดดู
+[`docs/providers/CURSOR-DOCKER.md`](../providers/CURSOR-DOCKER.md)
+
+### Claude Code
+
+แก้ไข `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:20128",
+    "ANTHROPIC_AUTH_TOKEN": "your-omniroute-api-key"
+  }
+}
+```
+
+ใช้ปลายทางรากที่เข้ากันได้กับ Claude ที่นี่ อย่าเติม `/v1` ต่อท้าย `ANTHROPIC_BASE_URL`
+
+### Codex CLI
+
+```bash
+export OPENAI_BASE_URL="http://localhost:20128"
+export OPENAI_API_KEY="your-omniroute-api-key"
+codex "your prompt"
+```
+
+### OpenClaw
+
+แก้ไข `~/.openclaw/openclaw.json`:
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": { "primary": "omniroute/if/kimi-k2.7-code" }
+    }
+  },
+  "models": {
+    "providers": {
+      "omniroute": {
+        "baseUrl": "http://localhost:20128/v1",
+        "apiKey": "your-omniroute-api-key",
+        "api": "openai-completions",
+        "models": [{ "id": "if/kimi-k2.7-code", "name": "Kimi K2.7 Code" }]
+      }
+    }
+  }
+}
+```
+
+**หรือใช้แดชบอร์ด:** เครื่องมือ CLI → OpenClaw → กำหนดค่าอัตโนมัติ
+
+### Cline / Continue / RooCode
+
+```
+ผู้ให้บริการ: รองรับ OpenAI
+Base URL: http://localhost:20128/v1
+API Key: [จากแดชบอร์ด]
+โมเดล: cc/claude-opus-4-7
+```
+
+---
+
+## 🚀 การปรับใช้
+
+### การติดตั้ง npm แบบส่วนกลาง (แนะนำ)
+
+```bash
+npm install -g omniroute
+
+# สร้างไดเรกทอรีการกำหนดค่า
+mkdir -p ~/.omniroute
+
+# สร้างไฟล์ .env (ดู .env.example)
+cp .env.example ~/.omniroute/.env
+
+# เริ่มต้นเซิร์ฟเวอร์
+omniroute
+# หรือใช้พอร์ตที่กำหนดเอง:
+omniroute --port 3000
+```
+
+CLI จะโหลด `.env` จาก `~/.omniroute/.env` หรือ `./.env` โดยอัตโนมัติ
+
+### โหมดถาดระบบ
+
+เริ่มต้น OmniRoute ในถาดระบบ:
+
+```bash
+omniroute serve --tray
+```
+
+คำสั่งจะสิ้นสุดการทำงานหลังจากเซิร์ฟเวอร์และถาดระบบพร้อมใช้งานแล้ว
+
+เซิร์ฟเวอร์จะทำงานต่อไปโดยไม่ต้องเปิดเทอร์มินัลไว้
+
+โหมดถาดระบบรองรับ macOS, Windows และเซสชัน Linux แบบกราฟิก โหมดถาดระบบจะไม่เปิดแดชบอร์ดโดยอัตโนมัติ
+
+ใช้เมนูถาดระบบเพื่อดำเนินการต่อไปนี้:
+
+- เปิดแดชบอร์ด
+- เปิด `/dashboard/logs`
+- เปลี่ยนการตั้งค่าเริ่มต้นอัตโนมัติ
+- หยุด OmniRoute
+
+อย่าใช้ `--tray` ร่วมกับตัวเลือกต่อไปนี้:
+
+- `--daemon`
+- `--log`
+- `--no-recovery`
+
+โหมดเหล่านี้ต้องใช้การเป็นเจ้าของโปรเซสที่แตกต่างกัน
+
+เปิดใช้งานการเริ่มต้นระบบเมื่อเข้าสู่ระบบเครื่องครั้งถัดไป:
+
+```bash
+omniroute autostart enable
+```
+
+การเริ่มต้นอัตโนมัติจะใช้โหมดถาดระบบบน macOS, Windows และเซสชัน Linux แบบกราฟิก ส่วน Linux แบบไม่มีส่วนติดต่อกราฟิกจะใช้บริการผู้ใช้ systemd ที่มีอยู่
+
+ปิดใช้งานการเริ่มต้นระบบเมื่อเข้าสู่ระบบ:
+
+```bash
+omniroute autostart disable
+```
+
+### การถอนการติดตั้ง
+
+เมื่อคุณไม่ต้องการใช้ OmniRoute อีกต่อไป เรามีสคริปต์ด่วนสองรายการสำหรับการลบออกอย่างหมดจด:
+
+| คำสั่ง                   | การดำเนินการ                                                             |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `npm run uninstall`      | ลบแอประบบ แต่ **เก็บฐานข้อมูลและการกำหนดค่าของคุณไว้** ใน `~/.omniroute` |
+| `npm run uninstall:full` | ลบแอป และ **ลบการกำหนดค่า คีย์ และฐานข้อมูลทั้งหมดอย่างถาวร**            |
+
+> หมายเหตุ: หากต้องการเรียกใช้คำสั่งเหล่านี้ ให้ไปยังโฟลเดอร์โปรเจกต์ OmniRoute (หากคุณโคลนโปรเจกต์ไว้) แล้วเรียกใช้คำสั่งดังกล่าว หรือหากติดตั้งแบบส่วนกลาง คุณสามารถเรียกใช้ `npm uninstall -g omniroute` ได้โดยตรง
+
+### การปรับใช้บน VPS
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute && npm install && npm run build
+
+export JWT_SECRET="your-secure-secret-change-this"
+export INITIAL_PASSWORD="your-password"
+export DATA_DIR="/var/lib/omniroute"
+export PORT="20128"
+export HOSTNAME="0.0.0.0"
+export NODE_ENV="production"
+export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
+export API_KEY_SECRET="endpoint-proxy-api-key-secret"
+
+npm run start
+# หรือ: pm2 start npm --name omniroute -- start
+```
+
+### การปรับใช้ด้วย PM2 (หน่วยความจำน้อย)
+
+สำหรับเซิร์ฟเวอร์ที่มี RAM จำกัด ให้ใช้ตัวเลือกจำกัดหน่วยความจำ:
+
+```bash
+# พร้อมขีดจำกัด 512MB (ค่าเริ่มต้น)
+pm2 start npm --name omniroute -- start
+
+# หรือใช้ขีดจำกัดหน่วยความจำที่กำหนดเอง
+OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
+
+# หรือใช้ ecosystem.config.js
+pm2 start ecosystem.config.js
+```
+
+สร้าง `ecosystem.config.js`:
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: "omniroute",
+      script: "npm",
+      args: "start",
+      env: {
+        NODE_ENV: "production",
+        OMNIROUTE_MEMORY_MB: "512",
+        JWT_SECRET: "your-secret",
+        INITIAL_PASSWORD: "your-password",
+      },
+      node_args: "--max-old-space-size=512",
+      max_memory_restart: "300M",
+    },
+  ],
+};
+```
+
+### Docker
+
+```bash
+# สร้างอิมเมจ (ค่าเริ่มต้น = runner-cli ที่ติดตั้ง codex/claude/droid ไว้ล่วงหน้า)
+docker build -t omniroute:cli .
+
+# โหมดพกพา (แนะนำ)
+docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
+```
+
+สำหรับโหมดที่ผสานรวมกับโฮสต์พร้อมไบนารี CLI โปรดดูส่วน Docker ในเอกสารหลัก
+
+### Void Linux (xbps-src)
+
+ผู้ใช้ Void Linux สามารถจัดแพ็กเกจและติดตั้ง OmniRoute แบบเนทีฟได้โดยใช้เฟรมเวิร์กการคอมไพล์ข้ามแพลตฟอร์ม `xbps-src` ซึ่งจะทำให้การสร้าง Node.js แบบสแตนด์อโลนพร้อมกับไบนารีไบน์ดิงแบบเนทีฟของ `better-sqlite3` ที่จำเป็นเป็นไปโดยอัตโนมัติ
+
+<details>
+<summary><b>ดูเทมเพลต xbps-src</b></summary>
+
+```bash
+# ไฟล์เทมเพลตสำหรับ 'omniroute'
+pkgname=omniroute
+version=3.8.0
+revision=1
+hostmakedepends="nodejs python3 make"
+depends="openssl"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+maintainer="zenobit <zenobit@disroot.org>"
+license="MIT"
+homepage="https://github.com/diegosouzapw/OmniRoute"
+distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
+system_accounts="_omniroute"
+omniroute_homedir="/var/lib/omniroute"
+export NODE_ENV=production
+export npm_config_engine_strict=false
+export npm_config_loglevel=error
+export npm_config_fund=false
+export npm_config_audit=false
+
+do_build() {
+	# กำหนดสถาปัตยกรรม CPU เป้าหมายสำหรับ node-gyp
+	local _gyp_arch
+	case "$XBPS_TARGET_MACHINE" in
+		aarch64*) _gyp_arch=arm64 ;;
+		armv7*|armv6*) _gyp_arch=arm ;;
+		i686*) _gyp_arch=ia32 ;;
+		*) _gyp_arch=x64 ;;
+	esac
+
+	# 1) ติดตั้งการขึ้นต่อกันทั้งหมด – ข้ามสคริปต์
+	NODE_ENV=development npm ci --ignore-scripts
+
+	# 2) สร้างบันเดิล Next.js แบบสแตนด์อโลน
+	npm run build
+
+	# 3) คัดลอกแอสเซ็ตแบบสแตติกไปยังสแตนด์อโลน
+	cp -r .next/static .next/standalone/.next/static
+	[ -d public ] && cp -r public .next/standalone/public || true
+
+	# 4) คอมไพล์ไบนารีไบน์ดิงแบบเนทีฟของ better-sqlite3
+	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
+	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
+
+	# 5) วางไบนารีไบน์ดิงที่คอมไพล์แล้วลงในบันเดิลสแตนด์อโลน
+	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
+	mkdir -p "$_bs3_release"
+	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
+
+	# 6) ลบบันเดิล sharp ที่เจาะจงตามสถาปัตยกรรม
+	rm -rf .next/standalone/node_modules/@img
+
+	# 7) คัดลอกการขึ้นต่อกันขณะรันไทม์ของ pino ที่การวิเคราะห์แบบสแตติกของ Next.js ไม่ได้นำมารวมไว้:
+	for _mod in pino-abstract-transport split2 process-warning; do
+		cp -r "node_modules/$_mod" .next/standalone/node_modules/
+	done
+}
+
+do_check() {
+	npm run test:unit
+}
+
+do_install() {
+	vmkdir usr/lib/omniroute/.next
+	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
+
+	# ป้องกันไม่ให้ฮุกหลังการติดตั้งลบไดเรกทอรีเราเตอร์แอป Next.js ที่ว่างเปล่า
+	for _d in \
+		.next/standalone/.next/server/app/dashboard \
+		.next/standalone/.next/server/app/dashboard/settings \
+		.next/standalone/.next/server/app/dashboard/providers; do
+		touch "${DESTDIR}/usr/lib/omniroute/${_d}/.keep"
+	done
+
+	cat > "${WRKDIR}/omniroute" <<'EOF'
+#!/bin/sh
+export PORT="${PORT:-20128}"
+export DATA_DIR="${DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/omniroute}"
+export APP_LOG_TO_FILE="${APP_LOG_TO_FILE:-false}"
+mkdir -p "${DATA_DIR}"
+exec node /usr/lib/omniroute/.next/standalone/server.js "$@"
+EOF
+	vbin "${WRKDIR}/omniroute"
+}
+
+post_install() {
+	vlicense LICENSE
+}
+```
+
+</details>
+
+### ตัวแปรสภาพแวดล้อม
+
+| ตัวแปร                                  | ค่าเริ่มต้น                          | คำอธิบาย                                                                                                            |
+| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | คีย์ลับสำหรับลงนาม JWT (**ต้องเปลี่ยนในระบบที่ใช้งานจริง**)                                                         |
+| `INITIAL_PASSWORD`                      | `CHANGEME`                           | รหัสผ่านสำหรับการเข้าสู่ระบบครั้งแรก                                                                                |
+| `DATA_DIR`                              | `~/.omniroute`                       | ไดเรกทอรีข้อมูล (ฐานข้อมูล ข้อมูลการใช้งาน และบันทึกเหตุการณ์)                                                      |
+| `PORT`                                  | ค่าเริ่มต้นของเฟรมเวิร์ก             | พอร์ตของบริการ (`20128` ในตัวอย่าง)                                                                                 |
+| `HOSTNAME`                              | ค่าเริ่มต้นของเฟรมเวิร์ก             | โฮสต์ที่ใช้รับการเชื่อมต่อ (Docker ใช้ค่าเริ่มต้นเป็น `0.0.0.0`)                                                    |
+| `NODE_ENV`                              | ค่าเริ่มต้นของรันไทม์                | ตั้งค่าเป็น `production` สำหรับการนำไปใช้งาน                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ฐานแบบสาธารณะที่แสดงต่อแดชบอร์ดและเปิดให้เซิร์ฟเวอร์ใช้งาน (ใช้แทน `BASE_URL` แบบเดิม)                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ฐานของปลายทางการซิงค์กับคลาวด์ (ใช้แทน `CLOUD_URL` แบบเดิม)                                                     |
+| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | คีย์ลับ HMAC สำหรับคีย์ API ที่สร้างขึ้น                                                                            |
+| `REQUIRE_API_KEY`                       | `false`                              | บังคับใช้คีย์ API แบบ Bearer กับ `/v1/*`                                                                            |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                              | อนุญาตให้ผู้ใช้แดชบอร์ดที่ผ่านการยืนยันตัวตนเปิดดูค่าคีย์ API ที่จัดเก็บไว้แบบเต็มได้ตามต้องการ                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ความถี่ในการรีเฟรชข้อมูล Provider Limits ที่แคชไว้จากฝั่งเซิร์ฟเวอร์ ปุ่มรีเฟรชใน UI ยังคงเรียกใช้การซิงค์ด้วยตนเอง |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ปิดใช้สแนปช็อต SQLite อัตโนมัติก่อนการเขียน/นำเข้า/กู้คืน โดยการสำรองข้อมูลด้วยตนเองยังคงใช้งานได้                  |
+| `APP_LOG_TO_FILE`                       | `true`                               | เปิดใช้การบันทึกเหตุการณ์ของแอปพลิเคชันและการตรวจสอบลงดิสก์                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                              | บังคับใช้คุกกี้การยืนยันตัวตนแบบ `Secure` (เมื่ออยู่หลังพร็อกซีย้อนกลับ HTTPS)                                      |
+| `CLOUDFLARED_BIN`                       | ไม่ได้ตั้งค่า                        | ใช้ไบนารี `cloudflared` ที่มีอยู่แทนการดาวน์โหลดที่มีการจัดการ                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | การขนส่งสำหรับ Quick Tunnels ที่มีการจัดการ (`http2`, `quic` หรือ `auto`)                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                                | ขีดจำกัดฮีปของ Node.js หน่วยเป็น MB                                                                                 |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | จำนวนรายการสูงสุดในแคชพรอมต์                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | จำนวนรายการสูงสุดในแคชเชิงความหมาย                                                                                  |
+
+สำหรับข้อมูลอ้างอิงตัวแปรสภาพแวดล้อมทั้งหมด โปรดดู [README](../README.md)
+
+---
+
+## 📊 โมเดลที่พร้อมใช้งาน
+
+<details>
+<summary><b>ดูโมเดลที่พร้อมใช้งานทั้งหมด</b></summary>
+
+> รายการด้านล่างคัดสรรมาจาก `open-sse/config/providerRegistry.ts` สำหรับ v3.8.0 แคตตาล็อกบนคลาวด์ (Gemini, OpenRouter ฯลฯ) จะซิงค์แบบไดนามิก — หากต้องการดูแคตตาล็อกปัจจุบันทั้งหมด ให้เปิด **Dashboard → Providers → [provider] → Available Models** หรือเรียกใช้ `GET /api/models/catalog`
+>
+> หากรายการในตัวของผู้ให้บริการไม่ตรงกับข้อมูลล่าสุด ให้ใช้ **Import from /models** ในหน้านั้น (หรือเปิดใช้ **Auto-Sync**) เพื่อดึงแคตตาล็อกจาก upstream ปัจจุบัน การดำเนินการนี้ได้รับการตรวจสอบใน v3.8.50 สำหรับ LLM7.io (`gemini-3.1-flash-lite`) และ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); การเข้าถึงแบบไม่ระบุชื่อของ Pollinations ยังคงถูกจำกัดโดย upstream ในระหว่างการทดสอบรอบเดียวกัน
+
+**Claude Code (`cc/`)** — OAuth สำหรับ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+
+**Codex (`cx/`)** — OAuth สำหรับ Plus/Pro: `cx/gpt-5.5` (+ ระดับ effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+
+**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+
+**Kiro (`kr/`)** — OAuth ฟรี: ใช้แคตตาล็อกปัจจุบันที่แสดงอยู่ใน **Dashboard → Providers → Kiro → Available Models** โมเดลที่พร้อมใช้งานขึ้นอยู่กับบัญชีและแพ็กเกจ
+
+**Qoder (`if/`)** — OAuth ฟรี: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/เดือนแบบเหมาจ่ายหรือจ่ายตามการใช้งาน: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+
+**DeepSeek (`ds/`)** — คีย์ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+
+**Groq (`groq/`)** — ความเร็วสูงเป็นพิเศษ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+
+**xAI (`xai/`)** — Grok แบบ native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+
+**Mistral (`mistral/`)** — โฮสต์ในสหภาพยุโรป: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+
+**Perplexity (`pplx/`)** — เพิ่มความสามารถด้วยการค้นหา: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+
+**Together AI (`together/`)** — โอเพนซอร์ส: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ฟรี), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+
+**Fireworks AI (`fireworks/`)** — การประมวลผลแบบอนุมานที่รวดเร็ว: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+
+**Cerebras (`cerebras/`)** — ระดับเวเฟอร์: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+
+**Cohere (`cohere/`)** — มุ่งเน้น RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+
+**NVIDIA NIM (`nvidia/`)** — ระดับองค์กร: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
+
+**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+
+**Gemini (Google Cloud `gemini/`)**: ซิงค์แบบสดตามคีย์ API จาก Google — ไม่มีรายการแบบคงที่ เชื่อมต่อคีย์ใน **Dashboard → Providers** แล้วใช้ **Available Models** เพื่อนำเข้าแคตตาล็อกปัจจุบัน (เช่น `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)
+
+**ผู้ให้บริการอื่นที่เข้ากันได้** (บางส่วน): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ผ่าน `aws-bedrock`), `azure-ai`, `openrouter` (แคตตาล็อกแบบ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` แต่ละรายจะดูแลรายการโมเดลของตนเองใน `providerRegistry.ts` และสามารถซิงค์อัตโนมัติได้เมื่อผู้ให้บริการเปิดใช้งานปลายทาง `/models`
+
+**หมายเหตุเกี่ยวกับ ID โมเดล:** OmniRoute ใช้ ID แบบ native ของผู้ให้บริการ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ID บางรายการมีเวอร์ชันคั่นด้วยจุด เนื่องจากเป็นรูปแบบที่ API upstream ต้องการ หากไม่พบโมเดลในรายการด้านบน ให้เรียกใช้ `omniroute models --search <term>` หรือเรียก `GET /api/models/catalog` เพื่อยืนยันความพร้อมใช้งาน
+
+</details>
+
+---
+
+## คุณสมบัติขั้นสูง 🧩
+
+### โมเดลที่กำหนดเอง
+
+เพิ่ม ID รุ่นใดๆ ให้กับผู้ให้บริการโดยไม่ต้องรอการอัปเดตแอป:
+
+```bash
+# Via API
+curl -X POST http://localhost:20128/api/provider-models \
+  -H "Content-Type: application/json" \
+  -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
+
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+```
+
+หรือใช้แดชบอร์ด:** ผู้ให้บริการ → [ผู้ให้บริการ] → โมเดลแบบกำหนดเอง** .
+
+หมายเหตุ:
+
+- ผู้ให้บริการ OpenRouter และ OpenAI/Anthropic-compatible ได้รับการจัดการจาก** รุ่นที่มีจำหน่าย** เท่านั้น. เพิ่ม นำเข้า และซิงค์อัตโนมัติทั้งหมดด้วยตนเองในรายการโมเดลที่มีอยู่เดียวกัน ดังนั้นจึงไม่มีส่วนโมเดลแบบกำหนดเองแยกต่างหากสำหรับผู้ให้บริการเหล่านั้น
+- ที่** โมเดลที่กำหนดเอง** ส่วนนี้มีไว้สำหรับผู้ให้บริการที่ไม่เปิดเผยการนำเข้าโมเดลที่มีการจัดการ
+
+### ผู้ให้บริการที่เข้ากันได้กับ OpenAI แบบกำหนดเอง
+
+เกตเวย์ใดๆ ที่พูด OpenAI API (พร็อกซีที่โฮสต์เอง, vLLM, ผู้รวบรวมบุคคลที่สาม) สามารถเพิ่มเป็นโหนดผู้ให้บริการของตนเองได้:
+
+1. **ผู้ให้บริการ → เพิ่ม OpenAI Compatible** .
+2. **ชื่อ** : ป้ายแสดงผลสำหรับโหนด
+3. **คำนำหน้า** : ชื่อเส้นทาง ลูกค้าเรียกโมเดลว่า `<prefix>/<model>` ดังนั้นโหนดที่มีคำนำหน้า `mygw` จะทำหน้าที่ `mygw/gpt-4o-mini` ที่จำเป็น; ไม่มีการจำกัดอักขระ
+4. **ประเภท API** : กลุ่มอุปกรณ์ปลายทางที่เกตเวย์ให้บริการ (การแชทเสร็จสิ้น การตอบกลับ การฝัง เสียง รูปภาพ)
+5. **ฐาน URL** : ราก API จนถึงและรวมถึง `/v1` (เช่น `https://gateway.example.com/v1`) ไม่ใช่เส้นทาง `/chat/completions` แบบเต็ม เกตเวย์ที่มีเส้นทางที่ไม่เป็นมาตรฐานกำหนดไว้ข้างใต้** การตั้งค่าขั้นสูง** (เส้นทางการแชท เส้นทางโมเดล)
+6. ที่** คีย์API (สำหรับตรวจสอบ)** ฟิลด์จะทดสอบการเชื่อมต่อเท่านั้น หลังจากสร้างโหนดแล้ว ให้เปิดและใช้งาน** เพิ่มการเชื่อมต่อ** เพื่อจัดเก็บคีย์ที่คำขอจะใช้
+
+โหนดได้รับรหัสภายในของแบบฟอร์ม `openai-compatible-<apiType>-<uuid>`; คุณไม่จำเป็นต้องพิมพ์ คำนำหน้าคือชื่อสาธารณะ
+
+#### คำนำหน้าที่สงวนไว้
+
+คำนำหน้าไม่สามารถเป็นรหัสหรือนามแฝงของผู้ให้บริการในตัว (เช่น `openai`, `cf`) หรือรหัสของผู้ให้บริการที่เลิกใช้แล้ว ตัวแก้ไขโมเดลจะตรวจสอบ ID และนามแฝงในตัวก่อนโหนดแบบกำหนดเอง ดังนั้นโหนดที่ใช้คำนำหน้าอย่างใดอย่างหนึ่งจะไม่ได้รับการรับส่งข้อมูล: `<prefix>/model` จะไปที่ผู้ให้บริการในตัวแทน หรือล้มเหลวในการปิดหากผู้ให้บริการนั้นถูกเลิกใช้แล้ว การสร้างหรือแก้ไขโหนดด้วยคำนำหน้าดังกล่าวจะถูกปฏิเสธด้วย:
+
+```text
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+```
+
+เลือกคำนำหน้าที่แตกต่างกัน (`mygw`, `acme-proxy`) หากคำขอไปยังโหนดแบบกำหนดเองล้มเหลวโดยมีข้อผิดพลาดที่ระบุชื่อผู้ให้บริการในตัวหรือข้อมูลรับรอง ให้ตรวจสอบว่าคำนำหน้าของโหนดถูกสงวนไว้หรือไม่: โหนดที่บันทึกไว้ก่อนที่จะมีกฎนี้จะยังคงถูกจัดเก็บ แต่คำนำหน้ากำหนดเส้นทางไปยังผู้ให้บริการในตัว แก้ไขโหนดและกำหนดคำนำหน้าใหม่
+
+#### ตัวเลือกเกตเวย์ต่อการเชื่อมต่อ
+
+คีย์เหล่านี้อยู่ใน `providerSpecificData` ของการเชื่อมต่อ (เช่นผ่าน `PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ
+- `quotaEndpoint` — จุดสิ้นสุด quota/credits ของเกตเวย์ อ่านแถบโควต้าแดชบอร์ดและการกำหนดเส้นทางการรับรู้โควต้า ใช้งานได้กับทั้งการเชื่อมต่อที่เข้ากันได้กับ OpenAI และ Anthropic รูปร่างเต็มมีการบันทึกไว้ใน `open-sse/services/usage/openaiCompatible.ts`
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### การผูกมัด OmniRoute Peers
+
+เกตเวย์ OmniRoute อื่นสามารถเพิ่มเป็น a** รองรับ OpenAI แบบกำหนดเอง** ผู้ให้บริการ ใช้ `/v1` ฐาน URL ของเพียร์และคีย์ API ที่มีสิทธิ์น้อยที่สุดโดยเฉพาะที่ออกโดยเพียร์นั้น
+
+สำหรับ Reciprocal หรือ Multi-hop Chain ให้เปิดใช้งาน Opt-in Loop Guard บนทุกเกตเวย์:
+
+```bash
+# gateway-a
+OMNIROUTE_INSTANCE_ID=gateway-a
+OMNIROUTE_PEER_URLS=http://gateway-b:20128/v1
+OMNIROUTE_PEER_MAX_HOPS=4
+```
+
+```bash
+# gateway-b
+OMNIROUTE_INSTANCE_ID=gateway-b
+OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
+OMNIROUTE_PEER_MAX_HOPS=4
+```
+
+เฉพาะคำขอที่ส่งไปยังเพียร์ URL ที่อนุญาตอย่างชัดเจนเท่านั้นที่จะได้รับส่วนหัว `X-OmniRoute-Peer-Trace` เกตเวย์ปฏิเสธอินสแตนซ์ซ้ำ ID หรืองบประมาณฮอปที่หมดลงด้วย HTTP `508 Loop Detected`; ผู้ให้บริการอัพสตรีมทั่วไปไม่ได้รับข้อมูลเมตาของเพียร์
+
+การผูกมัดเพียร์ไม่ใช่การจำลองฐานข้อมูลหรือโฮสต์ล้มเหลว แต่ละเกตเวย์จะรักษาสถานะ SQLite แคช ตัวนับอัตรา และเซสชันที่เป็นอิสระ ใช้พร็อกซีย้อนกลับหรือไคลเอ็นต์เฟลโอเวอร์ที่ตรวจสอบสภาพแล้วเพื่อความพร้อมใช้งาน active/passive หรือ active/active และอย่าติดตั้งฐานข้อมูล SQLite เดียวในอินสแตนซ์ OmniRoute ที่ทำงานอยู่หลายอินสแตนซ์
+
+### เส้นทางผู้ให้บริการเฉพาะ
+
+กำหนดเส้นทางคำขอโดยตรงไปยังผู้ให้บริการเฉพาะด้วยการตรวจสอบโมเดล:
+
+```bash
+POST http://localhost:20128/v1/providers/openai/chat/completions
+POST http://localhost:20128/v1/providers/openai/embeddings
+POST http://localhost:20128/v1/providers/fireworks/images/generations
+```
+
+คำนำหน้าผู้ให้บริการจะถูกเพิ่มอัตโนมัติหากไม่มี โมเดลที่ไม่ตรงกันส่งคืน `400`
+
+### การกำหนดค่าพร็อกซีเครือข่าย
+
+```bash
+# Set global proxy
+curl -X PUT http://localhost:20128/api/settings/proxy \
+  -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
+
+# Per-provider proxy
+curl -X PUT http://localhost:20128/api/settings/proxy \
+  -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
+
+# Test proxy
+curl -X POST http://localhost:20128/api/settings/proxy/test \
+  -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
+```
+
+**ลำดับความสำคัญ:** เฉพาะคีย์ → Combo เฉพาะ → เฉพาะผู้ให้บริการ → Global → Environment
+
+### แคตตาล็อกโมเดล API
+
+```bash
+curl http://localhost:20128/api/models/catalog
+```
+
+ส่งคืนโมเดลที่จัดกลุ่มตามผู้ให้บริการที่มีประเภท (`chat`, `embedding`, `image`)
+
+### การซิงค์บนคลาวด์
+
+- ผู้ให้บริการซิงค์ คอมโบ และการตั้งค่าระหว่างอุปกรณ์ต่างๆ
+- การซิงค์พื้นหลังอัตโนมัติพร้อมการหมดเวลา + ล้มเหลวอย่างรวดเร็ว
+- ต้องการ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ฝั่งเซิร์ฟเวอร์ในการใช้งานจริง
+
+### Cloudflare อุโมงค์ด่วน
+
+- มีจำหน่ายใน** แดชบอร์ด → Endpoints** สำหรับ Docker และการปรับใช้ที่โฮสต์เองอื่นๆ
+- สร้าง `https://*.trycloudflare.com` URL ชั่วคราวที่ส่งต่อไปยังจุดสิ้นสุด `/v1` ที่เข้ากันได้กับ OpenAI ปัจจุบันของคุณ
+- ขั้นแรกให้เปิดใช้งานการติดตั้ง `cloudflared` เมื่อจำเป็นเท่านั้น รีสตาร์ทในภายหลังนำไบนารีที่ได้รับการจัดการเดิมมาใช้ซ้ำ
+- Quick Tunnels จะไม่ถูกกู้คืนอัตโนมัติหลังจากการรีสตาร์ท OmniRoute หรือคอนเทนเนอร์ เปิดใช้งานอีกครั้งจากแดชบอร์ดเมื่อจำเป็น
+- อุโมงค์ URLs เป็นเพียงชั่วคราวและเปลี่ยนแปลงทุกครั้งที่คุณ stop/start อุโมงค์
+- Quick Tunnels ที่มีการจัดการมีค่าเริ่มต้นเป็นการขนส่ง HTTP/2 เพื่อหลีกเลี่ยงคำเตือนบัฟเฟอร์ QUIC UDP ที่มีเสียงดังในคอนเทนเนอร์ที่จำกัด
+- ตั้งค่า `CLOUDFLARED_PROTOCOL=quic` หรือ `auto` หากคุณต้องการแทนที่ตัวเลือกการขนส่งที่มีการจัดการ
+- ตั้งค่า `CLOUDFLARED_BIN` หากคุณต้องการใช้ไบนารี `cloudflared` ที่ติดตั้งไว้ล่วงหน้า แทนการดาวน์โหลดแบบมีการจัดการ
+- แผง Cloudflare Quick Tunnel, Tailscale Funnel และ ngrok Tunnel สามารถแสดงหรือซ่อนได้** การตั้งค่า → ลักษณะที่ปรากฏ** . การซ่อนแผงไม่ได้หยุดอุโมงค์ที่ทำงานอยู่
+
+### LLM Gateway Intelligence (ระยะที่ 9)
+
+- **แคชความหมาย** - แคชอัตโนมัติไม่สตรีมมิ่ง อุณหภูมิ= 0 ตอบสนอง (บายพาสด้วย `X-OmniRoute-No-Cache: true`)
+- **ขอความเป็นเอกภาพ** — กรองคำขอที่ซ้ำกันภายใน 5 วินาทีผ่านส่วนหัว `Idempotency-Key` หรือ `X-Request-Id`
+- **การติดตามความคืบหน้า** — เลือกเข้าร่วมกิจกรรม SSE `event: progress` ผ่านส่วนหัว `X-OmniRoute-Progress: true`
+
+---
+
+### สนามเด็กเล่นนักแปล
+
+เข้าถึงได้ทาง** แดชบอร์ด → นักแปล** . แก้ไขข้อบกพร่องและแสดงภาพว่า OmniRoute แปลคำขอ API ระหว่างผู้ให้บริการอย่างไร
+
+| โหมด               | วัตถุประสงค์                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **สนามเด็กเล่น**   | เลือกรูปแบบ source/target วางคำขอ และดูผลลัพธ์ที่แปลทันที                          |
+| **ผู้ทดสอบการแชท** | ส่งข้อความแชทสดผ่านพร็อกซีและตรวจสอบรอบ request/response ทั้งหมด                   |
+| **ม้านั่งทดสอบ**   | เรียกใช้การทดสอบเป็นกลุ่มโดยใช้รูปแบบต่างๆ ร่วมกันเพื่อตรวจสอบความถูกต้องของการแปล |
+| **การตรวจสอบสด**   | ดูการแปลแบบเรียลไทม์ตามคำขอที่ไหลผ่านพร็อกซี                                       |
+
+**กรณีการใช้งาน:**
+
+- ดีบักสาเหตุที่ชุดค่าผสม client/provider เฉพาะล้มเหลว
+- ตรวจสอบว่าแท็กการคิด การเรียกใช้เครื่องมือ และการแจ้งเตือนของระบบแปลอย่างถูกต้อง
+- เปรียบเทียบความแตกต่างของรูปแบบระหว่างรูปแบบ OpenAI, Claude, Gemini และ Responses API
+
+---
+
+### กลยุทธ์การกำหนดเส้นทาง
+
+กำหนดค่าผ่านทาง** แดชบอร์ดการตั้งค่า → การกำหนดเส้นทาง →** . แดชบอร์ดจะแสดงหกกลยุทธ์ที่ใช้บ่อยที่สุด คอมโบและเราเตอร์อัตโนมัติภายในรองรับชุดที่กว้างขึ้น
+
+**กลยุทธ์ที่มองเห็นได้บนแดชบอร์ด (การกำหนดเส้นทางระดับบัญชี):**
+
+| กลยุทธ์                      | คำอธิบาย                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **เติมก่อน**                 | ใช้บัญชีตามลำดับความสำคัญ — บัญชีหลักจะจัดการคำขอทั้งหมดจนกว่าจะไม่พร้อมใช้งาน                                 |
+| **ตัวกลม โรบิน**             | วนรอบบัญชีทั้งหมดด้วยขีดจำกัดที่กำหนดค่าได้ (ค่าเริ่มต้น: 3 สายต่อบัญชี)                                       |
+| **P2C (พลังของสองตัวเลือก)** | เลือกบัญชีแบบสุ่ม 2 บัญชีและเส้นทางไปยังบัญชีที่ดีต่อสุขภาพ — สร้างสมดุลระหว่างภาระกับความตระหนักรู้ด้านสุขภาพ |
+| **สุ่ม**                     | สุ่มเลือกบัญชีสำหรับแต่ละคำขอโดยใช้ Fisher-Yates shuffle                                                       |
+| **ใช้น้อยที่สุด**            | กำหนดเส้นทางไปยังบัญชีที่มีการประทับเวลา `lastUsedAt` เก่าที่สุด ซึ่งกระจายการรับส่งข้อมูลเท่าๆ กัน            |
+| **ปรับต้นทุนให้เหมาะสม**     | กำหนดเส้นทางไปยังบัญชีที่มีค่าลำดับความสำคัญต่ำสุด เพิ่มประสิทธิภาพสำหรับผู้ให้บริการที่มีต้นทุนต่ำที่สุด      |
+
+**คอมโบขั้นสูงและกลยุทธ์อัตโนมัติ** (กำหนดค่าได้ต่อคอมโบหรือผ่านคำนำหน้า `auto/*` - ดู [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+
+- `priority` - คำสั่งที่เข้มงวด ไม่มีการปัดเศษ
+- `weighted` - การรับส่งข้อมูลตามสัดส่วนแบ่งตามน้ำหนักต่อรุ่น
+- `fill-first` — ระบายโมเดลแรกจนกว่าจะถึงขีดจำกัด
+- `round-robin` / `strict-random` / `random`
+- `p2c` (พลังของสองตัวเลือก)
+- `least-used` และ `cost-optimized`
+- `auto` — ขับเคลื่อนด้วยคะแนนจากผู้สมัครทุกคน
+- `lkgp` (Last Known Good Provider) — ปักหมุดผู้ให้บริการที่ประสบความสำเร็จรายสุดท้าย จากนั้นจึงกลับสู่กฎเกณฑ์
+- `context-optimized` — เลือกโมเดลที่มีหน้าต่างบริบทฟรีที่ใหญ่ที่สุด
+- `context-relay` - เชื่อมโยงโมเดลบริบทแบบยาวสำหรับการติดตามผล
+
+#### ส่วนหัวเซสชัน Sticky ภายนอก
+
+สำหรับความสัมพันธ์ของเซสชันภายนอก (เช่น เอเจนต์ Claude Code/Codex ที่อยู่หลังพร็อกซีแบบย้อนกลับ) ให้ส่ง:
+
+```http
+X-Session-Id: your-session-key
+```
+
+OmniRoute ยังยอมรับ `x_session_id` และส่งคืนคีย์เซสชันที่มีประสิทธิภาพใน `X-OmniRoute-Session-Id`
+
+หากคุณใช้ Nginx และส่งส่วนหัวที่มีรูปแบบขีดล่าง ให้เปิดใช้งาน:
+
+```nginx
+underscores_in_headers on;
+```
+
+#### นามแฝงโมเดลไวลด์การ์ด
+
+สร้างรูปแบบไวด์การ์ดเพื่อทำการแมปชื่อโมเดลใหม่:
+
+```
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+สัญลักษณ์ตัวแทนรองรับ `*` (อักขระใดก็ได้) และ `?` (อักขระเดี่ยว)
+
+#### โซ่ทางเลือก
+
+กำหนดห่วงโซ่ทางเลือกส่วนกลางที่ใช้กับคำขอทั้งหมด:
+
+```
+Chain: production-fallback
+  1. cc/claude-opus-4-7
+  2. gh/gpt-5.3-codex
+  3. glm/glm-4.7
+```
+
+---
+
+### การรวมผู้ให้บริการทั่วไปและรูปแบบการกำหนดเส้นทาง
+
+ต่อไปนี้เป็นตัวอย่างรูปแบบสำหรับการรวมผู้ให้บริการหลายรายและการกำหนดเส้นทางระหว่างผู้ให้บริการเหล่านั้นใน OmniRoute:
+
+#### 1. Coding Agent Combo: การใช้เหตุผลระดับสูงด้วย Cost/Speed Fallback
+
+เหมาะสำหรับตัวแทนการเข้ารหัส (OpenCode, Claude Code, Cursor, Cline) กำหนดเส้นทางในตอนแรกไปยังโมเดลการให้เหตุผลแบบชายแดน ถอยกลับไปเป็นโมเดลการเขียนโค้ดที่รวดเร็วเนื่องจากโควต้าหมดหรือข้อผิดพลาด
+
+- **แดชบอร์ด** : คอมโบ → คอมโบใหม่ → ชื่อ: `agent-coding` → กลยุทธ์: `Priority`
+- **โมเดล** : :
+  1. `claude/claude-sonnet-4-6` (เอเจนต์การเข้ารหัสหลัก)
+  2. `openai/gpt-4o` (สำรองความจุสูงรอง)
+  3. `deepseek/deepseek-v4-flash` (ทางเลือกสำรองที่มีประสิทธิภาพสูงและคุ้มค่า)
+
+```bash
+# Example via API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
+
+#### 2. คอมโบการเฟลโอเวอร์อัตโนมัติระดับฟรี
+
+เชื่อมโยงผู้ให้บริการฟรีเทียร์และผู้ให้บริการแบบไร้กุญแจหลายรายเพื่อเพิ่มเวลาทำงานสูงสุดโดยไม่มีค่าใช้จ่าย API
+
+- **กลยุทธ์** : `Least Used` หรือ `Round Robin` (กระจายโหลดข้ามโควต้า)
+- **โมเดล** : :
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
+
+```bash
+# Example via CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. ท่อส่งต่อเนื่องหลายรูปแบบ / วิสัยทัศน์และข้อความ
+
+การจับคู่โมเดลการมองเห็นเฉพาะทางกับการสร้างข้อความความเร็วสูงสำหรับเวิร์กโฟลว์ที่เกี่ยวข้องกับการทำความเข้าใจรูปภาพและการสร้างโค้ด
+
+- **ลวดลาย** : คำสั่งผสม `Priority` ที่แสดงรายการโมเดลที่รองรับการมองเห็นก่อน และโมเดล text/code ที่มีปริมาณงานสูงจะอยู่ลำดับสุดท้าย
+- **โมเดล** : :
+  1. `gemini/gemini-2.5-pro` (ความเข้าใจ image/multimodal ที่แข็งแกร่ง)
+  2. `openai/gpt-4o` (การมองเห็นที่สมดุลและการใช้เครื่องมือ)
+  3. `deepseek/deepseek-v4-flash` ( รุ่น Text/code )
+
+---
+
+### ความยืดหยุ่นและเซอร์กิตเบรกเกอร์
+
+กำหนดค่าผ่านทาง** แดชบอร์ด การตั้งค่า → → ความยืดหยุ่น** .
+
+OmniRoute ใช้ความยืดหยุ่นระดับผู้ให้บริการด้วยองค์ประกอบ 5 ประการ:
+
+1. **ขอคิวและเว้นจังหวะ** — การสร้างคำขอระดับระบบ:
+   - **คำขอต่อนาที (RPM)** — คำขอสูงสุดต่อนาทีต่อบัญชี
+   - **เวลาขั้นต่ำระหว่างคำขอ** — ช่องว่างขั้นต่ำเป็นมิลลิวินาทีระหว่างคำขอ
+   - **คำขอพร้อมกันสูงสุด** — คำขอพร้อมกันสูงสุดต่อบัญชี
+
+2. **คูลดาวน์การเชื่อมต่อ** — การกำหนดค่าต่อประเภทการรับรองความถูกต้องสำหรับการเชื่อมต่อเดียวหลังจากความล้มเหลวที่ลองใหม่ได้:
+   - **คูลดาวน์พื้นฐาน** — หน้าต่างคูลดาวน์เริ่มต้นสำหรับความล้มเหลวของอัปสตรีมที่ลองใหม่ได้
+   - **ใช้คำแนะนำในการลองอัปสตรีมอีกครั้ง** — ให้เกียรติ `Retry-After` ที่เชื่อถือได้หรือรีเซ็ตคำแนะนำเมื่อระบุไว้
+   - **ขั้นตอน Backoff สูงสุด** — ระดับการถอยกลับแบบเอ็กซ์โปเนนเชียลสูงสุดสำหรับความล้มเหลวซ้ำๆ
+
+3. **ผู้ให้บริการเซอร์กิตเบรกเกอร์** — ติดตามความล้มเหลวของผู้ให้บริการแบบ end-to-end ทำเครื่องหมายผู้ให้บริการว่าลดระดับลงที่เกณฑ์คำเตือนที่กำหนดค่าไว้ และเปิดเบรกเกอร์เมื่อถึงเกณฑ์ความล้มเหลวที่กำหนดค่าไว้:
+   - **เกณฑ์การย่อยสลาย** — ความล้มเหลวของผู้ให้บริการติดต่อกันก่อนที่จะเข้าสู่ `DEGRADED`
+   - **เกณฑ์ความล้มเหลว** — ความล้มเหลวของผู้ให้บริการติดต่อกันก่อนที่จะเข้าสู่ `OPEN`
+   - **รีเซ็ตการหมดเวลา** — กรอบเวลาก่อนที่ผู้ให้บริการจะได้รับการทดสอบอีกครั้ง
+   - **CLOSED** (มีประสิทธิภาพดี) — คำขอดำเนินไปตามปกติ
+   - **DEGRADED** — คำขอยังคงดำเนินต่อไปในขณะที่มีการติดตามความล้มเหลวที่เพิ่มขึ้น
+   - **OPEN** — ผู้ให้บริการถูกบล็อคชั่วคราวหลังจากเกิดความล้มเหลวซ้ำแล้วซ้ำอีก
+   - **HALF_OPEN** — ทดสอบว่าผู้ให้บริการฟื้นตัวแล้วหรือไม่
+
+   ขีดจำกัดอัตรา `429` ในขอบเขตการเชื่อมต่อยังคงอยู่** คูลดาวน์การเชื่อมต่อ** และไม่นับรวมกับเบรกเกอร์ของผู้ให้บริการ
+
+   สถานะรันไทม์ของเบรกเกอร์ของผู้ให้บริการจะแสดงขึ้น** แดชบอร์ด → สุขภาพ** เท่านั้น.
+
+4. **รอคูลดาวน์** — หากทุกการเชื่อมต่อของผู้สมัครเย็นลงแล้ว OmniRoute สามารถรอคูลดาวน์แรกสุดและลองคำขอของไคลเอ็นต์เดิมอีกครั้งโดยอัตโนมัติ
+
+5. **อัตราจำกัดการตรวจจับอัตโนมัติ** — เมื่อผู้ให้บริการอัปสตรีมส่งคืนหน้าต่างรอที่ชัดเจน คำแนะนำเหล่านั้นจะแทนที่คูลดาวน์การเชื่อมต่อภายในเมื่อเปิดใช้งานการตั้งค่า
+
+**เคล็ดลับสำหรับมือโปร:** ใช้** สุขภาพ** หน้าเพื่อตรวจสอบและรีเซ็ตเบรกเกอร์ผู้ให้บริการสดหลังจากไฟดับ หน้าความยืดหยุ่นจะเปลี่ยนการกำหนดค่าเท่านั้น
+
+---
+
+### ฐานข้อมูลส่งออก / นำเข้า
+
+จัดการการสำรองฐานข้อมูลใน** แดชบอร์ด การตั้งค่า → ระบบ → และที่เก็บข้อมูล** .
+
+| การกระทำ                    | คำอธิบาย                                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ส่งออกฐานข้อมูล**         | ดาวน์โหลดฐานข้อมูล SQLite ปัจจุบันเป็นไฟล์ `.sqlite`                                                                                                      |
+| **ส่งออกทั้งหมด (.tar.gz)** | ดาวน์โหลดไฟล์เก็บถาวรการสำรองข้อมูลแบบเต็ม รวมถึง: ฐานข้อมูล, การตั้งค่า, คอมโบ, การเชื่อมต่อของผู้ให้บริการ (ไม่มีข้อมูลประจำตัว), ข้อมูลเมตาของคีย์ API |
+| **นำเข้าฐานข้อมูล**         | อัปโหลดไฟล์ `.sqlite` เพื่อแทนที่ฐานข้อมูลปัจจุบัน ข้อมูลสำรองก่อนนำเข้าจะถูกสร้างขึ้นโดยอัตโนมัติ ยกเว้น `DISABLE_SQLITE_AUTO_BACKUP=true`               |
+
+```bash
+# API: Export database
+curl -o backup.sqlite http://localhost:20128/api/db-backups/export
+
+# API: Export all (full archive)
+curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
+
+# API: Import database
+curl -X POST http://localhost:20128/api/db-backups/import \
+  -F "file=@backup.sqlite"
+```
+
+**การตรวจสอบการนำเข้า:** ไฟล์ที่นำเข้าได้รับการตรวจสอบความถูกต้อง (การตรวจสอบ SQLite pragma) ตารางที่จำเป็น (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) และขนาด (สูงสุด 100MB)
+
+**กรณีการใช้งาน:**
+
+- ย้าย OmniRoute ระหว่างเครื่อง
+- สร้างการสำรองข้อมูลภายนอกสำหรับการกู้คืนระบบ
+- แชร์การกำหนดค่าระหว่างสมาชิกในทีม (ส่งออกไฟล์แชร์ → ทั้งหมด)
+
+---
+
+### แดชบอร์ดการตั้งค่า
+
+หน้าการตั้งค่าถูกจัดเป็น** 7 แท็บ** เพื่อการนำทางที่ง่ายดาย:
+
+| แท็บ                | สารบัญ                                                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ทั่วไป**          | เครื่องมือจัดเก็บข้อมูลระบบ ลักษณะการทำงานเริ่มต้น การมองเห็นอุโมงค์ปลายทาง                                                                                   |
+| **รูปร่าง**         | การควบคุมธีม (light/dark/system) การมองเห็นแถบด้านข้าง การสลับแผงสำหรับการ์ดอุโมงค์ Cloudflare/Tailscale/ngrok                                                |
+| **AI**              | งบประมาณการคิด (การส่งผ่าน / แถบอัตโนมัติ / กำหนดเอง / การปรับเปลี่ยน — ดู [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), พรอมต์ระบบส่วนกลาง, สถิติแคชพร้อมต์  |
+| **ความปลอดภัย**     | การตั้งค่า Login/Password, การควบคุมการเข้าถึง IP, API auth สำหรับ `/models`, การบล็อกผู้ให้บริการ, การป้องกันการฉีดพร้อมท์                                   |
+| **การกำหนดเส้นทาง** | กลยุทธ์การกำหนดเส้นทางทั่วโลก (เติมก่อน / รอบ Robin / P2C / สุ่ม / ใช้น้อยที่สุด / ปรับต้นทุนให้เหมาะสม), นามแฝงโมเดลไวด์การ์ด, เชนทางเลือก, ค่าเริ่มต้นคอมโบ |
+| **ความยืดหยุ่น**    | คำขอคิว คูลดาวน์การเชื่อมต่อ การกำหนดค่าเบรกเกอร์ของผู้ให้บริการ และพฤติกรรมการรอคูลดาวน์                                                                     |
+| **ขั้นสูง**         | การกำหนดค่าพร็อกซีส่วนกลาง (HTTP/SOCKS5) การแทนที่พร็อกซีต่อผู้ให้บริการ                                                                                      |
+
+ทั่วไปจะไม่ทำซ้ำการบันทึกและบันทึกแคชแบบอ่านอย่างเดียวอีกต่อไป การตั้งค่าการเก็บรักษาและการเพิ่มประสิทธิภาพฐานข้อมูลยังคงอยู่ผ่าน `/api/settings/database`; การล้างแคชด้วยตนเองใช้ `DELETE /api/cache` ตัวพิมพ์ใหญ่ของแถวคำขอและบันทึกพร็อกซีถูกควบคุมโดย `CALL_LOGS_TABLE_MAX_ROWS` และ `PROXY_LOGS_TABLE_MAX_ROWS`
+
+---
+
+### การจัดการต้นทุนและงบประมาณ
+
+เข้าถึงได้ทาง** แดชบอร์ด → ต้นทุน** .
+
+| แท็บ         | วัตถุประสงค์                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| **งบประมาณ** | กำหนดวงเงินการใช้จ่ายต่อคีย์ API ด้วยงบประมาณ daily/weekly/monthly และการติดตามแบบเรียลไทม์ |
+| **ราคา**     | ดูและแก้ไขรายการการกำหนดราคาโมเดล — ต้นทุนต่อโทเค็น input/output 1K ต่อผู้ให้บริการ         |
+
+```bash
+# API: Set a budget
+curl -X POST http://localhost:20128/api/usage/budget \
+  -H "Content-Type: application/json" \
+  -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
+
+# API: Get current budget status
+curl http://localhost:20128/api/usage/budget
+```
+
+**การติดตามต้นทุน:** ทุกคำขอจะบันทึกการใช้งานโทเค็นและคำนวณต้นทุนโดยใช้ตารางราคา ดูรายละเอียดใน** การใช้งานแดชบอร์ด →** ตามผู้ให้บริการ รุ่น และคีย์ API
+
+---
+
+### การถอดเสียง
+
+OmniRoute รองรับการถอดเสียงผ่านจุดสิ้นสุดที่เข้ากันได้กับ OpenAI:
+
+```bash
+POST /v1/audio/transcriptions
+Authorization: Bearer your-api-key
+Content-Type: multipart/form-data
+
+# Example with curl
+curl -X POST http://localhost:20128/v1/audio/transcriptions \
+  -H "Authorization: Bearer your-api-key" \
+  -F "file=@audio.mp3" \
+  -F "model=openai/whisper-1"
+```
+
+`deepgram/nova-3` เป็นเส้นทาง Deepgram ดั้งเดิมและต้องการคีย์ Deepgram API หากกำหนดค่าเฉพาะ OpenRouter ให้ใช้ `openrouter/deepgram/nova-3`
+
+**คำพูดเป็นข้อความ (ถอดความ)** ผู้ให้บริการ:
+
+- `openai/` (เข้ากันได้กับเสียงกระซิบ)
+- `groq/` (Groq กระซิบเทอร์โบ)
+- `deepgram/` (ตระกูลโนวา)
+- `assemblyai/`
+- `nvidia/` (นกแก้ว, นกขมิ้น)
+- `huggingface/` (รูปแบบกระซิบ)
+- `qwen/`
+
+**ข้อความเป็นคำพูด (`POST /v1/audio/speech`)** ผู้ให้บริการ:
+
+- `openai/` (tts-1, tts-1-hd)
+- `hyperbolic/`
+- `deepgram/` (ออร่า)
+- `nvidia/` (นกกางเขน TTS)
+- `elevenlabs/`
+- `huggingface/`
+- `inworld/`
+- `cartesia/`
+- `playht/`
+- `kie/`
+- `aws-polly/`
+- `xiaomi-mimo/`
+- `coqui/`, `tortoise/`
+- `qwen/`
+
+รูปแบบเสียงที่รองรับสำหรับการถอดเสียง: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm` รูปแบบเอาต์พุต TTS ขึ้นอยู่กับผู้ให้บริการ (mp3, wav, opus, pcm, mulaw)
+
+---
+
+### กลยุทธ์การปรับสมดุลคอมโบ
+
+กำหนดค่าการปรับสมดุลต่อคอมโบ** แดชบอร์ด → Combos → Create/Edit → กลยุทธ์** .
+
+| กลยุทธ์                  | คำอธิบาย                                                       |
+| ------------------------ | -------------------------------------------------------------- |
+| **รอบโรบิน**             | หมุนเวียนไปตามแบบจำลองตามลำดับ                                 |
+| **ลำดับความสำคัญ**       | ลองใช้โมเดลแรกเสมอ ถอยกลับเมื่อมีข้อผิดพลาดเท่านั้น            |
+| **สุ่ม**                 | เลือกแบบจำลองแบบสุ่มจากคอมโบสำหรับแต่ละคำขอ                    |
+| **ถ่วงน้ำหนัก**          | เส้นทางตามสัดส่วนตามน้ำหนักที่กำหนดต่อรุ่น                     |
+| **ใช้น้อยที่สุด**        | กำหนดเส้นทางไปยังโมเดลที่มีคำขอล่าสุดน้อยที่สุด (ใช้เมตริกผสม) |
+| **ปรับต้นทุนให้เหมาะสม** | เส้นทางไปยังรุ่นที่ถูกที่สุด (ใช้ตารางราคา)                    |
+
+สามารถตั้งค่าเริ่มต้นคอมโบสากลได้** แดชบอร์ด การตั้งค่า → → การกำหนดเส้นทาง → Combo ค่าเริ่มต้น** . การหมดเวลาเป้าหมายแบบผสมสืบทอดการหมดเวลาคำขอปัจจุบันตามค่าเริ่มต้น ใช้** เป้าหมายหมดเวลา (วินาที)** ในค่าเริ่มต้นของคอมโบหรือคอมโบแต่ละรายการเฉพาะเมื่อขีดจำกัดต่อเป้าหมายที่สั้นลงควรกระตุ้นให้เกิดทางเลือกที่เร็วขึ้น
+
+เลือกใช้การเพิ่มประสิทธิภาพคอมโบแบบ Zero-latency ออกจาก** การเพิ่มประสิทธิภาพแบบ Zero-latency** ปิดการใช้งานเพื่อป้องกันคุณสมบัติเวลาแฝงเหล่านี้จากเป้าหมายทางเลือกการแข่ง ข้ามเป้าหมายตามประวัติ TTFT หรือการบีบอัดคำขอทางเลือกสำรอง การเปิดใช้งานดังกล่าวทำให้สามารถกำหนดค่าการป้องกันความเสี่ยง การข้าม TTFT ที่คาดการณ์ได้ และการบีบอัดทางเลือกเชิงรุกเพื่อแลกเปลี่ยนความเที่ยงตรง routing/request เพื่อลดเวลาแฝงที่ลดลง
+
+ปิดการใช้งาน** บัฟเฟอร์โทเค็นการใช้เหตุผล** เมื่อผู้ให้บริการอัปสตรีมต้องการขีดจำกัด `max_tokens` / `maxOutputTokens` ที่เข้มงวด เมื่อเปิดใช้งาน การกำหนดเส้นทางแบบคอมโบจะเพิ่มพื้นที่ส่วนหัวของโมเดลการให้เหตุผลสำหรับโมเดลที่มีขีดจำกัดเอาต์พุตที่รู้จักเท่านั้น และปล่อยให้ขีดจำกัดโทเค็นของไคลเอ็นต์ไม่เปลี่ยนแปลงเมื่อค่าบัฟเฟอร์ที่ปลอดภัยจะเกินขีดจำกัดนั้น หากขีดจำกัดของไคลเอ็นต์อยู่เหนือขีดจำกัดที่ทราบอยู่แล้ว OmniRoute จะยึดขีดจำกัดนั้นไว้จนถึงขีดจำกัดนั้นก่อนที่จะส่งคำขออัปสตรีม
+
+---
+
+### แดชบอร์ดสุขภาพ
+
+เข้าถึงได้ทาง** แดชบอร์ด → สุขภาพ** . ภาพรวมความสมบูรณ์ของระบบเรียลไทม์พร้อมการ์ด 6 ใบ:
+
+| การ์ด                     | มันแสดงให้เห็นอะไร                                               |
+| ------------------------- | ---------------------------------------------------------------- |
+| **สถานะของระบบ**          | เวลาทำงาน เวอร์ชัน การใช้หน่วยความจำ ไดเร็กทอรีข้อมูล            |
+| **สุขภาพของผู้ให้บริการ** | สถานะรันไทม์ของเซอร์กิตเบรกเกอร์ของผู้ให้บริการทั่วโลก           |
+| **ขีดจำกัดอัตรา**         | คูลดาวน์การเชื่อมต่อที่ใช้งานอยู่ต่อบัญชีพร้อมเวลาที่เหลืออยู่   |
+| **การล็อกที่ใช้งานอยู่**  | การล็อกขอบเขตโมเดลที่ใช้งานอยู่และการยกเว้นชั่วคราว              |
+| **แคชลายเซ็น**            | สถิติแคชการขจัดข้อมูลซ้ำซ้อน (คีย์ที่ใช้งานอยู่ อัตราการเข้าถึง) |
+| **การวัดระยะไกลแบบแฝง**   | การรวมเวลาแฝง p50/p95/p99 ต่อผู้ให้บริการ                        |
+
+**เคล็ดลับสำหรับมือโปร:** หน้าสุขภาพจะรีเฟรชอัตโนมัติทุกๆ 10 วินาที ใช้การ์ดเซอร์กิตเบรกเกอร์เพื่อระบุว่าผู้ให้บริการรายใดกำลังประสบปัญหา
+
+---
+
+## 🤖 การกำหนดเส้นทางอัตโนมัติ (ไม่ต้องตั้งค่า)
+
+OmniRoute มาพร้อมกับ **เราเตอร์อัตโนมัติที่ขับเคลื่อนด้วยคะแนน** ซึ่งเลือกโมเดลที่ดีที่สุดสำหรับแต่ละคำขอจากผู้ให้บริการที่เชื่อมต่อทั้งหมด โดยไม่ต้องดูแลคอมโบใดๆ เพียงส่งคำขอโดยใช้คำนำหน้า `auto/*` รายการใดรายการหนึ่ง แล้ว OmniRoute จะประกอบคอมโบเสมือนขึ้นทันที พร้อมให้คะแนนตัวเลือกโดยพิจารณาจากเวลาแฝง ต้นทุน อัตราความสำเร็จ ความเหมาะสมกับบริบท ความเหมาะสมของโมเดลต่องาน ความล้มเหลวล่าสุด โควตา และสถานะของเซอร์กิตเบรกเกอร์
+
+| คำนำหน้า       | ปรับให้เหมาะสมสำหรับ                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------------- |
+| `auto`         | ค่าเริ่มต้นแบบสมดุล (เวลาแฝง × ต้นทุน × อัตราความสำเร็จ)                                                   |
+| `auto/coding`  | งานเขียนโค้ด: ให้ความสำคัญกับ Claude, GPT-5, GLM, Kimi, Qwen Coder และโมเดลเขียนโค้ดของ DeepSeek           |
+| `auto/cheap`   | ราคาต่อโทเค็นต่ำที่สุด โดยยอมรับเวลาแฝงที่สูงขึ้น                                                          |
+| `auto/fast`    | เวลาแฝงต่ำที่สุด โดยไม่คำนึงถึงต้นทุน                                                                      |
+| `auto/offline` | ผู้ให้บริการภายในเครื่องเท่านั้น (Ollama, vLLM, llama.cpp) — มีประโยชน์สำหรับระบบที่ตัดขาดจากเครือข่าย     |
+| `auto/smart`   | ให้ความสำคัญกับคุณภาพการให้เหตุผลเป็นอันดับแรก (Opus, GPT-5 xhigh, R1, การให้เหตุผลของ GLM 5.1)            |
+| `auto/lkgp`    | "ผู้ให้บริการล่าสุดที่ใช้งานได้" — ตรึงไว้กับผู้ให้บริการรายล่าสุดที่ทำงานสำเร็จ จากนั้นจึงย้อนกลับไปใช้กฎ |
+
+ตัวอย่าง:
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer $OMNIROUTE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "auto/coding",
+    "messages": [{ "role": "user", "content": "ปรับโครงสร้างฟังก์ชัน Python นี้" }],
+    "stream": true
+  }'
+```
+
+เราเตอร์อัตโนมัติมีคำอธิบายฉบับสมบูรณ์อยู่ใน [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ซึ่งรวมถึงวิธีปรับแต่งค่าน้ำหนักการให้คะแนน ขึ้นบัญชีดำผู้ให้บริการ และตรวจสอบการตัดสินใจกำหนดเส้นทางใน **แดชบอร์ด → คอมโบอัตโนมัติ**
+
+---
+
+## 🔌 การผสานรวม MCP และ A2A
+
+OmniRoute เป็นทั้ง **เซิร์ฟเวอร์ MCP** (Model Context Protocol) และ **เซิร์ฟเวอร์ A2A** (Agent-to-Agent JSON-RPC 2.0) IDE หรือโฮสต์เอเจนต์ใดๆ ที่รองรับ MCP สามารถเรียกใช้เครื่องมือของ OmniRoute ได้โดยตรง โดยไม่ต้องมีแรปเปอร์เพิ่มเติม
+
+### การรับส่งข้อมูลของ MCP
+
+- **SSE**: `http://localhost:20128/api/mcp/sse`
+- **HTTP แบบสตรีมได้**: `http://localhost:20128/api/mcp/stream`
+- **stdio**: `omniroute --mcp` (สำหรับปลั๊กอิน IDE ที่ต้องการใช้ stdio)
+
+### เชื่อมต่อ Claude Desktop
+
+แก้ไข `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) หรือไฟล์ที่เทียบเท่ากันบน Windows/Linux:
+
+```json
+{
+  "mcpServers": {
+    "omniroute": {
+      "command": "omniroute",
+      "args": ["--mcp"]
+    }
+  }
+}
+```
+
+### เชื่อมต่อ Cursor / Continue / VS Code MCP
+
+ใช้ URL ของ SSE `http://localhost:20128/api/mcp/sse` และคีย์ Bearer API ที่สร้างใน **แดชบอร์ด → คีย์ API**
+
+### ขอบเขตสิทธิ์
+
+ปัจจุบัน MCP กำหนดขอบเขตสิทธิ์ที่มีชื่อไว้ 32 รายการ โดยคีย์ Bearer แต่ละคีย์สามารถจำกัดให้ใช้เฉพาะขอบเขตสิทธิ์ที่กำหนดได้ — ดูรายการขอบเขตสิทธิ์และเครื่องมือที่เป็นแหล่งอ้างอิงหลักได้ใน [MCP-SERVER.md](../frameworks/MCP-SERVER.md) และดูสคีมา JSON-RPC ได้ใน [A2A-SERVER.md](../frameworks/A2A-SERVER.md)
+
+---
+
+## 🧠 ระบบทักษะ
+
+OmniRoute มี **เฟรมเวิร์กทักษะ** ที่ขยายความสามารถได้ (`src/lib/skills/`) เพื่อให้เอเจนต์และปลายทาง A2A สามารถเรียกใช้รูทีนเฉพาะด้านได้ (เช่น `code-review`, `summarize`, `extract-facts`, `web-research`)
+
+- **UI มาร์เก็ตเพลส** — เรียกดูและติดตั้งทักษะจาก **แดชบอร์ด → ทักษะ**
+- **ขอบเขตต่อคีย์** — จำกัดว่า API key ใดสามารถเรียกใช้ทักษะใดได้บ้าง
+- **ทักษะแบบกำหนดเอง** — วางไฟล์ TypeScript ใน `src/lib/a2a/skills/` ลงทะเบียนไฟล์ดังกล่าว แล้วทักษะนั้นจะพร้อมให้เรียกใช้ผ่าน A2A ได้ทันที
+
+เอกสารอ้างอิงฉบับเต็ม: [SKILLS.md](../frameworks/SKILLS.md)
+
+---
+
+## 💾 ระบบหน่วยความจำ
+
+OmniRoute จัดเก็บ **หน่วยความจำการสนทนาระยะยาว** พร้อมการค้นคืนแบบไฮบริด:
+
+- **SQLite FTS5** สำหรับค้นหาด้วยคีย์เวิร์ดจากบทสนทนาที่ผ่านมา
+- **ที่เก็บเวกเตอร์ Qdrant** (ไม่บังคับ) สำหรับเรียกคืนข้อมูลตามความหมาย
+- **การสกัดข้อเท็จจริงอัตโนมัติ** — เอนทิตี ความชอบ และการตัดสินใจจะถูกสรุปหลังจากแต่ละเซสชันและจัดเก็บไว้ในตาราง `memory_facts`
+- หน่วยความจำจะถูกแยกขอบเขตตาม API key และตามเซสชัน
+
+จัดการหน่วยความจำได้ใน **แดชบอร์ด → หน่วยความจำ** (ค้นหา แก้ไข ส่งออก ล้างข้อมูล) อินเทอร์เฟซ HTTP (`/api/memory/*`) ช่วยให้เอเจนต์ส่งและค้นหาข้อเท็จจริงผ่านโปรแกรมได้ — ดู [MEMORY.md](../frameworks/MEMORY.md)
+
+---
+
+## 🔔 Webhook
+
+สมัครรับเหตุการณ์จาก OmniRoute เพื่อการตรวจสอบและระบบอัตโนมัติแบบเรียลไทม์
+
+- สร้าง webhook ใน **แดชบอร์ด → Webhook** พร้อม URL ปลายทางและข้อมูลลับสำหรับการลงนาม HMAC
+- เหตุการณ์ที่พร้อมใช้งาน: `request.completed`, `request.failed`, `provider.unavailable`, `budget.exceeded`, `combo.switched`, `circuit_breaker.opened`, `circuit_breaker.closed`
+- ทุกเพย์โหลดมี `X-OmniRoute-Signature` (HMAC-SHA256) สำหรับการตรวจสอบความถูกต้อง
+- การลองใหม่: 3 ครั้งโดยเพิ่มระยะเวลารอแบบทวีคูณ จากนั้นส่งไปยังคิวข้อความที่ไม่สามารถประมวลผลได้
+
+สคีมาฉบับเต็มอยู่ใน [WEBHOOKS.md](../frameworks/WEBHOOKS.md)
+
+---
+
+## ☁️ เอเจนต์บนคลาวด์
+
+OmniRoute ทำงานร่วมกับเอเจนต์เขียนโค้ดบนคลาวด์ (**OpenAI Codex Cloud**, **Devin**, **Jules**, **Antigravity**) เพื่อให้คุณสามารถมอบหมายงานที่ใช้เวลานานจากแดชบอร์ดเดียวกับที่ใช้จัดการการกำหนดเส้นทางภายในเครื่องได้
+
+- สร้างงานใน **แดชบอร์ด → เอเจนต์บนคลาวด์** หรือผ่าน `POST /api/v1/agents/tasks`
+- ติดตามสถานะ บันทึก และอาร์ติแฟกต์ของแต่ละงาน
+- ใช้ API key ของคุณเองสำหรับผู้ให้บริการแต่ละราย — ข้อมูลประจำตัวจะไม่ออกจากอินสแตนซ์ OmniRoute
+
+เอกสารอ้างอิงฉบับเต็ม: [CLOUD_AGENT.md](../frameworks/CLOUD_AGENT.md)
+
+---
+
+## 🛠️ การจัดการผ่านโปรแกรม
+
+คุณสามารถจัดการทรัพยากรทั้งหมดของ OmniRoute (ผู้ให้บริการ คอมโบ คีย์ และการตั้งค่า) ผ่าน HTTP โดยใช้ **Bearer key ที่มีขอบเขต `manage`**
+
+สร้างคีย์ใน **แดชบอร์ด → API Key → คีย์ใหม่ → ขอบเขต: manage** จากนั้น:
+
+```bash
+# แสดงรายการผู้ให้บริการ
+curl http://localhost:20128/api/providers \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
+
+# เพิ่มการเชื่อมต่อผู้ให้บริการ
+curl -X POST http://localhost:20128/api/providers \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
+
+# สร้างคอมโบ
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
+
+# แสดงรายการ/สร้าง API key
+curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
+curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -d '{ "name": "ci-bot", "scopes": ["chat"] }'
+```
+
+ดูแค็ตตาล็อกปลายทางและสคีมาคำขอ/การตอบกลับทั้งหมดได้ใน [API_REFERENCE.md](../reference/API_REFERENCE.md)
+
+---
+
+## 💻 CLI ภายใน
+
+OmniRoute มาพร้อม CLI ภายใน (`omniroute …`) สำหรับการตั้งค่า การวินิจฉัย และการควบคุมขณะรันไทม์ ซึ่ง **แยกจากหน้า "CLI Tools" ในแดชบอร์ด** ที่ใช้กำหนดค่า CLI ของบุคคลที่สาม (Claude Code, Cursor, Codex, Cline, …) เพื่อให้สามารถสื่อสารกับ OmniRoute ได้
+
+```bash
+omniroute setup                    # วิซาร์ดแบบโต้ตอบ (รหัสผ่าน ผู้ให้บริการ คอมโบ)
+omniroute setup --non-interactive  # เหมาะสำหรับ CI
+omniroute doctor                   # การวินิจฉัยสถานะ (ไดเรกทอรีข้อมูล, DB, ผู้ให้บริการ, พอร์ต)
+omniroute providers available      # แสดงรายการผู้ให้บริการที่รองรับ
+omniroute providers list           # แสดงรายการการเชื่อมต่อที่กำหนดค่าไว้
+omniroute providers test <id>      # ทดสอบการเชื่อมต่อผู้ให้บริการแบบสด
+omniroute combos list              # แสดงรายการคอมโบ
+omniroute combos switch <name>     # ตั้งค่าคอมโบเริ่มต้น
+omniroute models                   # แสดงรายการโมเดลที่พร้อมใช้งาน (--json, --search)
+omniroute keys add | list | remove # จัดการคีย์ API จากเทอร์มินัล
+omniroute backup                   # สร้างสแนปช็อตการกำหนดค่า + DB
+omniroute restore [<timestamp>]    # กู้คืนจากสแนปช็อต
+omniroute health                   # สถานะโดยละเอียด (เบรกเกอร์, แคช, หน่วยความจำ)
+omniroute quota                    # การใช้โควตาของผู้ให้บริการ
+omniroute mcp status               # สถานะเซิร์ฟเวอร์ MCP
+omniroute a2a status               # สถานะเซิร์ฟเวอร์ A2A
+omniroute tunnel list|create|stop  # ทันเนล Cloudflare/Tailscale/ngrok
+omniroute reset-password           # รีเซ็ตรหัสผ่านผู้ดูแลระบบ
+omniroute --mcp                    # เริ่มเซิร์ฟเวอร์ MCP ผ่าน stdio
+omniroute --port 3000              # เริ่มเซิร์ฟเวอร์บนพอร์ตที่กำหนดเอง
+```
+
+เคล็ดลับ: ใช้ `omniroute doctor --json` ร่วมกับเครื่องมือตรวจสอบของคุณเพื่อแจ้งเตือนเมื่อการเชื่อมต่อผู้ให้บริการมีปัญหา
+
+---
+
+## 🖥️ แอปพลิเคชันเดสก์ท็อป (Electron)
+
+OmniRoute มีให้ใช้งานเป็นแอปพลิเคชันเดสก์ท็อปแบบเนทีฟสำหรับ Windows, macOS และ Linux
+
+### การติดตั้ง
+
+```bash
+# จากไดเรกทอรี electron:
+cd electron
+npm install
+
+# โหมดการพัฒนา (เชื่อมต่อกับเซิร์ฟเวอร์สำหรับการพัฒนา Next.js ที่กำลังทำงานอยู่):
+npm run dev
+
+# โหมดโปรดักชัน (ใช้บิลด์แบบสแตนด์อโลน):
+npm start
+```
+
+### การสร้างตัวติดตั้ง
+
+```bash
+cd electron
+npm run build          # แพลตฟอร์มปัจจุบัน
+npm run build:win      # Windows (.exe NSIS)
+npm run build:mac      # macOS (.dmg universal)
+npm run build:linux    # Linux (.AppImage)
+```
+
+เอาต์พุต → `electron/dist-electron/`
+
+### คุณสมบัติหลัก
+
+| คุณสมบัติ                       | คำอธิบาย                                                            |
+| ------------------------------- | ------------------------------------------------------------------- |
+| **ความพร้อมของเซิร์ฟเวอร์**     | ตรวจสอบเซิร์ฟเวอร์เป็นระยะก่อนแสดงหน้าต่าง (ไม่มีหน้าจอว่าง)        |
+| **ถาดระบบ**                     | ย่อไปยังถาดระบบ เปลี่ยนพอร์ต และออกจากเมนูถาดระบบ                   |
+| **การจัดการพอร์ต**              | เปลี่ยนพอร์ตเซิร์ฟเวอร์จากถาดระบบ (รีสตาร์ตเซิร์ฟเวอร์โดยอัตโนมัติ) |
+| **นโยบายความปลอดภัยของเนื้อหา** | CSP แบบเข้มงวดผ่านส่วนหัวเซสชัน                                     |
+| **อินสแตนซ์เดียว**              | สามารถเรียกใช้แอปได้ครั้งละหนึ่งอินสแตนซ์เท่านั้น                   |
+| **โหมดออฟไลน์**                 | เซิร์ฟเวอร์ Next.js ที่รวมมาด้วยสามารถทำงานได้โดยไม่ใช้อินเทอร์เน็ต |
+
+### ตัวแปรสภาพแวดล้อม
+
+| ตัวแปร                | ค่าเริ่มต้น | คำอธิบาย                             |
+| --------------------- | ----------- | ------------------------------------ |
+| `OMNIROUTE_PORT`      | `20128`     | พอร์ตเซิร์ฟเวอร์                     |
+| `OMNIROUTE_MEMORY_MB` | `512`       | ขีดจำกัดฮีปของ Node.js (64–16384 MB) |
+
+📖 เอกสารฉบับเต็ม: [`electron/README.md`](../../electron/README.md)

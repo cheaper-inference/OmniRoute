@@ -1,0 +1,273 @@
+// @vitest-environment jsdom
+//
+// Select all / Unselect all for currently visible models in ModelSelectModal.
+// Used by combo Create/Edit "Browse Catalog" (keepOpenOnSelect + batch callbacks).
+import React from "react";
+import { act } from "react";
+import { createRoot } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body. Several modals are mounted per test (probe renders), so each render
+// hands back the dialog it just opened (the newest one) as the query root.
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => {
+    const t = (key: string) => key;
+    t.has = () => false;
+    return t;
+  },
+}));
+
+const { default: ModelSelectModal } = await import("@/shared/components/ModelSelectModal");
+
+const containers: HTMLElement[] = [];
+
+async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelectModal>> = {}) {
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  containers.push(container);
+
+  const root = createRoot(container);
+  await act(async () => {
+    root.render(
+      <ModelSelectModal
+        isOpen={true}
+        onClose={() => {}}
+        onSelect={() => {}}
+        showCombos={false}
+        activeProviders={[{ provider: "openai" }]}
+        keepOpenOnSelect
+        {...props}
+      />
+    );
+  });
+
+  await act(async () => {});
+  const dialogs = document.body.querySelectorAll<HTMLElement>('[role="dialog"]');
+  return { container: dialogs[dialogs.length - 1], root };
+}
+
+// The kit confirm dialog renders the mocked `common` keys as labels ("confirmAction", "cancel").
+function findDialogButton(label: string): HTMLButtonElement | null {
+  const buttons = document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button');
+  return [...buttons].find((b) => b.textContent?.trim() === label) ?? null;
+}
+
+// These tests exercise selection bookkeeping, not the confirm-above-threshold UX (see
+// modelSelectModalHelpers.ts::shouldConfirmSelectAll): accept the kit confirm dialog when
+// it opens, so assertions don't depend on how many models the fixture catalog exposes.
+async function clickAndAccept(button: HTMLButtonElement) {
+  await act(async () => {
+    button.click();
+  });
+  const accept = findDialogButton("confirmAction");
+  if (accept) {
+    await act(async () => {
+      accept.click();
+    });
+  }
+}
+
+beforeEach(() => {
+  (
+    globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+  ).IS_REACT_ACT_ENVIRONMENT = true;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => {
+      if (url === "/api/provider-nodes") {
+        return { ok: true, json: async () => ({ nodes: [] }) };
+      }
+      if (url === "/api/provider-models") {
+        return { ok: true, json: async () => ({ models: {} }) };
+      }
+      if (url === "/api/combos") {
+        return { ok: true, json: async () => ({ combos: [] }) };
+      }
+      return { ok: true, json: async () => ({}) };
+    })
+  );
+});
+
+afterEach(() => {
+  while (containers.length > 0) {
+    containers.pop()?.remove();
+  }
+  document.body.innerHTML = "";
+  vi.unstubAllGlobals();
+});
+
+describe("ModelSelectModal — Select all / Unselect all visible models", () => {
+  it("does not render the toggle without batch callbacks", async () => {
+    const { container } = await renderModal();
+    expect(container.querySelector('[data-testid="model-select-toggle-all-visible"]')).toBeNull();
+  });
+
+  it("renders Select all when keepOpenOnSelect + batch callbacks are set", async () => {
+    const { container } = await renderModal({
+      onSelectMany: vi.fn(),
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement | null;
+    expect(toggle, "expected Select all toggle").not.toBeNull();
+    expect(toggle!.textContent).toMatch(/Select all/i);
+  });
+
+  it("calls onSelectMany with every visible model that is not yet added", async () => {
+    const onSelectMany = vi.fn();
+    const onDeselectMany = vi.fn();
+
+    const { container } = await renderModal({
+      onSelectMany,
+      onDeselectMany,
+      addedModelValues: [],
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    expect(toggle).not.toBeNull();
+
+    await clickAndAccept(toggle);
+
+    expect(onSelectMany).toHaveBeenCalledTimes(1);
+    expect(onDeselectMany).not.toHaveBeenCalled();
+    const selected = onSelectMany.mock.calls[0][0] as Array<{ value: string }>;
+    expect(Array.isArray(selected)).toBe(true);
+    expect(selected.length).toBeGreaterThan(1);
+    expect(selected.every((m) => typeof m.value === "string" && m.value.length > 0)).toBe(true);
+  });
+
+  it("shows Unselect all and calls onDeselectMany when every visible model is already added", async () => {
+    const probeSelect = vi.fn();
+    const probe = await renderModal({
+      onSelectMany: probeSelect,
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+    const probeToggle = probe.container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    await clickAndAccept(probeToggle);
+    const allValues = (probeSelect.mock.calls[0][0] as Array<{ value: string }>).map(
+      (m) => m.value
+    );
+    expect(allValues.length).toBeGreaterThan(1);
+
+    const onSelectMany = vi.fn();
+    const onDeselectMany = vi.fn();
+    const { container } = await renderModal({
+      onSelectMany,
+      onDeselectMany,
+      addedModelValues: allValues,
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    expect(toggle.textContent).toMatch(/Unselect all/i);
+
+    await clickAndAccept(toggle);
+
+    expect(onDeselectMany).toHaveBeenCalledTimes(1);
+    expect(onSelectMany).not.toHaveBeenCalled();
+    const removed = onDeselectMany.mock.calls[0][0] as Array<{ value: string }>;
+    expect(removed.map((m) => m.value).sort()).toEqual([...allValues].sort());
+  });
+
+  it("Select all only adds models that are not already in addedModelValues", async () => {
+    const probeSelect = vi.fn();
+    const probe = await renderModal({
+      onSelectMany: probeSelect,
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+    const probeToggle = probe.container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    await clickAndAccept(probeToggle);
+    const allValues = (probeSelect.mock.calls[0][0] as Array<{ value: string }>).map(
+      (m) => m.value
+    );
+    const alreadyAdded = [allValues[0]];
+
+    const onSelectMany = vi.fn();
+    const { container } = await renderModal({
+      onSelectMany,
+      onDeselectMany: vi.fn(),
+      addedModelValues: alreadyAdded,
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    await clickAndAccept(toggle);
+
+    const selected = onSelectMany.mock.calls[0][0] as Array<{ value: string }>;
+    expect(selected.some((m) => m.value === alreadyAdded[0])).toBe(false);
+    expect(selected.length).toBe(allValues.length - 1);
+  });
+
+  it("asks for confirmation before Select all above the threshold, and honors decline", async () => {
+    const onSelectMany = vi.fn();
+    // openai (20 models) + anthropic (10 models) = 30 candidates, comfortably
+    // above SELECT_ALL_CONFIRM_THRESHOLD (20) — see modelSelectModalHelpers.ts.
+    const { container } = await renderModal({
+      activeProviders: [{ provider: "openai" }, { provider: "anthropic" }],
+      onSelectMany,
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+
+    await act(async () => {
+      toggle.click();
+    });
+
+    // The kit confirm dialog (not the native confirm()) asks before the batch add.
+    expect(onSelectMany).not.toHaveBeenCalled();
+    expect(document.body.textContent).toMatch(/Add \d+ models to this combo\?/);
+    const cancel = findDialogButton("cancel");
+    expect(cancel, "expected the confirm dialog Cancel button").not.toBeNull();
+    await act(async () => {
+      cancel!.click();
+    });
+
+    // Declining the confirmation must abort the batch add entirely.
+    expect(onSelectMany).not.toHaveBeenCalled();
+    expect(findDialogButton("confirmAction")).toBeNull();
+  });
+
+  it("adds the models only after the confirm dialog is accepted", async () => {
+    const onSelectMany = vi.fn();
+    const { container } = await renderModal({
+      activeProviders: [{ provider: "openai" }, { provider: "anthropic" }],
+      onSelectMany,
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      toggle.click();
+    });
+    expect(onSelectMany).not.toHaveBeenCalled();
+
+    await act(async () => {
+      findDialogButton("confirmAction")!.click();
+    });
+    expect(onSelectMany).toHaveBeenCalledTimes(1);
+    // Above SELECT_ALL_CONFIRM_THRESHOLD (20), which is why the dialog asked.
+    expect((onSelectMany.mock.calls[0][0] as unknown[]).length).toBeGreaterThan(20);
+  });
+});

@@ -1,0 +1,386 @@
+// Anthropic/Claude-format provider key validators (anthropic-like, claude-oauth-inline, anthropic-compatible, claude-code-compatible).
+// Extracted from validation.ts (god-file decomposition) — top-level functions; behavior is
+// byte-identical to the original inline defs.
+import {
+  buildClaudeCodeCompatibleHeaders,
+  buildClaudeCodeCompatibleValidationPayload,
+  CLAUDE_CODE_COMPATIBLE_DEFAULT_CHAT_PATH,
+  CLAUDE_CODE_COMPATIBLE_DEFAULT_MODELS_PATH,
+  joinClaudeCodeCompatibleUrl,
+  joinBaseUrlAndPath,
+} from "@omniroute/open-sse/services/claudeCodeCompatible.ts";
+import { getDefaultExecutor } from "@omniroute/open-sse/executors/defaultResolver.ts";
+import {
+  addModelsSuffix,
+  normalizeAnthropicBaseUrl,
+  normalizeClaudeCodeCompatibleBaseUrl,
+} from "./urlHelpers";
+import { applyCustomUserAgent, mergeConnectionCustomHeaders } from "./headers";
+import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
+
+export async function validateAnthropicLikeProvider({
+  apiKey,
+  baseUrl,
+  modelId = "claude-3-5-sonnet-20240620",
+  headers = {},
+  providerSpecificData = {},
+  isLocal = false,
+}: any) {
+  try {
+    if (!baseUrl) {
+      return { valid: false, error: "Missing base URL" };
+    }
+
+    if (typeof apiKey === "string" && apiKey.startsWith("sk-ant-oat")) {
+      return validateClaudeOAuthInline({ apiKey, modelId, providerSpecificData });
+    }
+
+    const probeUrl =
+      typeof providerSpecificData?.modelsUrl === "string" &&
+      providerSpecificData.modelsUrl.trim() !== ""
+        ? providerSpecificData.modelsUrl.trim()
+        : addModelsSuffix(baseUrl);
+
+    // Best-effort /models probe. It must not fail validation: canonical Claude
+    // base URLs can already include a path/query (…/messages?beta=true).
+    try {
+      await validationRead(
+        probeUrl,
+        {
+          headers: {
+            "anthropic-version": "2023-06-01",
+            ...headers,
+          },
+        },
+        isLocal
+      );
+    } catch {
+      // ignore probe failures
+    }
+
+    const requestUrl =
+      typeof providerSpecificData?.modelsUrl === "string" &&
+      providerSpecificData.modelsUrl.trim() !== ""
+        ? providerSpecificData.modelsUrl.trim()
+        : "";
+
+    if (requestUrl) {
+      const response = await validationRead(
+        requestUrl,
+        {
+          headers: {
+            "anthropic-version": "2023-06-01",
+            ...headers,
+          },
+        },
+        isLocal
+      );
+
+      if (response.status === 401 || response.status === 403) {
+        return { valid: false, error: "Invalid API key" };
+      }
+    }
+
+    const requestHeaders = applyCustomUserAgent(
+      {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      providerSpecificData
+    );
+
+    if (!requestHeaders["x-api-key"] && !requestHeaders["X-API-Key"]) {
+      requestHeaders["x-api-key"] = apiKey;
+    }
+
+    if (!requestHeaders["anthropic-version"] && !requestHeaders["Anthropic-Version"]) {
+      requestHeaders["anthropic-version"] = "2023-06-01";
+    }
+
+    // The chat path sends the connection's custom headers (#8369); the probe must too, or a
+    // key that needs one (e.g. anthropic-workspace-id) is tested without it.
+    mergeConnectionCustomHeaders(requestHeaders, providerSpecificData);
+
+    const testModelId =
+      providerSpecificData?.validationModelId || modelId || "claude-3-5-sonnet-20241022";
+
+    const chatResponse = await validationWrite(
+      baseUrl,
+      {
+        method: "POST",
+        headers: requestHeaders,
+        body: JSON.stringify({
+          model: testModelId,
+          max_tokens: 1,
+          messages: [{ role: "user", content: "test" }],
+        }),
+      },
+      isLocal
+    );
+
+    if (chatResponse.status === 401 || chatResponse.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
+
+    // A 400 usually means the key passed auth and the probe payload was refused (relays reject
+    // the probe model or max_tokens:1), so it stays valid. Two Anthropic 400s are about the
+    // key itself, though: every real request would fail the same way.
+    const keyError = await anthropicKeyErrorFrom400(chatResponse);
+    if (keyError) return { valid: false, error: keyError, statusCode: 400 };
+
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+const CREDIT_BALANCE_TOO_LOW = /credit balance is too low|credit_balance_too_low/i;
+const WORKSPACE_REQUIRED = /not scoped to a workspace/i;
+const KEY_ERROR_BODY_MAX_BYTES = 8 * 1024;
+const KEY_ERROR_BODY_TIMEOUT_MS = 3000;
+
+/**
+ * For a 400 probe answer, return a message when the body is one of the two Anthropic errors
+ * about the key itself, else null. The body read is bounded in size and time: the fetch
+ * timeout stops at the headers, and a relay could trickle or never close a 400 body.
+ */
+async function anthropicKeyErrorFrom400(response: Response): Promise<string | null> {
+  if (response.status !== 400) return null;
+  const body = await readBodyPrefix(response, KEY_ERROR_BODY_MAX_BYTES, KEY_ERROR_BODY_TIMEOUT_MS);
+  if (CREDIT_BALANCE_TOO_LOW.test(body)) {
+    return "Upstream reports the credit balance is too low for this key";
+  }
+  if (WORKSPACE_REQUIRED.test(body)) {
+    return "This key is not scoped to a workspace: add an anthropic-workspace-id custom header to the connection";
+  }
+  return null;
+}
+
+async function readBodyPrefix(
+  response: Response,
+  maxBytes: number,
+  timeoutMs: number
+): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const decoder = new TextDecoder();
+  let text = "";
+  let received = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), timeoutMs);
+  });
+  try {
+    while (received < maxBytes) {
+      const chunk = await Promise.race([reader.read(), timedOut]);
+      if (!chunk || chunk.done) break;
+      received += chunk.value.byteLength;
+      text += decoder.decode(chunk.value, { stream: true });
+    }
+  } catch {
+    // a broken body is just "not a recognised key error"
+  } finally {
+    clearTimeout(timer);
+    reader.cancel().catch(() => {});
+  }
+  return text.slice(0, maxBytes);
+}
+
+export async function validateClaudeOAuthInline({
+  apiKey,
+  modelId,
+  providerSpecificData = {},
+}: {
+  apiKey: string;
+  modelId: string | null | undefined;
+  providerSpecificData?: Record<string, unknown>;
+}) {
+  const override = providerSpecificData?.validationModelId;
+  const testModelId: string =
+    typeof override === "string" && override ? override : modelId || "claude-haiku-4-5-20251001";
+
+  try {
+    const executed = await getDefaultExecutor("claude").execute({
+      model: testModelId,
+      body: {
+        model: testModelId,
+        max_tokens: 1,
+        messages: [{ role: "user", content: "test" }],
+      },
+      stream: false,
+      credentials: { accessToken: apiKey, providerSpecificData },
+    });
+
+    const response = executed instanceof Response ? executed : executed.response;
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: "Invalid OAuth token" };
+    }
+    if (response.status >= 500) {
+      return { valid: false, error: `Provider unavailable (${response.status})` };
+    }
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateAnthropicCompatibleProvider({
+  apiKey,
+  providerSpecificData = {},
+  isLocal = false,
+}: any) {
+  let baseUrl = normalizeAnthropicBaseUrl(providerSpecificData.baseUrl);
+  if (!baseUrl) {
+    return { valid: false, error: "No base URL configured for Anthropic compatible provider" };
+  }
+
+  const headers = applyCustomUserAgent(
+    {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    providerSpecificData
+  );
+  mergeConnectionCustomHeaders(headers, providerSpecificData);
+
+  // Step 1: Best-effort GET /models probe. /models is NOT part of the Anthropic API spec
+  // and many compatible proxies either 404, 401, or 403 on /models even with a valid key —
+  // so a 401/403 here must NOT mark the credentials invalid. Only a 2xx is a positive
+  // signal that the proxy DOES implement /models AND the key was accepted; everything else
+  // (including auth-shaped statuses) falls through to the authoritative POST /v1/messages
+  // probe below. Ported from decolua/9router 584cf66a.
+  try {
+    const modelsRes = await validationRead(
+      joinBaseUrlAndPath(baseUrl, providerSpecificData?.modelsPath || "/models"),
+      {
+        method: "GET",
+        headers,
+      },
+      isLocal
+    );
+
+    if (modelsRes.ok) {
+      return { valid: true, error: null };
+    }
+  } catch {
+    // /models fetch failed — fall through to messages test
+  }
+
+  // Step 2: Authoritative probe — POST /v1/messages with max_tokens=1.
+  const testModelId = providerSpecificData?.validationModelId || "claude-3-5-sonnet-20241022";
+  try {
+    const messagesRes = await validationWrite(
+      joinBaseUrlAndPath(baseUrl, providerSpecificData?.chatPath || "/messages"),
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: testModelId,
+          max_tokens: 1,
+          messages: [{ role: "user", content: "test" }],
+        }),
+      },
+      isLocal
+    );
+
+    if (messagesRes.status === 401 || messagesRes.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
+
+    // Same two key-level Anthropic 400s as validateAnthropicLikeProvider (a compatible node
+    // can point at api.anthropic.com itself).
+    const keyError = await anthropicKeyErrorFrom400(messagesRes);
+    if (keyError) return { valid: false, error: keyError, statusCode: 400 };
+
+    // Any other response (200, 400, 422, etc.) means auth passed
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateClaudeCodeCompatibleProvider({
+  apiKey,
+  providerSpecificData = {},
+}: any) {
+  const baseUrl = normalizeClaudeCodeCompatibleBaseUrl(providerSpecificData.baseUrl);
+  if (!baseUrl) {
+    return { valid: false, error: "No base URL configured for CC Compatible provider" };
+  }
+
+  const modelsPath = providerSpecificData?.modelsPath || CLAUDE_CODE_COMPATIBLE_DEFAULT_MODELS_PATH;
+  const chatPath = providerSpecificData?.chatPath || CLAUDE_CODE_COMPATIBLE_DEFAULT_CHAT_PATH;
+  const defaultHeaders = applyCustomUserAgent(
+    buildClaudeCodeCompatibleHeaders(apiKey, false),
+    providerSpecificData
+  );
+  mergeConnectionCustomHeaders(defaultHeaders, providerSpecificData);
+
+  try {
+    const modelsRes = await validationRead(joinClaudeCodeCompatibleUrl(baseUrl, modelsPath), {
+      method: "GET",
+      headers: defaultHeaders,
+    });
+
+    if (modelsRes.ok) {
+      return { valid: true, error: null, method: "models_endpoint" };
+    }
+
+    if (modelsRes.status === 401 || modelsRes.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
+  } catch {
+    // Fall through to bridge request validation.
+  }
+
+  const payload = buildClaudeCodeCompatibleValidationPayload(
+    providerSpecificData?.validationModelId || "claude-sonnet-4-6"
+  );
+  const sessionId = JSON.parse(payload.metadata.user_id as string).session_id;
+
+  try {
+    const messagesRes = await validationWrite(joinClaudeCodeCompatibleUrl(baseUrl, chatPath), {
+      method: "POST",
+      headers: mergeConnectionCustomHeaders(
+        applyCustomUserAgent(
+          buildClaudeCodeCompatibleHeaders(apiKey, true, sessionId),
+          providerSpecificData
+        ),
+        providerSpecificData
+      ),
+      body: JSON.stringify(payload),
+    });
+
+    if (messagesRes.status === 401 || messagesRes.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
+
+    if (messagesRes.status === 429) {
+      return {
+        valid: true,
+        error: null,
+        method: "cc_bridge_request",
+        warning: "Rate limited, but credentials are valid",
+      };
+    }
+
+    if (messagesRes.status >= 400 && messagesRes.status < 500) {
+      return {
+        valid: true,
+        error: null,
+        method: "cc_bridge_request",
+        warning: "Bridge request reached upstream, but the model or payload was rejected",
+      };
+    }
+
+    return {
+      valid: messagesRes.ok,
+      error: messagesRes.ok ? null : `Validation failed: ${messagesRes.status}`,
+      method: "cc_bridge_request",
+    };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}

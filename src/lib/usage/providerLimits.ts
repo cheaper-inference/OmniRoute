@@ -1,0 +1,1383 @@
+import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
+import {
+  getProviderConnectionById,
+  getProviderConnections,
+  updateProviderConnection,
+} from "@/lib/db/providers";
+import { getSettings, resolveProxyForConnection, updateSettings } from "@/lib/db/settings";
+import {
+  getAllProviderLimitsCache,
+  getProviderLimitsCache,
+  setProviderLimitsCache,
+  setProviderLimitsCacheBatch,
+  type ProviderLimitsCacheEntry,
+} from "@/lib/db/providerLimits";
+import { syncToCloud } from "@/lib/cloudSync";
+import { setQuotaCache } from "@/domain/quotaCache";
+import { buildClaudeExtraUsageConnectionUpdate } from "@/lib/providers/claudeExtraUsage";
+import { clearRecoveredProviderState } from "@/sse/services/auth";
+import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
+import {
+  clearModelLock,
+  getAllModelLockouts,
+} from "@omniroute/open-sse/services/accountFallback.ts";
+import { RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
+import {
+  claudeQuotaMatchesModel,
+  isClaudeQuotaMetadata,
+  isExplicitClaudeQuota429Text,
+} from "@omniroute/open-sse/services/usage/claudeQuota.ts";
+import { getMachineId } from "@/shared/utils/machine";
+import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
+import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
+import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
+import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
+import {
+  fetchAndSeedClaudeResetCreditUsage,
+  withClaudeResetCreditCount,
+} from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
+import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
+import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
+import {
+  extractCodeAssistOnboardTierId,
+  extractCodeAssistSubscriptionTier,
+} from "@omniroute/open-sse/services/codeAssistSubscription.ts";
+import {
+  extractAntigravityProjectIdFromPayload,
+  getStoredAntigravityProjectId,
+} from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
+import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { onUsageRecorded } from "./usageEvents";
+import {
+  isRecord,
+  isUsageQuotaKeyAllowed,
+  normalizeUsageQuotasForProvider,
+  sanitizeUsageQuotasForProvider,
+} from "./providerLimits/quotaNormalize";
+import { getCachedLiveModelIds, refreshLiveModelIds } from "./providerLimits/liveModelIds";
+import { syncInChunksWithSpacing } from "./providerLimits/chunkedSpacingSync";
+import {
+  refreshAndUpdateCredentialsWithResolver,
+  type CredentialRefreshOptions,
+  type ProviderConnectionLike,
+} from "./providerLimits/credentialRefresh";
+export { shouldAttemptRotatingRefresh } from "./providerLimits/credentialRefresh";
+type JsonRecord = Record<string, unknown>;
+type SyncSource = "manual" | "scheduled";
+
+const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
+  "glm",
+  "glm-cn",
+  "zai",
+  "glmt",
+  "opencode-go",
+  "ollama-cloud",
+  "minimax",
+  "minimax-cn",
+  "crof",
+  "nanogpt",
+  "nan",
+  "apmix",
+  "deepseek",
+  // StepFun account balance (GET /v1/accounts; base-URL override selects
+  // China vs international platform — same override the chat path honors)
+  "stepfun",
+  "xiaomi-mimo",
+  "vertex",
+  "vertex-partner",
+  "kimi-coding-apikey",
+  "kiro",
+  // Qoder connections are PAT-based (authType "apikey"); the usage fetcher
+  // exchanges the PAT for a job token and reads openapi.qoder.sh/user/status.
+  "qoder",
+  "promptql", // PromptQL playground JWT → getCreditSummary USD credits
+  "pql",
+  // Adobe Firefly: web-cookie / JWT stored as apikey → credits/balance
+  "adobe-firefly",
+  "firefly",
+  // HyperAgent session cookie → billing/usage creditBlocks
+  "hyperagent",
+  "ha",
+  "firecrawl",
+  // Context7 rate limit quota (ratelimit-* headers of GET https://context7.com/api/v1/search)
+  "context7",
+  // Tavily API key → /usage account & plan credits
+  "tavily-search",
+  "tavily",
+  // Jina wallet balance (GET https://dash.jina.ai/api/v1/api_key/fe_user)
+  "jina-search",
+  "jina",
+  "jina-ai",
+  "jina-reader",
+  // Volcano Ark Plan subscriptions (agent-plan / coding-plan)
+  "volcengine-agent-plan",
+  "volcengine-coding-plan",
+  // Command Code API key → /alpha/billing/credits + windowLimits
+  "command-code",
+  "conol-web",
+  "cnl",
+  "syntx",
+  "stx",
+  // Alibaba Coding Plan (console API key) + Qwen personal Token Plan (console cookie) — #9603
+  "bailian-coding-plan",
+  "qwen-cloud-token-plan",
+  // AgentRouter (New-API) console System Access Token + New-Api-User id (providerSpecificData)
+  "agentrouter",
+  // OpenRouter API key → /key limits + /credits account balance
+  "openrouter",
+  // LLM Gateway API key (llmgtwy_…) → GET /v1/key DevPass allowance
+  "llmgateway",
+  // Lyceum API key (lk_…) → GET /api/v2/external/billing/credits balance
+  "lyceum",
+]);
+const DEFAULT_PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES = 70;
+const PROVIDER_LIMITS_AUTO_SYNC_SETTING_KEY = "provider_limits_auto_sync_last_run";
+const DEFAULT_PROVIDER_LIMITS_POST_USAGE_REFRESH_DELAY_MS = 5_000;
+const pendingPostUsageRefreshes = new Set<string>();
+
+function getProviderLimitsPostUsageRefreshDelayMs(): number {
+  const raw = Number(process.env.PROVIDER_LIMITS_POST_USAGE_REFRESH_DELAY_MS ?? "");
+  return Number.isFinite(raw) && raw >= 0
+    ? raw
+    : DEFAULT_PROVIDER_LIMITS_POST_USAGE_REFRESH_DELAY_MS;
+}
+
+function scheduleProviderLimitsPostUsageRefresh(connectionId: string): void {
+  if (!connectionId || pendingPostUsageRefreshes.has(connectionId)) return;
+
+  pendingPostUsageRefreshes.add(connectionId);
+  const timer = setTimeout(() => {
+    pendingPostUsageRefreshes.delete(connectionId);
+    void fetchAndPersistProviderLimits(connectionId, "scheduled", {
+      allowRotatingRefresh: true,
+    }).catch((error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(
+        `[ProviderLimits] Post-usage refresh failed for connection ${connectionId}: ${message}`
+      );
+    });
+  }, getProviderLimitsPostUsageRefreshDelayMs());
+  timer.unref?.();
+}
+
+export function notifyProviderUsageRecorded(
+  provider: string | null | undefined,
+  connectionId: string | null | undefined
+): void {
+  if ((provider !== "antigravity" && provider !== "agy") || !connectionId) return;
+  scheduleProviderLimitsPostUsageRefresh(connectionId);
+}
+
+// Subscribe at module load so usageHistory can emit usage events without importing
+// this module (and its executors/translator import graph). This module is loaded by
+// the provider-limits route and the background auto-sync scheduler at server boot.
+onUsageRecorded(notifyProviderUsageRecorded);
+
+function hasRetrieveUserQuotaSource(
+  provider: string,
+  cache: ProviderLimitsCacheEntry | undefined
+): boolean {
+  if (provider !== "antigravity" && provider !== "agy") return true;
+  if (!cache?.quotas) return false;
+  return Object.values(cache.quotas).some((quota) => {
+    if (!isRecord(quota)) return false;
+    return quota.quotaSource === "retrieveUserQuota";
+  });
+}
+
+function sanitizeProviderLimitsCacheForConnection(
+  connection: ProviderConnectionLike | null | undefined,
+  entry: ProviderLimitsCacheEntry | null
+): ProviderLimitsCacheEntry | null {
+  if (!connection || !entry || !entry.quotas) return entry;
+  if (connection.provider !== "antigravity" && connection.provider !== "agy") return entry;
+
+  const sanitizedQuotas = normalizeUsageQuotasForProvider(
+    connection.provider,
+    entry.quotas,
+    getCachedLiveModelIds(connection.provider)
+  );
+  return sanitizedQuotas === entry.quotas ? entry : { ...entry, quotas: sanitizedQuotas };
+}
+
+function shouldRefreshProviderLimitsCache(
+  connection: ProviderConnectionLike,
+  cache: ProviderLimitsCacheEntry | undefined
+): boolean {
+  if (!cache?.quotas) return true;
+  if (connection.provider !== "antigravity" && connection.provider !== "agy") return false;
+
+  return (
+    !hasRetrieveUserQuotaSource(connection.provider, cache) ||
+    Object.keys(cache.quotas).some(
+      (quotaKey) =>
+        !isUsageQuotaKeyAllowed(
+          connection.provider,
+          quotaKey,
+          getCachedLiveModelIds(connection.provider)
+        )
+    )
+  );
+}
+
+export function isSupportedUsageConnection(connection: ProviderConnectionLike | null): boolean {
+  if (!connection?.provider) return false;
+
+  if (connection.authType === "oauth") {
+    return supportsProviderQuota(connection.provider, connection);
+  }
+  if (connection.authType !== "apikey" && connection.authType !== "api_key") return false;
+  if (PROVIDER_LIMITS_APIKEY_PROVIDERS.has(connection.provider)) return true;
+  return supportsProviderQuota(connection.provider, connection);
+}
+
+function withStatus(error: Error, status: number): Error & { status: number } {
+  return Object.assign(error, { status });
+}
+
+async function syncToCloudIfEnabled() {
+  try {
+    const machineId = await getMachineId();
+    if (!machineId) return;
+    await syncToCloud(machineId);
+  } catch (error) {
+    console.error("[ProviderLimits] Error syncing refreshed credentials to cloud:", error);
+  }
+}
+
+export async function refreshAndUpdateCredentials(
+  connection: ProviderConnectionLike,
+  opts: CredentialRefreshOptions = {}
+) {
+  return refreshAndUpdateCredentialsWithResolver(connection, getCredentialRefreshExecutor, opts);
+}
+
+function isUsageAuthError(message: unknown): boolean {
+  if (typeof message !== "string") return false;
+  const m = message.toLowerCase();
+  return (
+    m.includes("token expired") ||
+    m.includes("unauthorized") ||
+    m.includes("re-authenticate") ||
+    m.includes("access denied") ||
+    m.includes("invalidated") ||
+    m.includes("401")
+  );
+}
+
+function isNetworkFailureMessage(message: unknown): boolean {
+  if (typeof message !== "string") return false;
+  return (
+    message.includes("fetch failed") ||
+    message.includes("ECONNREFUSED") ||
+    message.includes("ETIMEDOUT") ||
+    message.includes("Proxy unreachable") ||
+    message.includes("UND_ERR_CONNECT_TIMEOUT")
+  );
+}
+
+function isAccountScopedProxyResolution(proxyInfo: unknown): boolean {
+  if (!isRecord(proxyInfo)) return false;
+  if (!proxyInfo.proxy) return false;
+  return proxyInfo.level === "key" || proxyInfo.level === "account";
+}
+
+function shouldFailClosedForProviderLimitsProxy(
+  connection: ProviderConnectionLike,
+  proxyInfo: unknown
+): boolean {
+  return connection.authType === "oauth" && isAccountScopedProxyResolution(proxyInfo);
+}
+
+/**
+ * Decide whether the quota-sync path should flag a connection `expired` from an
+ * auth-style usage error. Exported for unit testing.
+ *
+ * Rotating-refresh providers (Codex/OpenAI/Claude/etc. — see refreshSerializer's
+ * ROTATION_LOCK_GROUP) have their access_token deliberately NOT proactively
+ * refreshed in this quota path (#3019, to avoid the Auth0 family-revocation
+ * cascade). So a "token expired" from the quota fetch is a recoverable
+ * false-negative: the credential is still valid (its `expires_at` is in the
+ * future) and the reactive, serialized 401 path refreshes the access_token on
+ * next use. Flagging it `expired` hides a healthy account from the quota page
+ * (observed: freshly-added Codex accounts flagged expired while a providers-page
+ * refresh turns them green). So never mark a rotating provider expired from the
+ * quota sync — leave its status to the reactive path / connection test.
+ */
+export function quotaPathShouldMarkExpired(
+  provider: string,
+  usageMessage: unknown,
+  currentTestStatus: string | null | undefined
+): boolean {
+  if (currentTestStatus === "expired") return false;
+
+  const message = typeof usageMessage === "string" ? usageMessage.toLowerCase() : "";
+  const isAuthError =
+    message.includes("token expired") ||
+    message.includes("access denied") ||
+    message.includes("re-authenticate") ||
+    message.includes("unauthorized");
+  if (!isAuthError) return false;
+
+  if (rotationGroupFor(provider) !== null) return false;
+
+  return true;
+}
+
+const TERMINAL_STATUSES_FOR_QUOTA_RECOVERY = new Set([
+  "credits_exhausted",
+  "banned",
+  "expired",
+  "deactivated",
+]);
+
+function isTerminalStatusForQuotaRecovery(testStatus: string | null | undefined): boolean {
+  if (!testStatus) return false;
+  return TERMINAL_STATUSES_FOR_QUOTA_RECOVERY.has(testStatus);
+}
+
+export function hasUsableQuota(usage: JsonRecord): boolean {
+  const quotas = usage?.quotas;
+  if (!isRecord(quotas)) return false;
+  for (const value of Object.values(quotas)) {
+    if (!isRecord(value)) continue;
+    if (value.unlimited === true) return true;
+    const remaining =
+      typeof value.remaining === "number"
+        ? value.remaining
+        : typeof value.remainingPercentage === "number"
+          ? value.remainingPercentage
+          : null;
+    if (remaining !== null && remaining > 0) return true;
+  }
+  return false;
+}
+
+// A SYNTHETIC cooldown (persisted by a poller without a parseable upstream
+// reset — e.g. the Claude-subscription SUBSCRIPTION_QUOTA_COOLDOWN_MS lock) may
+// be overruled only by POSITIVE live-window evidence: EVERY reported quota
+// window is replenished (remaining > 0) AND carries a documented reset
+// timestamp that has already elapsed. Unknown-reset windows never authorize an
+// override (matching the kimi-coding partial-refresh semantics);
+// `unlimited` windows carry no reset evidence and are rejected.
+export function syntheticCooldownOutlivedByRealWindows(
+  usage: JsonRecord,
+  nowMs: number = Date.now()
+): boolean {
+  if (!isRecord(usage) || !isRecord(usage.quotas)) return false;
+  const windows = Object.values(usage.quotas);
+  if (windows.length === 0) return false;
+  for (const value of windows) {
+    if (!isRecord(value) || value.unlimited === true) return false;
+    const remaining =
+      typeof value.remaining === "number"
+        ? value.remaining
+        : typeof value.remainingPercentage === "number"
+          ? value.remainingPercentage
+          : null;
+    if (remaining === null || remaining <= 0) return false;
+    if (value.resetAt == null) return false;
+    const resetMs = Date.parse(String(value.resetAt));
+    if (Number.isNaN(resetMs) || resetMs > nowMs) return false;
+  }
+  return true;
+}
+
+/**
+ * Is an explicit cooldown still in the future?
+ *
+ * A rateLimitedUntil set by the upstream 429 handler is a hard statement and
+ * must never be overruled by a quota poll.
+ *
+ * Gate on the timestamp alone; lastErrorType stays irrelevant here.
+ */
+export function hasActiveCooldown(
+  connection: Pick<ProviderConnectionLike, "rateLimitedUntil">,
+  now: number = Date.now()
+): boolean {
+  if (!connection.rateLimitedUntil) return false;
+  // #3954: the rate_limited_until TEXT column holds an ISO string (dashboard/AUTH
+  // path) OR numeric epoch ms (setConnectionRateLimitUntil, the chat path). A bare
+  // `new Date(String(...))` yields Invalid Date for the numeric form, which read as
+  // "no cooldown" and let every poller wipe a chat-path-written lockout. Use the
+  // canonical parser connectionRecovery.ts already relies on.
+  const until = cooldownUntilMs(connection.rateLimitedUntil as string | number | null | undefined);
+  return Number.isFinite(until) && until > now;
+}
+
+/**
+ * Whether a connection test may wipe the persisted error/cooldown state.
+ *
+ * A successful probe proves the CREDENTIAL is valid; it does not prove an
+ * exhausted quota window reopened — the probe is a cheap auth/models call that
+ * never touches the chat quota a weekly cap applies to. The credential-health
+ * scheduler runs that probe against every connection every 300s, so without this
+ * gate a weekly-capped connection was reset to `active` / `rateLimitedUntil=null`
+ * within 30s of every restart and dispatched straight back into the same 429.
+ *
+ * Same rule as `maybeClearRecoveredQuotaState`: a future `rateLimitedUntil` is
+ * the 429 handler's hard statement and no poller may overrule it. Once the
+ * window elapses, the next probe clears the state normally.
+ */
+export function shouldClearErrorStateOnValidProbe(
+  connection: Pick<ProviderConnectionLike, "rateLimitedUntil">,
+  probeValid: boolean,
+  now: number = Date.now()
+): boolean {
+  return probeValid && !hasActiveCooldown(connection, now);
+}
+
+/**
+ * May an active cooldown be released because the REAL quota windows recovered?
+ *
+ * An ordinary quota poll may not overrule a real upstream 429 (#11277).
+ * There are only two narrow recovery paths: a synthetic cooldown whose real
+ * windows have elapsed (#10534), or a Claude weekly reset event positively
+ * observed AFTER that exact 429 with every reported quota window replenished
+ * (#17043). Unobserved/partial/stale windows preserve the original cooldown.
+ */
+
+/**
+ * Is an explicit cooldown still in the future?
+ *
+ * A rateLimitedUntil set by the upstream 429 handler is a hard statement and
+ * must never be overruled by a quota poll.
+ *
+ * Gate on the timestamp alone; lastErrorType stays irrelevant here.
+ */
+
+/**
+ * Whether a connection test may wipe the persisted error/cooldown state.
+ *
+ * A successful probe proves the CREDENTIAL is valid; it does not prove an
+ * exhausted quota window reopened — the probe is a cheap auth/models call that
+ * never touches the chat quota a weekly cap applies to. The credential-health
+ * scheduler runs that probe against every connection every 300s, so without this
+ * gate a weekly-capped connection was reset to `active` / `rateLimitedUntil=null`
+ * within 30s of every restart and dispatched straight back into the same 429.
+ *
+ * Same rule as `maybeClearRecoveredQuotaState`: a future `rateLimitedUntil` is
+ * the 429 handler's hard statement and no poller may overrule it. Once the
+ * window elapses, the next probe clears the state normally.
+ */
+
+/**
+ * A weekly reset event cannot release an unrelated Claude RPM or monthly-spend
+ * cooldown. Require weekly provenance from the persisted upstream error: either
+ * a named weekly window or Claude's native account-rate-limit quota wording.
+ */
+export function isClaudeWeeklyQuota429Signal(errorText: string | null | undefined): boolean {
+  if (!errorText) return false;
+  const lower = errorText.toLowerCase();
+  return (
+    lower.includes("weekly") ||
+    lower.includes("seven_day") ||
+    lower.includes("seven day") ||
+    lower.includes("7-day") ||
+    lower.includes("7d") ||
+    (lower.includes("would exceed your account's rate limit") &&
+      isExplicitClaudeQuota429Text(errorText))
+  );
+}
+
+/** A reset event must not make one full/unknown governing window disappear. */
+export function everyQuotaWindowReplenished(usage: JsonRecord): boolean {
+  if (usage.message || usage._stale || !isRecord(usage.quotas)) return false;
+  const windows = Object.values(usage.quotas);
+  return (
+    windows.length > 0 &&
+    windows.every((value) => {
+      if (!isRecord(value) || value.unlimited === true || value.fractionReported === false) {
+        return false;
+      }
+      const remaining =
+        typeof value.remainingPercentage === "number"
+          ? value.remainingPercentage
+          : typeof value.remaining === "number"
+            ? value.remaining
+            : null;
+      return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+    })
+  );
+}
+
+/** A partial session-only poll is not proof of a recovered weekly allowance. */
+export function hasRecoveredClaudeWeeklyWindow(usage: JsonRecord): boolean {
+  if (!isRecord(usage.quotas)) return false;
+  return Object.entries(usage.quotas).some(([key, value]) => {
+    // Normalized Claude quotas put model-scoped buckets in modelQuotas.
+    // Reject similarly named rows here rather than treating a recovered
+    // Opus/Haiku weekly bucket as recovered account-wide capacity.
+    const normalized = key.trim().toLowerCase();
+    if (!["weekly", "weekly (7d)", "7d"].includes(normalized)) return false;
+    if (!isRecord(value) || value.fractionReported === false || value.unlimited === true) {
+      return false;
+    }
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining !== null && Number.isFinite(remaining) && remaining > 0;
+  });
+}
+
+/**
+ * A recovered account-wide bucket does not prove that an existing model-specific
+ * quota lock has recovered. Clear it only when the fresh response supplies an
+ * explicit matching weekly model quota with positive, reported remaining capacity.
+ * Missing/empty/unknown model telemetry must fail closed (#17043).
+ */
+export function hasBlockingClaudeModelQuota(usage: JsonRecord, model: string): boolean {
+  if (!isRecord(usage.modelQuotas)) return true;
+  const matchingScopes = Object.values(usage.modelQuotas).filter((value) => {
+    if (!isRecord(value) || !isClaudeQuotaMetadata(value.claudeQuota)) return false;
+    return (
+      value.claudeQuota.kind === "weekly_scoped" &&
+      claudeQuotaMatchesModel(value.claudeQuota, model)
+    );
+  });
+  if (matchingScopes.length === 0) return true;
+  return matchingScopes.some((value) => {
+    if (!isRecord(value)) return true;
+    if (value.fractionReported === false || value.unlimited === true) return true;
+    const remaining =
+      typeof value.remainingPercentage === "number"
+        ? value.remainingPercentage
+        : typeof value.remaining === "number"
+          ? value.remaining
+          : null;
+    return remaining === null || !Number.isFinite(remaining) || remaining <= 0;
+  });
+}
+
+function canRecoverClaudeFromObservedReset(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): boolean {
+  return (
+    connection.provider === "claude" &&
+    (connection.lastErrorType === "quota_exhausted" ||
+      // Older 429 records used the generic RPM classifier for Claude's
+      // weekly-quota text. Only admit such a record with the full positive
+      // reset evidence and an explicit long-window signal.
+      connection.lastErrorType === "rate_limited") &&
+    isClaudeWeeklyQuota429Signal(connection.lastError) &&
+    connection.lastErrorSource !== "extra_usage" &&
+    Number(connection.errorCode) === 429 &&
+    hasObservedClaudeQuotaResetAfter(connection.id, connection.lastErrorAt) &&
+    everyQuotaWindowReplenished(usage) &&
+    hasRecoveredClaudeWeeklyWindow(usage)
+  );
+}
+
+function clearRecoveredClaudeQuotaModelLocks(connectionId: string, usage: JsonRecord): void {
+  const accountLocks = getAllModelLockouts().filter(
+    (lock) => lock.connectionId === connectionId && lock.provider === "claude"
+  );
+  // clearModelLock removes *all* lock keys for a model. Never let quota
+  // recovery erase an unrelated capacity/auth/not-found lock on that model.
+  const unrelatedModels = new Set(
+    accountLocks
+      .filter((lock) => lock.reason !== RateLimitReason.QUOTA_EXHAUSTED)
+      .map((lock) => lock.model)
+  );
+  for (const lock of accountLocks) {
+    if (lock.reason !== RateLimitReason.QUOTA_EXHAUSTED) continue;
+    if (unrelatedModels.has(lock.model)) continue;
+    if (hasBlockingClaudeModelQuota(usage, lock.model)) continue;
+    clearModelLock(lock.provider, lock.connectionId, lock.model);
+  }
+}
+
+export async function maybeClearRecoveredQuotaState(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (!hasUsableQuota(usage)) return connection;
+  if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  // Google keeps reporting Antigravity quota for an account blocked by 403 VALIDATION_REQUIRED,
+  // so usable quota says nothing about that block: keep the error until a passing connection
+  // test drops the stored verification link.
+  if (readStoredVerificationUrl(connection.providerSpecificData)) return connection;
+  let verifiedResetRecovery = false;
+  if (hasActiveCooldown(connection)) {
+    // A future rateLimitedUntil written from a real upstream signal is a hard
+    // statement no poller may overrule (#11277) — executor-sourced rate limits
+    // and extra-usage policy blocks included. Two independently evidenced
+    // exceptions exist: an outlived synthetic cooldown and a recorded Claude
+    // weekly reset observed after the 429 with fresh, usable windows.
+    const syntheticRecoveryOverride =
+      connection.lastErrorType === "quota_exhausted" &&
+      connection.lastErrorSource !== "extra_usage" &&
+      syntheticCooldownOutlivedByRealWindows(usage);
+    // #17043: unlike an ordinary quota poll, a persisted weekly reset event
+    // observed after the last 429 is independent positive evidence. It can
+    // release only a Claude quota-exhaustion lock with every live window open.
+    const observedResetOverride = canRecoverClaudeFromObservedReset(connection, usage);
+    if (!syntheticRecoveryOverride && !observedResetOverride) return connection;
+    verifiedResetRecovery = observedResetOverride;
+  }
+
+  const hasTransientState =
+    connection.testStatus === "unavailable" ||
+    Boolean(connection.rateLimitedUntil) ||
+    Boolean(connection.lastError) ||
+    Boolean(connection.errorCode) ||
+    Boolean(connection.lastErrorType) ||
+    Boolean(connection.lastErrorSource) ||
+    (connection.backoffLevel ?? 0) > 0;
+
+  if (!hasTransientState) return connection;
+
+  let cleared = true;
+  try {
+    const result = await clearRecoveredProviderState(
+      {
+        connectionId: connection.id,
+        testStatus: connection.testStatus,
+        lastError: connection.lastError ?? null,
+        rateLimitedUntil: connection.rateLimitedUntil ?? null,
+        errorCode: connection.errorCode ?? null,
+        lastErrorType: connection.lastErrorType ?? null,
+        lastErrorSource: connection.lastErrorSource ?? null,
+      },
+      {
+        testStatus: connection.testStatus ?? null,
+        lastErrorAt: connection.lastErrorAt ?? null,
+        rateLimitedUntil: connection.rateLimitedUntil ?? null,
+      }
+    );
+    cleared = result.applied;
+  } catch (dbError) {
+    console.warn("[ProviderLimits] Failed to clear recovered quota state:", dbError);
+    return connection;
+  }
+
+  if (cleared && verifiedResetRecovery) {
+    // Only quota-family locks belong to this reset. Preserve auth, capacity,
+    // missing-model, and generic RPM locks for their own recovery path.
+    clearRecoveredClaudeQuotaModelLocks(connection.id, usage);
+  }
+
+  if (!cleared) {
+    // CAS miss — a concurrent writer (markAccountUnavailable, etc.) updated
+    // the row between our read and the clear. Return the original snapshot;
+    // the next read from DB will surface the fresh state.
+    return connection;
+  }
+
+  return {
+    ...connection,
+    testStatus: "active",
+    lastError: null,
+    lastErrorAt: null,
+    lastErrorType: null,
+    lastErrorSource: null,
+    errorCode: null,
+    rateLimitedUntil: null,
+    backoffLevel: 0,
+  };
+}
+
+async function syncExpiredStatusIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (!quotaPathShouldMarkExpired(connection.provider, usage.message, connection.testStatus)) {
+    return connection;
+  }
+
+  try {
+    await updateProviderConnection(connection.id, {
+      testStatus: "expired",
+      lastErrorType: "token_expired",
+      lastErrorAt: new Date().toISOString(),
+    });
+  } catch (dbError) {
+    console.error("[ProviderLimits] Failed to sync expired status to DB:", dbError);
+    return connection;
+  }
+
+  return {
+    ...connection,
+    testStatus: "expired",
+    lastErrorType: "token_expired",
+  };
+}
+
+async function syncClaudeExtraUsageStateIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  const update = buildClaudeExtraUsageConnectionUpdate(connection, usage);
+  if (!update) return connection;
+
+  await updateProviderConnection(connection.id, update);
+  return {
+    ...connection,
+    ...update,
+  };
+}
+
+const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
+
+/** Ineligible: flag the account and append the auto-managed Argon exclusions (keeps operator ones). */
+function markArgonIneligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== false) {
+    nextPsd.hasArgon = false;
+    changed = true;
+  }
+
+  const existing = Array.isArray(psd.excludedModels)
+    ? psd.excludedModels.filter((m): m is string => typeof m === "string")
+    : [];
+  const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
+    (pattern) => !existing.includes(pattern)
+  );
+  if (missing.length > 0) {
+    nextPsd.excludedModels = [...existing, ...missing];
+    changed = true;
+  }
+  return changed;
+}
+
+/** Eligible: flag the account and strip only the auto-managed Argon exclusions. */
+function markArgonEligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== true) {
+    nextPsd.hasArgon = true;
+    changed = true;
+  }
+
+  if (!Array.isArray(psd.excludedModels)) return changed;
+  const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
+  const filtered = psd.excludedModels.filter((m) => typeof m !== "string" || !autoSet.has(m));
+  if (filtered.length !== psd.excludedModels.length) {
+    nextPsd.excludedModels = filtered;
+    changed = true;
+  }
+  return changed;
+}
+
+export function applyAntigravityArgonEligibilityToPsd(
+  psd: Record<string, unknown>,
+  hasArgon: unknown
+): { nextPsd: Record<string, unknown>; changed: boolean } {
+  const nextPsd: Record<string, unknown> = { ...psd };
+  if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
+  const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
+  return { nextPsd, changed };
+}
+
+/** Copy tier, plan and a newly discovered projectId from loadCodeAssist into nextPsd. */
+function applyAntigravitySubscriptionInfoToPsd(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord,
+  psd: JsonRecord,
+  nextPsd: JsonRecord
+): { changed: boolean; nextProjectId?: string } {
+  const subscriptionInfo = usage.subscriptionInfo;
+  let changed = false;
+
+  const tierId = extractCodeAssistOnboardTierId(subscriptionInfo);
+  if (tierId && tierId !== "legacy-tier" && psd.tier !== tierId) {
+    nextPsd.tier = tierId;
+    changed = true;
+  }
+
+  const subscriptionTier = extractCodeAssistSubscriptionTier(subscriptionInfo);
+  if (subscriptionTier && psd.subscriptionTier !== subscriptionTier) {
+    nextPsd.subscriptionTier = subscriptionTier;
+    changed = true;
+  }
+
+  const plan = typeof usage.plan === "string" ? usage.plan.trim() : "";
+  if (plan && psd.plan !== plan) {
+    nextPsd.plan = plan;
+    changed = true;
+  }
+
+  const discoveredProjectId = extractAntigravityProjectIdFromPayload(
+    subscriptionInfo as Record<string, unknown>
+  );
+  const storedProjectId = getStoredAntigravityProjectId(connection);
+  if (discoveredProjectId && !storedProjectId) {
+    nextPsd.projectId = discoveredProjectId;
+    return { changed: true, nextProjectId: discoveredProjectId };
+  }
+  return { changed };
+}
+
+/** Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not only OAuth). */
+async function syncAntigravitySubscriptionIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
+  if (!usage.subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
+
+  const psd = (connection.providerSpecificData || {}) as JsonRecord;
+  let nextPsd: JsonRecord = { ...psd };
+  const subscriptionResult = usage.subscriptionInfo
+    ? applyAntigravitySubscriptionInfoToPsd(connection, usage, psd, nextPsd)
+    : { changed: false };
+  let changed = subscriptionResult.changed;
+  const nextProjectId = subscriptionResult.nextProjectId;
+
+  if (typeof usage.hasArgon === "boolean") {
+    const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
+    if (argonResult.changed) {
+      nextPsd = argonResult.nextPsd;
+      changed = true;
+    }
+  }
+
+  if (!changed) return connection;
+
+  await updateProviderConnection(connection.id, {
+    ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
+    providerSpecificData: nextPsd,
+  });
+  return {
+    ...connection,
+    ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
+    providerSpecificData: nextPsd,
+  };
+}
+
+/** Persist refreshed Claude bootstrap fields into psd; writes only on diff. */
+async function syncClaudeBootstrapIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (connection.provider !== "claude") return connection;
+  const bootstrap = usage?.bootstrap as Record<string, string | null> | null | undefined;
+  if (!bootstrap || typeof bootstrap !== "object") return connection;
+
+  const psd = (connection.providerSpecificData || {}) as JsonRecord;
+  const mapping: Array<[keyof typeof bootstrap, string]> = [
+    ["account_uuid", "accountUUID"],
+    ["organization_uuid", "organizationUUID"],
+    ["organization_name", "organizationName"],
+    ["organization_type", "organizationType"],
+    ["organization_rate_limit_tier", "organizationRateLimitTier"],
+    // The account's own tier: `rateLimitTier` is otherwise frozen at import (copied from the
+    // CLI credentials file) and goes stale when a Team admin moves seats.
+    ["user_rate_limit_tier", "rateLimitTier"],
+    ["seat_tier", "seatTier"],
+  ];
+
+  const nextPsd: JsonRecord = { ...psd };
+  let changed = false;
+  for (const [bsKey, psdKey] of mapping) {
+    const next = bootstrap[bsKey];
+    if (typeof next === "string" && next.length > 0 && psd[psdKey] !== next) {
+      nextPsd[psdKey] = next;
+      changed = true;
+    }
+  }
+
+  if (!changed) return connection;
+
+  await updateProviderConnection(connection.id, { providerSpecificData: nextPsd });
+  return {
+    ...connection,
+    providerSpecificData: nextPsd,
+  };
+}
+
+export function getProviderLimitsSyncIntervalMinutes(): number {
+  const raw = Number.parseInt(process.env.PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES ?? "", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES;
+}
+
+export function getProviderLimitsSyncIntervalMs(): number {
+  return getProviderLimitsSyncIntervalMinutes() * 60 * 1000;
+}
+
+/** Default gap (ms) inserted between two consecutive OAuth quota fetches. */
+const DEFAULT_PROVIDER_LIMITS_SYNC_SPACING_MS = 1500;
+
+/**
+ * Spacing (ms) applied between consecutive provider-limits fetch batches in a
+ * bulk sync, for BOTH the OAuth and local/API-key paths.
+ *
+ * OAuth providers (Codex/Claude/Kimi-coding/…) are fetched ONE AT A TIME with
+ * this gap so a single host never bursts several simultaneous usage/refresh
+ * requests to the same upstream — bursts read as automated traffic and
+ * contribute to session termination / anomaly flags (and, for rotating-token
+ * providers, to the Auth0 family-revocation race). Local/API-key connections
+ * (e.g. Ollama) keep their fast in-chunk concurrent path, but the gap is now
+ * also applied BETWEEN concurrency chunks so a local endpoint isn't hit by a
+ * simultaneous refresh burst either (#6916). Tunable via
+ * `PROVIDER_LIMITS_SYNC_SPACING_MS`; set to `"0"` to opt out on either path.
+ */
+export function getProviderLimitsSyncSpacingMs(): number {
+  const rawEnv = process.env.PROVIDER_LIMITS_SYNC_SPACING_MS;
+  if (rawEnv === undefined || rawEnv === "") return DEFAULT_PROVIDER_LIMITS_SYNC_SPACING_MS;
+  const raw = Number(rawEnv);
+  return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_PROVIDER_LIMITS_SYNC_SPACING_MS;
+}
+
+export async function getLastProviderLimitsAutoSyncTime(): Promise<string | null> {
+  try {
+    const settings = await getSettings();
+    const value = settings[PROVIDER_LIMITS_AUTO_SYNC_SETTING_KEY];
+    return typeof value === "string" && value.trim() ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+async function setLastProviderLimitsAutoSyncTime(timestamp: string): Promise<void> {
+  await updateSettings({ [PROVIDER_LIMITS_AUTO_SYNC_SETTING_KEY]: timestamp });
+}
+
+export function getCachedProviderLimitsMap(): Record<string, ProviderLimitsCacheEntry> {
+  return getAllProviderLimitsCache();
+}
+
+export async function getSanitizedCachedProviderLimitsMap(): Promise<
+  Record<string, ProviderLimitsCacheEntry>
+> {
+  const caches = getAllProviderLimitsCache();
+  // Sanitization only rewrites Antigravity/agy quota keys; every other provider's cache
+  // entry is returned untouched (see sanitizeProviderLimitsCacheForConnection). The
+  // dashboard polls this on an auto-refresh interval, so avoid the unconditional
+  // `SELECT * FROM provider_connections` + per-row credential decryption that the
+  // previous implementation paid on every poll: skip the scan entirely when nothing is
+  // cached, and otherwise fetch ONLY the Antigravity/agy connections. For any other
+  // provider, byId.get(id) is undefined and the entry is returned verbatim — identical
+  // output to scanning every active connection, but without decrypting unrelated keys.
+  // (LEDGER-2 / #3821-review)
+  const connectionIds = Object.keys(caches);
+  if (connectionIds.length === 0) return {};
+
+  const sanitizableConnections = [
+    ...((await getProviderConnections({
+      isActive: true,
+      provider: "antigravity",
+    })) as unknown as ProviderConnectionLike[]),
+    ...((await getProviderConnections({
+      isActive: true,
+      provider: "agy",
+    })) as unknown as ProviderConnectionLike[]),
+  ];
+  if (sanitizableConnections.length === 0) {
+    // No connection can change the cache → return the raw entries unchanged.
+    return { ...caches };
+  }
+
+  // Refresh the live-discovery snapshot the sync sanitizer reads, so a model the
+  // connection reports but the static catalog predates keeps its quota bucket.
+  await Promise.all([refreshLiveModelIds("antigravity"), refreshLiveModelIds("agy")]);
+
+  const byId = new Map(sanitizableConnections.map((conn) => [conn.id, conn]));
+  const sanitized: Record<string, ProviderLimitsCacheEntry> = {};
+  for (const [connectionId, entry] of Object.entries(caches)) {
+    sanitized[connectionId] =
+      sanitizeProviderLimitsCacheForConnection(byId.get(connectionId), entry) || entry;
+  }
+  return sanitized;
+}
+
+export async function fetchLiveProviderLimits(connectionId: string): Promise<{
+  connection: ProviderConnectionLike;
+  usage: JsonRecord;
+}> {
+  return fetchLiveProviderLimitsWithOptions(connectionId, { forceRefresh: false });
+}
+
+async function fetchLiveProviderLimitsWithOptions(
+  connectionId: string,
+  options: {
+    forceRefresh?: boolean;
+    allowRotatingRefresh?: boolean;
+    includeResetCredits?: boolean;
+  } = {}
+): Promise<{
+  connection: ProviderConnectionLike;
+  usage: JsonRecord;
+}> {
+  let connection = (await getProviderConnectionById(
+    connectionId
+  )) as unknown as ProviderConnectionLike | null;
+  if (!connection) {
+    throw withStatus(new Error("Connection not found"), 404);
+  }
+
+  if (!isSupportedUsageConnection(connection)) {
+    throw withStatus(new Error("Usage not available for this connection"), 400);
+  }
+
+  if (connection.authType !== "oauth") {
+    // L3: route the API-key usage/quota fetch through the connection's proxy context,
+    // mirroring the OAuth branch below (proxyInfo?.proxy ?? null). Without this, API-key
+    // usage egresses on the host IP, ignoring the connection's assigned proxy.
+    const apiKeyProxy = await resolveProxyForConnection(connectionId);
+    const usage = sanitizeUsageQuotasForProvider(
+      connection.provider,
+      (await runWithProxyContext(apiKeyProxy?.proxy ?? null, () =>
+        getUsageForProvider(connection as unknown as JsonRecord, { ...options, includePlan: true })
+      )) as JsonRecord,
+      await refreshLiveModelIds(connection.provider)
+    );
+    if (isRecord(usage.quotas)) {
+      setQuotaCache(
+        connectionId,
+        connection.provider,
+        usage.quotas,
+        isRecord(usage.modelQuotas) ? usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(usage) }
+      );
+    }
+    connection = await syncExpiredStatusIfNeeded(connection, usage);
+    connection = await syncClaudeExtraUsageStateIfNeeded(connection, usage);
+    connection = await syncClaudeBootstrapIfNeeded(connection, usage);
+    connection = await syncAntigravitySubscriptionIfNeeded(connection, usage);
+    connection = await maybeClearRecoveredQuotaState(connection, usage);
+    return { connection, usage };
+  }
+
+  const proxyInfo = await resolveProxyForConnection(connectionId);
+
+  const fetchUsageWithContext = async (proxyConfig: unknown) =>
+    runWithProxyContext(proxyConfig, async () => {
+      let conn = connection as ProviderConnectionLike;
+      let wasRefreshed = false;
+
+      const result = await refreshAndUpdateCredentials(conn, {
+        allowRotatingRefresh: options.allowRotatingRefresh,
+      });
+      conn = result.connection;
+      wasRefreshed = result.refreshed;
+
+      if (wasRefreshed) {
+        await syncToCloudIfEnabled();
+      }
+
+      let usageData = sanitizeUsageQuotasForProvider(
+        conn.provider,
+        (await getUsageForProvider(conn as unknown as JsonRecord, {
+          ...options,
+          includePlan: true,
+        })) as JsonRecord,
+        await refreshLiveModelIds(conn.provider)
+      );
+
+      // Reactive 401 recovery (on-demand/force path only): an unauthorized usage
+      // response means the access token is actually dead. Force ONE serialized
+      // re-mint and retry once. This recovers imported accounts (expiresAt=null,
+      // where the proactive needsRefresh heuristic never fires) without ever
+      // refreshing proactively from the bulk path.
+      if (options.allowRotatingRefresh && !wasRefreshed && isUsageAuthError(usageData?.message)) {
+        const forced = await refreshAndUpdateCredentials(conn, {
+          allowRotatingRefresh: true,
+          force: true,
+        });
+        if (forced.refreshed || forced.adopted) {
+          conn = forced.connection;
+          if (forced.refreshed) await syncToCloudIfEnabled();
+          usageData = sanitizeUsageQuotasForProvider(
+            conn.provider,
+            (await getUsageForProvider(conn as unknown as JsonRecord, {
+              ...options,
+              includePlan: true,
+            })) as JsonRecord,
+            await refreshLiveModelIds(conn.provider)
+          );
+        }
+      }
+
+      // Only the dashboard's on-demand refresh lists credits; background polls keep
+      // their base usage request and never trigger reset-credit activity. The only
+      // background exception is the opt-in, capped sweep in
+      // src/lib/services/codexResetCreditAutospend.ts, and it runs outside this path.
+      if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
+        await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
+      }
+      connection = conn;
+      return { usage: usageData };
+    });
+
+  let result: { usage: JsonRecord };
+  const proxyConfig = proxyInfo?.proxy || null;
+  const failClosedOnProxyFailure = shouldFailClosedForProviderLimitsProxy(connection, proxyInfo);
+
+  try {
+    result = await fetchUsageWithContext(proxyConfig);
+  } catch (error: any) {
+    const isThrownNetworkError =
+      error?.message === "fetch failed" ||
+      error?.code === "PROXY_UNREACHABLE" ||
+      error?.code === "UND_ERR_CONNECT_TIMEOUT" ||
+      error?.cause?.code === "ECONNREFUSED";
+
+    if (proxyConfig && isThrownNetworkError) {
+      if (failClosedOnProxyFailure) {
+        console.warn(
+          "[ProviderLimits] Account-scoped %s proxy fetch failed for %s; failing closed without direct retry:",
+          connection.provider,
+          connectionId,
+          error?.message
+        );
+        throw error;
+      }
+
+      console.warn(
+        "[ProviderLimits] Proxy fetch threw for %s, retrying without proxy:",
+        connectionId,
+        error?.message
+      );
+      result = await fetchUsageWithContext(null);
+    } else {
+      throw error;
+    }
+  }
+
+  if (proxyConfig && isNetworkFailureMessage(result.usage?.message)) {
+    if (failClosedOnProxyFailure) {
+      const message =
+        typeof result.usage.message === "string"
+          ? result.usage.message
+          : "Provider-limits proxy request failed";
+      console.warn(
+        "[ProviderLimits] Account-scoped %s proxy usage failed for %s; failing closed without direct retry:",
+        connection.provider,
+        connectionId,
+        message
+      );
+      throw withStatus(new Error(message), 503);
+    }
+
+    console.warn(
+      "[ProviderLimits] Proxy usage returned network error for %s, retrying without proxy:",
+      connectionId,
+      result.usage.message
+    );
+    result = await fetchUsageWithContext(null);
+  }
+
+  if (connection.provider === "codex") {
+    const data = await syncCodexQuotaObservation(
+      connection.id,
+      result.usage,
+      connection.providerSpecificData
+    );
+    if (data) connection = { ...connection, providerSpecificData: data };
+  }
+  if (isRecord(result.usage.quotas)) {
+    setQuotaCache(
+      connectionId,
+      connection.provider,
+      result.usage.quotas,
+      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
+      { complete: isCompleteUsageReading(result.usage) }
+    );
+  }
+  connection = await syncExpiredStatusIfNeeded(connection, result.usage);
+  connection = await syncClaudeExtraUsageStateIfNeeded(connection, result.usage);
+  connection = await syncClaudeBootstrapIfNeeded(connection, result.usage);
+  connection = await syncAntigravitySubscriptionIfNeeded(connection, result.usage);
+  connection = await maybeClearRecoveredQuotaState(connection, result.usage);
+
+  return {
+    connection,
+    // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
+    // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
+    usage:
+      connection.provider === "claude"
+        ? withClaudeResetCreditCount(connection.id, result.usage)
+        : result.usage,
+  };
+}
+
+function cacheReadObservedAt(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord,
+  readStartedAt: string
+): string | undefined {
+  return connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined;
+}
+
+export async function fetchAndPersistProviderLimits(
+  connectionId: string,
+  source: SyncSource = "manual",
+  opts: { allowRotatingRefresh?: boolean; includeResetCredits?: boolean } = {}
+): Promise<{
+  connection: ProviderConnectionLike;
+  usage: JsonRecord;
+  cache: ProviderLimitsCacheEntry;
+}> {
+  // Conservative observation ordering: a slow usage poll must not outrank
+  // inference evidence accepted while that poll was in flight.
+  const readStartedAt = new Date().toISOString();
+  const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
+    forceRefresh: source === "manual",
+    allowRotatingRefresh: opts.allowRotatingRefresh,
+    includeResetCredits: opts.includeResetCredits,
+  });
+  const newCache = toProviderLimitsCacheEntry(
+    usage,
+    source,
+    cacheReadObservedAt(connection, usage, readStartedAt)
+  );
+  const previous = getProviderLimitsCache(connectionId);
+  const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
+
+  // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
+  // Serve the prior entry instead; only successful fetches update the cache.
+  if (cache === previous && newCache.message) {
+    // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
+    // so a cached count — e.g. from before a redeem — must not come back through here.
+    const isClaude = connection.provider === "claude";
+    const bankedResetCredits = isClaude ? newCache.bankedResetCredits : previous.bankedResetCredits;
+    let served = previous;
+    if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
+      const { bankedResetCredits: _cached, ...rest } = previous;
+      served = setProviderLimitsCache(
+        connectionId,
+        bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
+      );
+    }
+    const staleUsage: JsonRecord = {
+      ...usage,
+      quotas: previous.quotas,
+      modelQuotas: previous.modelQuotas,
+      plan: previous.plan ?? usage.plan ?? null,
+      bankedResetCredits,
+      paidCredits: previous.paidCredits,
+      billing: previous.billing,
+      message: null,
+      _stale: true,
+      _staleSince: previous.fetchedAt,
+      _staleReason: newCache.message,
+    };
+    if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
+    return { connection, usage: staleUsage, cache: served };
+  }
+
+  const mergedUsage: JsonRecord = {
+    ...usage,
+    ...(cache.billing ? { billing: cache.billing } : {}),
+  };
+  setProviderLimitsCache(connectionId, cache);
+  if (connection.provider === "codex") {
+    const current = getProviderLimitsCache(connectionId) ?? cache;
+    return {
+      connection,
+      usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
+      cache: current,
+    };
+  }
+  return { connection, usage: mergedUsage, cache };
+}
+
+async function fetchUsageCacheForSync(connection: ProviderConnectionLike, source: SyncSource) {
+  const existingCache = getProviderLimitsCache(connection.id);
+  await refreshLiveModelIds(connection.provider);
+  const forceRefresh =
+    source === "manual" || shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
+  const readStartedAt = new Date().toISOString();
+  const { usage } = await fetchLiveProviderLimitsWithOptions(connection.id, { forceRefresh });
+  const nextCache = toProviderLimitsCacheEntry(
+    usage,
+    source,
+    cacheReadObservedAt(connection, usage, readStartedAt)
+  );
+  const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
+  return { connectionId: connection.id, cache };
+}
+
+export async function syncAllProviderLimits(
+  options: {
+    source?: SyncSource;
+    concurrency?: number;
+  } = {}
+): Promise<{
+  total: number;
+  succeeded: number;
+  failed: number;
+  caches: Record<string, ProviderLimitsCacheEntry>;
+  errors: Record<string, string>;
+}> {
+  const { source = "manual", concurrency = 5 } = options;
+  const connectionRows = (await getProviderConnections({
+    isActive: true,
+  })) as unknown as ProviderConnectionLike[];
+  const connections = connectionRows.filter(isSupportedUsageConnection);
+  const cacheEntries: Array<{ connectionId: string; entry: ProviderLimitsCacheEntry }> = [];
+  const caches: Record<string, ProviderLimitsCacheEntry> = {};
+  const errors: Record<string, string> = {};
+
+  const recordResult = (
+    connectionId: string,
+    result: PromiseSettledResult<{ connectionId: string; cache: ProviderLimitsCacheEntry }>
+  ) => {
+    if (result.status === "fulfilled") {
+      const { cache } = result.value;
+      const previous = getProviderLimitsCache(connectionId);
+      if (cache === previous) {
+        caches[connectionId] = cache;
+        return;
+      }
+      cacheEntries.push({ connectionId, entry: cache });
+      caches[connectionId] = cache;
+      return;
+    }
+    const reason = result.reason as { message?: string } | undefined;
+    errors[connectionId] = reason?.message || "Failed to refresh provider limits";
+  };
+
+  const fetchOne = (connection: ProviderConnectionLike) =>
+    fetchUsageCacheForSync(connection, source);
+
+  // OAuth connections are processed STRICTLY SEQUENTIALLY (chunk size 1) with a
+  // spacing gap so a single host never bursts simultaneous usage/refresh
+  // requests to the same upstream (anomaly/session-termination guard; see
+  // getProviderLimitsSyncSpacingMs). Local/API-key connections keep their fast
+  // in-chunk concurrent path, spaced BETWEEN chunks (#6916).
+  const oauthConnections = connections.filter((c) => c.authType === "oauth");
+  const otherConnections = connections.filter((c) => c.authType !== "oauth");
+  const spacingMs = getProviderLimitsSyncSpacingMs();
+
+  const recordChunk = (
+    chunk: ProviderConnectionLike[],
+    results: PromiseSettledResult<{ connectionId: string; cache: ProviderLimitsCacheEntry }>[]
+  ) => {
+    results.forEach((result, index) => {
+      const connectionId = chunk[index]?.id;
+      if (connectionId) recordResult(connectionId, result);
+    });
+  };
+
+  await syncInChunksWithSpacing(otherConnections, concurrency, spacingMs, fetchOne, recordChunk);
+  await syncInChunksWithSpacing(oauthConnections, 1, spacingMs, fetchOne, recordChunk);
+
+  if (cacheEntries.length > 0) {
+    setProviderLimitsCacheBatch(cacheEntries);
+  }
+
+  if (source === "scheduled") {
+    await setLastProviderLimitsAutoSyncTime(new Date().toISOString());
+  }
+
+  return {
+    total: connections.length,
+    succeeded: cacheEntries.length,
+    failed: connections.length - cacheEntries.length,
+    caches,
+    errors,
+  };
+}

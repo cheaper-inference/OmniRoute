@@ -1,0 +1,395 @@
+// Tests for the Rule #12 error-sanitization gate (scripts/check/check-error-helper.mjs).
+// Exercises the pure findErrorHelperViolations() against synthetic file shapes so the
+// conservative heuristic (flag direct + indirect raw-error leaks, never internal sinks
+// or helper-importing files) is locked down as a regression guard.
+import test from "node:test";
+import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+// @ts-expect-error — .mjs gate module has no type declarations; runtime shape is known.
+import {
+  findErrorHelperViolations,
+  KNOWN_MISSING_ERROR_HELPER,
+} from "../../scripts/check/check-error-helper.mjs";
+
+type FileEntry = { path: string; source: string };
+type FindFn = (files: FileEntry[], allowlist: Set<string>) => string[];
+const find = findErrorHelperViolations as FindFn;
+const allowlist = KNOWN_MISSING_ERROR_HELPER as Set<string>;
+
+const EMPTY = new Set<string>();
+
+function run(source: string, path = "open-sse/executors/x.ts"): string[] {
+  return find([{ path, source } as FileEntry], EMPTY);
+}
+
+test("flags raw err.message assigned directly to an error: field", () => {
+  const src = `export function exec() {
+    try { doThing(); } catch (err) {
+      return { success: false, status: 502, error: err.message };
+    }
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags raw err.message interpolated into a message: field", () => {
+  const src = `function build(err: Error) {
+    return new Response(JSON.stringify({ error: { message: \`boom: \${err.message}\` } }));
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags err.stack placed into a message: field", () => {
+  const src = `function build(err: Error) {
+    return { error: { message: err.stack } };
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags multi-line OpenAI error envelope inside new Response()", () => {
+  const src = `function build(err: unknown) {
+    return new Response(
+      JSON.stringify({
+        error: {
+          message: isTls
+            ? \`tls failed: \${(err as Error).message}\`
+            : \`conn failed: \${err instanceof Error ? err.message : String(err)}\`,
+          type: "upstream_error",
+        },
+      }),
+      { status: 502 }
+    );
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags a tainted local variable passed into a response-builder call", () => {
+  const src = `function makeErrorResponse(s: number, m: string) { return new Response(m); }
+  function exec(err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { response: makeErrorResponse(401, \`auth failed: \${msg}\`) };
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags errResp(msg) where msg is tainted", () => {
+  const src = `function errResp(message: string) { return new Response(JSON.stringify({ error: { message } })); }
+  function exec(err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to get nonce";
+    return { response: errResp(msg) };
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("flags forwarded upstream body.error.message without sanitize", () => {
+  const src = `function build(body: { error: { message: string } }) {
+    return { success: false, error: body.error.message };
+  }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+// --- Negative cases: the gate must NOT flag these (conservative, no false positives) ---
+//
+// G-03 (#15159) INVERTED the next two cases. They used to assert "a file that
+// imports utils/error is never flagged", which is exactly the blind spot that let
+// the audit's live E-09 (deepseek-web.ts: imports the sanitizer, keeps a raw
+// file-local builder) ship green. Their fixtures contain a REAL raw leak, so
+// asserting `[]` locked the bug in. Trust is now call-scoped: an import only
+// excuses the line that actually routes through it. Do NOT "restore" these — the
+// call-scoped contract is asserted in check-error-helper-call-scope.test.ts.
+
+test("G-03: a file importing only the sanitizer is STILL flagged for a raw leak", () => {
+  const src = `import { sanitizeErrorMessage } from "../utils/error.ts";
+  function build(err: Error) { return { error: { message: err.message } }; }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("G-03: importing a builder name does not license a separate raw Response body", () => {
+  const src = `import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+  function build(err: Error) { return new Response(JSON.stringify({ error: { message: \`x \${err.message}\` } })); }`;
+  assert.deepEqual(run(src), ["open-sse/executors/x.ts"]);
+});
+
+test("does NOT flag raw err.message inside a saveCallLog audit row", () => {
+  const src = `function exec(err: Error) {
+    saveCallLog({
+      method: "POST",
+      status: 502,
+      error: err.message,
+      requestBody: rb,
+    }).catch(() => {});
+    return ok;
+  }`;
+  assert.deepEqual(run(src), []);
+});
+
+test("does NOT flag raw err.message inside a log call", () => {
+  const src = `function exec(err: Error) {
+    log?.error?.("X", \`refresh error: \${err.message}\`);
+    return ok;
+  }`;
+  assert.deepEqual(run(src), []);
+});
+
+test("does NOT flag err.message inside a thrown Error", () => {
+  const src = `function exec(err: Error) {
+    throw new Error(\`SPA send failed: \${err instanceof Error ? err.message : String(err)}\`);
+  }`;
+  assert.deepEqual(run(src), []);
+});
+
+test("does NOT flag err.message inside reject()", () => {
+  const src = `new Promise((_, reject) => {
+    onErr((err: Error) => reject(new Error(\`failed: \${err.message}\`)));
+  });`;
+  assert.deepEqual(run(src), []);
+});
+
+test("does NOT flag upstream-event read event.error.message", () => {
+  const src = `function parse(event: { error: { message: string } }) {
+    const content = typeof event.error === "string" ? event.error : event.error.message;
+    return { choices: [{ message: { content } }] };
+  }`;
+  assert.deepEqual(run(src), []);
+});
+
+test("does NOT flag a sanitized body.error.message line", () => {
+  const src = `function build(body: { error: { message: string } }) {
+    return { error: sanitizeErrorMessage(body.error.message) };
+  }`;
+  assert.deepEqual(run(src), []);
+});
+
+// --- Allowlist behavior ---
+
+test("an allowlisted path is suppressed even when it would otherwise flag", () => {
+  const src = `function build(err: Error) { return { error: { message: err.message } }; }`;
+  const path = "open-sse/executors/legacy.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), [path]);
+  assert.deepEqual(find([{ path, source: src } as FileEntry], new Set([path])), []);
+});
+
+test("every shipped allowlist entry is a real on-disk source file", () => {
+  // G-03 (#15159): this gate now sees 23 pre-existing Rule #12 violations that the
+  // old file-level skip made invisible, so they are frozen (see the justification
+  // blocks in check-error-helper.mjs). Freezing is only honest if every entry
+  // points at a file that exists — a typo here would silently disable the gate
+  // for a path that later gets "fixed" by rename.
+  //
+  // Note the allowlist was NOT empty before this change either in spirit: the
+  // previous assertion was a hardcoded `[]`, which passed for a set of zero and
+  // therefore could not detect a stale or bogus entry. The gate's own
+  // `assertNoStale` in main() catches entries that stop violating; this test
+  // catches entries that never existed.
+  assert.ok(allowlist.size > 0, "allowlist should not be empty after G-03");
+  for (const entry of allowlist) {
+    assert.ok(existsSync(new URL(`../../${entry}`, import.meta.url)), `missing file: ${entry}`);
+  }
+});
+
+async function assertRouteRemovedFromMissingHelperAllowlist(path: string) {
+  const source = await import("node:fs").then((fs) => fs.readFileSync(path, "utf8"));
+
+  assert.equal(allowlist.has(path), false);
+  assert.deepEqual(find([{ path, source }], EMPTY), []);
+  assert.ok(source.includes("sanitizeErrorMessage"));
+}
+
+test("import-json route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/settings/import-json/route.ts");
+});
+
+test("logs export route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/logs/export/route.ts");
+});
+
+test("proxy logs route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/usage/proxy-logs/route.ts");
+});
+
+test("models catalog route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/models/catalog/route.ts");
+});
+
+test("cli-tools backups route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/cli-tools/backups/route.ts");
+});
+
+test("cli-tools guide-settings route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist(
+    "src/app/api/cli-tools/guide-settings/[toolId]/route.ts"
+  );
+});
+
+test("providers test-batch route has been removed from the shipped missing-helper allowlist", async () => {
+  await assertRouteRemovedFromMissingHelperAllowlist("src/app/api/providers/test-batch/route.ts");
+});
+
+test("returns multiple violating paths and preserves input order", () => {
+  const files: FileEntry[] = [
+    { path: "open-sse/executors/a.ts", source: `return { error: { message: err.message } };` },
+    {
+      // G-03: `x` is not a canonical builder, so this import buys no trust and
+      // the raw `err.message` is a violation like any other.
+      path: "open-sse/executors/b.ts",
+      source: `import { x } from "../utils/error.ts"; return { error: err.message };`,
+    },
+    { path: "open-sse/executors/c.ts", source: `return { error: e.stack };` },
+  ];
+  assert.deepEqual(find(files, EMPTY), [
+    "open-sse/executors/a.ts",
+    "open-sse/executors/b.ts",
+    "open-sse/executors/c.ts",
+  ]);
+});
+
+// --- 6A.8: expanded scope (MCP server + API route.ts) ---
+
+test("6A.8: flags a file under open-sse/mcp-server/ that forwards raw err.message", () => {
+  const src = `function handleTool(err: Error) { return { error: { message: err.message } }; }`;
+  const result = find([{ path: "open-sse/mcp-server/tools/fakeTool.ts", source: src }], EMPTY);
+  assert.deepEqual(result, ["open-sse/mcp-server/tools/fakeTool.ts"]);
+});
+
+test("6A.8: flags a src/app/api route.ts that forwards raw err.message", () => {
+  const src = `function handler(err: Error) { return new Response(JSON.stringify({ error: { message: err.message } })); }`;
+  const result = find([{ path: "src/app/api/widgets/route.ts", source: src }], EMPTY);
+  assert.deepEqual(result, ["src/app/api/widgets/route.ts"]);
+});
+
+test("6A.8: does NOT flag mcp-server file that imports utils/error", () => {
+  const src = `import { buildErrorBody } from "@omniroute/open-sse/utils/error";
+  function handleTool(err: Error) { return buildErrorBody(err); }`;
+  const result = find([{ path: "open-sse/mcp-server/tools/safeTool.ts", source: src }], EMPTY);
+  assert.deepEqual(result, []);
+});
+
+test("6A.8: does NOT flag api route.ts that imports utils/error", () => {
+  const src = `import { sanitizeErrorMessage } from "../../../../open-sse/utils/error.ts";
+  export async function POST(req: Request) { try { } catch (err) { return new Response(sanitizeErrorMessage(err)); } }`;
+  const result = find([{ path: "src/app/api/safe-route/route.ts", source: src }], EMPTY);
+  assert.deepEqual(result, []);
+});
+
+// --- G-11 (#15159): MCP tool-result shapes the gate historically could not see ---
+
+test("G-11: flags an MCP tool result built from an alias-laundered raw error", () => {
+  // The exact advancedTools.ts catch shape: `const msg = err.message` on one line,
+  // then `${msg}` interpolated into the client-facing tool result on a later line.
+  const src = `export async function handleThing(args: unknown) {
+  try {
+    return await apiFetch("/api/x");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { content: [{ type: "text" as const, text: \`Error: \${msg}\` }], isError: true };
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/advancedTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), [path]);
+});
+
+test("G-11: flags a raw-error ternary in a tool-result error field", () => {
+  // The handleTestCombo per-provider shape (advancedTools.ts:574): the raw error
+  // sits on its own `error:` line inside a returned result object — no builder call.
+  const src = `export async function runModel() {
+  try {
+    return await apiFetch("/v1/chat/completions");
+  } catch (err) {
+    return {
+      provider: "p",
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/advancedTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), [path]);
+});
+
+test("G-11: does NOT flag a tool result whose alias went through toSafeMcpErrorMessage", () => {
+  const src = `import { toSafeMcpErrorMessage } from "../errorMessage.ts";
+export async function handleThing() {
+  try {
+    return await apiFetch("/api/x");
+  } catch (err) {
+    const msg = toSafeMcpErrorMessage(err, "Tool failed");
+    return { content: [{ type: "text" as const, text: \`Error: \${msg}\` }], isError: true };
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/advancedTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
+test("G-11: does NOT flag a tainted alias sanitized at the interpolation site", () => {
+  const src = `export async function handleThing() {
+  try {
+    return await apiFetch("/api/x");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { content: [{ type: "text" as const, text: \`Error: \${sanitizeErrorMessage(msg)}\` }], isError: true };
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/advancedTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
+// --- G-11 false-positive guards (found by running the tightened gate on the repo) ---
+
+test("G-11: does NOT read a ternary `err.message : String(err)` as a field named message", () => {
+  // `err.message : String(err)` contains the text `message :`, which looks exactly
+  // like an object field named `message` to a naive field matcher. A member access
+  // is not a field: the leading `.` must disqualify it. Without this the tightened
+  // gate flags every internal helper that merely formats an error message.
+  const src = `export function describeError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  return err instanceof Error ? err.message : String(err);
+}`;
+  const path = "open-sse/mcp-server/audit.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
+test("G-11: does NOT flag a raw error inside a logToolCall audit row", () => {
+  // logToolCall writes the MCP audit DB row — the same internal-sink class the gate
+  // already exempts for saveCallLog. The handler re-throws, so nothing client-facing
+  // is built from errorMessage here.
+  const src = `export async function handleThing(args: unknown) {
+  try {
+    return await doThing();
+  } catch (error) {
+    const duration = Date.now() - start;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    await logToolCall("omniroute_thing", args, { error: errorMessage }, duration, false, "ERROR");
+    throw error;
+  }
+}`;
+  const path = "open-sse/mcp-server/tools/compressionTools.ts";
+  assert.deepEqual(find([{ path, source: src } as FileEntry], EMPTY), []);
+});
+
+// --- 6A.8: stale-allowlist enforcement ---
+
+// @ts-expect-error — reportStaleEntries exported from the gate module
+import { reportStaleEntries } from "../../scripts/check/lib/allowlist.mjs";
+type ReportStaleFn = (allowlist: Set<string> | string[], live: string[], gate: string) => string[];
+const reportStale = reportStaleEntries as ReportStaleFn;
+
+test("6A.8 stale: reportStaleEntries identifies entries that no longer match any live violation", () => {
+  const allow = new Set(["open-sse/executors/fixed.ts", "open-sse/executors/live.ts"]);
+  const live = ["open-sse/executors/live.ts"];
+  const stale = reportStale(allow, live, "check-error-helper");
+  assert.deepEqual(stale, ["open-sse/executors/fixed.ts"]);
+});
+
+test("6A.8 stale: no stale entries when all allowlist items are still live violations", () => {
+  const allow = new Set(["open-sse/executors/a.ts", "open-sse/executors/b.ts"]);
+  const live = ["open-sse/executors/a.ts", "open-sse/executors/b.ts"];
+  assert.deepEqual(reportStale(allow, live, "check-error-helper"), []);
+});
+
+test("6A.8: the shipped allowlist freezes the new expanded-scope known violators (api routes)", () => {
+  // These are the real violations found when expanding scope to src/app/api/**/route.ts.
+  // They are frozen as pre-existing; fixing one requires removing it from the allowlist.
+  const expectedApiViolators: string[] = [];
+  for (const p of expectedApiViolators) {
+    assert.ok(allowlist.has(p), `expected allowlist to contain pre-existing API violation: ${p}`);
+  }
+});
