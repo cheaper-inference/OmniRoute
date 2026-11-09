@@ -83,14 +83,12 @@ export function ComboTestSummaryNote({ results }) {
       ? getI18nOrFallback(t, "jevNotConfigured", String(results.jev.configurationNote))
       : null;
     return (
-      <div className="rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2.5 py-2 flex flex-col gap-1.5">
-        <p className="text-xs text-indigo-800 dark:text-indigo-200">{admittedSentence}</p>
-        <p className="text-xs text-indigo-800 dark:text-indigo-200">{heldSentence}</p>
-        <p className="text-xs text-indigo-800 dark:text-indigo-200">{blockedSentence}</p>
+      <div className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2 flex flex-col gap-1.5">
+        <p className="text-xs text-primary">{admittedSentence}</p>
+        <p className="text-xs text-primary">{heldSentence}</p>
+        <p className="text-xs text-primary">{blockedSentence}</p>
         {configurationNote ? (
-          <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-            {configurationNote}
-          </p>
+          <p className="text-xs font-medium text-warning">{configurationNote}</p>
         ) : null}
         <p className="text-[10px] text-text-muted">
           {getI18nOrFallback(

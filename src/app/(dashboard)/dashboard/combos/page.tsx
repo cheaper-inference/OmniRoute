@@ -3659,8 +3659,8 @@ function ComboFormModal({
                 ))}
               </RadioGroup>
               {strategy === "jev" && (
-                <div className="mt-2 rounded-md border border-indigo-500/20 bg-indigo-500/5 px-2.5 py-2">
-                  <p className="text-[10px] text-indigo-700 dark:text-indigo-300">
+                <div className="mt-2 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2">
+                  <p className="text-[10px] text-primary">
                     {getI18nOrFallback(
                       t,
                       "jevPrivacyNote",
