@@ -2,21 +2,22 @@
 // Generates the per-model free-tier budget card (docs/screenshots/free-tier-budget-card.svg) from
 // the catalog, through the same function the docs gate and the dashboard use — never by parsing
 // the data file with a regex (that silently skipped every row carrying an extra field). Same kit
-// look as the README diagrams: palette and text roles from scripts/docs/readme-diagram-theme.mjs,
-// fonts subset and embedded by scripts/docs/readme-fonts.mjs. No page embeds this file today; the
-// README draws the provider-level sibling, docs/diagrams/free-tier-budget.svg. Here each row is
-// the largest model of its pool, under the name the catalog gives that model.
+// look as the README diagrams: the Editions palette and the text roles from
+// scripts/docs/readme-diagram-theme.mjs; scripts/docs/readme-outline.mjs draws the Switzer roles as
+// vector outlines and keeps the code roles as text on the embedded mono subset. No page embeds this
+// file today; the README draws the provider-level sibling, docs/diagrams/free-tier-budget.svg.
+// Here each row is the largest model of its pool, under the name the catalog gives that model.
 // Run from the repo root (a shared-module or catalog change means regenerating this file too;
 // tests/unit/gen-budget-card-svg.test.ts fails until you do):
 //   node --import tsx/esm scripts/research/gen-budget-card-svg.mjs [--out path.svg]
 //
 // buildBudgetCardCopy() returns every string the card draws, formatted exactly as drawn: it is
-// both the drawn text and the subset input for the embedded fonts.
+// both the drawn text and what the outlining step shapes (or, for the code roles, subsets).
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
 import { svgOpen, gridDefs, esc } from "../docs/readme-diagram-theme.mjs";
-import { buildFontFaceCss, fontStack } from "../docs/readme-fonts.mjs";
+import { outlineSvg } from "../docs/readme-outline.mjs";
 
 const W = 1200;
 const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
@@ -106,8 +107,8 @@ export function buildBudgetCardCopy() {
   return buildBudgetCardModel().copy;
 }
 
-// Segment / dot tones: the largest pool is the card's one lime emphasis; the rest cycle the kit's
-// status and neutral fills (the grid dots repeat the same sequence as the bar).
+// Segment / dot tones: the largest pool is the card's one copper emphasis (the Editions accent);
+// the rest cycle the kit's status and neutral fills (the grid dots repeat the bar's sequence).
 const TONES = ["info", "ok", "warn", "ink", "muted"];
 const tone = (i) => (i === 0 ? "accent" : TONES[(i - 1) % TONES.length]);
 const dotClass = (i) => (i === 0 ? "accent stroke-ink" : tone(i));
@@ -120,12 +121,6 @@ const GRID = { cols: 4, colW: 270, x: 66, y: 298, rowH: 30 };
 
 export async function renderBudgetCard() {
   const { copy: C, title, desc, grid, steady } = buildBudgetCardModel();
-  const { css } = await buildFontFaceCss({
-    display: [...C.title, ...C.statValues].join(""),
-    ui: [...C.statLabels, ...C.note].join("") + C.gatedNote.join(""),
-    uiBold: C.credits.join(""),
-    mono: [C.meta, C.caption, C.poolNames, C.poolValues, C.chips, C.footer].flat().join(""),
-  });
 
   const n = grid.length;
   const extra = BAR.w - BAR.min * n - (n - 1);
@@ -188,13 +183,13 @@ export async function renderBudgetCard() {
   const footerY = y;
   const H = footerY + 24;
 
-  return (
+  // The stat figures: the kit's num role (Switzer 500, -0.02em) at the card's 46px.
+  const svg =
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title,
       desc,
-      fontFaceCss: css,
-      extraCss: `.bc-stat{${fontStack("display")};font-weight:400;font-size:46px}`,
+      extraCss: `.bc-stat{font-weight:500;font-size:46px;letter-spacing:-0.02em}`,
     }) +
     gridDefs("bc-grid") +
     `  <defs>\n` +
@@ -223,8 +218,8 @@ export async function renderBudgetCard() {
     `  <rect x="60" y="${noteY}" width="1080" height="${noteH}" rx="12" class="surface" stroke-width="1"/>\n` +
     `${noteText.join("\n")}\n` +
     `  <text x="1140" y="${footerY}" text-anchor="end" class="mono-xs">${esc(C.footer[0])}</text>\n` +
-    "</svg>\n"
-  );
+    "</svg>\n";
+  return outlineSvg(svg);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

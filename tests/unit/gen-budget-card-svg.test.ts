@@ -83,13 +83,15 @@ test(
   }
 );
 
-test("the card embeds the four kit faces and nothing external", async () => {
+test("the card embeds only the mono subset, draws Switzer as outlines and nothing external", async () => {
   const svg = await renderBudgetCard();
-  // display (title, stat figures) + ui + uiBold + mono.
-  assert.equal((svg.match(/@font-face/g) || []).length, 4);
-  for (const family of ["CI Serif", "CI Sans", "CI Mono"]) {
-    assert.ok(svg.includes(`font-family:"${family}"`), family);
+  // Switzer is never embedded (FFL): only the code roles keep a face, the OFL IBM Plex Mono subset.
+  assert.equal((svg.match(/@font-face/g) || []).length, 1);
+  assert.ok(svg.includes(`font-family:"CI Mono"`), "CI Mono");
+  for (const family of ["CI Serif", "CI Sans", "Switzer"]) {
+    assert.ok(!svg.includes(`font-family:"${family}"`), `${family} must not be embedded`);
   }
+  assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
   assert.match(svg, /^<svg viewBox="0 0 1200 \d+" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
@@ -113,10 +115,16 @@ test("the figures stay readable as <text> in the raw file", async () => {
   assert.doesNotMatch(svg, /<image/);
 });
 
-test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
+test("light and dark Editions palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderBudgetCard();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /:root\{[^}]*--surface:#faf9f4/);
+  assert.match(svg, /:root\{[^}]*--ink:#20211c/);
+  assert.match(svg, /:root\{[^}]*--accent:#e5ac82/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--surface:#191a16/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--ink:#f2f0e8/);
+  assert.doesNotMatch(svg, /#d8ff00|#040d10|#fbfbf8/i, "no Classic palette value survives");
   const body = svg.slice(svg.indexOf("</style>"));
   assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });
