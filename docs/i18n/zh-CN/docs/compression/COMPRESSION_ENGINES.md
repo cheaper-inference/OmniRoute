@@ -373,7 +373,7 @@ MCP工具文本结果被裁剪在`mcpAccessibility.maxTextChars` （默认`50000
 
 ### 会话生命周期
 
-Streamable-HTTP 会话空闲，服务器获取它们；空闲窗口是`MCP_SESSION_IDLE_MS`常量（通过名称引用，而不是硬编码值，因此该页面在更改时不会漂移）。空闲会话的症状是HTTP 404 和`Unknown Mcp-Session-Id` —补救措施是重新连接或重新启动会话，**不是**旋转关键点、更改范围或重命名工具。
+Streamable-HTTP 会话空闲，服务器获取它们；空闲窗口由`OMNIROUTE_MCP_SESSION_IDLE_MS`设置（默认 5 分钟；通过名称引用，而不是硬编码值，因此该页面在更改时不会漂移）。空闲会话的症状是HTTP 404 和`Unknown Mcp-Session-Id` —补救措施是重新连接或重新启动会话，**不是**旋转关键点、更改范围或重命名工具。
 
 ## API 接口
 

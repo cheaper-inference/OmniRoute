@@ -389,7 +389,7 @@ Instrumentul de recuperare se numește în prezent `omniroute_ccr_retrieve` (pre
 
 ### Ciclul de viață al sesiunii
 
-Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este constanta `MCP_SESSION_IDLE_MS` (referită prin nume, nu o valoare codificată, deci această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
+Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este setată de `OMNIROUTE_MCP_SESSION_IDLE_MS` (implicit 5 minute; referit după nume, nu o valoare codificată, astfel încât această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
 
 ## Suprafața API
 

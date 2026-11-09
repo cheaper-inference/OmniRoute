@@ -126,6 +126,27 @@ handleComboChat(저장된 콤보와 동일한 엔진)
 | `src/sse/handlers/chat.ts`                                | 통합: auto 접두사 단락 처리             |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` 시스템 항목     |
 
+## 저장된 자동 콤보에 대한 계정 환경설정
+
+Intelligent Auto 편집기는 옵션을 제공합니다.** 계정 환경설정** 부분. 각 연결은 기본 설정, 일반(기본값), 예약 또는 제외됨일 수 있습니다. 여러 연결이 계층을 공유할 수 있습니다. 첫 번째 적격 계층 내에서 자동 선택하여 해당 계층에서 scoring/router 동작을 유지합니다. 실패한 시도는 나머지 구체적인 계정으로 전달되며, 예비보다 정상보다 선호됩니다. 제외된 연결은 이 콤보에서 사용되지 않습니다.
+
+설정은 ID 연결로 입력된 `config.accountPreferences` 로 저장됩니다.
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+생략되거나 빈 지도는 기존 경로를 유지합니다. 기본 설정에서는 비활성화된 연결을 활성화하거나, API 키 액세스 권한을 부여하거나, 할당량이 차단된 후보를 복원하거나, 예산 확인을 우회하지 않습니다. 각 시도는 구체적인 연결로 제한되므로 계정 대체는 콤보 라우터 뒤의 계층으로 이동할 수 없습니다. 기존 세션 선호도는 적격 계정을 유지할 수 있습니다. 기본 턴에 바인딩된 계정을 제외하면 자동으로 계정을 변경하는 대신 해당 턴이 중지됩니다.
+
+구성된 기본 설정은 계정 인식 자동 경로를 사용합니다. 바인딩되지 않은 컨텍스트 캐시, 스마트 파이프라인, 카오스 및 섀도우 바로가기는 전달되지 않습니다. 이러한 요청에 대해서는 투기적 헤징이 비활성화되어 있으므로 예비 계정은 우선 계정과 경쟁할 수 없습니다. 다른 콤보 전략은 이 설정을 해석하지 않습니다. 자동에서 콤보를 변경하면 나중에 다시 전환할 때 저장된 기본 설정이 유지됩니다.
+
 ## 실제 모델 ID와 일치하는 콤보 이름
 
 `name`이 접두사 없는 모델 ID와 동일한 콤보(예: 이름이 `gpt-5.5`인 콤보)는 버그가 아니라 **의도적으로 지원되는 패턴**입니다. 이는 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)에 문서화된 모델 ID별 공급자 폴백 메커니즘입니다. 접두사 없는 모델 ID를 확인하기 전에 콤보 해석을 먼저 확인하므로(`src/sse/services/model.ts`의 `getComboForModel()`), 접두사 없는 ID `gpt-5.5`에 대한 요청은 단일 공급자로 곧바로 전달되지 않고 콤보의 대상(예: `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`)을 통해 라우팅됩니다. 이는 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)을 위해 구현된 재작성 전 콤보 우선순위를 재사용하며, `tests/unit/responses-combo-resolution-3227.test.ts` 및 `tests/unit/combo-name-codex-responses-rewrite.test.ts`에서 회귀 테스트됩니다.

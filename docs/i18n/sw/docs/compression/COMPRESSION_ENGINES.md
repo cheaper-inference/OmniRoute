@@ -381,7 +381,7 @@ Zana ya kurejesha kwa sasa imepewa jina `omniroute_ccr_retrieve` (kiambishi awal
 
 ### Mzunguko wa maisha ya kikao
 
-Vipindi vya HTTP vinavyoweza kutiririka bila kufanya kitu na seva huvivuna; dirisha la uvivu ni `MCP_SESSION_IDLE_MS` ya mara kwa mara (inayorejelewa kwa jina, sio thamani ya msimbo ngumu, kwa hivyo ukurasa huu hautelezi wakati unabadilika). Dalili ya kikao kilichovunwa bila kufanya kitu ni HTTP 404 na `Unknown Mcp-Session-Id` — suluhu ni kuunganisha upya au kuanzisha upya kipindi,** sivyo** kuzungusha kitufe, kubadilisha upeo, au kubadilisha jina la zana.
+Vipindi vya HTTP vinavyoweza kutiririka bila kufanya kitu na seva huvivuna; dirisha la uvivu limewekwa na `OMNIROUTE_MCP_SESSION_IDLE_MS` (dakika 5 chaguomsingi; iliyorejelewa kwa jina, sio thamani ya msimbo ngumu, kwa hivyo ukurasa huu hauelezi inapobadilika). Dalili ya kikao kilichovunwa bila kufanya kitu ni HTTP 404 na `Unknown Mcp-Session-Id` — suluhu ni kuunganisha upya au kuanzisha upya kipindi,** sivyo** kuzungusha kitufe, kubadilisha upeo, au kubadilisha jina la zana.
 
 ## Kiolesura cha API
 
