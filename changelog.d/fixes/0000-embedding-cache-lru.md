@@ -1,1 +1,0 @@
-- **fix(memory):** the embedding cache now evicts the least recently used vector, so texts that are reused often stay cached when new texts arrive.

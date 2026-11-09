@@ -1,1 +1,0 @@
-- **fix(media):** stored video and media files are now capped at 2 GiB in total. When a new file pushes the folder past the cap, the oldest files are removed first. Before, only age (7 days) limited the folder, so a burst of video jobs could fill the disk.
