@@ -6,7 +6,7 @@ import test from "node:test";
 import { createNodeSqliteAdapterFromDatabase } from "../../../src/lib/db/adapters/nodeSqliteShared.ts";
 
 // key_templates was published by PR #19311 in slots 228, 231 and 232 before the
-// release claimed them. The canonical migration lives at 234; databases that
+// release claimed them. The canonical migration lives at 236; databases that
 // recorded an earlier slot must be rehomed so the release migrations still run.
 fs.mkdirSync(path.resolve("_artifacts"), { recursive: true });
 const fixture = fs.mkdtempSync(path.resolve("_artifacts/key-templates-migration-"));
@@ -43,10 +43,10 @@ for (const [version, name] of Object.entries(CANONICAL_OCCUPANTS)) {
   );
 }
 const templateSql = fs.readFileSync(
-  new URL("../../../src/lib/db/migrations/234_key_templates.sql", import.meta.url),
+  new URL("../../../src/lib/db/migrations/236_key_templates.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixture, "234_key_templates.sql"), templateSql, "utf8");
+fs.writeFileSync(path.join(fixture, "236_key_templates.sql"), templateSql, "utf8");
 
 const { runMigrations } = await import("../../../src/lib/db/migrationRunner.ts");
 
@@ -66,7 +66,7 @@ const EXPECTED_LEDGER = [
   { version: "228", name: "purge_orphaned_provider_catalogs" },
   { version: "231", name: "daily_cached_input" },
   { version: "232", name: "proxy_payload_traffic" },
-  { version: "234", name: "key_templates" },
+  { version: "236", name: "key_templates" },
 ];
 
 const assertCanonicalOccupantsRan = (db: ReturnType<typeof makeDb>) => {
@@ -80,7 +80,7 @@ const assertCanonicalOccupantsRan = (db: ReturnType<typeof makeDb>) => {
   }
 };
 
-test("fresh database applies key_templates at 234 next to the canonical slots", () => {
+test("fresh database applies key_templates at 236 next to the canonical slots", () => {
   const db = makeDb();
   try {
     assert.equal(runMigrations(db, { isNewDb: true }), 4);
@@ -96,7 +96,7 @@ test("fresh database applies key_templates at 234 next to the canonical slots", 
   }
 });
 
-test("databases that applied key_templates in a published slot are rehomed to 234", () => {
+test("databases that applied key_templates in a published slot are rehomed to 236", () => {
   const subsets = Array.from({ length: (1 << PUBLISHED_SLOTS.length) - 1 }, (_, i) =>
     PUBLISHED_SLOTS.filter((_, index) => (i + 1) & (1 << index))
   );
@@ -118,7 +118,7 @@ test("databases that applied key_templates in a published slot are rehomed to 23
       assertCanonicalOccupantsRan(db);
       assert.equal(
         (
-          db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='234'").get() as {
+          db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='236'").get() as {
             applied_at: string;
           }
         ).applied_at,

@@ -104,7 +104,7 @@ describe("migrationRunner/constants — large-table integrity", () => {
       ["228", "231", "232"].map((fromVersion) => ({
         fromVersion,
         fromName: "key_templates",
-        toVersion: "234",
+        toVersion: "236",
         toName: "key_templates",
       }))
     );

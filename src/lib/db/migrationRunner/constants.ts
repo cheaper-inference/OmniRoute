@@ -321,24 +321,24 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
   },
   // PR #19311 (key policy templates) published key_templates in slots 228, 231 and
   // 232 before release claimed them (purge_orphaned_provider_catalogs,
-  // daily_cached_input, proxy_payload_traffic). Rehome those ledger rows to 234 so
+  // daily_cached_input, proxy_payload_traffic). Rehome those ledger rows to 236 so
   // the canonical release migrations in the vacated slots still run.
   {
     fromVersion: "228",
     fromName: "key_templates",
-    toVersion: "234",
+    toVersion: "236",
     toName: "key_templates",
   },
   {
     fromVersion: "231",
     fromName: "key_templates",
-    toVersion: "234",
+    toVersion: "236",
     toName: "key_templates",
   },
   {
     fromVersion: "232",
     fromName: "key_templates",
-    toVersion: "234",
+    toVersion: "236",
     toName: "key_templates",
   },
   // PR #10409 circulated through these draft slots before the current release
