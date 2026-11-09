@@ -91,3 +91,13 @@ test("the Windows remove script only matches the loopback lines with exactly tha
   assert.match(powershell, /\$part\[0\] -eq '127\.0\.0\.1'/);
   assert.match(powershell, /\$part\[0\] -eq '::1'/);
 });
+
+test("the Windows remove script compares the host case-sensitively, like the POSIX filter", async () => {
+  const original =
+    [...OPERATOR_LINES, "127.0.0.1 Intranet.Corp", ...OMNIROUTE_LINES].join("\n") + "\n";
+  const { powershell } = await captureRemoveCommand(original, "win32");
+  assert.ok(powershell, "the PowerShell remove command must run");
+  // PowerShell -contains ignores case, so it would also drop "127.0.0.1 Intranet.Corp".
+  assert.match(powershell, /\$targetHosts -ccontains \$part\[1\]/);
+  assert.doesNotMatch(powershell, /-contains/);
+});

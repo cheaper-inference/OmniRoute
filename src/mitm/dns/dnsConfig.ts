@@ -242,7 +242,7 @@ export async function removeDNSEntries(
       "          $lines = Get-Content -LiteralPath $hostsFile;\n" +
       "          $filtered = $lines | Where-Object {\n" +
       "            $part = ($_ -split '\\s+') | Where-Object { $_ };\n" +
-      "            -not ($part.Length -eq 2 -and ($part[0] -eq '127.0.0.1' -or $part[0] -eq '::1') -and ($targetHosts -contains $part[1]))\n" +
+      "            -not ($part.Length -eq 2 -and ($part[0] -eq '127.0.0.1' -or $part[0] -eq '::1') -and ($targetHosts -ccontains $part[1]))\n" +
       "          };\n" +
       "          Set-Content -LiteralPath $hostsFile -Value $filtered;\n        ";
     await commands.runElevatedPowerShell(script);
