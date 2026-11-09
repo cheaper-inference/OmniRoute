@@ -8,37 +8,32 @@
 >
 > מקור האמת: `open-sse/mcp-server/server.ts` מחשב **110 כלים ייחודיים** באמצעות `countUniqueMcpTools()`:‏ 45 הגדרות קנוניות (כולל ששת כלי מחזור החיים של CCR, שלישיית agent-skills,‏ `omniroute_radar_catalog` ו-`omniroute_x_search`), בתוספת זיכרון (3), מיומנויות (4), מיומנויות GitHub‏ (3), pool‏ (6), משחוק (8), תוספים (8), Notion‏ (6), Obsidian‏ (22), מאגר מקומי (3) ושני כלי דחיסה המיועדים ל-RTK בלבד.
 
-## התקנה
+## הַתקָנָה
 
-OmniRoute MCP מובנה במערכת. הפעילו אותו באמצעות:
+OmniRoute MCP מובנה. התחל את זה עם:
 
 ```bash
 omniroute --mcp
 ```
 
-או באמצעות תעבורת open-sse:
+או באמצעות התחבורה הפתוחה:
 
 ```bash
-# תעבורה הניתנת להזרמה באמצעות HTTP (פורט 20130)
-omniroute --dev  # MCP מופעל אוטומטית בנקודת הקצה /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-תעבורות ה-HTTP‏ (`sse` / `streamable-http`, המוגשות בתוך אותו תהליך על ידי שרת לוח הבקרה)
-כבויות כברירת מחדל, ובעבר ניתן היה להפעיל או להשבית אותן רק מהדף `/dashboard/mcp`. החל מ-v3.8.51
-קיימת תמיכה מקבילה גם ב-CLI:
+העברות HTTP (`sse` / `streamable-http`, מוגשות בתהליך על ידי שרת לוח המחוונים) כבויות כברירת מחדל והיו ניתנים להחלפה בעבר רק מדף `/dashboard/mcp`. החל מגרסה 3.8.51 ל- CLI יש זוגיות:
 
 ```bash
-omniroute mcp status                                  # מצב הפעלה/חיבור, תעבורה ומספר כלים
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # מאפס הפעלות sse/streamable-http פעילות
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` שולחות בקשת PATCH לאותה הגדרת `mcpEnabled` (ובאופן אופציונלי גם `mcpTransport`)
-שלוח הבקרה משנה באמצעות `/api/settings`. הפקודה `mcp restart` קוראת אל `POST /api/mcp/restart`: היא מסיימת
-הפעלות `sse`/`streamable-http` פעילות, כדי שהבקשה הבאה תאותחל מחדש באופן נקי, מחזירה
-`409` אם MCP מושבת ו-`501` עבור תעבורת `stdio` (לקוחות stdio מנהלים את תהליך המשנה שלהם בעצמם —
-אין נקודת אחיזה בתוך התהליך שניתן להפעיל מחדש).
+`mcp enable`/`mcp disable` PATCH אותה הגדרת `mcpEnabled` (ואופציונלית `mcpTransport`) לוח המחוונים משתנה באמצעות `/api/settings`. `mcp restart` קורא ל- `POST /api/mcp/restart`: הוא מפרק הפעלות פעילות `sse`/`streamable-http` כך שהבקשה הבאה מאתחלת מחדש בצורה נקייה, מחזירה `409` אם MCP מושבתת, ו- `501` עבור ה- `stdio` transport (ללקוחות stdio יש את תת-התהליך משלהם — אין נקודת אחיזה בתהליך להפעלה מחדש).
 
 ## תעבורות
 
@@ -133,52 +128,40 @@ Cursor, Cline ולקוחות MCP תואמים.
 
 ## כלי דחיסה (13)
 
-| כלי                                 | הרשאות              | תיאור                                                                                                          |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | הגדרות דחיסה, סיכום ניתוח ונתונים סטטיסטיים מודעי-מטמון (כולל מטא-נתוני `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | הגדרת מצב הדחיסה, סף, יחס יעד, שימור הנחיית המערכת ומתג דחיסת תיאורי MCP                                       |
-| `omniroute_set_compression_engine`  | `write:compression` | בחירת המנוע הפעיל (off/caveman/rtk/stacked) ועוצמת Caveman/RTK                                                 |
-| `omniroute_list_compression_combos` | `read:compression`  | הצגת שילובי דחיסה בעלי שם וצינורות העיבוד של המנועים שלהם                                                      |
-| `omniroute_compression_combo_stats` | `read:compression`  | ניתוחים המקובצים לפי שילוב דחיסה ומנוע                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | אחסון תוכן מבודד לפי קורא במאגר CCR מוגבל בזיכרון והחזרת סמן יחד עם הפניית `ccr://`                            |
-| `omniroute_ccr_retrieve`            | `read:compression`  | אחזור תוכן CCR במלואו או במצבי התחלה, סוף, שורות, grep ונתונים סטטיסטיים                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | בדיקת מטא-נתוני CCR שבבעלות הקורא ללא החזרת התוכן                                                              |
-| `omniroute_ccr_list`                | `read:compression`  | הצגת מטא-נתונים מחולקים לעמודים עבור מקטעי CCR שבבעלות הקורא                                                   |
-| `omniroute_ccr_delete`              | `write:compression` | מחיקת מקטע CCR שבבעלות הקורא                                                                                   |
-| `omniroute_ccr_stats`               | `read:compression`  | דיווח על השימוש בזיכרון בהיקף הקורא, מוני מחזור חיים ומגבלות המאגר                                             |
-| `omniroute_rtk_discover`            | `read:compression`  | גילוי רעש חוזר בדגימות פלט RTK שנאספו בהסכמה                                                                   |
-| `omniroute_rtk_learn`               | `read:compression`  | יצירת טיוטת מסנן RTK הניתנת לסקירה מתוך דגימות שנאספו בהסכמה                                                   |
+| כְּלִי                              | היקפים              | תֵאוּר                                                                                                             |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | הגדרות דחיסה, סיכום ניתוח ונתונים סטטיסטיים מודעים למטמון (כולל מטא נתונים `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | הגדר מצב דחיסה, סף, יחס יעד, שימור בקשת מערכת, החלפת מצב דחיסה של תיאור MCP                                        |
+| `omniroute_set_compression_engine`  | `write:compression` | בחר את המנוע הפעיל (off/caveman/rtk/stacked) ואת עוצמת Caveman/RTK                                                 |
+| `omniroute_list_compression_combos` | `read:compression`  | רשימת שילובי דחיסה וצינורות המנוע שלהם                                                                             |
+| `omniroute_compression_combo_stats` | `read:compression`  | אנליטיקה מקובצת לפי שילוב דחיסה ומנוע                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | אחסן תוכן מבודד מתקשר בחנות CCR התחום בזיכרון והחזר סמן פלוס הפניה ל- `ccr://`                                     |
+| `omniroute_ccr_retrieve`            | `read:compression`  | אחזר תוכן CCR במלואו או עם מצבי ראש, זנב, קווים, grep וסטטיסטיקה                                                   |
+| `omniroute_ccr_inspect`             | `read:compression`  | בדוק מטא נתונים CCR בבעלות המתקשר מבלי להחזיר תוכן                                                                 |
+| `omniroute_ccr_list`                | `read:compression`  | רשום מטא נתונים מעומדים עבור בלוקי CCR שבבעלות המתקשר                                                              |
+| `omniroute_ccr_delete`              | `write:compression` | מחק בלוק CCR שבבעלות המתקשר                                                                                        |
+| `omniroute_ccr_stats`               | `read:compression`  | דווח על שימוש בזיכרון בהיקף מתקשר, מוני מחזור חיים ומגבלות אחסון                                                   |
+| `omniroute_rtk_discover`            | `read:compression`  | גלה רעשים חוזרים בדגימות פלט RTK עם הסכמה                                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | צור טיוטת מסנן RTK הניתנת לבדיקה מדגימות הסכמה                                                                     |
 
-רשומות CCR נשמרות בזיכרון בלבד ונעלמות בעת הפעלה מחדש. כל מקטע מוגבל ל-2 MiB, כל
-זהות ראשית ל-16 MiB, והמאגר הגלובלי ל-64 MiB. כברירת מחדל, לרשומות מוגדר TTL של 24 שעות (לכל היותר
-שבעה ימים). אחזור MCP מלא מוגבל ל-256 KiB; מקטעים גדולים יותר נשארים זמינים באמצעות
-מצבי הטווח וה-grep. האחסון, האחזור, ההצגה, הבדיקה, המחיקה והנתונים הסטטיסטיים מבודדים לפי
-הזהות הראשית של מפתח ה-API המאומת. רשומות ביקורת מכילות גיבובים ומטא-נתוני גודל, ולעולם לא תוכן.
+ערכי CCR משתמשים בחנות דו-שכבתית: שכבת זיכרון חמה מגובה, בזמני ריצה מקומיים שאינם בענן, בשכבת SQLite עמידה (`ccr_blocks`, פועלת כברירת מחדל) כך שבלוק שורד פינוי או הפעלה מחדש עד שה- TTL שלו נגמר — למעט בלוקים מעל 512 KB ונשארים זמני ריצה של זיכרון בענן. כל בלוק מוגבל ל-2 MiB, כל עיקרון ל-16 MiB, והחנות העולמית ל-64 MiB. ברירת המחדל של ערכים הוא TTL של 24 שעות (מקסימום שבעה ימים). שליפה מלאה MCP מוגבלת ל-256 KiB; בלוקים גדולים יותר נשארים זמינים דרך מצבי הטווח ו-grep. אחסון, אחזור, רישום, בדיקה, מחיקה וסטטיסטיקה מבודדים על ידי מנהל מפתח ה-API המאומת. רשומות ביקורת מכילות גיבוב ומטא נתונים של גודל, אף פעם לא תוכן. פרטים הפונים למפעיל (שני הסמנים, דרישות מוקדמות ללקוח, `codemode:false`, היקפים לכל כלי, עימוד ומטריצת אבחון) מופיעים ב- [Compression Engines → Prerequisites / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` מדווח על דחיסת תיאורי MCP בנפרד תחת
-`analytics.mcpDescriptionCompression`. ערכים אלה הם אומדנים של גודל המטא-נתונים עבור תיאורי MCP
-הניתנים להצגה ברשימה (`tools`,‏ `prompts`,‏ `resources` ו-`resourceTemplates`); הם אינם אישורי שימוש
-של הספק ומסומנים באמצעות `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` מדווח על דחיסת תיאור MCP בנפרד תחת `analytics.mcpDescriptionCompression`. ערכים אלה הם אומדני גודל מטא נתונים עבור תיאורים הניתנים לרשימה של MCP (`tools`, `prompts`, `resources` ו- `resourceTemplates`); הן אינן קבלות על שימוש של ספק ומסומנות ב- `source: "mcp_metadata_estimate"`.
 
-### מסנן עץ הנגישות של MCP (v3.8.0)
+### מסנן עץ נגישות MCP (v3.8.0)
 
-בנפרד מכלי הדחיסה שלעיל, OmniRoute כולל מסנן שפועל לאחר הביצוע ודוחס את **תוצאות הכלים** של כלי
-דפדפן/נגישות של MCP לפני שהן מוחזרות לסוכן. מסנן זה אינו כלי בפני עצמו — הוא פועל באופן שקוף על כל
-תוצאת כלי שמכילה טקסט מפורט של עץ נגישות או תמונת מצב של דפדפן (≥2000 תווים).
+בנפרד מכלי הדחיסה שלמעלה, OmniRoute כולל מסנן לאחר ביצוע שדוחס את** תוצאות הכלים** של כלים MCP browser/accessibility לפני שהם מוחזרים לסוכן. מסנן זה אינו כשלעצמו כלי — הוא פועל בשקיפות על כל תוצאת כלי המכילה טקסט נגישות מילולי או טקסט תמונת דפדפן (≥ 2000 תווים).
 
-התנהגויות עיקריות:
+התנהגויות מפתח:
 
-- מכווץ ≥30 שורות אחאיות רצופות וחוזרות לסיכום הכולל התחלה + סוף
-- משמר עוגני `[ref=eXX]` הנדרשים על ידי Playwright/שימוש במחשב
-- מקצר באופן קשיח טקסט גדול מדי (>50,000 תווים) ומוסיף רמז לניווט
-- חיסכון צפוי: **60–80%** במטעני תמונות מצב של דפדפן
+- מכווץ ≥ 30 שורות אחים חוזרות ונשנות לסיכום זנב + בראש
+- שומר על עוגני `[ref=eXX]` הנדרשים ע"י Playwright/computer-use
+- טקסט גדול חתוך קשה (> 50,000 תווים) עם רמז לניווט
+- חיסכון צפוי:** 60-80%** על מטענים של תמונת מצב של דפדפן
 
-תצורה: `compression.mcpAccessibility` בהגדרות הגלובליות (מיגרציה 056).
-מימוש: `open-sse/services/compression/engines/mcpAccessibility/`.
-תיעוד מלא: [מנועי דחיסה — מסנן עץ הנגישות של MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+תצורה: `compression.mcpAccessibility` בהגדרות גלובליות (הגירה 056). יישום: `open-sse/services/compression/engines/mcpAccessibility/`. מסמכים מלאים: [מנועי דחיסה — MCP מסנן עץ נגישות](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-ראו [מנועי דחיסה](../compression/COMPRESSION_ENGINES.md) ו-[דחיסת RTK](../compression/RTK_COMPRESSION.md) למידע על
-מודל הדחיסה בזמן ריצה שעליו מבוססים כלים אלה.
+ראה [מנועי דחיסה](../compression/COMPRESSION_ENGINES.md) [ודחיסה RTK](../compression/RTK_COMPRESSION.md) עבור מודל הדחיסה של זמן הריצה מאחורי כלים אלה.
 
 ## כלי 1Proxy‏ (3)
 

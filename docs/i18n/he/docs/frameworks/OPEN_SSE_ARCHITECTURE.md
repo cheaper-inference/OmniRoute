@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | קוֹבֶץ                        | מַטָרָה                            |
 | ----------------------------- | ---------------------------------- |
-| `providerRegistry.ts`         | רישום מודל צ'אט מעל קטלוג ספקי 380 |
+| `providerRegistry.ts`         | רישום מודל צ'אט על קטלוג 381 ספקים |
 | `providerModels.ts`           | כינויים של מודלים, מיפוי פורמטים   |
 | `constants.ts`                | פסק זמן, מגבלות, קודי סטטוס        |
 | `defaultThinkingSignature.ts` | חתימת חשיבה Claude ברירת מחדל      |
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-אימות Zod בעת טעינת המודול מבטיח שכל תצורות הספק חוקיות.
+אימות Zod בעת טעינת המודול מבטיח שכל הגדרות הספק חוקיות.
 
 ---
 

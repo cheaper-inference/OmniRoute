@@ -198,41 +198,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## راهاندازی پروتکل (MCP + A2A)
+## راه اندازی پروتکل (MCP + A2A)
 
-### راهاندازی MCP (پروتکل زمینه مدل)
+### راه اندازی MCP (پروتکل بافت مدل)
 
-انتقال MCP را در حالت stdio آغاز کنید:
+حمل و نقل MCP را در حالت stdio شروع کنید:
 
 ```bash
 omniroute --mcp
 ```
 
-روند پیشنهادی اعتبارسنجی:
+جریان اعتبارسنجی توصیه شده:
 
 ```bash
-# 1. سرور MCP را راهاندازی کنید
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. از کلاینت MCP خود، موارد زیر را فراخوانی کنید:
-omniroute_get_health        # باید سلامت سیستم را برگرداند
-omniroute_list_combos       # باید ترکیبهای فعال را برگرداند
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. یا مجموعه کامل E2E را اجرا کنید:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### پیکربندی کلاینت MCP
+#### پیکربندی مشتری MCP
 
-**Claude Code:**
+**کد Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-این مورد را به تنظیمات MCP خود اضافه کنید:
+به تنظیمات MCP خود اضافه کنید (stdio، با کلید تا تماس گیرنده یک اصل داشته باشد):
 
 ```json
 {
@@ -240,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**مستندات کامل MCP:** [README سرور MCP](../../open-sse/mcp-server/README.md) — شامل 110 ابزار، پیکربندیهای IDE و کلاینتهای Python/TS/Go.
+یا وقتی `mcpTransport` `streamable-http` است (آن را روی `/dashboard/mcp` یا با `omniroute mcp enable --transport streamable-http` تنظیم کنید)، ورودی سرور MCP راه دور مشتری را روی `http://localhost:20128/api/mcp/stream` قرار دهید.
 
-### راهاندازی A2A (پروتکل عاملبهعامل)
+کلید به صورت `Authorization: Bearer <api-key>` حرکت می کند (به [MCP Server → دسترسی از راه دور](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) برای میزبان های راه دور مراجعه کنید؛ یک کلید راه دور `mcp:connect` به علاوه حوزه های read/write آن نیاز دارد).
 
-کارت عامل را بررسی کنید:
+**مستندات کامل MCP :** ابزار [MCP README](../../open-sse/mcp-server/README.md) — 110، تنظیمات IDE ، مشتریان Python/TS/Go. مرجع اپراتور برای ابزارهای فشرده سازی CCR/dedup (نشانگرها، پیش نیازها، محدوده هر ابزار، صفحه بندی بازیابی، تشخیص): [موتورهای فشرده سازی → پیش نیازها / راهنمای اپراتور](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### راه اندازی A2A (پروتکل عامل به نماینده)
+
+تأیید کارت نماینده:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-یک وظیفه ارسال کنید:
+ارسال یک کار:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**مستندات کامل A2A:** [README سرور A2A](../../src/lib/a2a/README.md) — شامل JSON-RPC 2.0، مهارتها، استریم و چرخه عمر وظیفه.
+**مستندات کامل A2A :** [سرور A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0، مهارت ها، جریان، چرخه عمر کار.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## قالب Void Linux ‏(`xbps-src`)
+## الگوی Void Linux (xbps-src).
 
-کاربران Void Linux میتوانند با استفاده از `xbps-src` یک بستهٔ بومی بسازند. این بلوک را با مسیر `srcpkgs/omniroute/template` ذخیره کنید:
+برای کاربران Void Linux ، می توانید یک بسته بومی با استفاده از `xbps-src` بسازید. این بلوک را به عنوان `srcpkgs/omniroute/template` ذخیره کنید:
 
 ```bash
-# فایل قالب برای 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# برای هر انتشار، checksum را با دستور زیر دوباره تولید کنید:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

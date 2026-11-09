@@ -191,9 +191,9 @@ Para sa detalyadong configuration ng bawat tool (Claude Code, Codex CLI, Cursor,
 
 ---
 
-## Pag-setup ng Protocol (MCP + A2A)
+## Setup ng Protocol (MCP + A2A)
 
-### Pag-setup ng MCP (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
 Simulan ang MCP transport sa stdio mode:
 
@@ -201,31 +201,31 @@ Simulan ang MCP transport sa stdio mode:
 omniroute --mcp
 ```
 
-Inirerekomendang daloy ng validation:
+Inirerekomendang daloy ng pagpapatunay:
 
 ```bash
-# 1. Simulan ang MCP server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Mula sa iyong MCP client, tawagin ang:
-omniroute_get_health        # Dapat ibalik ang kalagayan ng system
-omniroute_list_combos       # Dapat ibalik ang mga aktibong combo
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. O patakbuhin ang kumpletong E2E suite:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Configuration ng MCP Client
+#### MCP Configuration ng Kliyente
 
 **Claude Code:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Idagdag sa iyong mga setting ng MCP:
+Idagdag sa iyong mga setting MCP (stdio, gamit ang key para may principal ang tumatawag):
 
 ```json
 {
@@ -233,17 +233,24 @@ Idagdag sa iyong mga setting ng MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Kumpletong dokumentasyon ng MCP:** [README ng MCP Server](../../open-sse/mcp-server/README.md) — 110 tool, mga config ng IDE, at mga Python/TS/Go client.
+O, kapag `mcpTransport` ay `streamable-http` (itakda ito sa `/dashboard/mcp` o sa `omniroute mcp enable --transport streamable-http`), ituro ang remote MCP server entry ng kliyente sa `http://localhost:20128/api/mcp/stream`.
 
-### Pag-setup ng A2A (Agent-to-Agent Protocol)
+Ang susi ay naglalakbay bilang `Authorization: Bearer <api-key>` (tingnan [MCP Server → Remote access](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) para sa mga malayuang host; ang isang remote key ay nangangailangan ng `mcp:connect` kasama ang mga read/write na saklaw nito).
 
-I-verify ang Agent Card:
+**Buong dokumentasyon MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tool, IDE config, Python/TS/Go client. Sanggunian ng operator para sa mga tool ng compression CCR/dedup (mga marker, mga kinakailangan, mga saklaw ng bawat tool, pagbawi ng pagination, mga diagnostic): [Mga Compression Engine → Mga kinakailangan / gabay ng operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (Agent-to-Agent Protocol)
+
+I-verify ang Ahente Card:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -254,10 +261,10 @@ Magpadala ng gawain:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Bigyan ako ng maikling buod ng quota."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Kumpletong dokumentasyon ng A2A:** [README ng A2A Server](../../src/lib/a2a/README.md) — JSON-RPC 2.0, mga skill, streaming, at lifecycle ng gawain.
+**Buong dokumentasyon A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, mga kasanayan, streaming, lifecycle ng gawain.
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Template ng Void Linux (xbps-src)
+## Void Linux (xbps-src) Template
 
-Para sa mga gumagamit ng Void Linux, maaari kang bumuo ng native na package gamit ang `xbps-src`. I-save ang block na ito bilang `srcpkgs/omniroute/template`:
+Para sa mga gumagamit ng Void Linux, maaari kang bumuo ng isang native na package gamit ang `xbps-src`. I-save ang block na ito bilang `srcpkgs/omniroute/template`:
 
 ```bash
-# Template file para sa 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Muling buuin ang checksum para sa bawat release gamit ang:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

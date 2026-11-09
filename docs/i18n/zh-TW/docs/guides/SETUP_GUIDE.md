@@ -191,41 +191,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## 通訊協定設定（MCP + A2A）
+## 協定設定 (MCP + A2A)
 
-### MCP 設定（模型上下文通訊協定）
+### MCP設定（模型上下文協定）
 
-以 stdio 模式啟動 MCP 傳輸：
+以 stdio 模式啟動MCP傳輸：
 
 ```bash
 omniroute --mcp
 ```
 
-建議的驗證流程：
+推薦的驗證流程：
 
 ```bash
-# 1. 啟動 MCP 伺服器
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. 從您的 MCP 用戶端呼叫：
-omniroute_get_health        # 應傳回系統健康狀態
-omniroute_list_combos       # 應傳回作用中的組合
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. 或執行完整的 E2E 測試套件：
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP 用戶端設定
+#### MCP客戶端配置
 
-**Claude Code：**
+**Claude代碼：**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline：**
+**Cursor / Cline:**
 
-新增至您的 MCP 設定：
+新增到您的MCP設定（stdio，帶有金鑰，以便呼叫者擁有主體）：
 
 ```json
 {
@@ -233,31 +233,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**完整 MCP 文件：** [MCP 伺服器 README](../../open-sse/mcp-server/README.md) — 110 個工具、IDE 設定，以及 Python/TS/Go 用戶端。
+或者，當`mcpTransport`為`streamable-http` （在`/dashboard/mcp`上設定或使用`omniroute mcp enable --transport streamable-http`進行設定）時，將客戶端的遠端MCP伺服器項目指向`http://localhost:20128/api/mcp/stream`。
 
-### A2A 設定（代理程式對代理程式通訊協定）
+密鑰作為`Authorization: Bearer <api-key>`傳輸（請參閱[MCP伺服器→遠端主機的遠端存取](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass)；遠端密鑰需要`mcp:connect`及其read/write範圍）。
 
-驗證 Agent Card：
+**完整的MCP文件：** [MCP伺服器README](../../open-sse/mcp-server/README.md) — 110 工具、 IDE設定、 Python/TS/Go客戶端。壓縮CCR/dedup工具的操作員參考（標記、先決條件、每個工具範圍、擷取分頁、診斷）：[壓縮引擎→先決條件/操作員指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+### A2A設定（代理到代理協定）
+
+驗證代理卡：
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-傳送工作：
+發送任務：
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"請提供簡短的配額摘要。"}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**完整 A2A 文件：** [A2A 伺服器 README](../../src/lib/a2a/README.md) — JSON-RPC 2.0、技能、串流，以及工作生命週期。
+**完整的A2A文件：** [A2A伺服器README](../../src/lib/a2a/README.md) — JSON-RPC 2.0，技能，串流媒體，任務生命週期。
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux（xbps-src）範本
+## 作廢Linux (xbps-src) 模板
 
-Void Linux 使用者可以使用 `xbps-src` 建置原生套件。請將此區塊儲存為 `srcpkgs/omniroute/template`：
+對於 Void Linux用戶，您可以使用`xbps-src`建置原生包。將此區塊儲存為`srcpkgs/omniroute/template`：
 
 ```bash
-# 'omniroute' 的範本檔案
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 每次發行時，使用以下指令重新產生總和檢查碼：
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

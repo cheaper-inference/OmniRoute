@@ -157,17 +157,17 @@ Management routes មួយចំនួនទទួលយក **របៀបទ�
   4. លុបការកំណត់ `OMNIROUTE_DISABLE_MFA` ចេញ ចាប់ផ្តើមម៉ាស៊ីនមេឡើងវិញ ហើយចុះឈ្មោះ
      ម្តងទៀត ប្រសិនបើចាំបាច់។
 
-## ប្រភេទ Route
+## ថ្នាក់ផ្លូវ
 
-`src/server/authz/types.ts` កំណត់ប្រភេទបី; route ណាមួយដែលមិនអាចចាត់ថ្នាក់ដោយកំណត់បានត្រូវធ្លាក់ទៅ `MANAGEMENT`។
+`src/server/authz/types.ts` កំណត់បីថ្នាក់; ផ្លូវណាមួយដែលមិនអាចចាត់ថ្នាក់កំណត់បាន ត្រឡប់ទៅ `MANAGEMENT`។
 
-| ប្រភេទ       | ការពិពណ៌នា                                                                                                                                     | ត្រូវការ auth                                                  |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `PUBLIC`     | Route ដែលមានសុវត្ថិភាពច្បាស់លាស់ — login, logout, status, init, health, onboarding bootstrap។                                                  | គ្មាន                                                          |
-| `CLIENT_API` | Endpoint បម្រើម៉ូដែល — `/api/v1/*`, `/api/v1beta/*`, និង alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`។ | Bearer key នៅពេល feature flag `REQUIRE_API_KEY` ដែលត្រូវបានបើក |
-| `MANAGEMENT` | ទំព័រ dashboard, settings, provider, key, endpoint admin និង diagnostics។                                                                      | Dashboard session ឬ Bearer ដែលមាន scope `manage`               |
+| ថ្នាក់       | ការពិពណ៌នា                                                                                                                                                    | ទាមទារសិទ្ធិ                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | ផ្លូវដែលមានសុវត្ថិភាពច្បាស់លាស់ ការចូល — ចេញ ស្ថានភាព សុខភាព ការចាប់ផ្តើមដំណើរការ។                                                                            | គ្មាន                                                                    |
+| `CLIENT_API` | ចំណុចបញ្ចប់ដែលបម្រើតាមគំរូ — `/api/v1/*`, `/api/v1beta/*`, បូកឈ្មោះក្លែងក្លាយ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`។ | Bearer key នៅពេលដែលទង់មុខងារ `REQUIRE_API_KEY` មានប្រសិទ្ធភាពត្រូវបានបើក |
+| `MANAGEMENT` | ទំព័រផ្ទាំងគ្រប់គ្រង ការកំណត់ អ្នកផ្តល់សេវា សោ អ្នកគ្រប់គ្រង និងចំណុចបញ្ចប់ការវិនិច្ឆ័យ។                                                                      | សម័យផ្ទាំងគ្រប់គ្រង OR Bearer ជាមួយនឹងវិសាលភាព `manage`                  |
 
-សកម្មភាព `MANAGEMENT` មួយចំនួនជា **operator-only**: key `manage` មិនគ្រប់គ្រាន់ទេ។ ការនាំចេញ credential ដែលបានរក្សាទុក (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ការស្តារ backup ជំនួស data ផ្ទាល់ (`POST /api/db-backups/import` រួមទាំង `dryRun=true`, `POST /api/db-backups` ស្តារតាម id, `POST /api/settings/import-json`), ការលុប restore point (`DELETE /api/db-backups` cleanup និង `PATCH /api/db-backups` ព្រោះ retention ដែលវារក្សាជំរុញការលុបដោយស្វ័យប្រវត្តិ បន្ទាប់ពីគ្រប់ backup) ទាំងនេះត្រូវការ dashboard session, CLI subject មូលដ្ឋាន ឬការចូលត្រូវបានបិទ។ ការចេញ sync token (`POST /api/sync/tokens`) និងការបង្កើត CLI access token `admin` (`POST /api/cli/tokens`) ត្រូវការ dashboard session ឬ CLI subject មូលដ្ឋានក្នុងគ្រប់ mode ការចូលទាំងអស់។ API key នៃ scope ណាមួយ និង access token `oma_` មិនមែនជា credential operator ទេ: ពួកវាទទួល `403` គ្រប់ពេលដែលត្រូវការ។ ការពិនិត្យស្ថិតនៅ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)។ ការផ្លាស់ប្តូរ setting ការចូលក៏ជា operator-only ដែរ: `POST /api/settings/require-login` (កំណត់ management password / បិទបើក `requireLogin`) ទទួលយកតែ credential ទាំងនោះនៅពេលមាន password រួចហើយ — បង្អួច bootstrap លើកដំបូង (មិនទាន់មាន password) មិនផ្លាស់ប្តូរ — ហើយ session dashboard ត្រូវតែផ្ញើ `currentPassword` ដើម្បីជំនួស password (`403` នៅពេលវាបាត់ ឬខុស ត្រូវបានកត់ត្រាជា `settings.update_failed`)។ CLI មូលដ្ឋាន និង instance ដែលបិទការចូល រក្សាផ្លូវសង្គ្រោះ ហើយអាចកំណត់ password ដោយមិនមាន `currentPassword` បាន ព្រោះទាំងពីរភ្ជាប់ជាមួយ host ដែលគ្រប់គ្រង data directory។
+សកម្មភាព `MANAGEMENT` ពីរបីគឺ** ប្រតិបត្តិករតែប៉ុណ្ណោះ** ៖ គ្រាប់ចុច `manage` មិនគ្រប់គ្រាន់ទេ។ ការនាំចេញព័ត៌មានសម្ងាត់ដែលបានរក្សាទុក (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) ការស្ដារការបម្រុងទុកលើទិន្នន័យបន្តផ្ទាល់ (`POST /api/db-backups/import` រួមទាំង `dryRun=true`, `POST /api/db-backups` ស្ដារឡើងវិញដោយលេខសម្គាល់ `POST /api/settings/import-json`) បំផ្លាញចំណុចស្ដារ (`DELETE /api/db-backups` សម្អាត និង `PATCH /api/db-backups` ពីព្រោះការរក្សាទុកវាបន្តជំរុញការកាត់ចេញដោយស្វ័យប្រវត្តិបន្ទាប់ពីរាល់ការបម្រុងទុកដែលបានបម្រុងទុក) តម្រូវឱ្យមានការបិទផ្ទាំង CLI ឬការគ្រប់គ្រងទិន្នន័យ។ ការចេញនិមិត្តសញ្ញាសមកាលកម្ម (`POST /api/sync/tokens`) និងការបញ្ចូលលេខសម្ងាត់ចូលប្រើ `admin` CLI (`POST /api/cli/tokens`) តម្រូវឱ្យមានវគ្គនៃផ្ទាំងគ្រប់គ្រង ឬប្រធានបទ CLI មូលដ្ឋាននៅក្នុងគ្រប់របៀបចូល។ គ្រាប់ចុច API នៃវិសាលភាពណាមួយ និងសញ្ញាសម្ងាត់ចូលប្រើ `oma_` មិនមែនជាព័ត៌មានបញ្ជាក់អត្តសញ្ញាណរបស់ប្រតិបត្តិករទេ៖ ពួកគេទទួលបាន `403` នៅពេលណាមួយត្រូវបានទាមទារ។ មូលប្បទានប័ត្ររស់នៅក្នុង `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) ។ ការផ្លាស់ប្តូរការកំណត់ការចូលគឺប្រតិបត្តិករតែប៉ុណ្ណោះ៖ `POST /api/settings/require-login` (កំណត់ពាក្យសម្ងាត់គ្រប់គ្រង / បិទបើក `requireLogin`) ទទួលយកតែព័ត៌មានបញ្ជាក់អត្តសញ្ញាណទាំងនោះនៅពេលដែលពាក្យសម្ងាត់មាន — បង្អួចចាប់ផ្ដើមដំណើរការដំបូង (មិនទាន់មានពាក្យសម្ងាត់នៅឡើយទេ) មិនផ្លាស់ប្តូរ — ហើយវគ្គផ្ទាំងគ្រប់គ្រងត្រូវតែផ្ញើ `currentPassword` ដើម្បីជំនួសពាក្យសម្ងាត់ (`403` នៅពេលដែលវាបាត់ ឬខុស។ `settings.update_failed`) ។ CLI មូលដ្ឋាន និងឧទាហរណ៍ដែលមានការចូលត្រូវបានបិទរក្សាផ្លូវសង្គ្រោះ ហើយអាចកំណត់ពាក្យសម្ងាត់ដោយគ្មានវា ចាប់តាំងពីទាំងពីរត្រូវបានចងភ្ជាប់ទៅនឹងម៉ាស៊ីនដែលជាម្ចាស់ថតទិន្នន័យ។
 
 ## បំពង់
 
@@ -200,51 +200,47 @@ Incoming request → src/proxy.ts
 
 ## បញ្ជីផ្លូវសាធារណៈ
 
-`src/shared/constants/publicApiRoutes.ts` គឺជា allowlist ដែលកំណត់យ៉ាងច្បាស់៖
+`src/shared/constants/publicApiRoutes.ts` គឺជាបញ្ជីអនុញ្ញាតច្បាស់លាស់៖
 
-បញ្ជីនេះត្រូវបានបែងចែកតាម **រូបរាង** ហើយការបែងចែកនេះមានសារៈសំខាន់ចំពោះការដំណើរការ (GHSA-74g9-q8f6-793h)៖ បុព្វបទមួយត្រូវបាន
-ផ្គូផ្គងដោយប្រើ `startsWith()` ដូច្នេះវាក៏ផ្គូផ្គងរាល់ផ្លូវជាប់គ្នាដែលមានតួអក្សរដើមដូចគ្នាផងដែរ។
-`/api/usage/om-usage` ជាបុព្វបទដែលសម្គាល់ `/api/usage/om-usage<anything>` ថាជា PUBLIC ហើយ Next ដោះស្រាយ
-វាទៅជា `/api/usage/[connectionId]` — ដែលជា handler មួយដែលគ្មានការផ្ទៀងផ្ទាត់សិទ្ធិផ្ទាល់ខ្លួន។
+បញ្ជីត្រូវបានបំបែកដោយ** រាង** ហើយការបំបែកគឺផ្ទុកបន្ទុក (GHSA-74g9-q8f6-793h): បុព្វបទត្រូវបានផ្គូផ្គងជាមួយ `startsWith()` ដូច្នេះវាក៏ត្រូវគ្នានឹងគ្រប់ផ្លូវដែលនៅជាប់គ្នាដែលចែករំលែកតួអក្សរនាំមុខរបស់វា។ `/api/usage/om-usage` ជាបុព្វបទដែលបានសម្គាល់ `/api/usage/om-usage<anything>` PUBLIC ហើយបន្ទាប់ដោះស្រាយវាទៅ `/api/usage/[connectionId]` — អ្នកគ្រប់គ្រងដោយគ្មានសិទ្ធិផ្ទាល់ខ្លួន។
 
 ```ts
-// បណ្តុំផ្លូវរងពិតប្រាកដ។ រាល់ធាតុត្រូវតែបញ្ចប់ដោយ "/" (បានផ្ទៀងផ្ទាត់ដោយ unit test)។
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // ត្រូវបានចាត់ទុកជា CLIENT_API ក្នុង classify មិនមែនជា "no-auth public" ទេ
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ផ្លូវតែមួយ ដែលត្រូវផ្គូផ្គងយ៉ាង EXACTLY (មាន ឬគ្មាន trailing slash)។
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // ជំហានទី 2 នៃការចូលសម្រាប់ TOTP ដែលបានជ្រើសប្រើ; ត្រូវការខូគី MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// ផ្លូវតែមួយសម្រាប់អានតែប៉ុណ្ណោះ ដែលទទួលការបន្ធូរលក្ខខណ្ឌ origin របស់ CORS ផងដែរ។
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// ផ្លូវតែមួយសម្រាប់អានតែប៉ុណ្ណោះ ដោយគ្មានការបន្ធូរលក្ខខណ្ឌ CORS។
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-ផ្លូវសម្រាប់អានតែប៉ុណ្ណោះ គឺជាសាធារណៈ **តែ** សម្រាប់ method ដែលមានសុវត្ថិភាពប៉ុណ្ណោះ។ ចំណាំ៖ `classifyRoute()` មិនរាប់បញ្ចូល `/api/v1/*` និង `/api/v1beta/*` ក្នុងការបន្តចាត់ទុកជា PUBLIC ទេ — ផ្លូវទាំងនេះតែងតែជា `CLIENT_API` ដូច្នេះគោលការណ៍ Bearer-key នៅតែអនុវត្ត។
+ផ្លូវសម្រាប់តែអាន គឺជាផ្លូវសាធារណៈ** តែប៉ុណ្ណោះ** សម្រាប់វិធីសាស្រ្តសុវត្ថិភាព។ ចំណាំ៖ `classifyRoute()` មិនរាប់បញ្ចូល `/api/v1/*` និង `/api/v1beta/*` ពី PUBLIC fall-through — ទាំងនោះតែងតែ `CLIENT_API` ដូច្នេះគោលការណ៍ Bearer-key នៅតែអនុវត្ត។
 
 ## ការបន្ថែម Route ថ្មី
 
@@ -308,15 +304,15 @@ API keys មាន array `scopes` (រក្សាទុកជា JSON ក្ន
 
 `read` / `write` / `admin` លើ tokens `oma_live_…` ដែលត្រូវបានចាត់ថ្នាក់ដោយ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`)។ ចំណាត់ថ្នាក់នេះអនុវត្តចំពោះ access-token credential ប៉ុណ្ណោះ។ សូមមើល [Management Authentication](../guides/MANAGEMENT-AUTH.md)។
 
-## ប៊ូតុងបើក/បិទការត្រួតពិនិត្យ Auth
+## បិទ/បើកតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់
 
-`isAuthRequired()` នៅ `src/shared/utils/apiAuth.ts` សម្រេចថាតើ auth **ណាមួយ** ត្រូវបានអនុវត្តសម្រាប់សំណើឬអត់:
+`isAuthRequired()` ក្នុង `src/shared/utils/apiAuth.ts` សម្រេចថាតើ** ណាមួយ។** ការផ្ទៀងផ្ទាត់ត្រូវបានអនុវត្តសម្រាប់សំណើមួយ៖
 
-- `settings.requireLogin === false` → auth ត្រូវបានបិទទូទាំងប្រព័ន្ធ លើកលែងតែ tier ដែលការពារជានិច្ច (មើល [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) និងការហៅដែលផ្ដល់ credential ដែលវាទទួលយក ដែលត្រូវការ credential ដូចគ្នាដូចពេលការចូលបើក: ការចេញ sync token, ការបង្កើត CLI access token នៃ scope ណាមួយ, និងការបង្កើត API key ដែលមាន scope `manage`/`admin`, ការផ្ដល់ scope នោះទៅ key, ឬការបង្កើតឡើងវិញ ឬការបង្ហាញ key បែបនោះ (`requireCredentialForManagementScopedKey()` នៅ `src/lib/api/requireManagementAuth.ts`)។ Key សម្រាប់ inference តែប៉ុណ្ណោះនៅតែបើក។
-- មិនបានកំណត់ password **និង** មិនមាន env var `INITIAL_PASSWORD` → mode bootstrap អនុញ្ញាត onboarding wizard និងសំណើ loopback ប៉ុន្តែសំណើបណ្តាញខាងក្រៅនៅតែត្រូវការ credential។
-- កំហុស DB ណាមួយ → fail closed (ការពារសុវត្ថិភាពតាមលំនាំដើម)។
+- `settings.requireLogin === false` → auth ត្រូវបានបិទជាសកល លើកលែងតែថ្នាក់ការពារជានិច្ច (សូមមើល [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) និងការហៅទូរសព្ទដែលផ្តល់ព័ត៌មានបញ្ជាក់អត្តសញ្ញាណដែលវាទទួលយក ដែលត្រូវការលិខិតសម្គាល់ដូចគ្នានឹងការចូល៖ ចេញនិមិត្តសញ្ញាសមកាលកម្ម ការបញ្ចូលលេខសម្ងាត់ចូលប្រើ CLI នៅគ្រប់វិសាលភាព និងបង្កើត API គន្លឹះដែលប្រើ `manage` `admin` គ្រាប់ចុច ឬការបង្កើតឡើងវិញ ឬបង្ហាញសោបែបនេះ (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)។ គ្រាប់ចុចសម្រាប់តែការសន្និដ្ឋាននៅតែបើក។ ការសរសេរទង់មុខងារដែលបានការពារ (`REQUIRE_API_KEY` ទង់សុវត្ថិភាពផ្សេងទៀត និងទង់ SSRF / TLS / MCP-scope / sandbox ដែលបានរាយក្នុង [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) និងការរក្សាទុកការកំណត់របាំង PII (`PUT /api/settings/pii`) ក៏បន្តត្រូវការលិខិតសម្គាល់ផងដែរ។
+- គ្មានការកំណត់ពាក្យសម្ងាត់ទេ។** និង** គ្មាន `INITIAL_PASSWORD` env var → bootstrap mode អនុញ្ញាតឱ្យអ្នកជំនួយការចាប់ផ្តើមដំណើរការនិងសំណើរង្វិលជុំ ប៉ុន្តែសំណើបណ្តាញដែលបានលាតត្រដាងនៅតែត្រូវការព័ត៌មានសម្ងាត់។ ករណីលើកលែង៖ ការសរសេរទង់មុខងារដែលបានការពារ និងរក្សាទុកការកំណត់របាំង PII (`PUT /api/settings/pii`) ត្រូវការលិខិតសម្គាល់សូម្បីតែពីរង្វិលជុំវិញ ដូច្នេះរង្វិលជុំវិញដោយខ្លួនឯងគឺមិនគ្រប់គ្រាន់នៅទីនោះទេ។
+- កំហុស DB ណាមួយ → បរាជ័យ (សុវត្ថិភាពតាមលំនាំដើម) ។
 
-ការអនុវត្ត API key របស់ client ប្រើ `isRequireApiKeyEnabled()` នៅ `src/shared/utils/featureFlags.ts` មិនមែនការអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ នេះសំខាន់សម្រាប់ instance ដែលបានដាក់ពង្រាយ: ការប្ដូរ `REQUIRE_API_KEY` ក្នុង Dashboard → Feature Flags ទុក DB override ហើយមានផលភ្លាមៗលើ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` និងការពិនិត្យ auth client-API ផ្សេងទៀតដែលចែករំលែក helper នេះ។ ប្រសិនបើមិនអាចអាន store feature flag ទេ auth client API fail closed ហើយតម្រូវឱ្យមាន key។
+ការអនុវត្តគន្លឹះ API អតិថិជនប្រើ `isRequireApiKeyEnabled()` ក្នុង `src/shared/utils/featureFlags.ts` មិនមែនជាការអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ វាសំខាន់សម្រាប់ករណីដែលបានដាក់ពង្រាយ៖ ការបិទបើក `REQUIRE_API_KEY` នៅក្នុងផ្ទាំងគ្រប់គ្រង → Feature Flags រក្សាទុក DB override និងប៉ះពាល់ដល់ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, និងការពិនិត្យផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវរបស់អតិថិជន-API ផ្សេងទៀតដែលចែករំលែកជំនួយនេះ។ ប្រសិនបើកន្លែងផ្ទុកទង់មុខងារមិនអាចអានបានទេ អតិថិជន API auth បរាជ័យ ហើយទាមទារសោ។
 
 ## ការផ្លាស់ប្តូរដែលមិនត្រូវគ្នាជាមួយកំណែមុន — v3.8.0
 

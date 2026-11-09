@@ -82,6 +82,18 @@ Walaupun di luar rantau yang disekat, proksi berguna untuk:
 
 ---
 
+## Keadaan proksi lalai untuk akaun baharu
+
+Dalam** Tetapan → Proksi → Konfigurasi global** , gunakan** Dayakan proksi secara lalai untuk sambungan baharu** untuk memilih keadaan proksi awal akaun pembekal yang baru ditambah.
+
+Tetapan baharu mengawal keadaan proksi awal akaun pembekal yang baru ditambah. Ia tidak menukar akaun sedia ada atau menggantikan suis proksi global. Nilai awalnya mengekalkan tingkah laku sebelumnya. Matikannya sekali untuk membuat akaun masa hadapan dengan proksi dilumpuhkan secara lalai.
+
+Keutamaan disimpan sebagai `defaultNewConnectionProxyEnabled` melalui Tetapan sedia ada API. Ia lalai kepada `true` apabila tidak pernah disimpan. Menyimpan `false` berkuat kuasa untuk akaun baharu berikutnya tanpa dimulakan semula. `POST /api/providers` menerima `proxyEnabled` boolean ketat pilihan; `true` atau `false` eksplisit diutamakan daripada lalai penciptaan. Peninggalan pada akaun pendua atau OAuth reconnect mengekalkan keadaan disimpan akaun tersebut. Akaun individu masih boleh didayakan atau dilumpuhkan selepas itu.
+
+Pemindahan pembekal terpilih menggunakan lalai pemasangan destinasi untuk akaun baharu dan mengekalkan dasar destinasi apabila menggantikan akaun sedia ada. Togol proksi bukan medan pemindahan mudah alih. Pemulihan sandaran penuh dan migrasi JSON/SQL sejarah mengekalkan semantik pemulihan sedia ada, termasuk nilai akaun disimpan dan lalai skema warisan; pemulihan tetapan penuh juga boleh memulihkan keutamaan ini.
+
+Keutamaan ini tidak menetapkan proksi atau menetapkan bahawa seseorang itu sihat atau sedang digunakan. Penghalaan sebenar masih bergantung pada suis proksi global dan konfigurasi proksi yang berkenaan. Penyedia sintetik tanpa akaun berterusan, trafik OAuth sebelum penciptaan akaun, proksi environment/system dan rangkaian hujung belakang luaran berada di luar skopnya.
+
 ## Sistem Proksi 4 Peringkat
 
 OmniRoute menyokong konfigurasi proksi pada **empat skop bebas**, yang diselesaikan mengikut keutamaan:

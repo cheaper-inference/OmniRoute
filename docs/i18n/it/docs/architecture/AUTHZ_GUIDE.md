@@ -154,17 +154,17 @@ l'operatore non la abilita
   4. Rimuovi l'impostazione di `OMNIROUTE_DISABLE_MFA`, riavvia e, se necessario,
      esegui nuovamente la registrazione.
 
-## Classi di route
+## Classi di percorso
 
-`src/server/authz/types.ts` definisce tre classi; qualsiasi route che non può essere classificata in modo deterministico ricade in `MANAGEMENT`.
+`src/server/authz/types.ts` definisce tre classi; qualsiasi percorso che non può essere classificato deterministicamente ricade su `MANAGEMENT`.
 
-| Classe       | Descrizione                                                                                                                                                     | Autenticazione richiesta                                                     |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `PUBLIC`     | Route esplicitamente sicure: login, logout, stato, inizializzazione, health check e bootstrap dell'onboarding.                                                  | Nessuna                                                                      |
-| `CLIENT_API` | Endpoint di erogazione dei modelli: `/api/v1/*`, `/api/v1beta/*`, più gli alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chiave Bearer quando il feature flag effettivo `REQUIRE_API_KEY` è abilitato |
-| `MANAGEMENT` | Pagine della dashboard, impostazioni, provider, chiavi, endpoint amministrativi e di diagnostica.                                                               | Sessione della dashboard OPPURE Bearer con scope `manage`                    |
+| Classe       | Descrizione                                                                                                                                                | Autenticazione richiesta                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Percorsi esplicitamente sicuri — login, logout, stato, integrità, bootstrap di onboarding.                                                                 | Nessuno                                                                                   |
+| `CLIENT_API` | Endpoint di gestione del modello — `/api/v1/*`, `/api/v1beta/*`, più alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Chiave di trasporto quando è abilitato il flag della funzione `REQUIRE_API_KEY` effettiva |
+| `MANAGEMENT` | Pagine della dashboard, impostazioni, provider, chiavi, endpoint di amministrazione e diagnostica.                                                         | Sessione dashboard OR Bearer con ambito `manage`                                          |
 
-Alcune azioni di `MANAGEMENT` sono **riservate all'operatore**: una chiave `manage` non basta. Esportare le credenziali memorizzate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ripristinare un backup sopra i dati attivi (`POST /api/db-backups/import` incluso `dryRun=true`, `POST /api/db-backups` con ripristino per id, `POST /api/settings/import-json`) ed eliminare i punti di ripristino (la pulizia con `DELETE /api/db-backups` e `PATCH /api/db-backups`, perché la retention che salva guida la potatura automatica dopo ogni backup) richiedono una sessione della dashboard, l'identità della CLI locale o il login disabilitato. Emettere un token di sincronizzazione (`POST /api/sync/tokens`) e creare un token di accesso CLI con scope `admin` (`POST /api/cli/tokens`) richiedono, in ogni modalità di login, una sessione della dashboard o l'identità della CLI locale. Le chiavi API di qualunque scope e i token di accesso `oma_` non sono credenziali operatore: ricevono `403` ogni volta che ne è richiesta una. Il controllo si trova in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Anche la modifica delle impostazioni di login è riservata all'operatore: `POST /api/settings/require-login` (impostare la password di gestione / attivare o disattivare `requireLogin`) accetta solo queste credenziali una volta che esiste una password. La finestra di bootstrap del primo avvio (nessuna password ancora) resta invariata, e una sessione della dashboard deve inviare `currentPassword` per sostituire la password (`403` se manca o è errata, registrato come `settings.update_failed`). La CLI locale e un'istanza con login disabilitato mantengono il percorso di recupero e possono impostare una password senza questo passaggio, poiché entrambi sono vincolati all'host che possiede la directory dei dati.
+Alcune azioni `MANAGEMENT` lo sono** solo operatore** : una chiave `manage` non è sufficiente. L'esportazione delle credenziali archiviate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), il ripristino di un backup sui dati live (`POST /api/db-backups/import` incluso `dryRun=true`, `POST /api/db-backups` ripristino tramite id, `POST /api/settings/import-json`), la distruzione dei punti di ripristino (`DELETE /api/db-backups` cleanup e `PATCH /api/db-backups` perché la conservazione persiste guida l'eliminazione automatica dopo ogni backup) richiedono una sessione del dashboard, l'oggetto CLI locale o l'accesso disabilitato. L'emissione di un token di sincronizzazione (`POST /api/sync/tokens`) e il conio di un token di accesso `admin` CLI (`POST /api/cli/tokens`) richiedono una sessione del dashboard o l'oggetto CLI locale in ogni modalità di accesso. Le chiavi API di qualsiasi ambito e i token di accesso `oma_` non sono credenziali dell'operatore: ottengono `403` ogni volta che ne viene richiesto uno. L'assegno risiede in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Anche la modifica delle impostazioni di accesso è riservata solo all'operatore: `POST /api/settings/require-login` (imposta la password di gestione / attiva/disattiva `requireLogin`) accetta solo quelle credenziali una volta che esiste una password — la finestra di bootstrap di prima esecuzione (ancora nessuna password) è invariata — e una sessione del dashboard deve inviare `currentPassword` per sostituire la password (`403` quando manca o è errata, controllata come `settings.update_failed`). Lo CLI locale e un'istanza con login disabilitato mantengono il percorso di ripristino e possono impostare una password senza di esso, poiché entrambi sono vincolati all'host che possiede la directory dei dati.
 
 ## Conduttura
 
@@ -195,53 +195,49 @@ Ogni classe di percorso ha una politica in `src/server/authz/policies/`:
 
 Una policy di successo restituisce `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. I gestori downstream possono leggerlo tramite `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` invece di rieseguire la logica di autenticazione.
 
-## Elenco delle route pubbliche
+## Elenco percorsi pubblici
 
-`src/shared/constants/publicApiRoutes.ts` è la allowlist esplicita:
+`src/shared/constants/publicApiRoutes.ts` è la lista consentita esplicita:
 
-L'elenco è suddiviso per **forma** e la suddivisione è fondamentale (GHSA-74g9-q8f6-793h): un prefisso viene
-verificato con `startsWith()`, quindi corrisponde anche a ogni percorso adiacente che condivide i caratteri iniziali.
-`/api/usage/om-usage` come prefisso contrassegna `/api/usage/om-usage<anything>` come PUBLIC e Next lo risolve
-in `/api/usage/[connectionId]` — un handler privo di autenticazione propria.
+L'elenco è suddiviso per** forma** , e la suddivisione è portante (GHSA-74g9-q8f6-793h): un prefisso viene abbinato a `startsWith()`, quindi corrisponde anche a ogni percorso adiacente che condivide i suoi caratteri iniziali. `/api/usage/om-usage` come prefisso contrassegnato `/api/usage/om-usage<anything>` PUBLIC e Next lo risolve in `/api/usage/[connectionId]` — un gestore senza autenticazione propria.
 
 ```ts
-// Sottoalberi autentici. Ogni voce DEVE terminare con "/" (verificato da un unit test).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // trattato come CLIENT_API in classify, non come "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Route singole, verificate in modo ESATTO (con o senza slash finale).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // passaggio 2 del login per TOTP con attivazione facoltativa; richiede il cookie MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Route singole di sola lettura che ricevono anche l'allentamento relativo all'origine CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Route singola di sola lettura SENZA l'allentamento relativo a CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Le route di sola lettura sono pubbliche **solo** per i metodi sicuri. Nota: `classifyRoute()` esclude `/api/v1/*` e `/api/v1beta/*` dal fall-through PUBLIC — sono sempre `CLIENT_API`, quindi si applica comunque la policy della chiave Bearer.
+I percorsi di sola lettura sono pubblici** soltanto** per metodi sicuri. Nota: `classifyRoute()` esclude `/api/v1/*` e `/api/v1beta/*` dal fall-through PUBLIC — quelli sono sempre `CLIENT_API` quindi si applica ancora la politica della chiave al portatore.
 
 ## Aggiunta di una nuova route
 
@@ -319,15 +315,15 @@ Rimane disattivato a meno che `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Questa classificazione si applica solo alla
 credenziale del token di accesso. Vedi [Autenticazione di gestione](../guides/MANAGEMENT-AUTH.md).
 
-## Interruttore «autenticazione richiesta»
+## Attiva/disattiva autenticazione richiesta
 
-`isAuthRequired()` in `src/shared/utils/apiAuth.ts` decide se viene imposta **una qualsiasi** autenticazione per una richiesta:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` decide se** Qualunque** l'autenticazione viene applicata per una richiesta:
 
-- `settings.requireLogin === false` → l'autenticazione è disabilitata a livello globale, eccetto per il livello sempre protetto (vedi [Livelli del Route Guard](../security/ROUTE_GUARD_TIERS.md)) e per le chiamate che rilasciano una credenziale che esso accetta; queste richiedono la stessa credenziale che con il login attivo: emettere token di sincronizzazione, creare token di accesso CLI di qualunque scope, creare una chiave API con scope `manage`/`admin`, concedere quello scope a una chiave, oppure rigenerare o rivelare una chiave del genere (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Le chiavi solo per l'inferenza restano aperte.
-- Nessuna password configurata **e** nessuna variabile d'ambiente `INITIAL_PASSWORD` → la modalità di bootstrap consente la procedura guidata di onboarding e le richieste loopback, ma le richieste di rete esposte richiedono comunque credenziali.
-- Qualsiasi errore del database → fallisce in modo chiuso (sicuro per impostazione predefinita).
+- `settings.requireLogin === false` → auth è disabilitato a livello globale, ad eccezione del livello sempre protetto (vedi [Livelli Route Guard](../security/ROUTE_GUARD_TIERS.md) ) e delle chiamate che distribuiscono una credenziale accettata, che richiedono le stesse credenziali dell'accesso attivo: emissione di token di sincronizzazione, conio di token di accesso CLI in qualsiasi ambito e creazione di una chiave API con l'ambito `manage`/`admin`, concessione di tale ambito a una chiave o rigenerazione o rivelazione di tale chiave (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Le chiavi di sola inferenza rimangono aperte. Anche la scrittura di un flag di funzionalità protetta (`REQUIRE_API_KEY`, gli altri flag di sicurezza e i flag SSRF / TLS / ambito MCP / sandbox elencati in [Flag di funzionalità](../reference/FEATURE_FLAGS.md#rest-api) ) e il salvataggio delle impostazioni di mascheramento PII (`PUT /api/settings/pii`) continuano a richiedere una credenziale.
+- Nessuna password configurata** E** no `INITIAL_PASSWORD` env var → la modalità bootstrap consente la procedura guidata di onboarding e le richieste di loopback, ma le richieste di rete esposte necessitano comunque di credenziali. Eccezione: la scrittura di un flag di funzionalità protetta e il salvataggio delle impostazioni di mascheramento PII (`PUT /api/settings/pii`) richiedono una credenziale anche dal loopback, quindi il loopback da solo non è sufficiente in questo caso.
+- Qualsiasi errore DB → non riesce a chiudersi (sicuro per impostazione predefinita).
 
-L'applicazione delle chiavi API client usa `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, non una lettura diretta di `process.env.REQUIRE_API_KEY`. Questo conta per le istanze distribuite: attivare o disattivare `REQUIRE_API_KEY` in Dashboard → Feature Flags salva un override nel database e incide subito su `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e sugli altri controlli di autenticazione dell'API client che condividono questo helper. Se l'archivio dei feature flag non può essere letto, l'autenticazione dell'API client fallisce in modo chiuso e richiede una chiave.
+L'imposizione della chiave API del client utilizza `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, non una lettura `process.env.REQUIRE_API_KEY` diretta. Questo è importante per le istanze distribuite: l'attivazione `REQUIRE_API_KEY` nel dashboard → Feature Flags memorizza un override DB e influisce immediatamente su `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e altri controlli di autenticazione dell'API client che condividono questo helper. Se l'archivio flag di funzionalità non può essere letto, il client API auth non viene chiuso e richiede una chiave.
 
 ## Modifica incompatibile — v3.8.0
 

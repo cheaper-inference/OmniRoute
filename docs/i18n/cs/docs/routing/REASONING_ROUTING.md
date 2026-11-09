@@ -38,25 +38,19 @@ a podporují porovnávání `any` nebo `all`.
 Pravidlo `connection` se vyhodnocuje pouze tehdy, když nezvítězilo žádné předběžné pravidlo a již bylo
 vybráno konkrétní připojení poskytovatele. Může změnit pouze míru úsilí a rozpočet.
 
-## Míra úsilí a rozpočet
+## Úsilí a rozpočet
 
-`sourceEffort` přijímá hodnoty `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` a
-`ultra`. `missing` znamená, že požadavek neobsahuje ani konkrétní míru úsilí, ani přepínač přemýšlení,
-ani rozpočet na přemýšlení. Signálu obsahujícímu pouze rozpočet proto odpovídá jen `any`.
+`sourceEffort` přijímá `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` a `ultra`. `missing` znamená, že požadavek neobsahuje ani diskrétní úsilí, ani myšlenkový přepínač nebo myšlenkový rozpočet. Signál pouze pro rozpočet je tedy porovnáván pouze s `any`.
 
 `effortMode` má tři varianty:
 
-- `inherit` zachová míru úsilí klienta a zároveň umožní změnu modelu nebo kombinace.
-- `default` nastaví `targetEffort` pouze tehdy, když není přítomen žádný explicitní signál uvažování.
-- `force` nahradí konkrétní míru úsilí hodnotou `targetEffort`.
+- `inherit` udržuje úsilí klienta a zároveň umožňuje změnu modelu nebo kombinace.
+- `default` nastavuje `targetEffort` pouze v případě, že není přítomen žádný explicitní uvažovací signál.
+- `force` nahrazuje diskrétní úsilí `targetEffort`.
 
-Nezávisle na tom může mít `budgetAction` hodnotu `preserve`, `remove` nebo `set`. Kombinace `force`
-s hodnotou `none` odstraní všechna rozpoznaná pole míry úsilí a rozpočtu. Kombinace `none` a `set`
-je neplatná.
+Independently, `budgetAction` can be `preserve`, `remove`, or `set`. `force` with `none` removes all recognized effort and budget fields, then sets `reasoning_effort: "none"`, because some providers turn thinking on when the field is absent. Providers that reject the literal `none` are adjusted at dispatch in `open-sse/executors/base/reasoningEffort.ts`. Command Code maps it to `low`, except on Responses-shaped requests (`input` without `messages`), where it keeps `none`. On Cloudflare Workers AI (`cloudflare-ai`), the models that reject `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) get `low`; other Workers AI models keep `none`. Vypuštění pole zde není možné, protože nepřítomné úsilí spustí výchozí úroveň modelu. `none` together with `set` is invalid.
 
-Požadavky cílené na známé nekompatibilní modely jsou zamítnuty před voláním nadřazené služby. U cílů
-typu kombinace jsou nekompatibilní položky odstraněny; pokud žádná nezůstane, požadavek vrátí stav
-`400`. Neznámé údaje o schopnostech vygenerují varování a pravidlo zůstane aktivní.
+Požadavky zacílené na známé nekompatibilní modely jsou před upstreamovým voláním zamítnuty. U kombinovaných cílů jsou nekompatibilní položky odstraněny; pokud žádný nezůstane, požadavek vrátí stav `400`. Neznámá data schopnosti vygenerují varování a ponechá pravidlo aktivní.
 
 ## Zabezpečení a přenosové protokoly
 

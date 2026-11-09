@@ -40,22 +40,17 @@ već odabrana. Ono može promijeniti samo razinu napora i proračun.
 
 ## Napor i proračun
 
-`sourceEffort` prihvaća `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` i
-`ultra`. `missing` znači da zahtjev ne sadrži ni diskretnu razinu napora, ni prekidač za razmišljanje,
-ni proračun za razmišljanje. Stoga se signal koji sadrži samo proračun podudara jedino s `any`.
+`sourceEffort` prihvaća `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` i `ultra`. `missing` znači da zahtjev ne sadrži niti diskretan napor niti razmišljanje o prebacivanju ili razmišljanju proračuna. Signal samo za proračun stoga odgovara samo `any`.
 
 `effortMode` ima tri varijante:
 
-- `inherit` zadržava razinu napora klijenta, a istodobno i dalje omogućuje promjenu modela ili kombinacije.
-- `default` postavlja `targetEffort` samo kada nije prisutan eksplicitan signal zaključivanja.
-- `force` zamjenjuje diskretnu razinu napora vrijednošću `targetEffort`.
+- `inherit` zadržava trud klijenta dok još uvijek dopušta promjenu modela ili kombinacije.
+- `default` postavlja `targetEffort` samo kada nije prisutan eksplicitni signal rasuđivanja.
+- `force` zamjenjuje diskretni napor sa `targetEffort`.
 
-Neovisno o tome, `budgetAction` može biti `preserve`, `remove` ili `set`. `force` s vrijednošću `none` uklanja
-sva prepoznata polja napora i proračuna. `none` zajedno sa `set` nije valjano.
+Neovisno, `budgetAction` može biti `preserve`, `remove` ili `set`. `force` sa `none` uklanja sva prepoznata polja napora i proračuna, zatim postavlja `reasoning_effort: "none"` jer neki pružatelji uključuju razmišljanje kada polja nema. Davatelji koji odbiju literal `none` prilagođavaju se prilikom otpreme u `open-sse/executors/base/reasoningEffort.ts`. Kod naredbe preslikava ga na `low`, osim na zahtjevima u obliku odgovora (`input` bez `messages`), gdje zadržava `none`. Na Cloudflare radnicima AI (`cloudflare-ai`), modeli koji odbijaju `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) dobivaju `low`; drugi radnici AI modeli zadržati `none`. Ispuštanje polja tamo nije opcija, jer izostanak napora pokreće zadanu razinu modela. `none` zajedno sa `set` je nevažeći.
 
-Zahtjevi usmjereni na poznate nekompatibilne modele odbijaju se prije poziva nadređenoj usluzi. Za ciljne
-kombinacije uklanjaju se nekompatibilne stavke; ako nijedna ne preostane, zahtjev vraća status `400`.
-Nepoznati podaci o mogućnostima generiraju upozorenje i ostavljaju pravilo aktivnim.
+Zahtjevi koji ciljaju poznate nekompatibilne modele odbijaju se prije uzlaznog poziva. Za kombinirane ciljeve uklanjaju se nekompatibilni unosi; ako nijedan ne ostane, zahtjev vraća status `400`. Podaci o nepoznatim mogućnostima proizvode upozorenje i ostavljaju pravilo aktivnim.
 
 ## Sigurnost i prijenosi
 

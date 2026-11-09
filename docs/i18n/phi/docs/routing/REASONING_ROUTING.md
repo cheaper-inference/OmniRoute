@@ -37,24 +37,19 @@ at sinusuportahan nito ang pagtutugmang `any` o `all`.
 Sinusuri lamang ang isang panuntunang `connection` kapag walang nanalo sa maagang pagsusuri at napili na
 ang isang partikular na koneksyon ng provider. Maaari lamang nitong baguhin ang effort at budget.
 
-## Effort at Budget
+## Pagsisikap at Badyet
 
-Tinatanggap ng `sourceEffort` ang `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, at
-`ultra`. Ang `missing` ay nangangahulugang walang discrete effort, toggle ng pag-iisip,
-o budget sa pag-iisip ang kahilingan. Samakatuwid, ang signal na budget lamang ay tinutugma lang ng `any`.
+tumatanggap ang `sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, at `ultra`. Nangangahulugan ang `missing` na ang kahilingan ay hindi naglalaman ng isang hiwalay na pagsisikap o isang toggle sa pag-iisip o badyet sa pag-iisip. Samakatuwid, ang signal na badyet lamang ay itinutugma lamang ng `any`.
 
-May tatlong variant ang `effortMode`:
+`effortMode` ay may tatlong variant:
 
-- Pinananatili ng `inherit` ang effort ng client habang pinapayagan pa ring magbago ang modelo o combo.
-- Itinatakda ng `default` ang `targetEffort` kapag walang tahasang signal ng pangangatwiran.
-- Pinapalitan ng `force` ang discrete effort ng `targetEffort`.
+- Pinapanatili `inherit` ang pagsisikap ng kliyente habang pinapayagan pa ring magbago ang modelo o combo.
+- itinatakda lang ng `default` `targetEffort` kapag walang malinaw na senyales ng pangangatwiran.
+- Pinapalitan `force` ang discrete effort ng `targetEffort`.
 
-Nang hiwalay, maaaring maging `preserve`, `remove`, o `set` ang `budgetAction`. Inaalis ng `force` na may `none`
-ang lahat ng kinikilalang field ng effort at budget. Hindi valid ang `none` kasama ng `set`.
+Mag-isa, `budgetAction` ay maaaring `preserve`, `remove`, o `set`. Tinatanggal `force` na may `none` ang lahat ng kinikilalang field ng pagsisikap at badyet, pagkatapos ay itinatakda ang `reasoning_effort: "none"`, dahil ino-on ng ilang provider ang pag-iisip kapag wala ang field. Ang mga provider na tumatanggi sa literal na `none` ay isinasaayos sa pagpapadala sa `open-sse/executors/base/reasoningEffort.ts`. Ipinamapa ito ng Command Code sa `low`, maliban sa mga kahilingang hugis Responses (`input` without `messages`), kung saan pinapanatili nito `none`. Sa Cloudflare Workers AI (`cloudflare-ai`), ang mga modelong tumatanggi sa `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) ay makakakuha ng `low`; iba pang Manggagawa AI modelo panatilihin `none`. Ang pag-drop sa field ay hindi isang opsyon doon, dahil ang isang absent na pagsisikap ay nagpapatakbo ng default na tier ng modelo. `none` kasama ng `set` ay hindi wasto.
 
-Tinatanggihan bago ang upstream na tawag ang mga kahilingang nagta-target sa mga modelong kilalang hindi compatible. Para sa mga combo
-target, inaalis ang mga hindi compatible na entry; kung walang matira, magbabalik ang kahilingan ng status na `400`.
-Naglalabas ng babala ang hindi kilalang capability data at pinananatiling aktibo ang panuntunan.
+Ang mga kahilingan na nagta-target sa mga kilalang hindi tugmang modelo ay tinatanggihan bago ang upstream na tawag. Para sa mga combo target, inalis ang mga hindi tugmang entry; kung walang natitira, ibabalik ng kahilingan ang status `400`. Ang hindi kilalang data ng kakayahan ay gumagawa ng babala at iniiwan ang panuntunang aktibo.
 
 ## Seguridad at mga Transport
 

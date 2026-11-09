@@ -198,41 +198,41 @@ Fún ìṣètò alálàyé ohun èlò kọ̀ọ̀kan (Claude Code, Codex CLI, Cu
 
 ---
 
-## Ìṣètò Ìlànà Ìbánisọ̀rọ̀ (MCP + A2A)
+## Eto Ilana (MCP + A2A)
 
-### Ìṣètò MCP (Ìlànà Àyíká Ọ̀rọ̀ Àwòṣe)
+### Eto MCP (Awoṣe Ilana Ilana)
 
-Bẹ̀rẹ̀ ìrìnàjò MCP ní ipò stdio:
+Bẹrẹ gbigbe MCP ni ipo sitẹrio:
 
 ```bash
 omniroute --mcp
 ```
 
-Ìṣàn ìmúdájú tí a dámọ̀ràn:
+Ṣiṣan afọwọsi ti a ṣeduro:
 
 ```bash
-# 1. Bẹ̀rẹ̀ olupin MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Láti inú oníbàárà MCP rẹ, pe:
-omniroute_get_health        # Ó yẹ kí ó dá ìlera ẹ̀rọ padà
-omniroute_list_combos       # Ó yẹ kí ó dá àwọn combo tó ń ṣiṣẹ́ padà
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Tàbí ṣiṣẹ́ gbogbo àkójọpọ̀ E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Ìṣètò Oníbàárà MCP
+#### MCP Onibara iṣeto ni
 
-**Claude Code:**
+**koodu Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ṣàfikún sí àwọn ààtò MCP rẹ:
+Ṣafikun awọn eto MCP rẹ (stdio, pẹlu bọtini ki olupe naa ni akọkọ):
 
 ```json
 {
@@ -240,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Ìwé MCP kíkún:** [README Olupin MCP](../../open-sse/mcp-server/README.md) — ohun èlò 110, àwọn àtòpọ̀ IDE, àti àwọn oníbàárà Python/TS/Go.
+Tabi, nigbati `mcpTransport` jẹ `streamable-http` (ṣeto sori `/dashboard/mcp` tabi pẹlu `omniroute mcp enable --transport streamable-http`), tọka si titẹsi olupin MCP latọna jijin ti alabara ni `http://localhost:20128/api/mcp/stream`.
 
-### Ìṣètò A2A (Ìlànà Aṣojú-sí-Aṣojú)
+Bọtini naa rin irin-ajo bi `Authorization: Bearer <api-key>` (wo [MCP Server → Wiwọle jijin](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) fun awọn agbalejo latọna jijin; bọtini jijin nilo `mcp:connect` pẹlu awọn aaye read/write rẹ).
 
-Ṣàrídájú Káàdì Aṣojú náà:
+**Iwe MCP ni kikun:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 irinṣẹ, IDE atunto, Python/TS/Go ibara. Itọkasi onišẹ fun awọn irinṣẹ CCR/dedup funmorawon (awọn ami ami, awọn ohun pataki, awọn iwọn fun-ọpa, pagination igbapada, awọn iwadii aisan): [Awọn ẹrọ titẹkuro → Awọn iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Eto A2A (Ilana Aṣoju-si-Aṣoju)
+
+Ṣayẹwo kaadi Aṣoju naa:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Fi iṣẹ́ kan ránṣẹ́:
+Fi iṣẹ-ṣiṣe ranṣẹ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Ìwé A2A kíkún:** [README Olupin A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, àwọn ọgbọ́n, ìṣànwọ́lé, àti ìgbésí-ayé iṣẹ́.
+**Iwe A2A ni kikun:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ogbon, ṣiṣanwọle, igbesi aye iṣẹ-ṣiṣe.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Àdàkọ Void Linux (xbps-src)
+## Ofo Linux (xbps-src) Àdàkọ
 
-Fún àwọn olùlò Void Linux, ẹ lè kọ́ package abínibí nípa lílo `xbps-src`. Fi ìdíwọ̀n yìí pamọ́ gẹ́gẹ́ bí `srcpkgs/omniroute/template`:
+Fun awọn olumulo Linux ofo, o le kọ akojọpọ abinibi nipa lilo `xbps-src`. Ṣafipamọ bulọọki yii bi `srcpkgs/omniroute/template`:
 
 ```bash
-# Fáìlì àdàkọ fún 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Ṣe àtúnṣẹ̀dá checksum fún ìtújáde kọ̀ọ̀kan pẹ̀lú:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

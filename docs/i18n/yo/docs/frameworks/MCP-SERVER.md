@@ -8,37 +8,32 @@
 >
 > Orísun òtítọ́: `open-sse/mcp-server/server.ts` ṣe ìṣirò **àwọn irinṣẹ́ aláìlẹ́ẹ̀mejì 110** pẹ̀lú `countUniqueMcpTools()`: àwọn ìtumọ̀ àṣẹ 45 (tí ó ní àwọn irinṣẹ́ ìgbésí-ayé CCR mẹ́fà, ẹ̀ẹ̀mẹ́ta ti ọgbọ́n aṣojú, `omniroute_radar_catalog`, àti `omniroute_x_search`), pẹ̀lú ìrántí (3), àwọn ọgbọ́n (4), àwọn ọgbọ́n GitHub (3), àkójọpọ̀ (6), ṣíṣe bí eré (8), àwọn àfikún (8), Notion (6), Obsidian (22), àkójọ ọ̀rọ̀ abẹ́lé (3), àti àwọn irinṣẹ́ ìfúnpọ̀ méjì tí ó jẹ́ ti RTK nìkan.
 
-## Fífi sori ẹrọ
+## Fifi sori ẹrọ
 
-OmniRoute MCP wà nínú rẹ̀ láti ìbẹ̀rẹ̀. Bẹ̀rẹ̀ rẹ̀ pẹ̀lú:
+OmniRoute MCP ti wa ni itumọ ti. Bẹrẹ pẹlu:
 
 ```bash
 omniroute --mcp
 ```
 
-Tàbí nípasẹ̀ ìrìnàjò open-sse:
+Tabi nipasẹ gbigbe-si-sse:
 
 ```bash
-# Ìrìnàjò HTTP tí a lè sanwọle (port 20130)
-omniroute --dev  # MCP máa ń bẹ̀rẹ̀ fúnra rẹ̀ lórí endpoint /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Àwọn ìrìnàjò HTTP (`sse` / `streamable-http`, tí server dashboard ń pèsè láàárín process náà) jẹ́
-pípà nípa àìròtẹ́lẹ̀, àti pé tẹ́lẹ̀, ojú-ìwé `/dashboard/mcp` nìkan ni a ti lè tan tàbí pa wọ́n. Láti v3.8.51
-lọ, CLI náà ní agbára kan náà:
+Awọn gbigbe HTTP (`sse` / `streamable-http`, ti o ṣiṣẹ ni ilana nipasẹ olupin dasibodu) wa ni pipa nipasẹ aiyipada ati pe o jẹ iyipada tẹlẹ nikan lati oju-iwe `/dashboard/mcp`. Bi ti v3.8.51 CLI ni o ni ibamu:
 
 ```bash
-omniroute mcp status                                  # enabled/online, ìrìnàjò, iye irinṣẹ́
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # tún àwọn session sse/streamable-http tó ń ṣiṣẹ́ ṣe
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` máa ń fi PATCH ranṣẹ́ sí setting `mcpEnabled` kan náà (àti `mcpTransport` bí ó bá yẹ)
-tí dashboard ń tàn tàbí pa nípasẹ̀ `/api/settings`. `mcp restart` máa ń pe `POST /api/mcp/restart`: ó máa ń
-fopin sí àwọn session `sse`/`streamable-http` tó ń ṣiṣẹ́ kí request tó kàn lè tún bẹ̀rẹ̀ láìsí ìṣòro, ó máa ń dá
-`409` padà bí MCP bá jẹ́ pípà, àti `501` fún ìrìnàjò `stdio` (àwọn client stdio ló ni subprocess tiwọn fúnra wọn —
-kò sí handle inú process láti tún bẹ̀rẹ̀).
+`mcp enable`/`mcp disable` PATCH kanna `mcpEnabled` (ati iyan `mcpTransport`) tito dasibodu awọn iyipada nipasẹ `/api/settings`. `mcp restart` n pe `POST /api/mcp/restart`: o ya lulẹ awọn akoko `sse`/`streamable-http` ti nṣiṣe lọwọ nitorina ibeere ti o tẹle tun bẹrẹ ni mimọ, da pada `409` ti o ba jẹ alaabo MCP, ati `501` fun gbigbe `stdio` (awọn alabara stdio ni awọn ilana ti ara wọn — ko si imudani inu-ila lati tun bẹrẹ).
 
 ## Àwọn Transport
 
@@ -131,55 +126,42 @@ Cursor, Cline, àti àwọn oníbàárà MCP tó bá a mu.
 | `omniroute_cache_stats` | `read:cache`  | Àwọn ìṣirò semantic cache, prompt-cache, àti idempotency |
 | `omniroute_cache_flush` | `write:cache` | Pa cache rẹ́ káàkiri tàbí nípasẹ̀ signature/model          |
 
-## Àwọn Irinṣẹ́ Ìkójọpọ̀ (13)
+## Awọn irin-iṣẹ funmorawon (13)
 
-| Irinṣẹ́                              | Àwọn Ààyè Àṣẹ       | Àpèjúwe                                                                                                                   |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | Àwọn ètò ìkójọpọ̀, àkótán ìtúpalẹ̀, àti àwọn ìṣirò tó mọ̀ nípa cache (pẹ̀lú metadata `analytics.mcpDescriptionCompression`)   |
-| `omniroute_compression_configure`   | `write:compression` | Ṣètò mode ìkójọpọ̀, ààlà, ìpín àfojúsùn, pípa system-prompt mọ́, àti títan tàbí pípa ìkójọpọ̀ àpèjúwe MCP                    |
-| `omniroute_set_compression_engine`  | `write:compression` | Yan engine tó ń ṣiṣẹ́ (off/caveman/rtk/stacked) àti bí Caveman/RTK ṣe lágbára tó                                           |
-| `omniroute_list_compression_combos` | `read:compression`  | Ṣe àkójọ àwọn combo ìkójọpọ̀ tí a fún ní orúkọ àti àwọn pipeline engine wọn                                                |
-| `omniroute_compression_combo_stats` | `read:compression`  | Ìtúpalẹ̀ tí a pín sí ẹ̀ka gẹ́gẹ́ bí combo ìkójọpọ̀ àti engine                                                                  |
-| `omniroute_ccr_store`               | `write:compression` | Fi àkóónú tí a yà sọ́tọ̀ fún olùpè sínú ibi ìpamọ́ CCR inú-memory tó ní ààlà, kí o sì dá àmì kan àti reference `ccr://` padà |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Gba àkóónú CCR padà ní ẹ̀kúnrẹ́rẹ́ tàbí pẹ̀lú mode head, tail, lines, grep, àti stats                                         |
-| `omniroute_ccr_inspect`             | `read:compression`  | Ṣàyẹ̀wò metadata CCR tí olùpè ní láì dá àkóónú padà                                                                        |
-| `omniroute_ccr_list`                | `read:compression`  | Ṣe àkójọ metadata ọlọ́jọ́-ojú-ìwé fún àwọn block CCR tí olùpè ní                                                            |
-| `omniroute_ccr_delete`              | `write:compression` | Pa block CCR tí olùpè ní rẹ́                                                                                               |
-| `omniroute_ccr_stats`               | `read:compression`  | Jábọ̀ lílo memory tó dá lórí olùpè, àwọn counter ìgbésí-ayé, àti àwọn ààlà ibi ìpamọ́                                       |
-| `omniroute_rtk_discover`            | `read:compression`  | Ṣàwárí ariwo tó ń tún ara rẹ̀ ṣe nínú àwọn àpẹẹrẹ àbájáde RTK tí a yàn láti kópa                                           |
-| `omniroute_rtk_learn`               | `read:compression`  | Ṣẹ̀dá àkọ́kọ́ filter RTK tí a lè ṣàyẹ̀wò láti inú àwọn àpẹẹrẹ tí a yàn láti kópa                                              |
+| Irinṣẹ                              | Awọn aaye           | Apejuwe                                                                                                          |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Awọn eto funmorawon, akopọ atupale, ati awọn iṣiro kaṣe-mọ (pẹlu `analytics.mcpDescriptionCompression` metadata) |
+| `omniroute_compression_configure`   | `write:compression` | Ṣe atunto ipo funmorawon, iloro, ipin ibi-afẹde, itọju eto-kia, ijuwe funmorawon MCP                             |
+| `omniroute_set_compression_engine`  | `write:compression` | Mu engine ti nṣiṣe lọwọ (off/caveman/rtk/stacked) ati kikankikan Caveman/RTK                                     |
+| `omniroute_list_compression_combos` | `read:compression`  | Akojọ ti a npè ni combos funmorawon ati awọn won engine pipelines                                                |
+| `omniroute_compression_combo_stats` | `read:compression`  | Awọn atupale ṣe akojọpọ nipasẹ konbo funmorawon ati ẹrọ                                                          |
+| `omniroute_ccr_store`               | `write:compression` | Tọju akoonu ti o yasọtọ olupe sinu ibi-ipamọ iranti CCR ile-itaja ati da asami pada pẹlu itọkasi `ccr://`        |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Gba akoonu CCR pada ni kikun tabi pẹlu ori, iru, awọn laini, grep, ati awọn ipo iṣiro                            |
+| `omniroute_ccr_inspect`             | `read:compression`  | Inspect caller-owned CCR metadata without returning content                                                      |
+| `omniroute_ccr_list`                | `read:compression`  | Ṣe atokọ awọn metadata paginated fun awọn bulọọki CCR ti olupe                                                   |
+| `omniroute_ccr_delete`              | `write:compression` | Pa idinaki CCR ti olupe rẹ rẹ                                                                                    |
+| `omniroute_ccr_stats`               | `read:compression`  | Jabọ lilo iranti ti olupe, awọn iṣiro igbesi aye, ati awọn opin ile itaja                                        |
+| `omniroute_rtk_discover`            | `read:compression`  | Ṣe iwari ariwo loorekoore ni ijade-inu awọn ayẹwo igbejade RTK                                                   |
+| `omniroute_rtk_learn`               | `read:compression`  | Ṣe agbekalẹ apẹrẹ àlẹmọ RTK atunyẹwo lati awọn ayẹwo ijade                                                       |
 
-Àwọn àkọsílẹ̀ CCR wà nínú memory nìkan, wọ́n sì máa parẹ́ nígbà tí a bá tún ètò náà bẹ̀rẹ̀. Block kọ̀ọ̀kan ní ààlà 2 MiB, principal kọ̀ọ̀kan
-ní ààlà 16 MiB, ibi ìpamọ́ àgbáyé sì ní ààlà 64 MiB. Àwọn àkọsílẹ̀ máa ń lo TTL wákàtí 24 gẹ́gẹ́ bí àtẹ̀jáde (ọjọ́ méje
-ni ó pọ̀ jù). Ìgbàpadà MCP ní ẹ̀kúnrẹ́rẹ́ ní ààlà 256 KiB; àwọn block tó tóbi jù ṣì wà nípasẹ̀
-àwọn mode ranged àti grep. Ìpamọ́, ìgbàpadà, ṣíṣe àkójọ, àyẹ̀wò, ìparẹ́, àti àwọn stats jẹ́ èyí tí a yà sọ́tọ̀ nípasẹ̀
-principal API-key tí a ti fi ìdánimọ̀ rẹ̀ múlẹ̀. Àwọn àkọsílẹ̀ audit ní hashes àti metadata ìwọ̀n nínú, kì í ṣe àkóónú.
+awọn titẹ sii CCR lo ibi-itaja meji-ipele: ipele iranti ti o gbona ti o ṣe afẹyinti, lori awọn akoko asiko-awọsanma ti agbegbe, nipasẹ ipele SQLite ti o tọ (`ccr_blocks`, lori aiyipada) nitoribẹẹ bulọki kan ye kuro ni ilekuro tabi tun bẹrẹ titi TTL rẹ yoo fi jade — ayafi awọn bulọọki lori 512 KB ati awọn akoko asiko awọsanma, eyiti o duro iranti-lori. Bulọọki kọọkan ni opin si 2 MiB, ọkọọkan si 16 MiB, ati ile itaja agbaye si 64 MiB. Awọn titẹ sii aiyipada si 24-wakati TTL (o pọju ọjọ meje). Igbapada MCP ni kikun ni opin si 256 KiB; awọn bulọọki ti o tobi julọ wa nipasẹ awọn ipo larin ati awọn ipo grep. Ibi ipamọ, imupadabọ, kikojọ, ayewo, piparẹ, ati awọn iṣiro jẹ iyasọtọ nipasẹ oluṣakoso bọtini API-ifọwọsi. Awọn igbasilẹ iṣayẹwo ni awọn hashes ati metadata iwọn, ko ni akoonu rara. Awọn alaye ti nkọju si oniṣẹ (awọn ami ami meji, awọn ohun pataki alabara, `codemode:false`, awọn iwọn-ọpa-ọpa, pagination, ati matrix iwadii kan) n gbe ni [Awọn ẹrọ Imudarapọ → Awọn iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` ń ṣe ìròyìn fúnmọ́ra MCP lọ́tọ̀ọ̀tọ̀ lábẹ́
-`analytics.mcpDescriptionCompression`. Àwọn iye wọ̀nyẹn jẹ́ àfojúsùn ìwọ̀n metadata fún àwọn àpèjúwe MCP tí a lè ṣe àtòjọ
-(`tools`, `prompts`, `resources`, àti `resourceTemplates`); wọn kì í ṣe ẹ̀rí lílò láti ọ̀dọ̀ olùpèsè,
-a sì máa ń fi `source: "mcp_metadata_estimate"` sàmì sí wọn.
+`omniroute_compression_status` ṣe ijabọ funmorawon apejuwe MCP lọtọ labẹ `analytics.mcpDescriptionCompression`. Awọn iye wọnyẹn jẹ awọn iṣiro iwọn-metadata fun awọn apejuwe MCP ti a ṣe akojọ (`tools`, `prompts`, `resources`, ati `resourceTemplates`); wọn kii ṣe awọn sisanwo lilo olupese ati pe wọn samisi pẹlu `source: "mcp_metadata_estimate"`.
 
-### Ajọ Igi Ìráàyèsí MCP (v3.8.0)
+### MCP Ajọ Igi Wiwọle (v3.8.0)
 
-Yàtọ̀ sí àwọn irinṣẹ́ fúnmọ́ra tó wà lókè, OmniRoute ní ajọ lẹ́yìn-ìmúṣẹ tí
-ó máa ń fún **àwọn èsì irinṣẹ́** ti àwọn irinṣẹ́ aṣàwákiri/ìráàyèsí MCP pọ̀ kí wọ́n tó dá wọn padà sí
-aṣojú náà. Ajọ yìí kì í ṣe irinṣẹ́ fúnra rẹ̀ — ó máa ń ṣiṣẹ́ láìfarahàn lórí èsì irinṣẹ́ èyíkéyìí tó ní
-ọ̀rọ̀ igi ìráàyèsí tàbí àwòrán-ìṣẹ́jú aṣàwákiri tó gùn jù (≥2000 àmì-ọ̀rọ̀).
+Lọtọ si awọn irinṣẹ funmorawon loke, OmniRoute pẹlu àlẹmọ lẹhin-ipaniyan ti o compresses awọn** irinṣẹ esi** ti awọn irinṣẹ MCP browser/accessibility ṣaaju ki wọn to da wọn pada si oluranlowo. Àlẹmọ yii kii ṣe irinṣẹ — funrarẹ o nṣiṣẹ ni itara lori abajade irinṣẹ eyikeyi ti o ni iraye si-igi-igi tabi ọrọ-fọọti aṣawakiri (≥ 2000 chars).
 
-Àwọn ìhùwàsí pàtàkì:
+Awọn iwa pataki:
 
-- Ó máa ń ṣókùn àwọn ìlà ará-ọ̀kan tó tún ara wọn ṣe ní ìtẹ̀lé ≥30 sí àkótán ìbẹ̀rẹ̀ + ìparí
-- Ó máa ń pa àwọn àmì ìdákọ̀ró `[ref=eXX]` tí Playwright/computer-use nílò mọ́
-- Ó máa ń gé ọ̀rọ̀ tó tóbi jù (>50,000 àmì-ọ̀rọ̀) pátápátá, pẹ̀lú ìtọ́kasí fún ìlọ kiri
-- Ìfipamọ́ tí a ń retí: **60–80%** lórí ẹrù dátà àwòrán-ìṣẹ́jú aṣàwákiri
+- Pa ≥ 30 leralera awọn laini arakunrin leralera sinu akopọ iru + ori
+- Ṣe itọju awọn ìdákọró `[ref=eXX]` ti o nilo nipasẹ Playwright/computer-use
+- Lile-pipa ọrọ ti o tobi ju (> 50,000 chars) pẹlu itọka lilọ kiri
+- Awọn ifipamọ ti a nireti:** 60–80%** lori awọn owo sisan aworan aworan aṣawakiri
 
-Ìṣètò: `compression.mcpAccessibility` nínú àwọn ààtò àgbáyé (migration 056).
-Ìmúṣẹ: `open-sse/services/compression/engines/mcpAccessibility/`.
-Àwọn àkọsílẹ̀ ẹ̀kúnrẹ́rẹ́: [Àwọn Ẹ́ńjìnnì Fúnmọ́ra — Ajọ Igi Ìráàyèsí MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Iṣeto ni: `compression.mcpAccessibility` ni agbaye eto (migration 056). imuse: `open-sse/services/compression/engines/mcpAccessibility/`. Awọn iwe-kikun kikun: [Awọn ẹrọ Imudanu — MCP Ajọ Igi Wiwọle](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Wo [Àwọn Ẹ́ńjìnnì Fúnmọ́ra](../compression/COMPRESSION_ENGINES.md) àti [Fúnmọ́ra RTK](../compression/RTK_COMPRESSION.md) fún
-àwòṣe fúnmọ́ra àkókò-ṣiṣe tó wà lẹ́yìn àwọn irinṣẹ́ wọ̀nyí.
+Wo [Awọn enjini funmorawon](../compression/COMPRESSION_ENGINES.md) ati [RTK funmorawon](../compression/RTK_COMPRESSION.md) fun awoṣe funmorawon asiko isise lẹhin awọn irinṣẹ wọnyi.
 
 ## Àwọn Irinṣẹ́ 1Proxy (3)
 

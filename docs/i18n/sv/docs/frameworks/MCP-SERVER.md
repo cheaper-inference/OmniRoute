@@ -10,35 +10,30 @@
 
 ## Installation
 
-OmniRoute MCP är inbyggt. Starta det med:
+OmniRoute MCP är inbyggd. Börja med:
 
 ```bash
 omniroute --mcp
 ```
 
-Eller via open-sse-transporten:
+Eller via open-sse transport:
 
 ```bash
-# HTTP-transport med strömning (port 20130)
-omniroute --dev  # MCP startas automatiskt på /mcp-slutpunkten
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP-transporterna (`sse` / `streamable-http`, som tillhandahålls i samma process av instrumentpanelens server) är
-inaktiverade som standard och kunde tidigare endast aktiveras eller inaktiveras från sidan `/dashboard/mcp`. Från och med v3.8.51
-har CLI:n motsvarande funktionalitet:
+HTTP transporterna (`sse` / `streamable-http`, betjänas av instrumentpanelens server) är avstängda som standard och var tidigare endast växlande från `/dashboard/mcp` sidan. Från v3.8.51 har CLI paritet:
 
 ```bash
-omniroute mcp status                                  # aktiverad/online, transport, antal verktyg
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # återställer aktiva sse/streamable-http-sessioner
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` skickar PATCH för samma inställning `mcpEnabled` (och valfritt `mcpTransport`)
-som instrumentpanelen växlar via `/api/settings`. `mcp restart` anropar `POST /api/mcp/restart`: det avslutar
-aktiva `sse`/`streamable-http`-sessioner så att nästa begäran initieras om på ett rent sätt, returnerar
-`409` om MCP är inaktiverat och `501` för transporten `stdio` (stdio-klienter äger sin egen
-underprocess — det finns inget handtag i processen att starta om).
+`mcp enable`/`mcp disable` PATCH samma `mcpEnabled` (och valfritt `mcpTransport`) inställning instrumentpanelen växlar via `/api/settings`. `mcp restart` anropar `POST /api/mcp/restart`: det river ned aktiva `sse`/`streamable-http` -sessioner så att nästa begäran återinitieras rent, returnerar `409` om MCP är inaktiverat och `501` för `stdio` -transporten (stdio-klienter äger sin egen underprocess — det finns inget handtag under processen att starta om).
 
 ## Transporter
 
@@ -133,53 +128,40 @@ Cursor, Cline och kompatibla MCP-klienter.
 
 ## Komprimeringsverktyg (13)
 
-| Verktyg                             | Behörigheter        | Beskrivning                                                                                                                                  |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Komprimeringsinställningar, analyssammanfattning och cachemedveten statistik (inkluderar metadata för `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurera komprimeringsläge, tröskelvärde, målförhållande, bevarande av systemprompt och växling av MCP-beskrivningskomprimering           |
-| `omniroute_set_compression_engine`  | `write:compression` | Välj aktiv motor (off/caveman/rtk/stacked) och intensitet för Caveman/RTK                                                                    |
-| `omniroute_list_compression_combos` | `read:compression`  | Lista namngivna komprimeringskombinationer och deras motorpipelines                                                                          |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analys grupperad efter komprimeringskombination och motor                                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | Lagra anroparisolerat innehåll i det storleksbegränsade CCR-minnet och returnera en markör samt en `ccr://`-referens                         |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Hämta CCR-innehåll i sin helhet eller med lägen för början, slutet, rader, grep och statistik                                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | Inspektera anroparägd CCR-metadata utan att returnera innehåll                                                                               |
-| `omniroute_ccr_list`                | `read:compression`  | Lista sidindelad metadata för anroparägda CCR-block                                                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Ta bort ett anroparägt CCR-block                                                                                                             |
-| `omniroute_ccr_stats`               | `read:compression`  | Rapportera anroparspecifik minnesanvändning, livscykelräknare och lagringsgränser                                                            |
-| `omniroute_rtk_discover`            | `read:compression`  | Upptäck återkommande brus i frivilligt tillhandahållna RTK-utdataexempel                                                                     |
-| `omniroute_rtk_learn`               | `read:compression`  | Generera ett granskningsbart utkast till RTK-filter från frivilligt tillhandahållna exempel                                                  |
+| Verktyg                             | Omfattningar        | Beskrivning                                                                                                                              |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Komprimeringsinställningar, analyssammanfattning och cachemedveten statistik (inkluderar `analytics.mcpDescriptionCompression` metadata) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurera komprimeringsläge, tröskelvärde, målförhållande, systempromptbevarande, MCP beskrivningskompressionsväxling                  |
+| `omniroute_set_compression_engine`  | `write:compression` | Välj den aktiva motorn (off/caveman/rtk/stacked) och Caveman/RTK -intensiteten                                                           |
+| `omniroute_list_compression_combos` | `read:compression`  | Lista namngivna kompressionskombinationer och deras motorrörledningar                                                                    |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analyser grupperade efter kompressionskombination och motor                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | Lagra uppringarisolerat innehåll i den avgränsade CCR -butiken i minnet och returnera en markör plus `ccr://` referens                   |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Hämta CCR innehåll i sin helhet eller med lägen huvud, svans, linjer, grep och statistik                                                 |
+| `omniroute_ccr_inspect`             | `read:compression`  | Inspektera samtalsägd CCR -metadata utan att returnera innehåll                                                                          |
+| `omniroute_ccr_list`                | `read:compression`  | Lista sidnumrerade metadata för anroparägda CCR block                                                                                    |
+| `omniroute_ccr_delete`              | `write:compression` | Ta bort ett anropsägt CCR block                                                                                                          |
+| `omniroute_ccr_stats`               | `read:compression`  | Rapportera minnesanvändning för ringer, livscykelräknare och lagringsgränser                                                             |
+| `omniroute_rtk_discover`            | `read:compression`  | Upptäck återkommande brus i opt-in RTK -utgångsprover                                                                                    |
+| `omniroute_rtk_learn`               | `read:compression`  | Generera ett utkast till RTK -filter som går att granska från prover på opt-in                                                           |
 
-CCR-poster lagras endast i minnet och försvinner vid omstart. Varje block är begränsat till 2 MiB, varje
-huvudman till 16 MiB och det globala lagret till 64 MiB. Poster har som standard en TTL på 24 timmar (högst
-sju dagar). Fullständig hämtning via MCP är begränsad till 256 KiB; större block förblir tillgängliga via
-intervall- och grep-lägena. Lagring, hämtning, listning, inspektion, borttagning och statistik isoleras efter
-den autentiserade API-nyckelns huvudman. Granskningsposter innehåller hashvärden och storleksmetadata, aldrig innehåll.
+CCR -poster använder en tvåskiktsbutik: en het minnesnivå stödd, på lokala körtider som inte är moln, av en hållbar SQLite nivå (`ccr_blocks`, på som standard) så ett block överlever vräkning eller en omstart tills dess TTL tar slut — förutom block över 512 KB och förblir molnminne-runtimes. Varje block är begränsat till 2 MiB, varje princip till 16 MiB och det globala lagret till 64 MiB. Poster som standard är en 24-timmars TTL (högst sju dagar). Full MCP -hämtning är begränsad till 256 KiB; större block förblir tillgängliga via avstånds- och grep-lägena. Lagring, hämtning, listning, inspektion, radering och statistik isoleras av den autentiserade API-nyckelns principal. Granskningsposter innehåller hash- och storleksmetadata, aldrig innehåll. Operatörsvända detaljer (de två markörerna, klientförutsättningar, `codemode:false`, omfattningar per verktyg, paginering och en diagnostisk matris) finns i [Compression Engines → Prerequisites / operatörsguide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` rapporterar komprimering av MCP-beskrivningar separat under
-`analytics.mcpDescriptionCompression`. Dessa värden är uppskattningar av metadatastorleken för
-listbara MCP-beskrivningar (`tools`, `prompts`, `resources` och `resourceTemplates`); de är inte
-leverantörskvitton för användning och är markerade med `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` rapporterar MCP -beskrivningskomprimering separat under `analytics.mcpDescriptionCompression`. Dessa värden är uppskattningar av metadatastorlek för MCP listbara beskrivningar (`tools`, `prompts`, `resources` och `resourceTemplates`); de är inte leverantörskvitton och är markerade med `source: "mcp_metadata_estimate"`.
 
-### MCP-filter för tillgänglighetsträd (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-Utöver komprimeringsverktygen ovan innehåller OmniRoute ett filter efter körning som
-komprimerar **verktygsresultaten** från MCP-webbläsar-/tillgänglighetsverktyg innan de returneras till
-agenten. Detta filter är inte i sig ett verktyg — det körs transparent på alla verktygsresultat som innehåller
-utförlig text från tillgänglighetsträd eller webbläsarögonblicksbilder (≥2000 tecken).
+Separat från komprimeringsverktygen ovan inkluderar OmniRoute ett efterexekveringsfilter som komprimerar** verktygsresultat** av MCP browser/accessibility verktyg innan de returneras till agenten. Detta filter är inte i sig ett verktyg — det körs transparent på alla verktygsresultat som innehåller utförlig tillgänglighetsträd eller webbläsarögonblicksbildtext (≥ 2000 tecken).
 
-Viktiga beteenden:
+Nyckelbeteenden:
 
-- Komprimerar ≥30 efterföljande upprepade syskonrader till en sammanfattning med början + slut
-- Bevarar `[ref=eXX]`-ankare som krävs av Playwright/datoranvändning
-- Hårdkapning av överdimensionerad text (>50 000 tecken) med en navigeringstips
-- Förväntad besparing: **60–80 %** för nyttolaster med webbläsarögonblicksbilder
+- Komprimerar ≥ 30 på varandra följande upprepade syskonrader till head + tail sammanfattning
+- Bevarar `[ref=eXX]` -ankare som krävs av Playwright/computer-use
+- Hårt trunkerat överdimensionerad text (> 50 000 tecken) med en navigeringstips
+- Förväntade besparingar:** 60–80 %** på nyttolaster för ögonblicksbilder av webbläsare
 
-Konfiguration: `compression.mcpAccessibility` i globala inställningar (migrering 056).
-Implementering: `open-sse/services/compression/engines/mcpAccessibility/`.
-Fullständig dokumentation: [Komprimeringsmotorer — MCP-filter för tillgänglighetsträd](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguration: `compression.mcpAccessibility` i globala inställningar (migrering 056). Implementering: `open-sse/services/compression/engines/mcpAccessibility/`. Fullständiga dokument: [Kompressionsmotorer — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Se [Komprimeringsmotorer](../compression/COMPRESSION_ENGINES.md) och [RTK-komprimering](../compression/RTK_COMPRESSION.md) för
-modellen för körningskomprimering bakom dessa verktyg.
+Se [Compression Engines](../compression/COMPRESSION_ENGINES.md) och [RTK Compression](../compression/RTK_COMPRESSION.md) för körtidskomprimeringsmodellen bakom dessa verktyg.
 
 ## 1Proxy-verktyg (3)
 

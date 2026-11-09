@@ -10,35 +10,30 @@
 
 ## Quraşdırma
 
-OmniRoute MCP daxildə mövcuddur. Onu belə başladın:
+OmniRoute MCP quraşdırılmışdır. Buna başlayın:
 
 ```bash
 omniroute --mcp
 ```
 
-Yaxud open-sse nəqliyyatı vasitəsilə:
+Və ya açıq nəqliyyat vasitəsi ilə:
 
 ```bash
-# HTTP axınlı nəqliyyat (port 20130)
-omniroute --dev  # MCP /mcp son nöqtəsində avtomatik başlayır
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP nəqliyyatları (`sse` / `streamable-http`, idarə paneli serveri tərəfindən proses daxilində təqdim olunur)
-standart olaraq deaktivdir və əvvəllər yalnız `/dashboard/mcp` səhifəsindən dəyişdirilə bilirdi. v3.8.51-dən
-etibarən CLI də eyni imkanlara malikdir:
+HTTP nəqlləri (`sse` / `streamable-http`, idarə paneli serveri tərəfindən prosesdə xidmət edilir) defolt olaraq söndürülür və əvvəllər yalnız `/dashboard/mcp` səhifəsindən dəyişdirilə bilirdi. v3.8.51-dən etibarən CLI paritetə malikdir:
 
 ```bash
-omniroute mcp status                                  # aktiv/onlayn vəziyyəti, nəqliyyat, alət sayı
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # aktiv sse/streamable-http sessiyalarını sıfırlayır
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`, idarə panelinin `/api/settings` vasitəsilə dəyişdirdiyi eyni `mcpEnabled`
-(və istəyə görə `mcpTransport`) parametrini PATCH edir. `mcp restart`, `POST /api/mcp/restart` çağırır: növbəti
-sorğunun təmiz şəkildə yenidən başladılması üçün aktiv `sse`/`streamable-http` sessiyalarını dayandırır, MCP
-deaktivdirsə `409`, `stdio` nəqliyyatı üçün isə `501` qaytarır (stdio klientləri öz alt proseslərinə sahibdir —
-yenidən başlatmaq üçün prosesdaxili idarəetmə mexanizmi yoxdur).
+`mcp enable`/`mcp disable` PATCH eyni `mcpEnabled` (və istəyə görə `mcpTransport`) tablosunu `/api/settings` vasitəsilə dəyişdirir. `mcp restart` `POST /api/mcp/restart` çağırır: o, aktiv `sse`/`streamable-http` seanslarını sıradan çıxarır, beləliklə, növbəti sorğu təmiz şəkildə yenidən işə salınır, MCP qeyri-aktivdirsə `409` qaytarır və `stdio` nəqli üçün `501` (stdio müştəriləri öz alt prosesinə malikdir — yenidən başlamaq üçün prosesdaxili idarə yoxdur).
 
 ## Nəqliyyatlar
 
@@ -130,54 +125,42 @@ Claude Desktop, Cursor, Cline və uyğun MCP klientlərinin qurulması üçün [
 | `omniroute_cache_stats` | `read:cache`   | Semantik keş, sorğu keşi və idempotentlik statistikası |
 | `omniroute_cache_flush` | `write:cache`  | Keşi qlobal şəkildə və ya imza/model üzrə təmizləyir   |
 
-## Sıxışdırma Alətləri (13)
+## Sıxılma Alətləri (13)
 
-| Alət                                | İcazə sahələri      | Təsvir                                                                                                                                                   |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Sıxışdırma parametrləri, analitika xülasəsi və keş nəzərə alınmaqla statistika (`analytics.mcpDescriptionCompression` metadatasını ehtiva edir)          |
-| `omniroute_compression_configure`   | `write:compression` | Sıxışdırma rejimini, həddi, hədəf nisbətini, sistem sorğusunun qorunmasını və MCP təsviri sıxışdırma keçidini konfiqurasiya edir                         |
-| `omniroute_set_compression_engine`  | `write:compression` | Aktiv mühərriki (off/caveman/rtk/stacked) və Caveman/RTK intensivliyini seçir                                                                            |
-| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıxışdırma kombinasiyalarını və onların mühərrik konveyerlərini sadalayır                                                                  |
-| `omniroute_compression_combo_stats` | `read:compression`  | Sıxışdırma kombinasiyası və mühərrik üzrə qruplaşdırılmış analitika                                                                                      |
-| `omniroute_ccr_store`               | `write:compression` | Çağıran tərəfə görə təcrid olunmuş məzmunu ölçüsü məhdudlaşdırılmış yaddaşdaxili CCR yaddaşında saxlayır və markerlə birlikdə `ccr://` istinadı qaytarır |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR məzmununu tam şəkildə və ya başlanğıc, sonluq, sətirlər, grep və statistika rejimləri ilə əldə edir                                                  |
-| `omniroute_ccr_inspect`             | `read:compression`  | Məzmunu qaytarmadan çağıran tərəfə məxsus CCR metadatasını yoxlayır                                                                                      |
-| `omniroute_ccr_list`                | `read:compression`  | Çağıran tərəfə məxsus CCR blokları üçün səhifələnmiş metadatanı sadalayır                                                                                |
-| `omniroute_ccr_delete`              | `write:compression` | Çağıran tərəfə məxsus CCR blokunu silir                                                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | Çağıran tərəf üzrə yaddaş istifadəsini, həyat dövrü sayğaclarını və yaddaş məhdudiyyətlərini bildirir                                                    |
-| `omniroute_rtk_discover`            | `read:compression`  | İştirakı könüllü seçilmiş RTK çıxış nümunələrində təkrarlanan küyü aşkarlayır                                                                            |
-| `omniroute_rtk_learn`               | `read:compression`  | İştirakı könüllü seçilmiş nümunələrdən nəzərdən keçirilə bilən RTK filtri qaralaması yaradır                                                             |
+| Alət                                | Əhatə dairələri     | Təsvir                                                                                                                                   |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Sıxılma parametrləri, analitika xülasəsi və keşdən xəbərdar olan statistika ( `analytics.mcpDescriptionCompression` metadatası daxildir) |
+| `omniroute_compression_configure`   | `write:compression` | Sıxılma rejimini, həddi, hədəf nisbətini, sistem operativ qorunmasını, MCP təsviri sıxılma keçidini konfiqurasiya edin                   |
+| `omniroute_set_compression_engine`  | `write:compression` | Aktiv mühərriki (off/caveman/rtk/stacked) və Caveman/RTK intensivliyini seçin                                                            |
+| `omniroute_list_compression_combos` | `read:compression`  | Adlandırılmış sıxılma kombinlərini və onların mühərrik boru kəmərlərini sadalayın                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | Sıxılma kombisi və mühərrikə görə qruplaşdırılmış analitika                                                                              |
+| `omniroute_ccr_store`               | `write:compression` | Zəng edən tərəfindən təcrid olunmuş məzmunu məhdud yaddaşdaxili CCR mağazasında saxlayın və marker və `ccr://` arayışı qaytarın          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR məzmununu tam və ya baş, quyruq, xətlər, grep və statistika rejimləri ilə əldə edin                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | Məzmunu qaytarmadan zəng edənə məxsus CCR metadatasını yoxlayın                                                                          |
+| `omniroute_ccr_list`                | `read:compression`  | Zəng edənə məxsus CCR blokları üçün səhifələnmiş metadata siyahıları                                                                     |
+| `omniroute_ccr_delete`              | `write:compression` | Zəng edənə məxsus CCR blokunu silin                                                                                                      |
+| `omniroute_ccr_stats`               | `read:compression`  | Zəng edənin əhatə etdiyi yaddaş istifadəsini, həyat dövrü sayğaclarını və mağaza limitlərini bildirin                                    |
+| `omniroute_rtk_discover`            | `read:compression`  | Seçilmiş RTK çıxış nümunələrində təkrarlanan səs-küyü kəşf edin                                                                          |
+| `omniroute_rtk_learn`               | `read:compression`  | Seçilmiş nümunələrdən nəzərdən keçirilə bilən RTK filtr layihəsi yaradın                                                                 |
 
-CCR qeydləri yalnız yaddaş daxilində saxlanılır və yenidən başladıldıqda yox olur. Hər blok 2 MiB, hər
-əsas subyekt 16 MiB, qlobal yaddaş isə 64 MiB ilə məhdudlaşdırılıb. Qeydlər üçün standart TTL 24 saatdır (maksimum
-yeddi gün). Tam MCP əldəetməsi 256 KiB ilə məhdudlaşdırılıb; daha böyük bloklar diapazon və grep rejimləri vasitəsilə
-əlçatan qalır. Saxlama, əldəetmə, siyahılama, yoxlama, silmə və statistika autentifikasiya edilmiş
-API açarının əsas subyektinə görə təcrid olunur. Audit qeydlərində yalnız heşlər və ölçü metadatası saxlanılır, məzmun isə heç vaxt saxlanılmır.
+CCR girişləri iki səviyyəli mağazadan istifadə edir: yerli qeyri-bulud iş vaxtlarında, davamlı SQLite səviyyəsi ilə dəstəklənən isti yaddaşdaxili səviyyə (`ccr_blocks`, standart olaraq aktivdir), beləliklə blok 512 — KB dən çox bloklar və buludda işləyən bloklar istisna olmaqla, TTL bitənə qədər çıxarılmadan və ya yenidən işə salınmadan sağ qalır. Hər blok 2 MiB, hər bir əsas 16 MiB və qlobal mağaza 64 MiB ilə məhdudlaşır . Girişlər standart olaraq 24 saatlıq TTL (maksimum yeddi gün). Tam MCP axtarışı 256 KiB ilə məhdudlaşır; diapazonlu və grep rejimləri vasitəsilə daha böyük bloklar əlçatan qalır. Saxlama, axtarış, siyahı, yoxlama, silinmə və statistik məlumatlar təsdiqlənmiş API açarı prinsipi ilə təcrid olunur. Audit qeydlərində heşlər və ölçü metadataları var, heç vaxt məzmun yoxdur. Operatorla bağlı təfərrüatlar (iki marker, müştəri ilkin şərtləri, `codemode:false`, alət üzrə əhatə dairəsi, səhifələşdirmə və diaqnostik matrisa) [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatında](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mövcuddur.
 
-`omniroute_compression_status` MCP təsvir sıxılmasını ayrıca
-`analytics.mcpDescriptionCompression` altında bildirir. Bu dəyərlər MCP-də siyahılana bilən
-təsvirlər (`tools`, `prompts`, `resources` və `resourceTemplates`) üçün metadata ölçüsü təxminləridir;
-onlar provayder istifadə qəbzləri deyil və `source: "mcp_metadata_estimate"` ilə işarələnir.
+`omniroute_compression_status` ayrıca `analytics.mcpDescriptionCompression` altında MCP təsvirinin sıxılmasını bildirir. Bu dəyərlər MCP siyahıya alına bilən təsvirlər üçün metadata ölçüsündə təxminlərdir (`tools`, `prompts`, `resources` və `resourceTemplates`); onlar provayderin istifadə qəbzi deyil və `source: "mcp_metadata_estimate"` ilə qeyd olunur.
 
-### MCP Əlçatanlıq Ağacı Filtri (v3.8.0)
+### MCP Əlçatımlılıq Ağacı Filtri (v3.8.0)
 
-Yuxarıdakı sıxılma alətlərindən ayrı olaraq, OmniRoute MCP brauzer/əlçatanlıq alətlərinin
-**alət nəticələrini** agentə qaytarmazdan əvvəl sıxan icradan sonrakı filtr ehtiva edir. Bu filtr özü
-alət deyil — geniş həcmli əlçatanlıq ağacı və ya brauzer ani görüntüsü mətni (≥2000 simvol) ehtiva
-edən istənilən alət nəticəsi üzərində şəffaf şəkildə işləyir.
+Yuxarıdakı sıxılma vasitələrindən ayrı olaraq, OmniRoute -ya sıxışdıran icradan sonrakı filtr daxildir** alət nəticələri** MCP browser/accessibility alətlərinin agentə qaytarılmasından əvvəl. Bu filtr özü alət deyil — o, ətraflı əlçatanlıq ağacı və ya brauzerin snapshot mətni (≥ 2000 simvol) olan istənilən alət nəticəsində şəffaf şəkildə işləyir.
 
 Əsas davranışlar:
 
-- Ardıcıl təkrarlanan ≥30 qonşu sətri başlanğıc + son xülasə formasında yığcamlaşdırır
-- Playwright/computer-use üçün tələb olunan `[ref=eXX]` lövbərlərini qoruyur
-- Həddindən artıq böyük mətni (>50,000 simvol) naviqasiya ipucu ilə məcburi şəkildə qısaldır
-- Gözlənilən qənaət: brauzer ani görüntüsü faydalı yüklərində **60–80%**
+- ≥ 30 ardıcıl təkrarlanan qardaş sətirləri baş + quyruq xülasəsinə yığır
+- Playwright/computer-use tərəfindən tələb olunan `[ref=eXX]` lövbərlərini qoruyur
+- Naviqasiya işarəsi ilə böyük ölçülü mətni (> 50.000 simvol) sərt şəkildə kəsir
+- Gözlənilən qənaət:** 60-80%** brauzer snapshot yüklərində
 
-Konfiqurasiya: qlobal parametrlərdə `compression.mcpAccessibility` (miqrasiya 056).
-İmplementasiya: `open-sse/services/compression/engines/mcpAccessibility/`.
-Tam sənədlər: [Sıxılma Mühərrikləri — MCP Əlçatanlıq Ağacı Filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiqurasiya: qlobal parametrlərdə `compression.mcpAccessibility` (miqrasiya 056). İcra: `open-sse/services/compression/engines/mcpAccessibility/`. Tam sənədlər: [Sıxılma Mühərrikləri — MCP Əlçatanlıq Ağacı Filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Bu alətlərin arxasındakı icra vaxtı sıxılma modeli üçün [Sıxılma Mühərrikləri](../compression/COMPRESSION_ENGINES.md) və [RTK Sıxılması](../compression/RTK_COMPRESSION.md) sənədlərinə baxın.
+Bu alətlərin arxasında işləmə zamanı sıxılma modeli üçün [Sıxılma Mühərriklərinə](../compression/COMPRESSION_ENGINES.md) və [RTK Sıxılmaya](../compression/RTK_COMPRESSION.md) baxın.
 
 ## 1Proxy Alətləri (3)
 

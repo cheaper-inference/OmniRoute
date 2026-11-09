@@ -191,41 +191,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Настройване на протоколи (MCP + A2A)
+## Настройка на протокол (MCP + A2A)
 
-### Настройване на MCP (Model Context Protocol)
+### Настройка MCP (моделен контекстен протокол)
 
-Стартирайте MCP транспорта в режим stdio:
+Стартирайте MCP транспорт в режим stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Препоръчителен процес за валидиране:
+Препоръчителен поток за валидиране:
 
 ```bash
-# 1. Стартирайте MCP сървъра
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. От своя MCP клиент извикайте:
-omniroute_get_health        # Трябва да върне състоянието на системата
-omniroute_list_combos       # Трябва да върне активните комбинации
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Или изпълнете пълния E2E набор:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Конфигуриране на MCP клиент
+#### MCP клиентска конфигурация
 
-**Claude Code:**
+**Claude код:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Добавете към настройките си за MCP:
+Добавете към вашите MCP настройки (stdio, с ключа, така че повикващият да има принципал):
 
 ```json
 {
@@ -233,17 +233,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Пълна документация за MCP:** [README на MCP сървъра](../../open-sse/mcp-server/README.md) — 110 инструмента, конфигурации за IDE, клиенти за Python/TS/Go.
+Или, когато `mcpTransport` е `streamable-http` (задайте го на `/dashboard/mcp` или с `omniroute mcp enable --transport streamable-http`), насочете записа на отдалечения MCP сървър на клиента към `http://localhost:20128/api/mcp/stream`.
 
-### Настройване на A2A (Agent-to-Agent Protocol)
+Ключът пътува като `Authorization: Bearer <api-key>` (вижте [MCP сървър → отдалечен достъп](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) за отдалечени хостове; отдалеченият ключ се нуждае от `mcp:connect` плюс неговите read/write обхвати).
 
-Проверете Agent Card:
+**Пълна MCP документация:** [MCP сървър README](../../open-sse/mcp-server/README.md) — 110 инструменти, IDE конфигурации, Python/TS/Go клиенти. Справка на оператора за CCR/dedup инструментите за компресиране (маркери, предпоставки, обхвати за всеки инструмент, страници за извличане, диагностика): [Компресиращи машини → Предпоставки / ръководство за оператора](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Настройка A2A (протокол от агент към агент)
+
+Потвърдете картата на агента:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Пълна документация за A2A:** [README на A2A сървъра](../../src/lib/a2a/README.md) — JSON-RPC 2.0, умения, поточно предаване, жизнен цикъл на задачите.
+**Пълна A2A документация:** [A2A сървър README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, умения, стрийминг, жизнен цикъл на задачата.
 
 ---
 
@@ -316,23 +323,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Шаблон за Void Linux (xbps-src)
+## Шаблон Void Linux (xbps-src).
 
-Потребителите на Void Linux могат да създадат нативен пакет чрез `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
+За потребителите на Void Linux можете да създадете собствен пакет с помощта `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
 
 ```bash
-# Шаблонен файл за 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Универсален AI шлюз с интелигентно маршрутизиране за множество доставчици на LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Генерирайте отново контролната сума за всяка версия чрез:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

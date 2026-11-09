@@ -163,7 +163,7 @@ OmniRoute avslöjar 6 A2A färdigheter kopplade i `src/lib/a2a/taskExecution.ts:
 | Hälsorapport       | `health-report`      | Aggregerat strömbrytare, nedkylning, låsningstillstånd per leverantör                                                                                | hälsa, motståndskraft          | "Visa hälsostatus för alla leverantörer"         |
 | Lista funktioner   | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en nedräkningstabell med rå SKILL.md URLs för kontextinjektion | katalog, upptäckt, färdigheter | "Lista alla OmniRoute -funktioner"               |
 
-> Agentkortet ska hållas i linje med 380-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
+> Agentkortet ska hållas i linje med 381-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
 
 ### `list-capabilities` Skicklighetsdetalj
 
@@ -180,20 +180,28 @@ Varje rad inkluderar `rawUrl` kolumnen så att agenter omedelbart kan hämta hel
 
 ---
 
-## REST-API (kompletterande)
+## REST API (hjälp)
 
-JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpunkterna nedan ger kompletterande åtkomst för instrumentpaneler och externa verktyg:
+JSON-RPC-ändpunkten `/a2a` är den kanoniska A2A ingångspunkten. REST -ändpunkterna nedan ger extra åtkomst för instrumentpaneler och externa verktyg:
 
-| Slutpunkt                    | Metod | Beskrivning                                                          | Autentisering                                 |
-| :--------------------------- | :---- | :------------------------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET   | Serverstatus, registrerade färdigheter                               | (offentlig)                                   |
-| `/api/a2a/tasks`             | GET   | Lista uppgifter med filter                                           | administration                                |
-| `/api/a2a/tasks/[id]`        | GET   | Hämta uppgift via ID                                                 | administration                                |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Avbryt pågående uppgift                                              | administration                                |
-| `/.well-known/agent.json`    | GET   | Agentkort (A2A-identifiering)                                        | (offentlig, cachelagras i 3600 s)             |
-| `/api/a2a/tasks`             | POST  | Inkommande delegering till OmniConductor-flottan (Conductor PRD RF5) | Bearer mot `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Slutpunkt                    | Metod | Beskrivning                                                          | Auth                                                                                                |
+| :--------------------------- | :---- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | Serverstatus, registrerade färdigheter                               | (offentlig)                                                                                         |
+| `/api/a2a/tasks`             | GET   | Lista uppgifter med filter                                           | management eller API -nyckel (se nedan)                                                             |
+| `/api/a2a/tasks/[id]`        | GET   | Få uppgift av ID                                                     | management eller API -nyckel (se nedan)                                                             |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Avbryt pågående uppgift                                              | management eller API -nyckel (se nedan)                                                             |
+| `/.well-known/agent.json`    | GET   | Agentkort (A2A discovery)                                            | (offentlig, cachad 3600-tal)                                                                        |
+| `/api/a2a/tasks`             | POST  | Inkommande delegering till OmniConductor flottan (Conductor PRD RF5) | samma som `GET`, plus `OMNIROUTE_API_KEY` om satt medan `REQUIRE_API_KEY` är avstängt; `a2aEnabled` |
 
-**Inkommande Conductor-delegering (`POST /api/a2a/tasks`):** externa A2A-agenter delegerar programmeringsarbete till OmniConductor-flottan via OmniRoute. Innehåll: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — endast färdigheter för Conductor-flottan (de som anges på agentkortet) kan delegeras; `metadata.conductor.repo.url` är obligatorisk (flottan arbetar med git-arkiv). Rutten översätts till hubbens `POST /v1/tasks` med `CONDUCTOR_ORCHESTRATOR_TOKEN` på serversidan (`CONDUCTOR_HUB_TOKEN` används som reserv) och returnerar `201 { conductor_task_id, state: "submitted" }`; uppgiftstillstånd återförs via SSE→A2A-speglingen (RF1) och visas via `GET /api/a2a/tasks?skill=conductor`.
+Vem som kommer igenom till `/api/a2a/tasks*` rutterna beror på inställningarna för inloggning och API-nyckel:
+
+- `requireLogin=true` (standard): mellanprogramvaran tillåter endast hanteringsuppgifter (dashboardsession, `manage` -scope API nyckel, `oma_` -åtkomsttoken) och `OMNIROUTE_API_KEY`. En vanlig slutledningsnyckel får `403`. I `Authorization` huvudet tar mellanvaran bara `OMNIROUTE_API_KEY` som `Bearer <key>`; en bar nyckel eller en tabb efter `Bearer` får `401`.
+- `requireLogin=false`, eller loopback-fönstret innan ombordstigning: med `REQUIRE_API_KEY=true` accepteras alla giltiga OmniRoute API nyckel eller hanteringsuppgifter och anonyma uppringare får `401`; med `REQUIRE_API_KEY` utanför är rutterna öppna.
+- `POST /api/a2a/tasks` kräver dessutom `OMNIROUTE_API_KEY` i `Authorization` -huvudet när den variabeln är inställd och `REQUIRE_API_KEY` är avstängd. Andra rubriker, som `x-api-key`, räknas inte där. Med inloggning av eller före onboarding passerar nyckeln med eller utan ett `Bearer` -prefix; med inloggning på, bara `Bearer <key>` kommer förbi mellanvaran.
+
+Där en legitimation krävs fungerar en `read` -scope `oma_` token bara för `GET`.
+
+**Inkommande ledare delegering (`POST /api/a2a/tasks`):** externa A2A agenter delegerar kodningsarbete till OmniConductor flottan genom OmniRoute. Kropp: endast `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — färdigheter i konduktörflottan (de som anges på agentkortet) är delegerbara; `metadata.conductor.repo.url` krävs (flottan fungerar på git-repos). Rutten översätts till navets `POST /v1/tasks` med hjälp av serversidan `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) och returnerar `201 { conductor_task_id, state: "submitted" }`; uppgiftstillstånd flödar tillbaka genom SSE→A2A spegeln (RF1) och är synliga via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,16 +209,16 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
 
 1. **Skapa färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportera en asynkronfunktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ formen av befintliga färdigheter som `smartRouting.ts`.
+   Exportera en asynkronfunktion `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Följ formen av befintliga färdigheter som `smartRouting.ts`. Om färdigheten anropar tillbaka till OmniRoute över HTTP, bygg rubrikerna med `buildSelfLoopHeaders(caller)` från `src/lib/a2a/selfLoopAuth.ts` så att samtalet körs med A2A -anroparens nyckel, inte `OMNIROUTE_API_KEY`, och skicka `redirect: "error"` till `fetch` så att en omdirigering aldrig får nyckeln. Hjälparen bygger bara rubriker; varje färdighet anger själva omdirigeringspolicyn. Den kastar `UnsafeSelfLoopTargetError` snarare än att bifoga en nyckel när den lösta basen URL är vanlig http utanför det privata nätverket (loopback, ett container- eller tjänstnamn och privata adresser är bra) eller har referenser, så en färdighet som sväljer avvisade samtal måste kasta tillbaka det felet.
 
 2. **Registerhanterare:** i `src/lib/a2a/taskExecution.ts`, lägg till en post i `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

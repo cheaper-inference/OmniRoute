@@ -488,10 +488,10 @@ createResponsesApiTransformStream(): TransformStream
 
 | ਫਾਈਲ                           | ਮਕਸਦ                                      |
 | ------------------------------ | ----------------------------------------- |
-| `providerRegistry.ts`          | 380-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਉੱਤੇ ਚੈਟ-ਮਾਡਲ ਰਜਿਸਟਰੀ |
+| `providerRegistry.ts`          | 381-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਉੱਤੇ ਚੈਟ-ਮਾਡਲ ਰਜਿਸਟਰੀ |
 | `providerModels.ts`            | ਮਾਡਲ ਉਪਨਾਮ, ਫਾਰਮੈਟ ਮੈਪਿੰਗ                 |
 | `constants.ts`                 | ਸਮਾਂ ਸਮਾਪਤੀ, ਸੀਮਾਵਾਂ, ਸਥਿਤੀ ਕੋਡ           |
-| `defaultThinkingSignature.ts`  | ਡਿਫਾਲਟ Claude ਸੋਚ ਦਸਤਖਤ                   |
+| `defaultThinkingSignature.ts`  | ਡਿਫੌਲਟ Claude ਸੋਚ ਦਸਤਖਤ                   |
 | `modelStrip.ts` (ਸੇਵਾਵਾਂ ਵਿੱਚ) | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਖੇਤਰ ਸਟ੍ਰਿਪਿੰਗ              |
 
 ### ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀ ਸਕੀਮਾ

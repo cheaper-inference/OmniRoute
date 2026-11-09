@@ -38,24 +38,19 @@ og støtter samsvar med `any` eller `all`.
 En `connection`-regel evalueres bare når ingen tidlig regel vant og en konkret leverandørtilkobling allerede
 er valgt. Den kan bare endre innsatsnivå og budsjett.
 
-## Innsatsnivå og budsjett
+## Innsats og budsjett
 
-`sourceEffort` godtar `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` og
-`ultra`. `missing` betyr at forespørselen verken inneholder et eksplisitt innsatsnivå, en tenkebryter
-eller et tenkebudsjett. Et signal som bare angir budsjett, samsvarer derfor kun med `any`.
+`sourceEffort` aksepterer `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` og `ultra`. `missing` betyr at forespørselen verken inneholder en diskret innsats eller en tankeveksel eller tenkebudsjett. Et budsjettsignal matches derfor bare av `any`.
 
 `effortMode` har tre varianter:
 
-- `inherit` beholder klientens innsatsnivå, samtidig som modellen eller kombinasjonen fortsatt kan endres.
-- `default` angir `targetEffort` bare når det ikke finnes noe eksplisitt resonneringssignal.
-- `force` erstatter det eksplisitte innsatsnivået med `targetEffort`.
+- `inherit` beholder klientinnsatsen mens den fortsatt lar modellen eller kombinasjonen endres.
+- `default` setter `targetEffort` bare når det ikke finnes noe eksplisitt resonneringssignal.
+- `force` erstatter den diskrete innsatsen med `targetEffort`.
 
-Uavhengig av dette kan `budgetAction` være `preserve`, `remove` eller `set`. `force` med `none` fjerner
-alle gjenkjente felt for innsatsnivå og budsjett. `none` sammen med `set` er ugyldig.
+Uavhengig kan `budgetAction` være `preserve`, `remove` eller `set`. `force` med `none` fjerner alle anerkjente innsats- og budsjettfelt, og setter deretter `reasoning_effort: "none"`, fordi noen leverandører slår på tenkning når feltet er fraværende. Leverandører som avviser den bokstavelige `none`, justeres ved utsendelse i `open-sse/executors/base/reasoningEffort.ts`. Kommandokode tilordner den til `low`, bortsett fra på svarformede forespørsler (`input` uten `messages`), hvor den beholder `none`. På Cloudflare Workers AI (`cloudflare-ai`), får modellene som avviser `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low`; andre Workers AI modeller beholder `none`. Å droppe feltet er ikke et alternativ der, fordi en fraværende innsats kjører modellens standardnivå. `none` sammen med `set` er ugyldig.
 
-Forespørsler rettet mot modeller som er kjent for å være inkompatible, avvises før oppstrømskallet. For kombinasjonsmål
-fjernes inkompatible oppføringer. Hvis ingen gjenstår, returnerer forespørselen status `400`.
-Ukjente funksjonsdata genererer en advarsel og lar regelen forbli aktiv.
+Forespørsler rettet mot kjente inkompatible modeller avvises før oppstrømssamtalen. For kombinasjonsmål fjernes inkompatible oppføringer; hvis ingen gjenstår, returnerer forespørselen status `400`. Ukjente funksjonsdata produserer en advarsel og lar regelen være aktiv.
 
 ## Sikkerhet og transportmekanismer
 

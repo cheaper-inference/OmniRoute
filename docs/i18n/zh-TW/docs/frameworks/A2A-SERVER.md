@@ -162,7 +162,7 @@ OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中連結的
 | 健康報告   | `health-report`      | 聚合每個提供者的斷路器、冷卻時間、鎖定狀態                                                                  | 健康、韌性       | “顯示所有提供者的健康狀況” |
 | 列出能力   | `list-capabilities`  | 返回完整的 45 條目代理技能目錄（23 API + 21 CLI + 1 配置）作為降價表，並使用原始SKILL.md URLs進行上下文注入 | 目錄、發現、技能 | “列出所有OmniRoute功能”    |
 
-> 代理卡應與即時 380 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
+> 代理卡應與即時 381 提供者目錄保持一致；提供者計數和free/no-auth資料源自運行時註冊表。
 
 ### `list-capabilities`技能詳情
 
@@ -179,20 +179,28 @@ OmniRoute公開了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中連結的
 
 ---
 
-## REST API（輔助）
+## REST API (輔助)
 
-JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表板與外部工具提供輔助存取：
+JSON-RPC 端點`/a2a`是規範的A2A入口點。下面的REST端點為儀表板和外部工具提供輔助存取：
 
-| 端點                         | 方法 | 說明                                                     | 驗證                                           |
-| :--------------------------- | :--- | :------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET  | 伺服器狀態、已註冊的技能                                 | （公開）                                       |
-| `/api/a2a/tasks`             | GET  | 使用篩選條件列出任務                                     | 管理                                           |
-| `/api/a2a/tasks/[id]`        | GET  | 依 ID 取得任務                                           | 管理                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST | 取消執行中的任務                                         | 管理                                           |
-| `/.well-known/agent.json`    | GET  | Agent Card（A2A 探索）                                   | （公開，快取 3600s）                           |
-| `/api/a2a/tasks`             | POST | 將入站委派傳送至 OmniConductor 機群（Conductor PRD RF5） | Bearer 對照 `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| 端點                         | 方法 | 描述                                       | 授權                                                                                      |
+| :--------------------------- | :--- | :----------------------------------------- | :---------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | 伺服器狀態、註冊技能                       | （民眾）                                                                                  |
+| `/api/a2a/tasks`             | GET  | 使用過濾器列出任務                         | 管理或API金鑰（見下文）                                                                   |
+| `/api/a2a/tasks/[id]`        | GET  | 透過ID獲取任務                             | 管理或API金鑰（見下文）                                                                   |
+| `/api/a2a/tasks/[id]/cancel` | POST | 取消正在運行的任務                         | 管理或API金鑰（見下文）                                                                   |
+| `/.well-known/agent.json`    | GET  | 代理卡（A2A發現）                          | （公共，快取 3600 秒）                                                                    |
+| `/api/a2a/tasks`             | POST | OmniConductor車隊入境代表團（指揮PRD RF5） | 與`GET`相同，如果在`REQUIRE_API_KEY`關閉時設置，則加上`OMNIROUTE_API_KEY` ； `a2aEnabled` |
 
-**入站 Conductor 委派（`POST /api/a2a/tasks`）：**外部 A2A 代理程式透過 OmniRoute 將程式開發工作委派給 OmniConductor 機群。主體：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 只有 Conductor 機群技能（即 Agent Card 上公告的技能）可供委派；`metadata.conductor.repo.url` 為必填（機群在 git 儲存庫上作業）。此路由會使用伺服器端的 `CONDUCTOR_ORCHESTRATOR_TOKEN`（備援為 `CONDUCTOR_HUB_TOKEN`）轉換為中樞的 `POST /v1/tasks`，並傳回 `201 { conductor_task_id, state: "submitted" }`；任務狀態會透過 SSE→A2A 鏡像（RF1）回傳，並可透過 `GET /api/a2a/tasks?skill=conductor` 查看。
+誰可以存取`/api/a2a/tasks*`路由取決於登入和 API 金鑰設定：
+
+- `requireLogin=true` （預設）：中間件僅允許管理憑證（儀表板會話、 `manage` -scope API金鑰、 `oma_`存取權杖）和`OMNIROUTE_API_KEY`。簡單的推理密鑰得到`403`。在`Authorization`標頭中，中間件僅將`OMNIROUTE_API_KEY`視為`Bearer <key>`； `Bearer`取得`401`後的裸鍵或製表符。
+- `requireLogin=false`，或加入先前的環回視窗：使用`REQUIRE_API_KEY=true`時，任何有效的OmniRoute API密鑰或管理憑證都會被接受，匿名呼叫者將獲得`401`； `REQUIRE_API_KEY`關閉後，路線就打開了。
+- 當設定變數且`REQUIRE_API_KEY`關閉時，`POST /api/a2a/tasks`還需要`Authorization`標頭中的`OMNIROUTE_API_KEY` 。其他標頭（例如`x-api-key`）不計入其中。在關閉登入或登入之前，密鑰會通過（有或沒有`Bearer`前綴）；登入後，只有`Bearer <key>`通過中間件。
+
+在需要憑證的情況下， `read` -scope `oma_`令牌僅適用於`GET`。
+
+**入境指揮委派 (`POST /api/a2a/tasks`):**外部A2A代理透過OmniRoute將編碼工作委託給OmniConductor佇列。本體： `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` —僅指揮艦隊技能（特工卡上公佈的技能）可委託； `metadata.conductor.repo.url`是必需的（艦隊在 git 儲存庫上工作）。此路由使用伺服器端`CONDUCTOR_ORCHESTRATOR_TOKEN` （後備`CONDUCTOR_HUB_TOKEN`）轉換為集線器的`POST /v1/tasks`並傳回`201 { conductor_task_id, state: "submitted" }`；任務狀態透過SSE→A2A鏡像 (RF1) 回流，並透過`GET /api/a2a/tasks?skill=conductor`可見。
 
 ---
 
@@ -200,16 +208,16 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 1. **建立技能文件：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   導出異步函數`(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循`smartRouting.ts`等現有技能的形狀。
+   導出異步函數`(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`。遵循`smartRouting.ts`等現有技能的形狀。如果技能透過HTTP回調到OmniRoute ，請使用`buildSelfLoopHeaders(caller)`從`src/lib/a2a/selfLoopAuth.ts`建立標頭，以便呼叫使用A2A呼叫者的金鑰（而不是`OMNIROUTE_API_KEY`）運行，並將`redirect: "error"`傳遞給`fetch`以便重定向永遠不會取得金鑰。助手僅建立標頭；每個技能都會自行設定重定向策略。當解析的基本URL是私有網路以外的普通 http（環回、容器或服務名稱以及私有位址都可以）或保存憑證時，它會拋出`UnsafeSelfLoopTargetError`而不是附加金鑰，因此吞下拒絕的呼叫的技能必須重新拋出該錯誤。
 
 2. **註冊處理程序：**在`src/lib/a2a/taskExecution.ts`中，在`A2A_SKILL_HANDLERS`中新增一個條目：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

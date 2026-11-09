@@ -488,7 +488,7 @@ Zpracovává:
 
 | Soubor                        | Účel                                                |
 | ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | Registr modelu chatu přes katalog 380 poskytovatelů |
+| `providerRegistry.ts`         | Registr modelu chatu přes katalog poskytovatelů 381 |
 | `providerModels.ts`           | Aliasy modelu, mapování formátu                     |
 | `constants.ts`                | Časové limity, limity, stavové kódy                 |
 | `defaultThinkingSignature.ts` | Výchozí podpis myšlení Claude                       |

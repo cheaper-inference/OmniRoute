@@ -19,8 +19,9 @@ omniroute --mcp
 Nebo prostřednictvím dopravy open-sse:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 Přenosy HTTP (`sse` / `streamable-http`, obsluhované v průběhu procesu serverem řídicího panelu) jsou ve výchozím nastavení vypnuty a dříve je bylo možné přepínat pouze ze stránky `/dashboard/mcp`. Od verze 3.8.51 má CLI paritu:
@@ -142,7 +143,7 @@ Viz [Konfigurace klienta MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_rtk_discover`            | `read:compression`  | Objevte opakující se šum v volitelných výstupních vzorcích RTK                                                        |
 | `omniroute_rtk_learn`               | `read:compression`  | Vygenerujte zkontrolovatelný koncept filtru RTK z volitelných vzorků                                                  |
 
-Záznamy CCR jsou pouze v paměti a po restartu zmizí. Každý blok je omezen na 2 MiB, každý hlavní na 16 MiB a globální úložiště na 64 MiB. Výchozí hodnoty položek jsou 24hodinové TTL (maximálně sedm dní). Plné načtení MCP je omezeno na 256 KiB; větší bloky zůstávají dostupné prostřednictvím režimů ranged a grep. Úložiště, načítání, výpis, kontrola, mazání a statistiky jsou izolovány autentizovaným principem klíče API. Záznamy auditu obsahují hash a metadata velikosti, nikoli obsah.
+Záznamy CCR používají dvouvrstvé úložiště: horká vrstva v paměti podporovaná na lokálních necloudových runtimech trvalou vrstvou SQLite (`ccr_blocks`, ve výchozím nastavení zapnuto), takže blok přežije vystěhování nebo restart, dokud jeho TTL nedojde — kromě bloků nad 512 KB a cloudových runtime, které zůstávají pouze v paměti. Každý blok je omezen na 2 MiB, každý hlavní na 16 MiB a globální úložiště na 64 MiB. Výchozí nastavení položek je 24hodinový TTL (maximálně sedm dní). Plné načtení MCP je omezeno na 256 KiB; větší bloky zůstávají dostupné prostřednictvím režimů ranged a grep. Úložiště, načítání, výpis, kontrola, mazání a statistiky jsou izolovány autentizovaným principem klíče API. Záznamy auditu obsahují hash a metadata velikosti, nikoli obsah. Podrobnosti týkající se operátora (dvě značky, předpoklady klienta, `codemode:false`, rozsahy pro jednotlivé nástroje, stránkování a diagnostická matice) jsou k dispozici v [Compression Engines → Předpoklady / příručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` hlásí kompresi popisu MCP samostatně pod `analytics.mcpDescriptionCompression`. Tyto hodnoty jsou odhady velikosti metadat pro popisy v seznamu MCP (`tools`, `prompts`, `resources` a `resourceTemplates`); nejedná se o potvrzení o používání poskytovatele a jsou označeny `source: "mcp_metadata_estimate"`.
 

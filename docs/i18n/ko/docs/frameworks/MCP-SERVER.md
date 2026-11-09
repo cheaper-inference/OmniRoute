@@ -10,35 +10,30 @@
 
 ## 설치
 
-OmniRoute MCP는 기본 제공됩니다. 다음 명령으로 시작합니다.
+OmniRoute MCP 내장되어 있습니다. 다음으로 시작하세요:
 
 ```bash
 omniroute --mcp
 ```
 
-또는 open-sse 전송 방식을 통해 시작합니다.
+또는 open-sse 전송을 통해:
 
 ```bash
-# HTTP 스트리밍 가능 전송 방식(포트 20130)
-omniroute --dev  # MCP가 /mcp 엔드포인트에서 자동으로 시작됨
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP 전송 방식(`sse` / `streamable-http`, 대시보드 서버가 동일 프로세스 내에서 제공)은
-기본적으로 비활성화되어 있으며, 이전에는 `/dashboard/mcp` 페이지에서만 전환할 수 있었습니다. v3.8.51부터는
-CLI에서도 동일한 기능을 제공합니다.
+HTTP 전송(`sse` / `streamable-http`, 대시보드 서버에서 프로세스 내 제공)은 기본적으로 꺼져 있으며 이전에는 `/dashboard/mcp` 페이지에서만 전환할 수 있었습니다. v3.8.51부터 CLI 에는 패리티가 있습니다.
 
 ```bash
-omniroute mcp status                                  # 활성화/온라인 여부, 전송 방식, 도구 수
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # 활성 sse/streamable-http 세션 재설정
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`은 대시보드가 `/api/settings`를 통해 전환하는 것과 동일한 `mcpEnabled`
-설정(선택적으로 `mcpTransport`도 포함)을 PATCH합니다. `mcp restart`는 `POST /api/mcp/restart`를 호출합니다. 이 명령은
-활성 `sse`/`streamable-http` 세션을 종료하여 다음 요청이 초기화부터 정상적으로 다시 시작되도록 하며,
-MCP가 비활성화된 경우 `409`, `stdio` 전송 방식인 경우 `501`을 반환합니다(stdio 클라이언트는 자체
-하위 프로세스를 소유하므로 동일 프로세스 내에서 재시작할 수 있는 핸들이 없습니다).
+`mcp enable`/`mcp disable` PATCH 동일한 `mcpEnabled` (및 선택적으로 `mcpTransport`) 대시보드 설정은 `/api/settings` 통해 전환됩니다. `mcp restart` `POST /api/mcp/restart` 호출합니다. 활성 `sse`/`streamable-http` 세션을 해제하여 다음 요청이 깔끔하게 다시 초기화되고 MCP 비활성화된 경우 `409` 반환하며 `stdio` 전송을 위해 `501` 반환합니다(stdio 클라이언트는 자체 하위 프로세스 — 소유하므로 다시 시작할 프로세스 내 핸들이 없습니다).
 
 ## 전송 방식
 
@@ -132,53 +127,40 @@ Claude Desktop, Cursor, Cline 및 호환되는 MCP 클라이언트 설정은 [MC
 
 ## 압축 도구 (13)
 
-| 도구                                | 범위                | 설명                                                                                          |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | 압축 설정, 분석 요약 및 캐시 인식 통계(`analytics.mcpDescriptionCompression` 메타데이터 포함) |
-| `omniroute_compression_configure`   | `write:compression` | 압축 모드, 임계값, 목표 비율, 시스템 프롬프트 보존 및 MCP 설명 압축 토글 구성                 |
-| `omniroute_set_compression_engine`  | `write:compression` | 활성 엔진(off/caveman/rtk/stacked) 및 Caveman/RTK 강도 선택                                   |
-| `omniroute_list_compression_combos` | `read:compression`  | 명명된 압축 콤보 및 해당 엔진 파이프라인 목록 표시                                            |
-| `omniroute_compression_combo_stats` | `read:compression`  | 압축 콤보 및 엔진별로 그룹화된 분석                                                           |
-| `omniroute_ccr_store`               | `write:compression` | 호출자별로 격리된 콘텐츠를 제한된 인메모리 CCR 저장소에 저장하고 마커와 `ccr://` 참조 반환    |
-| `omniroute_ccr_retrieve`            | `read:compression`  | 전체 또는 헤드, 테일, 줄, grep 및 통계 모드로 CCR 콘텐츠 검색                                 |
-| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자 소유 CCR 메타데이터 검사                                        |
-| `omniroute_ccr_list`                | `read:compression`  | 호출자 소유 CCR 블록의 페이지네이션된 메타데이터 목록 표시                                    |
-| `omniroute_ccr_delete`              | `write:compression` | 호출자 소유 CCR 블록 삭제                                                                     |
-| `omniroute_ccr_stats`               | `read:compression`  | 호출자 범위의 메모리 사용량, 수명 주기 카운터 및 저장소 제한 보고                             |
-| `omniroute_rtk_discover`            | `read:compression`  | 옵트인 RTK 출력 샘플에서 반복되는 노이즈 탐색                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | 옵트인 샘플에서 검토 가능한 RTK 필터 초안 생성                                                |
+| 도구                                | 범위                | 설명                                                                                           |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | 압축 설정, 분석 요약 및 캐시 인식 통계( `analytics.mcpDescriptionCompression` 메타데이터 포함) |
+| `omniroute_compression_configure`   | `write:compression` | 압축 모드, 임계값, 대상 비율, 시스템 프롬프트 보존, MCP 설명 압축 토글 구성                    |
+| `omniroute_set_compression_engine`  | `write:compression` | 활성 엔진(off/caveman/rtk/stacked) 및 Caveman/RTK 강도를 선택합니다.                           |
+| `omniroute_list_compression_combos` | `read:compression`  | 명명된 압축 콤보 및 해당 엔진 파이프라인 나열                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | 압축 콤보 및 엔진별로 그룹화된 분석                                                            |
+| `omniroute_ccr_store`               | `write:compression` | 제한된 인메모리 CCR 저장소에 호출자 격리 콘텐츠를 저장하고 마커와 `ccr://` 참조를 반환합니다.  |
+| `omniroute_ccr_retrieve`            | `read:compression`  | 전체 또는 헤드, 테일, 라인, grep 및 통계 모드를 사용하여 CCR 콘텐츠를 검색합니다.              |
+| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자 소유의 CCR 메타데이터를 검사합니다.                              |
+| `omniroute_ccr_list`                | `read:compression`  | 호출자가 소유한 CCR 블록에 대한 페이지가 매겨진 메타데이터 나열                                |
+| `omniroute_ccr_delete`              | `write:compression` | 호출자가 소유한 CCR 블록 삭제                                                                  |
+| `omniroute_ccr_stats`               | `read:compression`  | 호출자 범위 메모리 사용량, 수명 주기 카운터 및 저장 제한 보고                                  |
+| `omniroute_rtk_discover`            | `read:compression`  | 옵트인 RTK 출력 샘플에서 반복되는 노이즈 발견                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | 옵트인 샘플에서 검토 가능한 RTK 필터 초안 생성                                                 |
 
-CCR 항목은 인메모리에만 존재하며 재시작하면 사라집니다. 각 블록은 2 MiB, 각
-주체는 16 MiB, 전역 저장소는 64 MiB로 제한됩니다. 항목의 기본 TTL은 24시간입니다(최대
-7일). 전체 MCP 검색은 256 KiB로 제한되며, 더 큰 블록은 범위 지정 및
-grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 목록 표시, 검사, 삭제 및 통계는
-인증된 API 키 주체별로 격리됩니다. 감사 기록에는 해시와 크기 메타데이터만 포함되며 콘텐츠는 포함되지 않습니다.
+CCR 항목은 2계층 저장소를 사용합니다. 즉, 로컬 비클라우드 런타임에서 내구성 있는 SQLite 계층(`ccr_blocks`, 기본적으로 켜져 있음)으로 지원되는 핫 인 메모리 계층을 사용하므로 블록은 TTL — 모두 소모할 때까지 제거 또는 재시작 후에도 유지됩니다. 단, 512개 이상의 KB 및 클라우드 런타임은 메모리 전용으로 유지됩니다. 각 블록은 2 MiB, 각 주체는 16 MiB, 전역 저장소는 64 MiB 로 제한됩니다. 항목은 기본적으로 24시간 TTL (최대 7일)로 설정됩니다. 전체 MCP 검색은 256 KiB 로 제한됩니다. 더 큰 블록은 ranged 및 grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 나열, 검사, 삭제 및 통계는 인증된 API 키 주체에 의해 격리됩니다. 감사 기록에는 해시 및 크기 메타데이터가 포함되며 콘텐츠는 포함되지 않습니다. 운영자 측 세부 정보(두 개의 마커, 클라이언트 전제 조건, `codemode:false`, 도구별 범위, 페이지 매김 및 진단 매트릭스)는 [압축 엔진 → 전제 조건 / 운영자 가이드](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) 에 있습니다.
 
-`omniroute_compression_status`는 MCP 설명 압축을
-`analytics.mcpDescriptionCompression` 아래에 별도로 보고합니다. 해당 값은 MCP에서 목록 조회가 가능한
-설명(`tools`, `prompts`, `resources`, `resourceTemplates`)의 메타데이터 크기 추정치이며, 제공자 사용량
-영수증이 아니므로 `source: "mcp_metadata_estimate"`로 표시됩니다.
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` 에서 별도로 MCP 설명 압축을 보고합니다. 해당 값은 MCP 목록 가능 설명(`tools`, `prompts`, `resources` 및 `resourceTemplates`)에 대한 메타데이터 크기 추정치입니다. 이는 공급자 사용 영수증이 아니며 `source: "mcp_metadata_estimate"` 로 표시됩니다.
 
-### MCP 접근성 트리 필터 (v3.8.0)
+### MCP 접근성 트리 필터(v3.8.0)
 
-위의 압축 도구와 별개로, OmniRoute에는 MCP 브라우저/접근성 도구의 **도구 결과**가
-에이전트에 반환되기 전에 압축하는 실행 후 필터가 포함되어 있습니다. 이 필터 자체는 도구가 아니며,
-상세한 접근성 트리 또는 브라우저 스냅샷 텍스트(2,000자 이상)가 포함된 모든 도구 결과에 투명하게
-적용됩니다.
+위의 압축 도구와 별도로 OmniRoute 다음을 압축하는 실행 후 필터가 포함되어 있습니다.** 도구 결과** MCP browser/accessibility 도구가 에이전트에 반환되기 전. 이 필터 자체는 도구 — 아니며 자세한 접근성 트리 또는 브라우저 스냅샷 텍스트(≥ 2000자)가 포함된 도구 결과에 대해 투명하게 실행됩니다.
 
-주요 동작:
+주요 행동:
 
-- 연속으로 30줄 이상 반복되는 형제 항목을 앞부분 + 뒷부분 요약으로 축약
-- Playwright/computer-use에 필요한 `[ref=eXX]` 앵커 보존
-- 지나치게 큰 텍스트(50,000자 초과)를 탐색 힌트와 함께 강제 잘라내기
-- 예상 절감률: 브라우저 스냅샷 페이로드의 **60~80%**
+- ≥ 30개의 연속 반복 형제 라인을 head + tail 요약으로 축소합니다.
+- Playwright/computer-use 에 필요한 `[ref=eXX]` 앵커를 유지합니다.
+- 탐색 힌트를 사용하여 큰 텍스트(> 50,000자)를 잘립니다.
+- 예상 절감액:** 60~80%** 브라우저 스냅샷 페이로드
 
-구성: 전역 설정의 `compression.mcpAccessibility`(마이그레이션 056).
-구현: `open-sse/services/compression/engines/mcpAccessibility/`.
-전체 문서: [압축 엔진 — MCP 접근성 트리 필터](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+구성: 전역 설정의 `compression.mcpAccessibility` (마이그레이션 056) 구현: `open-sse/services/compression/engines/mcpAccessibility/`. 전체 문서: [압축 엔진 — MCP 접근성 트리 필터](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-이러한 도구의 기반이 되는 런타임 압축 모델은 [압축 엔진](../compression/COMPRESSION_ENGINES.md) 및 [RTK 압축](../compression/RTK_COMPRESSION.md)을
-참조하세요.
+이러한 도구 뒤에 있는 런타임 압축 모델은 [압축 엔진](../compression/COMPRESSION_ENGINES.md) 및 [RTK 압축을](../compression/RTK_COMPRESSION.md) 참조하세요.
 
 ## 1Proxy 도구 (3)
 

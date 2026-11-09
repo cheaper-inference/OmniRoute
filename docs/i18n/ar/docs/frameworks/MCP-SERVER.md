@@ -8,37 +8,32 @@
 >
 > مصدر الحقيقة: يحسب `open-sse/mcp-server/server.ts` **110 أدوات فريدة** باستخدام `countUniqueMcpTools()`: عددها 45 تعريفًا أساسيًا (بما في ذلك أدوات دورة حياة CCR الست، وثلاثية agent-skills، و`omniroute_radar_catalog`، و`omniroute_x_search`)، بالإضافة إلى الذاكرة (3)، والمهارات (4)، ومهارات GitHub ‏(3)، والمجموعة (6)، والتلعيب (8)، والإضافات (8)، وNotion ‏(6)، وObsidian ‏(22)، والمحتوى المحلي (3)، وأداتَي ضغط متاحتين فقط في RTK.
 
-## التثبيت
+## تثبيت
 
-يأتي OmniRoute MCP مدمجًا. شغّله باستخدام:
+OmniRoute MCP مدمج. ابدأ بـ:
 
 ```bash
 omniroute --mcp
 ```
 
-أو عبر ناقل open-sse:
+أو عبر النقل المفتوح:
 
 ```bash
-# ناقل HTTP قابل للبث (المنفذ 20130)
-omniroute --dev  # يبدأ MCP تلقائيًا على نقطة النهاية /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-تكون نواقل HTTP ‏(`sse` / `streamable-http`، التي يقدمها خادم لوحة المعلومات داخل العملية نفسها)
-معطّلة افتراضيًا، وكان تبديل حالتها سابقًا ممكنًا فقط من صفحة `/dashboard/mcp`. اعتبارًا من v3.8.51،
-توفر واجهة CLI الإمكانات نفسها:
+تكون عمليات النقل HTTP (`sse` / `streamable-http`، التي يتم تقديمها أثناء العملية بواسطة خادم لوحة المعلومات) معطلة افتراضيًا وكانت قابلة للتبديل سابقًا فقط من صفحة `/dashboard/mcp`. اعتبارًا من الإصدار 3.8.51، أصبح لدى CLI تكافؤ:
 
 ```bash
-omniroute mcp status                                  # حالة التمكين/الاتصال، والناقل، وعدد الأدوات
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # يعيد تعيين جلسات sse/streamable-http النشطة
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-يرسل `mcp enable`/`mcp disable` طلب PATCH إلى إعداد `mcpEnabled` نفسه (وإلى `mcpTransport` اختياريًا)
-الذي تبدّل لوحة المعلومات حالته عبر `/api/settings`. يستدعي `mcp restart` المسار `POST /api/mcp/restart`:
-فهو ينهي جلسات `sse`/`streamable-http` النشطة كي يُعاد تهيئة الطلب التالي بصورة سليمة، ويُرجع
-`409` إذا كان MCP معطّلًا، و`501` لناقل `stdio` (إذ تدير عملاء stdio عملياتها الفرعية بنفسها —
-ولا يوجد معرّف داخل العملية لإعادة تشغيله).
+`mcp enable`/`mcp disable` PATCH نفس `mcpEnabled` (واختياريًا `mcpTransport`) يتم تبديل إعداد لوحة القيادة عبر `/api/settings`. يستدعي `mcp restart` `POST /api/mcp/restart`: فهو يمزق جلسات `sse`/`streamable-http` النشطة بحيث تتم إعادة تهيئة الطلب التالي بشكل نظيف، ويعيد `409` إذا تم تعطيل MCP ، و `501` لنقل `stdio` (يمتلك عملاء stdio العملية الفرعية الخاصة بهم — ولا يوجد مؤشر قيد التشغيل لإعادة التشغيل).
 
 ## النواقل
 
@@ -132,53 +127,40 @@ curl -i \
 
 ## أدوات الضغط (13)
 
-| الأداة                              | النطاقات            | الوصف                                                                                                                            |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | إعدادات الضغط، وملخص التحليلات، وإحصاءات تراعي ذاكرة التخزين المؤقت (تتضمن بيانات `analytics.mcpDescriptionCompression` الوصفية) |
-| `omniroute_compression_configure`   | `write:compression` | تهيئة وضع الضغط، والحد، والنسبة المستهدفة، والحفاظ على مطالبة النظام، ومفتاح تبديل ضغط وصف MCP                                   |
-| `omniroute_set_compression_engine`  | `write:compression` | اختيار المحرك النشط (off/caveman/rtk/stacked) ومستوى كثافة Caveman/RTK                                                           |
-| `omniroute_list_compression_combos` | `read:compression`  | سرد مجموعات الضغط المسماة ومسارات محركاتها                                                                                       |
-| `omniroute_compression_combo_stats` | `read:compression`  | تحليلات مجمّعة حسب مجموعة الضغط والمحرك                                                                                          |
-| `omniroute_ccr_store`               | `write:compression` | تخزين محتوى معزول حسب المستدعي في مخزن CCR محدود داخل الذاكرة، وإرجاع علامة بالإضافة إلى مرجع `ccr://`                           |
-| `omniroute_ccr_retrieve`            | `read:compression`  | استرداد محتوى CCR بالكامل أو باستخدام أوضاع البداية، والنهاية، والأسطر، والبحث grep، والإحصاءات                                  |
-| `omniroute_ccr_inspect`             | `read:compression`  | فحص بيانات CCR الوصفية المملوكة للمستدعي دون إرجاع المحتوى                                                                       |
-| `omniroute_ccr_list`                | `read:compression`  | سرد البيانات الوصفية المرقّمة على صفحات لكتل CCR المملوكة للمستدعي                                                               |
-| `omniroute_ccr_delete`              | `write:compression` | حذف كتلة CCR مملوكة للمستدعي                                                                                                     |
-| `omniroute_ccr_stats`               | `read:compression`  | الإبلاغ عن استخدام الذاكرة ضمن نطاق المستدعي، وعدادات دورة الحياة، وحدود المخزن                                                  |
-| `omniroute_rtk_discover`            | `read:compression`  | اكتشاف الضوضاء المتكررة في عينات مخرجات RTK المضمّنة اختياريًا                                                                   |
-| `omniroute_rtk_learn`               | `read:compression`  | إنشاء مسودة مرشح RTK قابلة للمراجعة من العينات المضمّنة اختياريًا                                                                |
+| أداة                                | النطاقات            | وصف                                                                                                                           |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | إعدادات الضغط وملخص التحليلات وإحصائيات ذاكرة التخزين المؤقت (بما في ذلك بيانات تعريف `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | تكوين وضع الضغط، والعتبة، ونسبة الهدف، والحفاظ على موجه النظام، وتبديل ضغط وصف MCP                                            |
+| `omniroute_set_compression_engine`  | `write:compression` | اختر المحرك النشط (off/caveman/rtk/stacked) وكثافة Caveman/RTK                                                                |
+| `omniroute_list_compression_combos` | `read:compression`  | قم بإدراج مجموعات الضغط المسماة وخطوط أنابيب المحرك الخاصة بها                                                                |
+| `omniroute_compression_combo_stats` | `read:compression`  | التحليلات مجمعة حسب مجموعة الضغط والمحرك                                                                                      |
+| `omniroute_ccr_store`               | `write:compression` | قم بتخزين المحتوى المعزول للمتصل في مخزن CCR المحدود بالذاكرة وإرجاع علامة بالإضافة إلى مرجع `ccr://`                         |
+| `omniroute_ccr_retrieve`            | `read:compression`  | استرجع محتوى CCR بالكامل أو باستخدام أوضاع الرأس والذيل والخطوط وgrep والإحصائيات                                             |
+| `omniroute_ccr_inspect`             | `read:compression`  | فحص بيانات تعريف CCR المملوكة للمتصل دون إرجاع المحتوى                                                                        |
+| `omniroute_ccr_list`                | `read:compression`  | قم بإدراج البيانات الوصفية المرقّمة لكتل CCR المملوكة للمتصل                                                                  |
+| `omniroute_ccr_delete`              | `write:compression` | حذف كتلة CCR المملوكة للمتصل                                                                                                  |
+| `omniroute_ccr_stats`               | `read:compression`  | قم بالإبلاغ عن استخدام الذاكرة على مستوى المتصل، وعدادات دورة الحياة، وحدود المتجر                                            |
+| `omniroute_rtk_discover`            | `read:compression`  | اكتشف الضوضاء المتكررة في عينات مخرجات RTK التي تم الاشتراك فيها                                                              |
+| `omniroute_rtk_learn`               | `read:compression`  | قم بإنشاء مسودة مرشح RTK قابلة للمراجعة من عينات الاشتراك                                                                     |
 
-توجد إدخالات CCR في الذاكرة فقط وتختفي عند إعادة التشغيل. يقتصر حجم كل كتلة على 2 MiB، وكل
-هوية رئيسية على 16 MiB، والمخزن العام على 64 MiB. مدة البقاء الافتراضية للإدخالات هي 24 ساعة (بحد أقصى
-سبعة أيام). يقتصر الاسترداد الكامل عبر MCP على 256 KiB؛ وتظل الكتل الأكبر متاحة عبر
-أوضاع النطاق والبحث grep. تُعزل عمليات التخزين، والاسترداد، والسرد، والفحص، والحذف، والإحصاءات حسب
-الهوية الرئيسية لمفتاح API المصادق عليه. تحتوي سجلات التدقيق على قيم التجزئة وبيانات الحجم الوصفية، ولا تحتوي على المحتوى مطلقًا.
+تستخدم إدخالات CCR متجرًا من مستويين: طبقة ساخنة في الذاكرة مدعومة، في أوقات تشغيل محلية غير سحابية، بواسطة طبقة SQLite متينة (`ccr_blocks`، قيد التشغيل افتراضيًا) بحيث تظل الكتلة على قيد الحياة بعد الإخلاء أو إعادة التشغيل حتى ينفد TTL الخاص بها — باستثناء الكتل التي تزيد عن 512 KB وأوقات التشغيل السحابية، والتي تظل في الذاكرة فقط. تقتصر كل كتلة على 2 MiB، وكل مدير على 16 MiB، والمتجر العالمي على 64 MiB. الإدخالات الافتراضية هي TTL لمدة 24 ساعة (بحد أقصى سبعة أيام). يقتصر استرجاع MCP الكامل على 256 KiB؛ تظل الكتل الأكبر متاحة من خلال الوضعين ranged و grep. يتم عزل التخزين والاسترجاع والإدراج والفحص والحذف والإحصائيات بواسطة مفتاح API المعتمد. تحتوي سجلات التدقيق على بيانات تعريف الحجم والتجزئة، وليس المحتوى أبدًا. التفاصيل التي تواجه المشغل (العلامتان، ومتطلبات العميل الأساسية، و `codemode:false`، والنطاقات لكل أداة، وترقيم الصفحات، ومصفوفة التشخيص) موجودة في [Compression Engines → Prequirements / دليل المشغل](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-يُبلغ `omniroute_compression_status` عن ضغط أوصاف MCP بشكل منفصل ضمن
-`analytics.mcpDescriptionCompression`. تمثل هذه القيم تقديرات لحجم البيانات الوصفية لأوصاف MCP القابلة للسرد
-(`tools` و`prompts` و`resources` و`resourceTemplates`)؛ وهي ليست إيصالات استخدام من مزوّد الخدمة،
-وتُميّز بالقيمة `source: "mcp_metadata_estimate"`.
+تقارير `omniroute_compression_status` عن ضغط وصف MCP بشكل منفصل ضمن `analytics.mcpDescriptionCompression`. هذه القيم عبارة عن تقديرات لحجم البيانات الوصفية لأوصاف قائمة MCP (`tools` و `prompts` و `resources` و `resourceTemplates`) ؛ فهي ليست إيصالات استخدام للموفر ويتم تمييزها بـ `source: "mcp_metadata_estimate"`.
 
-### مرشّح شجرة إمكانية الوصول في MCP (v3.8.0)
+### MCP عامل تصفية شجرة إمكانية الوصول (v3.8.0)
 
-بمعزل عن أدوات الضغط المذكورة أعلاه، يتضمن OmniRoute مرشّحًا يعمل بعد التنفيذ
-لضغط **نتائج الأدوات** الخاصة بأدوات المتصفح/إمكانية الوصول في MCP قبل إعادتها إلى
-الوكيل. هذا المرشّح ليس أداة بحد ذاته — بل يعمل بشفافية على أي نتيجة أداة تحتوي على
-نص مطوّل لشجرة إمكانية الوصول أو لقطة المتصفح (≥2000 حرف).
+بشكل منفصل عن أدوات الضغط المذكورة أعلاه، يتضمن OmniRoute مرشحًا لمرحلة ما بعد التنفيذ يقوم بضغط ملف** نتائج الأداة** من أدوات MCP browser/accessibility قبل إعادتها إلى الوكيل. هذا الفلتر ليس في حد ذاته أداة — بل يتم تشغيله بشفافية على أي نتيجة أداة تحتوي على شجرة إمكانية الوصول المطولة أو نص لقطة المتصفح (≥ 2000 chars).
 
 السلوكيات الرئيسية:
 
-- يطوي ≥30 سطرًا متتاليًا ومكررًا من العناصر الشقيقة في ملخص يضم البداية + النهاية
-- يحافظ على نقاط الارتساء `[ref=eXX]` المطلوبة بواسطة Playwright/استخدام الحاسوب
-- يقتطع النصوص كبيرة الحجم بشكل صارم (>50,000 حرف) مع تلميح للتنقل
-- التوفير المتوقع: **60–80%** في حمولات لقطات المتصفح
+- طي ≥ 30 سطرًا شقيقًا متكررًا متتاليًا في ملخص ذيل + للرأس
+- يحافظ على مراسي `[ref=eXX]` المطلوبة بواسطة Playwright/computer-use
+- يقتطع بشدة النص الكبير الحجم (> 50000 حرف) باستخدام تلميح التنقل
+- التوفير المتوقع:** 60-80%** على حمولات لقطة المتصفح
 
-الإعداد: `compression.mcpAccessibility` في الإعدادات العامة (الترحيل 056).
-التنفيذ: `open-sse/services/compression/engines/mcpAccessibility/`.
-الوثائق الكاملة: [محركات الضغط — مرشّح شجرة إمكانية الوصول في MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+التكوين: `compression.mcpAccessibility` في الإعدادات العامة (الترحيل 056). التنفيذ : `open-sse/services/compression/engines/mcpAccessibility/`. المستندات الكاملة: [محركات الضغط — MCP مرشح شجرة إمكانية الوصول](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-راجع [محركات الضغط](../compression/COMPRESSION_ENGINES.md) و[ضغط RTK](../compression/RTK_COMPRESSION.md) للاطلاع على
-نموذج الضغط في وقت التشغيل الذي تستند إليه هذه الأدوات.
+راجع [محركات الضغط](../compression/COMPRESSION_ENGINES.md) [وضغط RTK](../compression/RTK_COMPRESSION.md) للتعرف على نموذج ضغط وقت التشغيل وراء هذه الأدوات.
 
 ## أدوات 1Proxy (3)
 

@@ -198,9 +198,9 @@ Pentru configurarea detaliată a fiecărui instrument (Claude Code, Codex CLI, C
 
 ---
 
-## Configurarea protocoalelor (MCP + A2A)
+## Configurare protocol (MCP + A2A)
 
-### Configurarea MCP (Model Context Protocol)
+### Configurare MCP (Protocol de context model)
 
 Porniți transportul MCP în modul stdio:
 
@@ -211,28 +211,28 @@ omniroute --mcp
 Flux de validare recomandat:
 
 ```bash
-# 1. Porniți serverul MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Din clientul MCP, apelați:
-omniroute_get_health        # Ar trebui să returneze starea sistemului
-omniroute_list_combos       # Ar trebui să returneze combinațiile active
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Sau rulați suita E2E completă:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Configurarea clientului MCP
+#### MCP Client Configuration
 
-**Claude Code:**
+**Cod Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Adăugați în setările MCP:
+Adăugați la setările dvs. MCP (stdio, cu cheia, astfel încât apelantul să aibă un principal):
 
 ```json
 {
@@ -240,17 +240,24 @@ Adăugați în setările MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Documentația MCP completă:** [README-ul serverului MCP](../../open-sse/mcp-server/README.md) — 110 instrumente, configurații IDE, clienți Python/TS/Go.
+Sau, când `mcpTransport` este `streamable-http` (setați-l pe `/dashboard/mcp` sau cu `omniroute mcp enable --transport streamable-http`), indicați intrarea serverului MCP de la distanță a clientului la `http://localhost:20128/api/mcp/stream`.
 
-### Configurarea A2A (Agent-to-Agent Protocol)
+Cheia se deplasează ca `Authorization: Bearer <api-key>` (vezi [MCP Server → Acces de la distanță](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) pentru gazde la distanță; o cheie de la distanță are nevoie `mcp:connect` plus domeniile sale read/write ).
 
-Verificați Agent Card:
+**Documentația completă MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients. Referință operator pentru instrumentele de compresie CCR/dedup (marcatori, cerințe preliminare, domenii per instrument, paginare de recuperare, diagnosticare): [Motoare de compresie → Cerințe preliminare / ghid operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (protocol de la agent la agent)
+
+Verificați cardul de agent:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,10 +268,10 @@ Trimiteți o sarcină:
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Oferă-mi un rezumat scurt al cotelor."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Documentația A2A completă:** [README-ul serverului A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, abilități, streaming, ciclul de viață al sarcinilor.
+**Documentația completă A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, abilități, streaming, ciclu de viață al sarcinilor.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Șablon pentru Void Linux (xbps-src)
+## Void Linux (xbps-src) Șablon
 
-Pentru utilizatorii Void Linux, puteți construi un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
+Pentru utilizatorii Void Linux, puteți crea un pachet nativ folosind `xbps-src`. Salvați acest bloc ca `srcpkgs/omniroute/template`:
 
 ```bash
-# Fișier șablon pentru „omniroute”
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Regenerați suma de control pentru fiecare versiune cu:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

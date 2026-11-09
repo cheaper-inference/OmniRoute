@@ -31,36 +31,11 @@ Khi osv hoặc Trivy chuyển sang màu đỏ do một CVE mới được tiết
 
 Cả hai cổng đều **bỏ qua một cách nhẹ nhàng** (exit 0) khi công cụ không có mặt hoặc phép đo thất bại (osv-scanner không có trong PATH, osv.dev/network không thể truy cập, JSON không hợp lệ) — một lỗi **phép đo** không bao giờ chặn, chỉ một sự thoái lui **được đo lường** mới chặn.
 
-## Các rủi ro đã được chấp nhận
+## Rủi ro phụ thuộc khi nghỉ hưu
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Tệp khóa gốc không còn bao gồm `extract-zip` hoặc cạnh phụ thuộc vào nó sau khi nâng cấp công cụ phát triển nhắc nhở được ghim. Điều này sẽ loại bỏ chuỗi `promptfoo` → `@openai/codex-security` → `extract-zip` đã được chấp nhận trước đó được theo dõi trong #14482. Kiểm tra hồi quy trong `tests/unit/extract-zip-14482-exposure.test.ts` từ chối việc giới thiệu lại nó và giữ nguyên lệnh cấm nhập khẩu từ mã sản xuất.
 
-`extract-zip@2.0.1` chứa hai cảnh báo symlink-traversal mức độ nghiêm trọng cao chưa được vá.
-Theo nhánh "không có bản vá upstream" của giải pháp CVE Variance ở trên, đây là một
-**rủi ro được chấp nhận**, không phải là một bản cập nhật:
-
-- **Chuỗi:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Đã xác nhận qua `package-lock.json` — chính xác một gói trong toàn bộ cây phụ thuộc
-  (`@openai/codex-security`) khai báo `extract-zip`, và chính xác một gói
-  (`promptfoo`) khai báo `@openai/codex-security`.
-- **Không có bản phát hành đã sửa lỗi nào tồn tại trong chuỗi.** `extract-zip@2.0.1` (phát hành năm 2020) là bản phát hành cuối cùng của gói — nó không được duy trì. `@openai/codex-security`'s
-  npm-latest hiện tại (`0.1.29`) vẫn kéo `extract-zip@2.0.1`.
-- **Không thể truy cập từ môi trường sản xuất.** `promptfoo` chỉ là devDependency (không bao giờ được liệt kê
-  trong `dependencies`), và không có tệp nào trong `src/`, `open-sse/`, hoặc `bin/` nhập gói
-  npm `extract-zip` — trợ giúp `extractZip()` của OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) sử dụng `unzip`/`tar` gốc
-  và không liên quan. `@openai/codex-security` cũng tích hợp bộ bảo vệ symlink-traversal của riêng mình
-  trên callback onEntry của extract-zip.
-- **Không** nên tạo bí danh `extract-zip` thông qua `overrides` trong `package.json` — giải pháp thay thế khả thi duy nhất
-  là Electron-org-internal và không tương thích API với
-  các kiểm tra onEntry/defaultDirMode/defaultFileMode của `@openai/codex-security`;
-  ghi đè nó sẽ âm thầm phá vỡ các kiểm tra bảo mật của gói đó.
-- **Mức cơ sở:** `vulnCount` (3) được đo bởi osv đã thấp hơn nhiều so với
-  mức cơ sở `config/quality/quality-baseline.json` đã đóng băng (27) — không cần thay đổi ratchet.
-- **Bảo vệ chống hồi quy:** `tests/unit/extract-zip-14482-exposure.test.ts` khẳng định
-  chuỗi và bất biến không nhập từ môi trường sản xuất ở trên; nó sẽ làm CI thất bại nếu một trong hai
-  bị phá vỡ (ví dụ: một PR trong tương lai làm cho `extract-zip` có thể truy cập từ môi trường sản xuất).
-- **Theo dõi:** vấn đề #14482.
+Bản sửa lỗi phụ thuộc hiện tại cũng có phạm vi ghi đè khả năng tương thích với ứng dụng khách MSAL của Azure nhận dạng và ứng dụng khách FTP của get-uri. Việc thu thập mã thông báo Azure và truy xuất FTP được thử nghiệm bằng các phương thức vận chuyển có kiểm soát; cả hai gói OpenCode đều chạy bộ thử nghiệm và xây dựng riêng. Số lượng tư vấn đăng ký là số đo tại một thời điểm và có thể thay đổi sau khi tệp khóa được cam kết.
 
 ## Backlog: Cảnh báo Scorecard → chặn
 

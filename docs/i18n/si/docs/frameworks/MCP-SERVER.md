@@ -10,35 +10,30 @@
 
 ## ස්ථාපනය
 
-OmniRoute MCP අන්තර්ගතව ඇත. පහත විධානයෙන් එය ආරම්භ කරන්න:
+OmniRoute MCP ගොඩනඟා ඇත. එය ආරම්භ කරන්න:
 
 ```bash
 omniroute --mcp
 ```
 
-නැතහොත් open-sse ප්රවාහනය හරහා:
+හෝ විවෘත ප්‍රවාහනය හරහා:
 
 ```bash
-# HTTP ප්රවාහ කළ හැකි ප්රවාහනය (port 20130)
-omniroute --dev  # MCP /mcp endpoint මත ස්වයංක්රීයව ආරම්භ වේ
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP ප්රවාහන (`sse` / `streamable-http`, dashboard server මඟින් එම process එක තුළම සපයනු ලැබේ)
-පෙරනිමියෙන් අක්රිය වන අතර, පෙර ඒවා සක්රිය හෝ අක්රිය කළ හැකි වූයේ `/dashboard/mcp` පිටුවෙන් පමණි. v3.8.51 සිට
-CLI වෙතද සමාන හැකියාවන් ඇත:
+HTTP ප්‍රවාහනය (`sse` / `streamable-http`, උපකරණ පුවරු සේවාදායකය මඟින් ක්‍රියාවලියේ දී සේවය කරනු ලැබේ) පෙරනිමියෙන් ක්‍රියා විරහිත කර ඇති අතර පෙර ටොගල් කළ හැක්කේ `/dashboard/mcp` පිටුවෙන් පමණි. v3.8.51 වන විට CLI හි සමානාත්මතාවය ඇත:
 
 ```bash
-omniroute mcp status                                  # සක්රිය/මාර්ගගත තත්ත්වය, ප්රවාහනය, මෙවලම් ගණන
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # සක්රිය sse/streamable-http සැසි යළි සකසයි
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`, dashboard එක `/api/settings` හරහා මාරු කරන එම `mcpEnabled`
-(සහ විකල්ප වශයෙන් `mcpTransport`) සැකසුමටම PATCH ඉල්ලීමක් යවයි. `mcp restart`, `POST /api/mcp/restart`
-අමතයි: එය සක්රිය `sse`/`streamable-http` සැසි අවසන් කරන අතර, එමඟින් ඊළඟ ඉල්ලීම පිරිසිදුව යළි ආරම්භ වේ;
-MCP අක්රිය නම් `409` ද, `stdio` ප්රවාහනය සඳහා `501` ද ආපසු ලබා දෙයි (stdio clients තමන්ගේම
-subprocess පාලනය කරයි — යළි ආරම්භ කිරීම සඳහා එම process එක තුළ handle එකක් නොමැත).
+`mcp enable`/`mcp disable` PATCH එම `mcpEnabled` (සහ විකල්ප වශයෙන් `mcpTransport`) උපකරණ පුවරුව `/api/settings` හරහා ටොගල් සැකසීම. `mcp restart` `POST /api/mcp/restart` අමතයි: එය සක්‍රිය `sse`/`streamable-http` සැසි ඉරා දමයි, එවිට ඊළඟ ඉල්ලීම පිරිසිදුව නැවත ආරම්භ වේ, MCP අක්‍රිය නම් `409` ආපසු ලබා දෙයි, සහ `stdio` ප්‍රවාහනය සඳහා `501` (stdio සේවාලාභීන්ට ඔවුන්ගේම උපක්‍රියාවලි — නැවත ආරම්භ කිරීමට ක්‍රියාවලියේ හැසිරවීමක් නොමැත).
 
 ## ප්රවාහන
 
@@ -132,53 +127,40 @@ Claude Desktop, Cursor, Cline සහ අනුකූල MCP සේවාලා�
 
 ## සම්පීඩන මෙවලම් (13)
 
-| මෙවලම                               | විෂය පථ             | විස්තරය                                                                                                               |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | සම්පීඩන සැකසුම්, විශ්ලේෂණ සාරාංශය සහ හැඹිලි-දැනුවත් සංඛ්යාලේඛන (`analytics.mcpDescriptionCompression` පාරදත්ත ඇතුළුව) |
-| `omniroute_compression_configure`   | `write:compression` | සම්පීඩන ප්රකාරය, සීමාව, ඉලක්ක අනුපාතය, පද්ධති-ප්රේරක සංරක්ෂණය සහ MCP විස්තර සම්පීඩන ටොගලය වින්යාස කිරීම               |
-| `omniroute_set_compression_engine`  | `write:compression` | සක්රිය එන්ජිම (off/caveman/rtk/stacked) සහ Caveman/RTK තීව්රතාව තේරීම                                                 |
-| `omniroute_list_compression_combos` | `read:compression`  | නම් කළ සම්පීඩන සංයෝජන සහ ඒවායේ එන්ජින් නළමාර්ග ලැයිස්තුගත කිරීම                                                       |
-| `omniroute_compression_combo_stats` | `read:compression`  | සම්පීඩන සංයෝජනය සහ එන්ජිම අනුව කාණ්ඩගත කළ විශ්ලේෂණ                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | ඇමතුම්කරු-හුදකලා අන්තර්ගතය සීමිත මතකස්ථ CCR ගබඩාවේ ගබඩා කර සලකුණක් සහ `ccr://` යොමුවක් ආපසු ලබා දීම                   |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR අන්තර්ගතය සම්පූර්ණයෙන් හෝ ආරම්භක කොටස, අවසාන කොටස, පේළි, grep සහ සංඛ්යාලේඛන ප්රකාර මඟින් ලබා ගැනීම                |
-| `omniroute_ccr_inspect`             | `read:compression`  | අන්තර්ගතය ආපසු ලබා නොදී ඇමතුම්කරුට අයත් CCR පාරදත්ත පරීක්ෂා කිරීම                                                     |
-| `omniroute_ccr_list`                | `read:compression`  | ඇමතුම්කරුට අයත් CCR කොටස් සඳහා පිටුගත කළ පාරදත්ත ලැයිස්තුගත කිරීම                                                     |
-| `omniroute_ccr_delete`              | `write:compression` | ඇමතුම්කරුට අයත් CCR කොටසක් මකා දැමීම                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | ඇමතුම්කරුට සීමා වූ මතක භාවිතය, ජීවන චක්ර ගණක සහ ගබඩා සීමා වාර්තා කිරීම                                                |
-| `omniroute_rtk_discover`            | `read:compression`  | සක්රීයව තෝරාගත් RTK ප්රතිදාන නියැදිවල පුනරාවර්තන අනවශ්ය දත්ත සොයා ගැනීම                                               |
-| `omniroute_rtk_learn`               | `read:compression`  | සක්රීයව තෝරාගත් නියැදිවලින් සමාලෝචනය කළ හැකි RTK පෙරහන් කෙටුම්පතක් ජනනය කිරීම                                         |
+| මෙවලම                               | විෂය පථයන්          | විස්තරය                                                                                                                  |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | සම්පීඩන සැකසීම්, විශ්ලේෂණ සාරාංශය, සහ හැඹිලි-දැනුවත් සංඛ්‍යාලේඛන ( `analytics.mcpDescriptionCompression` පාරදත්ත ඇතුළත්) |
+| `omniroute_compression_configure`   | `write:compression` | සම්පීඩන මාදිලිය, එළිපත්ත, ඉලක්ක අනුපාතය, පද්ධති-ක්ෂණික සංරක්ෂණය, MCP විස්තර සම්පීඩන ටොගල් වින්‍යාස කරන්න                 |
+| `omniroute_set_compression_engine`  | `write:compression` | ක්රියාකාරී එන්ජිම (off/caveman/rtk/stacked) සහ Caveman/RTK තීව්රතාවය තෝරන්න                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | සම්පීඩන සංයෝජන සහ ඒවායේ එන්ජින් නල මාර්ග නම් කර ඇති ලැයිස්තුව                                                            |
+| `omniroute_compression_combo_stats` | `read:compression`  | සම්පීඩන සංයෝජනය සහ එන්ජිම මගින් කාණ්ඩගත කරන ලද විශ්ලේෂණ                                                                  |
+| `omniroute_ccr_store`               | `write:compression` | සීමා කරන ලද මතකයේ ඇති CCR ගබඩාවේ ඇමතුම්කරු-හුදකලා අන්තර්ගතය ගබඩා කර ලකුණුකරයක් සහ `ccr://` යොමුවක් ආපසු දෙන්න            |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR අන්තර්ගතය සම්පූර්ණයෙන් හෝ හිස, වලිගය, රේඛා, grep සහ සංඛ්‍යාලේඛන මාතයන් සමඟ ලබා ගන්න                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | අන්තර්ගතය ආපසු නොදී ඇමතුම්කරු සතු CCR පාරදත්ත පරීක්ෂා කරන්න                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | ඇමතුම්කරු සතු CCR කුට්ටි සඳහා පිටුගත පාරදත්ත ලැයිස්තුගත කරන්න                                                            |
+| `omniroute_ccr_delete`              | `write:compression` | අමතන්නා සතු CCR බ්ලොක් එකක් මකන්න                                                                                        |
+| `omniroute_ccr_stats`               | `read:compression`  | අමතන්නාගේ විෂය පථය මතක භාවිතය, ජීවන චක්‍ර කවුන්ටර සහ ගබඩා සීමාවන් වාර්තා කරන්න                                           |
+| `omniroute_rtk_discover`            | `read:compression`  | RTK ප්‍රතිදාන නියැදි තෝරා ගැනීමේදී පුනරාවර්තන ශබ්දය සොයා ගන්න                                                            |
+| `omniroute_rtk_learn`               | `read:compression`  | තේරීම් සාම්පල වලින් සමාලෝචනය කළ හැකි RTK පෙරහන් කෙටුම්පතක් ජනනය කරන්න                                                    |
 
-CCR ඇතුළත් කිරීම් මතකයේ පමණක් පවතින අතර නැවත ආරම්භ කිරීමේදී අතුරුදහන් වේ. සෑම කොටසක්ම 2 MiB දක්වාත්, සෑම
-principal එකක්ම 16 MiB දක්වාත්, ගෝලීය ගබඩාව 64 MiB දක්වාත් සීමා වේ. ඇතුළත් කිරීම්වල පෙරනිමි TTL පැය 24කි (උපරිමය
-දින හතකි). සම්පූර්ණ MCP ලබා ගැනීම 256 KiB දක්වා සීමා වේ; විශාල කොටස් පරාසගත සහ grep ප්රකාර හරහා
-තවදුරටත් ලබාගත හැකිය. ගබඩා කිරීම, ලබා ගැනීම, ලැයිස්තුගත කිරීම, පරීක්ෂා කිරීම, මකා දැමීම සහ සංඛ්යාලේඛන,
-සත්යාපිත API-key principal අනුව හුදකලා කර ඇත. විගණන වාර්තාවල අඩංගු වන්නේ හැෂ් සහ ප්රමාණ පාරදත්ත පමණක් වන අතර,
-කිසිවිටෙකත් අන්තර්ගතය අඩංගු නොවේ.
+CCR ප්‍රවේශයන් ද්වි-ස්ථර වෙළඳසැලක් භාවිතා කරයි: උණුසුම් මතක ස්ථරයක්, දේශීය වලාකුළු නොවන ධාවන කාලවලදී, කල් පවතින SQLite ස්ථරයකින් (`ccr_blocks`, පෙරනිමියෙන් ක්‍රියාත්මක වේ) එබැවින් බ්ලොක් එකක් ඉවත් කිරීම හෝ නැවත ආරම්භ කිරීම නොනැසී පවතිනු ඇත, එහි TTL කාලය KB සහ වලාකුළු 512 ට වැඩි මතකය හැර — ක්‍රියා විරහිත වන තුරු. සෑම බ්ලොක් එකක්ම MiB 2 කටද, එක් එක් ප්‍රධාන 16 MiB දක්වාද, ගෝලීය ගබඩාව 64 MiB දක්වාද සීමා වේ. ඇතුළත් කිරීම් පැය 24 TTL වෙත පෙරනිමියෙන් (උපරිම දින හතක්). සම්පූර්ණ MCP ලබා ගැනීම 256 KiB වලට සීමා වේ; විශාල කොටස් පරාසයක සහ grep මාතයන් හරහා පවතී. ගබඩා කිරීම, ලබා ගැනීම, ලැයිස්තුගත කිරීම, පරීක්ෂා කිරීම, මකාදැමීම සහ සංඛ්‍යාලේඛන සත්‍යාපනය කරන ලද API-යතුරු ප්‍රධානියා විසින් හුදකලා කර ඇත. විගණන වාර්තාවල හෑෂ් සහ ප්‍රමාණයේ පාර-දත්ත අඩංගු වේ, කිසිවිටෙක අන්තර්ගත නොවේ. ක්‍රියාකරු මුහුණ දෙන විස්තර (සලකුණු දෙක, සේවාදායක පූර්වාවශ්‍යතා, `codemode:false`, එක් මෙවලමක් සඳහා විෂය පථයන්, පිටුකරණය සහ රෝග විනිශ්චය අනුකෘතියක්) [සම්පීඩන එන්ජින් → පූර්වාවශ්‍යතා / ක්‍රියාකරු මාර්ගෝපදේශය](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) තුළ ජීවත් වේ.
 
-`omniroute_compression_status` මඟින් MCP විස්තර සම්පීඩනය
-`analytics.mcpDescriptionCompression` යටතේ වෙනම වාර්තා කරයි. එම අගයන් MCP විසින් ලැයිස්තුගත කළ හැකි
-විස්තර (`tools`, `prompts`, `resources`, සහ `resourceTemplates`) සඳහා වන පාරදත්ත ප්රමාණ ඇස්තමේන්තු වේ; ඒවා සැපයුම්කරුගේ භාවිත
-ලදුපත් නොවන අතර `source: "mcp_metadata_estimate"` ලෙස සලකුණු කර ඇත.
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` යටතේ වෙන වෙනම MCP විස්තර සම්පීඩනය වාර්තා කරයි. එම අගයන් MCP ලැයිස්තුගත කළ හැකි විස්තර සඳහා පාර-දත්ත ප්‍රමාණයේ ඇස්තමේන්තු වේ (`tools`, `prompts`, `resources`, සහ `resourceTemplates`); ඒවා සපයන්නාගේ භාවිත කුවිතාන්සි නොවන අතර `source: "mcp_metadata_estimate"` ලෙස සලකුණු කර ඇත.
 
-### MCP ප්රවේශ්යතා වෘක්ෂ පෙරහන (v3.8.0)
+### MCP ප්‍රවේශ්‍යතා ගස් පෙරහන (v3.8.0)
 
-ඉහත සම්පීඩන මෙවලම්වලින් වෙන්ව, OmniRoute විසින් MCP බ්රවුසර/ප්රවේශ්යතා මෙවලම්වල
-**මෙවලම් ප්රතිඵල** නියෝජිතයා වෙත ආපසු ලබාදීමට පෙර ඒවා සම්පීඩනය කරන පසු-ක්රියාත්මක පෙරහනක් ඇතුළත් කරයි.
-මෙම පෙරහන ස්වයං වශයෙන් මෙවලමක් නොවේ — සවිස්තරාත්මක ප්රවේශ්යතා-වෘක්ෂ හෝ බ්රවුසර-ස්නැප්ෂොට් පෙළ
-(අක්ෂර ≥2000) අඩංගු ඕනෑම මෙවලම් ප්රතිඵලයක් මත එය විනිවිද පෙනෙන ලෙස ක්රියාත්මක වේ.
+ඉහත සම්පීඩන මෙවලම් වලින් වෙන්ව, OmniRoute හි සංකෝචනය කරන පශ්චාත්-ක්‍රියාත්මක කිරීමේ පෙරහන ඇතුළත් වේ.** මෙවලම් ප්රතිඵල** MCP browser/accessibility මෙවලම් නියෝජිතයා වෙත ආපසු ලබා දීමට පෙර. මෙම පෙරහන — මෙවලමක් නොවේ, එය වාචික ප්‍රවේශ්‍යතා-ගසක් හෝ බ්‍රව්සර්-ස්නැප්ෂොට් පෙළ (≥ 2000 අක්ෂර) අඩංගු ඕනෑම මෙවලම් ප්‍රතිඵලයක් මත විනිවිද පෙනෙන ලෙස ක්‍රියා කරයි.
 
 ප්රධාන හැසිරීම්:
 
-- අඛණ්ඩව පුනරාවර්තනය වන සහෝදර පේළි ≥30ක් ආරම්භක + අවසාන සාරාංශයකට හකුළයි
-- Playwright/පරිගණක-භාවිතය සඳහා අවශ්ය `[ref=eXX]` නැංගුරම් සුරකියි
-- අතිවිශාල පෙළ (අක්ෂර >50,000) සංචාලන ඉඟියක් සමඟ දැඩිව කප්පාදු කරයි
-- අපේක්ෂිත ඉතිරිය: බ්රවුසර ස්නැප්ෂොට් දත්ත ප්රමාණවලින් **60–80%**
+- ≥ 30 අඛණ්ඩව පුනරාවර්තන සහෝදර පේළි හිස + වලිග සාරාංශයට හකුළයි
+- Playwright/computer-use මගින් අවශ්‍ය `[ref=eXX]` නැංගුරම් සංරක්ෂණය කරයි
+- සංචාලන ඉඟියක් සහිත විශාල පෙළ (> 50,000 අක්ෂර) දැඩි ලෙස කප්පාදු කරයි
+- අපේක්ෂිත ඉතිරිකිරීම්:** 60-80%** බ්‍රවුසර ස්නැප්ෂොට් ගෙවීම් මත
 
-වින්යාසය: ගෝලීය සැකසුම් තුළ `compression.mcpAccessibility` (සංක්රමණය 056).
-ක්රියාත්මක කිරීම: `open-sse/services/compression/engines/mcpAccessibility/`.
-සම්පූර්ණ ලේඛන: [සම්පීඩන එන්ජින් — MCP ප්රවේශ්යතා වෘක්ෂ පෙරහන](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+වින්‍යාසය: ගෝලීය සැකසුම් තුළ `compression.mcpAccessibility` (සංක්‍රමණය 056). ක්රියාත්මක කිරීම: `open-sse/services/compression/engines/mcpAccessibility/`. සම්පූර්ණ ලේඛන: [සම්පීඩන එන්ජින් — MCP ප්‍රවේශ්‍යතා ගස පෙරහන](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-මෙම මෙවලම් පසුපස ඇති ධාවන-කාල සම්පීඩන ආකෘතිය සඳහා [සම්පීඩන එන්ජින්](../compression/COMPRESSION_ENGINES.md) සහ [RTK සම්පීඩනය](../compression/RTK_COMPRESSION.md) බලන්න.
+මෙම මෙවලම් පිටුපස ධාවන කාල සම්පීඩන ආකෘතිය සඳහා [සම්පීඩන එන්ජින්](../compression/COMPRESSION_ENGINES.md) සහ [RTK සම්පීඩනය](../compression/RTK_COMPRESSION.md) බලන්න.
 
 ## 1Proxy මෙවලම් (3)
 

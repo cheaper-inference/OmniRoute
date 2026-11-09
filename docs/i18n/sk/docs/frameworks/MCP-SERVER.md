@@ -10,35 +10,30 @@
 
 ## Inštalácia
 
-OmniRoute MCP je vstavaný. Spustite ho pomocou:
+OmniRoute MCP je vstavaný. Začnite s:
 
 ```bash
 omniroute --mcp
 ```
 
-Alebo cez open-sse transport:
+Alebo cez dopravu open-sse:
 
 ```bash
-# HTTP streamovateľný transport (port 20130)
-omniroute --dev  # MCP sa automaticky spustí na /mcp koncovom bode
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transporty (`sse` / `streamable-http`, obsluhované v rámci procesu serverom dashboardu) sú
-predvolene vypnuté a predtým boli prepínateľné iba zo stránky `/dashboard/mcp`. Od verzie v3.8.51
-má CLI paritu:
+Prenosy HTTP (`sse` / `streamable-http`, obsluhované v procese serverom dashboardu) sú predvolene vypnuté a predtým sa dali prepínať iba zo stránky `/dashboard/mcp`. Od verzie 3.8.51 má CLI paritu:
 
 ```bash
-omniroute mcp status                                  # povolené/online, transport, počet nástrojov
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # resetuje aktívne sse/streamable-http relácie
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCHujú rovnaké nastavenie `mcpEnabled` (a voliteľne `mcpTransport`),
-ktoré dashboard prepína cez `/api/settings`. `mcp restart` volá `POST /api/mcp/restart`: ukončí
-aktívne `sse`/`streamable-http` relácie, aby sa ďalšia požiadavka čisto reinicializovala, vráti
-`409`, ak je MCP zakázané, a `501` pre `stdio` transport (klienti stdio spravujú svoj vlastný
-podproces – neexistuje žiadny in-process handle na reštart).
+`mcp enable`/`mcp disable` PATCH rovnaké nastavenie `mcpEnabled` (a voliteľne `mcpTransport`) sa prepína pomocou `/api/settings`. `mcp restart` volá `POST /api/mcp/restart`: zničí aktívne relácie `sse`/`streamable-http` takže ďalšia požiadavka sa čisto znova inicializuje, vráti `409` ak je MCP vypnuté, a `501` pre prenos `stdio` (klienti stdio vlastnia svoj vlastný podproces — nie je tu žiadny identifikátor procesu na reštartovanie).
 
 ## Transporty
 
@@ -131,47 +126,42 @@ Cursor, Cline a kompatibilného klienta MCP.
 | `omniroute_cache_stats` | `read:cache`  | Štatistiky sémantickej vyrovnávacej pamäte, vyrovnávacej pamäte pre výzvy a idempotencie |
 | `omniroute_cache_flush` | `write:cache` | Vyprázdniť vyrovnávaciu pamäť globálne alebo podľa podpisu/modelu                        |
 
-## Nástroje pre kompresiu (13)
+## Kompresné nástroje (13)
 
-| Nástroj                             | Rozsahy             | Popis                                                                                                                                   |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Nastavenia kompresie, súhrn analýz a štatistiky s ohľadom na vyrovnávaciu pamäť (zahŕňa metadáta `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurovať režim kompresie, prah, cieľový pomer, zachovanie systémovej výzvy, prepínač kompresie popisu MCP                           |
-| `omniroute_set_compression_engine`  | `write:compression` | Vybrať aktívny engine (vypnutý/caveman/rtk/stacked) a intenzitu Caveman/RTK                                                             |
-| `omniroute_list_compression_combos` | `read:compression`  | Zoznam pomenovaných kompresných kombinácií a ich engine pipeline                                                                        |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analýzy zoskupené podľa kompresnej kombinácie a enginu                                                                                  |
-| `omniroute_ccr_store`               | `write:compression` | Uložiť obsah izolovaný volajúcim do obmedzeného in-memory CCR úložiska a vrátiť značku plus referenciu `ccr://`                         |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Načítať obsah CCR v plnom rozsahu alebo s režimami head, tail, lines, grep a stats                                                      |
-| `omniroute_ccr_inspect`             | `read:compression`  | Skontrolovať metadáta CCR vlastnené volajúcim bez vrátenia obsahu                                                                       |
-| `omniroute_ccr_list`                | `read:compression`  | Zoznam stránkovaných metadát pre CCR bloky vlastnené volajúcim                                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Odstrániť CCR blok vlastnený volajúcim                                                                                                  |
-| `omniroute_ccr_stats`               | `read:compression`  | Nahlásiť využitie pamäte v rozsahu volajúceho, počítadlá životného cyklu a limity úložiska                                              |
-| `omniroute_rtk_discover`            | `read:compression`  | Objaviť opakujúci sa šum vo vzorkách výstupu RTK s povolením                                                                            |
-| `omniroute_rtk_learn`               | `read:compression`  | Generovať návrh RTK filtra na kontrolu zo vzoriek s povolením                                                                           |
+| Nástroj                             | Rozsahy             | Popis                                                                                                                                                 |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Nastavenia kompresie, súhrn analytických údajov a štatistiky s ohľadom na vyrovnávaciu pamäť (zahŕňa metadáta `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Nakonfigurujte režim kompresie, prah, cieľový pomer, zachovanie systémových pokynov, prepínač kompresie popisu MCP                                    |
+| `omniroute_set_compression_engine`  | `write:compression` | Vyberte aktívny motor (off/caveman/rtk/stacked) a intenzitu Caveman/RTK                                                                               |
+| `omniroute_list_compression_combos` | `read:compression`  | Uveďte pomenované kompresné kombá a ich motorové potrubia                                                                                             |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analýzy zoskupené podľa kombinácie kompresie a nástroja                                                                                               |
+| `omniroute_ccr_store`               | `write:compression` | Uložte obsah izolovaný od volajúceho v ohraničenom úložisku CCR v pamäti a vráťte značku plus referenciu `ccr://`                                     |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Získajte obsah CCR v plnom rozsahu alebo s režimami hlava, chvost, čiary, grep a štatistiky                                                           |
+| `omniroute_ccr_inspect`             | `read:compression`  | Skontrolujte metadáta CCR vlastnené volajúcim bez vrátenia obsahu                                                                                     |
+| `omniroute_ccr_list`                | `read:compression`  | Zoznam stránkovaných metadát pre bloky CCR vlastnené volajúcim                                                                                        |
+| `omniroute_ccr_delete`              | `write:compression` | Odstráňte blok CCR vlastnený volajúcim                                                                                                                |
+| `omniroute_ccr_stats`               | `read:compression`  | Hlásiť využitie pamäte v rozsahu volajúceho, počítadlá životného cyklu a limity úložiska                                                              |
+| `omniroute_rtk_discover`            | `read:compression`  | Objavte opakujúci sa šum v voliteľných výstupných vzorkách RTK                                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | Vygenerujte skontrolovateľný koncept filtra RTK z voliteľných vzoriek                                                                                 |
 
-Záznamy CCR sú iba v pamäti a po reštarte zmiznú. Každý blok je obmedzený na 2 MiB, každý princípál na 16 MiB a globálne úložisko na 64 MiB. Záznamy majú predvolenú TTL 24 hodín (maximálne sedem dní). Úplné načítanie MCP je obmedzené na 256 KiB; väčšie bloky zostávajú dostupné prostredníctvom režimov rozsahu a grep. Ukladanie, načítanie, zoznam, kontrola, mazanie a štatistiky sú izolované autentifikovaným princípálom API kľúča. Auditné záznamy obsahujú haše a metadáta veľkosti, nikdy nie obsah.
+Záznamy CCR používajú dvojvrstvové úložisko: horúcu vrstvu v pamäti podporovanú na lokálnych necloudových runtimech trvalou vrstvou SQLite (`ccr_blocks`, predvolene zapnuté), takže blok prežije vysťahovanie alebo reštart, kým sa jeho TTL neminie — s výnimkou blokov nad 512 KB a cloudových runtime, ktoré zostávajú iba v pamäti. Každý blok je obmedzený na 2 MiB, každý hlavný na 16 MiB a globálny obchod na 64 MiB. Položky predvolene používajú 24-hodinový TTL (maximálne sedem dní). Úplné načítanie MCP je obmedzené na 256 KiB; väčšie bloky zostávajú dostupné prostredníctvom režimov ranged a grep. Ukladanie, získavanie, zoznam, kontrola, vymazanie a štatistiky sú izolované prostredníctvom overeného princípu kľúča API. Záznamy auditu obsahujú hash a metadáta veľkosti, nikdy nie obsah. Podrobnosti týkajúce sa operátora (dva značky, požiadavky klienta, `codemode:false`, rozsahy jednotlivých nástrojov, stránkovanie a diagnostická matica) sa nachádzajú v [Compression Engines → Požiadavky / príručka operátora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` hlási kompresiu popisu MCP samostatne pod
-`analytics.mcpDescriptionCompression`. Tieto hodnoty sú odhady veľkosti metadát pre popisy MCP, ktoré je možné zoznamovať
-(`tools`, `prompts`, `resources`, a `resourceTemplates`); nie sú to potvrdenia o použití poskytovateľa a sú označené `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` hlási kompresiu popisu MCP samostatne pod `analytics.mcpDescriptionCompression`. Tieto hodnoty sú odhady veľkosti metadát pre popisy MCP (`tools`, `prompts`, `resources` a `resourceTemplates`); nie sú potvrdeniami o používaní poskytovateľa a sú označené `source: "mcp_metadata_estimate"`.
 
-### Filter stromu prístupnosti MCP (v3.8.0)
+### MCP stromový filter dostupnosti (v3.8.0)
 
-Oddelene od vyššie uvedených kompresných nástrojov, OmniRoute obsahuje filter po vykonaní, ktorý komprimuje **výsledky nástrojov** prehliadačových/prístupnostných nástrojov MCP predtým, ako sú vrátené agentovi. Tento filter sám o sebe nie je nástrojom — beží transparentne na akomkoľvek výsledku nástroja, ktorý obsahuje rozsiahly text stromu prístupnosti alebo snímky prehliadača (≥2000 znakov).
+Okrem vyššie uvedených nástrojov na kompresiu obsahuje OmniRoute filter po spustení, ktorý komprimuje súbor** výsledky nástroja** nástrojov MCP browser/accessibility pred ich vrátením agentovi. Tento filter sám osebe nie je nástrojom — beží transparentne na akomkoľvek výsledku nástroja, ktorý obsahuje podrobný strom prístupnosti alebo text snímky prehliadača (≥ 2000 znakov).
 
 Kľúčové správanie:
 
-- Zbalí ≥30 po sebe idúcich opakujúcich sa súrodeneckých riadkov do súhrnu hlavy + chvosta
-- Zachováva kotvy `[ref=eXX]` vyžadované Playwright/computer-use
-- Nekompromisne skracuje nadrozmerný text (>50 000 znakov) s navigačnou nápovedou
-- Očakávané úspory: **60–80%** na dátových balíkoch snímok prehliadača
+- Zbalí ≥ 30 po sebe idúcich opakovaných súrodeneckých línií do súhrnu hlavy + chvosta
+- Zachová kotvy `[ref=eXX]` požadované Playwright/computer-use
+- Pevne skráti nadmerný text (> 50 000 znakov) s navigačným tipom
+- Očakávané úspory:** 60 – 80 %** na užitočné zaťaženia snímok prehliadača
 
-Konfigurácia: `compression.mcpAccessibility` v globálnych nastaveniach (migrácia 056).
-Implementácia: `open-sse/services/compression/engines/mcpAccessibility/`.
-Kompletná dokumentácia: [Kompresné enginy — Filter stromu prístupnosti MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurácia: `compression.mcpAccessibility` v globálnych nastaveniach (migrácia 056). Realizácia: `open-sse/services/compression/engines/mcpAccessibility/`. Úplné dokumenty: [Kompresné motory — MCP Stromový filter prístupnosti](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Pozrite si [Kompresné enginy](../compression/COMPRESSION_ENGINES.md) a [RTK kompresiu](../compression/RTK_COMPRESSION.md) pre
-model kompresie za behu, ktorý stojí za týmito nástrojmi.
+Pozrite si [Compression Engines](../compression/COMPRESSION_ENGINES.md) a [RTK Compression](../compression/RTK_COMPRESSION.md) pre runtime kompresný model za týmito nástrojmi.
 
 ## Nástroje 1Proxy (3)
 

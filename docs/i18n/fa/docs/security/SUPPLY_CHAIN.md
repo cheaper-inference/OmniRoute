@@ -31,33 +31,11 @@ osv و Trivy وابستگیها را با پایگاههای داده CVE که *
 
 هر دو دروازه در صورت عدم وجود ابزار یا شکست اندازهگیری (osv-scanner در PATH نیست، osv.dev/network غیرقابل دسترس است، JSON نامعتبر است) **به آرامی رد میشوند** (exit 0) — شکست **اندازهگیری** هرگز مسدود نمیکند، فقط یک رگرسیون **اندازهگیری شده** مسدود میکند.
 
-## ریسکهای پذیرفتهشده شناختهشده
+## خطر وابستگی بازنشسته
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+پس از ارتقاء ابزار توسعه promptfoo پین شده، فایل lock root دیگر شامل `extract-zip` یا لبه وابستگی به آن نیست. این امر زنجیره `promptfoo` → `@openai/codex-security` → `extract-zip` #14482 که قبلاً پذیرفته شده بود بازنشسته میکند. بررسی های رگرسیون در `tests/unit/extract-zip-14482-exposure.test.ts` معرفی مجدد آن را رد کرده و ممنوعیت واردات از کد تولید را حفظ می کند.
 
-`extract-zip@2.0.1` دارای دو مشاوره امنیتی وصلهنشده با شدت بالا در مورد پیمایش سیملینک (symlink-traversal) است.
-بر اساس شاخه "عدم وجود راهحل بالادستی" (no upstream fix) از راهکار واریانس CVE در بالا، این یک
-**ریسک پذیرفتهشده** است، نه یک ارتقا:
-
-- **زنجیره:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  تایید شده از طریق `package-lock.json` — دقیقاً یک پکیج در کل درخت وابستگی
-  (`@openai/codex-security`) `extract-zip` را اعلام میکند، و دقیقاً یک پکیج
-  (`promptfoo`) `@openai/codex-security` را اعلام میکند.
-- **هیچ نسخه ثابتی در هیچ کجای زنجیره وجود ندارد.** `extract-zip@2.0.1` (منتشر شده در ۲۰۲۰) آخرین نسخه منتشر شده این پکیج است — و بدون پشتیبانی است. `@openai/codex-security`
-  نسخه فعلی npm-latest (`0.1.29`) همچنان `extract-zip@2.0.1` را فراخوانی میکند.
-- **غیرقابل دسترس از محیط تولید.** `promptfoo` فقط وابستگی توسعه (devDependency-only) است (هرگز
-  تحت `dependencies` لیست نشده است)، و هیچ فایلی در `src/`، `open-sse/`، یا `bin/` پکیج npm
-  `extract-zip` را ایمپورت نمیکند — کمککننده `extractZip()` خود OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) از `unzip`/`tar` بومی استفاده میکند
-  و نامرتبط است. `@openai/codex-security` همچنین محافظ پیمایش سیملینک (symlink-traversal) خود را
-  علاوه بر callback `onEntry` مربوط به `extract-zip` ارائه میدهد.
-- **نام مستعار قرار ندهید** برای `extract-zip` از طریق `overrides` در `package.json` — تنها جایگزین قابل استفاده مستقیم
-  (drop-in replacement) که موجود است، Electron-org-internal است و با بررسیهای `onEntry`/`defaultDirMode`/`defaultFileMode`
-  خود `@openai/codex-security` ناسازگار با API است؛ جایگزینی آن بیصدا بررسیهای امنیتی آن پکیج را از کار میاندازد.
-- **خط مبنا:** `vulnCount` اندازهگیری شده osv (3) در حال حاضر بسیار پایینتر از
-  خط مبنای ثابت شده `config/quality/quality-baseline.json` (27) است — نیازی به تغییر ratchet نیست.
-- **محافظ رگرسیون:** `tests/unit/extract-zip-14482-exposure.test.ts` زنجیره و ثابت عدم ایمپورت در تولید (no-production-import invariant) بالا را تایید میکند؛ در صورت شکست هر یک (مثلاً یک PR آینده `extract-zip` را از محیط تولید قابل دسترس کند)، CI را با خطا مواجه میکند.
-- **پیگیری:** issue #14482.
+تعمیر وابستگی کنونی همچنین سازگاری را به مشتری MSAL هویت Azure و مشتری FTP get-uri لغو می کند. کسب توکن Azure و بازیابی FTP با حمل و نقل کنترل شده آزمایش می شود. هر دو بسته OpenCode مجموعه های ساخت و آزمایش خود را اجرا می کنند. شمارش مشاوره رجیستری اندازه گیری در یک نقطه از زمان است و می تواند پس از تعهد فایل قفل تغییر کند.
 
 ## بکلاگ: مشاوره Scorecard → مسدودکننده
 

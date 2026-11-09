@@ -151,15 +151,15 @@ operators to ieslēdz (`src/server/auth/dashboardMfa.ts`).
 
 ## Maršrutu klases
 
-`src/server/authz/types.ts` definē trīs klases. Jebkurš maršruts, ko nevar deterministiski klasificēt, pēc noklusējuma tiek piešķirts `MANAGEMENT`.
+`src/server/authz/types.ts` definē trīs klases; jebkurš maršruts, ko nevar deterministiski klasificēt, atgriežas pie `MANAGEMENT`.
 
-| Klase        | Apraksts                                                                                                                                                          | Nepieciešamā autentifikācija                                          |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `PUBLIC`     | Skaidri drošie maršruti: pieteikšanās, izrakstīšanās, statuss, inicializācija, veselības pārbaude un onboarding bootstrap.                                        | Nav                                                                   |
-| `CLIENT_API` | Modeļu apkalpošanas galapunkti: `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer atslēga, kad ir iespējots funkciju karodziņš `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Infopaneļa lapas, iestatījumi, pakalpojumu sniedzēji, atslēgas, administratīvie un diagnostikas galapunkti.                                                       | Infopaneļa sesija VAI Bearer ar `manage` darbības jomu                |
+| Klase        | Apraksts                                                                                                                                                           | Nepieciešama autentifikācija                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `PUBLIC`     | Skaidri droši maršruti — login, logoout, status, health, onboarding bootstrap.                                                                                     | Nav                                                                           |
+| `CLIENT_API` | Modeļa apkalpošanas galapunkti — `/api/v1/*`, `/api/v1beta/*`, kā arī aizstājvārdi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Nesēja atslēga, ja ir iespējots efektīvais `REQUIRE_API_KEY` funkcijas karogs |
+| `MANAGEMENT` | Informācijas paneļa lapas, iestatījumi, nodrošinātāji, atslēgas, administratora un diagnostikas galapunkti.                                                        | Informācijas paneļa sesija OR nesējs ar `manage` tvērumu                      |
 
-Dažas `MANAGEMENT` darbības ir **tikai operatoram**: viena `manage` atslēga nepietiek. Saglabāto pilnvaru eksports (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dublējuma atjaunošana pār pašreizējiem datiem (`POST /api/db-backups/import`, ieskaitot `dryRun=true`, `POST /api/db-backups` atjaunošana pēc id, `POST /api/settings/import-json`) un atjaunošanas punktu iznīcināšana (`DELETE /api/db-backups` tīrīšana, kā arī `PATCH /api/db-backups`, jo saglabātais glabāšanas laiks vada automātisko tīrīšanu pēc katras dublējuma kopijas) prasa infopaneļa sesiju, vietējo CLI identitāti vai to, ka pieteikšanās ir atspējota. Sinhronizācijas žetona izdošana (`POST /api/sync/tokens`) un `admin` darbības jomas CLI piekļuves žetona izveide (`POST /api/cli/tokens`) prasa infopaneļa sesiju vai vietējo CLI identitāti jebkurā pieteikšanās režīmā. API atslēgas jebkurā darbības jomā un `oma_` piekļuves žetoni nav operatora pilnvaras: tiem atgriež `403`, kad tāda nepieciešama. Pārbaude atrodas failā `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Pieteikšanās iestatījumu maiņa arī ir tikai operatoram: `POST /api/settings/require-login` (iestatīt pārvaldības paroli / pārslēgt `requireLogin`) pieņem šīs pilnvaras tikai tad, kad parole jau ir. Sākotnējās iestatīšanas bootstrap logs (paroles vēl nav) nemainās, un infopaneļa sesijai, lai aizstātu paroli, jānosūta `currentPassword` (`403`, ja tā trūkst vai ir nepareiza, reģistrēts kā `settings.update_failed`). Vietējais CLI un instance ar atspējotu pieteikšanos saglabā atjaunošanas ceļu un drīkst iestatīt paroli bez tā, jo abi ir piesaistīti resursdatoram, kas pieder datu direktorijai.
+Dažas `MANAGEMENT` darbības ir** tikai operatoram** : ar `manage` taustiņu nepietiek. Saglabāto akreditācijas datu eksportēšana (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dublējuma atjaunošana, izmantojot reāllaika datus (`POST /api/db-backups/import`, tostarp `dryRun=true`, `POST /api/db-backups` atjaunošana pēc id , `POST /api/settings/import-json`), atjaunošanas punktu iznīcināšana (`DELETE /api/db-backups` tīrīšana un `PATCH /api/db-backups` jo saglabāšana, kas tai nepieciešama, pēc katras automātiskās dublēšanas sesijas tiek vadīta pēc da automātiskās prshboard). CLI tēma vai pieteikšanās ir atspējota. Lai izdotu sinhronizācijas pilnvaru (`POST /api/sync/tokens`) un izveidotu `admin` CLI piekļuves pilnvaru (`POST /api/cli/tokens`), katrā pieteikšanās režīmā ir nepieciešama informācijas paneļa sesija vai lokālais CLI subjekts. Jebkuras darbības jomas API atslēgas un `oma_` piekļuves pilnvaras nav operatora akreditācijas dati: tie saņem `403` ikreiz, kad tas ir nepieciešams. Čeks dzīvo `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mainīt pieteikšanās iestatījumus var arī tikai operators: `POST /api/settings/require-login` (iestatiet pārvaldības paroli / pārslēdziet `requireLogin`) pieņem tikai tos akreditācijas datus, tiklīdz parole pastāv — pirmās palaišanas sāknēšanas logs (vēl nav paroles) ir nemainīgs — un informācijas paneļa sesijai ir jānosūta `currentPassword` lai aizstātu paroli (`403`, ja tā tiek pārbaudīta kā `settings.update_failed`). Vietējais CLI un gadījums ar atspējotu pieteikšanos saglabā atkopšanas ceļu un var iestatīt paroli bez tā, jo abi ir saistīti ar resursdatoru, kuram pieder datu direktorijs.
 
 ## Cauruļvads
 
@@ -192,52 +192,47 @@ Veiksmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashbo
 
 ## Publisko maršrutu saraksts
 
-`src/shared/constants/publicApiRoutes.ts` ir eksplicīts atļauto saraksts:
+`src/shared/constants/publicApiRoutes.ts` ir precīzs atļaušanas saraksts:
 
-Saraksts ir sadalīts pēc **formas**, un šis sadalījums ir kritiski svarīgs (GHSA-74g9-q8f6-793h): prefikss
-tiek salīdzināts ar `startsWith()`, tāpēc tas atbilst arī katram blakus esošam ceļam, kuram ir tādi paši sākuma simboli.
-`/api/usage/om-usage` kā prefikss atzīmē `/api/usage/om-usage<anything>` kā PUBLIC, un Next to atrisina
-uz `/api/usage/[connectionId]` — apdarinātāju, kuram nav savas autentifikācijas.
+Saraksts ir sadalīts pēc** forma** , un sadalījums ir nesošs (GHSA-74g9-q8f6-793h): prefikss tiek saskaņots ar `startsWith()`, tāpēc tas atbilst arī katram blakus esošajam ceļam, kuram ir kopīgas galvenās rakstzīmes. `/api/usage/om-usage` kā prefiksu apzīmēts `/api/usage/om-usage<anything>` PUBLIC, un Next atrisina to, lai `/api/usage/[connectionId]` — apstrādātājs bez sava autentifikācijas.
 
 ```ts
-// Īstas apakškoka struktūras. Katram ierakstam OBLIGĀTI jābeidzas ar "/" (to pārbauda vienības tests).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify funkcijā tiek apstrādāts kā CLIENT_API, nevis kā "publisks bez autentifikācijas"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Atsevišķi maršruti, kuriem tiek piemērota PRECĪZA atbilstība (ar beigu slīpsvītru vai bez tās).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // 2. pieteikšanās darbība izvēles TOTP gadījumā; nepieciešams MFA gaidīšanas sīkfails
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Tikai lasāmi atsevišķi maršruti, kuriem tiek piemērota arī CORS izcelsmes atslābināšana.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Tikai lasāms atsevišķs maršruts BEZ CORS izcelsmes atslābināšanas.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Tikai lasāmi maršruti ir publiski **tikai** drošajām metodēm. Piezīme: `classifyRoute()` izslēdz `/api/v1/*` un `/api/v1beta/*` no PUBLIC
-rezerves apstrādes — tie vienmēr ir `CLIENT_API`, tāpēc uz tiem joprojām attiecas Bearer atslēgas politika.
+Tikai lasāmie maršruti ir publiski** tikai** par drošām metodēm. Piezīme: `classifyRoute()` izslēdz `/api/v1/*` un `/api/v1beta/*` no PUBLIC fall-through — tie vienmēr ir `CLIENT_API` tāpēc joprojām tiek piemērota uzrādītāja atslēgas politika.
 
 ## Jauna maršruta pievienošana
 
@@ -312,15 +307,15 @@ Tā paliek izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves marķiera
 akreditācijas datiem. Skatīt [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
-## Nepieciešamās autentifikācijas slēdzis
+## Nepieciešama autentifikācija
 
-`isAuthRequired()` failā `src/shared/utils/apiAuth.ts` nosaka, vai pieprasījumam tiek piemērota **jebkāda** autentifikācija:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` izlemj, vai** jebkura** autentifikācija tiek veikta pieprasījumam:
 
-- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skat. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) un izsaukumus, kas izsniedz pilnvaru, ko tā pieņem. Tiem nepieciešama tā pati pilnvara, kāda ir nepieciešama, ja pieteikšanās ir ieslēgta: sinhronizācijas žetonu izdošana, CLI piekļuves žetonu izdošana jebkurā darbības jomā un API atslēgas izveide ar `manage`/`admin` darbības jomu, šīs darbības jomas piešķiršana atslēgai vai tādas atslēgas regenerēšana vai parādīšana (`requireCredentialForManagementScopedKey()` failā `src/lib/api/requireManagementAuth.ts`). Atslēgas tikai secinājumiem paliek atvērtas.
-- Parole nav konfigurēta **un** nav vides mainīgā `INITIAL_PASSWORD` → bootstrap režīms atļauj iestatīšanas vedni un loopback pieprasījumus, bet ārējie tīkla pieprasījumi joprojām prasa pilnvaras.
-- Jebkura DB kļūda → bloķē piekļuvi (drošs pēc noklusējuma).
+- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skatiet [sadaļu Maršruta apsardzes līmeņi](../security/ROUTE_GUARD_TIERS.md) ) un izsaukumus, kuros tiek izsniegti akreditācijas dati, kurus tā pieņem un kuriem ir nepieciešami tādi paši akreditācijas dati kā pieteikšanās gadījumā: sinhronizācijas pilnvaru izsniegšana, CLI piekļuves pilnvaru kalšana jebkurā tvērumā, API `manage`/`admin` atslēgas piešķiršana. atslēgu vai šādas atslēgas atjaunošanu vai atklāšanu (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Atslēgas, kas paredzētas tikai secinājumiem, paliek atvērtas. Akreditācijas dati joprojām ir nepieciešami, rakstot aizsargātā līdzekļa karogu (`REQUIRE_API_KEY`, citus drošības karogus un SSRF / TLS / MCP darbības jomas / smilškastes karogus, kas norādīti sadaļā [Funkcijas karodziņi](../reference/FEATURE_FLAGS.md#rest-api) ) un saglabājot PII maskēšanas iestatījumus (`PUT /api/settings/pii`).
+- Nav konfigurēta parole** un** no `INITIAL_PASSWORD` env var → sāknēšanas režīms ļauj veikt ieslēgšanas vedni un cilpas pieprasījumus, taču atklātajiem tīkla pieprasījumiem joprojām ir nepieciešami akreditācijas dati. Izņēmums: lai rakstītu aizsargātu līdzekļa karogu un saglabātu PII maskēšanas iestatījumus (`PUT /api/settings/pii`), ir nepieciešami akreditācijas dati pat no cilpas, tāpēc ar atpakaļcilpu vien nepietiek.
+- Jebkura DB kļūda → neizdodas aizvērt (drošs pēc noklusējuma).
 
-Klienta API atslēgu piemērošanai izmanto `isRequireApiKeyEnabled()` no `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotām instancēm: `REQUIRE_API_KEY` pārslēgšana Dashboard → Feature Flags saglabā DB pārrakstījumu un tūlīt ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kas izmanto šo palīgfunkciju. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija bloķē piekļuvi un prasa atslēgu.
+Klienta API atslēgas izpilde `isRequireApiKeyEnabled()` izmanto `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotajiem gadījumiem: pārslēdzot `REQUIRE_API_KEY` informācijas panelī → līdzekļu karodziņi, tiek saglabāts DB ignorēšana un nekavējoties tiek ietekmētas `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kurām ir kopīgs šis palīgs. Ja līdzekļa karoga krātuvi nevar nolasīt, klienta API autentifikācija neizdodas aizvērt un nepieciešama atslēga.
 
 ## Nesaderīgas izmaiņas — v3.8.0
 

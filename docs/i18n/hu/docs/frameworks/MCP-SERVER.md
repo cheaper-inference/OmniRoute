@@ -10,34 +10,30 @@
 
 ## Telepítés
 
-Az OmniRoute MCP beépített funkció. Indítsa el ezzel:
+OmniRoute MCP be van építve. Kezdje ezzel:
 
 ```bash
 omniroute --mcp
 ```
 
-Vagy az open-sse transzporton keresztül:
+Vagy az open-sse transzporttal:
 
 ```bash
-# HTTP streamelhető transzport (20130-as port)
-omniroute --dev  # Az MCP automatikusan elindul az /mcp végponton
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-A HTTP-transzportok (`sse` / `streamable-http`), amelyeket a dashboard szerver folyamaton belül szolgál ki, alapértelmezés szerint
-ki vannak kapcsolva, és korábban csak a `/dashboard/mcp` oldalról lehetett őket engedélyezni vagy letiltani. A v3.8.51-es verziótól
-a CLI paritást biztosít:
+A HTTP átvitelek (`sse` / `streamable-http`, folyamat közben az irányítópult-szerver szolgálja ki) alapértelmezés szerint ki vannak kapcsolva, és korábban csak a `/dashboard/mcp` oldalról válthatók át. A 3.8.51 verziótól kezdve a CLI paritása:
 
 ```bash
-omniroute mcp status                                  # engedélyezve/online, transzport, eszközök száma
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # visszaállítja az aktív sse/streamable-http munkameneteket
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-Az `mcp enable`/`mcp disable` ugyanazt az `mcpEnabled` (és opcionálisan az `mcpTransport`) beállítást módosítja PATCH-kéréssel,
-amelyet a dashboard a `/api/settings` végponton keresztül kapcsol. Az `mcp restart` a `POST /api/mcp/restart` végpontot hívja: leállítja
-az aktív `sse`/`streamable-http` munkameneteket, így a következő kérés tisztán újrainicializálja őket, `409`-et ad vissza, ha az MCP le van tiltva,
-és `501`-et a `stdio` transzport esetén (a stdio-kliensek saját alfolyamatukat kezelik — nincs folyamaton belüli kezelő, amelyet újra lehetne indítani).
+`mcp enable`/`mcp disable` PATCH ugyanaz a `mcpEnabled` (és opcionálisan `mcpTransport`) a műszerfal beállítása `/api/settings` keresztül vált. `mcp restart` meghívja `POST /api/mcp/restart`: lebontja az aktív `sse`/`streamable-http` szekciókat, így a következő kérés tisztán újrainicializálódik, `409` adja vissza, ha MCP le van tiltva, és `501` adja vissza a `stdio` szállításhoz (az stdio kliensek saját alfolyamattal rendelkeznek — nincs folyamaton belüli fogantyú az újraindításhoz).
 
 ## Transzportok
 
@@ -130,50 +126,42 @@ Cursor, Cline és kompatibilis MCP-kliensek beállításához lásd az [MCP-klie
 | `omniroute_cache_stats` | `read:cache`  | Szemantikus gyorsítótár-, prompt-gyorsítótár- és idempotencia-statisztikák |
 | `omniroute_cache_flush` | `write:cache` | A gyorsítótár ürítése globálisan vagy aláírás/modell alapján               |
 
-## Tömörítési eszközök (13)
+## Tömörítő eszközök (13)
 
-| Eszköz                              | Hatókörök           | Leírás                                                                                                                                                 |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Tömörítési beállítások, analitikai összefoglaló és gyorsítótár-tudatos statisztikák (tartalmazza az `analytics.mcpDescriptionCompression` metaadatait) |
-| `omniroute_compression_configure`   | `write:compression` | A tömörítési mód, küszöbérték, célarány, rendszerprompt-megőrzés és az MCP-leírás tömörítésének kapcsolójának konfigurálása                            |
-| `omniroute_set_compression_engine`  | `write:compression` | Az aktív motor kiválasztása (off/caveman/rtk/stacked), valamint a Caveman/RTK intenzitásának beállítása                                                |
-| `omniroute_list_compression_combos` | `read:compression`  | A névvel ellátott tömörítési kombók és motorfolyamataik felsorolása                                                                                    |
-| `omniroute_compression_combo_stats` | `read:compression`  | A tömörítési kombó és a motor szerint csoportosított analitika                                                                                         |
-| `omniroute_ccr_store`               | `write:compression` | A hívó által elkülönített tartalom tárolása a korlátozott memóriabeli CCR-tárolóban, valamint marker és `ccr://` hivatkozás visszaadása                |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR-tartalom lekérése teljes egészében vagy head, tail, lines, grep és stats módban                                                                    |
-| `omniroute_ccr_inspect`             | `read:compression`  | A hívó tulajdonában lévő CCR-metaadatok vizsgálata a tartalom visszaadása nélkül                                                                       |
-| `omniroute_ccr_list`                | `read:compression`  | A hívó tulajdonában lévő CCR-blokkok lapozott metaadatainak felsorolása                                                                                |
-| `omniroute_ccr_delete`              | `write:compression` | A hívó tulajdonában lévő CCR-blokk törlése                                                                                                             |
-| `omniroute_ccr_stats`               | `read:compression`  | A hívó hatókörére érvényes memóriahasználat, életciklus-számlálók és tárolókorlátok jelentése                                                          |
-| `omniroute_rtk_discover`            | `read:compression`  | Ismétlődő zajok felismerése az engedélyezetten megadott RTK-kimeneti mintákban                                                                         |
-| `omniroute_rtk_learn`               | `read:compression`  | Ellenőrizhető RTK-szűrőtervezet létrehozása az engedélyezetten megadott mintákból                                                                      |
+| Eszköz                              | Hatókör             | Leírás                                                                                                                                           |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Tömörítési beállítások, elemzési összefoglaló és gyorsítótár-tudatos statisztikák (beleértve `analytics.mcpDescriptionCompression` metaadatokat) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurálja a tömörítési módot, a küszöbértéket, a célarányt, a rendszer azonnali megőrzését, MCP leírásának tömörítési kapcsolóját             |
+| `omniroute_set_compression_engine`  | `write:compression` | Válassza ki az aktív motort (off/caveman/rtk/stacked) és Caveman/RTK intenzitást                                                                 |
+| `omniroute_list_compression_combos` | `read:compression`  | Sorolja fel a megnevezett kompressziós kombókat és azok motorvezetékeit                                                                          |
+| `omniroute_compression_combo_stats` | `read:compression`  | Az elemzés tömörítési kombináció és motor szerint csoportosítva                                                                                  |
+| `omniroute_ccr_store`               | `write:compression` | Tárolja a hívó féltől elkülönített tartalmat a behatárolt memórián belüli CCR tárolóban, és adjon vissza egy jelölőt és `ccr://` hivatkozást     |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Töltse le CCR tartalmat teljes egészében vagy fej, farok, vonalak, grep és statisztikai módokkal                                                 |
+| `omniroute_ccr_inspect`             | `read:compression`  | A hívó tulajdonában lévő CCR metaadatok ellenőrzése tartalom visszaadása nélkül                                                                  |
+| `omniroute_ccr_list`                | `read:compression`  | Sorolja fel a hívó tulajdonában lévő CCR blokkok oldalszámozott metaadatait                                                                      |
+| `omniroute_ccr_delete`              | `write:compression` | Törölje a hívó tulajdonában lévő CCR blokkot                                                                                                     |
+| `omniroute_ccr_stats`               | `read:compression`  | Jelentse a hívó hatókörű memóriahasználatot, az életciklus-számlálókat és a tárolási korlátokat                                                  |
+| `omniroute_rtk_discover`            | `read:compression`  | Fedezze fel az ismétlődő zajokat az opt-in RTK kimeneti mintákban                                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | Áttekinthető RTK szűrővázlat létrehozása az önkéntes mintákból                                                                                   |
 
-A CCR-bejegyzések csak a memóriában léteznek, és újraindításkor eltűnnek. Minden blokk legfeljebb 2 MiB méretű lehet, egy-egy
-principal legfeljebb 16 MiB-ot használhat, a globális tároló pedig legfeljebb 64 MiB méretű lehet. A bejegyzések alapértelmezett TTL-je
-24 óra (legfeljebb hét nap). A teljes MCP-lekérés 256 KiB-ra korlátozott; a nagyobb blokkok továbbra is elérhetők a
-tartományalapú és grep módokon keresztül. A tárolás, lekérés, felsorolás, vizsgálat, törlés és statisztikák elkülönítése a
-hitelesített API-kulcshoz tartozó principal alapján történik. Az auditrekordok kivonatokat és méretmetaadatokat tartalmaznak, a
-tartalmat soha.
+CCR bejegyzések kétszintű tárolót használnak: egy forró memóriaréteget, amelyet helyi, nem felhőalapú futtatókörnyezeteken támogat egy tartós SQLite réteg (`ccr_blocks`, alapértelmezés szerint be van kapcsolva), így a blokk túléli a kilakoltatást vagy az újraindítást, amíg TTL ből ki nem fogy — kivéve az 512 feletti KB memóriablokkokat, amelyek megmaradnak. Minden blokk 2 MiB-re, mindegyik fő 16 MiB, a globális tároló pedig 64 MiB-re korlátozódik. A bejegyzések alapértelmezés szerint 24 órás TTL (maximum hét nap). A teljes MCP visszakeresés 256 KiB-re korlátozódik; a nagyobb blokkok elérhetők maradnak a ranged és grep módokon keresztül. A tárolást, a visszakeresést, a listázást, az ellenőrzést, a törlést és a statisztikákat a hitelesített API-kulcs elválasztja. Az ellenőrzési rekordok kivonatokat és méret metaadatokat tartalmaznak, tartalmat soha. A kezelőre vonatkozó részletek (a két jelölő, az ügyfél előfeltételei, `codemode:false`, az eszközenkénti hatókör, az oldalszámozás és a diagnosztikai mátrix) megtalálhatók [a Compression Engines → Előfeltételek / kezelői útmutatóban](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` külön jelenti az MCP-leírások tömörítését a következő alatt:
-`analytics.mcpDescriptionCompression`. Ezek az értékek az MCP listázható leírásainak (`tools`, `prompts`, `resources` és `resourceTemplates`) metaadatméret-becslései; nem szolgáltatói használati bizonylatok, és `source: "mcp_metadata_estimate"` értékkel vannak megjelölve.
+`omniroute_compression_status` külön jelenti MCP leírás tömörítését `analytics.mcpDescriptionCompression` alatt. Ezek az értékek MCP listázható leírások metaadat-méretére vonatkozó becslések (`tools`, `prompts`, `resources` és `resourceTemplates`); ezek nem szolgáltatói használati nyugták, és `source: "mcp_metadata_estimate"` jelzéssel vannak ellátva.
 
-### MCP akadálymentességi fa szűrő (v3.8.0)
+### MCP Accessibility Tree Filter (v3.8.0)
 
-A fenti tömörítési eszközöktől különállóan az OmniRoute tartalmaz egy végrehajtás utáni szűrőt, amely tömöríti az MCP böngésző- és akadálymentességi eszközeinek **eszközeredményeit**, mielőtt azok visszakerülnének az ügynökhöz. Ez a szűrő önmagában nem eszköz — átláthatóan lefut minden olyan eszközeredményen, amely részletes akadálymentességi fa- vagy böngésző-pillanatkép-szöveget tartalmaz (≥2000 karakter).
+A fenti tömörítési eszközöktől eltekintve OmniRoute tartalmaz egy végrehajtás utáni szűrőt, amely tömöríti a** eszköz eredményeit** MCP browser/accessibility eszközöket, mielőtt visszaküldik őket az ügynöknek. Ez a szűrő önmagában nem egy eszköz — hanem transzparensen fut minden olyan eszközeredményen, amely bőbeszédű akadálymentesítési fát vagy böngésző-pillanatkép szöveget tartalmaz (≥ 2000 karakter).
 
-Főbb működési jellemzők:
+Legfontosabb viselkedések:
 
-- ≥30 egymást követő, ismétlődő testvérsort egy fejlécből és egy záró összegzésből álló formára von össze
-- Megőrzi a Playwright/computer-use által igényelt `[ref=eXX]` horgonyokat
-- A túlméretezett szöveget (>50,000 karakter) navigációs javaslattal csonkolja
-- Várható megtakarítás: **60–80%** a böngésző-pillanatképek hasznos terhelésén
+- Összecsukja ≥ 30 egymást követő ismétlődő testvérsort a head + tail összefoglalóba
+- Megőrzi Playwright/computer-use által igényelt `[ref=eXX]` horgonyokat
+- A túlméretezett szöveget keményen csonkolja (> 50 000 karakter) navigációs utalással
+- Várható megtakarítás:** 60-80%** a böngésző pillanatképei rakományain
 
-Konfiguráció: `compression.mcpAccessibility` a globális beállításokban (056-os migráció).
-Implementáció: `open-sse/services/compression/engines/mcpAccessibility/`.
-Teljes dokumentáció: [Tömörítési motorok — MCP akadálymentességi fa szűrő](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguráció: `compression.mcpAccessibility` a globális beállításokban (migráció 056). Megvalósítás: `open-sse/services/compression/engines/mcpAccessibility/`. Teljes dokumentumok: [Compression Engines — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Lásd a [Tömörítési motorok](../compression/COMPRESSION_ENGINES.md) és az [RTK-tömörítés](../compression/RTK_COMPRESSION.md) dokumentációját az ezen eszközök mögött álló futásidejű tömörítési modellért.
+Az eszközök mögötti futásidejű tömörítési modellért lásd: [Compression Engines](../compression/COMPRESSION_ENGINES.md) és [RTK Compression](../compression/RTK_COMPRESSION.md).
 
 ## 1Proxy-eszközök (3)
 

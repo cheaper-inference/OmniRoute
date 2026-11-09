@@ -38,24 +38,19 @@ e permitem correspondência por `any` ou `all`.
 Uma regra de `connection` é avaliada somente quando nenhuma regra antecipada venceu e uma conexão concreta com o provedor já
 foi selecionada. Ela pode alterar apenas o esforço e o orçamento.
 
-## Esforço e orçamento
+## Esforço e Orçamento
 
-`sourceEffort` aceita `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` e
-`ultra`. `missing` significa que a solicitação não contém esforço discreto, alternância de raciocínio
-nem orçamento de raciocínio. Portanto, um sinal somente de orçamento corresponde apenas a `any`.
+`sourceEffort` aceita `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` e `ultra`. `missing` significa que a solicitação não contém um esforço discreto nem uma alternância de pensamento ou orçamento de pensamento. Portanto, um sinal somente de orçamento é correspondido apenas por `any`.
 
 `effortMode` tem três variantes:
 
-- `inherit` mantém o esforço do cliente e ainda permite que o modelo ou combo seja alterado.
-- `default` define `targetEffort` somente quando nenhum sinal explícito de raciocínio está presente.
+- `inherit` mantém o esforço do cliente enquanto permite a alteração do modelo ou combo.
+- `default` define `targetEffort` somente quando nenhum sinal de raciocínio explícito está presente.
 - `force` substitui o esforço discreto por `targetEffort`.
 
-Independentemente disso, `budgetAction` pode ser `preserve`, `remove` ou `set`. `force` com `none` remove
-todos os campos reconhecidos de esforço e orçamento. `none` junto com `set` é inválido.
+Independentemente, `budgetAction` pode ser `preserve`, `remove` ou `set`. `force` com `none` remove todos os campos de esforço e orçamento reconhecidos e, em seguida, define `reasoning_effort: "none"`, porque alguns provedores ativam o pensamento quando o campo está ausente. Provedores que rejeitam o `none` literal são ajustados no despacho em `open-sse/executors/base/reasoningEffort.ts`. O Código de Comando mapeia-o para `low`, exceto em solicitações em formato de Respostas (`input` sem `messages`), onde mantém `none`. Em Cloudflare Workers AI (`cloudflare-ai`), os modelos que rejeitam `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) obtêm `low`; outros modelos Workers AI mantêm `none`. Eliminar o campo não é uma opção, porque um esforço ausente executa a camada padrão do modelo. `none` junto com `set` é inválido.
 
-As solicitações direcionadas a modelos conhecidos como incompatíveis são rejeitadas antes da chamada upstream. Para destinos de
-combo, as entradas incompatíveis são removidas; se nenhuma permanecer, a solicitação retornará o status `400`.
-Dados de capacidade desconhecidos geram um aviso e mantêm a regra ativa.
+As solicitações direcionadas a modelos incompatíveis são rejeitadas antes da chamada upstream. Para alvos combinados, as entradas incompatíveis são removidas; se não restar nenhum, a solicitação retornará o status `400`. Dados de capacidade desconhecidos produzem um aviso e deixam a regra ativa.
 
 ## Segurança e transportes
 

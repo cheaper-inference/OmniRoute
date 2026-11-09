@@ -207,31 +207,31 @@ stdio ಮೋಡ್ನಲ್ಲಿ MCP ಸಾರಿಗೆಯನ್ನು ಪ್�
 omniroute --mcp
 ```
 
-ಶಿಫಾರಸು ಮಾಡಿದ ಮೌಲ್ಯೀಕರಣ ಪ್ರಕ್ರಿಯೆ:
+ಶಿಫಾರಸು ಮಾಡಲಾದ ಮೌಲ್ಯೀಕರಣದ ಹರಿವು:
 
 ```bash
-# 1. MCP ಸರ್ವರ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಿ
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ನಿಮ್ಮ MCP ಕ್ಲೈಂಟ್ನಿಂದ, ಇವುಗಳನ್ನು ಕರೆ ಮಾಡಿ:
-omniroute_get_health        # ಸಿಸ್ಟಮ್ ಆರೋಗ್ಯವನ್ನು ಹಿಂದಿರುಗಿಸಬೇಕು
-omniroute_list_combos       # ಸಕ್ರಿಯ ಕಾಂಬೊಗಳನ್ನು ಹಿಂದಿರುಗಿಸಬೇಕು
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ಅಥವಾ ಸಂಪೂರ್ಣ E2E ಸೂಟ್ ಅನ್ನು ಚಲಾಯಿಸಿ:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP ಕ್ಲೈಂಟ್ ಸಂರಚನೆ
+#### MCP ಕ್ಲೈಂಟ್ ಕಾನ್ಫಿಗರೇಶನ್
 
-**Claude Code:**
+**Claude ಕೋಡ್:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-ನಿಮ್ಮ MCP ಸೆಟ್ಟಿಂಗ್ಗಳಿಗೆ ಸೇರಿಸಿ:
+ನಿಮ್ಮ MCP ಸೆಟ್ಟಿಂಗ್ಗಳಿಗೆ ಸೇರಿಸಿ (stdio, ಕೀಲಿಯೊಂದಿಗೆ ಕರೆ ಮಾಡುವವರು ಪ್ರಮುಖರನ್ನು ಹೊಂದಿರುತ್ತಾರೆ):
 
 ```json
 {
@@ -239,15 +239,22 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**ಸಂಪೂರ್ಣ MCP ದಸ್ತಾವೇಜು:** [MCP ಸರ್ವರ್ README](../../open-sse/mcp-server/README.md) — 110 ಪರಿಕರಗಳು, IDE ಸಂರಚನೆಗಳು, Python/TS/Go ಕ್ಲೈಂಟ್ಗಳು.
+ಅಥವಾ, `mcpTransport` `streamable-http` ಆಗಿರುವಾಗ (ಅದನ್ನು `/dashboard/mcp` ಅಥವಾ `omniroute mcp enable --transport streamable-http` ನೊಂದಿಗೆ ಹೊಂದಿಸಿ), ಕ್ಲೈಂಟ್ನ ರಿಮೋಟ್ MCP ಸರ್ವರ್ ಪ್ರವೇಶವನ್ನು `http://localhost:20128/api/mcp/stream` ನಲ್ಲಿ ಪಾಯಿಂಟ್ ಮಾಡಿ.
 
-### A2A ಸೆಟಪ್ (ಏಜೆಂಟ್-ನಿಂದ-ಏಜೆಂಟ್ ಪ್ರೋಟೋಕಾಲ್)
+ಕೀಲಿಯು `Authorization: Bearer <api-key>` ಆಗಿ ಚಲಿಸುತ್ತದೆ (ರಿಮೋಟ್ ಹೋಸ್ಟ್ಗಳಿಗಾಗಿ [MCP ಸರ್ವರ್ → ರಿಮೋಟ್ ಪ್ರವೇಶವನ್ನು](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ನೋಡಿ; ರಿಮೋಟ್ ಕೀಗೆ `mcp:connect` ಜೊತೆಗೆ ಅದರ read/write ಸ್ಕೋಪ್ಗಳು ಬೇಕಾಗುತ್ತವೆ).
+
+**ಪೂರ್ಣ MCP ದಸ್ತಾವೇಜನ್ನು:** [MCP ಸರ್ವರ್ README](../../open-sse/mcp-server/README.md) — 110 ಉಪಕರಣಗಳು, IDE ಸಂರಚನೆಗಳು, Python/TS/Go ಕ್ಲೈಂಟ್ಗಳು. ಕಂಪ್ರೆಷನ್ CCR/dedup ಪರಿಕರಗಳಿಗಾಗಿ ಆಪರೇಟರ್ ಉಲ್ಲೇಖ (ಮಾರ್ಕರ್ಗಳು, ಪೂರ್ವಾಪೇಕ್ಷಿತಗಳು, ಪ್ರತಿ-ಟೂಲ್ ಸ್ಕೋಪ್ಗಳು, ಮರುಪಡೆಯುವಿಕೆ ಪುಟೀಕರಣ, ಡಯಾಗ್ನೋಸ್ಟಿಕ್ಸ್): [ಕಂಪ್ರೆಷನ್ ಇಂಜಿನ್ಗಳು → ಪೂರ್ವಾಪೇಕ್ಷಿತಗಳು / ಆಪರೇಟರ್ ಮಾರ್ಗದರ್ಶಿ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A ಸೆಟಪ್ (ಏಜೆಂಟ್-ಟು-ಏಜೆಂಟ್ ಪ್ರೋಟೋಕಾಲ್)
 
 ಏಜೆಂಟ್ ಕಾರ್ಡ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ:
 
@@ -255,7 +262,7 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ಕಾರ್ಯವೊಂದನ್ನು ಕಳುಹಿಸಿ:
+ಕಾರ್ಯವನ್ನು ಕಳುಹಿಸಿ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**ಸಂಪೂರ್ಣ A2A ದಸ್ತಾವೇಜು:** [A2A ಸರ್ವರ್ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ಕೌಶಲ್ಯಗಳು, ಸ್ಟ್ರೀಮಿಂಗ್, ಕಾರ್ಯದ ಜೀವನಚಕ್ರ.
+**ಪೂರ್ಣ A2A ದಸ್ತಾವೇಜನ್ನು:** [A2A ಸರ್ವರ್ README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ಕೌಶಲ್ಯಗಳು, ಸ್ಟ್ರೀಮಿಂಗ್, ಕಾರ್ಯ ಜೀವನಚಕ್ರ.
 
 ---
 
@@ -322,23 +329,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) ಟೆಂಪ್ಲೇಟ್
+## ಶೂನ್ಯ Linux (xbps-src) ಟೆಂಪ್ಲೇಟ್
 
-Void Linux ಬಳಕೆದಾರರು `xbps-src` ಬಳಸಿ ಸ್ಥಳೀಯ ಪ್ಯಾಕೇಜ್ ಅನ್ನು ನಿರ್ಮಿಸಬಹುದು. ಈ ಬ್ಲಾಕ್ ಅನ್ನು `srcpkgs/omniroute/template` ಆಗಿ ಉಳಿಸಿ:
+ಶೂನ್ಯ Linux ಬಳಕೆದಾರರಿಗೆ, ನೀವು `xbps-src` ಬಳಸಿಕೊಂಡು ಸ್ಥಳೀಯ ಪ್ಯಾಕೇಜ್ ಅನ್ನು ನಿರ್ಮಿಸಬಹುದು. ಈ ಬ್ಲಾಕ್ ಅನ್ನು `srcpkgs/omniroute/template` ಎಂದು ಉಳಿಸಿ:
 
 ```bash
-# 'omniroute' ಗಾಗಿ ಟೆಂಪ್ಲೇಟ್ ಫೈಲ್
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="ಬಹು LLM ಪೂರೈಕೆದಾರಗಳಿಗಾಗಿ ಸ್ಮಾರ್ಟ್ ರೂಟಿಂಗ್ ಹೊಂದಿರುವ ಸಾರ್ವತ್ರಿಕ AI ಗೇಟ್ವೇ"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ಪ್ರತಿ ಬಿಡುಗಡೆಯ checksum ಅನ್ನು ಈ ಕೆಳಗಿನದರೊಂದಿಗೆ ಮರುರಚಿಸಿ:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

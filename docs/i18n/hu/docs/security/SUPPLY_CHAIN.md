@@ -31,36 +31,11 @@ Ha az osv vagy a Trivy pirosra vált egy újonnan felfedezett CVE miatt, a megol
 
 Mindkét kapu **elegánsan ÁTUGRJA** (exit 0) a lépést, ha az eszköz hiányzik, vagy a mérés sikertelen (osv-scanner nincs a PATH-ban, osv.dev/hálózat elérhetetlen, érvénytelen JSON) — egy **mérési** hiba soha nem blokkol, csak egy **mért** regresszió blokkol.
 
-## Ismert elfogadott kockázatok
+## Nyugdíjas függőségi kockázat
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+A rögzített promptfoo fejlesztőeszköz frissítése után a gyökérzárfájl már nem tartalmazza `extract-zip` vagy annak függőségi élét. Ezzel megszűnik a korábban elfogadott `promptfoo` → `@openai/codex-security` → `extract-zip` lánc, amely #14482 ben van nyomon. A `tests/unit/extract-zip-14482-exposure.test.ts` regressziós ellenőrzései elutasítják az újbóli bevezetését, és megtartják a termelési kódból történő behozatal tilalmát.
 
-Az `extract-zip@2.0.1` két, nem javított, magas súlyosságú szimbolikus link bejárási tanácsot tartalmaz.
-A fenti CVE Variance orvoslás "nincs upstream javítás" ága szerint ez egy
-**elfogadott kockázat**, nem pedig frissítés:
-
-- **Lánc:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Megerősítve a `package-lock.json` fájlon keresztül — a teljes függőségi
-  fában pontosan egy csomag (`@openai/codex-security`) deklarálja az `extract-zip`-et,
-  és pontosan egy csomag (`promptfoo`) deklarálja az `@openai/codex-security`-t.
-- **Nincs javított kiadás a láncban.** Az `extract-zip@2.0.1` (2020-ban publikálva) a csomag utolsó kiadása — nem karbantartott. Az `@openai/codex-security`
-  jelenlegi npm-latest (`0.1.29`) továbbra is az `extract-zip@2.0.1`-et húzza be.
-- **Elérhetetlen a produkcióból.** A `promptfoo` csak devDependency (soha nincs felsorolva
-  a `dependencies` alatt), és a `src/`, `open-sse/` vagy `bin/` alatt egyetlen fájl sem importálja az
-  `extract-zip` npm csomagot — az OmniRoute saját `extractZip()` segédje
-  (`src/lib/versionManager/binaryManager.ts:93`) natív `unzip`/`tar`
-  parancsokat használ, és nem kapcsolódik ehhez. Az `@openai/codex-security` emellett saját szimbolikus link bejárási
-  védelmet is tartalmaz az extract-zip `onEntry` callback-je felett.
-- **Ne** aliasolja az `extract-zip`-et a `package.json` `overrides` segítségével — az egyetlen életképes
-  helyettesítő az Electron-org-internal, és API-kompatibilis az
-  `@openai/codex-security` saját `onEntry`/`defaultDirMode`/`defaultFileMode` ellenőrzéseivel;
-  felülírása csendesen megszakítaná a csomag biztonsági ellenőrzéseit.
-- **Alapvonal:** a mért osv `vulnCount` (3) már jóval az
-  `config/quality/quality-baseline.json` rögzített alapvonal (27) alatt van — nincs szükség alapvonal változtatásra.
-- **Regresszióvédelem:** a `tests/unit/extract-zip-14482-exposure.test.ts` ellenőrzi a
-  láncot és a fenti, produkcióból való importálhatatlansági invariánst; meghiúsítja a CI-t, ha bármelyik
-  megszakad (pl. egy jövőbeli PR elérhetővé teszi az `extract-zip`-et a produkcióból).
-- **Nyomon követés:** issue #14482.
+A jelenlegi függőségi javítás kiterjed a kompatibilitás felülbírálására is az Azure Identitás MSAL ügyfelére és a get-uri FTP ügyfelére. Az Azure-jogkivonat-beszerzést és FTP lekérést ellenőrzött szállításokkal tesztelték; mindkét OpenCode csomag saját build- és tesztcsomagot futtat. A regisztrációs tájékoztató számlálók egy adott időpontban mért értékek, és a zárolási fájl véglegesítése után változhatnak.
 
 ## Hátralék: Scorecard tanács → blokkoló
 

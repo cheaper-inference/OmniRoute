@@ -10,35 +10,30 @@
 
 ## Installatie
 
-OmniRoute MCP is ingebouwd. Start het met:
+OmniRoute MCP is ingebouwd. Begin het met:
 
 ```bash
 omniroute --mcp
 ```
 
-Of via het open-sse-transport:
+Of via het open-sse transport:
 
 ```bash
-# Streambaar HTTP-transport (poort 20130)
-omniroute --dev  # MCP start automatisch op het /mcp-eindpunt
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-De HTTP-transporten (`sse` / `streamable-http`, die in hetzelfde proces door de dashboardserver worden aangeboden) zijn
-standaard uitgeschakeld en konden voorheen alleen via de pagina `/dashboard/mcp` worden in- en uitgeschakeld. Sinds v3.8.51
-biedt de CLI dezelfde functionaliteit:
+De HTTP transporten (`sse` / `streamable-http`, in-process geserveerd door de dashboardserver) zijn standaard uitgeschakeld en konden voorheen alleen worden geschakeld vanaf de `/dashboard/mcp` pagina. Vanaf v3.8.51 heeft de CLI pariteit:
 
 ```bash
-omniroute mcp status                                  # ingeschakeld/online, transport, aantal tools
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # stelt actieve sse/streamable-http-sessies opnieuw in
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` voeren een PATCH uit op dezelfde instelling `mcpEnabled` (en optioneel `mcpTransport`)
-die het dashboard via `/api/settings` in- en uitschakelt. `mcp restart` roept `POST /api/mcp/restart` aan: deze opdracht beëindigt
-actieve `sse`/`streamable-http`-sessies, zodat het volgende verzoek opnieuw correct wordt geïnitialiseerd, retourneert
-`409` als MCP is uitgeschakeld en `501` voor het `stdio`-transport (stdio-clients beheren hun eigen
-subproces — er is geen handvat binnen het proces om opnieuw te starten).
+`mcp enable`/`mcp disable` PATCH dezelfde `mcpEnabled` (en optioneel `mcpTransport`) instelling, het dashboard schakelt via `/api/settings`. `mcp restart` roept `POST /api/mcp/restart` aan: het breekt actieve `sse`/`streamable-http` -sessies af, zodat het volgende verzoek netjes opnieuw wordt geïnitialiseerd, retourneert `409` als MCP is uitgeschakeld, en `501` voor het `stdio` -transport (stdio-clients bezitten hun eigen subproces — er is geen in-proces-handle om opnieuw op te starten).
 
 ## Transporten
 
@@ -131,55 +126,42 @@ Cursor, Cline en compatibele MCP-clients.
 | `omniroute_cache_stats` | `read:cache`  | Statistieken voor semantische cache, promptcache en idempotentie |
 | `omniroute_cache_flush` | `write:cache` | Cache globaal of per handtekening/model leegmaken                |
 
-## Compressietools (13)
+## Compressiegereedschappen (13)
 
-| Tool                                | Scopes              | Beschrijving                                                                                                                                  |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Compressie-instellingen, analyseoverzicht en cachebewuste statistieken (inclusief metagegevens van `analytics.mcpDescriptionCompression`)     |
-| `omniroute_compression_configure`   | `write:compression` | Compressiemodus, drempelwaarde, doelverhouding, behoud van systeemprompts en schakeloptie voor compressie van MCP-beschrijvingen configureren |
-| `omniroute_set_compression_engine`  | `write:compression` | De actieve engine (off/caveman/rtk/stacked) en Caveman/RTK-intensiteit kiezen                                                                 |
-| `omniroute_list_compression_combos` | `read:compression`  | Benoemde compressiecombo's en hun enginepipelines weergeven                                                                                   |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analyses gegroepeerd per compressiecombo en engine                                                                                            |
-| `omniroute_ccr_store`               | `write:compression` | Van de aanroeper geïsoleerde inhoud opslaan in het begrensde CCR-geheugen en een markering plus `ccr://`-verwijzing retourneren               |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR-inhoud volledig of via kop-, staart-, regel-, grep- en statistiekmodi ophalen                                                             |
-| `omniroute_ccr_inspect`             | `read:compression`  | Metagegevens van CCR-blokken van de aanroeper inspecteren zonder inhoud te retourneren                                                        |
-| `omniroute_ccr_list`                | `read:compression`  | Gepagineerde metagegevens voor CCR-blokken van de aanroeper weergeven                                                                         |
-| `omniroute_ccr_delete`              | `write:compression` | Een CCR-blok van de aanroeper verwijderen                                                                                                     |
-| `omniroute_ccr_stats`               | `read:compression`  | Geheugengebruik, levenscyclustellers en opslaglimieten binnen het bereik van de aanroeper rapporteren                                         |
-| `omniroute_rtk_discover`            | `read:compression`  | Terugkerende ruis ontdekken in vrijwillig aangeleverde RTK-uitvoervoorbeelden                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | Een controleerbaar concept voor een RTK-filter genereren uit vrijwillig aangeleverde voorbeelden                                              |
+| Hulpmiddel                          | Bereik              | Beschrijving                                                                                                                             |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Compressie-instellingen, analysesamenvatting en cachebewuste statistieken (inclusief `analytics.mcpDescriptionCompression` metagegevens) |
+| `omniroute_compression_configure`   | `write:compression` | Configureer de compressiemodus, drempel, doelverhouding, behoud van systeemprompts, compressieschakelaar voor MCP -beschrijving          |
+| `omniroute_set_compression_engine`  | `write:compression` | Kies de actieve engine (off/caveman/rtk/stacked) en Caveman/RTK intensiteit                                                              |
+| `omniroute_list_compression_combos` | `read:compression`  | Maak een lijst van genoemde compressiecombo's en hun motorpijplijnen                                                                     |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analytics gegroepeerd op compressiecombinatie en engine                                                                                  |
+| `omniroute_ccr_store`               | `write:compression` | Sla door de beller geïsoleerde inhoud op in de begrensde CCR opslag in het geheugen en retourneer een markering plus `ccr://` referentie |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Haal CCR inhoud volledig op of met de modi Head, Tail, Lines, Grep en Stats                                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Inspecteer CCR -metadata van de beller zonder inhoud terug te sturen                                                                     |
+| `omniroute_ccr_list`                | `read:compression`  | Lijst met gepagineerde metadata voor CCR -blokken die eigendom zijn van de beller                                                        |
+| `omniroute_ccr_delete`              | `write:compression` | Verwijder een CCR -blok dat eigendom is van de beller                                                                                    |
+| `omniroute_ccr_stats`               | `read:compression`  | Rapporteer op de beller afgestemd geheugengebruik, levenscyclustellers en winkellimieten                                                 |
+| `omniroute_rtk_discover`            | `read:compression`  | Ontdek terugkerende ruis in opt-in RTK uitvoervoorbeelden                                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | Genereer een reviewbaar RTK -filterconcept op basis van opt-in-voorbeelden                                                               |
 
-CCR-vermeldingen bestaan uitsluitend in het geheugen en verdwijnen na een herstart. Elk blok is beperkt tot 2 MiB, elke
-principal tot 16 MiB en de globale opslag tot 64 MiB. Vermeldingen hebben standaard een TTL van 24 uur (maximaal
-zeven dagen). Volledig ophalen via MCP is beperkt tot 256 KiB; grotere blokken blijven beschikbaar via de
-bereik- en grep-modi. Opslag, ophalen, weergeven, inspectie, verwijdering en statistieken worden geïsoleerd per
-principal van de geverifieerde API-sleutel. Auditrecords bevatten hashes en metagegevens over de grootte, nooit inhoud.
+CCR items gebruiken een opslag met twee niveaus: een hot-in-memory-laag die, op lokale niet-cloud-runtimes, wordt ondersteund door een duurzame SQLite laag (`ccr_blocks`, standaard aan), zodat een blok een uitzetting of een herstart overleeft totdat de TTL op is. — behalve blokken van meer dan 512 KB en cloud-runtimes, die alleen geheugen blijven. Elk blok is beperkt tot 2 MiB, elke hoofdsom tot 16 MiB en de globale opslag tot 64 MiB. Inzendingen hebben standaard een TTL van 24 uur (maximaal zeven dagen). Het volledig ophalen MCP is beperkt tot 256 KiB; grotere blokken blijven beschikbaar via de afstands- en grep-modi. Opslag, ophalen, weergeven, inspectie, verwijderen en statistieken worden geïsoleerd door de geverifieerde API-sleutelprincipal. Auditrecords bevatten hashes en metagegevens over de grootte, nooit inhoud. Details voor de operator (de twee markeringen, clientvereisten, `codemode:false`, scopes per tool, paginering en een diagnostische matrix) zijn te vinden in [Compression Engines → Vereisten / operatorhandleiding](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` rapporteert MCP-beschrijvingscompressie afzonderlijk onder
-`analytics.mcpDescriptionCompression`. Deze waarden zijn schattingen van de metadatagrootte voor opvraagbare MCP-
-beschrijvingen (`tools`, `prompts`, `resources` en `resourceTemplates`); het zijn geen gebruiksbewijzen
-van providers en ze zijn gemarkeerd met `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` rapporteert MCP -beschrijvingscompressie afzonderlijk onder `analytics.mcpDescriptionCompression`. Deze waarden zijn schattingen van de metagegevensgrootte voor MCP lijstbare beschrijvingen (`tools`, `prompts`, `resources` en `resourceTemplates`); het zijn geen gebruiksbewijzen van de provider en zijn gemarkeerd met `source: "mcp_metadata_estimate"`.
 
-### MCP-toegankelijkheidsboomfilter (v3.8.0)
+### MCP Toegankelijkheidsboomfilter (v3.8.0)
 
-Los van de bovenstaande compressietools bevat OmniRoute een filter voor na de uitvoering dat
-de **toolresultaten** van MCP-browser-/toegankelijkheidstools comprimeert voordat ze aan de
-agent worden geretourneerd. Dit filter is zelf geen tool — het wordt transparant uitgevoerd op elk toolresultaat dat
-uitgebreide tekst van een toegankelijkheidsboom of browsersnapshot bevat (≥2000 tekens).
+Los van de bovenstaande compressietools bevat OmniRoute een post-uitvoeringsfilter dat de** gereedschap resultaten** van MCP browser/accessibility tools voordat ze worden teruggestuurd naar de agent. Dit filter is op zichzelf geen tool — het werkt transparant op elk toolresultaat dat uitgebreide toegankelijkheidsboom- of browser-snapshot-tekst bevat (≥ 2000 tekens).
 
 Belangrijkste gedragingen:
 
-- Vouwt ≥30 opeenvolgende, herhaalde siblingregels samen tot een samenvatting met begin en einde
-- Behoudt `[ref=eXX]`-ankers die vereist zijn door Playwright/computergebruik
-- Kapt te lange tekst (>50.000 tekens) af met een navigatiehint
-- Verwachte besparing: **60–80%** op browsersnapshot-payloads
+- Vouwt ≥ 30 opeenvolgende herhaalde broers en zussen samen in de hoofd- + -staartsamenvatting
+- Behoudt `[ref=eXX]` ankers vereist door Playwright/computer-use
+- Kapt te grote tekst hard af (> 50.000 tekens) met een navigatiehint
+- Verwachte besparingen:** 60-80%** op browser-snapshot-payloads
 
-Configuratie: `compression.mcpAccessibility` in de algemene instellingen (migratie 056).
-Implementatie: `open-sse/services/compression/engines/mcpAccessibility/`.
-Volledige documentatie: [Compressie-engines — MCP-toegankelijkheidsboomfilter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Configuratie: `compression.mcpAccessibility` in globale instellingen (migratie 056). Implementatie: `open-sse/services/compression/engines/mcpAccessibility/`. Volledige documenten: [Compressie-engines — MCP Toegankelijkheidsboomfilter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Zie [Compressie-engines](../compression/COMPRESSION_ENGINES.md) en [RTK-compressie](../compression/RTK_COMPRESSION.md) voor
-het runtimecompressiemodel achter deze tools.
+Zie [Compressie-engines](../compression/COMPRESSION_ENGINES.md) en [RTK -compressie](../compression/RTK_COMPRESSION.md) voor het runtime-compressiemodel achter deze tools.
 
 ## 1Proxy-tools (3)
 

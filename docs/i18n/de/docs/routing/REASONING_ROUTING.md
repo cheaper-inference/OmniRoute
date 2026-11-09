@@ -33,17 +33,17 @@ Eine `connection`-Regel wird nur ausgewertet, wenn keine frühe Regel gewonnen h
 
 ## Aufwand und Budget
 
-`sourceEffort` akzeptiert `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` und `ultra`. `missing` bedeutet, dass die Anfrage weder einen diskreten Aufwand noch einen Thinking-Schalter oder ein Thinking-Budget enthält. Ein ausschließliches Budgetsignal wird daher nur von `any` erfasst.
+`sourceEffort` akzeptiert `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` und `ultra`. `missing` bedeutet, dass die Anfrage weder einen diskreten Aufwand noch eine Denkumschaltung oder ein Denkbudget enthält. Ein Nur-Budget-Signal wird daher nur von `any` abgeglichen.
 
 `effortMode` hat drei Varianten:
 
-- `inherit` behält den Aufwand des Clients bei, erlaubt aber weiterhin eine Änderung des Modells oder der Combo.
-- `default` setzt `targetEffort` nur, wenn kein explizites Reasoning-Signal vorhanden ist.
+- `inherit` behält den Aufwand des Kunden bei und lässt gleichzeitig zu, dass sich das Modell oder die Kombination ändert.
+- `default` setzt `targetEffort` nur, wenn kein explizites Argumentationssignal vorhanden ist.
 - `force` ersetzt den diskreten Aufwand durch `targetEffort`.
 
-Unabhängig davon kann `budgetAction` den Wert `preserve`, `remove` oder `set` haben. `force` mit `none` entfernt alle erkannten Aufwands- und Budgetfelder. `none` zusammen mit `set` ist ungültig.
+Unabhängig davon kann `budgetAction` `preserve`, `remove` oder `set` sein. `force` mit `none` entfernt alle erkannten Aufwands- und Budgetfelder und setzt dann `reasoning_effort: "none"`, da einige Anbieter das Denken einschalten, wenn das Feld fehlt. Anbieter, die das Literal `none` ablehnen, werden beim Versand in `open-sse/executors/base/reasoningEffort.ts` angepasst. Der Befehlscode ordnet es `low` zu, außer bei antwortförmigen Anforderungen (`input` ohne `messages`), wo `none` beibehalten wird. Auf Cloudflare Workers AI (`cloudflare-ai`) erhalten die Modelle, die `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) ablehnen `low`; Andere Workers AI Modelle behalten `none`. Das Löschen des Feldes ist dort keine Option, da bei fehlendem Aufwand die Standardebene des Modells ausgeführt wird. `none` zusammen mit `set` ist ungültig.
 
-Anfragen an bekanntermaßen inkompatible Modelle werden vor dem Upstream-Aufruf abgelehnt. Bei Combo-Zielen werden inkompatible Einträge entfernt; wenn keine Einträge übrig bleiben, gibt die Anfrage den Status `400` zurück. Unbekannte Fähigkeitsdaten erzeugen eine Warnung und lassen die Regel aktiv.
+Anfragen, die auf bekanntermaßen inkompatible Modelle abzielen, werden vor dem Upstream-Aufruf abgelehnt. Bei Combo-Zielen werden inkompatible Einträge entfernt; Wenn keine übrig bleiben, gibt die Anfrage den Status `400` zurück. Unbekannte Fähigkeitsdaten erzeugen eine Warnung und lassen die Regel aktiv.
 
 ## Sicherheit und Übertragungswege
 

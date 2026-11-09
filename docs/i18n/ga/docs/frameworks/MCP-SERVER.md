@@ -16,29 +16,24 @@ Tá OmniRoute MCP ionsuite. Tosaigh é le:
 omniroute --mcp
 ```
 
-Nó tríd an iompar open-sse:
+Nó tríd an iompar sse oscailte:
 
 ```bash
-# Iompar HTTP insruthaithe (port 20130)
-omniroute --dev  # Tosaíonn MCP go huathoibríoch ar an gcríochphointe /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Bíonn na hiompair HTTP (`sse` / `streamable-http`, arna soláthar laistigh den phróiseas ag freastalaí an deais)
-díchumasaithe de réir réamhshocraithe agus roimhe seo níorbh fhéidir iad a scoránú ach ón leathanach `/dashboard/mcp`. Ó v3.8.51 ar aghaidh
-tá na cumais chéanna ag an CLI:
+Tá na hiompair HTTP (`sse` / `streamable-http`, a bhfreastalaíonn an freastalaí deais orthu in-phróiseála) múchta de réir réamhshocraithe agus ní raibh siad in ann ach scoránaigh ón leathanach `/dashboard/mcp` amháin roimhe seo. Mar v3.8.51 tá paireacht ag an CLI :
 
 ```bash
-omniroute mcp status                                  # cumasaithe/ar líne, iompar, líon uirlisí
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # athshocraíonn sé seisiúin ghníomhacha sse/streamable-http
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-Déanann `mcp enable`/`mcp disable` iarratas PATCH ar an socrú céanna `mcpEnabled` (agus, go roghnach, `mcpTransport`)
-a scoránaíonn an deais trí `/api/settings`. Glaonn `mcp restart` ar `POST /api/mcp/restart`: dúnann sé
-seisiúin ghníomhacha `sse`/`streamable-http` ionas go n-ath-thúsaítear go glan iad leis an gcéad iarratas eile, seolann sé
-`409` ar ais má tá MCP díchumasaithe, agus `501` don iompar `stdio` (is leis na cliaint stdio a bhfo-phróiseas
-féin — níl aon hanla laistigh den phróiseas ann lena atosú).
+`mcp enable`/`mcp disable` PATCH an `mcpEnabled` céanna (agus go roghnach `mcpTransport`) ag socrú an deais scoránaigh trí `/api/settings`. glaonna `mcp restart` `POST /api/mcp/restart`: deora sé síos seisiúin `sse`/`streamable-http` gníomhach agus mar sin ath-thionscnaíonn an chéad iarratas eile go glan, filleann `409` má tá MCP díchumasaithe, agus `501` le haghaidh an iompair `stdio` (tá a bhfophróiseas féin ag cliaint stdio — níl aon láimhseáil in-phróiseas le atosú).
 
 ## Iompar
 
@@ -133,54 +128,40 @@ Cursor, Cline, agus socrú cliaint MCP comhoiriúnach.
 
 ## Uirlisí Comhbhrú (13)
 
-| Uirlis                              | Scóip               | Cur Síos                                                                                                                                           |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Socruithe comhbhrú, achoimre anailísíochta, agus staitisticí feasach-taisce (ionchuimsíonn sé meiteashonraí `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Cumraigh modh comhbhrú, tairseach, cóimheas sprice, caomhnú córas-leid, scorán comhbhrú tuairisc MCP                                               |
-| `omniroute_set_compression_engine`  | `write:compression` | Roghnaigh an t-inneall gníomhach (off/caveman/rtk/stacked) agus déine Caveman/RTK                                                                  |
-| `omniroute_list_compression_combos` | `read:compression`  | Liostaigh combos comhbhrú ainmnithe agus a bpíblínte innill                                                                                        |
-| `omniroute_compression_combo_stats` | `read:compression`  | Anailísíocht grúpáilte de réir combo comhbhrú agus innill                                                                                          |
-| `omniroute_ccr_store`               | `write:compression` | Stóráil ábhar aonraithe-ghlaoiteora sa stóras CCR cuimhne-teoranta agus fill marcóir móide tagairt `ccr://`                                        |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Aisghabh ábhar CCR go hiomlán nó le modhanna ceann, eireaball, línte, grep, agus staitisticí                                                       |
-| `omniroute_ccr_inspect`             | `read:compression`  | Scrúdaigh meiteashonraí CCR úinéireachta-ghlaoiteora gan ábhar a thabhairt ar ais                                                                  |
-| `omniroute_ccr_list`                | `read:compression`  | Liostaigh meiteashonraí págánaithe do bhlocanna CCR úinéireachta-ghlaoiteora                                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | Scrios bloc CCR úinéireachta-ghlaoiteora                                                                                                           |
-| `omniroute_ccr_stats`               | `read:compression`  | Tuairiscigh úsáid chuimhne scóip-ghlaoiteora, cuntair shaolré, agus teorainneacha stórais                                                          |
-| `omniroute_rtk_discover`            | `read:compression`  | Faigh amach torann athfhillteach i samplaí aschuir RTK rogha-iontrála                                                                              |
-| `omniroute_rtk_learn`               | `read:compression`  | Gine dréacht scagaire RTK in-athbhreithnithe ó shamplaí rogha-iontrála                                                                             |
+| Uirlis                              | Scóip               | Cur síos                                                                                                                                                     |
+| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Socruithe comhbhrú, achoimre anailísíochta, agus staitisticí ar an eolas faoi thaisce (lena n-áirítear meiteashonraí `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Cumraigh mód comhbhrú, tairseach, cóimheas sprice, caomhnú pras córais, scorán comhbhrú tuairisc MCP                                                         |
+| `omniroute_set_compression_engine`  | `write:compression` | Roghnaigh an t-inneall gníomhach (off/caveman/rtk/stacked) agus an déine Caveman/RTK                                                                         |
+| `omniroute_list_compression_combos` | `read:compression`  | Liostaigh combos comhbhrú ainmnithe agus a bpíblínte innill                                                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analytics grúpáilte de réir teaglama comhbhrú agus inneall                                                                                                   |
+| `omniroute_ccr_store`               | `write:compression` | Stóráil inneachar atá aonraithe ag an nglaoiteoir sa stór CCR i gcuimhne ar an teorainn agus seol ar ais marcóir móide tagairt `ccr://`                      |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Aisghabh ábhar CCR ina iomláine nó le modhanna cloigne, eireaball, línte, grep, agus stats                                                                   |
+| `omniroute_ccr_inspect`             | `read:compression`  | Iniúchadh meiteashonraí CCR atá faoi úinéireacht an ghlaoiteora gan inneachar a sheoladh ar ais                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | Liostaigh meiteashonraí uimhrithe maidir le bloic CCR atá faoi úinéireacht an ghlaoiteora                                                                    |
+| `omniroute_ccr_delete`              | `write:compression` | Scrios bloc CCR atá faoi úinéireacht an ghlaoiteora                                                                                                          |
+| `omniroute_ccr_stats`               | `read:compression`  | Tuairiscigh úsáid chuimhne a bhfuil scóip an té a ghlaoigh uirthi, cuntair saolré, agus teorainneacha stórais                                                |
+| `omniroute_rtk_discover`            | `read:compression`  | Faigh amach torann athfhillteach i samplaí aschuir RTK rogha an diúltaithe                                                                                   |
+| `omniroute_rtk_learn`               | `read:compression`  | Gin dréacht scagaire RTK inathbhreithnithe ó shamplaí rogha an diúltaithe                                                                                    |
 
-Níl iontrálacha CCR ach i gcuimhne agus imíonn siad ar atosú. Tá gach bloc teoranta do 2 MiB, gach
-príomh-áiritheoir go 16 MiB, agus an stóras domhanda go 64 MiB. Is é 24 uair an TTL réamhshocraithe
-d'iontrálacha (uasmhéid seacht lá). Tá aisghabháil iomlán MCP teoranta do 256 KiB; fanann bloic níos mó
-ar fáil trí na modhanna raon agus grep. Tá stóráil, aisghabháil, liostú, cigireacht, scriosadh, agus
-staitisticí aonraithe ag príomh-áiritheoir eochair-API fíordheimhnithe. Tá hashes agus meiteashonraí
-méide in iontrálacha iniúchta, riamh ábhar.
+Úsáideann iontrálacha CCR stór dhá chiseal: sraith te i gcuimhne le tacaíocht, ar amanna rite neamh-scamall áitiúil, ag sraith durable SQLite (`ccr_blocks`, ar aghaidh de réir réamhshocraithe) mar sin maireann bloc díshealbhú nó atosú go dtí go n-imíonn a TTL amach — ach amháin bloic os cionn 512 KB agus amanna rite scamall, a fhanann cuimhne-amháin. Tá gach bloc teoranta do 2 MiB, gach príomhoide go 16 MiB, agus an siopa domhanda go 64 MiB. Réamhshocrú iontrálacha chuig TTL 24 uair an chloig (seacht lá ar a mhéad). Tá aisghabháil iomlán MCP teoranta do 256 KiB; tá bloic níos mó fós ar fáil trí na modhanna raoin agus grep. Tá stóráil, aisghabháil, liostú, cigireacht, scriosadh agus staitisticí aonraithe ag an bpríomhoide API-eochair fhíordheimhnithe. Tá hashes agus meiteashonraí méide i dtaifid iniúchta, ní ábhar iad. Tá sonraí os comhair an oibreora (an dá mharcóir, réamhriachtanais an chliaint, `codemode:false`, scóip in aghaidh an uirlis, uimhriú, agus maitrís dhiagnóiseach) ina gcónaí in [Innill Chomhbhrú → Réamhriachtanais / treoir oibreora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-Tuairiscíonn `omniroute_compression_status` comhbhrú tuairisc MCP ar leithligh faoi
-`analytics.mcpDescriptionCompression`. Is meastacháin mhéid-mheiteashonraí iad na luachanna sin do
-thuairiscí inliostaithe MCP (`tools`, `prompts`, `resources`, agus `resourceTemplates`); ní
-admhálacha úsáide soláthróra iad agus tá siad marcáilte le `source: "mcp_metadata_estimate"`.
+tuairiscíonn `omniroute_compression_status` comhbhrú tuairisc MCP ar leithligh faoi `analytics.mcpDescriptionCompression`. Is meastacháin ar mhéid meiteashonraí iad na luachanna sin le haghaidh tuairiscí inliostaithe MCP (`tools`, `prompts`, `resources`, agus `resourceTemplates`); ní admhálacha úsáide soláthraithe iad agus tá siad marcáilte le `source: "mcp_metadata_estimate"`.
 
-### Scagaire Crann Inrochtaineachta MCP (v3.8.0)
+### MCP Scagaire Crann Inrochtaineachta (v3.8.0)
 
-Ar leithligh ó na huirlisí comhbhrú thuas, ionchuimsíonn OmniRoute scagaire iar-fhorghníomhaithe a
-chomhbhrúíonn **torthaí uirlisí** na n-uirlisí brabhsálaí/inrochtaineachta MCP sula dtuigtear iad don
-ghníomhaire. Ní uirlis é an scagaire seo féin — ritheann sé go trédhearcach ar aon toradh uirlise a
-ionchuimsíonn téacs crann-inrochtaineachta nó scáthán-brabhsálaí foclach (≥2000 carachtar).
+Ar leithligh ó na huirlisí comhbhrú thuas, folaíonn OmniRoute scagaire iar-fhorghníomhaithe a chomhbhrúigh an** torthaí uirlisí** na n-uirlisí MCP browser/accessibility sula gcuirtear ar ais chuig an ngníomhaire iad. Ní uirlis é an scagaire seo féin — ritheann sé go trédhearcach ar aon toradh uirlise ina bhfuil téacs inrochtaineachta briathartha nó téacs brabhsálaí (≥ 2000 chars).
 
 Príomh-iompraíochtaí:
 
-- Comhthiteann ≥30 líne deirfiúr athfhillteach as a chéile in achoimre ceann + eireaball
+- Laghdaíonn ≥ 30 líne siblín as a chéile arís agus arís eile go hachomair eireaball ceann +
 - Caomhnaíonn sé ancairí `[ref=eXX]` a theastaíonn ó Playwright/computer-use
-- Gearrann sé go crua téacs an-mhór (>50,000 carachtar) le leid loingseoireachta
-- Coigilteas ionchais: **60–80%** ar ualaí scáthán-brabhsálaí
+- Téacs atá ró-mhór le teascán crua (> 50,000 charn) le leid loingseoireachta
+- Coigilteas ionchais:** 60–80%** ar uaslódálacha seat brabhsálaí
 
-Cumraíocht: `compression.mcpAccessibility` i socruithe domhanda (imirce 056).
-Cur i bhfeidhm: `open-sse/services/compression/engines/mcpAccessibility/`.
-Doiciméid iomlána: [Innill Chomhbhrú — Scagaire Crann Inrochtaineachta MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Cumraíocht: `compression.mcpAccessibility` i suíomhanna domhanda (imirce 056). Cur i bhfeidhm: `open-sse/services/compression/engines/mcpAccessibility/`. Doiciméid iomlána: [Innill Chomhbhrú — MCP Inrochtaineacht Crann Scagaire](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Féach [Innill Chomhbhrú](../compression/COMPRESSION_ENGINES.md) agus [Comhbhrú RTK](../compression/RTK_COMPRESSION.md) le haghaidh
-an tsamhail chomhbhrú rite atá taobh thiar de na huirlisí seo.
+Féach [Innill Chomhbhrú](../compression/COMPRESSION_ENGINES.md) agus [Comhbhrú RTK](../compression/RTK_COMPRESSION.md) le haghaidh an tsamhail chomhbhrú ama rite taobh thiar de na huirlisí seo.
 
 ## Uirlisí 1Proxy (3)
 

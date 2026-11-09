@@ -31,19 +31,19 @@ Laajuuden sisällä suurempi `priority` voittaa ensin, minkä jälkeen mallin ta
 
 `connection`-sääntö arvioidaan vain, jos mikään varhainen sääntö ei voittanut ja konkreettinen palveluntarjoajayhteys on jo valittu. Se voi muuttaa vain päättelyn tasoa ja budjettia.
 
-## Päättelyn taso ja budjetti
+## Pyrkimys ja budjetti
 
-`sourceEffort` hyväksyy arvot `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ja `ultra`. `missing` tarkoittaa, ettei pyyntö sisällä erillistä päättelyn tasoa, ajattelun valintaa eikä ajattelubudjettia. Siksi pelkkä budjettisignaali vastaa vain arvoa `any`.
+`sourceEffort` hyväksyy `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ja `ultra`. `missing` tarkoittaa, että pyyntö ei sisällä erillistä ponnistusta eikä ajattelun vaihtokytkintä tai ajattelubudjettia. Pelkästään budjetin signaalia vastaa siis vain `any`.
 
-`effortMode`-asetuksella on kolme vaihtoehtoa:
+`effortMode` on kolme versiota:
 
-- `inherit` säilyttää asiakkaan päättelyn tason, mutta sallii silti mallin tai yhdistelmän vaihtamisen.
-- `default` asettaa arvon `targetEffort` vain, kun nimenomaista päättelysignaalia ei ole.
-- `force` korvaa erillisen päättelyn tason arvolla `targetEffort`.
+- `inherit` pitää asiakkaan vaivan, mutta sallii mallin tai yhdistelmän muuttua.
+- `default` asettaa `targetEffort` vain, kun eksplisiittistä päättelysignaalia ei ole.
+- `force` korvaa diskreetin ponnistuksen `targetEffort`:llä.
 
-Tästä riippumatta `budgetAction` voi olla `preserve`, `remove` tai `set`. Yhdistelmä `force` ja `none` poistaa kaikki tunnistetut päättelyn taso- ja budjettikentät. Arvon `none` käyttäminen yhdessä arvon `set` kanssa ei ole sallittua.
+Itsenäisesti `budgetAction` voi olla `preserve`, `remove` tai `set`. `force` ja `none` poistaa kaikki tunnistetut työ- ja budjettikentät ja asettaa sitten `reasoning_effort: "none"`, koska jotkut palveluntarjoajat käynnistävät ajattelun, kun kenttä puuttuu. Palveluntarjoajat, jotka hylkäävät kirjaimellisen `none`, mukautetaan lähettämisen yhteydessä `open-sse/executors/base/reasoningEffort.ts` muodossa. Komentokoodi kartoittaa sen arvoon `low`, paitsi vastausmuotoisissa pyynnöissä (`input` ilman `messages`), jossa se säilyttää `none`. Cloudflare Workers AI ssa (`cloudflare-ai`) mallit, jotka hylkäävät `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), saavat `low`; muut työntekijät AI mallit pitävät `none`. Kentän pudottaminen ei ole vaihtoehto, koska poissa oleva toiminto suorittaa mallin oletustason. `none` yhdessä `set` kanssa on virheellinen.
 
-Tunnetusti epäyhteensopiviin malleihin kohdistuvat pyynnöt hylätään ennen ylävirran kutsua. Yhdistelmäkohteista poistetaan epäyhteensopivat kohteet. Jos yhtään ei jää jäljelle, pyyntö palauttaa tilan `400`. Tuntemattomat ominaisuustiedot tuottavat varoituksen, ja sääntö pysyy aktiivisena.
+Tunnettuihin yhteensopimattomiin malleihin kohdistuvat pyynnöt hylätään ennen ylävirran puhelua. Yhdistelmäkohteiden yhteensopimattomat merkinnät poistetaan. jos niitä ei ole jäljellä, pyyntö palauttaa tilan `400`. Tuntemattomat ominaisuudet tuottavat varoituksen ja jättävät säännön aktiiviseksi.
 
 ## Tietoturva ja siirtotavat
 

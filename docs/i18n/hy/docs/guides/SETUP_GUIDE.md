@@ -191,41 +191,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Արձանագրությունների կարգավորում (MCP + A2A)
+## Արձանագրության կարգավորում (MCP + A2A)
 
-### MCP-ի կարգավորում (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Գործարկեք MCP փոխադրումը stdio ռեժիմով.
+Սկսեք MCP տրանսպորտը stdio ռեժիմում.
 
 ```bash
 omniroute --mcp
 ```
 
-Առաջարկվող վավերացման ընթացքը.
+Առաջարկվող վավերացման հոսք.
 
 ```bash
-# 1. Գործարկեք MCP սերվերը
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Ձեր MCP հաճախորդից կանչեք՝
-omniroute_get_health        # Պետք է վերադարձնի համակարգի առողջական վիճակը
-omniroute_list_combos       # Պետք է վերադարձնի ակտիվ համակցությունները
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Կամ գործարկեք ամբողջական E2E թեստային փաթեթը՝
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP հաճախորդի կազմաձևում
+#### MCP Client Configuration
 
-**Claude Code:**
+**Claude Կոդ:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Ավելացրեք ձեր MCP կարգավորումներին.
+Ավելացրեք ձեր MCP կարգավորումներին (stdio, ստեղնով, որպեսզի զանգահարողն ունենա հիմնական տնօրեն).
 
 ```json
 {
@@ -233,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ի ամբողջական փաստաթղթեր:** [MCP սերվերի README](../../open-sse/mcp-server/README.md) — 110 գործիք, IDE կազմաձևեր, Python/TS/Go հաճախորդներ:
+Կամ, երբ `mcpTransport` `streamable-http` է (այն սահմանեք `/dashboard/mcp` կամ `omniroute mcp enable --transport streamable-http` վրա), ուղղեք հաճախորդի հեռավոր MCP սերվերի մուտքագրումը `http://localhost:20128/api/mcp/stream` վրա:
 
-### A2A-ի կարգավորում (գործակալից գործակալ արձանագրություն)
+Բանալին շարժվում է որպես `Authorization: Bearer <api-key>` (տե՛ս [MCP Server → Հեռակա մուտքի հնարավորություն](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) հեռավոր հոսթերների համար. հեռակառավարվող ստեղնին անհրաժեշտ է `mcp:connect` և դրա read/write շրջանակները):
 
-Ստուգեք Agent Card-ը.
+**Ամբողջական MCP փաստաթղթերը.** [MCP սերվեր README](../../open-sse/mcp-server/README.md) — 110 գործիքներ, IDE կազմաձևեր, Python/TS/Go հաճախորդներ: Օպերատորի տեղեկանք սեղմման CCR/dedup գործիքների համար (մարկերներ, նախադրյալներ, յուրաքանչյուր գործիքի շրջանակներ, որոնման էջավորում, ախտորոշում). [Կոմպրեսիոն շարժիչներ → Նախադրյալներ / օպերատորի ուղեցույց](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) :
+
+### A2A կարգավորում (գործակալից գործակալի արձանագրություն)
+
+Ստուգեք գործակալի քարտը.
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Ուղարկեք առաջադրանք.
+Ուղարկել առաջադրանք.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ի ամբողջական փաստաթղթեր:** [A2A սերվերի README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսքային փոխանցում, առաջադրանքի կենսափուլ:
+**Ամբողջական A2A փաստաթղթերը.** [A2A սերվեր README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, հմտություններ, հոսք, առաջադրանքի կյանքի ցիկլ:
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ի (xbps-src) ձևանմուշ
+## Void Linux (xbps-src) Կաղապար
 
-Void Linux-ի օգտատերերը կարող են ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`-ը։ Պահեք այս բլոկը որպես `srcpkgs/omniroute/template`․
+Void Linux օգտատերերի համար դուք կարող եք ստեղծել բնիկ փաթեթ՝ օգտագործելով `xbps-src`: Պահպանեք այս բլոկը որպես `srcpkgs/omniroute/template`.
 
 ```bash
-# 'omniroute'-ի ձևանմուշային ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Յուրաքանչյուր թողարկման համար checksum-ը վերաստեղծեք հետևյալ հրամանով․
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -139,17 +139,17 @@ operátor be nem kapcsolja (`src/server/auth/dashboardMfa.ts`).
   3. A Beállítások → Biztonság → Letiltás alatt adja meg a jelszót, és hagyja üresen a kódot. A `POST /api/auth/mfa/disable` csak akkor fogad el `code` nélküli törzset, amikor a változó be van állítva, és a kérés a gazdagépről érkezik; továbbra is megköveteli a vezérlőpult-munkamenetet és az aktuális jelszót, és `auth.mfa.disabled` eseményként naplózza `secondFactor: "recovery_switch"` értékkel.
   4. Szüntesse meg a `OMNIROUTE_DISABLE_MFA` beállítását, indítsa újra, és szükség esetén végezze el újra a regisztrációt.
 
-## Útvonalosztályok
+## Útvonal osztályok
 
-A `src/server/authz/types.ts` három osztályt határoz meg. Minden olyan útvonal, amelyet nem lehet determinisztikusan besorolni, a `MANAGEMENT` osztályba kerül.
+`src/server/authz/types.ts` három osztályt határoz meg; minden olyan útvonal, amelyet nem lehet determinisztikusan besorolni, `MANAGEMENT` re esik vissza.
 
-| Osztály      | Leírás                                                                                                                                                          | Szükséges hitelesítés                                                           |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `PUBLIC`     | Kifejezetten biztonságos útvonalak — bejelentkezés, kijelentkezés, állapot, inicializálás, állapotellenőrzés és a beállítás kezdeti végpontjai.                 | Nincs                                                                           |
-| `CLIENT_API` | Modellkiszolgáló végpontok — `/api/v1/*`, `/api/v1beta/*`, valamint az aliasok: `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-kulcs, ha az effektív `REQUIRE_API_KEY` funkciókapcsoló be van kapcsolva |
-| `MANAGEMENT` | Irányítópult-oldalak, beállítások, szolgáltatók, kulcsok, adminisztrációs és diagnosztikai végpontok.                                                           | Irányítópult-munkamenet VAGY Bearer `manage` hatókörrel                         |
+| Osztály      | Leírás                                                                                                                                                      | Hitelesítés szükséges                                                             |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `PUBLIC`     | Kifejezetten biztonságos útvonalak — bejelentkezés, kijelentkezés, állapot, állapot, onboarding bootstrap.                                                  | Egyik sem                                                                         |
+| `CLIENT_API` | Modellkiszolgáló végpontok — `/api/v1/*`, `/api/v1beta/*`, valamint `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` álnevek. | Adathordozó kulcs, ha az effektív `REQUIRE_API_KEY` funkciójelző engedélyezve van |
+| `MANAGEMENT` | Irányítópult-oldalak, beállítások, szolgáltatók, kulcsok, adminisztrátori és diagnosztikai végpontok.                                                       | Műszerfali munkamenet OR Bearer `manage` hatókörrel                               |
 
-Néhány `MANAGEMENT` művelet **kizárólag operátor** által végezhető: a `manage` kulcs ehhez nem elég. A hitelesítő adatok exportálása (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), visszaállítás az élő adatok fölé (`POST /api/db-backups/import`, beleértve a `dryRun=true` változatot, `POST /api/db-backups` azonosító szerinti visszaállítás, `POST /api/settings/import-json`), a visszaállítási pontok megsemmisítése (`DELETE /api/db-backups` takarítás, és `PATCH /api/db-backups`, mert az általa mentett megőrzési idő vezérli minden mentés utáni automatikus törlést) irányítópult-munkamenetet, a helyi CLI alanyt vagy a letiltott bejelentkezést követeli meg. Szinkronizációs token kiállítása (`POST /api/sync/tokens`) és `admin` CLI hozzáférési token létrehozása (`POST /api/cli/tokens`) minden bejelentkezési módban irányítópult-munkamenetet vagy a helyi CLI alanyt igényel. Bármely hatókörű API-kulcs és `oma_` hozzáférési token nem operátori hitelesítő adat: ha ilyet kell megadni, `403`-at kapnak. Az ellenőrzés a `src/lib/api/operatorCredential.ts` fájlban van (`resolveOperatorCredential()` / `requireOperatorCredential()`). A bejelentkezési beállítások módosítása is kizárólag operátori feladat: a `POST /api/settings/require-login` (kezelési jelszó beállítása / `requireLogin` átkapcsolása) jelszó megléte után csak ezekkel a hitelesítő adatokkal fogadja el a kérést. Az első indításkori bootstrap ablak (még nincs jelszó) változatlan marad, a jelszó cseréjéhez pedig az irányítópult-munkamenetnek el kell küldenie a `currentPassword` mezőt (hiány vagy hibás érték esetén `403`, `settings.update_failed` eseményként naplózva). A helyi CLI és a bejelentkezés nélküli példány megőrzi a helyreállítási utat, és jelszót jelszó nélkül is állíthat be, mert mindkettő ahhoz a géphez van kötve, amelyen az adatkönyvtár található.
+Néhány `MANAGEMENT` akció van** csak kezelő számára** : egy `manage` kulcs nem elég. Tárolt hitelesítő adatok exportálása (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), biztonsági mentés visszaállítása az élő adatokon keresztül (`POST /api/db-backups/import` beleértve `dryRun=true`, `POST /api/db-backups` visszaállítást id alapján , `POST /api/settings/import-json`), a visszaállítási pontok megsemmisítése (`DELETE /api/db-backups` tisztítás és `PATCH /api/db-backups`, mert az általa megkövetelt megőrzés minden da automatikus biztonsági mentés után meghajtja az da automatikus prsh lapot) CLI tárgy, vagy a bejelentkezés letiltva. A szinkronizálási token (`POST /api/sync/tokens`) kiadásához és a `admin` CLI hozzáférési jogkivonat (`POST /api/cli/tokens`) elkészítéséhez minden bejelentkezési módban szükség van egy műszerfali munkamenetre vagy a helyi CLI alanyra. A tetszőleges hatókörű API kulcsok és `oma_` hozzáférési jogkivonatok nem operátori hitelesítési adatok: `403` kapnak, amikor szükség van rá. A csekk `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) él. A bejelentkezési beállítások módosítása is csak a kezelő által történik: `POST /api/settings/require-login` (a felügyeleti jelszó beállítása / `requireLogin` váltás) csak azokat a hitelesítő adatokat fogadja el, ha már létezik jelszó — az első futtatási rendszerindítási ablak (még nincs jelszó) változatlan — és a műszerfali munkamenetnek el kell küldenie a `currentPassword` a jelszó cseréjéhez (`403`, audited hiányzik, mint `settings.update_failed`). A helyi CLI és a letiltott bejelentkezési példány megtartja a helyreállítási útvonalat, és e nélkül is beállíthat jelszót, mivel mindkettő az adatkönyvtárat birtokló gazdagéphez van kötve.
 
 ## Folyamat
 
@@ -183,49 +183,47 @@ A sikeres házirend `AuthSubject` értéket ad vissza, amelynek `kind ∈ { clie
 
 ## Nyilvános útvonalak listája
 
-A `src/shared/constants/publicApiRoutes.ts` fájl tartalmazza a kifejezett engedélyezési listát:
+`src/shared/constants/publicApiRoutes.ts` az explicit engedélyezési lista:
 
-A lista **struktúra** szerint van felosztva, és ez a felosztás biztonsági szempontból lényeges (GHSA-74g9-q8f6-793h): az előtag ellenőrzése a `startsWith()` használatával történik, ezért minden olyan szomszédos útvonalra is illeszkedik, amely ugyanazokkal a kezdő karakterekkel rendelkezik.
-A `/api/usage/om-usage` előtagként `/api/usage/om-usage<anything>` értéket PUBLIC-ként jelöli, a Next pedig ezt `/api/usage/[connectionId]` értékre oldja fel — ez egy saját hitelesítéssel nem rendelkező kezelő.
+A lista fel van osztva** alak** , és a felosztás teherhordó (GHSA-74g9-q8f6-793h): az előtag illeszkedik `startsWith()`-be, így minden szomszédos útvonalat is illeszt, amely megosztja a vezető karaktereit. `/api/usage/om-usage` előtagként `/api/usage/om-usage<anything>` PUBLIC jelölésű, és a Next feloldja, hogy `/api/usage/[connectionId]` — egy saját hitelesítés nélküli kezelőt.
 
 ```ts
-// Valódi részfák. Minden bejegyzésnek "/" karakterre KELL végződnie (ezt egy egységteszt ellenőrzi).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // a classify CLIENT_API-ként kezeli, nem „hitelesítés nélküli nyilvános” útvonalként
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Egyedi útvonalak, amelyek illesztése PONTOSAN történik (záró perjellel vagy anélkül).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // bejelentkezési folyamat 2. lépése az opcionális TOTP esetén; szüksége van az MFA-pending cookie-ra
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Csak olvasható egyedi útvonalak, amelyekre a CORS origin lazítása is vonatkozik.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Csak olvasható egyedi útvonal, amelyre NEM vonatkozik a CORS lazítása.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-A csak olvasható útvonalak kizárólag biztonságos metódusokkal nyilvánosak. Megjegyzés: a `classifyRoute()` kizárja a `/api/v1/*` és `/api/v1beta/*` útvonalakat a PUBLIC tartalékágából — ezek mindig `CLIENT_API` értékűek, így rájuk továbbra is vonatkozik a Bearer-kulcs szabályzata.
+A csak olvasható útvonalak nyilvánosak** csak** biztonságos módszerekért. Megjegyzés: `classifyRoute()` kizárja `/api/v1/*` és `/api/v1beta/*` a PUBLIC áteső — ből, ezek mindig `CLIENT_API`, így a Kulcshordozó-szabályzat továbbra is érvényes.
 
 ## Új útvonal hozzáadása
 
@@ -307,15 +305,15 @@ Ez kikapcsolva marad, hacsak az `OMNIROUTE_MCP_ENFORCE_SCOPES=true` nincs beáll
 hozzáférési token hitelesítő adatokra vonatkozik. Lásd:
 [Kezelési hitelesítés](../guides/MANAGEMENT-AUTH.md).
 
-## Hitelesítés-kötelezőség kapcsoló
+## Auth Required kapcsoló
 
-Az `isAuthRequired()` a `src/shared/utils/apiAuth.ts` fájlban dönti el, hogy egy kérésnél érvényesül-e **bármilyen** hitelesítés:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` ben dönti el, hogy** bármilyen** a hitelesítés érvényesítve egy kérésre:
 
-- `settings.requireLogin === false` → a hitelesítés globálisan ki van kapcsolva, kivéve az mindig védett szintet (lásd: [Útvonalvédelmi szintek](../security/ROUTE_GUARD_TIERS.md)), valamint azokat a hívásokat, amelyek olyan hitelesítő adatot állítanak ki, amelyet a rendszer elfogad. Ezekhez ugyanaz a hitelesítő adat kell, mint bejelentkezéssel: szinkronizációs tokenek kiállítása, CLI hozzáférési tokenek kiállítása bármilyen hatókörrel, valamint `manage`/`admin` hatókörű API-kulcs létrehozása, ilyen hatókör megadása egy kulcsnak, vagy ilyen kulcs újragenerálása és megjelenítése (`requireCredentialForManagementScopedKey()` a `src/lib/api/requireManagementAuth.ts` fájlban). A következtetési célú kulcsok nyitva maradnak.
-- Nincs jelszó beállítva **és** nincs `INITIAL_PASSWORD` környezeti változó → bootstrap mód: a beállító varázsló és a loopback kérések engedélyezettek, de a külső hálózati kéréseknek továbbra is hitelesítő adat kell.
-- Bármilyen adatbázis-hiba → zárt állapot (biztonságos alapértelmezés).
+- `settings.requireLogin === false` → hitelesítés globálisan le van tiltva, kivéve a mindig védett réteget (lásd: [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) és az általa elfogadott hitelesítő adatokat kiosztó hívásokat, amelyekhez ugyanaz a hitelesítő adat szükséges, mint a bejelentkezéskor: szinkronizálási tokenek kiadása, CLI hozzáférési jogkivonatok verése bármilyen hatókörben, és API `admin` megadása a `manage` hatókörhöz. kulcsot, vagy egy ilyen kulcsot újra generál vagy felfed (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). A csak következtetésre szolgáló kulcsok nyitva maradnak. A védett funkciójelzők (`REQUIRE_API_KEY`, a többi biztonsági jelző és a SSRF / TLS / MCP-scope / sandbox jelzők [a Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) részben felsorolt jelzők) írásához és a PII maszkolási beállítások (`PUT /api/settings/pii`) mentéséhez szintén szükség van hitelesítő adatokra.
+- Nincs beállítva jelszó** és** no `INITIAL_PASSWORD` env var → bootstrap mód lehetővé teszi a bekapcsolási varázslót és a visszahurkolási kérelmeket, de a nyílt hálózati kérésekhez továbbra is hitelesítő adatokra van szükség. Kivétel: a védett funkciójelző jelzőjének írásához és a PII maszkolási beállítások (`PUT /api/settings/pii`) mentéséhez még visszacsatolásból is kell egy hitelesítő adat, így a visszacsatolás önmagában nem elegendő.
+- Bármilyen DB hiba → sikertelen lezárása (alapértelmezés szerint biztonságos).
 
-Az ügyfél-API kulcs érvényesítése az `isRequireApiKeyEnabled()` függvényt használja a `src/shared/utils/featureFlags.ts` fájlban, nem közvetlenül a `process.env.REQUIRE_API_KEY` olvasását. Ez a telepített példányoknál fontos: a `REQUIRE_API_KEY` átkapcsolása az Irányítópult → Funkciókapcsolók menüben DB-felülírást tárol, és azonnal hat a `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` útvonalakra és a többi ügyfél-API hitelesítési ellenőrzésre, amelyek ezt a segédfüggvényt használják. Ha a funkciókapcsoló-tár nem olvasható, az ügyfél-API hitelesítés zárt állapotba kerül, és kulcsot kér.
+Az ügyfél API kulcsának végrehajtása `isRequireApiKeyEnabled()` használja `src/shared/utils/featureFlags.ts` ben, nem pedig a közvetlen `process.env.REQUIRE_API_KEY` olvasást. Ez fontos a telepített példányok esetében: `REQUIRE_API_KEY` átváltása az irányítópulton → Feature Flags tárolja a DB felülírást, és azonnal hatással van `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` és más ügyfél-API hitelesítési ellenőrzésekre, amelyek megosztják ezt a segítőt. Ha a szolgáltatásjelző tárolója nem olvasható, akkor a kliens API hitelesítése meghiúsul, és kulcsra van szükség.
 
 ## Inkompatibilis változás — v3.8.0
 

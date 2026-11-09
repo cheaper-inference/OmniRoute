@@ -19,8 +19,9 @@ omniroute --mcp
 Ili putem otvorenog transporta:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 HTTP transporti (`sse` / `streamable-http`, opslužuju se u procesu od strane servera kontrolne table) su podrazumevano isključeni i ranije su se mogli menjati samo sa `/dashboard/mcp` stranice. Od v3.8.51 CLI ima paritet:
@@ -133,7 +134,7 @@ Pogledajte [konfiguraciju MCP klijenta](../guides/SETUP_GUIDE.md#mcp-client-conf
 | `omniroute_set_compression_engine`  | `write:compression` | Odaberite aktivni motor (off/caveman/rtk/stacked) i Caveman/RTK intenzitet                                                             |
 | `omniroute_list_compression_combos` | `read:compression`  | Navedite imenovane kombinacije kompresije i njihove cijevi motora                                                                      |
 | `omniroute_compression_combo_stats` | `read:compression`  | Analitika grupirana po kombo kompresiji i motoru                                                                                       |
-| `omniroute_ccr_store`               | `write:compression` | Spremite sadržaj izolovan od pozivaoca u CCR skladište u ograničenoj memoriji i vratite marker plus `ccr://` referencu                 |
+| `omniroute_ccr_store`               | `write:compression` | Spremite sadržaj izolovan od pozivaoca u CCR skladište ograničene memorije i vratite marker plus `ccr://` referencu                    |
 | `omniroute_ccr_retrieve`            | `read:compression`  | Preuzmi CCR sadržaj u cijelosti ili s načinima glave, repa, linija, grep i statistike                                                  |
 | `omniroute_ccr_inspect`             | `read:compression`  | Pregledajte CCR metapodatke u vlasništvu pozivatelja bez vraćanja sadržaja                                                             |
 | `omniroute_ccr_list`                | `read:compression`  | Navedite paginirane metapodatke za CCR blokove u vlasništvu pozivatelja                                                                |
@@ -142,7 +143,7 @@ Pogledajte [konfiguraciju MCP klijenta](../guides/SETUP_GUIDE.md#mcp-client-conf
 | `omniroute_rtk_discover`            | `read:compression`  | Otkrijte ponavljajuću buku u izbornim RTK izlaznim uzorcima                                                                            |
 | `omniroute_rtk_learn`               | `read:compression`  | Generirajte nacrt RTK filtera koji se može pregledati iz uzoraka za odabir                                                             |
 
-CCR unosi su samo u memoriji i nestaju nakon ponovnog pokretanja. Svaki blok je ograničen na 2 MiB, svaki principal na 16 MiB, a globalno skladište na 64 MiB. Unosi su podrazumevani na 24-satni TTL (maksimalno sedam dana). Potpuno MCP preuzimanje je ograničeno na 256 KiB; veći blokovi ostaju dostupni putem rangiranih i grep modova. Skladištenje, preuzimanje, listanje, inspekcija, brisanje i statistika su izolirani od strane ovlaštenog principala API ključa. Revizijski zapisi sadrže hasheve i metapodatke o veličini, a nikada sadržaj.
+CCR unosi koriste dvoslojnu pohranu: vrući nivo u memoriji podržan, na lokalnim vremenima izvođenja bez oblaka, trajnim SQLite slojem (`ccr_blocks`, uključeno po defaultu), tako da blok preživljava izbacivanje ili ponovno pokretanje dok njegov TTL ne ponestane — osim blokova preko 512 KB koji ostaju u vremenu izvođenja u oblaku. Svaki blok je ograničen na 2 MiB, svaki principal na 16 MiB, a globalno skladište na 64 MiB. Unosi su podrazumevani na 24-satni TTL (maksimalno sedam dana). Potpuno MCP preuzimanje je ograničeno na 256 KiB; veći blokovi ostaju dostupni kroz ranged i grep modove. Skladištenje, pronalaženje, listanje, inspekcija, brisanje i statistika su izolirani od strane ovlaštenog principala API ključa. Revizijski zapisi sadrže hasheve i metapodatke o veličini, a nikada sadržaj. Detalji okrenuti operateru (dva markera, preduslovi klijenta, `codemode:false`, opseg po alatu, paginacija i dijagnostička matrica) žive u [Compression Engines → Preduslovi / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` prijavljuje kompresiju opisa MCP zasebno pod `analytics.mcpDescriptionCompression`. Te vrijednosti su procjene veličine metapodataka za MCP popisive opise (`tools`, `prompts`, `resources` i `resourceTemplates`); nisu priznanice o korištenju dobavljača i označene su sa `source: "mcp_metadata_estimate"`.
 

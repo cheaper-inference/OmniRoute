@@ -81,6 +81,18 @@ Ko da a wajen yankunan da aka toshe, proxies suna da amfani ga:
 
 ---
 
+## Tsohuwar jihar wakili don sababbin asusu
+
+A ciki** Saituna → Proxy → Tsarin Duniya** , amfani** Kunna wakili ta tsohuwa don sababbin haɗi** don zaɓar matsayin wakili na farko na sabbin ƙarin asusun mai ba da sabis.
+
+Sabon saitin yana sarrafa yanayin wakili na farko na sabbin asusun masu bada da aka ƙara. Ba ya canza asusu masu wanzuwa ko maye gurbin canjin wakili na duniya. Ƙimar farko ta tana kiyaye halayen da suka gabata. Kashe shi sau ɗaya don ƙirƙirar asusun nan gaba tare da kashe wakili ta tsohuwa.
+
+Ana adana zaɓin azaman `defaultNewConnectionProxyEnabled` ta cikin Saitunan da ke akwai API. Yana saɓawa zuwa `true` lokacin da ba a adana shi ba. Ajiye `false` yana aiki don sabbin asusu na gaba ba tare da sake farawa ba. `POST /api/providers` ya yarda da wani zaɓi na zaɓi mai tsauri `proxyEnabled`; bayyanannen `true` ko `false` yana ɗaukan fifiko akan tsohowar halitta. Ragewa akan kwafin asusu ko sake haɗin OAuth yana adana yanayin da aka adana asusu. Har yanzu ana iya kunna ko kashe asusun ɗaya bayan haka.
+
+Canja wurin mai ba da zaɓaɓɓu yana amfani da tsohowar shigarwar wurin da za a shigar don sababbin asusu da adana manufofin manufa lokacin da ake maye gurbin asusun da ke akwai. Toggles wakili ba filayen canja wuri ba ne. Cikakkun gyare-gyaren ajiyar ajiya da ƙaura JSON/SQL na tarihi suna riƙe da abubuwan da suka dace na maido da su, gami da ajiyayyun ƙimar asusu da gazawar tsarin gado; cikakken saituna mayar kuma zai iya mayar da wannan zaɓin.
+
+Wannan zaɓin baya sanya wakili ko tabbatar da cewa mutum yana da koshin lafiya ko ana amfani dashi. Haƙiƙan hanyar tuƙi har yanzu ya dogara da canjin wakili na duniya da daidaitawar wakili. Masu samar da roba ba tare da dagewar asusu ba, zirga-zirgar OAuth kafin ƙirƙirar asusun, environment/system proxies, da hanyoyin sadarwar mara waya na waje ba su da iyaka.
+
 ## Tsarin Proxy Mai Matakai 4
 
 OmniRoute yana goyon bayan daidaita proxy a **matakai huɗu masu zaman kansu**, waɗanda ake tantancewa bisa jerin fifiko:

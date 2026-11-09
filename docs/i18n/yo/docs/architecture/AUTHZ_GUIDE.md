@@ -144,17 +144,17 @@ A máa ń forúkọ sí i láti Ètò → Aàbò; ó wà ní pípa títí oní�
   4. Yọ `OMNIROUTE_DISABLE_MFA` kúrò, tun bẹ̀rẹ̀, kí o sì forúkọsílẹ̀ lẹ́ẹ̀kan sí i bí ó bá
      ṣeé ṣe.
 
-## Àwọn Ẹ̀ka Route
+## Awọn kilasi ipa ọna
 
-`src/server/authz/types.ts` ṣàlàyé ẹ̀ka mẹ́ta; route kan tí a kò lè pín ní ìdánilójú ń padà sí `MANAGEMENT`.
+`src/server/authz/types.ts` asọye mẹta kilasi; eyikeyi ipa ọna ti ko le ṣe ipinpinpin ipinnu ṣubu pada si `MANAGEMENT`.
 
-| Ẹ̀ka          | Àpèjúwe                                                                                                                                                        | Ìjẹ́rìí tí a nílò                                                        |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PUBLIC`     | Àwọn route tí ó ṣe kedere ní ààbò: wíwọlé, jíjáde, ipò, init, health, onboarding bootstrap.                                                                    | Kò sí                                                                   |
-| `CLIENT_API` | Àwọn endpoint ìsìn àwòṣe: `/api/v1/*`, `/api/v1beta/*`, pẹ̀lú àwọn orúkọ àpọ́nlé `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key nígbà tí feature flag `REQUIRE_API_KEY` tó ń ṣiṣẹ́ bá ti ṣiṣẹ́ |
-| `MANAGEMENT` | Àwọn ojú-ìwé dashboard, àwọn ètò, àwọn olùpèsè, àwọn kọ́kọ́rọ́, àwọn endpoint admin àti ìwádìí.                                                                   | Ìgbà dashboard TÀBÍ Bearer tí ó ní ìwọ̀n `manage`                        |
+| Kilasi       | Apejuwe                                                                                                                                                     | Auth beere                                                               |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `PUBLIC`     | Awọn ipa-ọna ailewu taara — iwọle, ijade jade, ipo, ilera, bata bata inu.                                                                                   | Ko si                                                                    |
+| `CLIENT_API` | Awọn aaye ipari iṣẹ awoṣe — `/api/v1/*`, `/api/v1beta/*`, pẹlu awọn inagijẹ `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bọtini agbateru nigbati asia ẹya `REQUIRE_API_KEY` ti o munadoko ti ṣiṣẹ |
+| `MANAGEMENT` | Awọn oju-iwe Dasibodu, awọn eto, awọn olupese, awọn bọtini, abojuto ati awọn aaye ipari iwadii.                                                             | Dasibodu igba OR Bearer pẹlu `manage` dopin                              |
 
-Àwọn ìgbésẹ̀ `MANAGEMENT` kan jẹ́ **ti operator nìkan**: kọ́kọ́rọ́ `manage` kò tó. Kíkó àwọn credential tí a tọ́jú jáde (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dída afẹ́yìntì padà sórí data ààyè (`POST /api/db-backups/import` pẹ̀lú `dryRun=true`, `POST /api/db-backups` restore nípa id, `POST /api/settings/import-json`), àti pípa àwọn ibi ìpadàbọ̀ rẹ́ (`DELETE /api/db-backups` cleanup, àti `PATCH /api/db-backups` nítorí pé retention tí ó ń tọ́jú ni ó ń wa pruning aládàáṣe lẹ́yìn gbogbo backup) nílò ìgbà dashboard, olùmọ̀ CLI ti agbègbè, tàbí wíwọlé tí a ti pa. Fífúnni ní sync token (`POST /api/sync/tokens`) àti ṣíṣe `admin` CLI access token (`POST /api/cli/tokens`) nílò ìgbà dashboard tàbí olùmọ̀ CLI ti agbègbè ní gbogbo ipò wíwọlé. Àwọn kọ́kọ́rọ́ API ti ìwọ̀n èyíkéyìí àti àwọn `oma_` access token kì í ṣe àwọn credential operator: wọ́n máa gba `403` nígbàkígbà tí a bá nílò ọ̀kan. Àyẹ̀wò yìí wà nínú `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Yíyí àwọn ètò wíwọlé padà pẹ̀lú jẹ́ ti operator nìkan: `POST /api/settings/require-login` (ṣètò ọ̀rọ̀ aṣínà ìṣàkóso / yí `requireLogin` padà) ń gba àwọn credential wọ̀nyí nìkan nígbà tí ọ̀rọ̀ aṣínà bá ti wà. Fèrèsé bootstrap ìbẹ̀rẹ̀ (kò sí ọ̀rọ̀ aṣínà síbẹ̀) kò yí padà, ìgbà dashboard sì gbọ́dọ̀ fi `currentPassword` ránṣẹ́ láti rọ́pò ọ̀rọ̀ aṣínà (`403` tí ó bá kù tàbí tí kò tọ̀nà, a sì ń ṣe àkọsílẹ̀ rẹ̀ gẹ́gẹ́ bí `settings.update_failed`). CLI ti agbègbè àti instance tí wíwọlé rẹ̀ jẹ́ alaabọ̀ ń pa ọ̀nà ìmúpadàbọ̀sípò mọ́, wọ́n sì lè ṣètò ọ̀rọ̀ aṣínà láìsí i, nítorí méjèèjì ni a so mọ́ host tí ó ni data directory.
+Awọn iṣe `MANAGEMENT` diẹ ni** onišẹ-nikan** : bọtini `manage` ko to. Gbigbe awọn iwe-ẹri ti a fipamọ sori okeere (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), mimu-pada sipo afẹyinti lori data laaye (`POST /api/db-backups/import` pẹlu `dryRun=true`, `POST /api/db-backups` mu pada nipasẹ id, `POST /api/settings/import-json`), iparun awọn aaye imupadabọ (`DELETE /api/db-backups` nu, ati `PATCH /api/db-backups` nitori idaduro ti o tẹsiwaju n ṣafẹri pruning laifọwọyi lẹhin gbogbo afẹyinti) nilo igba dasibodu, koko-ọrọ CLI agbegbe. Ipinfunni àmi ìsiṣẹpọ (`POST /api/sync/tokens`) ati mimuṣe ami ami wiwọle `admin` CLI (`POST /api/cli/tokens`) nilo igba dasibodu tabi koko-ọrọ CLI agbegbe ni gbogbo ipo iwọle. awọn bọtini API ti eyikeyi iwọn ati awọn ami iraye si `oma_` kii ṣe awọn iwe-ẹri oniṣẹ: wọn gba `403` nigbakugba ti o nilo ọkan. Ṣayẹwo naa ngbe ni `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Yiyipada awọn eto iwọle jẹ oniṣẹ-nikan paapaa: `POST /api/settings/require-login` (ṣeto ọrọ igbaniwọle iṣakoso / toggle `requireLogin`) gba awọn iwe-ẹri wọnyẹn nikan ni kete ti ọrọ igbaniwọle kan wa — window bootstrap akọkọ-ṣiṣe (ko si ọrọ igbaniwọle sibẹsibẹ) ko yipada — ati pe igba dasibodu gbọdọ fi `currentPassword` ranṣẹ lati rọpo ọrọ igbaniwọle (`403` nigbati o nsọnu tabi aṣiṣe, ṣayẹwo bi `settings.update_failed`). CLI agbegbe ati apẹẹrẹ pẹlu alaabo iwọle tọju ọna imularada ati pe o le ṣeto ọrọ igbaniwọle kan laisi rẹ, nitori awọn mejeeji wa ni owun si agbalejo ti o ni itọsọna data.
 
 ## Pipeline
 
@@ -185,51 +185,49 @@ Kilasi ipa ọna kọọkan ni eto imulo ni `src/server/authz/policies/`:
 
 Ilana aṣeyọri da `AuthSubject` pada pẹlu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Awọn olutọju isalẹ le ka nipasẹ `assertAuth(request, "CLIENT_API")` ni `src/server/authz/assertAuth.ts` dipo ṣiṣiṣẹ auth kannaa.
 
-## Àtòjọ Àwọn Ọ̀nà Gbangba
+## Akojọ Awọn ipa ọna gbangba
 
-`src/shared/constants/publicApiRoutes.ts` ni àtòjọ ààyè tí a fàyè gba ní kedere:
+`src/shared/constants/publicApiRoutes.ts` jẹ atokọ ti o han gbangba:
 
-A pín àtòjọ náà sí gẹ́gẹ́ bí **ìrísí**, ìpín náà sì ṣe pàtàkì fún ìṣiṣẹ́ (GHSA-74g9-q8f6-793h): a máa bá prefix mu pẹ̀lú `startsWith()`, nítorí náà ó tún máa bá gbogbo ọ̀nà tó wà lẹ́gbẹ̀ẹ́ tí ó pín àwọn àmì àkọ́kọ́ rẹ̀ mu.
-`/api/usage/om-usage` gẹ́gẹ́ bí prefix kan jẹ́ àmì `/api/usage/om-usage<anything>` PUBLIC, Next sì máa yan èyí sí `/api/usage/[connectionId]` — handler kan tí kò ní ìfọwọ́sí tirẹ̀.
+Awọn akojọ ti wa ni pin nipa** apẹrẹ** , ati pipin jẹ fifuye-rù (GHSA-74g9-q8f6-793h): ìpele kan ni ibamu pẹlu `startsWith()`, nitorina o tun baamu gbogbo ọna ti o wa nitosi pinpin awọn ohun kikọ asiwaju rẹ. `/api/usage/om-usage` gẹgẹbi ìpele kan ti samisi `/api/usage/om-usage<anything>` PUBLIC, ati Nigbamii ti pinnu pe lati `/api/usage/[connectionId]` — oluṣakoso kan ti ko ni ijẹrisi tirẹ.
 
 ```ts
-// Àwọn subtree gidi. Gbogbo àkọsílẹ̀ GBỌ́DỌ̀ parí pẹ̀lú "/" (unit test kan ló ń jẹ́rìí sí i).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // a ṣe é gẹ́gẹ́ bí CLIENT_API nínú classify, kì í ṣe "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Àwọn ọ̀nà ẹyọkan, tí a máa bá mu GÁN-GÁN (pẹ̀lú tàbí láìsí slash ìparí).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // ìgbésẹ̀ 2 ìwọlé fún TOTP tí a yàn; ó nílò cookie MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Àwọn ọ̀nà ẹyọkan tí a kà sí kíkà-nìkan, tí wọ́n tún gba ìrọ̀rùn origin CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Ọ̀nà ẹyọkan tí a kà sí kíkà-nìkan LAÌSÌ ìrọ̀rùn CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Àwọn ọ̀nà kíkà-nìkan jẹ́ gbangba **kìkì** fún àwọn ọ̀nà tí kò léwu. Àkíyèsí: `classifyRoute()` máa yọ `/api/v1/*` àti `/api/v1beta/*` kúrò nínú PUBLIC fall-through — àwọn wọ̀nyí máa jẹ́ `CLIENT_API` ní gbogbo ìgbà, nítorí náà ìlànà Bearer-key ṣì kan wọn.
+Awọn ipa ọna kika-nikan jẹ ti gbogbo eniyan** nikan** fun awọn ọna ailewu. Akiyesi: `classifyRoute()` yọkuro `/api/v1/*` ati `/api/v1beta/*` kuro ninu isubu PUBLIC -nipasẹ — awọn wọn jẹ `CLIENT_API` nigbagbogbo nitorina eto imulo bọtini Bearer tun wa.
 
 ## Fífì Route Tuntun Kún Un
 
@@ -300,15 +298,15 @@ bá ti yanjú àwọn àyè láti ìwífún ìfọwọ́sí MCP, metadata ìbé�
 `read` / `write` / `admin` lórí àwọn àmì `oma_live_…`, tí a tò lẹ́sẹẹsẹ nípasẹ̀ `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Ìpele yìí kan ìwé-ẹ̀rí àmì ìwọlé nìkan. Wo [Ìfọwọ́sí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md).
 
-## Ìyípadà Ìjẹ́rìí Tí A Nílò
+## Auth Nilo Toggle
 
-`isAuthRequired()` nínú `src/shared/utils/apiAuth.ts` ló ń pinnu bóyá a óò fi **ìjẹ́rìí** kankan lélẹ̀ fún ìbéèrè kan:
+`isAuthRequired()` ni `src/shared/utils/apiAuth.ts` pinnu boya** eyikeyi** auth ti wa ni imuse fun ibeere kan:
 
-- `settings.requireLogin === false` → ìjẹ́rìí ti di pípa lápapọ̀, àfi ipele ààbò tí ó máa wà nígbà gbogbo (wo [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) àti àwọn ìpè tí ń fúnni ní credential tí ó gbà, tí ó nílò credential kan náà bí wíwọlé ṣe wà ní títàn: fífúnni ní sync token, ṣíṣe CLI access token ní ìwọ̀n èyíkéyìí, àti dídá kọ́kọ́rọ́ API tí ó ní ìwọ̀n `manage`/`admin`, fífún kọ́kọ́rọ́ ní ìwọ̀n yẹn, tàbí tún ṣe tàbí fihàn irú kọ́kọ́rọ́ bẹ́ẹ̀ (`requireCredentialForManagementScopedKey()` nínú `src/lib/api/requireManagementAuth.ts`). Àwọn kọ́kọ́rọ́ inference nìkan ló wà ní sísílẹ̀.
-- Kò sí ọ̀rọ̀ aṣínà tí a ṣètò **àti** kò sí env var `INITIAL_PASSWORD` → ipò bootstrap: ó gba onboarding wizard àti àwọn ìbéèrè loopback láàyè, ṣùgbọ́n àwọn ìbéèrè nẹ́tíwọ́kì tí a ṣí payá ṣì nílò credential.
-- Àṣìṣe DB èyíkéyìí → ó kùnà ní títì (secure-by-default).
+- `settings.requireLogin === false` → auth jẹ alaabo agbaye, ayafi fun ipele ti o ni aabo nigbagbogbo (wo [Awọn Tiers Itọju Ipa ọna](../security/ROUTE_GUARD_TIERS.md) ) ati awọn ipe ti o fi iwe `admin` ẹri kan ti o gba, eyiti o nilo iwe-ẹri kanna gẹgẹbi pẹlu iwọle lori: ipinfunni awọn ami amuṣiṣẹpọ, Mining CLI awọn ami iraye si ni eyikeyi iwọn, ati ṣiṣẹda bọtini API `manage`, fifun zq dopin to dopin zq atunbi tabi ṣiṣafihan iru bọtini bẹ (`requireCredentialForManagementScopedKey()` ni `src/lib/api/requireManagementAuth.ts`). Awọn bọtini idawọle nikan wa ni sisi. Kikọ asia ẹya ti o ni aabo kan (`REQUIRE_API_KEY`, awọn asia Aabo miiran, ati SSRF / TLS / MCP-scope / awọn asia apoti iyanrin ti a ṣe akojọ si ni [Awọn asia Ẹya](../reference/FEATURE_FLAGS.md#rest-api) ) ati fifipamọ awọn eto boju-boju PII (`PUT /api/settings/pii`) tun tọju nilo ijẹrisi kan.
+- Ko si ọrọ igbaniwọle tunto** ati** ko si `INITIAL_PASSWORD` env var → bootstrap mode faye gba awọn onboarding oluṣeto ati loopback ibeere, ṣugbọn fara nẹtiwọki ibeere tun nilo awọn iwe eri. Iyatọ: kikọ asia ẹya ti o ni aabo ati fifipamọ awọn eto boju-boju PII (`PUT /api/settings/pii`) nilo ijẹrisi paapaa lati loopback, nitorinaa loopback funrararẹ ko to nibẹ.
+- Eyikeyi aṣiṣe DB → kuna ni pipade (ni aabo-nipasẹ-aiyipada).
 
-Ìfipágbára API key ti oníbàárà ń lo `isRequireApiKeyEnabled()` nínú `src/shared/utils/featureFlags.ts`, kì í ṣe kíka `process.env.REQUIRE_API_KEY` tààrà. Èyí ṣe pàtàkì fún àwọn instance tí a fi ránṣẹ́: yíyí `REQUIRE_API_KEY` padà nínú Dashboard → Feature Flags ń tọ́jú DB override, ó sì ń nípa lórí `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, àti àwọn àyẹ̀wò ìjẹ́rìí client-API mìíràn tí ó ń pín olùrànlọ́wọ́ yìí lẹsẹkẹsẹ. Tí a kò bá lè ka feature flag store, ìjẹ́rìí client API ń kùnà ní títì, ó sì nílò kọ́kọ́rọ́.
+Imudaniloju bọtini API onibara nlo `isRequireApiKeyEnabled()` ni `src/shared/utils/featureFlags.ts`, kii ṣe kika `process.env.REQUIRE_API_KEY` taara. Eyi ṣe pataki fun awọn iṣẹlẹ ti a fi ranṣẹ: toggling `REQUIRE_API_KEY` ni Dashboard → Awọn asia Ẹya ṣe ipamọ DB kan ati pe lẹsẹkẹsẹ yoo kan `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ati awọn sọwedowo auth alabara-API miiran ti o pin oluranlọwọ yii. Ti ile itaja asia ẹya ko ba le ka, alabara API auth kuna ni pipade ati nilo bọtini kan.
 
 ## Àyípadà Tó Fọ́ Ìbámu — v3.8.0
 

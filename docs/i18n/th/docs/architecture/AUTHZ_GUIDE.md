@@ -139,17 +139,17 @@ JWT อื่นที่ลงนามด้วย `JWT_SECRET` ก็มี�
      `secondFactor: "recovery_switch"`
   4. ยกเลิกการตั้งค่า `OMNIROUTE_DISABLE_MFA` รีสตาร์ต และลงทะเบียนใหม่หากจำเป็น
 
-## คลาสของเส้นทาง
+## คลาสเส้นทาง
 
-`src/server/authz/types.ts` กำหนดคลาสไว้สามคลาส และเส้นทางใดที่จัดประเภทได้อย่างแน่นอนไม่ได้จะตกไปอยู่ที่ `MANAGEMENT` เสมอ
+`src/server/authz/types.ts` กำหนดสามคลาส; เส้นทางใด ๆ ที่ไม่สามารถจำแนกได้จะกลับไปเป็น `MANAGEMENT` ตามกำหนด
 
-| Class        | Description                                                                                                                                      | Auth required                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `PUBLIC`     | เส้นทางที่ปลอดภัยอย่างชัดเจน — ล็อกอิน ล็อกเอาต์ สถานะ การเริ่มต้นระบบ health check และการบูตสแตรปการเริ่มใช้งาน                                 | ไม่ต้องใช้                                                     |
-| `CLIENT_API` | เอนด์พอยต์ให้บริการโมเดล — `/api/v1/*`, `/api/v1beta/*` และ alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` | Bearer key เมื่อเปิดฟีเจอร์แฟล็ก `REQUIRE_API_KEY` ที่มีผลอยู่ |
-| `MANAGEMENT` | หน้าแดชบอร์ด การตั้งค่า ผู้ให้บริการ คีย์ และเอนด์พอยต์ของผู้ดูแลระบบและการวินิจฉัย                                                              | เซสชันแดชบอร์ด หรือ Bearer ที่มีขอบเขต `manage`                |
+| ระดับ        | คำอธิบาย                                                                                                                                       | ต้องมีการตรวจสอบสิทธิ์                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `PUBLIC`     | เส้นทางที่ปลอดภัยอย่างชัดเจน การเข้าสู่ระบบ —, ออกจากระบบ, สถานะ, สุขภาพ, การเริ่มต้นใช้งานบูตสแตรป                                            | ไม่มี                                                                   |
+| `CLIENT_API` | จุดสิ้นสุดการแสดงโมเดล — `/api/v1/*`, `/api/v1beta/*` บวกนามแฝง `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` | รหัสผู้ถือเมื่อเปิดใช้งานแฟล็กคุณลักษณะ `REQUIRE_API_KEY` ที่มีผลใช้งาน |
+| `MANAGEMENT` | หน้าแดชบอร์ด การตั้งค่า ผู้ให้บริการ คีย์ จุดสิ้นสุดของผู้ดูแลระบบและการวินิจฉัย                                                               | เซสชันแดชบอร์ด OR Bearer พร้อมขอบเขต `manage`                           |
 
-การกระทำบางอย่างใน `MANAGEMENT` เป็น **สำหรับผู้ดูแลระบบเท่านั้น** การมีคีย์ `manage` เพียงอย่างเดียวไม่พอ ได้แก่ การส่งออกข้อมูลรับรองที่เก็บไว้ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) การกู้คืนแบ็กอัปทับข้อมูลสดที่ใช้งานอยู่ (`POST /api/db-backups/import` รวมถึง `dryRun=true`, `POST /api/db-backups` การกู้คืนด้วย id, `POST /api/settings/import-json`) และการทำลายจุดกู้คืน (`DELETE /api/db-backups` สำหรับการเคลียร์ และ `PATCH /api/db-backups` เพราะการตั้งค่าการเก็บรักษาที่มันบันทึกไว้จะขับเคลื่อนการลบอัตโนมัติหลังสร้างแบ็กอัปทุกครั้ง) ซึ่งต้องใช้เซสชันแดชบอร์ด ตัวตน CLI ในเครื่อง หรือการปิดการล็อกอินอยู่ การออกโทเค็นการซิงก์ (`POST /api/sync/tokens`) และการสร้างโทเค็นการเข้าถึง CLI แบบ `admin` (`POST /api/cli/tokens`) ต้องใช้เซสชันแดชบอร์ดหรือตัวตน CLI ในเครื่องในทุกโหมดการล็อกอิน คีย์ API ทุกขอบเขตและโทเค็นการเข้าถึง `oma_` ไม่ใช่ข้อมูลรับรองของผู้ดูแลระบบ จึงจะได้รับ `403` ทุกครั้งที่ต้องใช้ข้อมูลรับรองแบบนั้น การตรวจสอบนี้อยู่ใน `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) การเปลี่ยนการตั้งค่าการล็อกอินก็เป็นงานของผู้ดูแลระบบเช่นกัน `POST /api/settings/require-login` (ตั้งรหัสผ่านผู้จัดการ หรือสลับ `requireLogin`) จะยอมรับเฉพาะข้อมูลรับรองเหล่านี้เมื่อมีรหัสผ่านแล้ว ช่วงบูตสแตรปครั้งแรกที่ยังไม่มีรหัสผ่านไม่มีการเปลี่ยนแปลง และเซสชันแดชบอร์ดต้องส่ง `currentPassword` มาเพื่อแทนที่รหัสผ่าน (ตอบ `403` เมื่อไม่มีหรือผิด และบันทึกเป็น audit ว่า `settings.update_failed`) CLI ในเครื่องและอินสแตนซ์ที่ปิดการล็อกอินอยู่จะคงเส้นทางการกู้คืนไว้ และตั้งรหัสผ่านได้โดยไม่ต้องใช้ค่านี้ เพราะทั้งสองผูกกับโฮสต์ที่เป็นเจ้าของไดเรกทอรีข้อมูล
+การกระทำของ `MANAGEMENT` บางประการคือ** ผู้ดำเนินการเท่านั้น** : ปุ่ม `manage` นั้นไม่เพียงพอ การส่งออกข้อมูลรับรองที่เก็บไว้ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) การกู้คืนการสำรองข้อมูลบนข้อมูลสด (`POST /api/db-backups/import` รวมถึง `dryRun=true`, `POST /api/db-backups` กู้คืนโดย id, `POST /api/settings/import-json`) การทำลายจุดคืนค่า ( การล้างข้อมูล `DELETE /api/db-backups` และ `PATCH /api/db-backups` เนื่องจากการเก็บรักษาที่ยังคงอยู่ ขับเคลื่อนการตัดอัตโนมัติหลังจากการสำรองข้อมูลทุกครั้ง) จำเป็นต้องมีเซสชันแดชบอร์ด เรื่อง CLI ในเครื่อง หรือปิดใช้งานการเข้าสู่ระบบ การออกโทเค็นการซิงค์ (`POST /api/sync/tokens`) และการสร้างโทเค็นการเข้าถึง `admin` CLI (`POST /api/cli/tokens`) จำเป็นต้องมีเซสชันแดชบอร์ดหรือหัวเรื่อง CLI ในเครื่องในทุกโหมดการเข้าสู่ระบบ คีย์ API ของขอบเขตใดๆ และโทเค็นการเข้าถึง `oma_` ไม่ใช่ข้อมูลรับรองของผู้ปฏิบัติงาน โดยจะได้รับ `403` ทุกครั้งที่จำเป็น เช็คอยู่ใน `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) การเปลี่ยนการตั้งค่าการเข้าสู่ระบบเป็นเพียงผู้ดำเนินการเท่านั้น: `POST /api/settings/require-login` (ตั้งรหัสผ่านการจัดการ / สลับ `requireLogin`) ยอมรับเฉพาะข้อมูลรับรองเหล่านั้นเมื่อมีรหัสผ่านอยู่ — หน้าต่างบูตสแตรปที่ทำงานครั้งแรก (ยังไม่มีรหัสผ่าน) จะไม่เปลี่ยนแปลง — และเซสชันแดชบอร์ดต้องส่ง `currentPassword` เพื่อแทนที่รหัสผ่าน (`403` เมื่อหายไปหรือผิด ตรวจสอบเป็น `settings.update_failed`) CLI ในเครื่องและอินสแตนซ์ที่ปิดใช้งานการเข้าสู่ระบบจะเก็บเส้นทางการกู้คืนไว้และอาจตั้งรหัสผ่านโดยไม่มีเส้นทางดังกล่าว เนื่องจากทั้งสองถูกผูกไว้กับโฮสต์ที่เป็นเจ้าของไดเร็กทอรีข้อมูล
 
 ## ไปป์ไลน์
 
@@ -182,49 +182,47 @@ Incoming request → src/proxy.ts
 
 ## รายการเส้นทางสาธารณะ
 
-`src/shared/constants/publicApiRoutes.ts` คือรายการอนุญาตอย่างชัดเจน:
+`src/shared/constants/publicApiRoutes.ts` เป็นรายการที่อนุญาตอย่างชัดเจน:
 
-รายการนี้แบ่งตาม **รูปแบบ** และการแบ่งนี้มีผลต่อการทำงาน (GHSA-74g9-q8f6-793h): คำนำหน้าจะถูกจับคู่ด้วย `startsWith()` ดังนั้นจึงจับคู่ทุกเส้นทางที่อยู่ติดกันและใช้อักขระเริ่มต้นร่วมกันด้วย
-`/api/usage/om-usage` ในฐานะคำนำหน้าจะทำให้ `/api/usage/om-usage<anything>` เป็น PUBLIC และ Next จะ resolve เส้นทางดังกล่าวไปยัง `/api/usage/[connectionId]` — handler ที่ไม่มีการตรวจสอบสิทธิ์ในตัวเอง
+รายการจะถูกแบ่งตาม** รูปร่าง** และการแยกเป็นแบบรับน้ำหนัก (GHSA-74g9-q8f6-793h): คำนำหน้าจับคู่กับ `startsWith()` ดังนั้นจึงจับคู่ทุกเส้นทางที่อยู่ติดกันซึ่งใช้อักขระนำร่วมกัน `/api/usage/om-usage` เป็นคำนำหน้าที่มีเครื่องหมาย `/api/usage/om-usage<anything>` PUBLIC และ Next แก้ไขสิ่งนั้นเป็น `/api/usage/[connectionId]` — ตัวจัดการที่ไม่มีการรับรองความถูกต้องของตัวเอง
 
 ```ts
-// กลุ่มเส้นทางย่อยที่แท้จริง ทุกรายการ MUST ลงท้ายด้วย "/" (ยืนยันโดย unit test)
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // ถือเป็น CLIENT_API ใน classify ไม่ใช่ "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// เส้นทางเดี่ยว จับคู่แบบตรงกัน EXACTLY (มีหรือไม่มี slash ต่อท้าย)
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // ขั้นตอนที่ 2 ของการเข้าสู่ระบบสำหรับ TOTP ที่เปิดใช้โดยเลือกเอง ต้องใช้คุกกี้ MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// เส้นทางเดี่ยวแบบอ่านอย่างเดียวที่ใช้การผ่อนปรน origin ของ CORS ด้วย
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// เส้นทางเดี่ยวแบบอ่านอย่างเดียวที่ไม่มีการผ่อนปรน CORS
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-เส้นทางแบบอ่านอย่างเดียวจะเป็นสาธารณะ **เฉพาะ** สำหรับเมธอดที่ปลอดภัยเท่านั้น หมายเหตุ: `classifyRoute()` จะไม่รวม `/api/v1/*` และ `/api/v1beta/*` ไว้ในการตกผ่านไปยัง PUBLIC — เส้นทางเหล่านี้จะเป็น `CLIENT_API` เสมอ ดังนั้นนโยบาย Bearer-key ยังคงมีผลอยู่
+เส้นทางแบบอ่านอย่างเดียวเป็นแบบสาธารณะ** เท่านั้น** เพื่อวิธีการที่ปลอดภัย หมายเหตุ: `classifyRoute()` แยก `/api/v1/*` และ `/api/v1beta/*` ออกจาก PUBLIC fall-through — ซึ่งจะเป็น `CLIENT_API` เสมอ ดังนั้นนโยบาย Bearer-key ยังคงมีผลใช้อยู่
 
 ## การเพิ่มเส้นทางใหม่
 
@@ -288,15 +286,15 @@ export async function POST(request: Request) {
 
 `read` / `write` / `admin` บนโทเค็น `oma_live_…` จัดอันดับโดย `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) การจัดอันดับนี้ใช้กับข้อมูลประจำตัวของโทเค็นการเข้าถึงเท่านั้น ดู [Management Authentication](../guides/MANAGEMENT-AUTH.md)
 
-## สวิตช์การกำหนดให้ต้องยืนยันตัวตน
+## จำเป็นต้องมีการสลับการรับรองความถูกต้อง
 
-`isAuthRequired()` ใน `src/shared/utils/apiAuth.ts` ตัดสินว่าคำขอหนึ่ง ๆ จะถูกบังคับให้ยืนยันตัวตน **หรือไม่** ดังนี้:
+`isAuthRequired()` ใน `src/shared/utils/apiAuth.ts` ตัดสินใจว่า** ใดๆ** การรับรองความถูกต้องถูกบังคับใช้สำหรับคำขอ:
 
-- `settings.requireLogin === false` → ปิดการยืนยันตัวตนทั้งระบบ ยกเว้นระดับที่ป้องกันเสมอ (ดู [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) และการเรียกที่ออกข้อมูลรับรองซึ่งระบบยอมรับ ซึ่งต้องใช้ข้อมูลรับรองเดียวกับตอนที่เปิดการล็อกอิน ได้แก่ การออกโทเค็นการซิงก์ การสร้างโทเค็นการเข้าถึง CLI ทุกขอบเขต การสร้างคีย์ API ที่มีขอบเขต `manage`/`admin` การให้ขอบเขตนั้นแก่คีย์ การสร้างใหม่หรือการเปิดเผยคีย์ดังกล่าว (`requireCredentialForManagementScopedKey()` ใน `src/lib/api/requireManagementAuth.ts`) คีย์สำหรับการอนุมาน (inference) อย่างเดียวยังคงเปิดอยู่
-- ยังไม่ได้ตั้งรหัสผ่าน **และ** ไม่มีตัวแปรสภาพแวดล้อม `INITIAL_PASSWORD` → โหมดบูตสแตรปอนุญาตวิซาร์ดการเริ่มต้นใช้งานและคำขอจาก loopback แต่คำขอจากเครือข่ายภายนอกยังต้องใช้ข้อมูลรับรอง
-- ข้อผิดพลาดของ DB ใด ๆ → ปิดล็อก (fails closed, ค่าเริ่มต้นที่ปลอดภัย)
+- `settings.requireLogin === false` → auth ถูกปิดใช้งานทั่วโลก ยกเว้นระดับที่มีการป้องกันตลอดเวลา (ดู [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) และการเรียกที่มอบข้อมูลรับรองที่ยอมรับ ซึ่งต้องใช้ข้อมูลรับรองเดียวกันกับเมื่อเปิดการเข้าสู่ระบบ: การออกโทเค็นการซิงค์ การสร้างโทเค็นการเข้าถึง CLI ที่ขอบเขตใด ๆ และสร้างคีย์ API ด้วยขอบเขต `manage`/`admin` การอนุญาตขอบเขตนั้นให้กับคีย์ หรือการสร้างใหม่ หรือเปิดเผยคีย์ดังกล่าว (`requireCredentialForManagementScopedKey()` ใน `src/lib/api/requireManagementAuth.ts`) คีย์สำหรับการอนุมานเท่านั้นยังคงเปิดอยู่ การเขียนแฟล็กคุณลักษณะที่ได้รับการป้องกัน (`REQUIRE_API_KEY` แฟล็ก Security อื่นๆ และแฟล็ก SSRF / TLS / MCP-scope / sandbox ที่แสดงอยู่ใน [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) และการบันทึกการตั้งค่าการมาสก์ PII (`PUT /api/settings/pii`) ยังจำเป็นต้องมีหนังสือรับรองอยู่
+- ไม่มีการกำหนดค่ารหัสผ่าน** และ** ไม่มีโหมดบูทสแตรป `INITIAL_PASSWORD` env var → อนุญาตให้ใช้วิซาร์ดการออนบอร์ดและคำขอลูปแบ็คได้ แต่คำขอเครือข่ายที่เปิดเผยยังคงต้องการข้อมูลรับรอง ข้อยกเว้น: การเขียนแฟล็กคุณลักษณะที่ได้รับการป้องกันและการบันทึกการตั้งค่าการมาสก์ PII (`PUT /api/settings/pii`) จำเป็นต้องมีข้อมูลรับรองแม้จะมาจากลูปแบ็ค ดังนั้นการวนกลับด้วยตัวเองจึงไม่เพียงพอ
+- ข้อผิดพลาด DB ใดๆ → ล้มเหลวในการปิด (ปลอดภัยโดยค่าเริ่มต้น)
 
-การบังคับใช้ API key ของไคลเอนต์ใช้ `isRequireApiKeyEnabled()` ใน `src/shared/utils/featureFlags.ts` แทนการอ่าน `process.env.REQUIRE_API_KEY` โดยตรง ซึ่งสำคัญสำหรับอินสแตนซ์ที่นำไปใช้งานจริง เมื่อสลับ `REQUIRE_API_KEY` ใน Dashboard → Feature Flags ระบบจะเก็บค่า override ลงฐานข้อมูล และมีผลทันทีต่อ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` และการตรวจสอบการยืนยันตัวตนของ client API อื่น ๆ ที่ใช้ฟังก์ชันตัวช่วยนี้ร่วมกัน หากอ่านที่เก็บ feature flag ไม่ได้ การยืนยันตัวตนของ client API จะปิดล็อกและต้องการคีย์
+การบังคับใช้คีย์ API ของไคลเอ็นต์ใช้ `isRequireApiKeyEnabled()` ใน `src/shared/utils/featureFlags.ts` ไม่ใช่การอ่าน `process.env.REQUIRE_API_KEY` โดยตรง สิ่งนี้สำคัญสำหรับอินสแตนซ์ที่ปรับใช้: การสลับ `REQUIRE_API_KEY` ในแดชบอร์ด → Feature Flags จะจัดเก็บการแทนที่ DB และส่งผลทันที `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` และการตรวจสอบการตรวจสอบสิทธิ์ไคลเอ็นต์-API อื่นๆ ที่ใช้ตัวช่วยนี้ร่วมกัน หากไม่สามารถอ่านที่เก็บค่าสถานะคุณลักษณะได้ ไคลเอ็นต์ API auth จะปิดไม่สำเร็จและต้องใช้คีย์
 
 ## การเปลี่ยนแปลงที่ส่งผลกระทบ — v3.8.0
 

@@ -191,41 +191,41 @@ Za podrobno konfiguracijo posameznih orodij (Claude Code, Codex CLI, Cursor, Cli
 
 ---
 
-## Nastavitev protokolov (MCP + A2A)
+## Nastavitev protokola (MCP + A2A)
 
 ### Nastavitev MCP (Model Context Protocol)
 
-Zaženite prenos MCP v načinu stdio:
+Zaženite transport MCP v načinu stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Priporočen postopek preverjanja:
+Priporočen potek preverjanja:
 
 ```bash
-# 1. Zaženite strežnik MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Iz svojega odjemalca MCP pokličite:
-omniroute_get_health        # Vrne naj stanje sistema
-omniroute_list_combos       # Vrne naj aktivne kombinacije
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ali zaženite celoten paket E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Konfiguracija odjemalca MCP
 
-**Claude Code:**
+**koda Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Dodajte v svoje nastavitve MCP:
+Dodajte svojim nastavitvam MCP (stdio, s ključem, da ima klicatelj glavnega):
 
 ```json
 {
@@ -233,31 +233,38 @@ Dodajte v svoje nastavitve MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Celotna dokumentacija MCP:** [README strežnika MCP](../../open-sse/mcp-server/README.md) — 110 orodij, konfiguracije IDE ter odjemalci Python/TS/Go.
+Ali pa, ko je `mcpTransport` `streamable-http` (nastavite ga na `/dashboard/mcp` ali z `omniroute mcp enable --transport streamable-http`), usmerite vnos odjemalčevega oddaljenega strežnika MCP na `http://localhost:20128/api/mcp/stream`.
 
-### Nastavitev A2A (protokol med agenti)
+Ključ potuje kot `Authorization: Bearer <api-key>` (glejte [Oddaljeni dostop strežnika MCP →](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) za oddaljene gostitelje; oddaljeni ključ potrebuje `mcp:connect` in njegove obsege read/write ).
 
-Preverite kartico agenta:
+**Celotna dokumentacija MCP :** [strežnik MCP README](../../open-sse/mcp-server/README.md) — 110 orodja, konfiguracije IDE, odjemalci Python/TS/Go. Referenca operaterja za orodja za stiskanje CCR/dedup (označevalci, predpogoji, obsegi po orodjih, paginacija pri iskanju, diagnostika): [Predpogoji za kompresijske motorje → / vodnik za uporabnika](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Nastavitev A2A (protokol agent-agent)
+
+Preverite agentsko kartico:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Pošljite opravilo:
+Pošlji nalogo:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Podaj mi kratek povzetek kvote."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Celotna dokumentacija A2A:** [README strežnika A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, veščine, pretočno pošiljanje in življenjski cikel opravil.
+**Celotna dokumentacija A2A :** [A2A strežnik README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, spretnosti, pretakanje, življenjski cikel nalog.
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Predloga za Void Linux (xbps-src)
+## Predloga Void Linux (xbps-src).
 
-Uporabniki distribucije Void Linux lahko izdelajo izvorni paket z uporabo `xbps-src`. Ta blok shranite kot `srcpkgs/omniroute/template`:
+Za uporabnike Void Linux lahko ustvarite izvorni paket z uporabo `xbps-src`. Shranite ta blok kot `srcpkgs/omniroute/template`:
 
 ```bash
-# Datoteka predloge za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Za vsako izdajo znova ustvarite kontrolno vsoto z:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

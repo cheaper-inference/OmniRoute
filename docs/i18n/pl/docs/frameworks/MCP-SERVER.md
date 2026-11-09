@@ -10,35 +10,30 @@
 
 ## Instalacja
 
-OmniRoute MCP jest wbudowany. Uruchom go za pomocą:
+OmniRoute MCP jest wbudowany. Zacznij od:
 
 ```bash
 omniroute --mcp
 ```
 
-Lub za pośrednictwem transportu open-sse:
+Lub poprzez transport open-sse:
 
 ```bash
-# Transport strumieniowy HTTP (port 20130)
-omniroute --dev  # MCP uruchamia się automatycznie w punkcie końcowym /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Transporty HTTP (`sse` / `streamable-http`, obsługiwane w ramach procesu przez serwer panelu) są
-domyślnie wyłączone i wcześniej można je było przełączać wyłącznie na stronie `/dashboard/mcp`. Od v3.8.51
-CLI zapewnia te same możliwości:
+Transporty HTTP (`sse` / `streamable-http`, obsługiwane w procesie przez serwer dashboardu) są domyślnie wyłączone i wcześniej można je było przełączać tylko na stronie `/dashboard/mcp`. Od wersji 3.8.51 CLI ma parzystość:
 
 ```bash
-omniroute mcp status                                  # stan włączenia/dostępności, transport, liczba narzędzi
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # resetuje aktywne sesje sse/streamable-http
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` wysyłają żądanie PATCH dla tego samego ustawienia `mcpEnabled` (oraz opcjonalnie `mcpTransport`),
-które panel przełącza za pośrednictwem `/api/settings`. `mcp restart` wywołuje `POST /api/mcp/restart`: zamyka
-aktywne sesje `sse`/`streamable-http`, dzięki czemu następne żądanie wykonuje czystą ponowną inicjalizację; zwraca
-`409`, jeśli MCP jest wyłączony, oraz `501` dla transportu `stdio` (klienci stdio zarządzają własnymi
-podprocesami — nie istnieje uchwyt wewnątrz procesu, który można ponownie uruchomić).
+`mcp enable`/`mcp disable` PATCH to samo ustawienie `mcpEnabled` (i opcjonalnie `mcpTransport`) przełączanie pulpitu nawigacyjnego poprzez `/api/settings`. `mcp restart` wywołuje `POST /api/mcp/restart`: przerywa aktywne sesje `sse`/`streamable-http`, więc następne żądanie zostaje ponownie zainicjowane w sposób czysty, zwraca `409` jeśli MCP jest wyłączone, i `501` dla transportu `stdio` (klienci stdio posiadają własny podproces — nie ma uchwytu w procesie do ponownego uruchomienia).
 
 ## Transporty
 
@@ -131,56 +126,42 @@ Cursor, Cline oraz kompatybilne klienty MCP.
 | `omniroute_cache_stats` | `read:cache`  | Statystyki pamięci semantycznej, pamięci promptów i idempotentności  |
 | `omniroute_cache_flush` | `write:cache` | Opróżnienie pamięci podręcznej globalnie lub według sygnatury/modelu |
 
-## Narzędzia kompresji (13)
+## Narzędzia do kompresji (13)
 
-| Narzędzie                           | Zakresy             | Opis                                                                                                                                                  |
-| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Ustawienia kompresji, podsumowanie analityczne i statystyki uwzględniające pamięć podręczną (obejmuje metadane `analytics.mcpDescriptionCompression`) |
-| `omniroute_compression_configure`   | `write:compression` | Konfiguracja trybu kompresji, progu, docelowego współczynnika, zachowywania promptu systemowego i przełącznika kompresji opisów MCP                   |
-| `omniroute_set_compression_engine`  | `write:compression` | Wybór aktywnego silnika (off/caveman/rtk/stacked) oraz intensywności Caveman/RTK                                                                      |
-| `omniroute_list_compression_combos` | `read:compression`  | Lista nazwanych kombinacji kompresji i ich potoków silników                                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | Dane analityczne pogrupowane według kombinacji kompresji i silnika                                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | Zapisanie zawartości izolowanej dla wywołującego w ograniczonym magazynie CCR w pamięci i zwrócenie znacznika wraz z odwołaniem `ccr://`              |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Pobranie pełnej zawartości CCR lub w trybie początku, końca, wierszy, grep albo statystyk                                                             |
-| `omniroute_ccr_inspect`             | `read:compression`  | Sprawdzenie metadanych CCR należących do wywołującego bez zwracania zawartości                                                                        |
-| `omniroute_ccr_list`                | `read:compression`  | Wyświetlenie stronicowanych metadanych bloków CCR należących do wywołującego                                                                          |
-| `omniroute_ccr_delete`              | `write:compression` | Usunięcie bloku CCR należącego do wywołującego                                                                                                        |
-| `omniroute_ccr_stats`               | `read:compression`  | Raportowanie użycia pamięci w zakresie wywołującego, liczników cyklu życia i limitów magazynu                                                         |
-| `omniroute_rtk_discover`            | `read:compression`  | Wykrywanie powtarzających się zakłóceń w dobrowolnie udostępnionych próbkach danych wyjściowych RTK                                                   |
-| `omniroute_rtk_learn`               | `read:compression`  | Generowanie możliwej do przejrzenia wersji roboczej filtra RTK na podstawie dobrowolnie udostępnionych próbek                                         |
+| Narzędzie                           | Zakresy             | Opis                                                                                                                                           |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Ustawienia kompresji, podsumowanie analiz i statystyki uwzględniające pamięć podręczną (w tym metadane `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Skonfiguruj tryb kompresji, próg, współczynnik docelowy, zachowanie podpowiedzi systemowych, przełącznik kompresji opisu MCP                   |
+| `omniroute_set_compression_engine`  | `write:compression` | Wybierz aktywny silnik (off/caveman/rtk/stacked) i intensywność Caveman/RTK                                                                    |
+| `omniroute_list_compression_combos` | `read:compression`  | Wypisz nazwane kombinacje kompresji i ich potoki silnika                                                                                       |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analityka pogrupowana według kombinacji kompresji i silnika                                                                                    |
+| `omniroute_ccr_store`               | `write:compression` | Przechowuj zawartość izolowaną od wywołującego w ograniczonym magazynie CCR w pamięci i zwracaj znacznik plus odwołanie do `ccr://`            |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Pobierz zawartość CCR w całości lub w trybach głowy, ogona, linii, grep i statystyk                                                            |
+| `omniroute_ccr_inspect`             | `read:compression`  | Sprawdź metadane CCR należące do dzwoniącego bez zwracania treści                                                                              |
+| `omniroute_ccr_list`                | `read:compression`  | Lista metadanych podzielonych na strony dla bloków CCR należących do dzwoniącego                                                               |
+| `omniroute_ccr_delete`              | `write:compression` | Usuń blok CCR należący do dzwoniącego                                                                                                          |
+| `omniroute_ccr_stats`               | `read:compression`  | Raportuj wykorzystanie pamięci w zakresie wywołującego, liczniki cyklu życia i limity przechowywania                                           |
+| `omniroute_rtk_discover`            | `read:compression`  | Odkryj powtarzający się szum w próbkach wyjściowych RTK, które wyraziłeś zgodę                                                                 |
+| `omniroute_rtk_learn`               | `read:compression`  | Wygeneruj możliwą do sprawdzenia wersję roboczą filtra RTK na podstawie próbek, które wyraziłeś zgodę                                          |
 
-Wpisy CCR są przechowywane wyłącznie w pamięci i znikają po ponownym uruchomieniu. Każdy blok ma limit 2 MiB, każdy
-podmiot uwierzytelniony — 16 MiB, a globalny magazyn — 64 MiB. Domyślny czas TTL wpisów wynosi 24 godziny (maksymalnie
-siedem dni). Pełne pobieranie przez MCP jest ograniczone do 256 KiB; większe bloki pozostają dostępne za pośrednictwem
-trybów zakresowych i grep. Zapisywanie, pobieranie, wyświetlanie listy, sprawdzanie, usuwanie i statystyki są izolowane
-według podmiotu uwierzytelnionego kluczem API. Rekordy audytu zawierają skróty i metadane rozmiaru, nigdy zawartość.
+wpisy CCR korzystają z magazynu dwuwarstwowego: warstwy gorącej pamięci wspieranej, w lokalnych środowiskach wykonawczych innych niż chmura, przez trwałą warstwę SQLite (`ccr_blocks`, domyślnie włączona), dzięki czemu blok przetrwa eksmisję lub ponowne uruchomienie, aż do wyczerpania się TTL — z wyjątkiem bloków przekraczających 512 KB i środowisk wykonawczych w chmurze, które pozostają tylko w pamięci. Każdy blok jest ograniczony do 2 MiB, każdy główny do 16 MiB, a magazyn globalny do 64 MiB. Wpisy są domyślnie ustawione na 24-godzinny TTL (maksymalnie siedem dni). Pełne pobieranie MCP jest ograniczone do 256 KiB; większe bloki pozostają dostępne w trybach zasięgowych i grep. Przechowywanie, pobieranie, wyświetlanie, sprawdzanie, usuwanie i statystyki są izolowane przez uwierzytelnionego głównego klucza API. Rekordy audytu zawierają skróty i metadane dotyczące rozmiaru, a nigdy treść. Szczegóły widoczne dla operatora (dwa znaczniki, wymagania wstępne klienta, `codemode:false`, zakresy poszczególnych narzędzi, paginacja i macierz diagnostyczna) znajdują się w [Compression Engines → Prequirements/podręcznik operatora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` raportuje kompresję opisów MCP osobno w polu
-`analytics.mcpDescriptionCompression`. Wartości te są szacunkami rozmiaru metadanych dla opisów
-MCP dostępnych na listach (`tools`, `prompts`, `resources` i `resourceTemplates`); nie są one
-potwierdzeniami użycia dostawcy i są oznaczone jako `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` raportuje kompresję opisu MCP osobno w `analytics.mcpDescriptionCompression`. Wartości te są szacunkami rozmiaru metadanych dla opisów listowych MCP (`tools`, `prompts`, `resources` i `resourceTemplates`); nie są to rachunki za korzystanie z usług dostawcy i są oznaczone symbolem `source: "mcp_metadata_estimate"`.
 
-### Filtr drzewa dostępności MCP (v3.8.0)
+### MCP Filtr drzewa dostępności (v3.8.0)
 
-Niezależnie od powyższych narzędzi do kompresji OmniRoute zawiera filtr wykonywany po zakończeniu
-operacji, który kompresuje **wyniki narzędzi** przeglądarkowych/dostępności MCP, zanim zostaną one
-zwrócone agentowi. Ten filtr sam w sobie nie jest narzędziem — działa w sposób przezroczysty na
-każdym wyniku narzędzia zawierającym rozbudowany tekst drzewa dostępności lub migawki przeglądarki
-(≥2000 znaków).
+Oprócz powyższych narzędzi do kompresji, OmniRoute zawiera filtr po wykonaniu, który kompresuje plik** wyniki narzędzia** narzędzi MCP browser/accessibility przed ich zwróceniem agentowi. Ten filtr — w sobie nie jest narzędziem. Działa w sposób przezroczysty na każdym wyniku narzędzia, który zawiera szczegółowe drzewo dostępności lub tekst migawki przeglądarki (≥ 2000 znaków).
 
-Najważniejsze zachowania:
+Kluczowe zachowania:
 
-- Zastępuje ≥30 kolejnych, powtarzających się wierszy elementów równorzędnych podsumowaniem zawierającym początek i koniec
-- Zachowuje kotwice `[ref=eXX]` wymagane przez Playwright/obsługę komputera
-- Twardo obcina zbyt długi tekst (>50 000 znaków), dodając wskazówkę dotyczącą nawigacji
-- Oczekiwana oszczędność: **60–80%** dla danych migawek przeglądarki
+- Zwija ≥ 30 kolejnych powtarzających się linii rodzeństwa do podsumowania head + tail
+- Zachowuje kotwy `[ref=eXX]` wymagane przez Playwright/computer-use
+- Twardo obcina zbyt duży tekst (> 50 000 znaków) wraz ze wskazówką nawigacyjną
+- Oczekiwane oszczędności:** 60–80%** w ładunkach migawek przeglądarki
 
-Konfiguracja: `compression.mcpAccessibility` w ustawieniach globalnych (migracja 056).
-Implementacja: `open-sse/services/compression/engines/mcpAccessibility/`.
-Pełna dokumentacja: [Mechanizmy kompresji — filtr drzewa dostępności MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguracja: `compression.mcpAccessibility` w ustawieniach globalnych (migracja 056). Implementacja: `open-sse/services/compression/engines/mcpAccessibility/`. Pełna dokumentacja: [Silniki kompresji — MCP Filtr drzewa dostępności](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Zobacz [Mechanizmy kompresji](../compression/COMPRESSION_ENGINES.md) i [Kompresja RTK](../compression/RTK_COMPRESSION.md), aby
-poznać model kompresji w czasie wykonywania używany przez te narzędzia.
+Zobacz [Silniki kompresji](../compression/COMPRESSION_ENGINES.md) i [Kompresja RTK](../compression/RTK_COMPRESSION.md), aby zapoznać się z modelem kompresji środowiska wykonawczego tych narzędzi.
 
 ## Narzędzia 1Proxy (3)
 

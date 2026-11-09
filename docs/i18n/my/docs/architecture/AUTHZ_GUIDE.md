@@ -159,17 +159,17 @@ Settings → Security မှ စာရင်းသွင်းနိုင်သ
      `secondFactor: "recovery_switch"` ဖြင့် audit မှတ်တမ်းတင်မည်။
   4. `OMNIROUTE_DISABLE_MFA` ကို unset လုပ်ပြီး ပြန်လည်စတင်ပါ။ လိုအပ်ပါက ထပ်မံ enroll လုပ်ပါ။
 
-## Route အမျိုးအစားများ
+## လမ်းကြောင်းသင်တန်းများ
 
-`src/server/authz/types.ts` သည် အမျိုးအစား သုံးမျိုးကို သတ်မှတ်သည်; အမျိုးအစား အတိအကျ သတ်မှတ်၍ မရသော route မှန်သမျှသည် `MANAGEMENT` သို့ ပြန်ကျသည်။
+`src/server/authz/types.ts` class သုံးခုကိုသတ်မှတ်သည်။ ခွဲခြား၍မရသော မည်သည့်လမ်းကြောင်းသည် `MANAGEMENT` သို့ ပြန်ရောက်သွားသည် ။
 
-| အမျိုးအစား   | ဖော်ပြချက်                                                                                                                                                       | လိုအပ်သော auth                                                      |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `PUBLIC`     | ရှင်းရှင်းလင်းလင်း ဘေးကင်းသော route များ — login၊ logout၊ status၊ init၊ health၊ onboarding bootstrap။                                                            | မလို                                                                |
-| `CLIENT_API` | Model ဝန်ဆောင်မှု endpoint များ — `/api/v1/*`၊ `/api/v1beta/*`၊ နှင့် alias များ `/v1/*`၊ `/v1beta/*`၊ `/chat/completions`၊ `/responses`၊ `/models`၊ `/codex/*`။ | ထင်ရှားသော `REQUIRE_API_KEY` feature flag ဖွင့်ထားသောအခါ Bearer key |
-| `MANAGEMENT` | Dashboard စာမျက်နှာများ၊ settings၊ provider များ၊ key များ၊ admin နှင့် diagnostics endpoint များ။                                                               | Dashboard session သို့မဟုတ် `manage` scope ပါသော Bearer             |
+| အတန်း        | ဖော်ပြချက်                                                                                                                                                              | အထောက်အထား လိုအပ်သည်။                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `PUBLIC`     | — အကောင့်ဝင်ခြင်း၊ ထွက်ခြင်း၊ အခြေအနေ၊ ကျန်းမာရေး၊ စတင်အသုံးပြုသည့် bootstrap လမ်းကြောင်းများကို ပြတ်သားစွာ လုံခြုံစွာပြုလုပ်ပါ။                                        | တစ်ခုမှ                                                                         |
+| `CLIENT_API` | မော်ဒယ်မှ ဝန်ဆောင်မှုပေးသည့် အဆုံးမှတ်များ — `/api/v1/*`, `/api/v1beta/*`, plus aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | ထိရောက်သော `REQUIRE_API_KEY` အင်္ဂါရပ်အလံကို ဖွင့်ထားသောအခါတွင် ကိုင်ဆောင်သူကီး |
+| `MANAGEMENT` | ဒက်ရှ်ဘုတ်စာမျက်နှာများ၊ ဆက်တင်များ၊ ပံ့ပိုးပေးသူများ၊ သော့များ၊ စီမံခန့်ခွဲသူနှင့် အဖြေရှာရေးဆိုင်ရာ အဆုံးမှတ်များ။                                                    | `manage` နယ်ပယ်နှင့်အတူ ဒက်ရှ်ဘုတ်စက်ရှင် OR ထမ်းသမား                           |
 
-`MANAGEMENT` လုပ်ဆောင်ချက် အချို့သည် **operator-only** ဖြစ်သည်: `manage` key သာလျှင် မလုံလောက်ပါ။ သိမ်းထားသော credential များကို ထုတ်ယူခြင်း (`GET /api/settings/export-json`၊ `GET /api/db-backups/export`၊ `GET /api/db-backups/exportAll`)၊ လက်ရှိ data အပေါ် backup ကို ပြန်ထည့်ခြင်း (`dryRun=true` အပါအဝင် `POST /api/db-backups/import`၊ id ဖြင့် `POST /api/db-backups` restore၊ `POST /api/settings/import-json`)၊ restore point များကို ဖျက်ခြင်း (`DELETE /api/db-backups` cleanup နှင့် `PATCH /api/db-backups` ကြောင့်ဆိုသော ၎င်းက ထိန်းသိမ်းထားသော retention သည် backup တိုင်းပြီးနောက် အလိုအလျောက် pruning ကို မောင်းနှင်သည်) တို့အတွက် dashboard session၊ local CLI subject သို့မဟုတ် login ပိတ်ထားခြင်း လိုအပ်သည်။ Sync token ထုတ်ခြင်း (`POST /api/sync/tokens`) နှင့် `admin` CLI access token ထုတ်ခြင်း (`POST /api/cli/tokens`) တို့သည် login မုဒ်အားလုံးတွင် dashboard session သို့မဟုတ် local CLI subject လိုအပ်သည်။ မည်သည့် scope ရှိ API key မဆို နှင့် `oma_` access token များသည် operator credential မဟုတ်ပါ: လိုအပ်သည့်အခါတိုင်း `403` ရရှိသည်။ စစ်ဆေးမှုသည် `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) တွင် ရှိသည်။ Login setting များ ပြောင်းခြင်းလည်း operator-only ဖြစ်သည်: `POST /api/settings/require-login` (management password သတ်မှတ်ခြင်း / `requireLogin` ပြောင်းခြင်း) သည် password ရှိပြီးနောက် ထို credential များကိုသာ လက်ခံသည် — ပထမဆုံး run ချိန် bootstrap window (password မရှိသေးချိန်) မပြောင်းလဲပါ — နှင့် dashboard session က password အစားထိုးရန် `currentPassword` ပို့ရမည် (မပါခြင်း သို့မဟုတ် မှားခြင်းဖြစ်ပါက `403`၊ `settings.update_failed` အဖြစ် audit လုပ်သည်)။ Local CLI နှင့် login ပိတ်ထားသော instance တို့သည် recovery လမ်းကြောင်းကို ထိန်းသိမ်းထားပြီး ထို့ကြောင့် `currentPassword` မပါဘဲ password သတ်မှတ်နိုင်သည်၊ အကြောင်းမှာ နှစ်ခုလုံးသည် data directory ပိုင်ဆိုင်သော host ဖြင့် ချိတ်ဆက်ထားသောကြောင့် ဖြစ်သည်။
+`MANAGEMENT` လုပ်ဆောင်ချက် အနည်းငယ်ရှိသည်။** အော်ပရေတာ သီးသန့်** `manage` ကီးတစ်ခု မလုံလောက်ပါ။ သိမ်းဆည်းထားသော အထောက်အထားများ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) ၊ တိုက်ရိုက်ဒေတာပေါ်မှ အရန်ကူးယူခြင်း (`POST /api/db-backups/import` အပါအဝင် `dryRun=true`၊ `POST /api/db-backups` ပြန်လည်ရယူခြင်း id ၊ `POST /api/settings/import-json`) ၊ ပြန်လည်ရယူသည့်အချက်များ (`DELETE /api/db-backups` သန့်ရှင်းရေးနှင့် `PATCH /api/db-backups` တို့ကို ဖျက်စီးခြင်း ၊ ၎င်းကို ဆက်လက်ထိန်းသိမ်းထားခြင်းဖြင့် ၎င်းသည် ဆက်လက်တည်ရှိနေသောကြောင့် ၎င်းသည် ဆက်ရှိနေပါက အလိုအလျောက်ဖြတ်တောက်ခြင်းကို တွန်းအားပေးပါသည်။ အရန်သိမ်းထားတိုင်းပြီးနောက် စက်တွင်း သို့မဟုတ် CLI စက်ရှင်ကို ဖြုတ်ထားရန် လိုအပ်ပါသည်)၊ စင့်ခ် တိုကင် (`POST /api/sync/tokens`) ကို ထုတ်ပေးခြင်းနှင့် `admin` CLI ဝင်ရောက်ခွင့် တိုကင် (`POST /api/cli/tokens`) ကို ရေးသွင်းခြင်းသည် လော့ဂ်အင်မုဒ်တိုင်းတွင် ဒက်ရှ်ဘုတ် စက်ရှင် သို့မဟုတ် ဒေသန္တရ CLI အကြောင်းအရာ လိုအပ်ပါသည်။ မည်သည့်နယ်ပယ်၏ API သော့များနှင့် `oma_` ဝင်ရောက်နိုင်သော တိုကင်များသည် အော်ပရေတာအထောက်အထားများမဟုတ်ပါ- လိုအပ်သည့်အခါတိုင်း `403` ရရှိသည်။ ချက်လက်မှတ်သည် `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) တွင် နေထိုင်သည်။ လော့ဂ်အင်ဆက်တင်များကို ပြောင်းလဲခြင်းသည် အော်ပရေတာ-သီးသန့်လည်းဖြစ်သည်- `POST /api/settings/require-login` (စီမံခန့်ခွဲမှုစကားဝှက်ကိုသတ်မှတ်ရန် / `requireLogin` ကိုသတ်မှတ်ခြင်း) စကားဝှက်တစ်ခုရှိသည်နှင့်တစ်ပြိုင်နက် ထိုအထောက်အထားများကိုသာလက်ခံသည် — ပထမဖွင့်စထရက်ပ်ဝင်းဒိုး (စကားဝှက်မရှိသေးပါ) သည် — မပြောင်းလဲဘဲ၊ စကားဝှက်ကိုအစားထိုးရန်အတွက် ဒက်ရှ်ဘုတ်ကဏ္ဍမှ `currentPassword` ပေးပို့ရပါမည် (`403` ) ပျောက်ဆုံးနေပါက သို့မဟုတ် မှားနေသည့်အခါ `settings.update_failed`၊ audit local CLI နှင့် login disabled instance တစ်ခုသည် recovery path ကိုသိမ်းထားပြီး နှစ်ခုလုံးကို data directory ပိုင်ဆိုင်သော host နှင့် ချိတ်ဆက်ထားသောကြောင့် ၎င်းမပါဘဲ စကားဝှက်တစ်ခုသတ်မှတ်နိုင်သည်။
 
 ## ပိုက်လိုင်း
 
@@ -200,53 +200,49 @@ Incoming request → src/proxy.ts
 
 အောင်မြင်သောမူဝါဒသည် `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ဖြင့် ပြန်ပေးသည်။ အောက်ခြေမှ ကိုင်တွယ်သူများသည် auth logic ကို ပြန်လည်လုပ်ဆောင်မည့်အစား `assertAuth(request, "CLIENT_API")` ရှိ `src/server/authz/assertAuth.ts` မှတစ်ဆင့် ဖတ်နိုင်သည်။
 
-## အများပြည်သူသုံး Route စာရင်း
+## အများသူငှာ လမ်းကြောင်းများစာရင်း
 
-`src/shared/constants/publicApiRoutes.ts` သည် တိတိကျကျ သတ်မှတ်ထားသော ခွင့်ပြုစာရင်းဖြစ်သည်။
+`src/shared/constants/publicApiRoutes.ts` သည် ထင်ရှားသော ခွင့်ပြုစာရင်းဖြစ်သည်-
 
-ဤစာရင်းကို **ပုံစံ** အလိုက် ခွဲထားပြီး၊ ထိုခွဲခြားမှုသည် အရေးကြီးသော လုံခြုံရေးဆိုင်ရာ အကျိုးသက်ရောက်မှုရှိသည် (GHSA-74g9-q8f6-793h)။ Prefix တစ်ခုကို
-`startsWith()` ဖြင့် ကိုက်ညီစစ်ဆေးသောကြောင့်၊ ၎င်း၏ ရှေ့စာလုံးများနှင့် တူညီသည့် အနီးစပ်ဆုံး path အားလုံးကိုလည်း ကိုက်ညီစေသည်။
-`/api/usage/om-usage` ကို prefix အဖြစ် သတ်မှတ်ထားသောကြောင့် `/api/usage/om-usage<anything>` သည် PUBLIC ဖြစ်ပြီး၊ Next က ၎င်းကို
-`/api/usage/[connectionId]` သို့ ဖြေရှင်းပေးသည် — ကိုယ်ပိုင် auth မရှိသော handler တစ်ခုဖြစ်သည်။
+စာရင်းကို ခွဲထားသည်။** ပုံသဏ္ဍာန်** ၊ ခွဲခြမ်းသည် load-bearing (GHSA-74g9-q8f6-793h) : ရှေ့ဆက်သည် `startsWith()` နှင့် ကိုက်ညီသည်၊ ထို့ကြောင့် ၎င်းသည် ၎င်း၏ ဦးဆောင်ဇာတ်ကောင်များကို မျှဝေသည့် ကပ်လျက်လမ်းကြောင်းတိုင်းနှင့်လည်း ကိုက်ညီပါသည်။ `/api/usage/om-usage` ၏ရှေ့ဆက်အဖြစ် `/api/usage/om-usage<anything>` PUBLIC အမှတ်အသားပြုထားပြီး၊ ထို့နောက် ၎င်းသည် ၎င်းကို ကိုယ်ပိုင် auth မရှိသော ကိုင်တွယ်သူကို `/api/usage/[connectionId]` — သို့ ဖြေရှင်းသည်။
 
 ```ts
-// အမှန်တကယ်သော subtree များ။ entry တိုင်းသည် "/" ဖြင့် အဆုံးသတ်ရမည် (unit test ဖြင့် အတည်ပြုထားသည်)။
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify တွင် CLIENT_API အဖြစ် သတ်မှတ်ပြီး "auth မလိုသော public" အဖြစ် မသတ်မှတ်ပါ။
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// နောက်ဆုံး slash ပါသည်ဖြစ်စေ၊ မပါသည်ဖြစ်စေ အတိအကျ ကိုက်ညီရမည့် route တစ်ခုချင်းစီ။
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP အတွက် login အဆင့် ၂၊ MFA-pending cookie လိုအပ်သည်
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin ဖြေလျှော့မှုကိုလည်း အသုံးပြုသည့်၊ ဖတ်ရှုရန်သာဖြစ်သော route တစ်ခုချင်းစီ။
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS ဖြေလျှော့မှု မပါဝင်သည့်၊ ဖတ်ရှုရန်သာဖြစ်သော route တစ်ခု။
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-ဖတ်ရှုရန်သာ route များသည် လုံခြုံသော method များအတွက်သာ အများပြည်သူသုံးနိုင်သည်။ မှတ်ချက် — `classifyRoute()` သည် `/api/v1/*` နှင့် `/api/v1beta/*` ကို PUBLIC fall-through မှ ဖယ်ထုတ်ထားသည် — ထို route များသည် အမြဲတမ်း `CLIENT_API` ဖြစ်သောကြောင့် Bearer-key မူဝါဒကို ဆက်လက်အသုံးပြုရသည်။
+Read-only လမ်းကြောင်းများသည် အများသူငှာဖြစ်သည်။** အားလုံးအတွက်** လုံခြုံသောနည်းလမ်းများအတွက်။ မှတ်ချက်- `classifyRoute()` `/api/v1/*` နှင့် `/api/v1beta/*` PUBLIC မှတဆင့် — မှ ဖယ်ထုတ်ထားခြင်းဖြစ်ပြီး ၎င်းတို့သည် အမြဲတမ်း `CLIENT_API` ဖြစ်သောကြောင့် Bearer-key မူဝါဒကို ဆက်လက်ကျင့်သုံးဆဲဖြစ်သည်။
 
 ## Route အသစ်တစ်ခု ထည့်သွင်းခြင်း
 
@@ -319,15 +315,15 @@ subset ဖြစ်ပြီး၊ ထို full catalog မဟုတ်ပါ�
 (`src/lib/accessTokens/scopes.ts`) ဖြင့် အဆင့်သတ်မှတ်သည်။ ဤအဆင့်သည် access-token
 credential အတွက်သာ သက်ဆိုင်သည်။ [Management Authentication](../guides/MANAGEMENT-AUTH.md) ကို ကြည့်ပါ။
 
-## Auth လိုအပ်ချက် ခလုတ်
+## အထောက်အထားပြရန် လိုအပ်သည်
 
-`src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် request တစ်ခုအတွက် **မည်သည့်** auth ကိုမဆို တည်ဆဲ လုပ်ရမလား ဆုံးဖြတ်သည်:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` ရှိမရှိ ဆုံးဖြတ်သည်။** တစ်ခုခု** တောင်းဆိုချက်တစ်ခုအတွက် auth ကို ပြဌာန်းသည်-
 
-- `settings.requireLogin === false` → auth ကို global အရ ပိတ်ထားသည်၊ ဒါပေမဲ့ always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) နှင့် ၎င်းလက်ခံသော credential ကို ထုတ်ပေးသည့် ခေါ်ဆိုမှုများကတော့ login ဖွင့်ထားစဉ်နှင့် တူညီသော credential လိုအပ်သည်: sync token ထုတ်ခြင်း၊ မည်သည့် scope ဖြင့်မဆို CLI access token ထုတ်ခြင်း၊ နှင့် `manage`/`admin` scope ပါသော API key ဖန်တီးခြင်း၊ ထို scope ကို key တစ်ခုသို့ ပေးခြင်း၊ သို့မဟုတ် ထို key ကို regenerate သို့မဟုတ် ပြခြင်း (`src/lib/api/requireManagementAuth.ts` ရှိ `requireCredentialForManagementScopedKey()`)။ Inference-only key များသည် ဖွင့်ထားဆဲ ဖြစ်သည်။
-- Password သတ်မှတ်မထားပြီး **နှင့်** `INITIAL_PASSWORD` env var မရှိပါက → bootstrap mode သည် onboarding wizard နှင့် loopback request များကို ခွင့်ပြုသော်လည်း ပြင်ပ network request များသည် credential လိုအပ်ဆဲ ဖြစ်သည်။
-- DB error မည်သည့်အချိန်မဆို → fail closed (ဘေးကင်းရေးကို မူလအဖြစ် ထားသည်)။
+- `settings.requireLogin === false` → auth သည် အမြဲတမ်းကာကွယ်ထားသောအဆင့် ( [Route Guard Tiers ကို](../security/ROUTE_GUARD_TIERS.md) ကြည့်ပါ) နှင့် အကောင့်ဝင်ခြင်းကဲ့သို့တူညီသောအထောက်အထားလိုအပ်သည့် အထောက်အထားတစ်ခုထုတ်ပေးသောခေါ်ဆိုမှုများမှလွဲ၍ တစ်ကမ္ဘာလုံးပိတ်ထားသည်- စင့်ခ်တိုကင်`admin` ထုတ်ပေးခြင်း၊ CLI ဝင်ရောက်ခွင့်တိုကင်များကိုမည်သည့်နယ်ပယ်တွင်မဆိုထည့်သွင်းခြင်းနှင့် API သော့ဖြင့် `manage` ကိုဖန်တီးခြင်း၊ သော့၊ သို့မဟုတ် ထိုသော့ကို ပြန်ထုတ်ခြင်း သို့မဟုတ် ထုတ်ဖော်ခြင်း (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)။ အနုမာန-သီးသန့်သော့များ ဆက်လက်ဖွင့်ထားသည်။ ကာကွယ်ထားသော အင်္ဂါရပ်အလံ (`REQUIRE_API_KEY`၊ အခြားလုံခြုံရေးအလံများ၊ နှင့် SSRF / TLS / MCP-scope / sandbox အလံများ [အင်္ဂါရပ်အလံ](../reference/FEATURE_FLAGS.md#rest-api) များတွင် ဖော်ပြထားသော အလံများ ) နှင့် PII မျက်နှာဖုံးဆက်တင်များ (`PUT /api/settings/pii`) ကို သိမ်းဆည်းခြင်းသည်လည်း အထောက်အထားတစ်ခု လိုအပ်နေပါသည်။
+- စကားဝှက်ကို ပြင်ဆင်သတ်မှတ်ထားခြင်းမရှိပါ။** နှင့်** `INITIAL_PASSWORD` env var → bootstrap မုဒ်သည် onboarding wizard နှင့် loopback တောင်းဆိုမှုများကို ခွင့်ပြုသော်လည်း ထိတွေ့ထားသော ကွန်ရက်တောင်းဆိုမှုများသည် အထောက်အထားများ လိုအပ်နေသေးသည်။ ခြွင်းချက်- ကာကွယ်ထားသော အင်္ဂါရပ်အလံတစ်ခုရေးခြင်းနှင့် PII မျက်နှာဖုံးဆက်တင်များ (`PUT /api/settings/pii`) ကို သိမ်းဆည်းခြင်းသည် loopback မှပင် အထောက်အထားတစ်ခု လိုအပ်သည်၊ ထို့ကြောင့် loopback သူ့ဘာသာသူ မလုံလောက်ပါ။
+- မည်သည့် DB error → ပိတ်သည် (secure-by-default)။
 
-Client API key enforcement သည် `src/shared/utils/featureFlags.ts` ရှိ `isRequireApiKeyEnabled()` ကို အသုံးပြုသည်၊ တိုက်ရိုက် `process.env.REQUIRE_API_KEY` ကို ဖတ်ခြင်း မဟုတ်ပါ။ ၎င်းသည် deployed instance များအတွက် အရေးကြီးသည်: Dashboard → Feature Flags တွင် `REQUIRE_API_KEY` ကို ပြောင်းခြင်းက DB override ကို သိမ်းပြီး `/v1/*`၊ `/v1beta/*`၊ `/models`၊ `/responses`၊ `/chat/completions`၊ `/codex/*` နှင့် ဤ helper ကို မျှဝေသော အခြား client-API auth စစ်ဆေးမှုများကို ချက်ချင်း သက်ရောက်စေသည်။ Feature flag store ကို ဖတ်၍ မရပါက client API auth သည် fail closed ဖြစ်ပြီး key တစ်ခု လိုအပ်သည်။
+Client API key enforcement သည် `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` တွင်အသုံးပြုသည်၊၊ တိုက်ရိုက် `process.env.REQUIRE_API_KEY` ဖတ်ခြင်းမဟုတ်ပါ။ အသုံးပြုထားသော သာဓကများအတွက် ၎င်းသည် အရေးကြီးသည်- Dashboard → တွင် `REQUIRE_API_KEY` အင်္ဂါရပ်အလံများကို ပြောင်းဖွင့်ခြင်းသည် DB အစားထိုးမှုတစ်ခုကို သိမ်းဆည်းထားပြီး `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, နှင့် ဤအကူအညီကို မျှဝေသော အခြား client-API စစ်မှန်ကြောင်းစစ်ဆေးမှုများကို အကျိုးသက်ရောက်စေသည်။ အင်္ဂါရပ်အလံစတိုးဆိုင်ကို မဖတ်နိုင်ပါက၊ ကလိုင်းယင့် API စစ်မှန်ခြင်းပျက်ကွက်ပြီး သော့တစ်ခု လိုအပ်သည်။
 
 ## လိုက်ဖက်ညီမှုကို ချိုးဖောက်သော ပြောင်းလဲမှု — v3.8.0
 

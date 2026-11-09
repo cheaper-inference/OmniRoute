@@ -10,7 +10,7 @@
 
 ## Instalare
 
-OmniRoute MCP este integrat. Porniți-l cu:
+OmniRoute MCP este încorporat. Începeți cu:
 
 ```bash
 omniroute --mcp
@@ -19,26 +19,21 @@ omniroute --mcp
 Sau prin transportul open-sse:
 
 ```bash
-# Transport HTTP cu streaming (portul 20130)
-omniroute --dev  # MCP pornește automat la endpoint-ul /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Transporturile HTTP (`sse` / `streamable-http`, furnizate în același proces de serverul tabloului de bord) sunt
-dezactivate în mod implicit și, anterior, puteau fi comutate numai din pagina `/dashboard/mcp`. Începând cu v3.8.51,
-CLI-ul oferă funcționalitate echivalentă:
+Transporturile HTTP (`sse` / `streamable-http`, servite în proces de serverul tabloului de bord) sunt dezactivate în mod implicit și anterior puteau comuta doar din pagina `/dashboard/mcp`. Începând cu v3.8.51, CLI are paritate:
 
 ```bash
-omniroute mcp status                                  # activat/online, transport, numărul de instrumente
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # resetează sesiunile sse/streamable-http active
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` trimit o solicitare PATCH pentru aceeași setare `mcpEnabled` (și, opțional, `mcpTransport`)
-pe care tabloul de bord o comută prin `/api/settings`. `mcp restart` apelează `POST /api/mcp/restart`: închide
-sesiunile `sse`/`streamable-http` active, astfel încât următoarea solicitare să efectueze o reinițializare curată, returnează
-`409` dacă MCP este dezactivat și `501` pentru transportul `stdio` (clienții stdio își gestionează propriul
-subproces — nu există niciun identificator intern de proces care să poată fi repornit).
+`mcp enable`/`mcp disable` PATCH același `mcpEnabled` (și opțional `mcpTransport`) setarea tabloului de bord comută prin `/api/settings`. `mcp restart` apelează `POST /api/mcp/restart`: distruge sesiunile active `sse`/`streamable-http`, astfel încât următoarea solicitare se reinițializează curat, returnează `409` dacă MCP este dezactivat și `501` pentru transportul `stdio` (clienții stdio dețin propriul subproces — nu există un handle în proces pentru a reporni).
 
 ## Transporturi
 
@@ -133,53 +128,40 @@ Cursor, Cline și a clienților MCP compatibili.
 
 ## Instrumente de compresie (13)
 
-| Instrument                          | Domenii de acces    | Descriere                                                                                                                                |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Setări de compresie, rezumat analitic și statistici care țin cont de cache (include metadatele `analytics.mcpDescriptionCompression`)    |
-| `omniroute_compression_configure`   | `write:compression` | Configurează modul de compresie, pragul, raportul țintă, păstrarea promptului de sistem și comutatorul pentru compresia descrierilor MCP |
-| `omniroute_set_compression_engine`  | `write:compression` | Selectează motorul activ (off/caveman/rtk/stacked) și intensitatea Caveman/RTK                                                           |
-| `omniroute_list_compression_combos` | `read:compression`  | Listează combinațiile de compresie denumite și fluxurile lor de motoare                                                                  |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analize grupate după combinația de compresie și motor                                                                                    |
-| `omniroute_ccr_store`               | `write:compression` | Stochează conținut izolat per apelant în spațiul CCR limitat din memorie și returnează un marcaj plus o referință `ccr://`               |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Recuperează integral conținutul CCR sau folosind modurile de început, sfârșit, linii, grep și statistici                                 |
-| `omniroute_ccr_inspect`             | `read:compression`  | Inspectează metadatele CCR deținute de apelant fără a returna conținutul                                                                 |
-| `omniroute_ccr_list`                | `read:compression`  | Listează metadatele paginate pentru blocurile CCR deținute de apelant                                                                    |
-| `omniroute_ccr_delete`              | `write:compression` | Șterge un bloc CCR deținut de apelant                                                                                                    |
-| `omniroute_ccr_stats`               | `read:compression`  | Raportează utilizarea memoriei per apelant, contoarele ciclului de viață și limitele spațiului de stocare                                |
-| `omniroute_rtk_discover`            | `read:compression`  | Descoperă zgomotul recurent în eșantioanele de ieșire RTK incluse voluntar                                                               |
-| `omniroute_rtk_learn`               | `read:compression`  | Generează o versiune preliminară revizuibilă a filtrului RTK din eșantioanele incluse voluntar                                           |
+| Instrument                          | Domenii de aplicare | Descriere                                                                                                                                   |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | Setări de compresie, rezumat a analizelor și statistici care țin seama de cache (include metadatele `analytics.mcpDescriptionCompression` ) |
+| `omniroute_compression_configure`   | `write:compression` | Configurați modul de compresie, pragul, raportul țintă, conservarea promptului de sistem, comutatorul de compresie al descrierii MCP        |
+| `omniroute_set_compression_engine`  | `write:compression` | Alegeți motorul activ (off/caveman/rtk/stacked) și intensitatea Caveman/RTK                                                                 |
+| `omniroute_list_compression_combos` | `read:compression`  | Listați combo-urile de compresie numite și conductele lor de motor                                                                          |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analize grupate după combo de compresie și motor                                                                                            |
+| `omniroute_ccr_store`               | `write:compression` | Stocați conținutul izolat de apelant în magazinul CCR delimitat din memorie și returnați un marker plus referință `ccr://`                  |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Preluați conținutul CCR în întregime sau cu modurile cap, coadă, linii, grep și statistici                                                  |
+| `omniroute_ccr_inspect`             | `read:compression`  | Inspectați metadatele CCR deținute de apelant fără a returna conținut                                                                       |
+| `omniroute_ccr_list`                | `read:compression`  | Listează metadatele paginate pentru blocurile CCR deținute de apelant                                                                       |
+| `omniroute_ccr_delete`              | `write:compression` | Ștergeți un bloc CCR deținut de apelant                                                                                                     |
+| `omniroute_ccr_stats`               | `read:compression`  | Raportați utilizarea memoriei pentru apelant, contoarele ciclului de viață și limitele stocării                                             |
+| `omniroute_rtk_discover`            | `read:compression`  | Descoperiți zgomotul recurent în mostrele de ieșire RTK opt-in                                                                              |
+| `omniroute_rtk_learn`               | `read:compression`  | Generați o schiță de filtru RTK care poate fi revizuită din mostre de înscriere                                                             |
 
-Intrările CCR sunt păstrate doar în memorie și dispar la repornire. Fiecare bloc este limitat la 2 MiB, fiecare
-principal la 16 MiB, iar spațiul de stocare global la 64 MiB. În mod implicit, intrările au un TTL de 24 de ore (maximum
-șapte zile). Recuperarea MCP integrală este limitată la 256 KiB; blocurile mai mari rămân disponibile prin
-modurile cu intervale și grep. Stocarea, recuperarea, listarea, inspectarea, ștergerea și statisticile sunt izolate în funcție de
-principalul cheii API autentificate. Înregistrările de audit conțin hash-uri și metadate privind dimensiunea, niciodată conținutul.
+Intrările CCR folosesc un magazin cu două niveluri: un nivel în memorie fierbinte susținut, pe timpi de execuție non-cloud locale, de un nivel SQLite durabil (`ccr_blocks`, activat în mod implicit), astfel încât un bloc supraviețuiește evacuării sau repornirii până când TTL său se epuizează — cu excepția blocurilor de peste 512 KB și a duratelor de memorie în cloud, care rămân în mod constant. Fiecare bloc este limitat la 2 MiB, fiecare principal la 16 MiB, iar magazinul global la 64 MiB. Intrările implicite sunt TTL de 24 de ore (maximum șapte zile). Recuperarea completă MCP este limitată la 256 KiB; blocurile mai mari rămân disponibile prin modurile ranged și grep. Stocarea, preluarea, listarea, inspecția, ștergerea și statisticile sunt izolate de principalul cheie API autentificată. Înregistrările de audit conțin hash-uri și metadate de dimensiune, niciodată conținut. Detaliile orientate către operator (cei doi markeri, cerințele prealabile ale clientului, `codemode:false`, domeniile per instrument, paginarea și o matrice de diagnosticare) sunt disponibile în [Compression Engines → Prerequisite / ghid operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` raportează separat compresia descrierilor MCP în
-`analytics.mcpDescriptionCompression`. Valorile respective sunt estimări ale dimensiunii metadatelor pentru descrierile MCP care pot fi listate
-(`tools`, `prompts`, `resources` și `resourceTemplates`); acestea nu sunt înregistrări ale utilizării furnizorului
-și sunt marcate cu `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` raportează comprimarea descrierii MCP separat sub `analytics.mcpDescriptionCompression`. Aceste valori sunt estimări ale dimensiunii metadatelor pentru descrierile listabile MCP (`tools`, `prompts`, `resources` și `resourceTemplates`); nu sunt chitanțe de utilizare a furnizorului și sunt marcate cu `source: "mcp_metadata_estimate"`.
 
 ### Filtrul arborelui de accesibilitate MCP (v3.8.0)
 
-Separat de instrumentele de compresie de mai sus, OmniRoute include un filtru post-execuție care
-comprimă **rezultatele instrumentelor** MCP pentru browser/accesibilitate înainte ca acestea să fie returnate
-agentului. Acest filtru nu este el însuși un instrument — rulează transparent pentru orice rezultat al unui instrument care conține
-text detaliat al arborelui de accesibilitate sau al instantaneului browserului (≥2000 de caractere).
+Separat de instrumentele de compresie de mai sus, OmniRoute include un filtru post-execuție care comprimă** rezultatele instrumentului** de instrumente MCP browser/accessibility înainte ca acestea să fie returnate agentului. Acest filtru nu este în sine un instrument — rulează transparent pe orice rezultat al instrumentului care conține un arbore de accesibilitate verbos sau un text instantaneu al browserului (≥ 2000 de caractere).
 
-Comportamente principale:
+Comportamente cheie:
 
-- Restrânge ≥30 de linii-surori consecutive repetate într-un rezumat cu începutul + sfârșitul
-- Păstrează ancorele `[ref=eXX]` necesare pentru Playwright/utilizarea computerului
-- Trunchiază forțat textul supradimensionat (>50.000 de caractere), incluzând un indiciu de navigare
-- Economii estimate: **60–80%** pentru sarcinile utile ale instantaneelor browserului
+- Restrânge ≥ 30 de linii de frate repetate consecutive în rezumatul capului + coada
+- Păstrează ancorele `[ref=eXX]` cerute de Playwright/computer-use
+- Trunchiază complet textul supradimensionat (> 50.000 de caractere) cu un indiciu de navigare
+- Economii așteptate:** 60–80%** pe încărcăturile utile de instantanee ale browserului
 
-Configurare: `compression.mcpAccessibility` în setările globale (migrarea 056).
-Implementare: `open-sse/services/compression/engines/mcpAccessibility/`.
-Documentație completă: [Motoare de compresie — Filtrul arborelui de accesibilitate MCP](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Configurare: `compression.mcpAccessibility` în setările globale (migrarea 056). Implementare: `open-sse/services/compression/engines/mcpAccessibility/`. Documente complete: [Motoare de compresie — MCP Filtru arbore de accesibilitate](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Consultați [Motoare de compresie](../compression/COMPRESSION_ENGINES.md) și [Compresia RTK](../compression/RTK_COMPRESSION.md) pentru
-modelul de compresie la execuție pe care se bazează aceste instrumente.
+Consultați [Motoarele de compresie](../compression/COMPRESSION_ENGINES.md) și [RTK Compression](../compression/RTK_COMPRESSION.md) pentru modelul de compresie de rulare din spatele acestor instrumente.
 
 ## Instrumente 1Proxy (3)
 

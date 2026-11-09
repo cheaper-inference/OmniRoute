@@ -153,17 +153,17 @@ Dashboard-ის ადმინისტრატორის შესვლ�
   4. გააუქმეთ `OMNIROUTE_DISABLE_MFA`-ის დაყენება, გადატვირთეთ სერვერი და საჭიროების შემთხვევაში
      ხელახლა გაიარეთ რეგისტრაცია.
 
-## მარშრუტების კლასები
+## მარშრუტის კლასები
 
-`src/server/authz/types.ts` განსაზღვრავს სამ კლასს; ნებისმიერი მარშრუტი, რომლის დეტერმინისტულად კლასიფიცირებაც შეუძლებელია, უბრუნდება `MANAGEMENT`-ს.
+`src/server/authz/types.ts` განსაზღვრავს სამ კლასს; ნებისმიერი მარშრუტი, რომელიც არ შეიძლება კლასიფიცირებული იყოს დეტერმინისტულად, ისევ `MANAGEMENT` ზე მოდის.
 
-| კლასი        | აღწერა                                                                                                                                                                | საჭირო ავთენტიფიკაცია                                           |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | აშკარად უსაფრთხო მარშრუტები — შესვლა, გასვლა, სტატუსი, ინიციალიზაცია, ჯანმრთელობა, onboarding-ის bootstrap.                                                           | არცერთი                                                         |
-| `CLIENT_API` | მოდელების მომსახურების endpoint-ები — `/api/v1/*`, `/api/v1beta/*`, ასევე მეტსახელები `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer გასაღები, როცა ჩართულია `REQUIRE_API_KEY` feature flag-ი |
-| `MANAGEMENT` | დაფის გვერდები, პარამეტრები, providers, გასაღებები, ადმინისტრატორისა და დიაგნოსტიკის endpoint-ები.                                                                    | დაფის სესია ან Bearer `manage` scope-ით                         |
+| კლასი        | აღწერა                                                                                                                                                               | საჭიროა ავტორიზაცია                                                             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `PUBLIC`     | აშკარად უსაფრთხო მარშრუტები — შესვლა, გამოსვლა, სტატუსი, ჯანმრთელობა, ბორტზე ჩამტვირთავი.                                                                            | არცერთი                                                                         |
+| `CLIENT_API` | მოდელის მომსახურე საბოლოო წერტილები — `/api/v1/*`, `/api/v1beta/*`, პლუს მეტსახელები `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | მატარებლის გასაღები, როდესაც ჩართულია ეფექტური `REQUIRE_API_KEY` ფუნქციის დროშა |
+| `MANAGEMENT` | დაფის გვერდები, პარამეტრები, პროვაიდერები, გასაღებები, ადმინისტრატორი და დიაგნოსტიკის საბოლოო წერტილები.                                                             | დაფის სესიის OR Bearer `manage` მასშტაბით                                       |
 
-`MANAGEMENT`-ის ზოგიერთი მოქმედება **მხოლოდ ოპერატორისთვისაა**: `manage` გასაღები არ არის საკმარისი. შენახული credential-ების ექსპორტი (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), სარეზერვო ასლის აღდგენა ცოცხალ მონაცემებზე (`POST /api/db-backups/import`, მათ შორის `dryRun=true`, `POST /api/db-backups` აღდგენა id-ით, `POST /api/settings/import-json`), აღდგენის წერტილების განადგურება (`DELETE /api/db-backups` გასუფთავება და `PATCH /api/db-backups`, რადგან მის მიერ შენახული შენარჩუნების პოლიტიკა მართავს ყოველი სარეზერვო ასლის შემდეგ ავტომატურ წაშლას) მოითხოვს დაფის სესიას, ლოკალურ CLI სუბიექტს ან გამორთულ შესვლას. სინქრონიზაციის token-ის გაცემა (`POST /api/sync/tokens`) და `admin` CLI წვდომის token-ის მოჭრა (`POST /api/cli/tokens`) მოითხოვს დაფის სესიას ან ლოკალურ CLI სუბიექტს შესვლის ყველა რეჟიმში. API გასაღებები ნებისმიერი scope-ით და `oma_` წვდომის token-ები არ არიან ოპერატორის credential-ები: როცა ისინი საჭიროა, იღებენ `403`-ს. შემოწმება მდებარეობს `src/lib/api/operatorCredential.ts`-ში (`resolveOperatorCredential()` / `requireOperatorCredential()`). შესვლის პარამეტრების შეცვლაც მხოლოდ ოპერატორისთვისაა: `POST /api/settings/require-login` (მართვის პაროლის დაყენება / `requireLogin`-ის გადართვა) პაროლის არსებობის შემდეგ იღებს მხოლოდ ამ credential-ებს — პირველი გაშვების bootstrap ფანჯარა (როცა პაროლი ჯერ არ არსებობს) უცვლელი რჩება — ხოლო დაფის სესიამ პაროლის შესაცვლელად უნდა გააგზავნოს `currentPassword` (`403`, როცა ის აკლია ან არასწორია, აუდიტირდება როგორც `settings.update_failed`). ლოკალური CLI და გამორთული შესვლის მქონე ინსტალაცია ინარჩუნებენ აღდგენის გზას და პაროლის დაყენებას შეუძლიათ მის გარეშეც, რადგან ორივე მიბმულია ჰოსტზე, რომელიც მონაცემთა დირექტორიას ფლობს.
+რამდენიმე `MANAGEMENT` ქმედებაა** მხოლოდ ოპერატორისთვის** : `manage` გასაღები არ არის საკმარისი. შენახული სერთიფიკატების ექსპორტი (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), სარეზერვო ასლის აღდგენა ცოცხალ მონაცემებზე (`POST /api/db-backups/import` მათ შორის `dryRun=true`, `POST /api/db-backups` აღდგენა id, `POST /api/settings/import-json`), აღდგენის წერტილების განადგურება (`DELETE /api/db-backups` გასუფთავება და `PATCH /api/db-backups` რადგან მისი შეკავება განაპირობებს ავტომატურ გასხვლას ყოველი სარეზერვო დაფის შემდეგ, CLI სესიის შემდეგ, ლოკალური სარეზერვო სუბიექტი საჭიროებს. სინქრონიზაციის ჟეტონის (`POST /api/sync/tokens`) გაცემა და `admin` CLI წვდომის ჟეტონის (`POST /api/cli/tokens`) გამოთქმა მოითხოვს დაფის სესიას ან ლოკალურ CLI საგანს ყველა შესვლის რეჟიმში. ნებისმიერი მოცულობის API კლავიშები და `oma_` წვდომის ნიშნები არ არის ოპერატორის რწმუნებათა სიგელები: ისინი იღებენ `403` როდესაც საჭიროა. ჩეკი ცხოვრობს `src/lib/api/operatorCredential.ts` ში (`resolveOperatorCredential()` / `requireOperatorCredential()`). შესვლის პარამეტრების შეცვლა ასევე მხოლოდ ოპერატორისთვისაა: `POST /api/settings/require-login` (მმართველობის პაროლის დაყენება / გადართვა `requireLogin`) იღებს მხოლოდ იმ სერთიფიკატებს, როდესაც პაროლი არსებობს — პირველი გაშვებული ჩატვირთვის ფანჯარა (ჯერ პაროლი არ არის) უცვლელი რჩება — და დაფის სესიამ უნდა გამოაგზავნოს `currentPassword` პაროლის შესაცვლელად (`403` როდესაც ის არ არის შემოწმებული, როგორც `settings.update_failed`). ადგილობრივი CLI და შესვლის გამორთული მაგალითი ინარჩუნებს აღდგენის გზას და შეიძლება დააყენოს პაროლი მის გარეშე, რადგან ორივე დაკავშირებულია ჰოსტთან, რომელიც ფლობს მონაცემთა დირექტორიას.
 
 ## მილსადენი
 
@@ -196,52 +196,47 @@ Incoming request → src/proxy.ts
 
 ## საჯარო მარშრუტების სია
 
-`src/shared/constants/publicApiRoutes.ts` წარმოადგენს მკაფიო დაშვებულ სიას:
+`src/shared/constants/publicApiRoutes.ts` არის აშკარა დაშვებული სია:
 
-სია დაყოფილია **ფორმის** მიხედვით და ეს დაყოფა კრიტიკულია (GHSA-74g9-q8f6-793h): პრეფიქსი
-ემთხვევა `startsWith()`-ის გამოყენებით, ამიტომ ის ასევე ემთხვევა ყველა მიმდებარე გზას, რომელსაც
-მისი საწყისი სიმბოლოები აქვს.
-`/api/usage/om-usage` პრეფიქსის სახით მონიშნულია `/api/usage/om-usage<anything>` PUBLIC-ად, ხოლო Next მას ხსნის
-`/api/usage/[connectionId]`-ზე — ჰენდლერზე, რომელსაც საკუთარი ავტორიზაცია არ გააჩნია.
+სია დაყოფილია** ფორმა** და გაყოფა მატარებელია (GHSA-74g9-q8f6-793h): პრეფიქსი ემთხვევა `startsWith()`, ამიტომ ის ასევე ემთხვევა ყველა მიმდებარე ბილიკს, რომელიც იზიარებს მის წამყვან სიმბოლოებს. `/api/usage/om-usage` როგორც პრეფიქსი, მონიშნულია `/api/usage/om-usage<anything>` PUBLIC, და Next წყვეტს, რომ `/api/usage/[connectionId]` — დამმუშავებელს არ აქვს საკუთარი ავტორიზაცია.
 
 ```ts
-// ნამდვილი ქვესიმრავლეები. თითოეული ჩანაწერი MUST დასრულდეს "/"-ით (მოწმდება unit test-ით).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify-ში განიხილება როგორც CLIENT_API და არა როგორც "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ცალკეული მარშრუტები, რომლებიც ემთხვევა EXACTLY (ბოლო სლეშით ან მის გარეშე).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // შესვლის მე-2 ეტაპი opt-in TOTP-ისთვის; საჭიროებს MFA-pending cookie-ს
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// მხოლოდ წაკითხვისთვის განკუთვნილი ცალკეული მარშრუტები, რომლებზეც ასევე ვრცელდება CORS origin-ის გამარტივებული წესი.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// მხოლოდ წაკითხვისთვის განკუთვნილი ცალკეული მარშრუტი CORS-ის გამარტივებული წესის გარეშე.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-მხოლოდ უსაფრთხო მეთოდებისთვისაა მხოლოდ წაკითხვის მარშრუტები საჯარო. შენიშვნა: `classifyRoute()` `/api/v1/*`-სა და `/api/v1beta/*`-ს გამორიცხავს PUBLIC-ის შემდგომი დამთხვევიდან — ისინი ყოველთვის `CLIENT_API`-ია, ამიტომ Bearer-key პოლიტიკა კვლავ მოქმედებს.
+მხოლოდ წაკითხვადი მარშრუტები საჯაროა** მხოლოდ** უსაფრთხო მეთოდებისთვის. შენიშვნა: `classifyRoute()` გამორიცხავს `/api/v1/*` და `/api/v1beta/*` PUBLIC ვარდნის — დან, ისინი ყოველთვის `CLIENT_API` არიან, ასე რომ, მატარებლის გასაღების პოლიტიკა კვლავ მოქმედებს.
 
 ## ახალი მარშრუტის დამატება
 
@@ -310,15 +305,15 @@ API გასაღებები შეიცავს `scopes` მასი�
 `read` / `write` / `admin` `oma_live_…` ტოკენებზე, რანჟირებული `scopeSatisfies`-ის მიხედვით
 (`src/lib/accessTokens/scopes.ts`). ეს რანგი ვრცელდება მხოლოდ წვდომის ტოკენის სერთიფიკატზე. იხილეთ [მართვის ავთენტიფიკაცია](../guides/MANAGEMENT-AUTH.md).
 
-## ავთენტიფიკაციის საჭიროების გადამრთველი
+## ავტორიზაციის საჭირო გადართვა
 
-`src/shared/utils/apiAuth.ts`-ის `isAuthRequired()` განსაზღვრავს, ვრცელდება თუ არა **რაიმე** ავთენტიფიკაცია მოთხოვნაზე:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` წყვეტს თუ არა** ნებისმიერი** ავტორიზაცია ძალაშია მოთხოვნისთვის:
 
-- `settings.requireLogin === false` → ავთენტიფიკაცია გლობალურად გამორთულია, გარდა ყოველთვის დაცული იარუსისა (იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) და იმ გამოძახებებისა, რომლებიც გასცემენ credential-ს, რომელსაც ის იღებს. ეს მოითხოვს იმავე credential-ს, რაც შესვლის ჩართულობისას: სინქრონიზაციის token-ების გაცემა, CLI წვდომის token-ების მოჭრა ნებისმიერი scope-ით, და `manage`/`admin` scope-ის მქონე API გასაღების შექმნა, ამ scope-ის მინიჭება გასაღებისთვის, ან ასეთი გასაღების ხელახლა გენერირება ან გამჟღავნება (`requireCredentialForManagementScopedKey()`, `src/lib/api/requireManagementAuth.ts`). მხოლოდ inference გასაღებები რჩება ღია.
-- პაროლი არ არის კონფიგურირებული **და** არ არსებობს `INITIAL_PASSWORD` გარემოს ცვლადი → bootstrap რეჟიმი უშვებს onboarding wizard-სა და loopback მოთხოვნებს, მაგრამ ქსელიდან გახსნილ მოთხოვნებს კვლავ სჭირდებათ credential-ები.
-- ნებისმიერი DB შეცდომა → დახურულად ვერ ხერხდება (secure-by-default).
+- `settings.requireLogin === false` → auth გლობალურად გამორთულია, გარდა ყოველთვის დაცული ფენისა (იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) და ზარები, რომლებიც აწვდიან ავტორიზაციას, რომელსაც იგი იღებს, რომლებიც საჭიროებენ იგივე რწმუნებათა სიგელებს, როგორც შესვლისას: სინქრონიზაციის ნიშნების გაცემა, CLI წვდომის ჟეტონების გამოთვლა ნებისმიერ ფარგლებსში და `manage`/ კლავიშის მინიჭება API `admin`. გასაღები, ან ასეთი გასაღების რეგენერაცია ან გამოვლენა (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). მხოლოდ დასკვნის გასაღებები რჩება ღია. დაცული ფუნქციის დროშის დაწერა (`REQUIRE_API_KEY`, უსაფრთხოების სხვა დროშები და SSRF / TLS / MCP-scope / sandbox დროშები, რომლებიც ჩამოთვლილია [ფუნქციების დროშებში](../reference/FEATURE_FLAGS.md#rest-api) ) და PII masking პარამეტრების შენახვა (`PUT /api/settings/pii`) ასევე საჭიროებს რწმუნებათა სიგელებს.
+- პაროლი არ არის კონფიგურირებული** და** no `INITIAL_PASSWORD` env var → bootstrap რეჟიმი საშუალებას აძლევს ჩატვირთვის ოსტატის და loopback-ის მოთხოვნებს, მაგრამ გამოვლენილი ქსელის მოთხოვნას მაინც სჭირდება სერთიფიკატები. გამონაკლისი: დაცული ფუნქციის დროშის ჩაწერა და PII masking პარამეტრების (`PUT /api/settings/pii`) შენახვა საჭიროებს სერთიფიკატს, თუნდაც loopback-დან, ამიტომ loopback თავისთავად საკმარისი არ არის.
+- ნებისმიერი DB შეცდომა → ვერ დაიხურება (ნაგულისხმევად უსაფრთხო).
 
-კლიენტის API გასაღების აღსრულება იყენებს `src/shared/utils/featureFlags.ts`-ის `isRequireApiKeyEnabled()`-ს და არა `process.env.REQUIRE_API_KEY`-ის პირდაპირ წაკითხვას. ეს მნიშვნელოვანია განლაგებული ინსტანციებისთვის: Dashboard → Feature Flags-ში `REQUIRE_API_KEY`-ის შეცვლა ინახავს DB-ის გადაფარვას და მაშინვე მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტის API-ის სხვა ავთენტიფიკაციის შემოწმებებზე, რომლებიც ამ დამხმარეს იზიარებენ. თუ feature flag-ების საცავი ვერ იკითხება, კლიენტის API-ის ავთენტიფიკაცია დახურულად ვერ ხერხდება და გასაღებს ითხოვს.
+კლიენტის API გასაღების აღსრულება იყენებს `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` ში და არა პირდაპირ `process.env.REQUIRE_API_KEY` წაკითხვას. ეს მნიშვნელოვანია განლაგებული შემთხვევებისთვის: `REQUIRE_API_KEY` გადართვა Dashboard-ში → Feature Flags ინახავს DB გადაფარვას და დაუყოვნებლივ მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტ-API-ის სხვა აუთ ჩეკებზე, რომლებიც იზიარებენ ამ დამხმარეს. თუ ფუნქციების დროშის მაღაზიის წაკითხვა შეუძლებელია, კლიენტი API auth ვერ დაიხურება და საჭიროებს გასაღებს.
 
 ## შეუთავსებელი ცვლილება — v3.8.0
 

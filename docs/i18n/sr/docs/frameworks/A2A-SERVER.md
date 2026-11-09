@@ -163,7 +163,7 @@ OmniRoute открива 6 A2A вештина повезаних у `src/lib/a2a
 | Хеалтх Репорт      | `health-report`      | Обједињује прекидач, хлађење, стање закључавања по провајдеру                                                                                                        | здравље, отпорност        | „Прикажи здравствени статус свих провајдера“ |
 | Листа могућности   | `list-capabilities`  | Враћа комплетан каталог вештина агената од 45 уноса (23 API + 21 CLI + 1 конфигурација) као табелу смањења вредности са сировим SKILL.md URLs за убацивање контекста | каталог, откриће, вештине | „Наведите све OmniRoute могућности“          |
 
-> Картица агента треба да буде усклађена са активним каталогом 380 провајдера; Број провајдера и метаподаци free/no-auth потичу из регистра времена извршавања.
+> Картица агента треба да буде усклађена са активним каталогом 381-провајдера; Број провајдера и метаподаци free/no-auth потичу из регистра времена извршавања.
 
 ### `list-capabilities` Детаљи вештине
 
@@ -180,20 +180,28 @@ OmniRoute открива 6 A2A вештина повезаних у `src/lib/a2a
 
 ---
 
-## REST API (dodatno)
+## REST API (помоћни)
 
-JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačke ispod pružaju dodatni pristup za komandne table i eksterne alatke:
+ЈСОН-РПЦ крајња тачка `/a2a` је канонска улазна тачка A2A. REST крајње тачке у наставку пружају помоћни приступ за контролне табле и спољне алате:
 
-| Krajnja tačka                | Metod | Opis                                                        | Autentikacija                                         |
-| :--------------------------- | :---- | :---------------------------------------------------------- | :---------------------------------------------------- |
-| `/api/a2a/status`            | GET   | Status servera, registrovane vештine                        | (javno)                                               |
-| `/api/a2a/tasks`             | GET   | Listanje zadataka sa filterima                              | management                                            |
-| `/api/a2a/tasks/[id]`        | GET   | Preuzimanje zadatka po ID-u                                 | management                                            |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Otkazivanje zadatka koji je u toku                          | management                                            |
-| `/.well-known/agent.json`    | GET   | Agent Card (A2A otkrivanje)                                 | (javno, keširano 3600s)                               |
-| `/api/a2a/tasks`             | POST  | Dolazno delegiranje flotе OmniConductor (Conductor PRD RF5) | Bearer u odnosu na `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Крајња тачка                 | Метод | Опис                                                         | Аутх                                                                                                       |
+| :--------------------------- | :---- | :----------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | Статус сервера, регистроване вештине                         | (јавно)                                                                                                    |
+| `/api/a2a/tasks`             | GET   | Наведите задатке са филтерима                                | управљање или API кључ (погледајте доле)                                                                   |
+| `/api/a2a/tasks/[id]`        | GET   | Добијте задатак од ID                                        | управљање или API кључ (погледајте доле)                                                                   |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Откажите покренути задатак                                   | управљање или API кључ (погледајте доле)                                                                   |
+| `/.well-known/agent.json`    | GET   | Картица агента (A2A дисцовери)                               | (јавно, кеширано 3600с)                                                                                    |
+| `/api/a2a/tasks`             | POST  | Долазна делегација у OmniConductor флоту (кондуктор PRD RF5) | исто као `GET`, плус `OMNIROUTE_API_KEY` ако је постављено док је `REQUIRE_API_KEY` искључен; `a2aEnabled` |
 
-**Dolazno delegiranje Conductor-u (`POST /api/a2a/tasks`):** eksterni A2A agenti delegiraju posao kodiranja floti OmniConductor kroz OmniRoute. Тело: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — mogu se delegirati samo vештine flote Conductor (one koje su objavljene na Agent Card-u); `metadata.conductor.repo.url` je obavezan (flota radi na git repozitorijumima). Ruta se prevodi u `POST /v1/tasks` hub-a koristeći serversku `CONDUCTOR_ORCHESTRATOR_TOKEN` (rezervna opcija `CONDUCTOR_HUB_TOKEN`) i vraća `201 { conductor_task_id, state: "submitted" }`; stanja zadatka se prosleđuju nazad kroz SSE→A2A mirror (RF1) i vidljiva su preko `GET /api/a2a/tasks?skill=conductor`.
+Ко ће проћи до `/api/a2a/tasks*` рута зависи од подешавања за пријаву и АПИ кључ:
+
+- `requireLogin=true` (подразумевано): средњи софтвер прихвата само управљачке акредитиве (сесија контролне табле, `manage` -scope API кључ, `oma_` приступни токен) и `OMNIROUTE_API_KEY`. Обичан кључ за закључивање добија `403`. У `Authorization` заглављу средњи софтвер узима само `OMNIROUTE_API_KEY` као `Bearer <key>`; голи кључ или таб након што `Bearer` добије `401`.
+- `requireLogin=false`, или прозор повратне петље пре укључивања: са `REQUIRE_API_KEY=true` сваки важећи OmniRoute API кључ или управљачки акредитиви се прихватају и анонимни позиваоци добијају `401`; са `REQUIRE_API_KEY` офф руте су отворене.
+- `POST /api/a2a/tasks` додатно захтева `OMNIROUTE_API_KEY` у `Authorization` заглављу када је та променљива постављена, а `REQUIRE_API_KEY` искључен. Остала заглавља, као што је `x-api-key`, се ту не рачунају. Са одјављивањем или пре укључивања кључ пролази са или без `Bearer` префикса; са укљученим пријављивањем, само `Bearer <key>` пролази кроз средњи софтвер.
+
+Тамо где је потребан акредитив, `read` -scope `oma_` токен ради само за `GET`.
+
+**Делегација улазног кондуктера (`POST /api/a2a/tasks`):** екстерни A2A агенти делегирају посао кодирања OmniConductor флоти преко OmniRoute. Тело: само `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Вештине диригентске флоте (оне објављене на картици агента) се могу делегирати; `metadata.conductor.repo.url` је обавезан (флота ради на гит репо-овима). Рута се преводи у `POST /v1/tasks` чворишта користећи `CONDUCTOR_ORCHESTRATOR_TOKEN` на страни сервера (резервни `CONDUCTOR_HUB_TOKEN`) и враћа `201 { conductor_task_id, state: "submitted" }`; стања задатака се враћају кроз SSE→A2A огледало (RF1) и видљива су преко `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
@@ -201,16 +209,16 @@ JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačk
 
 1. **Креирајте датотеку вештина:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Извезите асинхронизовану функцију `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Пратите облик постојећих вештина као што је `smartRouting.ts`.
+   Извезите асинхронизовану функцију `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Пратите облик постојећих вештина као што је `smartRouting.ts`. Ако се вештина позива назад у OmniRoute преко HTTP, направите заглавља са `buildSelfLoopHeaders(caller)` из `src/lib/a2a/selfLoopAuth.ts` тако да се позив изводи са кључем A2A позиваоца, а не `OMNIROUTE_API_KEY`, и проследите `redirect: "error"` на `fetch` тако да преусмеравање никада не добије кључ. Помоћник гради само заглавља; свака вештина сама поставља политику преусмеравања. Избацује `UnsafeSelfLoopTargetError` уместо да прилаже кључ када је решени основни URL обичан хттп ван приватне мреже (повратна петља, назив контејнера или услуге и приватне адресе су у реду) или држи акредитиве, тако да вештина која прогута одбијене позиве мора поново да избаци ту грешку.
 
 2. **Руковалац регистром:** у `src/lib/a2a/taskExecution.ts`, додајте унос у `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```

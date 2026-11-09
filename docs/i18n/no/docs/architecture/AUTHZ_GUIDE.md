@@ -155,17 +155,17 @@ Aktiveres fra Innstillinger → Sikkerhet; er deaktivert til operatøren slår d
   4. Fjern `OMNIROUTE_DISABLE_MFA`, start på nytt, og registrer på nytt
      ved behov.
 
-## Rutetyper
+## Ruteklasser
 
-`src/server/authz/types.ts` definerer tre typer. Enhver rute som ikke kan klassifiseres deterministisk, faller tilbake til `MANAGEMENT`.
+`src/server/authz/types.ts` definerer tre klasser; enhver rute som ikke kan klassifiseres deterministisk faller tilbake til `MANAGEMENT`.
 
-| Type         | Beskrivelse                                                                                                                                                   | Autentisering kreves                                            |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC`     | Eksplisitt trygge ruter: innlogging, utlogging, status, init, helsesjekk og onboarding-bootstrap.                                                             | Ingen                                                           |
-| `CLIENT_API` | Endepunkter for modelltjenester: `/api/v1/*`, `/api/v1beta/*`, pluss aliasene `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-nøkkel når feature flagget `REQUIRE_API_KEY` er aktivert |
-| `MANAGEMENT` | Dashboardsider, innstillinger, leverandører, nøkler, admin- og diagnoseendepunkter.                                                                           | Dashboard-økt ELLER Bearer med scopet `manage`                  |
+| Klasse       | Beskrivelse                                                                                                                                                | Godkjenning kreves                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `PUBLIC`     | Eksplisitt sikre ruter — pålogging, utlogging, status, helse, onboarding bootstrap.                                                                        | Ingen                                                                        |
+| `CLIENT_API` | Modellserverende endepunkter — `/api/v1/*`, `/api/v1beta/*`, pluss aliaser `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bærernøkkel når det effektive `REQUIRE_API_KEY` funksjonsflagget er aktivert |
+| `MANAGEMENT` | Dashboard-sider, innstillinger, leverandører, nøkler, admin- og diagnostikkendepunkter.                                                                    | Dashboard session OR Bearer med `manage` scope                               |
 
-Noen `MANAGEMENT`-handlinger er **kun for operatøren**: en nøkkel med scopet `manage` er ikke nok. Eksport av lagrede legitimasjoner (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), gjenoppretting av en sikkerhetskopi over de aktive dataene (`POST /api/db-backups/import`, inkludert `dryRun=true`, `POST /api/db-backups` gjenoppretting via id, `POST /api/settings/import-json`) og sletting av gjenopprettingspunkter (`DELETE /api/db-backups` for opprydding, og `PATCH /api/db-backups` fordi den lagrede retensjonen styrer den automatiske opprydningen etter hver sikkerhetskopi) krever en dashboard-økt, den lokale CLI-identiteten eller at innlogging er deaktivert. Utstedelse av et synk-token (`POST /api/sync/tokens`) og oppretting av et `admin`-tilgangstoken for CLI (`POST /api/cli/tokens`) krever en dashboard-økt eller den lokale CLI-identiteten i alle innloggingsmoduser. API-nøkler med hvilket som helst scope og `oma_`-tilgangstokens er ikke operatørlegitimasjoner: de får `403` når en slik kreves. Kontrollen ligger i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Endring av innloggingsinnstillingene er også bare for operatøren: `POST /api/settings/require-login` (sett administrasjonspassordet / slå `requireLogin` av og på) godtar bare disse legitimasjonene når et passord finnes. Bootstrap-vinduet ved første oppsett (ingen passord ennå) er uendret, og en dashboard-økt må sende `currentPassword` for å erstatte passordet (`403` når det mangler eller er feil, logget som `settings.update_failed`). Den lokale CLI-en og en instans med innlogging deaktivert beholder gjenopprettingsveien og kan sette et passord uten det, fordi begge er bundet til verten som eier datamappen.
+Noen få `MANAGEMENT` -handlinger er** kun for operatør** : en `manage` nøkkel er ikke nok. Eksportering av lagret legitimasjon (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), gjenoppretting av en sikkerhetskopi over live-dataene (`POST /api/db-backups/import` inkludert `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), ødeleggelse av gjenopprettingspunkter (`DELETE /api/db-backups` opprydding og `PATCH /api/db-backups` fordi oppbevaringen den vedvarer driver den automatiske beskjæringen etter hver sikkerhetskopi av emnet for zdq-panelet, loggbar CLI -innholdssøkt, logg-in). Utstedelse av et synkroniseringstoken (`POST /api/sync/tokens`) og preging av et `admin` CLI -tilgangstoken (`POST /api/cli/tokens`) krever en dashbordøkt eller det lokale CLI emnet i hver påloggingsmodus. API nøkler av ethvert omfang og `oma_` -tilgangstokener er ikke operatørlegitimasjon: de får `403` når en er nødvendig. Sjekken lever i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Endring av påloggingsinnstillingene er også kun for operatøren: `POST /api/settings/require-login` (angi administrasjonspassordet / veksle `requireLogin`) godtar kun disse legitimasjonene når et passord eksisterer — det første oppstartsvinduet (ingen passord ennå) er uendret — og en dashbordøkt må sende `currentPassword` for å erstatte passordet (`403` når det mangler eller er feil, `settings.update_failed` som). Den lokale CLI og en forekomst med pålogging deaktivert beholder gjenopprettingsbanen og kan sette et passord uten den, siden begge er bundet til verten som eier datakatalogen.
 
 ## Rørledning
 
@@ -200,49 +200,45 @@ En vellykket policy returnerer `AuthSubject` med `kind ∈ { client_api_key, das
 
 `src/shared/constants/publicApiRoutes.ts` er den eksplisitte tillatelseslisten:
 
-Listen er delt inn etter **form**, og oppdelingen er avgjørende (GHSA-74g9-q8f6-793h): Et prefiks
-sjekkes med `startsWith()`, så det samsvarer også med alle tilstøtende stier som deler de samme
-innledende tegnene. `/api/usage/om-usage` som prefiks merket `/api/usage/om-usage<anything>` som PUBLIC,
-og Next løser dette til `/api/usage/[connectionId]` — en håndterer uten egen autentisering.
+Listen er delt etter** form** , og delingen er bærende (GHSA-74g9-q8f6-793h): et prefiks matches med `startsWith()`, så det samsvarer også med hver tilstøtende bane som deler sine ledende tegn. `/api/usage/om-usage` som et prefiks merket `/api/usage/om-usage<anything>` PUBLIC, og Next løser det for å `/api/usage/[connectionId]` — en behandler uten egen auth.
 
 ```ts
-// Ekte undertrær. Hver oppføring MÅ slutte med "/" (bekreftes av en enhetstest).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // behandles som CLIENT_API i classify, ikke som "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Enkeltstående ruter, samsvarer EKSAKT (med eller uten avsluttende skråstrek).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // innloggingstrinn 2 for valgfri TOTP; krever MFA-pågående informasjonskapsel
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Skrivebeskyttede enkeltstående ruter som også bruker CORS-opprinnelsesavslapningen.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Skrivebeskyttet enkeltstående rute UTEN CORS-opprinnelsesavslapningen.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Skrivebeskyttede ruter er offentlige **bare** for sikre metoder. Merk: `classifyRoute()` utelukker `/api/v1/*` og `/api/v1beta/*` fra PUBLIC-reservehåndteringen — disse er alltid `CLIENT_API`, slik at Bearer-nøkkelpolicyen fortsatt gjelder.
+Ruter med lesetilgang er offentlige** bare** for sikre metoder. Merk: `classifyRoute()` ekskluderer `/api/v1/*` og `/api/v1beta/*` fra PUBLIC fall-through — disse er alltid `CLIENT_API` så bærernøkkelen gjelder fortsatt.
 
 ## Legge til en ny rute
 
@@ -320,15 +316,15 @@ Den forblir av med mindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Denne rangeringen gjelder kun for tilgangstoken-legitimasjonen.
 Se [Administrasjonsautentisering](../guides/MANAGEMENT-AUTH.md).
 
-## Bryter for påkrevd autentisering
+## Auth Required Switch
 
-`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgjør om **noen** autentisering i det hele tatt håndheves for en forespørsel:
+`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgjør om** noen** auth håndheves for en forespørsel:
 
-- `settings.requireLogin === false` → autentisering er globalt deaktivert, unntatt for det alltid beskyttede nivået (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) og kallene som utleverer en legitimasjon den godtar. Disse krever samme legitimasjon som når innlogging er på: utstedelse av synk-tokens, utstedelse av CLI-tilgangstokens med hvilket som helst scope, og oppretting av en API-nøkkel med scopet `manage`/`admin`, tildeling av det scopet til en nøkkel, eller regenerering eller visning av en slik nøkkel (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Nøkler som bare er for inferens, forblir åpne.
-- Ingen passord konfigurert **og** ingen `INITIAL_PASSWORD`-miljøvariabel → bootstrap-modus tillater introduksjonsveiviseren og loopback-forespørsler, men eksponerte nettverksforespørsler krever fortsatt legitimasjon.
-- Enhver DB-feil → stenger for tilgang (sikker som standard).
+- `settings.requireLogin === false` → auth er globalt deaktivert, bortsett fra det alltid beskyttede nivået (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) og anropene som deler ut en legitimasjon den aksepterer, som trenger samme legitimasjon som med pålogging: utstede synkroniseringstokener, prege CLI tilgangstokener uansett omfang, og opprette en API nøkkel med a `manage`-nøkkelen,`admin` -tasten, nøkkel, eller regenerering eller avsløring av en slik nøkkel (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Nøkler som kun kan følges, forblir åpne. Å skrive et beskyttet funksjonsflagg (`REQUIRE_API_KEY`, de andre sikkerhetsflaggene og SSRF / TLS / MCP-scope / sandbox-flaggene oppført i [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) og lagre PII maskeringsinnstillingene (`PUT /api/settings/pii`) trenger også en legitimasjon.
+- Ingen passord konfigurert** og** no `INITIAL_PASSWORD` env var → bootstrap-modus tillater onboarding-veiviseren og loopback-forespørsler, men eksponerte nettverksforespørsler trenger fortsatt legitimasjon. Unntak: å skrive et beskyttet funksjonsflagg og lagre PII maskeringsinnstillingene (`PUT /api/settings/pii`) trenger en legitimasjon selv fra loopback, så loopback i seg selv er ikke nok der.
+- Enhver DB -feil → fails closed (sikker som standard).
 
-Håndhevingen av klient-API-nøkkel bruker `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, ikke en direkte lesing av `process.env.REQUIRE_API_KEY`. Dette betyr noe for utrullede instanser: å veksle `REQUIRE_API_KEY` i Dashboard → Feature Flags lagrer en DB-overstyring og påvirker umiddelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` og andre autentiseringssjekker for klient-API-et som deler denne hjelperen. Hvis feature flag-lageret ikke kan leses, stenger autentiseringen for klient-API-et for tilgang og krever en nøkkel.
+Client API key enforcement bruker `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, ikke en direkte `process.env.REQUIRE_API_KEY` lesing. Dette er viktig for utplasserte forekomster: veksling `REQUIRE_API_KEY` i Dashboard → Feature Flags lagrer en DB overstyring og påvirker umiddelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` og andre klient-API-autentiseringssjekker som deler denne hjelperen. Hvis funksjonsflagglageret ikke kan leses, mislykkes klient- API authoriseringen og krever en nøkkel.
 
 ## Inkompatibel endring — v3.8.0
 

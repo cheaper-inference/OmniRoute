@@ -198,41 +198,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Ρύθμιση πρωτοκόλλων (MCP + A2A)
+## Ρύθμιση πρωτοκόλλου (MCP + A2A)
 
-### Ρύθμιση MCP (Model Context Protocol)
+### Ρύθμιση MCP (Πρωτόκολλο περιβάλλοντος μοντέλου)
 
-Εκκινήστε τη μεταφορά MCP σε λειτουργία stdio:
+Ξεκινήστε τη μεταφορά MCP σε λειτουργία stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Προτεινόμενη ροή επαλήθευσης:
+Προτεινόμενη ροή επικύρωσης:
 
 ```bash
-# 1. Εκκινήστε τον διακομιστή MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Από τον πελάτη MCP σας, καλέστε:
-omniroute_get_health        # Θα πρέπει να επιστρέψει την κατάσταση εύρυθμης λειτουργίας του συστήματος
-omniroute_list_combos       # Θα πρέπει να επιστρέψει τους ενεργούς συνδυασμούς
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Εναλλακτικά, εκτελέστε την πλήρη σουίτα E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Διαμόρφωση πελάτη MCP
 
-**Claude Code:**
+**Κωδικός Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Προσθέστε το εξής στις ρυθμίσεις MCP:
+Προσθέστε στις ρυθμίσεις σας MCP (stdio, με το κλειδί ώστε ο καλών να έχει έναν κύριο):
 
 ```json
 {
@@ -240,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Πλήρης τεκμηρίωση MCP:** [README διακομιστή MCP](../../open-sse/mcp-server/README.md) — 110 εργαλεία, διαμορφώσεις IDE, πελάτες Python/TS/Go.
+Ή, όταν `mcpTransport` είναι `streamable-http` (ρυθμίστε το σε `/dashboard/mcp` ή με `omniroute mcp enable --transport streamable-http`), τοποθετήστε την καταχώρηση απομακρυσμένου διακομιστή MCP του πελάτη στο `http://localhost:20128/api/mcp/stream`.
 
-### Ρύθμιση A2A (Πρωτόκολλο μεταξύ πρακτόρων)
+Το κλειδί ταξιδεύει ως `Authorization: Bearer <api-key>` (δείτε [MCP Server → Απομακρυσμένη πρόσβαση](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) για απομακρυσμένους κεντρικούς υπολογιστές· ένα απομακρυσμένο κλειδί χρειάζεται `mcp:connect` συν τα πεδία read/write του).
 
-Επαληθεύστε την κάρτα πράκτορα:
+**Πλήρης τεκμηρίωση MCP :** [Διακομιστής MCP README](../../open-sse/mcp-server/README.md) — 110 εργαλεία, ρυθμίσεις παραμέτρων IDE, πελάτες Python/TS/Go. Αναφορά χειριστή για τα εργαλεία συμπίεσης CCR/dedup (δείκτες, προαπαιτούμενα, πεδία ανά εργαλείο, σελιδοποίηση ανάκτησης, διαγνωστικά): [Μηχανές συμπίεσης → Προαπαιτούμενα / οδηγός χειριστή](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Ρύθμιση A2A (Πρωτόκολλο Agent-to-Agent)
+
+Επαληθεύστε την κάρτα αντιπροσώπου:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Στείλτε μια εργασία:
+Αποστολή εργασίας:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Πλήρης τεκμηρίωση A2A:** [README διακομιστή A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή δεδομένων, κύκλος ζωής εργασιών.
+**Πλήρης τεκμηρίωση A2A :** [Διακομιστής A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή, κύκλος ζωής εργασιών.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Πρότυπο για Void Linux (xbps-src)
+## Κενό πρότυπο Linux (xbps-src).
 
-Για χρήστες του Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας το `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
+Για χρήστες Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
 
 ```bash
-# Αρχείο προτύπου για το 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Δημιουργήστε ξανά το άθροισμα ελέγχου για κάθε έκδοση με:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

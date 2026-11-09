@@ -40,22 +40,17 @@ artıq seçildikdə qiymətləndirilir. O, yalnız səy və büdcəni dəyişə 
 
 ## Səy və Büdcə
 
-`sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` və
-`ultra` dəyərlərini qəbul edir. `missing` sorğunun nə diskret səy, nə düşünmə keçidi,
-nə də düşünmə büdcəsi ehtiva etməsi deməkdir. Buna görə yalnız büdcə siqnalına yalnız `any` uyğun gəlir.
+`sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` və `ultra` qəbul edir . `missing` o deməkdir ki, sorğuda nə diskret səy, nə də düşünmə keçidi və ya düşüncə büdcəsi yoxdur. Buna görə də, yalnız büdcə siqnalı yalnız `any` ilə uyğunlaşdırılır.
 
-`effortMode` üç varianta malikdir:
+`effortMode` üç variantı var:
 
-- `inherit` modelin və ya combo-nun dəyişməsinə imkan verməklə yanaşı, müştərinin səy dəyərini saxlayır.
-- `default` yalnız açıq düşünmə siqnalı olmadıqda `targetEffort` təyin edir.
-- `force` diskret səy dəyərini `targetEffort` ilə əvəz edir.
+- `inherit` modeli və ya kombini dəyişməyə icazə verərkən müştəri səylərini saxlayır.
+- `default` yalnız açıq əsaslandırma siqnalı olmadıqda `targetEffort` təyin edir.
+- `force` diskret səyi `targetEffort` ilə əvəz edir.
 
-Müstəqil olaraq, `budgetAction` `preserve`, `remove` və ya `set` ola bilər. `none` ilə birlikdə `force`
-bütün tanınan səy və büdcə sahələrini silir. `none` ilə `set` kombinasiyası etibarsızdır.
+Müstəqil olaraq `budgetAction` `preserve`, `remove` və ya `set` ola bilər. `none` ilə `force` bütün tanınmış səyləri və büdcə sahələrini silir, sonra `reasoning_effort: "none"` təyin edir, çünki bəzi provayderlər sahə olmadıqda düşünməyə başlayır. Hərfi `none` rədd edən provayderlər göndərilərkən `open-sse/executors/base/reasoningEffort.ts` də tənzimlənir. Əmr Kodu onu `low` ilə əlaqələndirir, `none` saxladığı Cavab formalı sorğular ( `messages` olmadan `input` ) istisna olmaqla. Cloudflare Workers AI (`cloudflare-ai`) üzərində `none` rədd edən modellər (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low` alır; digər İşçilər AI modelləri `none` saxlayır. Sahənin buraxılması orada seçim deyil, çünki olmayan səy modelin standart səviyyəsini idarə edir. `none` `set` ilə birlikdə etibarsızdır.
 
-Uyğunsuz olduğu məlum olan modelləri hədəfləyən sorğular yuxarı axın çağırışından əvvəl rədd edilir. Combo
-hədəfləri üçün uyğunsuz elementlər silinir; heç biri qalmazsa, sorğu `400` statusu qaytarır.
-Naməlum imkan məlumatları xəbərdarlıq yaradır və qaydanı aktiv saxlayır.
+Məlum uyğunsuz modelləri hədəfləyən sorğular yuxarı zəngdən əvvəl rədd edilir. Kombo hədəflər üçün uyğun olmayan girişlər silinir; heç biri qalmazsa, sorğu `400` statusunu qaytarır. Naməlum qabiliyyət məlumatları xəbərdarlıq yaradır və qaydanı aktiv qoyur.
 
 ## Təhlükəsizlik və Nəqliyyatlar
 

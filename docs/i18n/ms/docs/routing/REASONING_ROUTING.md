@@ -40,22 +40,17 @@ pun dipilih. Peraturan ini hanya boleh mengubah usaha dan belanjawan.
 
 ## Usaha dan Belanjawan
 
-`sourceEffort` menerima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` dan
-`ultra`. `missing` bermaksud permintaan tidak mengandungi usaha diskret mahupun togol pemikiran
-atau belanjawan pemikiran. Oleh itu, isyarat belanjawan sahaja hanya dipadankan oleh `any`.
+`sourceEffort` menerima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` dan `ultra`. `missing` bermaksud bahawa permintaan itu tidak mengandungi usaha diskret mahupun togol pemikiran atau belanjawan berfikir. Oleh itu isyarat belanjawan sahaja dipadankan hanya dengan `any`.
 
 `effortMode` mempunyai tiga varian:
 
-- `inherit` mengekalkan usaha klien sambil masih membenarkan model atau kombo berubah.
+- `inherit` mengekalkan usaha pelanggan sambil masih membenarkan model atau kombo berubah.
 - `default` menetapkan `targetEffort` hanya apabila tiada isyarat penaakulan eksplisit hadir.
 - `force` menggantikan usaha diskret dengan `targetEffort`.
 
-Secara berasingan, `budgetAction` boleh berupa `preserve`, `remove` atau `set`. `force` dengan `none` mengalih keluar
-semua medan usaha dan belanjawan yang dikenali. `none` bersama-sama `set` adalah tidak sah.
+Secara bebas, `budgetAction` boleh menjadi `preserve`, `remove`, atau `set`. `force` dengan `none` mengalih keluar semua medan usaha dan belanjawan yang diiktiraf, kemudian menetapkan `reasoning_effort: "none"`, kerana sesetengah penyedia menghidupkan pemikiran apabila medan itu tiada. Penyedia yang menolak `none` literal dilaraskan semasa penghantaran dalam `open-sse/executors/base/reasoningEffort.ts`. Kod Perintah memetakannya kepada `low`, kecuali pada permintaan berbentuk Respons (`input` tanpa `messages`), di mana ia menyimpan `none`. Pada Cloudflare Workers AI (`cloudflare-ai`), model yang menolak `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) mendapat `low`; pekerja lain model AI menyimpan `none`. Menggugurkan medan bukan pilihan di sana, kerana usaha yang tidak hadir menjalankan peringkat lalai model. `none` bersama-sama dengan `set` adalah tidak sah.
 
-Permintaan yang menyasarkan model yang diketahui tidak serasi ditolak sebelum panggilan huluan. Bagi sasaran kombo,
-entri yang tidak serasi dialih keluar; jika tiada yang berbaki, permintaan mengembalikan status `400`.
-Data keupayaan yang tidak diketahui menghasilkan amaran dan membiarkan peraturan kekal aktif.
+Permintaan yang menyasarkan model yang diketahui tidak serasi ditolak sebelum panggilan huluan. Untuk sasaran kombo, entri yang tidak serasi dialih keluar; jika tiada yang kekal, permintaan mengembalikan status `400`. Data keupayaan tidak diketahui menghasilkan amaran dan membiarkan peraturan aktif.
 
 ## Keselamatan dan Pengangkutan
 

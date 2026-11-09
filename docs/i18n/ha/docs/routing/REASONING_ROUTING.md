@@ -38,24 +38,19 @@ kuma suna goyon bayan matching na `any` ko `all`.
 Ana tantance ka’idar `connection` ne kawai idan babu wata ka’idar farko da ta yi nasara kuma an riga an
 zaɓi takamaiman provider connection. Za ta iya canza effort da budget kawai.
 
-## Effort da Budget
+## Kokari da Kasafin Kudi
 
-`sourceEffort` yana karɓar `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, da
-`ultra`. `missing` yana nufin cewa request ɗin bai ƙunshi discrete effort ko thinking toggle
-ko thinking budget ba. Saboda haka, signal mai budget kawai zai dace da `any` ne kawai.
+`sourceEffort` yarda da `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, da `ultra`. `missing` yana nufin cewa buƙatar ba ta ƙunshi ƙwaƙƙwaran ƙwarewa ko jujjuya tunani ko kasafin tunani ba. Ana daidaita siginar kasafin kuɗi kawai ta `any` kawai.
 
-`effortMode` yana da nau’o’i uku:
+`effortMode` tana da bambance-bambancen guda uku:
 
-- `inherit` yana riƙe client effort tare da ci gaba da ba model ko combo damar canzawa.
-- `default` yana saita `targetEffort` ne kawai idan babu explicit reasoning signal.
-- `force` yana maye gurbin discrete effort da `targetEffort`.
+- `inherit` yana kiyaye ƙoƙarin abokin ciniki yayin da yake barin samfurin ko haɗa su canza.
+- `default` tana saita `targetEffort` ne kawai lokacin da babu sigina bayyananne.
+- `force` ya maye gurbin ƙoƙari mai hankali da `targetEffort`.
 
-Ba tare da dogaro da wannan ba, `budgetAction` na iya zama `preserve`, `remove`, ko `set`. `force` tare da `none` yana cire
-duk effort da budget fields da aka sani. `none` tare da `set` ba ya da inganci.
+Mai zaman kansa, `budgetAction` na iya zama `preserve`, `remove`, ko `set`. `force` tare da `none` yana cire duk ƙoƙarin da aka sani da filayen kasafin kuɗi, sannan saita `reasoning_effort: "none"`, saboda wasu masu samarwa suna kunna tunani lokacin da filin ba ya nan. Masu samar da waɗanda suka ƙi ainihin `none` ana daidaita su yayin aikawa cikin `open-sse/executors/base/reasoningEffort.ts`. Lambar Umurnin taswira shi zuwa `low`, sai dai a kan buƙatun mai sifar Amsoshi (`input` ba tare da `messages`), inda yake adana `none`. A kan ma'aikatan Cloudflare AI (`cloudflare-ai`), samfuran da suka ƙi `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) samun `low`; sauran Ma'aikata AI model kiyaye `none`. Zubar da filin ba zaɓi ba ne a wurin, saboda ƙoƙarin da ba ya nan yana gudanar da matakin tsoho na ƙirar. `none` tare da `set` ba shi da inganci.
 
-Ana ƙin requests da ke nufin models da aka sani ba su dace ba kafin upstream call. Ga combo
-targets, ana cire entries da ba su dace ba; idan babu wanda ya rage, request ɗin zai mayar da status `400`.
-Bayanan capability da ba a sani ba suna haifar da warning kuma suna barin ka’idar tana aiki.
+Buƙatun da aka yi niyya sanannun samfuran da ba su dace ba ana ƙi su kafin kiran sama. Don maƙasudin haɗuwa, an cire shigarwar da ba ta dace ba; idan babu wanda ya rage, buƙatar ta dawo da matsayi `400`. Bayanan iyawar da ba a sani ba yana haifar da gargaɗi kuma ya bar ƙa'idar aiki.
 
 ## Tsaro da Transports
 

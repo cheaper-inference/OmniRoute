@@ -31,19 +31,19 @@ Bir kapsam içinde önce daha yüksek `priority` değerine sahip olan kazanır; 
 
 Bir `connection` kuralı, yalnızca hiçbir erken kural kazanmadığında ve somut bir sağlayıcı bağlantısı zaten seçilmiş olduğunda değerlendirilir. Yalnızca eforu ve bütçeyi değiştirebilir.
 
-## Efor ve Bütçe
+## Çaba ve Bütçe
 
-`sourceEffort`; `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ve `ultra` değerlerini kabul eder. `missing`, isteğin ne ayrık bir efor ne de bir düşünme anahtarı veya düşünme bütçesi içerdiği anlamına gelir. Bu nedenle yalnızca bütçe sinyali, sadece `any` tarafından eşleştirilir.
+`sourceEffort`, `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ve `ultra` kabul eder. `missing` isteğin ne ayrı bir çaba ne de bir düşünme geçişi veya düşünme bütçesi içermediği anlamına gelir. Bu nedenle yalnızca bütçe sinyali yalnızca `any` ile eşleştirilir.
 
-`effortMode` üç varyanta sahiptir:
+`effortMode` üç çeşidi vardır:
 
-- `inherit`, modelin veya combo'nun değişmesine yine de izin verirken istemci eforunu korur.
-- `default`, yalnızca açık bir akıl yürütme sinyali mevcut olmadığında `targetEffort` değerini ayarlar.
-- `force`, ayrık eforu `targetEffort` ile değiştirir.
+- `inherit` modelin veya kombinasyonun değişmesine izin verirken müşterinin çabasını korur.
+- `default` `targetEffort` yalnızca açık bir akıl yürütme sinyali bulunmadığında ayarlar.
+- `force` ayrık çabayı `targetEffort` ile değiştirir.
 
-Bundan bağımsız olarak `budgetAction`; `preserve`, `remove` veya `set` olabilir. `none` ile birlikte kullanılan `force`, tanınan tüm efor ve bütçe alanlarını kaldırır. `none` ile `set` kombinasyonu geçersizdir.
+Bağımsız olarak `budgetAction`, `preserve`, `remove` veya `set` olabilir. `force` ile `none` tanınan tüm çaba ve bütçe alanlarını kaldırır, ardından `reasoning_effort: "none"` ayarlar çünkü bazı sağlayıcılar alan olmadığında düşünmeye başlar. Gerçek `none` reddeden sağlayıcılar gönderim sırasında `open-sse/executors/base/reasoningEffort.ts` cinsinden ayarlanır. Komut Kodu, `none` sakladığı Yanıt şeklindeki istekler ( `messages` olmadan `input` ) haricinde `low` ile eşler. Cloudflare Workers AI (`cloudflare-ai`), `none` reddeden modeller (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low` değerini alır; diğer İşçi AI modelleri `none` korur. Alanı bırakmak burada bir seçenek değil çünkü eksik bir çaba modelin varsayılan katmanını çalıştırıyor. `none` ile `set` birlikte geçersiz.
 
-Uyumsuz olduğu bilinen modelleri hedefleyen istekler, yukarı akış çağrısından önce reddedilir. Combo hedeflerinde uyumsuz girdiler kaldırılır; hiçbiri kalmazsa istek `400` durum koduyla sonuçlanır. Bilinmeyen yetenek verileri bir uyarı üretir ve kuralı etkin bırakır.
+Bilinen uyumsuz modelleri hedefleyen istekler, yukarı akış çağrısından önce reddedilir. Birleşik hedefler için uyumsuz girişler kaldırılır; hiçbiri kalmazsa istek `400` durumunu döndürür. Bilinmeyen yetenek verileri bir uyarı üretir ve kuralı etkin bırakır.
 
 ## Güvenlik ve Aktarımlar
 
