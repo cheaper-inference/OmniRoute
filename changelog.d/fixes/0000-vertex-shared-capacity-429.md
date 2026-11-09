@@ -1,1 +1,0 @@
-- **fix(vertex):** A Vertex "Resource exhausted. Please try again later." 429 with no quota wording and no retry details no longer locks the model or cools the account. The request moves to the next account and the account stays in rotation. Quota 429s and 429s with retry details cool as before.
