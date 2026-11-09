@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mapendeleo ya akaunti",
+    "description": "Pendelea akaunti nyingi au uziweke kama akiba kwa usanidi huu. Uelekezaji otomatiki hupanga akaunti ndani ya kila ngazi. Akaunti ambazo hazijaorodheshwa ni za kawaida. Ruhusa, vikomo vya mgao na uhusishaji wa zamu uliopo bado vinatumika.",
+    "preferred": "Inayopendelewa",
+    "normal": "Ya kawaida",
+    "reserve": "Akiba",
+    "excluded": "Zilizotengwa",
+    "loading": "Inapakia akaunti…",
+    "error": "Imeshindwa kupakia akaunti. Fungua tena kihariri ili ujaribu tena.",
+    "missing": "Akaunti isiyopatikana ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Hali ya huduma ya Codex kwa ufunguo huu wa API",
     "description": "Inatumika kwa maombi ya Codex, ikijumuisha miundo ya Codex iliyo ndani ya michanganyiko. Hali zilizolazimishwa hubatilisha mipangilio ya mteja, mipangilio ya jumla na chaguo-msingi za muunganisho. Watoa huduma wengine hawabadiliki.",
@@ -5722,6 +5733,7 @@
     "filterError": "Hitilafu",
     "filterBanned": "Imepigwa marufuku",
     "filterCreditsExhausted": "Salio limeisha",
+    "filterVerificationRequired": "Inahitaji uthibitishaji",
     "accountSearchPlaceholder": "Tafuta akaunti…",
     "noFilteredConnections": "Hakuna miunganisho inayolingana na chuujio cha sasa.",
     "failedSetAlias": "Imeshindikana kuweka jina mbadala",
@@ -14635,6 +14647,8 @@
     "usdUsageQuotaDescription": "Huzuia ufunguo huu kwa kosa la API la 400 baada ya matumizi yake ya ndani ya USD kufikia kiwango kilichosanidiwa cha kila siku au kila wiki.",
     "dailyQuotaUsd": "Kiwango cha kila siku (USD)",
     "weeklyQuotaUsd": "Kiwango cha kila wiki (USD)",
+    "fiveHourQuotaUsd": "Kiwango cha saa 5 (USD)",
+    "fiveHourQuotaHint": "Dirisha linalosonga: matumizi ya kila ombi yanahesabiwa kwa saa 5, kisha yanaachiliwa.",
     "quotaWindowDescription": "Kiwango cha kila wiki hufuata uwekaji upya wa kila wiki wa Claude uliohifadhiwa kwenye kache unapopatikana; vinginevyo hurudi kwenye kipindi cha siku 7 kinachoendelea. Kiwango cha kila siku kinatumia siku ya kalenda ya Fortaleza.",
     "apiKeyUsdQuota": "Kiwango cha USD cha ufunguo wa API",
     "apiKeyUsdQuotaDescription": "Inapowezeshwa, @@om-usage inarudisha kiwango cha kila siku, kiwango cha kila wiki, matumizi ya kila siku, na matumizi ya kila wiki katika USD. Kila wiki hufuata uwekaji upya wa Claude uliohifadhiwa kwenye kache unapopatikana.",

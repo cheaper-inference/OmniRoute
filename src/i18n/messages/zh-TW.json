@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "帳戶偏好設定",
+    "description": "為此路由設定優先使用多個帳戶，或將其保留為備用。自動路由會在每個層級內排列帳戶順序。未列出的帳戶會照常使用。權限、配額限制以及現有的回合綁定仍然適用。",
+    "preferred": "優先",
+    "normal": "一般",
+    "reserve": "備用",
+    "excluded": "排除",
+    "loading": "正在載入帳戶…",
+    "error": "無法載入帳戶。重新開啟編輯器以重試。",
+    "missing": "帳戶無法使用（{id}）"
+  },
   "codexKeyServiceMode": {
     "title": "此 API 金鑰的 Codex 服務模式",
     "description": "套用於 Codex 請求，包括組合中的 Codex 模型。強制模式會覆寫用戶端、全域設定和連線預設值。其他提供者不受影響。",
@@ -5722,6 +5733,7 @@
     "filterError": "錯誤",
     "filterBanned": "封禁",
     "filterCreditsExhausted": "額度耗盡",
+    "filterVerificationRequired": "需要驗證",
     "accountSearchPlaceholder": "搜尋帳戶…",
     "noFilteredConnections": "沒有符合當前篩選條件的連線。",
     "failedSetAlias": "設定別名失敗",
@@ -14635,6 +14647,8 @@
     "usdUsageQuotaDescription": "當此金鑰的本地 USD 支出達到設定的每日或每週配額後，會以 400 API 錯誤封鎖該金鑰。",
     "dailyQuotaUsd": "每日配額（USD）",
     "weeklyQuotaUsd": "每週配額（USD）",
+    "fiveHourQuotaUsd": "5 小時配額（USD）",
+    "fiveHourQuotaHint": "滾動視窗：每個請求的花費計入 5 小時，之後釋放。",
     "quotaWindowDescription": "每週配額在可用時會遵循快取的 Claude 每週重置時間，否則會備用滾動 7 天區間。每日配額使用 Fortaleza 日曆日。",
     "apiKeyUsdQuota": "API 金鑰 USD 配額",
     "apiKeyUsdQuotaDescription": "啟用後，@@om-usage 會傳回每日配額、每週配額、每日支出和每週支出（以 USD 計）。每週配額在可用時會遵循快取的 Claude 重置時間。",

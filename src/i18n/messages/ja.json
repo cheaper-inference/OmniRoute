@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "アカウント設定",
+    "description": "このコンボで複数のアカウントを優先するか、予備として保持します。自動ルーティングは各ティア内でアカウントを順位付けします。リストにないアカウントは通常扱いです。権限、クォータ制限、既存のターンへの割り当ては引き続き適用されます。",
+    "preferred": "優先",
+    "normal": "通常",
+    "reserve": "予備",
+    "excluded": "除外",
+    "loading": "アカウントを読み込み中…",
+    "error": "アカウントを読み込めませんでした。再試行するにはエディターを開き直してください。",
+    "missing": "利用できないアカウント（{id}）"
+  },
   "codexKeyServiceMode": {
     "title": "このAPIキーのCodexサービスモード",
     "description": "コンボ内のCodexモデルを含むCodexリクエストに適用されます。強制モードは、クライアント、グローバル設定、接続のデフォルト設定より優先されます。他のプロバイダーには影響しません。",
@@ -5722,6 +5733,7 @@
     "filterError": "エラー",
     "filterBanned": "禁止",
     "filterCreditsExhausted": "クレジット切れ",
+    "filterVerificationRequired": "確認が必要",
     "accountSearchPlaceholder": "アカウントを検索…",
     "noFilteredConnections": "現在のフィルターに一致する接続はありません。",
     "failedSetAlias": "エイリアスの設定に失敗しました",
@@ -14635,6 +14647,8 @@
     "usdUsageQuotaDescription": "ローカルのUSD消費額が設定された日次または週次のクォータに達すると、このキーを400 APIエラーでブロックします。",
     "dailyQuotaUsd": "日次クォータ (USD)",
     "weeklyQuotaUsd": "週次クォータ (USD)",
+    "fiveHourQuotaUsd": "5時間クォータ (USD)",
+    "fiveHourQuotaHint": "ローリングウィンドウ: 各リクエストの支出は5時間カウントされ、その後解放されます。",
     "quotaWindowDescription": "週次クォータは、利用可能な場合はキャッシュされたClaudeの週次リセットに従います。それ以外の場合は、ローリング7日間のウィンドウにフォールバックします。日次クォータはFortalezaのカレンダー日を使用します。",
     "apiKeyUsdQuota": "APIキーのUSDクォータ",
     "apiKeyUsdQuotaDescription": "有効にすると、@@om-usageは日次クォータ、週次クォータ、日次消費額、および週次消費額をUSDで返します。週次は、利用可能な場合はキャッシュされたClaudeのリセットに従います。",
