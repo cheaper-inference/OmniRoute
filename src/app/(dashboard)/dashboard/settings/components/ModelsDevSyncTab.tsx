@@ -289,7 +289,9 @@ export default function ModelsDevSyncTab() {
 
         {/* Sync interval */}
         {enabled && (
-          <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+          // dir="ltr": the kit places marks with `left`, so in an RTL page the 1h mark would
+          // sit at the 7d end of the (mirrored) track. Pinning the slider LTR keeps them aligned.
+          <div dir="ltr" className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
             <Slider
               label={t("modelsDevInterval")}
               min={0}
@@ -302,6 +304,8 @@ export default function ModelsDevSyncTab() {
               onTouchEnd={commitDraftInterval}
               onBlur={commitDraftInterval}
               marks={INTERVAL_MARKS}
+              // The kit marks are aria-hidden and the input runs 0..3: speak the interval.
+              aria-valuetext={formatInterval(positionToHours(draftPos))}
             />
           </div>
         )}

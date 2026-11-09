@@ -145,6 +145,20 @@ describe("ModelsDevSyncTab interval slider checkpoints", () => {
     expect(sliderRoot?.nextElementSibling?.textContent ?? "").not.toContain("1h6h24h7d");
   });
 
+  it("keeps the marks on the track's direction and names the value for screen readers", async () => {
+    const container = await render();
+    await waitFor(() => getSlider(container).value === "2", "saved interval to load");
+
+    // The kit positions marks with `left`, so the slider is pinned LTR: in an RTL page the
+    // range minimum (1h) would otherwise sit on the right while its mark stays on the left.
+    expect(getSlider(container).closest("[dir]")?.getAttribute("dir")).toBe("ltr");
+    // The kit draws the marks aria-hidden and the input runs 0..3, so the value is spoken
+    // as the formatted interval.
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("24h");
+    await setSliderValue(container, "1.5");
+    expect(getSlider(container).getAttribute("aria-valuetext")).toBe("15h");
+  });
+
   it("shows interpolated hours while dragging between checkpoints", async () => {
     const container = await render();
     await waitFor(() => getSlider(container).value === "2", "saved interval to load");
