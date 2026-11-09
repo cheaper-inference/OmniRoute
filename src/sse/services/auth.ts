@@ -1866,7 +1866,7 @@ export async function getProviderCredentials(
         {
           reason: sessionAffinityTtlMs <= 0 ? "affinity_disabled" : "no_connection",
           provider,
-          candidates: orderedConnections.length,
+          candidates: leasePolicy.connections.length,
         }
       );
     }
