@@ -224,6 +224,30 @@ function literal(node) {
     : null;
 }
 
+// Enumerate literal outcomes without evaluating the condition or importing product code.
+// Unknown branches remain incomplete; expansion uses the existing work/depth limits.
+function literalKeys(node, budget) {
+  const pending = [{ node, depth: 0 }];
+  const keys = new Set();
+  while (pending.length) {
+    const current = pending.pop();
+    budget.check(true);
+    requireInput(current.depth <= budget.limits.maxBindingDepth, "ANALYSIS_DEPTH_LIMIT");
+    const key = literal(current.node);
+    if (key !== null) {
+      keys.add(key);
+    } else if (current.node && ts.isParenthesizedExpression(current.node)) {
+      pending.push({ node: current.node.expression, depth: current.depth + 1 });
+    } else if (current.node && ts.isConditionalExpression(current.node)) {
+      pending.push({ node: current.node.whenFalse, depth: current.depth + 1 });
+      pending.push({ node: current.node.whenTrue, depth: current.depth + 1 });
+    } else {
+      return null;
+    }
+  }
+  return [...keys];
+}
+
 function programFor(files, budget) {
   const sources = new Map(
     Object.entries(files).map(([file, text]) => {
@@ -632,48 +656,53 @@ function references(files, targets, budget, existingContext) {
             new Set(),
             Boolean(wrapped)
           ) || (wrapped ? { reason: "UNRESOLVED_TRANSLATOR_BINDING" } : null);
-        const key = literal(node.arguments[wrapped ? 1 : 0]);
         if (binding && method !== "has") {
+          const keys =
+            binding.reason || method ? null : literalKeys(node.arguments[wrapped ? 1 : 0], budget);
           const position = source.getLineAndCharacterOfPosition(node.getStart(source));
           const reason =
             binding.reason ||
-            (method ? "UNSUPPORTED_TRANSLATION_METHOD" : key === null ? "DYNAMIC_KEY" : null);
-          result.push(
-            reason
-              ? {
-                  file,
-                  reason,
-                  expression: printed(node),
-                  baselineComparable:
-                    typeof binding.namespace === "string" || Boolean(binding.namespaceProof),
-                  syntaxFingerprint: createHash("sha256")
-                    .update(
-                      JSON.stringify({
-                        receiver: wrapped ? "reviewed-wrapper" : method || "direct",
-                        namespace: binding.namespace ?? null,
-                        namespaceProof: binding.namespaceProof || null,
-                        dependencyFingerprint: binding.dependencyFingerprint || null,
-                        key: node.arguments[wrapped ? 1 : 0]
-                          ? syntaxShape(node.arguments[wrapped ? 1 : 0])
-                          : null,
-                        values: node.arguments[wrapped ? 3 : 1]
-                          ? syntaxShape(node.arguments[wrapped ? 3 : 1])
-                          : null,
-                      })
-                    )
-                    .digest("hex"),
-                  namespace: binding.namespace,
-                  line: position.line + 1,
-                }
-              : {
-                  file,
-                  key: binding.namespace ? `${binding.namespace}.${key}` : key,
-                  binding: binding.binding,
-                  parameters: valueParameters(node.arguments[wrapped ? 3 : 1]),
-                  line: position.line + 1,
-                }
-          );
-          budget.references++;
+            (method ? "UNSUPPORTED_TRANSLATION_METHOD" : keys === null ? "DYNAMIC_KEY" : null);
+          const parameters = reason ? null : valueParameters(node.arguments[wrapped ? 3 : 1]);
+          for (const key of keys || [null]) {
+            result.push(
+              reason
+                ? {
+                    file,
+                    reason,
+                    expression: printed(node),
+                    baselineComparable:
+                      typeof binding.namespace === "string" || Boolean(binding.namespaceProof),
+                    syntaxFingerprint: createHash("sha256")
+                      .update(
+                        JSON.stringify({
+                          receiver: wrapped ? "reviewed-wrapper" : method || "direct",
+                          namespace: binding.namespace ?? null,
+                          namespaceProof: binding.namespaceProof || null,
+                          dependencyFingerprint: binding.dependencyFingerprint || null,
+                          key: node.arguments[wrapped ? 1 : 0]
+                            ? syntaxShape(node.arguments[wrapped ? 1 : 0])
+                            : null,
+                          values: node.arguments[wrapped ? 3 : 1]
+                            ? syntaxShape(node.arguments[wrapped ? 3 : 1])
+                            : null,
+                        })
+                      )
+                      .digest("hex"),
+                    namespace: binding.namespace,
+                    line: position.line + 1,
+                  }
+                : {
+                    file,
+                    key: binding.namespace ? `${binding.namespace}.${key}` : key,
+                    binding: binding.binding,
+                    parameters,
+                    line: position.line + 1,
+                  }
+            );
+            budget.references++;
+            budget.check();
+          }
         } else if (wrapped === false) {
           result.push({ file, reason: "WRAPPER_CONTRACT_CHANGED", expression: printed(node) });
         }
