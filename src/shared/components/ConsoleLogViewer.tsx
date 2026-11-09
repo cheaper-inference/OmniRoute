@@ -95,9 +95,10 @@ function shouldSkipFetch(
   paused: boolean,
   viewingHistory: boolean,
   cursor: string | undefined,
-  refresh: boolean
+  refresh: boolean,
+  requestPending: boolean
 ): boolean {
-  return paused || (!cursor && viewingHistory && !refresh);
+  return paused || (!cursor && !refresh && (viewingHistory || requestPending));
 }
 
 const errorText = (err: unknown, fallback: string): string =>
@@ -124,6 +125,18 @@ function readPageMeta(res: Response): { nextCursor: string | null; scanLimited: 
     nextCursor: res.headers?.get("x-console-next-cursor") || null,
     scanLimited: res.headers?.get("x-console-truncated") === "true",
   };
+}
+
+async function logPageError(res: Response, onExpired: () => void): Promise<Error> {
+  if (res.status === 410) onExpired();
+  const payload = await res.json().catch(() => null);
+  const message = payload?.error?.message;
+  return new Error(typeof message === "string" ? message : `HTTP ${res.status}`);
+}
+
+function readLogPage(data: unknown, res: Response, fetchFailed: string) {
+  if (!Array.isArray(data)) throw new Error(fetchFailed);
+  return { data: data as LogEntry[], ...readPageMeta(res) };
 }
 
 type ViewerTranslator = ReturnType<typeof useTranslations>;
@@ -337,11 +350,17 @@ export default function ConsoleLogViewer() {
 
   const fetchLogs = useCallback(
     async (cursor?: string, refresh = false) => {
-      if (shouldSkipFetch(pausedRef.current, historyRef.current, cursor, refresh)) return;
-      if (cursor || refresh) {
-        historyRef.current = Boolean(cursor);
-        setViewingHistory(Boolean(cursor));
-      }
+      // An older page is not history until it succeeds; live ticks must not cancel it.
+      if (
+        shouldSkipFetch(
+          pausedRef.current,
+          historyRef.current,
+          cursor,
+          refresh,
+          Boolean(fetchAbortRef.current)
+        )
+      )
+        return;
       setLoading(true);
       const version = ++requestVersionRef.current;
       fetchAbortRef.current?.abort();
@@ -353,11 +372,18 @@ export default function ConsoleLogViewer() {
           signal: controller.signal,
           cache: "no-store",
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: LogEntry[] = await res.json();
+        if (!res.ok) {
+          throw await logPageError(res, () => {
+            if (isCurrent()) setNextCursor(null);
+          });
+        }
+        const payload: unknown = await res.json();
         if (!isCurrent()) return;
-        if (!Array.isArray(data)) throw new Error(tv("fetchFailed"));
-        const meta = readPageMeta(res);
+        const { data, ...meta } = readLogPage(payload, res, tv("fetchFailed"));
+        if (cursor || refresh) {
+          historyRef.current = Boolean(cursor);
+          setViewingHistory(Boolean(cursor));
+        }
         setLogs((previous) => mergeLogPage(previous, data, cursor));
         setNextCursor(meta.nextCursor);
         setScanLimited(meta.scanLimited);

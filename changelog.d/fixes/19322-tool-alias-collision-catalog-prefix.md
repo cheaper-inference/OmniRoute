@@ -1,0 +1,1 @@
+- **fix(sse):** reject OpenAI tool-name aliases that would collide after length normalization (including case-insensitive shadowing of a valid name) before the request is mutated, instead of restoring tool calls to the wrong tool; combo target model resolution no longer scans every provider alias per target ([#19322](https://github.com/cheaper-inference/OmniRoute/pull/19322))
