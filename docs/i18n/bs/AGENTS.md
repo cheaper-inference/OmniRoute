@@ -31,23 +31,23 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 
 ---
 
-## Projekat ukratko
+## Pregled projekta
 
-**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 380 LLM provajdera, automatski rezervni prelaz.
+**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 381 LLM provajder, automatski prelazak na rezervnu opciju.
 
-- API rute — `src/app/api/v1/` (ulazne tačke App Routera za Next.js)
-- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, ugrađivanja itd.)
-- Izvršioci — `open-sse/executors/` (HTTP usmjeravanje specifično za provajdera)
+- API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
+- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
+- Izvršioci — `open-sse/executors/` (HTTP slanje specifično za provajdera)
 - Prevoditelji — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
-- Servisi — `open-sse/services/` (kombinovano usmjeravanje, ograničenja brzine, keširanje itd.)
-- Baza podataka — `src/lib/db/` (domenski moduli za SQLite, 222 migracije)
-- Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog prelaza)
-- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modula; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
-- A2A server — `src/lib/a2a/` (protokol agenata JSON-RPC 2.0)
-- Vještine — `src/lib/skills/` (proširivi okvir vještina); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
+- Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja brzine, keširanje itd.)
+- Baza podataka — `src/lib/db/` (SQLite domenski moduli, 225 migracija)
+- Domen/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog preusmjeravanja)
+- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli za memoriju/vještine/GitHub/pool/gamifikaciju/dodatke/Notion/Obsidian/lokalni korpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
+- A2A server — `src/lib/a2a/` (agentni protokol JSON-RPC 2.0)
+- Vještine — `src/lib/skills/` (proširivi okvir za vještine); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
-Monorepozitorij: `src/` (aplikacija Next.js 16), `open-sse/` (radni prostor za mehanizam strimovanja), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+Monorepozitorij: `src/` (Next.js 16 aplikacija), `open-sse/` (workspace mehanizma za streaming), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
 
 ---
 

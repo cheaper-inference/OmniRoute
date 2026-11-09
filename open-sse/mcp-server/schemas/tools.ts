@@ -293,7 +293,7 @@ export const checkQuotaOutput = z.object({
       connectionId: z.string(),
       quotaUsed: z.number(),
       quotaTotal: z.number().nullable(),
-      percentRemaining: z.number(),
+      percentRemaining: z.number().nullable(),
       resetAt: z.string().nullable(),
       tokenStatus: z.enum(["valid", "expiring", "expired", "refreshing"]),
     })
@@ -313,7 +313,7 @@ export const checkQuotaOutput = z.object({
 export const checkQuotaTool: McpToolDefinition<typeof checkQuotaInput, typeof checkQuotaOutput> = {
   name: "omniroute_check_quota",
   description:
-    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining, reset time, and token health status.",
+    "Checks the remaining API quota for one or all providers. Returns quota used/total, percentage remaining (null when no quota signal is available for a connection), reset time, and token health status.",
   inputSchema: checkQuotaInput,
   outputSchema: checkQuotaOutput,
   scopes: ["read:quota"],

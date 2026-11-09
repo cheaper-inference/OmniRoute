@@ -127,6 +127,27 @@ Evaluarea automată selectează cel mai bun furnizor/model pentru fiecare cerere
 | `src/sse/handlers/chat.ts`                                | Integrare: scurtcircuitarea prefixului auto                          |
 | `src/shared/constants/providers.ts`                       | Intrarea de sistem `SYSTEM_PROVIDERS.auto`                           |
 
+## Preferințele contului pentru combinațiile automate salvate
+
+Editorul automat inteligent oferă opțional** Preferințele contului** secțiune. Fiecare conexiune poate fi Preferată, Normală (implicit), Rezervată sau Exclusă. Conexiunile multiple pot partaja un nivel. Selectează automat în primul nivel eligibil, păstrându-și comportamentul scoring/router acolo; încercările eșuate revin la conturile concrete rămase, de preferat înaintea normalului înainte de rezervă. Conexiunile excluse nu sunt niciodată folosite de acest combo.
+
+Setarea este stocată ca `config.accountPreferences`, tastată de conexiunea ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+O hartă omise sau goală păstrează ruta existentă. Preferințele nu permit conexiunile dezactivate, nu acordă acces la cheia API, nu restabilește candidații blocați de cote sau nu ocolesc verificările bugetare. Fiecare încercare este limitată la conexiunea sa concretă, astfel încât back-ul de rezervă a contului nu poate sări trepte în spatele routerului combo. Afinitatea de sesiune existentă poate păstra un cont eligibil; excluderea contului legat de un turn nativ se oprește care se rotesc în loc să schimbe în tăcere conturile.
+
+Preferințele configurate folosesc calea automată conștientă de cont: comenzile rapide nelegate de context-cache, smart-pipeline, haos și umbră nu sunt trimise. Acoperirea speculativă este dezactivată pentru aceste solicitări, astfel încât conturile de rezervă nu pot concura cu cele preferate. Alte strategii combinate nu interpretează această setare. Schimbarea unei combinații de la Auto păstrează preferințele salvate pentru o comutare ulterioară înapoi.
+
 ## Nume de combo-uri care corespund unui ID real de model
 
 Un combo al cărui `name` este identic cu un ID simplu de model (de exemplu, un combo numit
