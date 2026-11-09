@@ -61,6 +61,9 @@ export interface LoadPluginOptions {
   /** Per-call IPC hook timeout in ms. Defaults to DEFAULT_HOOK_TIMEOUT (10s); injectable
    *  so tests can exercise the timeout paths without waiting out the production value. */
   hookTimeoutMs?: number;
+  /** Called once when the plugin process ends without cleanup() (crash, or the kill after a
+   *  blocking-hook timeout). The loader never respawns it: the caller decides what to do. */
+  onUnexpectedExit?: (info: { name: string; code: number | null }) => void;
 }
 
 /**
@@ -268,6 +271,10 @@ export async function loadPlugin(
     }
   > = new Map();
   let callCounter = 0;
+  // The process is gone for good (no respawn). Calls then fail at once instead of waiting
+  // out the hook timeout on a channel nobody reads.
+  let exited = false;
+  let closing = false;
 
   child.on(
     "message",
@@ -294,7 +301,12 @@ export async function loadPlugin(
   });
 
   child.on("exit", (code) => {
+    exited = true;
     log.info("loader.process_exit", { name: manifest.name, code });
+    if (!closing) {
+      log.error("plugin.process_dead", { name: manifest.name, code });
+      options.onUnexpectedExit?.({ name: manifest.name, code });
+    }
     for (const [, pending] of pendingCalls) {
       clearTimeout(pending.timer);
       pending.reject(new Error(`Plugin process exited with code ${code}`));
@@ -306,6 +318,7 @@ export async function loadPlugin(
   // Call a hook in the child process with a timeout. Blocking/lifecycle hooks escalate
   // SIGTERM → SIGKILL on timeout; NOTIFICATION_HOOKS only drop the pending call.
   const callHook = (hook: string, payload: unknown, timeout = hookTimeoutMs): Promise<unknown> => {
+    if (exited) return Promise.reject(new Error(`Plugin process is not running (hook '${hook}')`));
     return new Promise((resolve, reject) => {
       const id = String(++callCounter);
       const timer = setTimeout(() => {
@@ -424,6 +437,7 @@ export async function loadPlugin(
   });
 
   const cleanup = () => {
+    closing = true;
     child.kill("SIGTERM");
     // Escalate to SIGKILL after grace period
     escalateToSigkill(child);
