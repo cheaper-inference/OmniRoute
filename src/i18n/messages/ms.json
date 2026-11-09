@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Keutamaan akaun",
+    "description": "Tetapkan akaun yang perlu diutamakan atau disimpan sebagai sandaran untuk gabungan ini. Penghalaan automatik menyusun kedudukan akaun dalam setiap peringkat. Akaun yang tidak disenaraikan dianggap biasa. Kebenaran, had kuota dan ikatan giliran sedia ada masih terpakai.",
+    "preferred": "Diutamakan",
+    "normal": "Biasa",
+    "reserve": "Sandaran",
+    "excluded": "Dikecualikan",
+    "loading": "Memuatkan akaun…",
+    "error": "Tidak dapat memuatkan akaun. Buka semula editor untuk mencuba lagi.",
+    "missing": "Akaun tidak tersedia ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mod perkhidmatan Codex untuk kunci API ini",
     "description": "Terpakai pada permintaan Codex, termasuk model Codex dalam kombinasi. Mod paksa mengatasi tetapan klien, tetapan global dan lalai sambungan. Penyedia lain kekal tidak berubah.",

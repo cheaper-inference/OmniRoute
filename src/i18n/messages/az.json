@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Hesab tərcihləri",
+    "description": "Bu marşrutlaşdırma konfiqurasiyası üçün bir neçə hesaba üstünlük verin və ya onları ehtiyatda saxlayın. Avtomatik marşrutlaşdırma hər səviyyədə hesabları sıralayır. Siyahıda olmayan hesablar adi hesab olunur. İcazələr, kvota limitləri və mövcud növbə bağlantıları yenə də tətbiq edilir.",
+    "preferred": "Üstünlük verilən",
+    "normal": "Adi",
+    "reserve": "Ehtiyat",
+    "excluded": "İstisna edilən",
+    "loading": "Hesablar yüklənir…",
+    "error": "Hesabları yükləmək mümkün olmadı. Yenidən cəhd etmək üçün redaktoru yenidən açın.",
+    "missing": "Əlçatan olmayan hesab ({id})"
+  },
   "teamCosts": {
     "title": "Komanda xərcləri",
     "subtitle": "Paylaşılan yumşaq büdcələri və kataloq xərc təxminlərini idarə edin.",

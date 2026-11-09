@@ -553,6 +553,7 @@
       "trafficInspector"
     ],
     "combos": [
+      "accountPreferences",
       "agentSkills",
       "analytics",
       "breadcrumbs",
