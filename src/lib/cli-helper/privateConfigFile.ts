@@ -33,6 +33,15 @@ export function writePrivateConfigFile(configPath: string, content: string): voi
     if (existing.isSymbolicLink())
       throw new Error("Refusing to write symbolic link at CLI config path");
     if (!existing.isFile()) throw new Error("CLI config destination must be a regular file");
+    // The temp-file-and-rename write makes the writer the new owner. Over a file that belongs
+    // to another uid (a container user over a bind-mounted host config) that strands the
+    // owner without read access, so refuse before anything is written.
+    const writerUid = typeof process.geteuid === "function" ? process.geteuid() : null;
+    if (writerUid !== null && existing.uid !== writerUid) {
+      throw new Error(
+        `Refusing to replace CLI config owned by uid ${existing.uid} from uid ${writerUid}: ${configPath}`
+      );
+    }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
