@@ -139,6 +139,36 @@ function scheduled(id, values) {
   );
 }
 
+test("i18n preparation is separate from absolute queue and base admission", () => {
+  const steps = workflow.jobs["docs-sync-strict"].steps.filter((step) =>
+    String(step.run ?? "").includes("scripts/i18n/check-translation-drift.mjs")
+  );
+  const cases = [
+    { values: ready, preparation: true },
+    { values: queue, preparation: false },
+    { values: { ...ready, "github.event_name": "merge_group" }, preparation: false },
+    { values: { ...ready, "github.event_name": "push" }, preparation: false },
+    { values: { ...ready, "github.event_name": "workflow_dispatch" }, preparation: false },
+  ];
+  for (const item of cases) {
+    const values = jobValues(item.values);
+    const selected = steps.filter((step) => condition(step.if ?? "true", values));
+    assert.equal(selected.length, 1, JSON.stringify(item));
+    const command = selected[0].run;
+    assert.equal(command.includes("--preflight"), item.preparation, JSON.stringify(item));
+    if (item.preparation) {
+      assert.match(command, /--baseline-evidence/);
+      assert.match(command, /--base-report/);
+      assert.doesNotMatch(
+        command.split("\n").find((line) => line.includes("--preflight")),
+        /--warn/
+      );
+    } else {
+      assert.doesNotMatch(command, /--warn|--base-report|--preflight/);
+    }
+  }
+});
+
 test("an official queue draft enables every applicable required CI lane", () => {
   const values = jobValues(queue);
   assert.equal(values["needs.changes.outputs.queueCandidate"], "true");

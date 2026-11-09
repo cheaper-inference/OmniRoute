@@ -1,9 +1,9 @@
 name: i18n mirror refresh
 
-# Post-merge refresh of the translated docs mirrors (docs/i18n/<locale>/…). Since #18420 the
-# docs drift gate is advisory on PRs; merge_group keeps its strict check, so drifted mirrors pile up on the
-# release branch until somebody runs `npm run i18n:run` by hand. This workflow does that run
-# on a schedule and turns the result into ONE pull request:
+# Scheduled recovery of translated docs mirrors (docs/i18n/<locale>/…). Ordinary PR
+# preparation may leave proven English-only work pending, but queue/base admission requires
+# all five drift classes to pass. Maintainers refresh the composed candidate before merge;
+# this workflow separately repairs debt already present on a public base in ONE pull request:
 #
 #   1. target = the highest release/v* branch (or the `base` input); skipped with a notice while
 #      an open `release-freeze` issue names that branch (Hard Rule #21);

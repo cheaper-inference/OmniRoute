@@ -521,40 +521,25 @@ jobs:
       # One FS inventory of src/app/api for both anti-hallucination directions.
       - name: API docs refs (openapi + prose → routes)
         run: npm run check:api-docs-refs
-      # Blocking since the 2026-09 docs re-sync: a core doc edited without `npm run i18n:run
-      # --files=<doc>` (or `--adopt` for a mechanical edit) leaves 65 stale mirrors behind;
-      # the run only retranslates the `## ` sections whose text changed, so it is cheap.
-      #
-      # PR-scoped since 2026-10-20: on a pull request the gate compares against the BASE
-      # checkout and fails only on drift this PR introduces. Drift the base already carried
-      # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
-      # is printed as inherited — the branch's own push run and the nightly Release-Green keep
-      # the full strict verdict, so the debt stays visible without painting every PR red.
-      #
-      # Advisory on pull requests since 2026-10-28: an English doc edit no longer has to ship
-      # its 66 mirrors in the same PR. Per-PR translation serialised every doc PR behind one
-      # translation backend (a 6-day quota outage froze 8 PRs; one doc took 6.6 h of retries)
-      # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
-      # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
-      # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
+      # Ordinary PRs may prepare English edits while exact inherited state/targets stay
+      # unchanged. New target/cache corruption still blocks. This is preparation only:
+      # the trusted queue candidate, merge group and base must pass all five drift classes
+      # before admission. Refresh mirrors in the composed candidate before merging.
       - name: Base checkout for the i18n drift baseline (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && needs.changes.outputs.queueCandidate != 'true' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: .i18n-base
           persist-credentials: false
-      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: i18n docs preparation (ordinary PR)
+        if: ${{ github.event_name == 'pull_request' && needs.changes.outputs.queueCandidate != 'true' }}
         run: |
           set -euo pipefail
-          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
-          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json --warn | tee /tmp/i18n-pr-drift.txt
-          if grep -q "WARN — drift detected" /tmp/i18n-pr-drift.txt; then
-            echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
-          fi
-      - name: i18n docs drift (sources changed since their translation)
-        if: ${{ github.event_name != 'pull_request' }}
+          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --baseline-evidence --warn > /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json --preflight
+      - name: i18n docs admission (all provenance classes)
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true' }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:
