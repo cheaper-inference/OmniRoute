@@ -127,6 +127,27 @@ Automatické vyhodnocovanie vyberie pre každú požiadavku najlepšieho poskyto
 | `src/sse/handlers/chat.ts`                                | Integrácia: skrátené spracovanie automatického prefixu       |
 | `src/shared/constants/providers.ts`                       | Systémová položka `SYSTEM_PROVIDERS.auto`                    |
 
+## Predvoľby účtu pre uložené automatické kombinácie
+
+Inteligentný automatický editor ponúka voliteľné** Predvoľby účtu** oddiele. Každé pripojenie môže byť Preferované, Normálne (predvolené), Rezervované alebo Vylúčené. Viaceré pripojenia môžu zdieľať vrstvu. Automaticky vyberá v rámci prvej vhodnej úrovne, pričom si tam zachováva svoje správanie scoring/router ; neúspešné pokusy prepadnú na zostávajúce konkrétne účty, uprednostnené pred normálnymi pred rezervou. Táto kombinácia nikdy nepoužíva vylúčené pripojenia.
+
+Nastavenie je uložené ako `config.accountPreferences`, zakódované spojením ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Vynechaná alebo prázdna mapa si zachová existujúcu trasu. Predvoľby nepovoľujú zakázané pripojenia, neudeľujú prístup ku kľúču API, neobnovujú kandidátov so zablokovanými kvótami ani neobchádzajú kontroly rozpočtu. Každý pokus je obmedzený na konkrétne pripojenie, takže záložný účet nemôže preskakovať úrovne za kombinovaný smerovač. Súčasná príbuznosť relácie si môže zachovať vhodný účet; vylúčenie účtu viazaného na natívny obrat zastavuje, ktoré sa otáčajú namiesto tichého menenia účtov.
+
+Nakonfigurované preferencie používajú automatickú cestu s ohľadom na účet: neviazaná kontextová vyrovnávacia pamäť, inteligentné potrubie, chaos a tieňové skratky sa neodosielajú. Špekulatívne zaistenie je pre tieto požiadavky zakázané, takže rezervné účty nemôžu súťažiť s preferovanými. Iné kombinované stratégie toto nastavenie neinterpretujú. Ak zmeníte kombináciu z možnosti Automaticky, uložené predvoľby sa zachovajú na neskoršie prepnutie späť.
+
 ## Názvy kombinácií zhodné so skutočným identifikátorom modelu
 
 Kombinácia, ktorej `name` je zhodný s holým identifikátorom modelu (napr. kombinácia s názvom

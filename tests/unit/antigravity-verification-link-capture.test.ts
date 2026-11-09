@@ -50,9 +50,9 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
-async function makeConn() {
+async function makeConn(provider = "antigravity") {
   const conn = (await providersDb.createProviderConnection({
-    provider: "antigravity",
+    provider,
     authType: "oauth",
     accessToken: "access-token",
     refreshToken: "refresh-token",
@@ -172,4 +172,22 @@ test("connection test: a passing probe clears a stored verification link", async
   }
   assert.equal(result.valid, true);
   assert.equal(await storedLink(id), undefined, "a verified account leaves the pending filter");
+});
+
+test("agy connection: a 403 stores the verification link on agy connections", async () => {
+  const id = await makeConn("agy");
+  const connection = await providersDb.getProviderConnectionById(id);
+  const restore = stubFetch(403, VALIDATION_BODY);
+  try {
+    const result = await testOAuthConnection(connection, 5000);
+    assert.equal(result.valid, false);
+    assert.equal(result.statusCode, 403);
+  } finally {
+    restore();
+  }
+  assert.equal(
+    await storedLink(id),
+    LINK,
+    "agy connections must store the verification link so the button appears"
+  );
 });

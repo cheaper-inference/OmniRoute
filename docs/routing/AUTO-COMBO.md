@@ -406,6 +406,14 @@ removed history; this is deterministic trimming, not a semantic summary. If the 
 context still exceeds the budget, the request returns 413 before contacting the model.
 With compaction disabled or below the threshold the request passes through unchanged.
 
+On tool-result continuations, OmniRoute also stops execution when two consecutive
+completed rounds repeat the same tool calls with unchanged results, or when every
+explicitly marked result in two consecutive rounds failed. Changed results permit
+repeated calls (for example, polling). The guard resets on a fresh user request,
+groups parallel calls into one round, and supports Anthropic, Chat Completions,
+Responses and Gemini histories. The planner receives the reason and owns the final
+answer even if it requests another tool round.
+
 Additional models after the second target are ordered executor backups. A failed
 HTTP response or transport exception advances to the next executor, carrying the
 same planner decision and native tools but that executor's own step prompt and
