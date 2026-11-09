@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-120 flags across 6 categories. **Default** is the definition default — the value
+121 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (11)
@@ -284,10 +284,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 120 flags
+    // ... all 121 flags
   ],
   "summary": {
-    "total": 120,
+    "total": 121,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
