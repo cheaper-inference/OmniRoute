@@ -344,8 +344,10 @@ function resolveEffectiveResponseStartBudget(
   requestTimeoutMs?: number
 ): { timeoutMs: number; requestScoped: boolean } {
   const configuredMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
-  const validCap = typeof requestTimeoutMs === "number" &&
-    Number.isFinite(requestTimeoutMs) && requestTimeoutMs > 0;
+  const validCap =
+    typeof requestTimeoutMs === "number" &&
+    Number.isFinite(requestTimeoutMs) &&
+    requestTimeoutMs > 0;
   if (!validCap) return { timeoutMs: configuredMs, requestScoped: false };
   const capMs = Math.max(1, Math.floor(requestTimeoutMs!));
   return {
@@ -387,7 +389,11 @@ export async function executeWithUpstreamStartTimeout<T>({
   execute: (signal: AbortSignal) => Promise<T>;
 }): Promise<T> {
   const { timeoutMs, requestScoped } = resolveEffectiveResponseStartBudget(
-    executor, provider, model, connectionTimeoutMs, requestTimeoutMs
+    executor,
+    provider,
+    model,
+    connectionTimeoutMs,
+    requestTimeoutMs
   );
   if (timeoutMs <= 0) return execute(signal);
   if (signal.aborted) throw createAbortError(signal);

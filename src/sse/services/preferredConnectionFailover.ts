@@ -28,14 +28,18 @@ const MAX_KEY_LENGTH = 180;
 // 0 disables the preferred-timeout policy for a provider or exact model.
 // The existing underlying provider deadline still applies unchanged.
 function validTimeout(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) &&
-    (value === 0 || (value >= MIN_MS && value <= MAX_MS));
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    (value === 0 || (value >= MIN_MS && value <= MAX_MS))
+  );
 }
 
 function validKey(key: string): boolean {
   // Reject prototype-looking names and wildcard forms other than trailing *.
-  return key.length > 0 && key.length <= MAX_KEY_LENGTH &&
-    /^[a-z0-9][a-z0-9._/@:+-]*\*?$/i.test(key);
+  return (
+    key.length > 0 && key.length <= MAX_KEY_LENGTH && /^[a-z0-9][a-z0-9._/@:+-]*\*?$/i.test(key)
+  );
 }
 
 function readOverrides(value: unknown, fallback: Record<string, number>): Record<string, number> {
@@ -55,13 +59,16 @@ export function normalizePreferredFailoverSettings(
   value: unknown,
   fallback: PreferredFailoverSettings = DEFAULT_PREFERRED_FAILOVER_SETTINGS
 ): PreferredFailoverSettings {
-  const data = value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown> : {};
+  const data =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
   return {
     enabled: typeof data.enabled === "boolean" ? data.enabled : fallback.enabled,
     defaultTimeoutMs:
       validTimeout(data.defaultTimeoutMs) && data.defaultTimeoutMs > 0
-        ? data.defaultTimeoutMs : fallback.defaultTimeoutMs,
+        ? data.defaultTimeoutMs
+        : fallback.defaultTimeoutMs,
     providerTimeoutsMs: readOverrides(data.providerTimeoutsMs, fallback.providerTimeoutsMs),
     modelTimeoutsMs: readOverrides(data.modelTimeoutsMs, fallback.modelTimeoutsMs),
   };
@@ -94,8 +101,8 @@ function canonicalProvider(provider: string): string {
 function canonicalModelKey(provider: string, modelId: string): string {
   const raw = modelId.trim().toLowerCase();
   const slash = raw.indexOf("/");
-  const bare = slash > 0 && canonicalProvider(raw.slice(0, slash)) === provider
-    ? raw.slice(slash + 1) : raw;
+  const bare =
+    slash > 0 && canonicalProvider(raw.slice(0, slash)) === provider ? raw.slice(slash + 1) : raw;
   return provider + "/" + bare;
 }
 
@@ -129,12 +136,13 @@ function configuredPreferredTimeoutMs(
   if (modelOverride !== undefined) return modelOverride;
   const providerOverride = Object.prototype.hasOwnProperty.call(settings.providerTimeoutsMs, p)
     ? settings.providerTimeoutsMs[p]
-    : p === "antigravity" ? settings.providerTimeoutsMs.agy : undefined;
+    : p === "antigravity"
+      ? settings.providerTimeoutsMs.agy
+      : undefined;
   if (providerOverride !== undefined) return providerOverride;
   // Preserve the existing Antigravity fast-path defaults.
   if (p !== "antigravity") return settings.defaultTimeoutMs;
-  return /^antigravity\/gemini-3\.8-flash(?:-tiered|-high|-medium|-low)?$/.test(m)
-    ? 12_000 : 5_000;
+  return /^antigravity\/gemini-3\.8-flash(?:-tiered|-high|-medium|-low)?$/.test(m) ? 12_000 : 5_000;
 }
 
 export function resolvePreferredConnectionUpstreamStartTimeoutMs(
@@ -146,7 +154,8 @@ export function resolvePreferredConnectionUpstreamStartTimeoutMs(
 ): PreferredFailoverDeadline {
   const hint =
     typeof requestHintMs === "number" && Number.isFinite(requestHintMs) && requestHintMs > 0
-      ? Math.floor(requestHintMs) : undefined;
+      ? Math.floor(requestHintMs)
+      : undefined;
   if (
     !settings.enabled ||
     credentials?.selectedByApiKeyPreference !== true ||
