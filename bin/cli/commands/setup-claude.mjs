@@ -24,7 +24,7 @@ import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 import { detectLocalCliProvider } from "../utils/localCliAvailability.mjs";
 import { loadAvailableProviders } from "../provider-catalog.mjs";
 import { isLoopbackUrl } from "../api.mjs";
-import { buildClaudeEnv } from "./launch.mjs";
+import { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";
 import {
   categoriseModel,
   isCodexCompatibleTextModel,
@@ -106,12 +106,10 @@ export function inheritedAnthropicKeyWarning(env = process.env) {
  * Build the settings.json content for one Claude Code profile.
  * `contextWindow` is the model's real window from the catalog; without it the profile table's
  * `cfg.ctx` is used. The window rule (compact at 85% below 200k, else 190000) is the one
- * `omniroute launch` applies, so it is read from `buildClaudeEnv` instead of copied.
+ * `omniroute launch` applies; it lives in claudeWindowEnv, shared by both.
  */
 export function buildProfileSettings(modelId, baseUrl, cfg, contextWindow) {
-  const window = buildClaudeEnv({}, baseUrl, undefined, {
-    contextWindow: contextWindow ?? cfg?.ctx,
-  });
+  const window = claudeWindowEnv(contextWindow ?? cfg?.ctx);
   const env = {
     ANTHROPIC_BASE_URL: baseUrl,
     ANTHROPIC_MODEL: modelId,

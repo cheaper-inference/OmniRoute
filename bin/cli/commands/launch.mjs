@@ -5,6 +5,7 @@ import { t } from "../i18n.mjs";
 import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
+import { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";
 
 function stripTrailingSlash(value) {
   let s = String(value);
@@ -48,20 +49,8 @@ export function buildClaudeEnv(baseEnv, baseUrlOrPort, authToken, opts = {}) {
   // stays stripped (above) so it can't shadow the Bearer token.
   env.ANTHROPIC_AUTH_TOKEN = (authToken && String(authToken).trim()) || "omniroute-no-auth";
   env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1";
-  env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = "190000";
-  // Claude Code assumes 200K for a gateway model id it does not know, so 190000 is
-  // right for windows of 200k or more. A smaller real window would overflow first:
-  // compact at 85% of it, and declare the window itself because Claude Code accepts
-  // no compact window below 100000. shortcut: no 1M marking for larger windows, a
-  // wrong 1M claim puts the safety net behind the API limit; add it once the
-  // catalog windows are trusted.
-  const contextWindow = Math.floor(Number(opts.contextWindow));
-  if (contextWindow > 0 && contextWindow < 200_000) {
-    env.CLAUDE_CODE_MAX_CONTEXT_TOKENS = String(contextWindow);
-    const compact = Math.floor(contextWindow * 0.85);
-    if (compact >= 100_000) env.CLAUDE_CODE_AUTO_COMPACT_WINDOW = String(compact);
-    else delete env.CLAUDE_CODE_AUTO_COMPACT_WINDOW;
-  }
+  // Window sizing for a model with a known real window: see claudeWindowEnv.
+  Object.assign(env, claudeWindowEnv(opts.contextWindow));
   // Profile isolation (Claude Code has no native profiles — CLAUDE_CONFIG_DIR is
   // the idiomatic mechanism: separate settings/credentials/history/cache per dir).
   if (opts.configDir) env.CLAUDE_CONFIG_DIR = opts.configDir;
