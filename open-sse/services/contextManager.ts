@@ -1134,3 +1134,20 @@ export function stripTrailingAssistantForProvider(
 
   return messages.slice(0, messages.length - 1);
 }
+
+/**
+ * The same rule for a Responses `input` array, where tool calls are items of their own: only a
+ * trailing assistant message is dropped, with the reasoning items of that turn.
+ */
+export function stripTrailingAssistantInputForProvider<T>(input: T, provider: string): T {
+  if (!PROVIDERS_REQUIRING_USER_LAST_MESSAGE.has(provider) || !Array.isArray(input)) return input;
+
+  const items = input as Record<string, unknown>[];
+  const last = items[items.length - 1];
+  const isMessage = last?.type === undefined || last.type === "message";
+  if (last?.role !== "assistant" || !isMessage) return input;
+
+  let end = items.length - 1;
+  while (end > 0 && items[end - 1]?.type === "reasoning") end--;
+  return items.slice(0, end) as T;
+}
