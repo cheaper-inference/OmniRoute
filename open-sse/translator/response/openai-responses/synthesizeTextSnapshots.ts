@@ -74,11 +74,9 @@ function resolveItem(t: TextTracker, identity: Identity, allowAnonymous = false)
   if (!id && outputIndex === undefined && t.anonymous) return t.anonymous;
   const byId = id ? t.byId.get(id) : undefined;
   const byIndex = outputIndex !== undefined ? t.byIndex.get(outputIndex) : undefined;
-  // Explicit IDs are authoritative; a malformed reused output index must not merge them.
-  const compatibleIndex =
-    byIndex && (!id || !byIndex.id || byIndex.id === id) ? byIndex : undefined;
-  let item = byId ?? compatibleIndex;
-  if (byId && compatibleIndex && byId !== compatibleIndex) mergeItems(t, byId, compatibleIndex);
+  // Match by explicit ID or by output index (e.g. GitHub Copilot rotating item_id on every event).
+  let item = byId ?? byIndex;
+  if (byId && byIndex && byId !== byIndex) mergeItems(t, byId, byIndex);
   // Only a complete, single-message snapshot can prove where anonymous deltas belong.
   if (allowAnonymous && t.anonymous && t.items.size === (item ? 2 : 1)) {
     if (item) mergeItems(t, item, t.anonymous);
