@@ -20,10 +20,13 @@ const { stripOutputConfigFormatForCompat } =
 const build = (
   body: unknown,
   provider: string,
+  // chatCore binds the routed provider into every normalize call; do the same here.
   normalize: (p: never, o: never) => void = (p: unknown, o: unknown) =>
     normalizeClaudeUpstreamMessages(
       p as Record<string, unknown>,
-      o as { preserveToolResultBlocks?: boolean }
+      { ...(o as { preserveToolResultBlocks?: boolean }), provider } as {
+        preserveToolResultBlocks?: boolean;
+      }
     )
 ) =>
   buildClaudePassthroughBody({
@@ -142,4 +145,51 @@ test("non-Anthropic target (preserveToolResultBlocks=false) still converts/drops
     (b: Record<string, unknown>) => b.type
   );
   assert.deepEqual(types, ["text"]);
+});
+
+// A Claude-format route to a non-Anthropic backend (for example DeepSeek's
+// Anthropic-compatible alternate) reaches the same builder. It does not support
+// search_result, so the unknown block must still be dropped there, while the
+// tool_result block (which it does support) must still pass through.
+test("passthrough to a non-Anthropic Claude-format route drops unknown blocks, keeps tool_result", () => {
+  const body = {
+    model: "deepseek-v4-pro",
+    max_tokens: 10,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "tool_result", tool_use_id: "toolu_1", content: "ok" },
+          { type: "search_result", source: "https://x", title: "T", content: [] },
+          { type: "text", text: "summarise" },
+        ],
+      },
+    ],
+  };
+  const out = build(body, "deepseek") as Record<string, unknown>;
+  const types = out.messages[0].content.map((b: Record<string, unknown>) => b.type);
+  assert.deepEqual(
+    types,
+    ["tool_result", "text"],
+    `blocks sent upstream: ${JSON.stringify(types)}`
+  );
+});
+
+test("passthrough to the anthropic API-key provider keeps native user blocks", () => {
+  const body = {
+    model: "claude-sonnet-4-5",
+    max_tokens: 10,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "search_result", source: "https://x", title: "T", content: [] },
+          { type: "text", text: "summarise" },
+        ],
+      },
+    ],
+  };
+  const out = build(body, "anthropic") as Record<string, unknown>;
+  const types = out.messages[0].content.map((b: Record<string, unknown>) => b.type);
+  assert.deepEqual(types, ["search_result", "text"]);
 });
