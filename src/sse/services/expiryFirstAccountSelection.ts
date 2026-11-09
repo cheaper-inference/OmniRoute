@@ -210,6 +210,15 @@ function selectByNearestDeadline<T extends ExpiryFirstCandidate>(
  * no winner. The caller commits `lastUsedAt` afterwards (same as least-used,
  * #10945) because the tie band reads that field.
  */
+/**
+ * True when the settings ask expiry-first for `deadline` order. That order is an
+ * explicit "spend this account first" decision, so callers must not move the
+ * request to another account afterwards (e.g. OAuth session spreading).
+ */
+export function isExpiryFirstDeadlineOrder(settings: unknown): boolean {
+  return resolveExpiryFirstConfig(settings as Record<string, unknown> | null).order === "deadline";
+}
+
 export function pickExpiryFirstConnection<T extends ExpiryFirstCandidate>(
   orderedConnections: readonly T[],
   settings: unknown,

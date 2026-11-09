@@ -14,7 +14,10 @@ import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
-import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
+import {
+  isExpiryFirstDeadlineOrder,
+  pickExpiryFirstConnection,
+} from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
 import { isCIPayloadQuotaFailure } from "./ciPayloadQuotaFailure.ts";
 import {
@@ -2022,10 +2025,17 @@ export async function getProviderCredentials(
       connection = orderedConnections[0];
     }
 
+    // Spread concurrent OAuth sessions over peer accounts — except when expiry-first runs in
+    // deadline order: there the account to spend is chosen on purpose, and spreading moved
+    // every parallel conversation onto the account with the later deadline.
+    const keepDeadlinePick =
+      strategy === "expiry-first" &&
+      isExpiryFirstDeadlineOrder({ ...(settings as object), ...providerOverride });
     if (
       options.reserveOAuthSession === true &&
       connection?.authType === "oauth" &&
-      !selectedByApiKeyPreference
+      !selectedByApiKeyPreference &&
+      !keepDeadlinePick
     ) {
       const selectedPriority = connection.priority || 999;
       const selectedAvailability = getOAuthSessionAvailability(connection.id, options.sessionKey);
