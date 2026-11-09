@@ -303,6 +303,15 @@ function toolCallsFromClaudeSummary(summary: unknown): ToolCall[] {
   return calls;
 }
 
+const RESPONSES_TERMINAL_EVENT_TYPES = new Set([
+  "response.completed",
+  "response.incomplete",
+  "response.failed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+]);
+
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -1001,7 +1010,9 @@ export function createSSEStream(options: StreamOptions = {}) {
     nativeClaudeUsage
       ? (nativeClaudeUsage.getUsage() ??
         (totalContentLength > 0 ? estimateUsage(body, totalContentLength, sourceFormat) : null))
-      : state?.usage;
+      : state
+        ? state.usage
+        : usage; // passthrough keeps its usage in the closure, not in translator state
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1011,6 +1022,55 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughForwardedUsageSummary = false;
   /** Translate: usage already reached the client, or no trailing usage chunk applies. */
   let translateForwardedUsage = sourceFormat !== FORMATS.OPENAI || !shouldEmitDoneTerminator;
+  /** Passthrough: the upstream ended its turn ([DONE], a finish_reason or a Responses terminal event). */
+  let passthroughSawTerminal = false;
+  const noteTerminal = (payload: unknown) => {
+    const p = asRecord(payload);
+    if (
+      p.done === true ||
+      (typeof p.type === "string" && RESPONSES_TERMINAL_EVENT_TYPES.has(p.type)) ||
+      p.type === "message_stop" ||
+      (p.type === "message_delta" && asRecord(p.delta).stop_reason) ||
+      (Array.isArray(p.choices) && p.choices.some((c) => asRecord(c).finish_reason))
+    ) {
+      passthroughSawTerminal = true;
+    }
+  };
+  /** Claude passthrough usage: message_start holds input, message_delta holds output; a 0 never erases a count. */
+  const mergeClaudePassthroughUsage = (extracted: unknown) => {
+    if (!usage) usage = {};
+    const u = usage;
+    const eu = extracted as UsageTokenRecord;
+    Object.assign(u, mergeCacheCreationFields(u, extracted));
+    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
+    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
+    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
+    if (eu.cache_read_input_tokens !== undefined)
+      u.cache_read_input_tokens = eu.cache_read_input_tokens;
+    if (eu.cache_creation_input_tokens !== undefined)
+      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+  };
+  /** EOF-tail frames skip the main loop: record the usage and finish evidence it would have kept. */
+  const noteTailPayload = (payload: unknown) => {
+    noteTerminal(payload);
+    const extracted = extractUsage(payload as never);
+    if (extracted) {
+      if (clientExpectsClaudeStream) {
+        mergeClaudePassthroughUsage(extracted);
+      } else {
+        usage = {
+          ...mergeUsageSnapshot(usage, extracted),
+          ...mergeCacheCreationFields(usage, extracted),
+        };
+        // The tail frame already carries the usage to the client: flush adds no estimate.
+        if (hasValidUsage(extracted)) passthroughForwardedUsage = true;
+      }
+    }
+    const choices = asRecord(payload).choices;
+    if (Array.isArray(choices) && asRecord(choices[0]).finish_reason) {
+      passthroughSawFinishReason = true;
+    }
+  };
   // Passthrough Responses SSE: snapshots of items seen via `response.output_item.done`,
   // used to backfill `response.completed.response.output` when upstream returns it
   // empty (which happens when `store: false` — see backfillResponsesCompletedOutput).
@@ -1708,6 +1768,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
               if (providerPayload) {
                 providerPayloadCollector.push(providerPayload);
+                noteTerminal(providerPayload);
                 if ((providerPayload as { done?: unknown }).done === true) {
                   continue;
                 }
@@ -2175,21 +2236,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Claude SSE: extract usage, track content, forward as-is
                   const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
                   const extracted = extractUsage(parsed);
-                  if (extracted) {
-                    // Non-destructive merge: never overwrite a positive value with 0
-                    // message_start carries input_tokens, message_delta carries output_tokens;
-                    if (!usage) usage = {};
-                    const u = usage;
-                    const eu = extracted as UsageTokenRecord;
-                    Object.assign(u, mergeCacheCreationFields(u, extracted));
-                    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
-                    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
-                    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
-                    if (eu.cache_read_input_tokens !== undefined)
-                      u.cache_read_input_tokens = eu.cache_read_input_tokens;
-                    if (eu.cache_creation_input_tokens !== undefined)
-                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  }
+                  if (extracted) mergeClaudePassthroughUsage(extracted);
                   if (
                     shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                       claudeEmptyResponseLifecycle,
@@ -2902,8 +2949,17 @@ export function createSSEStream(options: StreamOptions = {}) {
               },
               pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: (payload: unknown) =>
-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+              // Runs once per tail data frame, after projection: read usage and finish evidence
+              // from the same payload the client receives.
+              sanitizeUsagePayload: (payload: unknown) => {
+                const changed = sanitizeUsagePayloadForRequest(
+                  payload as UsageLike,
+                  body,
+                  clientResponseFormat
+                );
+                noteTailPayload(payload);
+                return changed;
+              },
               setPassthroughResponsesId: (value: string) => {
                 passthroughResponsesId = value;
               },
@@ -2958,6 +3014,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             };
 
             for (const line of normalizedTailLines) {
+              if (/^data:\s*\[DONE\]\s*$/.test(line.trim())) passthroughSawTerminal = true;
               if (processBufferedPassthroughLine(line, tailProcessorContext)) {
                 return;
               }
@@ -2988,6 +3045,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
                 mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
+                noteTailPayload(bufferedPayload);
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3131,6 +3189,37 @@ export function createSSEStream(options: StreamOptions = {}) {
               clientPayloadCollector.push(thinkFlush.syntheticChunk);
               reqLogger?.appendConvertedChunk?.(thinkFlush.flushOutput);
               forward(controller, encoder.encode(thinkFlush.flushOutput));
+            }
+
+            // EOF with output but no provider terminal is a cut answer: fail it in the
+            // client protocol instead of faking a stop and recording a 200.
+            if (
+              (shouldEmitDoneTerminator || clientExpectsResponsesStream) &&
+              !passthroughSawTerminal &&
+              !passthroughSawFinishReason &&
+              (totalContentLength > 0 || passthroughHasToolCalls)
+            ) {
+              const message = "Upstream stream ended without a terminal marker";
+              const failure: StreamFailurePayload = {
+                status: 502,
+                message,
+                code: "stream_early_eof",
+                type: "server_error",
+                streamSnapshot: buildStreamFailureSnapshot(providerPayloadCollector),
+              };
+              const errorFrame = formatTranslatedStreamError(
+                failure,
+                clientResponseFormat ?? undefined
+              );
+              reqLogger?.appendConvertedChunk?.(errorFrame);
+              forward(controller, encoder.encode(errorFrame));
+              upstreamErrorForwarded = true;
+              doneSent = true;
+              abortStreamFailure(controller, failure, message, {
+                notifyComplete: true,
+                ...failureBoundaryOptions(),
+              });
+              return;
             }
 
             // Estimate usage if provider didn't return valid usage

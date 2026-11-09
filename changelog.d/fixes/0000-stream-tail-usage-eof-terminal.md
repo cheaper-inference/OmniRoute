@@ -1,0 +1,1 @@
+- **fix(sse):** a streamed chat or Responses answer that the provider cuts off before any finish marker now ends with one error frame and a failed call-log entry, instead of a faked `stop` and a recorded success. A final usage frame that arrives without a blank-line suffix is now billed as sent, not replaced by an estimate.

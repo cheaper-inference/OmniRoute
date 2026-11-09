@@ -49,6 +49,16 @@ function contentChunk(): string {
   })}\n\n`;
 }
 
+function finishChunk(): string {
+  return `data: ${JSON.stringify({
+    id: "chatcmpl-sse-comments-9305",
+    object: "chat.completion.chunk",
+    created: 1700000000,
+    model: "test-model",
+    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+  })}\n\n`;
+}
+
 function countOccurrences(value: string, needle: string): number {
   return value.split(needle).length - 1;
 }
@@ -79,6 +89,8 @@ async function runFinalizationCase({
       start(controller) {
         controller.enqueue(encoder.encode(contentChunk()));
         if (upstreamDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        // A natural EOF without [DONE] is a clean end only when the upstream sent its finish chunk.
+        else controller.enqueue(encoder.encode(finishChunk()));
         controller.close();
       },
     });
