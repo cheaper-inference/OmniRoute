@@ -42,27 +42,27 @@ Arịrịọ ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Ọrụ `usage.ts` na-edekọ **ihe omume ojiji** maka arịrịọ ọ bụla:
 
-| Ubi                | Ụdị     | Ebe o si bịa                                               |
-| ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | UUID e mepụtara mgbe a na-edekọ ya                         |
-| `apiKeyId`         | string  | API key malitere arịrịọ ahụ                                |
-| `provider`         | string  | NJ provider (openai, anthropic, dgz.)                      |
-| `model`            | string  | NJ model (gpt-5, claude-opus-4-6, dgz.)                    |
-| `comboId`          | string? | NJ combo ma ọ bụrụ na e zigara ya site na combo            |
-| `promptTokens`     | number  | Site na nzaghachi upstream                                 |
-| `completionTokens` | number  | Site na nzaghachi upstream                                 |
-| `cachedTokens`     | number  | Token ndị cache chọtara (cache prompt Anthropic, dgz.)     |
-| `totalTokens`      | number  | prompt + mmecha                                            |
-| `costUsd`          | number  | Nke a gbakọrọ site na data ọnụahịa                         |
-| `latencyMs`        | number  | Ogologo oge arịrịọ ahụ niile were                          |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
-| `errorClass`       | string? | Klas njehie ma ọ bụrụ na status != success                 |
-| `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | Data ahaziri nke plugin tinyere                            |
+| Oghere             | Ụdị            | Isi iyi                                                             |
+| ------------------ | -------------- | ------------------------------------------------------------------- |
+| `id`               | eriri ederede  | UUID e mepụtara mgbe a na-edekọ                                     |
+| `apiKeyId`         | eriri ederede  | Igodo API malitere arịrịọ ahụ                                       |
+| `provider`         | eriri ederede  | ID onye na-eweta ọrụ (openai, anthropic, wdg.)                      |
+| `model`            | eriri ederede  | ID ụdị (gpt-5, claude-opus-4-6, wdg.)                               |
+| `comboId`          | eriri ederede? | ID combo ma ọ bụrụ na e si na combo duzie ya                        |
+| `promptTokens`     | ọnụọgụ         | Site na nzaghachi onye na-eweta ọrụ                                 |
+| `completionTokens` | ọnụọgụ         | Site na nzaghachi onye na-eweta ọrụ                                 |
+| `cachedTokens`     | ọnụọgụ         | Token ndị a hụrụ na cache (nchekwa prompt Anthropic na cache, wdg.) |
+| `totalTokens`      | ọnụọgụ         | prompt + mmecha                                                     |
+| `costUsd`          | ọnụọgụ         | A gbakọrọ site na data ọnụahịa                                      |
+| `latencyMs`        | ọnụọgụ         | Ogologo oge arịrịọ site na mmalite ruo na njedebe                   |
+| `status`           | enum           | `success`, `error`, `rate_limited`, `timeout`, `cancelled`          |
+| `errorClass`       | eriri ederede? | Klas njehie ma ọ bụrụ na ọnọdụ abụghị ihe ịga nke ọma               |
+| `timestamp`        | eriri ederede  | ISO 8601 UTC                                                        |
+| `metadata`         | ihe            | Data ahaziri iche nke plugin tinyere                                |
 
 ### Ebe Token Si Abịa
 
-A na-ewepụta token site na nzaghachi provider upstream n'ime **response handler**:
+A na-ewepụta token site na nzaghachi onye na-eweta ọrụ na **onye na-ahụ maka nzaghachi**:
 
 ```ts
 // Site na open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Maka provider ndị na-adịghị eweghachi ozi ojiji (ụfọdụ provider web-cookie), OmniRoute na-eji atụmatụ `~4 chars per token` **atụ ọnụ ọgụgụ** token (lee `open-sse/services/autoCombo/pipelineRouter.ts`).
+Maka ndị na-eweta ọrụ na-anaghị eweghachi data ojiji (ụfọdụ ndị na-eweta ọrụ web-cookie), OmniRoute na-**eme atụmatụ** token site na iji usoro ntụle `~4 chars per token` (lee `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Token Ndị E Debere na Cache
+### Token E Chekwara na Cache
 
-OmniRoute na-enyocha `cached_tokens` iche na `prompt_tokens` n'ihi na:
+OmniRoute na-esochi `cached_tokens` iche na `prompt_tokens` n'ihi na:
 
-- Cache prompt Anthropic na-ana ọnụego dị ala maka token ndị dị na cache (10% nke ọnụego nkịtị)
-- Ụfọdụ provider na-eweghachi `cache_read_input_tokens` nke e kwesịrị ịgbakọ ọnụahịa ya n'ụzọ dị iche
-- Nnyocha data nwere ike igosi **ọnụego cache hit** = `cached_tokens / prompt_tokens`
+- Nchekwa prompt Anthropic na cache na-ana ọnụahịa dị ala maka token echekwara na cache (10% nke ọnụahịa nkịtị)
+- Ụfọdụ ndị na-eweta ọrụ na-eweghachi `cache_read_input_tokens` nke kwesịrị inwe ọnụahịa dị iche
+- Nyocha nwere ike igosi **oke nchọta na cache** = `cached_tokens / prompt_tokens`
+
+### Nchọpụta ọkwa ide na cache
+
+Ogwe ahụike prompt-cache dị na dashboard Nyocha na-ekewa ide na cache
+nke nkeji 5 na nke elekere 1 ndị na-eweta ọrụ kọọrọ. A na-edobe
+`usage.cache_creation.ephemeral_5m_input_tokens` na
+`usage.cache_creation.ephemeral_1h_input_tokens` nke Anthropic n'oge ntụgharị data ojiji nke nkwanye na
+nke na-abụghị nkwanye, ma chekwaa ha na nchịkọta ndekọ oku. A naghị etinye ngụkọta
+ide na cache agbakwunyere n'ime otu ndị ahụ nke ugboro abụọ.
+
+Oku ndị nwere naanị ihe ngụkọ ide agbakwunyere, gụnyere ndekọ ochie, nwere ọkwa
+a na-amaghị. Nkewa na-ezughị ezu na-ahapụ ihe fọdụrụ nke ekenyeghị ka ihe a na-amaghị; a na-akanye ihe ngụkọ na-adịghị mma ma ọ bụ
+ndị na-emegiderịta ibe ha akara kama ikenye ha TTL na nzuzo. Ihe nrịbama TTL n'akụkụ arịrịọ
+abụghị ihe akaebe nke ọkwa a kwụrụ ụgwọ maka ya.
+
+Atụmatụ ide nke ogwe ahụ nke kwekọrọ na API na-ekpuchi naanị ọkwa a kọọrọ nke nwere ọnụahịa, ọ bụghị
+arịrịọ ahụ dum. Maka ọnụahịa ụdị Claude/Anthropic nke ala ya, ọ na-eji okpukpu 1.25 nke
+ọnụahịa ntinye maka ide nke nkeji 5 na okpukpu abụọ nke ọnụahịa ntinye maka ide nke elekere 1. Ọnụahịa
+na-efu adịghị, ọ bụghị efu. A na-edekọ ọnụahịa mgbe a na-edekọ oku ọhụrụ ọ bụla;
+a naghị agbanwe ọnụahịa ndekọ akụkọ ihe mere eme. N'ihi ya, akaụntụ ndenye aha nwere ike inwe
+atụmatụ kwekọrọ na API na-ejighị ego ahụ dịka mmefu ego ma ọ bụ oke
+nden ye aha. Ngụkọta oke ojiji, mmefu ego na ọnụ ahịa ziri ezi nke onye na-eweta ọrụ dị adị anaghị agbanwe.
+
+Nchọpụta ndị a na-eji nchịkọta ahụike cache nwere oke na oge idobe ndekọ oku
+dị adị. Ha anaghị agbanwe ntọala TTL arịrịọ, nduzi ma ọ bụ nhọrọ akaụntụ.
+E yigharịrị idekọ TTL onye ahịa rịọrọ ma e jiri ya tụnyere TTL ọpụpụ na-arụ ọrụ n'ebe a
+na-ezigara onye na-eweta ọrụ; ogwe a na-akọ ọkwa nnata, ọ bụghị TTL ọpụpụ na-arụ ọrụ.
+
+Mmejuputa: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, na `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,46 +151,46 @@ Maka model ndị na-enweghị data ọnụahịa, OmniRoute na-eji **atụmatụ
 
 ---
 
-## Nchịkọta Oke Ụbọchị
+## Nchịkọta Oge Ụbọchị
 
-Modul `usageAnalytics.ts` na-eji data ojiji mbụ agbakọ wijet dashboard. Ọ na-akwado oke oge 7:
+Modul `usageAnalytics.ts` na-agbakọ wijetị dashboard site na data ojiji a na-edozibeghị. Ọ na-akwado oge 7:
 
-| Oke      | N'agbata oge                    | Ihe eji ya eme                  |
-| -------- | ------------------------------- | ------------------------------- |
-| `1d`     | Awa 24 gara aga                 | Ịchọpụta nrịgo ụgwọ kwa elekere |
-| `7d`     | Ụbọchị 7 gara aga               | Ntụle kwa izu                   |
-| `30d`    | Ụbọchị 30 gara aga              | Ịgba ụgwọ kwa ọnwa              |
-| `90d`    | Ụbọchị 90 gara aga              | Nyocha kwa nkeji afọ            |
-| `ytd`    | Kemgbe Jenụwarị 1 nke afọ a     | Nsochi mmefu ego kwa afọ        |
-| `all`    | Oge niile                       | Ọnụọgụ oge niile                |
-| `custom` | Mmalite/ngwụcha onye ọrụ kọwara | Nnyocha ndekọ, ajụjụ pụrụ iche  |
+| Oge      | Oge a gụnyere                   | Ihe eji ya eme                          |
+| -------- | ------------------------------- | --------------------------------------- |
+| `1d`     | Awa 24 gara aga                 | Ịchọpụta mmụba mberede nke ụgwọ kwa awa |
+| `7d`     | Ụbọchị 7 gara aga               | Ntụle kwa izu                           |
+| `30d`    | Ụbọchị 30 gara aga              | Ịkwụ ụgwọ kwa ọnwa                      |
+| `90d`    | Ụbọchị 90 gara aga              | Nyocha kwa ọnwa atọ                     |
+| `ytd`    | Site na Jenụwarị 1 nke afọ a    | Nsochi mmefu ego kwa afọ                |
+| `all`    | Oge niile                       | Ndekọ ọnụ ọgụgụ nke oge niile           |
+| `custom` | Mmalite/njedebe onye ọrụ kọwara | Nyocha ndekọ, ajụjụ dịka mkpa si dị     |
 
-### Wijet Dashboard A Na-agbakọ
+### Wijetị Dashboard A Na-agbakọ
 
-Maka oke ụbọchị ọ bụla, oyi akwa nyocha na-agbakọ:
+Maka oge ụbọchị ọ bụla, ngalaba nyocha na-agbakọ:
 
-| Wijet                       | Nkọwa                                                               |
-| --------------------------- | ------------------------------------------------------------------- |
-| **Kaadị nchịkọta**          | Ngụkọta arịrịọ, ngụkọta ụgwọ, ngụkọta token, ọnụego ihe ịga nke ọma |
-| **Chaatị usoro kwa ụbọchị** | Ụgwọ + token kwa ụbọchị, ekpokọtara dịka model si dị                |
-| **Maapụ okpomọkụ mmemme**   | Grid awa-n'ime-ụbọchị × ụbọchị-n'ime-izu, agba = ọnụọgụ arịrịọ      |
-| **Nkewa model**             | Chaatị paị nke ụgwọ dịka model si dị                                |
-| **Nkewa provider**          | Chaatị ogwe nke arịrịọ dịka provider si dị                          |
-| **API key kacha elu**       | Tebụl key 10 kachasị elu dịka ụgwọ si dị                            |
-| **Nyocha njehie**           | Ọnụego njehie ka oge na-aga, klaasị njehie kachasị elu              |
+| Wijetị                                 | Nkọwa                                                               |
+| -------------------------------------- | ------------------------------------------------------------------- |
+| **Kaadị nchịkọta**                     | Ngụkọta arịrịọ, ngụkọta ụgwọ, ngụkọta token, ọnụego ihe ịga nke ọma |
+| **Eserese mgbanwe kwa ụbọchị**         | Ụgwọ + token kwa ụbọchị, a kwakọtara dịka model si dị               |
+| **Maapụ okpomọkụ ọrụ**                 | Okporo awa nke ụbọchị × ụbọchị nke izu, agba = ọnụọgụ arịrịọ        |
+| **Nkọwa dịka model si dị**             | Eserese okirikiri nke ụgwọ dịka model si dị                         |
+| **Nkọwa dịka onye na-eweta ọrụ si dị** | Eserese ogwe nke arịrịọ dịka onye na-eweta ọrụ si dị                |
+| **Igodo API kacha elu**                | Tebụl nke igodo 10 kacha elu dịka ụgwọ si dị                        |
+| **Nyocha njehie**                      | Ọnụego njehie ka oge na-aga, ụdị njehie kacha pụta ìhè              |
 
-### Ịnweta Site na Mmemme
+### Nweta Site na Mmemme
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
   history,              // ndekọ akụkọ ojiji
-  "7d",                 // oke oge: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // maapụ njikọ provider (connectionId → aha akaụntụ)
+  "7d",                 // oge: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
+  connectionMap,        // maapụ njikọ onye na-eweta ọrụ (connectionId → aha akaụntụ)
   {
-    startDate: "2025-01-01",  // nhọrọ: maka oke "custom"
-    endDate: "2025-06-01",   // nhọrọ: maka oke "custom"
+    startDate: "2025-01-01",  // ọ bụghị iwu: maka oge "custom"
+    endDate: "2025-06-01",   // ọ bụghị iwu: maka oge "custom"
   }
 );
 
@@ -171,18 +201,18 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Mmanye Oke Ojiji
 
-A na-amanye oke ojiji nke API key ọ bụla n’ebe abụọ:
+A na-amanye oke ojiji nke igodo API ọ bụla n'ebe abụọ:
 
-1. **Oke dị nro** (`quotaWarnAt`): ịdọ aka ná ntị na dashboard mgbe ojiji gafere oke a kara aka
-2. **Oke siri ike** (`quotaLimit`): a na-ajụ arịrịọ site na HTTP 429 mgbe ọ gafere oke
+1. **Oke ịdọ aka ná ntị** (`quotaWarnAt`): ịdọ aka ná ntị na dashboard mgbe ojiji gafere oke e debere
+2. **Oke nkwụsị** (`quotaLimit`): a na-ajụ arịrịọ site na HTTP 429 mgbe agafere oke
 
 ### Nhazi
 
 ```ts
-// Maka API key ọ bụla
+// Maka igodo API ọ bụla
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — gosi ịdọ aka ná ntị
-  quotaLimit: 10_00,    // $10.00 — kwụsị kpamkpam
+  quotaLimit: 10_00,    // $10.00 — nkwụsị kpamkpam
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -192,30 +222,30 @@ await updateApiKey(keyId, {
 ```
 Arịrịọ ──▶ quotaCheck()
               │
-              ├── Ọ dị n'ime oke?  ──▶ kwe
+              ├── Ọ dị n'ime oke?  ──▶ kwe ka ọ gaa
               │
-              └── Ọ gafere oke?  ──▶ 429 Arịrịọ Karịrị Akarị
-                                   ya na nkụnyeisi Retry-After
+              └── Ọ gafere oke?  ──▶ 429 Arịrịọ Karịrị Akari
+                                   nwere nkụnye Retry-After
 ```
 
-### Ndetu Ọnọdụ Oke Ojiji
+### Ndekọ Ọnọdụ Oke Ojiji
 
-Tebụl `quotaSnapshots` na-echekwa **ọnọdụ oke ojiji nke akụkọ gara aga** maka nyocha usoro mgbanwe:
+Tebụl `quotaSnapshots` na-echekwa **ọnọdụ oke ojiji n'oge gara aga** maka nyocha mgbanwe:
 
-| Oghere | Nkọwa |
+| Mpaghara | Nkọwa |
 | ----------- | -------------------------------- | ------ | ------- |
-| `apiKeyId` | Key a na-enyocha |
-| `window` | "day" | "week" | "month" |
-| `used` | Ọnụ ahịa e jiri na window a (cents) |
-| `limit` | Oke ahụ (cents) |
-| `resetAt` | Mgbe window ahụ ga-amalitegharị |
-| `createdAt` | Mgbe e mere ndetu ọnọdụ ahụ |
+| `apiKeyId` | Igodo a na-esochi |
+| `window` | "ụbọchị" | "izu" | "ọnwa" |
+| `used` | Ụgwọ e jiri n'ime oge a (sent) |
+| `limit` | Oke (sent) |
+| `resetAt` | Mgbe oge ahụ na-amaliteghachi |
+| `createdAt` | Mgbe e dekọrọ ọnọdụ ahụ |
 
-A na-eme ndetu ọnọdụ **na arịrịọ ọ bụla** nke na-eji ụgwọ > 0, a na-ejikwa ya:
+A na-edekọ ọnọdụ **n'arịrịọ ọ bụla** na-eji ụgwọ > 0, a na-ejikwa ha:
 
-- Igosipụta ogwe ọganihu oke ojiji na dashboard
-- Igosipụta eserese usoro mgbanwe oke ojiji nke ụbọchị 30
-- Ịkpalite ọkwa mgbe ojiji na-eru nso n’oke ahụ
+- Gosipụta ogwe ọganihu oke ojiji na dashboard
+- Gosi eserese mgbanwe oke ojiji nke ụbọchị 30
+- Kpalite ọkwa ịdọ aka ná ntị mgbe ojiji na-eru nso oke
 
 ---
 
@@ -272,12 +302,7 @@ Nzaghachi:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,26 +311,26 @@ Nzaghachi:
 }
 ```
 
-### Jụọ Ajụjụ Nyocha Ojiji
+### Jụọ Ajụjụ Banyere Nyocha Ojiji
 
-A na-enweta data ojiji site na dashboard ma ọ bụ ngwaọrụ MCP, ọ bụghị site na endpoint mbupụ REST ozugbo. Nyocha ndị dị:
+A na-enweta data ojiji site na dashboard ma ọ bụ ngwaọrụ MCP, ọ bụghị site na njedebe REST maka mbupụ ozugbo. Nyocha ndị dị:
 
-- **`/api/usage/analytics`** — metrik ojiji agbakọtara ọnụ (hazie site na model, provider, key)
-- **`/api/usage/quota`** — ọnọdụ oke ojiji ugbu a maka API key ọ bụla
+- **`/api/usage/analytics`** — ọnụọgụ nha ojiji achịkọtara (kewaa dịka model, onye na-eweta ọrụ, igodo)
+- **`/api/usage/quota`** — ọnọdụ oke ojiji ugbu a maka igodo API ọ bụla
 - **`/api/usage/history`** — ndekọ akụkọ arịrịọ
 
 ---
 
 ## Ngwaọrụ MCP
 
-Ngwaọrụ MCP abụọ na-eme ka ndị agent nweta data ojiji (lee `open-sse/mcp-server/tools/`):
+Ngwaọrụ MCP abụọ na-eme ka ndị nnọchi anya nweta data ojiji (lee `open-sse/mcp-server/tools/`):
 
-| Ngwaọrụ                 | Nkọwa                                                    |
-| ----------------------- | -------------------------------------------------------- |
-| `omniroute_cost_report` | Na-emepụta akụkọ ọnụ ahịa nke key ọ bụla maka oge enyere |
-| `omniroute_check_quota` | Na-eweghachi ọnọdụ oke ojiji ugbu a maka API key         |
+| Ngwaọrụ                 | Nkọwa                                                        |
+| ----------------------- | ------------------------------------------------------------ |
+| `omniroute_cost_report` | Na-emepụta akụkọ ọnụ ahịa maka igodo ọ bụla n'ime oge enyere |
+| `omniroute_check_quota` | Na-eweghachi ọnọdụ oke ojiji ugbu a maka igodo API           |
 
-Ọmụmaatụ ọkpụkpọ agent:
+Ihe atụ nke ịkpọ ngwaọrụ site n'aka onye nnọchi anya:
 
 ```json
 {
@@ -316,67 +341,67 @@ Ngwaọrụ MCP abụọ na-eme ka ndị agent nweta data ojiji (lee `open-sse/m
 
 ---
 
-## Ndogide na Nhicha
+## Njide Data na Nhicha
 
-Data ojiji na-eto ihe dịka ~1-10KB kwa arịrịọ. N'ọ̀tụ̀tụ̀ buru ibu, nke a nwere ike ịdị oke mkpa.
+Data ojiji na-abawanye ~1-10KB maka arịrịọ ọ bụla. Mgbe arịrịọ bara ụba, nke a nwere ike ibu nnukwu ohere.
 
-### Ntọala Ndogide
+### Ntọala Njide Data
 
-A na-ahazi ndogide akụkọ ojiji site na Database Settings dị na UI ma ọ bụ site na `/api/settings/database`.
+A na-ahazi njide akụkọ ojiji site na Ntọala Ebe Nchekwa Data na UI ma ọ bụ site na `/api/settings/database`.
 
 Na ndabara, a na-edobe akụkọ ojiji ruo **ụbọchị 90**.
 
 ### Nhicha
 
-`src/lib/db/cleanup.ts` na-ehichapụ ndekọ ochie:
+A na-ehichapụ ndekọ ochie site na `src/lib/db/cleanup.ts`:
 
-- Usoro cron nke na-arụ n'azụ na-akpalite ya
-- Ọ na-ehichapụ ndekọ dị na `usage_history` ndị karịrị oge ndogide `usageHistory` ahaziri
+- Usoro cron na-arụ ọrụ n'azụ na-akpalite ya
+- Ọ na-ehichapụ ndekọ dị na `usage_history` nke karịrị oge njide ahaziri na ntọala `usageHistory`
 
-### Atụmatụ Ebe Nchekwa
+### Atụmatụ Ogo Nchekwa
 
-| Ọ̀tụ̀tụ̀ arịrịọ          | Nchekwa ụbọchị 30 | Nchekwa ụbọchị 90 |
+| Ọnụọgụ arịrịọ         | Nchekwa ụbọchị 30 | Nchekwa ụbọchị 90 |
 | --------------------- | ----------------- | ----------------- |
 | Arịrịọ 100/ụbọchị     | ~3MB              | ~9MB              |
 | Arịrịọ 1,000/ụbọchị   | ~30MB             | ~90MB             |
 | Arịrịọ 10,000/ụbọchị  | ~300MB            | ~900MB            |
 | Arịrịọ 100,000/ụbọchị | ~3GB              | ~9GB              |
 
-Maka okporoụzọ dị oke elu, tụlee:
+Maka arịrịọ bara ụba nke ukwuu, tụlee:
 
-- Ibelata oge ndogide site na Database Settings
-- Iji `aggregated_metrics` kama ndekọ ndị mbụ (naanị maka nyocha data)
+- Ịbelata oge njide data site na Ntọala Ebe Nchekwa Data
+- Iji `aggregated_metrics` kama ndekọ mbụ (naanị maka nyocha)
 
 ---
 
-## Ndụmọdụ Maka Ibelata Ọnụ Ahịa
+## Ndụmọdụ Maka Ibelata Ọnụ Ego
 
 ### 1. Jiri Model Kwesịrị Ekwesị
 
 ```bash
-# Azịza ngwa ngwa — jiri nke dị ọnụ ala ma dịkwa ngwa
+# Azịza ngwa ngwa — jiri nke dị ọnụ ala ma na-arụ ngwa ngwa
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Ọrụ dị mgbagwoju anya — jiri nke dị mma
+# Ọrụ dị mgbagwoju anya — jiri nke nwere ogo dị elu
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Kwado Caching
+### 2. Gbanye Nchekwa Nwa Oge
 
-Caching prompt nke Anthropic na-echekwa **90% na context a na-emegharị ugboro ugboro**:
+Nchekwa nwa oge nke prompt Anthropic na-echekwa **90% n'ihe gbara arịrịọ gburugburu a na-emegharị ugboro ugboro**:
 
 ```ts
-// Caching na-eme na-akpaghị aka — naanị tinye otu nnukwu system prompt ahụ
+// Nchekwa nwa oge na-eme na-akpaghị aka — naanị tinye otu nnukwu prompt sistemụ ahụ
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // A ga-etinye ya na cache na-akpaghị aka
+  system: longSystemPrompt, // A ga-echekwa ya nwa oge na-akpaghị aka
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Jiri Mkpakọ
 
-Mkpakọ RTK + Caveman na-echekwa **15-95% na session ndị na-eji ngwáọrụ nke ukwuu**:
+Mkpakọ RTK + Caveman na-echekwa **15-95% n'oge nnọkọ ndị na-eji ngwaọrụ eme ihe nke ukwuu**:
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. Tọọ Oke Maka Igodo Ọ Bụla
+### 4. Tọọ Oke Ojiji Maka Igodo Ọ Bụla
 
-Na-edobe `quotaLimit` mgbe niile iji gbochie ụgwọ ịrị elu na-enweghị njikwa:
+Tọọ `quotaLimit` mgbe niile iji gbochie ọnụ ego ịrị elu na-enweghị njikwa:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Oke $10/ọnwa
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Oke $10 kwa ọnwa
 ```
 
-### 5. Nyochaa Ndị Na-eji Akụrụngwa Kachasị Elu
+### 5. Nyochaa Ndị Na-eji Ihe Kacha Ọtụtụ
 
-Jiri dashboard ma ọ bụ **`/api/usage/analytics`** iji chịkọta dịka API key ma hazie dịka ọnụ ahịa:
+Jiri dashboard ma ọ bụ **`/api/usage/analytics`** kekọta dịka igodo API si dị ma hazie dịka ọnụ ego si dị:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Nchọpụta na Ndozi Nsogbu
 
-### "Ọnụ ahịa dị elu karịa ka a tụrụ anya"
+### "Ọnụ ego dị elu karịa ka a tụrụ anya"
 
 1. Lelee **`/api/usage/analytics?groupBy=model`** — chọta model dị oke ọnụ
-2. Lelee **`/api/usage/analytics?groupBy=apiKey`** — chọta onye na-eji akụrụngwa nke ukwuu
-3. Nyochaa na data ọnụ ahịa bụ nke ọhụrụ: `POST /api/pricing/sync`
+2. Lelee **`/api/usage/analytics?groupBy=apiKey`** — chọta onye na-eji ihe nke ukwuu
+3. Gbaa mbọ hụ na data ọnụahịa bụ nke ugbu a: `POST /api/pricing/sync`
 
-### "Ndekọ efuola"
+### "Ndekọ adịghị"
 
-- Lelee ntọala ndogide DB n'okpuru Dashboard → Database → Cleanup — ọrụ nhicha nke na-arụ mgbe ụfọdụ na-ehichapụ ndekọ ochie (`src/lib/db/cleanup.ts`)
-- Lelee njehie na `src/lib/db/usage*.ts` — a na-edekọ ọdịda ide na DB mana anaghị egosipụta ha
-- Nyochaa na arịrịọ ahụ rutere `chatCore` n'ezie — lelee combo routing
+- Lelee ntọala oge idobe data DB n'okpuru Dashboard → Ebe Nchekwa Data → Nhicha — ọrụ nhicha a na-arụ kwa oge na-ehichapụ ndekọ ochie (`src/lib/db/cleanup.ts`)
+- Lelee ma enwere njehie na `src/lib/db/usage*.ts` — a na-edekọ ọdịda ide data na DB mana anaghị egosipụta ha
+- Gbaa mbọ hụ na arịrịọ ahụ rutere `chatCore` n'ezie — lelee ntụziaka combo
 
-### "A naghị amanye oke"
+### "A naghị amanye oke ojiji"
 
 - Lelee ntọala `quotaLimit` nke igodo ahụ
-- Nyochaa na edobere `quotaWindow` nke ọma
+- Gbaa mbọ hụ na edoziri `quotaWindow` nke ọma
 - Chọọ ndekọ `quotaSnapshots` — ekwesịrị ịmepụta ha na arịrịọ ọ bụla
 
 ---
 
-## Hụkwa
+## Leekwa
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schema maka tebụl ojiji
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — env vars maka mmekọrịta ọnụ ahịa
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Otu `auto/fast`, `auto/cheap` si ebelata ọnụ ahịa
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Ntụaka `/api/usage/*` zuru ezu
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Nhazi tebụl ojiji
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Ngbanwe gburugburu maka ịmekọrịta ọnụahịa
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Otu `auto/fast`, `auto/cheap` si ebelata ọnụ ego
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Ntụaka zuru ezu maka `/api/usage/*`
 - Isi mmalite: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`
