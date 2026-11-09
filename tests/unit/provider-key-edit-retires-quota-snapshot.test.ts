@@ -21,6 +21,7 @@ const { createProviderConnection } = await import("../../src/lib/db/providers.ts
 const { saveQuotaSnapshot } = await import("../../src/lib/db/quotaSnapshots.ts");
 const quotaCache = await import("../../src/domain/quotaCache.ts");
 const providerByIdRoute = await import("../../src/app/api/providers/[id]/route.ts");
+const providerLimits = await import("../../src/lib/usage/providerLimits.ts");
 
 test.beforeEach(() => {
   core.resetDbInstance();
@@ -115,4 +116,53 @@ test("an edit that keeps the same API key keeps the connection's quota pause", a
 
   quotaCache.__clearForTests();
   assert.equal(quotaCache.isAccountQuotaExhausted(id), true);
+});
+
+// A usage fetch that began under the old key can finish after the edit. Its exhausted reading
+// belongs to the old key: it must not refill the cache or write a new snapshot for the new key.
+test("a usage fetch started under the old key cannot restore its pause after a key edit", async () => {
+  const connection = (await createProviderConnection({
+    provider: "glm",
+    authType: "apikey",
+    name: "Racing",
+    apiKey: "sk-old-key-for-race-test",
+    priority: 1,
+    isActive: true,
+    testStatus: "active",
+  })) as { id: string };
+  const id = connection.id;
+
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => (release = resolve));
+  let started!: () => void;
+  const fetchStarted = new Promise<void>((resolve) => (started = resolve));
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    started();
+    await gate;
+    return new Response(
+      JSON.stringify({
+        code: 200,
+        success: true,
+        data: {
+          planName: "max",
+          limits: [{ type: "TOKENS_LIMIT", unit: 3, number: 5, percentage: 100, models: [] }],
+        },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+  try {
+    const inflight = providerLimits.fetchAndPersistProviderLimits(id, "manual");
+    await fetchStarted;
+    await put(id, { apiKey: "sk-new-key-for-race-test" });
+    release();
+    await inflight;
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.equal(quotaCache.isAccountQuotaExhausted(id), false, "the running process stays clear");
+  quotaCache.__clearForTests(); // a cold cache, as after a server start
+  assert.equal(quotaCache.isAccountQuotaExhausted(id), false, "no snapshot of the old key remains");
 });
