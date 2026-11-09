@@ -54,9 +54,26 @@ describe("VscodeCopilotBanner", () => {
     expect(link?.getAttribute("rel")).toContain("noopener");
   });
 
+  it("tints the banner with the partner brand and leaves the CTA to the kit button", async () => {
+    const container = await renderBanner();
+    const banner = container.querySelector<HTMLElement>("[role='complementary']");
+    expect(banner?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(banner?.style.getPropertyValue("--ci-brand")).toBe("#007acc");
+    const cta = container.querySelector("a[href]");
+    expect(cta?.className).toContain("ci-button");
+    expect(cta?.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(cta?.className).not.toContain("text-white");
+  });
+
   it("shows the Open VSX secondary note near the CTA", async () => {
     const container = await renderBanner();
     expect(container.textContent).toContain("secondaryNote");
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "secondaryNote"
+    );
+    // AA (KEA-7886 P7): was text-[9px] text-text-muted/70.
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
   });
 
   it("dismiss button hides the banner and persists the dismissal to localStorage", async () => {

@@ -516,11 +516,16 @@ export function hasThinkingConfig(body) {
 }
 
 // Normalize thinking config based on last message role
-// - If lastMessage is not user → remove Claude/Gemini-style thinking config
+// - Only an assistant/model prefill (last turn) removes Claude/Gemini-style thinking config
+// - Tool-result turns (OpenAI role "tool", Claude user tool_result, Gemini role "function")
+//   keep thinking, so agentic loops do not silently degrade to non-thinking mode
 // - Preserve an explicit Claude opt-out; it is request-level intent, not a thinking turn
 // - Keep OpenAI Chat Completions reasoning_effort as a request-level option.
 export function normalizeThinkingConfig(body) {
-  if (!isLastMessageFromUser(body) && body.thinking?.type !== "disabled") {
+  const messages = body.messages || body.contents;
+  const lastRole = messages?.length ? messages[messages.length - 1]?.role : undefined;
+  const isPrefill = lastRole === "assistant" || lastRole === "model";
+  if (isPrefill && body.thinking?.type !== "disabled") {
     delete body.thinking;
   }
   return body;

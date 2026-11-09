@@ -28,13 +28,12 @@ Diukur pada 2026-10-18:
 | swap        | 16 GB                         | `omniroute-113-5` berjalan dengan swap dinonaktifkan (`MemorySwapMax=0`), sehingga build yang tidak terkendali dihentikan pada batasnya alih-alih menyebabkan mesin melakukan swap                                                                                                                                                                                                                                      |
 | `/tmp`      | **tmpfs 12 GB = RAM**         | apa pun yang disimpan di sana menggunakan memori; sisa file dibersihkan setelah 3 jam                                                                                                                                                                                                                                                                                                                                   |
 | CPU         | load 60 pada 32 core teramati | sebelum kuota diterapkan, satu build Turbopack (~1166 % CPU) ditambah suite coverage pada mesin yang sama membuat heartbeat listener lain kekurangan sumber daya (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                  |
-| runner      | **6 listener**                | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` dinonaktifkan (`systemctl enable --now` mengaktifkan kembali salah satunya)                                                                                                                                                                                                                                                                             |
+| runner      | **7 listener** (2026-10-28)   | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` juga membawa `omni-build`; `omniroute-113-3/-4/-8` telah dihapus dari repositori (2026-10-28)                                                                                                                                                                                                                                                                    |
 
 Batasan berada di `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` milik setiap unit
 (nilai sebelumnya disimpan sebagai `override.conf.bak-20261018`) dan diterapkan secara live dengan
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — tanpa restart, sehingga
-tidak ada job yang sedang berjalan yang terdampak. Label diubah melalui API runner
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+tidak ada job yang sedang berjalan yang terdampak. Label diubah melalui API runner (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), juga secara live.
 
 ## Instal janitor (satu kali, di mesin)
@@ -43,7 +42,7 @@ tidak ada job yang sedang berjalan yang terdampak. Label diubah melalui API runn
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): setiap 30 menit, catat log ke /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` diperlukan: janitor memastikan suatu path sedang tidak digunakan melalui satu snapshot file
@@ -123,8 +122,16 @@ satu waktu, hanya ketika idle**, dengan pemeriksaan kondisi idle dan perintah mu
   melakukan reclaim di sana; 8 GB menghilangkan throttling tersebut.
 - **Jumlah listener sengaja dikurangi.** Empat unit OmniRoute dinonaktifkan pada 2026-08-29 — setiap
   listener tambahan menjadi tenant lain bagi anggaran memori di atas. Batas maksimum janitor adalah
-  6 (`MAX_ACTIVE_RUNNERS=6` di cron): nilai tersebut menghitung setiap `Runner.Listener` pada mesin,
-  dan OmniHeuris + OmniMind menambahkan dua listener ke empat listener milik kami.
+  8 (`MAX_ACTIVE_RUNNERS=8` di cron): nilai tersebut menghitung setiap `Runner.Listener` pada mesin,
+  dan OmniHeuris + OmniMind menambahkan dua listener ke lima listener milik kami.
+- **Job unit dan Vitest tetap hosted.** `ci.yml` mengirim shard unit dan job Vitest ke
+  `[self-hosted, omni-ci]` hanya ketika variabel repositori `vars.USE_VPS_TEST_RUNNER` bernilai
+  `true`, dan itu pun hanya untuk proses `pull_request` dari repositori yang sama; fork, `merge_group` dan push
+  tetap di `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabel tersebut bernilai
+  `false`. Pada 2026-10-28, tiga listener `omni-ci` 4-core membutuhkan 250–270 detik untuk `npm ci` dan setiap
+  shard unit mencapai batas job 30 menit, dibandingkan ~634 detik untuk shard hosted, dengan beban mesin
+  17–24. Listener tersebut telah dihapus. Jangan aktifkan kembali variabel tersebut tanpa listener yang ukurannya
+  sesuai untuk satu shard unit.
 - **Jangan pernah membersihkan `/tmp` atau `_work` secara manual saat ada runner yang sibuk.**
   Proses periksa-lalu-hapus dengan jeda di antara kedua langkah tersebut menyebabkan `_work`
   milik job Build yang sedang aktif terhapus pada 2026-08-27. Janitor melakukan pemeriksaan dan
@@ -139,8 +146,10 @@ satu waktu, hanya ketika idle**, dengan pemeriksaan kondisi idle dan perintah mu
 
 ## Jalur hosted (runner yang dihosting GitHub)
 
-Akun ini menggunakan paket **Pro**: **40 job hosted serentak**, yang digunakan bersama oleh setiap pemeriksaan PR,
-setiap workflow yang dipicu oleh push, dan penyiapan default CodeQL. Pengukuran pada 2026-10-18 selama
+Repositori ini milik organisasi `cheaper-inference`, yang menggunakan paket **Team**: **60
+job hosted serentak**, yang digunakan bersama oleh setiap repositori dalam organisasi, setiap pemeriksaan PR,
+setiap workflow yang dipicu oleh push, dan penyiapan default CodeQL. Angka-angka di bawah ini diukur pada
+paket **Pro** (40 job hosted serentak). Pengukuran pada 2026-10-18 selama
 kampanye merge (~10 merge/jam pada `release/v3.8.52`) menunjukkan: **2.500 proses workflow dibuat dalam
 24 jam**, 44 push ke branch tersebut dalam 6 jam, serta **106 job hosted mengantre** sementara pemeriksaan PR menunggu
 selama berjam-jam dan PR di-merge tanpa pemeriksaan tersebut. Sembilan workflow dipicu pada setiap push ke branch:

@@ -17,139 +17,221 @@ OmniRoute có một quy trình ủy quyền nhận biết tuyến đường, ki�
 
 ### 1. Khóa API (Bearer)
 
-Dùng cho các API client tương thích OpenAI/Anthropic/Gemini và một số route quản trị khi khóa có phạm vi `manage`.
+Được sử dụng cho các API client tương thích với OpenAI/Anthropic/Gemini và một số route quản lý khi khóa có scope `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Được xác thực bởi `isValidApiKey()` / `extractApiKey()` trong `src/sse/services/auth.ts` và được tái xuất qua `src/shared/utils/apiAuth.ts`. Trình xác thực cũng chấp nhận các biến môi trường `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` làm khóa passthrough cố định (issue #1350).
+Được xác thực bởi `isValidApiKey()` / `extractApiKey()` trong `src/sse/services/auth.ts` và được export lại thông qua `src/shared/utils/apiAuth.ts`. Bộ kiểm tra cũng chấp nhận các biến môi trường `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` làm khóa chuyển tiếp lâu dài (issue #1350).
 
 ### 2. Phiên Dashboard (cookie auth_token)
 
-Dành cho các trang dashboard và thao tác quản trị.
+Dành cho các trang dashboard và các thao tác quản trị.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Cookie chỉ được coi là phiên khi JWT được xác minh **và** mang `authenticated: true` (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Mọi nơi sử dụng cookie — bộ bảo vệ route dashboard (`isDashboardSessionAuthenticated()`), làm mới pipeline authz, bắt tay WebSocket, live server, `/api/settings/require-login`, `/api/auth/status` — đều đi qua hàm trợ giúp này.
-Các JWT khác được ký bằng `JWT_SECRET` vẫn tồn tại — luồng passthrough của Cursor CLI cấp token `iss "omniroute" / aud "cursor-cli"` cho những người giữ khóa — và chúng không bao giờ được coi là phiên (#13298).
+Cookie chỉ được xem là một phiên khi JWT được xác minh **và** chứa `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Mọi
+thành phần sử dụng cookie (bộ bảo vệ route dashboard (`isDashboardSessionAuthenticated()`), làm mới pipeline phân quyền, bắt tay WebSocket, máy chủ trực tiếp,
+`/api/settings/require-login`, `/api/auth/status`) đều thông qua helper đó.
+Các JWT khác được ký bằng `JWT_SECRET` vẫn tồn tại — Cursor CLI passthrough tạo ra các token
+có `iss "omniroute" / aud "cursor-cli"` cho những người sở hữu khóa — và không bao giờ là phiên
+(#13298).
 
-Được xác minh bởi `isDashboardSessionAuthenticated()` trong `src/shared/utils/apiAuth.ts`. Pipeline tự động làm mới JWT khi còn ít hơn 7 ngày trong vòng đời 30 ngày.
+Được xác minh bởi `isDashboardSessionAuthenticated()` trong `src/shared/utils/apiAuth.ts`. Pipeline tự động làm mới JWT khi thời gian còn lại dưới 7 ngày trong thời hạn 30 ngày của token.
 
-Phiên cũng có thể kết thúc trước khi đủ 30 ngày, vì mọi bên cấp phát đều đi qua `mintDashboardSessionToken` (thời điểm cấp `iat` và mã định danh `jti`), và bộ xác minh kiểm tra hai thiết lập: `sessionsValidAfter`, được đặt khi đổi mật khẩu, khiến mọi phiên được cấp trước đó không còn hợp lệ (trình duyệt đổi mật khẩu nhận cookie mới), và `revokedDashboardSessions`, nơi `POST /api/auth/logout` thêm `jti` của phiên đã đăng xuất. Các phiên do bản phát hành cũ cấp không mang hai claim này và vẫn hợp lệ cho đến lần đổi mật khẩu đầu tiên. Nếu không đọc được thiết lập, phiên không được tin cậy.
+Một phiên cũng có thể kết thúc trước khi hết 30 ngày, vì mọi thành phần tạo token đều thông qua `mintDashboardSessionToken` (với thời điểm phát hành `iat` và mã định danh `jti`), đồng thời bộ xác minh kiểm tra hai cài đặt: `sessionsValidAfter`, được thiết lập khi thay đổi mật khẩu để mọi phiên được tạo trước thời điểm đó không còn được xác minh (trình duyệt đã thay đổi mật khẩu sẽ nhận cookie mới), và `revokedDashboardSessions`, nơi `POST /api/auth/logout` thêm `jti` của phiên đã đăng xuất. Các phiên được tạo bởi bản phát hành cũ hơn không chứa hai claim này và vẫn hợp lệ cho đến lần thay đổi mật khẩu đầu tiên. Nếu không thể đọc các cài đặt, phiên sẽ không được tin cậy.
 
-Một số route quản trị chấp nhận **một trong hai** chế độ: cookie HOẶC `Bearer <key>` khi khóa API có phạm vi `manage` (hoặc `admin`). Đây là điều cho phép quy trình "có thể cấu hình qua lệnh gọi API" được bổ sung trong v3.8.
+Một số route quản lý chấp nhận **một trong hai** chế độ: cookie HOẶC `Bearer <key>` khi khóa API có scope `manage` (hoặc `admin`). Đây là cơ chế cho phép quy trình "có thể cấu hình thông qua các lệnh gọi API" được bổ sung trong v3.8.
 
 #### Cổng đăng nhập OIDC tùy chọn (#6973)
 
-Đăng nhập quản trị dashboard cũng hỗ trợ luồng OIDC (OpenID Connect) **tùy chọn** bên cạnh đăng nhập mật khẩu mặc định — đăng nhập bằng mật khẩu không bao giờ bị xóa, chỉ được bổ sung thêm:
+Đăng nhập quản trị dashboard cũng hỗ trợ quy trình OIDC (OpenID Connect) **tùy chọn** bên cạnh phương thức đăng nhập bằng mật khẩu mặc định — đăng nhập bằng mật khẩu không bao giờ bị loại bỏ mà chỉ được
+bổ sung:
 
-- Chỉ bật khi `settings.oidcEnabled === true` **và** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` đều đã được cấu hình (Settings → Auth). Nếu không, `GET /api/auth/oidc/login` trả về `400`.
-- `GET /api/auth/oidc/login` tìm `authorization_endpoint` từ `/.well-known/openid-configuration` của issuer (dự phòng là `<issuer>/authorize`), xây dựng URI chuyển hướng từ yêu cầu đến (có xử lý `x-forwarded-proto`), và chuyển hướng đến IdP với giá trị `state` ngẫu nhiên được lưu trong cookie `oidc_state` có `httpOnly`.
-- `GET /api/auth/oidc/callback` kiểm tra `state`, đổi authorization code, và xác minh chữ ký ID token qua JWKS của issuer (`createRemoteJWKSet` của `jose`, được cache theo từng URI JWKS), kèm kiểm tra `issuer`/`audience`. Danh sách cho phép `oidcAllowedSubjects` là bắt buộc: nó được so khớp với claim `sub` của token hoặc claim `email` — claim email chỉ được chấp nhận khi `email_verified === true`, nên một email chưa xác minh ở IdP không bao giờ vượt qua được cổng này — và nếu không có mục nào, callback sẽ từ chối mọi đăng nhập (`not_configured`).
-- Khi thành công, nó cấp **đúng cùng** JWT `auth_token` 30 ngày như đăng nhập bằng mật khẩu (`src/app/api/auth/login/route.ts`), vì vậy phần còn lại của pipeline phiên dashboard (tự động làm mới, cờ cookie) không thay đổi — OIDC chỉ thay đổi cách cookie được cấp, không thay đổi quyền mà nó cấp.
-- Mọi thiết lập `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) đều nằm trong `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` trả về `400 PASSWORD_REQUIRED` trừ khi nội dung yêu cầu mang mật khẩu quản trị dưới dạng `currentPassword` (`401 PASSWORD_MISMATCH` nếu sai). `oidcDisablePasswordLogin` cấm _đăng nhập_ bằng mật khẩu (`POST /api/auth/login`) nhưng vẫn giữ hash mật khẩu đã lưu, và xác thực lại vẫn kiểm tra nó bằng `currentPassword`.
-- `corsOrigins` và `bruteForceProtection` cũng nằm trong `SECURITY_IMPACTING_SETTINGS_KEYS`: nới lỏng một trong hai sẽ làm yếu khả năng phòng thủ đăng nhập, nên cả hai đều yêu cầu xác thực lại bằng `currentPassword` như vậy (tab Security sẽ hỏi) và việc nhập JSON sẽ loại bỏ chúng.
-- Mọi khóa chính sách bảo mật — các mục `SECURITY_IMPACTING_SETTINGS_KEYS`, mọi khóa `oidc*` và trạng thái phiên dashboard — chỉ dành cho **operator** trên `PATCH /api/settings`: khóa API có phạm vi manage hoặc access token `oma_` bị từ chối với `403` ngay cả khi gửi đúng `currentPassword`, và việc từ chối được ghi audit là `settings.update_failed` với `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` trong `src/lib/api/operatorCredential.ts`). Các thiết lập thông thường (giao diện, tùy chọn hiển thị) vẫn có thể ghi bởi khóa `manage` hoặc access token `admin`. Mọi thay đổi trên chính `/api/settings` (và `/api/settings/require-login`) cũng cần phạm vi access token `admin` (`ADMIN_MUTATION_EXACT_PATHS` trong `src/server/authz/accessScopes.ts`, khớp đường dẫn chính xác); `GET` cần `read`, còn các route con `/api/settings/*` khác (proxy, mặc định combo, alias model, nén, dọn dẹp…) giữ phạm vi `write` suy ra từ phương thức.
-- `POST /api/settings/import-json` bỏ qua xác thực lại đó, nên trước khi ghi nó loại bỏ mọi khóa trong `IMPORT_STRIPPED_SETTINGS_KEYS` (cùng tệp): mật khẩu và `currentPassword`, mọi mục `SECURITY_IMPACTING_SETTINGS_KEYS`, và trạng thái phiên dashboard (`sessionsValidAfter`, `revokedDashboardSessions`). Do đó, nhập một bản sao lưu cũ không thể làm sống lại phiên đã bị chấm dứt bởi việc đổi mật khẩu hoặc đăng xuất.
-- Chỉ bật khi `settings.oidcEnabled === true` **và** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` đều đã được cấu hình (Settings → Auth). Nếu không, `GET /api/auth/oidc/login` trả về `400`.
-- `GET /api/auth/oidc/login` tìm `authorization_endpoint` từ `/.well-known/openid-configuration` của issuer (dự phòng là `<issuer>/authorize`), xây dựng URI chuyển hướng từ yêu cầu đến (có xử lý `x-forwarded-proto`), và chuyển hướng đến IdP với giá trị `state` ngẫu nhiên được lưu trong cookie `oidc_state` có `httpOnly`.
-- `GET /api/auth/oidc/callback` kiểm tra `state`, đổi authorization code, và xác minh chữ ký ID token qua JWKS của issuer (`createRemoteJWKSet` của `jose`, được cache theo từng URI JWKS), kèm kiểm tra `issuer`/`audience`. Danh sách cho phép `oidcAllowedSubjects` là bắt buộc: nó được so khớp với claim `sub` của token hoặc claim `email` — claim email chỉ được chấp nhận khi `email_verified === true`, nên một email chưa xác minh ở IdP không bao giờ vượt qua được cổng này — và nếu không có mục nào, callback sẽ từ chối mọi đăng nhập (`not_configured`).
-- Khi thành công, nó cấp **đúng cùng** JWT `auth_token` 30 ngày như đăng nhập bằng mật khẩu (`src/app/api/auth/login/route.ts`), vì vậy phần còn lại của pipeline phiên dashboard (tự động làm mới, cờ cookie) không thay đổi — OIDC chỉ thay đổi cách cookie được cấp, không thay đổi quyền mà nó cấp.
-- Mọi thiết lập `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) đều nằm trong `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings` trả về `400 PASSWORD_REQUIRED` trừ khi nội dung yêu cầu mang mật khẩu quản trị dưới dạng `currentPassword` (`401 PASSWORD_MISMATCH` nếu sai). `oidcDisablePasswordLogin` cấm _đăng nhập_ bằng mật khẩu (`POST /api/auth/login`) nhưng vẫn giữ hash mật khẩu đã lưu, và xác thực lại vẫn kiểm tra nó bằng `currentPassword`.
-- `corsOrigins` và `bruteForceProtection` cũng nằm trong `SECURITY_IMPACTING_SETTINGS_KEYS`: nới lỏng một trong hai sẽ làm yếu khả năng phòng thủ đăng nhập, nên cả hai đều yêu cầu xác thực lại bằng `currentPassword` như vậy (tab Security sẽ hỏi) và việc nhập JSON sẽ loại bỏ chúng.
-- Mọi khóa chính sách bảo mật — các mục `SECURITY_IMPACTING_SETTINGS_KEYS`, mọi khóa `oidc*` và trạng thái phiên dashboard — chỉ dành cho **operator** trên `PATCH /api/settings`: khóa API có phạm vi manage hoặc access token `oma_` bị từ chối với `403` ngay cả khi gửi đúng `currentPassword`, và việc từ chối được ghi audit là `settings.update_failed` với `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` trong `src/lib/api/operatorCredential.ts`). Các thiết lập thông thường (giao diện, tùy chọn hiển thị) vẫn có thể ghi bởi khóa `manage` hoặc access token `admin`. Mọi thay đổi trên chính `/api/settings` (và `/api/settings/require-login`) cũng cần phạm vi access token `admin` (`ADMIN_MUTATION_EXACT_PATHS` trong `src/server/authz/accessScopes.ts`, khớp đường dẫn chính xác); `GET` cần `read`, còn các route con `/api/settings/*` khác (proxy, mặc định combo, alias model, nén, dọn dẹp…) giữ phạm vi `write` suy ra từ phương thức.
-- `POST /api/settings/import-json` bỏ qua xác thực lại đó, nên trước khi ghi nó loại bỏ mọi khóa trong `IMPORT_STRIPPED_SETTINGS_KEYS` (cùng tệp): mật khẩu và `currentPassword`, mọi mục `SECURITY_IMPACTING_SETTINGS_KEYS`, và trạng thái phiên dashboard (`sessionsValidAfter`, `revokedDashboardSessions`). Do đó, nhập một bản sao lưu cũ không thể làm sống lại phiên đã bị chấm dứt bởi việc đổi mật khẩu hoặc đăng xuất.
+- Bị vô hiệu hóa trừ khi `settings.oidcEnabled === true` **và** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` đều được cấu hình (Cài đặt → Xác thực).
+  `GET /api/auth/oidc/login` trả về `400` trong các trường hợp khác.
+- `GET /api/auth/oidc/login` phát hiện `authorization_endpoint` từ
+  `/.well-known/openid-configuration` của issuer (dự phòng về
+  `<issuer>/authorize`), xây dựng URI chuyển hướng từ request đến (có xét
+  `x-forwarded-proto`), rồi chuyển hướng đến IdP với `state` ngẫu nhiên được
+  lưu trong cookie `oidc_state` `httpOnly`.
+- `GET /api/auth/oidc/callback` xác thực `state`, trao đổi mã ủy quyền và
+  xác minh chữ ký của ID token thông qua JWKS của issuer
+  (`createRemoteJWKSet` của `jose`, được lưu vào bộ nhớ đệm theo URI JWKS),
+  cùng với các kiểm tra `issuer`/`audience`. Để được truy cập dashboard, phải
+  có danh sách `oidcAllowedSubjects` không rỗng, chính sách
+  `oidcAdmissionClaim`, hoặc cả hai. Danh sách subject chỉ khớp với `sub` hoặc
+  `email` khi `email_verified === true`. Chính sách claim tùy chọn nhận một
+  đường dẫn claim ID token phân tách bằng dấu chấm (ví dụ:
+  `realm_access.roles`) và một mảng các giá trị được chấp nhận; claim được phân
+  giải phải là một mảng các chuỗi chứa ít nhất một giá trị được chấp nhận. Nếu
+  cả hai chính sách được cấu hình, cả hai đều phải đạt. Claim bị thiếu/không
+  đúng định dạng sẽ khiến xác thực thất bại an toàn, và nếu không có chính sách
+  nào thì callback từ chối đăng nhập (`not_configured`). Các cấu hình chỉ theo
+  subject hiện có vẫn tiếp tục hoạt động không thay đổi.
+- Keycloak thường ánh xạ các realm role vào access token, không nhất thiết vào
+  ID token. Để yêu cầu realm role `admin`, hãy cấu hình protocol mapper cho
+  client này để đưa `realm_access.roles` vào **ID token**, sau đó đặt
+  `oidcAdmissionClaim` thành `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Hãy kiểm tra claim ID token thực tế của client này trước khi bật cơ chế cấp
+  quyền chỉ dựa trên role; ứng dụng không đọc các role trong access token. Việc
+  từ chối token ở phía IdP có thể bổ sung nhưng không thay thế cho kiểm tra ở
+  phía ứng dụng này.
+- Khi thành công, hệ thống phát hành **chính xác cùng** JWT `auth_token` có
+  thời hạn 30 ngày mà đăng nhập bằng mật khẩu phát hành
+  (`src/app/api/auth/login/route.ts`), vì vậy toàn bộ pipeline phiên dashboard
+  còn lại (tự động làm mới, cờ cookie) không thay đổi — OIDC chỉ thay thế cách
+  cookie được phát hành, không thay đổi quyền mà nó cấp. Các thay đổi về role/
+  group trên IdP không vô hiệu hóa những phiên OmniRoute hiện có; đăng xuất,
+  thay đổi mật khẩu hoặc phiên hết hạn vẫn quyết định thời gian tồn tại của
+  chúng.
+- Mọi cài đặt `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) đều nằm trong
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  trả về `400 PASSWORD_REQUIRED` trừ khi body gửi kèm mật khẩu quản trị dưới
+  dạng `currentPassword` (`401 PASSWORD_MISMATCH` khi mật khẩu không đúng).
+  `oidcDisablePasswordLogin` từ chối đăng nhập bằng mật khẩu
+  (`POST /api/auth/login`) nhưng vẫn giữ hash mật khẩu đã lưu, và việc xác thực
+  lại vẫn kiểm tra `currentPassword` với hash đó.
+- `corsOrigins` và `bruteForceProtection` cũng nằm trong
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: việc nới lỏng một trong hai làm suy yếu
+  các cơ chế phòng vệ đăng nhập, vì vậy chúng cũng yêu cầu xác thực lại bằng
+  `currentPassword` (tab Bảo mật yêu cầu giá trị này) và tính năng nhập JSON
+  sẽ loại bỏ chúng.
+- Mọi khóa chính sách bảo mật — các mục trong
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, mọi khóa `oidc*` và trạng thái phiên
+  dashboard — đều **chỉ dành cho operator** trên `PATCH /api/settings`: API key
+  có phạm vi manage hoặc access token `oma_` đều bị từ chối với `403` ngay cả
+  khi gửi đúng `currentPassword`, và việc từ chối được ghi audit dưới dạng
+  `settings.update_failed` với `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` trong `src/lib/api/operatorCredential.ts`).
+  Các cài đặt thông thường (chủ đề, tùy chọn hiển thị) vẫn có thể được ghi bởi
+  key `manage` hoặc access token `admin`. Mọi thay đổi đối với chính
+  `/api/settings` (và `/api/settings/require-login`) cũng yêu cầu scope access
+  token `admin` (`ADMIN_MUTATION_EXACT_PATHS` trong
+  `src/server/authz/accessScopes.ts`, khớp đường dẫn chính xác); `GET` vẫn là
+  `read`, còn các route con `/api/settings/*` khác (proxy, giá trị mặc định
+  combo, bí danh model, nén, dọn dẹp…) vẫn giữ scope `write` được suy ra theo
+  phương thức.
+- `POST /api/settings/import-json` bỏ qua bước xác thực lại đó, vì vậy sẽ loại
+  bỏ mọi khóa trong `IMPORT_STRIPPED_SETTINGS_KEYS` (cùng tệp) trước khi ghi:
+  mật khẩu và `currentPassword`, mọi mục trong
+  `SECURITY_IMPACTING_SETTINGS_KEYS` và trạng thái phiên dashboard
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Do đó, việc nhập bản sao
+  lưu cũ hơn không thể khôi phục một phiên mà việc đổi mật khẩu hoặc đăng xuất
+  đã kết thúc.
 
-## Các lớp route
+#### Đăng nhập hai yếu tố TOTP tùy chọn (#16619)
 
-`src/server/authz/types.ts` định nghĩa ba lớp; mọi route không thể phân loại một cách xác định sẽ rơi về `MANAGEMENT`.
+Được đăng ký từ Cài đặt → Bảo mật; bị tắt cho đến khi operator bật lên
+(`src/server/auth/dashboardMfa.ts`).
 
-| Lớp          | Mô tả                                                                                                                                                     | Xác thực yêu cầu                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `PUBLIC`     | Các route an toàn một cách rõ ràng — đăng nhập, đăng xuất, trạng thái, khởi tạo, health và bootstrap onboarding.                                          | Không có                                                         |
-| `CLIENT_API` | Các endpoint phục vụ model — `/api/v1/*`, `/api/v1beta/*`, cùng các alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Khóa Bearer khi cờ tính năng `REQUIRE_API_KEY` hiệu lực đang bật |
-| `MANAGEMENT` | Các trang dashboard, cài đặt, nhà cung cấp, khóa, và các endpoint quản trị và chẩn đoán.                                                                  | Phiên dashboard HOẶC Bearer có phạm vi `manage`                  |
+- **Nội dung bao gồm:** đăng nhập bằng mật khẩu (`POST /api/auth/login`, sau đó cần
+  `POST /api/auth/mfa/verify`) và `omniroute connect` (`POST /api/cli/connect`,
+  từ chối trao đổi chỉ bằng mật khẩu và nhận mã dưới dạng `totp`).
+- **Nội dung không bao gồm:** đăng nhập OIDC / SSO (`/api/auth/oidc/callback`) không
+  yêu cầu TOTP của OmniRoute. Tính năng này dựa vào yếu tố thứ hai của chính nhà
+  cung cấp danh tính, vì vậy hãy thực thi MFA tại IdP nếu OIDC được bật.
+- **Khôi phục** (mất thiết bị, không còn mã khôi phục hoặc không thể xác minh yếu tố
+  nữa, chẳng hạn sau khi `STORAGE_ENCRYPTION_KEY` thay đổi):
+  1. Khởi động lại máy chủ với `OMNIROUTE_DISABLE_MFA=true`.
+  2. Trên chính máy chủ (peer loopback và `Host` loopback, chẳng hạn
+     `http://localhost:20128`), đăng nhập bằng mật khẩu. Yếu tố thứ hai chỉ được bỏ
+     qua cho origin đó; mọi origin khác vẫn cần mã.
+  3. Trong Cài đặt → Bảo mật → Tắt, nhập mật khẩu và để trống mã. `POST /api/auth/mfa/disable` chỉ chấp nhận body không có `code` khi biến này được đặt và yêu cầu đến từ máy chủ; endpoint này vẫn yêu cầu phiên dashboard và mật khẩu hiện tại, đồng thời được ghi nhật ký kiểm toán với `auth.mfa.disabled` và `secondFactor: "recovery_switch"`.
+  4. Bỏ đặt `OMNIROUTE_DISABLE_MFA`, khởi động lại và đăng ký lại nếu cần.
 
-Một số hành động `MANAGEMENT` chỉ dành cho **operator**: khóa `manage` là không đủ. Việc xuất thông tin xác thực đã lưu (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), khôi phục bản sao lưu đè lên dữ liệu trực tiếp (`POST /api/db-backups/import` kể cả với `dryRun=true`, `POST /api/db-backups` khôi phục theo id, `POST /api/settings/import-json`), và hủy các điểm khôi phục (`DELETE /api/db-backups` dọn dẹp, và `PATCH /api/db-backups` vì thời gian lưu giữ mà nó duy trì điều khiển việc cắt tỉa tự động sau mỗi bản sao lưu) đều yêu cầu phiên dashboard, chủ thể CLI cục bộ, hoặc đăng nhập đã bị tắt. Việc cấp token đồng bộ (`POST /api/sync/tokens`) và đúc access token CLI `admin` (`POST /api/cli/tokens`) yêu cầu phiên dashboard hoặc chủ thể CLI cục bộ trong mọi chế độ đăng nhập. Khóa API thuộc bất kỳ phạm vi nào và access token `oma_` không phải là thông tin xác thực operator: chúng nhận `403` bất cứ khi nào cần đến. Kiểm tra nằm trong `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Việc thay đổi cài đặt đăng nhập cũng chỉ dành cho operator: `POST /api/settings/require-login` (đặt mật khẩu quản trị / bật tắt `requireLogin`) chỉ chấp nhận các thông tin xác thực đó khi đã có mật khẩu — cửa sổ bootstrap lần đầu (chưa có mật khẩu) giữ nguyên — và phiên dashboard phải gửi `currentPassword` để thay mật khẩu (`403` khi thiếu hoặc sai, được ghi audit là `settings.update_failed`). CLI cục bộ và một instance đã tắt đăng nhập giữ lại đường khôi phục và có thể đặt mật khẩu mà không cần nó, vì cả hai đều gắn với host sở hữu thư mục dữ liệu.
+## Lớp tuyến đường
 
-## Pipeline
+`src/server/authz/types.ts` định nghĩa ba lớp; bất kỳ tuyến đường nào không thể được phân loại một cách xác định sẽ quay trở lại `MANAGEMENT`.
+
+| Lớp học      | Sự miêu tả                                                                                                                                                     | Yêu cầu xác thực                                               |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUBLIC`     | Các tuyến đường an toàn rõ ràng — đăng nhập, đăng xuất, trạng thái, tình trạng, khởi động bootstrap.                                                           | Không có                                                       |
+| `CLIENT_API` | Điểm cuối phục vụ mô hình — `/api/v1/*`, `/api/v1beta/*`, cộng với các bí danh `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Khóa mang khi cờ tính năng `REQUIRE_API_KEY` hiệu quả được bật |
+| `MANAGEMENT` | Trang tổng quan, cài đặt, nhà cung cấp, khóa, điểm cuối quản trị và chẩn đoán.                                                                                 | Phiên bảng điều khiển OR Bearer với phạm vi `manage`           |
+
+Một vài hành động `MANAGEMENT` là** chỉ dành cho người vận hành** : khóa `manage` là không đủ. Xuất thông tin đăng nhập được lưu trữ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), khôi phục bản sao lưu trên dữ liệu trực tiếp (`POST /api/db-backups/import` bao gồm `dryRun=true`, `POST /api/db-backups` khôi phục theo id, `POST /api/settings/import-json`), hủy các điểm khôi phục ( dọn dẹp `DELETE /api/db-backups` và `PATCH /api/db-backups` vì việc lưu giữ nó vẫn tiếp tục thúc đẩy quá trình cắt tỉa tự động sau mỗi lần sao lưu) yêu cầu phiên bảng điều khiển, chủ đề CLI cục bộ hoặc vô hiệu hóa đăng nhập. Việc phát hành mã thông báo đồng bộ hóa (`POST /api/sync/tokens`) và tạo mã thông báo truy cập `admin` CLI (`POST /api/cli/tokens`) yêu cầu phiên bảng điều khiển hoặc chủ đề CLI cục bộ trong mọi chế độ đăng nhập. Khóa API thuộc bất kỳ phạm vi nào và mã thông báo truy cập `oma_` không phải là thông tin xác thực của nhà điều hành: chúng nhận được `403` bất cứ khi nào được yêu cầu. Séc có dạng `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Việc thay đổi cài đặt đăng nhập cũng chỉ dành cho nhà điều hành: `POST /api/settings/require-login` (đặt mật khẩu quản lý / chuyển đổi `requireLogin`) chỉ chấp nhận những thông tin xác thực đó khi mật khẩu tồn tại — cửa sổ bootstrap chạy lần đầu (chưa có mật khẩu) không thay đổi — và phiên bảng điều khiển phải gửi `currentPassword` để thay thế mật khẩu (`403` khi nó bị thiếu hoặc sai, được kiểm tra là `settings.update_failed`). CLI cục bộ và một phiên bản bị vô hiệu hóa đăng nhập sẽ giữ đường dẫn khôi phục và có thể đặt mật khẩu mà không cần nó, vì cả hai đều được liên kết với máy chủ sở hữu thư mục dữ liệu.
+
+## Đường ống
 
 ```
-Yêu cầu đến → src/proxy.ts
-  → runAuthzPipeline() trong src/server/authz/pipeline.ts
-    1. Loại bỏ các header nội bộ đáng tin cậy (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Tạo ID yêu cầu, phân loại tuyến qua classifyRoute()
-    3. Nếu pathname == "/" → chuyển hướng đến /dashboard
-    4. Nếu đang rút dần lưu lượng (tắt hệ thống an toàn) và /api/* → 503
-    5. Nếu không phải GET và thuộc /api/* → áp dụng cơ chế bảo vệ checkBodySize()
-    6. Nếu OPTIONS → CORS preflight 204
-    7. Nếu options.enforce == false → cho đi qua kèm các header lớp tuyến
-    8. Nếu không: POLICIES[routeClass].evaluate(ctx)
-       - cho phép  → đóng dấu x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - từ chối → lỗi JSON kèm correlation_id (các trang bảng điều khiển → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Các header nội bộ đáng tin cậy (được định nghĩa trong `src/server/authz/headers.ts`) được **loại bỏ khỏi các yêu cầu đến** trước khi phân loại — client không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ thể.
+Các tiêu đề nội bộ đáng tin cậy (được xác định trong `src/server/authz/headers.ts`) là** bị loại bỏ khỏi các yêu cầu đến** trước khi phân loại máy khách — không thể điền trước `x-omniroute-auth-*` để mạo danh một chủ đề.
 
 ### Hợp đồng chính sách
 
 Mỗi lớp tuyến có một chính sách trong `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — luôn trả về `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — trích xuất Bearer, xác thực qua `validateApiKey()`. Chỉ chuyển sang chế độ ẩn danh khi cờ tính năng `REQUIRE_API_KEY` hiệu lực bị tắt. Cờ hiệu lực được phân giải thông qua `isRequireApiKeyEnabled()` (`ghi đè bằng cờ tính năng trong DB > process.env.REQUIRE_API_KEY > giá trị mặc định`) để các Cờ tính năng trên Bảng điều khiển và biến môi trường chi phối `/api/v1/*`, `/api/v1beta/*` và các bí danh một cách nhất quán; lỗi bộ phân giải sẽ mặc định từ chối. Cho phép các yêu cầu có phiên bảng điều khiển trên các tuyến API client (bao gồm `/api/v1/models`, được danh mục mô hình của bảng điều khiển sử dụng).
-- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, các yêu cầu đồng bộ mô hình nội bộ (được đối sánh với `/api/providers/[name]/(sync-models|models)`), hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về false. Trả về 403 (`AUTH_001`) khi có token Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp bảo vệ tuyến (LOCAL_ONLY / ALWAYS_PROTECTED) trước mọi nhánh xác thực — xem [Các cấp bảo vệ tuyến](../security/ROUTE_GUARD_TIERS.md). Các đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hiện tại: `/api/mcp/`) có thể được truy cập từ địa chỉ không phải loopback khi khóa Bearer có phạm vi `manage`; tất cả các đường dẫn LOCAL_ONLY khác vẫn bị giới hạn nghiêm ngặt ở loopback bất kể phạm vi.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — trích xuất Bearer, xác thực thông qua `validateApiKey()`. Chỉ chuyển sang ẩn danh khi cờ tính năng `REQUIRE_API_KEY` hiệu quả bị tắt. Cờ hiệu quả được giải quyết thông qua `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vì vậy Cờ tính năng của Bảng điều khiển và các biến môi trường chi phối `/api/v1/*`, `/api/v1beta/*` và bí danh một cách nhất quán; lỗi trình giải quyết không đóng được. Cho phép yêu cầu phiên bảng thông tin trên các tuyến API của máy khách (bao gồm `/api/v1/models`, được sử dụng bởi danh mục mô hình bảng thông tin). Khi Entra ID SSO được bật, Bearer có cấu trúc là mã thông báo Entra (ba phân đoạn base64url, `RS*` alg, `kid`) được xử lý bởi nhánh SSO** trước** `validateApiKey()` và phán quyết của nó là — cuối cùng, nó không bao giờ đi đến đường dẫn khóa API hoặc nhánh chuyển đổi thành ẩn danh, do đó, việc ngừng hoạt động của nhà cung cấp danh tính không thể trở thành quyền truy cập mở. Các phím API tĩnh không bị ảnh hưởng. Xem [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — chấp nhận phiên bảng điều khiển, yêu cầu đồng bộ hóa mô hình nội bộ (khớp với `/api/providers/[name]/(sync-models|models)`) hoặc bỏ qua hoàn toàn nếu `isAuthRequired()` trả về sai. Trả về 403 (`AUTH_001`) khi có mã thông báo Bearer nhưng không hợp lệ, nếu không thì trả về 401. Đồng thời thực thi các cấp độ bảo vệ tuyến đường (LOCAL_ONLY / ALWAYS_PROTECTED) trước bất kỳ nhánh xác thực — hãy xem [Cấp độ bảo vệ tuyến đường](../security/ROUTE_GUARD_TIERS.md). Các đường dẫn LOCAL_ONLY trong `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hôm nay: `/api/mcp/`) có thể được truy cập từ chế độ không lặp lại khi khóa Bearer mang phạm vi `manage` ; tất cả các đường dẫn LOCAL_ONLY khác vẫn ở chế độ vòng lặp nghiêm ngặt bất kể phạm vi.
 
-Một chính sách thành công trả về `AuthSubject` với `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Các handler phía sau có thể đọc chủ thể này qua `assertAuth(request, "CLIENT_API")` trong `src/server/authz/assertAuth.ts` thay vì chạy lại logic xác thực.
+Chính sách thành công trả về `AuthSubject` với `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Trình xử lý xuôi dòng có thể đọc nó qua `assertAuth(request, "CLIENT_API")` trong `src/server/authz/assertAuth.ts` thay vì chạy lại logic xác thực.
 
-## Danh sách route công khai
+## Danh sách tuyến đường công cộng
 
-`src/shared/constants/publicApiRoutes.ts` là danh sách cho phép tường minh:
+`src/shared/constants/publicApiRoutes.ts` là danh sách cho phép rõ ràng:
 
-Danh sách được phân chia theo **hình dạng**, và sự phân chia này có ý nghĩa thiết yếu (GHSA-74g9-q8f6-793h): một tiền tố được
-đối chiếu bằng `startsWith()`, vì vậy nó cũng khớp với mọi đường dẫn liền kề có chung các ký tự đầu.
-Việc dùng `/api/usage/om-usage` làm tiền tố đã đánh dấu `/api/usage/om-usage<anything>` là CÔNG KHAI, và Next phân giải
-đường dẫn đó thành `/api/usage/[connectionId]` — một trình xử lý không có cơ chế xác thực riêng.
+Danh sách được chia theo** hình dạng** và phần phân tách có tính chất chịu tải (GHSA-74g9-q8f6-793h): tiền tố được khớp với `startsWith()`, do đó, nó cũng khớp với mọi đường dẫn liền kề có chung các ký tự đầu của nó. `/api/usage/om-usage` dưới dạng tiền tố được đánh dấu `/api/usage/om-usage<anything>` PUBLIC và Next giải quyết điều đó thành `/api/usage/[connectionId]` — một trình xử lý không có xác thực riêng.
 
 ```ts
-// Các cây con thực sự. Mọi mục PHẢI kết thúc bằng "/" (được kiểm tra bằng unit test).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // được xử lý là CLIENT_API trong classify, không phải là công khai "không cần xác thực"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Các route đơn lẻ, được đối chiếu CHÍNH XÁC (có hoặc không có dấu gạch chéo ở cuối).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Các route đơn lẻ chỉ đọc cũng được áp dụng chính sách nới lỏng origin CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Route đơn lẻ chỉ đọc KHÔNG áp dụng chính sách nới lỏng CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Các route chỉ đọc là công khai **chỉ** đối với các phương thức an toàn. Lưu ý: `classifyRoute()` loại `/api/v1/*` và `/api/v1beta/*` khỏi trường hợp dự phòng PUBLIC — chúng luôn là `CLIENT_API`, vì vậy chính sách khóa Bearer vẫn được áp dụng.
+Các tuyến chỉ đọc là công khai** chỉ một** để có những phương pháp an toàn. Lưu ý: `classifyRoute()` loại trừ `/api/v1/*` và `/api/v1beta/*` khỏi PUBLIC rơi vào — chúng luôn là `CLIENT_API` nên chính sách Bearer-key vẫn được áp dụng.
 
 ## Thêm route mới
 
@@ -227,15 +309,15 @@ Nó vẫn tắt trừ khi `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Thứ hạng này chỉ áp dụng cho thông tin xác thực
 mã thông báo truy cập. Xem [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md).
 
-## Công tắc yêu cầu xác thực
+## Yêu cầu xác thực Chuyển đổi
 
-`isAuthRequired()` trong `src/shared/utils/apiAuth.ts` quyết định liệu **bất kỳ** xác thực nào có được áp dụng cho một yêu cầu hay không:
+`isAuthRequired()` trong `src/shared/utils/apiAuth.ts` quyết định xem** bất kì** auth được thực thi cho một yêu cầu:
 
-- `settings.requireLogin === false` → xác thực bị tắt toàn cục, ngoại trừ tầng luôn được bảo vệ (xem [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) và các lệnh gọi cấp thông tin xác thực mà nó chấp nhận, vốn cần cùng thông tin xác thực như khi đăng nhập được bật: cấp token đồng bộ, đúc access token CLI ở bất kỳ phạm vi nào, và tạo khóa API có phạm vi `manage`/`admin`, cấp phạm vi đó cho một khóa, hoặc tạo lại hay hiển thị một khóa như vậy (`requireCredentialForManagementScopedKey()` trong `src/lib/api/requireManagementAuth.ts`). Các khóa chỉ dùng cho inference vẫn mở.
-- Chưa cấu hình mật khẩu **và** không có biến môi trường `INITIAL_PASSWORD` → chế độ bootstrap: trình hướng dẫn onboarding và các yêu cầu loopback được phép, nhưng các yêu cầu từ mạng bên ngoài vẫn cần thông tin xác thực.
-- Bất kỳ lỗi DB nào → thất bại đóng (an toàn theo mặc định).
+- `settings.requireLogin === false` → auth bị vô hiệu hóa trên toàn cầu, ngoại trừ tầng luôn được bảo vệ (xem [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) và các cuộc gọi đưa ra thông tin xác thực mà nó chấp nhận, cần có thông tin xác thực giống như khi đăng nhập: phát hành mã thông báo đồng bộ hóa, đúc mã thông báo truy cập CLI ở bất kỳ phạm vi nào và tạo khóa API với phạm vi `manage`/`admin`, cấp phạm vi đó cho một khóa hoặc tạo lại hoặc tiết lộ một khóa như vậy (`requireCredentialForManagementScopedKey()` trong `src/lib/api/requireManagementAuth.ts`). Các phím chỉ suy luận vẫn mở. Viết cờ tính năng được bảo vệ (`REQUIRE_API_KEY`, các cờ Bảo mật khác và cờ SSRF / TLS / MCP-scope / sandbox được liệt kê trong [Cờ tính năng](../reference/FEATURE_FLAGS.md#rest-api) ) và lưu cài đặt mặt nạ PII (`PUT /api/settings/pii`) cũng cần có thông tin xác thực.
+- Không có mật khẩu được cấu hình** Và** không có chế độ khởi động `INITIAL_PASSWORD` env var → cho phép trình hướng dẫn tích hợp và yêu cầu quay vòng, nhưng các yêu cầu mạng bị lộ vẫn cần thông tin xác thực. Ngoại lệ: viết cờ tính năng được bảo vệ và lưu cài đặt mặt nạ PII (`PUT /api/settings/pii`) cần có thông tin xác thực ngay cả từ loopback, do đó, bản thân loopback là không đủ.
+- Bất kỳ lỗi DB nào → đều không đóng được (bảo mật theo mặc định).
 
-Việc cưỡng chế khóa API client dùng `isRequireApiKeyEnabled()` trong `src/shared/utils/featureFlags.ts`, không đọc trực tiếp `process.env.REQUIRE_API_KEY`. Điều này quan trọng với các instance đã triển khai: bật tắt `REQUIRE_API_KEY` trong Dashboard → Feature Flags sẽ lưu một ghi đè DB và ảnh hưởng ngay đến `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` cùng các kiểm tra xác thực API client khác dùng chung hàm trợ giúp này. Nếu kho feature flag không đọc được, xác thực API client thất bại đóng và yêu cầu một khóa.
+Việc thực thi khóa API của khách hàng sử dụng `isRequireApiKeyEnabled()` trong `src/shared/utils/featureFlags.ts`, không phải đọc `process.env.REQUIRE_API_KEY` trực tiếp. Điều này quan trọng đối với các phiên bản đã triển khai: việc chuyển đổi `REQUIRE_API_KEY` trong Bảng điều khiển → Cờ tính năng lưu trữ ghi đè DB và ngay lập tức ảnh hưởng đến `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` và các kiểm tra xác thực client-API khác chia sẻ trình trợ giúp này. Nếu kho lưu trữ cờ tính năng không thể đọc được, xác thực API của máy khách không đóng được và yêu cầu khóa.
 
 ## Thay đổi không tương thích — v3.8.0
 
@@ -253,23 +335,23 @@ Các endpoint `/api/v1/agents/tasks/*` và `/api/resilience/model-cooldowns` **h
 
 ## Gỡ lỗi
 
-Pipeline luôn đóng dấu các phản hồi bằng:
+Quy trình luôn đóng dấu phản hồi bằng:
 
 ```
-x-request-id:               <ID tương quan, được lặp lại trong phần thân lỗi>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Đối với các yêu cầu đã xác thực, các header yêu cầu ở phía upstream (phía handler) cũng bao gồm:
+Đối với các yêu cầu được xác thực, các tiêu đề yêu cầu ngược dòng (phía trình xử lý) cũng bao gồm:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4-ký-tự-cuối> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (tùy chọn)
-x-omniroute-auth-scopes:    danh sách phân tách bằng dấu phẩy
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Sử dụng `assertAuth(req, expectedClass)` bên trong các handler — hàm này ném `AuthzAssertionError` với mã `AUTHZ_NOT_INITIALIZED` nếu middleware bị bỏ qua (hữu ích để phát hiện các lỗi hồi quy cấu hình trong quá trình kiểm thử).
+Sử dụng `assertAuth(req, expectedClass)` bên trong trình xử lý — nó sẽ ném `AuthzAssertionError` với mã `AUTHZ_NOT_INITIALIZED` nếu phần mềm trung gian bị bỏ qua (hữu ích để phát hiện các hồi quy cấu hình trong các thử nghiệm).
 
 ## Xem thêm
 

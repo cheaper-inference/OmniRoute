@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import Button from "./Button";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import { ConfirmModal } from "./Modal";
 
 type ButtonState = "idle" | "distributing" | "complete";
@@ -61,7 +62,7 @@ export default function DistributeProxiesButton({
         ? "bg-success/15 border-success/40 text-success"
         : "text-text-muted hover:text-text-main hover:border-primary/40";
 
-  const icon = state === "distributing" ? "sync" : state === "complete" ? "check" : "swap_horiz";
+  const icon = state === "complete" ? "check" : "swap_horiz";
   const displayLabel =
     state === "distributing"
       ? t("distributing")
@@ -80,11 +81,11 @@ export default function DistributeProxiesButton({
         title={displayLabel}
         aria-label={displayLabel}
       >
-        <Icon
-          name={icon}
-          size={14}
-          className={state === "distributing" ? "animate-spin" : undefined}
-        />
+        {state === "distributing" ? (
+          <Spinner decorative size="xs" />
+        ) : (
+          <Icon name={icon} size={14} />
+        )}
         {displayLabel}
       </Button>
       <ConfirmModal

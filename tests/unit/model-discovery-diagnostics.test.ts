@@ -22,6 +22,9 @@ type ModelsBody = {
   intentional?: boolean;
   models?: ModelRow[];
   discoveryFailure?: Record<string, unknown>;
+  degraded?: boolean;
+  error?: string;
+  failure?: unknown;
 };
 
 async function resetStorage() {
@@ -145,6 +148,11 @@ test("Copilot route returns safe structured failure diagnostics with its fallbac
     contentType: "application/json",
     bodyShape: "json",
   });
+  // One shape: the structured diagnostics stay published as `discoveryFailure`
+  // and the closed-vocabulary cause is derived from them, never rebuilt apart.
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "HTTP 503");
+  assert.equal("failure" in body, false, "the internal failure never reaches the response");
   assert.doesNotMatch(
     JSON.stringify(body),
     /must-not-leak|github-access-secret|copilot-token-secret/

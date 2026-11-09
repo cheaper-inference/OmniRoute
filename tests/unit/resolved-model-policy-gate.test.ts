@@ -60,7 +60,7 @@ test("allowedCombos grants stored combos but never auto/* combos", () => {
 test("gate skips granted targets and fails closed on the rest", async () => {
   const gate = createResolvedModelGate({
     apiKeyInfo: { id: "key" },
-    apiKey: null, // metadata without a key → policy unavailable
+    request: null, // metadata without a key → policy unavailable
     contextModel: "my-combo",
     comboGrantsTargets: true,
     provider: "openai",
@@ -78,7 +78,7 @@ test("gate skips granted targets and fails closed on the rest", async () => {
 test("gate admits everything when the request carries no API-key metadata", async () => {
   const gate = createResolvedModelGate({
     apiKeyInfo: null,
-    apiKey: null,
+    request: null,
     contextModel: null,
     comboGrantsTargets: false,
     provider: "openai",

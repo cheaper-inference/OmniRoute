@@ -11,55 +11,73 @@ OmniRoute; yönetim işlemlerini, kimlik doğrulama olaylarını, sağlayıcı k
 
 Uygulama `src/lib/compliance/index.ts` (T-43 — "Uyumluluk Denetimleri") ve `src/lib/compliance/providerAudit.ts` içinde yer alır. Denetim yazma işlemleri hiçbir zaman hata fırlatmaz: herhangi bir hata durumunda çağrı sessizce yutulur; böylece denetim günlüğü, ana istek akışını bozamaz.
 
-## Günlüğe Kaydedilenler
+## Neler Günlüğe Kaydedilir
 
-### Yönetimsel denetim olayları (`audit_log`)
+### Yönetim denetim olayları (`audit_log`)
 
-Her `logAuditEvent({ action, actor, target, details, ... })` çağrısı bir satır oluşturur. Eylem dizeleri `domain.verb` (veya `domain.verb.outcome`) kalıbını izler. Kaynak ağacında doğrulanmış eylem türleri şunlardır:
+`logAuditEvent({ action, actor, target, details, ... })` çağrılarının her biri
+bir satır üretir. Eylem dizeleri `domain.verb` (veya `domain.verb.outcome`)
+biçimini izler. Ağaç içinde doğrulanmış eylem türleri şunlardır:
 
-| Eylem                                | Kaynak                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Eylem                                | Kaynak                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Her kayıt `action`, `actor` (varsayılan olarak `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` ve `timestamp` alanlarını içerir. Hassas anahtarlar (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ile eşleşen her şey vb.), satır yazılmadan önce özyinelemeli olarak `"[redacted]"` değeriyle sansürlenir.
+Her girişte `action`, varsayılanı `"system"` olan `actor`, `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` ve `timestamp` bilgileri tutulur. Hassas anahtarlar (`apiKey`,
+`accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ile
+eşleşen her şey vb.), satır yazılmadan önce özyinelemeli olarak `"[redacted]"`
+şeklinde maskelenir.
 
-### MCP aracı çağrıları (`mcp_tool_audit`)
+`api_key.auth.touch` satırları, istek günlüğüne hiç ulaşmayan başarılı API anahtarı
+meta verisi ve keşif okumalarını (GET/HEAD) kaydeder: hangi anahtarın ne zaman
+kullanıldığı ve normalleştirilmiş yol. Bu kayıtlar birleştirilir ve 1.000 satırla
+sınırlandırılır. `noLog` özelliğine sahip anahtarlar ve ortam anahtarı atlanır.
+Çağrıyı yapanın IP adresi ve user-agent bilgileri yalnızca
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` özellik bayrağı etkin olduğunda eklenir
+(varsayılan olarak kapalıdır).
 
-Her MCP aracı çağrısı, `open-sse/mcp-server/audit.ts` üzerinden bir satır yazar. Şema (`src/lib/db/migrations/002_mcp_a2a_tables.sql` dosyasından):
+### MCP araç çağrıları (`mcp_tool_audit`)
 
-| Sütun            | Notlar                                 |
-| ---------------- | -------------------------------------- |
-| `id`             | otomatik artan                         |
-| `tool_name`      | MCP aracı tanımlayıcısı                |
-| `input_hash`     | girdinin sha256 özeti (yük depolanmaz) |
-| `output_summary` | kısa, kesilmiş özet                    |
-| `duration_ms`    | geçen gerçek süre                      |
-| `api_key_id`     | çağıran taraf (null olabilir)          |
-| `success`        | `1` / `0`                              |
-| `error_code`     | hata durumundaki nihai hata kodu       |
-| `created_at`     | ISO zaman damgası                      |
+Her MCP aracı çağrısı, `open-sse/mcp-server/audit.ts` üzerinden bir satır yazar.
+Şema (`src/lib/db/migrations/002_mcp_a2a_tables.sql` dosyasından):
+
+| Sütun            | Notlar                                    |
+| ---------------- | ----------------------------------------- |
+| `id`             | otomatik artırma                          |
+| `tool_name`      | MCP araç tanımlayıcısı                    |
+| `input_hash`     | girdinin sha256 özeti (payload saklanmaz) |
+| `output_summary` | kısa, kısaltılmış özet                    |
+| `duration_ms`    | geçen süre                                |
+| `api_key_id`     | çağrıyı yapan (null olabilir)             |
+| `success`        | `1` / `0`                                 |
+| `error_code`     | hata durumundaki son hata kodu            |
+| `created_at`     | ISO zaman damgası                         |
 
 ### İstek / kullanım günlükleri
 
-Bunlar operasyonel telemetri verileridir (tam anlamıyla yönetimsel denetim değildir), ancak aynı saklama işlem hattını paylaşırlar:
+Bunlar operasyonel telemetridir (kesin olarak yönetim denetimi değildir), ancak
+aynı saklama sürecini paylaşırlar:
 
-- `usage_history` — istek başına toplu kullanım
-- `call_logs` — istek başına tam günlük (satır sınırına tabidir; aşağıya bakın)
+- `usage_history` — istek başına kullanım özeti
+- `call_logs` — istek başına tam günlük (aşağıdaki satır sınırına tabidir)
 - `proxy_logs` — proxy trafiği günlüğü (satır sınırına tabidir)
-- `request_detail_logs` — eski ayrıntılı istek günlüğü (mevcutsa hâlâ budanır)
+- `request_detail_logs` — eski ayrıntılı istek günlüğü (varsa hâlâ temizlenir)
 
 ## Depolama Şeması
 

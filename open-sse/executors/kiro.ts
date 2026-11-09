@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -31,6 +32,7 @@ import {
   appendBufferedKiroToolInput,
   encodeSse,
   getBufferedKiroToolInput,
+  kiroRequestDeclaresToolCallWrapperName,
   validateKiroToolCallWrapperInput,
   validateKiroToolName,
   validateKiroToolUse,
@@ -128,6 +130,48 @@ export function flushBufferedToolArgs(
     }
   }
   state.toolArgsBuffered.clear();
+}
+
+/**
+ * Give argument-less tool calls a parseable `"{}"` before the stream finishes.
+ *
+ * A tool call starts with `arguments: ""`. When Kiro sends no input for it (a
+ * tool with no parameters, or one whose parameters are all optional and the
+ * model passed none), nothing replaces that empty string, so the client
+ * reassembles `""` — which strict OpenAI clients reject as a malformed call.
+ * OpenAI itself sends `"{}"` for these, so match that.
+ *
+ * Only call this at the terminal flush: injecting `"{}"` earlier could be
+ * followed by a late argument fragment for the same call.
+ */
+export function flushEmptyToolCallArgs(
+  state: Pick<KiroStreamState, "seenToolIds" | "toolArgsEmitted">,
+  controller: { enqueue: (chunk: Uint8Array) => void },
+  ctx: { responseId: string; created: number; model: string }
+): void {
+  if (!state.seenToolIds || state.seenToolIds.size === 0) return;
+  const { responseId, created, model } = ctx;
+  for (const [toolCallId, toolIndex] of state.seenToolIds) {
+    const emitted = state.toolArgsEmitted.get(toolCallId) || "";
+    if (emitted.trim() !== "") continue;
+    const argsChunk: JsonRecord = {
+      id: responseId,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [{ index: toolIndex, function: { arguments: "{}" } }],
+          },
+          finish_reason: null,
+        },
+      ],
+    };
+    controller.enqueue(TEXT_ENCODER.encode(`data: ${JSON.stringify(argsChunk)}\n\n`));
+    state.toolArgsEmitted.set(toolCallId, emitted + "{}");
+  }
 }
 
 function buildKiroFinishChunk(
@@ -309,7 +353,7 @@ const KIRO_IMPROPERLY_FORMED_MESSAGE = "Improperly formed request";
 async function isBrandedGatewayProfileArnRejection(response: Response): Promise<boolean> {
   if (response.status !== 400) return false;
   try {
-    const text = await response.clone().text();
+    const text = await readResponseTextWithinCap(response.clone());
     return (
       text.includes(KIRO_PROFILE_ARN_REQUIRED_MESSAGE) ||
       text.includes(KIRO_IMPROPERLY_FORMED_MESSAGE)
@@ -487,18 +531,24 @@ export class KiroExecutor extends BaseExecutor {
         )?.userInputMessage as Record<string, unknown>
       )?.content as string) || "";
     const thinkingExpected = userContent.includes("<thinking_mode>enabled</thinking_mode>");
+    // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675). Read the
+    // pre-allowlist body: it carries the names openai-to-kiro synthesized from history.
+    const sseOpts = {
+      thinkingExpected,
+      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(body),
+    };
     const transformedResponse =
       stream && isKiroToolCallRepairEnabled()
         ? createKiroToolCallRepairStream({
             upstream: response,
             transform: (raw, opts) =>
-              this.transformEventStreamToSSE(raw, model, { thinkingExpected, ...opts }),
+              this.transformEventStreamToSSE(raw, model, { ...sseOpts, ...opts }),
             retry: async (payload, retrySignal) => (await send(payload, retrySignal)).res,
             transformedBody,
             signal,
             log,
           })
-        : this.transformEventStreamToSSE(response, model, { thinkingExpected });
+        : this.transformEventStreamToSSE(response, model, sseOpts);
 
     return { response: transformedResponse, url, headers, transformedBody };
   }
@@ -522,6 +572,11 @@ export class KiroExecutor extends BaseExecutor {
     model: string,
     opts: {
       thinkingExpected?: boolean;
+      /**
+       * The request declared its own tool named `tool_call`: treat those events as
+       * ordinary client tool calls instead of the Kiro MCP wrapper (#18675).
+       */
+      clientDeclaresWrapperName?: boolean;
       /** Return true to suppress the error frame (the one-shot repair will retry). */
       onInvalidToolCall?: (message: string) => boolean;
       responseId?: string;
@@ -648,7 +703,10 @@ export class KiroExecutor extends BaseExecutor {
         emitToolCallStart(controller, toolCall.toolCallId, toolCall.toolName, toolIndex);
         const argumentsStr =
           typeof toolInput === "string" ? toolInput : JSON.stringify(toolInput ?? {});
-        if (argumentsStr) emitToolCallArguments(controller, toolIndex, argumentsStr);
+        if (argumentsStr) {
+          emitToolCallArguments(controller, toolIndex, argumentsStr);
+          state.toolArgsEmitted.set(toolCall.toolCallId, argumentsStr);
+        }
       }
       state.pendingWrapperToolCalls.clear();
       return true;
@@ -874,7 +932,7 @@ export class KiroExecutor extends BaseExecutor {
                 const toolCallId = getToolCallId(singleToolUse);
                 const toolInput = singleToolUse.input;
 
-                if (toolName === KIRO_TOOL_CALL_WRAPPER) {
+                if (toolName === KIRO_TOOL_CALL_WRAPPER && !opts.clientDeclaresWrapperName) {
                   let pending = state.pendingWrapperToolCalls.get(toolCallId);
                   if (!pending) {
                     if (state.seenToolIds.has(toolCallId)) {
@@ -1090,6 +1148,8 @@ export class KiroExecutor extends BaseExecutor {
           // Flush any buffered tool arguments (partial-object payloads) before finishing —
           // idempotent against toolArgsEmitted if messageStopEvent already flushed them.
           flushBufferedToolArgs(state, controller, { responseId, created, model });
+          // A tool call that never received input still has `arguments: ""`; send "{}".
+          flushEmptyToolCallArgs(state, controller, { responseId, created, model });
 
           // Drain any pending inline-thinking tag fragment so we don't drop
           // trailing characters when the stream ends mid-tag (e.g. `<thi`).

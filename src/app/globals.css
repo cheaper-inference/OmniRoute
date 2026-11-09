@@ -1,30 +1,41 @@
 @import "tailwindcss" source(none);
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
-/* Keak type ramp — self-hosted (no CDN: Google Fonts is unreachable in some regions, #3695). Inter is the
-   UI family (tracking 0), Instrument Serif only for sparse large headings, IBM Plex Mono for code.
-   Static weights on purpose: the variable Inter package registers the family "Inter Variable",
-   which the kit's `--ci-font-ui: "Inter", …` never matches (spike finding). Mirrors the kit's
-   own Storybook preview. */
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
-@import "@fontsource/ibm-plex-mono/400.css";
-@import "@fontsource/ibm-plex-mono/500.css";
-@import "@fontsource/ibm-plex-mono/600.css";
-@import "@fontsource/ibm-plex-mono/700.css";
+/* Keak type ramp: the vendored kit self-hosts Switzer (packages/ui-kit/src/ci-fonts.css, imported by
+   ci-tokens.css) for UI, display and code text. No CDN (Google Fonts is unreachable in some regions,
+   #3695). */
 /* CI UI Kit — vendored snapshot (packages/ui-kit, see UPSTREAM.md). Declares the same
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
    wins over the preflight because of selector specificity. */
-@import "../../packages/ui-kit/src/ci-ui.css";
-/* react18-json-view (request/response JSON tree in RequestLoggerDetail) — imported here
-   instead of in the component so node:test / esbuild never see a .css import. */
-@import "react18-json-view/src/style.css";
-@import "react18-json-view/src/dark.css";
+@import "../../packages/ui-kit/src/ci-styles.css";
+/* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
+   no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
+   fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+/* Vazirmatn: Arabic-script typeface for the RTL locales (fa, ar, ur), which neither Switzer nor
+   Inter cover. Declared globally but only NAMED by the `html[dir="rtl"]` rule below, and its arabic
+   face carries a unicode-range, so an LTR page never fetches it (tests/unit/rtl-font-stack.test.ts). */
+@import "@fontsource/vazirmatn/400.css";
+@import "@fontsource/vazirmatn/500.css";
+@import "@fontsource/vazirmatn/600.css";
+@import "@fontsource/vazirmatn/700.css";
+
+:root,
+.ci-theme {
+  /* Switzer first; Inter only for the scripts Switzer lacks (see the @import above) */
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  /* Code, keys, IDs, JSON and logs need a real monospace face: kit 0.0.66 points --ci-font-mono at
+     Switzer, and upstream 0.0.76 adds --ci-font-code for exactly this, so the name is reused and
+     the next kit sync makes this line redundant instead of conflicting. */
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  /* the kit also exposes --font-mono at runtime (ci-tokens.css): keep raw var() users monospace */
+  --font-mono: var(--ci-font-code);
+}
 @source "../../node_modules/fumadocs-ui/css/generated/*.css";
 
 /* Keep Tailwind v4 from scanning the entire repository. The UI lives in the
@@ -51,13 +62,15 @@
   --desktop-safe-bottom: 0px;
   color-scheme: light;
 
-  /* Brand accent (lime) — the only accent; presets were retired (spec D4). */
+  /* Brand accent — the active palette's (Editions copper by default, Classic lime as the
+     option; src/shared/constants/appearancePalette.ts). Presets were retired (spec D4). */
   --color-primary: var(--ci-color-accent);
   --color-primary-hover: var(--ci-color-accent-hover);
-  /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): lime is a surface that
-     carries dark ink, never ink on light (lime-400 on the background ≈ 1.1:1). The kit has no
-     accent-ink token yet (pendência), so light uses its lime-800 (≈ 7.1:1); dark flips back
-     to the lime below. */
+  /* Primary as TEXT (`text-primary` via @theme's --text-color-primary): the accent is a
+     surface that carries dark ink, never ink on light (Classic lime-400 on the background
+     ≈ 1.1:1, Editions copper ≈ 1.8:1). The kit has no accent-ink token yet (pendência), so
+     Classic light uses its lime-800 (≈ 7.1:1) and dark flips back to the lime below; Editions
+     reads its own accent-active (block after the dark one). */
   --color-primary-ink: var(--ci-lime-800);
   --color-accent: var(--ci-color-accent);
   --color-accent-light: var(--ci-color-accent-surface-strong);
@@ -86,6 +99,10 @@
   --color-bg-primary: var(--ci-color-background);
   --color-bg-subtle: var(--ci-color-surface-subtle);
   --color-surface: var(--ci-color-surface);
+  /* Secondary/muted panel tints (`bg-surface-secondary/30`, `bg-muted/50`): kit subtle and
+     muted surfaces — the kit flips both under data-theme="dark". */
+  --color-surface-secondary: var(--ci-color-surface-subtle);
+  --color-muted: var(--ci-color-surface-muted);
   --color-card: var(--ci-color-surface);
   --color-sidebar: var(--ci-color-surface);
   --surface-2: var(--ci-color-surface-muted);
@@ -102,6 +119,26 @@
   --color-chart-3: var(--ci-chart-3);
   --color-chart-4: var(--ci-chart-4);
   --color-chart-5: var(--ci-chart-5);
+  --color-chart-6: var(--ci-chart-6);
+  --color-chart-7: var(--ci-chart-7);
+  --color-chart-8: var(--ci-chart-8);
+  /* Text-safe ink and opaque chip tint per chart token (the kit flips both in dark). */
+  --color-chart-1-ink: var(--ci-chart-1-ink);
+  --color-chart-2-ink: var(--ci-chart-2-ink);
+  --color-chart-3-ink: var(--ci-chart-3-ink);
+  --color-chart-4-ink: var(--ci-chart-4-ink);
+  --color-chart-5-ink: var(--ci-chart-5-ink);
+  --color-chart-6-ink: var(--ci-chart-6-ink);
+  --color-chart-7-ink: var(--ci-chart-7-ink);
+  --color-chart-8-ink: var(--ci-chart-8-ink);
+  --color-chart-1-subtle: var(--ci-chart-1-subtle);
+  --color-chart-2-subtle: var(--ci-chart-2-subtle);
+  --color-chart-3-subtle: var(--ci-chart-3-subtle);
+  --color-chart-4-subtle: var(--ci-chart-4-subtle);
+  --color-chart-5-subtle: var(--ci-chart-5-subtle);
+  --color-chart-6-subtle: var(--ci-chart-6-subtle);
+  --color-chart-7-subtle: var(--ci-chart-7-subtle);
+  --color-chart-8-subtle: var(--ci-chart-8-subtle);
 
   /* Fumadocs (/docs) */
   --color-fd-background: var(--ci-color-background);
@@ -136,10 +173,32 @@
   --table-header-bg: var(--ci-color-surface-muted);
 }
 
-/* Dark: lime reads on the dark background (≈ 17:1), so the primary ink is the accent itself.
-   Same `data-theme="dark"` hook the kit flips on. */
+/* Classic dark: lime reads on the dark background (≈ 17:1), so the primary ink is the accent
+   itself. Same `data-theme="dark"` hook the kit flips on. */
 :root[data-theme="dark"] {
   --color-primary-ink: var(--ci-color-accent);
+}
+
+/* Editions (default palette, packages/ui-kit/src/ci-editions.css): the primary ink is the kit's
+   --ci-color-accent-active — the deep copper #99562f in light (≈ 5.0:1 on the background) and
+   the copper accent #e5ac82 in dark (≈ 9.5:1), both flipped by the kit itself. `html:root[…]`
+   outranks the `:root[data-theme="dark"]` rule above, so Classic keeps its two values. */
+html:root[data-ci-appearance="editions"] {
+  --color-primary-ink: var(--ci-color-accent-active);
+}
+
+/* Inside a brand tint the kit moves secondary text to the brand ink, the only ink it guarantees on
+   an arbitrary tint. The alias above resolved on .ci-theme and would keep the neutral, so
+   `text-text-muted` is pointed back at the tinted value here. */
+.ci-brand-tint {
+  --color-text-muted: var(--ci-color-text-muted);
+}
+
+/* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
+   Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
+   tinted background, the canvas and the surface, so the alias is just the kit value. */
+:root {
+  --color-warning-ink: var(--ci-color-warning);
 }
 
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the
@@ -156,10 +215,12 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   /* `text-*` reads --text-color-* before --color-*: text-primary → readable ink, while
-     bg-/border-/ring-primary keep the lime above. */
+     bg-/border-/ring-primary keep the accent above. */
   --text-color-primary: var(--color-primary-ink);
-  /* --color-accent is the same kit lime (var(--ci-color-accent)), so text-accent gets the ink. */
+  /* --color-accent is the same kit accent (var(--ci-color-accent)), so text-accent gets the ink. */
   --text-color-accent: var(--color-primary-ink);
+  /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
+  --text-color-warning: var(--color-warning-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);
@@ -182,12 +243,37 @@
   --color-chart-3: var(--color-chart-3);
   --color-chart-4: var(--color-chart-4);
   --color-chart-5: var(--color-chart-5);
+  --color-chart-6: var(--color-chart-6);
+  --color-chart-7: var(--color-chart-7);
+  --color-chart-8: var(--color-chart-8);
+  --color-chart-1-ink: var(--color-chart-1-ink);
+  --color-chart-2-ink: var(--color-chart-2-ink);
+  --color-chart-3-ink: var(--color-chart-3-ink);
+  --color-chart-4-ink: var(--color-chart-4-ink);
+  --color-chart-5-ink: var(--color-chart-5-ink);
+  --color-chart-6-ink: var(--color-chart-6-ink);
+  --color-chart-7-ink: var(--color-chart-7-ink);
+  --color-chart-8-ink: var(--color-chart-8-ink);
+  --color-chart-1-subtle: var(--color-chart-1-subtle);
+  --color-chart-2-subtle: var(--color-chart-2-subtle);
+  --color-chart-3-subtle: var(--color-chart-3-subtle);
+  --color-chart-4-subtle: var(--color-chart-4-subtle);
+  --color-chart-5-subtle: var(--color-chart-5-subtle);
+  --color-chart-6-subtle: var(--color-chart-6-subtle);
+  --color-chart-7-subtle: var(--color-chart-7-subtle);
+  --color-chart-8-subtle: var(--color-chart-8-subtle);
 
   /* Auto-switch colors (use CSS variables from :root/.dark) */
   --color-bg: var(--color-bg);
   --color-bg-primary: var(--color-bg-primary);
+  /* bg-alt / muted / surface-secondary had a :root value but no @theme entry, so their
+     utilities (41× bg-bg-alt, bg-muted/50, bg-surface-secondary/30) generated nothing
+     (KEA-7886 P4 — tests/unit/design-kit-bridge.test.ts pins these three). */
+  --color-bg-alt: var(--color-bg-alt);
   --color-bg-subtle: var(--color-bg-subtle);
   --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-muted: var(--color-muted);
   --color-card: var(--color-card);
   --color-sidebar: var(--color-sidebar);
   --color-border: var(--color-border);
@@ -200,9 +286,9 @@
   --shadow-warm: var(--shadow-warm);
   --shadow-elevated: var(--shadow-elevated);
 
-  /* Keak type ramp (kit tokens): Inter / IBM Plex Mono / Instrument Serif (font-display) */
+  /* Keak type ramp (kit tokens): Switzer for sans and display; a monospace stack for code */
   --font-sans: var(--ci-font-ui);
-  --font-mono: var(--ci-font-mono);
+  --font-mono: var(--ci-font-code);
   --font-display: var(--ci-font-display);
 
   /* Nested surface (enables bg-surface-2) */
@@ -261,9 +347,8 @@ body.electron-macos {
   }
 }
 
-/* Selection — with fallback for browsers that don't support color-mix() */
+/* Selection — accent tint (color-mix() is baseline in every supported browser) */
 ::selection {
-  background-color: rgba(229, 77, 94, 0.22);
   background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
   color: var(--color-primary-ink);
 }
@@ -367,20 +452,6 @@ body.electron-macos {
   }
 }
 
-/* react18-json-view fold control: the SVG chevron itself is ~14px, too small
-   a touch target on mobile. Padding + a matching negative margin grows the
-   hit area without shifting sibling layout -- unlike the row-level icon this
-   replaces (see the reverted react-json-view-lite alignment attempt), this
-   click target is a trailing decoration appended after the object/array's
-   opening brace, not a leading element sibling keys align against, so
-   padding it here cannot reproduce that regression. */
-.jv-size-chevron {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 4px;
-  margin: -10px -4px;
-}
-
 /* Animations */
 @keyframes spin {
   from {
@@ -409,50 +480,6 @@ body.electron-macos {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes border-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 5px rgba(229, 77, 94, 0.3),
-      0 0 10px rgba(229, 77, 94, 0.2);
-    border-color: rgba(229, 77, 94, 0.5);
-  }
-  50% {
-    box-shadow:
-      0 0 10px rgba(229, 77, 94, 0.5),
-      0 0 20px rgba(229, 77, 94, 0.3);
-    border-color: rgba(229, 77, 94, 0.8);
-  }
-}
-
-.animate-border-glow {
-  animation: border-glow 2s ease-in-out infinite;
-}
-
-/* macOS Vibrancy/Blur Effect */
-.bg-vibrancy {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.dark .bg-vibrancy {
-  background: rgba(16, 20, 30, 0.72);
-}
-
-/* ── Mobile Layout Fixes (Issue #659) ── */
-@media (max-width: 768px) {
-  .ant-table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100vw;
-  }
-
-  .ant-table {
-    min-width: 600px; /* Prevent columns from crushing together */
-  }
-}
-
 /* Fix for native dropdown options visibility in dark mode */
 select option {
   background-color: var(--color-surface);
@@ -473,6 +500,34 @@ select option {
 /* ═══════════════════════════════════════════════════════════════
    RTL (Right-to-Left) Compatibility — fixes #7680
    ═══════════════════════════════════════════════════════════════ */
+/* Arabic-script typography: neither Switzer (Latin only) nor Inter has Arabic glyphs, so fa/ar/ur
+   used to fall back to whatever the OS had. Order is the same as on LTR pages with Vazirmatn added:
+   Switzer keeps Latin model ids and labels, Inter still catches the scripts Switzer lacks, and
+   Arabic script falls through to Vazirmatn. Redefined on `.ci-theme` too because the kit sets
+   `--ci-font-ui` there. Keep every Vazirmatn reference under `html[dir="rtl"]` — never `:lang()`,
+   which also matches the language switcher's native names on LTR pages.
+   Zero tracking: letter-spacing breaks Arabic-script joining, and kit controls and Tailwind
+   `tracking-*` set their own value instead of inheriting, so their tokens are reset here too. */
+html[dir="rtl"],
+html[dir="rtl"] .ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial,
+    sans-serif;
+  --font-sans: var(--ci-font-ui);
+  --ci-letter-spacing-display: 0;
+  --ci-letter-spacing-ui: 0;
+  --ci-letter-spacing-caps: 0;
+  --ci-type-heading-tracking: 0;
+  --ci-type-control-tracking: 0;
+  --ci-type-caption-tracking: 0;
+  --ci-type-metric-tracking: 0;
+  --tracking-tighter: 0;
+  --tracking-tight: 0;
+  --tracking-wide: 0;
+  --tracking-wider: 0;
+  --tracking-widest: 0;
+  letter-spacing: 0;
+}
 html[dir="rtl"] .text-left {
   text-align: start;
 }
@@ -786,116 +841,5 @@ html[dir="rtl"] :where(.react-flow) {
   }
   .orchestration-canvas .orch-edge-particle {
     display: none;
-  }
-}
-
-/* ── Adapter extensions (OmniRoute-side; never patch packages/ui-kit) ────────────────────── */
-@layer components {
-  /* Button variant="warning" (spec §3.6): kit has no warning button; outline + warning ink. */
-  .ci-button--warning {
-    color: var(--ci-color-warning);
-    border-color: var(--ci-color-warning);
-    background: var(--ci-color-warning-bg);
-  }
-  .ci-button--warning:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--ci-color-warning) 16%, var(--ci-color-warning-bg));
-  }
-  /* Badge status tones (spec §3.6): kit Badge has default/secondary/destructive/outline/live;
-     OmniRoute's success/warning/error/info/primary map to an outline badge with a tone. */
-  .ci-badge[data-tone="success"] {
-    color: var(--ci-color-success);
-    background: var(--ci-color-success-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="warning"] {
-    color: var(--ci-color-warning);
-    background: var(--ci-color-warning-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="danger"] {
-    color: var(--ci-color-danger);
-    background: var(--ci-color-danger-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="info"] {
-    color: var(--ci-color-info);
-    background: var(--ci-color-info-bg);
-    border-color: transparent;
-  }
-  .ci-badge[data-tone="primary"] {
-    color: var(--ci-color-accent-foreground);
-    background: var(--ci-color-accent-surface-strong);
-    border-color: transparent;
-  }
-  /* Dark: the surface is a 14 % lime tint over the dark background, so the near-black accent
-     foreground vanished ("8 features" on the translator, F4); the lime itself is the ink. */
-  :root[data-theme="dark"] .ci-badge[data-tone="primary"] {
-    color: var(--ci-color-accent);
-  }
-}
-
-/* === OmniRoute kit extensions: trilha C === */
-@layer components {
-  /* Native <select> fallback for callers that pass <option> children (Select adapter). */
-  .ci-select-native {
-    width: 100%;
-    height: var(--ci-control-height-lg);
-    /* logical: the chevron room follows the inline end, so RTL locales mirror it */
-    padding-block: 0;
-    padding-inline: 0.75rem 2rem;
-    border: var(--ci-border-default) solid var(--ci-field-border);
-    border-radius: var(--ci-radius-control);
-    background: var(--ci-field-bg);
-    color: var(--ci-field-fg);
-    font: inherit;
-    font-size: var(--ci-font-size-sm);
-  }
-  .ci-select-native--sm {
-    height: var(--ci-control-height-md);
-    font-size: var(--ci-font-size-sm);
-  }
-  .ci-select-native--error {
-    border-color: var(--ci-color-danger);
-  }
-  .ci-select-native:focus-visible {
-    outline: 2px solid var(--ci-color-focus-ring);
-    outline-offset: 1px;
-  }
-  .ci-select-native:disabled {
-    opacity: 0.48;
-    cursor: not-allowed;
-  }
-
-  /* Toggle size="xs"|"sm" (Toggle adapter): a smaller kit switch. The class sits on the kit
-     root — the <label> row, or the bare control when there is no label. Track 2.25×1.25rem,
-     thumb 0.875rem; travel = 2.25 − 0.875 − 2×0.125 − 2px border ≈ 1rem. */
-  .ci-switch--compact .ci-switch__track {
-    width: 2.25rem;
-    height: 1.25rem;
-  }
-  .ci-switch--compact .ci-switch__thumb {
-    top: 0.125rem;
-    left: 0.125rem;
-    width: 0.875rem;
-    height: 0.875rem;
-  }
-  .ci-switch--compact .ci-switch__input:checked + .ci-switch__track .ci-switch__thumb {
-    transform: translateX(1rem);
-  }
-
-  /* Kit Switch hit target (Toggle adapter): the kit keeps the native input as a 1px box under
-     the track, so a switch without a <label> row (Toggle with only ariaLabel) could not be
-     clicked at all, and the track intercepted pointer hit-tests (Playwright clicks). Stretch the
-     transparent input over the control so the visible track is the input. */
-  .ci-switch__control > .ci-switch__input {
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    cursor: pointer;
-  }
-  .ci-switch__control > .ci-switch__input:disabled {
-    cursor: not-allowed;
   }
 }

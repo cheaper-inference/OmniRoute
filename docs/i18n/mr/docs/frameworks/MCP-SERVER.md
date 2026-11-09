@@ -4,63 +4,58 @@
 
 ---
 
-> राउटिंग, कॅशे, कॉम्प्रेशन, मेमरी, स्किल्स, प्रॉक्सी, पूल, Radar आणि कॉन्टेक्स्ट सोर्स ऑपरेशन्समध्ये एकूण 110 टूल्स असलेला Model Context Protocol सर्व्हर.
+> रूटिंग, कॅशे, कॉम्प्रेशन, मेमरी, स्किल्स, प्रॉक्सी, पूल, रडार आणि संदर्भ स्रोत ऑपरेशन्समध्ये 110 टूल्ससह मॉडेल कॉन्टेक्स्ट प्रोटोकॉल सर्व्हर.
 >
-> सत्याचा अधिकृत स्रोत: `open-sse/mcp-server/server.ts` हा `countUniqueMcpTools()` वापरून **110 अद्वितीय टूल्स** मोजतो: 45 प्रमाणित व्याख्या (सहा CCR लाइफसायकल टूल्स, एजंट-स्किल्स त्रिकूट, `omniroute_radar_catalog` आणि `omniroute_x_search` यांसह), तसेच मेमरी (3), स्किल्स (4), GitHub स्किल्स (3), पूल (6), गेमिफिकेशन (8), प्लगइन्स (8), Notion (6), Obsidian (22), स्थानिक कॉर्पस (3) आणि केवळ RTK साठी असलेली दोन कॉम्प्रेशन टूल्स.
+> सत्याचा स्रोत: `open-sse/mcp-server/server.ts` computes** 110 अद्वितीय साधने** `countUniqueMcpTools()` सह : 45 कॅनोनिकल व्याख्या (सहा CCR लाइफसायकल टूल्ससह, एजंट-कौशल्य त्रिकूट, `omniroute_radar_catalog`, आणि `omniroute_x_search`), अधिक मेमरी (3), कौशल्ये (4), GitHub कौशल्ये (3), पूल (6), गेमिफिकेशन (8), प्लगइन (8), Notion (6), स्थानिक (6), Obsidian (6), स्थानिक RTK-केवळ कॉम्प्रेशन टूल्स.
 
 ## स्थापना
 
-OmniRoute MCP अंगभूत आहे. तो याप्रकारे सुरू करा:
+OmniRoute MCP अंगभूत आहे. यासह प्रारंभ करा:
 
 ```bash
 omniroute --mcp
 ```
 
-किंवा open-sse ट्रान्सपोर्टद्वारे:
+किंवा ओपन-एसएसई वाहतुकीद्वारे:
 
 ```bash
-# HTTP स्ट्रीम करण्यायोग्य ट्रान्सपोर्ट (पोर्ट 20130)
-omniroute --dev  # MCP /mcp एंडपॉइंटवर आपोआप सुरू होतो
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP ट्रान्सपोर्ट्स (`sse` / `streamable-http`, जे डॅशबोर्ड सर्व्हरद्वारे प्रक्रियेअंतर्गत उपलब्ध केले जातात) डीफॉल्टनुसार
-बंद असतात आणि यापूर्वी ते फक्त `/dashboard/mcp` पृष्ठावरून टॉगल करता येत होते. v3.8.51 पासून
-CLI मध्येही समान सुविधा उपलब्ध आहेत:
+HTTP वाहतूक (`sse` / `streamable-http`, डॅशबोर्ड सर्व्हरद्वारे प्रक्रियेत सेवा) डीफॉल्टनुसार बंद आहेत आणि पूर्वी फक्त `/dashboard/mcp` पृष्ठावरून टॉगल करण्यायोग्य होते. v3.8.51 नुसार CLI मध्ये समानता आहे:
 
 ```bash
-omniroute mcp status                                  # सक्षम/ऑनलाइन, ट्रान्सपोर्ट, टूल्सची संख्या
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # सक्रिय sse/streamable-http सत्रे रीसेट करतो
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` हे `/api/settings` द्वारे डॅशबोर्ड ज्या `mcpEnabled` (आणि पर्यायाने `mcpTransport`) सेटिंगला
-टॉगल करतो, त्याच सेटिंगवर PATCH करतात. `mcp restart` हे `POST /api/mcp/restart` कॉल करते: ते
-सक्रिय `sse`/`streamable-http` सत्रे बंद करते, जेणेकरून पुढील विनंती स्वच्छपणे पुन्हा इनिशियलाइझ होईल; MCP अक्षम असल्यास
-ते `409` आणि `stdio` ट्रान्सपोर्टसाठी `501` परत करते (stdio क्लायंट्स त्यांच्या स्वतःच्या
-सबप्रोसेसचे नियंत्रण करतात — रीस्टार्ट करण्यासाठी प्रक्रियेअंतर्गत हँडल उपलब्ध नसते).
+`mcp enable`/`mcp disable` PATCH समान `mcpEnabled` (आणि पर्यायाने `mcpTransport`) `/api/settings` द्वारे डॅशबोर्ड टॉगल सेट करणे. `mcp restart` `POST /api/mcp/restart` कॉल करते : ते सक्रिय `sse`/`streamable-http` सत्रे काढून टाकते त्यामुळे पुढील विनंती स्वच्छपणे पुन्हा सुरू होते, MCP अक्षम असल्यास `409` परत करते आणि `stdio` वाहतुकीसाठी `501` (stdio क्लायंटचे स्वतःचे उपप्रक्रिया — रीस्टार्ट करण्यासाठी कोणतेही इन-प्रोसेस हँडल नसते).
 
-## ट्रान्सपोर्ट्स
+## वाहतूक
 
-MCP सर्व्हर तीन ट्रान्सपोर्ट्स उपलब्ध करून देतो आणि त्या सर्वांना समान `createMcpServer()` फॅक्टरीचा आधार आहे:
+MCP सर्व्हर तीन वाहतूक उघड करतो, सर्व समान `createMcpServer()` कारखान्याद्वारे समर्थित आहेत:
 
-| ट्रान्सपोर्ट      | कुठे                                           | कधी वापरावे                                                |
-| :---------------- | :--------------------------------------------- | :--------------------------------------------------------- |
-| `stdio`           | `open-sse/mcp-server/server.ts`                | IDE एकत्रीकरणे (Claude Desktop, Cursor इत्यादी)            |
-| `sse`             | `POST/GET /api/mcp/sse` द्वारे `httpTransport` | इव्हेंट स्ट्रीमची आवश्यकता असलेले ब्राउझर/एजंट क्लायंट्स   |
-| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`              | एकाधिक सत्रे असलेले HTTP क्लायंट्स (`mcp-session-id` हेडर) |
+| वाहतूक            | कुठे                                           | कधी वापरायचे                                                 |
+| :---------------- | :--------------------------------------------- | :----------------------------------------------------------- |
+| `stdio`           | `open-sse/mcp-server/server.ts`                | IDE एकत्रीकरण (Claude डेस्कटॉप, Cursor इ.)                   |
+| `sse`             | `POST/GET /api/mcp/sse` द्वारे `httpTransport` | Browser/agent क्लायंट ज्यांना इव्हेंट प्रवाहाची आवश्यकता आहे |
+| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`              | मल्टी-सेशन HTTP क्लायंट (`mcp-session-id` शीर्षलेख)          |
 
-सक्रिय HTTP ट्रान्सपोर्ट (`sse` किंवा `streamable-http`) `mcpTransport` सेटिंगद्वारे निवडला जातो. ट्रान्सपोर्ट बदलल्यास दुसऱ्या ट्रान्सपोर्टवरील विद्यमान सत्रे बंद होतात.
+सक्रिय HTTP वाहतूक (`sse` किंवा `streamable-http`) `mcpTransport` सेटिंगद्वारे निवडली जाते. ट्रान्सपोर्ट स्विच केल्याने इतर ट्रान्सपोर्टवरील विद्यमान सत्रे बंद होतात.
 
-### दूरस्थ प्रवेश (manage-स्कोप बायपास)
+### रिमोट ऍक्सेस (मॅनेज-स्कोप बायपास)
 
-`/api/mcp/*` हे LOCAL_ONLY स्तरात (`src/server/authz/routeGuard.ts`) आहे — डीफॉल्टनुसार फक्त लूपबॅक होस्ट्स (`localhost`, `127.0.0.1`, `::1`) त्यापर्यंत पोहोचू शकतात. v3.8.2 पासून, लूपबॅकबाहेरील क्लायंट्सनी `manage` स्कोप असलेली की वापरून `Authorization: Bearer <api-key>` सादर केल्यास ते कनेक्ट होऊ शकतात. टनेल, रिव्हर्स प्रॉक्सी किंवा सार्वजनिक होस्टनेमद्वारे दूरस्थ MCP सर्व्हरपर्यंत पोहोचण्याचा हा एकमेव मार्ग आहे.
+`/api/mcp/*` LOCAL_ONLY टियरमध्ये आहे (`src/server/authz/routeGuard.ts`) — बाय डीफॉल्ट फक्त लूपबॅक होस्ट (`localhost`, `127.0.0.1`, `::1`) त्यावर पोहोचू शकतात. v3.8.2 पासून, नॉन-लूपबॅक क्लायंट कनेक्ट करू शकतात जर त्यांनी `Authorization: Bearer <api-key>` सादर केला असेल ज्याची की `manage` स्कोप असेल. सुरंग, रिव्हर्स प्रॉक्सी किंवा सार्वजनिक होस्टनावाद्वारे रिमोट MCP सर्व्हरवर पोहोचण्याचा हा एकमेव मार्ग आहे.
 
 ```bash
-# manage स्कोप मंजूर करा: डॅशबोर्डचे API Keys पृष्ठ उघडा आणि कीवरील
-# "Management Access" टॉगल करा किंवा तयार करताना POST scopes:["manage"] वापरा.
+# Grant manage scope: open the dashboard API Keys page and toggle
+# "Management Access" on the key, or POST scopes:["manage"] when creating.
 
-# त्यानंतर दूरस्थ MCP क्लायंटवरून कनेक्ट करा:
+# Then connect from a remote MCP client:
 curl -i \
   -H "Host: your-public-host.example" \
   -H "Authorization: Bearer sk-…" \
@@ -70,315 +65,277 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-`manage` स्कोप नसलेली की (किंवा Bearer नसल्यास) `403 LOCAL_ONLY` परत करते. शेजारील प्रीफिक्स `/api/cli-tools/runtime/*` हेतुपुरस्सर बायपास करता येत नाही — [Route Guard स्तर — Manage-स्कोप अपवाद](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) पहा.
+व्यवस्थापित न केलेली की (किंवा वाहक नाही) `403 LOCAL_ONLY` परत करते. सिबलिंग उपसर्ग `/api/cli-tools/runtime/*` हे हेतुपुरस्सर NOT बायपास करण्यायोग्य — आहे [रूट गार्ड टियर्स — मॅनेज-स्कोप कार्व्ह-आउट](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) पहा.
+
+### मूळ प्रमाणीकरण
+
+प्रमाणीकरणानंतर, `/api/mcp/*` — वाहतूक आणि व्यवस्थापन मार्ग जसे की `status`, `tools`, `audit` आणि `restart` —, कॉलर काहीही असो (API की, CLI टोकन, डॅशबोर्ड सत्र, किंवा अनामित लूपबॅकसह) `Origin` हेडर प्रमाणित केले जाते. हे DNS-रीबाइंडिंग संरक्षण आहे जे MCP स्ट्रीम करण्यायोग्य HTTP स्पेकसाठी आवश्यक आहे.
+
+- **`Origin` शीर्षलेख नाही** → परवानगी आहे. OmniRoute CLI, SDK आणि IDE क्लायंट एक पाठवत नाहीत.
+- **परवानगी `Origin`** → `localhost`, `127.0.0.1` किंवा `[::1]` कोणत्याही पोर्टवर, किंवा OmniRoute चे स्वतःचे सार्वजनिक मूळ: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, विश्वासार्ह रिव्हर्स प्रॉक्सीचे फॉरवर्ड केलेले मूळ (`OMNIROUTE_TRUST_PROXY`, केवळ बेस URL सेट केलेले नसताना), किंवा थेट loopback/LAN IP. केवळ `Host` शीर्षलेख कधीही मूळ विश्वासू बनवत नाही.
+- **`null` सह इतर कोणतेही `Origin`** JSON-RPC त्रुटी मुख्य भागासह → `403` : `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. वैध CSRF टोकन सादर करणारे डॅशबोर्ड सत्र अजूनही स्वीकारले जाते, जसे की इतर डॅशबोर्ड लेखनासाठी.
+
+रिव्हर्स प्रॉक्सीच्या मागे सर्व्ह केलेल्या ब्राउझर MCP क्लायंटला `OMNIROUTE_PUBLIC_BASE_URL` आवश्यक आहे; इतर उत्पत्तीसाठी परवानगी-सूची नाही. CORS preflight (`OPTIONS`) मूळ-तपासलेले नाही; पुढील विनंती आहे.
 
 ## IDE कॉन्फिगरेशन
 
-Claude Desktop, Cursor, Cline आणि सुसंगत MCP क्लायंटच्या सेटअपसाठी [MCP क्लायंट कॉन्फिगरेशन](../guides/SETUP_GUIDE.md#mcp-client-configuration) पहा.
+Claude डेस्कटॉप, Cursor, Cline आणि सुसंगत MCP क्लायंट सेटअपसाठी [MCP क्लायंट कॉन्फिगरेशन](../guides/SETUP_GUIDE.md#mcp-client-configuration) पहा.
 
 ---
 
-## अत्यावश्यक साधने (14) — टप्पा 1
+## आवश्यक साधने (14) — फेज 1
 
-| साधन                            | व्याप्ती              | वर्णन                                                                                                                               |
-| :------------------------------ | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_get_health`          | `read:health`         | अपटाइम, मेमरी, सर्किट ब्रेकर्स, दर मर्यादा, कॅशेची आकडेवारी                                                                         |
-| `omniroute_list_combos`         | `read:combos`         | धोरणांसह कॉन्फिगर केलेले सर्व कॉम्बो (पर्यायी मेट्रिक्स)                                                                            |
-| `omniroute_get_combo_metrics`   | `read:combos`         | विशिष्ट कॉम्बोसाठी कार्यप्रदर्शन मेट्रिक्स                                                                                          |
-| `omniroute_switch_combo`        | `write:combos`        | कॉम्बो सक्रिय किंवा निष्क्रिय करा                                                                                                   |
-| `omniroute_create_combo`        | `write:combos`        | विद्यमान कॉम्बो API द्वारे प्रमाणीकरण केलेला कॉम्बो तयार करा                                                                        |
-| `omniroute_check_quota`         | `read:quota`          | वापरलेला/एकूण कोटा, उर्वरित टक्केवारी, रीसेट वेळ, टोकनची स्थिती                                                                     |
-| `omniroute_route_request`       | `execute:completions` | OmniRoute राउटिंगद्वारे चॅट कम्प्लिशन पाठवा                                                                                         |
-| `omniroute_cost_report`         | `read:usage`          | कालावधीनुसार खर्चाचा अहवाल (सत्र/दिवस/आठवडा/महिना)                                                                                  |
-| `omniroute_list_models_catalog` | `read:models`         | क्षमता, स्थिती आणि किंमतींसह संपूर्ण मॉडेल कॅटलॉग                                                                                   |
-| `omniroute_radar_catalog`       | `read:radar`          | स्थानिक स्वाक्षरीकृत Radar कॅटलॉग; पर्यायी प्रदाता/फॅमिली फिल्टर्स                                                                  |
-| `omniroute_tool_search`         | `read:tools`          | नोंदणीकृत MCP कॅटलॉगमधून साधने शोधा                                                                                                 |
-| `omniroute_web_search`          | `execute:search`      | कॉन्फिगर केलेल्या शोध प्रदात्यांद्वारे वेब शोध. X/Twitter नाही.                                                                     |
-| `omniroute_x_search`            | `execute:search`      | xAI/SuperGrok द्वारे X वर शोधा किंवा Xquik API परिणामांसाठी `xquik-search` निवडा. निवडलेल्या बॅकएंडसाठी क्रेडेन्शियल्स आवश्यक आहेत. |
-| `omniroute_web_fetch`           | `execute:search`      | कॉन्फिगर केलेल्या फेच प्रदात्यांद्वारे वेब सामग्री मिळवा                                                                            |
+| साधन                            | व्याप्ती              | वर्णन                                                                                                                             |
+| :------------------------------ | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_get_health`          | `read:health`         | अपटाइम, मेमरी, सर्किट ब्रेकर्स, दर मर्यादा, कॅशे आकडेवारी                                                                         |
+| `omniroute_list_combos`         | `read:combos`         | धोरणांसह सर्व कॉन्फिगर केलेले कॉम्बो (पर्यायी मेट्रिक्स)                                                                          |
+| `omniroute_get_combo_metrics`   | `read:combos`         | विशिष्ट कॉम्बोसाठी कार्यप्रदर्शन मेट्रिक्स                                                                                        |
+| `omniroute_switch_combo`        | `write:combos`        | कॉम्बो सक्रिय किंवा निष्क्रिय करा                                                                                                 |
+| `omniroute_create_combo`        | `write:combos`        | विद्यमान कॉम्बो API द्वारे प्रमाणित कॉम्बो तयार करा                                                                               |
+| `omniroute_check_quota`         | `read:quota`          | कोटा used/total, टक्के शिल्लक, रीसेट वेळ, टोकन आरोग्य                                                                             |
+| `omniroute_route_request`       | `execute:completions` | OmniRoute रूटिंगद्वारे चॅट पूर्ण करण्यासाठी पाठवा                                                                                 |
+| `omniroute_cost_report`         | `read:usage`          | कालावधीनुसार खर्च अहवाल (session/day/week/month)                                                                                  |
+| `omniroute_list_models_catalog` | `read:models`         | क्षमता, स्थिती, किंमतीसह पूर्ण मॉडेल कॅटलॉग                                                                                       |
+| `omniroute_radar_catalog`       | `read:radar`          | स्थानिक स्वाक्षरी केलेले रडार कॅटलॉग; पर्यायी provider/family फिल्टर                                                              |
+| `omniroute_tool_search`         | `read:tools`          | नोंदणीकृत MCP कॅटलॉगमधून साधने शोधा                                                                                               |
+| `omniroute_web_search`          | `execute:search`      | कॉन्फिगर केलेल्या शोध प्रदात्यांद्वारे वेब शोध. X/Twitter. नाही                                                                   |
+| `omniroute_x_search`            | `execute:search`      | xAI/SuperGrok द्वारे X शोधा, किंवा Xquik API परिणामांसाठी `xquik-search` निवडा. निवडलेल्या बॅकएंडसाठी क्रेडेन्शियल्स आवश्यक आहेत. |
+| `omniroute_web_fetch`           | `execute:search`      | कॉन्फिगर केलेल्या फेच प्रदात्यांद्वारे वेब सामग्री मिळवा                                                                          |
 
-## प्रगत साधने (11) — टप्पा 2
+## प्रगत साधने (11) — फेज 2
 
-| साधन                               | व्याप्ती                             | वर्णन                                                                                                    |
-| :--------------------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | फॉलबॅक ट्रीसह ड्राय-रन रूटिंग सिम्युलेशन                                                                 |
-| `omniroute_set_budget_guard`       | `write:budget`                       | कार्यक्षमता कमी करणे/ब्लॉक करणे/सूचना देणे या कृतींसह सत्राचे बजेट                                       |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | रनटाइममध्ये कॉम्बो धोरण अद्ययावत करा (प्राधान्य/भारित/स्वयंचलित/इत्यादी)                                 |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | `aggressive` / `balanced` / `conservative` पूर्वनियोजित लवचिकता संरचना लागू करा                          |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | वास्तविक अपस्ट्रीम कॉल वापरून कॉम्बोमधील प्रत्येक प्रदात्याची थेट चाचणी करा                              |
-| `omniroute_get_provider_metrics`   | `read:health`                        | p50/p95/p99 विलंब आणि सर्किट ब्रेकर स्थितीसह प्रत्येक प्रदात्याची मेट्रिक्स                              |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | बजेट/विलंब मर्यादांसह कार्याच्या प्रकारानुसार कॉम्बोची शिफारस करा                                        |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | विनंती एखाद्या प्रदात्याकडे का रूट केली गेली हे स्पष्ट करा (स्कोअरिंग घटक + फॉलबॅक)                      |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | संपूर्ण सत्र स्नॅपशॉट: खर्च, टोकन्स, प्रमुख मॉडेल्स/प्रदाते, त्रुटी, बजेट गार्ड                          |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | तुटलेले कॉम्बो संदर्भ/अनाथ पंक्ती यांसारख्या डेटाबेस विसंगतींचे निदान (आणि पर्यायाने स्वयंचलित दुरुस्ती) |
-| `omniroute_sync_pricing`           | `pricing:write`                      | बाह्य स्रोतांमधून (LiteLLM) किंमत डेटा समक्रमित करा; `dryRun` समर्थित आहे                                |
+| साधन                               | व्याप्ती                             | वर्णन                                                                                                      |
+| :--------------------------------- | :----------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | फॉलबॅक ट्रीसह ड्राय-रन रूटिंग सिम्युलेशन                                                                   |
+| `omniroute_set_budget_guard`       | `write:budget`                       | degrade/block/alert कृतीसह सत्राचे बजेट                                                                    |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | रनटाइमवर कॉम्बो स्ट्रॅटेजी अपडेट करा (priority/weighted/auto/etc.)                                         |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | `aggressive` / `balanced` / `conservative` लवचिकता प्रीसेट लागू करा                                        |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | वास्तविक अपस्ट्रीम कॉल वापरून कॉम्बोमधील प्रत्येक प्रदात्याची थेट चाचणी                                    |
+| `omniroute_get_provider_metrics`   | `read:health`                        | p50/p95/p99 विलंबता आणि सर्किट ब्रेकर स्थितीसह प्रति-प्रदाता मेट्रिक्स                                     |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | budget/latency मर्यादांसह कार्य प्रकारानुसार कॉम्बोची शिफारस करा                                           |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | प्रदात्याकडे विनंती का पाठवली गेली ते स्पष्ट करा (स्कोअरिंग घटक + फॉलबॅक)                                  |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | पूर्ण सत्र स्नॅपशॉट: खर्च, टोकन, शीर्ष models/providers, त्रुटी, बजेट गार्ड                                |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | तुटलेल्या कॉम्बो रेफ / अनाथ पंक्ती सारख्या डेटाबेस ड्रिफ्टचे निदान (आणि वैकल्पिकरित्या स्वयं-दुरुस्ती) करा |
+| `omniroute_sync_pricing`           | `pricing:write`                      | बाह्य स्त्रोतांकडून किंमत डेटा समक्रमित करा (LiteLLM); `dryRun` समर्थन करते                                |
 
-## कॅशे साधने (2)
+## कॅशे टूल्स (2)
 
 | साधन                    | व्याप्ती      | वर्णन                                                     |
 | :---------------------- | :------------ | :-------------------------------------------------------- |
-| `omniroute_cache_stats` | `read:cache`  | सिमॅंटिक कॅशे, प्रॉम्प्ट-कॅशे आणि आयडेम्पोटन्सी आकडेवारी  |
-| `omniroute_cache_flush` | `write:cache` | जागतिक स्तरावर किंवा स्वाक्षरी/मॉडेलनुसार कॅशे रिकामी करा |
+| `omniroute_cache_stats` | `read:cache`  | सिमेंटिक कॅशे, प्रॉम्प्ट-कॅशे आणि इडेम्पोटेन्सी आकडेवारी  |
+| `omniroute_cache_flush` | `write:cache` | जागतिक स्तरावर किंवा signature/model द्वारे कॅशे फ्लश करा |
 
-## संपीडन साधने (13)
+## कॉम्प्रेशन टूल्स (१३)
 
-| साधन                                | व्याप्ती            | वर्णन                                                                                                        |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | संपीडन सेटिंग्ज, विश्लेषण सारांश आणि कॅशे-जागरूक आकडेवारी (`analytics.mcpDescriptionCompression` मेटाडेटासह) |
-| `omniroute_compression_configure`   | `write:compression` | संपीडन मोड, थ्रेशोल्ड, लक्ष्य गुणोत्तर, सिस्टम-प्रॉम्प्ट जतन आणि MCP वर्णन संपीडन टॉगल कॉन्फिगर करा          |
-| `omniroute_set_compression_engine`  | `write:compression` | सक्रिय इंजिन (off/caveman/rtk/stacked) आणि Caveman/RTK तीव्रता निवडा                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | नाव दिलेले संपीडन कॉम्बो आणि त्यांच्या इंजिन पाइपलाइनची सूची दाखवा                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | संपीडन कॉम्बो आणि इंजिननुसार गटबद्ध केलेले विश्लेषण                                                          |
-| `omniroute_ccr_store`               | `write:compression` | कॉलर-विलग सामग्री मर्यादित इन-मेमरी CCR स्टोअरमध्ये साठवा आणि मार्करसह `ccr://` संदर्भ परत करा               |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्णपणे किंवा शीर्ष, शेवट, ओळी, grep आणि आकडेवारी मोडसह पुनर्प्राप्त करा                        |
-| `omniroute_ccr_inspect`             | `read:compression`  | सामग्री परत न करता कॉलरच्या मालकीच्या CCR मेटाडेटाची तपासणी करा                                              |
-| `omniroute_ccr_list`                | `read:compression`  | कॉलरच्या मालकीच्या CCR ब्लॉक्ससाठी पृष्ठांकित मेटाडेटाची सूची दाखवा                                          |
-| `omniroute_ccr_delete`              | `write:compression` | कॉलरच्या मालकीचा CCR ब्लॉक हटवा                                                                              |
-| `omniroute_ccr_stats`               | `read:compression`  | कॉलर-व्याप्त मेमरी वापर, जीवनचक्र मोजमाप आणि स्टोअर मर्यादा नोंदवा                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | संमती दिलेल्या RTK आउटपुट नमुन्यांमधील वारंवार येणारा नॉइज शोधा                                              |
-| `omniroute_rtk_learn`               | `read:compression`  | संमती दिलेल्या नमुन्यांपासून पुनरावलोकन करता येणारा RTK फिल्टर मसुदा तयार करा                                |
+| साधन                                | व्याप्ती            | वर्णन                                                                                                                       |
+| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | कम्प्रेशन सेटिंग्ज, विश्लेषण सारांश आणि कॅशे-जागरूक आकडेवारी ( `analytics.mcpDescriptionCompression` मेटाडेटा समाविष्ट आहे) |
+| `omniroute_compression_configure`   | `write:compression` | कॉम्प्रेशन मोड, थ्रेशोल्ड, लक्ष्य प्रमाण, सिस्टम-प्रॉम्प्ट संरक्षण, MCP वर्णन कॉम्प्रेशन टॉगल कॉन्फिगर करा                  |
+| `omniroute_set_compression_engine`  | `write:compression` | सक्रिय इंजिन (off/caveman/rtk/stacked) आणि Caveman/RTK तीव्रता निवडा                                                        |
+| `omniroute_list_compression_combos` | `read:compression`  | कॉम्प्रेशन कॉम्बो आणि त्यांच्या इंजिन पाइपलाइन नावाची यादी करा                                                              |
+| `omniroute_compression_combo_stats` | `read:compression`  | कॉम्प्रेशन कॉम्बो आणि इंजिनद्वारे गटबद्ध केलेले विश्लेषण                                                                    |
+| `omniroute_ccr_store`               | `write:compression` | कॉलर-पृथक सामग्री बाउंडेड इन-मेमरी CCR स्टोअरमध्ये संचयित करा आणि मार्कर अधिक `ccr://` संदर्भ परत करा                       |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्ण किंवा डोके, शेपटी, रेषा, grep आणि आकडेवारी मोडसह पुनर्प्राप्त करा                                         |
+| `omniroute_ccr_inspect`             | `read:compression`  | सामग्री परत न करता कॉलरच्या मालकीच्या CCR मेटाडेटाची तपासणी करा                                                             |
+| `omniroute_ccr_list`                | `read:compression`  | कॉलरच्या मालकीच्या CCR ब्लॉक्ससाठी पृष्ठांकित मेटाडेटा सूचीबद्ध करा                                                         |
+| `omniroute_ccr_delete`              | `write:compression` | कॉलरच्या मालकीचा CCR ब्लॉक हटवा                                                                                             |
+| `omniroute_ccr_stats`               | `read:compression`  | कॉलर-स्कोप्ड मेमरी वापर, लाइफसायकल काउंटर आणि स्टोअर मर्यादा नोंदवा                                                         |
+| `omniroute_rtk_discover`            | `read:compression`  | RTK आउटपुट नमुन्यांमध्ये आवर्ती आवाज शोधा                                                                                   |
+| `omniroute_rtk_learn`               | `read:compression`  | निवडलेल्या नमुन्यांमधून पुनरावलोकन करण्यायोग्य RTK फिल्टर मसुदा तयार करा                                                    |
 
-CCR नोंदी केवळ इन-मेमरी असतात आणि रीस्टार्ट केल्यावर अदृश्य होतात. प्रत्येक ब्लॉकची मर्यादा 2 MiB, प्रत्येक
-प्रिन्सिपलची मर्यादा 16 MiB आणि जागतिक स्टोअरची मर्यादा 64 MiB आहे. नोंदींसाठी डीफॉल्ट TTL 24 तासांचा असतो (कमाल
-सात दिवस). संपूर्ण MCP पुनर्प्राप्ती 256 KiB पर्यंत मर्यादित आहे; मोठे ब्लॉक्स श्रेणीबद्ध आणि grep मोडद्वारे
-उपलब्ध राहतात. स्टोरेज, पुनर्प्राप्ती, सूचीकरण, तपासणी, हटवणे आणि आकडेवारी हे प्रमाणित API-key प्रिन्सिपलनुसार विलग केलेले
-असतात. ऑडिट नोंदींमध्ये हॅश आणि आकाराचे मेटाडेटा असतात, सामग्री कधीही नसते.
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status`, MCP वर्णन संक्षेपणाचा अहवाल
-`analytics.mcpDescriptionCompression` अंतर्गत स्वतंत्रपणे देते. ही मूल्ये MCP मध्ये सूचीबद्ध करता येणाऱ्या
-वर्णनांसाठी (`tools`, `prompts`, `resources`, आणि `resourceTemplates`) मेटाडेटा-आकाराची अनुमाने आहेत; ती प्रदाता वापराच्या
-पावत्या नाहीत आणि त्यांना `source: "mcp_metadata_estimate"` असे चिन्हांकित केलेले आहे.
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` अंतर्गत स्वतंत्रपणे MCP वर्णन कॉम्प्रेशनचा अहवाल देतो. ती मूल्ये MCP सूचीबद्ध करण्यायोग्य वर्णनांसाठी मेटाडेटा-आकार अंदाज आहेत (`tools`, `prompts`, `resources`, आणि `resourceTemplates`); त्या प्रदाता वापराच्या पावत्या नाहीत आणि `source: "mcp_metadata_estimate"` ने चिन्हांकित केल्या आहेत.
 
 ### MCP प्रवेशयोग्यता ट्री फिल्टर (v3.8.0)
 
-वरील संक्षेपण साधनांपासून स्वतंत्रपणे, OmniRoute मध्ये कार्यवाही-पश्चात फिल्टर समाविष्ट आहे, जो MCP ब्राउझर/प्रवेशयोग्यता साधनांचे **साधन परिणाम** एजंटकडे परत पाठवण्यापूर्वी संक्षिप्त करतो. हा फिल्टर स्वतः साधन नाही — तपशीलवार प्रवेशयोग्यता-ट्री किंवा ब्राउझर-स्नॅपशॉट मजकूर (≥2000 वर्ण) असलेल्या कोणत्याही साधन परिणामावर तो पारदर्शकपणे चालतो.
+वरील कॉम्प्रेशन टूल्सपासून वेगळे, OmniRoute मध्ये पोस्ट-एक्सिक्युशन फिल्टर समाविष्ट आहे जे कॉम्प्रेस करते** साधन परिणाम** MCP browser/accessibility टूल्स एजंटला परत करण्याआधी. हे फिल्टर स्वतः एक साधन — नाही ते कोणत्याही साधन परिणामांवर पारदर्शकपणे चालते ज्यामध्ये वर्बोज ऍक्सेसिबिलिटी-ट्री किंवा ब्राउझर-स्नॅपशॉट मजकूर (≥ 2000 वर्ण) असतो.
 
-प्रमुख वर्तन:
+मुख्य वर्तन:
 
-- ≥30 सलग पुनरावृत्त सिब्लिंग ओळींना सुरुवात + शेवट अशा सारांशात संक्षिप्त करतो
-- Playwright/संगणक-वापरासाठी आवश्यक `[ref=eXX]` अँकर जतन करतो
-- अतिमोठा मजकूर (>50,000 वर्ण) नेव्हिगेशन सूचनेसह सक्तीने कापतो
-- अपेक्षित बचत: ब्राउझर स्नॅपशॉट पेलोडवर **60–80%**
+- हेड + टेल सारांश मध्ये ≥ 30 सलग पुनरावृत्ती झालेल्या भावंड ओळी कोलॅप्स करते
+- Playwright/computer-use ला आवश्यक असलेले `[ref=eXX]` अँकर संरक्षित करते
+- नेव्हिगेशन इशारासह मोठ्या आकाराचा मजकूर (> 50,000 वर्ण) हार्ड-ट्रंकेट करतो
+- अपेक्षित बचत:** 60-80%** ब्राउझर स्नॅपशॉट पेलोड्सवर
 
-कॉन्फिगरेशन: जागतिक सेटिंग्जमधील `compression.mcpAccessibility` (मायग्रेशन 056).
-अंमलबजावणी: `open-sse/services/compression/engines/mcpAccessibility/`.
-संपूर्ण दस्तऐवजीकरण: [संक्षेपण इंजिने — MCP प्रवेशयोग्यता ट्री फिल्टर](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+कॉन्फिगरेशन: जागतिक सेटिंग्जमध्ये `compression.mcpAccessibility` (स्थलांतर 056). अंमलबजावणी: `open-sse/services/compression/engines/mcpAccessibility/`. पूर्ण दस्तऐवज: [कॉम्प्रेशन इंजिन — MCP प्रवेशयोग्यता ट्री फिल्टर](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-या साधनांमागील रनटाइम संक्षेपण मॉडेलसाठी [संक्षेपण इंजिने](../compression/COMPRESSION_ENGINES.md) आणि [RTK संक्षेपण](../compression/RTK_COMPRESSION.md) पहा.
+या साधनांमागील रनटाइम कॉम्प्रेशन मॉडेलसाठी [कॉम्प्रेशन इंजिन](../compression/COMPRESSION_ENGINES.md) आणि [RTK कॉम्प्रेशन](../compression/RTK_COMPRESSION.md) पहा.
 
-## 1Proxy साधने (3)
+## 1प्रॉक्सी साधने (3)
 
-| साधन                        | व्याप्ती       | वर्णन                                                                                      |
-| :-------------------------- | :------------- | :----------------------------------------------------------------------------------------- |
-| `omniroute_oneproxy_fetch`  | `read:proxies` | 1proxy मार्केटप्लेसमधून विनामूल्य प्रॉक्सी मिळवा (प्रोटोकॉल/देश/गुणवत्ता/मर्यादा फिल्टर्स) |
-| `omniroute_oneproxy_rotate` | `read:proxies` | धोरणानुसार पुढील उपलब्ध प्रॉक्सी मिळवा (`random` / `quality` / `sequential`)               |
-| `omniroute_oneproxy_stats`  | `read:proxies` | पूलची आकडेवारी, समक्रमण स्थिती आणि प्रोटोकॉल व देशानुसार वितरण                             |
+| साधन                        | व्याप्ती       | वर्णन                                                                                       |
+| :-------------------------- | :------------- | :------------------------------------------------------------------------------------------ |
+| `omniroute_oneproxy_fetch`  | `read:proxies` | 1प्रॉक्सी मार्केटप्लेसमधून विनामूल्य प्रॉक्सी मिळवा (protocol/country/quality/limit फिल्टर) |
+| `omniroute_oneproxy_rotate` | `read:proxies` | धोरणानुसार पुढील उपलब्ध प्रॉक्सी मिळवा (`random` / `quality` / `sequential`)                |
+| `omniroute_oneproxy_stats`  | `read:proxies` | पूल आकडेवारी, समक्रमण स्थिती, प्रोटोकॉल आणि देशानुसार वितरण                                 |
 
-## मेमरी साधने (3)
+## मेमरी टूल्स (3)
 
-`open-sse/mcp-server/tools/memoryTools.ts` मध्ये परिभाषित केलेली आहेत. प्रमाणीकरण/व्याप्ती मानक MCP व्याप्ती पाइपलाइनद्वारे लागू केली जाते.
+`open-sse/mcp-server/tools/memoryTools.ts` मध्ये परिभाषित केले आहे. Auth/scope अंमलबजावणी मानक MCP स्कोप पाइपलाइनद्वारे केली जाते.
 
-| साधन                      | व्याप्ती       | वर्णन                                                                                        |
-| :------------------------ | :------------- | :------------------------------------------------------------------------------------------- |
-| `omniroute_memory_search` | `read:memory`  | टोकन-बजेट अंमलबजावणीसह क्वेरी / प्रकार / API कीनुसार मेमरी शोधा                              |
-| `omniroute_memory_add`    | `write:memory` | नवीन मेमरी नोंद जोडा (`factual` / `episodic` / `procedural` / `semantic`)                    |
-| `omniroute_memory_clear`  | `write:memory` | API कीसाठीच्या मेमरी साफ करा; पर्यायाने प्रकार किंवा `olderThan` टाइमस्टॅम्पनुसार फिल्टर करा |
+| साधन                      | व्याप्ती       | वर्णन                                                                                     |
+| :------------------------ | :------------- | :---------------------------------------------------------------------------------------- |
+| `omniroute_memory_search` | `read:memory`  | टोकन-बजेट अंमलबजावणीसह क्वेरी / टाइप / API की द्वारे आठवणी शोधा                           |
+| `omniroute_memory_add`    | `write:memory` | नवीन मेमरी एंट्री जोडा (`factual` / `episodic` / `procedural` / `semantic`)               |
+| `omniroute_memory_clear`  | `write:memory` | API की साठी मेमरी साफ करा, पर्यायाने प्रकार किंवा `olderThan` टाइमस्टॅम्पनुसार फिल्टर करा |
 
 ## कौशल्य साधने (4)
 
-`open-sse/mcp-server/tools/skillTools.ts` मध्ये परिभाषित केलेली आहेत. `src/lib/skills/registry` + `src/lib/skills/executor` द्वारे समर्थित.
+`open-sse/mcp-server/tools/skillTools.ts` मध्ये परिभाषित केले आहे. `src/lib/skills/registry` + `src/lib/skills/executor` द्वारे समर्थित.
 
-| साधन                          | व्याप्ती         | वर्णन                                                                                 |
-| :---------------------------- | :--------------- | :------------------------------------------------------------------------------------ |
-| `omniroute_skills_list`       | `read:skills`    | API की, नाव किंवा सक्षम स्थितीनुसार पर्यायी फिल्टरिंगसह नोंदणीकृत कौशल्यांची यादी करा |
-| `omniroute_skills_enable`     | `write:skills`   | ID नुसार विशिष्ट कौशल्य सक्षम किंवा अक्षम करा                                         |
-| `omniroute_skills_execute`    | `execute:skills` | दिलेल्या इनपुटसह कौशल्य कार्यान्वित करा आणि कार्यान्वयन नोंद परत करा                  |
-| `omniroute_skills_executions` | `read:skills`    | अलीकडील कौशल्य कार्यान्वयन इतिहासाची यादी करा                                         |
+| साधन                          | व्याप्ती         | वर्णन                                                                                   |
+| :---------------------------- | :--------------- | :-------------------------------------------------------------------------------------- |
+| `omniroute_skills_list`       | `read:skills`    | API की, नाव किंवा सक्षम स्थितीनुसार वैकल्पिक फिल्टरिंगसह नोंदणीकृत कौशल्ये सूचीबद्ध करा |
+| `omniroute_skills_enable`     | `write:skills`   | ID द्वारे विशिष्ट कौशल्य सक्षम किंवा अक्षम करा                                          |
+| `omniroute_skills_execute`    | `execute:skills` | प्रदान केलेल्या इनपुटसह कौशल्य कार्यान्वित करा आणि अंमलबजावणी रेकॉर्ड परत करा           |
+| `omniroute_skills_executions` | `read:skills`    | अलीकडील कौशल्य अंमलबजावणी इतिहास सूचीबद्ध करा                                           |
 
 ## Notion संदर्भ स्रोत (6)
 
-`open-sse/mcp-server/tools/notionTools.ts` मध्ये परिभाषित केलेला आहे. टोकन `src/lib/db/notion.ts` द्वारे `key_value` तक्त्यात संग्रहित केले जाते. REST क्लायंट `src/lib/notion/api.ts` मध्ये आहे. सेटिंग्ज API `src/app/api/settings/notion/route.ts` मध्ये आहे. डॅशबोर्ड UI `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` मध्ये आहे.
+`open-sse/mcp-server/tools/notionTools.ts` मध्ये परिभाषित केले आहे. टोकन `src/lib/db/notion.ts` द्वारे `key_value` टेबलमध्ये साठवले जाते. `src/lib/notion/api.ts` मध्ये REST क्लायंट. `src/app/api/settings/notion/route.ts` मध्ये API सेटिंग्ज. `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` मध्ये डॅशबोर्ड UI.
 
-तुमचे Notion एकत्रीकरण टोकन Endpoint डॅशबोर्डमधील **संदर्भ स्रोत** टॅबमधून किंवा REST API द्वारे कॉन्फिगर करा:
+वरून तुमचे Notion एकत्रीकरण टोकन कॉन्फिगर करा** संदर्भ स्रोत** एंडपॉइंट डॅशबोर्डमधील टॅब, किंवा REST API द्वारे :
 
 ```bash
-# टोकन सेट करा
+# Set token
 curl -X POST http://localhost:20128/api/settings/notion \
   -H "Content-Type: application/json" \
   -d '{"token": "ntn_..."}'
 
-# स्थिती तपासा
+# Check status
 curl http://localhost:20128/api/settings/notion
 
-# डिस्कनेक्ट करा
+# Disconnect
 curl -X DELETE http://localhost:20128/api/settings/notion
 ```
 
-| साधन                         | व्याप्ती       | वर्णन                                                                |
-| :--------------------------- | :------------- | :------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | सर्व पृष्ठे आणि डेटाबेसेसमध्ये पूर्ण-मजकूर शोध करा                   |
-| `notion_get_page`            | `read:notion`  | पृष्ठ त्याच्या गुणधर्मांसह ID द्वारे मिळवा                           |
-| `notion_list_block_children` | `read:notion`  | पृष्ठाच्या किंवा ब्लॉकच्या चाइल्ड ब्लॉक्सची यादी करा                 |
-| `notion_query_database`      | `read:notion`  | फिल्टर्स, क्रमवारी आणि पृष्ठांकनासह डेटाबेस क्वेरी करा               |
-| `notion_get_database`        | `read:notion`  | ID द्वारे डेटाबेस स्कीमा मिळवा                                       |
-| `notion_append_blocks`       | `write:notion` | पॅरेंट ब्लॉकमध्ये चाइल्ड ब्लॉक्स जोडा (प्रत्येक विनंतीसाठी कमाल 100) |
+| साधन                         | व्याप्ती       | वर्णन                                                          |
+| :--------------------------- | :------------- | :------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | सर्व पृष्ठे आणि डेटाबेसमध्ये पूर्ण-मजकूर शोध                   |
+| `notion_get_page`            | `read:notion`  | त्याच्या गुणधर्मांसह ID द्वारे पृष्ठ मिळवा                     |
+| `notion_list_block_children` | `read:notion`  | पेज किंवा ब्लॉकच्या चाइल्ड ब्लॉक्सची यादी करा                  |
+| `notion_query_database`      | `read:notion`  | फिल्टर, प्रकार आणि पृष्ठांकनासह डेटाबेसची क्वेरी करा           |
+| `notion_get_database`        | `read:notion`  | ID द्वारे डेटाबेस स्कीमा मिळवा                                 |
+| `notion_append_blocks`       | `write:notion` | मुलांच्या ब्लॉकला पालक ब्लॉकमध्ये जोडा (प्रति विनंती कमाल 100) |
 
 ## एजंट कौशल्य कॅटलॉग साधने (3)
 
-`open-sse/mcp-server/tools/agentSkillTools.ts` मध्ये परिभाषित. `src/lib/agentSkills/catalog` द्वारे समर्थित. ही साधने MCP क्लायंट आणि बाह्य एजंटना 45-नोंदींचा एजंट कौशल्य दस्तऐवजीकरण कॅटलॉग उपलब्ध करून देतात. व्याप्ती: `read:catalog`.
+`open-sse/mcp-server/tools/agentSkillTools.ts` मध्ये परिभाषित केले आहे. `src/lib/agentSkills/catalog` द्वारे समर्थित. ही साधने 45-एंट्री एजंट स्किल दस्तऐवजीकरण कॅटलॉग MCP क्लायंट आणि बाह्य एजंट्सना उघड करतात. व्याप्ती: `read:catalog`.
 
-| साधन                              | व्याप्ती       | वर्णन                                                                                                                                              |
-| :-------------------------------- | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_agent_skills_list`     | `read:catalog` | पर्यायी `category` (api\|cli) आणि `area` फिल्टरसह सर्व 45 एजंट कौशल्यांची सूची देते; मेटाडेटा + कव्हरेज परत करते                                   |
-| `omniroute_agent_skills_get`      | `read:catalog` | प्रमाणित `id` द्वारे एका कौशल्यासाठी संपूर्ण मेटाडेटा + SKILL.md सामग्री मिळवते                                                                    |
-| `omniroute_agent_skills_coverage` | `read:catalog` | कव्हरेज आकडेवारी: 23 API, 21 CLI आणि 1 config कौशल्यांपैकी किती कौशल्यांच्या फाइलसिस्टमवर SKILL.md फाइल्स आहेत याची कॅटलॉगच्या एकूण संख्येशी तुलना |
+| साधन                              | व्याप्ती       | वर्णन                                                                                                                   |
+| :-------------------------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_agent_skills_list`     | `read:catalog` | पर्यायी `category` (api\| cli) आणि `area` फिल्टरसह सर्व 45 एजंट कौशल्यांची यादी करा; मेटाडेटा + कव्हरेज परत करते        |
+| `omniroute_agent_skills_get`      | `read:catalog` | कॅनॉनिकल `id` द्वारे एकाच कौशल्यासाठी संपूर्ण मेटाडेटा + SKILL.md सामग्री मिळवा                                         |
+| `omniroute_agent_skills_coverage` | `read:catalog` | कव्हरेज आकडेवारी: 23 API, 21 CLI आणि 1 कॉन्फिगरेशन कौशल्यांपैकी किती SKILL.md फाइल्स फाइल सिस्टम वि कॅटलॉग बेरीजवर आहेत |
 
-संपूर्ण कॅटलॉग आणि बाह्य एजंट तो कसा वापरतात यासाठी [AGENT-SKILLS.md](./AGENT-SKILLS.md) पहा.
+संपूर्ण कॅटलॉग आणि बाह्य एजंट ते कसे वापरतात यासाठी [AGENT-SKILLS.md](./AGENT-SKILLS.md) पहा.
 
-## संबंधित फ्रेमवर्क्स (v3.8.0)
+## संबंधित फ्रेमवर्क (v3.8.0)
 
-वरील MCP साधन सूची (110 अद्वितीय साधने, `countUniqueMcpTools()` द्वारे गणना केलेली) हेतुपुरस्सर
-रनटाइम राउटिंग/कॅशे/कॉम्प्रेशन/मेमरी/कौशल्ये/प्रॉक्सी/कॉन्टेक्स्ट-स्रोत ऑपरेशन्सपुरती मर्यादित आहे. दोन संलग्न
-फ्रेमवर्क्स v3.8.0 मध्ये MCP सर्व्हरसह वितरित केले जातात आणि त्यांचे दस्तऐवजीकरण स्वतंत्रपणे केले आहे:
+वरील MCP टूल इन्व्हेंटरी (110 अनन्य साधने, `countUniqueMcpTools()` द्वारे गणना केलेली) जाणूनबुजून रनटाइम routing/cache/compression/memory/skills/proxy/context-source ऑपरेशन्ससाठी व्यापलेली आहे. दोन समीप फ्रेमवर्क MCP सर्व्हरच्या बाजूने v3.8.0 मध्ये पाठवले जातात आणि स्वतंत्रपणे दस्तऐवजीकरण केले जातात:
 
-### क्लाउड एजंट्स
+### क्लाउड एजंट
 
-क्लाउड एजंट्स हे प्रक्रियेबाहेर चालणारे AI कोडिंग एजंट्स (codex-cloud, cursor-cloud, devin, jules) आहेत, जे
-LLM प्रदात्यांसाठी वापरल्या जाणाऱ्या त्याच कनेक्शन मॉडेलद्वारे OmniRoute शी जोडलेले आहेत. ते
-त्यांच्या स्वतःच्या REST पृष्ठभागाद्वारे (`/api/v1/agents/*`) उपलब्ध केले जातात आणि MCP साधन कॅटलॉगचा भाग **नाहीत**
-— क्लाउड एजंटला कॉल केल्याने MCP व्याप्ती वापरली जात नाही.
+क्लाउड एजंट हे AI कोडिंग एजंट्स (कोडेक्स-क्लाउड, कर्सर-क्लाउड, डेव्हिन, ज्यूल्स) LLM प्रदात्यांसाठी वापरल्या जाणाऱ्या समान कनेक्शन मॉडेलद्वारे OmniRoute मध्ये वायर्ड केलेले आहेत. ते त्यांच्या स्वत: च्या REST पृष्ठभाग (`/api/v1/agents/*`) द्वारे उघड आहेत आणि आहेत** नाही** MCP टूल कॅटलॉगचा एक भाग — क्लाउड एजंटला कॉल करताना MCP स्कोप वापरत नाही.
 
 - अंमलबजावणी: `src/lib/cloudAgent/` (`registry.ts`, `agents/codex.ts`, `agents/cursor.ts`, `agents/devin.ts`, `agents/jules.ts`).
 - जीवनचक्र: `createTask`, `getStatus`, `approvePlan`, `sendMessage`, `listSources`.
 - दस्तऐवजीकरण: [docs/frameworks/CLOUD_AGENT.md](./CLOUD_AGENT.md).
 
-### गार्डरेल्स
+### रेलिंग
 
-गार्डरेल्स हे चॅट पाइपलाइनमध्ये लागू केले जाणारे अंमलबजावणीपूर्व/अंमलबजावणीनंतरचे फिल्टर्स (vision-bridge, pii-masker, prompt-injection)
-आहेत. MCP साधन/रूट स्तरापर्यंत पोहोचण्यापूर्वी ते चालतात
-आणि ऑडिट पाइपलाइनमध्ये संरचित उल्लंघने उत्सर्जित करतात; त्यांना MCP साधने म्हणून कॉल केले जात नाही.
+गार्डरेल्स हे चॅट पाइपलाइनमध्ये लावलेले pre/post-execution फिल्टर (व्हिजन-ब्रिज, पीआय-मास्कर, प्रॉम्प्ट-इंजेक्शन) आहेत. ते MCP tool/route स्तरावर पोहोचण्यापूर्वी धावतात आणि ऑडिट पाइपलाइनमध्ये संरचित उल्लंघने उत्सर्जित करतात; ते MCP टूल्स म्हणून वापरले जात नाहीत.
 
 - अंमलबजावणी: `src/lib/guardrails/`.
 - दस्तऐवजीकरण: [docs/security/GUARDRAILS.md](../security/GUARDRAILS.md).
 
-ब्लॉक झाल्यासारखा दिसणारा MCP कॉल डीबग करताना, MCP ऑडिट लॉग
-(`scope_denied:*` नोंदी) आणि गार्डरेल्स ऑडिट ट्रेल हे दोन्ही तपासा — विनंती MCP व्याप्ती अंमलबजावणी स्तरापर्यंत पोहोचण्यापूर्वीच
-गार्डरेलद्वारे नाकारली जाऊ शकते.
+ब्लॉक केलेला MCP कॉल डीबग करताना, MCP ऑडिट लॉग (`scope_denied:*` नोंदी) आणि रेलिंग ऑडिट ट्रेल — दोन्ही तपासा रेलिंगद्वारे विनंती नाकारली जाऊ शकते** आधी** ते कधीही MCP स्कोप अंमलबजावणी स्तरावर पोहोचते.
 
 ---
 
 ## REST API एंडपॉइंट्स
 
-| एंडपॉइंट               | पद्धत                 | वर्णन                                                                                             | प्रमाणीकरण               |
-| :--------------------- | :-------------------- | :------------------------------------------------------------------------------------------------ | :----------------------- |
-| `/api/mcp/status`      | `GET`                 | सर्व्हर स्थिती: हार्टबीट, HTTP ट्रान्सपोर्ट स्थिती, ऑडिट क्रियाकलाप सारांश                        | व्यवस्थापन (सेशन/अॅडमिन) |
-| `/api/mcp/tools`       | `GET`                 | साधन कॅटलॉग (नाव, वर्णन, व्याप्ती, टप्पा, स्रोत एंडपॉइंट्स)                                       | व्यवस्थापन               |
-| `/api/mcp/sse`         | `GET` / `POST`        | SSE ट्रान्सपोर्ट एंडपॉइंट (`mcpEnabled` + `mcpTransport === "sse"` द्वारे नियंत्रित)              | API की + व्याप्ती        |
-| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | स्ट्रीम करण्यायोग्य HTTP ट्रान्सपोर्ट (`mcp-session-id` हेडर वापरतो; `DELETE` सेशन समाप्त करते)   | API की + व्याप्ती        |
-| `/api/mcp/audit`       | `GET`                 | `mcp_tool_audit` मधील ऑडिट लॉग नोंदी (फिल्टर्स: `limit`, `offset`, `tool`, `success`, `apiKeyId`) | व्यवस्थापन               |
-| `/api/mcp/audit/stats` | `GET`                 | एकत्रित ऑडिट आकडेवारी (`totalCalls`, `successRate`, `avgDurationMs`, प्रमुख साधने)                | व्यवस्थापन               |
+| शेवटचा बिंदू           | पद्धत                 | वर्णन                                                                                            | प्रमाण                     |
+| :--------------------- | :-------------------- | :----------------------------------------------------------------------------------------------- | :------------------------- |
+| `/api/mcp/status`      | `GET`                 | सर्व्हर स्थिती: हृदयाचा ठोका, HTTP वाहतूक स्थिती, ऑडिट क्रियाकलाप सारांश                         | व्यवस्थापन (session/admin) |
+| `/api/mcp/tools`       | `GET`                 | टूल कॅटलॉग (नाव, वर्णन, स्कोप, फेज, स्त्रोत एंडपॉइंट)                                            | व्यवस्थापन                 |
+| `/api/mcp/sse`         | `GET` / `POST`        | SSE ट्रान्सपोर्ट एंडपॉइंट ( `mcpEnabled` + `mcpTransport === "sse"` द्वारे गेट केलेले)           | API की + स्कोप             |
+| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | प्रवाह करण्यायोग्य HTTP वाहतूक ( `mcp-session-id` शीर्षलेख वापरते; `DELETE` सत्र समाप्त करते)    | API की + स्कोप             |
+| `/api/mcp/audit`       | `GET`                 | `mcp_tool_audit` कडून ऑडिट लॉग एंट्री (फिल्टर: `limit`, `offset`, `tool`, `success`, `apiKeyId`) | व्यवस्थापन                 |
+| `/api/mcp/audit/stats` | `GET`                 | एकत्रित ऑडिट आकडेवारी (`totalCalls`, `successRate`, `avgDurationMs`, शीर्ष साधने)                | व्यवस्थापन                 |
 
-स्रोत फाइल्स: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
+स्त्रोत फाइल्स: `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
 
-सेटिंग्जमध्ये MCP सर्व्हर सक्षम (`mcpEnabled`) होईपर्यंत आणि योग्य `mcpTransport` निवडला जाईपर्यंत SSE आणि स्ट्रीम करण्यायोग्य HTTP हे दोन्ही ट्रान्सपोर्ट ब्लॉक केलेले असतात. चुकीचा ट्रान्सपोर्ट कॉन्फिगर केलेला असल्यास, सेटिंग्ज बदलण्याच्या सूचनेसह रूट HTTP 400 परत करतो.
+सेटिंग्ज (`mcpEnabled`) मध्ये MCP सर्व्हर सक्षम होईपर्यंत आणि योग्य `mcpTransport` निवडले जाईपर्यंत SSE आणि Streamable HTTP दोन्ही वाहतूक अवरोधित केली जाते. जर चुकीची वाहतूक कॉन्फिगर केली असेल तर सेटिंग्ज स्विच करण्याच्या इशारासह मार्ग HTTP 400 परत करतो.
 
 ---
 
-## प्रमाणीकरण आणि स्कोप्स
+## प्रमाणीकरण आणि व्याप्ती
 
-MCP टूल कॉल्स कॉलरकडून स्कोप स्ट्रिंग्स वाचतात. ती तपासणी तीन स्वतंत्र नेमस्पेसेसपैकी एक आहे. एका तपासकामधून मिळालेली मान्यता इतर तपासकांसाठी मान्यता नसते. नियम [तीन स्कोप नेमस्पेसेस](#three-scope-namespaces) मध्ये आहेत.
-टूल कॅटलॉग [MCP टूल स्कोप्स](#mcp-tool-scopes) मध्ये आहे.
+MCP टूल कॉल कॉलरकडून स्कोप स्ट्रिंग वाचतो. तो चेक तीन स्वतंत्र नेमस्पेसेसपैकी एक आहे. एका तपासकाचा पास हा इतरांचा पास नसतो. नियम [तीन स्कोप नेमस्पेसेस](#three-scope-namespaces) आहेत. टूल कॅटलॉग हे [MCP टूल स्कोप](#mcp-tool-scopes) आहे.
 
 ### तीन स्कोप नेमस्पेसेस
 
-API कीवरील `manage`, MCP टूलवरील `read:compression`, आणि `oma_live_…` ॲक्सेस टोकनवरील `read` हे तीन वेगवेगळे अधिकार आहेत. बदल करणाऱ्या व्यवस्थापन रूटला `read` ॲक्सेस टोकन पाठवणाऱ्या कॉलर्सना HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-मिळते. ती श्रेणी `scopeSatisfies` आहे. ते MCP टेबल तपासत नाही आणि MCP मॅचरही ते तपासत नाही.
+API की वर `manage`, MCP टूलवर `read:compression` आणि `oma_live_…` ऍक्सेस टोकनवर `read` हे तीन वेगवेगळे अनुदान आहेत. म्युटेटिंग मॅनेजमेंट रूटवर `read` ऍक्सेस टोकन पाठवणाऱ्या कॉलर्सना HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` मिळते ती रँक `scopeSatisfies` आहे. हे MCP टेबलचा सल्ला घेत नाही आणि MCP जुळणारा त्याचा सल्ला घेत नाही.
 
-| नेमस्पेस          | क्रेडेन्शियल                                               | तपासक                   | मान्यता मिळाल्यास अनुमती                                           |
-| :---------------- | :--------------------------------------------------------- | :---------------------- | :----------------------------------------------------------------- |
-| API-की व्यवस्थापन | `api_keys.scopes`                                          | `hasManageScope`        | त्या Bearer कीसाठी व्यवस्थापन REST                                 |
-| API-की अतिरिक्त   | तोच ॲरे, एक तंतोतंत स्ट्रिंग                               | खाली नमूद केलेला हेल्पर | केवळ ती एक क्षमता                                                  |
-| MCP टूल स्कोप्स   | तोच ॲरे, अन्यथा MCP `_meta`, अन्यथा `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | अंमलबजावणी सुरू झाल्यानंतर ते टूल                                  |
-| ॲक्सेस टोकन       | `oma_live_…`                                               | `scopeSatisfies`        | ज्या व्यवस्थापन रूटच्या मेथड आणि पाथला ती श्रेणी आवश्यक आहे तो रूट |
+| नेमस्पेस          | ओळखपत्र                                                                   | तपासक                  | एक पास परवानगी देतो                                                      |
+| :---------------- | :------------------------------------------------------------------------ | :--------------------- | :----------------------------------------------------------------------- |
+| API-की व्यवस्थापन | `api_keys.scopes`                                                         | `hasManageScope`       | त्या वाहक की साठी व्यवस्थापन REST                                        |
+| API-की ऍडिटीव्ह   | समान ॲरे, एक अचूक स्ट्रिंग                                                | खाली नाव दिलेले मदतनीस | फक्त एकच क्षमता                                                          |
+| MCP टूल स्कोप     | समान ॲरे, बाकी MCP `_meta` ( फक्त HTTP/SSE ), बाकी `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | ते साधन, एकदा अंमलबजावणी चालू आहे                                        |
+| प्रवेश टोकन       | `oma_live_…`                                                              | `scopeSatisfies`       | व्यवस्थापन मार्ग ज्याच्या पद्धती आणि मार्गाला त्या श्रेणीची आवश्यकता आहे |
 
-प्रत्येक क्रेडेन्शियल जारी करण्याची माहिती
-[व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) मध्ये दिली आहे.
+[व्यवस्थापन प्रमाणीकरणामध्ये](../guides/MANAGEMENT-AUTH.md) प्रत्येक क्रेडेन्शियल मिंट करणे समाविष्ट आहे.
 
-#### API-की स्कोप्स
+#### API-की स्कोप
 
-एक `api_keys.scopes` ॲरे दोन कामांसाठी वापरला जातो. त्यासाठी वेगवेगळी फंक्शन्स वापरली जातात.
+एक `api_keys.scopes` ॲरे दोन नोकऱ्या पुरवतो. ते विविध कार्ये वापरतात.
 
-**व्यवस्थापन REST.** `manage` आणि `admin` हे
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) चे सदस्य आहेत.
-त्या कीसाठी व्यवस्थापन रूट्सना अधिकृत करणारे `hasManageScope` आहे. त्या रूट्सवर `admin` व्यवस्थापन-सक्षम आहे. येथे `admin` हा शब्द ॲक्सेस-टोकन श्रेणी नाही आणि तो MCP टूल स्कोप्समध्ये विस्तारित होत नाही.
+**व्यवस्थापन REST.** `manage` आणि `admin` हे `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) चे सदस्य आहेत. `hasManageScope` हे त्या की साठी व्यवस्थापन मार्ग अधिकृत करते. `admin` त्या मार्गांवर व्यवस्थापन-सक्षम आहे. येथे `admin` हा शब्द प्रवेश-टोकन रँक नाही आणि तो MCP टूल स्कोपमध्ये विस्तारत नाही.
 
-**अतिरिक्त स्ट्रिंग्स.** प्रत्येक स्ट्रिंगसाठी तंतोतंत सदस्यत्व तपासणी केली जाते आणि प्रत्येक स्ट्रिंग
-`MANAGEMENT_API_KEY_SCOPES` च्या बाहेरच राहते.
+**ॲडिटीव्ह स्ट्रिंग्स.** प्रत्येक एक अचूक सदस्यत्व चाचणी आहे आणि प्रत्येकजण `MANAGEMENT_API_KEY_SCOPES` बाहेर राहतो.
 
-| स्कोप                          | मान्यता मिळाल्यास अनुमती                                                                                                                                      |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | केवळ नॉन-लूपबॅक `/api/mcp/` LOCAL_ONLY अपवाद (`hasMcpConnectOrManageScope`). `manage` किंवा `admin` असलेली कीदेखील या अपवादासाठी मान्य ठरते.                  |
-| `self:usage`                   | या कीसाठी `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` तयार करताना हा स्कोप जोडते (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | त्या स्थिती पेलोडमधील अपस्ट्रीम खाते कोटे (`src/lib/usage/apiKeySelfService.ts`). स्थिती रूटला तरीही `self:usage` आवश्यक असते.                                |
-| `policy:bypass-provider-quota` | या कीचे इन्फरन्स कॉल्स प्रदाता-कोटा धोरण वगळतात (`src/sse/handlers/chat.ts` मधील `hasProviderQuotaBypassScope`).                                              |
+| व्याप्ती                       | एक पास परवानगी देतो                                                                                                                                      |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | नॉन-लूपबॅक `/api/mcp/` LOCAL_ONLY कोरव्ह-आउट फक्त (`hasMcpConnectOrManageScope`). `manage` किंवा `admin` असलेली की अजूनही ती कोरून काढते.                |
+| `self:usage`                   | या कीसाठी`GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` हे स्कोप तयार (`normalizeSelfServiceScopesForCreate`) वर जोडते. |
+| `self:account-quota`           | त्या स्टेटस पेलोडमध्ये अपस्ट्रीम खाते कोटा (`src/lib/usage/apiKeySelfService.ts`). स्थिती मार्गासाठी अद्याप `self:usage` आवश्यक आहे.                     |
+| `policy:bypass-provider-quota` | या कीचे अनुमान प्रदाता-कोटा धोरण वगळा (`hasProviderQuotaBypassScope` मध्ये `src/sse/handlers/chat.ts`) कॉल करते.                                         |
 
-#### जुळवणी
+#### जुळणारे
 
-कॅटलॉग म्हणजे [MCP टूल स्कोप्स](#mcp-tool-scopes) अंतर्गत असलेले टेबल. `src/shared/constants/mcpScopes.ts` मधील `MCP_SCOPE_LIST` ला तो कॅटलॉग समजू नका:
-तो मूळ टाइप केलेला उपसंच आहे. नंतरची टूल्स त्याच्या शेजारी आणखी स्कोप्स घोषित करतात
-(`read:notion`, `read:skills`, `read:local-corpus`, आणि टेबलमधील उर्वरित स्कोप्स).
+कॅटलॉग हे [MCP टूल स्कोप](#mcp-tool-scopes) अंतर्गत टेबल आहे. `src/shared/constants/mcpScopes.ts` मधील `MCP_SCOPE_LIST` ला कॅटलॉग मानू नका: तो मूळ टाइप केलेला उपसंच आहे. नंतरची साधने त्याच्या बाजूला पुढील स्कोप घोषित करतात (`read:notion`, `read:skills`, `read:local-corpus`, आणि उर्वरित सारणी).
 
-`open-sse/mcp-server/scopeEnforcement.ts` मधील `evaluateToolScopes` प्रत्येक आवश्यक स्कोप कोणत्यातरी मंजूर स्कोपशी जुळत असल्यास कॉलला अनुमती देते:
+`open-sse/mcp-server/scopeEnforcement.ts` मधील `evaluateToolScopes` कॉलला परवानगी देतो जेव्हा प्रत्येक आवश्यक स्कोप काही मंजूर स्कोपशी जुळतो:
 
-- `*` प्रत्येक आवश्यक स्कोपशी जुळतो.
-- `*` ने संपणारा मंजूर स्कोप, तारकाचिन्हापूर्वीच्या उपसर्गाने सुरू होणाऱ्या आवश्यक स्कोपशी जुळतो. `read:*` हा `read:compression` शी जुळतो.
-- इतर प्रत्येक मंजूर स्कोप केवळ तंतोतंत समान असलेल्या आवश्यक स्ट्रिंगशी जुळतो.
+- `*` प्रत्येक आवश्यक व्याप्तीशी जुळते.
+- `*` मध्ये समाप्त होणारी मंजूर स्कोप आवश्यक व्याप्तीशी जुळते जी तारेच्या आधी उपसर्गाने सुरू होते. `read:*` `read:compression` जुळतो.
+- प्रत्येक इतर मंजूर स्कोप फक्त समान आवश्यक स्ट्रिंगशी जुळतो.
 
-ज्या कीचे स्कोप्स `["manage"]` आहेत, ती `read:compression` साठी `scopeMatches` मध्ये अयशस्वी ठरते.
-मंजूर केलेल्या एकमेव स्ट्रिंग्स अनुक्रमे `admin`, `mcp:connect`, `read`, किंवा `write` असतील, तर तोच कॉल अयशस्वी ठरतो. शेवटी असलेल्या `*` व्यतिरिक्त MCP टूल स्कोप्समध्ये कोणतीही श्रेणीबद्धता नाही.
+एक की ज्याचे स्कोप `["manage"]` आहेत ते `read:compression` साठी `scopeMatches` फेल होते. `admin`, `mcp:connect`, `read`, आणि `write` साठी समान कॉल अयशस्वी होतो जेव्हा ते फक्त मंजूर स्ट्रिंग असतात. अनुगामी `*` पलीकडे MCP टूल स्कोपमध्ये कोणतीही श्रेणीबद्धता नाही.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` असल्याशिवाय अंमलबजावणी बंद असते (डीफॉल्ट
-`false`). ती बंद असताना `evaluateToolScopes` कॉलला अनुमती देते आणि कॅटलॉग वगळते. ती सुरू असताना HTTP, Bearer कीचे `api_keys.scopes`
-`authInfo` म्हणून वापरते ([प्रति-की HTTP स्कोप बाइंडिंग](#per-key-http-scope-binding-7895) पहा).
-कोणतेही की स्कोप्स उपलब्ध न झाल्यास, मंजूर संच प्रथम MCP `_meta` आणि नंतर
-`OMNIROUTE_MCP_SCOPES` कडे जातो.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (डिफॉल्ट `false`) नसल्यास अंमलबजावणी बंद आहे. ते बंद असताना, `evaluateToolScopes` कॉलला अनुमती देते आणि कॅटलॉग वगळते. ते चालू असताना, HTTP बेअरर कीचे `api_keys.scopes` `authInfo` म्हणून वापरते ( [पर-की HTTP स्कोप बाइंडिंग](#per-key-http-scope-binding-7895) पहा). जेव्हा कोणतेही मुख्य कार्यक्षेत्र निराकरण होत नाही, तेव्हा मंजूर केलेला संच MCP `_meta` द्वारे येतो (केवळ HTTP/SSE कॉलरसाठी सन्मानित, HTTP प्रमाणीकरण संदर्भामध्ये; stdio कॉलरच्या `_meta` दुर्लक्ष केले जाते कारण क्लायंट नियंत्रित करतो आणि त्यात प्रति-कॉलर ओळख नसते), नंतर `OMNIROUTE_MCP_SCOPES`.
 
-#### ॲक्सेस-टोकन स्कोप्स
+#### प्रवेश-टोकन स्कोप
 
-`oma_live_…` टोकन्समध्ये (`src/lib/accessTokens/scopes.ts`) `read`, `write`,
-किंवा `admin` असते. `scopeSatisfies` ही एक श्रेणी आहे: `admin` मध्ये `write` आणि `read` समाविष्ट आहेत, आणि
-`write` मध्ये `read` समाविष्ट आहे. अज्ञात स्कोप्स कोणतीही अनुमती देत नाहीत.
+`oma_live_…` टोकन (`src/lib/accessTokens/scopes.ts`) मध्ये `read`, `write`, किंवा `admin` असतात . `scopeSatisfies` एक रँक आहे: `admin` `write` आणि `read` कव्हर करते आणि `write` `read` कव्हर करते. अज्ञात स्कोप काहीही कव्हर करत नाहीत.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) त्या श्रेणीची
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) सोबत तुलना करते:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) त्या रँकची `inferRequiredScope` (`src/server/authz/accessScopes.ts`) शी तुलना करते :
 
-- `GET`, `HEAD`, आणि `OPTIONS` यांना `read` आवश्यक आहे.
-- इतर प्रत्येक मेथडला `write` आवश्यक आहे.
-- `ADMIN_SCOPE_PREFIXES` मधील पाथ्सना प्रत्येक मेथडसाठी `admin` आवश्यक आहे. `/api/mcp`
-  त्या यादीत आहे, त्यामुळे `write` ॲक्सेस टोकन तरीही MCP HTTP
-  पृष्ठभागाला कॉल करू शकत नाही.
-- `ADMIN_MUTATION_PREFIXES` मधील पाथ्सना केवळ बदलांसाठी `admin` आवश्यक आहे.
-- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) मधील पाथ्सना केवळ बदलांसाठी आणि केवळ
-  त्या तंतोतंत पाथवर `admin` आवश्यक आहे — इतर `/api/settings/*` उप-रूट्ससाठी `write` कायम राहते.
+- `GET`, `HEAD`, आणि `OPTIONS` `read` आवश्यक आहे.
+- इतर प्रत्येक पद्धतीसाठी `write` आवश्यक आहे.
+- `ADMIN_SCOPE_PREFIXES` मधील पथांना प्रत्येक पद्धतीसाठी `admin` आवश्यक आहे. `/api/mcp` त्या सूचीमध्ये आहे, त्यामुळे `write` ऍक्सेस टोकन अद्याप MCP HTTP पृष्ठभागावर कॉल करू शकत नाही.
+- `ADMIN_MUTATION_PREFIXES` मधील पथांना केवळ उत्परिवर्तनांसाठी `admin` आवश्यक आहे.
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) मधील पथांना केवळ उत्परिवर्तनासाठी `admin` आवश्यक आहे आणि फक्त त्याच मार्गावर — इतर `/api/settings/*` उप-मार्ग `write` ठेवतात.
 
-`PATCH /api/keys/{id}` हे mutation आहे आणि ते त्या admin सूचींमध्ये नाही, त्यामुळे
-`read` token ला 403
-`Access token scope 'read' is insufficient; 'write' required.`
-मिळतो.
-`write` किंवा `admin` access token त्या route ची आवश्यकता पूर्ण करतो. dashboard JWT,
-loopback CLI machine-id token आणि `manage` किंवा `admin` असलेली API key
-इतर branches वापरतात आणि या rank मुळे मर्यादित होत नाहीत.
+`PATCH /api/keys/{id}` एक उत्परिवर्तन आहे आणि त्या प्रशासक सूचीमध्ये नाही, म्हणून `read` टोकन 403 `Access token scope 'read' is insufficient; 'write' required.` A `write` किंवा `admin` प्रवेश टोकन प्राप्त करतो त्या मार्गाचे समाधान करतो. डॅशबोर्ड JWT, लूपबॅक CLI मशीन-आयडी टोकन, आणि `manage` किंवा `admin` सह API की इतर शाखा घेतात आणि या श्रेणीनुसार संकुचित नाहीत.
 
-`/api/mcp` साठी `scopeSatisfies` उत्तीर्ण करणाऱ्या access token ने केवळ
-management gate पार केलेले असते. Tool calls अजूनही API-key
-scopes विरुद्ध `scopeMatches` चालवतात. access-token rank हा `scopeMatches` साठी input नाही.
+`/api/mcp` साठी `scopeSatisfies` पास करणाऱ्या ऍक्सेस टोकनने फक्त व्यवस्थापन गेट साफ केले आहे. टूल कॉल अजूनही API-की स्कोप विरुद्ध `scopeMatches` चालवतात. प्रवेश-टोकन रँक `scopeMatches` साठी इनपुट नाही.
 
-### MCP tool scopes
+### MCP टूल स्कोप
 
-Scope enforcement हे `open-sse/mcp-server/scopeEnforcement.ts` मध्ये केंद्रीकृत केले आहे.
-प्रत्येक tool साठी विशिष्ट scopes आवश्यक आहेत:
+व्याप्ती अंमलबजावणी `open-sse/mcp-server/scopeEnforcement.ts` मध्ये केंद्रीकृत आहे. प्रत्येक साधनाला विशिष्ट स्कोप आवश्यक आहेत:
 
 | व्याप्ती              | साधने                                                                                                                                                                        |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -416,113 +373,81 @@ Scope enforcement हे `open-sse/mcp-server/scopeEnforcement.ts` मध्य�
 | `write:obsidian`      | 9 लेखन साधने — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-वाइल्डकार्ड स्कोप समर्थित आहेत: `read:*` सर्व वाचन-स्कोप प्रदान करतो, तर `*` पूर्ण प्रवेश प्रदान करतो.
+वाइल्डकार्ड स्कोप समर्थित आहेत: `read:*` सर्व वाचन-स्कोप मंजूर करते, `*` पूर्ण प्रवेश मंजूर करते.
 
-### `mcp:connect` — मर्यादित रूट क्षमता (#7895)
+### `mcp:connect` — अरुंद मार्ग क्षमता (#7895)
 
-नॉन-लूपबॅकवरून HTTP/SSE MCP ट्रान्सपोर्टपर्यंत (`/api/mcp/*`) पोहोचण्यासाठी
-`/api/mcp/` LOCAL_ONLY अपवाद आवश्यक आहे (`docs/security/ROUTE_GUARD_TIERS.md` पहा). ऐतिहासिकदृष्ट्या,
-या अपवादाने केवळ पूर्ण `manage`/`admin`-स्कोप API की स्वीकारली — केवळ MCP शी संवाद साधण्याची
-गरज असलेल्या कॉलरसाठी हे खूप व्यापक होते. `src/shared/constants/managementScopes.ts` आता
-`MCP_CONNECT_SCOPE = "mcp:connect"` एक्सपोर्ट करते: हा एक अतिरिक्त, मर्यादित स्कोप आहे (`SELF_USAGE_SCOPE`
-सारखाच पूर्वदृष्टांत), जो `src/server/authz/policies/management.ts` मधील केवळ `/api/mcp/`
-बायपासला अधिकृत करतो — तो इतर कोणत्याही व्यवस्थापन-रूटचा प्रवेश प्रदान करत नाही
-आणि जाणीवपूर्वक `MANAGEMENT_API_KEY_SCOPES` च्या बाहेर ठेवला आहे. `manage`/`admin`
-असलेली की पूर्वीप्रमाणेच या अपवादातून जाते; रिमोट केवळ-MCP कॉलर्ससाठी `mcp:connect`
-हा कमी-विशेषाधिकाराचा पर्याय आहे, जो `hasMcpConnectOrManageScope()` द्वारे तपासला जातो.
+नॉन-लूपबॅकवरून HTTP/SSE MCP वाहतूक (`/api/mcp/*`) पर्यंत पोहोचण्यासाठी `/api/mcp/` LOCAL_ONLY कोरीव-आऊट आवश्यक आहे ( `docs/security/ROUTE_GUARD_TIERS.md` पहा). ऐतिहासिकदृष्ट्या ते कोरीव-आऊटने फक्त `manage`/`admin` -scope API की — स्वीकारली आहे जी कॉलरसाठी फक्त MCP बोलणे आवश्यक आहे. `src/shared/constants/managementScopes.ts` आता `MCP_CONNECT_SCOPE = "mcp:connect"` निर्यात करते: एक अतिरिक्त, अरुंद स्कोप ( `SELF_USAGE_SCOPE` प्रमाणेच उदाहरण) जे ONLY `src/server/authz/policies/management.ts` — मध्ये `/api/mcp/` बायपास अधिकृत करते, ते इतर कोणतेही व्यवस्थापन-मार्ग प्रवेश मंजूर करत नाही आणि मुद्दाम `MANAGEMENT_API_KEY_SCOPES` चे OUT ठेवले जाते. `manage`/`admin` धारण केलेली की अजूनही न बदलता कोरीव-आउट पास करते; `mcp:connect` हा रिमोट MCP-केवळ कॉलरसाठी कमी-विशेषाधिकार पर्याय आहे, `hasMcpConnectOrManageScope()` द्वारे तपासला जातो.
 
-### प्रत्येक कीसाठी HTTP स्कोप बाइंडिंग (#7895)
+### प्रति-की HTTP स्कोप बंधनकारक (#7895)
 
-HTTP/SSE वर, `open-sse/mcp-server/httpTransport.ts` आता
-`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) द्वारे कॉलरचे वास्तविक
-`api_keys.scopes` निर्धारित करते आणि ते MCP SDK च्या `transport.handleRequest(req, { authInfo })`
-कडे पाठवते, त्यामुळे प्रत्येक साधन-कॉलपर्यंत पोहोचणारे `extra.authInfo.scopes` Bearer कीचे स्वतःचे
-स्कोप दर्शवते. `scopeEnforcement.ts` मधील `resolveCallerScopeContext()` आधीपासूनच `_meta`
-आणि `OMNIROUTE_MCP_SCOPES` env फॉलबॅकपेक्षा `authInfo` ला प्राधान्य देत होते — यामुळे केवळ
-तो पहिला, सर्वोच्च-प्राधान्याचा स्रोत भरला जातो, ज्याला यापूर्वी HTTP वर माहिती पुरवली जात नव्हती.
-कोणतीही API की निर्धारित होत नसल्यास (हेडर नसणे, अवैध की), `authInfo` हे `undefined` राहते
-आणि निर्धारण कोणताही बदल न होता विद्यमान `meta`/env साखळीकडे जाते. stdio मध्ये प्रत्येक
-कॉलरसाठी स्वतंत्र ओळख नसते (`mcpCallerIdentity.ts` पहा) आणि त्यावर याचा परिणाम होत नाही —
-ते `_meta`/env फॉलबॅक साखळीवरच राहते.
+HTTP/SSE वर, `open-sse/mcp-server/httpTransport.ts` आता कॉलरच्या रिअल `api_keys.scopes` `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) द्वारे निराकरण करते आणि ते MCP SDK च्या `transport.handleRequest(req, { authInfo })` कडे जाते, त्यामुळे `extra.authInfo.scopes` प्रत्येक टूल कॉलवर पोहोचणे हे बेअरर कीचे स्वतःचे कार्यक्षेत्र प्रतिबिंबित करते. `scopeEnforcement.ts` च्या `resolveCallerScopeContext()` आधीच `_meta` वर `authInfo` प्राधान्य दिले आहे आणि `OMNIROUTE_MCP_SCOPES` env फॉलबॅक — हे फक्त प्रथम, सर्वोच्च-प्राधान्य स्त्रोत भरते, जे पूर्वी HTTP वर अनफेड होते. जेव्हा कोणतीही API की निराकरण करत नाही (कोणतेही शीर्षलेख, अवैध की नाही), `authInfo` `undefined` राहते आणि रिझोल्यूशन अपरिवर्तित विद्यमान `meta`/env चेनमध्ये येते. stdio ची प्रति-कॉलर ओळख नाही ( `mcpCallerIdentity.ts` पहा) आणि प्रति-की बंधनकारक — द्वारे प्रभावित होत नाही ते `_meta` चरण वगळते (`_meta` फक्त HTTP प्रमाणीकरण संदर्भ, #15159 मध्ये सन्मानित केले जाते) आणि केवळ `OMNIROUTE_MCP_SCOPES` env की वरून निराकरण करते.
 
-**मर्यादित-स्कोप असलेल्या HTTP/SSE कॉलर्ससाठी `OMNIROUTE_MCP_ENFORCE_SCOPES` काहीही असले तरी
-अंमलबजावणी सक्तीने सुरू केली जाते.** `OMNIROUTE_MCP_ENFORCE_SCOPES` चे डीफॉल्ट मूल्य `false` असणे
-केवळ स्थानिक/stdio एकल-ऑपरेटर प्रवाहासाठी सुरक्षित आहे, जिथे स्कोप लागू करण्यासाठी प्रत्येक
-कॉलरसाठी स्वतंत्र ओळख नसते. जेव्हा `resolveCallerScopeContext()` ने
-`source === "authInfo"` निर्धारित केलेले असते (म्हणजे प्रत्येक कीसाठी वास्तविक HTTP Authorization
-हेडर, केवळ HTTP/SSE) आणि त्या कीकडे पूर्ण `manage`/`admin` स्कोप नसतो, तेव्हा
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` प्रत्येक साधनासाठी स्कोप अंमलबजावणी
-बिनशर्त सुरू करते (`scopeEnforcement.ts` मधील `shouldForceScopeEnforcement()`).
-यामुळे अशी त्रुटी दूर होते की, केवळ मर्यादित `mcp:connect` बायपास स्कोप असलेली की —
-जी वर नमूद केल्याप्रमाणे `/api/mcp/` LOCAL_ONLY अपवादाव्यतिरिक्त इतर कशालाही अधिकृत करत नाही —
-ऑपरेटरने रिमोट/नॉन-लूपबॅक MCP प्रवेश सक्षम केल्यानंतर प्रत्येक MCP साधन वापरू शकली असती,
-कारण `OMNIROUTE_MCP_ENFORCE_SCOPES` चे डीफॉल्ट मूल्य `false` असते. HTTP वरील पूर्ण
-`manage`/`admin` की आणि प्रत्येक stdio/स्थानिक कॉलरसाठी विद्यमान
-`OMNIROUTE_MCP_ENFORCE_SCOPES`-नियंत्रित वर्तन कोणताही बदल न होता कायम राहते.
+**HTTP/SSE काहीही असो `OMNIROUTE_MCP_ENFORCE_SCOPES`** `OMNIROUTE_MCP_ENFORCE_SCOPES` ला `false` डीफॉल्ट करणे केवळ local/stdio सिंगल-ऑपरेटर प्रवाहासाठी सुरक्षित आहे, जेथे प्रति-कॉलर ओळख विरुद्ध स्कोप नाही. `open-sse/mcp-server/server.ts::withScopeEnforcement()` प्रति-टूल स्कोप अंमलबजावणी बिनशर्त ( `scopeEnforcement.ts` मध्ये`shouldForceScopeEnforcement()` ) वर वळते जेव्हा `resolveCallerScopeContext()` ने `source === "authInfo"` (म्हणजे वास्तविक प्रति-की HTTP ऑथोरायझेशन हेडर, HTTP/SSE-only) AND ती की पूर्ण `manage`/`admin` स्कोप धारण करत नाही. हे अंतर बंद करते जेथे ONLY संकुचित `mcp:connect` बायपास स्कोप — वर दस्तऐवजीकरण केलेल्या `/api/mcp/` LOCAL_ONLY कोरीव-आउट — शिवाय काहीही अधिकृत करत नाही, अन्यथा ऑपरेटरने remote/non-loopback MCP ऍक्सेस सक्षम केल्यावर प्रत्येक MCP टूलला विनंती करू शकते, फक्त कारण `OMNIROUTE_MCP_ENFORCE_SCOPES` जहाजे `false` द्वारे डिफॉल्ट. HTTP वर पूर्ण `manage`/`admin` की, आणि प्रत्येक stdio/local कॉलर, विद्यमान `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated वर्तन अपरिवर्तित ठेवा.
 
 ---
 
-## पर्यावरण चल
+## पर्यावरण परिवर्तने
 
-| चल                                      | डीफॉल्ट                               | उद्देश                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| :-------------------------------------- | :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`              | अंतर्गत OmniRoute API कॉल करताना MCP सर्व्हर वापरत असलेली मूळ URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `OMNIROUTE_API_KEY`                     | (रिक्त)                               | अंतर्गत API कॉलसाठी `Authorization: Bearer` म्हणून पुढे पाठवली जाणारी API की                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (केवळ `"true"` ते सक्षम करते) | सक्षम केलेले असताना, आवश्यक स्कोप उपलब्ध नसल्यास टूल कॉल नाकारले जातात आणि ऑडिट लॉगमध्ये `scope_denied:<reason>` नोंदवले जाते. तसेच, प्रति-की Authorization हेडरवरून निर्धारित केलेल्या (`source === "authInfo"`) आणि पूर्ण `manage`/`admin` स्कोप नसलेल्या कोणत्याही HTTP/SSE कॉलरसाठी या फ्लॅगची पर्वा न करता अंमलबजावणी सक्तीने सुरू केली जाते — उदा. केवळ मर्यादित `mcp:connect` बायपास स्कोप असलेली की — त्यामुळे हा डीफॉल्ट फक्त स्थानिक/stdio एकल-ऑपरेटर प्रवाहासाठी सुरक्षित आहे, दूरस्थ नॉन-लूपबॅक प्रवेशासाठी कधीही नाही |
-| `OMNIROUTE_MCP_SCOPES`                  | (रिक्त)                               | डीफॉल्टनुसार "उपलब्ध" मानल्या जाणाऱ्या स्कोपची स्वल्पविरामाने विभक्त केलेली अनुमतीसूची (कॉलरने स्वतःचे स्कोप दिले नसताना वापरली जाते)                                                                                                                                                                                                                                                                                                                                                                                              |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (सेट नसल्यास = सुरू)                  | `0/false/off/no` वर सेट केल्यास, नोंदणीच्या वेळी MCP वर्णन संक्षेपण अक्षम करते                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (सेट नसल्यास = सुरू)                  | वरील टॉगलसाठी पर्यायी उपनाव                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                               | अंतर्गत व्यवस्थापन वाचनांसाठी रद्द करण्याची कालमर्यादा (आरोग्य, लवचिकता, संयोजने, कोटा, वापर)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                               | प्रदात्याची प्रतीक्षा करणाऱ्या हॉप्ससाठी रद्द करण्याची कालमर्यादा (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `MCP_TOOL_DENY`                         | (सेट नसल्यास = फिल्टर नाही)           | `tools/list` मधून वगळण्यासाठी स्वल्पविरामाने विभक्त केलेली टूल नावे (टूल-कार्डिनॅलिटी कमी करणे — खाली पाहा)                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `MCP_TOOL_ALLOW`                        | (सेट न केलेले = कोणतेही फिल्टर नाही)  | केवळ ठेवायच्या टूलच्या नावांची स्वल्पविरामाने विभक्त केलेली सूची (अनुमती-सूची मोड — खाली पहा)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                        | हार्टबीट फाइल `${DATA_DIR}/runtime/mcp-heartbeat.json` येथे लिहिली जाते                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-
----
-
-## वर्णन संक्षेपण
-
-क्लायंटसमोर उघड होणारा मेटाडेटाचा आकार (आणि त्यामुळे प्रॉम्प्ट संदर्भाचा खर्च) कमी करण्यासाठी MCP टूल, प्रॉम्प्ट आणि रिसोर्स रजिस्ट्री नोंदणी/सूचीकरणाच्या वेळी वर्णने संक्षिप्त करू शकतात. अंमलबजावणी `open-sse/mcp-server/descriptionCompressor.ts` मध्ये आहे आणि `createMcpServer()` मधील `compressMcpRegistryMetadata` द्वारे MCP सर्व्हरशी जोडली आहे.
-
-- संरचनात्मक मजकूर बदलला जाणार नाही यासाठी जतन केलेल्या ब्लॉकचे निष्कर्षण (कोड स्पॅन्स, फेन्स्ड ब्लॉक्स इत्यादी) वापरून, Caveman नियमसंचाद्वारे (`getRulesForContext("all", "full")`) वर्णन मजकुरावर संक्षेपण चालते.
-- `key_value` सेटिंग्ज टेबलमधील `compression.mcpDescriptionCompressionEnabled` मूल्याद्वारे प्रत्येक डिप्लॉयमेंटनुसार टॉगल करा (डीफॉल्ट: सक्षम) — UI मध्ये **विश्लेषण → MCP वर्णन संक्षेपण** म्हणून उपलब्ध.
-- `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false` किंवा `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false` यांपैकी कोणत्याही एकाद्वारे संपूर्ण प्रक्रियेसाठी टॉगल करा.
-- रिअलटाइम आकडेवारी `omniroute_compression_status` द्वारे `analytics.mcpDescriptionCompression` अंतर्गत दर्शवली जाते आणि वास्तविक प्रदाता वापर पावत्यांपासून वेगळे ओळखण्यासाठी तिला `source: "mcp_metadata_estimate"` टॅग लावला जातो.
+| चल                                      | डीफॉल्ट                               | उद्देश                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :-------------------------------------- | :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`              | OmniRoute अंतर्गत APIs कॉल करताना MCP सर्व्हर बेस URL वापरतो                                                                                                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_API_KEY`                     | (रिक्त)                               | API की अंतर्गत API कॉलवर `Authorization: Bearer` म्हणून अग्रेषित केली जाते                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (केवळ `"true"` ते सक्षम करते) | सक्षम केल्यावर, गहाळ स्कोप टूल कॉल नाकारतात आणि ऑडिट लॉगमध्ये `scope_denied:<reason>` लॉग करतात. पूर्ण `manage`/`admin` स्कोप — नसलेल्या प्रति-की ऑथोरायझेशन हेडर (`source === "authInfo"`) वरून सोडवलेल्या कोणत्याही HTTP/SSE कॉलरसाठी या ध्वजाची पर्वा न करता अंमलबजावणी ALSO सक्ती केली जाते उदा. फक्त अरुंद `mcp:connect` बायपास स्कोप — धारण केलेली की त्यामुळे हे डीफॉल्ट केवळ local/stdio नेव्हर-ऑपरेटर-नॉन-ऑपरेटर-रिफॉल्ट ऍक्सेससाठी सुरक्षित आहे. |
+| `OMNIROUTE_MCP_SCOPES`                  | (रिक्त)                               | डीफॉल्टनुसार "उपलब्ध" मानल्या जाणाऱ्या स्कोपची स्वल्पविरामाने विभक्त केलेली अनुमत सूची (जेव्हा कॉलर स्वतःचे स्कोप प्रदान करत नाही तेव्हा वापरले जाते)                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | ( = अनसेट करा)                        | `0/false/off/no` वर सेट केल्यावर, नोंदणीच्या वेळी MCP वर्णन कॉम्प्रेशन अक्षम करते                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | ( = अनसेट करा)                        | वरीलप्रमाणे समान टॉगलसाठी पर्यायी उपनाव                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                               | अंतर्गत व्यवस्थापन वाचनासाठी बजेट रद्द करा (आरोग्य, लवचिकता, कॉम्बो, कोटा, वापर)                                                                                                                                                                                                                                                                                                                                                                           |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                               | प्रदात्यावर वाट पाहणाऱ्या हॉप्ससाठी बजेट रद्द करा (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                             |
+| `MCP_TOOL_DENY`                         | ( = नो फिल्टर अनसेट करा)              | स्वल्पविरामाने विभक्त केलेल्या साधनांची नावे `tools/list` मधून टाकली जातील (टूल-कार्डिनॅलिटी रिडक्शन — खाली पहा)                                                                                                                                                                                                                                                                                                                                           |
+| `MCP_TOOL_ALLOW`                        | ( = नो फिल्टर अनसेट करा)              | केवळ ठेवण्यासाठी स्वल्पविरामाने विभक्त केलेल्या साधनांची नावे (अनुमती-सूची मोड — खाली पहा)                                                                                                                                                                                                                                                                                                                                                                 |
+| `DATA_DIR`                              | `~/.omniroute`                        | हार्टबीट फाइल `${DATA_DIR}/runtime/mcp-heartbeat.json` वर लिहिली आहे                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ---
 
-## टूल कार्डिनॅलिटी कपात (F4.3)
+## वर्णन कॉम्प्रेशन
 
-वर्णन संक्षेपणामुळे प्रत्येक टूलचा मेटाडेटा कमी होतो; **टूल-कार्डिनॅलिटी कपात** यापुढे एक पाऊल टाकून एकूण _किती_ टूल्स जाहीर केली जातात हे कमी करते. `tools/list` मॅनिफेस्टमध्ये कमी टूल्स प्रदर्शित केल्यामुळे टूल कॅटलॉगसाठी क्लायंटच्या मॉडेलला मोजावी लागणारी प्रति-विनंती टोकन किंमत कमी होते ("layer 5" संक्षेपण). अंमलबजावणी ही `open-sse/mcp-server/toolCardinality.ts` मधील (`reduceToolManifest`) पूर्णपणे स्टेटलेस फिल्टर आहे, जी `createMcpServer()` (`open-sse/mcp-server/server.ts`) मधील नोंदणी लूपशी जोडलेली आहे.
+MCP टूल, प्रॉम्प्ट आणि रिसोर्स रेजिस्ट्री क्लायंटच्या समोर येणारा मेटाडेटा फूटप्रिंट कमी करण्यासाठी registration/list वेळी वर्णन संकुचित करू शकतात (आणि म्हणून त्वरित संदर्भ खर्च). अंमलबजावणी `open-sse/mcp-server/descriptionCompressor.ts` मध्ये राहते आणि `createMcpServer()` आत `compressMcpRegistryMetadata` द्वारे MCP सर्व्हरमध्ये वायर्ड केली जाते.
 
-**निवड केल्यावरच सक्रिय, डीफॉल्टनुसार बंद.** दोन पर्यावरण चलांपैकी किमान एक सेट केलेला असेल तेव्हाच फिल्टर चालतो; दोन्हीपैकी एकही सेट नसल्यास सर्व 110 टूल्स कोणताही बदल न करता जाहीर केली जातात.
+- कॉम्प्रेशन वर्णन मजकूरावर Caveman Ruleset (`getRulesForContext("all", "full")`) वापरून संरक्षित-ब्लॉक एक्स्ट्रक्शन (कोड स्पॅन्स, फेंस्ड ब्लॉक्स इ.) वापरून चालते त्यामुळे संरचनात्मक सामग्री बदलली जात नाही.
+- `key_value` सेटिंग्ज टेबलमधील `compression.mcpDescriptionCompressionEnabled` मूल्याद्वारे प्रति-डिप्लॉयमेंट टॉगल करा (डीफॉल्ट: सक्षम) UI मध्ये — म्हणून उघड** विश्लेषण → MCP वर्णन कॉम्प्रेशन** .
+- `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false` किंवा `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false` द्वारे प्रक्रिया-व्यापी टॉगल करा.
+- रिअलटाइम आकडेवारी `omniroute_compression_status` द्वारे `analytics.mcpDescriptionCompression` अंतर्गत समोर आली आहे आणि वास्तविक प्रदात्याच्या वापराच्या पावत्यांमधून स्पष्टीकरण देण्यासाठी `source: "mcp_metadata_estimate"` टॅग केले आहे.
 
-| चल               | मोड                                                                                                  |
-| :--------------- | :--------------------------------------------------------------------------------------------------- |
-| `MCP_TOOL_DENY`  | ब्लॅकलिस्ट — `tools/list` मधून नेहमी वगळल्या जाणाऱ्या टूल्सची स्वल्पविरामाने विभक्त केलेली नावे      |
-| `MCP_TOOL_ALLOW` | अनुमती-सूची — टूल्सची स्वल्पविरामाने विभक्त केलेली नावे; केवळ हीच कायम राहतात, बाकी सर्व वगळली जातात |
+---
 
-`deny` ला `allow` पेक्षा प्राधान्य आहे. नावे स्वल्पविरामाने विभक्त केली जातात, त्यांच्या सुरुवातीची व शेवटची रिकामी जागा काढली जाते आणि रिकाम्या नोंदी दुर्लक्षित केल्या जातात. उदाहरणे:
+## टूल कार्डिनॅलिटी रिडक्शन (F4.3)
+
+वर्णन कॉम्प्रेशन प्रत्येक टूलचा मेटाडेटा संकुचित करते;** साधन-कार्डिनॅलिटी घट** _किती_ साधने जाहीर केली आहेत ते कमी करून एक पाऊल पुढे जाते. `tools/list` मॅनिफेस्टमध्ये कमी टूल्सची जाहिरात केल्याने क्लायंटचे मॉडेल टूल कॅटलॉग ("लेयर 5" कॉम्प्रेशन) साठी देणाऱ्या प्रति-विनंती टोकन खर्चात कपात करते. अंमलबजावणी हे `open-sse/mcp-server/toolCardinality.ts` (`reduceToolManifest`) मधील शुद्ध, स्टेटलेस फिल्टर आहे, जे `createMcpServer()` (`open-sse/mcp-server/server.ts`) मधील नोंदणी लूपमध्ये वायर्ड आहे.
+
+**निवड करा, डीफॉल्टनुसार बंद करा.** फिल्टर फक्त तेव्हाच चालतो जेव्हा दोनपैकी किमान एक पर्यावरण व्हेरिएबल्स सेट केले जातात; कोणत्याही सेटसह, सर्व 110 साधने अपरिवर्तित घोषित केली जातात.
+
+| चल               | मोड                                                                                                          |
+| :--------------- | :----------------------------------------------------------------------------------------------------------- |
+| `MCP_TOOL_DENY`  | — स्वल्पविरामाने विभक्त केलेल्या साधनांची नावे ब्लॅकलिस्ट करा जी नेहमी `tools/list` मधून वगळली जातात         |
+| `MCP_TOOL_ALLOW` | — स्वल्पविरामाने विभक्त केलेल्या साधनांच्या नावांना परवानगी द्या; फक्त हेच टिकतात, बाकी सर्व काही सोडले जाते |
+
+`deny` `allow` पेक्षा प्राधान्य घेते. नावे स्वल्पविरामाने विभक्त केलेली आहेत, ट्रिम केलेली आहेत आणि रिक्त नोंदी दुर्लक्षित केल्या आहेत. उदाहरणे:
 
 ```bash
-# कॅटलॉगमधून दोन टूल्स वगळा
+# Drop two tools from the catalog
 MCP_TOOL_DENY="omniroute_get_health,omniroute_list_combos" omniroute --mcp
 
-# केवळ राउटिंग + कोटा टूल्स जाहीर करा (अनुमती-सूची मोड)
+# Announce only the routing + quota tools (allow-list mode)
 MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 ```
 
-**फिल्टर केलेली टूल्स कशी काढली जातात:** नोंदणी नेहमी यशस्वी होते; प्रोफाइलने नाकारलेल्या टूलवर नंतर MCP SDK हँडलद्वारे `.disable()` लागू केले जाते, त्यामुळे ते `tools/list` मध्ये कधीही दिसत नाही, पण जोडणी अबाधित राहते (सुलभ सक्रियीकरण/निष्क्रियीकरण, पुनर्नोंदणी नाही). प्रोफाइल पार्सर `readMcpToolProfileFromEnv(process.env)` आहे, जो दोन्ही चल रिकामे असताना `null` (फिल्टरिंग नाही) परत करतो.
+**फिल्टर केलेली साधने कशी काढली जातात:** नोंदणी नेहमी यशस्वी होते; प्रोफाईलने नाकारलेले साधन नंतर MCP SDK हँडलवर `.disable()` d असते, त्यामुळे ते `tools/list` मध्ये कधीही दिसत नाही परंतु वायरिंग अखंड राहते (क्लीन enable/disable, पुन्हा नोंदणी नाही). प्रोफाइल पार्सर हे `readMcpToolProfileFromEnv(process.env)` आहे, जे दोन्ही var रिक्त असताना `null` (कोणतेही फिल्टरिंग नाही) परत करते.
 
-`reduceToolManifest` मागील अधिक समृद्ध `ToolProfile` रचना स्कोप-इंटरसेक्शन फिल्टरिंग (`allowScopes`, `read:*`-शैलीतील वाइल्डकार्ड जुळणीसह) आणि निर्धारक `maxTools` मर्यादेलाही समर्थन देते; मात्र या दोन्ही पर्यायांना नोंदणीच्या वेळी संपूर्ण मॅनिफेस्टची आवश्यकता असते आणि ते सध्या पर्यावरण चलांद्वारे उपलब्ध केलेले **नाहीत** (`tools/list`-पातळीवरील हुक हा नोंदवलेला पुढील टप्पा आहे). कपात करण्यापूर्वी आणि केल्यानंतरच्या मॅनिफेस्ट टोकन खर्चाची तुलना करण्यासाठी `estimateManifestTokens()` उपलब्ध आहे.
+`reduceToolManifest` मागे असलेला समृद्ध `ToolProfile` आकार स्कोप-इंटरसेक्शन फिल्टरिंग (`allowScopes`, `read:*` -style वाइल्डकार्ड मॅचिंगसह) आणि एक निर्धारक `maxTools` कॅपला देखील समर्थन देतो, परंतु त्या दोन नॉब्सना नोंदणीच्या वेळी पूर्ण प्रकटीकरण आवश्यक आहे आणि ते आहेत** नाही** आज पर्यावरण व्हेरिएबल्सद्वारे उघड झाले आहे (एक `tools/list` -level हुक ट्रॅक केलेला फॉलो-अप आहे). कपात करण्यापूर्वी आणि नंतर मॅनिफेस्ट टोकन खर्चाची तुलना करण्यासाठी `estimateManifestTokens()` उपलब्ध आहे.
 
 ---
 
 ## रनटाइम हार्टबीट
 
-stdio ट्रान्सपोर्ट दर 5 सेकंदांनी `${DATA_DIR}/runtime/mcp-heartbeat.json` मध्ये सक्रियतेची स्थिती कायमस्वरूपी नोंदवतो. डॅशबोर्ड (`/api/mcp/status`) `online` स्थिती निर्धारित करण्यासाठी ही फाइल आणि PID सक्रियता वाचतो. त्याऐवजी HTTP ट्रान्सपोर्ट्स प्रक्रियेअंतर्गत `getMcpHttpStatus()` मधून स्थिती कळवतात (फाइलमध्ये लेखन केले जात नाही).
+stdio वाहतूक दर 5 सेकंदांनी `${DATA_DIR}/runtime/mcp-heartbeat.json` पर्यंत जिवंत राहते. डॅशबोर्ड (`/api/mcp/status`) `online` मिळवण्यासाठी ही फाईल अधिक PID लाइव्हनेस वाचतो. HTTP त्याऐवजी प्रक्रियेतील `getMcpHttpStatus()` वरून अहवालाची स्थिती वाहतूक करते (फाइल लिहू नका).
 
-हार्टबीट स्नॅपशॉटमध्ये पुढील माहिती असते:
+हृदयाचा ठोका स्नॅपशॉटमध्ये समाविष्ट आहे:
 
 ```json
 {
@@ -541,45 +466,45 @@ stdio ट्रान्सपोर्ट दर 5 सेकंदांनी 
 
 ## ऑडिट लॉगिंग
 
-प्रत्येक टूल कॉलची नोंद `open-sse/mcp-server/audit.ts` द्वारे SQLite मधील `mcp_tool_audit` टेबलमध्ये केली जाते:
+प्रत्येक टूल कॉल `open-sse/mcp-server/audit.ts` द्वारे SQLite `mcp_tool_audit` टेबलवर लॉग इन केला जातो:
 
-- टूलचे नाव, आर्ग्युमेंट्स (प्रत्येक टूलच्या `auditLevel` नुसार हॅश केलेले/लहान केलेले), परिणाम
-- ms मधील कालावधी, यश/अपयश फ्लॅग, त्रुटी संदेश (लागू असल्यास)
+- साधनाचे नाव, युक्तिवाद (hashed/truncated प्रति-टूल `auditLevel`), परिणाम
+- ms मध्ये कालावधी, success/failure ध्वज, त्रुटी संदेश (लागू असेल तेव्हा)
 - API की हॅश, टाइमस्टॅम्प
-- स्कोप नकारांची नोंद गहाळ स्कोप सूचीसह `scope_denied:<reason>` म्हणून केली जाते
+- स्कोप नकार गहाळ स्कोप सूचीसह `scope_denied:<reason>` म्हणून लॉग केले जातात
 
-अलीकडील कॉल्स तपासण्यासाठी डॅशबोर्ड किंवा `/api/mcp/audit` आणि `/api/mcp/audit/stats` REST एंडपॉइंट्स वापरा.
+अलीकडील कॉल्सची तपासणी करण्यासाठी डॅशबोर्ड किंवा `/api/mcp/audit` आणि `/api/mcp/audit/stats` REST एंडपॉइंट्स वापरा.
 
 ---
 
-## फाइल्स
+## फाईल्स
 
-| फाइल                                                                     | उद्देश                                                          |
-| :----------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| `open-sse/mcp-server/server.ts`                                          | MCP सर्व्हर फॅक्टरी, stdio एंट्री पॉइंट, स्कोपनुसार टूल नोंदणी  |
-| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + Streamable HTTP ट्रान्सपोर्ट (सत्र व्यवस्थापन)            |
-| `open-sse/mcp-server/scopeEnforcement.ts`                                | टूल स्कोप मूल्यमापन आणि कॉलर निर्धारण                           |
-| `open-sse/mcp-server/audit.ts`                                           | टूल कॉल ऑडिट लॉगिंग (`mcp_tool_audit`)                          |
-| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio हार्टबीट रायटर (`mcp-heartbeat.json`)                     |
-| `open-sse/mcp-server/descriptionCompressor.ts`                           | टूल / प्रॉम्प्ट / रिसोर्स रजिस्ट्रींसाठी वर्णन संक्षेपण         |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod स्कीमा + टूल रजिस्ट्री (`MCP_TOOLS`, 45 नोंदी)              |
-| `open-sse/mcp-server/tools/advancedTools.ts`                             | टप्पा 2 + कॅशे + 1proxy टूल हँडलर्स                             |
-| `open-sse/mcp-server/tools/compressionTools.ts`                          | संक्षेपण टूल हँडलर्स                                            |
-| `open-sse/mcp-server/tools/memoryTools.ts`                               | मेमरी टूल व्याख्या (3 टूल्स)                                    |
-| `open-sse/mcp-server/tools/skillTools.ts`                                | कौशल्य टूल व्याख्या (4 टूल्स)                                   |
-| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion संदर्भ-स्रोत टूल व्याख्या (6 टूल्स)                      |
-| `open-sse/mcp-server/tools/gamificationTools.ts`                         | गेमिफिकेशन टूल व्याख्या (8 टूल्स)                               |
-| `open-sse/mcp-server/tools/pluginTools.ts`                               | प्लगइन नोंदणी आणि व्यवस्थापन टूल्स (8 टूल्स)                    |
-| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status` एंडपॉइंट                                      |
-| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools` एंडपॉइंट                                       |
-| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE ट्रान्सपोर्ट रूट                             |
-| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` Streamable HTTP ट्रान्सपोर्ट रूट              |
-| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit` ऑडिट लॉग क्वेरी                                |
-| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats` एकत्रित ऑडिट मेट्रिक्स                   |
-| `src/lib/notion/api.ts`                                                  | Notion REST API क्लायंट (पुनःप्रयत्न, टाइमआउट, त्रुटी वर्गीकरण) |
-| `src/lib/db/notion.ts`                                                   | Notion टोकन सातत्यपूर्ण संचयन (`key_value` टेबल)                |
-| `src/app/api/settings/notion/route.ts`                                   | Notion सेटिंग्ज API (GET/POST/DELETE)                           |
-| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion टोकन व्यवस्थापन UI                                       |
-| `tests/unit/notion-api.test.ts`                                          | Notion API क्लायंट चाचण्या (7)                                  |
-| `tests/unit/notion-tools.test.ts`                                        | Notion टूल्स स्कोप अंमलबजावणी चाचण्या (10)                      |
-| `tests/unit/db/notion.test.mjs`                                          | Notion DB मॉड्यूल चाचण्या (3)                                   |
+| फाईल                                                                     | उद्देश                                                                  |
+| :----------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `open-sse/mcp-server/server.ts`                                          | MCP सर्व्हर फॅक्टरी, stdio एंट्री पॉइंट, स्कोप्ड टूल नोंदणी             |
+| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + प्रवाह करण्यायोग्य HTTP वाहतूक (सत्र व्यवस्थापन)                  |
+| `open-sse/mcp-server/scopeEnforcement.ts`                                | टूल स्कोप मूल्यांकन आणि कॉलर रिझोल्यूशन                                 |
+| `open-sse/mcp-server/audit.ts`                                           | टूल कॉल ऑडिट लॉगिंग (`mcp_tool_audit`)                                  |
+| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio हृदयाचा ठोका लेखक (`mcp-heartbeat.json`)                          |
+| `open-sse/mcp-server/descriptionCompressor.ts`                           | टूल / प्रॉम्प्ट / संसाधन नोंदणीसाठी वर्णन कॉम्प्रेशन                    |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod स्कीमा + टूल रेजिस्ट्री (`MCP_TOOLS`, 45 नोंदी)                     |
+| `open-sse/mcp-server/tools/advancedTools.ts`                             | फेज 2 + कॅशे + 1प्रॉक्सी टूल हँडलर                                      |
+| `open-sse/mcp-server/tools/compressionTools.ts`                          | कॉम्प्रेशन टूल हँडलर                                                    |
+| `open-sse/mcp-server/tools/memoryTools.ts`                               | मेमरी टूल व्याख्या (3 साधने)                                            |
+| `open-sse/mcp-server/tools/skillTools.ts`                                | कौशल्य साधन व्याख्या (4 साधने)                                          |
+| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion संदर्भ स्रोत साधन व्याख्या (6 साधने)                             |
+| `open-sse/mcp-server/tools/gamificationTools.ts`                         | गेमिफिकेशन टूल व्याख्या (8 साधने)                                       |
+| `open-sse/mcp-server/tools/pluginTools.ts`                               | प्लगइन नोंदणी आणि व्यवस्थापन साधने (8 साधने)                            |
+| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status` एंडपॉइंट                                              |
+| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools` एंडपॉइंट                                               |
+| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE वाहतूक मार्ग                                         |
+| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` प्रवाही HTTP वाहतूक मार्ग                             |
+| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit` ऑडिट लॉग क्वेरी                                        |
+| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats` एकत्रित ऑडिट मेट्रिक्स                           |
+| `src/lib/notion/api.ts`                                                  | Notion REST API क्लायंट (पुन्हा प्रयत्न करा, कालबाह्य, त्रुटी वर्गीकरण) |
+| `src/lib/db/notion.ts`                                                   | Notion टोकन पर्सिस्टन्स (`key_value` टेबल)                              |
+| `src/app/api/settings/notion/route.ts`                                   | Notion सेटिंग्ज API (GET/POST/DELETE)                                   |
+| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion टोकन व्यवस्थापन UI                                               |
+| `tests/unit/notion-api.test.ts`                                          | Notion API क्लायंट चाचण्या (7)                                          |
+| `tests/unit/notion-tools.test.ts`                                        | Notion टूल्स स्कोप अंमलबजावणी चाचण्या (10)                              |
+| `tests/unit/db/notion.test.mjs`                                          | Notion DB मॉड्यूल चाचण्या (3)                                           |

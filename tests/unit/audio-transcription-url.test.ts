@@ -7,7 +7,10 @@ import {
   resolveTranscriptionFile,
   resolveTranscriptionFileOrResponse,
 } from "../../open-sse/utils/transcriptionRemoteAudio.ts";
-import { setPinnedFetchTestOverride } from "../../src/shared/network/remoteImageFetch.ts";
+import {
+  fetchRemoteMedia,
+  setPinnedFetchTestOverride,
+} from "../../src/shared/network/remoteImageFetch.ts";
 
 const REMOTE_AUDIO_URL = "https://8.8.8.8/bot123456:PRIVATE_TELEGRAM_TOKEN/voice.oga";
 
@@ -40,6 +43,7 @@ test("URL input is fetched by OmniRoute then sent to Groq as file, never as a Te
     const form = urlOnly();
     form.set("language", "uk");
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: form,
       credentials: { apiKey: "groq-secret" },
     });
@@ -72,6 +76,7 @@ test("URL input retains OpenAI-compatible provider routing and multipart field f
   try {
     const form = urlOnly("openai/whisper-1");
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: form,
       credentials: { apiKey: "openai-key" },
     });
@@ -93,6 +98,7 @@ test("uploaded file takes precedence over URL without any remote fetch", async (
     const form = urlOnly();
     form.set("file", new File(["uploaded"], "clip.wav", { type: "audio/wav" }));
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: form,
       credentials: { apiKey: "groq-secret" },
     });
@@ -108,7 +114,11 @@ test("missing provider credentials are rejected before downloading URL audio", a
     throw new Error("must not fetch");
   });
   try {
-    const response = await handleAudioTranscription({ formData: urlOnly(), credentials: null });
+    const response = await handleAudioTranscription({
+      formData: urlOnly(),
+      credentials: null,
+      remoteMediaFetcher: fetchRemoteMedia,
+    });
     assert.equal(response.status, 401);
   } finally {
     setPinnedFetchTestOverride(undefined);
@@ -124,6 +134,7 @@ test("rejects HTTP, URL credentials, nonstandard ports, and invalid URLs", async
     "not-a-url",
   ]) {
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: urlOnly(undefined, url),
       credentials: { apiKey: "groq-secret" },
     });
@@ -140,6 +151,7 @@ test("rejects local, link-local, and cloud metadata URLs without network calls",
   try {
     for (const host of ["127.0.0.1", "169.254.169.254", "10.0.0.5", "192.168.1.3", "[::1]"]) {
       const response = await handleAudioTranscription({
+        remoteMediaFetcher: fetchRemoteMedia,
         formData: urlOnly(undefined, `https://${host}/file.ogg`),
         credentials: { apiKey: "groq-secret" },
       });
@@ -162,6 +174,7 @@ test("rejects redirect to a private address rather than following it", async () 
   });
   try {
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: urlOnly(),
       credentials: { apiKey: "groq-secret" },
     });
@@ -179,6 +192,7 @@ test("refuses oversized remote audio based on Content-Length before reading body
   );
   try {
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: urlOnly(),
       credentials: { apiKey: "groq-secret" },
     });
@@ -194,6 +208,7 @@ test("refuses HTML response even when the URL ends in .ogg", async () => {
   );
   try {
     const response = await handleAudioTranscription({
+      remoteMediaFetcher: fetchRemoteMedia,
       formData: urlOnly(),
       credentials: { apiKey: "groq-secret" },
     });
@@ -233,7 +248,8 @@ test("hasTranscriptionInput accepts a file or a url string and rejects neither",
 
 test("resolveTranscriptionFileOrResponse maps failures to a sanitized error Response", async () => {
   const unsafe = await resolveTranscriptionFileOrResponse(
-    urlOnly(undefined, "http://8.8.8.8/bot123456:PRIVATE_TELEGRAM_TOKEN/voice.oga")
+    urlOnly(undefined, "http://8.8.8.8/bot123456:PRIVATE_TELEGRAM_TOKEN/voice.oga"),
+    fetchRemoteMedia
   );
   assert.ok("response" in unsafe);
   assert.equal(unsafe.response.status, 400);

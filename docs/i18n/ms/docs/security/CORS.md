@@ -56,11 +56,11 @@ disebabkan satu fakta pelaksanaan yang nyata:
 
 Maksudnya bagi setiap permukaan, walaupun dengan `CORS_ALLOW_ALL=true`:
 
-| Permukaan                           | Mekanisme pengesahan           | Kesan CORS kad bebas                                                                                                                                                                                                                                                |
-| ----------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Papan Pemuka / PENGURUSAN `/api/*`  | Sesi kuki                      | Origin dipantulkan, tetapi **tanpa `Allow-Credentials`**, pelayar **menyekat** pembacaan yang menggunakan bukti kelayakan. Laman silang origin berniat jahat **tidak boleh membaca** respons papan pemuka anda yang telah disahkan, dan kuki sesi tidak didedahkan. |
-| API Klien `/v1/*`, `/v1beta/*`      | Pengepala Bearer / `x-api-key` | Sudah bersifat permisif **secara reka bentuk** (`relaxForTokenAuth`): pelayar tidak pernah melampirkan `Authorization`/`x-api-key` secara automatik, maka halaman penyerang tidak boleh membekalkan kunci anda. `CORS_ALLOW_ALL` tidak meluaskan akses ini.         |
-| Awam baca sahaja (`/api/health`, …) | Tiada                          | Tidak sensitif; kad bebas tidak memudaratkan.                                                                                                                                                                                                                       |
+| Permukaan                           | Mekanisme pengesahan           | Kesan CORS kad bebas                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Papan Pemuka / PENGURUSAN `/api/*`  | Sesi kuki                      | Origin dipantulkan, tetapi **tanpa `Allow-Credentials`**, pelayar **menyekat** pembacaan yang menggunakan bukti kelayakan. Laman silang origin berniat jahat **tidak boleh membaca** respons papan pemuka anda yang telah disahkan, dan kuki sesi tidak didedahkan.                                                                                                                                         |
+| API Klien `/v1/*`, `/v1beta/*`      | Pengepala Bearer / `x-api-key` | Sudah bersifat permisif **secara reka bentuk** (`relaxForTokenAuth`): pelayar tidak pernah melampirkan `Authorization`/`x-api-key` secara automatik, maka halaman penyerang tidak boleh membekalkan kunci anda. Pantulan hanya digunakan apabila kunci yang dikemukakan telah disahkan; respons tanpa nama (`REQUIRE_API_KEY=false`) mengekalkan senarai benar. `CORS_ALLOW_ALL` tidak meluaskan akses ini. |
+| Awam baca sahaja (`/api/health`, …) | Tiada                          | Tidak sensitif; kad bebas tidak memudaratkan.                                                                                                                                                                                                                                                                                                                                                               |
 
 Jadi, pendedahan **baki** daripada `CORS_ALLOW_ALL=true` terhad kepada: (a)
 **pembacaan** silang origin tanpa bukti kelayakan terhadap data yang sememangnya tidak memerlukan pengesahan, dan (b)
@@ -122,10 +122,52 @@ memulakan semula.
   secara automatik. CORS bukan penghalang yang bermakna di sini — kunci API ialah
   penghalangnya — sebab itulah permukaan tersebut sengaja dibuat permisif supaya klien pelayar dan
   Electron boleh membaca respons yang sememangnya mereka berhak terima.
+  Pantulan yang dilonggarkan mengikut kunci yang telah disahkan, bukan sekadar kehadiran
+  pengepala: apabila `REQUIRE_API_KEY=false` melayan permintaan secara tanpa nama,
+  respons yang berjaya mengekalkan senarai benar fail-closed. Penolakan pengesahan (401)
+  kekal boleh dibaca supaya klien dapat memaparkan kunci yang dibatalkan atau tersalah
+  taip (#5242): 401 milik saluran paip itu sendiri mengekalkan pantulan, dan laluan yang
+  menolak kunci itu sendiri selepas saluran paip melayannya sebagai tanpa nama
+  (`/v1/models` dan `/v1beta/models` apabila pengesahan pengurusan dikonfigurasi, laluan
+  berskop pemilik `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` dan
+  laluan calon auto-combo) menambah pantulan pada 401 tersebut melalui
+  `credentialRejectionHeaders()`. Pantulan ditentukan oleh sama ada permintaan membawa
+  pengepala bukti kelayakan (`Authorization`, `x-api-key`, `x-goog-api-key` atau kuki
+  `auth_token`), bukan oleh yang mana satu disemak oleh laluan, dan tidak pernah
+  dipasangkan dengan `Access-Control-Allow-Credentials`; badannya ialah sampul ralat
+  yang tetap. Laluan pengurusan di bawah `/api/v1/` yang dikawal oleh
+  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) tidak
+  menambah pantulan: dengan `REQUIRE_API_KEY=false`, 401/403 laluan tersebut tidak boleh
+  dibaca merentas origin.
 - **Sesi kuki (papan pemuka):** dilindungi oleh lalai tutup-jika-gagal **dan**
   oleh ketiadaan `Access-Control-Allow-Credentials` pada laluan dikongsi. Jangan
   masukkan origin pengurusan/papan pemuka dalam sebarang konfigurasi permisif; origin tersebut mesti kekal
   tutup-jika-gagal sepenuhnya.
+
+## Jabat tangan WebSocket (`/v1/responses`, `/v1/ws`)
+
+Pelayar tidak menggunakan CORS pada WebSocket, maka pengangkutan WebSocket yang
+memulangkan output inferens menyemak `Origin` jabat tangan dengan sendirinya
+(`src/server/origin/wsOrigin.ts`): WebSocket Responses (`/v1/responses`) dan, apabila
+OmniRoute dijalankan melalui `npm start` / `npm run dev`, jambatan `/v1/ws` dan
+`/api/v1/ws`, yang menstrim `/v1/chat/completions`, `/v1/messages` dan
+`/v1/responses` sebagai bingkai. Jambatan meminta keputusan daripada
+`/api/v1/ws?handshake=1` dan enggan menaik taraf sambungan melainkan laluan itu telah
+menjalankan semakan. Jabat tangan diterima apabila:
+
+- ia tiada pengepala `Origin` (Codex CLI, SDK dan klien bukan pelayar yang lain);
+- `Origin` dibenarkan oleh senarai benar di atas (`CORS_ALLOWED_ORIGINS`, tetapan
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ialah salah satu origin awam milik OmniRoute sendiri (URL asas awam yang
+  dikonfigurasi, origin yang dimajukan oleh proksi yang dipercayai, atau hos loopback/LAN
+  langsung yang diberikan sebagai literal IP atau `localhost` — calon yang sama yang
+  digunakan oleh semakan mutasi papan pemuka); atau
+- ia membawa kunci API yang sah, seperti pada permukaan HTTP `/v1/*`.
+
+Selain itu akan menerima `403 ws_origin_forbidden`. Kuki sesi papan pemuka tidak
+mengecualikan `Origin` asing, kerana pelayar melampirkannya pada soket mana-mana halaman.
+`localhost` pada port lain tidak dianggap sebagai origin yang sama; tambah origin
+pembangunan sedemikian ke dalam `CORS_ALLOWED_ORIGINS`.
 
 ## Contoh: proksi songsang di hadapan OmniRoute
 
@@ -161,6 +203,7 @@ tab Security), bukan dalam proksi.
 | Sepanduk amaran papan pemuka                               | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Medan CORS Allowed Origins                                 | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per laluan Cloud-Agent (pengecualian)                 | `src/lib/cloudAgent/api.ts`                                          |
+| Semakan `Origin` jabat tangan WebSocket                    | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Lihat juga
 

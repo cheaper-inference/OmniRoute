@@ -12,18 +12,19 @@ function joinNonEmpty(parts: string[]) {
   return parts.filter(Boolean).join("\n").trim();
 }
 
-function extractTextFromContent(content: unknown): string {
-  if (typeof content === "string") return content.trim();
+function extractTextFromContent(content: unknown, preserveWhitespace = false): string {
+  if (typeof content === "string") return preserveWhitespace ? content : content.trim();
 
   if (!Array.isArray(content)) return "";
 
-  return content
+  const text = content
     .map((part) => {
-      if (typeof part === "string") return part.trim();
+      if (typeof part === "string") return preserveWhitespace ? part : part.trim();
 
       const block = asRecord(part);
       const blockType = typeof block.type === "string" ? block.type : "";
-      const blockText = typeof block.text === "string" ? block.text.trim() : "";
+      const blockText =
+        typeof block.text === "string" ? (preserveWhitespace ? block.text : block.text.trim()) : "";
 
       if (blockText && (blockType === "" || blockType === "text" || blockType === "output_text")) {
         return blockText;
@@ -32,8 +33,8 @@ function extractTextFromContent(content: unknown): string {
       return "";
     })
     .filter(Boolean)
-    .join("\n")
-    .trim();
+    .join(preserveWhitespace ? "" : "\n");
+  return preserveWhitespace ? text : text.trim();
 }
 
 function extractReasoningText(record: JsonRecord): string {
@@ -180,23 +181,30 @@ function extractStreamError(body: JsonRecord): ComboTestStreamResult["error"] {
   };
 }
 
-function extractStreamPayload(payload: string): ComboTestStreamResult | undefined {
+function extractStreamPayload(
+  payload: string
+): (ComboTestStreamResult & { reasoning?: string }) | undefined {
   try {
     const body = JSON.parse(payload);
     const error = extractStreamError(asRecord(body));
     if (error) return { text: "", error };
 
     const collected: string[] = [];
-    const direct = extractComboTestResponseText(body);
+    const reasoningParts: string[] = [];
+    const direct = extractComboTestResponseText(body, false);
     if (direct) collected.push(direct);
+    else {
+      const fallback = extractComboTestResponseText(body);
+      if (fallback) reasoningParts.push(fallback);
+    }
     for (const choice of Array.isArray(body?.choices) ? body.choices : []) {
       const delta = asRecord(choice?.delta);
-      const content = extractTextFromContent(delta.content);
+      const content = extractTextFromContent(delta.content, true);
       const reasoning = extractReasoningText(delta);
       if (content) collected.push(content);
-      else if (reasoning) collected.push(reasoning);
+      if (reasoning) reasoningParts.push(reasoning);
     }
-    return { text: collected.join("") };
+    return { text: collected.join(""), reasoning: reasoningParts.join("") };
   } catch {
     // Ignore malformed/non-JSON SSE events; a later valid event can still
     // prove that the model is healthy.
@@ -206,6 +214,7 @@ function extractStreamPayload(payload: string): ComboTestStreamResult | undefine
 
 export function extractComboTestStreamResult(streamBody: string): ComboTestStreamResult {
   const collected: string[] = [];
+  const reasoningParts: string[] = [];
   let streamError: ComboTestStreamResult["error"];
   for (const line of streamBody.split(/\r?\n/)) {
     if (!line.startsWith("data:")) continue;
@@ -214,16 +223,26 @@ export function extractComboTestStreamResult(streamBody: string): ComboTestStrea
     const result = extractStreamPayload(payload);
     if (!result) continue;
     if (result.error) streamError = result.error;
-    else if (result.text) collected.push(result.text);
+    else {
+      if (result.text) collected.push(result.text);
+      if (result.reasoning) reasoningParts.push(result.reasoning);
+    }
   }
-  return { text: collected.join("").trim(), ...(streamError ? { error: streamError } : {}) };
+  const content = collected.join("").trim();
+  return {
+    text: content || reasoningParts.join("").trim(),
+    ...(streamError ? { error: streamError } : {}),
+  };
 }
 
 export function extractComboTestStreamText(streamBody: string): string {
   return extractComboTestStreamResult(streamBody).text;
 }
 
-export function extractComboTestResponseText(responseBody: unknown): string {
+export function extractComboTestResponseText(
+  responseBody: unknown,
+  includeReasoning = true
+): string {
   const body = asRecord(responseBody);
 
   if (typeof body.output_text === "string" && body.output_text.trim()) {
@@ -242,7 +261,7 @@ export function extractComboTestResponseText(responseBody: unknown): string {
       if (messageText) return messageText;
 
       const reasoningText = extractReasoningText(message);
-      if (reasoningText) return reasoningText;
+      if (includeReasoning && reasoningText) return reasoningText;
 
       if (typeof choiceRecord.text === "string" && choiceRecord.text.trim()) {
         return choiceRecord.text.trim();
@@ -257,7 +276,7 @@ export function extractComboTestResponseText(responseBody: unknown): string {
       if (contentText) return contentText;
 
       const reasoningText = extractReasoningText(itemRecord);
-      if (reasoningText) return reasoningText;
+      if (includeReasoning && reasoningText) return reasoningText;
     }
   }
 
@@ -265,9 +284,9 @@ export function extractComboTestResponseText(responseBody: unknown): string {
   if (topLevelText) return topLevelText;
 
   const topLevelReasoning = extractReasoningText(body);
-  if (topLevelReasoning) return topLevelReasoning;
+  if (includeReasoning && topLevelReasoning) return topLevelReasoning;
 
-  if (hasReasoningOnlyCompletion(body)) {
+  if (includeReasoning && hasReasoningOnlyCompletion(body)) {
     return "[reasoning-only completion]";
   }
 

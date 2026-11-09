@@ -61,6 +61,7 @@ export const createKeySchema = z
     usageLimitEnabled: z.boolean().optional(),
     dailyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     weeklyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
+    fiveHourUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     chaosModeEnabled: z.boolean().optional(),
     expiresAt: z.string().datetime().nullable().optional(),
     scopes: z.array(z.string().trim().min(1).max(64)).max(32).optional(),
@@ -195,6 +196,7 @@ export const updateKeyPermissionsSchema = z
     compressionEnabled: z.boolean().optional(),
     codexServiceMode: z.enum(API_KEY_CODEX_SERVICE_MODES).optional(),
     allowAutoCombos: z.boolean().optional(),
+    allowCcDiscoveryAliases: z.boolean().optional(),
     catalogScope: z.enum(["all", "combos", "models"]).optional(),
     // Per-key enforced routing target; null (or blank) clears the pin.
     forcedModel: z.string().trim().max(300).nullable().optional(),
@@ -204,6 +206,7 @@ export const updateKeyPermissionsSchema = z
     usageLimitEnabled: z.boolean().optional(),
     dailyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     weeklyUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
+    fiveHourUsageLimitUsd: z.coerce.number().min(0).optional().nullable(),
     chaosModeEnabled: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
@@ -259,6 +262,7 @@ export const updateKeyPermissionsSchema = z
       value.compressionEnabled === undefined &&
       value.codexServiceMode === undefined &&
       value.allowAutoCombos === undefined &&
+      value.allowCcDiscoveryAliases === undefined &&
       value.catalogScope === undefined &&
       value.forcedModel === undefined &&
       value.cacheDefaultMode === undefined &&
@@ -267,6 +271,7 @@ export const updateKeyPermissionsSchema = z
       value.usageLimitEnabled === undefined &&
       value.dailyUsageLimitUsd === undefined &&
       value.weeklyUsageLimitUsd === undefined &&
+      value.fiveHourUsageLimitUsd === undefined &&
       value.chaosModeEnabled === undefined
     ) {
       ctx.addIssue({

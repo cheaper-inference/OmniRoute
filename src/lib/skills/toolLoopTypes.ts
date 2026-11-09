@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../../open-sse/utils/providerHttpAttempts.ts";
 /**
  * Shared types for the server-owned tool loop.
  * All consumers use `import type` — no runtime imports.
@@ -51,11 +52,17 @@ export interface ChatCoreErrorResult {
 export type NonStreamingProviderLegResult =
   | {
       kind: "ok";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       response: Record<string, unknown>;
       responseForMemoryExtraction: Record<string, unknown>;
       providerBody: Record<string, unknown>;
       providerRequest: Record<string, unknown>;
       usage: ProviderLegUsage | null;
+      /**
+       * Full provider usage extracted before the client translate mutated the body
+       * (cost/credit fields, estimate marker included). Billing source of truth.
+       */
+      billingUsage?: Record<string, unknown> | null;
       responsePayloadFormat: string;
       looksLikeSSE: boolean;
       connectionId: string;
@@ -67,6 +74,7 @@ export type NonStreamingProviderLegResult =
     }
   | {
       kind: "error";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       result: ChatCoreErrorResult;
       upstreamDiagnostic?: Record<string, unknown>;
       receipt: ProviderLegReceipt;
@@ -99,6 +107,7 @@ export interface ServerOwnedToolLoopOptions {
 }
 
 export interface ServerOwnedToolLoopResult {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   kind: "ok" | "error";
   response?: Record<string, unknown>;
   responseForMemoryExtraction?: Record<string, unknown>;
@@ -198,6 +207,8 @@ export interface NonStreamingClientTranslateInput {
    * reports through `onReasoningReplayHistory` instead.
    */
   historyMessages?: unknown[] | null;
+  /** Connection+family scoped Gemini thought-signature namespace (#17912). */
+  signatureNamespace?: string | null;
   responseToolNameMap: Map<string, string> | null;
   customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap: Map<string, { namespace?: string; name: string }> | null;
@@ -206,6 +217,8 @@ export interface NonStreamingClientTranslateInput {
   videoTranscriptSensitive?: boolean;
   clientHeaders: Headers | Record<string, unknown> | null;
   isClaudeCodeCompatible: boolean;
+  /** Serving connection id — the Claude thinking store binds entries on it (#17324). */
+  connectionId?: string | null;
   /**
    * The client's explicit thinking intent for THIS request (same value the
    * streaming path threads into the SSE translator). Without it the

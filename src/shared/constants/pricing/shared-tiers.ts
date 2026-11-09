@@ -169,6 +169,27 @@ export const CLAUDE_SONNET_5_PRICING = {
   cache_creation: 2.5,
 };
 
+// Claude Haiku 5 / 5.5 — length-tiered pricing, source:
+// https://platform.claude.com/docs/en/about-claude/pricing
+// Prompts up to 100k tokens: $0.10 in / $0.50 out / $0.01 cache hit / $0.125 5m cache write.
+// Prompts over 100k tokens (cache reads/writes count): $0.50 / $2.50 / $0.05 / $0.625,
+// applied to the whole request via the `long_context` tier.
+export const CLAUDE_HAIKU_5_PRICING = {
+  input: 0.1,
+  output: 0.5,
+  cached: 0.01,
+  reasoning: 0.5,
+  cache_creation: 0.125,
+  long_context: {
+    threshold: 100_000,
+    input: 0.5,
+    output: 2.5,
+    cached: 0.05,
+    reasoning: 2.5,
+    cache_creation: 0.625,
+  },
+};
+
 export const GLM_PRICING = {
   // GLM-5.3 Flash (2026-08-26, https://models.dev / Z.AI)
   "glm-5.3-flash": {

@@ -1,0 +1,1 @@
+- **fix(opencode):** route OpenCode Go Gemini-wire models (`gemini-4-argon`) to the Go inference host with `x-goog-api-key` auth instead of the chat host with Bearer ([#18287](https://github.com/cheaper-inference/OmniRoute/pull/18287)) — thanks @dqphong0302

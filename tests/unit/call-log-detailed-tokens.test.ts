@@ -107,12 +107,14 @@ describe("detailed token extraction â€” per provider format", () => {
     assert.equal(getReasoningTokensOrNull(tokens), null, "No reasoning field");
   });
 
-  it("Antigravity / openai-compatible-sp: same as Codex (no breakdowns)", () => {
+  it("Antigravity / Gemini: cached input remains a subset of prompt input", () => {
     const tokens = {
-      prompt_tokens: 300,
-      completion_tokens: 150,
+      prompt_tokens: 46212,
+      completion_tokens: 4,
+      cached_tokens: 40929,
     };
-    assert.equal(getPromptCacheReadTokensOrNull(tokens), null);
+    assert.equal(getLoggedInputTokens(tokens), 46212);
+    assert.equal(getPromptCacheReadTokensOrNull(tokens), 40929);
     assert.equal(getPromptCacheCreationTokensOrNull(tokens), null);
     assert.equal(getReasoningTokensOrNull(tokens), null);
   });

@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Ọrụ Ndị Dị Ugbu A
+## Nka dị
 
-OmniRoute na-ekpughe ọrụ A2A 6 ndị e jikọrọ na `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Modul ọrụ ọ bụla bi na `src/lib/a2a/skills/`.
+OmniRoute ekpughere nka A2A 6 etinyere na `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Modul nka ọ bụla bi na `src/lib/a2a/skills/`.
 
-| Ọrụ                | ID                   | Nkọwa                                                                                                                                                             | Mkpado                     | Ọmụmaatụ                                 |
-| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------- |
-| Smart Routing      | `smart-routing`      | Na-ebufe prompt site na provider/combo kacha mma site na iji combo engine nke OmniRoute + scoring                                                                 | routing, providers         | "Bufee prompt a site na model kacha mma" |
-| Quota Management   | `quota-management`   | Na-akọ ọnọdụ quota nke provider ọ bụla, na-enyere ndị na-akpọ aka ịkpebi mgbe ha ga-achịkwa ọsọ/gbanwee                                                           | quota, providers           | "Lelee quota maka anthropic"             |
-| Provider Discovery | `provider-discovery` | Na-edepụta providers arụnyere na ikike ha, flags free-tier, ọnọdụ OAuth                                                                                           | providers, discovery       | "Kedu providers ndị dị?"                 |
-| Cost Analysis      | `cost-analysis`      | Na-atụle ọnụ ego nke request/mkparịta ụka site na catalog + ojiji nke na-adịbeghị anya                                                                            | cost, usage                | "Tụlee ọnụ ego maka mkparịta ụka a"      |
-| Health Report      | `health-report`      | Na-akọkọta ọnọdụ circuit breaker, cooldown, na lockout nke provider ọ bụla                                                                                        | health, resilience         | "Gosi ọnọdụ ahụ ike nke providers niile" |
-| List Capabilities  | `list-capabilities`  | Na-alọghachi catalog Agent Skills zuru ezu nke ihe ndenye 45 (23 API + 21 CLI + 1 config) dị ka tebulu markdown nwere URL SKILL.md gburugburu maka ịtinye context | catalog, discovery, skills | "Depụta ikike OmniRoute niile"           |
+| Nkà                    | ID                   | Nkọwa                                                                                                                                    | Tags                    | Ihe atụ                                      |
+| :--------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------- |
+| Smart Routing          | `smart-routing`      | Na-emegharị ngwa ngwa site na provider/combo kacha mma na-eji OmniRoute's combo engine + scoreing                                        | ụzọ, ndị na-eweta       | "Jigharịa ngwa ngwa a site na ụdị kacha mma" |
+| Njikwa oke             | `quota-management`   | Akụkọ kwa onye na-eweta oke steeti, na-enyere ndị na-akpọ oku aka ikpebi mgbe ha ga- throttle/switch                                     | oke, ndị na-eweta       | "Lelee oke maka anthropic"                   |
+| Nchọpụta onye na-eweta | `provider-discovery` | Na-edepụta ndị na-eweta arụnyere nwere ikike, ọkọlọtọ ọkwa efu, ọkwa OAuth                                                               | ndị na-enye, nchọpụta   | "Olee ndị na-enye ọrụ dị?"                   |
+| Nyocha ọnụahịa         | `cost-analysis`      | Atụmatụ ọnụ ahịa request/conversation nyere katalọgụ + ojiji na nso nso a                                                                | ego, ojiji              | "Tinye ọnụ ahịa mkparịta ụka a"              |
+| Akụkọ ahụike           | `health-report`      | Na-achịkọta ihe mgbaji sekit, nkwụsịtụ, ọnọdụ mkpọchi maka onye na-eweta ya                                                              | ahụike, resilience      | "Gosi ọkwa ahụike nke ndị niile na-enye ya"  |
+| Ike ndepụta            | `list-capabilities`  | weghachite katalọgụ Skills Agent Skills 45 (23 API + 21 CLI + 1 config) dị ka tebụl akara nwere SKILL.md URLs raw maka ịgbanye okirikiri | katalọgụ, nchọpụta, nkà | "Depụta ikike OmniRoute niile"               |
 
-> A ga-edebe Agent Card ka ọ kwekọrọ na catalog ndị provider 375 dị ugbu a; a na-enweta ọnụ ọgụgụ provider na metadata free/no-auth site na registry oge ọrụ.
+> Ekwesịrị idowe Kaadị Agent ka ọ dabara na katalọgụ ndị na-eweta 381 dị ndụ; Ọnụọgụ ndị na-eweta na free/no-auth metadata sitere na ndekọ oge ojiri gaa.
 
-### Nkọwa Zuru Ezu nke Ọrụ `list-capabilities`
+### `list-capabilities` Skill nkọwa
 
-Ọrụ `list-capabilities` bara nnukwu uru maka ndị agent mpụga chọrọ ịchọpụta ihe OmniRoute na-ekpughe tupu ha iziga API calls. Ọ na-alọghachi artifact tebulu markdown haziri ahazi:
+Nkà `list-capabilities` bara uru karịsịa maka ndị nnọchi anya mpụga chọrọ ịchọpụta ihe OmniRoute na-ekpughe tupu izipu oku API. Ọ na-eweghachite ihe arụrụ arụ tebụl akara akara ahaziri ahazi:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,60 +176,68 @@ OmniRoute na-ekpughe ọrụ A2A 6 ndị e jikọrọ na `src/lib/a2a/taskExecut
 ...
 ```
 
-Ahịrị ọ bụla gụnyere kọlụm `rawUrl` ka ndị agent wee nwee ike ibudata SKILL.md zuru ezu ozugbo. Ubi `metadata.totalSkills` na-egosipụta nha catalog (45 taa). Nhọpụta: `src/lib/a2a/skills/listCapabilities.ts`. Lee kwa [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ahịrị ọ bụla gụnyere kọlụm `rawUrl` ka ndị nnọchi anya wee nweta SKILL.md zuru ezu ozugbo. Mpaghara `metadata.totalSkills` na-egosipụta nha katalọgụ (45 taa). Mmejuputa: `src/lib/a2a/skills/listCapabilities.ts`. Hụkwa [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (ihe enyemaka)
+## REST API ( inyeaka)
 
-Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị dị n'okpuru na-enye ohere enyemaka maka dashboard na ngwa mpụga:
+JSON-RPC njedebe `/a2a` bụ ebe ntinye A2A nke canonical. Ebe njedebe REST dị n'okpuru na-enye ohere inyeaka maka dashboards na ngwá ọrụ mpụga:
 
-| Ebe njedebe                  | Usoro | Nkọwa                                                       | Nkwenye                                          |
-| :--------------------------- | :---- | :---------------------------------------------------------- | :----------------------------------------------- |
-| `/api/a2a/status`            | GET   | Ọnọdụ sava, nkà ndị edebanyere aha                          | (ọha)                                            |
-| `/api/a2a/tasks`             | GET   | Depụta ọrụ site na nzacha                                   | njikwa                                           |
-| `/api/a2a/tasks/[id]`        | GET   | Nweta ọrụ site na ID                                        | njikwa                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Kagbuo ọrụ na-aga n'ihu                                     | njikwa                                           |
-| `/.well-known/agent.json`    | GET   | Kaadị Agent (nchọpụta A2A)                                  | (ọha, echekwara 3600s)                           |
-| `/api/a2a/tasks`             | POST  | Nnyefe ọrụ mbata nye ìgwè OmniConductor (Conductor PRD RF5) | Bearer megide `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Ebe njedebe                  | Usoro | Nkọwa                                                                 | Auth                                                                                                          |
+| :--------------------------- | :---- | :-------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET   | Ọkwa nkesa, nka edebanyere aha                                        | (ọha)                                                                                                         |
+| `/api/a2a/tasks`             | GET   | Jiri nzacha depụta ọrụ                                                | njikwa ma ọ bụ igodo API (lee n'okpuru)                                                                       |
+| `/api/a2a/tasks/[id]`        | GET   | Nweta ọrụ site na ID                                                  | njikwa ma ọ bụ igodo API (lee n'okpuru)                                                                       |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Kagbuo ọrụ ịgba ọsọ                                                   | njikwa ma ọ bụ igodo API (lee n'okpuru)                                                                       |
+| `/.well-known/agent.json`    | GET   | Kaadị onye nnọchi anya (nchọpụta A2A )                                | (ọha, nke echekwara 3600s)                                                                                    |
+| `/api/a2a/tasks`             | POST  | Ndị nnọchi anya mbata na ụgbọ mmiri OmniConductor (Conductor PRD RF5) | dị ka `GET`, gbakwunyere `OMNIROUTE_API_KEY` ma ọ bụrụ na edobere mgbe `REQUIRE_API_KEY` na-apụ; `a2aEnabled` |
 
-**Nnyefe ọrụ Conductor mbata (`POST /api/a2a/tasks`):** ndị agent A2A mpụga na-enyefe ọrụ ide koodu nye ìgwè OmniConductor site na OmniRoute. Ahụ: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — naanị nkà nke ìgwè Conductor (ndị ekwuputara na Kaadị Agent) ka enwere ike inyefe ọrụ; `metadata.conductor.repo.url` dị mkpa (ìgwè ahụ na-arụ ọrụ na repo git). Ụzọ ahụ na-atụgharị gaa na `POST /v1/tasks` nke hub site n'iji `CONDUCTOR_ORCHESTRATOR_TOKEN` dị n'akụkụ sava (ọ bụrụ na nke ahụ adịghị, `CONDUCTOR_HUB_TOKEN`) ma weghachite `201 { conductor_task_id, state: "submitted" }`; ọnọdụ ọrụ na-alaghachi site na enyo SSE→A2A (RF1), a pụkwara ịhụ ha site na `GET /api/a2a/tasks?skill=conductor`.
+Onye na-agafe na ụzọ `/api/a2a/tasks*` dabere na nbanye na ntọala API:
+
+- `requireLogin=true` (ndabara): middleware na-anabata naanị nzere njikwa (nnọkọ dashboard, igodo `manage` -scope API, akara ohere `oma_` ) na `OMNIROUTE_API_KEY`. Igodo ntinye aka dị larịị na-enweta `403`. Na nkụnye eji isi `Authorization` nke etiti na-ewe naanị `OMNIROUTE_API_KEY` ka `Bearer <key>`; igodo efu ma ọ bụ taabụ mgbe `Bearer` nwetara `401`.
+- `requireLogin=false`, ma ọ bụ windo loopback tupu ịbanye: na `REQUIRE_API_KEY=true` ọ bụla igodo OmniRoute API ma ọ bụ nzere njikwa na-anabata ma ndị na-akpọ aha na-enweta `401`; na `REQUIRE_API_KEY` kwụsịrị ụzọ ahụ emeghere.
+- `POST /api/a2a/tasks` chọkwara `OMNIROUTE_API_KEY` na nkụnye eji isi `Authorization` mgbe agbanwere mgbanwe ahụ ma gbanyụọ `REQUIRE_API_KEY`. nkụnye eji isi mee ndị ọzọ, dị ka `x-api-key`, anaghị agụta ebe ahụ. Na nbanye ma ọ bụ tupu ịbanye igodo na-agafe na ma ọ bụ na-enweghị prefix `Bearer` ; na nbanye, naanị `Bearer <key>` na-agafe n'etiti ngwa.
+
+Ebe achọrọ nzere, akara `read` -scope `oma_` na-arụ ọrụ naanị maka `GET`.
+
+**Ndị nnọchi anya mbata (`POST /api/a2a/tasks`):** Ndị nnọchi anya A2A dị na mpụga na-enyefe ọrụ nzuzo n'ụgbọ mmiri OmniConductor site na OmniRoute. Ahụ: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — naanị nkà ndị na-eduzi ụgbọ mmiri (ndị mara ọkwa na Kaadị Agent) bụ ndị a na-enyefe; achọrọ `metadata.conductor.repo.url` (ụgbọ mmiri na-arụ ọrụ na git repos). Ụzọ a na-atụgharị gaa na `POST /v1/tasks` hub site na iji ihe nkesa-n'akụkụ `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) wee laghachi `201 { conductor_task_id, state: "submitted" }`; Ọnọdụ ọrụ na-alaghachi azụ site na enyo SSE→A2A (RF1) a na-ahụkwa ya site na `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Ịgbakwunye Nkà Ọhụrụ
+## Na-agbakwunye nka Ọhụrụ
 
-1. **Mepụta faịlụ nkà:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Mepụta faịlụ nka:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Bupụ function async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Soro nhazi nke nkà ndị dị ugbu a dịka `smartRouting.ts`.
+   Bupụ ọrụ async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Soro udi nke nka dị dị ka `smartRouting.ts`. Ọ bụrụ na nka na-akpọ azụ n'ime OmniRoute n'elu HTTP, wulite nkụnye eji isi mee ya na `buildSelfLoopHeaders(caller)` sitere na `src/lib/a2a/selfLoopAuth.ts` ka oku na-eji igodo A2A na-akpọ oku, ọ bụghị `OMNIROUTE_API_KEY`, wee nyefee `redirect: "error"` gaa `fetch` yabụ redirect agaghị enweta igodo ahụ. Onye inyeaka na-ewu naanị nkụnye eji isi mee; nkà ọ bụla na-esetịpụ iwu redirect n'onwe ya. Ọ na-atụba `UnsafeSelfLoopTargetError` kama itinye mkpịsị ugodi mgbe ntọala URL edoziri dị larịị http na mpụga netwọkụ nkeonwe (loopback, akpa ma ọ bụ aha ọrụ, na adreesị nkeonwe dị mma) ma ọ bụ na-ejide nzere, yabụ nka nke na-eloda oku a jụrụ ajụ ga-atụgharịrịrị njehie ahụ.
 
-2. **Debanye handler aha:** n'ime `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
+2. **Onye njikwa aha:** na `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...nkà ndị dị ugbu a
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Gosipụta ya na Kaadị Agent:** n'ime `src/app/.well-known/agent.json/route.ts`, gbakwunye na njedebe array `skills`:
+3. **Gosipụta na Kaadị Agent:** na `src/lib/a2a/agentCardMetadata.ts` (nke `/.well-known/agent.json` na `/.well-known/agent-card.json` kesara), tinye n'usoro `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Nkà Gị",
-     "description": "Nkọwa dị nkenke nke lekwasịrị anya na ebumnuche",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Ihe atụ nke ịkpọ ya n'asụsụ mmadụ"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Kpuchie ụzọ ihe si aga nke ọma + ụzọ njehie.
+4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Na-ekpuchi ụzọ obi ụtọ + ụzọ njehie.
 
-5. **Detuo nkọwa** nke nkà ọhụrụ ahụ na tebụl `Available Skills` nke faịlụ a.
+5. **Akwụkwọ** nka ọhụrụ dị na tebụl `Available Skills` faịlụ a.
 
 ---
 
@@ -266,9 +274,9 @@ submitted → working → completed
 
 ---
 
-## Ọmụmaatụ Njikọ
+## Ihe atụ njikọta
 
-### Python (requests)
+### Python (arịrịọ)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (butere)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

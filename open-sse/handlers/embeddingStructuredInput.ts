@@ -211,13 +211,34 @@ function embeddingValues(entry: unknown): unknown[] {
   return Array.isArray(values) ? values : [];
 }
 
+/**
+ * Gemini embedContent and batchEmbedContents report one usageMetadata object
+ * at the response root. Read its prompt count without estimating from vector
+ * length or adding per-vector values (which would overcount batch requests).
+ */
+function geminiEmbeddingUsage(data: Record<string, unknown>): {
+  prompt_tokens: number;
+  total_tokens: number;
+} {
+  const metadata = data.usageMetadata;
+  const reported =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata)
+      ? (metadata as Record<string, unknown>).promptTokenCount
+      : undefined;
+  const promptTokens =
+    typeof reported === "number" && Number.isSafeInteger(reported) && reported >= 0
+      ? reported
+      : 0;
+  return { prompt_tokens: promptTokens, total_tokens: promptTokens };
+}
+
 function normalizeGeminiEmbedContentResponse(
   data: Record<string, unknown>
 ): Record<string, unknown> {
   return {
     object: "list",
     data: [{ object: "embedding", embedding: embeddingValues(data.embedding), index: 0 }],
-    usage: { prompt_tokens: 0, total_tokens: 0 },
+    usage: geminiEmbeddingUsage(data),
   };
 }
 
@@ -230,7 +251,7 @@ function normalizeGeminiBatchResponse(data: Record<string, unknown>): Record<str
       embedding: embeddingValues(entry),
       index,
     })),
-    usage: { prompt_tokens: 0, total_tokens: 0 },
+    usage: geminiEmbeddingUsage(data),
   };
 }
 

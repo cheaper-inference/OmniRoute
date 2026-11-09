@@ -38,6 +38,7 @@ interface ResetCreditRequestState {
   setQuotaData: SetQuotaData;
   setRedeemingResetCreditId: React.Dispatch<React.SetStateAction<string | null>>;
   setResetCreditPicker: React.Dispatch<React.SetStateAction<ResetCreditPickerState | null>>;
+  onConfirmedChange?: (connectionId: string) => void;
   tr: TranslateUsage;
 }
 
@@ -203,6 +204,7 @@ function useRedeemCodexResetCredit(state: ResetCreditRequestState) {
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || response.statusText);
+        state.onConfirmedChange?.(picker.connectionId);
         const refreshPending = data.refreshPending === true && !data.usage;
         if (refreshPending) {
           // The upstream redemption already committed but the post-commit quota
@@ -253,7 +255,8 @@ export function useCodexResetCreditRedemption(
   tr: TranslateUsage,
   setErrors: React.Dispatch<React.SetStateAction<Record<string, string | null>>>,
   setQuotaData: React.Dispatch<React.SetStateAction<Record<string, any>>>,
-  setLastRefreshedAt: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  setLastRefreshedAt: React.Dispatch<React.SetStateAction<Record<string, string>>>,
+  onConfirmedChange?: (connectionId: string) => void
 ) {
   const [redeemingResetCreditId, setRedeemingResetCreditId] = useState<string | null>(null);
   const [loadingResetCreditsId, setLoadingResetCreditsId] = useState<string | null>(null);
@@ -278,6 +281,7 @@ export function useCodexResetCreditRedemption(
     setQuotaData,
     setRedeemingResetCreditId,
     setResetCreditPicker,
+    onConfirmedChange,
     tr,
   });
 

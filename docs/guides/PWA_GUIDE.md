@@ -53,13 +53,13 @@ The manifest is configured with `display: "fullscreen"`, which means the install
 
 OmniRoute includes a service worker (`sw.js`) that provides intelligent caching:
 
-| Asset Type                                              | Strategy                           | Behavior                                                                     |
-| ------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------- |
-| **App Shell**                                           | Cache-first                        | `/`, `/offline`, manifest, and icons are pre-cached on install               |
-| **Static assets** (CSS, JS, images, fonts)              | Network-first with cache fallback  | Fetches fresh from the network; falls back to cache if offline               |
-| **Next.js bundles** (`/_next/`)                         | Network-first with cache update    | Fetches from network and updates cache; serves cached version if offline     |
-| **Navigation requests**                                 | Bypass (never intercepted)         | Browser owns HTTP/3→HTTP/2 fallback; a dead QUIC socket must not become `Response.error()` |
-| **API / dashboard routes** (`/api/`, `/a2a`, `/dashboard`) | Bypass (never cached)           | Always goes directly to the server — never intercepted by the service worker |
+| Asset Type                                                                                                                                                                                              | Strategy                          | Behavior                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------ |
+| **App Shell**                                                                                                                                                                                           | Cache-first                       | `/`, `/offline`, manifest, and icons are pre-cached on install                             |
+| **Static assets** (CSS, JS, images, fonts)                                                                                                                                                              | Network-first with cache fallback | Fetches fresh from the network; falls back to cache if offline                             |
+| **Next.js bundles** (`/_next/`)                                                                                                                                                                         | Network-first with cache update   | Fetches from network and updates cache; serves cached version if offline                   |
+| **Navigation requests**                                                                                                                                                                                 | Bypass (never intercepted)        | Browser owns HTTP/3→HTTP/2 fallback; a dead QUIC socket must not become `Response.error()` |
+| **API / dashboard routes** (`/api/`, `/a2a`, `/dashboard`, the client-API aliases `/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`, plus `/callback`, `/login`; matched case-insensitively) | Bypass (never cached)             | Always goes directly to the server — never intercepted by the service worker               |
 
 ### Offline Page
 

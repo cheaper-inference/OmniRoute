@@ -382,10 +382,11 @@ export async function applyHealthKeyScope(
   }
   const catalogScope = keyMeta.catalogScope ?? "all";
   if (catalogScope === "combos") return { rows: [], keyMeta };
-  const blockedModels = keyMeta.blockedModels;
   const out: HealthRow[] = [];
   for (const row of rows) {
-    if (await isCatalogModelAllowedForKey(apiKey, { id: row.id, root: row.root }, blockedModels)) {
+    // Same visibility rule as /v1/models (catalogKeyFilter): the key's allowlist and
+    // blocklist together decide whether the row is listed for this key.
+    if (await isCatalogModelAllowedForKey(apiKey, { id: row.id, root: row.root }, keyMeta)) {
       out.push(row);
     }
   }

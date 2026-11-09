@@ -1,4 +1,4 @@
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { fetchRemoteImage } from "../../../utils/remoteMediaFetch.ts";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { sleep } from "../../../utils/sleep.ts";
@@ -113,6 +113,11 @@ async function fetchHordeImageBytes(
     // providers' remote image URLs.
     const remote = await fetchRemoteImage(value, {
       guard: "public-only",
+      // Pin a direct connection to the address that passed the public-only check, so a DNS
+      // answer that changes between the check and the connect cannot reach a private host.
+      // A proxied request stays on its proxy, which resolves the name itself.
+      pinDns: true,
+      pinDirectOnly: true,
       timeoutMs: options.timeoutMs,
       signal: options.signal ?? undefined,
       maxBytes: MAX_HORDE_IMAGE_BYTES,

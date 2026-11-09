@@ -12,10 +12,14 @@ import {
   normalizeComboConfigMode,
   type ComboConfigMode,
 } from "@/shared/constants/comboConfigMode";
+import {
+  APPEARANCE_PALETTES,
+  normalizeAppearancePalette,
+} from "@/shared/constants/appearancePalette";
 import AccountEmailVisibilitySetting from "./AccountEmailVisibilitySetting";
 
 export default function AppearanceTab() {
-  const { theme, setTheme, isDark } = useTheme();
+  const { theme, setTheme, isDark, palette, setPalette } = useTheme();
   const t = useTranslations("settings");
 
   const isElectron = useIsElectron();
@@ -54,6 +58,19 @@ export default function AppearanceTab() {
     light: t("themeLight"),
     dark: t("themeDark"),
     system: t("themeSystem"),
+  };
+
+  const paletteOptions: Record<string, { label: string; description: string; icon: string }> = {
+    editions: {
+      label: t("paletteEditions"),
+      description: t("paletteEditionsDesc"),
+      icon: "brush",
+    },
+    classic: {
+      label: t("paletteClassic"),
+      description: t("paletteClassicDesc"),
+      icon: "history",
+    },
   };
 
   useEffect(() => {
@@ -158,6 +175,34 @@ export default function AppearanceTab() {
                     {themeOptionLabels[option] || option}
                   </span>
                 }
+              />
+            ))}
+          </RadioGroup>
+        </div>
+
+        <div className="pt-4 border-t border-border">
+          <div className="mb-3">
+            <p className="font-medium">{t("paletteTitle")}</p>
+            <p className="text-sm text-text-muted">{t("paletteDesc")}</p>
+          </div>
+          <RadioGroup
+            aria-label={t("paletteSelectionAria")}
+            orientation="horizontal"
+            value={palette}
+            onValueChange={(next) => setPalette(normalizeAppearancePalette(next))}
+          >
+            {APPEARANCE_PALETTES.map((option) => (
+              <RadioGroupItem
+                key={option}
+                card
+                value={option}
+                label={
+                  <span className="flex items-center gap-2">
+                    <Icon name={paletteOptions[option].icon} size={18} />
+                    {paletteOptions[option].label}
+                  </span>
+                }
+                description={paletteOptions[option].description}
               />
             ))}
           </RadioGroup>

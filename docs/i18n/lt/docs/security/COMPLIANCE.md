@@ -23,38 +23,46 @@ eigos.
 
 ### Administracinio audito įvykiai (`audit_log`)
 
-Kiekvienas `logAuditEvent({ action, actor, target, details, ... })` iškvietimas
-sukuria vieną eilutę. Veiksmų eilutės atitinka `domain.verb` (arba
-`domain.verb.outcome`) šabloną. Kode patvirtinti veiksmų tipai:
+Kiekvienas `logAuditEvent({ action, actor, target, details, ... })` iškvietimas sukuria
+vieną eilutę. Veiksmų eilutės atitinka `domain.verb` (arba `domain.verb.outcome`)
+šabloną. Patvirtinti medyje esantys veiksmų tipai:
 
-| Veiksmas                             | Šaltinis                                |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Veiksmas                             | Šaltinis                                 |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Kiekviename įraše užfiksuojami `action`, `actor` (numatytoji reikšmė —
-`"system"`), `target`, `details` / `metadata` (JSON), `ip_address`,
-`resource_type`, `status`, `request_id` ir `timestamp`. Neskelbtini raktai
-(`apiKey`, `accessToken`, `refreshToken`, `password`, visi raktai, atitinkantys
-`*token` / `*secret` / `*apikey` ir kt.) prieš įrašant eilutę rekursyviai
-pakeičiami reikšme `"[redacted]"`.
+Kiekviename įraše išsaugomi `action`, `actor` (numatytoji reikšmė – `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` ir `timestamp`. Prieš įrašant eilutę, neskelbtini raktai (`apiKey`, `accessToken`,
+`refreshToken`, `password`, visi raktai, atitinkantys `*token`/`*secret`/`*apikey`,
+ir kt.) rekursyviai pakeičiami į `"[redacted]"`.
+
+`api_key.auth.touch` eilutėse įrašomi sėkmingi API rakto metaduomenų ir aptikimo
+skaitymai (GET/HEAD), kurie niekada nepasiekia užklausų žurnalo: kuris raktas, kada
+ir normalizuotas kelias; įrašai sujungiami ir jų skaičius ribojamas iki 1 000 eilučių. Raktai su
+`noLog` ir aplinkos raktas praleidžiami. Iškvietėjo IP adresas ir naudotojo agentas
+pridedami tik tada, kai įjungta `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` funkcijų vėliavėlė
+(pagal numatytuosius nustatymus išjungta).
 
 ### MCP įrankių iškvietimai (`mcp_tool_audit`)
 
-Kiekvienas MCP įrankio iškvietimas per `open-sse/mcp-server/audit.ts` įrašo
-vieną eilutę. Schema (iš `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Kiekvienas MCP įrankio iškvietimas įrašo eilutę per
+`open-sse/mcp-server/audit.ts`. Schema (iš
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Stulpelis        | Pastabos                                       |
 | ---------------- | ---------------------------------------------- |
@@ -63,20 +71,20 @@ vieną eilutę. Schema (iš `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 | `input_hash`     | įvesties sha256 (naudingoji apkrova nesaugoma) |
 | `output_summary` | trumpa, sutrumpinta santrauka                  |
 | `duration_ms`    | faktinė trukmė                                 |
-| `api_key_id`     | iškvietėjas (gali būti „null“)                 |
+| `api_key_id`     | iškvietėjas (gali būti tuščias)                |
 | `success`        | `1` / `0`                                      |
-| `error_code`     | galutinis klaidos kodas nesėkmės atveju        |
+| `error_code`     | galutinės klaidos kodas nesėkmės atveju        |
 | `created_at`     | ISO laiko žyma                                 |
 
 ### Užklausų / naudojimo žurnalai
 
-Tai yra veikimo telemetrija (ne tik administracinis auditas), tačiau jai taikomas
-tas pats saugojimo trukmės procesas:
+Tai operacinė telemetrija (ne griežtai administracinis auditas), tačiau jiems taikomas tas pats
+saugojimo laikotarpio procesas:
 
 - `usage_history` — kiekvienos užklausos naudojimo suvestinė
-- `call_logs` — išsamus kiekvienos užklausos žurnalas (taikomas eilučių limitas, žr. toliau)
-- `proxy_logs` — tarpinio serverio srauto žurnalas (taikomas eilučių limitas)
-- `request_detail_logs` — senasis išsamus užklausų žurnalas (jei yra, jis vis tiek išvalomas)
+- `call_logs` — visas kiekvienos užklausos žurnalas (taikomas eilučių skaičiaus limitas, žr. toliau)
+- `proxy_logs` — tarpinio serverio srauto žurnalas (taikomas eilučių skaičiaus limitas)
+- `request_detail_logs` — senasis išsamus užklausų žurnalas (jei yra, jis vis dar valomas)
 
 ## Saugyklos schema
 

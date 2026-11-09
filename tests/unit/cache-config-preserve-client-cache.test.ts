@@ -61,6 +61,35 @@ test("alwaysPreserveClientCache set via cache-config reaches the runtime read pa
     assert.equal(await getCacheControlSettings(), "always");
   });
 
+  await t.test("invalid persisted cache mode falls back to auto", async () => {
+    const { updateSettings } = await import("../../src/lib/db/settings.ts");
+    const { getCacheControlSettings, invalidateCacheControlSettingsCache } =
+      await import("../../src/lib/cacheControlSettings.ts");
+    await updateSettings({ alwaysPreserveClientCache: "unexpected" } as never);
+    invalidateCacheControlSettingsCache();
+    assert.equal(await getCacheControlSettings(), "auto");
+  });
+
+  await t.test(
+    "the generic settings PATCH accepts Gemini mode and rejects invalid mode",
+    async () => {
+      const settingsRoute = await import("../../src/app/api/settings/route.ts");
+      const { getSettings } = await import("../../src/lib/db/settings.ts");
+      const patch = (value: unknown) =>
+        settingsRoute.PATCH(
+          new Request("http://localhost/api/settings", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ geminiPromptCacheMode: value }),
+          })
+        );
+      const valid = await patch("implicit");
+      assert.notEqual(valid.status, 400);
+      assert.equal((await getSettings()).geminiPromptCacheMode, "implicit");
+      assert.equal((await patch("invalid")).status, 400);
+    }
+  );
+
   await t.test("GET reports the flat value, not the ignored cache-section copy", async () => {
     // Seed a stale value in the databaseSettings "cache" section — the store
     // the runtime never reads. GET must not surface it.

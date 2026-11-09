@@ -37,6 +37,14 @@ test("normalizeArtifactPath normalizes slashes and leading relative markers", ()
   );
 });
 
+test("OTLP request-header helper is required in the published source manifest", () => {
+  const helper = "src/lib/logExport/destinations/otlpRequestHeaders.ts";
+  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(helper));
+  assert.ok(existsSync(new URL(`../../${helper}`, import.meta.url)));
+  const pkg = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+  assert.ok(pkg.files.includes("src/lib/"));
+});
+
 test("parseJsonArrayOutput extracts the first valid array from mixed command output", () => {
   const output = [
     "notice [not-json]",
@@ -322,6 +330,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "bin/cli/utils/ensureAndroidCacheDir.mjs",
     "bin/cli/utils/parseEnvValue.mjs",
     "bin/cli/utils/storageKeyProvision.mjs",
+    "bin/cli/utils/untrustedCwdEnv.mjs",
     "bin/cli/utils/versionFastPath.mjs",
     "bin/cli/utils/volatileEnvPath.mjs",
     "bin/mcp-server.mjs",
@@ -332,6 +341,8 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "config/release/wreq-js-native-manifest.json",
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
+    // 2026-11-03: one translated docs mirror, so losing the mirrors fails the pack gate.
+    "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
     "dist/h2c-upgrade-guard.cjs",
     "dist/head-response-guard.cjs",
     "dist/http-method-guard.cjs",
@@ -357,6 +368,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "scripts/build/wreqJsNative.mjs",
     "scripts/packs/optionalPackInstaller.mjs",
     "scripts/packs/optionalPackManifest.mjs",
+    "src/lib/logExport/destinations/otlpRequestHeaders.ts",
     "src/shared/utils/nodeRuntimeSupport.ts",
   ]);
 });

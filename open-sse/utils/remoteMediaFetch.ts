@@ -9,6 +9,7 @@ import {
   parseOutboundUrl,
 } from "@/shared/network/outboundUrlGuard";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
+import { resolveProxyForRequest } from "./proxyFetch.ts";
 // #12569: `createPinnedFetch` now lives in the shared `dnsPinnedFetch.ts` module so the
 // webhook outbound-URL guard can reuse the exact same connection-pinning mechanism instead of
 // duplicating it. Re-exported here for backward compatibility with existing importers of
@@ -36,6 +37,13 @@ export interface RemoteImageFetchOptions {
   fetchImpl?: typeof fetch;
   /** Pin the network connection to a DNS answer that passed validation. */
   pinDns?: boolean;
+  /**
+   * With `pinDns`, pin only a direct connection. A pinned connection goes straight to the checked
+   * address, so a request that a proxy should carry keeps the proxied fetch instead. The proxy
+   * resolves the name itself: a local lookup failure is then no reason to refuse the request, but
+   * a private answer still is. Decided at every hop, because NO_PROXY can differ between hosts.
+   */
+  pinDirectOnly?: boolean;
   guard?: OutboundUrlGuardMode;
   maxBytes?: number;
   maxRedirects?: number;
@@ -78,7 +86,8 @@ const defaultLookup: RemoteImageLookup = (hostname) => dns.promises.lookup(hostn
 async function assertHostnameResolvesPublic(
   url: URL,
   guard: OutboundUrlGuardMode,
-  lookup: RemoteImageLookup
+  lookup: RemoteImageLookup,
+  failClosed: boolean
 ): Promise<Array<{ address: string; family: number }>> {
   if (guard !== "public-only") return [];
   const hostname = url.hostname;
@@ -90,14 +99,16 @@ async function assertHostnameResolvesPublic(
   try {
     resolved = await lookup(bare);
   } catch {
-    throw new Error("Remote image host could not be resolved (blocked)");
+    if (!failClosed) return [];
+    throw new Error("Remote media host could not be resolved (blocked)");
   }
   if (!resolved.length) {
-    throw new Error("Remote image host could not be resolved (blocked)");
+    if (!failClosed) return [];
+    throw new Error("Remote media host could not be resolved (blocked)");
   }
   for (const { address } of resolved) {
     if (isPrivateHost(address)) {
-      throw new Error("Remote image host resolves to a blocked private address (DNS rebinding)");
+      throw new Error("Remote media host resolves to a blocked private address (DNS rebinding)");
     }
   }
   return resolved;
@@ -112,13 +123,13 @@ async function readResponseBuffer(response: Response, maxBytes: number) {
   const contentLengthHeader = response.headers.get("content-length");
   const contentLength = contentLengthHeader ? Number.parseInt(contentLengthHeader, 10) : null;
   if (contentLength !== null && Number.isFinite(contentLength) && contentLength > maxBytes) {
-    throw new Error(`Remote image exceeds ${maxBytes} byte limit`);
+    throw new Error(`Remote media exceeds ${maxBytes} byte limit`);
   }
 
   if (!response.body) {
     const buffer = Buffer.from(await response.arrayBuffer());
     if (buffer.byteLength > maxBytes) {
-      throw new Error(`Remote image exceeds ${maxBytes} byte limit`);
+      throw new Error(`Remote media exceeds ${maxBytes} byte limit`);
     }
     return buffer;
   }
@@ -136,7 +147,7 @@ async function readResponseBuffer(response: Response, maxBytes: number) {
       totalBytes += chunk.byteLength;
       if (totalBytes > maxBytes) {
         await reader.cancel();
-        throw new Error(`Remote image exceeds ${maxBytes} byte limit`);
+        throw new Error(`Remote media exceeds ${maxBytes} byte limit`);
       }
       chunks.push(chunk);
     }
@@ -157,17 +168,24 @@ export function setPinnedFetchTestOverride(fetchImpl: typeof fetch | undefined):
   pinnedFetchTestOverride = fetchImpl;
 }
 
-export async function fetchRemoteMedia(
+async function cancelBody(response: Response): Promise<void> {
+  await response.body?.cancel().catch(() => {});
+}
+
+/**
+ * Follow redirects by hand, checking every hop, and return the first non-redirect response
+ * without reading its body. A 3xx body is discarded before the next hop.
+ */
+async function openRemoteMedia(
   input: string | URL,
-  options: RemoteMediaFetchOptions = {}
-): Promise<RemoteMediaFetchResult> {
+  options: RemoteMediaFetchOptions
+): Promise<{ response: Response; url: URL }> {
   const injectedFetch = options.fetchImpl;
   // Default off: production callers that need connection pinning opt in. This keeps
   // globalThis.fetch mockable for image-generation tests and preserves the previous
   // DNS pre-check behavior for non-embedding callers.
   const pinDns = options.pinDns === true;
   const guard = options.guard ?? getProviderOutboundGuard();
-  const maxBytes = options.maxBytes ?? DEFAULT_MAX_REMOTE_IMAGE_BYTES;
   const maxRedirects = options.maxRedirects ?? DEFAULT_MAX_REDIRECTS;
   const signal = combineSignals(options.signal, options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
   const lookup = options.lookup ?? defaultLookup;
@@ -179,11 +197,15 @@ export async function fetchRemoteMedia(
   for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
     // DNS-rebinding guard: validate every hop's hostname against its resolved
     // IPs before issuing the request (GHSA-cmhj-wh2f-9cgx).
-    const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup);
+    // A proxy URL is what sends patched fetch down the proxied route: a context with no usable
+    // host has a source but no URL, and connects directly.
+    const proxied =
+      options.pinDirectOnly === true && !!resolveProxyForRequest(currentUrl.toString()).proxyUrl;
+    const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup, !proxied);
     const fetchImpl =
       injectedFetch ??
       pinnedFetchTestOverride ??
-      (pinDns && addresses.length
+      (pinDns && !proxied && addresses.length
         ? createPinnedFetch(addresses[0].address, addresses[0].family)
         : fetch);
     const response = await fetchImpl(currentUrl.toString(), {
@@ -194,11 +216,12 @@ export async function fetchRemoteMedia(
 
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
+      await cancelBody(response);
       if (!location) {
-        throw new Error(`Remote image redirect missing Location header (${response.status})`);
+        throw new Error(`Remote media redirect missing Location header (${response.status})`);
       }
       if (redirectCount >= maxRedirects) {
-        throw new Error(`Remote image exceeded ${maxRedirects} redirect limit`);
+        throw new Error(`Remote media exceeded ${maxRedirects} redirect limit`);
       }
       currentUrl = requireHttps(
         validateRemoteImageUrl(new URL(location, currentUrl), guard),
@@ -207,18 +230,27 @@ export async function fetchRemoteMedia(
       continue;
     }
 
-    if (!response.ok) {
-      throw new Error(`Remote image fetch error ${response.status}`);
-    }
-
-    return {
-      buffer: await readResponseBuffer(response, maxBytes),
-      contentType: response.headers.get("content-type") || "application/octet-stream",
-      url: currentUrl.toString(),
-    };
+    return { response, url: currentUrl };
   }
 
-  throw new Error(`Remote image exceeded ${maxRedirects} redirect limit`);
+  throw new Error(`Remote media exceeded ${maxRedirects} redirect limit`);
+}
+
+export async function fetchRemoteMedia(
+  input: string | URL,
+  options: RemoteMediaFetchOptions = {}
+): Promise<RemoteMediaFetchResult> {
+  const maxBytes = options.maxBytes ?? DEFAULT_MAX_REMOTE_IMAGE_BYTES;
+  const { response, url } = await openRemoteMedia(input, options);
+  if (!response.ok) {
+    await cancelBody(response);
+    throw new Error(`Remote media fetch error ${response.status}`);
+  }
+  return {
+    buffer: await readResponseBuffer(response, maxBytes),
+    contentType: response.headers.get("content-type") || "application/octet-stream",
+    url: url.toString(),
+  };
 }
 
 /** Backward-compatible image-specific entry point. */
@@ -253,4 +285,83 @@ export async function fetchUntrustedRemoteImage(
   opts: RemoteImageFetchOptions = {}
 ): Promise<RemoteImageFetchResult> {
   return fetchRemoteImage(input, { ...opts, guard: "public-only", pinDns: true });
+}
+
+export interface UpstreamMediaDownloadOptions {
+  maxBytes: number;
+  timeoutMs: number;
+  signal?: AbortSignal | null;
+}
+
+/** Size and time caps for provider result downloads, by media kind. */
+export const UPSTREAM_MEDIA_LIMITS = {
+  image: { maxBytes: 25 * 1024 * 1024, timeoutMs: 60_000 },
+  audio: { maxBytes: 50 * 1024 * 1024, timeoutMs: 120_000 },
+  video: { maxBytes: 100 * 1024 * 1024, timeoutMs: 300_000 },
+} as const satisfies Record<string, UpstreamMediaDownloadOptions>;
+
+const UPSTREAM_MEDIA_MAX_REDIRECTS = 3;
+
+function upstreamMediaPolicy(): RemoteMediaFetchOptions {
+  return {
+    guard: "public-only",
+    pinDns: true,
+    pinDirectOnly: true,
+    enforceHttps: true,
+    maxRedirects: UPSTREAM_MEDIA_MAX_REDIRECTS,
+  };
+}
+
+/**
+ * Download a result file whose URL came back in a provider's API response (a generated image,
+ * song, speech clip or video). OmniRoute does not choose that host, so it gets the same policy
+ * as a caller-supplied URL: HTTPS only, public addresses only at every redirect hop, at most
+ * three redirects, a direct connection pinned to the address that was checked, and an explicit
+ * byte cap and timeout from the caller. A proxied request stays on its proxy, so the download
+ * leaves through the same egress as the rest of the connection. No request headers are sent, so
+ * this is only for URLs that need no credentials.
+ */
+export async function downloadUpstreamMedia(
+  url: string,
+  { maxBytes, timeoutMs, signal }: UpstreamMediaDownloadOptions
+): Promise<RemoteMediaFetchResult> {
+  return fetchRemoteMedia(url, {
+    ...upstreamMediaPolicy(),
+    maxBytes,
+    timeoutMs,
+    signal: signal ?? undefined,
+  });
+}
+
+/**
+ * Same policy as downloadUpstreamMedia, but hand back the final response unread, for a caller
+ * that reads the body with its own limits. A non-2xx response is returned as is. `fetchImpl`
+ * is a test seam: it replaces the connection, so production callers leave it unset.
+ */
+export async function openUpstreamMedia(
+  url: string,
+  {
+    timeoutMs,
+    signal,
+    fetchImpl,
+  }: { timeoutMs: number; signal?: AbortSignal | null; fetchImpl?: typeof fetch }
+): Promise<Response> {
+  const { response } = await openRemoteMedia(url, {
+    ...upstreamMediaPolicy(),
+    timeoutMs,
+    signal: signal ?? undefined,
+    fetchImpl,
+  });
+  return response;
+}
+
+/** Content-Type for a downloaded speech clip: keep audio/*, otherwise label it audio/mpeg. */
+export function upstreamAudioContentType(contentType: string): string {
+  const type = contentType.split(";")[0].trim().toLowerCase();
+  return type.startsWith("audio/") ? contentType : "audio/mpeg";
+}
+
+/** The message of a download failure, without the error class name in front. */
+export function upstreamMediaErrorText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
 }

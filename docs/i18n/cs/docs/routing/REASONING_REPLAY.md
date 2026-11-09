@@ -1,62 +1,61 @@
-# Reasoning Replay Cache (Čeština)
+# REASONING_REPLAY (Čeština)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../routing/REASONING_REPLAY.md) · 🇪🇹 [am](../../../am/docs/routing/REASONING_REPLAY.md) · 🇸🇦 [ar](../../../ar/docs/routing/REASONING_REPLAY.md) · 🇦🇿 [az](../../../az/docs/routing/REASONING_REPLAY.md) · 🇧🇬 [bg](../../../bg/docs/routing/REASONING_REPLAY.md) · 🇧🇩 [bn](../../../bn/docs/routing/REASONING_REPLAY.md) · 🇧🇦 [bs](../../../bs/docs/routing/REASONING_REPLAY.md) · 🇩🇰 [da](../../../da/docs/routing/REASONING_REPLAY.md) · 🇩🇪 [de](../../../de/docs/routing/REASONING_REPLAY.md) · 🇬🇷 [el](../../../el/docs/routing/REASONING_REPLAY.md) · 🇪🇸 [es](../../../es/docs/routing/REASONING_REPLAY.md) · 🇪🇪 [et](../../../et/docs/routing/REASONING_REPLAY.md) · 🇮🇷 [fa](../../../fa/docs/routing/REASONING_REPLAY.md) · 🇫🇮 [fi](../../../fi/docs/routing/REASONING_REPLAY.md) · 🇫🇷 [fr](../../../fr/docs/routing/REASONING_REPLAY.md) · 🇮🇪 [ga](../../../ga/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [gu](../../../gu/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ha](../../../ha/docs/routing/REASONING_REPLAY.md) · 🇮🇱 [he](../../../he/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [hi](../../../hi/docs/routing/REASONING_REPLAY.md) · 🇭🇷 [hr](../../../hr/docs/routing/REASONING_REPLAY.md) · 🇭🇺 [hu](../../../hu/docs/routing/REASONING_REPLAY.md) · 🇦🇲 [hy](../../../hy/docs/routing/REASONING_REPLAY.md) · 🇮🇩 [id](../../../id/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [ig](../../../ig/docs/routing/REASONING_REPLAY.md) · 🇮🇹 [it](../../../it/docs/routing/REASONING_REPLAY.md) · 🇯🇵 [ja](../../../ja/docs/routing/REASONING_REPLAY.md) · 🇬🇪 [ka](../../../ka/docs/routing/REASONING_REPLAY.md) · 🇰🇭 [km](../../../km/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [kn](../../../kn/docs/routing/REASONING_REPLAY.md) · 🇰🇷 [ko](../../../ko/docs/routing/REASONING_REPLAY.md) · 🇱🇹 [lt](../../../lt/docs/routing/REASONING_REPLAY.md) · 🇱🇻 [lv](../../../lv/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ml](../../../ml/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [mr](../../../mr/docs/routing/REASONING_REPLAY.md) · 🇲🇾 [ms](../../../ms/docs/routing/REASONING_REPLAY.md) · 🇲🇹 [mt](../../../mt/docs/routing/REASONING_REPLAY.md) · 🇲🇲 [my](../../../my/docs/routing/REASONING_REPLAY.md) · 🇳🇵 [ne](../../../ne/docs/routing/REASONING_REPLAY.md) · 🇳🇱 [nl](../../../nl/docs/routing/REASONING_REPLAY.md) · 🇳🇴 [no](../../../no/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [or](../../../or/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [pa](../../../pa/docs/routing/REASONING_REPLAY.md) · 🇵🇭 [phi](../../../phi/docs/routing/REASONING_REPLAY.md) · 🇵🇱 [pl](../../../pl/docs/routing/REASONING_REPLAY.md) · 🇵🇹 [pt](../../../pt/docs/routing/REASONING_REPLAY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/routing/REASONING_REPLAY.md) · 🇷🇴 [ro](../../../ro/docs/routing/REASONING_REPLAY.md) · 🇷🇺 [ru](../../../ru/docs/routing/REASONING_REPLAY.md) · 🇱🇰 [si](../../../si/docs/routing/REASONING_REPLAY.md) · 🇸🇰 [sk](../../../sk/docs/routing/REASONING_REPLAY.md) · 🇸🇮 [sl](../../../sl/docs/routing/REASONING_REPLAY.md) · 🇷🇸 [sr](../../../sr/docs/routing/REASONING_REPLAY.md) · 🇸🇪 [sv](../../../sv/docs/routing/REASONING_REPLAY.md) · 🇰🇪 [sw](../../../sw/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [ta](../../../ta/docs/routing/REASONING_REPLAY.md) · 🇮🇳 [te](../../../te/docs/routing/REASONING_REPLAY.md) · 🇹🇭 [th](../../../th/docs/routing/REASONING_REPLAY.md) · 🇹🇷 [tr](../../../tr/docs/routing/REASONING_REPLAY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/routing/REASONING_REPLAY.md) · 🇵🇰 [ur](../../../ur/docs/routing/REASONING_REPLAY.md) · 🇺🇿 [uz](../../../uz/docs/routing/REASONING_REPLAY.md) · 🇻🇳 [vi](../../../vi/docs/routing/REASONING_REPLAY.md) · 🇳🇬 [yo](../../../yo/docs/routing/REASONING_REPLAY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/routing/REASONING_REPLAY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/routing/REASONING_REPLAY.md)
 
 ---
 
-> **Zdroj pravdy:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
-> **Poslední aktualizace:** 2026-06-28 — v3.8.40
+> **Zdroj pravdy:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`** Poslední aktualizace:** 2026-06-28 — v3.8.40
 
-OmniRoute zachycuje `reasoning_content` asistenta vytvořený modely v režimu přemýšlení a transparentně jej přehrává u vícekolových požadavků, pokud to poskytovatel upstreamu vyžaduje. Tím se eliminují chyby HTTP 400, které striktní poskytovatelé vracejí, když v historii konverzace klienta chybí uvažování z předchozího kola.
+OmniRoute zachycuje pomocné `reasoning_content` vytvořené modely v myšlenkovém režimu a transparentně je přehrává na víceotáčkových požadavcích, když to upstream poskytovatel požaduje. To eliminuje chyby HTTP 400, které striktní poskytovatelé upozorňují, když v historii konverzace klienta chybí zdůvodnění předchozího kola.
 
-## Proč tato funkce existuje
+## Proč toto existuje
 
-Několik poskytovatelů režimu přemýšlení odmítne navazující kolo, pokud **předchozí zpráva asistenta neobsahuje původní `reasoning_content`**. Upstream vrátí chybu 400 se zprávami, jako je například:
+Několik poskytovatelů myšlenkových režimů odmítá následný obrat, pokud není** předchozí zpráva asistenta obsahuje původní `reasoning_content`** . Upstream vrátí 400 se zprávami jako:
 
 ```
-Nesprávný parametr: reasoning_content v režimu přemýšlení musí být předán zpět rozhraní API.
+Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Běžní klienti (Cursor, Cline, Roo Code, OpenAI SDK) však `reasoning_content` z historie, kterou znovu odesílají, odstraňují. OmniRoute jej obnoví z mezipaměti na straně serveru, aby byl požadavek, který upstream obdrží, konzistentní. Issue #1628 zavedl hybridní perzistenci v paměti/SQLite, aby mezipaměť přežila restart procesu.
+Ale typičtí klienti (Cursor, Cline, Roo Code, OpenAI SDK) stahují `reasoning_content` z historie, kterou přehrávají. OmniRoute jej obnoví z mezipaměti na straně serveru, takže požadavek, který upstream vidí, je konzistentní. Vydání #1628 zavedlo hybridní memory/SQLite persistenci, takže mezipaměť přežije restartování procesu.
 
 ## Architektura
 
 ```
-Tah N (asistent generuje):
-  → odpověď obsahuje reasoning_content + tool_calls
-  → pokud requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      zapíše (do paměti + DB), s klíčem podle každého tool_call.id
-  → předá odpověď klientovi (který může, ale nemusí zachovat reasoning)
+Turn N (assistant generates):
+  → response contains reasoning_content + tool_calls
+  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
+      writes (memory + DB), keyed by every tool_call.id
+  → forward response to client (which may or may not retain reasoning)
 
-Tah N+1 (klient odešle navazující požadavek):
-  → překladač zjistí: requiresReasoningReplay(provider, model) === true
-  → pro každou zprávu asistenta s tool_calls a bez reasoning_content:
-      lookupReasoning(toolCalls[0].id) → paměť → DB
-      nalezeno   → msg.reasoning_content = cached; recordReplay()
-      nenalezeno → msg.reasoning_content = "" (zpětně kompatibilní náhradní řešení pro starší DeepSeek)
-  → nadřazená služba obdrží konzistentní historii → žádná chyba 400
+Turn N+1 (client sends follow-up):
+  → translator detects: requiresReasoningReplay(provider, model) === true
+  → for each assistant message with tool_calls and no reasoning_content:
+      lookupReasoning(toolCalls[0].id) → memory → DB
+      hit  → msg.reasoning_content = cached; recordReplay()
+      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
+  → upstream sees consistent history → no 400
 ```
 
-Zachycení probíhá v `open-sse/handlers/chatCore.ts` (na dvou místech, ve dvou místech volání `cacheReasoningFromAssistantMessage`). Opětovné vložení probíhá v `open-sse/translator/index.ts` po vynucení schématu, ale před odesláním.
+Zachycení probíhá v `open-sse/handlers/chatCore.ts` (dvě místa, na dvou místech volání `cacheReasoningFromAssistantMessage` ). Přehrání proběhne v `open-sse/translator/index.ts` po vynucení schématu, ale před odesláním.
 
-Běžné tahy asistenta (bez volání nástrojů) používají odlišné klíče: `buildAssistantMessageCacheKey()` vytvoří otisk rozsahu relace spolu s normalizovaným přepisem ve formátu OpenAI až po daný tah, protože DeepSeek po přítomnosti `tools` vyžaduje reasoning z _každého_ předchozího tahu. U cílů rozhraní Responses API (například `opencode-go/deepseek-v4-flash`, směrovaného na `/responses`) obsahuje tělo nadřazeného požadavku `input`, nikoli `messages`, takže `translateRequest()` (`open-sse/translator/index.ts`) prostřednictvím možnosti zpětného volání předá pivotní přepis, z něhož vytvořil otisk, a místa zachycení vytvoří otisk téhož přepisu. Průchod pro opětovné vložení Responses se spouští nad pivotním formátem OpenAI pro každý zdrojový formát, takže se opětovné vložení provádí i pro klienty Anthropic Messages (Claude → OpenAI → Responses).
+Obyčejné tahy asistenta (bez volání nástroje) jsou klíčovány odlišně: `buildAssistantMessageCacheKey()` zpracovává rozsah relace plus normalizovaný přepis ve formátu OpenAI až do tohoto tahu, protože DeepSeek vyžaduje zdůvodnění _každého_ předchozího tahu, jakmile je přítomen `tools`. U cílů Responses-API (například `opencode-go/deepseek-v4-flash`, směrované do `/responses`) tělo proti směru proudění nese `input`, nikoli `messages`, takže `translateRequest()` (`open-sse/translator/index.ts`) hlásí hlavní transkript, který natrávil prostřednictvím možnosti zpětného volání, a zachycovací místa stráví stejný přepis. Přehrávání Responses běží na pivotu OpenAI pro každý zdrojový formát, takže klienti Anthropic Messages (Claude → OpenAI → Responses) jsou také přehráni.
 
-## Úložiště — hybridní paměť + SQLite
+## Úložiště — Hybridní paměť + SQLite
 
-Kritická cesta používá `Map` v paměti (LRU podle času vytvoření), který je doplněn tabulkou SQLite pro obnovení po pádu a zobrazení na řídicím panelu.
+Horká cesta používá in-memory `Map` (LRU-by-creation) podporovanou tabulkou SQLite pro zotavení po havárii a viditelnost řídicího panelu.
 
-| Vrstva | Implementace                                  | Účel                                           |
-| ------ | --------------------------------------------- | ---------------------------------------------- |
-| Paměť  | `Map` v `open-sse/services/reasoningCache.ts` | Rychlé vyhledávání, odstraní nejstarší při 200 |
-| DB     | Tabulka `reasoning_cache` (`src/lib/db/`)     | Přetrvává po restartech, poskytuje statistiky  |
+| Vrstva | Implementace                                  | Účel                                             |
+| ------ | --------------------------------------------- | ------------------------------------------------ |
+| Paměť  | `Map` v `open-sse/services/reasoningCache.ts` | Rychlé vyhledávání, vystěhování nejstarší na 200 |
+| DB     | tabulka `reasoning_cache` (`src/lib/db/`)     | Přetrvává přes restarty, řídí statistiky         |
 
-Zápisy směřují do obou vrstev. Čtení nejprve kontroluje paměť a poté použije jako náhradní zdroj DB (záznamy nalezené v DB jsou znovu přesunuty do paměti). Selhání DB nejsou kritická — mezipaměť v paměti nadále obsluhuje kritickou cestu.
+Zápisy jdou do obou. Čtení nejprve konzultuje paměť, pak se vrátí k DB (DB hity jsou povýšeny zpět do paměti). Selhání DB nejsou fatální — mezipaměť v paměti nadále obsluhuje horkou cestu.
 
-**Výchozí hodnoty:**
+**Výchozí:**
 
 - TTL: `2h` (`TTL_MS = 2 * 60 * 60 * 1000`)
-- Maximální počet záznamů v paměti: `200` (`MAX_MEMORY_ENTRIES`)
-- Odstraňování: nejdříve nejstarší `createdAt`
+- Maximální paměťové položky: `200` (`MAX_MEMORY_ENTRIES`)
+- Vystěhování: nejstarší `createdAt` jako první
 
 ## Schéma databáze
 
@@ -74,13 +73,13 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-Indexy: `expires_at`, `provider`, `model`, `created_at`. `expires_at` je uloženo jako počet sekund unixového času; vrstva SELECT normalizuje starší textové hodnoty prostřednictvím `EXPIRES_AT_EPOCH_SQL`.
+Indexy: `expires_at`, `provider`, `model`, `created_at`. `expires_at` je uloženo jako sekundy epoch Unix; vrstva SELECT normalizuje hodnoty staršího textu pomocí `EXPIRES_AT_EPOCH_SQL`.
 
-## Detekce poskytovatele / modelu
+## Poskytovatel / Detekce modelu
 
-Opakované vložení je povoleno, když `requiresReasoningReplay(provider, model)` vrátí `true`. Funkce kontroluje dva seznamy v `open-sse/services/reasoningCache.ts`.
+Replay je povolen, když `requiresReasoningReplay(provider, model)` vrátí `true`. Funkce kontroluje dva seznamy v `open-sse/services/reasoningCache.ts`.
 
-**ID poskytovatelů (přesná shoda bez rozlišení velikosti písmen):**
+**Poskytovatel IDs (přesná shoda, nerozlišují se malá a velká písmena):**
 
 - `deepseek`
 - `opencode-go`
@@ -94,12 +93,12 @@ Opakované vložení je povoleno, když `requiresReasoningReplay(provider, model
 - `kimi-coding-apikey`
 - `xiaomi-mimo`
 
-**Regulární výrazy modelů (bez rozlišení velikosti písmen):**
+**Modelování vzorů regulárních výrazů (nerozlišují se malá a velká písmena):**
 
 - `/deepseek-r1/i`
 - `/deepseek-reasoner/i`
 - `/deepseek-chat/i`
-- `/deepseek[-/]?v4[-.]flash/i` a `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, volitelná přípona `-free`)
+- `/deepseek[-/]?v4[-.]flash/i` a `/deepseek[-/]?v4[-.]pro/i` (V4 Flash / Pro, volitelná přípona `-free` )
 - `/(deepseek|zen\/deepseek)-v4/i`
 - `/kimi[-/]k\d/i`
 - `/qwq/i`
@@ -107,21 +106,21 @@ Opakované vložení je povoleno, když `requiresReasoningReplay(provider, model
 - `/glm.*think/i`
 - `/^mimo[-.]?v\d/i`
 
-Přidání nového striktního poskytovatele/modelu znamená přidání položky do jednoho z těchto seznamů a vytvoření jednotkového testu ověřujícího vložení opakovaně použitého obsahu. Popis PR by měl citovat přesný upstreamový text chyby 400, který změnu podnítil.
+Přidání nového přísného provider/model znamená připojení k jednomu z těchto seznamů a napsání testu jednotky s potvrzením replay injection. Popis PR by měl uvádět přesný řetězec 400 upstream, který změnu motivoval.
 
 ## REST API
 
-Mezipaměť zpřístupňuje dva koncové body v `src/app/api/cache/reasoning/route.ts`. Oba vyžadují autentizaci pro správu (`isAuthenticated` z `@/shared/utils/apiAuth`).
+Mezipaměť zpřístupňuje dva koncové body pod `src/app/api/cache/reasoning/route.ts`. Oba vyžadují autentizaci pro správu (`isAuthenticated` z `@/shared/utils/apiAuth`).
 
-| Metoda | Koncový bod                                               | Popis                                                     |
-| ------ | --------------------------------------------------------- | --------------------------------------------------------- |
-| GET    | `/api/cache/reasoning`                                    | Statistiky + stránkované záznamy                          |
-| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | Filtrovaný výpis (`limit` omezený na rozsah `[1, 200]`)   |
-| DELETE | `/api/cache/reasoning`                                    | Vymaže vše (paměť + DB) a vynuluje počty zásahů/neúspěchů |
-| DELETE | `/api/cache/reasoning?provider=deepseek`                  | Vymaže pouze záznamy jednoho poskytovatele                |
-| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | Odstraní jeden záznam                                     |
+| Metoda | Koncový bod                                               | Popis                                               |
+| ------ | --------------------------------------------------------- | --------------------------------------------------- |
+| GET    | `/api/cache/reasoning`                                    | Statistiky + stránkované záznamy                    |
+| GET    | `/api/cache/reasoning?provider=deepseek&model=...&limit=` | Filtrovaný výpis (`limit` upnutý na `[1, 200]`)     |
+| DELETE | `/api/cache/reasoning`                                    | Vymažte vše (paměť + DB) a resetujte počty hit/miss |
+| DELETE | `/api/cache/reasoning?provider=deepseek`                  | Vymazat pouze záznamy pro jednoho poskytovatele     |
+| DELETE | `/api/cache/reasoning?toolCallId=call_abc`                | Smazat jeden záznam                                 |
 
-**Struktura odpovědi GET:**
+**tvar odpovědi GET :**
 
 ```json
 {
@@ -155,17 +154,33 @@ Mezipaměť zpřístupňuje dva koncové body v `src/app/api/cache/reasoning/rou
 
 ## Provozní poznámky
 
-- **Čištění:** `cleanupReasoningCache()` odstraní z paměti záznamy s prošlou platností a spustí `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. Pracovní procesy kontroly stavu tuto funkci pravidelně volají.
-- **Obnova po pádu:** Po restartu je paměť prázdná, ale DB stále obsahuje záznamy, jejichž platnost nevypršela. První vyhledání daného `tool_call_id` je zásah do DB; další vyhledání jsou zásahy do paměti.
-- **Žádné uvažování, žádná mezipaměť:** `cacheReasoningFromAssistantMessage` vrátí `0`, pokud zpráva asistenta neobsahuje pole `reasoning_content` / `reasoning`, takže odpovědi bez uvažování nic nestojí.
-- **Podmíněný je i zápis:** obě místa volání v `chatCore.ts` (bez streamování i se streamováním) volají `cacheReasoningFromAssistantMessage()` pouze tehdy, když `requiresReasoningReplay(provider, model)` vrátí `true` — tedy stejný predikát, který kontroluje strana čtení. Instalace, které nikdy nepoužijí poskytovatele vyžadujícího opakované vložení, tak přestanou platit režii za zápis, aktualizaci indexu a blok try/catch u každé odpovědi obsahující uvažování.
-- **Nestriktní poskytovatelé:** Když `requiresReasoningReplay` vrátí `false` a cílovým formátem je OpenAI, překladač **odstraní** z odchozích zpráv všechna pole `reasoning_content` — OpenAI Chat Completions je nepřijímá.
+- **Čištění:** `cleanupReasoningCache()` vyčistí položky paměti s vypršenou platností a spustí `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. Pracovníci zdravotní kontroly to pravidelně volají.
+- **Obnova po havárii:** Po restartu je paměť prázdná, ale DB stále obsahuje položky, které nevypršely. První vyhledávání pro daný `tool_call_id` je DB hit; následné vyhledávání jsou zásahy do paměti.
+- **Žádné uvažování, žádná mezipaměť:** `cacheReasoningFromAssistantMessage` vrátí `0` když zpráva asistenta nemá pole `reasoning_content` / `reasoning`, takže odpovědi bez přemýšlení nic nestojí.
+- **Zápis je také chráněn:** obě volací místa v `chatCore.ts` (bez streamování a streamování) volají `cacheReasoningFromAssistantMessage()` pouze tehdy, když `requiresReasoningReplay(provider, model)` je `true` — stejný predikát kontroly na straně čtení. Instalace, které se nikdy nedotknou poskytovatele přehrávání, přestanou platit za zápis, aktualizaci indexu a try/catch při každé odpovědi nesoucí důvod.
+- **Nepřísní poskytovatelé:** Když `requiresReasoningReplay` je `false` a cílový formát je OpenAI, překladač** proužky** jakékoli pole `reasoning_content` z odchozích zpráv — OpenAI Chat Completions to nepřijímá.
+
+## Vlastnictví Muse Opaque-Reasoning
+
+Muse (`muse-code`) vrací neprůhledné uvažování vázané na volajícího (`encrypted_content`). Přehrání pod jiným účtem nebo připomenutým pověřením selže upstream, takže nativní požadavky OAuth používají vlastnictví na úrovni relace místo rotace podle požadavku (`src/sse/services/museSessionOwnership.ts`, vynuceno v `src/sse/handlers/chat.ts`). Explicitně vybraná připojení pomocí klíče API a konfigurace pouze s klíčem API si zachovají své stávající směrování bez tohoto režimu vlastnictví.
+
+- Poskytněte stabilní relaci ID v každém tahu: `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id` nebo `x-codex-session-id`; alternativně použijte `prompt_cache_key`, `session_id`, `conversation_id` nebo `metadata.session_id` v těle (v tomto pořadí priority). Chybějící nebo prázdné IDs vrátí 400, když jsou aktivní dva nebo více nativních účtů OAuth ; s jedním účtem OAuth není co otáčet, takže takový požadavek udržuje nepřipnuté směrování. Rozsah zahrnuje klíč API OmniRoute volajícího ID.
+- Nové nezávislé relace cyklicky napříč aktivními nativními účty OAuth povolenými zásadami připojení pomocí klíče API, seřazené podle připojení ID. Round-robin přeskakuje účty při ochlazení připojení, se stavem terminálu (`banned`, `expired`, `credits_exhausted`) nebo uzamčením modelu pro požadovaný model; Porucha Muse upstream zaznamenává cooldown a stav jističe jako ostatní poskytovatelé. Explicitně vynucené připojení obchází kruhovou obsluhu pro novou relaci, ale nemůže přepsat existujícího vlastníka.
+- Dokud vlastník nedoručí úspěšnou odpověď, je relace, jejíž vlastník se stal nedostupným, znovu nárokována na zdravý účet. Po první úspěšné odpovědi zůstane relace připnutá k danému vlastníkovi, dokud nebude 30 dní nečinná (`MUSE_SESSION_IDLE_TTL_MS`).
+- Každé pokračování a otočení výsledku nástroje zůstává připojeno k vlastníkovi relace: připojení, identita účtu a generování odvozených pověření, které jsou znovu zkontrolovány před pokusy o upstream, včetně opakovaných pokusů o obnovení pověření. Pro danou relaci a generování musí být zaznamenány odkazy na volání IDs/item odpovědí a volání nástroje IDs dokončení chatu.
+- Záznamy SQLite `key_value` ve jmenném prostoru `muse_session_ownership` (`src/lib/db/museSessionOwnership.ts`) přetrvávají vlastnictví a rotace kurzoru přes restarty. Každý požadavek a doručená odpověď obnoví razítko aktivity relace; nečinná relace delší než `MUSE_SESSION_IDLE_TTL_MS` je ořezána (pin vlastníka, obsluhovaný příznak a zaznamenané haše opaque/reference ), maximálně jednou za 10 minut a v omezených dávkách, takže pozdější přehrání její historie se nezdaří uzavřít jako neznámý vlastník. Záznamy obsahují IDs připojení a hash identity účtu, přihlašovací údaje, neprůhledný obsah a odkazy na pokračování, nikoli tajemství nebo historii konverzace. Klienti si musí uchovat a zaslat svou úplnou historii a neprůhledné odůvodnění.
+- Neznámé nebo cizí neprůhledné zdůvodnění, chybějící vlastník, nedostupný účet vlastníka nebo generační změna se zaznamenanou historií se nezdaří s explicitním 4xx/503 — never silent cross-account failover a nikdy neupuštěné zdůvodnění.
+- Připomenutý klíč stejného účtu je přijat pouze tehdy, když relace nezaznamenala žádnou opakovatelnou historii; zaznamenané relace se nedaří uzavřít, dokud nezačnou znovu.
+- Prázdná odezva proti proudu (`upstream_empty_response` / `empty_response`, volajícímu se nic nevysílá) je u stejného vlastníka opakována maximálně dvakrát, po 0,5 s pak 1,5 s (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). Pokud jsou všechny pokusy prázdné, původní 502 je vráceno bez cooldownu nebo bez označení jističe, takže nekvalitní odpověď nikdy nezablokuje vlastníka.
+- Všechny požadavky `muse-code` obcházejí čtení a zápisy sémantické mezipaměti, včetně streamovaných zápisů, takže neprůhledný výstup uložený v mezipaměti nemůže získat jiného vlastníka relace.
+
+Ochrany regrese: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts` a `tests/unit/chatcore-semantic-cache.test.ts`.
 
 ## Viz také
 
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — jističe, doby obnovení, blokování modelů
-- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — diagnostika odpovědí 400 od nadřazených služeb
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — jističe, cooldowny, model lockouts
+- [TROUBLESHOOTING.md](../guides/TROUBLESHOOTING.md) — diagnostika upstream 400s
 - Zdroj: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - Migrace: `src/lib/db/migrations/033_create_reasoning_cache.sql`
-- Trasa API: `src/app/api/cache/reasoning/route.ts`
-- Původní problém: #1628
+- trasa API : `src/app/api/cache/reasoning/route.ts`
+- Původní vydání: #1628
