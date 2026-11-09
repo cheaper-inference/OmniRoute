@@ -166,6 +166,159 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // Vacate feature slot 215 before Team history is rehomed there.
+  {
+    // Published cache reporting used slots now owned by canonical release migrations.
+    fromVersion: "206",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "213",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "214",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "215",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "217",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "218",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "223",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "224",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "225",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "226",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "228",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "229",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    // Earlier traffic candidates occupied slots now owned by release migrations.
+    fromVersion: "206",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "207",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "213",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "214",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "215",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "217",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "218",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "223",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "224",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "225",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "226",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "228",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "229",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.
@@ -209,7 +362,7 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // A later pushed #14771 build used the upstream mirror-URL slot.
     fromVersion: "218",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
@@ -218,14 +371,6 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "recreate_turn_nodes_content_hash_index",
     toVersion: "211",
     toName: "recreate_turn_nodes_content_hash_index",
-  },
-  {
-    // #14771/#14862 builds pushed before 228_purge_orphaned_provider_catalogs landed
-    // shipped this as 228.
-    fromVersion: "228",
-    fromName: "api_key_self_service_settings",
-    toVersion: "229",
-    toName: "api_key_self_service_settings",
   },
   {
     fromVersion: "134",
@@ -288,21 +433,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
@@ -317,7 +462,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
     fromVersion: "213",
     fromName: "api_key_self_service_settings",
-    toVersion: "229",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 228, now purge_orphaned_provider_catalogs.
+    fromVersion: "228",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // #14771 builds then used 229, now api_key_five_hour_limit.
+    fromVersion: "229",
+    fromName: "api_key_self_service_settings",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
 ] as const;

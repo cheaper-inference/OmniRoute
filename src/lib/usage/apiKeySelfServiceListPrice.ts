@@ -86,7 +86,7 @@ export const defaultListPriceCache = createListPriceCache();
 
 const cutsByPricingTable = new WeakMap<object, number[]>();
 
-/** The smallest whole prompt size a pricing row's `long_context` tier applies to, if it has one. */
+/** The smallest whole prompt size a pricing row's `long_context` tier applies to, or null. */
 function longContextCut(row: unknown): number | null {
   const tier = (row as { long_context?: unknown } | null)?.long_context;
   if (!tier || typeof tier !== "object" || Array.isArray(tier)) return null;

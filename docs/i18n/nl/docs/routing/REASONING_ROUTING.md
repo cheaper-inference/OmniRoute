@@ -33,17 +33,31 @@ Een `connection`-regel wordt alleen geëvalueerd wanneer geen vroege regel heeft
 
 ## Inspanning en budget
 
-`sourceEffort` accepteert `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` en `ultra`. `missing` betekent dat de aanvraag noch een afzonderlijke inspanningswaarde, noch een thinking-schakelaar of thinking-budget bevat. Een signaal dat alleen uit een budget bestaat, wordt daarom uitsluitend door `any` gematcht.
+`sourceEffort` accepteert `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` en
+`ultra`. `missing` betekent dat het verzoek noch een discrete inspanning, noch een schakelaar of
+budget voor nadenken bevat. Een signaal dat alleen uit een budget bestaat, wordt daarom alleen door
+`any` gematcht.
 
 `effortMode` heeft drie varianten:
 
-- `inherit` behoudt de inspanning van de client, terwijl het model of de combo nog steeds mag worden gewijzigd.
-- `default` stelt `targetEffort` alleen in wanneer er geen expliciet reasoningsignaal aanwezig is.
-- `force` vervangt de afzonderlijke inspanningswaarde door `targetEffort`.
+- `inherit` behoudt de inspanning van de client en staat het model of de combinatie toch toe deze te wijzigen.
+- `default` stelt `targetEffort` alleen in wanneer er geen expliciet redeneersignaal aanwezig is.
+- `force` vervangt de discrete inspanning door `targetEffort`.
 
-Onafhankelijk daarvan kan `budgetAction` de waarde `preserve`, `remove` of `set` hebben. `force` met `none` verwijdert alle herkende inspannings- en budgetvelden. `none` in combinatie met `set` is ongeldig.
+Onafhankelijk hiervan kan `budgetAction` `preserve`, `remove` of `set` zijn. `force` met `none` verwijdert
+alle herkende velden voor inspanning en budget en stelt vervolgens `reasoning_effort: "none"` in, omdat
+sommige providers nadenken inschakelen wanneer het veld ontbreekt. Providers die de letterlijke waarde
+`none` weigeren, worden tijdens het verzenden aangepast in `open-sse/executors/base/reasoningEffort.ts`. Command Code
+brengt dit in kaart naar `low`, behalve bij Responses-vormige verzoeken (`input` zonder `messages`), waar
+`none` behouden blijft. Op Cloudflare Workers AI (`cloudflare-ai`) krijgen de modellen die `none` weigeren
+(gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low`; andere Workers AI-modellen behouden `none`. Het veld
+weglaten is daar geen optie, omdat een ontbrekende inspanning de standaardlaag van het model uitvoert.
+`none` in combinatie met `set` is ongeldig.
 
-Aanvragen die zijn gericht op modellen waarvan bekend is dat ze incompatibel zijn, worden vóór de upstreamaanroep afgewezen. Voor combodoelen worden incompatibele vermeldingen verwijderd; als er geen overblijven, retourneert de aanvraag status `400`. Onbekende capaciteitsgegevens leiden tot een waarschuwing en laten de regel actief.
+Verzoeken die zijn gericht op bekende incompatibele modellen worden afgewezen voordat de upstream-aanroep
+plaatsvindt. Voor combinatiedoelen worden incompatibele items verwijderd; als er geen items overblijven,
+retourneert het verzoek status `400`. Onbekende capabilitygegevens genereren een waarschuwing en laten
+de regel actief.
 
 ## Beveiliging en transporten
 
