@@ -127,6 +127,27 @@ Samodejno točkovanje izbere najboljšega ponudnika/model za posamezno zahtevo
 | `src/sse/handlers/chat.ts`                                | Integracija: takojšnja obravnava samodejne predpone |
 | `src/shared/constants/providers.ts`                       | Sistemski vnos `SYSTEM_PROVIDERS.auto`              |
 
+## Nastavitve računa za shranjene samodejne kombinacije
+
+Urejevalnik Intelligent Auto ponuja izbirno** Nastavitve računa** razdelek. Vsaka povezava je lahko prednostna, običajna (privzeta), rezervna ali izključena. Več povezav si lahko deli raven. Samodejno izbere znotraj prve primerne stopnje in tam ohrani svoje vedenje scoring/router ; neuspeli poskusi padejo na preostale konkretne račune, prednost pred običajnim pred rezervnim. Ta kombinacija nikoli ne uporablja izključenih povezav.
+
+Nastavitev je shranjena kot `config.accountPreferences`, vnesena s povezavo ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Izpuščen ali prazen zemljevid ohrani obstoječo pot. Nastavitve ne omogočajo onemogočenih povezav, ne dodeljujejo dostopa do ključa API-ja, ne obnavljajo kandidatov, blokiranih s kvoto, ali obidejo preverjanja proračuna. Vsak poskus je omejen na svojo konkretno povezavo, zato nadomestni račun ne more preskočiti ravni za kombiniranim usmerjevalnikom. Obstoječa afiniteta seje lahko obdrži primeren račun; izključitev računa, ki je vezan na izvorni turn, ustavi ta turn namesto tihega spreminjanja računov.
+
+Konfigurirane nastavitve uporabljajo samodejno pot, ki upošteva račun: nevezan kontekstni predpomnilnik, pametni cevovod, kaos in bližnjice v senci niso poslane. Špekulativno varovanje pred tveganjem je za te zahteve onemogočeno, tako da rezervni računi ne morejo tekmovati s prednostnimi. Druge kombinirane strategije ne razlagajo te nastavitve. Če kombinacijo spremenite iz samodejne, ohranite shranjene nastavitve za poznejši preklop nazaj.
+
 ## Imena kombinacij, ki se ujemajo z dejanskim ID-jem modela
 
 Kombinacija, katere `name` je enak samostojnemu ID-ju modela (npr. kombinacija z imenom

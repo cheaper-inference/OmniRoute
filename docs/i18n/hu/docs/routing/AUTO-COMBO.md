@@ -127,6 +127,27 @@ Az automatikus pontozás kérésenként kiválasztja a legjobb szolgáltatót/mo
 | `src/sse/handlers/chat.ts`                                | Integráció: az automatikus előtag rövidzáras kezelése              |
 | `src/shared/constants/providers.ts`                       | A `SYSTEM_PROVIDERS.auto` rendszerbejegyzés                        |
 
+## Fiókbeállítások a mentett automatikus kombinációkhoz
+
+Az Intelligens Auto szerkesztő opcionális lehetőséget kínál** Fiókbeállítások** szakasz. Mindegyik kapcsolat lehet Preferált, Normál (alapértelmezett), Fenntartott vagy Kizárt. Több kapcsolat is megoszthat egy szintet. Az automatikus az első jogosult rétegen belül választ, megtartva ott scoring/router viselkedését; a sikertelen kísérletek a fennmaradó konkrét számlákra esnek át, előnyösebb a normál előtt a tartalékolás előtt. Ez a kombináció soha nem használja a kizárt kapcsolatokat.
+
+A beállítás `config.accountPreferences` néven tárolódik, ID csatlakozással kulcsolható:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+A kihagyott vagy üres térkép megtartja a meglévő útvonaltervet. A beállítások nem engedélyezik a letiltott kapcsolatokat, nem adnak hozzáférést API-kulcshoz, nem állítják vissza a kvóta által blokkolt jelölteket, és nem kerülik ki a költségvetés ellenőrzését. Minden kísérlet a konkrét kapcsolatra korlátozódik, így a fiók visszaállítása nem ugorhat a kombinált útválasztó mögé. A meglévő munkamenet-affinitás megtarthat egy jogosult fiókot; a natív fordulóhoz kötött fiók kizárása megáll, amely a fiókok csendes váltása helyett fordul.
+
+A konfigurált beállítások a fióktudatos automatikus elérési utat használják: a nem kötött kontextus-gyorsítótár, az intelligens csővezeték, a káosz és az árnyék-parancsikonok nem kerülnek kiküldésre. A spekulatív fedezeti ügylet le van tiltva ezeknél a kéréseknél, így a tartalékszámlák nem versenyezhetnek a preferált fiókokkal. Más kombinált stratégiák nem értelmezik ezt a beállítást. Ha a kombót leváltja az Automatikusról, akkor a mentett beállítások megmaradnak a későbbi visszakapcsoláshoz.
+
 ## Valós modellazonosítóval megegyező nevű kombók
 
 Az olyan kombó, amelynek `name` mezője megegyezik egy önálló modellazonosítóval (például egy

@@ -155,7 +155,7 @@ src/
 | `app/(dashboard)/dashboard/activity/`                                        | ਗਤੀਵਿਧੀ ਫੀਡ ਪੰਨਾ (ਗਰੁੱਪ ਬੀ): `page.tsx` (ਸਰਵਰ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ਦੇਖੋ `docs/architecture/MONITORING_SECTIONS.md`                                                                                                            |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | ਕੋਟਾ ਸ਼ੇਅਰਿੰਗ ਪੰਨਾ (ਗਰੁੱਪ ਬੀ): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ਪ੍ਰਦਾਤਾ ਯੋਜਨਾ ਸੰਰਚਨਾ ਪੰਨਾ (ਗਰੁੱਪ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ਕੋਟਾ ਮਾਪ ਪ੍ਰਤੀ ਕੁਨੈਕਸ਼ਨ ਓਵਰਰਾਈਡ                                                                                                                                                                                              |
-| `app/docs/`                                                                  | ਏਮਬੈੱਡਡ ਦਸਤਾਵੇਜ਼ ਦਰਸ਼ਕ (ਰੈਂਡਰ `docs/*.md`)                                                                                                                                                                                                                                                                      |
+| `app/docs/`                                                                  | ਏਮਬੇਡਡ ਦਸਤਾਵੇਜ਼ੀ ਦਰਸ਼ਕ (ਰੈਂਡਰ `docs/*.md`)                                                                                                                                                                                                                                                                      |
 | `app/landing/`                                                               | ਮਾਰਕੀਟਿੰਗ ਲੈਂਡਿੰਗ ਪੰਨਾ                                                                                                                                                                                                                                                                                          |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | ਪ੍ਰਮਾਣਿਕਤਾ-ਸਬੰਧਤ ਪੰਨੇ                                                                                                                                                                                                                                                                                           |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ਗਲਤੀ ਪੰਨੇ                                                                                                                                                                                                                                                                                                  |
@@ -186,16 +186,16 @@ src/
 | `embeddings/`                            | ਏਮਬੈਡਿੰਗ ਸੇਵਾ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                             |
 | `env/`                                   | Env ਵੇਰੀਏਬਲ ਪਾਰਸਿੰਗ + ਪ੍ਰਮਾਣਿਕਤਾ                                                                                                                                                                                                                                                                                |
 | `evals/`                                 | Eval ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨਰ, ਰਨਟਾਈਮ) — `docs/frameworks/EVALS.md` ਵੇਖੋ                                                                                                                                                                                                                                               |
-| `guardrails/`                            | PII ਮਾਸਕਰ, ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ — ਦੇਖੋ `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                   |
+| `guardrails/`                            | PII ਮਾਸਕ, ਪ੍ਰੋਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ — ਦੇਖੋ `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                    |
 | `jobs/`                                  | ਪਿਛੋਕੜ ਦੀਆਂ ਨੌਕਰੀਆਂ (ਕ੍ਰੋਨ ਵਰਗੀਆਂ)                                                                                                                                                                                                                                                                              |
 | `memory/`                                | ਗੱਲਬਾਤ ਸੰਬੰਧੀ ਮੈਮੋਰੀ (SQLite FTS5 + sqlite-vec ਹਾਈਬ੍ਰਿਡ RRF + Qdrant ਟੀਅਰ 2) — ਦੇਖੋ `docs/frameworks/MEMORY.md`                                                                                                                                                                                                 |
 | `memory/embedding/`                      | ਮਲਟੀ-ਸੋਰਸ ਏਮਬੈਡਿੰਗ ਲੇਅਰ: `index.ts` (ਰੈਜ਼ੋਲਵਰ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ਯੋਜਨਾ 21)                                                                                                                                                                       |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ਰੈਪਰ — KNN ਬਰੂਟ-ਫੋਰਸ + ਹਾਈਬ੍ਰਿਡ RRF (FTS5 + ਵੈਕਟਰ, k = 60)। Lazy-init, sqlite-vec ਅਣਉਪਲਬਧ ਹੋਣ 'ਤੇ ਸ਼ਾਨਦਾਰ ਢੰਗ ਨਾਲ ਘਟਾਉਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                                      |
 | `memory/reindex.ts`                      | `runReindexBatch()` — ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ `needs_reindex=1` ਨਾਲ ਯਾਦਾਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕਰਦਾ ਹੈ; `POST /api/memory/reindex` ਅਤੇ ਆਲਸੀ-ਬੈਕਫਿਲ ਮਾਰਗ ਦੁਆਰਾ ਬੁਲਾਇਆ ਜਾਂਦਾ ਹੈ। (ਯੋਜਨਾ 21)                                                                                                                                        |
 | `monitoring/`                            | ਸਿਹਤ ਜਾਂਚ, ਮੈਟ੍ਰਿਕਸ ਨਿਕਾਸ                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | 22 ਪ੍ਰਦਾਤਾ ਮਾਡਿਊਲਾਂ ਲਈ OAuth/import ਫਲੋਅ (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, , kimideroqe, ਓਪਨ, ਕਿਮੀ, xai-oauth, zed-ਹੋਸਟਡ, zed)                                                                 |
+| `oauth/`                                 | OAuth/import 22 ਪ੍ਰਦਾਤਾ ਮਾਡਿਊਲਾਂ (ਐਜੀ, ਐਂਟੀਗਰੈਵਿਟੀ, ਕਲੌਡ, ਕਲਾਈਨ, ਕੋਡਬੱਡੀ-ਸੀਐਨ, ਕੋਡੈਕਸ, ਕਰਸਰ, ਡੇਵਿਨ-ਡੈਸਕਟੌਪ, ਗੇ-ਕੋਪਾਇਲਟ, ਗੀਥਬ, ਗਿਟਲਬ-ਡੂਓ, ਗ੍ਰੋਕ-ਕਲੀ-ਓਥ, ਗ੍ਰੋਕ-ਕਲੀ, ਕਿਲੋਕੋਡ, ਕਿਮੀਕੋਡ, ਕਿਮੀਕੋਡ, ਕਿਮੀ-ਕਲੀ, ਓਪਨ xai-oauth, zed-ਹੋਸਟਡ, zed)                                                                           |
 | `plugins/`                               | ਪਲੱਗਇਨ ਰਜਿਸਟਰੀ                                                                                                                                                                                                                                                                                                  |
-| `promptCache/`                           | ਐਂਥਰੋਪਿਕ-ਸ਼ੈਲੀ ਪ੍ਰੋਂਪਟ ਕੈਸ਼ ਬ੍ਰੇਕਪੁਆਇੰਟਸ                                                                                                                                                                                                                                                                        |
+| `promptCache/`                           | ਐਂਥ੍ਰੋਪਿਕ-ਸ਼ੈਲੀ ਪ੍ਰੋਂਪਟ ਕੈਸ਼ ਬ੍ਰੇਕਪੁਆਇੰਟਸ                                                                                                                                                                                                                                                                       |
 | `skills/`                                | ਹੁਨਰ ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH) — ਦੇਖੋ `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                               |
 | `playground/`                            | ਪਲੇਗ੍ਰਾਉਂਡ ਸਟੂਡੀਓ ਸਾਂਝੇ ਸਹਾਇਕ: `codeExport.ts` (curl/Python/TS ਜਨਰੇਟਰ), `promptImprover.ts` (ਮੈਟਾ-ਪ੍ਰੋਂਪਟ ਬਿਲਡਰ), `streamMetrics.ts` (ਸ਼ੁੱਧ TTFT/TPS), `types.ts` (ਕੀਮਤ ਸਾਰਣੀ) — ਵੇਖੋ `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                    |
 | `webhookDispatcher.ts`                   | HMAC ਵੈਬਹੁੱਕ ਡਿਲੀਵਰੀ — `docs/frameworks/WEBHOOKS.md` ਦੇਖੋ                                                                                                                                                                                                                                                       |
@@ -241,8 +241,8 @@ src/
 | ਮੋਡੀਊਲ                           | ਮਕਸਦ                                                                                             |
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ਡੈਸ਼ਬੋਰਡ ਕੰਪੋਨੈਂਟ API: `packages/ui-kit` — ਉੱਤੇ ਅਡਾਪਟਰ ਵੇਖੋ `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ਸਕ੍ਰੀਨਾਂ ਦੁਆਰਾ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਆਈਕਨ ਨਾਮ → ਲੂਸਾਈਡ ਕੰਪੋਨੈਂਟਸ (`<Icon>`)                  |
-| `constants/providers.ts`         | **380 ਪ੍ਰਦਾਤਾ** Zod ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਨਾਲ (ਸੱਚ ਦਾ ਸਰੋਤ)                                              |
+| `constants/iconMap.ts`           | `ICON_MAP`: ਸਕ੍ਰੀਨਾਂ ਦੁਆਰਾ ਵਰਤੇ ਗਏ ਆਈਕਨ ਨਾਮ → ਲੂਸਾਈਡ ਕੰਪੋਨੈਂਟਸ (`<Icon>`)                        |
+| `constants/providers.ts`         | **੩੮੧ ਪ੍ਰਦਾਤਾ** Zod ਪ੍ਰਮਾਣਿਕਤਾ ਦੇ ਨਾਲ (ਸੱਚ ਦਾ ਸਰੋਤ)                                              |
 | `constants/cliTools.ts`          | ਬਾਹਰੀ CLI ਟੂਲ ਰਜਿਸਟਰੀ                                                                            |
 | `constants/routingStrategies.ts` | **20 ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ** ਤਰਜੀਹਾਂ ਦੇ ਨਾਲ                                                            |
 | `constants/publicApiRoutes.ts`   | ਰੂਟ ਜਿਨ੍ਹਾਂ ਲਈ ਬੇਅਰਰ (ਬਨਾਮ ਪ੍ਰਬੰਧਨ) ਪ੍ਰਮਾਣਿਕਤਾ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ                                   |
@@ -395,24 +395,24 @@ open-sse/
 
 ### ਸਿਖਰ-ਪੱਧਰ ਦੀਆਂ ਗਾਈਡਾਂ
 
-| ਡਾਕ                         | ਮਕਸਦ                                                                                  |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬ-ਸਿਸਟਮ ਦਾ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤਹ                                  |
-| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਸੰਦਰਭ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਸੰਮੇਲਨ                                        |
-| `FEATURES.md`               | v3.8 ਹਾਈਲਾਈਟਸ ਦੇ ਨਾਲ ਫੀਚਰ ਮੈਟਰਿਕਸ                                                     |
-| `USER_GUIDE.md`             | ਅੰਤਮ-ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈਟਅੱਪ, ਮਾਡਲ, ਕੰਬੋਜ਼, CLIs, ਆਡੀਓ, ਆਦਿ)                           |
-| `API_REFERENCE.md`          | ਪ੍ਰਮਾਣਿਕਤਾ ਮਾਡਲ ਦੇ ਨਾਲ API ਅੰਤਮ ਬਿੰਦੂ ਸੰਦਰਭ                                           |
-| `openapi.yaml`              | OpenAPI 3.0 ਸਪੇਕ (121 ਮਾਰਗ)                                                           |
-| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲ ਕਰਨ ਦੇ ਤਰੀਕੇ (npm, npx, Docker, Electron, Termux, ਸਰੋਤ)                        |
-| `ENVIRONMENT.md`            | ਸਾਰੇ env vars (~ 800 ਦਸਤਾਵੇਜ਼ੀ, ~ 3,050 ਲਾਈਨਾਂ `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਜਾਣੇ-ਪਛਾਣੇ ਮੁੱਦੇ                                                   |
-| `RELEASE_CHECKLIST.md`      | ਪੂਰਾ ਰੀਲੀਜ਼ ਪ੍ਰਵਾਹ (ਹੁਨਰ, ਹਸਕੀ, ਰਵਾਇਤੀ ਕਮਿਟ, ਤੈਨਾਤ)                                   |
-| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                           |
-| `FREE_TIERS.md`             | ਕਿਉਰੇਟਿਡ ਫ੍ਰੀ-ਟੀਅਰ ਪ੍ਰਦਾਤਾ (48 + ਮੁਫ਼ਤ + 11 OAuth)                                    |
-| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਏਕੀਕਰਣ + ਅੰਦਰੂਨੀ OmniRoute CLI                                              |
-| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਇੱਕ ਭਾਸ਼ਾ ਜੋੜਨਾ, 67 ਲੋਕੇਲ                                             |
-| `UNINSTALL.md`              | ਅਣਇੰਸਟੌਲ ਕਦਮਾਂ ਨੂੰ ਸਾਫ਼ ਕਰੋ                                                           |
-| `PROVIDER_REFERENCE.md`     | **ਸਵੈ-ਤਿਆਰ ਕੀਤਾ** 380 ਪ੍ਰਦਾਤਾਵਾਂ ਦਾ ਕੈਟਾਲਾਗ (regen: `npm run gen:provider-reference`) |
+| ਡਾਕ                         | ਮਕਸਦ                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬ-ਸਿਸਟਮ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤਹ                                 |
+| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਸੰਦਰਭ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਸੰਮੇਲਨ                                    |
+| `FEATURES.md`               | v3.8 ਹਾਈਲਾਈਟਸ ਦੇ ਨਾਲ ਫੀਚਰ ਮੈਟਰਿਕਸ                                                 |
+| `USER_GUIDE.md`             | ਅੰਤਮ-ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈੱਟਅੱਪ, ਮਾਡਲ, ਕੰਬੋਜ਼, CLIs, ਆਡੀਓ, ਆਦਿ)                      |
+| `API_REFERENCE.md`          | ਪ੍ਰਮਾਣਿਕਤਾ ਮਾਡਲ ਦੇ ਨਾਲ API ਅੰਤਮ ਬਿੰਦੂ ਸੰਦਰਭ                                       |
+| `openapi.yaml`              | OpenAPI 3.0 ਸਪੇਕ (121 ਮਾਰਗ)                                                       |
+| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲ ਕਰਨ ਦੇ ਤਰੀਕੇ (npm, npx, Docker, Electron, Termux, ਸਰੋਤ)                    |
+| `ENVIRONMENT.md`            | ਸਾਰੇ env vars (~ 800 ਦਸਤਾਵੇਜ਼ੀ, ~ 3,050 ਲਾਈਨਾਂ `.env.example`)                    |
+| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਜਾਣੇ-ਪਛਾਣੇ ਮੁੱਦੇ                                               |
+| `RELEASE_CHECKLIST.md`      | ਪੂਰਾ ਰੀਲੀਜ਼ ਪ੍ਰਵਾਹ (ਹੁਨਰ, ਹਸਕੀ, ਰਵਾਇਤੀ ਕਮਿਟ, ਤੈਨਾਤ)                               |
+| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                       |
+| `FREE_TIERS.md`             | ਕਿਉਰੇਟਿਡ ਫ੍ਰੀ-ਟੀਅਰ ਪ੍ਰਦਾਤਾ (48 + ਮੁਫ਼ਤ + 11 OAuth)                                |
+| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਏਕੀਕਰਣ + ਅੰਦਰੂਨੀ OmniRoute CLI                                          |
+| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਇੱਕ ਭਾਸ਼ਾ ਜੋੜਨਾ, 67 ਲੋਕੇਲ                                         |
+| `UNINSTALL.md`              | ਅਣਇੰਸਟੌਲ ਕਦਮਾਂ ਨੂੰ ਸਾਫ਼ ਕਰੋ                                                       |
+| `PROVIDER_REFERENCE.md`     | **ਸਵੈ-ਤਿਆਰ ਕੀਤਾ** 381 ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸੂਚੀ (ਰੀਜਨ: `npm run gen:provider-reference`) |
 
 ### ਉਪ-ਸਿਸਟਮ ਡੂੰਘੇ-ਡੁਬਕੀ
 
@@ -458,7 +458,7 @@ open-sse/
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale ਫਨਲ                              |
 | `PROXY_GUIDE.md`             | 4-ਪੱਧਰ ਦੀ ਆਊਟਬਾਉਂਡ ਪ੍ਰੌਕਸੀ + 1proxy ਮਾਰਕੀਟਪਲੇਸ                   |
 
-### ਉਪ-ਡਾਇਰੈਕਟਰੀਆਂ
+### ਸਬ-ਡਾਇਰੈਕਟਰੀਆਂ
 
 | ਸਬਦੀਰ                 | ਮਕਸਦ                                                                                                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
