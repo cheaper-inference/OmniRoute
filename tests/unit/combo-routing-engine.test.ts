@@ -25,6 +25,8 @@ const { resolveReasoningBufferedMaxTokens } =
 const { normalizeComboStep } = await import("../../src/lib/combos/steps.ts");
 const { registerStrategy } = await import("../../open-sse/services/autoCombo/routerStrategy.ts");
 const { touchSession, clearSessions } = await import("../../open-sse/services/sessionManager.ts");
+const { scopeHandoffSessionId } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
@@ -1415,7 +1417,7 @@ test("#11408 guard: no-executable-targets early exit still records the combo fai
   // bookkeeping: the consecutive-failure counter must still advance so the
   // session pin auto-clears after COMBO_FAILURE_THRESHOLD no-target failures.
   assert.equal(
-    getComboFailureCount("sess-guard-11408", "guard-empty-11408"),
+    getComboFailureCount(scopeHandoffSessionId("sess-guard-11408", null), "guard-empty-11408"),
     1,
     "recordComboFailure must run on the no-executable-targets early exit"
   );

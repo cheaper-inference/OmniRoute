@@ -197,12 +197,15 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
   },
   leonardo: {
     id: "leonardo",
-    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
+    baseUrl: "https://cloud.leonardo.ai/api/rest/v1/generations-text-to-video",
     statusUrl: "https://cloud.leonardo.ai/api/rest/v1/generations",
     authType: "apikey",
     authHeader: "bearer",
     format: "leonardo-video",
-    models: [{ id: "phoenix", name: "Phoenix Video" }],
+    models: [
+      { id: "motion-2.0", name: "Motion 2.0" },
+      { id: "motion-2.0-fast", name: "Motion 2.0 Fast" },
+    ],
   },
   pollinations: {
     id: "pollinations",

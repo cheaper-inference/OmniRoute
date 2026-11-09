@@ -2,8 +2,10 @@ export { SidebarBranch, type SidebarBranchItem, type SidebarBranchProps } from "
 export { SignalDiagram, DiagramFrame, type SignalNode, type SignalEdge, type SignalDiagramProps, type DiagramFrameProps } from "./signal-diagram";
 export { OverviewCard, type OverviewCardProps, type OverviewMetric, type OverviewTone } from "./overview-card";
 export { MetricChartFrame, MetricFunnel, MetricDonut, StatusMatrix, defaultStatusMatrixToneLabels, statusMatrixToneOrder, type MetricChartFrameProps, type MetricFunnelDatum, type MetricFunnelProps, type MetricDonutDatum, type MetricDonutProps, type StatusMatrixItem, type StatusMatrixProps, type StatusMatrixTone } from "./metric-charts";
-export { StackedBarChart, Sparkline, type ChartSeries, type StackedBarDatum, type StackedBarChartProps, type SparklineProps } from "./reporting-charts";
+export { LineChart, StackedBarChart, Sparkline, type ChartSeries, type LineChartDatum, type LineChartProps, type LineChartSeries, type StackedBarDatum, type StackedBarChartProps, type SparklineProps } from "./reporting-charts";
+export { chartTheme } from "./chart-theme";
 export { MetricCard, MetricTrend, type MetricCardProps, type MetricTrendProps } from "./metric-card";
+export { CalendarHeatmap, type CalendarHeatmapDatum, type CalendarHeatmapProps } from "./calendar-heatmap";
 export { LegendMarker, chartSeries, legendMarkerShapes, type ChartSeriesStyle, type LegendMarkerProps, type LegendMarkerShape, type LegendMarkerSize } from "./legend-marker";
 export { WorkflowGuide, type WorkflowGuideItem, type WorkflowGuideProps } from "./workflow-guide";
 export {
@@ -15,9 +17,14 @@ export {
   type CiTokens,
 } from "./tokens";
 
+export { brandTintVars, type BrandTintVars } from "./brand-tint";
 export { Button, buttonVariants, type ButtonProps, type ButtonSize, type ButtonVariant } from "./button";
 export { GuardedAction, type GuardedActionProps } from "./guarded-action";
-export { Badge, badgeVariants, type BadgeProps, type BadgeShape, type BadgeVariant } from "./badge";
+export { Badge, badgeVariants, type BadgeProps, type BadgeShape, type BadgeTone, type BadgeVariant } from "./badge";
+export { Kbd, KbdGroup, type KbdGroupProps, type KbdProps, type KbdSize } from "./kbd";
+export { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, type AlertDialogActionProps, type AlertDialogCancelProps, type AlertDialogContentProps, type AlertDialogProps, type AlertDialogTone } from "./alert-dialog";
+export { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, type CommandEmptyProps, type CommandFilter, type CommandFilterItem, type CommandGroupProps, type CommandInputProps, type CommandItemProps, type CommandListProps, type CommandProps } from "./command";
+export { JsonTree, defaultJsonTreeLabels, formatJsonTreePath, type JsonTreeCopyDetail, type JsonTreeCopyKind, type JsonTreeLabels, type JsonTreeNode, type JsonTreePath, type JsonTreeProps } from "./json-tree";
 export { Tile, type TileLayout, type TileProps } from "./tile";
 export { ToggleChip, type ToggleChipProps, type ToggleChipSize } from "./toggle-chip";
 export { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, type CardFooterAlign, type CardFooterProps, type CardProps } from "./card";
@@ -61,6 +68,7 @@ export {
   type SelectSize,
   type SelectVariant,
 } from "./select";
+export { NativeSelect, type NativeSelectProps, type NativeSelectSize } from "./native-select";
 export {
   Field,
   FieldGroup,
@@ -121,6 +129,7 @@ export {
   type StatTone,
 } from "./stat";
 export { Progress, type ProgressProps, type ProgressTone, type ProgressSegment } from "./progress";
+export { Spinner, type SpinnerProps, type SpinnerSize } from "./spinner";
 export {
   Chart,
   type ChartDatum,
@@ -303,11 +312,16 @@ export {
 } from "./sidebar";
 export { DataTable, type DataTableColumn, type DataTableProps, type DataTableValue } from "./data-table";
 export {
+  DataTableColumnsMenu,
   DataTableFilterField,
   DataTableFooter,
   DataTablePageSizeControl,
   DataTableShell,
   SortableTableHead,
+  defaultDataTableColumnsMenuLabels,
+  type DataTableColumnsMenuColumn,
+  type DataTableColumnsMenuLabels,
+  type DataTableColumnsMenuProps,
   type DataTableFilterFieldProps,
   type DataTableFooterProps,
   type DataTablePageSizeControlProps,

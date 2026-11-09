@@ -19,7 +19,13 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 
-process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES = "1";
+// The stagger contract only exists while the background services run. With
+// OMNIROUTE_DISABLE_BACKGROUND_SERVICES on, startCleanupScheduler() arms nothing at all (covered
+// by background-services-disabled-schedulers.test.ts), so force the flag off for this file and
+// restore it afterwards.
+const BACKGROUND_FLAG = "OMNIROUTE_DISABLE_BACKGROUND_SERVICES";
+const originalBackgroundFlag = process.env[BACKGROUND_FLAG];
+delete process.env[BACKGROUND_FLAG];
 
 let startCleanupScheduler: () => void;
 let stopCleanupScheduler: () => void;
@@ -33,6 +39,8 @@ before(async () => {
 });
 
 after(() => {
+  if (originalBackgroundFlag === undefined) delete process.env[BACKGROUND_FLAG];
+  else process.env[BACKGROUND_FLAG] = originalBackgroundFlag;
   try {
     stopCleanupScheduler();
   } catch {}

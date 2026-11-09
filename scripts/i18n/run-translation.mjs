@@ -896,9 +896,10 @@ export function joinTranslatedChunks(parts) {
 // A mirror is retranslated section by section: the state remembers a short
 // hash of every `## ` section of the source at the time of translation, and a
 // later run only sends the sections whose hash changed, splicing the untouched
-// translated sections of the mirror back in. Sections are matched by index
-// only — an inserted or removed section shifts everything after it and costs
-// a retranslation of the tail, which is acceptable.
+// translated sections of the mirror back in. While the source keeps its section
+// count, sections are matched by index (a rewritten section keeps its slot).
+// When a section is inserted or removed the two lists are lined up by hash, so
+// only the sections that are really new go to the model.
 
 // Section 0 is the preamble (text before the first `## `); every other section
 // starts with its `## ` heading line. Joining with "\n\n" reproduces the body
@@ -925,22 +926,60 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
-  if (previousHashes.length !== sections.length) return null;
   const now = sectionHashes(sections);
+  // `match[i]` is the recorded section (and so the mirror section) that source section `i`
+  // lines up with, or -1 when it has no counterpart.
+  const match =
+    previousHashes.length === now.length
+      ? now.map((_, i) => i)
+      : alignSectionHashes(previousHashes, now);
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
+    const j = match[i];
+    if (j < 0) {
+      translate.push(i);
+      return;
+    }
     // A mirror section byte-equal to its source section is an untranslated copy (322 mirrors
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(mirrorSections[j]);
+    const untranslated = looksUntranslated(mirrorSections[j], sections[i]);
+    if (h === previousHashes[j] && !untranslated && !leakedFrontmatter)
+      reuse.set(i, mirrorSections[j]);
     else translate.push(i);
   });
   return { reuse, translate };
+}
+
+// Longest common subsequence of the recorded hashes and the current ones: for every current
+// section, the index of the recorded section it lines up with, or -1. Used only when the section
+// count changed. Order is preserved, so a section that merely moved is translated again; equal
+// hashes (two identical sections) pair up left to right.
+function alignSectionHashes(previous, now) {
+  const rows = previous.length + 1;
+  const cols = now.length + 1;
+  const lcs = Array.from({ length: rows }, () => new Uint32Array(cols));
+  for (let i = previous.length - 1; i >= 0; i--) {
+    for (let j = now.length - 1; j >= 0; j--) {
+      lcs[i][j] =
+        previous[i] === now[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+  const match = new Array(now.length).fill(-1);
+  let i = 0;
+  let j = 0;
+  while (i < previous.length && j < now.length) {
+    if (previous[i] === now[j]) {
+      match[j] = i;
+      i++;
+      j++;
+    } else if (lcs[i + 1][j] >= lcs[i][j + 1]) i++;
+    else j++;
+  }
+  return match;
 }
 
 // The mirror without the prefix this script writes in front of the translated

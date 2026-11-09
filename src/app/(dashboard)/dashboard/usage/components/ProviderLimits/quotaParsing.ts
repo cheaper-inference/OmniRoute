@@ -297,7 +297,9 @@ function parseClaude(data: any) {
     quotas: Record<string, { fractionReported?: boolean } | null> | null | undefined
   ) =>
     Object.fromEntries(
-      Object.entries(quotas ?? {}).filter(([, quota]) => quota?.fractionReported !== false)
+      Object.entries(quotas ?? {}).filter(
+        ([, quota]) => quota != null && quota.fractionReported !== false
+      )
     );
   const quotas = quotaEntries({
     quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },

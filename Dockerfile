@@ -411,7 +411,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 # `spawn qodercli ENOENT`. Same pinning rationale as the tools above.
 # npm 12 requires an explicit allowlist for required global lifecycle scripts.
 RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
-  npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,openclaw \
+  npm install -g --no-audit --no-fund --allow-scripts=@anthropic-ai/claude-code,@qoder-ai/qodercli,droid,openclaw,sharp,@google/genai,tree-sitter-bash,protobufjs \
     @openai/codex@0.165.0 \
     @anthropic-ai/claude-code@2.1.260 \
     droid@0.212.0 \

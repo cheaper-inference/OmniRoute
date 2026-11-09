@@ -10,6 +10,7 @@ import {
   isAppearancePalette,
   type AppearancePalette,
 } from "@/shared/constants/appearancePalette";
+import { applyThemeColor } from "@/shared/utils/themeColorMeta";
 
 interface ThemeState {
   theme: string;
@@ -58,23 +59,29 @@ const useThemeStore = create<ThemeState>()(
     (set, get) => ({
       theme: THEME_CONFIG.defaultTheme,
       palette: DEFAULT_APPEARANCE_PALETTE,
+      // Every action also re-points the browser chrome (`theme-color`), which depends on both
+      // the theme and the palette (src/shared/utils/themeColorMeta.ts).
       setTheme: (theme) => {
         set({ theme });
         applyTheme(theme);
+        applyThemeColor(theme, get().palette);
       },
       toggleTheme: () => {
         const next = get().theme === "dark" ? "light" : "dark";
         set({ theme: next });
         applyTheme(next);
+        applyThemeColor(next, get().palette);
       },
       setPalette: (palette) => {
         const next = isAppearancePalette(palette) ? palette : DEFAULT_APPEARANCE_PALETTE;
         set({ palette: next });
         applyPalette(next);
+        applyThemeColor(get().theme, next);
       },
       initTheme: () => {
         applyTheme(get().theme);
         applyPalette(get().palette);
+        applyThemeColor(get().theme, get().palette);
       },
     }),
     {

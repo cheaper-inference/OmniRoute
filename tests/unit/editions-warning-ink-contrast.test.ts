@@ -5,8 +5,8 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 // Warning text (badge, warning button, `text-warning`) must reach WCAG AA (4.5:1) in the default
-// light Editions palette. The kit's light Editions warning #99631f does not on its own tinted
-// background, so globals.css swaps in --color-warning-ink. Colours are read from the CSS files,
+// light Editions palette. globals.css reads it through --color-warning-ink, an alias of the kit's
+// --ci-color-warning (AA since kit 0.0.88, upstream #155). Colours are read from the CSS files,
 // so a kit sync or a palette edit that breaks contrast fails here.
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -31,17 +31,17 @@ function editionsLight(token: string): string {
   return m[1].toLowerCase();
 }
 
-function lightEditionsInk(): string {
-  const m =
-    /html:root\[data-ci-appearance="editions"\]:not\(\[data-theme="dark"\]\)\s*\{[^}]*--color-warning-ink:\s*(#[0-9a-fA-F]{6})/.exec(
-      globals
-    );
-  assert.ok(m, "globals.css sets --color-warning-ink for light Editions");
-  return m[1].toLowerCase();
+function warningInkIsTheKitToken(): boolean {
+  return /:root\s*\{[^}]*--color-warning-ink:\s*var\(--ci-color-warning\);/.test(globals);
 }
 
 test("light Editions warning ink reaches AA on every surface it is drawn on", () => {
-  const ink = lightEditionsInk();
+  // The alias is the kit token, so the kit's light Editions value is what renders.
+  assert.ok(
+    warningInkIsTheKitToken(),
+    "globals.css maps --color-warning-ink to --ci-color-warning"
+  );
+  const ink = editionsLight("ci-color-warning");
   const surfaces = {
     "warning background": editionsLight("ci-color-warning-bg"),
     canvas: editionsLight("ci-color-background"),
@@ -53,31 +53,27 @@ test("light Editions warning ink reaches AA on every surface it is drawn on", ()
   }
 });
 
-test("the kit's own light Editions warning still needs the override", () => {
-  // If upstream fixes its warning colour, this fails: drop the override in globals.css then.
-  const kit = editionsLight("ci-color-warning");
-  assert.ok(contrast(kit, editionsLight("ci-color-warning-bg")) < 4.5);
+test("globals.css no longer overrides the kit's warning colour", () => {
+  // Kit 0.0.88 (upstream #155) ships the AA value, so a hard-coded override would only drift.
+  assert.doesNotMatch(globals, /--color-warning-ink:\s*#[0-9a-fA-F]{3,8}/);
 });
 
 test("warning badge, warning button and text-warning read the warning ink", () => {
   assert.match(globals, /:root\s*\{\s*--color-warning-ink:\s*var\(--ci-color-warning\);/);
   assert.match(globals, /--text-color-warning:\s*var\(--color-warning-ink\);/);
-  assert.match(
-    globals,
-    /\.ci-badge\[data-tone="warning"\]\s*\{\s*color:\s*var\(--color-warning-ink\);/
-  );
-  assert.match(globals, /\.ci-button--warning\s*\{\s*color:\s*var\(--color-warning-ink\);/);
+  // The badge tone and the button are kit rules on the same token the alias points at.
+  const kitUi = fs.readFileSync(path.join(root, "packages/ui-kit/src/ci-ui.css"), "utf8");
+  assert.match(kitUi, /\.ci-badge--tone-warning\s*\{[^}]*color:\s*var\(--ci-color-warning\);/);
+  assert.match(kitUi, /\.ci-button--warning\s*\{\s*color:\s*var\(--ci-color-warning\);/);
 });
 
 test("without data-theme, a dark system preference keeps the kit's dark warning ink", () => {
   // The kit picks dark Editions from prefers-color-scheme when <html> has no data-theme (before
-  // the boot script, or without JS); the light override must not paint #8c5a1b on that.
+  // the boot script, or without JS). The alias follows the kit token, so no palette- or
+  // theme-specific override of --color-warning-ink may exist in globals.css.
   assert.match(
     editions,
     /@media \(prefers-color-scheme: dark\)\s*\{\s*:is\(html:root:not\(\[data-theme\]\)/
   );
-  assert.match(
-    globals,
-    /@media \(prefers-color-scheme: dark\)\s*\{\s*html:root\[data-ci-appearance="editions"\]:not\(\[data-theme\]\)\s*\{\s*--color-warning-ink:\s*var\(--ci-color-warning\);/
-  );
+  assert.equal(globals.match(/--color-warning-ink:/g)?.length, 1);
 });

@@ -1,3 +1,4 @@
+import { isHttpLogError } from "@/shared/utils/upstreamHttp";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -48,7 +49,7 @@ export function rowMatchesFilter(row: any, filter: Record<string, any>): boolean
   if (!filter) return true;
 
   if (filter.status === "error") {
-    if (!(Number(row?.status) >= 400 || Boolean(row?.error))) return false;
+    if (!isHttpLogError(row)) return false;
   } else if (filter.status === "ok") {
     if (!(Number(row?.status) >= 200 && Number(row?.status) < 300)) return false;
   } else if (

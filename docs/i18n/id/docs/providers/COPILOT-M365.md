@@ -64,38 +64,39 @@ HAR mendekode waktu kedaluwarsa JWT dan menampilkan sisa masa berlaku token.
 > **Jangan pernah melakukan commit terhadap ekspor HAR asli, token akses, atau token refresh.** Nilai pengujian dan
 > dokumentasi harus selalu berupa placeholder.
 
-## Masa berlaku dan refresh token
+## Masa berlaku token dan penyegaran
 
-`access_token` berumur pendek (biasanya **~75 menit**). Setelah kedaluwarsa, penyedia
-melaporkan kesalahan koneksi dan Anda harus mengambil ulang kredensial.
+`access_token` memiliki masa berlaku singkat (biasanya **~75 menit**). Tanpa token
+penyegaran yang dapat digunakan, Anda harus mengambil ulang kredensial setelah masa berlakunya
+habis.
 
-### Refresh otomatis dengan `refreshToken`
+### Penyegaran otomatis dengan `refreshToken`
 
-Untuk menghindari pengambilan ulang secara manual, Anda dapat menyimpan token refresh Microsoft di
-**Advanced Settings → providerSpecificData** koneksi:
+Dalam dialog **Tambah koneksi** atau **Edit koneksi** penyedia Microsoft 365, buka
+**Pengaturan Lanjutan → Token penyegaran (opsional)**. Tempel token penyegaran OAuth Microsoft
+untuk cakupan `substrate.office.com/sydney`, lalu simpan. Input ini disamarkan dan tidak pernah
+diisi sebelumnya dengan token yang tersimpan. Saat mengedit, biarkan kosong untuk
+mempertahankan token yang ada; tempel token baru untuk menggantinya.
 
-| Kolom          | Deskripsi                                                               |
-| -------------- | ----------------------------------------------------------------------- |
-| `refreshToken` | Token refresh OAuth Microsoft untuk scope `substrate.office.com/sydney` |
-| `tier`         | `individual` (default), `edu`, atau `enterprise`                        |
+Dapatkan token penyegaran dari alur kode perangkat Microsoft atau kode otorisasi
+dengan cakupan `substrate.office.com/sydney`; dasbor tidak mendapatkannya untuk Anda.
+Dengan token penyegaran yang dikonfigurasi, OmniRoute memeriksa `access_token` sebelum permintaan
+dan menyegarkannya hanya saat perlu disegarkan. Penyegaran yang berhasil juga menyimpan
+token penyegaran yang diputar, sehingga Anda tidak perlu mengambil ulang secara manual selama
+token penyegaran tersebut masih valid.
 
-Dapatkan token refresh dari alur device-code atau authorization-code Microsoft
-dengan scope `substrate.office.com/sydney`. Jika `refreshToken` telah ditetapkan, OmniRoute
-melakukan refresh awal terhadap `access_token` sebelum setiap permintaan sehingga Anda tidak perlu
-mengambil ulang kredensial setelah setiap periode kedaluwarsa ~75 menit.
-
-Jika `refreshToken` tidak ditetapkan, Anda harus mengambil ulang kredensial WebSocket secara manual
-setelah setiap kali kedaluwarsa.
+Jika `refreshToken` tidak diatur, Anda harus mengambil ulang kredensial WebSocket
+secara manual setiap kali masa berlakunya habis.
 
 ### Pemilihan tingkat
 
-| Tingkat      | Alias       | Layanan                      |
-| ------------ | ----------- | ---------------------------- |
-| `individual` | _(default)_ | M365 Copilot Konsumen        |
-| `edu`        | `included`  | M365 Copilot Pendidikan      |
-| `enterprise` | `work`      | M365 Copilot untuk Pekerjaan |
+| Tingkat      | Alias       | Antarmuka                     |
+| ------------ | ----------- | ----------------------------- |
+| `individual` | _(default)_ | M365 Copilot untuk Konsumen   |
+| `edu`        | `included`  | M365 Copilot untuk Pendidikan |
+| `enterprise` | `work`      | M365 Copilot untuk Kerja      |
 
-Tetapkan tingkat di **Advanced Settings → providerSpecificData → tier**. Tingkat tersebut memengaruhi
+Atur tingkat tersebut di **Pengaturan Lanjutan → Tingkat Copilot**. Tingkat ini memengaruhi
 perutean BizChat dan akses model.
 
 ## Model keamanan
@@ -109,32 +110,27 @@ perutean BizChat dan akses model.
 - Token penyegaran memberikan akses jangka panjang ke antarmuka BizChat. Simpan dengan
   tingkat kehati-hatian yang sama seperti kunci API.
 
-## Pemecahan masalah
+## Pemecahan Masalah
 
 ### Autentikasi langsung gagal
 
-- Pastikan Anda menyalinnya dari **URL WebSocket**, bukan dari permintaan XHR/Fetch. Kredensial
-  berada dalam parameter kueri `access_token` pada koneksi WebSocket Chathub
-  — bukan dalam header `Authorization: Bearer`.
-- Pastikan `chathubPath` menyertakan segmen `<oid>@<tenant>` lengkap dari path
-  URL.
+- Pastikan Anda menyalin dari **WebSocket URL**, bukan dari permintaan XHR/Fetch. Kredensial berada di parameter kueri `access_token` pada koneksi WebSocket Chathub — bukan di header `Authorization: Bearer`.
+- Pastikan `chathubPath` menyertakan segmen `<oid>@<tenant>` lengkap dari jalur URL.
 
-### Token kedaluwarsa setelah ~75 menit
+### Token kedaluwarsa setelah sekitar 75 menit
 
-Ini normal. Tanpa `refreshToken`, token akses berumur pendek. Anda dapat:
+Hal ini memang diharapkan. Tanpa `refreshToken`, access token hanya berlaku dalam waktu singkat. Pilih salah satu:
 
-- Mengambil ulang kredensial dari DevTools, atau
-- Mengonfigurasi `refreshToken` di Pengaturan Lanjutan untuk penyegaran otomatis.
+- Ambil ulang kredensial dari DevTools, atau
+- Konfigurasikan **Pengaturan Lanjutan → Refresh token (opsional)** dalam dialog koneksi Tambah atau Edit untuk melakukan penyegaran otomatis.
 
-### Uji Koneksi berhasil, tetapi chat menghasilkan 401
+### Test Connection berhasil, tetapi chat mengembalikan 401
 
-Token mungkin telah kedaluwarsa di antara validasi dan permintaan pertama. Ambil ulang
-kredensial baru.
+Token mungkin telah kedaluwarsa antara validasi dan permintaan pertama. Ambil ulang kredensial yang masih berlaku.
 
 ### Copilot tidak muncul dalam daftar penyedia
 
-Pastikan `copilot-m365-web` diaktifkan di **Dasbor → Penyedia**. Penyedia tersebut mungkin
-disembunyikan secara default pada beberapa tingkat langganan.
+Pastikan `copilot-m365-web` diaktifkan di **Dasbor → Penyedia**. Penyedia tersebut mungkin tersembunyi secara default pada beberapa tingkat layanan.
 
 ## Referensi
 

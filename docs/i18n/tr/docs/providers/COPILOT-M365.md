@@ -68,38 +68,38 @@ süresini gösterir.
 > **Gerçek bir HAR dışa aktarımını, erişim belirtecini veya yenileme belirtecini asla
 > depoya işlemeyin.** Test ve dokümantasyon değerleri her zaman yer tutucu olmalıdır.
 
-## Belirteç kullanım süresi ve yenileme
+## Belirteç ömrü ve yenileme
 
-`access_token` kısa ömürlüdür (genellikle **~75 dakika**). Süresi dolduktan sonra sağlayıcı
-bir bağlantı hatası bildirir ve kimlik bilgisini yeniden almanız gerekir.
+`access_token` kısa ömürlüdür (genellikle **~75 dakika**). Kullanılabilir bir yenileme
+belirteci olmadan, süresi dolduktan sonra kimlik bilgisini yeniden almanız gerekir.
 
 ### `refreshToken` ile otomatik yenileme
 
-Elle yeniden alma gereksinimini önlemek için Microsoft yenileme belirtecini bağlantının
-**Advanced Settings → providerSpecificData** bölümünde saklayabilirsiniz:
+Microsoft 365 sağlayıcısının **Bağlantı ekle** veya **Bağlantıyı düzenle** iletişim kutusunda
+**Gelişmiş ayarlar → Yenileme belirteci (isteğe bağlı)** seçeneğini açın. `substrate.office.com/sydney`
+kapsamı için bir Microsoft OAuth yenileme belirtecini yapıştırıp kaydedin. Girdi maskelenir ve
+kayıtlı belirteçle önceden doldurulmaz. Düzenleme sırasında mevcut belirteci korumak için alanı
+boş bırakın; değiştirmek için yeni bir belirteç yapıştırın.
 
-| Alan           | Açıklama                                                                      |
-| -------------- | ----------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` kapsamı için Microsoft OAuth yenileme belirteci |
-| `tier`         | `individual` (varsayılan), `edu` veya `enterprise`                            |
+Yenileme belirtecini `substrate.office.com/sydney` kapsamına sahip bir Microsoft cihaz kodu veya
+yetkilendirme kodu akışından edinin; pano bunu sizin için almaz. Bir yenileme belirteci
+yapılandırıldığında OmniRoute, isteklerden önce `access_token` değerini kontrol eder ve yalnızca
+yenilenmesi gerektiğinde yeniler. Başarılı bir yenileme, döndürülen yenileme belirtecini de
+kaydederek yenileme belirteci geçerli kaldığı sürece kimlik bilgisinin manuel olarak yeniden
+alınmasını önler.
 
-Yenileme belirtecini, `substrate.office.com/sydney` kapsamına sahip bir Microsoft
-cihaz kodu veya yetkilendirme kodu akışından edinin. `refreshToken` ayarlandığında
-OmniRoute, her istekten önce `access_token` değerini önceden yeniler; böylece her
-~75 dakikalık süre dolumundan sonra kimlik bilgisini yeniden almanız gerekmez.
-
-`refreshToken` ayarlanmamışsa her süre dolumundan sonra WebSocket kimlik bilgisini
-elle yeniden almanız gerekir.
+`refreshToken` ayarlanmamışsa, her sürenin dolmasından sonra WebSocket kimlik bilgisini manuel
+olarak yeniden almanız gerekir.
 
 ### Katman seçimi
 
-| Katman       | Diğer ad       | Yüzey                    |
-| ------------ | -------------- | ------------------------ |
-| `individual` | _(varsayılan)_ | Bireysel M365 Copilot    |
-| `edu`        | `included`     | Eğitim için M365 Copilot |
-| `enterprise` | `work`         | İş için M365 Copilot     |
+| Katman       | Takma ad       | Arayüz                |
+| ------------ | -------------- | --------------------- |
+| `individual` | _(varsayılan)_ | Tüketici M365 Copilot |
+| `edu`        | `included`     | Eğitim M365 Copilot   |
+| `enterprise` | `work`         | İş için M365 Copilot  |
 
-Katmanı **Advanced Settings → providerSpecificData → tier** bölümünde ayarlayın. Katman,
+Katmanı **Gelişmiş ayarlar → Copilot katmanı** bölümünde ayarlayın. Katman,
 BizChat yönlendirmesini ve model erişimini etkiler.
 
 ## Güvenlik modeli
@@ -114,32 +114,27 @@ BizChat yönlendirmesini ve model erişimini etkiler.
 - Yenileme belirteci, BizChat yüzeyine uzun süreli erişim sağlar. Bunu bir
   API anahtarıyla aynı özeni göstererek saklayın.
 
-## Sorun giderme
+## Sorun Giderme
 
 ### Kimlik doğrulama hemen başarısız oluyor
 
-- Bir XHR/Fetch isteğinden değil, **WebSocket URL'sinden** kopyaladığınızı doğrulayın.
-  Kimlik bilgisi, Chathub WebSocket bağlantısının `access_token` sorgu
-  parametresindedir; `Authorization: Bearer` başlığında değildir.
-- `chathubPath` değerinin URL yolundaki tam `<oid>@<tenant>` bölümünü
-  içerdiğinden emin olun.
+- Bir XHR/Fetch isteğinden değil, **WebSocket URL'sinden** kopyaladığınızı doğrulayın. Kimlik bilgisi, `Authorization: Bearer` üst bilgisinde değil, Chathub WebSocket bağlantısının `access_token` sorgu parametresindedir.
+- `chathubPath` değerinin URL yolundaki tam `<oid>@<tenant>` segmentini içerdiğinden emin olun.
 
-### Belirteç yaklaşık 75 dakika sonra sona eriyor
+### Belirtecin süresi yaklaşık 75 dakika sonra doluyor
 
 Bu beklenen bir durumdur. `refreshToken` olmadan erişim belirteci kısa ömürlüdür. Şunlardan birini yapın:
 
 - Kimlik bilgisini DevTools'tan yeniden yakalayın veya
-- Otomatik yenileme için Gelişmiş Ayarlar'da bir `refreshToken` yapılandırın.
+- Otomatik yenileme için bağlantı ekleme veya düzenleme iletişim kutusunda **Gelişmiş Ayarlar → Yenileme belirteci (isteğe bağlı)** seçeneğini yapılandırın.
 
-### Bağlantıyı Test Et başarılı oluyor ancak sohbet 401 döndürüyor
+### Bağlantıyı Sına başarılı oluyor ancak sohbet 401 döndürüyor
 
-Belirtecin süresi doğrulama ile ilk istek arasında dolmuş olabilir. Yeni bir
-kimlik bilgisini yeniden yakalayın.
+Belirtecin doğrulama ile ilk istek arasında süresi dolmuş olabilir. Yeni bir kimlik bilgisini yeniden yakalayın.
 
 ### Copilot sağlayıcı listesinde görünmüyor
 
-**Kontrol Paneli → Sağlayıcılar** bölümünde `copilot-m365-web` seçeneğinin etkinleştirildiğinden emin olun. Sağlayıcı,
-bazı katmanlarda varsayılan olarak gizli olabilir.
+**Dashboard → Providers** bölümünde `copilot-m365-web` seçeneğinin etkin olduğundan emin olun. Bazı katmanlarda sağlayıcı varsayılan olarak gizlenmiş olabilir.
 
 ## Referanslar
 

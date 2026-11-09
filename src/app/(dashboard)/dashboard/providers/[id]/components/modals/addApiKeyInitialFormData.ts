@@ -31,6 +31,7 @@ export function createInitialAddApiKeyFormData({
     name: computeConnectionDefaultName(existingConnectionNames),
     apiKey: "",
     tokenSecret: "", // #5446 — Modal Token Secret (joined with apiKey as id:secret)
+    m365RefreshToken: "",
     defaultModel: "",
     priority: 1,
     baseUrl: initialBaseUrl || defaultBaseUrl,
