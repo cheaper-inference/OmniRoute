@@ -140,7 +140,12 @@ import {
   getProviderPrefixes as getProviderPrefixesFromMaps,
   getComboTargetModelId as getComboTargetModelIdFromMaps,
 } from "./catalogProviderMaps";
-import { indexNodeApiTypes, nodeModelEndpoints, overlayEndpoints } from "./catalogNodeModality";
+import {
+  customOverlayEndpointFields,
+  indexNodeApiTypes,
+  nodeModelEndpoints,
+  overlayEndpoints,
+} from "./catalogNodeModality";
 import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
   getModelCatalogAuthRejection,
@@ -1962,10 +1967,7 @@ async function buildUnifiedModelsResponseCore(
           const existingIndex = models.findIndex((m) => m.id === aliasId);
           if (existingIndex !== -1) {
             const existing = models[existingIndex] as Record<string, unknown> & { id: string };
-            const endpoints = Array.isArray(model.supportedEndpoints)
-              ? model.supportedEndpoints
-              : undefined;
-            const apiFormat = typeof model.apiFormat === "string" ? model.apiFormat : undefined;
+            const { endpoints, apiFormat } = customOverlayEndpointFields(model, existing);
             const visionFields =
               typeof model.supportsVision === "boolean"
                 ? model.supportsVision

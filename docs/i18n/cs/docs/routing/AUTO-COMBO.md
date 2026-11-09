@@ -127,6 +127,27 @@ Automatické vyhodnocení vybere pro každý požadavek nejlepšího poskytovate
 | `src/sse/handlers/chat.ts`                                | Integrace: zkratka pro automatický prefix               |
 | `src/shared/constants/providers.ts`                       | Systémová položka `SYSTEM_PROVIDERS.auto`               |
 
+## Předvolby účtu pro uložená automatická komba
+
+Inteligentní automatický editor nabízí volitelnou možnost** Předvolby účtu** sekce. Každé připojení může být Preferované, Normální (výchozí), Rezervované nebo Vyloučené. Více připojení může sdílet vrstvu. Automaticky vybírá v rámci první vhodné úrovně a zachovává zde své chování scoring/router ; neúspěšné pokusy propadají na zbývající konkrétní účty, upřednostňované před normálními před rezervou. Toto kombo nikdy nepoužívá vyloučená připojení.
+
+Nastavení je uloženo jako `config.accountPreferences`, klíčované spojením ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Vynechaná nebo prázdná mapa zachová stávající směrování. Předvolby nepovolují zakázaná připojení, neudělují přístup ke klíči API, neobnovují kandidáty s blokováním kvót ani neobcházejí kontroly rozpočtu. Každý pokus je omezen na jeho konkrétní připojení, takže záložní účet nemůže přeskakovat úrovně za kombinovaným routerem. Stávající afinita relace si může ponechat způsobilý účet; vyloučení účtu vázaného na nativní tah zastaví, že se otočí místo tichého střídání účtů.
+
+Nakonfigurované předvolby používají automatickou cestu s ohledem na účet: neodesílají se neomezená kontextová mezipaměť, inteligentní potrubí, chaos a stínové zkratky. Spekulativní zajištění je pro tyto požadavky zakázáno, takže rezervní účty nemohou závodit s těmi preferovanými. Jiné kombinované strategie toto nastavení neinterpretují. Změnou kombinace z možnosti Auto zůstanou uložené předvolby pro pozdější přepnutí zpět.
+
 ## Názvy kombinací odpovídající skutečnému ID modelu
 
 Kombinace, jejíž `name` je shodný se samotným ID modelu (např. kombinace s názvem

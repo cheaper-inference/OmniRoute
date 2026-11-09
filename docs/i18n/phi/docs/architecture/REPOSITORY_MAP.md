@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Dashboard component API: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
-| `constants/providers.ts`         | **380 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
+| `constants/providers.ts`         | **381 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
 | `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
 | `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
 | `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |
@@ -395,24 +395,24 @@ open-sse/
 
 ### Mga gabay sa nangungunang antas
 
-| Dok                         | Layunin                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Mataas na antas ng arkitektura, mapa ng subsystem, ibabaw ng dashboard                   |
-| `CODEBASE_DOCUMENTATION.md` | Sanggunian sa engineering: mga direktoryo, module, mga kumbensyon                        |
-| `FEATURES.md`               | Feature matrix na may mga highlight ng v3.8                                              |
-| `USER_GUIDE.md`             | Manual ng end-user (setup, mga modelo, combo, CLIs, audio, atbp.)                        |
-| `API_REFERENCE.md`          | API endpoint reference na may modelo ng auth                                             |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 path)                                                              |
-| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                   |
-| `ENVIRONMENT.md`            | Lahat ng env vars (~ 800 documented, ~ 3,050 lines `.env.example`)                       |
-| `TROUBLESHOOTING.md`        | Mga karaniwang error + v3.8.0 kilalang isyu                                              |
-| `RELEASE_CHECKLIST.md`      | Full release flow (skills, husky, conventional commits, deploy)                          |
-| `COVERAGE_PLAN.md`          | Mga layunin sa saklaw at kasalukuyang estado                                             |
-| `FREE_TIERS.md`             | Mga na-curate na free-tier na provider (48 + libreng + 11 OAuth)                         |
-| `CLI-TOOLS.md`              | Panlabas CLI integrations + Panloob OmniRoute CLI                                        |
-| `I18N.md`                   | i18n architecture, pagdaragdag ng isang wika, 67 locale                                  |
-| `UNINSTALL.md`              | Linisin ang mga hakbang sa pag-uninstall                                                 |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 380 provider (regen: `npm run gen:provider-reference`) |
+| Dok                         | Layunin                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Mataas na antas ng arkitektura, mapa ng subsystem, ibabaw ng dashboard                    |
+| `CODEBASE_DOCUMENTATION.md` | Sanggunian sa engineering: mga direktoryo, module, mga kumbensyon                         |
+| `FEATURES.md`               | Feature matrix na may mga highlight ng v3.8                                               |
+| `USER_GUIDE.md`             | Manual ng end-user (setup, mga modelo, combo, CLIs, audio, atbp.)                         |
+| `API_REFERENCE.md`          | API endpoint reference na may modelo ng auth                                              |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 path)                                                               |
+| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                    |
+| `ENVIRONMENT.md`            | Lahat ng env vars (~ 800 documented, ~ 3,050 lines `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | Mga karaniwang error + v3.8.0 kilalang isyu                                               |
+| `RELEASE_CHECKLIST.md`      | Full release flow (skills, husky, conventional commits, deploy)                           |
+| `COVERAGE_PLAN.md`          | Mga layunin sa saklaw at kasalukuyang estado                                              |
+| `FREE_TIERS.md`             | Mga na-curate na free-tier na provider (48 + libreng + 11 OAuth)                          |
+| `CLI-TOOLS.md`              | Panlabas CLI integrations + Panloob OmniRoute CLI                                         |
+| `I18N.md`                   | i18n architecture, pagdaragdag ng isang wika, 67 locale                                   |
+| `UNINSTALL.md`              | Linisin ang mga hakbang sa pag-uninstall                                                  |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 381 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dive
 
