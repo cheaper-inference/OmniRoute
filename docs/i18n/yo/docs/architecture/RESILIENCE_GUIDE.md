@@ -247,106 +247,116 @@ waiting-for-capacity, àti `Retry-After` tí a ní ààlà tí a yọ láti expi
 
 ---
 
-## 3. Ìdènà Àwòṣe
+## 3. Títì Awoṣe
 
-**Ìbúgbòòrò:** olùpèsè + ìsopọ̀ + àwòṣe mẹ́ta.
+**Ààlà:** provider + connection + model mẹ́ta.
 
-**Ìbúgbòòrò kọ́kọ́rọ́ gẹ́gẹ́ bí ipò:** ipò tó kùnà ló pinnu kọ́kọ́rọ́ tí ìdènà yóò kọ sí
+**Ààlà kókó nípa status:** status tó ń fa ìkùnà ló pinnu kókó tí lockout yóò kọ sí
 (`resolveLockoutScope()` nínú `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — àmì ìpín tàbí ẹ̀tọ́ lílò — dí **ẹbí ìpín**:
-  fún codex, gbogbo ìbúgbòòrò `codex` / `spark` (gbogbo àwòṣe `gpt-5*` ti
-  ìsopọ̀ náà), fún àwọn olùpèsè míì `getQuotaScopedModelForProvider()`.
-- `404` máa ń dí àwòṣe náà nìkan (`getModelLockKey()` dín `not_found` kù).
-- Ipò míì èyíkéyìí — àwọn ìkùnà ìgbékarí/olùpèsè `5xx` àti `502` tí OmniRoute
-  fúnra rẹ̀ ṣẹ̀dá láti inú ìmúdájú dídára — máa ń dí ìṣùpọ̀
-  olùpèsè/ìsopọ̀/àwòṣe **gẹ́lẹ́** nìkan. Ìṣàn búburú lórí àwòṣe kan kì í ṣe ẹ̀rí
-  nípa ìpín àkọọ́lẹ̀ náà; ṣáájú òfin yìí, ìdáhùn òfo kan lórí
-  `codex/gpt-5.6-luna` máa ń yọ gbogbo àwòṣe `gpt-5*` ti ìsopọ̀ náà kúrò nínú
-  ìtọ́sọ́nà fún ìṣẹ́jú 2–30 (tí ó ń pọ̀ sí i), nígbà tí ìpín rẹ̀ kò ní ìyípadà.
-- Àṣàyàn `scope` tí olùpè bá sọ ní kedere máa ń borí nígbà gbogbo (Antigravity ń fi `"exact"` ránṣẹ́).
+- `429` / `403` / `402` — àmì quota tàbí ẹ̀tọ́ lílo — tì **quota family**:
+  fún codex, gbogbo ààlà `codex` / `spark` (gbogbo awoṣe
+  `gpt-5*` ti connection náà), fún àwọn provider míì
+  `getQuotaScopedModelForProvider()`.
+- `404` tì awoṣe aláìlékè (`getModelLockKey()` dín
+  `not_found` kù).
+- Status míì — àwọn ìkùnà ìrìnàjò/server `5xx` àti `502` tí OmniRoute fúnra rẹ̀
+  ṣe jáde láti inú ìmúdájú didara — tì **exact**
+  provider/connection/model tuple nìkan. Stream búburú lórí awoṣe kan kì í ṣe ẹ̀rí
+  nípa quota account náà; kí ìlànà yìí tó wà, ìdáhùn òfo kan lórí
+  `codex/gpt-5.6-luna` máa ń yọ gbogbo awoṣe `gpt-5*` ti connection náà kúrò
+  nínú routing fún ìṣẹ́jú 2–30 (tí ó ń pọ̀ sí i), nígbà tí quota rẹ̀ kò yí padà.
+- Àṣàyàn `scope` tí caller bá ṣàlàyé máa ń borí gbogbo ohun míì
+  (Antigravity ń kọjá `"exact"`).
 
-**Ète:** láti yàgò fún pípa gbogbo ìsopọ̀ kan nígbà tí àwòṣe kan ṣoṣo ni kò sí tàbí tí ìpín rẹ̀ ti ní ààlà.
+**Ète:** láti yẹra fún dídènà connection gbogbo nígbà tí awoṣe kan ṣoṣo kò sí tàbí quota rẹ̀ ní ààlà.
 
-**Àwọn àpẹẹrẹ:**
+**Àpẹẹrẹ:**
 
-- Àwọn olùpèsè ìpín-fún-àwòṣe tí ń dá `429` padà
-- Àwọn olùpèsè agbègbè tí ń dá `404` padà fún àwòṣe kan tí kò sí
-- Àwọn ìkùnà àṣẹ fún ipò/àwòṣe pàtó sí olùpèsè (fún àpẹẹrẹ, àwọn ipò Grok)
+- Àwọn provider quota fún awoṣe kọ̀ọ̀kan tí ń dá `429` padà
+- Àwọn provider àdúgbò tí ń dá `404` padà fún awoṣe kan tí kò sí
+- Àwọn ìkùnà àṣẹ mode/model tó jẹ́ pàtàkì sí provider (fún àpẹẹrẹ, àwọn mode Grok)
 
-**Ìmúṣẹ:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
+**Ìmúlò:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`.
 
-### Pátákó Ìṣàkóso Àkókò Ìsinmi Àwòṣe (v3.8.0)
+### Pánẹ́lì Cooldowns Awoṣe (v3.8.0)
 
-UI: Ètò → Àwọn Àkókò Ìsinmi Àwòṣe (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-Ó ṣe àtòjọ àwọn ìdènà tó ń ṣiṣẹ́ pẹ̀lú: olùpèsè, ìsopọ̀, àwòṣe, ìdí, expiresAt. Àwọn olùṣàkóso lè tún àwòṣe kan mú ṣiṣẹ́ pẹ̀lú ọwọ́ láti inú káàdì náà.
+Ó ń ṣàfihàn àwọn lockout tó ń ṣiṣẹ́ pẹ̀lú: provider, connection, model, reason, expiresAt. Àwọn oníṣe lè tún mu awoṣe ṣiṣẹ́ pẹ̀lú ọwọ́ láti inú káàdì náà.
 
 **REST API:**
 
-- `GET /api/resilience/model-cooldowns` — ṣe àtòjọ àwọn ìdènà tó ń ṣiṣẹ́
-- `DELETE /api/resilience/model-cooldowns` — tún un mú ṣiṣẹ́ pẹ̀lú ọwọ́. Ara: `{provider, connection, model}`. Ìfàṣẹsí: ìṣàkóso.
+- `GET /api/resilience/model-cooldowns` — ṣe àkójọ àwọn lockout tó ń ṣiṣẹ́
+- `DELETE /api/resilience/model-cooldowns` — tún mú ṣiṣẹ́ pẹ̀lú ọwọ́. Body: `{provider, connection, model}`. Auth: management.
 
-### Olùṣàkóso Àkókò Ìsinmi
+### Alábojútó Cooldown
 
-UI: Àbójútó → Olùṣàkóso Àkókò Ìsinmi (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
+UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`).
 
-Ojú-ewé kan fún gbogbo ìsopọ̀ tí a yọ kúrò nínú ìtọ́sọ́nà fún ìdí ìgbà díẹ̀, dípò
-ṣíṣí ojú-ewé olùpèsè kọ̀ọ̀kan. Ó ṣe àtòjọ àwọn àkókò ìsinmi ìsopọ̀, àwọn ìdènà àwòṣe àti
-àwọn ipò ìgbẹ̀yìn, ó sì ń pa wọ́n rẹ́ fún ìsopọ̀ kọ̀ọ̀kan, fún àṣàyàn kan, tàbí fún gbogbo ìsopọ̀ olùpèsè kan,
-ó tún ń ṣàtúnṣe àwọn òfin àkókò ìsinmi tí a máa ń ṣàtúnṣe jù lọ: `streamStallCooldown.enabled` àti àkókò ìsinmi ìpìlẹ̀
-`connectionCooldown` fún OAuth / kọ́kọ́rọ́ API àti iye ìgbésẹ̀ ìfàsẹ́yìn tó pọ̀ jù (tí a ń fi pamọ́ nípasẹ̀
-`PATCH /api/resilience`). Àwọn ipò ìgbẹ̀yìn (`banned`, `expired`, `credits_exhausted`) wà nínú
-àtòjọ ṣùgbọ́n a kì í pa wọ́n rẹ́ níbí.
+Ojú-ìwé kan fún gbogbo connection tí kò sí nínú routing nítorí ìdí ìgbà díẹ̀, dípò
+ṣíṣí ojú-ìwé provider kọ̀ọ̀kan. Ó ń ṣe àkójọ cooldown connection, lockout awoṣe àti àwọn
+ipò ìkẹyìn, ó ń pa wọ́n kúrò fún connection kọ̀ọ̀kan, fún yíyan kan, tàbí fún gbogbo
+connection ti provider kan, ó sì ń ṣàtúnṣe àwọn òfin cooldown tí a máa ń ṣàtúnṣe jù:
+`streamStallCooldown.enabled` àti OAuth / API-key
+`connectionCooldown` base cooldown àti iye ìgbésẹ̀ backoff tó pọ̀ jù (a máa ń fipamọ́ wọn nípasẹ̀
+`PATCH /api/resilience`). Àwọn ipò ìkẹyìn (`banned`, `expired`, `credits_exhausted`) ni
+a máa ń ṣàkójọ, ṣùgbọ́n a kì í pa wọ́n kúrò níbí.
 
-**REST API** (`src/lib/resilience/cooldownManager.ts`, ìfàṣẹsí: ìṣàkóso):
+Káàdì **Error cooldown rules** tó wà lórí ojú-ìwé kan náà ń ṣàtúnṣe àwọn òfin aṣiṣe operator
+(`settings.providerErrorRules`) àti àwọn àìpẹ̀yà catch-all fún provider kọ̀ọ̀kan
+(`settings.providerErrorDefaults`) nípasẹ̀ `PATCH /api/settings` — wo “Operator-declared
+rules” lábẹ́ §7 fún bí wọ́n ṣe ń bá ara wọn mu. Àwọn iye àkókò ni Default (kò sí cooldown tí a ṣàlàyé),
+30 min, 1 h, 5 h, 24 h, tàbí 1 sí 43,200 ìṣẹ́jú (ọjọ́ 30) tí a ṣètò pẹ̀lú ọwọ́.
 
-- `GET /api/resilience/cooldowns[?provider=]` — àwọn ìsopọ̀ pẹ̀lú ipò, àkókò ìsinmi tó kù,
-  ìpele ìfàsẹ́yìn, irú àṣìṣe tó ṣẹ̀yìn jù àti àwọn ìdènà àwòṣe (láìsí ẹ̀rí ìdánimọ̀)
-- `POST /api/resilience/cooldowns` — ara `{connectionIds: string[]}` tàbí
-  `{all: true, provider?}`; ó dá `{cleared, unchanged, skippedTerminal, lockoutsCleared}` padà
+**REST API** (`src/lib/resilience/cooldownManager.ts`, auth: management):
 
-### UI ètò ìdènà + ìmúpadàbọ̀ ìdínkù-lẹ́yìn-àṣeyọrí (v3.8.23)
+- `GET /api/resilience/cooldowns[?provider=]` — àwọn connection pẹ̀lú status, cooldown tó kù,
+  ìpele backoff, irú aṣiṣe tó ṣẹ̀ṣẹ̀ ṣẹlẹ̀ àti lockout awoṣe (kò ní credentials)
+- `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` tàbí
+  `{all: true, provider?}`; ó máa dá `{cleared, unchanged, skippedTerminal, lockoutsCleared}` padà
 
-Ìdènà àwòṣe yí padà láti ìhùwàsí aláìyípadà tó máa ń ṣiṣẹ́ nígbà gbogbo sí ẹya tí a lè
-tò ní kíkún, tí a gbọ́dọ̀ yàn láti mú ṣiṣẹ́, pẹ̀lú káàdì ètò tirẹ̀ àti ọ̀nà ìmúpadàbọ̀ tó ń tún ara rẹ̀ ṣe.
+### UI àwọn ètò Lockout àti ìmúláradá success-decay (v3.8.23)
 
-**Káàdì ètò:** Ètò → Ìdènà Àwòṣe
+Lockout awoṣe ti yí padà láti inú ìhùwàsí tí a fi kó sínú kóòdù tí ó ń ṣiṣẹ́ nígbà gbogbo sí
+ẹ̀yà tí a lè ṣètò ní kíkún, tí a gbọ́dọ̀ yàn láti ṣiṣẹ́, pẹ̀lú káàdì ètò tirẹ̀ àti ọ̀nà ìmúláradá
+tí ń tún ara rẹ̀ ṣe.
+
+**Káàdì ètò:** Settings → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`).
-Èyí **yàtọ̀** sí `ModelCooldownsCard` kíkà-nìkan tó wà lókè (èyí tí ó kan
-_ṣe àtòjọ_ àwọn ìdènà tó ń ṣiṣẹ́) — káàdì tuntun náà _ń ṣètò àwọn àlàyé ìṣàkóso_. Àwọn iye àìyípadà
-wà nínú `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+Èyí **yàtọ̀** sí `ModelCooldownsCard` tí ó kàn ń kàwé lókè (èyí tí ó kàn
+ń _ṣe àkójọ_ àwọn lockout tó ń ṣiṣẹ́) — káàdì tuntun náà _ń ṣètò àwọn paramita_. Àwọn àìpẹ̀yà wà nínú
+`DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| Ètò                     | Iye àìyípadà                     | Ìtumọ̀                                                                        |
-| ----------------------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| `enabled`               | `false`                          | Yíyàn àgbà — ìdènà àwòṣe **wà ní pípa nípa àìyípadà**.                       |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Àwọn ipò láti orísun òkè tí a kà sí ìkùnà tó ní ìbúgbòòrò àwòṣe.             |
-| `baseCooldownMs`        | `120_000` (120 s)                | Gígùn ìdènà àkọ́kọ́ fún ìkùnà àkọ́kọ́.                                           |
-| `maxCooldownMs`         | `1_800_000` (30 min)             | Ààlà tó ga jù fún àkókò ìsinmi tó ń pọ̀ sí i.                                 |
-| `maxBackoffSteps`       | `10`                             | Iye ìgbésẹ̀ ìfàsẹ́yìn onírúpo tó pọ̀ jù.                                        |
-| `useExponentialBackoff` | `true`                           | Bóyá àwọn ìkùnà tó ń tún ṣẹlẹ̀ yóò mú kí àkókò ìsinmi pọ̀ sí i ní ọ̀nà onírúpo. |
+| Ètò                     | Àìpẹ̀yà                           | Ìtumọ̀                                                                  |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------------------- |
+| `enabled`               | `false`                          | Toggle àkóso — lockout awoṣe **kò ṣiṣẹ́ ní àìpẹ̀yà**.                    |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | Àwọn status upstream tí a ka sí ìkùnà tó ní ààlà awoṣe.                |
+| `baseCooldownMs`        | `120_000` (120 s)                | Àkókò lockout ìbẹ̀rẹ̀ fún ìkùnà àkọ́kọ́.                                   |
+| `maxCooldownMs`         | `1_800_000` (30 min)             | Ààlà cooldown tí a pọ̀ sí i.                                            |
+| `maxBackoffSteps`       | `10`                             | Iye ìgbésẹ̀ escalation exponential-backoff tó pọ̀ jù.                    |
+| `useExponentialBackoff` | `true`                           | Bóyá àwọn ìkùnà tí ń tún ṣẹlẹ̀ máa ń pọ̀ sí cooldown nípasẹ̀ exponential. |
 
-Àwọn ètò máa ń dúró nípasẹ̀ ibi ìpamọ́ ètò déédéé, wọ́n sì ń jẹ́rìí nípasẹ̀
-àwòrán ètò ìfaradà; káàdì náà ń fi ààlà sí `baseCooldownMs`/`maxCooldownMs`
-(pẹ̀lú `maxCooldownMs ≥ baseCooldownMs`) àti `maxBackoffSteps`.
+A máa ń fipamọ́ àwọn ètò sínú settings store déédéé, a sì máa ń fìdí wọn múlẹ̀ nípasẹ̀
+resilience settings schema; káàdì náà máa ń dí `baseCooldownMs`/`maxCooldownMs`
+(bẹ́ẹ̀ ni `maxCooldownMs ≥ baseCooldownMs`) àti `maxBackoffSteps` mọ́.
 
-**Ìmúpadàbọ̀ ìdínkù-lẹ́yìn-àṣeyọrí:** ìmúpadàbọ̀ **kì í ṣe** pípé àkókò nìkan. Ìdáhùn
-tó ní ìlera máa ń dín iye ìkùnà àwòṣe náà kù díẹ̀díẹ̀, kí àwòṣe kan tó bọ̀ sípò
-láàárín àkókò má bàa tẹ̀síwájú láti pọ̀ sí i (kí ó sì yọ ìdènà náà) ṣáájú kí aago rẹ̀ tó pé. Lórí ibi àfojúsùn
-àpapọ̀ tó ṣàṣeyọrí, `open-sse/services/combo.ts` máa ń pe `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`), èyí tí ó **pín** `failureCount` tí a fi pamọ́
-**sí ìdajì** (`Math.floor(failureCount / 2)`); nígbà tí ó bá dé `0`, a pa àkọsílẹ̀ ìdènà náà
-rẹ́ pátápátá. Ẹlẹgbẹ́ rẹ̀ `recordModelLockoutFailure()`
-ń fi kún iye náà (ó sì ń mú àkókò ìsinmi pọ̀ sí i) nígbà àwọn ìkùnà tó wáyé láàárín
-àkókò ìmúpọ̀sí. Ìdínkù-lẹ́yìn-àṣeyọrí yìí jẹ́ àfikún sí pípé àkókò lásán —
-ọ̀nà méjèèjì lè tún àwòṣe kan mú ṣiṣẹ́.
+**Ìmúláradá success-decay:** ìmúláradá **kì í ṣe** pé timer nìkan ló ń parí. Ìdáhùn tó ní ìlera
+máa ń dín iye ìkùnà awoṣe kù díẹ̀díẹ̀, kí awoṣe tí ó ti bọ́ sípò ní àárín window
+má bà a lọ́wọ́ láti tẹ̀síwájú nínú escalation (kí ó sì lè ṣí) kí timer rẹ̀ tó parí. Ní target combo
+tó ṣàṣeyọrí, `open-sse/services/combo.ts` máa ń pe `decayModelFailureCount()`
+(`open-sse/services/accountFallback.ts`), èyí tí **ń pín** `failureCount` tí a fipamọ́ sí méjì
+(`Math.floor(failureCount / 2)`); nígbà tí ó bá dé `0`, a máa ń pa àkọsílẹ̀ lockout náà rẹ́ pátápátá. Àkóbá rẹ̀
+`recordModelLockoutFailure()` máa ń pọ̀ sí iye náà (ó sì máa ń pọ̀ sí cooldown) fún àwọn ìkùnà tó ṣẹlẹ̀ nínú
+window escalation. Success-decay yìí jẹ́ àfikún sí expiry timer lasán —
+ọ̀nà méjèèjì lè tún mú awoṣe ṣiṣẹ́.
 
-**Ipò:** a ń pa àwọn ìdènà mọ́ **nínú ìrántí** (àwọn `Map` ti iṣẹ́-ọ̀nà kọ̀ọ̀kan fún
-`ModelLockoutEntry` tí `provider:connectionId:model` jẹ́ kọ́kọ́rọ́ wọn, àwọn ìdènà ìbúgbòòrò-gẹ́lẹ́ sì ní
-`provider:connectionId:exact:model`), a kò fi wọ́n pamọ́ sínú
-DB — wọ́n máa ń sọnù nígbà àtúnbẹ̀rẹ̀. A ń fi _àwọn ètò_ pamọ́; _ipò_ ìdènà
-tó ń ṣiṣẹ́ jẹ́ ti ìgbà díẹ̀.
+**Ìpò:** àwọn lockout ni a ń pa **ní inú ìrántí** (àwọn `Map` fún
+ilana kọ̀ọ̀kan ti `ModelLockoutEntry` tí a fi `provider:connectionId:model` ṣe kọ́kọ́rọ́,
+àwọn lock tí ó ní ààlà pàtó sì jẹ́ `provider:connectionId:exact:model`), kì í ṣe pé a
+fi pamọ́ sínú
+DB — wọ́n máa ń sọnù nígbà tí a bá tún bẹ̀rẹ̀. A máa ń fi _àwọn ètò_ pamọ́; _ipò_ lockout tó ń ṣiṣẹ́ jẹ́ ti ìgbà díẹ̀.
 
 ---
 
@@ -586,281 +596,227 @@ Nigbati o ba mu ṣiṣẹ, iṣẹyun oluṣọ ni a lo nikan si igbiyanju oke 
 
 ---
 
-## 7. Àtúnsọ Ìpò Upstream (àwọn àṣìṣe iye-ààyè tí a ṣàlàyé lọ́nà tí kò tọ́)
+## 7. Àtúnsọ Ìpo Upstream (àwọn aṣiṣe quota tí a sọ ní ọna tí kò tọ́)
 
-**Ààlà:** ẹnubodè upstream kan tí ó ń jabo pé iye-ààyè ti parí fún ìgbà díẹ̀ pẹ̀lú ipò HTTP tí kò tọ́.
+**Ààlà:** gateway upstream kan tí ń jabo pé quota ti rẹ̀ fún ìgbà díẹ̀ pẹ̀lú HTTP status tí kò tọ́.
 
-**Ète:** ṣàtúnṣe ipò tí ń ṣini lọ́nà ṢÁÁJÚ ìsọ̀rí, kí àwọn olùlò downstream (ẹ̀rọ àfidípò, àkójọpọ̀ combo, ìdáhùn tí a fi hàn sí oníbàárà) lè rí pé a lè tún ìkùnà náà gbìyànjú ní tòótọ́.
+**Ète:** ṣàtúnṣe status tí ń ṣìṣìfihàn náà KÓÓRÁ kí a tó ṣe classification, kí àwọn oníbàárà downstream (fallback engine, combo aggregation, àti ìdáhùn tí ó dojú kọ́ client) lè rí ìwà retryable gidi ti ìkùnà náà.
 
-Àwọn ẹnubodè kan ń fi hàn pé iye-ààyè ti parí fún ÌGBÀ DÍẸ̀ pẹ̀lú ipò HTTP
-tí kò ṣeé tún gbìyànjú. `agentrouter.org` ń dá `403` padà (nígbà míì `400`) pẹ̀lú àkóónú Ṣáínà
-(`用户额度不足` / `额度不足`) dípò `429` boṣewa. Àwọn oníbàárà bíi Claude
-Code ka `403` sí ohun tí ó wà pẹ́ títí, wọ́n sì fòpin sí session náà, àti pé láìsí àtúnṣe,
-ẹ̀rọ àfidípò yóò ṣe ìsọ̀rí rẹ̀ gẹ́gẹ́ bí `AUTH_ERROR` dípò ìṣẹ̀lẹ̀
-iye-ààyè.
+Àwọn gateway kan máa ń fi status HTTP tí kò lè ṣe retry hàn nígbà tí quota bá ti rẹ̀ fún ìgbà díẹ̀. `agentrouter.org` máa ń dá `403` (nígbà míì `400`) padà pẹ̀lú ara ìdáhùn Ṣáínà
+(`用户额度不足` / `额度不足`) dípò `429` ìlànà. Àwọn client bí Claude
+Code máa ń ka `403` sí ohun tí ó pé títí, wọ́n sì ń dá session dúró; bí a kò bá ṣe àtúnṣe, fallback engine yóò ṣe classification rẹ̀ sí `AUTH_ERROR` dípò event quota.
 
-**Ìmúṣẹ:**
+**Ìmúlò:**
 
-- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — àtòjọ
-  àwọn òfin fún provider kọ̀ọ̀kan (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`), tí a ń bá mu nípasẹ̀ `applyStatusRestatement()`.
-- Ibi ìpè: block `providerFailure:` inú `open-sse/handlers/chatCore.ts`
-  (ní àyíká ìlà 3654), lẹ́sẹ̀kẹsẹ̀ lẹ́yìn tí `parseUpstreamError()` bá ṣe àtúpalẹ̀ ìdáhùn
-  upstream kan tí ó ní ipò HTTP àṣìṣe (`!providerResponse.ok`), àti ṣáájú kí
-  ìsọ̀rí èyíkéyìí tó bẹ̀rẹ̀, kí gbogbo olùlò downstream lè rí ipò tí a
-  ṣàtúnṣe. Àwọn àṣìṣe tí a fi sínú stream SSE `200` ń tẹ̀lé ọ̀nà mìíràn,
-  tí ó wà lẹ́yìn, fún ṣíṣe àtúpalẹ̀ stream, wọn kò sì wà lábẹ́ hook yìí lónìí — èyí jẹ́
-  ààlà tí a mọ̀, tí a kò tíì nílò fún ipò àṣìṣe agentrouter (èyí tí
-  ó ń farahàn gẹ́gẹ́ bí ipò HTTP àṣìṣe).
-- Yíyẹ fún àtúngbìyànjú: `429` wà nínú `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`), nítorí náà àṣìṣe tí a tún ipò rẹ̀ sọ
-  ní àkókò àtúngbìyànjú gidi dípò kí ó farahàn gẹ́gẹ́ bí `403` tí kò lè ṣiṣẹ́ mọ́.
-- `60s` àdáṣe `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  jẹ́ ohun tí ìdáhùn tí a tún ipò rẹ̀ sọ ń sọ fún **oníbàárà** nìkan; kì í ṣe
-  iye àkókò cooldown/lockout abẹ́nú ti connection náà — èyí ni
-  mechanism èyíkéyìí tí ó bá ń bójú tó àṣìṣe tí a tún ipò rẹ̀ sọ ń ṣàkóso
-  lọ́tọ̀ (backoff tí ń pọ̀ sí i ti Connection Cooldown, §2, pẹ̀lú ìpilẹ̀ `3s` fún àwọn
-  provider API-key; tàbí Model Lockout, §3, fún àwọn provider iye-ààyè-àkọ́ṣe-bákannáà bíi
-  agentrouter). Router lè tún yẹ láti gbìyànjú ní abẹ́nú kí
-  window 60s tí ó kéde fún oníbàárà tó pé — headroom tí a mọ̀ọ́mọ̀ ṣe ni,
-  kì í ṣe bug.
+- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — àkójọ àwọn ìlànà fún provider kọ̀ọ̀kan (`{id, fromStatuses, toStatus, textMarkers, excludeMarkers, defaultRetryAfterMs}`), tí a ń bá mu nípasẹ̀ `applyStatusRestatement()`.
+- Call site: block `providerFailure:` nínú `open-sse/handlers/chatCore.ts`
+  (ní ayíká laini 3654), lẹ́yìn tí `parseUpstreamError()` bá ti parse ìdáhùn upstream pẹ̀lú error HTTP status (`!providerResponse.ok`), àti kí classification kankan tó bẹ̀rẹ̀, kí gbogbo downstream consumer lè rí status tí a ti ṣàtúnṣe. Àwọn aṣiṣe tí a fi sínú SSE stream `200` máa ń tẹ̀lé ọ̀nà míì tí a ń lo lẹ́yìn náà fún stream-parsing, kò sì sí lábẹ́ hook yìí lónìí — ó jẹ́ ààlà tí a mọ̀, tí kò tíì ṣe pàtàkì fún misstatus `agentrouter` (èyí tí ń farahàn gẹ́gẹ́ bí error HTTP status).
+- Ìyẹ̀sí fún retry: `429` wà nínú `RETRY_AFTER_ELIGIBLE_STATUSES`
+  (`open-sse/services/combo/unavailableRetryGate.ts`), nítorí náà error tí a tún sọ status rẹ̀ máa ń ní àkókò retry gidi dípò kí ó farahàn gẹ́gẹ́ bí `403` tí kò lè ṣiṣẹ́ mọ́.
+- `defaultRetryAfterMs` `60s` tí a ṣe sílẹ̀ (`upstreamStatusRestatement.ts`) jẹ́ ohun tí response tí a tún ṣàtúnṣe ń sọ fún **client** nìkan; kì í ṣe àkókò cooldown/lockout inú connection fúnra rẹ̀ — mechanism tí ó bójú tó error tí a tún ṣàtúnṣe ni ó ń ṣàkóso èyí lọ́tọ̀ (Connection Cooldown pẹ̀lú escalating backoff, §2, base `3s` fún àwọn provider API-key; tàbí Model Lockout, §3, fún àwọn provider per-model-quota bí agentrouter). Router lè di eligible láti ṣe retry nínú ara rẹ̀ kí window 60s tí ó polówó fún client tó parí — headroom tí a pinnu, kì í ṣe bug.
 
-Àwọn àṣìṣe tí ó wà pẹ́ títí (ti agentrouter `无权访问模型` — kò ní àṣẹ láti wọ model yìí) kì í
-ṣeé tún ipò wọn sọ LÁÉ: `excludeMarkers` ń fagilé òfin náà kódà nígbà tí `textMarkers` bá bá mu,
-nítorí náà àṣìṣe náà máa pa ipò ìbẹ̀rẹ̀ rẹ̀ mọ́, kò sì sí ohun tí yóò máa tún un gbìyànjú títí láé. Òfin
-ìsọ̀rí provider tí ó bá a mu
-(`agentrouter-model-access-denied` inú `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, cooldown ìpilẹ̀ `6h` tí a kéde) ni
-`checkFallbackError` (`open-sse/services/accountFallback.ts`) ń ṣàyẹ̀wò
-_ṣáájú_ early-return `FORBIDDEN` àkópọ̀ apikey gbogbogbò, tí a fi
-`honorsRuleLockScope(provider)` ṣe gate rẹ̀ (#10334 — lọ́wọ́lọ́wọ́ agentrouter nìkan nípasẹ̀
-allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` inú
-`providerErrorRules.ts`). Cooldown 6h tí òfin náà kéde ń gba ọ̀nà kọjá gẹ́gẹ́ bí
-`fallbackResult.baseCooldownMs`, ṣùgbọ́n ó ṣì ń wọ ọ̀nà lockout iye-ààyè-àkọ́ṣe-bákannáà
-tí ó ti wà tẹ́lẹ̀ (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()`, tí #10334 kò yí padà àyàfi orísun cooldown):
-a dín in kù sí `mlSettings.maxCooldownMs` ti operator
-(àdáṣe `1_800_000ms` / 30min), bí gbogbo model lockout mìíràn, àti pé
-_ìdí lockout tí a fi pamọ́_ ṣì jẹ́ `"forbidden"` tí a ti hardcode tẹ́lẹ̀,
-kì í ṣe `"auth_error"` ti òfin náà — iye àkókò cooldown nìkan ni a bọ̀wọ̀ fún
-láti ìbẹ̀rẹ̀ dé òpin, kì í ṣe reason string. Connection fúnra rẹ̀ ṣì ṣiṣẹ́;
-àwọn model arákùnrin-lábọ̀ rẹ̀ lórí connection kan náà kò ní ipa kankan.
+Àwọn error tí ó pé títí (agentrouter’s `无权访问模型` — kò sí àṣẹ láti wọ̀lé sí model yìí) KÒ SÍGBÀ kan tí a tún máa ń sọ status wọn: `excludeMarkers` máa ń kọ ìlànà náà sílẹ̀, kódà nígbà tí `textMarkers` bá bá a mu, nítorí náà error náà máa ń pa status ìpilẹ̀ṣẹ̀ rẹ̀ mọ́, kò sì sí ohun tí yóò retry rẹ̀ títí láé. Ìlànà classification provider tó bá mu
+(`agentrouter-model-access-denied` nínú `open-sse/config/providerErrorRules.ts`:
+`reason: "auth_error"`, `scope: "model"`, cooldown base tí a kéde sí `6h`) ni `checkFallbackError` (`open-sse/services/accountFallback.ts`) máa ń ṣàyẹ̀wò _kí generic apikey-category `FORBIDDEN` early-return tó ṣẹlẹ̀_, lábẹ́ àfọwọ́sí `honorsRuleLockScope(provider)` (#10334 — lónìí agentrouter nìkan ni ó wà nínú allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` nínú
+`providerErrorRules.ts`). Cooldown 6h tí ìlànà náà kéde máa ń kọjá lọ sí `fallbackResult.baseCooldownMs`, ṣùgbọ́n ó ṣì ń lo ọ̀nà lockout per-model-quota tó ti wà tẹ́lẹ̀ (`lockModelIfPerModelQuota()` /
+`recordModelLockoutFailure()`, tí #10334 kò yí padà àyàfi orísun cooldown): a máa dín í kù sí `mlSettings.maxCooldownMs` ti operator (àdáṣe `1_800_000ms` / 30min), gẹ́gẹ́ bí gbogbo model lockout mìíràn, àti _reason lockout tí a pamọ́_ ṣì máa jẹ́ `"forbidden"` tí a hardcode sí tẹ́lẹ̀, kì í ṣe `"auth_error"` ti ìlànà náà — iye àkókò cooldown nìkan ni a bọ́wọ̀ fún láti ìbẹ̀rẹ̀ dé òpin, kì í ṣe string reason náà. Connection fúnra rẹ̀ máa ń dúró sílẹ̀; àwọn sibling model tó wà lórí connection kan náà kò ní ipa.
 
-Àwọn àṣìṣe iye-ààyè tí a tún ipò wọn sọ (`额度不足`) dé òfin provider kan ní production
+Àwọn quota error tí a tún sọ status wọn (`额度不足`) máa ń dé bá provider rule kan ní production
 (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"`, kò ní cooldown tí a kéde fúnra rẹ̀ — àdáṣe scaled backoff ti persistence layer
-ni ó kan). Láti #10334, `scope` lórí
-`ProviderErrorRuleMatch` NI a ń lò láti ìbẹ̀rẹ̀ dé òpin, ṣùgbọ́n **nìkan** fún àwọn provider tó wà nínú
-allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` —
-lónìí `"agentrouter"` nìkan, tí a fi `honorsRuleLockScope()` ṣe gate rẹ̀). Fún gbogbo
-provider mìíràn `scope` ṣì jẹ́ àlàyé nìkan, gan-an bí ó ti rí ṣáájú #10334.
-`checkFallbackError` ń fi scope òfin tí ó bá mu hàn gẹ́gẹ́ bí
+"connection"`, kò sí cooldown tí a kéde fúnra rẹ̀ — persistence layer’s scaled backoff default ni ó máa ń ṣiṣẹ́). Láti #10334, `scope` lórí
+`ProviderErrorRuleMatch` NI a ń lò láti ìbẹ̀rẹ̀ dé òpin, ṣùgbọ́n **fún àwọn provider tó wà nínú allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` nìkan** (`providerErrorRules.ts` —
+lónìí `"agentrouter"` nìkan, tí a ń ṣàkóso nípasẹ̀
+`honorsRuleLockScope()`). Fún gbogbo provider mìíràn `scope` ṣì jẹ́ ìsọfúnni nìkan, gẹ́gẹ́ bí ó ti rí ṣáájú #10334.
+`checkFallbackError` máa ń fi scope ìlànà tí ó bá mu hàn gẹ́gẹ́ bí
 `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) ni guard tí a jọ ń lò láti jẹ́rìí pé
-`ruleScope` kan dájú pé ó léwu-kéré tó láti bọ̀wọ̀ fún gẹ́gẹ́ bí àmì jakejado connection tí ó lè padà bọ̀ sípò fúnra rẹ̀
-(scope `"connection"`, reason `quota_exhausted`, kì í jẹ́ `permanent` láé,
-kì í jẹ́ `creditsExhausted` láé — ìdáàbòbò sí òfin ọjọ́ iwájú tí ó lè so scope
-`"connection"` pọ̀ mọ́ ipò account tí ó wà pẹ́ títí). Àwọn olùlò méjì ń pè é:
+(`src/sse/services/auth.ts`) ni guard tí a pín fún gbogbo ibi, tó ń jẹ́rìí pé
+`ruleScope` dájú pé ó bójú mu láti bọ̀wọ̀ fún gẹ́gẹ́ bí àmì connection-wide tí ó lè gba ara rẹ̀ padà (scope `"connection"`, reason `quota_exhausted`, kì í ṣe `permanent` láé, kì í ṣe `creditsExhausted` — ààbò lòdì sí bí ìlànà ọjọ́ iwájú bá so scope `"connection"` pọ̀ mọ́ ipò account títí láé). Àwọn consumer méjì ló ń pè é:
 
-- **Ìtọ́jú** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  dípò kí ó wọlé sínú ẹ̀ka ìdèwọ́n **fun-gbogbo-àwoṣe** ti olùpèsè passthrough
+- **Ìpamọ́** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
+  dípò kí ó ṣubú sínú ẹ̀ka ìdènà **per-model** passthrough-provider
   (agentrouter jẹ́ `passthroughModels: true` → `hasPerModelQuota()`
-  ń dá `true` padà), ó ń lo **ìsinmi ìsopọ̀ fún ìgbà díẹ̀** —
-  `testStatus: "unavailable"` + `rateLimitedUntil`, kì í ṣe ipò ìparí
-  (`credits_exhausted`/`banned`/`expired`) — nítorí náà ìsopọ̀ náà máa tún
-  ara rẹ̀ ṣe nígbà tí ìsinmi náà bá parí dípò kí ó nílò àtúntò ẹ̀rí
-  ìbáṣepọ̀ pẹ̀lú ọwọ́. A ó rẹ̀ sílẹ̀ fún àwọn ìsopọ̀ tí ó ní
-  `disableCooling: true` (#2997): ìyọ-ara-kúrò yìí máa rílù wọlé sínú
-  ìdèwọ́n fun-gbogbo-àwoṣe dípò (ìdíẹ̀kèdíẹ̀ kan tí a ṣe àkọsílẹ̀ — wo
-  àríwísí kóòdù tó wà lókè ẹ̀ka náà).
-- **Ìdarípo combo ìbéèrè-kannáá** (`applyComboTargetExhaustion()`,
-  `open-sse/services/combo/targetExhaustion.ts`): ààbò kannáá máa fi ìsopọ̀
-  náà sínú ìkójọpọ̀ `exhaustedConnections` inú ìrántí, pẹ̀lú kòkòrò
-  `${provider}:${connectionId}`. Èyí ń kọjá àfojúsùn ÌBÉÈRÈ-KANNÁÁ tó kù
-  tí _ó ti ní `connectionId` yẹn gan-an lórí ohun èlò àfojúsùn tirẹ̀_
-  nìkan (`getExhaustedTargetSkipReason()`,
+  padà `true`), ó máa ń lo **ìsinmi ìgbà díẹ̀ fún ìsopọ̀** —
+  `testStatus: "unavailable"` + `rateLimitedUntil`, kì í ṣe status ìkẹyìn
+  (`credits_exhausted`/`banned`/`expired`) — kí ìsopọ̀ lè tún ara rẹ̀ ṣe
+  lẹ́yìn tí ìsinmi náà bá parí dípò kí ó nílò àtúnṣe credential pẹ̀lú ọwọ́.
+  A máa ń fo èyí fún àwọn ìsopọ̀ tí `disableCooling: true` (#2997): yíyan
+  kúrò yìí máa ń jẹ́ kí ó ṣubú sínú ìdènà per-model dípò rẹ̀ (àṣàyàn tí a
+  ṣàlàyé — wo àlàyé kóòdù tó wà lókè ẹ̀ka náà).
+- **Ìdarí combo nínú ìbéèrè kan náà** (`applyComboTargetExhaustion()`,
+  `open-sse/services/combo/targetExhaustion.ts`): guard kan náà máa ń fi
+  ìsopọ̀ sí inú ṣètò `exhaustedConnections` tó wà nínú memory, pẹ̀lú kọ́kọ́rọ́
+  `${provider}:${connectionId}`. Èyí máa ń fo target SAME-REQUEST tó kù nìkan
+  tí _ó fúnra rẹ̀ ti ní `connectionId` gangan yẹn_ lórí ohun target tirẹ̀
+  (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` ṣáájú wíwá `exhaustedConnections`) — combo àtòjọ-àwoṣe
-  lásán, ibi tí àwọn àfojúsùn arákùnrin kò ní `connectionId` kankan tí a
-  kánlẹ̀ fúnra wọn tí ọ̀kan sì jẹ́ yíyán nígbà-ìránṣẹ́-kọ̀ọ̀kan nìkan látinú
-  àkópọ̀ `X-OmniRoute-Selected-Connection-Id` ti èsì náà, kò ní kọlu
-  ìbáṣọ̀rọ̀ kòkòrò yẹn rárá. Fún ọ̀rọ̀ tó wọ́pọ̀ yẹn, ààbò gidi lòdì sí kí
-  ẹsẹ̀ tó kù tún àpamọ́wọ́ tó ṣẹ̀ṣẹ̀ parí náà lo KÌ Í ṢÈ Set yìí — ẹ̀yí
-  ìtọ́jú tó wà lókè ni (`rateLimitedUntil` ti ìsopọ̀ náà ti wà láwájọ́)
-  tí a pọ̀ mọ́ ààbò kannáá yìí tó ń dín `transientRateLimitedProviders` kù
-  fún ìkùnà náà (wo "Ìpèsè ìpele-méjì" àti àríwísí kóòdù lórí ẹ̀ka
-  `isAgentrouterConnectionQuotaScope` nínú `targetExhaustion.ts`): pẹ̀lú
-  Set yẹn tí a kò fi àmì sílẹ̀, ìgba-àyè-lógbára `allowRateLimitedConnection`
-  ti `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) KÒ
-  ní bẹ̀rẹ̀ iṣẹ́ fún àwọn ẹsẹ̀ tó kù ti olùpèsè náà, nítorí náà a ó bọ̀wọ́
-  fún ìyọ̀ `rateLimitedUntil` ti ìyàn ẹ̀rí ìbáṣepọ̀
-  (`src/sse/services/auth.ts:1238`) ní deédéé, tí ẹsẹ̀ tó kù sì tàbí yàn
-  ìsopọ̀ agentrouter mìíràn tí ó ṣì yẹ, tàbí kùnà pẹ̀lú kí kò sí ẹ̀rí
-  ìbáṣepọ̀ kankan rárá — kò fi agbára dá àárà rẹ̀ padà sórí ìsopọ̀ tí ẹ̀ka
-  yìí ṣẹ̀ṣẹ̀ fi sinmi.
+connectionId)` ṣáájú àyẹ̀wò `exhaustedConnections`) — combo àtòjọ model lasan,
+  níbi tí àwọn target arákùnrin kò ní `connectionId` tí a so mọ́ wọn fúnra wọn
+  tí a sì ń yan ọ̀kan nìkan fún dispatch kọ̀ọ̀kan láti inú header
+  `X-OmniRoute-Selected-Connection-Id` ti response, kì í ṣe ìbámu kọ́kọ́rọ́ yẹn
+  rárá. Ní ọ̀ràn tí ó wọ́pọ̀ yìí, ààbò gidi lòdì sí kí ẹsẹ̀ tó kù tún lo
+  account tí ó ṣẹ̀ṣẹ̀ rẹ̀wẹ̀sì kì í ṣe Set yìí — ó jẹ́ layer ìpamọ́ tó wà lókè
+  (nítorí `rateLimitedUntil` ìsopọ̀ náà wà ní ọjọ́ iwájú báyìí) pẹ̀lú guard
+  kan náà tó ń dín `transientRateLimitedProviders` kù fún ìkùnà náà (wo
+  "Àpẹrẹ ipele méjì" àti àlàyé kóòdù lórí ẹ̀ka
+  `isAgentrouterConnectionQuotaScope` nínú `targetExhaustion.ts`): nígbà tí
+  a kò bá fi àmì sí Set náà, `allowRateLimitedConnection` force-allow ti
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) KÌ Í
+  ṣiṣẹ́ fún àwọn ẹsẹ̀ tó kù ti provider náà, nítorí náà a máa bọ̀wọ̀ fún
+  àlẹ̀ `rateLimitedUntil` ti yíyan credential (`src/sse/services/auth.ts:1238`)
+  gẹ́gẹ́ bí ó ti ṣe déédéé, ẹsẹ̀ tó kù yóò sì yan ìsopọ̀ agentrouter míràn tí
+  ó ṣì yẹ, tàbí kó kùnà pẹ̀lú kò sí credential tó wà — kò ní fi agbára
+  padà sínú ìsopọ̀ tí ẹ̀ka yìí ṣẹ̀ṣẹ̀ fi sí ìsinmi.
 
-### Ìpèsè ìpele-méjì: àtúntún sọ ipò, lẹ́yìn náà ìsọtò
+### Àpẹrẹ ipele méjì: àtúnkọ status, lẹ́yìn náà ìpín sí ẹ̀ka
 
-Àtúntún sọ ipò (`upstreamStatusRestatement.ts`) àti àwọn òfin ìsọtò
-olùpèsè (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) jẹ́ àwọn ìforúkọsílẹ̀ ọtọọtọ̀ tí ẹ̀mejì ń lo
-kòkòrò lórí id olùpèsè àti àwọn àmì ọ̀rọ̀, ṣùgbọ́n wọ́n ń ṣiṣẹ́ ní àwọn ibi
-tí ó yàtọ̀ wọ́n sì ń ṣe ìleré tí ó yàtọ̀: àtúntún sọ ipò ń tún ipò HTTP kọ
-ní kutukutu nínú `chatCore.ts`; àwọn òfin ìsọtò ń yàn `reason` ìpàrọ́
-àti tìítí `scope` (`model` / `provider` / `connection`) nínú
-`checkFallbackError()` (`open-sse/services/accountFallback.ts`).
+Àtúnkọ status (`upstreamStatusRestatement.ts`) àti àwọn òfin ìpín provider
+(`open-sse/config/providerErrorRules.ts`,
+`providerRuleRegistry`) jẹ́ registry méjì ọ̀tọ̀ọ̀tọ̀ tí méjèèjì ń lo provider id
+àti àwọn àmì ọ̀rọ̀ gẹ́gẹ́ bí kọ́kọ́rọ́, ṣùgbọ́n wọ́n ń ṣiṣẹ́ ní ibi ọ̀tọ̀ọ̀tọ̀
+wọ́n sì ní ète ọ̀tọ̀ọ̀tọ̀: àtúnkọ máa ń tún HTTP status kọ́ ní kutukutu nínú
+`chatCore.ts`; àwọn òfin ìpín sì ń yan `reason` ìpadàpẹ̀yà àti `scope`
+(`model` / `provider` / `connection`) nínú `checkFallbackError()`
+(`open-sse/services/accountFallback.ts`).
 
-Àwọn òfin ìsọtò máa rí **ọ̀rọ̀** aṣìṣe kíkún ṣoṣo (tí a nílò láti bá àwọn
-àmì ara bíi `额度不足` mu) fún àwọn olùpèsè tí a kọ sínú àkójọ-àṣẹ
-`FULL_TEXT_RULE_PROVIDERS` nínú `providerErrorRules.ts` — `"agentrouter"`
-nìkan ló wà ní báyìí. Fún gbogbo olùpèsè **ìkàtálógù inú-ètò** mìíràn,
-`checkFallbackError` máa fún `getProviderErrorRuleMatch` ní aṣìṣe tí a
-ṣètò (`{code, type}`) nìkan, èyí tó tó fún àwọn òfin tí ó dá lórí
-àkópọ̀/ipò/kóòdù ṣùgbọ́n tó foójù fún àwọn àmì ọ̀rọ̀-ara. Olùrànlọ́wọ́
-`resolveRuleMatchBody()` ló ń ṣe ìyàn yìí: ọ̀rọ̀ aṣìṣe kíkún fún àwọn
-olùpèsè tí ó wà nínú àkójọ-àṣẹ, aṣìṣe tí a ṣètò ní bí kò bá ṣe bẹ́ẹ̀.
-Ìfikún olùpèsè **inú-ètò** kan sí `FULL_TEXT_RULE_PROVIDERS` jẹ́ ìforúkọ
-wọlé tí ó kedere fún olùpèsè-kọ̀ọ̀kan — ó wà nítorí kí ọ̀nà àtìbàjọ́ fún
-gbogbo olùpèsè tí kò sí lórí àtòjọ náà máa dúró bí kò bá yí padà
-báìtì-fún-báìtì.
+Àwọn òfin ìpín máa ń rí **ọ̀rọ̀** aṣìṣe pípé nìkan (èyí tó ṣe pàtàkì láti bá
+àwọn àmì inú body bí `额度不足` mu) fún àwọn provider tí a kọ sínú allowlist
+`FULL_TEXT_RULE_PROVIDERS` nínú `providerErrorRules.ts` — ní báyìí `"agentrouter"`
+nìkan. Fún gbogbo provider **built-in catalog** mìíràn,
+`checkFallbackError` máa ń fún `getProviderErrorRuleMatch` ní aṣìṣe tí a
+ṣètò (`{code, type}`) nìkan, èyí tó tó fún àwọn òfin tó dá lórí
+header/status/code ṣùgbọ́n tí kò rí àwọn àmì ọ̀rọ̀ inú body. Helper
+`resolveRuleMatchBody()` ló ń ṣe yíyan yìí: ọ̀rọ̀ aṣìṣe pípé fún àwọn provider
+tó wà nínú allowlist, aṣìṣe tí a ṣètò fún àwọn yòókù. Fífà `provider`
+**built-in** kún `FULL_TEXT_RULE_PROVIDERS` jẹ́ ìyàsọ́tọ̀ tí provider kọ̀ọ̀kan
+gbọdọ̀ gba ní kedere — ó wà kí ipa àìpẹ̀yà fún gbogbo provider tí kò sí
+nínú àtòjọ náà lè dúró láìyípadà byte-for-byte.
 
-`scope` òfin kan (`model` / `provider` / `connection`) jẹ́ ìforúkọ wọlé
-tí ó yàtọ̀ sí `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` máa fara
-rẹ̀ gẹ́gẹ́ bí `fallbackResult.ruleScope` nìkan, àwọn olùlo ìsàlẹ̀ sì máa
-bọ̀wọ́ fún un gẹ́gẹ́ bí ohunkóhun mìíràn ju àmì ìsọfúnni lọ, fún àwọn
-olùpèsè nìkan tí ó wà nínú àkójọ-àṣẹ `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-nínú fáìlì kannáá (tí a dè àyè lọ́nà `honorsRuleLockScope()` — òní
-`"agentrouter"` nìkan). Wo "Àwọn aṣìṣe àwò tí a tún sọ" lókè fún ohun
-tí ìbáṣọ̀rọ̀ `scope: "connection"` kan ṣe ní tòótọ́ nígbà tí olùpèsè kan
-bá ti wà lórí àkójọ-àṣẹ yẹn.
+`scope` òfin kan (`model` / `provider` / `connection`) jẹ́ ìyàsọ́tọ̀ ọ̀tọ̀
+kúrò nínú `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` máa ń fihàn án
+gẹ́gẹ́ bí `fallbackResult.ruleScope` nìkan, àwọn oníbàárà downstream sì máa ń
+bọ̀wọ̀ fún un gẹ́gẹ́ bí ohun tó ju àmì ìfitónilétí lọ fún àwọn provider tó wà
+nínú allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` nínú fáìlì kan náà (a ń
+ṣàkóso rẹ̀ nípasẹ̀ `honorsRuleLockScope()` — lónìí `"agentrouter"` nìkan).
+Wo "Àwọn aṣìṣe quota tí a tún kọ" lókè fún ohun tí ìbámu
+`scope: "connection"` ń ṣe ní ti gidi lẹ́yìn tí provider bá wà nínú allowlist
+yẹn.
 
-**#11104 — àwọn òfin tí olùṣàkóso kéde máa kọjá àkójọ-àṣẹ méjèèjì.**
-Olùṣàkóso lè kéde òfin fún olùpèsè-kọ̀ọ̀kan nígbà ṣíṣe lọ́nà
+**#11104 — àwọn òfin tí operator kéde máa ń yí allowlist méjèèjì kọjá.**
+Operator lè kéde òfin fún provider kọ̀ọ̀kan ní runtime nípasẹ̀
 `settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-láì tún fáìlì yìí ṣe. Ìdè òfin olùṣàkóso kan sí ẹ̀yìn
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — àwọn
-àkójọ-àṣẹ tí wọ́n ṣe láti dáàbò bo ìwà **àtìbàjọ́** ti àwọn òfin ìkàtálógù
-inú-ètò — yóò jẹ́ kí ẹ̀rọ ìṣètò náà di àìṣiṣẹ́ fún gbogbo olùpèsè àyàfi
-àwọn tí a ti kọ síbẹ̀ rẹ́, níwọ̀n ìgbà tí ìkéde òfin náà ti jẹ́ ìforúkọ
-wọlé tí ó kedere ti olùṣàkóso. `resolveRuleMatchBody()` àti
-`honorsRuleLockScope()` méjèèjì máa kọ́kọ́ ṣàyẹ̀wò
-`hasOperatorRuleForProvider()`: olùpèsè tí ó ní òfin olùṣàkóso máa gba
-ọ̀rọ̀ aṣìṣe gidi, a ó sì bọ̀wọ́ fún `scope` tí ó kéde, láìka bóyá ó tún
-fara nínú èyíkéyìí àkójọ-àṣẹ.
+láìsí àtúnṣe fáìlì yìí. Síso òfin operator mọ́
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — allowlist tí
+a dá sílẹ̀ láti dá ìhùwàsí **àìpẹ̀yà** àwọn òfin built-in catalog sí — yóò jẹ́
+kí ètò settings náà di aláìlóǹà fún gbogbo provider àfi àwọn tí a ti kọ sínú
+àtòjọ náà, nítorí kéde òfin náà fúnra rẹ̀ ti jẹ́ ìyàsọ́tọ̀ operator ní kedere.
+`resolveRuleMatchBody()` àti `honorsRuleLockScope()` méjèèjì máa ń ṣàyẹ̀wò
+`hasOperatorRuleForProvider()` kọ́kọ́: provider tó bá ní òfin operator máa ń
+gba ọ̀rọ̀ aṣìṣe aise, a sì máa ń bọ̀wọ̀ fún `scope` tí ó kéde, láìka bóyá ó
+wà nínú allowlist èyíkéyìí.
 
-**Àlàfo tí a mọ̀ — kò sí gbogbo ìbéèrè lọ́dọ̀ `providerRuleRegistry` fún
-HTTP 400 rárá.** Ẹ̀ka `BAD_REQUEST` ti `checkFallbackError` ń ṣe ìsọtò
-ipò 400 ní kíkún nípasẹ̀ àwọn àkópọ̀ ìlànà tirẹ̀
-(`MODEL_ACCESS_DENIED_PATTERNS`, `CONTEXT_OVERFLOW_PATTERNS`,
-bẹ́ẹ̀bẹ́ẹ̀ lọ nínú `accountFallback.ts`) ó sì ń padà ṣáájú kí ẹ̀ka
-`configuredRule`/`getProviderErrorRuleMatch` tó wà lókè rẹ̀ tó dé. Òfin
-ìkàtálógù inú-ètò (tàbí òfin olùṣàkóso) tí ó ní `status: 400` wúlò ní
-ọ̀nà gírámà ṣùgbọ́n kò ní tan rárá. Kò sí òfin tó wà lónìí tí ó ń
-fojúsìn 400, nítorí náà kò sí ohunkóhun nínú iṣẹ́ gidi tó níkanjá —
-ṣùgbọ́n òfin 400 ọjọ́ iwájú nílò kí a kọ́kọ́ kan ẹ̀ka yìí, èyí tí ó jẹ́
-àyípadà tó tóbi ju ìfikún òfin kan lọ (ó máa tún ìsọtò 400 ṣe fún gbogbo
-olùpèsè tí ó ti gbára lé ìwà àkópọ̀-ìlànà náà) ó sì kọjá ààlà ìleré fún
-ìfikún òfin olùpèsè-ọ̀kan.
+**Àwọn òfin tí operator kéde** (`OperatorProviderErrorRule`): òfin kọ̀ọ̀kan
+ní `status` àṣàyàn kan àti `match` àṣàyàn kan (substring lasan, tí kò ka
+ọ̀rọ̀ ńlá sí, nínú ọ̀rọ̀ aṣìṣe, kì í ṣe RegExp, nítorí náà kò lè fa ReDoS),
+ó sì gbọ́dọ̀ ṣètò ó kéré tán ọ̀kan nínú méjèèjì. Tí a bá ṣètò méjèèjì, a máa
+so wọ́n pọ̀ pẹ̀lú AND; pápá tí a fi sílẹ̀ láìsí iye máa ń bá ohunkóhun mu,
+nítorí náà `{match: "insufficient_quota"}` máa ń bá status èyíkéyìí tí ó
+ní code yẹn mu. Òfin àkọ́kọ́ tó bá mu ni a máa ń lò. `cooldownMs` gba títí
+dé ọjọ́ 30; àwọn òfin 50 péré ni gbogbo wọn lè pọ̀ jọ.
 
-### Ṣí àfikún gateway tuntun tó ń sọ quota ẹ̀kúnrẹ̀rẹ̀
+**Àwọn àiyipada gbogbogbogbo** (`settings.providerErrorDefaults`, opt-in, tí a ṣètò nipasẹ
+`setOperatorProviderErrorDefaults`): `{[provider]: {cooldownMs, scope?, reason?}}`
+pẹ̀lú `cooldownMs` láti ìṣẹ́jú 1 sí ọjọ́ 30. Àiyipada kan máa ń ṣiṣẹ́ nìkan nígbà tí kò bá sí
+ofin operator kankan tàbí ofin katalogi tí a ṣe sínú ètò tó báamu, àti nìkan fún àwọn aṣìṣe 402, 403, 408,
+429 àti 5xx. Àwọn aṣìṣe irisi ìbéèrè (400, 404, 409, 413, 422) àti 401 tí kò ní àlàyé míràn
+máa ń pa ìlànà mímu wọn mọ́. Bí kò bá sí `reason` tí a ṣàlàyé, reason náà máa ń wá láti status,
+gẹ́gẹ́ bí `classifyError` ṣe ń ṣe é. Ìkéde àiyipada kan kà sí ofin operator fún
+`hasOperatorRuleForProvider()`, nítorí náà `scope` rẹ̀ (àiyipada
+`"connection"`) ni a bọ̀wọ̀ fún. Àkókò ìtútù tó wúlò fún àiyipada kan máa ń gùn ju nínú
+`cooldownMs` rẹ̀ àti ìtọ́kasí ìgbìyànjú provider fúnra rẹ̀ (`Retry-After`,
+`x-ratelimit-reset` tàbí ìtọ́kasí reset nínú body, ìtọ́kasí kan náà tí engine ń bọ̀wọ̀ fún nígbà tí
+ètò connection-cooldown “use upstream retry hints” bá wà lórí), nítorí náà àiyipada kan lè fa ìtọ́kasí
+upstream kúkúrú gùn sí i ṣùgbọ́n kò lè gé reset gidi kúrú. Ofin operator tí a ṣàlàyé ní kedere máa ń pa
+`cooldownMs` pàtó rẹ̀ mọ́. Bẹ́ẹ̀ ni ofin tàbí àiyipada kò sí nínú àwọn ohun tó ń fo
+àwọn ìdènà connection-cooldown ní `markAccountUnavailable`: a kì í dín cooldown tó ń ṣiṣẹ́ tí ó sì gùn kúrú,
+a kì í sì tún status terminal kọ́. Àwọn aṣàwárí ọ̀rọ̀ tí a ṣe sínú ètò tí ń ṣiṣẹ́ ṣáájú nínú
+`checkFallbackError` (credits exhausted, daily quota, account deactivated) ṣì máa ń kọ́kọ́
+wáyé fún àwọn gbolóhùn tiwọn.
 
-1. Forúkọsílẹ̀ rule array kan nínú `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`). Jẹ́ kí `textMarkers` jẹ́
-   ti-olúpèsè-nìkan; má ṣe tún àwọn gbólóhùn Gẹ̀ẹ́sì gbogbogbò lo tí wọ́n bá
+**Àfojúsùn tí a mọ̀ — `providerRuleRegistry` kì í ṣe àyẹ̀wò fún HTTP 400.**
+Ẹka `BAD_REQUEST` ti `checkFallbackError` máa ń pín status 400 sí ẹ̀ka rẹ̀ pátápátá nípasẹ̀ àwọn àkójọpọ̀
+pattern tirẹ̀ (`MODEL_ACCESS_DENIED_PATTERNS`,
+`CONTEXT_OVERFLOW_PATTERNS`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ nínú `accountFallback.ts`) ó sì máa ń padà ṣáájú kí ẹ̀ka
+`configuredRule`/`getProviderErrorRuleMatch` tó wà lókè rẹ̀ lè dé. Ofin katalogi tí a ṣe sínú ètò (tàbí ofin
+operator) tí ó ní `status: 400` bó tilẹ̀ jẹ́ pé ó wúlò nípa syntax, kò ní ṣiṣẹ́ láé. Kò sí ofin tó wà
+lónìí tó ń dojú kọ 400, nítorí náà kò sí ohun tó kan production — ṣùgbọ́n ofin 400 ọjọ́ iwájú nílò kí a
+kọ́kọ́ kan ẹ̀ka yìí, èyí sì tóbi ju fífi ofin kún un lọ (ó tún ń pín 400 sí ẹ̀ka míràn fún gbogbo provider
+tí ó ti ń gbẹ́kẹ̀ lé ìhùwàsí pattern-array) ó sì wà lẹ́yìn ààlà iṣẹ́ fún fífi ofin provider kan ṣoṣo kún un.
+
+### Fífi gateway tuntun tó ń sọ quota ní àṣìṣe kún un
+
+1. Forúkọsílẹ̀ àkójọpọ̀ ofin kan nínú `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`). Jẹ́ kí `textMarkers`
+   jẹ́ pàtó fún provider; má ṣe tún lo àwọn gbolóhùn Gẹ̀ẹ́sì gbogbogbò tí wọ́n lè bá
    `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) kọlu.
-2. Bí o bá fẹ́, forúkọsílẹ̀ àwọn òfin ìṣọ̀wọ́pọ̀ nínú
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) láti yan
-   lock scope tó tọ́ (`connection` fún quota tó ká gbogbo account, `model`
-   fún àwọn àṣìṣe lójú-model-nìkan). Ìgbésẹ̀ yìí ń ṣiṣẹ́ ní production nìkan
-   fún àwọn olúpèsè tí àwọn òfin wọn nílò gbogbo ọ̀rọ̀ àṣìṣe náà (body
-   markers): ṣàfikún provider id sí `FULL_TEXT_RULE_PROVIDERS` nínú fáìlì
-   kannáà — bí kò bẹ́ẹ̀, `checkFallbackError` yóò ma fi àṣìṣe `{code, type}`
-   tó jẹ́ structured nìkan lé òfin náà lọ́wọ́, òfin body-text sì kò ní bá
-   live traffic mu rárá. Àwọn òfin tó ń mu lórí `status`/`headers` lásán
-   (bí ti Opencode tàbí ti Minimax) kò nílò opt-in yìí. Lọ́dàlọ́dà, bí òfin
-   náà bá kéde `scope: "connection"` tí èròjà rẹ̀ sì jẹ́ cooldown tó ká
-   gbogbo connection ní ti-òótọ́ pẹ̀lú combo skip lórí ìbèèrè kannáà (kì í
-   ṣe àmì-ìsọfúnni lásán), ṣàfikún provider id sí
-   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` nínú fáìlì kannáà — èyí ni ó ń ṣàkóso
-   lílò àwòrán `isAgentrouterConnectionQuotaScope()` nínú
+2. Tí ó bá yẹ, forúkọsílẹ̀ àwọn ofin classification nínú
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) láti yan scope lock tó tọ́
+   (`connection` fún quota tó kan account gbogbo rẹ̀, `model` fún àwọn aṣìṣe tó kan model kan ṣoṣo). Ìgbésẹ̀ yìí
+   máa ń ní ipa ní production nìkan fún àwọn provider tí àwọn ofin wọn nílò gbogbo error text (body markers):
+   fi provider id náà kún `FULL_TEXT_RULE_PROVIDERS` nínú fáìlì kan náà — bí bẹ́ẹ̀ kọ́,
+   `checkFallbackError` máa ń fi structured
+   `{code, type}` error nìkan fún ofin náà, body-text rule náà kò sì ní bá traffic gidi mu láé.
+   Àwọn ofin tí wọ́n bá `status`/`headers` nìkan mu (gẹ́gẹ́ bí ti Opencode tàbí
+   Minimax) kò nílò opt-in yìí. Lọ́tọ̀ sí èyí, bí ofin náà bá kéde
+   `scope: "connection"` tí ète rẹ̀ sì jẹ́ connection-wide cooldown gidi pẹ̀lú same-request combo skip
+   (kì í ṣe label ìwífún nìkan), fi provider id náà kún
+   `HONORS_RULE_LOCK_SCOPE_PROVIDERS` nínú fáìlì kan náà — èyí ni ó ń ṣàkóso
+   lílo irú `isAgentrouterConnectionQuotaScope()` ní
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) àti
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); láìsí rẹ̀, `scope` ṣì máa
-   ń kọja lọ́nà `fallbackResult.ruleScope` ṣùgbọ́n kò sí ohun tó ń ṣe iṣẹ́
-   pẹ̀lú rẹ̀.
-3. Ṣàfikún àwọn unit tests tó dá lórí
-   `tests/unit/upstream-status-restatement.test.ts` àti
-   `tests/unit/agentrouter-error-rules.test.ts` (pẹ̀lú àwọn ààbò
-   not-permanent / not-creditsExhausted, àti — bí olúpèsè náà bá nílò
-   allowlist — test kan tó ń fìdí múlẹ̀ pé `resolveRuleMatchBody()` ń dá
-   gbogbo ọ̀rọ̀ náà padà fún olúpèsè yẹn nìkan).
+   (`open-sse/services/combo/targetExhaustion.ts`); láìsí rẹ̀, `scope`
+   ṣì máa ń kọjá nínú `fallbackResult.ruleScope` ṣùgbọ́n kò sí ohun tó ń ṣe é.
+3. Ṣàfikún unit tests tó ń fara wé
+   `tests/unit/upstream-status-restatement.test.ts`
+   àti `tests/unit/agentrouter-error-rules.test.ts` (pẹ̀lú àwọn guard
+   not-permanent / not-creditsExhausted, àti — bí provider náà bá nílò
+   allowlist — test kan tó ń jẹ́rìí pé `resolveRuleMatchBody()` máa ń dá full text padà fún provider yẹn nìkan).
 
-Kò sí àyípadà kankan tó yẹ sí `chatCore.ts`, `classifyError`, tàbí combo.
+Kò sí ìyípadà kankan tó nílò nínú `chatCore.ts`, `classifyError`, tàbí combo.
 
-#### Lock tó dá lórí ìpín-egress (#10880)
+#### Egress-bucketed lock (#10880)
 
-Àwọn olúpèsè nínú `EGRESS_BUCKETED_LOCK_PROVIDERS` (ẹbí opencode) ni wọ́n ń
-gẹ́ bí upstream tí wọ́n ṣọ́ ní ìpín-IP (free tier ti opencode jẹ́ ìpín-IP, kì
-í ṣe ìpín-account — wo #9611): status-429 tí a ṣọ̀wọ́pọ̀ gẹ́gẹ́ bí
-`quota_exhausted` **tàbí** `rate_limit_exceeded` máa ń dá gbogbo connection
-ẹbí-allowlist tí egress IP tó gbẹ̀yìn rẹ̀ bá ti connection tó kùnà mu dúró,
-kí rotation tó gbìyànjú láti lo wọ́n
-— èyí dènà àwọn ìpè sí upstream tó dájú pé yóò kùnà N-1 (bó ṣe rí gẹ́gẹ́ bí
-#10460/#10525).
-`rate_limit_exceeded` wà nínú rẹ̀ lábẹ́rò: lọ́nà `markAccountUnavailable`,
-àwọn òfin opencode-nìkan kò ní mu rárá (kò sí headers/body tí wọ́n lé
-`checkFallbackError` lọ́wọ́, opencode kò sì wà nínú
-`FULL_TEXT_RULE_PROVIDERS`), nítorí náà 429 kan tí ara rẹ̀ ru ọ̀rọ̀
-subscription-quota ("monthly usage limit reached") ni wọ́n ṣọ̀wọ́pọ̀ gẹ́gẹ́ bí
-`quota_exhausted` nípasẹ̀ quota-text fallback
-(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown wákàtí kan)
-kí wọ́n tó dé òfin `status_429` rárá — nígbà tí 429 tó gbẹ́ láìsí ọ̀rọ̀ quota
-(rate limiting lásán) ń ṣọ̀wọ́pọ̀ nípasẹ̀ òfin `status_429` gẹ́gẹ́ bí
-`rate_limit_exceeded`, ó sì ṣì dá ẹbí IP náà dúró. Fún olúpèsè kan nínú
-allowlist, rate limit tí wọ́n ṣọ́ ní ìpín-IP jẹ́ àmì kannáà bí quota tó gbẹ́.
-Àwọn òpin òdodo:
+Àwọn provider tó wà nínú `EGRESS_BUCKETED_LOCK_PROVIDERS` (ẹbí opencode) ni a ń ṣe sí
+upstream tí IP rẹ̀ ti pín sí buckets (free tier opencode jẹ́ IP-bucketed, kì í ṣe
+account-bucketed — wo #9611): status-429 tí a pín sí
+`quota_exhausted`
+**tàbí** `rate_limit_exceeded` máa ń mú kí gbogbo allowlisted-family connection
+tí egress IP tí a mọ̀ gbẹ̀yìn rẹ̀ bá bá ti connection tó kuna mu wọ cooldown, kí rotation tó lè gbìyànjú wọn
+— èyí ń yàgò fún N-1 upstream calls tí ìkùnà wọn ti dájú (irú kan náà pẹ̀lú #10460/#10525).
+A fi `rate_limit_exceeded` kún un ní mọ̀ọ́mọ̀: ní ọ̀nà `markAccountUnavailable`
+àwọn ofin pàtó fún opencode kì í báamu láé (a kì í fi headers/body fún
+`checkFallbackError`, opencode kò sì sí nínú `FULL_TEXT_RULE_PROVIDERS`), nítorí náà 429 kan
+tí body rẹ̀ bá ní ọ̀rọ̀ subscription-quota (“monthly usage limit
+reached”) máa ń di `quota_exhausted` nípasẹ̀ quota-text fallback
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; cooldown wákàtí 1) kí a tó dé ofin
+`status_429` — nígbà tí 429 tí kò ní quota text (rate limiting lasán) máa ń pín sí
+`rate_limit_exceeded` nípasẹ̀ ofin `status_429`, ó sì tún máa ń mú kí IP family náà wọ cooldown. Fún provider tí a gba láyè, rate limit IP-bucketed jẹ́ àmì kan náà pẹ̀lú quota tó ti rẹ̀. Àwọn ààlà tó bójú mu:
 
-- **Ìgbìyànjú tó dára jù (Best-effort)**: àtìpadà náà ṣàtúlọ ètò asopọ̀ tó gbẹ̀yìn
-  mọ̀ `egress_ip` láti inú `proxy_logs` (fèrèsé wákàtí 24, alámuṣọre, láìsí cache). Cache tútù
-  (wọn kò tíì ṣèwádìí IP egress rárá) tàbí kò sí ilà kankan → a ṣì máa dàá isopọ̀ tó kùnà
-  dúró ní ẹ̀yìn ipò ìdánimọ̀ (wọ́n á ṣàkọ sílẹ̀ bó ṣe wà lónìí), ṣùgbọ́n kò sí arákùnrin
-  tó máa jẹ́ àtìpadà.
-- **Kò lè di òpin ayérayé**: ìdánimọ̀ náà jẹ́ fèrèsé àpòye tó ń tún ara rẹ̀ ṣe
-  (`testStatus: "unavailable"`); a kò gbọdọ̀ yọ ipò ayérayé kankan láti ara àmì
-  ìpele IP. Àwọn isopọ̀ `disableCooling` máa kọjá ẹ̀yìn ipò náà ní kíkún.
-- **Ìyípadà iwọn àtìpadà fún ẹbí tó wà nínú àtòkọ àfiyèsí**: èyí jẹ́ ìyípadà àyíká,
-  kì í ṣe ìmúdára arákùnrin nìkan. opencode jẹ́ olùpèsède `passthroughModels`,
-  nítorí náà ṣáájú ẹ̀yìn ipò yìí, àṣìṣe 429 máa mú kí àtìpadà kan ṣẹlẹ̀ fún MODEL kọ̀ọ̀kan;
-  báyìí ó ń mú kí ìdánimọ̀ isopọ̀ ṣẹlẹ̀ — títí fi kan olùlò tó ń ṣiṣẹ́ pẹ̀lú isopọ̀ ẹyọ kan ṣoṣo
-  láìsí arákùnrin kankan rárá. Ìyẹn ni iwọn tí tábìlì òfin opencode ti kàlẹ̀ pé ó tọ́
-  (`scope: "connection"`, `providerErrorRules.ts`), èyí tí a kò tíì mú ṣẹlẹ̀ rí nítorí pé opencode
-  kò sí nínú `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Ẹ̀yìn ipò náà kọ ìdánimọ̀ isopọ̀ tó kùnà +
-  `backoffLevel` fúnra rẹ̀, ó tẹ̀lé àpẹẹrẹ ẹ̀yìn ipò agentrouter tí wọ́n lò ìwọ̀n isopọ̀, kí ó sì padà
-  — a kò lè dé ìdíwọ́ fún-model kọ̀ọ̀kan àti ọ̀nà gbòòrò tó wà ní ìsàlẹ̀ rárá.
-- **Combo wà nínú rẹ̀**: bí ẹ̀yìn ipò agentrouter ṣe ṣe é, àyíká náà faramọ́ láìgbàgbọ́
-  ìsókalẹ̀ `persistUnavailableState`/`isCombo` tí olùpè combo kan lò sórí àṣìṣe 429. Àtìpadà
-  fún-model kọ̀ọ̀kan kì í ṣe ọ̀nà tó péyìn sí i fún àyíká yìí, ó jẹ́ ẹyọ àwòn tó ṣì tọ́: kò sọ ohunkohun
-  nípa IP tó parẹ̀, nítorí náà ìyípadà combo náà máa tẹ̀síwájú láti ń dán àpè èyọ kan tó dájú pé
-  á kùnà lójì fún arákùnrin kọ̀ọ̀kan.
-- **Ààbò arákùnrin**: a kò gbọdọ̀ ṣe àtúnṣe lórí arákùnrin tó ti dé òpin (banned/credits_exhausted)
-  tàbí tó ti wà nínú ìdánimọ̀ tó gùn ju rárá.
-- **Àtòkọ àfiyèsí tó yà sọ́tọ̀**: fífi `EGRESS_BUCKETED_LOCK_PROVIDERS` fẹ̀ jẹ́ ìpinnu tó ṣe kedere
-  ti oníwọ̀n; kò sí ìsopọ̀ gbòòrò kankan (àpẹẹrẹ #10334/#10419). Ìbéèrè arákùnrin náà so àtòkọ
-  àfiyèsí kan náà mọ́ ibi tí wọ́n sì tún un tún kọ sílẹ̀ gẹ́gẹ́ bí òkè SQL, nítorí náà fífi un fẹ̀
-  máa jẹ́ àtúnṣe ilà kan ṣoṣo.
-- **Ìyípadà IP egress, ní ìtọsọ́nà méjèèjì**: fèrèsé ìwádìí náà (wákàtí 24) fẹ̀rẹ̀ jù àkókò TTL
-  ti cache IP egress (ìṣẹ́jú 5) lọ, nítorí náà "IP tó gbẹ̀yìn mọ̀" jẹ́ ìtàn, kì í ṣe ipò lọwọlọwọ.
-  Bí proxy isopọ̀ kan bá ti yí padà láàrin fèrèsé náà, àtìpadà lè **padánù** IP tó wà ní kíkàjọ
-  ní tòótọ́ (IP tí wọ́n ṣàkọ sílẹ̀ ni èyí tuntun, èyí tí kò tíì parẹ̀) — àti ní bákan náà ó lè
-  **dàá arákùnrin tó ti yí kúrò dúró** lọ́dọ̀ IP tó parẹ̀. Ọ̀rọ̀ kejì náà máa ná arákùnrin náà fèrèsé
-  ìdánimọ̀ kan; a gba àwọn méjèèjì gẹ́gẹ́ bí ààlà ìgbìyànjú tó dára jù ti ìwádìí tó dá lórí ìtàn.
-- **Èròjà**: ìwádìí méjì tó ni ààlà nínú `proxy_logs` (tí wọ́n ṣe àṣàyàn fèrèsé rẹ̀ nípasẹ̀
-  `idx_pl_timestamp`), ní ìgbà tí àṣìṣe 429 ṣe ń ṣẹlẹ̀ nìkan. Kò sí àtòkọ tuntun kankan (ìyípadà 134
-  YAGNI). Wọ́n wọn ọn lórí àwòrán DB ìwọ̀n ọkùnrùn tó ní ìwọ̀n àárín; àpẹrẹ kan tó ní ìwọ̀n iṣẹ́ gíga
-  máa ní àwọn ilà tó bá i mu nínú fèrèsé kan náà.
-
----
+- **Ìsapá tó dára jù lọ**: ìdènà náà máa ń yan `egress_ip` tí a mọ̀ gbẹ̀yìn fún ìsopọ̀ náà
+  láti inú `proxy_logs` (àkókò wákàtí 24, synchronous, kò sí cache). Cache tí ó tutù
+  (`egress_ip` kò tíì ṣe probe rí) tàbí tí kò bá sí row → ẹ̀ka náà ṣì máa ń fi ìdákẹ́jẹ̀
+  sí ìsopọ̀ tó ń kuna (a máa ń gba silẹ̀ bíi ti òní), ṣùgbọ́n kò sí sibling tí a máa ń dì.
+- **Kò lè di àkókò pípẹ́**: ìdákẹ́jẹ̀ jẹ́ fèrèsé quota tí ń tún ara rẹ̀ ṣe
+  (`testStatus: "unavailable"`); a kì í yọ ipò pípẹ́ kúrò nínú àmì IP-level. Àwọn ìsopọ̀
+  `disableCooling` máa ń fo ẹ̀ka náà kọjá pátápátá.
+- **Ìwọ̀n ìdènà yí padà fún ẹbí tí a gbà láyè**: èyí jẹ́ ìyípadà scope, kì í ṣe ìmúdára sibling nìkan. opencode jẹ́ olupèsè `passthroughModels`, nítorí náà ṣáájú ẹ̀ka yìí 429 kan máa ń mú ìdènà fún MODEL kọ̀ọ̀kan; báyìí ó máa ń mú ìdákẹ́jẹ̀ fún ìsopọ̀ — pẹ̀lú fún operator tó ń ṣiṣẹ́ ìsopọ̀ kan ṣoṣo tí kò ní sibling rárá. Èyí ni ìwọ̀n tí tábìlì òfin opencode ti kéde pé ó tọ́ (`scope: "connection"`,
+  `providerErrorRules.ts`), ṣùgbọ́n a kò tíì bọ̀wọ̀ fún un rí nítorí opencode kò sí nínú `HONORS_RULE_LOCK_SCOPE_PROVIDERS`. Ẹ̀ka náà fúnra rẹ̀ máa ń kọ ìdákẹ́jẹ̀ àti `backoffLevel` ìsopọ̀ tó ń kuna, ní fífi ẹ̀ka agentrouter tí scope rẹ̀ jẹ́ connection ṣe àfihàn, ó sì máa ń padà — a kì í dé ìdènà per-model àti ọ̀nà gbogbogbò tí ó wà ní ìsàlẹ̀.
+- **Combo wà nínú rẹ̀**: gẹ́gẹ́ bí ẹ̀ka agentrouter, scope náà mọ̀ọ́mọ̀ kọ̀ láti ka ìdínkù `persistUnavailableState`/`isCombo` tí olùpè combo máa ń lò sí 429. Ìdènà per-model kì í ṣe irú scope yìí tí ó rọrùn síi; ó jẹ́ ẹyọ tí kò tọ́: kò sọ ohunkóhun nípa IP tí ó ti rẹ̀, nítorí náà yíyí combo máa ń tẹ̀síwájú láti jó ìpè kan tí ó dájú pé yóò kuna fún sibling kọ̀ọ̀kan.
+- **Ààbò sibling**: a kì í fọwọ́ rọ́pò sibling tí ó ti wà ní ipò pípẹ́ (banned/credits_exhausted) tàbí tí ó ti wà nínú ìdákẹ́jẹ̀ tó gùn jù.
+- **Àtòjọ ìyàsọ́tọ̀ tí a gbà láyè**: fífẹ̀ `EGRESS_BUCKETED_LOCK_PROVIDERS` jẹ́ ìpinnu owner tó ṣe kedere; kò sí wiring gbogbogbò (pattern #10334/#10419). Ìbéèrè sibling máa ń so allowlist kan náà mọ́ dípò kí ó tún un ṣe gẹ́gẹ́ bí SQL literal, nítorí fífẹ̀ rẹ̀ máa ń jẹ́ ìyípadà laini kan ṣoṣo.
+- **Yíyí Egress IP, ní àwọn ìtọ́sọ́nà méjèèjì**: fèrèsé ìwádìí náà (wákàtí 24) gùn gan-an ju TTL cache egress-IP lọ (ìṣẹ́jú 5), nítorí náà “IP tí a mọ̀ gbẹ̀yìn” jẹ́ ìtàn, kì í ṣe ipò lọ́wọ́lọ́wọ́. Bí proxy ìsopọ̀ kan bá yí padà láàárín fèrèsé náà, ìdènà náà lè **padà sílẹ̀** láti rí IP tí àwọn míì ń pín ní tòótọ́ (IP tí a gbasilẹ ni tuntun, tí kò tíì rẹ̀) — àti ní ọ̀nà kejì, ó lè **fi ìdákẹ́jẹ̀ sí** sibling tí ó ti yí padà kúrò ní IP tí ó ti rẹ̀. Ọ̀ràn kejì máa ń ná sibling náà fèrèsé ìdákẹ́jẹ̀ kan; a gba àwọn méjèèjì gẹ́gẹ́ bí ààlà best-effort tí ìwádìí tó dá lórí ìtàn ń ní.
+- **Ìnáwó**: scans méjì tí a fi ààlà sí ti `proxy_logs` (a ṣe àlẹ̀mọ́ fèrèsé nípasẹ̀ `idx_pl_timestamp`), kìkì ní ìgbà 429. Kò sí index tuntun (migration 134
+  YAGNI). A díwọ̀n rẹ̀ lórí ẹ̀dà DB tí traffic gidi wà lórí rẹ̀, tí ìwọ̀n rẹ̀ dá-ń-gbè; instance tí throughput rẹ̀ ga máa ń ní rows púpọ̀ síi ní fèrèsé kan náà.
 
 ## Àwọn Ẹ̀ya Ìfaradà Mìíràn
 

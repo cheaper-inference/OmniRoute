@@ -130,6 +130,27 @@ Penilaian otomatis memilih penyedia/model terbaik untuk setiap permintaan
 | `src/sse/handlers/chat.ts`                                | Integrasi: pintasan awal prefiks otomatis     |
 | `src/shared/constants/providers.ts`                       | Entri sistem `SYSTEM_PROVIDERS.auto`          |
 
+## Preferensi akun untuk kombo Otomatis yang disimpan
+
+Editor Intelligent Auto menawarkan opsi opsional** Preferensi akun** bagian. Setiap koneksi dapat Disukai, Normal (default), Cadangan, atau Dikecualikan. Beberapa koneksi dapat berbagi tingkatan. Memilih otomatis dalam tingkat pertama yang memenuhi syarat, mempertahankan perilaku scoring/router di sana; upaya yang gagal akan dimasukkan ke akun konkrit yang tersisa, lebih disukai sebelum normal sebelum cadangan. Koneksi yang dikecualikan tidak pernah digunakan oleh kombo ini.
+
+Pengaturan disimpan sebagai `config.accountPreferences`, dikunci oleh koneksi ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Peta yang dihilangkan atau kosong mempertahankan perutean yang ada. Preferensi tidak mengaktifkan koneksi yang dinonaktifkan, memberikan akses kunci API, memulihkan kandidat yang diblokir kuota, atau mengabaikan pemeriksaan anggaran. Setiap upaya dibatasi pada koneksi konkretnya, sehingga penggantian akun tidak dapat melompati tingkatan di belakang router kombo. Afinitas sesi yang ada dapat mempertahankan akun yang memenuhi syarat; tidak termasuk akun yang terikat pada giliran asli menghentikan giliran itu alih-alih mengubah akun secara diam-diam.
+
+Preferensi yang dikonfigurasi menggunakan jalur Otomatis yang sadar akun: cache konteks yang tidak terikat, saluran cerdas, kekacauan, dan pintasan bayangan tidak dikirimkan. Lindung nilai spekulatif dinonaktifkan untuk permintaan ini sehingga akun cadangan tidak dapat bersaing dengan akun pilihan. Strategi kombo lainnya tidak menafsirkan pengaturan ini. Mengubah kombo dari Otomatis akan mempertahankan preferensi yang disimpan untuk peralihan nanti.
+
 ## Nama Combo yang Cocok dengan ID Model Nyata
 
 Combo yang `name`-nya identik dengan ID model tanpa prefiks (misalnya combo bernama
