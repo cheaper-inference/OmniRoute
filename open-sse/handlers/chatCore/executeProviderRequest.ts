@@ -24,7 +24,10 @@ import {
   stripNextMiddlewareControlHeaders,
   stripStaleForwardingHeaders,
 } from "./responseHeaders.ts";
-import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
+import {
+  readNonStreamingResponseBody,
+  readResponseTextWithinCap,
+} from "./nonStreamingResponseBody.ts";
 import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
 import {
   normalizeExecutorResult,
@@ -447,10 +450,7 @@ export async function executeProviderRequest(
             ) {
               const failureDetail = res.response.ok
                 ? ""
-                : await res.response
-                    .clone()
-                    .text()
-                    .catch(() => "");
+                : await readResponseTextWithinCap(res.response.clone()).catch(() => "");
               recordKeyHealthStatus(
                 res.response.status,
                 execCreds,
@@ -463,10 +463,9 @@ export async function executeProviderRequest(
             }
 
             if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
-              const bodyPeek = await res.response
-                .clone()
-                .text()
-                .catch(() => "");
+              const bodyPeek = await readResponseTextWithinCap(res.response.clone()).catch(
+                () => ""
+              );
               const normalizedHeaders = normalizeHeaders(res.response.headers);
               const decision = classifyModelScope429(bodyPeek, normalizedHeaders);
               if (decision.retryable) {
