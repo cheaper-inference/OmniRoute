@@ -4,13 +4,17 @@
  * module only owns the SQL.
  *
  * A key counts as "limited" only when enforcement can actually block it: the
- * per-key USD limit is enabled AND at least one positive daily/weekly limit is
+ * per-key USD limit is enabled AND at least one positive daily/weekly/5-hour limit is
  * configured (mirrors `normalizeLimitUsd` in `apiKeyUsageLimits.ts`).
  */
 import { getDbInstance } from "./core";
 
 const LIMITED_KEY_SQL = `k.usage_limit_enabled = 1
-  AND (COALESCE(k.daily_usage_limit_usd, 0) > 0 OR COALESCE(k.weekly_usage_limit_usd, 0) > 0)`;
+  AND (
+    COALESCE(k.daily_usage_limit_usd, 0) > 0
+    OR COALESCE(k.weekly_usage_limit_usd, 0) > 0
+    OR COALESCE(k.five_hour_usage_limit_usd, 0) > 0
+  )`;
 
 export interface UsageModelGroupRow {
   provider: string;

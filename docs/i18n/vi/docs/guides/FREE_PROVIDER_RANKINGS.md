@@ -13,11 +13,11 @@
 
 ## Nó là gì
 
-OmniRoute đăng ký 380 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu**free/no-auth** (không có xác thực, OAuth bậc miễn phí hoặc khóa API bậc miễn phí — hãy xem [Hướng dẫn về bậc miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và [thư mục Bậc miễn phí](../reference/FREE_TIERS.md) đầy đủ ). Điều đáng chú ý: các nhà cung cấp miễn phí rất khác nhau về chất lượng mô hình. Một nhà cung cấp không xác thực phục vụ mô hình biên giới sẽ hữu ích hơn nhiều so với một nhà cung cấp mô hình kế thừa nhỏ.
+OmniRoute đăng ký 381 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu**free/no-auth** (không có xác thực, OAuth bậc miễn phí hoặc khóa API bậc miễn phí — hãy xem [Hướng dẫn về bậc miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và [thư mục Bậc miễn phí](../reference/FREE_TIERS.md) đầy đủ ). Điều đáng chú ý: các nhà cung cấp miễn phí rất khác nhau về chất lượng mô hình. Một nhà cung cấp không xác thực phục vụ mô hình biên giới sẽ hữu ích hơn nhiều so với một nhà cung cấp mô hình kế thừa nhỏ.
 
 **Xếp hạng nhà cung cấp miễn phí** câu trả lời"** nhà cung cấp miễn phí nào cung cấp cho tôi mô hình tốt nhất?** " bằng cách tham gia danh mục của mỗi nhà cung cấp miễn phí với** điểm chất lượng có nguồn gốc từ đám đông** từ** Bảng xếp hạng Arena AI** ( ELO sở thích của con người, ý tưởng tương tự đằng sau đấu trường chatbot LMArena ). Các nhà cung cấp sau đó được xếp hạng theo sức mạnh của họ** mô hình miễn phí tốt nhất** .
 
-Thứ hạng được tính toán từ ba nguồn thực tế:
+Thứ hạng được tính từ ba nguồn thực:
 
 1. Nhà cung cấp miễn phí liệt kê — `NOAUTH_PROVIDERS`, cộng với các mục nhập `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` được gắn cờ `hasFree` (`src/shared/constants/providers.ts`).
 2. Danh mục mô hình của mỗi nhà cung cấp từ cơ quan đăng ký nhà cung cấp (`open-sse/config/providerRegistry.ts`).
