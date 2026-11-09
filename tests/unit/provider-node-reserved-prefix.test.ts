@@ -227,7 +227,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // more (436 -> 438).
   // Supersonic Labs (#18838) reserves its native provider id (438 -> 439).
   // EmpirioLabs AI (#17209) registers id "empiriolabs" with the same alias (+1: 439 -> 440).
-  assert.equal(RESERVED_PREFIX_COUNT, 440);
+  // ParalonCloud registers id "paraloncloud" plus alias "paralon" (+2: 440 -> 442).
+  assert.equal(RESERVED_PREFIX_COUNT, 442);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("supersoniclabs"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ainetcafe"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("tokenharbor"), true);
