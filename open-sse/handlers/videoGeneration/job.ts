@@ -577,6 +577,7 @@ async function runVideoJobGeneration({
           credentials,
           log,
           mediaSink,
+          signal,
         });
       }
 
@@ -669,6 +670,7 @@ async function storeAuthGatedResult({
   credentials,
   log,
   mediaSink,
+  signal,
 }: {
   url: string;
   baseUrl: string;
@@ -677,6 +679,7 @@ async function storeAuthGatedResult({
   credentials: unknown;
   log?: JobLog;
   mediaSink?: VideoMediaSink;
+  signal?: AbortSignal | null;
 }): Promise<VideoJobResult> {
   if (!sameOrigin(url, baseUrl)) {
     return {
@@ -697,7 +700,10 @@ async function storeAuthGatedResult({
     headers: buildJobHeaders(preset, credentials),
     log,
     raw: true,
+    signal,
   });
+  // A caller that aborted mid-download gets no stored file, even if the bytes arrived.
+  if (signal?.aborted) return abortedVideoResult();
   if (download.ok === false) {
     return { success: false, status: download.status, error: download.error };
   }
