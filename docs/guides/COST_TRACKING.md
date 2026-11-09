@@ -124,22 +124,27 @@ historical cost estimates retroactively.
 
 ---
 
-## Cortecs reranking credits
+## Cortecs reranking costs
 
 For dynamic reranker nodes targeting `https://api.cortecs.ai/v1/rerank`,
-OmniRoute records measured token counts and native credits from each successful
-physical request. Cortecs documents `usage.cost` as **credits**, not USD;
-see the [Cortecs rerank response schema](https://docs.cortecs.ai/api/rerank.md).
+OmniRoute sends `x-cortecs-cost-unit: USD` and records the returned `usage.cost`
+directly as USD for each successful physical request. This also applies to
+the existing `/rerank` fallback. Cortecs performs the currency conversion;
+see its [USD cost-header documentation](https://docs.cortecs.ai/integration-examples/tooling/litellm.md).
+There is no extra account/management key, manually maintained exchange rate,
+token-tariff estimate or second conversion. Fractional and whole-dollar USD
+amounts are both accepted, including explicit zero. USD amounts are not stored
+as native credits or used to invent a credit quantity.
 
-Set `CORTECS_CREDIT_PRICE_USD` to an explicit positive USD value per raw
-credit if you want a USD valuation. There is no default rate and no automatic
-FX lookup. The rate must reflect your credit denomination and billing/FX policy;
-neither a raw credit count nor a EUR tariff may be copied directly into USD.
-The numerical USD valuation is snapshotted per request for reporting and key
-budgets, while `usage_history.provider_credits` retains the original quantity.
-Later rate or token-catalogue edits do not reprice already-valued requests.
+`CORTECS_CREDIT_PRICE_USD` remains supported only by legacy callers of the
+credit-unit normalizer. It is ignored for requests explicitly made in USD.
+Legacy conversion has no default; only genuine reported credit quantities are
+stored in `usage_history.provider_credits`. The numerical USD cost is
+snapshotted in `provider_cost_usd` for reporting and key budgets. Later rate or
+token-catalogue edits do not reprice already-valued requests.
 
-With no valid conversion, positive or missing credit costs remain **unknown**:
+Missing or invalid reported USD costs remain **unknown**, never guessed from a
+legacy rate. Positive legacy credits without a valid conversion also stay unknown:
 the response omits its numeric cost header, sets
 `X-OmniRoute-Cost-Status: unknown`, and existing unpriced-budget safeguards
 apply to limited keys. Explicit zero credits remain known zero cost.
@@ -147,7 +152,7 @@ Unknown credit spending is not estimated from token tariffs.
 
 The usage vendor is canonical `cortecs`, independent of the node alias.
 The selected custom connection, model and caller key remain attributed.
-The original response body is unchanged, including its native credit units.
+The response body retains the provider's reported USD `usage.cost` unchanged.
 No-log keys keep numerical accounting without document payloads.
 Other rerank providers retain their existing behavior. This is forward-only
 accounting, not a historical backfill or an invoice reconciliation.

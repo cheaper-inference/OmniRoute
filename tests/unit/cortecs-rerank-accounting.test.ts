@@ -21,7 +21,7 @@ const originalFetch = globalThis.fetch;
 const model = "ranked/bge-reranker-v2-m3";
 const responseBody = {
   results: [{ index: 0, relevance_score: 0.9 }],
-  usage: { prompt_tokens: 1234, completion_tokens: 0, total_tokens: 1234, cost: 17 },
+  usage: { prompt_tokens: 1234, completion_tokens: 0, total_tokens: 1234, cost: 0.34 },
 };
 
 test.beforeEach(async () => {
@@ -89,13 +89,53 @@ function mockUpstream(
   globalThis.fetch = async (input, init) => {
     assert.equal(String(input), url, "no unmocked HTTP request is allowed");
     assert.equal(new Headers(init?.headers).get("authorization"), "Bearer synthetic-upstream-key");
+    assert.equal(
+      new Headers(init?.headers).get("x-cortecs-cost-unit"),
+      url.startsWith("https://api.cortecs.ai/") ? "USD" : null
+    );
     calls++;
     return Response.json(body, { status });
   };
   return () => calls;
 }
 
-test("Cortecs credits become one USD charge only with an explicit conversion", async () => {
+test("the serialized Cortecs HTTP request asks for USD and records the returned fraction once", async () => {
+  process.env.CORTECS_CREDIT_PRICE_USD = "1000";
+  const { key } = await seed();
+  const cost = 0.000004466;
+  let calls = 0;
+  globalThis.fetch = async (url, init) => {
+    calls++;
+    assert.equal(String(url), "https://api.cortecs.ai/v1/rerank");
+    assert.equal(init?.method, "POST");
+    assert.equal(new Headers(init?.headers).get("x-cortecs-cost-unit"), "USD");
+    const serialized = JSON.parse(String(init?.body));
+    assert.equal(serialized.model, "bge-reranker-v2-m3");
+    assert.deepEqual(serialized.documents, ["Passage alpha", "Passage beta"]);
+    assert.equal(serialized.query, "Query alpha");
+    return Response.json({ ...responseBody, usage: { ...responseBody.usage, cost } });
+  };
+  const response = await POST(request(key.key), {});
+  assert.equal(response.status, 200);
+  assert.equal(Number(response.headers.get("x-omniroute-response-cost")), cost);
+  const row = core
+    .getDbInstance()
+    .prepare<{ provider_cost_usd: number; provider_credits: number | null }>(
+      "SELECT provider_cost_usd,provider_credits FROM usage_history"
+    )
+    .get();
+  assert.equal(row?.provider_cost_usd, cost);
+  assert.equal(row?.provider_credits, null);
+  await waitForCallLogSaves(10000);
+  const ledger = core
+    .getDbInstance()
+    .prepare<{ amount_usd: number }>("SELECT amount_usd FROM request_cost_ledger")
+    .all();
+  assert.deepEqual(ledger, [{ amount_usd: cost }]);
+  assert.equal(calls, 1);
+});
+
+test("reported Cortecs USD becomes one charge despite an obsolete credit conversion", async () => {
   process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key, connection } = await seed();
   const calls = mockUpstream();
@@ -120,7 +160,7 @@ test("Cortecs credits become one USD charge only with an explicit conversion", a
         api_key_id: key.id,
         tokens_input: 1234,
         tokens_output: 0,
-        provider_credits: 17,
+        provider_credits: null,
         provider_cost_usd: 0.34,
       },
     ]
@@ -139,9 +179,51 @@ test("Cortecs credits become one USD charge only with an explicit conversion", a
   assert.equal(calls(), 1);
 });
 
-test("unconverted credits remain recorded and unknown, never literal USD or free", async () => {
+test("the existing /rerank fallback retains the USD header and charges its success once", async () => {
   const { key } = await seed();
-  const calls = mockUpstream();
+  const targets: string[] = [];
+  globalThis.fetch = async (url, init) => {
+    targets.push(String(url));
+    assert.equal(new Headers(init?.headers).get("x-cortecs-cost-unit"), "USD");
+    if (String(url) === "https://api.cortecs.ai/v1/rerank") {
+      return Response.json({ message: "not found" }, { status: 404 });
+    }
+    assert.equal(String(url), "https://api.cortecs.ai/rerank");
+    return Response.json(responseBody);
+  };
+  const response = await POST(request(key.key), {});
+  assert.equal(response.status, 200);
+  assert.equal(Number(response.headers.get("x-omniroute-response-cost")), responseBody.usage.cost);
+  assert.deepEqual(targets, ["https://api.cortecs.ai/v1/rerank", "https://api.cortecs.ai/rerank"]);
+  await waitForCallLogSaves(10000);
+  assert.deepEqual(
+    core.getDbInstance().prepare("SELECT amount_usd FROM request_cost_ledger").all(),
+    [{ amount_usd: responseBody.usage.cost }]
+  );
+});
+
+test("a whole-dollar USD cost is not mistaken for integer credits", async () => {
+  const { key } = await seed(100);
+  process.env.CORTECS_CREDIT_PRICE_USD = "0.000001";
+  mockUpstream({ ...responseBody, usage: { ...responseBody.usage, cost: 17 } });
+  const response = await POST(request(key.key), {});
+  assert.equal(response.status, 200);
+  assert.equal(Number(response.headers.get("x-omniroute-response-cost")), 17);
+  assert.deepEqual(
+    core
+      .getDbInstance()
+      .prepare("SELECT provider_credits,provider_cost_usd FROM usage_history")
+      .get(),
+    { provider_credits: null, provider_cost_usd: 17 }
+  );
+});
+
+test("missing USD remains unknown and cannot bypass caller budgets", async () => {
+  const { key } = await seed();
+  const calls = mockUpstream({
+    ...responseBody,
+    usage: { prompt_tokens: 1234, total_tokens: 1234 },
+  });
   const result = await POST(request(key.key), {});
   assert.equal(result.status, 200);
   assert.equal(result.headers.get("x-omniroute-response-cost"), null);
@@ -152,7 +234,7 @@ test("unconverted credits remain recorded and unknown, never literal USD or free
       "SELECT provider_credits,provider_cost_usd FROM usage_history"
     )
     .get();
-  assert.equal(row?.provider_credits, 17);
+  assert.equal(row?.provider_credits, null);
   assert.equal(row?.provider_cost_usd, null);
   assert.equal(
     core
@@ -201,7 +283,7 @@ test("a failed upstream rerank does not create successful billing", async () => 
   );
 });
 
-test("zero credits are genuinely zero without a USD conversion setting", async () => {
+test("zero USD is genuinely zero without a conversion setting or invented credits", async () => {
   const { key } = await seed();
   mockUpstream({ ...responseBody, usage: { ...responseBody.usage, cost: 0 } });
   const result = await POST(request(key.key), {});
@@ -214,7 +296,7 @@ test("zero credits are genuinely zero without a USD conversion setting", async (
       "SELECT provider_credits,provider_cost_usd FROM usage_history"
     )
     .get();
-  assert.equal(row?.provider_credits, 0);
+  assert.equal(row?.provider_credits, null);
   assert.equal(row?.provider_cost_usd, 0);
 });
 
@@ -237,7 +319,7 @@ test("same-millisecond physical calls remain separate and their stored charges a
       "SELECT COUNT(*) AS n,SUM(provider_credits) AS credits,SUM(provider_cost_usd) AS usd,COUNT(DISTINCT timestamp) AS timestamps FROM usage_history"
     )
     .get();
-  assert.deepEqual(row, { n: 2, credits: 34, usd: 0.68, timestamps: 1 });
+  assert.deepEqual(row, { n: 2, credits: null, usd: 0.68, timestamps: 1 });
   assert.equal(
     db.prepare<{ n: number }>("SELECT COUNT(*) AS n FROM request_cost_ledger").get()?.n,
     2
@@ -359,7 +441,7 @@ test("a combo charges only its successful physical Cortecs target", async () => 
   assert.equal(Number(costs.checkBudget(key.id).periodUsed), 0.34);
 });
 
-test("credits and spend stay isolated to the caller key", async () => {
+test("reported USD spend stays isolated to the caller key", async () => {
   process.env.CORTECS_CREDIT_PRICE_USD = "0.02";
   const { key } = await seed();
   const other = await keys.createApiKey("Other synthetic caller", "other-machine");

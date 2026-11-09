@@ -2,6 +2,7 @@ import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { saveRequestUsage } from "./usageHistory";
 
 type Usage = Record<string, number>;
+export type CortecsRerankCostUnit = "credits" | "USD";
 /** Numerical provenance and the optional request-time USD valuation. */
 export interface CortecsRerankBill {
   usage: Usage;
@@ -28,19 +29,29 @@ const isCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 
 /**
- * Cortecs documents usage.cost as credits, NOT USD. Keep only numerical
- * metering fields. A positive USD-per-credit rate is explicit operator input;
- * no credit denomination, EUR/USD parity, live FX request or default is assumed.
+ * Default responses use credits; requests with x-cortecs-cost-unit: USD
+ * receive USD instead. The trusted outbound request selects the unit, never
+ * a guessed magnitude or a raw USD-looking field. Only the legacy credit
+ * path uses an optional operator-supplied rate; USD must not be converted twice.
  */
 export function normalizeCortecsRerankUsage(
   raw: unknown,
-  creditPriceUsd = process.env.CORTECS_CREDIT_PRICE_USD
+  creditPriceUsd = process.env.CORTECS_CREDIT_PRICE_USD,
+  costUnit: CortecsRerankCostUnit = "credits"
 ): CortecsRerankBill {
   const source =
     raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const usage: Usage = {};
   for (const key of ["prompt_tokens", "completion_tokens", "total_tokens"]) {
     if (isCount(source[key])) usage[key] = source[key];
+  }
+  if (costUnit === "USD") {
+    const costUsd =
+      typeof source.cost === "number" && Number.isFinite(source.cost) && source.cost >= 0
+        ? source.cost
+        : null;
+    if (costUsd !== null) usage.cost_usd = costUsd;
+    return { usage, costUsd };
   }
   const credits = isCount(source.cost) ? source.cost : null;
   if (credits !== null) usage.provider_credits = credits;
@@ -65,6 +76,7 @@ export async function accountCortecsRerankRequest(
   input: {
     upstreamUrl: string;
     usage: unknown;
+    costUnit?: CortecsRerankCostUnit;
     model: string;
     connectionId?: string | null;
     apiKeyId?: string | null;
@@ -79,7 +91,7 @@ export async function accountCortecsRerankRequest(
   } = {}
 ): Promise<CortecsRerankBill | null> {
   if (!isCortecsRerankUrl(input.upstreamUrl)) return null;
-  const bill = normalizeCortecsRerankUsage(input.usage);
+  const bill = normalizeCortecsRerankUsage(input.usage, undefined, input.costUnit);
   const identity = {
     provider: "cortecs",
     model: input.model,

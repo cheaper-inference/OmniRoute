@@ -31,7 +31,10 @@ import { saveCallLog } from "@/lib/usageDb";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
-import { accountCortecsRerankRequest } from "@/lib/usage/cortecsRerankAccounting";
+import {
+  accountCortecsRerankRequest,
+  isCortecsRerankUrl,
+} from "@/lib/usage/cortecsRerankAccounting";
 import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
 import { deriveRerankProviderForChatProvider } from "@omniroute/open-sse/config/rerankRegistry.ts";
 import { resolveAlibabaQwen3RerankUrl } from "@/shared/constants/alibabaProviderRegions";
@@ -320,11 +323,13 @@ export async function handleValidatedRerankRequestBody(
           return_documents: body.return_documents as boolean | undefined,
         })
       );
+      const cortecsCostUnit = isCortecsRerankUrl(localProvider.baseUrl) ? "USD" : undefined;
       const upstreamInit: RequestInit = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...(cortecsCostUnit ? { "x-cortecs-cost-unit": cortecsCostUnit } : {}),
         },
         body: upstreamBody,
       };
@@ -386,6 +391,7 @@ export async function handleValidatedRerankRequestBody(
         const bill = await accountCortecsRerankRequest({
           upstreamUrl: localProvider.baseUrl,
           usage: data?.usage,
+          costUnit: cortecsCostUnit,
           model: localModel,
           connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
           apiKeyId: meta.apiKeyId,

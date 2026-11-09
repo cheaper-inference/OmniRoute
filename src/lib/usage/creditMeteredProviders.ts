@@ -28,7 +28,7 @@
  * neither the auth category nor a token-pricing row determines billing units.
  */
 const CREDIT_METERED_PROVIDER_IDS: Readonly<Record<string, true>> = {
-  cortecs: true, // Rerank usage.cost is native credits; never a token tariff or literal USD.
+  cortecs: true, // Rerank uses upstream-reported USD or explicitly valued legacy credits, not tokens.
   kiro: true, // Kiro reports `credit` metering events; KIRO_CREDIT_PRICE_USD converts them
   kr: true, // the same connection under its alias id
 };
