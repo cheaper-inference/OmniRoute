@@ -999,14 +999,17 @@ export async function updateProviderConnection(
   opts?: ProviderConnectionUpdateOpts
 ) {
   const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
-  if (!existing) return null;
 
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
   // to prevent -- and re-checking the merged value would spend a bcrypt round
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
+
+  // Read AFTER the await: from here to the write there is no await, so a
+  // concurrent update to another field cannot be overwritten by a stale snapshot.
+  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+  if (!existing) return null;
 
   const existingCamel = toRecord(rowToCamel(existing));
   const merged: JsonRecord = {

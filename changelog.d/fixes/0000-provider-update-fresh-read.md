@@ -1,0 +1,1 @@
+- **fix(providers):** two overlapping edits to different fields of one provider connection no longer lose one of the edits.
