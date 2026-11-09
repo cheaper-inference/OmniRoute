@@ -985,8 +985,11 @@ export function getModelNormalizeToolCallId(
         return Boolean(pc.normalizeToolCallId);
       }
     }
-    return Boolean(m.normalizeToolCallId);
+    if (Object.prototype.hasOwnProperty.call(m, "normalizeToolCallId")) {
+      return Boolean(m.normalizeToolCallId);
+    }
   }
+
   const co = readCompatList(providerId).find((e) => e.id === modelId);
   if (protocol && co?.compatByProtocol?.[protocol]) {
     const pc = co.compatByProtocol[protocol]!;
@@ -994,7 +997,11 @@ export function getModelNormalizeToolCallId(
       return Boolean(pc.normalizeToolCallId);
     }
   }
-  return Boolean(co?.normalizeToolCallId);
+  if (co && Object.prototype.hasOwnProperty.call(co, "normalizeToolCallId")) {
+    return Boolean(co.normalizeToolCallId);
+  }
+
+  return providerId === "mistral";
 }
 
 /**
