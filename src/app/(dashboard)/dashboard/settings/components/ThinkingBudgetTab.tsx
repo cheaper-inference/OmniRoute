@@ -111,7 +111,7 @@ export default function ThinkingBudgetTab() {
       {/* Mode selector */}
       <RadioGroup
         aria-label={t("thinkingBudgetTitle")}
-        orientation="horizontal"
+        columns={2}
         value={config.mode}
         onValueChange={(next) => save({ mode: next })}
         disabled={loading || saving}
@@ -155,7 +155,8 @@ export default function ThinkingBudgetTab() {
           <p className="text-xs text-text-muted mb-3">{t("adaptiveHint")}</p>
           <RadioGroup
             aria-label={t("baseEffortLevel")}
-            orientation="horizontal"
+            columns={4}
+            minItemWidth="7rem"
             value={config.effortLevel}
             onValueChange={(next) => save({ effortLevel: next })}
             disabled={loading || saving}
