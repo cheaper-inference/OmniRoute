@@ -30,6 +30,8 @@ import {
 import { saveCallLog } from "@/lib/usageDb";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
+import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
+import { accountCortecsRerankRequest } from "@/lib/usage/cortecsRerankAccounting";
 import { CORS_HEADERS } from "@omniroute/open-sse/utils/cors.ts";
 import { deriveRerankProviderForChatProvider } from "@omniroute/open-sse/config/rerankRegistry.ts";
 import { resolveAlibabaQwen3RerankUrl } from "@/shared/constants/alibabaProviderRegions";
@@ -380,7 +382,19 @@ export async function handleValidatedRerankRequestBody(
           return_documents: body.return_documents as boolean | undefined,
         });
         const latencyMs = Date.now() - startTime;
+        const requestId = generateRequestId();
+        const bill = await accountCortecsRerankRequest({
+          upstreamUrl: localProvider.baseUrl,
+          usage: data?.usage,
+          model: localModel,
+          connectionId: (credentials as { connectionId?: string } | null)?.connectionId || null,
+          apiKeyId: meta.apiKeyId,
+          apiKeyName: meta.apiKeyName,
+          startTime,
+          requestId,
+        });
         saveCallLog({
+          id: bill ? requestId : undefined,
           method: "POST",
           path: "/v1/rerank",
           status: 200,
@@ -389,7 +403,7 @@ export async function handleValidatedRerankRequestBody(
           connectionId:
             (credentials as { connectionId?: string } | null)?.connectionId || undefined,
           duration: latencyMs,
-          tokens: { prompt_tokens: 0, completion_tokens: 0 },
+          tokens: bill?.usage || { prompt_tokens: 0, completion_tokens: 0 },
           requestBody: {
             model: body.model,
             query: body.query,
@@ -408,10 +422,15 @@ export async function handleValidatedRerankRequestBody(
         attachOmniRouteMetaHeaders(headers, {
           provider: prefix,
           model: localModel,
-          costUsd: 0,
+          costUsd: bill?.costUsd ?? 0,
           latencyMs,
-          requestId: generateRequestId(),
+          requestId,
+          usage: bill?.usage,
         });
+        if (bill) {
+          headers.set("X-OmniRoute-Cost-Status", bill.costUsd === null ? "unknown" : "known");
+          if (bill.costUsd === null) headers.delete(OMNIROUTE_RESPONSE_HEADERS.responseCost);
+        }
         return new Response(JSON.stringify(data), {
           status: 200,
           headers,

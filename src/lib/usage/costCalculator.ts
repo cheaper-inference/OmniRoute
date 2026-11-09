@@ -348,6 +348,9 @@ export async function calculateCostDetailed(
   // cost is present (xAI ticks or OpenRouter's USD cost — see extractExactCostUsd).
   const exactCostUsd = extractExactCostUsd(tokens);
   if (exactCostUsd !== null) return { costUsd: exactCostUsd, priced: true };
+  // Native Cortecs credits need an explicit USD valuation. A token catalogue
+  // entry must not turn an unknown conversion into a free or guessed USD bill.
+  if (provider.trim().toLowerCase() === "cortecs") return { costUsd: 0, priced: false };
 
   try {
     const pricing = await resolvePricingRow(provider, model);
