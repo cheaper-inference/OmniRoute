@@ -58,6 +58,8 @@ export type KeyQuotaDimension = "tpm" | "rpm";
 
 /** 2-bucket sliding window over a 60s fixed window. */
 export const KEY_QUOTA_WINDOW_MS = 60_000;
+/** Most stale minute rows one counter write deletes; later writes drain the rest. */
+const STALE_COUNTER_DELETE_LIMIT = 1000;
 
 /** dimension_key fragment for the counters table. */
 const DIMENSION_TPM = "key-quota:tpm";
@@ -255,10 +257,16 @@ export function incrementKeyQuotaCounter(
        consumed = consumed + excluded.consumed,
        updated_at = excluded.updated_at`
   ).run(apiKeyId, dimensionKey, bucket, delta, nowMs);
-  // Reads use the current and the previous bucket only; older rows never count again.
+  // Reads use the current and the previous bucket only; older rows never count again. Normal use
+  // leaves one stale row per minute. A capped delete keeps one request from stalling on an old
+  // backlog; later writes drain the rest.
   db.prepare(
-    "DELETE FROM api_key_quota_counters WHERE api_key_id = ? AND dimension_key = ? AND bucket_index < ?"
-  ).run(apiKeyId, dimensionKey, bucket - 1);
+    `DELETE FROM api_key_quota_counters WHERE rowid IN (
+       SELECT rowid FROM api_key_quota_counters
+       WHERE api_key_id = ? AND dimension_key = ? AND bucket_index < ?
+       LIMIT ?
+     )`
+  ).run(apiKeyId, dimensionKey, bucket - 1, STALE_COUNTER_DELETE_LIMIT);
 }
 
 /**

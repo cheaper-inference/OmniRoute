@@ -48,3 +48,37 @@ test("pruning does not change the sliding-window count", () => {
   const counters = quotaDb.getKeyQuotaCounters("key-2", { now: () => t0 + WINDOW });
   assert.equal(counters.tpmUsed, 1000 * (1 - 30_000 / WINDOW) + 250);
 });
+
+test("one write removes only a bounded part of a large backlog; later writes drain the rest", () => {
+  const db = core.getDbInstance();
+  const now = t0 + 20 * WINDOW;
+  const current = Math.floor(now / WINDOW);
+  const insert = db.prepare(
+    "INSERT INTO api_key_quota_counters (api_key_id, dimension_key, bucket_index, consumed, updated_at) VALUES ('key-backlog', 'key-quota:tpm', ?, 1, ?)"
+  );
+  db.transaction(() => {
+    for (let i = 2; i < 5002; i++) insert.run(current - i, now);
+  })();
+  const oldRows = () =>
+    (
+      db
+        .prepare(
+          "SELECT COUNT(*) AS n FROM api_key_quota_counters WHERE api_key_id = 'key-backlog' AND bucket_index < ?"
+        )
+        .get(current - 1) as { n: number }
+    ).n;
+  assert.equal(oldRows(), 5000);
+
+  quotaDomain.recordKeyQuotaUsage("key-backlog", 100, at(now));
+  const afterFirst = oldRows();
+  assert.ok(afterFirst > 0, "one request must not delete the whole backlog");
+  assert.ok(afterFirst < 5000, "the first request must still make progress");
+
+  let writes = 1;
+  while (oldRows() > 0 && writes < 50) {
+    quotaDomain.recordKeyQuotaUsage("key-backlog", 100, at(now));
+    writes++;
+  }
+  assert.equal(oldRows(), 0, "later writes drain the backlog");
+  assert.deepEqual(bucketsOf("key-backlog"), [current]);
+});
