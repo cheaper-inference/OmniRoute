@@ -480,7 +480,7 @@ describe("usage memory option", () => {
         [
           "nova-3",
           {
-            name: "Nova 3 (Transcription)",
+            name: "Deepgram - Nova 3 (Transcription)",
             providerAlias: "deepgram",
             providerCanonical: "deepgram",
             providerDisplayName: "Deepgram",
@@ -498,7 +498,9 @@ describe("usage memory option", () => {
       );
       const restored = collected.entries.get("omniroute/dg/nova-3");
       assert.ok(restored);
-      assert.match(JSON.stringify(restored), /Deepgram/);
+      assert.equal(restored?.cost.input, 1);
+      assert.equal(restored?.cost.output, 2);
+      assert.equal(restored?.name, "Deepgram - Nova 3 (Transcription)");
     });
   });
 });
@@ -976,5 +978,35 @@ describe("freshness window in days", () => {
       assert.ok(collected.entries.has("omniroute/win/old"));
       assert.ok(collected.entries.has("omniroute/win/older"));
     });
+  });
+});
+
+describe("disambiguation stays unique across groups", () => {
+  it("keeps a route-renamed name from colliding with another group's kept name", async () => {
+    const raw = await entriesThroughReader([
+      { id: "a/m", owned_by: "a", context_length: 1000 },
+      { id: "b/m", owned_by: "b", context_length: 1000 },
+      { id: "c/keep", owned_by: "c", context_length: 1000 },
+    ]);
+    const enrichment = new Map([
+      ["a/m", { name: "X" }],
+      ["b/m", { name: "X" }],
+      ["c/keep", { name: "X (a)" }],
+    ]);
+    const collected = await collectCatalog(
+      { ...baseOpts, enrichment },
+      { fetcher: async () => raw, combosFetcher: async () => [] }
+    );
+    const names = [
+      collected.entries.get("omniroute/a/m")?.name,
+      collected.entries.get("omniroute/b/m")?.name,
+      collected.entries.get("omniroute/c/keep")?.name,
+    ];
+    for (const name of names) assert.ok(name, "every entry keeps a published name");
+    assert.equal(
+      new Set(names).size,
+      3,
+      `no two entries publish the same name: ${JSON.stringify(names)}`
+    );
   });
 });

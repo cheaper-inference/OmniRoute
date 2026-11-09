@@ -1,0 +1,1 @@
+- **feat(mitm):** Antigravity MITM can map Claude Sonnet 5.5 / Opus 5.5 (low/medium/high tiers) to OmniRoute routes ([#16709](https://github.com/diegosouzapw/OmniRoute/pull/16709)) — thanks @lmortezal
