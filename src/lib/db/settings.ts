@@ -191,6 +191,11 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // Per-operator Quota Tracker provider group order (drag-to-reorder), written
+    // through by ProviderLimits/useProviderOrder. Empty = no server order (the
+    // dashboard keeps its localStorage order, else the built-in PROVIDER_ORDER).
+    // Display-only; never touches connection priority.
+    quotaProviderOrder: [],
     // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
     // Resolved through resolveProxyBulkImportLimit at both enforcement points.
     proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,
@@ -320,6 +325,17 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-spend of Codex reset credits that are about to expire. Spending a
+    // credit mutates upstream account state, so this is off by default (Hard Rule #20
+    // spirit: never consume on the operator's behalf until they opt in).
+    // `enabled` is the master switch; `connections` narrows it to specific ids
+    // (absent = every eligible Codex connection; `{}` = nobody). `maxPerDay` is a
+    // per-connection ceiling and `horizonHours` how close to expiry a credit must be.
+    codexSpendExpiringResetCredits: {
+      enabled: false,
+      horizonHours: 24,
+      maxPerDay: 1,
+    },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex

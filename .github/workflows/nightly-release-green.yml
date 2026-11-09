@@ -285,6 +285,7 @@ jobs:
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
@@ -579,6 +580,7 @@ jobs:
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
