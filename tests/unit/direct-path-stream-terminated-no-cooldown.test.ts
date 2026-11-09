@@ -36,7 +36,7 @@ function cutStreamResponse(error: Error) {
   return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
 }
 
-async function runCutStream(error: Error) {
+async function runCutStream(error: Error, { expectCooldown = false } = {}) {
   const conn = await providersDb.createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -85,12 +85,19 @@ async function runCutStream(error: Error) {
       const step = await reader.read().catch(() => ({ done: true }));
       if (step.done) break;
     }
-    // onStreamFailure -> markAccountUnavailable runs async after the read loop ends.
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    // The stream notifier does not await onStreamFailure, so the cooldown write lands after the
+    // read loop. Cooldown expectations poll the stored row below. The no-cooldown guard returns
+    // before any write, so a short settle is enough there.
+    if (!expectCooldown) await new Promise((resolve) => setTimeout(resolve, 200));
   } finally {
     globalThis.fetch = originalFetch;
   }
-  const after = await providersDb.getProviderConnectionById(conn.id);
+  let after = await providersDb.getProviderConnectionById(conn.id);
+  for (let end = Date.now() + 5000; expectCooldown && Date.now() < end;) {
+    if ((after as { rateLimitedUntil?: string | null } | null)?.rateLimitedUntil) break;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    after = await providersDb.getProviderConnectionById(conn.id);
+  }
   assert.ok(after, "connection must still exist");
   return after as { rateLimitedUntil?: string | null; testStatus?: string };
 }
@@ -110,7 +117,15 @@ test("direct path: a cut 200 stream (terminated) does not cool the connection", 
   assert.equal(after.testStatus, "active");
 });
 
+test("direct path: a terminated stream that carries a 429 status still cools the connection", async () => {
+  const refusal = Object.assign(new TypeError("terminated"), { statusCode: 429 });
+  const after = await runCutStream(refusal, { expectCooldown: true });
+  assert.ok(after.rateLimitedUntil, "an upstream refusal status must keep the cooldown");
+});
+
 test("direct path: another stream failure (not terminated) still cools the connection", async () => {
-  const after = await runCutStream(new Error("upstream pipeline exploded"));
+  const after = await runCutStream(new Error("upstream pipeline exploded"), {
+    expectCooldown: true,
+  });
   assert.ok(after.rateLimitedUntil, "a non-terminated stream failure keeps the cooldown");
 });
