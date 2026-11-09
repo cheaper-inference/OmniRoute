@@ -93,20 +93,22 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/accounts/{id}/limits",
     method: "GET",
     summary: "GET accounts › <id> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Accounts",
     tags: ["V1 Accounts"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/accounts/{id}/limits",
     method: "PUT",
     summary: "PUT accounts › <id> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Accounts",
     tags: ["V1 Accounts"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -475,10 +477,11 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/issues/report",
     method: "POST",
     summary: "POST issues › report",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Issues",
     tags: ["V1 Issues"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
@@ -892,20 +895,22 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/providers/{provider}/limits",
     method: "GET",
     summary: "GET providers › <provider> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Providers",
     tags: ["V1 Providers"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
     path: "/api/v1/providers/{provider}/limits",
     method: "PUT",
     summary: "PUT providers › <provider> › limits",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Providers",
     tags: ["V1 Providers"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
