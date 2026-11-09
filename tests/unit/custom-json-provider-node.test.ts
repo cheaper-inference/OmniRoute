@@ -1,4 +1,4 @@
-// Custom JSON API provider nodes: persistence (migration 233), node create/update routes,
+// Custom JSON API provider nodes: persistence (migration 234), node create/update routes,
 // connection hydration, config-only connection validation and the explicit node test.
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -78,7 +78,7 @@ function updateNode(id: string, body: Json) {
   });
 }
 
-test("migration 233 adds provider_nodes.custom_json_config_json", () => {
+test("migration 234 adds provider_nodes.custom_json_config_json", () => {
   const db = core.getDbInstance() as unknown as {
     prepare: (sql: string) => { all: () => Json[] };
   };
