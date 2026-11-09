@@ -151,8 +151,59 @@ async function applyMessageFieldRecovery(
   return fetchFn(url, { ...fetchOptions, body: retryBody });
 }
 
+// Fields whose removal fixed a request, per provider and model. A caller reads them before its
+// first send, so the next request skips the rejected round trip. In memory only; a field is
+// learned only after the retry without it succeeds, and each entry expires, so one odd 400
+// cannot strip a field for good. shortcut: no persistence across restarts, add it if cold starts hurt.
+const LEARNED_TTL_MS = 60 * 60_000;
+const LEARNED_MAX_KEYS = 500;
+const learnedFields = new Map<string, { fields: Set<string>; expiresAt: number }>();
+
+const learnedKey = (provider: string, model: string | undefined) => `${provider}\0${model ?? ""}`;
+
+/** Fields a successful 400 retry dropped for this provider and model; empty when none or expired. */
+export function getLearnedStrippedFields(provider: string, model: string | undefined): string[] {
+  const key = learnedKey(provider, model);
+  const entry = learnedFields.get(key);
+  if (!entry) return [];
+  if (entry.expiresAt <= Date.now()) {
+    learnedFields.delete(key);
+    return [];
+  }
+  return [...entry.fields];
+}
+
+/** @internal tests only: forget everything learned so far. */
+export function __clearLearnedStrippedFieldsForTests(): void {
+  learnedFields.clear();
+}
+
+function learnStrippedFields(provider: string, model: string | undefined, fields: string[]): void {
+  if (fields.length === 0) return;
+  const key = learnedKey(provider, model);
+  const entry = learnedFields.get(key);
+  const live = entry && entry.expiresAt > Date.now() ? entry.fields : new Set<string>();
+  for (const field of fields) live.add(field);
+  learnedFields.delete(key);
+  learnedFields.set(key, { fields: live, expiresAt: Date.now() + LEARNED_TTL_MS });
+  if (learnedFields.size > LEARNED_MAX_KEYS) {
+    const oldest = learnedFields.keys().next().value;
+    if (oldest !== undefined) learnedFields.delete(oldest);
+  }
+}
+
 /** Returns the response to use going forward (the retry's when one was issued). */
 export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams): Promise<Response> {
+  const before = new Set(params.strippedFields);
+  const response = await recoverFromFieldRejection(params);
+  if (response.ok) {
+    const dropped = [...params.strippedFields].filter((field) => !before.has(field));
+    learnStrippedFields(params.provider, params.model, dropped);
+  }
+  return response;
+}
+
+async function recoverFromFieldRejection(params: FieldDowngradeParams): Promise<Response> {
   const { url, fetchOptions, fetchFn, serializeBody, strippedFields, log } = params;
   const { response } = params;
   const body = params.body;
