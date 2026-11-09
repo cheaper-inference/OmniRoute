@@ -36,6 +36,9 @@ vi.mock("@/app/(dashboard)/dashboard/settings/components/CodexAutoPingTab", () =
 vi.mock("@/app/(dashboard)/dashboard/settings/components/CodexQuotaAlertsTab", () => ({
   default: () => null,
 }));
+vi.mock("@/app/(dashboard)/dashboard/settings/components/BankedResetAutoApplyTab", () => ({
+  default: () => null,
+}));
 vi.mock("@/app/(dashboard)/dashboard/settings/components/ClaudeFastModeTab", () => ({
   default: () => null,
 }));
