@@ -5,6 +5,11 @@
 import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 
 // Leonardo's v1 API takes a platform-model UUID as `modelId` and answers a catalog id such
 // as "phoenix" with HTTP 500 "internal error". UUIDs from GET /api/rest/v1/platformModels.
@@ -99,15 +104,16 @@ export async function handleLeonardoImageGeneration({
       if (gen.status === "COMPLETE") {
         const imgUrl = gen.generated_images?.[0]?.url;
         if (imgUrl) {
-          const imgRes = await fetch(imgUrl);
-          if (!imgRes.ok) {
+          let buf: Buffer;
+          try {
+            ({ buffer: buf } = await downloadUpstreamMedia(imgUrl, UPSTREAM_MEDIA_LIMITS.image));
+          } catch (err) {
             return {
               success: false,
-              status: imgRes.status,
-              error: `Failed to download image: ${imgRes.status}`,
+              status: 502,
+              error: `Failed to download image: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
             };
           }
-          const buf = await imgRes.arrayBuffer();
           saveCallLog({
             method: "POST",
             path: "/v1/images/generations",
@@ -120,7 +126,7 @@ export async function handleLeonardoImageGeneration({
             success: true,
             data: {
               created: Math.floor(Date.now() / 1000),
-              data: [{ b64_json: Buffer.from(buf).toString("base64") }],
+              data: [{ b64_json: buf.toString("base64") }],
             },
           };
         }

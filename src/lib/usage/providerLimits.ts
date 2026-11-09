@@ -1,4 +1,5 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import {
   getProviderConnectionById,
   getProviderConnections,
@@ -1037,7 +1038,8 @@ async function fetchLiveProviderLimitsWithOptions(
         connectionId,
         connection.provider,
         usage.quotas,
-        isRecord(usage.modelQuotas) ? usage.modelQuotas : {}
+        isRecord(usage.modelQuotas) ? usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(usage) }
       );
     }
     connection = await syncExpiredStatusIfNeeded(connection, usage);
@@ -1099,7 +1101,9 @@ async function fetchLiveProviderLimitsWithOptions(
       }
 
       // Only the dashboard's on-demand refresh lists credits; background polls keep
-      // their base usage request and never trigger reset-credit activity.
+      // their base usage request and never trigger reset-credit activity. The only
+      // background exception is the opt-in, capped sweep in
+      // src/lib/services/codexResetCreditAutospend.ts, and it runs outside this path.
       if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
         await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
       }
@@ -1178,7 +1182,8 @@ async function fetchLiveProviderLimitsWithOptions(
       connectionId,
       connection.provider,
       result.usage.quotas,
-      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {}
+      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {},
+      { complete: isCompleteUsageReading(result.usage) }
     );
   }
   connection = await syncExpiredStatusIfNeeded(connection, result.usage);

@@ -3,7 +3,11 @@ import {
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
 import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
-import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
+import { resolveAntigravityModelId } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
+import {
+  getProviderModels,
+  PROVIDER_ID_TO_ALIAS,
+} from "@omniroute/open-sse/config/providerModels.ts";
 import {
   ensureCursorAutoCatalogEntry,
   ensureCursorGrokEffortAliases,
@@ -562,17 +566,40 @@ export async function reconcileProvidersWithActiveSyncedCatalog(
   const excludedProviders: string[] = [];
 
   for (const { provider, catalog } of states) {
-    const modelIsLive = catalog.models.some((model) => model.id === modelId);
+    // A slash may be part of a literal model ID (e.g. a custom marketplace
+    // route), not a provider qualifier. Strip it only when its first segment
+    // actually names this provider or a compatible catalog sibling.
+    const slash = modelId.indexOf("/");
+    const canonicalProvider = resolveStoredProviderId(provider);
+    const qualifiedProvider = slash > 0 ? resolveStoredProviderId(modelId.slice(0, slash)) : "";
+    const isMatchingProviderPrefix =
+      slash > 0 && catalogLookupIds(canonicalProvider).includes(qualifiedProvider);
+    const candidateIds = isMatchingProviderPrefix ? [modelId.slice(slash + 1), modelId] : [modelId];
+    // Antigravity ids route through a declared wire alias in both shapes: legacy 3.7
+    // tiers onto the shared `-tiered` id, and the `-tiered` id that getModelInfo folds
+    // a 3.8 tier into back onto a tier id the roster may list instead.
+    // Unknown suffixes and unrelated providers stay governed by the live roster.
+    const liveModelIds =
+      canonicalProvider === "antigravity" || canonicalProvider === "agy"
+        ? Array.from(new Set([...candidateIds, ...candidateIds.map(resolveAntigravityModelId)]))
+        : candidateIds;
+    const registryModel = getProviderModels(provider).find((model) =>
+      liveModelIds.includes(model.id)
+    );
+    const declaredLiveIds = Array.isArray(registryModel?.liveCatalogIds)
+      ? registryModel.liveCatalogIds
+      : [];
+    const modelIsLive = catalog.models.some(
+      (model) => liveModelIds.includes(model.id) || declaredLiveIds.includes(model.id)
+    );
     // Cursor auto-router: always allow `auto` / router variants even if a stale live
     // catalog omitted them (AvailableModels / agent list often returns wire id
     // `default` only; listing injects `auto` + cost/balance/intelligence).
     const cursorAutoAllow =
-      provider === "cursor" &&
-      (modelId === "auto" ||
-        modelId === "default" ||
-        modelId === "auto-cost" ||
-        modelId === "auto-balance" ||
-        modelId === "auto-intelligence");
+      canonicalProvider === "cursor" &&
+      ["auto", "default", "auto-cost", "auto-balance", "auto-intelligence"].some((id) =>
+        candidateIds.includes(id)
+      );
 
     if (!catalog.authoritative || modelIsLive || cursorAutoAllow) {
       providers.push(provider);

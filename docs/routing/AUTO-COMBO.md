@@ -129,6 +129,41 @@ Auto-scoring selects best provider/model per request
 | `src/sse/handlers/chat.ts`                                | Integration: auto prefix short-circuit    |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` system entry      |
 
+## Account preferences for saved Auto combos
+
+The Intelligent Auto editor offers an optional **Account preferences** section.
+Each connection can be Preferred, Normal (the default), Reserve, or Excluded.
+Multiple connections can share a tier. Auto selects within the first eligible
+tier, retaining its scoring/router behavior there; failed attempts fall through
+to the remaining concrete accounts, preferred before normal before reserve.
+Excluded connections are never used by this combo.
+
+The setting is stored as `config.accountPreferences`, keyed by connection ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+An omitted or empty map retains existing routing. Preferences do not enable
+disabled connections, grant API-key access, restore quota-blocked candidates, or
+bypass budget checks. Each attempt is restricted to its concrete connection, so
+account fallback cannot jump tiers behind the combo router. Existing session
+affinity may retain an eligible account; excluding the account bound to a native
+turn stops that turn instead of silently changing accounts.
+
+Configured preferences use the account-aware Auto path: unbound context-cache,
+smart-pipeline, chaos and shadow shortcuts are not dispatched. Speculative hedging
+is disabled for these requests so reserve accounts cannot race preferred ones. Other combo
+strategies do not interpret this setting. Changing a combo away from Auto keeps
+the saved preferences for a later switch back.
+
 ## Combo Names That Match a Real Model Id
 
 A combo whose `name` is identical to a bare model id (e.g. a combo named
@@ -346,6 +381,14 @@ the second target emits client-native tool calls. OmniRoute detects tool-result
 continuations from the request protocol, asks the planner whether another tool round is
 needed, and dynamically makes either the executor or planner the client-facing final
 step.
+
+On tool-result continuations, OmniRoute also stops execution when two consecutive
+completed rounds repeat the same tool calls with unchanged results, or when every
+explicitly marked result in two consecutive rounds failed. Changed results permit
+repeated calls (for example, polling). The guard resets on a fresh user request,
+groups parallel calls into one round, and supports Anthropic, Chat Completions,
+Responses and Gemini histories. The planner receives the reason and owns the final
+answer even if it requests another tool round.
 
 Additional models after the second target are ordered executor backups. A failed
 HTTP response or transport exception advances to the next executor, carrying the

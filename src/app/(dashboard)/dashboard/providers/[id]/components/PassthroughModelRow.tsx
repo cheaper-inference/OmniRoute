@@ -13,14 +13,19 @@ import { Spinner } from "@/shared/components/Loading";
  */
 import React, { useState, useRef, useEffect } from "react";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
-import { Badge, Button, CapabilityBadge } from "@/shared/components";
-import { parseContextWindowOverrideInput, providerText } from "../providerPageHelpers";
+import { Badge, Button } from "@/shared/components";
+import { providerText } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
 import ModelVisionOverrideEditor from "./ModelVisionOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelOutputTokenEditor from "./ModelOutputTokenEditor";
 import { ModelSourceBadge, type ModelCompatSavePatch } from "./ModelRow";
+import {
+  ContextWindowOverrideEditButton,
+  ContextWindowOverrideField,
+  useContextWindowOverrideEditor,
+} from "./ContextWindowOverrideEditor";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -118,9 +123,11 @@ export default function PassthroughModelRow({
   const [editing, setEditing] = useState(false);
   const [aliasValue, setAliasValue] = useState(alias || "");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [editingContext, setEditingContext] = useState(false);
-  const [contextValue, setContextValue] = useState("");
-  const contextInputRef = useRef<HTMLInputElement>(null);
+  const contextEditor = useContextWindowOverrideEditor({
+    modelId,
+    override: contextWindowOverride,
+    onSave: onSaveContextWindowOverride,
+  });
 
   // Only useful when it actually differs from the id — otherwise we would just print
   // the opaque id twice.
@@ -134,44 +141,9 @@ export default function PassthroughModelRow({
     }
   }, [editing]);
 
-  useEffect(() => {
-    if (editingContext && contextInputRef.current) {
-      contextInputRef.current.focus();
-      contextInputRef.current.select();
-    }
-  }, [editingContext]);
-
   const startEditing = () => {
     setAliasValue(alias || "");
     setEditing(true);
-  };
-
-  const startEditingContext = () => {
-    setContextValue(typeof contextWindowOverride === "number" ? String(contextWindowOverride) : "");
-    setEditingContext(true);
-  };
-
-  const submitContextOverride = async () => {
-    if (!onSaveContextWindowOverride) return;
-    const parsed = parseContextWindowOverrideInput(contextValue);
-    // Invalid input keeps the editor open rather than silently discarding the
-    // value or writing a wrong one; the section surfaces the message.
-    if (parsed.invalid) {
-      await onSaveContextWindowOverride(modelId, Number.NaN);
-      return;
-    }
-    await onSaveContextWindowOverride(modelId, parsed.value);
-    setEditingContext(false);
-  };
-
-  const handleContextKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      void submitContextOverride();
-    }
-    if (e.key === "Escape") {
-      setEditingContext(false);
-    }
   };
 
   const handleAliasSubmit = () => {
@@ -282,53 +254,12 @@ export default function PassthroughModelRow({
           )}
           {/* #14337: the same context-window badge custom rows carry, so an override set
               here is visible after reload instead of being write-only. */}
-          {typeof contextWindowOverride === "number" && !editingContext && (
-            <CapabilityBadge
-              icon="width_normal"
-              className="shrink-0 bg-warning/15 text-warning"
-              title={t("contextWindowOverrideHint")}
-            >
-              {contextWindowOverride.toLocaleString()}
-            </CapabilityBadge>
-          )}
-          {editingContext && (
-            <span className="flex items-center gap-1">
-              <KitInput
-                ref={contextInputRef}
-                type="text"
-                size="sm"
-                inputMode="numeric"
-                value={contextValue}
-                onChange={(e) => setContextValue(e.target.value)}
-                onKeyDown={handleContextKeyDown}
-                disabled={savingContextOverride}
-                placeholder={t("contextWindowOverridePlaceholder")}
-                title={t("contextWindowOverrideHint")}
-                aria-label={t("contextWindowOverrideLabel")}
-                className="h-6 min-h-0 w-28 px-1.5 text-[11px]"
-              />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                icon="check"
-                onClick={() => void submitContextOverride()}
-                disabled={savingContextOverride}
-                className="size-6 min-h-6 rounded text-text-muted disabled:opacity-40"
-                title={providerText(t, "save", "Save")}
-                aria-label={providerText(t, "save", "Save")}
-              />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                icon="close"
-                onClick={() => setEditingContext(false)}
-                disabled={savingContextOverride}
-                className="size-6 min-h-6 rounded text-text-muted disabled:opacity-40"
-                title={providerText(t, "cancel", "Cancel")}
-                aria-label={providerText(t, "cancel", "Cancel")}
-              />
-            </span>
-          )}
+          <ContextWindowOverrideField
+            editor={contextEditor}
+            override={contextWindowOverride}
+            saving={savingContextOverride}
+            t={t}
+          />
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {onToggleHidden && testStatus === "error" && (
@@ -352,16 +283,8 @@ export default function PassthroughModelRow({
           {/* #14337: the affordance itself. Rendered only when the section
               supplies a handler, so rows that cannot take an override are
               unchanged. */}
-          {onSaveContextWindowOverride && !editingContext && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              icon="edit"
-              onClick={startEditingContext}
-              className="size-6 min-h-6 rounded text-text-muted"
-              title={t("contextWindowOverrideLabel")}
-              aria-label={t("contextWindowOverrideLabel")}
-            />
+          {onSaveContextWindowOverride && (
+            <ContextWindowOverrideEditButton editor={contextEditor} t={t} />
           )}
           <Button
             variant="ghost"

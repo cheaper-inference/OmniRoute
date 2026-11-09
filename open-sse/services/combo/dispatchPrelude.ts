@@ -24,7 +24,13 @@ import { errorResponse, errorResponseWithComboDiagnostics } from "../../utils/er
 import { parseModel } from "../model.ts";
 import { handlePipelineChat, type PipelineStep } from "../pipeline.ts";
 import type { resolveComboSetupConfig } from "../comboConfig.ts";
-import { clampComboDepth, clampGlobalAttempts, resolveDelayMs } from "./comboPredicates.ts";
+import {
+  clampComboDepth,
+  clampGlobalAttempts,
+  resolveDelayMs,
+  isLocalProcessPressureResponse,
+} from "./comboPredicates.ts";
+import { readAttemptFailure } from "./attemptFailure.ts";
 import {
   deriveRequestCompatibilityRequirements,
   isVisionIncompatibleTarget,
@@ -285,6 +291,11 @@ async function evaluatePinnedResponse(args: {
     );
     return null;
   }
+  if (
+    pinnedResult.status === 503 &&
+    isLocalProcessPressureResponse(pinnedResult, (await readAttemptFailure(pinnedResult)).errorBody)
+  )
+    return pinnedResult;
   const pinnedStatus = pinnedResult.status || 500;
   if (![401, 408, 429, 500, 502, 503, 504].includes(pinnedStatus)) {
     return pinnedResult;
