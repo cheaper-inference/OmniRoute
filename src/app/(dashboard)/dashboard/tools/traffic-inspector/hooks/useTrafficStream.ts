@@ -6,6 +6,10 @@ import { matchesTrafficFilter } from "@/lib/inspector/matchesTrafficFilter";
 import type { FiltersState } from "./useTrafficFilters";
 
 const WS_PATH = "/api/tools/traffic-inspector/ws";
+// Fallback when the WebSocket upgrade is refused or dropped: poll the REST list the same page
+// already uses for requests. The socket keeps retrying in the background; polling stops on open.
+const POLL_PATH = "/api/tools/traffic-inspector/requests";
+const POLL_INTERVAL_MS = 2000;
 const INITIAL_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 30_000;
 const BACKOFF_MULTIPLIER = 2;
@@ -35,6 +39,7 @@ export function useTrafficStream(
   const wsRef = useRef<WebSocket | null>(null);
   const backoffRef = useRef(INITIAL_BACKOFF_MS);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mountedRef = useRef(true);
   const pausedRef = useRef(false);
   const pendingRef = useRef<InterceptedRequest[]>([]);
@@ -54,6 +59,32 @@ export function useTrafficStream(
   useEffect(() => {
     mountedRef.current = true;
 
+    const stopPolling = () => {
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    };
+
+    const pollOnce = async () => {
+      try {
+        const res = await fetch(POLL_PATH, { credentials: "same-origin" });
+        if (!res.ok || !mountedRef.current || pollTimerRef.current === null) return;
+        const body = (await res.json()) as { requests?: InterceptedRequest[] };
+        if (!Array.isArray(body.requests)) return;
+        setConnected(true);
+        if (pausedRef.current) return;
+        // The list is oldest first; the socket path shows newest first.
+        setRequests(body.requests.filter(applyFilter).reverse().slice(0, 1000));
+      } catch {
+        // A failed poll is retried on the next tick.
+      }
+    };
+
+    const startPolling = () => {
+      if (pollTimerRef.current) return;
+      pollTimerRef.current = setInterval(pollOnce, POLL_INTERVAL_MS);
+      void pollOnce();
+    };
+
     const connect = () => {
       if (!mountedRef.current) return;
       if (wsRef.current && wsRef.current.readyState < WebSocket.CLOSING) {
@@ -68,6 +99,7 @@ export function useTrafficStream(
       ws.onopen = () => {
         if (!mountedRef.current) return;
         backoffRef.current = INITIAL_BACKOFF_MS;
+        stopPolling();
         setConnected(true);
       };
 
@@ -108,6 +140,7 @@ export function useTrafficStream(
       ws.onclose = () => {
         if (!mountedRef.current) return;
         setConnected(false);
+        startPolling();
         const delay = Math.min(backoffRef.current, MAX_BACKOFF_MS);
         backoffRef.current = Math.min(backoffRef.current * BACKOFF_MULTIPLIER, MAX_BACKOFF_MS);
         reconnectTimerRef.current = setTimeout(() => {
@@ -128,6 +161,7 @@ export function useTrafficStream(
     return () => {
       mountedRef.current = false;
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      stopPolling();
       wsRef.current?.close();
     };
   }, [applyFilter]);
