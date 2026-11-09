@@ -73,13 +73,17 @@ test("removing a provider override clears the old stored value", () => {
 });
 
 test("PATCH accepts safe per-provider/per-model keys and zero disables", () => {
-  assert.equal(updateResilienceSchema.safeParse({
-    preferredAccountFailover: {
-      enabled: true, defaultTimeoutMs: 20000,
-      providerTimeoutsMs: { codex: 0, openai: 35000 },
-      modelTimeoutsMs: { "anthropic/claude-opus-*": 45000 },
-    },
-  }).success, true);
+  assert.equal(
+    updateResilienceSchema.safeParse({
+      preferredAccountFailover: {
+        enabled: true,
+        defaultTimeoutMs: 20000,
+        providerTimeoutsMs: { codex: 0, openai: 35000 },
+        modelTimeoutsMs: { "anthropic/claude-opus-*": 45000 },
+      },
+    }).success,
+    true
+  );
 
   for (const payload of [
     { preferredAccountFailover: { defaultTimeoutMs: 499 } },
