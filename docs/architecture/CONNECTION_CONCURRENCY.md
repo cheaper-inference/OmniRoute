@@ -1,0 +1,5 @@
+# Connection concurrency defaults and adaptive mode
+
+On a provider detail page, the default connection cap selector writes `resilienceSettings.providerQuotaOverrides[providerId].defaultConnectionConcurrency` (1–10000). It applies only when a connection's `maxConcurrent` is null/zero. Explicit positive connection caps take precedence; no configured default preserves previous unlimited account behavior.
+
+Set an individual connection's `maxConcurrent` to `-1` for adaptive mode. Its process-local limit starts at the provider default or 4, clamped to 1–32. Every upstream HTTP 429 halves the limit (floor 1); every 16 successful upstream HTTP 2xx responses add one (ceiling 32). Other statuses, client aborts and local queue timeouts leave it unchanged. It resets on restart and is not synchronized across replicas. The admin-only `GET /api/admin/concurrency` reports `adaptiveConnectionLimits` by account gate key. Combo pre-dispatch checks use the same cap; model and provider aggregate gates remain independent. This is concurrency control, not RPM or token-quota learning.
