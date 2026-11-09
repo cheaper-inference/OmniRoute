@@ -9,6 +9,7 @@
 
 import { toNumber } from "@/shared/utils/numeric";
 import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+import { resolveClaudeEffortVariantBase } from "@omniroute/open-sse/handlers/chatCore/claudeEffortVariant.ts";
 import { isCreditMeteredProvider } from "./creditMeteredProviders";
 import { isFlatRateProvider } from "./flatRateProviders";
 
@@ -133,14 +134,23 @@ function isCodexProvider(provider: string | null | undefined): boolean {
 /**
  * Model ids to look up, in order, when pricing (provider, model): exact id first (so
  * a user override on an annotated id wins), then the prefix-free id, then — for
- * Codex — the id with its reasoning-effort suffix removed. Exported so the
+ * Codex — the id with its reasoning-effort suffix removed, and — for a Claude effort
+ * variant that chatCore dispatches as its base model (#18754) — that base model.
+ * Lanes that send the suffixed id upstream literally get no base fallback. Exported so the
  * `/v1/models` catalog prices entries with the same fallbacks as cost accounting.
  */
 export function getPricingLookupModels(provider: string, model: string): string[] {
   const keys = [model];
   const normalized = normalizeModelName(model);
   if (normalized !== model) keys.push(normalized);
-  if (isCodexProvider(provider)) keys.push(...getCodexEffortlessPricingKeys(normalized));
+  if (isCodexProvider(provider)) {
+    keys.push(...getCodexEffortlessPricingKeys(normalized));
+  } else {
+    const claudeVariant = resolveClaudeEffortVariantBase(provider, normalized);
+    if (claudeVariant && !keys.includes(claudeVariant.baseModel)) {
+      keys.push(claudeVariant.baseModel);
+    }
+  }
   return keys;
 }
 

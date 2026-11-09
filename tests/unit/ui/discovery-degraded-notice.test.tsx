@@ -381,7 +381,8 @@ describe("the status icon of the model import dialog", () => {
     return line;
   }
 
-  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon]");
+  // The running phases draw the kit Spinner; every other state a Lucide icon.
+  const kitIcons = (line: Element) => line.querySelectorAll("[data-icon], [data-slot='spinner']");
   const legacySpans = (line: Element) => line.querySelectorAll("span.material-symbols-outlined");
 
   for (const phase of PHASES) {
@@ -405,7 +406,10 @@ describe("the status icon of the model import dialog", () => {
             ? "warning"
             : phase === "error"
               ? "error"
-              : "progress_activity"
+              : null
+      );
+      expect(kitIcons(line)[0].getAttribute("data-slot")).toBe(
+        phase === "fetching" || phase === "importing" ? "spinner" : null
       );
     });
   }

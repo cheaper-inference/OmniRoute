@@ -274,6 +274,23 @@ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
   { version: "033", name: "add_batch_id_to_call_logs" },
   { version: "046", name: "remove_status_from_files" },
   { version: "051", name: "remove_status_from_files" },
+  // A renumbering shifted 140-143 in pairs, leaving the ledger holding the old
+  // arrangement: ccr_blocks at 139 and 140, api_key_cache_default_mode at 141
+  // and 143. In each pair exactly one row still matches a file (ccr_blocks at
+  // 139, api_key_cache_default_mode at 143), so only the other row is listed
+  // here. Its occupancy is what stopped the file now belonging at that version
+  // from being back-filled; radar_referrals_cache and the two
+  // proxy_subscriptions columns were the visible casualties. Releasing a slot
+  // replays that version's file after everything newer has run, so an entry here
+  // needs a file that is safe out of order, or a guard in isSchemaAlreadyApplied
+  // (178 has one: its file would otherwise overwrite the trigger 203 installed).
+  { version: "140", name: "ccr_blocks" },
+  { version: "141", name: "api_key_cache_default_mode" },
+  { version: "142", name: "connection_runtime_state" },
+  { version: "176", name: "provider_connection_synced_models_at" },
+  { version: "177", name: "xp_action_counts" },
+  { version: "178", name: "memory_fts_skip_access_updates" },
+  { version: "197", name: "model_capabilities_reasoning_efforts" },
 ] as const;
 
 export const SUPERSEDED_DUPLICATE_MIGRATIONS = [

@@ -274,6 +274,36 @@ export function getRetryDispatcher(hostname?: string): Dispatcher {
 }
 
 /**
+ * Dedicated Codex image generation can take several minutes before returning headers.
+ * Its undici transport limits must exceed the image-specific response-start watchdog:
+ * generic model routes on this host deliberately use far shorter timeouts.
+ * Use a fresh-socket configuration; never replay an image generation POST.
+ * Keyed by timeout: the deadline comes from one env value, so this holds a single Agent.
+ */
+const dedicatedCodexImageDispatchers = new Map<number, Dispatcher>();
+export function getDedicatedCodexImageDispatcher(responseStartTimeoutMs: number): Dispatcher {
+  const timeoutMs = Math.max(60_000, responseStartTimeoutMs + 60_000);
+  let dispatcher = dedicatedCodexImageDispatchers.get(timeoutMs);
+  if (!dispatcher) {
+    const defaults = getDispatcherOptions();
+    dispatcher = new Agent({
+      ...defaults,
+      headersTimeout: Math.max(defaults.headersTimeout, timeoutMs),
+      bodyTimeout: Math.max(defaults.bodyTimeout, timeoutMs),
+      keepAliveTimeout: 1,
+      keepAliveMaxTimeout: 1,
+      pipelining: 0,
+      // HTTP/2 multiplexes POSTs even with pipelining disabled. undici's Pool lets
+      // connect.allowH2 override the top-level option, so both must be pinned.
+      allowH2: false,
+      connect: { ...defaults.connect, allowH2: false },
+    });
+    dedicatedCodexImageDispatchers.set(timeoutMs, dispatcher);
+  }
+  return dispatcher;
+}
+
+/**
  * Extract the port from a proxy URL string before URL parsing.
  * `new URL("http://host:80")` strips port 80 since it's the HTTP default,
  * but proxy servers commonly listen on port 80/443, so we need to preserve it.
@@ -645,6 +675,38 @@ export function getProxyRetryDispatcher(proxyUrl: string): Dispatcher {
     return winner;
   }
   setDispatcherCacheEntry(retryKey, dispatcher);
+  return dispatcher;
+}
+
+/** Isolated proxy transport for long-running, non-replayable Codex image operations. */
+export function getDedicatedCodexImageProxyDispatcher(
+  proxyUrl: string,
+  responseStartTimeoutMs: number
+): Dispatcher {
+  const normalizedUrl = normalizeProxyUrl(proxyUrl, "proxy dispatcher");
+  const timeoutMs = Math.max(60_000, responseStartTimeoutMs + 60_000);
+  const key = "codex-image:" + timeoutMs + ":" + normalizedUrl;
+  const dispatcherCache = getDispatcherCache();
+  const cached = dispatcherCache.get(key);
+  if (cached) return cached;
+  const defaults = getProxyDispatcherOptions();
+  const dispatcher = buildProxyDispatcher(normalizedUrl, {
+    ...defaults,
+    headersTimeout: Math.max(defaults.headersTimeout, timeoutMs),
+    bodyTimeout: Math.max(defaults.bodyTimeout, timeoutMs),
+    keepAliveTimeout: 1,
+    keepAliveMaxTimeout: 1,
+    pipelining: 0,
+    allowH2: false,
+    requestTls: { ...defaults.requestTls, allowH2: false },
+    proxyTls: { ...defaults.proxyTls, allowH2: false },
+  });
+  const winner = dispatcherCache.get(key);
+  if (winner) {
+    void dispatcher.close().catch(() => {});
+    return winner;
+  }
+  setDispatcherCacheEntry(key, dispatcher);
   return dispatcher;
 }
 

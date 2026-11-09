@@ -255,6 +255,22 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
+  // Mid-conversation system turns in place (open-sse/services/claudeMidConversationSystem.ts).
+  if (
+    "keepMidConversationSystem" in normalized &&
+    typeof normalized.keepMidConversationSystem !== "boolean"
+  ) {
+    delete normalized.keepMidConversationSystem;
+  }
+
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
   // persist real booleans; both default to off when absent.
   if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {

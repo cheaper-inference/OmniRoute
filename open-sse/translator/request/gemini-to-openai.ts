@@ -1,7 +1,9 @@
 import { register } from "../registry.ts";
+import { geminiMediaToOpenAI } from "../helpers/mediaContentParts.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
+import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
 
 const newCallId = () => `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -70,7 +72,7 @@ export function geminiToOpenAIRequest(model, body, stream) {
             function: {
               name: func.name,
               description: func.description || "",
-              parameters: func.parameters || { type: "object", properties: {} },
+              parameters: geminiFunctionParameters(func) || { type: "object", properties: {} },
             },
           });
         }
@@ -114,6 +116,7 @@ function splitCoLocatedFunctionResponses(contents) {
   return out;
 }
 
+/** Convert Gemini history to OpenAI messages with its tool calls and media intact. */
 function convertGeminiContent(content, toolCallIds) {
   const role = content.role === "user" ? "user" : "assistant";
 
@@ -129,16 +132,8 @@ function convertGeminiContent(content, toolCallIds) {
       parts.push({ type: "text", text: part.text });
     }
 
-    if (part.inlineData || part.inline_data) {
-      const data = part.inlineData || part.inline_data;
-      const mimeType = data.mimeType || data.mime_type || "image/png";
-      parts.push({
-        type: "image_url",
-        image_url: {
-          url: `data:${mimeType};base64,${data.data}`,
-        },
-      });
-    }
+    const media = geminiMediaToOpenAI(part);
+    if (media) parts.push(media);
 
     if (part.functionCall) {
       toolCalls.push({

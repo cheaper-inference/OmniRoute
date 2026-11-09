@@ -2,17 +2,16 @@
 
 import { Card } from "@/shared/components";
 import { CHART_SERIES, getSeriesColor } from "@/shared/components/analytics/chartColors";
+import { chartTheme } from "@omniroute/ui-kit/chart-theme";
+import { LineChart } from "@omniroute/ui-kit/reporting-charts";
 import {
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   Tooltip,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   BarChart,
   Bar,
 } from "recharts";
@@ -76,14 +75,8 @@ export function ProviderSpendCard({
                 ))}
               </Pie>
               <Tooltip
+                {...chartTheme.tooltip}
                 formatter={(value: number) => currencyFormatter.format(value || 0)}
-                contentStyle={{
-                  backgroundColor: "var(--color-surface)",
-                  borderColor: "var(--color-border)",
-                  borderRadius: 12,
-                  color: "var(--color-text-main)",
-                  boxShadow: "var(--shadow-soft)",
-                }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -120,8 +113,9 @@ export function CostTrendCard({
 }) {
   const currencyFormatter = createCurrencyFormatter(locale);
   const chartRows = rows.map((row) => ({
-    date: row.date.slice(5),
-    cost: row.cost || 0,
+    id: row.date,
+    label: row.date.slice(5),
+    values: { cost: row.cost || 0 },
   }));
 
   return (
@@ -129,45 +123,14 @@ export function CostTrendCard({
       <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
         {title}
       </h3>
-      <div className="h-55">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartRows} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="var(--ci-color-border-subtle)" vertical={false} />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
-              interval={Math.max(Math.floor(chartRows.length / 8), 0)}
-            />
-            <YAxis
-              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(value) => currencyFormatter.format(value).replace(".00", "")}
-              width={48}
-            />
-            <Tooltip
-              formatter={(value: number) => currencyFormatter.format(value || 0)}
-              contentStyle={{
-                backgroundColor: "var(--color-surface)",
-                borderColor: "var(--color-border)",
-                borderRadius: 12,
-                color: "var(--color-text-main)",
-                boxShadow: "var(--shadow-soft)",
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="cost"
-              stroke={CHART_SERIES.cost}
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{ r: 4 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <LineChart
+        ariaLabel={title}
+        data={chartRows}
+        series={[{ key: "cost", label: title, color: CHART_SERIES.cost }]}
+        valueFormatter={(value) => currencyFormatter.format(value)}
+        yTickFormatter={(value) => currencyFormatter.format(value).replace(".00", "")}
+        height={220}
+      />
     </Card>
   );
 }
@@ -195,35 +158,22 @@ export function WeeklyPatternCard({
       </h3>
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
-            <XAxis
-              dataKey="day"
-              tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
-            />
+          <BarChart data={chartData} margin={chartTheme.margin}>
+            <XAxis {...chartTheme.xAxis} dataKey="day" interval={0} />
             <YAxis
-              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
-              axisLine={false}
-              tickLine={false}
+              {...chartTheme.yAxis}
               tickFormatter={(value) =>
                 new Intl.NumberFormat(locale, {
                   notation: "compact",
                 }).format(Number(value || 0))
               }
-              width={40}
             />
             <Tooltip
+              {...chartTheme.tooltip}
+              cursor={{ fill: "var(--color-surface-2)" }}
               formatter={(value: number) =>
                 `${new Intl.NumberFormat(locale).format(value || 0)} ${tokensLabel}`
               }
-              contentStyle={{
-                backgroundColor: "var(--color-surface)",
-                borderColor: "var(--color-border)",
-                borderRadius: 12,
-                color: "var(--color-text-main)",
-                boxShadow: "var(--shadow-soft)",
-              }}
             />
             <Bar dataKey="tokens" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
           </BarChart>

@@ -83,16 +83,6 @@ const STATUS_AND_SURFACE_TOKENS: Record<string, string> = {
   accentSoft: "--ci-color-accent-surface-range",
 };
 
-// The one measured exception (readme-diagram-theme.mjs header): light warn is the kit's warning
-// scaled to 90 % per channel, because the kit value is below AA for text on the light canvas.
-const WARN_SCALE = 0.9;
-const scaleHex = (hex: string, k: number) =>
-  "#" +
-  [1, 3, 5]
-    .map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * k))
-    .map((c) => c.toString(16).padStart(2, "0"))
-    .join("");
-
 // WCAG 2.x contrast; a translucent colour is composited over the background first.
 const rgbOf = (c: string, over?: number[]): number[] => {
   const hex = /^#([0-9a-f]{6})$/i.exec(c);
@@ -173,11 +163,13 @@ test("every KIT value equals what its Editions token resolves to (light warn exc
   }
 });
 
-test("light warn is the kit warning darkened 10 % — and only because the kit value misses AA", () => {
+test("warn is the kit's own Editions warning, which clears AA on every light diagram surface", () => {
+  // Kit 0.0.89 brought the light Editions warning to AA on every surface, so the diagrams read
+  // the kit value as is, in both schemes.
   const kitWarn = resolve("--ci-color-warning", lightBlock);
-  assert.equal(kitWarn, "#99631f");
-  assert.equal(KIT.light.warn, scaleHex(kitWarn, WARN_SCALE));
-  assert.ok(contrast(kitWarn, KIT.light.bg) < 4.5, "the kit warning is below AA on the canvas");
+  assert.equal(kitWarn, "#8a591c");
+  assert.equal(KIT.light.warn, kitWarn);
+  assert.equal(KIT.dark.warn, resolve("--ci-color-warning", darkBlock));
   for (const bg of ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"]) {
     const ratio = contrast(KIT.light.warn, KIT.light[bg]);
     assert.ok(ratio >= 4.5, `light warn on ${bg}: ${ratio.toFixed(2)}:1`);

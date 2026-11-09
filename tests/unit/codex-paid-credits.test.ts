@@ -30,7 +30,10 @@ const credits = { hasCredits: true, unlimited: false, overageLimitReached: false
 test("Codex paid credits preserve Business availability without inventing a balance", () => {
   const parsed = buildCodexUsageQuotas({
     credits: { has_credits: true, unlimited: false, overage_limit_reached: false, balance: null },
-    rate_limit: { limit_reached: true, primary_window: { used_percent: 100 } },
+    rate_limit: {
+      limit_reached: true,
+      primary_window: { used_percent: 100, limit_window_seconds: 18000 },
+    },
     rate_limit_reset_credits: { available_count: 3 },
   });
   assert.deepEqual(parsed.paidCredits, credits);
