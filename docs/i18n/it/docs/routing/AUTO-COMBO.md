@@ -127,6 +127,27 @@ L'assegnazione automatica dei punteggi seleziona il provider/modello migliore pe
 | `src/sse/handlers/chat.ts`                                | Integrazione: short-circuit del prefisso auto      |
 | `src/shared/constants/providers.ts`                       | Voce di sistema `SYSTEM_PROVIDERS.auto`            |
 
+## Preferenze account per le combo automatiche salvate
+
+L'editor Intelligent Auto offre un optional** Preferenze dell'account** sezione. Ciascuna connessione può essere Preferita, Normale (impostazione predefinita), Riservata o Esclusa. Più connessioni possono condividere un livello. Seleziona automaticamente all'interno del primo livello idoneo, mantenendo lì il suo comportamento scoring/router ; i tentativi falliti ricadono sui restanti conti concreti, preferiti alla normalità rispetto alla riserva. Le connessioni escluse non vengono mai utilizzate da questa combinazione.
+
+L'impostazione viene memorizzata come `config.accountPreferences`, codificata dalla connessione ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Una mappa omessa o vuota mantiene il percorso esistente. Le preferenze non abilitano connessioni disabilitate, concedono l'accesso alla chiave API, ripristinano i candidati bloccati dalla quota o ignorano i controlli del budget. Ogni tentativo è limitato alla sua connessione concreta, quindi il fallback dell'account non può saltare i livelli dietro il router combinato. L'affinità di sessione esistente può mantenere un account idoneo; escludendo l'account legato a un turno nativo, si interrompe quel turno invece di modificare silenziosamente gli account.
+
+Le preferenze configurate utilizzano il percorso automatico basato sull'account: i collegamenti cache di contesto non associati, smart pipeline, caos e shadow non vengono inviati. La copertura speculativa è disabilitata per queste richieste, quindi i conti di riserva non possono competere con quelli preferiti. Altre strategie combinate non interpretano questa impostazione. La modifica di una combinazione da Auto mantiene le preferenze salvate per un successivo passaggio indietro.
+
 ## Nomi di combo che corrispondono a un ID modello reale
 
 Una combo il cui `name` è identico a un ID modello senza prefisso (ad esempio, una combo denominata `gpt-5.5`) è un **modello intenzionale e supportato**, non un bug: è il meccanismo per il fallback del provider per ID modello documentato in [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Poiché la risoluzione delle combo viene verificata prima della risoluzione degli ID modello senza prefisso (`getComboForModel()` in `src/sse/services/model.ts`), una richiesta per l'ID senza prefisso `gpt-5.5` viene instradata attraverso le destinazioni della combo (ad esempio, `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) anziché direttamente verso un singolo provider. Questo riutilizza la precedenza combo-prima-della-riscrittura implementata per [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ed è sottoposto a test di regressione da `tests/unit/responses-combo-resolution-3227.test.ts` e `tests/unit/combo-name-codex-responses-rewrite.test.ts`.

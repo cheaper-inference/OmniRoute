@@ -30,6 +30,7 @@ import {
 } from "./nonStreamingResponseBody.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
@@ -160,12 +161,16 @@ function extractUsage(
   responseBody: Record<string, unknown>,
   provider: string
 ): ProviderLegUsage | null {
-  const raw = extractUsageFromResponse(responseBody, provider);
+  return summarizeUsage(extractUsageFromResponse(responseBody, provider));
+}
+
+function summarizeUsage(raw: unknown): ProviderLegUsage | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
   return {
+    ...cacheCreationFields(raw),
     prompt_tokens: pt,
     completion_tokens: ct,
     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,
@@ -296,7 +301,12 @@ function finishOk(
     params.transformedBody || params.requestBody,
     params.responsePayloadFormat
   );
-  const usage = extractUsage(body, params.provider);
+  // Full provider usage, read BEFORE translateNonStreamingClientResponse rewrites the
+  // body for the client (applyClientUsageBuffer folds in the #8331 context buffer and
+  // can swap in an estimate). Billing needs this object, not the token-only summary:
+  // it also carries provider-reported cost/credit fields and the estimate marker.
+  const billingUsage = extractUsageFromResponse(body, params.provider);
+  const usage = summarizeUsage(billingUsage);
   const clientTranslate = translateNonStreamingClientResponse({
     responseBody: body,
     responsePayloadFormat: params.responsePayloadFormat,
@@ -344,6 +354,7 @@ function finishOk(
     providerBody: body,
     providerRequest: input.translatedBody ?? {},
     usage,
+    billingUsage,
     responsePayloadFormat: params.responsePayloadFormat,
     looksLikeSSE: params.looksLikeSSE,
     connectionId: params.connectionId,

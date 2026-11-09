@@ -357,65 +357,65 @@ API բանալի՝ [կառավարման վահանակից]
 
 ---
 
-## 🚀 Տեղակայում
+## 🚀 տեղակայում
 
-### npm-ի գլոբալ տեղադրում (խորհուրդ է տրվում)
+### Համաշխարհային npm տեղադրում (Առաջարկվում է)
 
 ```bash
 npm install -g omniroute
 
-# Ստեղծել կազմաձևման պանակը
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Ստեղծել .env ֆայլը (տե՛ս .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Գործարկել սերվերը
+# Start server
 omniroute
-# Կամ հատուկ պորտով՝
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI-ն ավտոմատ կերպով բեռնում է `.env`-ը `~/.omniroute/.env`-ից կամ `./.env`-ից։
+CLI ավտոմատ կերպով բեռնում է `.env` `~/.omniroute/.env` ից կամ `./.env`: Աշխատանքային գրացուցակում `./.env` կարող է սահմանել ստեղների միայն կարճ թույլատրելի ցուցակ (պորտ, `REQUIRE_API_KEY`, տեղայնություն և գույնի կարգավորումներ); մնացած ամեն ինչ դրեք `~/.omniroute/.env` ում: Տես [CLI գործարկման պայմանագրերը](CLI-LAUNCH-CONTRACTS.md#working-directory-env) :
 
-### Համակարգային դարակի ռեժիմ
+### Սկուտեղի ռեժիմ
 
-Գործարկեք OmniRoute-ը համակարգային դարակում․
+Սկսեք OmniRoute համակարգի սկուտեղում.
 
 ```bash
 omniroute serve --tray
 ```
 
-Հրամանի կատարումն ավարտվում է սերվերի և համակարգային դարակի պատրաստ լինելուց հետո։
+Հրամանը վերադառնում է սերվերի և սկուտեղի պատրաստ լինելուց հետո:
 
-Սերվերը շարունակում է աշխատել առանց տերմինալի։
+Սերվերը շարունակում է առանց տերմինալի:
 
-Համակարգային դարակի ռեժիմն աջակցում է macOS-ը, Windows-ը և գրաֆիկական Linux աշխատաշրջանները։ Համակարգային դարակի ռեժիմը կառավարման վահանակն ավտոմատ չի բացում։
+Սկուտեղի ռեժիմն աջակցում է macOS, Windows և գրաֆիկական Linux նիստերին: Սկուտեղի ռեժիմը ավտոմատ կերպով չի բացում վահանակը:
 
-Օգտագործեք համակարգային դարակի ընտրացանկը հետևյալ գործողությունների համար․
+Օգտագործեք սկուտեղի ընտրացանկը հետևյալ գործողությունների համար.
 
-- Բացել կառավարման վահանակը։
-- Բացել `/dashboard/logs`-ը։
-- Փոխել ավտոմատ գործարկման կարգավորումը։
-- Կանգնեցնել OmniRoute-ը։
+- Բացեք վահանակը:
+- Բացեք `/dashboard/logs`.
+- Փոխել ավտոմատ մեկնարկը:
+- Stop OmniRoute.
 
-Մի՛ համակցեք `--tray`-ը հետևյալ ընտրանքների հետ․
+Մի համատեղեք `--tray` այս տարբերակների հետ.
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Այս ռեժիմները պահանջում են գործընթացների կառավարման տարբեր եղանակներ։
+Այս ռեժիմները պահանջում են տարբեր գործընթացների սեփականություն:
 
-Միացրեք գործարկումը համակարգ հաջորդ մուտք գործելիս․
+Միացնել գործարկումը հաջորդ մեքենայի մուտքի ժամանակ.
 
 ```bash
 omniroute autostart enable
 ```
 
-Ավտոմատ գործարկումն օգտագործում է համակարգային դարակի ռեժիմը macOS-ում, Windows-ում և գրաֆիկական Linux աշխատաշրջաններում։ Առանց գրաֆիկական միջավայրի Linux-ն օգտագործում է գոյություն ունեցող systemd օգտատիրոջ ծառայությունը։
+Ավտոմատ մեկնարկը օգտագործում է սկուտեղի ռեժիմը macOS, Windows և գրաֆիկական Linux նիստերում: Headless Linux օգտագործում է առկա systemd օգտվողի ծառայությունը:
 
-Անջատեք մուտք գործելիս ավտոմատ գործարկումը․
+Անջատել գործարկումը մուտքի ժամանակ.
 
 ```bash
 omniroute autostart disable
@@ -423,16 +423,16 @@ omniroute autostart disable
 
 ### Ապատեղադրում
 
-Երբ OmniRoute-ն այլևս անհրաժեշտ չէ, մաքուր հեռացման համար տրամադրում ենք երկու արագ սկրիպտ․
+Երբ դուք այլևս OmniRoute կարիք չունեք, մենք տրամադրում ենք երկու արագ սցենար մաքուր հեռացման համար.
 
-| Հրաման                   | Գործողություն                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Հեռացնում է համակարգային հավելվածը, բայց **պահպանում է ձեր ՏԲ-ն և կազմաձևումները** `~/.omniroute`-ում։ |
-| `npm run uninstall:full` | Հեռացնում է հավելվածը ԵՎ ընդմիշտ **ջնջում է բոլոր կազմաձևումները, բանալիներն ու տվյալների բազաները**։  |
+| Հրաման                   | Գործողություն                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Հեռացնում է համակարգի հավելվածը, բայց** պահպանում է ձեր DB և կոնֆիգուրացիաները** `~/.omniroute`.        |
+| `npm run uninstall:full` | Ընդմիշտ հեռացնում է AND հավելվածը** ջնջում է բոլոր կոնֆիգուրացիաները, ստեղները և տվյալների բազաները** . |
 
-> Նշում․ այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի պանակ (եթե կլոնավորել եք այն) և գործարկեք դրանք։ Որպես այլընտրանք, եթե այն տեղադրված է գլոբալ կերպով, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`։
+> Նշում. Այս հրամանները գործարկելու համար անցեք OmniRoute նախագծի թղթապանակ (եթե այն կլոնավորել եք) և գործարկեք դրանք: Այլապես, եթե գլոբալ տեղադրման դեպքում, կարող եք պարզապես գործարկել `npm uninstall -g omniroute`:
 
-### Տեղակայում VPS-ում
+### VPS տեղակայում
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -448,25 +448,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Կամ՝ pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 տեղակայում (քիչ հիշողությամբ)
+### PM2 տեղակայում (ցածր հիշողություն)
 
-Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի ընտրանքը․
+Սահմանափակ RAM ունեցող սերվերների համար օգտագործեք հիշողության սահմանաչափի տարբերակը.
 
 ```bash
-# 512MB սահմանաչափով (լռելյայն)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Կամ հիշողության հատուկ սահմանաչափով
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Կամ՝ օգտագործելով ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Ստեղծեք `ecosystem.config.js`․
+Ստեղծել `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -491,24 +491,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Կառուցել պատկերը (լռելյայն = runner-cli՝ նախապես տեղադրված codex/claude/droid-ով)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Դյուրակիր ռեժիմ (խորհուրդ է տրվում)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI բինար ֆայլերով հոսթին ինտեգրված ռեժիմի համար տե՛ս հիմնական փաստաթղթերի Docker բաժինը։
+Հոսթին ինտեգրված ռեժիմի համար CLI երկուական սարքերով տե՛ս Docker բաժինը հիմնական փաստաթղթերում:
 
-### Void Linux (xbps-src)
+### Անվավեր Linux (xbps-src)
 
-Void Linux-ի օգտատերերը կարող են փաթեթավորել և տեղադրել OmniRoute-ը բնիկ եղանակով՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը։ Այն ավտոմատացնում է Node.js-ի ինքնուրույն հավաքումը՝ անհրաժեշտ `better-sqlite3` բնիկ կապակցումների հետ միասին։
+Void Linux օգտվողները կարող են փաթեթավորել և տեղադրել OmniRoute ՝ օգտագործելով `xbps-src` խաչաձև կոմպիլյացիայի շրջանակը: Սա ավտոմատացնում է Node.js ինքնուրույն կառուցումը անհրաժեշտ `better-sqlite3` մայրենի կապակցումների հետ միասին:
 
 <details>
-<summary><b>Դիտել xbps-src ձևանմուշը</b></summary>
+<summary><b>Դիտեք xbps-src ձևանմուշը</b></summary>
 
 ```bash
-# «omniroute»-ի ձևանմուշի ֆայլ
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -529,7 +529,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Որոշել node-gyp-ի նպատակային պրոցեսորի ճարտարապետությունը
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -538,29 +538,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Տեղադրել բոլոր կախվածությունները՝ բաց թողնելով սկրիպտները
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Հավաքել Next.js-ի ինքնուրույն փաթեթը
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Պատճենել ստատիկ ռեսուրսներն ինքնուրույն փաթեթի մեջ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Կոմպիլացնել better-sqlite3-ի բնիկ կապակցումը
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Կոմպիլացված կապակցումը տեղադրել ինքնուրույն փաթեթի մեջ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Հեռացնել ճարտարապետությանը հատուկ sharp փաթեթները
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Պատճենել Next.js-ի ստատիկ վերլուծության կողմից բաց թողնված pino-ի կատարման միջավայրի կախվածությունները.
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -574,7 +574,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Կանխել Next.js հավելվածի երթուղիչի դատարկ պանակների հեռացումը հետտեղադրման մշակիչի կողմից
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -600,32 +600,32 @@ post_install() {
 
 </details>
 
-### Միջավայրի փոփոխականներ
+### Շրջակա միջավայրի փոփոխականներ
 
-| Փոփոխական                               | Լռելյայն արժեք                       | Նկարագրություն                                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT ստորագրման գաղտնիք (**փոխեք արտադրական միջավայրում**)                                                                                                               |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Առաջին մուտքի գաղտնաբառ                                                                                                                                                 |
-| `DATA_DIR`                              | `~/.omniroute`                       | Տվյալների գրացուցակ (տվյալների բազա, օգտագործման տվյալներ, մատյաններ)                                                                                                   |
-| `PORT`                                  | ֆրեյմվորկի լռելյայն արժեք            | Ծառայության միացք (օրինակներում՝ `20128`)                                                                                                                               |
-| `HOSTNAME`                              | ֆրեյմվորկի լռելյայն արժեք            | Կապակցման հոսթ (Docker-ի լռելյայն արժեքը՝ `0.0.0.0`)                                                                                                                    |
-| `NODE_ENV`                              | գործարկման միջավայրի լռելյայն արժեք  | Տեղակայման համար սահմանեք `production`                                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Հանրային բազային URL, որը հասանելի է կառավարման վահանակին և սերվերին (փոխարինում է հնացած `BASE_URL`-ը)                                                                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Ամպային համաժամացման վերջնակետի բազային URL (փոխարինում է հնացած `CLOUD_URL`-ը)                                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC գաղտնիք՝ API բանալիներ ստեղծելու համար                                                                                                                             |
-| `REQUIRE_API_KEY`                       | `false`                              | Պահանջել Bearer API բանալի `/v1/*` հասցեների համար                                                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Թույլատրել նույնականացված կառավարման վահանակի օգտատերերին ըստ պահանջի ցուցադրել պահված API բանալիների ամբողջական արժեքները                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Քեշավորված մատակարարների սահմանաչափերի տվյալների՝ սերվերի կողմից թարմացման հաճախականություն․ միջերեսի թարմացման կոճակները շարունակում են գործարկել ձեռքով համաժամացումը |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Անջատել SQLite-ի ավտոմատ պատճենահանումը գրառումից, ներմուծումից կամ վերականգնումից առաջ․ ձեռքով պատճենահանումը շարունակում է աշխատել                                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Միացնում է հավելվածի և աուդիտի մատյանների գրանցումը սկավառակի վրա                                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Պարտադրել նույնականացման `Secure` cookie-ի օգտագործումը (HTTPS հակադարձ պրոքսիի հետևում)                                                                                |
-| `CLOUDFLARED_BIN`                       | սահմանված չէ                         | Կառավարվող ներբեռնման փոխարեն օգտագործել առկա `cloudflared` երկուական ֆայլը                                                                                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Կառավարվող Quick Tunnels-ի փոխանցման արձանագրություն (`http2`, `quic` կամ `auto`)                                                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js-ի heap հիշողության սահմանաչափը՝ MB-ով                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Հուշումների քեշի գրառումների առավելագույն քանակը                                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Իմաստային քեշի գրառումների առավելագույն քանակը                                                                                                                          |
+| Փոփոխական                               | Կանխադրված                   | Նկարագրություն                                                                                                                                                   |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ավտոգեներացված)_           | JWT ստորագրման գաղտնի — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և շարունակվել է `server.env` ին: սահմանել այն հստակ, երբ տվյալների գրացուցակը ժամանակավոր է |
+| `INITIAL_PASSWORD`                      | _(չսահմանված)_               | Առաջին մուտքի գաղտնաբառը: npm/source տեղադրումը սկսվում է `CHANGEME` ով. փոխարինեք այն: Չկարգավորված՝ միացման հրաշագործ                                          |
+| `DATA_DIR`                              | `~/.omniroute`               | Տվյալների գրացուցակ (db, օգտագործում, տեղեկամատյաններ)                                                                                                           |
+| `PORT`                                  | շրջանակի լռելյայն            | Սպասարկման նավահանգիստ (`20128` օրինակներով)                                                                                                                     |
+| `HOSTNAME`                              | շրջանակի լռելյայն            | Կապել հոսթին (Docker կանխադրված է `0.0.0.0` ին)                                                                                                                  |
+| `NODE_ENV`                              | գործարկման ժամանակի լռելյայն | Սահմանել `production` տեղակայման համար                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`     | Հանրային URL բազան հայտնվել է վահանակի վրա և ենթարկվել սերվերին (փոխարինում է հին `BASE_URL`)                                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`      | Cloud sync վերջնական կետի բազային URL (փոխարինում է ժառանգված `CLOUD_URL`)                                                                                       |
+| `API_KEY_SECRET`                        | _(ավտոգեներացված)_           | HMAC գաղտնիքը գեներացված API ստեղների համար — ավտոմատ ստեղծվել է առաջին գործարկման ժամանակ և պահպանվել է `server.env` ում                                        |
+| `REQUIRE_API_KEY`                       | `false`                      | Կիրառեք կրող API բանալին `/v1/*` ում                                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                      | Թույլատրել վավերացված վահանակի օգտատերերին՝ ըստ պահանջի, բացահայտել ամբողջական պահպանված API հիմնական արժեքները                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                         | Սերվերի կողմից թարմացման արագություն քեշավորված Մատակարարի սահմանաչափերի տվյալների համար; UI թարմացման կոճակները դեռ գործարկում են ձեռքով համաժամացումը          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                      | Անջատել ավտոմատ SQLite snapshot-ները writes/import/restore ից առաջ; ձեռքով կրկնօրինակումները դեռ աշխատում են                                                     |
+| `APP_LOG_TO_FILE`                       | `true`                       | Միացնում է հավելվածի և աուդիտի գրանցամատյանի ելքը սկավառակի վրա                                                                                                  |
+| `AUTH_COOKIE_SECURE`                    | `false`                      | Ստիպել `Secure` auth քուքի ( HTTPS հակադարձ պրոքսիի հետևում)                                                                                                     |
+| `CLOUDFLARED_BIN`                       | չկարգավորված                 | Օգտագործեք գոյություն ունեցող `cloudflared` երկուական տարբերակը կառավարվող ներբեռնման փոխարեն                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                      | Տրանսպորտ կառավարվող արագ թունելների համար (`http2`, `quic` կամ `auto`)                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                        | Node.js կույտի սահմանը MB ում                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                         | Առավելագույն հուշում քեշի գրառումները                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                        | Առավելագույն իմաստային քեշի մուտքերը                                                                                                                             |
 
-Միջավայրի փոփոխականների ամբողջական տեղեկատուի համար տե՛ս [README](../README.md)-ն։
+Շրջակա միջավայրի փոփոխականի ամբողջական հղումի համար տե՛ս [README](../README.md) :
 
 ---
 

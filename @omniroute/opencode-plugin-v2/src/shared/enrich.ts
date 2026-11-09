@@ -29,7 +29,6 @@ export interface OmniRouteEnrichmentEntry {
    * Human-readable upstream provider label (e.g. `Claude`, `Kiro`,
    * `Windsurf`, `GitHub Models`). Populated from the per-provider
    * `entry.name` field inside `/api/pricing/models`. Used by the
-   * `providerTag` feature to suffix `ModelV2.name` with the routing
    * destination so the OC TUI picker can differentiate the same
    * model id sold through different upstream connections.
    */
@@ -204,111 +203,12 @@ export function canonicalDedupSet(
 }
 
 /**
- * Build a per-alias index of enrichment metadata so we can render the
- * provider prefix even for raw models that don't have their own
- * curated `/api/pricing/models` entry.
- *
- * Real example: OmniRoute's `pricing['cohere']` slot lists 10 curated
- * models but `/v1/models` also returns `cohere/rerank-multilingual-v3.0`
- * and `cohere/rerank-v4.0-fast` (not in the curated 10). Without this
- * index, those rows surface in the picker as `cohere/...` with no
- * `Cohere - ` prefix because the per-model enrichment lookup misses.
- *
- * This index records the first non-empty `providerDisplayName` seen
- * for each alias, plus the alias itself. Callers use it to synthesize
- * a minimal `OmniRouteEnrichmentEntry` whenever the direct lookup
- * misses but the raw id's prefix matches a known alias.
- *
- * Built once per refresh; first-wins on duplicate alias (matches
- * `buildCanonicalToAliasMap` semantics).
- */
-export function buildAliasIndex(
-  enrichment: OmniRouteEnrichmentMap | undefined
-): Map<string, OmniRouteEnrichmentEntry> {
-  const out = new Map<string, OmniRouteEnrichmentEntry>();
-  if (!enrichment) return out;
-  for (const entry of enrichment.values()) {
-    const alias = typeof entry.providerAlias === "string" ? entry.providerAlias.trim() : "";
-    if (alias.length === 0) continue;
-    if (out.has(alias)) {
-      // First-wins, but upgrade to the first entry that carries a
-      // non-empty providerDisplayName so the prefix renders nicely.
-      const existing = out.get(alias);
-      if (
-        existing &&
-        (!existing.providerDisplayName || existing.providerDisplayName.trim().length === 0) &&
-        typeof entry.providerDisplayName === "string" &&
-        entry.providerDisplayName.trim().length > 0
-      ) {
-        out.set(alias, entry);
-      }
-      continue;
-    }
-    out.set(alias, entry);
-  }
-  return out;
-}
-
-/**
- * Resolve a synthesised enrichment entry for `applyProviderTag` /
- * `shortProviderLabel` consumption, combining two sources:
- *
- *  1. The direct per-model enrichment match (if present).
- *  2. A per-alias fallback derived from `buildAliasIndex` — covers raw
- *     ids whose prefix matches a known alias but the specific model
- *     id wasn't curated in `/api/pricing/models`. Example:
- *     `cohere/rerank-multilingual-v3.0` falls back to the cohere slot's
- *     `providerDisplayName='Cohere'` even though that specific id
- *     isn't in the curated 10-model list.
- *
- * Returns `undefined` when neither source surfaces an alias.
- *
- * NOTE: this function is read-only over its inputs; it never mutates
- * the underlying `direct` entry. When it falls back to the alias
- * index, it constructs a fresh minimal entry exposing only the
- * provider-prefix fields (`providerAlias`, `providerCanonical`,
- * `providerDisplayName`). Other fields (name, pricing) are explicitly
- * left undefined so `applyEnrichment` won't accidentally overwrite a
- * model name with the alias-slot label.
- */
-export function resolveProviderTagEntry(
-  rawId: string,
-  direct: OmniRouteEnrichmentEntry | undefined,
-  aliasIndex: Map<string, OmniRouteEnrichmentEntry>,
-  canonicalToAlias?: Map<string, string>
-): OmniRouteEnrichmentEntry | undefined {
-  if (direct) {
-    const alias = typeof direct.providerAlias === "string" ? direct.providerAlias.trim() : "";
-    const display =
-      typeof direct.providerDisplayName === "string" ? direct.providerDisplayName.trim() : "";
-    if (alias.length > 0 || display.length > 0) return direct;
-  }
-  const slash = rawId.indexOf("/");
-  if (slash <= 0) return direct;
-  const prefix = rawId.slice(0, slash);
-  // 1. Direct alias lookup (`cohere/...` → cohere slot keyed by alias=cohere).
-  let fromAlias = aliasIndex.get(prefix);
-  // 2. Canonical fallback (`pollinations/...` → look up via alias `pol`).
-  if (!fromAlias && canonicalToAlias) {
-    const alias = canonicalToAlias.get(prefix);
-    if (alias) fromAlias = aliasIndex.get(alias);
-  }
-  if (!fromAlias) return direct;
-  // Synthesize: borrow only the provider-prefix metadata.
-  return {
-    providerAlias: fromAlias.providerAlias,
-    providerCanonical: fromAlias.providerCanonical,
-    providerDisplayName: fromAlias.providerDisplayName,
-  };
-}
-
-/**
  * Fetcher contract: resolves the enrichment overlay (display names +
  * pricing + free-tier budgets) from a running OmniRoute instance.
  */
 /**
  * Reports a source that could not be read. Enrichment stays best-effort, but
- * a caller that swallows this loses display names, provider tags, canonical
+ * a caller that swallows this loses display names, provider labels, canonical
  * dedupe and pricing with no way to tell why.
  */
 export type OmniRouteEnrichmentSourceError = (endpoint: string, reason: string) => void;
@@ -649,22 +549,25 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
  */
 /** What the caller knows about the entry that the overlay itself cannot tell. */
 export interface EnrichmentDisplayContext {
-  /** Combos never carry a provider tag: they route across providers. */
+  /** Combos never carry a provider label: they route across providers. */
   isCombo?: boolean;
   isAutoCombo?: boolean;
-  /** Set false to publish the bare display name, without the provider tag. */
+  /** Original gateway model id, used to derive the provider when enrichment lacks a label. */
+  rawModelId?: string;
+  /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
 }
 
 /**
- * Fold the overlay into a mapped model: display name, provider tag, free-tier
+ * Fold the overlay into a mapped model: display name, provider label, free-tier
  * marker and budget, and pricing.
  *
  * The name is built rather than copied, because the gateway ships the parts
  * separately — the pricing catalog gives a display name and an upstream
  * provider label, the free-tier summary gives the budget. A picker showing
- * `Claude - [Free] Sonnet 4.6 · 1M/mo` tells the user which connection serves
- * the model and what it costs them; `claude-sonnet-4-6` tells them nothing.
+ * `🆓 Claude - Sonnet 4.6 · 1M tokens/month` tells the user what it costs
+ * them; the provider prefix renders whenever one is known, and entries that
+ * share a name gain a route suffix later in the collect pass.
  */
 export function applyEnrichment(
   model: ModelV2,
@@ -672,11 +575,24 @@ export function applyEnrichment(
   context: EnrichmentDisplayContext = {}
 ): ModelV2 {
   if (!enrichment) return model;
+  const rawModelId =
+    typeof context.rawModelId === "string" && context.rawModelId.length > 0
+      ? context.rawModelId
+      : "";
+  let providerDisplayName = enrichment.providerDisplayName;
+  if (
+    (!providerDisplayName || providerDisplayName.trim().length === 0) &&
+    typeof rawModelId === "string" &&
+    rawModelId.includes("/")
+  ) {
+    providerDisplayName = rawModelId.slice(0, rawModelId.indexOf("/"));
+  }
   const built = buildModelDisplayName({
-    rawId: model.name && model.name.length > 0 ? model.name : model.id,
+    rawId: rawModelId,
     enrichmentName: enrichment.name,
-    providerAlias: context.providerTag === false ? undefined : enrichment.providerAlias,
-    providerDisplayName: context.providerTag === false ? undefined : enrichment.providerDisplayName,
+    providerAlias: enrichment.providerAlias,
+    providerDisplayName,
+    providerTag: context.providerTag,
     isFree: enrichment.freeType !== undefined,
     freeType: enrichment.freeType,
     monthlyTokens: enrichment.monthlyTokens,

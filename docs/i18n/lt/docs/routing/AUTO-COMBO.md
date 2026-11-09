@@ -128,6 +128,27 @@ Automatinis vertinimas kiekvienai užklausai parenka geriausią teikėją / mode
 | `src/sse/handlers/chat.ts`                                | Integracija: spartusis automatinio prefikso kelias |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistemos įrašas            |
 
+## Išsaugotų automatinių kombinacijų paskyros nuostatos
+
+Išmanusis automatinis redaktorius siūlo pasirinktinai** Paskyros nuostatos** skyrių. Kiekvienas ryšys gali būti pageidaujamas, įprastas (numatytasis), rezervuotas arba neįtrauktas. Keli ryšiai gali dalytis lygiu. Automatiškai pasirenka pirmoje tinkamoje pakopoje, išlaikant scoring/router elgseną ten; nesėkmingi bandymai patenka į likusias konkrečias sąskaitas, pirmenybę teikiant įprastai prieš rezervą. Išskirtos jungtys niekada nenaudojamos šiame derinyje.
+
+Nustatymas išsaugomas kaip `config.accountPreferences`, pažymėtas jungtimi ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Praleistas arba tuščias žemėlapis išlaiko esamą maršrutą. Nuostatos neįgalina išjungtų ryšių, nesuteikia API rakto prieigos, neatkuria kvotų užblokuotų kandidatų arba apeina biudžeto patikras. Kiekvienas bandymas apsiriboja konkrečiu ryšiu, todėl paskyros atsarginė dalis negali pereiti aukštų už kombinuoto maršrutizatoriaus. Esama seanso bendrija gali išlaikyti tinkamą paskyrą; neįskaitant paskyros, susietos su savuoju posūkiu, sustojimai, kurie apsisuka, o ne tyliai keičia paskyras.
+
+Sukonfigūruotose nuostatose naudojamas automatinis kelias nuo paskyros: nesusietas konteksto talpykla, išmanusis vamzdynas, chaosas ir šešėliniai spartieji klavišai nesiunčiami. Spekuliatyvus apsidraudimas šioms užklausoms išjungtas, todėl rezervinės sąskaitos negali varžytis su pageidaujamomis. Kitos kombinuotos strategijos neaiškina šio nustatymo. Pakeitus kombinaciją iš Auto, išsaugomos išsaugotos nuostatos, kad vėliau būtų galima grįžti atgal.
+
 ## Kombinacijų pavadinimai, sutampantys su tikru modelio ID
 
 Kombinacija, kurios `name` yra identiškas nepapildytam modelio ID (pvz., kombinacija, pavadinta

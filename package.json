@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.54",
-  "description": "Unified AI router with 381 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "Unified AI router with 383 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -269,6 +269,7 @@
     "audit:deps": "npm audit --audit-level=critical && (npm audit --audit-level=high || echo '::warning::high-severity advisories present (non-blocking)') && npm run audit:electron",
     "audit:electron": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
+    "typecheck:build": "tsc --pretty false -p tsconfig.build.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
     "check:dashboard-typecheck": "node scripts/check/check-dashboard-typecheck.mjs",
     "check:build-typecheck": "node scripts/check/check-build-typecheck.mjs",
@@ -344,6 +345,7 @@
     "@lobehub/icons": "^5.16.0",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@monaco-editor/react": "^4.7.0",
+    "@msgpack/msgpack": "^3.1.3",
     "@ngrok/ngrok": "^1.7.0",
     "@radix-ui/react-dialog": "1.1.23",
     "@radix-ui/react-dropdown-menu": "2.1.24",
