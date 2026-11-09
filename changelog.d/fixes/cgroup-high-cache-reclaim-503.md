@@ -1,1 +1,1 @@
-Prevent global `503 resource_pressure` rejections when a Linux cgroup briefly reclaims SQLite page cache at `memory.high` with low local PSI and ample anonymous-memory headroom; retain shedding for genuine memory stalls and `memory.max` events.
+- Prevent global `503 resource_pressure` rejections when a Linux cgroup briefly reclaims SQLite page cache at `memory.high` with low local PSI and ample anonymous-memory headroom; retain shedding for genuine memory stalls and `memory.max` events.
