@@ -698,24 +698,49 @@ export async function withEarlyStreamKeepalive(
             // Real SSE stream — forward it verbatim.
             upstreamReader = response.body.getReader();
             let bytesForwarded = 0;
+            // Last four forwarded bytes. A finished SSE event ends in \n\n (or \r\n\r\n).
+            const tail = [0, 0, 0, 0];
+            const noteTail = (value: Uint8Array) => {
+              for (let i = 0; i < value.byteLength; i++) {
+                tail.copyWithin(0, 1);
+                tail[3] = value[i];
+              }
+            };
+            const endedOnEventBoundary = () => {
+              if (bytesForwarded >= 2 && tail[2] === 0x0a && tail[3] === 0x0a) return true;
+              return (
+                bytesForwarded >= 4 &&
+                tail[0] === 0x0d &&
+                tail[1] === 0x0a &&
+                tail[2] === 0x0d &&
+                tail[3] === 0x0a
+              );
+            };
             try {
               while (true) {
                 const { done, value } = await upstreamReader.read();
                 if (done) break;
-                if (value) {
+                if (value && value.byteLength > 0) {
                   controller.enqueue(value);
                   bytesForwarded += value.byteLength;
+                  noteTail(value);
                 }
               }
             } catch {
               if (aborted) return;
-              if (bytesForwarded === 0) {
+              if (bytesForwarded === 0 || endedOnEventBoundary()) {
+                // Nothing forwarded yet, or the last forwarded bytes finished an
+                // SSE event: append one generic terminal error event and close
+                // cleanly. controller.error() here is what Claude Code reports as
+                // "The response stream was malformed" after it has already shown
+                // the text (#18773), and a quiet close would pass a failed turn
+                // off as complete.
                 controller.enqueue(errorFrame);
                 recordClientBytes(errorFrame);
               } else {
-                // The last forwarded bytes may end inside an SSE frame. Fail the
-                // transport instead of appending invalid SSE or reporting clean EOF.
-                // Never expose the upstream exception, its stack, or its cause.
+                // The client already holds a cut frame. Reject the transport so
+                // that half line is not a clean EOF, and do not append another
+                // frame or the upstream's own message.
                 streamErrored = true;
                 controller.error(new Error("Upstream stream failed before completion."));
               }

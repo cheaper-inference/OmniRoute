@@ -10,77 +10,76 @@ _Päivitetty viimeksi: 2026-06-28_
 
 ## Tiivistelmä
 
-OmniRoute on Next.js-pohjainen paikallinen tekoälyn reititysyhdyskäytävä ja hallintapaneeli.  
-Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää liikennettä useiden ylävirran palveluntarjoajien välillä käännösten, varajärjestelyjen, tunnisteiden päivityksen ja käytön seurannan avulla.
+OmniRoute on paikallinen AI -reititysyhdyskäytävä ja kojelauta, joka on rakennettu Next.js. Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää liikenteen useiden ylävirran palveluntarjoajien kesken kääntämisen, varaosion, tunnuksen päivityksen ja käytön seurannan avulla.
 
-Keskeiset ominaisuudet:
+Ydinominaisuudet:
 
-- OpenAI-yhteensopiva API-pinta CLI-työkaluille (380 palveluntarjoajaa, 159 suoritusmoduulia)
-- Pyyntöjen ja vastausten käännös palveluntarjoajien muotojen välillä
-- Mallien yhdistelmävarajärjestely (monen mallin järjestys)
-- Rakenteiset yhdistelmävaiheet (`provider + model + connection`), joiden suoritusjärjestys määritetään ajonaikaisesti kohteen `compositeTiers` perusteella
-- Tilikohtainen varajärjestely (useita tilejä palveluntarjoajaa kohden)
-- Kiintiön ennakkotarkistus ja kiintiöt huomioiva P2C-tilin valinta pääkeskustelupolussa
-- OAuth- ja API-avaimiin perustuvien palveluntarjoajayhteyksien hallinta (27 OAuth-palveluntarjoajamoduulia)
-- Upotusten luonti käyttäen `/v1/embeddings`-päätepistettä (18 palveluntarjoajaa)
-- Kuvien luonti käyttäen `/v1/images/generations`-päätepistettä (10+ palveluntarjoajaa, 20+ mallia)
-- Äänen litterointi käyttäen `/v1/audio/transcriptions`-päätepistettä (18 palveluntarjoajaa)
-- Tekstin muuntaminen puheeksi käyttäen `/v1/audio/speech`-päätepistettä (24 sisäänrakennettua palveluntarjoajaa)
-- Videoiden luonti käyttäen `/v1/videos/generations`-päätepistettä (ComfyUI + SD WebUI)
-- Musiikin luonti käyttäen `/v1/music/generations`-päätepistettä (ComfyUI)
-- Verkkohaut käyttäen `/v1/search`-päätepistettä (20 palveluntarjoajaa)
-- Moderoinnit käyttäen `/v1/moderations`-päätepistettä
-- Uudelleenjärjestäminen käyttäen `/v1/rerank`-päätepistettä
-- Ajattelutagien (`<think>...</think>`) jäsennys päättelymalleja varten
-- Vastausten puhdistus tiukan OpenAI SDK -yhteensopivuuden varmistamiseksi
-- Roolien normalisointi (developer→system, system→user) palveluntarjoajien välisen yhteensopivuuden varmistamiseksi
-- Rakenteisen tulosteen muuntaminen (json_schema → Geminin responseSchema)
-- Palveluntarjoajien, avainten, aliasten, yhdistelmien, asetusten ja hinnoittelun paikallinen tallennus (122 tietokantamoduulia)
-- Käytön ja kustannusten seuranta sekä pyyntöjen lokitus
-- Valinnainen pilvisynkronointi useiden laitteiden ja tilan synkronointia varten
-- IP-osoitteiden sallittujen ja estettyjen luettelo API-käytön hallintaa varten
-- Ajattelubudjetin hallinta (passthrough/auto/custom/adaptive)
-- Järjestelmäkehotteen yleinen lisääminen
-- Istuntojen seuranta ja sormenjälkien muodostaminen
-- Tilikohtainen tehostettu nopeuden rajoitus palveluntarjoajakohtaisilla profiileilla
-- Sulakekatkaisijamalli palveluntarjoajien vikasietoisuutta varten
-- Mutex-lukitukseen perustuva suojaus samanaikaisten pyyntöryntäysten vaikutuksia vastaan
-- Allekirjoituspohjainen pyyntöjen deduplikaatiovälimuisti
-- Domain-kerros: kustannussäännöt, varajärjestelykäytäntö ja lukituskäytäntö
-- Context Relay: istunnon siirtämisen yhteenvetoja tilien kierron jatkuvuutta varten
-- Domain-tilan tallennus (SQLite write-through -välimuisti varajärjestelyille, budjeteille, lukituksille ja sulakekatkaisijoille)
-- Käytäntömoottori pyyntöjen keskitettyyn arviointiin (lukitus → budjetti → varajärjestely)
-- Pyyntöjen telemetria, joka kokoaa p50/p95/p99-viiveet
-- Yhdistelmäkohteiden telemetria ja yhdistelmäkohteiden historiallinen kunto käyttäen `combo_execution_key` / `combo_step_id`
-- Korrelaatiotunnus (X-Request-Id) päästä päähän -jäljitystä varten
-- Vaatimustenmukaisuuden auditointilokitus, jossa käytön voi poistaa käytöstä API-avainkohtaisesti
-- Eval-kehys LLM-laadunvarmistusta varten
-- Kuntohallintapaneeli, jossa palveluntarjoajien sulakekatkaisijoiden tila näkyy reaaliaikaisesti
-- MCP-palvelin (110 työkalua) kolmella siirtotavalla (stdio/SSE/Streamable HTTP)
-- A2A-palvelin (JSON-RPC 2.0 + SSE), jossa on taidot ja tehtävien elinkaari
-- Muistijärjestelmä (poiminta, lisääminen, haku ja tiivistäminen)
-- Taitojärjestelmä (rekisteri, suorittaja, hiekkalaatikko ja sisäänrakennetut taidot)
-- MITM-välityspalvelin varmenteiden hallinnalla ja DNS-käsittelyllä
-- Kehotteen injektion estävä middleware
-- Kehotteen pakkausputki, jossa on Caveman, RTK, pinotut putket, pakkausyhdistelmät, kielipaketit ja analytiikka
+- OpenAI-yhteensopiva API pinta CLI/tools (381 tarjoajaa, 159 toteuttajamoduulia)
+- Request/response -käännös eri palveluntarjoajien formaateissa
+- Mallin yhdistelmävara (usean mallin sarja)
+- Strukturoidut yhdistelmäaskeleet (`provider + model + connection`) `compositeTiers`:n ajonaikaisessa järjestyksessä
+- Tilitason varavaihtoehto (useita tiliä palveluntarjoajaa kohti)
+- Kiintiön esitarkastus ja kiintiötietoinen P2C tilin valinta pääkeskustelupolulla
+- OAuth + API-avain tarjoajan yhteydenhallinta (27 OAuth toimittajamoduulia)
+- Upottaminen sukupolven `/v1/embeddings` kautta (18 palveluntarjoajaa)
+- Kuvien luominen `/v1/images/generations` kautta (10 + toimittajaa, 20 + -mallia)
+- Äänen transkriptio `/v1/audio/transcriptions` kautta (18 palveluntarjoajaa)
+- Tekstistä puheeksi `/v1/audio/speech` kautta (24 sisäänrakennettua palveluntarjoajaa)
+- Videon luominen `/v1/videos/generations` kautta (ComfyUI + SD WebUI)
+- Musiikin luominen `/v1/music/generations` kautta (ComfyUI)
+- Verkkohaku `/v1/search` kautta (20 palveluntarjoajaa)
+- Moderointi `/v1/moderations` kautta
+- Uudelleensijoitus `/v1/rerank` kautta
+- Ajattele tagien jäsentämistä (`<think>...</think>`) päättelymalleille
+- Vastauksen desinfiointi tiukan OpenAI SDK -yhteensopivuuden takaamiseksi
+- Roolin normalisointi (kehittäjä-→ järjestelmä, järjestelmän → käyttäjä) palveluntarjoajien välisen yhteensopivuuden varmistamiseksi
+- Strukturoidun lähdön muunnos (json_schema → Gemini responseSchema)
+- Paikallinen pysyvyys tarjoajille, avaimille, aliaksille, yhdistelmille, asetuksille, hinnoittelulle (122 DB moduulia)
+- Usage/cost -seuranta ja pyyntöjen kirjaaminen
+- Valinnainen pilvisynkronointi multi-device/state synkronointiin
+- IP allowlist/blocklist : API kulunvalvontaan
+- Ajatteleva budjetin hallinta (passthrough/auto/custom/adaptive)
+- Globaali järjestelmän nopea ruiskutus
+- Istunnon seuranta ja sormenjäljet
+- Tilikohtainen tehostettu hintarajoitus tarjoajakohtaisilla profiileilla
+- Katkaisijakuvio palveluntarjoajan joustavuuden parantamiseksi
+- Ukkosta estävä laumasuoja mutex-lukolla
+- Allekirjoituspohjainen pyyntöjen duplikoinnin välimuisti
+- Verkkotunnustaso: kustannussäännöt, varakäytäntö, lukituskäytäntö
+- Kontekstivälitys: istunnon vaihdon yhteenvedot tilin vuorottelun jatkuvuudesta
+- Verkkotunnuksen tilan pysyvyys (SQLite -välimuisti varauksille, budjeteille, lukituksille, katkaisimille)
+- Käytäntömoottori keskitettyä pyyntöjen arviointia varten (lockout → budget → backback)
+- Pyydä telemetriaa p50/p95/p99 -latenssikoostumuksella
+- Yhdistelmäkohdetelemetria ja historiallinen yhdistelmäkohdekuvio `combo_execution_key` / `combo_step_id` kautta
+- Korrelaatio ID (X-Request-Id) päästä päähän -jäljitykseen
+- Vaatimustenmukaisuuden tarkastuksen kirjaaminen opt-out-toiminnolla API -avaimella
+- Eval-kehys LLM -laadunvarmistukselle
+- Terveyskojelauta, jossa on reaaliaikainen palveluntarjoajan katkaisijan tila
+- MCP palvelin (110 työkalua), 3 siirtoa (stdio/SSE/Streamable HTTP)
+- A2A palvelin (JSON-RPC 2.0 + SSE) taitojen ja tehtävien elinkaarella
+- Muistijärjestelmä (poisto, injektio, haku, yhteenveto)
+- Taitojärjestelmä (rekisteri, toimeenpanija, hiekkalaatikko, sisäänrakennetut taidot)
+- MITM -välityspalvelin varmenteiden hallinnan ja DNS -käsittelyn kanssa
+- Nopea ruiskutussuojan väliohjelmisto
+- Nopea pakkausputki, jossa on Caveman, RTK, pinotut putkistot, pakkausyhdistelmät, kielipaketit ja analytiikka
 - ACP (Agent Communication Protocol) -rekisteri
-- Modulaariset OAuth-palveluntarjoajat (22 yksittäistä moduulia hakemistossa `src/lib/oauth/providers/`)
-- Poisto- ja täydellisen poiston komentosarjat
-- OAuth-ympäristön korjaustoiminto
-- WebSocket-silta OpenAI-yhteensopiville WS-asiakkaille (`/v1/ws`)
-- Synkronointitunnisteiden hallinta (myöntäminen/peruuttaminen, ETag-versioitu määrityspaketin lataus)
-- GLM Thinking (`glmt`) ensiluokkaisena palveluntarjoajan esiasetuksena
-- Hybridi-tunnisteiden laskenta (palveluntarjoajan puolen `/messages/count_tokens` ja arviointiin perustuva varamenettely)
-- Mallialiasten automaattinen alustaminen (30+ palvelinten välistä murretta normalisoidaan käynnistyksen yhteydessä)
-- Turvallinen lähtevä haku SSRF-suojauksella, yksityisten URL-osoitteiden estolla ja määritettävällä uudelleenyrityksellä
-- Jäähdytysajan huomioivat keskustelujen uudelleenyritykset, joissa `requestRetry` ja `maxRetryIntervalSec` ovat määritettävissä
-- Ajonaikaisen ympäristön validointi Zodilla käynnistyksen yhteydessä
-- Vaatimustenmukaisuuden auditointi v2, jossa on sivutus, palveluntarjoajien CRUD-tapahtumat ja SSRF-estettyjen validointien lokitus
+- Modular OAuth providers (22 individual modules under `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall -skriptit
+- OAuth ympäristön korjaustoimet
+- WebSocket silta OpenAI-yhteensopiville WS asiakkaille (`/v1/ws`)
+- Synkronointitunnuksen hallinta (issue/revoke, ETag-version määrityspaketin lataus)
+- GLM Thinking (`glmt`) ensiluokkainen palveluntarjoajan esiasetus
+- Hybriditunnusten laskenta (palveluntarjoajan puoleinen `/messages/count_tokens` arvioinnin varalla)
+- Mallin aliaksen automaattinen kylvö (30 + välityspalvelinten välisen murteen normalisoinnit käynnistyksen yhteydessä)
+- Turvallinen lähtevä nouto SSRF -suojalla, yksityinen URL -esto ja konfiguroitava uudelleenyritys
+- Cooldown-tietoinen chat-yritys uudelleen määritettävillä `requestRetry` ja `maxRetryIntervalSec` painikkeilla
+- Ajonaikaisen ympäristön validointi Zod käynnistyksen yhteydessä
+- Vaatimustenmukaisuuden tarkastus v2, jossa on sivutus, palveluntarjoajan CRUD -tapahtumat ja SSRF-estämä vahvistusloki
 
-Ensisijainen ajonaikainen malli:
+Ensisijainen suoritusaikamalli:
 
-- Next.js-sovellusreitit hakemistossa `src/app/api/*` toteuttavat sekä hallintapaneelin API:t että yhteensopivuus-API:t
-- Jaettu SSE-/reititysydin hakemistoissa `src/sse/*` + `open-sse/*` käsittelee palveluntarjoajien suorittamisen, käännökset, suoratoiston, varajärjestelyt ja käytön
+- Next.js -sovellusreitit `src/app/api/*` alla toteuttavat sekä kojelaudan APIs että yhteensopivuuden APIs
+- Jaettu SSE/routing -ydin `src/sse/*` :ssä + `open-sse/*` hoitaa palveluntarjoajan suorittamisen, käännöksen, suoratoiston, varatoiminnon ja käytön
 
 ## Viitekaaviot
 
@@ -415,7 +414,7 @@ Katso sääntöjoukkojen luomisesta ja kynnyksen virityksestä [`docs/security/G
 - Connection/model -säännön liittäjä: `src/domain/connectionModelRules.ts`
 - Mallin saatavuuden tilannekuvat: `src/domain/modelAvailability.ts`
 - Palveluntarjoajan vanhenemisen seuranta: `src/domain/providerExpiration.ts`
-- Kiintiön välimuisti: `src/domain/quotaCache.ts`
+- Kiintiön välimuisti: `src/domain/quotaCache.ts`. Palveluntarjoajat lisäävät ja poistavat kiintiöikkunoita (OpenAI pudotti 5 tunnin Codex ikkunan joissakin suunnitelmissa), joten palveluntarjoajan sovittimen käyttölukeman todistaa olevan täydellinen (`quotasComplete`, katso `src/lib/usage/usageReading.ts`) on tilin koko ikkunasarja: aiemmin tunnettu ikkuna, joka puuttuu siitä, on poistettu käytöstä, välimuistissa, rependedqreteften (rependedqretef) pysyi Codex -kiintiön tilassa ja `quota_snapshots` : Claude kyllästymisryhmissä. Osittaiset todisteet (vastausten otsikot, vanhentuneet kopiot) päivittävät vain siinä olevat ikkunat.
 - Hajoamistila: `src/domain/degradation.ts`
 - Kokoonpanon tarkastus: `src/domain/configAudit.ts`
 - OmniRoute -vastauksen metatietojen rakentaja: `src/domain/omnirouteResponseMeta.ts`

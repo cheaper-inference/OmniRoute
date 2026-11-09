@@ -62,9 +62,19 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "grok-cli",
   "muse-code",
   "workbuddy",
+  // MiniMax Code: the account service issues a device code the user confirms
+  // in the browser; the credential lands in the local MiniMax Code profile.
+  "minimax-code",
 ]);
 
-const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+const TOKEN_PASTE_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
 const IMPORT_TOKEN_ONLY_PROVIDERS = new Set(["devin-cli"]);
 // Devin Desktop opens on the key import (its long-standing default); browser sign-in is a tab.
 const PASTE_FIRST_PROVIDERS = new Set([...IMPORT_TOKEN_ONLY_PROVIDERS, "devin-desktop", "claude"]);

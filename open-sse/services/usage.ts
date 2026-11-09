@@ -98,6 +98,7 @@ import { getMegabrainUsage } from "./usage/megabrain.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
 import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
+import { getZedHostedUsage } from "./usage/zedHosted.ts";
 import { getMuseUsage } from "./usage/museCode.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -313,6 +314,9 @@ export async function getUsageForProvider(
     case "cloudflare-ai":
       // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
       return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
+    case "zed-hosted":
+      // USD credit from the operator-pasted Orb billing portal link; display-only.
+      return await getZedHostedUsage(id || "", providerSpecificData);
     case "muse-code":
       // Muse Code has no usage/balance API. Return persisted subscription metadata.
       return await getMuseUsage(accessToken, providerSpecificData, id || "");

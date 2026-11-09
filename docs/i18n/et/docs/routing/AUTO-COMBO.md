@@ -127,6 +127,27 @@ Automaatne hindamine valib iga päringu jaoks parima pakkuja/mudeli
 | `src/sse/handlers/chat.ts`                                | Integratsioon: automaatse prefiksi korral otsetee |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` süsteemikirje             |
 
+## Salvestatud automaatkombinatsioonide kontoeelistused
+
+Intelligentne automaatne redaktor pakub valikulist funktsiooni** Konto eelistused** osa. Iga ühendus võib olla eelistatud, tavaline (vaikeseade), reserveeritud või välistatud. Mitu ühendust võivad jagada taset. Automaatne valib esimesest sobilikust astmest, säilitades seal oma scoring/router käitumise; ebaõnnestunud katsed langevad ülejäänud konkreetsete kontode alla, eelistatakse enne tavalist enne reservi. See kombinatsioon ei kasuta kunagi välistatud ühendusi.
+
+Seade salvestatakse kui `config.accountPreferences`, mis on klahvitud ühendusega ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Väljajäetud või tühi kaart säilitab olemasoleva marsruudi. Eelistused ei luba keelatud ühendusi, ei anna API-võtmele juurdepääsu, ei taasta kvoodiga blokeeritud kandidaate ega jäta eelarvekontrollidest mööda. Iga katse on piiratud selle konkreetse ühendusega, nii et konto varundus ei saa hüpata kombineeritud ruuteri taha. Olemasolev seansi seanss võib säilitada sobiliku konto; omakeelse pöördega seotud konto väljajätmine peatused, mis vaikselt kontode vahetamise asemel pöörduvad.
+
+Konfigureeritud eelistused kasutavad kontoteadlikku automaatset teed: sidumata konteksti vahemälu, nutikat torujuhet, kaose ja vari otseteid ei saadeta. Spekulatiivne riskimaandamine on nende taotluste puhul keelatud, nii et reservkontod ei saa eelistatud kontodega võistelda. Teised kombineeritud strateegiad seda sätet ei tõlgenda. Kombo muutmine valikust Auto ära jätab salvestatud eelistused hilisemaks tagasilülitamiseks.
+
 ## Kombo nimed, mis vastavad tegelikule mudeli ID-le
 
 Kombo, mille `name` on identne alasti mudeli ID-ga (nt kombo nimeks on `gpt-5.5`), on **tahtlik ja toetatud muster**, mitte viga: see on mehhanism per-mudeli-ID pakkuja varundamiseks, mida kirjeldatakse [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Kuna kombo lahendamine kontrollitakse enne alasti mudeli ID lahendamist (`getComboForModel()` `src/sse/services/model.ts`), suunatakse alasti ID `gpt-5.5` päringud läbi kombo sihtmärkide (nt `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) asemel otse ühele pakkujale – see kasutab ära kombo-enne-ümbertöötlemise eelistust, mis ehitati [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) jaoks ning mida testitakse regressioonina `tests/unit/responses-combo-resolution-3227.test.ts` ja `tests/unit/combo-name-codex-responses-rewrite.test.ts` abil.
