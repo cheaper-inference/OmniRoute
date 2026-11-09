@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferências de contas",
+    "description": "Defina várias contas como preferenciais ou de reserva para esta configuração de roteamento. O roteamento automático classifica as contas dentro de cada nível. As contas não listadas permanecem normais. As permissões, os limites de cota e os vínculos de turno existentes continuam válidos.",
+    "preferred": "Preferencial",
+    "normal": "Normal",
+    "reserve": "Reserva",
+    "excluded": "Excluída",
+    "loading": "Carregando contas…",
+    "error": "Não foi possível carregar as contas. Reabra o editor para tentar novamente.",
+    "missing": "Conta indisponível ({id})"
+  },
   "teamCosts": {
     "title": "Custos da equipa",
     "subtitle": "Gira orçamentos flexíveis partilhados e estimativas de custo do catálogo.",

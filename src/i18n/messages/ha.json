@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Zaɓuɓɓukan asusu",
+    "description": "Zaɓi asusu da dama don amfani da su da farko ko ajiye su a madadin wannan combo. Tsarin sarrafa hanya ta atomatik yana jera asusu a cikin kowane mataki. Asusun da ba a lissafo ba na al’ada ne. Izini, iyakokin ƙima da kuma haɗin da aka riga aka ɗaure ga zagayen magana har yanzu suna aiki.",
+    "preferred": "Za a fara amfani da shi",
+    "normal": "Na al’ada",
+    "reserve": "A madadin",
+    "excluded": "Ba za a yi amfani da shi ba",
+    "loading": "Ana loda asusu…",
+    "error": "An kasa loda asusu. Sake buɗe editan don sake gwadawa.",
+    "missing": "Asusun da babu shi ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Yanayin sabis na Codex don wannan maɓallin API",
     "description": "Yana aiki ga buƙatun Codex, har da samfurorin Codex da ke cikin haɗaɗɗun tsare-tsare. Yanayin da aka tilasta suna rinjayar saitunan abokin hulɗa, saitunan gaba ɗaya da tsoffin saitunan haɗi. Sauran masu samarwa ba sa canzawa.",
