@@ -1,0 +1,1 @@
+- **feat(gemini-web):** add opt-in `gemini-4-argon` model support to the `gemini-web` provider registry with UI mode selection and verification descriptor; off by default until its selectors are checked live, enable with `OMNIROUTE_GEMINI_WEB_ARGON_ENABLED=1` ([#16573](https://github.com/diegosouzapw/OmniRoute/pull/16573))

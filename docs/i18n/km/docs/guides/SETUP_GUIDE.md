@@ -191,41 +191,41 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## ការរៀបចំពិធីការ (MCP + A2A)
+## ការដំឡើងពិធីការ (MCP + A2A)
 
-### ការរៀបចំ MCP (Model Context Protocol)
+### ការដំឡើង MCP (ពិធីការបរិបទគំរូ)
 
-ចាប់ផ្ដើម transport MCP ក្នុងរបៀប stdio៖
+ចាប់ផ្តើមការដឹកជញ្ជូន MCP នៅក្នុងរបៀប stdio៖
 
 ```bash
 omniroute --mcp
 ```
 
-លំហូរផ្ទៀងផ្ទាត់ដែលបានណែនាំ៖
+លំហូរសុពលភាពដែលបានណែនាំ៖
 
 ```bash
-# 1. ចាប់ផ្ដើមម៉ាស៊ីនមេ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. ពីម៉ាស៊ីនភ្ញៀវ MCP របស់អ្នក សូមហៅ៖
-omniroute_get_health        # គួរតែត្រឡប់ស្ថានភាពសុខភាពប្រព័ន្ធ
-omniroute_list_combos       # គួរតែត្រឡប់ combos ដែលសកម្ម
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ឬដំណើរការឈុត E2E ពេញលេញ៖
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### ការកំណត់រចនាសម្ព័ន្ធម៉ាស៊ីនភ្ញៀវ MCP
+#### MCP ការកំណត់រចនាសម្ព័ន្ធម៉ាស៊ីនភ្ញៀវ
 
-**Claude Code:**
+**កូដ Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-បន្ថែមទៅក្នុងការកំណត់ MCP របស់អ្នក៖
+បន្ថែមទៅការកំណត់ MCP របស់អ្នក (stdio ដោយប្រើសោ ដូច្នេះអ្នកហៅចូលមានប្រាក់ដើម)៖
 
 ```json
 {
@@ -233,23 +233,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**ឯកសារ MCP ពេញលេញ៖** [README របស់ម៉ាស៊ីនមេ MCP](../../open-sse/mcp-server/README.md) — ឧបករណ៍ 110, ការកំណត់ IDE, ម៉ាស៊ីនភ្ញៀវ Python/TS/Go។
+ឬនៅពេលដែល `mcpTransport` គឺ `streamable-http` (កំណត់វានៅលើ `/dashboard/mcp` ឬជាមួយ `omniroute mcp enable --transport streamable-http`) ចង្អុលធាតុម៉ាស៊ីនមេ MCP ពីចម្ងាយរបស់អតិថិជននៅ `http://localhost:20128/api/mcp/stream`។
 
-### ការរៀបចំ A2A (Agent-to-Agent Protocol)
+គន្លឹះធ្វើដំណើរជា `Authorization: Bearer <api-key>` (សូមមើល [MCP Server → ការចូលប្រើពីចម្ងាយ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) សម្រាប់ម៉ាស៊ីនពីចម្ងាយ សោពីចម្ងាយត្រូវការ `mcp:connect` បូកនឹងវិសាលភាព read/write របស់វា)។
 
-ផ្ទៀងផ្ទាត់ Agent Card៖
+**ឯកសារ MCP ពេញលេញ៖** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 tools, IDE configs, Python/TS/Go clients. សេចក្តីយោងប្រតិបត្តិករសម្រាប់ឧបករណ៍ CCR/dedup ការបង្ហាប់ (សញ្ញាសម្គាល់ តម្រូវការជាមុន វិសាលភាពឧបករណ៍នីមួយៗ ការដកទំព័រ ការវិនិច្ឆ័យ)៖ [ម៉ាស៊ីនបង្ហាប់ → តម្រូវការជាមុន / មគ្គុទ្ទេសក៍ប្រតិបត្តិករ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ។
+
+### ការដំឡើង A2A (ពិធីការភ្នាក់ងារទៅភ្នាក់ងារ)
+
+ផ្ទៀងផ្ទាត់កាតភ្នាក់ងារ៖
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-ផ្ញើភារកិច្ចមួយ៖
+ផ្ញើកិច្ចការ៖
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -257,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**ឯកសារ A2A ពេញលេញ៖** [README របស់ម៉ាស៊ីនមេ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ជំនាញ, ការស្ទ្រីម, វដ្តជីវិតភារកិច្ច។
+**ឯកសារ A2A ពេញលេញ៖** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ជំនាញ, ការផ្សាយ, វដ្តជីវិតការងារ។
 
 ---
 
@@ -316,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## គំរូសម្រាប់ Void Linux (xbps-src)
+## គំរូ Linux (xbps-src) ចាត់ទុកជាមោឃៈ
 
 សម្រាប់អ្នកប្រើប្រាស់ Void Linux អ្នកអាចបង្កើតកញ្ចប់ដើមដោយប្រើ `xbps-src`។ រក្សាទុកប្លុកនេះជា `srcpkgs/omniroute/template`៖
 
 ```bash
-# ឯកសារគំរូសម្រាប់ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# បង្កើត checksum ឡើងវិញសម្រាប់រាល់ការចេញផ្សាយដោយប្រើ៖
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

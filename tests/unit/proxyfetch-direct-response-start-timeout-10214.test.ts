@@ -14,10 +14,13 @@
  * replayed after that ambiguous timeout: their caller deadline remains the
  * response-start bound.
  */
-import { test } from "node:test";
+import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
 import { getDefaultDispatcher, getRetryDispatcher } from "../../open-sse/utils/proxyDispatcher.ts";
+import { useDirectMockHosts } from "../helpers/directMockHosts.ts";
+
+beforeEach((t) => useDirectMockHosts(t, "example.test"));
 
 function waitForAbort(init?: RequestInit): Promise<Response> {
   return new Promise<Response>((_, reject) => {
@@ -223,7 +226,7 @@ test("a healthy POST is untouched by the guard", async () => {
 
   const res = await withFastTimeout(() =>
     proxyFetch(
-      "https://opencode.ai/zen/go/v1/chat/completions",
+      "https://example.test/zen/go/v1/chat/completions",
       { method: "POST", body: "{}" },
       { undiciFetch: mockUndici }
     )
