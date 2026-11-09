@@ -15,3 +15,19 @@ export function buildAuthHeaders(
   headers.set("Authorization", `Bearer ${apiKey}`);
   return headers;
 }
+
+/**
+ * The `headers` option without any `authorization` entry, compared
+ * case-insensitively. Used where the headers are published for the host to
+ * send (provider and model info), so a caller value can never sit next to,
+ * or replace, the inference bearer token the host builds from `apiKey`.
+ */
+export function withoutAuthorizationHeader(
+  extraHeaders: Record<string, string> | undefined
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [name, value] of Object.entries(extraHeaders ?? {})) {
+    if (name.trim().toLowerCase() !== "authorization") out[name] = value;
+  }
+  return out;
+}

@@ -212,7 +212,10 @@ npm install --prefix ~/.config/opencode/plugins/omniroute-opencode-plugin-prepro
 | `modelCacheTtl`       | `number` | `300000` (5 min)                           | `/v1/models` TTL in ms                                                                                |
 | `baseURL`             | `string` | resolved from `auth.json` after `/connect` | Override OmniRoute base URL                                                                           |
 | `managementReadToken` | `string` | falls back to `apiKey`                     | Optional read-only token for management catalog GETs; `/v1` inference stays on the connected `apiKey` |
+| `headers`             | `object` | none                                       | Extra request headers for a gateway behind Cloudflare Access or a similar proxy; see the note below   |
 | `features`            | `object` | see below                                  | Feature toggles (all opt-in/out, defaults preserve v0.1.0)                                            |
+
+`headers` is sent with every catalog read and, while `features.fetchInterceptor` stays on (the default), with inference requests to the same origin; with the interceptor off, inference does not carry them. An `Authorization` entry, in any casing, never replaces the bearer token. Values such as a Cloudflare Access client secret sit in plain text in `opencode.json`, so treat that file as a secret.
 
 For least-privilege deployments, set top-level `managementReadToken` to a read-only management token. It is sent only to catalog reads (`/api/combos`, `/api/pricing/models`, `/api/pricing`, `/api/context/combos`, and `/api/providers`). Inference requests under `/v1`, including chat, continue to use the `apiKey` stored by OpenCode. `features.mcpToken` remains independent. If `managementReadToken` is omitted, catalog reads retain the previous `apiKey` behavior. `features.autoCombos` is accepted but ignored: the gateway serves the `auto/*` entries through `/v1/models` with server-computed limits and modalities, so no separate fetch is needed.
 

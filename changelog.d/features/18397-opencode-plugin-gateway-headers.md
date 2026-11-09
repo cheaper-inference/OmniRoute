@@ -1,0 +1,1 @@
+- **feat(opencode-plugin):** a `headers` option for gateways behind Cloudflare Access or other header-auth proxies, in both plugin generations. Sent on catalog reads and on same-origin inference; an `Authorization` entry, in any casing, never replaces the bearer token ([#18397](https://github.com/cheaper-inference/OmniRoute/pull/18397)) — thanks @misumisumi

@@ -51,6 +51,7 @@ import {
   mapRawModelToModelV2,
   usableProviderAliasSet,
 } from "./shared/index.js";
+import { buildAuthHeaders, withoutAuthorizationHeader } from "./shared/auth-headers.js";
 import {
   compileModelListFilter,
   matchesModelFilter,
@@ -188,7 +189,8 @@ export type OmniRouteUsageFetcher = (
   rootBaseURL: string,
   managementToken: string,
   timeoutMs?: number,
-  onSourceError?: (endpoint: string, reason: string) => void
+  onSourceError?: (endpoint: string, reason: string) => void,
+  headers?: Record<string, string>
 ) => Promise<string[]>;
 
 function trimUsageSlashes(value: string): string {
@@ -209,7 +211,8 @@ export const defaultOmniRouteUsageFetcher: OmniRouteUsageFetcher = async (
   rootBaseURL,
   managementToken,
   timeoutMs = 10_000,
-  onSourceError
+  onSourceError,
+  headers
 ) => {
   if (!rootBaseURL) throw new Error("[omniroute-v2] baseURL required to fetch usage analytics");
   if (!managementToken) throw new Error("[omniroute-v2] management token required");
@@ -221,10 +224,7 @@ export const defaultOmniRouteUsageFetcher: OmniRouteUsageFetcher = async (
   try {
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${managementToken}`,
-        Accept: "application/json",
-      },
+      headers: buildAuthHeaders(headers, managementToken),
       signal: controller.signal,
     });
     if (!res.ok) {
@@ -277,7 +277,8 @@ async function resolveUsageIds(
       opts.baseURL,
       opts.managementReadToken,
       opts.timeoutMs,
-      fetchers?.onSourceError
+      fetchers?.onSourceError,
+      opts.headers
     );
   } catch (err) {
     log.warn(
@@ -1124,6 +1125,24 @@ export async function collectCatalog(
   };
 }
 
+function withExtraHeaders(
+  stable: StableModelInfo,
+  extraHeaders: Record<string, string>
+): StableModelInfo {
+  const model = stable as unknown as {
+    headers?: Record<string, string>;
+    variants?: Array<{ headers?: Record<string, string> }>;
+  };
+  return {
+    ...model,
+    headers: { ...extraHeaders, ...model.headers },
+    variants: model.variants?.map((variant) => ({
+      ...variant,
+      headers: { ...extraHeaders, ...variant.headers },
+    })),
+  } as unknown as StableModelInfo;
+}
+
 /**
  * Project a collected catalog onto the stable contract: one provider `info`
  * plus one `Model.Info` per entry. The provider carries the endpoint and the
@@ -1136,20 +1155,28 @@ export function buildProviderPayload(
   opts: ResolvedOptions
 ): { info: StableProviderInfo; models: StableModelInfo[] } {
   const X = opts.providerId;
+  // The host sends these with inference; `Authorization` stays the one it
+  // builds from `apiKey`, so a caller entry for it is never published.
+  const extraHeaders = withoutAuthorizationHeader(opts.headers);
+  const hasExtraHeaders = Object.keys(extraHeaders).length > 0;
   const info = {
     id: X,
     name: opts.displayName ?? "OmniRoute",
     activation: "enabled",
     package: NPM_OPENAI_COMPAT,
     settings: { baseURL: ensureV1Suffix(opts.baseURL), apiKey: opts.apiKey },
-    headers: opts.headers,
+    ...(hasExtraHeaders ? { headers: extraHeaders } : {}),
     integrationID: X,
   } as unknown as StableProviderInfo;
   const models: StableModelInfo[] = [];
   for (const [key, legacy] of collected.entries) {
     const slash = key.indexOf("/");
     const bareId = slash > 0 ? key.slice(slash + 1) : legacy.id;
-    models.push(legacyToStable(X, bareId, legacy, opts.apiKey, opts.baseURL));
+    const stable = legacyToStable(X, bareId, legacy, opts.apiKey, opts.baseURL);
+    // Models repeat the provider's headers for the same reason they repeat its
+    // settings: the host merges model fields over provider fields, so an empty
+    // model `headers` must not drop the provider's.
+    models.push(hasExtraHeaders ? withExtraHeaders(stable, extraHeaders) : stable);
   }
   return { info, models };
 }
