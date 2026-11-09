@@ -21,7 +21,10 @@ import {
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { capMaxOutputTokens, capThinkingBudget } from "../../../src/lib/modelCapabilities.ts";
 import { getModelSpec } from "../../../src/shared/constants/modelSpecs.ts";
-import { gemini38ThinkingConfig, isGemini38Model } from "../../services/thinkingBudget.ts";
+import {
+  gemini38ThinkingConfig,
+  isGeminiThinkingLevelModel,
+} from "../../services/thinkingBudget.ts";
 
 import {
   buildChangedToolNameMap,
@@ -459,7 +462,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       // (possibly cap-clamped) budget value. Only the reasoning_effort/output_config.effort
       // paths below treat a resulting budget of 0 as "thinking disabled".
       // Flash-Lite models 400 on thinkingBudget 0, so it is omitted for them.
-      result.generationConfig.thinkingConfig = isGemini38Model(model)
+      result.generationConfig.thinkingConfig = isGeminiThinkingLevelModel(model)
         ? gemini38ThinkingConfig(model, cappedBudget, body)
         : buildGeminiThinkingConfig(model, cappedBudget, true);
     }
@@ -485,7 +488,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       // Models with thinkingBudgetCap:0 (e.g. gemini-3-flash) reject
       // thinkingConfig even for effort-based paths.
       if (getModelSpec(model)?.thinkingBudgetCap !== 0) {
-        result.generationConfig.thinkingConfig = isGemini38Model(model)
+        result.generationConfig.thinkingConfig = isGeminiThinkingLevelModel(model)
           ? gemini38ThinkingConfig(model, budget, body)
           : {
               thinkingBudget: budget,

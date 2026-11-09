@@ -156,6 +156,34 @@ test("runUsageQuota exibe providers de quota", async () => {
   assert.equal(parsed[0].provider, "openai");
 });
 
+test("runUsageQuota reports an unknown percentRemaining as unknown, not exhausted (#18745)", async () => {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = mockFetch({
+    quota: {
+      providers: [
+        { provider: "unknown-quota", quotaTotal: null, percentRemaining: null },
+        { provider: "empty-quota", quotaTotal: 100, percentRemaining: 0 },
+        { provider: "open-quota", quotaTotal: 100, percentRemaining: 40 },
+      ],
+    },
+  }) as unknown as typeof fetch;
+
+  const { runUsageQuota } = await import("../../bin/cli/commands/usage.mjs");
+  const cmd = { optsWithGlobals: () => ({ output: "json", quiet: true }) };
+  const out = await captureStdout(() => runUsageQuota({}, cmd));
+
+  globalThis.fetch = origFetch;
+  const parsed = JSON.parse(out);
+  assert.deepEqual(
+    parsed.map((r: { provider: string; state: string }) => [r.provider, r.state]),
+    [
+      ["unknown-quota", "unknown"],
+      ["empty-quota", "exhausted"],
+      ["open-quota", "available"],
+    ]
+  );
+});
+
 test("runUsageLogs exibe logs com mascaramento de API key", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = mockFetch() as any;

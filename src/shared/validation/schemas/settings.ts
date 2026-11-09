@@ -219,7 +219,11 @@ const preferredOverrideTimeoutSchema = z
 
 const preferredTimeoutOverridesSchema = z
   .record(
-    z.string().min(1).max(180).regex(/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i),
+    z
+      .string()
+      .min(1)
+      .max(180)
+      .regex(/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i),
     preferredOverrideTimeoutSchema
   )
   .refine((value) => Object.keys(value).length <= 64, "Too many timeout overrides");
@@ -236,6 +240,7 @@ export const preferredAccountFailoverSchema = z
 export const updateResilienceSchema = z
   .object({
     preferredAccountFailover: preferredAccountFailoverSchema.optional(),
+    antigravityTimingTelemetry: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -295,6 +300,7 @@ export const updateResilienceSchema = z
     const provided = [
       value.requestQueue,
       value.preferredAccountFailover,
+      value.antigravityTimingTelemetry,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,

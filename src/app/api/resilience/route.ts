@@ -144,6 +144,7 @@ export async function GET() {
     const resilience = resolveResilienceSettings(settings);
 
     return NextResponse.json({
+      antigravityTimingTelemetry: resilience.antigravityTimingTelemetry,
       requestQueue: resilience.requestQueue,
       preferredAccountFailover: resilience.preferredAccountFailover,
       connectionCooldown: resilience.connectionCooldown,
@@ -215,6 +216,12 @@ export async function PATCH(request) {
         ? {
             preferredAccountFailover:
               body.preferredAccountFailover as ResilienceSettingsPatch["preferredAccountFailover"],
+          }
+        : {}),
+      ...(body.antigravityTimingTelemetry
+        ? {
+            antigravityTimingTelemetry:
+              body.antigravityTimingTelemetry as ResilienceSettingsPatch["antigravityTimingTelemetry"],
           }
         : {}),
       ...(body.requestQueue
@@ -318,6 +325,7 @@ export async function PATCH(request) {
 
     return NextResponse.json({
       ok: true,
+      antigravityTimingTelemetry: nextResilience.antigravityTimingTelemetry,
       requestQueue: nextResilience.requestQueue,
       preferredAccountFailover: nextResilience.preferredAccountFailover,
       connectionCooldown: nextResilience.connectionCooldown,
