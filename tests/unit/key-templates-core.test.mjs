@@ -579,7 +579,7 @@ test("migration, core schema and lazy ensure declare the same key_templates tabl
   assert.ok(table, "core schema declares key_templates");
   assert.equal(norm(table[0]), norm(KEY_TEMPLATES_TABLE_SQL));
   const migrationSource = readFileSync(
-    new URL("../../src/lib/db/migrations/230_key_templates.sql", import.meta.url),
+    new URL("../../src/lib/db/migrations/231_key_templates.sql", import.meta.url),
     "utf8"
   );
   const migrationTable = /CREATE TABLE IF NOT EXISTS key_templates \([\s\S]*?\n\s*\);/.exec(
