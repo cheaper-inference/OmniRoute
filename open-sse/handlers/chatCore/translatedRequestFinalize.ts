@@ -14,6 +14,7 @@ import { aliasMuseToolNames } from "../../executors/museToolNameAliases.ts";
 import { applyResponsesPreviousResponseIdPolicy } from "../../utils/responsesStatePolicy.ts";
 import { sanitizeKiroTools } from "../../utils/kiroSanitizer.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { enforceResponsesToolHistory } from "../../translator/helpers/responsesToolHistory.ts";
 import { normalizeClaudeToolsForDispatch } from "./claudeToolDefaults.ts";
 import { normalizeToolSchemasForProvider } from "./openrouterToolSchemas.ts";
 import { buildClaudePassthroughToolNameMap } from "./passthroughToolNames.ts";
@@ -33,6 +34,7 @@ type KiroToolCarrier = {
   };
 };
 
+/** Finalize provider metadata and continuation policy; strict mode rejects invalid tool history. */
 export function finalizeTranslatedRequest({
   translatedBody: translatedBodyInput,
   body,
@@ -162,6 +164,13 @@ export function finalizeTranslatedRequest({
     credentials,
   });
   translatedBody = previousResponseIdPolicy.body as typeof translatedBody;
+
+  // Strict mode: continuation-owned outputs are valid only while the effective wire
+  // payload still carries previous_response_id. Revalidate after policy finalization so
+  // stateless dispatch cannot forward an output whose ownership was stripped.
+  if (targetFormat === FORMATS.OPENAI_RESPONSES) {
+    enforceResponsesToolHistory(translatedBody);
+  }
 
   // #1789: Prevent output_config.effort from overriding effort encoded in model name (Codex)
   if (provider === "codex" || provider?.startsWith("codex")) {

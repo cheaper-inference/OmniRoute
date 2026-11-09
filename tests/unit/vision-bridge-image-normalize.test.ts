@@ -16,14 +16,22 @@
  * `tests/unit/vision-bridge-describe-cache.test.ts` and
  * `tests/unit/remote-image-fetch.test.ts`).
  */
-import { test } from "node:test";
+import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
+import dns from "node:dns";
 
 import { ensureBase64ImagesForClaudeWire } from "../../src/lib/guardrails/visionBridgeHelpers.ts";
 
 // zai speaks the claude wire format (open-sse/config/providers/registry/zai/index.ts),
 // so `isClaudeWireFormatModel` routes it through the base64 self-fetch path.
 const CLAUDE_WIRE_MODEL = "zai/glm-4.6";
+
+beforeEach((t) => {
+  t.mock.method(dns.promises, "lookup", async (hostname) => {
+    assert.equal(hostname, "example.com");
+    return [{ address: "93.184.216.34", family: 4 }];
+  });
+});
 
 function bodyWithRemoteImage(url: string) {
   return {

@@ -1,0 +1,1 @@
+- **fix(mcp):** stop the idle sweep from reaping MCP sessions with an open SSE stream or a running tool call, expose session counts and ages in the status endpoint, and make the idle limit env-overridable ([#18894](https://github.com/cheaper-inference/OmniRoute/pull/18894)) — thanks @maxmad64bis
