@@ -1000,10 +1000,11 @@ export class PlaywrightChatGptWebBrowserSession implements ChatGptWebBrowserSess
         return {
           url: location.href.replace("https://chatgpt.com", ""),
           assistantSelector: matchedSelector,
-          roles: nodes.map((n) =>
-            n.getAttribute("data-message-author-role") ??
-            n.getAttribute("data-conversation-role") ??
-            "assistant"
+          roles: nodes.map(
+            (n) =>
+              n.getAttribute("data-message-author-role") ??
+              n.getAttribute("data-conversation-role") ??
+              "assistant"
           ),
           lastHtml: (last?.innerHTML ?? "").slice(0, 240),
           lastChildClasses: Array.from(last?.querySelectorAll("*") ?? [])
