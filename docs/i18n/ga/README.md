@@ -1305,7 +1305,7 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ar fud <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroílár ó v2.0)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 226 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 228 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
   <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/A uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
