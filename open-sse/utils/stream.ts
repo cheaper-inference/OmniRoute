@@ -1557,7 +1557,19 @@ export function createSSEStream(options: StreamOptions = {}) {
         }
       },
 
+      // An exception thrown while translating errors both stream sides without running
+      // flush() or cancel(): clear the idle watchdog here, or its interval keeps the failed
+      // stream alive until the idle timeout.
       transform(chunk, controller) {
+        try {
+          this.transformChunk(chunk, controller);
+        } catch (error) {
+          clearIdleTimer();
+          throw error;
+        }
+      },
+
+      transformChunk(chunk: Uint8Array, controller: TransformStreamDefaultController<Uint8Array>) {
         if (streamTimedOut) return;
         const now = Date.now();
         timing.markByte();
