@@ -63,6 +63,23 @@ test("Claude to OpenAI ignores a system directive that has no effort", () => {
   assert.equal(out.reasoning_effort, "low");
 });
 
+test("Claude to OpenAI keeps an earlier directive effort when the last directive has none", () => {
+  const out = claudeToOpenAIRequest(
+    "gpt-5",
+    {
+      max_tokens: 64,
+      output_config: { effort: "low" },
+      messages: [
+        { role: "system", content: [], output_config: { effort: "high" } },
+        ...turns({ format: { type: "json_schema", schema: {} } }),
+      ],
+    },
+    false
+  );
+
+  assert.equal(out.reasoning_effort, "high");
+});
+
 test("Claude to OpenAI treats a whitespace-only system effort as empty", () => {
   const out = claudeToOpenAIRequest(
     "gpt-5",
