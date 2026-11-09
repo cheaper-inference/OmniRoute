@@ -185,6 +185,7 @@ function cleanSchemaPreservingRequired(schema: unknown): unknown {
 }
 
 // Draft 2020-12 / JSON Schema meta keywords the Antigravity upstream does not accept.
+// Stripped from schema nodes only, never from the keys of a `properties` map.
 const DRAFT_META_KEYS = new Set([
   "$schema",
   "$defs",
@@ -210,8 +211,15 @@ function stripDraftMeta(obj: unknown): void {
       delete record[key];
     }
   }
-  for (const value of Object.values(record)) {
-    if (value && typeof value === "object") stripDraftMeta(value);
+  for (const [key, value] of Object.entries(record)) {
+    if (!value || typeof value !== "object") continue;
+    if (key === "properties" && !Array.isArray(value)) {
+      // The keys of a `properties` map are parameter names, not keywords (#18972): a tool
+      // parameter named `title`, `const` or `x-...` must survive. Clean each child schema only.
+      for (const child of Object.values(value as JsonRecord)) stripDraftMeta(child);
+      continue;
+    }
+    stripDraftMeta(value);
   }
 }
 
