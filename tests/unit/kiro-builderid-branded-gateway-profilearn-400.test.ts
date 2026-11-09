@@ -166,7 +166,8 @@ test("KiroExecutor.execute never tries the branded gateway for api_key/idc auth 
 
     assert.equal(result.response.status, 400);
     assert.equal(calledUrls.length, 1);
-    assert.match(calledUrls[0], /codewhisperer\.us-east-1\.amazonaws\.com/);
+    // API keys go straight to the regional Amazon Q host (never the branded gateway).
+    assert.match(calledUrls[0], /q\.us-east-1\.amazonaws\.com/);
   } finally {
     globalThis.fetch = originalFetch;
   }

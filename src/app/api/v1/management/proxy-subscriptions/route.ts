@@ -1,10 +1,15 @@
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
 import {
+  readSelectorEarlyReasons,
+  selectorEarlyReasonsForDisplay,
+} from "@/lib/proxySubscription/selectorEarlyReasons";
+import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
+import {
   listSubscriptions,
   createSubscription,
   startSubscriptionScheduler,
-  redactSubscriptionUrl,
+  redactSubscriptionRecord,
   proxySubscriptionCreateSchema,
   firstIssueMessage,
 } from "@/lib/proxySubscription";
@@ -26,8 +31,14 @@ export async function GET(request: Request) {
     startSubscriptionScheduler();
     const items = await listSubscriptions();
     // Redact credentials in the subscription URL before sending to the client.
-    const safe = items.map((it) => ({ ...it, url: redactSubscriptionUrl(it.url) }));
-    return Response.json({ items: safe });
+    const safe = items.map(redactSubscriptionRecord);
+    // In-memory skip counters (reset on restart); present only when a count
+    // concerns a configured selector, so default setups see nothing new.
+    const earlyReasons = selectorEarlyReasonsForDisplay(readSelectorEarlyReasons(), {
+      selectorEnabled: isProxySkipRecentlyFailedEnabled(),
+      subscriptions: items,
+    });
+    return Response.json(earlyReasons ? { items: safe, earlyReasons } : { items: safe });
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to list proxy subscriptions");
   }
@@ -43,7 +54,7 @@ export async function POST(request: Request) {
       return Response.json({ error: firstIssueMessage(parsed.error) }, { status: 400 });
     }
     const created = await createSubscription(parsed.data);
-    return Response.json({ ...created, url: redactSubscriptionUrl(created.url) }, { status: 201 });
+    return Response.json(redactSubscriptionRecord(created), { status: 201 });
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to create proxy subscription");
   }

@@ -1,17 +1,24 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { cn } from "@/shared/utils/cn";
+import Button from "./Button";
+import Icon from "./Icon";
+import Input from "./Input";
+import Select from "./Select";
 
 /**
  * Console Log Viewer — Real-time application log viewer.
  *
  * Displays structured application logs from the server with a terminal-like UI.
- * Polls the backend API every 5 seconds. Shows logs from the last 1 hour.
+ * Polls the newest retained page every 5 seconds. Older pages and pause freeze updates.
  * Supports level filtering, text search, auto-scroll, and copy-to-clipboard.
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { copyToClipboard } from "@/shared/utils/clipboard";
+import { isPinnedToBottom } from "@/shared/utils/scrollFollow";
 
 interface LogEntry {
   timestamp: string;
@@ -24,71 +31,406 @@ interface LogEntry {
   [key: string]: unknown;
 }
 
+// The terminal pane stays dark in both themes, on the kit's log inks and their tints.
 const LEVEL_COLORS: Record<string, string> = {
-  debug: "text-gray-400",
-  trace: "text-gray-500",
-  info: "text-cyan-400",
-  warn: "text-yellow-400",
-  error: "text-red-400",
-  fatal: "text-fuchsia-400",
+  debug: "text-[var(--ci-log-debug)]",
+  trace: "text-[var(--ci-log-trace)]",
+  info: "text-[var(--ci-log-info)]",
+  warn: "text-[var(--ci-log-warn)]",
+  error: "text-[var(--ci-log-error)]",
+  fatal: "text-[var(--ci-log-fatal)]",
 };
 
-const LEVEL_BG: Record<string, string> = {
-  debug: "bg-gray-500/10 border-gray-500/20",
-  trace: "bg-gray-500/10 border-gray-500/20",
-  info: "bg-cyan-500/10 border-cyan-500/20",
-  warn: "bg-yellow-500/10 border-yellow-500/20",
-  error: "bg-red-500/10 border-red-500/20",
-  fatal: "bg-fuchsia-500/10 border-fuchsia-500/20",
+const LEVEL_TINTS: Record<string, string> = {
+  debug: "bg-[var(--ci-log-debug-subtle)]",
+  trace: "bg-[var(--ci-log-trace-subtle)]",
+  info: "bg-[var(--ci-log-info-subtle)]",
+  warn: "bg-[var(--ci-log-warn-subtle)]",
+  error: "bg-[var(--ci-log-error-subtle)]",
+  fatal: "bg-[var(--ci-log-fatal-subtle)]",
 };
+
+// These levels tint their whole row. The kit's tints do not stack, so their badge stays clear.
+const ROW_TINT_LEVELS = new Set(["error", "fatal"]);
 
 const POLL_INTERVAL = 5000; // 5 seconds
+const PAGE_LIMIT = 2000;
+
+const stringifyValue = (value: unknown): string => {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+};
+
+const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
+const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
+const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
+
+function formatLogTime(ts: string, locale: string, range: string): string {
+  try {
+    const d = new Date(ts);
+    return d.toLocaleString(locale, {
+      ...(range !== "1h" ? ({ year: "numeric", month: "2-digit", day: "2-digit" } as const) : {}),
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      fractionalSecondDigits: 3,
+    });
+  } catch {
+    return ts;
+  }
+}
+
+/** Polling never replaces a paused snapshot or a history page the reader is browsing. */
+function shouldSkipFetch(
+  paused: boolean,
+  viewingHistory: boolean,
+  cursor: string | undefined,
+  refresh: boolean,
+  requestPending: boolean
+): boolean {
+  return paused || (!cursor && !refresh && (viewingHistory || requestPending));
+}
+
+const errorText = (err: unknown, fallback: string): string =>
+  err instanceof Error ? err.message : fallback;
+
+/** `/api/logs/console` query string for one page (newest page when `cursor` is absent). */
+function buildLogQuery(levelFilter: string, range: string, cursor?: string): string {
+  const params = new URLSearchParams();
+  if (levelFilter !== "all") params.set("level", levelFilter);
+  params.set("limit", "500");
+  params.set("range", range);
+  if (cursor) params.set("cursor", cursor);
+  return params.toString();
+}
+
+/** Bound browser memory independently of the retained files. Keep the older
+ * end while paging so every retained page stays reachable. */
+function mergeLogPage(previous: LogEntry[], data: LogEntry[], cursor?: string): LogEntry[] {
+  return cursor ? [...data, ...previous].slice(0, PAGE_LIMIT) : data;
+}
+
+function readPageMeta(res: Response): { nextCursor: string | null; scanLimited: boolean } {
+  return {
+    nextCursor: res.headers?.get("x-console-next-cursor") || null,
+    scanLimited: res.headers?.get("x-console-truncated") === "true",
+  };
+}
+
+async function logPageError(res: Response, onExpired: () => void): Promise<Error> {
+  if (res.status === 410) onExpired();
+  const payload = await res.json().catch(() => null);
+  const message = payload?.error?.message;
+  return new Error(typeof message === "string" ? message : `HTTP ${res.status}`);
+}
+
+function readLogPage(data: unknown, res: Response, fetchFailed: string) {
+  if (!Array.isArray(data)) throw new Error(fetchFailed);
+  return { data: data as LogEntry[], ...readPageMeta(res) };
+}
+
+type ViewerTranslator = ReturnType<typeof useTranslations>;
+
+function rangeLabel(
+  range: string,
+  tv: ViewerTranslator,
+  tc: ViewerTranslator,
+  tl: ViewerTranslator
+) {
+  if (range === "all") return tc("all");
+  if (range === "1h") return tv("lastHour");
+  return tl("lastNHours", { hours: range === "24h" ? "24h" : "168h" });
+}
+
+function ConsoleStatus({
+  paused,
+  viewingHistory,
+  scanLimited,
+  count,
+  range,
+  lastUpdated,
+  locale,
+}: {
+  paused: boolean;
+  viewingHistory: boolean;
+  scanLimited: boolean;
+  count: number;
+  range: string;
+  lastUpdated: Date | null;
+  locale: string;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const tl = useTranslations("logs");
+  const frozen = paused || viewingHistory;
+  return (
+    <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "inline-block size-2 rounded-full",
+          frozen ? "bg-warning" : "animate-pulse bg-success"
+        )}
+      />
+      {frozen && <span>{tv("paused")}</span>}
+      {scanLimited && <span>{tv("scanLimited")}</span>}
+      <span>{tv("entryCount", { count })}</span>
+      <span className="text-text-muted/50">•</span>
+      <span>{rangeLabel(range, tv, tc, tl)}</span>
+      {lastUpdated && (
+        <>
+          <span className="text-text-muted/50">•</span>
+          <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LogRow({
+  entry,
+  idx,
+  copied,
+  locale,
+  range,
+  onCopy,
+}: {
+  entry: LogEntry;
+  idx: number;
+  copied: boolean;
+  locale: string;
+  range: string;
+  onCopy: (entry: LogEntry, idx: number) => void;
+}) {
+  const tv = useTranslations("logs.consoleViewer");
+  const tc = useTranslations("common");
+  const level = stringifyValue(entry.level || "info").toLowerCase();
+  const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
+  const tintClass = LEVEL_TINTS[level] || "";
+  const rowTinted = ROW_TINT_LEVELS.has(level);
+  const comp = getComponent(entry);
+  const msg = getText(entry);
+  const correlationId = getCorrelationId(entry);
+
+  return (
+    <div
+      className={cn(
+        "group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded transition-colors",
+        rowTinted ? tintClass : "hover:bg-white/5"
+      )}
+    >
+      {/* Timestamp */}
+      <span className="text-[var(--ci-log-trace)] whitespace-nowrap shrink-0 select-none">
+        {formatLogTime(entry.timestamp, locale, range)}
+      </span>
+
+      {/* Level badge */}
+      <span
+        className={cn(
+          "inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border border-current/20 shrink-0",
+          colorClass,
+          !rowTinted && tintClass
+        )}
+      >
+        {level.padEnd(5)}
+      </span>
+
+      {/* Component */}
+      {comp && (
+        <span className="text-[var(--ci-code-inverse-property)]/80 max-w-full break-all sm:shrink-0">
+          [{comp}]
+        </span>
+      )}
+
+      {/* Message */}
+      <span className="text-[var(--ci-color-text-inverse)] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
+        {msg}
+        {/* Extra meta */}
+        {correlationId && (
+          <span className="text-[var(--ci-log-trace)] ml-2">cid:{correlationId.slice(0, 8)}</span>
+        )}
+      </span>
+
+      {/* Copy button */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => onCopy(entry, idx)}
+        title={tv("copyLogEntry")}
+        aria-label={tv("copyLogEntry")}
+        className="size-6 min-h-6 shrink-0 text-[var(--ci-log-trace)] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+      >
+        <Icon name={copied ? "check" : "content_copy"} size={14} />
+      </Button>
+      {copied && (
+        <span className="sr-only" role="status" aria-live="polite">
+          {tc("copied")}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function PauseButton({ paused, onToggle }: { paused: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      onClick={onToggle}
+      aria-label={tv(paused ? "resumeLogs" : "pauseLogs")}
+      aria-pressed={paused}
+    >
+      <Icon name={paused ? "play_arrow" : "pause"} size={16} />
+      {tv(paused ? "resumeLogs" : "pauseLogs")}
+    </Button>
+  );
+}
+
+function AutoScrollButton({ autoScroll, onToggle }: { autoScroll: boolean; onToggle: () => void }) {
+  const tv = useTranslations("logs.consoleViewer");
+  return (
+    <Button
+      variant="outline"
+      aria-pressed={autoScroll}
+      onClick={onToggle}
+      title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
+      className={cn(autoScroll && "border-info/30 bg-info/15 text-info")}
+    >
+      <Icon name={autoScroll ? "vertical_align_bottom" : "lock"} size={16} />
+      {tv("autoScroll")}
+    </Button>
+  );
+}
 
 export default function ConsoleLogViewer() {
   const locale = useLocale();
   const t = useTranslations("loggers");
   const tv = useTranslations("logs.consoleViewer");
   const tc = useTranslations("common");
+  const tl = useTranslations("logs");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState("all");
+  const [range, setRange] = useState("all");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [viewingHistory, setViewingHistory] = useState(false);
+  const [scanLimited, setScanLimited] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const historyRef = useRef(false);
+  const pausedRef = useRef(false);
+  const requestVersionRef = useRef(0);
+  const fetchAbortRef = useRef<AbortController | null>(null);
   const [searchText, setSearchText] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Whether the reader is at the tail. Recorded on scroll rather than read in the effect: by the
+  // time the effect runs the new lines are laid out, so the box no longer reports where the
+  // reader was before they arrived.
+  const followTailRef = useRef(true);
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (levelFilter !== "all") params.set("level", levelFilter);
-      params.set("limit", "500");
+  const invalidateFetch = useCallback(() => {
+    requestVersionRef.current++;
+    fetchAbortRef.current?.abort();
+    fetchAbortRef.current = null;
+  }, []);
 
-      const res = await fetch(`/api/logs/console?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: LogEntry[] = await res.json();
+  const fetchLogs = useCallback(
+    async (cursor?: string, refresh = false) => {
+      // An older page is not history until it succeeds; live ticks must not cancel it.
+      if (
+        shouldSkipFetch(
+          pausedRef.current,
+          historyRef.current,
+          cursor,
+          refresh,
+          Boolean(fetchAbortRef.current)
+        )
+      )
+        return;
+      setLoading(true);
+      const version = ++requestVersionRef.current;
+      fetchAbortRef.current?.abort();
+      const controller = new AbortController();
+      fetchAbortRef.current = controller;
+      const isCurrent = () => !pausedRef.current && version === requestVersionRef.current;
+      try {
+        const res = await fetch(`/api/logs/console?${buildLogQuery(levelFilter, range, cursor)}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!res.ok) {
+          throw await logPageError(res, () => {
+            if (isCurrent()) setNextCursor(null);
+          });
+        }
+        const payload: unknown = await res.json();
+        if (!isCurrent()) return;
+        const { data, ...meta } = readLogPage(payload, res, tv("fetchFailed"));
+        if (cursor || refresh) {
+          historyRef.current = Boolean(cursor);
+          setViewingHistory(Boolean(cursor));
+        }
+        setLogs((previous) => mergeLogPage(previous, data, cursor));
+        setNextCursor(meta.nextCursor);
+        setScanLimited(meta.scanLimited);
+        setLastUpdated(new Date());
+        setError(null);
+      } catch (err: unknown) {
+        if (isCurrent() && !controller.signal.aborted) setError(errorText(err, tv("fetchFailed")));
+      } finally {
+        if (isCurrent()) {
+          fetchAbortRef.current = null;
+          setLoading(false);
+        }
+      }
+    },
+    [levelFilter, range, tv]
+  );
 
-      setLogs(data);
-      setLastUpdated(new Date());
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || tv("fetchFailed"));
-    } finally {
-      setLoading(false);
+  const togglePause = () => {
+    // Invalidate synchronously: even a response already decoding must not
+    // replace selected text, including after a quick pause/resume.
+    pausedRef.current = !pausedRef.current;
+    invalidateFetch();
+    setLoading(false);
+    setPaused(pausedRef.current);
+    if (!pausedRef.current) {
+      historyRef.current = false;
+      setViewingHistory(false);
     }
-  }, [levelFilter, tv]);
+  };
+  const resetHistory = () => {
+    invalidateFetch();
+    historyRef.current = false;
+    setViewingHistory(false);
+    setNextCursor(null);
+  };
 
-  // Initial fetch + polling
+  // Pause freezes the displayed snapshot, not the server's log writer.
   useEffect(() => {
+    if (paused) return;
     const initialFetch = setTimeout(() => void fetchLogs(), 0);
-    const interval = setInterval(fetchLogs, POLL_INTERVAL);
+    const interval = setInterval(() => void fetchLogs(), POLL_INTERVAL);
     return () => {
       clearTimeout(initialFetch);
       clearInterval(interval);
+      invalidateFetch();
     };
-  }, [fetchLogs]);
+  }, [fetchLogs, paused, invalidateFetch]);
 
   useEffect(
     () => () => {
@@ -97,12 +439,12 @@ export default function ConsoleLogViewer() {
     []
   );
 
-  // Auto-scroll to bottom on new logs
+  // Auto-scroll to bottom on new logs, but only while the reader is already at the bottom
   useEffect(() => {
-    if (autoScroll && scrollRef.current) {
+    if (autoScroll && !paused && !viewingHistory && followTailRef.current && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [logs, autoScroll]);
+  }, [logs, autoScroll, paused, viewingHistory]);
 
   const handleCopy = async (entry: LogEntry, idx: number) => {
     const text = JSON.stringify(entry, null, 2);
@@ -121,39 +463,6 @@ export default function ConsoleLogViewer() {
     }, 2000);
   };
 
-  const formatTime = (ts: string) => {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleTimeString(locale, {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        fractionalSecondDigits: 3,
-      });
-    } catch {
-      return ts;
-    }
-  };
-
-  const stringifyValue = (value: unknown) => {
-    if (value === undefined || value === null) return "";
-    if (typeof value === "string") return value;
-    if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
-      return String(value);
-    }
-
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return String(value);
-    }
-  };
-
-  const getText = (entry: LogEntry) => stringifyValue(entry.msg || entry.message || "");
-  const getComponent = (entry: LogEntry) => stringifyValue(entry.component || entry.module || "");
-  const getCorrelationId = (entry: LogEntry) => stringifyValue(entry.correlationId);
-
   // Apply text search filter
   const filteredLogs = searchText
     ? logs.filter((entry) => {
@@ -165,101 +474,131 @@ export default function ConsoleLogViewer() {
   return (
     <div className="flex flex-col gap-4">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]">
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface p-4">
         {/* Level filter */}
-        <select
+        <Select
           value={levelFilter}
-          onChange={(e) => setLevelFilter(e.target.value)}
+          onChange={(e) => {
+            resetHistory();
+            setLevelFilter(e.target.value);
+          }}
+          disabled={paused}
           aria-label={tv("filterByLevel")}
-          className="px-3 py-2 rounded-lg text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-main)] focus:outline-2 focus:outline-[var(--color-accent)]"
         >
           <option value="all">{t("allLevels")}</option>
           <option value="debug">Debug+</option>
           <option value="info">Info+</option>
           <option value="warn">Warn+</option>
           <option value="error">Error+</option>
-        </select>
+        </Select>
+
+        <Select
+          data-console-history="range"
+          aria-label={tl("timeRange")}
+          value={range}
+          disabled={paused}
+          onChange={(e) => {
+            resetHistory();
+            setRange(e.target.value);
+          }}
+        >
+          <option value="all">{tc("all")}</option>
+          <option value="1h">{tv("lastHour")}</option>
+          <option value="24h">{tl("lastNHours", { hours: "24h" })}</option>
+          <option value="7d">{tl("lastNHours", { hours: "168h" })}</option>
+        </Select>
+        <Button
+          variant="outline"
+          data-console-history="older"
+          onClick={() => {
+            if (nextCursor) void fetchLogs(nextCursor);
+          }}
+          disabled={!nextCursor || loading || paused}
+        >
+          {tc("loadMore")}
+        </Button>
 
         {/* Search */}
-        <input
+        <Input
           type="text"
+          icon="search"
           placeholder={tv("searchPlaceholder")}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           aria-label={tv("searchAria")}
-          className="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-sm bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-2 focus:outline-[var(--color-accent)]"
+          className="min-w-[200px] flex-1"
         />
 
+        <PauseButton paused={paused} onToggle={togglePause} />
+
         {/* Auto-scroll toggle */}
-        <button
-          onClick={() => setAutoScroll(!autoScroll)}
-          title={autoScroll ? tv("disableAutoScroll") : tv("enableAutoScroll")}
-          className={`px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-            autoScroll
-              ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30"
-              : "bg-[var(--color-bg)] text-[var(--color-text-muted)] border-[var(--color-border)]"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[16px] align-middle mr-1">
-            {autoScroll ? "vertical_align_bottom" : "lock"}
-          </span>
-          {tv("autoScroll")}
-        </button>
+        <AutoScrollButton
+          autoScroll={autoScroll}
+          onToggle={() => {
+            // Switching auto-scroll back on is an explicit "take me to the newest line".
+            if (!autoScroll) followTailRef.current = true;
+            setAutoScroll(!autoScroll);
+          }}
+        />
 
         {/* Refresh */}
-        <button
-          onClick={fetchLogs}
-          disabled={loading}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => void fetchLogs(undefined, true)}
+          disabled={loading || paused}
           aria-label={tc("refresh")}
-          className="px-3 py-2 rounded-lg text-sm font-medium bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-main)] hover:bg-[var(--color-bg-alt)] disabled:opacity-50 transition-colors"
+          title={tc("refresh")}
         >
-          <span className="material-symbols-outlined text-[16px] align-middle" aria-hidden="true">
-            refresh
-          </span>
-        </button>
+          <Icon name="refresh" size={16} />
+        </Button>
 
         {/* Status */}
-        <div className="flex items-center gap-2 ml-auto text-xs text-[var(--color-text-muted)]">
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span>{tv("entryCount", { count: filteredLogs.length })}</span>
-          <span className="text-[var(--color-text-muted)]/50">•</span>
-          <span>{tv("lastHour")}</span>
-          {lastUpdated && (
-            <>
-              <span className="text-[var(--color-text-muted)]/50">•</span>
-              <span>{tv("updatedAt", { time: lastUpdated.toLocaleTimeString(locale) })}</span>
-            </>
-          )}
-        </div>
+        <ConsoleStatus
+          paused={paused}
+          viewingHistory={viewingHistory}
+          scanLimited={scanLimited}
+          count={filteredLogs.length}
+          range={range}
+          lastUpdated={lastUpdated}
+          locale={locale}
+        />
       </div>
 
       {/* Error */}
       {error && (
-        <div
-          className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
-          role="alert"
-        >
-          <span className="material-symbols-outlined text-[16px] align-middle mr-2">error</span>
-          {error}
-          <span className="text-xs ml-2 opacity-70">— {tv("fileLoggingRequired")}</span>
-        </div>
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setError(null)}
+          description={
+            <>
+              {error}
+              <span className="ml-2 text-xs opacity-70">— {tv("fileLoggingRequired")}</span>
+            </>
+          }
+        />
       )}
 
       {/* Console output */}
       <div
         ref={scrollRef}
-        className="rounded-xl border border-[var(--color-border)] bg-[#0d1117] overflow-auto font-mono text-xs leading-relaxed"
+        onScroll={() => {
+          followTailRef.current = isPinnedToBottom(scrollRef.current);
+        }}
+        className="rounded-xl border border-border bg-[var(--ci-color-surface-inverse)] overflow-auto font-mono text-xs leading-relaxed"
         style={{ maxHeight: "calc(100vh - 340px)", minHeight: "400px" }}
         role="log"
         aria-label={tv("consoleAria")}
-        aria-live="polite"
+        aria-live={paused || viewingHistory ? "off" : "polite"}
       >
         {/* Header bar */}
-        <div className="sticky top-0 z-10 px-4 py-2 bg-[#161b22] border-b border-[#30363d] flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-          <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-          <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-          <span className="ml-3 text-[#8b949e] text-[11px]">
+        <div className="sticky top-0 z-10 px-4 py-2 bg-[var(--ci-color-surface-inverse)] border-b border-white/15 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-log-error)]" />
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-log-warn)]" />
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-code-inverse-string)]" />
+          <span className="ml-3 text-[var(--ci-log-trace)] text-[11px]">
             OmniRoute — {tv("applicationConsole")}
           </span>
         </div>
@@ -267,79 +606,28 @@ export default function ConsoleLogViewer() {
         {/* Log entries */}
         <div className="p-3 space-y-px">
           {filteredLogs.length === 0 && !loading ? (
-            <div className="text-[#8b949e] text-center py-12">
-              <span className="material-symbols-outlined text-[40px] block mb-2 opacity-30">
-                terminal
-              </span>
+            <div className="text-[var(--ci-log-trace)] text-center py-12">
+              <Icon name="terminal" size={40} className="block mb-2 opacity-30" />
               <p>{t("noLogEntries")}</p>
-              <p className="text-[10px] mt-1 opacity-60">{tv("emptyFileLoggingHint")}</p>
+              <p className="text-[10px] mt-1">{tv("emptyFileLoggingHint")}</p>
             </div>
           ) : (
-            filteredLogs.map((entry, idx) => {
-              const level = stringifyValue(entry.level || "info").toLowerCase();
-              const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
-              const bgClass = LEVEL_BG[level] || "";
-              const comp = getComponent(entry);
-              const msg = getText(entry);
-              const correlationId = getCorrelationId(entry);
-
-              return (
-                <div
-                  key={idx}
-                  className={`group flex items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
-                    level === "error" || level === "fatal" ? "bg-red-500/5" : ""
-                  }`}
-                >
-                  {/* Timestamp */}
-                  <span className="text-[#484f58] whitespace-nowrap shrink-0 select-none">
-                    {formatTime(entry.timestamp)}
-                  </span>
-
-                  {/* Level badge */}
-                  <span
-                    className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
-                  >
-                    {level.padEnd(5)}
-                  </span>
-
-                  {/* Component */}
-                  {comp && <span className="text-purple-400/80 shrink-0">[{comp}]</span>}
-
-                  {/* Message */}
-                  <span className="text-[#c9d1d9] flex-1 break-all">
-                    {msg}
-                    {/* Extra meta */}
-                    {correlationId && (
-                      <span className="text-[#484f58] ml-2">cid:{correlationId.slice(0, 8)}</span>
-                    )}
-                  </span>
-
-                  {/* Copy button */}
-                  <button
-                    onClick={() => handleCopy(entry, idx)}
-                    title={tv("copyLogEntry")}
-                    aria-label={tv("copyLogEntry")}
-                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shrink-0 text-[#8b949e] hover:text-white"
-                  >
-                    <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                      {copiedIdx === idx ? "check" : "content_copy"}
-                    </span>
-                  </button>
-                  {copiedIdx === idx && (
-                    <span className="sr-only" role="status" aria-live="polite">
-                      {tc("copied")}
-                    </span>
-                  )}
-                </div>
-              );
-            })
+            filteredLogs.map((entry, idx) => (
+              <LogRow
+                key={idx}
+                entry={entry}
+                idx={idx}
+                copied={copiedIdx === idx}
+                locale={locale}
+                range={range}
+                onCopy={handleCopy}
+              />
+            ))
           )}
 
           {loading && filteredLogs.length === 0 && (
-            <div className="text-[#8b949e] text-center py-12">
-              <span className="material-symbols-outlined text-[24px] animate-spin block mb-2">
-                progress_activity
-              </span>
+            <div className="text-[var(--ci-log-trace)] text-center py-12">
+              <Icon name="progress_activity" size={24} className="animate-spin block mb-2" />
               {t("loadingLogs")}
             </div>
           )}

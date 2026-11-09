@@ -1,0 +1,1 @@
+- **fix(api):** `/v1/models` no longer re-advertises a reasoning-effort variant (e.g. `cmd/claude-opus-4-7-low`) that was hidden on its own or matched by `modelVisibilityDenylist` while its base stays visible ([#19039](https://github.com/cheaper-inference/OmniRoute/pull/19039), closes #18726)

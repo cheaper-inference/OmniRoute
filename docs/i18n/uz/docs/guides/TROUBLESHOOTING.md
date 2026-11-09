@@ -33,37 +33,43 @@ OmniRoute uchun keng tarqalgan muammolar va ularning yechimlari.
 
 ---
 
-## Batafsil nosozliklarni bartaraf etish
+## Batafsil muammolarni bartaraf etish
 
 ---
 
-### Bepul provayderlarda soʻrovlar tezligini cheklash (429 / 400 / 401)
+### Bepul provayderlarda rate limiting (429 / 400 / 401)
 
-**Alomat**: Bepul/autentifikatsiyasiz provayderlar (opencode, auggie va boshqalar) bilan `model: "auto"`dan foydalanganda, vaqti-vaqti bilan javoblar oʻrniga `HTTP 429`, `400` yoki `401` xatolarini olasiz. Birozdan keyin ayni soʻrovni qayta yuborsangiz, u muvaffaqiyatli bajariladi, ammo avtomatlashtirish vositalari (cron vazifalari, agentlar, skriptlar) birinchi xatolikdayoq toʻxtab qoladi.
+**Belgi**: `model: "auto"` bepul/autentifikatsiyasiz provayderlar (auggie va boshqalar) bilan ishlatilganda, javoblar o‘rniga vaqti-vaqti bilan `HTTP 429`, `400` yoki `401` xatolari olinadi. Xuddi shu promptni bir necha lahzadan so‘ng qayta yuborganda so‘rovlar muvaffaqiyatli bajariladi, ammo avtomatlashtirish (cron jobs, agentlar, skriptlar) birinchi xatodanoq ishlamay qoladi.
 
-**Asosiy sabab**: Uchta mustaqil xatolik holati bir-birining ustiga qoʻshiladi:
+**Asosiy sabab**: Uchta mustaqil xato rejimi bir-birini kuchaytiradi:
 
-1. **Provayderning soʻrovlar tezligi cheklovi (`429`)**: Bepul tariflarda muayyan vaqt oraligʻi uchun kvota qoʻllanishi mumkin. Parallel chaqiruvlar oqimi uni tugatadi, shuning uchun vaqt oynasi qayta tiklanmaguncha keyingi soʻrov rad etiladi.
-2. **Toʻgʻridan-toʻgʻri uzatishdagi ishlamaydigan model (`400`/`401`)**: `auto/*` havzalari `opencode` katalogida roʻyxatdan oʻtgan, ammo amaldagi hisob maʼlumotlariga ega boʻlmagan toʻgʻridan-toʻgʻri uzatish modellarini oʻz ichiga olishi mumkin (masalan, `oc/north-mini-code-free` → `401`). Avtomatik marshrutizator ulardan birini sinaydi, muvaffaqiyatsizlikka uchraydi va zaxira variant ishga tushishidan oldin xatolik uzatiladi.
-3. **Parallellikning kuchayishi (yuklama ostida `429`)**: Bir nechta agent/cron seansi bir vaqtning oʻzida `auto`ga murojaat qilganda, umumiy soʻrov tezligi bepul provayderlar bardosh bera oladigan chegaradan oshadi, natijada haqiqiy chaqiruvlar zararli deb belgilanadi.
+1. **Provayder rate-limit (`429`)**: Bepul tariflar har bir vaqt oynasi uchun kvotani cheklashi mumkin. Parallel so‘rovlar to‘lqini bu kvotani tugatadi, shuning uchun keyingi so‘rov oyna yangilanguncha rad etiladi.
+2. **Passthrough ichidagi ishlamaydigan model (`400`/`401`)**: `auto/*` pool’lariga katalogda ro‘yxatdan o‘tgan, ammo amaldagi hisob ma’lumotlariga ega bo‘lmagan passthrough modellar kirishi mumkin (→ `401`). Auto-router ulardan birini sinab ko‘radi, muvaffaqiyatsiz bo‘ladi va fallback ishga tushishidan oldin xato uzatiladi.
+3. **Konkurentlikning kuchayishi (`429` yuklama ostida)**: Bir nechta agent/cron sessiyasi bir vaqtda `auto` ga murojaat qilganda, umumiy so‘rovlar tezligi bepul provayderlar bardosh bera oladigan darajadan oshib ketadi va qonuniy so‘rovlar suiiste’mol sifatida belgilanadi.
 
-**Tasdiqlangan yechim (hamjamiyat xabari, 2026-08-10)**: rotatsiya, parallellik va zaxira variantiga oʻtish bepul tarifdagi beqarorlikni xatolik bilan yakunlash oʻrniga oʻzlashtirishi uchun uchta muhit oʻzgaruvchisini sozlang:
+**Tasdiqlangan yechim (hamjamiyat xabari, 2026-08-10)**: Rotatsiya, konkurentlik va fallback bepul tarifdagi o‘zgaruvchan yuklamani xatolik bilan to‘xtab qolmasdan qabul qilishi uchun uchta muhit o‘zgaruvchisini sozlang:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 holatida boshqa model/provayderga oʻtadi (ishlamaydigan toʻgʻridan-toʻgʻri uzatish modellarini chetlab oʻtadi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ogʻir soʻrovlarni qabul qilishning aniq yuqori chegarasi (birlamchi holatda oʻrnatilmagan: soʻrovlar soniga cheklov yoʻq, quyidagi izohga qarang)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sekin yuqori oqimlar uchun cheklangan kutish vaqtini RATE_LIMIT_MAX_WAIT_MS standart qiymatidan oshiradi
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 holatlarida boshqa model/provayderga o‘tish (ishlamaydigan passthrough modellarini o‘tkazib yuboradi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # og‘ir so‘rovlar uchun aniq parallel ishlash chegarasi (sukut bo‘yicha belgilanmagan: so‘rovlar soniga cheklov yo‘q, quyidagi izohga qarang)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # sekin upstreamlar uchun RATE_LIMIT_MAX_WAIT_MS sukut bo‘yicha qiymatidan kattaroq cheklangan kutish vaqtini belgilash
 ```
 
-Bularni OmniRoute jarayoni muhitida (demon uchun, masalan, LaunchAgent plist yoki `systemctl edit` orqali) oʻrnating, soʻng OmniRoute xizmatini qayta ishga tushiring. Rotatsiya bayrogʻi eng katta samara beradigan yagona vositadir: u jiddiy xatolikni havzadagi sogʻlom provayder orqali shaffof qayta urinishga aylantiradi.
+Ularni OmniRoute jarayonining muhitida belgilang (daemon uchun, masalan, LaunchAgent plist yoki `systemctl edit` orqali), so‘ng OmniRoute’ni qayta ishga tushiring. Rotatsiya bayrog‘i eng katta ta’sirga ega yagona parametrdir: u qat’iy xatoni pool’dagi sog‘lom provayderga shaffof qayta urinishga aylantiradi.
 
-**Izoh**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` bir vaqtda bajariladigan ogʻir — uzun kontekstli — soʻrovlar sonini cheklaydi; bu chegara provayder soʻrovlari tezligini cheklovchi vosita emas, balki qabul qilish shlyuzidir. **#503-fanout yangilanishi:** endi bu oʻzgaruvchi birlamchi holatda oʻrnatilmaydi (endi u faqat yuqoridagi kabi aniq sozlanganda kuchga kiradi) — ogʻir soʻrovlarni qabul qilish oʻrniga xostning haqiqiy xotira chegarasiga qarab avtomatik miqyoslanadigan, avtomatik hosil qilingan bayt budjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) orqali boshqariladi. Shu sababli yangi oʻrnatilgan tizim bu oʻzgaruvchini umuman sozlamasdan ham ancha kamroq `503 chat_admission_busy` rad etishlarini koʻrishi kerak; uni bu yerda aniq oʻrnatish ham hujjatlarda koʻrsatilganidek ishlashda davom etadi. Bayt budjetining aniq qayta belgilangan qiymatlari 8 MiB–2 GiB oraligʻi bilan cheklanadi. `413 body_exceeds_budget` vaqtinchalik emas: ushbu bayt budjetini oshiring, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` qiymatini kamaytiring yoki jarayon xotirasi chegarasini oshiring. `inflight_bytes_budget` sababli yuklamani kamaytirish vaqtinchalik resurs raqobati boʻlib, qayta urinish mumkin. Har bir provayder uchun soʻrovlar tezligini cheklash (`open-sse/services/rateLimitManager.ts`) alohida ravishda `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` va `RATE_LIMIT_AUTO_ENABLE` orqali boshqariladi — `.env.example` fayliga qarang.
+**Izoh**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` bir vaqtning o‘zida bajariladigan og‘ir — uzun kontekstli — so‘rovlar sonini cheklaydi; bu chegara qabul qilish darvozasi bo‘lib, provayderning rate limiter’i emas. **#503-fanout yangilanishi:** bu o‘zgaruvchi endi sukut bo‘yicha belgilanmaydi (endi faqat yuqoridagi kabi aniq sozlanganda ishlaydi) — og‘ir so‘rovlarni qabul qilish endi host’ning haqiqiy xotira chegarasidan kelib chiqib o‘zini moslaydigan avtomatik hosil qilingan bayt budjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) orqali boshqariladi. Shu sababli yangi o‘rnatishda bu o‘zgaruvchini umuman sozlamasdan ham `503 chat_admission_busy` rad etishlari ancha kamayishi kerak; uni bu yerda aniq belgilash esa hujjatlarda ko‘rsatilganidek ishlashda davom etadi. Bayt budjetining aniq kiritilgan qiymatlari 8 MiB–2 GiB oralig‘ida cheklanadi. `413 body_exceeds_budget` vaqtinchalik xato emas: bayt budjetini oshiring, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` yoki saqlangan so‘rov tanasi limitini kamaytiring, yoxud jarayonning xotira chegarasini oshiring. `inflight_bytes_budget` sababli so‘rovni chiqarib yuborish vaqtinchalik bandlik bo‘lib, qayta urinish mumkin. Har bir provayder uchun rate limiting (`open-sse/services/rateLimitManager.ts`) alohida ravishda `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` va `RATE_LIMIT_AUTO_ENABLE` orqali boshqariladi — `.env.example` fayliga qarang.
 
-**Ishlaganini qanday tekshirish mumkin**: agent/cron’ingizni ketma-ket ikki marta tezda ishga tushiring va har ikkala ishga tushirish ham muvaffaqiyatli yakunlanganini tasdiqlang. Tuzatishdan oldin ikkinchi ishga tushirish odatda `429`/`401` xatosini chiqaradi. Tuzatishdan keyin xatolar (agar yuz bersa) avtomatik tarzda qayta urinib ko‘riladi va chaqiruv yakunlanadi. Shuningdek, `curl /monitoring/health` buyrug‘ini bajarib, provayder ulanishlaridagi `rateLimitedUntil` maydonini va ta’sirlangan provayderlar uchun `circuitBreakers.providerBreakers[].state` qiymatini kuzatishingiz mumkin — holat `CLOSED`, `DEGRADED`, `OPEN` yoki `HALF_OPEN` qiymatlaridan biri bo‘ladi (`src/shared/utils/circuitBreaker.ts` fayliga qarang); xato berishda davom etayotgan provayder tiklash oralig‘i sinov so‘rovini o‘tkazishga imkon bermaguncha (`HALF_OPEN`) `CLOSED → DEGRADED → OPEN` holatlariga o‘tadi.
+**Yangilash haqida izoh: saqlangan so‘rov tanasi limiti endi chatga ham qo‘llanadi.** Avval Settings > Advanced > Request Body Limit (`maxBodySizeMb`) bo‘limida saqlangan limit endi `/v1/chat/completions` va `/v1/responses` uchun ham amal qiladi. Bu o‘zgarishdan oldin ushbu ikki route saqlangan qiymatdan qat’i nazar, 50 MB gacha bo‘lgan tanalarni qabul qilardi. Shu sababli, saqlangan limiti pastroq bo‘lgan o‘rnatma endi undan katta chat tanalarini rad eta boshlaydi. Hech qachon limit saqlamagan o‘rnatmada 50 MB lik sukut bo‘yicha qiymat saqlanib qoladi.
 
-**Agar hali ham 429 xatosini ko‘rsangiz**: ushbu provayder uchun faol hisob o‘z _kvotasini_ (faqat so‘rov tezligi cheklovini emas) amalda tugatgan. OmniRoute boshqaruv panelidagi Providers → Accounts bo‘limida ayni provayder uchun ikkinchi hisobni qo‘shing yoki boshqa bepul provayderni (masalan, `routeway`, `auggie`) ham ishlating. Almashtirib ishlatish faqat vaqtinchalik tezlik cheklovi/400/401 xatolarida yordam beradi; kvota butunlay tugagan bo‘lsa, ikkinchi hisob ma’lumotlari yoki boshqa provayder talab qilinadi.
+Rad etish HTTP `413` bilan qaytariladi; bunda `error.code` qiymati `PAYLOAD_TOO_LARGE`, `error.type` qiymati esa `payload_too_large` qilib belgilanadi. Xabar amaldagi limitni ko‘rsatadi: e’lon qilingan `Content-Length` undan katta bo‘lsa, `Request body too large. Maximum allowed: 10 MB`; amalda o‘qilgan baytlar undan oshsa esa `Request body too large for chat completions (max 10 MB).` ko‘rsatiladi. Bu yuqoridagi `413 body_exceeds_budget` bilan bir xil emas: u xotira budjetidan kelib chiqadi va bu sozlama bilan o‘zgarmaydi.
 
-**Agar ko‘rish modellarida (`auto/vision`, `bazaarlink/*`) 403 xatosini ko‘rsangiz**: ulangan hisobda ko‘rish imkoniyatini o‘z ichiga oluvchi pulli tarif yo‘q yoki API kalitining ruxsatlari yetarli emas. Provayder boshqaruv panelida kalit doirasi ko‘rish/multimodal imkoniyatlarini o‘z ichiga olishini tekshiring yoki pulli tarifdagi hisobni ulang va uni ko‘rish uchun maqsadli hisob sifatida saqlang.
+Limitni oshirish uchun `/dashboard/settings/advanced` sahifasida kattaroq qiymatni saqlang yoki `{"maxBodySizeMb": 50}` bilan `PATCH /api/settings` yuboring. 1 dan 500 MB gacha bo‘lgan qiymatlar qabul qilinadi, ular qayta ishga tushirishsiz qo‘llanadi va 50 avvalgi chat limitini tiklaydi. Yana ikkita limit kattaroq tanani to‘xtatishi mumkin: belgilangan bo‘lsa, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` saqlangan limitni ham cheklaydi; Kubernetes ingress annotatsiyasidagi `proxy-body-size` (yetkazib beriladigan manifestlarda `50m`) esa 50 MB dan katta qiymatlar uchun alohida oshirilishi kerak.
+
+**Ishlaganini qanday tekshirish mumkin**: agent/cron’ni qisqa vaqt oralig‘ida ikki marta ishga tushiring va ikkalasi ham muvaffaqiyatli yakunlanganini tasdiqlang. Tuzatishdan oldin ikkinchi ishga tushirish odatda `429`/`401` xatosini qaytaradi. Tuzatishdan keyin xatolar (agar yuz bersa) shaffof tarzda qayta uriniladi va chaqiruv yakunlanadi. Shuningdek, `curl /monitoring/health` buyrug‘ini bajarib, provayder ulanishlaridagi `rateLimitedUntil` maydonini hamda ta’sirlangan provayderlar uchun `circuitBreakers.providerBreakers[].state` qiymatini kuzatishingiz mumkin — holat `CLOSED`, `DEGRADED`, `OPEN` yoki `HALF_OPEN` qiymatlaridan biri bo‘ladi (`src/shared/utils/circuitBreaker.ts` fayliga qarang). Doimiy ravishda muvaffaqiyatsiz bo‘layotgan provayder reset oynasi probe so‘rovini o‘tkazishga imkon berguncha (`HALF_OPEN`) `CLOSED → DEGRADED → OPEN` holatlaridan o‘tadi.
+
+**Agar hali ham 429 ko‘rsangiz**: ushbu provayder uchun faol hisob haqiqatan ham _kvotasini_ tugatgan (bu shunchaki rate emas). OmniRoute dashboard → Providers → Accounts bo‘limida ayni provayder uchun ikkinchi hisob qo‘shing yoki boshqa bepul provayderni (masalan, `routeway`, `auggie`) ham aralashtirib ishlating. Rotatsiya faqat vaqtinchalik rate/400/401 muammolarida yordam beradi; kvotaning butunlay tugashi uchun ikkinchi credential yoki boshqa provayder kerak bo‘ladi.
+
+**Agar vision modellarida (`auto/vision`, `bazaarlink/*`) 403 ko‘rsangiz**: ulangan hisobda vision’ni o‘z ichiga olgan pullik tarif mavjud emas yoki API kalitining ruxsatlari yetarli emas. Provayder dashboard’ida kalit scope’iga vision/multimodal kiritilganini tekshiring yoki pullik tarifdagi hisobni ulang va uni vision target sifatida qoldiring.
 
 ---
 
@@ -90,48 +96,48 @@ Ogohlantirishlar OmniRoute nazorat qilmaydigan uchinchi tomon paketlaridagi eski
 
 ---
 
-## npm install-scripts bloklanganligi haqidagi ogohlantirish (global oʻrnatish)
+## npm install-scripts bloklangani haqidagi ogohlantirish (global o‘rnatish)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` buyrugʻi ishga tushirilganda, npm'ning yangi versiyalari (v11+ va v12+) paketning hayot sikli skriptlarini standart holatda bloklaydi va install-scripts ogohlantirishini koʻrsatadi:
+`npm install -g omniroute` buyrug‘i ishga tushirilganda, npm’ning yangi versiyalari (v11+ va v12+) paketning hayot sikli skriptlarini sukut bo‘yicha bloklaydi va install-scripts ogohlantirishini ko‘rsatadi:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 ta paketning o‘rnatish skriptlari allowScripts tomonidan qamrab olinmagani sababli bloklandi:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Bu ogohlantirishni eʼtiborsiz qoldirish mumkinmi?
+### Bu ogohlantirishni e’tiborsiz qoldirish mumkinmi?
 
-**Qisman, ammo skriptlarsiz ishga tushirish tavsiya etilmaydi.** OmniRoute muqobil variantlarga muammosiz oʻtish imkoniyatini oʻz ichiga oladi: agar mahalliy `better-sqlite3` bogʻlanishlarini mustaqil toʻplamdan yuklab boʻlmasa, ilova `node:sqlite` yoki `sql.js` kabi muqobil drayverlarga oʻtadi ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) boʻlimiga qarang). Server baribir ishga tushadi, ammo `sql.js` kabi WASM muqobil variantlarida ishlash SQLite WAL (Write-Ahead Logging) rejimini oʻchiradi hamda xotira va diskni sinxronlash xarajatlarini oshiradi.
+**Qisman, ammo skriptlarsiz ishga tushirish tavsiya etilmaydi.** OmniRoute muqobil yechimlarga silliq o‘tishni qo‘llab-quvvatlaydi: agar mustaqil to‘plamdan mahalliy `better-sqlite3` bog‘lanishlarini yuklab bo‘lmasa, ilova `node:sqlite` yoki `sql.js` kabi muqobil drayverlarga o‘tadi ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) bo‘limiga qarang). Server baribir ishga tushadi, ammo `sql.js` kabi WASM muqobil yechimlaridan foydalanish SQLite WAL (oldindan yozib borish jurnali) rejimini o‘chiradi hamda xotira sarfi va disk bilan sinxronlash yuklamasini oshiradi.
 
-### Qaysi skriptlar haqiqatan ham talab qilinadi?
+### Qaysi skriptlar amalda talab qilinadi?
 
-Bloklangan skriptlarning hammasi ham OmniRoute'ni ishga tushirish uchun zarur emas:
+Bloklangan skriptlarning barchasi ham OmniRoute’ni ishga tushirish uchun zarur emas:
 
-- **Zarur (`omniroute`, `better-sqlite3`):** OmniRoute Next.js mustaqil ilova toʻplamidan (`dist/`) ishlaydi. Oʻrnatish vaqtida npm yuqori darajadagi `node_modules/better-sqlite3/` ichiga xostga xos mahalliy SQLite drayverini yuklab oladi yoki kompilyatsiya qiladi. Keyin OmniRoute'ning `postinstall` skripti (`scripts/build/postinstall.mjs`) ushbu xostga xos ikkilik fayllarni tekshiradi va mustaqil server ularga kira olishi uchun `dist/node_modules/` ichiga nusxalaydi. Agar `omniroute` paketining postinstall skripti bloklansa, bu nusxalash bosqichi oʻtkazib yuboriladi.
-- **Ixtiyoriy/tranzitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bular yigʻish yordamchilari, kuzatuv vositalari yoki tizim kalitlar zanjiri yordamchi dasturlaridir. Ularga ruxsat berish yigʻish ogohlantirishlarining oldini oladi, ammo ular asosiy marshrutlash funksiyasi uchun talab qilinmaydi.
-- **Chiqarib tashlangan (`onnxruntime-node`):** Mahalliy AI embeddinglari uchun ixtiyoriy bogʻliqlik boʻlib, OmniRoute ishlashi uchun **talab qilinmaydi**. Uning postinstall skripti NuGet'dan taxminan 300MB hajmdagi CUDA resurslarini yuklab oladi; qoʻllab-quvvatlanadigan uskunada mahalliy ONNX tezlashtirishidan foydalanishni aniq rejalashtirmasangiz, uni ruxsat etilganlar roʻyxatiga kiritmang.
+- **Zarur (`omniroute`, `better-sqlite3`):** OmniRoute Next.js’ning mustaqil ilova to‘plamidan (`dist/`) ishlaydi. O‘rnatish vaqtida npm xostga xos mahalliy SQLite drayverini yuqori darajadagi `node_modules/better-sqlite3/` ichiga yuklab oladi yoki kompilyatsiya qiladi. Shundan so‘ng OmniRoute’ning `postinstall` skripti (`scripts/build/postinstall.mjs`) ushbu xostga xos ikkilik fayllarni tekshiradi va mustaqil server ulardan foydalana olishi uchun `dist/node_modules/` ichiga nusxalaydi. Agar `omniroute` paketining postinstall skripti bloklansa, ushbu nusxalash bosqichi bajarilmaydi.
+- **Ixtiyoriy/tranzitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bular yig‘ish yordamchilari, kuzatuv vositalari yoki tizim kalitlar zanjiri yordamchi dasturlaridir. Ularga ruxsat berish yig‘ish ogohlantirishlarining oldini oladi, ammo ular asosiy marshrutlash funksiyasi uchun talab qilinmaydi.
+- **Istisno qilingan (`onnxruntime-node`):** Mahalliy AI embeddinglari uchun ixtiyoriy bog‘liqlik bo‘lib, OmniRoute ishlashi uchun **talab qilinmaydi**. Uning postinstall skripti NuGet’dan taxminan 300 MB hajmdagi CUDA resurslarini yuklab oladi; qo‘llab-quvvatlanadigan qurilmada mahalliy ONNX tezlashtirishidan foydalanishni aniq rejalashtirmagan bo‘lsangiz, uni ruxsat etilganlar ro‘yxatiga kiritmang.
 
-### Tavsiya etilgan tuzatish
+### Tavsiya etilgan yechim
 
-Global oʻrnatish vaqtida talab qilinadigan oʻrnatish skriptlariga ruxsat berish va ogohlantirishlarni yashirish uchun OmniRoute hamda uning mahalliy bogʻliqliklariga `--allow-scripts` parametrini uzating:
+Global o‘rnatish vaqtida kerakli o‘rnatish skriptlariga ruxsat berish va ogohlantirishlarni o‘chirish uchun OmniRoute hamda uning mahalliy bog‘liqliklari uchun `--allow-scripts` parametrini kiriting:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Yoki buni foydalanuvchi hisobingizdagi barcha global oʻrnatishlar uchun doimiy sozlash maqsadida:
+Shu bilan bir qatorda, buni foydalanuvchi hisobingizdagi barcha global o‘rnatishlar uchun doimiy ravishda sozlashingiz mumkin:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Oʻrnatishni tekshirish
+### O‘rnatishni tekshirish
 
-Oʻrnatishdan soʻng mahalliy bogʻlanishlar va bajarilish muhiti soz holatda ekanini tekshirish uchun ichki diagnostika vositasini ishga tushiring:
+O‘rnatishdan so‘ng mahalliy bog‘lanishlar va bajarilish muhiti to‘g‘ri ishlayotganiga ishonch hosil qilish uchun ichki diagnostika vositasini ishga tushiring:
 
 ```bash
 omniroute doctor
@@ -827,6 +833,30 @@ omniroute serve --ready-timeout 180000
 Standart qiymat 60 000 ms (60 s). Ogohlantirish faqat axborot uchun; server fonda ishga tushishda davom etadi va yuklanish tugagach undan foydalanish mumkin boʻladi.
 
 `OMNIROUTE_READY_TIMEOUT_MS` haqida toʻliq maʼlumot olish uchun [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) fayliga qarang.
+
+---
+
+## CCR / dedup muammolari
+
+Siqish CCR (`ccr`) va `session-dedup` asboblari uchun diagnostika matritsasi. Operatorning to'liq ma'lumotnomasi (markerlar, dastlabki shartlar, har bir asbob doirasi, qidirish sahifalari) uchun [Compression Engines → Prerequisites / operator qo'llanmasiga](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) qarang.
+
+| Alomat                                                                                             | Mumkin sabab                                                                                                                                                     | Tasdiqlash                                                                                                                          | Tuzatish                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                     | Route-guard loopback auth, transport xatosi emas. Hech qanday `Bearer` yoki `mcp:connect`/`manage`/`admin` bo'lmagan kalit `/api/mcp/` marshrutiga etib bormadi. | So‘rovda no/invalid `Authorization` sarlavhasi bor edi.                                                                             | Yaroqli `Bearer` kalitini yuboring. Masofaviy kalit `mcp:connect` (faqat `/api/mcp/` mahalliy o'chirishga ruxsat beradi) va unga kerak bo'lgan maxsus read/write doirasini ushlab turishi mumkin.                                                                                                                            |
+| **blok topilmadi** — `omniroute_ccr_retrieve` xeshni rad etadi                                     | Xesh 24 oltilik qiymat emas yoki noto‘g‘ri ko‘chirilgan yoki blok muddati tugagan / chiqarib tashlangan.                                                         | Xeshni `[CCR retrieve hash=…]` markeridagi 24 hex qiymati bilan solishtiring; do'kon holati uchun `omniroute_ccr_stats` tekshiring. | Markerdan so'zma-so'z 24 hexli xeshni nusxa ko'chiring. Agar blok haqiqatan ham yo'qolgan bo'lsa, u o'zining TTL muddatidan o'tib ketgan yoki hech qachon bardoshli do'konga etib bormagan (bloklar 512 KB dan ortiq va bulutli ish vaqtidagi har bir blok faqat xotirada qoladi va qayta ishga tushirishdan omon qolmaydi). |
+| **CCR no-op** — blok siqilmagan (matn o'zgarmagan holda qaytib keladi)                             | Siqish chegarasidan pastroqda blokirovka qiling yoki CCR dvigateli / rejimi faol emas.                                                                           | Faol siqish `strategy`/`enabled` va blok o'lchamini chegaraga nisbatan tekshiring.                                                  | CCR (yoki uni boshqaradigan stacked rejimini) yoqing va blokni saqlashga arziydigan darajada katta ekanligini tasdiqlang. No-op xato emas — bu "siqish uchun hech narsa yo'q".                                                                                                                                               |
+| **deup marker** chiqishda — `[dedup:ref sha=…]` ko'rinadi                                          | **Qasddan orqaga qarash** , yo'qotish yoki xato emas. `session-dedup` elided matn allaqachon xuddi shu seansning oldingi navbatida yuborilgan.                   | Xuddi shu matn sessiyada oldin paydo bo'lishini tasdiqlang.                                                                         | Hech narsa qilmang — asbobni chaqirmang va uni qayta qurishga urinmang. Birinchi hodisa kanonik nusxadir; joriy navbat hech qachon qayta yozilmaydi, u keyingi burilishda deduktsiya qilinadi.                                                                                                                               |
+| **Kod rejimi** — `omniroute_ccr_*` asboblari `tools[]` / CCR yo'riqnomasida mavjud emas (OpenCode) | OpenCode Code Mode (standart) MCP vositalarini `tools[]` dan yashirib, modelga faqat mahalliy vositalarni reklama qiladi.                                        | OpenCode MCP server yozuvini `codemode` uchun tekshiring.                                                                           | Server yozuvida `codemode: false` ni o'rnating (a** mijoz** sozlash) shuning uchun MCP vositalari reklama qilinadi. CCR retrieve-protocol ko'rsatmasi o'chiq qoladi: `omniroute` nomli server `omniroute_omniroute_ccr_retrieve` ochadi va `_` mos ajratuvchi emas.                                                          |
+
+Ko'proq alomatlar:
+
+| Alomat                                                                                                      | Mumkin sabab                                                                                                                                                                   | Tuzatish                                                                                                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                     | HTTP 403 emas, MCP vositasi xatosi natijasi (`isError: true`).                                                                                                                 | Har bir asboblar jadvalidan doirani qo'shing (operator qo'llanmasiga qarang). Masalan, `omniroute_ccr_retrieve` `read:compression` kerak.                                                              |
+| `Unknown Mcp-Session-Id`                                                                                    | Streamable-HTTP seansi o'chirildi va yig'ildi (`OMNIROUTE_MCP_SESSION_IDLE_MS`); server HTTP 404 ga javob beradi.                                                              | — do sessiyasini qayta ulang yoki qayta ishga tushiring** emas** tugmani aylantiring, doirani o'zgartiring yoki asbob nomini o'zgartiring. Bu 401/403. emas                                            |
+| asbob natijasida `JSON Parse error` / `Unterminated string`                                                 | MCP vositasi matni `mcpAccessibility.maxTextChars` (standart `50000`) atrofida JSON o'rtasida kesilgan.                                                                        | Yalang'och to'liq o'rniga sahifalangan `mode` foydalaning: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` yoki `mode:"stats"`. Asosiy qoida: `chars > 40000` → a `mode` dan foydalaning.  |
+| `Failed to open SSE stream`                                                                                 | Tashish `streamable` bo'lsa, mijoz eski `/api/mcp/sse` singletonni urdi.                                                                                                       | Mijozni `/api/mcp/sse` o'rniga `/api/mcp/stream` (oqimli so'nggi nuqta) ga qarating.                                                                                                                   |
+| **O'lik stdio yurak urishi** — `mcp-heartbeat.json` HTTP transport yuklanganda `pidAlive: false` ko'rsatadi | Yurak urishi fayli stdio qoldig'i (eskirgan PID yoki boshqa versiya); HTTP transportlari jarayonda va uning o'rniga `getMcpHttpStatus()` dan hisobot holati (fayl yozilmaydi). | Hech qanday harakat — transport sog'lom. Haqiqat yurak urishi fayli emas, balki `/api/mcp/status` dan `httpTransport.online` / `startedAt`. Serverni qayta ishga tushirmang yoki kalitni aylantirmang. |
 
 ---
 

@@ -4,7 +4,7 @@
 # vez de depender do snapshot gravado no deploy. Fonte: scripts/release/radar-export.mjs.
 #
 # A URL estável resultante (definir em RADAR_EXPORT_URL no .env do radar-server):
-#   https://github.com/diegosouzapw/OmniRoute/releases/download/radar-export-latest/export-omniroute.json
+#   https://github.com/cheaper-inference/OmniRoute/releases/download/radar-export-latest/export-omniroute.json
 name: Radar Export
 
 on:
@@ -39,7 +39,7 @@ env:
 
 jobs:
   publish-export:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release upload — clobra o asset estável do export
@@ -52,6 +52,8 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
           cache: npm
       - run: npm ci
+        env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Generate catalog export with provenance
         run: node --import tsx/esm scripts/release/radar-export.mjs "$RUNNER_TEMP/export-omniroute.json"
       - name: Publish to the stable release asset

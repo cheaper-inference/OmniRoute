@@ -1,23 +1,32 @@
 import type { Model, Provider } from "@opencode/plugin";
 import {
-  buildProviderResolve,
-  compileProviderFilter,
-  filterAllUnknown,
   passesProviderCombo,
   passesProviderFilter,
-  warnNoVocabulary,
-  warnUnknownProviders,
+  resolveProviderFilter,
+  warnProviderMatchedNothing,
   type ProviderFilter,
   type ProviderResolve,
 } from "./provider-filter.js";
 import type { LegacyModel } from "./legacy-model.js";
-import { type CapabilityPresetFlags, passesCapabilityPresets } from "./capability-presets.js";
+import { isUserComboRow, usesModelsComboSource, type CombosSource } from "./combos-source.js";
+import {
+  comboLookupName,
+  filterRawPoolByPreset,
+  foldComboPresetSteps,
+  presetsActive,
+  recordComboPresetVerdict,
+  type CapabilityPresetFlags,
+  passesCapabilityPresets,
+} from "./capability-presets.js";
+import { type FreeOptions, INFERRED_FREE_LABEL } from "./shared/free-signals.js";
+import { isInferredFree, warnOnEmptyFreeOverlay } from "./shared/free-signals.js";
 import {
   isHttpUrl,
   type ApiFormatV2,
   type LogLevel,
   type Logger,
   type OmniRouteCombosFetcher,
+  type OmniRouteEnrichmentEntry,
   type OmniRouteEnrichmentFetcher,
   type OmniRouteEnrichmentMap,
   type OmniRouteModelsFetcher,
@@ -27,10 +36,13 @@ import {
   type OmniRouteRawModelEntry,
   applyEnrichment,
   buildCanonicalToAliasMap,
+  buildModelDisplayName,
   canonicalDedupSet,
+  countFreeTierMatch,
   createLogger,
   defaultOmniRouteEnrichmentFetcher,
   defaultOmniRouteProvidersFetcher,
+  disambiguateDisplayNames,
   ensureV1Suffix,
   isUsableCombo,
   isUsableRawModelId,
@@ -40,13 +52,17 @@ import {
   usableProviderAliasSet,
 } from "./shared/index.js";
 import {
+  compileModelListFilter,
+  matchesModelFilter,
+  type ModelListFilter,
+} from "./model-filter.js";
+import {
   FRESH_PER_OWNER,
   FRESH_WINDOW_DAYS,
   SHOWCASE_PER_OWNER,
   baseIdOf,
   freshWindowDaysToMs,
   isFlatTierId,
-  matchesSuffix,
   passesWhatServes,
   readEntryStatus,
   selectFreshKeptIds,
@@ -69,8 +85,7 @@ export {
   selectShowcaseIds,
   staysDropped,
 } from "./catalog-freshness.js";
-export type { ModelListFilter } from "./catalog-freshness.js";
-import type { ModelListFilter } from "./catalog-freshness.js";
+export type { ModelListFilter } from "./model-filter.js";
 
 export type ModelsFetcher = OmniRouteModelsFetcher;
 export type CombosFetcher = OmniRouteCombosFetcher;
@@ -83,7 +98,7 @@ export interface EndpointTimeouts {
   enrichment?: number;
 }
 
-export interface ResolvedOptions {
+export interface ResolvedOptions extends FreeOptions {
   providerId: string;
   baseURL: string;
   apiKey: string;
@@ -94,7 +109,7 @@ export interface ResolvedOptions {
   logLevel?: LogLevel;
   startupDebug?: boolean;
   modelCacheTtlMs: number;
-  /** v1 parity: prefix the display name with the upstream provider label. */
+  /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
   displayName?: string;
   apiFormat?: ApiFormatV2;
@@ -102,7 +117,14 @@ export interface ResolvedOptions {
   hiddenModels?: string[];
   providersAllow?: string[];
   usableOnly: boolean;
-  freeOnly?: boolean;
+  /** Hide every combo when false (default true keeps combos). */
+  combos?: boolean;
+  /**
+   * Combo source. Absent or `"api"` keeps the member-verified `/api/combos`
+   * pass; `"models"` opts into the `/v1/models` combo rows when no
+   * member-level filter is on (see `usesModelsComboSource`).
+   */
+  combosSource?: CombosSource;
   toolsOnly?: boolean;
   visionOnly?: boolean;
   enrichment?: OmniRouteEnrichmentMap | boolean;
@@ -428,72 +450,9 @@ export function legacyApiToInfoApi(api: LegacyModel["api"]): {
   return { id: api.id, type: "aisdk", package: api.npm, url: api.url };
 }
 
-function legacyCostToInfoCost(cost: LegacyModel["cost"]): StableModelInfo["cost"] {
-  const c = [{ input: cost.input, output: cost.output, cache: cost.cache }];
-  return c as unknown as StableModelInfo["cost"];
-}
-
-function legacyCapabilitiesToInfoCapabilities(
-  caps: LegacyModel["capabilities"]
-): StableModelInfo["capabilities"] {
-  const input: string[] = [];
-  if (caps.input.text) input.push("text");
-  if (caps.input.audio) input.push("audio");
-  if (caps.input.image) input.push("image");
-  if (caps.input.video) input.push("video");
-  if (caps.input.pdf) input.push("pdf");
-  const output: string[] = [];
-  if (caps.output.text) output.push("text");
-  if (caps.output.audio) output.push("audio");
-  if (caps.output.image) output.push("image");
-  if (caps.output.video) output.push("video");
-  if (caps.output.pdf) output.push("pdf");
-  return { tools: caps.toolcall, input, output };
-}
-
-function legacyToInfo(providerID: string, modelID: string, m: LegacyModel): StableModelInfo {
-  const variants = Object.entries(m.variants ?? {}).map(([id, body]) => ({
-    id,
-    headers: {},
-    body: body as Record<string, unknown>,
-  }));
-  const parsed = Date.parse(m.release_date);
-  const out = {
-    id: modelID,
-    modelID,
-    providerID,
-    ...(m.family !== undefined ? { family: m.family } : {}),
-    name: m.name,
-    capabilities: legacyCapabilitiesToInfoCapabilities(m.capabilities),
-    headers: { ...m.headers },
-    variants,
-    time: { released: Number.isNaN(parsed) ? 0 : parsed },
-    cost: legacyCostToInfoCost(m.cost),
-    status: m.status,
-    enabled: true,
-    limit: { ...m.limit },
-  };
-  return out as unknown as StableModelInfo;
-}
-
 export interface PublishCounts {
   models: number;
   combos: number;
-}
-
-export function compileModelListFilter(list?: string[]): ModelListFilter | undefined {
-  if (!list || list.length === 0) return undefined;
-  const exact = new Set<string>();
-  const suffixes = new Set<string>();
-  for (const id of list) {
-    if (id.includes("/")) {
-      exact.add(id);
-    } else {
-      suffixes.add(id);
-    }
-  }
-  if (exact.size === 0 && suffixes.size === 0) return undefined;
-  return { exact, suffixes };
 }
 
 export function passesModelAllowlist(
@@ -502,10 +461,10 @@ export function passesModelAllowlist(
   hidden?: ModelListFilter
 ): boolean {
   if (hidden) {
-    if (hidden.exact.has(id) || matchesSuffix(id, hidden.suffixes)) return false;
+    if (matchesModelFilter(id, hidden)) return false;
   }
   if (visible) {
-    if (!visible.exact.has(id) && !matchesSuffix(id, visible.suffixes)) return false;
+    if (!matchesModelFilter(id, visible)) return false;
   }
   return true;
 }
@@ -520,7 +479,7 @@ export function passesComboAllowlist(combo: OmniRouteRawCombo, visible?: ModelLi
     const modelId = typeof step?.model === "string" ? step.model : "";
     if (modelId.length === 0) continue;
     sawResolvableMember = true;
-    if (visible.exact.has(modelId) || matchesSuffix(modelId, visible.suffixes)) return true;
+    if (matchesModelFilter(modelId, visible)) return true;
   }
   if (!sawResolvableMember) return true;
   return false;
@@ -563,19 +522,6 @@ export function assignProviderFields(
 }
 
 /** A widened capability flag (`boolean | { field }`) read back as a plain flag. */
-function isCapabilityEnabled(value: boolean | { field: string }): boolean {
-  return value !== false;
-}
-
-/**
- * Combo steps reach us from the gateway with a shape the SDK types do not
- * describe (`kind`, `comboName`, `model` appear per step kind). One reader
- * keeps that single untyped boundary in one place instead of scattering casts.
- */
-function readStepField(step: unknown, key: "kind" | "comboName" | "model"): unknown {
-  return (step as Record<string, unknown> | null | undefined)?.[key];
-}
-
 /**
  * Resolve the display-name + pricing overlay. A caller may hand over a
  * ready-made map (tests, pre-resolved overlays) or turn the fetch off; a
@@ -663,6 +609,8 @@ interface PublishContext {
   /** Shared with the combos pass: one collision warning per key, per run. */
   warnedCombos: Set<string>;
   cacheKey: string;
+  /** Per-entry inferred-free verdict, bound to this publish's overlay. */
+  isFreeInferred: (id: string, entry: OmniRouteEnrichmentEntry | undefined) => boolean;
 }
 
 /**
@@ -700,6 +648,7 @@ async function publishCombos(
     warnedCombos,
     cacheKey,
   } = ctx;
+  const { isFreeInferred } = ctx;
   let rawCombos: OmniRouteRawCombo[];
   try {
     rawCombos = combosFetcher
@@ -734,49 +683,58 @@ async function publishCombos(
     return true;
   });
   const resolvedByName = new Map<string, LegacyModel>();
+  const presetByName = new Map<string, boolean>();
+  const activeFlags: CapabilityPresetFlags = {
+    freeOnly: opts.freeOnly,
+    toolsOnly: opts.toolsOnly,
+    visionOnly: opts.visionOnly,
+  };
   let unresolved: typeof pending = [];
 
   for (let pass = 0; pass < MAX_COMBO_PASSES && pending.length > 0; pass++) {
     const stillPending: typeof pending = [];
     for (const combo of pending) {
-      const memberSteps = Array.isArray(combo.models) ? combo.models : [];
-      const memberEntries: OmniRouteRawModelEntry[] = [];
-      let deferred = false;
-      for (const step of memberSteps) {
-        const kind = readStepField(step, "kind");
-        if (kind === "combo-ref") {
-          const comboName = readStepField(step, "comboName");
-          if (typeof comboName !== "string" || comboName.length === 0) continue;
-          const nested = resolvedByName.get(comboName);
-          if (!nested) {
-            deferred = true;
-            break;
-          }
-          memberEntries.push(synthesizeNestedMember(comboName, nested));
-          continue;
-        }
-        const modelId = readStepField(step, "model");
-        if (typeof modelId !== "string" || modelId.length === 0) continue;
-        const member = rawModelById.get(modelId);
-        if (member) memberEntries.push(member);
-      }
+      const { memberEntries, deferred, failsPreset, countable } = foldComboPresetSteps(
+        combo,
+        rawModelById,
+        resolvedByName,
+        presetByName,
+        enrichment,
+        canonicalToAlias,
+        activeFlags,
+        isFreeInferred
+      );
       if (deferred) {
         stillPending.push(combo);
         continue;
       }
       const mapped = mapComboToModelV2(combo, memberEntries, X, opts.baseURL, opts.apiFormat);
+      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
       const comboEnrichment = lookupEnrichment(combo.id, enrichment, canonicalToAlias);
       applyEnrichment(mapped, comboEnrichment, {
         isCombo: true,
       });
+      const comboName = comboLookupName(combo);
+      const comboInferred = isFreeInferred(combo.id, comboEnrichment);
+      const passesMembers = recordComboPresetVerdict(
+        presetByName,
+        combo,
+        failsPreset,
+        countable,
+        activeFlags
+      );
       if (
-        !passesCapabilityPresets(mapped, comboEnrichment, {
-          freeOnly: opts.freeOnly,
-          toolsOnly: opts.toolsOnly,
-          visionOnly: opts.visionOnly,
-        } satisfies CapabilityPresetFlags)
+        presetsActive(activeFlags)
+          ? !passesMembers
+          : !passesCapabilityPresets(mapped, comboEnrichment, {
+              freeOnly: opts.freeOnly,
+              freeInferred: comboInferred,
+              toolsOnly: opts.toolsOnly,
+              visionOnly: opts.visionOnly,
+            } satisfies CapabilityPresetFlags)
       )
         continue;
+      if (comboInferred) mapped.name += INFERRED_FREE_LABEL;
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       if (publishedKeys.has(key)) {
@@ -806,11 +764,7 @@ async function publishCombos(
       publishedKeys.add(key);
       publishedModelIds.set(key, mapped.id);
       comboCount += 1;
-      const lookupName =
-        typeof combo.name === "string" && combo.name.trim().length > 0
-          ? combo.name.trim()
-          : combo.id;
-      if (!resolvedByName.has(lookupName)) resolvedByName.set(lookupName, mapped);
+      if (!resolvedByName.has(comboName)) resolvedByName.set(comboName, mapped);
     }
     if (stillPending.length === pending.length) {
       unresolved = stillPending;
@@ -827,47 +781,6 @@ async function publishCombos(
     );
   }
   return { published: comboCount, providerDropped };
-}
-
-/**
- * Synthesize a raw-model entry from an already-resolved nested combo so a
- * parent combo's LCD folds the whole nested capability vector (context,
- * output, modalities, capabilities) instead of only direct raw members.
- * v1 parity (combo member synthesis at nested resolution time).
- */
-function synthesizeNestedMember(name: string, nested: LegacyModel): OmniRouteRawModelEntry {
-  const inputModalities: string[] = [];
-  if (nested.capabilities.input.text) inputModalities.push("text");
-  if (nested.capabilities.input.audio) inputModalities.push("audio");
-  if (nested.capabilities.input.image) inputModalities.push("image");
-  if (nested.capabilities.input.video) inputModalities.push("video");
-  if (nested.capabilities.input.pdf) inputModalities.push("pdf");
-  const outputModalities: string[] = [];
-  if (nested.capabilities.output.text) outputModalities.push("text");
-  if (nested.capabilities.output.audio) outputModalities.push("audio");
-  if (nested.capabilities.output.image) outputModalities.push("image");
-  if (nested.capabilities.output.video) outputModalities.push("video");
-  if (nested.capabilities.output.pdf) outputModalities.push("pdf");
-  return {
-    id: `combo-ref:${name}`,
-    context_length: nested.limit.context,
-    max_output_tokens: nested.limit.output,
-    ...(nested.limit.input !== undefined ? { max_input_tokens: nested.limit.input } : {}),
-    owned_by: "combo",
-    input_modalities: inputModalities,
-    output_modalities: outputModalities,
-    capabilities: {
-      temperature: nested.capabilities.temperature,
-      // A raw entry carries plain flags; the mapped model widens them to
-      // `boolean | { field }` (custom reasoning/thinking field). Every
-      // non-false form means the capability is present, which is all the
-      // LCD fold reads.
-      reasoning: isCapabilityEnabled(nested.capabilities.reasoning),
-      thinking: isCapabilityEnabled(nested.capabilities.interleaved),
-      attachment: nested.capabilities.attachment,
-      tool_calling: nested.capabilities.toolcall,
-    },
-  };
 }
 
 /**
@@ -916,22 +829,22 @@ export async function collectCatalog(
   const enrichment = await resolveEnrichmentOverlay(opts, fetchers, log);
   const canonicalToAlias = buildCanonicalToAliasMap(enrichment);
   const canonicalDedup = canonicalDedupSet(rawModels, canonicalToAlias);
-  // `freeOnly` reads the overlay: an empty overlay (no management token,
-  // `enrichment: false`, or fetch failure) would otherwise empty the catalog
-  // silently. Warn once per refresh and keep filtering (fail-closed).
-  if (opts.freeOnly === true) {
-    let hasFreeEntry = false;
-    for (const entry of enrichment.values()) {
-      if (entry.freeType !== undefined) {
-        hasFreeEntry = true;
-        break;
-      }
-    }
-    if (!hasFreeEntry) {
-      log.warn(
-        `[omniroute-v2] freeOnly is on but the enrichment overlay has no free-tier entries (no management token, enrichment disabled, or free-tier fetch failed); publishing an empty catalog. Disable freeOnly or configure the management token.`
-      );
-    }
+  warnOnEmptyFreeOverlay(opts, enrichment, (m) => log.warn(m));
+  // A sparse overlay (free-tier lines that never meet a served id) warns
+  // with its match ratio instead, so a short catalog names its cause.
+  const {
+    total: freeTotal,
+    matched: freeMatched,
+    unmatched: freeUnmatched,
+  } = countFreeTierMatch(
+    rawModels.map((e) => e.id),
+    enrichment,
+    canonicalToAlias
+  );
+  if (opts.freeOnly === true && freeTotal > 0 && freeUnmatched > 0) {
+    log.warn(
+      `[omniroute-v2] freeOnly dropped ${freeUnmatched} of ${freeTotal} free-tier lines: ${freeMatched}/${freeTotal} free-tier entries match the served catalog.`
+    );
   }
 
   const usable = await resolveUsableAliases(
@@ -944,27 +857,16 @@ export async function collectCatalog(
   );
 
   // Provider allowlist (same seam as the allowlists above, applied last):
-  // compile once, resolve alias<->canonical once via the usable pass, then
-  // one predicate per collection point. `buildCanonicalToAliasMap` returns
-  // canonical->alias; the resolve table needs the inverse alias->canonical.
+  // compiled once here, then one predicate per collection point.
   const warnedCombos = opts.collisionWarned ?? new Set<string>();
-  const providerFilter = compileProviderFilter(opts.providersAllow);
-  let providerResolve: ProviderResolve | undefined;
-  let providerAllUnknown = false;
-  if (providerFilter) {
-    const pairs: Array<{ alias?: string; canonical?: string }> = [];
-    for (const entry of enrichment.values()) {
-      pairs.push({ alias: entry.providerAlias, canonical: entry.providerCanonical });
-    }
-    for (const [canonical, alias] of canonicalToAlias) {
-      pairs.push({ alias, canonical });
-    }
-    providerResolve = buildProviderResolve(pairs, usable?.canonicals);
-    providerAllUnknown = filterAllUnknown(providerFilter, providerResolve);
-    if (providerResolve.known.size === 0)
-      warnNoVocabulary(providerFilter, providerResolve.known, warnedCombos, log);
-    else warnUnknownProviders(providerFilter, providerResolve.known, warnedCombos, log);
-  }
+  const { providerFilter, providerResolve, providerAllUnknown } = resolveProviderFilter(
+    opts.providersAllow,
+    enrichment,
+    canonicalToAlias,
+    usable?.canonicals,
+    warnedCombos,
+    log
+  );
 
   const rawModelById = new Map<string, OmniRouteRawModelEntry>();
   for (const entry of rawModels) {
@@ -981,9 +883,19 @@ export async function collectCatalog(
   let providerDroppedCount = 0;
   // Showcase ranks the allowlisted pool so the default picker stays usable
   // without pinning plus the curated dates and pinned ids below.
+  const presetFlags: CapabilityPresetFlags = {
+    freeOnly: opts.freeOnly,
+    toolsOnly: opts.toolsOnly,
+    visionOnly: opts.visionOnly,
+  };
+  const isFreeInferred = (id: string, entry: OmniRouteEnrichmentEntry | undefined): boolean =>
+    isInferredFree(id, entry, opts, enrichment, canonicalToAlias);
+  const presetPool = catalogAll
+    ? []
+    : filterRawPoolByPreset(rawModels, enrichment, canonicalToAlias, presetFlags, isFreeInferred);
   const showcasePool = catalogAll
     ? []
-    : rawModels.filter(
+    : presetPool.filter(
         (entry) =>
           entry.id &&
           !canonicalDedup.has(entry.id) &&
@@ -1001,15 +913,33 @@ export async function collectCatalog(
   const freshKept = catalogAll
     ? new Set<string>()
     : selectFreshKeptIds(
-        rawModels,
+        presetPool,
         opts.freshPerOwner ?? FRESH_PER_OWNER,
         nowMs,
         visibleFilter,
         windowMs
       );
   const staticallyDropped: OmniRouteRawModelEntry[] = [];
+  // Stage counters for the refresh summary line. Frozen at the end of the
+  // static pass, before the usage-memory restoration below: restored
+  // entries rejoin `collected` (so `published` can exceed `afterPresets`),
+  // and the summary keeps reading the filter stages, not the restore.
+  let afterDefaultView = 0;
+  let afterPresets = 0;
+  // Opt-in `combosSource: "models"`: the user combo rows of /v1/models are
+  // the published combos, so they skip the default-view narrowing exactly
+  // like the /api/combos pass never narrows a combo.
+  const combosEnabled = opts.combos !== false;
+  const modelsComboSource = combosEnabled && usesModelsComboSource(opts);
+  if (opts.combosSource === "models" && !modelsComboSource) {
+    log.debug(
+      "[omniroute-v2] combosSource=models needs no member-level filter; a preset, usableOnly, providersAllow or a visible/hidden list is on, so combos keep the /api/combos source."
+    );
+  }
+  let modelsComboCount = 0;
   for (const entry of rawModels) {
     if (!entry.id) continue;
+    if (combosEnabled === false && entry.owned_by === "combo") continue;
     if (canonicalDedup.has(entry.id)) continue;
     if (usable && !isUsableRawModelId(entry.id, usable)) continue;
     if (!passesModelAllowlist(entry.id, visibleFilter, hiddenFilter)) continue;
@@ -1017,36 +947,54 @@ export async function collectCatalog(
       providerDroppedCount += 1;
       continue;
     }
+    const servedCombo = modelsComboSource && isUserComboRow(entry);
     if (
       !catalogAll &&
+      !servedCombo &&
       !passesWhatServes(entry, showcased, visibleFilter, nowMs, freshKept, windowMs)
     ) {
       staticallyDropped.push(entry);
       continue;
     }
+    afterDefaultView += 1;
     const mapped = mapRawModelToModelV2(entry, {
       providerId: X,
       baseURL: opts.baseURL,
       apiFormat: opts.apiFormat,
     });
-    const enrichmentEntry = lookupEnrichment(entry.id, enrichment, canonicalToAlias);
+    if (servedCombo) {
+      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
+    }
+    const enrichmentEntry = lookupEnrichment(
+      entry.id,
+      enrichment,
+      canonicalToAlias,
+      entry.owned_by
+    );
     applyEnrichment(mapped, enrichmentEntry, {
-      providerTag: opts.providerTag !== false,
+      isCombo: servedCombo,
+      rawModelId: entry.id,
+      providerTag: opts.providerTag,
     });
+    const inferred = isInferredFree(entry.id, enrichmentEntry, opts, enrichment, canonicalToAlias);
     if (
       !passesCapabilityPresets(mapped, enrichmentEntry, {
         freeOnly: opts.freeOnly,
+        freeInferred: inferred,
         toolsOnly: opts.toolsOnly,
         visionOnly: opts.visionOnly,
       } satisfies CapabilityPresetFlags)
     )
       continue;
+    afterPresets += 1;
+    if (inferred) mapped.name += INFERRED_FREE_LABEL;
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
     collected.set(key, mapped);
     publishedKeys.add(key);
     publishedModelIds.set(key, mapped.id);
-    modelCount += 1;
+    if (servedCombo) modelsComboCount += 1;
+    else modelCount += 1;
   }
   // Memory branch: restore only what the static pass dropped and the last
   // 30 days of usage still names. Empty usage, a failed fetch, no token or
@@ -1066,9 +1014,33 @@ export async function collectCatalog(
         baseURL: opts.baseURL,
         apiFormat: opts.apiFormat,
       });
-      applyEnrichment(mapped, lookupEnrichment(entry.id, enrichment, canonicalToAlias), {
-        providerTag: opts.providerTag !== false,
+      const restoreEnrichment = lookupEnrichment(
+        entry.id,
+        enrichment,
+        canonicalToAlias,
+        entry.owned_by
+      );
+      applyEnrichment(mapped, restoreEnrichment, {
+        rawModelId: entry.id,
+        providerTag: opts.providerTag,
       });
+      const restoreInferred = isInferredFree(
+        entry.id,
+        restoreEnrichment,
+        opts,
+        enrichment,
+        canonicalToAlias
+      );
+      if (
+        !passesCapabilityPresets(mapped, restoreEnrichment, {
+          freeOnly: opts.freeOnly,
+          freeInferred: restoreInferred,
+          toolsOnly: opts.toolsOnly,
+          visionOnly: opts.visionOnly,
+        } satisfies CapabilityPresetFlags)
+      )
+        continue;
+      if (restoreInferred) mapped.name += INFERRED_FREE_LABEL;
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       collected.set(key, mapped);
@@ -1079,29 +1051,58 @@ export async function collectCatalog(
   }
 
   const cacheKey = `${opts.baseURL}::${opts.providerId}`;
-  const comboResult = await publishCombos({
-    opts,
-    log,
-    providerId: X,
-    enrichment,
-    rawModelById,
-    collected,
-    publishedKeys,
-    publishedModelIds,
-    visibleFilter,
-    hiddenFilter,
-    usable,
-    canonicalToAlias,
-    providerFilter,
-    providerResolve,
-    providerAllUnknown,
-    combosFetcher,
-    combosTimeout,
-    warnedCombos,
-    cacheKey,
-  });
-  if (comboResult === undefined)
+  const comboResult =
+    combosEnabled === false
+      ? { published: 0, providerDropped: 0 }
+      : modelsComboSource
+        ? { published: modelsComboCount, providerDropped: 0 }
+        : await publishCombos({
+            opts,
+            log,
+            providerId: X,
+            enrichment,
+            rawModelById,
+            collected,
+            publishedKeys,
+            publishedModelIds,
+            visibleFilter,
+            hiddenFilter,
+            usable,
+            canonicalToAlias,
+            providerFilter,
+            providerResolve,
+            providerAllUnknown,
+            combosFetcher,
+            combosTimeout,
+            warnedCombos,
+            cacheKey,
+            isFreeInferred,
+          });
+  // One summary line per successful refresh: the stage counters plus the
+  // free-tier lines the served catalog never reached. Audible at the
+  // default `warn` level so a service install (stdout lost) still reads
+  // the cause of a short catalog in the host log.
+  const emitSummary = (published: number): void => {
+    log.warn(
+      `[omniroute-v2] catalog refresh: served=${rawModels.length} default=${afterDefaultView} presets=${afterPresets} published=${published} unmatched-free=${freeUnmatched}`
+    );
+  };
+  // Same-named entries stay distinguishable: one disambiguation pass over
+  // the published set renames collisions with a route suffix. Local to
+  // this collect call — nothing survives the return.
+  const applyNameDisambiguation = (): void => {
+    const renamed = disambiguateDisplayNames(
+      [...collected].map(([id, entry]) => ({ id, name: entry.name }))
+    );
+    for (const [id, name] of renamed) {
+      collected.get(id)!.name = name;
+    }
+  };
+  if (comboResult === undefined) {
+    applyNameDisambiguation();
+    emitSummary(collected.size);
     return { entries: collected, counts: { models: modelCount, combos: 0 } };
+  }
   const comboCount = comboResult.published;
   providerDroppedCount += comboResult.providerDropped;
 
@@ -1114,24 +1115,12 @@ export async function collectCatalog(
     warnProviderMatchedNothing(providerFilter, warnedCombos, log);
   }
 
+  applyNameDisambiguation();
+  emitSummary(collected.size);
   return {
     entries: collected,
     counts: { models: modelCount, combos: comboCount },
   };
-}
-
-function warnProviderMatchedNothing(
-  providerFilter: ProviderFilter | undefined,
-  warnedCombos: Set<string>,
-  log: Logger
-): void {
-  if (!providerFilter) return;
-  const key = `provider-matched-nothing::${[...providerFilter.allow].sort().join(",")}`;
-  if (warnedCombos.has(key)) return;
-  warnedCombos.add(key);
-  log.warn(
-    `[omniroute-v2] providersAllow [${providerFilter.originals.join(", ")}] matched nothing, publishing empty catalog.`
-  );
 }
 
 /**

@@ -40,7 +40,7 @@ function SourceNodeImpl({ data }: { data: OrchNode }) {
       </div>
       {stale && <div className="text-[10px] text-warning">{t("sourceStale", { since })}</div>}
       {data.sourceIssue === "offline" && (
-        <div className="text-[10px] text-muted">{t("sourceOffline")}</div>
+        <div className="text-[10px] text-text-muted">{t("sourceOffline")}</div>
       )}
       <div className="flex flex-wrap gap-1 mt-1">
         {ORCH_STATES.filter((s) => (data.counts?.[s] ?? 0) > 0).map((s) => (

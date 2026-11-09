@@ -196,3 +196,24 @@ test("gemini38ThinkingLevelFromBudget maps above medium cap to high", () => {
   assert.equal(gemini38ThinkingLevelFromBudget("gemini-3.8-flash-medium", 8193), "high");
   assert.equal(gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", 24576), "high");
 });
+
+test("vertex/gemini-4-argon emits thinkingLevel, never thinkingBudget (#16603)", () => {
+  const silent = thinkingConfigOf("vertex/gemini-4-argon");
+  assert.equal(silent?.thinkingLevel, "medium");
+  assert.equal(silent?.thinkingBudget, undefined);
+
+  const low = thinkingConfigOf("vertex/gemini-4-argon", { reasoning_effort: "low" });
+  assert.equal(low?.thinkingLevel, "low");
+  assert.equal(low?.thinkingBudget, undefined);
+
+  const high = thinkingConfigOf("vertex/gemini-4-argon", { reasoning_effort: "high" });
+  assert.equal(high?.thinkingLevel, "high");
+  assert.equal(high?.thinkingBudget, undefined);
+
+  const claudeReq = claudeToGeminiRequest("vertex/gemini-4-argon", {
+    messages: [{ role: "user", content: "hi" }],
+    thinking: { type: "enabled", budget_tokens: 16000 },
+  }) as GeminiReq;
+  assert.equal(claudeReq.generationConfig?.thinkingConfig?.thinkingLevel, "high");
+  assert.equal(claudeReq.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
+});

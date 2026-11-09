@@ -20,15 +20,27 @@ import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 import { getSpeechProvider, parseSpeechModel } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
 import { kieExecutor } from "../executors/kie.ts";
-import { vertexGenerateSpeech } from "../executors/vertexMedia.ts";
+import { extractSpeechInstruction, vertexGenerateSpeech } from "../executors/vertexMedia.ts";
 import { handleGeminiTtsSpeech } from "../executors/geminiTts.ts";
 import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
+import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
 import { errorResponse } from "../utils/error.ts";
+import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
-import { audioStreamResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
+import {
+  audioErrorResponse,
+  audioStreamResponse,
+  upstreamErrorResponse,
+} from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import {
+  UPSTREAM_MEDIA_LIMITS,
+  downloadUpstreamMedia,
+  upstreamAudioContentType,
+  upstreamMediaErrorText,
+} from "@/shared/network/remoteImageFetch";
 import {
   getKieCallbackUrl,
   getKieErrorMessage,
@@ -118,6 +130,20 @@ function findKieAudioUrl(recordData: unknown): string | null {
   }
 
   return null;
+}
+
+// Kie returns the finished audio as a URL in its task result; download it with the
+// upstream-media policy instead of streaming whatever that URL answers.
+async function kieAudioResponse(url: string): Promise<Response> {
+  try {
+    const { buffer, contentType } = await downloadUpstreamMedia(url, UPSTREAM_MEDIA_LIMITS.audio);
+    return new Response(buffer, {
+      status: 200,
+      headers: { ...CORS_HEADERS, "Content-Type": upstreamAudioContentType(contentType) },
+    });
+  } catch (err) {
+    return errorResponse(502, `Failed to download Kie audio: ${upstreamMediaErrorText(err)}`);
+  }
 }
 
 /**
@@ -605,8 +631,7 @@ async function handleKieAudioSpeech(providerConfig, body, modelId, token) {
 
   const audioUrl = findKieAudioUrl(data);
   if (typeof audioUrl === "string" && audioUrl.length > 0) {
-    const audioRes = await fetch(audioUrl);
-    return audioStreamResponse(audioRes);
+    return kieAudioResponse(audioUrl);
   }
 
   return errorResponse(
@@ -633,8 +658,7 @@ async function pollKieAudioResult(baseUrl, modelId, taskId, token) {
     if (state === "success") {
       const url = findKieAudioUrl(data);
       if (url) {
-        const audioRes = await fetch(url);
-        return audioStreamResponse(audioRes);
+        return kieAudioResponse(url);
       }
       return errorResponse(502, "Kie audio task completed without audio URL");
     }
@@ -867,6 +891,19 @@ async function handleGttsSpeech(body) {
   }
 }
 
+/** Style / pace / output-format options shared by the AI Studio and Vertex Gemini TTS paths. */
+function googleSpeechStyleOptions(body: Record<string, unknown>): {
+  instructions?: string;
+  speed?: number;
+  response_format?: string;
+} {
+  return {
+    instructions: extractSpeechInstruction(body),
+    speed: typeof body.speed === "number" ? body.speed : undefined,
+    response_format: typeof body.response_format === "string" ? body.response_format : undefined,
+  };
+}
+
 /**
  * Handle audio speech (TTS) request
  *
@@ -916,6 +953,10 @@ export async function handleAudioSpeech({
 
   try {
     // Route to provider-specific handler
+    if (providerConfig.format === "grok-tts") {
+      return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
     if (providerConfig.format === "uc-tts") {
       const { handleUcTextToSpeech } = await import("./uc/ucTts.ts");
       const result = await handleUcTextToSpeech({
@@ -938,6 +979,7 @@ export async function handleAudioSpeech({
         model: modelId,
         input: body.input,
         voice: body.voice,
+        ...googleSpeechStyleOptions(body),
       });
       return new Response(audio, {
         status: 200,
@@ -949,6 +991,7 @@ export async function handleAudioSpeech({
         model: modelId,
         text: body.input,
         voice: body.voice,
+        ...googleSpeechStyleOptions(body),
       });
     }
 
@@ -1008,6 +1051,10 @@ export async function handleAudioSpeech({
       return handleXiaomiMimoSpeech(providerConfig, body, modelId, token, credentials);
     }
 
+    if (providerConfig.format === "dashscope-tts") {
+      return handleDashscopeTtsSpeech(providerConfig, body, modelId, token, credentials);
+    }
+
     if (providerConfig.format === "minimax-tts") {
       return handleMinimaxSpeech(providerConfig, body, modelId, token);
     }
@@ -1038,7 +1085,7 @@ export async function handleAudioSpeech({
       body: JSON.stringify({
         model: modelId,
         input: body.input,
-        voice: body.voice || "alloy",
+        voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
       }),
@@ -1050,6 +1097,6 @@ export async function handleAudioSpeech({
 
     return audioStreamResponse(res);
   } catch (err) {
-    return errorResponse(500, `Speech request failed: ${err.message}`);
+    return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }
 }

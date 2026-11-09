@@ -38,35 +38,35 @@ Traffic Inspector là trình gỡ lỗi lưu lượng HTTPS tích hợp sẵn c�
 
 ---
 
-## §2 Chế độ thu thập
+## §2 Các chế độ thu thập
 
-Traffic Inspector hỗ trợ **5 nguồn thu thập đồng thời**. Mỗi nguồn có thể được bật/tắt độc lập. Trường `source` trên mọi `InterceptedRequest` (`src/mitm/inspector/types.ts`) là một trong các giá trị `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` hoặc `"tproxy"`.
+Traffic Inspector hỗ trợ **5 nguồn thu thập đồng thời**. Mỗi nguồn có thể được bật/tắt độc lập. Trường `source` trên mỗi `InterceptedRequest` (`src/mitm/inspector/types.ts`) là một trong các giá trị `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` hoặc `"tproxy"`.
 
 ### Chế độ 1 — AgentBridge (mặc định, luôn bật)
 
-**Nguồn:** Các handler AgentBridge (`src/mitm/handlers/base.ts`)
-**Cơ chế:** Mỗi lệnh gọi `intercept()` trong `MitmHandlerBase` sẽ gọi `hookBufferStart()` trước khi chuyển tiếp và `hookBufferUpdate()` khi hoàn tất. Không cần cấu hình bổ sung — hoạt động ngay khi AgentBridge chạy.
+**Nguồn:** Các trình xử lý AgentBridge (`src/mitm/handlers/base.ts`)
+**Cơ chế:** Mỗi lệnh gọi `intercept()` trong `MitmHandlerBase` gọi `hookBufferStart()` trước khi chuyển tiếp và `hookBufferUpdate()` khi hoàn tất. Không cần cấu hình bổ sung — hoạt động ngay khi AgentBridge đang chạy.
 **Phạm vi:** 9 tác nhân IDE được cấu hình trong AgentBridge
 **Lưu ý:** Trường `source` trong `InterceptedRequest` = `"agent-bridge"`
 
 ### Chế độ 2 — Máy chủ tùy chỉnh (chuyển hướng DNS)
 
 **Nguồn:** Danh sách máy chủ do người dùng xác định (bảng `inspector_custom_hosts`)
-**Cơ chế:** Việc thêm máy chủ qua giao diện người dùng sẽ thêm `127.0.0.1 <host>` vào `/etc/hosts` (yêu cầu sudo). Máy chủ MITM AgentBridge hiện có (cổng 443) tự động tạo chứng chỉ SNI cho máy chủ mới.
-**Phạm vi:** Bất kỳ ứng dụng nào sử dụng máy chủ đã thêm — không cần thay đổi cấu hình ứng dụng
+**Cơ chế:** Việc thêm một máy chủ qua giao diện người dùng sẽ thêm `127.0.0.1 <host>` vào `/etc/hosts` (yêu cầu sudo). Máy chủ MITM AgentBridge hiện có (cổng 443) tự động tạo chứng chỉ SNI cho máy chủ mới.
+**Phạm vi:** Mọi ứng dụng sử dụng máy chủ đã thêm — không cần thay đổi cấu hình ứng dụng
 **Lưu ý:** `source` = `"custom-host"`
 
-Ví dụ về trường hợp sử dụng:
+Các trường hợp sử dụng ví dụ:
 
 - Giám sát `api.openai.com` từ các tập lệnh Python
 - Gỡ lỗi `my-internal-llm.company.com`
-- Thu thập lưu lượng từ thiết bị di động trên cùng mạng (thông qua giả mạo ARP — nâng cao)
+- Thu thập lưu lượng từ các thiết bị di động trên cùng mạng (thông qua giả mạo ARP — nâng cao)
 
 ### Chế độ 3 — Trình lắng nghe HTTP_PROXY (cổng 8080)
 
 **Nguồn:** Các ứng dụng sử dụng biến môi trường `HTTP_PROXY`/`HTTPS_PROXY`
-**Cơ chế:** Trình lắng nghe phụ tại cổng 8080 (`src/mitm/inspector/httpProxyServer.ts`) hoạt động như một proxy HTTP/HTTPS tường minh tiêu chuẩn. Chấp nhận các đường hầm `CONNECT` (HTTPS) và các yêu cầu HTTP trực tiếp.
-**Phạm vi:** Bất kỳ ứng dụng nào tuân thủ biến môi trường `HTTP_PROXY` — không cần thay đổi DNS, không cần sudo
+**Cơ chế:** Trình lắng nghe phụ tại cổng 8080 (`src/mitm/inspector/httpProxyServer.ts`), hoạt động như một proxy HTTP/HTTPS tường minh tiêu chuẩn. Chấp nhận các đường hầm `CONNECT` (HTTPS) và yêu cầu HTTP trực tiếp.
+**Phạm vi:** Mọi ứng dụng tuân theo biến môi trường `HTTP_PROXY` — không cần thay đổi DNS, không cần sudo
 **Lưu ý:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Giới hạn TLS:** Các đường hầm HTTPS `CONNECT` chỉ được thu thập dưới dạng siêu dữ liệu (máy chủ, cổng, thời gian) — nội dung TLS không được giải mã theo mặc định.
+**Hạn chế TLS:** HTTPS đi qua một đường hầm `CONNECT` thuần túy: trình lắng nghe chuyển tiếp nguyên trạng các byte đã mã hóa và chỉ ghi lại siêu dữ liệu (máy chủ, cổng, thời gian). Trình lắng nghe không bao giờ giải mã HTTPS và không có cài đặt nào để bật giải mã cho chế độ này. Để thu thập nội dung HTTPS, hãy định tuyến máy chủ qua Chế độ 1 (AgentBridge), Chế độ 2 (Máy chủ tùy chỉnh) hoặc Chế độ 5 (giải mã TPROXY).
 
 **Xung đột cổng:** Nếu cổng 8080 đang được sử dụng, AgentBridge trả về mã 409 cùng lỗi có cấu trúc. Thay đổi cổng thông qua biến môi trường `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Chế độ 4 — Proxy toàn hệ thống (nâng cao, tùy chọn tham gia)
+### Chế độ 4 — Proxy toàn hệ thống (nâng cao, tùy chọn bật)
 
 **Nguồn:** Cài đặt proxy cấp hệ điều hành (áp dụng cho tất cả ứng dụng trên máy)
-**Cơ chế:** Sử dụng API của hệ điều hành để chuyển hướng toàn bộ lưu lượng HTTP/HTTPS qua trình lắng nghe HTTP_PROXY:
+**Cơ chế:** Sử dụng các API của hệ điều hành để chuyển hướng toàn bộ lưu lượng HTTP/HTTPS qua trình lắng nghe HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Phạm vi:** Mọi ứng dụng trên máy tuân thủ cài đặt proxy hệ thống
+  **Phạm vi:** Mọi ứng dụng trên máy tuân theo cài đặt proxy hệ thống
   **Lưu ý:** `source` = `"system-proxy"`
 
 **Cơ chế an toàn:**
 
-- Bộ hẹn giờ tự động vô hiệu hóa (mặc định 30 phút, có thể cấu hình qua `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Bộ hẹn giờ tự động vô hiệu hóa (mặc định 30 phút, có thể cấu hình thông qua `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - Trạng thái proxy hệ thống trước đó được lưu trong DB và khôi phục khi hoàn nguyên
 - Bảng điều khiển hiển thị lời nhắc "Đang hoàn nguyên proxy hệ thống" nếu người dùng rời khỏi trang trong khi proxy đang hoạt động
 - Giao diện người dùng hiển thị huy hiệu `⚠ Nâng cao` + hộp kiểm xác nhận rõ ràng
 
-### Chế độ 5 — Giải mã trong suốt TPROXY (Linux, root, tùy chọn tham gia)
+### Chế độ 5 — Giải mã trong suốt TPROXY (Linux, root, tùy chọn bật)
 
 **Nguồn:** TPROXY của kernel + định tuyến theo chính sách (`src/mitm/tproxy/`)
-**Cơ chế:** Đánh dấu các kết nối TCP cục bộ đi ra mới đến một cổng đích (mặc định `443`) trong `mangle OUTPUT`; một `ip rule` định tuyến lại các gói tin được đánh dấu để phân phối cục bộ; và đích `TPROXY` của `mangle PREROUTING` chuyển chúng đến một trình lắng nghe trong suốt (**IP_TRANSPARENT**) (cổng mặc định `8443`). Trình lắng nghe kết thúc TLS bằng chứng chỉ lá do CA động cấp **theo từng tên máy chủ SNI khi có yêu cầu**, thu thập phiên trao đổi đã giải mã và chuyển tiếp yêu cầu được mã hóa lại đến đích ban đầu.
-**Phạm vi:** Các máy chủ đích **bất kỳ** trên cổng mục tiêu — không giả mạo `/etc/hosts`, không cần biến môi trường `HTTP_PROXY`, không sửa đổi proxy toàn hệ thống. Tiến trình bị chặn không cần thay đổi cấu hình nhưng phải tin cậy CA động.
+**Cơ chế:** Đánh dấu các kết nối TCP cục bộ mới đi ra ngoài tới một cổng đích (mặc định `443`) trong `mangle OUTPUT`; một `ip rule` định tuyến lại các gói đã đánh dấu để chuyển phát cục bộ; và đích `TPROXY` của `mangle PREROUTING` chuyển chúng tới một trình lắng nghe trong suốt (**IP_TRANSPARENT**) (cổng mặc định `8443`). Trình lắng nghe chấm dứt TLS bằng chứng chỉ thực thể cuối được CA động cấp **theo từng tên máy chủ SNI khi có yêu cầu**, thu thập phiên trao đổi đã giải mã và chuyển tiếp yêu cầu sau khi mã hóa lại tới đích ban đầu.
+**Phạm vi:** Các máy chủ đích **bất kỳ** trên cổng mục tiêu — không giả mạo `/etc/hosts`, không cần biến môi trường `HTTP_PROXY`, không thay đổi proxy toàn hệ thống. Tiến trình bị chặn không cần thay đổi cấu hình nhưng phải tin cậy CA động.
 **Lưu ý:** `source` = `"tproxy"`
 
-**Yêu cầu:** Chỉ hỗ trợ Linux (**IP_TRANSPARENT** chỉ có trên Linux), khả năng **CAP_NET_ADMIN** (root) và một addon N-API gốc phải được biên dịch bằng bộ công cụ C (`npm run build:native:tproxy`). Khi không khả dụng, nút bật/tắt trên bảng điều khiển sẽ bị vô hiệu hóa với chú giải công cụ "Giải mã TPROXY yêu cầu Linux + root + addon gốc". Các quy tắc tường lửa được áp dụng/hoàn nguyên theo giao dịch (sự cố không bao giờ để lại quy tắc `mangle`) và bị xóa khi khởi động lại. Cơ chế chống vòng lặp dựa trên SO_MARK ngăn luồng chuyển tiếp đã mã hóa lại của chính proxy bị chặn lần nữa.
+**Yêu cầu:** Chỉ dành cho Linux (**IP_TRANSPARENT** chỉ có trên Linux), capability **CAP_NET_ADMIN** (root) và một addon N-API gốc phải được xây dựng bằng bộ công cụ C (`npm run build:native:tproxy`). Khi không khả dụng, nút chuyển đổi trên bảng điều khiển bị vô hiệu hóa với chú giải công cụ "Giải mã TPROXY yêu cầu Linux + root + addon gốc". Các quy tắc tường lửa được áp dụng/hoàn nguyên theo giao dịch (sự cố không bao giờ để lại quy tắc `mangle`) và bị xóa khi khởi động lại. Cơ chế chống vòng lặp dựa trên SO_MARK ngăn luồng chuyển tiếp đã mã hóa lại của chính proxy bị chặn lại.
 
-Đây là một hệ thống con đáng kể có hướng dẫn vận hành chuyên biệt riêng — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) để biết đầy đủ công thức tường lửa, CA động theo từng SNI + trình cài đặt kho tin cậy, tuyến chỉ cục bộ, chi tiết chống vòng lặp và lược đồ cấu hình. Nút bật/tắt được điều khiển bởi `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (lưu ý: tuyến này nằm dưới tiền tố AgentBridge, không phải tiền tố Traffic Inspector).
+Đây là một hệ thống con đáng kể với hướng dẫn vận hành chuyên biệt riêng — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) để biết đầy đủ công thức cấu hình tường lửa, CA động theo từng SNI + trình cài đặt kho tin cậy, tuyến chỉ dành cho cục bộ, chi tiết chống vòng lặp và lược đồ cấu hình. Nút chuyển đổi được điều khiển bởi `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (lưu ý: tuyến nằm dưới tiền tố AgentBridge, không phải tiền tố Traffic Inspector).
 
 ### So sánh các chế độ thu thập
 
-| Chế độ             | Thiết lập                      |           Sudo?           | Phạm vi                   | Ghi chú                                                                                                                    |
-| ------------------ | ------------------------------ | :-----------------------: | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge     | Tự động                        | Một lần (chứng chỉ+hosts) | 9 tác nhân IDE            | Bật mặc định                                                                                                               |
-| 2. Hosts tùy chỉnh | Nhập theo từng host            |      Có (tệp hosts)       | Mọi ứng dụng dùng host đó | Được lưu trong DB                                                                                                          |
-| 3. HTTP_PROXY      | `export HTTPS_PROXY=...`       |           Không           | Ứng dụng tuân theo env    | Cổng 8080, mặc định không giải mã TLS                                                                                      |
-| 4. Toàn hệ thống   | Bật/tắt + xác nhận             |            Có             | Mọi ứng dụng trên máy     | Tự động tắt sau 30 phút                                                                                                    |
-| 5. Giải mã TPROXY  | Bật/tắt (Linux + addon native) |  Có (root + cài đặt CA)   | Mọi host trên cổng đích   | Giải mã các host bất kỳ; mặc định tắt — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) |
+| Chế độ            | Thiết lập                      |           Sudo?           | Phạm vi                    | Ghi chú                                                                                                                   |
+| ----------------- | ------------------------------ | :-----------------------: | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Tự động                        | Một lần (chứng chỉ+hosts) | 9 tác nhân IDE             | Bật mặc định                                                                                                              |
+| 2. Host tùy chỉnh | Nhập theo từng host            |      Có (tệp hosts)       | Mọi ứng dụng dùng host đó  | Được lưu trong DB                                                                                                         |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`       |           Không           | Các ứng dụng tuân theo env | Cổng 8080; HTTPS được tạo đường hầm bằng CONNECT (chỉ metadata, không bao giờ được giải mã)                               |
+| 4. Toàn hệ thống  | Bật/tắt + xác nhận             |            Có             | Tất cả ứng dụng trên máy   | Tự động tắt sau 30 phút                                                                                                   |
+| 5. Giải mã TPROXY | Bật/tắt (Linux + addon native) |  Có (root + cài đặt CA)   | Mọi host trên cổng đích    | Giải mã các host tùy ý; mặc định tắt — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) |
 
 ---
 
@@ -341,29 +341,29 @@ Xuất qua `GET /api/tools/traffic-inspector/sessions/{id}/export.har` hoặc n�
 
 ## §6 Bảo mật
 
-Traffic Inspector hiển thị **tất cả lưu lượng HTTPS bị chặn bắt**, bao gồm các header ủy quyền và nội dung yêu cầu. Các biện pháp kiểm soát sau được áp dụng:
+Traffic Inspector hiển thị **toàn bộ lưu lượng HTTPS bị chặn**, bao gồm các tiêu đề ủy quyền và nội dung yêu cầu. Các biện pháp kiểm soát sau được áp dụng:
 
-| Biện pháp kiểm soát           | Chi tiết                                                                                                                                                                                            |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                | Tất cả route và endpoint WebSocket chỉ có thể truy cập qua loopback (được thực thi trong `routeGuard.ts` trước bước xác thực)                                                                       |
-| **Che giấu thông tin bí mật** | Trình quét tuyến tính `maskSecret()` biên tập ẩn thông tin xác thực Bearer theo RFC 6750, các khóa có tiền tố nhà cung cấp và token dài khó đoán trước khi gọi `TrafficBuffer.push()`               |
-| **Giới hạn kích thước body**  | Các body > `INSPECTOR_MAX_BODY_KB` (mặc định 1024 KB) bị cắt bớt kèm thông báo `"(đã cắt bớt để đảm bảo hiệu năng)"`                                                                                |
-| **Làm sạch header**           | Tên được chuyển thành chữ thường; các header đóng khung/hop-by-hop và xác thực proxy bị loại bỏ; cookie được biên tập ẩn hoàn toàn; giá trị thông tin xác thực được chuyển cho `maskSecret()` xử lý |
-| **CSP**                       | Chính sách bảo mật nội dung nghiêm ngặt trên các trang Traffic Inspector nhằm ngăn chặn XSS thông qua nội dung phản hồi bị chèn                                                                     |
-| **Mặc định không lưu trữ**    | `TrafficBuffer` nằm trong bộ nhớ và bị mất khi máy chủ khởi động lại. Các phiên chỉ được lưu trữ lâu dài khi được ghi một cách rõ ràng                                                              |
+| Biện pháp kiểm soát              | Chi tiết                                                                                                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                   | Tất cả các tuyến và điểm cuối WebSocket chỉ có thể truy cập qua loopback (được thực thi trong `routeGuard.ts` trước bước xác thực)                                                       |
+| **Che giấu thông tin bí mật**    | Trình quét tuyến tính `maskSecret()` che thông tin xác thực Bearer theo RFC 6750, các khóa có tiền tố nhà cung cấp và token mờ dài trước `TrafficBuffer.push()`                          |
+| **Giới hạn kích thước nội dung** | Nội dung > `INSPECTOR_MAX_BODY_KB` (mặc định 1024 KB) bị cắt bớt kèm thông báo `"(đã cắt bớt để đảm bảo hiệu năng)"`                                                                     |
+| **Làm sạch tiêu đề**             | Tên được chuyển thành chữ thường; các tiêu đề đóng khung/hop-by-hop và xác thực proxy bị loại bỏ; cookie bị che hoàn toàn; các giá trị thông tin xác thực được chuyển cho `maskSecret()` |
+| **CSP**                          | Chính sách bảo mật nội dung nghiêm ngặt trên các trang Traffic Inspector nhằm ngăn chặn XSS thông qua nội dung phản hồi bị chèn                                                          |
+| **Mặc định không lưu trữ**       | `TrafficBuffer` nằm trong bộ nhớ và bị mất khi máy chủ khởi động lại. Các phiên chỉ được lưu trữ khi được ghi lại một cách rõ ràng                                                       |
 
 ### Các quy tắc bắt buộc được áp dụng
 
 | Quy tắc                           | Cách áp dụng                                                                            |
 | --------------------------------- | --------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Tất cả phản hồi lỗi HTTP từ các route của Traffic Inspector đều được làm sạch           |
+| **#12** `sanitizeErrorMessage`    | Tất cả phản hồi lỗi HTTP từ các tuyến Traffic Inspector đều được làm sạch               |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` là LOCAL_ONLY + SPAWN_CAPABLE (các lệnh proxy hệ thống) |
 
 ### Các hạn chế đã biết
 
-- **Chế độ proxy toàn hệ thống** ảnh hưởng đến tất cả ứng dụng trên máy, bao gồm các ứng dụng VPN và SSO. Luôn sử dụng cùng bộ hẹn giờ tự động vô hiệu hóa. Không sử dụng trên máy dùng chung.
-- **HTTPS qua đường hầm CONNECT**: Chế độ 3 (HTTP_PROXY) chỉ ghi lại siêu dữ liệu đường hầm cho các đích HTTPS, trừ khi tính năng chặn bắt TLS được bật. Đây là hành vi có chủ đích — việc ghi lại trong suốt khi chứng chỉ AgentBridge chưa được các ứng dụng đó tin cậy sẽ làm hỏng quá trình xác minh TLS.
-- **Chuỗi được mã hóa cứng trong một số thành phần**: Một số thành phần giao diện người dùng (F7/F8) có một lượng nhỏ chuỗi được mã hóa cứng chưa được bao phủ bởi các khóa i18n. Chúng được ghi nhận là Hạn chế đã biết trong báo cáo khoảng trống i18n; chúng sẽ được di chuyển trong một lượt xử lý tiếp theo. Các chuỗi bị ảnh hưởng là nhãn trang trí giao diện người dùng, không cần dịch để sử dụng chức năng.
+- **Chế độ proxy toàn hệ thống** ảnh hưởng đến tất cả ứng dụng trên máy, bao gồm cả ứng dụng VPN và SSO. Luôn sử dụng cùng bộ hẹn giờ tự động vô hiệu hóa. Không sử dụng trên máy dùng chung.
+- **HTTPS qua đường hầm CONNECT**: Chế độ 3 (HTTP_PROXY) chỉ thu thập siêu dữ liệu đường hầm đối với các đích HTTPS và không bao giờ giải mã chúng. Đây là thiết kế có chủ đích — việc giải mã sẽ yêu cầu mọi máy khách tin cậy một chứng chỉ MITM, vì vậy trình lắng nghe duy trì mã hóa HTTPS đầu cuối. Sử dụng AgentBridge, Custom Hosts hoặc giải mã TPROXY khi bạn cần nội dung HTTPS.
+- **Chuỗi được mã hóa cứng trong một số thành phần**: Một số thành phần UI (F7/F8) có một lượng nhỏ chuỗi được mã hóa cứng chưa được bao phủ bởi các khóa i18n. Chúng được ghi nhận là một Hạn chế đã biết trong báo cáo khoảng trống i18n; chúng sẽ được chuyển đổi trong một đợt tiếp theo. Các chuỗi bị ảnh hưởng là những nhãn trang trí UI không cần dịch để sử dụng chức năng.
 
 ---
 
@@ -426,9 +426,9 @@ Khi bộ đệm đạt đến `INSPECTOR_BUFFER_SIZE` (mặc định là 1000), 
 
 ---
 
-## §8 Tài liệu tham khảo API
+## §8 Tham chiếu API
 
-Tất cả các tuyến đều là `LOCAL_ONLY` (chỉ loopback) và `SPAWN_CAPABLE` (các lệnh proxy hệ thống). Xem `src/server/authz/routeGuard.ts`.
+Tất cả các route đều là `LOCAL_ONLY` (chỉ loopback) và `SPAWN_CAPABLE` (các lệnh proxy hệ thống). Xem `src/server/authz/routeGuard.ts`.
 
 Đường dẫn cơ sở: `/api/tools/traffic-inspector/`
 
@@ -448,11 +448,11 @@ Tất cả các tuyến đều là `LOCAL_ONLY` (chỉ loopback) và `SPAWN_CAPA
 | ----------- | --------- | --------------------------------------------------------------------------------------------------- |
 | GET         | `/ws`     | Luồng WebSocket trực tiếp. Gửi `snapshot` khi kết nối, sau đó là các sự kiện `new`/`update`/`clear` |
 
-### Xuất dữ liệu
+### Xuất
 
-| Phương thức | Đường dẫn     | Mô tả                                          |
-| ----------- | ------------- | ---------------------------------------------- |
-| GET         | `/export.har` | Xuất danh sách đang được lọc dưới dạng HAR 1.2 |
+| Phương thức | Đường dẫn     | Mô tả                                               |
+| ----------- | ------------- | --------------------------------------------------- |
+| GET         | `/export.har` | Xuất danh sách hiện đang được lọc dưới dạng HAR 1.2 |
 
 ### Máy chủ tùy chỉnh
 
@@ -463,15 +463,15 @@ Tất cả các tuyến đều là `LOCAL_ONLY` (chỉ loopback) và `SPAWN_CAPA
 | DELETE      | `/hosts/{host}` | Xóa máy chủ                             |
 | PATCH       | `/hosts/{host}` | Bật/tắt `enabled`                       |
 
-### Chế độ ghi nhận
+### Chế độ thu thập
 
 | Phương thức | Đường dẫn                     | Mô tả                                                                                   |
 | ----------- | ----------------------------- | --------------------------------------------------------------------------------------- |
 | GET         | `/capture-modes`              | Trạng thái của các chế độ AgentBridge / máy chủ tùy chỉnh / HTTP_PROXY / proxy hệ thống |
 | POST        | `/capture-modes/http-proxy`   | Khởi động/dừng trình lắng nghe HTTP_PROXY (`{action: "start"\|"stop"}`)                 |
-| POST        | `/capture-modes/system-proxy` | Áp dụng/khôi phục proxy toàn hệ thống (`{action: "apply"\|"revert"}`)                   |
+| POST        | `/capture-modes/system-proxy` | Áp dụng/hoàn nguyên proxy trên toàn hệ thống (`{action: "apply"\|"revert"}`)            |
 
-> **Giải mã TPROXY** (chế độ ghi nhận 5) được điều khiển bởi một tuyến **riêng biệt** bên dưới
+> **Giải mã TPROXY** (chế độ thu thập 5) được điều khiển bởi một route **riêng biệt** dưới
 > tiền tố AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — không nằm
 > dưới `/api/tools/traffic-inspector/`. Xem
 > `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`).
@@ -487,10 +487,10 @@ Tất cả các tuyến đều là `LOCAL_ONLY` (chỉ loopback) và `SPAWN_CAPA
 | DELETE      | `/sessions/{id}`            | Xóa phiên                                                       |
 | GET         | `/sessions/{id}/export.har` | Xuất phiên dưới dạng HAR 1.2                                    |
 
-### Tiếp nhận nội bộ (phương án dự phòng D4)
+### Tiếp nhận nội bộ (D4 dự phòng)
 
-| Phương thức | Đường dẫn          | Mô tả                                                                                                                 |
-| ----------- | ------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| POST        | `/internal/ingest` | Chấp nhận yêu cầu bị chặn từ đường dẫn chuyển tiếp của `server.cjs`; yêu cầu header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Phương thức | Đường dẫn          | Mô tả                                                                                                             |
+| ----------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| POST        | `/internal/ingest` | Chấp nhận yêu cầu bị chặn từ đường dẫn chuyển tiếp `server.cjs`; yêu cầu header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Các schema OpenAPI đầy đủ: `docs/openapi.yaml` → thẻ `Traffic Inspector`.

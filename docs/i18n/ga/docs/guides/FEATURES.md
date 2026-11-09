@@ -290,15 +290,15 @@ Príomh-oibreachaí:
 
 ---
 
-## 🔑 Comharthaí Sioncronaithe & Pacáiste Cumraíochta _(v3.6.6+)_
+## 🔑 Comharthaí Sioncronaithe & Beart Cumraíochta _(v3.6.6+)_
 
-Tá rochtain ilghléis agus oibreoirí seachtrach anois indéanta trí **comharthaí sioncronaithe scóipithe**:
+Is féidir rochtain ilghléas agus rochtain d’oibreoirí seachtracha a fháil anois trí **chomharthaí sioncronaithe scóipithe**:
 
-- **`POST /api/sync/tokens`** — Eiseachd comhartha sioncronaithe nua (scóipithe, le seachthréimhse roghnach)
-- **`DELETE /api/sync/tokens/:id`** — Cealaigh comhartha
-- **`GET /api/sync/bundle`** — Íoslódáil lámhscáileán JSON leagtha ag ETag de gach socruithe nach bhfuil cearr san áireamh (pasfhocail scriosta)
+- **`POST /api/sync/tokens`** — Eisigh comhartha sioncronaithe nua (scóipithe, le dul in éag roghnach)
+- **`DELETE /api/sync/tokens/:id`** — Cúlghair comhartha
+- **`GET /api/sync/bundle`** — Íoslódáil seat JSON den chumraíocht atá leagtha de réir leagain agus eochraithe le ETag (fíordheimhnithe le comhartha sioncronaithe amháin). Baintear socruithe fíordheimhnithe amhail pasfhocal an deais, ach cuirtear dintiúir soláthraithe agus eochracha API san áireamh, mar sin caith leis an gcomhad mar rún
 
-Tógtar an pacáiste cumraíochta ag `src/lib/sern/bundle.ts`. Déanann tomhaltóirí comparáid idir an ceanntásc freagra `ETag` chun athruithe a bhrath gan an méid iomlán a íoslódáil arís.
+Cruthaíonn `src/lib/sync/bundle.ts` an beart cumraíochta. Déanann tomhaltóirí comparáid idir ceanntásc freagartha `ETag` chun athruithe a bhrath gan an t-ualach iomlán a athíoslódáil. Ón CLI, sábhálann `omniroute sync bundle <outPath> --token <syncToken>` (nó `OMNIROUTE_SYNC_TOKEN`) é i gcomhad nach bhfuil rochtain ach ag an úinéir air.
 
 ---
 

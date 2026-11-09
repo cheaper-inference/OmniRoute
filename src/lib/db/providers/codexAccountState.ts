@@ -1,3 +1,4 @@
+import { mergeCodexQuotaObservation } from "@/lib/providers/codexQuotaDisplay";
 import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
@@ -114,6 +115,21 @@ export function stripCodexChildCooldownsFromConnection(
   if (wrote) invalidateDbCache("connections", id, { skipModelCatalog: true });
 }
 
+function applyQuotaStatePatch(
+  previous: JsonRecord,
+  next: JsonRecord,
+  scope: "codex" | "spark",
+  quotaState: JsonRecord | undefined
+): boolean {
+  if (!quotaState) return true;
+  const byScope = toRecord(previous.codexQuotaStateByScope);
+  const merged = mergeCodexQuotaObservation(toRecord(byScope[scope]), quotaState);
+  if (!merged) return false;
+  next.codexQuotaStateByScope = { ...byScope, [scope]: merged };
+  next.codexQuotaState = { ...merged, scope, updatedAt: quotaState.observedAt };
+  return true;
+}
+
 /**
  * Atomically merge one virtual Codex child's quota evidence into its persisted parent.
  * The transaction reads the latest row so sibling child state cannot be lost.
@@ -137,17 +153,10 @@ export async function updateCodexScopedQuotaState(
     const providerSpecificData = toRecord(existingRecord.providerSpecificData);
     const nextProviderSpecificData: JsonRecord = { ...providerSpecificData };
 
-    if (patch.quotaState) {
-      const quotaByScope = toRecord(providerSpecificData.codexQuotaStateByScope);
-      nextProviderSpecificData.codexQuotaStateByScope = {
-        ...quotaByScope,
-        [scope]: patch.quotaState,
-      };
-      nextProviderSpecificData.codexQuotaState = {
-        ...patch.quotaState,
-        scope,
-        updatedAt: patch.quotaState.observedAt,
-      };
+    if (
+      !applyQuotaStatePatch(providerSpecificData, nextProviderSpecificData, scope, patch.quotaState)
+    ) {
+      return null;
     }
 
     if (patch.exhaustedWindow !== undefined) {

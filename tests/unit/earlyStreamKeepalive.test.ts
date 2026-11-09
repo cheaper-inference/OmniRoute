@@ -67,79 +67,38 @@ test("slow path forwards SSE stream content", async () => {
   assert.ok(text.includes("[DONE]"), "should contain DONE marker");
 });
 
-// ── Upstream error with 0 bytes → error frame emitted ─────────────────────
-
-test("upstream error with 0 bytes forwarded emits error frame", { skip: true, todo: "ReadableStream error simulation hangs in Node.js test runner" }, async () => {
-  // Use a TransformStream where we error the writable side
-  const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
-  const writer = writable.getWriter();
-  writer.releaseLock();
-  writable.abort(new Error("upstream died")).catch(() => {});
-
-  const response = new Response(readable, {
-    status: 200,
-    headers: { "content-type": "text/event-stream" },
-  });
-
-  const delayed = new Promise<Response>((resolve) => setTimeout(() => resolve(response), 10));
-
-  const result = await withEarlyStreamKeepalive(delayed, {
-    thresholdMs: 10,
-    intervalMs: 50,
-  });
-
-  assert.equal(result.status, 200);
-  const text = await drainStream(result.body!);
-  assert.ok(text.includes("Upstream stream failed before completion"), "should contain error frame");
-});
-
-// ── Upstream error after partial content → NO error frame ──────────────────
-
-test("upstream error after partial content does NOT emit error frame", { skip: true, todo: "ReadableStream error simulation hangs in Node.js test runner" }, async () => {
-  // Use a TransformStream where we send one chunk then error
-  const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
-  const writer = writable.getWriter();
-  await writer.write(ENCODER.encode('data: {"choices":[{"delta":{"content":"partial"}}]}\n\n'));
-  writer.releaseLock();
-  writable.abort(new Error("upstream died mid-stream")).catch(() => {});
-
-  const response = new Response(readable, {
-    status: 200,
-    headers: { "content-type": "text/event-stream" },
-  });
-
-  const delayed = new Promise<Response>((resolve) => setTimeout(() => resolve(response), 10));
-
-  const result = await withEarlyStreamKeepalive(delayed, {
-    thresholdMs: 10,
-    intervalMs: 50,
-  });
-
-  assert.equal(result.status, 200);
-  const text = await drainStream(result.body!);
-  assert.ok(text.includes("partial"), "should contain forwarded content");
-  assert.ok(
-    !text.includes("Upstream stream failed"),
-    "should NOT contain error frame after partial content"
-  );
-});
+// Upstream read failures are covered by early-stream-midstream-failure-17292.test.ts.
 
 // ── Handler rejection → error frame ───────────────────────────────────────
 
-test("handler rejection emits error frame", async () => {
-  const delayed = new Promise<Response>((_resolve, reject) =>
-    setTimeout(() => reject(new Error("handler failed")), 10)
-  );
+test("handler rejection emits error frame", { timeout: 10000 }, async () => {
+  let rejectHandler!: (reason: Error) => void;
+  const delayed = new Promise<Response>((_resolve, reject) => {
+    rejectHandler = reject;
+  });
 
   const result = await withEarlyStreamKeepalive(delayed, {
     thresholdMs: 5,
     intervalMs: 50,
   });
 
+  rejectHandler(new Error("handler failed"));
   assert.equal(result.status, 200);
   const text = await drainStream(result.body!);
   assert.ok(text.includes("Upstream stream failed before completion"));
 });
+
+test(
+  "handler rejection before commitment stays a fast-path rejection",
+  { timeout: 10000 },
+  async () => {
+    const error = new Error("handler failed before commitment");
+    await assert.rejects(
+      withEarlyStreamKeepalive(Promise.reject(error), { thresholdMs: 5 }),
+      (actual) => actual === error
+    );
+  }
+);
 
 // ── Client abort stops keepalive ──────────────────────────────────────────
 

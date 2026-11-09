@@ -4,7 +4,7 @@
 
 ---
 
-> **Ringkasnya**: Pasang → Sambungkan penyedia percuma → Halakan IDE anda ke OmniRoute. Selesai.
+> **Ringkasnya**: Pasang → Sambungkan penyedia yang layak → Halakan IDE anda ke OmniRoute. Selesai.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute bermula di `http://localhost:20128`. Papan pemuka dibuka secara automa
 
 ---
 
-## Langkah 3: Sambungkan Penyedia Percuma
+## Langkah 3: Sambungkan Penyedia yang Layak
 
-Anda boleh menggunakan OmniRoute **tanpa perlu membayar apa-apa** dengan menyambungkan penyedia percuma.
+Pilih penyedia yang syarat dan kuotanya memenuhi keperluan anda. Dalam **Dashboard → Providers**, sambungkan akaun atau kunci API anda sendiri, kemudian uji sambungan tersebut. Akses percuma dan ketersediaan tanpa kunci tidak dijamin.
 
-### Pilihan A: Kiro (Claude Percuma — Tanpa Kad Kredit)
-
-1. Buka papan pemuka di `http://localhost:20128`
-2. Pergi ke **Penyedia** → **Tambah Penyedia**
-3. Pilih **Kiro AI**
-4. Klik **Sambung** (kunci API tidak diperlukan!)
-5. Selesai! Kini anda mempunyai akses percuma kepada model Claude.
-
-### Pilihan B: OpenCode Free (Tanpa Pengesahan)
-
-1. Buka papan pemuka di `http://localhost:20128`
-2. Pergi ke **Penyedia** → **Tambah Penyedia**
-3. Pilih **OpenCode Free**
-4. Klik **Sambung** (kunci API tidak diperlukan!)
-5. Selesai! Kini anda mempunyai akses percuma kepada berbilang model.
-
-### Pilihan C: Pollinations (Kunci Tidak Diperlukan)
-
-1. Buka papan pemuka di `http://localhost:20128`
-2. Pergi ke **Penyedia** → **Tambah Penyedia**
-3. Pilih **Pollinations**
-4. Klik **Sambung** (kunci API tidak diperlukan!)
-5. Selesai! Kini anda mempunyai akses percuma kepada GPT-5, Claude, Gemini dan banyak lagi.
+`auto` mengecualikan penyedia yang ditandai `tos: avoid`, termasuk Kiro, secara lalai. Menyambungkan akaun tidak mengubah dasar tersebut. Pilihan ikut serta dalam **Dashboard → Combos** terpakai kepada semua kombo automatik. Semak [Panduan Peringkat Percuma](./FREE-TIERS-GUIDE.md) sebelum memilih penyedia.
 
 ---
 
@@ -154,7 +132,7 @@ Anda boleh melihat butiran permintaan dengan mengklik [Pemantauan/Log](http://lo
 
 - **[Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Biarkan OmniRoute memilih AI terbaik untuk anda
 - **[Panduan Penyedia](./PROVIDERS-GUIDE.md)** — Sambungkan lebih banyak penyedia (percuma dan berbayar)
-- **[Panduan Peringkat Percuma](./FREE-TIERS-GUIDE.md)** — Dapatkan AI percuma tanpa kad kredit
+- **[Panduan Peringkat Percuma](./FREE-TIERS-GUIDE.md)** — Semak terma penyedia dan had peringkat percuma
 - **[Penyelesaian Masalah](../guides/TROUBLESHOOTING.md)** — Selesaikan isu lazim
 
 ---
@@ -163,11 +141,11 @@ Anda boleh melihat butiran permintaan dengan mengklik [Pemantauan/Log](http://lo
 
 ### "Adakah saya memerlukan kunci API?"
 
-**Tidak!** Anda boleh menggunakan penyedia percuma (Kiro, OpenCode Free, Pollinations) tanpa sebarang kunci API. Hanya sambungkan penyedia tersebut dalam papan pemuka.
+Kunci API OmniRoute mengesahkan alat anda. Bukti kelayakan huluan bergantung pada penyedia: sesetengahnya memerlukan kunci API atau log masuk akaun. Akses percuma tidak dijamin.
 
 ### "Apakah itu `auto`?"
 
-`auto` mengarahkan OmniRoute supaya memilih penyedia terbaik secara automatik bagi setiap permintaan. Ia mempertimbangkan kelajuan, kos, kualiti dan ketersediaan. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk butiran.
+`auto` mengarahkan OmniRoute untuk memilih penyedia terbaik secara automatik bagi setiap permintaan. Ia mempertimbangkan kelajuan, kos, kualiti dan ketersediaan. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk mendapatkan butiran.
 
 ### "Berapakah kosnya?"
 
@@ -177,9 +155,9 @@ OmniRoute sendiri adalah **percuma dan sumber terbuka**. Anda hanya membayar unt
 
 **Ya!** OmniRoute berfungsi dengan mana-mana alat yang menyokong format OpenAI. Hanya tetapkan URL asas kepada `http://localhost:20128/v1`. Lihat [Panduan Alat CLI](../reference/CLI-TOOLS.md) untuk arahan persediaan khusus.
 
-### "Bagaimana jika penyedia mengalami gangguan?"
+### "Bagaimana jika penyedia tidak berfungsi?"
 
-OmniRoute melangkau penyedia yang gagal secara automatik dan mencuba penyedia seterusnya. Anda tidak perlu melakukan apa-apa. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk butiran.
+OmniRoute secara automatik melangkau penyedia yang gagal dan mencuba penyedia seterusnya. Anda tidak perlu berbuat apa-apa. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk mendapatkan butiran.
 
 ---
 

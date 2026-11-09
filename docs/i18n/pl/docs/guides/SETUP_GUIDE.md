@@ -1,4 +1,9 @@
+# 📖 Setup Guide — OmniRoute (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/SETUP_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/SETUP_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/SETUP_GUIDE.md) · 🇦🇿 [az](../../../az/docs/guides/SETUP_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/SETUP_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/SETUP_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/SETUP_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/SETUP_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/SETUP_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/SETUP_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/SETUP_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/SETUP_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/SETUP_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/SETUP_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/SETUP_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/SETUP_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/SETUP_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/SETUP_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/SETUP_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/SETUP_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/SETUP_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/SETUP_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/SETUP_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/SETUP_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/SETUP_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/SETUP_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/SETUP_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/SETUP_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/SETUP_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/SETUP_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/SETUP_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/SETUP_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/SETUP_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/SETUP_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/SETUP_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/SETUP_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/SETUP_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/SETUP_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/SETUP_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/SETUP_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/SETUP_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/SETUP_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/SETUP_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/SETUP_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/SETUP_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/SETUP_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/SETUP_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/SETUP_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/SETUP_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/SETUP_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/SETUP_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/SETUP_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/SETUP_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/SETUP_GUIDE.md)
+
 ---
+
 title: "📖 Przewodnik instalacji — OmniRoute"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -138,66 +143,62 @@ omniroute providers validate
 
 ## Konfiguracja narzędzi CLI
 
-### 1) Podłącz providerów i utwórz klucz API
+### 1) Połącz dostawców i utwórz klucz API
 
-1. Otwórz Dashboard → `Providers` i podłącz co najmniej jednego providera (OAuth lub klucz API).
+1. Otwórz Dashboard → `Providers` i połącz co najmniej jednego dostawcę (za pomocą OAuth lub klucza API).
 2. Otwórz Dashboard → `Endpoints` i utwórz klucz API.
-3. (Opcjonalnie) Otwórz Dashboard → `Combos` i ustaw łańcuch fallback.
+3. (Opcjonalnie) Otwórz Dashboard → `Combos` i skonfiguruj łańcuch awaryjny.
 
-### 2) Wskaż narzędzie do kodowania
-
-```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
-```
-
-Jeśli edytor nie może wysłać `Authorization: Bearer ...`, użyj zamiast tego stokenizowanej bazy zgodności:
+### 2) Skonfiguruj narzędzie programistyczne
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Bazowy URL: http://localhost:20128/v1
+Klucz API:  [skopiuj ze strony Endpoint]
+Model:      if/qwen3.8-max-preview (lub dowolny prefiks dostawcy/modelu)
 ```
 
-Działa z Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode oraz SDK zgodnymi z OpenAI.
+Jeśli edytor nie może wysłać nagłówka `Authorization: Bearer ...`, użyj zamiast tego bazowego adresu zgodności z tokenem:
 
-#### Autokonfiguracja przez `setup-*`
+```txt
+Bazowy URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL modeli: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL czatu: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL tagów Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Zamiast ręcznie wklejać base URL i klucz, pozwól OmniRoute zapisać konfigurację
-każdego narzędzia na podstawie żywego katalogu modeli. Jedno polecenie na narzędzie:
+Działa z Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode oraz zestawami SDK zgodnymi z OpenAI.
+
+#### Automatyczna konfiguracja za pomocą `setup-*`
+
+Zamiast ręcznie wklejać bazowy adres URL i klucz, pozwól OmniRoute zapisać konfigurację każdego narzędzia na podstawie aktualnego katalogu modeli. Jedno polecenie na narzędzie:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml profiles
+omniroute setup-codex        # profile ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-compatible)
-omniroute setup-cline        # Cline CLI + VS Code extension settings
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (zgodny z OpenAI)
+omniroute setup-cline        # Cline CLI + ustawienia rozszerzenia VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # prints Cursor's in-app steps
-omniroute setup-roo          # Roo Code import + autoImport pointer
+omniroute setup-cursor       # wyświetla instrukcje wykonywane w aplikacji Cursor
+omniroute setup-roo          # import Roo Code + wskaźnik autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Każde przyjmuje `--remote <url> --api-key <key>`, aby skonfigurować lokalne narzędzie względem
-**zdalnego** OmniRoute, oraz `--dry-run` do podglądu. Launchery
-`omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) uruchamiają CLI
-z wstrzykniętym właściwym env, bez zapisu jakiejkolwiek konfiguracji.
+Każde polecenie obsługuje opcje `--remote <url> --api-key <key>`, umożliwiające skonfigurowanie lokalnego narzędzia do współpracy ze **zdalną** instancją OmniRoute, a także opcję `--dry-run` do podglądu zmian. Aby uruchomić CLI z odpowiednio wstrzykniętymi zmiennymi środowiskowymi bez zapisywania jakiejkolwiek konfiguracji, użyj ogólnego programu uruchamiającego `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); starsze programy uruchamiające dla poszczególnych narzędzi — `omniroute launch` (Claude Code) oraz `omniroute launch-codex` (Codex) — pozostają dostępne.
 
-Pełna tabela (co każde polecenie zapisuje, wszystkie flagi, local vs remote, konwencje
-base-URL `/v1`): **[Integracje CLI](./CLI-INTEGRATIONS.md)**.
+Pełną tabelę (co zapisuje każde polecenie, wszystkie flagi, tryb lokalny i zdalny oraz konwencje `/v1` dla bazowych adresów URL) znajdziesz w dokumencie **[Integracje CLI](./CLI-INTEGRATIONS.md)**.
 
-Szczegółowa konfiguracja per narzędzie (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i inne): dedykowany **[Przewodnik narzędzi CLI](../reference/CLI-TOOLS.md)**.
+Szczegółową konfigurację poszczególnych narzędzi (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot i innych) znajdziesz w dedykowanym **[przewodniku po narzędziach CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
-## Konfiguracja protokołów (MCP + A2A)
+## Konfiguracja protokołu (MCP + A2A)
 
-### Konfiguracja MCP (Model Context Protocol)
+### Konfiguracja MCP (protokół kontekstu modelu)
 
 Uruchom transport MCP w trybie stdio:
 
@@ -221,15 +222,15 @@ npm run test:protocols:e2e
 
 #### Konfiguracja klienta MCP
 
-**Claude Code:**
+**Kod Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Dodaj do ustawień MCP:
+Dodaj do ustawień MCP (stdio, z kluczem, aby dzwoniący miał zleceniodawcę):
 
 ```json
 {
@@ -237,17 +238,24 @@ Dodaj do ustawień MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Pełna dokumentacja MCP:** [MCP Server README](../../open-sse/mcp-server/README.md) — 107 narzędzi, 32 scope'y, konfiguracje IDE, klienci Python/TS/Go.
+Lub, gdy `mcpTransport` to `streamable-http` (ustaw na `/dashboard/mcp` lub za pomocą `omniroute mcp enable --transport streamable-http`), skieruj wpis zdalnego serwera MCP klienta na `http://localhost:20128/api/mcp/stream`.
 
-### Konfiguracja A2A (Agent-to-Agent Protocol)
+Klucz podróżuje jako `Authorization: Bearer <api-key>` (zobacz [MCP Server → Zdalny dostęp](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) do zdalnych hostów; zdalny klucz wymaga `mcp:connect` i jego zakresów read/write ).
 
-Zweryfikuj Agent Card:
+**Pełna dokumentacja MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 narzędzi, konfiguracje IDE, klienci Python/TS/Go. Informacje dla operatora dotyczące narzędzi do kompresji CCR/dedup (znaczniki, wymagania wstępne, zakresy poszczególnych narzędzi, paginacja wyszukiwania, diagnostyka): [Silniki kompresji → Wymagania wstępne / podręcznik operatora](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Konfiguracja A2A (protokół agent-agent)
+
+Zweryfikuj kartę agenta:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -261,7 +269,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Pełna dokumentacja A2A:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, skills, streaming, cykl życia zadań.
+**Pełna dokumentacja A2A :** [A2A Serwer README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, umiejętności, streaming, cykl życia zadań.
 
 ---
 
@@ -320,9 +328,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) Template
+## Unieważnij szablon Linux (xbps-src).
 
-Dla użytkowników Void Linux możesz zbudować natywny pakiet przez `xbps-src`. Zapisz ten blok jako `srcpkgs/omniroute/template`:
+Użytkownicy Void Linux mogą zbudować pakiet natywny za pomocą `xbps-src`. Zapisz ten blok jako `srcpkgs/omniroute/template`:
 
 ```bash
 # Template file for 'omniroute'

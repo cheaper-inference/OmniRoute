@@ -708,6 +708,45 @@ test("withRateLimit forwards AbortController DOMException without mutating it", 
   });
 });
 
+test("withRateLimit never starts the work of a caller that aborted before dispatch", async () => {
+  await rateLimitManager.applyRequestQueueSettings({
+    ...resilienceSettings.DEFAULT_RESILIENCE_SETTINGS.requestQueue,
+    autoEnableApiKeyProviders: false,
+  });
+  const limiters: InstanceType<typeof Bottleneck>[] = [];
+  rateLimitManager.__setLimiterFactoryForTests((options) => {
+    const limiter = new Bottleneck(options);
+    limiters.push(limiter);
+    return limiter;
+  });
+  const connectionId = "conn-abort-before-dispatch";
+  rateLimitManager.enableRateLimitProtection(connectionId);
+  const controller = new AbortController();
+  let calls = 0;
+  const pending = rateLimitManager.withRateLimit(
+    "openai",
+    connectionId,
+    "gpt-4o",
+    async () => {
+      calls++;
+      return "must-not-run";
+    },
+    controller.signal
+  );
+  // withRateLimit is suspended before limiter.schedule() when the abort lands.
+  // With capacity free, Bottleneck dispatches the job inside its submit lock,
+  // so the job leaves QUEUED before abandonQueuedJob() can take that lock.
+  controller.abort();
+
+  await assert.rejects(pending, { name: "AbortError" });
+  assert.equal(limiters.length, 1, "the aborted caller's job never reached a limiter");
+  await waitForCondition(() => {
+    const counts = limiters[0].counts();
+    return counts.RECEIVED + counts.QUEUED + counts.RUNNING + counts.EXECUTING === 0;
+  }, "the aborted caller's job never left the limiter");
+  assert.equal(calls, 0, "work must not start for a caller that already received AbortError");
+});
+
 test("rate limit manager handles soft over-limit warnings and normal header learning", async () => {
   rateLimitManager.enableRateLimitProtection("conn-over-limit");
   rateLimitManager.updateFromHeaders(

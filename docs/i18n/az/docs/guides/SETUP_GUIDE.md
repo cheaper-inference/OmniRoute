@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) Provayderləri Qoşun və API Açarı Yaradın
 
-1. İdarəetmə panelində → `Providers` bölməsini açın və ən azı bir provayderi qoşun (OAuth və ya API açarı).
+1. İdarəetmə panelində → `Providers` bölməsini açın və ən azı bir provayderi (OAuth və ya API açarı vasitəsilə) qoşun.
 2. İdarəetmə panelində → `Endpoints` bölməsini açın və API açarı yaradın.
 3. (İstəyə bağlı) İdarəetmə panelində → `Combos` bölməsini açın və ehtiyat keçid zəncirinizi təyin edin.
 
@@ -148,89 +148,90 @@ omniroute providers validate
 
 ```txt
 Baza URL-i: http://localhost:20128/v1
-API açarı:  [Endpoint səhifəsindən kopyalayın]
+API açarı:  [Endpoint səhifəsindən köçürün]
 Model:      if/qwen3.8-max-preview (və ya istənilən provayder/model prefiksi)
 ```
 
-Əgər redaktorunuz `Authorization: Bearer ...` göndərə bilmirsə, əvəzində tokenləşdirilmiş uyğunluq bazasından istifadə edin:
+Redaktorunuz `Authorization: Bearer ...` göndərə bilmirsə, əvəzinə token əlavə edilmiş uyğunluq baza ünvanından istifadə edin:
 
 ```txt
 Baza URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 Modellər URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 Söhbət URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama teqləri URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Ollama Teqləri URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode və OpenAI ilə uyğun SDK-larla işləyir.
 
 #### `setup-*` ilə avtomatik konfiqurasiya
 
-Baza URL-ini və açarı əl ilə daxil etmək əvəzinə, OmniRoute-un aktiv model kataloqu əsasında hər alətin
-öz konfiqurasiyasını yazmasına icazə verin. Hər alət üçün bir əmr:
+Baza URL-ini və açarı əl ilə daxil etmək əvəzinə, OmniRoute-un hər bir alətin
+öz konfiqurasiyasını aktual model kataloqu əsasında yazmasına icazə verin. Hər alət üçün bir əmr:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilləri
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI ilə uyğun)
-omniroute setup-cline        # Cline CLI + VS Code genişləndirməsinin parametrləri
+omniroute setup-cline        # Cline CLI + VS Code genişlənməsi parametrləri
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor-un tətbiqdaxili addımlarını göstərir
 omniroute setup-roo          # Roo Code idxalı + autoImport göstəricisi
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Hər biri lokal aləti **uzaq** OmniRoute-a qarşı konfiqurasiya etmək üçün `--remote <url> --api-key <key>`, önizləmə üçün isə `--dry-run` qəbul edir. Düzgün
-mühit dəyişənləri daxil edilmiş şəkildə və ümumiyyətlə heç bir konfiqurasiya yazmadan CLI-ni işə salmaq üçün ümumi başlatma əmrindən
+Hər biri yerli aləti **uzaq** OmniRoute-a uyğun konfiqurasiya etmək üçün `--remote <url> --api-key <key>`, eləcə də önizləmə üçün `--dry-run` qəbul edir. CLI-ni düzgün
+mühit dəyişənləri daxil edilmiş şəkildə və ümumiyyətlə heç bir konfiqurasiya yazmadan işə salmaq üçün ümumi başladıcıdan
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) istifadə edin;
-hər alət üçün köhnə başlatma əmrləri `omniroute launch` (Claude Code) və
-`omniroute launch-codex` (Codex) hələ də əlçatandır.
+köhnə, alətə xas başladıcılar `omniroute launch` (Claude Code) və
+`omniroute launch-codex` (Codex) istifadəyə açıq qalır.
 
-Tam cədvəl (hər əmrin nə yazdığı, bütün bayraqlar, lokal və uzaq rejimlər, baza URL-i
+Tam cədvəl (hər əmrin nə yazdığı, bütün bayraqlar, yerli və uzaq rejimlər, baza URL-i
 üçün `/v1` qaydaları) üçün **[CLI İnteqrasiyaları](./CLI-INTEGRATIONS.md)** bölməsinə baxın.
 
-Hər alət üzrə ətraflı konfiqurasiya (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot və digərləri) üçün ayrıca **[CLI Alətləri Təlimatı](../reference/CLI-TOOLS.md)** sənədinə baxın.
+Hər bir alət üçün ətraflı konfiqurasiya (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot və digərləri) üçün xüsusi **[CLI Alətləri Təlimatına](../reference/CLI-TOOLS.md)** baxın.
 
 ---
 
-## Protokolun Quraşdırılması (MCP + A2A)
+## Protokol Quraşdırma (MCP + A2A)
 
-### MCP Quraşdırılması (Model Konteksti Protokolu)
+### MCP Quraşdırma (Model Kontekst Protokolu)
 
-MCP nəqlini stdio rejimində başladın:
+Stdio rejimində MCP nəqlini başladın:
 
 ```bash
 omniroute --mcp
 ```
 
-Tövsiyə olunan yoxlama ardıcıllığı:
+Tövsiyə olunan doğrulama axını:
 
 ```bash
-# 1. MCP serverini başladın
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP klientinizdən bunları çağırın:
-omniroute_get_health        # Sistem sağlamlığını qaytarmalıdır
-omniroute_list_combos       # Aktiv kombinasiyaları qaytarmalıdır
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Və ya tam E2E dəstini işə salın:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP Klientinin Konfiqurasiyası
+#### MCP Müştəri Konfiqurasiyası
 
-**Claude Code:**
+**Claude Kodu:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-MCP parametrlərinizə əlavə edin:
+MCP parametrlərinizə əlavə edin (stdio, açarla zəng edənin əsas sahibi olması üçün):
 
 ```json
 {
@@ -238,15 +239,22 @@ MCP parametrlərinizə əlavə edin:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tam MCP sənədləri:** [MCP Serverinin README-si](../../open-sse/mcp-server/README.md) — 110 alət, IDE konfiqurasiyaları, Python/TS/Go klientləri.
+Və ya `mcpTransport` `streamable-http` olduqda (onu `/dashboard/mcp` və ya `omniroute mcp enable --transport streamable-http` ilə təyin edin), müştərinin uzaq MCP server girişini `http://localhost:20128/api/mcp/stream` ünvanına yönəldin.
 
-### A2A Quraşdırılması (Agentlərarası Protokol)
+Açar `Authorization: Bearer <api-key>` kimi hərəkət edir (uzaqdan hostlar üçün [MCP Server → Uzaqdan girişə](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) baxın; uzaq açara `mcp:connect` və onun read/write əhatə dairəsi lazımdır).
+
+**Tam MCP sənədləri:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 alətləri, IDE konfiqurasiyaları, Python/TS/Go müştəriləri. Sıxılma CCR/dedup alətləri üçün operator arayışı (markerlər, ilkin şərtlər, alət üzrə əhatə dairələri, axtarış səhifələnməsi, diaqnostika): [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatı](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Quraşdırma (Agent-to-Agent Protokolu)
 
 Agent Kartını yoxlayın:
 
@@ -262,7 +270,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tam A2A sənədləri:** [A2A Serverinin README-si](../../src/lib/a2a/README.md) — JSON-RPC 2.0, bacarıqlar, axınla ötürmə, tapşırığın həyat dövrü.
+**Tam A2A sənədləri:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, bacarıqlar, axın, tapşırıqların həyat dövrü.
 
 ---
 
@@ -321,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) Şablonu
+## Ləğv et Linux (xbps-src) Şablonu
 
-Void Linux istifadəçiləri `xbps-src` vasitəsilə yerli paket yarada bilərlər. Bu bloku `srcpkgs/omniroute/template` kimi yadda saxlayın:
+Void Linux istifadəçiləri üçün `xbps-src` istifadə edərək yerli paket yarada bilərsiniz. Bu bloku `srcpkgs/omniroute/template` olaraq yadda saxlayın:
 
 ```bash
-# 'omniroute' üçün şablon faylı
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -337,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Hər buraxılış üçün yoxlama cəmini aşağıdakı əmrlə yenidən yaradın:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -1,0 +1,1 @@
+- **fix(api):** `GET /api/init` is no longer a public route and requires management auth, so an anonymous request cannot start the background sync jobs when login is required

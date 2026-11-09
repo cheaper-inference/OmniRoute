@@ -1,1 +1,0 @@
-- fix(stream): passthrough keeps the real trailing usage-only summary (cache reads) after the finish-chunk usage instead of dropping it (#15619)

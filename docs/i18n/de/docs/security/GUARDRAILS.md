@@ -4,25 +4,32 @@
 
 ---
 
-> **Verbindliche Quelle:** `src/lib/guardrails/`
-> **Zuletzt aktualisiert:** 2026-08-29 — v3.8.51 (Die Herkunft des Video-Bridge-Transkripts wird vom Aufrufer deklariert,
-> aber noch nicht serverseitig verifiziert — gemäß #11661 klargestellt)
+> **Maßgebliche Quelle:** `src/lib/guardrails/`
+> **Zuletzt aktualisiert:** 2026-10-17 — v3.8.52 (hinzugefügt: [Abdeckung und Grenzen](#coverage-and-limits):
+> welche Routen und Antwortpfade die Hooks erreichen, die zusammengeführten Disable-Header (#16412), der
+> Injection-Blockmodus als verbindliche Grenze (#16413) und was eine Antwort vor dem Post-Call sieht)
 
-Guardrails erzwingen Sicherheitsvorgaben, Richtlinien und Inhaltstransformationen an der Grenze
-zwischen OmniRoute und vorgelagerten Anbietern. Jede Guardrail kann Anfrage-Payloads (`preCall`) und
-Antworten vorgelagerter Anbieter (`postCall`) prüfen (und optional ablehnen, transformieren oder
-mit Anmerkungen versehen).
+Guardrails erzwingen Sicherheits-, Richtlinien- und Inhaltstransformationen an der Grenze
+zwischen OmniRoute und den Upstream-Anbietern. Jede Guardrail kann Request-Payloads
+(`preCall`) und Upstream-Antworten (`postCall`) prüfen (und optional ablehnen,
+transformieren oder annotieren).
 
-Das System ist **fehlertolerant (Fail-open)**: Löst eine Guardrail während der Ausführung einen Fehler aus,
-zeichnet die Registry den Fehler auf und fährt mit der nächsten Guardrail fort, anstatt die
-Anfrage fehlschlagen zu lassen. Das Blockieren ist stets eine explizite Entscheidung (`block: true`)
-und niemals ein Versehen.
+Das System ist **fail-open**: Wenn eine Guardrail während der Ausführung einen Fehler
+wirft, protokolliert die Registry den Fehler und fährt mit der nächsten Guardrail fort,
+statt den Request fehlschlagen zu lassen. Blockieren ist eine explizite Entscheidung
+(`block: true`), niemals ein Versehen. Die einzige Ausnahme ist ein abgebrochener
+Request: Wenn das `signal` des Aufrufers abgebrochen wird, lehnt eine werfende
+Guardrail den Hook-Lauf ab, statt übersprungen zu werden.
 
-## Integrierte Guardrails
+Die Hooks laufen **nicht** auf jeder Route und nicht für jede Antwort. Lesen Sie
+[Abdeckung und Grenzen](#coverage-and-limits), bevor Sie sich auf eine Guardrail als
+Sicherheitskontrolle verlassen.
 
-Das Register lädt beim Import automatisch sechs Guardrails in Prioritätsreihenfolge (siehe `registry.ts` → `registerDefaultGuardrails()`):
+## Eingebaute Leitplanken
 
-| Priorität | Name                | Phase(n)       | Datei                 |
+Die Registry lädt beim Import automatisch sechs Leitplanken in der Reihenfolge ihrer Priorität (siehe `registry.ts` → `registerDefaultGuardrails()`):
+
+| Priorität | Name                | Etappe(n)      | Datei                 |
 | --------- | ------------------- | -------------- | --------------------- |
 | `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -31,319 +38,267 @@ Das Register lädt beim Import automatisch sechs Guardrails in Prioritätsreihen
 | `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
 | `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
 
-Niedrigere Prioritätsnummern werden **zuerst** ausgeführt.
+Nummern mit niedrigerer Priorität werden ausgeführt** Erste** .
 
-### Vision Bridge (`visionBridge.ts`) — Modalitätsbrücke PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Fängt bildhaltige Anfragen ab, die an **nicht-Vision-Modelle** gerichtet sind, und leitet entweder die gesamte Anfrage an ein Vision-fähiges Modell um oder ersetzt die Bildteile durch Textbeschreibungen, die von einem konfigurierbaren Vision-Modell erstellt wurden, bevor der Upstream-Aufruf erfolgt. Dies ermöglicht es reinen Textanbietern, multimodale Payloads transparent zu verarbeiten.
+Das GLM 5.3-Basismodell und `glm-5.3-{low,high,max}` verfügen über explizite `supportsVision:false` registry/spec Metadaten. Die GLM 5.3 Flash-Varianten bleiben Native-Vision-Modelle. `/v1/messages` Route des Claude Codes tritt in die gemeinsame `handleChat` Leitplankenkette vor dem Anruf ein** vor** Claude-zu-OpenAI-Übersetzung; Verschachtelte `Read` -Tool-Ergebnisbilder müssen beschrieben oder bearbeitet werden, bevor diese Übersetzung sie in OpenAI `image_url` Inhalt (#17069) überführt.
 
-Ablauf:
+Fängt gezielt bildtragende Anfragen ab** Nicht-Vision-Modelle** und leitet entweder die gesamte Anfrage an ein visionsfähiges Modell um oder ersetzt die Bildteile durch Textbeschreibungen, die von einem konfigurierbaren Visionsmodell vor dem Upstream-Aufruf erstellt wurden. Dadurch können Nur-Text-Anbieter multimodale Nutzlasten transparent verarbeiten.
 
-1.  Überspringen, wenn das Zielmodell bereits Vision unterstützt (es sei denn, es erscheint in der Liste der erzwungenen Brücken `isVisionBridgeForcedModel`).
-2.  Extrahiert Bildteile über `extractImageParts(messages)` (`visionBridgeHelpers.ts`), das an den **einheitlichen Mediendetektor** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` delegiert – die einzige Quelle der Wahrheit, die mit dem Combo-Kompatibilitätsfilter geteilt wird. Die Extraktion ist auf Top-Level-Teile der Formen beschränkt, die `replaceImageParts` wieder einfügen kann (der Extraktions↔Ersetzungs-Vertrag): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` und Responses API `input_image`. Verschachtelte Treffer und nur-Indikator-Formen sind Combo-Filter-Material und werden niemals extrahiert. Überspringen, wenn keine gefunden wurden.
-3.  Löst die Laufzeitkonfiguration über `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) auf: neue `modalityBridge*`-Einstellungsschlüssel gewinnen; ältere `visionBridge*`-Schlüssel bleiben ein **Ein-Zyklus-Fallback** (Rollback-Fenster). Überspringen Sie vor jeder Medienprüfung, wenn die Brücke deaktiviert ist.
-4.  Der Modusselektor (`modalityBridgeVisionMode`, siehe Tabelle unten) entscheidet zwischen Umleitung und Beschreibung. Eine Umleitung gibt `modifiedPayload` zurück, wobei nur `model` ausgetauscht wurde, plus Metadaten `{ rerouted, fromModel, toModel, imagesKept }`.
-5.  Beschreibungspfad: Bilder auf `maxImages` begrenzen, den aufgabenbewussten Prompt zusammenstellen, den Beschreibungscache konsultieren, das Vision-Modell **parallel** aufrufen (`Promise.allSettled`) und `[Bild N]: <Beschreibung>`-Textteile an ihrer Stelle einfügen. Eine fehlgeschlagene Beschreibung ergibt `null`, und der ursprüngliche Bildteil wird **beibehalten** (#4012) – außer auf dem Combo-Beschreibungspfad, wenn jede Beschreibung fehlgeschlagen ist, wo ein bestätigter nicht-Vision-Upstream stattdessen einen `(nicht verfügbar – kein Vision-fähiger Anbieter verbunden)`-Stub erhält (#8430).
-6.  Gibt `modifiedPayload` + Metadaten (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`) zurück.
+Fließen:
 
-#### Modusselektor (`modalityBridgeVisionMode`)
+1. Überspringen, wenn das Zielmodell bereits Vision unterstützt (es sei denn, es erscheint in der Forced-Bridge-Liste `isVisionBridgeForcedModel`).
+2. Extrahieren Sie Bildteile über `extractImageParts(messages)` (`visionBridgeHelpers.ts`), das an die delegiert** einheitlicher Mediendetektor** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — die einzige Quelle der Wahrheit, die mit dem Combo-Kompatibilitätsfilter geteilt wird. Die Extraktion wird für die Formen zugelassen, `replaceImageParts` zurückspleißen kann (der Extrakt ↔ ersetzt den Vertrag): OpenAI `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL `source.type:"url"` und Antworten API `input_image`. Übereinstimmende Bilder, die in den Ausgaben Claude -Codes `tool_result.content` und des Antworttools verschachtelt sind, werden ebenfalls extrahiert und an ihren ursprünglichen Pfaden ersetzt. Nur-Indikator-Formen sind Kombinationsfiltermaterial und werden nicht extrahiert. Überspringen, wenn nichts gefunden wird.
+3. Laufzeitkonfiguration über `resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) auflösen: neue `modalityBridge*` Einstellungsschlüssel win; Legacy- `visionBridge*` -Schlüssel bleiben a** Ein-Zyklus-Fallback** (Rollback-Fenster). Vor jedem Mediendurchlauf überspringen, wenn die Brücke deaktiviert ist.
+4. Der Modusselektor (`modalityBridgeVisionMode`, siehe Tabelle unten) entscheidet über Umleitung oder Beschreibung. Reroute gibt `modifiedPayload` zurück, wobei nur `model` ausgetauscht wurde, plus Meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Beschreibungspfad: Bilder bei `maxImages` abdecken, aufgabenbezogene Eingabeaufforderung erstellen, Beschreibungs-Cache konsultieren, Vision-Modell aufrufen** parallel** (`Promise.allSettled`) und fügen an ihrer Stelle `[Image N]: <description>` -Textteile ein. Eine fehlgeschlagene Beschreibung ergibt `null`: Das Rohbild bleibt für unknown/vision-capable -Ziele (#4012) erhalten, aber a** Bestätigtes Nur-Text-Direktziel** oder Zero-Vision-Combo erhält einen expliziten `(unavailable — no vision-capable provider connected)` -Text-Stub für jedes unbeschriebene Bild, einschließlich Teilfehlern und Bildern, die über die Beschreibungsaufrufobergrenze (#17069) hinausgehen. Der vorhandene All-Failed-Combo-Description-Fallback bleibt bestehen (#8430).
+6. Gibt `modifiedPayload` + meta (`imagesProcessed`, `descriptions`, `processingTimeMs`, `visionModel`) zurück.
 
-| Modus      | Standard | Verhalten                                                                                                                                                                                                                                                                                                                                           |
-| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔        | Alte Heuristik, unberührt (#6640/#7204): Nicht-Combo-/`auto/`-Modelle leiten an das beste Vision-Modell um, es sei denn, das ursprüngliche Modell hat bereits verwendbare Anmeldeinformationen (dann beschreiben); Combo-Ziele beschreiben immer.                                                                                                   |
-| `describe` |          | Immer beschreiben – der Umleitungsblock wird vollständig übersprungen; das vom Benutzer gewählte Modell antwortet immer.                                                                                                                                                                                                                            |
-| `reroute`  |          | Umleitung erzwingen: Die Schutzfunktion für Modelle mit Anmeldeinformationen wird umgangen. Die Schutzfunktion für Anmeldeinformationen des Umleitungs-**Ziels** bleibt bestehen – wenn kein verwendbares Vision-Ziel existiert, fällt die Anfrage auf die Beschreibung zurück, sodass Rohbilder niemals ein reines Text-Backend erreichen (#8430). |
+#### Moduswahlschalter (`modalityBridgeVisionMode`)
 
-Erzwungene Modi schalten **vor** der Ausführung der Auto-Heuristik kurz; das `auto`-Verhalten ist byte-identisch mit der Guardrail vor PR-1.
+| Modus      | Standard | Verhalten                                                                                                                                                                                                                                                                                                      |
+| ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔        | Legacy-Heuristik, unberührt (#6640/#7204): Nicht-Combo-/`auto/` Modelle leiten zum besten Vision-Modell um, es sei denn, das ursprüngliche Modell verfügt bereits über verwendbare Anmeldeinformationen (dann beschreiben); Combo-Ziele beschreiben immer.                                                     |
+| `describe` |          | Beschreiben Sie immer — der Umleitungsblock vollständig übersprungen wird. Es antwortet immer das vom Benutzer gewählte Modell.                                                                                                                                                                                |
+| `reroute`  |          | Umleitung erzwingen: Der Keep-Credentialed-Model-Guard wird umgangen. Die Umleitung-** Ziel** Credential Guard wendet weiterhin — an, wenn kein verwendbares Sichtziel vorhanden ist. Die Bridge blockiert mit einem eindeutigen Fehler, anstatt Rohbilder zu beschreiben oder an ein Nur-Text-Ziel zu senden. |
 
-#### Aufgabenbewusster Beschreibungsprompt (`modalityBridgeVisionTaskAware`)
+Kurzschluss im erzwungenen Modus** vor** die automatische Heuristik wird ausgeführt; Das Verhalten `auto` ist byteidentisch mit der pre-PR-1 Leitschiene.
 
-Standardmäßig **wahr**. `composeVisionPrompt()` (`visionBridgeHelpers.ts`) hängt den Text der **letzten Benutzernachricht** (auf 500 Zeichen gekürzt) an den Basis-Beschreibungsprompt an, lenkt die Beschreibung auf das, was der Benutzer tatsächlich gefragt hat (Codex-Vision-Proxy-Muster), und fordert das Vision-Modell auf, sichtbaren Text zu transkribieren. Wenn das Flag deaktiviert ist – oder kein Benutzertext vorhanden ist – wird der Basis-Prompt unverändert verwendet.
+#### API-Schlüsselbereich (`visionBridgeKeyScope.ts`)
 
-Die eigene OpenAI-kompatible Anfrage des Describe-Self-Loops (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) fordert immer `image_url.detail: "high"` an – bedingungslos, für jeden Aufrufer/Anbieter, nicht durch ein Clientsignal gesteuert. Eine Abtastung mit geringer Detailgenauigkeit verschlechtert die OCR-Genauigkeit genau für die Texttranskriptionsaufgabe, die dieser Prompt anfordert, daher fordert der Describe-Aufruf selbst immer hohe Detailgenauigkeit an, unabhängig davon, welche Detailstufe die ursprüngliche eingehende Anfrage verwendet hat. Dies betrifft nur den internen Describe-Anfragekörper; es ändert nicht, wie OmniRoute das eigene `image_url.detail` des Aufrufers bei der primären Anfrage weiterleitet – diese Standardeinstellung wird separat und nur für erkannte OpenCode-Clients in `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) angewendet. Der Anthropic-Wire-Format-Zweig des Describe-Self-Loops hat kein `detail`-Feld und wird von keiner der Standardeinstellungen beeinflusst.
+Wenn der API Schlüssel des Anrufers `allowedConnections`, Quotenpools (`allowedQuotas`) oder Modelle (`allowedModels` / `blockedModels` / `modelAccessMode: "restricted"` / `disableNonPublicModels`) einschränkt, wählt die Bridge nur Umleitungs- und Beschreibungsmodelle aus, die der Schlüssel verwenden darf, und zwar bei Verbindungen, die der Schlüssel verwenden darf. Der Beschreibungsaufruf durchläuft dann immer die OmniRoute -Selbstschleife mit dem `x-omniroute-self-loop-key-id` Header, sodass die empfangende Chat-Anfrage die Verbindungs- und Modellrichtlinie dieses Schlüssels erneut erzwingt. `enforceApiKeyPolicy()` berücksichtigt diesen Header nur zusammen mit dem Self-Loop-Träger, sodass der Zugriff nur eingeschränkt werden kann und eine ID, die nicht aufgelöst wird, abgelehnt wird.
 
-#### Describe-Ausgabebegrenzung (`modalityBridgeVisionMaxChars`)
+Wenn für den Schlüssel kein Vision-Modell zulässig ist, a** Bestätigtes Nur-Text-Ziel** lehnt die Bildanfrage lokal mit einem klaren HTTP 400 ab, anstatt Bildbytes an einen unfähigen Upstream (#17069) weiterzuleiten. Bei Zielen mit unbekannter oder nativer Sichtfähigkeit behält der Beschreibungspfad sein vorheriges Fail-Open-Verhalten (meta `{ skipped: true, reason: "no_permitted_vision_model" }`) bei. Anfragen ohne Schlüssel und Schlüssel ohne diese Einschränkungen verhalten sich genauso wie zuvor.
 
-| Schlüssel                      | Standard | Bereich            |
-| :----------------------------- | :------- | :----------------- |
+#### Aufgabenbewusste Beschreibungsaufforderung (`modalityBridgeVisionTaskAware`)
+
+Standard** WAHR** . `composeVisionPrompt()` (`visionBridgeHelpers.ts`) hängt den Text an** letzte Benutzernachricht** (auf 500 Zeichen gekürzt) zur Basis-Beschreibungsaufforderung, lenkt die Beschreibung auf das, was der Benutzer tatsächlich gefragt hat (Codex-Vision-Proxy-Muster) und fordert das Vision-Modell auf, sichtbaren Text zu transkribieren. Wenn das Flag — deaktiviert ist oder kein Benutzertext — vorhanden ist, wird die Basis-Eingabeaufforderung unverändert verwendet.
+
+Die eigene OpenAI-kompatible Anforderung der Beschreibungsselbstschleife (`callVisionModelSingle()` in `visionBridgeHelpers.ts`) fordert `image_url.detail: "high"` — immer bedingungslos für jedes caller/provider an und ist nicht an ein Clientsignal gebunden. Die Stichprobenentnahme mit geringen Details verschlechtert OCR Genauigkeit genau für die Texttranskriptionsaufgabe, nach der diese Eingabeaufforderung verlangt, sodass der Beschreibungsaufruf selbst immer nach hohen Details fragt, unabhängig von der Detailebene, die in der ursprünglichen eingehenden Anfrage verwendet wurde. Dies betrifft nur den internen Beschreibungsanforderungstext. Es ändert nichts daran, wie OmniRoute das eigene `image_url.detail` des Anrufers auf die primäre Anfrage — weiterleitet. Die Standardeinstellung wird separat und nur für erkannte OpenCode Clients in `defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`) angewendet. Der Anthropic -Wire-Format-Zweig der Describe-Self-Schleife hat kein `detail` Feld und ist von keiner der beiden Standardeinstellungen betroffen.
+
+#### Beschreiben Sie die Ausgabeobergrenze (`modalityBridgeVisionMaxChars`).
+
+| Schlüssel                      | Standard | Reichweite         |
+| ------------------------------ | -------- | ------------------ |
 | `modalityBridgeVisionMaxChars` | `0`      | `0` oder 100–50000 |
 
-`0` (Standard) bedeutet **keine Begrenzung** – die von `callVisionModel()` zurückgegebene Beschreibung wird unverändert weitergeleitet, wodurch das bestehende Verhalten beibehalten wird. Jeder Wert im Bereich von 100–50000 kürzt die Beschreibung mit einem `…`-Suffix, bevor sie als `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`) wieder eingefügt wird. Erhöhen Sie diesen Wert für detailreiche OCR-Aufgaben, bei denen das nachgeschaltete Modell die vollständige Transkription benötigt; senken Sie ihn, um die Token-Nutzung bei gesprächigen Vision-Modellen zu begrenzen. Das Dashboard-Feld befindet sich im erweiterten Bereich des Vision-Tabs (`modality-bridge-max-chars` in `ModalityBridgeVisionTab.tsx`) und begrenzt jeden Wert zwischen 1 und 99 auf den Mindestwert von 100, während eine explizite `0` unberührt bleibt – `0` ist ein eigenständiger gültiger Zod-Wert (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), nicht nur der "nicht gesetzte" Standardwert.
+`0` (Standard) bedeutet** keine Kappe** — Die von `callVisionModel()` zurückgegebene Beschreibung wird unverändert weitergegeben, wobei das vorhandene Verhalten erhalten bleibt. Jeder Wert im Bereich von 100–50.000 kürzt die Beschreibung mit einem `…` Suffix ab, bevor sie als `[Image N]: <description>` (`VisionBridgeGuardrail.preCall()` in `src/lib/guardrails/visionBridge.ts`) zurückgespleißt wird. Erhöhen Sie dies für detailintensive OCR Aufgaben, bei denen das Downstream-Modell die vollständige Transkription benötigt. Reduzieren Sie den Wert, um die Token-Nutzung bei gesprächigen Vision-Modellen zu beschränken. Das Dashboard-Feld befindet sich im Bereich „Erweitert“ der Registerkarte „Vision“ (`modality-bridge-max-chars` `z.union([z.literal(0), z.number().int().min(100).max(50000)])` `ModalityBridgeVisionTab.tsx`) und klemmt Zod Wert zwischen 1 und — bis zur 100er- `0`, während ein expliziter `0` unberührt bleibt.
 
-#### Describe-Cache (`modalityBridge/bridgeCache.ts`)
+#### Cache beschreiben (`modalityBridge/bridgeCache.ts`)
 
-In-Memory LRU + TTL-Cache für Describe-Ausgaben, prozessweit geteilt. Schlüssel = `sha256(imageRef + composedPrompt + configuredBridgeModel)` mit Längenpräfix-Framing (keine Feldgrenzenkollisionen). Die Modellkomponente ist das **konfigurierte** Bridge-Modell, nicht das Modell, das tatsächlich geantwortet hat – `callVisionModel` kann intern zurückgreifen, und eine Schlüsselung pro Versuch würde den Cache fragmentieren. Fehlgeschlagene Describes werden niemals zwischengespeichert. Einstellungen:
+In-Memory LRU + TTL Cache für Beschreibungsausgaben, prozessweit gemeinsam genutzt. Schlüssel = `sha256(imageRef + composedPrompt + configuredBridgeModel)` mit Längenpräfixrahmen (keine Feldgrenzenkollisionen). Die Modellkomponente ist die** konfiguriert** Bridge-Modell, nicht das Modell, das tatsächlich — `callVisionModel` geantwortet hat, kann intern zurückgreifen, und die Verschlüsselung pro Versuch würde den Cache fragmentieren. Fehlgeschlagene Beschreibungen werden niemals zwischengespeichert. Einstellungen:
 
-| Schlüssel                       | Standard | Bereich |
-| :------------------------------ | :------- | :------ |
-| `modalityBridgeCacheEnabled`    | `true`   | —       |
-| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440  |
-| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000 |
+| Schlüssel                       | Standard | Reichweite |
+| ------------------------------- | -------- | ---------- |
+| `modalityBridgeCacheEnabled`    | `true`   | —          |
+| `modalityBridgeCacheTtlMinutes` | `60`     | 1–1440     |
+| `modalityBridgeCacheMaxEntries` | `200`    | 10–5000    |
 
-#### Remote-Bildnormalisierung (Self-Loop Describe/Base64-Abruf)
+#### Remote-Bildnormalisierung (Selbstschleifen- describe/base64 Abruf)
 
-Wenn die Bridge selbst ein **Remote-Bild** abruft – der Anthropic Describe-Self-Call und die Claude-Wire-Format-Base64-Konvertierung (`ensureBase64ImagesForClaudeWire`), beides über `fetchRemoteImageAsDataUri()` in `visionBridgeHelpers.ts` – wird die resultierende Daten-URI durch `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) geleitet, bevor sie in die Vision-Modell-Anfrage eingebettet wird. Überdimensionierte Bilder werden auf eine **2048px lange Kante** herunterskaliert (entsprechend der Größenbegrenzung, die OpenAI/Anthropic bereits serverseitig anwenden), was Upload-Bytes/Latenz reduziert, ohne zu ändern, was das Vision-Modell sieht. Die Größenänderung verwendet `sharp`, geladen über dynamischen Import: Auf einer Plattform, auf der die native Binärdatei nicht geladen werden kann, **wirft `normalizeDataUri()` niemals einen Fehler** – es fällt auf eine Weiterleitung der Originalbytes zurück, sodass der Describe-/Base64-Konvertierungspfad immer funktioniert. Nicht-Bild-Bytes (ein Abruf, der kein dekodierbares Bild zurückgab) werden ebenfalls unberührt weitergeleitet. Diese Normalisierung ist auf Bilder beschränkt, die die Bridge für ihren eigenen Self-Call abruft – sie wird niemals auf die rohe Passthrough-Nutzlast des Aufrufers angewendet, im Einklang mit dem Prinzip der Opt-in-Mutation (Harte Regel #20).
+Wenn die Brücke a abruft** Fernbedienung** Das Bild selbst — der Anthropic beschreibt den Selbstaufruf und die Claude-Wire-Format-Base64-Konvertierung (`ensureBase64ImagesForClaudeWire`), beide über `fetchRemoteImageAsDataUri()` in `visionBridgeHelpers.ts` — Die resultierenden Daten URI werden durch `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) geleitet, bevor sie in die Vision-Model-Anfrage eingebettet werden. Übergroße Bilder werden auf a verkleinert** 2048px lange Kante** (Entsprechend der Größenänderungsobergrenze OpenAI/Anthropic die bereits serverseitig angewendet wird), wodurch der Upload- bytes/latency gekürzt wird, ohne zu ändern, was das Vision-Modell sieht. Bei der Größenänderung wird `sharp` verwendet, das über dynamischen Import geladen wird: auf einer Plattform, auf der die native Binärdatei `normalizeDataUri()` nicht geladen werden kann** wirft nie** — wird auf ein Passthrough der ursprünglichen Bytes zurückgegriffen, sodass der describe/base64-conversion Pfad immer weiter funktioniert. Nicht-Bildbytes (ein Abruf, der kein dekodierbares Bild zurückgab) werden ebenfalls unverändert weitergeleitet. Diese Normalisierung ist auf Bilder beschränkt, die die Bridge für ihren eigenen Selbstaufruf — abruft. Sie wird niemals auf die rohe Passthrough-Nutzlast des Anrufers angewendet, im Einklang mit dem Opt-in-Only-Mutationsprinzip (harte Regel #20).
 
-#### Einstellungen Schema + Migration
+#### Einstellungsschema + Migration
 
-Die neuen `modalityBridge*`-Schlüssel werden in `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`) Zod-validiert: `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, das `modalityBridgeCache*`-Trio und die von der Audio Bridge verwendete `modalityBridgeAudio*`-Gruppe. Migration `141_modality_bridge_settings.sql` kopiert bestehende Legacy-`visionBridge*`-Werte auf die passenden neuen Schlüssel (idempotent, überschreibt niemals einen vom Operator gesetzten `modalityBridge*`-Wert); die Legacy-Schlüssel bleiben für einen Release-Zyklus als Lese-Fallback akzeptiert.
+Die neuen `modalityBridge*` Schlüssel sind Zod-validiert in `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, dem `modalityBridgeCache*` -Trio und der von der Audio Bridge verwendeten `modalityBridgeAudio*` Gruppe. Migration `141_modality_bridge_settings.sql` kopiert vorhandene Legacy `visionBridge*` -Werte in die passenden neuen Schlüssel (idempotent, überschreibt niemals einen vom Operator festgelegten `modalityBridge*` Wert); Die Legacy-Schlüssel bleiben für einen Release-Zyklus als Lese-Fallback akzeptiert.
 
-#### Transparenz-Header + Statistiken
+#### Transparenz-Header- + Statistiken
 
-Describe-transformierte Antworten tragen `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (erstellt von `buildModalityBridgeHeader()` in `modalityBridge/bridgeStats.ts`, gestempelt von `withModalityBridgeHeader()` in `src/sse/handlers/chatHelpers.ts`). Weitergeleitete Anfragen erhalten **keinen** Header – die Nutzlast blieb unberührt und der Modelltausch ist bereits im `model`-Feld des Antwortkörpers sichtbar.
+Describe-transformierte Antworten enthalten `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (erstellt von `buildModalityBridgeHeader()` in `modalityBridge/bridgeStats.ts`, gestempelt von `withModalityBridgeHeader()` in `src/sse/handlers/chatHelpers.ts`). Umgeleitete Anfragen erhalten** NEIN** Im — -Header blieb die Nutzlast unverändert und der Modellaustausch ist bereits im `model` Feld des Antworttexts sichtbar.
 
-`GET /api/modality-bridge/stats` (Management-Authentifizierung, gleiche Ebene wie `GET /api/settings`) gibt die In-Memory-Zähler pro Modalität `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` für `vision`, `audio` und `video` zurück. `averageLatencyMs` verwendet `latencySamples` als Nenner, nicht alle Versuche; ein Vorgang ohne Zeitmessung erzeugt kein Null-Millisekunden-Sample. `bridged` bleibt der abwärtskompatible Alias für erfolgreiche Konvertierungen; fehlgeschlagene Versuche erhöhen ihn nicht. Zähler werden beim Neustart des Prozesses absichtlich zurückgesetzt (Telemetrie, keine Buchhaltung).
+`GET /api/modality-bridge/stats` (Verwaltungsauthentifizierung, gleiche Ebene wie `GET /api/settings`) gibt die In-Memory-Zähler `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` pro Modalität für `vision`, `audio` und `video` zurück. `averageLatencyMs` verwendet `latencySamples`, nicht alle Versuche, als Nenner; Eine Operation ohne Timing erzeugt keine Stichprobe von null Millisekunden. `bridged` bleibt der abwärtskompatible Alias für erfolgreiche Konvertierungen; Fehlversuche erhöhen ihn nicht. Zähler werden beim Neustart des Prozesses konstruktionsbedingt zurückgesetzt (Telemetrie, nicht Abrechnung).
 
 #### Dashboard-Konfiguration
 
-Die dedizierte Dashboard-Seite ist
-`/dashboard/settings/modality-bridge`. Ihre URL-adressierbaren `Vision`-, `Audio`-
-und `Video`-Registerkarten bewahren Abfrageparameter beim Wechsel des `tab`-Werts.
-Die `Vision`-Registerkarte bietet Aktivierung, Modus, Modellauswahl (einschließlich der automatischen
-Standardeinstellung), aufgabenbezogenes Prompting, erweiterte Timeout-/Bild-/Beschreibungs-Längen-/Cache-Limits,
-Laufzeit-Zähler und eine geschützte Beispielanfrage. Die `Audio`-Registerkarte ist ebenfalls live: Sie bietet
-Aktivierung, einen reinen STT-Modell-Picker mit Auto, Timeout-/Max-Clip-Limits, Audio-Zähler
-und einen `input_audio`-Beispieltest. Die `Video`-Registerkarte ist funktionsfähig: Sie meldet
-den FFmpeg/ffprobe-Laufzeitstatus – einen von vier expliziten UI-Zuständen (`unknown`, während
-die Prüfung läuft oder nicht abgeschlossen werden konnte; `restricted` auf einem Nicht-Loopback-
-Dashboard-Host, wo die Prüfung clientseitig übersprungen wird; `unavailable`, sobald geprüft
-und als fehlend bestätigt; oder `available` mit den FFmpeg/ffprobe-Versionen) – speichert
-Aktivierungs-/Modell-/Frame-/Video-/Timeout-Limits, filtert den Modell-Picker auf vision-fähige
-Modelle und zeigt Video-Zähler an.
+Die dedizierte Dashboard-Seite ist `/dashboard/settings/modality-bridge`. Die über URLs adressierbaren Registerkarten `Vision`, `Audio` und `Video` behalten Abfrageparameter bei, während der `tab` Wert geändert wird. Auf der Registerkarte „Vision“ werden Aktivierung, Modus, Modellauswahl (einschließlich der automatischen Standardeinstellung), aufgabenbezogene Eingabeaufforderungen, erweiterte timeout/image/description-length/cache Grenzwerte, Laufzeitzähler und eine geschützte Beispielanforderung angezeigt. Die Registerkarte „Audio“ ist ebenfalls aktiv: Sie stellt die Aktivierung, eine reine STT-Modellauswahl mit Auto, timeout/max-clip Grenzwerte, Audiozähler und einen `input_audio` Beispieltest bereit. Die Registerkarte „Video“ ist funktionsfähig: Sie meldet den FFmpeg/ffprobe Laufzeitstatus — einen von vier expliziten UI Zuständen enable/model/frame/video/timeout `unknown`, während die Sonde in Betrieb ist oder nicht abgeschlossen werden konnte, `restricted` auf einem Nicht-Loopback-Dashboard — Host, bei dem die Sonde clientseitig übersprungen wird, `unavailable`, sobald sie geprüft und als vermisst bestätigt wurde, oder `available` mit den FFmpeg/ffprobe Versionen).
 
-Die frühere Vision Bridge-Karte unter `AI settings` ist ein Kompatibilitätslink zur
-neuen Seite; sie besitzt keine zweite Kopie des Formulars mehr. `Media Providers`
-verknüpft auch `Image-to-Text`- und `Speech-to-Text`-Workflows mit den entsprechenden `Modality
-Bridge`-Registerkarten, ohne den bestehenden `Speech-to-Text playground` zu entfernen.
+Die frühere Vision Bridge-Karte unter AI -Einstellungen ist ein Kompatibilitätslink zur neuen Seite. Es besitzt keine zweite Kopie des Formulars mehr. Medienanbieter verknüpfen außerdem Bild-zu-Text- und Speech-to-Text-Workflows mit den entsprechenden Modality Bridge-Registerkarten, ohne den vorhandenen Speech-to-Text-Spielplatz zu entfernen.
 
-**Self-loop-Zulassungs-Bypass:** Wenn der `describe`-Aufruf über OmniRoutes eigenen
-`/v1`-Self-Loop (nicht-standardmäßiges Provider-Modell) geleitet wird, sendet die
-Unteranfrage `x-omniroute-admission-bypass: internal` und wird mit dem aufgelösten
-Self-loop-Zugangsdaten authentifiziert – dem lokalen `sk_omniroute`-Sentinel im lokalen
-Modus oder dem vom Operator konfigurierten `OMNIROUTE_API_KEY` / `ROUTER_API_KEY`
-Umgebungsschlüssel (#1350), damit `REQUIRE_API_KEY=true`-Bereitstellungen den `describe`-Aufruf
-weiterhin ausführen können. Der Bypass wird nur für diese exakten Zugangsdaten berücksichtigt,
-sodass externe Clients den Header nicht verwenden können, um die Zulassung zu umgehen.
+**Self-Loop-Zulassungsumgehung:** Wenn der Beschreibungsaufruf durch OmniRoute eigene `/v1` -Selbstschleife (nicht standardmäßiges Anbietermodell) geleitet wird, sendet die Unteranforderung `x-omniroute-admission-bypass: internal` und wird mit den aufgelösten Selbstschleifen-Anmeldeinformationen — dem lokalen `sk_omniroute` Sentinel im lokalen Modus oder dem vom Betreiber konfigurierten `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` -Env-Schlüssel (#1350) authentifiziert, sodass `REQUIRE_API_KEY=true` Bereitstellungen den Beschreibungsaufruf weiterhin ausführen können. Die Umgehung wird nur für genau diese Anmeldeinformationen berücksichtigt, sodass externe Clients den Header nicht verwenden können, um den Zugang zu überspringen.
 
-Legacy-Standardwerte befinden sich in `src/shared/constants/visionBridgeDefaults.ts`; die
-neuen Modus-/aufgabenbezogenen/Cache-Standardwerte und der Einstellungs-Resolver befinden sich in
-`src/shared/constants/modalityBridgeDefaults.ts`. Die Schutzschiene bietet eine `deps`-Konstruktoroption,
-damit Tests gefälschte `getSettings`- und `callVisionModel`-Implementierungen injizieren können.
+Legacy-Standardeinstellungen sind in `src/shared/constants/visionBridgeDefaults.ts` verfügbar; Die neuen mode/task-aware/cache Standardeinstellungen und der Einstellungs-Resolver sind in `src/shared/constants/modalityBridgeDefaults.ts` verfügbar. Die Leitplanke stellt eine `deps` Konstruktoroption bereit, sodass Tests gefälschte `getSettings` und `callVisionModel` Implementierungen einfügen können.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Fängt Audio-tragende Chat-Anfragen ab, bevor sie ein Ziel erreichen, das bekanntermaßen
-keine Audioeingabe akzeptiert. Es leitet die Chat-Anfrage niemals um: Audio-Teile werden
-über den bestehenden OpenAI-kompatiblen Multipart-Endpunkt transkribiert, und das
-gewählte Chat-Modell fährt mit Texttranskripten fort.
+Fängt Audio-Chat-Anfragen ab, bevor sie ein Ziel erreichen, von dem bekannt ist, dass es Audio-Eingaben nicht akzeptiert. Die Chat-Anfrage wird nie umgeleitet: Audioteile werden über den vorhandenen OpenAI-kompatiblen Multipart-Endpunkt transkribiert und das gewählte Chat-Modell fährt mit Texttranskripten fort.
 
-Ablauf:
+Fließen:
 
-1.  `supportsAudio` über `getResolvedModelCapabilities()` auflösen. Explizite
-    Provider-Registry-Metadaten haben Vorrang, dann statische Modell-Metadaten, dann
-    synchronisierte `modalities_input`. Eine deklarierte Eingabeliste ohne `audio` ist
-    `false`; kein Fähigkeitsnachweis bleibt `null`. Sowohl `false` als auch `null`
-    aktivieren die konservative Bridge, während `true` sie umgeht.
-2.  `modalityBridgeAudio*`-Einstellungen auflösen und über den gemeinsamen
-    `detectMediaParts()`-Detektor spleißbare Audio-Teile der obersten Ebene aus jeder
-    Nachricht extrahieren. Unterstützte Wire-Shapes sind OpenAI `input_audio`, `audio_url`
-    und `source.media_type: "audio/*"`. Verschachteltes Audio wird für das Routing erkannt,
-    aber nicht vom Spleißpfad entfernt. Die Arbeit ist durch `modalityBridgeAudioMaxClips`
-    begrenzt; spätere Teile bleiben unberührt.
-3.  Ein konfiguriertes `provider/model` berücksichtigen oder `selectAudioBridgeModel()`
-    die `AUDIO_TRANSCRIPTION_PROVIDERS` in stabiler Katalogreihenfolge durchlaufen lassen
-    und das erste Modell mit einem nutzbaren aktiven Provider-Zugangsdaten auswählen.
-4.  `callAudioTranscription()` konvertiert base64/data-URI-Audio in eine Multipart-`file`
-    oder lädt eine entfernte `audio_url` über den nur-öffentlichen Outbound-Guard mit
-    DNS-Pinning und einer 25 MB-Grenze herunter. Anschließend POSTet es die Datei und das
-    ausgewählte Modell an den lokalen `/v1/audio/transcriptions`-Self-Loop, authentifiziert
-    mit `resolveSelfLoopBearer()`. Die bestehende Transkriptionsroute führt normale
-    Zugangsdaten-Suche, Cooldown-/Ratenlimit-Behandlung und Provider-Dispatch durch.
-5.  Erfolgreiche Aufrufe ersetzen ihre Teile durch `[Audio N]: <transcript>`. Aufrufe
-    werden mit `Promise.allSettled` ausgeführt: Ein individueller Fehler bewahrt den
-    ursprünglichen Audio-Teil (#4012-Vertrag). Wenn jeder Aufruf fehlschlägt und das
-    Ziel als `supportsAudio === false` erwiesen ist, werden die Teile zu
-    `[Audio N]: (unavailable — no STT provider connected)` (#8430-Vertrag). Für ein
-    unbekanntes Ziel (`null`) bleibt ein Gesamtausfallergebnis unberührt. Ein erwiesenes
-    reines Text-Ziel ohne nutzbare STT-Zugangsdaten erhält denselben expliziten Stub,
-    ohne einen Netzwerkaufruf auszulösen.
+1. Lösen Sie `supportsAudio` über `getResolvedModelCapabilities()` auf. Explizite Provider-Registry-Metadaten gewinnen, dann statische Modellmetadaten und dann synchronisierte `modalities_input`. Eine deklarierte Eingabeliste ohne `audio` ist `false`; es bleiben keine Fähigkeitsnachweise übrig `null`. Sowohl `false` als auch `null` aktivieren die konservative Brücke, während `true` sie umgeht.
+2. Lösen Sie `modalityBridgeAudio*` -Einstellungen auf und extrahieren Sie über den gemeinsam genutzten `detectMediaParts()` Detektor spleißbare Audioteile der obersten Ebene aus jeder Nachricht. Unterstützte Drahtformen sind OpenAI, `input_audio`, `audio_url` und `source.media_type: "audio/*"`. Verschachteltes Audio wird für das Routing erkannt, aber nicht vom Spleißpfad entfernt. Die Arbeit wird durch `modalityBridgeAudioMaxClips` begrenzt; spätere Teile bleiben unberührt.
+3. Beachten Sie ein konfiguriertes `provider/model` oder lassen Sie `selectAudioBridgeModel()` `AUDIO_TRANSCRIPTION_PROVIDERS` in stabiler Katalogreihenfolge durchlaufen und wählen Sie das erste Modell mit einer verwendbaren aktiven Provider-Anmeldeinformation aus.
+4. `callAudioTranscription()` konvertiert base64/data-URI Audio in ein mehrteiliges `file` oder lädt ein Remote- `audio_url` über den nur für die Öffentlichkeit zugänglichen Outbound Guard mit DNS -Pinning und einer 25 MB Grenze herunter. Anschließend wird die Datei und das ausgewählte Modell in die lokale `/v1/audio/transcriptions` -Selbstschleife POSTs und mit `resolveSelfLoopBearer()` authentifiziert. Die vorhandene Transkriptionsroute führt die normale Suche nach Anmeldeinformationen, cooldown/rate-limit -Verarbeitung und den Provider-Versand durch.
+5. Erfolgreiche Aufrufe ersetzen ihre Teile durch `[Audio N]: <transcript>`. Mit `Promise.allSettled` ausgeführte Anrufe: Bei einem einzelnen Fehler bleibt der ursprüngliche Audioteil erhalten (#4012 Vertrag). Wenn jeder Aufruf fehlschlägt und das Ziel `supportsAudio === false` ist, werden die Teile `[Audio N]: (unavailable — no STT provider connected)` (#8430 Vertrag). Bei einem unbekannten Ziel (`null`) bleibt das Ergebnis „Alles fehlgeschlagen“ unberührt. Ein bewährtes Nur-Text-Ziel ohne verwendbare STT Anmeldeinformationen erhält denselben expliziten Stub, ohne einen Netzwerkaufruf auszugeben.
 
-Erfolgreiche Transkripte verwenden den prozessweiten Modality Bridge LRU/TTL-Cache. Der
-Schlüssel kombiniert die Audio-Referenz, das stabile `audio-transcription`-Operationslabel
-und das ausgewählte STT-Modell; Fehler werden niemals zwischengespeichert. Audio-Versuche
-aktualisieren die gemeinsamen `bridged`-, `cacheHits`-, `failures`- und `lastUsedAt`-Zähler.
-Transformierte Antworten tragen
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; unberührte
-Anfragen erhalten kein Audio Bridge-Segment.
+Erfolgreiche Transkripte nutzen den prozessweiten LRU/TTL -Cache von Modality Bridge. Der Schlüssel kombiniert die Audioreferenz, die stabile `audio-transcription` Betriebsbezeichnung und das ausgewählte STT -Modell. Fehler werden niemals zwischengespeichert. Audioversuche aktualisieren die gemeinsam genutzten Zähler `bridged`, `cacheHits`, `failures` und `lastUsedAt`. Transformierte Antworten tragen `x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`; Unbearbeitete Anfragen erhalten kein Audio Bridge-Segment.
 
 Laufzeiteinstellungen sind DB-gestützt und Zod-validiert:
 
-| Schlüssel                     | Standard | Bereich        |
-| :---------------------------- | :------- | :------------- |
-| `modalityBridgeAudioEnabled`  | `true`   | —              |
-| `modalityBridgeAudioModel`    | `""`     | Auto or STT ID |
-| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000    |
-| `modalityBridgeAudioMaxClips` | `3`      | 1–10           |
+| Schlüssel                     | Standard | Reichweite       |
+| ----------------------------- | -------- | ---------------- |
+| `modalityBridgeAudioEnabled`  | `true`   | —                |
+| `modalityBridgeAudioModel`    | `""`     | Auto oder STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`  | 1000–300000      |
+| `modalityBridgeAudioMaxClips` | `3`      | 1–10             |
 
-Der gemeinsame Cache wird weiterhin durch `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` und `modalityBridgeCacheMaxEntries` gesteuert.
+Der gemeinsam genutzte Cache wird weiterhin von `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` und `modalityBridgeCacheMaxEntries` kontrolliert.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Videobrücke (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Fängt Video-Teile der obersten Ebene in Chat Completions `messages` und Responses API `input` ab, bevor ein Ziel ohne bekannte native Videounterstützung aufgerufen wird. Unterstützte Formate sind `input_video`, `video_url`, `video_source`, HTTPS-URLs und `data:video/*;base64,...` Daten-URIs. Einfache Dateinamen im Text werden nicht als Video behandelt.
+Fängt Videoteile der obersten Ebene in Chat Completions `messages` und Responses API `input` ab, bevor ein Ziel ohne bekannte native Videounterstützung aufgerufen wird. Unterstützte Formen sind `input_video`, `video_url`, `video_source`, HTTPS URLs und `data:video/*;base64,...` data URIs. Einfache Dateinamen im Text werden nicht als Video behandelt.
 
-`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ist verantwortlich für die Anforderungsdurchquerung, die Fähigkeits-/Richtlinienprüfung, die Aggregation pro Anforderung und die Antwortnutzlast. Die Arbeit pro Video – Erfassung, der Gesamtergebnis-Cache, die Beschreibung einer Bildsequenz (die jedes vom Aufrufer deklarierte Audio-Transkript zusammenführt) und Metriken/Abbruch/Bereinigung pro Versuch – ist hinter `processVideoPart` in `videoBridgePipeline.ts` verborgen, das einmal pro Videoteil innerhalb der Schleife von `preCall` aufgerufen wird. Dieses Modul definiert auch die expliziten Port-Grenzen `VideoMediaBrokerPort` (Erfassung von Bytes und Extrahieren von gesampelten Frames), `VideoAudioTranscriptionPort` (Zusammenführung eines vom Aufrufer deklarierten Audio-Transkripts mit den gesampelten Untertiteln) und `VideoDrilldownPort` (die Persistenzgrenze für Frame-Drilldown; noch nicht in `processVideoPart` integriert – nur die separate Route `/api/modality-bridge/video/drilldown` schreibt heute Drilldown-Einträge).
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) ist für die Anforderungsdurchquerung, die capability/policy Prüfung, die Aggregation pro Anforderung und die Antwortnutzlast verantwortlich. — Erfassung pro Videoarbeit, der Gesamtergebnis-Cache, der eine Frame-Sequenz beschreibt (die alle vom Anrufer deklarierten Audiotranskripte zusammenführt) und pro Versuch metrics/abort/cleanup — ist hinter `processVideoPart` in `videoBridgePipeline.ts` verborgen und wird einmal pro Videoteil innerhalb `preCall`-Schleife aufgerufen. Dieses Modul definiert auch die expliziten Portgrenzen `VideoMediaBrokerPort` (Erfassen von Bytes und Extrahieren abgetasteter Frames), `VideoAudioTranscriptionPort` (Zusammenführen eines vom Anrufer deklarierten Audiotranskripts mit den abgetasteten Untertiteln) und `VideoDrilldownPort` (die alte Raw-Store-Form). Produktions- STT und Frame-Retention werden um den beschreibenden Port herum durch `createVideoSttAdapter` und `createVideoDrilldownAdapter` gebildet; Letzteres verwendet den gemeinsamen Lebenszyklus für undurchsichtige Handles.
 
-Der öffentliche Anforderungspfad `/v1` importiert oder ruft niemals einen Unterprozess auf. Remote-Videos werden unter einer Grenze von 50 MiB heruntergeladen; Inline-Base64-Videos haben eine konservative Obergrenze von 36 MiB dekodiert pro Video, damit der Modell-/Nachrichten-/Framing-Umschlag innerhalb der öffentlichen JSON-Anforderungszulassungsgrenze von 50 MiB bleiben kann. Inline-Länge und dekodierte Größenabschätzungen werden vor der Zuweisung überprüft. HTTPS ist für die anfängliche Remote-URL und jede Weiterleitung erforderlich, unter Verwendung des bestehenden nur-öffentlichen ausgehenden Schutzes mit DNS-Pinning. Die Bytes überqueren dann die exakte interne Broker-Grenze `POST /api/modality-bridge/video/extract`. Diese Route ist sowohl `LOCAL_ONLY` als auch `SPAWN_CAPABLE`, akzeptiert nur eine prozessauthentifizierte, vertrauenswürdige Loopback-Anforderung und akzeptiert niemals eine URL, einen Dateisystempfad, eine ausführbare Datei oder eine Argumentliste. Die API-Body-Size-Pipeline und der inkrementelle Body-Reader des Handlers erzwingen unabhängig voneinander eine Broker-Eingabegrenze von 50 MiB. Die begrenzte Warteschlange führt jeweils eine Extraktion aus, erlaubt vier ausstehende Aufträge und begrenzt die ausstehende Eingabe auf 100 MiB.
+Der öffentliche `/v1` Anforderungspfad importiert oder ruft niemals einen Unterprozess auf. Remote-Videos werden mit einer Grenze von 50 MiB heruntergeladen; Inline-Base64-Videos haben eine konservative Obergrenze von 36 MiB für die Decodierung pro Video, sodass der model/messages/framing Umschlag innerhalb der öffentlichen JSON Anforderungszulassungsgrenze von 50 MiB bleiben kann. Schätzungen der Inline-Länge und der dekodierten Größe werden vor der Zuweisung überprüft. HTTPS ist auf dem anfänglichen Remote- URL und jeder Weiterleitung erforderlich, wobei der vorhandene, nur für die Öffentlichkeit zugängliche Outbound-Guard mit DNS Pinning verwendet wird. Die Bytes überschreiten dann genau die interne Grenze `POST /api/modality-bridge/video/extract` Brokers. Diese Route ist sowohl `LOCAL_ONLY` als auch `SPAWN_CAPABLE`, akzeptiert nur eine pro Prozess authentifizierte, vertrauenswürdige Loopback-Anfrage und akzeptiert niemals einen URL, einen Dateisystempfad, eine ausführbare Datei oder eine Argumentliste. Die API Body-Size-Pipeline und der inkrementelle Body-Reader des Handlers erzwingen unabhängig voneinander eine 50- MiB -Broker-Eingabeobergrenze. Seine begrenzte Warteschlange führt jeweils eine Extraktion aus, lässt vier ausstehende Jobs zu und begrenzt ausstehende Eingaben auf 100 MiB.
 
-Innerhalb des Brokers liest `ffprobe` eine private lokale Datei; die feste Format-Zulassungsliste schließt Wiedergabelisten- und Manifestformate aus. Für zugelassene MOV-Familien-Container bleiben externe MOV-Datenreferenzen standardmäßig deaktiviert, und der feste Befehl aktiviert sie nicht. Sowohl `ffprobe` als auch `ffmpeg` verwenden die `file`-only Protokoll-Whitelist, einen Thread, feste Argument-Arrays, keine Shell und ausführbare Dateien, die aus `PATH` aufgelöst werden. Angehängte Bild-Cover-Streams sind keine abspielbaren Kandidaten. Alle abspielbaren Streams müssen die Grenzwerte erfüllen, und ein expliziter Standard-Stream wird vor dem deterministischen Fallback mit dem niedrigsten Index bevorzugt. Videos sind auf 600 Sekunden, 8.192 Pixel pro Dimension und 33.554.432 Quellpixel begrenzt. FFmpeg sampelt 1–16 mittlere JPEG-Frames, skaliert die längere Kante auf maximal 1.024 Pixel herunter, ohne kleinere Eingaben hochzuskalieren, und empfängt niemals eine URL. Das Sampling ist standardmäßig `uniform`. Die optionalen `scene_aware` und experimentellen `segment_aware` Richtlinien führen einen zusätzlichen festen FFmpeg-Durchlauf über den bereits validierten lokalen Stream durch, wählen begrenzte `showinfo` Szenen-Zeitstempel aus und fallen bei Detektorfehler, Timeout, fehlerhafter Ausgabe oder einem leeren Kandidatensatz deterministisch auf dieselben uniformen Mittelpunkte zurück. Der segment-aware Modus weist Mittelpunkt-Samples proportional zu den validierten Szenenintervallen zu; segment-aware Evidenz und Fallback-Verhalten werden unten detailliert beschrieben. Die feste Obergrenze von 16 Frames wird nach der Auswahl in jeder Richtlinie angewendet. Wenn eine szenenbewusste Anforderung nur ein Ein-Frame-Budget hat, verwendet sie den uniformen Mittelpunkt des aktiven Vollvideo- oder Fokusfensters und meldet `policyEffective: uniform`: ein einzelner ausgewählter Szenen-Frame kann nicht beide temporalen Enden bewahren. Ein Aufrufer kann optional ein endliches Fokusfenster (`start`/`end` Sekunden) bereitstellen; Grenzen werden auf die Mediendauer geklemmt, umgekehrte oder nicht-endliche Fenster werden abgelehnt, und alle Sampling-Richtlinien werden nur innerhalb des normalisierten Intervalls durchgeführt. Das resultierende Fenster wird in den Sampling-Metadaten und im nicht vertrauenswürdigen Beschreibungspräfix enthalten, damit nachgeschaltete Modelle einen fokussierten Ausschnitt von der vollständigen Zeitleiste unterscheiden können.
+Innerhalb des Brokers liest `ffprobe` eine private lokale Datei; Die Zulassungsliste für feste Formate schließt Wiedergabelisten- und Manifestformate aus. Für zulässige Container der MOV-Familie bleiben externe MOV -Datenverweise standardmäßig deaktiviert und der Befehl „fixed“ lässt sie nicht zu. Sowohl `ffprobe` als auch `ffmpeg` verwenden die `file` -only -Protokoll-Whitelist, einen Thread, feste Argumentarrays, keine Shell und ausführbare Dateien, die von `PATH` aufgelöst werden. Cover-Streams mit angehängten Bildern sind keine abspielbaren Kandidaten. Alle abspielbaren Streams müssen die Grenzwerte erfüllen, und ein expliziter Standardstream wird vor dem deterministischen Fallback mit dem niedrigsten Index bevorzugt. Videos sind auf 600 Sekunden, 8.192 Pixel pro Dimension und 33.554.432 Quellpixel begrenzt. FFmpeg tastet 1–16 Mittelpunkt JPEG Frames ab, skaliert die lange Kante auf höchstens 1.024 Pixel herunter, ohne kleinere Eingaben hochzuskalieren, und empfängt niemals ein URL. Die Stichprobe ist standardmäßig `uniform`. Die optionalen `scene_aware` und experimentellen `segment_aware` Richtlinien führen einen zusätzlichen festen FFmpeg Durchlauf über den bereits validierten lokalen Stream durch, wählen begrenzte `showinfo` Szenenzeitstempel aus und greifen deterministisch auf dieselben einheitlichen Mittelpunkte zurück, wenn ein Detektor ausfällt, eine Zeitüberschreitung auftritt, eine fehlerhafte Ausgabe vorliegt oder ein leerer Kandidatensatz vorhanden ist. Der segmentbewusste Modus weist Mittelpunktproben proportional zu den validierten Szenenintervallen zu; segmentbezogene Beweise und Fallback-Verhalten werden unten detailliert beschrieben. Die harte 16-Frame-Obergrenze wird nach der Auswahl in jeder Richtlinie angewendet. Wenn eine szenenbezogene Anfrage nur über ein Budget von einem Bild verfügt, verwendet sie den einheitlichen Mittelpunkt des aktiven Vollvideo- oder Fokusfensters und meldet `policyEffective: uniform`: Ein einzelnes ausgewähltes Szenenbild kann nicht beide zeitlichen Enden beibehalten. Ein Anrufer kann optional ein endliches Fokusfenster bereitstellen (`start`/`end` Sekunden); Grenzen werden auf die Mediendauer festgelegt, umgekehrte oder nicht endliche Fenster werden abgelehnt und alle Stichprobenrichtlinien werden nur innerhalb des normalisierten Intervalls durchgeführt. Das resultierende Fenster ist in den Sampling-Metadaten und im nicht vertrauenswürdigen Beschreibungspräfix enthalten, sodass nachgelagerte Modelle einen fokussierten Ausschnitt von der vollständigen Zeitleiste unterscheiden können.
 
-Semantischer Untertitel-Fokus ist eine separate, explizite Einstellung. Der Standard-Analysemodus `full` bewahrt den vorhandenen Frame-Prompt und leitet niemals Anforderungstext an das Untertitelmodell weiter. Im `focused`-Modus liest die Bridge nur den neuesten nicht-leeren, vom Benutzer verfassten `text`/`input_text` aus demselben Chat- oder Responses-Container, normalisiert ihn zu NFC, komprimiert Steuerzeichen und Leerzeichen und begrenzt ihn auf 500 Unicode-Codepunkte. Ein leeres Ergebnis fällt auf den exakten `full`-Prompt zurück. Ein nutzbarer Hinweis wird als JSON in einem dedizierten nicht vertrauenswürdigen Benutzerkontextblock serialisiert und darf nur beobachtbare Details priorisieren; er kann die separate Warnung vor dem Befolgen von Anweisungen, die in den Medien sichtbar oder hörbar sind, nicht außer Kraft setzen. Textueller Fokus leitet niemals `start`/`end` ab oder ändert den temporalen Sampler.
+Der semantische Beschriftungsfokus ist eine separate, explizite Einstellung. Der Standard- `full` -Analysemodus behält die vorhandene Frame-Eingabeaufforderung bei und leitet niemals Anforderungstext an das Beschriftungsmodell weiter. Im `focused` Modus liest die Bridge nur den neuesten, nicht leeren, vom Benutzer erstellten `text`/`input_text` aus demselben Chat- oder Antwortcontainer, normalisiert ihn auf NFC, reduziert Steuerzeichen und Leerzeichen und begrenzt ihn auf 500 Unicode-Codepunkte. Ein leeres Ergebnis greift auf die exakte `full` Eingabeaufforderung zurück. Ein verwendbarer Hinweis wird als JSON in einem dedizierten Block für den nicht vertrauenswürdigen Benutzerkontext serialisiert und priorisiert möglicherweise nur beobachtbare Details. Sie kann die gesonderte Warnung vor der Befolgung von Anweisungen, die in den Medien sichtbar oder hörbar sind, nicht außer Kraft setzen. Der Textfokus leitet niemals `start`/`end` ab oder ändert den zeitlichen Sampler.
 
-#### FU-07 strukturelle Segmentnachweise
+#### Beweise FU-07 Struktursegmente
 
-`segment_aware` verwendet einen begrenzten Voranalyse-Durchlauf über den bereits validierten lokalen Videostream. Die feste Filterkette skaliert zuerst auf maximal 320 Pixel Breite, erkennt Szenenwechsel und eingefrorene Intervalle, und sampelt dann mit 1 Frame pro Sekunde auf Unschärfe, durchschnittliche Luminanz und räumliche/zeitliche Informationen. Der Durchlauf ist auf 600 strukturelle Samples, einen FFmpeg/Filter-Thread, dieselben `file`-only Protokoll- und Container-Zulassungslisten, eine 1 MiB Prozessausgabe-Grenze und maximal 30 Sekunden innerhalb des gemeinsamen Abbruchs/der Frist des Brokers begrenzt. Es akzeptiert niemals einen Befehl, Filter, Pfad oder eine URL aus der Anforderung.
+`segment_aware` verwendet einen begrenzten Voranalysedurchlauf über den bereits validierten lokalen Videostream. Die feste Filterkette skaliert zunächst auf eine Breite von höchstens 320 Pixeln, erkennt Szenenwechsel und eingefrorene Intervalle und tastet dann mit 1 Bild pro Sekunde Unschärfe, durchschnittliche Luma und spatial/temporal Informationen ab. Der Durchgang ist auf 600 Strukturbeispiele, einen FFmpeg/filter Thread, dasselbe `file` -only -Protokoll und dieselben Container-Zulassungslisten, eine 1- MiB -Prozessausgabegrenze und höchstens 30 Sekunden innerhalb der gemeinsamen abort/deadline. des Brokers beschränkt. Er akzeptiert niemals einen Befehl, Filter, Pfad oder URL von der Anfrage.
 
-Die strukturellen Werte sind deterministische Stichprobenbeweise, keine semantische Videoverständnis. Sie leiten keine Subjekte, Aktionen, Bildunterschriften, Sprache oder Benutzerabsichten ab. Szenen- und Freeze-Grenzen bilden Segmente; Freeze-Abdeckung, Unschärfe, Belichtung, räumliche Details und zeitliche Änderungen beeinflussen nur, wie das vorhandene Budget von 1–16 Frames zugewiesen wird. Ein vollständig eingefrorenes Segment ist auf einen Frame begrenzt, während nicht eingefrorene Segmente um das verbleibende Budget konkurrieren. Wenn die Grenzen die Anzahl der Frames übersteigen, wird eine gleichmäßige Zeitachsenabdeckung beibehalten, sodass schnelle frühe Schnitte kein langes nachfolgendes Segment verbergen können. Szenengrenzen innerhalb der 1-Sekunden-Analyseauflösung einer Freeze-Grenze werden zusammengeführt.
+Bei den Strukturwerten handelt es sich um deterministische Sampling-Beweise, nicht um semantisches Videoverständnis. Sie lassen keine Rückschlüsse auf Themen, Aktionen, Bildunterschriften, Sprache oder Benutzerabsichten zu. Szenen- und Standbildgrenzen bilden Segmente; Standbildabdeckung, Unschärfe, Belichtung, räumliche Details und zeitliche Änderungen haben nur Einfluss darauf, wie das vorhandene Budget für 1–16 Bilder zugewiesen wird. Ein vollständig eingefrorenes Segment ist auf einen Frame begrenzt, während nicht eingefrorene Segmente um das verbleibende Budget konkurrieren. Wenn die Anzahl der Grenzen die Anzahl der Frames übersteigt, bleibt die einheitliche Timeline-Abdeckung erhalten, sodass schnelle frühe Schnitte ein langes nachlaufendes Segment nicht verdecken können. Szenengrenzen innerhalb der 1-Sekunden-Analyseauflösung einer Standbildgrenze werden zusammengeführt.
 
-Fehlende Filter, fehlerhafte/leere Beweise, ein Detektorfehler oder das begrenzte Pre-Analyse-Timeout führen zu einem offenen Fehler und zur exakten einheitlichen Mittelpunktrichtlinie. Ein Abbruch durch den Aufrufer oder eine Broker-Frist führt nicht zu einem offenen Fehler: Er beendet den laufenden Unterprozess, verhindert eine spätere Frame-Extraktion, und der private temporäre Baum wird in `finally` entfernt.
+Fehlende Filter, malformed/empty -Beweise, ein Detektorfehler oder das begrenzte Zeitlimit vor der Analyse schlagen fehl, wenn die Richtlinie für den genauen einheitlichen Mittelpunkt gilt. Ein Aufrufer-Abbruch oder eine Broker-Frist schlägt nicht fehl: Es beendet den laufenden Unterprozess, verhindert eine spätere Frame-Extraktion und der private temporäre Baum wird in `finally` entfernt.
 
-`scripts/perf/video-bridge-fu07-eval.ts` generiert deterministische, echte FFmpeg-Fixtures für Einsparungen bei Bildunterschriften-Aufrufen nach der Deduplizierung, Budgetzuweisung für dichte Bewegung, Unschärfe-/Belichtungs-/SI-TI-Beweise, schnelle Schnitte mit langem Nachlauf und False Positives bei allmählichem Ausblenden. Es zeichnet die Wall-Time vor der Analyse auf und, wo `/usr/bin/time` verfügbar ist, die CPU-Nutzung des Kindprozesses und den Spitzen-RSS. Seine Qualitätsprüfungen sind nur strukturelle Orakel. Die Qualität des echten Bildunterschriftenmodells bleibt `HOLD`, da dieses Testgeschirr keinen autorisierten Endpunkt oder festen Richter hat. Monetäre Einsparungen bleiben ebenfalls `HOLD`, es sei denn, `--caption-cost-per-call-usd` liefert eine explizite positive Schätzung pro Aufruf; das Skript erzeugt niemals eines der beiden Ergebnisse.
+`scripts/perf/video-bridge-fu07-eval.ts` generiert deterministische echte FFmpeg Vorrichtungen für Einsparungen bei Untertitelaufrufen nach der Dedup-Operation, Budgetzuweisung bei dichter Bewegung, blur/exposure/SI-TI Beweis, schnelle Schnitte mit einem langen Schwanz und allmählich verblassende Fehlalarme. Es zeichnet die Wandzeit vor der Analyse und, sofern `/usr/bin/time` verfügbar ist, untergeordnete CPU und Spitzen- RSS auf. Seine Qualitätsprüfungen sind lediglich strukturelle Orakel. Die Qualität des echten Bildunterschriftenmodells bleibt `HOLD` da dieser Kabelbaum keinen autorisierten Endpunkt oder eingefrorenen Richter hat. Auch die monetären Einsparungen bleiben `HOLD` es sei denn, `--caption-cost-per-call-usd` liefert eine explizite positive Schätzung pro Anruf; Das Skript fabriziert niemals eines der beiden Ergebnisse.
 
-Jeder Frame ist auf 4 MiB begrenzt, alle Roh-Frames zusammen auf 23 MiB und die serialisierte Broker-Antwort auf 32 MiB. Ein privates temporäres Verzeichnis wird in `finally` entfernt. OmniRoute bündelt FFmpeg nicht und akzeptiert keinen benutzerdefinierten ausführbaren Pfad. Vor der Beschriftung wendet die Bridge einen konservativen visuellen Deduplizierungsdurchlauf an: Jedes JPEG wird auf einen 16×16 Graustufenpuffer reduziert und nur mit dem zuletzt beibehaltenen Frame verglichen. Für ein angefordertes Beschriftungsbudget von mehr als einem Frame liefert die Extraktion einen begrenzten Kandidatenpool von bis zu dem doppelten Budget und niemals mehr als 16 Frames. Die angeforderte Obergrenze wird erst nach der Deduplizierung angewendet, wobei die ersten und letzten ausgewählten Kandidaten während der endgültigen Ausdünnung beibehalten werden, wenn das Budget mindestens zwei beträgt. Die versionierte `grayscale-16x16-mean-cells-v2`-Richtlinie verwendet den größeren Wert aus dem mittleren Luma-Delta und dem Verhältnis der Thumbnail-Zellen, deren normalisiertes Delta mindestens 0,05 beträgt. Der Duplikatschwellenwert ist die Konstante 0,04, gewählt für Vorhersagbarkeit und nicht als Laufzeiteinstellung verfügbar gemacht. Dieses sekundäre Hochkontrastsignal bewahrt kleine Bewegungen und sichtbare Textänderungen, die ein reiner Mittelwertvergleich verbergen kann. Komparator- oder Decoderfehler führen zu einem offenen Fehler und behalten die Abdeckung bei. Ausgabe-Metadaten trennen extrahierte Kandidaten, erfolgreich verwendete Frames und visuell verworfene Duplikate.
+Jeder Frame ist auf 4 MiB begrenzt, alle Rohframes zusammen auf 23 MiB und die serialisierte Broker-Antwort auf 32 MiB. Ein privates temporäres Verzeichnis wird in `finally` entfernt. OmniRoute bündelt FFmpeg nicht und akzeptiert keinen benutzerdefinierten ausführbaren Pfad. Vor der Untertitelung wendet die Bridge einen konservativen visuellen Deduplizierungsdurchlauf an: Jeder JPEG wird auf einen 16-×-16-Graustufenpuffer reduziert und nur mit dem letzten beibehaltenen Frame verglichen. Bei einem angeforderten Untertitelbudget von mehr als einem Frame liefert die Extraktion einen begrenzten Kandidatenpool von bis zum Doppelten dieses Budgets und nie mehr als 16 Frames. Die angeforderte Obergrenze wird erst nach der Deduplizierung angewendet, wobei die ersten und letzten ausgewählten Kandidaten bei der endgültigen Ausdünnung erhalten bleiben, wenn das Budget mindestens zwei beträgt. Die versionierte `grayscale-16x16-mean-cells-v2` Richtlinie verwendet den größeren Wert aus mittlerem Luma-Delta und dem Verhältnis von Miniaturzellen, deren normalisiertes Delta mindestens 0,05 beträgt. Der Duplikatschwellenwert ist die Konstante 0,04, die aus Gründen der Vorhersagbarkeit ausgewählt und nicht als Laufzeiteinstellung verfügbar gemacht wird. Dieses sekundäre Signal mit hohem Kontrast bewahrt kleine Bewegungs- und sichtbare Textänderungen, die ein reiner Mittelwertvergleich verbergen kann. Komparator- oder Decoderfehler schlagen fehl und behalten die Abdeckung bei. Ausgabemetadaten trennen extrahierte Kandidaten, erfolgreich verwendete Frames und gelöschte visuelle Duplikate.
 
-Ein explizit markierter Videoteil kann ein mit Zeitstempel versehenes Kontaktblatt anfordern. Die Bridge erstellt maximal ein JPEG-Raster mit 4 Spalten und 16 Frames. Jede 512-Pixel-Zelle brennt ihren Quell-Zeitstempel in ein kontrastreiches unteres Band ein, während dieselben Zeitstempel in den Textmetadaten für die nachgelagerte Zuordnung und Prüfung verbleiben. Das vollständige JPEG bleibt auf 32 MiB begrenzt. Wenn `sharp` das Raster nicht dekodieren oder zusammensetzen kann, greift die Bridge auf die einzelnen JPEG-Frames zurück; ein Client-Abbruch wird weiterhin durch den Blattvorgang propagiert.
+Für einen explizit gekennzeichneten Videoteil kann ein Kontaktabzug mit Zeitstempel erforderlich sein. Die Brücke baut höchstens ein JPEG Gitter mit 4 Spalten und 16 Rahmen auf. Jede 512-Pixel-Zelle brennt ihren Quellzeitstempel in ein kontrastreiches unteres Band, während dieselben Zeitstempel in den Textmetadaten für nachgelagerte Zuordnung und Prüfung verbleiben. Der gesamte JPEG bleibt auf 32 MiB begrenzt. Wenn `sharp` das Raster nicht dekodieren oder zusammenstellen kann, greift die Brücke auf die einzelnen JPEG Frames zurück; Ein Client-Abbruch breitet sich weiterhin über den Blattvorgang aus.
 
-Beförderungsnachweise sind bewusst getrennt vom synthetischen Kompositions-Mikrobenchmark. `scripts/perf/video-bridge-contact-sheet-eval.ts` definiert ein schema-versioniertes A/B-Testgeschirr für echte OpenAI-kompatible Visionsmodelle. Es misst vom Anbieter gemeldete Tokens, End-to-End-Wall-Latenz (einschließlich Blattkomposition), Anzahl der Modellaufrufe und die im Manifest definierte Faktenbeibehaltung. Rohe Modellantworten werden nicht in den Bericht geschrieben; nur SHA-256-Hashes und übereinstimmende Fakten-IDs werden beibehalten. Das Testgeschirr führt keine Netzwerk- oder kostenpflichtigen Modellaufrufe durch, es sei denn, `--execute-real` wird übergeben und `--model`, `OMNIROUTE_BASE_URL` und `OMNIROUTE_API_KEY` sind konfiguriert. Ohne diesen expliziten echten Lauf bleibt sein maschinenlesbares Urteil `HOLD`; synthetische Nutzlast-/Aufrufzählungs-Messungen allein sind kein Beförderungsnachweis.
+Werbenachweise werden bewusst vom Mikrobenchmark der synthetischen Zusammensetzung getrennt. `scripts/perf/video-bridge-contact-sheet-eval.ts` definiert einen schemaversionierten A/B -Harness für echte OpenAI-kompatible Vision-Modelle. Es misst vom Anbieter gemeldete Token, die End-to-End-Wall-Latenz (einschließlich Blattzusammensetzung), die Anzahl der Modellaufrufe und die manifestdefinierte Faktenspeicherung. Rohe Modellantworten werden nicht in den Bericht geschrieben; Nur SHA-256 Digests und übereinstimmende Fakten IDs werden beibehalten. Der Kabelbaum führt keinen Netzwerk- oder kostenpflichtigen Modellanruf durch, es sei denn `--execute-real` wird übergeben und `--model`, `OMNIROUTE_BASE_URL` und `OMNIROUTE_API_KEY` sind konfiguriert. Ohne diesen expliziten realen Lauf bleibt sein maschinenlesbares Urteil `HOLD`; Synthetische payload/call-count Messungen allein sind kein Werbebeweis.
 
-Aufrufer können einem unterstützten Videoteil ein optionales `transcript.cues`-Array anhängen, wenn sie bereits ausgerichteten Text besitzen. Jeder Cue muss `text`, ein endliches `start`/`end`-Intervall innerhalb der untersuchten Dauer und eine Whitelist-`source` (`client`, `embedded` oder `audio-bridge`) enthalten; `confidence` ist standardmäßig `1` und muss zwischen `0` und `1` liegen. Exakte doppelte Cues werden zusammengeführt. OmniRoute startet niemals eine Transkription aus diesen Metadaten: Validierte Cues werden mit Quelle, Konfidenz und Intervall in das beschriebene Ergebnis kopiert und als nicht vertrauenswürdige Beobachtungen neben den Frame-Bildunterschriften dargestellt. Ungültiger, außerhalb des Bereichs liegender oder herkunftsfreier Text wird abgelehnt, anstatt in den Bildunterschriftenstrom gemischt zu werden. Das `source`-Feld wird derzeit vom Aufrufer deklariert, nicht vom Server verifiziert: OmniRoute erzwingt, dass der Wert eine der drei zulässigen Zeichenketten ist, bestätigt aber noch nicht kryptografisch, dass ein `embedded`- oder `audio-bridge`-Label tatsächlich von einer serverseitigen Extraktion stammt. Behandeln Sie `source` als einen nicht vertrauenswürdigen Hinweis, bis diese Verifizierung implementiert ist; treffen Sie keine Autorisierungsentscheidungen darauf basierend.
+Anrufer können ein optionales `transcript.cues` Array an einen unterstützten Videoteil anhängen, wenn sie bereits über ausgerichteten Text verfügen. Jeder Cue muss `text`, ein endliches `start`/`end` Intervall innerhalb der untersuchten Dauer und ein auf der Whitelist aufgeführtes `source` (`client`, `embedded` oder `audio-bridge`) enthalten. `confidence` ist standardmäßig `1` und muss zwischen `0` und `1` bleiben. Genau doppelte Hinweise werden ausgeblendet. OmniRoute beginnt nie mit der Transkription dieser Metadaten: Validierte Hinweise werden mit Quelle, Konfidenz und Intervall in das beschriebene Ergebnis kopiert und als nicht vertrauenswürdige Beobachtungen neben den Bildunterschriften gerendert. Ungültiger, außerhalb des zulässigen Bereichs liegender oder herkunftsfreier Text wird zurückgewiesen und nicht in den Untertitel-Stream eingemischt. Beide Request-Body-Transkriptkanäle normalisieren die bereitgestellte Herkunft zu `client`, einschließlich selbstbehaupteter `embedded` oder `audio-bridge` Labels. Nur ein servereigener Adapter kann diese vertrauenswürdigen Labels über das Nur-Code-Argument `trustedSource` zuweisen; Ein Anforderungs- JSON Feld kann dieses Argument nicht erreichen. Der Transkripttext bleibt unabhängig von seiner Herkunft ein nicht vertrauenswürdiger Medieninhalt und darf niemals über die Autorisierung entscheiden.
 
-Ein fortgeschrittener Aufrufer kann einen bereits autorisierten `audioTranscript`-Track für dasselbe Video bereitstellen. Die Fusionsnaht führt visuelle und Audio-Beobachtungen unter einer Frist und einem Abbruchsignal aus, ordnet sie auf einer gemeinsamen Zeitachse an, kollabiert exakte Duplikate und meldet ein Teilergebnis, wenn nur eine Seite erfolgreich ist. Ein ungültiger `audioTranscript` degradiert zu diesem Teilergebnis – die visuelle Beschreibung wird beibehalten und der Audio-Zweig zeichnet einen bereinigten Fehlercode auf – anstatt das gesamte Video fehlschlagen zu lassen. Die Verfügbarkeit pro Zweig, das Teilergebnis-Flag und die bereinigten Fehlercodes werden im beschriebenen Ergebnis, in den Guardrail-Metadaten (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), in den Ergebnis-Cache-Metadaten und in den Bridge-Fusionszählern beibehalten. Der Standard-Video-Bridge-Pfad ruft keine Spracherkennung auf oder lädt keine zweite Medienkopie herunter; ohne diesen expliziten Track bleibt er nur Video.
+Ein erfahrener Anrufer kann einen `audioTranscript` Track für dasselbe Video bereitstellen. Es wird als vom Client bereitgestellter Text behandelt, nicht als Beweis der Servertranskription. Die Fusionsnaht führt visuelle und akustische Beobachtungen unter einer Frist und einem Abbruchsignal durch, ordnet sie auf einer gemeinsamen Zeitachse an, kollabiert exakte Duplikate und meldet ein Teilergebnis, wenn nur eine Seite erfolgreich ist. Ein ungültiges `audioTranscript` degradiert zu diesem Teilergebnis — die visuelle Beschreibung bleibt erhalten und der Audiozweig zeichnet einen bereinigten Fehlercode — auf, anstatt das gesamte Video fehlschlagen zu lassen. Die Verfügbarkeit pro Zweig, das Teilflag und die bereinigten Fehlercodes bleiben im beschriebenen Ergebnis, in den Leitplanken-Metadaten (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`), in den Ergebnis-Cache-Metadaten und in den Bridge-Fusion-Zählern erhalten. Der standardmäßige Video Bridge-Pfad ruft weder Sprache in Text auf noch lädt er eine zweite Medienkopie herunter. Ohne diesen expliziten Titel bleibt es nur ein Video.
 
-**Transkript-Aufbewahrung (#12150 P1).** Dies wird automatisch angewendet, wann immer die Video Bridge (selbst opt-in) einen Transkript-Cue rendert – es gibt kein separates Aufbewahrungs-Flag. Wenn eine Anfrage einen Transkript-Cue rendert (ein vom Aufrufer deklariertes `transcript` oder ein fusioniertes `audioTranscript`), markiert die Guardrail diesen als `videoBridgeObserved` und erzeugt einen redigierten Schatten der Videobeschreibung – eine identische Darstellung, bei der der Freitextkörper jedes Cues durch `[redacted-video-transcript]` ersetzt wird, erstellt durch das Ersetzen des strukturierten Cue-Feldes, bevor der String zusammengesetzt wird (niemals durch Parsen des abgeflachten Textes, sodass kein Cue-Inhalt – ob adversariell oder gewöhnlich, einschließlich Körpern, die `]` enthalten, wie `[inaudible]`/`[music]` – überleben kann). Der persistierte Call-Log-Anfragekörper tauscht jeden vom Video abgeleiteten Textteil gegen diesen redigierten Schatten aus, abgeglichen durch Inhaltsgleichheit; der `fullText`-Anker wird aus der fertigen Pre-Call-Guardrail-Payload neu gelesen, sodass die Übereinstimmung auch nach späteren Ketten-Guardrails (den PII- und Anmeldeinformations-Maskierern, Prioritäten 10/95) erfolgreich ist, die den Beschreibungstext an Ort und Stelle umschreiben, und nachdem System-Prompt/Handoff/Memory-Injektion das Nachrichten-Array umformt. Der an das Modell gesendete Upstream-Körper bleibt unverändert. Eine beobachtete Anfrage füllt auch keinen dauerhaften Speicher (sowohl anfrage- als auch antwortbasierte Extraktion werden übersprungen), sodass die eigene Antwort des Modells keinen Transkripttext in den Speicher zurückgeben kann.
+**Transkriptaufbewahrung (#12150 P1).** Dies gilt automatisch, wenn die Video Bridge (selbst Opt-in) einen Transkript-Cue rendert, — gibt es kein separates Aufbewahrungsflag. Wenn eine Anfrage einen Transkript-Cue (ein vom Aufrufer deklariertes `transcript` oder ein verschmolzenes `audioTranscript`) rendert, markiert die Leitplanke ihn `videoBridgeObserved` und erzeugt einen geschwärzten Schatten der Videobeschreibung. — ist ein identisches Rendering, bei dem der Freitextkörper jedes Cues durch `[redacted-video-transcript]` ersetzt wird. Dies wird durch Ersetzen des strukturierten Cue-Felds vor dem Zusammensetzen der Zeichenfolge erstellt (niemals durch Parsen des abgeflachten Textes, also kein Cue-Inhalt — adversarial oder). gewöhnliche, einschließlich `]` enthaltende Körper wie `[inaudible]`/`[music]` — können überleben). Der persistente Anrufprotokoll-Anforderungstext tauscht jeden aus dem Video abgeleiteten Textteil gegen diesen geschwärzten Schatten aus, der durch Inhaltsgleichheit abgeglichen wird. Der `fullText` Anker wird aus der fertigen Leitplanken-Nutzlast vor dem Aufruf erneut gelesen, sodass die Übereinstimmung auch dann noch erfolgreich ist, wenn spätere Kettenleitplanken (die PII und Credential-Masker, Prioritäten 10/95) den Beschreibungstext an Ort und Stelle neu schreiben und nach system-prompt/handoff/memory Injektion das Nachrichtenarray umgestalten. Der vor dem Modell gesendete Körper bleibt unverändert. Eine beobachtete Anfrage füllt auch keinen dauerhaften Speicher (sowohl die von der Anfrage als auch der Antwort abgeleitete Extraktion wird übersprungen), sodass die eigene Antwort des Modells keinen Transkripttext in den Speicher zurückgeben kann.
 
-**Unverarbeitete Videofelder (#12430).** Wenn die Bridge aktiviert ist und native Videounterstützung unbekannt ist oder fehlt, aktivieren definierte `transcript`/`audioTranscript`-Felder ebenfalls `videoBridgeObserved`, auch bei fehlgeschlagener Beschreibung oder erreichtem `maxVideos`-Limit. `null` und leere Zeichenfolgen zählen mit; fehlende Felder und Metadaten ohne Videobezug nicht. Gespeicherte Kopien schwärzen diese Felder oder lassen die Anfrage weg; Caches/Memory werden umgangen. Die an den Provider gesendeten Daten bleiben unverändert.
+**Rohvideofelder (#12430).** Wenn die Bridge aktiviert ist und die native Videounterstützung unbekannt ist oder nicht vorhanden ist, aktivieren definierte `transcript`/`audioTranscript` Felder auch `videoBridgeObserved`, selbst nach einem Beschreibungsfehler oder einem `maxVideos` Limit. `null` und leere Strings zählen; Fehlende Felder und Nicht-Video-Metadaten gelten nicht. Bei aufbewahrten Kopien werden diese Felder geschwärzt oder die Anforderung weggelassen, und caches/Memory werden umgangen.
 
-Zusätzliche aufbewahrte Kopien verwenden dasselbe beobachtete Anfragesignal. Der rohe Pre-Guardrail-Client-Anfrage-Snapshot, die im Speicher befindliche ausstehende Anfrage und das frühe Log abgelehnter Anfragen ersetzen strukturell Transkriptfelder in Videoteilen; String-Prompts, die von Pipeline-Stufen und Kontextübergabe synthetisiert werden, werden am persistierten Anfragekörper-Sink redigiert. Der persistierte `video_content_removed`-Marker bewirkt, dass die `previous_response_id`-Fortsetzung geschlossen fehlschlägt, anstatt Text zu rekonstruieren, der absichtlich verworfen wurde. Wenn eine beobachtete Anfrage ihren pro-Teil-Redaktionsschatten vor der Protokollierung verliert oder sogar einer von mehreren Videoschatten nach späteren Anfragemutationen nicht übereinstimmt, wird der aufbewahrte Anfragekörper vollständig weggelassen, anstatt ein teilweise redigiertes Transkript aufzubewahren.
+Auf diesen Fallback-Pfaden werden gültige Anruferhinweise zu unterstützten `text`/`input_text` -Teilen und nicht zu nicht standardmäßigen Anbieterfeldern. Bei beiden auf Anfrage bereitgestellten Tracks handelt es sich weiterhin um nicht vertrauenswürdige `client` Beobachtungen, mit der ausdrücklichen Warnung, dass das Video nicht beschrieben wurde und die Zeitstempel nicht anhand der Medien überprüft wurden. Die bestehenden 256-cue/64-KiB Gesamt- und Pro-Cue-Budgets gelten für beide Tracks zusammen; Zeitstempel müssen zur 600-Sekunden-Obergrenze des Brokers und allen bereitgestellten Fokusfenstern passen. Ungültige Titel werden verworfen und nicht als beliebiger Text weitergeleitet. Ein gültiger Geschwisterteil kann weiterhin verwendet werden, es sei denn, sein Gesamtbudget wird überschritten. Null/empty Felder fügen keinen Text hinzu. Durch diesen Fallback wird kein Medienabruf oder keine Transkription hinzugefügt. Transkripterweiterungsfelder werden aus dem Fallback-Videoträger und seinen `video_url`/`source` -Objekten entfernt. Die OpenAI -Kabelzulassungsliste bleibt streng; Unbekannte native Videoträger bleiben verfügbar und bekannte Nur-Text-Ziele behalten sichere Markierungen. Strukturierte Schwärzungsschatten schützen den angehängten Transkripttext, während die ursprüngliche Anfrage des Anrufers unverändert bleibt. Native unterstützte Ziele und deaktivierte Bridges behalten ihr bestehendes Umgehungsverhalten bei.
 
-Bei einer beobachteten Anfrage könnte eine Modellantwort einen beliebigen Teil des Transkripts ohne eine strukturierte Cue-Grenze zitieren. Sein persistierter Call-Log `responseBody` wird daher durch einen Auslassungsmarker ersetzt; das detaillierte Pipeline-Artefakt (das Upstream-/Client-Körper und Stream-Chunks enthalten kann) wird nicht aufbewahrt. Semantische, Idempotenz- und Reasoning-Replay-Caches umgehen Lese- und Schreibvorgänge für diese Anfrage. Die Provider-Anfrage und die für den Client sichtbare Antwort bleiben unverändert. Frühe Keepalive-Bytes werden aus dem temporären Puffer abgeleitet, wenn das detaillierte Artefakt weggelassen wird. Kiros Warnung vor fehlerhaftem EventStream meldet nur die Payload-Byte-Anzahl, niemals deren Inhalt oder den Rohfehler des JSON-Parsers. Dies bedeutet nicht, dass jede nicht verwandte Provider-/Plugin-Diagnose geprüft wurde; die umfassendere Bereinigung der aufbewahrten Sinks wird unter #11658 verfolgt.
+Zusätzliche aufbewahrte Kopien verwenden dasselbe Observed-Request-Signal. Der rohe Pre-Guardrail-Client-Anfrage-Snapshot, die im Arbeitsspeicher ausstehende Anfrage und das Protokoll früher abgelehnter Anfragen ersetzen strukturell Transkriptfelder in Videoteilen; Durch Pipeline-Stufen und Kontextübergabe synthetisierte Zeichenfolgen-Eingabeaufforderungen werden an der Senke des persistenten Anforderungskörpers geschwärzt. Die persistente `video_content_removed` Markierung sorgt dafür, dass `previous_response_id` Fortsetzung nicht geschlossen werden kann, anstatt Text zu rekonstruieren, der absichtlich verworfen wurde. Wenn eine beobachtete Anfrage vor der Protokollierung ihren Redaktionsschatten pro Teil verliert oder sogar einer von mehreren Videoschatten nach späteren Anfragemutationen nicht übereinstimmt, wird der beibehaltene Anfragetext vollständig weggelassen, anstatt ein teilweise redigiertes Transkript beizubehalten.
 
-Der interne `/api/modality-bridge/video/drilldown`-Lebenszyklus ist ein separates, Loopback-/Token-authentifiziertes Cache-Substrat. Jede Operation erfordert auch eine kanonische undurchsichtige Principal-ID. Bevor ein Produktionsaufrufer aktiviert wird, muss er diese ID vom authentifizierten Tenant ableiten und darf niemals einen vom Client ausgewählten Wert weiterleiten. Cache-Schlüssel binden diesen Principal an kanonische Sitzungs- und Video-Referenz-IDs, speichern nur deren SHA-256-abgeleitete Schlüssel und beschränken sowohl Lese- als auch Löschvorgänge auf denselben Principal. Der Cache speichert maximal 16 abgeleitete JPEG-Frames pro Eintrag, lässt sie nach zehn Minuten ablaufen und unterstützt begrenzte `start`/`end`-Lesevorgänge oder explizite Sitzungslöschung.
+Bei einer beobachteten Anfrage könnte eine Modellantwort einen beliebigen Teil des Transkripts ohne strukturierte Cue-Grenze zitieren. Sein persistentes Anrufprotokoll `responseBody` wird daher durch eine Auslassungsmarkierung ersetzt; Das detaillierte Pipeline-Artefakt (das upstream/client Körper und Stream-Chunks umfassen kann) wird nicht beibehalten. Semantik-, Idempotenz- und Reasoning-Replay-Caches umgehen Lese- und Schreibvorgänge für diese Anfrage. Die Anbieteranforderung und die für den Client sichtbare Antwort bleiben unverändert. Frühe Keepalive-Bytes werden aus dem temporären Puffer entfernt, wenn das detaillierte Artefakt weggelassen wird. Die fehlerhafte EventStream -Warnung von Kiro meldet nur die Anzahl der Nutzlastbytes, niemals deren Inhalte oder den Rohfehler des JSON Parsers. Dies bedeutet nicht, dass jede nicht verwandte provider/plugin Diagnose geprüft wurde; Der breitere Retained-Sink-Sweep wird in #11658 verfolgt.
 
-Jeder Principal ist auf 16 Einträge und 64 MiB kanonischer JPEG-Daten begrenzt. Diese Limits sind unabhängig von der globalen Obergrenze von 64 Einträgen/256 MiB: Der Quota-Druck des Principals verdrängt nur die am wenigsten verwendeten Einträge dieses Principals, bevor die globale LRU-Verdrängung berücksichtigt wird. Abgelaufene Einträge werden bei Cache-Aktivität sowohl aus der Principal- als auch aus der globalen Abrechnung entfernt, während Abbruch und Validierungsfehler keine teilweise Ersetzung festschreiben.
+Der interne `/api/modality-bridge/video/drilldown` Lebenszyklus ist ein separates loopback/token-authenticated Cache-Substrat. Jede Operation erfordert außerdem einen kanonischen undurchsichtigen Principal ID. Bevor ein Produktionsaufrufer aktiviert wird, muss er diesen ID vom authentifizierten Mandanten ableiten und darf niemals einen vom Client ausgewählten Wert weiterleiten. Cache-Schlüssel binden diesen Principal an die kanonische Sitzung und Videoreferenz IDs, speichern nur ihre SHA-256-derived Schlüssel und beschränken Lese- und Löschvorgänge auf denselben Principal. Der Cache speichert höchstens 16 abgeleitete JPEG Frames pro Eintrag, lässt sie nach zehn Minuten ablaufen und unterstützt begrenzte `start`/`end` -Lesevorgänge oder explizite Sitzungslöschung.
 
-Der Cache lehnt nicht-kanonisches Base64, übermäßige Auffüllung, Nicht-JPEG-Medien, fehlerhafte oder abgeschnittene JPEGs und JPEGs ab, die während einer begrenzten `sharp`-Dekodierung eines vollständigen Bildes eine Warnung erzeugen. Er kodiert jedes akzeptierte Bild als kanonisches JPEG neu, leitet Breite und Höhe aus den dekodierten Bytes ab, anstatt den Aufruferfeldern zu vertrauen, und verwirft alle nachfolgenden Polyglot-Bytes, anstatt sie zu behalten. Nur der begrenzte kanonische komprimierte Puffer wird beiden Quoten angerechnet. Das JSON-Wire-Limit beinhaltet den Base64-Overhead für die 32 MiB dekodierte Eingabe-Obergrenze. Jede gespeicherte Ableitung zeichnet ihr validiertes JPEG-Format/Auflösung, Sampling-Richtlinie, Ableitungsversion, Erstellungszeit, serverseitig berechneten Inhaltshash und gehashte Elternreferenz sowie den Eltern-Inhaltshash des vertrauenswürdigen Aufrufers auf. Die Abbruchprüfung erfolgt zwischen asynchronen Dekodierungs-/Hash-Phasen vor dem atomaren Cache-Commit.
+Jeder Prinzipal ist auf 16 Einträge und 64 MiB kanonischer JPEG Daten beschränkt. Diese Grenzwerte sind unabhängig von der globalen 64-entry/256 MiB Obergrenze: Durch den Prinzipalquotendruck werden nur die am wenigsten verwendeten Einträge dieses Prinzipals entfernt, bevor die globale LRU Räumung berücksichtigt wird. Abgelaufene Einträge werden aufgrund der Cache-Aktivität sowohl aus der Hauptbuchhaltung als auch aus der globalen Buchhaltung gelöscht, während Stornierungs- und Validierungsfehler nicht zu einer teilweisen Ersetzung führen.
 
-Diese Tranche verbindet noch keinen Produktions-Producer mit der Route und bietet keine Multi-Resolution-Variantenwahl. Der transparente Video Bridge-Anfragepfad verursacht daher keine zusätzliche Arbeit, während die mandantenbezogene Prinzipalableitung und der vollständige FU-08 Multi-Resolution-Lebenszyklus explizite Folgemaßnahmen bleiben, anstatt als vollständiges Verhalten dokumentiert zu werden.
+Der Cache lehnt nicht-kanonisches Base64, überschüssiges Padding, Nicht-JPEG-Medien, fehlerhaftes oder abgeschnittenes JPEGs und JPEGs ab, die während einer begrenzten Vollbild `sharp` Dekodierung eine Warnung erzeugen. Es kodiert jedes akzeptierte Bild als kanonisches JPEG neu, leitet Breite und Höhe aus den dekodierten Bytes ab, anstatt den Aufruferfeldern zu vertrauen, und verwirft alle nachgestellten polyglotten Bytes, anstatt sie beizubehalten. Nur der begrenzte kanonische komprimierte Puffer wird auf beide Kontingente angerechnet. Das JSON -Drahtlimit beinhaltet den Base64-Overhead für die Obergrenze von 32 MiB für den dekodierten Eingang. Jede gespeicherte Ableitung zeichnet ihren validierten JPEG format/resolution, die Sampling-Richtlinie, die Ableitungsversion, die Erstellungszeit, den vom Server berechneten Inhalts-Hash und die gehashte übergeordnete Referenz sowie den übergeordneten Inhalts-Hash des vertrauenswürdigen Aufrufers auf. Der Abbruch wird zwischen asynchronen decode/hash Phasen vor dem Commit des atomaren Caches überprüft.
 
-Frames werden sequenziell mit dem konfigurierten Video-Modell beschriftet. Eine leere Video-Überschreibung erbt die Vision-Einstellung; sind beide leer, wählt der Vision-Auto-Router das effektive, visionsfähige Modell aus. Erfolgreiche Beschriftungen ersetzen den ursprünglichen Teil durch ein stabiles Präfix `[Video description:`, das den Text auch als nicht vertrauenswürdige, von Medien abgeleitete Beobachtung kennzeichnet und nachgeschalteten Modellen mitteilt, Anweisungen in den Medien nicht zu befolgen. Frame-Beschriftungs-Cache-Schlüssel umfassen die JPEG-Bytes, den Prompt, den Zeitstempel und das effektive Modell; nur erfolgreiche Beschriftungen werden zwischengespeichert. Cache-Einträge behalten das tatsächlich erfolgreiche Producer-Modell bei, einschließlich eines Fallback-Modells; die Bridge meldet `mixed`, wenn verschiedene Frames von verschiedenen Modellen produziert wurden. Ein Cache-Hit verwendet diese Producer-Identität wieder, anstatt sie als den angeforderten Routing-Plan neu zu kennzeichnen. Der Gesamtvideobeschreibungs-Ergebnis-Cache wird durch jede Eingabe geschlüsselt, die die Ausgabe ändert – Prompt, effektives Modell, Sampling-Richtlinie, Frame-Anzahl, semantischer Analysemodus, der SHA-256-Fingerabdruck des normalisierten Fokus-Hinweises, Fokusfenster, `transcript`, `audioTranscript` und das Kontaktbogen-Flag – sodass eine Änderung einer dieser Dimensionen ein Cache-Miss ist und niemals eine veraltete Wiederverwendung. Die Version der visuellen Deduplizierungsrichtlinie, der Schwellenwert und die begrenzte Anzahl von Kandidaten-Frames sind ebenfalls explizit im Ergebnis-Cache-Schlüssel und den Metadaten enthalten; eine Richtlinienänderung kann daher keine veraltete Gesamtvideobeschreibung wiederverwenden. Result-Cache v4-Metadaten behalten den Modus und den Fingerabdruck bei, niemals die rohe Benutzeraufgabe. Guardrail-Metadaten melden sowohl den angeforderten als auch den effektiven Analysemodus; ein angeforderter `focused`-Modus ohne verwendbaren Benutzertext wird als effektiv `full` gemeldet.
+Der Produktionsproduzent verwendet bereits abgeleitete Broker-Frames erst nach erfolgreicher visueller Analyse wieder, ohne zweites Video download/extraction. Es sind der Operator `modalityBridgeVideoDrilldownEnabled=true`, ein strikter Teil- `drilldown: true` und ein authentifizierter API-Schlüsseldatensatz ID erforderlich. Vom Client deklarierte principal/session -Werte begründen niemals den Besitz. Ohne alle drei Bedingungen erfolgt kein Hashing, keine Größenänderung oder Beibehaltung zusätzlicher Frames. Bei einem Aufbewahrungsfehler bleibt die nutzbare visuelle Reaktion erhalten. Eingewilligte Anfragen umgehen den Ergebniscache für das gesamte Video, sodass zwischengespeicherte Ergebnisse niemals Handles wiedergeben.
 
-Die Guardrail extrahiert jeden unterstützten Videoteil, beschreibt aber nicht mehr als `modalityBridgeVideoMaxVideos`. Für ein Ziel, bei dem nachweislich `supportsVideo === false` ist, werden fehlgeschlagene und überlimitierte Videos zu expliziten sicheren Textmarkern, sodass kein Rohvideo überlebt. Wenn die Fähigkeit unbekannt ist, bleiben diese Teile unberührt. Ziele mit `supportsVideo === true` umgehen die Bridge. Das Abbruchsignal der Client-Anfrage breitet sich über Download, Broker-Warteschlange, Subprozesse und Beschriftungsaufrufe aus; Abbrüche stoppen zwischen Videos und führen niemals zu einem offenen Fehler bei Rohmedien.
+Erfolgreiche JSON und SSE Antworten legen höchstens vier undurchsichtige Handles im begrenzten `x-omniroute-video-drilldown` Header offen. Autorisierte Browser-Ursprünge können diesen Header lesen, ohne die CORS Ursprungsrichtlinie zu erweitern. Neue Handles verwenden `v1.<32-byte random base64url token>` und die Registrierung behält nur ihre SHA-256 Hashes. Der reader/header Parser akzeptiert auch ältere 64-Hex-Token. Der authentifizierte öffentliche Verbraucher ist `GET /api/v1/video-bridge/drilldown?handle=...`, unabhängig gesteuert durch `modalityBridgeVideoDrilldownRemoteEnabled=true`. Explizites persistentes False widerruft den Zugriff, selbst wenn der Legacy- `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_REMOTE_ENABLED` Env-Fallback aktiviert ist. Bei der Produktionsaufbewahrung gibt es den analogen Legacy- `OMNIROUTE_VIDEO_BRIDGE_DRILLDOWN_ENABLED` Fallback. Beide Fallbacks sind standardmäßig deaktiviert.
+
+Der Verbraucher leitet den Besitz vom authentifizierten Schlüssel ab und wendet die Schlüsselrichtlinie an: Sowohl GET als auch DELETE gehören zur `video` Endpunktkategorie, einschließlich der Aliase `/v1` und `/api/v1`. Schlüssel mit einer nicht leeren Endpunkt-Zulassungsliste müssen `video` enthalten; Unbeschränkte Schlüssel bleiben kompatibel. Der Verbraucher gibt den gleichen 404-Fehler für unbekannte, abgelaufene und die Handles eines anderen Schlüssels zurück. Es akzeptiert `variant=preview|standard|detail` (maximale JPEG Dimension 320/640/1280, niemals hochskaliert), `limit=1..8` (oder den alten `frames` Alias, niemals beides), nullbasiertes `page` und optionale `start`/`end` Fokussekunden. Doppelte Abfrageschlüssel und umgekehrte Fokusfenster werden abgelehnt. Jede zurückgegebene Variante verfügt über einen Hash ihres tatsächlichen Inhalts und der tatsächlichen Auflösungsmetadaten, der mit der beibehaltenen Quelle verknüpft ist. Varianten werden beim Lesen abgeleitet und nicht als zusätzlich aufbewahrte Kopien gespeichert. Die JSON Antwort, einschließlich Base64/envelope, ist auf 32 MiB begrenzt; Eine übergroße Seite gibt 413 zurück und der Client muss weniger Frames anfordern. Liest den Abbruch bei jeder Größenänderung und überprüft die Handle-Gültigkeit erneut, bevor er zurückkehrt. `DELETE` nach Eigentümer ist idempotent; Beim Löschen oder TTL -Ablauf werden die beibehaltene Quelle und die Nutzungsabrechnung freigegeben.
+
+Der gemeinsam genutzte Speicher ist prozesslokal: Handles verfallen beim Neustart und sind nicht zwischen unabhängigen OmniRoute Prozessen übertragbar. Verwaltungsstatistiken legen nur wirksame Aufbewahrungs-/Remote-Richtlinien und aggregierte zurückgehaltene entries/bytes offen, niemals Medien, Referenzen, Haupt- IDs oder Handles. Im Bereich „Videoeinstellungen“ werden diese Werte angezeigt und beide Zustimmungsschalter können beibehalten werden. Bei dieser Implementierungsdokumentation handelt es sich nicht um einen Live-Bereitstellungs- oder Promotion-Beweis; Die Akzeptanz des realen Modells wird separat erfasst.
+
+Frames werden nacheinander mit dem konfigurierten Videomodell beschriftet. Eine leere Videoüberschreibung erbt die Vision-Einstellung; Wenn beide leer sind, wählt der Vision-Auto-Router das tatsächliche Vision-fähige Modell aus. Erfolgreiche Untertitel ersetzen den Originalteil durch ein stabiles `[Video description:` Präfix, das den Text auch als nicht vertrauenswürdige, von Medien abgeleitete Beobachtung markiert und nachgeschaltete Modelle anweist, den Anweisungen in den Medien nicht zu folgen. Zu den Cache-Schlüsseln für Bildunterschriften gehören die JPEG Bytes, die Eingabeaufforderung, der Zeitstempel und das effektive Modell. Nur erfolgreiche Untertitel werden zwischengespeichert. Cache-Einträge behalten das tatsächlich erfolgreiche Produzentenmodell bei, einschließlich eines Fallback-Modells; Die Brücke meldet `mixed` wenn unterschiedliche Rahmen von verschiedenen Modellen produziert wurden. Bei einem Cache-Treffer wird diese Herstelleridentität wiederverwendet, anstatt sie als angeforderten Routing-Plan umzukennen. Der Gesamtvideo-Ergebniscache wird bei jeder Eingabe verschlüsselt, die die Ausgabe — -Eingabeaufforderung, das effektive Modell, die Sampling-Richtlinie, die Frame-Anzahl, den semantischen Analysemodus, den SHA-256 Fingerabdruck des normalisierten Fokushinweises, das Fokusfenster, `transcript`, `audioTranscript` und das Kontaktblatt-Flag — ändert. Daher ist das Ändern einer dieser Dimensionen ein Cache-Fehler und niemals eine veraltete Wiederverwendung. Die Version der visuellen Deduplizierungsrichtlinie, der Schwellenwert und die Anzahl der begrenzten Kandidaten-Frames sind auch im Ergebnis-Cache-Schlüssel und in den Metadaten explizit angegeben. Eine Richtlinienänderung kann daher keine veraltete Beschreibung des gesamten Videos wiederverwenden. Die Metadaten des Result-Cache v4 behalten den Modus und den Fingerabdruck bei, niemals die reine Benutzeraufgabe. Guardrail-Metadaten melden sowohl den angeforderten als auch den effektiven Analysemodus; Ein angeforderter `focused` Modus ohne verwendbaren Benutzertext wird effektiv als `full` gemeldet.
+
+Die Leitplanke extrahiert jeden unterstützten Videoteil, beschreibt jedoch nicht mehr als `modalityBridgeVideoMaxVideos`. Für ein Ziel, das nachweislich über `supportsVideo === false` verfügt, werden fehlgeschlagene und überbewertete Videos zu expliziten sicheren Textmarkierungen, sodass kein Rohvideo überlebt. Wenn die Leistungsfähigkeit unbekannt ist, behalten diese Teile ihren Videoträger; Jedes Fallback-Transkript folgt der oben beschriebenen begrenzten Textkonvertierung. Ziele mit `supportsVideo === true` umgehen die Brücke. Das Abbruchsignal der Clientanforderung breitet sich über Download, Broker-Warteschlange, Unterprozesse und Untertitelaufrufe aus; Abbrüche stoppen zwischen den Videos und versagen nie bei Rohmedien.
 
 Laufzeiteinstellungen sind DB-gestützt und Zod-validiert:
 
-| Schlüssel                           | Standard    | Bereich / Verhalten                                                                                                                    |
-| :---------------------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| Schlüssel                           | Standard    | Reichweite / Verhalten                                                                                                                 |
+| ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `modalityBridgeVideoEnabled`        | `false`     | Optionale Laufzeit, Opt-in                                                                                                             |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` bewahrt generische Beschriftungen; `focused` verwendet einen begrenzten, nicht vertrauenswürdigen Kontext des letzten Benutzers |
-| `modalityBridgeVideoModel`          | `""`        | Erbt das Vision Bridge-Modell                                                                                                          |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | `full` behält generische Untertitel bei; `focused` verwendet einen begrenzten, nicht vertrauenswürdigen Kontext des neuesten Benutzers |
+| `modalityBridgeVideoModel`          | `""`        | Erben Sie das Vision Bridge-Modell                                                                                                     |
 | `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                                   |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` oder proportional `segment_aware`; Detektorfehler fällt auf `uniform` zurück                                  |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` oder proportional `segment_aware`; Der Detektorausfall fällt auf `uniform` zurück                             |
 | `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                                    |
 | `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                                         |
 
-Alte persistierte Video-Timeout-Werte über 120 Sekunden werden auf die Broker-Deadline geklemmt; neue Einstellungsschreibvorgänge über diesem Limit werden abgelehnt. `GET /api/modality-bridge/video/runtime` erfordert eine vertrauenswürdige, gestempelte Loopback-Lokalität vor der Authentifizierung oder Laufzeitprüfung und anschließend eine Verwaltungsauthentifizierung. Es gibt nur `available`, bereinigte FFmpeg/ffprobe-Versionen und einen festen Grund zurück, wenn die Laufzeit nicht verfügbar ist. Der interne Extraktions-Endpunkt ist keine öffentliche Upload-API: Warteschlangenüberlastung gibt `503` plus `Retry-After` zurück, eine Anrufer-Trennung gibt `499` zurück und die feste Broker-Deadline gibt `504` zurück. Konvertierte Antworten fügen `video->text;model=<visionModel>;parts=<videos>` zum zentralen `x-omniroute-modality-bridge`-Header hinzu, ohne Vision- oder Audio-Segmente zu entfernen.
+Legacy-dauerhafte Video-Timeout-Werte über 120 Sekunden werden auf die Broker-Frist beschränkt; Neue Einstellungen, die diesen Grenzwert überschreiten, werden abgelehnt. `GET /api/modality-bridge/video/runtime` erfordert vor der Authentifizierung oder Laufzeitprüfung eine vertrauenswürdige, gestempelte Loopback-Lokalität und anschließend eine Verwaltungsauthentifizierung. Es werden nur `available`, bereinigte FFmpeg/ffprobe Versionen und ein fester Grund zurückgegeben, wenn die Laufzeit nicht verfügbar ist. Der interne Extraktionsendpunkt ist kein öffentlicher Upload API: Die Warteschlangensättigung gibt `503` plus `Retry-After` zurück, eine Anrufertrennung gibt `499` zurück und die feste Broker-Deadline gibt `504` zurück. Konvertierte Antworten fügen `video->text;model=<visionModel>;parts=<videos>` zum zentralen `x-omniroute-modality-bridge` Header hinzu, ohne Vision- oder Audio-Segmente zu entfernen.
 
-### PII-Maskierer (`piiMasker.ts`)
+### PII Masker (`piiMasker.ts`)
 
-Läuft auf **beiden** Stufen.
+Läuft weiter** beide** Stufen.
 
-- **`preCall`** klont die Payload, durchläuft `system`, `messages`, `input` und `prompt` (einschließlich einfacher String-Elemente) und wendet `processPII()` (aus `@/shared/utils/inputSanitizer`) auf String-Felder `content`/`text` an. Wenn `PII_REDACTION_ENABLED=true`, werden erkannte PII in der ausgehenden Payload redigiert. Dies ist unabhängig von `INPUT_SANITIZER_MODE` (der nur die Prompt-Injection-Richtlinie steuert). Wenn die Redaktion ausgeschaltet ist, zeichnet der Aufruf die Erkennungszahlen auf, ohne den Inhalt neu zu schreiben.
-- **`postCall`** klont die Antwort tief, führt `sanitizePIIResponse()` sowie den Responses-API-Shape-Maskierer (`maskResponsesOutput` – deckt `output_text` und `output[].content[].text` ab) aus. Wenn eine Redaktion erfolgt, ersetzt die modifizierte Antwort die ursprüngliche.
+- **`preCall`** klont die Nutzlast, durchläuft `system`, `messages`, `input` und `prompt` (einschließlich einfacher String-Elemente) und wendet `processPII()` (von `@/shared/utils/inputSanitizer`) auf String- `content`/`text` Felder an. Bei `PII_REDACTION_ENABLED=true` wird das erkannte PII in der ausgehenden Nutzlast geschwärzt. Dies ist unabhängig von `INPUT_SANITIZER_MODE` (das nur die Prompt-Injection-Richtlinie steuert). Wenn die Schwärzung deaktiviert ist, zeichnet der Anruf die Erkennungszahlen auf, ohne dass der Inhalt neu geschrieben wird.
+- **`postCall`** Klont die Antwort tief, führt `sanitizePIIResponse()` und den Responses-API-Shape-Masker aus (`maskResponsesOutput` — deckt `output_text` und `output[].content[].text`). Bei einer Schwärzung ersetzt die geänderte Antwort das Original.
 
-Die Guardrail blockiert niemals; sie annotiert (`meta.detections`, `meta.redacted`) oder schreibt nur um.
+Die Leitplanke blockiert nie; es kommentiert nur (`meta.detections`, `meta.redacted`) oder schreibt neu.
 
-### Prompt-Injection (`promptInjection.ts`)
+#### Auswahl pro Typ, benutzerdefinierte Muster und Erkennungszähler
 
-Erkennt adversarielle Strukturen in benutzerbereitgestelltem Inhalt und erzwingt die konfigurierte Richtlinie. Das Verhalten wird durch Umgebungsvariablen und Konstruktoroptionen gesteuert:
+**Dashboard → Einstellungen → Sicherheit → PII Maskierung** wählt aus, was maskiert wird. Die Maskierung wird nicht aktiviert: Das sind immer noch `PII_REDACTION_ENABLED` (Anfrage) und `PII_RESPONSE_SANITIZATION` (Antwort + SSE), beide standardmäßig deaktiviert.
 
-| Einstellung      | Env-Variable                                                                                          | Standard | Effekt                                                                                                                                                                                                                                             |
-| ---------------- | ----------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aktiviert        | `INPUT_SANITIZER_ENABLED`                                                                             | `true`   | Wenn `false`, wird die Guardrail kurzgeschlossen.                                                                                                                                                                                                  |
-| Modus            | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`   | Injektionsrichtlinie: `block`, `warn` oder `log`. (`redact` wird aus Gründen der Abwärtskompatibilität akzeptiert, entfernt aber **nicht** den Injektionstext; die Anforderung zur PII-Umschreibung wird durch `PII_REDACTION_ENABLED` gesteuert.) |
-| Blockierschwelle | `blockThreshold` option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mindestschweregrad, der zum Blockieren erforderlich ist. "Medium" ist standardmäßig nur zur Beobachtung.                                                                                                                                           |
+- **Auswahl pro Typ** — Die integrierten IDs werden in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) aufgelistet. Nicht gesetzt bedeutet jeden Typ (das Verhalten, bevor diese Einstellung existierte). Das `ssn_us` Muster der Anforderungs-Engine wird `ssn` zugeordnet. Vorlagen (Minimal, Standard, Finanziell, Brasilianisch, USA, GDPR, POPIA, Vollständig) füllen nur die Kontrollkästchen im UI aus.
+- **GDPR und POPIA -Bezeichner** — zwölf integrierte IDs, die EU und südafrikanische persönliche Identifikatoren abdecken (Tabelle unten). Ihre regulären Ausdrücke, Validatoren und Gerichtsbarkeits-Tags befinden sich in einer Tabelle, `src/shared/utils/piiPatterns.ts`, die sowohl vom Response Sanitizer (`src/lib/piiSanitizer.ts`) als auch vom Request Masker (`src/shared/utils/inputSanitizer.ts`) genutzt wird. Eine Übereinstimmung wird nur dann geschwärzt, wenn ihr Validator sie akzeptiert; Eine bloße Ziffernfolge reicht nie aus. Ein Operator, der eine eingegrenzte Auswahl gespeichert hat, bevor diese IDs existierten, behält das Verhalten bei, bis die neuen IDs aktiviert werden.
+- **Benutzerdefinierte Muster** — bis zu 20 Regex- oder Platzhaltermuster (`*` = bis zu 64 Nicht-Leerzeichen, `?` = eins). Übereinstimmungen werden zu `[CUSTOM_REDACTED]`. Jedes Muster durchläuft `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): höchstens 500 Zeichen, Flags auf `g i m s u` beschränkt, muss kompiliert werden, muss `safe-regex` bestehen (katastrophales Backtracking) und darf nicht mit einer leeren Zeichenfolge oder einem Schwärzungsplatzhalter übereinstimmen. Ein Muster, das fehlschlägt, wird beim Speichern und Testen abgelehnt, und eine gespeicherte Zeile, die fehlschlägt, wird zur Laufzeit übersprungen, anstatt kompiliert zu werden. Benutzerdefinierte Muster werden nur ausgeführt, wenn die Maskierung aktiviert ist.
+- **Erkennungszähler** — -Zähler pro Typ (nie übereinstimmende Werte), werden im Speicher gehalten und beim Neustart zurückgesetzt (`src/lib/pii/piiDetectionStats.ts`). Sie nehmen nur zu, während die Maskierung aktiviert ist.
 
-**Modus-Priorität** (`getMode`): Anrufer `options.mode` →
-`INJECTION_GUARD_MODE` **DB-Feature-Flag-Überschreibung** (Dashboard →
-Einstellungen → Feature-Flags) → `INJECTION_GUARD_MODE` Env →
-`INPUT_SANITIZER_MODE` Env → `warn`. Eine Dashboard-Überschreibung hat daher
-Vorrang vor den Env-Variablen, sodass die Feature-Flags-Benutzeroberfläche die
-laufende Guardrail live steuert (kein Neustart erforderlich). Das Lesen aus der
-Datenbank ist ausfallsicher: Wenn ein Fehler auftritt, greift die Guardrail auf
-das umgebungsbasierte Verhalten zurück, und wenn keine Überschreibung festgelegt
-ist, ist das Verhalten identisch mit der reinen Env-Auflösung.
+Die Einstellungen befinden sich in der `key_value` Tabelle (Namespace `pii_settings`, `src/lib/db/piiSettings.ts`) und werden über einen 1-s-Cache gelesen. API:
+
+| Verfahren | Weg                      | Zweck                                                                                                          |
+| --------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `GET`     | `/api/settings/pii`      | Flag-Status, `enabledTypes`, `customPatterns`, Erkennungszähler                                                |
+| `PUT`     | `/api/settings/pii`      | Ersetzen Sie `enabledTypes` (`null` = alle) and/or `customPatterns`                                            |
+| `POST`    | `/api/settings/pii/test` | Führen Sie einen Probelauf mit einem Muster gegen eine Probe von höchstens 8 KB durch. nichts wird gespeichert |
+
+Alle drei erfordern eine Verwaltungsauthentifizierung und validieren den Körper mit Zod (`src/shared/validation/schemas/piiSettings.ts`). Bei deaktivierter Anmeldung (`requireLogin=false`) sind `GET` und der Testendpunkt geöffnet, aber `PUT` benötigt weiterhin eine Dashboard-Sitzung, einen `manage` -scope API -Schlüssel, ein `oma_` Zugriffstoken mit Schreibbereich oder höher oder das vom Loopback gesendete CLI Token oder interne Service-Token.
+
+#### GDPR (EU) und POPIA (Südafrika) Kennungen
+
+| Ausweis             | Kennung                          | Validierung                                                                                            |
+| ------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                             | Bekanntes Land, genaue Länge für dieses Land, ISO 13616 MOD-97-10                                      |
+| `eu_vat`            | EU VAT Nummer                    | Bekanntes Präfix des Mitgliedsstaats und das Nummernformat dieses Staates (keine VIES Suche)           |
+| `es_dni_nie`        | Spanisch DNI / NIE               | Kontrollbuchstabe (Wert mod 23); NIE ist `X/Y/Z` + 7 Ziffern                                           |
+| `it_codice_fiscale` | Italienischer Codice Fiscale     | Kontrollbuchstabe aus den odd/even -Positionstabellen                                                  |
+| `pl_pesel`          | Polnische PESEL                  | Gewichtete Prüfsumme und ein verschlüsseltes Geburtsdatum vorhanden                                    |
+| `nl_bsn`            | Niederländische BSN              | 11-Proof (Gewichte 9..2, -1)                                                                           |
+| `de_steuer_id`      | Deutsche Steuer-ID               | ISO 7064 Mod 11,10 plus die Ziffernstrukturregeln (keine führende 0)                                   |
+| `se_personnummer`   | Schwedische Personennummer       | Luhn über die letzten zehn Ziffern und ein plausibles Geburtsdatum (10 oder 12 Ziffern)                |
+| `za_id`             | Südafrikanische ID Nummer        | Luhn über alle 13 Ziffern, gültige Geburts- month/day, Staatsbürgerschaftsziffer 0 oder 1              |
+| `za_phone`          | Südafrikanisches Telefon         | `+27` / `27` -Präfix oder die nationale `0..` Form, geschrieben mit einem Leerzeichen oder Bindestrich |
+| `za_vat`            | Südafrikanische VAT Nummer       | 10 Ziffern beginnend mit `4`** Und** „VAT“ / „BTW“ in den 48 Zeichen davor                             |
+| `za_tax_ref`        | Südafrikanischer Steuerreferent. | 10 Ziffern beginnend mit `0`-`3`, Luhn,** Und** „tax“ / „SARS“ in den 48 Zeichen davor                 |
+
+Da die nur aus Ziffern bestehenden Formate mit Bestellnummern, Build-Nummern und Zeitstempeln kollidieren, benötigen die schwächsten Formate (`za_vat`, `za_tax_ref`) das Schlüsselwort cue, und eine bloße zehnstellige `0..` Nummer wird nicht als südafrikanische Telefonnummer behandelt. Leerzeichen IBANs (`GB29 NWBK ...`) stimmen nicht überein. Auf dem Streaming-Pfad wird der Cue nur innerhalb des aktuellen Chunks nachgeschlagen. Die IDs stehen vor den generischen Telefonmustern, sodass ein validierter Bezeichner seinen eigenen Platzhalter behält (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Die `gdpr` und `popia` Vorlagen wählen die EU bzw. südafrikanischen IDs aus. Die Maskierung selbst bleibt opt-in (harte Regel #20): Hier ändert sich nichts an einem Feature-Flag-Standard.
+
+### Sofortige Injektion (`promptInjection.ts`)
+
+Erkennt gegnerische Strukturen in vom Benutzer bereitgestellten Inhalten und setzt die konfigurierte Richtlinie durch. Das Verhalten wird durch Umgebungsvariablen und Konstruktoroptionen bestimmt:
+
+| Einstellung   | Umgebungsvar                                                                                          | Standard | Wirkung                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ermöglicht    | `INPUT_SANITIZER_ENABLED`                                                                             | `true`   | Bei `false` kommt es zu Kurzschlüssen der Leitplanke.                                                                                                                                                                                       |
+| Modus         | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                       | `warn`   | Injektionsrichtlinie: `block`, `warn` oder `log`. (`redact` wird für die Abwärtskompatibilität akzeptiert, tut dies aber** nicht** Streifeninjektionstext; Die Anforderung zum Umschreiben PII wird von `PII_REDACTION_ENABLED` gesteuert.) |
+| Blockschwelle | `blockThreshold` Option / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`   | Mindestschweregrad zum Blockieren erforderlich. Standardmäßig ist „Medium“ schreibgeschützt.                                                                                                                                                |
+
+**Moduspriorität** (`getMode`): Anrufer `options.mode` → `INJECTION_GUARD_MODE`**DB Feature-Flag-Überschreibung** (Dashboard → -Einstellungen → Funktionsflags) → `INJECTION_GUARD_MODE` env → `INPUT_SANITIZER_MODE` env → `warn`. Eine Dashboard-Überschreibung setzt sich daher gegen die Umgebungsvariablen durch, sodass die Feature Flags UI den laufenden Guard live steuern (kein Neustart). Der DB Lesevorgang ist ausfallsicher: Bei einem Fehler greift der Wächter auf das env-basierte Verhalten zurück, und wenn keine Überschreibung festgelegt ist, ist das Verhalten identisch mit der reinen env-Auflösung.
 
 Erkennungsquellen:
 
-1.  `sanitizeRequest()` von `@/shared/utils/inputSanitizer` (gemeinsamer
-    Detektorsatz, der an anderer Stelle in der Pipeline verwendet wird).
-2.  Integrierte `DEFAULT_GUARD_PATTERNS` (derzeit `system_override_inline` und
-    `markdown_system_block`, beide mit `high` Schweregrad).
-3.  Optionale `customPatterns`, die über Konstruktoroptionen übergeben werden
-    (Strings, Regex oder `{ name, pattern, severity }` Datensätze).
+1. `sanitizeRequest()` von `@/shared/utils/inputSanitizer` (gemeinsamer Detektorsatz, der an anderer Stelle in der Pipeline verwendet wird).
+2. Integriertes `DEFAULT_GUARD_PATTERNS` (derzeit `system_override_inline` und `markdown_system_block`, beide `high` Schweregrad).
+3. Optionales `customPatterns` das über Konstruktoroptionen (Strings, Regex oder `{ name, pattern, severity }` Datensätze) übergeben wird.
 
-Wenn `mode === "block"` **und** mindestens eine Erkennung den
-Schweregradschwellenwert erreicht, gibt `preCall` `{ block: true, message:
-"Request rejected: suspicious content detected" }` zurück. In den Modi
-`warn`/`log` protokolliert die Guardrail, erlaubt aber den Aufruf. Der
-gemeinsame Helfer `evaluatePromptInjection()` wird auch für Aufrufer exportiert,
-die Prompts auswerten müssen, ohne das Registry zu durchlaufen.
+Wenn `mode === "block"`** Und** Wenn mindestens eine Erkennung den Schweregradschwellenwert erreicht, gibt `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }` zurück. Im `warn`/`log` -Modus protokolliert die Leitplanke den Anruf, lässt ihn jedoch zu. Der gemeinsame Helfer `evaluatePromptInjection()` wird auch für Anrufer exportiert, die Eingabeaufforderungen auswerten müssen, ohne die Registrierung zu durchlaufen.
 
-**Scan-Grenze (v3.8.20):** Der Detektor prüft nur die **ersten 16 KB** des
-zusammengeführten Prompt-Textes — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16
-384 Bytes) in `src/shared/utils/inputSanitizer.ts`. Sowohl
-`detectInjection()` als auch `evaluatePromptInjection()` verwenden `slice(0,
-MAX_INJECTION_SCAN_BYTES)`, bevor die Musterschleife ausgeführt wird.
-Injektionsdirektiven befinden sich nahe am Anfang einer Eingabe, wodurch die
-Regex-CPU/GC bei mehreren hundert KB großen Payloads begrenzt wird, ohne die
-Erkennung zu schwächen (vgl. #3932, #4041).
+**Scan gebunden (v3.8.20):** Der Detektor prüft nur die** erste 16 KB** des zusammengefügten Eingabeaufforderungstextes — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16.384 Bytes) in `src/shared/utils/inputSanitizer.ts`. Sowohl `detectInjection()` als auch `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` bevor die Musterschleife ausgeführt wird. Injektionsdirektiven befinden sich am oberen Rand einer Eingabe, sodass der reguläre Ausdruck CPU/GC auf Nutzlasten mit mehreren hundert KB begrenzt wird, ohne die Erkennung zu beeinträchtigen (vgl. #3932, #4041).
 
 ### Credential Masker (`credentialMasker.ts`)
 
-Läuft in **beiden** Phasen, zuletzt in der Standardkette (Priorität `95`).
-Redigiert bekannte API-Schlüssel-/Geheimtoken-Muster aus der ausgehenden
-Payload (Nachrichteninhalt, Tool-Aufruf-Argumente, Tool-Ergebnisse) **und** der
-Anbieterantwort, sodass ein in einen Prompt eingefügtes (oder von einem
-Tool-Ergebnis zurückgegebenes) Credential nicht an den Upstream-Anbieter oder
-zurück an den Client weitergegeben wird.
+Läuft weiter** beide** Stufen, letzte in der Standardkette (Priorität `95`). Schwärzt bekannte API-Schlüssel-/Secret-Token-Muster aus der ausgehenden Nutzlast (Nachrichteninhalt, Tool-Aufrufargumente, Tool-Ergebnisse)** Und** die Antwort des Anbieters, sodass Anmeldeinformationen, die in eine Eingabeaufforderung eingefügt (oder von einem Tool-Ergebnis zurückgegeben) werden, nicht an den Upstream-Anbieter oder zurück an den Client weitergegeben werden.
 
-- **Nur Opt-in**, gleiche Konvention wie bei der PII-Redaktion (angrenzend an
-  Hard Rule #20): deaktiviert, es sei denn,
-  `settings.credentialRedactionEnabled === true` **oder**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Wenn es ausgeschaltet ist, ist die
-  Guardrail ein No-Op – sie blockiert nie und schreibt nie um.
-- `redactCredentials()` durchläuft den vollständigen Payload-/Antwortbaum
-  (`walkValue()`, prototyp-pollution-sicher, zyklussicher über `WeakSet`) und
-  ersetzt Übereinstimmungen durch einen `[REDACTED:<type>]`-Platzhalter,
-  wobei nur die tatsächlich geänderten Zweige geklont werden.
-- `CREDENTIAL_PATTERNS` deckt LLM-Anbieter-Schlüssel (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), VCS-/SaaS-Token (GitHub,
-  Slack, Linear, Notion, npm, Postman, Discord), Zahlungsschlüssel (Stripe,
-  Square), Cloud-Schlüssel (AWS-Zugriffsschlüssel, Twilio, SendGrid,
-  Mailgun), private Schlüssel / JWTs, Credential-tragende
-  Verbindungszeichenfolgen (`mongodb://user:pass@...`, etc.) und ein
-  generisches `Authorization`/`x-api-key`/`api-key`/`apikey`-Header-Wert-Muster
-  ab. Header-förmige Schlüssel (`authorization`, `x-api-key`, `api-key`,
-  `apikey`) werden strukturell redigiert (nur der Wert, Schema-Präfix wie
-  `Bearer `/`Basic ` bleibt erhalten) und nicht über den generischen
-  Text-Regex.
-- Die Guardrail blockiert nie; sie schreibt nur um (`modifiedPayload` /
-  `modifiedResponse`) und annotiert (`meta.credentialsRedacted`,
-  `meta.count`).
+- **Nur Opt-in** , gleiche Konvention wie PII Redaktion (harte Regel #20-adjacent): deaktiviert, sofern `settings.credentialRedactionEnabled === true`** oder** `CREDENTIAL_REDACTION_ENABLED=true`. Wenn es ausgeschaltet ist, ist die Leitplanke ein No-Op- — das niemals blockiert und niemals neu schreibt.
+- `redactCredentials()` durchläuft den gesamten payload/response Baum (`walkValue()`, Prototyp-Pollution-Safe, Cycle-Safe über `WeakSet`) und ersetzt Übereinstimmungen durch einen `[REDACTED:<type>]` Platzhalter, wobei nur die Zweige geklont werden, die sich tatsächlich geändert haben.
+- `CREDENTIAL_PATTERNS` umfasst LLM Anbieterschlüssel (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS Tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), Zahlungsschlüssel (Stripe, Square), Cloud-Schlüssel (AWS Zugriffsschlüssel, Twilio, SendGrid, Mailgun), private Schlüssel/ JWTs, anmeldeinformationstragende Verbindung Zeichenfolgen (`mongodb://user:pass@...` usw.) und ein generisches `Authorization`/`x-api-key`/`api-key`/`apikey` -Header-Wert-Muster. Headerförmige Schlüssel (`authorization`, `x-api-key`, `api-key`, `apikey`) werden strukturell redigiert (nur Wert, Schema-Präfix wie `Bearer `/`Basic ` bleibt erhalten) und nicht über den generischen Text-Regex.
+- Die Leitplanke blockiert nie; es schreibt nur um (`modifiedPayload` / `modifiedResponse`) und kommentiert (`meta.credentialsRedacted`, `meta.count`).
 
-Regressionsschutz: `tests/unit/credential-masker-guardrail.test.ts`.
+Regressionswächter: `tests/unit/credential-masker-guardrail.test.ts`.
 
-## Basisvertrag (`base.ts`)
+## Basiskontrakt (`base.ts`)
 
 ```typescript
 class BaseGuardrail {
@@ -359,11 +314,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // true bricht die Kette vorzeitig ab
-  message?: string; // wird beim Blockieren ausgegeben
+  block?: boolean; // true schließt die Kette kurz
+  message?: string; // wird beim Blockieren angezeigt
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // wird von preCall zurückgegeben, um die Anfrage umzuschreiben
-  modifiedResponse?: TValue; // wird von postCall zurückgegeben, um die Antwort umzuschreiben
+  modifiedPayload?: TValue; // von preCall zurückgegeben, um die Anfrage umzuschreiben
+  modifiedResponse?: TValue; // von postCall zurückgegeben, um die Antwort umzuschreiben
 }
 
 interface GuardrailContext {
@@ -382,87 +337,175 @@ interface GuardrailContext {
 }
 ```
 
-Eine Schutzvorrichtung signalisiert „keine Änderung“, indem sie entweder `void`, `{}` oder
-`{ block: false }` zurückgibt. Die Rückgabe eines `modifiedPayload`/`modifiedResponse` ersetzt
-den Wert, der für nachgelagerte Schutzvorrichtungen durch die Kette fließt.
-`signal?: AbortSignal` überträgt den Lebenszyklus des Aufrufers an die Schutzvorrichtungen. Der Abbruch einer Anfrage ist die bewusste Fail-Open-Ausnahme: Medienbrücken beenden ihre Arbeit und führen Aufräumarbeiten durch, ohne rohe Medien für ein Ziel wiederherzustellen, von dem bekannt ist, dass es diese nicht unterstützt.
+Ein Guardrail signalisiert „keine Änderung“, indem es entweder `void`, `{}` oder
+`{ block: false }` zurückgibt. Die Rückgabe eines `modifiedPayload`/`modifiedResponse`
+ersetzt den Wert, der für nachgelagerte Guardrails durch die Kette fließt.
+`signal?: AbortSignal` überträgt den Lebenszyklus des Aufrufers in die Guardrails.
+Ein Anfrageabbruch ist die bewusste Fail-Open-Ausnahme: Medienbrücken stoppen ihre
+Arbeit und räumen auf, ohne Rohmedien in ein Ziel wiederherzustellen, von dem bekannt
+ist, dass es diese nicht unterstützt.
 
-## Registrierung (`registry.ts`)
+## Registry (`registry.ts`)
 
-Der Singleton `guardrailRegistry` stellt Folgendes bereit:
+Das Singleton `guardrailRegistry` stellt Folgendes bereit:
 
-- `register(guardrail)` — fügt eine Schutzvorrichtung hinzu (oder ersetzt sie anhand ihres normalisierten Namens) und
-  sortiert erneut nach aufsteigender `priority`.
+- `register(guardrail)` — fügt ein Guardrail hinzu (oder ersetzt es anhand des
+  normalisierten Namens) und sortiert nach aufsteigender `priority` neu.
 - `clear()` / `list()` — administrative Hilfsfunktionen.
-- `runPreCallHooks(payload, context)` — durchläuft aktive Schutzvorrichtungen, reicht die
-  Nutzlast über `modifiedPayload` weiter und stoppt beim ersten `block: true`.
+- `runPreCallHooks(payload, context)` — iteriert über aktive Guardrails, führt die
+  Payload durch `modifiedPayload` und stoppt beim ersten `block: true`.
 - `runPostCallHooks(response, context)` — derselbe Ablauf auf der Antwortseite.
-- `resetGuardrailsForTests({ registerDefaults })` — löscht den Zustand und registriert optional
-  die Standardwerte erneut, um eine saubere Testisolation zu gewährleisten.
+- `resetGuardrailsForTests({ registerDefaults })` — löscht den Zustand und
+  registriert optional die Standardwerte neu, für eine saubere Testisolierung.
 
-Beide Ausführungsfunktionen geben `{ blocked, payload|response, results, guardrail?, message? }`
-zurück, wobei `results` ein Array von `GuardrailExecutionResult`-Datensätzen ist, die
-für jede Schutzvorrichtung die Felder `blocked`, `skipped`, `modified`, `error` und `meta`
-enthalten, was für die Ablaufverfolgung nützlich ist.
+Beide Runner geben `{ blocked, payload|response, results, guardrail?, message? }`
+zurück, wobei `results` ein Array von `GuardrailExecutionResult`-Einträgen ist, die
+pro Guardrail die Felder `blocked`, `skipped`, `modified`, `error` und `meta`
+enthalten – nützlich für das Tracing.
 
-### Schutzvorrichtungen pro Anfrage deaktivieren
+### Guardrails pro Anfrage deaktivieren
 
-`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` erstellt eine
-deduplizierte Liste der Namen von Schutzvorrichtungen, die für die aktuelle
-Anfrage übersprungen werden sollen. Quellen (alle optional, alle zusammengeführt):
+`resolveDisabledGuardrails({ apiKeyInfo, body, headers })` aggregiert eine
+deduplizierte Liste von Guardrail-Namen, die für die aktuelle Anfrage übersprungen
+werden sollen. Es gibt fünf Kanäle, die in dieser Reihenfolge gelesen und zu einer
+Liste zusammengeführt werden (beim Deduplizieren gewinnt das erste Vorkommen):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` im Anfragekörper (auf oberster Ebene)
-- `metadata.disabledGuardrails` im Anfragekörper
-- Header `x-omniroute-disabled-guardrails` (oder veraltet
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. Request-Body `disabledGuardrails` (oberste Ebene)
+3. Request-Body `metadata.disabledGuardrails` (nur wenn `metadata` ein Objekt ist)
+4. Header `x-omniroute-disabled-guardrails`
+5. Legacy-Header `x-disabled-guardrails`
 
-Werte können Zeichenfolgen-Arrays oder eine kommagetrennte Zeichenfolge sein; Namen werden
-in kleingeschriebene Kebab-Case-Schreibweise normalisiert (`pii_masker` → `pii-masker`). Das Ergebnis
-wird über `context.disabledGuardrails` an die Registrierung übergeben, die
-übereinstimmende Schutzvorrichtungen überspringt (`skipped: true` in `results`).
+Alle fünf Kanäle werden zusammengeführt, einschließlich der beiden Header: Werden
+sowohl `x-omniroute-disabled-guardrails` als auch `x-disabled-guardrails` gesendet,
+wird die Vereinigungsmenge ihrer Listen übersprungen, und ein leerer moderner Header
+verbirgt nicht mehr den Legacy-Header
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), behoben in
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+Werte können Arrays von Strings oder ein kommagetrennter String sein; Namen werden
+getrimmt und in Kleinbuchstaben-Kebab-Case normalisiert (`pii_masker` →
+`pii-masker`), und leere Einträge werden verworfen. Das Ergebnis wird über
+`context.disabledGuardrails` an die Registry übergeben, die übereinstimmende
+Guardrails überspringt (`skipped: true` in `results`).
+
+Die Deaktivierungsliste wirkt sich nur auf die **Registry** aus. Der
+Prompt-Injection-Modus `block` ist eine verbindliche Grenze: Die Injection-Guard-Middleware
+(`src/middleware/promptInjectionGuard.ts`) ruft `evaluatePromptInjection()`
+ohne jegliche aufrufergesteuerte Deaktivierungsliste auf (der tote Aufruf
+`resolveDisabledGuardrails({ body })`, den sie früher machte, wurde in
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934) entfernt), sodass
+eine Anfrage, die `prompt-injection` deaktiviert, im Modus `block` weiterhin
+abgelehnt wird. Das ist beabsichtigt. Die Deaktivierungskanäle werden vom Aufrufer
+kontrolliert (Request-Body, Metadaten, Header), und ein Aufrufer darf nicht in der
+Lage sein, eine Sicherheitskontrolle abzuschalten, die der Betreiber festgelegt hat
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Die
+Header-Vereinigung aus [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+ändert nur, welche Registry-Guardrails übersprungen werden; sie ermöglicht es einem
+Client nicht, die Middleware zu umgehen. Verbindliche Guardrail-Richtlinien pro
+Schlüssel und pro Gruppe werden im v4-RFC
+[#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417) verfolgt.
+Siehe [Abdeckung und Grenzen](#coverage-and-limits).
 
 ## Ausführungsreihenfolge
 
-Für jede Anfrage, die `src/sse/handlers/chat.ts` und
-`open-sse/handlers/chatCore.ts` durchläuft:
+Für jede Anfrage, die durch `src/sse/handlers/chat.ts` und
+`open-sse/handlers/chatCore.ts` fließt (die Chat-Familien-Routen, die unter
+[Abdeckung und Grenzen](#coverage-and-limits) aufgeführt sind):
 
-1. `resolveDisabledGuardrails(...)` erstellt anhand von API-Schlüssel, Body
-   und Headern die Liste der zu überspringenden Guardrails.
+1. `resolveDisabledGuardrails(...)` erstellt die Skip-Liste aus API-Schlüssel,
+   Body und Headern.
 2. `guardrailRegistry.runPreCallHooks(body, ctx)` führt Guardrails in
    aufsteigender Prioritätsreihenfolge aus:
    - Deaktivierte Guardrails werden als `skipped` erfasst.
-   - `preCall` jedes Guardrails kann die Nutzdaten über `modifiedPayload`
+   - Das `preCall` jeder Guardrail kann die Payload über `modifiedPayload`
      umschreiben.
-   - Das erste `block: true` bricht die Kette vorzeitig ab, und der Handler
-     gibt eine Guardrail-Ablehnungsantwort zurück.
-3. Die (möglicherweise umgeschriebenen) Nutzdaten werden an das Combo-Routing
-   und die Upstream-Weiterleitung übergeben.
-4. Nachdem die Antwort zusammengestellt wurde, führt
-   `guardrailRegistry.runPostCallHooks(...)` dieselbe Kette für die Antwort
-   aus. `block: true` verwirft hier die Upstream-Antwort.
+   - Das erste `block: true` unterbricht die Kette (Short-Circuit), und der
+     Handler gibt eine Guardrail-Ablehnungsantwort zurück.
+3. Die (möglicherweise umgeschriebene) Payload fließt in das Combo-Routing und
+   den Upstream-Dispatch.
+4. **Nur Non-Streaming:** Nachdem die Antwort zusammengesetzt wurde, führt
+   `guardrailRegistry.runPostCallHooks(...)` dieselbe Kette auf der Antwort
+   aus. `block: true` verwirft hier die Upstream-Antwort und gibt HTTP 400
+   zurück. Gestreamte Antworten überspringen diesen Schritt vollständig.
 
-Guardrails, die eine Ausnahme auslösen, werden mit `error: <message>` erfasst
-und über `logger.warn` protokolliert, die Kette wird jedoch fortgesetzt —
-dies entspricht dem Fail-Open-Prinzip.
+Guardrails, die eine Ausnahme werfen, werden mit `error: <message>` erfasst und
+über `logger.warn` protokolliert, aber die Kette läuft weiter — Fail-Open ist
+hier bewusstes Design.
+
+## Abdeckung und Grenzen
+
+Die Guardrail-Registry ist ausschließlich in die Chat-Pipeline eingebunden.
+Diese Grenzen sind durch
+`tests/unit/guardrail-pipeline-wiring-characterization.test.ts` und
+`tests/unit/guardrail-pipeline-characterization.test.ts` festgeschrieben;
+aktualisieren Sie diese Tests bewusst, wenn sich das Verhalten ändert.
+
+### Wo die Hooks laufen
+
+| Hook / Steuerung                    | Läuft bei                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`                   | Anfragen, die von `handleChat` verarbeitet werden (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (und `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*` sowie der Telegram-Chat-Proxy. Außerdem der Dashboard-Testendpunkt `/api/guardrails/test`. Ein Pre-Call-Block gibt HTTP 400 zurück. |
+| `runPostCallHooks`                  | Nur **Non-Streaming**-Chat-Antworten (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Gestreamte Antworten erreichen ihn nie.                                                                                                                                                                                                                                                                                                                     |
+| Streaming-PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), eingebunden in `streamingPipeline.ts`, wenn `PII_RESPONSE_SANITIZATION` aktiviert ist. Es ist keine Guardrail, daher wirken die Deaktivierungskanäle nicht darauf.                                                                                                                                                                                                                         |
+| Injection-Guard-Middleware (Legacy) | Jede prompt-führende `/v1`-Route, einschließlich der Chat-Familie (siehe [Routen-Abdeckung](#injection-guard-route-coverage--red-team-phase-8--block-d)). Nur Prompt Injection.                                                                                                                                                                                                                                                                          |
+
+### Was nicht abgedeckt ist
+
+- **Medien-, Embeddings- und Datenrouten** (`/v1/images/*`, `/v1/embeddings`,
+  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
+  `/v1/rerank`, `/v1/search`, `/v1/moderations`) erreichen die Registry nie.
+  Dort laufen weder PII-Maskierung noch Credential-Maskierung noch eine
+  Modalitätsbrücke. Ihre einzige Prüfung ist die
+  Legacy-Injection-Guard-Middleware.
+- **Gestreamte Antworten** erhalten keine Post-Call-Guardrails: kein
+  `pii-masker`- oder `credential-masker`-Post-Call und kein Post-Call-Block.
+  Nur die Streaming-PII-Transformation greift (wenn
+  `PII_RESPONSE_SANITIZATION` aktiviert ist). Ein Credential, das in einer
+  gestreamten Antwort zurückgegeben wird, wird nicht unkenntlich gemacht.
+- **Deaktivierungskanäle vs. die Middleware (by Design):** Die Middleware
+  wertet Prompt Injection mit ihrem eigenen Aufruf von
+  `evaluatePromptInjection()` aus, ohne eine aufrufergesteuerte
+  Deaktivierungsliste zu übergeben. Der `block`-Modus ist eine verbindliche
+  Grenze, die aufrufergesteuerte Deaktivierungen nicht umgehen können, auch
+  nicht auf Chat-Familien-Routen
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Das
+  Deaktivieren von `prompt-injection` überspringt nur die Registry-Guardrail.
+
+### Was eine Antwort vor dem Post-Call sieht
+
+Auf dem Non-Streaming-Pfad lautet die Reihenfolge: Memory-Extraktion →
+Ausführung eingebauter Tools → Post-Call-Guardrails → Post-Call-Block-Ausstieg
+→ Semantic-Cache-Speicherung.
+
+- **Speicherextraktion** und **Tool-Ausführung** sehen die Antwort, bevor
+  Post-Call-Guardrails sie umschreiben oder blockieren können. Seit
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401) leitet die
+  Speicherextraktion den extrahierten Text durch `sanitizePII`, wenn
+  `PII_RESPONSE_SANITIZATION` aktiviert ist (sowohl bei Streaming als auch bei
+  Nicht-Streaming), aber eine Antwort, die der Post-Call später blockiert, wurde
+  dennoch bereits dem Speicher und den Tools angeboten.
+- **Der semantische Cache** speichert die Antwort nach dem Post-Call, sodass er
+  die umgeschriebene Antwort speichert und eine blockierte Antwort niemals
+  zwischengespeichert wird. Cache-Einträge werden pro API-Schlüssel abgelegt.
 
 ## Konfiguration
 
-Von den integrierten Guardrails gelesene Umgebungsvariablen:
+Umgebungsvariablen, die von den integrierten Guardrails gelesen werden:
 
-| Variable                              | Verwendet von               | Auswirkung                                                                                                            |
-| ------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`          | Auf `false` setzen, um die Erkennung vollständig zu deaktivieren.                                                     |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`          | Injektionsrichtlinie: `warn`, `block` oder `log`. Der Legacy-Wert `redact` schreibt Injektionstext nicht um.          |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`          | Modus für den Injektions-Guard; zugleich ein DB-Feature-Flag, das die Umgebungsvariablen **überschreibt** (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`          | Mindestschweregrad, den `MODE=block` ablehnt: `high` (Standard), `medium` oder `low`.                                 |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`          | Legacy-Alias für `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                   |
-| `PII_REDACTION_ENABLED`               | `pii-masker`                | Bei `true` werden personenbezogene Daten in Anfragen redigiert (unabhängig vom Injektionsmodus).                      |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (nachgelagert) | Steuert das Maskierungsverhalten auf der Antwortseite.                                                                |
+| Variable                              | Verwendet von               | Wirkung                                                                                                      |
+| ------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`          | Auf `false` setzen, um die Erkennung vollständig zu deaktivieren.                                            |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`          | Injection-Richtlinie: `warn`, `block` oder `log`. Der Legacy-Wert `redact` schreibt Injection-Text nicht um. |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`          | Modus für den Injection-Guard; außerdem ein DB-Feature-Flag, das die Env-Vars **überschreibt** (DB > ENV).   |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`          | Mindestschweregrad, den `MODE=block` ablehnt: `high` (Standard), `medium` oder `low`.                        |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`          | Legacy-Alias für `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                          |
+| `PII_REDACTION_ENABLED`               | `pii-masker`                | Wenn `true`, werden PII in Anfragen geschwärzt (unabhängig vom Injection-Modus).                             |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (nachgelagert) | Steuert das Verhalten des Maskers auf der Antwortseite.                                                      |
 
 Die Modality-Bridge-Guardrails lesen die Laufzeitkonfiguration aus dem
-DB-gestützten Einstellungsspeicher (`getSettings()`), nicht aus
-Umgebungsvariablen. Die primären Schlüssel für Vision sind
+DB-gestützten Einstellungsspeicher (`getSettings()`), nicht aus Umgebungsvariablen.
+Die primären Schlüssel von Vision sind
 `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
 `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
 `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
@@ -470,25 +513,25 @@ Umgebungsvariablen. Die primären Schlüssel für Vision sind
 `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` und
 `modalityBridgeCacheMaxEntries`. Die Legacy-Schlüssel
 `visionBridge*` werden nur als dokumentierter Lese-Fallback für einen Zyklus
-akzeptiert; Schreibvorgänge über das Dashboard verwenden die primären
-Schlüssel. Standardwerte und der Fallback-Resolver befinden sich in
-`src/shared/constants/modalityBridgeDefaults.ts`, während Legacy-Konstanten in
-`src/shared/constants/visionBridgeDefaults.ts` beibehalten werden.
+akzeptiert; Dashboard-Schreibvorgänge verwenden die primären Schlüssel.
+Standardwerte und der Fallback-Resolver befinden sich in
+`src/shared/constants/modalityBridgeDefaults.ts`; Legacy-Konstanten bleiben
+in `src/shared/constants/visionBridgeDefaults.ts` erhalten.
 
 Audio verwendet `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
 `modalityBridgeAudioTimeout` und `modalityBridgeAudioMaxClips` sowie die
-gemeinsam genutzten `modalityBridgeCache*`-Einstellungen. Für Audio gibt es
-keinen Legacy-Schlüssel-Fallback, da diese Schlüssel mit dem
-Modality-Bridge-Schema eingeführt wurden.
+gemeinsamen `modalityBridgeCache*`-Einstellungen. Audio hat keinen
+Legacy-Schlüssel-Fallback, da diese Schlüssel mit dem Modality-Bridge-Schema
+eingeführt wurden.
 
 Video verwendet `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
 `modalityBridgeVideoModel`,
 `modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
 `modalityBridgeVideoMaxVideos` und
-`modalityBridgeVideoTimeout` sowie die gemeinsam genutzten
-`modalityBridgeCache*`-Einstellungen. Es ist standardmäßig deaktiviert, da
-FFmpeg/ffprobe optionale betriebliche Abhängigkeiten sind und die
-Frame-Beschriftung zusätzliche Latenz und Modellkosten verursacht.
+`modalityBridgeVideoTimeout` sowie die gemeinsamen `modalityBridgeCache*`-Einstellungen.
+Es ist standardmäßig deaktiviert, da FFmpeg/ffprobe optionale
+Betriebsabhängigkeiten sind und das Captioning von Einzelbildern Latenz und
+Modellkosten hinzufügt.
 
 ## Benutzerdefinierte Guardrails
 
@@ -513,11 +556,11 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 Schritte:
 
-1. Erstellen Sie `src/lib/guardrails/myGuardrail.ts` als Erweiterung von `BaseGuardrail`.
+1. Erstellen Sie `src/lib/guardrails/myGuardrail.ts`, das `BaseGuardrail` erweitert.
 2. Implementieren Sie `preCall` und/oder `postCall`.
-3. Registrieren Sie die Guardrail entweder beim Import (über `registerDefaultGuardrails`) oder
-   rufen Sie zur Laufzeit `guardrailRegistry.register(...)` auf — die Registry ersetzt
-   jede vorhandene Guardrail mit demselben normalisierten Namen.
+3. Registrieren Sie entweder zur Importzeit (Push aus `registerDefaultGuardrails`) oder
+   rufen Sie `guardrailRegistry.register(...)` zur Laufzeit auf — die Registry ersetzt
+   jeden vorherigen Guardrail mit demselben normalisierten Namen.
 4. Fügen Sie Tests unter `tests/unit/` hinzu (vorhandene Beispiele:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
@@ -525,30 +568,30 @@ Schritte:
 
 ## Tests
 
-Verwenden Sie zwischen den Tests `resetGuardrailsForTests()`, um mit einem bekannten Zustand zu beginnen.
-Übergeben Sie `{ registerDefaults: false }`, um mit einer leeren Registry zu beginnen und
-nur die zu testenden Guardrails zu registrieren. Vision Bridge unterstützt Dependency
-Injection (`deps.getSettings`, `deps.callVisionModel`); Audio Bridge stellt entsprechende
-Schnittstellen für Einstellungen, Fähigkeiten, STT-Modellauswahl, Anmeldedatenprüfungen
-und Transkription bereit. Tests können daher beide Abläufe ohne Datenbank- oder
-Netzwerkzugriff ausführen.
+Verwenden Sie `resetGuardrailsForTests()` zwischen den Tests, um von einem bekannten
+Zustand auszugehen. Übergeben Sie `{ registerDefaults: false }`, um mit einer leeren
+Registry zu starten und nur die zu testenden Guardrails zu registrieren. Vision Bridge
+akzeptiert Dependency Injection (`deps.getSettings`, `deps.callVisionModel`); Audio Bridge
+stellt die entsprechenden Nahtstellen für Einstellungen, Fähigkeiten, STT-Modellauswahl,
+Zugangsdatenprüfungen und Transkription bereit. Tests können daher beide Abläufe ohne
+DB- oder Netzwerkzugriff ausführen.
 
 ## Siehe auch
 
 - `src/lib/guardrails/` — Implementierung
-- `src/shared/utils/inputSanitizer.ts` — gemeinsamer Detektor, auf dem
-  Prompt-Injection-Erkennung und PII-Maskierung basieren
-- `src/shared/constants/visionBridgeDefaults.ts` — Standardwerte für Vision Bridge und
-  Modellliste für erzwungenes Bridging
-- `src/shared/constants/modalityBridgeDefaults.ts` — gemeinsame Laufzeitstandardwerte für Vision/Audio
-- `docs/architecture/RESILIENCE_GUIDE.md` — orthogonale Schicht (Circuit Breaker, Cooldowns)
+- `src/shared/utils/inputSanitizer.ts` — gemeinsamer Detektor, der Prompt-Injection-
+  und PII-Maskierung ermöglicht
+- `src/shared/constants/visionBridgeDefaults.ts` — Vision-Bridge-Standardeinstellungen
+  und Liste der erzwungenen Bridge-Modelle
+- `src/shared/constants/modalityBridgeDefaults.ts` — gemeinsame Vision-/Audio-Laufzeit-Standardeinstellungen
+- `docs/architecture/RESILIENCE_GUIDE.md` — orthogonale Ebene (Circuit Breaker, Cooldowns)
 - `docs/reference/ENVIRONMENT.md` — vollständige Referenz der Umgebungsvariablen
 
-## Routenabdeckung des Injection-Guards und Red-Teaming (Phase 8 · Block D)
+## Routenabdeckung des Injection-Guards & Red-Team (Phase 8 · Block D)
 
 Der Injection-Guard (`createInjectionGuard` / `withInjectionGuard`) deckt alle Routen ab,
-die Benutzer-Prompts akzeptieren. Er berücksichtigt `INJECTION_GUARD_MODE` (Standardwert `warn` = nur protokollieren;
-`block` = gibt HTTP 400 `SECURITY_001` zurück).
+die Benutzer-Prompts akzeptieren. Er berücksichtigt `INJECTION_GUARD_MODE` (Standard `warn`
+= nur protokollieren; `block` = gibt HTTP 400 `SECURITY_001` zurück).
 
 | Typ              | Routen                                                                                                                                               | Standardmodus |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
@@ -558,24 +601,29 @@ die Benutzer-Prompts akzeptieren. Er berücksichtigt `INJECTION_GUARD_MODE` (Sta
 
 Die Textextraktion (`extractMessageContents`) deckt `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` ab.
 
-**Red-Teaming (nächtlich, `nightly-llm-security.yml`):** promptfoo überprüft, dass jede Route
-den OWASP-LLM-Korpus bei `INJECTION_GUARD_MODE=block` blockiert; garak führt Prüfungen aus (wird ohne Secret übersprungen).
-`moderations` ist aus Konsistenzgründen enthalten — Betreiber können die Route im Blockierungsmodus über
-`resolveDisabledGuardrails` ausnehmen.
+**Red-Team (nächtlich, `nightly-llm-security.yml`):** promptfoo validiert, dass jede Route
+das OWASP-LLM-Korpus bei `INJECTION_GUARD_MODE=block` blockiert; garak führt Probes aus
+(wird ohne Secret übersprungen). `moderations` ist der Konsistenz halber enthalten. Der
+Block-Modus ist eine verbindliche Grenze: `evaluatePromptInjection()` ignoriert die
+anfragespezifische Deaktivierungsliste, die die Middleware übergibt, sodass
+`disabledGuardrails` eine Route **nicht** davon ausnimmt
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
-Der nächtliche Workflow (`.github/workflows/nightly-llm-security.yml`, Cron + manueller
-Start) umfasst zwei Jobs:
+Der Nightly-Workflow (`.github/workflows/nightly-llm-security.yml`, Cron + manueller
+Dispatch) hat zwei Jobs:
 
 - **`promptfoo-guard` (blockierend)** — führt `promptfoo eval -c promptfooconfig.yaml`
-  mit `INJECTION_GUARD_MODE=block` aus. Jeder adversariale Fall (z. B. „ignore all
-  previous instructions…“, Jailbreaks im DAN-Stil) stellt sicher, dass die Antwort
-  `error.code === "SECURITY_001"` enthält, d. h., dass die Guardrail die Anfrage tatsächlich abgelehnt hat.
-- **`garak` (informativ)** — führt garak mit `--probes promptinject,dan,leakreplay`
-  gegen eine lokale OmniRoute-Instanz (`http://localhost:20128/v1`) aus. Die Ausführung hängt von einem
-  Provider-Secret (`PROMPTFOO_PROVIDER_KEY`) ab; ohne dieses wird sie ordnungsgemäß übersprungen und ist mit
-  `|| true` versehen, sodass Ergebnisse gemeldet werden, ohne dass CI fehlschlägt.
+  mit `INJECTION_GUARD_MODE=block` aus. Jeder adversarische Testfall (z. B. "ignore all
+  previous instructions…", DAN-ähnliche Jailbreaks) prüft, dass die Antwort
+  `error.code === "SECURITY_001"` enthält, d. h. dass der Guard die Anfrage tatsächlich
+  abgelehnt hat.
+- **`garak` (nicht blockierend)** — führt garak `--probes promptinject,dan,leakreplay`
+  gegen eine lokale OmniRoute-Instanz (`http://localhost:20128/v1`) aus. Abhängig von
+  einem Provider-Secret (`PROMPTFOO_PROVIDER_KEY`); wird bei Fehlen sauber übersprungen
+  und ist mit `|| true` versehen, sodass es Bericht erstattet, ohne die CI fehlschlagen
+  zu lassen.
 
-Die Abdeckung des Guard-Helfers (`createInjectionGuard` / `withInjectionGuard`)
-erstreckt sich über jede Prompt-verarbeitende `/v1`-Route; der Prompt-Text wird durch
+Die Abdeckung des Guard-Helfers (`createInjectionGuard` / `withInjectionGuard`) erstreckt
+sich über jede prompt-führende `/v1`-Route; der Prompt-Text wird von
 `extractMessageContents()` in `src/shared/utils/inputSanitizer.ts` aus
 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` extrahiert.

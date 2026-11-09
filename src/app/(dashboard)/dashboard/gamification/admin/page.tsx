@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import { Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
 
 interface Anomaly {
   apiKeyId: string;
@@ -34,13 +44,14 @@ export default function GamificationAdminPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">{t("gamificationAdmin")}</h1>
-        <p className="text-sm text-text-muted mt-1">{t("monitorAnomaliesAndHealth")}</p>
-      </div>
+      <PageHeader
+        compact
+        title={t("gamificationAdmin")}
+        description={t("monitorAnomaliesAndHealth")}
+      />
 
       <Card>
-        <h2 className="text-lg font-semibold mb-3">{t("flaggedAnomalies")}</h2>
+        <SectionHeader className="mb-3" title={t("flaggedAnomalies")} />
         {loading ? (
           <div className="text-text-muted" role="status" aria-live="polite" aria-busy="true">
             {t("loading")}
@@ -50,32 +61,30 @@ export default function GamificationAdminPage() {
             {t("noAnomaliesDetected")}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-2 font-medium text-text-muted">{t("apiKey")}</th>
-                  <th className="text-right p-2 font-medium text-text-muted">{t("xpLastHour")}</th>
-                  <th className="text-right p-2 font-medium text-text-muted">{t("zScore")}</th>
-                  <th className="text-center p-2 font-medium text-text-muted">{t("status")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {anomalies.map((a) => (
-                  <tr key={a.apiKeyId} className="border-b border-border/50 last:border-b-0">
-                    <td className="p-2 font-mono text-xs">{a.apiKeyId.slice(0, 16)}...</td>
-                    <td className="p-2 text-right">{a.xpLastHour.toLocaleString()}</td>
-                    <td className="p-2 text-right text-red-400">{a.zScore.toFixed(2)}</td>
-                    <td className="p-2 text-center">
-                      <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded-full">
-                        {t("suspicious")}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table className="min-w-0" scrollbarLabel={t("flaggedAnomalies")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("apiKey")}</TableHead>
+                <TableHead className="text-right">{t("xpLastHour")}</TableHead>
+                <TableHead className="text-right">{t("zScore")}</TableHead>
+                <TableHead className="text-center">{t("status")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {anomalies.map((a) => (
+                <TableRow key={a.apiKeyId}>
+                  <TableCell className="font-mono text-xs">{a.apiKeyId.slice(0, 16)}...</TableCell>
+                  <TableCell className="text-right">{a.xpLastHour.toLocaleString()}</TableCell>
+                  <TableCell className="text-right text-error">{a.zScore.toFixed(2)}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="error" size="sm">
+                      {t("suspicious")}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </Card>
     </div>

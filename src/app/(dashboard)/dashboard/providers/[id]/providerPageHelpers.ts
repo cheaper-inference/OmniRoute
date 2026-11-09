@@ -11,6 +11,7 @@ import {
   MODEL_COMPAT_PROTOCOL_KEYS,
   type ModelCompatProtocolKey,
 } from "@/shared/constants/modelCompat";
+import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
 import {
   getClaudeCodeCompatibleRequestDefaults as _getClaudeCodeCompatibleRequestDefaults,
@@ -84,6 +85,7 @@ export type CompatModelRow = {
   source?: string;
   apiFormat?: string;
   supportedEndpoints?: string[];
+  endpointCapabilitySource?: string;
   normalizeToolCallId?: boolean;
   preserveOpenAIDeveloperRole?: boolean;
   isHidden?: boolean;
@@ -93,6 +95,10 @@ export type CompatModelRow = {
   compatByProtocol?: CompatByProtocolMap;
   /** #2905: per-model upstream wire-format override. */ targetFormat?: string;
   /** #4125: manual context-window override (tokens), when set. */ contextWindowOverride?: number;
+  /** Manual output-token-limit override (tokens), when set. Same persistence
+   * path as contextWindowOverride but via maxOutputTokenOverride / the
+   * `max_output_tokens` model-capability-override key. */
+  maxOutputTokenOverride?: number;
   /** #1904: manual vision-capability override for custom models whose upstream
    * discovery metadata doesn't self-report an image input modality. */
   supportsVision?: boolean;
@@ -119,6 +125,23 @@ export function targetFormatBadgeI18nKey(value: string): string | null {
   return TARGET_FORMAT_BADGE_I18N_KEYS[value] ?? null;
 }
 
+const GENERATION_FORMAT_ENDPOINTS: Record<string, ModelSupportedEndpoint[]> = {
+  "images-generations": ["images"],
+  video: ["videos"],
+};
+
+/**
+ * #17071 — endpoint ticks to apply when the custom-model API Format changes, or null to keep
+ * them. A generation format replaces the form's default "chat" tick (else the row advertises
+ * chat for an image/video-only model); leaving one restores the "chat" default.
+ */
+export function endpointsForApiFormatChange(
+  from: string,
+  to: string
+): ModelSupportedEndpoint[] | null {
+  return GENERATION_FORMAT_ENDPOINTS[to] ?? (GENERATION_FORMAT_ENDPOINTS[from] ? ["chat"] : null);
+}
+
 /** #5442 — badge for add-credential validation; unsupported → neutral N/A (not red Invalid). */
 export function validationBadgeProps(result: string): {
   variant: "success" | "error" | "info";
@@ -131,10 +154,28 @@ export function validationBadgeProps(result: string): {
   return { variant: "error", labelKey: "invalid", fallback: "Invalid" };
 }
 
+/**
+ * Extract a human-readable reason from a validate/test response `error` field. The
+ * field is a bare string for validator results but an `{ code, message }` envelope
+ * for pipeline rejections (403 LOCAL_ONLY, AUTH_*) — swallowing the envelope made a
+ * reverse-proxied dashboard's Check button show a bare "Invalid" with no reason.
+ */
+export function validationErrorMessage(error: unknown): string | null {
+  if (typeof error === "string" && error.trim()) return error;
+  if (error && typeof error === "object") {
+    const { message, code } = error as { message?: unknown; code?: unknown };
+    if (typeof message === "string" && message.trim()) return message;
+    if (typeof code === "string" && code.trim()) return code;
+  }
+  return null;
+}
+
 /** A single model's outcome from a `/api/models/test-all` response. */
 export interface TestAllModelOutcome {
   status: "ok" | "error";
   isQuota?: boolean;
+  /** The runner never dispatched this probe: neither working nor broken. */
+  skipped?: boolean;
   shouldHide: boolean;
 }
 type TestAllEntryStatus = "ok" | "error" | "slow";
@@ -186,6 +227,7 @@ export function evaluateTestAllEntry(
     // so an evening Test All on a free-tier provider doesn't silently wipe the
     // catalog for the next day.
     ...(entry?.isQuota ? { isQuota: true } : {}),
+    ...(!ok && entry?.skipped ? { skipped: true } : {}),
     // Hide only persistent failures. Transient (rate-limited, timeout, quota) are
     // surfaced on the icon but kept visible so a single throttled batch test
     // does not silently wipe the catalog.
@@ -205,6 +247,50 @@ export function testAllResultsText(
   total: number
 ): string {
   return providerText(t, "testAllResults", "{ok} of {total} models working", { ok, total });
+}
+
+/**
+ * Running counts for a "Test all models" batch. Skipped probes (a web-session
+ * provider's models are never dispatched) are neither working nor failing.
+ */
+export interface TestAllTally {
+  ok: number;
+  error: number;
+  skipped: number;
+  /** The runner's reason for the first skipped probe, shown in the summary. */
+  skipReason?: string;
+}
+
+/** Count one model's Test All outcome; `reason` is the entry's error message. */
+export function recordTestAllOutcome(
+  tally: TestAllTally,
+  outcome: Pick<TestAllModelOutcome, "status" | "skipped">,
+  reason?: string
+): void {
+  if (outcome.skipped) {
+    tally.skipped++;
+    tally.skipReason ??= reason;
+  } else if (outcome.status === "ok") {
+    tally.ok++;
+  } else {
+    tally.error++;
+  }
+}
+
+/**
+ * The toast lines for a finished "Test all models" batch: the count covers only
+ * the models that were tested, then the runner's skip reason is shown, as the
+ * single-model test does.
+ */
+export function testAllSummaryMessages(
+  t: ProviderMessageTranslator,
+  tally: TestAllTally
+): string[] {
+  const { ok, error, skipped, skipReason } = tally;
+  const tested = ok + error;
+  const messages = tested > 0 || skipped === 0 ? [testAllResultsText(t, ok, tested)] : [];
+  if (skipped > 0 && skipReason) messages.push(skipReason);
+  return messages.length > 0 ? messages : [testAllResultsText(t, ok, tested)];
 }
 
 export function providerCountText(

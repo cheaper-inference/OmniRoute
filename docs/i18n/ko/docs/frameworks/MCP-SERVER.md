@@ -10,35 +10,30 @@
 
 ## 설치
 
-OmniRoute MCP는 기본 제공됩니다. 다음 명령으로 시작합니다.
+OmniRoute MCP 내장되어 있습니다. 다음으로 시작하세요:
 
 ```bash
 omniroute --mcp
 ```
 
-또는 open-sse 전송 방식을 통해 시작합니다.
+또는 open-sse 전송을 통해:
 
 ```bash
-# HTTP 스트리밍 가능 전송 방식(포트 20130)
-omniroute --dev  # MCP가 /mcp 엔드포인트에서 자동으로 시작됨
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP 전송 방식(`sse` / `streamable-http`, 대시보드 서버가 동일 프로세스 내에서 제공)은
-기본적으로 비활성화되어 있으며, 이전에는 `/dashboard/mcp` 페이지에서만 전환할 수 있었습니다. v3.8.51부터는
-CLI에서도 동일한 기능을 제공합니다.
+HTTP 전송(`sse` / `streamable-http`, 대시보드 서버에서 프로세스 내 제공)은 기본적으로 꺼져 있으며 이전에는 `/dashboard/mcp` 페이지에서만 전환할 수 있었습니다. v3.8.51부터 CLI 에는 패리티가 있습니다.
 
 ```bash
-omniroute mcp status                                  # 활성화/온라인 여부, 전송 방식, 도구 수
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # 활성 sse/streamable-http 세션 재설정
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable`은 대시보드가 `/api/settings`를 통해 전환하는 것과 동일한 `mcpEnabled`
-설정(선택적으로 `mcpTransport`도 포함)을 PATCH합니다. `mcp restart`는 `POST /api/mcp/restart`를 호출합니다. 이 명령은
-활성 `sse`/`streamable-http` 세션을 종료하여 다음 요청이 초기화부터 정상적으로 다시 시작되도록 하며,
-MCP가 비활성화된 경우 `409`, `stdio` 전송 방식인 경우 `501`을 반환합니다(stdio 클라이언트는 자체
-하위 프로세스를 소유하므로 동일 프로세스 내에서 재시작할 수 있는 핸들이 없습니다).
+`mcp enable`/`mcp disable` PATCH 동일한 `mcpEnabled` (및 선택적으로 `mcpTransport`) 대시보드 설정은 `/api/settings` 통해 전환됩니다. `mcp restart` `POST /api/mcp/restart` 호출합니다. 활성 `sse`/`streamable-http` 세션을 해제하여 다음 요청이 깔끔하게 다시 초기화되고 MCP 비활성화된 경우 `409` 반환하며 `stdio` 전송을 위해 `501` 반환합니다(stdio 클라이언트는 자체 하위 프로세스 — 소유하므로 다시 시작할 프로세스 내 핸들이 없습니다).
 
 ## 전송 방식
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 `manage` 범위가 없는 키를 사용하거나 Bearer를 제공하지 않으면 `403 LOCAL_ONLY`가 반환됩니다. 인접한 접두사 `/api/cli-tools/runtime/*`는 의도적으로 우회할 수 없습니다. 자세한 내용은 [라우트 가드 계층 — manage 범위 예외](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)를 참조하세요.
+
+### Origin 검증
+
+인증 후 `/api/mcp/*`로 가는 모든 요청(트랜스포트와 `status`, `tools`, `audit`, `restart` 같은 관리 라우트)은 호출자(API 키, CLI 토큰, 대시보드 세션, 로그인 비활성화 시 익명 루프백)와 관계없이 `Origin` 헤더를 검증받습니다. 이는 MCP Streamable HTTP 사양이 요구하는 DNS 리바인딩 방어입니다.
+
+- **`Origin` 헤더 없음** → 허용. OmniRoute CLI, SDK, IDE 클라이언트는 이 헤더를 보내지 않습니다.
+- **허용되는 `Origin`** → 모든 포트의 `localhost` / `127.0.0.1` / `[::1]`, 또는 OmniRoute 자체 공개 origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, 신뢰된 리버스 프록시가 전달한 origin(`OMNIROUTE_TRUST_PROXY`, base URL이 설정되지 않은 경우에만), 또는 루프백/LAN IP 호스트 직접 접속. `Host` 헤더만으로는 어떤 origin도 신뢰되지 않습니다.
+- **그 밖의 모든 `Origin`(`null` 포함)** → `403`, JSON-RPC 오류 본문: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. 유효한 CSRF 토큰을 제시한 대시보드 세션은 다른 대시보드 쓰기와 마찬가지로 계속 허용됩니다.
+
+리버스 프록시 뒤에서 제공되는 브라우저 MCP 클라이언트는 `OMNIROUTE_PUBLIC_BASE_URL`가 필요하며, 다른 origin을 위한 허용 목록은 없습니다. CORS 프리플라이트(`OPTIONS`)는 Origin을 검사하지 않지만, 뒤따르는 실제 요청은 검사합니다.
 
 ## IDE 구성
 
@@ -122,53 +127,40 @@ Claude Desktop, Cursor, Cline 및 호환되는 MCP 클라이언트 설정은 [MC
 
 ## 압축 도구 (13)
 
-| 도구                                | 범위                | 설명                                                                                          |
-| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | 압축 설정, 분석 요약 및 캐시 인식 통계(`analytics.mcpDescriptionCompression` 메타데이터 포함) |
-| `omniroute_compression_configure`   | `write:compression` | 압축 모드, 임계값, 목표 비율, 시스템 프롬프트 보존 및 MCP 설명 압축 토글 구성                 |
-| `omniroute_set_compression_engine`  | `write:compression` | 활성 엔진(off/caveman/rtk/stacked) 및 Caveman/RTK 강도 선택                                   |
-| `omniroute_list_compression_combos` | `read:compression`  | 명명된 압축 콤보 및 해당 엔진 파이프라인 목록 표시                                            |
-| `omniroute_compression_combo_stats` | `read:compression`  | 압축 콤보 및 엔진별로 그룹화된 분석                                                           |
-| `omniroute_ccr_store`               | `write:compression` | 호출자별로 격리된 콘텐츠를 제한된 인메모리 CCR 저장소에 저장하고 마커와 `ccr://` 참조 반환    |
-| `omniroute_ccr_retrieve`            | `read:compression`  | 전체 또는 헤드, 테일, 줄, grep 및 통계 모드로 CCR 콘텐츠 검색                                 |
-| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자 소유 CCR 메타데이터 검사                                        |
-| `omniroute_ccr_list`                | `read:compression`  | 호출자 소유 CCR 블록의 페이지네이션된 메타데이터 목록 표시                                    |
-| `omniroute_ccr_delete`              | `write:compression` | 호출자 소유 CCR 블록 삭제                                                                     |
-| `omniroute_ccr_stats`               | `read:compression`  | 호출자 범위의 메모리 사용량, 수명 주기 카운터 및 저장소 제한 보고                             |
-| `omniroute_rtk_discover`            | `read:compression`  | 옵트인 RTK 출력 샘플에서 반복되는 노이즈 탐색                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | 옵트인 샘플에서 검토 가능한 RTK 필터 초안 생성                                                |
+| 도구                                | 범위                | 설명                                                                                           |
+| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | 압축 설정, 분석 요약 및 캐시 인식 통계( `analytics.mcpDescriptionCompression` 메타데이터 포함) |
+| `omniroute_compression_configure`   | `write:compression` | 압축 모드, 임계값, 대상 비율, 시스템 프롬프트 보존, MCP 설명 압축 토글 구성                    |
+| `omniroute_set_compression_engine`  | `write:compression` | 활성 엔진(off/caveman/rtk/stacked) 및 Caveman/RTK 강도를 선택합니다.                           |
+| `omniroute_list_compression_combos` | `read:compression`  | 명명된 압축 콤보 및 해당 엔진 파이프라인 나열                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | 압축 콤보 및 엔진별로 그룹화된 분석                                                            |
+| `omniroute_ccr_store`               | `write:compression` | 제한된 인메모리 CCR 저장소에 호출자 격리 콘텐츠를 저장하고 마커와 `ccr://` 참조를 반환합니다.  |
+| `omniroute_ccr_retrieve`            | `read:compression`  | 전체 또는 헤드, 테일, 라인, grep 및 통계 모드를 사용하여 CCR 콘텐츠를 검색합니다.              |
+| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자 소유의 CCR 메타데이터를 검사합니다.                              |
+| `omniroute_ccr_list`                | `read:compression`  | 호출자가 소유한 CCR 블록에 대한 페이지가 매겨진 메타데이터 나열                                |
+| `omniroute_ccr_delete`              | `write:compression` | 호출자가 소유한 CCR 블록 삭제                                                                  |
+| `omniroute_ccr_stats`               | `read:compression`  | 호출자 범위 메모리 사용량, 수명 주기 카운터 및 저장 제한 보고                                  |
+| `omniroute_rtk_discover`            | `read:compression`  | 옵트인 RTK 출력 샘플에서 반복되는 노이즈 발견                                                  |
+| `omniroute_rtk_learn`               | `read:compression`  | 옵트인 샘플에서 검토 가능한 RTK 필터 초안 생성                                                 |
 
-CCR 항목은 인메모리에만 존재하며 재시작하면 사라집니다. 각 블록은 2 MiB, 각
-주체는 16 MiB, 전역 저장소는 64 MiB로 제한됩니다. 항목의 기본 TTL은 24시간입니다(최대
-7일). 전체 MCP 검색은 256 KiB로 제한되며, 더 큰 블록은 범위 지정 및
-grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 목록 표시, 검사, 삭제 및 통계는
-인증된 API 키 주체별로 격리됩니다. 감사 기록에는 해시와 크기 메타데이터만 포함되며 콘텐츠는 포함되지 않습니다.
+CCR 항목은 2계층 저장소를 사용합니다. 즉, 로컬 비클라우드 런타임에서 내구성 있는 SQLite 계층(`ccr_blocks`, 기본적으로 켜져 있음)으로 지원되는 핫 인 메모리 계층을 사용하므로 블록은 TTL — 모두 소모할 때까지 제거 또는 재시작 후에도 유지됩니다. 단, 512개 이상의 KB 및 클라우드 런타임은 메모리 전용으로 유지됩니다. 각 블록은 2 MiB, 각 주체는 16 MiB, 전역 저장소는 64 MiB 로 제한됩니다. 항목은 기본적으로 24시간 TTL (최대 7일)로 설정됩니다. 전체 MCP 검색은 256 KiB 로 제한됩니다. 더 큰 블록은 ranged 및 grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 나열, 검사, 삭제 및 통계는 인증된 API 키 주체에 의해 격리됩니다. 감사 기록에는 해시 및 크기 메타데이터가 포함되며 콘텐츠는 포함되지 않습니다. 운영자 측 세부 정보(두 개의 마커, 클라이언트 전제 조건, `codemode:false`, 도구별 범위, 페이지 매김 및 진단 매트릭스)는 [압축 엔진 → 전제 조건 / 운영자 가이드](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) 에 있습니다.
 
-`omniroute_compression_status`는 MCP 설명 압축을
-`analytics.mcpDescriptionCompression` 아래에 별도로 보고합니다. 해당 값은 MCP에서 목록 조회가 가능한
-설명(`tools`, `prompts`, `resources`, `resourceTemplates`)의 메타데이터 크기 추정치이며, 제공자 사용량
-영수증이 아니므로 `source: "mcp_metadata_estimate"`로 표시됩니다.
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` 에서 별도로 MCP 설명 압축을 보고합니다. 해당 값은 MCP 목록 가능 설명(`tools`, `prompts`, `resources` 및 `resourceTemplates`)에 대한 메타데이터 크기 추정치입니다. 이는 공급자 사용 영수증이 아니며 `source: "mcp_metadata_estimate"` 로 표시됩니다.
 
-### MCP 접근성 트리 필터 (v3.8.0)
+### MCP 접근성 트리 필터(v3.8.0)
 
-위의 압축 도구와 별개로, OmniRoute에는 MCP 브라우저/접근성 도구의 **도구 결과**가
-에이전트에 반환되기 전에 압축하는 실행 후 필터가 포함되어 있습니다. 이 필터 자체는 도구가 아니며,
-상세한 접근성 트리 또는 브라우저 스냅샷 텍스트(2,000자 이상)가 포함된 모든 도구 결과에 투명하게
-적용됩니다.
+위의 압축 도구와 별도로 OmniRoute 다음을 압축하는 실행 후 필터가 포함되어 있습니다.** 도구 결과** MCP browser/accessibility 도구가 에이전트에 반환되기 전. 이 필터 자체는 도구 — 아니며 자세한 접근성 트리 또는 브라우저 스냅샷 텍스트(≥ 2000자)가 포함된 도구 결과에 대해 투명하게 실행됩니다.
 
-주요 동작:
+주요 행동:
 
-- 연속으로 30줄 이상 반복되는 형제 항목을 앞부분 + 뒷부분 요약으로 축약
-- Playwright/computer-use에 필요한 `[ref=eXX]` 앵커 보존
-- 지나치게 큰 텍스트(50,000자 초과)를 탐색 힌트와 함께 강제 잘라내기
-- 예상 절감률: 브라우저 스냅샷 페이로드의 **60~80%**
+- ≥ 30개의 연속 반복 형제 라인을 head + tail 요약으로 축소합니다.
+- Playwright/computer-use 에 필요한 `[ref=eXX]` 앵커를 유지합니다.
+- 탐색 힌트를 사용하여 큰 텍스트(> 50,000자)를 잘립니다.
+- 예상 절감액:** 60~80%** 브라우저 스냅샷 페이로드
 
-구성: 전역 설정의 `compression.mcpAccessibility`(마이그레이션 056).
-구현: `open-sse/services/compression/engines/mcpAccessibility/`.
-전체 문서: [압축 엔진 — MCP 접근성 트리 필터](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+구성: 전역 설정의 `compression.mcpAccessibility` (마이그레이션 056) 구현: `open-sse/services/compression/engines/mcpAccessibility/`. 전체 문서: [압축 엔진 — MCP 접근성 트리 필터](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-이러한 도구의 기반이 되는 런타임 압축 모델은 [압축 엔진](../compression/COMPRESSION_ENGINES.md) 및 [RTK 압축](../compression/RTK_COMPRESSION.md)을
-참조하세요.
+이러한 도구 뒤에 있는 런타임 압축 모델은 [압축 엔진](../compression/COMPRESSION_ENGINES.md) 및 [RTK 압축을](../compression/RTK_COMPRESSION.md) 참조하세요.
 
 ## 1Proxy 도구 (3)
 
@@ -288,181 +280,119 @@ MCP 도구/라우트 계층에 도달하기 전에 실행되며 구조화된 위
 
 ---
 
-## 인증 및 스코프
+## 인증 및 범위
 
-MCP 도구 호출은 호출자의 스코프 문자열을 읽습니다. 이 검사는 서로 독립적인 세 가지 네임스페이스 중 하나입니다. 한 검사기의 통과가 다른 검사기의 통과를 의미하지는 않습니다.
-관련 규칙은 [세 가지 스코프 네임스페이스](#three-scope-namespaces)를 참조하세요.
-도구 카탈로그는 [MCP 도구 스코프](#mcp-tool-scopes)를 참조하세요.
+MCP 도구는 호출자로부터 읽기 범위 문자열을 호출합니다. 해당 검사는 세 개의 독립적인 네임스페이스 중 하나입니다. 한 체커의 패스는 다른 체커의 패스가 아닙니다. 규칙은 [세 가지 범위 네임스페이스](#three-scope-namespaces) 입니다. 도구 카탈로그는 [MCP 도구 범위](#mcp-tool-scopes) 입니다.
 
-### 세 가지 스코프 네임스페이스
+### 세 가지 범위 네임스페이스
 
-API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 토큰의 `read`는 서로 다른 세 가지 권한입니다. `read` 액세스 토큰을 변경 작업을 수행하는 관리 경로에 전송하면 HTTP 403과 함께 다음 메시지가 반환됩니다.
-`Access token scope 'read' is insufficient; 'write' required.`
-이 순위는 `scopeSatisfies`입니다. 이는 MCP 테이블을 참조하지 않으며, MCP 매처도 이 순위를 참조하지 않습니다.
+API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 토큰의 `read` 는 세 가지 다른 부여입니다. 변경 관리 경로에 `read` 액세스 토큰을 보내는 호출자는 HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` 해당 순위는 `scopeSatisfies` 입니다. MCP 테이블을 참조하지 않으며 MCP matcher도 이를 참조하지 않습니다.
 
-| 네임스페이스     | 자격 증명                                                      | 검사기             | 통과 시 허용되는 작업                            |
-| :--------------- | :------------------------------------------------------------- | :----------------- | :----------------------------------------------- |
-| API 키 관리      | `api_keys.scopes`                                              | `hasManageScope`   | 해당 Bearer 키를 통한 관리 REST                  |
-| API 키 추가 권한 | 동일한 배열의 정확히 일치하는 문자열 하나                      | 아래에 명시된 헬퍼 | 해당 기능 하나만 허용                            |
-| MCP 도구 스코프  | 동일한 배열, 없으면 MCP `_meta`, 없으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 적용이 활성화된 경우 해당 도구                   |
-| 액세스 토큰      | `oma_live_…`                                                   | `scopeSatisfies`   | 메서드와 경로에서 해당 순위를 요구하는 관리 경로 |
+| 네임스페이스  | 신임장                                                                                     | 체커               | 패스가 허용됩니다                           |
+| :------------ | :----------------------------------------------------------------------------------------- | :----------------- | :------------------------------------------ |
+| API 키 관리   | `api_keys.scopes`                                                                          | `hasManageScope`   | 해당 Bearer 키에 대한 관리 REST             |
+| API 키 첨가제 | 동일한 배열, 하나의 정확한 문자열                                                          | 아래 이름의 도우미 | 그 능력 하나만으로                          |
+| MCP 도구 범위 | 같은 배열, 그렇지 않으면 MCP `_meta` (HTTP/SSE 전용), 그렇지 않으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 해당 도구는 시행이 시작되면                 |
+| 액세스 토큰   | `oma_live_…`                                                                               | `scopeSatisfies`   | 해당 순위가 필요한 방법 및 경로의 관리 경로 |
 
-각 자격 증명의 발급 방법은
-[관리 인증](../guides/MANAGEMENT-AUTH.md)에서 다룹니다.
+각 자격 증명 발행은 [관리 인증](../guides/MANAGEMENT-AUTH.md) 에서 다룹니다.
 
-#### API 키 스코프
+#### API 키 범위
 
-하나의 `api_keys.scopes` 배열이 두 가지 용도로 사용됩니다. 각 용도는 서로 다른 함수를 사용합니다.
+하나의 `api_keys.scopes` 어레이는 두 개의 작업을 제공합니다. 그들은 다른 기능을 사용합니다.
 
-**관리 REST.** `manage`와 `admin`은
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)의 구성원입니다.
-해당 키에 대해 관리 경로를 승인하는 것은 `hasManageScope`입니다. `admin`은
-이러한 경로에서 관리 권한을 제공합니다. 여기서 `admin`이라는 단어는
-액세스 토큰 순위가 아니며 MCP 도구 스코프로 확장되지도 않습니다.
+**관리 REST.** `manage` 및 `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`)의 멤버입니다. `hasManageScope` 는 해당 키에 대한 관리 경로를 승인하는 것입니다. `admin` 는 해당 경로에서 관리가 가능합니다. 여기서 `admin` 단어는 액세스 토큰 순위가 아니며 MCP 도구 범위로 확장되지 않습니다.
 
-**추가 문자열.** 각각은 정확한 구성원 일치 검사이며, 모두
-`MANAGEMENT_API_KEY_SCOPES` 외부에 유지됩니다.
+**추가 문자열.** 각각은 정확한 멤버십 테스트이며 각각은 `MANAGEMENT_API_KEY_SCOPES` 외부에 있습니다.
 
-| 스코프                         | 통과 시 허용되는 작업                                                                                                                                                             |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | 루프백이 아닌 `/api/mcp/`의 LOCAL_ONLY 예외만 허용합니다(`hasMcpConnectOrManageScope`). `manage` 또는 `admin`이 있는 키도 이 예외 검사를 통과합니다.                              |
-| `self:usage`                   | 이 키에 대한 `GET /api/v1/me/status`를 허용합니다(`src/app/api/v1/me/status/route.ts`). `POST /api/keys`는 생성 시 이 스코프를 추가합니다(`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | 해당 상태 페이로드 내의 업스트림 계정 할당량을 허용합니다(`src/lib/usage/apiKeySelfService.ts`). 상태 경로에는 여전히 `self:usage`가 필요합니다.                                  |
-| `policy:bypass-provider-quota` | 이 키의 추론 호출은 제공자 할당량 정책을 건너뜁니다(`src/sse/handlers/chat.ts`의 `hasProviderQuotaBypassScope`).                                                                  |
+| 범위                           | 패스가 허용됩니다                                                                                                                                                |
+| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | 루프백이 아닌 `/api/mcp/` LOCAL_ONLY 분할 전용(`hasMcpConnectOrManageScope`). `manage` 또는 `admin` 포함된 키는 여전히 해당 분할을 통과합니다.                   |
+| `self:usage`                   | 이 키(`src/app/api/v1/me/status/route.ts`)에 대해 `GET /api/v1/me/status`. `POST /api/keys` 생성 시(`normalizeSelfServiceScopesForCreate`) 이 범위를 추가합니다. |
+| `self:account-quota`           | 해당 상태 페이로드(`src/lib/usage/apiKeySelfService.ts`) 내의 업스트림 계정 할당량. 상태 경로에는 여전히 `self:usage` 필요합니다.                                |
+| `policy:bypass-provider-quota` | 이 키의 추론 호출은 공급자 할당량 정책( `src/sse/handlers/chat.ts` 의 `hasProviderQuotaBypassScope` )을 건너뜁니다.                                              |
 
-#### 매칭
+#### 어울리는
 
-카탈로그는 [MCP 도구 스코프](#mcp-tool-scopes) 아래의 테이블입니다.
-`src/shared/constants/mcpScopes.ts`의 `MCP_SCOPE_LIST`를 해당 카탈로그로
-취급하지 마세요. 이는 최초의 형식 지정된 하위 집합입니다. 이후 추가된 도구는 그 옆에서
-추가 스코프를 선언합니다(`read:notion`, `read:skills`, `read:local-corpus` 및 테이블의 나머지 항목).
+카탈로그는 [MCP 도구 범위](#mcp-tool-scopes) 아래의 테이블입니다. `src/shared/constants/mcpScopes.ts` 의 `MCP_SCOPE_LIST` 해당 카탈로그로 취급하지 마십시오. 이는 원래 유형의 하위 집합입니다. 이후 도구는 그 옆에 추가 범위(`read:notion`, `read:skills`, `read:local-corpus` 및 나머지 테이블)를 선언합니다.
 
-`open-sse/mcp-server/scopeEnforcement.ts`의 `evaluateToolScopes`는
-필요한 모든 스코프가 부여된 스코프 중 하나와 일치할 때 호출을 허용합니다.
+`open-sse/mcp-server/scopeEnforcement.ts` 의 `evaluateToolScopes` 모든 필수 범위가 일부 부여된 범위와 일치할 때 호출을 허용합니다.
 
-- `*`는 필요한 모든 스코프와 일치합니다.
-- 부여된 스코프가 `*`로 끝나면 별표 앞의 접두사로 시작하는 필수 스코프와 일치합니다. `read:*`는 `read:compression`과 일치합니다.
-- 그 밖의 부여된 스코프는 정확히 동일한 필수 문자열과만 일치합니다.
+- `*` 모든 필수 범위와 일치합니다.
+- `*` 로 끝나는 부여된 범위는 별 앞의 접두사로 시작하는 필수 범위와 일치합니다. `read:*` `read:compression` 일치합니다.
+- 다른 모든 부여된 범위는 동일한 필수 문자열과만 일치합니다.
 
-스코프가 `["manage"]`인 키는 `read:compression`에 대한 `scopeMatches`를 통과하지 못합니다.
-동일한 호출에서 부여된 문자열이 각각 `admin`, `mcp:connect`, `read`, `write`뿐인 경우에도
-검사에 실패합니다. 끝의 `*` 외에는 MCP 도구 스코프 간에 계층 구조가 없습니다.
+범위가 `["manage"]` 인 키는 `read:compression` 에 대해 `scopeMatches` 에 실패합니다. `admin`, `mcp:connect`, `read` 및 `write` 가 유일하게 부여된 문자열인 경우 동일한 호출이 실패합니다. 후행 `*` 이후의 MCP 도구 범위에는 계층 구조가 없습니다.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true`가 아니면 적용은 비활성화됩니다(기본값은
-`false`). 비활성화된 동안에는 `evaluateToolScopes`가 호출을 허용하고
-카탈로그를 건너뜁니다. 활성화된 동안에는 HTTP가 Bearer 키의 `api_keys.scopes`를
-`authInfo`로 사용합니다([키별 HTTP 스코프 바인딩](#per-key-http-scope-binding-7895) 참조).
-키 스코프가 확인되지 않으면 부여된 집합은 MCP `_meta`, 그다음
-`OMNIROUTE_MCP_SCOPES`로 대체됩니다.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (기본값 `false`)가 아니면 적용이 해제됩니다. 꺼져 있는 동안 `evaluateToolScopes` 호출을 허용하고 카탈로그를 건너뜁니다. 켜져 있는 동안 HTTP Bearer 키의 `api_keys.scopes` `authInfo` 로 사용합니다( [키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조). 키 범위가 확인되지 않으면 부여된 세트는 MCP `_meta` ( HTTP 인증 컨텍스트 내에서 HTTP/SSE 호출자에 대해서만 적용됩니다. stdio 호출자의 `_meta` 클라이언트가 이를 제어하고 호출자별 ID를 전달하지 않기 때문에 무시됩니다), `OMNIROUTE_MCP_SCOPES` 으로 넘어갑니다.
 
-#### 액세스 토큰 스코프
+#### 액세스 토큰 범위
 
-`oma_live_…` 토큰(`src/lib/accessTokens/scopes.ts`)은 `read`, `write`
-또는 `admin`을 가집니다. `scopeSatisfies`는 순위입니다. `admin`은 `write`와 `read`를
-포함하고, `write`는 `read`를 포함합니다. 알 수 없는 스코프는 아무 권한도 제공하지 않습니다.
+`oma_live_…` 토큰(`src/lib/accessTokens/scopes.ts`)은 `read`, `write` 또는 `admin` 전달합니다. `scopeSatisfies` 는 순위입니다. `admin` `write` 및 `read` 포함하고, `write` `read` 포함합니다. 알 수 없는 범위에는 아무 것도 포함되지 않습니다.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`)는 해당 순위를
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`)와 비교합니다.
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`)는 해당 순위를 `inferRequiredScope` (`src/server/authz/accessScopes.ts`)와 비교합니다.
 
-- `GET`, `HEAD`, `OPTIONS`에는 `read`가 필요합니다.
-- 그 외의 모든 메서드에는 `write`가 필요합니다.
-- `ADMIN_SCOPE_PREFIXES`의 경로는 모든 메서드에 `admin`이 필요합니다. `/api/mcp`가
-  이 목록에 포함되므로 `write` 액세스 토큰으로도 MCP HTTP 표면을 호출할 수 없습니다.
-- `ADMIN_MUTATION_PREFIXES`의 경로에는 변경 작업에만 `admin`이 필요합니다.
+- `GET`, `HEAD` 및 `OPTIONS` `read` 필요합니다.
+- 다른 모든 방법에는 `write` 필요합니다.
+- `ADMIN_SCOPE_PREFIXES` 의 경로에는 모든 방법에 대해 `admin` 필요합니다. `/api/mcp` 해당 목록에 있으므로 `write` 액세스 토큰은 여전히 MCP HTTP 표면을 호출할 수 없습니다.
+- `ADMIN_MUTATION_PREFIXES` 의 경로에는 돌연변이에만 `admin` 필요합니다.
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`)의 경로에는 돌연변이에 대해서만 `admin` 필요하며 해당 경로에서만 — 다른 `/api/settings/*` 하위 경로는 `write` 유지합니다.
 
-`PATCH /api/keys/{id}`는 변경 작업이며 해당 관리자 목록에 포함되지 않으므로,
-`read` 토큰에는 403 응답이 반환됩니다.
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` 또는 `admin` 액세스 토큰은 해당 라우트의 요구 사항을 충족합니다. 대시보드 JWT,
-루프백 CLI machine-id 토큰, 그리고 `manage` 또는 `admin` 권한을 가진 API 키는
-다른 분기를 사용하며 이 등급의 제한을 받지 않습니다.
+`PATCH /api/keys/{id}` 는 변형이며 해당 관리자 목록에 없으므로 `read` 토큰은 403 `Access token scope 'read' is insufficient; 'write' required.` 수신합니다. `write` 또는 `admin` 액세스 토큰은 해당 경로를 충족합니다. 대시보드 JWT, 루프백 CLI machine-id 토큰 및 `manage` 또는 `admin` 가 포함된 API 키는 다른 분기를 취하고 이 순위로 좁혀지지 않습니다.
 
-`/api/mcp`에 대해 `scopeSatisfies`를 통과한 액세스 토큰은 관리 게이트만
-통과한 것입니다. 도구 호출에는 여전히 API 키 범위를 대상으로 `scopeMatches`가
-실행됩니다. 액세스 토큰 등급은 `scopeMatches`의 입력값이 아닙니다.
+`/api/mcp` 용 `scopeSatisfies` 전달하는 액세스 토큰은 관리 게이트만 삭제했습니다. 도구 호출은 여전히 API 키 범위에 대해 `scopeMatches` 실행합니다. 액세스 토큰 순위는 `scopeMatches` 에 대한 입력이 아닙니다.
 
 ### MCP 도구 범위
 
-범위 적용은 `open-sse/mcp-server/scopeEnforcement.ts`에서 중앙 집중식으로 처리됩니다.
-각 도구에는 특정 범위가 필요합니다:
+범위 적용은 `open-sse/mcp-server/scopeEnforcement.ts` 에 중앙 집중화되어 있습니다. 각 도구에는 특정 범위가 필요합니다.
 
-| 범위                  | 도구                                                                                                                                                                          |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                             |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                     |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                        |
-| `read:quota`          | `check_quota`                                                                                                                                                                 |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                        |
-| `read:models`         | `list_models_catalog`                                                                                                                                                         |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                 |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                         |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                            |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                   |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                |
-| `read:cache`          | `cache_stats`                                                                                                                                                                 |
-| `write:cache`         | `cache_flush`                                                                                                                                                                 |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                    |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                             |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                         |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                              |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                        |
-| `read:memory`         | `memory_search`                                                                                                                                                               |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                  |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                            |
-| `write:skills`        | `skills_enable`                                                                                                                                                               |
-| `execute:skills`      | `skills_execute`                                                                                                                                                              |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                              |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                       |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                     |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                              |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                            |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                               |
-| `read:obsidian`       | 읽기 도구 13개 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 쓰기 도구 9개 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                             |
+| 범위                  | 도구                                                                                                                                                                            |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                          |
+| `read:quota`          | `check_quota`                                                                                                                                                                   |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                          |
+| `read:models`         | `list_models_catalog`                                                                                                                                                           |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                   |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                           |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                              |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                     |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                  |
+| `read:cache`          | `cache_stats`                                                                                                                                                                   |
+| `write:cache`         | `cache_flush`                                                                                                                                                                   |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                      |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                               |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                           |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                          |
+| `read:memory`         | `memory_search`                                                                                                                                                                 |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                    |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                              |
+| `write:skills`        | `skills_enable`                                                                                                                                                                 |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                         |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                       |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
+| `read:obsidian`       | 13개의 읽기 도구 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9개 쓰기 도구 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-와일드카드 범위가 지원됩니다. `read:*`는 모든 읽기 범위를 부여하고, `*`는 전체 접근 권한을 부여합니다.
+와일드카드 범위가 지원됩니다. `read:*` 모든 읽기 범위를 부여하고, `*` 전체 액세스 권한을 부여합니다.
 
-### `mcp:connect` — 제한된 라우트 권한 (#7895)
+### `mcp:connect` — 좁은 경로 기능(#7895)
 
-루프백이 아닌 곳에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 접근하려면
-`/api/mcp/` LOCAL_ONLY 예외가 필요합니다(`docs/security/ROUTE_GUARD_TIERS.md` 참조). 기존에는
-이 예외에서 전체 `manage`/`admin` 범위 API 키만 허용했는데, 이는 MCP와 통신하기만 하면 되는
-호출자에게는 지나치게 광범위했습니다. 이제 `src/shared/constants/managementScopes.ts`는
-`MCP_CONNECT_SCOPE = "mcp:connect"`를 내보냅니다. 이는 추가적으로 부여할 수 있는 제한된 범위로서
-(`SELF_USAGE_SCOPE`와 동일한 선례), `src/server/authz/policies/management.ts`의
-`/api/mcp/` 우회만 허용합니다. 다른 관리 라우트에 대한 접근 권한은 부여하지 않으며,
-의도적으로 `MANAGEMENT_API_KEY_SCOPES`에서 제외되어 있습니다. `manage`/`admin`을 보유한 키는
-기존과 동일하게 예외를 통과하며, `mcp:connect`는 원격 MCP 전용 호출자를 위한 더 낮은 권한의
-대안으로서 `hasMcpConnectOrManageScope()`를 통해 검사됩니다.
+비루프백에서 HTTP/SSE MCP 전송(`/api/mcp/*`)에 도달하려면 `/api/mcp/` LOCAL_ONLY 분할이 필요합니다( `docs/security/ROUTE_GUARD_TIERS.md` 참조). 역사적으로 그 분할은 전체 `manage`/`admin` -scope API 키 — 만 허용했으며 MCP 만 대화하면 되는 발신자에게는 너무 광범위했습니다. `src/shared/constants/managementScopes.ts` 이제 `MCP_CONNECT_SCOPE = "mcp:connect"` 내보냅니다. `src/server/authz/policies/management.ts` 에 `/api/mcp/` ONLY 권한을 부여하는 추가적이고 좁은 범위( `SELF_USAGE_SCOPE` 와 동일한 선례)입니다. — 는 다른 관리 경로 액세스 권한을 부여하지 않으며 의도적으로 `MANAGEMENT_API_KEY_SCOPES` 의 OUT 유지합니다. `manage`/`admin` 를 보유한 키는 여전히 변경되지 않은 채 분할을 전달합니다. `mcp:connect` `hasMcpConnectOrManageScope()` 통해 확인되는 원격 MCP 전용 호출자를 위한 낮은 권한의 대안입니다.
 
-### 키별 HTTP 범위 바인딩 (#7895)
+### 키별 HTTP 범위 바인딩(#7895)
 
-이제 HTTP/SSE에서 `open-sse/mcp-server/httpTransport.ts`는
-`resolveMcpCallerAuthInfo()`(`open-sse/mcp-server/httpAuthContext.ts`)를 통해 호출자의 실제
-`api_keys.scopes`를 확인하고 이를 MCP SDK의 `transport.handleRequest(req, { authInfo })`에
-전달하므로, 각 도구 호출에 전달되는 `extra.authInfo.scopes`에는 Bearer 키 자체의 범위가
-반영됩니다. `scopeEnforcement.ts`의 `resolveCallerScopeContext()`는 이미 `_meta` 및
-`OMNIROUTE_MCP_SCOPES` 환경 변수 폴백보다 `authInfo`를 우선시했습니다. 이번 변경은 HTTP에서
-이전에 제공되지 않았던 첫 번째 최우선 소스에 값을 채울 뿐입니다. 확인되는 API 키가 없으면
-(헤더 없음, 유효하지 않은 키) `authInfo`는 `undefined`로 유지되며, 확인 과정은 기존과 동일하게
-`meta`/환경 변수 체인으로 넘어갑니다. stdio에는 호출자별 ID가 없으므로
-(`mcpCallerIdentity.ts` 참조) 영향을 받지 않으며, 계속 `_meta`/환경 변수 폴백 체인을 사용합니다.
+HTTP/SSE 에 대해 `open-sse/mcp-server/httpTransport.ts` 이제 `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)를 통해 호출자의 실제 `api_keys.scopes` 확인하고 이를 MCP SDK 의 `transport.handleRequest(req, { authInfo })` 에 전달하므로 각 도구 호출에 도달하는 `extra.authInfo.scopes` Bearer 키의 자체 범위를 반영합니다. `scopeEnforcement.ts` 의 `resolveCallerScopeContext()` 이미 `_meta` 보다 `authInfo` 우선순위를 지정했으며 `OMNIROUTE_MCP_SCOPES` env 폴백 — 이전에 HTTP 보다 공급되지 않았던 가장 우선순위가 높은 첫 번째 소스만 채웁니다. API 키가 해결되지 않으면(헤더 없음, 잘못된 키) `authInfo` `undefined` 유지하고 해결은 변경되지 않은 기존 `meta`/env 체인으로 전달됩니다. stdio에는 호출자별 ID가 없으며( `mcpCallerIdentity.ts` 참조) 키별 바인딩 — 의 영향을 받지 않습니다. `_meta` 단계를 건너뛰고(`_meta` HTTP 인증 컨텍스트 내에서만 적용됨, #15159) `OMNIROUTE_MCP_SCOPES` env 키만으로 해결됩니다.
 
-**범위가 제한된 HTTP/SSE 호출자에 대해서는 `OMNIROUTE_MCP_ENFORCE_SCOPES`와 관계없이
-적용이 강제됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본값이 `false`인 것은 범위를 적용할
-호출자별 ID가 없는 로컬/stdio 단일 운영자 흐름에서만 안전합니다.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()`는
-`resolveCallerScopeContext()`에서 `source === "authInfo"`로 확인된 경우(즉, 실제 키별 HTTP
-Authorization 헤더이며 HTTP/SSE에만 해당) 그리고 해당 키가 전체 `manage`/`admin` 범위를
-보유하지 않은 경우에는 항상 도구별 범위 적용을 활성화합니다(`scopeEnforcement.ts`의
-`shouldForceScopeEnforcement()`). 이를 통해, 위에서 `/api/mcp/` LOCAL_ONLY 예외 외에는 아무것도
-허용하지 않는 것으로 설명된 제한된 `mcp:connect` 우회 범위만 보유한 키가 운영자가 원격/비루프백
-MCP 접근을 활성화한 후 모든 MCP 도구를 호출할 수 있었던 허점을 막습니다. 이러한 허점은
-`OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본 제공 값이 `false`이기 때문에 발생할 수 있었습니다.
-HTTP를 통한 전체 `manage`/`admin` 키와 모든 stdio/로컬 호출자에는 기존의
-`OMNIROUTE_MCP_ENFORCE_SCOPES` 기반 동작이 그대로 유지됩니다.
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` 에 관계없이 좁은 범위의 HTTP/SSE 호출자에 대해 강제로 적용됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES` `false` 로 기본값을 설정하는 것은 범위를 지정할 호출자별 ID가 없는 local/stdio 단일 연산자 흐름에서만 안전합니다. `open-sse/mcp-server/server.ts::withScopeEnforcement()` `resolveCallerScopeContext()` `source === "authInfo"` (실제 키별 HTTP 인증 헤더, HTTP/SSE-only) zqm을 해결할 때마다 도구별 범위 적용을 무조건( `scopeEnforcement.ts` 의 `shouldForceScopeEnforcement()` )로 설정합니다. 해당 키 AND 전체 `manage`/`admin` 범위를 보유하지 않습니다. 이는 `/api/mcp/` LOCAL_ONLY 분할 ONLY 만 승인하는 것으로 위에 문서화된 좁은 `mcp:connect` 우회 범위 — 의 — 를 보유하는 키가 운영자가 remote/non-loopback MCP 액세스를 활성화한 후 모든 MCP 도구를 호출할 수 있는 격차를 줄여줍니다. 단순히 `OMNIROUTE_MCP_ENFORCE_SCOPES` 가 기본적으로 `false` 제공하기 때문입니다. HTTP 에 대한 전체 `manage`/`admin` 키와 모든 stdio/local 호출자는 기존 `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated 동작을 변경하지 않고 유지합니다.
 
 ---
 

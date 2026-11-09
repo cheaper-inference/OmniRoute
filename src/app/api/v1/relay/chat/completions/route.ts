@@ -208,7 +208,7 @@ export async function OPTIONS() {
 
 async function postHandler(request: Request) {
   const startTime = Date.now();
-  const clientIp = getClientIp(request);
+  const { forensic: clientIp, throttleKey } = getClientIp(request);
   const userAgent = sanitizeForensicHeader(request.headers.get("user-agent"));
 
   try {
@@ -247,7 +247,7 @@ async function postHandler(request: Request) {
     }
 
     // 2a. Per-(token,IP) gate — bounds the blast radius of a leaked token.
-    const ipCheck = checkIpRateLimit(token.id, clientIp);
+    const ipCheck = checkIpRateLimit(token.id, throttleKey);
     if (!ipCheck.allowed) {
       recordRelayUsage(token.id, {
         requestId: request.headers.get("x-request-id") || undefined,

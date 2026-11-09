@@ -13,6 +13,11 @@ import * as log from "@/sse/utils/logger";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
+  keyAdmitsKeylessProviders,
+  resolveKeyConnectionScope,
+  withoutKeyScopeBlocked,
+} from "@/sse/services/keyConnectionScope";
+import {
   formatValidationMessage,
   isValidationFailure,
   validateBody,
@@ -88,7 +93,8 @@ function buildDomainFilter(domains?: string[]): string[] | undefined {
  * adapter only needs "cheapest available, else free no-key fallback".
  */
 async function resolveAlphaSearchProvider(
-  blockedProviders: string[]
+  blockedProviders: string[],
+  allowedConnections: string[] | null
 ): Promise<{ providerConfig: SearchProviderConfig; credentials: Record<string, any> } | null> {
   let providerConfig = selectProvider(undefined, "web");
   if (providerConfig && isProviderBlockedByIdOrAlias(providerConfig.id, blockedProviders)) {
@@ -96,8 +102,14 @@ async function resolveAlphaSearchProvider(
   }
 
   if (providerConfig) {
-    const credentials = await getProviderCredentialsWithQuotaPreflight(providerConfig.id).catch(
-      () => null
+    // GHSA-3w2r: bounded by the caller key's connection scope; a provider whose
+    // connections are all outside it counts as unconfigured.
+    const credentials = withoutKeyScopeBlocked(
+      await getProviderCredentialsWithQuotaPreflight(
+        providerConfig.id,
+        null,
+        allowedConnections
+      ).catch(() => null)
     );
     if (credentials && !isAllRateLimitedCredentials(credentials)) {
       return { providerConfig, credentials };
@@ -106,8 +118,14 @@ async function resolveAlphaSearchProvider(
 
   // Last resort: free, no-key DuckDuckGo search — same free fallback /v1/search
   // promotes when no credentialed provider is configured.
+  // GHSA-3w2r: the keyless fallback sends the query to a party the key's
+  // connection allowlist did not approve — only when it names `noauth`.
   const fallback = getSearchProvider("duckduckgo-free");
-  if (fallback && !isProviderBlockedByIdOrAlias(fallback.id, blockedProviders)) {
+  if (
+    fallback &&
+    keyAdmitsKeylessProviders(allowedConnections) &&
+    !isProviderBlockedByIdOrAlias(fallback.id, blockedProviders)
+  ) {
     return { providerConfig: fallback, credentials: {} };
   }
 
@@ -153,6 +171,8 @@ async function postHandler(request: Request) {
 
   const policy = await enforceApiKeyPolicy(request, "search");
   if (policy.rejection) return policy.rejection;
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
 
   const commands = body.commands || {};
   for (const key of UNSUPPORTED_COMMAND_KEYS) {
@@ -176,7 +196,7 @@ async function postHandler(request: Request) {
   const settings = await getSettings().catch(() => ({}) as any);
   const blockedProviders = settings?.blockedProviders || [];
 
-  const target = await resolveAlphaSearchProvider(blockedProviders);
+  const target = await resolveAlphaSearchProvider(blockedProviders, scope.allowedConnections);
   if (!target) {
     return jsonError(
       HTTP_STATUS.BAD_REQUEST,

@@ -11,16 +11,17 @@ asistenta (architektura, konvence, testování, kontroly kvality, pracovní post
 poznatky o PII). Přečtěte si jej celý; pravidla projektu sem znovu nepřidávejte. Vše níže se vztahuje POUZE
 na Claude Code — jde o provozní upřesnění pravidel již definovaných v souboru `AGENTS.md`.
 
-## Izolace worktree — specifika Claude Code
+## Izolace worktree — specifika pro Claude Code
 
-Úplný povinný protokol pro worktree (potvrzení základní větve, kanonická cesta
-`.claude/worktrees/`, `cp -al` pro node_modules, pravidla odstranění) je uveden v `AGENTS.md` → Git Workflow → „Worktree
-isolation“. Body specifické pro Claude Code:
+Kompletní povinný protokol worktree (potvrzení základní větve, kanonická cesta
+`.claude/worktrees/`, `cp -al` node_modules, pravidla pro odstranění) je v
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (shrnuto v `AGENTS.md` →
+Pracovní postup Gitu → "Izolace worktree"). Body specifické pro Claude Code:
 
-- Potvrďte základní větev s operátorem prostřednictvím `AskUserQuestion` (tvrdé pravidlo č. 19), pokud vám ji
-  již nesdělil.
-- Upřednostněte nativní nástroj `EnterWorktree` — worktree již vytváří v adresáři
-  `.claude/worktrees/` (kanonická cesta). Vytvořte worktree pomocí zdokumentovaného příkazu `git
+- Potvrďte základní větev s operátorem pomocí `AskUserQuestion` (Pevné pravidlo č. 19), pokud
+  vám ji již nesdělil.
+- Upřednostněte nativní nástroj `EnterWorktree` — ten již vytváří worktree pod
+  `.claude/worktrees/` (kanonická cesta). Vytvořte worktree zdokumentovaným příkazem `git
 worktree add` a poté zavolejte `EnterWorktree` s jeho `path`.
 
 ## Bezpečnost napříč relacemi — specifika Claude Code

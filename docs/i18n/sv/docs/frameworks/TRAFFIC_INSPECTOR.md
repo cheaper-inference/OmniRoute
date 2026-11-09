@@ -45,7 +45,7 @@ Traffic Inspector stöder **5 samtidiga insamlingskällor**. Var och en kan akti
 ### Läge 1 — AgentBridge (standard, alltid aktivt)
 
 **Källa:** AgentBridge-hanterare (`src/mitm/handlers/base.ts`)
-**Mekanism:** Varje anrop till `intercept()` i `MitmHandlerBase` anropar `hookBufferStart()` före vidarebefordran och `hookBufferUpdate()` när det är klart. Ingen extra konfiguration krävs — det fungerar så snart AgentBridge körs.
+**Mekanism:** Varje anrop till `intercept()` i `MitmHandlerBase` anropar `hookBufferStart()` före vidarebefordran och `hookBufferUpdate()` när anropet har slutförts. Ingen ytterligare konfiguration krävs — fungerar så snart AgentBridge körs.
 **Räckvidd:** De 9 IDE-agenter som konfigurerats i AgentBridge
 **Obs:** Fältet `source` i `InterceptedRequest` = `"agent-bridge"`
 
@@ -53,7 +53,7 @@ Traffic Inspector stöder **5 samtidiga insamlingskällor**. Var och en kan akti
 
 **Källa:** Användardefinierad värdlista (tabellen `inspector_custom_hosts`)
 **Mekanism:** När en värd läggs till via användargränssnittet läggs `127.0.0.1 <host>` till i `/etc/hosts` (kräver sudo). Den befintliga MITM-servern i AgentBridge (port 443) genererar dynamiskt ett SNI-certifikat för den nya värden.
-**Räckvidd:** Alla applikationer som använder den tillagda värden — ingen ändring av applikationskonfigurationen krävs
+**Räckvidd:** Alla program som använder den tillagda värden — ingen ändring av programkonfigurationen krävs
 **Obs:** `source` = `"custom-host"`
 
 Exempel på användningsfall:
@@ -64,9 +64,9 @@ Exempel på användningsfall:
 
 ### Läge 3 — HTTP_PROXY-lyssnare (port 8080)
 
-**Källa:** Applikationer som använder miljövariablerna `HTTP_PROXY`/`HTTPS_PROXY`
-**Mekanism:** En sekundär lyssnare på port 8080 (`src/mitm/inspector/httpProxyServer.ts`) som fungerar som en vanlig explicit HTTP/HTTPS-proxy. Accepterar `CONNECT`-tunnlar (HTTPS) och direkta HTTP-förfrågningar.
-**Räckvidd:** Alla applikationer som respekterar miljövariabeln `HTTP_PROXY` — ingen DNS-ändring, ingen sudo
+**Källa:** Program som använder miljövariablerna `HTTP_PROXY`/`HTTPS_PROXY`
+**Mekanism:** Sekundär lyssnare på port 8080 (`src/mitm/inspector/httpProxyServer.ts`) som fungerar som en vanlig explicit HTTP/HTTPS-proxy. Accepterar `CONNECT`-tunnlar (HTTPS) och direkta HTTP-förfrågningar.
+**Räckvidd:** Alla program som respekterar miljövariabeln `HTTP_PROXY` — ingen DNS-ändring, inget sudo
 **Obs:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS-begränsning:** HTTPS-`CONNECT`-tunnlar samlas som standard endast in som metadata (värd, port, tidsuppgifter) — TLS-innehållet dekrypteras inte.
+**TLS-begränsning:** HTTPS går genom en vanlig `CONNECT`-tunnel: lyssnaren vidarebefordrar de krypterade byte-värdena oförändrade och registrerar endast metadata (värd, port, tidsinformation). Den dekrypterar aldrig HTTPS, och det finns ingen inställning som aktiverar dekryptering för detta läge. Om du vill samla in HTTPS-innehåll ska du dirigera värden genom Läge 1 (AgentBridge), Läge 2 (Anpassade värdar) eller Läge 5 (TPROXY-dekryptering).
 
 **Portkonflikt:** Om port 8080 används returnerar AgentBridge 409 med ett strukturerat fel. Ändra porten via miljövariabeln `INSPECTOR_HTTP_PROXY_PORT`.
 
 ### Läge 4 — Systemomfattande proxy (avancerat, valfritt)
 
-**Källa:** Proxyinställningar på operativsystemnivå (gäller alla applikationer på datorn)
+**Källa:** Proxyinställningar på operativsystemnivå (gäller alla program på datorn)
 **Mekanism:** Använder operativsystemets API:er för att omdirigera all HTTP/HTTPS-trafik genom HTTP_PROXY-lyssnaren:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Räckvidd:** Alla applikationer på datorn som respekterar systemets proxyinställningar
+  **Räckvidd:** Alla program på datorn som respekterar systemets proxyinställningar
   **Obs:** `source` = `"system-proxy"`
 
 **Säkerhetsmekanismer:**
 
-- Timer för automatisk inaktivering (standardvärde 30 min, kan konfigureras via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Timer för automatisk inaktivering (standard 30 min, kan konfigureras via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - Systemets tidigare proxytillstånd sparas i databasen och återställs vid återställning
-- Kontrollpanelen visar uppmaningen ”Återställer systemproxy” om användaren navigerar bort medan funktionen är aktiv
-- Användargränssnittet visar märket `⚠ Avancerat` + en explicit kryssruta för bekräftelse
+- Instrumentpanelen visar uppmaningen "Återställer systemproxyn" om användaren lämnar sidan medan funktionen är aktiv
+- Användargränssnittet visar märket `⚠ Avancerat` + en kryssruta för uttrycklig bekräftelse
 
 ### Läge 5 — Transparent TPROXY-dekryptering (Linux, root, valfritt)
 
-**Källa:** Kärnans TPROXY + policybaserad routning (`src/mitm/tproxy/`)
-**Mekanism:** Märker nya lokala utgående TCP-anslutningar till en målport (standardvärde `443`) i `mangle OUTPUT`, en `ip rule` dirigerar om de märkta paketen till lokal leverans och målet `TPROXY` i `mangle PREROUTING` överlämnar dem till en transparent (**IP_TRANSPARENT**) lyssnare (standardport `8443`). Lyssnaren avslutar TLS med ett lövcertifikat som utfärdas **på begäran för varje SNI-värdnamn** av en dynamisk CA, samlar in det dekrypterade utbytet och vidarebefordrar förfrågan återkrypterad till den ursprungliga destinationen.
-**Räckvidd:** **Godtyckliga** destinationsvärdar på målporten — ingen förfalskning av `/etc/hosts`, ingen `HTTP_PROXY`-miljövariabel och ingen systemomfattande proxyändring. Den avlyssnade processen behöver ingen konfigurationsändring, men måste lita på den dynamiska CA:n.
+**Källa:** Kärnans TPROXY + policybaserad dirigering (`src/mitm/tproxy/`)
+**Mekanism:** Markerar nya lokala utgående TCP-anslutningar till en målport (standard `443`) i `mangle OUTPUT`, en `ip rule` dirigerar om de markerade paketen till lokal leverans och målet `TPROXY` i `mangle PREROUTING` överlämnar dem till en transparent (**IP_TRANSPARENT**) lyssnare (standardport `8443`). Lyssnaren avslutar TLS med ett lövcertifikat som utfärdas **per SNI-värdnamn på begäran** av en dynamisk CA, samlar in det dekrypterade utbytet och vidarebefordrar förfrågan återkrypterad till den ursprungliga destinationen.
+**Räckvidd:** **Valfria** destinationsvärdar på målporten — ingen förfalskning av `/etc/hosts`, ingen `HTTP_PROXY`-miljövariabel och ingen ändring av den systemomfattande proxyn. Den avlyssnade processen behöver ingen konfigurationsändring, men måste lita på den dynamiska CA:n.
 **Obs:** `source` = `"tproxy"`
 
-**Krav:** Endast Linux (**IP_TRANSPARENT** finns endast i Linux), behörigheten **CAP_NET_ADMIN** (root) och ett systemspecifikt N-API-tillägg som måste byggas med en C-verktygskedja (`npm run build:native:tproxy`). När detta inte är tillgängligt är reglaget på kontrollpanelen inaktiverat med verktygstipset ”TPROXY-dekryptering kräver Linux + root + det systemspecifika tillägget”. Brandväggsreglerna tillämpas och återställs transaktionellt (en krasch lämnar aldrig kvar en `mangle`-regel) och rensas vid omstart. En SO_MARK-baserad skyddsmekanism mot loopar förhindrar att proxyns egen återkrypterade vidarebefordran fångas upp igen.
+**Krav:** Endast Linux (**IP_TRANSPARENT** finns endast i Linux), rättigheten **CAP_NET_ADMIN** (root) och ett inbyggt N-API-tillägg som måste byggas med en C-verktygskedja (`npm run build:native:tproxy`). När funktionen inte är tillgänglig är reglaget på instrumentpanelen inaktiverat med verktygstipset "TPROXY-dekryptering kräver Linux + root + det inbyggda tillägget". Brandväggsreglerna tillämpas/återställs transaktionellt (en krasch lämnar aldrig kvar en `mangle`-regel) och rensas vid omstart. Ett SO_MARK-baserat skydd mot slingor förhindrar att proxyns egen återkrypterade vidarebefordran fångas upp igen.
 
-Detta är ett omfattande delsystem med en egen operatörsguide — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte till `/docs`) för det fullständiga brandväggsreceptet, den dynamiska CA:n per SNI + installationsprogrammet för betrodda certifikat, den lokala routen, information om skyddet mot loopar och konfigurationsschemat. Reglaget styrs av `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (obs: routen finns under AgentBridge-prefixet, inte Traffic Inspector-prefixet).
+Detta är ett omfattande delsystem med en egen särskild driftguide — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte till `/docs`) för det fullständiga brandväggsreceptet, den dynamiska CA:n per SNI + installationsprogrammet för tillitsarkivet, den lokala rutten, detaljer om skyddet mot slingor och konfigurationsschemat. Reglaget styrs av `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (obs: rutten finns under AgentBridge-prefixet, inte Traffic Inspector-prefixet).
 
 ### Jämförelse av insamlingslägen
 
-| Läge                   | Konfiguration                   |            Sudo?            | Räckvidd                           | Anmärkningar                                                                                                                            |
-| ---------------------- | ------------------------------- | :-------------------------: | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatisk                      | En gång (certifikat+hosts)  | 9 IDE-agenter                      | Aktiverat som standard                                                                                                                  |
-| 2. Anpassade hosts     | Inmatning per host              |      Ja (hosts-filen)       | Alla appar som använder den hosten | Sparas i databasen                                                                                                                      |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`        |             Nej             | Appar som respekterar miljön       | Port 8080, ingen TLS-dekryptering som standard                                                                                          |
-| 4. Systemomfattande    | Växla + bekräfta                |             Ja              | Alla appar på datorn               | Inaktiveras automatiskt efter 30 min                                                                                                    |
-| 5. TPROXY-dekryptering | Växla (Linux + inbyggt tillägg) | Ja (root + CA-installation) | Alla hosts på målporten            | Dekrypterar godtyckliga hosts; inaktiverat som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte till `/docs`) |
+| Läge                   | Konfiguration                           |            Sudo?            | Räckvidd                             | Anmärkningar                                                                                                                        |
+| ---------------------- | --------------------------------------- | :-------------------------: | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatisk                              | En gång (certifikat+hosts)  | 9 IDE-agenter                        | Aktiverat som standard                                                                                                              |
+| 2. Anpassade hosts     | Inmatning per host                      |      Ja (hosts-filen)       | Alla appar som använder den hosten   | Sparas i databasen                                                                                                                  |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                |             Nej             | Appar som respekterar miljövariabler | Port 8080; HTTPS tunnlas via CONNECT (endast metadata, dekrypteras aldrig)                                                          |
+| 4. Systemomfattande    | Växla + bekräfta                        |             Ja              | Alla appar på datorn                 | Inaktiveras automatiskt efter 30 min                                                                                                |
+| 5. TPROXY-dekryptering | Växla (Linux + systemspecifikt tillägg) | Ja (root + CA-installation) | Alla hosts på målporten              | Dekrypterar valfria hosts; inaktiverat som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte in i `/docs`) |
 
 ---
 
@@ -340,29 +340,29 @@ Exportera via `GET /api/tools/traffic-inspector/sessions/{id}/export.har` eller 
 
 ## §6 Säkerhet
 
-Trafikinspektören visar **all avlyssnad HTTPS-trafik**, inklusive auktoriseringshuvuden och förfrågningskroppar. Följande kontroller finns på plats:
+Traffic Inspector visar **all avlyssnad HTTPS-trafik**, inklusive auktoriseringshuvuden och begärandetexter. Följande kontroller finns på plats:
 
-| Kontroll                                 | Detaljer                                                                                                                                                                               |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                           | Alla rutter och WebSocket-slutpunkten är endast tillgängliga via loopback (framtvingas i `routeGuard.ts` före autentisering)                                                           |
-| **Maskering av hemligheter**             | Den linjära `maskSecret()`-skannern maskerar Bearer-autentiseringsuppgifter enligt RFC 6750, leverantörsprefixerade nycklar och långa ogenomskinliga token före `TrafficBuffer.push()` |
-| **Storleksgräns för kroppar**            | Kroppar > `INSPECTOR_MAX_BODY_KB` (standardvärde 1024 KB) trunkeras med meddelandet `"(trunkerat av prestandaskäl)"`                                                                   |
-| **Sanering av huvuden**                  | Namn konverteras till gemener; ramnings-, hop-by-hop- och proxyautentiseringshuvuden tas bort; cookies maskeras helt; autentiseringsvärden delegeras till `maskSecret()`               |
-| **CSP**                                  | Strikt Content Security Policy på Trafikinspektörens sidor för att förhindra XSS via injicerade svarskroppar                                                                           |
-| **Ingen beständig lagring som standard** | `TrafficBuffer` lagras i minnet och går förlorad när servern startas om. Sessioner lagras beständigt endast när de uttryckligen spelas in                                              |
+| Kontroll                                 | Detaljer                                                                                                                                                                          |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                           | Alla rutter och WebSocket-slutpunkten är endast tillgängliga via loopback (framtvingas i `routeGuard.ts` före autentisering)                                                      |
+| **Maskering av hemligheter**             | Den linjära `maskSecret()`-skannern maskerar RFC 6750 Bearer-autentiseringsuppgifter, leverantörsprefixerade nycklar och långa ogenomskinliga token innan `TrafficBuffer.push()`  |
+| **Gräns för brödtextstorlek**            | Brödtexter > `INSPECTOR_MAX_BODY_KB` (standardvärde 1024 KB) trunkeras med meddelandet `"(trunkerad av prestandaskäl)"`                                                           |
+| **Sanering av huvuden**                  | Namn konverteras till gemener; ram-, hop-by-hop- och proxyautentiseringshuvuden tas bort; cookies maskeras helt; värden för autentiseringsuppgifter delegeras till `maskSecret()` |
+| **CSP**                                  | Strikt Content Security Policy på Traffic Inspector-sidor för att förhindra XSS via injicerade svarstexter                                                                        |
+| **Ingen beständig lagring som standard** | `TrafficBuffer` lagras i minnet och går förlorad när servern startas om. Sessioner sparas endast när de uttryckligen spelas in                                                    |
 
-### Tillämpade hårda regler
+### Tillämpade fasta regler
 
 | Regel                             | Tillämpning                                                                          |
 | --------------------------------- | ------------------------------------------------------------------------------------ |
-| **#12** `sanitizeErrorMessage`    | Alla HTTP-felsvar från Trafikinspektörens rutter saneras                             |
+| **#12** `sanitizeErrorMessage`    | Alla HTTP-felsvar från Traffic Inspector-rutter saneras                              |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` är LOCAL_ONLY + SPAWN_CAPABLE (systemproxykommandon) |
 
 ### Kända begränsningar
 
-- **Systemomfattande proxyläge** påverkar alla program på datorn, inklusive VPN-klienter och SSO. Använd alltid läget med timern för automatisk inaktivering. Använd det inte på delade datorer.
-- **CONNECT-tunnel för HTTPS**: Läge 3 (HTTP_PROXY) registrerar endast tunnelmetadata för HTTPS-destinationer, såvida inte TLS-avlyssning är aktiverad. Detta är avsiktligt — transparent registrering utan att AgentBridge-certifikatet är betrott skulle bryta TLS-verifieringen för dessa appar.
-- **Hårdkodade strängar i vissa komponenter**: Vissa användargränssnittskomponenter (F7/F8) har ett mindre antal hårdkodade strängar som ännu inte omfattas av i18n-nycklar. Dessa dokumenteras som en känd begränsning i rapporten över i18n-luckor; de kommer att migreras i en uppföljande omgång. De berörda strängarna är dekorativa etiketter i användargränssnittet som inte behöver översättas för funktionell användning.
+- **Systemomfattande proxyläge** påverkar alla program på datorn, inklusive VPN-klienter och SSO. Använd alltid detta med timern för automatisk inaktivering. Använd det inte på delade datorer.
+- **CONNECT-tunnel för HTTPS**: Läge 3 (HTTP_PROXY) fångar endast tunnelmetadata för HTTPS-destinationer och dekrypterar dem aldrig. Detta är avsiktligt – dekryptering skulle kräva att varje klient litade på ett MITM-certifikat, så lyssnaren behåller HTTPS-kryptering hela vägen. Använd AgentBridge, Custom Hosts eller TPROXY-dekryptering när du behöver HTTPS-brödtexter.
+- **Hårdkodade strängar i vissa komponenter**: Vissa gränssnittskomponenter (F7/F8) har ett litet antal hårdkodade strängar som ännu inte omfattas av i18n-nycklar. Dessa är dokumenterade som en känd begränsning i i18n-luckrapporten och kommer att migreras i en uppföljande genomgång. De berörda strängarna är dekorativa etiketter i användargränssnittet som inte behöver översättas för funktionell användning.
 
 ---
 
@@ -433,19 +433,19 @@ Bassökväg: `/api/tools/traffic-inspector/`
 
 ### Hantering av förfrågningar
 
-| Metod  | Sökväg                      | Beskrivning                                                                                 |
-| ------ | --------------------------- | ------------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | Lista förfrågningar (kan filtreras: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Information om en enskild förfrågan                                                         |
-| DELETE | `/requests`                 | Rensa minnesbufferten                                                                       |
-| POST   | `/requests/{id}/replay`     | Kör samma förfrågan igen via OmniRoute-routern                                              |
-| PUT    | `/requests/{id}/annotation` | Spara eller uppdatera en anteckning för en förfrågan                                        |
+| Metod  | Sökväg                      | Beskrivning                                                                               |
+| ------ | --------------------------- | ----------------------------------------------------------------------------------------- |
+| GET    | `/requests`                 | Lista förfrågningar (filtrerbara: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Detaljer för en enskild förfrågan                                                         |
+| DELETE | `/requests`                 | Rensa minnesbufferten                                                                     |
+| POST   | `/requests/{id}/replay`     | Kör samma förfrågan igen via OmniRoute-routern                                            |
+| PUT    | `/requests/{id}/annotation` | Spara eller uppdatera en anteckning för en förfrågan                                      |
 
 ### WebSocket
 
-| Metod | Sökväg | Beskrivning                                                                                                  |
-| ----- | ------ | ------------------------------------------------------------------------------------------------------------ |
-| GET   | `/ws`  | WebSocket-ström i realtid. Skickar `snapshot` vid anslutning och därefter händelserna `new`/`update`/`clear` |
+| Metod | Sökväg | Beskrivning                                                                                              |
+| ----- | ------ | -------------------------------------------------------------------------------------------------------- |
+| GET   | `/ws`  | WebSocket-direktström. Skickar `snapshot` vid anslutning och därefter händelserna `new`/`update`/`clear` |
 
 ### Export
 
@@ -458,7 +458,7 @@ Bassökväg: `/api/tools/traffic-inspector/`
 | Metod  | Sökväg          | Beskrivning                                         |
 | ------ | --------------- | --------------------------------------------------- |
 | GET    | `/hosts`        | Lista anpassade värdar                              |
-| POST   | `/hosts`        | Lägg till värd (redigerar automatiskt `/etc/hosts`) |
+| POST   | `/hosts`        | Lägg till värd (redigerar `/etc/hosts` automatiskt) |
 | DELETE | `/hosts/{host}` | Ta bort värd                                        |
 | PATCH  | `/hosts/{host}` | Växla `enabled`                                     |
 
@@ -479,17 +479,17 @@ Bassökväg: `/api/tools/traffic-inspector/`
 
 | Metod  | Sökväg                      | Beskrivning                                                         |
 | ------ | --------------------------- | ------------------------------------------------------------------- |
-| POST   | `/sessions`                 | Börja spela in (`{name?: string}`)                                  |
+| POST   | `/sessions`                 | Starta inspelning (`{name?: string}`)                               |
 | PATCH  | `/sessions/{id}`            | Stoppa eller byt namn (`{action: "stop"\|"rename", name?: string}`) |
 | GET    | `/sessions`                 | Lista alla sparade sessioner                                        |
-| GET    | `/sessions/{id}`            | Ögonblicksbild av sessionen (alla förfrågningar)                    |
+| GET    | `/sessions/{id}`            | Sessionsögonblicksbild (alla förfrågningar)                         |
 | DELETE | `/sessions/{id}`            | Ta bort session                                                     |
 | GET    | `/sessions/{id}/export.har` | Exportera sessionen som HAR 1.2                                     |
 
-### Intern inläsning (D4-reservlösning)
+### Intern inmatning (D4-reservlösning)
 
-| Metod | Sökväg             | Beskrivning                                                                                                              |
-| ----- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| POST  | `/internal/ingest` | Tar emot en avlyssnad förfrågan från `server.cjs`:s passthrough-sökväg; kräver headern `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Metod | Sökväg             | Beskrivning                                                                                                                |
+| ----- | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| POST  | `/internal/ingest` | Tar emot en avlyssnad förfrågan från passthrough-sökvägen i `server.cjs`; kräver headern `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Fullständiga OpenAPI-scheman: `docs/openapi.yaml` → taggen `Traffic Inspector`.

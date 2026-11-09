@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import type { BreakerWithHistory } from "@/types/resilience";
 
 interface BreakerTimelineProps {
@@ -51,49 +53,58 @@ export default function BreakerTimeline({ breakers, onWindowChange }: BreakerTim
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <Card className="flex flex-col gap-4">
       {currentBreakers.length > 0 && (
-        <div>
-          <h3>{t("timeline.currentState")}</h3>
-          {currentBreakers.map((b) => (
-            <span key={b.name} style={{ display: "inline-block", marginRight: "8px" }}>
-              <Badge
-                variant={
-                  b.state === "OPEN"
-                    ? "error"
-                    : b.state === "HALF_OPEN" || b.state === "DEGRADED"
-                      ? "warning"
-                      : "success"
-                }
-                size="sm"
-              >
-                {b.name} ({b.state})
-              </Badge>
-            </span>
-          ))}
+        <div className="flex flex-col gap-2">
+          <h3 className="ci-heading text-sm">{t("timeline.currentState")}</h3>
+          <div className="flex flex-wrap gap-2">
+            {currentBreakers.map((b) => (
+              <span key={b.name}>
+                <Badge
+                  variant={
+                    b.state === "OPEN"
+                      ? "error"
+                      : b.state === "HALF_OPEN" || b.state === "DEGRADED"
+                        ? "warning"
+                        : "success"
+                  }
+                  size="sm"
+                >
+                  {b.name} ({b.state})
+                </Badge>
+              </span>
+            ))}
+          </div>
         </div>
       )}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-        <span style={{ fontWeight: 600 }}>{t("timeline.window")}</span>
+      <div
+        role="group"
+        aria-labelledby="breaker-timeline-window"
+        className="flex flex-wrap items-center gap-2"
+      >
+        <span id="breaker-timeline-window" className="mr-2 text-sm font-semibold">
+          {t("timeline.window")}
+        </span>
         {WINDOWS.map((w) => (
-          <button
+          <Button
             key={w.ms}
-            type="button"
+            size="sm"
+            variant={selectedWindowMs === w.ms ? "primary" : "outline"}
+            aria-pressed={selectedWindowMs === w.ms}
             onClick={() => {
               setSelectedWindowMs(w.ms);
               onWindowChange(w.ms);
             }}
-            style={{ fontWeight: selectedWindowMs === w.ms ? 700 : 400 }}
           >
             {t(`timeline.window${w.label}`)}
-          </button>
+          </Button>
         ))}
       </div>
       {filtered.length === 0 ? (
-        <p style={{ color: "var(--color-text-muted)" }}>{t("timeline.empty")}</p>
+        <p className="text-sm text-text-muted">{t("timeline.empty")}</p>
       ) : (
         filtered.map((b) => (
-          <div key={b.name}>
+          <div key={b.name} className="flex flex-col gap-2">
             <Badge
               variant={
                 b.state === "OPEN"
@@ -108,7 +119,7 @@ export default function BreakerTimeline({ breakers, onWindowChange }: BreakerTim
             >
               {b.name} ({stateLabel(b.state)})
             </Badge>
-            <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-text-muted">
               {b.transitionHistory.map((tr, i) => (
                 <li key={`${tr.timestamp}-${tr.from}-${tr.to}-${i}`}>
                   {new Date(tr.timestamp).toLocaleString()}: {stateLabel(tr.from)} {"->"}{" "}
@@ -120,6 +131,6 @@ export default function BreakerTimeline({ breakers, onWindowChange }: BreakerTim
           </div>
         ))
       )}
-    </div>
+    </Card>
   );
 }

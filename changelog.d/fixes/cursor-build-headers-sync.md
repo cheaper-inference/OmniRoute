@@ -1,1 +1,0 @@
-- Keep `CursorExecutor.buildHeaders` synchronous (and expose `getCursorAgentCliVersionSync`) so the executor honors the `BaseExecutor` contract again; the async override from the CLI-version refresh broke the types and would hand a Promise to callers that do not await.

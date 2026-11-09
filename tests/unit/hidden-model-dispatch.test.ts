@@ -170,14 +170,33 @@ test("a model hidden for another provider does not block a visible OpenAI model"
   assert.deepEqual(dispatchedModels, ["gpt-4o-mini"]);
 });
 
-test("a connection default cannot replace a visible request with a hidden model", async () => {
+test("a connection default does not replace a visible concrete bare model", async () => {
   await providers.updateProviderConnection(connectionId, { defaultModel: "gpt-4o-mini" });
   assert.equal((await chat("gpt-4o")).status, 200);
-  assert.deepEqual(dispatchedModels, ["gpt-4o-mini"]);
+  assert.deepEqual(dispatchedModels, ["gpt-4o"]);
   dispatchedModels.length = 0;
   models.mergeModelCompatOverride("openai", "gpt-4o-mini", { isHidden: true });
-  assert.equal((await chat("gpt-4o")).status, 404);
-  assert.deepEqual(dispatchedModels, []);
+  assert.equal((await chat("gpt-4o")).status, 200);
+  assert.deepEqual(dispatchedModels, ["gpt-4o"]);
+});
+
+test("a connection default cannot replace a visible request with a hidden model", async () => {
+  // The default only replaces a concrete bare model under the legacy override,
+  // so the hidden-model gate on that swap is exercised with the override on.
+  const before = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+  process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+  try {
+    await providers.updateProviderConnection(connectionId, { defaultModel: "gpt-4o-mini" });
+    assert.equal((await chat("gpt-4o")).status, 200);
+    assert.deepEqual(dispatchedModels, ["gpt-4o-mini"]);
+    dispatchedModels.length = 0;
+    models.mergeModelCompatOverride("openai", "gpt-4o-mini", { isHidden: true });
+    assert.equal((await chat("gpt-4o")).status, 404);
+    assert.deepEqual(dispatchedModels, []);
+  } finally {
+    if (before === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+    else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = before;
+  }
 });
 
 test("visibility does not override API-key denial or grant access to visible models", async () => {
@@ -272,4 +291,95 @@ test("a global reasoning rule cannot redirect a visible model to a hidden target
   assert.equal((await chat("openai/gpt-4o")).status, 404);
   assert.deepEqual(dispatchedModels, []);
   rules.invalidateReasoningRoutingRuleCache();
+});
+
+test("withHiddenModelGate keeps agy and antigravity visibility independent despite provider canonicalization", async () => {
+  const { createVisibleResolvedModelGate } =
+    await import("../../src/sse/handlers/chat/resolvedModelPolicy.ts");
+
+  models.mergeModelCompatOverride("antigravity", "claude-opus-5-5-high", { isHidden: true });
+
+  const agyGate = createVisibleResolvedModelGate({
+    apiKeyInfo: null,
+    apiKey: null,
+    contextModel: null,
+    comboGrantsTargets: false,
+    provider: "antigravity",
+    model: "claude-opus-5-5-high",
+    modelStr: "agy/claude-opus-5-5-high",
+  });
+  assert.equal(
+    await agyGate(["antigravity/claude-opus-5-5-high"]),
+    null,
+    "hiding on antigravity must not block an explicit agy/ request"
+  );
+
+  const antigravityGate = createVisibleResolvedModelGate({
+    apiKeyInfo: null,
+    apiKey: null,
+    contextModel: null,
+    comboGrantsTargets: false,
+    provider: "antigravity",
+    model: "claude-opus-5-5-high",
+    modelStr: "antigravity/claude-opus-5-5-high",
+  });
+  const agDenied = await antigravityGate(["antigravity/claude-opus-5-5-high"]);
+  assert.equal(agDenied?.status, 404);
+
+  models.mergeModelCompatOverride("antigravity", "claude-opus-5-5-high", { isHidden: false });
+  models.mergeModelCompatOverride("agy", "claude-opus-5-5-high", { isHidden: true });
+
+  const agyGateWhenHidden = createVisibleResolvedModelGate({
+    apiKeyInfo: null,
+    apiKey: null,
+    contextModel: null,
+    comboGrantsTargets: false,
+    provider: "antigravity",
+    model: "claude-opus-5-5-high",
+    modelStr: "agy/claude-opus-5-5-high",
+  });
+  const agyDenied = await agyGateWhenHidden(["antigravity/claude-opus-5-5-high"]);
+  assert.equal(agyDenied?.status, 404);
+});
+
+test("withHiddenModelGate infers agy visibility for unprefixed requests only when agy is the sole antigravity-family connection", async () => {
+  const { createVisibleResolvedModelGate } =
+    await import("../../src/sse/handlers/chat/resolvedModelPolicy.ts");
+  const gateFor = () =>
+    createVisibleResolvedModelGate({
+      apiKeyInfo: null,
+      apiKey: null,
+      contextModel: null,
+      comboGrantsTargets: false,
+      provider: "antigravity",
+      model: "claude-opus-5-5-high",
+      modelStr: "claude-opus-5-5-high",
+    });
+
+  models.mergeModelCompatOverride("antigravity", "claude-opus-5-5-high", { isHidden: true });
+
+  // Only an agy connection exists: the unprefixed request is an agy request, so hiding the
+  // model on antigravity must not block it.
+  await providers.createProviderConnection({
+    provider: "agy",
+    authType: "oauth",
+    name: "agy only fixture",
+    accessToken: "agy-fixture-token",
+    isActive: true,
+    testStatus: "active",
+  });
+  assert.equal(await gateFor()(["antigravity/claude-opus-5-5-high"]), null);
+
+  // Once an antigravity connection also exists the surface is ambiguous, so the canonical
+  // antigravity visibility applies again.
+  await providers.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    name: "antigravity fixture",
+    accessToken: "antigravity-fixture-token",
+    isActive: true,
+    testStatus: "active",
+  });
+  const denied = await gateFor()(["antigravity/claude-opus-5-5-high"]);
+  assert.equal(denied?.status, 404);
 });

@@ -45,7 +45,7 @@ A2A jest kontrolowane za pomocą przełącznika **Endpoints → A2A** i domyśln
 
 ## Metody JSON-RPC 2.0
 
-### `message/send` — wykonywanie synchroniczne
+### `message/send` — Wykonanie synchroniczne
 
 Wysyła wiadomość do umiejętności i oczekuje na pełną odpowiedź.
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+W przypadku `smart-routing` wartość `metadata.combo` jawnie zastępuje
+`metadata.model` w żądaniu do bramy; jest wysyłana jako rzeczywisty `model`,
+a nie jako ignorowane pole JSON `x-combo`. Nadal obowiązują standardowy klucz API bramy
+oraz autoryzacja dla poszczególnych elementów docelowych. Nieprawidłowa lub pusta kombinacja jest odrzucana.
+
+Wynik udostępnia pola `requested_combo` (intencja wywołującego), `dispatched_model`
+(rzeczywiste żądanie do bramy), `response_model` (odpowiedź bramy) oraz
+`confirmed_combo`. Ostatnie pole ma wartość `null`, chyba że brama jawnie
+wskaże kombinację. Dzienniki decyzji A2A przypisują wykonanie wyłącznie do
+potwierdzonej kombinacji, zachowując niepotwierdzone żądanie jako `requestedCombo`.
+
 **Odpowiedź:**
 
 ```json
@@ -76,28 +87,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — strumieniowanie SSE
+### `message/stream` — Strumieniowanie SSE
 
 Działa tak samo jak `message/send`, ale zwraca zdarzenia Server-Sent Events, umożliwiając strumieniowanie w czasie rzeczywistym.
 
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — sprawdzanie statusu zadania
+### `tasks/get` — Sprawdzanie stanu zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — anulowanie zadania
+### `tasks/cancel` — Anulowanie zadania
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,84 +152,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostępne umiejętności
 
-OmniRoute udostępnia 6 umiejętności A2A podłączonych w `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
+OmniRoute ujawnia 6 umiejętności A2A podłączonych do `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Każdy moduł umiejętności znajduje się w `src/lib/a2a/skills/`.
 
-| Umiejętność             | ID                   | Opis                                                                                                                                                                        | Tagi                              | Przykłady                                  |
-| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------- |
-| Inteligentne trasowanie | `smart-routing`      | Kieruje prompt do optymalnego dostawcy lub zestawu dostawców przy użyciu silnika kombinacji i systemu oceny OmniRoute                                                       | trasowanie, dostawcy              | „Skieruj ten prompt do najlepszego modelu” |
-| Zarządzanie limitami    | `quota-management`   | Raportuje stan limitów poszczególnych dostawców i pomaga wywołującym zdecydować, kiedy ograniczyć ruch lub zmienić dostawcę                                                 | limity, dostawcy                  | „Sprawdź limit dla anthropic”              |
-| Wykrywanie dostawców    | `provider-discovery` | Wyświetla zainstalowanych dostawców wraz z ich możliwościami, informacjami o darmowych planach i stanem OAuth                                                               | dostawcy, wykrywanie              | „Jacy dostawcy są dostępni?”               |
-| Analiza kosztów         | `cost-analysis`      | Szacuje koszt żądania lub konwersacji na podstawie katalogu i ostatniego użycia                                                                                             | koszt, użycie                     | „Oszacuj koszt tej konwersacji”            |
-| Raport o kondycji       | `health-report`      | Agreguje stan mechanizmu circuit breaker, okresu wyciszenia i blokady dla każdego dostawcy                                                                                  | kondycja, odporność               | „Pokaż stan kondycji wszystkich dostawców” |
-| Lista możliwości        | `list-capabilities`  | Zwraca pełny, 45-elementowy katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z surowymi adresami URL plików SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
+| Umiejętność                   | ID                   | Opis                                                                                                                                                                          | Tagi                            | Przykłady                                    |
+| :---------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------- |
+| Inteligentne wyznaczanie tras | `smart-routing`      | Kieruje monit przez optymalną provider/combo przy użyciu punktacji + silnika combo OmniRoute                                                                                  | routing, dostawcy               | „Przekieruj ten monit przez najlepszy model” |
+| Zarządzanie kwotami           | `quota-management`   | Raportuje stan limitu dla każdego dostawcy, pomaga dzwoniącym zdecydować, kiedy throttle/switch                                                                               | kontyngent, dostawcy            | „Sprawdź kwotę antropiczną”                  |
+| Wykrywanie dostawcy           | `provider-discovery` | Wyświetla listę zainstalowanych dostawców z możliwościami, flagami poziomu bezpłatnego i statusem OAuth                                                                       | dostawcy, odkrycie              | „Jaki dostawcy są dostępni?”                 |
+| Analiza kosztów               | `cost-analysis`      | Szacuje koszt request/conversation biorąc pod uwagę niedawne użycie katalogu +                                                                                                | koszt, zużycie                  | „Oszacuj koszt tej rozmowy”                  |
+| Raport o stanie zdrowia       | `health-report`      | Łączy wyłącznik automatyczny, czas odnowienia i stan blokady według dostawcy                                                                                                  | zdrowie, odporność              | „Pokaż stan zdrowia wszystkich dostawców”    |
+| Lista możliwości              | `list-capabilities`  | Zwraca pełny katalog umiejętności agenta składający się z 45 wpisów (23 API + 21 CLI + 1 konfiguracja) jako tabelę przecen z surowym SKILL.md URLs do wstrzykiwania kontekstu | katalog, odkrycie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute ”   |
 
-> Agent Card należy utrzymywać w zgodności z aktualnym katalogiem 352 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku wymogu uwierzytelnienia pochodzą z rejestru środowiska uruchomieniowego.
+> Karta agenta powinna być zgodna z aktualnym katalogiem dostawców 381; liczba dostawców i metadane free/no-auth pochodzą z rejestru wykonawczego.
 
-### Szczegóły umiejętności `list-capabilities`
+### `list-capabilities` Szczegóły umiejętności
 
-Umiejętność `list-capabilities` jest szczególnie przydatna dla agentów zewnętrznych, które muszą sprawdzić, co udostępnia OmniRoute, przed wysłaniem wywołań API. Zwraca artefakt w postaci ustrukturyzowanej tabeli markdown:
+Umiejętność `list-capabilities` jest szczególnie przydatna dla agentów zewnętrznych, którzy muszą odkryć, co ujawnia OmniRoute przed wysłaniem wywołań API. Zwraca ustrukturyzowany artefakt tabeli przecen:
 
 ```
-| ID | Nazwa | Kategoria | Obszar | Endpointy/polecenia | Surowy URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Uwierzytelnianie i sesje | api | uwierzytelnianie | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Każdy wiersz zawiera kolumnę `rawUrl`, dzięki czemu agenci mogą natychmiast pobrać pełny plik SKILL.md. Pole `metadata.totalSkills` odpowiada rozmiarowi katalogu (obecnie 45). Implementacja: `src/lib/a2a/skills/listCapabilities.ts`. Zobacz także [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Każdy wiersz zawiera kolumnę `rawUrl`, dzięki czemu agenci mogą natychmiast pobrać pełny SKILL.md. Pole `metadata.totalSkills` odzwierciedla rozmiar katalogu (obecnie 45). Implementacja: `src/lib/a2a/skills/listCapabilities.ts`. Zobacz także [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (pomocnicze)
+## REST API (pomocniczy)
 
-Punkt końcowy JSON-RPC `/a2a` jest kanonicznym punktem wejścia A2A. Poniższe punkty końcowe REST zapewniają pomocniczy dostęp dla pulpitów i narzędzi zewnętrznych:
+Punkt końcowy JSON-RPC `/a2a` jest kanonicznym punktem wejścia A2A. Poniższe punkty końcowe REST zapewniają pomocniczy dostęp do pulpitów nawigacyjnych i narzędzi zewnętrznych:
 
-| Punkt końcowy                | Metoda | Opis                                                                | Uwierzytelnianie                                   |
-| :--------------------------- | :----- | :------------------------------------------------------------------ | :------------------------------------------------- |
-| `/api/a2a/status`            | GET    | Stan serwera, zarejestrowane umiejętności                           | (publiczne)                                        |
-| `/api/a2a/tasks`             | GET    | Lista zadań z filtrami                                              | zarządzanie                                        |
-| `/api/a2a/tasks/[id]`        | GET    | Pobranie zadania według identyfikatora                              | zarządzanie                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Anulowanie wykonywanego zadania                                     | zarządzanie                                        |
-| `/.well-known/agent.json`    | GET    | Karta agenta (wykrywanie A2A)                                       | (publiczne, buforowane przez 3600s)                |
-| `/api/a2a/tasks`             | POST   | Delegowanie przychodzące do floty OmniConductor (Conductor PRD RF5) | Bearer względem `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Punkt końcowy                | Metoda | Opis                                                              | Autoryt                                                                                                          |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Status serwera, zarejestrowane umiejętności                       | (publiczny)                                                                                                      |
+| `/api/a2a/tasks`             | GET    | Lista zadań z filtrami                                            | klucz zarządzania lub API (patrz poniżej)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET    | Pobierz zadanie przez ID                                          | klucz zarządzania lub API (patrz poniżej)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Anuluj uruchomione zadanie                                        | klucz zarządzania lub API (patrz poniżej)                                                                        |
+| `/.well-known/agent.json`    | GET    | Karta Agenta (odkrycie A2A )                                      | (publiczny, buforowany 3600s)                                                                                    |
+| `/api/a2a/tasks`             | POST   | Delegacja przychodząca do floty OmniConductor (konduktor PRD RF5) | tak samo jak `GET` plus `OMNIROUTE_API_KEY`, jeśli ustawione, gdy `REQUIRE_API_KEY` jest wyłączone; `a2aEnabled` |
 
-**Przychodzące delegowanie Conductor (`POST /api/a2a/tasks`):** zewnętrzni agenci A2A delegują prace programistyczne do floty OmniConductor za pośrednictwem OmniRoute. Treść żądania: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — delegować można wyłącznie umiejętności floty Conductor (te ogłoszone na Karcie agenta); pole `metadata.conductor.repo.url` jest wymagane (flota pracuje na repozytoriach git). Trasa przekłada żądanie na `POST /v1/tasks` huba, używając po stronie serwera `CONDUCTOR_ORCHESTRATOR_TOKEN` (zastępczo `CONDUCTOR_HUB_TOKEN`), i zwraca `201 { conductor_task_id, state: "submitted" }`; stany zadań są przekazywane zwrotnie przez lustro SSE→A2A (RF1) i są widoczne za pośrednictwem `GET /api/a2a/tasks?skill=conductor`.
+To, kto dotrze do tras `/api/a2a/tasks*` zależy od ustawień logowania i klucza API:
+
+- `requireLogin=true` (domyślnie): oprogramowanie pośrednie akceptuje tylko poświadczenia zarządzania (sesja pulpitu nawigacyjnego, klucz `manage` -scope API, token dostępu `oma_` ) i `OMNIROUTE_API_KEY`. Zwykły klucz wnioskowania pobiera `403`. W nagłówku `Authorization` oprogramowanie pośredniczące przyjmuje tylko `OMNIROUTE_API_KEY` jako `Bearer <key>`; goły klawisz lub tabulator po tym, `Bearer` otrzyma `401`.
+- `requireLogin=false` lub okno pętli zwrotnej przed włączeniem: z `REQUIRE_API_KEY=true` akceptowany jest każdy ważny klucz OmniRoute API lub dane uwierzytelniające do zarządzania, a anonimowi dzwoniący otrzymują `401`; przy wyłączonym `REQUIRE_API_KEY` trasy są otwarte.
+- `POST /api/a2a/tasks` dodatkowo wymaga `OMNIROUTE_API_KEY` w nagłówku `Authorization` gdy ta zmienna jest ustawiona, a `REQUIRE_API_KEY` jest wyłączone. Inne nagłówki, takie jak `x-api-key`, nie liczą się tam. Przy wyłączonym logowaniu lub przed wejściem na pokład klucz jest przekazywany z prefiksem `Bearer` lub bez; przy włączonym logowaniu tylko `Bearer <key>` przechodzi przez oprogramowanie pośrednie.
+
+Tam, gdzie wymagane jest poświadczenie, token `read` -scope `oma_` działa tylko dla `GET`.
+
+**Delegacja konduktora przychodzącego (`POST /api/a2a/tasks`):** zewnętrzni agenci A2A delegują prace związane z kodowaniem flocie OmniConductor poprzez OmniRoute. Treść: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — tylko Umiejętności floty konduktorów (te ogłoszone na Karcie Agenta) podlegają delegowaniu; `metadata.conductor.repo.url` jest wymagany (flota działa na repozytoriach git). Trasa jest tłumaczona na `POST /v1/tasks` koncentratora przy użyciu `CONDUCTOR_ORCHESTRATOR_TOKEN` po stronie serwera (awaria `CONDUCTOR_HUB_TOKEN`) i zwraca `201 { conductor_task_id, state: "submitted" }`; stany zadań przepływają z powrotem przez lustro SSE→A2A (RF1) i są widoczne poprzez `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Dodawanie nowej umiejętności
+## Dodanie nowej umiejętności
 
 1. **Utwórz plik umiejętności:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Wyeksportuj funkcję asynchroniczną `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Zachowaj strukturę istniejących umiejętności, takich jak `smartRouting.ts`.
+   Eksportuj funkcję asynchroniczną `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Podążaj za kształtem istniejących umiejętności, takich jak `smartRouting.ts`. Jeśli umiejętność wywołuje ponownie do OmniRoute przez HTTP, zbuduj nagłówki za pomocą `buildSelfLoopHeaders(caller)` z `src/lib/a2a/selfLoopAuth.ts`, aby wywołanie działało z kluczem wywołującego A2A, a nie `OMNIROUTE_API_KEY`, i przekaż `redirect: "error"` do `fetch`, aby przekierowanie nigdy nie otrzymało klucza. Pomocnik buduje tylko nagłówki; każda umiejętność sama ustala politykę przekierowań. Rzuca `UnsafeSelfLoopTargetError` zamiast dołączać klucz, gdy rozwiązany podstawowy URL to zwykły http poza siecią prywatną (pętla zwrotna, nazwa kontenera lub usługi oraz adresy prywatne są w porządku) lub przechowuje dane uwierzytelniające, więc umiejętność, która połyka odrzucone wywołania, musi ponownie zgłosić ten błąd.
 
-2. **Zarejestruj procedurę obsługi:** w pliku `src/lib/a2a/taskExecution.ts` dodaj wpis do `A2A_SKILL_HANDLERS`:
+2. **Osoba zajmująca się rejestracją:** w `src/lib/a2a/taskExecution.ts` dodaj wpis do `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...istniejące umiejętności
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Udostępnij na Karcie agenta:** w pliku `src/app/.well-known/agent.json/route.ts` dołącz wpis do tablicy `skills`:
+3. **Ujawnij na karcie agenta:** w `src/lib/a2a/agentCardMetadata.ts` (współdzielonym przez `/.well-known/agent.json` i `/.well-known/agent-card.json`), dołącz do tablicy `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Twoja umiejętność",
-     "description": "Krótki opis skoncentrowany na przeznaczeniu",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Przykładowe wywołanie w języku naturalnym"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Uwzględnij poprawny przebieg i ścieżkę błędu.
+4. **Napisz testy:** `tests/unit/a2a-<your-skill>.test.ts`. Zakryj szczęśliwą ścieżkę ścieżki błędu +.
 
-5. **Udokumentuj** nową umiejętność w tabeli `Dostępne umiejętności` w tym pliku.
+5. **Dokument** nowa umiejętność w tabeli `Available Skills` w tym pliku.
 
 ---
 
@@ -264,7 +276,7 @@ przesłane → w toku → ukończone
 
 ## Przykłady integracji
 
-### Python (requests)
+### Python (żądania)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (przynieś)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

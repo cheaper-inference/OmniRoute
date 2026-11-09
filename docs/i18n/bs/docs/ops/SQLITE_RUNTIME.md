@@ -4,50 +4,48 @@
 
 ---
 
-# SQLite Runtime rezolucija
+OmniRoute određuje svoj SQLite upravljački program pri pokretanju putem lanca od 5 rezervnih koraka:
 
-OmniRoute razrješava svoj SQLite drajver pri pokretanju kroz lanac rezervnih opcija od 5 koraka:
+1. **Ugrađeni `better-sqlite3`** (putem `dependencies` u `package.json`)
+   — najbrži, nativna binarna datoteka, instalira se pomoću `npm install` kada su dostupni alati za izgradnju.
 
-1. **Bundled `better-sqlite3`** (putem `dependencies` u `package.json`)
-   — najbrži, izvorni binarni fajl, instaliran putem `npm install` kada su prisutni alati za izgradnju.
+2. **`better-sqlite3` instaliran tokom izvršavanja** (u `~/.omniroute/runtime/`)
+   — instalira se po potrebi pri prvom pokretanju **ILI** putem `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Prije učitavanja provjerava magične bajtove nativne `.node` datoteke (ELF / Mach-O / PE)
+   radi zaštite od oštećenih binarnih datoteka ili datoteka namijenjenih pogrešnoj platformi.
 
-2. **Runtime-installed `better-sqlite3`** (u `~/.omniroute/runtime/`)
-   — instaliran "lijeno" (lazily) pri prvom pokretanju **ILI** putem `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Validira izvorne `.node` magic bytes (ELF / Mach-O / PE) prije učitavanja
-   kako bi se zaštitio od korumpiranih ili binarnih fajlova za pogrešnu platformu.
+3. **`node:sqlite`** (standardna biblioteka za Node ≥22.5) — nije potrebna nativna izgradnja; koristi se kada
+   obje putanje za better-sqlite3 zakažu. Ograničen skup funkcija.
 
-3. **`node:sqlite`** (Node ≥22.5 stdlib) — nije potrebna izvorna izgradnja; koristi se kada
-   obje better-sqlite3 putanje ne uspiju. Ograničen skup funkcija.
-
-4. **`sql.js`** (WASM) — konačna rezervna opcija. Radi svuda, ali je sporiji
+4. **`sql.js`** (WASM) — krajnja rezervna opcija. Radi svugdje, ali je sporija
    i zapisuje podatke u intervalima umjesto sinhrono.
 
-## Zašto ova kompleksnost?
+## Zašto ova složenost?
 
-- **Windows EBUSY**: `npm install -g omniroute@latest` može ne uspjeti ako je
-  `better_sqlite3.node` prethodne verzije zaključan od strane procesa koji je u toku. Runtime
-  instalacija u `~/.omniroute/runtime/` zaobilazi globalni npm keš.
-- **Bez alata za izgradnju**: Neka okruženja (korporativni Windows bez VS Build
-  Tools, minimalne Docker slike) ne mogu kompajlirati `better-sqlite3`. Runtime
-  instalater razrješava unaprijed izgrađeni binarni fajl iz npm registra; rezervni
-  drajveri osiguravaju da se OmniRoute i dalje pokreće čak i ako to ne uspije.
-- **Air-gapped sistemi**: Ako npm registar nije dostupan, `node:sqlite`
+- **Windows EBUSY**: `npm install -g omniroute@latest` može ne uspjeti ako je datoteka
+  `better_sqlite3.node` prethodne verzije zaključana procesom koji je još uvijek pokrenut. Instalacija tokom
+  izvršavanja u `~/.omniroute/runtime/` zaobilazi globalnu npm predmemoriju.
+- **Nema alata za izgradnju**: Neka okruženja (poslovni Windows bez VS Build
+  Tools, minimalne Docker slike) ne mogu kompajlirati `better-sqlite3`. Instalacijski program tokom izvršavanja
+  preuzima unaprijed izgrađenu binarnu datoteku iz npm registra; rezervni upravljački
+  programi osiguravaju da se OmniRoute ipak pokrene čak i ako to ne uspije.
+- **Sistemi bez pristupa mreži**: Ako npm registar nije dostupan, `node:sqlite`
   ili `sql.js` garantuju osnovnu funkcionalnost.
 
-## Validacija magic-byte-ova
+## Provjera magičnih bajtova
 
-Prije učitavanja runtime-instaliranog `.node` fajla, OmniRoute čita prvih 8
-bajtova i upoređuje ih sa poznatim platformskim magic vrijednostima:
+Prije učitavanja `.node` datoteke instalirane tokom izvršavanja, OmniRoute čita prvih 8
+bajtova i upoređuje ih s poznatim magičnim vrijednostima platformi:
 
-| Platforma             | Bajtovi (hex) | Oznaka      |
-| --------------------- | ------------- | ----------- |
-| Linux                 | `7F 45 4C 46` | `elf`       |
-| macOS 64-bit BE       | `FE ED FA CF` | `macho`     |
-| macOS 64-bit LE       | `CF FA ED FE` | `macho-le`  |
-| macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
-| Windows               | `4D 5A` (MZ)  | `pe`        |
+| Platforma               | Bajtovi (hex) | Oznaka      |
+| ----------------------- | ------------- | ----------- |
+| Linux                   | `7F 45 4C 46` | `elf`       |
+| macOS 64-bit BE         | `FE ED FA CF` | `macho`     |
+| macOS 64-bit LE         | `CF FA ED FE` | `macho-le`  |
+| macOS fat (univerzalni) | `CA FE BA BE` | `macho-fat` |
+| Windows                 | `4D 5A` (MZ)  | `pe`        |
 
-Neodgovarajući magic → fajl se ignoriše, rezervna opcija prelazi na sljedeći korak.
+Nepodudarna magična vrijednost → datoteka se zanemaruje, a rezervni postupak nastavlja na sljedeći korak.
 
 ## Provjera aktivnog upravljačkog programa
 
@@ -59,39 +57,59 @@ const info = getDriverInfo();
 //   kind: "better-sqlite3" | "node-sqlite" | "sql-js" }
 ```
 
-## Ručna kontrola
+## Ručno upravljanje
 
 ```bash
-# Preskoči postinstall zagrijavanje (za brze CI instalacije)
+# Preskočite postinstall zagrijavanje (za brze CI instalacije)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# Prisilno ponovno instaliraj runtime better-sqlite3
+# Prisilno ponovo instalirajte runtime better-sqlite3
 rm -rf ~/.omniroute/runtime
-omniroute  # ponovo će instalirati pri sljedećem pokretanju
+omniroute  # ponovo će se instalirati pri sljedećem pokretanju
 
-# Provjeri koji je drajver aktivan
-omniroute config db-info  # (ako CLI komanda postoji)
+# Provjerite koji je upravljački program aktivan
+omniroute config db-info  # (ako CLI naredba postoji)
 ```
 
-## Referenca
+## Dijagnosticiranje sinhronih zastoja
+
+Uz `better-sqlite3`, prije pokretanja postavite `OMNIROUTE_SQLITE_SLOW_MS=200` kako biste
+uključili mjerenje vremena sinhronog adaptera. Podrazumijevano je isključeno. Završena operacija koja traje
+najmanje toliko milisekundi generiše upozorenje `[SQLITE-SLOW]`, najviše jednom u
+deset sekundi po adapteru. Upozorenje sadrži samo upravljački program, klasu operacije
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transakcija ili održavanje) i
+protekle milisekunde: bez SQL-a, vezanih vrijednosti, redova, putanja ili teksta izuzetka.
+
+Ovo je pomoćno sredstvo za dijagnostiku, a ne vremensko ograničenje ili optimizacija upita. Ne može prijaviti
+operaciju koja se nikada ne završi, razlikovati procesorski rad od čekanja na disk, identificirati
+tačan SQL niti posmatrati operacije izvršene putem izvornog rukovaoca upravljačkog programa.
+Trajanje asinhrone sigurnosne kopije namjerno je isključeno; drugi SQLite upravljački programi nisu
+obuhvaćeni ovom opcionalnom instrumentacijom. Onemogućavanje varijable vraća izvorni adapter
+bez omotača za mjerenje vremena. Nema promjena sheme baze podataka ili pohranjene konfiguracije.
+
+Upozorenje o kašnjenju za `/healthz` prijavljuje najveće kašnjenje petlje događaja od prethodnog uzorka,
+a ne prosjek tokom cijelog životnog vijeka. Uporedite njegove vremenske oznake s upozorenjima o sporim operacijama
+i metrikama hosta/pohrane prije nego što zastoj pripišete SQLite-u ili kvaru diska.
+
+## Reference
 
 Implementacija:
 
-- `bin/cli/runtime/magicBytes.mjs` — pomoćni programi za validaciju binarnih magic-byte-ova
-- `bin/cli/runtime/sqliteRuntime.mjs` — 5-step runtime resolver + "lijeni" instalater
+- `bin/cli/runtime/magicBytes.mjs` — pomoćne funkcije za provjeru magičnih bajtova binarnih datoteka
+- `bin/cli/runtime/sqliteRuntime.mjs` — sistem određivanja tokom izvršavanja u 5 koraka + instalacijski program koji se pokreće po potrebi
 - `bin/cli/runtime/index.mjs` — orkestrator pokretanja (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — npm post-install hook (nefatalno zagrijavanje)
-- `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` eksporti
+- `scripts/postinstall.mjs` — npm priključak nakon instalacije (nekritično zagrijavanje)
+- `src/lib/db/core.ts` — izvozi `ensureDbInitialized()` / `getDriverInfo()`
 
-## Topologija sa jednim pisačem (HA nije podržan)
+## Topologija s jednim zapisivačem (HA nije podržan)
 
-Lanac rezervnih drajvera iznad se i dalje pokreće u **jednom procesu**. Podrazumijevani SQLite
-OmniRoute je **single writer** (jedan pisač):
+Gornji lanac rezervnih upravljačkih programa i dalje se izvršava u **jednom procesu**. Podrazumijevani SQLite
+u OmniRouteu koristi **jedan zapisivač**:
 
-- Nemojte povezivati dvije OmniRoute replike na isti `storage.sqlite` fajl.
-- Ponovno pokretanje kontejnera, Recreate deploy, OOM kill ili HEALTHCHECK restart prekidaju
-  svaku SSE sesiju u toku. Ne postoji pražnjenje sesije (session drain) na standardnoj putanji.
-- Orkestrator liveness koji tretira spori `/healthz` kao mrtav će ubiti jedinu
-  repliku. Preferirajte TCP liveness + HTTP `/healthz` readiness. Pogledajte
-  [Docker Vodič — dostupnost](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  i [Kubernetes preporuke za probe](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+- Nemojte povezivati dvije OmniRoute replike s istom datotekom `storage.sqlite`.
+- Ponovno pokretanje kontejnera, Recreate implementacija, OOM prekid ili HEALTHCHECK ponovno pokretanje prekida
+  svaku aktivnu SSE sesiju. Standardni postupak ne omogućava kontrolirano pražnjenje sesija.
+- Provjera aktivnosti orkestratora koja spor odgovor `/healthz` tumači kao neaktivan prekinut će jedinu
+  repliku. Koristite TCP provjeru aktivnosti + HTTP `/healthz` provjeru spremnosti. Pogledajte
+  [Docker vodič — dostupnost](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
+  i [preporuke za Kubernetes provjere](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

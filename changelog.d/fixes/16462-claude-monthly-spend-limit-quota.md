@@ -1,1 +1,0 @@
-- **fix(resilience):** Claude's `429 "…monthly spend limit"` (extra-usage cap reached) is now classified as a long-window quota and parks the connection for the subscription cooldown instead of being retried on every request ([#16462](https://github.com/diegosouzapw/OmniRoute/pull/16462)) — thanks @tiagolabsit

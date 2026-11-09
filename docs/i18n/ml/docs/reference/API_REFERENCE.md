@@ -6,10 +6,12 @@
 
 🌐 **ഭാഷകൾ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API-യുടെ പ്രധാന റഫറൻസ്. ഇത് പൊതുവായ `/v1` ഇന്റർഫേസും ഏറ്റവും കൂടുതൽ ഉപയോഗിക്കുന്ന മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകളും ഉൾക്കൊള്ളുന്നു; മെഷീൻ വായനയോഗ്യമായ [`docs/openapi.yaml`](../openapi.yaml), `src/app/api/`-ന് കീഴിലുള്ള റൂട്ട് ട്രീ എന്നിവയാണ് സമഗ്രമായ ഉറവിടങ്ങൾ.
+OmniRoute API-യുടെ പ്രധാന റഫറൻസാണിത്. പൊതുവായി ലഭ്യമായ `/v1` ഉപരിതലവും ഏറ്റവും കൂടുതലായി ഉപയോഗിക്കുന്ന മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകളും ഇതിൽ ഉൾപ്പെടുന്നു; മെഷീൻ-റീഡബിൾ ആയ [`docs/openapi.yaml`](../openapi.yaml)യും `src/app/api/`-ന് കീഴിലുള്ള റൂട്ട് ട്രീയും സമഗ്രമായ ഉറവിടങ്ങളാണ്.
 
-OpenAI-അനുയോജ്യമായ പ്രോട്ടോക്കോളിന്റെയും പ്രൊവൈഡർ ശേഷി മാട്രിക്സിന്റെയും കേന്ദ്രീകൃത വിവരങ്ങൾക്ക്,
-[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) കാണുക.
+OpenAI-യുമായി പൊരുത്തപ്പെടുന്ന പ്രോട്ടോക്കോളിനെയും പ്രൊവൈഡർ ശേഷികളുടെ മാട്രിക്സിനെയും കുറിച്ചുള്ള കേന്ദ്രീകൃത വിവരങ്ങൾക്ക് കാണുക
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+ഓരോ ഡിപ്ലോയ്മെന്റും ബിൽഡിനിടെ `docs/openapi.yaml`-ൽ നിന്ന് സൃഷ്ടിച്ച സ്പെക്കിന്റെ സ്വന്തം പകർപ്പ് `/openapi.yaml`-ൽ നൽകുന്നു. അതിൽ ബിൽഡിന്റെ പതിപ്പും ആപേക്ഷികമായ സെർവർ URL (`./`)ഉം ഉൾപ്പെടുന്നു; അതിനാൽ അഭ്യർത്ഥനകൾ ഡോക്യുമെന്റ് നൽകിയ ഹോസ്റ്റിൽ തന്നെ തുടരും. ഡൗൺലോഡ് ചെയ്ത ഫയൽ ഇംപോർട്ട് ചെയ്യുന്ന ഒരു ടൂളിന് അത്തരമൊരു ഹോസ്റ്റ് ലഭ്യമല്ല, അതിനാൽ അടിസ്ഥാന URL സ്വമേധയാ സജ്ജീകരിക്കണം.
 
 ---
 
@@ -17,32 +19,33 @@ OpenAI-അനുയോജ്യമായ പ്രോട്ടോക്കോള
 
 - [ചാറ്റ് പൂർത്തീകരണങ്ങൾ](#chat-completions)
 - [എക്സ്ക്ലൂസീവ് മാനേജ്ഡ് സെഷൻ ലീസുകൾ](#exclusive-managed-session-leases)
-- [എംബെഡ്ഡിങ്ങുകൾ](#embeddings)
-- [ചിത്രം സൃഷ്ടിക്കൽ](#image-generation)
+- [എംബെഡ്ഡിംഗുകൾ](#embeddings)
+- [ചിത്ര ജനറേഷൻ](#image-generation)
 - [ഡോക്യുമെന്റ് OCR](#document-ocr)
-- [മോഡലുകളുടെ പട്ടിക](#list-models)
+- [മോഡലുകൾ പട്ടികപ്പെടുത്തുക](#list-models)
 - [പ്രൊവൈഡർ പ്ലഗിൻ മാനിഫെസ്റ്റ്](#provider-plugin-manifest)
-- [അനുയോജ്യതാ എൻഡ്പോയിന്റുകൾ](#compatibility-endpoints)
-- [ഫയലുകൾ API](#files-api)
-- [ബാച്ചുകൾ API](#batches-api)
-- [തിരയൽ API](#search-api)
-- [WebSocket സ്ട്രീമിംഗ്](#websocket-streaming)
-- [ക്വാട്ടകളും പ്രശ്നങ്ങൾ റിപ്പോർട്ട് ചെയ്യലും](#quotas--issues-reporting)
-- [സെമാന്റിക് കാഷ്](#semantic-cache)
+- [അനുയോജ്യത എൻഡ്പോയിന്റുകൾ](#compatibility-endpoints)
+- [Files API](#files-api)
+- [Batches API](#batches-api)
+- [Search API](#search-api)
+- [WebSocket Streaming](#websocket-streaming)
+- [ക്വോട്ടകളും പ്രശ്ന റിപ്പോർട്ടിംഗും](#quotas--issues-reporting)
+- [സെമാന്റിക് കാഷെ](#semantic-cache)
+- [CLIProxyAPI മാനേജ്മെന്റ് അനുയോജ്യത](#cliproxyapi-management-compatibility)
 - [ഡാഷ്ബോർഡും മാനേജ്മെന്റും](#dashboard--management)
 - [കോംബോ മാനേജ്മെന്റ്](#combo-management)
 - [വെബ്ഹുക്കുകൾ](#webhooks)
-- [രജിസ്റ്റർ ചെയ്ത കീകൾ (സ്വയമേവയുള്ള മാനേജ്മെന്റ്)](#registered-keys-auto-management)
-- [ഏജന്റ്സ് പ്രോട്ടോക്കോൾ](#agents-protocol)
+- [രജിസ്റ്റർ ചെയ്ത കീകൾ (ഓട്ടോ-മാനേജ്മെന്റ്)](#registered-keys-auto-management)
+- [Agents Protocol](#agents-protocol)
 - [മാനേജ്മെന്റ് പ്രോക്സികൾ](#management-proxies)
-- [പ്രതിരോധക്ഷമത (വിപുലീകരിച്ചത്)](#resilience-extended)
-- [സ്കില്ലുകൾ](#skills)
+- [റെസിലിയൻസ് (വിപുലീകരിച്ചത്)](#resilience-extended)
+- [കഴിവുകൾ](#skills)
 - [മെമ്മറി](#memory)
-- [MCP സെർവർ](#mcp-server)
-- [A2A സെർവർ](#a2a-server)
-- [ക്ലൗഡ്, ഇവാലുകൾ, അസസ്മെന്റ്](#cloud-evals--assess)
+- [MCP Server](#mcp-server)
+- [A2A Server](#a2a-server)
+- [ക്ലൗഡ്, Evals & Assess](#cloud-evals--assess)
 - [അഭ്യർത്ഥന പ്രോസസ്സിംഗ്](#request-processing)
-- [പ്രാമാണീകരണം](#authentication)
+- [ഓതന്റിക്കേഷൻ](#authentication)
 
 ---
 
@@ -64,36 +67,86 @@ Content-Type: application/json
 
 ### ഇഷ്ടാനുസൃത ഹെഡറുകൾ
 
-| ഹെഡർ                     | ദിശ       | വിവരണം                                                                                                                                                                                                                               |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `X-OmniRoute-No-Cache`   | അഭ്യർത്ഥന | കാഷ് ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                               |
-| `x-omniroute-no-memory`  | അഭ്യർത്ഥന | ഈ അഭ്യർത്ഥനയ്ക്കായി മെമ്മറി + സ്കിൽസ് ഇൻജക്ഷൻ ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക (no-cache-ന് സമാനമാണ്; ഓരോ കോളിലുമുള്ള ടോക്കൺ/ചെലവ് അധികഭാരം ഒഴിവാക്കുന്നു)                                                                          |
-| `X-OmniRoute-Progress`   | അഭ്യർത്ഥന | പുരോഗതി ഇവന്റുകൾക്കായി `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                        |
-| `X-Session-Id`           | അഭ്യർത്ഥന | ബാഹ്യ സെഷൻ അഫിനിറ്റിക്കുള്ള സ്റ്റിക്കി സെഷൻ കീ                                                                                                                                                                                       |
-| `x_session_id`           | അഭ്യർത്ഥന | അണ്ടർസ്കോർ വകഭേദവും സ്വീകരിക്കും (നേരിട്ടുള്ള HTTP)                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | അഭ്യർത്ഥന | കോളർ നൽകുന്ന സെഷൻ/സംഭാഷണ ടാഗ് (മെമ്മറിയിലേക്കും നൽകുന്നു). ഇത് നിലവിലുണ്ടെങ്കിൽ, ഓരോ സെഷനിലെയും ചെലവ് കണക്കാക്കുന്നതിനായി `call_logs.session_tag`-ലേക്ക് അതേപടി നിലനിർത്തുന്നു (#8249) — ഇല്ലാത്തപ്പോൾ ഒരിക്കലും സ്വയം സൃഷ്ടിക്കില്ല |
-| `Idempotency-Key`        | അഭ്യർത്ഥന | ഡിഡ്യൂപ്ലിക്കേഷൻ കീ (5s വിൻഡോ)                                                                                                                                                                                                       |
-| `X-Request-Id`           | അഭ്യർത്ഥന | പകരമായ ഡിഡ്യൂപ്ലിക്കേഷൻ കീ                                                                                                                                                                                                           |
-| `X-OmniRoute-Cache`      | പ്രതികരണം | `HIT` അല്ലെങ്കിൽ `MISS` (സ്ട്രീമിംഗ് അല്ലാത്തത്)                                                                                                                                                                                     |
-| `X-OmniRoute-Idempotent` | പ്രതികരണം | ഡിഡ്യൂപ്ലിക്കേറ്റ് ചെയ്തിട്ടുണ്ടെങ്കിൽ `true`                                                                                                                                                                                        |
-| `X-OmniRoute-Progress`   | പ്രതികരണം | പുരോഗതി ട്രാക്കിംഗ് ഓണാണെങ്കിൽ `enabled`                                                                                                                                                                                             |
-| `X-OmniRoute-Session-Id` | പ്രതികരണം | OmniRoute ഉപയോഗിച്ച പ്രാബല്യത്തിലുള്ള സെഷൻ ഐഡി                                                                                                                                                                                       |
-| `X-OmniRoute-Request-Id` | പ്രതികരണം | അഭ്യർത്ഥന കോറിലേഷൻ ഐഡി (അറിയാമെങ്കിൽ)                                                                                                                                                                                                |
-| `X-OmniRoute-Version`    | പ്രതികരണം | OmniRoute ബിൽഡ് പതിപ്പ് (എപ്പോഴും ലഭ്യമാണ്)                                                                                                                                                                                          |
-| `X-OmniRoute-Cost-Saved` | പ്രതികരണം | ഒരു HIT-ൽ കാഷ് ഒഴിവാക്കിയ USD ചെലവ് (കാഷ് ഹിറ്റുകൾക്ക് മാത്രം)                                                                                                                                                                       |
-| `X-OmniRoute-Decision`   | പ്രതികരണം | റൂട്ടിംഗ് ട്രേസ്: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` എന്നത് കോംബോ സ്ട്രാറ്റജിയാണ്, അല്ലെങ്കിൽ കോംബോ അല്ലാത്ത അഭ്യർത്ഥനയ്ക്ക് `single`) — പൂർത്തീകരണ പ്രതികരണങ്ങളിൽ എപ്പോഴും ലഭ്യമാണ്                      |
+| Header                   | Direction | Description                                                                                                                                                                                                                                    |
+| ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | അഭ്യർത്ഥന | കാഷ് ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                                         |
+| `x-omniroute-no-memory`  | അഭ്യർത്ഥന | ഈ അഭ്യർത്ഥനയ്ക്കുള്ള മെമ്മറി + skills injection ഒഴിവാക്കാൻ `true` ആയി സജ്ജമാക്കുക (no-cache-നെ പ്രതിഫലിപ്പിക്കുന്നു; ഓരോ കോൾക്കുമുള്ള token/cost overhead ഒഴിവാക്കുന്നു)                                                                       |
+| `X-OmniRoute-Progress`   | അഭ്യർത്ഥന | പുരോഗതി ഇവന്റുകൾക്കായി `true` ആയി സജ്ജമാക്കുക                                                                                                                                                                                                  |
+| `X-Session-Id`           | അഭ്യർത്ഥന | ബാഹ്യ സെഷൻ affinity-യ്ക്കുള്ള sticky session key                                                                                                                                                                                               |
+| `x_session_id`           | അഭ്യർത്ഥന | Underscore variant-ും സ്വീകരിക്കുന്നു (നേരിട്ടുള്ള HTTP)                                                                                                                                                                                       |
+| `X-OmniRoute-Session-Id` | അഭ്യർത്ഥന | Caller നൽകുന്ന session/conversation tag (memory-ലേക്കും നൽകുന്നു). ഇത് ഉള്ളപ്പോൾ, ഓരോ സെഷനിലെയും ചെലവ് attribution-നായി (#8249) `call_logs.session_tag`-ലേക്ക് verbatim ആയി persist ചെയ്യുന്നു — ഇല്ലാത്തപ്പോൾ ഒരിക്കലും synthesized ചെയ്യില്ല |
+| `Idempotency-Key`        | അഭ്യർത്ഥന | Dedup key (5s window)                                                                                                                                                                                                                          |
+| `X-Request-Id`           | അഭ്യർത്ഥന | Alternative dedup key                                                                                                                                                                                                                          |
+| `x-omniroute-connection` | അഭ്യർത്ഥന | ഒരു single-model അഭ്യർത്ഥനയെ അതിന്റെ id ഉപയോഗിച്ച് ഒരു provider connection (account)-ലേക്ക് pin ചെയ്യുന്നു — [ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള Account pinning](#account-pinning-per-request) കാണുക                                                    |
+| `X-OmniRoute-Cache`      | പ്രതികരണം | `HIT` അല്ലെങ്കിൽ `MISS` (non-streaming)                                                                                                                                                                                                        |
+| `X-OmniRoute-Idempotent` | പ്രതികരണം | Deduplicate ചെയ്തിട്ടുണ്ടെങ്കിൽ `true`                                                                                                                                                                                                         |
+| `X-OmniRoute-Progress`   | പ്രതികരണം | പുരോഗതി tracking ഓണാണെങ്കിൽ `enabled`                                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | പ്രതികരണം | OmniRoute ഉപയോഗിച്ച effective session ID                                                                                                                                                                                                       |
+| `X-OmniRoute-Request-Id` | പ്രതികരണം | Request correlation id (അറിയാവുന്നപ്പോൾ)                                                                                                                                                                                                       |
+| `X-OmniRoute-Version`    | പ്രതികരണം | OmniRoute build version (എപ്പോഴും ഉണ്ടായിരിക്കും)                                                                                                                                                                                              |
+| `X-OmniRoute-Cost-Saved` | പ്രതികരണം | HIT-ൽ കാഷ് ഒഴിവാക്കിയ USD (cache hits-ൽ മാത്രം)                                                                                                                                                                                                |
+| `X-OmniRoute-Decision`   | പ്രതികരണം | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` combo strategy ആണ്, അല്ലെങ്കിൽ combo അല്ലാത്ത അഭ്യർത്ഥനയ്ക്കായി `single`) — completion responses-ൽ എപ്പോഴും ഉണ്ടായിരിക്കും                                        |
 
-> Nginx കുറിപ്പ്: നിങ്ങൾ അണ്ടർസ്കോർ ഹെഡറുകളെ ആശ്രയിക്കുന്നുവെങ്കിൽ (ഉദാഹരണത്തിന് `x_session_id`), `underscores_in_headers on;` പ്രവർത്തനക്ഷമമാക്കുക.
+> Nginx കുറിപ്പ്: underscore headers (ഉദാഹരണത്തിന് `x_session_id`) ആശ്രയിക്കുന്നുവെങ്കിൽ, `underscores_in_headers on;` പ്രവർത്തനക്ഷമമാക്കുക.
 
-> **ചെലവ് ടെലിമെട്രി ഹെഡറുകൾ:** സ്ട്രീമിംഗ് അല്ലാത്ത വിജയകരമായ പ്രതികരണങ്ങളിൽ `X-OmniRoute-*` ചെലവ്-ടെലിമെട്രി സെറ്റും ഉൾപ്പെടുന്നു — `X-OmniRoute-Response-Cost` (USD, നിശ്ചിതമായി 10 ദശാംശ സ്ഥാനങ്ങൾ; സൗജന്യമായ/വില നിശ്ചയിച്ചിട്ടില്ലാത്തവയ്ക്ക് `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, കൂടാതെ `X-OmniRoute-Fallback-Attempts` (> 0 ആയിരിക്കുമ്പോൾ മാത്രം), അതോടൊപ്പം `X-OmniRoute-Request-Id`, `X-OmniRoute-Version` എന്നിവയും. ഇവ ചാറ്റ് പൂർത്തീകരണങ്ങൾ, `/v1/responses`, `/v1/messages`, **കൂടാതെ മീഡിയ എൻഡ്പോയിന്റുകൾ** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations` (ചെലവ് എപ്പോഴും `0`) — എന്നിവ പുറപ്പെടുവിക്കുന്നു. വില ലഭ്യമാണെങ്കിൽ ഓരോ മോഡാലിറ്റിക്കും അനുസരിച്ച് (ഓരോ ചിത്രത്തിനും, ഓരോ സെക്കൻഡിനും, ഓരോ അക്ഷരത്തിനും, ഓരോ തിരയൽ യൂണിറ്റിനും) മീഡിയ ചെലവ് കണക്കാക്കുന്നു; അല്ലെങ്കിൽ `0` (fail-open).
+#### ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള Account pinning
 
-> **കാഷ്-ഹിറ്റ് ചെലവ് സെമാന്റിക്സ്:** ഒരു സെമാന്റിക്-കാഷ് HIT-ൽ (`X-OmniRoute-Cache-Hit: true`) അപ്സ്ട്രീം കോൾ ഒന്നും നടത്താത്തതിനാൽ, `X-OmniRoute-Response-Cost` എന്നത് `0.0000000000` ആണ് (ഹിറ്റ് നൽകുന്നതിനുള്ള **അധിക** ചെലവ്). യഥാർത്ഥ/ഉണ്ടാകുമായിരുന്ന ചെലവ് `X-OmniRoute-Cost-Saved`-ൽ പ്രത്യേകം റിപ്പോർട്ട് ചെയ്യുന്നു. ബില്ലിംഗ് ഉപഭോക്താക്കൾ `X-OmniRoute-Response-Cost` കൂട്ടിച്ചേർക്കണം (ഹിറ്റുകൾക്ക് ചെലവില്ല); കാഷ് അനലിറ്റിക്സിന് `X-OmniRoute-Cost-Saved` സംഗ്രഹിക്കാം.
+ഒരു provider-ന് നിരവധി connections (accounts അല്ലെങ്കിൽ keys) ഉള്ളപ്പോൾ, OmniRoute സാധാരണയായി അതിന്റെ account-selection strategy ഉപയോഗിച്ച് ഒന്ന് തിരഞ്ഞെടുക്കുന്നു. പകരം, `x-omniroute-connection` header ഉപയോഗിച്ച് ഒരു നിർദ്ദിഷ്ട connection-ലേക്ക് ഒരു അഭ്യർത്ഥന pin ചെയ്യാം:
+
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your OmniRoute API key>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
+```
+
+- **id എവിടെ കണ്ടെത്താം.** ഡാഷ്ബോർഡിൽ provider പേജ് തുറക്കുക
+  (**Dashboard → Providers → <provider>**) കൂടാതെ ഒരു connection
+  വരിയിലെ `xxxxxxxx…` id chip ക്ലിക്ക് ചെയ്യുക — ഇത് പൂർണ്ണ connection id പകർത്തും.
+- **ഏത് requests ആണ് ഇത് മാനിക്കുന്നത്.** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`
+  എന്നിവയിലെ single-model requests (`provider/model`). Combos ഈ header അവഗണിക്കും: ഓരോ combo
+  step-നും ആ step-ന്റെ സ്വന്തം connection വഴി ഒരു account pin ചെയ്യുക.
+- **ഈ pin ഒരു preference അല്ല, കർശനമായ നിയന്ത്രണമാണ്.** Pinned connection മാത്രമേ ഉപയോഗിക്കൂ. ഒരു
+  request-ിനുള്ളിലെ പരാജയം account-ന്റെ cooldown രേഖപ്പെടുത്തും, പക്ഷേ അതേ provider-ലെ
+  sibling account-ിലേക്ക് മാറില്ല.
+- **Cooldown-ഉം quota-യും pin ഒഴിവാക്കും.** Pinned connection cooldown-ലായിരിക്കുമ്പോൾ,
+  quota തീർന്നിരിക്കുമ്പോൾ, അല്ലെങ്കിൽ quota policy കാരണം blocked ആയിരിക്കുമ്പോൾ, പിന്നീട് വരുന്ന
+  requests provider-ന്റെ മറ്റ് connections-ലേക്ക് fallback ചെയ്യും — pin ചെയ്യാത്ത traffic പോലെ തന്നെ.
+- **അജ്ഞാതമോ disabled ആയതോ ആയ ids പരാജയപ്പെടും.** Provider-ന്റെ active pool-ൽ ഇല്ലാത്ത ഒരു id
+  (deleted, deactivated, അല്ലെങ്കിൽ മറ്റൊരു provider-ന്റേതായ id) eligible account ഒന്നും
+  അവശേഷിപ്പിക്കില്ല; അതിനാൽ request പരാജയപ്പെടും, നിശ്ശബ്ദമായി മറ്റൊരിടത്തേക്ക് route ചെയ്യില്ല.
+
+Claude Code custom headers `ANTHROPIC_CUSTOM_HEADERS` വഴി അയയ്ക്കുന്നു. ഇത്
+`~/.claude/settings.json`-ന്റെ `env` block-ൽ ഇടുക, അല്ലെങ്കിൽ ഓരോ project-നും വ്യത്യസ്ത account
+pin ചെയ്യുന്നതിനായി project-level `.claude/settings.json`-ൽ ഇടുക:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+ഉറവിടം: `src/sse/handlers/chat.ts` (header read), `src/sse/services/auth.ts`, കൂടാതെ
+`src/sse/services/sessionAffinityPin.ts` (pin release-ഉം pool-ൽ നിന്ന് missing ആയതിന്റെ check-ഉം).
+
+> **Cost telemetry headers:** non-streaming success responses-ലും `X-OmniRoute-*` cost-telemetry set ഉൾപ്പെടുന്നു — `X-OmniRoute-Response-Cost` (USD, fixed 10 decimals; സൗജന്യമായി ലഭിക്കുന്നതോ വില നിശ്ചയിച്ചിട്ടില്ലാത്തതോ ആണെങ്കിൽ `0.0000000000`), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, കൂടാതെ `X-OmniRoute-Fallback-Attempts` (0-ൽ കൂടുതലായിരിക്കുമ്പോൾ മാത്രം), അതോടൊപ്പം `X-OmniRoute-Request-Id`, `X-OmniRoute-Version`. ഇവ chat completions, `/v1/responses`, `/v1/messages`, **കൂടാതെ media endpoints** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/moderations` — എന്നിവയിൽ നിന്നുമാണ് പുറപ്പെടുവിക്കുന്നത് (`0` cost എപ്പോഴും). Pricing ലഭ്യമാണെങ്കിൽ media cost ഓരോ modality-ക്കും (per-image, per-second, per-character, per search-unit) കണക്കാക്കും; അല്ലാത്തപക്ഷം `0` ആയിരിക്കും (fail-open).
+
+> **Cache-hit cost semantics:** ഒരു semantic-cache HIT-ൽ (`X-OmniRoute-Cache-Hit: true`) upstream call ഉണ്ടാകില്ല; അതിനാൽ `X-OmniRoute-Response-Cost` `0.0000000000` ആയിരിക്കും (hit നൽകുന്നതിനുള്ള **incremental** cost). യഥാർത്ഥമായി ഉണ്ടായതോ ഉണ്ടാകുമായിരുന്നതോ ആയ cost `X-OmniRoute-Cost-Saved`-ൽ പ്രത്യേകം റിപ്പോർട്ട് ചെയ്യും. Billing consumers `X-OmniRoute-Response-Cost` കൂട്ടിച്ചേർക്കണം (hits-ന് cost ഒന്നുമില്ല); cache analytics-ന് `X-OmniRoute-Cost-Saved` aggregate ചെയ്യാം.
 
 ## എക്സ്ക്ലൂസീവ് മാനേജ്ഡ് സെഷൻ ലീസുകൾ
 
-എക്സ്ക്ലൂസീവ് മാനേജ്ഡ് സെഷൻ ലീസിംഗ് എന്നത് ഒരു ഓപ്റ്റ്-ഇൻ, ക്ലയിന്റ്-ന്യൂട്രൽ റൂട്ടിംഗ് കരാറാണ്: ഒരു സജീവ ഉടമ ഒരു യോഗ്യമായ ഓമ്നിറൂട്ട് കണക്ഷൻ കൈവശം വെക്കുന്നു. ഇത് ഒരു മോഡലിനെ ലീസിന് നൽകുകയോ, OAuth ആവശ്യപ്പെടുകയോ, ഒരു പ്രത്യേക ക്ലയിന്റിനെ തിരിച്ചറിയുകയോ, ഒരു പ്രത്യേക പ്രൊവൈഡറെ ആവശ്യപ്പെടുകയോ ചെയ്യുന്നില്ല.
+എക്സ്ക്ലൂസീവ് മാനേജ്ഡ് സെഷൻ ലീസിംഗ് ഒരു opt-in, client-neutral റൂട്ടിംഗ് കരാറാണ്: ഒരു സജീവ ഉടമ
+ഒരു യോഗ്യമായ OmniRoute കണക്ഷൻ കൈവശം വയ്ക്കുന്നു. ഇത് ഒരു മോഡൽ ലീസ് ചെയ്യുന്നില്ല, OAuth ആവശ്യപ്പെടുന്നില്ല,
+ഒരു പ്രത്യേക ക്ലയന്റിനെ തിരിച്ചറിയുന്നില്ല, ഒരു പ്രത്യേക പ്രൊവൈഡറിനെ ആവശ്യപ്പെടുന്നുമില്ല.
 
-ഓതന്റിക്കേറ്റിംഗ് API കീക്ക് `lease:exclusive` എന്ന സ്കോപ്പും വ്യക്തമായ ശൂന്യമല്ലാത്ത `allowedConnections` ലിസ്റ്റും ഉണ്ടായിരിക്കണം. കീ ഉണ്ടാക്കുമ്പോഴും ഭാഗികമായി അപ്ഡേറ്റ് ചെയ്യുമ്പോഴും ഡാറ്റാബേസ് മ്യൂട്ടേഷൻ ബൗണ്ടറി ഈ രണ്ട് ഫീൽഡുകളും ഒരുമിച്ച് നടപ്പിലാക്കുന്നു.
+ഓതന്റിക്കേറ്റ് ചെയ്യുന്ന API കീയ്ക്ക് `lease:exclusive` സ്കോപ്പും ശൂന്യമല്ലാത്ത വ്യക്തമായ
+`allowedConnections` ലിസ്റ്റും ഉണ്ടായിരിക്കണം. കീ സൃഷ്ടിക്കുമ്പോഴും ഭാഗിക അപ്ഡേറ്റുകൾ നടത്തുമ്പോഴും ഡാറ്റാബേസ്
+മ്യൂട്ടേഷൻ അതിർത്തി ഈ രണ്ട് ഫീൽഡുകളും ഒരുമിച്ച് നിർബന്ധമാക്കുന്നു.
 
 ```http
 POST /api/v1/session-leases
@@ -104,7 +157,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-വിജയകരമായ അക്വയർ, റിന്യൂ, റിലീസ് പ്രതികരണങ്ങൾ ടൈംസ്റ്റാമ്പുകൾ, `state`, കൃത്യമായ പോസിറ്റീവ് `generation` എന്നിവ വെളിപ്പെടുത്തുന്നു, എന്നാൽ തിരഞ്ഞെടുത്ത കണക്ഷനോ ക്രെഡൻഷ്യലുകളോ ഒരിക്കലും വെളിപ്പെടുത്തുന്നില്ല. റിന്യൂവും റിലീസും JSON ബോഡിയിൽ ജനറേഷൻ നൽകുന്നു:
+വിജയകരമായ acquire, renew, release പ്രതികരണങ്ങൾ ടൈംസ്റ്റാമ്പുകൾ, `state`, കൃത്യമായ പോസിറ്റീവ്
+`generation` എന്നിവ പ്രദർശിപ്പിക്കും, എന്നാൽ തിരഞ്ഞെടുത്ത കണക്ഷനോ ക്രെഡൻഷ്യലുകളോ ഒരിക്കലും പ്രദർശിപ്പിക്കില്ല. Renew, release എന്നിവ
+JSON ബോഡിയിൽ generation നൽകുന്നു:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -114,7 +169,7 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-ഒരു സജീവ ലീസിംഗ് ഉടമയ്ക്ക് നിലവിലെ ബൈൻഡിംഗിനായുള്ള സ്വകാര്യത-സുരക്ഷിത ഡിസ്പ്ലേ മെറ്റാഡാറ്റ വ്യക്തമായി അഭ്യർത്ഥിക്കാം:
+ഒരു സജീവ ലീസ് ഉടമയ്ക്ക് അതിന്റെ നിലവിലെ ബൈൻഡിംഗിനായുള്ള സ്വകാര്യതാ സുരക്ഷിതമായ പ്രദർശന മെറ്റാഡാറ്റ വ്യക്തമായി അഭ്യർത്ഥിക്കാം:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -134,22 +189,37 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 }
 ```
 
-ഈ ഓപ്റ്റ്-ഇൻ സ്റ്റാറ്റസ് പ്രവർത്തനം ഒപാക് ഉടമ, ഓതന്റിക്കേറ്റഡ് മാനേജ്ഡ് API കീ, ഒരു ഡാറ്റാബേസ് ട്രാൻസാക്ഷനിലെ കൃത്യമായ സജീവ ജനറേഷൻ എന്നിവയാൽ വേർതിരിച്ചിരിക്കുന്നു. `displayName` എന്നത് ട്രിം ചെയ്ത കോൺഫിഗർ ചെയ്ത കണക്ഷൻ പേര് മാത്രമാണ്; സുരക്ഷിതമായ കോൺഫിഗർ ചെയ്ത പേര് നിലവിലില്ലെങ്കിൽ അത് `null` ആയിരിക്കും. ഓമ്നിറൂട്ട് ഒരിക്കലും ഒരു ഇമെയിലോ ജനറേറ്റ് ചെയ്ത അക്കൗണ്ട് ഐഡന്റിറ്റിയോ ഉപയോഗിക്കുന്നില്ല. പ്രൊവൈഡർ മൂല്യം ഒരു സെൻസിറ്റീവ് അല്ലാത്ത ഡിസ്പ്ലേ ലേബലാണ്, ഒരിക്കലും ജനറേറ്റ് ചെയ്ത അനുയോജ്യമായ-പ്രൊവൈഡർ ഐഡന്റിഫയർ അല്ല. ക്രെഡൻഷ്യലുകൾ, ടോക്കണുകൾ, കുക്കികൾ, റോ കണക്ഷൻ അല്ലെങ്കിൽ API കീ ഐഡികൾ, ഉടമയുടെ ഹാഷുകൾ, ഫെൻസിംഗ് സീക്രട്ടുകൾ, ആന്തരിക റൂട്ടിംഗ് ഡാറ്റ എന്നിവ ഒഴിവാക്കിയിരിക്കുന്നു.
+ഈ opt-in status പ്രവർത്തനം അപാകമായ ഉടമ, ഓതന്റിക്കേറ്റ് ചെയ്ത മാനേജ്ഡ് API കീ, കൃത്യമായ
+സജീവ generation എന്നിവ ഉപയോഗിച്ച് ഒരു ഡാറ്റാബേസ് ട്രാൻസാക്ഷനിൽ സംരക്ഷിക്കപ്പെടുന്നു. `displayName` ക്രമീകരിച്ച
+കണക്ഷൻ പേരിന്റെ trim ചെയ്ത രൂപം മാത്രമാണ്; സുരക്ഷിതമായി ക്രമീകരിച്ച പേര് ലഭ്യമല്ലെങ്കിൽ ഇത് `null` ആയിരിക്കും. OmniRoute ഒരിക്കലും
+ഒരു ഇമെയിലിനെയോ സൃഷ്ടിച്ച അക്കൗണ്ട് ഐഡന്റിറ്റിയെയോ പകരം ഉപയോഗിക്കില്ല. പ്രൊവൈഡർ മൂല്യം സെൻസിറ്റീവ് അല്ലാത്ത ഒരു
+പ്രദർശന ലേബലാണ്; സൃഷ്ടിച്ച compatible-provider ഐഡന്റിഫയറായി ഇത് ഒരിക്കലും ഉപയോഗിക്കില്ല. ക്രെഡൻഷ്യലുകൾ, ടോക്കണുകൾ, കുക്കികൾ,
+raw connection അല്ലെങ്കിൽ API key ഐഡികൾ, ഉടമയുടെ ഹാഷുകൾ, ഫെൻസിംഗ് രഹസ്യങ്ങൾ, ആന്തരിക റൂട്ടിംഗ് ഡാറ്റ എന്നിവ ഒഴിവാക്കപ്പെട്ടിരിക്കുന്നു.
 
-തെറ്റായ കീ, തെറ്റായ ഉടമ, കാലഹരണപ്പെട്ട ജനറേഷൻ, കാണാതായ, കാലഹരണപ്പെട്ട, റിലീസ് ചെയ്ത, അസാധുവാക്കിയ ലുക്കപ്പുകൾ എല്ലാം കണക്ഷൻ മെറ്റാഡാറ്റ ഇല്ലാതെ ഒരേ `409 LEASE_FENCE_STALE` പിശക് നൽകുന്നു. കപ്പാസിറ്റി-വെയ്റ്റ് പ്രതികരണം ലഭിച്ച ഒരു ക്ലയിന്റിന് പരിശോധിക്കാൻ സജീവമായ ബൈൻഡിംഗ് ഇല്ല. റൂട്ടിംഗ് ഒരു സജീവ ലീസിനെ മാറ്റുമ്പോൾ, അതേ ജനറേഷൻ സാധുവായി തുടരുകയും സ്റ്റാറ്റസ് ആറ്റോമികമായി പുതിയ ബൈൻഡിംഗ് നൽകുകയും ചെയ്യുന്നു, പഴയത് ഒരിക്കലും നൽകുന്നില്ല. നിലവിലുള്ള ക്ലയിന്റുകൾ മാറ്റമില്ലാതെ തുടരുന്നു, കാരണം അക്വയർ, റിന്യൂ, റിലീസ്, കാത്തിരിക്കുന്ന പ്രതികരണങ്ങൾ എന്നിവ അവയുടെ മുൻ രൂപങ്ങൾ നിലനിർത്തുന്നു.
+തെറ്റായ കീ, തെറ്റായ ഉടമ, കാലഹരണപ്പെട്ട generation, നഷ്ടപ്പെട്ടത്, കാലാവധി കഴിഞ്ഞത്, റിലീസ് ചെയ്തത്, അസാധുവാക്കിയതുമായ എല്ലാ
+ലുക്കപ്പുകളും കണക്ഷൻ മെറ്റാഡാറ്റ ഇല്ലാതെ ഒരേ `409 LEASE_FENCE_STALE` പിശക് നൽകുന്നു. കപ്പാസിറ്റി കാത്തിരിപ്പ് പ്രതികരണം ലഭിച്ച
+ക്ലയന്റിന് പരിശോധിക്കാനുള്ള സജീവ ബൈൻഡിംഗ് ഉണ്ടായിരിക്കില്ല. റൂട്ടിംഗ് ഒരു സജീവ ലീസ് മാറ്റുമ്പോൾ,
+അതേ generation സാധുവായി തുടരുകയും status പുതിയ ബൈൻഡിംഗ് ആറ്റമിക്കായി തിരികെ നൽകുകയും ചെയ്യും; പഴയത് ഒരിക്കലും നൽകില്ല.
+acquire, renew, release, waiting പ്രതികരണങ്ങൾ അവയുടെ മുൻ രൂപങ്ങൾ നിലനിർത്തുന്നതിനാൽ നിലവിലുള്ള ക്ലയന്റുകൾക്ക് മാറ്റമുണ്ടാകില്ല.
 
-ഈ സെർവർ കരാർ സ്റ്റോക്ക് OpenAI Codex `/status` മാറ്റുന്നില്ല. സ്റ്റോക്ക് Codex നിലവിൽ അതിന്റെ മോഡൽ പ്രൊവൈഡറും ബിൽറ്റ്-ഇൻ ഓതന്റിക്കേഷൻ/അക്കൗണ്ട് സ്റ്റേറ്റും റിപ്പോർട്ട് ചെയ്യുന്നു, എന്നാൽ അനിയന്ത്രിതമായ കസ്റ്റം പ്രൊവൈഡർ അക്കൗണ്ട് മെറ്റാഡാറ്റ റെൻഡർ ചെയ്യുന്നില്ല; ഒരു പിന്നീടുള്ള ക്ലയിന്റ് ഇന്റഗ്രേഷൻ ഈ പ്രവർത്തനം വിളിച്ച് `connection.displayName` എങ്ങനെ പ്രദർശിപ്പിക്കണമെന്ന് തീരുമാനിക്കണം.
+ഈ സെർവർ കരാർ സ്റ്റോക്ക് OpenAI Codex `/status`-നെ മാറ്റുന്നില്ല. സ്റ്റോക്ക് Codex നിലവിൽ അതിന്റെ
+മോഡൽ പ്രൊവൈഡറും ബിൽറ്റ്-ഇൻ ഓതന്റിക്കേഷൻ/അക്കൗണ്ട് നിലയും റിപ്പോർട്ട് ചെയ്യുന്നു, എന്നാൽ ഇഷ്ടാനുസൃത
+പ്രൊവൈഡർ അക്കൗണ്ട് മെറ്റാഡാറ്റ പ്രദർശിപ്പിക്കുന്നില്ല; ഭാവിയിലെ ക്ലയന്റ് ഇന്റഗ്രേഷൻ ഈ പ്രവർത്തനം വിളിച്ച്
+`connection.displayName` എങ്ങനെ പ്രദർശിപ്പിക്കണമെന്ന് തീരുമാനിക്കണം.
 
-ഓരോ മാനേജ്ഡ് ഇൻഫറൻസ് അഭ്യർത്ഥനയും രണ്ട് കൺട്രോൾ ഹെഡറുകളും നൽകുന്നു:
+ഓരോ മാനേജ്ഡ് ഇൻഫറൻസ് അഭ്യർത്ഥനയും തുടർന്ന് രണ്ട് നിയന്ത്രണ ഹെഡറുകളും നൽകുന്നു:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-കൃത്യമായ ഉടമ, ജനറേഷൻ, സജീവ കണക്ഷൻ, ഓതന്റിക്കേറ്റഡ് API കീ എന്നിവ ഓരോ പിന്തുണയ്ക്കുന്ന അപ്സ്ട്രീം ശ്രമത്തിനും തൊട്ടുമുമ്പ് വേർതിരിച്ചിരിക്കുന്നു. മറ്റൊരു കീ ഉപയോഗിച്ച് ഉടമയെയും ജനറേഷനെയും വീണ്ടും പ്ലേ ചെയ്യുന്നത് പരാജയപ്പെടും, ആ കീ അതേ കണക്ഷൻ അനുവദിച്ചാൽ പോലും. റോ ഉടമകളെ നിലനിർത്തുകയോ, ലോഗ് ചെയ്യുകയോ, അഭ്യർത്ഥന സ്നാപ്പ്ഷോട്ടിൽ നിലനിർത്തുകയോ, അപ്സ്ട്രീമിലേക്ക് ഫോർവേഡ് ചെയ്യുകയോ ചെയ്യുന്നില്ല.
+പിന്തുണയ്ക്കുന്ന ഓരോ അപ്സ്ട്രീം ശ്രമത്തിനും തൊട്ടുമുമ്പ് കൃത്യമായ ഉടമ, generation, സജീവ കണക്ഷൻ, ഓതന്റിക്കേറ്റ് ചെയ്ത
+API കീ എന്നിവ ഫെൻസ് ചെയ്യപ്പെടുന്നു. മറ്റൊരു കീ ഉപയോഗിച്ച് ഉടമയും generation-ഉം വീണ്ടും അയച്ചാൽ, ആ കീക്ക് അതേ കണക്ഷൻ
+അനുവദിച്ചിട്ടുണ്ടെങ്കിലും പരാജയപ്പെടും. Raw ഉടമകൾ സ്ഥിരമായി സൂക്ഷിക്കുകയോ, ലോഗ് ചെയ്യുകയോ, നിലനിർത്തുകയോ,
+റിക്വസ്റ്റ് സ്നാപ്ഷോട്ടിൽ ഉൾപ്പെടുത്തുകയോ, അപ്സ്ട്രീമിലേക്ക് ഫോർവേഡ് ചെയ്യുകയോ ഇല്ല.
 
-താൽക്കാലിക തടസ്സം HTTP `429` ഉം `Retry-After` ഉം നൽകുന്നു:
+താൽക്കാലിക മത്സരാവസ്ഥ `Retry-After` സഹിതം HTTP `429`യും ഇതും നൽകുന്നു:
 
 ```json
 {
@@ -160,29 +230,32 @@ X-OmniRoute-Lease-Generation: 1
 }
 ```
 
-ഈ പ്രതികരണം അർത്ഥമാക്കുന്നത് സാധാരണ യോഗ്യമായ സെറ്റ് ശൂന്യമല്ലാത്തതും ഓരോ സൗജന്യ കാൻഡിഡേറ്റും ഒരു വിദേശ സജീവ ലീസിനാൽ കൈവശം വെച്ചിരുന്നു എന്നുമാണ്. പിന്തുണയ്ക്കാത്ത മോഡലുകൾ/പ്രൊവൈഡർമാർ, പോളിസി പൊരുത്തക്കേട്, കൂൾഡൗൺ, ക്വാട്ട, ആരോഗ്യം, മറ്റ് സാധാരണ യോഗ്യതാ പരാജയങ്ങൾ എന്നിവ അവയുടെ നിലവിലുള്ള ഓമ്നിറൂട്ട് പ്രതികരണങ്ങൾ നിലനിർത്തുന്നു.
+സാധാരണ യോഗ്യമായ സെറ്റ് ശൂന്യമല്ലെന്നും ലഭ്യമായ എല്ലാ സ്വതന്ത്ര സ്ഥാനാർത്ഥികളും മറ്റൊരു സജീവ ലീസിന്റെ കൈവശമാണെന്നും മാത്രമാണ്
+ഈ പ്രതികരണം സൂചിപ്പിക്കുന്നത്. പിന്തുണയ്ക്കാത്ത മോഡലുകൾ/പ്രൊവൈഡർമാർ, നയ പൊരുത്തക്കേട്, കൂൾഡൗൺ, ക്വോട്ട,
+ഹെൽത്ത്, മറ്റ് സാധാരണ യോഗ്യതാ പരാജയങ്ങൾ എന്നിവ അവയുടെ നിലവിലുള്ള OmniRoute പ്രതികരണങ്ങൾ നിലനിർത്തും.
 
 ### `x-omniroute-compression`
 
-കംപ്രഷൻ പ്ലാനിന്റെ ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള ഓവർറൈഡ്. ഏറ്റവും ഉയർന്ന മുൻഗണന — റൂട്ടിംഗ്-കോംബോ ഓവർറൈഡ്, സജീവ പ്രൊഫൈൽ, ഓട്ടോ-ട്രിഗർ, പാനൽ ഡിഫോൾട്ട് എന്നിവയെ മറികടക്കുന്നു. മൂല്യങ്ങൾ:
+കംപ്രഷൻ പ്ലാനിനായുള്ള ഓരോ റിക്വസ്റ്റിനുമുള്ള ഓവർറൈഡ്. ഏറ്റവും ഉയർന്ന മുൻഗണന — റൂട്ടിംഗ്-കോമ്പോ
+ഓവർറൈഡ്, സജീവ പ്രൊഫൈൽ, auto-trigger, പാനൽ Default എന്നിവയെ മറികടക്കുന്നു. മൂല്യങ്ങൾ:
 
-| മൂല്യം        | പ്രഭാവം                                                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | ഈ അഭ്യർത്ഥനയ്ക്ക് കംപ്രഷൻ ഇല്ല.                                                                                              |
-| `default`     | പാനലിൽ നിന്ന് ലഭിച്ച ഡിഫോൾട്ട് പ്രൊഫൈൽ (സജീവ പ്രൊഫൈൽ അവഗണിക്കുന്നു). ലോസി എഞ്ചിനുകൾ ഓഫ് ആയിരിക്കും.                          |
-| `safe`        | ഡെഡ്യൂപ്പും വൈറ്റ്സ്പേസ് ഫോൾഡിംഗും മാത്രം.                                                                                   |
-| `allow-lossy` | സംഗ്രഹങ്ങളും സ്റ്റൈൽ റീറൈറ്റുകളും ഉൾപ്പെടെ, ഈ അഭ്യർത്ഥനയ്ക്കുള്ള ഓപ്പറേറ്റർ പ്ലാൻ നിലനിർത്തുക.                               |
-| `engine:<id>` | പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ ഒരു എഞ്ചിൻ മാത്രം, ഉദാഹരണത്തിന് `engine:rtk`. ആ എഞ്ചിനിനായുള്ള ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള ഓപ്റ്റ്-ഇൻ. |
-| `<combo>`     | പേര് (കേസ്-ഇൻസെൻസിറ്റീവ്) അനുസരിച്ച് ആദ്യം, പിന്നീട് ഐഡി അനുസരിച്ച് പൊരുത്തപ്പെടുന്ന ഒരു പേരുള്ള കോംബോ.                      |
+| Value         | Effect                                                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `off`         | ഈ റിക്വസ്റ്റിനായി കംപ്രഷൻ ഇല്ല.                                                                                      |
+| `default`     | പാനലിൽ നിന്ന് ലഭിച്ച Default പ്രൊഫൈൽ (സജീവ പ്രൊഫൈലിനെ അവഗണിക്കുന്നു). Lossy എഞ്ചിനുകൾ ഓഫ് ആയി തുടരും.                |
+| `safe`        | Dedup, whitespace folding എന്നിവ മാത്രം.                                                                             |
+| `allow-lossy` | summaries, style rewrites എന്നിവ ഉൾപ്പെടെ ഈ റിക്വസ്റ്റിനായി ഓപ്പറേറ്റർ പ്ലാൻ നിലനിർത്തുന്നു.                         |
+| `engine:<id>` | പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ ഒരു എഞ്ചിൻ മാത്രം, ഉദാ. `engine:rtk`. ആ എഞ്ചിനായുള്ള ഓരോ റിക്വസ്റ്റിനുമുള്ള opt-in. |
+| `<combo>`     | പേരിനനുസരിച്ചുള്ള named combo; ആദ്യം പേരുമായി (case-insensitive) പൊരുത്തപ്പെടുത്തുന്നു, തുടർന്ന് id ഉപയോഗിച്ച്.      |
 
 കുറിപ്പുകൾ:
 
-- അറിയാത്ത മൂല്യങ്ങൾ അവഗണിക്കപ്പെടുന്നു (അഭ്യർത്ഥന ഒരിക്കലും നിരസിക്കപ്പെടുന്നില്ല); റെസല്യൂഷൻ സാധാരണ ഓപ്പറേറ്റർ മുൻഗണനയിലേക്ക് വരുന്നു.
-- ഒന്നിലധികം കോംബോകൾക്ക് ഒരേ പേരുണ്ടെങ്കിൽ, ഒരു നിർണ്ണായക പൊരുത്തത്തിനായി കോംബോ **id** നൽകുക.
-- `off` അല്ലെങ്കിൽ `default` എന്ന് പേരുള്ള ഒരു കോംബോ പേര് ഉപയോഗിച്ച് തിരഞ്ഞെടുക്കാൻ കഴിയില്ല (ആ കീവേഡുകൾ ആദ്യം വ്യാഖ്യാനിക്കപ്പെടുന്നു); അത്തരം ഒരു കോംബോയെ അതിന്റെ ഐഡി ഉപയോഗിച്ച് റഫർ ചെയ്യുക.
-- മാസ്റ്റർ കംപ്രഷൻ സ്വിച്ച് ഒരു ഹാർഡ് ഗേറ്റാണ്: കംപ്രഷൻ ആഗോളതലത്തിൽ പ്രവർത്തനരഹിതമാക്കുമ്പോൾ, ഈ ഹെഡറിന് അത് പ്രവർത്തനക്ഷമമാക്കാൻ കഴിയില്ല.
+- അറിയാത്ത മൂല്യങ്ങൾ അവഗണിക്കപ്പെടും (റിക്വസ്റ്റ് ഒരിക്കലും നിരസിക്കില്ല); പരിഹാരം സാധാരണ ഓപ്പറേറ്റർ മുൻഗണനാക്രമത്തിലൂടെ തുടരും.
+- ഒന്നിലധികം combos-ന് ഒരേ പേര് ഉണ്ടെങ്കിൽ, നിർണ്ണായകമായ പൊരുത്തത്തിനായി combo **id** നൽകുക.
+- `off` അല്ലെങ്കിൽ `default` എന്ന പേര് ഉള്ള combo പേര് ഉപയോഗിച്ച് തിരഞ്ഞെടുക്കാനാകില്ല (ഈ കീവേഡുകൾ ആദ്യം വ്യാഖ്യാനിക്കപ്പെടുന്നു); അത്തരത്തിലുള്ള combo-യെ അതിന്റെ id ഉപയോഗിച്ച് റഫർ ചെയ്യുക.
+- മാസ്റ്റർ കംപ്രഷൻ സ്വിച്ച് ഒരു ഹാർഡ് ഗേറ്റാണ്: കംപ്രഷൻ ആഗോളമായി പ്രവർത്തനരഹിതമാക്കിയിരിക്കുമ്പോൾ ഈ ഹെഡറിന് അത് പ്രവർത്തനക്ഷമമാക്കാനാകില്ല.
 
-പ്രയോഗിച്ച പ്ലാൻ പ്രതികരണ ഹെഡറിൽ തിരികെ ലഭിക്കുന്നു:
+പ്രയോഗിച്ച പ്ലാൻ പ്രതികരണ ഹെഡറിൽ തിരികെ നൽകുന്നു:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
@@ -205,18 +278,19 @@ Content-Type: application/json
 }
 ```
 
-ലഭ്യമായ പ്രൊവൈഡറുകൾ: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
+ലഭ്യമായ ദാതാക്കൾ: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-കാറ്റലോഗ് ഐഡികൾ `provider/model` എന്ന രൂപത്തിലാണ് (ഉദാഹരണം: `jina-ai/jina-embeddings-v5-omni-small`). രജിസ്ട്രിയിൽ ദൃശ്യമാകുന്ന പ്രൊവൈഡർ പ്രിഫിക്സ് ഇല്ലാത്ത Jina മോഡൽ ഐഡികളും (ഉദാഹരണത്തിന് `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) റെസോൾവ് ചെയ്യപ്പെടും. Jina embed/rerank/classify/segment ആദ്യം ഡാഷ്ബോർഡിലെ `jina-ai` ക്രെഡൻഷ്യലുകൾ ഉപയോഗിക്കുന്നു; ഡാഷ്ബോർഡ് കീ ഇല്ലാത്തപ്പോൾ മാത്രമാണ് `JINA_AI_API_KEY` ഒരു ഫാൾബാക്കായി ഉപയോഗിക്കുന്നത്. `jina-reader` കാർഡ് Reader / `r.jina.ai`-ക്ക് മാത്രമുള്ളതാണ് (`POST /v1/web/fetch`), അത് ഒരിക്കലും embeddings അല്ലെങ്കിൽ rerank നൽകുന്നില്ല.
+കാറ്റലോഗ് ഐഡികൾ `provider/model` ആണ് (ഉദാഹരണം: `jina-ai/jina-embeddings-v5-omni-small`). രജിസ്ട്രിയിൽ കാണുന്ന bare Jina model ids (ഉദാഹരണത്തിന്, `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) എന്നിവയും പരിഹരിക്കപ്പെടും. Jina embed/rerank/classify/segment സേവനങ്ങൾ ആദ്യം dashboard `jina-ai` credentials ഉപയോഗിക്കുന്നു; dashboard key ഇല്ലാത്തപ്പോൾ മാത്രം `JINA_AI_API_KEY` fallback ആയി ഉപയോഗിക്കുന്നു. `jina-reader` കാർഡ് Reader / `r.jina.ai`-ക്കായി മാത്രം ഉള്ളതാണ് (`POST /v1/web/fetch`), embeddings അല്ലെങ്കിൽ rerank ഒരിക്കലും നൽകുന്നില്ല.
 
-മൾട്ടിമോഡൽ പിന്തുണ പരസ്യപ്പെടുത്തുന്ന രജിസ്ട്രി മോഡലുകൾ, പ്രൊവൈഡറിൽനിന്ന് സ്വതന്ത്രമായ ഘടനാബദ്ധമായ പരമാവധി 32
-ഇനങ്ങളും സ്വീകരിക്കുന്നു. മീഡിയ ഇനങ്ങളുടെ തരങ്ങൾ `text`, `image`, `audio`, `video`, `document` എന്നിവയാണ്. അവയുടെ മീഡിയ `source`
-ഒന്നുകിൽ `{"type":"url","url":"https://..."}` അല്ലെങ്കിൽ
-`{"type":"base64","data":"...","media_type":"..."}` ആണ്.
+Multimodal പിന്തുണ പരസ്യപ്പെടുത്തുന്ന registry models provider-neutral ആയ പരമാവധി 32 structured
+items സ്വീകരിക്കുന്നു. Media item തരങ്ങൾ `text`, `image`, `audio`, `video`, `document` എന്നിവയാണ്. അവയുടെ media `source`
+`{"type":"url","url":"https://..."}` അല്ലെങ്കിൽ
+`{"type":"base64","data":"...","media_type":"..."}` ആയിരിക്കും.
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
-കൂടാതെ ഫാമിലി അപരനാമമായ `jina-ai/jina-embeddings-v5-omni` → omni-small) Jina-യുടെ നേറ്റീവ്
-EmbeddingsV5Request ഡോക്യുമെന്റുകളും സ്വീകരിക്കുകയും അവയെ **മാറ്റമില്ലാതെ ഫോർവേഡ് ചെയ്യുകയും** ചെയ്യുന്നു: `https://api.jina.ai/v1/embeddings`
+കൂടാതെ family alias `jina-ai/jina-embeddings-v5-omni` → omni-small) Jina-യുടെ native
+EmbeddingsV5Request docs-വും സ്വീകരിക്കുകയും അവയെ അതേപടി
+`https://api.jina.ai/v1/embeddings`-ലേക്ക് **forward** ചെയ്യുകയും ചെയ്യുന്നു:
 
 ```json
 {
@@ -226,39 +300,33 @@ EmbeddingsV5Request ഡോക്യുമെന്റുകളും സ്വ�
   "input": [
     { "text": "a red bicycle" },
     { "image": "https://example.com/bike.png" },
-    {
-      "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }]
-    }
+    { "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }] }
   ]
 }
 ```
 
-നേറ്റീവ് `{ image | audio | video | pdf }` മൂല്യങ്ങൾ ഒരു പബ്ലിക് HTTPS URL, ഒരു `data:` URI, അല്ലെങ്കിൽ റോ
-base64 ആയിരിക്കാം. OmniRoute ആ ഒബ്ജക്റ്റുകളെ സ്ട്രിംഗുകളാക്കി മാറ്റുകയോ നേറ്റീവ് ഇമേജ് URL-കൾ ഫെച്ച് ചെയ്യുകയോ ചെയ്യുന്നില്ല — Jina തന്നെ
-പബ്ലിക് മീഡിയ വീണ്ടെടുക്കുന്നു. അധിക Jina ഫീൽഡുകൾ (`task`, `normalized`, `truncate`, `embedding_type`)
-ഫോർവേഡ് ചെയ്യപ്പെടുന്നു. ടെക്സ്റ്റ് മാത്രമുള്ള Jina SKU-കൾ ഇപ്പോഴും ടെക്സ്റ്റ് അല്ലാത്ത ഡോക്യുമെന്റുകൾ നിരസിക്കുന്നു.
+Native `{ image | audio | video | pdf }` values ഒരു public HTTPS URL, `data:` URI, അല്ലെങ്കിൽ raw
+base64 ആയിരിക്കാം. OmniRoute ഈ objects-നെ string ആക്കി മാറ്റുകയോ native image URLs fetch ചെയ്യുകയോ ചെയ്യുന്നില്ല — Jina
+public media സ്വയം retrieve ചെയ്യുന്നു. അധിക Jina fields (`task`, `normalized`, `truncate`, `embedding_type`) forward ചെയ്യപ്പെടുന്നു. Text-only Jina SKUs ഇപ്പോഴും non-text docs നിരസിക്കുന്നു.
 
-സുരക്ഷാ, ട്രാൻസ്പോർട്ട് പരിധികൾ:
+സുരക്ഷയും ഗതാഗത പരിധികളും:
 
-- റിമോട്ട് മീഡിയ URL-കൾ പബ്ലിക് HTTPS ആയിരിക്കണം. കാനോണിക്കൽ `{type,source:url}` ഇനങ്ങൾ
-  സെർവർ ഭാഗത്ത് ഫെച്ച് ചെയ്യപ്പെടുകയും (റീഡയറക്ട് പുനഃസാധൂകരണം, ടൈംഔട്ട്, വലുപ്പ പരിധികൾ, പബ്ലിക് DNS, കണക്ഷൻ പിന്നിംഗ്)
-  പ്രൊവൈഡർ കോളിന് മുമ്പ് ഇൻലൈൻ ചെയ്യപ്പെടുകയും ചെയ്യുന്നു. Jina-നേറ്റീവ് `{image:"https://..."}` ഇനങ്ങൾ
-  അതേ പബ്ലിക്-HTTPS പരിശോധനയ്ക്കുശേഷം അതേപടി ഫോർവേഡ് ചെയ്യപ്പെടുന്നു; Jina URL ഫെച്ച് ചെയ്യുന്നു.
-- ഇൻലൈൻ base64 മീഡിയ ഓരോ ഇനത്തിനും ഡീകോഡ് ചെയ്ത 8 MiB ആയും മുഴുവൻ റിക്വസ്റ്റിലുമായി ഡീകോഡ് ചെയ്ത 16 MiB ആയും പരിമിതപ്പെടുത്തിയിരിക്കുന്നു.
+- Remote media URLs public HTTPS ആയിരിക്കണം. Canonical `{type,source:url}` items server-side ആയി fetch ചെയ്യപ്പെടുന്നു
+  (redirect revalidation, timeout, size limits, public DNS, connection pinning), തുടർന്ന് provider call-ന് മുമ്പ്
+  inline ചെയ്യപ്പെടുന്നു. Jina-native `{image:"https://..."}` items അതേ public-HTTPS പരിശോധനയ്ക്ക് ശേഷം അതേപടി forward ചെയ്യപ്പെടുന്നു; URL Jina fetch ചെയ്യുന്നു.
+- Inline base64 media ഓരോ item-നും decoded ആയി 8 MiB വരെയും request മുഴുവൻ decoded ആയി 16 MiB വരെയും മാത്രമേ അനുവദിക്കൂ.
 
-പ്രൊവൈഡർ പരിഭാഷ (കാനോണിക്കൽ ഇനങ്ങൾ ഒരിക്കലും മാറ്റമില്ലാതെ ഫോർവേഡ് ചെയ്യപ്പെടില്ല):
+Provider translation (canonical items ഒരിക്കലും മാറ്റമില്ലാതെ forward ചെയ്യപ്പെടുന്നില്ല):
 
-- Jina മൾട്ടിമോഡൽ മോഡലുകൾ: ഓരോ ടോപ്പ്-ലെവൽ ഇനവും ഇൻലൈൻ മീഡിയയ്ക്കായി ഡാറ്റ URI-കൾ ഉപയോഗിക്കുന്ന ഒരു മോഡാലിറ്റി-കീഡ് ഒബ്ജക്റ്റായി
-  (`text` / `image` / `audio` / `video` / `pdf`) മാറുന്നു; ഓരോ ടോപ്പ്-ലെവൽ ഇനത്തിനും ഒരു വെക്റ്റർ.
-- Gemini Embedding 2 ഫാമിലി: ഒരു ടോപ്പ്-ലെവൽ അറേ, `content.parts` (`text` അല്ലെങ്കിൽ `inline_data`) ഉള്ള ഒരൊറ്റ നേറ്റീവ്
-  `models/{model}:embedContent` റിക്വസ്റ്റായി മാറുന്നു.
-- llama.cpp (`llama-cpp/<model>`, ലോക്കൽ സെർവർ ലോഡ് ചെയ്ത ഏത് മോഡലും): കാനോണിക്കൽ `text` ഇനങ്ങൾ
-  പ്ലെയിൻ സ്ട്രിംഗുകളായി മാറുന്നു; `image` / `audio` / `video` എന്നിവയിൽ ഓരോന്നും ഇൻലൈൻ ഡാറ്റയോടെ llama-server-ന്റെ ചാറ്റ് കണ്ടന്റ് പാർട്ടുകൾ (`image_url`,
-  `input_audio`, ഫോർമാറ്റ് `wav` / `mp3` / `flac`, `input_video`) ഉപയോഗിക്കുന്ന ഓരോ
-  `{"content": [part]}` ഒബ്ജക്റ്റായി മാറുന്നു; ഓരോ ടോപ്പ്-ലെവൽ ഇനത്തിനും ഒരു വെക്റ്റർ.
-  സെർവർ `--embedding --mmproj …` ഉപയോഗിച്ച് പ്രവർത്തിക്കണം; പ്രൊജക്ടർ ഇല്ലെങ്കിൽ
-  അത് മീഡിയയെ സ്വയം നിരസിക്കും. `document` പിന്തുണയ്ക്കുന്നില്ല.
-- വ്യക്തമായ മോഡാലിറ്റി മെറ്റാഡാറ്റയില്ലാത്ത അജ്ഞാത/ഡൈനാമിക് മോഡലുകൾ, ഘടനാബദ്ധമായ ഇൻപുട്ട് HTTP 400 ഉപയോഗിച്ച് നിരസിക്കുന്നു.
+- Jina multimodal models: ഓരോ top-level item-വും data URIs ഉപയോഗിക്കുന്ന modality-keyed object
+  (`text` / `image` / `audio` / `video` / `pdf`) ആയി മാറുന്നു; ഓരോ top-level item-നും ഒരു vector.
+- Gemini Embedding 2 family: ഒരു top-level array ഒറ്റ native
+  `models/{model}:embedContent` request ആയി മാറുന്നു; അതിൽ `content.parts` (`text` അല്ലെങ്കിൽ `inline_data`) ഉണ്ടായിരിക്കും.
+- llama.cpp (`llama-cpp/<model>`, local server load ചെയ്തിട്ടുള്ള ഏതൊരു model-ഉം): canonical `text` items
+  plain strings ആകുന്നു, കൂടാതെ `image` / `audio` / `video` ഓരോന്നും ഒരു
+  `{"content": [part]}` object ആയി മാറുന്നു; llama-server-ന്റെ chat content parts (`image_url`,
+  `input_audio` with format `wav` / `mp3` / `flac`, `input_video`) inline data ഉപയോഗിക്കുന്നു; ഓരോ top-level item-നും ഒരു vector. `--embedding --mmproj …` ഉപയോഗിച്ച് server പ്രവർത്തിക്കണം; projector ഇല്ലെങ്കിൽ media server തന്നെ നിരസിക്കും. `document` പിന്തുണയ്ക്കുന്നില്ല.
+- വ്യക്തമായ modality metadata ഇല്ലാത്ത Unknown/dynamic models structured input നിരസിക്കുകയും HTTP 400 നൽകുകയും ചെയ്യും.
 
 ```json
 {
@@ -275,17 +343,17 @@ base64 ആയിരിക്കാം. OmniRoute ആ ഒബ്ജക്റ്റ
 }
 ```
 
-പിന്തുണയ്ക്കാത്ത മോഡൽ/മോഡാലിറ്റി കോമ്പിനേഷനുകൾ ഇനത്തെ കോഴ്സ് ചെയ്യുന്നതിനുപകരം HTTP 400 തിരികെ നൽകുന്നു. പഴയ സ്ട്രിംഗ്/ടോക്കൺ റിക്വസ്റ്റുകളിലെ ഇൻപുട്ട് അല്ലാത്ത
-എക്സ്റ്റൻഷൻ ഫീൽഡുകൾ മാറ്റമില്ലാതെ പാസ് ചെയ്യുന്നത് തുടരുന്നു.
+പിന്തുണയ്ക്കാത്ത model/modality combinations item coercing ചെയ്യുന്നതിനുപകരം HTTP 400 നൽകുന്നു. Legacy string/token requests-ലെ Non-input
+extension fields തുടർന്നും മാറ്റമില്ലാതെ pass through ചെയ്യപ്പെടും.
 
 ```bash
-# എല്ലാ എംബെഡ്ഡിംഗ് മോഡലുകളും ലിസ്റ്റ് ചെയ്യുക
+# എല്ലാ embedding മോഡലുകളും ലിസ്റ്റ് ചെയ്യുക
 GET /v1/embeddings
 ```
 
 ---
 
-## ചിത്രം സൃഷ്ടിക്കൽ
+## ഇമേജ് ജനറേഷൻ
 
 ```bash
 POST /v1/images/generations
@@ -294,33 +362,27 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "പർവതങ്ങൾക്കു മുകളിലെ മനോഹരമായ സൂര്യാസ്തമയം",
+  "prompt": "A beautiful sunset over mountains",
   "size": "1024x1024"
 }
 ```
 
-ലഭ്യമായ പ്രൊവൈഡറുകളിൽ OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (ലോക്കൽ), ComfyUI (ലോക്കൽ) എന്നിവ ഉൾപ്പെടുന്നു.
+ലഭ്യമായ ദാതാക്കളിൽ OpenAI (GPT ഇമേജ് 2), xAI (Grok ഇമേജ്), Together AI (FLUX), Fireworks AI, Nebius (FLUX), ഹൈപ്പർബോളിക്, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (ലോക്കൽ), ComfyUI (ലോക്കൽ).
 
-നിലവിലുള്ള API-key കണക്ഷൻ ZenMux വീണ്ടും ഉപയോഗിക്കുകയും `zenmux/` അല്ലെങ്കിൽ `zm/` പ്രിഫിക്സുകൾ സ്വീകരിക്കുകയും ചെയ്യുന്നു:
+`n` `data[]` ൽ `n` ഇമേജുകൾ നൽകുന്നു. ഓരോ കോളിനും ഒരു ചിത്രം നൽകുന്ന അപ്സ്ട്രീം API ദാതാക്കൾക്ക് (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik, NVIDIA NIM, Cloudflare Workers AI) `n` പ്രത്യേക അപ്സ്ട്രീം കോളുകൾ ലഭിക്കും, പരമാവധി 4 ഫ്ലൈറ്റിൽ. ഒരു നിശ്ചിത `seed` കോൾ സൂചിക (`seed`, `seed + 1`, …) വഴി ഓഫ്സെറ്റ് ചെയ്യുന്നു, അതിനാൽ ചിത്രങ്ങൾ വ്യത്യസ്തമാണെങ്കിലും പുനർനിർമ്മിക്കാവുന്നതായിരിക്കും. `n` എന്നതിൻ്റെ പരിധി 10 ആണ്. ഏതെങ്കിലും കോൾ പരാജയപ്പെടുകയാണെങ്കിൽ അഭ്യർത്ഥന മൊത്തത്തിൽ പരാജയപ്പെടും. ഫാൻ ഔട്ട് ഫോർമാറ്റുകളുടെ ലിസ്റ്റ് `open-sse/handlers/imageGeneration/fanOut.ts` ൽ `SINGLE_IMAGE_FANOUT_FORMATS` ആണ്.
 
-- `zenmux/openai/gpt-image-2` ZenMux-ന്റെ OpenAI Images API ഉപയോഗിക്കുന്നു. `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format` എന്നിവ ഓപ്ഷനുകളിൽ ഉൾപ്പെടുന്നു.
-- `zm/meta/muse-image-1.0` പോലുള്ള മറ്റ് പ്രസാധകർ ZenMux-ന്റെ Vertex AI `:predict`
-  എൻഡ്പോയിന്റ് ഉപയോഗിക്കുന്നു. `n` എന്നത് `sampleCount`-ലേക്കും `aspect_ratio` എന്നത് `aspectRatio`-ലേക്കും `image_size`
-  (`1K`, `2K`, `4K`) എന്നത് `sampleImageSize`-ലേക്കും മാപ്പ് ചെയ്യപ്പെടുന്നു. പിക്സൽ `size` ഒരു ആസ്പെക്റ്റ് റേഷ്യോ മാത്രമാണ് നൽകുന്നത്,
-  പിക്സൽ അളവുകൾ ഉറപ്പുനൽകുന്നില്ല. പിന്തുണയ്ക്കുന്ന അനുപാതങ്ങളും റെസല്യൂഷനുകളും എണ്ണവും മോഡൽ അനുസരിച്ച് വ്യത്യാസപ്പെടുന്നു.
-- `zm/inclusionai/ming-image-0.1-design` അതിന്റെ അളവുകൾ സ്വയം തിരഞ്ഞെടുക്കുന്നു. `size`,
-  `aspect_ratio`, `image_size` എന്നിവ ഒഴിവാക്കുക; വ്യക്തമായി നൽകിയ മൂല്യങ്ങൾ HTTP 400 തിരികെ നൽകും. `output_format` ഉപയോഗിച്ച് PNG, JPEG, WebP
-  എന്നിവ അഭ്യർത്ഥിക്കാം.
+ZenMux നിലവിലുള്ള API-കീ കണക്ഷൻ വീണ്ടും ഉപയോഗിക്കുകയും `zenmux/` അല്ലെങ്കിൽ `zm/` പ്രിഫിക്സുകൾ സ്വീകരിക്കുകയും ചെയ്യുന്നു:
 
-ഈ ഇന്റഗ്രേഷൻ ടെക്സ്റ്റിൽനിന്നുള്ള ചിത്രം സൃഷ്ടിക്കലിനെ പിന്തുണയ്ക്കുന്നു, റഫറൻസ്-ചിത്ര എഡിറ്റിംഗിനെ അല്ല. Vertex
-ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്യപ്പെടുന്നു; ഇമേജ് ബൈറ്റുകൾ മാത്രം ലഭ്യമായിരിക്കുമ്പോൾ `response_format: "url"` ഒരു അപ്സ്ട്രീം
-HTTPS URL അല്ലെങ്കിൽ base64 ഡാറ്റ URL തിരികെ നൽകുന്നു. ശൂന്യമായ/ഫിൽട്ടർ ചെയ്ത ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയപ്രതികരണത്തിന് പകരം
-ഒരു പിശക് തിരികെ നൽകുന്നു. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ ആശ്രയിച്ചിരിക്കുന്നു.
-[ZenMux-ന്റെ Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image) എന്നിവ കാണുക.
+- `zenmux/openai/gpt-image-2` ZenMux ൻ്റെ OpenAI ഇമേജുകൾ API ഉപയോഗിക്കുന്നു. ഓപ്ഷനുകളിൽ `size`, `quality`, `n`, `output_format`, `output_compression`, `background`, `response_format` എന്നിവ ഉൾപ്പെടുന്നു.
+- `zm/meta/muse-image-1.0` പോലുള്ള മറ്റ് പ്രസാധകർ ZenMux ൻ്റെ Vertex AI `:predict` എൻഡ്പോയിൻ്റ് ഉപയോഗിക്കുന്നു. `n` മാപ്പുകൾ `sampleCount`, `aspect_ratio` മുതൽ `aspectRatio`, `image_size` (`1K`, `2K`, `4K`) `sampleImageSize`. ഒരു പിക്സൽ `size` ഒരു വീക്ഷണാനുപാതം മാത്രമേ നൽകുന്നുള്ളൂ, പിക്സൽ അളവുകൾ ഉറപ്പുനൽകുന്നില്ല. പിന്തുണയ്ക്കുന്ന അനുപാതങ്ങൾ, റെസല്യൂഷനുകൾ, എണ്ണങ്ങൾ എന്നിവ മോഡൽ അനുസരിച്ച് വ്യത്യാസപ്പെടുന്നു.
+- `zm/inclusionai/ming-image-0.1-design` അതിൻ്റേതായ അളവുകൾ തിരഞ്ഞെടുക്കുന്നു. `size`, `aspect_ratio`, `image_size` എന്നിവ ഒഴിവാക്കുക; വ്യക്തമായ മൂല്യങ്ങൾ HTTP 400 നൽകുന്നു. `output_format` ഉപയോഗിച്ച് PNG, JPEG, WebP എന്നിവ അഭ്യർത്ഥിക്കാം.
+
+ഈ സംയോജനം ടെക്സ്റ്റ്-ടു-ഇമേജ് ജനറേഷൻ പിന്തുണയ്ക്കുന്നു, റഫറൻസ്-ഇമേജ് എഡിറ്റിംഗ് അല്ല. വെർട്ടെക്സ് ഔട്ട്പുട്ട് `data[].b64_json` ആയി നോർമലൈസ് ചെയ്തു; ഇമേജ് ബൈറ്റുകൾ മാത്രം ലഭ്യമാകുമ്പോൾ `response_format: "url"` ഒരു അപ്സ്ട്രീം HTTPS URL അല്ലെങ്കിൽ ഒരു base64 ഡാറ്റ URL നൽകുന്നു. Empty/filtered ഔട്ട്പുട്ടുകൾ ശൂന്യമായ വിജയത്തിനു പകരം ഒരു പിശക് നൽകുന്നു. മോഡൽ ആക്സസ് ZenMux അക്കൗണ്ടിനെ ആശ്രയിച്ചിരിക്കുന്നു. [ZenMux ൻ്റെ വെർട്ടെക്സ് API](https://docs.zenmux.ai/api/vertexai/generate-images), [OpenAI ഇമേജുകൾ API എന്നിവ](https://docs.zenmux.ai/api/openai/generate-an-image) കാണുക.
+
+Copilot ൻ്റെ ബിൽറ്റ്-ഇൻ ഇമേജ് ടൂൾ വഴി ഒരു Microsoft 365 Copilot സൈൻ-ഇൻ കണക്ഷൻ `copilot-m365-web/m365-copilot-image` നൽകുന്നു: ഓരോ ചിത്രത്തിനും ഒരു Copilot ടേൺ (`n` 1–4), `size` സ്റ്റിയറിംഗ് ഓറിയൻ്റേഷൻ മാത്രം, കൂടാതെ ഇൻലൈനിൽ മടങ്ങിയ ചിത്രങ്ങൾ (`b64_json`, അല്ലെങ്കിൽ `response_format: "url"` ന് ഒരു ഡാറ്റ URL ). [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation) കാണുക.
 
 ```bash
-# എല്ലാ ഇമേജ് മോഡലുകളും ലിസ്റ്റ് ചെയ്യുക
+# List all image models
 GET /v1/images/generations
 ```
 
@@ -342,17 +404,18 @@ Content-Type: application/json
 }
 ```
 
-`model`, `provider/model` പ്രിഫിക്സ് വഴി OCR പ്രൊവൈഡറെ തിരഞ്ഞെടുക്കുന്നു; പ്രൊവൈഡർ ഇല്ലാത്ത ഒരു മോഡൽ id (ഉദാ.
-`mistral-ocr-latest`) അതിന്റെ രജിസ്റ്റർ ചെയ്ത പ്രൊവൈഡറിലേക്ക് പരിഹരിക്കപ്പെടുന്നു, കൂടാതെ `model` ഒഴിവാക്കിയാൽ ഡിഫോൾട്ടായി
-Mistral (`mistral-ocr-latest`) ഉപയോഗിക്കും. രജിസ്റ്റർ ചെയ്ത പ്രൊവൈഡർമാർ (`open-sse/config/ocrRegistry.ts`):
+`model` ഒരു `provider/model` പ്രിഫിക്സ് ഉപയോഗിച്ച് OCR ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നു; ഒരു ബെയർ മോഡൽ ഐഡി (ഉദാ.
+`mistral-ocr-latest`) അതിന്റെ രജിസ്റ്റർ ചെയ്ത ദാതാവിലേക്ക് പരിഹരിക്കപ്പെടും, കൂടാതെ `model` ഒഴിവാക്കിയാൽ
+Mistral (`mistral-ocr-latest`) ഡിഫോൾട്ടായി ഉപയോഗിക്കും. രജിസ്റ്റർ ചെയ്ത ദാതാക്കൾ
+(`open-sse/config/ocrRegistry.ts`):
 
-| പ്രൊവൈഡർ id                   | മോഡൽ id              | `model` മൂല്യം                                                                   | കുറിപ്പുകൾ                                                                                                                           |
-| ----------------------------- | -------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (അല്ലെങ്കിൽ പ്രൊവൈഡർ ഇല്ലാത്ത `mistral-ocr-latest`) | സിൻക്രണസ് — ഒരൊറ്റ അപ്സ്ട്രീം കോളിൽനിന്നുള്ള പ്രതികരണം നേരിട്ട് തിരികെ നൽകുന്നു.                                                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                                      | അസിൻക്രണസ് അപ്സ്ട്രീം (`analyze` + പോളിംഗ്) — താഴെ കാണുക.                                                                            |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                                          | സിൻക്രണസ്, Vertex AI-യുടെ `openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റ് വഴി — ഓതന്റിക്കേഷൻ/URL സംബന്ധിച്ച വിവരങ്ങൾക്ക് താഴെ കാണുക. |
+| ദാതാവ് ഐഡി                    | മോഡൽ ഐഡി             | `model` മൂല്യം                                                      | കുറിപ്പുകൾ                                                                                                                         |
+| ----------------------------- | -------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (അല്ലെങ്കിൽ ബെയർ `mistral-ocr-latest`) | സമകാലികം — ഒരൊറ്റ അപ്സ്ട്രീം കോളിൽ നിന്നുള്ള പ്രതികരണം നേരിട്ട് നൽകുന്നു.                                                          |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                         | അസമകാലിക അപ്സ്ട്രീം (`analyze` + poll) — താഴെ കാണുക.                                                                               |
+| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                             | Vertex AI-യുടെ `openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റ് വഴി സമകാലികം — ഓതന്റിക്കേഷൻ/URL സംബന്ധിച്ച വിവരങ്ങൾക്ക് താഴെ കാണുക. |
 
-മൂന്ന് പ്രൊവൈഡർമാരും ഒരേ Mistral-രൂപത്തിലുള്ള ബോഡിയിലാണ് പ്രതികരിക്കുന്നത്:
+മൂന്ന് ദാതാക്കളും ഒരേ Mistral-ആകൃതിയിലുള്ള ബോഡി നൽകുന്നു:
 
 ```json
 {
@@ -362,190 +425,365 @@ Mistral (`mistral-ocr-latest`) ഉപയോഗിക്കും. രജിസ�
 }
 ```
 
-### Azure Document Intelligence പോൾ പ്രവാഹം
+### Azure Document Intelligence പോൾ ഫ്ലോ
 
-Azure Document Intelligence-ന്റെ `analyze` API അസിൻക്രണസാണ്: പ്രാരംഭ അഭ്യർത്ഥന ഒരു ബോഡിക്ക് പകരം
-`Operation-Location` ഹെഡർ തിരികെ നൽകുന്നു, അതിനാൽ ഫലം ലഭിക്കാൻ പോളിംഗ് നടത്തണം. ഹാൻഡ്ലർ
-(`open-sse/handlers/ocr.ts`) ആ URL-ൽ ഓരോ സെക്കൻഡിലും പരമാവധി 30 തവണ വരെ പോളിംഗ് നടത്തുന്നു, `ok` അല്ലാത്ത പോൾ പ്രതികരണമോ `"failed"` സ്റ്റാറ്റസോ ലഭിച്ചാൽ ഉടൻ പരാജയപ്പെടുന്നു (പോളിംഗ്
-തുടരില്ല), കൂടാതെ അനുവദിച്ച ശ്രമങ്ങളുടെ പരിധി തീർന്നിട്ടും പ്രവർത്തനം തുടരുകയാണെങ്കിൽ `504` തിരികെ നൽകുന്നു. അന്തിമ Azure പ്രതികരണം,
-കോളറിലേക്ക് തിരികെ നൽകുന്നതിന് മുമ്പ് Mistral ഉപയോഗിക്കുന്ന അതേ `pages`/`markdown` രൂപത്തിലേക്ക്
-നോർമലൈസ് ചെയ്യുന്നു, അതിനാൽ ക്ലയന്റ് കോഡിന് പ്രൊവൈഡർക്കായി പ്രത്യേക കൈകാര്യം ചെയ്യൽ ആവശ്യമില്ല.
+Azure Document Intelligence-ന്റെ `analyze` API അസമകാലികമാണ്: പ്രാരംഭ അഭ്യർത്ഥന ഒരു ബോഡിക്ക് പകരം
+`Operation-Location` ഹെഡർ തിരികെ നൽകുന്നു, അതിനാൽ ഫലത്തിനായി പോൾ ചെയ്യണം. ഹാൻഡ്ലർ
+(`open-sse/handlers/ocr.ts`) ഓരോ സെക്കൻഡിലും പരമാവധി 30 ശ്രമങ്ങൾ വരെ ആ URL പോൾ ചെയ്യുന്നു; `ok` അല്ലാത്ത
+പോൾ പ്രതികരണത്തിലോ `"failed"` സ്റ്റാറ്റസിലോ ഉടൻ പരാജയപ്പെടുന്നു (പോൾ ചെയ്യുന്നത് തുടരില്ല), കൂടാതെ ശ്രമങ്ങളുടെ
+പരിധി കഴിഞ്ഞിട്ടും ഓപ്പറേഷൻ പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുകയാണെങ്കിൽ `504` നൽകുന്നു. അന്തിമ Azure പ്രതികരണം
+കോളറിലേക്ക് നൽകുന്നതിന് മുമ്പ് Mistral ഉപയോഗിക്കുന്ന അതേ `pages`/`markdown` ആകൃതിയിലേക്ക് നോർമലൈസ് ചെയ്യുന്നു;
+അതിനാൽ ക്ലയന്റ് കോഡിന് ദാതാവിനെ പ്രത്യേകം പരിഗണിക്കേണ്ടതില്ല.
 
 ### Vertex AI DeepSeek OCR ഓതന്റിക്കേഷനും എൻഡ്പോയിന്റ് പരിഹാരവും
 
-ചാറ്റ്/ഇമേജ് ട്രാഫിക്കിനായി OmniRoute ഇതിനകം പിന്തുണയ്ക്കുന്ന അതേ Vertex AI ഓതന്റിക്കേഷൻ
-(`open-sse/executors/vertex.ts`) തന്നെയാണ് `vertex-deepseek-ocr` വീണ്ടും ഉപയോഗിക്കുന്നത്: കണക്ഷന്റെ API കീ ഒന്നുകിൽ
-Service Account JSON ക്രെഡൻഷ്യൽ (JWT-bearer പ്രവാഹം വഴി ഹ്രസ്വകാല OAuth ആക്സസ് ടോക്കണായി
-കൈമാറ്റം ചെയ്യുന്നത്) അല്ലെങ്കിൽ മാറ്റമില്ലാതെ ഉപയോഗിക്കുന്ന, നേരത്തേ സൃഷ്ടിച്ച OAuth ആക്സസ് ടോക്കൺ ആയിരിക്കും. അപ്സ്ട്രീം എൻഡ്പോയിന്റ് URL എന്നത് കണക്ഷന്റെ പ്രോജക്റ്റും
-റീജിയനും ഉപയോഗിച്ച് നിർമ്മിക്കുന്ന Vertex-ന്റെ പൊതുവായ `openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റാണ് — വ്യക്തമായി നൽകിയ `providerSpecificData.project`/`providerSpecificData.region`-ന് എപ്പോഴും മുൻഗണന ലഭിക്കും;
-അല്ലാത്തപക്ഷം, Service Account JSON-ലെ `project_id`-ൽനിന്ന് പ്രോജക്റ്റ് നിർണ്ണയിക്കുകയും റീജിയന്റെ
-ഡിഫോൾട്ടായി `us-central1` ഉപയോഗിക്കുകയും ചെയ്യുന്നു. രണ്ട് പരിഹാരങ്ങളും `open-sse/handlers/ocr.ts`-ലാണ് നടക്കുന്നത്
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), തുടർന്ന് `handleOcr`-ലേക്ക് അയയ്ക്കുന്നതിന് മുമ്പ്
-`src/app/api/v1/ocr/route.ts` അവ ഉപയോഗിക്കുന്നു.
+`vertex-deepseek-ocr`, ചാറ്റ്/ഇമേജ് ട്രാഫിക്കിനായി OmniRoute ഇതിനകം പിന്തുണയ്ക്കുന്ന അതേ Vertex AI
+ഓതന്റിക്കേഷൻ വീണ്ടും ഉപയോഗിക്കുന്നു (`open-sse/executors/vertex.ts`): കണക്ഷന്റെ API key ഒന്നുകിൽ ഒരു
+Service Account JSON ക്രെഡൻഷ്യൽ (JWT-bearer ഫ്ലോ വഴി കുറച്ചുസമയം മാത്രം സാധുവായ OAuth ആക്സസ് ടോക്കണുമായി
+മാറ്റിവാങ്ങുന്നത്) ആയിരിക്കും, അല്ലെങ്കിൽ ഇതിനകം സൃഷ്ടിച്ച OAuth ആക്സസ് ടോക്കൺ അതേപടി ഉപയോഗിക്കും. അപ്സ്ട്രീം
+എൻഡ്പോയിന്റ് URL, കണക്ഷന്റെ പ്രോജക്റ്റും റീജിയനും ഉപയോഗിച്ച് നിർമ്മിക്കുന്ന Vertex-ന്റെ പൊതുവായ
+`openapi/chat/completions` പാർട്ണർ എൻഡ്പോയിന്റാണ് — വ്യക്തമായി നൽകിയ
+`providerSpecificData.project`/`providerSpecificData.region` എപ്പോഴും മുൻഗണന നേടും; അല്ലാത്തപക്ഷം പ്രോജക്റ്റ്
+Service Account JSON-ലെ `project_id`-ൽ നിന്ന് കണ്ടെത്തുകയും റീജിയൻ `us-central1` ആയി ഡിഫോൾട്ട് ചെയ്യുകയും ചെയ്യും.
+രണ്ട് പരിഹാരങ്ങളും `open-sse/handlers/ocr.ts`-ൽ (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`)
+നടക്കുന്നു; `handleOcr`-ലേക്ക് ഡിസ്പാച്ച് ചെയ്യുന്നതിന് മുമ്പ് `src/app/api/v1/ocr/route.ts` അവ ഉപയോഗിക്കുന്നു.
 
 ---
 
-## മോഡലുകളുടെ പട്ടിക
+## മോഡലുകൾ പട്ടികപ്പെടുത്തുക
 
 ```bash
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ OpenAI ഫോർമാറ്റിലുള്ള എല്ലാ ചാറ്റ്, എംബെഡ്ഡിംഗ്, ഇമേജ് മോഡലുകളും + കോംബോകളും നൽകുന്നു
+→ OpenAI ഫോർമാറ്റിൽ എല്ലാ chat, embedding, image മോഡലുകളും + കോമ്പോകളും നൽകുന്നു
 ```
 
-### മോഡൽ id പ്രിഫിക്സുകൾ (`?prefix=`)
+### മോഡൽ വിലകൾ (`pricing`)
 
-മിക്ക മോഡലുകളും ഒരു **പ്രൊവൈഡർ പ്രിഫിക്സിന്** കീഴിലാണ് പ്രസിദ്ധീകരിക്കുന്നത്. നിങ്ങൾക്ക് ലഭിക്കുന്ന പ്രിഫിക്സ്
-`MODELS_CATALOG_PREFIX_MODE` ഫീച്ചർ ഫ്ലാഗാണ് നിയന്ത്രിക്കുന്നത്; കൂടാതെ, മറ്റെല്ലാവർക്കുമുള്ള
-സെർവർ-വ്യാപക ക്രമീകരണം മാറ്റാതെ വൃത്തിയുള്ള ഒരു പട്ടിക ആവശ്യമുള്ള ക്ലയന്റുകൾക്ക് പ്രയോജനപ്പെടുന്ന വിധത്തിൽ,
-ഒരു ക്വറി പാരാമീറ്റർ ഉപയോഗിച്ച് ഇത് **ഓരോ അഭ്യർത്ഥനയ്ക്കും** അസാധുവാക്കാം:
+OmniRoute-ന് മോഡലിന്റെ വില അറിയാമെങ്കിൽ ഒരു എൻട്രിയിൽ `pricing` ഒബ്ജക്റ്റ് ഉണ്ടായിരിക്കും. ചെലവ്
+കണക്കാക്കൽ ഉപയോഗിക്കുന്ന വിലപ്പട്ടികയിൽ നിന്നാണ് വില ലഭിക്കുന്നത്: അന്തർനിർമ്മിത ഡീഫോൾട്ടുകൾ,
+സിങ്ക് ചെയ്ത വിലകൾ, `/api/pricing` വഴി സജ്ജീകരിച്ച ഓവർറൈഡുകൾ എന്നിവ. ഇവ ലിസ്റ്റ് വിലകളാണ്,
+അതിനാൽ സബ്സ്ക്രിപ്ഷൻ പ്രൊവൈഡറുകളിലും ഓരോ ടോക്കണിനുമുള്ള വില കാണിക്കും.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| ഫീൽഡുകൾ                                                         | യൂണിറ്റ്                             | കുറിപ്പുകൾ                                                                                                                                                         |
+| --------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | ഓരോ ടോക്കണിനും USD, ഡെസിമൽ സ്ട്രിംഗ് | OpenRouter-നോട് അനുയോജ്യം, ഒരിക്കലും എക്സ്പോണന്റ് നോട്ടേഷനിൽ അല്ല. കാഷ് വിലയുള്ളപ്പോൾ മാത്രമേ രണ്ട് കാഷ് ഫീൽഡുകളും കാണിക്കൂ.                                       |
+| `input`, `output`, `cached`, `cache_creation`                   | 1M ടോക്കണുകൾക്ക് USD, നമ്പർ          | മുൻകാല കാറ്റലോഗ് പതിപ്പുകളിൽ നിന്നുള്ള ഫീൽഡുകൾ, നിലവിലുള്ള ക്ലയന്റുകൾക്കായി നിലനിർത്തിയവ. വിലനിരയിൽ അവയുണ്ടെങ്കിൽ `reasoning`, `long_context` എന്നിവയും കാണിക്കും. |
+
+- **കോമ്പോകൾ** അവയുടെ ആദ്യത്തെ ദൃശ്യമായ ടാർഗറ്റിന്റെ വില വഹിക്കുന്നു. അന്തർനിർമ്മിത
+  `auto/*` കോമ്പോകൾ അഭ്യർത്ഥന സമയത്ത് ഒരു ടാർഗറ്റ് തിരഞ്ഞെടുക്കുന്നതിനാൽ അവയ്ക്ക് `pricing`
+  ഇല്ല.
+- **സൗജന്യ മോഡലുകൾക്ക്**, വില പൂജ്യമാണെങ്കിൽ `"0"` (ഒപ്പം `0`) കാണിക്കും. വിലനിരയില്ലാത്ത
+  ഒരു മോഡൽ കാറ്റലോഗ് അതിനെ സൗജന്യമെന്ന് അടയാളപ്പെടുത്തിയാൽ (`free: true`) അല്ലെങ്കിൽ
+  അന്തർനിർമ്മിത സൗജന്യ-മോഡൽ കാറ്റലോഗിൽ അത് പട്ടികപ്പെടുത്തിയിട്ടുണ്ടെങ്കിൽ `"0"` എന്നും കാണിക്കും.
+- **അജ്ഞാത വില:** എൻട്രിയിൽ `pricing` കീ ഉണ്ടാകില്ല.
+- **ക്രെഡിറ്റ് അടിസ്ഥാനത്തിൽ നിരക്ക് ഈടാക്കുന്ന പ്രൊവൈഡർമാർ** (Kiro പോലുള്ളവ) ഓരോ ടോക്കണിനുപകരം
+  ഓരോ അഭ്യർത്ഥനയ്ക്കും ബിൽ ചെയ്യും. അവരുടെ എൻട്രികളിൽ മുമ്പുണ്ടായിരുന്ന 1M-ന്റേതായ സംഖ്യാ
+  ഫീൽഡുകൾ തുടരും; ഓരോ ടോക്കണിനുമുള്ള സ്ട്രിംഗ് ഫീൽഡുകൾ ഉണ്ടാകില്ല.
+- **വേരിയന്റുകൾ** (reasoning-effort ഐഡികൾ, no-thinking അപരനാമങ്ങൾ, discovery, gateway
+  മിററുകൾ) തങ്ങൾ റൂട്ട് ചെയ്യുന്ന മോഡലിന്റെ വില പകർത്തുന്നു.
+- ഫീൽഡുകൾ അടിസ്ഥാന നിരക്കുകൾ മാത്രമാണ് വഹിക്കുന്നത്. ദീർഘ-കോൺടെക്സ്റ്റ് ടയറുകളും (സംഖ്യയായ
+  `long_context` ഫീൽഡ്) സർവീസ്-ടയർ ഗുണിതങ്ങളും (ഉദാഹരണത്തിന് Codex fast അല്ലെങ്കിൽ flex)
+  `prompt` അല്ലെങ്കിൽ `completion` മാറ്റില്ല.
+- `x-api-key`, `anthropic-version` എന്നിവയുള്ള Anthropic-ശൈലിയിലുള്ള അഭ്യർത്ഥന ഉൾപ്പെടെ,
+  എല്ലാ ഓതന്റിക്കേഷൻ രീതികൾക്കും ഒബ്ജക്റ്റ് ഒന്നുതന്നെയാണ് (പ്രതികരണം `{ "object": "list",
+"data": [...] }` ആയി തുടരും). നടപ്പാക്കൽ: `src/app/api/v1/models/catalogPricing.ts`.
+
+### മോഡൽ ഐഡി പ്രിഫിക്സുകൾ (`?prefix=`)
+
+മിക്ക മോഡലുകളും ഒരു **പ്രൊവൈഡർ പ്രിഫിക്സിന്** കീഴിലാണ് പരസ്യപ്പെടുത്തുന്നത്. നിങ്ങൾക്ക് ലഭിക്കുന്ന
+പ്രിഫിക്സ് `MODELS_CATALOG_PREFIX_MODE` ഫീച്ചർ ഫ്ലാഗ് നിയന്ത്രിക്കുന്നു. ഓരോ അഭ്യർത്ഥനയ്ക്കും
+ഒരു ക്വറി പാരാമീറ്റർ ഉപയോഗിച്ച് ഇത് ഓവർറൈഡ് ചെയ്യാം — എല്ലാവർക്കുമുള്ള സെർവർ-വ്യാപക
+ക്രമീകരണം മാറ്റാതെ വൃത്തിയുള്ള ഒരു ലിസ്റ്റ് ആഗ്രഹിക്കുന്ന ക്ലയന്റിന് ഇത് പ്രയോജനപ്പെടും:
 
 ```bash
-GET /v1/models?prefix=alias        # ഓരോ മോഡലിനും ഒരു id — ഹ്രസ്വമായ alias പ്രിഫിക്സ്
-GET /v1/models?prefix=dual         # രണ്ട് രൂപങ്ങളും (സെർവർ ഡിഫോൾട്ട്)
+GET /v1/models?prefix=alias        # ഓരോ മോഡലിനും ഒരു ഐഡി — ചുരുക്കിയ alias പ്രിഫിക്സ്
+GET /v1/models?prefix=dual         # രണ്ട് രൂപങ്ങളും (സെർവർ ഡീഫോൾട്ട്)
 GET /v1/models?prefix=canonical    # പൂർണ്ണ provider-id പ്രിഫിക്സ് മാത്രം
 ```
 
-| മോഡ്        | നൽകുന്നത്                                                    | കുറിപ്പുകൾ                                                                                                                                                                                                                    |
-| ----------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **കൂടാതെ** `claude/claude-sonnet-4-6` | **ഡിഫോൾട്ട്.** രണ്ട് id-കളും ഒരേ മോഡലിലേക്കാണ് റൂട്ട് ചെയ്യുന്നത്; ഏതെങ്കിലും രൂപം ഹാർഡ്കോഡ് ചെയ്ത ക്ലയന്റ് കോൺഫിഗുകൾ തുടർന്നും പ്രവർത്തിക്കാൻ ഇത് നിലനിർത്തിയിരിക്കുന്നു. ഇത് കാറ്റലോഗിന്റെ വലുപ്പം ഏകദേശം ഇരട്ടിയാക്കുന്നു. |
-| `alias`     | `cc/claude-sonnet-4-6`                                       | ഓരോ മോഡലിനും ഒരു എൻട്രി. വ്യത്യസ്തമായ alias ഇല്ലാത്ത പ്രൊവൈഡറുകളും അവരുടെ എൻട്രി നൽകുന്നതിനാൽ ഒന്നും നഷ്ടപ്പെടുന്നില്ല.                                                                                                       |
-| `canonical` | `claude/claude-sonnet-4-6`                                   | പൂർണ്ണ provider-id പ്രിഫിക്സിന് കീഴിൽ ഓരോ മോഡലിനും ഒരു എൻട്രി. വ്യത്യസ്തമായ alias ഇല്ലാത്ത പ്രൊവൈഡറുകളും (ഉദാ. `antigravity/…`, `agy/…`) അവരുടെ ഏക id ഇവിടെയും നൽകുന്നതിനാൽ ഒന്നും നഷ്ടപ്പെടുന്നില്ല.                         |
+| മോഡ്        | നൽകുന്നത്                                                   | കുറിപ്പുകൾ                                                                                                                                                                                                         |
+| ----------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `dual`      | `cc/claude-sonnet-4-6` **ഒപ്പം** `claude/claude-sonnet-4-6` | **ഡീഫോൾട്ട്.** രണ്ട് ഐഡികളും ഒരേ മോഡലിലേക്കാണ് റൂട്ട് ചെയ്യുന്നത്; ഏതെങ്കിലും രൂപം ഹാർഡ്കോഡ് ചെയ്ത ക്ലയന്റ് കോൺഫിഗറേഷനുകൾ തുടർന്നും പ്രവർത്തിക്കാനായി ഇവ നിലനിർത്തുന്നു. കാറ്റലോഗിന്റെ വലുപ്പം ഏകദേശം ഇരട്ടിയാകും. |
+| `alias`     | `cc/claude-sonnet-4-6`                                      | ഓരോ മോഡലിനും ഒരു എൻട്രി. വ്യത്യസ്തമായ alias ഇല്ലാത്ത പ്രൊവൈഡർമാരും അവരുടെ എൻട്രി നൽകും, അതിനാൽ ഒന്നും നഷ്ടപ്പെടില്ല.                                                                                               |
+| `canonical` | `claude/claude-sonnet-4-6`                                  | പൂർണ്ണ provider-id പ്രിഫിക്സിന് കീഴിൽ ഓരോ മോഡലിനും ഒരു എൻട്രി. വ്യത്യസ്തമായ alias ഇല്ലാത്ത പ്രൊവൈഡർമാർ (ഉദാ. `antigravity/…`, `agy/…`) അവരുടെ ഏക ഐഡിയും ഇവിടെ നൽകും, അതിനാൽ ഒന്നും നഷ്ടപ്പെടില്ല.                  |
 
-ക്വറി പാരാമീറ്റർ ഇല്ലാതെയും `dual` മോഡ് മിറർ തിരിച്ചറിയാം: പ്രാഥമിക id-യിലേക്ക് ചൂണ്ടുന്ന ഒരു `parent`
-ഫീൽഡ് അതിലുണ്ടാകും.
+ക്വറി പാരാമീറ്റർ ഇല്ലാതെയും ഒരു `dual`-മോഡ് മിറർ തിരിച്ചറിയാം: അതിൽ പ്രാഥമിക ഐഡിയിലേക്ക്
+ചൂണ്ടുന്ന `parent` ഫീൽഡ് ഉണ്ടായിരിക്കും.
 
-ഒരു മോഡൽ പിക്കർ റെൻഡർ ചെയ്യുന്ന ക്ലയന്റുകൾ `?prefix=alias` അഭ്യർത്ഥിക്കണം —
-[OmniCopilot VS Code extension](../guides/VSCODE-COPILOT.md) ചെയ്യുന്നതും ഇതാണ്.
+മോഡൽ പിക്കർ റെൻഡർ ചെയ്യുന്ന ക്ലയന്റുകൾ `?prefix=alias` അഭ്യർത്ഥിക്കണം — ഇതാണ്
+[OmniCopilot VS Code എക്സ്റ്റൻഷൻ](../guides/VSCODE-COPILOT.md) ചെയ്യുന്നത്.
 
-### പ്രത്യേകം മറച്ചുവച്ച ചാറ്റ് മോഡലുകൾ
+### ഡിസ്കവറി ഫിൽട്ടറുകൾ (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-ഒരു പ്രൊവൈഡർ പേജിൽ **Hidden** എന്ന് അടയാളപ്പെടുത്തിയ മോഡൽ കാറ്റലോഗിൽ നിന്ന് ഒഴിവാക്കുകയും,
-വ്യക്തമായി അഭ്യർത്ഥിക്കുമ്പോൾ HTTP `404` / `model_not_found` നൽകി നിരസിക്കുകയും ചെയ്യും. പരിഹരിച്ചെടുത്ത
-പ്രൊവൈഡറും മോഡലും ഉപയോഗിച്ചാണ് പരിശോധന നടത്തുന്നത്; ഇതിൽ പ്രൊവൈഡർ alias-കൾ, compatible-provider നോഡ് പ്രിഫിക്സുകൾ,
-കണക്ഷൻ ഡിഫോൾട്ടുകൾ എന്നിവയും ഉൾപ്പെടുന്നു. ഒരു കോംബോ മറച്ചുവച്ച ടാർഗെറ്റുകൾ ഒഴിവാക്കി ദൃശ്യമാകുന്ന മറ്റൊരു സമാന ടാർഗെറ്റ് ഉപയോഗിക്കാം;
-പ്രവർത്തിപ്പിക്കാവുന്ന ടാർഗെറ്റുകളൊന്നും ശേഷിക്കുന്നില്ലെങ്കിൽ അതേ എറർ കോഡ് തിരികെ നൽകും. മോഡൽ വീണ്ടും ദൃശ്യമാക്കുന്നത് അടുത്ത
-അഭ്യർത്ഥന മുതൽ പ്രാബല്യത്തിൽ വരും. ഇമേജുകൾക്ക് മാത്രമുള്ള visibility override-കൾ അതേ ID ഉള്ള ചാറ്റ് മോഡലിനെ മറയ്ക്കില്ല.
+`GET /v1/models` ഓപ്റ്റ്-ഇൻ ഡിസ്കവറി ഫിൽട്ടറുകൾ സ്വീകരിക്കുന്നു. ഇവയൊന്നും ഇല്ലെങ്കിൽ പ്രതികരണം
+മാറ്റമില്ലാതെ തുടരും. വിളിക്കുന്നയാൾ ഇതിനകം കാണുന്ന കാറ്റലോഗിനെ ഇവ ചുരുക്കുന്നു (API-key
+അനുമതികൾ ആദ്യം പ്രയോഗിക്കും), കൂടാതെ OpenAI-ശൈലിയിലുള്ള `limit` / `after` പേജിംഗിന് മുമ്പ്
+ഇവ പ്രവർത്തിക്കും:
 
-ഈ വ്യക്തിഗത മോഡൽ ക്രമീകരണം [മോഡൽ എക്സ്പോഷർ അനുവദിക്കൽ/നിരസിക്കൽ പട്ടികകളിൽ](../routing/MODEL_EXPOSURE_LIST.md) നിന്ന്
-വേറിട്ടതാണ്; വ്യക്തമായ ഡിസ്പാച്ച് നിലനിർത്തിക്കൊണ്ട് അവ കാറ്റലോഗ് പരസ്യപ്പെടുത്തലും ഓട്ടോ-റൂട്ടിംഗ് കാൻഡിഡേറ്റുകളും ഫിൽട്ടർ ചെയ്യുന്നു.
-API-key മോഡൽ അനുമതികൾ സ്വതന്ത്രമായി തുടർന്നും ബാധകമാണ്. ഡിഫോൾട്ട് കാറ്റലോഗ് പ്രിഫിക്സ് മോഡ് `dual` ആയി തുടരും.
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # പട്ടികപ്പെടുത്തിയിരിക്കുന്ന എല്ലാ capability-കളും true ആയിരിക്കണം
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # കാറ്റലോഗ് `type`; ഒന്ന് ഇല്ലാത്ത വരികൾ `chat` ആണ്
+GET /v1/models?q=sonnet&limit=10                           # id അല്ലെങ്കിൽ name-ൽ കേസ് പരിഗണിക്കാത്ത പൊരുത്തം
+```
 
-### ചിന്തയില്ലാത്ത മോഡൽ വകഭേദങ്ങൾ
+| Param         | Values                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | non-negative integer, `context_length`-മായി താരതമ്യം ചെയ്യുന്നു                                     |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | 1–200 അക്ഷരങ്ങൾ                                                                                     |
 
-ചിന്താശേഷിയുള്ള Claude മോഡലുകൾക്കായി, `/v1/models` `claude-3-omniroute-no-thinking/` എന്ന പ്രിഫിക്സുള്ള id ഉപയോഗിക്കുന്ന ഒരു **ചിന്തയില്ലാത്ത** വകഭേദവും പ്രസിദ്ധീകരിക്കുന്നു:
+അജ്ഞാതമായ മൂല്യം, അല്ലെങ്കിൽ non-negative integer അല്ലാത്ത `min_context` (ഉദാഹരണത്തിന് `1.5`),
+HTTP `400`യും സാധുവായ മൂല്യങ്ങൾ ഉൾപ്പെടുന്ന സന്ദേശവും നൽകുന്നു. നടപ്പാക്കൽ:
+`src/app/api/v1/models/catalogFilters.ts`.
+
+### മോഡൽ ഷോർട്ട്ലിസ്റ്റ് (`POST /v1/models/query`)
+
+`POST /v1/models/query`, `GET /v1/models`-നുള്ള അതേ auth-ഉം ഓരോ key-യ്ക്കുമുള്ള ദൃശ്യപരതയും ഉപയോഗിച്ച്,
+അതേ കാറ്റലോഗിൽ നിന്നുള്ള ചെറുതും നിർണിതവുമായ ഒരു ലിസ്റ്റ് നൽകുന്നു:
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+എല്ലാ ഫീൽഡുകളും ഐച്ഛികമാണ്. `capabilities`-നും `exclude`-നും ഒരു array അല്ലെങ്കിൽ comma-separated string
+സ്വീകരിക്കാം; `max_output`, `max_output_tokens`-മായി താരതമ്യം ചെയ്യുന്നു. ഫലങ്ങൾ ആദ്യം `owned_by`-യും
+തുടർന്ന് `id`-യും അനുസരിച്ച് ക്രമീകരിക്കുന്നു. `limit`-ന്റെ ഡിഫോൾട്ട് മൂല്യം `20` ആണ്; `100`-നു മുകളിലുള്ള
+മൂല്യങ്ങൾ `100` ആയി പരിമിതപ്പെടുത്തുന്നു. അസാധുവായ JSON, അജ്ഞാതമായ ഫീൽഡ്, അല്ലെങ്കിൽ അസാധുവായ മൂല്യം
+HTTP `400` നൽകുന്നു.
+
+### വ്യക്തിഗതമായി മറച്ചിരിക്കുന്ന chat മോഡലുകൾ
+
+ഒരു provider പേജിൽ **മറച്ചത്** എന്ന് അടയാളപ്പെടുത്തിയ മോഡൽ കാറ്റലോഗിൽ നിന്ന് ഒഴിവാക്കുകയും,
+വ്യക്തമായി അഭ്യർത്ഥിക്കുമ്പോൾ HTTP `404` / `model_not_found` ഉപയോഗിച്ച് നിരസിക്കുകയും ചെയ്യുന്നു.
+provider aliases, compatible-provider node prefixes, connection defaults എന്നിവ ഉൾപ്പെടെ,
+resolved provider-ഉം model-ഉം ഉപയോഗിച്ചാണ് പരിശോധന നടത്തുന്നത്. ഒരു combo മറച്ചിരിക്കുന്ന target-ുകൾ
+ഒഴിവാക്കി ദൃശ്യമായ sibling ഉപയോഗിക്കാം; executable target ഒന്നും ശേഷിക്കാത്തപ്പോൾ അതേ error code
+നൽകുന്നു. മറച്ച നില നീക്കുന്നത് അടുത്ത അഭ്യർത്ഥനയിൽ പ്രാബല്യത്തിൽ വരും. Image-only visibility
+overrides, അതേ ID ഉള്ള chat മോഡലിനെ മറയ്ക്കില്ല.
+
+ഈ വ്യക്തിഗത മോഡൽ ക്രമീകരണം
+[model exposure allow/deny lists](../routing/MODEL_EXPOSURE_LIST.md)-ൽ നിന്ന് വേറിട്ടതാണ്. അവ കാറ്റലോഗിലെ
+advertisement-ഉം auto-routing candidates-ഉം ഫിൽട്ടർ ചെയ്യുമ്പോഴും explicit dispatch നിലനിർത്തുന്നു.
+API-key model permissions സ്വതന്ത്രമായി തുടർന്നും ബാധകമാണ്. ഡിഫോൾട്ട് catalog prefix mode `dual` ആയി
+തുടരുന്നു.
+
+### ചിന്തിക്കാത്ത മോഡൽ വകഭേദങ്ങൾ
+
+thinking-ശേഷിയുള്ള Claude മോഡലുകൾക്കായി, `/v1/models` `claude-3-omniroute-no-thinking/` എന്ന prefix
+ഉള്ള ഒരു **no-thinking** വകഭേദവും പരസ്യപ്പെടുത്തുന്നു:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-ഈ id തിരഞ്ഞെടുക്കുമ്പോൾ (ഉദാ. എല്ലായ്പ്പോഴും ഒരു `thinking` ബ്ലോക്ക് ചേർക്കുന്ന Claude Code കോൺഫിഗിൽ), റീസണിംഗ് അടിച്ചമർത്തിക്കൊണ്ട് യഥാർഥ `<provider>/<model>`-ലേക്ക് തിരികെ പരിഹരിക്കപ്പെടുന്നു — `/v1/messages` പാതയിൽ `thinking:{type:"disabled"}`, അല്ലെങ്കിൽ `/v1/chat/completions` പാതയിൽ `reasoning`/`reasoning_effort` ഫീൽഡുകൾ നീക്കം ചെയ്യപ്പെടും. ചിന്തയെ പിന്തുണയ്ക്കുകയും **ഒപ്പം** `disabled` മാനിക്കുകയും ചെയ്യുന്ന Claude-കുടുംബ മോഡലുകൾക്കായി മാത്രമാണ് ഈ വകഭേദം പട്ടികപ്പെടുത്തുന്നത് (അതിനാൽ, ഉദാ. `disabled` നിരസിക്കുന്ന adaptive-only മോഡലുകൾ ഒഴിവാക്കപ്പെടുന്നു). ഓപ്പറേറ്റർമാർക്ക് `ModelSpec.noThinkingAlias` വഴി ഓരോ മോഡലിനും ഈ വകഭേദം നിർബന്ധമായി ഓൺ അല്ലെങ്കിൽ ഓഫ് ചെയ്യാം.
+ഈ ID തിരഞ്ഞെടുക്കുമ്പോൾ (ഉദാ. എല്ലായ്പ്പോഴും `thinking` block ചേർക്കുന്ന Claude Code config-ൽ)
+യഥാർത്ഥ `<provider>/<model>`-ലേക്ക് resolve ചെയ്ത് reasoning അടിച്ചമർത്തുന്നു — `/v1/messages` പാതയിൽ
+`thinking:{type:"disabled"}` ഉപയോഗിച്ചും, `/v1/chat/completions` പാതയിൽ `reasoning`/
+`reasoning_effort` ഫീൽഡുകൾ നീക്കിയും. thinking പിന്തുണയ്ക്കുകയും **and** `disabled` അംഗീകരിക്കുകയും
+ചെയ്യുന്ന Claude-family മോഡലുകൾക്കു മാത്രമാണ് ഈ വകഭേദം ലിസ്റ്റ് ചെയ്യുന്നത് (ഉദാഹരണത്തിന്, `disabled`
+നിരസിക്കുന്ന adaptive-only മോഡലുകൾ ഒഴിവാക്കപ്പെടുന്നു). `ModelSpec.noThinkingAlias` വഴി operators-ക്ക്
+ഓരോ മോഡലിനും ഈ വകഭേദം force ചെയ്ത് ഓണാക്കുകയോ ഓഫാക്കുകയോ ചെയ്യാം.
 
 ---
 
-## പ്രൊവൈഡർ പ്ലഗിൻ മാനിഫെസ്റ്റ്
+## Provider പ്ലഗിൻ മാനിഫെസ്റ്റ്
 
 ```bash
 GET /api/v1/provider-plugin-manifest
 ```
 
-Bifrost, CLIProxyAPI, ഭാവിയിലെ sidecar റൗട്ടറുകൾ എന്നിവ ഉപയോഗിക്കുന്ന JSON-സുരക്ഷിതമായ പ്രൊവൈഡർ പ്ലഗിൻ മാനിഫെസ്റ്റ് തിരികെ നൽകുന്നു. TypeScript പ്രൊവൈഡർ രജിസ്ട്രിയിൽനിന്നാണ് പ്രതികരണം സൃഷ്ടിക്കുന്നത്; OAuth ക്ലയന്റ് രഹസ്യങ്ങൾ, റൺടൈം എൻവയോൺമെന്റ് റെസല്യൂഷൻ, എക്സിക്യൂട്ടർ ഫംഗ്ഷനുകൾ, അഭ്യർത്ഥനാ ഹെഡറുകൾ, അക്കൗണ്ട് ഡാറ്റ എന്നിവ മനഃപൂർവം ഒഴിവാക്കുന്നു.
+Bifrost, CLIProxyAPI, ഭാവിയിലെ sidecar റൂട്ടറുകൾ എന്നിവ ഉപയോഗിക്കുന്ന JSON-സുരക്ഷിതമായ provider പ്ലഗിൻ മാനിഫെസ്റ്റ് നൽകുന്നു. TypeScript provider രജിസ്ട്രിയിൽ നിന്നാണ് പ്രതികരണം സൃഷ്ടിക്കുന്നത്. OAuth client secrets, runtime environment resolution, executor functions, request headers, account data എന്നിവ ഉദ്ദേശപൂർവം ഒഴിവാക്കുന്നു.
 
-ഒരു sidecar പ്രോസസിന് പുറത്തായി പ്രവർത്തിക്കുകയും
-`open-sse/config/providerPluginManifestRegistry.ts` നേരിട്ട് ഇമ്പോർട്ട് ചെയ്യാൻ കഴിയാതിരിക്കുകയും ചെയ്യുമ്പോൾ ഈ എൻഡ്പോയിന്റ് ഉപയോഗിക്കുക.
+ഒരു sidecar out-of-process ആയി പ്രവർത്തിക്കുകയും
+`open-sse/config/providerPluginManifestRegistry.ts` നേരിട്ട് ഇറക്കുമതി ചെയ്യാൻ കഴിയാതിരിക്കുകയും ചെയ്യുമ്പോൾ ഈ endpoint ഉപയോഗിക്കുക.
+
+---
+
+## ElevenLabs ഓഡിയോ ജനറേഷൻ
+
+നിങ്ങളുടെ ElevenLabs API key ഉപയോഗിച്ച് OmniRoute-ൽ ഒരു `elevenlabs` provider connection കോൺഫിഗർ ചെയ്യുക. ക്ലയന്റുകൾ അവരുടെ **OmniRoute** key ഉപയോഗിച്ച് authenticate ചെയ്യുന്നു (`Authorization: Bearer $OMNIROUTE_API_KEY`); gateway സംഭരിച്ചിരിക്കുന്ന provider key-യെ `xi-api-key` ആയി നൽകുന്നു. ElevenLabs key ഒരിക്കലും gateway bearer token ആയി അയയ്ക്കരുത്.
+
+| രീതി | പാത                         | പ്രതികരണം                                     | API key endpoint വിഭാഗം |
+| ---- | --------------------------- | --------------------------------------------- | ----------------------- |
+| POST | `/v1/sound-generation`      | Native ഓഡിയോ ബൈറ്റുകൾ                         | `elevenlabs`            |
+| POST | `/v1/music`                 | Native ഓഡിയോ ബൈറ്റുകൾ                         | `music`                 |
+| POST | `/v1/music/stream`          | Streaming ഓഡിയോ ബൈറ്റുകൾ                      | `music`                 |
+| POST | `/v1/music/detailed`        | Native multipart ഓഡിയോയും composition plan-ഉം | `music`                 |
+| POST | `/v1/music/detailed/stream` | Native SSE metadata-യും ഓഡിയോ chunks-ഉം       | `music`                 |
+| POST | `/v1/music/plan`            | JSON composition plan                         | `music`                 |
+
+ഈ endpoints നിലവിലുള്ള `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}`, `/v1/speech-to-text` റൂട്ടുകൾക്ക് പൂരകമാണ്. Native JSON fields-ഉം
+`output_format`, `enable_logging` പോലുള്ള query parameters-ഉം മാറ്റമില്ലാതെ സംരക്ഷിക്കുന്നു.
+`/v1/music/detailed` പ്രതികരണങ്ങളിലെ multipart boundaries നിലനിർത്തുന്നു; അവ multipart ആയി parse ചെയ്യുക.
+`/v1/music/detailed/stream` composition metadata-യും SSE events-ലെ
+base64 audio chunks-ഉം ഉൾക്കൊള്ളുന്ന `text/event-stream` നൽകുന്നു. എല്ലാ ആറ് റൂട്ടുകളും CORS preflight പിന്തുണയ്ക്കുന്നു.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# ഒരു ചെറിയ sound effect. ദൈർഘ്യം: 0.5 മുതൽ 30 സെക്കൻഡ് വരെ.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Music-ന്റെ ദൈർഘ്യം മില്ലിസെക്കൻഡിൽ രേഖപ്പെടുത്തുന്നു: 3000 മുതൽ 600000 വരെ.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+ക്രമാനുസൃതമായ ഓഡിയോ delivery-ക്കായി അതേ JSON body ഉപയോഗിച്ച് `/v1/music/stream` ഉപയോഗിക്കുക. Composition-ൽ
+`prompt` അല്ലെങ്കിൽ `composition_plan` ഇവയിൽ കൃത്യമായി ഒന്ന് മാത്രമേ സ്വീകരിക്കൂ; `/v1/music/plan`-ന് `prompt`
+ആവശ്യമാണ്, കൂടാതെ ഐച്ഛികമായി `source_composition_plan` സ്വീകരിക്കുന്നു. Native schemas അധിക
+provider fields സംരക്ഷിക്കുന്നതിനാൽ composition-plan versions-ഉം fine-tuning options-ഉം ElevenLabs-ലേക്ക് എത്തുന്നു.
+
+ഏകീകൃത `/v1/music/generations` endpoint `elevenlabs/music_v1`,
+`elevenlabs/music_v2`, `elevenlabs/music_v2_5` എന്നിവയും സ്വീകരിക്കുന്നു. സജീവമായ ElevenLabs connection ഉണ്ടെങ്കിൽ,
+ഈ models music catalog-ൽ ലഭ്യമാകും. ഈ endpoint
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}` നൽകുന്നു. ഇതിലെ `duration` field
+സെക്കൻഡുകളിലാണ്, അത് `music_length_ms`-ലേക്ക് map ചെയ്യുന്നു; വ്യക്തമായി നൽകിയ `music_length_ms`-ന് മുൻഗണനയുണ്ട്.
+`instrumental`, `force_instrumental`-ലേക്ക് map ചെയ്യുന്നു; native field-ന് മുൻഗണനയുണ്ട്.
+Streaming-നായി native streaming endpoints-ഉം composition plan മാത്രം അടിസ്ഥാനമാക്കിയുള്ള
+requests-നായി native composition endpoint-ഉം ഉപയോഗിക്കുക.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Upstream call നടത്തുന്നതിന് മുമ്പ് endpoint, model, budget, connection നിയന്ത്രണങ്ങൾ പ്രയോഗിക്കുന്നു. Native
+routes upstream status codes-ഉം error bodies-ഉം മാറ്റമില്ലാതെ തിരികെ നൽകുന്നു; plan restriction-നുള്ള `402`-ഉം
+quota limit-നുള്ള `429`-ഉം ഇതിൽ ഉൾപ്പെടുന്നു. ലഭ്യമെങ്കിൽ `character-cost`, `song-id`, `request-id`, `retry-after`
+headers സംരക്ഷിക്കുന്നു. സൗജന്യ credit balance ഉണ്ടായിരിക്കുന്നത് എല്ലാ music models-ലേക്കും,
+output formats-ലേക്കും API features-ലേക്കും പ്രവേശനം ഉറപ്പാക്കുന്നില്ല: ഓരോ request-ന്റെയും entitlement ElevenLabs ആണ് തീരുമാനിക്കുന്നത്.
+ഏകീകൃത endpoint error status codes-നെ OmniRoute-ന്റെ normalized error envelope-ൽ സംരക്ഷിക്കുന്നു.
+
+Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[music composition](https://elevenlabs.io/docs/api-reference/music/compose), [streaming music details](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
 ## അനുയോജ്യതാ എൻഡ്പോയിന്റുകൾ
 
-| രീതി | പാത                                       | ഫോർമാറ്റ്                              |
-| ---- | ----------------------------------------- | -------------------------------------- |
-| POST | `/v1/chat/completions`                    | OpenAI                                 |
-| POST | `/v1/messages`                            | Anthropic                              |
-| POST | `/v1/responses`                           | OpenAI Responses                       |
-| POST | `/v1/embeddings`                          | OpenAI                                 |
-| POST | `/v1/images/generations`                  | OpenAI Images                          |
-| POST | `/v1/images/edits`                        | OpenAI Images (തിരുത്തൽ/inpaint)       |
-| POST | `/v1/videos/generations`                  | OpenAI-ശൈലിയിലുള്ള വീഡിയോ സൃഷ്ടിക്കൽ   |
-| POST | `/v1/music/generations`                   | OpenAI-ശൈലിയിലുള്ള സംഗീത സൃഷ്ടിക്കൽ    |
-| POST | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                     |
-| POST | `/v1/audio/speech`                        | OpenAI TTS (ഓഡിയോ ബോഡി മടക്കിനൽകുന്നു) |
-| POST | `/v1/rerank`                              | Cohere/Voyage-ശൈലിയിലുള്ള rerank       |
-| POST | `/v1/classify`                            | Jina classify (`api.jina.ai`)          |
-| POST | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)     |
-| POST | `/v1/moderations`                         | OpenAI Moderations                     |
-| GET  | `/v1/models`                              | OpenAI                                 |
-| POST | `/v1/messages/count_tokens`               | Anthropic                              |
-| GET  | `/v1beta/models`                          | Gemini                                 |
-| POST | `/v1beta/models/{...path}`                | Gemini generateContent                 |
-| POST | `/v1/api/chat`                            | Ollama                                 |
-| GET  | `/api/v1/vscode/{token}/`                 | OpenAI കാറ്റലോഗ് അപരനാമം               |
-| GET  | `/api/v1/vscode/{token}/models`           | OpenAI മോഡലുകളുടെ അപരനാമം              |
-| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ടോക്കണൈസ്ഡ് അപരനാമം             |
-| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses ടോക്കണൈസ്ഡ് അപരനാമം   |
-| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ടോക്കണൈസ്ഡ് അപരനാമം             |
-| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama tags ടോക്കണൈസ്ഡ് അപരനാമം        |
+| രീതി | പാത                                       | ഫോർമാറ്റ്                            |
+| ---- | ----------------------------------------- | ------------------------------------ |
+| POST | `/v1/chat/completions`                    | OpenAI                               |
+| POST | `/v1/messages`                            | Anthropic                            |
+| POST | `/v1/responses`                           | OpenAI Responses                     |
+| POST | `/v1/embeddings`                          | OpenAI                               |
+| POST | `/v1/images/generations`                  | OpenAI Images                        |
+| POST | `/v1/images/edits`                        | OpenAI Images (എഡിറ്റ്/ഇൻപെയിന്റ്)   |
+| POST | `/v1/videos/generations`                  | OpenAI-ശൈലിയിലുള്ള വീഡിയോ ജനറേഷൻ     |
+| POST | `/v1/music/generations`                   | OpenAI-ശൈലിയിലുള്ള സംഗീത ജനറേഷൻ      |
+| POST | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
+| POST | `/v1/audio/speech`                        | OpenAI TTS (ഓഡിയോ ബോഡി നൽകുന്നു)     |
+| POST | `/v1/rerank`                              | Cohere/Voyage-ശൈലിയിലുള്ള റീറാങ്ക്   |
+| POST | `/v1/classify`                            | Jina ക്ലാസിഫൈ (`api.jina.ai`)        |
+| POST | `/v1/segment`                             | Jina സെഗ്മെന്റർ (`segment.jina.ai`)  |
+| POST | `/v1/moderations`                         | OpenAI Moderations                   |
+| GET  | `/v1/models`                              | OpenAI                               |
+| POST | `/v1/models/query`                        | ഫിൽട്ടർ ചെയ്ത മോഡൽ ഷോർട്ട്ലിസ്റ്റ്   |
+| POST | `/v1/messages/count_tokens`               | Anthropic                            |
+| GET  | `/v1beta/models`                          | Gemini                               |
+| POST | `/v1beta/models/{...path}`                | Gemini generateContent               |
+| POST | `/v1/api/chat`                            | Ollama                               |
+| GET  | `/api/v1/vscode/{token}/`                 | OpenAI കാറ്റലോഗ് അപരനാമം             |
+| GET  | `/api/v1/vscode/{token}/models`           | OpenAI മോഡൽ അപരനാമം                  |
+| POST | `/api/v1/vscode/{token}/chat/completions` | OpenAI ടോക്കണൈസ്ഡ് അപരനാമം           |
+| POST | `/api/v1/vscode/{token}/responses`        | OpenAI Responses ടോക്കണൈസ്ഡ് അപരനാമം |
+| POST | `/api/v1/vscode/{token}/api/chat`         | Ollama ടോക്കണൈസ്ഡ് അപരനാമം           |
+| GET  | `/api/v1/vscode/{token}/api/tags`         | Ollama ടാഗുകൾ ടോക്കണൈസ്ഡ് അപരനാമം    |
 
-എല്ലാ POST റൂട്ടുകളും ഒരേ ഘടന പിന്തുടരുന്നു: `Bearer your-api-key` + Zod സാധൂകരിച്ച JSON ബോഡി (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` മുതലായവ; `src/shared/validation/schemas.ts` കാണുക). സ്കീമ സാധൂകരണം പരാജയപ്പെട്ടാൽ 4xx മടക്കിനൽകും.
+എല്ലാ POST റൂട്ടുകളും ഒരേ ഘടന പിന്തുടരുന്നു: `Bearer your-api-key` + Zod ഉപയോഗിച്ച് സാധുത പരിശോധിച്ച JSON ബോഡി (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` തുടങ്ങിയവ; `src/shared/validation/schemas.ts` കാണുക). സ്കീമ പരാജയപ്പെട്ടാൽ 4xx തിരികെ നൽകും.
 
-`Authorization: Bearer ...` ചേർക്കാൻ കഴിയാത്ത ക്ലയന്റുകൾക്കായി, query-string അനുയോജ്യത (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) വഴിയോ താഴെ രേഖപ്പെടുത്തിയിരിക്കുന്ന പ്രത്യേക `/api/v1/vscode/{token}/...` എൻഡ്പോയിന്റുകൾ വഴിയോ URL-ൽ API കീകൾ OmniRoute സ്വീകരിക്കുന്നു.
+`Authorization: Bearer ...` ചേർക്കാൻ കഴിയാത്ത ക്ലയന്റുകൾക്കായി, താഴെ രേഖപ്പെടുത്തിയിരിക്കുന്ന ക്വറി-സ്ട്രിംഗ് അനുയോജ്യത (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) വഴിയോ സമർപ്പിതമായ `/api/v1/vscode/{token}/...` എൻഡ്പോയിന്റുകൾ വഴിയോ URL-ൽ API കീകൾ സ്വീകരിക്കുന്നതും OmniRoute പിന്തുണയ്ക്കുന്നു.
 
 ```bash
-# Rerank (ക്ലൗഡ് രജിസ്ട്രി പ്രൊവൈഡർ, അല്ലെങ്കിൽ "<prefix>/<model>" എന്ന രീതിയിലുള്ള OpenAI-അനുയോജ്യ പ്രൊവൈഡർ നോഡ്)
+# റീറാങ്ക് (ക്ലൗഡ് രജിസ്ട്രി പ്രൊവൈഡർ, അല്ലെങ്കിൽ "<prefix>/<model>" എന്ന രൂപത്തിലുള്ള OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡ്)
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina classify (Foundation API ക്രെഡൻഷ്യലുകൾ)
+# Jina ക്ലാസിഫൈ (Foundation API ക്രെഡൻഷ്യലുകൾ)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina segmenter
+# Jina സെഗ്മെന്റർ
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina search (s.jina.ai; പ്രൊവൈഡർ അപരനാമങ്ങൾ: jina-search, jina-ai, jina)
+# Jina തിരയൽ (s.jina.ai; പ്രൊവൈഡർ അപരനാമങ്ങൾ: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Moderations
+# മോഡറേഷനുകൾ
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — audio/mpeg (അല്ലെങ്കിൽ അഭ്യർത്ഥിച്ച ഫോർമാറ്റ്) ബോഡി മടക്കിനൽകുന്നു
+# TTS — audio/mpeg (അല്ലെങ്കിൽ അഭ്യർത്ഥിച്ച ഫോർമാറ്റ്) ബോഡി നൽകുന്നു
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS-ന് ഒരു ഭാഷയും ഒരു ശബ്ദവും ആവശ്യമാണ്: `language`-ന്റെ സ്ഥിരസ്ഥിതി "en" ആണ്; ശബ്ദം നൽകിയിട്ടില്ലെങ്കിലോ
-# OpenAI-യുടെ സ്റ്റോക്ക് ശബ്ദനാമം (alloy, nova, …) നൽകിയാലോ അത് "Adrian" ആകുന്നു
+# Soniox TTS-ന് ഭാഷയും ശബ്ദവും ആവശ്യമാണ്: `language`-ന്റെ ഡിഫോൾട്ട് "en" ആണ്; ശബ്ദം
+# ഇല്ലാത്തതോ OpenAI-യുടെ സ്റ്റോക്ക് ശബ്ദനാമമായതോ (alloy, nova, …) ആണെങ്കിൽ "Adrian" ആയി മാറും
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# ചിത്രം തിരുത്തൽ (multipart)
+# ഇമേജ് എഡിറ്റ് (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# വീഡിയോ / സംഗീത സൃഷ്ടിക്കൽ (പ്രൊവൈഡർ-പ്രിഫിക്സുള്ള മോഡൽ ഐഡി)
+# വീഡിയോ / സംഗീത ജനറേഷൻ (പ്രൊവൈഡർ-പ്രിഫിക്സ് ചെയ്ത മോഡൽ ഐഡി)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Rerank പ്രൊവൈഡർ നോഡുകൾ:** `POST /v1/rerank`, `<node-prefix>/<model>` എന്ന രീതിയിൽ അഭിസംബോധന ചെയ്യുന്ന OpenAI-അനുയോജ്യ പ്രൊവൈഡർ നോഡുകളിലേക്കും
-> (oMLX, vLLM, Infinity, ഒരു ഗേറ്റ്വേയ്ക്ക് പിന്നിലുള്ള TEI, …) റൂട്ട് ചെയ്യുന്നു. Loopback
-> നോഡുകൾ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) എല്ലായ്പ്പോഴും യോഗ്യമാണ്; കൂടാതെ
-> ഓപ്പറേറ്റർ `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-ൽ പട്ടികപ്പെടുത്തുന്ന ഹോസ്റ്റ്നാമങ്ങളും യോഗ്യമാണ് (ഉദാ. `http://reranker:8080/v1` പോലുള്ള
-> Docker/Compose സേവനനാമം; ഇവ നേരിട്ടാണ് വിളിക്കപ്പെടുന്നത്, ഒരിക്കലും `HTTP(S)_PROXY` വഴിയോ
+> **റീരാങ്ക് പ്രൊവൈഡർ നോഡുകൾ:** `POST /v1/rerank` എന്നതും `<node-prefix>/<model>` ആയി അഭിസംബോധന ചെയ്യുന്ന OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡുകളിലേക്ക് (oMLX, vLLM, Infinity, ഒരു ഗേറ്റ്വേയ്ക്കു പിന്നിലുള്ള TEI, …) റൂട്ട് ചെയ്യുന്നു. Loopback
+> നോഡുകൾ (`localhost`, `127.0.0.1`, `172.16.0.0/12`) എല്ലായ്പ്പോഴും യോഗ്യമാണ്. കൂടാതെ
+> `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`-ൽ ഓപ്പറേറ്റർ ലിസ്റ്റ് ചെയ്യുന്ന ഹോസ്റ്റ്നെയിമുകളും യോഗ്യമാണ് (ഉദാ. `http://reranker:8080/v1` പോലുള്ള
+> Docker/Compose സർവീസ് പേര്; ഇവയെ നേരിട്ട് വിളിക്കുന്നു, ഒരിക്കലും `HTTP(S)_PROXY` വഴിയോ
 > ഒരു കണക്ഷന്റെ പിൻ ചെയ്ത പ്രോക്സി വഴിയോ അല്ല). മറ്റേതെങ്കിലും
-> ഹോസ്റ്റിലുള്ള നോഡുകൾ — ഒരു LAN ബോക്സ് അല്ലെങ്കിൽ Tailscale പിയർ — ഓപ്പറേറ്റർ
-> `RERANK_REMOTE_PROVIDER_NODES` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമാക്കുകയും നോഡിന്റെ അടിസ്ഥാന URL പ്രൊവൈഡർ
-> ഔട്ട്ബൗണ്ട് URL നയം (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) പാലിക്കുകയും ചെയ്യുമ്പോൾ മാത്രമേ യോഗ്യമാകൂ.
-> മെമ്മറി എൻജിന്റെ rerank ഘട്ടം loopback വഴി ഈ റൂട്ട് വിളിക്കുന്നതിനാൽ,
-> Memory ക്രമീകരണങ്ങളിലെ `rerankProviderModel`-നും ഇതേ നിയമം ബാധകമാണ്.
+> ഹോസ്റ്റിലുള്ള നോഡുകൾ — ഒരു LAN ബോക്സോ Tailscale പീയറോ — ഓപ്പറേറ്റർ
+> `RERANK_REMOTE_PROVIDER_NODES` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനക്ഷമമാക്കുകയും **നോഡിന്റെ** ബേസ് URL പ്രൊവൈഡർ
+> ഔട്ട്ബൗണ്ട് URL നയം (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`) പാലിക്കുകയും
+> ചെയ്യുന്നപ്പോൾ മാത്രമേ യോഗ്യമായിരിക്കൂ. മെമ്മറി എഞ്ചിന്റെ റീരാങ്ക് ഘട്ടം ഈ റൂട്ടിനെ
+> loopback വഴി വിളിക്കുന്നു, അതിനാൽ Memory ക്രമീകരണങ്ങളിലെ `rerankProviderModel`-നും ഇതേ നിയമം ബാധകമാണ്.
 >
-> **ലോക്കൽ സെർവർ ഘടനകൾ:** നോഡ് `<base>/v1/rerank`-ലും, 404 ലഭിച്ചാൽ `<base>/rerank`-ലും
-> (Infinity, TEI) വിളിക്കപ്പെടുന്നു. അപ്സ്ട്രീം ബോഡിയിൽ Cohere/OpenAI സ്പെല്ലിംഗും (`documents`,
-> `return_documents`) TEI സ്പെല്ലിംഗും (`texts`, `return_text`) ഉൾപ്പെടുന്നു; അപ്സ്ട്രീം പ്രതികരണം
-> Cohere എൻവലപ്പിലേക്ക് നോർമലൈസ് ചെയ്യപ്പെടുന്നു: TEI-യുടെ ലളിതമായ `[{index, score, text}]`, ലളിതമായ ഗേറ്റ്വേകളിൽ നിന്നുള്ള
-> `{results: [{index, score}]}`, Voyage-ശൈലിയിലുള്ള `{data: [...]}` എന്നിവയെല്ലാം ക്ലയന്റിലേക്ക്
-> `{results: [{index, relevance_score, document?}]}` എന്ന രൂപത്തിൽ, സ്കോർ അനുസരിച്ച് ക്രമീകരിച്ച് `top_n` പരിധിയിൽ മടക്കിനൽകുന്നു.
+> **ലോക്കൽ സെർവർ രൂപങ്ങൾ:** നോഡിനെ `<base>/v1/rerank` എന്നതിലും, 404 ലഭിച്ചാൽ `<base>/rerank` എന്നതിലും
+> (Infinity, TEI) വിളിക്കുന്നു. അപ്സ്ട്രീം ബോഡിയിൽ Cohere/OpenAI സ്പെല്ലിംഗും (`documents`,
+> `return_documents`) TEI സ്പെല്ലിംഗും (`texts`, `return_text`) ഉൾപ്പെടുന്നു. അപ്സ്ട്രീം പ്രതികരണം
+> Cohere എൻവലോപ്പിലേക്ക് നോർമലൈസ് ചെയ്യുന്നു: TEI-യുടെ വെറും `[{index, score, text}]`, തിൻ ഗേറ്റ്വേകളിൽ നിന്നുള്ള `{results: [{index, score}]}`
+> , Voyage-ശൈലിയിലുള്ള `{data: [...]}` എന്നിവയെല്ലാം ക്ലയന്റിലേക്ക്
+> `{results: [{index, relevance_score, document?}]}` ആയി മടങ്ങുന്നു; സ്കോർ അനുസരിച്ച് ക്രമീകരിച്ചും `top_n` വരെ പരിമിതപ്പെടുത്തിയുമാണ്.
 
-> **പ്രൊവൈഡർ-നോഡ് കണ്ടെത്തൽ:** OpenAI-അനുയോജ്യമായ ഒരു പ്രൊവൈഡർ നോഡിലെ മോഡലുകൾ `GET /v1/models`-ൽ
-> നോഡ് പ്രിഫിക്സിന് കീഴിൽ ദൃശ്യമാകും. എൻഡ്പോയിന്റ് മെറ്റാഡാറ്റ ഇല്ലാത്ത വരികൾ (പ്രാദേശിക `/v1/models` ലിസ്റ്റിങ്ങുകളിൽ സാധാരണം)
-> നോഡിന്റെ `apiType` അവകാശമാക്കുന്നു; അതിനാൽ, ഡിഫോൾട്ടായി ചാറ്റ് ആയി കണക്കാക്കുന്നതിനുപകരം ഒരു `embeddings` നോഡിന്റെ മോഡലുകൾക്ക് `type: "embedding"` എന്നും
-> ഒരു `rerank` നോഡിന്റെ മോഡലുകൾക്ക് `type: "rerank"` എന്നും ആയിരിക്കും; സമന്വയിപ്പിച്ചതോ മാനുവലായി ചേർത്തതോ ആയ ഒരു വരിയിലെ വ്യക്തമായ
-> `supportedEndpoints`-ന് ഇപ്പോഴും മുൻഗണന ലഭിക്കും.
+> **പ്രൊവൈഡർ-നോഡ് കണ്ടെത്തൽ:** OpenAI-അനുയോജ്യമായ പ്രൊവൈഡർ നോഡിലെ മോഡലുകൾ `GET /v1/models`-ൽ
+> നോഡ് പ്രിഫിക്സിന് കീഴിൽ പ്രത്യക്ഷപ്പെടുന്നു. എൻഡ്പോയിന്റ് മെറ്റാഡാറ്റ ഇല്ലാത്ത വരികൾ (ലോക്കൽ `/v1/models` ലിസ്റ്റിംഗുകളിൽ സാധാരണ കാണുന്നത്)
+> നോഡിന്റെ `apiType` പാരമ്പര്യമായി സ്വീകരിക്കുന്നു. അതിനാൽ ഒരു `embeddings` നോഡിലെ മോഡലുകൾ `type: "embedding"` ആയും
+> ഒരു `rerank` നോഡിലെ മോഡലുകൾ `type: "rerank"` ആയും മാറുന്നു; ഡീഫോൾട്ടായി chat ആകുന്നില്ല. സമന്വയിപ്പിച്ചതോ
+> സ്വമേധയാ ചേർത്തതോ ആയ വരിയിലെ വ്യക്തമായ `supportedEndpoints`-ന് ഇപ്പോഴും മുൻഗണനയുണ്ട്.
 
 ### സമർപ്പിത പ്രൊവൈഡർ റൂട്ടുകൾ
 
@@ -555,28 +793,23 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-പ്രൊവൈഡർ പ്രിഫിക്സ് ഇല്ലെങ്കിൽ അത് സ്വയമേവ ചേർക്കപ്പെടും. പൊരുത്തപ്പെടാത്ത മോഡലുകൾ `400` മടക്കിനൽകും.
+ഇല്ലെങ്കിൽ പ്രൊവൈഡർ പ്രിഫിക്സ് സ്വയമേവ ചേർക്കുന്നു. പൊരുത്തപ്പെടാത്ത മോഡലുകൾ `400` നൽകുന്നു.
 
 ---
 
 ## Files API
 
-ബാച്ച് ഇൻപുട്ട്/ഔട്ട്പുട്ടിനും ഫയൽ-ഉദ്ദേശ്യ അപ്ലോഡുകൾക്കുമുള്ള OpenAI-അനുയോജ്യമായ ഫയൽ എൻഡ്പോയിന്റ്.
+ബാച്ച് ഇൻപുട്ട്/ഔട്ട്പുട്ടിനും ഫയൽ-ഉദ്ദേശ്യ അപ്ലോഡുകൾക്കുമായുള്ള OpenAI-അനുയോജ്യമായ ഫയൽ എൻഡ്പോയിന്റ്.
 
-| രീതി   | പാത്ത്                   | വിവരണം                                                                                                                      |
+| Method | Path                     | Description                                                                                                                 |
 | ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | POST   | `/v1/files`              | ഒരു ഫയൽ അപ്ലോഡ് ചെയ്യുക (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — പരമാവധി 512 MiB |
-| GET    | `/v1/files`              | പ്രാമാണീകരിച്ച API കീയുടെ ഫയലുകൾ പട്ടികപ്പെടുത്തുക                                                                          |
+| GET    | `/v1/files`              | ഓതന്റിക്കേറ്റ് ചെയ്ത API കീയ്ക്കായുള്ള ഫയലുകളുടെ പട്ടിക കാണിക്കുക                                                           |
 | GET    | `/v1/files/[id]`         | ഒരു ഫയലിന്റെ മെറ്റാഡാറ്റ വീണ്ടെടുക്കുക                                                                                      |
 | DELETE | `/v1/files/[id]`         | ഒരു ഫയൽ ഇല്ലാതാക്കുക                                                                                                        |
-| GET    | `/v1/files/[id]/content` | അസംസ്കൃത ഫയൽ ബോഡി തിരികെ സ്ട്രീം ചെയ്യുക                                                                                    |
+| GET    | `/v1/files/[id]/content` | അസംസ്കൃത ഫയൽ ബോഡി സ്ട്രീം ചെയ്യുക                                                                                           |
 
-**പ്രാമാണീകരണം:** Bearer API കീ — `getApiKeyRequestScope` വഴി ഫയലുകൾ ഓരോ API കീയ്ക്കും പ്രത്യേകം സ്കോപ്പ് ചെയ്തിരിക്കുന്നു. ഒരു കീയ്ക്ക്
-സ്വന്തം ഫയലുകൾ മാത്രം കാണാനും ഡൗൺലോഡ് ചെയ്യാനും ഇല്ലാതാക്കാനും കഴിയും; കീയില്ലാത്ത ഒരു ഡാഷ്ബോർഡ് സെഷന് മുഴുവൻ
-ഇൻസ്റ്റൻസ് വായിക്കാനാകും; ഉടമയില്ലാത്ത ഒരു ഫയലിലേക്കുള്ള (അജ്ഞാത അല്ലെങ്കിൽ ഡാഷ്ബോർഡ്-സെഷൻ അപ്ലോഡ്) പ്രവേശനം എല്ലാ
-നോൺ-സെഷൻ കോളർമാർക്കും നിഷേധിക്കപ്പെടും. `GET /v1/files` ഒരു അജ്ഞാത കോളറെ — കൂടാതെ നൽകിയിട്ടുള്ളതെങ്കിലും
-പരിഹരിക്കാനാകാത്ത ഒരു കീയെയും — `REQUIRE_API_KEY=false` ആയിരിക്കുമ്പോൾ പോലും, എല്ലാ ടെനന്റുകളുടെയും
-ഫയലുകൾ പട്ടികപ്പെടുത്തുന്നതിനുപകരം `401` ഉപയോഗിച്ച് നിരസിക്കുന്നു (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
+**ഓതന്റിക്കേഷൻ:** Bearer API കീ — `getApiKeyRequestScope` മുഖേന ഫയലുകൾ ഓരോ API കീയ്ക്കും പ്രത്യേകം പരിധിയിടുന്നു. ഒരു കീയ്ക്ക് അതിന്റെ സ്വന്തം ഫയലുകൾ മാത്രമേ കാണാനും ഡൗൺലോഡ് ചെയ്യാനും ഇല്ലാതാക്കാനും കഴിയൂ; കീ ഇല്ലാത്ത ഡാഷ്ബോർഡ് സെഷന് മുഴുവൻ ഇൻസ്റ്റൻസും വായിക്കാനാകും; ഉടമയില്ലാത്ത ഒരു ഫയൽ (അനാമികമായോ ഡാഷ്ബോർഡ്-സെഷൻ അപ്ലോഡായോ ഉള്ളത്) സെഷനല്ലാത്ത എല്ലാ കോallerമാർക്കും നിരസിക്കപ്പെടും. `GET /v1/files` ഒരു അനാമിക കോളറിനെയും — പരിഹരിക്കപ്പെടാത്ത കീ സമർപ്പിച്ച കോളറിനെയും — `REQUIRE_API_KEY=false` ആയിരിക്കുമ്പോഴും `401` പിശകോടെ നിരസിക്കുന്നു; പകരം എല്ലാ ടെനന്റുകളുടെയും ഫയലുകൾ പട്ടികപ്പെടുത്തുന്നില്ല (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
 
@@ -584,168 +817,216 @@ POST /v1/providers/{provider}/images/generations
 
 OpenAI-അനുയോജ്യമായ ബാച്ച് പ്രോസസ്സിംഗ്.
 
-| രീതി   | പാത്ത്                    | വിവരണം                                                                                                                        |
+| Method | Path                      | Description                                                                                                                   |
 | ------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | POST   | `/v1/batches`             | ബാച്ച് സൃഷ്ടിക്കുക — ബോഡി `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു |
-| GET    | `/v1/batches`             | ബാച്ചുകൾ പട്ടികപ്പെടുത്തുക                                                                                                    |
-| GET    | `/v1/batches/[id]`        | ബാച്ച് നില + `request_counts` വീണ്ടെടുക്കുക                                                                                   |
+| GET    | `/v1/batches`             | ബാച്ചുകളുടെ പട്ടിക കാണിക്കുക                                                                                                  |
+| GET    | `/v1/batches/[id]`        | ബാച്ചിന്റെ നിലയും `request_counts` ഉം വീണ്ടെടുക്കുക                                                                           |
 | DELETE | `/v1/batches/[id]`        | പൂർത്തിയായ/പരാജയപ്പെട്ട ബാച്ച് ഇല്ലാതാക്കുക                                                                                   |
 | POST   | `/v1/batches/[id]/cancel` | പുരോഗതിയിലുള്ള ബാച്ച് റദ്ദാക്കുക                                                                                              |
 
-**പ്രാമാണീകരണം:** Bearer API കീ. ഫയലുകൾക്ക് ബാധകമായ അതേ ത്രിതല നിയമപ്രകാരം, ബാച്ചുകൾ ഓരോ API കീയ്ക്കും പ്രത്യേകം പരിമിതപ്പെടുത്തിയിരിക്കുന്നു: സ്വന്തം കീയ്ക്ക് മാത്രം, ഡാഷ്ബോർഡ് സെഷന് ഇൻസ്റ്റൻസ് മുഴുവനായും, കൂടാതെ ഉടമയില്ലാത്ത റെക്കോർഡുകളിലേക്കുള്ള പ്രവേശനം സെഷനില്ലാത്ത എല്ലാ കോളർമാർക്കും നിഷേധിക്കപ്പെടുന്നു (വീണ്ടെടുക്കൽ, ഇല്ലാതാക്കൽ, റദ്ദാക്കൽ, സൃഷ്ടിക്കുമ്പോഴുള്ള `input_file_id` പരിശോധന എന്നിവയ്ക്ക്).
-`REQUIRE_API_KEY=false` ആയിരിക്കുമ്പോൾ പോലും, അജ്ഞാത കോളറിൽ നിന്നുള്ള `GET /v1/batches` അഭ്യർത്ഥന `401` നൽകി നിരസിക്കുന്നു.
+**ഓതന്റിക്കേഷൻ:** Bearer API കീ. ഫയലുകൾക്കുള്ള അതേ മൂന്ന്-വഴി നിയമപ്രകാരം ബാച്ചുകൾ ഓരോ API കീയ്ക്കും പ്രത്യേകം പരിധിയിടുന്നു: സ്വന്തം കീയ്ക്ക് മാത്രം പ്രവേശനം, ഡാഷ്ബോർഡ് സെഷന് ഇൻസ്റ്റൻസ്-വ്യാപക പ്രവേശനം, ഉടമയില്ലാത്ത റെക്കോർഡുകൾ എല്ലാ സെഷനല്ലാത്ത കോളറുകൾക്കും നിരസിക്കൽ (വീണ്ടെടുക്കൽ, ഇല്ലാതാക്കൽ, റദ്ദാക്കൽ, സൃഷ്ടിക്കുമ്പോഴുള്ള `input_file_id` പരിശോധന എന്നിവയിൽ). `GET /v1/batches` `REQUIRE_API_KEY=false` ആയിരിക്കുമ്പോഴും അനാമിക കോളറിനെ `401` പിശകോടെ നിരസിക്കുന്നു.
 
 ---
 
-## Search API
+## API തിരയുക
 
-വെബ്/സെർച്ച് പ്രൊവൈഡർ അബ്സ്ട്രാക്ഷൻ (Tavily, Brave, Exa, Serper മുതലായവ).
+Web/search ദാതാവിൻ്റെ സംഗ്രഹം (തവിലി, ബ്രേവ്, എക്സാ, സെർപ്പർ മുതലായവ).
 
-| രീതി | പാത്ത്                 | വിവരണം                                                                                                                    |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | കോൺഫിഗർ ചെയ്ത സെർച്ച് പ്രൊവൈഡറുകളും അവയുടെ ശേഷികളും ലിസ്റ്റ് ചെയ്യുക                                                      |
-| POST | `/v1/search`           | സെർച്ച് ക്വറി പ്രവർത്തിപ്പിക്കുക — `v1SearchSchema` ഉപയോഗിച്ച് ബോഡി സാധൂകരിക്കുന്നു, കാഷിംഗ്/കോഅലെസിംഗ് പിന്തുണയ്ക്കുന്നു |
-| GET  | `/v1/search/analytics` | ഓരോ പ്രൊവൈഡറിന്റെയും ഹിറ്റ്/ലേറ്റൻസി/കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ                                                            |
+| രീതി | പാത                    | വിവരണം                                                                                                         |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | ക്രമീകരിച്ച തിരയൽ ദാതാക്കളുടെ + കഴിവുകൾ ലിസ്റ്റ് ചെയ്യുക                                                       |
+| POST | `/v1/search`           | `v1SearchSchema` സാധൂകരിച്ച ഒരു തിരയൽ അന്വേഷണം — ബോഡി പ്രവർത്തിപ്പിക്കുക, caching/coalescing പിന്തുണയ്ക്കുന്നു |
+| GET  | `/v1/search/analytics` | ഓരോ ദാതാവിൻ്റെയും hit/latency/cache സ്ഥിതിവിവരക്കണക്കുകൾ                                                       |
 
-**പ്രാമാണീകരണം:** Bearer API കീ (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` വഴി സെർച്ച് നയം നടപ്പിലാക്കുന്നു.
+**അംഗീകാരം:** ബെയറർ API കീ (`extractApiKey` + `isValidApiKey`). തിരയൽ നയം `enforceApiKeyPolicy` വഴി നടപ്പിലാക്കി.
+
+**സ്വയമേവ തിരഞ്ഞെടുക്കൂ:** `provider` ഇല്ലാതെ, കോൺഫിഗർ ചെയ്ത കണക്ഷനുള്ള ഏറ്റവും വിലകുറഞ്ഞ ദാതാവ് ആദ്യം പ്രവർത്തിക്കുന്നു, അടുത്ത വിലകുറഞ്ഞത് പരാജയമാണ്. മറ്റൊന്നും കോൺഫിഗർ ചെയ്യാത്തപ്പോൾ മാത്രമാണ് സൗജന്യ ലാസ്റ്റ് റിസോർട്ട് പ്രൊവൈഡർമാർ (`duckduckgo-free`) ഉപയോഗിക്കുന്നത്. ഒരു സ്വയം-ഹോസ്റ്റ് ചെയ്ത SearXNG അതിൻ്റെ കണക്ഷൻ ഒരു യഥാർത്ഥ `baseUrl` (കാറ്റലോഗ് ഡിഫോൾട്ട് `http://localhost:8888/search` അല്ല) സംഭരിച്ചുകഴിഞ്ഞാൽ കോൺഫിഗർ ചെയ്തതായി കണക്കാക്കുന്നു: അത് കീ ചെയ്തവയെക്കാൾ $0 ദാതാവായി റാങ്ക് ചെയ്യുന്നു, ഏറ്റവും വിലകുറഞ്ഞ കീ ചെയ്ത ദാതാവിനെ പരാജയമായി കണക്കാക്കുന്നു `http(s)` SearXNG 400, 401, 40403 Ahzq URL `baseUrl` ക്ലൗഡ്-മെറ്റാഡാറ്റ വിലാസത്തിലെ പോയിൻ്റുകൾ കണക്കാക്കില്ല. ഒരു ടോക്കൺ സംഭരിക്കുന്ന ഒരു SearXNG കണക്ഷൻ `https://` അല്ലെങ്കിൽ loopback `http://` ൽ മാത്രമേ ഈ രീതിയിൽ റാങ്ക് ചെയ്യുന്നുള്ളൂ. റിമോട്ട് പ്ലെയിൻ `http://` ൽ ഇത് ഒരിക്കലും പരാജയമല്ല, അവസാന ആശ്രയമായി തുടരുന്നു, മറ്റേതെങ്കിലും ദാതാവ് കോൺഫിഗർ ചെയ്യാത്തപ്പോഴോ പേര് ആവശ്യപ്പെടുമ്പോഴോ മാത്രം ഉപയോഗിക്കുന്നു, അതിനാൽ ആ രണ്ട് സന്ദർഭങ്ങളിലും ഇത് വ്യക്തമായ ടെക്സ്റ്റിൽ ടോക്കൺ അയയ്ക്കുന്നു.
+
+### എക്സാ, താവിലി `provider_options`
+
+Exa, Tavily ഒരു നെയിംസ്പെയ്സ്ഡ് ബാഗിൽ നിന്ന് പ്രൊവൈഡർ-നിർദ്ദിഷ്ട ഫീൽഡുകൾ വായിക്കുന്നു: `provider_options.exa` (അല്ലെങ്കിൽ `provider_options["exa-search"]`), `provider_options.tavily` (അല്ലെങ്കിൽ `provider_options["tavily-search"]`). താഴെയുള്ള കീകൾ മാത്രമാണ് ഫോർവേഡ് ചെയ്യുന്നത്. ഓരോന്നും അതിൻ്റെ സ്വന്തം Zod സ്കീമയ്ക്കെതിരെ `open-sse/handlers/search/providerOptionsPassthrough.ts` ൽ പരിശോധിക്കുന്നു, തെറ്റായ തരത്തിലുള്ള ഒരു കീ ഡ്രോപ്പ് ചെയ്യപ്പെടും. auth, ബേസ് URL, `stream`, `outputSchema` എന്നിവയുൾപ്പെടെ മറ്റേതെങ്കിലും കീ അവഗണിക്കപ്പെടും. മറ്റ് ദാതാക്കൾ ഉപയോഗിക്കുന്ന ഫ്ലാറ്റ് കീകൾ (`cx`, `depth`, ...) മുമ്പത്തെപ്പോലെ പ്രവർത്തിക്കുന്നു.
+
+| ദാതാവ് | ഉയർന്ന തലത്തിലുള്ള ഫീൽഡുകൾ                                                                                                                                                                                                                                                                                                                                                | നെസ്റ്റഡ്                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| എക്സാ  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ഫ്ലാറ്റ് പ്രിമിറ്റീവ്സ്), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` സ്ഥിരസ്ഥിതി `{ text: true, highlights: true }` ൽ ലയിച്ചു |
+| താവിലി | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                      |
+
+പൊതുവായ ഫീൽഡുകൾ എല്ലായ്പ്പോഴും വിജയിക്കുന്നു: `query`, `max_results`, `filters` (ഡൊമെയ്നുകൾ), `country` കൂടാതെ `search_type` ൽ നിന്ന് ഉരുത്തിരിഞ്ഞ വിഷയവും. എക്സായിൽ, `search_type: "news"` `category: "news"` നിലനിർത്തുന്നു. താവിലിയും `search_type: "finance"` (`topic: "finance"`) സ്വീകരിക്കുന്നു.
+
+ഫയർക്രാൾ തിരയൽ നിരക്ക് 10 റിട്ടേൺ ചെയ്ത ഫലങ്ങളുടെ ഒരു ബ്ലോക്കിന് $0.002 (2 ക്രെഡിറ്റുകൾ) എന്ന നിരക്കിലും ഓരോ കോളിന് ഒരു ബ്ലോക്കിലും ( [ഫയർക്രാൾ ബില്ലിംഗ്](https://docs.firecrawl.dev/billing) ) രേഖപ്പെടുത്തുന്നു: 11 ഫലങ്ങൾക്ക് $0.004 ചിലവാകും.
+
+ജെനറിക് `time_range` ഇപ്പോൾ രണ്ട് ദാതാക്കളിലേക്കും എത്തുന്നു: Exa-യ്ക്ക് `startPublishedDate` (ISO ടൈംസ്റ്റാമ്പ്) ലഭിക്കുന്നു, Tavily-യ്ക്ക് `start_date` (`YYYY-MM-DD`) ലഭിക്കുന്നു. `provider_options` ൽ വ്യക്തമായ ഒരു തീയതി മാപ്പ് ചെയ്തതിനെ അസാധുവാക്കുന്നു.
+
+എക്സാ ഫലങ്ങൾ `id`, `highlights` (ഓരോ ഹൈലൈറ്റും, `snippet` ആയി ഉപയോഗിച്ച ആദ്യത്തേത് മാത്രമല്ല), `provider_raw` യിൽ `highlight_scores`, `summary`, `subpages`, `entities`, `extras` എന്നിവ നിലനിർത്തുന്നു. Tavily ഫലങ്ങൾ `images`, `favicon` എന്നിവ നിലനിർത്തുന്നു.
+
+`depth` `fast`, `standard` എന്നിവയ്ക്കായി ലിങ്ക് അപ്പ് തിരയൽ ചെലവ് $0.005 ഉം `deep` ന് $0.05 ഉം ( [ലിങ്കപ്പ് വിലനിർണ്ണയം](https://docs.linkup.so/pages/documentation/development/pricing) ) രേഖപ്പെടുത്തുന്നു, `depth` `provider_options` ൽ നിന്നോ കണക്ഷൻ്റെ ക്രമീകരണങ്ങളിൽ നിന്നോ വന്നാലും.
+
+Exa `type: "lite"` (Exa 3.0) ഒരു ചെറിയ സെറ്റ് ഫീൽഡുകൾ സ്വീകരിക്കുകയും മറ്റേതെങ്കിലും ഫീൽഡ് സജ്ജമാക്കുമ്പോൾ മുഴുവൻ അഭ്യർത്ഥനയും നിരസിക്കുകയും ചെയ്യുന്നു. ലൈറ്റിനായി, `additionalQueries`, `systemPrompt` കൂടാതെ `text`, `highlights` എന്നിവ ഒഴികെയുള്ള എല്ലാ `contents` കീകളും കോളിന് മുമ്പ് ഡ്രോപ്പ് ചെയ്യപ്പെടും. ഒഴിവാക്കിയ `subpages`, `subpageTarget`, `highlights.numSentences`, `highlights.highlightsPerUrl` എന്നിവ ഇനി ഫോർവേഡ് ചെയ്യപ്പെടില്ല.
+
+എക്സായുടെ സ്വന്തം വിലനിർണ്ണയം പിന്തുടരുന്ന എക്സാ ഒഴികെയുള്ള ഫ്ലാറ്റ് രജിസ്ട്രി `costPerQuery` ആണ് കോസ്റ്റ് അക്കൗണ്ടിംഗ്: `auto` (ഒപ്പം ലെഗസി `fast`) ഓരോ കോളിനും $0.007 അല്ലെങ്കിൽ 10 ഫലങ്ങൾ ഉൾക്കൊള്ളുന്ന `lite` (ഒപ്പം ലെഗസി `instant`) ന് $0.004; ഓരോ തുടർന്നുള്ള ഫലത്തിനും $0.001; കൂടാതെ `contents.summary` സജ്ജീകരിക്കുമ്പോൾ ലഭിക്കുന്ന ഓരോ ഫലത്തിനും $0.001. `search_depth` `basic`, `fast`, `ultra-fast` എന്നിവയ്ക്ക് 1 ക്രെഡിറ്റിലും ($0.008) `advanced` ന് 2 ക്രെഡിറ്റുകളിലും ($0.016) Tavily രേഖപ്പെടുത്തിയിരിക്കുന്നു ( [Tavily API ക്രെഡിറ്റുകൾ](https://docs.tavily.com/documentation/api-credits) ). Tavily അഡ്വാൻസ്ഡിലേക്ക് അപ്ഗ്രേഡ് ചെയ്യുന്ന `auto_parameters: true` ഉള്ള ഒരു കോൾ ഇപ്പോഴും 1 ക്രെഡിറ്റിൽ റെക്കോർഡ് ചെയ്തിരിക്കുന്നു.
 
 ---
 
 ## Web Fetch API
 
-കോൺഫിഗർ ചെയ്ത web-fetch പ്രൊവൈഡർ (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract) വഴി ഒരു URL-ൽനിന്ന് ഉള്ളടക്കം എക്സ്ട്രാക്റ്റ് ചെയ്യുക.
+ക്രമീകരിച്ച web-fetch provider (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) വഴി ഒരു URL-ൽ നിന്ന് ഉള്ളടക്കം എക്സ്ട്രാക്റ്റ് ചെയ്യുക.
 
-| രീതി | പാത്ത്          | വിവരണം                                                                                    |
-| ---- | --------------- | ----------------------------------------------------------------------------------------- |
-| POST | `/v1/web/fetch` | ഒരു URL ഫെച്ച്/സ്ക്രേപ്പ് ചെയ്യുന്നു — ബോഡി `v1WebFetchSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു |
+Parallel Extract (`parallel-search`, Parallel Search-ന്റെ അതേ API key) Markdown
+മാത്രമേ മടക്കിനൽകൂ — മറ്റേതെങ്കിലും `format` ആയാൽ `400` ലഭിക്കും — കൂടാതെ ഉള്ളടക്കം
+100,000 അക്ഷരങ്ങളായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു. ലക്ഷ്യ പേജ് തന്നെ എക്സ്ട്രാക്റ്റ് ചെയ്യാൻ
+കഴിയാത്തപ്പോൾ upstream അത് ഒരു HTTP 200-നുള്ളിൽ റിപ്പോർട്ട് ചെയ്യും;
+OmniRoute അത് നിശ്ചിത സന്ദേശമുള്ള `422` ആയി പ്രദർശിപ്പിക്കും.
 
-**ഓതന്റിക്കേഷൻ:** Bearer API കീ (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` വഴി പോളിസി നടപ്പാക്കുന്നു.
+| Method | Path            | Description                                                                       |
+| ------ | --------------- | --------------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | ഒരു URL fetch/scrape ചെയ്യുക — body `v1WebFetchSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു |
 
-**ക്വോട്ട പരിഗണിക്കുന്ന ഫാൾബാക്ക് (#8297):** വ്യക്തമായ `provider` നൽകിയിട്ടില്ലെങ്കിൽ, പൂൾ
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`) സ്ഥിരമായ
-മുൻഗണനാക്രമത്തിൽ (fill-first) പരിശോധിക്കുന്നു — റേറ്റ്-ലിമിറ്റ് ചെയ്യപ്പെട്ടെങ്കിലും കോൺഫിഗർ ചെയ്തിട്ടുള്ള ഒരു പ്രൊവൈഡർ,
-റിക്വസ്റ്റ് ഉടൻ അവസാനിപ്പിക്കുന്നതിനുപകരം ഒഴിവാക്കപ്പെടുന്നു; കൂടാതെ വീണ്ടും ശ്രമിക്കാവുന്ന/ക്വോട്ടയുമായി ബന്ധപ്പെട്ട അപ്സ്ട്രീം പരാജയം
-(HTTP 429 എല്ലായ്പ്പോഴും; Firecrawl/Tavily/TinyFish എന്നിവയുടെ ക്വോട്ട-ശൈലിയിലുള്ള സൗജന്യ ടയറുകൾക്ക് 402/403 —
-Jina Reader-ന് ബാധകമല്ല, കൂടാതെ സാധാരണ 400 മോശം റിക്വസ്റ്റിന് ഒരിക്കലും ബാധകമല്ല) റിക്വസ്റ്റ് സമയത്ത്
-ഇതുവരെ ശ്രമിച്ചിട്ടില്ലാത്ത അടുത്ത ക്രെഡൻഷ്യലുള്ള പ്രൊവൈഡറിലേക്ക് കടക്കുന്നു. പൂളിലെ എല്ലാ പ്രൊവൈഡറുകളും
-തീർന്നുകഴിഞ്ഞാൽ, മുമ്പുണ്ടായിരുന്ന പൊതുവായ `400`-ന് പകരം എൻഡ്പോയിന്റ് ഒറ്റ `429`
-(`Retry-After` ഹെഡറോടെ) നൽകുന്നു. വ്യക്തമായ `provider` അഭ്യർത്ഥിക്കുമ്പോൾ,
-നിശ്ശബ്ദമായ ഫാൾബാക്ക് **ഉണ്ടാകില്ല** — റേറ്റ്-ലിമിറ്റ് ചെയ്യപ്പെട്ടതോ പരാജയപ്പെട്ടതോ ആയ വ്യക്തമായ
-പ്രൊവൈഡർ അതിന്റെ സ്വന്തം പിശക് പുറത്തുകൊണ്ടുവരുന്നു (റേറ്റ്-ലിമിറ്റ് ചെയ്തിട്ടുണ്ടെങ്കിൽ `429`, അല്ലെങ്കിൽ അപ്സ്ട്രീം
-സ്റ്റാറ്റസ്).
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). നയം
+`enforceApiKeyPolicy` വഴി പ്രാബല്യത്തിൽ വരുത്തുന്നു.
+
+**Quota-aware fallback (#8297):** വ്യക്തമായ `provider` നൽകിയിട്ടില്ലെങ്കിൽ, pool
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`) നിശ്ചിത
+മുൻഗണനാ ക്രമത്തിൽ (fill-first) പരിശോധിക്കുന്നു — rate-limited ആയിരുന്നാലും
+ക്രമീകരിച്ചിരിക്കുന്ന provider അഭ്യർത്ഥന short-circuit ചെയ്യുന്നതിനുപകരം ഒഴിവാക്കുന്നു,
+കൂടാതെ retry ചെയ്യാവുന്ന/quota upstream പരാജയം (HTTP 429 എപ്പോഴും; Firecrawl/Tavily/TinyFish
+quota-style free tiers-നായി 402/403 — Jina Reader-നല്ല, സാധാരണ 400 bad request-നും
+ഒരിക്കലുമല്ല) request സമയത്ത് ശ്രമിക്കാത്ത അടുത്ത credential ഉള്ള provider-ലേക്ക്
+കൈമാറുന്നു. pool-ലുള്ള എല്ലാ provider-കളും exhausted ആകുമ്പോൾ, മുൻ generic `400`-ന്
+പകരം endpoint `Retry-After` header ഉള്ള ഒരൊറ്റ `429` മടക്കിനൽകുന്നു. വ്യക്തമായ
+`provider` അഭ്യർത്ഥിച്ചാൽ, നിശ്ശബ്ദമായ fallback ഉണ്ടാകില്ല — rate-limited ആയതോ
+പരാജയപ്പെട്ടതോ ആയ explicit provider സ്വന്തം error പ്രദർശിപ്പിക്കും (rate-limited ആണെങ്കിൽ
+`429`, അല്ലെങ്കിൽ upstream status).
 
 ---
 
-## WebSocket സ്ട്രീമിംഗ്
+## WebSocket Streaming
 
 ```bash
 GET /v1/ws?handshake=1
 ```
 
-ഒരു WebSocket അപ്ഗ്രേഡ് ഹാൻഡ്ഷേക്ക് സാധൂകരിക്കുകയും വയർ പ്രോട്ടോക്കോൾ ഉദാഹരണ സന്ദേശങ്ങൾ (`request`, `cancel`) നൽകുകയും ചെയ്യുന്നു. യഥാർത്ഥ WS ഫ്രെയിമുകൾ Next.js റൂട്ട് ടേബിളിന് പുറത്തുള്ള ബണ്ടിൽ ചെയ്ത WS സെർവർ കൈകാര്യം ചെയ്യുന്നു.
+WebSocket upgrade handshake സാധൂകരിക്കുകയും wire protocol-ന്റെ ഉദാഹരണ സന്ദേശങ്ങൾ
+(`request`, `cancel`) മടക്കിനൽകുകയും ചെയ്യുന്നു. യഥാർത്ഥ WS frames Next.js route
+table-ന് പുറത്തുള്ള bundled WS server ആണ് കൈകാര്യം ചെയ്യുന്നത്.
 
-**ഓതന്റിക്കേഷൻ:** ഹാൻഡ്ഷേക്ക് സമയത്ത് Bearer API കീ.
+**Auth:** handshake സമയത്തെ Bearer API key.
 
-### WebSocket വഴിയുള്ള Responses API (codex മാത്രം)
+### Responses API over WebSocket (codex only)
 
 ```bash
-# HTTP API-യുടെ അതേ host:port (ഡിഫോൾട്ട് 20128); കണക്ഷൻ അപ്ഗ്രേഡ് ചെയ്യുക:
+# HTTP API-യുടെ അതേ host:port (default 20128); connection upgrade ചെയ്യുക:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 # (അല്ലെങ്കിൽ: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
-# ആദ്യ ഫ്രെയിം response.create ആയിരിക്കണം:
+# ആദ്യ frame MUST be response.create:
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-Responses-API-over-WebSocket പ്രോക്സി **`codex`-ലേക്ക് മാത്രമായി** ബന്ധിപ്പിച്ചിരിക്കുന്നു (ChatGPT
-ബാക്കെൻഡ്). API/ഡാഷ്ബോർഡിന്റെ അതേ പോർട്ടിൽ `/v1/responses`,
-`/responses`, `/api/v1/responses` എന്നീ പാത്തുകളിൽ ഇത് ലിസൻ ചെയ്യുന്നു. ആദ്യത്തെ `response.create` ഫ്രെയിമിൽ,
-ആന്തരിക `codex-responses-ws` ബ്രിഡ്ജ് വഴി ഇത് ഓതന്റിക്കേറ്റ് ചെയ്യുകയും തയ്യാറാക്കുകയും, ഒരു
-codex OAuth കണക്ഷൻ തിരഞ്ഞെടുക്കുകയും, `wreq-js` ട്രാൻസ്പോർട്ട് വഴി `wss://chatgpt.com/backend-api/codex/responses`
-എന്നതിലേക്ക് ടണൽ ചെയ്യുകയും ചെയ്യുന്നു. **codex അല്ലാത്ത മോഡലുകൾ നിരസിക്കപ്പെടും** (`codex_ws_provider_required`).
-ക്വോട്ട-ഷെയർ റൂട്ടിങ്ങിന് `model: "qtSd/<group>/codex/<model>"` ഉപയോഗിക്കുക. ഇത്
-`app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`
-എന്നിവയിൽ നടപ്പാക്കിയിരിക്കുന്നു.
+Responses-API-over-WebSocket proxy **`codex`-ലേക്ക് മാത്രം** (ChatGPT backend)
+പ്രത്യേകമായി ബന്ധിപ്പിച്ചിരിക്കുന്നു. ഇത് API/dashboard-ന്റെ അതേ port-ൽ
+`/v1/responses`, `/responses`, `/api/v1/responses` എന്നീ paths-ൽ കേൾക്കുന്നു. ആദ്യത്തെ
+`response.create` frame-ൽ ഇത് internal `codex-responses-ws` bridge ഉപയോഗിച്ച്
+authenticate + prepare ചെയ്യുകയും, ഒരു codex OAuth connection തിരഞ്ഞെടുക്കുകയും,
+`wreq-js` transport വഴി `wss://chatgpt.com/backend-api/codex/responses`-ലേക്ക്
+tunnel ചെയ്യുകയും ചെയ്യുന്നു. **Non-codex models നിരസിക്കപ്പെടുന്നു**
+(`codex_ws_provider_required`). Quota-share routing-നായി
+`model: "qtSd/<group>/codex/<model>"` ഉപയോഗിക്കുക. ഇത്
+`app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` +
+`src/app/api/internal/codex-responses-ws/route.ts`-ൽ നടപ്പാക്കിയിരിക്കുന്നു.
 
-**ഓതന്റിക്കേഷൻ:** ഹാൻഡ്ഷേക്ക് സമയത്ത് Bearer API കീ. ബണ്ടിൽ ചെയ്ത HTTP സെർവർ (`server-ws.mjs`)
-സജീവ എൻട്രിപോയിന്റായിരിക്കണം (`app/server-ws.mjs` നിലവിലുണ്ടെങ്കിൽ ഡിഫോൾട്ടായി അങ്ങനെയാണ്).
+**Auth:** handshake സമയത്തെ Bearer API key. Bundled HTTP server (`server-ws.mjs`)
+active entrypoint ആയിരിക്കണം (`app/server-ws.mjs` നിലവിലുണ്ടെങ്കിൽ default ആയി അങ്ങനെ തന്നെയാണ്).
 
-#### മോഡൽ id: ലളിതമായ ChatGPT id ഉപയോഗിക്കുക (`codex/` പ്രിഫിക്സ് ഇല്ലാതെ)
+#### Model id: bare ChatGPT id ഉപയോഗിക്കുക (`codex/` prefix ഇല്ലാതെ)
 
-`supports_websockets = true` ആയിരിക്കുമ്പോൾ OpenAI **Codex CLI** ക്ലയന്റ്-സൈഡിൽ മോഡൽ നാമം
-സാധൂകരിക്കുകയും `codex/gpt-5.5` പോലുള്ള **പ്രൊവൈഡർ-പ്രിഫിക്സ് ചെയ്ത ids നിരസിക്കുകയും ചെയ്യുന്നു**
-(`The 'codex/gpt-5.5' model is not supported when using Codex with
-a ChatGPT account`). ലളിതമായ id അയയ്ക്കുക (ഉദാ. `gpt-5.5`). OmniRoute-ന്റെ ബ്രിഡ്ജ്
-codex-ന് മാത്രമുള്ളതിനാൽ, അപ്സ്ട്രീമിലേക്ക് ടണൽ ചെയ്യുന്നതിന് മുമ്പ് ലളിതമായ id-യെ codex മോഡലായി
-(`resolveCodexWsModelInfo`) വീണ്ടും റിസോൾവ് ചെയ്യുന്നു — ലളിതമായ
-`gpt-5.5` സാധാരണയായി HTTP വഴി മറ്റൊരു പ്രൊവൈഡറിലേക്ക് റൂട്ട് ചെയ്യുമെങ്കിലും.
+OpenAI **Codex CLI** client-side ആയി model name സാധൂകരിക്കുമ്പോൾ
+`supports_websockets = true` ആണെങ്കിൽ `codex/gpt-5.5` പോലുള്ള provider-prefixed ids
+നിരസിക്കുന്നു (`The 'codex/gpt-5.5' model is not supported when using Codex with
+a ChatGPT account`). **Bare** id അയയ്ക്കുക (ഉദാ. `gpt-5.5`). OmniRoute-ന്റെ bridge
+codex-only ആയതിനാൽ, upstream-ലേക്ക് tunnel ചെയ്യുന്നതിന് മുമ്പ് ഇത് bare id-നെ codex
+model ആയി വീണ്ടും resolve ചെയ്യുന്നു (`resolveCodexWsModelInfo`) — അല്ലാത്തപക്ഷം bare
+`gpt-5.5` HTTP വഴി മറ്റൊരു provider-ലേക്ക് route ചെയ്യപ്പെടുമെങ്കിലും.
 
-#### OpenAI Codex CLI കോൺഫിഗർ ചെയ്യൽ
+#### OpenAI Codex CLI ക്രമീകരിക്കൽ
 
-`~/.codex/config.toml`-ൽ WebSocket പിന്തുണയുള്ള ഒരു കസ്റ്റം പ്രൊവൈഡർ ചേർത്ത് Codex CLI-യെ
-OmniRoute-ലേക്ക് നയിക്കുക (നിലവിലുള്ള കോൺഫിഗിൽ മാറ്റം വരുത്താതിരിക്കാൻ വേറിട്ട `CODEX_HOME` ഉപയോഗിക്കുക):
+WebSocket support ഉള്ള ഒരു custom provider ചേർത്ത് OmniRoute-ലേക്ക് Codex CLI point
+ചെയ്യുക; ഇതിനായി `~/.codex/config.toml`-ലേക്ക് ചേർക്കുക (നിലവിലുള്ള config-നെ
+തൊടാതിരിക്കാൻ വേറിട്ട `CODEX_HOME` ഉപയോഗിക്കുക):
 
 ```toml
-model = "gpt-5.5"                 # ലളിതമായ id — "codex/gpt-5.5" അല്ല
+model = "gpt-5.5"                 # bare id — "codex/gpt-5.5" അല്ല
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
-base_url = "http://localhost:20128/v1"   # അവസാനത്തിൽ സ്ലാഷ് പാടില്ല; WS URL ഇതിൽനിന്ന് നിർണ്ണയിക്കുന്നു (പ്രൊഡക്ഷനിൽ https/wss ഉപയോഗിക്കുക)
-wire_api = "responses"                    # Feb 2026 മുതൽ പിന്തുണയ്ക്കുന്ന ഏക മൂല്യം
-supports_websockets = true                # Responses-over-WS ട്രാൻസ്പോർട്ട് സജ്ജമാക്കുന്നു
-env_key = "OMNIROUTE_API_KEY"             # OmniRoute API കീ (Bearer) സൂക്ഷിക്കുന്നു
+base_url = "http://localhost:20128/v1"   # trailing slash ഇല്ല; WS URL derive ചെയ്യപ്പെടുന്നു (production-ൽ https/wss ഉപയോഗിക്കുക)
+wire_api = "responses"                    # Feb 2026 മുതൽ supported ആയ ഏക value
+supports_websockets = true                # Responses-over-WS transport പ്രവർത്തനക്ഷമമാക്കുന്നു
+env_key = "OMNIROUTE_API_KEY"             # OmniRoute API key (Bearer) സൂക്ഷിക്കുന്നു
 ```
 
 ```bash
-export OMNIROUTE_API_KEY=sk-...           # ഒരു OmniRoute API കീ (REQUIRE_API_KEY=false ആണെങ്കിൽ ഏതെങ്കിലും കീ)
+export OMNIROUTE_API_KEY=sk-...           # ഒരു OmniRoute API key (REQUIRE_API_KEY=false ആണെങ്കിൽ ഏതെങ്കിലും key)
 codex exec "Responda apenas: PONG"
 ```
 
-CLI, `base_url + /responses` എന്നതിനെ WebSocket ആയി അപ്ഗ്രേഡ് ചെയ്യുകയും OmniRoute അതിനെ
-തിരഞ്ഞെടുത്ത codex OAuth കണക്ഷനിലേക്ക് ടണൽ ചെയ്യുകയും ചെയ്യുന്നു. ലോക്കൽ സെർവറിനെതിരെ എൻഡ്-ടു-എൻഡ്
-സാധൂകരിച്ചിട്ടുണ്ട്: ChatGPT `codex.rate_limits` + `response.created` നൽകുകയും
-കംപ്ലീഷൻ സ്ട്രീം ചെയ്യുകയും ചെയ്യുന്നു.
+CLI `base_url + /responses`-നെ WebSocket ആയി upgrade ചെയ്യുകയും OmniRoute അത്
+തിരഞ്ഞെടുത്ത codex OAuth connection-ലേക്ക് tunnel ചെയ്യുകയും ചെയ്യുന്നു. Local
+server-നെതിരെ end-to-end ആയി സാധൂകരിച്ചിരിക്കുന്നു: ChatGPT
+`codex.rate_limits` + `response.created` മടക്കിനൽകുകയും completion stream ചെയ്യുകയും
+ചെയ്യുന്നു.
 
 ---
 
 ## ക്വോട്ടകളും പ്രശ്ന റിപ്പോർട്ടിംഗും
 
-| രീതി | പാത                 | വിവരണം                                                                                                 |
-| ---- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET  | `/v1/quotas/check`  | രജിസ്റ്റർ ചെയ്ത കീ നൽകുന്നതിന് മുമ്പ് ഒരു `provider` + `accountId`-ന്റെ ക്വോട്ട മുൻകൂട്ടി സാധൂകരിക്കുക |
-| POST | `/v1/issues/report` | ക്വോട്ട/കീ നൽകൽ പരാജയം GitHub-ലേക്ക് റിപ്പോർട്ട് ചെയ്യുക (`GITHUB_ISSUES_REPO` + ടോക്കൺ ആവശ്യമാണ്)     |
+| രീതി | പാത                 | വിവരണം                                                                                                          |
+| ---- | ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | രജിസ്റ്റർ ചെയ്ത കീ നൽകുന്നതിന് മുമ്പ് ഒരു `provider` + `accountId` കോമ്പിനേഷന്റെ ക്വോട്ട മുൻകൂട്ടി പരിശോധിക്കുക |
+| POST | `/v1/issues/report` | GitHub-ലേക്ക് ക്വോട്ട/കീ നൽകൽ പരാജയം റിപ്പോർട്ട് ചെയ്യുക (`GITHUB_ISSUES_REPO` + ടോക്കൺ ആവശ്യമാണ്)              |
 
 **ഓതന്റിക്കേഷൻ:** Bearer API കീ (`isAuthenticated`).
 
+### ക്വോട്ട സെഷൻ വീണ്ടെടുക്കൽ (ഓപ്റ്റ്-ഇൻ)
+
+ടെർമിനൽ ക്വോട്ട പിശകോടെ (`402`/`429`/`503`, അതിന്റെ ബോഡിയിൽ ക്വോട്ടയോ ക്രെഡിറ്റുകളോ തീർന്നതായി പറയുന്നുണ്ടെങ്കിൽ) പരാജയപ്പെടുന്ന, സ്ട്രീമിംഗ് അല്ലാത്ത
+`POST /v1/chat/completions` അല്ലെങ്കിൽ `POST /v1/responses` അഭ്യർത്ഥന, പിശക് തിരികെ നൽകുന്നതിന് പകരം പാർക്ക് ചെയ്ത് പിന്നീട് വീണ്ടും പ്ലേ ചെയ്യാം. ഓരോ അഭ്യർത്ഥനയ്ക്കും കോളർ താഴെപ്പറയുന്ന മൂന്ന് ഹെഡറുകൾ ഉപയോഗിച്ച് ഓപ്റ്റ്-ഇൻ ചെയ്യുന്നു:
+
+| ഹെഡർ                         | മൂല്യം                               |
+| ---------------------------- | ------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                               |
+| `x-omniroute-session`        | സെഷൻ ഐഡി, `[A-Za-z0-9._:-]{1,128}`   |
+| `x-omniroute-recovery-turn`  | സെഷനിൽ സവിശേഷമായ ടേൺ ഐഡി (അതേ നിയമം) |
+
+`stream: false` ആയതും ടൂളുകളോ ടൂൾ ചരിത്രമോ `previous_response_id`-യോ ഇല്ലാത്തതും `x-omniroute-connection` പിൻ ഇല്ലാത്തതുമായ ടേണുകൾക്ക് മാത്രമേ അർഹതയുള്ളൂ, കൂടാതെ `STORAGE_ENCRYPTION_KEY` സജ്ജീകരിച്ചിരിക്കണം (അഭ്യർത്ഥന പരമാവധി 24 മണിക്കൂർ വരെ എൻക്രിപ്റ്റ് ചെയ്ത് സംഭരിക്കും). തുടർന്ന് പ്രതികരണം `202` ആയിരിക്കും, അതിൽ `recovery.poll` ഉണ്ടാകും; പോൾ ചെയ്യാൻ `GET /v1/quota-recoveries/{id}` ഉപയോഗിക്കുക (കാത്തിരിക്കുമ്പോൾ `202`, പൂർത്തിയായാൽ വീണ്ടെടുത്ത ബോഡിയോടെ `200`) അല്ലെങ്കിൽ `DELETE` ഉപയോഗിച്ച് റദ്ദാക്കുക. ടിക്കറ്റുകൾ സൃഷ്ടിച്ച API കീയ്ക്ക് മാത്രമേ ദൃശ്യമാകൂ. ഫലം അനിശ്ചിതമായ ഒരു റീപ്ലേ രണ്ടുതവണ അയയ്ക്കുന്നതിന് പകരം `needs_confirmation` നിലയിൽ അവസാനിക്കും. ഉറവിടം: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
-## സ്വയം-സേവന ഉപയോഗം (`/api/usage/om-usage`)
+## സ്വയം സേവന ഉപയോഗം (`/api/usage/om-usage`)
 
-ഏത് API കീക്കും **സ്വന്തം** ഉപയോഗവും ക്വോട്ടകളും വായിക്കാം — മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമില്ല. ഒരു കീ ഉടമയ്ക്ക് അവരുടെ ചെലവ് കാണിക്കുന്നതിനായി
-ഒരു ക്ലയന്റ് (CLI, OmniCopilot പാനൽ) ഉപയോഗിക്കുന്ന എൻഡ്പോയിന്റാണിത്.
+ഏത് API കീയും വായിക്കാൻ കഴിയും** സ്വന്തം** ഉപയോഗവും ക്വാട്ടകളും — മാനേജ്മെൻ്റ് ഓത്ത് ഇല്ല. ഒരു ക്ലയൻ്റ് (CLI, OmniCopilot പാനൽ) ഒരു കീ ഹോൾഡറെ അവരുടെ ചെലവ് കാണിക്കാൻ ഉപയോഗിക്കുന്ന അവസാന പോയിൻ്റാണിത്.
 
 ```bash
-# ടെക്സ്റ്റ് രൂപം (ചരിത്രപരമായ കരാർ — ടെർമിനലിനുള്ള പ്ലെയിൻ ടെക്സ്റ്റ്)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# ഘടനാബദ്ധമായ രൂപം — ഒരു UI ഉപയോഗിക്കുന്നത്
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-കീയിൽ **`allowUsageCommand`** പ്രവർത്തനക്ഷമമാക്കിയിരിക്കണം (ഡിഫോൾട്ടായി ഓഫാണ് — ഡാഷ്ബോർഡിലെ API-കീ
-മാനേജർ ഓരോ കീയ്ക്കുമായി ഇത് ടോഗിൾ ചെയ്യുന്നു). അതില്ലെങ്കിൽ എൻഡ്പോയിന്റ് `403` എന്ന മറുപടി നൽകും.
+താക്കോൽ ഉണ്ടായിരിക്കണം**`allowUsageCommand`** പ്രവർത്തനക്ഷമമാക്കി (ഡിഫോൾട്ടായി ഓഫ് — ഡാഷ്ബോർഡിൻ്റെ API-കീ മാനേജർ ഓരോ കീയിലും ഇത് ടോഗിൾ ചെയ്യുന്നു). അതില്ലാതെ എൻഡ്പോയിൻ്റ് `403` എന്ന് ഉത്തരം നൽകുന്നു.
 
-നിരസിക്കപ്പെട്ട പ്രതികരണത്തിൽ നിന്ന് ഒരു കോളർ ഒരിക്കലും ഡാറ്റാ ഫീൽഡ് വായിക്കാതിരിക്കാനായി `?format=json` വ്യത്യസ്തമായി തിരിച്ചറിയാവുന്ന ഒരു ഘടന നൽകുന്നു.
-വിജയിക്കുമ്പോൾ:
+`?format=json` ഒരു വിവേചനപരമായ രൂപം നൽകുന്നു, അതിനാൽ ഒരു കോളർ ഒരിക്കലും നിരസിച്ചതിൻ്റെ ഒരു ഡാറ്റ ഫീൽഡ് വായിക്കില്ല. വിജയത്തെക്കുറിച്ച്:
 
 ```jsonc
 {
   "allowed": true,
-  // ഓരോ കീയ്ക്കുമുള്ള ഉപയോഗപരിധികൾ (ദൈനംദിന/പ്രതിവാര USD) കീ തിരഞ്ഞെടുത്തിട്ടുണ്ടെങ്കിൽ മാത്രം ഉണ്ടാകും:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -754,14 +1035,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // തിരഞ്ഞെടുത്ത പ്രൊവൈഡറിന്റെ ക്വോട്ട സ്നാപ്പ്ഷോട്ട്, അല്ലെങ്കിൽ ഒന്നും ഇതുവരെ കാഷ് ചെയ്തിട്ടില്ലെങ്കിൽ null:
-  "provider": {
-    "connectionId": "…",
-    "provider": "claude",
-    "plan": "…",
-    "quotas": {/* … */},
-  },
-  // ഓരോ കണക്ഷന്റെയും സ്നാപ്പ്ഷോട്ട്, അതുവഴി ഒരു UI-ക്ക് നിരവധി പ്രൊവൈഡർമാരെ അടുത്തടുത്തായി റെൻഡർ ചെയ്യാം:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
+  "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -769,71 +1045,56 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-നിരസിക്കുമ്പോൾ (`401` തെറ്റായ കീ / `403` അനുമതിയില്ല), അതേ റൂട്ട്
-`{ "allowed": false, "error": { "message": "…" } }` നൽകുന്നു — നിലവിലുണ്ടെങ്കിലും ശൂന്യമായ `personal`/`provider`
-(കീ അനുവദിച്ചിരിക്കുന്നു, ഇതുവരെ ഒന്നും ലഭിച്ചിട്ടില്ല) എന്നത് നിരസിക്കപ്പെട്ടതിൽനിന്ന് വ്യത്യസ്തമായ അവസ്ഥയാണ്; JSON രൂപത്തിന് മാത്രമേ
-അവയെ വേർതിരിച്ചറിയാനാകൂ.
+നിരസിക്കുമ്പോൾ (`401` മോശം കീ / `403` അനുവദനീയമല്ല) അതേ റൂട്ട് `{ "allowed": false, "error": { "message": "…" } }` — നൽകുന്നു, നിലവിലുള്ളതും എന്നാൽ ശൂന്യവുമായ `personal`/`provider` (കീ അനുവദനീയമാണ്, ഇതുവരെ ഒന്നും പഠിച്ചിട്ടില്ല) നിരസിച്ചതിൽ നിന്ന് വ്യത്യസ്തമായ അവസ്ഥയാണ്, JSON ഫോം മാത്രമേ അവയെ വേർതിരിക്കുന്നുള്ളൂ.
 
-**ഓതന്റിക്കേഷൻ:** കോളറുടെ സ്വന്തം Bearer API കീ, `isValidApiKey` ഉപയോഗിച്ച് സാധൂകരിച്ചത് — ഇത്
-`requireManagementAuth`-ന് പിന്നിൽ തുടരുന്ന മാനേജ്മെന്റ് ഉപരിതലം (`/api/keys/…`) _അല്ല_.
+**അംഗീകാരം:** വിളിക്കുന്നയാളുടെ സ്വന്തം ബെയറർ API കീ, `isValidApiKey` — ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു, ഇത് _not_ മാനേജുമെൻ്റ് ഉപരിതലമാണ് (`/api/keys/…`), ഇത് `requireManagementAuth` പിന്നിലാണ്.
 
-### അസംസ്കൃതവും കട്ട്ഓഫിന് അനുസരിച്ച് ക്രമീകരിച്ചതുമായ ക്വോട്ട ശതമാനങ്ങൾ
+### റോ വേഴ്സസ് കട്ട്ഓഫ്-അഡ്ജസ്റ്റ് ചെയ്ത ക്വാട്ട ശതമാനം
 
-`/api/usage/om-usage` ഉപയോഗിക്കുമ്പോൾ, **പ്ലെയിൻ-ടെക്സ്റ്റ് ഔട്ട്പുട്ടും** ഘടനാബദ്ധമായ **JSON ഔട്ട്പുട്ടും**
-അവതരിപ്പിക്കുന്ന ശതമാനങ്ങൾ തമ്മിലുള്ള വ്യത്യാസം കോളർമാർ ശ്രദ്ധിക്കണം:
+`/api/usage/om-usage` ഉപയോഗിക്കുമ്പോൾ, വിളിക്കുന്നവർ അവതരിപ്പിച്ച ശതമാനങ്ങൾ തമ്മിലുള്ള വ്യത്യാസം ശ്രദ്ധിക്കേണ്ടതാണ്** പ്ലെയിൻ-ടെക്സ്റ്റ് ഔട്ട്പുട്ട്** ഘടനാപരമായതും**JSON ഔട്ട്പുട്ട്** :
 
-| വശം                     | പ്ലെയിൻ-ടെക്സ്റ്റ് ഫോർമാറ്റ് (`/api/usage/om-usage` / `@@om-usage`)                                        | JSON ഫോർമാറ്റ് (`?format=json`)                                                           |
-| :---------------------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
-| **ഔട്ട്പുട്ട് ഫീൽഡ്**   | `NN% left` (ഉദാ., `20% left`)                                                                              | `provider.quotas` / `providers[].quotas`                                                  |
-| **അളവ്**                | **കട്ട്ഓഫിന് അനുസരിച്ച് ക്രമീകരിച്ച ഉപയോഗയോഗ്യമായ അലവൻസ്**: കട്ട്ഓഫ് പരിധിക്ക് മുകളിലുള്ള ശേഷിക്കുന്ന ശേഷി | **അസംസ്കൃത അപ്സ്ട്രീം ക്വോട്ട**: ക്രമീകരിക്കാത്ത പ്രൊവൈഡർ അളവ്                            |
-| **കട്ട്ഓഫ് സ്കെയിലിങ്** | സംരക്ഷിത റിസർവ് `0% left` ആയി കാണിക്കുന്നതിന് `effectiveRemainingPercent()` വഴി സ്കെയിൽ ചെയ്തത്            | ഇല്ല (പ്രൊവൈഡർ റിപ്പോർട്ട് ചെയ്ത അസംസ്കൃത സ്നാപ്പ്ഷോട്ട് മൂല്യങ്ങൾ)                       |
-| **ത്രെഷോൾഡ് ഡാറ്റ**     | പ്രദർശിപ്പിക്കുന്ന ശതമാനത്തിൽ ഉൾപ്പെടുത്തിയിരിക്കുന്നു                                                     | ഓരോ കണക്ഷനും `quotaWindowThresholds`-ൽ സംഭരിച്ചിരിക്കുന്നു (അല്ലെങ്കിൽ സെർവർ ഡിഫോൾട്ടുകൾ) |
-| **പ്രധാന ഉപഭോക്താവ്**   | ഇന്ററാക്ടീവ് CLI-കൾ, ടെർമിനൽ പ്രോംപ്റ്റുകൾ, മനുഷ്യ ഓപ്പറേറ്റർമാർ                                           | പ്രോഗ്രാമാറ്റിക് ഇന്റഗ്രേഷനുകൾ, ഡാഷ്ബോർഡുകൾ, അനലിറ്റിക്സ്, ബില്ലിങ് ട്രാക്കറുകൾ           |
+| വശം                      | പ്ലെയിൻ-ടെക്സ്റ്റ് ഫോർമാറ്റ് (`/api/usage/om-usage` / `@@om-usage`)                                 | JSON ഫോർമാറ്റ് (`?format=json`)                                                           |
+| :----------------------- | :-------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| **ഔട്ട്പുട്ട് ഫീൽഡ്**    | `NN% left` (ഉദാ, `20% left`)                                                                        | `provider.quotas` / `providers[].quotas`                                                  |
+| **അളക്കൽ**               | **കട്ട്ഓഫ്-അഡ്ജസ്റ്റ് ചെയ്ത ഉപയോഗിക്കാവുന്ന അലവൻസ്** : കട്ട്ഓഫ് ത്രെഷോൾഡിന് മുകളിൽ ശേഷിക്കുന്ന ശേഷി | **റോ അപ്സ്ട്രീം ക്വാട്ട** : ക്രമീകരിക്കാത്ത ദാതാവിൻ്റെ അളവ്                               |
+| **കട്ട്ഓഫ് സ്കെയിലിംഗ്** | `effectiveRemainingPercent()` വഴി സ്കെയിൽ ചെയ്തതിനാൽ സംരക്ഷിത റിസർവ് `0% left` ആയി വായിക്കുന്നു     | ഒന്നുമില്ല (ദാതാവ് റിപ്പോർട്ട് ചെയ്ത പ്രകാരം റോ സ്നാപ്പ്ഷോട്ട് മൂല്യങ്ങൾ)                 |
+| **ത്രെഷോൾഡ് ഡാറ്റ**      | പ്രദർശിപ്പിച്ച ശതമാനത്തിൽ ഉൾപ്പെടുത്തിയിട്ടുണ്ട്                                                    | ഓരോ കണക്ഷനും `quotaWindowThresholds` ൽ സംഭരിച്ചിരിക്കുന്നു (അല്ലെങ്കിൽ സെർവർ ഡിഫോൾട്ടുകൾ) |
+| **പ്രാഥമിക ഉപഭോക്താവ്**  | ഇൻ്ററാക്ടീവ് CLIs, ടെർമിനൽ പ്രോംപ്റ്റുകൾ, ഹ്യൂമൻ ഓപ്പറേറ്റർമാർ                                      | പ്രോഗ്രാമാറ്റിക് ഇൻ്റഗ്രേഷനുകൾ, ഡാഷ്ബോർഡുകൾ, അനലിറ്റിക്സ്, ബില്ലിംഗ് ട്രാക്കറുകൾ          |
 
-#### കട്ട്ഓഫ് ക്രമീകരണ ഫോർമുല
+#### കട്ട്ഓഫ് അഡ്ജസ്റ്റ്മെൻ്റ് ഫോർമുല
 
-അപ്സ്ട്രീം ക്വോട്ട തീരുന്നത് തടയാൻ OmniRoute മുൻകൂർ ക്വോട്ട കട്ട്ഓഫുകൾ പിന്തുണയ്ക്കുന്നു (കണക്ഷൻ
-`quotaWindowThresholds`, പ്രൊവൈഡർ ഡിഫോൾട്ടുകൾ, അല്ലെങ്കിൽ ഗ്ലോബൽ റെസിലിയൻസ് ക്രമീകരണങ്ങൾ വഴി കോൺഫിഗർ ചെയ്യുന്നു). ഒരു ക്വോട്ട വിൻഡോയിൽ കട്ട്ഓഫ് ത്രെഷോൾഡ്
-(ഉദാ., `cutoff = 25%`) സജീവമായിരിക്കുമ്പോൾ, ടെക്സ്റ്റ് റെൻഡറർ ശേഷിക്കുന്ന അലവൻസ് ഇങ്ങനെ കണക്കാക്കുന്നു:
+അപ്സ്ട്രീം ക്ഷീണം തടയാൻ OmniRoute പ്രോക്റ്റീവ് ക്വാട്ട കട്ട്ഓഫുകളെ പിന്തുണയ്ക്കുന്നു (കണക്ഷൻ `quotaWindowThresholds`, ദാതാവിൻ്റെ ഡിഫോൾട്ടുകൾ അല്ലെങ്കിൽ ആഗോള റെസിലൻസ് ക്രമീകരണങ്ങൾ വഴി കോൺഫിഗർ ചെയ്തിരിക്കുന്നു). ഒരു ക്വാട്ട വിൻഡോയിൽ ഒരു കട്ട്ഓഫ് ത്രെഷോൾഡ് (ഉദാ, `cutoff = 25%`) സജീവമാകുമ്പോൾ, ടെക്സ്റ്റ് റെൻഡറർ ശേഷിക്കുന്ന അലവൻസ് ഇപ്രകാരം കണക്കാക്കുന്നു:
 
 - `remaining <= cutoff` ആണെങ്കിൽ: `0%` നൽകുന്നു.
 - `remaining > cutoff` ആണെങ്കിൽ: `((remaining - cutoff) / (100 - cutoff)) * 100` നൽകുന്നു.
 
-ഫോർമാറ്റ് ചെയ്ത ടെക്സ്റ്റ് ഔട്ട്പുട്ട് ഇതിനെ ഏറ്റവും അടുത്ത പൂർണ്ണസംഖ്യയിലേക്ക് റൗണ്ട് ചെയ്യുന്നു (`Math.round(...)`).
+ഫോർമാറ്റ് ചെയ്ത ടെക്സ്റ്റ് ഔട്ട്പുട്ട് ഇതിനെ അടുത്തുള്ള പൂർണ്ണസംഖ്യയിലേക്ക് (`Math.round(...)`) റൗണ്ട് ചെയ്യുന്നു.
 
-#### ഉദാഹരണം
+#### ചിത്രീകരണ ഉദാഹരണം
 
-**60% അസംസ്കൃത ഉപയോഗവും** (അതായത് **40% അസംസ്കൃത ശേഷിക്കുന്ന ക്വോട്ട**) കോൺഫിഗർ ചെയ്ത
-**25% ശേഷിക്കുന്ന-ക്വോട്ട കട്ട്ഓഫ്** ത്രെഷോൾഡുമുള്ള ഒരു പ്രൊവൈഡർ വിൻഡോ പരിഗണിക്കുക:
+ഒരു പ്രൊവൈഡർ വിൻഡോ പരിഗണിക്കുക** 60% അസംസ്കൃത ഉപയോഗം** (അതിനാൽ** 40% അസംസ്കൃത ക്വാട്ട** ) കൂടാതെ ക്രമീകരിച്ചത്** 25% ശേഷിക്കുന്ന ക്വാട്ട കട്ട്ഓഫ്** പരിധി:
 
-| പ്രതിനിധാനം                           | കണക്കുകൂട്ടൽ                                       | ശേഷിക്കുന്നത് |             സൂചിപ്പിക്കുന്ന ഉപയോഗം              |
-| :------------------------------------ | :------------------------------------------------- | :-----------: | :---------------------------------------------: |
-| **അസംസ്കൃത JSON (`?format=json`)**    | അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട് (`quotas[window]`)       |    **40%**    |                     **60%**                     |
-| **ടെക്സ്റ്റ് ഫോർമാറ്റ് (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |    **20%**    | **80%** (`100 - remaining` കണക്കാക്കുന്നെങ്കിൽ) |
+| പ്രാതിനിധ്യം                          | കണക്കുകൂട്ടൽ                                       | ശേഷിക്കുന്നത് |             സൂചിപ്പിച്ചത് ഉപയോഗിച്ചു              |
+| :------------------------------------ | :------------------------------------------------- | :-----------: | :-----------------------------------------------: |
+| **അസംസ്കൃത JSON (`?format=json`)**    | അപ്സ്ട്രീം സ്നാപ്പ്ഷോട്ട് (`quotas[window]`)       |    **40%**    |                      **60%**                      |
+| **ടെക്സ്റ്റ് ഫോർമാറ്റ് (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |    **20%**    | **80%** ( `100 - remaining` കണക്കാക്കുകയാണെങ്കിൽ) |
 
-- **ടെക്സ്റ്റ് 20% ശേഷിക്കുന്നതായി കാണിക്കുന്നത് എന്തുകൊണ്ട്:** അക്കൗണ്ടിൽ ഭൗതികമായി ശേഷിക്കുന്ന 40% ക്വോട്ടയിൽ 25%,
-  കട്ട്ഓഫ് നയം റിസർവ് ചെയ്തിരിക്കുന്നു. റൂട്ടർ ഈ കണക്ഷനിലേക്ക് റൂട്ട് ചെയ്യുന്നത് നിർത്തുന്നതിന് മുമ്പുള്ള 75% ഉപയോഗയോഗ്യമായ ഹെഡ്റൂമിൽ
-  കോളർക്ക് 15% മാത്രമാണ് ശേഷിക്കുന്നത്. റൂട്ടിങ് അവസാനിക്കുന്ന കൃത്യമായ സമയത്ത് കണക്ഷൻ ക്വോട്ട തീർന്നതായി
-  (`0% left`) സൂചിപ്പിക്കുമെന്ന് സ്കെയിലിങ് ഉറപ്പാക്കുന്നു.
-- **JSON അസംസ്കൃത മൂല്യങ്ങൾ നിലനിർത്തുന്നത് എന്തുകൊണ്ട്:** JSON പേലോഡ് കൃത്യമായ പ്രൊവൈഡർ സ്നാപ്പ്ഷോട്ട് (`UsageSnapshot`)
-  നൽകുന്നതിനാൽ, ബാഹ്യ ടൂളുകൾക്ക് സെർവർ-സൈഡ് നഷ്ടകരമായ സ്കെയിലിങ് ഇല്ലാതെ യഥാർത്ഥ അപ്സ്ട്രീം ഉപയോഗനിലയും കണക്ഷൻ-ലെവൽ
-  `quotaWindowThresholds`-ഉം ലഭ്യമാകും.
+- **എന്തുകൊണ്ടാണ് ടെക്സ്റ്റ് 20% അവശേഷിക്കുന്നത് കാണിക്കുന്നത്:** അക്കൗണ്ടിൽ ശേഷിക്കുന്ന 40% ഫിസിക്കൽ ക്വാട്ടയിൽ, 25% കട്ട്ഓഫ് പോളിസിയിൽ നിക്ഷിപ്തമാണ്. റൂട്ടർ ഈ കണക്ഷനിലേക്കുള്ള റൂട്ടിംഗ് നിർത്തുന്നതിന് മുമ്പ് കോളർക്ക് ഉപയോഗിക്കാവുന്ന 75% ഹെഡ്റൂമിൽ 15% മാത്രമേ ശേഷിക്കുന്നുള്ളൂ. റൂട്ടിംഗ് നിർത്തുമ്പോൾ കൃത്യമായി കണക്ഷൻ സിഗ്നലുകൾ ക്ഷീണം (`0% left`) സ്കെയിലിംഗ് ഉറപ്പാക്കുന്നു.
+- **എന്തുകൊണ്ടാണ് JSON അസംസ്കൃത മൂല്യങ്ങൾ സംരക്ഷിക്കുന്നത്:** JSON പേലോഡ് കൃത്യമായ ദാതാവിൻ്റെ സ്നാപ്പ്ഷോട്ട് (`UsageSnapshot`) നൽകുന്നു, അതിനാൽ ബാഹ്യ ടൂളുകൾക്ക് ഗ്രൗണ്ട്-ട്രൂത്ത് അപ്സ്ട്രീം ഉപയോഗത്തിലേക്കും സെർവർ-സൈഡ് ലോസി സ്കെയിലിംഗ് ഇല്ലാതെ കണക്ഷൻ ലെവൽ `quotaWindowThresholds` യിലേക്കും ആക്സസ് ഉണ്ട്.
 
 #### ഉപഭോക്തൃ മൈഗ്രേഷൻ മാർഗ്ഗനിർദ്ദേശം
 
-ഒരു ബാഹ്യ ഇന്റഗ്രേഷൻ (എഡിറ്റർ പ്ലഗിൻ അല്ലെങ്കിൽ ഏജന്റ് എക്സ്റ്റൻഷൻ പോലുള്ളത്) മുമ്പ് ടെക്സ്റ്റ്
-എൻഡ്പോയിന്റിൽനിന്ന് (`NN% left`) ഡാറ്റ സ്ക്രേപ്പ് ചെയ്ത് ഉപയോഗിച്ച ശതമാനം `100 - NN` ആയി കണക്കാക്കിയിരുന്നെങ്കിൽ, `?format=json`-ലേക്കുള്ള മൈഗ്രേഷൻ അർത്ഥമാക്കുന്നത്:
+ഒരു ബാഹ്യ സംയോജനം (എഡിറ്റർ പ്ലഗിൻ അല്ലെങ്കിൽ ഏജൻ്റ് എക്സ്റ്റൻഷൻ പോലുള്ളവ) മുമ്പ് ടെക്സ്റ്റ് എൻഡ് പോയിൻ്റ് (`NN% left`) സ്ക്രാപ്പ് ചെയ്യുകയും ഉപയോഗിച്ച ശതമാനം `100 - NN` ആയി കണക്കാക്കുകയും ചെയ്താൽ, `?format=json` ലേക്ക് മൈഗ്രേറ്റ് ചെയ്യുന്നത് അർത്ഥമാക്കുന്നത്:
 
-- അസംസ്കൃത JSON മൂല്യങ്ങൾ വായിക്കുന്നത് **യഥാർത്ഥ അപ്സ്ട്രീം ഉപഭോഗം** പ്രതിഫലിപ്പിക്കും (മുകളിലെ ഉദാഹരണത്തിൽ 60% ഉപയോഗിച്ചു).
-- ടെക്സ്റ്റ് എൻഡ്പോയിന്റിന്റെ ഉപയോഗയോഗ്യ-അലവൻസ് സെമാന്റിക്സ് നിലനിർത്താൻ ഇന്റഗ്രേഷൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ,
-  കണക്ഷൻ-ലെവൽ ഓവർറൈഡുകൾക്കുള്ള `quotaWindowThresholds` ഉപയോഗിച്ച് ക്ലയന്റ്-സൈഡിൽ ഫലപ്രദമായ ശേഷിക്കുന്നതിന്റെ ഫോർമുല വിലയിരുത്താം.
+- അസംസ്കൃത JSON മൂല്യങ്ങൾ വായിക്കുന്നത് പ്രതിഫലിപ്പിക്കും** യഥാർത്ഥ അപ്സ്ട്രീം ഉപഭോഗം** (മുകളിലുള്ള ഉദാഹരണത്തിൽ 60% ഉപയോഗിച്ചു).
+- ടെക്സ്റ്റ് എൻഡ്പോയിൻ്റിൻ്റെ ഉപയോഗിക്കാവുന്ന-അലവൻസ് സെമാൻ്റിക്സ് സംരക്ഷിക്കാൻ ഇൻ്റഗ്രേഷൻ ആഗ്രഹിക്കുന്നുവെങ്കിൽ, കണക്ഷൻ-ലെവൽ ഓവർറൈഡുകൾക്കായി `quotaWindowThresholds` ഉപയോഗിച്ച് ഫലപ്രദമായ ശേഷിക്കുന്ന ഫോർമുല ക്ലയൻ്റ്-സൈഡ് വിലയിരുത്താൻ ഇതിന് കഴിയും.
 
 ---
 
-## സെമാന്റിക് കാഷ്
+## സെമാന്റിക് കാഷെ
 
 ```bash
-# കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ നേടുക
+# കാഷെ സ്ഥിതിവിവരക്കണക്കുകൾ നേടുക
 GET /api/cache/stats
 
 # എല്ലാ കാഷുകളും മായ്ക്കുക
@@ -857,29 +1118,30 @@ DELETE /api/cache/stats
 }
 ```
 
-### ലേറ്റൻസിയിലുള്ള സ്വാധീനം
+### ലേറ്റൻസിയിലെ സ്വാധീനം
 
-ഒരു സെമാന്റിക് കാഷ് HIT പ്രതികരണം **അപ്സ്ട്രീം കോൾ ഇല്ലാതെ**
-കാഷിൽനിന്ന് നൽകുന്നതിനാൽ, റിപ്പോർട്ട് ചെയ്യുന്ന `X-OmniRoute-Response-Latency` ഏതാണ്ട് പൂജ്യമായിരിക്കും
-(യഥാർത്ഥ അപ്സ്ട്രീം ലേറ്റൻസി പരിഗണിക്കാതെ). ലേറ്റൻസിയോട് സംവേദനക്ഷമമായ ക്ലയന്റുകൾ
-(ബെഞ്ച്മാർക്കിംഗ്, p50/p99 നിരീക്ഷണം) `X-OmniRoute-Cache-Latency`
-പ്രതികരണ ഹെഡർ പരിശോധിക്കണം:
+ഒരു സെമാന്റിക് കാഷെ HIT പ്രതികരണം **upstream
+വിളിയില്ലാതെ** കാഷിൽ നിന്ന് നൽകുന്നു. അതിനാൽ റിപ്പോർട്ട് ചെയ്യുന്ന
+`X-OmniRoute-Response-Latency` ഏകദേശം പൂജ്യമായിരിക്കും
+(യഥാർത്ഥ upstream ലേറ്റൻസി എന്തുതന്നെയായാലും). ലേറ്റൻസിയിൽ ശ്രദ്ധ കേന്ദ്രീകരിക്കുന്ന ക്ലയന്റുകൾ
+(ബെഞ്ച്മാർക്കിംഗ്, p50/p99 നിരീക്ഷണം) പ്രതികരണത്തിലെ
+`X-OmniRoute-Cache-Latency` ഹെഡർ പരിശോധിക്കണം:
 
-| മൂല്യം      | അർത്ഥം                                                          |
-| ----------- | --------------------------------------------------------------- |
-| `synthetic` | പ്രതികരണം കാഷിൽനിന്ന് നൽകി; ലേറ്റൻസി യഥാർത്ഥ അപ്സ്ട്രീം സമയമല്ല |
-| _(ഇല്ല)_    | യഥാർത്ഥ അപ്സ്ട്രീം കോളിൽനിന്നുള്ള പ്രതികരണം                     |
+| മൂല്യം         | അർത്ഥം                                                           |
+| -------------- | ---------------------------------------------------------------- |
+| `synthetic`    | പ്രതികരണം കാഷിൽ നിന്ന് നൽകി; ലേറ്റൻസി യഥാർത്ഥ upstream സമയം അല്ല |
+| _(ഇല്ലാത്തത്)_ | യഥാർത്ഥ upstream വിളിയിൽ നിന്നുള്ള പ്രതികരണം                     |
 
-### ഓരോ കീയ്ക്കുമുള്ള കാഷ് ബൈപാസ്
+### ഓരോ കീയ്ക്കുമുള്ള കാഷെ ബൈപാസ്
 
-`cacheDefaultMode` വഴി API കീകൾക്ക് സെമാന്റിക് കാഷ് റീഡുകൾ ഒഴിവാക്കാം:
+`cacheDefaultMode` വഴി API കീകൾക്ക് സെമാന്റിക് കാഷെ വായനയിൽ നിന്ന് ഒഴിവാകാം:
 
-| മൂല്യം   | പ്രവർത്തനം                                                                  |
-| -------- | --------------------------------------------------------------------------- |
-| `legacy` | സാധാരണ കാഷ് പ്രവർത്തനം (ഡിഫോൾട്ട്)                                          |
-| `bypass` | കാഷ് ലുക്കപ്പ് പൂർണ്ണമായി ഒഴിവാക്കുക; എല്ലായ്പ്പോഴും അപ്സ്ട്രീം ഉപയോഗിക്കുക |
+| മൂല്യം   | പെരുമാറ്റം                                                                 |
+| -------- | -------------------------------------------------------------------------- |
+| `legacy` | സാധാരണ കാഷെ പെരുമാറ്റം (ഡിഫോൾട്ട്)                                         |
+| `bypass` | കാഷെ തിരച്ചിൽ പൂർണ്ണമായും ഒഴിവാക്കുക; എല്ലായ്പ്പോഴും upstream-നെ വിളിക്കുക |
 
-കീ സൃഷ്ടിക്കുമ്പോൾ (`POST /api/keys`) സജ്ജമാക്കുക, അല്ലെങ്കിൽ (`PATCH /api/keys/[id]`) അപ്ഡേറ്റ് ചെയ്യുക:
+കീ സൃഷ്ടിക്കുമ്പോൾ (`POST /api/keys`) അല്ലെങ്കിൽ അപ്ഡേറ്റ് ചെയ്യുമ്പോൾ (`PATCH /api/keys/[id]`) സജ്ജമാക്കുക:
 
 ```json
 { "cacheDefaultMode": "bypass" }
@@ -887,7 +1149,7 @@ DELETE /api/cache/stats
 
 ### ഓരോ അഭ്യർത്ഥനയ്ക്കുമുള്ള ബൈപാസ്
 
-കീ ക്രമീകരണങ്ങൾ പരിഗണിക്കാതെ ഏത് അഭ്യർത്ഥനയ്ക്കും കാഷ് ബൈപാസ് ചെയ്യാനാകും:
+കീ ക്രമീകരണങ്ങൾ പരിഗണിക്കാതെ ഏത് അഭ്യർത്ഥനയ്ക്കും കാഷെ ബൈപാസ് ചെയ്യാം:
 
 ```
 X-OmniRoute-No-Cache: true
@@ -895,51 +1157,72 @@ X-OmniRoute-No-Cache: true
 
 ---
 
-## ഡാഷ്ബോർഡും മാനേജ്മെന്റും
+## CLIProxyAPI മാനേജ്മെന്റ് അനുയോജ്യത
 
-മാനേജ്മെന്റ് റൂട്ടുകൾക്ക് (പൊതു auth/login ഒഴികെയുള്ള `/api/*`) സാധാരണ inference API കീകൾ വഴി **അനുമതി ലഭിക്കില്ല**. ക്രെഡൻഷ്യൽ വിഭാഗങ്ങൾ, സ്കോപ്പുകൾ, curl ഉദാഹരണങ്ങൾ എന്നിവയ്ക്ക് കാണുക:
-[മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ](../guides/MANAGEMENT-AUTH.md).
+ഉപയോഗ ഡാഷ്ബോർഡുകൾ Claude, Codex സബ്സ്ക്രിപ്ഷൻ പരിധികൾ വായിക്കാൻ വിളിക്കുന്ന മൂന്ന് [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകൾക്ക് OmniRoute മറുപടി നൽകുന്നു
+(ഉദാഹരണത്തിന്, T3 Code-ന്റെ `cliproxy` ഉപയോഗ-പരിധി ഉറവിടം). ക്ലയന്റിന്റെ അടിസ്ഥാന URL
+OmniRoute-ലേക്ക് ചൂണ്ടിക്കാണിക്കുകയും, അതിന്റെ മാനേജ്മെന്റ് കീ ആയി `manage` സ്കോപ്പുള്ള API കീ ഉപയോഗിക്കുകയും ചെയ്യുക. റൂട്ടുകൾ
+`/v0/management/*`, `/api/v0/management/*` എന്നിവയിൽ ലഭ്യമാണ്.
 
-### ഓതന്റിക്കേഷൻ
+| രീതി | പാത                          | വിവരണം                                                                                                                                              |
+| ---- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ആയി Claude, Codex OAuth കണക്ഷനുകൾ. ടോക്കണുകളില്ല                             |
+| POST | `/v0/management/api-call`    | ബോഡി `{ auth_index, method, url, header?, data? }`. അക്കൗണ്ടിന്റെ ടോക്കൺ ഉപയോഗിച്ച് ഒരു അനുവദിച്ച അഭ്യർത്ഥന അയച്ച് `{ status_code, body }` നൽകുന്നു |
+| POST | `/v0/management/reset-quota` | ബോഡി `{ auth_index }`. ഒരു അക്കൗണ്ടിന്റെ കണക്ഷൻ കൂൾഡൗൺ, മോഡൽ ലോക്ക്ഔട്ടുകൾ, Codex ഓരോ-സ്കോപ്പ് കൂൾഡൗണുകൾ എന്നിവ നീക്കം ചെയ്യുന്നു                   |
 
-| എൻഡ്പോയിന്റ്                  | മെത്തഡ് | വിവരണം                           |
-| ----------------------------- | ------- | -------------------------------- |
-| `/api/auth/login`             | POST    | ലോഗിൻ                            |
-| `/api/auth/logout`            | POST    | ലോഗ്ഔട്ട്                        |
-| `/api/settings/require-login` | GET/PUT | ലോഗിൻ നിർബന്ധമാക്കുന്നത് മാറ്റുക |
+- `auth_index` എന്നത് OmniRoute കണക്ഷൻ ഐഡിയാണ്. `provider` `claude` അല്ലെങ്കിൽ `codex` ആയിരിക്കും (OAuth
+  കണക്ഷനുകൾ മാത്രം; `anthropic` API-key പ്രൊവൈഡർ പട്ടികയിൽ ഉൾപ്പെടില്ല). Codex-നായി,
+  `id_token.chatgpt_account_id` സംഭരിച്ചിരിക്കുന്ന വർക്ക്സ്പേസ് ഐഡിയും `plan_type` സംഭരിച്ചിരിക്കുന്ന പ്ലാനുമാണ്.
+- `api-call` ഒരു പൊതുവായ പ്രോക്സിയല്ല. ഇത് Claude `GET
+https://api.anthropic.com/api/oauth/usage` മാത്രവും Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` എന്നിവയും മാത്രമേ സ്വീകരിക്കൂ; ഓരോന്നും പൊരുത്തപ്പെടുന്ന പ്രൊവൈഡറുള്ള അക്കൗണ്ടിനായി മാത്രം. മറ്റെന്തും upstream-നെ ബന്ധപ്പെടാതെ `403` നൽകും. വിളിക്കുന്നയാളുടെ
+  `Authorization` ഹെഡർ (`$TOKEN$` പ്ലേസ്ഹോൾഡർ ഉൾപ്പെടെ) അവഗണിക്കപ്പെടുന്നു: OmniRoute കണക്ഷന്റെ ആക്സസ് ടോക്കൺ ചേർക്കുകയും, അത് കാലഹരണപ്പെടാൻ അടുത്തിരിക്കുമ്പോൾ ആദ്യം പുതുക്കുകയും, അനുവദിച്ച ഹെഡറുകൾ മാത്രം ഫോർവേഡ് ചെയ്യുകയും ചെയ്യുന്നു (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). `Chatgpt-Account-Id` ഇല്ലെങ്കിൽ സംഭരിച്ചിരിക്കുന്ന വർക്ക്സ്പേസ് ഐഡി ഡിഫോൾട്ടായി ഉപയോഗിക്കും.
+  അഭ്യർത്ഥനകൾക്ക് 15 സെക്കൻഡിന് ശേഷം ടൈംഔട്ട് സംഭവിക്കുകയും കണക്ഷന്റെ പ്രോക്സി ഉപയോഗിക്കുകയും ചെയ്യും.
+- `reset-quota` ടെർമിനൽ നിലകൾ (banned, expired, credits_exhausted) മാറ്റമില്ലാതെ നിലനിർത്തുന്നു. അറിയപ്പെടാത്ത
+  `auth_index` `404` നൽകുന്നു.
 
-### പ്രൊവൈഡർ മാനേജ്മെന്റ്
+**ഓത്ത്:** ലോഗിൻ പ്രവർത്തനരഹിതമാക്കിയിരിക്കുമ്പോഴും ഡാഷ്ബോർഡ് സെഷൻ അല്ലെങ്കിൽ `manage`-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്
+(പാതകൾ `ALWAYS_PROTECTED_API_PATHS`-ൽ ഉൾപ്പെട്ടിരിക്കുന്നു). ഇൻഫറൻസ്-മാത്രം കീകൾക്ക് `403` ലഭിക്കും. ഉറവിടം:
+`src/lib/cliproxyCompat/managementApi.ts`.
 
-| എൻഡ്പോയിന്റ്                            | മെത്തഡ്                   | വിവരണം                                                                                                                                                          |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | പ്രൊവൈഡറുകളെ പട്ടികപ്പെടുത്തുക / സൃഷ്ടിക്കുക                                                                                                                    |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | ഒരു പ്രൊവൈഡറെ നിയന്ത്രിക്കുക                                                                                                                                    |
-| `/api/providers/[id]/test`              | POST                      | പ്രൊവൈഡർ കണക്ഷൻ പരിശോധിക്കുക                                                                                                                                    |
-| `/api/providers/[id]/models`            | GET                       | പ്രൊവൈഡർ മോഡലുകളെ പട്ടികപ്പെടുത്തുക                                                                                                                             |
-| `/api/providers/validate`               | POST                      | പ്രൊവൈഡർ കോൺഫിഗറേഷൻ സാധൂകരിക്കുക                                                                                                                                |
-| `/api/providers/bulk`                   | POST                      | ഒരു പ്രൊവൈഡറിനായി API കീകൾ കൂട്ടമായി ചേർക്കുക                                                                                                                   |
-| `/api/providers/import`                 | POST                      | പാർസ് ചെയ്ത CSV/JSON ഫയലിൽനിന്ന് വ്യത്യസ്ത തരത്തിലുള്ള പ്രൊവൈഡർ പട്ടിക ഇറക്കുമതി ചെയ്യുക (#6836); ഓരോ വരിയിലെയും ഭാഗിക പരാജയഫലങ്ങൾ                              |
-| `/api/provider-nodes*`                  | വിവിധതരം                  | പ്രൊവൈഡർ നോഡ് മാനേജ്മെന്റ്                                                                                                                                      |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | കസ്റ്റം മോഡലുകളും ഓരോ മോഡലിനുമുള്ള ഓവർറൈഡുകളും (ചേർക്കുക, അപ്ഡേറ്റ് ചെയ്യുക, മറയ്ക്കുക/കാണിക്കുക, ഇല്ലാതാക്കുക)                                                 |
-| `/api/provider-models/validate-and-add` | POST                      | മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമായ, ഐച്ഛികമായ കർശന കണക്ഷൻ സാധൂകരണവും ആറ്റോമിക് കസ്റ്റം-മോഡൽ രജിസ്ട്രേഷനും; [മോഡൽ സാധൂകരണം](../guides/MODEL-VALIDATION.md) കാണുക |
+---
 
-സമന്വയിപ്പിച്ചതോ ഇറക്കുമതി ചെയ്തതോ ആയ മോഡലുകൾക്കായി, `PUT /api/provider-models` എന്നത് `provider`, `modelId`,
-`maxOutputTokenOverride` എന്നിവ സ്വീകരിക്കുന്നു: ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യ മാനുവൽ ഔട്ട്പുട്ട്-ടോക്കൺ പരിധി സജ്ജമാക്കുന്നു,
-`null` അത് നീക്കി ഡിഫോൾട്ട് പുനഃസ്ഥാപിക്കുന്നു. `GET /api/provider-models?provider=<provider>` ഈ മൂല്യങ്ങൾ
-`modelOutputOverrides`-ൽ തിരികെ നൽകുന്നു; കസ്റ്റം-മോഡൽ റോ ഇല്ലാത്ത മോഡലുകളും ഇതിൽ ഉൾപ്പെടും. ഓവർറൈഡ്
-റൺടൈം `max_output_tokens` ശേഷി ഉപയോഗിക്കുകയും മോഡൽ വീണ്ടും സമന്വയിപ്പിച്ചതിനുശേഷവും നിലനിൽക്കുകയും ചെയ്യുന്നു. OpenAI-അനുയോജ്യമായ
-പ്രൊവൈഡർ പേജ് സമാനമായ എഡിറ്റ്/ക്ലിയർ നിയന്ത്രണങ്ങൾ നൽകുകയും വ്യക്തമായ vision പിന്തുണയുള്ള മോഡലുകളെ അടയാളപ്പെടുത്തുകയും ചെയ്യുന്നു.
+## ഡാഷ്ബോർഡും മാനേജ്മെൻ്റും
 
-കസ്റ്റം Chat Completions നോഡുകൾ, വ്യക്തമായ reasoning ഒഴിവാക്കലുകളെ upstream backend-ന് അനുയോജ്യമാക്കുന്നു. വിജയകരമായ
-ഒരു കണക്ഷൻ പരിശോധന, `/models` എൻട്രിയിൽ അംഗീകരിക്കപ്പെട്ട `owned_by` മൂല്യം തെളിയിക്കപ്പെടുന്ന ഓരോ കൃത്യമായ മോഡൽ ID-യ്ക്കും
-chat-template നിയന്ത്രണങ്ങൾ സ്വയമേവ തിരഞ്ഞെടുക്കുന്നു: `vllm`, `sglang`, അല്ലെങ്കിൽ `llamacpp`.
-സുതാര്യമായ OpenAI-അനുയോജ്യ wrapper-കൾക്ക് യഥാർത്ഥ മോഡൽ എൻട്രി നെസ്റ്റഡ്
-`openai` ഒബ്ജക്റ്റിനുള്ളിൽ നിലനിർത്താനാകും; കണ്ടെത്തൽ അത്തരത്തിലുള്ള പരമാവധി മൂന്ന് envelope-ുകളിലൂടെ പിന്തുടരുന്നു. ഉടമസ്ഥാവകാശം ഇല്ലാത്തതോ, അറിയപ്പെടാത്തതോ,
-പരസ്പരവിരുദ്ധമായതോ ആയ മോഡലുകൾ സാധാരണ OpenAI സ്വഭാവം നിലനിർത്തുന്നു. കണ്ടെത്തൽ നിലവിലുള്ള catalog അഭ്യർത്ഥന വീണ്ടും ഉപയോഗിക്കുന്നു,
-completion ടോക്കണുകളൊന്നും സൃഷ്ടിക്കുന്നില്ല, കൂടാതെ കണക്ഷൻ എൻഡ്പോയിന്റ് മാറുമ്പോൾ അസാധുവാക്കപ്പെടുന്നു.
+മാനേജ്മെൻ്റ് റൂട്ടുകൾ (പൊതു auth/login ഒഴികെ`/api/*` ) ആകുന്നു** അല്ല** സാധാരണ അനുമാനം API കീകൾ വഴി അധികാരപ്പെടുത്തിയിരിക്കുന്നു. ക്രെഡൻഷ്യൽ ഫാമിലികൾ, സ്കോപ്പുകൾ, ചുരുളൻ ഉദാഹരണങ്ങൾ: [മാനേജ്മെൻ്റ് ആധികാരികത](../guides/MANAGEMENT-AUTH.md).
 
-ആ metadata വെളിപ്പെടുത്താത്ത ഒരു backend-നായി ഈ സ്വഭാവം സ്ഥിരപ്പെടുത്താൻ, നിലവിലുള്ള ഭാഗിക
-പ്രൊവൈഡർ അപ്ഡേറ്റ് API ഉപയോഗിക്കുക:
+### പ്രാമാണീകരണം
+
+| അവസാന പോയിൻ്റ്                | രീതി     | വിവരണം                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | ലോഗിൻ                                                                                                                                                                                                                                                                                                                       |
+| `/api/auth/logout`            | POST     | പുറത്തുകടക്കുക                                                                                                                                                                                                                                                                                                               |
+| `/api/settings/require-login` | GET/POST | ലോഗിൻ നില (GET, പൊതു). POST പാസ്വേഡ് സജ്ജമാക്കുന്നു / ലോഗിൻ ടോഗിൾ ചെയ്യുന്നു: ഓപ്പറേറ്റർ-ഒരു പാസ്വേഡ് നിലവിലുണ്ടെങ്കിൽ മാത്രം (ഡാഷ്ബോർഡ് സെഷൻ, ലോക്കൽ CLI, അല്ലെങ്കിൽ ലോഗിൻ ഡിസേബിൾഡ് — API കീകളും `oma_` ടോക്കണുകളും `403` ലഭിക്കും ); പാസ്വേഡ് മാറ്റിസ്ഥാപിക്കുന്നതിനായി ഒരു ഡാഷ്ബോർഡ് സെഷൻ `currentPassword` അയയ്ക്കുന്നു |
+
+### ദാതാവ് മാനേജ്മെൻ്റ്
+
+| അവസാന പോയിൻ്റ്                          | രീതി                      | വിവരണം                                                                                                                                                      |
+| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | ദാതാക്കളെ ലിസ്റ്റുചെയ്യുക / സൃഷ്ടിക്കുക                                                                                                                     |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | ഒരു ദാതാവിനെ നിയന്ത്രിക്കുക                                                                                                                                 |
+| `/api/providers/[id]/test`              | POST                      | ടെസ്റ്റ് പ്രൊവൈഡർ കണക്ഷൻ                                                                                                                                    |
+| `/api/providers/[id]/models`            | GET                       | ദാതാവിൻ്റെ മോഡലുകൾ ലിസ്റ്റ് ചെയ്യുക                                                                                                                         |
+| `/api/providers/validate`               | POST                      | പ്രൊവൈഡർ കോൺഫിഗറേഷൻ സാധൂകരിക്കുക                                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | ONE ദാതാവിനായി API കീകൾ ബൾക്ക് ആഡ് ചെയ്യുക                                                                                                                  |
+| `/api/providers/import`                 | POST                      | പാഴ്സ് ചെയ്ത CSV/JSON ഫയലിൽ നിന്ന് (#6836) ഒരു വൈവിധ്യമാർന്ന ദാതാവ് LIST ഇറക്കുമതി ചെയ്യുക; ഓരോ-വരി ഭാഗിക-പരാജയ ഫലങ്ങൾ                                      |
+| `/api/provider-nodes*`                  | വിവിധ                     | പ്രൊവൈഡർ നോഡ് മാനേജ്മെൻ്റ്                                                                                                                                  |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | ഇഷ്ടാനുസൃത മോഡലുകളും ഓരോ മോഡൽ ഓവർറൈഡുകളും (ചേർക്കുക, അപ്ഡേറ്റ് ചെയ്യുക, hide/show, ഇല്ലാതാക്കുക)                                                            |
+| `/api/provider-models/validate-and-add` | POST                      | മാനേജ്മെൻ്റ്-ആധികാരികത, ഓപ്റ്റ്-ഇൻ കർശന-കണക്ഷൻ മൂല്യനിർണ്ണയം, ആറ്റോമിക് കസ്റ്റം-മോഡൽ രജിസ്ട്രേഷൻ; [മോഡൽ മൂല്യനിർണ്ണയം](../guides/MODEL-VALIDATION.md) കാണുക |
+
+synced/imported മോഡലുകൾക്കായി, `PUT /api/provider-models` `provider`, `modelId`, `maxOutputTokenOverride` എന്നിവ സ്വീകരിക്കുന്നു: ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യ മാനുവൽ ഔട്ട്പുട്ട്-ടോക്കൺ ക്യാപ് സജ്ജമാക്കുന്നു, സ്ഥിരസ്ഥിതി പുനഃസ്ഥാപിക്കുന്നതിന് `null` അത് മായ്ക്കുന്നു. ഇഷ്ടാനുസൃത-മോഡൽ വരിയില്ലാത്ത മോഡലുകൾ ഉൾപ്പെടെ, `GET /api/provider-models?provider=<provider>` ഈ മൂല്യങ്ങൾ `modelOutputOverrides` ൽ നൽകുന്നു. ഓവർറൈഡ് റൺടൈം `max_output_tokens` ശേഷി ഉപയോഗിക്കുകയും ഒരു മോഡൽ വീണ്ടും സമന്വയിപ്പിക്കുകയും ചെയ്യുന്നു. OpenAI-അനുയോജ്യമായ ദാതാവ് പേജ് അതേ edit/clear നിയന്ത്രണങ്ങൾ വാഗ്ദാനം ചെയ്യുന്നു, വ്യക്തമായ കാഴ്ച പിന്തുണയുള്ള മോഡലുകൾ അടയാളപ്പെടുത്തുന്നു.
+
+അനുയോജ്യമായ ഒരു പ്രൊവൈഡർ നോഡിൽ, റൈറ്റ് പാത്തുകൾ (`POST`, `PUT`, `PATCH`, `DELETE`, `/api/provider-models/validate-and-add`) മോഡൽ ഐഡിയെ വെറും അപ്സ്ട്രീം ഐഡിയായി സംഭരിക്കുന്നു: ഒരു പ്രിഫിക്സ് ലിസ്റ്റിംഗിൽ നിന്ന് ഒട്ടിച്ച ഒരു ഐഡിയിൽ നോഡിൻ്റെ സ്വന്തം പ്രിഫിക്സിൻ്റെ ഏതെങ്കിലും മുൻനിര സ്റ്റാക്ക് ഉണ്ട്, സംഭരിച്ച പ്രതികരണങ്ങൾ പ്രതിധ്വനിക്കുന്നു. കാനോനിക്കൽ ദാതാക്കളുടെ സ്ലാഷ്ഡ് ഐഡികൾ (ഉദാ. `nvidia/nemotron-…`) പദാനുപദമായി സൂക്ഷിക്കുന്നു. `/v1/models` ഒരിക്കലും അടുക്കിയിരിക്കുന്ന `<prefix>/<prefix>/<model>` ഐഡി പുറപ്പെടുവിക്കുന്നില്ല.
+
+ഇഷ്ടാനുസൃത ചാറ്റ് പൂർത്തീകരണ നോഡുകൾ അപ്സ്ട്രീം ബാക്കെൻഡിലേക്ക് വ്യക്തമായ ന്യായവാദ ഓപ്റ്റ്-ഔട്ടുകൾ പൊരുത്തപ്പെടുത്തുന്നു. ഒരു വിജയകരമായ കണക്ഷൻ ടെസ്റ്റ്, `/models` എൻട്രി അംഗീകൃത `owned_by` മൂല്യം തെളിയിക്കുന്ന ഓരോ കൃത്യമായ മോഡൽ ID ചാറ്റ്-ടെംപ്ലേറ്റ് നിയന്ത്രണങ്ങൾ സ്വയമേവ തിരഞ്ഞെടുക്കുന്നു: `vllm`, `sglang`, അല്ലെങ്കിൽ `llamacpp`. സുതാര്യമായ OpenAI-അനുയോജ്യമായ റാപ്പറുകൾ ഒരു നെസ്റ്റഡ് `openai` ഒബ്ജക്റ്റിനുള്ളിൽ യഥാർത്ഥ മോഡൽ എൻട്രി സംരക്ഷിച്ചേക്കാം; കണ്ടെത്തൽ അത്തരം മൂന്ന് എൻവലപ്പുകൾ വരെ പിന്തുടരുന്നു. നഷ്ടമായതോ അറിയപ്പെടാത്തതോ വൈരുദ്ധ്യമുള്ളതോ ആയ ഉടമസ്ഥാവകാശമുള്ള മോഡലുകൾ സാധാരണ OpenAI സ്വഭാവം നിലനിർത്തുന്നു. കണ്ടെത്തൽ നിലവിലുള്ള കാറ്റലോഗ് അഭ്യർത്ഥന വീണ്ടും ഉപയോഗിക്കുന്നു, പൂർത്തീകരണ ടോക്കണുകളൊന്നും സൃഷ്ടിക്കുന്നില്ല, കൂടാതെ കണക്ഷൻ എൻഡ്പോയിൻ്റ് മാറുമ്പോൾ അസാധുവാകും.
+
+ആ മെറ്റാഡാറ്റ വെളിപ്പെടുത്താത്ത ഒരു ബാക്കെൻഡിനുള്ള പെരുമാറ്റം പിൻ ചെയ്യാൻ, നിലവിലുള്ള ഭാഗിക ദാതാവിൻ്റെ അപ്ഡേറ്റ് API ഉപയോഗിക്കുക:
 
 ```json
 {
@@ -949,77 +1232,91 @@ completion ടോക്കണുകളൊന്നും സൃഷ്ടിക�
 }
 ```
 
-ആ body `PUT /api/providers/<connection-id>` ഉപയോഗിച്ച് അയയ്ക്കുക. ആ കണക്ഷനിൽ, `none` എന്ന വ്യക്തമായ
-reasoning effort, `chat_template_kwargs.thinking=false` എന്നും
-`chat_template_kwargs.enable_thinking=false` എന്നും അയയ്ക്കപ്പെടുന്നു. ഒരു server-side reasoning നിയമം ഒരു effort നിർബന്ധമാക്കുന്നില്ലെങ്കിൽ,
-വ്യക്തമായി നൽകിയ native template മൂല്യങ്ങൾക്കാണ് മുൻഗണന. ഒരു കസ്റ്റം
-OpenAI-അനുയോജ്യ കണക്ഷൻ Chat Completions body അയയ്ക്കുമ്പോൾ മാത്രമാണ് ഈ ക്രമീകരണം ബാധകമാകുന്നത്; Responses അഭ്യർത്ഥനകളും സാധാരണ
-പ്രൊവൈഡറുകളും അവയുടെ native request shape നിലനിർത്തുന്നു. സാധാരണ OpenAI
-`reasoning_effort` passthrough നിർബന്ധമാക്കാൻ `reasoningControl` എന്നത് `openai` ആയി സജ്ജമാക്കുക; അല്ലെങ്കിൽ സ്വയമേവയുള്ള കണ്ടെത്തൽ ഉപയോഗിക്കാൻ അത് ഒഴിവാക്കുകയോ `null` ആയി സജ്ജമാക്കുകയോ ചെയ്യുക.
+ആ ശരീരം `PUT /api/providers/<connection-id>` ഉപയോഗിച്ച് അയയ്ക്കുക. ആ കണക്ഷനിൽ, `none` യുടെ വ്യക്തമായ ന്യായവാദം `chat_template_kwargs.thinking=false`, `chat_template_kwargs.enable_thinking=false` എന്നിങ്ങനെ അയയ്ക്കുന്നു. ഒരു സെർവർ സൈഡ് ന്യായവാദ നിയമം ഒരു ശ്രമത്തെ നിർബന്ധിക്കുന്നില്ലെങ്കിൽ വ്യക്തമായ നേറ്റീവ് ടെംപ്ലേറ്റ് മൂല്യങ്ങൾ ആധികാരികമായി നിലനിൽക്കും. ഒരു ഇഷ്ടാനുസൃത OpenAI-അനുയോജ്യമായ കണക്ഷൻ ഒരു ചാറ്റ് പൂർത്തീകരണ ബോഡി അയയ്ക്കുമ്പോൾ മാത്രമേ ക്രമീകരണം ബാധകമാകൂ; പ്രതികരണ അഭ്യർത്ഥനകളും സാധാരണ ദാതാക്കളും അവരുടെ നേറ്റീവ് അഭ്യർത്ഥനയുടെ ആകൃതി നിലനിർത്തുന്നു. സാധാരണ OpenAI `reasoning_effort` പാസ്ത്രൂ നിർബന്ധിതമാക്കാൻ `reasoningControl` `openai` ആയി സജ്ജീകരിക്കുക, അല്ലെങ്കിൽ സ്വയമേവയുള്ള കണ്ടെത്തൽ ഉപയോഗിക്കുന്നതിന് `null` ലേക്ക് it/set ഒഴിവാക്കുക.
 
-വ്യക്തമായ reasoning controls ഒന്നും അടങ്ങിയിട്ടില്ലെങ്കിൽ, Claude Code auto-mode classifier അഭ്യർത്ഥനകൾ native thinking ഡിഫോൾട്ടായി പ്രവർത്തനരഹിതമാക്കുന്നു. കണ്ടെത്തൽ നടത്തുന്നത് model പേരുകളോ completion പരിധികളോ ഉപയോഗിച്ചല്ല, മറിച്ച് Claude-format അഭ്യർത്ഥനകളിലെ classifier-ന്റെ system marker ഉപയോഗിച്ചാണ്. വ്യക്തമായ body controls, പിന്തുണയ്ക്കുന്ന effort/thinking headers, routing rules, resolved model effort എന്നിവയ്ക്ക് നിലവിലുള്ള മുൻഗണന തുടരും. രണ്ട് classifier ഘട്ടങ്ങളും അവയുടെ prompts, completion പരിധികൾ, stop sequences, യഥാർത്ഥ upstream permission verdicts എന്നിവ നിലനിർത്തുന്നു; രണ്ടാം ഘട്ടത്തിന് ആവശ്യപ്പെട്ട ദൃശ്യമായ reasoning സാധാരണ text ആയി തുടർന്നും സൃഷ്ടിക്കാനാകും.
+Claude കോഡ് യാന്ത്രിക-മോഡ് ക്ലാസിഫയർ വ്യക്തമായ ന്യായവാദ നിയന്ത്രണങ്ങൾ ഇല്ലാത്തപ്പോൾ ഡിഫോൾട്ട് നേറ്റീവ് ചിന്തയെ പ്രവർത്തനരഹിതമാക്കാൻ അഭ്യർത്ഥിക്കുന്നു. കണ്ടെത്തൽ ക്ലോഡ് ഫോർമാറ്റ് അഭ്യർത്ഥനകളിൽ ക്ലാസിഫയറിൻ്റെ സിസ്റ്റം മാർക്കർ ഉപയോഗിക്കുന്നു, മോഡലിൻ്റെ പേരുകളോ പൂർത്തീകരണ പരിധികളോ അല്ല. വ്യക്തമായ ബോഡി നിയന്ത്രണങ്ങൾ, പിന്തുണയ്ക്കുന്ന effort/thinking തലക്കെട്ടുകൾ, റൂട്ടിംഗ് നിയമങ്ങൾ, പരിഹരിച്ച മോഡൽ പരിശ്രമം എന്നിവ അവയുടെ നിലവിലുള്ള മുൻഗണന നിലനിർത്തുന്നു. രണ്ട് ക്ലാസിഫയർ ഘട്ടങ്ങളും അവയുടെ പ്രോംപ്റ്റുകൾ, പൂർത്തീകരണ പരിധികൾ, സ്റ്റോപ്പ് സീക്വൻസുകൾ, യഥാർത്ഥ അപ്സ്ട്രീം അനുമതി വിധികൾ എന്നിവ നിലനിർത്തുന്നു; രണ്ടാം ഘട്ടത്തിന് അപ്പോഴും അതിൻ്റെ അഭ്യർത്ഥിച്ച ദൃശ്യമായ ന്യായവാദം സാധാരണ ടെക്സ്റ്റായി നിർമ്മിക്കാനാകും.
 
-### OAuth പ്രവാഹങ്ങൾ
+### OAuth ഒഴുകുന്നു
 
-| Endpoint                         | Method | വിവരണം                    |
-| -------------------------------- | ------ | ------------------------- |
-| `/api/oauth/[provider]/[action]` | വിവിധം | Provider-നിർദ്ദിഷ്ട OAuth |
+| അവസാന പോയിൻ്റ്                   | രീതി  | വിവരണം                  |
+| -------------------------------- | ----- | ----------------------- |
+| `/api/oauth/[provider]/[action]` | വിവിധ | ദാതാവ്-നിർദ്ദിഷ്ട OAuth |
 
-### Routing & Config
+### റൂട്ടിംഗും കോൺഫിഗറേഷനും
 
-| Endpoint              | Method   | വിവരണം                                     |
-| --------------------- | -------- | ------------------------------------------ |
-| `/api/models/alias`   | GET/POST | Model അപരനാമങ്ങൾ                           |
-| `/api/models/catalog` | GET      | Provider + type അനുസരിച്ചുള്ള എല്ലാ models |
-| `/api/combos*`        | വിവിധം   | Combo മാനേജ്മെന്റ്                         |
-| `/api/keys*`          | വിവിധം   | API key മാനേജ്മെന്റ്                       |
-| `/api/pricing`        | GET      | Model നിരക്കുകൾ                            |
+| അവസാന പോയിൻ്റ്        | രീതി     | വിവരണം                                      |
+| --------------------- | -------- | ------------------------------------------- |
+| `/api/models`         | GET/PUT  | മോഡൽ ലിസ്റ്റ് / അപരനാമ അപ്ഡേറ്റ്            |
+| `/api/models/alias`   | GET/POST | മോഡൽ അപരനാമങ്ങൾ                             |
+| `/api/models/catalog` | GET      | ദാതാവിൻ്റെ + തരം അനുസരിച്ച് എല്ലാ മോഡലുകളും |
+| `/api/combos*`        | വിവിധ    | കോംബോ മാനേജ്മെൻ്റ്                          |
+| `/api/keys*`          | വിവിധ    | API കീ മാനേജ്മെൻ്റ്                         |
+| `/api/pricing`        | GET      | മോഡൽ വിലനിർണ്ണയം                            |
 
-### ഉപയോഗവും Analytics-ഉം
+#### മോഡൽ പരിധി പ്രൊവെനൻസ്
 
-| Endpoint                         | Method          | വിവരണം                                                                                                                                                                                                                                                                                                                          |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | ഉപയോഗ ചരിത്രം                                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/logs`                | GET             | ഉപയോഗ logs                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/request-logs`        | GET             | അഭ്യർത്ഥനാതല logs                                                                                                                                                                                                                                                                                                               |
-| `/api/usage/[connectionId]`      | GET             | ഓരോ connection-ന്റെയും ഉപയോഗം                                                                                                                                                                                                                                                                                                   |
-| `/api/usage/token-limits`        | GET/POST/DELETE | ഓരോ API key-യുടെയും token-limit ബജറ്റുകൾ                                                                                                                                                                                                                                                                                        |
-| `/api/usage/model-latency-stats` | GET             | ഓരോ provider/model-ന്റെയും rolling latency aggregate (avg/p50/p95/p99, വിജയനിരക്ക്); filters: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                   |
-| `/api/usage/cache-health`        | GET             | `call_logs` അടിസ്ഥാനമാക്കിയുള്ള prompt-cache health സംഗ്രഹം — write/read അനുപാതം, p50/p90/p99 write-size വിതരണം, heavy-write കേന്ദ്രീകരണം, ഓരോ model-ന്റെയും വിഭജനം, കൂടാതെ `healthy`/`degraded`/`thrash`/`no-data` verdict; query params `range` (`1h`\|`24h`\|`7d`\|`30d`, ഡിഫോൾട്ട് `24h`), ഐച്ഛികമായ `model` എന്നിവ (#8827) |
+`GET /api/models?withLimits=1` ( `true`; `0`/`false` അല്ലെങ്കിൽ അത് ഒഴിവാക്കുന്നത് സ്ഥിരസ്ഥിതി പേലോഡ് മാറ്റമില്ലാതെ നിലനിർത്തുന്നു) എല്ലാ മോഡൽ വരിയിലും `contextWindow`, `maxInputTokens`, `maxOutputTokens` കൂടാതെ ഒരു `capsSource` ഒബ്ജക്റ്റും ചേർക്കുന്നു. `capsSource` ഓരോ പരിധിയും നൽകിയ നിയമത്തിന് പേരിടുന്നു, അതിനാൽ അതിശയിപ്പിക്കുന്ന ഒരു പരിധി (ഉദാഹരണത്തിന് 1M മോഡലിൽ 128k) അതിൻ്റെ ഉത്ഭവം കണ്ടെത്താനാകും. പരിഹരിച്ച മൂല്യങ്ങൾ റൂട്ടിംഗ് ഉപയോഗങ്ങൾ തന്നെയാണ്; ഫ്ലാഗ് ഫീൽഡുകൾ ചേർക്കുന്നു, മൂല്യം മാറ്റില്ല. മറ്റേതെങ്കിലും `withLimits` മൂല്യം `400` ഉപയോഗിച്ച് നിരസിക്കപ്പെടും.
 
-### API key അനുമതികൾ
+| `capsSource` മൂല്യം                          | ഉത്ഭവം                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------ |
+| `override:context`                           | സ്ഥിരമായ സന്ദർഭ-ജാലക അസാധുവാക്കൽ (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | `max_input_tokens` / `max_output_tokens` ശേഷി അസാധുവാക്കുന്നു      |
+| `static-authoritative:<provider>/<model>`    | സ്റ്റാറ്റിക് ആധികാരിക സന്ദർഭ-ജാലക പട്ടിക                           |
+| `synced:<provider>/<model>`                  | models.dev സമന്വയിപ്പിച്ച ശേഷി വരി                                 |
+| `registry:<provider>/<model>`                | ദാതാവിൻ്റെ രജിസ്ട്രി എൻട്രി                                        |
+| `spec:<model>`                               | സ്റ്റാറ്റിക് മോഡൽ സ്പെസിഫിക്കേഷൻ                                   |
+| `effort-base:` പ്രിഫിക്സ്                    | പ്രയത്ന-പ്രത്യയ വേരിയൻ്റിൻ്റെ അടിസ്ഥാന മോഡലിൽ നിന്ന് കടമെടുത്ത വരി |
+| `none`                                       | ഒരു ഉറവിടവും പരിധി പ്രഖ്യാപിക്കുന്നില്ല (മൂല്യം `null` ആണ്)        |
 
-`PATCH /api/keys/{id}` നിലവിലുള്ള ഒരു key-യുടെ അനുമതികൾ പുതുക്കുന്നു. മറ്റെല്ലാ `/api/keys*` route-കളെയും പോലെ, ഇതിന് inference key അല്ല, management authorization ആവശ്യമാണ് ([Management Authentication](../guides/MANAGEMENT-AUTH.md) കാണുക). മാറ്റാൻ ആഗ്രഹിക്കുന്ന fields മാത്രം അയയ്ക്കുക; അവയൊന്നും ഇല്ലാത്ത അഭ്യർത്ഥന `No valid fields to update` എന്ന പിശകോടെ നിരസിക്കപ്പെടും. സ്വീകരിക്കുന്ന fields `src/shared/validation/schemas/keys.ts`-ലെ `updateKeyPermissionsSchema` നിർവചിക്കുന്നു.
+നടപ്പാക്കൽ: `src/lib/modelCapabilities.ts` ൽ `getResolvedModelCapabilitiesWithLimitSources()`, `src/lib/modelCapabilityLimits.ts` ൽ മുൻഗണന ശൃംഖലകൾ.
 
-| ഫീൽഡ്                                       | തരം                                                                                  | കുറിപ്പുകൾ                                                                                                                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | string, 1-200 അക്ഷരങ്ങൾ                                                              |                                                                                                                                                                                            |
-| `isActive`                                  | boolean                                                                              |                                                                                                                                                                                            |
-| `isBanned`                                  | boolean                                                                              |                                                                                                                                                                                            |
-| `expiresAt`                                 | ISO 8601 datetime അല്ലെങ്കിൽ `null`                                                  | `null` കാലഹരണപ്പെടൽ നീക്കം ചെയ്യുന്നു                                                                                                                                                      |
-| `modelAccessMode`                           | `all` \| `restricted`                                                                | മോഡ് `all` ആയിരിക്കുമ്പോൾ `allowedModels` ശൂന്യമായിരിക്കണം                                                                                                                                 |
-| `allowedModels`, `blockedModels`            | string-ുകളുടെ array, പരമാവധി 1000                                                    |                                                                                                                                                                                            |
-| `allowedCombos`                             | string-ുകളുടെ array, പരമാവധി 500                                                     | കീയ്ക്ക് ഏതെല്ലാം കോംബോകൾ വിളിക്കാമെന്ന് നിയന്ത്രിക്കുന്നു; നേരിട്ടുള്ള മോഡലുകൾ `modelAccessMode` / `allowedModels` അനുസരിച്ചാണ് നിയന്ത്രിക്കപ്പെടുന്നത്                                   |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                                | `restricted` ആയിരിക്കുമ്പോൾ `allowedConnections` ശൂന്യമല്ലാതെയും `all` ആയിരിക്കുമ്പോൾ ശൂന്യമായും ആയിരിക്കണം                                                                                |
-| `allowedConnections`                        | UUID-കളുടെ array, പരമാവധി 100                                                        |                                                                                                                                                                                            |
-| `allowAutoCombos`                           | boolean                                                                              | `false` ആണെങ്കിൽ ഈ കീ ഉപയോഗിച്ചുള്ള `auto/*` മോഡലുകൾക്കായുള്ള അഭ്യർത്ഥനകൾ നിരസിക്കുന്നു; ഇത് ഒരിക്കലും സജ്ജീകരിച്ചിട്ടില്ലാത്ത കീകൾ അനുവദിക്കപ്പെടും                                       |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                        | ഈ കീയ്ക്കായി `GET /v1/models` എന്തെല്ലാം ലിസ്റ്റ് ചെയ്യണമെന്ന് നിർണ്ണയിക്കുന്നു (കോംബോകൾ മാത്രം, മോഡലുകൾ മാത്രം, അല്ലെങ്കിൽ രണ്ടും); കീയ്ക്ക് എന്തെല്ലാം വിളിക്കാമെന്നത് ഇത് മാറ്റുന്നില്ല |
-| `noLog`, `autoResolve`                      | boolean                                                                              |                                                                                                                                                                                            |
-| `throttleDelayMs`                           | integer, 0-300000                                                                    |                                                                                                                                                                                            |
-| `maxSessions`                               | integer, 0-10000                                                                     |                                                                                                                                                                                            |
-| `rateLimits`                                | `{ limit, window }`-ന്റെ array (പോസിറ്റീവ് integer-കൾ, പരമാവധി 50) അല്ലെങ്കിൽ `null` | `null` പരിധികൾ നീക്കം ചെയ്യുന്നു                                                                                                                                                           |
-| `accessSchedule`                            | ഷെഡ്യൂൾ ഒബ്ജക്റ്റ് അല്ലെങ്കിൽ `null`                                                 | `null` ഷെഡ്യൂൾ നീക്കം ചെയ്യുന്നു                                                                                                                                                           |
-| `scopes`                                    | string-ുകളുടെ array, പരമാവധി 32                                                      |                                                                                                                                                                                            |
-| `allowedEndpoints`                          | string-ുകളുടെ array, പരമാവധി 20                                                      |                                                                                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                                   |                                                                                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                                 | [ഓരോ കീയ്ക്കുമുള്ള കാഷ് ബൈപാസ്](#per-key-cache-bypass) കാണുക                                                                                                                               |
-| `compressionEnabled`                        | boolean                                                                              |                                                                                                                                                                                            |
-| `codexServiceMode`                          | Codex സേവന മോഡുകളിൽ ഒന്ന്                                                            |                                                                                                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                                              |                                                                                                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                                              |                                                                                                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                                              |                                                                                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 0-നേക്കാൾ വലുതോ തുല്യമോ ആയ number അല്ലെങ്കിൽ `null`                                  |                                                                                                                                                                                            |
-| `chaosModeEnabled`                          | boolean                                                                              |                                                                                                                                                                                            |
+### ഉപയോഗവും വിശകലനവും
+
+| അവസാന പോയിൻ്റ്                   | രീതി            | വിവരണം                                                                                                                                                                                                                                                                                                                    |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | ഉപയോഗ ചരിത്രം                                                                                                                                                                                                                                                                                                             |
+| `/api/usage/logs`                | GET             | ഉപയോഗ രേഖകൾ                                                                                                                                                                                                                                                                                                               |
+| `/api/usage/request-logs`        | GET             | അഭ്യർത്ഥന ലെവൽ ലോഗുകൾ                                                                                                                                                                                                                                                                                                     |
+| `/api/usage/[connectionId]`      | GET             | ഓരോ കണക്ഷനും ഉപയോഗം                                                                                                                                                                                                                                                                                                       |
+| `/api/usage/token-limits`        | GET/POST/DELETE | ഓരോ API-കീ ടോക്കൺ-പരിധി ബജറ്റുകൾ                                                                                                                                                                                                                                                                                          |
+| `/api/usage/model-latency-stats` | GET             | റോളിംഗ് per-provider/model ലേറ്റൻസി അഗ്രഗേറ്റ് (avg/p50/p95/p99, വിജയ നിരക്ക്); ഫിൽട്ടറുകൾ: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                               |
+| `/api/usage/cache-health`        | GET             | `call_logs` — write/read അനുപാതം, p50/p90/p99 റൈറ്റ്-സൈസ് ഡിസ്ട്രിബ്യൂഷൻ, ഹെവി-റൈറ്റ് കോൺസൺട്രേഷൻ, ഓരോ മോഡൽ വിഭജനം, ഒരു `healthy`/`degraded`/`thrash`/`no-data` വിധി എന്നിവയെക്കുറിച്ചുള്ള പ്രോംപ്റ്റ്-കാഷെ ആരോഗ്യ സംഗ്രഹം; ചോദ്യം `range` (`1h`\| `24h`\| `7d`\| `30d`, സ്ഥിരസ്ഥിതി `24h`) കൂടാതെ ഓപ്ഷണൽ `model` (#8827) |
+
+### API കീ അനുമതികൾ
+
+`PATCH /api/keys/{id}` നിലവിലുള്ള ഒരു കീയുടെ അനുമതികൾ അപ്ഡേറ്റ് ചെയ്യുന്നു. എല്ലാ `/api/keys*` റൂട്ടുകൾക്കും പോലെ ഇതിന് മാനേജ്മെൻ്റ് അംഗീകാരം ആവശ്യമാണ് ( [മാനേജ്മെൻ്റ് ആധികാരികത](../guides/MANAGEMENT-AUTH.md) കാണുക), ഒരു അനുമാന കീ അല്ല. നിങ്ങൾ മാറ്റാൻ ആഗ്രഹിക്കുന്ന ഫീൽഡുകൾ മാത്രം അയയ്ക്കുക; അവയിൽ ഒന്നുമില്ലാത്ത ഒരു അഭ്യർത്ഥന `No valid fields to update` ഉപയോഗിച്ച് നിരസിക്കപ്പെട്ടു. അംഗീകൃത ഫീൽഡുകൾ `src/shared/validation/schemas/keys.ts` ൽ `updateKeyPermissionsSchema` നിർവചിച്ചിരിക്കുന്നു.
+
+| ഫീൽഡ്                                       | ടൈപ്പ് ചെയ്യുക                                                           | കുറിപ്പുകൾ                                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | സ്ട്രിംഗ്, 1-200 അക്ഷരങ്ങൾ                                               |                                                                                                                                                                                                                                                                                 |
+| `isActive`                                  | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `isBanned`                                  | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 തീയതി സമയം അല്ലെങ്കിൽ `null`                                    | `null` കാലഹരണപ്പെടൽ മായ്ക്കുന്നു                                                                                                                                                                                                                                                |
+| `modelAccessMode`                           | `all` \| `restricted`                                                    | മോഡ് `all` ആയിരിക്കുമ്പോൾ `allowedModels` ശൂന്യമായിരിക്കണം                                                                                                                                                                                                                      |
+| `allowedModels`, `blockedModels`            | 1000 വരെ സ്ട്രിംഗുകളുടെ നിര                                              |                                                                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | 500 വരെ സ്ട്രിംഗുകളുടെ നിര                                               | കീ കോമ്പോസ് ചെയ്യുന്ന ഗേറ്റുകൾ വിളിക്കാം; നേരിട്ടുള്ള മോഡലുകൾ നിയന്ത്രിക്കുന്നത് `modelAccessMode` / `allowedModels` ആണ്                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                    | `restricted` ആകുമ്പോൾ `allowedConnections` ശൂന്യവും `all` ആകുമ്പോൾ ശൂന്യവുമാകണം                                                                                                                                                                                                 |
+| `allowedConnections`                        | UUIDs യുടെ നിര, 100 വരെ                                                  |                                                                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | ബൂളിയൻ                                                                   | ഈ കീ ഉപയോഗിച്ച് `auto/*` മോഡലുകൾക്കായുള്ള അഭ്യർത്ഥനകൾ `false` നിരസിക്കുന്നു; ഒരിക്കലും സജ്ജീകരിക്കാത്ത കീകൾ അനുവദനീയമാണ്                                                                                                                                                        |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                            | ഈ കീക്കായി `GET /v1/models` ലിസ്റ്റ് ചെയ്യുന്നവ (കോമ്പോസ് മാത്രം, മോഡലുകൾ മാത്രം, അല്ലെങ്കിൽ രണ്ടും); കീ വിളിക്കുന്നതിനെ ഇത് മാറ്റില്ല                                                                                                                                          |
+| `forcedModel`                               | 300 അക്ഷരങ്ങൾ വരെ സ്ട്രിംഗ്, അല്ലെങ്കിൽ `null`                           | `X-Route-Model`, `body.model` എന്നിവയിലൂടെ ഈ model/combo ലേക്കുള്ള ചാറ്റ് അഭ്യർത്ഥനകൾ റൂട്ടുകൾ; കീയുടെ പരിധികൾ ഇപ്പോഴും ബാധകമാണ്                                                                                                                                                |
+| `noLog`, `autoResolve`                      | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | പൂർണ്ണസംഖ്യ, 0-300000                                                    |                                                                                                                                                                                                                                                                                 |
+| `maxSessions`                               | പൂർണ്ണസംഖ്യ, 0-10000                                                     |                                                                                                                                                                                                                                                                                 |
+| `rateLimits`                                | `{ limit, window }` (പോസിറ്റീവ് പൂർണ്ണസംഖ്യകൾ, 50 വരെ) അല്ലെങ്കിൽ `null` | `null` പരിധികൾ മായ്ക്കുന്നു                                                                                                                                                                                                                                                     |
+| `accessSchedule`                            | ഷെഡ്യൂൾ ഒബ്ജക്റ്റ് അല്ലെങ്കിൽ `null`                                     | `null` ഷെഡ്യൂൾ മായ്ക്കുന്നു                                                                                                                                                                                                                                                     |
+| `scopes`                                    | സ്ട്രിംഗുകളുടെ നിര, 32 വരെ                                               |                                                                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | സ്ട്രിംഗുകളുടെ നിര, 20 വരെ                                               |                                                                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                       |                                                                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                     | [ഓരോ കീ കാഷെ ബൈപാസ്](#per-key-cache-bypass) കാണുക                                                                                                                                                                                                                               |
+| `compressionEnabled`                        | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | Codex സേവന മോഡുകളിൽ ഒന്ന്                                                |                                                                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | നമ്പർ >= 0 അല്ലെങ്കിൽ `null`                                             |                                                                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | നമ്പർ >= 0 അല്ലെങ്കിൽ `null`                                             | റോളിംഗ് 5 മണിക്കൂർ USD ബജറ്റ്, ദൈനംദിന, പ്രതിവാര പരിധികൾ (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`) പോലെ നടപ്പിലാക്കുന്നു. `retry-after` എന്നത് വിൻഡോയിലെ ഏറ്റവും പഴയ ചിലവുകൾക്ക് പ്രായമാകുമ്പോൾ, അതിൻ്റെ പരിധിക്കപ്പുറം ഒരു താക്കോൽ ഇപ്പോഴും ബ്ലോക്ക് ചെയ്യപ്പെടാം. |
+| `chaosModeEnabled`                          | ബൂളിയൻ                                                                   |                                                                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1030,151 +1327,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### ക്രമീകരണങ്ങൾ
 
-| എൻഡ്പോയിന്റ്                          | രീതി          | വിവരണം                                                                                                                                                                                       |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | പൊതുവായ ക്രമീകരണങ്ങൾ                                                                                                                                                                         |
-| `/api/settings/proxy`                 | GET/PUT       | നെറ്റ്വർക്ക് പ്രോക്സി കോൺഫിഗറേഷൻ                                                                                                                                                             |
-| `/api/settings/proxy/test`            | POST          | പ്രോക്സി കണക്ഷൻ പരിശോധിക്കുക                                                                                                                                                                 |
-| `/api/settings/ip-filter`             | GET/PUT       | IP അനുവദനീയപട്ടിക/തടയൽപട്ടിക                                                                                                                                                                 |
-| `/api/settings/thinking-budget`       | GET/PUT       | ചിന്തിക്കൽ/യുക്തിചിന്താ **അഭ്യർത്ഥന** റീറൈറ്റ് മോഡ് (passthrough / auto-strip / custom / adaptive). കംപ്രഷനിൽനിന്ന് സ്വതന്ത്രമാണ്. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) കാണുക. |
-| `/api/settings/system-prompt`         | GET/PUT       | ആഗോള സിസ്റ്റം പ്രോംപ്റ്റ്                                                                                                                                                                    |
-| `/api/settings/compression`           | GET/PUT       | ആഗോള കംപ്രഷൻ കോൺഫിഗറേഷൻ                                                                                                                                                                      |
-| `/api/settings/purge-request-history` | POST          | അഭ്യർത്ഥനാ ലോഗ് വരികളും ലോക്കൽ കോൾ-ലോഗ് ആർട്ടിഫാക്റ്റുകളും മായ്ക്കുക                                                                                                                         |
+| അവസാന പോയിൻ്റ്                        | രീതി          | വിവരണം                                                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | പൊതുവായ ക്രമീകരണങ്ങൾ. സുരക്ഷാ-നയ കീകൾക്ക് (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) `currentPassword` ആവശ്യമാണ്, കൂടാതെ ഒരു ഓപ്പറേറ്റർ ക്രെഡൻഷ്യൽ — API കീകളും `oma_` ടോക്കണുകളും `403` ലഭിക്കും; എല്ലാ മ്യൂട്ടേഷനും `admin` ആക്സസ്-ടോക്കൺ സ്കോപ്പ് ആവശ്യമാണ് |
+| `/api/settings/proxy`                 | GET/PUT       | നെറ്റ്വർക്ക് പ്രോക്സി കോൺഫിഗറേഷൻ                                                                                                                                                                                                                                                                    |
+| `/api/settings/proxy/test`            | POST          | പ്രോക്സി കണക്ഷൻ പരിശോധിക്കുക                                                                                                                                                                                                                                                                        |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                              |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** അഭ്യർത്ഥന** റീറൈറ്റ് മോഡ് (പാസ്ത്രൂ / ഓട്ടോ-സ്ട്രിപ്പ് / കസ്റ്റം / അഡാപ്റ്റീവ്). കംപ്രഷൻ സ്വതന്ത്രമായി. [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md) കാണുക .                                                                                                             |
+| `/api/settings/system-prompt`         | GET/PUT       | ഗ്ലോബൽ സിസ്റ്റം പ്രോംപ്റ്റ്                                                                                                                                                                                                                                                                         |
+| `/api/settings/compression`           | GET/PUT       | ഗ്ലോബൽ കംപ്രഷൻ കോൺഫിഗറേഷൻ                                                                                                                                                                                                                                                                           |
+| `/api/settings/purge-request-history` | POST          | അഭ്യർത്ഥന ലോഗ് വരികളും പ്രാദേശിക കോൾ-ലോഗ് ആർട്ടിഫാക്റ്റുകളും മായ്ക്കുക                                                                                                                                                                                                                              |
 
-### കോൺടെക്സ്റ്റും കംപ്രഷനും
+### സന്ദർഭവും കംപ്രഷനും
 
-| എൻഡ്പോയിന്റ്                           | രീതി           | വിവരണം                                                                                              |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked കംപ്രഷൻ പ്രിവ്യൂ ചെയ്യുക                             |
-| `/api/compression/language-packs`      | GET            | ലഭ്യമായ Caveman ഭാഷാ പാക്കുകൾ പട്ടികപ്പെടുത്തുക                                                     |
-| `/api/compression/rules`               | GET            | Caveman നിയമ മെറ്റാഡാറ്റ പട്ടികപ്പെടുത്തുക                                                          |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman-നിർദ്ദിഷ്ട ക്രമീകരണങ്ങളുടെ അപരനാമം                                                          |
-| `/api/context/rtk/config`              | GET/PUT        | ഇഷ്ടാനുസൃത ഫിൽട്ടറുകളും അസംസ്കൃത ഔട്ട്പുട്ട് നിലനിർത്തലും ഉൾപ്പെടെയുള്ള RTK-നിർദ്ദിഷ്ട ക്രമീകരണങ്ങൾ |
-| `/api/context/rtk/filters`             | GET            | RTK ഫിൽട്ടർ കാറ്റലോഗും ഇഷ്ടാനുസൃത-ഫിൽട്ടർ ഡയഗ്നോസ്റ്റിക്സും                                         |
-| `/api/context/rtk/test`                | POST           | ഒരു ടെക്സ്റ്റ് പേലോഡിനെതിരെ RTK പ്രിവ്യൂ/ടെസ്റ്റ് പ്രവർത്തിപ്പിക്കുക                                |
-| `/api/context/rtk/raw-output/[id]`     | GET            | പോയിന്റർ id ഉപയോഗിച്ച് നിലനിർത്തിയ തിരുത്തിയ അസംസ്കൃത ഔട്ട്പുട്ട് വായിക്കുക                         |
-| `/api/context/combos`                  | GET/POST       | കംപ്രഷൻ കോംബോ പട്ടികപ്പെടുത്തുക/സൃഷ്ടിക്കുക                                                         |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | കംപ്രഷൻ കോംബോയുടെ വിശദാംശം/അപ്ഡേറ്റ്/ഇല്ലാതാക്കൽ                                                    |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | റൂട്ടിംഗ് കോംബോകൾക്ക് കംപ്രഷൻ കോംബോകൾ നൽകുക                                                         |
-| `/api/context/analytics`               | GET            | കംപ്രഷൻ അനലിറ്റിക്സ് അപരനാമം                                                                        |
+| അവസാന പോയിൻ്റ്                         | രീതി           | വിവരണം                                                                                        |
+| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked കംപ്രഷൻ പ്രിവ്യൂ ചെയ്യുക                       |
+| `/api/compression/language-packs`      | GET            | ലഭ്യമായ കേവ്മാൻ ഭാഷാ പായ്ക്കുകൾ ലിസ്റ്റ് ചെയ്യുക                                              |
+| `/api/compression/rules`               | GET            | കേവ്മാൻ റൂൾ മെറ്റാഡാറ്റ ലിസ്റ്റ് ചെയ്യുക                                                      |
+| `/api/context/caveman/config`          | GET/PUT        | കേവ്മാൻ-നിർദ്ദിഷ്ട ക്രമീകരണം അപരനാമം                                                          |
+| `/api/context/rtk/config`              | GET/PUT        | ഇഷ്ടാനുസൃത ഫിൽട്ടറുകളും റോ-ഔട്ട്പുട്ട് നിലനിർത്തലും ഉൾപ്പെടെയുള്ള RTK-നിർദ്ദിഷ്ട ക്രമീകരണങ്ങൾ |
+| `/api/context/rtk/filters`             | GET            | RTK ഫിൽട്ടർ കാറ്റലോഗും ഇഷ്ടാനുസൃത-ഫിൽട്ടർ ഡയഗ്നോസ്റ്റിക്സും                                   |
+| `/api/context/rtk/test`                | POST           | ഒരു ടെക്സ്റ്റ് പേലോഡിനെതിരെ RTK preview/test പ്രവർത്തിപ്പിക്കുക                               |
+| `/api/context/rtk/raw-output/[id]`     | GET            | പോയിൻ്റർ ഐഡി മുഖേന നിലനിർത്തിയ തിരുത്തിയ റോ ഔട്ട്പുട്ട് വായിക്കുക                             |
+| `/api/context/combos`                  | GET/POST       | കംപ്രഷൻ കോംബോ list/create                                                                     |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | കംപ്രഷൻ കോംബോ detail/update/delete                                                            |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | റൂട്ടിംഗ് കോമ്പോകൾക്ക് കംപ്രഷൻ കോമ്പോകൾ നൽകുക                                                 |
+| `/api/context/analytics`               | GET            | കംപ്രഷൻ അനലിറ്റിക്സ് അപരനാമം                                                                  |
 
 ### നിരീക്ഷണം
 
-| Endpoint                             | Method     | വിവരണം                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | സജീവ സെഷൻ ട്രാക്കിംഗ്                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `/api/rate-limits`                   | GET        | ഓരോ അക്കൗണ്ടിനുമുള്ള നിരക്ക് പരിധികൾ                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/monitoring/health`             | GET        | ആരോഗ്യ പരിശോധന + പ്രൊവൈഡർ സംഗ്രഹം (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). മാനേജ്മെന്റ് കാഴ്ചയിൽ `credentialHealth` ഉൾപ്പെടുന്നു: പ്രോബ്-കാഷ് സ്കെയിലറുകൾ, `failed>0` ആയിരിക്കുമ്പോൾ `failedConnections`, കൂടാതെ `staleDbNonOkCount` (SQLite സ്റ്റിക്കി `test_status`, ഗേജ് അല്ല). [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) കാണുക. |
-| `/api/cache/stats`                   | GET/DELETE | കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ / മായ്ക്കൽ                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/modality-bridge/stats`         | GET        | ഇൻ-മെമ്മറി `attempts`, വിജയങ്ങൾ/`bridged`, പരാജയങ്ങൾ, കാഷ് ഹിറ്റുകൾ, `totalLatencyMs`, `latencySamples`, സാമ്പിൾ അടിസ്ഥാനത്തിലുള്ള `averageLatencyMs`, അവസാനമായി ഉപയോഗിച്ച സമയം (പുനരാരംഭിക്കുമ്പോൾ റീസെറ്റ് ചെയ്യും; മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ)                                                                                                                                                                            |
-| `/api/modality-bridge/video/runtime` | GET        | മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ/പ്രോബിന് മുമ്പുള്ള കർശനമായ വിശ്വസനീയ-ലൂപ്പ്ബാക്ക് പരിശോധന; ശുദ്ധീകരിച്ച FFmpeg/ffprobe ലഭ്യതയും പതിപ്പുകളും (സംഭരിക്കരുത്)                                                                                                                                                                                                                                                                        |
-| `/api/modality-bridge/video/extract` | POST       | ആന്തരിക ഓതന്റിക്കേഷൻ ചെയ്ത വിശ്വസനീയ-ലൂപ്പ്ബാക്ക് ബൈറ്റ് ബ്രോക്കർ; 50 MiB ഇൻപുട്ട്, പരിധിയുള്ള ക്യൂ/32 MiB ഔട്ട്പുട്ട്, `503` ശേഷി, `499` വിച്ഛേദം, `504` സമയപരിധി; ഇതൊരു പൊതു അപ്ലോഡ് API അല്ല                                                                                                                                                                                                                             |
+| അവസാന പോയിൻ്റ്                       | രീതി       | വിവരണം                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | സജീവമായ സെഷൻ ട്രാക്കിംഗ്                                                                                                                                                                                                                                                                                                                                                                                            |
+| `/api/rate-limits`                   | GET        | ഓരോ അക്കൗണ്ടിനും നിരക്ക് പരിധി                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/monitoring/health`             | GET        | ആരോഗ്യ പരിശോധന + ദാതാവിൻ്റെ സംഗ്രഹം (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). മാനേജ്മെൻ്റ് കാഴ്ചയിൽ `credentialHealth` ഉൾപ്പെടുന്നു: പ്രോബ്-കാഷെ സ്കെയിലറുകൾ, `failedConnections` ചെയ്യുമ്പോൾ `failed>0`, `staleDbNonOkCount` (SQLite സ്റ്റിക്കി `test_status`, ഗേജ് അല്ല). [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status) കാണുക. |
+| `/api/cache/stats`                   | GET/DELETE | കാഷെ സ്ഥിതിവിവരക്കണക്കുകൾ / വ്യക്തമായത്                                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/modality-bridge/stats`         | GET        | ഇൻ-മെമ്മറി `attempts`, വിജയങ്ങൾ/`bridged`, പരാജയങ്ങൾ, കാഷെ ഹിറ്റുകൾ, `totalLatencyMs`, `latencySamples`, സാമ്പിൾ-ഡിനോമിനേറ്റഡ് `averageLatencyMs`, അവസാന ഉപയോഗ സമയം (പുനരാരംഭിക്കുമ്പോൾ പുനഃസജ്ജമാക്കുക; മാനേജ്മെൻ്റ് ഓത്ത്)                                                                                                                                                                                        |
+| `/api/modality-bridge/video/runtime` | GET        | മാനേജ്മെൻ്റ് auth/probe ന് മുമ്പായി കർശനമായ വിശ്വസനീയമായ-ലൂപ്പ്ബാക്ക് പരിശോധന; അണുവിമുക്തമാക്കിയ FFmpeg/ffprobe ലഭ്യതയും പതിപ്പുകളും (സ്റ്റോർ ഇല്ല)                                                                                                                                                                                                                                                                 |
+| `/api/modality-bridge/video/extract` | POST       | ആന്തരിക ആധികാരികതയുള്ള വിശ്വസനീയ-ലൂപ്പ്ബാക്ക് ബൈറ്റ് ബ്രോക്കർ; 50 MiB ഇൻപുട്ട്, ബൗണ്ടഡ് queue/32 MiB ഔട്ട്പുട്ട്, `503` കപ്പാസിറ്റി, `499` ഡിസ്കണക്ട്, `504` ഡെഡ്ലൈൻ; ഒരു പൊതു അപ്ലോഡ് API അല്ല                                                                                                                                                                                                                     |
 
-### ബാക്കപ്പും എക്സ്പോർട്ട്/ഇംപോർട്ടും
+### വീഡിയോ ഫ്രെയിം ഡ്രിൽ-ഡൗൺ
 
-| Endpoint                    | Method | വിവരണം                                                   |
-| --------------------------- | ------ | -------------------------------------------------------- |
-| `/api/db-backups`           | GET    | ലഭ്യമായ ബാക്കപ്പുകൾ പട്ടികപ്പെടുത്തുക                    |
-| `/api/db-backups`           | PUT    | മാനുവൽ ബാക്കപ്പ് സൃഷ്ടിക്കുക                             |
-| `/api/db-backups`           | POST   | ഒരു നിർദ്ദിഷ്ട ബാക്കപ്പിൽ നിന്ന് പുനഃസ്ഥാപിക്കുക         |
-| `/api/db-backups/export`    | GET    | ഡാറ്റാബേസ് .sqlite ഫയലായി ഡൗൺലോഡ് ചെയ്യുക                |
-| `/api/db-backups/import`    | POST   | ഡാറ്റാബേസ് മാറ്റിസ്ഥാപിക്കാൻ .sqlite ഫയൽ അപ്ലോഡ് ചെയ്യുക |
-| `/api/db-backups/exportAll` | GET    | പൂർണ്ണ ബാക്കപ്പ് .tar.gz ആർക്കൈവായി ഡൗൺലോഡ് ചെയ്യുക      |
+വ്യക്തമായ സമ്മതമുള്ള വീഡിയോ ബ്രിഡ്ജ് അഭ്യർത്ഥനയ്ക്ക് ശേഷം `x-omniroute-video-drilldown` യിൽ തിരിച്ചെത്തിയ കുടിയാൻ ബന്ധിത അതാര്യമായ ഹാൻഡിൽ `GET /api/v1/video-bridge/drilldown` വായിക്കുന്നു. റീഡിനും `DELETE` എപ്പോഴും സാധുവായ ഒരു API കീയും ഓപ്പറേറ്ററുടെ സ്വതന്ത്ര `modalityBridgeVideoDrilldownRemoteEnabled` അനുമതിയും ആവശ്യമാണ്. ഉൽപ്പാദനം നിലനിർത്തുന്നതിന് `modalityBridgeVideoDrilldownEnabled` ഉം കർശനമായ ഓരോ ഭാഗവും `drilldown: true` ആവശ്യമാണ്. കീയ്ക്ക് ശൂന്യമല്ലാത്ത എൻഡ്പോയിൻ്റ് അനുവദിക്കൽ ലിസ്റ്റ് ഉണ്ടെങ്കിൽ, കോളർ `/v1` അല്ലെങ്കിൽ `/api/v1` ഉപയോഗിച്ചാലും GET, DELETE എന്നിവയ്ക്കായി അതിൽ `video` ഉൾപ്പെടുത്തണം.
+
+GET അന്വേഷണം: ആവശ്യമായ `handle`; ഓപ്ഷണൽ `variant` (`preview`, `standard`, `detail`), `limit` (1-8; ലെഗസി `frames` സ്വീകാര്യമാണ് എന്നാൽ `limit` യുമായി സംയോജിപ്പിക്കാൻ കഴിയില്ല), പൂജ്യം അടിസ്ഥാനമാക്കിയുള്ള `page`, `start`/`end` സെക്കൻഡ്. രണ്ട് ഫോക്കസ് ബൗണ്ടുകളും നൽകുമ്പോൾ, `end` `start` നേക്കാൾ വലുതായിരിക്കണം. Duplicate/unknown അന്വേഷണ കീകൾ നിരസിച്ചു. വിജയകരമായ പ്രതികരണങ്ങളിൽ `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant`, ഓപ്ഷണൽ `focusWindow` എന്നിവ അടങ്ങിയിരിക്കുന്നു; നോ-സ്റ്റോർ JSON Base64 ഉൾപ്പെടെ 32 MiB ആണ്. ഓവർസൈസ്ഡ് ഔട്ട്പുട്ട് റിട്ടേൺസ് 413; കുറച്ച് ഫ്രെയിമുകൾ അഭ്യർത്ഥിക്കുക.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` `{ "removed": 0|1 }` തിരികെ നൽകുന്നു. അജ്ഞാതവും കാലഹരണപ്പെട്ടതും ക്രോസ്-കീ GETs വേർതിരിച്ചറിയാൻ കഴിയാത്ത 404 പ്രതികരണങ്ങളാണ്; ക്രോസ്-കീ DELETE ഉടമയുടെ എൻട്രി നീക്കം ചെയ്യാൻ കഴിയില്ല. അപ്രാപ്തമാക്കിയ ആക്സസ്സ് 403, missing/invalid പ്രാമാണീകരണം 401, അസാധുവായ അന്വേഷണങ്ങൾ 400, റദ്ദാക്കൽ 499, താൽക്കാലിക പിശകുകൾ 503. ഹാൻഡിലുകൾ പ്രോസസ്-ലോക്കൽ ആണ്, പത്ത് മിനിറ്റിന് ശേഷം കാലഹരണപ്പെടും, പുനരാരംഭിച്ചാൽ അത് നിലനിൽക്കില്ല. പുതിയ ഹാൻഡിലുകൾ `v1.` കൂടാതെ 32-ബൈറ്റ് റാൻഡം Base64URL ടോക്കൺ ഉപയോഗിക്കുന്നു; ടോക്കൺ ഹാഷുകൾ മാത്രം നിലനിർത്തുന്നു. ലെഗസി 64-ഹെക്സ് ടോക്കണുകൾ അനുയോജ്യതയ്ക്കായി വാക്യഘടനാപരമായി വായിക്കാൻ കഴിയുന്നവയായി തുടരുന്നു. സമ്മതം, ക്വാട്ട, വേരിയൻറ് ഡെറിവേഷൻ വിശദാംശങ്ങൾ എന്നിവയ്ക്കായി [വീഡിയോ ബ്രിഡ്ജ് ഗാർഡ്റെയിലുകൾ](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) കാണുക.
+
+### ബാക്കപ്പ് & Export/Import
+
+| അവസാന പോയിൻ്റ്              | രീതി   | വിവരണം                                                                                                 |
+| --------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| `/api/db-backups`           | GET    | ലഭ്യമായ ബാക്കപ്പുകൾ ലിസ്റ്റ് ചെയ്യുക                                                                   |
+| `/api/db-backups`           | PUT    | ഒരു മാനുവൽ ബാക്കപ്പ് സൃഷ്ടിക്കുക                                                                       |
+| `/api/db-backups`           | POST   | ഒരു നിർദ്ദിഷ്ട ബാക്കപ്പിൽ നിന്ന് പുനഃസ്ഥാപിക്കുക                                                       |
+| `/api/db-backups`           | PATCH  | ബാക്കപ്പ് നിലനിർത്തൽ ക്രമീകരണങ്ങൾ സംരക്ഷിക്കുക (ഓപ്പറേറ്റർ-മാത്രം)                                     |
+| `/api/db-backups`           | DELETE | സംഭരിച്ച ബാക്കപ്പുകൾ നിലനിർത്തൽ ക്രമീകരണങ്ങളിലേക്ക് പ്രൂൺ ചെയ്യുക (ഓപ്പറേറ്റർ-മാത്രം)                  |
+| `/api/db-backups/export`    | GET    | ഡാറ്റാബേസ് .sqlite ഫയലായി ഡൗൺലോഡ് ചെയ്യുക                                                              |
+| `/api/db-backups/import`    | POST   | ഡാറ്റാബേസ് മാറ്റിസ്ഥാപിക്കുന്നതിന് .sqlite ഫയൽ അപ്ലോഡ് ചെയ്യുക (`?dryRun=true` സാധൂകരിക്കുന്നു മാത്രം) |
+| `/api/db-backups/exportAll` | GET    | മുഴുവൻ ബാക്കപ്പും .tar.gz ആർക്കൈവ് ആയി ഡൗൺലോഡ് ചെയ്യുക                                                 |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll`, `/api/settings/export-json` എന്നിവ സംഭരിച്ചിരിക്കുന്ന എല്ലാ ക്രെഡൻഷ്യലുകളും കൈമാറുന്നു, അതിനാൽ അവർക്ക് ഡാഷ്ബോർഡ് സെഷനോ പ്രാദേശിക CLI (അല്ലെങ്കിൽ ലോഗിൻ പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു) ആവശ്യമാണ്. ഏത് സ്കോപ്പിൻ്റെയും API കീകൾക്കും `oma_` ആക്സസ് ടോക്കണുകൾക്കും `403` ലഭിക്കും. പുനഃസ്ഥാപിക്കലുകളും ഒരേ അതിർത്തി നിലനിർത്തുന്നു: `POST /api/db-backups/import` (`dryRun=true` ഉൾപ്പെടുത്തിയിട്ടുണ്ട്), `POST /api/db-backups` (ഐഡി ഉപയോഗിച്ച് പുനഃസ്ഥാപിക്കുക), `POST /api/settings/import-json` തത്സമയ ഡാറ്റാബേസ് അല്ലെങ്കിൽ ക്രമീകരണങ്ങൾ മാറ്റിസ്ഥാപിക്കുന്നു, അതിനാൽ ഒരു മെഷീൻ ക്രെഡൻഷ്യൽ അവിടെയും `403` ലഭിക്കും; `omniroute sync import` പ്രാദേശിക CLI ക്രെഡൻഷ്യൽ അയയ്ക്കുന്നു. അതിനാൽ, `DELETE /api/db-backups` (സംഭരിച്ച ബാക്കപ്പുകൾ വെട്ടിമാറ്റുക), `PATCH /api/db-backups` (നിലനിർത്തൽ ക്രമീകരണങ്ങൾ: ഓരോ ബാക്കപ്പിനു ശേഷവും സ്വയമേവയുള്ള പ്രൂണിംഗ് നിലനിർത്തുന്നത് സ്ഥിരമായ മൂല്യങ്ങൾ) ചെയ്യുക. ലിസ്റ്റുചെയ്യലും (`GET`) ഒരു മാനുവൽ ബാക്കപ്പ് സൃഷ്ടിക്കുന്നതും (`PUT`) സാധാരണ മാനേജ്മെൻ്റ് ഓത്ത് നിലനിർത്തുക.
 
 ### ക്ലൗഡ് സമന്വയം
 
-| Endpoint               | Method | വിവരണം                      |
-| ---------------------- | ------ | --------------------------- |
-| `/api/sync/cloud`      | വിവിധം | ക്ലൗഡ് സമന്വയ പ്രവർത്തനങ്ങൾ |
-| `/api/sync/initialize` | POST   | സമന്വയം ആരംഭിക്കുക          |
-| `/api/cloud/*`         | വിവിധം | ക്ലൗഡ് മാനേജ്മെന്റ്         |
+| അവസാന പോയിൻ്റ്         | രീതി  | വിവരണം                      |
+| ---------------------- | ----- | --------------------------- |
+| `/api/sync/cloud`      | വിവിധ | ക്ലൗഡ് സമന്വയ പ്രവർത്തനങ്ങൾ |
+| `/api/sync/initialize` | POST  | സമന്വയം ആരംഭിക്കുക          |
+| `/api/cloud/*`         | വിവിധ | ക്ലൗഡ് മാനേജ്മെൻ്റ്         |
 
-### ടണലുകൾ
+### തുരങ്കങ്ങൾ
 
-| Endpoint                   | Method | വിവരണം                                                                                                 |
-| -------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
-| `/api/tunnels/cloudflared` | GET    | ഡാഷ്ബോർഡിനായുള്ള Cloudflare Quick Tunnel ഇൻസ്റ്റാൾ/റൺടൈം നില വായിക്കുക                                 |
-| `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel പ്രവർത്തനക്ഷമമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കുക (`action=enable/disable`) |
-| `/api/tunnels/ngrok`       | GET    | ഡാഷ്ബോർഡിനായുള്ള ngrok Tunnel റൺടൈം നില വായിക്കുക                                                      |
-| `/api/tunnels/ngrok`       | POST   | ngrok Tunnel പ്രവർത്തനക്ഷമമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കുക (`action=enable/disable`)            |
+| അവസാന പോയിൻ്റ്             | രീതി | വിവരണം                                                                                                  |
+| -------------------------- | ---- | ------------------------------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET  | ഡാഷ്ബോർഡിനായി Cloudflare ക്വിക്ക് ടണൽ install/runtime സ്റ്റാറ്റസ് വായിക്കുക                             |
+| `/api/tunnels/cloudflared` | POST | Cloudflare ദ്രുത തുരങ്കം (`action=enable/disable`) പ്രവർത്തനക്ഷമമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കുക |
+| `/api/tunnels/ngrok`       | GET  | ഡാഷ്ബോർഡിനായി ngrok ടണൽ റൺടൈം സ്റ്റാറ്റസ് വായിക്കുക                                                     |
+| `/api/tunnels/ngrok`       | POST | ngrok ടണൽ (`action=enable/disable`) പ്രവർത്തനക്ഷമമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തനരഹിതമാക്കുക                |
 
-### CLI ഉപകരണങ്ങൾ
+### CLI ടൂളുകൾ
 
-| എൻഡ്പോയിന്റ്                       | രീതി | വിവരണം            |
-| ---------------------------------- | ---- | ----------------- |
-| `/api/cli-tools/claude-settings`   | GET  | Claude CLI നില    |
-| `/api/cli-tools/codex-settings`    | GET  | Codex CLI നില     |
-| `/api/cli-tools/droid-settings`    | GET  | Droid CLI നില     |
-| `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI നില  |
-| `/api/cli-tools/runtime/[toolId]`  | GET  | പൊതുവായ CLI റൺടൈം |
+| അവസാന പോയിൻ്റ്                     | രീതി | വിവരണം           |
+| ---------------------------------- | ---- | ---------------- |
+| `/api/cli-tools/claude-settings`   | GET  | Claude CLI നില   |
+| `/api/cli-tools/codex-settings`    | GET  | Codex CLI നില    |
+| `/api/cli-tools/droid-settings`    | GET  | Droid CLI നില    |
+| `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI നില |
+| `/api/cli-tools/runtime/[toolId]`  | GET  | ജനറിക് CLI റൺടൈം |
 
-CLI പ്രതികരണങ്ങളിൽ ഇവ ഉൾപ്പെടുന്നു: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI പ്രതികരണങ്ങളിൽ ഉൾപ്പെടുന്നു: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### ACP ഏജന്റുകൾ
+### ACP ഏജൻ്റുകൾ
 
-| എൻഡ്പോയിന്റ്      | രീതി   | വിവരണം                                                                                 |
-| ----------------- | ------ | -------------------------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | കണ്ടെത്തിയ എല്ലാ ഏജന്റുകളെയും (ബിൽറ്റ്-ഇൻ + ഇഷ്ടാനുസൃതം) നിലയോടൊപ്പം പട്ടികപ്പെടുത്തുക |
-| `/api/acp/agents` | POST   | ഇഷ്ടാനുസൃത ഏജന്റ് ചേർക്കുക അല്ലെങ്കിൽ കണ്ടെത്തൽ കാഷ് പുതുക്കുക                         |
-| `/api/acp/agents` | DELETE | `id` ക്വറി പാരാമീറ്റർ ഉപയോഗിച്ച് ഒരു ഇഷ്ടാനുസൃത ഏജന്റിനെ നീക്കംചെയ്യുക                 |
+| അവസാന പോയിൻ്റ്    | രീതി   | വിവരണം                                                                                       |
+| ----------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | കണ്ടെത്തിയ എല്ലാ ഏജൻ്റുമാരെയും (ബിൽറ്റ്-ഇൻ + ഇഷ്ടാനുസൃതം) സ്റ്റാറ്റസിനൊപ്പം ലിസ്റ്റ് ചെയ്യുക |
+| `/api/acp/agents` | POST   | ഇഷ്ടാനുസൃത ഏജൻ്റ് ചേർക്കുക അല്ലെങ്കിൽ കണ്ടെത്തൽ കാഷെ പുതുക്കുക                               |
+| `/api/acp/agents` | DELETE | `id` അന്വേഷണ പാരാം വഴി ഒരു ഇഷ്ടാനുസൃത ഏജൻ്റ് നീക്കം ചെയ്യുക                                  |
 
-GET പ്രതികരണത്തിൽ `agents[]` (id, name, binary, version, installed, protocol, isCustom), `summary` (total, installed, notFound, builtIn, custom) എന്നിവ ഉൾപ്പെടുന്നു.
+GET പ്രതികരണത്തിൽ `agents[]` (ഐഡി, പേര്, ബൈനറി, പതിപ്പ്, ഇൻസ്റ്റാൾ ചെയ്തവ, പ്രോട്ടോക്കോൾ, isCustom) കൂടാതെ `summary` (ആകെ, ഇൻസ്റ്റാൾ ചെയ്തവ, notFound, builtIn, കസ്റ്റം) എന്നിവ ഉൾപ്പെടുന്നു.
 
-### പ്രതിരോധശേഷിയും നിരക്ക് പരിധികളും
+### പ്രതിരോധശേഷി & നിരക്ക് പരിധികൾ
 
-| എൻഡ്പോയിന്റ്                      | രീതി      | വിവരണം                                                                                                        |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | അഭ്യർത്ഥന ക്യൂ, കണക്ഷൻ കൂൾഡൗൺ, പ്രൊവൈഡർ ബ്രേക്കർ, കാത്തിരിപ്പ് ക്രമീകരണങ്ങൾ എന്നിവ നേടുക/പുതുക്കുക            |
-| `/api/resilience/reset`           | POST      | പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കറുകൾ പുനഃസജ്ജമാക്കുക                                                               |
-| `/api/resilience/model-cooldowns` | GET       | ശേഷിക്കുന്ന സമയം അനുസരിച്ച് ക്രമീകരിച്ച സജീവമായ ഓരോ-(പ്രൊവൈഡർ, കണക്ഷൻ, മോഡൽ) ലോക്കൗട്ടുകളും പട്ടികപ്പെടുത്തുക |
-| `/api/resilience/model-cooldowns` | DELETE    | ഒരു മോഡൽ ലോക്കൗട്ട് മായ്ക്കുക — ബോഡി `{provider, model}` അല്ലെങ്കിൽ എല്ലാം മായ്ക്കാൻ `{all: true}`            |
-| `/api/rate-limits`                | GET       | ഓരോ അക്കൗണ്ടിനുമുള്ള നിരക്ക് പരിധിയുടെ നില                                                                    |
-| `/api/rate-limit`                 | GET       | ആഗോള നിരക്ക് പരിധി കോൺഫിഗറേഷൻ                                                                                 |
+| അവസാന പോയിൻ്റ്                    | രീതി      | വിവരണം                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | Get/update അഭ്യർത്ഥന ക്യൂ, കണക്ഷൻ കൂൾഡൗൺ, പ്രൊവൈഡർ ബ്രേക്കർ, കാത്തിരിപ്പ് ക്രമീകരണങ്ങൾ                                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/reset`           | POST      | പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കറുകൾ പുനഃസജ്ജമാക്കുക                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/resilience/model-cooldowns` | GET       | ശേഷിക്കുന്ന സമയം അനുസരിച്ച് ക്രമീകരിച്ച, സജീവമായ ഓരോ (ദാതാവ്, കണക്ഷൻ, മോഡൽ) ലോക്കൗട്ടുകളുടെ ലിസ്റ്റ്                                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/resilience/model-cooldowns` | DELETE    | എല്ലാം മായ്ക്കാൻ ഒരു മോഡൽ ലോക്കൗട്ട് — ബോഡി `{provider, model}` അല്ലെങ്കിൽ `{all: true}` മായ്ക്കുക                                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/rate-limits`                | GET/POST  | ഓരോ അക്കൗണ്ടിനും നിരക്ക് പരിധി നില (GET) അല്ലെങ്കിൽ ഒരു കണക്ഷനുള്ള നിരക്ക് പരിധി സംരക്ഷണം ടോഗിൾ ചെയ്യുക (POST `{connectionId, enabled}`). `rateLimitProtection` നുള്ള പിന്തുണയുള്ള റൈറ്റ് പാത്ത് ( `PUT /api/providers/[id]` വഴി ഒരിക്കലും പരിഷ്കരിച്ചിട്ടില്ല). ശ്രദ്ധിക്കുക: `enabled: false` വ്യക്തമായ സംരക്ഷണം പ്രവർത്തനരഹിതമാക്കുന്നു, എന്നാൽ ആഗോള സ്വയമേവ പ്രവർത്തനക്ഷമമാക്കുന്ന സുരക്ഷാ വലയിൽ (`autoEnableApiKeyProviders`) സജീവമായ API-കീ കണക്ഷൻ തിരഞ്ഞെടുക്കുന്നില്ല. |
+| `/api/rate-limit`                 | GET       | ആഗോള നിരക്ക് പരിധി കോൺഫിഗറേഷൻ (ഒഴിവാക്കപ്പെട്ടു; `/api/rate-limits` എന്നതിൻ്റെ അപരനാമം)                                                                                                                                                                                                                                                                                                                                                                                        |
 
-> നാല് `/api/resilience/*` റൂട്ടുകൾക്കും **മാനേജ്മെന്റ് ഓത്ത്** (`requireManagementAuth`) ആവശ്യമാണ്. പ്രൊവൈഡർ ബ്രേക്കർ, കണക്ഷൻ കൂൾഡൗൺ, മോഡൽ ലോക്കൗട്ട് എന്നിവയുടെ പൂർണ്ണമായ വിശദീകരണത്തിന് [പ്രതിരോധശേഷി (വിപുലീകരിച്ചത്)](#resilience-extended) കാണുക.
+> നാല് `/api/resilience/*` റൂട്ടുകൾക്കും ആവശ്യമാണ്** മാനേജ്മെൻ്റ് ആധികാരികത** (`requireManagementAuth`). പ്രൊവൈഡർ ബ്രേക്കർ vs കണക്ഷൻ കൂൾഡൗൺ vs മോഡൽ ലോക്കൗട്ടിൻ്റെ പൂർണ്ണമായ തകർച്ചയ്ക്കായി [റെസിലിയൻസ് (വിപുലീകരിച്ചത്)](#resilience-extended) കാണുക.
 
-### മൂല്യനിർണ്ണയങ്ങൾ
+### എവൽസ്
 
-| എൻഡ്പോയിന്റ് | രീതി     | വിവരണം                                                                       |
-| ------------ | -------- | ---------------------------------------------------------------------------- |
-| `/api/evals` | GET/POST | മൂല്യനിർണ്ണയ സ്യൂട്ടുകൾ പട്ടികപ്പെടുത്തുക / മൂല്യനിർണ്ണയം പ്രവർത്തിപ്പിക്കുക |
+| അവസാന പോയിൻ്റ് | രീതി     | വിവരണം                                     |
+| -------------- | -------- | ------------------------------------------ |
+| `/api/evals`   | GET/POST | ലിസ്റ്റ് എവൽ സ്യൂട്ടുകൾ / റൺ മൂല്യനിർണ്ണയം |
 
 ### നയങ്ങൾ
 
-| എൻഡ്പോയിന്റ്    | രീതി            | വിവരണം                           |
-| --------------- | --------------- | -------------------------------- |
-| `/api/policies` | GET/POST/DELETE | റൂട്ടിംഗ് നയങ്ങൾ കൈകാര്യംചെയ്യുക |
+| അവസാന പോയിൻ്റ്  | രീതി            | വിവരണം                          |
+| --------------- | --------------- | ------------------------------- |
+| `/api/policies` | GET/POST/DELETE | റൂട്ടിംഗ് നയങ്ങൾ നിയന്ത്രിക്കുക |
 
-### അനുസൃതത
+### പാലിക്കൽ
 
-| എൻഡ്പോയിന്റ്                | രീതി | വിവരണം                                    |
-| --------------------------- | ---- | ----------------------------------------- |
-| `/api/compliance/audit-log` | GET  | അനുസൃതതാ ഓഡിറ്റ് ലോഗ് (അവസാനത്തെ N എണ്ണം) |
+| അവസാന പോയിൻ്റ്              | രീതി | വിവരണം                           |
+| --------------------------- | ---- | -------------------------------- |
+| `/api/compliance/audit-log` | GET  | കംപ്ലയൻസ് ഓഡിറ്റ് ലോഗ് (അവസാന N) |
 
-### v1beta (Gemini-അനുയോജ്യം)
+### v1beta (ജെമിനി-അനുയോജ്യമായത്)
 
-| എൻഡ്പോയിന്റ്               | രീതി | വിവരണം                                      |
-| -------------------------- | ---- | ------------------------------------------- |
-| `/v1beta/models`           | GET  | Gemini ഫോർമാറ്റിൽ മോഡലുകൾ പട്ടികപ്പെടുത്തുക |
-| `/v1beta/models/{...path}` | POST | Gemini `generateContent` എൻഡ്പോയിന്റ്       |
+| അവസാന പോയിൻ്റ്             | രീതി | വിവരണം                                     |
+| -------------------------- | ---- | ------------------------------------------ |
+| `/v1beta/models`           | GET  | Gemini ഫോർമാറ്റിൽ മോഡലുകൾ ലിസ്റ്റ് ചെയ്യുക |
+| `/v1beta/models/{...path}` | POST | Gemini `generateContent` അവസാന പോയിൻ്റ്    |
 
-നേറ്റീവ് Gemini SDK അനുയോജ്യത പ്രതീക്ഷിക്കുന്ന ക്ലയന്റുകൾക്കായി ഈ എൻഡ്പോയിന്റുകൾ Gemini-യുടെ API ഫോർമാറ്റിനെ പ്രതിഫലിപ്പിക്കുന്നു.
+നേറ്റീവ് Gemini SDK അനുയോജ്യത പ്രതീക്ഷിക്കുന്ന ക്ലയൻ്റുകൾക്ക് ഈ എൻഡ് പോയിൻ്റുകൾ Gemini യുടെ API ഫോർമാറ്റിനെ പ്രതിഫലിപ്പിക്കുന്നു.
 
-### ആന്തരിക / സിസ്റ്റം API-കൾ
+### ആന്തരിക / സിസ്റ്റം APIs
 
-| എൻഡ്പോയിന്റ്             | രീതി | വിവരണം                                                                 |
-| ------------------------ | ---- | ---------------------------------------------------------------------- |
-| `/api/init`              | GET  | ആപ്ലിക്കേഷൻ ആരംഭീകരണ പരിശോധന (ആദ്യ പ്രവർത്തനത്തിൽ ഉപയോഗിക്കുന്നത്)     |
-| `/api/tags`              | GET  | Ollama-അനുയോജ്യ മോഡൽ ടാഗുകൾ (Ollama ക്ലയന്റുകൾക്കായി)                  |
-| `/api/restart`           | POST | ക്രമാനുസൃത സർവർ പുനരാരംഭം ട്രിഗർ ചെയ്യുക                               |
-| `/api/shutdown`          | POST | ക്രമാനുസൃത സർവർ ഷട്ട്ഡൗൺ ട്രിഗർ ചെയ്യുക                                |
-| `/api/system/env/repair` | POST | OAuth പ്രൊവൈഡർ എൻവയോൺമെന്റ് വേരിയബിളുകൾ നന്നാക്കുക                     |
-| `/api/system/version`    | GET  | നിലവിലെ/ഏറ്റവും പുതിയ പതിപ്പ്, അപ്ഡേറ്റ് നില, റിലീസ് ചാനൽ              |
-| `/api/system/version`    | POST | ഏറ്റവും പുതിയ പതിപ്പിലേക്കുള്ള വിന്യാസ-അവബോധമുള്ള അപ്ഡേറ്റ് ആരംഭിക്കുക |
+| അവസാന പോയിൻ്റ്           | രീതി | വിവരണം                                                             |
+| ------------------------ | ---- | ------------------------------------------------------------------ |
+| `/api/init`              | GET  | പശ്ചാത്തല സമന്വയ സേവനങ്ങൾ ആരംഭിക്കുക (മാനേജ്മെൻ്റ് ഓത്ത്)          |
+| `/api/tags`              | GET  | ഒല്ലാമ-അനുയോജ്യമായ മോഡൽ ടാഗുകൾ ( Ollama ക്ലയൻ്റുകൾക്ക്)            |
+| `/api/restart`           | POST | മനോഹരമായ സെർവർ പുനരാരംഭിക്കുക                                      |
+| `/api/shutdown`          | POST | മനോഹരമായ സെർവർ ഷട്ട്ഡൗൺ ട്രിഗർ ചെയ്യുക                             |
+| `/api/system/env/repair` | POST | OAuth പ്രൊവൈഡർ എൻവയോൺമെൻ്റ് വേരിയബിളുകൾ നന്നാക്കുക                 |
+| `/api/system/version`    | GET  | Current/latest പതിപ്പ്, അപ്ഡേറ്റ് സ്റ്റാറ്റസ്, റിലീസ് ചാനൽ         |
+| `/api/system/version`    | POST | ഏറ്റവും പുതിയ പതിപ്പിലേക്ക് ഒരു വിന്യാസ-അറിയൽ അപ്ഡേറ്റ് ആരംഭിക്കുക |
 
-> **കുറിപ്പ്:** ഈ എൻഡ്പോയിന്റുകൾ സിസ്റ്റം ആന്തരികമായി അല്ലെങ്കിൽ Ollama ക്ലയന്റ് അനുയോജ്യതയ്ക്കായി ഉപയോഗിക്കുന്നു. അന്തിമ ഉപയോക്താക്കൾ സാധാരണയായി ഇവയെ നേരിട്ട് വിളിക്കാറില്ല.
+> **കുറിപ്പ്:** ഈ എൻഡ് പോയിൻ്റുകൾ സിസ്റ്റം ആന്തരികമായി അല്ലെങ്കിൽ Ollama ക്ലയൻ്റ് അനുയോജ്യതയ്ക്കായി ഉപയോഗിക്കുന്നു. അന്തിമ ഉപയോക്താക്കൾ അവരെ സാധാരണയായി വിളിക്കാറില്ല.
 
-### OAuth എൻവയോൺമെന്റ് നന്നാക്കൽ _(v3.6.1+)_
+### OAuth പരിസ്ഥിതി നന്നാക്കൽ _(v3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1185,7 +1494,7 @@ Content-Type: application/json
 }
 ```
 
-ഒരു പ്രത്യേക പ്രൊവൈഡറിന്റെ നഷ്ടപ്പെട്ടതോ കേടായതോ ആയ OAuth എൻവയോൺമെന്റ് വേരിയബിളുകൾ നന്നാക്കുന്നു. തിരികെ നൽകുന്നത്:
+ഒരു നിർദ്ദിഷ്ട ദാതാവിനായി നഷ്ടമായതോ കേടായതോ ആയ OAuth എൻവയോൺമെൻ്റ് വേരിയബിളുകൾ നന്നാക്കുന്നു. റിട്ടേണുകൾ:
 
 ```json
 {
@@ -1201,10 +1510,7 @@ Content-Type: application/json
 GET /api/system/version
 ```
 
-ലൂപ്പ്ബാക്കിൽ മാത്രം ലഭ്യമായ മാനേജ്മെന്റ് റൂട്ട് (അഡ്മിൻ ഓത്ത്). പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുന്ന പതിപ്പ്, ഏറ്റവും പുതിയ
-പ്രസിദ്ധീകരിച്ച പതിപ്പ്, ഓട്ടോ-അപ്ഡേറ്റ് നില എന്നിവ തിരികെ നൽകുന്നു. `releaseChannel`, `channels` എന്നിവ അധികമായി ചേർത്ത
-ഫീൽഡുകളാണ് (rail 3.8.54); `channel` അതിന്റെ അർത്ഥം നിലനിർത്തുന്നു — ഡാഷ്ബോർഡ് അപ്ഡേറ്റർ
-ഉപയോഗിക്കുന്ന വിന്യാസ മോഡ് (`npm`, `source` അല്ലെങ്കിൽ `docker-compose`).
+ലൂപ്പ്ബാക്ക്-മാത്രം മാനേജ്മെൻ്റ് റൂട്ട് (അഡ്മിൻ ഓത്ത്). പ്രവർത്തിക്കുന്ന പതിപ്പും ഏറ്റവും പുതിയ പ്രസിദ്ധീകരിച്ച പതിപ്പും യാന്ത്രിക-അപ്ഡേറ്റ് നിലയും നൽകുന്നു. `releaseChannel`, `channels` എന്നിവ അഡിറ്റീവ് ഫീൽഡുകളാണ് (റെയിൽ 3.8.54); `channel` അതിൻ്റെ അർത്ഥം — ഡാഷ്ബോർഡ് അപ്ഡേറ്റർ ഉപയോഗിക്കുന്ന വിന്യാസ മോഡ് (`npm`, `source` അല്ലെങ്കിൽ `docker-compose`) നിലനിർത്തുന്നു.
 
 ```json
 {
@@ -1220,19 +1526,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — പ്രവർത്തിക്കുന്ന ബിൽഡിന്റെ npm ചാനൽ: `-nightly.*` പതിപ്പുകൾക്ക് `nightly`,
-  മറ്റ് പ്രീ-റിലീസുകൾക്ക് (`-rc.*`, `-beta.*`, `-alpha.*`) `next`, `channels.latest`-നേക്കാൾ
-  പഴയ മേജർ പതിപ്പിന്റെ സ്ഥിരതയുള്ള പതിപ്പിന് `lts`, അല്ലാത്തപക്ഷം `latest`. പ്രസിദ്ധീകരണ സമയത്ത്
-  npm dist-tag തിരഞ്ഞെടുക്കുന്ന `scripts/release/dist-tag.mjs`-ലെ അതേ നിയമങ്ങൾ.
-- `channels` — `npm view omniroute dist-tags`-ൽ നിന്നുള്ള ഓരോ dist-tag-ന്റെയും പ്രസിദ്ധീകരിച്ച
-  ഏറ്റവും പുതിയ പതിപ്പ് (registry HTTP ഫാൾബാക്ക്), `latest`-ന്റെ അതേ 10-മിനിറ്റ് TTL ഉപയോഗിച്ച്
-  കാഷ് ചെയ്യുന്നു. `latest` എല്ലായ്പ്പോഴും ഉണ്ടായിരിക്കും (ആദ്യം `latest` ഫീൽഡിലേക്കും തുടർന്ന്
-  `"unavailable"`-ലേക്കും ഫാൾബാക്ക് ചെയ്യുന്നു); ബന്ധപ്പെട്ട dist-tag നിലവിലുണ്ടെങ്കിൽ മാത്രം
-  `next`, `nightly`, `lts` എന്നിവ പ്രത്യക്ഷപ്പെടും. ഒരു `Cache-Control: no-cache` അഭ്യർത്ഥന രണ്ട്
-  ലുക്കപ്പുകളും പുതുക്കുന്നു.
+- പ്രവർത്തിപ്പിക്കുന്ന ബിൽഡിൻ്റെ`releaseChannel` — npm ചാനൽ: `-nightly.*` പതിപ്പുകൾക്കുള്ള `nightly`, മറ്റ് പ്രീ-റിലീസുകൾക്ക് `next` (`-rc.*`, `-beta.*`, `-alpha.*`), `channels.latest` നേക്കാൾ പഴയ മേജറിൻ്റെ സ്ഥിരതയുള്ള പതിപ്പിന് `lts`, അല്ലാത്തപക്ഷം `latest`. പ്രസിദ്ധീകരിക്കുന്ന സമയത്ത് npm dist-tag തിരഞ്ഞെടുക്കുന്ന `scripts/release/dist-tag.mjs` ൻ്റെ അതേ നിയമങ്ങൾ.
+- `channels` —, `npm view omniroute dist-tags` (രജിസ്ട്രി HTTP ഫാൾബാക്ക്) യിൽ നിന്ന് ഓരോ ഡിസ്റ്റ്-ടാഗിൻ്റെയും തലക്കെട്ട് പ്രസിദ്ധീകരിച്ചു, `latest` അതേ 10 മിനിറ്റ് TTL ഉപയോഗിച്ച് കാഷെ ചെയ്തു. `latest` എല്ലായ്പ്പോഴും നിലവിലുണ്ട് ( `latest` ഫീൽഡിലേക്ക് മടങ്ങുന്നു, തുടർന്ന് `"unavailable"`); `next`, `nightly`, `lts` എന്നിവ ഡിസ്റ്റ്-ടാഗ് നിലവിലുണ്ടെങ്കിൽ മാത്രമേ ദൃശ്യമാകൂ. ഒരു `Cache-Control: no-cache` അഭ്യർത്ഥന രണ്ട് ലുക്കപ്പുകളും പുതുക്കുന്നു.
 
-ചാനൽ മോഡൽ (`latest` = 4.0 GA വരെ v3, `next` = rc, `nightly` = `develop` ബിൽഡുകൾ,
-`lts` = 4.0 GA-യ്ക്ക് ശേഷമുള്ള v3 പാച്ചുകൾ) `docs/ops/RELEASE_STRATEGY.md`-ൽ വിവരിച്ചിരിക്കുന്നു.
+ചാനൽ മോഡൽ (`latest` = v3 വരെ 4.0 GA, `next` = rc, `nightly` = `develop` ബിൽഡുകൾ, 4.0 GA ന് ശേഷമുള്ള `lts` = v3 പാച്ചുകൾ) `docs/ops/RELEASE_STRATEGY.md` ൽ വിവരിച്ചിരിക്കുന്നു.
 
 ---
 
@@ -1244,9 +1541,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-കോൺഫിഗർ ചെയ്തിട്ടുള്ള ഏതെങ്കിലും STT പ്രൊവൈഡർ ഉപയോഗിച്ച് ഓഡിയോ ഫയലുകൾ ട്രാൻസ്ക്രൈബ് ചെയ്യുക. പാതയിലെ ആദ്യത്തെ
-സെഗ്മെന്റ് നേറ്റീവ് പ്രൊവൈഡറെ തിരഞ്ഞെടുക്കുന്നു (`openai/…`, `deepgram/…`). മറ്റൊരു വെണ്ടറിന്റെ
-മോഡൽ വീണ്ടും എക്സ്പോർട്ട് ചെയ്യുന്ന ഗേറ്റ്വേകൾ യോഗ്യതയുള്ള ഒരു ഐഡി ഉപയോഗിക്കുന്നു
+ക്രമീകരിച്ചിട്ടുള്ള ഏതെങ്കിലും STT ദാതാവ് ഉപയോഗിച്ച് ഓഡിയോ ഫയലുകൾ ട്രാൻസ്ക്രൈബ് ചെയ്യുക. ആദ്യത്തെ പാത്ത്
+സെഗ്മെന്റ് നേറ്റീവ് ദാതാവിനെ തിരഞ്ഞെടുക്കുന്നു (`openai/…`, `deepgram/…`). മറ്റൊരു
+വെൻഡറിന്റെ മോഡൽ വീണ്ടും എക്സ്പോർട്ട് ചെയ്യുന്ന ഗേറ്റ്വേകൾ യോഗ്യതപ്പെടുത്തിയ ഐഡി ഉപയോഗിക്കുന്നു
 (`openrouter/deepgram/nova-3`).
 
 **അഭ്യർത്ഥന:**
@@ -1269,43 +1566,51 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ഉദാഹരണ മോഡൽ ഐഡികൾ:** `openai/whisper-1` (ഒരു OpenAI കീ ആവശ്യമാണ്),
-`openrouter/deepgram/nova-3` (ഒരു OpenRouter കീ ആവശ്യമാണ്),
-`deepgram/nova-3` (ഒരു നേറ്റീവ് Deepgram കീ ആവശ്യമാണ്). യോഗ്യതാപ്രത്യയമില്ലാത്ത
-`deepgram/nova-3` അഭ്യർത്ഥന OpenRouter ഉപയോഗിക്കില്ല.
+**ഉദാഹരണ മോഡൽ ഐഡികൾ:** `openai/whisper-1` (OpenAI കീ ആവശ്യമാണ്),
+`openrouter/deepgram/nova-3` (OpenRouter കീ ആവശ്യമാണ്),
+`deepgram/nova-3` (നേറ്റീവ് Deepgram കീ ആവശ്യമാണ്). വെറും
+`deepgram/nova-3` അഭ്യർത്ഥന OpenRouter ഉപയോഗിക്കുന്നില്ല.
 
 **പിന്തുണയ്ക്കുന്ന ഫോർമാറ്റുകൾ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket വഴിയുള്ള ഫയൽ-മോഡ് ട്രാൻസ്ക്രിപ്ഷൻ (Gemini API കീ ആവശ്യമാണ്). അപ്ലോഡ് `ffmpeg`
+ഉപയോഗിച്ച് 16 kHz മോണോ PCM ആയി പരിവർത്തനം ചെയ്യപ്പെടുന്നു
+(ഫയൽ ഇതിനകം 16 kHz മോണോ PCM WAV അല്ലെങ്കിൽ `PATH`-ൽ ഉണ്ടായിരിക്കണം), സെഷനിലേക്ക്
+സ്ട്രീം ചെയ്യപ്പെടുകയും അന്തിമീകരിച്ച ടെക്സ്റ്റ് `{ "text": "..." }` ആയി തിരികെ നൽകുകയും ചെയ്യുന്നു. ഓപ്ഷണൽ
+`language`, `prompt` ഫോം ഫീൽഡുകൾ ഫോർവേഡ് ചെയ്യപ്പെടും. പരിധികൾ: 25 MiB-നു മുകളിലുള്ള അപ്ലോഡുകൾ അല്ലെങ്കിൽ
+ഡീകോഡ് ചെയ്ത ഓഡിയോ 10 മിനിറ്റിൽ കൂടുതലാണെങ്കിൽ `413` മറുപടി ലഭിക്കും; 60 സെക്കൻഡിൽ കൂടുതൽ സമയം എടുക്കുന്ന
+പരിവർത്തനം അവസാനിപ്പിക്കപ്പെടുകയും `504` മറുപടി ലഭിക്കുകയും ചെയ്യും. API കീ
+`x-goog-api-key` ഹെഡറിൽ മാത്രമേ അയയ്ക്കൂ, WebSocket URL-ൽ ഒരിക്കലും അയയ്ക്കില്ല.
 
 ## Ollama അനുയോജ്യത
 
-Ollama-യുടെ API ഫോർമാറ്റ് ഉപയോഗിക്കുന്ന ക്ലയന്റുകൾക്കായി:
+Ollama-യുടെ API format ഉപയോഗിക്കുന്ന clients-നായി:
 
 ```bash
-# ചാറ്റ് എൻഡ്പോയിന്റ് (Ollama ഫോർമാറ്റ്)
+# Chat endpoint (Ollama format)
 POST /v1/api/chat
 
-# മോഡൽ ലിസ്റ്റിംഗ് (Ollama ഫോർമാറ്റ്)
+# Model listing (Ollama format)
 GET /api/tags
 ```
 
-അഭ്യർത്ഥനകൾ Ollama ഫോർമാറ്റിനും ആന്തരിക ഫോർമാറ്റുകൾക്കും ഇടയിൽ സ്വയമേവ പരിവർത്തനം ചെയ്യപ്പെടുന്നു.
+Requests Ollama-യും internal formats-ഉം തമ്മിൽ സ്വയമേവ വിവർത്തനം ചെയ്യപ്പെടുന്നു.
 
-## ടോക്കണൈസ് ചെയ്ത VS Code / ഹെഡറില്ലാത്ത അപരനാമങ്ങൾ
+## Tokenized VS Code / Headerless Aliases
 
-ഒരു ഇന്റഗ്രേഷന് `Authorization` ഹെഡർ ചേർക്കാൻ കഴിയാതിരിക്കുകയും അടിസ്ഥാന URL-ൽ API കീ ഉൾപ്പെടുത്തേണ്ടിവരികയും ചെയ്യുമ്പോൾ ഈ അപരനാമങ്ങൾ ഉപയോഗിക്കുക.
+ഒരു integration-ന് `Authorization` header ചേർക്കാൻ കഴിയാത്തതും API key base URL-ൽ ഉൾപ്പെടുത്തേണ്ടതുമായ സാഹചര്യങ്ങളിൽ ഈ aliases ഉപയോഗിക്കുക.
 
 ```bash
-# OpenAI-ശൈലിയിലുള്ള കാറ്റലോഗ് അപരനാമം
+# OpenAI-style catalog alias
 GET /api/v1/vscode/{token}/
 GET /api/v1/vscode/{token}/models
 
-# OpenAI-ശൈലിയിലുള്ള ചാറ്റ് അപരനാമങ്ങൾ
+# OpenAI-style chat aliases
 POST /api/v1/vscode/{token}/chat/completions
 POST /api/v1/vscode/{token}/responses
 
-# Ollama-ശൈലിയിലുള്ള അപരനാമങ്ങൾ
+# Ollama-style aliases
 POST /api/v1/vscode/{token}/api/chat
 GET /api/v1/vscode/{token}/api/tags
 ```
@@ -1321,16 +1626,16 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 
 കുറിപ്പുകൾ:
 
-- ടോക്കണൈസ് ചെയ്ത അപരനാമങ്ങൾ `/v1/*`, `/api/tags` എന്നിവയുടെ അതേ ഹാൻഡ്ലറുകൾ വീണ്ടും ഉപയോഗിക്കുന്നു; പ്രതികരണ ഘടനകൾ മാറ്റമില്ലാതെ തുടരും.
-- ക്ലയന്റ് ഇഷ്ടാനുസൃത ഹെഡറുകൾ പിന്തുണയ്ക്കുമ്പോഴെല്ലാം `Authorization: Bearer ...` ഉപയോഗിക്കുന്നതിന് മുൻഗണന നൽകുക.
-- URL അടിസ്ഥാനമാക്കിയുള്ള ടോക്കണുകൾ റിവേഴ്സ്-പ്രോക്സി ലോഗുകളിലും ബ്രൗസർ ചരിത്രത്തിലും OmniRoute-ന് പുറത്തുള്ള ടെലിമെട്രിയിലും പ്രത്യക്ഷപ്പെട്ടേക്കാം. അവയെ ഡിഫോൾട്ട് ഓതന്റിക്കേഷൻ രീതിയായല്ല, അനുയോജ്യതയ്ക്കുള്ള ഒരു ഓപ്ഷനായി പരിഗണിക്കുക.
+- Tokenized aliases `/v1/*`, `/api/tags` എന്നിവയുടെ അതേ handlers വീണ്ടും ഉപയോഗിക്കുന്നു; response shapes മാറ്റമില്ലാതെ തുടരുന്നു.
+- Client custom headers പിന്തുണയ്ക്കുമ്പോഴെല്ലാം `Authorization: Bearer ...` മുൻഗണന നൽകുക.
+- URL-അടിസ്ഥാനത്തിലുള്ള tokens reverse-proxy logs, browser history, OmniRoute-ന് പുറത്തുള്ള telemetry എന്നിവയിൽ പ്രത്യക്ഷപ്പെടാം. അവയെ default authentication mode ആയി കാണാതെ compatibility option ആയി മാത്രം പരിഗണിക്കുക.
 
 ---
 
 ## ടെലിമെട്രി
 
 ```bash
-# ലേറ്റൻസി ടെലിമെട്രി സംഗ്രഹം നേടുക (ഓരോ പ്രൊവൈഡറിനും p50/p95/p99)
+# Latency telemetry summary നേടുക (provider-നുസരിച്ചുള്ള p50/p95/p99)
 GET /api/telemetry/summary
 ```
 
@@ -1350,10 +1655,10 @@ GET /api/telemetry/summary
 ## ബജറ്റ്
 
 ```bash
-# എല്ലാ API കീകളുടെയും ബജറ്റ് നില നേടുക
+# എല്ലാ API keys-കൾക്കുമുള്ള budget status നേടുക
 GET /api/usage/budget
 
-# ഒരു ബജറ്റ് സജ്ജമാക്കുക അല്ലെങ്കിൽ അപ്ഡേറ്റ് ചെയ്യുക
+# ഒരു budget സജ്ജീകരിക്കുകയോ പുതുക്കുകയോ ചെയ്യുക
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1367,17 +1672,17 @@ Content-Type: application/json
 }
 ```
 
-> **സ്കീമ കുറിപ്പുകൾ** (`setBudgetSchema`): `apiKeyId` നിർബന്ധമാണ്; `dailyLimitUsd`, `weeklyLimitUsd`, അല്ലെങ്കിൽ `monthlyLimitUsd` എന്നിവയിൽ കുറഞ്ഞത് ഒരെണ്ണമെങ്കിലും പൂജ്യത്തേക്കാൾ കൂടുതലായിരിക്കണം. ഐച്ഛിക ഫീൽഡുകൾ: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). പഴയ `{keyId, limit, period}` ഘടന `400 Bad Request` മടക്കി നൽകുന്നു.
+> **Schema കുറിപ്പുകൾ** (`setBudgetSchema`): `apiKeyId` ആവശ്യമാണ്; `dailyLimitUsd`, `weeklyLimitUsd`, അല്ലെങ്കിൽ `monthlyLimitUsd` എന്നിവയിൽ കുറഞ്ഞത് ഒന്ന് പൂജ്യത്തേക്കാൾ കൂടുതലായിരിക്കണം. ഐച്ഛിക fields: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). പഴയ `{keyId, limit, period}` shape `400 Bad Request` നൽകുന്നു.
 
 ## ടോക്കൺ പരിധികൾ
 
-ഓരോ API കീയ്ക്കുമുള്ള **ടോക്കൺ** ബജറ്റുകൾ (മുകളിലുള്ള USD-അടിസ്ഥാന ബജറ്റിൽ നിന്ന് വ്യത്യസ്തമാണ്). അഭ്യർത്ഥനാ പാതയിൽത്തന്നെ ഇത് നടപ്പാക്കുന്നു: ഒരു കീയുടെ നിലവിലെ വിൻഡോയിലെ ഉപയോഗം അതിന്റെ പരിധിയിലെത്തുമ്പോൾ, അഭ്യർത്ഥനകൾ `429 Too Many Requests` ഉപയോഗിച്ച് നിരസിക്കപ്പെടും. പരിധികൾ ഒരു പ്രത്യേക `model`, ഒരു `provider` എന്നിവയിലേക്ക് പരിമിതപ്പെടുത്താം, അല്ലെങ്കിൽ കീയിൽ ഉടനീളം `global` ആയി പ്രയോഗിക്കാം; ഒരു അഭ്യർത്ഥനയുമായി നിരവധി പരിധികൾ പൊരുത്തപ്പെടുമ്പോൾ, ഏറ്റവും കർശനമായ പരിധിയാണ് പ്രാബല്യത്തിൽ വരുന്നത്.
+ഓരോ API കീയ്ക്കുമുള്ള **ടോക്കൺ** ബജറ്റുകൾ (മുകളിൽ പറഞ്ഞ USD അടിസ്ഥാനത്തിലുള്ള ബജറ്റിൽ നിന്ന് വ്യത്യസ്തം). അഭ്യർത്ഥനാ പാതയിൽ തന്നെ പ്രയോഗിക്കുന്നു: ഒരു കീയുടെ നിലവിലെ വിൻഡോ ഉപയോഗം പരിധിയിലെത്തുമ്പോൾ, `429 Too Many Requests` സഹിതം അഭ്യർത്ഥനകൾ നിരസിക്കപ്പെടും. പരിധികൾ ഒരു നിർദ്ദിഷ്ട `model`-ലേക്കോ, ഒരു `provider`-ലേക്കോ സ്കോപ്പ് ചെയ്യാം, അല്ലെങ്കിൽ കീ മുഴുവൻ ബാധകമായ `global` പരിധിയായി പ്രയോഗിക്കാം; ഒരു അഭ്യർത്ഥനയുമായി പൊരുത്തപ്പെടുന്ന നിരവധി പരിധികൾ ഉണ്ടായാൽ, ഏറ്റവും കർശനമായ പരിധിയാണ് പ്രാബല്യത്തിൽ വരുന്നത്.
 
 ```bash
-# ഒരു കീയുടെ ടോക്കൺ പരിധികൾ പട്ടികപ്പെടുത്തുക (തത്സമയ വിൻഡോ ഉപയോഗം ഉൾപ്പെടെ)
+# ഒരു കീയുടെ ടോക്കൺ പരിധികൾ പട്ടികപ്പെടുത്തുക (തത്സമയ വിൻഡോ ഉപയോഗവും ഉൾപ്പെടുന്നു)
 GET /api/usage/token-limits?apiKeyId=key-123
 
-# ഒരു ടോക്കൺ പരിധി സൃഷ്ടിക്കുകയോ അപ്ഡേറ്റ് ചെയ്യുകയോ ചെയ്യുക
+# ഒരു ടോക്കൺ പരിധി സൃഷ്ടിക്കുകയോ പുതുക്കുകയോ ചെയ്യുക
 POST /api/usage/token-limits
 Content-Type: application/json
 
@@ -1390,95 +1695,95 @@ Content-Type: application/json
   "enabled": true
 }
 
-# id ഉപയോഗിച്ച് ഒരു ടോക്കൺ പരിധി ഇല്ലാതാക്കുക
+# ഒരു id പ്രകാരം ടോക്കൺ പരിധി ഇല്ലാതാക്കുക
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **സ്കീമ കുറിപ്പുകൾ** (`setTokenLimitSchema`): `apiKeyId`, `scopeType` (`model` | `provider` | `global`) എന്നിവ നിർബന്ധമാണ്. `scopeType` എന്നത് `global` അല്ലാത്തപക്ഷം `scopeValue` നിർബന്ധമാണ് (ഉദാ. `model` സ്കോപ്പിനായി ഒരു മോഡൽ id, `provider` സ്കോപ്പിനായി ഒരു പ്രൊവൈഡർ id). `tokenLimit` ഒരു പോസിറ്റീവ് ഇന്റിജർ ആയിരിക്കണം (സ്ട്രിങ്ങിൽ നിന്ന് കോഴ്സ് ചെയ്യപ്പെടുന്നു). ഐച്ഛികമായവ: `id` (സൃഷ്ടിക്കാൻ ഒഴിവാക്കുക, അപ്ഡേറ്റ് ചെയ്യാൻ നൽകുക), `resetInterval` (`daily` | `weekly` | `monthly`, ഡിഫോൾട്ട് `monthly`), `resetTime` (`HH:MM`), `enabled` (ഡിഫോൾട്ട് `true`). `GET` പ്രതികരണങ്ങൾ ഓരോ പരിധിയെയും `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, `nextResetAt` എന്നിവ ഉപയോഗിച്ച് സമ്പുഷ്ടമാക്കുന്നു. ഇത് ഒരു മാനേജ്മെന്റ്-ക്ലാസ് എൻഡ്പോയിന്റാണ് (authz പൈപ്പ്ലൈൻ വഴി ഓതന്റിക്കേഷൻ കേന്ദ്രീകൃതമായി നടപ്പാക്കുന്നു).
+> **സ്കീമ കുറിപ്പുകൾ** (`setTokenLimitSchema`): `apiKeyId`യും `scopeType` (`model` | `provider` | `global`)യും ആവശ്യമാണ്. `scopeType` `global` അല്ലെങ്കിൽ `scopeValue` ആവശ്യമാണ് (`model` സ്കോപ്പിന് ഒരു മോഡൽ id, `provider` സ്കോപ്പിന് ഒരു provider id എന്നിവ ഉദാഹരണങ്ങൾ). `tokenLimit` ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യയായിരിക്കണം (സ്ട്രിംഗിൽ നിന്ന് coercion ചെയ്യുന്നു). ഐച്ഛികം: `id` (സൃഷ്ടിക്കുമ്പോൾ ഒഴിവാക്കുക, പുതുക്കുമ്പോൾ നൽകുക), `resetInterval` (`daily` | `weekly` | `monthly`, ഡിഫോൾട്ട് `monthly`), `resetTime` (`HH:MM`), `enabled` (ഡിഫോൾട്ട് `true`). ഓരോ പരിധിയിലേക്കും `GET` പ്രതികരണങ്ങൾ `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, `nextResetAt` എന്നിവ ചേർക്കുന്നു. ഇത് ഒരു മാനേജ്മെന്റ്-ക്ലാസ് എൻഡ്പോയിന്റാണ് (authz പൈപ്പ്ലൈൻ വഴി പ്രാമാണീകരണം കേന്ദ്രീകൃതമായി പ്രയോഗിക്കുന്നു).
 
-## അഭ്യർത്ഥനാ പ്രോസസ്സിംഗ്
+## അഭ്യർത്ഥന പ്രോസസ്സിംഗ്
 
-1. ക്ലയന്റ് `/v1/*` എന്നതിലേക്ക് അഭ്യർത്ഥന അയയ്ക്കുന്നു
+1. ക്ലയന്റ് `/v1/*`-ലേക്ക് അഭ്യർത്ഥന അയയ്ക്കുന്നു
 2. റൂട്ട് ഹാൻഡ്ലർ `handleChat`, `handleEmbedding`, `handleAudioTranscription`, അല്ലെങ്കിൽ `handleImageGeneration` വിളിക്കുന്നു
-3. മോഡൽ പരിഹരിക്കപ്പെടുന്നു (നേരിട്ടുള്ള പ്രൊവൈഡർ/മോഡൽ അല്ലെങ്കിൽ അപരനാമം/കോംബോ)
-4. അക്കൗണ്ട് ലഭ്യതാ ഫിൽട്ടറിങ്ങോടെ ലോക്കൽ DB-യിൽ നിന്ന് ക്രെഡൻഷ്യലുകൾ തിരഞ്ഞെടുക്കുന്നു
-5. ചാറ്റിനായി: `handleChatCore` സെമാന്റിക്/സിഗ്നേച്ചർ കാഷ് പരിശോധിക്കുകയും കോംബോ കംപ്രഷൻ ക്രമീകരണങ്ങൾ പരിഹരിക്കുകയും ചെയ്യുന്നു
-6. പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ പ്രൊവൈഡർ പരിഭാഷയ്ക്ക് മുമ്പായി പ്രോആക്റ്റീവ് കംപ്രഷൻ പ്രവർത്തിക്കുന്നു (`lite`, Caveman, RTK, അല്ലെങ്കിൽ സ്റ്റാക്ക് ചെയ്തത്)
-7. പ്രൊവൈഡർ എക്സിക്യൂട്ടർ അപ്സ്ട്രീം അഭ്യർത്ഥന അയയ്ക്കുന്നു
-8. പ്രതികരണം ക്ലയന്റ് ഫോർമാറ്റിലേക്ക് തിരികെ പരിഭാഷപ്പെടുത്തുന്നു (ചാറ്റ്) അല്ലെങ്കിൽ അതേപടി തിരികെ നൽകുന്നു (എംബെഡ്ഡിങ്ങുകൾ/ചിത്രങ്ങൾ/ഓഡിയോ)
+3. മോഡൽ പരിഹരിക്കപ്പെടുന്നു (നേരിട്ടുള്ള provider/model അല്ലെങ്കിൽ alias/combo)
+4. അക്കൗണ്ട് ലഭ്യത ഫിൽട്ടറിംഗ് ഉപയോഗിച്ച് പ്രാദേശിക DB-യിൽ നിന്ന് ക്രെഡൻഷ്യലുകൾ തിരഞ്ഞെടുക്കുന്നു
+5. ചാറ്റിനായി: `handleChatCore` സെമാന്റിക്/സിഗ്നേച്ചർ കാഷെ പരിശോധിക്കുകയും combo കംപ്രഷൻ ക്രമീകരണങ്ങൾ പരിഹരിക്കുകയും ചെയ്യുന്നു
+6. പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ provider വിവർത്തനത്തിന് മുമ്പ് പ്രൊആക്റ്റീവ് കംപ്രഷൻ പ്രവർത്തിക്കുന്നു (`lite`, Caveman, RTK, അല്ലെങ്കിൽ stacked)
+7. Provider എക്സിക്യൂട്ടർ അപ്സ്ട്രീം അഭ്യർത്ഥന അയയ്ക്കുന്നു
+8. പ്രതികരണം ക്ലയന്റ് ഫോർമാറ്റിലേക്ക് (ചാറ്റ്) വിവർത്തനം ചെയ്യുകയോ അതേപടി തിരികെ നൽകുകയോ ചെയ്യുന്നു (embeddings/images/audio)
 9. ഉപയോഗം, കംപ്രഷൻ അനലിറ്റിക്സ്, അഭ്യർത്ഥനാ ലോഗുകൾ എന്നിവ രേഖപ്പെടുത്തുന്നു
-10. പിശകുകൾ സംഭവിക്കുമ്പോൾ കോംബോ നിയമങ്ങൾ അനുസരിച്ച് ഫാൾബാക്ക് പ്രയോഗിക്കുന്നു
+10. combo നിയമങ്ങൾ അനുസരിച്ച് പിശകുകൾ സംഭവിക്കുമ്പോൾ fallback പ്രയോഗിക്കുന്നു
 
-പൂർണ്ണമായ ആർക്കിടെക്ചർ റഫറൻസ്: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+പൂർണ്ണ ആർക്കിടെക്ചർ റഫറൻസ്: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
 ---
 
-## കോംബോ മാനേജ്മെന്റ്
+## Combo മാനേജ്മെന്റ്
 
-ഉയർന്ന തലത്തിലുള്ള റൂട്ടിങ് കോംബോകൾ (`/api/combos*` എന്നതിന് കീഴിൽ ഇതിനകം സംഗ്രഹിച്ചിട്ടുള്ളവ) ഒരു മോഡൽ id പാറ്റേണിൽ നിന്ന് 1:1 ആയും മാപ്പ് ചെയ്യാം; ഇതിലൂടെ OpenAI-ശൈലിയിലുള്ള ഒരു മോഡൽ id സുതാര്യമായി ഒരു കോംബോയിലേക്ക് റീഡയറക്ട് ചെയ്യാൻ കഴിയും.
+ഉയർന്നതല റൂട്ടിംഗ് combos (`/api/combos*`-ന്റെ കീഴിൽ ഇതിനകം സംഗ്രഹിച്ചവ) ഒരു മോഡൽ id പാറ്റേണിൽ നിന്ന് 1:1 ആയി മാപ്പ് ചെയ്യാനും കഴിയും; ഇതിലൂടെ OpenAI-ശൈലിയിലുള്ള മോഡൽ id-യെ ഒരു combo-യിലേക്ക് സുതാര്യമായി തിരിച്ചുവിടാം.
 
-| രീതി   | പാത                              | വിവരണം                                                                               |
-| ------ | -------------------------------- | ------------------------------------------------------------------------------------ |
-| GET    | `/api/model-combo-mappings`      | എല്ലാ മോഡൽ→കോംബോ മാപ്പിങ്ങുകളും പട്ടികപ്പെടുത്തുക                                    |
-| POST   | `/api/model-combo-mappings`      | മാപ്പിങ് സൃഷ്ടിക്കുക — ബോഡി: `{pattern, comboId, priority?, enabled?, description?}` |
-| GET    | `/api/model-combo-mappings/[id]` | ഒരൊറ്റ മാപ്പിങ് വീണ്ടെടുക്കുക                                                        |
-| PUT    | `/api/model-combo-mappings/[id]` | നിലവിലുള്ള ഒരു മാപ്പിങ്ങിന്റെ ഫീൽഡുകൾ അപ്ഡേറ്റ് ചെയ്യുക                              |
-| DELETE | `/api/model-combo-mappings/[id]` | ഒരു മാപ്പിങ് നീക്കംചെയ്യുക                                                           |
+| രീതി   | പാത                              | വിവരണം                                                                                |
+| ------ | -------------------------------- | ------------------------------------------------------------------------------------- |
+| GET    | `/api/model-combo-mappings`      | എല്ലാ model→combo മാപ്പിംഗുകളും പട്ടികപ്പെടുത്തുക                                     |
+| POST   | `/api/model-combo-mappings`      | മാപ്പിംഗ് സൃഷ്ടിക്കുക — ബോഡി: `{pattern, comboId, priority?, enabled?, description?}` |
+| GET    | `/api/model-combo-mappings/[id]` | ഒരൊറ്റ മാപ്പിംഗ് വീണ്ടെടുക്കുക                                                        |
+| PUT    | `/api/model-combo-mappings/[id]` | നിലവിലുള്ള മാപ്പിംഗിന്റെ ഫീൽഡുകൾ പുതുക്കുക                                            |
+| DELETE | `/api/model-combo-mappings/[id]` | ഒരു മാപ്പിംഗ് നീക്കം ചെയ്യുക                                                          |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`).
+**Auth:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`).
 
 ---
 
 ## വെബ്ഹുക്കുകൾ
 
-OmniRoute ഇവന്റുകൾക്കായുള്ള ഔട്ട്ബൗണ്ട് വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷനുകൾ (അഭ്യർത്ഥന പൂർത്തീകരണം, ക്വാട്ട തീരൽ, കീ റൊട്ടേഷൻ തുടങ്ങിയവ).
+OmniRoute ഇവന്റുകൾക്കായുള്ള ഔട്ട്ബൗണ്ട് വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷനുകൾ (അഭ്യർത്ഥന പൂർത്തീകരണം, ക്വോട്ട തീർന്നുപോകൽ, കീ റൊട്ടേഷൻ മുതലായവ).
 
-| രീതി   | പാത                       | വിവരണം                                                                        |
+| Method | Path                      | Description                                                                   |
 | ------ | ------------------------- | ----------------------------------------------------------------------------- |
-| GET    | `/api/webhooks`           | വെബ്ഹുക്കുകൾ പട്ടികപ്പെടുത്തുക (രഹസ്യങ്ങൾ `<prefix>...` ആയി മറച്ചിരിക്കും)    |
-| POST   | `/api/webhooks`           | വെബ്ഹുക്ക് സൃഷ്ടിക്കുക — ബോഡി: `{url, events?: ["*"], secret?, description?}` |
+| GET    | `/api/webhooks`           | വെബ്ഹുക്കുകളുടെ പട്ടിക (സീക്രട്ടുകൾ `<prefix>...` ആയി മറച്ചിരിക്കും)          |
+| POST   | `/api/webhooks`           | വെബ്ഹുക്ക് സൃഷ്ടിക്കുക — body: `{url, events?: ["*"], secret?, description?}` |
 | GET    | `/api/webhooks/[id]`      | ഒരു വെബ്ഹുക്ക് വീണ്ടെടുക്കുക                                                  |
 | PUT    | `/api/webhooks/[id]`      | url/events/secret/description അപ്ഡേറ്റ് ചെയ്യുക                               |
 | DELETE | `/api/webhooks/[id]`      | ഒരു വെബ്ഹുക്ക് നീക്കം ചെയ്യുക                                                 |
-| POST   | `/api/webhooks/[id]/test` | വെബ്ഹുക്ക് URL-ലേക്ക് ഒരു ടെസ്റ്റ് പേലോഡ് അയച്ച് ഡെലിവറി നില തിരികെ നൽകുക     |
+| POST   | `/api/webhooks/[id]/test` | വെബ്ഹുക്ക് URL-ലേക്ക് ഒരു ടെസ്റ്റ് payload അയച്ച് ഡെലിവറി നില തിരികെ നൽകുക    |
 
-**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`).
+**Auth:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`).
 
 ---
 
-## രജിസ്റ്റർ ചെയ്ത കീകൾ (സ്വയമേവയുള്ള മാനേജ്മെന്റ്)
+## രജിസ്റ്റർ ചെയ്ത കീകൾ (ഓട്ടോ-മാനേജ്മെന്റ്)
 
-ദൈനംദിന/മണിക്കൂർ ക്വാട്ടകളോടെ, അടിസ്ഥാന provider/account-നെതിരെ API കീകൾ നൽകുന്നതിനും റൊട്ടേറ്റ് ചെയ്യുന്നതിനും ഓട്ടോ-കീ മാനേജ്മെന്റ് സബ്സിസ്റ്റം ഉപയോഗിക്കുന്നു.
+ബാക്കിംഗ് പ്രൊവൈഡർ/അക്കൗണ്ടിനെതിരെ API കീകൾ നൽകാനും റൊട്ടേറ്റ് ചെയ്യാനും, ദിവസേന/മണിക്കൂറുതോറുമുള്ള ക്വോട്ടുകളോടെ, ഓട്ടോ-കീ മാനേജ്മെന്റ് സബ്സിസ്റ്റം ഉപയോഗിക്കുന്നു.
 
-| രീതി   | പാത                                   | വിവരണം                                                                                                                                                                                                                             |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | രജിസ്റ്റർ ചെയ്ത കീകൾ പട്ടികപ്പെടുത്തുക (മറച്ച പ്രിഫിക്സ് മാത്രം)                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys`             | പുതിയൊരു രജിസ്റ്റർ ചെയ്ത കീ നൽകുക — ബോഡി: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. അസംസ്കൃത കീ **ഒരിക്കൽ മാത്രം** തിരികെ നൽകുന്നു. ക്വാട്ട നിരസിക്കുമ്പോൾ `429` തിരികെ നൽകുന്നു. |
-| GET    | `/api/v1/registered-keys/[id]`        | രജിസ്റ്റർ ചെയ്ത ഒരു കീയുടെ മെറ്റാഡാറ്റ വീണ്ടെടുക്കുക (അസംസ്കൃത കീ ഉൾപ്പെടില്ല)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | രജിസ്റ്റർ ചെയ്ത ഒരു കീ അസാധുവാക്കുക                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | വ്യക്തമായ അസാധുവാക്കൽ എൻഡ്പോയിന്റ് (DELETE-ന്റെ അതേ ഫലം)                                                                                                                                                                           |
+| Method | Path                                  | Description                                                                                                                                                                                                           |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | രജിസ്റ്റർ ചെയ്ത കീകളുടെ പട്ടിക (മറച്ചിരിക്കുന്ന പ്രിഫിക്സ് മാത്രം)                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | പുതിയ രജിസ്റ്റർ ചെയ്ത കീ നൽകുക — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. raw key **ഒരിക്കൽ മാത്രം** തിരികെ നൽകും. ക്വോട്ട നിരസിക്കുമ്പോൾ `429` തിരികെ നൽകും. |
+| GET    | `/api/v1/registered-keys/[id]`        | രജിസ്റ്റർ ചെയ്ത കീയുടെ മെറ്റാഡാറ്റ വീണ്ടെടുക്കുക (raw material ഇല്ല)                                                                                                                                                  |
+| DELETE | `/api/v1/registered-keys/[id]`        | രജിസ്റ്റർ ചെയ്ത കീ റദ്ദാക്കുക                                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | വ്യക്തമായ revoke endpoint (DELETE-ന്റെ അതേ ഫലം)                                                                                                                                                                       |
 
-**പ്രാമാണീകരണം:** Bearer API കീ (`isAuthenticated`). `/v1/quotas/check`, `/v1/issues/report` എന്നിവയും കാണുക.
+**Auth:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`) — `/api/keys`-ലെ അതേ ഗാർഡ്: ഒരു ഡാഷ്ബോർഡ് സെഷൻ, ലോക്കൽ CLI ടോക്കൺ, അല്ലെങ്കിൽ `manage`/`admin` സ്കോപ്പുള്ള API കീ; inference-only API കീകൾക്ക് `403` ലഭിക്കും. `/v1/quotas/check`, `/v1/issues/report` എന്നിവയും കാണുക.
 
 ---
 
 ## ഏജന്റ്സ് പ്രോട്ടോക്കോൾ
 
-OmniRoute ഉപയോക്താക്കൾക്കുവേണ്ടി വിദൂരമായി നിർവഹിക്കുന്ന ക്ലൗഡ് ഏജന്റ് ടാസ്കുകൾ (Claude Code, Codex Cloud, OpenHands മുതലായവ).
+OmniRoute ഉപയോക്താക്കളുടെ പേരിൽ വിദൂരമായി നിർവഹിക്കുന്ന ക്ലൗഡ് ഏജന്റ് ടാസ്കുകൾ (Claude Code, Codex Cloud, OpenHands മുതലായവ).
 
-| രീതി   | പാത                           | വിവരണം                                                                                                                                                                       |
+| Method | Path                          | Description                                                                                                                                                                  |
 | ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/agents/tasks`        | ടാസ്കുകൾ പട്ടികപ്പെടുത്തുക — ഐച്ഛികമായി `?provider=`, `?status=`, `?limit=` (1–500, ഡിഫോൾട്ട് 50)                                                                            |
-| POST   | `/api/v1/agents/tasks`        | ടാസ്ക് സൃഷ്ടിക്കുക — ബോഡി `CreateCloudAgentTaskSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു (`providerId`, `prompt`, `source`, `options?`). ടാസ്ക് എൻവലപ്പിനൊപ്പം `201` മടക്കിനൽകുന്നു |
+| GET    | `/api/v1/agents/tasks`        | ടാസ്കുകൾ പട്ടികപ്പെടുത്തുക — ഐച്ഛികമായ `?provider=`, `?status=`, `?limit=` (1–500, ഡിഫോൾട്ട് 50)                                                                             |
+| POST   | `/api/v1/agents/tasks`        | ടാസ്ക് സൃഷ്ടിക്കുക — ബോഡി `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`) ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു. ടാസ്ക് എൻവലപ്പ് സഹിതം `201` മടക്കിനൽകുന്നു |
 | DELETE | `/api/v1/agents/tasks?id=...` | ഒരു ടാസ്ക് ഇല്ലാതാക്കുക                                                                                                                                                      |
-| GET    | `/api/v1/agents/tasks/[id]`   | ടാസ്ക് വായിക്കുക — `external_id` സജ്ജീകരിച്ചിട്ടുണ്ടെങ്കിൽ അപ്സ്ട്രീം ക്ലൗഡ് ഏജന്റിൽനിന്ന് സ്റ്റാറ്റസ് സമകാലികമായി പുതുക്കുന്നു                                              |
-| POST   | `/api/v1/agents/tasks/[id]`   | വേർതിരിച്ചറിയാവുന്ന ആക്ഷൻ: `{action: "approve"}`, `{action: "message", message}`, അല്ലെങ്കിൽ `{action: "cancel"}`                                                            |
-| DELETE | `/api/v1/agents/tasks/[id]`   | id അനുസരിച്ച് ഒരു നിർദ്ദിഷ്ട ടാസ്ക് ഇല്ലാതാക്കുക                                                                                                                             |
+| GET    | `/api/v1/agents/tasks/[id]`   | ടാസ്ക് വായിക്കുക — `external_id` സജ്ജീകരിച്ചിട്ടുണ്ടെങ്കിൽ അപ്സ്ട്രീം ക്ലൗഡ് ഏജന്റിൽ നിന്ന് സ്റ്റാറ്റസ് സമകാലികമായി പുതുക്കുന്നു                                             |
+| POST   | `/api/v1/agents/tasks/[id]`   | വിഭജിച്ച ആക്ഷൻ: `{action: "approve"}`, `{action: "message", message}`, അല്ലെങ്കിൽ `{action: "cancel"}`                                                                       |
+| DELETE | `/api/v1/agents/tasks/[id]`   | `id` ഉപയോഗിച്ച് നിർദ്ദിഷ്ട ടാസ്ക് ഇല്ലാതാക്കുക                                                                                                                               |
 
-> **ഓതന്റിക്കേഷൻ:** എല്ലാ രീതികൾക്കും മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമാണ് (`requireCloudAgentManagementAuth`). v3.8.0-ന് മുമ്പ് ഇവയ്ക്ക് ഓതന്റിക്കേഷൻ ഉണ്ടായിരുന്നില്ല — ഈ ബ്രേക്കിംഗ് മാറ്റത്തിന് commit `588a0333` കാണുക.
+> **ഓതന്റിക്കേഷൻ:** എല്ലാ മെത്തഡുകൾക്കും മാനേജ്മെന്റ് ഓതന്റിക്കേഷൻ ആവശ്യമാണ് (`requireCloudAgentManagementAuth`). v3.8.0-ന് മുമ്പ് ഇവ ഓതന്റിക്കേഷൻ ഇല്ലാത്തവയായിരുന്നു — ബ്രേക്കിംഗ് മാറ്റത്തിനായി commit `588a0333` കാണുക.
 
 ```bash
-# ഒരു Claude Code ക്ലൗഡ് ടാസ്ക് സൃഷ്ടിക്കുക
+# Create a Claude Code cloud task
 curl -X POST http://localhost:20128/api/v1/agents/tasks \
   -H "Authorization: Bearer your-management-key" \
   -H "Content-Type: application/json" \
@@ -1489,122 +1794,128 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ## മാനേജ്മെന്റ് പ്രോക്സികൾ
 
-പ്രൊവൈഡർമാർക്കോ അക്കൗണ്ടുകൾക്കോ ആഗോളമായോ അസൈൻ ചെയ്യാവുന്ന ഔട്ട്ബൗണ്ട് HTTP(S)/SOCKS പ്രോക്സികൾ.
+പ്രൊവൈഡർമാർക്കും അക്കൗണ്ടുകൾക്കും ആഗോളമായും നിയോഗിക്കാവുന്ന ഔട്ട്ബൗണ്ട് HTTP(S)/SOCKS പ്രോക്സികൾ.
 
-| രീതി   | പാത                                          | വിവരണം                                                                                                                                                                                 |
-| ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/management/proxies`                 | പ്രോക്സികൾ പട്ടികപ്പെടുത്തുക (`?id=` ഉപയോഗിച്ച് ഒന്ന് മടക്കിനൽകുന്നു; `?id=&where_used=1` ഉപയോഗിച്ച് അസൈൻമെന്റ് ഗ്രാഫ് മടക്കിനൽകുന്നു)                                                 |
-| POST   | `/api/v1/management/proxies`                 | പ്രോക്സി സൃഷ്ടിക്കുക — ബോഡി `createProxyRegistrySchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു                                                                                                     |
-| PATCH  | `/api/v1/management/proxies`                 | പ്രോക്സി അപ്ഡേറ്റ് ചെയ്യുക — ബോഡി `updateProxyRegistrySchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു (`id` ആവശ്യമാണ്)                                                                              |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | പ്രോക്സി ഇല്ലാതാക്കുക (അസൈൻമെന്റുകൾ വേർപെടുത്താൻ `force=1` ഉപയോഗിക്കുക)                                                                                                                |
-| GET    | `/api/v1/management/proxies/assignments`     | അസൈൻമെന്റുകൾ പട്ടികപ്പെടുത്തുക — `proxy_id`, `scope`, `scope_id` എന്നിവ ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യാം; ഒരു കണക്ഷനുവേണ്ടിയുള്ള സജീവ പ്രോക്സി കണ്ടെത്താൻ `resolve_connection_id=<id>` നൽകുക |
-| PUT    | `/api/v1/management/proxies/assignments`     | അസൈൻ ചെയ്യുക — ബോഡി `proxyAssignmentSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു (`{scope, scopeId?, proxyId?}`). ഡിസ്പാച്ചർ കാഷ് മായ്ക്കുന്നു                                                   |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | ബൾക്ക് അസൈൻ ചെയ്യുക — ബോഡി `bulkProxyAssignmentSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു (`{scope, scopeIds[], proxyId?}`)                                                                    |
-| GET    | `/api/v1/management/proxies/health?hours=24` | ഒരു സമയപരിധിയിലുടനീളമുള്ള സംഗ്രഹിച്ച പ്രോക്സി ഹെൽത്ത് (വിജയ/പരാജയ എണ്ണങ്ങൾ, ലേറ്റൻസി)                                                                                                  |
+| Method | Path                                         | Description                                                                                                                                                                     |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/management/proxies`                 | പ്രോക്സികൾ പട്ടികപ്പെടുത്തുക (`?id=` നൽകിയാൽ ഒന്ന് മാത്രം; `?id=&where_used=1` നൽകിയാൽ അസൈൻമെന്റ് ഗ്രാഫ് നൽകുന്നു)                                                              |
+| POST   | `/api/v1/management/proxies`                 | പ്രോക്സി സൃഷ്ടിക്കുക — ബോഡി `createProxyRegistrySchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു                                                                                              |
+| PATCH  | `/api/v1/management/proxies`                 | പ്രോക്സി അപ്ഡേറ്റ് ചെയ്യുക — ബോഡി `updateProxyRegistrySchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു (`id` ആവശ്യമാണ്)                                                                       |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | പ്രോക്സി ഇല്ലാതാക്കുക (അസൈൻമെന്റുകൾ വേർപെടുത്താൻ `force=1` ഉപയോഗിക്കുക)                                                                                                         |
+| GET    | `/api/v1/management/proxies/assignments`     | അസൈൻമെന്റുകൾ പട്ടികപ്പെടുത്തുക — `proxy_id`, `scope`, `scope_id` എന്നിവ ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യാം; ഒരു കണക്ഷനുള്ള സജീവ പ്രോക്സി പരിഹരിക്കാൻ `resolve_connection_id=<id>` നൽകുക |
+| PUT    | `/api/v1/management/proxies/assignments`     | അസൈൻ ചെയ്യുക — ബോഡി `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`) ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു. ഡിസ്പാച്ചർ കാഷെ നീക്കം ചെയ്യുന്നു                                       |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | ബൾക്ക്-അസൈൻ ചെയ്യുക — ബോഡി `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`) ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു                                                             |
+| GET    | `/api/v1/management/proxies/health?hours=24` | ഒരു കാലയളവിലെ സമാഹരിച്ച പ്രോക്സി ആരോഗ്യനില (വിജയം/പരാജയങ്ങളുടെ എണ്ണം, ലാറ്റൻസി)                                                                                                 |
 
-**ഓതന്റിക്കേഷൻ:** എല്ലാ റൂട്ടിലും മാനേജ്മെന്റ് സെഷൻ/API കീ ആവശ്യമാണ് (`requireManagementAuth`).
+**ഓതന്റിക്കേഷൻ:** എല്ലാ റൂട്ടുകളിലും മാനേജ്മെന്റ് സെഷൻ/API കീ ആവശ്യമാണ് (`requireManagementAuth`).
 
-> ടാസ്ക് വിവരണത്തിലെ `POST /api/v1/management/proxies/[id]/assignments`, `POST /api/v1/management/proxies/[id]/health` എന്നിവ മുകളിൽ കാണിച്ചിരിക്കുന്ന ഫ്ലാറ്റ് `/assignments`, `/health` റൂട്ടുകളാണ് നൽകുന്നത് — കോഡ്ബേസിൽ ഓരോ id-ക്കും പ്രത്യേക സബ്റൂട്ടുകളില്ല.
+> ടാസ്ക് വിവരണത്തിലെ `POST /api/v1/management/proxies/[id]/assignments`, `POST /api/v1/management/proxies/[id]/health` എന്നിവ മുകളിൽ കാണിച്ചിരിക്കുന്ന ഫ്ലാറ്റ് `/assignments`, `/health` റൂട്ടുകളാണ് നൽകുന്നത് — കോഡ്ബേസിൽ ഓരോ ഐഡിക്കുമുള്ള സബ്റൂട്ടുകൾ ഇല്ല.
 
 ---
 
 ## പ്രതിരോധശേഷി (വിപുലീകരിച്ചത്)
 
-OmniRoute മൂന്ന് സ്വതന്ത്ര താൽക്കാലിക-പരാജയ സംവിധാനങ്ങൾ ലഭ്യമാക്കുന്നു; താഴെയുള്ള മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകൾ ഉപയോഗിച്ച് ഓപ്പറേറ്റർമാർക്ക് അവയുടെ നില വായിക്കാനും അവയെ അസാധുവാക്കാനും കഴിയും:
+OmniRoute മൂന്ന് സ്വതന്ത്ര താൽക്കാലിക-പരാജയ സംവിധാനങ്ങൾ നൽകുന്നു; താഴെയുള്ള മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകൾ ഉപയോഗിച്ച് ഓപ്പറേറ്റർമാർക്ക് അവ വായിക്കാനും override ചെയ്യാനും കഴിയും:
 
-| പരിധി                        | നില സംഭരണം                               | വായിക്കുക                                 | റീസെറ്റ് / മായ്ക്കുക                                                  |
-| ---------------------------- | ---------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
-| പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ | `domain_circuit_breakers` + ഇൻ-മെമ്മറി   | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                          |
-| കണക്ഷൻ കൂൾഡൗൺ                | പ്രൊവൈഡർ കണക്ഷനുകളിലെ `rateLimitedUntil` | `/api/rate-limits`, `/api/providers/[id]` | (ആവശ്യാനുസരണം വീണ്ടും പ്രവർത്തനക്ഷമമാകും; പ്രൊവൈഡർ PUT വഴി മായ്ക്കുക) |
-| മോഡൽ ലോക്കൗട്ട്              | ഇൻ-മെമ്മറി മോഡൽ-ലഭ്യതാ രജിസ്ട്രി         | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                              |
+| പരിധി               | സ്റ്റേറ്റ് സംഭരണം                             | വായിക്കുക                                 | റീസെറ്റ് / മായ്ക്കുക                                                    |
+| ------------------- | --------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------- |
+| Provider breaker    | `domain_circuit_breakers` + in-memory         | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                            |
+| Connection cooldown | Provider connections-ലുള്ള `rateLimitedUntil` | `/api/rate-limits`, `/api/providers/[id]` | (വീണ്ടും പ്രവർത്തനക്ഷമമാക്കുന്നത് lazy ആയി; provider PUT വഴി മായ്ക്കുക) |
+| Model lockout       | In-memory model-availability registry         | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                                |
 
-`PATCH /api/resilience`, `providerBreaker.oauth`, `providerBreaker.apikey` എന്നിവയ്ക്ക് കീഴിലുള്ള പ്രൊവൈഡർ സർക്യൂട്ട് ബ്രേക്കർ ഓവർറൈഡുകൾ സ്വീകരിക്കുന്നു. ഓരോ പ്രൊഫൈലും `degradationThreshold`, `failureThreshold`, `resetTimeoutMs` എന്നിവ പിന്തുണയ്ക്കുന്നു; ഇതേ ഫീൽഡുകൾ Dashboard → Settings → Resilience എന്നതിലും ലഭ്യമാണ്.
+`PATCH /api/resilience` എന്നത് `providerBreaker.oauth`, `providerBreaker.apikey` എന്നിവയ്ക്ക് കീഴിലുള്ള provider breaker override-ുകൾ സ്വീകരിക്കുന്നു. ഓരോ profile-ും `degradationThreshold`, `failureThreshold`, `resetTimeoutMs` എന്നിവ പിന്തുണയ്ക്കുന്നു; ഇതേ ഫീൽഡുകൾ Dashboard → Settings → Resilience എന്നതിലും ലഭ്യമാണ്.
 
 ```bash
-# ഒരു മോഡൽ ലോക്കൗട്ട് മായ്ക്കുക
+# ഒരു മോഡൽ lockout മായ്ക്കുക
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# എല്ലാ ലോക്കൗട്ടുകളും മായ്ക്കുക
+# എല്ലാ lockout-ുകളും മായ്ക്കുക
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-പൂർണ്ണമായ ആശയപരമായ റഫറൻസിനും സർക്യൂട്ട് ബ്രേക്കറിന്റെ ഡിഫോൾട്ട് മൂല്യങ്ങൾക്കും: [`CLAUDE.md`](../../CLAUDE.md) → "പ്രതിരോധശേഷിയുടെ റൺടൈം നില" കാണുക.
+പൂർണ്ണമായ ആശയപരമായ റഫറൻസിനും breaker ഡിഫോൾട്ടുകൾക്കുമായി: [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State", [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) എന്നിവ കാണുക.
+
+### Rate-Limit Queue & Auto-Enable Safety Net
+
+- **പിന്തുണയ്ക്കുന്ന write path**: `POST /api/rate-limits` എന്നതിലേക്ക് `{"connectionId": "<id>", "enabled": true|false}` body ആയി അയയ്ക്കുന്നത് ഒരു connection-ന്റെ rate-limit protection toggle ചെയ്യുന്നതിനുള്ള പിന്തുണയ്ക്കുന്ന management endpoint ആണ്. `PUT /api/providers/[id]` ഉദ്ദേശപൂർവ്വം `rateLimitProtection` പരിഷ്കരിക്കുകയോ മാറ്റുകയോ ചെയ്യുന്നില്ല (#11278).
+- **`enabled: false` എന്നതിന്റെ അർത്ഥം**: `enabled: false` സജ്ജമാക്കുന്നത് connection-നുള്ള explicit protection നീക്കംചെയ്യുന്നു, എന്നാൽ **സജീവമായ API-key connection-നെ ആഗോള auto-enable safety net-ൽ നിന്ന് ഒഴിവാക്കുന്നില്ല** (`autoEnableApiKeyProviders = true`). `reconcileEnabledConnections`-ൽ (`open-sse/services/rateLimitManager.ts`), `false`-യും `undefined`-യും ഒരുപോലെയാണ്; explicit protection ഇല്ലാത്ത സജീവ API-key connection-ുകൾ auto-enable safety net-ന്റെ കീഴിൽ protected ആയി തുടരും.
+- **Global disable**: rate-limit queue-കളില്ലാതെ API-key connection-ുകൾ പ്രവർത്തിപ്പിക്കാൻ, `RATE_LIMIT_AUTO_ENABLE=false` (env) അല്ലെങ്കിൽ `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Settings → Resilience / `PATCH /api/resilience`) ഉപയോഗിച്ച് safety net ആഗോളമായി disable ചെയ്യുക.
 
 ---
 
-## സ്കില്ലുകൾ
+## Skills
 
-ഇഷ്ടാനുസൃത എക്സിക്യൂട്ടബിൾ ഹാൻഡ്ലറുകളും മാർക്കറ്റ്പ്ലേസ് ഇന്റഗ്രേഷനുകളും ഉപയോഗിച്ച് OmniRoute വിപുലീകരിക്കുന്നതിനുള്ള സ്കിൽ ഫ്രെയിംവർക്ക്.
+Custom executable handler-ുകൾ ഉപയോഗിച്ച് OmniRoute വിപുലീകരിക്കുന്നതിനും marketplace integration-ുകൾക്കുമുള്ള skill framework.
 
-| രീതി   | പാത്ത്                            | വിവരണം                                                                                                                                                                         |
-| ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/skills`                     | ഇൻസ്റ്റാൾ ചെയ്ത സ്കില്ലുകൾ പട്ടികപ്പെടുത്തുക — `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local` എന്നിവ ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യാം, പേജിനേഷൻ പിന്തുണയ്ക്കുന്നു |
-| GET    | `/api/skills/[id]`                | ഒരു സ്കിൽ ലഭ്യമാക്കുക                                                                                                                                                          |
-| PUT    | `/api/skills/[id]`                | സ്കിൽ അപ്ഡേറ്റ് ചെയ്യുക (പേര്, വിവരണം, മോഡ്, സ്കീമ, ഹാൻഡ്ലർ, ടാഗുകൾ)                                                                                                           |
-| DELETE | `/api/skills/[id]`                | ഒരു സ്കിൽ അൺഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                                                                  |
-| POST   | `/api/skills/install`             | റോ മാനിഫെസ്റ്റിൽ നിന്ന് ഒരു സ്കിൽ ഇൻസ്റ്റാൾ ചെയ്യുക — ബോഡി: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`                                     |
-| GET    | `/api/skills/executions`          | സമീപകാല സ്കിൽ എക്സിക്യൂഷനുകൾ പട്ടികപ്പെടുത്തുക (ഇൻപുട്ടുകൾ/ഔട്ട്പുട്ടുകൾ/ദൈർഘ്യം ഉൾപ്പെടെയുള്ള ഓഡിറ്റ് ട്രെയിൽ)                                                                |
-| GET    | `/api/skills/marketplace?q=...`   | SkillsMP മാർക്കറ്റ്പ്ലേസിൽ നിന്നുള്ള തിരയൽ/ജനപ്രിയ പട്ടിക (`skillsmpApiKey` ക്രമീകരണം ആവശ്യമാണ്)                                                                               |
-| POST   | `/api/skills/marketplace/install` | SkillsMP-യിൽ നിന്ന് id ഉപയോഗിച്ച് ഒരു സ്കിൽ ഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                                  |
-| GET    | `/api/skills/skillssh?q=&limit=`  | skills.sh രജിസ്ട്രിയിൽ തിരയുക                                                                                                                                                  |
-| POST   | `/api/skills/skillssh/install`    | skills.sh-ൽ നിന്ന് id ഉപയോഗിച്ച് ഒരു സ്കിൽ ഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                                   |
+| Method | Path                              | Description                                                                                                                                                            |
+| ------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`                     | ഇൻസ്റ്റാൾ ചെയ്ത skill-ുകളുടെ പട്ടിക — `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local` എന്നിവ ഉപയോഗിച്ച് filter ചെയ്യാം, pagination പിന്തുണയ്ക്കുന്നു |
+| GET    | `/api/skills/[id]`                | ഒരു skill വീണ്ടെടുക്കുക                                                                                                                                                |
+| PUT    | `/api/skills/[id]`                | skill അപ്ഡേറ്റ് ചെയ്യുക (name, description, mode, schema, handler, tags)                                                                                               |
+| DELETE | `/api/skills/[id]`                | ഒരു skill uninstall ചെയ്യുക                                                                                                                                            |
+| POST   | `/api/skills/install`             | ഒരു raw manifest-ിൽ നിന്ന് skill ഇൻസ്റ്റാൾ ചെയ്യുക — body: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`                              |
+| GET    | `/api/skills/executions`          | അടുത്തിടെ നടന്ന skill execution-ുകളുടെ പട്ടിക (inputs/outputs/duration ഉൾപ്പെടുന്ന audit trail)                                                                        |
+| GET    | `/api/skills/marketplace?q=...`   | SkillsMP marketplace-ൽ നിന്ന് search/popular പട്ടിക ( `skillsmpApiKey` setting ആവശ്യമാണ്)                                                                              |
+| POST   | `/api/skills/marketplace/install` | SkillsMP-ൽ നിന്ന് id ഉപയോഗിച്ച് ഒരു skill ഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                            |
+| GET    | `/api/skills/skillssh?q=&limit=`  | skills.sh registry-യിൽ തിരയുക                                                                                                                                          |
+| POST   | `/api/skills/skillssh/install`    | skills.sh-ൽ നിന്ന് id ഉപയോഗിച്ച് ഒരു skill ഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                           |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ/API കീ. മാർക്കറ്റ്പ്ലേസ് തിരയൽ റൂട്ടുകൾ മാനേജ്മെന്റ് ഓതന്റിക്കേഷനോ ഒരു Bearer API കീയോ (`isAuthenticated`) സ്വീകരിക്കുന്നു.
+**Auth:** management session/API key. Marketplace search route-ുകൾ management auth അല്ലെങ്കിൽ Bearer API key (`isAuthenticated`) സ്വീകരിക്കുന്നു.
 
 ---
 
 ## മെമ്മറി
 
-API കീ / സെഷൻ അടിസ്ഥാനത്തിൽ പരിധി നിശ്ചയിച്ചിട്ടുള്ള സ്ഥിരമായ സംഭാഷണ/വസ്തുതാപരമായ മെമ്മറി സംഭരണി.
+API കീ / സെഷൻ പരിധിയിൽ സ്ഥിരമായ സംഭാഷണാത്മക/വസ്തുതാപരമായ മെമ്മറി സ്റ്റോർ.
 
-| രീതി   | പാത                  | വിവരണം                                                                                                                             |
-| ------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/memory`        | മെമ്മറികൾ പട്ടികപ്പെടുത്തുക — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, കൂടാതെ `offset/limit` അല്ലെങ്കിൽ `page/limit` പേജിനേഷൻ |
-| POST   | `/api/memory`        | മെമ്മറി സൃഷ്ടിക്കുക — Zod സാധൂകരിക്കുന്ന ബോഡി: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`               |
-| GET    | `/api/memory/[id]`   | ഒരു മെമ്മറി വീണ്ടെടുക്കുക                                                                                                          |
-| DELETE | `/api/memory/[id]`   | ഒരു മെമ്മറി ഇല്ലാതാക്കുക                                                                                                           |
-| GET    | `/api/memory/health` | മെമ്മറി ഉപസിസ്റ്റത്തിന്റെ നില (DB കണക്റ്റിവിറ്റി, എംബെഡ്ഡിങ്സ് ബാക്കെൻഡ്, വെക്റ്റർ ഇൻഡക്സ് നില)                                    |
+| രീതി   | പാത                  | വിവരണം                                                                                                                           |
+| ------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/memory`        | മെമ്മറികൾ ലിസ്റ്റ് ചെയ്യുക — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, `offset/limit` അല്ലെങ്കിൽ `page/limit` പേജിനേഷൻ സഹിതം |
+| POST   | `/api/memory`        | മെമ്മറി സൃഷ്ടിക്കുക — Zod ഉപയോഗിച്ച് സാധൂകരിച്ച ബോഡി: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`      |
+| GET    | `/api/memory/[id]`   | ഒരു മെമ്മറി വീണ്ടെടുക്കുക                                                                                                        |
+| DELETE | `/api/memory/[id]`   | ഒരു മെമ്മറി ഇല്ലാതാക്കുക                                                                                                         |
+| GET    | `/api/memory/health` | മെമ്മറി സബ്സിസ്റ്റത്തിന്റെ ആരോഗ്യം (DB കണക്റ്റിവിറ്റി, embeddings backend, vector index നില)                                     |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`). `type` enum: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (`src/lib/memory/types.ts`-ലെ `MemoryType` കാണുക).
+**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ/API കീ (`requireManagementAuth`). `type` enum: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (`src/lib/memory/types.ts`-ലെ `MemoryType` കാണുക).
 
 ---
 
 ## MCP സെർവർ
 
-OmniRoute, 3 ട്രാൻസ്പോർട്ടുകളും (stdio, SSE, streamable-http) സ്കോപ്പ് ചെയ്ത ടൂളുകളുമുള്ള ഒരു എംബെഡഡ് Model Context Protocol സെർവറുമായി ലഭ്യമാകുന്നു. ചുവടെയുള്ള ഡാഷ്ബോർഡ് എൻഡ്പോയിന്റുകൾ നില/ഓഡിറ്റ് ഡാറ്റ വായിക്കുകയും HTTP ട്രാൻസ്പോർട്ടുകളെ പ്രോക്സി ചെയ്യുകയും ചെയ്യുന്നു.
+OmniRoute 3 ട്രാൻസ്പോർട്ടുകളും (stdio, SSE, streamable-http) പരിധിനിർണ്ണയിച്ച ടൂളുകളും ഉള്ള ഒരു എംബെഡഡ് Model Context Protocol സെർവർ നൽകുന്നു. താഴെയുള്ള ഡാഷ്ബോർഡ് എൻഡ്പോയിന്റുകൾ സ്റ്റാറ്റസ്/ഓഡിറ്റ് ഡാറ്റ വായിക്കുകയും HTTP ട്രാൻസ്പോർട്ടുകൾക്ക് പ്രോക്സിയായി പ്രവർത്തിക്കുകയും ചെയ്യുന്നു.
 
 | രീതി | പാത | വിവരണം |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | ഹാർട്ട്ബീറ്റ്, ട്രാൻസ്പോർട്ട്, ഓൺലൈൻ നില, അവസാന കോൾ, മുൻനിര ടൂളുകൾ, 24 മണിക്കൂർ വിജയനിരക്ക് |
+| GET | `/api/mcp/status` | ഹാർട്ട്ബീറ്റ്, ട്രാൻസ്പോർട്ട്, ഓൺലൈൻ നില, അവസാന കോൾ, മുൻനിര ടൂളുകൾ, 24 മണിക്കൂർ വിജയ നിരക്ക് |
 | GET | `/api/mcp/tools` | `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` എന്നിവയുള്ള MCP ടൂളുകളുടെ പട്ടിക |
-| GET | `/api/mcp/sse` | SSE ട്രാൻസ്പോർട്ടിനായി SSE സ്ട്രീം തുറക്കുക (MCP പ്രവർത്തനരഹിതമാണെങ്കിലോ ട്രാൻസ്പോർട്ട് പൊരുത്തക്കേടുണ്ടെങ്കിലോ `503` തിരികെ നൽകുന്നു) |
+| GET | `/api/mcp/sse` | SSE ട്രാൻസ്പോർട്ടിനായി SSE സ്ട്രീം തുറക്കുക (MCP പ്രവർത്തനരഹിതമാണെങ്കിൽ അല്ലെങ്കിൽ ട്രാൻസ്പോർട്ട് പൊരുത്തപ്പെടുന്നില്ലെങ്കിൽ `503` നൽകുന്നു) |
 | POST | `/api/mcp/sse` | SSE ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക |
-| GET | `/api/mcp/stream` | Streamable HTTP ട്രാൻസ്പോർട്ടിന്റെ SSE വശം തുറക്കുക (സെർവർ ആരംഭിക്കുന്ന സന്ദേശങ്ങൾ) |
+| GET | `/api/mcp/stream` | Streamable HTTP ട്രാൻസ്പോർട്ടിന്റെ SSE വശം തുറക്കുക (സെർവർ ആരംഭിച്ച സന്ദേശങ്ങൾ) |
 | POST | `/api/mcp/stream` | Streamable HTTP ട്രാൻസ്പോർട്ടിൽ JSON-RPC ഫ്രെയിം അയയ്ക്കുക |
 | DELETE | `/api/mcp/stream` | ഒരു Streamable HTTP സെഷൻ അവസാനിപ്പിക്കുക |
 | GET | `/api/mcp/audit` | ഓഡിറ്റ് ലോഗ് അന്വേഷിക്കുക — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | സമാഹരിച്ച ഓഡിറ്റ് സ്ഥിതിവിവരക്കണക്കുകൾ (ആകെ എണ്ണം, വിജയനിരക്ക്, ശരാശരി ദൈർഘ്യം, മുൻനിര ടൂളുകൾ) |
+| GET | `/api/mcp/audit/stats` | സംഗ്രഹിച്ച ഓഡിറ്റ് സ്ഥിതിവിവരക്കണക്കുകൾ (ആകെ എണ്ണം, വിജയ നിരക്ക്, ശരാശരി ദൈർഘ്യം, മുൻനിര ടൂളുകൾ) |
 
-**ഓതന്റിക്കേഷൻ:** `sse`/`stream` ട്രാൻസ്പോർട്ടുകൾ MCP-നിർദ്ദിഷ്ട ഓതന്റിക്കേഷൻ സംവിധാനം പാലിക്കുന്നു (`mcp` സ്കോപ്പുള്ള Bearer API കീ); `status`/`tools`/`audit*` റൂട്ടുകൾ ഡാഷ്ബോർഡിൽ നിന്ന് വായിക്കാനാകും (ഡാഷ്ബോർഡ് ഹോസ്റ്റിലേക്ക് എത്തുന്നതിനപ്പുറം അധിക ഓതന്റിക്കേഷൻ ആവശ്യമില്ല).
+**പ്രാമാണീകരണം:** `sse`/`stream` ട്രാൻസ്പോർട്ടുകൾ MCP-നിർദ്ദിഷ്ട പ്രാമാണീകരണ ഉപരിതലത്തെ ( `mcp` സ്കോപ്പുള്ള Bearer API കീ) മാനിക്കുന്നു; `status`/`tools`/`audit*` റൂട്ടുകൾ ഡാഷ്ബോർഡിൽ നിന്ന് വായിക്കാനാകും (ഡാഷ്ബോർഡ് ഹോസ്റ്റിൽ എത്തിച്ചേരുന്നതിന് പുറമെ അധിക പ്രാമാണീകരണം ആവശ്യമില്ല).
 
-> രണ്ട് HTTP ട്രാൻസ്പോർട്ടുകളും `settings.mcpEnabled`, `settings.mcpTransport` എന്നിവയാൽ നിയന്ത്രിക്കപ്പെടുന്നു — ട്രാൻസ്പോർട്ട് പൊരുത്തക്കേട് `400` തിരികെ നൽകും, MCP പ്രവർത്തനരഹിതമായ നില `503` തിരികെ നൽകും.
+> രണ്ട് HTTP ട്രാൻസ്പോർട്ടുകളും `settings.mcpEnabled`, `settings.mcpTransport` എന്നിവ ഉപയോഗിച്ച് നിയന്ത്രിക്കപ്പെടുന്നു — ട്രാൻസ്പോർട്ട് പൊരുത്തപ്പെടാത്തപ്പോൾ `400`, MCP പ്രവർത്തനരഹിതമായിരിക്കുമ്പോൾ `503` നൽകുന്നു.
 
 ---
 
 ## A2A സെർവർ
 
-പരിശോധനയ്ക്കും ഡാഷ്ബോർഡ് ഉപയോഗത്തിനുമുള്ള REST റാപ്പറിനൊപ്പം ഒരു A2A (Agent-to-Agent) JSON-RPC 2.0 എൻഡ്പോയിന്റ് OmniRoute ലഭ്യമാക്കുന്നു.
+OmniRoute ഒരു A2A (Agent-to-Agent) JSON-RPC 2.0 എൻഡ്പോയിന്റും പരിശോധനയ്ക്കും ഡാഷ്ബോർഡ് ഉപയോഗത്തിനുമായി ഒരു REST റാപ്പറും നൽകുന്നു.
 
 ### JSON-RPC
 
 ```bash
 POST /a2a
-Authorization: Bearer your-api-key   # OMNIROUTE_API_KEY സജ്ജമാക്കിയിട്ടില്ലെങ്കിൽ ഐച്ഛികം
+Authorization: Bearer your-api-key   # OMNIROUTE_API_KEY സജ്ജീകരിച്ചിട്ടില്ലെങ്കിൽ മാത്രം ഐച്ഛികം
 Content-Type: application/json
 
 {
@@ -1618,14 +1929,14 @@ Content-Type: application/json
 }
 ```
 
-പിന്തുണയ്ക്കുന്ന രീതികൾ (എല്ലാം `settings.a2aEnabled` എന്ന ക്രമീകരണത്തിന് വിധേയമാണ്):
+പിന്തുണയ്ക്കുന്ന രീതികൾ (`settings.a2aEnabled` സജ്ജീകരിച്ചിരിക്കുമ്പോൾ മാത്രം ലഭ്യം):
 
-| രീതി             | വിവരണം                                                               |
-| ---------------- | -------------------------------------------------------------------- |
-| `message/send`   | സമകാലിക സ്കിൽ നിർവഹണം; `{task, artifacts, metadata}` തിരികെ നൽകുന്നു |
-| `message/stream` | അതേ സ്കിൽ ഗണത്തിന്റെ സ്ട്രീമിംഗ് SSE നിർവഹണം                         |
-| `tasks/get`      | `taskId` ഉപയോഗിച്ച് ഒരു ടാസ്ക് ലഭ്യമാക്കുന്നു                        |
-| `tasks/cancel`   | `taskId` ഉപയോഗിച്ച് ഒരു ടാസ്ക് റദ്ദാക്കുന്നു                         |
+| രീതി             | വിവരണം                                                                  |
+| ---------------- | ----------------------------------------------------------------------- |
+| `message/send`   | സിങ്ക്രണസ് സ്കിൽ നിർവഹണം; `{task, artifacts, metadata}` തിരികെ നൽകുന്നു |
+| `message/stream` | അതേ സ്കിൽ സെറ്റിന്റെ SSE സ്ട്രീമിംഗ് നിർവഹണം                            |
+| `tasks/get`      | `taskId` ഉപയോഗിച്ച് ഒരു ടാസ്ക് ലഭ്യമാക്കുക                              |
+| `tasks/cancel`   | `taskId` ഉപയോഗിച്ച് ഒരു ടാസ്ക് റദ്ദാക്കുക                               |
 
 അന്തർനിർമ്മിത സ്കില്ലുകൾ: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
@@ -1635,51 +1946,51 @@ Content-Type: application/json
 GET /.well-known/agent.json
 ```
 
-പൊതുവായ A2A ഏജന്റ് കാർഡ് (പേര്, വിവരണം, ശേഷികൾ, സ്കിൽ കാറ്റലോഗ്, പ്രാമാണീകരണ സ്കീം) തിരികെ നൽകുന്നു — പൊതുവായി 1 മണിക്കൂർ കാഷ് ചെയ്യപ്പെടും. പ്രാമാണീകരണം ആവശ്യമില്ല.
+പൊതുവായി ലഭ്യമായ A2A ഏജന്റ് കാർഡ് (പേര്, വിവരണം, കഴിവുകൾ, സ്കിൽ കാറ്റലോഗ്, ഓത്ത് സ്കീം) തിരികെ നൽകുന്നു — 1 മണിക്കൂർ പൊതുവായി കാഷ് ചെയ്യപ്പെടുന്നു. ഓത്ത് ആവശ്യമില്ല.
 
-### REST സഹായികൾ
+### REST സഹായകങ്ങൾ
 
-| രീതി | പാത                          | വിവരണം                                                                                                                             |
-| ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/api/a2a/status`            | A2A പ്രവർത്തനക്ഷമമാണോ എന്ന നില + ടാസ്ക് സ്ഥിതിവിവരക്കണക്കുകൾ + കാഷ് ചെയ്ത ഏജന്റ് കാർഡിന്റെ സംഗ്രഹം                                 |
-| GET  | `/api/a2a/tasks`             | ടാസ്കുകൾ പട്ടികപ്പെടുത്തുന്നു — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
-| POST | `/api/a2a/tasks`             | (REST സഹായിയായി നടപ്പിലാക്കിയിട്ടില്ല — JSON-RPC `message/send` വഴി സൃഷ്ടിക്കുക)                                                   |
-| GET  | `/api/a2a/tasks/[id]`        | ഒരു ടാസ്ക് ലഭ്യമാക്കുന്നു                                                                                                          |
-| POST | `/api/a2a/tasks/[id]/cancel` | ഒരു ടാസ്ക് റദ്ദാക്കുന്നു                                                                                                           |
+| രീതി | പാത                          | വിവരണം                                                                                                                          |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/api/a2a/status`            | A2A പ്രവർത്തനക്ഷമമാണോ എന്നത് + ടാസ്ക് സ്ഥിതിവിവരങ്ങൾ + കാഷ് ചെയ്ത ഏജന്റ് കാർഡിന്റെ സംഗ്രഹം                                      |
+| GET  | `/api/a2a/tasks`             | ടാസ്കുകൾ പട്ടികപ്പെടുത്തുക — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
+| POST | `/api/a2a/tasks`             | (REST സഹായകമായി നടപ്പാക്കിയിട്ടില്ല — JSON-RPC `message/send` വഴി സൃഷ്ടിക്കുക)                                                  |
+| GET  | `/api/a2a/tasks/[id]`        | ഒരു ടാസ്ക് ലഭ്യമാക്കുക                                                                                                          |
+| POST | `/api/a2a/tasks/[id]/cancel` | ഒരു ടാസ്ക് റദ്ദാക്കുക                                                                                                           |
 
-**പ്രാമാണീകരണം:** REST സഹായികൾ മാനേജ്മെന്റ് പ്രാമാണീകരണമില്ലാതെ പ്രവർത്തിക്കുന്നു (ഡാഷ്ബോർഡിൽ വായിക്കാവുന്നത്); ക്രമീകരിച്ചിട്ടുണ്ടെങ്കിൽ JSON-RPC `/a2a` റൂട്ട് Bearer `OMNIROUTE_API_KEY` ഉപയോഗിക്കുന്നു.
+**ഓത്ത്:** REST സഹായകങ്ങൾ മാനേജ്മെന്റ് ഓത്ത് ഇല്ലാതെ പ്രവർത്തിക്കുന്നു (ഡാഷ്ബോർഡിൽ വായിക്കാനാകുന്നത്); കോൺഫിഗർ ചെയ്തിട്ടുണ്ടെങ്കിൽ JSON-RPC `/a2a` റൂട്ട് Bearer `OMNIROUTE_API_KEY` ഉപയോഗിക്കുന്നു.
 
 ---
 
-## ക്ലൗഡ്, മൂല്യനിർണ്ണയങ്ങൾ & വിലയിരുത്തൽ
+## ക്ലൗഡ്, Evals & Assess
 
 | രീതി | പാത | വിവരണം |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | ഒരു Bearer കീ പരിശോധിച്ച് ക്ലൗഡ് സമന്വയ ക്ലയന്റുകൾക്കായി മറച്ചുവെച്ച പ്രൊവൈഡർ കണക്ഷനുകളും മോഡൽ അപരനാമങ്ങളും തിരികെ നൽകുക |
-| POST | `/api/cloud/credentials/update` | ക്ലൗഡുമായി സമന്വയിപ്പിച്ച ഒരു പ്രൊവൈഡറിന്റെ എൻക്രിപ്റ്റ് ചെയ്ത ക്രെഡൻഷ്യലുകൾ അപ്ഡേറ്റ് ചെയ്യുക |
-| POST | `/api/cloud/model/resolve` | ലോക്കൽ റൂട്ടിങ് പട്ടിക ഉപയോഗിച്ച് ഒരു ലോജിക്കൽ മോഡൽ ഐഡിയെ നിർദിഷ്ട പ്രൊവൈഡർ/മോഡലിലേക്ക് റെസോൾവ് ചെയ്യുക |
-| GET | `/api/cloud/models/alias` | ക്ലൗഡ് സമന്വയത്തിന് ലഭ്യമാക്കിയിരിക്കുന്ന മോഡൽ അപരനാമങ്ങൾ പട്ടികപ്പെടുത്തുക |
+| POST | `/api/cloud/auth` | ഒരു Bearer കീ പരിശോധിച്ച് ക്ലൗഡ് സിങ്ക് ക്ലയന്റുകൾക്കായി മാസ്ക് ചെയ്ത പ്രൊവൈഡർ കണക്ഷനുകളും മോഡൽ അപരനാമങ്ങളും തിരികെ നൽകുക |
+| POST | `/api/cloud/credentials/update` | ക്ലൗഡ്-സിങ്ക് ചെയ്ത പ്രൊവൈഡറിനായുള്ള എൻക്രിപ്റ്റ് ചെയ്ത ക്രെഡൻഷ്യലുകൾ പുതുക്കുക |
+| POST | `/api/cloud/model/resolve` | പ്രാദേശിക റൂട്ടിംഗ് പട്ടിക ഉപയോഗിച്ച് ഒരു ലോജിക്കൽ മോഡൽ ഐഡിയെ കൃത്യമായ പ്രൊവൈഡർ/മോഡലിലേക്ക് പരിഹരിക്കുക |
+| GET | `/api/cloud/models/alias` | ക്ലൗഡ് സിങ്കിലേക്ക് വെളിപ്പെടുത്തിയിരിക്കുന്ന മോഡൽ അപരനാമങ്ങൾ പട്ടികപ്പെടുത്തുക |
 | GET | `/api/assess` | ഏറ്റവും പുതിയ വിലയിരുത്തൽ വർഗ്ഗീകരണങ്ങൾ വായിക്കുക (ഓരോ പ്രൊവൈഡർ/മോഡലിനും) |
-| POST | `/api/assess` | ഒരു വിലയിരുത്തൽ പ്രവർത്തിപ്പിക്കുക — ബോഡി: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | ബിൽറ്റ്-ഇൻ മൂല്യനിർണ്ണയ സ്യൂട്ടുകളും ഏറ്റവും പുതിയ റണ്ണുകളും പട്ടികപ്പെടുത്തുക |
-| POST | `/api/evals` | ഒരു മൂല്യനിർണ്ണയ റൺ ട്രിഗർ ചെയ്യുക |
-| POST | `/api/evals/suites` | ഒരു ഇഷ്ടാനുസൃത മൂല്യനിർണ്ണയ സ്യൂട്ട് സൃഷ്ടിക്കുക — ബോഡി `evalSuiteSaveSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു |
-| GET | `/api/evals/suites/[id]` | ഒരു ഇഷ്ടാനുസൃത മൂല്യനിർണ്ണയ സ്യൂട്ട് ലഭ്യമാക്കുക |
+| POST | `/api/assess` | ഒരു വിലയിരുത്തൽ നടത്തുക — ബോഡി: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | അന്തർനിർമ്മിത eval സ്യൂട്ടുകളും ഏറ്റവും പുതിയ റണ്ണുകളും പട്ടികപ്പെടുത്തുക |
+| POST | `/api/evals` | ഒരു eval റൺ ട്രിഗർ ചെയ്യുക |
+| POST | `/api/evals/suites` | ഒരു കസ്റ്റം eval സ്യൂട്ട് സൃഷ്ടിക്കുക — ബോഡി `evalSuiteSaveSchema` ഉപയോഗിച്ച് സാധൂകരിക്കുന്നു |
+| GET | `/api/evals/suites/[id]` | ഒരു കസ്റ്റം eval സ്യൂട്ട് ലഭ്യമാക്കുക |
 
-**പ്രാമാണീകരണം:** `/api/cloud/auth` ഒരു Bearer കീ നേരിട്ട് സാധൂകരിക്കുകയും `manage` / `admin` സ്കോപ്പുള്ള ഒരു കീയ്ക്ക് മാത്രമായി ഓരോ കണക്ഷന്റെയും മറച്ചുവെച്ച കീയും `projectId`-യും തിരികെ നൽകുകയും ചെയ്യുന്നു; മറ്റ് `/api/cloud/*`, `/api/evals/*`, `/api/assess` റൂട്ടുകൾക്ക് മാനേജ്മെന്റ് സെഷൻ/API കീ ആവശ്യമാണ്. `/api/assess` POST, ഡിസ്ക്രിമിനേറ്റഡ്-യൂണിയൻ സ്കോപ്പ് സ്കീമയ്ക്കൊപ്പം `validateBody` ഉപയോഗിക്കുന്നു.
+**ഓത്ത്:** `/api/cloud/auth` ഒരു Bearer കീ നേരിട്ട് സാധൂകരിക്കുകയും `manage` / `admin` സ്കോപ്പുള്ള ഒരു കീയ്ക്കായി മാത്രം ഓരോ കണക്ഷന്റെയും മാസ്ക് ചെയ്ത കീയും `projectId`യും തിരികെ നൽകുകയും ചെയ്യുന്നു; മറ്റ് `/api/cloud/*`, `/api/evals/*`, `/api/assess` റൂട്ടുകൾക്ക് മാനേജ്മെന്റ് സെഷൻ/API കീ ആവശ്യമാണ്. `/api/assess` POST വ്യത്യാസപ്പെടുത്തിയ-യൂണിയൻ സ്കീമയുള്ള `validateBody` ഉപയോഗിക്കുന്നു.
 
 ---
 
 ## ACP (Agent Client Protocol) മാനേജ്മെന്റ്
 
-ചൈൽഡ് പ്രോസസ്സുകളായി. ഈ എൻഡ്പോയിന്റുകൾ ACP ഏജന്റ് കണ്ടെത്തലും ഇഷ്ടാനുസൃത ഏജന്റ്
+ചൈൽഡ് പ്രോസസുകളായി. ഈ എൻഡ്പോയിന്റുകൾ ACP ഏജന്റ് കണ്ടെത്തലും കസ്റ്റം ഏജന്റ്
 രജിസ്ട്രേഷനും നിയന്ത്രിക്കുന്നു.
 
-| രീതി   | പാത               | വിവരണം                                                                                                                                                                                        |
-| ------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/acp/agents` | ഇൻസ്റ്റലേഷൻ നില, പതിപ്പ്, ബൈനറി എന്നിവയുൾപ്പെടെ അറിയപ്പെടുന്ന എല്ലാ CLI ഏജന്റുകളെയും (ബിൽറ്റ്-ഇൻ + ഇഷ്ടാനുസൃതം) പട്ടികപ്പെടുത്തുന്നു                                                          |
-| POST   | `/api/acp/agents` | ഒരു ഇഷ്ടാനുസൃത ACP ഏജന്റിനെ രജിസ്റ്റർ ചെയ്യുകയോ കാഷ് പുതുക്കുകയോ ചെയ്യുന്നു — ബോഡി: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` അല്ലെങ്കിൽ `{action: "refresh"}` |
-| DELETE | `/api/acp/agents` | ഒരു ഇഷ്ടാനുസൃത ACP ഏജന്റിനെ നീക്കം ചെയ്യുന്നു — ക്വറി പാരാമീറ്റർ: `?id=<agentId>`                                                                                                             |
+| Method | Path              | Description                                                                                                                                                                          |
+| ------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/acp/agents` | ഇൻസ്റ്റാൾ ചെയ്ത നില, പതിപ്പ്, ബൈനറി എന്നിവയോടുകൂടിയ അറിയപ്പെടുന്ന എല്ലാ CLI ഏജന്റുകളും (ബിൽറ്റ്-ഇൻ + കസ്റ്റം) ലിസ്റ്റ് ചെയ്യുക                                                       |
+| POST   | `/api/acp/agents` | ഒരു കസ്റ്റം ACP ഏജന്റ് രജിസ്റ്റർ ചെയ്യുക അല്ലെങ്കിൽ കാഷെ പുതുക്കുക — body: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` അല്ലെങ്കിൽ `{action: "refresh"}` |
+| DELETE | `/api/acp/agents` | ഒരു കസ്റ്റം ACP ഏജന്റിനെ നീക്കം ചെയ്യുക — query param: `?id=<agentId>`                                                                                                               |
 
 **പ്രതികരണ ഉദാഹരണം** (`GET /api/acp/agents`):
 
@@ -1711,23 +2022,24 @@ GET /.well-known/agent.json
 ```
 
 **ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ (ഡാഷ്ബോർഡ് `auth_token` കുക്കി) അല്ലെങ്കിൽ
-മാനേജ്മെന്റ് സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
+മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
 
-പൂർണ്ണ വിവരങ്ങൾക്ക് [ACP ഫ്രെയിംവർക്ക്](../frameworks/ACP.md) കാണുക.
+പൂർണ്ണ വിവരങ്ങൾക്ക് [ACP ചട്ടക്കൂട്](../frameworks/ACP.md) കാണുക.
 
 ---
 
 ## അനലിറ്റിക്സും നിരീക്ഷണക്ഷമതയും
 
-റൂട്ടിംഗ്, കംപ്രഷൻ, പ്രൊവൈഡർ വൈവിധ്യം എന്നിവ നിരീക്ഷിക്കുന്നതിനുള്ള തത്സമയ അനലിറ്റിക്സ്
-എൻഡ്പോയിന്റുകൾ. ഇവയാണ് `/dashboard/analytics/*` പേജുകൾക്ക് ശക്തി പകരുന്നത്.
+റൂട്ടിംഗ്, കംപ്രഷൻ, പ്രൊവൈഡർ വൈവിധ്യം എന്നിവ നിരീക്ഷിക്കുന്നതിനുള്ള തത്സമയ
+അനലിറ്റിക്സ് എൻഡ്പോയിന്റുകൾ. `/dashboard/analytics/*` പേജുകൾക്ക് ഇവയാണ്
+അടിസ്ഥാനം.
 
 ### ഓട്ടോ-റൂട്ടിംഗ് അനലിറ്റിക്സ്
 
-| രീതി | പാത                                  | വിവരണം                                                                                                             |
-| ---- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| GET  | `/api/analytics/auto-routing`        | സമാഹരിച്ച ഓട്ടോ-റൂട്ടിംഗ് സ്ഥിതിവിവരക്കണക്കുകൾ: മൊത്തം കോളുകൾ, സ്ട്രാറ്റജി വിതരണം, ടിയർ വിതരണം, മുൻനിര പ്രൊവൈഡർമാർ |
-| GET  | `/api/analytics/auto-routing?days=7` | സമയപരിധി അടിസ്ഥാനമാക്കിയുള്ള സ്ഥിതിവിവരക്കണക്കുകൾ (സ്ഥിരസ്ഥിതി 24h)                                                |
+| Method | Path                                 | Description                                                                                                                  |
+| ------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/auto-routing`        | മൊത്തം കോളുകൾ, സ്ട്രാറ്റജി വിതരണം, ടിയർ വിതരണം, മുൻനിര പ്രൊവൈഡർമാർ എന്നിവയുടെ സമാഹരിച്ച ഓട്ടോ-റൂട്ടിംഗ് സ്ഥിതിവിവരക്കണക്കുകൾ |
+| GET    | `/api/analytics/auto-routing?days=7` | സമയപരിധി അടിസ്ഥാനമാക്കിയുള്ള സ്ഥിതിവിവരക്കണക്കുകൾ (ഡിഫോൾട്ട് 24h)                                                            |
 
 **പ്രതികരണ ഉദാഹരണം**:
 
@@ -1757,9 +2069,9 @@ GET /.well-known/agent.json
 
 ### കംപ്രഷൻ അനലിറ്റിക്സ്
 
-| രീതി | പാത                          | വിവരണം                                                                                          |
-| ---- | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| GET  | `/api/analytics/compression` | സമാഹരിച്ച കംപ്രഷൻ സ്ഥിതിവിവരക്കണക്കുകൾ: ലാഭിച്ച ടോക്കണുകൾ, ലാഭശതമാനം, മോഡ് വിതരണം, എൻജിൻ ഉപയോഗം |
+| Method | Path                         | Description                                                                                                  |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/analytics/compression` | ടോക്കണുകൾ ലാഭിച്ചത്, ലാഭശതമാനം, മോഡ് വിതരണം, എഞ്ചിൻ ഉപയോഗം എന്നിവയുടെ സമാഹരിച്ച കംപ്രഷൻ സ്ഥിതിവിവരക്കണക്കുകൾ |
 
 **പ്രതികരണ ഉദാഹരണം**:
 
@@ -1786,9 +2098,9 @@ GET /.well-known/agent.json
 
 ### പ്രൊവൈഡർ വൈവിധ്യ ട്രാക്കിംഗ്
 
-| രീതി | പാത                        | വിവരണം                                                                                                                                       |
-| ---- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET  | `/api/analytics/diversity` | Shannon entropy അടിസ്ഥാനമാക്കിയുള്ള വൈവിധ്യ ട്രാക്കിംഗ്: പ്രൊവൈഡർമാർക്കിടയിലെ വ്യാപ്തി അളക്കുന്നതിലൂടെ ഒറ്റപ്പെട്ട പരാജയകേന്ദ്രങ്ങൾ തടയുന്നു |
+| Method | Path                       | Description                                                                                                           |
+| ------ | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/diversity` | ഷാനൺ എൻട്രോപ്പി അടിസ്ഥാനമാക്കിയുള്ള വൈവിധ്യ ട്രാക്കിംഗ്: പ്രൊവൈഡർമാരുടെ വ്യാപ്തി അളന്ന് ഒറ്റ പരാജയബിന്ദുക്കൾ തടയുന്നു |
 
 **പ്രതികരണ ഉദാഹരണം**:
 
@@ -1808,92 +2120,93 @@ GET /.well-known/agent.json
 }
 ```
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ് സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
+**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ
+ആവശ്യമാണ്.
 
 ---
 
 ## അഡ്മിൻ പ്രവർത്തനങ്ങൾ
 
-പ്രവർത്തനപരമായ മാനേജ്മെന്റിനായുള്ള അഡ്മിൻ-മാത്രം എൻഡ്പോയിന്റുകൾ.
+ഓപ്പറേഷണൽ മാനേജ്മെന്റിനായുള്ള അഡ്മിൻ-മാത്രം എൻഡ്പോയിന്റുകൾ.
 
-| രീതി | പാത                      | വിവരണം                                                                                              |
-| ---- | ------------------------ | --------------------------------------------------------------------------------------------------- |
-| GET  | `/api/admin/concurrency` | നിലവിലെ കൺകറൻസി പരിധികൾ വായിക്കുക (ആഗോളതലം + ഓരോ പ്രൊവൈഡറിനും)                                      |
-| POST | `/api/admin/concurrency` | കൺകറൻസി പരിധികൾ അപ്ഡേറ്റ് ചെയ്യുക — ബോഡി: `{global?: number, perProvider?: Record<string, number>}` |
+| രീതി | പാത്ത്                   | വിവരണം                                                                                               |
+| ---- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| GET  | `/api/admin/concurrency` | നിലവിലെ കോൺകറൻസി പരിധികൾ വായിക്കുക (ഗ്ലോബൽ + ഓരോ പ്രൊവൈഡറിനും)                                       |
+| POST | `/api/admin/concurrency` | കോൺകറൻസി പരിധികൾ അപ്ഡേറ്റ് ചെയ്യുക — ബോഡി: `{global?: number, perProvider?: Record<string, number>}` |
 
-**ഓതന്റിക്കേഷൻ:** അഡ്മിൻ സ്കോപ്പുള്ള മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**ഓത്ത്:** അഡ്മിൻ സ്കോപ്പുള്ള മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
 
 ---
 
-## CLI ഉപകരണ മാനേജ്മെന്റ്
+## CLI ടൂളുകളുടെ മാനേജ്മെന്റ്
 
-OmniRoute-മായി സംയോജിപ്പിക്കുന്ന CLI ഉപകരണങ്ങൾ (antigravity, commandCode,
-devin-cli മുതലായവ) മാനേജ് ചെയ്യുക. പൂർണ്ണമായ പട്ടികയ്ക്കായി [പ്രൊവൈഡർ റഫറൻസ്](./PROVIDER_REFERENCE.md) കാണുക.
+OmniRoute-ുമായി സംയോജിപ്പിക്കുന്ന CLI ടൂളുകൾ മാനേജ് ചെയ്യുക (antigravity, commandCode,
+devin-cli മുതലായവ). പൂർണ്ണ പട്ടികയ്ക്കായി [പ്രൊവൈഡർ റഫറൻസ്](./PROVIDER_REFERENCE.md) കാണുക.
 
-| രീതി | പാത്ത്                                  | വിവരണം                                                                                                                                                                                           |
-| ---- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET  | `/api/cli-tools/all-statuses`           | എല്ലാ CLI ഉപകരണങ്ങളുടെയും നില (ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടോ, പതിപ്പ്, അവസാനം കണ്ടത്)                                                                                                                 |
-| GET  | `/api/cli-tools/status`                 | ഒരു CLI ഉപകരണത്തിന്റെ വിശദമായ നില (`?tool=` ക്വറി)                                                                                                                                               |
-| POST | `/api/cli-tools/apply`                  | ഒരു ഉപകരണത്തിനായി സൃഷ്ടിച്ച കോൺഫിഗറേഷൻ എഴുതുക (`dryRun` പ്രിവ്യൂ നൽകുന്നു; കണ്ടെയ്നറൈസ് ചെയ്തിരിക്കുമ്പോൾ `422` + `containerEphemeralTarget`; `migration` ഒരു ലെഗസി Codex YAML സൂചിപ്പിക്കുന്നു) |
-| GET  | `/api/cli-tools/backups`                | CLI ഉപകരണ കോൺഫിഗറേഷൻ ബാക്കപ്പുകൾ പട്ടികപ്പെടുത്തുക                                                                                                                                               |
-| POST | `/api/cli-tools/backups`                | എല്ലാ CLI ഉപകരണ കോൺഫിഗറേഷനുകളുടെയും ബാക്കപ്പ് സൃഷ്ടിക്കുക                                                                                                                                        |
-| POST | `/api/cli-tools/backups`                | പുനഃസ്ഥാപിക്കൽ: ബോഡിയിൽ `{tool, backupId}` ഉൾപ്പെടുത്തി ഇതേ എൻഡ്പോയിന്റ് ഉപയോഗിക്കുന്നത് ആ ബാക്കപ്പ് പുനഃസ്ഥാപിക്കുന്നു                                                                          |
-| GET  | `/api/cli-tools/antigravity-mitm`       | Antigravity MITM പ്രോക്സിയുടെ നില ("antigravity-mitm" CLI ഉപകരണം)                                                                                                                                |
-| POST | `/api/cli-tools/antigravity-mitm/alias` | antigravity-mitm അപരനാമങ്ങൾ കോൺഫിഗർ ചെയ്യുക                                                                                                                                                      |
+| രീതി | പാത്ത്                                  | വിവരണം                                                                                                                                                                                               |
+| ---- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/api/cli-tools/all-statuses`           | എല്ലാ CLI ടൂളുകളുടെയും നില (ഇൻസ്റ്റാൾ ചെയ്തിട്ടുണ്ടോ, പതിപ്പ്, അവസാനം കണ്ട സമയം)                                                                                                                     |
+| GET  | `/api/cli-tools/status`                 | ഒരു CLI ടൂളിന്റെ നിലാ വിശദാംശങ്ങൾ (`?tool=` query)                                                                                                                                                   |
+| POST | `/api/cli-tools/apply`                  | ഒരു ടൂളിന്റെ ജനറേറ്റ് ചെയ്ത കോൺഫിഗ് എഴുതുക (`dryRun` പ്രിവ്യൂകൾ കാണിക്കുന്നു; കണ്ടെയ്നറൈസ് ചെയ്തിരിക്കുമ്പോൾ `422` + `containerEphemeralTarget`; `migration` ഒരു ലെഗസി Codex YAML രേഖപ്പെടുത്തുന്നു) |
+| GET  | `/api/cli-tools/backups`                | CLI ടൂൾ കോൺഫിഗറേഷൻ ബാക്കപ്പുകളുടെ പട്ടിക                                                                                                                                                             |
+| POST | `/api/cli-tools/backups`                | എല്ലാ CLI ടൂൾ കോൺഫിഗറേഷനുകളുടെയും ബാക്കപ്പ് സൃഷ്ടിക്കുക                                                                                                                                              |
+| POST | `/api/cli-tools/backups`                | പുനഃസ്ഥാപിക്കുക: ബോഡിയിൽ `{tool, backupId}` സഹിതം അതേ എൻഡ്പോയിന്റ് ഉപയോഗിച്ചാൽ ആ ബാക്കപ്പ് പുനഃസ്ഥാപിക്കും                                                                                           |
+| GET  | `/api/cli-tools/antigravity-mitm`       | Antigravity MITM പ്രോക്സിയുടെ നില ("antigravity-mitm" CLI ടൂൾ)                                                                                                                                       |
+| POST | `/api/cli-tools/antigravity-mitm/alias` | antigravity-mitm അപരനാമങ്ങൾ കോൺഫിഗർ ചെയ്യുക                                                                                                                                                          |
 
-**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**ഓത്ത്:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
 
 ---
 
 ## ഏജന്റ് സ്കില്ലുകൾ
 
-AI ഏജന്റ് സ്കില്ലുകൾ മാനേജ് ചെയ്യുക (OpenAI-യുടെ ഇഷ്ടാനുസൃത GPT-കൾക്ക് സമാനമായവ, എന്നാൽ ഏജന്റുകൾക്കായി).
+AI ഏജന്റ് സ്കില്ലുകൾ മാനേജ് ചെയ്യുക (OpenAI-യുടെ കസ്റ്റം GPT-കൾക്ക് സമാനമായത്, എന്നാൽ ഏജന്റുകൾക്കായി).
 
-| രീതി   | പാത                          | വിവരണം                                                                                          |
-| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/api/agent-skills`          | എല്ലാ ഏജന്റ് സ്കില്ലുകളും ലിസ്റ്റ് ചെയ്യുക (ബിൽറ്റ്-ഇൻ + ഇഷ്ടാനുസൃതം)                           |
-| GET    | `/api/agent-skills/[id]`     | നിർദ്ദിഷ്ട ഏജന്റ് സ്കിൽ നേടുക                                                                   |
-| POST   | `/api/agent-skills`          | ഇഷ്ടാനുസൃത ഏജന്റ് സ്കിൽ സൃഷ്ടിക്കുക — ബോഡി: `{name, description, prompt, model?, temperature?}` |
-| PUT    | `/api/agent-skills/[id]`     | ഇഷ്ടാനുസൃത ഏജന്റ് സ്കിൽ അപ്ഡേറ്റ് ചെയ്യുക                                                       |
-| DELETE | `/api/agent-skills/[id]`     | ഇഷ്ടാനുസൃത ഏജന്റ് സ്കിൽ ഇല്ലാതാക്കുക                                                            |
-| GET    | `/api/agent-skills/[id]/raw` | അസംസ്കൃത പ്രോംപ്റ്റും മെറ്റാഡാറ്റയും നേടുക (നിർവഹണമില്ലാതെ)                                     |
-| POST   | `/api/agent-skills/generate` | സ്വാഭാവിക ഭാഷയിലുള്ള വിവരണത്തിൽനിന്ന് AI ഉപയോഗിച്ച് പുതിയൊരു സ്കിൽ ജനറേറ്റ് ചെയ്യുക             |
+| രീതി   | പാത്ത്                       | വിവരണം                                                                                           |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/api/agent-skills`          | എല്ലാ ഏജന്റ് സ്കില്ലുകളുടെയും പട്ടിക (ബിൽറ്റ്-ഇൻ + കസ്റ്റം)                                      |
+| GET    | `/api/agent-skills/[id]`     | നിർദ്ദിഷ്ട ഏജന്റ് സ്കിൽ നേടുക                                                                    |
+| POST   | `/api/agent-skills`          | ഒരു കസ്റ്റം ഏജന്റ് സ്കിൽ സൃഷ്ടിക്കുക — ബോഡി: `{name, description, prompt, model?, temperature?}` |
+| PUT    | `/api/agent-skills/[id]`     | ഒരു കസ്റ്റം ഏജന്റ് സ്കിൽ അപ്ഡേറ്റ് ചെയ്യുക                                                       |
+| DELETE | `/api/agent-skills/[id]`     | ഒരു കസ്റ്റം ഏജന്റ് സ്കിൽ ഇല്ലാതാക്കുക                                                            |
+| GET    | `/api/agent-skills/[id]/raw` | റോ പ്രോംപ്റ്റും മെറ്റാഡാറ്റയും നേടുക (എക്സിക്യൂഷൻ ഇല്ല)                                          |
+| POST   | `/api/agent-skills/generate` | സ്വാഭാവിക ഭാഷാ വിവരണത്തിൽ നിന്ന് ഒരു പുതിയ സ്കിൽ AI ഉപയോഗിച്ച് ജനറേറ്റ് ചെയ്യുക                  |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ് സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
+**ഓത്ത്:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
 
 ---
 
-## കാഷ് മാനേജ്മെന്റ്
+## കാഷെ മാനേജ്മെന്റ്
 
-സെമാന്റിക് കാഷും റീസണിംഗ് കാഷും നിയന്ത്രിക്കുക.
+സെമാന്റിക് കാഷെയും റീസണിംഗ് കാഷെയും നിയന്ത്രിക്കുക.
 
-| രീതി   | പാത                    | വിവരണം                                                                                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/cache`           | കാഷ് അവലോകനം: ആകെ എൻട്രികൾ, ഹിറ്റ് നിരക്ക്, ഡിസ്കിലെ വലുപ്പം                                                                         |
-| GET    | `/api/cache/entries`   | കാഷ് ചെയ്ത എൻട്രികളുടെ പട്ടിക (പേജിനേഷൻ സഹിതം)                                                                                       |
-| DELETE | `/api/cache/entries`   | കാഷ് എൻട്രികൾ ഇല്ലാതാക്കുക (ക്വറി പാരാമീറ്ററുകൾ പ്രകാരം ഫിൽട്ടർ ചെയ്യുക)                                                             |
-| GET    | `/api/cache/stats`     | വിശദമായ കാഷ് സ്ഥിതിവിവരക്കണക്കുകൾ (ഓരോ പ്രൊവൈഡറിനും ഓരോ മോഡലിനും)                                                                    |
-| GET    | `/api/cache/reasoning` | റീസണിംഗ് കാഷിന്റെ നില (റീസണിംഗ് റീപ്ലേയ്ക്കായി)                                                                                      |
-| DELETE | `/api/cache/reasoning` | റീസണിംഗ് കാഷ് മായ്ക്കുക — ക്വറി പാരാമീറ്ററുകൾ: `?toolCallId=<id>` (ഒന്ന്), `?provider=<p>`, അല്ലെങ്കിൽ പാരാമീറ്ററുകളില്ലാതെ (എല്ലാം) |
+| Method | Path                   | Description                                                                                                                                             |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cache`           | കാഷെ അവലോകനം: ആകെ എൻട്രികൾ, ഹിറ്റ് നിരക്ക്, ഡിസ്കിലെ വലുപ്പം                                                                                            |
+| GET    | `/api/cache/entries`   | കാഷ് ചെയ്ത എൻട്രികളുടെ പട്ടിക (പേജിനേഷനോടുകൂടെ)                                                                                                         |
+| DELETE | `/api/cache/entries`   | കാഷെ എൻട്രികൾ ഇല്ലാതാക്കുക (ക്വറി പാരാമീറ്ററുകൾ ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യുക)                                                                             |
+| GET    | `/api/cache/stats`     | വിശദമായ കാഷെ സ്ഥിതിവിവരക്കണക്കുകൾ (ഓരോ പ്രൊവൈഡർ, ഓരോ മോഡൽ അടിസ്ഥാനത്തിൽ)                                                                                |
+| GET    | `/api/cache/reasoning` | റീസണിംഗ് കാഷെ നില (റീസണിംഗ് റീപ്ലേയ്ക്കായി)                                                                                                             |
+| DELETE | `/api/cache/reasoning` | റീസണിംഗ് കാഷെ മായ്ക്കുക — ക്വറി പാരാമീറ്ററുകൾ: `?toolCallId=<id>` (ഒറ്റത്തേക്ക്) അല്ലെങ്കിൽ `?provider=<p>` അല്ലെങ്കിൽ പാരാമീറ്ററുകളൊന്നുമില്ല (എല്ലാം) |
 
-**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**Auth:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
 
 ---
 
 ## മെമ്മറി സിസ്റ്റം
 
-സ്ഥിരമായ മെമ്മറി (FTS5 + വെക്റ്റർ എംബെഡ്ഡിങ്ങുകൾ) നിയന്ത്രിക്കുക.
+സ്ഥിരമായ മെമ്മറി നിയന്ത്രിക്കുക (FTS5 + വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ).
 
-| രീതി   | പാത                | വിവരണം                                                                                                  |
-| ------ | ------------------ | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/memory`      | മെമ്മറി എൻട്രികളുടെ പട്ടിക (സ്കോപ്പ്, തരം, തിരയൽ ക്വറി എന്നിവ പ്രകാരം ഫിൽട്ടർ ചെയ്യുക)                  |
-| POST   | `/api/memory`      | പുതിയ മെമ്മറി എൻട്രി സൃഷ്ടിക്കുക — ബോഡി: `{scope, type, content, metadata?}`                            |
-| GET    | `/api/memory/[id]` | ഒരു നിർദ്ദിഷ്ട മെമ്മറി എൻട്രി നേടുക                                                                     |
-| PUT    | `/api/memory/[id]` | ഒരു മെമ്മറി എൻട്രി അപ്ഡേറ്റ് ചെയ്യുക                                                                    |
-| DELETE | `/api/memory/[id]` | ഒരു മെമ്മറി എൻട്രി ഇല്ലാതാക്കുക                                                                         |
-| GET    | `/api/memory?q=`   | മെമ്മറിയിൽ തിരയുക (FTS5 + വെക്റ്റർ) — അതേ പ്രതികരണത്തിൽ സ്ഥിതിവിവരക്കണക്കുകളും ഉൾപ്പെടുത്തിയിരിക്കുന്നു |
+| Method | Path               | Description                                                                                      |
+| ------ | ------------------ | ------------------------------------------------------------------------------------------------ |
+| GET    | `/api/memory`      | മെമ്മറി എൻട്രികളുടെ പട്ടിക (സ്കോപ്പ്, തരം, തിരയൽ ക്വറി എന്നിവ ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യുക)        |
+| POST   | `/api/memory`      | പുതിയ മെമ്മറി എൻട്രി സൃഷ്ടിക്കുക — ബോഡി: `{scope, type, content, metadata?}`                     |
+| GET    | `/api/memory/[id]` | നിർദ്ദിഷ്ട മെമ്മറി എൻട്രി നേടുക                                                                  |
+| PUT    | `/api/memory/[id]` | മെമ്മറി എൻട്രി അപ്ഡേറ്റ് ചെയ്യുക                                                                 |
+| DELETE | `/api/memory/[id]` | മെമ്മറി എൻട്രി ഇല്ലാതാക്കുക                                                                      |
+| GET    | `/api/memory?q=`   | മെമ്മറി തിരയുക (FTS5 + വെക്റ്റർ) — സ്ഥിതിവിവരക്കണക്കുകൾ അതേ പ്രതികരണത്തിൽ ഉൾപ്പെടുത്തിയിട്ടുണ്ട് |
 
-**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
+**Auth:** മാനേജ്മെന്റ് സെഷൻ അല്ലെങ്കിൽ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ ആവശ്യമാണ്.
 
 ---
 
@@ -1901,79 +2214,79 @@ AI ഏജന്റ് സ്കില്ലുകൾ മാനേജ് ചെ�
 
 ഇവന്റുകൾക്കായുള്ള വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷനുകൾ നിയന്ത്രിക്കുക.
 
-| രീതി   | പാത                             | വിവരണം                                                                               |
+| Method | Path                            | Description                                                                          |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------ |
 | GET    | `/api/webhooks`                 | എല്ലാ വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷനുകളുടെയും പട്ടിക                                       |
 | POST   | `/api/webhooks`                 | ഒരു വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷൻ സൃഷ്ടിക്കുക — ബോഡി: `{url, events[], secret?, active?}` |
-| GET    | `/api/webhooks/[id]`            | ഒരു നിർദ്ദിഷ്ട വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷൻ നേടുക                                        |
+| GET    | `/api/webhooks/[id]`            | നിർദ്ദിഷ്ട വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷൻ നേടുക                                            |
 | PUT    | `/api/webhooks/[id]`            | ഒരു വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷൻ അപ്ഡേറ്റ് ചെയ്യുക                                       |
 | DELETE | `/api/webhooks/[id]`            | ഒരു വെബ്ഹുക്ക് സബ്സ്ക്രിപ്ഷൻ ഇല്ലാതാക്കുക                                            |
-| GET    | `/api/webhooks/[id]/deliveries` | ഒരു വെബ്ഹുക്കിന്റെ ഡെലിവറി ചരിത്രം പട്ടികപ്പെടുത്തുക (വിജയ/പരാജയ ലോഗ്)               |
-| POST   | `/api/webhooks/[id]/test`       | ഒരു വെബ്ഹുക്കിലേക്ക് പരീക്ഷണ ഇവന്റ് അയയ്ക്കുക                                        |
+| GET    | `/api/webhooks/[id]/deliveries` | ഒരു വെബ്ഹുക്കിനായുള്ള ഡെലിവറി ചരിത്രത്തിന്റെ പട്ടിക (വിജയം/പരാജയം ലോഗ്)              |
+| POST   | `/api/webhooks/[id]/test`       | ഒരു വെബ്ഹുക്കിലേക്ക് ടെസ്റ്റ് ഇവന്റ് അയയ്ക്കുക                                       |
 
-**പ്രാമാണീകരണം:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**Auth:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
 
-എല്ലാ ഇവന്റ് തരങ്ങൾക്കും [വെബ്ഹുക്ക്സ് ഫ്രെയിംവർക്ക്](../frameworks/WEBHOOKS.md) കാണുക.
-
----
-
-## സ്കിൽസ് ഫ്രെയിംവർക്ക്
-
-സ്കിൽസ് (ഏജന്റിക് എക്സ്റ്റൻഷൻസ് ഫ്രെയിംവർക്ക്) മാനേജ് ചെയ്യുക.
-
-| മെത്തഡ് | പാത്ത്                   | വിവരണം                                                                                                    |
-| ------- | ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| GET     | `/api/skills`            | ഇൻസ്റ്റാൾ ചെയ്ത എല്ലാ സ്കിൽസും ലിസ്റ്റ് ചെയ്യുക (ബിൽറ്റ്-ഇൻ + കസ്റ്റം)                                    |
-| POST    | `/api/skills/install`    | ഒരു ലോക്കൽ പാത്തിൽ നിന്നോ URL-ൽ നിന്നോ ഒരു സ്കിൽ ഇൻസ്റ്റാൾ ചെയ്യുക                                        |
-| DELETE  | `/api/skills/[id]`       | ഒരു സ്കിൽ അൺഇൻസ്റ്റാൾ ചെയ്യുക                                                                             |
-| PUT     | `/api/skills/[id]`       | ഒരു സ്കിൽ എനേബിൾ അല്ലെങ്കിൽ ഡിസേബിൾ ചെയ്യുക — ബോഡി: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
-| POST    | `/api/skills/executions` | ഒരു സ്കിൽ എക്സിക്യൂട്ട് ചെയ്യുക — ബോഡി: `{skillName, apiKeyId, input?, sessionId?}`                       |
-| GET     | `/api/skills/executions` | എല്ലാ സ്കിൽസിന്റെയും എക്സിക്യൂഷൻ ഹിസ്റ്ററി ലിസ്റ്റ് ചെയ്യുക (`?apiKeyId=` ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യുക)     |
-
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷനോ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീയോ ആവശ്യമാണ്.
-
-പൂർണ്ണ വിവരങ്ങൾക്ക് [സ്കിൽസ് ഫ്രെയിംവർക്ക്](../frameworks/SKILLS.md) കാണുക.
+പൂർണ്ണമായ ഇവന്റ് തരങ്ങൾക്കായി [വെബ്ഹുക്കുകൾ ഫ്രെയിംവർക്ക്](../frameworks/WEBHOOKS.md) കാണുക.
 
 ---
 
-## പ്ലഗിനുകൾ
+## Skills Framework
 
-OmniRoute പ്ലഗിനുകൾ (മൂന്നാം കക്ഷി എക്സ്റ്റൻഷനുകൾ) മാനേജ് ചെയ്യുക.
+Skills (ഏജന്റിക് വിപുലീകരണ ഫ്രെയിംവർക്ക്) മാനേജ് ചെയ്യുക.
 
-| മെത്തഡ് | പാത്ത്                             | വിവരണം                                                |
-| ------- | ---------------------------------- | ----------------------------------------------------- |
-| GET     | `/api/plugins`                     | ഇൻസ്റ്റാൾ ചെയ്ത പ്ലഗിനുകൾ ലിസ്റ്റ് ചെയ്യുക            |
-| POST    | `/api/plugins/marketplace/install` | മാർക്കറ്റ്പ്ലേസിൽ നിന്ന് ഒരു പ്ലഗിൻ ഇൻസ്റ്റാൾ ചെയ്യുക |
-| DELETE  | `/api/plugins/[name]`              | ഒരു പ്ലഗിൻ അൺഇൻസ്റ്റാൾ ചെയ്യുക                        |
-| POST    | `/api/plugins/[name]/activate`     | ഒരു പ്ലഗിൻ ആക്റ്റിവേറ്റ് ചെയ്യുക                      |
-| POST    | `/api/plugins/[name]/deactivate`   | ഒരു പ്ലഗിൻ ഡീആക്റ്റിവേറ്റ് ചെയ്യുക                    |
-| GET     | `/api/plugins/[name]/config`       | പ്ലഗിൻ കോൺഫിഗറേഷൻ നേടുക                               |
-| PUT     | `/api/plugins/[name]/config`       | പ്ലഗിൻ കോൺഫിഗറേഷൻ അപ്ഡേറ്റ് ചെയ്യുക                   |
+| Method | Path                     | Description                                                                                                                   |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`            | ഇൻസ്റ്റാൾ ചെയ്ത എല്ലാ skills-ുകളും (built-in + custom) ലിസ്റ്റ് ചെയ്യുക                                                       |
+| POST   | `/api/skills/install`    | ഒരു പ്രാദേശിക പാതയിൽ നിന്നോ URL-ൽ നിന്നോ ഒരു skill ഇൻസ്റ്റാൾ ചെയ്യുക                                                          |
+| DELETE | `/api/skills/[id]`       | ഒരു skill അൺഇൻസ്റ്റാൾ ചെയ്യുക                                                                                                 |
+| PUT    | `/api/skills/[id]`       | ഒരു skill പ്രവർത്തനക്ഷമമാക്കുകയോ പ്രവർത്തനരഹിതമാക്കുകയോ ചെയ്യുക — body: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
+| POST   | `/api/skills/executions` | ഒരു skill എക്സിക്യൂട്ട് ചെയ്യുക — body: `{skillName, apiKeyId, input?, sessionId?}`                                           |
+| GET    | `/api/skills/executions` | എല്ലാ skills-ുകളുടെയും എക്സിക്യൂഷൻ ചരിത്രം ലിസ്റ്റ് ചെയ്യുക (`?apiKeyId=` ഉപയോഗിച്ച് ഫിൽട്ടർ ചെയ്യാം)                         |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**Auth:** management session അല്ലെങ്കിൽ management-scoped API key ആവശ്യമാണ്.
 
-പൂർണ്ണ വിവരങ്ങൾക്ക് [പ്ലഗിൻസ് ഫ്രെയിംവർക്ക്](../frameworks/PLUGIN_SDK.md) കാണുക.
-
----
-
-## ഷാഡോ റൂട്ടിംഗ്
-
-പ്രൊവൈഡർമാരുടെ ഷാഡോ / A-B താരതമ്യം **ഒരു സ്വതന്ത്ര REST സർഫേസ് അല്ല** — അത് കോംബോ റൂട്ടിംഗിലൂടെയാണ് കോൺഫിഗർ ചെയ്യുന്നത് ([ഓട്ടോ-കോംബോ](../routing/AUTO-COMBO.md) കാണുക). ഓരോ കോംബോയുടെയും താരതമ്യ മെട്രിക്സ് `GET /api/combos/metrics` വഴി ലഭ്യമാക്കുന്നു.
+പൂർണ്ണ വിവരങ്ങൾക്ക് [Skills Framework](../frameworks/SKILLS.md) കാണുക.
 
 ---
 
-## ഗാർഡ്റെയിലുകൾ
+## Plugins
 
-റൺടൈം ഗാർഡ്റെയിലുകൾ (PII ഡിറ്റക്ഷൻ, പ്രോംപ്റ്റ് ഇൻജക്ഷൻ ഡിറ്റക്ഷൻ, വിഷൻ ബ്രിഡ്ജിംഗ്) പരിശോധിക്കുക. എല്ലാ റിക്വസ്റ്റിലും ഗാർഡ്റെയിലുകൾ പ്രവർത്തിക്കുന്നു; ഓരോ കോളിലെയും ഒഴിവാക്കൽ `x-omniroute-disabled-guardrails` റിക്വസ്റ്റ് ഹെഡർ വഴിയാണ് — നിലനിൽക്കുന്ന എനേബിൾ/ഡിസേബിൾ സർഫേസ് ഇല്ല.
+OmniRoute plugins (മൂന്നാം കക്ഷി വിപുലീകരണങ്ങൾ) മാനേജ് ചെയ്യുക.
 
-| മെത്തഡ് | പാത്ത്                 | വിവരണം                                                                                          |
-| ------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET     | `/api/guardrails`      | രജിസ്റ്റർ ചെയ്ത ഗാർഡ്റെയിലുകളും അവയുടെ സ്റ്റാറ്റസും ലിസ്റ്റ് ചെയ്യുക (പേര് / എനേബിൾഡ് / മുൻഗണന) |
-| POST    | `/api/guardrails/test` | ഒരു സാമ്പിൾ ഇൻപുട്ടിൽ പ്രീ-കോൾ പൈപ്പ്ലൈൻ ഡ്രൈ-റൺ ചെയ്യുക — ബോഡി: `{input, disabledGuardrails?}` |
+| Method | Path                               | Description                                       |
+| ------ | ---------------------------------- | ------------------------------------------------- |
+| GET    | `/api/plugins`                     | ഇൻസ്റ്റാൾ ചെയ്ത plugins ലിസ്റ്റ് ചെയ്യുക          |
+| POST   | `/api/plugins/marketplace/install` | marketplace-ൽ നിന്ന് ഒരു plugin ഇൻസ്റ്റാൾ ചെയ്യുക |
+| DELETE | `/api/plugins/[name]`              | ഒരു plugin അൺഇൻസ്റ്റാൾ ചെയ്യുക                    |
+| POST   | `/api/plugins/[name]/activate`     | ഒരു plugin സജീവമാക്കുക                            |
+| POST   | `/api/plugins/[name]/deactivate`   | ഒരു plugin നിർജ്ജീവമാക്കുക                        |
+| GET    | `/api/plugins/[name]/config`       | plugin കോൺഫിഗറേഷൻ നേടുക                           |
+| PUT    | `/api/plugins/[name]/config`       | plugin കോൺഫിഗറേഷൻ അപ്ഡേറ്റ് ചെയ്യുക               |
 
-**ഓതന്റിക്കേഷൻ:** മാനേജ്മെന്റ് സെഷൻ ആവശ്യമാണ്.
+**Auth:** management session ആവശ്യമാണ്.
 
-പൂർണ്ണ വിവരങ്ങൾക്ക് [സുരക്ഷ > ഗാർഡ്റെയിലുകൾ](../security/GUARDRAILS.md) കാണുക.
+പൂർണ്ണ വിവരങ്ങൾക്ക് [Plugins Framework](../frameworks/PLUGIN_SDK.md) കാണുക.
+
+---
+
+## Shadow Routing
+
+Providers-ന്റെ Shadow / A-B താരതമ്യം **സ്വതന്ത്ര REST surface അല്ല** — ഇത് combo routing വഴി കോൺഫിഗർ ചെയ്യുന്നു ([Auto-Combo](../routing/AUTO-COMBO.md) കാണുക). ഓരോ combo-യുടെയും താരതമ്യ മെട്രിക്കുകൾ `GET /api/combos/metrics` വഴി ലഭ്യമാക്കുന്നു.
+
+---
+
+## Guardrails
+
+റൺടൈം guardrails (PII detection, prompt injection detection, vision bridging) പരിശോധിക്കുക. എല്ലാ request-ുകളിലും guardrails പ്രവർത്തിക്കുന്നു; ഓരോ call-ിനുമുള്ള opt-out `x-omniroute-disabled-guardrails` request header വഴിയാണ് — സ്ഥിരമായി enable/disable ചെയ്യുന്നതിനുള്ള surface ഇല്ല.
+
+| Method | Path                   | Description                                                                                    |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/api/guardrails`      | രജിസ്റ്റർ ചെയ്ത guardrails-ുകളും അവയുടെ status-ും (name / enabled / priority) ലിസ്റ്റ് ചെയ്യുക |
+| POST   | `/api/guardrails/test` | ഒരു sample input-ിൽ pre-call pipeline dry-run ചെയ്യുക — body: `{input, disabledGuardrails?}`   |
+
+**Auth:** management session ആവശ്യമാണ്.
+
+പൂർണ്ണ വിവരങ്ങൾക്ക് [Security > Guardrails](../security/GUARDRAILS.md) കാണുക.
 
 ---
 
@@ -1981,13 +2294,12 @@ OmniRoute പ്ലഗിനുകൾ (മൂന്നാം കക്ഷി എ
 
 ## പ്രാമാണീകരണം
 
-നാല് ക്രെഡൻഷ്യൽ വിഭാഗങ്ങളെക്കുറിച്ചും (ഡാഷ്ബോർഡ് സെഷൻ, ലോക്കൽ CLI ടോക്കൺ, `oma_live_…` ആക്സസ്
-ടോക്കൺ, മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ) അവ ഇൻഫറൻസ് കീകളിൽനിന്ന് എങ്ങനെ വ്യത്യാസപ്പെട്ടിരിക്കുന്നുവെന്നും അറിയാൻ [മാനേജ്മെന്റ് പ്രാമാണീകരണം](../guides/MANAGEMENT-AUTH.md) കാണുക.
+നാല് ക്രെഡൻഷ്യൽ കുടുംബങ്ങളെക്കുറിച്ചും (ഡാഷ്ബോർഡ് സെഷൻ, പ്രാദേശിക CLI ടോക്കൺ, `oma_live_…` ആക്സസ് ടോക്കൺ, മാനേജ്-സ്കോപ്പുള്ള API കീ) അവ inference കീകളിൽ നിന്ന് എങ്ങനെ വ്യത്യസ്തമാണെന്നും അറിയാൻ [Management Authentication](../guides/MANAGEMENT-AUTH.md) കാണുക.
 
 - ഡാഷ്ബോർഡ് റൂട്ടുകൾ (`/dashboard/*`) `auth_token` കുക്കി ഉപയോഗിക്കുന്നു
-- ലോഗിൻ സേവ് ചെയ്ത പാസ്വേഡ് ഹാഷ് ഉപയോഗിക്കുന്നു; ലഭ്യമല്ലെങ്കിൽ `INITIAL_PASSWORD` ഉപയോഗിക്കുന്നു
+- ലോഗിൻ സംരക്ഷിച്ച പാസ്വേഡ് ഹാഷ് ഉപയോഗിക്കുന്നു; fallback ആയി `INITIAL_PASSWORD` ഉപയോഗിക്കുന്നു
 - `/api/settings/require-login` വഴി `requireLogin` ടോഗിൾ ചെയ്യാം
-- `REQUIRE_API_KEY=true` ആയിരിക്കുമ്പോൾ `/v1/*` റൂട്ടുകൾക്ക് ഐച്ഛികമായി Bearer API കീ ആവശ്യമാണ്
-- ഈ റഫറൻസിലെ "മാനേജ്മെന്റ് ടോക്കൺ" / "മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ" എന്നത് ആ ഗൈഡിലുള്ള വിഭാഗങ്ങളിലൊന്നിനെയാണ് സൂചിപ്പിക്കുന്നത് — നിർവചിക്കാത്ത മറ്റൊരു രഹസ്യ തരത്തെയല്ല
+- `REQUIRE_API_KEY=true` ആയിരിക്കുമ്പോൾ `/v1/*` റൂട്ടുകൾക്ക് ഓപ്ഷണലായി Bearer API കീ ആവശ്യമാണ്
+- ഈ റഫറൻസിലെ "management token" / "management-scoped API key" എന്നത് ആ ഗൈഡിലെ ഏതെങ്കിലും ഒരു കുടുംബത്തെയാണ് സൂചിപ്പിക്കുന്നത് — നിർവചിക്കാത്ത മറ്റൊരു രഹസ്യ തരത്തെയല്ല
 
-> **പിന്നോട്ടുള്ള അനുയോജ്യത തകർക്കുന്ന മാറ്റം (v3.8.0)** — `/api/v1/agents/tasks/*` റൂട്ടുകൾക്കും കൂൾഡൗൺ മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകൾക്കും ഇപ്പോൾ **മാനേജ്മെന്റ് പ്രാമാണീകരണം** (ഡാഷ്ബോർഡ് `auth_token` കുക്കി അല്ലെങ്കിൽ മാനേജ്മെന്റ്-സ്കോപ്പുള്ള API കീ) ആവശ്യമാണ്. മുമ്പ് പ്രാമാണീകരണമില്ലാതെ ഈ റൂട്ടുകൾ വിളിച്ചിരുന്ന ക്ലയന്റുകൾക്ക് `401 Unauthorized` ലഭിക്കും. commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`) കാണുക.
+> **Breaking change (v3.8.0)** — `/api/v1/agents/tasks/*` ഉം cooldown മാനേജ്മെന്റ് എൻഡ്പോയിന്റുകളും ഇപ്പോൾ **management auth** (ഡാഷ്ബോർഡ് `auth_token` കുക്കി അല്ലെങ്കിൽ മാനേജ്-സ്കോപ്പുള്ള API കീ) ആവശ്യപ്പെടുന്നു. മുമ്പ് ഈ റൂട്ടുകൾ പ്രാമാണീകരണമില്ലാതെ വിളിച്ച ക്ലയന്റുകൾക്ക് `401 Unauthorized` ലഭിക്കും. `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`) എന്ന commit കാണുക.

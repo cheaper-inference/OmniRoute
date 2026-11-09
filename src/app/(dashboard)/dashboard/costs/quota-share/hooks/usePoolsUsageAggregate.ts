@@ -32,10 +32,14 @@ export function usePoolsUsageAggregate(pools: QuotaPool[]): PoolsUsageAggregate 
     const fetchAll = async () => {
       try {
         const snapshots = await Promise.all(
-          ids.map((id) => fetch(`/api/quota/pools/${id}/usage`).then((r) => (r.ok ? r.json() : null)))
+          ids.map((id) =>
+            fetch(`/api/quota/pools/${id}/usage`).then((r) => (r.ok ? r.json() : null))
+          )
         );
         if (!mounted) return;
-        const valid = snapshots.filter((s): s is { usage: PoolUsageSnapshot } => s !== null && !!s.usage);
+        const valid = snapshots.filter(
+          (s): s is { usage: PoolUsageSnapshot } => s !== null && !!s.usage
+        );
         let totalUtil = 0;
         let utilCount = 0;
         let borrowing = 0;
@@ -58,7 +62,11 @@ export function usePoolsUsageAggregate(pools: QuotaPool[]): PoolsUsageAggregate 
         });
       } catch (err) {
         if (mounted) {
-          setState((s) => ({ ...s, loading: false, error: err instanceof Error ? err.message : "fetch failed" }));
+          setState((s) => ({
+            ...s,
+            loading: false,
+            error: err instanceof Error ? err.message : "fetch failed",
+          }));
         }
       }
     };

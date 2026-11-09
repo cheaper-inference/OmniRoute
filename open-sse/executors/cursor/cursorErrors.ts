@@ -3,6 +3,8 @@
  * Modeled on OpenCodex `adapters/cursor/cursor-errors.ts` (safe messages + quota vs size).
  */
 
+const WEEKLY_MODEL_ENTITLEMENT = /\S{1,100} is not included in your weekly usage\b/i;
+
 const ABSOLUTE_PATH_PATTERN =
   /(?:\/Users\/[^ "';,]+|\/home\/[^ "';,]+|[A-Za-z]:\\Users\\[^ "';,]+)/g;
 const CURSOR_CREDENTIAL_PATTERN =
@@ -100,6 +102,10 @@ export function isCursorStreamTimeoutError(value: unknown): boolean {
 
 export function classifyCursorErrorKind(rawMessage: string): CursorErrorKind {
   const lower = rawMessage.toLowerCase();
+
+  // Explicit plan entitlement is model-unavailable, not exhausted account quota.
+  // Use the existing 404 contract so consumers lock only this connection/model.
+  if (WEEKLY_MODEL_ENTITLEMENT.test(lower)) return "not_found";
 
   if (lower.includes("resource_exhausted") || lower.includes("resource exhausted")) {
     return isCursorRequestTooLargeDetail(lower) ? "invalid" : "rate_limit";
@@ -260,7 +266,11 @@ export function resolveCursorEmptyTurnError(options: {
   const upstream = options.upstreamMessage?.trim();
   if (upstream) {
     const classified = classifyCursorError(upstream);
-    if (options.quotaExhaustedHint && classified.kind !== "auth") {
+    if (
+      options.quotaExhaustedHint &&
+      classified.kind !== "auth" &&
+      !WEEKLY_MODEL_ENTITLEMENT.test(upstream)
+    ) {
       return {
         ...classified,
         kind: "rate_limit",

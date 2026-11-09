@@ -509,18 +509,18 @@ Idan ya dawo da wani abu ban da `ok`, **dakatar da amfani da ma’ajiyar bayanan
 
 ---
 
-## Farfaɗowa Daga Bala'i
+## Farfadowa Daga Bala’i
 
-### Yanayi na 1: An Rasa Fayil ɗin WAL
+### Yanayi na 1: Fayil ɗin WAL Ya Ɓace
 
 Fayil ɗin `-wal` ya ɓace amma `-shm` da babban DB suna nan yadda suke:
 
 ```bash
-# Zai farfaɗo ta atomatik a buɗewa ta gaba
+# Yana farfadowa ta atomatik a buɗewa ta gaba
 omniroute
 ```
 
-Idan SQLite ba zai iya farfaɗowa ta atomatik ba:
+Idan SQLite ba zai iya farfadowa ta atomatik ba:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -533,18 +533,21 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Mayar daga madadin ajiya:
 
 ```bash
-omniroute sync pull --merge   # ko: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Yanayi na 3: An Rasa Maɓallin Rufaffen Bayani
+`omniroute sync pull [outPath]` yana sauke cikakken rumbun `.tar.gz` ne kawai daga sabar da ke aiki
+(`GET /api/db-backups/exportAll`, ana buƙatar shaidar mai gudanarwa); ba ya mayar da komai.
 
-**Ba za a iya farfaɗowa ba** ba tare da maɓallin ba. Ba za a iya karanta filayen da aka rufaffen bayanansu ba. Sake ƙara duk masu samarwa da hannu tare da sabbin bayanan tabbatarwa.
+### Yanayi na 3: An Rasa Maɓallin Ɓoyewa
 
-> **Rage Haɗari**: Koyaushe yi wa maɓallin rufaffen bayanai madadin ajiya daban, zai fi kyau a cikin manajan kalmomin sirri ko KMS.
+**Ba za a iya farfadowa ba** ba tare da maɓallin ba. Ba za a iya karanta filayen da aka ɓoye ba. Sake ƙara duk masu samarwa da hannu tare da sabbin bayanan shaida.
+
+> **Matakin kariya**: Koyaushe ajiye madadin maɓallin ɓoyewa daban, zai fi kyau a cikin manajan kalmomin sirri ko KMS.
 
 ### Yanayi na 4: Faifai Ya Cika
 
-SQLite zai dawo da kurakuran `SQLITE_FULL`. Samar da sarari a faifai, sannan:
+SQLite zai mayar da kurakuran `SQLITE_FULL`. Samar da sarari a faifai, sannan:
 
 ```bash
 # Yi checkpoint na WAL don samar da sarari

@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { buttonVariants } from "@omniroute/ui-kit/button";
 
+import Icon from "@/shared/components/Icon";
 import {
   filterActiveRadarOffers,
   localizeRadarOfferText,
@@ -12,6 +15,7 @@ import {
   type RadarOfferBenefit,
 } from "@/lib/radar/offersFeedSchema";
 import { Card } from "@/shared/components";
+import Button from "@/shared/components/Button";
 
 interface OffersMeta {
   version: string;
@@ -141,32 +145,28 @@ export default function RadarOffersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/dashboard/radar"
-          className="text-sm text-text-muted hover:text-text-main transition-colors w-fit"
-        >
-          ← {t("backToRadar")}
-        </Link>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold">{t("title")}</h1>
-            <p className="text-sm text-text-muted mt-1">{t("subtitle")}</p>
-          </div>
-          {hasSupporterKey && (
-            <button
-              type="button"
-              onClick={() => void syncAndLoad()}
-              disabled={refreshing}
-              className="px-4 py-2 text-sm font-medium rounded-lg border border-violet-500 text-violet-400 hover:bg-violet-500/10 transition-colors disabled:opacity-50"
-            >
+      <PageHeader
+        compact
+        breadcrumbs={
+          <Link
+            href="/dashboard/radar"
+            className="text-sm text-text-muted hover:text-text-main transition-colors"
+          >
+            ← {t("backToRadar")}
+          </Link>
+        }
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          hasSupporterKey ? (
+            <Button variant="outline" onClick={() => void syncAndLoad()} disabled={refreshing}>
               {refreshing ? t("refreshing") : t("refresh")}
-            </button>
-          )}
-        </div>
-      </div>
+            </Button>
+          ) : undefined
+        }
+      />
 
-      {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
+      {error && <div className="p-3 rounded-lg bg-error/10 text-error text-sm">{error}</div>}
 
       {loading ? (
         <div className="flex min-h-48 items-center justify-center text-text-muted">
@@ -175,7 +175,7 @@ export default function RadarOffersPage() {
       ) : !hasSupporterKey ? (
         <Card>
           <div className="flex flex-col items-center gap-4 py-8 text-center">
-            <span className="material-symbols-outlined text-4xl text-violet-400">redeem</span>
+            <Icon name="redeem" size={36} className="text-primary" />
             <h2 className="text-xl font-semibold">{t("keyRequiredTitle")}</h2>
             <p className="max-w-xl text-text-muted">{t("keyRequiredDescription")}</p>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -184,7 +184,7 @@ export default function RadarOffersPage() {
                   href={contributorClaimUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-lg border border-violet-500 text-violet-400 hover:bg-violet-500/10"
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   {t("contributorButton")}
                 </a>
@@ -194,7 +194,7 @@ export default function RadarOffersPage() {
                   href={supporterPlansUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-lg bg-violet-500 text-white hover:bg-violet-600"
+                  className={buttonVariants()}
                 >
                   {t("supporterButton")}
                 </a>
@@ -222,16 +222,14 @@ export default function RadarOffersPage() {
                   </div>
                   <span
                     className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      offer.partner
-                        ? "bg-violet-500/15 text-violet-300"
-                        : "bg-green-500/15 text-green-300"
+                      offer.partner ? "bg-primary/15 text-primary" : "bg-success/15 text-success"
                     }`}
                   >
                     {offer.partner ? t("partnerBadge") : t("officialBadge")}
                   </span>
                 </div>
 
-                <p className="text-2xl font-bold text-violet-300">{formatBenefit(offer.benefit)}</p>
+                <p className="text-2xl font-bold text-primary">{formatBenefit(offer.benefit)}</p>
                 <p className="text-sm text-text-muted">
                   {localizeRadarOfferText(offer.description, locale)}
                 </p>
@@ -252,10 +250,10 @@ export default function RadarOffersPage() {
                   href={offer.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-auto inline-flex w-fit items-center gap-1 text-sm font-medium text-violet-400 hover:underline"
+                  className="mt-auto inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                   {t("openOffer")}
-                  <span className="material-symbols-outlined text-sm">open_in_new</span>
+                  <Icon name="open_in_new" size={14} />
                 </a>
               </div>
             </Card>

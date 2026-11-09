@@ -14,13 +14,17 @@ export function registerRestart(program) {
     });
 }
 
-export async function runRestartCommand(opts = {}) {
+export async function runRestartCommand(opts = {}, deps = {}) {
+  const stop = deps.runStopCommand ?? runStopCommand;
+  const wait = deps.sleep ?? sleep;
   console.log(t("restart.restarting"));
 
-  await runStopCommand(opts);
-  await sleep(1000);
+  await stop(opts);
+  await wait(1000);
 
-  const { runServe } = await import("./serve.mjs");
-  await runServe(opts);
+  // #17168: come back detached, like `serve --daemon`. Without it runServe() took
+  // the foreground supervisor path and the restart never returned to the shell.
+  const runServe = deps.runServe ?? (await import("./serve.mjs")).runServe;
+  await runServe({ ...opts, daemon: true });
   return 0;
 }

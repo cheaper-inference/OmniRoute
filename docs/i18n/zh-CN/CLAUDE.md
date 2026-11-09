@@ -8,13 +8,15 @@
 
 **所有项目规则均位于 [`AGENTS.md`](AGENTS.md) 中**——它是每个 AI 助手在架构、约定、测试、质量门禁、git 工作流、23 条硬性规则以及 PII 经验方面的唯一事实来源。请完整阅读该文件；不要在此处重复添加项目规则。以下所有内容**仅适用于 Claude Code**——它们是对 `AGENTS.md` 中已定义规则的操作层面细化。
 
-## 工作树隔离——Claude Code 特定说明
+## Worktree 隔离 — Claude Code 特定说明
 
-完整且强制执行的工作树协议（确认基础分支、`.claude/worktrees/` 规范路径、`cp -al` node_modules、清理规则）位于 `AGENTS.md` → Git 工作流 →“工作树隔离”。Claude Code 特定要点：
+完整的强制性 worktree 协议（基础分支确认、`.claude/worktrees/` 规范路径、`cp -al` node_modules、清理规则）见
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)（摘要见 `AGENTS.md` →
+Git 工作流 → “Worktree 隔离”）。Claude Code 特有的要点：
 
-- 除非操作人员已经告知，否则应通过 `AskUserQuestion` 确认基础分支（硬性规则 #19）。
-- 优先使用原生 `EnterWorktree` 工具——它已在 `.claude/worktrees/`（规范路径）下创建工作树。使用文档规定的 `git
-worktree add` 命令创建工作树，然后以其 `path` 调用 `EnterWorktree`。
+- 除非操作者已经告知你，否则通过 `AskUserQuestion` 与其确认基础分支（硬性规则 #19）。
+- 优先使用原生的 `EnterWorktree` 工具——它已经会在 `.claude/worktrees/`（规范路径）下创建 worktree。使用文档中记载的 `git
+worktree add` 命令创建 worktree，然后调用 `EnterWorktree` 并传入其 `path`。
 
 ## 跨会话安全——Claude Code 特定说明
 

@@ -47,7 +47,7 @@ A2A 由 **Endpoints → A2A** 开关控制，默认处于禁用状态。禁用�
 
 ### `message/send` — 同步执行
 
-向技能发送消息并等待完整响应。
+向技能发送消息，并等待完整响应。
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+对于 `smart-routing`，`metadata.combo` 是网关请求中对
+`metadata.model` 的显式覆盖；它会作为真正的 `model` 发送，
+而不是作为被忽略的 `x-combo` JSON 字段。网关常规的 API 密钥和
+每目标授权仍然适用。无效或空的组合会被拒绝。
+
+结果会公开 `requested_combo`（调用方意图）、`dispatched_model`
+（实际网关请求）、`response_model`（网关响应）和
+`confirmed_combo`。除非网关明确标识某个组合，否则最后一个字段为 `null`。
+A2A 决策日志仅将执行归因于已确认的组合，并将未确认的请求保留为 `requestedCombo`。
+
 **响应：**
 
 ```json
@@ -76,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE 流式传输
 
-与 `message/send` 相同，但返回服务器发送事件，以进行实时流式传输。
+与 `message/send` 相同，但返回服务器发送事件以进行实时流式传输。
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,84 +151,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute 提供了 6 个 A2A 技能，它们在 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 中完成连接。每个技能模块均位于 `src/lib/a2a/skills/` 中。
+OmniRoute公开了`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`中连接的 6 个A2A技能。每个技能模块都位于`src/lib/a2a/skills/`中。
 
-| 技能         | ID                   | 描述                                                                                                                                        | 标签             | 示例                        |
-| :----------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :--------------- | :-------------------------- |
-| 智能路由     | `smart-routing`      | 使用 OmniRoute 的组合引擎和评分机制，通过最优提供者/组合路由提示词                                                                          | 路由、提供者     | “通过最佳模型路由此提示词”  |
-| 配额管理     | `quota-management`   | 报告各提供者的配额状态，帮助调用方决定何时限流/切换                                                                                         | 配额、提供者     | “检查 anthropic 的配额”     |
-| 提供者发现   | `provider-discovery` | 列出已安装的提供者及其能力、免费套餐标记和 OAuth 状态                                                                                       | 提供者、发现     | “有哪些可用的提供者？”      |
-| 成本分析     | `cost-analysis`      | 根据目录和近期使用情况，估算请求/对话的成本                                                                                                 | 成本、使用情况   | “估算此对话的成本”          |
-| 健康状况报告 | `health-report`      | 汇总各提供者的断路器、冷却和锁定状态                                                                                                        | 健康状况、韧性   | “显示所有提供者的健康状态”  |
-| 列出能力     | `list-capabilities`  | 以 Markdown 表格形式返回包含 45 个条目的完整 Agent Skills 目录（23 个 API + 21 个 CLI + 1 个配置），并附带用于上下文注入的原始 SKILL.md URL | 目录、发现、技能 | “列出 OmniRoute 的所有能力” |
+| 技能       | ID                   | 描述                                                                                                        | 标签             | 示例                       |
+| :--------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :------------------------- |
+| 智能路由   | `smart-routing`      | 使用OmniRoute的组合引擎+评分通过最佳provider/combo路由提示                                                  | 路由、提供者     | “通过最佳模型路由此提示”   |
+| 配额管理   | `quota-management`   | 报告每个提供者的配额状态，帮助调用者决定何时进行throttle/switch                                             | 配额、供应商     | “检查人类配额”             |
+| 提供者发现 | `provider-discovery` | 列出已安装的提供者及其功能、免费层标志、 OAuth状态                                                          | 提供者、发现     | “有哪些供应商可用？”       |
+| 成本分析   | `cost-analysis`      | 根据目录+最近的使用情况估计request/conversation的成本                                                       | 成本、使用量     | “估计这次对话的成本”       |
+| 健康报告   | `health-report`      | 聚合每个提供者的断路器、冷却时间、锁定状态                                                                  | 健康、韧性       | “显示所有提供者的健康状况” |
+| 列出能力   | `list-capabilities`  | 返回完整的 45 条目代理技能目录（23 API + 21 CLI + 1 配置）作为降价表，并使用原始SKILL.md URLs进行上下文注入 | 目录、发现、技能 | “列出所有OmniRoute功能”    |
 
-> Agent Card 应与实时的 352 个提供者目录保持一致；提供者数量以及免费/无需身份验证的元数据均来自运行时注册表。
+> 代理卡应与实时 381 提供者目录保持一致；提供者计数和free/no-auth数据源自运行时注册表。
 
-### `list-capabilities` 技能详情
+### `list-capabilities`技能详情
 
-`list-capabilities` 技能对于需要在发送 API 调用之前了解 OmniRoute 所提供功能的外部代理尤其有用。它会返回一个结构化的 Markdown 表格工件：
+`list-capabilities`技能对于需要在发送API调用之前发现OmniRoute公开的内容的外部代理特别有用。它返回一个结构化的 Markdown 表工件：
 
 ```
-| ID | 名称 | 类别 | 领域 | 端点/命令 | 原始 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 身份验证与会话 | api | 身份验证 | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-每一行都包含 `rawUrl` 列，以便代理可以立即获取完整的 SKILL.md。`metadata.totalSkills` 字段与目录大小保持一致（目前为 45）。实现：`src/lib/a2a/skills/listCapabilities.ts`。另请参阅 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
+每行都包含`rawUrl`列，因此代理可以立即获取完整的SKILL.md。 `metadata.totalSkills`字段反映了目录大小（今天为 45）。实现： `src/lib/a2a/skills/listCapabilities.ts`。另请参见[AGENT-SKILLS.md](./AGENT-SKILLS.md) 。
 
 ---
 
-## REST API（辅助）
+## REST API (辅助)
 
-JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表板和外部工具提供辅助访问：
+JSON-RPC 端点`/a2a`是规范的A2A入口点。下面的REST端点为仪表板和外部工具提供辅助访问：
 
-| 端点                         | 方法 | 描述                                                       | 认证                                           |
-| :--------------------------- | :--- | :--------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET  | 服务器状态、已注册技能                                     | （公开）                                       |
-| `/api/a2a/tasks`             | GET  | 使用筛选条件列出任务                                       | 管理                                           |
-| `/api/a2a/tasks/[id]`        | GET  | 按 ID 获取任务                                             | 管理                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST | 取消正在运行的任务                                         | 管理                                           |
-| `/.well-known/agent.json`    | GET  | Agent Card（A2A 发现）                                     | （公开，缓存 3600s）                           |
-| `/api/a2a/tasks`             | POST | 向 OmniConductor 工作群组进行入站委派（Conductor PRD RF5） | Bearer 对照 `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| 端点                         | 方法 | 描述                                       | 授权                                                                                      |
+| :--------------------------- | :--- | :----------------------------------------- | :---------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | 服务器状态、注册技能                       | （民众）                                                                                  |
+| `/api/a2a/tasks`             | GET  | 使用过滤器列出任务                         | 管理或API密钥（见下文）                                                                   |
+| `/api/a2a/tasks/[id]`        | GET  | 通过ID获取任务                             | 管理或API密钥（见下文）                                                                   |
+| `/api/a2a/tasks/[id]/cancel` | POST | 取消正在运行的任务                         | 管理或API密钥（见下文）                                                                   |
+| `/.well-known/agent.json`    | GET  | 代理卡（A2A发现）                          | （公共，缓存 3600 秒）                                                                    |
+| `/api/a2a/tasks`             | POST | OmniConductor车队入境代表团（指挥PRD RF5） | 与`GET`相同，如果在`REQUIRE_API_KEY`关闭时设置，则加上`OMNIROUTE_API_KEY` ； `a2aEnabled` |
 
-**入站 Conductor 委派（`POST /api/a2a/tasks`）：**外部 A2A 代理通过 OmniRoute 将编码工作委派给 OmniConductor 工作群组。请求体：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }`——仅可委派 Conductor 工作群组技能（即 Agent Card 上公布的技能）；`metadata.conductor.repo.url` 为必填项（该工作群组处理 git 仓库）。该路由使用服务器端的 `CONDUCTOR_ORCHESTRATOR_TOKEN`（回退为 `CONDUCTOR_HUB_TOKEN`）转换为中心节点的 `POST /v1/tasks`，并返回 `201 { conductor_task_id, state: "submitted" }`；任务状态通过 SSE→A2A 镜像（RF1）回传，并可通过 `GET /api/a2a/tasks?skill=conductor` 查看。
+谁可以访问`/api/a2a/tasks*`路由取决于登录和 API 密钥设置：
+
+- `requireLogin=true` （默认）：中间件仅允许管理凭据（仪表板会话、 `manage` -scope API密钥、 `oma_`访问令牌）和`OMNIROUTE_API_KEY`。简单的推理密钥得到`403`。在`Authorization`标头中，中间件仅将`OMNIROUTE_API_KEY`视为`Bearer <key>`； `Bearer`获取`401`后的裸键或制表符。
+- `requireLogin=false`，或加入之前的环回窗口：使用`REQUIRE_API_KEY=true`时，任何有效的OmniRoute API密钥或管理凭证都会被接受，匿名调用者将获得`401`； `REQUIRE_API_KEY`关闭后，路线就打开了。
+- 当设置该变量且`REQUIRE_API_KEY`关闭时，`POST /api/a2a/tasks`还需要`Authorization`标头中的`OMNIROUTE_API_KEY` 。其他标头（例如`x-api-key`）不计入其中。关闭登录或登录之前，密钥会通过（带或不带`Bearer`前缀）；登录后，只有`Bearer <key>`通过中间件。
+
+在需要凭证的情况下， `read` -scope `oma_`令牌仅适用于`GET`。
+
+**入境指挥委派 (`POST /api/a2a/tasks`):**外部A2A代理通过OmniRoute将编码工作委托给OmniConductor队列。本体： `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` —仅指挥舰队技能（特工卡上公布的技能）可委托； `metadata.conductor.repo.url`是必需的（舰队在 git 存储库上工作）。该路由使用服务器端`CONDUCTOR_ORCHESTRATOR_TOKEN` （后备`CONDUCTOR_HUB_TOKEN`）转换为集线器的`POST /v1/tasks`并返回`201 { conductor_task_id, state: "submitted" }`；任务状态通过SSE→A2A镜像 (RF1) 回流，并通过`GET /api/a2a/tasks?skill=conductor`可见。
 
 ---
 
 ## 添加新技能
 
-1. **创建技能文件：**`src/lib/a2a/skills/<your-skill>.ts`
+1. **创建技能文件：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   导出一个异步函数 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循现有技能（例如 `smartRouting.ts`）的结构。
+   导出异步函数`(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`。遵循`smartRouting.ts`等现有技能的形状。如果技能通过HTTP回调到OmniRoute ，请使用`buildSelfLoopHeaders(caller)`从`src/lib/a2a/selfLoopAuth.ts`构建标头，以便调用使用A2A调用者的密钥（而不是`OMNIROUTE_API_KEY`）运行，并将`redirect: "error"`传递给`fetch`以便重定向永远不会获取密钥。助手仅构建标头；每个技能都会自行设置重定向策略。当解析的基本URL是私有网络之外的普通 http（环回、容器或服务名称以及私有地址都可以）或保存凭据时，它会抛出`UnsafeSelfLoopTargetError`而不是附加密钥，因此吞下拒绝的调用的技能必须重新抛出该错误。
 
-2. **注册处理程序：**在 `src/lib/a2a/taskExecution.ts` 中，向 `A2A_SKILL_HANDLERS` 添加一个条目：
+2. **注册处理程序：**在`src/lib/a2a/taskExecution.ts`中，向`A2A_SKILL_HANDLERS`添加一个条目：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...现有技能
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **在 Agent Card 中公开：**在 `src/app/.well-known/agent.json/route.ts` 中，追加到 `skills` 数组：
+3. **在代理卡中公开：**在`src/lib/a2a/agentCardMetadata.ts` （由`/.well-known/agent.json`和`/.well-known/agent-card.json`共享）中，追加到`skills`数组：
 
    ```json
    {
      "id": "your-skill",
-     "name": "您的技能",
-     "description": "简短且聚焦意图的描述",
-     "tags": ["路由", "配额"],
-     "examples": ["自然语言调用示例"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **编写测试：**`tests/unit/a2a-<your-skill>.test.ts`。覆盖正常路径和错误路径。
+4. **编写测试：** `tests/unit/a2a-<your-skill>.test.ts`.覆盖快乐路径+错误路径。
 
-5. **记录文档：**在此文件的 `Available Skills` 表格中记录新技能。
+5. **文档**该文件的`Available Skills`表中的新技能。
 
 ---
 
@@ -264,7 +275,7 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
 
 ## 集成示例
 
-### Python（requests）
+### Python（请求）
 
 ```python
 import requests
@@ -283,7 +294,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript（fetch）
+### TypeScript （获取）
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

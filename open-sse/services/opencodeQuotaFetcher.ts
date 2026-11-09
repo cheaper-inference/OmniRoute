@@ -9,9 +9,15 @@
  * parsing failures remain fail-open so quota checks never block on missing data.
  */
 
-import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { buildOpencodeBackgroundHeaders } from "../utils/opencodeHeaders.ts";
 
 const OPENCODE_QUOTA_URL =
@@ -40,6 +46,15 @@ interface CacheEntry {
 
 // In-memory cache: connectionId → successful quota bound to its normalized API key
 const quotaCache = new Map<string, CacheEntry>();
+
+function normalizeApiKey(connection?: Record<string, unknown>): string {
+  return typeof connection?.apiKey === "string"
+    ? connection.apiKey
+        .trim()
+        .replace(/^Bearer\s+/i, "")
+        .trim()
+    : "";
+}
 
 // One-time 404 warning per URL (avoids spamming on every request)
 const _warned404Urls = new Set<string>();
@@ -160,13 +175,7 @@ export async function fetchOpencodeQuota(
   connectionId: string,
   connection?: Record<string, unknown>
 ): Promise<OpencodeTripleWindowQuota | null> {
-  const apiKey =
-    typeof connection?.apiKey === "string"
-      ? connection.apiKey
-          .trim()
-          .replace(/^Bearer\s+/i, "")
-          .trim()
-      : "";
+  const apiKey = normalizeApiKey(connection);
   if (!apiKey) return null;
 
   const cached = quotaCache.get(connectionId);
@@ -176,7 +185,7 @@ export async function fetchOpencodeQuota(
 
   try {
     await throttleQuotaFetch();
-    const response = await fetch(OPENCODE_QUOTA_URL, {
+    const response = await fetchWithConnectionProxy(connectionId, OPENCODE_QUOTA_URL, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -190,6 +199,7 @@ export async function fetchOpencodeQuota(
       },
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
 
     if (!response.ok) {
       if (response.status === 404 && !_warned404Urls.has(OPENCODE_QUOTA_URL)) {
@@ -233,13 +243,14 @@ export function invalidateOpencodeQuotaCache(connectionId: string): void {
 
 /**
  * Register the OpenCode quota fetcher with the preflight and monitor systems
- * for all three provider variants: opencode-go, opencode, opencode-zen.
+ * for both provider variants: opencode-go, opencode-zen.
  *
  * Call this once at server startup (in chat.ts, before registerGenericQuotaFetchers).
  */
 export function registerOpencodeQuotaFetcher(): void {
-  for (const provider of ["opencode-go", "opencode", "opencode-zen"] as const) {
+  for (const provider of ["opencode-go", "opencode-zen"] as const) {
     registerQuotaFetcher(provider, fetchOpencodeQuota);
+    registerQuotaCacheInvalidator(provider, invalidateOpencodeQuotaCache);
     registerMonitorFetcher(provider, fetchOpencodeQuota);
     registerQuotaWindows(provider, [
       OPENCODE_WINDOW_5H,

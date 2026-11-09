@@ -24,6 +24,27 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return sanitizeErrorMessage(error) || fallback;
 }
 
+function buildLegacyRequestQueuePatch(
+  defaults: JsonRecord
+): NonNullable<ResilienceSettingsPatch["requestQueue"]> {
+  return {
+    ...(typeof defaults.requestsPerMinute === "number"
+      ? { requestsPerMinute: defaults.requestsPerMinute }
+      : {}),
+    ...(typeof defaults.minTimeBetweenRequests === "number"
+      ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
+      : {}),
+    ...(typeof defaults.concurrentRequests === "number"
+      ? { concurrentRequests: defaults.concurrentRequests }
+      : {}),
+    // #18390: the legacy schema has accepted this key since the global gate landed,
+    // but it was never mapped, so the value was silently dropped.
+    ...(typeof defaults.globalConcurrentRequests === "number"
+      ? { globalConcurrentRequests: defaults.globalConcurrentRequests }
+      : {}),
+  };
+}
+
 function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const profiles = asRecord(body.profiles);
   const defaults = asRecord(body.defaults);
@@ -33,17 +54,7 @@ function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
   const patch: ResilienceSettingsPatch = {};
 
   if (Object.keys(defaults).length > 0) {
-    patch.requestQueue = {
-      ...(typeof defaults.requestsPerMinute === "number"
-        ? { requestsPerMinute: defaults.requestsPerMinute }
-        : {}),
-      ...(typeof defaults.minTimeBetweenRequests === "number"
-        ? { minTimeBetweenRequestsMs: defaults.minTimeBetweenRequests }
-        : {}),
-      ...(typeof defaults.concurrentRequests === "number"
-        ? { concurrentRequests: defaults.concurrentRequests }
-        : {}),
-    };
+    patch.requestQueue = buildLegacyRequestQueuePatch(defaults);
   }
 
   if (Object.keys(oauth).length > 0 || Object.keys(apikey).length > 0) {
@@ -133,6 +144,7 @@ export async function GET() {
     const resilience = resolveResilienceSettings(settings);
 
     return NextResponse.json({
+      antigravityTimingTelemetry: resilience.antigravityTimingTelemetry,
       requestQueue: resilience.requestQueue,
       connectionCooldown: resilience.connectionCooldown,
       providerBreaker: resilience.providerBreaker,
@@ -145,6 +157,7 @@ export async function GET() {
       comboCooldownWait: resilience.comboCooldownWait,
       quotaShareConcurrencyLimit: resilience.quotaShareConcurrencyLimit,
       streamStallCooldown: resilience.streamStallCooldown,
+      p2cLatency: resilience.p2cLatency,
       streamRecovery: resilience.streamRecovery,
       providerCooldown: resilience.providerCooldown,
       quotaPreflight: resilience.quotaPreflight,
@@ -198,6 +211,12 @@ export async function PATCH(request) {
       resilienceSettings: storedResilience,
     });
     const mergedFull = mergeResilienceSettings(sparseBase, {
+      ...(body.antigravityTimingTelemetry
+        ? {
+            antigravityTimingTelemetry:
+              body.antigravityTimingTelemetry as ResilienceSettingsPatch["antigravityTimingTelemetry"],
+          }
+        : {}),
       ...(body.requestQueue
         ? { requestQueue: body.requestQueue as ResilienceSettingsPatch["requestQueue"] }
         : {}),
@@ -236,6 +255,9 @@ export async function PATCH(request) {
             streamStallCooldown:
               body.streamStallCooldown as ResilienceSettingsPatch["streamStallCooldown"],
           }
+        : {}),
+      ...(body.p2cLatency
+        ? { p2cLatency: body.p2cLatency as ResilienceSettingsPatch["p2cLatency"] }
         : {}),
       ...(body.streamRecovery
         ? {
@@ -296,6 +318,7 @@ export async function PATCH(request) {
 
     return NextResponse.json({
       ok: true,
+      antigravityTimingTelemetry: nextResilience.antigravityTimingTelemetry,
       requestQueue: nextResilience.requestQueue,
       connectionCooldown: nextResilience.connectionCooldown,
       providerBreaker: nextResilience.providerBreaker,
@@ -308,6 +331,7 @@ export async function PATCH(request) {
       comboCooldownWait: nextResilience.comboCooldownWait,
       quotaShareConcurrencyLimit: nextResilience.quotaShareConcurrencyLimit,
       streamStallCooldown: nextResilience.streamStallCooldown,
+      p2cLatency: nextResilience.p2cLatency,
       streamRecovery: nextResilience.streamRecovery,
       providerCooldown: nextResilience.providerCooldown,
       quotaPreflight: nextResilience.quotaPreflight,

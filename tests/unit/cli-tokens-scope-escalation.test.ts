@@ -2,10 +2,11 @@
  * POST /api/cli/tokens must never hand out more privilege than the caller holds.
  *
  * An `admin` access token is the top of the CLI scope hierarchy, so minting one is an
- * operator action: a dashboard session, the machine-bound local CLI credential, or an
- * instance with login disabled. API keys (even with `manage`/`admin` scope) and `oma_`
- * access tokens are machine credentials that can be handed to automation — they may
- * still mint `write`/`read` tokens, but never an `admin` one.
+ * operator action: a dashboard session or the machine-bound local CLI credential — with
+ * login disabled too, since every access token passes the always-protected tier. API keys
+ * (even with `manage`/`admin` scope) and `oma_` access tokens are machine credentials that
+ * can be handed to automation — they may still mint `write`/`read` tokens, but never an
+ * `admin` one.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -32,7 +33,7 @@ process.env.INITIAL_PASSWORD = "cli-tokens-scope-password";
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const accessTokensDb = await import("../../src/lib/db/accessTokens.ts");
-const { updateSettings } = await import("../../src/lib/db/settings.ts");
+const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
 const tokensRoute = await import("../../src/app/api/cli/tokens/route.ts");
 
 await updateSettings({ requireLogin: true });
@@ -165,10 +166,19 @@ test("a dashboard session wins over a manage key sent alongside it", async () =>
   assert.equal(res.status, 200);
 });
 
-test("with login disabled the instance is open and admin can be minted", async () => {
+test("with login disabled, minting still takes a credential: anonymous 401, the operator gets admin", async () => {
   await updateSettings({ requireLogin: false });
   try {
-    const res = await mintWith({}, { name: "open-instance-admin", scope: "admin" });
+    assert.equal((await getSettings()).requireLogin, false, "open mode must stick");
+    const anon = await mintWith({}, { name: "open-instance-admin", scope: "admin" });
+    assert.equal(anon.status, 401);
+    assert.equal(liveAdminTokenNamed("open-instance-admin").length, 0);
+
+    const req = await makeManagementSessionRequest(URL_TOKENS, {
+      method: "POST",
+      body: { name: "open-instance-operator", scope: "admin" },
+    });
+    const res = await tokensRoute.POST(req);
     assert.equal(res.status, 200);
     assert.equal((await res.json()).scope, "admin");
   } finally {

@@ -1,1 +1,0 @@
-- **fix(usage):** redeeming a Codex or Grok Build reset credit now releases the account's local quota cooldown and model lockouts, so it re-enters rotation immediately ([#16682](https://github.com/diegosouzapw/OmniRoute/pull/16682)) — thanks @JunDev76

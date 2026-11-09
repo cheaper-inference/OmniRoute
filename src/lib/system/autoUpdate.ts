@@ -4,6 +4,14 @@ import { access } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { homedir } from "node:os";
+import { resolveDataDir } from "@/lib/dataPaths";
+import { isRunningInContainer } from "@/shared/utils/containerEnv";
+import {
+  buildDockerImageUpdateCommand,
+  isDockerTriggerPathInside,
+  isTriggerDirWritable,
+  writeDockerUpdateRequest,
+} from "./dockerUpdateTrigger";
 
 const execFileAsync = promisify(execFile);
 
@@ -48,7 +56,12 @@ const FALLBACK_CWD = process.env.HOME || homedir() || "/tmp";
 export const PROJECT_ROOT: string = resolveProjectRoot(FALLBACK_CWD);
 
 type ComposeCommand = "docker compose" | "docker-compose";
-export type AutoUpdateMode = "npm" | "docker-compose" | "source";
+/**
+ * `docker-image` / `docker-trigger` are never set explicitly: they are detected for a published
+ * image container (no `.git`, not under `node_modules`). See `./dockerUpdateTrigger.ts`.
+ */
+export type AutoUpdateMode =
+  "npm" | "docker-compose" | "source" | "docker-image" | "docker-trigger";
 
 type ExecFileLike = typeof execFileAsync;
 type SpawnLike = typeof spawn;
@@ -62,6 +75,12 @@ export type AutoUpdateConfig = {
   gitRemote: string;
   patchCommits: string[];
   logPath: string;
+  /** Data directory the Docker trigger file must live in. */
+  dataDir: string;
+  /** Absolute `DOCKER_UPDATE_TRIGGER_FILE` (relative values resolve against `dataDir`). */
+  dockerTriggerFile: string | null;
+  /** Host-side compose command shown to the operator in `docker-image` mode. */
+  manualUpdateCommand: string | null;
 };
 
 export type AutoUpdateValidation = {
@@ -154,11 +173,20 @@ export function resolveRuntimeModuleDir(
  */
 export function resolveAutoUpdateMode(
   rawMode: AutoUpdateMode,
-  detection: { isGitRepo: boolean; currentDir: string }
+  detection: {
+    isGitRepo: boolean;
+    currentDir: string;
+    isContainer?: boolean;
+    hasTriggerFile?: boolean;
+  }
 ): AutoUpdateMode {
   if (rawMode !== "npm") return rawMode;
   if (detection.isGitRepo) return "source";
-  return isUnderNodeModules(detection.currentDir) ? "npm" : "source";
+  // A container cannot update itself in place: a configured host trigger file wins, and a
+  // published image (not an npm install) gets the manual host compose command.
+  if (detection.isContainer && detection.hasTriggerFile) return "docker-trigger";
+  if (isUnderNodeModules(detection.currentDir)) return "npm";
+  return detection.isContainer ? "docker-image" : "source";
 }
 
 async function pathExists(targetPath: string): Promise<boolean> {
@@ -191,6 +219,7 @@ export type AutoUpdateRuntimeProbe = {
   compiledDir?: string;
   entryScripts?: ReadonlyArray<string | undefined>;
   exists?: (target: string) => boolean;
+  isContainer?: () => boolean;
 };
 
 export function getAutoUpdateConfig(
@@ -200,12 +229,29 @@ export function getAutoUpdateConfig(
   const dataDir = env.DATA_DIR || "/tmp/omniroute";
   const repoDir = env.AUTO_UPDATE_REPO_DIR || "/workspace/omniroute";
 
+  const triggerDataDir = env.DATA_DIR?.trim() ? path.resolve(env.DATA_DIR) : resolveDataDir();
+  const rawTrigger = env.DOCKER_UPDATE_TRIGGER_FILE?.trim();
+  const dockerTriggerFile = rawTrigger ? path.resolve(triggerDataDir, rawTrigger) : null;
+
   let mode = normalizeMode(env.AUTO_UPDATE_MODE);
   if (mode === "npm") {
     const exists = runtime.exists ?? existsSync;
     const isGitRepo = exists(path.join(PROJECT_ROOT, ".git"));
     const currentDir = resolveRuntimeModuleDir(runtime.compiledDir, runtime.entryScripts, exists);
-    mode = resolveAutoUpdateMode(mode, { isGitRepo, currentDir });
+    const isContainer = runtime.isContainer
+      ? runtime.isContainer()
+      : isRunningInContainer({
+          existsSync: exists,
+          readFileSync: (target, encoding) =>
+            readFileSync(target, encoding as BufferEncoding) as string,
+          env,
+        });
+    mode = resolveAutoUpdateMode(mode, {
+      isGitRepo,
+      currentDir,
+      isContainer,
+      hasTriggerFile: dockerTriggerFile !== null,
+    });
   }
 
   return {
@@ -217,6 +263,10 @@ export function getAutoUpdateConfig(
     gitRemote: env.AUTO_UPDATE_GIT_REMOTE || "origin",
     patchCommits: parsePatchCommits(env.AUTO_UPDATE_PATCH_COMMITS),
     logPath: env.AUTO_UPDATE_LOG_PATH || path.join(dataDir, "logs", "auto-update.log"),
+    dataDir: triggerDataDir,
+    dockerTriggerFile,
+    manualUpdateCommand:
+      mode === "docker-image" ? buildDockerImageUpdateCommand(env.AUTO_UPDATE_SERVICE) : null,
   };
 }
 
@@ -268,6 +318,35 @@ export async function validateAutoUpdateRuntime(
       reason: null,
       composeCommand: null,
     };
+  }
+
+  if (config.mode === "docker-image") {
+    return {
+      supported: false,
+      reason:
+        `Running inside a Docker container. Update from the host: ${config.manualUpdateCommand}. ` +
+        "To update from the dashboard, set DOCKER_UPDATE_TRIGGER_FILE and run a host watcher (see the Docker guide).",
+      composeCommand: null,
+    };
+  }
+
+  if (config.mode === "docker-trigger") {
+    const triggerFile = config.dockerTriggerFile;
+    if (!triggerFile || !isDockerTriggerPathInside(config.dataDir, triggerFile)) {
+      return {
+        supported: false,
+        reason: `DOCKER_UPDATE_TRIGGER_FILE must point to a file inside DATA_DIR (${config.dataDir}).`,
+        composeCommand: null,
+      };
+    }
+    if (!(await isTriggerDirWritable(config.dataDir, triggerFile))) {
+      return {
+        supported: false,
+        reason: "The DOCKER_UPDATE_TRIGGER_FILE directory is not writable by OmniRoute.",
+        composeCommand: null,
+      };
+    }
+    return { supported: true, reason: null, composeCommand: null };
   }
 
   if (config.mode !== "docker-compose") {
@@ -428,14 +507,16 @@ export async function launchAutoUpdate({
   execFileImpl = execFileAsync,
   spawnImpl = spawn,
   existsImpl = pathExists,
+  runtime = {},
 }: {
   latest: string;
   env?: NodeJS.ProcessEnv;
   execFileImpl?: ExecFileLike;
   spawnImpl?: SpawnLike;
   existsImpl?: (targetPath: string) => Promise<boolean>;
+  runtime?: AutoUpdateRuntimeProbe;
 }): Promise<AutoUpdateLaunchResult> {
-  const config = getAutoUpdateConfig(env);
+  const config = getAutoUpdateConfig(env, runtime);
   const validation = await validateAutoUpdateRuntime(config, execFileImpl, existsImpl);
 
   if (!validation.supported) {
@@ -445,6 +526,22 @@ export async function launchAutoUpdate({
       logPath: config.logPath,
       composeCommand: validation.composeCommand,
       error: validation.reason || "Auto-update runtime is not available.",
+    };
+  }
+
+  if (config.mode === "docker-trigger" && config.dockerTriggerFile) {
+    // The host watcher does the pull/recreate; OmniRoute only drops a request file (no shell).
+    const written = await writeDockerUpdateRequest(
+      config.dataDir,
+      config.dockerTriggerFile,
+      latest
+    );
+    return {
+      started: written.ok,
+      channel: config.mode,
+      logPath: config.logPath,
+      composeCommand: null,
+      ...(written.ok === false ? { error: written.error } : {}),
     };
   }
 

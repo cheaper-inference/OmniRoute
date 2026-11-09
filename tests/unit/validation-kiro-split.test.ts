@@ -66,7 +66,7 @@ test("validateKiroApiKeyRuntimeProbe: 400/422/429 treated as valid (auth passed)
   }
 });
 
-test("validateKiroApiKeyRuntimeProbe: us-east-1 targets the codewhisperer endpoint", async () => {
+test("validateKiroApiKeyRuntimeProbe: us-east-1 targets the Amazon Q endpoint (API keys are rejected on codewhisperer)", async () => {
   const originalFetch = globalThis.fetch;
   let calledUrl = "";
   globalThis.fetch = (async (url: URL | string) => {
@@ -75,10 +75,7 @@ test("validateKiroApiKeyRuntimeProbe: us-east-1 targets the codewhisperer endpoi
   }) as typeof fetch;
   try {
     await M.validateKiroApiKeyRuntimeProbe({ apiKey: "k", region: "us-east-1" });
-    assert.equal(
-      calledUrl,
-      "https://codewhisperer.us-east-1.amazonaws.com/generateAssistantResponse"
-    );
+    assert.equal(calledUrl, "https://q.us-east-1.amazonaws.com/generateAssistantResponse");
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -92,8 +89,8 @@ test("validateKiroApiKeyRuntimeProbe: non-us-east-1 targets the regional q endpo
     return new Response(new ReadableStream(), { status: 200 });
   }) as typeof fetch;
   try {
-    await M.validateKiroApiKeyRuntimeProbe({ apiKey: "k", region: "eu-west-1" });
-    assert.equal(calledUrl, "https://q.eu-west-1.amazonaws.com/generateAssistantResponse");
+    await M.validateKiroApiKeyRuntimeProbe({ apiKey: "k", region: "eu-central-1" });
+    assert.equal(calledUrl, "https://q.eu-central-1.amazonaws.com/generateAssistantResponse");
   } finally {
     globalThis.fetch = originalFetch;
   }

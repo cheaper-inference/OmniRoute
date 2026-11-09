@@ -1,1 +1,0 @@
-- **fix(checks):** repo quality checks now run in a throwaway data directory instead of the operator database ([#16353](https://github.com/diegosouzapw/OmniRoute/pull/16353)) — thanks @maxmad64bis

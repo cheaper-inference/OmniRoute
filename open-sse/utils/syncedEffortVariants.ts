@@ -22,8 +22,12 @@
  * Skipped entirely for `kimi`-owned, and GLM (`glm`, `glm-cn`, `glmt`) models:
  * they already own conflicting `-{effort}` aliases (`getKimiCodeStaticThinkingPolicy`, or `GlmExecutor::parseGlmEffortTier`), so generating
  * another layer here would create invalid nested ids. Other providers skip model ids that
- * already end in an effort token. Codex resolves exact discovered ids before aliases, so
- * legitimate upstream names such as "...-high" can also declare their own effort variants.
+ * already end in a canonical effort token (`-low`, `-high`, `-max`, …). That check does
+ * not include `-ultra`: a non-Codex id such as nemotron-ultra still exposes its variants.
+ * Codex `-ultra` aliases are already an effort tier and must not grow a second suffix.
+ * Exact discovered Codex ids ending in `-high` or `-max` still expose their own variants
+ * when no unsuffixed sibling stem is in the catalog (#13224). When that stem is present,
+ * the suffixed row is an alias and is left as it is.
  */
 import { getCodexWireEfforts } from "@/shared/reasoning/codexEfforts.ts";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization.ts";
@@ -58,6 +62,25 @@ function endsWithKnownEffortToken(id: string): boolean {
   return CANONICAL_EFFORT_VALUES.some((value) => id.endsWith(`-${value}`));
 }
 
+/** Longest first so `-xhigh` is not read as `-high`. */
+const CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST: readonly string[] = [
+  ...CANONICAL_EFFORT_VALUES,
+].sort((a, b) => b.length - a.length);
+
+function canonicalEffortSuffixStem(id: string): string | null {
+  for (const value of CANONICAL_EFFORT_SUFFIXES_LONGEST_FIRST) {
+    const suffix = `-${value}`;
+    if (id.endsWith(suffix) && id.length > suffix.length) return id.slice(0, -suffix.length);
+  }
+  return null;
+}
+
+/** True when this Codex id is an alias of a bare stem already present in the catalog. */
+function codexAliasHasSiblingStem(id: string, ids: ReadonlySet<unknown>): boolean {
+  const stem = canonicalEffortSuffixStem(id);
+  return stem !== null && ids.has(stem);
+}
+
 function extractEffortTiers(model: CatalogModelEntry): string[] {
   const tiers =
     model.capabilities?.effort_tiers ??
@@ -72,9 +95,12 @@ function extractEffortTiers(model: CatalogModelEntry): string[] {
 /**
  * Whether the catalog should advertise reasoning-effort variants for this entry.
  *
- * Rule: a synced model that declares `capabilities.effort_tiers`, is not owned by a
- * provider that already owns its own suffix mechanism, is not a virtual combo entry, and
- * whose id does not already end in a canonical effort token (except exact Codex ids).
+ * Rule: a synced model that declares effort tiers, is not owned by a provider that
+ * already owns its own suffix mechanism, is not a virtual combo entry, and — except
+ * exact Codex ids — does not already end in a canonical effort token. Codex `-ultra`
+ * aliases never grow another suffix. Codex `-high`/`-max` ids stay eligible here;
+ * `appendSyncedEffortVariants` skips those only when the unsuffixed sibling stem is
+ * already in the same catalog (#13224).
  */
 export function shouldExposeSyncedEffortVariants(
   model: CatalogModelEntry
@@ -86,7 +112,13 @@ export function shouldExposeSyncedEffortVariants(
   if (typeof model.owned_by === "string" && isSkippedEffortProvider(model.owned_by)) {
     return false;
   }
-  if (model.owned_by !== "codex" && endsWithKnownEffortToken(id)) return false;
+  // `-ultra` is not canonical. Only Codex treats it as an alias suffix, so a
+  // non-Codex id such as nemotron-ultra still exposes its variants.
+  if (model.owned_by === "codex") {
+    if (id.endsWith("-ultra")) return false;
+  } else if (endsWithKnownEffortToken(id)) {
+    return false;
+  }
   return extractEffortTiers(model).length > 0;
 }
 
@@ -115,6 +147,11 @@ export function appendSyncedEffortVariants<T extends CatalogModelEntry>(models: 
 
   for (const model of models) {
     if (!shouldExposeSyncedEffortVariants(model)) continue;
+    // Discovered Codex `*-high`/`*-max` ids stay when no bare stem exists (#13224).
+    // A suffixed row next to that stem is an alias and must not grow another tier.
+    if (model.owned_by === "codex" && codexAliasHasSiblingStem(model.id, existingIds)) {
+      continue;
+    }
     const baseRoot = typeof model.root === "string" && model.root ? model.root : model.id;
 
     for (const tier of extractEffortTiers(model)) {

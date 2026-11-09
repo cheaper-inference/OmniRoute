@@ -282,6 +282,11 @@ test("translateBatch falls back to `name` when a locale entry has no english/nat
 // translateString / callChat — the pre-existing per-string path, moved as-is
 // ---------------------------------------------------------------------------
 
+test("translation prompts keep rich-text tag names untranslated", () => {
+  assert.ok(TRANSLATION_SYSTEM("German", "Deutsch").includes("tag names"));
+  assert.ok(BATCH_SYSTEM("German", "Deutsch").includes("tag names"));
+});
+
 test("translateString sends the per-string prompt and trims the answer", async () => {
   await withFetch(
     () => chatCompletion("  Salvar\n"),
@@ -338,6 +343,7 @@ test("backendConfig reads OMNIROUTE_TRANSLATION_* and strips a trailing slash fr
         apiUrl: "http://translation.test/v1",
         apiKey: "sk-test",
         model: "test-model",
+        fallbackModels: [],
         timeoutMs: 60000,
       });
     }
@@ -533,6 +539,7 @@ test("backendConfig omits the key when the variable is unset, empty or blank", (
       apiUrl: "http://translation.test/v1",
       apiKey: "sk-test",
       model: "test-model",
+      fallbackModels: [],
       timeoutMs: 60000,
     });
   });
@@ -542,6 +549,7 @@ test("backendConfig omits the key when the variable is unset, empty or blank", (
         apiUrl: "http://translation.test/v1",
         apiKey: "sk-test",
         model: "test-model",
+        fallbackModels: [],
         timeoutMs: 60000,
       });
     });

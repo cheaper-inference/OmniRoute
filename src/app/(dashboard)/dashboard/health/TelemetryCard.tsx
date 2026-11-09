@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
 
 type TelemetryPayload = {
@@ -106,7 +108,7 @@ function Sparkline({
         strokeWidth="2"
         vectorEffect="non-scaling-stroke"
         points={points}
-        className="text-primary"
+        className="text-chart-1"
       />
     </svg>
   );
@@ -115,9 +117,9 @@ function Sparkline({
 function getIndicatorTone(value: number, warning: number, critical: number, inverse = false) {
   const healthy = inverse ? value >= warning : value <= warning;
   const criticalHit = inverse ? value < critical : value >= critical;
-  if (criticalHit) return "bg-red-500/10 text-red-500";
-  if (!healthy) return "bg-amber-500/10 text-amber-500";
-  return "bg-emerald-500/10 text-emerald-500";
+  if (criticalHit) return "bg-error/10 text-error";
+  if (!healthy) return "bg-warning/10 text-warning";
+  return "bg-success/10 text-success";
 }
 
 export default function TelemetryCard() {
@@ -215,7 +217,7 @@ export default function TelemetryCard() {
       label: t("uptime"),
       value: formatDuration(values.uptime),
       icon: "timer",
-      tone: "bg-blue-500/10 text-blue-500",
+      tone: "bg-info/10 text-info",
     },
     {
       label: t("totalRequests"),
@@ -239,13 +241,13 @@ export default function TelemetryCard() {
       label: t("activeConnections"),
       value: values.activeConnections.toLocaleString(),
       icon: "hub",
-      tone: "bg-cyan-500/10 text-cyan-500",
+      tone: "bg-info/10 text-info",
     },
     {
       label: t("memoryUsage"),
       value: formatBytes(values.memoryUsage.rss ?? values.memoryUsage.heapUsed ?? 0),
       icon: "memory",
-      tone: "bg-violet-500/10 text-violet-500",
+      tone: "bg-chart-3/10 text-chart-3",
     },
   ];
 
@@ -254,7 +256,7 @@ export default function TelemetryCard() {
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold text-text-main">
-            <span className="material-symbols-outlined text-[20px] text-primary">monitoring</span>
+            <Icon name="monitoring" size={20} className="text-primary" />
             {t("title")}
           </h2>
           <p className="mt-1 text-sm text-text-muted">{t("description")}</p>
@@ -264,23 +266,20 @@ export default function TelemetryCard() {
             </p>
           )}
         </div>
-        <button
+        <Button
+          variant="outline"
           onClick={() => void loadTelemetry()}
           disabled={loading}
           title={t("refresh")}
-          className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
+          className="gap-2"
         >
-          <span
-            className={`material-symbols-outlined text-[16px] ${loading ? "animate-spin" : ""}`}
-          >
-            refresh
-          </span>
+          <Icon name="refresh" size={16} className={loading ? "animate-spin" : undefined} />
           {t("refresh")}
-        </button>
+        </Button>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600">
+        <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
           {t("partialData", { error })}
         </div>
       )}
@@ -295,10 +294,8 @@ export default function TelemetryCard() {
                 </p>
                 <p className="mt-1 text-xl font-semibold text-text-main">{metric.value}</p>
               </div>
-              <span
-                className={`material-symbols-outlined rounded-lg p-2 text-[20px] ${metric.tone}`}
-              >
-                {metric.icon}
+              <span className={`rounded-lg p-2 ${metric.tone}`}>
+                <Icon name={metric.icon} size={20} />
               </span>
             </div>
           </div>

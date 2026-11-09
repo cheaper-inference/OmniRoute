@@ -1,8 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, Button, Input, Select, Badge, Spinner, ConfirmModal } from "@/shared/components";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useFormatter, useTranslations } from "next-intl";
+import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import {
+  Card,
+  Button,
+  Input,
+  Select,
+  Badge,
+  ConfirmModal,
+  EmptyState,
+  Modal,
+} from "@/shared/components";
 
 interface AccessTokenRow {
   id: string;
@@ -30,6 +50,8 @@ async function fetchTokens(): Promise<AccessTokenRow[]> {
 
 export default function AccessTokensTab() {
   const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const nameRef = useRef<HTMLInputElement>(null);
   const format = useFormatter();
   const scopeLabels = {
     read: t("accessTokensScopeReadLabel"),
@@ -45,7 +67,8 @@ export default function AccessTokensTab() {
   const [expires, setExpires] = useState("");
   const [creating, setCreating] = useState(false);
   const [newSecret, setNewSecret] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  // Name + scope of the token just created, shown as the secret preview's header.
+  const [newSecretMeta, setNewSecretMeta] = useState({ name: "", scope: "read" });
 
   const [revokeTarget, setRevokeTarget] = useState<AccessTokenRow | null>(null);
 
@@ -100,8 +123,8 @@ export default function AccessTokensTab() {
         );
         return;
       }
+      setNewSecretMeta({ name: name.trim(), scope });
       setNewSecret(data.token);
-      setCopied(false);
       setName("");
       setExpires("");
       setScope("read");
@@ -128,16 +151,6 @@ export default function AccessTokensTab() {
     }
   };
 
-  const copySecret = async () => {
-    if (!newSecret) return;
-    try {
-      await navigator.clipboard.writeText(newSecret);
-      setCopied(true);
-    } catch {
-      /* clipboard unavailable — user can select manually */
-    }
-  };
-
   const fmt = (iso: string | null) => {
     if (!iso) return "—";
     const date = new Date(iso);
@@ -146,136 +159,146 @@ export default function AccessTokensTab() {
       : format.dateTime(date, { dateStyle: "medium", timeStyle: "short" });
   };
 
+  // The dialog's opener ("Create") is disabled again once the name is cleared, so the Modal's
+  // own focus return lands on <body>; send focus back to the name field instead.
+  const dismissSecret = () => {
+    setNewSecret(null);
+    requestAnimationFrame(() => nameRef.current?.focus());
+  };
+
   return (
     <div className="space-y-6">
-      <Card>
-        <div className="p-5">
-          <h2 className="text-lg font-semibold text-text">{t("accessTokensTitle")}</h2>
-          <p className="mt-1 text-sm text-text-muted">{t("accessTokensDescription")}</p>
-        </div>
-      </Card>
+      <PageHeader
+        compact
+        title={t("accessTokensTitle")}
+        description={t("accessTokensDescription")}
+      />
 
       {/* Create */}
-      <Card>
-        <div className="p-5 space-y-4">
-          <h3 className="text-sm font-semibold text-text">{t("accessTokensCreateHeading")}</h3>
-          <div className="grid gap-3 sm:grid-cols-4">
-            <Input
-              aria-label={t("accessTokensColName")}
-              placeholder={t("accessTokensNamePlaceholder")}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Select
-              aria-label={t("accessTokensColScope")}
-              value={scope}
-              onChange={(e) => setScope(e.target.value)}
-              options={[
-                { value: "read", label: t("accessTokensScopeRead") },
-                { value: "write", label: t("accessTokensScopeWrite") },
-                { value: "admin", label: t("accessTokensScopeAdmin") },
-              ]}
-            />
-            <Input
-              type="number"
-              min={1}
-              aria-label={t("accessTokensExpiresPlaceholder")}
-              placeholder={t("accessTokensExpiresPlaceholder")}
-              value={expires}
-              onChange={(e) => setExpires(e.target.value)}
-            />
-            <Button onClick={createToken} disabled={creating || !name.trim()}>
-              {creating ? t("accessTokensCreating") : t("accessTokensCreate")}
-            </Button>
-          </div>
-
-          {newSecret && (
-            <div className="rounded-control border border-primary/40 bg-primary/5 p-4">
-              <p className="text-sm font-medium text-text">{t("accessTokensCopyNow")}</p>
-              <div className="mt-2 flex items-center gap-2">
-                <code className="flex-1 break-all rounded bg-surface px-3 py-2 font-mono text-xs text-text">
-                  {newSecret}
-                </code>
-                <Button variant="secondary" onClick={copySecret}>
-                  {copied ? t("accessTokensCopied") : t("accessTokensCopy")}
-                </Button>
-                <Button variant="ghost" onClick={() => setNewSecret(null)}>
-                  {t("accessTokensDismiss")}
-                </Button>
-              </div>
-            </div>
-          )}
+      <Card title={t("accessTokensCreateHeading")}>
+        <div className="grid gap-3 sm:grid-cols-4 sm:items-end">
+          <Input
+            ref={nameRef}
+            label={t("accessTokensColName")}
+            placeholder={t("accessTokensNamePlaceholder")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Select
+            label={t("accessTokensColScope")}
+            value={scope}
+            onChange={(e) => setScope(e.target.value)}
+            options={[
+              { value: "read", label: t("accessTokensScopeRead") },
+              { value: "write", label: t("accessTokensScopeWrite") },
+              { value: "admin", label: t("accessTokensScopeAdmin") },
+            ]}
+          />
+          <Input
+            type="number"
+            min={1}
+            label={t("accessTokensColExpires")}
+            placeholder={t("accessTokensExpiresPlaceholder")}
+            value={expires}
+            onChange={(e) => setExpires(e.target.value)}
+          />
+          <Button onClick={createToken} disabled={creating || !name.trim()}>
+            {creating ? t("accessTokensCreating") : t("accessTokensCreate")}
+          </Button>
         </div>
       </Card>
 
+      <Modal
+        isOpen={Boolean(newSecret)}
+        onClose={dismissSecret}
+        title={t("accessTokensTitle")}
+        size="lg"
+        closeOnOverlay={false}
+        showCloseButton={false}
+        footer={
+          <Button variant="secondary" onClick={dismissSecret}>
+            {t("accessTokensDismiss")}
+          </Button>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-text-main">{t("accessTokensCopyNow")}</p>
+          <CodePreview
+            variant="surface"
+            showLineNumbers={false}
+            filename={newSecretMeta.name || t("accessTokensTitle")}
+            language={scopeLabels[newSecretMeta.scope] || newSecretMeta.scope}
+            code={newSecret ?? ""}
+            copyLabel={t("accessTokensCopy")}
+            copiedLabel={t("accessTokensCopied")}
+          />
+        </div>
+      </Modal>
+
       {error && (
-        <div className="rounded-control border border-red-500/40 bg-red-500/5 px-4 py-3 text-sm text-red-400">
+        <div
+          role="alert"
+          className="rounded-control border border-error/40 bg-error-bg px-4 py-3 text-sm text-error"
+        >
           {error}
         </div>
       )}
 
       {/* List */}
-      <Card>
-        <div className="p-5">
-          <h3 className="mb-3 text-sm font-semibold text-text">{t("accessTokensExisting")}</h3>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
-            </div>
-          ) : tokens.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-muted">{t("accessTokensEmpty")}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-start text-text-muted">
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColName")}</th>
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColScope")}</th>
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColPrefix")}</th>
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColStatus")}</th>
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColLastUsed")}</th>
-                    <th className="py-2 pe-4 font-medium">{t("accessTokensColExpires")}</th>
-                    <th className="py-2 font-medium" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {tokens.map((tk) => {
-                    const revoked = Boolean(tk.revokedAt);
-                    return (
-                      <tr key={tk.id} className="border-b border-border/50">
-                        <td className="py-2 pe-4 text-text">{tk.name}</td>
-                        <td className="py-2 pe-4">
-                          <Badge variant={SCOPE_VARIANT[tk.scope] || "default"}>
-                            {scopeLabels[tk.scope] || tk.scope}
-                          </Badge>
-                        </td>
-                        <td className="py-2 pe-4 font-mono text-xs text-text-muted">
-                          {tk.tokenPrefix}
-                        </td>
-                        <td className="py-2 pe-4">
-                          <Badge variant={revoked ? "default" : "success"}>
-                            {revoked
-                              ? t("accessTokensStatusRevoked")
-                              : t("accessTokensStatusActive")}
-                          </Badge>
-                        </td>
-                        <td className="py-2 pe-4 text-text-muted">{fmt(tk.lastUsedAt)}</td>
-                        <td className="py-2 pe-4 text-text-muted">{fmt(tk.expiresAt)}</td>
-                        <td className="py-2 text-end">
-                          {!revoked && (
-                            <Button variant="ghost" size="sm" onClick={() => setRevokeTarget(tk)}>
-                              {t("accessTokensRevoke")}
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+      <Card title={t("accessTokensExisting")}>
+        {loading ? (
+          <TableLoadingState label={tc("loading")} />
+        ) : tokens.length === 0 ? (
+          <EmptyState icon="key" title={t("accessTokensEmpty")} className="py-6" />
+        ) : (
+          <Table scrollbarLabel={t("accessTokensExisting")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("accessTokensColName")}</TableHead>
+                <TableHead>{t("accessTokensColScope")}</TableHead>
+                <TableHead>{t("accessTokensColPrefix")}</TableHead>
+                <TableHead>{t("accessTokensColStatus")}</TableHead>
+                <TableHead>{t("accessTokensColLastUsed")}</TableHead>
+                <TableHead>{t("accessTokensColExpires")}</TableHead>
+                <TableHead>
+                  <span className="sr-only">{tc("actions")}</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tokens.map((tk) => {
+                const revoked = Boolean(tk.revokedAt);
+                return (
+                  <TableRow key={tk.id}>
+                    <TableCell className="text-text-main">{tk.name}</TableCell>
+                    <TableCell>
+                      <Badge variant={SCOPE_VARIANT[tk.scope] || "default"}>
+                        {scopeLabels[tk.scope] || tk.scope}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-text-muted">
+                      {tk.tokenPrefix}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={revoked ? "default" : "success"}>
+                        {revoked ? t("accessTokensStatusRevoked") : t("accessTokensStatusActive")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-text-muted">{fmt(tk.lastUsedAt)}</TableCell>
+                    <TableCell className="text-text-muted">{fmt(tk.expiresAt)}</TableCell>
+                    <TableCell className="text-end">
+                      {!revoked && (
+                        <Button variant="ghost" size="sm" onClick={() => setRevokeTarget(tk)}>
+                          {t("accessTokensRevoke")}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
       </Card>
 
       <ConfirmModal

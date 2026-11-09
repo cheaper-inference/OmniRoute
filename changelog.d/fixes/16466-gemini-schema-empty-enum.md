@@ -1,1 +1,0 @@
-- **fix(translator):** Gemini/Antigravity tool schemas no longer carry empty-string `enum` values (which Gemini rejects with `enum[N]: cannot be empty`); the value is dropped, and the enum with it when it was the only one, so one such MCP tool no longer fails every Gemini leg of a combo ([#16466](https://github.com/diegosouzapw/OmniRoute/pull/16466)) — thanks @tiagolabsit

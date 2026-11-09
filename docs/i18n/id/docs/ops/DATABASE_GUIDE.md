@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Pulihkan dari cadangan:
 
 ```bash
-omniroute sync pull --merge   # atau: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` hanya mengunduh arsip `.tar.gz` lengkap dari server yang sedang berjalan
+(`GET /api/db-backups/exportAll`, memerlukan kredensial operator); perintah ini tidak memulihkan apa pun.
 
 ### Skenario 3: Kunci Enkripsi Hilang
 
-**Pemulihan tidak dapat dilakukan** tanpa kunci tersebut. Bidang yang dienkripsi tidak dapat dibaca. Tambahkan kembali semua penyedia secara manual menggunakan kredensial baru.
+**Pemulihan tidak dapat dilakukan** tanpa kunci tersebut. Kolom yang dienkripsi tidak dapat dibaca. Tambahkan kembali semua penyedia secara manual dengan kredensial baru.
 
 > **Mitigasi**: Selalu cadangkan kunci enkripsi secara terpisah, idealnya di pengelola kata sandi atau KMS.
 
 ### Skenario 4: Disk Penuh
 
-SQLite akan menghasilkan galat `SQLITE_FULL`. Kosongkan ruang disk, lalu:
+SQLite akan mengembalikan kesalahan `SQLITE_FULL`. Kosongkan ruang disk, lalu:
 
 ```bash
-# Lakukan checkpoint WAL untuk mengosongkan ruang
+# Lakukan checkpoint pada WAL untuk mengosongkan ruang
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

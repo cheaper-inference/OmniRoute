@@ -76,6 +76,27 @@ test("empty input returns empty entries", () => {
   assert.equal(warnings.length, 0);
 });
 
+test("invalid unnamed keys consume an index but comments and named keys do not", () => {
+  assert.deepEqual(parseBulkApiKeys("# comment\r\n|\r\nnamed|\r\n\r\n|valid|suffix"), {
+    entries: [{ name: "Key 2", apiKey: "valid|suffix", lineNumber: 5 }],
+    warnings: ["Line 2: empty apiKey, skipped", "Line 3: empty apiKey, skipped"],
+  });
+});
+
+test("account parsing preserves warning precedence and numbering after invalid rows", () => {
+  const text = "# comment\nmissing\n|one-field\n||\n|account|\nnamed||key\n|account|key|suffix";
+  assert.deepEqual(parseBulkApiKeys(text, { withAccountId: true }), {
+    entries: [{ name: "Key 3", accountId: "account", apiKey: "key|suffix", lineNumber: 7 }],
+    warnings: [
+      "Line 2: expected name|accountId|apiKey, skipped",
+      "Line 3: missing accountId or apiKey, skipped",
+      "Line 4: empty accountId, skipped",
+      "Line 5: empty apiKey, skipped",
+      "Line 6: empty accountId, skipped",
+    ],
+  });
+});
+
 test("only whitespace returns empty entries", () => {
   const { entries } = parseBulkApiKeys("   \n\t\n  \n");
   assert.equal(entries.length, 0);
@@ -119,7 +140,10 @@ test("resolveBulkNameCollisions: renames an auto-named entry colliding with an e
 test("resolveBulkNameCollisions: renames a custom name colliding with an existing connection", () => {
   const entries = [{ name: "Prod" }];
   const out = resolveBulkNameCollisions(entries, ["Prod"]);
-  assert.deepEqual(out.map((e) => e.name), ["Prod 1"]);
+  assert.deepEqual(
+    out.map((e) => e.name),
+    ["Prod 1"]
+  );
 });
 
 test("resolveBulkNameCollisions: dedupes two identical custom names within the same batch", () => {

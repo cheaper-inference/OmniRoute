@@ -45,3 +45,21 @@ export function quoteShellArgs(args, platform) {
   const list = [...(args ?? [])];
   return platform === "win32" ? list.map(escapeWindowsShellArg) : list;
 }
+
+/**
+ * Quote argv for a spawn ONLY when the child actually goes through a shell.
+ *
+ * `quoteShellArgs` is mandatory on the `shell: true` path (cmd.exe reparses the
+ * joined command line — #8837). The native-installer path spawns a real `.exe`
+ * with `shell: undefined` (#9454), where the cmd.exe escaping reaches the
+ * binary literally and mangles every pass-through argument (#17177) — gate on
+ * the resolved spawn spec's `shell` before handing argv to spawn().
+ *
+ * @param {string[]} args
+ * @param {NodeJS.Platform|string} platform
+ * @param {boolean|undefined} useShell  the resolved spawn spec's `shell`
+ * @returns {string[]}
+ */
+export function quoteShellArgsForSpawn(args, platform, useShell) {
+  return useShell ? quoteShellArgs(args, platform) : [...(args ?? [])];
+}

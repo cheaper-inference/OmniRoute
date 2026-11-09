@@ -1,1 +1,0 @@
-- **fix(antigravity):** raise the IDE fingerprint fallback to 2.5.5 and resolve the live version before quota fetches so newer-model quota buckets are returned ([#16512](https://github.com/diegosouzapw/OmniRoute/pull/16512)) — thanks @FerryAr

@@ -8,8 +8,25 @@ import {
   resolveTimeouts,
   toResolvedOptions,
 } from "../src/options.js";
+import { buildModelDisplayName } from "../src/shared/naming.js";
 
 describe("parsePluginOptions", () => {
+  it("providerTag defaults to true and toggles the editor parenthesis", () => {
+    const opts = parsePluginOptions({ baseURL: "https://gw.example.com" });
+    assert.equal(opts.providerTag, true);
+    const withParen = buildModelDisplayName({
+      rawId: "openrouter/kimi-k-3-1-pro",
+      enrichmentName: "MoonshotAI: Kimi K 3.1 Pro",
+      providerTag: opts.providerTag,
+    });
+    assert.equal(withParen, "openrouter - Kimi K 3.1 Pro (MoonshotAI)");
+    const withoutParen = buildModelDisplayName({
+      rawId: "openrouter/kimi-k-3-1-pro",
+      enrichmentName: "MoonshotAI: Kimi K 3.1 Pro",
+      providerTag: false,
+    });
+    assert.equal(withoutParen, "openrouter - Kimi K 3.1 Pro");
+  });
   it("applies the real default path via parsePluginOptions: freeOnly/toolsOnly/visionOnly all off", () => {
     const opts = parsePluginOptions({ baseURL: "https://gw.example.com" });
     assert.equal(opts.providerId, "omniroute");
@@ -289,12 +306,12 @@ describe("providerId is bounded because it reaches a filesystem path", () => {
 });
 
 describe("resolved relay defaults", () => {
-  it("relays the four catalog filter defaults from parse to resolved options", () => {
+  it("relays the two free-signal defaults from parse to resolved options", () => {
     const parsed = parsePluginOptions({ baseURL: "https://gw.example.com" });
+    assert.deepEqual(parsed.freeSignals, ["declared"]);
+    assert.equal(parsed.freeProviders, undefined);
     const resolved = toResolvedOptions(parsed);
-    assert.equal(resolved.usableOnly, parsed.usableOnly);
-    assert.equal(resolved.freeOnly, parsed.freeOnly);
-    assert.equal(resolved.toolsOnly, parsed.toolsOnly);
-    assert.equal(resolved.visionOnly, parsed.visionOnly);
+    assert.deepEqual(resolved.freeSignals, ["declared"]);
+    assert.equal(resolved.freeProviders, undefined);
   });
 });

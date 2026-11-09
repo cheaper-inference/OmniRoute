@@ -1,1 +1,0 @@
-- fix(muse-code): validate device authorization URLs and expiry, bound requests, and sanitize polling responses while preserving renewable DCA credentials (#15869).

@@ -140,19 +140,19 @@ omniroute providers validate
 
 ### 1) เชื่อมต่อผู้ให้บริการและสร้างคีย์ API
 
-1. เปิดแดชบอร์ด → `Providers` แล้วเชื่อมต่อผู้ให้บริการอย่างน้อยหนึ่งราย (OAuth หรือคีย์ API)
-2. เปิดแดชบอร์ด → `Endpoints` แล้วสร้างคีย์ API
-3. (ไม่บังคับ) เปิดแดชบอร์ด → `Combos` แล้วกำหนดลำดับสำรองของคุณ
+1. เปิด Dashboard → `Providers` และเชื่อมต่อผู้ให้บริการอย่างน้อยหนึ่งราย (OAuth หรือคีย์ API)
+2. เปิด Dashboard → `Endpoints` และสร้างคีย์ API
+3. (ไม่บังคับ) เปิด Dashboard → `Combos` และตั้งค่าลำดับสำรองของคุณ
 
-### 2) กำหนดค่าเครื่องมือเขียนโค้ดของคุณ
+### 2) กำหนดปลายทางให้เครื่องมือเขียนโค้ดของคุณ
 
 ```txt
-URL ฐาน:   http://localhost:20128/v1
+URL ฐาน: http://localhost:20128/v1
 คีย์ API:  [คัดลอกจากหน้า Endpoint]
-โมเดล:     if/qwen3.8-max-preview (หรือคำนำหน้าผู้ให้บริการ/โมเดลใดก็ได้)
+โมเดล:    if/qwen3.8-max-preview (หรือคำนำหน้าผู้ให้บริการ/โมเดลใดก็ได้)
 ```
 
-หากเอดิเตอร์ของคุณไม่สามารถส่ง `Authorization: Bearer ...` ได้ ให้ใช้ URL ฐานสำหรับความเข้ากันได้แบบมีโทเค็นแทน:
+หากเอดิเตอร์ของคุณไม่สามารถส่ง `Authorization: Bearer ...` ได้ ให้ใช้ URL ฐานสำหรับความเข้ากันได้ที่มีโทเค็นแทน:
 
 ```txt
 URL ฐาน: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,7 +165,7 @@ URL แท็ก Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 #### กำหนดค่าอัตโนมัติด้วย `setup-*`
 
-แทนที่จะวาง URL ฐานและคีย์ด้วยตนเอง ให้ OmniRoute เขียนการกำหนดค่าเฉพาะของแต่ละเครื่องมือ
+แทนที่จะวาง URL ฐานและคีย์ด้วยตนเอง ให้ OmniRoute เขียนไฟล์กำหนดค่าเฉพาะของแต่ละเครื่องมือ
 จากแค็ตตาล็อกโมเดลที่ใช้งานอยู่ โดยใช้หนึ่งคำสั่งต่อหนึ่งเครื่องมือ:
 
 ```bash
@@ -178,20 +178,21 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # แสดงขั้นตอนภายในแอปของ Cursor
 omniroute setup-roo          # การนำเข้า Roo Code + ตัวชี้ autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-แต่ละคำสั่งรองรับ `--remote <url> --api-key <key>` เพื่อกำหนดค่าเครื่องมือภายในเครื่องให้ทำงานกับ
-OmniRoute **ระยะไกล** รวมถึง `--dry-run` สำหรับดูตัวอย่าง หากต้องการเปิด CLI โดยฉีดค่า
-สภาพแวดล้อมที่ถูกต้องและไม่เขียนการกำหนดค่าใดๆ เลย ให้ใช้ตัวเรียกใช้งานทั่วไป
+แต่ละคำสั่งรองรับ `--remote <url> --api-key <key>` เพื่อกำหนดค่าเครื่องมือภายในเครื่องให้ใช้งานกับ
+OmniRoute **ระยะไกล** รวมถึง `--dry-run` เพื่อดูตัวอย่างล่วงหน้า หากต้องการเปิดใช้ CLI โดยฉีด
+env ที่ถูกต้องและไม่เขียนไฟล์กำหนดค่าใดๆ เลย ให้ใช้ตัวเรียกใช้งานทั่วไป
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-ตัวเรียกใช้งานเฉพาะเครื่องมือแบบเดิม `omniroute launch` (Claude Code) และ
+ตัวเรียกใช้งานแบบเดิมที่แยกตามเครื่องมือ ได้แก่ `omniroute launch` (Claude Code) และ
 `omniroute launch-codex` (Codex) ยังคงพร้อมใช้งาน
 
-สำหรับตารางฉบับเต็ม (สิ่งที่แต่ละคำสั่งเขียน แฟล็กทั้งหมด แบบภายในเครื่องเทียบกับระยะไกล และรูปแบบ URL ฐาน
-`/v1`) โปรดดู **[การผสานรวม CLI](./CLI-INTEGRATIONS.md)**
+สำหรับตารางฉบับเต็ม (แต่ละคำสั่งเขียนอะไร แฟล็กทั้งหมด การใช้งานภายในเครื่องเทียบกับระยะไกล และหลักเกณฑ์
+`/v1` ของ URL ฐาน) โปรดดู **[การผสานรวม CLI](./CLI-INTEGRATIONS.md)**
 
 สำหรับการกำหนดค่าโดยละเอียดของแต่ละเครื่องมือ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot และอื่นๆ) โปรดดู **[คู่มือเครื่องมือ CLI](../reference/CLI-TOOLS.md)** โดยเฉพาะ
 
@@ -201,7 +202,7 @@ OmniRoute **ระยะไกล** รวมถึง `--dry-run` สำหร�
 
 ### การตั้งค่า MCP (Model Context Protocol)
 
-เริ่มการรับส่งข้อมูล MCP ในโหมด stdio:
+เริ่มการขนส่ง MCP ในโหมด stdio:
 
 ```bash
 omniroute --mcp
@@ -210,28 +211,28 @@ omniroute --mcp
 ขั้นตอนการตรวจสอบที่แนะนำ:
 
 ```bash
-# 1. เริ่มเซิร์ฟเวอร์ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. เรียกใช้จากไคลเอนต์ MCP ของคุณ:
-omniroute_get_health        # ควรส่งคืนสถานะความสมบูรณ์ของระบบ
-omniroute_list_combos       # ควรส่งคืนคอมโบที่ใช้งานอยู่
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. หรือเรียกใช้ชุดทดสอบ E2E แบบเต็ม:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### การกำหนดค่าไคลเอนต์ MCP
+#### การกำหนดค่าไคลเอนต์MCP
 
-**Claude Code:**
+**รหัส Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-เพิ่มลงในการตั้งค่า MCP ของคุณ:
+เพิ่มการตั้งค่า MCP ของคุณ (stdio พร้อมปุ่มเพื่อให้ผู้โทรมีตัวการ):
 
 ```json
 {
@@ -239,17 +240,24 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**เอกสาร MCP ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ MCP](../../open-sse/mcp-server/README.md) — เครื่องมือ 110 รายการ การกำหนดค่า IDE และไคลเอนต์ Python/TS/Go
+หรือเมื่อ `mcpTransport` เป็น `streamable-http` (ตั้งค่าเป็น `/dashboard/mcp` หรือด้วย `omniroute mcp enable --transport streamable-http`) ให้ชี้รายการเซิร์ฟเวอร์ MCP ระยะไกลของไคลเอ็นต์ไปที่ `http://localhost:20128/api/mcp/stream`
 
-### การตั้งค่า A2A (Agent-to-Agent Protocol)
+คีย์เดินทางเป็น `Authorization: Bearer <api-key>` (ดู [เซิร์ฟเวอร์MCP → การเข้าถึงระยะไกล](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) สำหรับโฮสต์ระยะไกล คีย์ระยะไกลจำเป็นต้องมี `mcp:connect` บวกกับขอบเขต read/write ของมัน)
 
-ตรวจสอบ Agent Card:
+**เอกสาร MCP ฉบับเต็ม:** [เซิร์ฟเวอร์MCP เครื่องมือ README](../../open-sse/mcp-server/README.md) — 110, การกำหนดค่า IDE, ไคลเอนต์ Python/TS/Go การอ้างอิงผู้ดำเนินการสำหรับเครื่องมือการบีบอัด CCR/dedup (เครื่องหมาย ข้อกำหนดเบื้องต้น ขอบเขตต่อเครื่องมือ การเรียกเลขหน้า การวินิจฉัย): [Compression Engines → ข้อกำหนดเบื้องต้น / คู่มือผู้ปฏิบัติงาน](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)
+
+### การตั้งค่า A2A (โปรโตคอลตัวแทนต่อตัวแทน)
+
+ตรวจสอบบัตรตัวแทน:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**เอกสาร A2A ฉบับเต็ม:** [README ของเซิร์ฟเวอร์ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม และวงจรชีวิตของงาน
+**เอกสาร A2A ฉบับเต็ม:** [เซิร์ฟเวอร์A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, ทักษะ, การสตรีม, วงจรชีวิตของงาน
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## เทมเพลตสำหรับ Void Linux (xbps-src)
+## เทมเพลต Linux (xbps-src) เป็นโมฆะ
 
-สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็กเกจแบบเนทีฟโดยใช้ `xbps-src` ได้ บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
+สำหรับผู้ใช้ Void Linux คุณสามารถสร้างแพ็คเกจเนทิฟได้โดยใช้ `xbps-src` บันทึกบล็อกนี้เป็น `srcpkgs/omniroute/template`:
 
 ```bash
-# ไฟล์เทมเพลตสำหรับ 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# สร้าง checksum ใหม่สำหรับแต่ละรีลีสด้วย:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

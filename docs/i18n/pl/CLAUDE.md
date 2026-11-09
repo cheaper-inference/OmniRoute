@@ -11,17 +11,18 @@ AI (architektura, konwencje, testowanie, bramki jakości, przepływ pracy z git,
 wnioski dotyczące PII). Przeczytaj go w całości; nie dodawaj tutaj ponownie reguł projektu. Wszystko poniżej dotyczy WYŁĄCZNIE
 Claude Code — są to operacyjne doprecyzowania reguł już zdefiniowanych w `AGENTS.md`.
 
-## Izolacja worktree — szczegóły dotyczące Claude Code
+## Izolacja worktree — specyfika Claude Code
 
 Pełny obowiązkowy protokół worktree (potwierdzenie gałęzi bazowej, kanoniczna ścieżka
-`.claude/worktrees/`, `cp -al` dla node_modules, reguły usuwania) znajduje się w `AGENTS.md` → Git Workflow → „Worktree
-isolation”. Punkty specyficzne dla Claude Code:
+`.claude/worktrees/`, `cp -al` dla node_modules, zasady usuwania) znajduje się w
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (streszczony w `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Kwestie specyficzne dla Claude Code:
 
-- Potwierdź gałąź bazową z operatorem za pomocą `AskUserQuestion` (Twarda Reguła #19), chyba że
-  została już przez niego podana.
-- Preferuj natywne narzędzie `EnterWorktree` — tworzy ono worktree w
-  `.claude/worktrees/` (ścieżce kanonicznej). Utwórz worktree udokumentowanym poleceniem `git
-worktree add`, a następnie wywołaj `EnterWorktree`, przekazując jego `path`.
+- Potwierdź gałąź bazową z operatorem za pomocą `AskUserQuestion` (Hard Rule #19), chyba że
+  już ci ją podał.
+- Preferuj natywne narzędzie `EnterWorktree` — tworzy ono worktree już w katalogu
+  `.claude/worktrees/` (kanoniczna ścieżka). Utwórz worktree udokumentowanym poleceniem `git
+worktree add`, a następnie wywołaj `EnterWorktree` z jego `path`.
 
 ## Bezpieczeństwo między sesjami — szczegóły dotyczące Claude Code
 

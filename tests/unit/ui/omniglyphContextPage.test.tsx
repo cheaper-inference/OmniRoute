@@ -109,7 +109,7 @@ async function mountPage(): Promise<HTMLElement> {
 
 function enableToggle(container: HTMLElement): HTMLButtonElement {
   const toggle = container.querySelector(
-    '[data-testid="omniglyph-enable-toggle"] button'
+    '[data-testid="omniglyph-enable-toggle"] [role="switch"]'
   ) as HTMLButtonElement | null;
   expect(toggle, "enable toggle button must exist").toBeTruthy();
   return toggle!;
@@ -210,6 +210,23 @@ describe("OmniglyphContextPage", () => {
     expect(puts.length).toBe(1);
     expect(toggle.getAttribute("aria-checked")).toBe("false");
     expect(container.textContent).toContain("Could not save.");
+  });
+
+  it("cancels the saved-status timer when the page unmounts", async () => {
+    vi.useFakeTimers();
+    try {
+      setupFetchMock();
+      const container = await mountPage();
+
+      await click(enableToggle(container));
+      expect(container.textContent).toContain("Saved.");
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+      act(() => roots.pop()?.unmount());
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("a timer left by an earlier save does not clear a later save error", async () => {
@@ -333,7 +350,7 @@ describe("OmniglyphContextPage when the settings GET fails", () => {
 
   function toggleButton(container: HTMLElement) {
     return container.querySelector(
-      '[data-testid="omniglyph-enable-toggle"] button'
+      '[data-testid="omniglyph-enable-toggle"] [role="switch"]'
     ) as HTMLButtonElement | null;
   }
 

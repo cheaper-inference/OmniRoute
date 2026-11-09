@@ -4,16 +4,17 @@
  * Extracted from handleComboChat's `handleSingleModelWithTimeout` closure (combo.ts).
  * A locally expired timer aborts that target and returns a typed 504 response so the Combo
  * can fall back without treating OmniRoute's own deadline as a provider-connection failure.
- * The per-model abort signal still comes from the target (`target.modelAbortSignal`), so
- * the outer request signal is intentionally NOT a dependency here.
+ * The per-model abort signal originates at the target (`target.modelAbortSignal`) and is combined
+ * with the local timeout so hedge cancellation can remain linked through response validation.
  *
  * See _tasks/superpowers/plans/2026-07-03-blocoJ-combo-hotpath-decomposition.md (Task 1).
  */
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../../utils/error.ts";
-import {
-  COMBO_HEDGE_CANCELLED_REASON,
-  COMBO_PER_MODEL_TIMEOUT_REASON,
-} from "./comboAbortReasons.ts";
+import { DECLARED_FIRST_OUTPUT_WAIT_CAP_MS } from "../comboConfig.ts";
+import { requestMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
+import { parseModel } from "../model.ts";
+import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
+import { awaitFirstOutput, isEventStreamResponse } from "./firstOutputStream.ts";
 import type { HandleSingleModel, SingleModelTarget, ComboLogger } from "./types.ts";
 
 /** Stable internal classification for OmniRoute's own combo per-target timer. */
@@ -89,6 +90,140 @@ function ensureDiagnosticListener(): void {
   });
 }
 
+/** The synthetic 504 a combo sees when its per-target budget runs out. */
+function targetTimeoutResponse(modelStr: string): Response {
+  // HTTP 504 (not proprietary 524): this is OmniRoute's own per-target timer.
+  // Typed as combo_target_timeout so request-scoped classification can keep the
+  // connection eligible for fallback instead of treating it like Cloudflare 524
+  // or a genuine upstream gateway timeout.
+  return new Response(
+    JSON.stringify(
+      buildErrorBody(504, sanitizeErrorMessage(`Model ${modelStr} timed out`), undefined, {
+        type: COMBO_TARGET_TIMEOUT_CODE,
+        code: COMBO_TARGET_TIMEOUT_CODE,
+      })
+    ),
+    {
+      status: 504,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+}
+
+/**
+ * A declared budget may lengthen the first-output wait, up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS;
+ * it never shortens it, and the cap never lowers a floor that is already longer.
+ */
+export function resolveFirstOutputWaitMs(floorMs: number, declaredMs: number | undefined): number {
+  if (typeof declaredMs !== "number" || !Number.isFinite(declaredMs)) return floorMs;
+  return Math.max(floorMs, Math.min(declaredMs, DECLARED_FIRST_OUTPUT_WAIT_CAP_MS));
+}
+
+interface FirstOutputGateParams {
+  dispatched: Response;
+  modelStr: string;
+  target?: SingleModelTarget;
+  effectiveTimeoutMs: number;
+  startedAt: number;
+  timeoutController: AbortController;
+  signal: AbortSignal;
+  resolveDeclaredTargetBudgetMs?: (
+    target?: SingleModelTarget
+  ) => Promise<number | undefined> | number | undefined;
+  log: ComboLogger;
+}
+
+/**
+ * The dispatch settles as soon as the upstream sends headers, so its budget says nothing
+ * about whether the body will produce a single token. Hold a successful stream until it
+ * carries output; otherwise a target that only holds the socket open keeps the combo
+ * waiting until the client gives up.
+ */
+async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response> {
+  const {
+    dispatched,
+    modelStr,
+    target,
+    effectiveTimeoutMs,
+    startedAt,
+    timeoutController,
+    signal,
+    resolveDeclaredTargetBudgetMs,
+    log,
+  } = params;
+  if (!dispatched.ok || !isEventStreamResponse(dispatched)) return dispatched;
+
+  const firstOutputBudgetMs = resolveFirstOutputWaitMs(
+    effectiveTimeoutMs,
+    await resolveDeclaredTargetBudgetMs?.(target)
+  );
+  const gate = await awaitFirstOutput(
+    dispatched,
+    firstOutputBudgetMs - (Date.now() - startedAt),
+    signal
+  );
+  if (gate.kind === "output") return gate.response;
+  if (gate.kind === "reasoning") {
+    log.info(
+      "COMBO",
+      `first-output gate: upstream thinking from ${modelStr} (${gate.frameKind}), ending the first-output wait`
+    );
+    return gate.response;
+  }
+
+  if (gate.reason !== "budget") {
+    // Cancelled from outside (hedge winner, client disconnect) or the body closed empty.
+    // Neither is the target's fault, so the response goes back with its body unread and the
+    // existing empty/cancel handling classifies it — never as combo_target_timeout.
+    log.debug?.(
+      "COMBO",
+      `Model ${modelStr} stream ended before output (${gate.reason}) after ${Date.now() - startedAt}ms — not counted as a timeout`
+    );
+    return dispatched;
+  }
+
+  const stallErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
+  recordTimeoutContext({
+    modelStr,
+    timeoutMs: firstOutputBudgetMs,
+    abortError: stallErr,
+    timestamp: Date.now(),
+  });
+  timeoutController.abort(stallErr);
+  log.warn(
+    "COMBO",
+    `Model ${modelStr} opened a stream but produced no output within ${Date.now() - startedAt}ms of dispatch (first-output budget ${firstOutputBudgetMs}ms) — falling back`
+  );
+  return targetTimeoutResponse(modelStr);
+}
+
+/** Reject incompatible media before starting a target timer or provider request. */
+function incompatibleMediaResponse(
+  b: Record<string, unknown>,
+  modelStr: string,
+  target?: SingleModelTarget
+): Response | null {
+  const media = requestMediaRequirements(b);
+  if (Object.values(media).some(Boolean)) {
+    const parsed = parseModel(modelStr);
+    const failures = nonImageMediaFailures(
+      {
+        modelStr,
+        provider: parsed.provider ?? "unknown",
+        providerId: parsed.provider,
+        connectionId: target && "connectionId" in target ? target.connectionId : null,
+      },
+      media
+    );
+    if (failures.length)
+      return errorResponse(
+        400,
+        `Selected model does not support required input: ${failures.join(", ")}`
+      );
+  }
+  return null;
+}
+
 export function buildTargetTimeoutRunner(deps: {
   handleSingleModel: HandleSingleModel;
   comboTargetTimeoutMs: number;
@@ -96,18 +231,36 @@ export function buildTargetTimeoutRunner(deps: {
   resolveTargetTimeoutMs?: (
     target?: SingleModelTarget
   ) => Promise<number | undefined> | number | undefined;
+  /**
+   * The target's own declared budget, consulted only for the first-output wait. It can only
+   * lengthen that wait past the dispatch budget (up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS),
+   * never shorten it.
+   */
+  resolveDeclaredTargetBudgetMs?: (
+    target?: SingleModelTarget
+  ) => Promise<number | undefined> | number | undefined;
 }): (
   b: Record<string, unknown>,
   modelStr: string,
   target?: SingleModelTarget
 ) => Promise<Response> {
-  const { handleSingleModel, comboTargetTimeoutMs, log, resolveTargetTimeoutMs } = deps;
+  const {
+    handleSingleModel,
+    comboTargetTimeoutMs,
+    log,
+    resolveTargetTimeoutMs,
+    resolveDeclaredTargetBudgetMs,
+  } = deps;
   ensureDiagnosticListener();
   return async (
     b: Record<string, unknown>,
     modelStr: string,
     target?: SingleModelTarget
   ): Promise<Response> => {
+    // Also cover pipeline stages, nested dispatch and late tool attachments,
+    // which can bypass the ordinary combo candidate prefilter.
+    const incompatible = incompatibleMediaResponse(b, modelStr, target);
+    if (incompatible) return incompatible;
     const resolvedTimeoutMs = await resolveTargetTimeoutMs?.(target);
     const effectiveTimeoutMs =
       typeof resolvedTimeoutMs === "number" && Number.isFinite(resolvedTimeoutMs)
@@ -126,6 +279,7 @@ export function buildTargetTimeoutRunner(deps: {
       );
     }
 
+    const startedAt = Date.now();
     const timeoutController = new AbortController();
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let timedOut = false;
@@ -144,56 +298,30 @@ export function buildTargetTimeoutRunner(deps: {
           `Model ${modelStr} exceeded ${effectiveTimeoutMs}ms timeout — falling back`
         );
         timeoutController.abort(abortErr);
-        // HTTP 504 (not proprietary 524): this is OmniRoute's own per-target timer.
-        // Typed as combo_target_timeout so request-scoped classification can keep the
-        // connection eligible for fallback instead of treating it like Cloudflare 524
-        // or a genuine upstream gateway timeout.
-        resolve(
-          new Response(
-            JSON.stringify(
-              buildErrorBody(504, sanitizeErrorMessage(`Model ${modelStr} timed out`), undefined, {
-                type: COMBO_TARGET_TIMEOUT_CODE,
-                code: COMBO_TARGET_TIMEOUT_CODE,
-              })
-            ),
-            {
-              status: 504,
-              headers: { "Content-Type": "application/json" },
-            }
-          )
-        );
+        resolve(targetTimeoutResponse(modelStr));
       }, effectiveTimeoutMs);
     });
+    const parentHedgeSignal = target?.modelAbortSignal ?? null;
+    const targetSignal = parentHedgeSignal
+      ? AbortSignal.any([timeoutController.signal, parentHedgeSignal])
+      : timeoutController.signal;
     const targetWithSignal = {
       ...(target ?? {}),
-      modelAbortSignal: timeoutController.signal,
+      // Keep the caller's abort linked after headers are returned: the attempt's
+      // response-quality peek may still be consuming this target's stream.
+      modelAbortSignal: targetSignal,
     };
-    const parentHedgeSignal = target?.modelAbortSignal ?? null;
-    let onParentHedgeAbort: (() => void) | null = null;
-    if (parentHedgeSignal) {
-      if (parentHedgeSignal.aborted) {
-        timeoutController.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
-      } else {
-        onParentHedgeAbort = () => {
-          timeoutController.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
-        };
-        parentHedgeSignal.addEventListener("abort", onParentHedgeAbort, { once: true });
-      }
-    }
+    // Both branches of the race resolve (never reject): the inner handleSingleModel call has a
+    // .catch() that converts rejections into responses, and timeoutPromise always resolves. The
+    // outer .catch() guards the .catch() handler itself (e.g. a broken Error.prototype.message
+    // getter), which would otherwise surface as a tagged unhandledRejection.
+    let dispatched: Response;
     try {
-      // Both branches of the race resolve (never reject): the inner
-      // handleSingleModel call has a .catch() that converts rejections into
-      // responses, and timeoutPromise always resolves. A defensive outer
-      // .catch() guards against unexpected throws in the .catch() handler
-      // itself (e.g. a broken Error.prototype.message getter) — without
-      // this, such a throw would surface as an unhandledRejection tagged
-      // "combo-per-model-timeout" in production logs.
-      return await Promise.race([
+      dispatched = await Promise.race([
         handleSingleModel(b, modelStr, targetWithSignal).catch((err) => {
           if (timedOut) {
-            // Inner call rejected because we aborted it. The synthetic 504 from
-            // timeoutPromise already wins the race; return an empty response so
-            // the loser branch resolves cleanly without leaking err.message.
+            // Inner call rejected because we aborted it. The synthetic 504 from timeoutPromise
+            // already won the race; resolve cleanly without leaking err.message.
             return new Response(null, { status: 599 });
           }
           return errorResponse(502, err?.message ?? "Upstream model error");
@@ -201,16 +329,27 @@ export function buildTargetTimeoutRunner(deps: {
         timeoutPromise,
       ]).catch((raceErr) => {
         // Defensive: should never fire — both race branches always resolve.
-        // Include the error message so the root cause is not masked.
         const detail = raceErr instanceof Error ? raceErr.message : String(raceErr);
-        log.error?.("COMBO", `Unexpected rejection in combo timeout race for ${modelStr}: ${detail}`);
+        log.error?.(
+          "COMBO",
+          `Unexpected rejection in combo timeout race for ${modelStr}: ${detail}`
+        );
         return errorResponse(502, `Combo timeout dispatch error: ${detail}`);
       });
     } finally {
       clearTimeout(timeoutId);
-      if (parentHedgeSignal && onParentHedgeAbort) {
-        parentHedgeSignal.removeEventListener("abort", onParentHedgeAbort);
-      }
     }
+
+    return gateFirstOutput({
+      dispatched,
+      modelStr,
+      target,
+      effectiveTimeoutMs,
+      startedAt,
+      timeoutController,
+      signal: targetSignal,
+      resolveDeclaredTargetBudgetMs,
+      log,
+    });
   };
 }

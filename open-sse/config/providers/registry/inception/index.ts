@@ -15,5 +15,11 @@ export const inceptionProvider: RegistryEntry = {
       contextLength: 128000,
       maxOutputTokens: 50000,
     },
+    {
+      id: "mercury-2.5",
+      name: "Mercury 2.5",
+      contextLength: 260000,
+      maxOutputTokens: 65536,
+    },
   ],
 };

@@ -138,11 +138,11 @@ omniroute providers validate
 
 ## Configuração da ferramenta CLI
 
-### 1) Ligar fornecedores e criar uma chave de API
+### 1) Ligar fornecedores e criar uma chave API
 
-1. Abra o Dashboard → `Providers` e ligue pelo menos um fornecedor (OAuth ou chave de API).
-2. Abra o Dashboard → `Endpoints` e crie uma chave de API.
-3. (Opcional) Abra o Dashboard → `Combos` e defina a sua cadeia de contingência.
+1. Abra Dashboard → `Providers` e ligue pelo menos um fornecedor (OAuth ou chave API).
+2. Abra Dashboard → `Endpoints` e crie uma chave API.
+3. (Opcional) Abra Dashboard → `Combos` e configure a sua cadeia de contingência.
 
 ### 2) Configurar a sua ferramenta de programação
 
@@ -152,47 +152,48 @@ Chave API: [copiar da página Endpoint]
 Modelo:    if/qwen3.8-max-preview (ou qualquer prefixo de fornecedor/modelo)
 ```
 
-Se o seu editor não conseguir enviar `Authorization: Bearer ...`, utilize, em alternativa, a base de compatibilidade com token:
+Se o seu editor não conseguir enviar `Authorization: Bearer ...`, utilize antes a base de compatibilidade com token:
 
 ```txt
 URL base:        http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL de modelos:  http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL de chat:     http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL Ollama Tags: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+URL dos modelos: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL do chat:     http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL das etiquetas do Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Funciona com Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode e SDKs compatíveis com OpenAI.
 
-#### Configuração automática com `setup-*`
+#### Configurar automaticamente com `setup-*`
 
 Em vez de colar manualmente o URL base e a chave, permita que o OmniRoute escreva a configuração própria de cada ferramenta a partir do catálogo de modelos em tempo real. Um comando por ferramenta:
 
 ```bash
-omniroute setup-codex        # Perfis em ~/.codex/<name>.config.toml
+omniroute setup-codex        # perfis em ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (compatível com OpenAI)
-omniroute setup-cline        # Definições da CLI do Cline + extensão do VS Code
+omniroute setup-cline        # definições da CLI do Cline + extensão do VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Apresenta os passos a seguir na aplicação Cursor
-omniroute setup-roo          # Importação do Roo Code + apontador autoImport
+omniroute setup-cursor       # apresenta os passos na aplicação Cursor
+omniroute setup-roo          # importação do Roo Code + apontador autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Cada comando aceita `--remote <url> --api-key <key>` para configurar uma ferramenta local para utilizar uma instância **remota** do OmniRoute, bem como `--dry-run` para pré-visualizar. Para iniciar uma CLI com o ambiente correto injetado, sem escrever qualquer configuração, utilize o iniciador genérico `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); os iniciadores legados específicos de cada ferramenta, `omniroute launch` (Claude Code) e `omniroute launch-codex` (Codex), continuam disponíveis.
+Cada comando aceita `--remote <url> --api-key <key>` para configurar uma ferramenta local com um OmniRoute **remoto**, bem como `--dry-run` para pré-visualizar. Para iniciar uma CLI com as variáveis de ambiente corretas injetadas e sem escrever qualquer configuração, utilize o iniciador genérico `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); os iniciadores legados específicos de cada ferramenta `omniroute launch` (Claude Code) e `omniroute launch-codex` (Codex) continuam disponíveis.
 
-Para consultar a tabela completa (o que cada comando escreve, todas as opções, modo local ou remoto e convenções de URL base com `/v1`), consulte **[Integrações CLI](./CLI-INTEGRATIONS.md)**.
+Para consultar a tabela completa (o que cada comando escreve, todas as opções, local vs. remoto e convenções de URL base com `/v1`), consulte **[Integrações CLI](./CLI-INTEGRATIONS.md)**.
 
-Para obter instruções de configuração detalhadas para cada ferramenta (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot e outras), consulte o **[Guia de ferramentas CLI](../reference/CLI-TOOLS.md)** dedicado.
+Para obter instruções detalhadas de configuração específicas de cada ferramenta (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot e outras), consulte o **[Guia de ferramentas CLI](../reference/CLI-TOOLS.md)** dedicado.
 
 ---
 
-## Configuração de protocolos (MCP + A2A)
+## Configuração do protocolo (MCP + A2A)
 
-### Configuração do MCP (Model Context Protocol)
+### Configuração MCP (protocolo de contexto do modelo)
 
 Inicie o transporte MCP no modo stdio:
 
@@ -203,28 +204,28 @@ omniroute --mcp
 Fluxo de validação recomendado:
 
 ```bash
-# 1. Iniciar o servidor MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. A partir do seu cliente MCP, chamar:
-omniroute_get_health        # Deve devolver o estado de funcionamento do sistema
-omniroute_list_combos       # Deve devolver os combos ativos
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Em alternativa, executar o conjunto E2E completo:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Configuração do cliente MCP
 
-**Claude Code:**
+**Código Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Adicione às suas definições de MCP:
+Adicione às definições do MCP (stdio, com a chave para que o chamador tenha um principal):
 
 ```json
 {
@@ -232,31 +233,38 @@ Adicione às suas definições de MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Documentação completa do MCP:** [README do servidor MCP](../../open-sse/mcp-server/README.md) — 110 ferramentas, configurações de IDE e clientes Python/TS/Go.
+Ou, quando `mcpTransport` for `streamable-http` (configure-o em `/dashboard/mcp` ou com `omniroute mcp enable --transport streamable-http`), aponte a entrada do servidor MCP remoto do cliente para `http://localhost:20128/api/mcp/stream`.
 
-### Configuração do A2A (protocolo Agent-to-Agent)
+A chave viaja como `Authorization: Bearer <api-key>` (consulte [MCP Server → Acesso remoto](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) para hosts remotos; uma chave remota necessita `mcp:connect` mais os seus escopos read/write ).
 
-Verifique o Agent Card:
+**Documentação completa MCP :** Ferramentas [MCP Server README](../../open-sse/mcp-server/README.md) — 110, configurações IDE, clientes Python/TS/Go. Referência do operador para as ferramentas CCR/dedup de compressão (marcadores, pré-requisitos, escopos por ferramenta, paginação de recuperação, diagnóstico): [Mecanismos de compressão → Pré-requisitos/guia do operador](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Configuração A2A (protocolo agente para agente)
+
+Verifique o cartão do agente:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Envie uma tarefa:
+Enviar uma tarefa:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Apresente-me um breve resumo da quota."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Documentação completa do A2A:** [README do servidor A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, competências, streaming e ciclo de vida das tarefas.
+**Documentação completa A2A :** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, skills, streaming, ciclo de vida das tarefas.
 
 ---
 
@@ -315,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Modelo para Void Linux (xbps-src)
+## Modelo Linux vazio (xbps-src)
 
-Os utilizadores do Void Linux podem criar um pacote nativo utilizando o `xbps-src`. Guarde este bloco como `srcpkgs/omniroute/template`:
+Para utilizadores do Void Linux, pode construir um pacote nativo utilizando `xbps-src`. Guarde este bloco como `srcpkgs/omniroute/template`:
 
 ```bash
-# Ficheiro de modelo para 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Gere novamente a soma de verificação para cada versão com:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

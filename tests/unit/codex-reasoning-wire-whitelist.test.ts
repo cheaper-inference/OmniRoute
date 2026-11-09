@@ -6,8 +6,8 @@ import { applyCodexReasoningSelection } from "../../open-sse/executors/codex/rea
 import { setThinkingBudgetConfig, ThinkingMode } from "../../open-sse/services/thinkingBudget.ts";
 import { normalizeReasoningRequest } from "../../src/shared/reasoning/effortStandardization.ts";
 
-// The Codex Responses API accepts only `effort` and `summary` inside
-// `reasoning`. Client ecosystems send OpenRouter-style keys (`enabled`,
+// Preserve explicit `effort`, `summary`, and `context` at the Codex wire seam;
+// backend support remains model/mode-specific. OpenRouter-style keys (`enabled`,
 // `max_tokens`, `exclude`, ...) that the upstream rejects with HTTP 400
 // "Unknown parameter: 'reasoning.<key>'", taking down every combo target
 // with the same deterministic client error. The executor must whitelist the
@@ -26,6 +26,37 @@ function reasoningOf(result: Record<string, unknown>): Record<string, unknown> |
   if (r && typeof r === "object" && !Array.isArray(r)) return r as Record<string, unknown>;
   return null;
 }
+
+test("native Lite-shaped Responses retains explicit context and opaque reasoning history", () => {
+  const result = transform(
+    {
+      model: "gpt-6.1-sol",
+      store: false,
+      client_metadata: { ws_request_header_x_openai_internal_codex_responses_lite: "true" },
+      reasoning: { effort: "xhigh", context: "all_turns", enabled: true, max_tokens: 2048 },
+      input: [
+        { type: "reasoning", encrypted_content: "opaque-test-ciphertext", summary: [] },
+        { role: "user", content: [{ type: "input_text", text: "Continue the prior task." }] },
+      ],
+    },
+    "gpt-6.1-sol"
+  );
+  assert.deepEqual(reasoningOf(result), {
+    effort: "xhigh",
+    context: "all_turns",
+    summary: "auto",
+  });
+  assert.ok((result.include as string[]).includes("reasoning.encrypted_content"));
+  const history = result.input as Record<string, unknown>[];
+  assert.ok(history.some((item) => item.encrypted_content === "opaque-test-ciphertext"));
+});
+
+test("executor preserves explicit context when enabled:false normalizes to effort none", () => {
+  const result = transform({
+    reasoning: { enabled: false, context: "current_turn", max_tokens: 2048, exclude: true },
+  });
+  assert.deepEqual(reasoningOf(result), { effort: "none", context: "current_turn" });
+});
 
 test("reasoning.enabled is stripped; explicit effort survives", () => {
   const r = reasoningOf(transform({ reasoning: { enabled: true, effort: "high" } }));
@@ -135,3 +166,122 @@ test("catalog-backed enabled:false with no effort resolves to none and drops oth
   );
   assert.deepEqual(body.reasoning, { effort: "none" });
 });
+
+const catalogThinking = {
+  model: "gpt-5.6-sol",
+  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+  defaultThinkingEffort: "high",
+};
+
+const unusableEfforts: Array<[string, unknown]> = [
+  ["undefined", undefined],
+  ["null", null],
+  ["empty", ""],
+  ["blank", "   "],
+  // Only non-budget numbers are unusable: a safe non-negative integer is a valid custom
+  // effort budget on the Codex wire (#18329) and is restored as the caller's own choice.
+  ["negative number", -1],
+  ["fractional number", 1.5],
+  ["NaN", Number.NaN],
+  ["object", {}],
+  ["array", []],
+];
+
+for (const [name, value] of unusableEfforts) {
+  for (const carrier of ["nested", "flat"]) {
+    test(`own ${name} metadata falls back to ${carrier} translated effort (#18746)`, () => {
+      const body: Record<string, unknown> = {
+        model: "gpt-5.6-sol",
+        ...(carrier === "nested"
+          ? { reasoning: { effort: "medium", summary: "auto" } }
+          : { reasoning_effort: "medium", reasoning: { summary: "auto" } }),
+      };
+      applyCodexReasoningSelection(
+        "gpt-5.6-sol",
+        body,
+        { ...catalogThinking, requestedThinkingEffort: value },
+        "low",
+        true
+      );
+      assert.deepEqual(body.reasoning, { effort: "medium", summary: "auto" });
+    });
+  }
+}
+
+test("missing effort metadata preserves translated effort over connection defaults", () => {
+  const body: Record<string, unknown> = { model: "gpt-5.6-sol", reasoning_effort: "medium" };
+  applyCodexReasoningSelection("gpt-5.6-sol", body, catalogThinking, "low", true);
+  assert.deepEqual(body.reasoning, { effort: "medium" });
+});
+
+for (const allowDefaults of [true, false]) {
+  test(`original native max is restored only in passthrough mode (allowDefaults=${allowDefaults})`, () => {
+    const body: Record<string, unknown> = {
+      model: "gpt-5.6-sol",
+      reasoning: { effort: "xhigh", summary: "auto" },
+    };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: "max" },
+      "low",
+      allowDefaults
+    );
+    assert.deepEqual(body.reasoning, {
+      effort: allowDefaults ? "max" : "xhigh",
+      summary: "auto",
+    });
+  });
+}
+
+for (const forcedEffort of [undefined, "low"]) {
+  test(`catalog suffix outranks explicit effort; server force outranks suffix (force=${forcedEffort})`, () => {
+    const body: Record<string, unknown> = {
+      model: "gpt-5.6-sol",
+      reasoning: { effort: "medium" },
+    };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: "medium", resolvedThinkingEffort: "high" },
+      "low",
+      true,
+      forcedEffort
+    );
+    assert.equal(body.model, "gpt-5.6-sol");
+    assert.deepEqual(body.reasoning, { effort: forcedEffort ?? "high" });
+  });
+}
+
+for (const disabled of [{ effort: "none" }, { enabled: false }]) {
+  test(`explicit ${JSON.stringify(disabled)} beats connection defaults with unusable metadata`, () => {
+    const body: Record<string, unknown> = { model: "gpt-5.6-sol", reasoning: disabled };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: undefined },
+      "low",
+      true
+    );
+    assert.deepEqual(body.reasoning, { effort: "none" });
+  });
+}
+
+const defaultCases = [
+  { connection: "low", catalog: "high", expected: "low" },
+  { connection: undefined, catalog: "high", expected: "high" },
+  { connection: undefined, catalog: undefined, expected: "medium" },
+];
+for (const { connection, catalog, expected } of defaultCases) {
+  test(`no-effort request uses connection=${connection}, catalog=${catalog}, fallback=${expected}`, () => {
+    const body: Record<string, unknown> = { model: "gpt-5.6-sol" };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, defaultThinkingEffort: catalog },
+      connection,
+      true
+    );
+    assert.deepEqual(body.reasoning, { effort: expected });
+  });
+}

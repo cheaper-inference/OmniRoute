@@ -302,3 +302,221 @@ test("VeoAIFreeWebExecutor returns deterministic error when artifact URL stays 4
   assert.equal(artifactAttempts, 12);
   assert.equal(payload.error.code, "VIDEO_ARTIFACT_UNAVAILABLE");
 });
+
+test("VeoAIFreeWebExecutor sends stored web-session credentials in Cookie header", async () => {
+  globalThis.setTimeout = immediateButSafeTimeout as typeof setTimeout;
+  const executor = new VeoAIFreeWebExecutor();
+  const seenCookies: string[] = [];
+  const mp4 = createTestMp4Buffer();
+
+  globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+    const stringUrl = String(url);
+    const headers = new Headers(init?.headers || {});
+    if (headers.get("Cookie")) seenCookies.push(headers.get("Cookie") || "");
+
+    if (stringUrl === "https://veoaifree.com") {
+      return createResponse('<html>{"nonce":"abc123ff"}</html>', {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      });
+    }
+
+    if (stringUrl === "https://veoaifree.com/wp-admin/admin-ajax.php") {
+      const params = new URLSearchParams(String(init?.body || ""));
+      if (params.get("actionType") === "full-video-generate") {
+        return createResponse("scene-with-auth", {
+          status: 200,
+          headers: { "content-type": "text/plain" },
+        });
+      }
+      if (params.get("actionType") === "final-video-results") {
+        return createResponse("https://93.184.216.34/video-auth.mp4", {
+          status: 200,
+          headers: { "content-type": "text/plain" },
+        });
+      }
+    }
+
+    if (stringUrl === "https://93.184.216.34/video-auth.mp4") {
+      return createResponse(mp4, {
+        status: 200,
+        headers: { "content-type": "video/mp4", "content-length": String(mp4.length) },
+      });
+    }
+
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  }) as typeof fetch;
+
+  const result = await executor.execute({
+    model: "veo",
+    body: { messages: [{ role: "user", content: "synthetic product shot" }] },
+    stream: false,
+    credentials: {
+      connectionId: "conn-1",
+      providerSpecificData: {
+        wordpress_logged_in_hash: "wp_user%7C12345%7Csecret_hash",
+      },
+    },
+    signal: null,
+    log: null,
+  });
+
+  const payload = await result.response.json();
+  assert.equal(result.response.status, 200);
+  assert.equal(payload.data[0].format, "mp4");
+  // Verify cookie was sent in requests
+  assert.ok(
+    seenCookies.some((cookie) =>
+      cookie.includes("wordpress_logged_in_hash=wp_user%7C12345%7Csecret_hash")
+    ),
+    "Executor should forward stored wordpress_logged_in cookie"
+  );
+});
+
+test("VeoAIFreeWebExecutor fails fast on 'Login to Create Videos' response without polling", async () => {
+  globalThis.setTimeout = immediateButSafeTimeout as typeof setTimeout;
+  const executor = new VeoAIFreeWebExecutor();
+  let pollCount = 0;
+
+  globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+    const stringUrl = String(url);
+
+    if (stringUrl === "https://veoaifree.com") {
+      return createResponse('<html>{"nonce":"abc123ff"}</html>', {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      });
+    }
+
+    if (stringUrl === "https://veoaifree.com/wp-admin/admin-ajax.php") {
+      const params = new URLSearchParams(String(init?.body || ""));
+      if (params.get("actionType") === "full-video-generate") {
+        return createResponse(
+          '<div class="rate-limit-exceed rate-3"><p><span>Login to Create Videos</span> Login to Create Videos</p></div>',
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          }
+        );
+      }
+      if (params.get("actionType") === "final-video-results") {
+        pollCount += 1;
+        return createResponse("scene-xyz", { status: 200 });
+      }
+    }
+
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  }) as typeof fetch;
+
+  const result = await executor.execute({
+    model: "veo",
+    body: { messages: [{ role: "user", content: "synthetic product shot" }] },
+    stream: false,
+    credentials: { connectionId: "noauth" },
+    signal: null,
+    log: null,
+  });
+
+  assert.equal(pollCount, 0, "Should fail fast on login requirement without polling");
+  assert.equal(result.response.status, 401);
+  const payload = await result.response.json();
+  assert.equal(payload.error.code, "authentication_required");
+  assert.match(payload.error.message, /Authentication required/i);
+});
+
+test("VeoAIFreeWebExecutor fails fast on rate-limit response", async () => {
+  globalThis.setTimeout = immediateButSafeTimeout as typeof setTimeout;
+  const executor = new VeoAIFreeWebExecutor();
+  let pollCount = 0;
+
+  globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+    const stringUrl = String(url);
+
+    if (stringUrl === "https://veoaifree.com") {
+      return createResponse('<html>{"nonce":"abc123ff"}</html>', {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      });
+    }
+
+    if (stringUrl === "https://veoaifree.com/wp-admin/admin-ajax.php") {
+      const params = new URLSearchParams(String(init?.body || ""));
+      if (params.get("actionType") === "full-video-generate") {
+        return createResponse(
+          '<div class="rate-limit-exceed rate-limit">Rate limit exceeded</div>',
+          {
+            status: 200,
+            headers: { "content-type": "text/html" },
+          }
+        );
+      }
+      if (params.get("actionType") === "final-video-results") {
+        pollCount += 1;
+        return createResponse("scene-xyz", { status: 200 });
+      }
+    }
+
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  }) as typeof fetch;
+
+  const result = await executor.execute({
+    model: "veo",
+    body: { messages: [{ role: "user", content: "synthetic product shot" }] },
+    stream: false,
+    credentials: { connectionId: "noauth" },
+    signal: null,
+    log: null,
+  });
+
+  assert.equal(pollCount, 0, "Should fail fast on rate limit without polling");
+  assert.equal(result.response.status, 429);
+  const payload = await result.response.json();
+  assert.equal(payload.error.code, "rate_limit_exceeded");
+});
+
+test("VeoAIFreeWebExecutor fails fast on HTML error tag response instead of polling", async () => {
+  globalThis.setTimeout = immediateButSafeTimeout as typeof setTimeout;
+  const executor = new VeoAIFreeWebExecutor();
+  let pollCount = 0;
+
+  globalThis.fetch = (async (url: unknown, init?: RequestInit) => {
+    const stringUrl = String(url);
+
+    if (stringUrl === "https://veoaifree.com") {
+      return createResponse('<html>{"nonce":"abc123ff"}</html>', {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      });
+    }
+
+    if (stringUrl === "https://veoaifree.com/wp-admin/admin-ajax.php") {
+      const params = new URLSearchParams(String(init?.body || ""));
+      if (params.get("actionType") === "full-video-generate") {
+        return createResponse('<div class="notice-box">Temporary maintenance window active</div>', {
+          status: 200,
+          headers: { "content-type": "text/html" },
+        });
+      }
+      if (params.get("actionType") === "final-video-results") {
+        pollCount += 1;
+        return createResponse("scene-xyz", { status: 200 });
+      }
+    }
+
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  }) as typeof fetch;
+
+  const result = await executor.execute({
+    model: "veo",
+    body: { messages: [{ role: "user", content: "synthetic product shot" }] },
+    stream: false,
+    credentials: { connectionId: "noauth" },
+    signal: null,
+    log: null,
+  });
+
+  assert.equal(pollCount, 0, "Should fail fast on HTML error response without polling");
+  assert.equal(result.response.status, 502);
+  const payload = await result.response.json();
+  assert.match(payload.error.message, /Video generation failed/i);
+});

@@ -40,33 +40,33 @@ Traffic Inspector bụ ngwa nchọpụta nsogbu okporo HTTPS arụnyere n’ime 
 
 ## §2 Ụdị njide
 
-Traffic Inspector na-akwado **ebe 5 a pụrụ isi jide data n'otu oge**. A pụrụ ịgbanye ma ọ bụ gbanyụọ nke ọ bụla n'onwe ya. Oghere `source` dị na `InterceptedRequest` ọ bụla (`src/mitm/inspector/types.ts`) bụ otu n'ime `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, ma ọ bụ `"tproxy"`.
+Traffic Inspector na-akwado **isi mmalite njide 5 n'otu oge**. Enwere ike ịgbanye ma ọ bụ gbanyụọ nke ọ bụla n'onwe ya. Oghere `source` dị na `InterceptedRequest` ọ bụla (`src/mitm/inspector/types.ts`) bụ otu n'ime `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, ma ọ bụ `"tproxy"`.
 
-### Ụdị 1 — AgentBridge (nke ndabara, na-arụ ọrụ mgbe niile)
+### Ụdị 1 — AgentBridge (ndabara, na-arụ ọrụ mgbe niile)
 
 **Isi mmalite:** Ndị njikwa AgentBridge (`src/mitm/handlers/base.ts`)
-**Usoro ọrụ:** Oku `intercept()` ọ bụla dị na `MitmHandlerBase` na-akpọ `hookBufferStart()` tupu iziga ya n'ihu, ma na-akpọ `hookBufferUpdate()` mgbe ọ gwụchara. Enweghị nhazi ọzọ achọrọ — ọ na-arụ ọrụ ozugbo AgentBridge malitere ịrụ ọrụ.
-**Ókè iru:** Ndị nnọchi anya IDE 9 ahaziri na AgentBridge
-**Ndetu:** Oghere `source` dị na `InterceptedRequest` = `"agent-bridge"`
+**Usoro ọrụ:** Oku `intercept()` ọ bụla dị na `MitmHandlerBase` na-akpọ `hookBufferStart()` tupu iziga ya n'ihu, ma na-akpọ `hookBufferUpdate()` mgbe ọ gwụchara. Achọghị nhazi ọzọ ọ bụla — ọ na-arụ ọrụ ozugbo AgentBridge malitere ịrụ ọrụ.
+**Oke iru:** Ndị nnọchi anya IDE 9 ahaziri na AgentBridge
+**Ndetu:** oghere `source` dị na `InterceptedRequest` = `"agent-bridge"`
 
 ### Ụdị 2 — Ndị nnabata ahaziri iche (ntụgharị DNS)
 
 **Isi mmalite:** Ndepụta ndị nnabata onye ọrụ kọwara (`inspector_custom_hosts` table)
-**Usoro ọrụ:** Ịtinye onye nnabata site na UI na-agbakwụnye `127.0.0.1 <host>` na `/etc/hosts` (ọ chọrọ sudo). Sava MITM AgentBridge dị ugbu a (port 443) na-emepụta asambodo SNI ozugbo maka onye nnabata ọhụrụ ahụ.
-**Ókè iru:** Ngwa ọ bụla na-eji onye nnabata agbakwunyere — ọ dịghị mgbanwe nhazi ngwa achọrọ
+**Usoro ọrụ:** Ịtinye onye nnabata site na UI na-agbakwunye `127.0.0.1 <host>` na `/etc/hosts` (ọ chọrọ sudo). Sava MITM AgentBridge dị ugbu a (ọdụ ụgbọ mmiri 443) na-emepụta asambodo SNI n'ike maka onye nnabata ọhụrụ ahụ.
+**Oke iru:** Ngwa ọ bụla na-eji onye nnabata agbakwunyere — achọghị mgbanwe nhazi ngwa
 **Ndetu:** `source` = `"custom-host"`
 
-Ọmụmaatụ ebe e ji ya eme ihe:
+Ọmụmaatụ ojiji:
 
 - Nyochaa `api.openai.com` site na skripti Python
-- Chọpụta ma dozie nsogbu dị na `my-internal-llm.company.com`
-- Jide okporoụzọ data sitere na ngwaọrụ mkpanaka ndị nọ n'otu netwọk ahụ (site na aghụghọ ARP — nke dị elu)
+- Chọta ma dozie nsogbu na `my-internal-llm.company.com`
+- Jide okporo ụzọ sitere na ngwaọrụ mkpanaka dị n'otu netwọkụ ahụ (site na aghụghọ ARP — nke dị elu)
 
-### Ụdị 3 — Onye na-ege HTTP_PROXY ntị (port 8080)
+### Ụdị 3 — Onye na-ege HTTP_PROXY ntị (ọdụ ụgbọ mmiri 8080)
 
 **Isi mmalite:** Ngwa ndị na-eji mgbanwe gburugburu `HTTP_PROXY`/`HTTPS_PROXY`
-**Usoro ọrụ:** Onye na-ege ntị nke abụọ na port 8080 (`src/mitm/inspector/httpProxyServer.ts`) nke na-arụ ọrụ dịka proxy HTTP/HTTPS doro anya nke ọkọlọtọ. Ọ na-anabata ọwara `CONNECT` (HTTPS) na arịrịọ HTTP kpọmkwem.
-**Ókè iru:** Ngwa ọ bụla na-asọpụrụ gburugburu `HTTP_PROXY` — enweghị mgbanwe DNS, enweghị sudo
+**Usoro ọrụ:** Onye na-ege ntị nke abụọ n'ọdụ ụgbọ mmiri 8080 (`src/mitm/inspector/httpProxyServer.ts`) nke na-arụ ọrụ dịka proxy HTTP/HTTPS doro anya nke ọkọlọtọ. Ọ na-anabata ọwara `CONNECT` (HTTPS) na arịrịọ HTTP kpọmkwem.
+**Oke iru:** Ngwa ọ bụla na-erube isi na gburugburu `HTTP_PROXY` — enweghị mgbanwe DNS, enweghị sudo
 **Ndetu:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Mmachi TLS:** A na-ejide ọwara HTTPS `CONNECT` dịka metadata naanị (onye nnabata, port, oge) — anaghị emeghe ezoro ezo nke ahụ TLS na ndabara.
+**Mmachi TLS:** HTTPS na-agafe n'ọwara `CONNECT` nkịtị: onye na-ege ntị na-ebufe byte ezoro ezo n'agbanweghị ha ma na-edekọ naanị metadata (onye nnabata, ọdụ ụgbọ mmiri, oge). Ọ naghị ewepụ izo ya ezo na HTTPS ma ọlị, ọ nweghịkwa ntọala na-agbanye iwepụ izo ya ezo maka ụdị a. Iji jide ahụ HTTPS, zipụ onye nnabata ahụ site na Ụdị 1 (AgentBridge), Ụdị 2 (Ndị nnabata ahaziri iche), ma ọ bụ Ụdị 5 (iwepụ izo ya ezo TPROXY).
 
-**Esemokwu port:** Ọ bụrụ na a na-eji port 8080 eme ihe, AgentBridge na-eweghachi 409 nwere njehie ahaziri ahazi. Gbanwee port ahụ site na mgbanwe gburugburu `INSPECTOR_HTTP_PROXY_PORT`.
+**Esemokwu ọdụ ụgbọ mmiri:** Ọ bụrụ na a na-eji ọdụ ụgbọ mmiri 8080, AgentBridge na-eweghachi 409 nwere njehie ahaziri n'ụdị doro anya. Gbanwee ọdụ ụgbọ mmiri site na mgbanwe gburugburu `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Ụdị 4 — Proxy zuru sistemụ (nke dị elu, a ga-ahọrọ ya n'onwe gị)
+### Ụdị 4 — Proxy n'usoro niile (nke dị elu, a ga-ahọrọ ịgbanye ya)
 
-**Isi mmalite:** Ntọala proxy nke OS (na-emetụta ngwa niile dị na kọmputa ahụ)
-**Usoro ọrụ:** Ọ na-eji API nke OS mee ka okporoụzọ HTTP/HTTPS niile gafere onye na-ege HTTP_PROXY ntị:
+**Isi mmalite:** Ntọala proxy nke sistemụ arụmọrụ (ọ na-emetụta ngwa niile dị na kọmputa ahụ)
+**Usoro ọrụ:** Ọ na-eji API nke sistemụ arụmọrụ tụgharịa okporo ụzọ HTTP/HTTPS niile ka ha gafee onye na-ege HTTP_PROXY ntị:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Ókè iru:** Ngwa ọ bụla dị na kọmputa ahụ nke na-asọpụrụ ntọala proxy sistemụ
+  **Oke iru:** Ngwa ọ bụla dị na kọmputa ahụ nke na-erube isi na ntọala proxy nke sistemụ
   **Ndetu:** `source` = `"system-proxy"`
 
 **Usoro nchekwa:**
 
-- Ngụ oge na-agbanyụọ ya na-akpaghị aka (ndabara bụ nkeji 30, a pụrụ ịhazi ya site na `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- A na-echekwa ọnọdụ proxy sistemụ gara aga na DB ma weghachite ya mgbe a kagburu mgbanwe ahụ
-- Dashboard na-egosi ọkwa "Na-eweghachi proxy sistemụ" ma ọ bụrụ na onye ọrụ pụọ na peeji ahụ mgbe ọ ka na-arụ ọrụ
-- UI na-egosi baajị `⚠ Nke dị elu` + igbe nkwenye doro anya
+- Ngụoge mgbanyụ akpaghị aka (ndabara bụ nkeji 30, enwere ike ịhazi ya site na `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- A na-echekwa ọnọdụ proxy sistemụ gara aga na DB ma weghachite ya mgbe a laghachiri azụ
+- Dashboard na-egosi ọkwa "Na-eweghachi proxy sistemụ" ma ọ bụrụ na onye ọrụ apụọ na peeji ahụ mgbe ọ ka na-arụ ọrụ
+- UI na-egosi baajị `⚠ Nke dị elu` + igbe nlele nkwenye doro anya
 
-### Ụdị 5 — Mmepe ezoro ezo transperentị TPROXY (Linux, root, a ga-ahọrọ ya n'onwe gị)
+### Ụdị 5 — Iwepụ izo ya ezo n'ụzọ transperent nke TPROXY (Linux, root, a ga-ahọrọ ịgbanye ya)
 
-**Isi mmalite:** TPROXY nke kernel + nhazi ụzọ dabere na iwu (`src/mitm/tproxy/`)
-**Usoro ọrụ:** Ọ na-etinye akara na njikọ TCP ọhụrụ na-apụ n'ime kọmputa gaa na port ebumnuche (ndabara `443`) na `mangle OUTPUT`; `ip rule` na-atụgharị ngwugwu ndị e nyere akara ka ebugara ha n'ime kọmputa ahụ, ebe ebumnuche `TPROXY` nke `mangle PREROUTING` na-enyefe ha n'aka onye na-ege ntị transperentị (**IP_TRANSPARENT**) (port ndabara `8443`). Onye na-ege ntị ahụ na-akwụsị TLS site na asambodo leaf nke CA na-agbanwe agbanwe na-enye **maka aha nnabata SNI ọ bụla mgbe achọrọ ya**, na-ejide mgbanwe data e meghere ezoro ezo ya, ma na-eziga arịrịọ ahụ n'ihu gaa na ebe izizi ya mgbe o zoro ya ezo ọzọ.
-**Ókè iru:** Ndị nnabata ebe njedebe **ọ bụla** nọ na port ebumnuche — enweghị aghụghọ `/etc/hosts`, enweghị gburugburu `HTTP_PROXY`, enweghị mgbanwe proxy zuru sistemụ. Usoro a na-egbochi achọghị mgbanwe nhazi ọ bụla, mana ọ ga-atụkwasịrịrị CA na-agbanwe agbanwe obi.
+**Isi mmalite:** TPROXY nke kernel + ntụgharị ụzọ dabere na iwu (`src/mitm/tproxy/`)
+**Usoro ọrụ:** Ọ na-etinye akara na njikọ TCP mpaghara ọhụrụ na-apụ apụ gaa n'ọdụ ụgbọ mmiri ebumnuche (ndabara `443`) n'ime `mangle OUTPUT`; `ip rule` na-atụgharị ngwugwu ndị e tinyere akara ka e nyefee ha n'ime sistemụ mpaghara, ebe ebumnuche `TPROXY` nke `mangle PREROUTING` na-enyefe ha n'aka onye na-ege ntị transperent (**IP_TRANSPARENT**) (ọdụ ụgbọ mmiri ndabara `8443`). Onye na-ege ntị na-akwụsị TLS site na asambodo leaf nke CA na-agbanwe agbanwe nyere **maka aha nnabata SNI ọ bụla mgbe achọrọ ya**, na-ejide mgbanwe data ewepụrala izo ya ezo, ma zipụ arịrịọ ahụ n'ihu gaa na ebe mbụ e bu n'obi mgbe e zoro ya ezo ọzọ.
+**Oke iru:** Ndị nnabata ebumnuche **ọ bụla** n'ọdụ ụgbọ mmiri ebumnuche — enweghị aghụghọ `/etc/hosts`, enweghị gburugburu `HTTP_PROXY`, enweghị mgbanwe proxy n'usoro niile. Usoro a na-egbochi achọghị mgbanwe nhazi ọ bụla, mana ọ ga-atụkwasịrịrị CA na-agbanwe agbanwe obi.
 **Ndetu:** `source` = `"tproxy"`
 
-**Ihe achọrọ:** Naanị Linux (**IP_TRANSPARENT** dị naanị na Linux), ikike **CAP_NET_ADMIN** (root), na mgbakwunye N-API nke sistemụ a ga-eji ngwá ọrụ C wuo (`npm run build:native:tproxy`). Mgbe ọ na-adịghị, a na-agbanyụọ nhọrọ ahụ na dashboard, tinyere tooltip "Mmepe ezoro ezo TPROXY chọrọ Linux + root + mgbakwunye nke sistemụ". A na-etinye ma na-akagbu iwu firewall n'ụzọ azụmahịa (ọdịda sistemụ anaghị ahapụ iwu `mangle` ọ bụla), a na-ehichapụkwa ha mgbe sistemụ malitegharịrị. Usoro mgbochi loop dabere na SO_MARK na-egbochi ntụgharị ezoro ezo nke proxy ahụ n'onwe ya iziga n'ihu ka a ghara ijide ya ọzọ.
+**Ihe ndị achọrọ:** Naanị Linux (**IP_TRANSPARENT** dị naanị na Linux), ikike **CAP_NET_ADMIN** (root), na mgbakwunye N-API nke sistemụ nke a ga-eji ngwaọrụ C wuo (`npm run build:native:tproxy`). Mgbe ha adịghị, a na-eme ka bọtịnụ ngbanwe dị na dashboard ghara ịrụ ọrụ, yana nkọwa ngwaọrụ "Iwepụ izo ya ezo TPROXY chọrọ Linux + root + mgbakwunye nke sistemụ". A na-etinye ma na-eweghachi iwu firewall dịka otu azụmahịa zuru oke (ọdịda usoro anaghị ahapụ iwu `mangle` n'azụ), a na-ekpochapụkwa ha mgbe sistemụ malitegharịrị. Usoro mgbochi loop dabere na SO_MARK na-egbochi ozi proxy ahụ zipụrụ n'ihu mgbe e zoro ya ezo ọzọ ka a ghara ijide ya ọzọ.
 
-Nke a bụ nnukwu sistemụ nta nke nwere ntuziaka onye ọrụ ya pụrụ iche — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị achịkọta ya n'ime `/docs`) maka usoro firewall zuru ezu, CA na-agbanwe agbanwe maka SNI ọ bụla + onye nrụnye trust-store, ụzọ ime kọmputa naanị, nkọwa mgbochi loop, na schema nhazi. `GET / POST / DELETE /api/tools/agent-bridge/tproxy` na-achịkwa nhọrọ ahụ (rịba ama: ụzọ ahụ dị n'okpuru prefix AgentBridge, ọ bụghị prefix Traffic Inspector).
+Nke a bụ nnukwu sistemụ nta nwere ntuziaka onye ọrụ nke ya — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị achịkọta ya n'ime `/docs`) maka usoro firewall zuru ezu, CA na-agbanwe agbanwe maka SNI ọ bụla + ihe nrụnye trust-store, ụzọ mpaghara naanị, nkọwa mgbochi loop, na schema nhazi. `GET / POST / DELETE /api/tools/agent-bridge/tproxy` na-achịkwa bọtịnụ ngbanwe ahụ (rịba ama: ụzọ ahụ dị n'okpuru prefix AgentBridge, ọ bụghị prefix Traffic Inspector).
 
 ### Ntụnyere ụdị njide
 
-| Usoro             | Nhazi                                 |          Sudo?          | Oke iru                          | Nkọwa                                                                                                                                   |
-| ----------------- | ------------------------------------- | :---------------------: | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Akpaka                                | Otu ugboro (cert+hosts) | ndị nnọchi anya IDE 9            | Agbanyere ya na ndabara                                                                                                                 |
-| 2. Custom Hosts   | Ntinye maka host ọ bụla               |    Ee (faịlụ hosts)     | Ngwa ọ bụla na-eji host ahụ      | Echekwara na DB                                                                                                                         |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`              |           Mba           | Ngwa ndị na-asọpụrụ env          | Port 8080, enweghị ịtọghe TLS na ndabara                                                                                                |
-| 4. System-wide    | Gbanye/gbanyụọ + kwado                |           Ee            | Ngwa niile dị na kọmputa ahụ     | Ọ ga-agbanyụ onwe ya n'ime nkeji 30                                                                                                     |
-| 5. TPROXY decrypt | Gbanye/gbanyụọ (Linux + native addon) |  Ee (root + ntinye CA)  | Host ọ bụla nọ na port ebumnuche | Na-atọghe host dị iche iche; agbanyụrụ ya na ndabara — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya n'ime `/docs`) |
+| Ọnọdụ             | Nhazi                                 |          Sudo?          | Ihe ọ na-eru                | Nkọwa                                                                                                                                      |
+| ----------------- | ------------------------------------- | :---------------------: | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge    | Akpaka                                | Otu ugboro (cert+hosts) | Agent IDE 9                 | Agbanyere na ndabara                                                                                                                       |
+| 2. Custom Hosts   | Ntinye maka host ọ bụla               |    Ee (faịlụ hosts)     | Ngwa ọ bụla na-eji host ahụ | Echekwara na DB                                                                                                                            |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`              |           Mba           | Ngwa ndị na-agbaso env      | Port 8080; a na-ebufe HTTPS site na ọwara CONNECT (naanị metadata, anaghị ewepụ izo ya ezo ma ọlị)                                         |
+| 4. System-wide    | Gbanye/gbanyụọ + kwenye               |           Ee            | Ngwa niile dị na kọmputa    | Ọ ga-agbanyụ onwe ya n'ime nkeji 30                                                                                                        |
+| 5. TPROXY decrypt | Gbanye/gbanyụọ (Linux + native addon) |  Ee (root + nrụnye CA)  | Host ọ bụla na port ezubere | Ọ na-ewepụ izo ya ezo na host ọ bụla; agbanyụrụ na ndabara — lee `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya na `/docs`) |
 
 ---
 
@@ -338,31 +338,31 @@ Bupụ site na `GET /api/tools/traffic-inspector/sessions/{id}/export.har` ma �
 
 ---
 
-## §6 Nche
+## §6 Nchebe
 
-Traffic Inspector na-egosi **okporo ụzọ HTTPS niile e jidere**, gụnyere nkụnye isi ikike na ahụ arịrịọ. Etinyela njikwa ndị a:
+Traffic Inspector na-egosi **okporo ụzọ HTTPS niile e jidere**, gụnyere nkụnyeisi ikike na ahụ arịrịọ. Etinyela usoro njikwa ndị a:
 
-| Njikwa                         | Nkọwa                                                                                                                                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                 | Ụzọ niile na ebe njedebe WebSocket bụ naanị maka loopback (a na-amanye nke a na `routeGuard.ts` tupu nyocha ikike)                                                                 |
-| **Ikpuchi ihe nzuzo**          | Ihe nyocha `maskSecret()` na-aga n'ahịrị na-ekpuchi nzere Bearer RFC 6750, igodo ndị nwere nganiihu onye na-eweta ọrụ na token opaque ndị toro ogologo tupu `TrafficBuffer.push()` |
-| **Oke nha ahụ**                | A na-ebipụ ahụ ndị karịrị `INSPECTOR_MAX_BODY_KB` (ndabara bụ 1024 KB) ma tinye ọkwa `"(ebipụrụ maka ịrụ ọrụ nke ọma)"`                                                            |
-| **Nhicha nkụnye isi**          | A na-atụgharị aha ka ha bụrụ mkpụrụedemede nta; a na-ewepụ nkụnye isi framing/hop-by-hop na proxy-auth; a na-ekpuchi kuki niile; a na-enyefe ụkpụrụ nzere n'aka `maskSecret()`     |
-| **CSP**                        | Amụma Nche Ọdịnaya siri ike na ibe Traffic Inspector iji gbochie XSS site n'ahụ nzaghachi etinyere                                                                                 |
-| **Enweghị nchekwa na ndabara** | `TrafficBuffer` dị na ebe nchekwa kọmputa, ọ ga-efukwa mgbe e bidogharịrị sava ahụ. A na-echekwa oge nnọkọ naanị mgbe e dekọrọ ha n'ụzọ doro anya                                  |
+| Usoro njikwa                              | Nkọwa                                                                                                                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                            | Ụzọ niile na ebe njedebe WebSocket bụ naanị maka loopback (a na-amanye nke a na `routeGuard.ts` tupu nkwenye ikike)                                                             |
+| **Ikpuchi ozi nzuzo**                     | Ihe nyocha `maskSecret()` nke na-arụ ọrụ n'usoro na-ezo nzere Bearer RFC 6750, igodo nwere nganiihu onye na-eweta, na token opaque ndị toro ogologo tupu `TrafficBuffer.push()` |
+| **Oke nha ahụ**                           | A na-ebipụ ahụ ndị karịrị `INSPECTOR_MAX_BODY_KB` (ndabara bụ 1024 KB), tinyekwa ọkwa `"(ebipụrụ maka ịrụ ọrụ nke ọma)"`                                                        |
+| **Ịsachasị nkụnyeisi**                    | A na-atụgharị aha ka ha bụrụ mkpụrụedemede nta; a na-ewepụ nkụnyeisi framing/hop-by-hop na proxy-auth; a na-ezo kuki kpamkpam; a na-enyefe ụkpụrụ nzere n'aka `maskSecret()`    |
+| **CSP**                                   | Amụma Nchebe Ọdịnaya siri ike dị na ibe Traffic Inspector iji gbochie XSS sitere n'ahụ nzaghachi etinyere n'ụzọ aghụghọ                                                         |
+| **Enweghị nchekwa na-adịgide na ndabara** | `TrafficBuffer` dị na ebe nchekwa kọmputa ma na-efu mgbe sava malitegharịrị. A na-echekwa nnọkọ naanị mgbe e dekọrọ ha n'ụzọ doro anya                                          |
 
-### Iwu Siri Ike etinyere
+### Iwu ndị siri ike etinyere
 
-| Iwu                               | Ntinye n'ọrụ                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | A na-ehicha nzaghachi njehie HTTP niile sitere n'ụzọ Traffic Inspector                |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` bụ LOCAL_ONLY + SPAWN_CAPABLE (iwu proxy nke sistemụ) |
+| Iwu                               | Etu e si etinye ya                                                                |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | A na-asachapụ nzaghachi njehie HTTP niile sitere n'ụzọ ndị Traffic Inspector      |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` bụ LOCAL_ONLY + SPAWN_CAPABLE (iwu proxy sistemụ) |
 
-### Oke ndị amaara
+### Mmachi ndị amaara
 
-- **Ọnọdụ proxy maka sistemụ dum** na-emetụta ngwa niile dị na igwe ahụ, gụnyere ndị ahịa VPN na SSO. Jiri ya mgbe niile tinyere ngụ oge nkwụsị-akpaghị aka. Ejila ya na igwe ọtụtụ mmadụ na-eji.
-- **HTTPS ọwara CONNECT**: Ọnọdụ 3 (HTTP_PROXY) na-ejide naanị metadata ọwara maka ebe HTTPS na-aga, belụsọ ma agbanyere njide TLS. Nke a bụ etu e siri hazie ya — njide doro anya na-enweghị ntụkwasị obi na asambodo AgentBridge ga-emebi nkwenye TLS maka ngwa ndị ahụ.
-- **Eriri edere kpọmkwem na ụfọdụ kọmpọnentị**: Ụfọdụ kọmpọnentị UI (F7/F8) nwere eriri ole na ole e dere kpọmkwem nke igodo i18n na-ekpuchibeghị. Edekọrọ ndị a dịka Oke Amaara na mkpesa oghere i18n; a ga-ebufe ha na ngafe na-esote. Eriri ndị o metụtara bụ akara ịchọ mma UI ndị anaghị achọ ntụgharị asụsụ maka ojiji na-arụ ọrụ.
+- **Ọnọdụ proxy sistemụ niile** na-emetụta ngwa niile dị na igwe ahụ, gụnyere ndị ahịa VPN na SSO. Jiri ya na ngụ oge nkwụsị akpaka mgbe niile. Ejila ya na igwe ọtụtụ mmadụ na-eji.
+- **HTTPS nke ọwara CONNECT**: Ọnọdụ 3 (HTTP_PROXY) na-ejide naanị metadata ọwara maka ebe HTTPS na-aga, ọ naghị ewepụkwa izo ya ezo ma ọlị. Nke a bụ atụmatụ e kpachapụrụ anya mee — iwepụ izo ya ezo ga-achọ ka onye ahịa ọ bụla tụkwasị asambodo MITM obi, ya mere onye na-ege ntị na-eme ka HTTPS nọgide bụrụ nke ezoro ezo site n'otu nsọtụ ruo na nke ọzọ. Jiri AgentBridge, Custom Hosts ma ọ bụ TPROXY decrypt mgbe ịchọrọ ahụ HTTPS.
+- **Eriri ederede edobere kpọmkwem n'ụfọdụ kọmponẹntị**: Ụfọdụ kọmponẹntị UI (F7/F8) nwere eriri ederede ole na ole edobere kpọmkwem nke igodo i18n na-ekpuchibeghị. Edekọrọ ihe ndị a dịka Mmachi Amaara na akụkọ oghere i18n; a ga-ebuga ha na usoro na-esote. Eriri ndị emetụtara bụ akara ịchọ mma UI ndị na-achọghị ntụgharị asụsụ maka ojiji arụmọrụ.
 
 ---
 
@@ -433,13 +433,13 @@ Mgbe buffer ruru `INSPECTOR_BUFFER_SIZE` (ndabara bụ 1000), ndenye ọhụrụ
 
 ### Njikwa arịrịọ
 
-| Usoro  | Ụzọ                         | Nkọwa                                                                                     |
-| ------ | --------------------------- | ----------------------------------------------------------------------------------------- |
-| GET    | `/requests`                 | Depụta arịrịọ (enwere ike iyo ha: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET    | `/requests/{id}`            | Nkọwa zuru ezu nke otu arịrịọ                                                             |
-| DELETE | `/requests`                 | Kpochapụ buffer dị na ebe nchekwa                                                         |
-| POST   | `/requests/{id}/replay`     | Site na router OmniRoute, megharịa otu arịrịọ ahụ                                         |
-| PUT    | `/requests/{id}/annotation` | Chekwaa ma ọ bụ melite ndetu dị n'arịrịọ                                                  |
+| Usoro  | Ụzọ                         | Nkọwa                                                                                      |
+| ------ | --------------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/requests`                 | Depụta arịrịọ (enwere ike inyocha: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Nkọwa nke otu arịrịọ                                                                       |
+| DELETE | `/requests`                 | Hichapụ buffer dị na ebe nchekwa                                                           |
+| POST   | `/requests/{id}/replay`     | Megharịa otu arịrịọ ahụ site na router OmniRoute                                           |
+| PUT    | `/requests/{id}/annotation` | Chekwaa ma ọ bụ melite ndetu dị n’arịrịọ                                                   |
 
 ### WebSocket
 
@@ -449,9 +449,9 @@ Mgbe buffer ruru `INSPECTOR_BUFFER_SIZE` (ndabara bụ 1000), ndenye ọhụrụ
 
 ### Mbupụ
 
-| Usoro | Ụzọ           | Nkọwa                                   |
-| ----- | ------------- | --------------------------------------- |
-| GET   | `/export.har` | Bupụ ndepụta a yọrọ ugbu a dịka HAR 1.2 |
+| Usoro | Ụzọ           | Nkọwa                                      |
+| ----- | ------------- | ------------------------------------------ |
+| GET   | `/export.har` | Bupụ ndepụta enyochara ugbu a dịka HAR 1.2 |
 
 ### Host ahaziri iche
 
@@ -460,36 +460,36 @@ Mgbe buffer ruru `INSPECTOR_BUFFER_SIZE` (ndabara bụ 1000), ndenye ọhụrụ
 | GET    | `/hosts`        | Depụta host ahaziri iche                          |
 | POST   | `/hosts`        | Tinye host (na-edezi `/etc/hosts` na-akpaghị aka) |
 | DELETE | `/hosts/{host}` | Wepụ host                                         |
-| PATCH  | `/hosts/{host}` | Gbanyụọ ma ọ bụ gbanye `enabled`                  |
+| PATCH  | `/hosts/{host}` | Gbanwee ọnọdụ `enabled`                           |
 
-### Ọnọdụ njide
+### Ụdị njide
 
-| Usoro | Ụzọ                           | Nkọwa                                                                    |
-| ----- | ----------------------------- | ------------------------------------------------------------------------ |
-| GET   | `/capture-modes`              | Ọnọdụ nke AgentBridge / custom-hosts / HTTP_PROXY / system-proxy         |
-| POST  | `/capture-modes/http-proxy`   | Malite/kwụsị listener HTTP_PROXY (`{action: "start"\|"stop"}`)           |
-| POST  | `/capture-modes/system-proxy` | Tinye/weghachite proxy nke sistemụ niile (`{action: "apply"\|"revert"}`) |
+| Usoro | Ụzọ                           | Nkọwa                                                                |
+| ----- | ----------------------------- | -------------------------------------------------------------------- |
+| GET   | `/capture-modes`              | Ọnọdụ nke ụdị AgentBridge / custom-hosts / HTTP_PROXY / system-proxy |
+| POST  | `/capture-modes/http-proxy`   | Malite/kwụsị listener HTTP_PROXY (`{action: "start"\|"stop"}`)       |
+| POST  | `/capture-modes/system-proxy` | Tinye/weghachite proxy n’ofe sistemụ (`{action: "apply"\|"revert"}`) |
 
-> **TPROXY decrypt** (ọnọdụ njide 5) na-eji ụzọ **dị iche** dị n'okpuru
+> **TPROXY decrypt** (ụdị njide 5) na-eji ụzọ **dị iche** dị n’okpuru
 > prefix AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ọ bụghị
-> n'okpuru `/api/tools/traffic-inspector/`. Lee
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya n'ime `/docs`).
+> n’okpuru `/api/tools/traffic-inspector/`. Lee
+> `docs/security/MITM-TPROXY-DECRYPT.md` (git; anaghị etinye ya n’ime `/docs` mgbe a na-achịkọta).
 
-### Session
+### Oge ndekọ
 
 | Usoro  | Ụzọ                         | Nkọwa                                                                     |
 | ------ | --------------------------- | ------------------------------------------------------------------------- |
 | POST   | `/sessions`                 | Malite ndekọ (`{name?: string}`)                                          |
 | PATCH  | `/sessions/{id}`            | Kwụsị ma ọ bụ nyegharịa aha (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Depụta session niile echekwara                                            |
-| GET    | `/sessions/{id}`            | Snapshot session (arịrịọ niile)                                           |
-| DELETE | `/sessions/{id}`            | Hichapụ session                                                           |
-| GET    | `/sessions/{id}/export.har` | Bupụ session dịka HAR 1.2                                                 |
+| GET    | `/sessions`                 | Depụta oge ndekọ niile echekwara                                          |
+| GET    | `/sessions/{id}`            | Snapshot oge ndekọ (arịrịọ niile)                                         |
+| DELETE | `/sessions/{id}`            | Hichapụ oge ndekọ                                                         |
+| GET    | `/sessions/{id}/export.har` | Bupụ oge ndekọ dịka HAR 1.2                                               |
 
-### Ingest ime (D4 fallback)
+### Ntinye data nke ime (D4 fallback)
 
-| Usoro | Ụzọ                | Nkọwa                                                                                                           |
-| ----- | ------------------ | --------------------------------------------------------------------------------------------------------------- |
-| POST  | `/internal/ingest` | Na-anabata arịrịọ ejidere sitere n'ụzọ passthrough `server.cjs`; chọrọ header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Usoro | Ụzọ                | Nkọwa                                                                                                             |
+| ----- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| POST  | `/internal/ingest` | Na-anabata arịrịọ ejidere site n’ụzọ passthrough nke `server.cjs`; chọrọ header `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
-Schema OpenAPI zuru ezu: `docs/openapi.yaml` → tag `Traffic Inspector`.
+Schema OpenAPI zuru ezu: `docs/openapi.yaml` → mkpado `Traffic Inspector`.

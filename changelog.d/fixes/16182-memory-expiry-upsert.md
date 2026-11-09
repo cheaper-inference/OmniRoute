@@ -1,1 +1,0 @@
-- **Memory expiration:** Serialize `Date` expiration values on UPSERT as ISO strings, matching inserts and preserving the existing record, owner, metadata and access telemetry. (#16182)

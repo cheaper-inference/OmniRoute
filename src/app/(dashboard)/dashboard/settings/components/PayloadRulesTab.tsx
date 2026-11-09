@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { Field } from "@omniroute/ui-kit/field";
+import { Badge, Card, Button, Textarea } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 const EMPTY_PAYLOAD_RULES_TEMPLATE = {
   default: [],
@@ -77,6 +80,9 @@ export default function PayloadRulesTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<StatusMessage | null>(null);
+  const editorId = useId();
+  const editorHintId = `${editorId}-hint`;
+  const editorErrorId = `${editorId}-error`;
 
   const parsedEditor = useMemo(() => {
     try {
@@ -168,104 +174,98 @@ export default function PayloadRulesTab() {
     }
   };
 
+  const ruleCards = [
+    ["payloadRuleDefaultTitle", "payloadRuleDefaultDesc"],
+    ["payloadRuleOverrideTitle", "payloadRuleOverrideDesc"],
+    ["payloadRuleFilterTitle", "payloadRuleFilterDesc"],
+    ["payloadRuleDefaultRawTitle", "payloadRuleDefaultRawDesc"],
+  ] as const;
+
   return (
-    <Card>
+    <Card title={t("payloadRulesTitle")} subtitle={t("payloadRulesDesc")} icon="data_object">
       <div className="flex flex-col gap-5">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              data_object
-            </span>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold">{t("payloadRulesTitle")}</h3>
-            <p className="text-sm text-text-muted mt-1">{t("payloadRulesDesc")}</p>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-          <div className="rounded-lg border border-border bg-bg-secondary/40 p-3">
-            <p className="text-sm font-medium">{t("payloadRuleDefaultTitle")}</p>
-            <p className="text-xs text-text-muted mt-1">{t("payloadRuleDefaultDesc")}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-bg-secondary/40 p-3">
-            <p className="text-sm font-medium">{t("payloadRuleOverrideTitle")}</p>
-            <p className="text-xs text-text-muted mt-1">{t("payloadRuleOverrideDesc")}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-bg-secondary/40 p-3">
-            <p className="text-sm font-medium">{t("payloadRuleFilterTitle")}</p>
-            <p className="text-xs text-text-muted mt-1">{t("payloadRuleFilterDesc")}</p>
-          </div>
-          <div className="rounded-lg border border-border bg-bg-secondary/40 p-3">
-            <p className="text-sm font-medium">{t("payloadRuleDefaultRawTitle")}</p>
-            <p className="text-xs text-text-muted mt-1">{t("payloadRuleDefaultRawDesc")}</p>
-          </div>
+          {ruleCards.map(([titleKey, descKey]) => (
+            <div key={titleKey} className="rounded-lg border border-border bg-bg-subtle p-3">
+              <p className="text-sm font-medium">{t(titleKey)}</p>
+              <p className="text-xs text-text-muted mt-1">{t(descKey)}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs text-text-muted">
-          <span className="rounded-full border border-border px-2.5 py-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge>
             {t("payloadRuleDefaultTitle")}: {summary.default}
-          </span>
-          <span className="rounded-full border border-border px-2.5 py-1">
+          </Badge>
+          <Badge>
             {t("payloadRuleOverrideTitle")}: {summary.override}
-          </span>
-          <span className="rounded-full border border-border px-2.5 py-1">
+          </Badge>
+          <Badge>
             {t("payloadRuleFilterTitle")}: {summary.filter}
-          </span>
-          <span className="rounded-full border border-border px-2.5 py-1">
+          </Badge>
+          <Badge>
             {t("payloadRuleDefaultRawTitle")}: {summary.defaultRaw}
-          </span>
+          </Badge>
         </div>
 
         {message && (
-          <div
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-              message.type === "success"
-                ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                : message.type === "info"
-                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                  : "bg-red-500/10 text-red-600 dark:text-red-400"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">
-              {message.type === "success"
-                ? "check_circle"
-                : message.type === "info"
-                  ? "info"
-                  : "error"}
-            </span>
-            {message.text}
-          </div>
+          <Alert
+            variant={
+              message.type === "success" ? "success" : message.type === "info" ? "info" : "critical"
+            }
+            icon={
+              <Icon
+                name={
+                  message.type === "success"
+                    ? "check_circle"
+                    : message.type === "info"
+                      ? "info"
+                      : "error"
+                }
+                size={16}
+              />
+            }
+            description={message.text}
+            dismissLabel={tCommon("close")}
+            onDismiss={() => setMessage(null)}
+          />
         )}
 
-        <div className="rounded-xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-secondary/30">
-            <div>
-              <p className="text-sm font-medium">{t("payloadEditorTitle")}</p>
-              <p className="text-xs text-text-muted">{t("payloadEditorDesc")}</p>
-            </div>
-            <div className="text-xs text-text-muted">
+        <Field
+          htmlFor={editorId}
+          label={t("payloadEditorTitle")}
+          hint={<span id={editorHintId}>{t("payloadEditorDesc")}</span>}
+          error={
+            parsedEditor.error ? (
+              <span id={editorErrorId} role="alert">
+                {t("payloadJsonParseError", { error: parsedEditor.error })}
+              </span>
+            ) : undefined
+          }
+        >
+          <div className="rounded-xl border border-border overflow-hidden">
+            <div
+              className="flex justify-end px-4 py-2 border-b border-border bg-bg-subtle text-xs text-text-muted"
+              role="status"
+            >
               {loading ? tCommon("loading") : t("payloadEditorReady")}
             </div>
+            <Textarea
+              id={editorId}
+              aria-describedby={parsedEditor.error ? editorErrorId : editorHintId}
+              value={editorValue}
+              onChange={(event) => {
+                setEditorValue(event.target.value);
+                if (message?.type === "error") setMessage(null);
+              }}
+              error={Boolean(parsedEditor.error)}
+              spellCheck={false}
+              rows={22}
+              className="w-full rounded-none border-0 px-4 py-4 text-sm font-mono leading-6 resize-y min-h-[420px]"
+              disabled={loading || saving}
+            />
           </div>
-          <textarea
-            value={editorValue}
-            onChange={(event) => {
-              setEditorValue(event.target.value);
-              if (message?.type === "error") setMessage(null);
-            }}
-            spellCheck={false}
-            rows={22}
-            className="w-full px-4 py-4 bg-transparent text-sm font-mono leading-6 text-text-main resize-y min-h-[420px] focus:outline-none"
-            disabled={loading || saving}
-          />
-        </div>
-
-        {parsedEditor.error && (
-          <p className="text-sm text-red-500">
-            {t("payloadJsonParseError", { error: parsedEditor.error })}
-          </p>
-        )}
+        </Field>
 
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={loadConfig} disabled={loading || saving}>

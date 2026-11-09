@@ -25,38 +25,39 @@ omniroute launch --profile glm52  # Claude Code använder glm/glm-5.2 via OmniRo
 
 ---
 
-## Så ansluter Claude Code till en gateway
+## Hur Claude Code ansluter till en gateway
 
-Claude Code kommunicerar via **Anthropic Messages API** och riktas mot en anpassad
-slutpunkt med miljövariabler (det har ingen `--base-url`-flagga):
+Claude Code talar om**Anthropic Meddelanden API** och pekar på en anpassad slutpunkt med miljövariabler (den har ingen `--base-url` flagga):
 
-| Variabel                                     | Syfte                                                                                         |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gatewayens rot-URL (Claude Code lägger till `/v1/messages`). **Inget `/v1`-suffix.**          |
-| `ANTHROPIC_AUTH_TOKEN`                       | Skickas som `Authorization: Bearer …` — använd din åtkomsttoken/API-nyckel för OmniRoute      |
-| `ANTHROPIC_API_KEY`                          | Alternativ: skickas som `x-api-key`. Om båda anges har `ANTHROPIC_AUTH_TOKEN` företräde       |
-| `ANTHROPIC_MODEL`                            | Framtvinga en specifik modell (åsidosätter standardvalet i `/model`)                          |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → den inbyggda `/model`-väljaren listar `claude*`/`anthropic*`-modeller från `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Begränsa antalet utdata-token per svar (t.ex. `65536`)                                        |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokengräns för automatisk komprimering                                                        |
+| Variabel                                     | Ändamål                                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gatewayrot URL (Claude -koden lägger till `/v1/messages`).** Inget `/v1` suffix.**             |
+| `ANTHROPIC_AUTH_TOKEN`                       | Skickat som `Authorization: Bearer …` — använd din OmniRoute -åtkomsttoken / API nyckel        |
+| `ANTHROPIC_API_KEY`                          | Alternativ: skickas som `x-api-key`. Om båda är inställda vinner `ANTHROPIC_AUTH_TOKEN`        |
+| `ANTHROPIC_MODEL`                            | Tvinga en specifik modell (åsidosätter `/model` -väljarens standard)                           |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → den inbyggda `/model` väljaren listar `claude*`/`anthropic*` -modeller från `/v1/models` |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cap output tokens per svar (t.ex. `65536`)                                                     |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokentröskel för automatisk komprimering                                                       |
 
-> Miljövariabler läses **en gång vid uppstart** — starta om Claude Code efter att du har ändrat dem.
+> Env vars läses** en gång vid start** — starta om Claude koden efter att ha ändrat dem.
 
-`omniroute launch` ställer in allt detta åt dig: kommandot hämtar bas-URL:en och token
-från den aktiva kontexten (så `omniroute connect <vps>` följt av `omniroute launch`
-fungerar direkt), hälsokontrollerar servern och kör `claude` via exec.
+För en referens som roterar istället för en fast sträng, ställ in `apiKeyHelper` i `~/.claude/settings.json` till ett kommando som skriver ut den aktuella referensen till stdout. Claude Code cachar sin utdata i fem minuter som standard (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` åsidosätter det) och skickar värdet i både `Authorization: Bearer` och `x-api-key`. Skriptet måste skriva ut autentiseringsuppgifterna och inget annat — en banner bredvid den misslyckas med hjälparen på v2.1.227 +.
+
+Så här fungerar Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` skriver ut en kortlivad Entra-åtkomsttoken som OmniRoute verifierar istället för en API nyckel. Se [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` ställer in alla dessa för dig: den löser basen URL + token från det aktiva sammanhanget (så `omniroute connect <vps>` då fungerar `omniroute launch` bara), hälsokontrollerar servern och execs `claude`.
 
 ---
 
-## Identifieringsalias — visa modeller som inte är Claude-modeller i `/model`-väljaren
+## Discovery-aliaser — visa icke-Claude-modeller i `/model`-väljaren
 
-Claude Codes identifiering av gatewaymodeller listar endast id:n som börjar med `claude`
-eller `anthropic`, så med `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` visar den inbyggda
-`/model`-väljaren normalt **endast** OmniRoutes Claude-/Anthropic-modeller — en
-`kimi/kimi-k2.6` eller `glm/glm-5.2` visas aldrig, trots att dirigeringen fungerar korrekt.
+Claude Codes modellupptäckt via gateway listar endast id:n som börjar med `claude`
+eller `anthropic`, så med `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` visar den
+inbyggda `/model`-väljaren normalt **endast** OmniRoutes Claude/Anthropic-modeller — en
+`kimi/kimi-k2.6` eller `glm/glm-5.2` visas aldrig, trots att den dirigeras utan problem.
 
-OmniRoute kan spegla valfri aktiverad modell (och kombination) under ett `claude/…`-id så att den
-passerar filtret och visas i väljaren:
+OmniRoute kan spegla valfri aktiverad modell (och combo) under ett `claude/…`-id så att
+den passerar det filtret och dyker upp i väljaren:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,39 +65,47 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-När du väljer en av dessa i Claude Code tar OmniRoute bort omslutningen `claude/`
-och återställer det verkliga id:t före dirigeringen — ett äkta `claude/<real-claude-model>`-id
+När du väljer ett av dessa i Claude Code tar OmniRoute bort `claude/`-omslaget och
+återställer det verkliga id:t innan dirigering — ett äkta `claude/<real-claude-model>`-id
 (den faktiska Claude OAuth-leverantören) lämnas alltid orört.
 
-**Detta är avstängt som standard** och styrs av en grind i tre nivåer (den mest specifika
-har företräde), så en vanlig OmniRoute-instans dubblerar aldrig sin katalog för klienter som inte
-använder Claude Code:
+Som standard speglas endast bas-id:n. Med den frivilliga funktionsflaggan
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` aktiverad speglas reasoning-effort-varianter som
+katalogen redan listar (t.ex. `codex/gpt-6-sol-high`) som vilket annat id som helst, så att
+Claude Code kan välja en explicit ansträngningsnivå, och inbyggda `auto/*`-id:n som
+anropsvägen inte kan materialisera speglas inte. Om ansträngningsvarianter listas
+överhuvudtaget styrs fortfarande av `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — spegeln
+lägger aldrig till en variant som baskatalogen saknar.
 
-| Nivå       | Var                                                                                 |
-| ---------- | ----------------------------------------------------------------------------------- |
-| Modell     | Leverantörens detaljsida → reglaget "Expose in Claude Code" per modell              |
-| Leverantör | Leverantörens detaljsida → reglage på leverantörsnivå (omfattar alla dess modeller) |
-| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (avstängt som standard)    |
+**Detta är avstängt som standard** och styrs av en trenivågrind (mest specifik vinner), så
+att en vanlig OmniRoute aldrig fördubblar sin katalog för klienter som inte använder
+Claude Code:
 
-Miljövariabeln `EXPOSE_CC_DISCOVERY_ALIASES` framtvingar aktivering på global nivå
-och har företräde framför åsidosättningen i kontrollpanelen (skärmen Feature Flags visar
-meddelandet "active via environment variable" när så är fallet). Reglagen per leverantör och
-per modell finjusterar därefter beteendet — exempelvis exponerar globalt avstängt + aktiverat för Kimi-leverantören
-endast Kimis modeller.
+| Nivå       | Var                                                                               |
+| ---------- | --------------------------------------------------------------------------------- |
+| Modell     | Leverantörens detaljsida → växel "Expose in Claude Code" per modell               |
+| Leverantör | Leverantörens detaljsida → växel på leverantörsnivå (omfattar alla dess modeller) |
+| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (av som standard)        |
 
-> ⚠️ **Skillnad i kontextfönster för modeller som inte är Claude-modeller.** Claude Code förutsätter ett kontextfönster
-> på 200K för alla id:n som det inte känner igen (det kan inte läsa det verkliga fönstret från
-> `/v1/models`). För en modell med ett större fönster (t.ex. Kimi K2:s 256K) anger du
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` till ett värde under modellens verkliga fönster så att
-> automatisk komprimering inte aktiveras för tidigt. De genererade profilerna ovan gör redan
-> detta per modell.
+Miljövariabeln `EXPOSE_CC_DISCOVERY_ALIASES` tvingar på den globala nivån och har
+företräde framför åsidosättandet i instrumentpanelen (skärmen Feature Flags visar då en
+anteckning om "active via environment variable"). Växlar per leverantör och per modell
+förfinar utifrån det — t.ex. globalt av + Kimi-leverantör på exponerar endast Kimis
+modeller.
+
+> ⚠️ **Felmatchat kontextfönster för icke-Claude-modeller.** Claude Code antar ett
+> kontextfönster på 200K för alla id:n den inte känner igen (den kan inte läsa en
+> verklig fönsterstorlek från `/v1/models`). För en modell med ett större fönster (t.ex.
+> Kimi K2:s 256K), ställ in `CLAUDE_CODE_AUTO_COMPACT_WINDOW` på ett värde under modellens
+> verkliga fönsterstorlek så att automatisk kompaktering inte utlöses i förtid. De
+> genererade profilerna ovan gör redan detta per modell.
 
 ---
 
 ## Introduktionsblock på instrumentpanelen
 
-Claude-verktygskortet (**Instrumentpanel → CLI Code**) visar det exakta `settings.json`-fragmentet
-för den här instansen, bredvid informationsknappen för identifieringsalias, med en kopieringsknapp:
+Claude-verktygskortet (**Dashboard → CLI Code**) visar det exakta `settings.json`-fragmentet
+för den här instansen, bredvid informationsknappen för identifieringsaliaset, med en kopieringsknapp:
 
 ```jsonc
 {
@@ -108,19 +117,32 @@ för den här instansen, bredvid informationsknappen för identifieringsalias, m
 }
 ```
 
-Bas-URL:en är den som kortet har fastställt (inklusive en anpassad åsidosättning som du har angett)
-och är redan normaliserad — inget `/v1`-suffix och inget avslutande snedstreck. **Nyckeln visas aldrig**:
-blocket innehåller en platshållare, så en skärmbild eller ett inklistrat kodavsnitt kan inte läcka
-någon nyckel. Ersätt platshållaren med din nyckel.
+Bas-URL:en är den som kortet har fastställt (inklusive en anpassad åsidosättning som du har angett) och är redan
+normaliserad — inget `/v1`-suffix och inget avslutande snedstreck. **Nyckeln visas aldrig**: blocket innehåller en
+platshållare, så en skärmbild eller ett inklistrat kodavsnitt kan inte läcka någon nyckel. Ersätt platshållaren med din nyckel.
 
 Lägg till `CLAUDE_CODE_AUTO_COMPACT_WINDOW` under samma `env`-block för alla modeller vars faktiska
-kontextfönster inte är 200K — Claude Code förutsätter 200K för varje id som det inte känner igen, så
-automatisk komprimering utlöses annars vid fel tidpunkt (se varningen i föregående avsnitt).
-Kodavsnittsbyggaren accepterar även det värdet, så en anropare som känner till målmodellens
-fönsterstorlek kan generera det direkt.
+kontextfönster inte är 200K — Claude Code förutsätter 200K för varje id som det inte känner igen, vilket innebär att
+automatisk komprimering annars utlöses vid fel tidpunkt (se varningen i föregående avsnitt).
+Kodavsnittsbyggaren accepterar även detta värde, så en anropare som känner till målmodellens kontextfönster
+kan generera det direkt.
 
 Källa: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ren
-byggare, enhetstestad), renderad av `ClaudeGatewayOnboardingBlock`.
+byggfunktion, enhetstestad) som renderas av `ClaudeGatewayOnboardingBlock`.
+
+### Lås till ett konto (valfritt)
+
+För att skicka varje Claude Code-begäran via ett specifikt leverantörskonto lägger du till
+`x-omniroute-connection`-headern via `ANTHROPIC_CUSTOM_HEADERS` i samma `env`-block:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopiera id:t från `xxxxxxxx…`-brickan på anslutningsraden på leverantörssidan. Låsningen gäller endast
+id:n för enskilda modeller (`provider/model`), inte kombinationer. Se
+[Kontolåsning per begäran](../reference/API_REFERENCE.md#account-pinning-per-request) för det
+exakta reservbeteendet.
 
 ---
 

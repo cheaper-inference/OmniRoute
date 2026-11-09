@@ -58,6 +58,8 @@ const {
 // Import DB helpers AFTER harness creation so they share the same DB instance
 // (DATA_DIR is set by the harness before any import triggers DB init).
 const { getHandoff } = await import("../../../src/lib/db/contextHandoffs.ts");
+const { scopeHandoffSessionId } =
+  await import("../../../open-sse/services/combo/handoffSessionScope.ts");
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -69,7 +71,8 @@ const CODEX_COMBO_NAME = "m-relay-codex-quota";
 // routing one (the assertion below does not depend on the name).
 const CONTROL_COMBO_NAME = "m-relay-openai-control";
 const SESSION_HEADER_VALUE = "relay-codex-quota-001";
-const SESSION_ID = `ext:${SESSION_HEADER_VALUE}`;
+// Rows are stored per caller; these requests carry no API key.
+const SESSION_ID = scopeHandoffSessionId(`ext:${SESSION_HEADER_VALUE}`, null)!;
 
 // Codex endpoint URLs (must match codexQuotaFetcher.ts and the executor config).
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";

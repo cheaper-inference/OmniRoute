@@ -1,13 +1,13 @@
 ---
 title: "Embedded Services"
-description: "Reference for 9Router, CLIProxyAPI, Mux, Bifrost, open-wa, and LLMLingua"
+description: "Reference for 9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, and sing-box"
 ---
 
 # Embedded Services
 
 > **Version:** v3.8.44
-> **Last updated:** 2026-09-16
-> **Audience:** Engineers adding, maintaining, or debugging embedded services (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Last updated:** 2026-10-28
+> **Audience:** Engineers adding, maintaining, or debugging embedded services (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Embedded services are locally-installed process sidecar tools that OmniRoute installs, supervises, and
 exposes as first-class routing targets. Unlike external providers (which are reached over the internet
@@ -32,19 +32,20 @@ via API keys), embedded services run on the same machine as OmniRoute and commun
 
 ### Why embedded services?
 
-Seven services are embedded:
+Eight services are embedded:
 
-| Service         | npm package                        | Default port | Purpose                                                                                                                                                                                |
-| --------------- | ---------------------------------- | :----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                          |    20130     | AI router that OmniRoute can use as a sub-provider. Models exposed as `9router/{sub}/{model}`                                                                                          |
-| **CLIProxyAPI** | GitHub release binary (`cliproxy`) |     8317     | Local proxy adapter for Anthropic CLI auth flows. Provides fallback routing when OAuth tokens expire                                                                                   |
-| **Mux**         | `mux` (headless `mux server`)      |     8322     | Local agent-orchestration daemon (coder/mux). Lifecycle-managed only — not a routing target (no LLM proxying).                                                                         |
-| **Bifrost**     | `@maximhq/bifrost`                 |     8080     | Go AI-gateway relay backend. When running, auto-selected by the relay route (`/v1/relay/`)                                                                                             |
-| **Dario**       | `@askalf/dario`                    |     3456     | Claude-subscription proxy — alternative/failover to CLIProxyAPI for Claude-Code-shaped traffic; the injected key becomes `DARIO_ADMIN_TOKEN` gating its `/admin/*` OAuth control plane |
-| **open-wa**     | `@open-wa/wa-automate`             |     8323     | WhatsApp Web automation (headless Chromium via Puppeteer). Lifecycle-managed only — not a routing target.                                                                              |
+| Service         | npm package                        | Default port | Purpose                                                                                                                                                                                                                                                                                                                          |
+| --------------- | ---------------------------------- | :----------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                          |    20130     | AI router that OmniRoute can use as a sub-provider. Models exposed as `9router/{sub}/{model}`                                                                                                                                                                                                                                    |
+| **CLIProxyAPI** | GitHub release binary (`cliproxy`) |     8317     | Local proxy adapter for Anthropic CLI auth flows. Provides fallback routing when OAuth tokens expire                                                                                                                                                                                                                             |
+| **Mux**         | `mux` (headless `mux server`)      |     8322     | Local agent-orchestration daemon (coder/mux). Lifecycle-managed only — not a routing target (no LLM proxying).                                                                                                                                                                                                                   |
+| **Bifrost**     | `@maximhq/bifrost`                 |     8080     | Go AI-gateway relay backend. When running, auto-selected by the relay route (`/v1/relay/`)                                                                                                                                                                                                                                       |
+| **Dario**       | `@askalf/dario`                    |     3456     | Claude-subscription proxy — alternative/failover to CLIProxyAPI for Claude-Code-shaped traffic; the injected key becomes `DARIO_ADMIN_TOKEN` gating its `/admin/*` OAuth control plane                                                                                                                                           |
+| **open-wa**     | `@open-wa/wa-automate`             |     8323     | WhatsApp Web automation (headless Chromium via Puppeteer). Lifecycle-managed only — not a routing target.                                                                                                                                                                                                                        |
 | **LLMLingua**   | `@atjsh/llmlingua-2`               |    20135     | Prompt-compression sidecar — real LLMLingua-2 ONNX model (JS/TS port of Microsoft's algorithm). `open-sse/services/compression/engines/llmlingua/index.ts` dispatches `/compress` over HTTP to it, falling back to the in-process worker-thread backend when the sidecar is down. Lifecycle-managed only — not a routing target. |
+| **sing-box**    | GitHub release binary (`singbox`)  |    20140     | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`). Installer downloads the pinned, checksum-verified release. Lifecycle-managed only — not a routing target (no LLM proxying)                                                                                                 |
 
-All seven follow the same supervisory model:
+All eight follow the same supervisory model:
 
 - OmniRoute installs them under `DATA_DIR/services/{name}/` (isolated from OmniRoute's own `package.json`)
 - OmniRoute spawns and monitors them as child processes
@@ -154,7 +155,7 @@ All seven follow the same supervisory model:
 | `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall for CLIProxyAPI     |
 | `src/lib/services/installers/mux.ts`        | npm install/update/uninstall for Mux             |
 | `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall for open-wa         |
-| `src/lib/services/installers/llmlingua.ts`   | npm install/update/uninstall for LLMLingua       |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall for LLMLingua       |
 | `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` helper                   |
 | `src/app/api/services/[name]/logs/route.ts` | Shared SSE logs endpoint                         |
 | `open-sse/executors/ninerouter.ts`          | Provider executor (Layer 4)                      |
@@ -574,7 +575,38 @@ response) falls back to the in-process worker-thread backend (`./worker.ts`).
 
 ---
 
-### 4.8 Reverse proxy (9Router dashboard embed)
+### 4.8 sing-box endpoints (8 routes)
+
+sing-box has the same endpoint shape as Mux — no `rotate-key` route, no API key
+injection (`needsApiKey: false` in `bootstrap.ts`). It is lifecycle-managed only:
+never a routing/LLM provider. `install()` downloads the official GitHub release
+binary (`SagerNet/sing-box`) for the pinned version (`SINGBOX_PINNED_VERSION` in
+`src/lib/services/installers/singbox.ts`) and verifies its SHA256 against a
+checksum baked into the same file before ever writing it to disk — any other
+requested version is rejected.
+
+| Method | Path                                         | Description                                               |
+| ------ | -------------------------------------------- | --------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Download + verify the pinned sing-box release             |
+| `POST` | `/api/services/singbox/start`                | Start sing-box (`sing-box run -c config.json`)            |
+| `POST` | `/api/services/singbox/stop`                 | Stop sing-box                                             |
+| `POST` | `/api/services/singbox/restart`              | Restart sing-box                                          |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall the pinned release                    |
+| `GET`  | `/api/services/singbox/status`               | Live + DB status                                          |
+| `POST` | `/api/services/singbox/auto-start`           | Toggle auto-start                                         |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Toggle auto-restart for an adopted (pre-existing) process |
+| `GET`  | `/api/services/singbox/logs`                 | SSE log tail (via shared `[name]/logs` dynamic route)     |
+
+**TPROXY wiring:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) writes
+`config.json` and starts the supervisor before `applyTproxy()` installs the
+TPROXY firewall rules. If the supervisor is missing or fails to reach `running`,
+it now logs at error level (rather than silently swallowing the failure) so an
+operator can tell the TPROXY rules were applied without a working listener
+behind them.
+
+---
+
+### 4.9 Reverse proxy (9Router dashboard embed)
 
 The dashboard embeds the 9Router web UI inside an iframe via an internal reverse
 proxy at:

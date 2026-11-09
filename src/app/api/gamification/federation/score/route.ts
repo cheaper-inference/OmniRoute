@@ -34,7 +34,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON body" },
+      { status: 400, headers: CORS_HEADERS }
+    );
+  }
   const schema = z.object({
     apiKeyId: z.string(),
     score: z.number(),

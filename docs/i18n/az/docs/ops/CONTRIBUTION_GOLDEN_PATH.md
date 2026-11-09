@@ -4,50 +4,57 @@
 
 ---
 
-Bu təlimatdan pull request üçün ən kiçik etibarlı inkişaf dövrəsini seçmək məqsədilə istifadə edin. Bu sənəd
-aşağıda keçid verilmiş sahəyə xas arxitektura və təhlükəsizlik sənədlərini əvəz etmir; o, hər bir ümumi
-dəyişiklik növünü onun müqavilələri, məqsədyönlü yoxlamaları və CI əhatəsi ilə əlaqələndirir.
+Bu təlimatdan pull request üçün ən kiçik etibarlı inkişaf dövrünü seçmək məqsədilə istifadə edin. O,
+aşağıda keçidləri verilmiş sahəyə xas arxitektura və təhlükəsizlik sənədlərini əvəz etmir; hər bir
+ümumi dəyişiklik növünü onun müqavilələri, fokuslanmış yoxlamaları və CI əhatəsi ilə əlaqələndirir.
 
 ## Hər dəyişikliyin izlədiyi yol
 
-1. **Redaktə etməzdən əvvəl baza qolunu seçin.** Ən yüksək aktiv `release/v*` qolunu tapın və onun
-   son nöqtəsindən yeni qol yaradın. `main` deyil, həmin qolu hədəfləyin. Reliz dondurulması aktivdirsə, dondurulmuş
-   qolu hədəfləməyin; [Qollanma və Reliz Modeli](BRANCHING_MODEL.md) sənədində təsvir edilən
-   növbəti aktiv dövrədən istifadə edin.
-2. **Müqavilələri müəyyənləşdirin.** Dəyişikliyin təsir etdiyi hər bir kataloqu, sxemi, yaradılmış artefaktı, ictimai API-ni və ya istifadəçi
-   interfeysini müəyyənləşdirin. Aşağıdakı cədvəl minimum başlanğıc dəstini göstərir.
-3. **Məqsədyönlü testləri yazın və ya yeniləyin.** `src/`, `open-sse/`, `electron/` və ya
-   `bin/` daxilindəki istehsal dəyişiklikləri eyni PR-da avtomatlaşdırılmış test tələb edir. Davranışı sübut edən ən kiçik
-   test fayllarını, sonra isə sadalanmış məqsədyönlü yoxlamaları işə salın.
-4. **Geniş matrisi CI-a həvalə edin.** Tam vahid test seqmentləri, Vitest, əhatə ratçeti və
-   istehsal yığımı PR-da işə salınır. Geniş test dəstini lokal olaraq yalnız məqsədyönlü nasazlıq
-   daha geniş təsirə işarə etdikdə və ya dəyişiklik bir neçə alt sistemi əhatə etdikdə işə salın.
-5. **İcmaldan əvvəl uzlaşdırın.** Aktiv baza qolunu əldə edin, onun yeni commit-lərini və ona nəzərən öz fərqinizi
-   yoxlayın, sonra töhfəçi iş axınına uyğun olaraq bazanı rebase və ya merge edin. Yaradılmış fayl
-   və kataloq konfliktlərini onların mənbəyində həll edin, onları yenidən yaradın, məqsədyönlü dövrəni təkrar işə salın və
-   PR-ın hələ də aktiv reliz qolunu hədəflədiyini təsdiqləyin.
-6. **Sübutları qeyd edin.** PR şablonunda işə salınmış komandaları, əlavə edilmiş və ya dəyişdirilmiş hər bir test faylını,
-   miqrasiyaları və ya funksiya bayraqlarını, həmçinin hələ gözləmədə olan yalnız CI üçün yoxlamaları sadalayın.
+1. **Redaktədən əvvəl baza budağını seçin.** Ən yuxarı aktiv `release/v*` budağını tapın və onun
+   son nöqtəsindən yeni budaq yaradın. `main` deyil, həmin budağı hədəfləyin. Buraxılış dondurulması
+   aktivdirsə, dondurulmuş budağı hədəfləməyin; [Budaqlanma və Buraxılış Modeli](BRANCHING_MODEL.md)
+   sənədində təsvir edilən növbəti aktiv dövrdən istifadə edin.
+2. **Müqavilələri adlandırın.** Dəyişikliyin təsir etdiyi hər bir kataloqu, sxemi, yaradılmış
+   artefaktı, ictimai API-ni və ya istifadəçi interfeysini müəyyənləşdirin. Aşağıdakı cədvəl minimum
+   başlanğıc dəstini göstərir.
+3. **Fokuslanmış testlər yazın və ya yeniləyin.** `src/`, `open-sse/`, `electron/` və ya
+   `bin/` daxilindəki istehsal dəyişiklikləri eyni PR daxilində avtomatlaşdırılmış test tələb edir.
+   Davranışı təsdiqləyən ən kiçik test fayllarını, sonra isə sadalanmış fokuslanmış yoxlamaları
+   işə salın.
+4. **Geniş matrisi CI-a həvalə edin.** Tam vahid test fraqmentləri, Vitest, əhatə səviyyəsi həddi
+   və istehsal yığımı PR üzərində işə salınır. Geniş test dəstini lokal olaraq yalnız fokuslanmış
+   uğursuzluq daha geniş təsirə işarə etdikdə və ya dəyişiklik bir neçə altsistemi əhatə etdikdə
+   işə salın.
+5. **Baxışdan əvvəl uyğunlaşdırın.** Aktiv baza budağını əldə edin, onun yeni commit-lərini və ona
+   nəzərən öz fərqinizi yoxlayın, sonra töhfəçi iş axınına uyğun olaraq baza budağını rebase və ya
+   merge edin. Yaradılmış fayl və kataloq ziddiyyətlərini onların mənbəyində həll edin, onları
+   yenidən yaradın, fokuslanmış dövrü yenidən işə salın və PR-ın hələ də aktiv buraxılış budağını
+   hədəflədiyini təsdiqləyin.
+6. **Sübutları qeyd edin.** PR şablonunda işə salınmış əmrləri, əlavə edilmiş və ya dəyişdirilmiş
+   hər bir test faylını, miqrasiyaları və ya funksiya bayraqlarını, həmçinin hələ gözləmədə olan
+   yalnız CI yoxlamalarını sadalayın.
 
-## Dəyişiklik növünə görə tövsiyə olunan yollar
+## Dəyişiklik növünə görə əsas yollar
 
-Aşağıdakı komandalar minimum məqsədyönlü yoxlamalardır, dəyişdirdiyiniz davranışı birbaşa əhatə edən testi
-ötürməyə icazə deyil.
+Aşağıdakı əmrlər minimum fokuslanmış yoxlamalardır; onlar dəyişdirdiyiniz davranışı birbaşa əhatə
+edən testi ötürməyə icazə vermir.
 
 ### Provayder
 
 **Müqavilələr**
 
-- `src/shared/constants/providers/` daxilində provayder tərifi və onun
-  `src/shared/constants/providers.ts` daxilində kompozisiyası.
-- `open-sse/config/providerRegistry.ts` və ya ondan çıxarılmış reyestr fayllarındakı modellər və imkanlar.
-- Tətbiqedici/tərcüməçi seçimi, OAuth və ya API açarı konfiqurasiyası, idarə paneli resursları və tətbiq
+- `src/shared/constants/providers/` daxilindəki provayder tərifi və onun
+  `src/shared/constants/providers.ts` daxilindəki kompozisiyası.
+- `open-sse/config/providerRegistry.ts` və ya ondan ayrılmış reyestr fayllarındakı modellər və
+  imkanlar.
+- İcraçı/tərcüməçi seçimi, OAuth və ya API açarı konfiqurasiyası, idarə paneli resursları və tətbiq
   olunduqda yaradılmış provayder arayışı.
-- İctimai etimadnamələr `resolvePublicCred()` istifadə etməlidir; xəta cavabları ortaq təmizlənmiş
-  xəta köməkçilərindən istifadə etməlidir. `docs/security/PUBLIC_CREDS.md` (git; `/docs` daxilində kompilyasiya edilmir) və
+- İctimai etimad məlumatları `resolvePublicCred()` istifadə etməlidir; xəta cavabları ortaq
+  təmizlənmiş xəta köməkçilərindən istifadə etməlidir. `docs/security/PUBLIC_CREDS.md` sənədinə
+  (`git` daxilindədir; `/docs` daxilində kompilyasiya edilmir) və
   [Xətaların Təmizlənməsi](../security/ERROR_SANITIZATION.md) sənədinə baxın.
 
-**Məqsədyönlü dövrə**
+**Fokuslanmış dövr**
 
 ```bash
 npm run check:provider-consistency
@@ -58,40 +65,45 @@ npm run gen:provider-reference   # kataloq dəyişdikdə; yaradılmış fərqi c
 npm run lint
 ```
 
-Həmçinin təsirlənmiş hər bir sorğu ailəsini test edin: çat, Responses, şəkillər, embedding-lər, audio və ya video.
-Yaradılmış kataloq və etalon fərqlərini müqavilə dəyişiklikləri kimi nəzərdən keçirin; onları kor-koranə qəbul etməyin.
+Həmçinin təsirə məruz qalan hər bir sorğu ailəsini test edin: çat, Responses, şəkillər, embedding-lər,
+audio və ya video. Yaradılmış kataloq və etalon fərqlərini müqavilə dəyişiklikləri kimi nəzərdən
+keçirin; onları kor-koranə qəbul etməyin.
 
 ### Marşrutlaşdırma
 
 **Müqavilələr**
 
-- `src/shared/constants/routingStrategies.ts` daxilində ictimai strategiya dəyərləri və UI metadatası.
-- `open-sse/services/combo.ts` və `open-sse/services/combo/` altında yönləndirmə və sıralama.
-- Combo sxemləri, davamlı saxlama, dayanıqlılıq vəziyyəti, model imkanları və API/UI idarəetmə elementləri.
+- `src/shared/constants/routingStrategies.ts` daxilindəki ictimai strategiya dəyərləri və UI
+  metadatası.
+- `open-sse/services/combo.ts` və `open-sse/services/combo/` altında göndərmə və sıralama.
+- Combo sxemləri, davamlı saxlanma, dayanıqlılıq vəziyyəti, model imkanları və API/UI idarəetmə
+  elementləri.
 - Davranış dəyişdikdə [Auto-Combo Mühərriki](../routing/AUTO-COMBO.md) və dayanıqlılıq sənədləri.
 
-**Məqsədyönlü dövrə**
+**Fokuslanmış dövr**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategiya və ya yönləndirmə dəyişiklikləri
+npm run test:combo:matrix        # strategiya və ya göndərmə dəyişiklikləri
 npm run check:known-symbols      # strategiyanın qeydiyyat dəyişiklikləri
 npm run lint
 ```
 
-Lokal olaraq deterministik, saxta yuxarı axınlı testlərdən istifadə edin. Canlı combo tüstü testləri etimadnamələr tələb edir və
-manualdır, CI əvəzedicisi deyil.
+Lokal olaraq deterministik, yuxarı axını imitasiya edən testlərdən istifadə edin. Canlı combo tüstü
+testləri etimad məlumatları tələb edir və əl ilə icra olunur; onlar CI əvəzi deyil.
 
 ### UI / UX
 
 **Müqavilələr**
 
-- `src/app/` və `src/shared/components/` altında Next.js marşrut/səhifə və ortaq komponent sərhədləri.
+- `src/app/` və `src/shared/components/` altındakı Next.js marşrut/səhifə və ortaq komponent
+  sərhədləri.
 - API cavab formaları, yüklənmə/boş/xəta vəziyyətləri, klaviatura və ekran oxuyucusu davranışı,
-  responsiv düzən, mövzular və lokal genişləndirmə.
-- `src/i18n/messages/en.json` daxilində ingiliscə UI mənbə sətirləri; istifadəçiyə göstərilən yeni mətni birbaşa kodda yazmayın.
+  adaptiv tərtibat, mövzular və lokal genişləndirilməsi.
+- `src/i18n/messages/en.json` daxilindəki ingiliscə UI mənbə sətirləri; istifadəçinin gördüyü yeni
+  mətni birbaşa koda yazmayın.
 
-**Məqsədyönlü dövrə**
+**Fokuslanmış dövr**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -100,22 +112,23 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-İnteraksiya və ya vizual dəyişikliklər üçün tətbiqi işə salın və həm dar, həm də geniş baxış sahələrini yoxlayın. CI
-istehsal yığımını və daha geniş test dəstlərini işə salır; vizual davranış üçün yenə də dəyişikliyə uyğun məqsədyönlü komponent,
-Playwright və ya sənədləşdirilmiş manual yoxlama tələb olunur.
+Qarşılıqlı əlaqə və ya vizual dəyişikliklər üçün tətbiqi işə salın, həm dar, həm də geniş baxış
+sahələrini yoxlayın. CI istehsal yığımını və daha geniş test dəstlərini işə salır; vizual davranış
+üçün yenə də dəyişikliyə uyğun fokuslanmış komponent testi, Playwright testi və ya sənədləşdirilmiş
+əl yoxlaması tələb olunur.
 
 ### i18n
 
 **Müqavilələr**
 
-- `src/i18n/messages/en.json` UI mənbəyidir; `config/i18n.json` lokal mənbəyidir.
+- `src/i18n/messages/en.json` UI mənbəyidir; `config/i18n.json` isə lokal mənbəyidir.
 - CLI kataloqları ayrıca `bin/cli/locales/` altında yerləşir.
-- ICU doldurucularını və teqlərini tam olaraq qoruyun. Məhsul/provayder/model adlarını,
-  protokol və başlıq adlarını, komandaları, kod/JSON identifikatorlarını, URL-ləri, mühit dəyişənlərini və ya
+- ICU doldurucularını və teqlərini dəqiq qoruyun. Məhsul/provayder/model adlarını, protokol və
+  başlıq adlarını, əmrləri, kod/JSON identifikatorlarını, URL-ləri, mühit dəyişənlərini və
   `OmniRoute`, `OAuth`, `MCP` və `A2A` kimi qorunan terminləri tərcümə etməyin. Cari mənbə siyahısı
   `scripts/i18n/glossary/protected-terms.json` faylındadır.
 
-**Məqsədyönlü dövrə**
+**Fokuslanmış dövr**
 
 ```bash
 npm run i18n:sync-ui:dry
@@ -126,10 +139,10 @@ npm run check:cli-i18n          # CLI sətirləri/kataloqları dəyişdikdə
 npm run lint
 ```
 
-Bu, mövcud sistem üçün təlimatdır, onun alətlərini və ya açar modelini genişləndirmək üçün dəvət deyil.
-Əvəzedici sistem layihələndirilərkən i18n düzəlişlərini məhdud və dəqiq saxlayın. Tapşırıq yaradılmış tərcümələri açıq şəkildə tələb etmədikcə və
-nəticədə yaranan fərqi nəzərdən keçirmədiyiniz halda xarici xidmətlərə müraciət edən tərcümə
-komandalarını işə salmayın.
+Bu, mövcud sistem üçün təlimatdır, onun alətlərini və ya açar modelini genişləndirməyə dəvət deyil.
+Əvəzedici sistem hazırlanarkən i18n düzəlişlərini məqsədyönlü və məhdud saxlayın. Tapşırıq yaradılmış
+tərcümələri açıq şəkildə tələb etmədikcə və nəticədə yaranan fərqi nəzərdən keçirmədikcə xarici
+xidmətləri çağıran tərcümə əmrlərini işə salmayın.
 
 ### CLI
 
@@ -137,8 +150,8 @@ komandalarını işə salmayın.
 
 - `bin/cli/` daxilindəki ictimai əmrlər və bayraqlar, yaradılmış API əmrləri, çıxış kodları, stdout/stderr və
   JSON çıxış strukturları, konfiqurasiya/mühit davranışı və paketlənmiş fayllar.
-- CLI istifadəçisinə göstərilən sətirlər CLI i18n qatından istifadə etməli və `en`/`pt-BR` kataloqları uyğun saxlanılmalıdır.
-- Node-u dəstəklənən icra mühiti, dərc edilmiş binar müqaviləni isə dəyişməz saxlayın.
+- CLI-da istifadəçiyə göstərilən sətirlər CLI i18n qatından istifadə etməli və `en`/`pt-BR` kataloqları uyğun saxlanmalıdır.
+- Dəstəklənən icra mühiti kimi Node-u və dərc edilmiş binar müqaviləni qoruyun.
 
 **Fokuslanmış dövr**
 
@@ -150,7 +163,7 @@ npm run check:pack-policy     # paket səthi dəyişiklikləri
 npm run lint
 ```
 
-Davranış təhlildən, fayllardan və ya çıxış statusundan asılı olduqda dəqiq əmri müvəqqəti məlumat qovluğunda istifadə edin.
+Davranış təhlildən, fayllardan və ya çıxış statusundan asılı olduqda, dəqiq əmri müvəqqəti məlumat qovluğunda istifadə edin.
 CI daha geniş paket artefaktı və ekosistem yoxlamalarını həyata keçirir.
 
 ### Verilənlər bazası
@@ -159,8 +172,8 @@ CI daha geniş paket artefaktı və ekosistem yoxlamalarını həyata keçirir.
 
 - `src/lib/db/` altındakı domen modulları; konkret modulları birbaşa idxal edin (köhnə `localDb.ts` təkrar ixrac qatı silinib).
 - `src/lib/db/migrations/` altındakı nömrələnmiş, idempotent SQL miqrasiyaları, tranzaksiya təhlükəsizliyi, təkmilləşdirmə
-  davranışı, indekslər və sxemdən təsirlənən hər bir çağıran tərəf.
-- Marşrutlar və işləyicilər heç vaxt birbaşa xam SQL sorğuları göndərmir.
+  davranışı, indekslər və sxemin təsir etdiyi hər bir çağıran tərəf.
+- Marşrutlar və işləyicilər heç vaxt birbaşa xam SQL sorğuları icra etmir.
 
 **Fokuslanmış dövr**
 
@@ -172,17 +185,17 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Miqrasiya əlavə edərkən həm təzə verilənlər bazasını, həm də əvvəlki sxemdən təkmilləşdirməni sınaqdan keçirin. Verilənlər bazası testləri
-təmizləmə zamanı deskriptorları bağlamalı və `resetDbInstance()` çağırmalıdır. `npm run test:bun:db` əmrini yalnız
-ən yaxşı səy prinsipi ilə işləyən Bun adapter yolu dəyişdikdə işə salın; Node əsas istinad olaraq qalır.
+Miqrasiya əlavə edərkən həm yeni verilənlər bazasını, həm də əvvəlki sxemdən təkmilləşdirməni sınaqdan keçirin. Verilənlər bazası testləri
+təmizləmə zamanı deskriptorları bağlamalı və `resetDbInstance()` funksiyasını çağırmalıdır. `npm run test:bun:db` əmrini yalnız
+ən yaxşı səy prinsipi ilə işləyən Bun adapter yolu dəyişdikdə icra edin; əsas istinad Node olaraq qalır.
 
 ### Quraşdırma / yerləşdirmə
 
 **Müqavilələr**
 
 - Kök və iş sahəsi manifestləri/kilid faylı, `scripts/build/`, Next.js müstəqil yığımı, `dist/`
-  paketinin məzmunu, Electron platforma metadatası, CI iş axınları və yerləşdirmə nəzarət göstəriciləri.
-- Dəstəklənən Node diapazonları və `CLAUDE.md` daxilində istifadəsinə icazə verilən Bun halları dəyişməz qalmalıdır.
+  paket məzmunu, Electron platforma metadatası, CI iş axınları və yerləşdirmə nəzarət göstəriciləri.
+- Dəstəklənən Node diapazonları və `CLAUDE.md` daxilində icazə siyahısına salınmış Bun istifadəsi toxunulmaz qalmalıdır.
 - Quraşdırma artefaktları izlənilməməlidir; asılılıq, lisenziya, iş axını və paket siyasətləri tətbiq olunur.
 
 **Fokuslanmış dövr**
@@ -196,79 +209,105 @@ npm run lint
 ```
 
 `npm run build` əmrini lokal olaraq yalnız dəyişiklik kompilyasiyaya, müstəqil yığıma, resurslara
-və ya icra mühiti paketlənməsinə təsir etdikdə istifadə edin. `npm run build:release` əmrini yalnız buraxılış/yerləşdirmə yoxlaması üçün istifadə edin. CI quraşdırması
-son çarpaz platforma göstəricisidir; platformaya xas Electron dəyişiklikləri üçün müvafiq fokuslanmış quraşdırma
+və ya icra zamanı paketləməyə təsir etdikdə istifadə edin. `npm run build:release` əmrini yalnız buraxılış/yerləşdirmə yoxlaması üçün istifadə edin. CI quraşdırması
+yekun çarpaz platforma siqnalıdır; platformaya xas Electron dəyişiklikləri üçün uyğun fokuslanmış quraşdırma
 və ya tüstü testi sübutu tələb olunur.
 
-## Lokal namizəd dövrü
+## Paylaşılan maşın üçün tərtibatçı skriptləri
 
-Mənbə testləri paketlənmiş artefaktın işə düşdüyünü sübut edə bilməz: paketləmə siyahıları, ixtisar edilmiş asılılıqlar
-və yerli binar fayllarla bağlı xətalar yalnız tarball quraşdırılıb başladıldıqdan sonra üzə çıxır. `npm run dev:candidate`
-(`scripts/dev/candidate.mjs`) RFC #8084-dəki bir dəfə qur / doğrula / irəli çək axınının lokal hissəsidir:
-o, bir namizəd qurur, məhz həmin artefaktı doğrulayır, kataloqların adını dəyişməklə onu irəli çəkir
-və irəli çəkilmiş slotun işlək vəziyyət yoxlaması uğursuz olarsa, onu geri qaytarır.
+Digər sessiyaların aktiv olduğu bir tərtibat maşınında yerli iş dövrünü iki `scripts/dev/` köməkçi skripti təmin edir:
 
 ```bash
-npm run dev:candidate -- run --dry-run --json  # planı göstər, heç nəyi dəyişmə
-npm run dev:candidate -- run                   # qur + doğrula + irəli çək, avtomatik geri qaytar
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # merge-base(HEAD, base)..HEAD aralığındakı fayllar
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # məhz bu fayllar
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # təcrid olunmuş worktree, paralel istifadə üçün təhlükəsizdir
+```
+
+- `typecheck-touched.sh` yalnız dəyişdirilmiş `.ts/.tsx` fayllarının tip yoxlamasını müvəqqəti
+  `tsconfig.touched.tmp.json` (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) vasitəsilə, 6 GB heap altında aparır; beləliklə, yüklənmiş maşında OOM-a
+  səbəb olan layihə miqyaslı `tsc -p tsconfig.json` əvəzlənir. Skript dəyişdirilmiş fayllardakı
+  xətaları və bir yekun sətri çap edir; dəyişdirilmiş fayllarda xətalar olduqda `1`, xətalar yalnız
+  import edilmiş fayllarda olduqda və ya tsc diaqnostika təqdim etmədən dayandıqda `2`
+  (`_artifacts/typecheck-touched/` altında adını göstərdiyi jurnalı oxuyun), xəta olmadıqda isə `0`
+  kodu ilə çıxır. Müvəqqəti tsconfig həmişə silinir; onu heç vaxt commit etməyin.
+- `new-worktree.sh` paralel icraları `<git-common-dir>/omniroute-new-worktree.lock` üzərindən
+  ardıcıllaşdırır (standart olaraq 600 saniyəyədək gözləyir və görünən mesaj göstərir; skriptin
+  başlığı bu dəyərin necə dəyişdiriləcəyini sənədləşdirir) və `git worktree add` worktree
+  yaranmazdan əvvəl uğursuz olarsa, yaratdığı branch-i geri qaytarır; buna görə təkrar cəhd üçün
+  əl ilə `git branch -D` icra etmək lazım deyil. Hard link ilə bağlanmış `node_modules` və
+  `.husky/_` nüsxəsi dəyişməz qalır.
+
+## Yerli namizəd dövrü
+
+Mənbə testləri paketlənmiş artefaktın işə düşdüyünü sübut edə bilməz: paketləmə siyahıları,
+ixtisar edilmiş asılılıqlar və native binar fayllar yalnız tarball quraşdırılıb başladıldıqdan sonra
+xəta verir. `npm run dev:candidate` (`scripts/dev/candidate.mjs`) RFC #8084-dəki bir dəfə build et /
+yoxla / irəli çək axınının yerli tərəfidir: bir namizəd yaradır, məhz həmin artefaktı yoxlayır,
+qovluqların adını dəyişərək onu irəli çəkir və irəli çəkilmiş slot sağlamlıq yoxlamasından keçmədikdə
+onu geri qaytarır.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # planı çap et, heç nəyi dəyişmə
+npm run dev:candidate -- run                   # build et + yoxla + irəli çək, avtomatik geri qaytar
 npm run dev:candidate -- build                 # npm pack + _artifacts/candidate/<id>/ daxilində quraşdır
 npm run dev:candidate -- validate --id <id>    # boş portda işə sal, /api/health + /v1/models
 npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
 npm run dev:candidate -- rollback              # current və previous slotlarını dəyişdir
-npm run dev:candidate -- run --from-tarball <file.tgz>  # başqa yerdə (CI) qurulmuş tarball-dan təkrar istifadə et
+npm run dev:candidate -- run --from-tarball <file.tgz>  # başqa yerdə (CI) yaradılmış tarball-dan təkrar istifadə et
 ```
 
-- **Bir dəfə qurun.** `build` cari ağacı paketləyir (ona `dist/server.js` lazımdır, buna görə əvvəlcə
-  `npm run build:release` icra edin) və ya `--from-tarball` ilə göstərilən faylı köçürür, sonra tarball-ı
-  təcrid olunmuş npm prefiksinə quraşdırır, çünki tarball daxilində `node_modules` yoxdur. İdentifikator
-  qısa `HEAD` sha-dır (ağacda lokal dəyişikliklər olduqda `-dirty`) və ya tarball üçün `tgz-<sha256>`-dır.
-  Artıq qurulmuş təmiz identifikator yenidən qurulmaq əvəzinə təkrar istifadə olunur; onu yenidən qurmaq
-  üçün `--force` parametrini ötürün.
-- **Mənbəni deyil, paketi doğrulayın.** `validate` quraşdırılmış CLI-ni
-  (`serve --port <free port>`) yeni `DATA_DIR=<candidate>/data`, saxta məxfi dəyərlərlə və operatorun
-  `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` və `INITIAL_PASSWORD` dəyişənlərini mühitdən çıxararaq
-  işə salır; beləliklə, yeni quraşdırmanın açarsız loopback rejimini yoxlayır. O,
-  `GET /api/health` sorğusunun 200 qaytarmasını gözləyir, `GET /v1/models` sorğusunun 200 qaytarmasını
-  tələb edir, proses qrupunu dayandırır və nəticəni tarball heşi ilə birlikdə `validation.json`
-  faylında qeyd edir.
-- **Eyni artefaktı irəli çəkin.** `promote` cari tarball heşi üçün uğurlu doğrulaması olmayan
+- **Bir dəfə build edin.** `build` cari ağacı paketləyir (bunun üçün `dist/server.js` lazımdır,
+  buna görə əvvəlcə `npm run build:release` icra edin) və ya `--from-tarball` faylını kopyalayır,
+  sonra isə tarball heç bir `node_modules` daşımadığı üçün onu təcrid olunmuş npm prefiksinə
+  quraşdırır. id qısa `HEAD` sha-sıdır (ağacda yerli dəyişikliklər olduqda `-dirty`) və ya tarball
+  üçün `tgz-<sha256>` olur. Artıq build edilmiş təmiz id yenidən build edilmək əvəzinə təkrar
+  istifadə olunur; onu yenidən build etmək üçün `--force` ötürün.
+- **Mənbəni deyil, paketi yoxlayın.** `validate` quraşdırılmış CLI-ni
+  (`serve --port <free port>`) yeni `DATA_DIR=<candidate>/data`, saxta məxfi məlumatlar ilə və
+  operatorun `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` və `INITIAL_PASSWORD` dəyişənlərini
+  mühitdən çıxararaq başladır; beləliklə, yeni quraşdırmanın açarsız loopback rejimini yoxlayır.
+  O, `GET /api/health` sorğusunun 200 qaytarmasını gözləyir, `GET /v1/models` sorğusunun 200
+  qaytarmasını tələb edir, proses qrupunu dayandırır və nəticəni tarball hash-i ilə birlikdə
+  `validation.json` faylında qeyd edir.
+- **Eyni artefaktı irəli çəkin.** `promote` cari tarball hash-i üçün uğurlu yoxlaması olmayan
   namizədi qəbul etmir. Standart aktiv slot `_artifacts/candidate/current`-dır; `--target <dir>`
-  eyni fayl sistemində başqa kataloq seçir və onun əvvəlki slotu `<dir>.previous` olur.
-  Hər ad dəyişdirmə atomikdir və prosesin ortasında xəta baş verərsə, artıq icra edilmiş ad
+  eyni fayl sistemində başqa qovluq seçir, onun əvvəlki slotu isə `<dir>.previous` olur. Hər bir
+  ad dəyişdirmə atomikdir və prosesin ortasında xəta baş verərsə, artıq icra edilmiş ad
   dəyişdirmələri geri qaytarılır.
-- **Geri qaytarın.** `run` irəli çəkilmiş slotu yenidən doğrulayır və həmin yoxlama uğursuz olduqda
-  `current` və `previous` slotlarının yerlərini yenidən dəyişir. İlk doğrulamadan keçməyən namizəd
-  heç vaxt irəli çəkilmir.
+- **Geri qaytarın.** `run` irəli çəkilmiş slotu yenidən yoxlayır və həmin yoxlama uğursuz olarsa,
+  `current` və `previous` slotlarını yenidən dəyişdirir. İlk yoxlamadan keçməyən namizəd heç vaxt
+  irəli çəkilmir.
 
-Hər şey git tərəfindən nəzərə alınmayan `_artifacts/candidate/` daxilində yazılır; mövcud OmniRoute
-quraşdırmasına və onun məlumat kataloquna heç vaxt toxunulmur. İrəli çəkilmiş CLI
-`_artifacts/candidate/current/prefix/bin/omniroute` yolundadır; ondan istifadə edərkən onu öz
-`DATA_DIR` dəyişəninizlə başladın. Çıxış kodları: `0` uğur, `1` uğursuz doğrulama və ya irəli çəkmə,
-`2` istifadə xətası və ya çatışmayan qurma.
+Hər şey git tərəfindən nəzərə alınmayan `_artifacts/candidate/` altında yazılır; mövcud OmniRoute
+quraşdırmasına və onun data qovluğuna heç vaxt toxunulmur. İrəli çəkilmiş CLI
+`_artifacts/candidate/current/prefix/bin/omniroute` yolundadır; onu istifadə edərkən öz `DATA_DIR`
+dəyərinizlə başladın. Çıxış kodları: `0` uğur, `1` uğursuz yoxlama və ya irəli çəkmə, `2` istifadə
+xətası və ya çatışmayan build.
 
 ## Lokal dövr ilə CI müqayisəsi
 
-| Hər dəyişiklik üçün lokal olaraq işə salınır                                                    | CI geniş əhatəli siqnal təmin edir                                                 |
-| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Yuxarıdakı birbaşa davranış testləri və kateqoriya yoxlamaları                                  | Hissələrə bölünmüş tam vahid test dəsti və ardıcıl testlər                         |
-| `npm run lint`                                                                                  | Vitest test dəstləri və əhatə/keyfiyyət üçün mərhələli hədlər                      |
-| Yalnız təsirə məruz qalan müqavilə tələb etdikdə tip yoxlaması və ya yığım                      | İstehsal yığımı, təhlükəsizlik, sənədlər, asılılıqlar və PR siyasəti yoxlamaları   |
-| Yalnız avtomatlaşdırma davranışı təsdiqləyə bilmədikdə əl ilə qarşılıqlı əlaqə/canlı yoxlamalar | İşlərarası inteqrasiya və iş axını ilə konfiqurasiya edilmiş platforma yoxlamaları |
+| Hər bir düzəliş üçün lokal olaraq işə salın                                                   | CI genişmiqyaslı siqnal təmin edir                                                       |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Yuxarıdakı birbaşa davranış testləri və kateqoriya keçidləri                                  | Hissələrə bölünmüş tam vahid test dəsti və ardıcıl testlər                               |
+| `npm run lint`                                                                                | Vitest test dəstləri və əhatə/keyfiyyət üçün mərhələli sərtləşdirmə                      |
+| Yalnız təsirə məruz qalan müqavilə tələb etdikdə tip yoxlaması və ya yığma                    | İstehsal yığması, təhlükəsizlik, sənədlər, asılılıq və PR siyasəti keçidləri             |
+| Yalnız avtomatlaşdırma davranışı təsdiqləyə bilmədikdə əllə qarşılıqlı əlaqə/canlı yoxlamalar | İş axını ilə konfiqurasiya edilmiş tapşırıqlararası inteqrasiya və platforma yoxlamaları |
 
-Uğurlu fokuslanmış dövr dəyişdirilmiş müqavilə barədə sübutdur, əlaqəsiz CI yoxlamalarının
-keçəcəyinə dair zəmanət deyil. Digər tərəfdən, hər lokal düzəlişi repozitorinin tam matrisini gözləməyə məcbur etməyin.
+Uğurlu hədəflənmiş dövr dəyişdirilmiş müqavilə haqqında sübutdur, əlaqəsiz CI yoxlamalarının
+keçəcəyinin zəmanəti deyil. Eyni zamanda, hər bir lokal düzəlişin tam repozitoriya matrisini gözləməsinə yol verməyin.
 
-## Uzlaşdırma üçün yoxlama siyahısı
+## Uzlaşdırma yoxlama siyahısı
 
-Yoxlama tələb etməzdən əvvəl:
+Baxış tələb etməzdən əvvəl:
 
-- PR-ın baza qolunun hələ də ən yuxarı aktiv `release/v*` qolu olduğunu təsdiqləyin.
-- Həmin baza qolunu əldə edin və qolunuzu yaratdıqdan sonra əlavə edilmiş commit-ləri nəzərdən keçirin.
-- Təsadüfi və ya generasiya edilmiş lazımsız dəyişiklikləri aşkar etmək üçün `git diff <active-base>...HEAD` nəticəsini nəzərdən keçirin.
-- Mənbəni yeniləyib çıxışı yenidən generasiya etməklə kataloq və generasiya edilmiş sənədlərdəki ziddiyyətləri həll edin.
-- Uzlaşdırmadan sonra PR təsvirində sadalanan hər bir fokuslanmış testi/yoxlamanı yenidən işə salın.
-- Dəyişmiş baza ilə uyğunlaşmaq xatirinə təsdiqləmələri heç vaxt zəiflətməyin və ya tələb olunan testləri çıxarmayın.
+- PR-ın baza budağının hələ də ən yüksək aktiv `release/v*` budağı olduğunu təsdiqləyin.
+- Həmin baza budağını əldə edin və budağınızı yaratdıqdan sonra ona əlavə edilmiş commit-ləri nəzərdən keçirin.
+- Təsadüfi və ya generasiya edilmiş lazımsız dəyişiklikləri müəyyən etmək üçün `git diff <active-base>...HEAD` nəticəsini nəzərdən keçirin.
+- Kataloq və generasiya edilmiş sənəd münaqişələrini mənbəni yeniləyərək və çıxışı yenidən generasiya edərək həll edin.
+- Uzlaşdırmadan sonra PR təsvirində sadalanmış bütün hədəflənmiş testləri/keçidləri yenidən işə salın.
+- Dəyişmiş baza ilə uyğunlaşmaq naminə heç vaxt təsdiqləmələri zəiflətməyin və ya tələb olunan testləri çıxarmayın.
 
-Buraxılışın dondurulması və hədəfin dəyişdirilməsi qaydaları üçün
-[Qollanma və Buraxılış Modeli](BRANCHING_MODEL.md) sənədindən istifadə edin. Tam CI inventarı üçün
-[Keyfiyyət Yoxlamaları Arayışı](../architecture/QUALITY_GATES.md) sənədindən istifadə edin.
+Reliz dondurması və yenidən hədəfləmə qaydaları üçün
+[Budaqlanma və Reliz Modeli](BRANCHING_MODEL.md) sənədindən istifadə edin. CI-nin tam inventarı üçün
+[Keyfiyyət Keçidləri Arayışı](../architecture/QUALITY_GATES.md) sənədindən istifadə edin.

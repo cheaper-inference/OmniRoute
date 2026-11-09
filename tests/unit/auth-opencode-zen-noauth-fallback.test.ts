@@ -1,13 +1,4 @@
-/**
- * Issue #2962 — Playground cannot use the OpenCode free model:
- * "No credentials for the provider: opencode-zen".
- *
- * opencode-zen serves the public, signup-free OpenCode Zen endpoint
- * (https://opencode.ai/zen/v1). When no API-key connection is configured,
- * getProviderCredentials returned null → the chat handler surfaced
- * "No credentials for provider: opencode-zen". It must instead fall back to
- * anonymous (no-auth) credentials so the free tier works.
- */
+// Free retirement removes anonymous OpenCode fallback; other providers keep their contracts.
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -26,15 +17,13 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("#2962 opencode-zen with no connection falls back to anonymous no-auth credentials", async () => {
-  const creds = await getProviderCredentials("opencode-zen");
-  assert.ok(creds, "opencode-zen must resolve to credentials, not null (no-auth free tier)");
-  assert.equal(
-    (creds as { connectionId?: string }).connectionId,
-    "noauth",
-    "should be synthetic no-auth credentials"
-  );
-  assert.equal((creds as { apiKey?: unknown }).apiKey, null, "anonymous access carries no api key");
+test("OpenCode Zen and Go without connections never synthesize Free credentials", async () => {
+  for (const provider of ["opencode-zen", "opencode-go"]) {
+    const creds = await getProviderCredentials(provider);
+    assert.equal(creds, null);
+    assert.notEqual(creds?.connectionId, "noauth");
+    assert.equal(creds?.apiKey, undefined);
+  }
 });
 
 test("apikey providers with anonymous fallback use no-auth when saved rows are terminal", async () => {
@@ -60,7 +49,7 @@ test("#2962 a normal api-key provider with no connection still returns null (no 
   assert.notEqual(connectionId, "noauth", "openai must not get anonymous no-auth credentials");
 });
 
-test("#2962 opencode-zen falls back to no-auth when saved key rows are unusable", async () => {
+test("OpenCode Zen does not fall back to Free when saved key rows are unusable", async () => {
   await createProviderConnection({
     provider: "opencode-zen",
     authType: "apikey",
@@ -71,7 +60,7 @@ test("#2962 opencode-zen falls back to no-auth when saved key rows are unusable"
   });
 
   const creds = await getProviderCredentials("opencode-zen");
-  assert.ok(creds, "opencode-zen should still resolve to anonymous no-auth credentials");
-  assert.equal((creds as { connectionId?: string }).connectionId, "noauth");
-  assert.equal((creds as { apiKey?: unknown }).apiKey, null);
+  assert.equal(creds?.allExpired, true);
+  assert.notEqual(creds?.connectionId, "noauth");
+  assert.equal(creds?.apiKey, undefined);
 });

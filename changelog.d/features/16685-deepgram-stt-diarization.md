@@ -1,1 +1,0 @@
-- **feat(stt):** Deepgram transcription supports opt-in speaker diarization and `verbose_json` speaker segments ([#16685](https://github.com/diegosouzapw/OmniRoute/pull/16685)) — thanks @n1klaus

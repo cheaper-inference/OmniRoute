@@ -10,7 +10,8 @@ import path from "node:path";
 // byte-identical to the base behavior with zero operator DB read, and a row
 // that crosses the window disappears on the next read even on the hot journal
 // cache path (no operator cache). The predicate fires on any shared address,
-// with the journal contributing only when non-opaque.
+// the journal contributing when its window stays inside one range, and the
+// operator source keeping exact keys.
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-operator-egress-reader-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -58,7 +59,7 @@ function push(host: string, port: number, addresses: string[], observedAt: strin
 function logEgress(host: string, port: number, egressIp: string | null) {
   proxyLogger.logProxyEvent({
     status: "success",
-    provider: "opencode",
+    provider: "opencode-go",
     targetUrl: "https://api.opencode.ai/chat",
     proxy: { type: "http", host, port },
     egressIp,
@@ -79,8 +80,8 @@ test("three operator addresses read as a set of three", async () => {
     ["198.51.100.1", "198.51.100.2", "198.51.100.3"],
     new Date(now).toISOString()
   );
-  const set = rotation.readEgressAddressSetForMember(member("203.0.113.1", 8180), now);
-  assert.deepEqual([...set.addresses].sort(), ["198.51.100.1", "198.51.100.2", "198.51.100.3"]);
+  const set = rotation.readEgressKeysForMember(member("203.0.113.1", 8180), now);
+  assert.deepEqual([...set.keys].sort(), ["198.51.100.1", "198.51.100.2", "198.51.100.3"]);
 });
 
 test("the freshest observation wins: 20 h operator row loses to a 2 min probe", async () => {
@@ -88,9 +89,9 @@ test("the freshest observation wins: 20 h operator row loses to a 2 min probe", 
   const now = Date.now();
   push("203.0.113.2", 8181, ["198.51.100.10"], new Date(now - 20 * HOUR_MS).toISOString());
   logEgress("203.0.113.2", 8181, "198.51.100.20");
-  const set = rotation.readEgressAddressSetForMember(member("203.0.113.2", 8181), now);
-  assert.ok(set.addresses.has("198.51.100.10"));
-  assert.ok(set.addresses.has("198.51.100.20"));
+  const set = rotation.readEgressKeysForMember(member("203.0.113.2", 8181), now);
+  assert.ok(set.keys.has("198.51.100.10"));
+  assert.ok(set.keys.has("198.51.100.20"));
   assert.equal(set.freshest?.address, "198.51.100.20");
 });
 
@@ -105,7 +106,7 @@ test("the freshest observation wins, flipped: fresh operator row beats a stale p
     .run(new Date(now - 20 * HOUR_MS).toISOString(), "203.0.113.3", 8182);
   rotation.__resetHotEgressCacheForTesting();
   push("203.0.113.3", 8182, ["198.51.100.31"], new Date(now).toISOString());
-  const set = rotation.readEgressAddressSetForMember(member("203.0.113.3", 8182), now);
+  const set = rotation.readEgressKeysForMember(member("203.0.113.3", 8182), now);
   assert.equal(set.freshest?.address, "198.51.100.31");
 });
 
@@ -124,8 +125,8 @@ test("flag off reads exactly the base behavior with zero operator DB read", asyn
     return (originalPrepare as (...args: unknown[]) => unknown)(sql, ...rest);
   }) as typeof originalPrepare;
   try {
-    const set = rotation.readEgressAddressSetForMember(member("203.0.113.4", 8183), now);
-    assert.deepEqual([...set.addresses], []);
+    const set = rotation.readEgressKeysForMember(member("203.0.113.4", 8183), now);
+    assert.deepEqual([...set.keys], []);
     assert.equal(operatorReads, 0);
   } finally {
     (db as { prepare: typeof originalPrepare }).prepare = originalPrepare;
@@ -138,15 +139,15 @@ test("cache-then-expire: a row past the window is absent even on the hot cache p
   const start = Date.now();
   push("203.0.113.5", 8184, ["198.51.100.50"], new Date(start).toISOString());
   // Warm the journal cache path first (reads through it, locks the expiry case).
-  const fresh = rotation.readEgressAddressSetForMember(member("203.0.113.5", 8184), start + 1000);
-  assert.ok(fresh.addresses.has("198.51.100.50"));
+  const fresh = rotation.readEgressKeysForMember(member("203.0.113.5", 8184), start + 1000);
+  assert.ok(fresh.keys.has("198.51.100.50"));
   // Advance past the 1 h window but inside the 30 s journal TTL: the operator
   // row must be absent — there is no operator cache to go stale behind.
-  const expired = rotation.readEgressAddressSetForMember(
+  const expired = rotation.readEgressKeysForMember(
     member("203.0.113.5", 8184),
     start + 2 * HOUR_MS
   );
-  assert.ok(!expired.addresses.has("198.51.100.50"));
+  assert.ok(!expired.keys.has("198.51.100.50"));
 });
 
 test("the predicate fires on any shared operator address", async () => {
@@ -165,7 +166,7 @@ test("the predicate fires on any shared operator address", async () => {
     const candidate = member("203.0.113.7", 8186);
     noteProxyRefusal(proxyEgressKey(avoided), "ip_quota_429");
     const predicate = rotation.buildHotEgressPredicate(
-      "opencode",
+      "opencode-go",
       [avoided, candidate],
       undefined,
       now
@@ -187,17 +188,34 @@ test("the journal contributes to the predicate only when non-opaque", async () =
   try {
     await knownMember("203.0.113.9", 8188);
     const now = Date.now();
-    // Opaque journal: two distinct addresses — contributes nothing.
+    // The window crosses two ranges: the journal contributes nothing.
     logEgress("203.0.113.9", 8188, "198.51.100.70");
-    logEgress("203.0.113.9", 8188, "198.51.100.71");
+    logEgress("203.0.113.9", 8188, "203.0.113.71");
     const opaque = member("203.0.113.9", 8188);
     noteProxyRefusal(proxyEgressKey(opaque), "ip_quota_429");
-    const predicate = rotation.buildHotEgressPredicate("opencode", [opaque], undefined, now);
-    // Empty hot set (opaque journal, no operator rows) -> predicate false for all.
+    const predicate = rotation.buildHotEgressPredicate("opencode-go", [opaque], undefined, now);
+    // Empty hot set (the window crosses two ranges, no operator rows) ->
+    // predicate false for all.
     assert.equal(predicate(opaque), false);
   } finally {
     delete process.env.PROXY_SKIP_RECENTLY_FAILED;
     delete process.env.PROXY_POOL_SHARED_EGRESS_ORDER;
     __resetProxyRefusalMemoryForTesting();
   }
+});
+
+test("the journal carries the range key of a member rotating inside one range", async () => {
+  await knownMember("203.0.113.10", 8189);
+  const now = Date.now();
+  // Two addresses of one /16: the member carries the range key, not the exact
+  // addresses, and it has no single freshest journal address.
+  logEgress("203.0.113.10", 8189, "203.0.113.7");
+  logEgress("203.0.113.10", 8189, "203.0.114.9");
+  const set = rotation.readEgressKeysForMember(member("203.0.113.10", 8189), now);
+  assert.deepEqual([...set.keys], ["r16:203.0.0.0/16"]);
+  assert.equal(set.freshest, null);
+  // The operator source stays exact: two addresses of one /16 are two keys.
+  push("203.0.113.10", 8189, ["198.51.100.80", "198.51.100.81"], new Date(now).toISOString());
+  const merged = rotation.readEgressKeysForMember(member("203.0.113.10", 8189), now);
+  assert.deepEqual([...merged.keys].sort(), ["198.51.100.80", "198.51.100.81", "r16:203.0.0.0/16"]);
 });

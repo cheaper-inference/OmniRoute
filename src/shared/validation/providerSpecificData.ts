@@ -3,6 +3,7 @@ import {
   OPENROUTER_PRESET_MAX_LENGTH,
   isOpenRouterPresetValue,
 } from "@/shared/constants/openRouterPreset";
+import { isValidGitHubCreditLimit } from "@omniroute/open-sse/services/githubCreditLimit.ts";
 
 function isHttpUrl(value: string): boolean {
   try {
@@ -203,6 +204,21 @@ export function validateProviderSpecificData(
     });
   }
 
+  const toolNameMaxLength = data.toolNameMaxLength;
+  if (
+    toolNameMaxLength !== undefined &&
+    toolNameMaxLength !== null &&
+    (!Number.isInteger(toolNameMaxLength) ||
+      (toolNameMaxLength as number) < 1 ||
+      (toolNameMaxLength as number) > 1024)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.toolNameMaxLength must be an integer from 1 to 1024",
+      path: ["toolNameMaxLength"],
+    });
+  }
+
   const customUserAgent = data.customUserAgent;
   if (
     customUserAgent !== undefined &&
@@ -213,6 +229,15 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.customUserAgent must be a string up to 500 chars",
       path: ["customUserAgent"],
+    });
+  }
+
+  const githubCreditLimit = data.githubCreditLimit;
+  if (githubCreditLimit !== undefined && !isValidGitHubCreditLimit(githubCreditLimit)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.githubCreditLimit must be a non-negative number or null",
+      path: ["githubCreditLimit"],
     });
   }
 
@@ -298,6 +323,14 @@ export function validateProviderSpecificData(
     });
   }
 
+  if (data.zdrEnabled !== undefined && typeof data.zdrEnabled !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.zdrEnabled must be a boolean",
+      path: ["zdrEnabled"],
+    });
+  }
+
   const blockExtraUsage = data.blockExtraUsage;
   if (data.allowPaidCredits !== undefined && typeof data.allowPaidCredits !== "boolean") {
     ctx.addIssue({
@@ -325,6 +358,24 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.autoFetchModels must be a boolean",
       path: ["autoFetchModels"],
+    });
+  }
+
+  const requireUserLastMessage = data.requireUserLastMessage;
+  if (requireUserLastMessage !== undefined && typeof requireUserLastMessage !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.requireUserLastMessage must be a boolean",
+      path: ["requireUserLastMessage"],
+    });
+  }
+
+  const keepMidConversationSystem = data.keepMidConversationSystem;
+  if (keepMidConversationSystem !== undefined && typeof keepMidConversationSystem !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.keepMidConversationSystem must be a boolean",
+      path: ["keepMidConversationSystem"],
     });
   }
 
@@ -413,6 +464,30 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.consoleApiKey must be at most 10000 characters",
       path: ["consoleApiKey"],
+    });
+  }
+
+  // Zed Hosted: the optional Orb billing portal link (or bare portal token).
+  // A bare token is accepted, so no URL shape is enforced here; the usage
+  // fetcher validates it before any request and treats the whole value as a
+  // credential.
+  const billingPortalUrl = data.billingPortalUrl;
+  if (
+    billingPortalUrl !== undefined &&
+    billingPortalUrl !== null &&
+    typeof billingPortalUrl !== "string"
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be a string",
+      path: ["billingPortalUrl"],
+    });
+  }
+  if (typeof billingPortalUrl === "string" && billingPortalUrl.length > 4096) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be at most 4096 characters",
+      path: ["billingPortalUrl"],
     });
   }
 

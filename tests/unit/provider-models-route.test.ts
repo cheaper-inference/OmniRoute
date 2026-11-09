@@ -645,10 +645,33 @@ test("provider models route does NOT flag a degraded remote-fetch fallback as in
   const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
   globalThis.fetch = async () => new Response("upstream down", { status: 500 });
 
-  const body = (await (await callRoute(connection.id)).json()) as any;
+  // refresh=true is the live attempt; without it the discovery never leaves the
+  // operator's "auto-fetch off" setting (see the next test).
+  const body = (await (await callRoute(connection.id, "?refresh=true")).json()) as any;
 
   assert.equal(body.source, "local_catalog");
   assert.notEqual(body.intentional, true, "degraded fallback must not be flagged intentional");
+  assert.equal(body.degraded, true, "a failed live discovery is a degraded discovery");
+  assert.equal(body.error, "HTTP 500", "the degraded fallback reports the reason");
+});
+
+test("provider models route flags a discovery the operator turned off as intentional", async () => {
+  // Auto-fetch is opt-in: with it off, the built-in catalog is the expected
+  // source, so the response is NOT a degraded discovery.
+  const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
+  globalThis.fetch = async () => new Response("upstream down", { status: 500 });
+
+  const body = (await (await callRoute(connection.id)).json()) as {
+    source?: string;
+    intentional?: unknown;
+    degraded?: unknown;
+    error?: unknown;
+  };
+
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.intentional, true, "a discovery the operator turned off is not a failure");
+  assert.notEqual(body.degraded, true);
+  assert.equal(body.error, undefined);
 });
 
 test("provider models route returns the local catalog for Runway video models", async () => {
@@ -818,13 +841,17 @@ test("provider models route falls back to cached models when a refresh fails", a
   assert.equal(fetchCalls, 2);
 });
 
-test("provider models route clears cached discovery when a refresh returns no remote models", async () => {
+// #19143: an empty answer may be transient, so it never clears a catalog or refreshes its
+// timestamp. A provider that really lost its models reports a degraded discovery until the
+// operator uses Clear All; a smaller non-empty list still replaces the catalog.
+test("provider models route keeps cached discovery when a refresh returns no remote models", async () => {
   const connection = await seedConnection("opencode-go", {
     apiKey: "opencode-go-key",
   });
   await modelsDb.replaceSyncedAvailableModelsForConnection("opencode-go", connection.id, [
     { id: "cached-go", name: "Cached Go", source: "imported" },
   ]);
+  const before = await providersDb.getProviderConnectionById(connection.id);
 
   globalThis.fetch = async () => {
     return Response.json({ data: [] });
@@ -836,12 +863,46 @@ test("provider models route clears cached discovery when a refresh returns no re
     "opencode-go",
     connection.id
   );
+  const after = await providersDb.getProviderConnectionById(connection.id);
 
   assert.equal(response.status, 200);
-  assert.equal(body.source, "local_catalog");
+  assert.equal(body.source, "cache");
   assert.match(body.warning, /no remote models discovered/i);
-  assert.ok(body.models.every((model) => model.id !== "cached-go"));
-  assert.deepEqual(cachedModels, []);
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(body.models.some((model) => model.id === "cached-go"));
+  assert.deepEqual(
+    cachedModels.map((model) => model.id),
+    ["cached-go"]
+  );
+  assert.equal(after?.syncedModelsAt, before?.syncedModelsAt);
+});
+
+test("provider models route answers a degraded empty list when no fallback exists", async () => {
+  const connection = await seedConnection("openai-compatible-no-fallback", {
+    apiKey: "sk-openai-compatible",
+    providerSpecificData: { autoFetchModels: true, baseUrl: "https://proxy.example.com/v1" },
+  });
+
+  globalThis.fetch = async () => {
+    return Response.json({ data: [] });
+  };
+
+  const response = await callRoute(connection.id);
+  const body = (await response.json()) as {
+    source: string;
+    degraded: boolean;
+    error: string;
+    models: unknown[];
+  };
+  const stored = await providersDb.getProviderConnectionById(connection.id);
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.models, []);
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "EMPTY_CATALOG");
+  assert.ok(!stored?.syncedModelsAt);
 });
 
 test("provider models route keeps upstream discovery off until autoFetchModels is explicitly enabled", async () => {
@@ -943,8 +1004,8 @@ test("provider models route retries Antigravity discovery endpoints before retur
       models: [
         { id: "gemini-3.1-pro-high", displayName: "Gemini 3.1 Pro (High)" },
         { id: "gemini-pro-agent", displayName: "Gemini 3.1 Pro (High)" },
-        { id: "gemini-3.7-flash-high", displayName: "Gemini 3.7 Flash High" },
-        { id: "gemini-3.7-flash-medium", displayName: "Gemini 3.7 Flash Medium" },
+        { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
+        { id: "gemini-3.8-flash-medium", displayName: "Gemini 3.8 Flash Medium" },
         { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
         { id: "gemini-3.6-flash-high", displayName: "upstream-3.6-high" },
         { id: "gemini-3.6-flash-medium", displayName: "upstream-3.6-medium" },
@@ -976,11 +1037,11 @@ test("provider models route retries Antigravity discovery endpoints before retur
     "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
   ]);
   assert.deepEqual(body.models, [
-    // #9106: both alias ids are user-callable now, so the upstream echo survives the filter.
+    // Callable aliases and repeated upstream IDs keep their shared catalog display names.
     { id: "gemini-3.1-pro-high", name: "Gemini 3.1 Pro (High)" },
     { id: "gemini-pro-agent", name: "Gemini 3.1 Pro (High)" },
-    { id: "gemini-3.7-flash-high", name: "Gemini 3.7 Flash (High)" },
-    { id: "gemini-3.7-flash-medium", name: "Gemini 3.7 Flash (Medium)" },
+    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
+    { id: "gemini-3.8-flash-medium", name: "Gemini 3.8 Flash (Medium)" },
     { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
   ]);
 });

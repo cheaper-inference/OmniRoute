@@ -120,7 +120,7 @@ export default function PeakHourProtectionEditor({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+    <div className="flex flex-col gap-4 rounded-lg border border-warning/30 bg-warning/5 p-4">
       <Toggle
         checked={value.enabled}
         onChange={(enabled) => onChange({ ...value, enabled })}
@@ -222,18 +222,16 @@ export default function PeakHourProtectionEditor({
                   {PEAK_HOUR_PROTECTION_DAYS.map((day) => {
                     const active = (window.days || []).includes(day);
                     return (
-                      <button
-                        type="button"
+                      <Button
                         key={day}
+                        size="sm"
+                        variant={active ? "warning" : "ghost"}
+                        aria-pressed={active}
                         onClick={() => toggleDay(window, day)}
-                        className={`rounded-full px-2 py-1 text-xs font-medium transition-colors ${
-                          active
-                            ? "bg-amber-500 text-white"
-                            : "bg-muted/60 text-text-muted hover:bg-muted"
-                        }`}
+                        className="h-7 min-h-7 px-2 text-xs"
                       >
                         {DAY_LABELS[day]}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

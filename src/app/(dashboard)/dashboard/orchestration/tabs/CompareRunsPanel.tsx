@@ -20,6 +20,7 @@
  */
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import { orchStateColor, type OrchState } from "../model/orchestrationTypes";
 import { normalizeRunSide, buildComparison } from "../model/compareRuns";
 import type { RunComparison, RunEvent, RunMemoryHit } from "../model/compareRuns";
@@ -204,10 +205,10 @@ function RunHeader({ item, t, testId }: { item: HistoryItem; t: Translate; testI
         />
         <span className="text-xs font-semibold truncate">{item.identity}</span>
       </div>
-      <div className="text-[10px] text-muted">
+      <div className="text-[10px] text-text-muted">
         {t(sourceKey)} · {t(STATE_KEY[item.state])}
       </div>
-      <div className="text-[10px] text-muted">{formatDateTime(item.createdAt, "date")}</div>
+      <div className="text-[10px] text-text-muted">{formatDateTime(item.createdAt, "date")}</div>
     </div>
   );
 }
@@ -232,7 +233,7 @@ function MetricRow({
 }) {
   return (
     <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-[11px] items-center min-w-[480px]">
-      <span className="text-muted uppercase text-[9px]">{label}</span>
+      <span className="text-text-muted uppercase text-[9px]">{label}</span>
       <span data-testid={`orchestration-compare-metric-${metricKey}-left`}>{leftText}</span>
       <span data-testid={`orchestration-compare-metric-${metricKey}-right`}>{rightText}</span>
       <span
@@ -246,7 +247,7 @@ function MetricRow({
 }
 
 function EventCell({ event }: { event: RunEvent | null }) {
-  if (!event) return <span className="text-muted">—</span>;
+  if (!event) return <span className="text-text-muted">—</span>;
   return (
     <span className="truncate block">
       {event.label}
@@ -267,7 +268,7 @@ function TimelineRows({ comparison, t }: { comparison: RunComparison; t: Transla
   }));
   return (
     <div className="mt-2">
-      <div className="text-[10px] font-semibold uppercase text-muted mb-1">
+      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">
         {t("compareEvents")}
       </div>
       <div className="flex flex-col gap-1 min-w-[480px]">
@@ -287,12 +288,12 @@ function TimelineRows({ comparison, t }: { comparison: RunComparison; t: Transla
 }
 
 function MemoryList({ hits }: { hits: RunMemoryHit[] }) {
-  if (hits.length === 0) return <span className="text-muted">—</span>;
+  if (hits.length === 0) return <span className="text-text-muted">—</span>;
   return (
     <ul className="flex flex-col gap-1">
       {hits.map((h) => (
         <li key={h.id} className="truncate">
-          <code className="text-[9px] text-muted mr-1">{h.type}</code>
+          <code className="text-[9px] text-text-muted mr-1">{h.type}</code>
           <span className="font-medium">{h.key}</span>
         </li>
       ))}
@@ -307,7 +308,9 @@ function MemorySection({ comparison, t }: { comparison: RunComparison; t: Transl
   if (left.memoryHits.length === 0 && right.memoryHits.length === 0) return null;
   return (
     <div className="mt-2">
-      <div className="text-[10px] font-semibold uppercase text-muted mb-1">{t("drawerMemory")}</div>
+      <div className="text-[10px] font-semibold uppercase text-text-muted mb-1">
+        {t("drawerMemory")}
+      </div>
       <div className="grid grid-cols-2 gap-2 text-[11px] min-w-[480px]">
         <MemoryList hits={left.memoryHits} />
         <MemoryList hits={right.memoryHits} />
@@ -344,15 +347,14 @@ function ComparePanelHeaderBar({ t, onClose }: { t: Translate; onClose: () => vo
   return (
     <div className="flex items-center justify-between mb-2 min-w-[480px]">
       <span className="text-xs font-semibold">{t("compareTitle")}</span>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
+        icon="close"
         data-testid="orchestration-compare-close"
         aria-label={t("drawerClose")}
-        className="text-muted"
         onClick={onClose}
-      >
-        ✕
-      </button>
+      />
     </div>
   );
 }
@@ -398,7 +400,7 @@ function ComparisonMetrics({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-[9px] items-center min-w-[480px] text-muted">
+      <div className="grid grid-cols-[70px_1fr_1fr_70px] gap-2 text-[9px] items-center min-w-[480px] text-text-muted">
         <span />
         <span />
         <span />

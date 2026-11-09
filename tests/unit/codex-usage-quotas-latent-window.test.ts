@@ -12,15 +12,14 @@
  * Separately, the window display label must follow the real window duration
  * (`limit_window_seconds`) rather than assuming primary=session / secondary=
  * weekly by position — so a 7-day primary_window is labeled "Weekly", not
- * "Session". The internal `session`/`weekly` keys (routing semantics) are
- * unchanged; only the display label is corrected.
+ * "Session". Routing keys now follow the same duration identity (#18326).
  */
 import test from "node:test";
 import assert from "node:assert/strict";
 
 import { buildCodexUsageQuotas } from "../../open-sse/services/codexUsageQuotas.ts";
 import {
-  CODEX_SPARK_QUOTA_SESSION,
+  CODEX_SPARK_QUOTA_WEEKLY,
   CODEX_SPARK_DISPLAY_NAME,
 } from "../../open-sse/config/codexQuotaScopes.ts";
 
@@ -47,8 +46,8 @@ test("omits a latent, never-used spark window (used 0% + full-window reset)", ()
       },
     ],
   });
-  assert.equal(quotas[CODEX_SPARK_QUOTA_SESSION], undefined, "latent spark window must be hidden");
-  assert.ok(quotas.session, "the main session window is still present");
+  assert.equal(quotas[CODEX_SPARK_QUOTA_WEEKLY], undefined, "latent spark window must be hidden");
+  assert.ok(quotas.weekly, "the main weekly window is still present");
 });
 
 test("includes the spark window once it has actually been used", () => {
@@ -70,8 +69,8 @@ test("includes the spark window once it has actually been used", () => {
       },
     ],
   });
-  assert.ok(quotas[CODEX_SPARK_QUOTA_SESSION], "used spark window must be shown");
-  assert.equal(quotas[CODEX_SPARK_QUOTA_SESSION].used, 12);
+  assert.ok(quotas[CODEX_SPARK_QUOTA_WEEKLY], "used spark window must be shown");
+  assert.equal(quotas[CODEX_SPARK_QUOTA_WEEKLY].used, 12);
 });
 
 test("spark display name comes from the payload limit_name, falling back to the constant", () => {
@@ -81,12 +80,20 @@ test("spark display name comes from the payload limit_name, falling back to the 
         limit_name: "GPT-9.9-Codex-Nova",
         metered_feature: "codex_bengalfox",
         rate_limit: {
-          primary_window: { used_percent: 5, limit_window_seconds: WEEK, reset_after_seconds: 1000 },
+          primary_window: {
+            used_percent: 5,
+            limit_window_seconds: WEEK,
+            reset_after_seconds: 1000,
+          },
         },
       },
     ],
-  }).quotas[CODEX_SPARK_QUOTA_SESSION];
-  assert.equal(withName?.displayName, "GPT-9.9-Codex-Nova", "uses payload limit_name");
+  }).quotas[CODEX_SPARK_QUOTA_WEEKLY];
+  assert.equal(
+    withName?.displayName,
+    "GPT-9.9-Codex-Nova Weekly",
+    "uses payload limit_name and duration"
+  );
 
   const withoutName = buildCodexUsageQuotas({
     additional_rate_limits: [
@@ -94,12 +101,20 @@ test("spark display name comes from the payload limit_name, falling back to the 
         metered_feature: "codex_bengalfox",
         model: "codex-spark",
         rate_limit: {
-          primary_window: { used_percent: 5, limit_window_seconds: WEEK, reset_after_seconds: 1000 },
+          primary_window: {
+            used_percent: 5,
+            limit_window_seconds: WEEK,
+            reset_after_seconds: 1000,
+          },
         },
       },
     ],
-  }).quotas[CODEX_SPARK_QUOTA_SESSION];
-  assert.equal(withoutName?.displayName, CODEX_SPARK_DISPLAY_NAME, "falls back to constant");
+  }).quotas[CODEX_SPARK_QUOTA_WEEKLY];
+  assert.equal(
+    withoutName?.displayName,
+    `${CODEX_SPARK_DISPLAY_NAME} Weekly`,
+    "falls back to constant"
+  );
 });
 
 test("labels a 7-day primary_window as Weekly, not Session", () => {
@@ -109,8 +124,8 @@ test("labels a 7-day primary_window as Weekly, not Session", () => {
       secondary_window: null,
     },
   });
-  assert.ok(quotas.session, "primary window is keyed 'session' (routing semantics unchanged)");
-  assert.equal(quotas.session.displayName, "Weekly", "but displayed as Weekly by real duration");
+  assert.ok(quotas.weekly, "weekly primary carries the weekly routing key");
+  assert.equal(quotas.session, undefined, "weekly primary never fabricates a session");
 });
 
 test("leaves a genuine 5h session window with the default label", () => {

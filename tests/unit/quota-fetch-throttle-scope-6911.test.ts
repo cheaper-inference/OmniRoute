@@ -9,17 +9,65 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { fetchDeepseekQuota, invalidateDeepseekQuotaCache } from "../../open-sse/services/deepseekQuotaFetcher.ts";
-import { fetchBailianQuota, invalidateBailianQuotaCache } from "../../open-sse/services/bailianQuotaFetcher.ts";
-import { fetchOpencodeQuota, invalidateOpencodeQuotaCache } from "../../open-sse/services/opencodeQuotaFetcher.ts";
-import { fetchCrofUsage, invalidateCrofUsageCache } from "../../open-sse/services/crofUsageFetcher.ts";
+import {
+  fetchDeepseekQuota,
+  invalidateDeepseekQuotaCache,
+} from "../../open-sse/services/deepseekQuotaFetcher.ts";
+import {
+  fetchBailianQuota,
+  invalidateBailianQuotaCache,
+} from "../../open-sse/services/bailianQuotaFetcher.ts";
+import {
+  fetchOpencodeQuota,
+  invalidateOpencodeQuotaCache,
+} from "../../open-sse/services/opencodeQuotaFetcher.ts";
+import {
+  fetchCrofUsage,
+  invalidateCrofUsageCache,
+} from "../../open-sse/services/crofUsageFetcher.ts";
 import { resetQuotaFetchThrottle } from "../../open-sse/services/quotaFetchThrottle.ts";
+import {
+  connectionProxyTestOverride,
+  fetchWithConnectionProxy,
+} from "../../open-sse/services/connectionProxyFetch.ts";
+
+// Timing margins (2026-10-18). The throttle spaces each acquire() by the interval plus up to
+// 120 ms of jitter, but this file measures at the mocked fetch, so whatever the process does
+// between acquire() and fetch is inside the window. On a loaded runner a 30-50 ms scheduling
+// hiccup on the first call alone shrank a 200 ms spacing to 168 ms (seen with the JON-562 heap
+// snapshot suite running in parallel). A wider interval keeps 100 ms of slack while an
+// unthrottled pair still lands within a few ms of each other, and a cache hit that waited on
+// the throttle would still take at least the full interval.
+const MIN_INTERVAL_MS = 400;
+const MIN_SPREAD_MS = 300;
+const MAX_CACHE_HIT_MS = 150;
 
 const originalFetch = globalThis.fetch;
 const originalEnv = process.env.OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS;
 
+// Since #15885 every fetcher calls fetchWithConnectionProxy() between the throttle's acquire()
+// and the upstream fetch. The first call of the process pays one-time costs inside that window:
+// it lazily imports the proxy transport and the error helpers, then imports the DB settings
+// module and opens SQLite with every migration to look up the connection's proxy (3-5 s on the
+// 2026-10-18 tip). The second call, released 200 ms later, waits on the same imports, so both
+// fetches left together (spread 20-50 ms) and the first test of this file failed whatever the
+// throttle did. This file measures the throttle, not that start-up: answer "no proxy assigned"
+// without the database, as the proxy suites do, and pay the lazy imports once before any timing.
+test.before(async () => {
+  connectionProxyTestOverride.resolveProxyForConnection = async () => null;
+  const fetchBeforeWarmup = globalThis.fetch;
+  await fetchWithConnectionProxy("warmup-6911", "https://warmup.invalid/", undefined, {
+    fetchFn: (async () => new Response("{}", { status: 200 })) as typeof fetch,
+  });
+  globalThis.fetch = fetchBeforeWarmup; // importing the transport installs its interceptor
+});
+
+test.after(() => {
+  connectionProxyTestOverride.resolveProxyForConnection = null;
+});
+
 test.beforeEach(() => {
-  process.env.OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS = "200";
+  process.env.OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS = String(MIN_INTERVAL_MS);
   resetQuotaFetchThrottle();
 });
 
@@ -88,8 +136,8 @@ async function assertSpacedByThrottle(
   assert.equal(callStarts.length, 2, `${label}: expected 2 upstream calls`);
   const spread = Math.abs(callStarts[1] - callStarts[0]);
   assert.ok(
-    spread >= 180,
-    `${label}: calls were NOT spaced by the shared throttle (spread=${spread}ms, expected >=180ms)`
+    spread >= MIN_SPREAD_MS,
+    `${label}: calls were NOT spaced by the shared throttle (spread=${spread}ms, expected >=${MIN_SPREAD_MS}ms)`
   );
 }
 
@@ -122,10 +170,7 @@ test("#6911 fetchOpencodeQuota is spaced by the shared quota-fetch throttle", as
 
 test("#6911 fetchCrofUsage is spaced by the shared quota-fetch throttle", async () => {
   await assertSpacedByThrottle("crof", crofBody, (idA, idB) =>
-    Promise.all([
-      fetchCrofUsage(idA, { apiKey: "sk-a" }),
-      fetchCrofUsage(idB, { apiKey: "sk-b" }),
-    ])
+    Promise.all([fetchCrofUsage(idA, { apiKey: "sk-a" }), fetchCrofUsage(idB, { apiKey: "sk-b" })])
   );
 });
 
@@ -150,7 +195,7 @@ test("#6911 cache hits are never delayed by the shared quota-fetch throttle", as
   assert.equal(calls, 1, "second call should be served from cache, not hit the network");
   assert.ok(second !== null);
   assert.ok(
-    secondElapsed < 50,
+    secondElapsed < MAX_CACHE_HIT_MS,
     `cache-hit path should not be delayed by the throttle (took ${secondElapsed}ms, t0=${t0})`
   );
 
@@ -182,7 +227,7 @@ test("#6911 fetchBailianQuota China-region retry fetch is also throttled", async
   assert.equal(callStarts.length, 2, "expected primary + China-region retry fetch");
   const spread = Math.abs(callStarts[1] - callStarts[0]);
   assert.ok(
-    spread >= 180,
+    spread >= MIN_SPREAD_MS,
     `China-region retry fetch was NOT spaced by the shared throttle (spread=${spread}ms)`
   );
 

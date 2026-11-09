@@ -65,6 +65,16 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` uchun `metadata.combo` shlyuz soʻrovidagi
+`metadata.model` qiymatini aniq almashtiradi; u eʼtiborsiz qoldiriladigan `x-combo` JSON maydoni sifatida emas, balki haqiqiy `model` sifatida yuboriladi.
+Shlyuzning odatiy API kaliti va har bir maqsad uchun avtorizatsiyasi hamon qoʻllaniladi. Notoʻgʻri yoki boʻsh kombinatsiya rad etiladi.
+
+Natija `requested_combo` (chaqiruvchining maqsadi), `dispatched_model`
+(shlyuzga yuborilgan haqiqiy soʻrov), `response_model` (shlyuz javobi) va
+`confirmed_combo` qiymatlarini taqdim etadi. Agar shlyuz kombinatsiyani aniq
+koʻrsatmasa, oxirgi maydon `null` boʻladi. A2A qaror jurnallari bajarilishni faqat
+tasdiqlangan kombinatsiyaga bogʻlaydi, tasdiqlanmagan soʻrov esa `requestedCombo` sifatida saqlanadi.
+
 **Javob:**
 
 ```json
@@ -76,28 +86,21 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE oqimi
+### `message/stream` — SSE orqali oqimli uzatish
 
 `message/send` bilan bir xil, ammo real vaqt rejimida oqimli uzatish uchun Server-Sent Events hodisalarini qaytaradi.
 
@@ -146,86 +149,94 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Mavjud ko‘nikmalar
+## Mavjud ko'nikmalar
 
-OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ichida ulangan 6 ta A2A ko‘nikmasini taqdim etadi. Har bir ko‘nikma moduli `src/lib/a2a/skills/` ichida joylashgan.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`-da o'rnatilgan 6 A2A ko'nikmalarini ochib beradi. Har bir mahorat moduli `src/lib/a2a/skills/` da yashaydi.
 
-| Ko‘nikma                   | ID                   | Tavsif                                                                                                                                                                             | Teglar                         | Misollar                                        |
-| :------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------- |
-| Aqlli marshrutlash         | `smart-routing`      | OmniRoute kombinatsiya mexanizmi va baholash tizimidan foydalanib, so‘rovni optimal provayder/kombinatsiya orqali yo‘naltiradi                                                     | marshrutlash, provayderlar     | "Bu so‘rovni eng yaxshi model orqali yo‘naltir" |
-| Kvotani boshqarish         | `quota-management`   | Har bir provayder bo‘yicha kvota holatini ko‘rsatadi va chaqiruvchilarga qachon cheklash/almashtirish kerakligini aniqlashga yordam beradi                                         | kvota, provayderlar            | "anthropic uchun kvotani tekshir"               |
-| Provayderlarni aniqlash    | `provider-discovery` | O‘rnatilgan provayderlarni imkoniyatlari, bepul tarif belgilari va OAuth holati bilan birga ro‘yxatlaydi                                                                           | provayderlar, aniqlash         | "Qanday provayderlar mavjud?"                   |
-| Xarajatlar tahlili         | `cost-analysis`      | Katalog va oxirgi foydalanish ma’lumotlari asosida so‘rov/suhbat xarajatini hisoblaydi                                                                                             | xarajat, foydalanish           | "Bu suhbat xarajatini hisobla"                  |
-| Holat hisoboti             | `health-report`      | Har bir provayder bo‘yicha avtomatik uzgich, kutish muddati va blokirovka holatini jamlaydi                                                                                        | holat, barqarorlik             | "Barcha provayderlarning holatini ko‘rsat"      |
-| Imkoniyatlarni ro‘yxatlash | `list-capabilities`  | Kontekst kiritish uchun xom SKILL.md URL manzillari bilan to‘liq 45 elementli Agent Skills katalogini (23 API + 21 CLI + 1 konfiguratsiya) markdown jadvali ko‘rinishida qaytaradi | katalog, aniqlash, ko‘nikmalar | "Barcha OmniRoute imkoniyatlarini ro‘yxatla"    |
+| Malaka                     | ID                   | Tavsif                                                                                                                                                           | Teglar                          | Misollar                                              |
+| :------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------- |
+| Aqlli marshrutlash         | `smart-routing`      | OmniRoute ning kombinatsiyalangan dvigateli + skoring yordamida optimal provider/combo bo'yicha taklifni yo'naltiradi                                            | marshrutlash, provayderlar      | "Ushbu taklifni eng yaxshi model orqali yo'naltiring" |
+| Kvota boshqaruvi           | `quota-management`   | Har bir provayder kvotasi holati haqida hisobot beradi, qo'ng'iroq qiluvchilarga qachon throttle/switch qilishni tanlashda yordam beradi                         | kvota, provayderlar             | "Antropik uchun kvotani tekshiring"                   |
+| Provayder kashfiyoti       | `provider-discovery` | Imkoniyatlar, bepul darajali bayroqlar, OAuth holati bilan o'rnatilgan provayderlar ro'yxati                                                                     | provayderlar, kashfiyot         | "Qanday provayderlar mavjud?"                         |
+| Xarajatlarni tahlil qilish | `cost-analysis`      | Katalog + so'nggi foydalanishni hisobga olgan holda request/conversation narxini taxmin qiladi                                                                   | xarajat, foydalanish            | "Ushbu suhbatning taxminiy narxi"                     |
+| Sog'liqni saqlash hisoboti | `health-report`      | Har bir provayder uchun avtomatik o'chirgich, sovutish, blokirovka holatini birlashtiradi                                                                        | salomatlik, chidamlilik         | "Barcha provayderlarning sog'lig'ini ko'rsatish"      |
+| Imkoniyatlar ro'yxati      | `list-capabilities`  | To‘liq 45 ta Agent Skills katalogini (23 API + 21 CLI + 1 konfiguratsiya) kontekstni kiritish uchun xom SKILL.md URLs bilan belgilash jadvali sifatida qaytaradi | katalog, kashfiyot, ko'nikmalar | "Barcha OmniRoute imkoniyatlarini sanab o'ting"       |
 
-> Agent kartasi amaldagi 352 provayderli katalog bilan muvofiqlashtirib turilishi kerak; provayderlar soni hamda bepul/autentifikatsiyasiz foydalanish metama’lumotlari bajarilish vaqtidagi reyestrdan olinadi.
+> Agent kartasi jonli 381 provayder katalogiga mos holda saqlanishi kerak; provayderlar soni va free/no-auth metama'lumotlari ish vaqti registridan olingan.
 
-### `list-capabilities` ko‘nikmasi tafsilotlari
+### `list-capabilities` mahorat tafsilotlari
 
-`list-capabilities` ko‘nikmasi API chaqiruvlarini yuborishdan oldin OmniRoute nimalarni taqdim etishini aniqlashi kerak bo‘lgan tashqi agentlar uchun ayniqsa foydalidir. U tuzilmali markdown jadval artefaktini qaytaradi:
+`list-capabilities` mahorati, ayniqsa API qo'ng'iroqlarini yuborishdan oldin OmniRoute nimani fosh qilishini bilishi kerak bo'lgan tashqi agentlar uchun foydalidir. U tuzilgan belgilash jadvali artefaktini qaytaradi:
 
 ```
-| ID | Nomi | Toifa | Soha | Endpointlar/Buyruqlar | Xom URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikatsiya va seanslar | api | autentifikatsiya | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Har bir qator `rawUrl` ustunini o‘z ichiga oladi, shuning uchun agentlar darhol to‘liq SKILL.md faylini olishi mumkin. `metadata.totalSkills` maydoni katalog hajmini aks ettiradi (bugungi kunda 45 ta). Amalga oshirish: `src/lib/a2a/skills/listCapabilities.ts`. Shuningdek, [AGENT-SKILLS.md](./AGENT-SKILLS.md) fayliga qarang.
+Har bir qator `rawUrl` ustunini o'z ichiga oladi, shuning uchun agentlar darhol to'liq SKILL.md olishlari mumkin. `metadata.totalSkills` maydoni katalog hajmini aks ettiradi (bugungi kunda 45). Amalga oshirish: `src/lib/a2a/skills/listCapabilities.ts`. Shuningdek qarang [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (yordamchi)
 
-JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointlari boshqaruv panellari va tashqi vositalar uchun yordamchi kirishni taqdim etadi:
+JSON-RPC oxirgi nuqtasi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST so'nggi nuqtalari asboblar paneli va tashqi asboblar uchun yordamchi kirishni ta'minlaydi:
 
-| Endpoint                     | Metod | Tavsif                                                         | Autentifikatsiya                             |
-| :--------------------------- | :---- | :------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET   | Server holati, roʻyxatdan oʻtgan ko‘nikmalar                   | (ommaviy)                                    |
-| `/api/a2a/tasks`             | GET   | Vazifalarni filtrlar bilan roʻyxatlash                         | boshqaruv                                    |
-| `/api/a2a/tasks/[id]`        | GET   | Vazifani ID boʻyicha olish                                     | boshqaruv                                    |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Bajarilayotgan vazifani bekor qilish                           | boshqaruv                                    |
-| `/.well-known/agent.json`    | GET   | Agent kartasi (A2A aniqlash)                                   | (ommaviy, 3600s keshlanadi)                  |
-| `/api/a2a/tasks`             | POST  | OmniConductor parkiga kiruvchi delegatsiya (Conductor PRD RF5) | Bearer va `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Yakuniy nuqta                | Usul | Tavsif                                                        | Avtor                                                                                                         |
+| :--------------------------- | :--- | :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET  | Server holati, ro'yxatdan o'tgan ko'nikmalar                  | (ommaviy)                                                                                                     |
+| `/api/a2a/tasks`             | GET  | Filtrlar bilan vazifalar ro'yxati                             | boshqaruv yoki API kaliti (pastga qarang)                                                                     |
+| `/api/a2a/tasks/[id]`        | GET  | Topshiriqni ID orqali oling                                   | boshqaruv yoki API kaliti (pastga qarang)                                                                     |
+| `/api/a2a/tasks/[id]/cancel` | POST | Ishlayotgan vazifani bekor qilish                             | boshqaruv yoki API kaliti (pastga qarang)                                                                     |
+| `/.well-known/agent.json`    | GET  | Agent kartasi (A2A kashfiyoti)                                | (ommaviy, keshlangan 3600s)                                                                                   |
+| `/api/a2a/tasks`             | POST | OmniConductor flotiga kiruvchi delegatsiya (dirijyor PRD RF5) | `GET` bilan bir xil, agar `REQUIRE_API_KEY` o'chirilgan bo'lsa, qo'shimcha `OMNIROUTE_API_KEY` ; `a2aEnabled` |
 
-**Kiruvchi Conductor delegatsiyasi (`POST /api/a2a/tasks`):** tashqi A2A agentlari kodlash ishlarini OmniRoute orqali OmniConductor parkiga delegatsiya qiladi. Soʻrov tanasi: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — faqat Conductor parki ko‘nikmalarini (Agent kartasida eʼlon qilinganlarini) delegatsiya qilish mumkin; `metadata.conductor.repo.url` talab qilinadi (park git repozitoriylari ustida ishlaydi). Marshrut server tomonidagi `CONDUCTOR_ORCHESTRATOR_TOKEN` (zaxira sifatida `CONDUCTOR_HUB_TOKEN`) yordamida hubning `POST /v1/tasks` soʻroviga aylantiriladi va `201 { conductor_task_id, state: "submitted" }` qaytaradi; vazifa holatlari SSE→A2A ko‘zgusi (RF1) orqali qaytib keladi va ularni `GET /api/a2a/tasks?skill=conductor` orqali koʻrish mumkin.
+`/api/a2a/tasks*` marshrutlariga kim kirishi login va API-kalit sozlamalariga bog'liq:
+
+- `requireLogin=true` (standart): o'rta dastur faqat boshqaruv hisob ma'lumotlarini (boshqaruv paneli sessiyasi, `manage` -scope API kaliti, `oma_` kirish tokeni) va `OMNIROUTE_API_KEY` qabul qiladi. Oddiy xulosa kaliti `403` oladi. `Authorization` sarlavhasida o'rta dastur faqat `OMNIROUTE_API_KEY` `Bearer <key>` sifatida qabul qiladi; yalang'och kalit yoki `Bearer` `401` olgandan keyin tab.
+- `requireLogin=false`, yoki ishga tushirishdan oldin orqaga qaytish oynasi: `REQUIRE_API_KEY=true` bilan har qanday joriy OmniRoute API kaliti yoki boshqaruv hisob ma’lumotlari qabul qilinadi va anonim qo‘ng‘iroq qiluvchilar `401` ega bo‘ladilar; `REQUIRE_API_KEY` o'chirilgan holda marshrutlar ochiq.
+- `POST /api/a2a/tasks` qo'shimcha ravishda bu o'zgaruvchi o'rnatilgan va `REQUIRE_API_KEY` o'chirilgan bo'lsa, `Authorization` sarlavhasida `OMNIROUTE_API_KEY` talab qiladi. Boshqa sarlavhalar, masalan `x-api-key`, u erda hisobga olinmaydi. Tizimga kirish oʻchirilganda yoki kirishdan oldin kalit `Bearer` prefiksi bilan yoki boʻlmasdan oʻtadi; login bilan faqat `Bearer <key>` o'rta dasturdan o'tadi.
+
+Hisob ma'lumotlari kerak bo'lganda, `read` -scope `oma_` tokeni faqat `GET` uchun ishlaydi.
+
+**Kiruvchi konduktor delegatsiyasi (`POST /api/a2a/tasks`):** tashqi A2A agentlari kodlash ishlarini OmniRoute orqali OmniConductor flotiga topshiradi. Tana: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — faqat Supero'tkazuvchilar parki ko'nikmalari (Agent kartasida e'lon qilinganlar) vakolatga ega; `metadata.conductor.repo.url` talab qilinadi (flot git reposlarida ishlaydi). Marshrut server tomonidagi `CONDUCTOR_ORCHESTRATOR_TOKEN` (qayta `CONDUCTOR_HUB_TOKEN`) yordamida markazning `POST /v1/tasks` ga tarjima qilinadi va `201 { conductor_task_id, state: "submitted" }` qaytaradi; vazifa holatlari SSE→A2A oynasi (RF1) orqali orqaga oqadi va `GET /api/a2a/tasks?skill=conductor` orqali ko'rinadi.
 
 ---
 
-## Yangi ko‘nikma qoʻshish
+## Yangi mahorat qo'shish
 
-1. **Ko‘nikma faylini yarating:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Malaka faylini yarating:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` asinxron funksiyasini eksport qiling. `smartRouting.ts` kabi mavjud ko‘nikmalar tuzilishiga amal qiling.
+   `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` asinx funksiyasini eksport qilish. `smartRouting.ts` kabi mavjud ko'nikmalar shakliga rioya qiling. Agar mahorat HTTP orqali OmniRoute ga qayta qo'ng'iroq qilsa, sarlavhalarni `src/lib/a2a/selfLoopAuth.ts` dan `buildSelfLoopHeaders(caller)` bilan tuzing, shunda qo'ng'iroq `OMNIROUTE_API_KEY` emas, A2A qo'ng'iroq qiluvchining kaliti bilan ishlaydi va `redirect: "error"` `fetch` ga o'tkazing, shuning uchun qayta yo'naltirish hech qachon kalitni olmaydi. Yordamchi faqat sarlavhalarni tuzadi; har bir mahorat qayta yo'naltirish siyosatini o'zi belgilaydi. Yechilgan URL bazasi xususiy tarmoqdan tashqarida oddiy http boʻlsa (qayta tiklash, konteyner yoki xizmat nomi va shaxsiy manzillar yaxshi) yoki hisob maʼlumotlariga ega boʻlsa, u kalitni biriktirish oʻrniga `UnsafeSelfLoopTargetError` chiqaradi, shuning uchun rad etilgan qoʻngʻiroqlarni yutib yuboradigan mahorat bu xatoni qayta tiklashi kerak.
 
-2. **Ishlov beruvchini roʻyxatdan oʻtkazing:** `src/lib/a2a/taskExecution.ts` faylidagi `A2A_SKILL_HANDLERS` obyektiga yozuv qoʻshing:
+2. **Ro'yxatdan o'tish boshqaruvchisi:** `src/lib/a2a/taskExecution.ts` da `A2A_SKILL_HANDLERS` ga yozuv qo'shing:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mavjud ko‘nikmalar
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent kartasida koʻrsating:** `src/app/.well-known/agent.json/route.ts` faylidagi `skills` massiviga qoʻshing:
+3. **Agent kartasida ochish:** `src/lib/a2a/agentCardMetadata.ts` da ( `/.well-known/agent.json` va `/.well-known/agent-card.json` tomonidan taqsimlangan), `skills` massiviga qo'shing:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ko‘nikmangiz",
-     "description": "Qisqa, maqsadga yoʻnaltirilgan tavsif",
-     "tags": ["marshrutlash", "kvota"],
-     "examples": ["Tabiiy tildagi chaqiruv namunasi"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Testlar yozing:** `tests/unit/a2a-<your-skill>.test.ts`. Muvaffaqiyatli bajarilish va xatolik holatlarini qamrab oling.
+4. **Testlarni yozing:** `tests/unit/a2a-<your-skill>.test.ts`. Baxtli yo'l + xato yo'lini yoping.
 
-5. **Yangi ko‘nikmani** ushbu fayldagi `Mavjud ko‘nikmalar` jadvalida hujjatlashtiring.
+5. **Hujjat** bu faylning `Available Skills` jadvalidagi yangi mahorat.
 
 ---
 
@@ -262,9 +273,9 @@ yuborilgan → bajarilmoqda → yakunlangan
 
 ---
 
-## Integratsiya misollari
+## Integratsiyaga misollar
 
-### Python (requests)
+### Python (so'rovlar)
 
 ```python
 import requests
@@ -283,7 +294,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (olish)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

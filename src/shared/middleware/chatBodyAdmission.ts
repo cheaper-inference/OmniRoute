@@ -15,6 +15,8 @@
  * connection's burst cannot starve others (#9654).
  */
 
+import { getCachedBodySizeSettings } from "../../lib/db/readCache";
+import { getSavedBodySizeLimitBytes } from "./bodySizeGuard";
 import { createLogger } from "../utils/logger";
 import { DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS } from "../../lib/resilience/settings";
 import v8 from "node:v8";
@@ -29,6 +31,7 @@ import {
 import {
   bodyExceedsBudgetResponse,
   chatAdmissionRejectionResponse,
+  contentEncodingRejectionResponse,
   resourcePressureRejectionResponse,
   structuralRejectionResponse,
 } from "./chatAdmissionResponses";
@@ -38,6 +41,7 @@ import {
   IngestByteAdmissionController,
   type IngestBudgetAcquireResult,
 } from "./ingestByteAdmission";
+import { decodeRequestBodyBytes, normalizeContentEncoding } from "../utils/requestBodyEncoding";
 import {
   checkResourcePressureGuard,
   getResourcePressureObservation,
@@ -62,6 +66,12 @@ export const CHAT_LARGE_BODY_BYTES = parsePositiveInt(
 export const CHAT_HARD_MAX_BODY_BYTES = parsePositiveInt(
   process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,
   50 * 1024 * 1024
+);
+
+/** Set only when the operator chose a chat ceiling; it then caps a saved limit as well. */
+const CHAT_EXPLICIT_HARD_MAX_BODY_BYTES = parsePositiveInt(
+  process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,
+  Number.POSITIVE_INFINITY
 );
 
 export const CHAT_MAX_HEAVY_IN_FLIGHT = parsePositiveInt(
@@ -249,7 +259,7 @@ export type ChatAdmissionShedReason =
  * "critical", a passive read here sheds every subsequent request before any
  * of those downstream paths can run, which means `check()` never gets called
  * again and the guard can never observe recovery. See
- * https://github.com/diegosouzapw/OmniRoute/issues/13821.
+ * https://github.com/cheaper-inference/OmniRoute/issues/13821.
  *
  * `checkResourcePressureGuard()` is cheap on the hot path: it only does a
  * synchronous `process.memoryUsage()` read plus a timestamp comparison per
@@ -1013,6 +1023,8 @@ function rebuildRequest(request: Request, body: Uint8Array): Request {
   const headers = new Headers(request.headers);
   // The inbound value may be absent or dishonest. Let the runtime derive the correct value.
   headers.delete("content-length");
+  // The body is already decoded (decodeAdmittedBody), so the encoding must not ride along.
+  headers.delete("content-encoding");
   return new Request(request.url, {
     method: request.method,
     headers,
@@ -1020,6 +1032,45 @@ function rebuildRequest(request: Request, body: Uint8Array): Request {
     signal: request.signal,
     duplex: "half",
   } as RequestInit & { duplex: "half" });
+}
+
+/**
+ * The saved `maxBodySizeMb` when there is one, the same limit the header guard uses for these
+ * routes; otherwise the chat default. A read failure also falls back to that default.
+ */
+async function getChatBodyLimitBytes(): Promise<number> {
+  try {
+    const saved = getSavedBodySizeLimitBytes(await getCachedBodySizeSettings());
+    return saved === null
+      ? CHAT_HARD_MAX_BODY_BYTES
+      : Math.min(saved, CHAT_EXPLICIT_HARD_MAX_BODY_BYTES);
+  } catch (error) {
+    shedLog.warn({ err: error }, "Failed to load request body limit; using the chat default");
+    return CHAT_HARD_MAX_BODY_BYTES;
+  }
+}
+
+/**
+ * Decode a compressed body exactly once, expanding to at most `hardMaxBytes` (decompression-
+ * bomb guard). Identity bodies pass through as the same buffer, with no copy.
+ */
+async function decodeAdmittedBody(
+  request: Request,
+  body: Uint8Array,
+  hardMaxBytes: number
+): Promise<{ body: Uint8Array } | { response: Response }> {
+  const encoding = normalizeContentEncoding(request.headers.get("content-encoding"));
+  if (!encoding) return { body };
+  const decoded = await decodeRequestBodyBytes(body, encoding, hardMaxBytes);
+  // `=== true` (not a truthiness test): the repo compiles without strictNullChecks, where
+  // only an equality check narrows the boolean discriminant to the failure branch below.
+  if (decoded.ok === true) return { body: decoded.body };
+  return {
+    response:
+      decoded.reason === "too_large"
+        ? chatAdmissionRejectionResponse(413, hardMaxBytes)
+        : contentEncodingRejectionResponse(decoded.reason),
+  };
 }
 
 /** Reserve heavyweight capacity and ingest the body with a hard byte bound. */
@@ -1038,7 +1089,8 @@ export async function admitChatRequest(
   const controller =
     options.controller ?? perConnectionAdmissionController.getController(sessionId);
   const largeBodyBytes = options.largeBodyBytes ?? CHAT_LARGE_BODY_BYTES;
-  const hardMaxBytes = options.hardMaxBytes ?? CHAT_HARD_MAX_BODY_BYTES;
+  // Snapshot the limit once per request: a body in flight keeps the limit it started under.
+  const hardMaxBytes = options.hardMaxBytes ?? (await getChatBodyLimitBytes());
   const queueMs = options.queueMs ?? 0;
   const internalBypass = isInternalAdmissionBypass(request);
   const contentLength = parseContentLength(request.headers.get("content-length"));
@@ -1076,7 +1128,9 @@ export async function admitChatRequest(
       body.set(chunk, offset);
       offset += chunk.byteLength;
     }
-    return { admit: true, request: rebuildRequest(request, body), lease: NULL_LEASE };
+    const decodedBypass = await decodeAdmittedBody(request, body, hardMaxBytes);
+    if ("response" in decodedBypass) return { admit: false, response: decodedBypass.response };
+    return { admit: true, request: rebuildRequest(request, decodedBypass.body), lease: NULL_LEASE };
   }
 
   // #503-fanout: shed before spending any bytes on ingestion when the process
@@ -1188,7 +1242,23 @@ export async function admitChatRequest(
     body.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return { admit: true, request: rebuildRequest(request, body), lease };
+  const decoded = await decodeAdmittedBody(request, body, hardMaxBytes);
+  if ("response" in decoded) {
+    lease?.release();
+    return { admit: false, response: decoded.response };
+  }
+  // Wire bytes were charged above. A body that only crosses the large-body line once
+  // expanded takes the same budget check and heavyweight lease as an uncompressed one.
+  const decodedBytes = decoded.body.byteLength;
+  if (decodedBytes !== totalBytes && decodedBytes >= largeBodyBytes) {
+    if (!controller.canFitBudget(decodedBytes)) {
+      controller.recordShed("body_exceeds_budget", sessionId);
+      lease?.release();
+      return { admit: false, response: bodyExceedsBudgetResponse(controller.maxInflightBytes) };
+    }
+    if (!(await reserve(decodedBytes))) return { admit: false, response: busyResponse() };
+  }
+  return { admit: true, request: rebuildRequest(request, decoded.body), lease };
 }
 
 // Lease release binding lives in ./chatAdmissionRelease. Re-exported here so

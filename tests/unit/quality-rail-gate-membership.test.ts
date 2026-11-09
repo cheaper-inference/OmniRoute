@@ -78,21 +78,27 @@ test("fast-gates carries the deterministic ratchets and security scanners from t
   ]) {
     assert.ok(block.includes(needle), `fast-gates must contain "${needle}"`);
   }
+  // The ratchet_gates move must be exclusive: a plain `cycles` entry would run
+  // check-cycles.mjs without --ratchet, which exits 1 on ANY cycle and fails
+  // every PR at the frozen 14-SCC ceiling (#15306). Pin the whole gates=(...)
+  // array, not just its current line, so a re-entry on any line trips the guard.
+  const plainGates = /\n(\s+)gates=\(([\s\S]*?)\n\1\)/.exec(block);
+  assert.ok(plainGates, "fast-gates must still carry the deterministic plain gates array");
+  assert.doesNotMatch(
+    plainGates[2],
+    /(^|\s)cycles(\s|$)/,
+    "cycles must not re-enter the plain gates array — it would run without --ratchet"
+  );
   assert.ok(
     block.includes(
       "BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}"
     ),
     "oasdiff must receive the origin-prefixed base ref fetched by actions/checkout"
   );
-  for (const version of [
-    "GITLEAKS_VERSION=v",
-    "OSV_SCANNER_VERSION=v",
-    "ACTIONLINT_VERSION=v",
-    "ZIZMOR_VERSION=",
-    "OASDIFF_VERSION=v",
-  ]) {
+  for (const version of ["GITLEAKS_VERSION=v", "OSV_SCANNER_VERSION=v", "OASDIFF_VERSION=v"]) {
     assert.ok(block.includes(version), `fast-gates must pin ${version.split("=")[0]}`);
   }
+  assert.ok(block.includes("bash scripts/ci/install-workflow-scanners.sh"));
   assert.doesNotMatch(
     block,
     /download-actionlint\.bash\) latest/,

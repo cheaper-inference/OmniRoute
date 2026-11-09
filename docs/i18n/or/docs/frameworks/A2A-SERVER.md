@@ -46,7 +46,7 @@ A2A **Endpoints → A2A** ଟଗଲ୍ ଦ୍ୱାରା ନିୟନ୍ତ୍�
 
 ### `message/send` — ସମକାଳୀନ ନିଷ୍ପାଦନ
 
-ଏକ ଦକ୍ଷତାକୁ ବାର୍ତ୍ତା ପଠାଏ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରତିକ୍ରିୟା ପାଇଁ ଅପେକ୍ଷା କରେ।
+ଏକ ସ୍କିଲ୍କୁ ସନ୍ଦେଶ ପଠାଏ ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରତିକ୍ରିୟା ପାଇଁ ଅପେକ୍ଷା କରେ।
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -64,6 +64,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` ପାଇଁ, `metadata.combo` ହେଉଛି ଗେଟୱେ ଅନୁରୋଧ ନିମନ୍ତେ
+`metadata.model`-ର ଏକ ସ୍ପଷ୍ଟ ଓଭରରାଇଡ୍; ଏହାକୁ ଅଣଦେଖା କରାଯାଇଥିବା `x-combo`
+JSON ଫିଲ୍ଡ ଭାବରେ ନୁହେଁ, ପ୍ରକୃତ `model` ଭାବରେ ପଠାଯାଏ। ଗେଟୱେର ସାଧାରଣ API କି ଏବଂ
+ପ୍ରତ୍ୟେକ ଟାର୍ଗେଟ୍ ପାଇଁ ପ୍ରାଧିକରଣ ତଥାପି ପ୍ରଯୁଜ୍ୟ ହୁଏ। ଏକ ଅବୈଧ କିମ୍ବା ଖାଲି କମ୍ବୋକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
+
+ଫଳାଫଳରେ `requested_combo` (କଲ୍କାରୀଙ୍କ ଉଦ୍ଦେଶ୍ୟ), `dispatched_model`
+(ପ୍ରକୃତ ଗେଟୱେ ଅନୁରୋଧ), `response_model` (ଗେଟୱେ ପ୍ରତିକ୍ରିୟା) ଏବଂ
+`confirmed_combo` ପ୍ରକାଶିତ ହୁଏ। ଗେଟୱେ ସ୍ପଷ୍ଟ ଭାବରେ କୌଣସି କମ୍ବୋ ଚିହ୍ନଟ ନକଲେ ଶେଷ ଫିଲ୍ଡଟି `null`
+ରହେ। A2A ନିଷ୍ପତ୍ତି ଲଗ୍ଗୁଡ଼ିକ କେବଳ ଏକ
+ନିଶ୍ଚିତ କମ୍ବୋକୁ ନିଷ୍ପାଦନର ଶ୍ରେୟ ଦିଅନ୍ତି, ଏବଂ ଏକ ଅନିଶ୍ଚିତ ଅନୁରୋଧକୁ `requestedCombo` ଭାବରେ ରଖନ୍ତି।
+
 **ପ୍ରତିକ୍ରିୟା:**
 
 ```json
@@ -75,22 +86,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -98,7 +102,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ଷ୍ଟ୍ରିମିଂ
 
-`message/send` ସହିତ ସମାନ, କିନ୍ତୁ ରିଅଲ୍-ଟାଇମ୍ ଷ୍ଟ୍ରିମିଂ ପାଇଁ Server-Sent Events ଫେରାଏ।
+`message/send` ସହ ସମାନ, କିନ୍ତୁ ରିଅଲ୍-ଟାଇମ୍ ଷ୍ଟ୍ରିମିଂ ପାଇଁ ସର୍ଭର୍-ସେଣ୍ଟ୍ ଇଭେଣ୍ଟ୍ଗୁଡ଼ିକ ଫେରାଏ।
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -115,7 +119,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE ଇଭେଣ୍ଟଗୁଡ଼ିକ:**
+**SSE ଇଭେଣ୍ଟ୍ଗୁଡ଼ିକ:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -125,7 +129,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — କାର୍ଯ୍ୟ ସ୍ଥିତି ପଚାରନ୍ତୁ
+### `tasks/get` — ଟାସ୍କ ସ୍ଥିତି ପଚାରନ୍ତୁ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -134,7 +138,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ଏକ କାର୍ଯ୍ୟ ବାତିଲ୍ କରନ୍ତୁ
+### `tasks/cancel` — ଏକ ଟାସ୍କ ବାତିଲ୍ କରନ୍ତୁ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -145,72 +149,80 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ଉପଲବ୍ଧ କୌଶଳଗୁଡ଼ିକ
+## ଉପଲବ୍ଧ କ ills ଶଳ।
 
-OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`ରେ ସଂଯୋଜିତ 6ଟି A2A କୌଶଳ ଉପଲବ୍ଧ କରାଏ। ପ୍ରତ୍ୟେକ କୌଶଳ ମଡ୍ୟୁଲ୍ `src/lib/a2a/skills/`ରେ ରହିଛି।
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ରେ ତାରଯୁକ୍ତ 6 A2A skills ଶଳ ପ୍ରକାଶ କରେ। ପ୍ରତ୍ୟେକ ସ୍କିଲ୍ ମଡ୍ୟୁଲ୍ `src/lib/a2a/skills/` ରେ ରୁହେ।
 
-| କୌଶଳ                 | ID                   | ବର୍ଣ୍ଣନା                                                                                                                                                       | ଟ୍ୟାଗ୍                    | ଉଦାହରଣ                                                 |
-| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :----------------------------------------------------- |
-| ସ୍ମାର୍ଟ ରାଉଟିଂ       | `smart-routing`      | OmniRouteର କମ୍ବୋ ଇଞ୍ଜିନ୍ + ସ୍କୋରିଂ ବ୍ୟବହାର କରି ସର୍ବୋତ୍ତମ ପ୍ରଦାନକାରୀ/କମ୍ବୋ ମାଧ୍ୟମରେ ଏକ ପ୍ରମ୍ପ୍ଟକୁ ରାଉଟ୍ କରେ                                                     | ରାଉଟିଂ, ପ୍ରଦାନକାରୀମାନେ    | "ସର୍ବୋତ୍ତମ ମଡେଲ୍ ମାଧ୍ୟମରେ ଏହି ପ୍ରମ୍ପ୍ଟକୁ ରାଉଟ୍ କରନ୍ତୁ" |
-| କୋଟା ପରିଚାଳନା        | `quota-management`   | ପ୍ରତି-ପ୍ରଦାନକାରୀ କୋଟା ସ୍ଥିତି ରିପୋର୍ଟ କରେ, କେବେ ଥ୍ରଟଲ୍/ସ୍ୱିଚ୍ କରିବେ ତାହା ନିର୍ଣ୍ଣୟ କରିବାରେ କଲର୍ମାନଙ୍କୁ ସାହାଯ୍ୟ କରେ                                               | କୋଟା, ପ୍ରଦାନକାରୀମାନେ      | "anthropic ପାଇଁ କୋଟା ଯାଞ୍ଚ କରନ୍ତୁ"                     |
-| ପ୍ରଦାନକାରୀ ଆବିଷ୍କାର  | `provider-discovery` | କ୍ଷମତା, ମାଗଣା-ସ୍ତର ଫ୍ଲାଗ୍ ଏବଂ OAuth ସ୍ଥିତି ସହିତ ଇନଷ୍ଟଲ୍ ହୋଇଥିବା ପ୍ରଦାନକାରୀମାନଙ୍କୁ ତାଲିକାଭୁକ୍ତ କରେ                                                              | ପ୍ରଦାନକାରୀମାନେ, ଆବିଷ୍କାର  | "କେଉଁ ପ୍ରଦାନକାରୀମାନେ ଉପଲବ୍ଧ?"                          |
-| ଖର୍ଚ୍ଚ ବିଶ୍ଳେଷଣ      | `cost-analysis`      | କ୍ୟାଟାଲଗ୍ + ସାମ୍ପ୍ରତିକ ବ୍ୟବହାର ଆଧାରରେ ଏକ ଅନୁରୋଧ/ବାର୍ତ୍ତାଳାପର ଖର୍ଚ୍ଚ ଆକଳନ କରେ                                                                                   | ଖର୍ଚ୍ଚ, ବ୍ୟବହାର           | "ଏହି ବାର୍ତ୍ତାଳାପର ଖର୍ଚ୍ଚ ଆକଳନ କରନ୍ତୁ"                  |
-| ସ୍ୱାସ୍ଥ୍ୟ ରିପୋର୍ଟ    | `health-report`      | ପ୍ରତି ପ୍ରଦାନକାରୀ ପାଇଁ ସର୍କିଟ୍ ବ୍ରେକର୍, କୁଲ୍ଡାଉନ୍ ଏବଂ ଲକ୍ଆଉଟ୍ ସ୍ଥିତିକୁ ଏକତ୍ର କରେ                                                                                | ସ୍ୱାସ୍ଥ୍ୟ, ସ୍ଥିତିସ୍ଥାପକତା | "ସମସ୍ତ ପ୍ରଦାନକାରୀଙ୍କ ସ୍ୱାସ୍ଥ୍ୟ ସ୍ଥିତି ଦେଖାନ୍ତୁ"        |
-| କ୍ଷମତାଗୁଡ଼ିକର ତାଲିକା | `list-capabilities`  | ପ୍ରସଙ୍ଗ ଇଞ୍ଜେକ୍ସନ୍ ପାଇଁ କଞ୍ଚା SKILL.md URLଗୁଡ଼ିକ ସହିତ ଏକ ମାର୍କଡାଉନ୍ ସାରଣୀ ଭାବେ ସମ୍ପୂର୍ଣ୍ଣ 45-ଏଣ୍ଟ୍ରି Agent Skills କ୍ୟାଟାଲଗ୍ (23 API + 21 CLI + 1 config) ଫେରାଏ | କ୍ୟାଟାଲଗ୍, ଆବିଷ୍କାର, କୌଶଳ | "ସମସ୍ତ OmniRoute କ୍ଷମତା ତାଲିକାଭୁକ୍ତ କରନ୍ତୁ"            |
+| ଦକ୍ଷତା।              | ID                   | ବର୍ଣ୍ଣନା                                                                                                                                                        | ଟ୍ୟାଗ୍ସ                         | ଉଦାହରଣଗୁଡିକ                                           |
+| :------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------- |
+| ସ୍ମାର୍ଟ ରାଉଟିଙ୍ଗ୍।   | `smart-routing`      | OmniRoute ର କମ୍ବୋ ଇଞ୍ଜିନ୍ + ସ୍କୋରିଂ ବ୍ୟବହାର କରି ଉତ୍କୃଷ୍ଟ provider/combo ମାଧ୍ୟମରେ ଏକ ପ୍ରମ୍ପ୍ଟକୁ ମାର୍ଗ ଦିଏ।                                                       | ମାର୍ଗ, ପ୍ରଦାନକାରୀ।              | ସର୍ବୋତ୍ତମ ମଡେଲ ମାଧ୍ୟମରେ ଏହି ପ୍ରମ୍ପ୍ଟକୁ ମାର୍ଗ ଦିଅନ୍ତୁ। |
+| କୋଟା ପରିଚାଳନା        | `quota-management`   | ପ୍ରତି-ପ୍ରଦାନକାରୀ କୋଟା ସ୍ଥିତିର ରିପୋର୍ଟ, କଲ୍ କରୁଥିବା ବ୍ୟକ୍ତିଙ୍କୁ throttle/switch ସ୍ଥିର କରିବାରେ ସାହାଯ୍ୟ କରେ।                                                       | କୋଟା, ପ୍ରଦାନକାରୀ।               | "ଆନ୍ଥ୍ରୋପିକ୍ ପାଇଁ କୋଟା ଯାଞ୍ଚ କରନ୍ତୁ"                  |
+| ପ୍ରଦାନକାରୀ ଆବିଷ୍କାର। | `provider-discovery` | ସାମର୍ଥ୍ୟ, ମାଗଣା ସ୍ତରୀୟ ପତାକା, OAuth ସ୍ଥିତି ସହିତ ସଂସ୍ଥାପିତ ପ୍ରଦାନକାରୀ ତାଲିକା।                                                                                    | ପ୍ରଦାନକାରୀ, ଆବିଷ୍କାର।           | "କେଉଁ ପ୍ରଦାନକାରୀ ଉପଲବ୍ଧ?"                             |
+| ମୂଲ୍ୟ ବିଶ୍ଳେଷଣ।      | `cost-analysis`      | ସମ୍ପ୍ରତି + କାଟାଲଗ୍ ଦିଆଯାଇଥିବା request/conversation ର ମୂଲ୍ୟ ଆକଳନ କରେ।                                                                                            | ମୂଲ୍ୟ, ବ୍ୟବହାର                  | "ଏହି ବାର୍ତ୍ତାଳାପ ପାଇଁ ଆନୁମାନିକ ମୂଲ୍ୟ"                 |
+| ସ୍ୱାସ୍ଥ୍ୟ ରିପୋର୍ଟ    | `health-report`      | ଏଗ୍ରିଗେଟ୍ ସର୍କିଟ ବ୍ରେକର୍, କୁଲଡାଉନ୍, ପ୍ରତି ପ୍ରଦାନକାରୀଙ୍କ ପାଇଁ ଲକଆଉଟ୍ ସ୍ଥିତି।                                                                                     | ସ୍ୱାସ୍ଥ୍ୟ, ସ୍ଥିରତା।             | "ସମସ୍ତ ପ୍ରଦାନକାରୀଙ୍କ ସ୍ୱାସ୍ଥ୍ୟ ସ୍ଥିତି ଦେଖାନ୍ତୁ"       |
+| ତାଲିକା ତାଲିକା।       | `list-capabilities`  | ପ୍ରସଙ୍ଗ ଇଞ୍ଜେକ୍ସନ୍ ପାଇଁ କଞ୍ଚା SKILL.md URLs ସହିତ ମାର୍କଡାଉନ୍ ଟେବୁଲ୍ ଭାବରେ ସମ୍ପୂର୍ଣ୍ଣ 45-ଏଣ୍ଟ୍ରି ଏଜେଣ୍ଟ ସ୍କିଲ୍ସ କାଟାଲଗ୍ (23 API + 21 CLI + 1 ବିନ୍ୟାସ) ଫେରସ୍ତ କରେ। | କାଟାଲଗ୍, ଆବିଷ୍କାର, କ skills ଶଳ। | "ସମସ୍ତ OmniRoute କ୍ଷମତା ତାଲିକା କର"                    |
 
-> Agent Cardକୁ ସକ୍ରିୟ 352-ପ୍ରଦାନକାରୀ କ୍ୟାଟାଲଗ୍ ସହିତ ସମନ୍ୱିତ ରଖିବା ଉଚିତ୍; ପ୍ରଦାନକାରୀ ସଂଖ୍ୟା ଏବଂ ମାଗଣା/ପ୍ରମାଣୀକରଣ-ବିହୀନ ମେଟାଡାଟା ରନ୍ଟାଇମ୍ ରେଜିଷ୍ଟ୍ରିରୁ ନିଆଯାଏ।
+> ଏଜେଣ୍ଟ କାର୍ଡକୁ ଲାଇଭ୍ 381-ପ୍ରଦାନକାରୀ କାଟାଲଗ୍ ସହିତ ସମାନ ରଖିବା ଉଚିତ୍; ପ୍ରଦାନକାରୀ ଗଣନା ଏବଂ free/no-auth ମେଟାଡାଟା ଚାଲିବା ସମୟ ରେଜିଷ୍ଟ୍ରିରୁ ସୋର୍ସ କରାଯାଏ।
 
-### `list-capabilities` କୌଶଳର ବିବରଣୀ
+### `list-capabilities` ଦକ୍ଷତା ବିବରଣୀ।
 
-API କଲ୍ ପଠାଇବା ପୂର୍ବରୁ OmniRoute କ’ଣ ଉପଲବ୍ଧ କରାଏ ତାହା ଖୋଜିବାକୁ ଆବଶ୍ୟକ କରୁଥିବା ବାହ୍ୟ ଏଜେଣ୍ଟମାନଙ୍କ ପାଇଁ `list-capabilities` କୌଶଳ ବିଶେଷ ଭାବରେ ଉପଯୋଗୀ। ଏହା ଏକ ସଂରଚିତ ମାର୍କଡାଉନ୍ ସାରଣୀ ଆର୍ଟିଫ୍ୟାକ୍ଟ ଫେରାଏ:
+`list-capabilities` ill ଶଳ ବାହ୍ୟ ଏଜେଣ୍ଟମାନଙ୍କ ପାଇଁ ବିଶେଷ ଉପଯୋଗୀ ଅଟେ ଯାହାକି API କଲ୍ ପଠାଇବା ପୂର୍ବରୁ OmniRoute କ’ଣ ପ୍ରକାଶ କରେ ତାହା ଆବିଷ୍କାର କରିବା ଆବଶ୍ୟକ। ଏହା ଏକ ସଂରକ୍ଷିତ ମାର୍କଡାଉନ୍ ଟେବୁଲ୍ କଳାକୃତି ଫେରସ୍ତ କରେ:
 
 ```
-| ID | ନାମ | ବର୍ଗ | କ୍ଷେତ୍ର | ଏଣ୍ଡପଏଣ୍ଟ୍/କମାଣ୍ଡ୍ | କଞ୍ଚା URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | ପ୍ରମାଣୀକରଣ ଏବଂ ସେସନ୍ଗୁଡ଼ିକ | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-ପ୍ରତ୍ୟେକ ଧାଡ଼ିରେ `rawUrl` ସ୍ତମ୍ଭ ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି, ଯାହାଦ୍ୱାରା ଏଜେଣ୍ଟମାନେ ତୁରନ୍ତ ସମ୍ପୂର୍ଣ୍ଣ SKILL.md ଆଣିପାରିବେ। `metadata.totalSkills` ଫିଲ୍ଡ କ୍ୟାଟାଲଗ୍ର ଆକାରକୁ ପ୍ରତିଫଳିତ କରେ (ଆଜି 45)। କାର୍ଯ୍ୟାନ୍ୱୟନ: `src/lib/a2a/skills/listCapabilities.ts`। [AGENT-SKILLS.md](./AGENT-SKILLS.md) ମଧ୍ୟ ଦେଖନ୍ତୁ।
+ପ୍ରତ୍ୟେକ ଧାଡିରେ `rawUrl` ସ୍ତମ୍ଭ ଅନ୍ତର୍ଭୂକ୍ତ ହୋଇଛି ତେଣୁ ଏଜେଣ୍ଟମାନେ ତୁରନ୍ତ ସମ୍ପୂର୍ଣ୍ଣ SKILL.md ଆଣିପାରିବେ। `metadata.totalSkills` ଫିଲ୍ଡ କାଟାଲଗ୍ ଆକାରକୁ ପ୍ରତିଫଳିତ କରେ (ଆଜି 45)। କାର୍ଯ୍ୟାନ୍ୱୟନ: `src/lib/a2a/skills/listCapabilities.ts`[AGENT-SKILLS.md](./AGENT-SKILLS.md) ମଧ୍ୟ ଦେଖନ୍ତୁ।
 
 ---
 
-## REST API (ସହାୟକ)
+## REST API (ସହାୟକକାରୀ)
 
-JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ୍ରବେଶ ବିନ୍ଦୁ। ନିମ୍ନର REST ଏଣ୍ଡପଏଣ୍ଟଗୁଡ଼ିକ ଡ୍ୟାସବୋର୍ଡ ଏବଂ ବାହ୍ୟ ଟୁଲିଂ ପାଇଁ ସହାୟକ ପ୍ରବେଶ ପ୍ରଦାନ କରେ:
+JSON-RPC ଶେଷ ପଏଣ୍ଟ `/a2a` ହେଉଛି କାନୋନିକାଲ୍ A2A ପ୍ରବେଶ ବିନ୍ଦୁ। ନିମ୍ନରେ ଥିବା REST ଶେଷ ପଏଣ୍ଟଗୁଡ଼ିକ ଡ୍ୟାସବୋର୍ଡ ଏବଂ ବାହ୍ୟ ସାଧନ ପାଇଁ ସହାୟକ ଆକ୍ସେସ୍ ପ୍ରଦାନ କରେ:
 
-| ଏଣ୍ଡପଏଣ୍ଟ                    | ପଦ୍ଧତି | ବର୍ଣ୍ଣନା                                                          | ପ୍ରମାଣୀକରଣ                                         |
-| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------------- |
-| `/api/a2a/status`            | GET    | ସର୍ଭର ସ୍ଥିତି, ପଞ୍ଜୀକୃତ ସ୍କିଲ୍                                     | (ସାର୍ବଜନୀନ)                                        |
-| `/api/a2a/tasks`             | GET    | ଫିଲ୍ଟର ସହିତ ଟାସ୍କଗୁଡ଼ିକର ତାଲିକା                                   | ପରିଚାଳନା                                           |
-| `/api/a2a/tasks/[id]`        | GET    | ID ଦ୍ୱାରା ଟାସ୍କ ପ୍ରାପ୍ତ କରନ୍ତୁ                                    | ପରିଚାଳନା                                           |
-| `/api/a2a/tasks/[id]/cancel` | POST   | ଚାଲୁଥିବା ଟାସ୍କ ବାତିଲ କରନ୍ତୁ                                       | ପରିଚାଳନା                                           |
-| `/.well-known/agent.json`    | GET    | Agent Card (A2A ଆବିଷ୍କାର)                                         | (ସାର୍ବଜନୀନ, 3600s ପାଇଁ କ୍ୟାଶ୍କୃତ)                  |
-| `/api/a2a/tasks`             | POST   | OmniConductor ଫ୍ଲିଟ୍କୁ ଇନ୍ବାଉଣ୍ଡ ପ୍ରତିନିଧିତ୍ୱ (Conductor PRD RF5) | `OMNIROUTE_API_KEY` + `a2aEnabled` ବିପକ୍ଷରେ Bearer |
+| ଶେଷ ପଏଣ୍ଟ।                   | ପଦ୍ଧତି | ବର୍ଣ୍ଣନା                                | Auth                                                                                        |
+| :--------------------------- | :----- | :-------------------------------------- | :------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | ସର୍ଭର ସ୍ଥିତି, ପଞ୍ଜୀକୃତ କ skills ଶଳ।     | (ଜନସାଧାରଣ)                                                                                  |
+| `/api/a2a/tasks`             | GET    | ଫିଲ୍ଟର୍ ସହିତ କାର୍ଯ୍ୟ ତାଲିକା କର।         | ପରିଚାଳନା କିମ୍ବା API କି (ନିମ୍ନରେ ଦେଖନ୍ତୁ)                                                    |
+| `/api/a2a/tasks/[id]`        | GET    | ID ଦ୍ୱାରା ଟାସ୍କ ପାଆନ୍ତୁ।                | ପରିଚାଳନା କିମ୍ବା API କି (ନିମ୍ନରେ ଦେଖନ୍ତୁ)                                                    |
+| `/api/a2a/tasks/[id]/cancel` | POST   | ଚାଲିବା କାର୍ଯ୍ୟ ବାତିଲ କରନ୍ତୁ।            | ପରିଚାଳନା କିମ୍ବା API କି (ନିମ୍ନରେ ଦେଖନ୍ତୁ)                                                    |
+| `/.well-known/agent.json`    | GET    | ଏଜେଣ୍ଟ କାର୍ଡ (A2A ଆବିଷ୍କାର)             | (ଜନସାଧାରଣ, 3600s କ୍ୟାଚ୍)                                                                    |
+| `/api/a2a/tasks`             | POST   | OmniConductor ଜାହାଜକୁ କଣ୍ଡକ୍ଟର PRD RF5) | `GET` ସହିତ ସମାନ, `OMNIROUTE_API_KEY` ବନ୍ଦ ହେଲେ `REQUIRE_API_KEY` ଯଦି ସେଟ୍ ହୁଏ; `a2aEnabled` |
 
-**ଇନ୍ବାଉଣ୍ଡ Conductor ପ୍ରତିନିଧିତ୍ୱ (`POST /api/a2a/tasks`):** ବାହ୍ୟ A2A ଏଜେଣ୍ଟଗୁଡ଼ିକ OmniRoute ମାଧ୍ୟମରେ OmniConductor ଫ୍ଲିଟ୍କୁ କୋଡିଂ କାର୍ଯ୍ୟ ପ୍ରତିନିଧିତ୍ୱ କରନ୍ତି। ବଡି: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — କେବଳ Conductor ଫ୍ଲିଟ୍ ସ୍କିଲ୍ଗୁଡ଼ିକ (Agent Cardରେ ଘୋଷିତ ସ୍କିଲ୍ଗୁଡ଼ିକ) ପ୍ରତିନିଧିତ୍ୱଯୋଗ୍ୟ; `metadata.conductor.repo.url` ଆବଶ୍ୟକ (ଫ୍ଲିଟ୍ଟି git ରିପୋଗୁଡ଼ିକରେ କାମ କରେ)। ଏହି ରୁଟ୍ ସର୍ଭର-ସାଇଡ୍ `CONDUCTOR_ORCHESTRATOR_TOKEN` (ଫଲ୍ବ୍ୟାକ୍ `CONDUCTOR_HUB_TOKEN`) ବ୍ୟବହାର କରି ହବ୍ର `POST /v1/tasks`କୁ ରୂପାନ୍ତର କରେ ଏବଂ `201 { conductor_task_id, state: "submitted" }` ଫେରାଏ; ଟାସ୍କ ସ୍ଥିତିଗୁଡ଼ିକ SSE→A2A ମିରର୍ (RF1) ମାଧ୍ୟମରେ ପୁନଃ ପ୍ରବାହିତ ହୁଏ ଏବଂ `GET /api/a2a/tasks?skill=conductor` ମାଧ୍ୟମରେ ଦୃଶ୍ୟମାନ ହୁଏ।
+`/api/a2a/tasks*` ରୁଟକୁ କିଏ ପ୍ରବେଶ କରେ ଲଗଇନ୍ ଏବଂ API- କି ସେଟିଙ୍ଗ ଉପରେ ନିର୍ଭର କରେ:
+
+- `requireLogin=true` (ଡିଫଲ୍ଟ): ମଧ୍ୟମ ସଫ୍ଟୱେର୍ କେବଳ ପରିଚାଳନା ପ୍ରମାଣପତ୍ର (ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, `manage` -scope API କି, `oma_` ପ୍ରବେଶ ଟୋକେନ୍) ଏବଂ `OMNIROUTE_API_KEY` ସ୍ୱୀକାର କରେ। ଏକ ସାଦା ଇନଫେରେନ୍ସ କୀ `403` ପାଇଥାଏ। `Authorization` ହେଡର୍ ରେ ମଧ୍ୟମ ସଫ୍ଟୱେର୍ କେବଳ `OMNIROUTE_API_KEY` `Bearer <key>` ଭାବରେ ନେଇଥାଏ। `Bearer` ପାଇବା ପରେ ଏକ ଖାଲି ଚାବି କିମ୍ବା ଏକ ଟ୍ୟାବ୍ `401`
+- `requireLogin=false`, କିମ୍ବା ଅନ୍ବୋର୍ଡିଂ ପୂର୍ବରୁ ଲୁପ୍ ବ୍ୟାକ୍ ୱିଣ୍ଡୋ: `REQUIRE_API_KEY=true` ସହିତ ଯେକ valid ଣସି ବ valid OmniRoute API କି କିମ୍ବା ପରିଚାଳନା ପ୍ରମାଣପତ୍ର ଗ୍ରହଣ କରାଯାଏ ଏବଂ ଅଜ୍ onymous ାତ କଲର୍ମାନେ `401` ପାଆନ୍ତି; `REQUIRE_API_KEY` ସହିତ ରୁଟଗୁଡିକ ଖୋଲା ଅଛି।
+- `POST /api/a2a/tasks` ଅତିରିକ୍ତ ଭାବରେ `Authorization` ହେଡର୍ ରେ `OMNIROUTE_API_KEY` ଆବଶ୍ୟକ କରେ ଯେତେବେଳେ ସେହି ଭେରିଏବଲ୍ ସେଟ୍ ହୋଇଯାଏ ଏବଂ `REQUIRE_API_KEY` ବନ୍ଦ ଥାଏ। ଅନ୍ୟାନ୍ୟ ହେଡର୍, ଯେପରିକି `x-api-key`, ସେଠାରେ ଗଣନା କରନ୍ତି ନାହିଁ। ଲଗଇନ୍ ଅଫ୍ କିମ୍ବା ଅନ୍ବୋର୍ଡିଂ ପୂର୍ବରୁ ଚାବି `Bearer` ଉପସର୍ଗ ସହିତ କିମ୍ବା ବିନା ପାସ୍ କରେ। ଲଗଇନ୍ ସହିତ, କେବଳ `Bearer <key>` ମଧ୍ୟମ ସଫ୍ଟୱେର୍ ଅତିକ୍ରମ କରେ।
+
+ଯେଉଁଠାରେ ଏକ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ, ଏକ `read` -scope `oma_` ଟୋକନ୍ କେବଳ `GET` ପାଇଁ କାମ କରେ।
+
+**ଇନବାଉଣ୍ଡ କଣ୍ଡକ୍ଟର ପ୍ରତିନିଧୀ (`POST /api/a2a/tasks`):** ବାହ୍ୟ A2A ଏଜେଣ୍ଟଗୁଡିକ OmniRoute ମାଧ୍ୟମରେ OmniConductor ଜାହାଜରେ କୋଡିଂ କାର୍ଯ୍ୟକୁ ପ୍ରତିନିଧିତ୍ୱ କରନ୍ତି। ଶରୀର: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — କେବଳ କଣ୍ଡକ୍ଟର ଫ୍ଲାଟ କ skills ଶଳ (ଏଜେଣ୍ଟ କାର୍ଡରେ ଘୋଷିତ) ପ୍ରତିନିଧୀ; `metadata.conductor.repo.url` ଆବଶ୍ୟକ (ଜାହାଜ git ରେପୋରେ କାମ କରେ)। ମାର୍ଗଟି ସର୍ଭର-ସାଇଡ୍ `CONDUCTOR_ORCHESTRATOR_TOKEN` (ଫଲବ୍ୟାକ୍ `CONDUCTOR_HUB_TOKEN`) ବ୍ୟବହାର କରି ହବ୍ ର `POST /v1/tasks` କୁ ଅନୁବାଦ କରେ ଏବଂ `201 { conductor_task_id, state: "submitted" }` ଫେରସ୍ତ କରେ। ଟାସ୍କ ଅବସ୍ଥା SSE→A2A ଦର୍ପଣ (RF1) ଦେଇ ଫେରିଥାଏ ଏବଂ `GET /api/a2a/tasks?skill=conductor` ମାଧ୍ୟମରେ ଦୃଶ୍ୟମାନ ହୁଏ।
 
 ---
 
-## ଏକ ନୂଆ ସ୍କିଲ୍ ଯୋଡ଼ିବା
+## ଏକ ନୂତନ ଦକ୍ଷତା ଯୋଗ କରିବା।
 
 1. **ସ୍କିଲ୍ ଫାଇଲ୍ ସୃଷ୍ଟି କରନ୍ତୁ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ଏକ async ଫଙ୍କସନ୍ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ଏକ୍ସପୋର୍ଟ କରନ୍ତୁ। `smartRouting.ts` ପରି ବିଦ୍ୟମାନ ସ୍କିଲ୍ଗୁଡ଼ିକର ଢାଞ୍ଚା ଅନୁସରଣ କରନ୍ତୁ।
+   ଏକ async ଫଙ୍କସନ୍ `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` ରପ୍ତାନି କରନ୍ତୁ। `smartRouting.ts` ପରି ବିଦ୍ୟମାନ କ skills ଶଳର ଆକୃତି ଅନୁସରଣ କରନ୍ତୁ। ଯଦି କ z ଶଳ HTTP ଉପରେ OmniRoute କୁ ପୁନର୍ବାର କଲ୍ କରେ, `src/lib/a2a/selfLoopAuth.ts` ରୁ `buildSelfLoopHeaders(caller)` ସହିତ ହେଡର୍ ଗଠନ କର ତେଣୁ କଲ A2A କଲର ଚାବି ସହିତ ଚାଲିବ, `OMNIROUTE_API_KEY` ନୁହେଁ, ଏବଂ `redirect: "error"` କୁ `fetch` କୁ ପଠାଇବ ତେଣୁ ପୁନ ir ନିର୍ଦ୍ଦେଶ କେବେବି ଚାବି ପାଇବ ନାହିଁ। ସହାୟକ କେବଳ ହେଡର୍ ଗଠନ କରେ; ପ୍ରତ୍ୟେକ ଦକ୍ଷତା ପୁନ red ନିର୍ଦ୍ଦେଶ ନୀତି ସ୍ଥିର କରେ। ଏହା ଏକ ଚାବି ସଂଲଗ୍ନ କରିବା ପରିବର୍ତ୍ତେ `UnsafeSelfLoopTargetError` ଫୋପାଡିଥାଏ ଯେତେବେଳେ ସମାଧାନ ହୋଇଥିବା ଆଧାର URL ବ୍ୟକ୍ତିଗତ ନେଟୱାର୍କ ବାହାରେ ସାଦା http (ଲୁପବ୍ୟାକ୍, ଏକ ପାତ୍ର କିମ୍ବା ସେବା ନାମ, ଏବଂ ବ୍ୟକ୍ତିଗତ ଠିକଣା ଠିକ ଅଛି) କିମ୍ବା ପ୍ରମାଣପତ୍ର ଧାରଣ କରିଥାଏ, ତେଣୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କଲକୁ ଗ୍ରାସ କରୁଥିବା ଏକ ଦକ୍ଷତା ସେହି ତ୍ରୁଟିକୁ ପୁନ r ଥ୍ରୋ କରିବା ଆବଶ୍ୟକ।
 
-2. **ହ୍ୟାଣ୍ଡଲର୍ ପଞ୍ଜୀକରଣ କରନ୍ତୁ:** `src/lib/a2a/taskExecution.ts`ରେ, `A2A_SKILL_HANDLERS`କୁ ଏକ ଏଣ୍ଟ୍ରି ଯୋଡ଼ନ୍ତୁ:
+2. **ପଞ୍ଜିକରଣ ନିୟନ୍ତ୍ରକ:** `src/lib/a2a/taskExecution.ts` ରେ, `A2A_SKILL_HANDLERS` ରେ ଏକ ଏଣ୍ଟ୍ରି ଯୋଡନ୍ତୁ:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ବିଦ୍ୟମାନ ସ୍କିଲ୍ଗୁଡ଼ିକ
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent Cardରେ ପ୍ରକାଶ କରନ୍ତୁ:** `src/app/.well-known/agent.json/route.ts`ରେ, `skills` ଆରେରେ ଯୋଡ଼ନ୍ତୁ:
+3. **ଏଜେଣ୍ଟ କାର୍ଡରେ ପ୍ରକାଶ କରନ୍ତୁ:** `src/lib/a2a/agentCardMetadata.ts` ରେ ( `/.well-known/agent.json` ଏବଂ `/.well-known/agent-card.json` ଦ୍ୱାରା ଅଂଶୀଦାର), `skills` ଆରେ ସହିତ ଯୋଡନ୍ତୁ:
 
    ```json
    {
@@ -222,9 +234,9 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
    }
    ```
 
-4. **ପରୀକ୍ଷାଗୁଡ଼ିକ ଲେଖନ୍ତୁ:** `tests/unit/a2a-<your-skill>.test.ts`। ସଫଳ ପଥ + ତ୍ରୁଟି ପଥକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ।
+4. **ପରୀକ୍ଷା ଲେଖ:** `tests/unit/a2a-<your-skill>.test.ts` ଖୁସି ପଥ + ତ୍ରୁଟି ପଥକୁ ଆଚ୍ଛାଦନ କରନ୍ତୁ।
 
-5. **ଡକ୍ୟୁମେଣ୍ଟ କରନ୍ତୁ** ଏହି ଫାଇଲ୍ର `Available Skills` ଟେବୁଲ୍ରେ ନୂଆ ସ୍କିଲ୍ଟିକୁ।
+5. **ଡକ୍ୟୁମେଣ୍ଟ୍** ଏହି ଫାଇଲ୍ ର `Available Skills` ସାରଣୀରେ ନୂତନ କ ill ଶଳ।
 
 ---
 
@@ -261,9 +273,9 @@ JSON-RPC ଏଣ୍ଡପଏଣ୍ଟ `/a2a` ହେଉଛି ମାନକ A2A ପ
 
 ---
 
-## ଏକୀକରଣ ଉଦାହରଣଗୁଡ଼ିକ
+## ଏକୀକରଣ ଉଦାହରଣ।
 
-### Python (requests)
+### ପାଇଥନ୍ (ଅନୁରୋଧ)
 
 ```python
 import requests
@@ -282,7 +294,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ଆଣ)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

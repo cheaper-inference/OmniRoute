@@ -1,1 +1,0 @@
-- **fix(resilience):** park GLM/Z.AI "insufficient balance" 429s (code 1113, `余额不足`) and new-api `insufficient_user_quota` / "out of funds" 400s as `credits_exhausted`, so the pool rotates instead of retrying a key with no credit ([#16675](https://github.com/diegosouzapw/OmniRoute/pull/16675)) — thanks @IEatCodeDaily, @brimob-sowax

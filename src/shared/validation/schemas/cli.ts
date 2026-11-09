@@ -86,6 +86,15 @@ export const cliModelConfigSchema = z.object({
 });
 
 /**
+ * Codex variant of `cliModelConfigSchema`. `modelCatalog: true` also writes an
+ * OmniRoute `model_catalog_json` so Codex's `/model` picker lists routable ids.
+ * Opt-in: omitted or `false` never writes the catalog.
+ */
+export const codexSettingsConfigSchema = cliModelConfigSchema.extend({
+  modelCatalog: z.boolean().optional(),
+});
+
+/**
  * Multi-model variant of `cliModelConfigSchema`. Adds optional `models`
  * (array of strings, takes precedence over `model`) and `activeModel`
  * (string id to promote to first position). Ported from upstream PR

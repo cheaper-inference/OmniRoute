@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, ModelSelectField, Toggle } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import {
+  Badge,
+  Button,
+  Card,
+  Collapsible,
+  Input,
+  ModelSelectField,
+  Toggle,
+} from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 export default function BackgroundDegradationTab() {
   const [config, setConfig] = useState({
@@ -87,18 +96,16 @@ export default function BackgroundDegradationTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            speed
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <Icon name="speed" size={20} />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{t("backgroundDegradationTitle")}</h3>
           <p className="text-sm text-text-muted">{t("backgroundDegradationDesc")}</p>
         </div>
         {status === "saved" && (
-          <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">check_circle</span> {t("saved")}
+          <span className="text-xs font-medium text-success flex items-center gap-1">
+            <Icon name="check_circle" size={14} /> {t("saved")}
           </span>
         )}
       </div>
@@ -122,11 +129,11 @@ export default function BackgroundDegradationTab() {
 
       {/* Stats */}
       {config.stats && config.stats.detected > 0 && (
-        <div className="flex items-center gap-4 p-3 rounded-lg bg-sky-500/5 border border-sky-500/20 mb-4">
+        <div className="flex items-center gap-4 p-3 rounded-lg bg-info/5 border border-info/20 mb-4">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[16px] text-sky-400">analytics</span>
+            <Icon name="analytics" size={16} className="text-info" />
             <span className="text-xs text-text-muted">{t("tasksDetected")}:</span>
-            <span className="text-sm font-mono font-semibold text-sky-400">
+            <span className="text-sm font-mono font-semibold text-info">
               {config.stats.detected}
             </span>
           </div>
@@ -154,13 +161,13 @@ export default function BackgroundDegradationTab() {
               <div className="flex-1">
                 <ModelSelectField value={newTo} onChange={setNewTo} placeholder={t("cheapModel")} />
               </div>
-              <button
+              <Button
+                variant="outline"
                 onClick={addMapping}
                 disabled={saving || !newFrom.trim() || !newTo.trim()}
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 disabled:opacity-50 transition-all"
               >
                 {t("add")}
-              </button>
+              </Button>
             </div>
 
             {/* Existing mappings */}
@@ -168,18 +175,18 @@ export default function BackgroundDegradationTab() {
               <div className="rounded-lg border border-border/30 divide-y divide-border/20 max-h-48 overflow-y-auto">
                 {mapEntries.map(([from, to]) => (
                   <div key={from} className="flex items-center gap-3 px-4 py-2">
-                    <code className="text-xs text-orange-400/80 flex-1 truncate">{from}</code>
-                    <span className="material-symbols-outlined text-[14px] text-text-muted">
-                      arrow_forward
-                    </span>
-                    <code className="text-xs text-sky-400/80 flex-1 truncate">{to}</code>
-                    <button
+                    <code className="text-xs text-text-muted flex-1 truncate">{from}</code>
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                    <code className="text-xs text-text-main flex-1 truncate">{to}</code>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      icon="close"
                       onClick={() => removeMapping(from)}
                       disabled={saving}
-                      className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 transition-all"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                    </button>
+                      aria-label={t("remove")}
+                      title={t("remove")}
+                    />
                   </div>
                 ))}
               </div>
@@ -187,51 +194,47 @@ export default function BackgroundDegradationTab() {
           </div>
 
           {/* Detection Patterns */}
-          <details className="group">
-            <summary className="text-xs font-medium text-text-muted uppercase tracking-wider cursor-pointer flex items-center gap-1 mb-2">
-              <span className="material-symbols-outlined text-[14px] group-open:rotate-90 transition-transform">
-                chevron_right
-              </span>
-              {t("detectionPatterns")} ({config.detectionPatterns?.length || 0})
-            </summary>
-
+          <Collapsible
+            variant="inline"
+            title={`${t("detectionPatterns")} (${config.detectionPatterns?.length || 0})`}
+          >
             {/* Add new pattern */}
             <div className="flex items-center gap-2 mb-3">
-              <input
+              <Input
                 type="text"
+                aria-label={t("newPattern")}
                 placeholder={t("newPattern")}
                 value={newPattern}
                 onChange={(e) => setNewPattern(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-lg text-sm bg-surface border border-border/50 focus:border-sky-500/50 focus:outline-none"
+                className="flex-1"
               />
-              <button
+              <Button
+                variant="outline"
                 onClick={addPattern}
                 disabled={saving || !newPattern.trim()}
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 disabled:opacity-50 transition-all"
               >
                 {t("add")}
-              </button>
+              </Button>
             </div>
 
             {/* Existing patterns */}
             <div className="flex flex-wrap gap-2">
               {(config.detectionPatterns || []).map((pattern, idx) => (
-                <span
-                  key={idx}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-sky-500/10 text-sky-400 border border-sky-500/20"
-                >
+                <Badge key={idx} variant="info" className="gap-1 pe-0.5">
                   {pattern}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    icon="close"
                     onClick={() => removePattern(idx)}
-                    className="hover:text-red-400 transition-colors"
                     disabled={saving}
-                  >
-                    <span className="material-symbols-outlined text-[12px]">close</span>
-                  </button>
-                </span>
+                    className="size-5 min-h-5"
+                    aria-label={`${t("remove")} ${pattern}`}
+                  />
+                </Badge>
               ))}
             </div>
-          </details>
+          </Collapsible>
         </>
       )}
     </Card>

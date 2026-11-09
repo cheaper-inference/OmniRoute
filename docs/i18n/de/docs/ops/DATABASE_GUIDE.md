@@ -532,21 +532,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Aus einer Sicherung wiederherstellen:
 
 ```bash
-omniroute sync pull --merge   # oder: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` lädt lediglich ein vollständiges `.tar.gz`-Archiv von einem laufenden Server herunter
+(`GET /api/db-backups/exportAll`, Anmeldedaten eines Operators erforderlich); es stellt nichts wieder her.
 
 ### Szenario 3: Verschlüsselungsschlüssel verloren
 
-Ohne den Schlüssel ist **keine Wiederherstellung möglich**. Die verschlüsselten Felder sind nicht lesbar. Fügen Sie alle Anbieter manuell mit neuen Zugangsdaten erneut hinzu.
+Ohne den Schlüssel ist **keine Wiederherstellung möglich**. Die verschlüsselten Felder sind nicht lesbar. Fügen Sie alle Anbieter manuell mit neuen Anmeldedaten erneut hinzu.
 
-> **Gegenmaßnahme**: Sichern Sie den Verschlüsselungsschlüssel stets separat, idealerweise in einem Passwortmanager oder KMS.
+> **Vorbeugung**: Sichern Sie den Verschlüsselungsschlüssel immer separat, idealerweise in einem Passwortmanager oder KMS.
 
 ### Szenario 4: Datenträger voll
 
 SQLite gibt `SQLITE_FULL`-Fehler zurück. Geben Sie Speicherplatz frei und führen Sie anschließend Folgendes aus:
 
 ```bash
-# WAL-Checkpoint durchführen, um Speicherplatz freizugeben
+# WAL-Prüfpunkt erstellen, um Speicherplatz freizugeben
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

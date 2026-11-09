@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import Button from "@/shared/components/Button";
+
 const SAMPLE_INPUT = {
   model: "modality-bridge/self-test",
   messages: [
@@ -92,14 +94,16 @@ export default function ModalityBridgeTestButton() {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <button
-        type="button"
-        className="rounded-control border border-border px-3 py-2 text-sm font-medium hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
+      <Button
+        variant="outline"
+        size="sm"
+        icon="play_arrow"
+        loading={running}
         disabled={running}
         onClick={() => void runTest()}
       >
         {t(running ? "modalityBridgeTestRunning" : "modalityBridgeTestButton")}
-      </button>
+      </Button>
       {result && (
         <p className="text-xs text-text-muted" role="status">
           {result}

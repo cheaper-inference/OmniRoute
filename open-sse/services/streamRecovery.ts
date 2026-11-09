@@ -11,7 +11,7 @@
  * without real sockets. The ReadableStream wiring lives in `createRecoverableStream`.
  */
 import { STREAM_RECOVERY } from "../config/constants.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import {
   createThroughputWatchdog,
   ThroughputWatchdogError,
@@ -28,7 +28,21 @@ const TOOLCALL_ORDER_FIX_FLAG = "STREAM_RECOVERY_TOOLCALL_ORDER_FIX";
  */
 function isToolcallOrderFixEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled(TOOLCALL_ORDER_FIX_FLAG);
+    return isRegisteredFeatureFlagEnabled(TOOLCALL_ORDER_FIX_FLAG);
+  } catch {
+    return false;
+  }
+}
+
+export const EMPTY_STREAM_SIBLING_RECOVERY_FLAG = "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED";
+
+/**
+ * #16438 opt-in: Claude/Codex empty-stream content probe plus a bounded retry on a
+ * sibling connection. Fail-closed: any resolution failure keeps the release behavior.
+ */
+export function isEmptyStreamSiblingRecoveryEnabled(): boolean {
+  try {
+    return isRegisteredFeatureFlagEnabled(EMPTY_STREAM_SIBLING_RECOVERY_FLAG);
   } catch {
     return false;
   }
@@ -181,6 +195,13 @@ const ANTHROPIC_STOP_MARKER = "message_stop";
 const RESPONSES_COMPLETED_MARKER = "response.completed";
 const RESPONSES_FAILED_MARKER = "response.failed";
 const RESPONSES_INCOMPLETE_MARKER = "response.incomplete";
+// A complete Gemini/Vertex/Antigravity/Clova SSE stream (`streamGenerateContent?alt=sse`,
+// wrapped by `createRecoverableStream` before format translation) ends with a candidate
+// carrying a non-null `"finishReason"` string (e.g. `"STOP"`, `"MAX_TOKENS"`, `"SAFETY"`)
+// and never emits `data: [DONE]`. Without this, any short or buffered Gemini turn that
+// finishes within the 750ms/64KB holdback window (such as thinking + tool-call turns) is
+// misclassified as `TruncatedStreamError` and replayed `EARLY_RETRY_MAX` (4) extra times.
+const GEMINI_FINISH_REASON_PATTERN = /"finishReason"\s*:\s*"[^"]+"/;
 
 /**
  * Heuristic check for a terminal SSE marker in the buffered opening window. Used to
@@ -196,7 +217,8 @@ export function hasTerminalMarker(bytes: Uint8Array): boolean {
     text.includes(ANTHROPIC_STOP_MARKER) ||
     text.includes(RESPONSES_COMPLETED_MARKER) ||
     text.includes(RESPONSES_FAILED_MARKER) ||
-    text.includes(RESPONSES_INCOMPLETE_MARKER)
+    text.includes(RESPONSES_INCOMPLETE_MARKER) ||
+    GEMINI_FINISH_REASON_PATTERN.test(text)
   );
 }
 

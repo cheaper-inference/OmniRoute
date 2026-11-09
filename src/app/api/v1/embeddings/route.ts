@@ -1,7 +1,12 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  createComboTargetKeyGate,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { v1EmbeddingsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -67,6 +72,13 @@ async function postHandler(request, context) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection (direct and per combo target) stays inside
+  // the key's connection scope, the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
+  // Respect the authenticated API key's credential scope before checking model capabilities.
+  const endpointMismatch = await getRequestedModelEndpointMismatch(body.model, "embeddings");
+  if (endpointMismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, endpointMismatch);
 
   // Extract API key info for logging
   const apiKeyMeta = policy.apiKeyInfo;
@@ -83,6 +95,8 @@ async function postHandler(request, context) {
     apiKeyId: apiKeyMeta?.id || null,
     apiKeyName: apiKeyMeta?.name || null,
     connectionId: null,
+    allowedConnections: scope.allowedConnections,
+    isComboTargetAllowed: createComboTargetKeyGate(policy, body.model),
   });
 }
 

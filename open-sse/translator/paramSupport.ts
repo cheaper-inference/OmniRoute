@@ -6,11 +6,17 @@
 //   - `provider` (optional) limits the rule to a single provider id.
 //   - `match` is a RegExp tested against the model id OR a predicate (model -> boolean).
 //   - `drop` is the list of param keys to remove when the rule fires.
+//   - `dropIfNull` removes a key only when its value is literally `null`, leaving
+//     real values untouched. For upstreams that reject `null` on an optional
+//     param instead of treating it as "unset" — the OpenAI SDKs serialise an
+//     unset optional as `null`, so such a param arrives on ordinary requests.
 //   - `clampToModelMaxOutput` clamps max_tokens/max_completion_tokens/max_output_tokens
 //     down to the model's catalog `maxOutputTokens` ceiling, when one is set.
 //   - `maxOutputCap` clamps the same keys down to a fixed endpoint-imposed ceiling
 //     (independent of the model's own advertised ceiling). When both are present on
 //     the same rule, the lower of the two wins.
+//   - `dropOutputConfigFields` removes keys nested under `output_config`, keeping the
+//     rest of the object and dropping `output_config` only when it ends up empty.
 //
 // A param is removed only when it is present (!== undefined). The helper never
 // introduces new keys and never throws on null/undefined bodies — call sites
@@ -23,6 +29,7 @@ type StripRule = {
   provider?: string;
   match: RegExp | ((model: string) => boolean);
   drop?: string[];
+  dropIfNull?: string[];
   clampToModelMaxOutput?: boolean;
   maxOutputCap?: number;
   // Remap `thinking.type` from one value to another instead of dropping the
@@ -30,9 +37,24 @@ type StripRule = {
   // budget_tokens). Only applies when `thinking` is an object whose current
   // `type` matches the key.
   mapThinkingType?: Record<string, string>;
+  dropOutputConfigFields?: string[];
 };
 
 const MAX_OUTPUT_TOKEN_KEYS = ["max_tokens", "max_completion_tokens", "max_output_tokens"] as const;
+
+// GitHub Copilot rejects `temperature` (HTTP 400 "Unsupported parameter:
+// 'temperature' is not supported with this model") for GPT-5.4 and newer GPT-5.x
+// (gpt-5.5, gpt-5.6-sol/terra/luna, gpt-5.10, ...) and for GPT-6.x — including
+// ids without a minor version such as gpt-6-astra. Anchored so gpt-5, gpt-5.3-codex
+// and malformed ids like gpt-5.4invalid keep their temperature. A leading
+// `provider/` prefix is ignored. Shared with GithubExecutor.transformRequest.
+const GITHUB_NO_TEMPERATURE_MODEL = /^gpt-(?:5\.(?:[4-9]|[1-9]\d+)|6(?:\.\d+)?)(?:-|$)/i;
+
+export function isGithubTemperatureUnsupportedModel(model: string | null | undefined): boolean {
+  if (typeof model !== "string" || !model) return false;
+  const bare = model.slice(model.lastIndexOf("/") + 1);
+  return GITHUB_NO_TEMPERATURE_MODEL.test(bare);
+}
 
 const STRIP_RULES: StripRule[] = [
   // claude-opus-4 series: temperature is deprecated (Anthropic returns 400). #1748
@@ -41,8 +63,9 @@ const STRIP_RULES: StripRule[] = [
   // telemetry object gated behind a beta OmniRoute does not advertise, so
   // Anthropic 400s with "diagnostics: Extra inputs are not permitted".
   { match: /claude/i, drop: ["diagnostics"] },
-  // GitHub Copilot gpt-5.4: temperature unsupported.
-  { provider: "github", match: /gpt-5\.4/i, drop: ["temperature"] },
+  // GitHub Copilot GPT-5.4+ and GPT-6.x: temperature unsupported.
+  { provider: "github", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
+  { provider: "ghe-copilot", match: isGithubTemperatureUnsupportedModel, drop: ["temperature"] },
   // OpenAI GPT-5.0 family (gpt-5, gpt-5-mini, gpt-5-nano, dated snapshots) always
   // reasons and rejects sampling params with HTTP 400 "Unsupported parameter:
   // 'temperature' is not supported with this model" (same for top_p). Agent
@@ -115,10 +138,10 @@ const STRIP_RULES: StripRule[] = [
   { provider: "glm", match: /^glm-4\.6v$/i, clampToModelMaxOutput: true },
   // Azure gpt-4o-mini deployments cap completion tokens at 16384 and 400 on
   // anything larger: "max_tokens is too large: 32000. This model supports at
-  // most 16384 completion tokens". OmniRoute's own tool-calling floor
-  // (DEFAULT_MIN_TOKENS = 32000, applied by adjustMaxTokens) raises even a tiny
-  // explicit max_tokens to 32000 whenever tools are present, so every agentic
-  // client trips this on its first turn. PROVIDER_MAX_TOKENS is not the right
+  // most 16384 completion tokens". The 32000 used to come from OmniRoute's own
+  // tool-calling floor (DEFAULT_MIN_TOKENS, applied by adjustMaxTokens); every
+  // translator now honors an explicit client cap, but agentic clients still send
+  // 32000+ themselves on their first turn. PROVIDER_MAX_TOKENS is not the right
   // lever here: it is provider-wide, and the same Azure resource also serves
   // GPT-5 deployments whose ceiling is far higher. Azure deployment names are
   // operator-chosen, hence a prefix match rather than an exact id, and the
@@ -126,6 +149,49 @@ const STRIP_RULES: StripRule[] = [
   // to read), hence the fixed cap.
   { provider: "azure-openai", match: /^gpt-4o-mini/i, maxOutputCap: 16384 },
   { provider: "azure-ai", match: /^gpt-4o-mini/i, maxOutputCap: 16384 },
+  // AI/ML API validates optional fields with a strict schema that rejects a
+  // literal `null` ("Expected number, received null") instead of reading null as
+  // "unset". The OpenAI SDKs serialise an unset optional as `null`, so an SDK
+  // client that never touches temperature still puts `temperature: null` on the
+  // wire — and OmniRoute relays the caller's body verbatim, so the request 400s.
+  //
+  // Field-by-field sweep against POST /v1/chat/completions, 2026-09-03:
+  //   400 on null, every model:  seed, tools, tool_choice, response_format,
+  //                              stream, stream_options, parallel_tool_calls,
+  //                              max_tokens, max_completion_tokens,
+  //                              reasoning_effort
+  //   400 on null, model-dependent: temperature, top_p (400 on
+  //                              claude-sonnet-4.6 and deepseek-chat, 200 on
+  //                              gpt-5 — so an integration smoke-tested only
+  //                              against gpt-5 looks healthy)
+  //   200 on null (left alone):  stop, presence_penalty, frequency_penalty, n,
+  //                              user, logprobs, logit_bias, top_logprobs,
+  //                              metadata
+  //
+  // Provider-wide, and only for the null value: an explicit `temperature: 0` or
+  // `stream: false` is forwarded untouched. Dropping is the correct reading —
+  // every field here means "unset" when the caller sends null.
+  //
+  // The 400 body's top-level `message` is generic; `details[].path` / `.reason`
+  // name the offending field, which is what this list was built from.
+  {
+    provider: "aimlapi",
+    match: /.*/,
+    dropIfNull: [
+      "temperature",
+      "top_p",
+      "seed",
+      "tools",
+      "tool_choice",
+      "response_format",
+      "stream",
+      "stream_options",
+      "parallel_tool_calls",
+      "max_tokens",
+      "max_completion_tokens",
+      "reasoning_effort",
+    ],
+  },
   // AgentRouter routes GLM models through the generic DefaultExecutor (no
   // GLM-specific handling), so a Claude-style `thinking.type: "adaptive"`
   // (the default a Claude-format client like Claude Code sends) reaches
@@ -137,6 +203,11 @@ const STRIP_RULES: StripRule[] = [
   // single model id, since AgentRouter's static catalog carries no glm-*
   // entries (passthroughModels: true lets arbitrary GLM ids through). #13696.
   { provider: "agentrouter", match: /glm-/i, mapThinkingType: { adaptive: "enabled" } },
+  // OpenCode Go's Claude lane (/v1/messages) is a strict Anthropic proxy that rejects
+  // `output_config.task_budget` with 400 "Extra inputs are not permitted" even when the
+  // task-budgets beta travels with it. `output_config.effort` stays: the adaptive-thinking
+  // Claude models there need it. Non-Claude opencode-go ids accept the field.
+  { provider: "opencode-go", match: /claude/i, dropOutputConfigFields: ["task_budget"] },
 ];
 
 function matches(rule: StripRule, model: string): boolean {
@@ -197,6 +268,23 @@ function applyThinkingTypeMap(rule: StripRule, body: Record<string, unknown>): v
 }
 
 /**
+ * When a rule requests it, drop keys nested under `body.output_config`. The object is
+ * replaced rather than mutated (the caller's original stays intact), and removed
+ * altogether only when nothing is left in it.
+ */
+function applyOutputConfigFieldDrops(rule: StripRule, body: Record<string, unknown>): void {
+  if (!rule.dropOutputConfigFields?.length) return;
+  const outputConfig = body.output_config;
+  if (!outputConfig || typeof outputConfig !== "object" || Array.isArray(outputConfig)) return;
+  const fields = rule.dropOutputConfigFields;
+  const record = outputConfig as Record<string, unknown>;
+  if (!fields.some((key) => record[key] !== undefined)) return;
+  const kept = Object.fromEntries(Object.entries(record).filter(([key]) => !fields.includes(key)));
+  if (Object.keys(kept).length > 0) body.output_config = kept;
+  else delete body.output_config;
+}
+
+/**
  * Remove unsupported params from `body` in place. Returns the same reference
  * (or `body` unchanged when it is not a plain object / model is empty).
  */
@@ -218,8 +306,12 @@ export function stripUnsupportedParams<T>(
     for (const key of rule.drop ?? []) {
       if (rec[key] !== undefined) delete rec[key];
     }
+    for (const key of rule.dropIfNull ?? []) {
+      if (rec[key] === null) delete rec[key];
+    }
     applyMaxOutputClamp(rule, provider, model, rec);
     applyThinkingTypeMap(rule, rec);
+    applyOutputConfigFieldDrops(rule, rec);
   }
 
   // Phase 2: Config-driven rules from DB

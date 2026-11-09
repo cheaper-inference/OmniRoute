@@ -9,33 +9,33 @@ OmniRoute menentukan pemacu SQLite semasa permulaan melalui rantaian sandaran 5 
 1. **`better-sqlite3` terbina dalam** (melalui `dependencies` dalam `package.json`)
    — paling pantas, binari natif, dipasang oleh `npm install` apabila alat binaan tersedia.
 
-2. **`better-sqlite3` yang dipasang semasa masa jalan** (dalam `~/.omniroute/runtime/`)
-   — dipasang secara malas pada pelaksanaan pertama **ATAU** oleh `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Mengesahkan bait magik `.node` natif (ELF / Mach-O / PE) sebelum dimuatkan
+2. **`better-sqlite3` yang dipasang semasa jalanan** (dalam `~/.omniroute/runtime/`)
+   — dipasang secara malas pada kali pertama dijalankan **ATAU** oleh `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Mengesahkan bait magik `.node` natif (ELF / Mach-O / PE) sebelum pemuatan
    untuk melindungi daripada binari yang rosak atau untuk platform yang salah.
 
-3. **`node:sqlite`** (pustaka standard Node ≥22.5) — tiada binaan natif diperlukan; digunakan apabila
+3. **`node:sqlite`** (pustaka standard Node ≥22.5) — tidak memerlukan binaan natif; digunakan apabila
    kedua-dua laluan better-sqlite3 gagal. Set ciri terhad.
 
 4. **`sql.js`** (WASM) — sandaran terakhir. Berfungsi di semua tempat tetapi lebih perlahan
-   dan menulis data mengikut sela masa dan bukannya secara segerak.
+   dan menulis data secara berkala dan bukannya secara segerak.
 
-## Mengapakah kerumitan ini diperlukan?
+## Mengapa begitu rumit?
 
-- **Windows EBUSY**: `npm install -g omniroute@latest` boleh gagal jika
-  `better_sqlite3.node` versi sebelumnya dikunci oleh proses yang sedang berjalan. Pemasangan
-  masa jalan dalam `~/.omniroute/runtime/` memintas cache npm global.
+- **EBUSY Windows**: `npm install -g omniroute@latest` boleh gagal jika
+  `better_sqlite3.node` daripada versi sebelumnya dikunci oleh proses yang sedang berjalan. Pemasangan
+  semasa jalanan dalam `~/.omniroute/runtime/` memintas cache npm global.
 - **Tiada alat binaan**: Sesetengah persekitaran (Windows korporat tanpa VS Build
-  Tools, imej Docker minimum) tidak dapat mengkompil `better-sqlite3`. Pemasang masa jalan
-  mendapatkan binari prabina daripada pendaftaran npm; pemacu sandaran
-  memastikan OmniRoute masih dapat dimulakan walaupun proses itu gagal.
-- **Sistem terasing daripada rangkaian**: Jika pendaftaran npm tidak dapat dicapai, `node:sqlite`
+  Tools, imej Docker minimum) tidak boleh mengkompil `better-sqlite3`. Pemasang semasa
+  jalanan mendapatkan binari prabina daripada registri npm; pemacu sandaran
+  memastikan OmniRoute masih boleh dimulakan walaupun proses tersebut gagal.
+- **Sistem terpencil daripada rangkaian**: Jika registri npm tidak dapat dicapai, `node:sqlite`
   atau `sql.js` menjamin kefungsian asas.
 
 ## Pengesahan bait magik
 
-Sebelum memuatkan fail `.node` yang dipasang semasa masa jalan, OmniRoute membaca 8
-bait pertama dan memadankannya dengan nilai magik platform yang diketahui:
+Sebelum memuatkan fail `.node` yang dipasang semasa jalanan, OmniRoute membaca 8
+bait pertama dan memadankannya dengan bait magik platform yang diketahui:
 
 | Platform              | Bait (heks)   | Label       |
 | --------------------- | ------------- | ----------- |
@@ -45,7 +45,7 @@ bait pertama dan memadankannya dengan nilai magik platform yang diketahui:
 | macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
 | Windows               | `4D 5A` (MZ)  | `pe`        |
 
-Nilai magik yang tidak sepadan → fail diabaikan, proses sandaran diteruskan ke langkah seterusnya.
+Bait magik yang tidak sepadan → fail diabaikan, proses sandaran diteruskan ke langkah seterusnya.
 
 ## Menyemak pemacu aktif
 
@@ -60,36 +60,56 @@ const info = getDriverInfo();
 ## Kawalan manual
 
 ```bash
-# Langkau pemanasan postinstall (untuk pemasangan CI yang pantas)
+# Langkau pemanasan pascapemasangan (untuk pemasangan CI yang pantas)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# Paksa pemasangan semula better-sqlite3 masa jalan
+# Pasang semula better-sqlite3 semasa jalanan secara paksa
 rm -rf ~/.omniroute/runtime
 omniroute  # akan dipasang semula pada permulaan seterusnya
 
-# Semak pemacu yang aktif
+# Semak pemacu yang sedang aktif
 omniroute config db-info  # (jika perintah CLI wujud)
 ```
+
+## Mendiagnosis kesesakan segerak
+
+Dengan `better-sqlite3`, tetapkan `OMNIROUTE_SQLITE_SLOW_MS=200` sebelum permulaan untuk
+mendayakan pemasaan penyesuai segerak. Secara lalai, ia dilumpuhkan. Operasi lengkap yang mengambil
+masa sekurang-kurangnya sebanyak itu dalam milisaat akan mengeluarkan amaran `[SQLITE-SLOW]`, paling
+banyak sekali setiap sepuluh saat bagi setiap penyesuai. Amaran tersebut hanya mengandungi pemacu, kelas operasi
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaksi atau penyelenggaraan), dan
+tempoh berlalu dalam milisaat: tiada SQL, pengikatan, baris, laluan atau teks pengecualian.
+
+Ini ialah bantuan diagnostik, bukannya tamat masa atau pengoptimuman pertanyaan. Ia tidak boleh melaporkan
+operasi yang tidak pernah kembali, membezakan kerja CPU daripada penantian cakera, mengenal pasti
+SQL yang tepat atau memerhatikan operasi yang dilakukan melalui pemegang pemacu mentah.
+Tempoh sandaran tak segerak sengaja dikecualikan; pemacu SQLite lain tidak
+diinstrumentasikan oleh pilihan ini. Melumpuhkan pemboleh ubah tersebut memulihkan penyesuai asal
+tanpa pembalut pemasaan. Tiada perubahan pada skema pangkalan data atau konfigurasi yang disimpan.
+
+Amaran sela `/healthz` melaporkan puncak gelung peristiwa sejak sampel sebelumnya,
+bukannya purata sepanjang hayat. Hubungkaitkan cap masanya dengan amaran operasi perlahan
+dan metrik hos/storan sebelum mengaitkan kesesakan dengan kegagalan SQLite atau cakera.
 
 ## Rujukan
 
 Pelaksanaan:
 
 - `bin/cli/runtime/magicBytes.mjs` — pembantu pengesahan bait magik binari
-- `bin/cli/runtime/sqliteRuntime.mjs` — penentu masa jalan 5 langkah + pemasang malas
+- `bin/cli/runtime/sqliteRuntime.mjs` — penentu semasa jalanan 5 langkah + pemasang malas
 - `bin/cli/runtime/index.mjs` — pengatur permulaan (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — cangkuk selepas pemasangan npm (pemanasan tidak membawa maut)
+- `scripts/postinstall.mjs` — cangkuk pascapemasangan npm (pemanasan tidak membawa maut)
 - `src/lib/db/core.ts` — eksport `ensureDbInitialized()` / `getDriverInfo()`
 
 ## Topologi penulis tunggal (HA tidak disokong)
 
-Rantaian sandaran pemacu di atas masih berjalan dalam **satu proses**. SQLite lalai
+Rantaian sandaran pemacu di atas masih berjalan dalam **satu proses**. Secara lalai, SQLite
 OmniRoute ialah **penulis tunggal**:
 
 - Jangan sambungkan dua replika OmniRoute kepada fail `storage.sqlite` yang sama.
-- Mulakan semula bekas, penggunaan Recreate, penamatan OOM atau mulakan semula HEALTHCHECK akan memutuskan
-  setiap sesi SSE yang sedang berlangsung. Tiada pengosongan sesi pada laluan lalai.
-- Keaktifan pengatur yang menganggap `/healthz` perlahan sebagai tidak aktif akan menamatkan satu-satunya
+- Mulakan semula bekas, penggunaan Recreate, penghentian OOM atau mula semula HEALTHCHECK akan menamatkan
+  setiap sesi SSE yang sedang berjalan. Tiada pengosongan sesi pada laluan standard.
+- Keaktifan pengatur yang menganggap `/healthz` perlahan sebagai mati akan menamatkan satu-satunya
   replika. Utamakan keaktifan TCP + kesediaan HTTP `/healthz`. Lihat
   [Panduan Docker — ketersediaan](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
   dan [cadangan prob Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

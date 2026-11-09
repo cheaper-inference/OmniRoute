@@ -1,1 +1,0 @@
-- **fix(open-sse):** replay a `403 or 451` title refusal carrying `insufficient_quota` once in the other tool shape, so a wrong shape no longer surfaces as exhausted credits ([#15451](https://github.com/diegosouzapw/OmniRoute/pull/15451)) — thanks @maxmad64bis

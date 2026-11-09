@@ -13,7 +13,7 @@ import { PROVIDERS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { BaseExecutor, mergeUpstreamExtraHeaders, type ExecuteInput } from "./base.ts";
 
-const DEVIN_DESKTOP_BASE_URL = "https://server.codeium.com";
+export const DEVIN_DESKTOP_BASE_URL = "https://server.codeium.com";
 const DEVIN_DESKTOP_CHAT_PATH = "/exa.api_server_pb.ApiServerService/GetChatMessage";
 const DEVIN_DESKTOP_AUTH_PATH = "/exa.auth_pb.AuthService/GetUserJwt";
 const DEVIN_DESKTOP_CHAT_URL = `${DEVIN_DESKTOP_BASE_URL}${DEVIN_DESKTOP_CHAT_PATH}`;
@@ -463,7 +463,7 @@ function decodeToolCall(bytes: Uint8Array): DevinToolCallDelta {
     if (field.wireType !== 2) continue;
     if (field.fieldNumber === 1) result.id = TEXT_DECODER.decode(field.value);
     else if (field.fieldNumber === 2) result.name = TEXT_DECODER.decode(field.value);
-    else if (field.fieldNumber === 3) result.arguments = TEXT_DECODER.decode(field.value);
+    else if (field.fieldNumber === 3) result.arguments += TEXT_DECODER.decode(field.value);
   }
   return result;
 }
@@ -483,7 +483,9 @@ function decodeGetChatMessageResponse(bytes: Uint8Array): DecodedResponse {
       result.stopReason = field.value;
     } else if (field.wireType === 2 && field.fieldNumber === 6) {
       const toolCall = decodeToolCall(field.value);
-      if (toolCall.id) result.toolCalls.push(toolCall);
+      // Tool call argument fragments arrive as id-less submessages; keep them
+      // so the emit loop can forward them as continuation deltas.
+      if (toolCall.id || toolCall.name || toolCall.arguments) result.toolCalls.push(toolCall);
     } else if (field.wireType === 2 && field.fieldNumber === 7) {
       result.usage = decodeUsage(field.value);
     } else if (field.wireType === 2 && field.fieldNumber === 9) {
@@ -768,6 +770,8 @@ export class DevinDesktopExecutor extends BaseExecutor {
         let roleEmitted = false;
         let stopReason = 0;
         const toolCallIndexes = new Map<string, number>();
+        let lastToolCallIndex: number | undefined;
+        let orphanArguments = "";
         let usage: DevinUsage | null = null;
         let trailerError: ConnectTrailerError | null = null;
         let sawEndStream = false;
@@ -800,13 +804,29 @@ export class DevinDesktopExecutor extends BaseExecutor {
             if (response.thinking) emitChunk({ reasoning_content: response.thinking });
             if (response.text) emitChunk({ content: response.text });
             for (const toolCall of response.toolCalls) {
-              const existingIndex = toolCallIndexes.get(toolCall.id);
+              // A fragment that arrives before any id'd call has nothing to continue:
+              // hold it and prepend it to the first call instead of emitting an
+              // index-0 delta with no id or name.
+              if (!toolCall.id && lastToolCallIndex === undefined) {
+                orphanArguments += toolCall.arguments;
+                continue;
+              }
+              // Argument fragments have no id: they continue the previous tool
+              // call and must be emitted as deltas on that same index.
+              const existingIndex = toolCall.id
+                ? toolCallIndexes.get(toolCall.id)
+                : lastToolCallIndex;
               const index = existingIndex ?? toolCallIndexes.size;
-              const firstDelta = existingIndex === undefined;
-              if (firstDelta) toolCallIndexes.set(toolCall.id, index);
+              const firstDelta = Boolean(toolCall.id) && existingIndex === undefined;
+              if (toolCall.id) {
+                if (firstDelta) toolCallIndexes.set(toolCall.id, index);
+                lastToolCallIndex = index;
+              }
               const functionDelta: Record<string, string> = {};
               if (toolCall.name) functionDelta.name = toolCall.name;
-              if (toolCall.arguments) functionDelta.arguments = toolCall.arguments;
+              const args = firstDelta ? orphanArguments + toolCall.arguments : toolCall.arguments;
+              if (firstDelta) orphanArguments = "";
+              if (args) functionDelta.arguments = args;
               emitChunk({
                 tool_calls: [
                   {

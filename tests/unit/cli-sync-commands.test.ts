@@ -34,44 +34,16 @@ function makeCmd(output = "json") {
   return { optsWithGlobals: () => ({ output, quiet: output !== "table" }) };
 }
 
-test("sync push envia parts para /api/sync/cloud", async () => {
-  let capturedBody: any = null;
-  let capturedUrl = "";
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((url: string, opts: any) => {
-    capturedUrl = url;
-    if (opts?.body) capturedBody = JSON.parse(opts.body);
-    return Promise.resolve(makeResp({ uploaded: true }));
-  }) as any;
-
-  await (globalThis.fetch as any)("/api/sync/cloud", {
-    method: "POST",
-    body: JSON.stringify({ parts: ["settings", "combos"], dryRun: false }),
-  });
-
-  globalThis.fetch = origFetch;
-  assert.ok(capturedUrl.includes("/api/sync/cloud"));
-  assert.ok(Array.isArray(capturedBody.parts));
-  assert.ok(capturedBody.parts.includes("settings"));
-});
+// `sync push`, `sync bundle` and `sync initialize` are covered against the real commander wiring
+// in tests/unit/cli-sync-subcommands-routes.test.ts. The stub that lived here asserted the
+// `{parts, dryRun}` body, i.e. the 400 bug itself (POST /api/sync/cloud only takes `{action}`).
 
 // `sync pull` is covered against the real commander wiring in
 // tests/unit/cli-sync-pull-exportall.test.ts (GET /api/db-backups/exportAll → .tar.gz on disk).
 // The stub that lived here asserted a POST body with `strategy`, i.e. the 405 bug itself.
 
-test("sync diff passa op=diff na query", async () => {
-  let capturedUrl = "";
-  const origFetch = globalThis.fetch;
-  globalThis.fetch = ((url: string) => {
-    capturedUrl = url;
-    return Promise.resolve(makeResp({ diff: [] }));
-  }) as any;
-
-  await (globalThis.fetch as any)("/api/sync/cloud?op=diff&source=local&target=cloud");
-
-  globalThis.fetch = origFetch;
-  assert.ok(capturedUrl.includes("op=diff"));
-});
+// `sync diff` (and `sync resolve`) were removed: GET /api/sync/cloud ignores `op=` and answers
+// with the cloud status, so the stub that asserted `op=diff` in the query encoded a no-op.
 
 test("sync status chama /api/sync/cloud?op=status", async () => {
   let capturedUrl = "";

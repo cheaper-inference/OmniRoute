@@ -1,9 +1,12 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Collapsible from "@/shared/components/Collapsible";
 import { Card, Button, Select, Badge } from "@/shared/components";
+import Input from "@/shared/components/Input";
 import { getExampleTemplates, FORMAT_META, FORMAT_OPTIONS } from "../../exampleTemplates";
 import { useProviderOptions } from "../../hooks/useProviderOptions";
 import { useAvailableModels } from "../../hooks/useAvailableModels";
@@ -216,9 +219,7 @@ function TestBenchContent() {
     <div className="space-y-5 min-w-0">
       {/* Info Banner */}
       <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 shrink-0">
-          info
-        </span>
+        <Icon name="info" size={20} className="text-primary mt-0.5" />
         <div>
           <p className="font-medium text-text-main mb-0.5">{t("compatibilityTester")}</p>
           <p>{t("testBenchDescription")}</p>
@@ -230,10 +231,8 @@ function TestBenchContent() {
         <div className="p-4 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row items-end gap-4 min-w-0">
             <div className="flex-1 w-full">
-              <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-                {t("source")}
-              </label>
               <Select
+                label={t("source")}
                 value={sourceFormat}
                 onChange={(e) => {
                   setSourceFormat(e.target.value);
@@ -243,15 +242,11 @@ function TestBenchContent() {
               />
             </div>
             <div className="flex items-center justify-center px-2">
-              <span className="material-symbols-outlined text-[22px] text-text-muted">
-                arrow_forward
-              </span>
+              <Icon name="arrow_forward" size={22} className="text-text-muted" />
             </div>
             <div className="flex-1 w-full">
-              <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-                {t("targetProvider")}
-              </label>
               <Select
+                label={t("targetProvider")}
                 value={provider}
                 onChange={(e) => {
                   setProvider(e.target.value);
@@ -271,17 +266,14 @@ function TestBenchContent() {
             </Button>
           </div>
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-              {t("model")}
-            </label>
             <div className="relative">
-              <input
+              <Input
                 type="text"
+                label={t("model")}
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 list="testbench-acc-model-suggestions"
                 placeholder={t("modelPlaceholder")}
-                className="w-full bg-bg-subtle border border-border rounded-lg px-3 py-2 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
               />
               <datalist id="testbench-acc-model-suggestions">
                 {availableModels.map((m) => (
@@ -311,17 +303,17 @@ function TestBenchContent() {
               </div>
               <div className="flex items-center gap-3 text-xs text-text-muted">
                 <span className="flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-green-500" /> {passCount} {t("passed")}
+                  <span className="size-2 rounded-full bg-success" /> {passCount} {t("passed")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="size-2 rounded-full bg-red-500" /> {failCount} {t("failed")}
+                  <span className="size-2 rounded-full bg-error" /> {failCount} {t("failed")}
                 </span>
               </div>
             </div>
             {/* Progress bar */}
             <div className="w-full h-2 bg-bg-subtle rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-success to-success rounded-full transition-all duration-500"
                 style={{ width: `${compatibility}%` }}
               />
             </div>
@@ -340,9 +332,9 @@ function TestBenchContent() {
               key={scenario.id}
               className={`transition-all ${
                 result?.status === "pass"
-                  ? "border-green-500/30"
+                  ? "border-success/30"
                   : result?.status === "error"
-                    ? "border-red-500/30"
+                    ? "border-error/30"
                     : ""
               }`}
             >
@@ -352,21 +344,24 @@ function TestBenchContent() {
                     <div
                       className={`flex items-center justify-center w-9 h-9 rounded-lg ${
                         result?.status === "pass"
-                          ? "bg-green-500/10 text-green-500"
+                          ? "bg-success/10 text-success"
                           : result?.status === "error"
-                            ? "bg-red-500/10 text-red-500"
+                            ? "bg-error/10 text-error"
                             : "bg-bg-subtle text-text-muted"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[20px]">
-                        {isRunning
-                          ? "progress_activity"
-                          : result?.status === "pass"
-                            ? "check_circle"
-                            : result?.status === "error"
-                              ? "error"
-                              : scenario.icon}
-                      </span>
+                      <Icon
+                        name={
+                          isRunning
+                            ? "progress_activity"
+                            : result?.status === "pass"
+                              ? "check_circle"
+                              : result?.status === "error"
+                                ? "error"
+                                : scenario.icon
+                        }
+                        size={20}
+                      />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-main">
@@ -385,8 +380,8 @@ function TestBenchContent() {
                   <div
                     className={`rounded-lg p-2 text-xs ${
                       result.status === "pass"
-                        ? "bg-green-500/5 text-green-600 dark:text-green-400"
-                        : "bg-red-500/5 text-red-600 dark:text-red-400"
+                        ? "bg-success/5 text-success"
+                        : "bg-error/5 text-error"
                     }`}
                   >
                     {result.status === "pass" ? (

@@ -5,29 +5,9 @@ import {
 } from "@/lib/db/providers";
 import { CodexAuthFileError } from "@/lib/oauth/utils/codexAuthFile";
 import { pickCodexConnectionForUser } from "@/lib/oauth/utils/codexConnectionSelection";
+import { toRecord, toNonEmptyString, decodeJwtPayload } from "./codexAuthValues";
 
 type JsonRecord = Record<string, unknown>;
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-function toNonEmptyString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
-function decodeJwtPayload(jwt: string): JsonRecord | null {
-  try {
-    const parts = jwt.split(".");
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], "base64url").toString("utf8");
-    return toRecord(JSON.parse(payload));
-  } catch {
-    return null;
-  }
-}
 
 function extractExpFromJwt(jwt: string): number | null {
   const payload = decodeJwtPayload(jwt);
@@ -123,10 +103,17 @@ export function parseAndValidateCodexAuth(raw: unknown): ParsedCodexAuth {
     );
   }
 
+  // The OAuth fields live under `tokens` in the Codex CLI / OmniRoute export shape, but
+  // other Codex-compatible clients write the same fields at the top level of auth.json.
+  // `/api/oauth/codex/import` already accepts both (see unwrapCodexAuthJson in
+  // lib/oauth/services/codexImport.ts); read both here too so the dashboard import
+  // reaches the same verdict. Nested values win when a key is present in both.
   const tokens = toRecord(doc.tokens);
-  const idToken = toNonEmptyString(tokens.id_token);
-  const accessToken = toNonEmptyString(tokens.access_token);
-  const refreshToken = toNonEmptyString(tokens.refresh_token);
+  const pickToken = (key: "id_token" | "access_token" | "refresh_token"): string | null =>
+    toNonEmptyString(tokens[key]) ?? toNonEmptyString(doc[key]);
+  const idToken = pickToken("id_token");
+  const accessToken = pickToken("access_token");
+  const refreshToken = pickToken("refresh_token");
 
   if (!idToken) {
     throw new CodexAuthFileError(
@@ -152,8 +139,9 @@ export function parseAndValidateCodexAuth(raw: unknown): ParsedCodexAuth {
     );
   }
 
-  const tokensAccountId = toNonEmptyString(tokens.account_id) ?? undefined;
-  const accountId = extractCodexAccountId(idToken, tokensAccountId);
+  const declaredAccountId =
+    toNonEmptyString(tokens.account_id) ?? toNonEmptyString(doc.account_id) ?? undefined;
+  const accountId = extractCodexAccountId(idToken, declaredAccountId);
 
   if (!accountId) {
     throw new CodexAuthFileError(

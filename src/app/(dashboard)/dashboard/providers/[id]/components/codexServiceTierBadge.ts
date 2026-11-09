@@ -14,7 +14,7 @@ export function getCodexServiceTierBadge(
     return {
       label: CODEX_ULTRAFAST_LABEL,
       icon: "bolt",
-      className: "bg-sky-500/15 text-sky-500",
+      className: "bg-info/15 text-info",
       title: CODEX_ULTRAFAST_MODEL_LABEL,
     };
   }
@@ -22,7 +22,7 @@ export function getCodexServiceTierBadge(
     return {
       label: providerText(t, "codexTierFastLabel", "Fast"),
       icon: "bolt",
-      className: "bg-sky-500/15 text-sky-500",
+      className: "bg-info/15 text-info",
       title: global
         ? providerText(
             t,
@@ -40,7 +40,7 @@ export function getCodexServiceTierBadge(
     return {
       label: providerText(t, "codexTierFlexLabel", "Flex"),
       icon: "speed",
-      className: "bg-cyan-500/15 text-cyan-500",
+      className: "bg-chart-2/15 text-chart-2",
       title: global
         ? providerText(
             t,

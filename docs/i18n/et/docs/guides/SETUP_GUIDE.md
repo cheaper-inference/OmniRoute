@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) Ühendage teenusepakkujad ja looge API-võti
 
-1. Avage Dashboard → `Providers` ja ühendage vähemalt üks teenusepakkuja (OAuthi või API-võtme abil).
+1. Avage Dashboard → `Providers` ja ühendage vähemalt üks teenusepakkuja (OAuth või API-võti).
 2. Avage Dashboard → `Endpoints` ja looge API-võti.
 3. (Valikuline) Avage Dashboard → `Combos` ja määrake varuahel.
 
@@ -152,7 +152,7 @@ API-võti: [kopeerige lehelt Endpoint]
 Mudel:    if/qwen3.8-max-preview (või mis tahes teenusepakkuja/mudeli prefiks)
 ```
 
-Kui teie redaktor ei saa saata päist `Authorization: Bearer ...`, kasutage selle asemel tokeniseeritud ühilduvusbaasi:
+Kui teie redaktor ei saa saata päist `Authorization: Bearer ...`, kasutage selle asemel tokeniseeritud ühilduvuse baas-URL-i:
 
 ```txt
 Baas-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,7 +165,7 @@ Töötab Claude Code'i, Codex CLI, Cursori, Cline'i, OpenClaw', OpenCode'i ja Op
 
 #### Automaatne seadistamine käsuga `setup-*`
 
-Selle asemel, et baas-URL ja võti käsitsi kleepida, laske OmniRoute'il kirjutada iga tööriista
+Baas-URL-i ja võtme käsitsi kleepimise asemel laske OmniRoute'il kirjutada iga tööriista
 konfiguratsioon aktiivse mudelikataloogi põhjal. Üks käsk tööriista kohta:
 
 ```bash
@@ -175,33 +175,34 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-ga ühil
 omniroute setup-cline        # Cline CLI + VS Code'i laienduse sätted
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # väljastab Cursori rakendusesisesed juhised
-omniroute setup-roo          # Roo Code'i import + autoImporti viit
+omniroute setup-cursor       # kuvab Cursoris tehtavad sammud
+omniroute setup-roo          # Roo Code'i import + autoImport viit
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Iga käsk toetab suvandit `--remote <url> --api-key <key>`, et seadistada kohalik tööriist
-**kaugserveris** töötava OmniRoute'i kasutamiseks, ning suvandit `--dry-run` eelvaate kuvamiseks. Õigete
-keskkonnamuutujatega CLI käivitamiseks ilma ühtegi konfiguratsiooni kirjutamata kasutage üldist käivitajat
+Iga käsk aktsepteerib suvandeid `--remote <url> --api-key <key>`, et seadistada kohalik tööriist
+**kaugserveris** töötava OmniRoute'i kasutamiseks, ning eelvaateks suvandit `--dry-run`. Õigete
+keskkonnamuutujatega CLI käivitamiseks ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-pärandtööriistapõhised käivitajad `omniroute launch` (Claude Code) ja
+pärandkäivitajad `omniroute launch` (Claude Code) ja
 `omniroute launch-codex` (Codex) on endiselt saadaval.
 
-Täieliku tabeli (mida iga käsk kirjutab, kõik lipud, kohalik vs. kaugserver, baas-URL-i
+Täieliku tabeli (mida iga käsk kirjutab, kõik lipud, kohalik või kaugühendus, baas-URL-i
 `/v1` tavad) leiate jaotisest **[CLI-integratsioonid](./CLI-INTEGRATIONS.md)**.
 
-Üksikasjalikud tööriistapõhised seadistusjuhised (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ja muud) leiate eraldi juhendist **[CLI-tööriistade juhend](../reference/CLI-TOOLS.md)**.
+Üksikasjalikud tööriistapõhised seadistusjuhised (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ja teised) leiate eraldi juhendist **[CLI-tööriistade juhend](../reference/CLI-TOOLS.md)**.
 
 ---
 
-## Protokollide seadistamine (MCP + A2A)
+## Protokolli seadistamine (MCP + A2A)
 
-### MCP seadistamine (Model Context Protocol)
+### MCP seadistamine (mudeli kontekstiprotokoll)
 
-Käivitage MCP-transport stdio-režiimis:
+Käivitage MCP transport stdio režiimis:
 
 ```bash
 omniroute --mcp
@@ -210,28 +211,28 @@ omniroute --mcp
 Soovitatav valideerimisvoog:
 
 ```bash
-# 1. Käivitage MCP-server
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kutsuge oma MCP-kliendist välja:
-omniroute_get_health        # Peaks tagastama süsteemi seisundi
-omniroute_list_combos       # Peaks tagastama aktiivsed kombinatsioonid
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Või käivitage täielik E2E-testikomplekt:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-kliendi seadistamine
+#### MCP kliendi konfiguratsioon
 
-**Claude Code:**
+**Claude kood:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Lisage oma MCP-sätetesse:
+Lisage oma MCP seadetesse (stdio, klahviga, et helistajal oleks põhiline):
 
 ```json
 {
@@ -239,23 +240,30 @@ Lisage oma MCP-sätetesse:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Täielik MCP-dokumentatsioon:** [MCP-serveri README](../../open-sse/mcp-server/README.md) — 110 tööriista, IDE konfiguratsioonid, Pythoni/TS-i/Go kliendid.
+Või kui `mcpTransport` on `streamable-http` (seadke see `/dashboard/mcp` või `omniroute mcp enable --transport streamable-http`-le), suunake kliendi kaug- MCP serveri kirje `http://localhost:20128/api/mcp/stream`.
 
-### A2A seadistamine (agentidevaheline protokoll)
+Võti liigub `Authorization: Bearer <api-key>` (vt [MCP Server → Kaughostide kaugjuurdepääs](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; kaugvõti vajab `mcp:connect` ja selle read/write ulatuseid).
 
-Kontrollige agendikaarti:
+**Täielik MCP dokumentatsioon:** [MCP server README](../../open-sse/mcp-server/README.md) — 110 tööriistad, IDE konfiguratsioonid, Python/TS/Go kliendid. Operaatori viide CCR/dedup tihendustööriistadele (markerid, eeltingimused, tööriistapõhised ulatused, otsingu leheküljed, diagnostika): [Compression Engines → Eeltingimused / kasutaja juhend](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A seadistamine (agent-agendi protokoll)
+
+Kinnitage agendikaart:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Saatke ülesanne:
+Saada ülesanne:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Täielik A2A-dokumentatsioon:** [A2A-serveri README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, oskused, voogedastus, ülesande elutsükkel.
+**Täielik A2A dokumentatsioon:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, oskused, voogesitus, ülesannete elutsükkel.
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linuxi (xbps-src) mall
+## Kehtetu Linux (xbps-src) mall
 
-Void Linuxi kasutajad saavad luua omapaketi tööriistaga `xbps-src`. Salvestage see plokk failina `srcpkgs/omniroute/template`:
+Void Linux kasutajad saavad luua natiivse paketi `xbps-src` abil. Salvestage see plokk `srcpkgs/omniroute/template`:
 
 ```bash
-# Mallifail paketile „omniroute”
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Genereerige kontrollsumma iga väljalaske jaoks uuesti käsuga:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

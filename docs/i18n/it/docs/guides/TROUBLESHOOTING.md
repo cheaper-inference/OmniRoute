@@ -37,33 +37,39 @@ Problemi comuni e soluzioni per OmniRoute.
 
 ---
 
-### Limitazione delle richieste sui provider gratuiti (429 / 400 / 401)
+### Limitazione della frequenza sui provider gratuiti (429 / 400 / 401)
 
-**Sintomo**: quando usi `model: "auto"` con provider gratuiti/senza autenticazione (opencode, auggie, ecc.), ricevi in modo intermittente `HTTP 429`, `400` o `401` anziché le risposte. Le richieste vanno a buon fine riprovando lo stesso prompt pochi istanti dopo, ma l'automazione (processi cron, agenti, script) si interrompe al primo errore.
+**Sintomo**: Quando si usa `model: "auto"` con provider gratuiti/senza autenticazione (auggie, ecc.), si ricevono occasionalmente `HTTP 429`, `400` o `401` invece delle risposte. Le richieste hanno esito positivo riprovando lo stesso prompt pochi istanti dopo, ma l'automazione (job cron, agenti, script) si interrompe al primo errore.
 
-**Causa principale**: si sommano tre modalità di errore indipendenti:
+**Causa principale**: si sovrappongono tre modalità di errore indipendenti:
 
-1. **Limite di richieste del provider (`429`)**: i piani gratuiti possono imporre una quota per intervallo temporale. Un picco di chiamate parallele la esaurisce, quindi la richiesta successiva viene rifiutata finché l'intervallo non viene reimpostato.
-2. **Modello non funzionante in passthrough (`400`/`401`)**: i pool `auto/*` possono includere modelli passthrough di `opencode` registrati nel catalogo ma privi di credenziali attive (ad es. `oc/north-mini-code-free` → `401`). Il router automatico ne prova uno, non riesce e l'errore viene propagato prima che si attivi il fallback.
-3. **Amplificazione della concorrenza (`429` sotto carico)**: quando più sessioni di agenti/cron usano `auto` contemporaneamente, la frequenza complessiva delle richieste supera quella tollerata dai provider gratuiti, quindi le chiamate legittime vengono contrassegnate come abusive.
+1. **Limitazione della frequenza del provider (`429`)**: i piani gratuiti possono applicare una quota per finestra temporale. Un burst di chiamate parallele la esaurisce, quindi la richiesta successiva viene rifiutata fino al ripristino della finestra.
+2. **Modello non funzionante nel passthrough (`400`/`401`)**: i pool `auto/*` possono includere modelli passthrough registrati nel catalogo ma privi di credenziali attive (→ `401`). L'auto-router ne tenta uno, fallisce e l'errore viene propagato prima che entri in funzione il fallback.
+3. **Amplificazione della concorrenza (`429` sotto carico)**: quando più sessioni di agenti/job cron usano `auto` contemporaneamente, la frequenza aggregata delle richieste supera ciò che i provider gratuiti riescono a gestire, perciò le chiamate legittime vengono segnalate come abusive.
 
-**Soluzione verificata (segnalata dalla community, 2026-08-10)**: configura tre variabili di ambiente affinché rotazione, concorrenza e fallback assorbano l'instabilità del piano gratuito anziché interrompersi a causa di essa:
+**Correzione verificata (segnalata dalla community, 2026-08-10)**: configurare tre variabili d'ambiente in modo che rotazione, concorrenza e fallback assorbano l'instabilità dei piani gratuiti invece di interrompersi:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # passa a un altro modello/provider in caso di 400/401 (salta i modelli passthrough non funzionanti)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limite massimo esplicito di ammissione per richieste pesanti (non impostato per impostazione predefinita: nessun limite al numero di richieste; vedi la nota sotto)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # estende l'attesa limitata oltre il valore predefinito di RATE_LIMIT_MAX_WAIT_MS per gli upstream lenti
+export OMNIROUTE_ROTATE_ON_400=true           # passa a un altro modello/provider in caso di 400/401 (ignora i modelli passthrough non funzionanti)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limite esplicito di ammissione per le richieste pesanti (non impostato per impostazione predefinita: nessun limite sul numero di richieste, vedi la nota sotto)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # aumenta l'attesa vincolata oltre il valore predefinito di RATE_LIMIT_MAX_WAIT_MS per i backend upstream lenti
 ```
 
-Impostale nell'ambiente del processo OmniRoute (il daemon, ad es. tramite il plist LaunchAgent o `systemctl edit`), quindi riavvia OmniRoute. Il flag di rotazione è il singolo strumento con il maggiore impatto: trasforma un errore irreversibile in un nuovo tentativo trasparente con un provider funzionante del pool.
+Impostare queste variabili nell'ambiente del processo OmniRoute (il daemon, ad esempio tramite il plist di LaunchAgent o `systemctl edit`), quindi riavviare OmniRoute. Il flag di rotazione è il singolo intervento più efficace: converte un errore irreversibile in un nuovo tentativo trasparente verso un provider funzionante del pool.
 
-**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limita il numero di richieste pesanti, ossia con contesto lungo, eseguite contemporaneamente; il limite è un controllo di ammissione, non un limitatore delle richieste del provider. **Aggiornamento #503-fanout:** questa variabile non viene più impostata per impostazione predefinita (ora si applica solo quando viene configurata esplicitamente, come sopra): l'ammissione delle richieste pesanti è invece regolata da un budget in byte derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), che si adatta al limite reale di memoria dell'host. Pertanto, una nuova distribuzione dovrebbe registrare molti meno rifiuti `503 chat_admission_busy` senza dover impostare affatto questa variabile; impostarla esplicitamente come mostrato qui continua comunque a funzionare esattamente come documentato. Le sostituzioni esplicite del budget in byte sono limitate all'intervallo 8 MiB–2 GiB. Un errore `413 body_exceeds_budget` non è transitorio: aumenta il budget in byte, riduci `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` oppure aumenta il limite di memoria del processo. Un rifiuto `inflight_bytes_budget` è dovuto a una contesa temporanea ed è possibile riprovare. La limitazione delle richieste per provider (`open-sse/services/rateLimitManager.ts`) è gestita separatamente da `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` e `RATE_LIMIT_AUTO_ENABLE`: consulta `.env.example`.
+**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` limita il numero di richieste pesanti — con contesto lungo — eseguite contemporaneamente; il limite è un gate di ammissione, non un limitatore della frequenza del provider. **Aggiornamento #503-fanout:** questa variabile non viene più impostata per impostazione predefinita (ora viene applicata solo se configurata esplicitamente, come sopra) — l'ammissione delle richieste pesanti è invece regolata da un budget di byte derivato automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) che si adatta al limite di memoria effettivo dell'host, quindi una nuova installazione dovrebbe riscontrare molti meno rifiuti `503 chat_admission_busy` senza impostare affatto questa variabile; impostarla esplicitamente qui continua a funzionare esattamente come documentato. Le sostituzioni esplicite del budget di byte sono limitate all'intervallo 8 MiB–2 GiB. Un errore `413 body_exceeds_budget` non è transitorio: aumentare tale budget in byte, ridurre `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` o il limite salvato per il corpo della richiesta, oppure aumentare il limite di memoria del processo. Un'eliminazione per `inflight_bytes_budget` indica una contesa temporanea e resta riprovabile. La limitazione della frequenza per provider (`open-sse/services/rateLimitManager.ts`) è regolata separatamente da `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` e `RATE_LIMIT_AUTO_ENABLE` — vedere `.env.example`.
 
-**Come verificare che abbia funzionato**: esegui il tuo agente/cron due volte in rapida successione e verifica che entrambe le esecuzioni vadano a buon fine. Prima della correzione, la seconda esecuzione genera in genere un errore `429`/`401`. Dopo la correzione, gli eventuali errori vengono ritentati in modo trasparente e la chiamata viene completata. Puoi anche eseguire `curl /monitoring/health` e monitorare il campo `rateLimitedUntil` nelle connessioni dei provider e `circuitBreakers.providerBreakers[].state` per i provider interessati: lo stato può essere `CLOSED`, `DEGRADED`, `OPEN` o `HALF_OPEN` (vedi `src/shared/utils/circuitBreaker.ts`), e un provider che continua a generare errori passerà da `CLOSED → DEGRADED → OPEN` prima che la finestra di ripristino consenta il passaggio di una richiesta di prova (`HALF_OPEN`).
+**Nota sull'aggiornamento: ora anche chat utilizza il limite salvato per il corpo della richiesta.** Un limite salvato in precedenza in Settings > Advanced > Request Body Limit (`maxBodySizeMb`) ora si applica anche a `/v1/chat/completions` e `/v1/responses`. Prima di questa modifica, queste due route accettavano fino a 50 MB indipendentemente dal valore salvato, quindi un'installazione con un limite salvato inferiore inizia a rifiutare i corpi delle richieste chat che lo superano. Un'installazione in cui non è mai stato salvato un limite mantiene il valore predefinito di 50 MB.
 
-**Se continui a ricevere un errore 429**: l'account attivo per quel provider ha effettivamente esaurito la propria _quota_ (non si tratta solo di un limite di frequenza). Aggiungi un secondo account per lo stesso provider nella dashboard di OmniRoute → Providers → Accounts, oppure includi un altro provider gratuito (ad esempio `routeway`, `auggie`). La rotazione è utile solo in caso di errori transitori relativi a limiti di frequenza/400/401; l'esaurimento totale della quota richiede una seconda credenziale o un provider diverso.
+Il rifiuto è un HTTP `413` con `error.code` impostato su `PAYLOAD_TOO_LARGE` e `error.type` impostato su `payload_too_large`. Il messaggio indica il limite in vigore: `Request body too large. Maximum allowed: 10 MB` quando `Content-Length` dichiarato lo supera, oppure `Request body too large for chat completions (max 10 MB).` quando lo superano i byte effettivamente letti. Non è lo stesso `413 body_exceeds_budget` descritto sopra, che proviene dal budget di memoria e non viene modificato da questa impostazione.
 
-**Se ricevi un errore 403 sui modelli di visione (`auto/vision`, `bazaarlink/*`)**: l'account connesso non dispone di un piano a pagamento che includa la visione oppure la chiave API non dispone di autorizzazioni sufficienti. Verifica nella dashboard del provider che l'ambito della chiave includa la visione/multimodale, oppure collega un account con un piano a pagamento e mantienilo come destinazione per la visione.
+Per aumentare il limite, salvare un valore maggiore in `/dashboard/settings/advanced`, oppure inviare `PATCH /api/settings` con `{"maxBodySizeMb": 50}`. Sono accettati valori da 1 a 500 MB, l'impostazione viene applicata senza riavvio e 50 ripristina il precedente limite chat. Due ulteriori limiti possono comunque bloccare un corpo più grande: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, se impostato, limita anch'esso un limite salvato, mentre l'annotazione dell'ingress Kubernetes `proxy-body-size` (`50m` nei manifest forniti) deve essere aumentata separatamente per qualsiasi valore superiore a 50 MB.
+
+**Come verificare che abbia funzionato**: eseguire l'agente/job cron due volte in rapida successione e verificare che entrambe le esecuzioni abbiano esito positivo. Prima della correzione, la seconda esecuzione genera in genere `429`/`401`. Dopo la correzione, gli errori (se presenti) vengono ritentati in modo trasparente e la chiamata viene completata. È anche possibile usare `curl /monitoring/health` e osservare il campo `rateLimitedUntil` nelle connessioni dei provider e `circuitBreakers.providerBreakers[].state` per i provider interessati — lo stato è uno tra `CLOSED`, `DEGRADED`, `OPEN` o `HALF_OPEN` (vedere `src/shared/utils/circuitBreaker.ts`), e un provider che continua a fallire passa da `CLOSED → DEGRADED → OPEN` prima che la finestra di ripristino consenta il passaggio di una probe (`HALF_OPEN`).
+
+**Se si vedono ancora errori 429**: l'account attivo per quel provider ha effettivamente esaurito la propria _quota_ (non solo la frequenza). Aggiungere un secondo account per lo stesso provider nella dashboard di OmniRoute → Providers → Accounts, oppure combinare un altro provider gratuito (ad esempio `routeway`, `auggie`). La rotazione è utile solo per errori transitori di frequenza/400/401; l'esaurimento completo della quota richiede una seconda credenziale o un provider diverso.
+
+**Se si vede 403 sui modelli vision (`auto/vision`, `bazaarlink/*`)**: l'account collegato non dispone di un piano a pagamento che includa vision, oppure la chiave API non dispone di autorizzazioni sufficienti. Verificare nella dashboard del provider che l'ambito della chiave includa vision/multimodal, oppure collegare un account con piano a pagamento e mantenerlo come destinazione vision.
 
 ---
 
@@ -90,48 +96,48 @@ Gli avvisi derivano da intervalli obsoleti delle dipendenze peer in pacchetti di
 
 ---
 
-## Avviso di blocco degli script di npm install (installazione globale)
+## Avviso install-scripts bloccati di npm (installazione globale)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Quando si esegue `npm install -g omniroute`, le versioni più recenti di npm (v11+ e v12+) bloccano per impostazione predefinita gli script del ciclo di vita dei pacchetti e visualizzano un avviso relativo agli script di installazione:
+Quando si esegue `npm install -g omniroute`, le versioni più recenti di npm (v11+ e v12+) bloccano per impostazione predefinita gli script del ciclo di vita dei pacchetti e mostrano un avviso relativo a install-scripts:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 pacchetti avevano script di installazione bloccati perché non inclusi in allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Questo avviso può essere ignorato?
+### È possibile ignorare questo avviso?
 
-**Parzialmente, ma l'esecuzione senza script non è consigliata.** OmniRoute include meccanismi di fallback affidabili: se i binding nativi di `better-sqlite3` non possono essere caricati dal bundle autonomo, l'applicazione ricorre a driver alternativi come `node:sqlite` o `sql.js` (consulta [Risoluzione del runtime SQLite](../ops/SQLITE_RUNTIME.md)). Il server verrà comunque avviato, ma l'esecuzione con fallback WASM come `sql.js` disabilita la modalità WAL (Write-Ahead Logging) di SQLite e aumenta il sovraccarico della memoria e della sincronizzazione su disco.
+**Parzialmente, ma l'esecuzione senza script non è consigliata.** OmniRoute include meccanismi di fallback affidabili: se non è possibile caricare dal bundle autonomo i binding nativi di `better-sqlite3`, l'applicazione utilizza driver alternativi come `node:sqlite` o `sql.js` (vedere [Risoluzione del runtime SQLite](../ops/SQLITE_RUNTIME.md)). Il server verrà comunque avviato, ma l'esecuzione con fallback WASM come `sql.js` disabilita la modalità WAL (Write-Ahead Logging) di SQLite e aumenta l'utilizzo della memoria e l'overhead di sincronizzazione su disco.
 
 ### Quali script sono effettivamente necessari?
 
-Non tutti gli script bloccati sono essenziali per l'esecuzione di OmniRoute:
+Non tutti gli script bloccati sono essenziali per eseguire OmniRoute:
 
-- **Essenziali (`omniroute`, `better-sqlite3`):** OmniRoute viene eseguito da un bundle applicativo autonomo Next.js (`dist/`). Durante l'installazione, npm scarica o compila il driver SQLite nativo specifico per l'host nella directory di primo livello `node_modules/better-sqlite3/`. Lo script `postinstall` di OmniRoute (`scripts/build/postinstall.mjs`) verifica e copia quindi questi binari specifici per l'host in `dist/node_modules/`, affinché il server autonomo possa accedervi. Se lo script postinstall di `omniroute` viene bloccato, questo passaggio di copia viene ignorato.
-- **Opzionali/transitivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Sono helper di compilazione, strumenti di monitoraggio o utilità per il portachiavi di sistema. Consentirne l'esecuzione evita gli avvisi di compilazione, ma non sono necessari per le funzionalità di routing principali.
-- **Escluso (`onnxruntime-node`):** È una dipendenza opzionale per gli embedding IA locali e **non** è necessaria per l'esecuzione di OmniRoute. Il suo script postinstall scarica circa 300 MB di risorse CUDA da NuGet; non includerlo nell'elenco delle autorizzazioni, a meno che tu non intenda esplicitamente utilizzare l'accelerazione ONNX locale su hardware supportato.
+- **Essenziali (`omniroute`, `better-sqlite3`):** OmniRoute viene eseguito da un bundle applicativo autonomo di Next.js (`dist/`). Durante l'installazione, npm scarica o compila il driver SQLite nativo specifico dell'host nella directory principale `node_modules/better-sqlite3/`. Lo script `postinstall` di OmniRoute (`scripts/build/postinstall.mjs`) verifica e copia quindi questi file binari specifici dell'host in `dist/node_modules/`, affinché il server autonomo possa accedervi. Se lo script postinstall di `omniroute` viene bloccato, questo passaggio di copia viene ignorato.
+- **Opzionali/transitivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Si tratta di strumenti ausiliari per la compilazione, strumenti di monitoraggio o utilità per il portachiavi di sistema. Consentirne l'esecuzione evita gli avvisi di compilazione, ma non sono necessari per le funzionalità di routing principali.
+- **Escluso (`onnxruntime-node`):** È una dipendenza opzionale per gli embedding IA locali e **non** è necessaria per eseguire OmniRoute. Il relativo script postinstall scarica da NuGet circa 300 MB di risorse CUDA; non includerlo nell'elenco delle autorizzazioni, a meno che non si intenda esplicitamente utilizzare l'accelerazione ONNX locale su hardware supportato.
 
-### Soluzione consigliata
+### Correzione consigliata
 
-Per consentire gli script di installazione richiesti durante un'installazione globale ed eliminare gli avvisi, specifica `--allow-scripts` per OmniRoute e le relative dipendenze native:
+Per consentire gli script di installazione necessari durante un'installazione globale ed eliminare gli avvisi, specificare `--allow-scripts` per OmniRoute e le relative dipendenze native:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-In alternativa, per configurare questa impostazione in modo permanente per tutte le installazioni globali del tuo account utente:
+In alternativa, per configurare questa impostazione in modo permanente per tutte le installazioni globali del proprio account utente:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Verifica l'installazione
+### Verificare l'installazione
 
-Dopo l'installazione, esegui lo strumento diagnostico integrato per assicurarti che i binding nativi e l'ambiente di runtime funzionino correttamente:
+Dopo l'installazione, eseguire lo strumento diagnostico integrato per assicurarsi che i binding nativi e l'ambiente di runtime funzionino correttamente:
 
 ```bash
 omniroute doctor
@@ -844,6 +850,30 @@ continua ad avviarsi in background e sarà raggiungibile una volta completato l'
 
 Consulta [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) per tutti i
 dettagli su `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## problemi CCR /dedup
+
+Matrice diagnostica per gli strumenti di compressione CCR (`ccr`) e `session-dedup`. Per il riferimento completo per l'operatore (marcatori, prerequisiti, ambiti per strumento, impaginazione di recupero) vedere [Motori di compressione → Prerequisiti/guida per l'operatore](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Sintomo                                                                                                            | Probabile causa                                                                                                                                                          | Verificare                                                                                                                                      | Aggiustare                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                     | Autenticazione loopback Route-guard, non un bug di trasporto. Nessuno `Bearer`, o una chiave senza `mcp:connect`/`manage`/`admin`, ha raggiunto il percorso `/api/mcp/`. | La richiesta conteneva l'intestazione no/invalid `Authorization`.                                                                               | Invia una chiave `Bearer` valida. Una chiave remota può contenere `mcp:connect` (autorizza il carve-out `/api/mcp/` solo locale) più l'ambito read/write specifico di cui ha bisogno.                                                                                                                    |
+| **blocco non trovato** — `omniroute_ccr_retrieve` rifiuta l'hash                                                   | L'hash non ha un valore esadecimale o è stato copiato in modo errato oppure il blocco è già scaduto/è stato eliminato.                                                   | Confronta l'hash con il valore 24 esadecimale nel marcatore `[CCR retrieve hash=…]` ; controlla `omniroute_ccr_stats` per lo stato del negozio. | Copia l'hash di 24 esadecimali parola per parola dal marcatore. Se il blocco è veramente scomparso, ha superato il suo TTL o non ha mai raggiunto l'archivio durevole (i blocchi superiori a 512 KB e ogni blocco su un runtime cloud rimangono solo in memoria e non sopravvivono a un riavvio).        |
+| **CCR no-op** — un blocco non viene compresso (il testo ritorna invariato)                                         | Blocca al di sotto della soglia di compressione oppure il motore/modalità CCR è inattivo.                                                                                | Controlla la compressione attiva `strategy`/`enabled` e la dimensione del blocco rispetto alla soglia.                                          | Abilita CCR (o una modalità in pila che lo esegue) e conferma che il blocco è abbastanza grande da valere la pena di essere archiviato. Un no-op non è un errore — è "niente da comprimere".                                                                                                             |
+| **indicatore di deduplicazione** — `[dedup:ref sha=…]` appare nell'output                                          | **Uno sguardo indietro intenzionale** , non una perdita o un errore. `session-dedup` testo eliso già inviato in un turno precedente della stessa sessione.               | Conferma che lo stesso testo venga visualizzato in precedenza nella sessione.                                                                   | Non fare nulla — non chiamare uno strumento e non provare a ricostruirlo. La prima occorrenza è la copia canonica; il turno corrente non viene mai riscritto, viene deduplicato in un turno successivo.                                                                                                  |
+| **Modalità codice** — strumenti `omniroute_ccr_*` assenti dalle istruzioni `tools[]` / CCR non inserite (OpenCode) | OpenCode Code Mode (l'impostazione predefinita) pubblicizza solo gli strumenti nativi nel modello, nascondendo gli strumenti MCP da `tools[]`.                           | Controllare la voce del server OpenCode MCP per `codemode`.                                                                                     | Imposta `codemode: false` nella voce del server (a** cliente** setting) in modo che gli strumenti MCP vengano pubblicizzati. L'istruzione CCR retrieve-protocol rimane disattivata: un server denominato `omniroute` espone `omniroute_omniroute_ccr_retrieve` e `_` non è un separatore corrispondente. |
+
+Altri sintomi:
+
+| Sintomo                                                                                                                | Probabile causa                                                                                                                                                                                | Aggiustare                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                                | Risultato di un errore dello strumento MCP (`isError: true`), non HTTP 403. La chiave del chiamante non ha l'ambito richiesto.                                                                 | Aggiungere l'ambito dalla tabella per strumento (vedere la guida dell'operatore). Ad esempio, `omniroute_ccr_retrieve` ha bisogno `read:compression`.                              |
+| `Unknown Mcp-Session-Id`                                                                                               | La sessione Streamable-HTTP è rimasta inattiva ed è stata raccolta (`OMNIROUTE_MCP_SESSION_IDLE_MS`); il server risponde HTTP 404.                                                             | Riconnetti o riavvia la sessione — do** non** ruotare una chiave, modificare un ambito o rinominare uno strumento. Non è uno 401/403.                                              |
+| `JSON Parse error` / `Unterminated string` nel risultato di uno strumento                                              | Il testo dello strumento MCP è ritagliato attorno a `mcpAccessibility.maxTextChars` (default `50000`) a metà del JSON.                                                                         | Utilizza uno `mode` paginato anziché uno completo: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` o `mode:"stats"`. Regola pratica: `chars > 40000` → usa uno `mode`. |
+| `Failed to open SSE stream`                                                                                            | Il client ha raggiunto il singleton legacy `/api/mcp/sse` mentre il trasporto è `streamable`.                                                                                                  | Puntare il client su `/api/mcp/stream` (l'endpoint streaming) anziché su `/api/mcp/sse`.                                                                                           |
+| **Battito cardiaco in studio morto** — `mcp-heartbeat.json` mostra `pidAlive: false` mentre il trasporto HTTP è attivo | Il file heartbeat è un residuo di stdio (obsoleto PID o una versione diversa); I trasporti HTTP sono in corso e segnalano invece lo stato da `getMcpHttpStatus()` (nessuna scrittura di file). | Nessuna azione — il trasporto è sano. La verità è `httpTransport.online` / `startedAt` da `/api/mcp/status`, non il file heartbeat. Non riavviare il server né ruotare una chiave. |
 
 ---
 

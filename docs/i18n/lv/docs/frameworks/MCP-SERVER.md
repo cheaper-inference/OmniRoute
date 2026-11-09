@@ -8,37 +8,32 @@
 >
 > Patiesības avots: `open-sse/mcp-server/server.ts` aprēķina **110 unikālus rīkus**, izmantojot `countUniqueMcpTools()`: 45 kanoniskās definīcijas (tostarp sešus CCR dzīves cikla rīkus, aģenta prasmju trio, `omniroute_radar_catalog` un `omniroute_x_search`), kā arī atmiņas (3), prasmju (4), GitHub prasmju (3), pūla (6), spēļošanas (8), spraudņu (8), Notion (6), Obsidian (22), lokālā korpusa (3) un divus tikai RTK paredzētus saspiešanas rīkus.
 
-## Instalēšana
+## Uzstādīšana
 
-OmniRoute MCP ir iebūvēts. Palaidiet to ar:
+OmniRoute MCP ir iebūvēts. Sāciet to ar:
 
 ```bash
 omniroute --mcp
 ```
 
-Vai izmantojot open-sse transportu:
+Vai ar atvērto transportu:
 
 ```bash
-# HTTP straumējamais transports (ports 20130)
-omniroute --dev  # MCP tiek automātiski palaists galapunktā /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transporti (`sse` / `streamable-http`, kurus tajā pašā procesā apkalpo informācijas paneļa serveris) pēc noklusējuma ir
-izslēgti, un iepriekš tos varēja pārslēgt tikai lapā `/dashboard/mcp`. Sākot ar v3.8.51,
-CLI nodrošina līdzvērtīgu funkcionalitāti:
+HTTP transportēšana (`sse` / `streamable-http`, kuru procesā apkalpo informācijas paneļa serveris) pēc noklusējuma ir izslēgta, un iepriekš tos varēja pārslēgt tikai no `/dashboard/mcp` lapas. No v3.8.51 CLI ir paritāte:
 
 ```bash
-omniroute mcp status                                  # iespējots/tiešsaistē, transports, rīku skaits
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # atiestata aktīvās sse/streamable-http sesijas
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` ar PATCH pieprasījumu maina to pašu `mcpEnabled` (un pēc izvēles `mcpTransport`) iestatījumu,
-kuru informācijas panelis pārslēdz, izmantojot `/api/settings`. `mcp restart` izsauc `POST /api/mcp/restart`: tas pārtrauc
-aktīvās `sse`/`streamable-http` sesijas, lai nākamais pieprasījums tās atkārtoti inicializētu tīrā stāvoklī, atgriež
-`409`, ja MCP ir atspējots, un `501` transportam `stdio` (stdio klienti pārvalda savus
-apakšprocesus — nav procesā iebūvēta deskriptora, ko restartēt).
+`mcp enable`/`mcp disable` PATCH tas pats `mcpEnabled` (un pēc izvēles `mcpTransport`), iestatot informācijas paneli, pārslēdzas, izmantojot `/api/settings`. `mcp restart` izsauc `POST /api/mcp/restart`: tas nojauc aktīvās `sse`/`streamable-http` sesijas, tāpēc nākamais pieprasījums tiek tīri inicializēts, atgriež `409`, ja MCP ir atspējots, un `501` `stdio` transportēšanai (stdio klientiem pieder savs apakšprocess — nav procesa roktura, ko restartēt).
 
 ## Transporti
 
@@ -71,6 +66,16 @@ curl -i \
 ```
 
 Atslēga bez manage tvēruma (vai bez Bearer) atgriež `403 LOCAL_ONLY`. Blakus prefiksu `/api/cli-tools/runtime/*` apiet nav iespējams — skatiet [Maršrutu aizsardzības līmeņi — manage tvēruma izņēmums](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### Origin pārbaude
+
+Pēc autentifikācijas katram pieprasījumam uz `/api/mcp/*` — transportiem un pārvaldības maršrutiem, piemēram, `status`, `tools`, `audit`, `restart` — tiek pārbaudīta `Origin` galvene neatkarīgi no izsaucēja (API atslēga, CLI marķieris, paneļa sesija vai anonīms loopback ar atspējotu pieteikšanos). Tā ir MCP Streamable HTTP specifikācijas prasītā aizsardzība pret DNS rebinding.
+
+- **Nav `Origin` galvenes** → atļauts. OmniRoute CLI, SDK un IDE klienti to nesūta.
+- **Atļauts `Origin`** → `localhost` / `127.0.0.1` / `[::1]` jebkurā portā vai paša OmniRoute publiskais origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, uzticama reversā starpniekservera pārsūtīts origin (`OMNIROUTE_TRUST_PROXY`, tikai ja base URL nav iestatīts) vai tieši izmantots loopback/LAN IP resursdators. Tikai `Host` galvene nekad nepadara origin uzticamu.
+- **Jebkurš cits `Origin`, ieskaitot `null`** → `403` ar JSON-RPC kļūdas pamattekstu: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Paneļa sesija ar derīgu CSRF marķieri joprojām tiek pieņemta, tāpat kā citu paneļa ierakstu gadījumā.
+
+Pārlūka MCP klientam aiz reversā starpniekservera nepieciešams `OMNIROUTE_PUBLIC_BASE_URL`; citiem origin atļauto sarakstu nav. CORS priekšpieprasījums (`OPTIONS`) netiek pārbaudīts pēc Origin; nākamais pieprasījums tiek.
 
 ## IDE konfigurācija
 
@@ -123,54 +128,40 @@ Cursor, Cline un saderīgu MCP klientu iestatīšanu.
 
 ## Saspiešanas rīki (13)
 
-| Rīks                                | Tvērumi             | Apraksts                                                                                                                                   |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Saspiešanas iestatījumi, analītikas kopsavilkums un kešatmiņu apzinoša statistika (ietver `analytics.mcpDescriptionCompression` metadatus) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurēt saspiešanas režīmu, slieksni, mērķa attiecību, sistēmas uzvednes saglabāšanu un MCP aprakstu saspiešanas pārslēgu               |
-| `omniroute_set_compression_engine`  | `write:compression` | Izvēlēties aktīvo dzini (off/caveman/rtk/stacked) un Caveman/RTK intensitāti                                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | Uzskaitīt nosauktās saspiešanas kombinācijas un to dzinēju cauruļvadus                                                                     |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analītika, grupēta pēc saspiešanas kombinācijas un dzinēja                                                                                 |
-| `omniroute_ccr_store`               | `write:compression` | Saglabāt izsaucēja izolētu saturu ierobežotā atmiņas CCR krātuvē un atgriezt marķieri ar `ccr://` atsauci                                  |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Iegūt CCR saturu pilnībā vai režīmos head, tail, lines, grep un stats                                                                      |
-| `omniroute_ccr_inspect`             | `read:compression`  | Pārbaudīt izsaucējam piederošus CCR metadatus, neatgriežot saturu                                                                          |
-| `omniroute_ccr_list`                | `read:compression`  | Uzskaitīt lapotos metadatus izsaucējam piederošajiem CCR blokiem                                                                           |
-| `omniroute_ccr_delete`              | `write:compression` | Dzēst izsaucējam piederošu CCR bloku                                                                                                       |
-| `omniroute_ccr_stats`               | `read:compression`  | Ziņot par izsaucēja tvērumam piesaistīto atmiņas lietojumu, dzīves cikla skaitītājiem un krātuves ierobežojumiem                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Atklāt atkārtotu troksni izvēles RTK izvades paraugos                                                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | Ģenerēt pārskatāmu RTK filtra melnrakstu no izvēles paraugiem                                                                              |
+| Rīks                                | Darbības jomas      | Apraksts                                                                                                                         |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Kompresijas iestatījumi, analīzes kopsavilkums un kešatmiņas statistika (ietver `analytics.mcpDescriptionCompression` metadatus) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurēt saspiešanas režīmu, slieksni, mērķa attiecību, sistēmas uzvednes saglabāšanu, MCP apraksta saspiešanas slēdzi         |
+| `omniroute_set_compression_engine`  | `write:compression` | Izvēlieties aktīvo dzinēju (off/caveman/rtk/stacked) un Caveman/RTK intensitāti                                                  |
+| `omniroute_list_compression_combos` | `read:compression`  | Nosauciet kompresijas kombinācijas un to dzinēju cauruļvadus                                                                     |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analīzes sagrupētas pēc saspiešanas kombinācijas un programmas                                                                   |
+| `omniroute_ccr_store`               | `write:compression` | Saglabājiet zvanītāja izolētu saturu ierobežotajā atmiņā esošajā CCR veikalā un atgrieziet marķieri un `ccr://` atsauci          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Izgūt CCR saturu pilnībā vai ar galvas, astes, līniju, grep un statistikas režīmiem                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Pārbaudiet zvanītājam piederošos CCR metadatus, neatgriežot saturu                                                               |
+| `omniroute_ccr_list`                | `read:compression`  | Norādiet lappušu metadatus zvanītājam piederošajiem CCR blokiem                                                                  |
+| `omniroute_ccr_delete`              | `write:compression` | Zvanītājam piederoša CCR bloka dzēšana                                                                                           |
+| `omniroute_ccr_stats`               | `read:compression`  | Ziņojiet par zvanītāja darbības jomas atmiņas lietojumu, dzīves cikla skaitītājiem un veikalu ierobežojumiem                     |
+| `omniroute_rtk_discover`            | `read:compression`  | Atklājiet atkārtotus trokšņus opt-in RTK izvades paraugos                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | Izveidojiet pārskatāmu RTK filtra melnrakstu no izvēlētajiem paraugiem                                                           |
 
-CCR ieraksti pastāv tikai atmiņā un pazūd pēc restartēšanas. Katra bloka lielums ir ierobežots līdz
-2 MiB, katra principāla — līdz 16 MiB, bet globālās krātuves — līdz 64 MiB. Ierakstu noklusējuma
-TTL ir 24 stundas (maksimums — septiņas dienas). Pilna MCP izgūšana ir ierobežota līdz 256 KiB;
-lielāki bloki paliek pieejami, izmantojot diapazona un grep režīmus. Glabāšana, izgūšana, uzskaitīšana,
-pārbaude, dzēšana un statistika ir izolēta pēc autentificētās API atslēgas principāla. Audita ieraksti
-satur jaucējvērtības un lieluma metadatus, bet nekad — saturu.
+CCR ierakstos tiek izmantots divu līmeņu krātuve: karsts atmiņas līmenis, kas tiek nodrošināts lokālajos, ne mākoņainajos izpildlaikos, ar izturīgu SQLite līmeni (`ccr_blocks`, pēc noklusējuma ieslēgts), lai bloks varētu izturēt izlikšanu vai restartēšanu, līdz tā TTL izbeidzas — izņemot blokus, kas pārsniedz 512 atmiņas izpildlaika KB. Katrs bloks ir ierobežots līdz 2 MiB, katrs galvenais — līdz 16 MiB, bet globālais veikals — līdz 64 MiB. Ieraksti pēc noklusējuma ir 24 stundu TTL (maksimums septiņas dienas). Pilna MCP izguve ir ierobežota līdz 256 KiB; lielāki bloki paliek pieejami, izmantojot diapazona un grep režīmus. Glabāšana, izguve, ierakstīšana sarakstā, pārbaude, dzēšana un statistika tiek izolēta ar autentificēto API atslēgas principu. Audita ierakstos ir ietverti jaukšanas un lieluma metadati, nevis saturs. Operatoram paredzēta informācija (divi marķieri, klienta priekšnosacījumi, `codemode:false`, katra rīka tvērumi, lappušu izkārtojums un diagnostikas matrica) ir pieejama [Kompresijas dzinēju → Priekšnosacījumi / operatora rokasgrāmata](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` atsevišķi ziņo par MCP aprakstu saspiešanu sadaļā
-`analytics.mcpDescriptionCompression`. Šīs vērtības ir MCP uzskaitāmo aprakstu
-(`tools`, `prompts`, `resources` un `resourceTemplates`) metadatu lieluma aprēķini; tās nav
-nodrošinātāja lietojuma uzskaites dati, un tās ir marķētas ar `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` ziņo par MCP apraksta saspiešanu atsevišķi zem `analytics.mcpDescriptionCompression`. Šīs vērtības ir metadatu lieluma aprēķini MCP sarakstu aprakstiem (`tools`, `prompts`, `resources` un `resourceTemplates`); tie nav pakalpojumu sniedzēja lietošanas kvītis un ir apzīmēti ar `source: "mcp_metadata_estimate"`.
 
 ### MCP pieejamības koka filtrs (v3.8.0)
 
-Atsevišķi no iepriekš minētajiem saspiešanas rīkiem OmniRoute ietver pēciekses filtru, kas saspiež
-MCP pārlūkprogrammas/pieejamības rīku **rīku rezultātus**, pirms tie tiek atgriezti aģentam. Šis
-filtrs pats par sevi nav rīks — tas darbojas caurspīdīgi ar jebkuru rīka rezultātu, kas satur
-detalizētu pieejamības koka vai pārlūkprogrammas momentuzņēmuma tekstu (≥2000 rakstzīmju).
+Atsevišķi no iepriekš minētajiem saspiešanas rīkiem OmniRoute ietver pēcizpildes filtru, kas saspiež** rīku rezultāti** MCP browser/accessibility rīkus, pirms tie tiek atgriezti aģentam. Šis filtrs pats par sevi nav rīks — tas darbojas pārskatāmi uz jebkura rīka rezultāta, kas satur detalizētu pieejamības koku vai pārlūkprogrammas momentuzņēmuma tekstu (≥ 2000 rakstzīmes).
 
-Galvenā darbība:
+Galvenās darbības:
 
-- Sakļauj ≥30 secīgas atkārtotas blakus mezglu rindas galvenes + beigu kopsavilkumā
-- Saglabā `[ref=eXX]` enkurus, kas nepieciešami Playwright/datora lietošanai
-- Stingri saīsina pārāk lielu tekstu (>50,000 rakstzīmju), pievienojot navigācijas norādi
-- Paredzamais ietaupījums: **60–80%** pārlūkprogrammas momentuzņēmumu lietderīgajā slodzē
+- Sakļauj ≥ 30 secīgas atkārtotas brāļu rindas galvas + astes kopsavilkumā
+- Saglabā `[ref=eXX]` enkurus, kas nepieciešami Playwright/computer-use
+- Grūti saīsina pārāk lielu tekstu (> 50 000 rakstzīmes) ar navigācijas mājienu
+- Paredzamie ietaupījumi:** 60–80%** pārlūkprogrammas momentuzņēmumu lietderīgās slodzes
 
-Konfigurācija: `compression.mcpAccessibility` globālajos iestatījumos (migrācija 056).
-Implementācija: `open-sse/services/compression/engines/mcpAccessibility/`.
-Pilna dokumentācija: [Saspiešanas dzinēji — MCP pieejamības koka filtrs](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurācija: `compression.mcpAccessibility` globālajos iestatījumos (migrācija 056). Īstenošana: `open-sse/services/compression/engines/mcpAccessibility/`. Pilni dokumenti: [Kompresijas dzinēji — MCP pieejamības koka filtrs](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Skatiet [Saspiešanas dzinēji](../compression/COMPRESSION_ENGINES.md) un [RTK saspiešana](../compression/RTK_COMPRESSION.md),
-lai uzzinātu par šo rīku pamatā esošo izpildes laika saspiešanas modeli.
+Skatiet [saspiešanas dzinējus](../compression/COMPRESSION_ENGINES.md) un [RTK kompresiju,](../compression/RTK_COMPRESSION.md) lai uzzinātu par šo rīku izpildlaika saspiešanas modeli.
 
 ## 1Proxy rīki (3)
 
@@ -281,188 +272,119 @@ Gan SSE, gan straumējamais HTTP transports ir bloķēts, līdz MCP serveris tie
 
 ---
 
-## Autentifikācija un tvērumi
+## Autentifikācija un darbības jomas
 
-MCP rīku izsaukumi nolasa tvērumu virknes no izsaucēja. Šī pārbaude ir viena no trim
-neatkarīgām nosaukumtelpām. Vienas pārbaudes sekmīgs rezultāts nenozīmē, ka pārējās arī būs sekmīgas.
-Noteikumi ir aprakstīti sadaļā [Trīs tvērumu nosaukumtelpas](#three-scope-namespaces).
-Rīku katalogs ir pieejams sadaļā [MCP rīku tvērumi](#mcp-tool-scopes).
+MCP rīka izsaukumi nolasa tvēruma virknes no zvanītāja. Šī pārbaude ir viena no trim neatkarīgām nosaukumvietām. Piespēle no viena pārbaudītāja nav piespēle no pārējām. Noteikumi ir [trīs tvēruma nosaukumvietas](#three-scope-namespaces). Instrumentu katalogs ir [MCP instrumentu tvērumi](#mcp-tool-scopes).
 
-### Trīs tvērumu nosaukumtelpas
+### Trīs tvēruma nosaukumvietas
 
-`manage` API atslēgai, `read:compression` MCP rīkam un `read`
-`oma_live_…` piekļuves pilnvarai ir trīs dažādas atļaujas. Izsaucēji, kas nosūta `read`
-piekļuves pilnvaru uz pārvaldības maršrutu, kurš veic izmaiņas, saņem HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Šo rangu pārbauda `scopeSatisfies`. Tā neizmanto MCP tabulu, un arī MCP
-atbilstības pārbaudītājs to neizmanto.
+`manage` uz API atslēgas, `read:compression` uz MCP rīka un `read` uz `oma_live_…` piekļuves pilnvaras ir trīs dažādas atļaujas. Zvanītāji, kuri nosūta `read` piekļuves marķieri mutācijas pārvaldības maršrutam, saņem HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Šis rangs ir `scopeSatisfies`. Tas neaplūko MCP tabulu, un MCP atbilstības meklētājs to neapskata.
 
-| Nosaukumtelpa             | Akreditācijas dati                                                 | Pārbaudītājs            | Sekmīga pārbaude atļauj                                            |
-| :------------------------ | :----------------------------------------------------------------- | :---------------------- | :----------------------------------------------------------------- |
-| API atslēgu pārvaldība    | `api_keys.scopes`                                                  | `hasManageScope`        | Pārvaldības REST darbības šai Bearer atslēgai                      |
-| API atslēgu papildtvērumi | tas pats masīvs, viena precīza virkne                              | tālāk norādītais palīgs | Tikai šo vienu iespēju                                             |
-| MCP rīku tvērumi          | tas pats masīvs, citādi MCP `_meta`, citādi `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Attiecīgo rīku, kad tvērumu ievērošana ir ieslēgta                 |
-| Piekļuves pilnvara        | `oma_live_…`                                                       | `scopeSatisfies`        | Pārvaldības maršrutu, kura metodei un ceļam nepieciešams šis rangs |
+| Vārdtelpa               | Akreditācijas dati                                                               | Pārbaudītājs            | Pielaide atļauj                                          |
+| :---------------------- | :------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------------------- |
+| API atslēgas pārvaldība | `api_keys.scopes`                                                                | `hasManageScope`        | Pārvaldības REST šai Nesēja atslēgai                     |
+| API atslēgas piedeva    | tas pats masīvs, viena precīza virkne                                            | tālāk nosauktais palīgs | Tikai šī viena spēja                                     |
+| MCP instrumentu tēmekļi | tas pats masīvs, cits MCP `_meta` (tikai HTTP/SSE ), cits `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Šis rīks, tiklīdz ir ieslēgta izpilde                    |
+| Piekļuves pilnvara      | `oma_live_…`                                                                     | `scopeSatisfies`        | Pārvaldības maršruts, kura metode un ceļš prasa šo rangu |
 
-Katru akreditācijas datu veidu var izveidot, kā aprakstīts sadaļā
-[Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
+Katra akreditācijas datu kalšana ir ietverta sadaļā [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
-#### API atslēgu tvērumi
+#### API atslēgas tvērumi
 
-Viens `api_keys.scopes` masīvs tiek izmantots diviem uzdevumiem. Tajos tiek izmantotas dažādas funkcijas.
+Viens `api_keys.scopes` masīvs nodrošina divus darbus. Viņi izmanto dažādas funkcijas.
 
-**Pārvaldības REST.** `manage` un `admin` ir
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) elementi.
-`hasManageScope` autorizē šīs atslēgas piekļuvi pārvaldības maršrutiem. `admin`
-nodrošina pārvaldības iespējas šajos maršrutos. Vārds `admin` šeit nav
-piekļuves pilnvaras rangs, un tas netiek izvērsts MCP rīku tvērumos.
+**Vadība REST.** `manage` un `admin` ir `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) dalībnieki. `hasManageScope` ir tas, kas pilnvaro šīs atslēgas pārvaldības maršrutus. `admin` šajos maršrutos ir spējīgs pārvaldīt. Vārds `admin` šeit nav piekļuves marķiera rangs, un tas netiek izvērsts MCP rīku tvērumos.
 
-**Papildtvērumu virknes.** Katra tiek pārbaudīta kā precīza masīva elementa atbilstība, un neviena no tām
-nav iekļauta `MANAGEMENT_API_KEY_SCOPES`.
+**Piedevu stīgas.** Katrs no tiem ir precīzs dalības tests, un katrs paliek ārpus `MANAGEMENT_API_KEY_SCOPES`.
 
-| Tvērums                        | Sekmīga pārbaude atļauj                                                                                                                                                  |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Tikai ne-loopback `/api/mcp/` LOCAL_ONLY izņēmumu (`hasMcpConnectOrManageScope`). Atslēga ar `manage` vai `admin` arī atbilst šī izņēmuma nosacījumiem.                  |
-| `self:usage`                   | `GET /api/v1/me/status` šai atslēgai (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` izveides laikā pievieno šo tvērumu (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Augšupstraumes konta kvotas šajā statusa lietderīgajā slodzē (`src/lib/usage/apiKeySelfService.ts`). Statusa maršrutam joprojām nepieciešams `self:usage`.               |
-| `policy:bypass-provider-quota` | Šīs atslēgas inferenču izsaukumi izlaiž pakalpojuma sniedzēja kvotas politiku (`hasProviderQuotaBypassScope` failā `src/sse/handlers/chat.ts`).                          |
+| Darbības joma                  | Pielaide atļauj                                                                                                                                                    |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Tikai bezcilpas `/api/mcp/` LOCAL_ONLY carve-out (`hasMcpConnectOrManageScope`). Atslēga ar `manage` vai `admin` joprojām iztur šo izgriezumu.                     |
+| `self:usage`                   | `GET /api/v1/me/status` šai atslēgai (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` pievieno šo tvērumu izveidei (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Augšupējo kontu kvotas šajā statusa kravnesībā (`src/lib/usage/apiKeySelfService.ts`). Statusa maršrutam joprojām ir nepieciešams `self:usage`.                    |
+| `policy:bypass-provider-quota` | Šīs atslēgas secinājumu izsaukumi izlaiž pakalpojumu sniedzēja kvotas politiku (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                      |
 
-#### Atbilstības noteikšana
+#### Atbilstība
 
-Katalogs ir tabula sadaļā [MCP rīku tvērumi](#mcp-tool-scopes). Neuzskatiet
-`MCP_SCOPE_LIST` failā `src/shared/constants/mcpScopes.ts` par šo katalogu:
-tā ir sākotnējā tipizētā apakškopa. Vēlāk pievienotie rīki deklarē papildu tvērumus līdzās tai
-(`read:notion`, `read:skills`, `read:local-corpus` un pārējie tabulā norādītie tvērumi).
+Katalogs ir tabula zem [MCP instrumentu tvērumiem](#mcp-tool-scopes). Neuzskatiet `MCP_SCOPE_LIST` `src/shared/constants/mcpScopes.ts` kā šo katalogu: tā ir oriģinālā drukātā apakškopa. Vēlāki rīki blakus tam deklarē papildu darbības jomas (`read:notion`, `read:skills`, `read:local-corpus` un pārējā tabula).
 
-`evaluateToolScopes` failā `open-sse/mcp-server/scopeEnforcement.ts` atļauj izsaukumu,
-ja katram nepieciešamajam tvērumam atbilst kāds piešķirtais tvērums:
+`evaluateToolScopes` programmā `open-sse/mcp-server/scopeEnforcement.ts` ļauj veikt zvanu, ja katrs nepieciešamais tvērums atbilst kādam piešķirtajam tvērumam:
 
 - `*` atbilst katram nepieciešamajam tvērumam.
-- Piešķirtais tvērums, kas beidzas ar `*`, atbilst nepieciešamajam tvērumam, kurš sākas ar
-  prefiksu pirms zvaigznītes. `read:*` atbilst `read:compression`.
-- Katrs cits piešķirtais tvērums atbilst tikai identiskai nepieciešamā tvēruma virknei.
+- Piešķirtais tvērums, kas beidzas ar `*` atbilst nepieciešamajam tvērumam, kas sākas ar prefiksu pirms zvaigznes. `read:*` atbilst `read:compression`.
+- Katrs cits piešķirtais tvērums atbilst tikai identiskajai obligātajai virknei.
 
-Atslēga, kuras tvērumi ir `["manage"]`, neiztur `scopeMatches` pārbaudi tvērumam `read:compression`.
-Tas pats izsaukums neizdodas arī ar `admin`, `mcp:connect`, `read` un `write`, ja tās
-ir vienīgās piešķirtās virknes. MCP rīku tvērumiem nav hierarhijas,
-izņemot noslēdzošo `*`.
+Atslēga, kuras darbības joma ir `["manage"]` neizdodas `scopeMatches` `read:compression`. Tas pats izsaukums neizdodas `admin`, `mcp:connect`, `read` un `write`, ja tās ir vienīgās piešķirtās virknes. Starp MCP rīku tvērumiem nav hierarhijas ārpus `*` beigām.
 
-Tvērumu ievērošana ir izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (noklusējuma vērtība
-ir `false`). Kamēr tā ir izslēgta, `evaluateToolScopes` atļauj izsaukumu un izlaiž
-katalogu. Kad tā ir ieslēgta, HTTP izmanto Bearer atslēgas `api_keys.scopes` kā
-`authInfo` (skatiet [HTTP tvērumu piesaiste katrai atslēgai](#per-key-http-scope-binding-7895)).
-Ja atslēgas tvērumus nevar noteikt, piešķirtā tvērumu kopa vispirms izmanto MCP `_meta`, pēc tam
-`OMNIROUTE_MCP_SCOPES`.
+Izpilde ir izslēgta, ja vien nav `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (noklusējuma `false`). Kamēr tas ir izslēgts, `evaluateToolScopes` atļauj zvanu un izlaiž katalogu. Kamēr tas ir ieslēgts, HTTP izmanto nesēja atslēgas `api_keys.scopes` kā `authInfo` (skatiet [HTTP tvēruma saistīšanu pa taustiņiem](#per-key-http-scope-binding-7895) ). Ja atslēgas tvērumi netiek atrisināti, piešķirtā kopa tiek izmantota MCP `_meta` (tiek ievērota tikai HTTP/SSE zvanītājiem HTTP autentifikācijas kontekstā; stdio zvanītāja `_meta` tiek ignorēts, jo klients to kontrolē un tajā nav katra zvanītāja identitātes), tad `OMNIROUTE_MCP_SCOPES`.
 
 #### Piekļuves pilnvaru tvērumi
 
-`oma_live_…` pilnvaras (`src/lib/accessTokens/scopes.ts`) ietver `read`, `write`
-vai `admin`. `scopeSatisfies` izmanto rangu: `admin` ietver `write` un `read`, bet
-`write` ietver `read`. Nezināmi tvērumi neko neatļauj.
+`oma_live_…` marķieri (`src/lib/accessTokens/scopes.ts`) satur `read`, `write` vai `admin`. `scopeSatisfies` ir rangs: `admin` aptver `write` un `read`, un `write` aptver `read`. Nezināmie tvērumi neko neaptver.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) salīdzina šo
-rangu ar `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) salīdzina šo rangu ar `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` un `OPTIONS` pieprasa `read`.
-- Visām pārējām metodēm nepieciešams `write`.
-- Ceļiem sarakstā `ADMIN_SCOPE_PREFIXES` visām metodēm nepieciešams `admin`. `/api/mcp`
-  ir šajā sarakstā, tāpēc `write` piekļuves pilnvara joprojām nevar izsaukt MCP HTTP
-  saskarni.
-- Ceļiem sarakstā `ADMIN_MUTATION_PREFIXES` `admin` ir nepieciešams tikai izmaiņu darbībām.
+- `GET`, `HEAD` un `OPTIONS` prasa `read`.
+- Visām citām metodēm ir nepieciešama `write`.
+- `ADMIN_SCOPE_PREFIXES` ceļiem katrai metodei ir nepieciešams `admin`. `/api/mcp` ir šajā sarakstā, tāpēc `write` piekļuves pilnvara joprojām nevar izsaukt MCP HTTP virsmu.
+- `ADMIN_MUTATION_PREFIXES` ceļiem ir nepieciešams `admin` tikai mutācijām.
+- Ceļiem `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) ir nepieciešams `admin` tikai mutācijām, un tikai šajā precīzajā ceļā — citi `/api/settings/*` apakšmaršruti saglabā `write`.
 
-`PATCH /api/keys/{id}` ir mutācijas pieprasījums un nav iekļauts šajos administratora sarakstos, tāpēc
-`read` pilnvara saņem atbildi 403:
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` vai `admin` piekļuves pilnvara atbilst šī maršruta prasībām. Informācijas paneļa JWT,
-atgriezeniskās cilpas CLI machine-id pilnvara un API atslēga ar `manage` vai `admin` izmanto
-citus atzarus, un šis rangs tās neierobežo.
+`PATCH /api/keys/{id}` ir mutācija un nav šajos administratoru sarakstos, tāpēc `read` marķieris saņem 403 `Access token scope 'read' is insufficient; 'write' required.` `write` vai `admin` piekļuves marķieris atbilst šim maršrutam. Informācijas panelis JWT, cilpas CLI mašīnas ID pilnvara un API atslēga ar `manage` vai `admin` aizņem citus atzarus, un šis rangs tos nesašaurina.
 
-Piekļuves pilnvara, kas iztur `scopeSatisfies` pārbaudi maršrutam `/api/mcp`, ir izgājusi tikai
-pārvaldības pārbaudi. Rīku izsaukumi joprojām izpilda `scopeMatches` pārbaudi attiecībā pret API atslēgas
-tvērumiem. Piekļuves pilnvaras rangs nav `scopeMatches` ievades parametrs.
+Piekļuves marķieris, kas nodod `scopeSatisfies` `/api/mcp` ir attīrījis tikai pārvaldības vārtus. Rīku izsaukumi joprojām darbojas `scopeMatches` pret API atslēgas tvērumiem. Piekļuves pilnvaras rangs nav `scopeMatches` ievade.
 
-### MCP rīku tvērumi
+### MCP instrumentu tēmekļi
 
-Tvērumu piemērošana ir centralizēta failā `open-sse/mcp-server/scopeEnforcement.ts`.
-Katram rīkam ir nepieciešami noteikti tvērumi:
+Darbības jomas izpilde ir centralizēta `open-sse/mcp-server/scopeEnforcement.ts`. Katram rīkam ir nepieciešamas noteiktas darbības jomas:
 
-| Tvērums               | Rīki                                                                                                                                                                             |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                        |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                           |
-| `read:quota`          | `check_quota`                                                                                                                                                                    |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                           |
-| `read:models`         | `list_models_catalog`                                                                                                                                                            |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                    |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                            |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                               |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                      |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                   |
-| `read:cache`          | `cache_stats`                                                                                                                                                                    |
-| `write:cache`         | `cache_flush`                                                                                                                                                                    |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                       |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                            |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                 |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                           |
-| `read:memory`         | `memory_search`                                                                                                                                                                  |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                     |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                               |
-| `write:skills`        | `skills_enable`                                                                                                                                                                  |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                 |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                 |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                          |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                        |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                 |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                   |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                               |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                  |
-| `read:obsidian`       | 13 lasīšanas rīki — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 rakstīšanas rīki — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                |
+| Darbības joma         | Rīki                                                                                                                                                                            |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                          |
+| `read:quota`          | `check_quota`                                                                                                                                                                   |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                          |
+| `read:models`         | `list_models_catalog`                                                                                                                                                           |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                   |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                           |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                              |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                     |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                  |
+| `read:cache`          | `cache_stats`                                                                                                                                                                   |
+| `write:cache`         | `cache_flush`                                                                                                                                                                   |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                      |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                               |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                           |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                          |
+| `read:memory`         | `memory_search`                                                                                                                                                                 |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                    |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                              |
+| `write:skills`        | `skills_enable`                                                                                                                                                                 |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                         |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                       |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
+| `read:obsidian`       | 13 lasīšanas rīki — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`,… |
+| `write:obsidian`      | 9 rakstīšanas rīki — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`,…              |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-Tiek atbalstīti aizstājējzīmju tvērumi: `read:*` piešķir visus lasīšanas tvērumus, bet `*` piešķir pilnu piekļuvi.
+Tiek atbalstīti aizstājējzīmju tvērumi: `read:*` piešķir visus lasīšanas tvērumus, `*` nodrošina pilnu piekļuvi.
 
-### `mcp:connect` — šauras darbības maršruta iespēja (#7895)
+### `mcp:connect` — šaura maršruta iespēja (#7895)
 
-Lai no adreses, kas nav cilpas interfeisa adrese, sasniegtu HTTP/SSE MCP transportu (`/api/mcp/*`), ir nepieciešams
-`/api/mcp/` LOCAL_ONLY izņēmums (skatiet `docs/security/ROUTE_GUARD_TIERS.md`). Vēsturiski
-šis izņēmums pieņēma tikai API atslēgu ar pilnu `manage`/`admin` tvērumu — tas ir pārāk plašs
-izsaucējam, kuram nepieciešams tikai sazināties ar MCP. `src/shared/constants/managementScopes.ts` tagad
-eksportē `MCP_CONNECT_SCOPE = "mcp:connect"`: papildinošu, šauru tvērumu (pēc tāda paša precedenta kā
-`SELF_USAGE_SCOPE`), kas autorizē TIKAI `/api/mcp/` apiešanu failā
-`src/server/authz/policies/management.ts` — tas nepiešķir piekļuvi nevienam citam pārvaldības maršrutam
-un apzināti NAV iekļauts `MANAGEMENT_API_KEY_SCOPES`. Atslēga ar `manage`/`admin`
-joprojām bez izmaiņām iztur izņēmuma pārbaudi; `mcp:connect` ir zemāku privilēģiju alternatīva
-attāliem izsaucējiem, kuri izmanto tikai MCP, un tā tiek pārbaudīta ar `hasMcpConnectOrManageScope()`.
+Lai sasniegtu HTTP/SSE MCP transportu (`/api/mcp/*`) no atpakaļcilpas, ir nepieciešama `/api/mcp/` LOCAL_ONLY izgriešana (sk. `docs/security/ROUTE_GUARD_TIERS.md`). Vēsturiski šajā izšķirtspējā tika pieņemts tikai pilns `manage`/`admin` -scope API taustiņš — pārāk plašs zvanītājam, kuram jārunā tikai MCP. `src/shared/constants/managementScopes.ts` tagad eksportē `MCP_CONNECT_SCOPE = "mcp:connect"`: papildu, šaura tvēruma (tāds pats precedents kā `SELF_USAGE_SCOPE`), kas atļauj ONLY `/api/mcp/` apvedceļu `src/server/authz/policies/management.ts` — tas nepiešķir nekādu citu pārvaldības maršruta piekļuvi un tiek apzināti saglabāts OUT no `MANAGEMENT_API_KEY_SCOPES`. Atslēga, kas tur `manage`/`admin` joprojām izlaiž izgriezumu bez izmaiņām; `mcp:connect` ir zemāku privilēģiju alternatīva tikai attāliem MCP zvanītājiem, ko pārbauda, izmantojot `hasMcpConnectOrManageScope()`.
 
-### HTTP tvērumu piesaiste katrai atslēgai (#7895)
+### HTTP tvēruma iesiešana uz katru taustiņu (#7895)
 
-Izmantojot HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` tagad nosaka izsaucēja faktiskos
-`api_keys.scopes`, izmantojot `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`),
-un nodod tos MCP SDK izsaukumam `transport.handleRequest(req, { authInfo })`, tāpēc
-`extra.authInfo.scopes`, kas nonāk līdz katram rīka izsaukumam, atspoguļo pašas Bearer atslēgas tvērumus.
-`scopeEnforcement.ts` funkcija `resolveCallerScopeContext()` jau piešķīra `authInfo` prioritāti pār
-`_meta` un `OMNIROUTE_MCP_SCOPES` vides rezerves variantu — šīs izmaiņas tikai aizpilda šo pirmo,
-augstākās prioritātes avotu, kas iepriekš HTTP gadījumā netika nodrošināts. Ja neviena API atslēga netiek
-noteikta (nav galvenes, nederīga atslēga), `authInfo` paliek `undefined`, un noteikšana bez izmaiņām pāriet uz
-esošo `meta`/vides ķēdi. stdio nav katram izsaucējam atsevišķas identitātes (skatiet
-`mcpCallerIdentity.ts`), un tas netiek ietekmēts — tas turpina izmantot `_meta`/vides rezerves ķēdi.
+Pārsniedzot HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` tagad atrisina zvanītāja reālo `api_keys.scopes` izmantojot `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`), un nodod to MCP SDK `transport.handleRequest(req, { authInfo })`, tāpēc `extra.authInfo.scopes` kas sasniedz katru rīka izsaukumu, atspoguļo nesēja atslēgas tvērumus. `scopeEnforcement.ts`'s `resolveCallerScopeContext()` jau piešķīra prioritāti `authInfo` pār `_meta` un `OMNIROUTE_MCP_SCOPES` env atkāpšanās — tas tikai aizpilda pirmo augstākās prioritātes avotu, kas iepriekš nebija padots salīdzinājumā ar HTTP. Ja netiek atrisināta neviena API atslēga (nav galvenes, nederīga atslēga), `authInfo` paliek `undefined` un izšķirtspēja tiek mainīta līdz esošajai `meta`/env ķēdei. stdio nav katra zvanītāja identitātes (skatiet `mcpCallerIdentity.ts`), un to neietekmē katras atslēgas saistīšana — tas izlaiž `_meta` darbību (`_meta` tiek ievērots tikai HTTP autentifikācijas kontekstā, #15159) un atrisina tikai no `OMNIROUTE_MCP_SCOPES` env atslēgas.
 
-**Tvērumu piemērošana šauri tvērtiem HTTP/SSE izsaucējiem tiek piespiedu kārtā ieslēgta neatkarīgi no
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Tas, ka `OMNIROUTE_MCP_ENFORCE_SCOPES` noklusējuma vērtība ir `false`, ir
-droši tikai lokālajai/stdio viena operatora darbplūsmai, kurā nav katram izsaucējam atsevišķas identitātes, pret kuru piemērot tvērumu.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` bez nosacījumiem ieslēdz tvērumu
-piemērošanu katram rīkam (`shouldForceScopeEnforcement()` failā `scopeEnforcement.ts`),
-kad vien `resolveCallerScopeContext()` ir noteicis
-`source === "authInfo"` (t. i., īstu katrai atslēgai atsevišķu HTTP Authorization galveni, tikai HTTP/SSE) UN šai
-atslēgai nav pilna `manage`/`admin` tvēruma. Tas novērš nepilnību, kuras dēļ atslēga, kurai ir TIKAI
-šaurais `mcp:connect` apiešanas tvērums — kas iepriekš dokumentēts kā tāds, kurš autorizē tikai
-`/api/mcp/` LOCAL_ONLY izņēmumu — citādi varētu izsaukt ikvienu MCP rīku, tiklīdz operators
-iespējotu attālu MCP piekļuvi vai piekļuvi no adresēm, kas nav cilpas interfeisa adreses, vienkārši tāpēc, ka `OMNIROUTE_MCP_ENFORCE_SCOPES` pēc
-noklusējuma tiek piegādāts ar vērtību `false`. Pilna `manage`/`admin` atslēga, izmantojot HTTP, un ikviens stdio/lokālais izsaucējs saglabā
-esošo, ar `OMNIROUTE_MCP_ENFORCE_SCOPES` kontrolēto darbību bez izmaiņām.
+**Izpilde ir piespiedu kārtā ieslēgta šauras darbības jomas HTTP/SSE zvanītājiem neatkarīgi no `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` noklusējuma iestatījums uz `false` ir drošs tikai local/stdio viena operatora plūsmai, kurā nav katra zvanītāja identitātes, pret kuru vērsties. `open-sse/mcp-server/server.ts::withScopeEnforcement()` beznosacījumu ieslēdz katra rīka tvēruma izpildi (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) ikreiz, kad `resolveCallerScopeContext()` atrisina `source === "authInfo"` (ti, īstu katras atslēgas HTTP autorizācijas galveni, HTTP/SSE-only) AND šai atslēgai nav pilns `manage`/`admin` tvērums. Tas novērsīs atstarpi, kur atslēga satur ONLY šauro `mcp:connect` apiešanas jomu — kas iepriekš dokumentēts kā autorizācija, izņemot `/api/mcp/` LOCAL_ONLY carve-out — citādi varētu izsaukt katru MCP rīku, tiklīdz operators ir iespējojis remote/non-loopback MCP piekļuvi, jo `OMNIROUTE_MCP_ENFORCE_SCOPES` pēc noklusējuma piegādā `false`. Pilns `manage`/`admin` taustiņš virs HTTP un katrs stdio/local zvanītājs saglabā esošo `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated darbību nemainīgu.
 
 ---
 

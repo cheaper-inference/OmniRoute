@@ -10,7 +10,10 @@ import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { updateKeyPermissionsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import * as log from "@/sse/utils/logger";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
@@ -73,6 +76,7 @@ export async function PATCH(request, { params }) {
       blockedModels,
       allowedCombos,
       allowedConnections,
+      preferredConnections,
       noLog,
       autoResolve,
       isActive,
@@ -87,7 +91,9 @@ export async function PATCH(request, { params }) {
       streamDefaultMode,
       compressionEnabled,
       allowAutoCombos,
+      allowCcDiscoveryAliases,
       catalogScope,
+      forcedModel,
       cacheDefaultMode,
       codexServiceMode,
       disableNonPublicModels,
@@ -95,8 +101,12 @@ export async function PATCH(request, { params }) {
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
       chaosModeEnabled,
     } = validation.data;
+
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, scopes);
+    if (scopeAuthError) return scopeAuthError;
 
     const payload: Parameters<typeof updateApiKeyPermissions>[1] = {};
     if (name !== undefined) payload.name = name;
@@ -109,6 +119,7 @@ export async function PATCH(request, { params }) {
     } else if (allowedConnections !== undefined) {
       payload.allowedConnections = allowedConnections;
     }
+    if (preferredConnections !== undefined) payload.preferredConnections = preferredConnections;
     if (noLog !== undefined) payload.noLog = noLog;
     if (autoResolve !== undefined) payload.autoResolve = autoResolve;
     if (isActive !== undefined) payload.isActive = isActive;
@@ -124,7 +135,10 @@ export async function PATCH(request, { params }) {
     if (compressionEnabled !== undefined) payload.compressionEnabled = compressionEnabled;
     if (codexServiceMode !== undefined) payload.codexServiceMode = codexServiceMode;
     if (allowAutoCombos !== undefined) payload.allowAutoCombos = allowAutoCombos;
+    if (allowCcDiscoveryAliases !== undefined)
+      payload.allowCcDiscoveryAliases = allowCcDiscoveryAliases;
     if (catalogScope !== undefined) payload.catalogScope = catalogScope;
+    if (forcedModel !== undefined) payload.forcedModel = forcedModel;
     if (cacheDefaultMode !== undefined) payload.cacheDefaultMode = cacheDefaultMode;
     if (disableNonPublicModels !== undefined)
       payload.disableNonPublicModels = disableNonPublicModels;
@@ -132,6 +146,7 @@ export async function PATCH(request, { params }) {
     if (usageLimitEnabled !== undefined) payload.usageLimitEnabled = usageLimitEnabled;
     if (dailyUsageLimitUsd !== undefined) payload.dailyUsageLimitUsd = dailyUsageLimitUsd;
     if (weeklyUsageLimitUsd !== undefined) payload.weeklyUsageLimitUsd = weeklyUsageLimitUsd;
+    if (fiveHourUsageLimitUsd !== undefined) payload.fiveHourUsageLimitUsd = fiveHourUsageLimitUsd;
     if (chaosModeEnabled !== undefined) payload.chaosModeEnabled = chaosModeEnabled;
 
     const updated = await updateApiKeyPermissions(id, payload);
@@ -150,6 +165,7 @@ export async function PATCH(request, { params }) {
       ...(blockedModels !== undefined && { blockedModels }),
       ...(allowedCombos !== undefined && { allowedCombos }),
       ...(allowedConnections !== undefined && { allowedConnections }),
+      ...(preferredConnections !== undefined && { preferredConnections }),
       ...(noLog !== undefined && { noLog }),
       ...(autoResolve !== undefined && { autoResolve }),
       ...(isActive !== undefined && { isActive }),
@@ -163,13 +179,16 @@ export async function PATCH(request, { params }) {
       ...(allowedEndpoints !== undefined && { allowedEndpoints }),
       ...(streamDefaultMode !== undefined && { streamDefaultMode }),
       ...(compressionEnabled !== undefined && { compressionEnabled }),
+      ...(allowCcDiscoveryAliases !== undefined && { allowCcDiscoveryAliases }),
       ...(cacheDefaultMode !== undefined && { cacheDefaultMode }),
       ...(codexServiceMode !== undefined && { codexServiceMode }),
+      ...(forcedModel !== undefined && { forcedModel }),
       ...(disableNonPublicModels !== undefined && { disableNonPublicModels }),
       ...(allowUsageCommand !== undefined && { allowUsageCommand }),
       ...(usageLimitEnabled !== undefined && { usageLimitEnabled }),
       ...(dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd }),
       ...(weeklyUsageLimitUsd !== undefined && { weeklyUsageLimitUsd }),
+      ...(fiveHourUsageLimitUsd !== undefined && { fiveHourUsageLimitUsd }),
       ...(chaosModeEnabled !== undefined && { chaosModeEnabled }),
     });
   } catch (error) {

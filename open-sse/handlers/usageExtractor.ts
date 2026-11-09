@@ -2,7 +2,8 @@
  * Extract usage from non-streaming response body
  * Handles different provider response formats
  */
-import { carryEstimatedUsageMarker } from "../utils/usageTracking.ts";
+import { carryEstimatedUsageMarker, pickReportedCostUsd } from "../utils/usageTracking.ts";
+import { cacheCreationFields, readCacheWriteUsage } from "../utils/cacheWriteUsage.ts";
 
 /**
  * True for an Anthropic Messages response body (`type: "message"`), whatever provider
@@ -23,6 +24,11 @@ function isAnthropicMessageUsage(
   );
 }
 
+/** A provider-reported, non-negative finite amount (credits or exact cost ticks). */
+function isReportedAmount(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
 export function extractUsageFromResponse(responseBody, provider) {
   if (!responseBody || typeof responseBody !== "object") return null;
   const providerId = typeof provider === "string" ? provider.toLowerCase() : "";
@@ -39,14 +45,10 @@ export function extractUsageFromResponse(responseBody, provider) {
     typeof responseBody.usage === "object" &&
     responseBody.usage.prompt_tokens !== undefined
   ) {
-    const cacheCreationTokens =
-      responseBody.usage.cache_creation_input_tokens ??
-      responseBody.usage.prompt_tokens_details?.cache_creation_tokens ??
-      responseBody.usage.input_tokens_details?.cache_creation_tokens ??
-      responseBody.usage.prompt_tokens_details?.cache_write_tokens ??
-      responseBody.usage.input_tokens_details?.cache_write_tokens ??
-      responseBody.usage.cache_write_tokens;
+    const cacheCreationTokens = readCacheWriteUsage(responseBody.usage).total ?? undefined;
+    const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
     const openAiUsage = {
+      ...cacheCreationFields(responseBody.usage),
       prompt_tokens: responseBody.usage.prompt_tokens || 0,
       completion_tokens: responseBody.usage.completion_tokens || 0,
       // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
@@ -82,6 +84,14 @@ export function extractUsageFromResponse(responseBody, provider) {
       responseBody.usage.cost_in_usd_ticks >= 0
         ? { cost_in_usd_ticks: responseBody.usage.cost_in_usd_ticks }
         : {}),
+      // Credit metering reported by a credit-metered provider (see
+      // src/lib/usage/creditMeteredProviders.ts). Only set when it is a real
+      // measurement, so non-credit OpenAI-shaped usage stays unchanged.
+      ...(isReportedAmount(responseBody.usage.provider_credits)
+        ? { provider_credits: responseBody.usage.provider_credits }
+        : {}),
+      // OpenRouter's provider-billed USD cost (`usage.cost`); only set when reported.
+      ...(reportedCostUsd !== undefined ? { cost_usd: reportedCostUsd } : {}),
     };
     return carryEstimatedUsageMarker(responseBody.usage, openAiUsage);
   }
@@ -96,7 +106,7 @@ export function extractUsageFromResponse(responseBody, provider) {
   ) {
     const inputTokens = responseBody.usage.input_tokens || 0;
     const cacheRead = responseBody.usage.cache_read_input_tokens || 0;
-    const cacheCreation = responseBody.usage.cache_creation_input_tokens || 0;
+    const cacheCreation = readCacheWriteUsage(responseBody.usage).total ?? 0;
 
     // Total prompt tokens = input + cache_read + cache_creation (per Claude API docs)
     const promptTokens = inputTokens + cacheRead + cacheCreation;
@@ -114,6 +124,7 @@ export function extractUsageFromResponse(responseBody, provider) {
       isClaudeProvider || (value !== undefined && value !== null);
 
     return {
+      ...cacheCreationFields(responseBody.usage),
       prompt_tokens: promptTokens,
       completion_tokens: responseBody.usage.output_tokens || 0,
       ...(reportedCache(responseBody.usage.cache_read_input_tokens)
@@ -134,6 +145,13 @@ export function extractUsageFromResponse(responseBody, provider) {
     (responsesUsage.input_tokens !== undefined || responsesUsage.output_tokens !== undefined)
   ) {
     return {
+      ...cacheCreationFields(responsesUsage),
+      ...(isReportedAmount(responsesUsage.provider_credits)
+        ? { provider_credits: responsesUsage.provider_credits }
+        : {}),
+      ...(isReportedAmount(responsesUsage.cost_in_usd_ticks)
+        ? { cost_in_usd_ticks: responsesUsage.cost_in_usd_ticks }
+        : {}),
       prompt_tokens: responsesUsage.input_tokens || 0,
       completion_tokens: responsesUsage.output_tokens || 0,
       cache_read_input_tokens: responsesUsage.cache_read_input_tokens,
@@ -141,11 +159,7 @@ export function extractUsageFromResponse(responseBody, provider) {
         responsesUsage.input_tokens_details?.cached_tokens ??
         responsesUsage.prompt_tokens_details?.cached_tokens ??
         responsesUsage.cache_read_input_tokens,
-      cache_creation_input_tokens:
-        responsesUsage.cache_creation_input_tokens ??
-        responsesUsage.input_tokens_details?.cache_creation_tokens ??
-        responsesUsage.prompt_tokens_details?.cache_creation_tokens ??
-        responsesUsage.cache_write_tokens,
+      cache_creation_input_tokens: readCacheWriteUsage(responsesUsage).total ?? undefined,
       reasoning_tokens:
         responsesUsage.output_tokens_details?.reasoning_tokens ??
         responsesUsage.completion_tokens_details?.reasoning_tokens ??
@@ -161,10 +175,28 @@ export function extractUsageFromResponse(responseBody, provider) {
     // Gemini reports thoughts outside candidates. Fold them into completion so
     // every provider keeps reasoning as a subset of completion tokens.
     const thoughts = usageMetadata.thoughtsTokenCount || 0;
+    const promptTokens = usageMetadata.promptTokenCount || 0;
+    const reportedCachedTokens = usageMetadata.cachedContentTokenCount;
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMetadata,
+      "cachedContentTokenCount"
+    );
+    const hasValidCachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokens;
     return {
-      prompt_tokens: usageMetadata.promptTokenCount || 0,
+      prompt_tokens: promptTokens,
       completion_tokens: (usageMetadata.candidatesTokenCount || 0) + thoughts,
-      cached_tokens: usageMetadata.cachedContentTokenCount || 0,
+      ...(hasValidCachedTokens ? { cached_tokens: reportedCachedTokens } : {}),
+      cache_evidence: !hasCachedCount
+        ? "unreported"
+        : hasValidCachedTokens
+          ? reportedCachedTokens > 0
+            ? "hit"
+            : "miss"
+          : "invalid",
       reasoning_tokens: thoughts,
     };
   }

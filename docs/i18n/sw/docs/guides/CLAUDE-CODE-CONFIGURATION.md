@@ -25,38 +25,39 @@ omniroute launch --profile glm52  # Claude Code ikitumia glm/glm-5.2 kupitia Omn
 
 ---
 
-## Jinsi Claude Code inavyounganishwa na lango
+## Jinsi Msimbo Claude unavyounganishwa na lango
 
-Claude Code huwasiliana na **Anthropic Messages API** na huelekezwa kwenye endpoint maalumu
-kupitia vigezo vya mazingira (haina chaguo la `--base-url`):
+Claude Kanuni inazungumza**Anthropic Ujumbe API** na imeelekezwa kwa mwisho maalum na anuwai za mazingira (haina bendera `--base-url` ):
 
-| Kigezo                                       | Madhumuni                                                                                            |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | URL ya msingi ya lango (Claude Code huongeza `/v1/messages`). **Bila kiambishi `/v1`.**              |
-| `ANTHROPIC_AUTH_TOKEN`                       | Hutumwa kama `Authorization: Bearer …` — tumia tokeni yako ya ufikiaji / ufunguo wa API wa OmniRoute |
-| `ANTHROPIC_API_KEY`                          | Mbadala: hutumwa kama `x-api-key`. Vyote viwekwa, `ANTHROPIC_AUTH_TOKEN` hutangulia                  |
-| `ANTHROPIC_MODEL`                            | Lazimisha modeli maalumu (hubatilisha chaguo-msingi la kiteuzi cha `/model`)                         |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → kiteuzi asilia cha `/model` huorodhesha modeli za `claude*`/`anthropic*` kutoka `/v1/models`   |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Weka kikomo cha tokeni za matokeo kwa kila jibu (k.m. `65536`)                                       |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Kizingiti cha tokeni kwa ajili ya ubanaji wa kiotomatiki                                             |
+| Inaweza kubadilika                           | Kusudi                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | Mzizi wa lango URL ( Msimbo wa Claude unaongeza `/v1/messages`).** Hakuna kiambishi `/v1`.**     |
+| `ANTHROPIC_AUTH_TOKEN`                       | Imetumwa kama `Authorization: Bearer …` — tumia tokeni yako ya ufikiaji OmniRoute / API kitufe   |
+| `ANTHROPIC_API_KEY`                          | Mbadala: imetumwa kama `x-api-key`. Ikiwa zote mbili zimewekwa, `ANTHROPIC_AUTH_TOKEN` itashinda |
+| `ANTHROPIC_MODEL`                            | Lazimisha muundo maalum (hubatilisha chaguo-msingi la kichagua `/model` )                        |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → kiteuzi asili `/model` huorodhesha mifano `claude*`/`anthropic*` kutoka `/v1/models`       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Tokeni kubwa kwa kila jibu (kwa mfano `65536`)                                                   |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Kiwango cha juu cha ishara kwa ugandamizaji kiotomatiki                                          |
 
-> Vigezo vya mazingira husomwa **mara moja wakati wa kuanza** — anzisha upya Claude Code baada ya kuvibadilisha.
+> Vyombo vya env vinasomwa** mara moja katika kuanza** — anza tena Msimbo wa Claude baada ya kuzibadilisha.
 
-`omniroute launch` hukuwekea vyote hivi: hutatua URL ya msingi + tokeni
-kutoka kwenye muktadha unaotumika (kwa hivyo `omniroute connect <vps>` kisha `omniroute launch`
-hufanya kazi moja kwa moja), hukagua afya ya seva, na hutekeleza `claude`.
+Kwa kitambulisho kinachozunguka badala ya mfuatano thabiti, weka `apiKeyHelper` katika `~/.claude/settings.json` hadi amri inayochapisha kitambulisho cha sasa kwa stdout. Claude Code huhifadhi matokeo yake kwa dakika tano kwa chaguo-msingi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` hubatilisha hiyo) na kutuma thamani katika zote `Authorization: Bearer` na `x-api-key`. Hati lazima ichapishe kitambulisho na hakuna kitu kingine chochote — bango kando yake kinachoshindwa msaidizi kwenye v2.1.227 +.
+
+Hivi ndivyo Entra ID SSO inavyofanya kazi: `scripts/cli/omniroute-sso.mjs token` huchapisha tokeni ya ufikiaji ya Entra ya muda mfupi ambayo OmniRoute inathibitisha badala ya kitufe API. Angalia [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` inakuwekea haya yote: inasuluhisha ishara ya URL + msingi kutoka kwa muktadha amilifu (kwa hivyo `omniroute connect <vps>` kisha `omniroute launch` inafanya kazi tu), afya-hukagua seva, na kutekeleza `claude`.
 
 ---
 
-## Lakabu za ugunduzi — onyesha modeli zisizo za Claude kwenye kiteuzi cha `/model`
+## Majina mbadala ya ugunduzi — kuonyesha modeli zisizo za Claude katika kichaguzi cha `/model`
 
-Ugunduzi wa modeli za lango wa Claude Code huorodhesha tu vitambulisho vinavyoanza na `claude`
-au `anthropic`, kwa hivyo ukiwa na `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, kiteuzi
-asilia cha `/model` kwa kawaida huonyesha **tu** modeli za Claude/Anthropic za OmniRoute — modeli kama
-`kimi/kimi-k2.6` au `glm/glm-5.2` haionekani kamwe, ingawa uelekezaji wake hufanya kazi vizuri.
+Ugunduzi wa modeli wa lango la Claude Code huorodhesha tu vitambulisho vinavyoanza na `claude`
+au `anthropic`, kwa hivyo kwa `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` kichaguzi
+cha asili cha `/model` kwa kawaida huonyesha modeli za Claude/Anthropic za OmniRoute **pekee** —
+`kimi/kimi-k2.6` au `glm/glm-5.2` kamwe haionekani, hata kama huelekezwa vyema.
 
-OmniRoute inaweza kuakisi modeli yoyote iliyowezeshwa (na mchanganyiko) chini ya kitambulisho cha `claude/…` ili
-ipite kichujio hicho na ionekane kwenye kiteuzi:
+OmniRoute inaweza kuakisi modeli yoyote iliyowezeshwa (na combo) chini ya kitambulisho cha `claude/…`
+ili kupita kichujio hicho na kuonekana katika kichaguzi:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -65,38 +66,47 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 ```
 
 Unapochagua mojawapo ya hizi katika Claude Code, OmniRoute huondoa kifuniko cha `claude/`
-na kurudisha kitambulisho halisi kabla ya kuelekeza — kitambulisho halisi cha `claude/<real-claude-model>`
-(mtoa huduma halisi wa Claude OAuth) daima huachwa bila kubadilishwa.
+na kurudisha kitambulisho halisi kabla ya kuelekeza — kitambulisho halisi cha
+`claude/<real-claude-model>` (mtoa huduma halisi wa Claude OAuth) hubaki bila kuguswa.
 
-**Hii imezimwa kwa chaguo-msingi** na inadhibitiwa na lango la ngazi tatu (lililo mahususi zaidi
-hutangulia), kwa hivyo OmniRoute ya kawaida kamwe hairudufu katalogi yake kwa wateja wasiotumia
-Claude Code:
+Kwa chaguo-msingi, ni vitambulisho vya msingi pekee vinavyoakisiwa. Kwa bendera ya kipengele
+cha kujiunga `CATALOG_MIRROR_REFINEMENTS_ENABLED` ikiwa imewashwa, tofauti za kiwango cha
+juhudi za ufikiraji ambazo orodha tayari huziorodhesha (km. `codex/gpt-6-sol-high`) huakisiwa
+kama kitambulisho kingine chochote, hivyo Claude Code inaweza kuchagua kiwango mahususi cha
+juhudi, na vitambulisho vya ndani vya `auto/*` ambavyo njia ya ombi haiwezi kuvitimiliza
+haviakisiwi. Ikiwa tofauti za juhudi zitaorodheshwa kabisa bado hudhibitiwa na
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — kioo kamwe hakiongezi tofauti ambayo orodha
+ya msingi haina.
 
-| Ngazi       | Mahali                                                                                           |
-| ----------- | ------------------------------------------------------------------------------------------------ |
-| Modeli      | Ukurasa wa maelezo ya mtoa huduma → swichi ya kila modeli ya "Onyesha katika Claude Code"        |
-| Mtoa huduma | Ukurasa wa maelezo ya mtoa huduma → swichi ya ngazi ya mtoa huduma (hujumuisha modeli zake zote) |
-| Kimataifa   | Mipangilio → Alama za Vipengele → `EXPOSE_CC_DISCOVERY_ALIASES` (imezimwa kwa chaguo-msingi)     |
+**Hii imezimwa kwa chaguo-msingi** na hudhibitiwa na lango la ngazi tatu (mahususi zaidi
+ndio hushinda), ili OmniRoute ya kawaida isiongeze orodha yake mara mbili kwa wateja
+ambao hawatumii Claude Code:
 
-Kigezo cha mazingira cha `EXPOSE_CC_DISCOVERY_ALIASES` hulazimisha ngazi ya kimataifa kuwashwa
-na hutangulia ubatilishaji wa dashibodi (skrini ya Alama za Vipengele huonyesha
-dokezo la "inatumika kupitia kigezo cha mazingira" inapofanya hivyo). Swichi za kila mtoa huduma na
-kila modeli huboresha uteuzi kuanzia hapo — k.m. hali ya kimataifa ikiwa imezimwa + mtoa huduma wa Kimi amewashwa huonyesha
-modeli za Kimi pekee.
+| Ngazi       | Wapi                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| Modeli      | Ukurasa wa maelezo ya mtoa huduma → kitufe cha "Onyesha katika Claude Code" kwa kila modeli       |
+| Mtoa huduma | Ukurasa wa maelezo ya mtoa huduma → kitufe cha ngazi ya mtoa huduma (huzingatia modeli zake zote) |
+| Kimataifa   | Mipangilio → Bendera za Vipengele → `EXPOSE_CC_DISCOVERY_ALIASES` (imezimwa kwa chaguo-msingi)    |
 
-> ⚠️ **Kutolingana kwa dirisha kwenye modeli zisizo za Claude.** Claude Code huchukulia dirisha la muktadha kuwa
-> 200K kwa kitambulisho chochote kisichokitambua (haiwezi kusoma ukubwa halisi wa dirisha kutoka
-> `/v1/models`). Kwa modeli yenye dirisha kubwa zaidi (k.m. 256K ya Kimi K2), weka
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kuwa thamani iliyo chini ya dirisha halisi la modeli ili
-> ubanaji wa kiotomatiki usianze mapema. Wasifu uliotengenezwa hapo juu tayari
-> hufanya hivi kwa kila modeli.
+Kibadilishaji cha mazingira `EXPOSE_CC_DISCOVERY_ALIASES` hudumu ngazi ya kimataifa iwe
+imewashwa na hupata kipaumbele juu ya ubatilishaji wa dashibodi (skrini ya Bendera za
+Vipengele huonyesha dokezo la "limeamilishwa kupitia kibadilishaji cha mazingira" inapofanya
+hivyo). Vifufe vya kila mtoa huduma na kila modeli huboresha kutoka hapo — km. kimataifa
+kimezimwa + mtoa huduma Kimi amewashwa huonyesha modeli za Kimi pekee.
+
+> ⚠️ **Ulinganifu mbaya wa dirisha kwenye modeli zisizo za Claude.** Claude Code huchukulia
+> dirisha la muktadha la 200K kwa kitambulisho chochote ambacho haikitambui (haiwezi kusoma
+> dirisha halisi kutoka `/v1/models`). Kwa modeli yenye dirisha kubwa zaidi (km. 256K ya
+> Kimi K2), weka `CLAUDE_CODE_AUTO_COMPACT_WINDOW` kwa thamani iliyo chini ya dirisha halisi
+> la modeli ili ujazaji wa kiotomatiki usiamilishwe mapema. Profaili zilizotengenezwa hapo
+> juu tayari hufanya hivi kwa kila modeli.
 
 ---
 
-## Sehemu ya utambulisho kwenye dashibodi
+## Sehemu ya uanzishaji kwenye dashibodi
 
-Kadi ya zana ya Claude (**Dashibodi → Msimbo wa CLI**) huonyesha kipande halisi cha `settings.json`
-cha instansi hii, karibu na kitufe cha maelezo ya lakabu ya ugunduzi, pamoja na kitufe cha kunakili:
+Kadi ya zana ya Claude (**Dashibodi → Msimbo wa CLI**) huonyesha kipande kamili cha `settings.json`
+cha instansi hii, kando ya kitufe cha taarifa za lakabu ya ugunduzi, pamoja na kitufe cha kunakili:
 
 ```jsonc
 {
@@ -108,18 +118,32 @@ cha instansi hii, karibu na kitufe cha maelezo ya lakabu ya ugunduzi, pamoja na 
 }
 ```
 
-URL ya msingi ndiyo iliyobainishwa na kadi (ikiwemo thamani maalum ya kubatilisha uliyoandika), na tayari
-imesawazishwa — haina kiambishi tamati cha `/v1` wala mfuo wa mwisho. **Ufunguo hauonyeshwi kamwe**: sehemu hiyo hutolewa ikiwa na
-kishikilia nafasi, kwa hivyo picha ya skrini au kipande kilichobandikwa hakiwezi kuuvujisha. Bandika ufunguo wako juu yake.
+URL ya msingi ndiyo iliyotambuliwa na kadi (ikiwemo thamani maalum ya kubatilisha uliyoandika), na tayari
+imesawazishwa — haina kiambishi tamati cha `/v1` wala mkwaju wa mwisho. **Ufunguo hauonyeshwi kamwe**: sehemu hiyo huja na
+kishika nafasi, kwa hivyo picha ya skrini au kipande kilichobandikwa hakiwezi kuuvujisha. Bandika ufunguo wako juu yake.
 
 Ongeza `CLAUDE_CODE_AUTO_COMPACT_WINDOW` chini ya sehemu hiyo hiyo ya `env` kwa modeli yoyote ambayo dirisha lake halisi
-la muktadha si 200K — Claude Code hudhani kuwa kila kitambulisho kisichotambuliwa kina 200K, kwa hivyo
-ufupishaji wa kiotomatiki huanza katika sehemu isiyofaa (angalia onyo katika sehemu iliyotangulia).
-Kiunda kipande kinakubali thamani hiyo pia, kwa hivyo mwitaji anayejua ukubwa wa dirisha la modeli lengwa
+la muktadha si 200K — Claude Code huchukulia 200K kwa kila kitambulisho isichokitambua, kwa hivyo
+ufupishaji wa kiotomatiki vinginevyo huanza katika hatua isiyofaa (tazama onyo katika sehemu iliyotangulia).
+Kiundaji cha kipande pia hukubali thamani hiyo, kwa hivyo mwitaji anayejua ukubwa wa dirisha la modeli lengwa
 anaweza kuitoa moja kwa moja.
 
-Chanzo: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (kiunda safi
-kilichofanyiwa majaribio ya vitengo) kinachoonyeshwa na `ClaudeGatewayOnboardingBlock`.
+Chanzo: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (kiundaji kisicho na
+athari za pembeni, kilichojaribiwa kwa majaribio ya kitengo) kinachoonyeshwa na `ClaudeGatewayOnboardingBlock`.
+
+### Bandika akaunti moja (si lazima)
+
+Ili kutuma kila ombi la Claude Code kupitia akaunti moja mahususi ya mtoa huduma, ongeza kichwa cha
+`x-omniroute-connection` kupitia `ANTHROPIC_CUSTOM_HEADERS` katika sehemu hiyo hiyo ya `env`:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Nakili kitambulisho kutoka kwenye chipu ya `xxxxxxxx…` katika safu ya muunganisho kwenye ukurasa wa mtoa huduma. Ubandikaji huo
+hutumika tu kwa vitambulisho vya modeli moja (`provider/model`), si kwa mikusanyiko. Tazama
+[Ubandikaji wa akaunti kwa kila ombi](../reference/API_REFERENCE.md#account-pinning-per-request) kwa
+tabia kamili ya mbadala.
 
 ---
 

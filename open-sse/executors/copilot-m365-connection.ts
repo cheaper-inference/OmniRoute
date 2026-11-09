@@ -8,8 +8,10 @@
  * the URL MUST go through redactWsUrl().
  */
 
-import { resolvePublicCred } from "../utils/publicCreds.ts";
 import { randomUUID, randomBytes } from "node:crypto";
+import { parseM365PastedCredential } from "../utils/m365Credentials.ts";
+import { resolvePublicCred } from "../utils/publicCreds.ts";
+import { sanitizeErrorMessage } from "../utils/error.ts";
 import type { ProviderCredentials } from "./base.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -118,38 +120,6 @@ export function newChatSessionId(): string {
   return randomBytes(16).toString("hex");
 }
 
-function parsePastedCredential(
-  raw: string
-): Partial<Pick<M365ConnectionParams, "accessToken" | "chathubPath">> {
-  const value = raw.trim();
-  const parts: Record<string, string> = {};
-
-  for (const segment of value.split(/[;\n]/)) {
-    const separator = segment.indexOf("=");
-    if (separator <= 0) continue;
-    const key = segment.slice(0, separator).trim();
-    const partValue = segment.slice(separator + 1).trim();
-    if (key && partValue) parts[key] = partValue;
-  }
-
-  if (/^wss:\/\/substrate\.office\.com\/m365Copilot\/Chathub\//i.test(value)) {
-    try {
-      const url = new URL(value);
-      parts.access_token ||= url.searchParams.get("access_token") || "";
-      parts.chathubPath ||= decodeURIComponent(
-        url.pathname.split("/m365Copilot/Chathub/")[1] || ""
-      );
-    } catch {
-      // Keep any key/value fields already parsed from the pasted text.
-    }
-  }
-
-  return {
-    accessToken: parts.access_token || parts.accessToken,
-    chathubPath: parts.chathubPath || parts.userTenant,
-  };
-}
-
 /**
  * Read the pasted credential bits. The individual access_token is opaque (JWE),
  * so it is consumed verbatim. The Chathub path (`user@tenant`) is pasted
@@ -160,39 +130,30 @@ export function resolveConnectionParams(
 ): M365ConnectionParams | { error: string } {
   const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
   const parsedApiKey =
-    typeof credentials?.apiKey === "string" ? parsePastedCredential(credentials.apiKey) : {};
-  // A JWT in credentials.accessToken (3 dot-separated parts — the individual-tier
-  // token is an opaque JWE with 5) is the freshest copy: the executor refreshes it
-  // in place before resolving params, and the framework mutates it after a refresh.
-  const credentialsJwt =
-    typeof credentials?.accessToken === "string" && credentials.accessToken.split(".").length === 3
-      ? credentials.accessToken
-      : "";
-  const accessToken =
-    credentialsJwt ||
-    parsedApiKey.accessToken ||
-    (typeof credentials?.apiKey === "string" &&
-      credentials.apiKey &&
-      !credentials.apiKey.includes("access_token=") &&
-      credentials.apiKey) ||
-    (typeof psd.accessToken === "string" && psd.accessToken) ||
-    (typeof psd.access_token === "string" && psd.access_token) ||
-    "";
+    typeof credentials?.apiKey === "string" ? parseM365PastedCredential(credentials.apiKey) : {};
+  const accessToken = currentM365AccessToken(credentials);
   if (!accessToken) {
     return { error: "Missing M365 Copilot access_token. Paste it as the provider credential." };
   }
-  const chathubPath =
-    parsedApiKey.chathubPath ||
-    (typeof psd.chathubPath === "string" && psd.chathubPath) ||
-    (typeof psd.userTenant === "string" && psd.userTenant) ||
-    "";
-  if (!chathubPath || !chathubPath.includes("@")) {
+  const chathubPath = currentM365ChathubPath(credentials);
+  if (!/^[\w.-]+@[\w.-]+$/.test(chathubPath)) {
     return {
       error:
         "Missing M365 Chathub path. Paste the '<user-oid>@<tenant-id>' segment from the WebSocket URL.",
     };
   }
-  const host = (typeof psd.host === "string" && psd.host) || M365_INDIVIDUAL_DEFAULTS.host;
+  const host =
+    (typeof psd.host === "string" && psd.host) ||
+    parsedApiKey.host ||
+    M365_INDIVIDUAL_DEFAULTS.host;
+  // Validate explicit destinations with the same allowlist as pasted browser URLs.
+  if (
+    !parseM365PastedCredential(`wss://${host}/m365Copilot/Chathub/u@t?access_token=validation`)
+      .host ||
+    !/^[a-z0-9.-]+$/i.test(host)
+  ) {
+    return { error: "Invalid M365 Chathub host." };
+  }
   const variants = typeof psd.variants === "string" && psd.variants ? psd.variants : undefined;
 
   return { host, chathubPath, accessToken, variants, ...resolveTierOverrides(psd) };
@@ -235,16 +196,20 @@ function resolveTierOverrides(
 /**
  * Build the BizChat WebSocket URL. The access_token rides in the query string
  * (per the protocol), so callers must never log the returned URL verbatim — use
- * redactWsUrl() for any logging.
+ * redactWsUrl() for any logging. Pass `conversation` to continue an existing
+ * conversation; otherwise new conversation and session ids are minted.
  */
-export function buildWsUrl(params: M365ConnectionParams): string {
+export function buildWsUrl(
+  params: M365ConnectionParams,
+  conversation?: { conversationId: string; sessionId: string }
+): string {
   const sessionKey = newChatSessionId();
   const query = new URLSearchParams({
     chatsessionid: sessionKey,
     XRoutingParameterSessionKey: sessionKey,
     clientrequestid: sessionKey,
-    "X-SessionId": randomUUID(),
-    ConversationId: randomUUID(),
+    "X-SessionId": conversation?.sessionId ?? randomUUID(),
+    ConversationId: conversation?.conversationId ?? randomUUID(),
     access_token: params.accessToken,
     variants: params.variants ?? M365_DEFAULT_VARIANTS.join(","),
     source: M365_INDIVIDUAL_DEFAULTS.source,
@@ -307,19 +272,25 @@ export function tokenNeedsRefresh(token: string, leadMs = M365_REFRESH_LEAD_MS):
   return claims.exp * 1000 <= Date.now() + leadMs;
 }
 
-/** The freshest readable access token for a connection (JWT column → apiKey → psd). */
+function pastedM365AccessToken(apiKey: string): string {
+  const parsed = parseM365PastedCredential(apiKey);
+  if (parsed.accessToken && parsed.accessToken.split(".").length === 3) return parsed.accessToken;
+  if (parsed.accessToken) return parsed.accessToken;
+  // A raw opaque token is usable; never mistake a URL or credential line for one.
+  if (apiKey && !apiKey.includes("=") && !/^[a-z][a-z\d+.-]*:\/\//i.test(apiKey.trim())) {
+    return apiKey;
+  }
+  return "";
+}
+
+/** Canonical token column wins legacy pasted credentials, including opaque tokens. */
 export function currentM365AccessToken(credentials: ProviderCredentials | undefined): string {
-  if (
-    typeof credentials?.accessToken === "string" &&
-    credentials.accessToken.split(".").length === 3
-  ) {
+  if (typeof credentials?.accessToken === "string" && credentials.accessToken) {
     return credentials.accessToken;
   }
   if (typeof credentials?.apiKey === "string") {
-    const parsed = parsePastedCredential(credentials.apiKey);
-    if (parsed.accessToken && parsed.accessToken.split(".").length === 3) return parsed.accessToken;
-    // Opaque (JWE) individual-tier token — still a usable credential, just not refreshable.
-    return parsed.accessToken || "";
+    const pasted = pastedM365AccessToken(credentials.apiKey);
+    if (pasted) return pasted;
   }
   const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
   if (typeof psd.accessToken === "string") return psd.accessToken;
@@ -330,20 +301,115 @@ export function currentM365AccessToken(credentials: ProviderCredentials | undefi
 /** The chathub path (`<user-oid>@<tenant-id>`) from wherever it is stored. */
 export function currentM365ChathubPath(credentials: ProviderCredentials | undefined): string {
   const psd = (credentials?.providerSpecificData ?? {}) as JsonRecord;
-  return (
-    (typeof credentials?.apiKey === "string"
-      ? parsePastedCredential(credentials.apiKey).chathubPath
-      : "") ||
-    (typeof psd.chathubPath === "string" && psd.chathubPath) ||
-    (typeof psd.userTenant === "string" && psd.userTenant) ||
-    ""
-  );
+  // Explicit identity wins even when malformed: the caller must reject, not
+  // silently replace a bad hint with a different account from an unverified JWT.
+  for (const key of ["chathubPath", "userTenant"]) {
+    if (Object.prototype.hasOwnProperty.call(psd, key)) {
+      return typeof psd[key] === "string" ? psd[key] : "";
+    }
+  }
+  const pasted =
+    typeof credentials?.apiKey === "string"
+      ? parseM365PastedCredential(credentials.apiKey).chathubPath
+      : undefined;
+  if (pasted !== undefined) return pasted;
+  const claims = decodeJwtClaims(currentM365AccessToken(credentials));
+  return isM365Guid(claims?.oid) && isM365Guid(claims?.tid) ? `${claims.oid}@${claims.tid}` : "";
 }
+
+const M365_GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isM365Guid(value: unknown): value is string {
+  return typeof value === "string" && M365_GUID.test(value);
+}
+
+export interface M365RefreshOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  /** Scopes to request; defaults to the chat scopes ({@link M365_OAUTH_SCOPE}). */
+  scope?: string;
+}
+
+/**
+ * The service behind generated-image artifacts. The chat token is refused there; the same
+ * first-party client is preauthorized for it, so the stored refresh token can mint one.
+ */
+export const M365_IMAGE_ARTIFACT_SCOPE =
+  "openid profile offline_access https://designerappservice.officeapps.live.com/.default";
 
 export interface M365RefreshResult {
   accessToken: string;
   refreshToken?: string;
   expiresIn?: number;
+}
+
+function projectM365RefreshResult(
+  data: Record<string, unknown> & { access_token: string }
+): M365RefreshResult {
+  return {
+    accessToken: data.access_token,
+    refreshToken:
+      typeof data.refresh_token === "string" && data.refresh_token ? data.refresh_token : undefined,
+    expiresIn:
+      typeof data.expires_in === "number" &&
+      Number.isFinite(data.expires_in) &&
+      data.expires_in > 0 &&
+      data.expires_in <= 31_536_000
+        ? data.expires_in
+        : undefined,
+  };
+}
+
+async function redeemM365RefreshGrant(
+  endpoint: string,
+  refreshToken: string,
+  signal: AbortSignal,
+  log?: MinimalLog,
+  scope: string = M365_OAUTH_SCOPE
+): Promise<M365RefreshResult | { error: string }> {
+  if (signal.aborted) return { error: "refresh_cancelled" };
+  const res = await fetch(endpoint, {
+    method: "POST",
+    redirect: "error",
+    signal,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+    },
+    body: new URLSearchParams({
+      client_id: M365_OAUTH_CLIENT_ID,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      scope,
+    }),
+  });
+  const data = (await res.json()) as Record<string, unknown> | null;
+  if (!res.ok || typeof data?.access_token !== "string" || !data.access_token) {
+    // Project known codes only; arbitrary OAuth error text can contain credentials.
+    const codes = [
+      "invalid_grant",
+      "invalid_request",
+      "invalid_token",
+      "expired_token",
+      "unauthorized_client",
+      "access_denied",
+      "server_error",
+      "temporarily_unavailable",
+    ];
+    const error =
+      typeof data?.error === "string" && codes.includes(data.error)
+        ? data.error
+        : "m365_refresh_failed";
+    log?.warn?.("M365_TOKEN", sanitizeErrorMessage(`refresh_token grant failed: ${error}`));
+    return { error };
+  }
+  log?.info?.("M365_TOKEN", "access token refreshed via refresh_token grant");
+  return projectM365RefreshResult(data as Record<string, unknown> & { access_token: string });
+}
+
+function m365RefreshTimeout(timeoutMs: number | undefined): number {
+  return typeof timeoutMs === "number" && Number.isFinite(timeoutMs) && timeoutMs > 0
+    ? Math.min(timeoutMs, 30_000)
+    : 30_000;
 }
 
 /**
@@ -353,40 +419,44 @@ export interface M365RefreshResult {
  */
 export async function refreshM365AccessToken(
   refreshToken: string,
-  tid: string,
-  log?: MinimalLog
+  tid: string = "common",
+  log?: MinimalLog,
+  options: M365RefreshOptions = {}
 ): Promise<M365RefreshResult | { error: string }> {
-  const endpoint = `https://login.microsoftonline.com/${tid || "common"}/oauth2/v2.0/token`;
+  if (tid !== "common" && !isM365Guid(tid)) return { error: "invalid_tenant" };
+  const endpoint = `https://login.microsoftonline.com/${tid}/oauth2/v2.0/token`;
+  const controller = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([controller.signal, options.signal])
+    : controller.signal;
+  const timeoutMs = m365RefreshTimeout(options.timeoutMs);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: (() => void) | undefined;
   try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/json",
-      },
-      body: new URLSearchParams({
-        client_id: M365_OAUTH_CLIENT_ID,
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-        scope: M365_OAUTH_SCOPE,
-      }),
+    const interrupted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => reject(new Error("refresh_cancelled"));
+      if (signal.aborted) onAbort();
+      else signal.addEventListener("abort", onAbort, { once: true });
+      timer = setTimeout(() => controller.abort(), timeoutMs);
     });
-    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    if (!res.ok || typeof data.access_token !== "string") {
-      const error = typeof data.error === "string" ? data.error : `HTTP ${res.status}`;
-      log?.warn?.("M365_TOKEN", `refresh_token grant failed: ${error}`);
-      return { error };
-    }
-    log?.info?.("M365_TOKEN", "access token refreshed via refresh_token grant");
-    return {
-      accessToken: data.access_token,
-      refreshToken: typeof data.refresh_token === "string" ? data.refresh_token : undefined,
-      expiresIn: typeof data.expires_in === "number" ? data.expires_in : undefined,
-    };
+
+    return await Promise.race([
+      redeemM365RefreshGrant(endpoint, refreshToken, signal, log, options.scope),
+      interrupted,
+    ]);
   } catch (e) {
-    const error = e instanceof Error ? e.message : String(e);
-    log?.warn?.("M365_TOKEN", `refresh request failed: ${error}`);
+    // Only retain an exact safe network code, never the transport's credential-bearing message.
+    const error =
+      e instanceof Error && e.message === "ENOTFOUND"
+        ? "ENOTFOUND"
+        : signal.aborted
+          ? "refresh_cancelled"
+          : "m365_refresh_failed";
+    log?.warn?.("M365_TOKEN", sanitizeErrorMessage(`refresh request failed: ${error}`));
     return { error };
+  } finally {
+    if (timer) clearTimeout(timer);
+    if (onAbort) signal.removeEventListener("abort", onAbort);
   }
 }
 

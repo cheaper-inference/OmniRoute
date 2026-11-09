@@ -1,9 +1,14 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { credentialCooldownResponse } from "./credentialCooldownResponse";
 import {
   getModelInfo,
   getComboForModel,
   getModelInfoOrRetirementResponse,
 } from "../services/model";
+import {
+  withModalityBridgeResponseHeaders,
+  type ModalityBridgeResponseHeaders,
+} from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import {
   clearAccountError,
   markAccountUnavailable,
@@ -12,7 +17,11 @@ import {
 import { maybeReactivateAfterExplicitProbe } from "../services/explicitInactiveProbe";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { clearRequestRejectedStreak } from "@omniroute/open-sse/services/requestRejectedStreak.ts";
-import { createBuiltinAutoCombo } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
+import { clearAntigravityVerificationUrl } from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
+import {
+  createBuiltinAutoCombo,
+  prepareBuiltinAutoComboInputs,
+} from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import * as log from "../utils/logger";
 import { updateProviderCredentials } from "../services/tokenRefresh";
 import { detectFormatFromEndpoint } from "@omniroute/open-sse/services/provider.ts";
@@ -53,14 +62,18 @@ import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHi
 import { resolveProviderId } from "../../shared/constants/providers";
 import { classifyProviderProbeResult } from "./providerProbeClassification";
 import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
-import { inheritResponsePolicies } from "./chat/responsePolicies.ts";
-import { isFeatureFlagEnabled } from "../../shared/utils/featureFlags";
+import {
+  isAutoRequestResolvedCapabilitiesEnabled,
+  isFeatureFlagEnabled,
+} from "../../shared/utils/featureFlags";
 
 import { noteProxyOutcome } from "./proxyOutcomeMemory";
 import { logProxyJournal } from "./proxyJournal";
 import type { AttemptJournalEntry } from "./proxyJournal";
 import { logTranslationEvent } from "../../lib/translatorEvents";
 import { getRuntimeProviderProfile } from "@omniroute/open-sse/services/accountFallback.ts";
+import { recordConnectionOutcome } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
+import { describeConnectionRestriction } from "../services/credentialSelectionDiagnostics.ts";
 
 // #14960: circuit-open 503 that also names the breaker's classified failure kind.
 function breakerOpenResponse(provider: string, breaker: CircuitBreaker, retryAfterSec: number) {
@@ -201,8 +214,19 @@ export async function resolveModelOrError(
       }
     }
 
+    // One pool preparation shared by the attempt below and the fuzzy fallbacks,
+    // built only when an id actually materializes (unknown ids never prepare).
+    // Default: the same inputs as createVirtualAutoCombo() (capabilities resolve on
+    // demand). AUTO_REQUEST_RESOLVED_CAPABILITIES (opt-in) resolves them up front,
+    // which also feeds them to the snapshot weights.
+    let prepared: Awaited<ReturnType<typeof prepareBuiltinAutoComboInputs>> | undefined;
+    const loadPrepared = async () =>
+      (prepared ??= await prepareBuiltinAutoComboInputs(undefined, {
+        includeResolvedCapabilities: isAutoRequestResolvedCapabilitiesEnabled(),
+      }));
+
     try {
-      const virtualCombo = await createBuiltinAutoCombo(modelStr, suffix);
+      const virtualCombo = await createBuiltinAutoCombo(modelStr, suffix, loadPrepared);
       const poolSize = virtualCombo.candidatePool?.length || 0;
       log.info(
         "AUTO",
@@ -227,7 +251,8 @@ export async function resolveModelOrError(
       try {
         const virtualCombo = await createBuiltinAutoCombo(
           candidate,
-          candidate.replace(/^auto\/?/, "")
+          candidate.replace(/^auto\/?/, ""),
+          loadPrepared
         );
         log.info(
           "AUTO",
@@ -446,11 +471,14 @@ export async function executeChatWithBreaker({
   reasoningTransportFallback = "drop",
   sessionAffinityKey = null,
   managedLease = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — undefined for every
   // non-video request. Passed straight through to handleChatCore; see its own destructure default.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null,
+  allowedConnections = null,
   // optional resume flag from a rehydrated previous_response_id —
   // forwarded to handleChatCore, which notes it under the attempt store.
   previousResponseResumed = undefined,
@@ -524,10 +552,13 @@ export async function executeChatWithBreaker({
             sessionAffinityKey,
             reasoningTransportFallback,
             managedLease,
+            beforeUpstreamAttempt,
             videoBridgeLog,
             previousResponseResumed,
             fallbackAttempts,
+            requestUpstreamStartTimeoutMs,
             forcedConnectionId,
+            allowedConnections,
             skipResourcePressureGuard: true,
             onCredentialsRefreshed: async (newCreds: any) => {
               await updateProviderCredentials(credentials.connectionId, {
@@ -545,9 +576,18 @@ export async function executeChatWithBreaker({
             },
             onRequestSuccess: async () => {
               if (isShadowTraffic) return;
-              // Only a real success ends the per-request refusal streak (#12859).
-              if (credentials.connectionId) clearRequestRejectedStreak(credentials.connectionId);
+              // Only a real success ends the per-request refusal streak (#12859), and only for
+              // the model that succeeded: a sibling model's success must not reset another
+              // model's refusal count (the streak is keyed by connection + model).
+              if (credentials.connectionId) {
+                clearRequestRejectedStreak(credentials.connectionId, model);
+              }
               await clearAccountError(credentials.connectionId, credentials);
+              await clearAntigravityVerificationUrl(
+                provider,
+                credentials.connectionId,
+                credentials.providerSpecificData
+              );
               await maybeReactivateAfterExplicitProbe({
                 connectionId: credentials.connectionId,
                 reactivatedFromInactive: credentials.reactivatedFromInactive,
@@ -640,7 +680,8 @@ export async function executeChatWithBreaker({
     let wasProviderProbe = false;
     const probeOptions = {
       classifyResult: chatPathOwnsBreakerAccounting,
-      classifyProbeResult: classifyProviderProbeResult,
+      classifyProbeResult: (value: Parameters<typeof classifyProviderProbeResult>[0]) =>
+        classifyProviderProbeResult(value, provider),
       onProbeAcquired: () => (wasProviderProbe = true),
     };
     const tracked = await breaker.execute(
@@ -815,19 +856,11 @@ export function handleNoCredentials(
     return errorResponse(httpStatus, message);
   }
   if (credentials?.blockedByKeyPolicy) {
-    // #13832: the provider HAS active connections — they were filtered out by the
-    // gateway API key's connection allowlist (`allowed_connections`) or its quota
-    // scope, so the pool arrived empty and the generic "No active credentials"
-    // below was indistinguishable from "this provider was never configured". That
-    // cost the reporter a full investigation: their key passed `/test` and synced
-    // 82 models (both address the connection by id and never consult the key's
-    // scope), while chat kept failing. The classic shape is a key minted before
-    // the provider existed, which is why older providers keep working on it.
-    // 403, not 401: the credential is fine, this principal is not allowed to use it.
+    // #15889: the effective restriction is not necessarily an API-key policy.
     const count = credentials.blockedCount || 1;
     const message =
-      `[${provider}] ${count} connection(s) exist but are excluded by this API key's ` +
-      `connection allowlist / quota scope — add them to the key in the dashboard, or use a key without that scope`;
+      `[${provider}] ${count} connection(s) exist but are excluded by ` +
+      `${describeConnectionRestriction(credentials.connectionRestrictionSources)} — review the connection routing constraints in the dashboard`;
     log.warn("AUTH", message);
     return errorResponse(HTTP_STATUS.FORBIDDEN, message);
   }
@@ -936,6 +969,7 @@ export const STREAM_EARLY_EOF_MAX_RETRIES = 1;
 const RETRYABLE_STREAM_EMPTY_CODES: ReadonlySet<string> = new Set([
   "STREAM_EARLY_EOF",
   "empty_response",
+  "empty_content",
 ]);
 
 export function shouldRetryStreamEarlyEof(
@@ -1129,6 +1163,8 @@ export async function safeLogEvents({
   } catch {
     // proxy selection feedback is best-effort; never break the request path
   }
+  // Rolling per-connection TTFB/outcome for the opt-in p2c latency term (never throws).
+  recordConnectionOutcome(credentials?.connectionId, model, proxyLatency, result?.success === true);
 
   try {
     await logProxyJournal({
@@ -1162,6 +1198,10 @@ export async function safeLogEvents({
   } catch {}
 }
 
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withSessionHeader(response: Response, sessionId: string | null): Response {
   if (!response || !sessionId) return response;
 
@@ -1175,10 +1215,17 @@ export function withSessionHeader(response: Response, sessionId: string | null):
       headers: response.headers,
     });
     cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withCorrelationId(response: Response, correlationId: string | null): Response {
   if (!response || !correlationId) return response;
 
@@ -1192,7 +1239,10 @@ export function withCorrelationId(response: Response, correlationId: string | nu
       headers: response.headers,
     });
     cloned.headers.set("X-Correlation-Id", correlationId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
@@ -1204,21 +1254,11 @@ export function withCorrelationId(response: Response, correlationId: string | nu
  * Same try-set/clone-fallback shape as withSessionHeader — the clone reuses
  * `response.body`, so SSE streams pass through untouched.
  */
-export function withModalityBridgeHeader(response: Response, value: string | null): Response {
-  if (!response || !value) return response;
-
-  try {
-    response.headers.set("x-omniroute-modality-bridge", value);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("x-omniroute-modality-bridge", value);
-    return cloned;
-  }
+export function withModalityBridgeHeader(
+  response: Response,
+  value: string | ModalityBridgeResponseHeaders | null
+): Response {
+  return withModalityBridgeResponseHeaders(response, value);
 }
 
 export function withConversationId(response: Response, conversationId: string | null): Response {
@@ -1238,22 +1278,4 @@ export function withConversationId(response: Response, conversationId: string | 
   }
 }
 
-export function withSelectedConnectionHeader(
-  response: Response,
-  connectionId: string | null | undefined
-): Response {
-  if (!response || !connectionId) return response;
-  try {
-    response.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
-    return inheritResponsePolicies(response, trusted);
-  }
-}
+export { withSelectedConnectionHeader } from "./chat/selectedConnectionHeader.ts";

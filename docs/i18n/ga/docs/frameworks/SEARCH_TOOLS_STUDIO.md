@@ -41,23 +41,23 @@ Stiúideo trí chluaisín a aontaíonn cuardach gréasáin, scríobadh gréasái
 
 Forbraíonn sé an `SearchForm` + `ResultsPanel` + `RerankPanel` atá ann cheana ina chluaisín:
 
-- Iarratas → torthaí (teideal, URL, sliocht, scór ábharthachta).
+- Iarratas → torthaí (teideal, URL, blúire, scór ábharthachta).
 - Meiteashonraí an tsoláthraí sa phána Cumraíochta (costas, cuóta, stádas).
 - Rannán athrangaithe: roghnaigh samhail athrangaithe, athordaigh na torthaí, taispeáin `positionDelta`.
-- Staid fholamh le glao chun gnímh nuair nach bhfuil aon soláthraithe cuardaigh cumraithe.
+- Staid fholamh le CTA nuair nach bhfuil aon soláthraí cuardaigh cumraithe.
 - Stair chuardaigh trí `SearchHistory.tsx`.
-- Glaonn sé ar `POST /v1/search` (críochphointe atá ann cheana, gan athruithe).
+- Glaonn sé ar `POST /v1/search` (críochphointe atá ann cheana, gan aon athruithe).
 
-### Cluaisín Scríobtha
+### Cluaisín Scrapála
 
 Cluaisín nua chun ábhar a bhaint as URL trí `POST /v1/web/fetch` (cruthaithe i bplean 05):
 
-- Ionchur: URL + scorán don leathanach iomlán + roghnóir formáide (markdown / téacs / HTML).
-- Seol → aisghabh → rindreáil `ScrapeResult.tsx`.
+- Ionchur: URL + scorán lánleathanaigh + roghnóir formáide (markdown / téacs / HTML).
+- Seol → faigh → rindreáil `ScrapeResult.tsx`.
 - Rindreálann `ScrapeResult` réamhamharc markdown + scorán amhábhair.
-- Teorainn: má tá corp an fhreagra > **256 KB**, taispeánann an Chomhéadain `(teasctha, féach ar an amhábhar)` agus osclaíonn sí an t-amhábhar i módúil Monaco (D21).
-- Painéal meiteashonraí: soláthraí (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), aga folaigh, costas, méid an fhreagra, líon na nasc.
-- Úsáideann sé an duán `useScrapeFetch.ts`.
+- Teorainn: más mó corp an fhreagra ná **256 KB**, taispeánann an Chomhéadain `(teasctha, féach ar an amhábhar)` agus osclaíonn sí an t-amhábhar i módaldialóg Monaco (D21).
+- Painéal meiteashonraí: soláthraí (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), aga folaigh, costas, méid an fhreagra, líon na nasc.
+- Úsáideann sé an crúca `useScrapeFetch.ts`.
 
 ### Cluaisín Comparáide
 
@@ -65,8 +65,8 @@ Ritheann sé an t-iarratas/URL céanna thar suas le **4 sholáthraí go comhthre
 
 - Colúin taobh le taobh do gach soláthraí.
 - Méadrachtaí: aga folaigh, costas, líon na dtorthaí, méid an fhreagra.
-- Ríomh forluí URLanna le haghaidh cuardaigh (líon na URLanna comhroinnte i gcomparáid leis an toradh tosaigh).
-- Glaonn sé ar `POST /v1/search` (cuardach) nó `POST /v1/web/fetch` (scríobadh) do gach soláthraí.
+- Ríomh forluí URLanna don chuardach (líon na URLanna comhroinnte i gcomparáid leis an toradh tosaigh).
+- Glaonn sé ar `POST /v1/search` (cuardach) nó `POST /v1/web/fetch` (scrapáil) do gach soláthraí.
 
 ---
 
@@ -102,12 +102,12 @@ Ritheann sé an t-iarratas/URL céanna thar suas le **4 sholáthraí go comhthre
 ## Catalóg Soláthraithe
 
 Nochtann `ProviderCatalog.tsx` liosta iomlán na soláthraithe ó `GET /api/search/providers`
-(leathnaithe in F4 chun soláthraithe gabhála a chur san áireamh):
+(leathnaithe in F4 chun soláthraithe aisghabhála a chur san áireamh):
 
-| `kind` | `"search"` (20 soláthraí) nó `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 soláthraí) nó `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-**Díorthaítear an stádas tráth an iarratais** trí sheiceáil an bhfuil dintiúir ann agus an bhfuil
-na heochracha uile i dtréimhse mharana faoi láthair.
+Déantar an stádas a **dhíorthú tráth na hiarrata** trí sheiceáil an bhfuil dintiúir ann agus an bhfuil
+na heochracha uile i dtréimhse shuaimhnithe faoi láthair.
 
 ---
 
@@ -119,18 +119,18 @@ Is é `$OMNIROUTE_API_KEY` an sealbhóir áite don eochair API i gcónaí (D11, 
 
 ---
 
-## Athruithe ar an Inneall
+## Athruithe ar an Inneall Cúil
 
-Ní raibh ach athrú amháin ar an inneall de dhíth don ghné seo:
+Ní raibh ach athrú amháin ar an inneall cúil ag teastáil don ghné seo:
 
 ### `GET /api/search/providers` Leathnaithe
 
 Leathnaíodh `src/app/api/search/providers/route.ts` chun:
 
-- Na 6 sholáthraí gabhála uile (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) a chur san eagar.
+- Gach soláthraí aisghabhála (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) a chur san áireamh san eagar.
 - `kind: "search" | "fetch"` a chur le gach mír.
-- `status: "configured" | "missing" | "rate_limited"` a chur leis, díorthaithe ó staid bheo na ndintiúr.
-- Comhoiriúnacht siarghabhálach a choinneáil — níl aon athrú ar na réimsí atá ann cheana (`id`, `name`, etc.).
+- `status: "configured" | "missing" | "rate_limited"` a chur leis, arna dhíorthú ó staid bheo na ndintiúr.
+- Comhoiriúnacht siarghabhálach a choinneáil — níor athraíodh na réimsí atá ann cheana (`id`, `name`, etc.).
 
 ---
 

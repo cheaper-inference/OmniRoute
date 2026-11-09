@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+För `smart-routing` är `metadata.combo` en uttrycklig åsidosättning av
+`metadata.model` för gateway-begäran. Den skickas som den faktiska `model`,
+inte som ett ignorerat `x-combo`-JSON-fält. Gatewayens normala API-nyckel och
+behörighetskontroll per mål gäller fortfarande. En ogiltig eller tom kombination avvisas.
+
+Resultatet visar `requested_combo` (anroparens avsikt), `dispatched_model`
+(den faktiska gateway-begäran), `response_model` (gateway-svaret) och
+`confirmed_combo`. Det sista fältet är `null` om inte gatewayen uttryckligen
+identifierar en kombination. A2A-beslutsloggar tillskriver endast körningen till en
+bekräftad kombination och behåller en obekräftad begäran som `requestedCombo`.
+
 **Svar:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Hämta uppgiftsstatus
+### `tasks/get` — Fråga efter uppgiftsstatus
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,84 +152,92 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tillgängliga färdigheter
 
-OmniRoute exponerar 6 A2A-färdigheter som är kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje färdighetsmodul finns i `src/lib/a2a/skills/`.
+OmniRoute avslöjar 6 A2A färdigheter kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje färdighetsmodul finns i `src/lib/a2a/skills/`.
 
-| Färdighet                | ID                   | Beskrivning                                                                                                                                                  | Taggar                              | Exempel                                        |
-| :----------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------- | :--------------------------------------------- |
-| Smart dirigering         | `smart-routing`      | Dirigerar en prompt via den optimala leverantören/kombinationen med hjälp av OmniRoutes kombinationsmotor och poängsättning                                  | dirigering, leverantörer            | "Dirigera denna prompt via den bästa modellen" |
-| Kvothantering            | `quota-management`   | Rapporterar kvotstatus per leverantör och hjälper anropare att avgöra när de ska begränsa hastigheten/byta                                                   | kvot, leverantörer                  | "Kontrollera kvoten för anthropic"             |
-| Leverantörsidentifiering | `provider-discovery` | Listar installerade leverantörer med funktioner, kostnadsfria nivåer och OAuth-status                                                                        | leverantörer, identifiering         | "Vilka leverantörer är tillgängliga?"          |
-| Kostnadsanalys           | `cost-analysis`      | Uppskattar kostnaden för en begäran/konversation utifrån katalogen och den senaste användningen                                                              | kostnad, användning                 | "Uppskatta kostnaden för denna konversation"   |
-| Hälsorapport             | `health-report`      | Sammanställer status för kretsbrytare, nedkylning och utelåsning per leverantör                                                                              | hälsa, motståndskraft               | "Visa hälsostatus för alla leverantörer"       |
-| Lista funktioner         | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 konfiguration) som en markdown-tabell med råa SKILL.md-URL:er för kontextinjektion | katalog, identifiering, färdigheter | "Lista alla OmniRoute-funktioner"              |
+| Skicklighet        | ID                   | Beskrivning                                                                                                                                          | Taggar                         | Exempel                                          |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :----------------------------------------------- |
+| Smart routing      | `smart-routing`      | Leder en prompt genom den optimala provider/combo med hjälp av OmniRoute kombinationsmotor + poäng                                                   | routing, leverantörer          | "Dirigera denna prompt via den bästa modellen"   |
+| Kvothantering      | `quota-management`   | Rapporterar kvotstatus per leverantör, hjälper uppringare att bestämma när de ska throttle/switch                                                    | kvot, leverantörer             | "Kontrollera kvoten för antropisk"               |
+| Provider Discovery | `provider-discovery` | Listar installerade leverantörer med funktioner, fria flaggor, OAuth status                                                                          | leverantörer, upptäckt         | "Vilka leverantörer är tillgängliga?"            |
+| Kostnadsanalys     | `cost-analysis`      | Uppskattar kostnaden för en request/conversation givet katalogen + senaste användning                                                                | kostnad, användning            | "Uppskatta kostnaden för den här konversationen" |
+| Hälsorapport       | `health-report`      | Aggregerat strömbrytare, nedkylning, låsningstillstånd per leverantör                                                                                | hälsa, motståndskraft          | "Visa hälsostatus för alla leverantörer"         |
+| Lista funktioner   | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en nedräkningstabell med rå SKILL.md URLs för kontextinjektion | katalog, upptäckt, färdigheter | "Lista alla OmniRoute -funktioner"               |
 
-> Agentkortet bör hållas synkroniserat med den aktiva katalogen med 352 leverantörer. Antal leverantörer och metadata om kostnadsfri/ingen autentisering hämtas från körningsregistret.
+> Agentkortet ska hållas i linje med 381-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
 
-### Detaljer om färdigheten `list-capabilities`
+### `list-capabilities` Skicklighetsdetalj
 
-Färdigheten `list-capabilities` är särskilt användbar för externa agenter som behöver ta reda på vad OmniRoute exponerar innan de skickar API-anrop. Den returnerar en strukturerad markdown-tabellartefakt:
+`list-capabilities` färdigheten är särskilt användbar för externa agenter som behöver upptäcka vad OmniRoute avslöjar innan de skickar API -anrop. Det returnerar en strukturerad markdown-tabellartefakt:
 
 ```
-| ID | Namn | Kategori | Område | Slutpunkter/kommandon | Rå URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentisering och sessioner | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Varje rad innehåller kolumnen `rawUrl` så att agenter omedelbart kan hämta hela SKILL.md. Fältet `metadata.totalSkills` motsvarar katalogens storlek (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Varje rad inkluderar `rawUrl` kolumnen så att agenter omedelbart kan hämta hela SKILL.md. `metadata.totalSkills` -fältet speglar katalogstorleken (45 idag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST-API (kompletterande)
+## REST API (hjälp)
 
-JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpunkterna nedan ger kompletterande åtkomst för instrumentpaneler och externa verktyg:
+JSON-RPC-ändpunkten `/a2a` är den kanoniska A2A ingångspunkten. REST -ändpunkterna nedan ger extra åtkomst för instrumentpaneler och externa verktyg:
 
-| Slutpunkt                    | Metod | Beskrivning                                                          | Autentisering                                 |
-| :--------------------------- | :---- | :------------------------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET   | Serverstatus, registrerade färdigheter                               | (offentlig)                                   |
-| `/api/a2a/tasks`             | GET   | Lista uppgifter med filter                                           | administration                                |
-| `/api/a2a/tasks/[id]`        | GET   | Hämta uppgift via ID                                                 | administration                                |
-| `/api/a2a/tasks/[id]/cancel` | POST  | Avbryt pågående uppgift                                              | administration                                |
-| `/.well-known/agent.json`    | GET   | Agentkort (A2A-identifiering)                                        | (offentlig, cachelagras i 3600 s)             |
-| `/api/a2a/tasks`             | POST  | Inkommande delegering till OmniConductor-flottan (Conductor PRD RF5) | Bearer mot `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Slutpunkt                    | Metod | Beskrivning                                                          | Auth                                                                                                |
+| :--------------------------- | :---- | :------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET   | Serverstatus, registrerade färdigheter                               | (offentlig)                                                                                         |
+| `/api/a2a/tasks`             | GET   | Lista uppgifter med filter                                           | management eller API -nyckel (se nedan)                                                             |
+| `/api/a2a/tasks/[id]`        | GET   | Få uppgift av ID                                                     | management eller API -nyckel (se nedan)                                                             |
+| `/api/a2a/tasks/[id]/cancel` | POST  | Avbryt pågående uppgift                                              | management eller API -nyckel (se nedan)                                                             |
+| `/.well-known/agent.json`    | GET   | Agentkort (A2A discovery)                                            | (offentlig, cachad 3600-tal)                                                                        |
+| `/api/a2a/tasks`             | POST  | Inkommande delegering till OmniConductor flottan (Conductor PRD RF5) | samma som `GET`, plus `OMNIROUTE_API_KEY` om satt medan `REQUIRE_API_KEY` är avstängt; `a2aEnabled` |
 
-**Inkommande Conductor-delegering (`POST /api/a2a/tasks`):** externa A2A-agenter delegerar programmeringsarbete till OmniConductor-flottan via OmniRoute. Innehåll: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — endast färdigheter för Conductor-flottan (de som anges på agentkortet) kan delegeras; `metadata.conductor.repo.url` är obligatorisk (flottan arbetar med git-arkiv). Rutten översätts till hubbens `POST /v1/tasks` med `CONDUCTOR_ORCHESTRATOR_TOKEN` på serversidan (`CONDUCTOR_HUB_TOKEN` används som reserv) och returnerar `201 { conductor_task_id, state: "submitted" }`; uppgiftstillstånd återförs via SSE→A2A-speglingen (RF1) och visas via `GET /api/a2a/tasks?skill=conductor`.
+Vem som kommer igenom till `/api/a2a/tasks*` rutterna beror på inställningarna för inloggning och API-nyckel:
+
+- `requireLogin=true` (standard): mellanprogramvaran tillåter endast hanteringsuppgifter (dashboardsession, `manage` -scope API nyckel, `oma_` -åtkomsttoken) och `OMNIROUTE_API_KEY`. En vanlig slutledningsnyckel får `403`. I `Authorization` huvudet tar mellanvaran bara `OMNIROUTE_API_KEY` som `Bearer <key>`; en bar nyckel eller en tabb efter `Bearer` får `401`.
+- `requireLogin=false`, eller loopback-fönstret innan ombordstigning: med `REQUIRE_API_KEY=true` accepteras alla giltiga OmniRoute API nyckel eller hanteringsuppgifter och anonyma uppringare får `401`; med `REQUIRE_API_KEY` utanför är rutterna öppna.
+- `POST /api/a2a/tasks` kräver dessutom `OMNIROUTE_API_KEY` i `Authorization` -huvudet när den variabeln är inställd och `REQUIRE_API_KEY` är avstängd. Andra rubriker, som `x-api-key`, räknas inte där. Med inloggning av eller före onboarding passerar nyckeln med eller utan ett `Bearer` -prefix; med inloggning på, bara `Bearer <key>` kommer förbi mellanvaran.
+
+Där en legitimation krävs fungerar en `read` -scope `oma_` token bara för `GET`.
+
+**Inkommande ledare delegering (`POST /api/a2a/tasks`):** externa A2A agenter delegerar kodningsarbete till OmniConductor flottan genom OmniRoute. Kropp: endast `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — färdigheter i konduktörflottan (de som anges på agentkortet) är delegerbara; `metadata.conductor.repo.url` krävs (flottan fungerar på git-repos). Rutten översätts till navets `POST /v1/tasks` med hjälp av serversidan `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) och returnerar `201 { conductor_task_id, state: "submitted" }`; uppgiftstillstånd flödar tillbaka genom SSE→A2A spegeln (RF1) och är synliga via `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
 ## Lägga till en ny färdighet
 
-1. **Skapa färdighetsfilen:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skapa färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter såsom `smartRouting.ts`.
+   Exportera en asynkronfunktion `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Följ formen av befintliga färdigheter som `smartRouting.ts`. Om färdigheten anropar tillbaka till OmniRoute över HTTP, bygg rubrikerna med `buildSelfLoopHeaders(caller)` från `src/lib/a2a/selfLoopAuth.ts` så att samtalet körs med A2A -anroparens nyckel, inte `OMNIROUTE_API_KEY`, och skicka `redirect: "error"` till `fetch` så att en omdirigering aldrig får nyckeln. Hjälparen bygger bara rubriker; varje färdighet anger själva omdirigeringspolicyn. Den kastar `UnsafeSelfLoopTargetError` snarare än att bifoga en nyckel när den lösta basen URL är vanlig http utanför det privata nätverket (loopback, ett container- eller tjänstnamn och privata adresser är bra) eller har referenser, så en färdighet som sväljer avvisade samtal måste kasta tillbaka det felet.
 
-2. **Registrera hanteraren:** lägg till en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registerhanterare:** i `src/lib/a2a/taskExecution.ts`, lägg till en post i `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...befintliga färdigheter
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/app/.well-known/agent.json/route.ts`:
+3. **Exponera i agentkort:** i `src/lib/a2a/agentCardMetadata.ts` (delas av `/.well-known/agent.json` och `/.well-known/agent-card.json`), lägg till `skills` matrisen:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Din färdighet",
-     "description": "Kortfattad, avsiktsfokuserad beskrivning",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Exempel på anrop med naturligt språk"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Täck både lyckat flöde och felflöde.
+4. **Skriv tester:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + felsökväg.
 
-5. **Dokumentera** den nya färdigheten i tabellen `Available Skills` i den här filen.
+5. **Dokumentera** den nya färdigheten i filens `Available Skills` tabell.
 
 ---
 
@@ -264,7 +276,7 @@ inskickad → pågående → slutförd
 
 ## Integrationsexempel
 
-### Python (requests)
+### Python (förfrågningar)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (hämta)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -7,6 +7,11 @@ import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableMod
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getSyncedCapabilities } from "@/lib/modelsDevSync";
 import { getModelsByProviderId } from "@/shared/constants/models";
+import { getImageProvider } from "@omniroute/open-sse/config/imageRegistry.ts";
+import {
+  getSpeechProvider,
+  getTranscriptionProvider,
+} from "@omniroute/open-sse/config/audioRegistry.ts";
 import {
   AI_PROVIDERS,
   NOAUTH_PROVIDERS,
@@ -15,6 +20,7 @@ import {
   isOpenAICompatibleProvider,
 } from "@/shared/constants/providers";
 import type { RegistryModel } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 
 type JsonRecord = Record<string, unknown>;
@@ -182,6 +188,30 @@ function getCompatibleProviderVisual(providerNodeType: string | null): ProviderV
   return { icon: "api", color: "#6B7280", source: "provider-node" };
 }
 
+function isDefaultChatRoutingMetadata(input: {
+  supportedEndpoints?: string[];
+  apiFormat?: string | null;
+}): boolean {
+  const endpoints = input.supportedEndpoints;
+  return (
+    Array.isArray(endpoints) &&
+    endpoints.length === 1 &&
+    endpoints[0] === "chat" &&
+    (!toStringOrNull(input.apiFormat) || input.apiFormat === "chat-completions")
+  );
+}
+
+function hasStaticMediaRoutingMetadata(model: ComboBuilderModelOption): boolean {
+  return (
+    model.source === "system" &&
+    Boolean(
+      model.supportedEndpoints?.some((endpoint) =>
+        ["images", "videos", "audio-speech", "audio-transcriptions"].includes(endpoint)
+      )
+    )
+  );
+}
+
 function getProviderVisual(
   providerId: string,
   providerNode: ProviderNodeLike | null
@@ -295,11 +325,12 @@ function addModelOption(
     outputTokenLimit?: number | null;
     supportsThinking?: boolean;
     customPrecedence?: boolean;
+    visibilityModality?: string;
   }
 ) {
   const modelId = toStringOrNull(input.id);
   if (!modelId) return;
-  if (getModelIsHidden(providerId, modelId)) return;
+  if (getModelIsHidden(providerId, modelId, input.visibilityModality)) return;
 
   const nextSourcePriority = getSourcePriority(input.source);
   const existing = modelMap.get(modelId);
@@ -333,8 +364,18 @@ function addModelOption(
   }
   if (input.customPrecedence) {
     existing.name = toStringOrNull(input.name) || existing.name;
-    if (input.supportedEndpoints?.length) existing.supportedEndpoints = input.supportedEndpoints;
-    if (toStringOrNull(input.apiFormat)) existing.apiFormat = input.apiFormat || undefined;
+    // A custom row created before media metadata existed carries the form's
+    // historical defaults (`chat-completions` + `["chat"]`).  Those defaults
+    // are not an intentional reclassification and must not erase a same-id
+    // image/video/audio registry entry.  Keep explicit non-default custom
+    // routing metadata authoritative, while still allowing all other custom
+    // fields (display name, token limits, thinking support) to take precedence.
+    const preserveStaticMediaRouting =
+      hasStaticMediaRoutingMetadata(existing) && isDefaultChatRoutingMetadata(input);
+    if (!preserveStaticMediaRouting) {
+      if (input.supportedEndpoints?.length) existing.supportedEndpoints = input.supportedEndpoints;
+      if (toStringOrNull(input.apiFormat)) existing.apiFormat = input.apiFormat || undefined;
+    }
     if (typeof input.contextLength === "number") existing.contextLength = input.contextLength;
     if (typeof input.outputTokenLimit === "number") {
       existing.outputTokenLimit = input.outputTokenLimit;
@@ -365,6 +406,58 @@ function addModelOption(
   existing.sources = Array.from(mergedSources).sort(
     (left, right) => getSourcePriority(left) - getSourcePriority(right)
   );
+}
+
+/**
+ * The chat provider registry deliberately does not include models whose only
+ * route is a media endpoint.  Combos, however, are endpoint-agnostic routing
+ * plans, so an account that can serve a static image/video/audio model must be
+ * able to select it without entering its id manually.  Keep this local to the
+ * builder rather than broadening the chat catalog used by provider pages.
+ */
+function addStaticMediaModelOptions(
+  modelMap: Map<string, ComboBuilderModelOption>,
+  providerId: string
+): void {
+  const append = (
+    models: unknown,
+    apiFormat: string,
+    supportedEndpoint: string,
+    visibilityModality: string
+  ) => {
+    if (!Array.isArray(models)) return;
+    for (const model of models) {
+      if (!model || typeof model !== "object" || Array.isArray(model)) continue;
+      const entry = model as { id?: unknown; name?: unknown };
+      addModelOption(modelMap, providerId, {
+        id: toStringOrNull(entry.id),
+        name: toStringOrNull(entry.name),
+        source: "system",
+        apiFormat,
+        supportedEndpoints: [supportedEndpoint],
+        visibilityModality,
+      });
+    }
+  };
+
+  const imageProvider = getImageProvider(providerId) as { models?: unknown } | null;
+  append(imageProvider?.models, "images", "images", "images");
+
+  // Some registries intentionally retain a diagnostic-only provider definition
+  // for unsupported transports.  It must not become a selectable combo target.
+  const videoProvider = getVideoProvider(providerId) as {
+    models?: unknown;
+    unsupported?: boolean;
+  } | null;
+  if (!videoProvider?.unsupported) {
+    append(videoProvider?.models, "video", "videos", "videos");
+  }
+
+  const speechProvider = getSpeechProvider(providerId);
+  append(speechProvider?.models, "audio", "audio-speech", "audio-speech");
+
+  const transcriptionProvider = getTranscriptionProvider(providerId);
+  append(transcriptionProvider?.models, "audio", "audio-transcriptions", "audio-transcriptions");
 }
 
 function buildModelOptions(
@@ -443,6 +536,11 @@ function buildModelOptions(
         : variant.id;
       if (modelMap.has(rawId)) continue;
       const baseId = baseRawIdByVariantId.get(variant.id) ?? rawId;
+      // #16977: a hidden base's generated effort variants must not surface
+      // either — the base's visibility carries into everything expanded from
+      // it. (The variant's own exact-id hidden state is still checked inside
+      // addModelOption; this guards the base that no longer reaches the map.)
+      if (getModelIsHidden(providerId, baseId)) continue;
       const base = modelMap.get(baseId);
       addModelOption(modelMap, providerId, {
         id: rawId,
@@ -470,6 +568,8 @@ function buildModelOptions(
       supportsThinking: resolved.supportsThinking ?? undefined,
     });
   }
+
+  addStaticMediaModelOptions(modelMap, providerId);
 
   // #9485: static registry models can declare provider-specific effort tiers even
   // when a connection's synced row does not include supportedThinkingEfforts.
@@ -507,6 +607,8 @@ function buildModelOptions(
         : variant.id;
       if (modelMap.has(rawId)) continue;
       const baseId = baseRawIdByVariantId.get(variant.id) ?? rawId;
+      // #16977: same hidden-base guard as the synced-expansion loop above.
+      if (getModelIsHidden(providerId, baseId)) continue;
       const base = modelMap.get(baseId);
       addModelOption(modelMap, providerId, {
         id: rawId,
@@ -704,18 +806,13 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
       customModels
     );
 
-    // #2901 follow-up: a configured OpenCode connection shadows the no-auth
-    // entry below, so it must receive the same `oc/` routing prefix. The raw
-    // `opencode/` prefix is reserved by model parsing for the api-key tier.
     // #14135: custom provider nodes (provider-node source) configured with a prefix alias
     // must route under their alias (e.g. "of/model"), not their raw internal database node id
     // (e.g. "openai-compatible-chat-<uuid>/model").
     const routingPrefix =
-      providerId === "opencode"
+      providerVisual.source === "provider-node" && providerVisual.alias
         ? providerVisual.alias
-        : providerVisual.source === "provider-node" && providerVisual.alias
-          ? providerVisual.alias
-          : providerId;
+        : providerId;
     rewriteQualifiedModelPrefix(modelMap, providerId, routingPrefix);
 
     const normalizedConnections =
@@ -778,10 +875,9 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
       customModels
     );
 
-    // #2901: no-auth providers must route under their alias (e.g. "oc"), not
-    // their id — "opencode/<model>" misroutes to the opencode-zen api-key tier
-    // (manual ALIAS_TO_PROVIDER_ID override), while "oc/<model>" resolves to the
-    // no-auth "opencode" provider. Rewrite qualifiedModel to the alias prefix.
+    // #2901: no-auth providers must route under their alias, not their id — a
+    // raw id can collide with a manual ALIAS_TO_PROVIDER_ID override that points
+    // at another provider. Rewrite qualifiedModel to the alias prefix.
     const routingPrefix = noAuthProvider.alias || providerId;
     rewriteQualifiedModelPrefix(modelMap, providerId, routingPrefix);
 
