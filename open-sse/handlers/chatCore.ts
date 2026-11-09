@@ -409,6 +409,7 @@ async function handleChatCoreInner({
   // the model-bound `body` itself is never touched.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
   allowedConnections = null, // routing allowlist; in-request account rotation must stay inside it
   previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
@@ -2591,16 +2592,15 @@ async function handleChatCoreInner({
   });
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
-  const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key AND the selected provider connection: dedup
-  // hands the SAME response object to every joiner, so a shared hash across keys
-  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
-  // across connections serves the request from an account the caller did not
-  // select — a pin on another account would silently be ignored while its
-  // response header still named the pinned one. Keyless installs keep dedup
-  // within a connection: identical requests that select the same connection
-  // still join. The hash is computed once, before dispatch; rotation inside the
-  // pipeline is handled by `allowDedup` (first attempt only), not here.
+  // A request-scoped deadline changes the executor contract; never let it
+  // join, or be joined by, an ordinary request through in-flight deduplication.
+  const dedupEnabled =
+    requestUpstreamStartTimeoutMs === undefined && shouldDeduplicate(dedupRequestBody);
+  // Namespace ordinary dedup by both API key and selected provider connection:
+  // cross-key reuse leaks principal responses, while cross-connection reuse can
+  // silently serve a pinned request using another account. Keyless requests
+  // still deduplicate when their connection matches. Rotation within a single
+  // execution is constrained by the first-attempt-only allowDedup policy.
   const dedupHash = dedupEnabled
     ? computeRequestHash(
         dedupRequestBody,
@@ -2643,6 +2643,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,

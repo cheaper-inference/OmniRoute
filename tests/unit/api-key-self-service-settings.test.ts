@@ -300,6 +300,40 @@ test("historical self-service migration 228 moves to 233 and frees the slot for 
   );
 });
 
+test("historical self-service migration 229 moves to 233 and frees the slot for api_key_five_hour_limit", async () => {
+  // Builds of this PR before the migration train shipped the settings table as 229, which the
+  // release assigns to 229_api_key_five_hour_limit (#18362). Those databases must keep their
+  // settings and still receive the api_keys.five_hour_usage_limit_usd column.
+  const db = core.getDbInstance();
+  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-229-key", {
+    sharedQuotaProviders: ["claude"],
+    anthropicRateLimitHeaders: "auto",
+  });
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version = '229';
+    UPDATE _omniroute_migrations SET version = '229'
+      WHERE version = '233' AND name = 'api_key_self_service_settings';
+    ALTER TABLE api_keys DROP COLUMN five_hour_usage_limit_usd;
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-229-key"), saved);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('229', '233') ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "229", name: "api_key_five_hour_limit" },
+      { version: "233", name: "api_key_self_service_settings" },
+    ]
+  );
+  const columns = db.prepare("PRAGMA table_info(api_keys)").all() as { name: string }[];
+  assert.ok(columns.some((column) => column.name === "five_hour_usage_limit_usd"));
+});
+
 test("historical turn-node index migration 207 does not skip upstream provider cleanup", async () => {
   const db = core.getDbInstance();
   db.exec(`
