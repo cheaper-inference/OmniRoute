@@ -43,8 +43,11 @@ const HOUR_MS = 60 * 60 * 1000;
 // whether ITS connection was probed and make only ITS probes fail.
 const probeCalls = new Map<string, number>();
 const failingNodes = new Set<string>();
+// Install the probe stub after the production wrapper's one-time initialization,
+// so importing the real routes cannot replace it with a network transport.
+await import("../../open-sse/utils/proxyFetch.ts");
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   const match = VALIDATION_PATH.exec(url);
@@ -240,6 +243,10 @@ async function sweepAt(offsetMs: number): Promise<void> {
     mock.timers.reset();
   }
 }
+
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
 
 test.after(() => {
   scheduler.stopCredentialHealthCheck();

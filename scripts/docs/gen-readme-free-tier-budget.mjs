@@ -255,7 +255,7 @@ export function buildFreeTierBudgetCopy() {
   return buildFreeTierBudgetModel().copy;
 }
 
-// Segment / dot tones: the largest pool is the card's one lime emphasis; the rest cycle the
+// Segment / dot tones: the largest pool is the card's one accent emphasis; the rest cycle the
 // kit's status and neutral fills (the grid dots repeat the same sequence as the bar).
 const TONES = ["info", "ok", "warn", "ink", "muted"];
 const tone = (i) => (i === 0 ? "accent" : TONES[(i - 1) % TONES.length]);

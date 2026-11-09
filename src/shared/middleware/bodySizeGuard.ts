@@ -28,7 +28,10 @@ export const MAX_BODY_BYTES_AUDIO = 100 * 1024 * 1024;
 /** Larger limit for file uploads: 500 MB */
 export const MAX_BODY_BYTES_FILE = 500 * 1024 * 1024;
 
-/** Larger limit for LLM request payloads: 50 MB */
+/**
+ * Default limit for LLM request payloads: 50 MB. A saved `maxBodySizeMb` replaces it, up or down;
+ * without one, this stays the floor so long-context agent payloads keep working.
+ */
 export const MAX_BODY_BYTES_LLM_API = 50 * 1024 * 1024;
 
 /** Fixed limit for the loopback-only Video Bridge extraction broker: 50 MB. */
@@ -52,6 +55,8 @@ type BodySizeRule = {
   limit: number;
   exactPath?: boolean;
   fixedLimit?: boolean;
+  /** A saved `maxBodySizeMb` replaces this limit instead of only raising it. */
+  savedLimitWins?: boolean;
 };
 
 const ROUTE_LIMITS: BodySizeRule[] = [
@@ -62,10 +67,11 @@ const ROUTE_LIMITS: BodySizeRule[] = [
     fixedLimit: true,
   },
   { prefix: "/api/db-backups/import", limit: MAX_BODY_BYTES_IMPORT },
-  { prefix: "/api/v1/chat/completions", limit: MAX_BODY_BYTES_LLM_API },
-  { prefix: "/api/v1/responses", limit: MAX_BODY_BYTES_LLM_API },
+  { prefix: "/api/v1/chat/completions", limit: MAX_BODY_BYTES_LLM_API, savedLimitWins: true },
+  { prefix: "/api/v1/responses", limit: MAX_BODY_BYTES_LLM_API, savedLimitWins: true },
   { prefix: "/api/v1/images", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/videos", limit: MAX_BODY_BYTES_MEDIA },
+  { prefix: "/api/v1/fal/run", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/audio/transcriptions", limit: MAX_BODY_BYTES_AUDIO },
   { prefix: "/api/v1/files", limit: MAX_BODY_BYTES_FILE },
 ];
@@ -78,6 +84,16 @@ export function getConfiguredBodySizeLimitBytes(settings?: Record<string, unknow
 }
 
 /**
+ * The limit an operator actually saved, in bytes, or null. `settings.maxBodySizeMb` cannot answer
+ * this: getSettings() fills it with the default when nothing was saved. See
+ * getCachedBodySizeSettings(), which adds `savedMaxBodySizeMb`.
+ */
+export function getSavedBodySizeLimitBytes(settings?: Record<string, unknown>): number | null {
+  const savedMb = normalizeRequestBodyLimitMb(settings?.savedMaxBodySizeMb);
+  return savedMb === null ? null : requestBodyLimitMbToBytes(savedMb);
+}
+
+/**
  * Resolve the body size limit for a request path.
  */
 export function getBodySizeLimit(pathname: string, settings?: Record<string, unknown>): number {
@@ -87,6 +103,8 @@ export function getBodySizeLimit(pathname: string, settings?: Record<string, unk
     rule.exactPath ? pathname === rule.prefix : pathname.startsWith(rule.prefix)
   );
   if (!customRule) return configuredLimit;
+  const savedLimit = customRule.savedLimitWins ? getSavedBodySizeLimitBytes(settings) : null;
+  if (savedLimit !== null) return savedLimit;
   return customRule.fixedLimit ? customRule.limit : Math.max(customRule.limit, configuredLimit);
 }
 

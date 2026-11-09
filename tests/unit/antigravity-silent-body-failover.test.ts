@@ -10,6 +10,36 @@ import {
   clearAntigravityVersionCaches,
 } from "../../open-sse/services/antigravityVersion.ts";
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
+import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../../open-sse/config/antigravityUpstream.ts";
+
+// The execute() tests below run the readiness watchdog on mocked timers. With a real
+// wall-clock budget (it used to be 50ms) the same budget also covers the healthy attempt,
+// so an event-loop or CPU-scheduling stall longer than the budget on a loaded runner turned
+// the healthy URL into a watchdog timeout as well (#18791). On a virtual clock the watchdog
+// only fires when the test advances it, so the outcome no longer depends on runner speed.
+const VIRTUAL_READINESS_TIMEOUT_MS = 30_000;
+
+/**
+ * A 200 body that never yields a chunk. `readPending` resolves once a reader is parked on it,
+ * i.e. once the readiness watchdog has started waiting for the first SSE event.
+ */
+function createSilentBody() {
+  let markReadPending: () => void = () => {};
+  const readPending = new Promise<void>((resolve) => {
+    markReadPending = resolve;
+  });
+  const body = new ReadableStream<Uint8Array>(
+    {
+      pull() {
+        markReadPending();
+        // Never enqueue and never close: a silent open body.
+        return new Promise<void>(() => {});
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  return { body, readPending };
+}
 
 describe("Part D - Antigravity silent-body watchdog and failover", () => {
   it("peekFirstAntigravitySseEvent throws AntigravityPreResponseTimeoutError on silent body", async () => {
@@ -73,9 +103,16 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
     seedAntigravityIdeVersionCache("1.11.5");
     seedAntigravityCliVersionCache("1.11.5");
 
-    const executor = new AntigravityExecutor({ streamReadinessTimeoutMs: 50 });
+    mock.timers.enable({ apis: ["setTimeout", "Date"] });
+    const executor = new AntigravityExecutor({
+      streamReadinessTimeoutMs: VIRTUAL_READINESS_TIMEOUT_MS,
+    });
+    // Default generation now stays on the daily endpoint only (#18706), so the failover
+    // path needs a second base URL configured explicitly to be exercised.
+    executor.config = { ...executor.config, baseUrls: [...ANTIGRAVITY_RUNTIME_BASE_URLS] };
     const encoder = new TextEncoder();
 
+    const silent = createSilentBody();
     let streamGenAttempt = 0;
     const originalFetch = globalThis.fetch;
     globalThis.fetch = mock.fn(async (input: RequestInfo | URL, _init?: RequestInit) => {
@@ -87,12 +124,7 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
       streamGenAttempt++;
       if (streamGenAttempt === 1) {
         // First endpoint: silent body (never enqueues, never closes)
-        const silentStream = new ReadableStream<Uint8Array>({
-          start() {
-            // silent open body
-          },
-        });
-        return new Response(silentStream, {
+        return new Response(silent.body, {
           status: 200,
           headers: { "Content-Type": "text/event-stream" },
         });
@@ -121,12 +153,23 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
         projectId: "test-project",
       };
 
-      const res = await executor.execute({
+      const pending = executor.execute({
         model: "gemini-2.5-flash",
         stream: true,
         body: { contents: [{ role: "user", parts: [{ text: "hi" }] }] },
         credentials: creds,
       });
+
+      // The watchdog is now waiting on the silent first URL. Nothing may fail over until
+      // the readiness budget has elapsed.
+      await silent.readPending;
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      assert.equal(streamGenAttempt, 1, "must not fail over before the readiness budget elapses");
+
+      // Spend exactly the readiness budget: the silent URL times out, the executor moves to
+      // the second base URL, whose healthy stream is ready without any further clock advance.
+      mock.timers.tick(VIRTUAL_READINESS_TIMEOUT_MS);
+      const res = await pending;
 
       assert.equal(
         streamGenAttempt,
@@ -150,6 +193,7 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
         `Expected body to contain 'success from fallback', got: ${fullText}`
       );
     } finally {
+      mock.timers.reset();
       globalThis.fetch = originalFetch;
       clearAntigravityVersionCaches();
     }
@@ -159,7 +203,12 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
     seedAntigravityIdeVersionCache("1.11.5");
     seedAntigravityCliVersionCache("1.11.5");
 
-    const executor = new AntigravityExecutor({ streamReadinessTimeoutMs: 100 });
+    // Virtual clock: the clock never advances here, so the watchdog cannot fire on a
+    // slow runner and only the healthy-stream path is exercised.
+    mock.timers.enable({ apis: ["setTimeout", "Date"] });
+    const executor = new AntigravityExecutor({
+      streamReadinessTimeoutMs: VIRTUAL_READINESS_TIMEOUT_MS,
+    });
     const encoder = new TextEncoder();
 
     let streamGenAttempt = 0;
@@ -217,6 +266,7 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
         `Expected body to contain 'healthy first attempt', got: ${fullText}`
       );
     } finally {
+      mock.timers.reset();
       globalThis.fetch = originalFetch;
       clearAntigravityVersionCaches();
     }

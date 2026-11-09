@@ -57,8 +57,8 @@ test("the counts gate still reads the terminal's canonical numbers (live code, s
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderCliTerminal();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
   // url(#id) references are not hex colors; everything else after the stylesheet is tokens.
   assert.doesNotMatch(svg.slice(svg.indexOf("</style>")), /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

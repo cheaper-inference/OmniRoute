@@ -118,18 +118,18 @@ Käyttö seuraavien kautta: WhatsApp, Telegram, Slack, Discord, iMessage, Signal
 
 ---
 
-## 📖 Palveluntarjoajien määritys
+## 📖 Palveluntarjoajan määritys
 
-Voit lisätä API-avainyhteyksiä joukkona CSV- tai JSON-tiedostosta valitsemalla **Hallintapaneeli → Palveluntarjoajat → Tuo tiedostosta**. Sarakkeet ovat paikkasidonnaisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on jo oltava hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
+Voit lisätä API-avaimia käyttävät yhteydet joukkona CSV- tai JSON-tiedostosta valitsemalla **Dashboard → Providers → Import from file**. Sarakkeet ovat sijaintiperusteisia (`provider,name,apiKey,baseUrl,priority`); `provider`-arvon on oltava jo olemassa oleva hallittu palveluntarjoaja tai yhteensopiva solmu. Katso [Palveluntarjoajien tuominen CSV- tai JSON-tiedostosta](../providers/CSV-IMPORT.md).
 
-### 🔐 Tilauspohjaiset palveluntarjoajat
+### 🔐 Tilauspalveluntarjoajat
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Claude Code
-→ OAuth-kirjautuminen → Tunnuksen automaattinen päivitys
-→ 5 tunnin ja viikoittaisen kiintiön seuranta
+Dashboard → Providers → Connect Claude Code
+→ OAuth-kirjautuminen → Tunnisteen automaattinen päivitys
+→ 5 tunnin + viikoittaisen kiintiön seuranta
 
 Mallit:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Mallit:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Ammattilaisen vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeutta vaativiin tehtäviin. OmniRoute seuraa kunkin mallin kiintiötä!
+**Vinkki:** Käytä Opusta monimutkaisiin tehtäviin ja Sonnetia nopeuteen. OmniRoute seuraa kiintiötä mallikohtaisesti!
 
-Eikö OmniRoute-isännällä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Codeen on kirjauduttu, ja liitä vuoden voimassa oleva tunnus **Setup Token** -välilehdelle. Katso [Claude Coden käyttäminen asetustunnuksella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Eikö OmniRoute-isännässä ole selainta? Suorita `claude setup-token` missä tahansa, missä Claude Code on kirjautuneena, ja liitä yhden vuoden tunniste **Setup Token** -välilehdelle. Katso [Claude Code määritystunnisteella](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-mallien `max`-päättelytason. Haiku-mallit eivät hyväksy `max`-tasoa, joten OmniRoute alentaa pyynnön korkeaan päättelybudjettiin ennen sen lähettämistä ylävirran palveluun.
+Claude- ja Claude Code -yhteensopivat reitit säilyttävät Opus- ja Sonnet-malleille `max`-ajattelupanostuksen.
+Haiku-mallit eivät hyväksy `max`-panostustasoa, joten OmniRoute pienentää kyseisen
+pyynnön suureksi ajattelubudjetiksi ennen sen lähettämistä palveluntarjoajalle.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä Codex
+Dashboard → Providers → Connect Codex
 → OAuth-kirjautuminen (portti 1455)
-→ Nollaus 5 tunnin välein ja viikoittain
+→ 5 tunnin + viikoittainen nollaus
 
 Mallit:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Mallit:
 #### GitHub Copilot
 
 ```bash
-Hallintapaneeli → Palveluntarjoajat → Yhdistä GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth GitHubin kautta
-→ Kuukausittainen nollaus (kuukauden 1. päivänä)
+→ Kuukausittainen nollaus (kuukauden 1. päivä)
 
 Mallit:
   gh/gpt-5.5
@@ -172,55 +174,72 @@ Mallit:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI-hyvitykset (tunnisteisiin perustuva laskutus).** Kun GitHub ilmoittaa tilille
+`credits_used`-arvon, Palveluntarjoajan rajoitukset -kortissa näkyy **AI-hyvitykset**-rivi,
+joka näyttää kuluvan laskutuskauden aikana käytetyt hyvitykset myös rajattomissa organisaatiopaketeissa.
+
+**Paikallinen AI-hyvitysten rajoitus.** Muokkaa GitHub-yhteyttä ja määritä **AI-hyvitysten
+rajoitus laskutuskautta kohden** (`providerSpecificData.githubCreditLimit`). Tyhjä arvo poistaa
+rajoituksen käytöstä; `0` ohittaa yhteyden aina. Kun viimeisin käyttöarvo on yhtä suuri tai
+suurempi kuin rajoitus, tilin valinta ohittaa kyseisen yhteyden ja reititys siirtyy muihin
+yhteyksiisi samalla tavalla kuin kiintiökäytännön rajoituksen kohdalla. Tarkistus käyttää
+käyttötietoa, jonka jaksottainen kiintiön päivitys kerää jo valmiiksi — GitHubiin ei koskaan
+soiteta pyynnön käsittelypolulla — ja se sallii toiminnan puuttuvan tai vanhentuneen tiedon
+tapauksessa: puuttuva tai vanhentunut lukema (yli 15 minuuttia vanha tai jo nollautuneelta
+laskutuskaudelta peräisin oleva) ei estä yhteyttä. Tämä on paikallinen suojatoiminto, **ei
+taattu kulutuskatto**: GitHubin raportointiviiveet, päivitysväli, käynnissä olevat pyynnöt ja
+OmniRouten ulkopuolinen käyttö voivat ylittää rajan. Käytä kiinteään kattoon GitHubin omia
+kulutusrajoituksia.
+
 ### 💰 Edulliset palveluntarjoajat
 
-#### GLM-4.7 (Päivittäinen nollaus, $0.6/1M)
+#### GLM-4.7 (päivittäinen nollaus, 0,6 $/1 M)
 
 1. Rekisteröidy: [Zhipu AI](https://open.bigmodel.cn)
-2. Hanki API-avain Coding Plan -tilauksesta
-3. Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `glm`, API-avain: `your-key`
+2. Hanki API-avain Coding Planista
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Käyttö:** `glm/glm-4.7` — **Ammattilaisen vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
+**Käyttö:** `glm/glm-4.7` — **Vinkki:** Coding Plan tarjoaa kolminkertaisen kiintiön seitsemäsosalla hinnasta! Nollaus päivittäin klo 10.00.
 
-#### MiniMax M2.1 (Nollaus 5 tunnin välein, $0.20/1M)
+#### MiniMax M2.1 (5 tunnin nollaus, 0,20 $/1 M)
 
 1. Rekisteröidy: [MiniMax](https://www.minimax.io)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `minimax/MiniMax-M2.1` — **Ammattilaisen vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1M tunnistetta)!
+**Käyttö:** `minimax/MiniMax-M2.1` — **Vinkki:** Edullisin vaihtoehto pitkälle kontekstille (1 M tokenia)!
 
-#### Kimi K2 (Kiinteästi $9/kuukausi)
+#### Kimi K2 (9 $/kuukausi kiinteä hinta)
 
 1. Tilaa: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Hanki API-avain → Hallintapaneeli → Lisää API-avain
+2. Hanki API-avain → Dashboard → Add API Key
 
-**Käyttö:** `kimi/kimi-k2.5` — **Ammattilaisen vinkki:** Kiinteä $9/kuukausi 10 miljoonasta tunnisteesta = todellinen kustannus $0.90/1M!
+**Käyttö:** `kimi/kimi-k2.5` — **Vinkki:** Kiinteä 9 $/kuukausi 10 miljoonalle tokenille = todellinen hinta 0,90 $/1 M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Rekisteröidy: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Luo Qianfan API-avain → Hallintapaneeli → Lisää API-avain: Palveluntarjoaja: `qianfan`
+2. Luo Qianfan API-avain → Dashboard → Add API Key: Provider: `qianfan`
 
-**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunnus.
+**Käyttö:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` tai jokin muu Qianfanin OpenAI-yhteensopiva mallitunniste.
 
 ### 🆓 ILMAISET palveluntarjoajat
 
-Todennusta edellyttämättömillä ilmaisilla palveluntarjoajilla on kytkin **Todennusta ei vaadita** -kohdan vieressä niiden palveluntarjoajasivulla.
-Sen poistaminen käytöstä poistaa kyseisen palveluntarjoajan käytöstä ja Palveluntarjoajien määritetyistä ja tiiviistä näkymistä sekä
-poistaa sen mallit `/v1/models`-luettelosta.
+Todennusta vaatimattomilla ilmaisilla palveluntarjoajilla on palveluntarjoajan sivulla **Todennusta ei tarvita** -kohdan vieressä oleva kytkin.
+Sen poistaminen käytöstä poistaa palveluntarjoajan käytöstä, poistaa sen Määritetyt palveluntarjoajat- ja Tiivis-näkymistä
+sekä poistaa sen mallit kohteesta `/v1/models`.
 
 #### Qoder (9 ILMAISTA mallia)
 
 ```bash
-Hallintapaneeli → Yhdistä Qoder → OAuth-kirjautuminen → Käyttöön sovelletaan palveluntarjoajan nykyisiä rajoituksia
+Dashboard → Connect Qoder → OAuth-kirjautuminen → Käyttö määräytyy palveluntarjoajan voimassa olevien rajoitusten mukaan
 
 Mallit: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ILMAISEKSI)
+#### Kiro (ILMAINEN Claude)
 
 ```bash
-Hallintapaneeli → Yhdistä Kiro → AWS Builder ID tai Google/GitHub → ~50 krediittiä kuukaudessa
+Dashboard → Connect Kiro → AWS Builder ID tai Google/GitHub → noin 50 hyvitystä/kuukausi
 
 Mallit: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -607,60 +626,60 @@ Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md
 
 ---
 
-## 📊 Käytettävissä olevat mallit
+## 📊 Saatavilla olevat mallit
 
 <details>
-<summary><b>Näytä kaikki käytettävissä olevat mallit</b></summary>
+<summary><b>Näytä kaikki saatavilla olevat mallit</b></summary>
 
-> Alla oleva lista on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiolle v3.8.0. Pilvikatalogit (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — täyden reaaliaikaisen katalogin näet valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Käytettävissä olevat mallit** tai kutsumalla `GET /api/models/catalog`.
+> Alla oleva luettelo on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiota v3.8.0 varten. Pilvipalveluluettelot (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — avaa täydellinen ajantasainen luettelo valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Saatavilla olevat mallit** tai kutsumalla `GET /api/models/catalog`.
 >
-> Jos palveluntarjoajan sisäänrakennettu lista on vanhentunut, käytä kyseisellä sivulla olevaa toimintoa **Tuo /models-rajapinnasta** (tai ota käyttöön **Automaattinen synkronointi**) hakeaksesi ajantasaisen ylävirran katalogin. Tämä varmistettiin versiossa v3.8.50 LLM7.io:lle (`gemini-3.1-flash-lite`) ja UncloseAI:lle (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö pysyi ylävirran rajoittamana saman testikierroksen aikana.
+> Jos palveluntarjoajan sisäinen luettelo on vanhentunut, käytä kyseisellä sivulla toimintoa **Tuo osoitteesta /models** (tai ota käyttöön **Automaattinen synkronointi**) ladataksesi ajantasaisen ylemmän tason luettelon. Tämä vahvistettiin versiossa v3.8.50 palveluille LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö oli saman testikierroksen aikana edelleen ylemmän tason rajoittamaa.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-tasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ tehokkuustasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ILMAINEN OAuth: käytä reaaliaikaista katalogia, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Käytettävissä olevat mallit**. Saatavuus riippuu tilistä ja tilaustasosta.
+**Kiro (`kr/`)** — ILMAINEN OAuth: käytä ajantasaista luetteloa, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Saatavilla olevat mallit**. Saatavuus riippuu tilistä ja tilauksesta.
 
 **Qoder (`if/`)** — ILMAINEN OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/kk kiinteä tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/kk kiinteänä hintana tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-avain: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Erittäin nopea: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-natiivit: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-natiivi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU:ssa isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Haulla tehostettu: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Hakua hyödyntävä: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Avoimen lähdekoodin: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ilmainen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Nopea päättely: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-mittakaavainen: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-painotteinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-keskeinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliajassa API-avaimella Googlelta — ei staattista listaa. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo sen jälkeen ajantasainen katalogi valitsemalla **Käytettävissä olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliaikaisesti Googlelta API-avaimen perusteella — staattista luetteloa ei ole. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo nykyinen luettelo valitsemalla **Saatavilla olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kautta `aws-bedrock`), `azure-ai`, `openrouter` (läpikulkukatalogi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Jokainen ylläpitää omaa mallilistaansa tiedostossa `providerRegistry.ts`, ja ne voidaan synkronoida automaattisesti, kun palveluntarjoaja tarjoaa `/models`-päätepisteen.
+**Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (palvelun `aws-bedrock` kautta), `azure-ai`, `openrouter` (välitetty luettelo), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kukin ylläpitää omaa malliluetteloaan tiedostossa `providerRegistry.ts`, ja luettelo voidaan synkronoida automaattisesti, jos palveluntarjoaja tarjoaa `/models`-päätepisteen.
 
-**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajien natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Jotkin tunnisteet sisältävät pisteellisiä versioita, koska ylävirran API odottaa niitä sellaisina. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai tee pyyntö `GET /api/models/catalog` vahvistaaksesi saatavuuden.
+**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajan natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Joissakin tunnisteissa on pisteitä sisältäviä versioita, koska ylemmän tason API odottaa niitä tässä muodossa. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai kutsu `GET /api/models/catalog` varmistaaksesi saatavuuden.
 
 </details>
 

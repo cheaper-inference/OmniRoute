@@ -444,104 +444,141 @@ Hinati sa mga nakatuong subdirectory:
 
 ---
 
-## 4. `open-sse/` — Streaming engine workspace
+## 4. `open-sse/` — Workspace ng streaming engine
 
-Paghiwalayin ang npm workspace na na-publish bilang `@omniroute/open-sse`. Nagmamay-ari ng pagpoproseso ng kahilingan, mga tagapagpatupad, mga tagasalin, mga serbisyo, transpormer, at ang MCP server.
+Hiwalay na npm workspace na inilalathala bilang `@omniroute/open-sse`. Pinamamahalaan nito ang pagproseso ng request, mga executor, translator, service, transformer, at MCP server.
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                Mga pampublikong export
+├── package.json            Manifest ng workspace
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              158 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 Mga registry ng provider, profile ng header, identity, …
+├── handlers/               Mga handler ng request (chat, embeddings, audio, image, …)
+├── executors/              159 na module ng executor ng provider (mga executor class + helper bawat provider)
+├── translator/             Conversion ng format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Transformer ng stream ng Responses API ↔ Chat Completions
+├── services/               Mahigit 80 module ng service (combos, fallback, quota, identity, …)
+├── utils/                  Mga helper para sa streaming, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transport, 33 saklaw, 110 tool)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Layunin                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Pangunahing chat pipeline (cache, limitasyon sa rate, combo routing, executor dispatch) |
-| `responsesHandler.ts`   | OpenAI Mga tugon API entry point                                                        |
-| `embeddings.ts`         | Mga pag-embed                                                                           |
-| `imageGeneration.ts`    | Pagbuo ng imahe                                                                         |
-| `audioSpeech.ts`        | Text-to-speech                                                                          |
-| `audioTranscription.ts` | Speech-to-text                                                                          |
-| `videoGeneration.ts`    | Pagbuo ng video                                                                         |
-| `musicGeneration.ts`    | henerasyon ng musika                                                                    |
-| `rerank.ts`             | Muling pagraranggo                                                                      |
-| `moderations.ts`        | Moderation                                                                              |
-| `search.ts`             | Paghahanap sa web                                                                       |
-| `sseParser.ts`          | SSE event parser                                                                        |
-| `usageExtractor.ts`     | Pull token counts out sa upstream streams                                               |
-| `responseSanitizer.ts`  | I-strip ang ingay na partikular sa provider                                             |
-| `responseTranslator.ts` | Idikit sa pagitan ng tugon ng provider at layer ng tagasalin                            |
+| Handler                 | Layunin                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Pangunahing pipeline ng chat (cache, limitasyon sa rate, combo routing, dispatch ng executor) |
+| `responsesHandler.ts`   | Entry point ng OpenAI Responses API                                                           |
+| `embeddings.ts`         | Mga embedding                                                                                 |
+| `imageGeneration.ts`    | Pagbuo ng image                                                                               |
+| `audioSpeech.ts`        | Text-to-speech                                                                                |
+| `audioTranscription.ts` | Speech-to-text                                                                                |
+| `videoGeneration.ts`    | Pagbuo ng video                                                                               |
+| `musicGeneration.ts`    | Pagbuo ng musika                                                                              |
+| `rerank.ts`             | Reranking                                                                                     |
+| `moderations.ts`        | Moderation                                                                                    |
+| `search.ts`             | Paghahanap sa web                                                                             |
+| `sseParser.ts`          | Parser ng SSE event                                                                           |
+| `usageExtractor.ts`     | Kinukuha ang bilang ng token mula sa upstream stream                                          |
+| `responseSanitizer.ts`  | Tinatanggal ang ingay na partikular sa provider                                               |
+| `responseTranslator.ts` | Nagdurugtong sa response ng provider at sa translator layer                                   |
 
 ### 4.2 `open-sse/executors/`
 
-158 top-level executor modules (`*.ts` minus `base.ts`, `index.ts` and tests — the count `npm run check:docs-counts` measures). Ang bawat klase ng tagapagpatupad ay nagpapalawak ng `BaseExecutor` (`base.ts`), direkta o sa pamamagitan ng `DefaultExecutor` o ibang tagapagpatupad; ang natitirang mga module ay mga katulong ng bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kasama sa mga tagapagpatupad ang:
+159 na top-level module ng executor (`*.ts` na hindi kasama ang `base.ts`, `index.ts` at mga test — sinusukat ng `npm run check:docs-counts` ang bilang). Ang bawat executor class ay nag-e-extend sa `BaseExecutor` (`base.ts`), direkta man o sa pamamagitan ng `DefaultExecutor` o ibang executor; ang natitirang module ay mga helper bawat provider (mga tool schema, fetch/TTS adapter, handler ng quirk). Kasama sa mga executor ang:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, tulong ( `claudeIdentity.ts` ) at ibinahagi `index.ts`
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
+`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
+`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, kasama ang `claudeIdentity.ts`
+(shared identity helper) at `index.ts` (registry).
 
-> Tandaan: ang mga provider na hindi nakalista dito ay inihahatid ng `default.ts` gamit ang generic na OpenAI-compatible executor. Ang buong catalog ng provider (380 provider) ay nakatira sa `src/shared/constants/providers.ts`.
+> Paalala: ang mga provider na hindi nakalista rito ay pinaglilingkuran ng `default.ts` gamit ang generic na executor na compatible sa OpenAI. Nasa `src/shared/constants/providers.ts` ang kumpletong catalog ng provider (380 provider).
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke na pagsasalin (OpenAI ang hub).
+Hub-and-spoke na translation (ang OpenAI ang hub).
 
-- **9 humiling ng mga tagasalin** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 na tagasalin ng tugon** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 na katulong** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, at mga pagsubok sa katulong.
-- **Mga katulong sa imahe** (`translator/image/sizeMapper.ts`).
-- Nangungunang antas: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **9 na translator ng request** (`translator/request/`):
+  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
+  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 na translator ng response** (`translator/response/`):
+  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **9 na helper** (`translator/helpers/`):
+  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, kasama ang
+  mga test ng helper.
+- **Mga helper para sa image** (`translator/image/sizeMapper.ts`).
+- Top-level: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Mga tugon API ↔ Chat Completions converter (ginagamit ng `responses/` route catch-all).
+- `responsesTransformer.ts` — Converter na nakabatay sa `TransformStream` para sa Responses API ↔ Chat
+  Completions (ginagamit ng catch-all ng route na `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Mga Highlight (buong listahan sa ilalim ng `open-sse/services/`):
+Mga pangunahing bahagi (ang kumpletong listahan ay nasa `open-sse/services/`):
 
-| Pag-aalala               | Mga file                                                                                                                                                                                                                                                 |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo routing            | `combo.ts` (20 diskarte), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| Auto Combo engine        | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Katatagan                | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
-| Mga quota                | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Pag-cache                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Pagruruta ng katalinuhan | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Paghawak ng modelo       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Compression              | `compression/` — full compression engine wiring                                                                                                                                                                                                          |
-| Token + session          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Tier / manifest          | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / network             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Mga batch                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Paggamit                 | `usage.ts`                                                                                                                                                                                                                                               |
+| Alalahanin                | Mga File                                                                                                                                                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pagruruta ng combo        | `combo.ts` (20 estratehiya), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
+| Engine ng Auto Combo      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Katatagan                 | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| Mga quota                 | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Pag-cache                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Intelligence sa pagruruta | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Pangangasiwa ng modelo    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Compression               | `compression/` — kumpletong wiring ng compression engine                                                                                                                                                                                                 |
+| Token + session           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Tier / manifest           | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / network              | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Mga batch                 | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Paggamit                  | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 natatanging tool** naka-wire sa `server.ts` (45 canonical sa `schemas/tools.ts` + memory, kasanayan, GitHub-skills, pool, gamification, plugin, Notion, Obsidian, local-corpus at compression modules — union binibilang ng `countUniqueMcpTools`).
-- **3 transportasyon** : stdio, HTTP Streamable, SSE.
-- **33 saklaw** ipinapatupad sa runtime — base list sa `src/shared/constants/mcpScopes.ts`, ang buong set ay ang unyon ng mga saklaw na ipinahayag ng bawat module ng tool.
-- Talahanayan ng pag-audit: `mcp_tool_audit` (pinupuno ng `audit.ts`).
-- Mga file: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, at mga pagsubok sa ilalim ng `__tests__/`.
+- **110 natatanging tool** ang naka-wire sa `server.ts` (45 canonical sa `schemas/tools.ts` +
+  mga module para sa memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus at compression — binilang ang unyon gamit ang `countUniqueMcpTools`).
+- **3 transport**: stdio, HTTP Streamable, SSE.
+- **33 scope** ang ipinapatupad sa runtime — pangunahing listahan sa `src/shared/constants/mcpScopes.ts`, ang buong set ay unyon ng mga scope na idineklara ng bawat tool module.
+- Talaan ng audit: `mcp_tool_audit` (pinupunan ng `audit.ts`).
+- Mga file: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
+  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
+  pati mga test sa ilalim ng `__tests__/`.
 - Tingnan ang [MCP-SERVER.md](../frameworks/MCP-SERVER.md) para sa buong katalogo ng tool.
 
 ### 4.7 `open-sse/config/`
 
-Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Mga registry ng provider (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), mga registry ng modelo ayon sa format (`audioRegistry.ts`,
+`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
+`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
+mga helper para sa identity (`codexIdentity.ts`, `codexInstructions.ts`,
+`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
+`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
+mga helper para sa credential (`credentialLoader.ts`, `codexClient.ts`), at mga cloud
+adapter (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
+`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Mga primitive `comfyuiClient.ts` streaming at mga katulong sa provider: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts` `usageTracking.ts` `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+Mga primitive sa streaming at helper ng provider: `stream.ts`, `streamHandler.ts`,
+`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
+`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
+`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
+`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
+`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
+`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
+`ollamaTransform.ts`.
 
 ---
 

@@ -1,15 +1,7 @@
-export interface FeatureFlagDefinition {
-  key: string;
-  label: string;
-  description: string;
-  descriptionI18nKey: string;
-  category: "security" | "network" | "policies" | "runtime" | "cli" | "health";
-  defaultValue: string;
-  type: "boolean" | "enum";
-  enumValues?: string[];
-  requiresRestart: boolean;
-  warningLevel?: "info" | "caution" | "danger";
-}
+import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+
+export type { FeatureFlagDefinition };
 
 export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   // ──────────────── Security (10) ────────────────
@@ -46,6 +38,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     enumValues: ["off", "warn", "block", "redact"],
     requiresRestart: false,
     warningLevel: "info",
+  },
+  {
+    key: "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED",
+    label: "API Key Audit: Record Client IP and User-Agent",
+    description:
+      "Record the caller's IP address and user-agent on the audit-log rows written for successful API-key metadata and discovery reads (action api_key.auth.touch). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent.",
+    descriptionI18nKey: "featureFlagApiKeyAuditClientDetailsEnabledDescription",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
   },
   {
     key: "PII_REDACTION_ENABLED",
@@ -229,6 +233,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "PROXY_REFUSAL_MODEL_SCOPE",
+    label: "Model-Scoped Quota Refusals",
+    description:
+      "Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model.",
+    descriptionI18nKey: "featureFlagProxyRefusalModelScopeDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "ROTATION_ATTRIBUTION",
     label: "Rotation Attribution Logging",
     description:
@@ -378,6 +394,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "For the OpenCode multi-account rotation, after a 429 from an egress-bucketed provider on a proxy-less account under an ambient pool context, ask the connection pool for another member for the next attempt instead of retrying the same egress address. Orders, never excludes: an exhausted pool keeps the current behavior. Off by default: every 429 rotates to the next account exactly as before.",
     descriptionI18nKey: "featureFlagOpencodePoolReselectDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "OPENCODE_FREE_TIER_EGRESS_PROBE",
+    label: "OpenCode Free-Tier Egress Probe",
+    description:
+      "For the OpenCode executor, when a proxied request is answered 403 or 451 FreeTierError and the observed-tools retry failed or did not apply, send the request once through a different proxy (another account proxy or another pool member, never a direct connection). Only when that probe answers 200 is the first egress set aside in the proxy refusal memory and the probe response served; when both refuse, the original refusal is returned and nothing is recorded. The same refusal text covers a flagged egress IP and a refused request shape, so the probe tells them apart by evidence. Off by default: the refusal is returned unchanged.",
+    descriptionI18nKey: "featureFlagOpencodeFreeTierEgressProbeDescription",
     category: "network",
     defaultValue: "false",
     type: "boolean",
@@ -1080,6 +1108,8 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
 
+  FAL_NATIVE_ENABLED_FLAG,
+
   {
     key: "CATALOG_MIRROR_REFINEMENTS_ENABLED",
     label: "Catalog Mirror Refinements",
@@ -1224,16 +1254,16 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM",
-    label: "Anthropic-Compatible Mid-Conversation System Turns",
+    key: "CLAUDE_CACHE_TAIL_TTL_1H",
+    label: "Claude Cache Tail 1h TTL",
     description:
-      "On plain anthropic-compatible-* relays (claude → claude passthrough), keep mid-conversation role:system turns inside messages[] instead of hoisting them into the top-level system parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 anthropic-beta (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays that do not support the beta reject role:system messages with 400.",
-    descriptionI18nKey: "featureFlagAnthropicCompatibleMidConversationSystemDescription",
+      "Mark the conversation tail OmniRoute anchors for Claude prompt caching (the second-to-last user turn and the last assistant turn) with the same 1h TTL already used for system and tools, so a pause longer than five minutes does not rewrite the cached prefix. Vertex keeps the 5m TTL. Off by default: the tail keeps the 5m TTL exactly as before. A 1h cache write costs 2x the input price instead of 1.25x, so fast agent loops that never idle past five minutes pay more with this on. Client-managed (passthrough) cache markers are never changed.",
+    descriptionI18nKey: "featureFlagClaudeCacheTailTtl1hDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",
     requiresRestart: false,
-    warningLevel: "caution",
+    warningLevel: "info",
   },
   {
     key: "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
@@ -1361,6 +1391,30 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
     descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "PROXY_STRICT_POST_REPLAY_ENABLED",
+    label: "Proxy Fetch: Strict POST Replay",
+    description:
+      "For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket.",
+    descriptionI18nKey: "featureFlagProxyStrictPostReplayEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED",
+    label: "Responses: Transport-Only Keepalive",
+    description:
+      "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event.",
+    descriptionI18nKey: "featureFlagResponsesTransportKeepaliveEnabledDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",

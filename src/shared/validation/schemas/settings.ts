@@ -43,6 +43,9 @@ export const requestQueueSettingsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
+    // #18390: the Request Queue card always posts this field. Bounds mirror
+    // normalizeRequestQueueSettings; 0 disables the global gate.
+    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
     // 0 is an explicit "disable the queue-wait budget" sentinel (see
     // src/lib/resilience/settings/normalize.ts maxWaitMs) — do not clamp it up to 1.
     maxWaitMs: z.number().int().min(0).optional(),
@@ -91,6 +94,9 @@ export const waitForCooldownSettingsSchema = z
     enabled: z.boolean().optional(),
     maxRetries: z.number().int().min(0).max(10).optional(),
     maxRetryWaitSec: z.number().int().min(0).max(300).optional(),
+    // #18390: read by normalizeWaitForCooldownSettings, which also floors it at
+    // maxRetryWaitSec * 1000. The ceiling matches its 5 minute cap.
+    budgetMs: z.number().int().min(0).max(300_000).optional(),
   })
   .strict();
 
@@ -206,6 +212,7 @@ export const tokenRefreshBreakerSettingsSchema = z
 
 export const updateResilienceSchema = z
   .object({
+    antigravityTimingTelemetry: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -264,6 +271,7 @@ export const updateResilienceSchema = z
   .superRefine((value, ctx) => {
     const provided = [
       value.requestQueue,
+      value.antigravityTimingTelemetry,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,

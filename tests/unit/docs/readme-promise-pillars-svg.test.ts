@@ -59,8 +59,8 @@ test("the counts gate's own readers of this file accept the generated content (l
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderReadmePromisePillars();
-  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
-  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#11120f/);
   const body = svg.slice(svg.indexOf("</style>"));
   assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

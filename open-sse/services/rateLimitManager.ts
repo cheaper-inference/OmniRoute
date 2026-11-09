@@ -769,8 +769,10 @@ export async function withRateLimit(
     if (queueWaitDisabled) return; // sentinel: never fires
     delayId = setTimeout(() => {
       queueTimedOut = true;
-      abandonQueuedJob();
+      // Settle the caller-facing cause before immediate queue cleanup can reject
+      // the scheduled promise with Bottleneck's internal drop message.
       reject(queueTimeoutErr);
+      abandonQueuedJob();
     }, queueRemainingMs);
   });
   timeoutPromise.catch(() => {});
@@ -803,20 +805,20 @@ export async function withRateLimit(
       let abortListener: (() => void) | undefined;
       const { promise: abortPromise, reject: rejectAbort } = Promise.withResolvers<never>();
       const onAbort = () => {
-        abandonQueuedJob();
         const reason = signal.reason;
         // Preserve native Error reasons (including AbortController's
         // read-only DOMException) instead of mutating or wrapping them.
         if (reason instanceof Error) {
           rejectAbort(reason);
-          return;
+        } else {
+          const err = new Error(typeof reason === "string" ? reason : "The operation was aborted");
+          err.name = "AbortError";
+          if (reason !== undefined) {
+            (err as Error & { cause?: unknown }).cause = reason;
+          }
+          rejectAbort(err);
         }
-        const err = new Error(typeof reason === "string" ? reason : "The operation was aborted");
-        err.name = "AbortError";
-        if (reason !== undefined) {
-          (err as Error & { cause?: unknown }).cause = reason;
-        }
-        rejectAbort(err);
+        abandonQueuedJob();
       };
       if (signal.aborted) {
         onAbort();

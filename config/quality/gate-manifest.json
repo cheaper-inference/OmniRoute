@@ -114,6 +114,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:build-typecheck",
+      "command": "node scripts/check/check-build-typecheck.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:db-rules",
       "command": "node scripts/check/check-db-rules.mjs",
       "disposition": "separately-invoked"

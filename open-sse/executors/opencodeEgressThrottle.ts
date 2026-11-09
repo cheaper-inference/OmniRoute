@@ -229,7 +229,8 @@ export interface AppliedEgressTracker {
  */
 export function createAppliedEgressTracker(
   dispatchUrl: string,
-  resolveProxy: AppliedProxyResolver
+  resolveProxy: AppliedProxyResolver,
+  model?: string | null
 ): AppliedEgressTracker {
   const byFingerprint = new Map<string, string>();
   let attemptAmbientKey: string | null | undefined;
@@ -258,7 +259,17 @@ export function createAppliedEgressTracker(
     a: AppliedEgressAccount,
     skipRecentlyFailed: boolean,
     kind: ProxyRefusalKind = "ip_quota_429"
-  ) => noteRefusedMember(a.proxy, skipRecentlyFailed, readAppliedKey, a.fingerprint, kind);
+  ) =>
+    // Only the per-model quota 429 is scoped to the model; egress-health kinds
+    // (geo, transport, slow, unreachable) stay model-less so every model sees them.
+    noteRefusedMember(
+      a.proxy,
+      skipRecentlyFailed,
+      readAppliedKey,
+      a.fingerprint,
+      kind,
+      kind === "ip_quota_429" ? model : null
+    );
   const destinationOfRequest = (): string | null => transportDestinationKey(dispatchUrl);
   const noteServed = <T>(
     a: AppliedEgressAccount,
@@ -576,7 +587,8 @@ export function noteRefusedMember(
   skipRecentlyFailed: boolean,
   readApplied?: AppliedEgressReader | null,
   fingerprint?: string,
-  kind: ProxyRefusalKind = "ip_quota_429"
+  kind: ProxyRefusalKind = "ip_quota_429",
+  model?: string | null
 ): number | null {
   if (!skipRecentlyFailed) return null;
   const key =
@@ -584,7 +596,7 @@ export function noteRefusedMember(
       ? proxyEgressKey(proxy)
       : resolveAppliedEgressKey({ proxy, fingerprint }, readApplied);
   if (key === null || key === DIRECT_EGRESS_SENTINEL) return null;
-  return noteProxyRefusal(key, kind);
+  return noteProxyRefusal(key, kind, undefined, model);
 }
 
 /**
@@ -836,6 +848,16 @@ export function lastResort429<A extends RotatableAccount>(
   cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
   ...refusedHere: Set<string>[]
 ) {
+  return lastResort429ForModel(undefined, accounts, cursor, ...refusedHere);
+}
+
+/** {@link lastResort429} for a request whose quota refusals are scoped to `model`. */
+export function lastResort429ForModel<A extends RotatableAccount>(
+  model: string | null | undefined,
+  accounts: A[],
+  cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
+  ...refusedHere: Set<string>[]
+) {
   let spent = false;
   const isOpen = (account: A): boolean => {
     const key = proxyKeyOf(account.proxy);
@@ -845,7 +867,7 @@ export function lastResort429<A extends RotatableAccount>(
     take(lastStatus: number | null, account: A, isCandidate: (a: A) => boolean): A | null {
       if (spent || lastStatus !== 429 || isCandidate(account)) return null;
       const saved = { ...cursor };
-      const spare = pickAccount(accounts, cursor, isOpen);
+      const spare = pickAccount(accounts, cursor, isOpen, undefined, model);
       if (!isOpen(spare)) {
         cursor.nextAccountIdx = saved.nextAccountIdx;
         cursor.lastHealthyFingerprint = saved.lastHealthyFingerprint;

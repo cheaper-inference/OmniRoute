@@ -200,39 +200,39 @@ Az egyes eszközök részletes konfigurációjáért (Claude Code, Codex CLI, Cu
 
 ## Protokollbeállítás (MCP + A2A)
 
-### MCP beállítása (Model Context Protocol)
+### MCP Setup (Model Context Protocol)
 
-Indítsa el az MCP-átvitelt stdio módban:
+Indítsa MCP átvitelt stdio módban:
 
 ```bash
 omniroute --mcp
 ```
 
-Ajánlott ellenőrzési folyamat:
+Javasolt érvényesítési folyamat:
 
 ```bash
-# 1. Indítsa el az MCP-kiszolgálót
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Az MCP-kliensből hívja meg a következőket:
-omniroute_get_health        # A rendszer állapotát kell visszaadnia
-omniroute_list_combos       # Az aktív kombinációkat kell visszaadnia
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Vagy futtassa a teljes E2E tesztcsomagot:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP-kliens konfigurálása
+#### MCP kliens konfigurációja
 
-**Claude Code:**
+**Claude kód:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Adja hozzá az MCP-beállításokhoz:
+Adja hozzá MCP beállításokhoz (stdio, a kulccsal, hogy a hívó félnek legyen fő tagja):
 
 ```json
 {
@@ -240,23 +240,30 @@ Adja hozzá az MCP-beállításokhoz:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Teljes MCP-dokumentáció:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 eszköz, IDE-konfigurációk, Python/TS/Go kliensek.
+Vagy ha `mcpTransport` `streamable-http` (állítsa `/dashboard/mcp` re vagy `omniroute mcp enable --transport streamable-http`-vel), mutasson a kliens távoli MCP szerver bejegyzésére a `http://localhost:20128/api/mcp/stream`-re.
 
-### A2A beállítása (ügynökök közötti protokoll)
+A kulcs `Authorization: Bearer <api-key>` -ként utazik (lásd: [MCP Server → Távoli hozzáférés](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) távoli gazdagépekhez; a távoli kulcshoz `mcp:connect` és read/write hatókörei szükségesek).
 
-Ellenőrizze az ügynökkártyát:
+**Teljes MCP dokumentáció:** [MCP szerver README](../../open-sse/mcp-server/README.md) — 110 eszközök, IDE konfigurációk, Python/TS/Go kliensek. Üzemeltetői hivatkozás a tömörítési CCR/dedup eszközökhöz (jelölők, előfeltételek, szerszámonkénti hatókör, visszakeresési oldalszámozás, diagnosztika): [Compression Engines → Előfeltételek / kezelői útmutató](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A beállítás (ügynök-ügynök protokoll)
+
+Az ügynökkártya ellenőrzése:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Küldjön egy feladatot:
+Feladat küldése:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -264,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Teljes A2A-dokumentáció:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, képességek, streamelés, feladat-életciklus.
+**Teljes A2A dokumentáció:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, készségek, adatfolyam, feladat életciklusa.
 
 ---
 
@@ -323,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) sablon
+## Érvénytelen Linux (xbps-src) sablon
 
-A Void Linux felhasználói natív csomagot készíthetnek az `xbps-src` használatával. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
+A Void Linux felhasználók számára natív csomagot készíthet a `xbps-src` használatával. Mentse ezt a blokkot `srcpkgs/omniroute/template` néven:
 
 ```bash
-# Sablonfájl az „omniroute” csomaghoz
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -339,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Minden kiadáshoz hozza létre újra az ellenőrző összeget a következő paranccsal:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

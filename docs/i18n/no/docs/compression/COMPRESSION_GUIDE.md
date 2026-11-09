@@ -34,91 +34,90 @@ Klientforespørsel
 
 ### Av
 
-Ingen komprimering brukes. Alle meldinger går gjennom uendret.
+Ingen komprimering utført. Alle meldinger sendes videre uendret.
 
-### Lite-modus (~15 % besparelse, <1 ms latens)
+### Lite-modus (~15 % besparelse, <1 ms latenstid)
 
-Den sikreste modusen — null semantisk endring, kun rydding i formatering:
+Den sikreste modusen — opprydding i formatering. Trunkering av verktøyresultater er tapsbringende, så standardbanen
+(uten `allow-lossy`, `engine:lite` eller eksplisitt opt-in for navngitt kombinasjon) kjører lite med
+`compressToolResults: false`: tidligere verktøyresultater når leverandøren uendret.
 
-| Teknikk                  | Beskrivelse                                                    |
-| ------------------------ | -------------------------------------------------------------- |
-| `collapseWhitespace`     | Slår sammen påfølgende tomme linjer og etterfølgende mellomrom |
-| `dedupSystemPrompt`      | Fjerner dupliserte systemmeldinger                             |
-| `compressToolResults`    | Komprimerer omstendelige verktøy-/funksjonsutdata              |
-| `removeRedundantContent` | Fjerner gjentatte instruksjoner                                |
-| `replaceImageUrls`       | Forkorter base64-bilde-data-URI-er                             |
+| Teknikk                  | Beskrivelse                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Slå sammen etterfølgende tomme linjer og mellomrom på slutten                                   |
+| `dedupSystemPrompt`      | Fjern dupliserte systemmeldinger                                                                |
+| `compressToolResults`    | Trunker tidligere verktøyresultater til lite-grensen (tapsbringende: kun med eksplisitt opt-in) |
+| `removeRedundantContent` | Fjern gjentatte instruksjoner                                                                   |
+| `replaceImageUrls`       | Forkort base64-baserte data-URI-er for bilder                                                   |
 
-**Best for:** Alltid-på-bruk, sikkerhetskritiske arbeidsflyter.
+**Best for:** Alltid-på-bruk og sikkerhetskritiske arbeidsflyter.
 
 ### Standardmodus (~30 % besparelse)
 
-Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyllord og omstendelige formuleringer mens betydningen bevares:
+Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyllord og omstendelige formuleringer samtidig som betydningen bevares:
 
-- Fjerner fyllord ("please", "I think", "basically", "actually")
-- Kondenserer omstendelige fraser ("in order to" → "to", "as a result of" → "because")
-- Fjerner høflige forbehold ("Would you mind...", "If you could possibly...")
-- 30+ regex-regler finjustert for kodeprompter
+- Fjerner fyllord («vær så snill», «jeg tror», «i bunn og grunn», «egentlig»)
+- Komprimerer omstendelige formuleringer («for å» → «å», «som et resultat av» → «fordi»)
+- Fjerner høflig forbehold («Har du noe imot ...», «Hvis du muligens kunne ...»)
+- Over 30 regulære uttrykksregler tilpasset kodeforespørsler
 
-**Best for:** Daglige kodearbeidsflyter, kostnadsbevisste team.
+**Best for:** Daglige arbeidsflyter for koding og kostnadsbevisste team.
 
 ### Aggressiv modus (~50 % besparelse)
 
 Smart historikkhåndtering for lange økter:
 
 - **Meldingsaldring** — eldre meldinger komprimeres gradvis
-- **Komprimering av verktøyresultater** — lange verktøyutdata avkortes eller utelates (første/siste linjer,
-  filtrering av trefflinjer, kompaktering av JSON-nøkler)
-- **Strukturelle integritetsvakter** — sørger for at `tool_use` + `tool_result`-par forblir konsistente
-- **Kontekstvindubevissthet** — respekterer token-grenser per modell
+- **Komprimering av verktøyresultater** — lange verktøyutdata trunkeres eller utelates (første/siste linjer,
+  filtrering etter samsvarende linjer, komprimering av JSON-nøkler)
+- **Vakter for strukturell integritet** — sikrer at par med `tool_use` + `tool_result` forblir konsistente
+- **Bevissthet om kontekstvinduet** — respekterer tokenbegrensninger per modell
 
-**Best for:** Lange feilsøkingsøkter, store kodebaser.
+**Best for:** Utvidede feilsøkingsøkter og store kodebaser.
 
 ### Ultra-modus (~75 % besparelse)
 
-Maksimal komprimering for token-kritiske scenarier:
+Maksimal komprimering for tokensensitive scenarioer:
 
-- **Heuristisk beskjæring** — scorebasert token-beskjæring av prosa
-- **Strukturbevaring** — inngjerdede kodeblokker, inline-kode, URL-er og identifikatorer erstattes med
-  plassholdere («tombstones») og sys sammen igjen ordrett — de beskjæres aldri
+- **Heuristisk beskjæring** — tokenbeskjæring av prosa basert på poengsum
+- **Bevaring av struktur** — kodeblokker med gjerder, innebygd kode, URL-er og identifikatorer
+  markeres og settes sammen igjen ordrett, og beskjæres aldri
 - **Valgfritt SLM-nivå** — en liten lokal modell kan forbedre beskjæringen når den er konfigurert
-- Uavhengig av Aggressiv modus: den kjører ikke meldingsaldring, komprimering av verktøyresultater
-  eller fallback-oppsummereren (kun en feil i SLM-nivået kan rute en fallback-runde gjennom
-  aggressiv)
+- Uavhengig av aggressiv modus: den kjører ikke meldingsaldring, komprimering av verktøyresultater
+  eller reservesammendraget (kun en feil på SLM-nivå kan rute en reservegjennomgang gjennom aggressiv modus)
 
 **Best for:** Når du gjentatte ganger når kontekstgrensene.
 
-### RTK-modus (60-90 % opptstrømsområde)
+### RTK-modus (60–90 % i oppstrømsområdet)
 
-RTK-modus er optimalisert for omstendelige verktøyutdata som dukker opp i kodeagentøkter:
+RTK-modus er optimalisert for ordrike verktøyutdata som forekommer i økter med kodeagenter:
 
-- Gjenkjenner kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkjørere,
-  TypeScript/Vite/Webpack-bygg, ESLint/Biome/Prettier, npm audit/installasjoner, Docker-logger,
-  infrastrukturutdata og generell shell-utdata
+- Oppdager kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkjørere,
+  TypeScript/Vite/Webpack-bygg, ESLint/Biome/Prettier, npm-revisjoner/-installasjoner, Docker-logger, infrastrukturutdata
+  og generiske skallutdata
 - Bruker JSON-filterpakker fra `open-sse/services/compression/engines/rtk/filters/`
-- Importerer RTK TOML-skjema v1-filtre fra prosjekt- eller globale `filters.toml`-filer, med
-  validering via inline-tester og tillitskontroll for prosjektfiler
-- Leveres med 56 innebygde filtre med inline-verifiseringseksempler
-- Fjerner ANSI-kontrollsekvenser, fremdriftslinjer, gjentatte linjer og støy som ikke kan handles på
-- Bevarer feiltilfeller, feilmeldinger, advarsler, endrede filer, sammendrag og de siste linjene i lang utdata
-- Støtter tillitskontrollerte prosjektfiltre, globale filtre og valgfri gjenoppretting av redigert råutdata
+- Importerer RTK TOML-skjema v1-filtre fra prosjekt- eller globale `filters.toml`-filer, med validering av innebygde tester
+  og tillitskontroll for prosjektfiler
+- Leveres med 56 innebygde filtre med eksempler for innebygd verifisering
+- Fjerner ANSI-kontrollsekvenser, fremdriftslinjer, gjentatte linjer og ikke-handlingsrettet støy
+- Bevarer feil, errors, advarsler, endrede filer, sammendrag og slutten av lange utdata
+- Støtter tillitskontrollerte prosjektfiltre, globale filtre og valgfri gjenoppretting av redigerte råutdata
 
-**Best for:** Agentøkter med transkripsjoner fra shell, bygg, tester, git, grep og filutdata.
+**Best for:** Agentøkter med skall-, bygg-, test-, git-, grep- og filutdatatranskripsjoner.
 
-### Stablet modus (78-95 % kvalifisert område)
+### Stablet modus (78–95 % av kvalifisert område)
 
-Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standard-pipelinen er:
+Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standardrørledningen er:
 
 ```txt
 RTK -> Caveman
 ```
 
-Den rekkefølgen holder terminal-/verktøyutdata kompakte først, og bruker deretter Cavemans semantiske
-kondensering på den gjenværende naturligspråklige prompten. Stablede pipelines kan konfigureres globalt
-eller gjennom komprimeringskombinasjoner tilordnet rutingskombinasjoner.
+Denne rekkefølgen holder terminal-/verktøyutdata kompakte først, og bruker deretter Caveman-semantisk kondensering på
+den gjenværende teksten i forespørselen. Stablede rørledninger kan konfigureres globalt eller gjennom
+komprimeringskombinasjoner som tilordnes rutingskombinasjoner.
 
-**Best for:** Blandet kontekst med store verktøylogger pluss menneskelige instruksjoner eller assistentsammendrag.
-
----
+**Best for:** Blandet kontekst med store verktøylogger samt menneskelige instruksjoner eller assistentsammendrag.
 
 ## Utregning av oppstrømsbesparelser
 
@@ -190,44 +189,46 @@ Med Stacked:       10K-2.5K tokener sendt     (78-95% kvalifisert RTK+Caveman-in
 
 Gå til `Dashboard → Context & Cache`:
 
-- **Caveman** — valg av modus, språkpakker, forhåndsvisning og globale standardinnstillinger
-- **RTK** — forhåndsvisning av kommandofilter, sikkerhetsinnstillinger for RTK og filterkatalog
-- **Compression Combos** — navngitte motorpipelines tilordnet rutingskombinasjoner
-- **Auto-Trigger Threshold** — aktiver komprimering automatisk når antallet tokener overstiger terskelen
+- **Caveman** — modusvalg, språkpakker, forhåndsvisning og globale standardinnstillinger
+- **RTK** — forhåndsvisning av kommandofiltre, RTK-sikkerhetsinnstillinger og filterkatalog
+- **Compression Combos** — navngitte motorpipelineer tilordnet rutingskombinasjoner
+- **Auto-Trigger Threshold** — aktiver komprimering automatisk når antallet tokens overskrider terskelen
 
 ### Overstyring per kombinasjon
 
 I `Dashboard → Context & Cache → Compression Combos` tilordner du en komprimeringskombinasjon til en rutingskombinasjon:
 
 ```txt
-Kombinasjon: "free-tier-fallback"
-  Komprimeringskombinasjon: "coding-agent-stack"
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
   Pipeline: RTK -> Caveman
-  Mål:
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Dette gjør at du kan bruke stablet komprimering hos kostnadsfrie leverandører og kodeleverandører, samtidig som du beholder lettmodus for betalte abonnementer.
+Dette lar deg bruke stablet komprimering på gratis-/kodeleverandører, samtidig som lite-modus beholdes på betalte abonnementer.
 
-Denne tilordningen med «Overstyring per kombinasjon» er en annen kontroll enn overstyringen av **komprimeringsmodus for rutingskombinasjonen** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — feltets skjema godtar også `rtk`, `stacked` og `omniglyph`) — denne overstyringen velger ikke en navngitt pipeline for en komprimeringskombinasjon. Den angir bare feltet `compressionMode`, som brukes av `resolveCompressionPlan`. Den kan angis enten på kombinasjonskortet (`Dashboard → Combos`) eller, siden #6760, per rutingskombinasjon i listen «Assign to routing» under `Dashboard → Context & Cache → Compression Combos`, rett ved siden av avmerkingsboksen for pipelinetilordning som er dokumentert ovenfor. Begge grensesnittene lagrer via det samme `PUT /api/combos/{id}`-endepunktet.
+Denne tilordningen av **Per-Combo Override** er en annen kontroll enn overstyringen av **routing-combo compression mode** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — feltets skjema godtar også `rtk`, `stacked` og `omniglyph`) — denne overstyringen velger ikke en navngitt pipeline for komprimeringskombinasjonen; den angir bare feltet `compressionMode` som brukes av `resolveCompressionPlan`. Den kan angis enten på kombinasjonskortet (`Dashboard → Combos`) eller, siden #6760, per rutingskombinasjon i listen «Assign to routing» på `Dashboard → Context & Cache → Compression Combos`, rett ved siden av avmerkingsboksen for pipeline-tilordning som er dokumentert ovenfor. Begge grensesnittene lagrer via det samme endepunktet `PUT /api/combos/{id}`.
 
 ### Overstyring per forespørsel
 
-Send forespørselshodet `x-omniroute-compression` for å overstyre komprimeringsplanen for én enkelt forespørsel. Det har høyest prioritet — det overstyrer rutingskombinasjonens overstyring, den aktive profilen, automatisk aktivering og panelets standardinnstilling. Ukjente verdier ignoreres (forespørselen avvises aldri), og den globale hovedbryteren styrer fortsatt alt: Når komprimering er slått av globalt, kan ikke hodet slå den på. Verdier:
+Send forespørselshodet `x-omniroute-compression` for å overstyre komprimeringsplanen for én enkelt forespørsel. Det har høyest prioritet — det overstyrer overstyringen for rutingskombinasjonen, den aktive profilen, automatisk utløsning og standardinnstillingen i panelet. Ukjente verdier ignoreres (forespørselen avvises aldri), og den globale hovedbryteren gjelder fortsatt for alt: når komprimering er globalt deaktivert, kan ikke headeren aktivere den. Verdier:
 
-| Verdi         | Effekt                                                                                                           |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `off`         | Ingen komprimering for denne forespørselen.                                                                      |
-| `default`     | Standardprofilen avledet fra panelet (ignorerer den aktive profilen). Tapsbaserte motorer forblir avslått.       |
-| `safe`        | Samme som å utelate hodet: bare deduplisering og sammenslåing av mellomrom.                                      |
-| `allow-lossy` | Behold operatørplanen for denne forespørselen, inkludert sammendrag, relevansfiltre og stilomskrivinger.         |
-| `engine:<id>` | Én enkelt motor når den er aktivert, f.eks. `engine:rtk`. Dette er aktivering per forespørsel for denne motoren. |
-| `<combo>`     | En navngitt kombinasjon, først matchet etter navn (uten hensyn til store og små bokstaver), deretter etter id.   |
+| Value         | Effect                                                                                                                           |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Ingen komprimering for denne forespørselen.                                                                                      |
+| `default`     | Den panelavledede Default-profilen (ignorerer den aktive profilen). Tapsbaserte motorer forblir deaktivert.                      |
+| `safe`        | Det samme som å utelate headeren.                                                                                                |
+| `allow-lossy` | Behold operatørplanen for denne forespørselen, inkludert sammendrag, relevansfiltre og stilomskrivinger.                         |
+| `engine:<id>` | Én enkelt motor når den er aktivert, for eksempel `engine:rtk`. Dette er eksplisitt aktivering av denne motoren per forespørsel. |
+| `<combo>`     | En navngitt kombinasjon, først matchet etter navn (uavhengig av store og små bokstaver), deretter etter id.                      |
 
-Uten `allow-lossy`, `engine:<id>` eller en navngitt kombinasjon brukes ikke tapsbaserte motorer. Forespørselen får fortsatt øktdeduplisering og sammenslåing av mellomrom når komprimering er slått på.
+Uten `allow-lossy`, `engine:<id>` eller en navngitt kombinasjon brukes ikke tapsbaserte motorer. Når en tapsbasert Default-, automatisk utløsings- eller rutingsoverstyring nedgraderes, beholder OmniRoute de gjenkjente tapsfrie trinnene fra den konfigurerte stablede pipelinen i konfigurert rekkefølge. Den faller bare tilbake til `session-dedup → lite` når ingen konfigurert tapsfri trinn overlever.
 
-Den anvendte planen returneres i svarhodet `X-OmniRoute-Compression: <mode>; source=<source>`, der `<source>` er én av `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` eller `off`.
+Forhåndsvisningen **Effective pipeline** i Innstillinger-panelet viser den ordinære planen som er lagret. Når en automatisk utløsning kan kjøres, viser den samme forhåndsvisningen også den betingede effektive pipelinen, slik at panelet og kjøretidsoppløsningen uten header forblir samkjørte.
+
+Den anvendte planen returneres i svarheaderen `X-OmniRoute-Compression: <mode>; source=<source>`, der `<source>` er én av `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` eller `off`.
 
 ### API
 
@@ -240,12 +241,12 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Forhåndsvis en bestemt RTK-/stacked-nyttelast
+# Forhåndsvis en spesifikk RTK/stacked-nyttelast
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# List opp RTK-filterpakker
+# List RTK-filterpakker
 curl http://localhost:20128/api/context/rtk/filters
 
 # Test RTK direkte med valgfrie kommandometadata

@@ -285,8 +285,11 @@ test("workflow: a failed issue lookup fails the step instead of opening a duplic
 
 test("workflow: the behind/up-to-date step still skips unknown, and this step runs for every state", () => {
   const steps = workflowSteps();
-  const behind = steps.find((s) => s.name === "Open or close the tracking issue");
-  assert.equal(behind?.if, "${{ steps.check.outputs.state != 'unknown' }}");
+  const behind = steps.find((s) => s.name === "Open, update or close the tracking issue");
+  assert.equal(
+    behind?.if,
+    "${{ !cancelled() && (steps.check.outputs.state == 'behind' || steps.check.outputs.state == 'up-to-date') }}"
+  );
   const access = steps.find((s) => s.name === STEP_NAME);
   assert.equal(access?.if, undefined);
   assert.ok(
