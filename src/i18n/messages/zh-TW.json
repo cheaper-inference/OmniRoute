@@ -12973,7 +12973,8 @@
       "continuesFromParent": "接續自父項目",
       "continuesFrom": "接續自 {id}",
       "viewConversation": "檢視對話",
-      "openConversation": "開啟對話 {id}"
+      "openConversation": "開啟對話 {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "請求日誌",
     "throughputPostFirstToken": "首個權杖後",

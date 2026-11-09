@@ -12973,7 +12973,8 @@
       "continuesFromParent": "মূল আইটেম থেকে অব্যাহত",
       "continuesFrom": "{id} থেকে অব্যাহত",
       "viewConversation": "কথোপকথন দেখুন",
-      "openConversation": "কথোপকথন {id} খুলুন"
+      "openConversation": "কথোপকথন {id} খুলুন",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "অনুরোধের লগ",
     "throughputPostFirstToken": "প্রথম-টোকেন-পরবর্তী",

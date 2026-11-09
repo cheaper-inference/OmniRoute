@@ -12973,7 +12973,8 @@
       "continuesFromParent": "මව් අයිතමයෙන් දිගටම පවතී",
       "continuesFrom": "{id} වෙතින් දිගටම පවතී",
       "viewConversation": "සංවාදය බලන්න",
-      "openConversation": "{id} සංවාදය විවෘත කරන්න"
+      "openConversation": "{id} සංවාදය විවෘත කරන්න",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "ඉල්ලීම් ලොග්",
     "throughputPostFirstToken": "පළමු ටෝකනයෙන් පසු",

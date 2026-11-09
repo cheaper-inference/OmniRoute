@@ -93,6 +93,7 @@
       "tests/unit/codex-account-catalog-routing.test.ts",
       "tests/unit/antigravity-plan-aware-model-routing.test.ts",
       "tests/unit/antigravity-tos-violation-appeal.test.ts",
+      "tests/unit/format-bytes.test.ts",
       "tests/unit/codex-sol-paid-routing.test.ts",
       "tests/unit/provider-transfer.test.ts",
       "tests/unit/credential-scope-diagnostics-15889.test.ts",

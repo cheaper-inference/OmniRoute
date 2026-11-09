@@ -12973,7 +12973,8 @@
       "continuesFromParent": "పేరెంట్ నుండి కొనసాగుతుంది",
       "continuesFrom": "{id} నుండి కొనసాగుతుంది",
       "viewConversation": "సంభాషణను వీక్షించండి",
-      "openConversation": "{id} సంభాషణను తెరవండి"
+      "openConversation": "{id} సంభాషణను తెరవండి",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "అభ్యర్థన లాగ్లు",
     "throughputPostFirstToken": "మొదటి టోకెన్ తర్వాత",

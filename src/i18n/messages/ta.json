@@ -12973,7 +12973,8 @@
       "continuesFromParent": "பெற்றோரிலிருந்து தொடர்கிறது",
       "continuesFrom": "{id} இலிருந்து தொடர்கிறது",
       "viewConversation": "உரையாடலைக் காண்க",
-      "openConversation": "{id} உரையாடலைத் திறக்கவும்"
+      "openConversation": "{id} உரையாடலைத் திறக்கவும்",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "கோரிக்கைப் பதிவுகள்",
     "throughputPostFirstToken": "முதல் டோக்கனுக்குப் பின்",

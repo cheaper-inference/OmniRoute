@@ -12973,7 +12973,8 @@
       "continuesFromParent": "pokračuje z nadřazené položky",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobrazit konverzaci",
-      "openConversation": "Otevřít konverzaci {id}"
+      "openConversation": "Otevřít konverzaci {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Protokoly požadavků",
     "throughputPostFirstToken": "Po prvním tokenu",

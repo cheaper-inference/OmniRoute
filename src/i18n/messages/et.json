@@ -12973,7 +12973,8 @@
       "continuesFromParent": "jätkub ülemüksusest",
       "continuesFrom": "Jätkub üksusest {id}",
       "viewConversation": "Kuva vestlus",
-      "openConversation": "Ava vestlus {id}"
+      "openConversation": "Ava vestlus {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Päringulogid",
     "throughputPostFirstToken": "Pärast esimest tokenit",

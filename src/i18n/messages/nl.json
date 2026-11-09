@@ -12973,7 +12973,8 @@
       "continuesFromParent": "gaat verder vanaf bovenliggend item",
       "continuesFrom": "Gaat verder vanaf {id}",
       "viewConversation": "gesprek bekijken",
-      "openConversation": "Gesprek {id} openen"
+      "openConversation": "Gesprek {id} openen",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Aanvraaglogboeken",
     "throughputPostFirstToken": "Na eerste token",

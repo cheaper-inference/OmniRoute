@@ -12973,7 +12973,8 @@
       "continuesFromParent": "پیرنٹ سے جاری ہے",
       "continuesFrom": "{id} سے جاری ہے",
       "viewConversation": "گفتگو دیکھیں",
-      "openConversation": "گفتگو {id} کھولیں"
+      "openConversation": "گفتگو {id} کھولیں",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "درخواست کے لاگز",
     "throughputPostFirstToken": "پہلے ٹوکن کے بعد",

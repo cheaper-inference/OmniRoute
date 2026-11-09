@@ -12973,7 +12973,8 @@
       "continuesFromParent": "nastavlja se od nadređenog",
       "continuesFrom": "Nastavlja se od {id}",
       "viewConversation": "prikaži razgovor",
-      "openConversation": "Otvori razgovor {id}"
+      "openConversation": "Otvori razgovor {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Zapisi zahtjeva",
     "throughputPostFirstToken": "Nakon prvog tokena",

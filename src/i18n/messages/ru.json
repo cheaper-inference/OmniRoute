@@ -12973,7 +12973,8 @@
       "continuesFromParent": "продолжается от родительского элемента",
       "continuesFrom": "Продолжается от {id}",
       "viewConversation": "просмотреть диалог",
-      "openConversation": "Открыть диалог {id}"
+      "openConversation": "Открыть диалог {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Журналы запросов",
     "throughputPostFirstToken": "После первого токена",

@@ -12973,7 +12973,8 @@
       "continuesFromParent": "ya ci gaba daga na sama",
       "continuesFrom": "Ya ci gaba daga {id}",
       "viewConversation": "duba tattaunawa",
-      "openConversation": "Buɗe tattaunawa {id}"
+      "openConversation": "Buɗe tattaunawa {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Rajistocin buƙatu",
     "throughputPostFirstToken": "Bayan farkon token",

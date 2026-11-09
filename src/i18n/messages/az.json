@@ -12973,7 +12973,8 @@
       "continuesFromParent": "ana elementdən davam edir",
       "continuesFrom": "{id} elementindən davam edir",
       "viewConversation": "söhbətə bax",
-      "openConversation": "{id} söhbətini aç"
+      "openConversation": "{id} söhbətini aç",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",

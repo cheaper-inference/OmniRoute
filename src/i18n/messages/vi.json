@@ -12973,7 +12973,8 @@
       "continuesFromParent": "tiếp nối từ yêu cầu cha",
       "continuesFrom": "Tiếp nối từ {id}",
       "viewConversation": "xem hội thoại",
-      "openConversation": "Mở hội thoại {id}"
+      "openConversation": "Mở hội thoại {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Nhật ký yêu cầu",
     "throughputPostFirstToken": "Sau token đầu tiên",

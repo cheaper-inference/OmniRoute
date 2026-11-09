@@ -12973,7 +12973,8 @@
       "continuesFromParent": "പാരന്റിൽ നിന്ന് തുടരുന്നു",
       "continuesFrom": "{id}-ൽ നിന്ന് തുടരുന്നു",
       "viewConversation": "സംഭാഷണം കാണുക",
-      "openConversation": "{id} സംഭാഷണം തുറക്കുക"
+      "openConversation": "{id} സംഭാഷണം തുറക്കുക",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ",
     "throughputPostFirstToken": "ആദ്യ ടോക്കണിന് ശേഷം",

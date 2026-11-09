@@ -12973,7 +12973,8 @@
       "continuesFromParent": "fortsætter fra overordnet",
       "continuesFrom": "Fortsætter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åbn samtale {id}"
+      "openConversation": "Åbn samtale {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Anmodningslogfiler",
     "throughputPostFirstToken": "Efter første token",

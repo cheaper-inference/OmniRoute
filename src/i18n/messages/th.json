@@ -12973,7 +12973,8 @@
       "continuesFromParent": "ดำเนินต่อจากรายการหลัก",
       "continuesFrom": "ดำเนินต่อจาก {id}",
       "viewConversation": "ดูการสนทนา",
-      "openConversation": "เปิดการสนทนา {id}"
+      "openConversation": "เปิดการสนทนา {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "บันทึกคำขอ",
     "throughputPostFirstToken": "หลังโทเคนแรก",

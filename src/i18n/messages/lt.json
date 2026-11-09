@@ -12973,7 +12973,8 @@
       "continuesFromParent": "tęsiama nuo pirminio elemento",
       "continuesFrom": "Tęsiama nuo {id}",
       "viewConversation": "Peržiūrėti pokalbį",
-      "openConversation": "Atidaryti pokalbį {id}"
+      "openConversation": "Atidaryti pokalbį {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Užklausų žurnalai",
     "throughputPostFirstToken": "Po pirmojo tokeno",

@@ -12973,7 +12973,8 @@
       "continuesFromParent": "પેરેન્ટથી ચાલુ રહે છે",
       "continuesFrom": "{id}થી ચાલુ રહે છે",
       "viewConversation": "વાતચીત જુઓ",
-      "openConversation": "વાતચીત {id} ખોલો"
+      "openConversation": "વાતચીત {id} ખોલો",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "વિનંતી લૉગ્સ",
     "throughputPostFirstToken": "પ્રથમ ટોકન પછી",

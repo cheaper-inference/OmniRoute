@@ -12973,7 +12973,8 @@
       "continuesFromParent": "fait suite au parent",
       "continuesFrom": "Fait suite à {id}",
       "viewConversation": "afficher la conversation",
-      "openConversation": "Ouvrir la conversation {id}"
+      "openConversation": "Ouvrir la conversation {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Journaux des requêtes",
     "throughputPostFirstToken": "Après le premier token",

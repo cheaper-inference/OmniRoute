@@ -12973,7 +12973,8 @@
       "continuesFromParent": "na-aga n'ihu site na nke nne na nna",
       "continuesFrom": "Na-aga n'ihu site na {id}",
       "viewConversation": "lee mkparịta ụka",
-      "openConversation": "Mepee mkparịta ụka {id}"
+      "openConversation": "Mepee mkparịta ụka {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Ndekọ arịrịọ",
     "throughputPostFirstToken": "Mgbe token mbụ gasịrị",

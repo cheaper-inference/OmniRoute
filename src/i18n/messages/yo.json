@@ -12973,7 +12973,8 @@
       "continuesFromParent": "ń tẹ̀síwájú láti ìbéèrè òbí",
       "continuesFrom": "Tẹ̀síwájú láti {id}",
       "viewConversation": "wo ìjíròrò",
-      "openConversation": "Ṣí ìjíròrò {id}"
+      "openConversation": "Ṣí ìjíròrò {id}",
+      "artifactSize": "Artifact Size"
     },
     "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè",
     "throughputPostFirstToken": "Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì",
