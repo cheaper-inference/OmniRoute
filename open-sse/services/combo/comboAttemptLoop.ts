@@ -10,6 +10,7 @@ import {
   getModelLockoutInfo,
   scanTransientModelLock,
 } from "../accountFallback.ts";
+import { calculateFullJitter } from "../../utils/jitterBackoff.ts";
 import {
   getCachedProviderConnectionById,
   getCachedProviderConnections,
@@ -223,20 +224,27 @@ export async function dispatchWithCooldownRetry(opts: {
   extra: DispatchWithCooldownRetryExtra;
 }): Promise<Response> {
   const { state, deps, extra } = opts;
+  // The cooldown-aware re-dispatch restarts this loop instead of recursing. It stays
+  // bounded by maxSetRetries, comboCooldownWait.maxAttempts and the cooldown budget.
+  let setTry = 0;
   // #7360: persist lastStatus/earliestRetryAfter across set retries; reset
   // only on a fresh dispatch (including cooldown-aware re-dispatch).
-  state.lastError = null;
-  state.earliestRetryAfter = null;
-  state.lastStatus = null;
-  state.skippedForCircuitOpen = false;
-  state.earliestCircuitOpenRetryMs = 0;
+  const resetForFreshDispatch = () => {
+    setTry = 0;
+    state.lastError = null;
+    state.earliestRetryAfter = null;
+    state.lastStatus = null;
+    state.skippedForCircuitOpen = false;
+    state.earliestCircuitOpenRetryMs = 0;
+  };
+  resetForFreshDispatch();
   // #11804: the loop-safety timer is armed per setTry iteration but must be
   // cleared on EVERY exit path, not just the happy one. Hoisted to function
   // scope so the `finally` at the end of this function always reaches it.
   let activeLoopSafetyTimer: ReturnType<typeof setTimeout> | null = null;
 
   try {
-    for (let setTry = 0; setTry <= extra.maxSetRetries; setTry++) {
+    while (setTry <= extra.maxSetRetries) {
       // Durable exhaustion (quota, credits, auth) survives the set boundary: a
       // provider or connection whose quota is gone stays skipped on the next
       // set. Transient failures (rate limit, connection error) are replayed.
@@ -260,8 +268,13 @@ export async function dispatchWithCooldownRetry(opts: {
           "COMBO",
           `All targets failed — retrying set (${setTry}/${extra.maxSetRetries})`
         );
+        // Full jitter: no deadline is known here, unlike the cooldown waits below.
+        const jitteredSetRetryDelay = calculateFullJitter(setTry, {
+          baseDelayMs: extra.setRetryDelayMs,
+          maxDelayMs: Math.max(30_000, extra.setRetryDelayMs),
+        });
         // Keep zero-delay retries on a timer turn so queued cancellation can run.
-        await waitForCooldownAwareRetry(Math.max(1, extra.setRetryDelayMs), deps.signal);
+        await waitForCooldownAwareRetry(Math.max(1, jitteredSetRetryDelay), deps.signal);
         if (deps.signal?.aborted) {
           deps.log.info("COMBO", "Client disconnected during set retry delay — aborting");
           return errorResponse(499, "Client disconnected");
@@ -624,6 +637,7 @@ export async function dispatchWithCooldownRetry(opts: {
         !comboRequestMalformed &&
         !state.requestScopedFailureSeen
       ) {
+        setTry++;
         continue;
       }
 
@@ -649,7 +663,8 @@ export async function dispatchWithCooldownRetry(opts: {
             0,
             extra.comboCooldownBudgetLeftMs.current - circuitOpenWait.waitMs
           );
-          return dispatchWithCooldownRetry({ state, deps, extra });
+          resetForFreshDispatch();
+          continue;
         }
         // #16319: a model-scoped cooldown is not a circuit-open skip. With zero
         // dispatched attempts nothing populates state.earliestRetryAfter, so the
@@ -685,7 +700,8 @@ export async function dispatchWithCooldownRetry(opts: {
             0,
             extra.comboCooldownBudgetLeftMs.current - modelLockWait.waitMs
           );
-          return dispatchWithCooldownRetry({ state, deps, extra });
+          resetForFreshDispatch();
+          continue;
         }
       }
 
@@ -884,7 +900,8 @@ export async function dispatchWithCooldownRetry(opts: {
             0,
             extra.comboCooldownBudgetLeftMs.current - decision.waitMs
           );
-          return dispatchWithCooldownRetry({ state, deps, extra });
+          resetForFreshDispatch();
+          continue;
         }
       }
 

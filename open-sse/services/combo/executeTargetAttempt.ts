@@ -123,6 +123,7 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { calculateFullJitter } from "../../utils/jitterBackoff.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
@@ -220,16 +221,21 @@ export async function executeTargetAttempt(
     }
 
     if (retry > 0) {
+      // Full jitter on the blind exponential retry delay (no known deadline).
+      const jitteredRetryDelay = calculateFullJitter(retry, {
+        baseDelayMs: retryDelayMs,
+        maxDelayMs: retryDelayMs * 10,
+      });
       deps.log.info(
         "COMBO",
-        `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
+        `Retrying ${modelStr} in ${jitteredRetryDelay}ms (attempt ${retry + 1}/${deps.maxRetries + 1}, base: ${retryDelayMs}ms)`
       );
       const outcome = await waitForAuthorizedRetry({
         state,
         deps,
         target,
         targetSignal,
-        retryDelayMs,
+        retryDelayMs: jitteredRetryDelay,
         cooldownWait,
         allowRateLimitedConnection,
       });

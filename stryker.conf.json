@@ -769,7 +769,8 @@
       "tests/unit/upstream-http-edge-selection.test.ts",
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
-      "tests/unit/universal-handoff-api-key-scope.test.ts"
+      "tests/unit/universal-handoff-api-key-scope.test.ts",
+      "tests/unit/combo-set-retry-state-and-jitter.test.ts"
     ],
     "nodeArgs": [
       "--import",
