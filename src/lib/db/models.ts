@@ -7,6 +7,7 @@
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
+import { getModelCatalogCacheVersion } from "./readCache";
 import { isSyncedAtFresh } from "./models/syncedCatalogFreshness";
 import { getProviderConnectionsCount, touchConnectionSyncedModelsAt } from "./providers";
 import { type JsonRecord, getKeyValue } from "./models/shared";
@@ -1062,6 +1063,31 @@ export function getModelIsHidden(
  * building to skip user-hidden models. Single bulk DB query — not N+1 per model.
  */
 export function getHiddenModelsByProvider(modality: string = "chat"): Map<string, Set<string>> {
+  // Combo routing reads this on every request. Every hide/show write ends in
+  // finishModelCatalogWriteWithBackup(), which bumps the catalog version, so a version
+  // change drops the cache at once; the TTL is only a backstop for a write that skips it.
+  // Callers mutate what they get, so each call returns a fresh copy.
+  const version = getModelCatalogCacheVersion();
+  const now = Date.now();
+  let hit = hiddenModelsCache.get(modality);
+  if (!hit || hit.version !== version || hit.expiresAt <= now) {
+    hit = {
+      version,
+      expiresAt: now + HIDDEN_MODELS_CACHE_TTL_MS,
+      value: readHiddenModelsByProvider(modality),
+    };
+    hiddenModelsCache.set(modality, hit);
+  }
+  return new Map([...hit.value].map(([providerId, ids]) => [providerId, new Set(ids)]));
+}
+
+const HIDDEN_MODELS_CACHE_TTL_MS = 5_000;
+const hiddenModelsCache = new Map<
+  string,
+  { version: number; expiresAt: number; value: Map<string, Set<string>> }
+>();
+
+function readHiddenModelsByProvider(modality: string): Map<string, Set<string>> {
   const db = getDbInstance();
   const visibilityByProvider = new Map<string, Map<string, boolean>>();
   const rows = db
