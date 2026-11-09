@@ -72,3 +72,16 @@ test("setSsoKeyActive(false) drops a cached pass", async () => {
   assert.equal(setSsoKeyActive(created.id, false), true);
   assert.equal(await apiKeysDb.validateApiKey(created.key), false);
 });
+
+test("setSsoKeyActive(false) on an already inactive key leaves other cached passes alone", async () => {
+  const shadow = await apiKeysDb.createApiKey("shadow", "machine-cache-inval");
+  const other = await primedKey();
+  assert.equal(setSsoKeyActive(shadow.id, false), true, "first call changes the state");
+
+  // Prime the cache again, then remove the row behind the cache: a cleared cache would see it.
+  assert.equal(await apiKeysDb.validateApiKey(other.key), true);
+  core.getDbInstance().prepare("DELETE FROM api_keys WHERE id = ?").run(other.id);
+
+  assert.equal(setSsoKeyActive(shadow.id, false), false, "second call changes nothing");
+  assert.equal(await apiKeysDb.validateApiKey(other.key), true, "the unrelated cache must stay");
+});
