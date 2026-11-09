@@ -7906,6 +7906,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "IP kontrola pristupa",
     "ipAccessControlDesc": "Blokirajte ili dozvolite specifične IP adrese",
+    "ipAccessMode": "Način pristupa",
     "ipModeDisabled": "Onemogućeno",
     "ipModeBlacklist": "Crna lista",
     "ipModeWhitelist": "Bijela lista",

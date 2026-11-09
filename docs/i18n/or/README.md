@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw)ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କେବେ କୋଡିଂ ବନ୍ଦ କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ AI ଟୁଲ୍ → 381 ପ୍ରଦାନକାରୀ — 150+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ। Claude Code, Codex, Cursor, Cline, Copilot ଏବଂ Antigravityକୁ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ସହିତ ମାଗଣା Claude / GPT / Geminiରେ ପରିଣତ କରନ୍ତୁ। RTK + Caveman ଷ୍ଟ୍ୟାକ୍ଡ କମ୍ପ୍ରେସନ୍ 15–95% ଟୋକେନ୍ (~89% ହାରାହାରି) ସଞ୍ଚୟ କରେ — କେବେ ସୀମାରେ ପହଞ୍ଚିବେ ନାହିଁ। 381 AI ପ୍ରଦାନକାରୀ · 150+ ମାଗଣା ଟିଅର୍ · ପ୍ରତି ମାସରେ ~1.62B ମାଗଣା ଟୋକେନ୍ · 20ଟି ରାଉଟିଂ କୌଶଳ · ଆରମ୍ଭ ପାଇଁ $0।"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କେବେ କୋଡିଂ ବନ୍ଦ କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ AI ଟୁଲ୍ → 384 ପ୍ରଦାନକାରୀ — 150+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ମାଧ୍ୟମରେ। Claude Code, Codex, Cursor, Cline, Copilot ଏବଂ Antigravityକୁ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ସହିତ ମାଗଣା Claude / GPT / Geminiରେ ପରିଣତ କରନ୍ତୁ। RTK + Caveman ଷ୍ଟ୍ୟାକ୍ଡ କମ୍ପ୍ରେସନ୍ 15–95% ଟୋକେନ୍ (~89% ହାରାହାରି) ସଞ୍ଚୟ କରେ — କେବେ ସୀମାରେ ପହଞ୍ଚିବେ ନାହିଁ। 384 AI ପ୍ରଦାନକାରୀ · 150+ ମାଗଣା ଟିଅର୍ · ପ୍ରତି ମାସରେ ~1.62B ମାଗଣା ଟୋକେନ୍ · 20ଟି ରାଉଟିଂ କୌଶଳ · ଆରମ୍ଭ ପାଇଁ $0।"/>
 
 </div>
 
@@ -73,7 +73,7 @@
 
 |                                  |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ              |           352           |   **358**   |          381          |
+| 🌐 ପ୍ରୋଭାଇଡର୍ଗୁଡ଼ିକ              |           352           |   **358**   |          384          |
 | 🧠 ସ୍ୱତନ୍ତ୍ର ଚାଟ୍ ମଡେଲ୍ IDଗୁଡ଼ିକ |          1320           |  **1374**   |         1491          |
 | 🖼️ ମୋଡାଲିଟି ବ୍ରିଜ୍               | 🆕 ଭିଜନ୍ + ଅଡିଓ + ଭିଡିଓ |      ✓      |           ✓           |
 | 📡 ରାଡାର୍ ମାଗଣା କ୍ୟାଟାଲଗ୍        |       🆕 ଅପ୍ଟ-ଇନ୍       |      ✓      |           ✓           |
@@ -114,7 +114,7 @@
   <tr>
     <td align="right"><b>⚙️ ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 କମ୍ବୋଗୁଡ଼ିକ</a></td>
-    <td align="center"><a href="#-381-ai-providers--153-catalog-marked-free">🌐 ପ୍ରଦାତାମାନେ</a></td>
+    <td align="center"><a href="#-384-ai-providers--153-catalog-marked-free">🌐 ପ୍ରଦାତାମାନେ</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ପ୍ରତିଶ୍ରୁତି — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ଏବଂ 381 ପ୍ରଦାତା। ଅନ୍ୟ ଏକ ସୁସ୍ଥ ଲକ୍ଷ୍ୟ ଉପଲବ୍ଧ ଥିବା ପର୍ଯ୍ୟନ୍ତ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ରାଉଟିଂ ଜାରି ରଖେ। ଛଅଟି ସ୍ତମ୍ଭ: 381 ପ୍ରଦାତା ମଧ୍ୟରେ ସୁଦୃଢ଼ ଫଲ୍ବ୍ୟାକ୍ · ଯୋଗ୍ୟ ୱର୍କଲୋଡ୍ରେ 95% ପର୍ଯ୍ୟନ୍ତ ଟୋକେନ୍ ସଞ୍ଚୟ · 150+ ମାଗଣା ଟିଅର୍ ଏବଂ 52ଟି ପୁନରାବୃତ୍ତିଶୀଳ/କୀ-ବିହୀନ ସର୍ବଦା-ମାଗଣା ପ୍ରଦାତା ସହିତ ଆରମ୍ଭ କରିବାକୁ $0 · ଗୋଟିଏ କନ୍ଫିଗ୍ ମାଧ୍ୟମରେ 39ଟି CLI/ଏଜେଣ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ · /v1 ରେ OpenAI, Claude, Gemini ଏବଂ Responses API ସହିତ ସୁସଙ୍ଗତତା · ସର୍କିଟ୍ ବ୍ରେକର୍, TLS ଷ୍ଟେଲ୍ଥ୍, MCP 110 ଟୁଲ୍, A2A, ମେମୋରୀ, ଗାର୍ଡରେଲ୍, ଇଭାଲ୍ସ ଏବଂ 7,800+ ଟ୍ରାକ୍ ହୋଇଥିବା ଟେଷ୍ଟ ଫାଇଲ୍ରେ 56,000+ ଷ୍ଟାଟିକ୍ ଟେଷ୍ଟ ଘୋଷଣା ସହିତ ପ୍ରଡକ୍ସନ୍ ନିୟନ୍ତ୍ରଣ।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ପ୍ରତିଶ୍ରୁତି — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ଏବଂ 384 ପ୍ରଦାତା। ଅନ୍ୟ ଏକ ସୁସ୍ଥ ଲକ୍ଷ୍ୟ ଉପଲବ୍ଧ ଥିବା ପର୍ଯ୍ୟନ୍ତ ସ୍ୱୟଂଚାଳିତ ଫଲ୍ବ୍ୟାକ୍ ରାଉଟିଂ ଜାରି ରଖେ। ଛଅଟି ସ୍ତମ୍ଭ: 384 ପ୍ରଦାତା ମଧ୍ୟରେ ସୁଦୃଢ଼ ଫଲ୍ବ୍ୟାକ୍ · ଯୋଗ୍ୟ ୱର୍କଲୋଡ୍ରେ 95% ପର୍ଯ୍ୟନ୍ତ ଟୋକେନ୍ ସଞ୍ଚୟ · 150+ ମାଗଣା ଟିଅର୍ ଏବଂ 52ଟି ପୁନରାବୃତ୍ତିଶୀଳ/କୀ-ବିହୀନ ସର୍ବଦା-ମାଗଣା ପ୍ରଦାତା ସହିତ ଆରମ୍ଭ କରିବାକୁ $0 · ଗୋଟିଏ କନ୍ଫିଗ୍ ମାଧ୍ୟମରେ 39ଟି CLI/ଏଜେଣ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ · /v1 ରେ OpenAI, Claude, Gemini ଏବଂ Responses API ସହିତ ସୁସଙ୍ଗତତା · ସର୍କିଟ୍ ବ୍ରେକର୍, TLS ଷ୍ଟେଲ୍ଥ୍, MCP 110 ଟୁଲ୍, A2A, ମେମୋରୀ, ଗାର୍ଡରେଲ୍, ଇଭାଲ୍ସ ଏବଂ 7,800+ ଟ୍ରାକ୍ ହୋଇଥିବା ଟେଷ୍ଟ ଫାଇଲ୍ରେ 56,000+ ଷ୍ଟାଟିକ୍ ଟେଷ୍ଟ ଘୋଷଣା ସହିତ ପ୍ରଡକ୍ସନ୍ ନିୟନ୍ତ୍ରଣ।"/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteକୁ କ’ଣ ସ୍ୱତନ୍ତ୍ର କରେ — 13ଟି କ୍ଷମତାରେ 9router, OpenRouter, CLIProxyAPI ଏବଂ LiteLLM ସହ ତାରିଖ-ସହିତ ବୈଶିଷ୍ଟ୍ୟ ତୁଳନା। OmniRoute: 381ଟି ପ୍ରଦାତା, ଅନ୍ତର୍ନିର୍ମିତ 150+ ମାଗଣା ଟିଅର୍, 20ଟି ରାଉଟିଂ କୌଶଳ, 12-ଇଞ୍ଜିନ୍ ଟୋକେନ୍ ସଙ୍କୋଚନ, 110ଟି ଟୁଲ୍ ସହ ଅନ୍ତର୍ନିର୍ମିତ MCP ସର୍ଭର, A2A ଏଜେଣ୍ଟ ପ୍ରୋଟୋକଲ୍, ସ୍ଥାୟୀ ମେମୋରି, ଗାର୍ଡରେଲ୍, କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ, TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଷ୍ଟିଲ୍ଥ୍, Desktop/Termux/PWA ଏବଂ 67ଟି i18n UI ଲୋକେଲ୍। OmniRoute MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ ଏବଂ ନିଜେ ହୋଷ୍ଟ କରାଯାଇପାରେ। ପ୍ରତିଦ୍ୱନ୍ଦ୍ୱୀମାନଙ୍କର କ୍ଷମତା ଏବଂ ସଂଖ୍ୟା ବଦଳିପାରେ; ଲିଙ୍କ୍ କରାଯାଇଥିବା ପଦ୍ଧତି ଦେଖନ୍ତୁ।"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRouteକୁ କ’ଣ ସ୍ୱତନ୍ତ୍ର କରେ — 13ଟି କ୍ଷମତାରେ 9router, OpenRouter, CLIProxyAPI ଏବଂ LiteLLM ସହ ତାରିଖ-ସହିତ ବୈଶିଷ୍ଟ୍ୟ ତୁଳନା। OmniRoute: 384ଟି ପ୍ରଦାତା, ଅନ୍ତର୍ନିର୍ମିତ 150+ ମାଗଣା ଟିଅର୍, 20ଟି ରାଉଟିଂ କୌଶଳ, 12-ଇଞ୍ଜିନ୍ ଟୋକେନ୍ ସଙ୍କୋଚନ, 110ଟି ଟୁଲ୍ ସହ ଅନ୍ତର୍ନିର୍ମିତ MCP ସର୍ଭର, A2A ଏଜେଣ୍ଟ ପ୍ରୋଟୋକଲ୍, ସ୍ଥାୟୀ ମେମୋରି, ଗାର୍ଡରେଲ୍, କ୍ଲାଉଡ୍ ଏଜେଣ୍ଟ, TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଷ୍ଟିଲ୍ଥ୍, Desktop/Termux/PWA ଏବଂ 67ଟି i18n UI ଲୋକେଲ୍। OmniRoute MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ ଏବଂ ନିଜେ ହୋଷ୍ଟ କରାଯାଇପାରେ। ପ୍ରତିଦ୍ୱନ୍ଦ୍ୱୀମାନଙ୍କର କ୍ଷମତା ଏବଂ ସଂଖ୍ୟା ବଦଳିପାରେ; ଲିଙ୍କ୍ କରାଯାଇଥିବା ପଦ୍ଧତି ଦେଖନ୍ତୁ।"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI ଏବଂ LiteLLM ସହ ସମ୍ପୂର୍ଣ୍ଣ ପଦ୍ଧତି ଏବଂ ପ୍ରତ୍ୟେକ ବୈଶିଷ୍ଟ୍ୟର ବିବରଣୀ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -605,7 +605,7 @@ Radar ଇଚ୍ଛାଧୀନ ଏବଂ କେବଳ GET ପାଇଁ ଉଦ୍
 - **🖼️ ନୂତନ endpoint** — `/v1/ocr` (Mistral OCR) ଏବଂ `/v1/audio/translations` (Whisper-style) media surfaceକୁ ସମ୍ପୂର୍ଣ୍ଣ କରେ। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — media ପାଇଁ ଗୋଟିଏ API: xAI Grok Imagine ଏବଂ Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, ଏବଂ ElevenLabs ପରି speech provider। → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment ଏବଂ ops** — reverse-proxy `basePath`, browser-language auto-detect, per-key device tracking, root-less MITM trust, zh-TW localization। → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 ଅଧିକ provider ଏବଂ agent** — cloud agent (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login ସହିତ Grok Build (xAI), first-class card ସହିତ Ollama, Claude Opus 5 ଏବଂ Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ଏବଂ ନବୀକୃତ **୩୮୧-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ଅଧିକ provider ଏବଂ agent** — cloud agent (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login ସହିତ Grok Build (xAI), first-class card ସହିତ Ollama, Claude Opus 5 ଏବଂ Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ଏବଂ ନବୀକୃତ **୩୮୩-provider catalog**। → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing transparency** — ପ୍ରତ୍ୟେକ responseରେ ଏକ `X-OmniRoute-Decision` header ଥାଏ, ଯାହା ଏହାକୁ ପରିବେଷଣ କରିଥିବା strategy/provider/latencyର ନାମ ଦିଏ; ନୂତନ `cache-optimized` combo strategy + Auto-Combo `cacheAffinity` factor ପୁନରାବୃତ୍ତି requestକୁ cached prefix ଧରିଥିବା connectionକୁ ପୁଣି ପଠାଏ; ଏବଂ କେବଳ-ପଠନୀୟ `/v1/auto-combo/{channel}/candidates` endpoint ଗୋଟିଏ `auto/*` channelର live candidate pool ପ୍ରକାଶ କରେ। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ସ୍ଥାନୀୟ କାର୍ଯ୍ୟଦକ୍ଷତା ଏବଂ ଇନ୍ଫ୍ରା** — ଏକ-କ୍ଲିକ୍ ସ୍ଥାନୀୟ Redis, Cloudflare Workers / Deno Deploy ରିଲେ ଡିପ୍ଲୟର୍, ଏବଂ ନିରୀକ୍ଷଣାଧୀନ ଏମ୍ବେଡେଡ୍ ସେବା ଭାବରେ Bifrost ଏବଂ Mux। → [ଏମ୍ବେଡେଡ୍ ସେବା](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 ବାକ୍ସରେ ଆହୁରି ଅନ୍ତର୍ଭୁକ୍ତ** — ପ୍ଲଗଇନ୍ ଫ୍ରେମୱର୍କ + ମାର୍କେଟପ୍ଲେସ୍, Omni/Agent/GitHub ସ୍କିଲ୍ ଫ୍ରେମୱର୍କଗୁଡ଼ିକ, Obsidian ଭଲ୍ଟ ଇଣ୍ଟିଗ୍ରେସନ୍ (22 MCP ଟୁଲ୍), OpenAI-ସୁସଙ୍ଗତ Batch ଏବଂ Files APIଗୁଡ଼ିକ, ସେମାଣ୍ଟିକ୍ ରେସପନ୍ସ କ୍ୟାଶ୍, ଲିଡରବୋର୍ଡ ସହିତ ଗେମିଫିକେସନ୍, ACP ଏଜେଣ୍ଟ ଡିସକଭରି (15ଟି ବିଲ୍ଟ-ଇନ୍ ଏଜେଣ୍ଟ), BigQueryକୁ ନିର୍ଦ୍ଧାରିତ ଲଗ୍ ରପ୍ତାନି, `auto/chaos` ସମାନ୍ତରାଳ ମଲ୍ଟି-ମଡେଲ୍ ଫ୍ୟାନ୍-ଆଉଟ୍, Telegram ବଟ୍ ବ୍ରିଜ୍, ଇନ୍-ଆପ୍ ଭର୍ସନ୍ ମ୍ୟାନେଜର୍ ଏବଂ LMArena-ELO ମାଗଣା-ପ୍ରଦାତା ର୍ୟାଙ୍କିଙ୍ଗ୍। → [ଡକ୍ୟୁମେଣ୍ଟେସନ୍](docs/README.md)
@@ -689,11 +689,11 @@ omniroute configure codex          # ଏହିଠାରେ ମଧ୍ୟ: claude 
 
 <div align="center">
 
-## 🌐 381 AI ପ୍ରଦାତା — 153 କ୍ୟାଟାଲଗ୍-ଚିହ୍ନିତ ମାଗଣା
+## 🌐 384 AI ପ୍ରଦାତା — 153 କ୍ୟାଟାଲଗ୍-ଚିହ୍ନିତ ମାଗଣା
 
 </div>
 
-> **381 ପଞ୍ଜୀକୃତ ପ୍ରଦାତା** canonical chat, media, search, local, cloud-agent ଏବଂ system ସଂଗ୍ରହଗୁଡ଼ିକରେ ରହିଛନ୍ତି, ଯାହାମଧ୍ୟରୁ **153 ଜଣଙ୍କ ପାଖରେ `hasFree: true` ଆବିଷ୍କାର ମେଟାଡାଟା** ରହିଛି। Chat model registry ରେ **239 ପ୍ରଦାତା / 3,059 ସ୍ୱତନ୍ତ୍ର provider-model ଯୁଗଳ / 1,475 କାଚା model ID** ରହିଛି; ଅଲଗା free-budget catalog ରେ **471 ପ୍ରତି-model ଧାଡ଼ି**, **34 ପୁନରାବୃତ୍ତିଶୀଳ pool** ଏବଂ **52 ପୁନରାବୃତ୍ତିଶୀଳ/keyless ସଦା-ମାଗଣା ପ୍ରଦାତା** ଅଛନ୍ତି। ଏଗୁଡ଼ିକ ଡିଜାଇନ୍ ଅନୁସାରେ ଭିନ୍ନ denominator; ସଂଜ୍ଞା ଏବଂ pool-deduped ଗଣନା [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ଏବଂ [Free Tiers](docs/reference/FREE_TIERS.md) ରେ ରହିଛି।
+> **384 ପଞ୍ଜୀକୃତ ପ୍ରଦାତା** canonical chat, media, search, local, cloud-agent ଏବଂ system ସଂଗ୍ରହଗୁଡ଼ିକରେ ରହିଛନ୍ତି, ଯାହାମଧ୍ୟରୁ **153 ଜଣଙ୍କ ପାଖରେ `hasFree: true` ଆବିଷ୍କାର ମେଟାଡାଟା** ରହିଛି। Chat model registry ରେ **239 ପ୍ରଦାତା / 3,059 ସ୍ୱତନ୍ତ୍ର provider-model ଯୁଗଳ / 1,475 କାଚା model ID** ରହିଛି; ଅଲଗା free-budget catalog ରେ **471 ପ୍ରତି-model ଧାଡ଼ି**, **34 ପୁନରାବୃତ୍ତିଶୀଳ pool** ଏବଂ **52 ପୁନରାବୃତ୍ତିଶୀଳ/keyless ସଦା-ମାଗଣା ପ୍ରଦାତା** ଅଛନ୍ତି। ଏଗୁଡ଼ିକ ଡିଜାଇନ୍ ଅନୁସାରେ ଭିନ୍ନ denominator; ସଂଜ୍ଞା ଏବଂ pool-deduped ଗଣନା [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ଏବଂ [Free Tiers](docs/reference/FREE_TIERS.md) ରେ ରହିଛି।
 
 <div align="center">
 

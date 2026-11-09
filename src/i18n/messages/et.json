@@ -7906,6 +7906,7 @@
     "systemActor": "süsteem",
     "ipAccessControl": "IP-juurdepääsu haldus",
     "ipAccessControlDesc": "Blokeerige või lubage kindlaid IP-aadresse",
+    "ipAccessMode": "Juurdepääsurežiim",
     "ipModeDisabled": "Keelatud",
     "ipModeBlacklist": "Blokeerimisnimekiri",
     "ipModeWhitelist": "Lubatud aadresside nimekiri",
