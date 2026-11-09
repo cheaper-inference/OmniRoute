@@ -3216,7 +3216,6 @@ paths:
         "503":
           description: Management authentication backend temporarily unavailable
 
-
   /api/keys/{id}:
     get:
       tags: [API Keys]
