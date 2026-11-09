@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { unexpectedCatalogNetworkRequests } from "../_helpers/catalogNetworkGuard13389.ts";
 
 import type { RequestFailedPayload } from "../../src/lib/events/types.ts";
 
@@ -107,6 +108,11 @@ async function main(): Promise<void> {
     assert.notEqual(persisted.id, traceId);
     assert.equal(persisted.error, "Error: Provider failed in <path> with api_key='[REDACTED]'");
     assert.doesNotMatch(persisted.error, /sk-live-dashboard-secret|\/srv\/omniroute|\n/);
+    assert.deepEqual(
+      unexpectedCatalogNetworkRequests,
+      [],
+      "the redaction probe must not depend on live provider or registry requests"
+    );
 
     console.log(
       RESULT_PREFIX +
