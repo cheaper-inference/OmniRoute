@@ -705,10 +705,11 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/me/sessions/{id}",
     method: "GET",
     summary: "GET me › sessions › <id>",
-    description: "Get details and recent requests of a session owned by the calling API key.",
+    description:
+      "Get details and recent requests of a session owned by the calling API key. Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.",
     tag: "V1 Me",
     tags: ["V1 Me"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {

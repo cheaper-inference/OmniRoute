@@ -16138,7 +16138,11 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › sessions › <id>"
-      description: Get details and recent requests of a session owned by the calling API key.
+      description: >-
+        Get details and recent requests of a session owned by the calling API key.
+        Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`.
+      security:
+        - BearerAuth: []
       parameters:
         - $ref: "#/components/parameters/ResourceId"
       responses:
@@ -16166,6 +16170,10 @@ paths:
                         latencyMs: { type: integer }
                         status: { type: [string, "null"] }
                         success: { type: boolean }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
         "404":
           description: Session not found
   /api/v1/models/{model}:

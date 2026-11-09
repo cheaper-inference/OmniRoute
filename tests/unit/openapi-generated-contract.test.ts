@@ -5,7 +5,12 @@ import { load } from "js-yaml";
 
 import { OPENAPI_ENDPOINTS, OPENAPI_VERSION } from "../../src/app/docs/lib/openapi.generated";
 
-type Operation = { security?: unknown[]; summary?: string };
+type Operation = {
+  security?: unknown[];
+  summary?: string;
+  description?: string;
+  responses?: Record<string, { $ref?: string; description?: string }>;
+};
 type Spec = {
   info: { version: string };
   paths: Record<string, Record<string, Operation>>;
@@ -42,6 +47,23 @@ test("the API Explorer preserves each operation's explicit authentication requir
       endpoint.requiresAuth,
       Array.isArray(operation.security) && operation.security.length > 0,
       `${endpoint.method} ${endpoint.path}`
+    );
+  }
+});
+
+test("session self-service operations document their required bearer and scope", () => {
+  for (const path of ["/api/v1/me/sessions", "/api/v1/me/sessions/{id}"]) {
+    const operation = spec.paths[path]?.get;
+    assert.ok(operation, `${path} must be documented`);
+    assert.deepEqual(operation.security, [{ BearerAuth: [] }], path);
+    assert.match(operation.description ?? "", /self:usage/);
+    assert.equal(operation.responses?.["401"]?.$ref, "#/components/responses/Unauthorized");
+    assert.match(operation.responses?.["403"]?.description ?? "", /self:usage/);
+    assert.equal(
+      OPENAPI_ENDPOINTS.find((endpoint) => endpoint.path === path && endpoint.method === "GET")
+        ?.requiresAuth,
+      true,
+      path
     );
   }
 });
