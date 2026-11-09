@@ -1010,29 +1010,26 @@ ključu koji ih je izradio. Ponovna reprodukcija čiji je ishod neizvjestan zavr
 
 ## Samoposlužna upotreba (`/api/usage/om-usage`)
 
-Svaki API ključ može čitati **vlastitu** upotrebu i kvote — nije potrebna upravljačka autentikacija. To je krajnja točka koju
-klijent (CLI, ploča OmniCopilot) koristi za prikaz potrošnje vlasniku ključa.
+Svaki API ključ može čitati** svoj vlastiti** korištenje i kvote — bez auth upravljanja. Ovo je krajnja točka koju klijent (CLI, OmniCopilot ploča) koristi da vlasniku ključa pokaže svoju potrošnju.
 
 ```bash
-# Tekstualni oblik (povijesni ugovor — običan tekst za terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Strukturirani oblik — ono što koristi korisničko sučelje
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Ključ mora imati omogućenu opciju **`allowUsageCommand`** (zadano je isključena — upravitelj API ključeva na
-nadzornoj ploči uključuje je za pojedinačni ključ). Bez nje krajnja točka odgovara s `403`.
+Ključ mora imati**`allowUsageCommand`** omogućeno (isključeno prema zadanim postavkama — upravitelj API ključeva na nadzornoj ploči uključuje ga po ključu). Bez toga krajnja točka odgovara `403`.
 
-`?format=json` vraća diskriminirani oblik tako da pozivatelj nikada ne čita podatkovno polje iz odbijenog
-odgovora. U slučaju uspjeha:
+`?format=json` vraća diskriminirani oblik tako da pozivatelj nikada ne čita podatkovno polje s odbijanja. O uspjehu:
 
 ```jsonc
 {
   "allowed": true,
-  // prisutno samo kada je ključ uključio ograničenja upotrebe po ključu (dnevno/tjedno u USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1041,9 +1038,9 @@ odgovora. U slučaju uspjeha:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // snimka kvote odabranog pružatelja ili null kada još ništa nije predmemorirano:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // snimka svake veze, tako da sučelje može prikazati više pružatelja jedan uz drugoga:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1051,65 +1048,49 @@ odgovora. U slučaju uspjeha:
 }
 ```
 
-U slučaju odbijanja (`401` neispravan ključ / `403` nije dopušteno), ista ruta vraća
-`{ "allowed": false, "error": { "message": "…" } }` — prisutan, ali prazan `personal`/`provider`
-(ključ je dopušten, ali još ništa nije pronađeno) predstavlja drugo stanje od odbijanja, a samo JSON oblik
-razlikuje ta stanja.
+Na odbijanje (`401` loš ključ / `403` nije dopušteno) ista ruta vraća `{ "allowed": false, "error": { "message": "…" } }` — prisutan-ali-prazan `personal`/`provider` (ključ dopušten, još ništa nije naučeno) je različito stanje od odbijanja, a razlikuje ih samo oblik JSON.
 
-**Autentikacija:** vlastiti Bearer API ključ pozivatelja, provjeren pomoću `isValidApiKey` — ovo nije
-upravljačko sučelje (`/api/keys/…`), koje ostaje zaštićeno pomoću `requireManagementAuth`.
+**Autent:** nositelj API ključ pozivatelja, potvrđen sa `isValidApiKey` — ovo _nije_ upravljačka površina (`/api/keys/…`), koja ostaje iza `requireManagementAuth`.
 
-### Sirovi postoci kvote u odnosu na postotke prilagođene pragu
+### Neobrađeni postoci kvota u odnosu na granično prilagođene postotke
 
-Pri korištenju `/api/usage/om-usage`, pozivatelji trebaju imati na umu razliku između
-postotaka prikazanih u **običnom tekstualnom izlazu** i strukturiranom **JSON izlazu**:
+Kada konzumiraju `/api/usage/om-usage`, pozivatelji bi trebali obratiti pažnju na razliku između postotaka predstavljenih od strane** izlaz običnog teksta** i strukturirani**JSON izlaz** :
 
-| Aspekt                | Tekstualni oblik (`/api/usage/om-usage` / `@@om-usage`)                                     | JSON oblik (`?format=json`)                                                        |
-| :-------------------- | :------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------- |
-| **Izlazno polje**     | `NN% left` (npr. `20% left`)                                                                | `provider.quotas` / `providers[].quotas`                                           |
-| **Mjerenje**          | **Iskoristivi preostali iznos prilagođen pragu**: preostali kapacitet iznad praga           | **Sirova kvota uzvodnog pružatelja**: neprilagođeno mjerenje pružatelja            |
-| **Skaliranje praga**  | Skalirano putem `effectiveRemainingPercent()` tako da zaštićena pričuva prikazuje `0% left` | Nema (vrijednosti sirove snimke kako ih je prijavio pružatelj)                     |
-| **Podaci o pragu**    | Uključeni u prikazani postotak                                                              | Pohranjeni u `quotaWindowThresholds` po vezi (ili zadane vrijednosti poslužitelja) |
-| **Primarni korisnik** | Interaktivni CLI-ji, terminalski upiti, ljudski operateri                                   | Programatske integracije, nadzorne ploče, analitika, alati za praćenje naplate     |
+| Aspekt                  | Format običnog teksta (`/api/usage/om-usage` / `@@om-usage`)                                               | JSON format (`?format=json`)                                                             |
+| :---------------------- | :--------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| **Izlazno polje**       | `NN% left` (npr. `20% left`)                                                                               | `provider.quotas` / `providers[].quotas`                                                 |
+| **Mjerenje**            | **Upotrebljivi dodatak prilagođen graničnoj vrijednosti** : preostali kapacitet iznad granične vrijednosti | **Neobrađena uzvodna kvota** : neprilagođeno mjerenje davatelja                          |
+| **Odsječno skaliranje** | Skalirano putem `effectiveRemainingPercent()` tako da se zaštićeni rezervat čita kao `0% left`             | Ništa (neobrađene vrijednosti snimke prema izvješću pružatelja)                          |
+| **Podaci o pragu**      | Uključeno u prikazani postotak                                                                             | Pohranjeno u `quotaWindowThresholds` po vezi (ili prema zadanim postavkama poslužitelja) |
+| **Primarni potrošač**   | Interaktivni CLIs, upiti terminala, ljudski operateri                                                      | Programske integracije, nadzorne ploče, analitika, alati za praćenje naplate             |
 
-#### Formula prilagodbe praga
+#### Formula za podešavanje granične vrijednosti
 
-OmniRoute podržava proaktivne pragove kvote radi sprječavanja iscrpljivanja uzvodnog pružatelja (konfigurira se putem veze
-`quotaWindowThresholds`, zadanih vrijednosti pružatelja ili globalnih postavki otpornosti). Kada je na prozoru kvote aktivan prag
-(npr. `cutoff = 25%`), alat za iscrtavanje teksta izračunava preostali iznos na sljedeći način:
+OmniRoute podržava proaktivna ograničenja kvota kako bi se spriječilo iscrpljivanje uzvodnog sustava (konfigurirano putem veze `quotaWindowThresholds`, zadanih postavki pružatelja ili globalnih postavki otpornosti). Kada je granični prag (npr. `cutoff = 25%`) aktivan na prozoru kvote, prikazivač teksta izračunava preostalo dopuštenje kao:
 
-- Ako je `remaining <= cutoff`: vraća `0%`.
-- Ako je `remaining > cutoff`: vraća `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Ako `remaining <= cutoff`: vraća `0%`.
+- Ako `remaining > cutoff`: vraća `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Formatirani tekstualni izlaz zaokružuje ovu vrijednost na najbliži cijeli broj (`Math.round(...)`).
+Izlaz oblikovanog teksta zaokružuje ovo na najbliži cijeli broj (`Math.round(...)`).
 
 #### Ilustrativni primjer
 
-Razmotrite prozor pružatelja s **60% sirove iskorištenosti** (stoga **40% sirove preostale kvote**) i konfiguriranim pragom **25% preostale kvote**:
+Razmotrite prozor pružatelja usluga s** 60% sirove upotrebe** (stoga** 40% sirove preostale kvote** ) i konfigurirano** 25% preostale kvote** prag:
 
-| Prikaz                             | Izračun                                            | Preostalo |            Implicitno iskorišteno             |
-| :--------------------------------- | :------------------------------------------------- | :-------: | :-------------------------------------------: |
-| **Sirovi JSON (`?format=json`)**   | Uzvodna snimka (`quotas[window]`)                  |  **40%**  |                    **60%**                    |
-| **Tekstualni format (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (ako se izračunava `100 - remaining`) |
+| Reprezentacija                       | Kalkulacija                                        | Preostalo |             Implicitno korišteno              |
+| :----------------------------------- | :------------------------------------------------- | :-------: | :-------------------------------------------: |
+| **Neobrađeni JSON (`?format=json`)** | Uzvodna snimka (`quotas[window]`)                  |  **40%**  |                    **60%**                    |
+| **Format teksta (`NN% left`)**       | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (ako se izračunava `100 - remaining`) |
 
-- **Zašto tekst prikazuje 20% preostalog:** Od fizički preostalih 40% kvote na računu, 25% rezervira pravilo
-  praga. Pozivatelju je preostalo samo 15% od 75% iskoristivog prostora prije nego što usmjerivač prestane
-  usmjeravati promet na ovu vezu. Skaliranje osigurava da veza signalizira iscrpljenost (`0% left`) točno u
-  trenutku kada će usmjeravanje prestati.
-- **Zašto JSON zadržava sirove vrijednosti:** JSON sadržaj vraća točnu snimku pružatelja (`UsageSnapshot`),
-  pa vanjski alati imaju pristup stvarnoj iskorištenosti uzvodnog sustava i `quotaWindowThresholds` na razini
-  veze, bez gubitničkog skaliranja na strani poslužitelja.
+- **Zašto tekst prikazuje 20% lijevo:** Od 40% fizičke kvote preostale na računu, 25% je rezervirano prema politici prekida. Pozivatelj ima samo 15% od 75% iskoristivog slobodnog prostora prije nego što usmjerivač prestane usmjeravati na ovu vezu. Skaliranje osigurava iscrpljenost signala veze (`0% left`) točno kada će usmjeravanje prestati.
+- **Zašto JSON čuva sirove vrijednosti:** Korisni teret JSON vraća točnu snimku pružatelja (`UsageSnapshot`) tako da vanjski alati imaju pristup korištenju zemaljske istine uzvodno i `quotaWindowThresholds` -u na razini veze bez skaliranja s gubitkom na strani poslužitelja.
 
 #### Smjernice za migraciju potrošača
 
-Ako je vanjska integracija (poput dodatka za uređivač ili proširenja agenta) prethodno dohvaćala tekstualnu
-krajnju točku (`NN% left`) i izračunavala postotak iskorištenosti kao `100 - NN`, migracija na `?format=json` znači:
+Ako je vanjska integracija (kao što je dodatak za uređivač ili proširenje agenta) prethodno skrapala krajnju točku teksta (`NN% left`) i izračunala iskorišteni postotak kao `100 - NN`, migriranje na `?format=json` znači:
 
-- Čitanje sirovih JSON vrijednosti odražavat će **stvarnu potrošnju uzvodnog sustava** (60% iskorišteno u
-  gornjem primjeru).
-- Ako integracija želi zadržati semantiku iskoristivog dopuštenja tekstualne krajnje točke, može lokalno
-  na strani klijenta izračunati formulu efektivno preostale vrijednosti koristeći `quotaWindowThresholds`
-  za nadjačavanja na razini veze.
+- Čitanje sirovih JSON vrijednosti odražavat će se** stvarna uzvodna potrošnja** (60% korišteno u gornjem primjeru).
+- Ako integracija želi sačuvati semantiku upotrebljivog dopuštanja krajnje točke teksta, može procijeniti efektivnu preostalu formulu na strani klijenta koristeći `quotaWindowThresholds` za nadjačavanja na razini veze.
 
 ---
 
@@ -1309,36 +1290,37 @@ Implementacija: `getResolvedModelCapabilitiesWithLimitSources()` u `src/lib/mode
 
 `PATCH /api/keys/{id}` ažurira dopuštenja postojećeg ključa. Kao i svaka `/api/keys*` ruta, potrebna je autorizacija upravljanja (pogledajte [Provjera autentičnosti upravljanja](../guides/MANAGEMENT-AUTH.md) ), a ne ključ zaključka. Pošaljite samo ona polja koja želite promijeniti; zahtjev s niti jednim od njih se odbija sa `No valid fields to update`. Prihvaćena polja definirana su pomoću `updateKeyPermissionsSchema` u `src/shared/validation/schemas/keys.ts`.
 
-| Polje                                       | Tip                                                                    | Bilješke                                                                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | niz, 1-200 znakova                                                     |                                                                                                                            |
-| `isActive`                                  | Booleov                                                                |                                                                                                                            |
-| `isBanned`                                  | Booleov                                                                |                                                                                                                            |
-| `expiresAt`                                 | ISO 8601 datumvrijeme ili `null`                                       | `null` briše istek                                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` mora biti prazno kada je način rada `all`                                                                  |
-| `allowedModels`, `blockedModels`            | niz nizova, do 1000                                                    |                                                                                                                            |
-| `allowedCombos`                             | niz nizova, do 500                                                     | Vrata čije kombinacije ključ može pozvati; izravnim modelima upravlja `modelAccessMode` / `allowedModels`                  |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` mora biti neprazan kada `restricted` i prazan kada je `all`                                           |
-| `allowedConnections`                        | niz UUIDs, do 100                                                      |                                                                                                                            |
-| `allowAutoCombos`                           | Booleov                                                                | `false` odbija zahtjeve za `auto/*` modele s ovim ključem; dopušteni su ključevi koji to nikada nisu postavili             |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Što `GET /v1/models` navodi za ovaj ključ (samo kombinacije, samo modeli ili oboje); ne mijenja ono što ključ može pozvati |
-| `forcedModel`                               | niz do 300 znakova, ili `null`                                         | Usmjerava zahtjeve za chat na ovaj model/combo, preko `X-Route-Model` i `body.model`; ograničenja ključa i dalje vrijede   |
-| `noLog`, `autoResolve`                      | Booleov                                                                |                                                                                                                            |
-| `throttleDelayMs`                           | cijeli broj, 0-300000                                                  |                                                                                                                            |
-| `maxSessions`                               | cijeli broj, 0-10000                                                   |                                                                                                                            |
-| `rateLimits`                                | niz `{ limit, window }` (pozitivnih cijelih brojeva, do 50) ili `null` | `null` briše granice                                                                                                       |
-| `accessSchedule`                            | objekt rasporeda ili `null`                                            | `null` briše raspored                                                                                                      |
-| `scopes`                                    | niz nizova, do 32                                                      |                                                                                                                            |
-| `allowedEndpoints`                          | niz nizova, do 20                                                      |                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Pogledajte [Zaobilaženje predmemorije po ključu](#per-key-cache-bypass)                                                    |
-| `compressionEnabled`                        | Booleov                                                                |                                                                                                                            |
-| `codexServiceMode`                          | jedan od načina usluge Codex                                           |                                                                                                                            |
-| `disableNonPublicModels`                    | Booleov                                                                |                                                                                                                            |
-| `allowUsageCommand`                         | Booleov                                                                |                                                                                                                            |
-| `usageLimitEnabled`                         | Booleov                                                                |                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | broj >= 0 ili `null`                                                   |                                                                                                                            |
-| `chaosModeEnabled`                          | Booleov                                                                |                                                                                                                            |
+| Polje                                       | Tip                                                                    | Bilješke                                                                                                                                                                                                                                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | niz, 1-200 znakova                                                     |                                                                                                                                                                                                                                                                                  |
+| `isActive`                                  | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `isBanned`                                  | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `expiresAt`                                 | ISO 8601 datumvrijeme ili `null`                                       | `null` briše istek                                                                                                                                                                                                                                                               |
+| `modelAccessMode`                           | `all` \| `restricted`                                                  | `allowedModels` mora biti prazno kada je način rada `all`                                                                                                                                                                                                                        |
+| `allowedModels`, `blockedModels`            | niz nizova, do 1000                                                    |                                                                                                                                                                                                                                                                                  |
+| `allowedCombos`                             | niz nizova, do 500                                                     | Vrata čije kombinacije ključ može pozvati; izravnim modelima upravlja `modelAccessMode` / `allowedModels`                                                                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                  | `allowedConnections` mora biti neprazan kada `restricted` i prazan kada je `all`                                                                                                                                                                                                 |
+| `allowedConnections`                        | niz UUIDs, do 100                                                      |                                                                                                                                                                                                                                                                                  |
+| `allowAutoCombos`                           | Booleov                                                                | `false` odbija zahtjeve za `auto/*` modele s ovim ključem; dopušteni su ključevi koji to nikada nisu postavili                                                                                                                                                                   |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                          | Što `GET /v1/models` navodi za ovaj ključ (samo kombinacije, samo modeli ili oboje); ne mijenja ono što ključ može pozvati                                                                                                                                                       |
+| `forcedModel`                               | niz do 300 znakova, ili `null`                                         | Usmjerava zahtjeve za chat na ovaj model/combo, preko `X-Route-Model` i `body.model`; ograničenja ključa i dalje vrijede                                                                                                                                                         |
+| `noLog`, `autoResolve`                      | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `throttleDelayMs`                           | cijeli broj, 0-300000                                                  |                                                                                                                                                                                                                                                                                  |
+| `maxSessions`                               | cijeli broj, 0-10000                                                   |                                                                                                                                                                                                                                                                                  |
+| `rateLimits`                                | niz `{ limit, window }` (pozitivnih cijelih brojeva, do 50) ili `null` | `null` briše granice                                                                                                                                                                                                                                                             |
+| `accessSchedule`                            | objekt rasporeda ili `null`                                            | `null` briše raspored                                                                                                                                                                                                                                                            |
+| `scopes`                                    | niz nizova, do 32                                                      |                                                                                                                                                                                                                                                                                  |
+| `allowedEndpoints`                          | niz nizova, do 20                                                      |                                                                                                                                                                                                                                                                                  |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                     |                                                                                                                                                                                                                                                                                  |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                   | Pogledajte [Zaobilaženje predmemorije po ključu](#per-key-cache-bypass)                                                                                                                                                                                                          |
+| `compressionEnabled`                        | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `codexServiceMode`                          | jedan od načina usluge Codex                                           |                                                                                                                                                                                                                                                                                  |
+| `disableNonPublicModels`                    | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `allowUsageCommand`                         | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `usageLimitEnabled`                         | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | broj >= 0 ili `null`                                                   |                                                                                                                                                                                                                                                                                  |
+| `fiveHourUsageLimitUsd`                     | broj >= 0 ili `null`                                                   | Tekući 5-satni USD proračun, koji se provodi poput dnevnih i tjednih ograničenja (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` je kada najstariji trošak u prozoru stari, što može ostaviti ključ koji je daleko iznad svog ograničenja i dalje blokiran. |
+| `chaosModeEnabled`                          | Booleov                                                                |                                                                                                                                                                                                                                                                                  |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

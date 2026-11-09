@@ -293,70 +293,53 @@ valuri riżolti jiddaħħlu fl-inputs eżistenti `config.modePack` / `config.bud
 `config.budgetFallback` tal-engine. Il-`config.budgetFallback` maħżun ta’ combo ("strict" |
 "cheapest") jistabbilixxi l-politika persistenti; il-header jissostitwiha għal talba waħda.
 
-## L-Istrateġiji Kollha tar-Rotot
+## L-Istrateġiji kollha tar-Rotot
 
-Il-magna tal-combos ta' OmniRoute tappoġġja **20 strateġija tar-rotot** (iddikjarati f'`src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Il-magna Auto Combo nnifisha hija esposta taħt l-istrateġija `auto`; l-oħrajn huma disponibbli għal combos persistiti.
+OmniRoute's jappoġġja magna combo** 20 strateġija ta' rotta** (iddikjarat fi `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Il-magna Auto Combo nnifisha hija esposta taħt l-istrateġija `auto` ; l-oħrajn huma disponibbli għal combos persistenti.
 
-| Strateġija          | Deskrizzjoni                                                                                                                                                                                                                             |
-| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Lista ordnata bl-ewwel mira, bi prijorità espliċita                                                                                                                                                                                      |
-| `weighted`          | Għażla każwali ppeżata skont il-piż ta' kull mira                                                                                                                                                                                        |
-| `round-robin`       | Dawwar mal-miri fl-ordni (f'lottijiet; ara hawn taħt)                                                                                                                                                                                    |
-| `context-relay`     | Għaddi l-kuntest bejn il-miri (konverżazzjonijiet twal)                                                                                                                                                                                  |
-| `fill-first`        | Imla l-kwota ta' kull mira qabel tgħaddi għal dik li jmiss                                                                                                                                                                               |
-| `p2c`               | Ibbilanċjar każwali tat-tagħbija bil-metodu tal-qawwa ta' 2 għażliet                                                                                                                                                                     |
-| `random`            | Għażla każwali uniformi                                                                                                                                                                                                                  |
-| `least-used`        | Agħżel il-mira bl-inqas tagħbija attwali                                                                                                                                                                                                 |
-| `cost-optimized`    | Imminimizza l-$ għal kull talba skont l-ipprezzar tal-katalgu                                                                                                                                                                            |
-| `reset-aware` ⭐    | Ipprijoritizza skont il-ħin tar-risettjar tal-kwota — intervalli ta' risettjar qosra jiġu kklassifikati ogħla                                                                                                                            |
-| `reset-window`      | Ippreferi miri li l-intervall tal-kwota tagħhom se jiġi risettjat l-aktar kmieni                                                                                                                                                         |
-| `headroom`          | Agħżel il-mira bl-akbar marġni ta' kwota li fadal                                                                                                                                                                                        |
-| `quota-weighted`    | Aqbeż il-kontijiet eżawriti, imbagħad agħżel fost il-bqija proporzjonalment għall-kwota li fadal diviża bit-tagħbija għaddejja; il-konverżazzjonijiet eżistenti jibqgħu marbuta mal-istess mira                                          |
-| `strict-random`     | Għażla każwali mingħajr tneħħija ta' repetizzjonijiet                                                                                                                                                                                    |
-| `auto`              | Uża l-punteġġ ta' Auto Combo (16-il fattur) — **rakkomandat**                                                                                                                                                                            |
-| `lkgp`              | L-Aħħar Rotta Magħrufa li Taħdem (torbot mal-aħħar fornitur li rnexxa, imbagħad tirrikorri għar-regoli)                                                                                                                                  |
-| `context-optimized` | Agħżel il-mira li taqbel l-aħjar mad-daqs attwali tal-kuntest                                                                                                                                                                            |
-| `cache-optimized`   | Ordna mill-ġdid il-miri skont l-affinità tal-cache tal-prompt — il-konnessjoni bl-ogħla probabbiltà li diġà jkollha l-prefiss fil-cache ta' din it-talba tiġi ppruvata l-ewwel (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Ibgħat it-talba lil grupp ta' mudelli b'mod parallel, imbagħad issintetizza tweġiba waħda permezz ta' ġudikatur (ara hawn taħt)                                                                                                          |
-| `pipeline`          | Ħaddem il-miri sekwenzjalment, billi tgħaddi l-output ta' kull pass bħala l-input tal-pass li jmiss; tingħata lura biss it-tweġiba finali (#6396)                                                                                        |
+| Strateġija          | Deskrizzjoni                                                                                                                                                                                                   |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Lista ordnata tal-ewwel mira bi prijorità espliċita                                                                                                                                                            |
+| `weighted`          | Peżat bl-addoċċ b'piż għal kull mira                                                                                                                                                                           |
+| `round-robin`       | Iddeċiedi tul il-miri fl-ordni (magħqud; ara hawn taħt)                                                                                                                                                        |
+| `context-relay`     | Ittrasferixxi l-kuntest bejn il-miri (konversazzjonijiet twal)                                                                                                                                                 |
+| `fill-first`        | Imla l-kwota ta 'kull mira qabel ma timxi għal li jmiss                                                                                                                                                        |
+| `p2c`               | Power-of-2-choices random load balancing                                                                                                                                                                       |
+| `random`            | Għażla każwali uniformi                                                                                                                                                                                        |
+| `least-used`        | Agħżel mira bl-inqas tagħbija kurrenti                                                                                                                                                                         |
+| `cost-optimized`    | Imminimizza $ għal kull talba mogħtija prezzijiet katalogu                                                                                                                                                     |
+| `reset-aware` ⭐    | Prijoritizza bil-kwota reset time — short reset windows kklassifikati ogħla                                                                                                                                    |
+| `reset-window`      | Ippreferi miri li t-tieqa tal-kwota tagħhom tirrisettja mill-aktar fis                                                                                                                                         |
+| `headroom`          | Agħżel il-mira bl-iktar spazju ta' kwota li fadal                                                                                                                                                              |
+| `quota-weighted`    | Aqbeż il-kontijiet eżawriti, imbagħad agħżel fost il-bqija fi proporzjon mal-kwota li jibqa' diviża bit-tagħbija waqt it-titjira; konversazzjonijiet eżistenti jibqgħu ippinjat                                |
+| `strict-random`     | Bl-addoċċ mingħajr deduplikazzjoni tar-repetizzjonijiet                                                                                                                                                        |
+| `auto`              | Uża Auto Combo punteġġ (16-fattur) —** rakkomandat**                                                                                                                                                           |
+| `lkgp`              | L-Aħħar Magħruf-Tajjeb (labar għall-aħħar fornitur ta' suċċess, imbagħad taqa' lura għar-regoli)                                                                                                               |
+| `context-optimized` | Agħżel mira bl-aħjar mod għad-daqs tal-kuntest attwali                                                                                                                                                         |
+| `cache-optimized`   | Ordna mill-ġdid il-miri b'affinità fil-pront-cache — l-ewwel li l-konnessjoni li x'aktarx iżżomm il-prefiss fil-cache ta' din it-talba tiġi ppruvata (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Tiftaħ fuq bord ta' mudelli b'mod parallel, imbagħad sintetizza tweġiba waħda permezz ta' imħallef (ara hawn taħt)                                                                                             |
+| `pipeline`          | Mexxi l-miri b'mod sekwenzjali, billi tpoġġi l-output ta 'kull pass fl-input tal-pass li jmiss; tingħata lura biss it-tweġiba finali (#6396)                                                                   |
 
-⭐ = Ġdid f'v3.8.0 · 🧬 = Ġdid f'v3.8.36
+⭐ = Ġdid fi v3.8.0 · 🧬 = Ġdid fi v3.8.36
 
-### Is-semantika ta' `weighted`
+### `weighted` semantika
 
-`weighted` huwa **tlugħ każwali proporzjonali għal kull talba**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), mhux mekkaniżmu ta' ekwalizzazzjoni:
+`weighted` hija a** tlugħ każwali proporzjonali għal kull talba** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), mhux equalizer:
 
-- Kull talba tiġbed **pass wieħed** bi probabbiltà `weight / totalWeight`; il-passi li jifdal
-  jiġu ordnati skont il-piż f'ordni dixxendenti bħala l-katina ta' riżerva għal dik it-talba.
-- Pass li l-piż tiegħu huwa `0` (jew nieqes) **qatt ma jintgħażel** sakemm xi pass ieħor ikollu
-  piż > 0 — jista' jservi biss bħala riżerva wara li jfalli l-pass magħżul. Huwa biss meta l-piżijiet
-  **kollha** jkunu 0 li l-għażla ssir uniformi.
-- Passi li l-miri tagħhom ikunu kollha mhux disponibbli — is-circuit breaker tal-fornitur ikun `OPEN`, il-konnessjoni
-  tkun f'cooldown, jew il-mudell ikun imblukkat — jitneħħew mit-tlugħ qabel ma jsir
-  (`open-sse/services/combo/targetResolution.ts`), għalhekk pass wieħed li jkun qed jaħdem jista' temporanjament
-  jintgħażel għal kull talba.
-- `stickyWeightedLimit` (konfigurazzjoni tal-combo, valur predefinit `1` = mitfi) iżomm il-pass magħżul marbut għal dak l-għadd
-  ta' suċċessi konsekuttivi qabel ma jerġa' jsir it-tlugħ.
+- Kull talba tiġbed** wieħed** pass bi probabbiltà `weight / totalWeight`; il-passi li jifdal huma ordnati skont il-piż dixxendenti bħala l-katina ta' riżerva għal dik it-talba.
+- Tarġa li l-piż tiegħu huwa `0` (jew nieqes) huwa** qatt mfassal** filwaqt li kwalunkwe pass ieħor għandu piż > 0 — jista’ jservi biss bħala riżerva wara li l-pass imfassal ifalli. Meta biss** kollha** il-piżijiet huma 0 l-għażla ssir uniformi.
+- Passi li l-miri tagħhom huma kollha mhux disponibbli — provider circuit breaker `OPEN`, cooldown tal-konnessjoni, lockout mudell — jitneħħew mit-tlugħ qabel ma jiġri (`open-sse/services/combo/targetResolution.ts`), sabiex pass b'saħħtu wieħed jista 'temporanjament jirbaħ kull talba.
+- `stickyWeightedLimit` (konfigurazzjoni kombinata, default `1` = off) ipinn il-pass imfassal għal dak il-ħafna suċċessi konsekuttivi qabel ma jerġa 'jiġbed.
 
-Għal rotazzjoni stretta uża `round-robin`; piżijiet indaqs fuq `weighted` jagħtu bilanċ
-statistiku — mhux strett.
+Għal rotazzjoni stretta uża `round-robin`; piżijiet ugwali fuq `weighted` jagħtu statistika — mhux strett — bilanċ.
 
-### Modalità ta’ pipeline aġentika
+### Modalità pipeline aġent
 
-Kombinazzjoni `pipeline` b’mill-inqas żewġ mudelli tista’ tagħżel ir-routing tal-pjanifikatur/eżekutur
-permezz ta’ `config.agenticOrchestration.enabled`. L-ewwel mira tieħu ħsieb l-ippjanar u t-tweġibiet finali;
-it-tieni mira toħroġ sejħiet tal-għodod nattivi għall-klijent. OmniRoute jidentifika l-kontinwazzjonijiet
-tar-riżultati tal-għodod mill-protokoll tat-talba, jistaqsi lill-pjanifikatur jekk hemmx bżonn ċiklu ieħor
-tal-għodod, u b’mod dinamiku jagħmel jew lill-eżekutur jew lill-pjanifikatur il-pass finali
-li jidher lill-klijent.
+A `pipeline` combo b'mill-inqas żewġ mudelli jistgħu jagħżlu planner/executor routing ma `config.agenticOrchestration.enabled`. L-ewwel mira għandha l-ippjanar u t-tweġibiet finali; it-tieni mira temetti sejħiet għodda indiġeni tal-klijent. OmniRoute jiskopri l-kontinwazzjonijiet tar-riżultat tal-għodda mill-protokoll tat-talba, jistaqsi lill-pjanifikatur jekk hemmx bżonn ta 'rawnd ta' għodda oħra, u dinamikament jagħmel jew lill-eżekutur jew lill-pjanifikatur il-pass finali li jiffaċċja l-klijent.
 
-Mudelli addizzjonali wara t-tieni mira jiġu ordnati bħala riżervi tal-eżekutur. Rispons
-HTTP li jfalli jew eċċezzjoni tat-trasport iwasslu għall-eżekutur li jmiss, filwaqt li jinżammu
-l-istess deċiżjoni tal-pjanifikatur u għodod nattivi, iżda jintużaw il-prompt tal-pass u
-l-konnessjoni riżolta ta’ dak l-eżekutur. L-ewwel rispons li jirnexxi jintbagħat lura mingħajr tibdil, inkluż
-l-istreaming SSE; fallimenti wara li jibda stream b’suċċess ma jistgħux jerġgħu jiġu ppruvati hawnhekk.
-Jekk l-eżekuturi kollha jfallu, jintbagħat lura l-aħħar falliment. L-abbandun mill-klijent iwaqqaf id-dispaċċ.
+Fuq il-kontinwazzjonijiet tar-riżultat tal-għodda, OmniRoute twaqqaf ukoll l-eżekuzzjoni meta żewġ rawnds konsekuttivi kompluti jirrepetu l-istess sejħiet tal-għodda b'riżultati mhux mibdula, jew meta kull riżultat immarkat b'mod espliċitu f'żewġ rawnds konsekuttivi fallew. Ir-riżultati mibdula jippermettu sejħiet ripetuti (per eżempju, polling). Il-gwardja reset fuq talba ġdida ta' utent, tiġbor sejħiet paralleli f'rawnd wieħed, u tappoġġja Anthropic, Tlestija ta' Chat, Risposti u storja Gemini. Il-pjanifikatur jirċievi r-raġuni u jippossjedi t-tweġiba finali anki jekk jitlob rawnd ta 'għodda oħra.
+
+Mudelli addizzjonali wara t-tieni mira huma ordnati backups eżekutur. Rispons HTTP fallut jew eċċezzjoni tat-trasport tavvanza lill-eżekutur li jmiss, li jġorr l-istess deċiżjoni tal-pjanifikatur u għodod indiġeni iżda l-pass ta 'dak l-eżekutur stess konnessjoni fil-pront u riżolta. L-ewwel tweġiba b'suċċess hija rritornata mhux mibdula, inkluż SSE streaming; fallimenti wara li jibda fluss b'suċċess ma jistgħux jerġgħu jiġu ppruvati hawn. Jekk l-eżekuturi kollha jfallu, l-aħħar falliment jiġi rritornat. Klijent abort stop dispatch.
 
 ```json
 {
@@ -368,35 +351,17 @@ Jekk l-eżekuturi kollha jfallu, jintbagħat lura l-aħħar falliment. L-abbandu
 }
 ```
 
-L-eżekutur jista’ joħroġ diversi sejħiet indipendenti f’rispons wieħed. Sejħiet dipendenti jiġu
-ġestiti f’ċikli sussegwenti tar-riżultati tal-għodod tal-klijent, bil-pjanifikatur jirrevedi kull riżultat.
-`maxToolRounds` għandu valur predefinit ta’ `8` u jaċċetta `1`–`32`; ladarba jintlaħaq, il-pjanifikatur irid
-jipproduċi l-aħjar tweġiba finali disponibbli. Id-deċiżjonijiet interni tal-pjanifikatur jinżammu f’buffer, filwaqt li
-r-rispons magħżul li jidher lill-klijent iżomm il-preferenza oriġinali tal-istreaming.
+L-eżekutur jista' jarmi sejħiet indipendenti multipli f'rispons wieħed. Is-sejħiet dipendenti jiġu ttrattati f'dawriet aktar tard tar-riżultat tal-għodda tal-klijent, bil-pjanifikatur jirrevedi kull riżultat. `maxToolRounds` default `8` u jaċċetta `1`–`32`; ladarba jintlaħaq, il-pjanifikatur għandu jipproduċi l-aħjar tweġiba finali disponibbli. Id-deċiżjonijiet tal-pjanifikatur intern huma baferjati, filwaqt li r-rispons magħżul li jiffaċċja l-klijent jippreserva l-preferenza tal-istreaming oriġinali.
 
-### Lott persistenti `round-robin` u espansjoni tal-kontijiet
+### `round-robin` lott li jwaħħal u espansjoni tal-kont
 
-Round-robin jaħdem f’lottijiet, mhux b’talba waħda għal kull pass:
+Round-robin huwa lott, mhux talba waħda għal kull pass:
 
-- `stickyRoundRobinLimit` (il-konfigurazzjoni tal-kombinazzjoni, imbagħad `comboStickyRoundRobinLimit`, imbagħad
-  `settings.stickyRoundRobinLimit`, valur predefinit **3**) iżomm l-istess mira għal dak l-għadd ta’
-  suċċessi konsekuttivi qabel ma jdur. Issettja l-override tal-kombinazzjoni għal `1` għal rotazzjoni ma’
-  kull talba. L-editur tal-kombinazzjonijiet juri l-valur effettiv u minn liema saff ġie.
-- `connectionAwareExpansion` (il-konfigurazzjoni tal-kombinazzjoni, imbagħad is-settings, valur predefinit **false**) jespandi
-  kull pass fil-livell tal-fornitur f’miri għal kull kont qabel ir-rotazzjoni. L-istrateġiji ta’ Group-B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) iżommu dehra fil-livell tal-fornitur sakemm din tiġi attivata. L-editur tal-kombinazzjonijiet joffri
-  inherit / on / off; inherit juża l-valur predefinit globali (off).
-- Ir-routing skont il-lokalità tal-cache tal-prompt (`promptCacheAffinityEnabled`, valur predefinit **true**) jerġa’ jordna
-  l-konnessjonijiet ippinjati sabiex cache keys li jaqblu jibqgħu fuq kont wieħed. Dan jieħu preċedenza fuq
-  ir-rotazzjoni round-robin u weighted fost passi ppinnjati għal kull kont. Itfih taħt
-  Settings → Combo defaults jekk teħtieġ rotazzjoni stretta. Ma hemm l-ebda override għal kull kombinazzjoni.
+- `stickyRoundRobinLimit` (konfigurazzjoni kombinata, imbagħad `comboStickyRoundRobinLimit`, imbagħad `settings.stickyRoundRobinLimit`, default** 3** ) iżomm l-istess mira għal dak ħafna suċċessi konsekuttivi qabel ma jdur. Issettja l-combo override għal `1` għal rotazzjoni ta 'talba waħda. L-editur combo juri l-valur effettiv u minn liema saff ġie.
+- `connectionAwareExpansion` (konfigurazzjoni kombo, imbagħad settings, default** falza** ) tespandi kull pass fil-livell tal-fornitur f'miri għal kull kont qabel ir-rotazzjoni. L-istrateġiji tal-Grupp B (prijoritarji, peżati, round-robin, każwali, p2c, l-inqas użati, kost-ottimizzati, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fużjoni, pipeline) iżommu viżjoni fil-livell tal-fornitur sakemm din tkun mixgħula. L-editur combo jesponi wiret / mixgħul / mitfi; wiret juża l-inadempjenza globali (off).
+- Rotot tal-lokalità fil-pront-cache (`promptCacheAffinityEnabled`, default** veru** ) jordna mill-ġdid konnessjonijiet ippinjati sabiex iċ-ċwievet tal-cache li jaqblu jibqgħu fuq kont wieħed. Tieħu preċedenza fuq ir-round-robin u r-rotazzjoni peżata fuq passi ippinjati għal kull kont. Itfih taħt Settings → Combo defaults jekk għandek bżonn rotazzjoni stretta. M'hemm l-ebda override per-combo.
 
-Għal rotazzjoni bejn diversi kontijiet fuq mudell wieħed, ippreferi **pass wieħed ta’ kont dinamiku** (`connectionId`
-vojt, il-pool kollu) b’limitu persistenti ta’ `1`, mhux tliet `connectionId`s ippinjati.
-Passi ppinnjati flimkien mal-affinità jikkonverġu fuq l-istess kont anki waqt li l-counter RR
-jibqa’ javvanza.
+Għal rotazzjoni b'ħafna kontijiet fuq mudell wieħed, ippreferi** pass wieħed ta' kont dinamiku** ( `connectionId` vojta , pool kollu) b limitu li jwaħħal `1`, mhux tliet pinned `connectionId` s. Passi ippinjat flimkien ma' affinità kollass fuq l-istess kont anke waqt li l-counter RR javvanza.
 
 ## Strateġija ta’ Fużjoni
 
