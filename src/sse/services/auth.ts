@@ -1452,6 +1452,15 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
+      // Class names and counts only: an operator sees why the pool is empty without ids or key state.
+      const rejectReasons: Record<string, number> = {};
+      for (const status of connectionFilterStatus.values()) {
+        rejectReasons[status] = (rejectReasons[status] ?? 0) + 1;
+      }
+      const rejectSummary = Object.entries(rejectReasons)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([reason, count]) => `${reason}=${count}`)
+        .join(", ");
       // Only plan-eligible accounts may contribute to this model's retry/cooldown hint.
       const planEligible = filterCodexPlanEligible(provider, connections, requestedModel);
       const cooldownStates: CooldownInspectionState[] = planEligible.map((connection) => {
@@ -1509,8 +1518,8 @@ export async function getProviderCredentials(
         log.warn(
           "AUTH",
           allBlockedByModelCooldown
-            ? `${provider} | all ${connections.length} active accounts cooling down for model ${requestedModel} (${formatRetryAfter(earliest)}) | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
-            : `${provider} | all ${connections.length} active accounts rate limited (${formatRetryAfter(earliest)}) | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
+            ? `${provider} | all ${connections.length} active accounts cooling down for model ${requestedModel} (${formatRetryAfter(earliest)}) | rejected: ${rejectSummary} | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
+            : `${provider} | all ${connections.length} active accounts rate limited (${formatRetryAfter(earliest)}) | rejected: ${rejectSummary} | lastErrorCode=${earliestConn?.errorCode}, lastError=${earliestConn?.lastError?.slice(0, 50)}`
         );
         invalidateManagedLease(
           options,
@@ -1526,6 +1535,7 @@ export async function getProviderCredentials(
           cooldownModel: allBlockedByModelCooldown ? requestedModel : null,
           ...copilotRejectionFlag(provider, requestedModel, connections, connectionFilterStatus),
           connectionsCount: connections.length,
+          rejectReasons,
         };
       }
       const syntheticFallback = await maybeSyntheticNoAuthFallback(
@@ -1544,7 +1554,10 @@ export async function getProviderCredentials(
         return buildAllExpiredCredentials(terminalConnections);
       }
       invalidateManagedLease(options, "CONNECTION_INELIGIBLE");
-      log.warn("AUTH", `${provider} | all ${connections.length} accounts unavailable`);
+      log.warn(
+        "AUTH",
+        `${provider} | all ${connections.length} accounts unavailable | rejected: ${rejectSummary}`
+      );
       return null;
     }
 
