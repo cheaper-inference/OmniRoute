@@ -2,11 +2,13 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { Progress } from "@omniroute/ui-kit/progress";
 import type { HealthAccount } from "./healthOverview";
 import {
   displayAccount,
   DISPLAY_COLORS,
   DISPLAY_LABELS,
+  isCooldownKind,
   type DisplayAccount,
 } from "./availabilityDisplay";
 import { useHealthText } from "./useHealthText";
@@ -39,7 +41,7 @@ function tooltipMessage(
 
 function TooltipStatus({ account }: { account: DisplayAccount }) {
   const { t, all, format, recovery } = useHealthText();
-  const cooling = account.kind === "cd5" || account.kind === "cdw";
+  const cooling = isCooldownKind(account.kind);
   const thresholdBlocked = account.reasons.some(
     (reason) =>
       reason.type === "quota" && (reason.percent ?? 0) > 0 && Number.isFinite(reason.cutoff)
@@ -122,23 +124,14 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
                 : ` · ${t("healthRecoveryUnknown")}`}
             </span>
           </div>
-          <div
-            role="progressbar"
+          {/* Remaining quota: any visible fill is the success tone (an empty bar draws nothing). */}
+          <Progress
+            className="mt-1"
             aria-label={windowLabel(cell)}
-            aria-valuenow={cell.percent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            className="mt-1 h-[6px] overflow-hidden rounded-full bg-border/60"
-          >
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${cell.percent}%`,
-                background:
-                  cell.percent > 0 ? "var(--color-success)" : DISPLAY_COLORS[account.kind],
-              }}
-            />
-          </div>
+            value={cell.percent}
+            tone="success"
+            animate={false}
+          />
         </div>
       ))}
     </div>

@@ -118,17 +118,17 @@ Ufikiaji kupitia: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Usanidi wa Watoa Huduma
+## 📖 Usanidi wa Mtoa Huduma
 
-Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashibodi → Watoa Huduma → Leta kutoka kwenye faili**. Safu wima hufuata mpangilio maalum (`provider,name,apiKey,baseUrl,priority`); `provider` lazima iwe tayari ipo kama mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Kuleta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
+Ili kuongeza kwa wingi miunganisho ya funguo za API kutoka kwenye faili la CSV au JSON, tumia **Dashboard → Providers → Import from file**. Safu wima hutegemea mpangilio (`provider,name,apiKey,baseUrl,priority`); `provider` lazima awe tayari mtoa huduma anayesimamiwa au nodi inayooana. Tazama [Leta watoa huduma kutoka kwenye faili la CSV au JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Watoa Huduma wa Usajili
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Claude Code
-→ Kuingia kwa OAuth → Uonyeshaji upya wa tokeni kiotomatiki
+Dashboard → Providers → Connect Claude Code
+→ Kuingia kupitia OAuth → Usasishaji otomatiki wa tokeni
 → Ufuatiliaji wa mgao wa saa 5 + wa kila wiki
 
 Miundo:
@@ -137,18 +137,20 @@ Miundo:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Kidokezo cha Kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila muundo!
+**Dokezo la kitaalamu:** Tumia Opus kwa kazi changamano, na Sonnet kwa kasi. OmniRoute hufuatilia mgao kwa kila modeli!
 
-Hakuna kivinjari kwenye seva pangishi ya OmniRoute? Endesha `claude setup-token` mahali popote ambapo Claude Code imeingia, kisha ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code kwa kutumia tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Je, huna kivinjari kwenye mwenyeji wa OmniRoute? Tekeleza `claude setup-token` mahali popote Claude Code ilipoingia na ubandike tokeni ya mwaka mmoja kwenye kichupo cha **Setup Token**. Tazama [Claude Code yenye tokeni ya usanidi](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Njia zinazooana na Claude na Claude Code huhifadhi kiwango cha juhudi ya kufikiri cha `max` kwa miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, kwa hivyo OmniRoute hushusha ombi hilo hadi kwenye bajeti ya juu ya kufikiri kabla ya kulituma kwa mtoa huduma wa juu.
+Njia zinazooana na Claude na Claude Code huhifadhi juhudi za kufikiri za `max` kwa
+miundo ya Opus na Sonnet. Miundo ya Haiku haikubali kiwango cha juhudi cha `max`, hivyo OmniRoute hushusha
+ombi hilo hadi bajeti ya juu ya kufikiri kabla ya kulituma kwenye huduma ya juu.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha Codex
-→ Kuingia kwa OAuth (bandari 1455)
-→ Uwekaji upya baada ya saa 5 + kila wiki
+Dashboard → Providers → Connect Codex
+→ Kuingia kupitia OAuth (bandari 1455)
+→ Kuweka upya baada ya saa 5 + kila wiki
 
 Miundo:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Miundo:
 #### GitHub Copilot
 
 ```bash
-Dashibodi → Watoa Huduma → Unganisha GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth kupitia GitHub
-→ Uwekaji upya wa kila mwezi (tarehe 1 ya mwezi)
+→ Kuweka upya kila mwezi (tarehe 1 ya mwezi)
 
 Miundo:
   gh/gpt-5.5
@@ -172,47 +174,63 @@ Miundo:
   gh/gemini-3.1-pro-preview
 ```
 
+**Mikopo ya AI (utozaji unaotegemea tokeni).** GitHub inaporipoti `credits_used` kwa
+akaunti, kadi ya Mipaka ya Mtoa Huduma huonyesha safu ya **Mikopo ya AI** yenye mikopo
+iliyotumika katika kipindi cha sasa cha utozaji, hata kwenye mipango ya mashirika isiyo na kikomo.
+
+**Kikomo cha ndani cha Mikopo ya AI.** Hariri muunganisho wa GitHub na uweke **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Kuacha wazi kunakizima; `0`
+huruka muunganisho huo kila wakati. Usomaji wa mwisho wa matumizi unapokuwa sawa na au juu ya kikomo,
+uteuzi wa akaunti huruka muunganisho huo na uelekezaji hurudi kwenye miunganisho yako mingine,
+kwa njia ileile ambayo ukomo wa sera ya mgao hufanya. Ukaguzi huu husoma matumizi ambayo
+usasishaji wa mara kwa mara wa mgao tayari hukusanya — hauiiti GitHub kwenye njia ya ombi —
+na huruhusu muunganisho endapo hakuna kizuizi: usomaji ambao haupo au umechakaa (wa zaidi ya dakika 15,
+au kutoka kwenye kipindi cha utozaji ambacho tayari kiliwekwa upya) hauzuii muunganisho. Hii ni kinga ya ndani,
+**si dari ya matumizi iliyohakikishwa**: ucheleweshaji wa ripoti za GitHub, muda wa kusasisha,
+maombi yanayoendelea na matumizi nje ya OmniRoute vinaweza kuzidi kikomo hicho. Tumia vidhibiti
+vya matumizi vya GitHub kwa kikomo kisichoweza kuzidi.
+
 ### 💰 Watoa Huduma wa Bei Nafuu
 
-#### GLM-4.7 (Uwekaji upya wa kila siku, $0.6/1M)
+#### GLM-4.7 (Hujiweka upya kila siku, $0.6/1M)
 
 1. Jisajili: [Zhipu AI](https://open.bigmodel.cn)
-2. Pata ufunguo wa API kutoka Coding Plan
-3. Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `glm`, Ufunguo wa API: `your-key`
+2. Pata ufunguo wa API kutoka kwenye Coding Plan
+3. Dashboard → Add API Key: Mtoa huduma: `glm`, Ufunguo wa API: `your-key`
 
-**Matumizi:** `glm/glm-4.7` — **Kidokezo cha Kitaalamu:** Coding Plan hutoa mgao mara 3 kwa gharama ya 1/7! Huwekwa upya kila siku saa 10:00 asubuhi.
+**Tumia:** `glm/glm-4.7` — **Dokezo la kitaalamu:** Coding Plan inatoa mgao mara 3 kwa 1/7 ya gharama! Hujiweka upya kila siku saa 10:00 AM.
 
-#### MiniMax M2.1 (Uwekaji upya baada ya saa 5, $0.20/1M)
+#### MiniMax M2.1 (Hujiweka upya baada ya saa 5, $0.20/1M)
 
 1. Jisajili: [MiniMax](https://www.minimax.io)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `minimax/MiniMax-M2.1` — **Kidokezo cha Kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni 1M)!
+**Tumia:** `minimax/MiniMax-M2.1` — **Dokezo la kitaalamu:** Chaguo la bei nafuu zaidi kwa muktadha mrefu (tokeni milioni 1)!
 
-#### Kimi K2 ($9/mwezi kwa kiwango kisichobadilika)
+#### Kimi K2 ($9/mwezi bila kubadilika)
 
 1. Jisajili: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Pata ufunguo wa API → Dashibodi → Ongeza Ufunguo wa API
+2. Pata ufunguo wa API → Dashboard → Add API Key
 
-**Matumizi:** `kimi/kimi-k2.5` — **Kidokezo cha Kitaalamu:** Kiwango kisichobadilika cha $9/mwezi kwa tokeni 10M = gharama halisi ya $0.90/1M!
+**Tumia:** `kimi/kimi-k2.5` — **Dokezo la kitaalamu:** $9/mwezi bila kubadilika kwa tokeni milioni 10 = gharama halisi ya $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Jisajili: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Unda ufunguo wa API wa Qianfan → Dashibodi → Ongeza Ufunguo wa API: Mtoa Huduma: `qianfan`
+2. Unda ufunguo wa API wa Qianfan → Dashboard → Add API Key: Mtoa huduma: `qianfan`
 
-**Matumizi:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha muundo wa Qianfan kinachooana na OpenAI.
+**Tumia:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, au kitambulisho kingine cha modeli kinachooana na OpenAI cha Qianfan.
 
 ### 🆓 Watoa Huduma BILA MALIPO
 
-Watoa huduma wasiolipishwa ambao hawahitaji uthibitishaji wana swichi kando ya **Hakuna uthibitishaji unaohitajika** kwenye ukurasa wao wa mtoa huduma.
-Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mionekano ya Watoa Huduma iliyosanidiwa/iliyofupishwa, na
-huondoa miundo yake kutoka `/v1/models`.
+Watoa huduma wasiolipishwa wasiohitaji uthibitishaji wana swichi iliyo kando ya **No authentication required** kwenye ukurasa wao wa mtoa huduma.
+Kuizima humlemaza mtoa huduma huyo, humwondoa kwenye mwonekano wa Watoa Huduma waliowekwa/configured na wa kubana/compact,
+na huondoa miundo yake kwenye `/v1/models`.
 
 #### Qoder (miundo 9 BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Qoder → Kuingia kwa OAuth → Ufikiaji unategemea vikomo vya sasa vya mtoa huduma
+Dashboard → Connect Qoder → Kuingia kupitia OAuth → Ufikiaji unategemea mipaka ya sasa ya mtoa huduma
 
 Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +238,7 @@ Miundo: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude BILA MALIPO)
 
 ```bash
-Dashibodi → Unganisha Kiro → AWS Builder ID au Google/GitHub → ~salio 50/mwezi
+Dashboard → Connect Kiro → AWS Builder ID au Google/GitHub → takriban mikopo 50/mwezi
 
 Miundo: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -607,60 +625,60 @@ Kwa marejeleo kamili ya vigezo vya mazingira, angalia [README](../README.md).
 
 ---
 
-## 📊 Mifano Inayopatikana
+## 📊 Miundo Inayopatikana
 
 <details>
-<summary><b>Tazama mifano yote inayopatikana</b></summary>
+<summary><b>Angalia miundo yote inayopatikana</b></summary>
 
-> Orodha iliyo hapa chini imekusanywa kutoka `open-sse/config/providerRegistry.ts` kwa v3.8.0. Katalogi za wingu (Gemini, OpenRouter, n.k.) husawazishwa kiotomatiki — kwa katalogi kamili ya moja kwa moja fungua **Dashibodi → Watoa Huduma → [mtoa huduma] → Mifano Inayopatikana** au piga `GET /api/models/catalog`.
+> Orodha iliyo hapa chini imetayarishwa kutoka `open-sse/config/providerRegistry.ts` kwa v3.8.0. Katalogi za wingu (Gemini, OpenRouter, n.k.) husawazishwa kwa nguvu — ili kuona katalogi kamili ya moja kwa moja, fungua **Dashibodi → Watoa huduma → [mtoa huduma] → Miundo Inayopatikana** au piga simu kwa `GET /api/models/catalog`.
 >
-> Ikiwa orodha iliyojengwa ndani ya mtoa huduma imechelewa, tumia **Ingiza kutoka /models** kwenye ukurasa huo (au washa **Usawazishaji Kiotomatiki**) kuvuta katalogi ya moja kwa moja ya upstream. Hii ilithibitishwa katika v3.8.50 kwa LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ufikiaji wa Pollinations bila kujitambulisha uliendelea kuwa na vikwazo vya upstream wakati wa kipindi hicho hicho cha majaribio.
+> Ikiwa orodha iliyojengewa ndani ya mtoa huduma imepitwa na wakati, tumia **Ingiza kutoka /models** kwenye ukurasa huo (au wezesha **Usawazishaji Otomatiki**) ili kupata katalogi ya moja kwa moja kutoka chanzo cha juu. Hili lilithibitishwa katika v3.8.50 kwa LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ufikiaji usiojulikana wa Pollinations uliendelea kuwa na kikomo kutoka chanzo cha juu wakati wa mfululizo huo huo wa majaribio.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth ya Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ngazi za juhudi: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth ya Plus/Pro: `cx/gpt-5.5` (+ viwango vya juhudi: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth BURE: tumia katalogi ya moja kwa moja inayoonyeshwa chini ya **Dashibodi → Watoa Huduma → Kiro → Mifano Inayopatikana**. Upatikanaji unategemea akaunti na mpango.
+**Kiro (`kr/`)** — OAuth BILA MALIPO: tumia katalogi ya moja kwa moja iliyoonyeshwa chini ya **Dashibodi → Watoa huduma → Kiro → Miundo Inayopatikana**. Upatikanaji hutegemea akaunti na mpango.
 
-**Qoder (`if/`)** — OAuth BURE: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth BILA MALIPO: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mwezi (bei ya kudumu) au kwa matumizi: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 kwa mwezi bila kikomo au kwa kila matumizi: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — ufunguo wa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Ufunguo wa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Kasi ya juu sana: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok asilia: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Inahifadhiwa EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Inapangishwa katika EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Imeimarishwa na utafutaji: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Imeongezewa utafutaji: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Chanzo huria: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bure), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Chanzo huria: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bila malipo), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Inferensi ya haraka: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Utekelezaji wa haraka: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Kiwango cha wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Kiwango cha kaki: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Inayolenga RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Imeelekezwa kwenye RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Kiwango cha biashara: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Kwa biashara: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Inasawazishwa moja kwa moja kwa kila ufunguo wa API kutoka Google — hakuna orodha tuli. Unganisha ufunguo katika **Dashibodi → Watoa Huduma** kisha tumia **Mifano Inayopatikana** kuingiza katalogi ya sasa (k.m. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Husawazishwa moja kwa moja kwa kila ufunguo wa API kutoka Google — hakuna orodha tuli. Unganisha ufunguo katika **Dashibodi → Watoa huduma**, kisha utumie **Miundo Inayopatikana** kuleta katalogi ya sasa (kwa mfano `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Watoa huduma wengine wanaoendana** (waliouchaguliwa): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kupitia `aws-bedrock`), `azure-ai`, `openrouter` (katalogi ya kupitisha), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kila mmoja hutunza orodha yake ya mifano katika `providerRegistry.ts` na inaweza kusawazishwa kiotomatiki wakati mtoa huduma anatoa endpoint ya `/models`.
+**Watoa huduma wengine wanaooana** (waliochaguliwa): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (kupitia `aws-bedrock`), `azure-ai`, `openrouter` (katalogi inayopitishwa), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kila mmoja hudumisha orodha yake ya miundo katika `providerRegistry.ts` na anaweza kusawazishwa kiotomatiki wakati mtoa huduma anatoa mwisho wa `/models`.
 
-**Kumbuka kuhusu vitambulisho vya mifano:** OmniRoute hutumia vitambulisho vya asili vya mtoa huduma (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baadhi ya vitambulisho vinajumuisha matoleo yenye nukta kwa sababu ndivyo API ya upstream inavyovitarajia. Ikiwa mfano haujaorodheshwa hapo juu, endesha `omniroute models --search <term>` au tumia `GET /api/models/catalog` kuthibitisha upatikanaji.
+**Dokezo kuhusu vitambulisho vya miundo:** OmniRoute hutumia vitambulisho asilia vya watoa huduma (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baadhi ya vitambulisho vina matoleo yenye nukta kwa sababu hivyo ndivyo API ya chanzo cha juu inavyovitarajia. Ikiwa muundo haujaorodheshwa hapo juu, endesha `omniroute models --search <term>` au piga `GET /api/models/catalog` ili kuthibitisha upatikanaji.
 
 </details>
 

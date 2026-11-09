@@ -10,35 +10,30 @@
 
 ## መጫን
 
-OmniRoute MCP አብሮ የተካተተ ነው። በሚከተለው ያስጀምሩት፦
+OmniRoute MCP አብሮገነብ ነው። ጀምር በ:
 
 ```bash
 omniroute --mcp
 ```
 
-ወይም በ open-sse ማጓጓዣ፦
+ወይም በክፍት-ሴ ትራንስፖርት በኩል፡-
 
 ```bash
-# HTTP የዥረት ማጓጓዣ (ወደብ 20130)
-omniroute --dev  # MCP በ /mcp መጨረሻ ነጥብ ላይ በራስ-ሰር ይጀምራል
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-የHTTP ማጓጓዣዎቹ (`sse` / `streamable-http`፣ በዳሽቦርድ ሰርቨሩ ሂደት ውስጥ የሚቀርቡ) በነባሪነት
-የተሰናከሉ ሲሆኑ፣ ከዚህ ቀደም ሊበሩና ሊጠፉ የሚችሉት ከ`/dashboard/mcp` ገጽ ብቻ ነበር። ከ v3.8.51
-ጀምሮ CLI ተመሳሳይ ችሎታ አለው፦
+HTTP ማጓጓዣዎች (`sse` / `streamable-http`፣ በሂደት በዳሽቦርድ አገልጋይ የቀረቡ) በነባሪነት ጠፍተዋል እና ከዚህ ቀደም ከ `/dashboard/mcp` ገጽ ብቻ ተለዋወጡ። ከ v3.8.51 ጀምሮ CLI እኩልነት አለው፡-
 
 ```bash
-omniroute mcp status                                  # የነቃ/መስመር ላይ፣ ማጓጓዣ፣ የመሣሪያዎች ብዛት
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # ንቁ የ sse/streamable-http ክፍለ-ጊዜዎችን ዳግም ያስጀምራል
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` ዳሽቦርዱ በ`/api/settings` በኩል የሚያበራውንና የሚያጠፋውን ተመሳሳይ `mcpEnabled`
-(እንደ አማራጭ `mcpTransport`ንም) ቅንብር PATCH ያደርጋሉ። `mcp restart` `POST /api/mcp/restart`ን ይጠራል፦ ቀጣዩ
-ጥያቄ ከንጹሕ ሁኔታ ዳግም እንዲጀምር ንቁ የ`sse`/`streamable-http` ክፍለ-ጊዜዎችን ያቋርጣል፣
-MCP ከተሰናከለ `409`ን፣ ለ`stdio` ማጓጓዣ ደግሞ `501`ን ይመልሳል (የstdio ደንበኞች የራሳቸውን
-ንዑስ ሂደት ያስተዳድራሉ — ዳግም ለማስጀመር በሂደት ውስጥ ያለ መያዣ የለም)።
+`mcp enable`/`mcp disable` PATCH ተመሳሳይ `mcpEnabled` (እና እንደ አማራጭ `mcpTransport`) ዳሽቦርዱን በ `/api/settings` በኩል ማቀናበር። `mcp restart` `POST /api/mcp/restart` ይደውላል፡ ንቁ `sse`/`streamable-http` ክፍለ ጊዜዎችን ያፈርሳል ስለዚህ የሚቀጥለው ጥያቄ በንጽህና እንደገና ይጀምራል፣ MCP ከተሰናከለ `409` ይመለሳል እና `501` ለ `stdio` ትራንስፖርት (የስቲዲዮ ደንበኞች የራሳቸው ንዑስ ፕሮሰስ አላቸው — እንደገና ለመጀመር በሂደት ላይ ያለ እጀታ የለውም)።
 
 ## ማጓጓዣዎች
 
@@ -130,55 +125,42 @@ curl -i \
 | `omniroute_cache_stats` | `read:cache`  | የትርጉማዊ መሸጎጫ፣ የጥያቄ መሸጎጫ እና የidempotency ስታቲስቲክስ |
 | `omniroute_cache_flush` | `write:cache` | መሸጎጫን በአጠቃላይ ወይም በፊርማ/ሞዴል ያጽዱ                  |
 
-## የማመቅ መሣሪያዎች (13)
+## የማመቂያ መሳሪያዎች (13)
 
-| መሣሪያ                                | የፈቃድ ወሰኖች           | መግለጫ                                                                                                  |
-| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | የማመቅ ቅንብሮች፣ የትንታኔ ማጠቃለያ እና መሸጎጫን ያገናዘቡ ስታቲስቲክሶች (`analytics.mcpDescriptionCompression` ዲበ-ውሂብን ያካትታል) |
-| `omniroute_compression_configure`   | `write:compression` | የማመቅ ሁነታን፣ ገደብን፣ የዒላማ ሬሾን፣ የስርዓት ጥያቄ ጥበቃን እና የMCP መግለጫ ማመቅ መቀያየሪያን ያዋቅሩ                               |
-| `omniroute_set_compression_engine`  | `write:compression` | ንቁውን ሞተር (off/caveman/rtk/stacked) እና የCaveman/RTK ጥንካሬን ይምረጡ                                         |
-| `omniroute_list_compression_combos` | `read:compression`  | ስም የተሰጣቸውን የማመቅ ጥምረቶች እና የሞተር ቧንቧ መስመሮቻቸውን ይዘርዝሩ                                                      |
-| `omniroute_compression_combo_stats` | `read:compression`  | በማመቅ ጥምረት እና በሞተር የተመደቡ ትንታኔዎች                                                                        |
-| `omniroute_ccr_store`               | `write:compression` | በጠሪ የተለየ ይዘትን ገደብ ባለው የማስታወሻ ውስጥ CCR ማከማቻ ያከማቹ እና ምልክት ከ`ccr://` ማጣቀሻ ጋር ይመልሱ                         |
-| `omniroute_ccr_retrieve`            | `read:compression`  | የCCR ይዘትን ሙሉ በሙሉ ወይም በhead፣ tail፣ lines፣ grep እና stats ሁነታዎች ሰርስረው ያውጡ                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | ይዘቱን ሳይመልሱ በጠሪው ባለቤትነት የተያዘውን የCCR ዲበ-ውሂብ ይመርምሩ                                                       |
-| `omniroute_ccr_list`                | `read:compression`  | በጠሪው ባለቤትነት ለተያዙ የCCR ብሎኮች በገጽ የተከፋፈለ ዲበ-ውሂብን ይዘርዝሩ                                                   |
-| `omniroute_ccr_delete`              | `write:compression` | በጠሪው ባለቤትነት የተያዘ የCCR ብሎክን ይሰርዙ                                                                       |
-| `omniroute_ccr_stats`               | `read:compression`  | በጠሪ ወሰን ያለውን የማስታወሻ አጠቃቀም፣ የሕይወት ዑደት ቆጣሪዎችን እና የማከማቻ ገደቦችን ሪፖርት ያድርጉ                                  |
-| `omniroute_rtk_discover`            | `read:compression`  | በፈቃደኝነት በተካተቱ የRTK ውጤት ናሙናዎች ውስጥ ተደጋጋሚ ጫጫታን ያግኙ                                                       |
-| `omniroute_rtk_learn`               | `read:compression`  | በፈቃደኝነት ከተካተቱ ናሙናዎች ሊገመገም የሚችል የRTK ማጣሪያ ረቂቅ ይፍጠሩ                                                     |
+| መሳሪያ                                | ወሰኖች                | መግለጫ                                                                                                |
+| :---------------------------------- | :------------------ | :-------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | የማመቂያ ቅንጅቶች፣ የትንታኔ ማጠቃለያ እና መሸጎጫ የሚያውቁ ስታቲስቲክስ ( `analytics.mcpDescriptionCompression` ሜታዳታን ያካትታል) |
+| `omniroute_compression_configure`   | `write:compression` | የማመቅ ሁነታን አዋቅር፣ ደፍ፣ ዒላማ ሬሾ፣ በስርአት ፈጣን ጥበቃ፣ MCP መግለጫ የማመቅ መቀያየር                                      |
+| `omniroute_set_compression_engine`  | `write:compression` | የነቃውን ሞተር (off/caveman/rtk/stacked) እና Caveman/RTK ጥንካሬን ይምረጡ                                       |
+| `omniroute_list_compression_combos` | `read:compression`  | የተሰየሙ የማመቂያ ጥንብሮች እና የሞተር ቧንቧ መስመሮቻቸው ይዘርዝሩ                                                         |
+| `omniroute_compression_combo_stats` | `read:compression`  | ትንታኔዎች በማመቅ ጥምር እና ሞተር ተመድበው                                                                        |
+| `omniroute_ccr_store`               | `write:compression` | የደዋይ-ነጠላ ይዘትን በተከለከለው የማህደረ ትውስታ CCR መደብር ውስጥ ያከማቹ እና ምልክት ማድረጊያ እና የ `ccr://` ማጣቀሻ ይመልሱ            |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR ይዘትን ሙሉ በሙሉ ወይም በጭንቅላት፣ ጅራት፣ መስመሮች፣ grep እና ስታቲስቲክስ ሁነታዎች ያውጡ                                   |
+| `omniroute_ccr_inspect`             | `read:compression`  | ይዘትን ሳይመልሱ የደዋይ ባለቤትነት ያለው CCR ሜታዳታ ይፈትሹ                                                            |
+| `omniroute_ccr_list`                | `read:compression`  | በጠዋቂ ባለቤትነት የተያዙ CCR ብሎኮች ፔጃኒዝድ ሜታዳታ ይዘርዝሩ                                                          |
+| `omniroute_ccr_delete`              | `write:compression` | የደዋይ ባለቤት የሆነ CCR ብሎክን ሰርዝ                                                                          |
+| `omniroute_ccr_stats`               | `read:compression`  | የደዋይ-ወሰን የማህደረ ትውስታ አጠቃቀምን፣ የህይወት ዑደት ቆጣሪዎችን እና የማከማቻ ገደቦችን ሪፖርት ያድርጉ                               |
+| `omniroute_rtk_discover`            | `read:compression`  | መርጦ መግባት RTK ውፅዓት ናሙናዎች ውስጥ ተደጋጋሚ ጫጫታ ያግኙ                                                           |
+| `omniroute_rtk_learn`               | `read:compression`  | ከመርጦ መግቢያ ናሙናዎች ሊገመገም የሚችል RTK ማጣሪያ ረቂቅ ይፍጠሩ                                                        |
 
-የCCR ግቤቶች በማስታወሻ ውስጥ ብቻ የሚቆዩ ሲሆን ዳግም ሲጀመር ይጠፋሉ። እያንዳንዱ ብሎክ እስከ 2 MiB፣ እያንዳንዱ
-principal እስከ 16 MiB፣ እና አጠቃላይ ማከማቻው እስከ 64 MiB የተገደበ ነው። የግቤቶች ነባሪ TTL 24 ሰዓት ነው (ከፍተኛው
-ሰባት ቀናት)። ሙሉ የMCP ሰርስሮ ማውጣት እስከ 256 KiB የተገደበ ነው፤ ትላልቅ ብሎኮች በክልል
-እና grep ሁነታዎች በኩል እንደተገኙ ይቆያሉ። ማከማቸት፣ ሰርስሮ ማውጣት፣ መዘርዘር፣ መመርመር፣ መሰረዝ እና ስታቲስቲክስ በ
-ማንነቱ የተረጋገጠው API-key principal ተለይተው ይጠበቃሉ። የኦዲት መዝገቦች hashes እና የመጠን ዲበ-ውሂብን ይይዛሉ፤ ይዘትን ፈጽሞ አይይዙም።
+CCR ግቤቶች ባለ ሁለት ደረጃ ሱቅ ይጠቀማሉ፡ ሙቅ ውስጠ-ማህደረ ትውስታ ደረጃ የሚደገፍ፣ በአካባቢው ደመና ባልሆኑ የሩጫ ጊዜዎች፣ በረጅም SQLite ደረጃ (`ccr_blocks`፣ በነባሪ) ስለዚህ አንድ ብሎክ ከመባረር ወይም እንደገና እስኪጀምር TTL እስኪያልቅ ድረስ — ከ512 KB እና የደመና ሩጫ ጊዜዎች በስተቀር፣ በማስታወስ የሚቆይ። እያንዳንዱ ብሎክ በ2 MiB፣እያንዳንዱ ርእሰመምህር እስከ 16 MiB እና የአለምአቀፍ መደብር በ64 MiB የተገደበ ነው። ግቤቶች ለ24-ሰዓት TTL ነባሪ (ቢበዛ ሰባት ቀናት)። ሙሉ MCP መልሶ ማግኘት በ 256 KiB የተገደበ ነው; ትላልቅ ብሎኮች በክልል እና በግሬፕ ሁነታዎች ይገኛሉ። ማከማቻ፣ ሰርስሮ ማውጣት፣ መዘርዘር፣ ፍተሻ፣ መሰረዝ እና ስታቲስቲክስ በተረጋገጠው የኤፒአይ-ቁልፍ ርእሰ መምህር ተለይተዋል። የኦዲት መዝገቦች ሃሽ እና መጠን ሜታዳታ ይይዛሉ፣ በጭራሽ ይዘት የላቸውም። ኦፕሬተር ፊት ለፊት የተቀመጡ ዝርዝሮች (ሁለቱ ማርከሮች፣ የደንበኛ ቅድመ ሁኔታዎች፣ `codemode:false`፣ በመሳሪያ ስፔሻሊስቶች፣ ፔጅኒሽኖች እና የምርመራ ማትሪክስ) በ [Compression Engines → ቅድመ ተፈላጊዎች/ኦፕሬተር መመሪያ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ውስጥ ይኖራሉ።
 
-`omniroute_compression_status` የMCP መግለጫ መጭመቅን በተናጠል በ
-`analytics.mcpDescriptionCompression` ስር ያሳውቃል። እነዚህ ዋጋዎች ለMCP ሊዘረዘሩ የሚችሉ
-መግለጫዎች (`tools`፣ `prompts`፣ `resources` እና `resourceTemplates`) የሜታዳታ መጠን ግምቶች ናቸው፤ የአቅራቢ አጠቃቀም
-ደረሰኞች አይደሉም፣ እንዲሁም `source: "mcp_metadata_estimate"` ተብለው ምልክት ተደርጎባቸዋል።
+`omniroute_compression_status` MCP መግለጫ መጭመቅን በ `analytics.mcpDescriptionCompression` ስር ዘግቧል። እነዚያ እሴቶች ለ MCP ሊዘረዘሩ የሚችሉ መግለጫዎች (`tools`, `prompts`, `resources` እና `resourceTemplates`) የሜታዳታ መጠን ግምቶች ናቸው; የአቅራቢዎች መጠቀሚያ ደረሰኞች አይደሉም እና በ `source: "mcp_metadata_estimate"` ምልክት የተደረገባቸው ናቸው.
 
-### MCP የተደራሽነት ዛፍ ማጣሪያ (v3.8.0)
+### MCP ተደራሽነት ዛፍ ማጣሪያ (v3.8.0)
 
-ከላይ ካሉት የመጭመቂያ መሣሪያዎች በተለየ፣ OmniRoute የMCP አሳሽ/ተደራሽነት መሣሪያዎችን
-**የመሣሪያ ውጤቶች** ወደ ወኪሉ ከመመለሳቸው በፊት የሚጨምቅ ከአፈጻጸም በኋላ የሚሠራ ማጣሪያን ያካትታል።
-ይህ ማጣሪያ ራሱ መሣሪያ አይደለም — ረጅም የተደራሽነት-ዛፍ ወይም የአሳሽ-ቅጽበታዊ ገጽታ ጽሑፍ (≥2000 ቁምፊዎች)
-በያዘ በማንኛውም የመሣሪያ ውጤት ላይ በግልጽነት ሳይታይ ይሠራል።
+ከላይ ካሉት የማመቂያ መሳሪያዎች የተለየ፣ OmniRoute ከአፈፃፀም በኋላ የሚጨመቅ ማጣሪያን ያካትታል** የመሳሪያ ውጤቶች** የ MCP browser/accessibility መሳሪያዎች ወደ ተወካዩ ከመመለሳቸው በፊት. ይህ ማጣሪያ ራሱ — መሳሪያ አይደለም የቃል ተደራሽነት-ዛፍ ወይም የአሳሽ ቅጽበታዊ ጽሑፍ (≥ 2000 chars) በያዘ በማንኛውም መሳሪያ ውጤት ላይ በግልፅ ይሰራል።
 
-ዋና ባህሪያት፦
+ቁልፍ ባህሪዎች
 
-- በተከታታይ የተደጋገሙ ≥30 የተመሳሳይ ደረጃ መስመሮችን ወደ መጀመሪያ + መጨረሻ ማጠቃለያ ይቀንሳል
-- ለPlaywright/የኮምፒውተር-አጠቃቀም የሚያስፈልጉ `[ref=eXX]` መልህቆችን ይጠብቃል
-- ከመጠን በላይ የሆነ ጽሑፍን (>50,000 ቁምፊዎች) ከአሰሳ ፍንጭ ጋር በግድ ይቆርጣል
-- የሚጠበቀው ቁጠባ፦ በአሳሽ ቅጽበታዊ ገጽታ የውሂብ ጭነቶች ላይ **60–80%**
+- ≥ 30 ተከታታይ ተደጋጋሚ ወንድም እህት መስመሮችን ወደ ራስ + ጅራት ማጠቃለያ ሰብስብ
+- በ Playwright/computer-use የሚፈለጉ `[ref=eXX]` መልህቆችን ይጠብቃል።
+- ጠንካራ-መጠን ያለ ጽሑፍ (> 50,000 chars) ከአሰሳ ፍንጭ ጋር ይቆርጣል
+- የሚጠበቁ ቁጠባዎች፡-** 60-80%** በአሳሽ ቅጽበተ-ፎቶ ጭነት ላይ
 
-ውቅር፦ በዓለም አቀፍ ቅንብሮች ውስጥ `compression.mcpAccessibility` (ፍልሰት 056)።
-ትግበራ፦ `open-sse/services/compression/engines/mcpAccessibility/`።
-ሙሉ ሰነዶች፦ [የመጭመቂያ ሞተሮች — MCP የተደራሽነት ዛፍ ማጣሪያ](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)።
+ውቅር `compression.mcpAccessibility` በአለምአቀፍ መቼቶች (ፍልሰት 056)። ትግበራ `open-sse/services/compression/engines/mcpAccessibility/`. ሙሉ ሰነዶች [፡ የማመቂያ ሞተርስ — MCP ተደራሽነት ዛፍ ማጣሪያ](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter) ።
 
-ከእነዚህ መሣሪያዎች በስተጀርባ ያለውን የአሂድ ጊዜ መጭመቂያ ሞዴል ለማወቅ [የመጭመቂያ ሞተሮች](../compression/COMPRESSION_ENGINES.md) እና [RTK መጭመቂያ](../compression/RTK_COMPRESSION.md)ን
-ይመልከቱ።
+ከእነዚህ መሳሪያዎች በስተጀርባ ላለው የአሂድ ጊዜ መጭመቂያ ሞዴል [Compression Engines](../compression/COMPRESSION_ENGINES.md) እና [RTK Compression](../compression/RTK_COMPRESSION.md) ይመልከቱ።
 
 ## 1Proxy መሳሪያዎች (3)
 

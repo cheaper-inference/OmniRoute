@@ -42,6 +42,7 @@ import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { resolveLocalSyncedEndpointRoute } from "@/lib/providerModels/syncedEndpointRouting";
 import { resolveAlibabaProviderEmbeddingUrl } from "@/shared/constants/alibabaProviderRegions";
+import { ensureCopilotEmbeddingToken } from "./copilotToken";
 
 /**
  * A local server (llama.cpp, LM Studio, …) embeds with whatever model it loaded and
@@ -135,7 +136,16 @@ export async function createEmbeddingResponse(
         // different models are not comparable). The generic combo engine has no
         // notion of embedding families, so reject loudly here before dispatch.
         // See _tasks/features-v3.8.12/01-embeddings-combo-family-guard.plan.md.
-        const dimConflict = findEmbeddingComboDimensionConflict(combo as any, allCombos as any);
+        // A pinned `dimensions` (the client's, else the combo's) is what every target is asked
+        // for, so the guard compares that effective size instead of the registry default.
+        const pinnedDimensions = Number(
+          body.dimensions ?? (combo as Record<string, unknown>).dimensions
+        );
+        const dimConflict = findEmbeddingComboDimensionConflict(
+          combo as any,
+          allCombos as any,
+          Number.isFinite(pinnedDimensions) ? pinnedDimensions : undefined
+        );
         if (dimConflict.conflict) {
           return errorResponse(
             HTTP_STATUS.BAD_REQUEST,
@@ -499,6 +509,9 @@ export async function createEmbeddingResponse(
     );
     if (connectionBaseUrl) providerConfig = { ...providerConfig, baseUrl: connectionBaseUrl };
   }
+
+  // GitHub Copilot: renew or mint the exchanged copilotToken before dispatch.
+  credentials = await ensureCopilotEmbeddingToken(providerConfig, provider, credentials);
 
   // #474: when the request used a bare model name (no "/" — e.g. an alias that
   // resolved to "auto") and the selected connection declares a defaultModel,

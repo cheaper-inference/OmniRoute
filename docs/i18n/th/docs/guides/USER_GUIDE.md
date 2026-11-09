@@ -120,37 +120,39 @@
 
 ## 📖 การตั้งค่าผู้ให้บริการ
 
-หากต้องการเพิ่มการเชื่อมต่อ API Key จำนวนมากจากไฟล์ CSV หรือ JSON ให้ใช้ **แดชบอร์ด → ผู้ให้บริการ → นำเข้าจากไฟล์** คอลัมน์จะเรียงตามตำแหน่ง (`provider,name,apiKey,baseUrl,priority`) โดย `provider` ต้องมีอยู่แล้วในฐานะผู้ให้บริการที่มีการจัดการหรือโหนดที่เข้ากันได้ ดู [นำเข้าผู้ให้บริการจากไฟล์ CSV หรือ JSON](../providers/CSV-IMPORT.md)
+หากต้องการเพิ่มการเชื่อมต่อคีย์ API จำนวนมากจากไฟล์ CSV หรือ JSON ให้ใช้ **Dashboard → Providers → Import from file** คอลัมน์จะเรียงตามตำแหน่ง (`provider,name,apiKey,baseUrl,priority`) โดย `provider` ต้องมีอยู่แล้วในฐานะผู้ให้บริการที่จัดการได้หรือโหนดที่เข้ากันได้ ดู [นำเข้าผู้ให้บริการจากไฟล์ CSV หรือ JSON](../providers/CSV-IMPORT.md)
 
 ### 🔐 ผู้ให้บริการแบบสมัครสมาชิก
 
 #### Claude Code (Pro/Max)
 
 ```bash
-แดชบอร์ด → ผู้ให้บริการ → เชื่อมต่อ Claude Code
-→ เข้าสู่ระบบด้วย OAuth → รีเฟรชโทเค็นอัตโนมัติ
-→ ติดตามโควตาแบบ 5 ชั่วโมงและรายสัปดาห์
+Dashboard → Providers → Connect Claude Code
+→ เข้าสู่ระบบ OAuth → รีเฟรชโทเค็นอัตโนมัติ
+→ ติดตามโควตา 5 ชั่วโมง + รายสัปดาห์
 
-โมเดล:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**เคล็ดลับ:** ใช้ Opus สำหรับงานที่ซับซ้อน และ Sonnet เมื่อต้องการความเร็ว OmniRoute ติดตามโควตาแยกตามโมเดล!
+**เคล็ดลับมือโปร:** ใช้ Opus สำหรับงานที่ซับซ้อน และ Sonnet หากต้องการความเร็ว OmniRoute ติดตามโควตาแยกตามโมเดล!
 
-ไม่มีเบราว์เซอร์บนโฮสต์ OmniRoute ใช่ไหม? เรียกใช้ `claude setup-token` บนอุปกรณ์ใดก็ได้ที่เข้าสู่ระบบ Claude Code อยู่ แล้ววางโทเค็นอายุหนึ่งปีลงในแท็บ **Setup Token** ดู [Claude Code พร้อม setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md)
+ไม่มีเบราว์เซอร์บนโฮสต์ OmniRoute ใช่ไหม ให้เรียกใช้ `claude setup-token` ที่ใดก็ได้ที่เข้าสู่ระบบ Claude Code อยู่ แล้วนำโทเค็นอายุหนึ่งปีไปวางในแท็บ **Setup Token** ดู [Claude Code พร้อม setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md)
 
-เส้นทางที่เข้ากันได้กับ Claude และ Claude Code จะคงระดับความพยายามในการคิด `max` ไว้สำหรับโมเดล Opus และ Sonnet โมเดล Haiku ไม่รองรับระดับความพยายาม `max` ดังนั้น OmniRoute จะปรับลดคำขอนั้นเป็นงบประมาณการคิดระดับสูงก่อนส่งไปยังต้นทาง
+เส้นทางที่เข้ากันได้กับ Claude และ Claude Code จะคงค่า effort การคิด `max` ไว้สำหรับโมเดล
+Opus และ Sonnet โมเดล Haiku ไม่รองรับระดับ effort `max` ดังนั้น OmniRoute จะลดระดับคำขอดังกล่าว
+เป็นงบประมาณการคิดระดับสูงก่อนส่งต่อไปยัง upstream
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-แดชบอร์ด → ผู้ให้บริการ → เชื่อมต่อ Codex
-→ เข้าสู่ระบบด้วย OAuth (พอร์ต 1455)
-→ รีเซ็ตทุก 5 ชั่วโมงและรายสัปดาห์
+Dashboard → Providers → Connect Codex
+→ เข้าสู่ระบบ OAuth (พอร์ต 1455)
+→ รีเซ็ตทุก 5 ชั่วโมง + รายสัปดาห์
 
-โมเดล:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,11 +162,11 @@
 #### GitHub Copilot
 
 ```bash
-แดชบอร์ด → ผู้ให้บริการ → เชื่อมต่อ GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth ผ่าน GitHub
 → รีเซ็ตรายเดือน (วันที่ 1 ของเดือน)
 
-โมเดล:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -172,55 +174,72 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**เครดิต AI (การเรียกเก็บเงินตามโทเค็น)** เมื่อ GitHub รายงาน `credits_used` สำหรับบัญชี
+การ์ดขีดจำกัดผู้ให้บริการจะแสดงแถว **เครดิต AI** พร้อมจำนวนเครดิตที่ใช้ไปในรอบการเรียกเก็บเงินปัจจุบัน
+รวมถึงแผนองค์กรแบบไม่จำกัด
+
+**ขีดจำกัดเครดิต AI ภายในเครื่อง** แก้ไขการเชื่อมต่อ GitHub แล้วตั้งค่า **ขีดจำกัดเครดิต AI ต่อ
+รอบการเรียกเก็บเงิน** (`providerSpecificData.githubCreditLimit`) การเว้นว่างจะปิดใช้งาน ส่วน `0`
+จะข้ามการเชื่อมต่อนั้นเสมอ เมื่อค่าการใช้งานล่าสุดมากกว่าหรือเท่ากับขีดจำกัด
+การเลือกบัญชีจะข้ามการเชื่อมต่อนั้น และการกำหนดเส้นทางจะย้อนกลับไปใช้การเชื่อมต่ออื่นของคุณ
+เช่นเดียวกับการตัดการทำงานตามนโยบายโควตา การตรวจสอบนี้อ่านข้อมูลการใช้งานที่การรีเฟรชโควตาตามช่วงเวลา
+รวบรวมไว้อยู่แล้ว — จะไม่เรียก GitHub บนเส้นทางคำขอ — และเป็นแบบ fail open: ค่าที่ขาดหายไปหรือล้าสมัย
+(เก่ากว่า 15 นาที หรือมาจากรอบการเรียกเก็บเงินที่รีเซ็ตไปแล้ว) จะไม่บล็อกการเชื่อมต่อ ข้อจำกัดนี้เป็น
+มาตรการป้องกันภายในเครื่อง **ไม่ใช่เพดานการใช้จ่ายที่รับประกันได้**: ความล่าช้าในการรายงานของ GitHub
+ช่วงเวลารีเฟรช คำขอที่กำลังดำเนินการอยู่ และการใช้งานภายนอก OmniRoute อาจทำให้ใช้เกินขีดจำกัดได้
+โปรดใช้การควบคุมการใช้จ่ายของ GitHub เองหากต้องการกำหนดเพดานที่เข้มงวด
+
 ### 💰 ผู้ให้บริการราคาประหยัด
 
 #### GLM-4.7 (รีเซ็ตรายวัน, $0.6/1M)
 
 1. สมัครใช้งาน: [Zhipu AI](https://open.bigmodel.cn)
-2. รับ API Key จาก Coding Plan
-3. แดชบอร์ด → เพิ่ม API Key: ผู้ให้บริการ: `glm`, API Key: `your-key`
+2. รับคีย์ API จาก Coding Plan
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**การใช้งาน:** `glm/glm-4.7` — **เคล็ดลับ:** Coding Plan มอบโควตา 3 เท่าในราคาเพียง 1/7! รีเซ็ตทุกวันเวลา 10:00 น.
+**การใช้งาน:** `glm/glm-4.7` — **เคล็ดลับมือโปร:** Coding Plan ให้โควตา 3 เท่าในราคา 1/7! รีเซ็ตทุกวันเวลา 10:00 น.
 
-#### MiniMax M2.1 (รีเซ็ตทุก 5 ชม., $0.20/1M)
+#### MiniMax M2.1 (รีเซ็ตทุก 5 ชั่วโมง, $0.20/1M)
 
 1. สมัครใช้งาน: [MiniMax](https://www.minimax.io)
-2. รับ API Key → แดชบอร์ด → เพิ่ม API Key
+2. รับคีย์ API → Dashboard → Add API Key
 
-**การใช้งาน:** `minimax/MiniMax-M2.1` — **เคล็ดลับ:** ตัวเลือกที่ถูกที่สุดสำหรับบริบทยาว (1M โทเค็น)!
+**การใช้งาน:** `minimax/MiniMax-M2.1` — **เคล็ดลับมือโปร:** ตัวเลือกที่ถูกที่สุดสำหรับบริบทขนาดยาว (1M โทเค็น)!
 
-#### Kimi K2 (เหมาจ่าย $9/เดือน)
+#### Kimi K2 ($9/เดือนแบบเหมาจ่าย)
 
 1. สมัครสมาชิก: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. รับ API Key → แดชบอร์ด → เพิ่ม API Key
+2. รับคีย์ API → Dashboard → Add API Key
 
-**การใช้งาน:** `kimi/kimi-k2.5` — **เคล็ดลับ:** ราคาเหมาจ่าย $9/เดือนสำหรับ 10M โทเค็น = ต้นทุนจริง $0.90/1M!
+**การใช้งาน:** `kimi/kimi-k2.5` — **เคล็ดลับมือโปร:** $9/เดือนแบบคงที่สำหรับ 10M โทเค็น = ค่าใช้จ่ายจริง $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. สมัครใช้งาน: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. สร้าง Qianfan API Key → แดชบอร์ด → เพิ่ม API Key: ผู้ให้บริการ: `qianfan`
+2. สร้างคีย์ API ของ Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
-**การใช้งาน:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` หรือ ID โมเดลอื่นของ Qianfan ที่เข้ากันได้กับ OpenAI
+**การใช้งาน:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` หรือรหัสโมเดลอื่นที่เข้ากันได้กับ OpenAI ของ Qianfan
 
 ### 🆓 ผู้ให้บริการฟรี
 
-ผู้ให้บริการฟรีที่ไม่ต้องยืนยันตัวตนจะมีสวิตช์อยู่ข้าง **ไม่ต้องยืนยันตัวตน** บนหน้าผู้ให้บริการ การปิดสวิตช์จะปิดใช้งานผู้ให้บริการนั้น นำผู้ให้บริการออกจากมุมมองผู้ให้บริการที่กำหนดค่าแล้ว/แบบย่อ และนำโมเดลของผู้ให้บริการออกจาก `/v1/models`
+ผู้ให้บริการฟรีที่ไม่ต้องยืนยันตัวตนจะมีสวิตช์อยู่ข้าง **ไม่ต้องมีการยืนยันตัวตน** ในหน้าผู้ให้บริการ
+การปิดสวิตช์จะปิดใช้งานผู้ให้บริการนั้น นำออกจากมุมมอง Providers configured/compact
+และนำโมเดลของผู้ให้บริการนั้นออกจาก `/v1/models`
 
 #### Qoder (9 โมเดลฟรี)
 
 ```bash
-แดชบอร์ด → เชื่อมต่อ Qoder → เข้าสู่ระบบด้วย OAuth → การเข้าถึงขึ้นอยู่กับขีดจำกัดปัจจุบันของผู้ให้บริการ
+Dashboard → Connect Qoder → เข้าสู่ระบบ OAuth → การเข้าถึงขึ้นอยู่กับขีดจำกัดปัจจุบันของผู้ให้บริการ
 
-โมเดล: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude ฟรี)
 
 ```bash
-แดชบอร์ด → เชื่อมต่อ Kiro → AWS Builder ID หรือ Google/GitHub → ~50 เครดิต/เดือน
+Dashboard → Connect Kiro → AWS Builder ID หรือ Google/GitHub → ประมาณ 50 เครดิต/เดือน
 
-โมเดล: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -605,22 +624,22 @@ post_install() {
 
 ---
 
-## 📊 โมเดลที่ใช้งานได้
+## 📊 โมเดลที่พร้อมใช้งาน
 
 <details>
-<summary><b>ดูโมเดลที่ใช้งานได้ทั้งหมด</b></summary>
+<summary><b>ดูโมเดลที่พร้อมใช้งานทั้งหมด</b></summary>
 
-> รายการด้านล่างนี้คัดสรรมาจาก `open-sse/config/providerRegistry.ts` สำหรับ v3.8.0 แคตตาล็อกบนคลาวด์ (Gemini, OpenRouter ฯลฯ) จะถูกซิงก์แบบไดนามิก — สำหรับแคตตาล็อกสดฉบับเต็ม ให้เปิด **แดชบอร์ด → ผู้ให้บริการ → [provider] → โมเดลที่ใช้งานได้** หรือเรียก `GET /api/models/catalog`
+> รายการด้านล่างคัดสรรมาจาก `open-sse/config/providerRegistry.ts` สำหรับ v3.8.0 แคตตาล็อกบนคลาวด์ (Gemini, OpenRouter ฯลฯ) จะซิงค์แบบไดนามิก — หากต้องการดูแคตตาล็อกปัจจุบันทั้งหมด ให้เปิด **Dashboard → Providers → [provider] → Available Models** หรือเรียกใช้ `GET /api/models/catalog`
 >
-> หากรายการในตัว (built-in) ของผู้ให้บริการรายใดคลาดเคลื่อนไปจากของจริง ให้ใช้ **นำเข้าจาก /models** บนหน้านั้น (หรือเปิดใช้งาน **ซิงก์อัตโนมัติ**) เพื่อดึงแคตตาล็อกสดจากต้นทาง เรื่องนี้ได้รับการยืนยันแล้วใน v3.8.50 สำหรับ LLM7.io (`gemini-3.1-flash-lite`) และ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ส่วนการเข้าถึงแบบไม่ระบุตัวตนของ Pollinations ยังคงถูกจำกัดจากฝั่งต้นทางในรอบการทดสอบเดียวกัน
+> หากรายการในตัวของผู้ให้บริการไม่ตรงกับข้อมูลล่าสุด ให้ใช้ **Import from /models** ในหน้านั้น (หรือเปิดใช้ **Auto-Sync**) เพื่อดึงแคตตาล็อกจาก upstream ปัจจุบัน การดำเนินการนี้ได้รับการตรวจสอบใน v3.8.50 สำหรับ LLM7.io (`gemini-3.1-flash-lite`) และ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); การเข้าถึงแบบไม่ระบุชื่อของ Pollinations ยังคงถูกจำกัดโดย upstream ในระหว่างการทดสอบรอบเดียวกัน
 
-**Claude Code (`cc/`)** — OAuth แบบ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth สำหรับ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth แบบ Plus/Pro: `cx/gpt-5.5` (+ ระดับ effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth สำหรับ Plus/Pro: `cx/gpt-5.5` (+ ระดับ effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ฟรี: ใช้แคตตาล็อกสดที่แสดงอยู่ใน **แดชบอร์ด → ผู้ให้บริการ → Kiro → โมเดลที่ใช้งานได้** ความพร้อมใช้งานขึ้นอยู่กับบัญชีและแพลนที่ใช้
+**Kiro (`kr/`)** — OAuth ฟรี: ใช้แคตตาล็อกปัจจุบันที่แสดงอยู่ใน **Dashboard → Providers → Kiro → Available Models** โมเดลที่พร้อมใช้งานขึ้นอยู่กับบัญชีและแพ็กเกจ
 
 **Qoder (`if/`)** — OAuth ฟรี: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -628,37 +647,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/เดือน แบบเหมาจ่ายหรือจ่ายตามการใช้งาน: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/เดือนแบบเหมาจ่ายหรือจ่ายตามการใช้งาน: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — คีย์ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ความเร็วสูงพิเศษ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ความเร็วสูงเป็นพิเศษ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok เนทีฟ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok แบบ native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — โฮสต์ในยุโรป: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — โฮสต์ในสหภาพยุโรป: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — เสริมความสามารถด้วยการค้นหา: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — เพิ่มความสามารถด้วยการค้นหา: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — โอเพนซอร์ส: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ฟรี), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — อินเฟอเรนซ์ความเร็วสูง: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — การประมวลผลแบบอนุมานที่รวดเร็ว: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — เทคโนโลยีระดับเวเฟอร์: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ระดับเวเฟอร์: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — เน้นงาน RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — มุ่งเน้น RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — สำหรับองค์กร: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ระดับองค์กร: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ซิงก์สดตามคีย์ API แต่ละคีย์จาก Google — ไม่มีรายการแบบคงที่ เชื่อมต่อคีย์ใน **แดชบอร์ด → ผู้ให้บริการ** จากนั้นใช้ **โมเดลที่ใช้งานได้** เพื่อนำเข้าแคตตาล็อกปัจจุบัน (เช่น `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)
+**Gemini (Google Cloud `gemini/`)**: ซิงค์แบบสดตามคีย์ API จาก Google — ไม่มีรายการแบบคงที่ เชื่อมต่อคีย์ใน **Dashboard → Providers** แล้วใช้ **Available Models** เพื่อนำเข้าแคตตาล็อกปัจจุบัน (เช่น `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)
 
-**ผู้ให้บริการอื่นที่รองรับ** (บางส่วน): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ผ่าน `aws-bedrock`), `azure-ai`, `openrouter` (แคตตาล็อกแบบ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` แต่ละรายดูแลรักษารายการโมเดลของตนเองไว้ใน `providerRegistry.ts` และสามารถซิงก์อัตโนมัติได้เมื่อผู้ให้บริการนั้นมี endpoint `/models` ให้ใช้งาน
+**ผู้ให้บริการอื่นที่เข้ากันได้** (บางส่วน): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ผ่าน `aws-bedrock`), `azure-ai`, `openrouter` (แคตตาล็อกแบบ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` แต่ละรายจะดูแลรายการโมเดลของตนเองใน `providerRegistry.ts` และสามารถซิงค์อัตโนมัติได้เมื่อผู้ให้บริการเปิดใช้งานปลายทาง `/models`
 
-**หมายเหตุเกี่ยวกับ ID โมเดล:** OmniRoute ใช้ ID แบบดั้งเดิมของแต่ละผู้ให้บริการ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ID บางรายการมีเลขเวอร์ชันแบบมีจุด เพราะนั่นคือรูปแบบที่ API ต้นทางคาดหวัง หากไม่พบโมเดลใดในรายการข้างต้น ให้รัน `omniroute models --search <term>` หรือเรียก `GET /api/models/catalog` เพื่อยืนยันความพร้อมใช้งาน
+**หมายเหตุเกี่ยวกับ ID โมเดล:** OmniRoute ใช้ ID แบบ native ของผู้ให้บริการ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ID บางรายการมีเวอร์ชันคั่นด้วยจุด เนื่องจากเป็นรูปแบบที่ API upstream ต้องการ หากไม่พบโมเดลในรายการด้านบน ให้เรียกใช้ `omniroute models --search <term>` หรือเรียก `GET /api/models/catalog` เพื่อยืนยันความพร้อมใช้งาน
 
 </details>
 

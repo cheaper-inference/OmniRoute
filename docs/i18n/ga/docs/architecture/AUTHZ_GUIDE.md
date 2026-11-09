@@ -17,127 +17,151 @@ Tá píblíne údaraithe atá feasach ar bhealaí ag OmniRoute a chuireann bac a
 
 ### 1. Eochair API (Bearer)
 
-Úsáidtear é le haghaidh APIanna cliaint atá comhoiriúnach le OpenAI/Anthropic/Gemini agus cúpla bealach bainistíochta nuair atá an scóip `manage` ag an eochair.
+Úsáidtear é le haghaidh APIanna cliaint atá comhoiriúnach le OpenAI/Anthropic/Gemini agus le cúpla bealach bainistíochta nuair a bhíonn an scóip `manage` ag an eochair.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Déantar í a bhailíochtú le `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts` agus a ath-easpórtáil trí `src/shared/utils/apiAuth.ts`. Glacann an bailíochtóir leis na hathróga timpeallachta `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` mar eochracha buana pas-tríd freisin (fadhb #1350).
+Déantar bailíochtú trí `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts`, agus déantar iad a ath-onnmhairiú trí `src/shared/utils/apiAuth.ts`. Glacann an bailíochtóir leis na hathróga timpeallachta `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` mar eochracha buan-sheachbhóthar freisin (saincheist #1350).
 
-### 2. Seisiún Deaise (fianán auth_token)
+### 2. Seisiún Deais (fianán auth_token)
 
-Le haghaidh leathanaigh deaise agus oibríochtaí riaracháin.
+Le haghaidh leathanaigh an deais agus oibríochtaí riaracháin.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Ní seisiún é fianán ach amháin nuair a fhíoraítear an JWT **agus** nuair atá `authenticated: true` ann
+Ní seisiún é fianán ach amháin nuair a fhíoraítear an JWT **agus nuair a iompraíonn sé `authenticated: true`**
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Téann gach
-úsáideoir den fhianán (garda bealaigh na deaise (`isDashboardSessionAuthenticated()`), athnuachan na píblíne údaraithe, croitheadh láimhe WebSocket, an freastalaí beo,
+tomhaltóir den fhianán (cosantóir bealaigh an deais (`isDashboardSessionAuthenticated()`), athnuachan an phíblíne údaraithe, croitheadh láimhe WebSocket, freastalaí beo,
 `/api/settings/require-login`, `/api/auth/status`) tríd an gcúntóir sin.
-Tá JWTanna eile sínithe le `JWT_SECRET` ann — eisíonn an pas-tríd Cursor CLI
-comharthaí `iss "omniroute" / aud "cursor-cli"` do shealbhóirí eochrach — agus ní seisiúin iad riamh
+Tá JWTanna eile sínithe le `JWT_SECRET` ann — gineann pasáiste CLI Cursor
+comharthaí `iss "omniroute" / aud "cursor-cli"` do she sealbhóirí eochrach — agus ní seisiúin iad riamh
 (#13298).
 
-Déantar é a fhíorú le `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. Athnuachan an phíblíne an JWT go huathoibríoch nuair atá níos lú ná 7 lá fágtha dá shaolré 30 lá.
+Déantar é a fhíorú le `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. Déanann an píblíne an JWT a athnuachan go huathoibríoch nuair atá níos lú ná 7 lá fágtha dá shaolré 30 lá.
 
-Is féidir deireadh a chur le seisiún sula mbeidh a 30 lá caite freisin, toisc go dtéann gach próiseas eisiúna trí `mintDashboardSessionToken` (le ham eisiúna `iat` agus aitheantas `jti`) agus seiceálann an fíoraitheoir dhá shocrú: `sessionsValidAfter`, a shocraítear nuair a athraítear pasfhocal ionas nach bhfíorófar aon seisiún a eisíodh roimhe sin (faigheann an brabhsálaí a d'athraigh an pasfhocal fianán úr), agus `revokedDashboardSessions`, a gcuireann `POST /api/auth/logout` `jti` an tseisiúin a síníodh amach leis. Ní bhíonn ceachtar éileamh ar sheisiúin a eisíodh le leagan níos sine agus fanann siad bailí go dtí an chéad athrú pasfhocail. Murar féidir na socruithe a léamh, ní chuirtear muinín sa seisiún.
+Is féidir deireadh a chur le seisiún freisin sula mbíonn a 30 lá istigh, mar go dtéann gach miontaire trí `mintDashboardSessionToken` (am eisiúna `iat` agus aitheantóir `jti`) agus seiceálann an fíoraitheoir dhá shocrú: `sessionsValidAfter`, a shocraítear le hathrú pasfhocail ionas nach bhfíoraítear aon seisiún a eisíodh roimhe sin (faigheann an brabhsálaí a d’athraigh an pasfhocal fianán úr), agus `revokedDashboardSessions`, a gcuireann `POST /api/auth/logout` `jti` an tseisiúin ar síníodh amach aisti leis. Níl ceachtar den dá mhaíomh ag seisiúin a rinneadh le heisiúint níos sine, agus fanann siad bailí go dtí an chéad athrú pasfhocail. Mura féidir na socruithe a léamh, ní chuirtear muinín sa seisiún.
 
-Glacann roinnt bealaí bainistíochta le **ceachtar** mód: fianán NÓ `Bearer <key>` nuair atá an scóip `manage` (nó `admin`) ag an eochair API. Is é seo a chumasaíonn an sreabhadh oibre “inchumraithe trí ghlaonna API” a cuireadh leis in v3.8.
+Glacann roinnt bealaí bainistíochta le **ceachtar** mód: fianán NÓ `Bearer <key>` nuair a bhíonn an scóip `manage` (nó `admin`) ag an eochair API. Seo a chumasaíonn an sreabhadh oibre “inchumraithe trí ghlaonna API” a cuireadh leis i v3.8.
 
 #### Geata roghnach logála isteach OIDC (#6973)
 
-Tacaíonn logáil isteach riarthóra na deaise le sreabhadh OIDC (OpenID Connect) **roghnach**
-taobh leis an logáil isteach réamhshocraithe le pasfhocal — ní bhaintear logáil isteach le pasfhocal riamh, ní dhéantar ach
-é a fhorlíonadh:
+Tacaíonn logáil isteach riaracháin an deais le sreabhadh OIDC (OpenID Connect) a roghnaítear a chumasú
+in éineacht leis an logáil isteach réamhshocraithe le pasfhocal — ní bhaintear an logáil isteach le pasfhocal riamh, ní chuirtear leis ach:
 
 - Díchumasaithe mura bhfuil `settings.oidcEnabled === true` **agus** mura bhfuil
-  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` uile cumraithe (Socruithe →
-  Fíordheimhniú). Filleann `GET /api/auth/oidc/login` `400` murach sin.
-- Aimsíonn `GET /api/auth/oidc/login` an `authorization_endpoint` ó
-  `/.well-known/openid-configuration` an eisitheora (agus téann sé siar go
-  `<issuer>/authorize`), tógann sé an URI atreoraithe ón iarratas isteach
-  (agus `x-forwarded-proto` á chur san áireamh), agus atreoraíonn sé chuig an IdP
-  le `state` randamach stóráilte i bhfianán `httpOnly` `oidc_state`.
-- Déanann `GET /api/auth/oidc/callback` `state` a bhailíochtú, malartaíonn sé an
-  cód údaraithe, agus fíoraíonn sé síniú an chomhartha ID trí JWKS an eisitheora
-  (`createRemoteJWKSet` de chuid `jose`, i dtaisce de réir URI JWKS) le seiceálacha
-  `issuer`/`audience`. Chun cead isteach chuig an deais a fháil, tá gá le liosta
-  neamhfholamh `oidcAllowedSubjects`, polasaí `oidcAdmissionClaim`, nó an dá
-  cheann. Meaitseálann liosta na n-ábhar `sub` nó `email` ach amháin nuair atá
-  `email_verified === true`. Glacann an polasaí roghnach éilimh conair éilimh
-  chomhartha ID scartha le poncanna (mar shampla, `realm_access.roles`) agus
-  eagar de luachanna a nglactar leo; ní mór don éileamh réitithe a bheith ina
-  eagar teaghrán ina bhfuil luach amháin ar a laghad a nglactar leis. Má tá an
-  dá pholasaí cumraithe, ní mór don dá cheann pas a fháil. Má tá éilimh ar
-  iarraidh nó míchumtha, teipeann an próiseas go dúnta, agus gan ceachtar
-  polasaí diúltaíonn an aisghlao don logáil isteach (`not_configured`). Leanann
-  cumraíochtaí atá bunaithe ar ábhar amháin de bheith ag obair gan athrú.
-- De ghnáth, mapálann Keycloak róil fearainn isteach i gcomharthaí rochtana, ach
-  ní gá go mapálann sé isteach i gcomharthaí ID iad. Chun an ról fearainn
-  `admin` a éileamh, cumraigh mapálaí prótacail don chliant seo a chuireann
-  `realm_access.roles` san áireamh ina **chomhartha ID**, ansin socraigh
-  `oidcAdmissionClaim` go `{ "path": "realm_access.roles", "values": ["admin"] }`.
-  Seiceáil éileamh iarbhír an chomhartha ID don chliant seo sula gcumasaítear
-  cead isteach bunaithe ar ról amháin; ní léann an feidhmchlár róil comhartha
-  rochtana. Is féidir le diúltú comharthaí ar thaobh an IdP cur leis an tseiceáil
-  seo ar thaobh an fheidhmchláir, ach ní féidir leis í a ionadú.
-- Má éiríonn leis, gineann sé an JWT `auth_token` 30 lá **díreach céanna** a
-  eisíonn an logáil isteach le pasfhocal (`src/app/api/auth/login/route.ts`), mar
-  sin ní athraítear an chuid eile de phíblíne seisiúin na deaise (uath-athnuachan,
-  bratacha fianán) — ní athraíonn OIDC ach an chaoi a ngintear an fianán, ní na
-  ceadanna a thugann sé. Ní dhéanann athruithe ar róil/grúpaí IdP seisiúin
-  OmniRoute atá ann cheana a neamhbhailíochtú; is iad logáil amach, rothlú
-  pasfhocail, nó dul in éag an tseisiúin a rialaíonn a saolré fós.
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` cumraithe go léir (Settings → Auth).
+  Tugann `GET /api/auth/oidc/login` `400` ar ais murach sin.
+- Faigheann `GET /api/auth/oidc/login` an `authorization_endpoint` amach ó
+  `/.well-known/openid-configuration` an eisitheora (úsáideann sé
+  `<issuer>/authorize` mar chúltaca), tógann sé URI an atreoraithe ón iarratas isteach
+  (agus bíonn sé feasach ar `x-forwarded-proto`), agus atreoraíonn sé chuig an IdP le
+  `state` randamach atá stóráilte i bhfianán `oidc_state` `httpOnly`.
+- Déanann `GET /api/auth/oidc/callback` `state` a bhailíochtú, malartaíonn sé an cód
+  údaraithe, agus fíoraíonn sé síniú an chomhartha ID trí JWKS an eisitheora
+  (`createRemoteJWKSet` de chuid `jose`, i dtaisce in aghaidh URI JWKS) le seiceálacha
+  `issuer`/`audience`. Chun ligean isteach ar an deais, ní mór liosta
+  `oidcAllowedSubjects` neamhfholamh, beartas `oidcAdmissionClaim`, nó an dá cheann a
+  bheith ann. Meaitseálann liosta na n-ábhar `sub` nó `email` ach amháin nuair is
+  `email_verified === true`. Glacann an beartas roghnach éilimh cosán éilimh
+  ponc-scartha ón gcomhartha ID (mar shampla, `realm_access.roles`) agus eagar de
+  luachanna inghlactha; ní mór gur eagar teaghrán é an t-éileamh réitithe ina bhfuil
+  luach inghlactha amháin ar a laghad. Má tá an dá bheartas cumraithe, ní mór don dá
+  cheann pas a fháil. Teipeann éilimh atá ar iarraidh nó míchumtha go slán, agus gan
+  cheachtar beartas diúltaíonn an glao isteach (`not_configured`) (`not_configured`).
+  Leanann cumraíochtaí atá bunaithe ar ábhar amháin orthu gan athrú.
+- De ghnáth mapálann Keycloak róil an réimse isteach i gcomharthaí rochtana, agus ní
+  gá go mapálann sé isteach i gcomharthaí ID iad. Chun ról an réimse `admin` a éileamh,
+  cumraigh mapálaí prótacail don chliant seo a chuireann `realm_access.roles` san
+  áireamh ina **chomhartha ID**, ansin socraigh `oidcAdmissionClaim` mar
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Seiceáil éileamh iarbhír
+  an chomhartha ID don chliant seo sula gcumasaíonn tú ligean isteach bunaithe ar róil
+  amháin; ní léann an feidhmchlár róil chomhartha na rochtana. Is féidir le diúltú
+  comharthaí ar thaobh an IdP an seiceáil seo ar thaobh an fheidhmchláir a chomhlánú,
+  ach ní féidir leis í a ionadú.
+- Ar éirigh leis, eisíonn sé an JWT `auth_token` **cruinn chéanna** 30 lá a eisíonn
+  logáil isteach le pasfhocal (`src/app/api/auth/login/route.ts`), agus mar sin ní
+  athraítear an chuid eile de phíblíne seisiúin an deais (athnuachan uathoibríoch,
+  bratacha fianán) — ní athraíonn OIDC ach an chaoi a n-eisítear an fianán, ní na
+  ceadanna a thugann sé. Ní neamhbhailíonn athruithe ar róil/grúpaí an IdP seisiúin
+  OmniRoute atá ann cheana; is iad logáil amach, rothlú pasfhocail, nó dul in éag an
+  tseisiúin a rialaíonn a saolré fós.
 - Tá gach socrú `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) in `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`): freagraíonn `PATCH /api/settings`
-  le `400 PASSWORD_REQUIRED` mura bhfuil an pasfhocal bainistíochta sa chorp mar
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): tugann `PATCH /api/settings`
+  `400 PASSWORD_REQUIRED` ar ais mura bhfuil pasfhocal bainistíochta sa chorp mar
   `currentPassword` (`401 PASSWORD_MISMATCH` nuair atá sé mícheart).
-  Diúltaíonn `oidcDisablePasswordLogin` don _logáil isteach_ le pasfhocal
-  (`POST /api/auth/login`) ach coinníonn sé hais an phasfhocail stóráilte, agus
-  seiceálann athfhíordheimhniú `currentPassword` ina aghaidh fós.
-- Tá `corsOrigins` agus `bruteForceProtection` in `SECURITY_IMPACTING_SETTINGS_KEYS`
-  freisin: lagaíonn maolú ceachtar ceann na cosaintí logála isteach, mar sin
-  éilíonn siad an t-athfhíordheimhniú céanna le `currentPassword` (iarrann an
-  cluaisín Slándála é) agus fágann an t-iompórtáil JSON ar lár iad.
-- Tá gach eochair polasaí slándála — na hiontrálacha
-  `SECURITY_IMPACTING_SETTINGS_KEYS`, gach eochair `oidc*` agus staid seisiúin na
-  deaise — **don oibreoir amháin** ar `PATCH /api/settings`: diúltaítear d'eochair
-  API a bhfuil scóip bainistíochta aici nó do chomhartha rochtana `oma_` le
-  `403` fiú nuair a sheolann sé an `currentPassword` ceart, agus déantar iniúchadh
-  ar an diúltú mar `settings.update_failed` le `reason: OPERATOR_REQUIRED`
+  Diúltaíonn `oidcDisablePasswordLogin` do logáil isteach le pasfhocal
+  (`POST /api/auth/login`) ach coinníonn sé an hais pasfhocail stóráilte, agus seiceálann
+  athfhíordheimhniú `currentPassword` ina choinne fós.
+- Tá `corsOrigins` agus `bruteForceProtection` in
+  `SECURITY_IMPACTING_SETTINGS_KEYS` freisin: lagaíonn maolú ceachtar acu cosaintí
+  logála isteach, mar sin úsáideann siad an t-athfhíordheimhniú céanna le
+  `currentPassword` (iarrann an cluaisín Security é) agus scaoileann an t-allmhairiú JSON
+  iad.
+- Is don oibreoir amháin gach eochair bheartais slándála — iontrálacha
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, gach eochair `oidc*` agus staid seisiúin an deais —
+  ar `PATCH /api/settings`: diúltaítear eochair API a bhfuil scóip manage aici nó
+  comhartha rochtana `oma_` le `403` fiú má sheolann sé an `currentPassword` ceart, agus
+  déantar an diúltú a iniúchadh mar `settings.update_failed` le
+  `reason: OPERATOR_REQUIRED`
   (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
-  Is féidir fós gnáthshocruithe (téama, sainroghanna taispeána) a scríobh le
-  heochair `manage` nó comhartha rochtana `admin`. Teastaíonn scóip chomhartha
-  rochtana `admin` freisin ó gach sóchán ar `/api/settings` féin (agus ar
-  `/api/settings/require-login`) (`ADMIN_MUTATION_EXACT_PATHS` in
-  `src/server/authz/accessScopes.ts`, meaitseáil conaire beacht); fanann `GET`
-  mar `read`, agus coinníonn na fo-bhealaí eile `/api/settings/*`
-  (seachfhreastalaithe, réamhshocruithe teaglama, ailiasanna samhlacha,
-  comhbhrú, glantaí…) an scóip `write` a thátaltar ón modh.
-- Scipeálann `POST /api/settings/import-json` an t-athfhíordheimhniú sin, mar sin
-  baineann sé gach eochair in `IMPORT_STRIPPED_SETTINGS_KEYS` (an comhad céanna)
-  sula scríobhtar: an pasfhocal agus `currentPassword`, gach iontráil
-  `SECURITY_IMPACTING_SETTINGS_KEYS`, agus staid seisiúin na deaise
+  Fanann gnáthshocruithe (téama, sainroghanna taispeána) inscríofa le heochair `manage`
+  nó le comhartha rochtana `admin`. Ní mór scóip an chomhartha rochtana `admin` a bheith
+  ag gach sóchán de `/api/settings` féin (agus de `/api/settings/require-login`) freisin
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, meaitseáil
+  chruinn an chosáin); fanann `GET` mar `read`, agus coinníonn na fo-bhealaí eile
+  `/api/settings/*` (seachvótálaithe, réamhshocruithe teaglama, ailiasanna samhlacha,
+  comhbhrú, glanta…) an scóip `write` a chinntear de réir an mhodha.
+- Scipeálann `POST /api/settings/import-json` an t-athfhíordheimhniú sin, agus mar sin
+  scaoileann sé gach eochair in `IMPORT_STRIPPED_SETTINGS_KEYS` (an comhad céanna) sula
+  scríobhann sé: an pasfhocal agus `currentPassword`, gach iontráil de
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, agus staid seisiúin an deais
   (`sessionsValidAfter`, `revokedDashboardSessions`). Dá bhrí sin, ní féidir le
-  hiompórtáil cúltaca níos sine seisiún a athbheochan a raibh deireadh curtha
-  leis cheana ag athrú pasfhocail nó ag logáil amach.
+  cúltaca níos sine seisiún a athbheochan atá curtha deireadh leis cheana féin ag athrú
+  pasfhocail nó ag síniú amach.
 
-## Catagóirí Bealaí
+#### Logáil isteach roghnach TOTP dhá fhachtóir (#16619)
 
-Sainíonn `src/server/authz/types.ts` trí chatagóir; titeann aon bhealach nach féidir a aicmiú go cinntitheach ar ais go `MANAGEMENT`.
+Cláraítear é ó Settings → Security; múchta go dtí go gcuireann an t-oibreoir ar siúl é
+(`src/server/auth/dashboardMfa.ts`).
 
-| Catagóir     | Cur síos                                                                                                                                                  | Fíordheimhniú riachtanach                                                          |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `PUBLIC`     | Bealaí atá sábháilte go sainiúil: logáil isteach, logáil amach, stádas, init, sláinte, bootstrap onboarding.                                              | Dada                                                                               |
-| `CLIENT_API` | Críochphointí freastail samhla: `/api/v1/*`, `/api/v1beta/*`, agus ailias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Eochair Bearer nuair a bhíonn bratach gné `REQUIRE_API_KEY` éifeachtach cumasaithe |
-| `MANAGEMENT` | Leathanaigh dashboard, socruithe, soláthraithe, eochracha, críochphointí riaracháin agus diagnóisicí.                                                     | Seisiún dashboard NÓ Bearer le scóip `manage`                                      |
+- **A gclúdaíonn sé:** logáil isteach le pasfhocal (`POST /api/auth/login`, a éilíonn ansin
+  `POST /api/auth/mfa/verify`) agus `omniroute connect` (`POST /api/cli/connect`,
+  a dhiúltaíonn do mhalartú nach n-úsáideann ach pasfhocal agus a ghlacann leis an gcód mar
+  `totp`).
+- **Na rudaí nach gclúdaíonn sé:** ní iarrann logáil isteach OIDC / SSO (`/api/auth/oidc/callback`)
+  TOTP OmniRoute. Braitheann sé ar an dara fachtóir atá ag an soláthraí aitheantais féin,
+  mar sin cuir MFA i bhfeidhm san IdP má tá OIDC cumasaithe.
+- **Aisghabháil** (gléas caillte, gan aon chóid aisghabhála fágtha, nó fachtóir nach féidir
+  a fhíorú a thuilleadh, mar shampla tar éis `STORAGE_ENCRYPTION_KEY` a athrú):
+  1. Atosaigh an freastalaí le `OMNIROUTE_DISABLE_MFA=true`.
+  2. Ar an óstach féin (piara loopback agus `Host` loopback, amhail
+     `http://localhost:20128`), logáil isteach leis an bhfocal faire. Scipeáiltear an dara fachtóir
+     don bhunús sin amháin; teastaíonn an cód fós ó gach bunús eile.
+  3. In Socruithe → Slándáil → Díchumasaigh, cuir isteach an focal faire agus fág an cód
+     bán. Glacann `POST /api/auth/mfa/disable` le corp gan `code` ach fad is atá an
+     athróg socraithe agus gur ón óstach a thagann an t-iarratas; teastaíonn seisiún an
+     deais agus an focal faire reatha uaidh fós, agus déantar iniúchadh air mar
+     `auth.mfa.disabled` le `secondFactor: "recovery_switch"`.
+  4. Díshocraigh `OMNIROUTE_DISABLE_MFA`, atosaigh, agus cláraigh arís más gá.
 
-Is **gníomhartha oibreora-amháin** cuid de ghníomhartha `MANAGEMENT`: ní leor eochair `manage`. Éilíonn easpórtáil creidiúintí stóráilte (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), cúltaca a athchur os cionn na sonraí beo (`POST /api/db-backups/import` lena n-áirítear `dryRun=true`, `POST /api/db-backups` athchóiriú de réir aitheantais, `POST /api/settings/import-json`), agus pointí athchóirithe a scriosadh (`DELETE /api/db-backups` glanadh, agus `PATCH /api/db-backups` toisc go dtiomáineann an coinneáil a shábhálann sé an glanadh uathoibríoch tar éis gach cúltaca) seisiún dashboard, ábhar CLI áitiúil, nó logáil isteach díchumasaithe. Éilíonn tocán sioncrónaithe a eisiúint (`POST /api/sync/tokens`) agus tocán rochtana CLI `admin` a bhathú (`POST /api/cli/tokens`) seisiún dashboard nó ábhar CLI áitiúil i ngach modh logála isteach. Ní creidiúintí oibreora iad eochracha API de scóip ar bith ná tocáin rochtana `oma_`: faigheann siad `403` aon uair a éilítear ceann. Tá an seiceáil i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Is oibreora-amháin freisin athrú ar shocruithe logála isteach: glacann `POST /api/settings/require-login` (pasfhocal riaracháin a shocrú / `requireLogin` a scor/a chasadh) leis na creidiúintí sin amháin a luaithe a bhíonn pasfhocal ann. Fanann fuinneog bootstrap na chéad rite (gan pasfhocal fós) gan athrú, agus caithfidh seisiún dashboard `currentPassword` a sheoladh chun an pasfhocal a athsholáthar (`403` nuair a bhíonn sé ar iarraidh nó mícheart, agus iniúchtar mar `settings.update_failed` é). Coinníonn an CLI áitiúil agus ocáid a bhfuil logáil isteach díchumasaithe aici an bealach athshlánúcháin agus féadfaidh sí pasfhocal a shocrú gan é, toisc go bhfuil an bheirt acu faoi cheangal leis an óstach a bhfuil an data directory aige.
+## Ranganna Bealaigh
+
+sainmhíníonn `src/server/authz/types.ts` trí rang; Titeann aon bhealach nach féidir a rangú go cinntitheach ar ais go `MANAGEMENT`.
+
+| Aicme        | Cur síos                                                                                                                                                              | Údar ag teastáil                                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `PUBLIC`     | Bealaí sábháilte go soiléir — logáil isteach, logáil amach, stádas, sláinte, bootstrap bordála.                                                                       | Dada                                                                                |
+| `CLIENT_API` | Críochphointí múnla a fhreastalaíonn — `/api/v1/*`, `/api/v1beta/*`, móide ailiasanna `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Eochair iompróra nuair atá an bhratach gné `REQUIRE_API_KEY` éifeachtach cumasaithe |
+| `MANAGEMENT` | Leathanaigh an phainéil, socruithe, soláthraithe, eochracha, críochphointí riaracháin agus diagnóisic.                                                                | Seisiún painéal OR Iompróir le scóip `manage`                                       |
+
+Tá cúpla gníomh `MANAGEMENT`** oibreoir-amháin** : ní leor eochair `manage`. Easpórtáil dintiúir stóráilte (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), cúltaca thar na sonraí beo a athbhunú (`POST /api/db-backups/import` lena n-áirítear `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), scrios pointí athchóirithe (`DELETE /api/db-backups` glanta, agus `PATCH /api/db-backups` mar gheall ar a choinneáil go leanann sé thiomáineann an bearradh uathoibríoch tar éis gach cúltaca) a cheangal ar seisiún deais, an t-ábhar logála CLI áitiúil díchumasaithe. Teastaíonn seisiún deais nó an t-ábhar áitiúil CLI i ngach modh logála isteach chun comhartha sioncronaithe (`POST /api/sync/tokens`) a eisiúint agus comhartha rochtana `admin` CLI (`POST /api/cli/tokens`) a bhualadh. Ní dintiúir oibreora iad eochracha API d'aon scóip agus comharthaí rochtana `oma_` : faigheann siad `403` nuair a bhíonn ceann ag teastáil. Cónaíonn an tseic i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Is oibreoir amháin a dhéantar na socruithe logáil isteach a athrú freisin: ní ghlacann `POST /api/settings/require-login` (socraigh an focal faire bainistíochta / scoránaigh `requireLogin`) ach leis na dintiúir sin a luaithe a bhíonn pasfhocal ann — níl an fhuinneog bootstrap den chéad rith (gan focal faire fós) gan athrú — agus ní mór do sheisiún deais `currentPassword` a sheoladh chun an focal faire a athsholáthar (`403` nuair a bhíonn sé in easnamh nó mícheart, arna iniúchadh mar `settings.update_failed`). Coinníonn an CLI áitiúil agus sampla le logáil isteach díchumasaithe an cosán athshlánaithe agus féadfaidh siad pasfhocal a shocrú gan é, ós rud é go bhfuil an dá cheann ceangailte leis an ósta ar leis an eolaire sonraí.
 
 ## Píblíne
 
@@ -170,50 +194,47 @@ Tugann polasaí rathúil `AuthSubject` le `kind ∈ { client_api_key, dashboard_
 
 ## Liosta Bealaí Poiblí
 
-Is é `src/shared/constants/publicApiRoutes.ts` an liosta ceada sainráite:
+Is é `src/shared/constants/publicApiRoutes.ts` an ceadliosta sainráite:
 
-Roinntear an liosta de réir **crutha**, agus tá an deighilt ríthábhachtach (GHSA-74g9-q8f6-793h): déantar réimír a
-mheaitseáil le `startsWith()`, mar sin meaitseálann sí gach cosán cóngarach a bhfuil na carachtair thosaigh chéanna aige freisin.
-Nuair a úsáideadh `/api/usage/om-usage` mar réimír, marcáladh `/api/usage/om-usage<anything>` mar PUBLIC, agus réitíonn Next
-é sin go `/api/usage/[connectionId]` — láimhseálaí nach bhfuil fíordheimhniú dá chuid féin aige.
+Tá an liosta roinnte de réir** cruth** , agus tá an scoilt ualachiompartha (GHSA-74g9-q8f6-793h): déantar réimír a mheaitseáil le `startsWith()`, mar sin de réir mar a mheaitseálann sé gach cosán in aice láimhe agus na príomhcharachtair á roinnt aige. `/api/usage/om-usage` mar réimír marcáilte `/api/usage/om-usage<anything>` PUBLIC, agus socraíonn Next go `/api/usage/[connectionId]` — láimhseálaí gan aon údarás dá chuid féin.
 
 ```ts
-// Fíorfhochrainn. NÍ MÓR do gach iontráil críochnú le "/" (deimhnithe le tástáil aonaid).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // caitear leis mar CLIENT_API in classify, ní mar "poiblí gan fíordheimhniú"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Bealaí aonair, meaitseáilte GO BEACHT (le slais deiridh nó gan í).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Bealaí aonair inléite amháin a fhaigheann maolú tionscnaimh CORS freisin.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Bealach aonair inléite amháin GAN an maolú CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Ní bhíonn bealaí inléite amháin poiblí **ach amháin** i gcás modhanna sábháilte. Tabhair faoi deara: eisiann `classifyRoute()` `/api/v1/*` agus `/api/v1beta/*` ón gcúlrogha PUBLIC — is `CLIENT_API` iad sin i gcónaí, ionas go mbeidh feidhm fós ag beartas na heochrach Bearer.
+Tá bealaí inléite amháin poiblí** amháin** le haghaidh modhanna sábháilte. Nóta: ní áirítear `classifyRoute()` `/api/v1/*` agus `/api/v1beta/*` ón PUBLIC titim-trí — iad siúd atá i gcónaí `CLIENT_API` agus mar sin tá feidhm fós ag an mbeartas Iompróra-eochair.
 
 ## Bealach Nua a Chur Leis
 
@@ -290,15 +311,15 @@ Fanann sé múchta mura bhfuil `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Ní bhaineann an rang seo ach leis an dintiúr
 comhartha rochtana. Féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
 
-## Aistriú Fíordheimhnithe Riachtanach
+## Údar ag Teastáil Scoránaigh
 
-Socraíonn `isAuthRequired()` i `src/shared/utils/apiAuth.ts` an ndéanfar **aon** fhíordheimhniú a fhorfheidhmiú d'iarratas:
+Cinneann `isAuthRequired()` in `src/shared/utils/apiAuth.ts` cé acu** ar bith** cuirtear an t-údar i bhfeidhm le haghaidh iarratais:
 
-- `settings.requireLogin === false` → díchumasaítear fíordheimhniú go domhanda, ach amháin an leibhéal cosanta buan (féach [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) agus na glaonna a thugann creidiúint a nglacann sé léi, a éilíonn an creidiúint chéanna mar a éilítear nuair a bhíonn logáil isteach cumasaithe: tocáin sioncrónaithe a eisiúint, tocáin rochtana CLI a mhint ar scóip ar bith, agus eochair API le scóip `manage`/`admin` a chruthú, an scóip sin a thabhairt d'eochair, nó eochair den sórt sin a athghiniúint nó a nochtadh (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Fanann eochracha inference-amháin oscailte.
-- Gan pasfhocal cumraithe **agus** gan athraitheach comhshaoil `INITIAL_PASSWORD` → mód bootstrap: ceadaíonn sé an draoi onboarding agus iarratais loopback, ach éilíonn iarratais líonra nochtaithe creidiúintí fós.
-- Aon earráid DB → teipeann sé ar dhúnadh (secure-by-default).
+- tá `settings.requireLogin === false` → auth díchumasaithe ar fud an domhain, ach amháin an tsraith atá faoi chosaint i gcónaí (féach [Sraitheanna an Gharda Slí](../security/ROUTE_GUARD_TIERS.md) ) agus na glaonna a thugann dintiúr a nglacann sé leis, a bhfuil an dintiúir chéanna ag teastáil uathu agus atá le logáil isteach: ag eisiúint éarlaisí sioncronaithe, ag miontú comharthaí rochtana CLI ag aon scóip, agus ag cruthú eochair API leis an `manage`/`admin` key scope to regen scope a dheonú nó a nochtadh, ag nochtadh na heochrach sin chun raon feidhme a dheonú nó a nochtadh. eochair (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Fanann eochracha tátail amháin ar oscailt. Bratach gné chosanta a scríobh (`REQUIRE_API_KEY`, na bratacha Slándála eile, agus na bratacha SSRF / TLS / MCP-scope / sandbox atá liostaithe i [Bratacha Gné](../reference/FEATURE_FLAGS.md#rest-api) ) agus na socruithe um chumhdach PII (`PUT /api/settings/pii`) a shábháil freisin, ní mór dintiúir i gcónaí.
+- Níl aon phasfhocal cumraithe** agus** ní cheadaíonn modh bootstrap `INITIAL_PASSWORD` env var → an draoi bordála agus iarratais loopback, ach tá dintiúir fós ag teastáil ó iarratais líonra nochta. Eisceacht: scríobh bratach gné chosanta agus a shábháil ar na socruithe chumhdaigh PII (`PUT /api/settings/pii`) gá dintiúir fiú ó loopback, mar sin ní leor loopback ann féin.
+- Theipeann ar aon earráid DB → dúnta (slán de réir réamhshocraithe).
 
-Úsáideann forfheidhmiú eochair API an chliaint `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, ní léamh dhíreach ar `process.env.REQUIRE_API_KEY`. Tá sé seo tábhachtach d'ionstraimí a imscaoileadh: nuair a athraítear `REQUIRE_API_KEY` i Dashboard → Feature Flags, stórálann sé forshárú DB agus dar ndóigh bíonn tionchar aige ar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, agus ar sheiceálacha fíordheimhnithe eile client-API a roinneann an cúntóir seo. Mura féidir stór na mbratach gné a léamh, teipeann ar fhíordheimhniú client API ar dhúnadh agus éilíonn sé eochair.
+Úsáideann cliant forfheidhmithe API key `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, ní léamh `process.env.REQUIRE_API_KEY` díreach. Baineann sé seo le cásanna imlonnaithe: déanann scoránú `REQUIRE_API_KEY` i Deais → Feature Flags sáruithe DB a stóráil agus bíonn tionchar láithreach aige ar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, agus seiceálacha údaráis cliant-API eile a roinneann an cúntóir seo. Murar féidir an stór brataí gné a léamh, ní dhúntar cliant API auth agus teastaíonn eochair.
 
 ## Athrú Bristeach — v3.8.0
 

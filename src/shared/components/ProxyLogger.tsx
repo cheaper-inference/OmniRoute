@@ -22,7 +22,12 @@ import EmptyState from "./EmptyState";
 import Input from "./Input";
 import Select from "./Select";
 import ProxyLogDetail from "./ProxyLogDetail";
-import { TYPE_COLORS, LEVEL_COLORS, PROVIDER_COLORS } from "@/shared/constants/colors";
+import {
+  TYPE_COLORS,
+  LEVEL_COLORS,
+  PROVIDER_COLORS,
+  neutralBadge,
+} from "@/shared/constants/colors";
 import {
   formatTime,
   formatDuration as formatLatency,
@@ -472,12 +477,8 @@ export default function ProxyLogger() {
           )}
 
           {uniqueProviders.map((p) => {
-            // Provider identity colours (brand palette in constants/colors), not status tones.
-            const pc = PROVIDER_COLORS[p] || {
-              bg: "#374151",
-              text: "#fff",
-              label: p.toUpperCase(),
-            };
+            // Provider identity tones (kit chart tokens in constants/colors), not status tones.
+            const pc = PROVIDER_COLORS[p] || neutralBadge(p.toUpperCase());
             const isActive = selectedProvider === p;
             return (
               <Button
@@ -490,11 +491,13 @@ export default function ProxyLogger() {
                   "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
                   isActive
                     ? "border-border-strong ring-1 ring-border-strong"
-                    : "border-transparent opacity-70 hover:opacity-100"
+                    : "border-transparent hover:bg-bg-subtle"
                 )}
+                // Active: tint + ink + hue border; inactive: the ink alone (AA on the page).
                 style={{
-                  backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
-                  color: isActive ? pc.text : pc.bg,
+                  backgroundColor: isActive ? pc.bg : undefined,
+                  borderColor: isActive ? pc.border : undefined,
+                  color: pc.text,
                 }}
               >
                 {pc.label}
@@ -549,21 +552,15 @@ export default function ProxyLogger() {
             </TableHeader>
             <TableBody>
               {sortedLogs.map((log) => {
-                // Proxy type / level keep their categorical palettes (constants/colors).
-                const typeColor = TYPE_COLORS[log.proxy?.type] || {
-                  bg: "#6B7280",
-                  text: "#fff",
-                  label: log.proxy?.type || "-",
-                };
+                // Proxy type / level badges are kit tones (constants/colors).
+                const typeColor =
+                  TYPE_COLORS[log.proxy?.type] || neutralBadge(log.proxy?.type || "-");
                 const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
                 const resolvedProviderLabel =
                   getProviderDisplayLabel(log.provider, providerNodes) ||
                   (log.provider || "-").toUpperCase();
-                const providerColor = PROVIDER_COLORS[log.provider] || {
-                  bg: "#374151",
-                  text: "#fff",
-                  label: resolvedProviderLabel,
-                };
+                const providerColor =
+                  PROVIDER_COLORS[log.provider] || neutralBadge(resolvedProviderLabel);
                 const isError = log.status === "error" || log.status === "timeout";
                 const egressAddress =
                   observedEgressAddresses({

@@ -14,6 +14,10 @@ language: en-US
 reviews:
   profile: chill
   high_level_summary: true
+  # Keep the summary in the walkthrough comment. Writing it into the PR description fires a
+  # pull_request "edited" event, which ci.yml and quality.yml listen to, so every review
+  # restarted (and cancelled) the PR's CI and Quality Gates runs.
+  high_level_summary_in_walkthrough: true
   poem: false
   # Single maintainer identity and a lot of walkthrough already: keep the summary lean.
   sequence_diagrams: false
@@ -44,18 +48,25 @@ reviews:
     ignore_title_keywords:
       - "[skip review]"
       - "WIP"
+      # Release-train validation PRs: 400+ files, over the review file limit, never merged.
+      - "do not merge"
   path_filters:
     # 66 translated doc mirrors and the translation state are produced by the i18n waves.
     - "!docs/i18n/**"
     - "!.i18n-state.json"
     # Translated UI catalogs; the English source catalog stays in review.
-    - "!src/i18n/messages/**"
-    - "src/i18n/messages/en.json"
+    # Exclusions only: a pattern without "!" turns the filter into an allowlist, and
+    # exclusions always win, so an "en.json" include left every file out of review.
+    # The two classes match every catalog except en.json (el, es, et start with "e").
+    - "!src/i18n/messages/[a-df-z]*.json"
+    - "!src/i18n/messages/e[a-mo-z]*.json"
     - "!**/package-lock.json"
     # Generated files.
     - "!docs/reference/PROVIDER_REFERENCE.md"
     - "!**/*.svg"
     - "!CHANGELOG.md"
+    # Vendored CI UI Kit: fixes belong upstream, and the snapshot check rejects local edits.
+    - "!packages/ui-kit/**"
   path_instructions:
     - path: "src/app/api/**"
       instructions: >-

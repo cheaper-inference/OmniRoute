@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import {
   handleAdobeFireflyImageGeneration,
   handleCodexImageEdit,
@@ -7,8 +8,9 @@ import {
   handleSyntxImageGeneration,
 } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import {
+  falImageEditBody,
+  falImageEditMaxReferences,
   handleFalAIImageEdit,
-  FAL_IMAGE_EDIT_MAX_REFERENCES,
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -19,6 +21,7 @@ import {
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
+  isCodexPoolPlanIneligibleForModel,
 } from "@/sse/services/auth";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import {
@@ -45,7 +48,6 @@ import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
   resolveImageRouteModel,
   resolveImageModelPrefix,
-  extractImageEditInputFromJson,
   validateCodexImageEditReferences,
   MAX_CODEX_IMAGE_EDIT_REFERENCES,
   MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES,
@@ -54,33 +56,12 @@ import { isMicrosoftDesignerWebProviderRetiredError } from "@/shared/constants/d
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
-import {
-  getBodySizeLimit,
-  readRequestBodyWithLimit,
-  RequestBodyTooLargeError,
-} from "@/shared/middleware/bodySizeGuard";
-import { getCachedSettings } from "@/lib/db/readCache";
+import { RequestBodyTooLargeError } from "@/shared/middleware/bodySizeGuard";
+import { readEditInput, type EditInput } from "./editInput.ts";
 import {
   CHATGPT_WEB_RETIRED_ERROR_CODE,
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
-import { z } from "zod";
-
-// JSON edit body (Open WebUI / OpenAI-style). All fields optional — the prompt
-// and resolvable image are enforced after extraction in POST — but the top-level
-// shape must be an object with correctly-typed fields, so a malformed body
-// (array, string, wrong types) is rejected with 400 instead of silently parsed.
-const ImageEditJsonSchema = z
-  .object({
-    prompt: z.string().optional(),
-    model: z.string().optional(),
-    size: z.string().optional(),
-    response_format: z.string().optional(),
-    image: z.unknown().optional(),
-    images: z.array(z.unknown()).optional(),
-  })
-  .passthrough();
-
 /**
  * /v1/images/edits — OpenAI-compatible image-edit endpoint.
  *
@@ -106,17 +87,6 @@ export async function OPTIONS() {
   });
 }
 
-interface EditInput {
-  prompt: string;
-  model: string | null;
-  size: string | null;
-  responseFormat: string | null;
-  imageBytes: Buffer | null;
-  imageMime: string | null;
-  images: Array<{ bytes: Buffer; mime: string }>;
-  imageInputCount: number;
-}
-
 const MAX_NON_CODEX_IMAGE_EDIT_REFERENCES = 1;
 
 /** Keep the legacy hosted-tool bound while matching the documented GPT Image edit cap. */
@@ -128,82 +98,6 @@ function validateCodexReferencesForModel(
     ? MAX_CODEX_GPT_IMAGE_EDIT_REFERENCES
     : MAX_CODEX_IMAGE_EDIT_REFERENCES;
   return validateCodexImageEditReferences(images, maxReferences);
-}
-
-async function readMultipartImage(formData: FormData): Promise<EditInput> {
-  const promptRaw = formData.get("prompt");
-  const prompt = typeof promptRaw === "string" ? promptRaw.trim() : "";
-  const modelRaw = formData.get("model");
-  const model = typeof modelRaw === "string" ? modelRaw.trim() : null;
-  const sizeRaw = formData.get("size");
-  const size = typeof sizeRaw === "string" ? sizeRaw.trim() : null;
-  const respRaw = formData.get("response_format");
-  const responseFormat = typeof respRaw === "string" ? respRaw.trim() : null;
-
-  // OpenAI-style clients may repeat either `image` or `image[]`. Count every submitted
-  // candidate so provider-specific cardinality checks cannot silently drop extras.
-  const imageEntries = Array.from(formData.entries())
-    .filter(([key]) => key === "image" || key === "image[]")
-    .map(([, value]) => value);
-  const images: Array<{ bytes: Buffer; mime: string }> = [];
-  for (const imageEntry of imageEntries) {
-    if (typeof imageEntry === "string") continue;
-    const file = imageEntry as File;
-    const bytes = Buffer.from(await file.arrayBuffer());
-    if (bytes.length === 0) continue;
-    images.push({ bytes, mime: file.type || "image/png" });
-  }
-  const firstImage = images[0] ?? null;
-  return {
-    prompt,
-    model,
-    size,
-    responseFormat,
-    imageBytes: firstImage?.bytes ?? null,
-    imageMime: firstImage?.mime ?? null,
-    images,
-    imageInputCount: imageEntries.length,
-  };
-}
-
-/** Read the edit input from either multipart/form-data or a JSON/data-URL body. */
-async function readEditInput(request: Request): Promise<EditInput | null> {
-  const contentType = request.headers.get("content-type") || "";
-  let bodySizeSettings: Record<string, unknown> | undefined;
-  try {
-    bodySizeSettings = await getCachedSettings();
-  } catch {
-    bodySizeSettings = undefined;
-  }
-  const bodySizeLimit = getBodySizeLimit("/api/v1/images/edits", bodySizeSettings);
-  const rawBody = await readRequestBodyWithLimit(request, bodySizeLimit);
-  if (contentType.includes("multipart/form-data")) {
-    try {
-      const formData = await new Response(rawBody, {
-        headers: { "content-type": contentType },
-      }).formData();
-      return await readMultipartImage(formData);
-    } catch (err) {
-      log.warn("IMAGE", `Invalid multipart body: ${err instanceof Error ? err.message : err}`);
-      return null;
-    }
-  }
-  if (contentType.includes("application/json")) {
-    try {
-      const parsed = ImageEditJsonSchema.safeParse(
-        JSON.parse(new TextDecoder().decode(rawBody)) as unknown
-      );
-      if (!parsed.success) {
-        log.warn("IMAGE", `Invalid JSON edit body shape: ${parsed.error.message}`);
-        return null;
-      }
-      return extractImageEditInputFromJson(parsed.data);
-    } catch (err) {
-      log.warn("IMAGE", `Invalid JSON edit body: ${err instanceof Error ? err.message : err}`);
-      return null;
-    }
-  }
-  return null;
 }
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -322,6 +216,7 @@ async function handleSyntxEditRequest(params: {
 
 /** Reference/prompt payload an edit dispatch needs, shared by single + combo paths. */
 interface ImageEditContext {
+  options?: Record<string, unknown>;
   prompt: string;
   size: string | null;
   responseFormat: string | null;
@@ -329,6 +224,7 @@ interface ImageEditContext {
   imageBytes: Buffer | null;
   imageMime: string | null;
   imageInputCount: number;
+  hasMask: boolean;
   allowedConnections: string[] | null;
   request: Request;
   accounting: EditAccountingBase;
@@ -360,7 +256,8 @@ function classifyImageEditTarget(
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
       providerConfig.format === "syntx-image" ||
-      (providerConfig.format === "fal-ai" && isFalImageEditModel(parsed.model)) ||
+      (providerConfig.format === "fal-ai" &&
+        isFalImageEditModel(parsed.model, getFalCompatibilityPreparer() !== null)) ||
       providerConfig.id === "openrouter"
     ) {
       return parsed.provider ? { credKey: parsed.provider } : null;
@@ -391,6 +288,9 @@ async function dispatchImageEditTarget(
 
   // Built-in Codex — native Responses hosted tool for reference-image edits.
   if (providerConfig?.format === "codex-responses") {
+    if (parsed.model === "gpt-6.1-sol" && ctx.hasMask) {
+      return { success: false, status: 400, error: "Sol hosted image edits do not support masks" };
+    }
     const modelEntry = getImageModelEntry(modelStr);
     if (!modelEntry || modelEntry.provider !== "codex" || modelEntry.model !== parsed.model) {
       return {
@@ -448,15 +348,23 @@ async function dispatchImageEditTarget(
       : editImage())) as ImageComboDispatchResult;
   }
 
-  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
+  const prepareFalInput = getFalCompatibilityPreparer();
+  const falNative = prepareFalInput !== null;
+  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)) {
     return (await handleFalAIImageEdit({
+      prepareFalInput,
       provider: parsed.provider,
       model: parsed.model,
       providerConfig,
-      body: { prompt, size: size ?? undefined, response_format: responseFormat ?? undefined, n: 1 },
+      body: falImageEditBody(parsed.model, falNative, ctx.options, {
+        prompt,
+        size,
+        responseFormat,
+      }),
       images,
       credentials: credentials as never,
       log,
+      signal: request.signal,
     })) as ImageComboDispatchResult;
   }
 
@@ -669,8 +577,17 @@ async function postHandler(request: Request, _context?: unknown) {
     );
   }
 
-  const { prompt, model, size, responseFormat, imageBytes, imageMime, images, imageInputCount } =
-    input;
+  const {
+    prompt,
+    model,
+    size,
+    responseFormat,
+    imageBytes,
+    imageMime,
+    images,
+    imageInputCount,
+    hasMask,
+  } = input;
   if (!prompt) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing required field: prompt");
   }
@@ -720,6 +637,7 @@ async function postHandler(request: Request, _context?: unknown) {
           ? comboPolicy.apiKeyInfo.allowedConnections
           : null;
       return executeImageEditCombo(fullModel, {
+        options: input.options,
         prompt,
         size,
         responseFormat,
@@ -727,6 +645,7 @@ async function postHandler(request: Request, _context?: unknown) {
         imageBytes,
         imageMime,
         imageInputCount,
+        hasMask,
         allowedConnections: comboAllowedConnections,
         request,
         accounting: { apiKeyInfo: comboPolicy.apiKeyInfo, startTime },
@@ -764,14 +683,16 @@ async function postHandler(request: Request, _context?: unknown) {
 
   const parsed = parseImageModel(resolvedModel);
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
+  const prepareFalInput = getFalCompatibilityPreparer();
+  const falNative = prepareFalInput !== null;
   // Firefly nano/gpt-image accept multiple reference blobs; other non-Codex stay at 1.
   const maxRefsForProvider =
     providerConfig?.format === "adobe-firefly-image"
       ? 4
       : providerConfig?.format === "codex-responses"
         ? Number.POSITIVE_INFINITY
-        : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)
-          ? FAL_IMAGE_EDIT_MAX_REFERENCES
+        : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)
+          ? falImageEditMaxReferences(parsed.model)
           : MAX_NON_CODEX_IMAGE_EDIT_REFERENCES;
   if (providerConfig?.format !== "codex-responses" && imageInputCount > maxRefsForProvider) {
     return errorResponse(
@@ -783,6 +704,9 @@ async function postHandler(request: Request, _context?: unknown) {
   }
   // Built-in Codex uses its native Responses hosted tool for stateless reference-image edits.
   if (providerConfig?.format === "codex-responses") {
+    if (parsed.model === "gpt-6.1-sol" && hasMask) {
+      return errorResponse(400, "Sol hosted image edits do not support masks");
+    }
     const modelEntry = getImageModelEntry(resolvedModel);
     if (!modelEntry || modelEntry.provider !== "codex" || modelEntry.model !== parsed.model) {
       return errorResponse(
@@ -801,6 +725,17 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       resolvedModel
     );
+    // Paid-only Codex models skip Free/Go accounts during selection; a pool made only of
+    // them still gets the explicit paid-plan answer instead of "no credentials".
+    if (
+      !credentials &&
+      (await isCodexPoolPlanIneligibleForModel(resolvedModel, allowedConnections))
+    ) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        "Codex image editing requires a paid ChatGPT/Codex plan"
+      );
+    }
     if (!credentials) {
       return errorResponse(
         HTTP_STATUS.UNAUTHORIZED,
@@ -887,7 +822,7 @@ async function postHandler(request: Request, _context?: unknown) {
     );
   }
 
-  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)) {
+  if (providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model, falNative)) {
     const credentials = await getProviderCredentialsWithQuotaPreflight(
       parsed.provider,
       null,
@@ -920,18 +855,19 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleFalAIImageEdit({
+          prepareFalInput,
           provider: parsed.provider,
           model: parsed.model,
           providerConfig,
-          body: {
+          body: falImageEditBody(parsed.model, falNative, input.options, {
             prompt,
-            size: size ?? undefined,
-            response_format: responseFormat ?? undefined,
-            n: 1,
-          },
+            size,
+            responseFormat,
+          }),
           images,
           credentials: credentials as Record<string, unknown>,
           log,
+          signal: request.signal,
         })
     );
 
@@ -1085,6 +1021,7 @@ async function postHandler(request: Request, _context?: unknown) {
       allowedConnections,
       execute: (creds) =>
         handleImageGeneration({
+          prepareFalInput,
           body: {
             model: resolvedModel,
             prompt,

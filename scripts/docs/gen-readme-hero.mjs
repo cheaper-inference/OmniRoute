@@ -15,14 +15,14 @@ import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
   headline: ["Never stop coding."],
-  sub: ["Every AI tool → 380 providers — 150+ free —", "through one endpoint."],
+  sub: ["Every AI tool → 381 providers — 150+ free —", "through one endpoint."],
   tools: [
     "Claude Code · Codex · Cursor · Cline · Copilot · Antigravity  →  FREE Claude / GPT / Gemini · auto-fallback",
   ],
   cmd: ["$ npm i -g omniroute"],
   foot: ["RTK + CAVEMAN · STACKED COMPRESSION · ONE ENDPOINT · /v1"],
   stats: [
-    "380",
+    "381",
     "AI PROVIDERS",
     "150+",
     "FREE TIERS",
@@ -39,7 +39,7 @@ export const HERO_COPY = {
 
 export async function renderReadmeHero() {
   const C = HERO_COPY;
-  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, lime edge).
+  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, accent edge).
   const cardX = 760;
   const cardY = 96;
   const cardW = 380;
@@ -60,8 +60,8 @@ export async function renderReadmeHero() {
     svgOpen({
       viewBox: "0 0 1200 548",
       title:
-        "OmniRoute — Never stop coding. Every AI tool to 380 providers, 150+ free, through one endpoint.",
-      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 380 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
+        "OmniRoute — Never stop coding. Every AI tool to 381 providers, 150+ free, through one endpoint.",
+      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 381 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
     }) +
       gridDefs("heroGrid") +
       `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +

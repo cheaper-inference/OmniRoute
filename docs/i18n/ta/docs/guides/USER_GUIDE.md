@@ -120,16 +120,16 @@
 
 ## 📖 வழங்குநர் அமைப்பு
 
-CSV அல்லது JSON கோப்பிலிருந்து API-key இணைப்புகளை மொத்தமாகச் சேர்க்க, **கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → கோப்பிலிருந்து இறக்குமதி செய்** என்பதைப் பயன்படுத்தவும். நெடுவரிசைகள் நிலை சார்ந்தவை (`provider,name,apiKey,baseUrl,priority`); `provider` ஏற்கனவே நிர்வகிக்கப்படும் வழங்குநராகவோ இணக்கமான node ஆகவோ இருக்க வேண்டும். [CSV அல்லது JSON கோப்பிலிருந்து வழங்குநர்களை இறக்குமதி செய்தல்](../providers/CSV-IMPORT.md) என்பதைப் பார்க்கவும்.
+CSV அல்லது JSON கோப்பிலிருந்து API விசை இணைப்புகளை மொத்தமாகச் சேர்க்க, **Dashboard → Providers → Import from file** என்பதைப் பயன்படுத்தவும். நெடுவரிசைகள் நிலைவரிசைப்படி இருக்கும் (`provider,name,apiKey,baseUrl,priority`); `provider` ஏற்கனவே நிர்வகிக்கப்படும் வழங்குநராகவோ இணக்கமான முனையாகவோ இருக்க வேண்டும். [CSV அல்லது JSON கோப்பிலிருந்து வழங்குநர்களை இறக்குமதி செய்வது](../providers/CSV-IMPORT.md) என்பதைப் பார்க்கவும்.
 
 ### 🔐 சந்தா வழங்குநர்கள்
 
 #### Claude Code (Pro/Max)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → Claude Code-ஐ இணைக்கவும்
-→ OAuth உள்நுழைவு → தானியங்கி token புதுப்பிப்பு
-→ 5 மணிநேர + வாராந்திர quota கண்காணிப்பு
+Dashboard → Providers → Connect Claude Code
+→ OAuth உள்நுழைவு → தானியங்கி டோக்கன் புதுப்பிப்பு
+→ 5-மணி + வாராந்திர ஒதுக்கீட்டு கண்காணிப்பு
 
 Models:
   cc/claude-opus-4-7
@@ -137,20 +137,21 @@ Models:
   cc/claude-haiku-4-5-20251001
 ```
 
-**சிறப்புக் குறிப்பு:** சிக்கலான பணிகளுக்கு Opus-ஐயும், வேகத்துக்கு Sonnet-ஐயும் பயன்படுத்தவும். OmniRoute ஒவ்வொரு model-க்கும் quota-வைக் கண்காணிக்கிறது!
+**சிறந்த உதவிக்குறிப்பு:** சிக்கலான பணிகளுக்கு Opus-ஐயும், வேகத்திற்காக Sonnet-ஐயும் பயன்படுத்தவும். OmniRoute ஒவ்வொரு மாதிரிக்கும் ஒதுக்கீட்டைக் கண்காணிக்கிறது!
 
-OmniRoute host-இல் browser இல்லையா? Claude Code-இல் உள்நுழைந்துள்ள எந்த இடத்திலும் `claude setup-token`-ஐ இயக்கி, ஓராண்டுக்கான token-ஐ **Setup Token** tab-இல் ஒட்டவும். [setup token உடன் Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) என்பதைப் பார்க்கவும்.
+OmniRoute வழங்கும் ஹோஸ்டில் உலாவி இல்லையா? Claude Code-இல் உள்நுழைந்துள்ள எந்த இடத்திலும் `claude setup-token` கட்டளையை இயக்கி, ஒரு வருட கால டோக்கனை **Setup Token** தாவலில் ஒட்டவும். [Setup token உடன் Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) என்பதைப் பார்க்கவும்.
 
-Claude மற்றும் Claude Code-இணக்கமான routes, Opus மற்றும் Sonnet
-models-க்கான `max` thinking effort-ஐத் தக்கவைக்கின்றன. Haiku models `max` effort tier-ஐ ஏற்காது; எனவே OmniRoute அந்த
-request-ஐ upstream-க்கு அனுப்புவதற்கு முன், அதிக thinking budget-க்கு மாற்றுகிறது.
+Claude மற்றும் Claude Code-உடன் இணக்கமான வழித்தடங்கள், Opus மற்றும் Sonnet
+மாதிரிகளுக்கான `max` சிந்தனை முயற்சியை அப்படியே பாதுகாக்கின்றன. Haiku மாதிரிகள் `max`
+முயற்சி அடுக்கை ஏற்காது; எனவே OmniRoute அந்தக் கோரிக்கையை upstream-க்கு அனுப்புவதற்கு முன்
+அதை அதிக சிந்தனை பட்ஜெட்டாகத் தாழ்த்துகிறது.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → Codex-ஐ இணைக்கவும்
+Dashboard → Providers → Connect Codex
 → OAuth உள்நுழைவு (port 1455)
-→ 5 மணிநேர + வாராந்திர மீட்டமைப்பு
+→ 5-மணி + வாராந்திர மீட்டமைப்பு
 
 Models:
   cx/gpt-5.5
@@ -162,7 +163,7 @@ Models:
 #### GitHub Copilot
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → GitHub-ஐ இணைக்கவும்
+Dashboard → Providers → Connect GitHub
 → GitHub வழியாக OAuth
 → மாதாந்திர மீட்டமைப்பு (மாதத்தின் 1ஆம் தேதி)
 
@@ -174,47 +175,67 @@ Models:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 மலிவான வழங்குநர்கள்
+**AI Credits (டோக்கன் அடிப்படையிலான கட்டணம்).** கணக்கிற்காக GitHub `credits_used`-ஐப்
+பதிவுசெய்யும்போது, வரம்பற்ற நிறுவனத் திட்டங்களிலும், Provider Limits அட்டையில் தற்போதைய
+கட்டணக் காலத்தில் பயன்படுத்தப்பட்ட கிரெடிட்களுடன் **AI Credits** வரிசை காட்டப்படும்.
+
+**உள்ளூர் AI Credits வரம்பு.** GitHub இணைப்பைத் திருத்தி, ஒவ்வொரு கட்டணக் காலத்திற்குமான
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) என்பதை
+அமைக்கவும். காலியாக விட்டால் அது முடக்கப்படும்; `0` என அமைத்தால் இணைப்பு எப்போதும்
+தவிர்க்கப்படும். கடைசியாகப் பெறப்பட்ட பயன்பாட்டு அளவீடு வரம்பை அடைந்திருந்தாலோ
+மீறியிருந்தாலோ, கணக்குத் தேர்வு அந்த இணைப்பைத் தவிர்த்து, quota-policy cutoff
+செயல்படுவது போலவே வழித்தடத்தை உங்கள் பிற இணைப்புகளுக்குத் திருப்பும். ஏற்கனவே
+காலமுறை ஒதுக்கீட்டு புதுப்பிப்பு சேகரிக்கும் பயன்பாட்டுத் தரவையே இந்தச் சரிபார்ப்பு
+படிக்கிறது — கோரிக்கை நடைபெறும் பாதையில் GitHub-ஐ அது ஒருபோதும் அழைக்காது — மேலும் இது
+திறந்த நிலையில் தோல்வியடையும்: காணாமல் போன அல்லது காலாவதியான அளவீடு (15 நிமிடங்களுக்கு
+மேல் பழையது, அல்லது ஏற்கனவே மீட்டமைக்கப்பட்ட கட்டணக் காலத்திலிருந்து வந்தது) இணைப்பைத்
+தடுக்காது. இது ஒரு உள்ளூர் பாதுகாப்பு நடவடிக்கை மட்டுமே; **உறுதிசெய்யப்பட்ட செலவுக்
+கூரை அல்ல**: GitHub அறிக்கையிடும் தாமதங்கள், புதுப்பிப்பு இடைவெளி, செயல்பாட்டிலுள்ள
+கோரிக்கைகள் மற்றும் OmniRoute-க்கு வெளியிலான பயன்பாடு ஆகியவற்றால் இந்த வரம்பை மீறலாம்.
+உறுதியான வரம்பிற்கு GitHub-இன் சொந்த செலவுக் கட்டுப்பாடுகளைப் பயன்படுத்தவும்.
+
+### 💰 குறைந்த விலை வழங்குநர்கள்
 
 #### GLM-4.7 (தினசரி மீட்டமைப்பு, $0.6/1M)
 
-1. பதிவு செய்க: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan-இலிருந்து API key-ஐப் பெறவும்
-3. கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்: வழங்குநர்: `glm`, API Key: `your-key`
+1. பதிவு செய்யவும்: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan-இலிருந்து API விசையைப் பெறவும்
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**பயன்பாடு:** `glm/glm-4.7` — **சிறப்புக் குறிப்பு:** Coding Plan, 1/7 செலவில் 3× quota-வை வழங்குகிறது! தினமும் காலை 10:00 மணிக்கு மீட்டமைக்கப்படும்.
+**பயன்பாடு:** `glm/glm-4.7` — **சிறந்த உதவிக்குறிப்பு:** Coding Plan, 1/7 விலையில் 3× ஒதுக்கீட்டை வழங்குகிறது! தினமும் காலை 10:00 மணிக்கு மீட்டமைக்கப்படும்.
 
-#### MiniMax M2.1 (5 மணிநேர மீட்டமைப்பு, $0.20/1M)
+#### MiniMax M2.1 (5-மணி மீட்டமைப்பு, $0.20/1M)
 
-1. பதிவு செய்க: [MiniMax](https://www.minimax.io)
-2. API key-ஐப் பெறவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்
+1. பதிவு செய்யவும்: [MiniMax](https://www.minimax.io)
+2. API விசையைப் பெறவும் → Dashboard → Add API Key
 
-**பயன்பாடு:** `minimax/MiniMax-M2.1` — **சிறப்புக் குறிப்பு:** நீண்ட context-க்கான (1M tokens) மிக மலிவான விருப்பம்!
+**பயன்பாடு:** `minimax/MiniMax-M2.1` — **சிறந்த உதவிக்குறிப்பு:** நீண்ட சூழலுக்கான குறைந்த விலைத் தேர்வு (1M டோக்கன்கள்)!
 
 #### Kimi K2 ($9/மாதம் நிலையான கட்டணம்)
 
-1. சந்தா செலுத்துக: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key-ஐப் பெறவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்
+1. சந்தா பெறவும்: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. API விசையைப் பெறவும் → Dashboard → Add API Key
 
-**பயன்பாடு:** `kimi/kimi-k2.5` — **சிறப்புக் குறிப்பு:** 10M tokens-க்கு நிலையான $9/மாதம் = நடைமுறைச் செலவு $0.90/1M!
+**பயன்பாடு:** `kimi/kimi-k2.5` — **சிறந்த உதவிக்குறிப்பு:** 10M டோக்கன்களுக்கு நிலையான $9/மாதம் = பயனுள்ள செலவு $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. பதிவு செய்க: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key ஒன்றை உருவாக்கவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்: வழங்குநர்: `qianfan`
+1. பதிவு செய்யவும்: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Qianfan API விசையை உருவாக்கவும் → Dashboard → Add API Key: Provider: `qianfan`
 
-**பயன்பாடு:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, அல்லது மற்றொரு Qianfan OpenAI-இணக்கமான model ID.
+**பயன்பாடு:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, அல்லது வேறு Qianfan OpenAI-உடன் இணக்கமான மாதிரி ID.
 
 ### 🆓 இலவச வழங்குநர்கள்
 
-அங்கீகாரம் தேவையற்ற இலவச வழங்குநர்களின் provider page-இல் **அங்கீகாரம் தேவையில்லை** என்பதற்கு அருகில் switch உள்ளது.
-அதை அணைப்பது அந்த வழங்குநரை முடக்கி, Providers configured/compact views-இலிருந்து அதை அகற்றி,
-அதன் models-ஐ `/v1/models`-இலிருந்து அகற்றும்.
+அங்கீகாரம் தேவையில்லாத இலவச வழங்குநர்களின் வழங்குநர் பக்கத்தில் **No authentication required**
+என்பதற்குப் பக்கத்தில் ஒரு சுவிட்ச் இருக்கும். அதை முடக்கினால் அந்த வழங்குநர் முடக்கப்பட்டு,
+Providers configured/compact காட்சிகளில் இருந்து அகற்றப்பட்டு, அதன் மாதிரிகள்
+`/v1/models`-இலிருந்தும் அகற்றப்படும்.
 
-#### Qoder (9 இலவச models)
+#### Qoder (9 இலவச மாதிரிகள்)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → Qoder-ஐ இணைக்கவும் → OAuth உள்நுழைவு → அணுகல் தற்போதைய வழங்குநர் வரம்புகளுக்கு உட்பட்டது
+Dashboard → Connect Qoder → OAuth உள்நுழைவு → அணுகல் தற்போதைய வழங்குநர் வரம்புகளுக்கு உட்பட்டது
 
 Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +243,7 @@ Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude இலவசம்)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → Kiro-வை இணைக்கவும் → AWS Builder ID அல்லது Google/GitHub → ~50 credits/மாதம்
+Dashboard → Connect Kiro → AWS Builder ID அல்லது Google/GitHub → மாதத்திற்கு சுமார் 50 கிரெடிட்கள்
 
 Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -609,22 +630,22 @@ post_install() {
 
 ---
 
-## 📊 கிடைக்கும் மாதிரிகள்
+## 📊 கிடைக்கக்கூடிய மாதிரிகள்
 
 <details>
-<summary><b>கிடைக்கும் அனைத்து மாதிரிகளையும் காண்க</b></summary>
+<summary><b>கிடைக்கக்கூடிய அனைத்து மாதிரிகளையும் காண்க</b></summary>
 
-> கீழுள்ள பட்டியல் v3.8.0-க்காக `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) டைனமிக்காக ஒத்திசைக்கப்படுகின்றன — முழு நேரடி பட்டியலுக்கு **Dashboard → Providers → [provider] → Available Models** ஐத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
+> கீழேயுள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts` கோப்பிலிருந்து தேர்ந்தெடுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் விதத்தில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரடி பட்டியலைப் பெற **டாஷ்போர்டு → வழங்குநர்கள் → [வழங்குநர்] → கிடைக்கக்கூடிய மாதிரிகள்** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
 >
-> ஒரு வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறிவிட்டால், நேரடி அப்ஸ்ட்ரீம் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** ஐப் பயன்படுத்தவும் (அல்லது **Auto-Sync** ஐ இயக்கவும்). இது v3.8.50-இல் LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations அநாமதேய அணுகல் அப்ஸ்ட்ரீம் வரம்புக்கு உட்பட்டதாகவே இருந்தது.
+> வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறுபட்டிருந்தால், நேரடி upstream பட்டியலைப் பெற அந்தப் பக்கத்தில் **/models இலிருந்து இறக்குமதி செய்** என்பதைப் பயன்படுத்தவும் (அல்லது **தானியங்கு ஒத்திசைவு** என்பதை இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்காக v3.8.50-ல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations-ன் அநாமதேய அணுகல் upstream வரம்புக்குள் இருந்தது.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி நிலைகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி அடுக்குகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** இல் காண்பிக்கப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைப் பொறுத்து மாறுபடும்.
+**Kiro (`kr/`)** — இலவச OAuth: **டாஷ்போர்டு → வழங்குநர்கள் → Kiro → கிடைக்கக்கூடிய மாதிரிகள்** என்பதன் கீழ் காட்டப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் மாதிரிகள் கணக்கு மற்றும் திட்டத்தைப் பொறுத்தது.
 
 **Qoder (`if/`)** — இலவச OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +653,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டிற்கேற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டின் அடிப்படையில்: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API விசை: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — மிக வேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — அதிவேகம்: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok நேட்டிவ்: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-இல் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-வில் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — தேடல்-மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — திறந்த மூல: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — வேகமான இன்ஃபரன்ஸ்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — வேகமான inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — வேஃபர்-அளவு: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-மையம்: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — எண்டர்பிரைஸ்: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து API விசை வாரியாக நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** இல் ஒரு விசையை இணைத்துவிட்டு, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** ஐப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google வழங்கும் API விசையின் அடிப்படையில் நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **டாஷ்போர்டு → வழங்குநர்கள்** என்பதில் ஒரு விசையை இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **கிடைக்கக்கூடிய மாதிரிகள்** என்பதைப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**மற்ற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (பாஸ்த்ரூ பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரி பட்டியலைப் பராமரிக்கிறது; வழங்குநர் `/models` எண்ட்பாயிண்ட்டை வெளிப்படுத்தும்போது தானாகவே ஒத்திசைக்கப்படலாம்.
+**பிற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (passthrough பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts` இல் தனித்தனி மாதிரிப் பட்டியலைப் பராமரிக்கிறது; மேலும், வழங்குநர் `/models` endpoint-ஐ வழங்கினால் தானாக ஒத்திசைக்கப்படலாம்.
 
-**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநர்-நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-கள் புள்ளியிட்ட பதிப்புகளைக் கொண்டுள்ளன, ஏனெனில் அப்ஸ்ட்ரீம் API அவற்றை அவ்வாறே எதிர்பார்க்கிறது. ஏதேனும் மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், கிடைக்கும் தன்மையை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
+**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநரின் நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-களில் புள்ளியுடன் கூடிய பதிப்புகள் உள்ளன; upstream API அவற்றை எதிர்பார்ப்பதே அதற்குக் காரணம். மேலே மாதிரி பட்டியலிடப்படவில்லை என்றால், கிடைக்குமா என்பதை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
 
 </details>
 

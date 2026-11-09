@@ -1,6 +1,6 @@
 ---
 title: "Design System & Visual Identity"
-lastUpdated: 2026-10-27
+lastUpdated: 2026-11-03
 ---
 
 # OmniRoute — Design System & Visual Identity
@@ -8,7 +8,9 @@ lastUpdated: 2026-10-27
 > **Status:** the dashboard is built on the **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
 > `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
-> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
+> theme; the default preference is `system`. The default palette is the kit's **Editions** appearance
+> (warm paper neutrals and the copper accent `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Settings →
+> Appearance → Color palette offers **Classic**, the kit's base tokens with the lime accent. Switzer is
 > the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
 > `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
 > imported by `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`):
@@ -25,25 +27,52 @@ lastUpdated: 2026-10-27
   kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
   through the `@omniroute/ui-kit` barrel: the barrel pulls every component (including the date picker)
   into each importer. The kit stylesheet enters through `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, the complete sheet: the core `ci-ui.css` plus every pattern family).
 - **Tokens.** `packages/ui-kit/src/ci-tokens.css` declares the `--ci-*` tokens; `src/app/globals.css`
   bridges them to the legacy OmniRoute names (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
   `--table-*`, `--orch-status-*`, `--color-fd-*`), so the existing `var(--color-*)` reads and Tailwind
   utilities keep working. New code uses the Tailwind utilities (`bg-surface`, `text-text-muted`,
   `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) or kit classes — never a hex value
   (`tests/unit/design-kit-bridge.test.ts` enforces the bridge). `text-primary` resolves to
-  `--color-primary-ink` through `--text-color-primary` (lime-800 in light, the lime accent in dark), so
-  primary text stays readable while `bg-primary`/`border-primary` keep the lime surface. Chart series use
-  `--color-chart-1` … `--color-chart-5`.
+  `--color-primary-ink` through `--text-color-primary`, so primary text stays readable while
+  `bg-primary`/`border-primary` keep the accent surface: under Editions it is the kit's
+  `--ci-color-accent-active` (the deep copper `#99562f` in light, the copper accent in dark); under Classic,
+  lime-800 in light and the lime accent in dark. Chart series use
+  `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
+  `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
 - **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
-  `src/store/themeStore.ts` (mirrored by the inline bootstrap script in `src/app/layout.tsx`, which runs
+  `src/store/themeStore.ts` (mirrored by `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, which runs
   before hydration) sets `data-theme="dark"|"light"` and toggles the `.dark` class on `<html>` together.
   The kit's dark token set is keyed on `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
   OmniRoute's own dark overrides (the `.dark` block in `globals.css`) and the legacy Tailwind `dark:`
   utilities key on the `.dark` class. There are no accent color presets: the accent always comes from the
   kit, and a persisted preset from an older build is dropped when the store loads.
+- **Palettes.** Two, both from the kit (`src/shared/constants/appearancePalette.ts`): `editions`, the
+  default, and `classic`. Editions is the kit's `data-ci-appearance="editions"` attribute on `<html>`, which
+  `ci-editions.css` (imported by `ci-ui.css`) combines with `data-theme`; Classic is the attribute's
+  absence. The root layout server-renders the attribute, so a visitor with nothing stored (or no JS) gets
+  Editions on every surface — dashboard, login, `/status`, error pages, `/docs` and the PWA. The choice is
+  persisted next to the theme in the same `theme` store (`palette`, `setPalette()`, `applyPalette()` in
+  `src/store/themeStore.ts`) and applied before paint by `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`, inlined in the layout's `<head>`), which removes the attribute
+  only when the stored palette is `"classic"`; `src/app/global-error.tsx`, outside the root layout, applies
+  it from the same store. Do not put `data-ci-appearance` on any other element: the kit matches it with
+  `html:root:has([data-ci-appearance="editions"])`, so one descendant would switch the whole document.
+  The Editions `data-ci-editions-variant="landing"` variant is for marketing pages, not the dashboard.
+  Browser chrome: the server renders the default, Editions, in `viewport.themeColor` (one tag per
+  `prefers-color-scheme`) and the web manifest — `PWA_THEME_COLORS` in
+  `src/shared/constants/pwaThemeColors.ts`, the one mirror of the Editions `--ci-color-background`
+  (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by `tests/unit/pwa-theme-colors.test.ts`. The live
+  `<meta name="theme-color">` then follows the stored palette and mode: `THEME_BOOT_SCRIPT` rewrites the
+  tags before paint and the theme store's actions do it on every change (`resolveThemeColor()` /
+  `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, with `CLASSIC_PAGE_BACKGROUND` read from
+  the kit's `ciTokens`). An explicit light/dark theme sets every tag to that mode; `system` keeps one
+  colour per scheme. The manifest stays Editions: it is fetched once per install, without the
+  preference. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
+  under Editions the probe read flips the root `data-theme` for one synchronous pass, because the kit
+  resolves Editions light/dark from the root.
 - **Components (adapters).** `src/shared/components/index.tsx` keeps the OmniRoute component API (same
   names, default exports and props), and the primitives behind it are adapters over the kit: forms
   (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays and feedback
@@ -52,9 +81,9 @@ lastUpdated: 2026-10-27
   (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). An adapter imports the kit
   component by subpath and maps the legacy props onto it — for example `Button variant="primary"` is the
   kit `default` button (`--ci-button-primary-*`: the inverse surface in light, the accent with its
-  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is `outline` plus
-  the `.ci-button--warning` extension. The `.ci-button--warning` and `.ci-badge[data-tone]` rules at the
-  end of `globals.css` (`@layer components`) are OmniRoute extensions on top of the kit classes.
+  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
+  button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
+  `NativeSelect`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
 - **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
@@ -87,7 +116,8 @@ lastUpdated: 2026-10-27
 1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
    `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
    palette for callers that need a literal hex. The categorical palettes are no exception any more:
-   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   they ride on the kit's eight chart tokens (`--color-chart-1..8`, plus `-ink`/`-subtle`), in the
+   kit series order, through
    `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
    canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).
@@ -183,9 +213,11 @@ image, and they are generated, not drawn by hand: 13 generator files at `scripts
 `tests/unit/docs/readme-*-svg.test.ts`, one per diagram, each byte-comparing the committed file with its
 generator's output (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the palette from `packages/ui-kit/src/ci-tokens.css`
-  (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`) and defines the text roles on
-  the kit's type scale: Switzer at the kit's weights (400/500/600, display at 500) and tracking for
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the Editions palette (the default look) from
+  `packages/ui-kit/src/ci-editions.css` (pinned against that file by
+  `tests/unit/docs/readme-diagram-theme.test.ts`, which also checks WCAG AA for every text colour on every
+  surface in both schemes; the one exception, light `warn`, is the kit warning darkened 10 % because the kit
+  value is 4.46:1 on the canvas) and defines the text roles on the kit's type scale (`ci-tokens.css`): Switzer at the kit's weights (400/500/600, display at 500) and tracking for
   everything, except the code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), which
   are IBM Plex Mono and are only for commands, URLs, identifiers and terminal screens.
   Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
@@ -220,13 +252,16 @@ generator's output (job `test-unit`).
 
 - `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
 - `packages/ui-kit/UPSTREAM.md` — pinned upstream commit and license authorization; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
+  `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` and the adapters next to it; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
+  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
   `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

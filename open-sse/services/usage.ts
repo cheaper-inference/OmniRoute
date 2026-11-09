@@ -95,7 +95,9 @@ import { getSyntxUsage } from "./usage/syntx.ts";
 import { getAgentrouterUsage } from "./usage/agentrouter.ts";
 import { getKilocodeUsage } from "./usage/kilocode.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
+import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
+import { getZedHostedUsage } from "./usage/zedHosted.ts";
 import { getMuseUsage } from "./usage/museCode.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -292,6 +294,8 @@ export async function getUsageForProvider(
       return await getSyntxUsage(apiKey, accessToken, providerSpecificData, id || "");
     case "agentrouter":
       return await getAgentrouterUsage(id, connection);
+    case "tokenrouter":
+      return await getTokenRouterUsage(apiKey || "", providerSpecificData);
     case "kilocode":
       return await getKilocodeUsage(id, connection);
     case "devin-cli":
@@ -305,6 +309,9 @@ export async function getUsageForProvider(
     case "cloudflare-ai":
       // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
       return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
+    case "zed-hosted":
+      // USD credit from the operator-pasted Orb billing portal link; display-only.
+      return await getZedHostedUsage(id || "", providerSpecificData);
     case "muse-code":
       // Muse Code has no usage/balance API. Return persisted subscription metadata.
       return await getMuseUsage(accessToken, providerSpecificData, id || "");

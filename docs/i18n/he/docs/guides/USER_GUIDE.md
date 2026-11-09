@@ -120,16 +120,16 @@
 
 ## 📖 הגדרת ספקים
 
-כדי להוסיף בכמות גדולה חיבורי מפתחות API מקובץ CSV או JSON, השתמשו ב-**לוח הבקרה → ספקים → ייבוא מקובץ**. העמודות מבוססות על מיקום (`provider,name,apiKey,baseUrl,priority`); הערך `provider` חייב להיות ספק מנוהל קיים או צומת תואם. ראו [ייבוא ספקים מקובץ CSV או JSON](../providers/CSV-IMPORT.md).
+כדי להוסיף בכמות גדולה חיבורים עם מפתחות API מקובץ CSV או JSON, השתמשו ב־**לוח הבקרה → ספקים → ייבוא מקובץ**. העמודות הן לפי מיקום (`provider,name,apiKey,baseUrl,priority`); `provider` חייב כבר להתקיים כספק מנוהל או כצומת תואם. ראו [ייבוא ספקים מקובץ CSV או JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 ספקי מנוי
+### 🔐 ספקי מנויים
 
 #### Claude Code (Pro/Max)
 
 ```bash
-לוח הבקרה → ספקים → חיבור Claude Code
-→ כניסה באמצעות OAuth → רענון אוטומטי של האסימון
-→ מעקב אחר מכסה ל-5 שעות + מכסה שבועית
+לוח הבקרה → ספקים → התחברות ל-Claude Code
+→ התחברות OAuth → רענון אוטומטי של האסימון
+→ מעקב אחר מכסה של 5 שעות ומכסה שבועית
 
 מודלים:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**טיפ מקצועי:** השתמשו ב-Opus למשימות מורכבות וב-Sonnet למהירות. OmniRoute עוקב אחר המכסה לכל מודל!
+**טיפ מקצועי:** השתמשו ב-Opus למשימות מורכבות וב-Sonnet למהירות. OmniRoute עוקב אחר המכסה לפי מודל!
 
-אין דפדפן במארח של OmniRoute? הפעילו את `claude setup-token` בכל מקום שבו Claude Code מחובר, והדביקו את האסימון לשנה בלשונית **אסימון הגדרה**. ראו [Claude Code עם אסימון הגדרה](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+אין דפדפן במארח של OmniRoute? הריצו `claude setup-token` בכל מקום שבו אתם מחוברים ל-Claude Code, והדביקו את האסימון לשנה אחת בכרטיסייה **Setup Token**. ראו [Claude Code עם אסימון הגדרה](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-נתיבים התואמים ל-Claude ול-Claude Code שומרים על מאמץ החשיבה `max` עבור מודלי Opus ו-Sonnet. מודלי Haiku אינם מקבלים את רמת המאמץ `max`, ולכן OmniRoute מוריד בקשה זו לתקציב חשיבה גבוה לפני שליחתה לספק במעלה הזרם.
+נתיבים תואמי Claude ו-Claude Code משמרים את מאמץ החשיבה `max` עבור
+מודלי Opus ו-Sonnet. מודלי Haiku אינם מקבלים את דרגת המאמץ `max`, ולכן OmniRoute
+מוריד את הבקשה לתקציב חשיבה גבוה לפני שליחתה לשירות upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-לוח הבקרה → ספקים → חיבור Codex
-→ כניסה באמצעות OAuth (יציאה 1455)
-→ איפוס לאחר 5 שעות + איפוס שבועי
+לוח הבקרה → ספקים → התחברות ל-Codex
+→ התחברות OAuth (יציאה 1455)
+→ איפוס של 5 שעות ואיפוס שבועי
 
 מודלים:
   cx/gpt-5.5
@@ -160,9 +162,9 @@
 #### GitHub Copilot
 
 ```bash
-לוח הבקרה → ספקים → חיבור GitHub
-→ OAuth באמצעות GitHub
-→ איפוס חודשי (ב-1 בחודש)
+לוח הבקרה → ספקים → התחברות ל-GitHub
+→ OAuth דרך GitHub
+→ איפוס חודשי (ביום הראשון של החודש)
 
 מודלים:
   gh/gpt-5.5
@@ -172,6 +174,22 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**זיכויי AI (חיוב לפי אסימונים).** כאשר GitHub מדווח על `credits_used` עבור החשבון,
+כרטיס מגבלות הספק מציג שורת **זיכויי AI** עם כמות הזיכויים שנצרכה בתקופת החיוב הנוכחית,
+כולל בתוכניות ארגוניות ללא הגבלה.
+
+**מגבלת זיכויי AI מקומית.** ערכו חיבור GitHub והגדירו **מגבלת זיכויי AI לכל
+תקופת חיוב** (`providerSpecificData.githubCreditLimit`). שדה ריק משבית את המגבלה; `0`
+מדלג תמיד על החיבור. כאשר קריאת השימוש האחרונה שווה למגבלה או גבוהה ממנה,
+בחירת החשבון מדלגת על החיבור הזה והניתוב חוזר לחיבורים האחרים שלכם, באותו אופן שבו
+חיתוך של מדיניות מכסה מפעיל זאת. הבדיקה קוראת את נתוני השימוש שרענון המכסה המחזורי
+כבר אוסף — היא אף פעם לא פונה ל-GitHub במהלך נתיב הבקשה — והיא פועלת במצב
+fail open: קריאה חסרה או לא עדכנית (ישנה יותר מ־15 דקות, או מתקופת חיוב שכבר
+התאפסה) אינה חוסמת את החיבור. זהו אמצעי הגנה מקומי, **ולא תקרת הוצאה מובטחת**:
+עיכובים בדיווח של GitHub, מרווח הרענון, בקשות בתהליך ושימוש מחוץ ל-OmniRoute
+עלולים לגרום לחריגה מהמגבלה. השתמשו בבקרות ההוצאה של GitHub עצמו כדי להגדיר
+תקרה קשיחה.
+
 ### 💰 ספקים זולים
 
 #### GLM-4.7 (איפוס יומי, $0.6/1M)
@@ -180,46 +198,47 @@
 2. קבלו מפתח API מתוכנית Coding Plan
 3. לוח הבקרה → הוספת מפתח API: ספק: `glm`, מפתח API: `your-key`
 
-**שימוש:** `glm/glm-4.7` — **טיפ מקצועי:** תוכנית Coding Plan מציעה מכסה גדולה פי 3 בשביעית מהעלות! האיפוס מתבצע מדי יום בשעה 10:00 בבוקר.
+**שימוש:** `glm/glm-4.7` — **טיפ מקצועי:** תוכנית Coding Plan מציעה מכסה פי 3 בעלות של 1/7! האיפוס מתבצע מדי יום בשעה 10:00.
 
-#### MiniMax M2.1 (איפוס לאחר 5 שעות, $0.20/1M)
+#### MiniMax M2.1 (איפוס כל 5 שעות, $0.20/1M)
 
 1. הירשמו: [MiniMax](https://www.minimax.io)
 2. קבלו מפתח API → לוח הבקרה → הוספת מפתח API
 
 **שימוש:** `minimax/MiniMax-M2.1` — **טיפ מקצועי:** האפשרות הזולה ביותר להקשר ארוך (מיליון אסימונים)!
 
-#### Kimi K2 (מחיר קבוע של $9 לחודש)
+#### Kimi K2 ($9 לחודש במחיר קבוע)
 
-1. הירשמו למנוי: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. הירשמו: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. קבלו מפתח API → לוח הבקרה → הוספת מפתח API
 
-**שימוש:** `kimi/kimi-k2.5` — **טיפ מקצועי:** מחיר קבוע של $9 לחודש עבור 10 מיליון אסימונים = עלות אפקטיבית של $0.90/1M!
+**שימוש:** `kimi/kimi-k2.5` — **טיפ מקצועי:** $9 קבועים לחודש עבור 10 מיליון אסימונים = עלות אפקטיבית של $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. הירשמו: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. צרו מפתח API של Qianfan → לוח הבקרה → הוספת מפתח API: ספק: `qianfan`
 
-**שימוש:** `qianfan/ernie-5.1`,‏ `qianfan/ernie-x1.1` או מזהה מודל אחר של Qianfan התואם ל-OpenAI.
+**שימוש:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, או מזהה מודל אחר תואם OpenAI של Qianfan.
 
-### 🆓 ספקים בחינם
+### 🆓 ספקים חינמיים
 
-לספקים חינמיים שאינם דורשים אימות יש מתג לצד **לא נדרש אימות** בדף הספק שלהם.
-כיבויו משבית את הספק, מסיר אותו מתצוגות הספקים המוגדרים/המצומצמות ומסיר את המודלים שלו מ-`/v1/models`.
+לספקים חינמיים ללא אימות יש מתג לצד **אין צורך באימות** בדף הספק.
+כיבוי המתג משבית את הספק, מסיר אותו מתצוגות הספקים שהוגדרו/הקומפקטיות,
+ומסיר את המודלים שלו מ־`/v1/models`.
 
-#### Qoder (9 מודלים בחינם)
+#### Qoder (9 מודלים חינמיים)
 
 ```bash
-לוח הבקרה → חיבור Qoder → כניסה באמצעות OAuth → הגישה כפופה למגבלות הספק הנוכחיות
+לוח הבקרה → התחברות ל-Qoder → התחברות OAuth → הגישה כפופה למגבלות הספק הנוכחיות
 
 מודלים: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude בחינם)
+#### Kiro (Claude חינמי)
 
 ```bash
-לוח הבקרה → חיבור Kiro → AWS Builder ID או Google/GitHub → כ-50 נקודות זכות בחודש
+לוח הבקרה → התחברות ל-Kiro → AWS Builder ID או Google/GitHub → כ־50 זיכויים בחודש
 
 מודלים: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -611,23 +630,23 @@ post_install() {
 <details>
 <summary><b>הצגת כל המודלים הזמינים</b></summary>
 
-> הרשימה שלמטה נאספת מתוך `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגי ענן (Gemini, OpenRouter וכו') מסונכרנים באופן דינמי — לקטלוג החי המלא פתחו את **Dashboard → Providers → [provider] → Available Models** או בצעו קריאה ל-`GET /api/models/catalog`.
+> הרשימה שלהלן נאספה מתוך `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגי הענן (Gemini, OpenRouter וכו') מסונכרנים באופן דינמי — לקבלת הקטלוג החי המלא, פתחו **לוח הבקרה → ספקים → [ספק] → מודלים זמינים** או קראו ל־`GET /api/models/catalog`.
 >
-> אם הרשימה המובנית של ספק מסוים איבדה עדכניות, השתמשו ב-**Import from /models** באותו עמוד (או הפעילו **Auto-Sync**) כדי למשוך את הקטלוג החי מהספק. זה אומת ב-v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ו-UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); גישה אנונימית ל-Pollinations נותרה מוגבלת מצד הספק במהלך אותו מחזור בדיקות.
+> אם הרשימה המובנית של ספק כלשהו אינה מעודכנת, השתמשו באפשרות **ייבוא מ־/models** בדף זה (או הפעילו **סנכרון אוטומטי**) כדי למשוך את הקטלוג העדכני במעלה הזרם. הדבר אומת ב־v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ו־UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); הגישה האנונימית ל־Pollinations נותרה מוגבלת על ידי המקור במעלה הזרם במהלך אותה סדרת בדיקות.
 
 **Claude Code (`cc/`)** — OAuth של Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth של Plus/Pro: `cx/gpt-5.5` (+ דרגות effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth של Plus/Pro: `cx/gpt-5.5` (בתוספת רמות מאמץ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth חינמי: השתמשו בקטלוג החי המוצג תחת **Dashboard → Providers → Kiro → Available Models**. הזמינות תלויה בחשבון ובמנוי.
+**Kiro (`kr/`)** — OAuth **חינמי**: השתמשו בקטלוג החי המוצג תחת **לוח הבקרה → ספקים → Kiro → מודלים זמינים**. הזמינות תלויה בחשבון ובתוכנית.
 
-**Qoder (`if/`)** — OAuth חינמי: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — OAuth **חינמי**: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6 לכל מיליון טוקנים: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2 לכל מיליון טוקנים: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
 **Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 לחודש בתעריף קבוע או לפי שימוש: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
@@ -637,29 +656,29 @@ post_install() {
 
 **xAI (`xai/`)** — Grok מקורי: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — מתארח באירופה: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — מתארח באיחוד האירופי: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — מועשר בחיפוש: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — קוד פתוח: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (חינם), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — קוד פתוח: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (חינמי), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — הסקה מהירה: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — בקנה מידה של וופר: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — בקנה מידה של פרוסה: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ממוקד RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — ממוקד ב־RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ארגוני: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — לארגונים: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: מסונכרן בזמן אמת לכל מפתח API מ-Google — אין רשימה סטטית. חברו מפתח ב-**Dashboard → Providers** ולאחר מכן השתמשו ב-**Available Models** כדי לייבא את הקטלוג העדכני (למשל `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: מסונכרן בזמן אמת לפי מפתח API מ־Google — אין רשימה סטטית. חברו מפתח ב־**לוח הבקרה → ספקים** ולאחר מכן השתמשו ב־**מודלים זמינים** כדי לייבא את הקטלוג העדכני (לדוגמה `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ספקים תואמים נוספים** (נבחרים): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (באמצעות `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מעבר ישיר), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. כל ספק מנהל רשימת מודלים משלו ב-`providerRegistry.ts` וניתן לסנכרנו אוטומטית כאשר הספק חושף נקודת קצה `/models`.
+**ספקים תואמים אחרים** (נבחרים): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (באמצעות `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מועבר), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. כל אחד מהם מנהל רשימת מודלים משלו ב־`providerRegistry.ts`, וניתן לסנכרן אותה אוטומטית כאשר הספק חושף נקודת קצה `/models`.
 
-**הערה לגבי מזהי מודלים:** OmniRoute משתמש במזהים הילידיים של הספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מהמזהים כוללים גרסאות עם נקודות, מכיוון שכך ה-API של הספק מצפה לקבלם. אם מודל אינו מופיע ברשימה למעלה, הריצו `omniroute models --search <term>` או בצעו קריאה ל-`GET /api/models/catalog` כדי לוודא זמינות.
+**הערה לגבי מזהי מודלים:** OmniRoute משתמש במזהים מקוריים של הספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מהמזהים כוללים גרסאות עם נקודות, מכיוון שכך ה־API במעלה הזרם מצפה לקבל אותן. אם מודל אינו מופיע ברשימה שלעיל, הריצו `omniroute models --search <term>` או פנו אל `GET /api/models/catalog` כדי לאשר את זמינותו.
 
 </details>
 

@@ -120,16 +120,16 @@
 
 ## 📖 プロバイダーのセットアップ
 
-CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって決まります（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして既に存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
+CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって解釈されます（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして、あらかじめ存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
 
 ### 🔐 サブスクリプションプロバイダー
 
 #### Claude Code（Pro/Max）
 
 ```bash
-ダッシュボード → プロバイダー → Claude Code に接続
-→ OAuth ログイン → トークンの自動更新
-→ 5時間および週間クォータの追跡
+ダッシュボード → プロバイダー → Claude Code を接続
+→ OAuth ログイン → トークンを自動更新
+→ 5 時間および週間クォータの追跡
 
 モデル:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ CSV または JSON ファイルから API キー接続を一括追加するに�
   cc/claude-haiku-4-5-20251001
 ```
 
-**ヒント:** 複雑なタスクには Opus、速度を重視する場合は Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します！
+**ヒント:** 複雑なタスクには Opus、速度重視なら Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します。
 
-OmniRoute ホストにブラウザーがありませんか？Claude Code にログインしている任意の環境で `claude setup-token` を実行し、1年間有効なトークンを **Setup Token** タブに貼り付けてください。[セットアップトークンを使用する Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
+OmniRoute ホストでブラウザーを使用できない場合は、Claude Code にログイン済みの任意の環境で `claude setup-token` を実行し、1 年間有効なトークンを **セットアップトークン** タブに貼り付けます。[セットアップトークンを使用した Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
 
-Claude および Claude Code 互換ルートでは、Opus および Sonnet モデルの `max` 思考強度が維持されます。Haiku モデルは `max` 強度レベルを受け付けないため、OmniRoute はそのリクエストをアップストリームに送信する前に、高い思考バジェットへダウングレードします。
+Claude および Claude Code 互換ルートでは、Opus と Sonnet
+モデルの `max` 思考エフォートが維持されます。Haiku モデルは `max` エフォート階層を受け付けないため、OmniRoute はその
+リクエストを高い思考予算に引き下げてから上流へ送信します。
 
 #### OpenAI Codex（Plus/Pro）
 
 ```bash
-ダッシュボード → プロバイダー → Codex に接続
+ダッシュボード → プロバイダー → Codex を接続
 → OAuth ログイン（ポート 1455）
-→ 5時間ごとおよび週間リセット
+→ 5 時間ごとおよび週間リセット
 
 モデル:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 #### GitHub Copilot
 
 ```bash
-ダッシュボード → プロバイダー → GitHub に接続
+ダッシュボード → プロバイダー → GitHub を接続
 → GitHub 経由の OAuth
-→ 毎月リセット（毎月1日）
+→ 毎月リセット（毎月 1 日）
 
 モデル:
   gh/gpt-5.5
@@ -172,7 +174,12 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 低価格プロバイダー
+**AI クレジット（トークンベースの課金）。** GitHub がアカウントの
+`credits_used` を報告すると、Provider Limits カードに、無制限の組織プランの場合も含め、現在の請求期間に消費されたクレジットを示す **AI クレジット** 行が表示されます。
+
+**ローカル AI クレジット制限。** GitHub 接続を編集し、**請求期間ごとの AI クレジット制限**（`providerSpecificData.githubCreditLimit`）を設定します。空欄にすると無効になり、`0` にすると常にその接続がスキップされます。最後に読み取られた使用量が制限以上の場合、アカウント選択時にその接続がスキップされ、クォータポリシーのカットオフと同様に、ルーティングは他の接続へフォールバックします。このチェックは、定期的なクォータ更新ですでに収集されている使用量を読み取るため、リクエスト処理中に GitHub を呼び出すことはありません。また、フェイルオープン方式です。読み取り値がない場合や古い場合（15 分を超えている場合、またはすでにリセットされた請求期間のものである場合）は、接続をブロックしません。これはローカルの安全策であり、**支出上限を保証するものではありません**。GitHub の報告遅延、更新間隔、処理中のリクエスト、OmniRoute 外での使用により、制限を超える可能性があります。厳格な上限には、GitHub 独自の支出管理機能を使用してください。
+
+### 💰 安価なプロバイダー
 
 #### GLM-4.7（毎日リセット、$0.6/1M）
 
@@ -180,21 +187,21 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 2. Coding Plan から API キーを取得
 3. ダッシュボード → API キーを追加: プロバイダー: `glm`、API キー: `your-key`
 
-**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、7分の1のコストで3倍のクォータを利用できます！毎日午前10時にリセットされます。
+**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、料金 1/7 でクォータが 3 倍になります。毎日午前 10:00 にリセットされます。
 
-#### MiniMax M2.1（5時間ごとにリセット、$0.20/1M）
+#### MiniMax M2.1（5 時間ごとにリセット、$0.20/1M）
 
 1. 登録: [MiniMax](https://www.minimax.io)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100万トークン）向けの最安オプションです！
+**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100 万トークン）に最も安価な選択肢です。
 
-#### Kimi K2（月額 $9 の定額制）
+#### Kimi K2（定額 $9/月）
 
-1. サブスクライブ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. 購読: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000万トークンを月額固定 $9 で利用でき、実質コストは $0.90/1M です！
+**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000 万トークンで固定 $9/月、実質コストは $0.90/1M です。
 
 #### Baidu Qianfan / ERNIE
 
@@ -205,20 +212,20 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 
 ### 🆓 無料プロバイダー
 
-認証不要の無料プロバイダーには、そのプロバイダーページの **認証不要** の横にスイッチがあります。オフにすると、そのプロバイダーが無効になり、プロバイダーの設定済みビューおよびコンパクトビューから削除され、そのモデルも `/v1/models` から削除されます。
+認証不要の無料プロバイダーには、プロバイダーページの **認証は不要** の横にスイッチがあります。これをオフにすると、そのプロバイダーが無効になり、「設定済みプロバイダー」/コンパクトビューから削除され、`/v1/models` からもそのモデルが削除されます。
 
-#### Qoder（無料モデル9種）
+#### Qoder（無料モデル 9 種類）
 
 ```bash
-ダッシュボード → Qoder に接続 → OAuth ログイン → アクセスには現在のプロバイダー制限が適用されます
+ダッシュボード → Qoder を接続 → OAuth ログイン → 利用は現在のプロバイダー制限の対象です
 
 モデル: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro（Claude を無料で利用）
+#### Kiro（Claude 無料版）
 
 ```bash
-ダッシュボード → Kiro に接続 → AWS Builder ID または Google/GitHub → 月間約50クレジット
+ダッシュボード → Kiro を接続 → AWS Builder ID または Google/GitHub → 月約 50 クレジット
 
 モデル: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -608,27 +615,27 @@ post_install() {
 ## 📊 利用可能なモデル
 
 <details>
-<summary><b>利用可能な全モデルを表示</b></summary>
+<summary><b>利用可能なすべてのモデルを表示</b></summary>
 
-> 以下のリストは v3.8.0 時点の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます — 最新の完全なカタログは **Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
+> 以下のリストは、v3.8.0 の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます。最新のライブカタログ全体を確認するには、**Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
 >
-> プロバイダーの組み込みリストが古くなっている場合は、そのページの **Import from /models** を使用する（または **Auto-Sync** を有効にする）ことで、最新の上流カタログを取得できます。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテスト工程で、Pollinations の匿名アクセスは上流側の制限により制約されたままでした。
+> プロバイダーの組み込みリストにずれがある場合は、そのページで **Import from /models** を使用するか、**Auto-Sync** を有効にして、アップストリームのライブカタログを取得してください。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテストでは、Pollinations の匿名アクセスは引き続きアップストリームによる制限を受けていました。
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ effort ティア: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ 推論レベル: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 無料 OAuth: **Dashboard → Providers → Kiro → Available Models** に表示される最新カタログを使用してください。利用可能なモデルはアカウントとプランによって異なります。
+**Kiro (`kr/`)** — 無料の OAuth: **Dashboard → Providers → Kiro → Available Models** に表示されるライブカタログを使用してください。利用可能かどうかはアカウントとプランによって異なります。
 
-**Qoder (`if/`)** — 無料 OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 無料の OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2〜0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
 **MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 月額 $9 定額または従量課金: `kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 月額 $9 または従量制: `kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API キー: `ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
@@ -636,7 +643,7 @@ post_install() {
 
 **xAI (`xai/`)** — Grok ネイティブ: `xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — 検索拡張: `pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
@@ -646,19 +653,19 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — ウェハースケール: `cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG 特化: `cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG に特化: `cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — エンタープライズ: `nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — エンタープライズ: `nvidia/google/gemma-4-31b-it`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`、`nvidia/nvidia/nemotron-3-ultra-550b-a55b`、`nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API キーごとに Google からリアルタイムで同期されます — 静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使って最新のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
+**Gemini (Google Cloud `gemini/`)**: Google から API キーごとにライブ同期されます。静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使用して現在のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**その他の互換プロバイダー**（抜粋）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期が可能です。
+**その他の互換プロバイダー**（一部）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。それぞれが `providerRegistry.ts` に独自のモデルリストを保持しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期できます。
 
-**モデル ID に関する注意:** OmniRoute はプロバイダーネイティブの ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、上流の API がその形式を要求するためです。上記に記載されていないモデルがある場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
+**モデル ID に関する注意:** OmniRoute はプロバイダー固有の ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、アップストリーム API がその形式を要求するためです。上記にモデルが記載されていない場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可能かどうかを確認してください。
 
 </details>
 
@@ -1277,36 +1284,36 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 
 ---
 
-## 🛠️プログラマティック管理
+## 🛠️ プログラムによる管理
 
-すべてのOmniRouteリソース (プロバイダー、コンボ、キー、設定) をHTTP経由で管理できます。** `manage`スコープのベアラー キー**。
+**`manage` スコープを持つ Bearer キー**を使用して、すべての OmniRoute リソース（プロバイダー、コンボ、キー、設定）を HTTP 経由で管理できます。
 
-でキーを生成します**ダッシュボード→ APIキー→新しいキー→スコープ: 管理**、 それから：
+キーは **ダッシュボード → API Keys → New Key → Scope: manage** から生成し、次のように使用します。
 
 ```bash
-# List providers
+# プロバイダーを一覧表示
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# Add a provider connection
+# プロバイダー接続を追加
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# Create a combo
+# コンボを作成
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# List/create API keys
+# API キーを一覧表示／作成
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-完全なエンドポイント カタログとrequest/responseスキーマについては、 [API_REFERENCE.md](../reference/API_REFERENCE.md)を参照してください。
+エンドポイントの完全な一覧とリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
 
 ---
 

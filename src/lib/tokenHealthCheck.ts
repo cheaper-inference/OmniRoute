@@ -20,6 +20,7 @@ import { getSettings } from "@/lib/db/settings";
 import { resolveGuardedProxyConfig } from "@/lib/tokenHealthCheckProxyGuard";
 import * as tokenRefresh from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { ROTATION_LOCK_GROUP } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import {
@@ -569,12 +570,17 @@ export async function sweep(): Promise<number> {
 /**
  * Check a single connection and refresh if due.
  */
-async function getRefreshRecoveryUpdate(connectionId: string) {
+export async function getRefreshRecoveryUpdate(connectionId: string) {
   // Refresh proves credentials work, not that inference quota has recovered. Read
   // after the network call: an inference request may have set a cooldown meanwhile.
   const current = await getProviderConnectionById(connectionId);
   const rateLimitedUntil = current?.rateLimitedUntil;
   if (typeof rateLimitedUntil === "string" && Date.parse(rateLimitedUntil) > Date.now()) {
+    return {};
+  }
+  // Nor that the account passed Google's "verify your account" check: while the
+  // verification link is stored the 403 VALIDATION_REQUIRED block is still in force.
+  if (readStoredVerificationUrl(current?.providerSpecificData)) {
     return {};
   }
   return {

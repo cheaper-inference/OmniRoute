@@ -14,6 +14,7 @@
 import { normalizePayloadForLog } from "@/lib/logPayloads";
 import { extractSSEErrorMessage } from "../sseParser.ts";
 import { readNonStreamingResponseBody } from "./nonStreamingResponseBody.ts";
+import { parseJsonDocumentBehindEventStream } from "./nonStreamingJsonDocument.ts";
 import { isTruncatedStreamBody } from "../sseParser/truncation.ts";
 import { markTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import {
@@ -58,7 +59,7 @@ export type NonStreamingParseResult =
       normalizedProviderPayload: unknown;
     };
 
-export async function parseNonStreamingResponseBody(opts: {
+type ParseOptions = {
   providerResponse: Response;
   upstreamStream: boolean;
   providerHeaders: Record<string, unknown> | Headers | null | undefined;
@@ -66,64 +67,91 @@ export async function parseNonStreamingResponseBody(opts: {
   targetFormat: string;
   model: string;
   log?: LoggerLike;
-}): Promise<NonStreamingParseResult> {
-  const { providerResponse, upstreamStream, providerHeaders, finalBody, targetFormat, model, log } =
-    opts;
+};
 
-  const contentType = (providerResponse.headers.get("content-type") || "").toLowerCase();
-  const rawBody = await readNonStreamingResponseBody(providerResponse, contentType, upstreamStream);
-  const normalizedProviderPayload = normalizePayloadForLog(rawBody);
-  const looksLikeSSE =
-    contentType.includes("text/event-stream") ||
-    contentType.includes("application/x-ndjson") ||
-    /(^|\n)\s*(event|data):/m.test(rawBody);
+/** Debug/warn log for an event stream buffered into a non-streaming client response. */
+function logBufferedEventStream(
+  opts: Pick<ParseOptions, "upstreamStream" | "providerHeaders" | "finalBody" | "log">,
+  streamKind: string
+): void {
+  const { upstreamStream, providerHeaders, finalBody, log } = opts;
+  if (shouldTreatBufferedEventResponseAsExpected(upstreamStream, providerHeaders, finalBody)) {
+    log?.debug?.(
+      "STREAM",
+      `Buffering upstream ${streamKind} response for non-streaming client request`
+    );
+  } else {
+    log?.warn?.(
+      "STREAM",
+      `Unexpected ${streamKind} response for non-streaming request — buffering`
+    );
+  }
+}
 
-  if (looksLikeSSE) {
-    const streamPayload = normalizeNonStreamingEventPayload(rawBody, contentType);
-    const streamKind = contentType.includes("application/x-ndjson") ? "NDJSON" : "SSE";
-    if (shouldTreatBufferedEventResponseAsExpected(upstreamStream, providerHeaders, finalBody)) {
-      log?.debug?.(
-        "STREAM",
-        `Buffering upstream ${streamKind} response for non-streaming client request`
-      );
-    } else {
-      log?.warn?.(
-        "STREAM",
-        `Unexpected ${streamKind} response for non-streaming request — buffering`
-      );
-    }
-    // Upstream returned an event stream for a non-streaming client; convert best-effort to JSON.
-    const parsedFromSSE = parseNonStreamingSSEPayload(streamPayload, targetFormat, model);
+/**
+ * Upstream returned an event stream for a non-streaming client; convert best-effort to JSON.
+ * Falls back to a complete JSON document behind the event-stream content type, then to the
+ * `invalid_sse` outcome.
+ */
+function parseBufferedEventStream(
+  opts: ParseOptions,
+  rawBody: string,
+  contentType: string,
+  normalizedProviderPayload: unknown
+): NonStreamingParseResult {
+  const { providerResponse, targetFormat, model, log } = opts;
+  const streamPayload = normalizeNonStreamingEventPayload(rawBody, contentType);
+  const streamKind = contentType.includes("application/x-ndjson") ? "NDJSON" : "SSE";
+  logBufferedEventStream(opts, streamKind);
+  const parsedFromSSE = parseNonStreamingSSEPayload(streamPayload, targetFormat, model);
 
-    if (!parsedFromSSE) {
-      // Some executors (e.g. the Devin/Windsurf CLI) always emit text/event-stream, signalling
-      // failure with an error-only chunk (`data: {"error":{"message":"Devin CLI not found..."}}`)
-      // that carries no `choices`. Surface that real, sanitized message instead of the generic 502
-      // so the actionable error is not swallowed (#3324).
-      const surfacedSseError = extractSSEErrorMessage(streamPayload);
-      const invalidSseMessage =
-        surfacedSseError || "Invalid SSE response for non-streaming request";
+  if (!parsedFromSSE) {
+    // A forced-streaming upstream may answer with one complete JSON response document under
+    // an event-stream content type: use it as the non-stream response instead of a 502.
+    const jsonDocument = parseJsonDocumentBehindEventStream(rawBody, targetFormat);
+    if (jsonDocument) {
+      log?.debug?.("STREAM", `Upstream ${streamKind} body is a complete JSON response document`);
       return {
-        kind: "invalid_sse",
-        message: invalidSseMessage,
+        kind: "ok",
+        responseBody: jsonDocument.body,
+        responsePayloadFormat: jsonDocument.format,
         looksLikeSSE: true,
         normalizedProviderPayload,
       };
     }
-
-    // #18460 follow-up — carry the parser's cut-stream verdict onto the upstream Response
-    // (internal marker, never serialized) so a combo can fail over to its next target.
-    if (isTruncatedStreamBody(parsedFromSSE.body)) markTruncatedStreamResponse(providerResponse);
-
+    // Some executors (e.g. the Devin/Windsurf CLI) always emit text/event-stream, signalling
+    // failure with an error-only chunk (`data: {"error":{"message":"Devin CLI not found..."}}`)
+    // that carries no `choices`. Surface that real, sanitized message instead of the generic 502
+    // so the actionable error is not swallowed (#3324).
+    const surfacedSseError = extractSSEErrorMessage(streamPayload);
+    const invalidSseMessage = surfacedSseError || "Invalid SSE response for non-streaming request";
     return {
-      kind: "ok",
-      responseBody: parsedFromSSE.body,
-      responsePayloadFormat: parsedFromSSE.format,
+      kind: "invalid_sse",
+      message: invalidSseMessage,
       looksLikeSSE: true,
       normalizedProviderPayload,
     };
   }
 
+  // #18460 follow-up — carry the parser's cut-stream verdict onto the upstream Response
+  // (internal marker, never serialized) so a combo can fail over to its next target.
+  if (isTruncatedStreamBody(parsedFromSSE.body)) markTruncatedStreamResponse(providerResponse);
+
+  return {
+    kind: "ok",
+    responseBody: parsedFromSSE.body,
+    responsePayloadFormat: parsedFromSSE.format,
+    looksLikeSSE: true,
+    normalizedProviderPayload,
+  };
+}
+
+/** Plain (non event-stream) body: parse as a JSON object payload. */
+function parseJsonObjectBody(
+  rawBody: string,
+  targetFormat: string,
+  normalizedProviderPayload: unknown
+): NonStreamingParseResult {
   try {
     const responseBody: unknown = rawBody ? JSON.parse(rawBody) : {};
     if (!isJsonRecord(responseBody)) {
@@ -153,4 +181,23 @@ export async function parseNonStreamingResponseBody(opts: {
       normalizedProviderPayload,
     };
   }
+}
+
+export async function parseNonStreamingResponseBody(
+  opts: ParseOptions
+): Promise<NonStreamingParseResult> {
+  const { providerResponse, upstreamStream, targetFormat } = opts;
+
+  const contentType = (providerResponse.headers.get("content-type") || "").toLowerCase();
+  const rawBody = await readNonStreamingResponseBody(providerResponse, contentType, upstreamStream);
+  const normalizedProviderPayload = normalizePayloadForLog(rawBody);
+  const looksLikeSSE =
+    contentType.includes("text/event-stream") ||
+    contentType.includes("application/x-ndjson") ||
+    /(^|\n)\s*(event|data):/m.test(rawBody);
+
+  if (looksLikeSSE) {
+    return parseBufferedEventStream(opts, rawBody, contentType, normalizedProviderPayload);
+  }
+  return parseJsonObjectBody(rawBody, targetFormat, normalizedProviderPayload);
 }

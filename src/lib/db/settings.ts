@@ -17,12 +17,16 @@ import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
-import { requestBodyLimitMbFromEnv } from "@/shared/constants/bodySize";
+import {
+  normalizeRequestBodyLimitMb,
+  requestBodyLimitMbFromEnv,
+} from "@/shared/constants/bodySize";
 import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/responsesPreviousResponseId";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
 
 /**
  * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
@@ -277,6 +281,7 @@ export async function getSettings() {
     autoDisableBannedScope: "all",
     proxyEnabled: true,
     perKeyProxyEnabled: false,
+    defaultNewConnectionProxyEnabled: DEFAULT_NEW_CONNECTION_PROXY_ENABLED,
     customSystemPromptEnabled: false,
     customSystemPrompt: "",
     // #6316: Opt-in filter that hides paid-only models from the /v1/models catalog.
@@ -315,6 +320,17 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-spend of Codex reset credits that are about to expire. Spending a
+    // credit mutates upstream account state, so this is off by default (Hard Rule #20
+    // spirit: never consume on the operator's behalf until they opt in).
+    // `enabled` is the master switch; `connections` narrows it to specific ids
+    // (absent = every eligible Codex connection; `{}` = nobody). `maxPerDay` is a
+    // per-connection ceiling and `horizonHours` how close to expiry a credit must be.
+    codexSpendExpiringResetCredits: {
+      enabled: false,
+      horizonHours: 24,
+      maxPerDay: 1,
+    },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex
@@ -355,6 +371,23 @@ export async function getSettings() {
   }
 
   return settings;
+}
+
+/**
+ * The `maxBodySizeMb` an operator saved, or null if they never did. getSettings() cannot tell these
+ * apart because it fills the key with the default.
+ */
+export function getSavedRequestBodyLimitMb(): number | null {
+  const row = getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'maxBodySizeMb'")
+    .get();
+  const rawValue = toRecord(row).value;
+  if (typeof rawValue !== "string") return null;
+  try {
+    return normalizeRequestBodyLimitMb(JSON.parse(rawValue));
+  } catch {
+    return null;
+  }
 }
 
 export async function updateSettings(

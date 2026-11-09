@@ -14,6 +14,7 @@ import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "../../services/webFetchI
 import { CLAUDE_OAUTH_TOOL_PREFIX } from "../../translator/request/openai-to-claude.ts";
 import { applyToolDisclosure, type ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 import {
+  isOpenCodeLane,
   providerSupportsCaching,
   resolveConnectionCacheOverride,
   type ConnectionCacheOverride,
@@ -307,6 +308,16 @@ function defaultImageDetail(bodyToSend: Body, isOpencodeClient: boolean): Body {
   return nextBody;
 }
 
+// OpenCode's model-derived cache support only describes implicit prefix caching. Nothing shows
+// its gateway accepts this field, so only an explicit connection opt-in sends it (#18787).
+function providerRejectsPromptCacheKey(
+  provider: string | null | undefined,
+  connectionCacheOverride: ConnectionCacheOverride | null
+): boolean {
+  if (["nvidia", "xai"].includes(provider)) return true;
+  return isOpenCodeLane(provider) && connectionCacheOverride?.supportsPromptCaching !== true;
+}
+
 // Inject prompt_cache_key only for providers that support it.
 async function injectPromptCacheKey(
   bodyToSend: Body,
@@ -324,7 +335,7 @@ async function injectPromptCacheKey(
     ) &&
     !bodyToSend.prompt_cache_key &&
     Array.isArray(bodyToSend.messages) &&
-    !["nvidia", "xai"].includes(provider)
+    !providerRejectsPromptCacheKey(provider, connectionCacheOverride)
   ) {
     const { generatePromptCacheKey } = await import("@/lib/promptCache");
     const cacheKey = generatePromptCacheKey(bodyToSend.messages);
@@ -377,7 +388,16 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
     translatedBody.reasoning !== undefined ||
     translatedBody.thinking !== undefined ||
     hasExplicitTemplateReasoning;
-  let bodyToSend: Body = { ...structuredClone(translatedBody), model: modelToCall };
+  // Codex's Responses transform normalizes input into new item records before
+  // mutation and independently copies its mutable tools/reasoning fields.
+  // Keep the potentially huge input history shared until that boundary: the
+  // no-rule payload path is also a no-op. All other targets retain full
+  // isolation until their executor mutation paths can be audited separately.
+  const attemptSource =
+    provider === "codex" && targetFormat === FORMATS.OPENAI_RESPONSES
+      ? translatedBody
+      : structuredClone(translatedBody);
+  let bodyToSend: Body = { ...attemptSource, model: modelToCall };
   bodyToSend = normalizeThinkingForModel(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeAdaptiveThinking(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeDisabledThinkingEffort(bodyToSend, modelToCall, provider);
@@ -400,6 +420,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       rawBody: opts.rawBody as Parameters<typeof wireAdaptiveEffort>[1]["rawBody"],
       clientRawRequest: opts.clientRawRequest,
       targetFormat,
+      model: modelToCall,
     });
   }
   if (provider === "xiaomi-mimo") bodyToSend = normalizeMimoThinking(bodyToSend);

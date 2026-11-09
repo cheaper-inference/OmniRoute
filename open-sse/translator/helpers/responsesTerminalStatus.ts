@@ -26,3 +26,15 @@ export function finalizeResponsesTerminalStatus(
   response.incomplete_details = { reason };
   return "response.incomplete";
 }
+
+/**
+ * True for a Responses body that may end with no output on purpose once the native
+ * turn is trusted: an ordinary completion, or the status given above to a filtered
+ * turn such as a Claude refusal. `max_output_tokens` stays out because that output
+ * was cut short, not withheld.
+ */
+export function isDeliberateEmptyResponsesTerminal(body: Record<string, unknown>): boolean {
+  if (body.status === "completed") return true;
+  const details = body.incomplete_details as Record<string, unknown> | null | undefined;
+  return body.status === "incomplete" && details?.reason === "content_filter";
+}

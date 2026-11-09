@@ -3,6 +3,11 @@
  * Pure data; merged by default-pricing.ts via spread (god-file decomposition; semantic split).
  */
 export const DEFAULT_PRICING_INFERENCE = {
+  typesafe: {
+    "jev-latest": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+    "jev-preview": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+    "jev-1.13.0": { input: 0.042, output: 0, cached: 0.042, reasoning: 0 },
+  },
   agentrouter: {
     auto: { input: 2.0, output: 8.0 },
   },
@@ -408,6 +413,15 @@ export const DEFAULT_PRICING_INFERENCE = {
       cache_creation: 0,
     },
     "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
+    // #18418: emergency fallback default (free endpoint). Without a row, usage is
+    // unpriced and USD-limited API keys fail closed (#12341) after one fallback.
+    "nvidia/nemotron-3.5-super-vl-120b-a12b": {
       input: 0,
       output: 0,
       cached: 0,
