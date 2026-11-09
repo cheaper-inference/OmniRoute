@@ -1,1 +1,0 @@
-- **perf(translator):** Long Claude agent sessions sent to Gemini no longer grow without bound with screenshots. Only the five newest tool result images are sent; older ones become a short text note, and the count is logged.
