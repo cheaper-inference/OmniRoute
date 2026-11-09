@@ -77,6 +77,7 @@ test("gemini-3.8-flash-high reasoning_effort high emits thinkingLevel high, no n
   });
   // includeThoughts defaults to true on the thinking-level path (#19302).
   assert.deepEqual(tc, { thinkingLevel: "high", includeThoughts: true });
+  assert.equal(tc?.includeThoughts, true);
   assert.equal(tc?.thinkingBudget, undefined);
 });
 
