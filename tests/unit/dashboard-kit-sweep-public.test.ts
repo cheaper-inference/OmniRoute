@@ -278,7 +278,6 @@ const STALE_KIT_EXCEPTION_ALLOWED: Allow = Object.fromEntries(
     ["src/app/(dashboard)/dashboard/settings/components/ProviderTransferPanel.tsx", 1],
     ["src/app/(dashboard)/dashboard/usage/components/EvalsTab.tsx", 1],
     ["src/app/(dashboard)/dashboard/webhooks/components/shared/IntegrationCard.tsx", 1],
-    ["src/shared/components/Sidebar.tsx", 1],
   ].map(([file, max]) => [
     file,
     {
