@@ -90,7 +90,9 @@ export function useCreateKeySubmission(
         await options.onCreated(data.key);
       } else {
         if (res.status === 422 && Array.isArray(data?.issues)) {
-          draft.setCreateKeyRefIssues(anchorReferenceIssues(data.issues, policy, draft.createKeyFormState));
+          draft.setCreateKeyRefIssues(
+            anchorReferenceIssues(data.issues, policy, draft.createKeyFormState)
+          );
           draft.setShowFullPolicyEditor(true);
         }
         draft.setCreateError(extractApiErrorMessage(data, t("failedCreateKey")));

@@ -9,7 +9,7 @@
  *   identity  — id, name, key, key_hash, key_prefix, machine_id, created_at, source
  *   history   — last_used_at
  *   lifecycle — revoked_at, expires_at (plus is_active / is_banned policy flags)
- *   policy    — API_KEY_POLICY_FIELDS below
+ *   policy    — API_KEY_POLICY_FIELDS in fieldParsing.ts
  *   related configuration — key_group_members, domain_budgets, api_key_quota_limits,
  *               api_key_token_limits, auto_candidate_overrides, reasoning_routing_rules
  *   excluded (never copied, disclosed when present) — sso_identities,
@@ -29,7 +29,14 @@ import type {
   TemplateReferenceIssue,
   TemplateWarning,
 } from "../../../shared/types/keyTemplates.ts";
-import { API_KEY_POLICY_FIELDS, parseField, strictList, truthy, falsy, toFiniteNumber } from "./fieldParsing.ts";
+import {
+  API_KEY_POLICY_FIELDS,
+  parseField,
+  strictList,
+  truthy,
+  falsy,
+  toFiniteNumber,
+} from "./fieldParsing.ts";
 import { isLiteralKeyTemplateComboReference } from "../../../shared/utils/keyTemplateReferences.ts";
 
 export interface PolicyStatement {
@@ -59,8 +66,6 @@ export const API_KEY_IDENTITY_COLUMNS = [
 ] as const;
 export const API_KEY_HISTORY_COLUMNS = ["last_used_at"] as const;
 export const API_KEY_LIFECYCLE_COLUMNS = ["revoked_at", "expires_at"] as const;
-
-export { API_KEY_POLICY_FIELDS } from "./fieldParsing.ts";
 
 export const API_KEY_POLICY_COLUMNS = API_KEY_POLICY_FIELDS.map((spec) => spec.column);
 
@@ -324,14 +329,19 @@ export function readKeyPolicyRows(db: PolicyDb, keyId: string): KeyPolicyRows | 
       "priority DESC, rowid"
     ),
     excluded: {
-      ssoIdentity: source !== "manual" || countRows(db, "sso_identities", "api_key_id = ?", keyId) > 0,
+      ssoIdentity:
+        source !== "manual" || countRows(db, "sso_identities", "api_key_id = ?", keyId) > 0,
       weightedAllocations:
         countRows(db, "quota_allocations", "api_key_id = ?", keyId) +
         countRows(db, "quota_allocation_model_caps", "api_key_id = ?", keyId),
       contextSources: countRows(db, "api_key_context_sources", "api_key_id = ?", keyId),
       billingTeam:
-        countRows(db, "api_key_billing_team_history", "api_key_id = ? AND valid_to IS NULL", keyId) >
-        0,
+        countRows(
+          db,
+          "api_key_billing_team_history",
+          "api_key_id = ? AND valid_to IS NULL",
+          keyId
+        ) > 0,
     },
     unclassified,
   };
@@ -518,31 +528,79 @@ function captureExpiry(
   const ttlSeconds =
     expiresMs !== null && createdMs !== null ? Math.round((expiresMs - createdMs) / 1000) : 0;
   if (expiresMs !== null && expiresMs <= nowMs) {
-    warnings.push(warn("KEY_EXPIRED", "The source key has expired. Keys created from the template get a fresh lifetime.", true));
+    warnings.push(
+      warn(
+        "KEY_EXPIRED",
+        "The source key has expired. Keys created from the template get a fresh lifetime.",
+        true
+      )
+    );
   }
   if (ttlSeconds > 0) {
-    warnings.push(warn("EXPIRY_CONVERTED_TO_RELATIVE", `The fixed expiry date becomes a lifetime of ${ttlSeconds} seconds from creation.`, false));
+    warnings.push(
+      warn(
+        "EXPIRY_CONVERTED_TO_RELATIVE",
+        `The fixed expiry date becomes a lifetime of ${ttlSeconds} seconds from creation.`,
+        false
+      )
+    );
     return { mode: "relative", ttlSeconds };
   }
-  warnings.push(warn("EXPIRY_NOT_DERIVABLE", "The source expiry cannot be expressed as a lifetime. The template has no expiry; set one in the editor if needed.", true));
+  warnings.push(
+    warn(
+      "EXPIRY_NOT_DERIVABLE",
+      "The source expiry cannot be expressed as a lifetime. The template has no expiry; set one in the editor if needed.",
+      true
+    )
+  );
   return { mode: "none" };
 }
 
 function captureExcludedWarnings(rows: KeyPolicyRows, warnings: TemplateWarning[]): void {
   if (rows.excluded.ssoIdentity) {
-    warnings.push(warn("SSO_IDENTITY_EXCLUDED", "The source key is bound to an SSO identity. The identity is never captured; group memberships the identity provider maintains are captured as static memberships.", true));
+    warnings.push(
+      warn(
+        "SSO_IDENTITY_EXCLUDED",
+        "The source key is bound to an SSO identity. The identity is never captured; group memberships the identity provider maintains are captured as static memberships.",
+        true
+      )
+    );
   }
   if (rows.excluded.weightedAllocations > 0) {
-    warnings.push(warn("WEIGHTED_ALLOCATION_EXCLUDED", `The source key holds ${rows.excluded.weightedAllocations} weighted quota pool allocation or cap row(s). They are shared pool settings and are not captured; pool weights stay unchanged.`, true));
+    warnings.push(
+      warn(
+        "WEIGHTED_ALLOCATION_EXCLUDED",
+        `The source key holds ${rows.excluded.weightedAllocations} weighted quota pool allocation or cap row(s). They are shared pool settings and are not captured; pool weights stay unchanged.`,
+        true
+      )
+    );
   }
   if (rows.excluded.contextSources > 0) {
-    warnings.push(warn("CONTEXT_SOURCES_EXCLUDED", `The source key has ${rows.excluded.contextSources} context source(s). They carry credentials and are never captured.`, true));
+    warnings.push(
+      warn(
+        "CONTEXT_SOURCES_EXCLUDED",
+        `The source key has ${rows.excluded.contextSources} context source(s). They carry credentials and are never captured.`,
+        true
+      )
+    );
   }
   if (rows.excluded.billingTeam) {
-    warnings.push(warn("BILLING_TEAM_EXCLUDED", "The source key is assigned to a billing team. Billing assignment history is not captured; assign the team after creating a key.", true));
+    warnings.push(
+      warn(
+        "BILLING_TEAM_EXCLUDED",
+        "The source key is assigned to a billing team. Billing assignment history is not captured; assign the team after creating a key.",
+        true
+      )
+    );
   }
   if (rows.groupIds.length > 0) {
-    warnings.push(warn("GROUP_POLICY_SHARED", "Group memberships are captured. Group permissions are shared: later group edits affect every member key.", false));
+    warnings.push(
+      warn(
+        "GROUP_POLICY_SHARED",
+        "Group memberships are captured. Group permissions are shared: later group edits affect every member key.",
+        false
+      )
+    );
   }
 }
 
@@ -551,42 +609,83 @@ function captureKeyFields(rows: KeyPolicyRows, problems: TemplateReferenceIssue[
   for (const spec of API_KEY_POLICY_FIELDS) {
     const parsed = parseField(spec, rows.keyColumns[spec.column], rows.keyColumns);
     if (!parsed.ok) {
-      problems.push(issue(`key.${spec.field}`, "UNREADABLE_SOURCE_FIELD",
-        `The stored value of ${spec.field} cannot be read; fix it on the key before saving a template.`, true));
+      problems.push(
+        issue(
+          `key.${spec.field}`,
+          "UNREADABLE_SOURCE_FIELD",
+          `The stored value of ${spec.field} cannot be read; fix it on the key before saving a template.`,
+          true
+        )
+      );
       continue;
     }
     key[spec.field] = parsed.value;
   }
   for (const field of rows.unclassified) {
-    problems.push(issue(`${field.table}.${field.column}`, "UNCLASSIFIED_SOURCE_FIELD",
-      `${field.table}.${field.column} holds a value this version cannot capture; refusing to drop it silently.`, true));
+    problems.push(
+      issue(
+        `${field.table}.${field.column}`,
+        "UNCLASSIFIED_SOURCE_FIELD",
+        `${field.table}.${field.column} holds a value this version cannot capture; refusing to drop it silently.`,
+        true
+      )
+    );
   }
   return key;
 }
 
-function normalizeCapturedLifecycle(rows: KeyPolicyRows, key: Row, warnings: TemplateWarning[]): void {
+function normalizeCapturedLifecycle(
+  rows: KeyPolicyRows,
+  key: Row,
+  warnings: TemplateWarning[]
+): void {
   const revokedAt = rows.keyColumns.revoked_at;
   if (typeof revokedAt === "string" && revokedAt.trim() !== "") {
-    warnings.push(warn("KEY_REVOKED",
-      "The source key is revoked. The template will not carry the revocation; keys created from it start usable.", true));
+    warnings.push(
+      warn(
+        "KEY_REVOKED",
+        "The source key is revoked. The template will not carry the revocation; keys created from it start usable.",
+        true
+      )
+    );
   }
   if (key.isActive === false) {
-    warnings.push(warn("KEY_DISABLED",
-      "The source key is disabled. The template is normalized to active; switch it off in the editor to keep new keys disabled.", true));
+    warnings.push(
+      warn(
+        "KEY_DISABLED",
+        "The source key is disabled. The template is normalized to active; switch it off in the editor to keep new keys disabled.",
+        true
+      )
+    );
     key.isActive = true;
   }
   if (key.isBanned === true) {
-    warnings.push(warn("KEY_BANNED", "The source key is banned. The template is normalized to not banned.", true));
+    warnings.push(
+      warn(
+        "KEY_BANNED",
+        "The source key is banned. The template is normalized to not banned.",
+        true
+      )
+    );
     key.isBanned = false;
   }
 }
 
-function captureReasoningRules(rows: KeyPolicyRows, problems: TemplateReferenceIssue[]): KeyTemplateReasoningRule[] {
+function captureReasoningRules(
+  rows: KeyPolicyRows,
+  problems: TemplateReferenceIssue[]
+): KeyTemplateReasoningRule[] {
   return rows.reasoningRules.map((rule, index) => {
     const tags = strictList(rule.request_tags, []);
     if (!tags.ok) {
-      problems.push(issue(`related.reasoningRules.${index}.requestTags`, "UNREADABLE_SOURCE_FIELD",
-        "The stored request tags of this reasoning rule cannot be read.", true));
+      problems.push(
+        issue(
+          `related.reasoningRules.${index}.requestTags`,
+          "UNREADABLE_SOURCE_FIELD",
+          "The stored request tags of this reasoning rule cannot be read.",
+          true
+        )
+      );
     }
     return {
       name: String(rule.name ?? ""),
@@ -611,29 +710,40 @@ function captureReasoningRules(rows: KeyPolicyRows, problems: TemplateReferenceI
   });
 }
 
-function captureRelated(rows: KeyPolicyRows, problems: TemplateReferenceIssue[]): KeyTemplatePolicy["related"] {
+function captureRelated(
+  rows: KeyPolicyRows,
+  problems: TemplateReferenceIssue[]
+): KeyTemplatePolicy["related"] {
   const budget = rows.domainBudget;
   const quota = rows.quotaLimits;
   return {
     groupIds: [...rows.groupIds],
-    domainBudget: budget ? {
-      dailyLimitUsd: relatedNumber(budget.daily_limit_usd, 0),
-      weeklyLimitUsd: relatedNumber(budget.weekly_limit_usd, 0),
-      monthlyLimitUsd: relatedNumber(budget.monthly_limit_usd, 0),
-      warningThreshold: relatedNumber(budget.warning_threshold, 0.8),
-      resetInterval: (typeof budget.reset_interval === "string" ? budget.reset_interval : "daily") as "daily",
-      resetTime: typeof budget.reset_time === "string" ? budget.reset_time : "00:00",
-    } : null,
-    quotaLimits: quota ? {
-      tpmLimit: relatedNullableNumber(quota.tpm_limit),
-      rpmLimit: relatedNullableNumber(quota.rpm_limit),
-      monthlyAmountUsd: relatedNullableNumber(quota.monthly_amount_usd),
-    } : null,
+    domainBudget: budget
+      ? {
+          dailyLimitUsd: relatedNumber(budget.daily_limit_usd, 0),
+          weeklyLimitUsd: relatedNumber(budget.weekly_limit_usd, 0),
+          monthlyLimitUsd: relatedNumber(budget.monthly_limit_usd, 0),
+          warningThreshold: relatedNumber(budget.warning_threshold, 0.8),
+          resetInterval: (typeof budget.reset_interval === "string"
+            ? budget.reset_interval
+            : "daily") as "daily",
+          resetTime: typeof budget.reset_time === "string" ? budget.reset_time : "00:00",
+        }
+      : null,
+    quotaLimits: quota
+      ? {
+          tpmLimit: relatedNullableNumber(quota.tpm_limit),
+          rpmLimit: relatedNullableNumber(quota.rpm_limit),
+          monthlyAmountUsd: relatedNullableNumber(quota.monthly_amount_usd),
+        }
+      : null,
     tokenLimits: rows.tokenLimits.map((limit) => ({
       scopeType: String(limit.scope_type) as "global",
       scopeValue: typeof limit.scope_value === "string" ? limit.scope_value : "",
       tokenLimit: relatedNumber(limit.token_limit, 0),
-      resetInterval: (typeof limit.reset_interval === "string" ? limit.reset_interval : "monthly") as "monthly",
+      resetInterval: (typeof limit.reset_interval === "string"
+        ? limit.reset_interval
+        : "monthly") as "monthly",
       resetTime: nullableText(limit.reset_time),
       enabled: limit.enabled === undefined ? true : !falsy(limit.enabled),
     })),
@@ -759,7 +869,10 @@ function serializeRelatedRows(policy: KeyTemplatePolicy): Omit<KeyPolicyInsertRo
 }
 
 /** Converts a validated policy into rows for insertKeyPolicyRows(). */
-export function templatePolicyToRows(policy: KeyTemplatePolicy, nowMs: number): KeyPolicyInsertRows {
+export function templatePolicyToRows(
+  policy: KeyTemplatePolicy,
+  nowMs: number
+): KeyPolicyInsertRows {
   return { keyColumns: serializeKeyColumns(policy, nowMs), ...serializeRelatedRows(policy) };
 }
 
@@ -935,9 +1048,9 @@ function collectReasoningRuleIssues(
     db,
     "combos",
     "id",
-    rules.flatMap((r) => [r.comboId, r.targetComboId]).filter(
-      (id): id is string => typeof id === "string"
-    )
+    rules
+      .flatMap((r) => [r.comboId, r.targetComboId])
+      .filter((id): id is string => typeof id === "string")
   );
   rules.forEach((rule, index) => {
     if (rule.comboId && !ruleCombos.has(rule.comboId)) {
@@ -1044,9 +1157,8 @@ export class KeyTemplateNameConflictError extends Error {
 }
 
 function nameTaken(db: PolicyDb, name: string, exceptId: string | null): boolean {
-  const row = db
-    .prepare("SELECT id FROM key_templates WHERE name = ? COLLATE NOCASE")
-    .get(name) as Row | undefined;
+  const row = db.prepare("SELECT id FROM key_templates WHERE name = ? COLLATE NOCASE").get(name) as
+    Row | undefined;
   return Boolean(row && row.id !== exceptId);
 }
 
@@ -1083,9 +1195,7 @@ export function insertStoredTemplate(
       input.now,
       input.now
     );
-    return rowToStored(
-      db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as Row
-    );
+    return rowToStored(db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as Row);
   });
 }
 
@@ -1109,8 +1219,7 @@ export function updateStoredTemplate(
   ensureKeyTemplatesTable(db);
   return runImmediate(db, (): UpdateStoredResult => {
     const current = db.prepare("SELECT * FROM key_templates WHERE id = ?").get(input.id) as
-      | Row
-      | undefined;
+      Row | undefined;
     if (!current) return { status: "not_found" };
     if (Number(current.revision) !== input.revision) {
       return { status: "conflict", currentRevision: Number(current.revision) };

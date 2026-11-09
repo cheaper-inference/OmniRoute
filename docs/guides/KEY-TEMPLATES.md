@@ -34,8 +34,11 @@ Execution permissions and the `/v1/models` listing are separate:
 
 - `modelAccessMode: restricted` with an empty model list denies every raw model.
 - An empty combo list denies every combo; `combo/*` explicitly allows all combos.
-- Empty connection, endpoint and IP restrictions retain their existing
+- Empty connection, quota-pool, endpoint and IP restrictions retain their existing
   unrestricted meaning. Missing references are never silently pruned to empty.
+  Clearing the final quota-pool restriction in the editor requires confirmation.
+  Removing a stale rule affects only that rule, including when another rule
+  refers to the same missing connection.
 - `catalogScope` lists all authorized entries, combos only, or provider models
   only. It does not change permission to execute a model.
 - `disableNonPublicModels` affects both discovery and execution. Routing pins,

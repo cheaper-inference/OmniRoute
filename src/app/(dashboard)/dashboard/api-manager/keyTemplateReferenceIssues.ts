@@ -16,32 +16,61 @@ type AnchoredIssue = TemplateReferenceIssue & { rowId?: string };
 type RowCollection = "reasoningRules" | "autoCandidateOverrides";
 
 function compoundTarget(path: string) {
-  const match = /^related\.(reasoningRules|autoCandidateOverrides)\.(\d+)\.(connectionId|comboId|targetComboId)$/.exec(path.replace(/^policy\./, ""));
-  return match ? { collection: match[1] as RowCollection, index: Number(match[2]), field: match[3] } : undefined;
+  const match =
+    /^related\.(reasoningRules|autoCandidateOverrides)\.(\d+)\.(connectionId|comboId|targetComboId)$/.exec(
+      path.replace(/^policy\./, "")
+    );
+  return match
+    ? { collection: match[1] as RowCollection, index: Number(match[2]), field: match[3] }
+    : undefined;
 }
 
 /** Anchor server paths once against the exact submitted or freshly loaded form. */
-export function anchorReferenceIssues(issues: readonly TemplateReferenceIssue[], policy: KeyTemplatePolicy, form?: PolicyEditorFormState): TemplateReferenceIssue[] {
+export function anchorReferenceIssues(
+  issues: readonly TemplateReferenceIssue[],
+  policy: KeyTemplatePolicy,
+  form?: PolicyEditorFormState
+): TemplateReferenceIssue[] {
   return issues.map((issue): AnchoredIssue => {
     const anchored = issue as AnchoredIssue;
-    const value = issue.value ?? issue.path.replace(/^policy\./, "").split(".").reduce<unknown>(
-      (node, part) => node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
-      policy
-    );
+    const value =
+      issue.value ??
+      issue.path
+        .replace(/^policy\./, "")
+        .split(".")
+        .reduce<unknown>(
+          (node, part) =>
+            node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined,
+          policy
+        );
     const target = compoundTarget(issue.path);
-    if (!target || anchored.rowId !== undefined) return typeof value === "string" ? { ...issue, value } : issue;
-    const rowId = form ? form[target.collection][target.index]?.clientRowId : `${target.collection === "reasoningRules" ? "rr" : "aco"}-${target.index}`;
-    return { ...issue, ...(typeof value === "string" ? { value } : {}), ...(rowId === undefined ? {} : { rowId }) };
+    if (!target || anchored.rowId !== undefined)
+      return typeof value === "string" ? { ...issue, value } : issue;
+    const rowId = form
+      ? form[target.collection][target.index]?.clientRowId
+      : `${target.collection === "reasoningRules" ? "rr" : "aco"}-${target.index}`;
+    return {
+      ...issue,
+      ...(typeof value === "string" ? { value } : {}),
+      ...(rowId === undefined ? {} : { rowId }),
+    };
   });
 }
 
 /** Preserve anchors when an edit did not clear any field-validation issue. */
-export function clearFieldValidationIssues(issues: TemplateReferenceIssue[]): TemplateReferenceIssue[] {
-  return issues.some((issue) => issue.code === "INVALID_FIELD") ? issues.filter((issue) => issue.code !== "INVALID_FIELD") : issues;
+export function clearFieldValidationIssues(
+  issues: TemplateReferenceIssue[]
+): TemplateReferenceIssue[] {
+  return issues.some((issue) => issue.code === "INVALID_FIELD")
+    ? issues.filter((issue) => issue.code !== "INVALID_FIELD")
+    : issues;
 }
 
 export function canRemoveReferenceIssue(issue: TemplateReferenceIssue): boolean {
-  return issue.value !== undefined && (!compoundTarget(issue.path) || (issue as AnchoredIssue).rowId !== undefined);
+  return (
+    issue.value !== undefined &&
+    (!compoundTarget(issue.path) || (issue as AnchoredIssue).rowId !== undefined)
+  );
 }
 
 export function referenceIssueKey(issue: TemplateReferenceIssue): string {
@@ -49,13 +78,18 @@ export function referenceIssueKey(issue: TemplateReferenceIssue): string {
   return `${path}:${issue.code}:${issue.value ?? ""}:${(issue as AnchoredIssue).rowId ?? ""}`;
 }
 
-function rowReferencePresent(state: PolicyEditorFormState, issue: TemplateReferenceIssue, catalog?: ReferenceCatalog): boolean | undefined {
+function rowReferencePresent(
+  state: PolicyEditorFormState,
+  issue: TemplateReferenceIssue,
+  catalog?: ReferenceCatalog
+): boolean | undefined {
   const target = compoundTarget(issue.path);
   if (!target) return undefined;
   const rowId = (issue as AnchoredIssue).rowId;
   if (rowId === undefined || issue.value === undefined) return true;
   const row = state[target.collection].find((item) => item.clientRowId === rowId);
-  if (!row || (row as unknown as Record<string, unknown>)[target.field] !== issue.value) return false;
+  if (!row || (row as unknown as Record<string, unknown>)[target.field] !== issue.value)
+    return false;
   const known = knownValues(issue, catalog);
   return known ? !known.has(issue.value) : true;
 }
@@ -215,7 +249,9 @@ export function resolveActiveReferenceIssues(
   catalog?: ReferenceCatalog
 ): TemplateReferenceIssue[] {
   const issues = [
-    ...serverIssues.filter((issue) => serverIssuePresent(state, issue, catalog)).map((issue) => refreshIssuePath(state, issue)),
+    ...serverIssues
+      .filter((issue) => serverIssuePresent(state, issue, catalog))
+      .map((issue) => refreshIssuePath(state, issue)),
     ...narrowingReferenceIssues(state, catalog),
     ...bindingReferenceIssues(state, catalog),
   ];
@@ -224,10 +260,7 @@ export function resolveActiveReferenceIssues(
     const nonblocking = ["CONNECTION_NOT_FOUND", "QUOTA_POOL_NOT_FOUND", "GROUP_INACTIVE"].includes(
       issue.code
     );
-    unique.set(
-      referenceIssueKey(issue),
-      nonblocking ? { ...issue, blocking: false } : issue
-    );
+    unique.set(referenceIssueKey(issue), nonblocking ? { ...issue, blocking: false } : issue);
   }
   return [...unique.values()];
 }
@@ -258,8 +291,13 @@ export function removeReferenceTarget(
   const rowId = (issue as AnchoredIssue).rowId;
   if (target && rowId !== undefined) {
     const rows = state[target.collection];
-    const index = rows.findIndex((row) => row.clientRowId === rowId && (row as unknown as Record<string, unknown>)[target.field] === value);
-    if (index >= 0) return { ...state, [target.collection]: rows.filter((_, current) => current !== index) };
+    const index = rows.findIndex(
+      (row) =>
+        row.clientRowId === rowId &&
+        (row as unknown as Record<string, unknown>)[target.field] === value
+    );
+    if (index >= 0)
+      return { ...state, [target.collection]: rows.filter((_, current) => current !== index) };
   }
 
   return state;
@@ -273,14 +311,24 @@ export function removesLastQuotaRestriction(
 }
 
 /** Display current indices without changing the snapshot identity used for removal. */
-function refreshIssuePath(state: PolicyEditorFormState, issue: TemplateReferenceIssue): TemplateReferenceIssue {
+function refreshIssuePath(
+  state: PolicyEditorFormState,
+  issue: TemplateReferenceIssue
+): TemplateReferenceIssue {
   if (issue.value === undefined) return issue;
   const target = compoundTarget(issue.path);
   if (target) {
-    const index = state[target.collection].findIndex((row) => row.clientRowId === (issue as AnchoredIssue).rowId);
-    return index < 0 ? issue : { ...issue, path: `related.${target.collection}.${index}.${target.field}` };
+    const index = state[target.collection].findIndex(
+      (row) => row.clientRowId === (issue as AnchoredIssue).rowId
+    );
+    return index < 0
+      ? issue
+      : { ...issue, path: `related.${target.collection}.${index}.${target.field}` };
   }
-  const flat = /^(key\.(allowedConnections|preferredConnections|allowedCombos|allowedQuotas)|related\.groupIds)\.\d+$/.exec(issue.path.replace(/^policy\./, ""));
+  const flat =
+    /^(key\.(allowedConnections|preferredConnections|allowedCombos|allowedQuotas)|related\.groupIds)\.\d+$/.exec(
+      issue.path.replace(/^policy\./, "")
+    );
   if (!flat) return issue;
   const index = issueValues(state, issue.path)?.indexOf(issue.value) ?? -1;
   return index < 0 ? issue : { ...issue, path: `${flat[1]}.${index}` };

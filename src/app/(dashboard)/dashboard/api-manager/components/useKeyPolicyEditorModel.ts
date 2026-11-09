@@ -325,5 +325,16 @@ function usePolicyDraftInputs() {
   const [newExtraScope, setNewExtraScope] = useState("");
   const [newOverrideChannel, setNewOverrideChannel] = useState("auto");
   const [newOverrideConnId, setNewOverrideConnId] = useState("");
-  return { newBlockedPattern, setNewBlockedPattern, newIpCidr, setNewIpCidr, newExtraScope, setNewExtraScope, newOverrideChannel, setNewOverrideChannel, newOverrideConnId, setNewOverrideConnId };
+  return {
+    newBlockedPattern,
+    setNewBlockedPattern,
+    newIpCidr,
+    setNewIpCidr,
+    newExtraScope,
+    setNewExtraScope,
+    newOverrideChannel,
+    setNewOverrideChannel,
+    newOverrideConnId,
+    setNewOverrideConnId,
+  };
 }

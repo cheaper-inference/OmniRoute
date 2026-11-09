@@ -2,7 +2,11 @@
 
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
-import { removeReferenceTarget, canRemoveReferenceIssue, referenceIssueKey } from "../keyTemplateReferenceIssues";
+import {
+  removeReferenceTarget,
+  canRemoveReferenceIssue,
+  referenceIssueKey,
+} from "../keyTemplateReferenceIssues";
 import { useKeyPolicyEditor } from "./KeyPolicyEditorContext";
 
 export default function KeyPolicyReferenceIssues() {
@@ -28,7 +32,9 @@ export default function KeyPolicyReferenceIssues() {
               </span>
               <span>{issue.message}</span>
               <span className="font-mono text-[10px]">{issue.path}</span>
-              {!canRemoveReferenceIssue(issue) && <span>{t("templateReferenceReloadRequired")}</span>}
+              {!canRemoveReferenceIssue(issue) && (
+                <span>{t("templateReferenceReloadRequired")}</span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">

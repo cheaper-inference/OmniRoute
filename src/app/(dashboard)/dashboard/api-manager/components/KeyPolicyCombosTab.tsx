@@ -215,7 +215,12 @@ function AutoCandidateOverrides() {
               ...p.autoCandidateOverrides.filter(
                 (o) => !(o.autoChannel === ch && o.connectionId === cid)
               ),
-              { clientRowId: crypto.randomUUID(), autoChannel: ch, connectionId: cid, excluded: true },
+              {
+                clientRowId: crypto.randomUUID(),
+                autoChannel: ch,
+                connectionId: cid,
+                excluded: true,
+              },
             ],
           }));
           setNewOverrideConnId("");

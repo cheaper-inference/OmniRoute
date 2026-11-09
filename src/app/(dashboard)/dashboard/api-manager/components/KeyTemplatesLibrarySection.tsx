@@ -45,7 +45,9 @@ function useLibraryDraft() {
   const [draftPolicy, setDraftPolicy] = useState<KeyTemplatePolicy>(() =>
     createDefaultClientKeyTemplatePolicy()
   );
-  const [draftFormState, setDraftFormState] = useState<PolicyEditorFormState | undefined>(undefined);
+  const [draftFormState, setDraftFormState] = useState<PolicyEditorFormState | undefined>(
+    undefined
+  );
   const [serverRefIssues, setServerRefIssues] = useState<TemplateReferenceIssue[]>([]);
   const [hasEditorErrors, setHasEditorErrors] = useState(false);
   const [hasBlockingRefs, setHasBlockingRefs] = useState(false);
@@ -95,7 +97,7 @@ function useLibraryDraft() {
 
 type LibraryDraft = ReturnType<typeof useLibraryDraft>;
 
-function useLibraryEditing(state: LibraryDraft) {
+function useLibraryCreate(state: LibraryDraft) {
   const {
     setEditorMode,
     setEditingTemplate,
@@ -106,9 +108,7 @@ function useLibraryEditing(state: LibraryDraft) {
     setServerRefIssues,
     setLoadingTemplateDetail,
     setModalError,
-    isSubmitting,
     setRequiresReload,
-    t,
     loadGenerationRef,
   } = state;
   const openCreateModal = useCallback(() => {
@@ -123,8 +123,38 @@ function useLibraryEditing(state: LibraryDraft) {
     setServerRefIssues([]);
     setModalError(null);
     setRequiresReload(false);
-  }, [loadGenerationRef, setDraftPolicy, setDraftFormState, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError, setRequiresReload, setServerRefIssues, setTemplateDesc, setTemplateName]);
+  }, [
+    loadGenerationRef,
+    setDraftPolicy,
+    setDraftFormState,
+    setEditingTemplate,
+    setEditorMode,
+    setLoadingTemplateDetail,
+    setModalError,
+    setRequiresReload,
+    setServerRefIssues,
+    setTemplateDesc,
+    setTemplateName,
+  ]);
 
+  return openCreateModal;
+}
+
+function useLibraryEdit(state: LibraryDraft) {
+  const {
+    setEditorMode,
+    setEditingTemplate,
+    setTemplateName,
+    setTemplateDesc,
+    setDraftPolicy,
+    setDraftFormState,
+    setServerRefIssues,
+    setLoadingTemplateDetail,
+    setModalError,
+    setRequiresReload,
+    t,
+    loadGenerationRef,
+  } = state;
   const openEditModal = useCallback(
     async (tpl: KeyTemplate) => {
       const generation = ++loadGenerationRef.current;
@@ -168,9 +198,36 @@ function useLibraryEditing(state: LibraryDraft) {
         if (generation === loadGenerationRef.current) setLoadingTemplateDetail(false);
       }
     },
-    [t, loadGenerationRef, setDraftPolicy, setDraftFormState, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError, setRequiresReload, setServerRefIssues, setTemplateDesc, setTemplateName]
+    [
+      t,
+      loadGenerationRef,
+      setDraftPolicy,
+      setDraftFormState,
+      setEditingTemplate,
+      setEditorMode,
+      setLoadingTemplateDetail,
+      setModalError,
+      setRequiresReload,
+      setServerRefIssues,
+      setTemplateDesc,
+      setTemplateName,
+    ]
   );
 
+  return openEditModal;
+}
+
+function useLibraryEditing(state: LibraryDraft) {
+  const openCreateModal = useLibraryCreate(state);
+  const openEditModal = useLibraryEdit(state);
+  const {
+    setEditorMode,
+    setEditingTemplate,
+    setLoadingTemplateDetail,
+    setModalError,
+    isSubmitting,
+    loadGenerationRef,
+  } = state;
   const closeEditorModal = useCallback(() => {
     if (isSubmitting) return;
     loadGenerationRef.current++;
@@ -178,7 +235,14 @@ function useLibraryEditing(state: LibraryDraft) {
     setEditorMode(null);
     setEditingTemplate(null);
     setModalError(null);
-  }, [isSubmitting, loadGenerationRef, setEditingTemplate, setEditorMode, setLoadingTemplateDetail, setModalError]);
+  }, [
+    isSubmitting,
+    loadGenerationRef,
+    setEditingTemplate,
+    setEditorMode,
+    setLoadingTemplateDetail,
+    setModalError,
+  ]);
 
   return { openCreateModal, openEditModal, closeEditorModal };
 }
@@ -324,65 +388,12 @@ type LibraryModel = ReturnType<typeof useLibraryModel>;
 
 export default function KeyTemplatesLibrarySection(props: KeyTemplatesLibrarySectionProps) {
   const model = useLibraryModel(props);
-  const {
-    sectionError,
-    setSectionError,
-    t,
-    tc,
-    confirmDialog,
-    templates,
-    unreadable,
-    loadError,
-    loading,
-    onRefreshTemplates,
-    openCreateModal,
-    handleDeleteTemplate,
-  } = model;
+  const { templates, unreadable, loadError, loading, t, openCreateModal, confirmDialog } = model;
   return (
     <Card data-testid="key-templates-library">
       <TemplateLibraryHeader model={model} />
 
-      {sectionError && (
-        <div className="mb-4">
-          <Alert
-            variant="critical"
-            icon={<Icon name="error" />}
-            description={sectionError}
-            dismissLabel={tc("close")}
-            onDismiss={() => setSectionError(null)}
-          />
-        </div>
-      )}
-
-      {loadError && <Alert variant="critical" description={loadError} />}
-      {loading && <Spinner size="sm" />}
-      {loadError && (
-        <Button variant="outline" onClick={onRefreshTemplates}>
-          {tc("retry")}
-        </Button>
-      )}
-      {unreadable.map((template) => (
-        <div
-          key={template.id}
-          data-testid={`unreadable-template-${template.id}`}
-          className="flex items-center justify-between gap-3 rounded-lg border border-error/30 p-4 mb-3"
-        >
-          <div>
-            <p className="font-semibold">{template.name}</p>
-            <p className="text-xs text-error">
-              {t("templateUnreadableStatus")} ({template.code})
-            </p>
-          </div>
-          <Button
-            icon="delete"
-            variant="outline"
-            onClick={() => handleDeleteTemplate(template)}
-            aria-label={`${t("deleteTemplateAction")} ${template.name}`}
-          >
-            {tc("delete")}
-          </Button>
-        </div>
-      ))}
+      <TemplateLibraryStatus model={model} />
       {templates.length === 0 && unreadable.length === 0 && !loadError && !loading ? (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg border border-dashed border-border bg-surface/20">
           <div className="flex items-center gap-3">
@@ -591,12 +602,6 @@ function TemplateEditorModal({ model }: { model: LibraryModel }) {
   const {
     editorMode,
     editingTemplate,
-    draftPolicy,
-    setDraftPolicy,
-    serverRefIssues,
-    setServerRefIssues,
-    setHasEditorErrors,
-    setHasBlockingRefs,
     loadingTemplateDetail,
     modalError,
     setModalError,
@@ -629,24 +634,7 @@ function TemplateEditorModal({ model }: { model: LibraryModel }) {
           </div>
         )}
 
-        {editorMode !== null && (
-          <KeyPolicySixTabEditor
-          onFormStateChange={model.setDraftFormState}
-            policy={draftPolicy}
-            onChange={(next) => {
-              setDraftPolicy(next);
-              setServerRefIssues((issues) =>
-                issues.filter((issue) => issue.code !== "INVALID_FIELD")
-              );
-            }}
-            serverReferenceIssues={serverRefIssues}
-            onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
-              setHasEditorErrors(hasErrors);
-              setHasBlockingRefs(hasBlockingReferenceIssues);
-            }}
-            disabled={isSubmitting || loadingTemplateDetail || requiresReload}
-          />
-        )}
+        <TemplatePolicyEditor model={model} />
 
         {modalError && (
           <Alert
@@ -676,24 +664,120 @@ function TemplateEditorModal({ model }: { model: LibraryModel }) {
 function TemplateLibraryHeader({ model }: { model: LibraryModel }) {
   const { t, templates, unreadable, openCreateModal } = model;
   return (
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-            <Icon name="layers" className="text-xl text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">
-              {t("keyTemplatesTitle")}
-              <span className="ml-1.5 text-sm font-normal text-text-muted">
-                ({templates.length + unreadable.length})
-              </span>
-            </h3>
-            <p className="text-xs text-text-muted">{t("keyTemplatesDesc")}</p>
-          </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
+          <Icon name="layers" className="text-xl text-primary" />
         </div>
-        <Button icon="add" variant="secondary" onClick={openCreateModal}>
-          {t("newTemplateAction")}
-        </Button>
+        <div>
+          <h3 className="font-semibold">
+            {t("keyTemplatesTitle")}
+            <span className="ml-1.5 text-sm font-normal text-text-muted">
+              ({templates.length + unreadable.length})
+            </span>
+          </h3>
+          <p className="text-xs text-text-muted">{t("keyTemplatesDesc")}</p>
+        </div>
       </div>
+      <Button icon="add" variant="secondary" onClick={openCreateModal}>
+        {t("newTemplateAction")}
+      </Button>
+    </div>
+  );
+}
+
+function TemplateLibraryStatus({ model }: { model: LibraryModel }) {
+  const {
+    sectionError,
+    setSectionError,
+    t,
+    tc,
+    unreadable,
+    loadError,
+    loading,
+    onRefreshTemplates,
+    handleDeleteTemplate,
+  } = model;
+  return (
+    <>
+      {sectionError && (
+        <div className="mb-4">
+          <Alert
+            variant="critical"
+            icon={<Icon name="error" />}
+            description={sectionError}
+            dismissLabel={tc("close")}
+            onDismiss={() => setSectionError(null)}
+          />
+        </div>
+      )}
+
+      {loadError && <Alert variant="critical" description={loadError} />}
+      {loading && <Spinner size="sm" />}
+      {loadError && (
+        <Button variant="outline" onClick={onRefreshTemplates}>
+          {tc("retry")}
+        </Button>
+      )}
+      {unreadable.map((template) => (
+        <div
+          key={template.id}
+          data-testid={`unreadable-template-${template.id}`}
+          className="flex items-center justify-between gap-3 rounded-lg border border-error/30 p-4 mb-3"
+        >
+          <div>
+            <p className="font-semibold">{template.name}</p>
+            <p className="text-xs text-error">
+              {t("templateUnreadableStatus")} ({template.code})
+            </p>
+          </div>
+          <Button
+            icon="delete"
+            variant="outline"
+            onClick={() => handleDeleteTemplate(template)}
+            aria-label={`${t("deleteTemplateAction")} ${template.name}`}
+          >
+            {tc("delete")}
+          </Button>
+        </div>
+      ))}
+    </>
+  );
+}
+
+function TemplatePolicyEditor({ model }: { model: LibraryModel }) {
+  const {
+    editorMode,
+    draftPolicy,
+    setDraftPolicy,
+    serverRefIssues,
+    setServerRefIssues,
+    setHasEditorErrors,
+    setHasBlockingRefs,
+    isSubmitting,
+    loadingTemplateDetail,
+    requiresReload,
+  } = model;
+  return (
+    <>
+      {editorMode !== null && (
+        <KeyPolicySixTabEditor
+          onFormStateChange={model.setDraftFormState}
+          policy={draftPolicy}
+          onChange={(next) => {
+            setDraftPolicy(next);
+            setServerRefIssues((issues) =>
+              issues.filter((issue) => issue.code !== "INVALID_FIELD")
+            );
+          }}
+          serverReferenceIssues={serverRefIssues}
+          onValidationStateChange={({ hasErrors, hasBlockingReferenceIssues }) => {
+            setHasEditorErrors(hasErrors);
+            setHasBlockingRefs(hasBlockingReferenceIssues);
+          }}
+          disabled={isSubmitting || loadingTemplateDetail || requiresReload}
+        />
+      )}{" "}
+    </>
   );
 }

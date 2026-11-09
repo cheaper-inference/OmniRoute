@@ -878,9 +878,9 @@ function writeAutoCandidateOverrides(
   state: PolicyEditorFormState
 ): Pick<KeyTemplatePolicy["related"], "autoCandidateOverrides"> {
   return {
-    autoCandidateOverrides: state.autoCandidateOverrides.filter(
-      (o) => o.autoChannel.trim().length > 0 && o.connectionId.trim().length > 0
-    ).map(withoutClientRowId),
+    autoCandidateOverrides: state.autoCandidateOverrides
+      .filter((o) => o.autoChannel.trim().length > 0 && o.connectionId.trim().length > 0)
+      .map(withoutClientRowId),
   };
 }
 
