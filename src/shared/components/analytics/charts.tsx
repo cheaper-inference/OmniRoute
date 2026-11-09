@@ -37,21 +37,6 @@ function createDateFormatter(locale: string, options: Intl.DateTimeFormatOptions
   }
 }
 
-// ── Sort Indicator (shared by tables) ──────────────────────────────────────
-
-export function SortIndicator({ active, sortOrder }: { active: boolean; sortOrder: string }) {
-  if (!active) {
-    return <Icon name="unfold_more" size={12} className="opacity-0 group-hover:opacity-30" />;
-  }
-  return (
-    <Icon
-      name={sortOrder === "asc" ? "expand_less" : "expand_more"}
-      size={12}
-      className="text-primary"
-    />
-  );
-}
-
 // ── StatCard (primary KPI) ─────────────────────────────────────────────────
 
 export function StatCard({

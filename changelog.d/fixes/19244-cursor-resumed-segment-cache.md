@@ -1,0 +1,1 @@
+- **fix(cursor):** attribute the prior segment's prompt prefix as `cached_tokens` on intermediate tool-resumed turns before `turn_ended` ([#19244](https://github.com/cheaper-inference/OmniRoute/pull/19244), closes [#19241](https://github.com/cheaper-inference/OmniRoute/issues/19241))

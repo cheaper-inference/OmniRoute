@@ -353,82 +353,82 @@ codex "your prompt"
 
 ---
 
-## 🚀 פריסה
+## פריסת 🚀
 
-### התקנת npm גלובלית (מומלץ)
+### התקנה גלובלית npm (מומלץ)
 
 ```bash
 npm install -g omniroute
 
-# יצירת תיקיית תצורה
+# Create config directory
 mkdir -p ~/.omniroute
 
-# יצירת קובץ .env (ראו .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# הפעלת השרת
+# Start server
 omniroute
-# או עם יציאה מותאמת אישית:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-ה-CLI טוען אוטומטית את `.env` מתוך `~/.omniroute/.env` או `./.env`.
+ה- CLI טוען אוטומטית `.env` מ- `~/.omniroute/.env` או `./.env`. `./.env` בספריית העבודה עשויה להגדיר רק רשימת הרשאות קצרה של מפתחות (יציאות, `REQUIRE_API_KEY`, מיקום והגדרות צבע); שים את כל השאר ב- `~/.omniroute/.env`. ראה [חוזי השקה של CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### מצב מגש מערכת
+### מצב מגש
 
-הפעילו את OmniRoute במגש המערכת:
+התחל את OmniRoute במגש המערכת:
 
 ```bash
 omniroute serve --tray
 ```
 
-הפקודה מסתיימת לאחר שהשרת ומגש המערכת מוכנים.
+הפקודה חוזרת לאחר שהשרת והמגש מוכנים.
 
-השרת ממשיך לפעול ללא המסוף.
+השרת ממשיך ללא הטרמינל.
 
-מצב מגש המערכת נתמך ב-macOS, ב-Windows ובהפעלות Linux גרפיות. מצב מגש המערכת אינו פותח את לוח הבקרה באופן אוטומטי.
+מצב מגש תומך בהפעלות macOS, Windows ו- Linux גרפיות. מצב מגש אינו פותח את לוח המחוונים באופן אוטומטי.
 
-השתמשו בתפריט מגש המערכת עבור הפעולות הבאות:
+השתמש בתפריט המגש עבור הפעולות הבאות:
 
-- פתיחת לוח הבקרה.
-- פתיחת `/dashboard/logs`.
-- שינוי ההפעלה האוטומטית.
-- עצירת OmniRoute.
+- פתח את לוח המחוונים.
+- פתח `/dashboard/logs`.
+- שנה הפעלה אוטומטית.
+- עצור OmniRoute.
 
-אין לשלב את `--tray` עם האפשרויות הבאות:
+אל תשלב `--tray` עם האפשרויות הבאות:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-מצבים אלה דורשים בעלות שונה על התהליך.
+מצבים אלה דורשים בעלות שונה על תהליך.
 
-הפעילו את OmniRoute בעת הכניסה הבאה למחשב:
+אפשר את האתחול בכניסה הבאה למחשב:
 
 ```bash
 omniroute autostart enable
 ```
 
-ההפעלה האוטומטית משתמשת במצב מגש המערכת ב-macOS, ב-Windows ובהפעלות Linux גרפיות. Linux ללא ממשק גרפי משתמש בשירות המשתמש הקיים של systemd.
+הפעלה אוטומטית משתמשת במצב מגש בהפעלות macOS, Windows ו- Linux גרפיות. Headless Linux משתמש בשירות המשתמש הקיים של systemd.
 
-השביתו הפעלה בעת הכניסה:
+השבת את האתחול בעת הכניסה:
 
 ```bash
 omniroute autostart disable
 ```
 
-### הסרת התקנה
+### מסיר התקנה
 
-כאשר OmniRoute אינו נחוץ עוד, אנו מספקים שני סקריפטים מהירים להסרה נקייה:
+כאשר אתה כבר לא צריך OmniRoute, אנו מספקים שני סקריפטים מהירים להסרה נקייה:
 
-| פקודה                    | פעולה                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | מסירה את יישום המערכת, אך **שומרת את מסד הנתונים ואת ההגדרות שלכם** בתוך `~/.omniroute`. |
-| `npm run uninstall:full` | מסירה את היישום וגם **מוחקת לצמיתות את כל ההגדרות, המפתחות ומסדי הנתונים**.              |
+| פְּקוּדָה                | פְּעוּלָה                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `npm run uninstall`      | מסיר את אפליקציית המערכת אבל** שומר על DB והתצורות שלך** ב- `~/.omniroute`.   |
+| `npm run uninstall:full` | מסיר את האפליקציה AND לצמיתות** מוחק את כל התצורות, המפתחות ומסדי הנתונים** . |
 
-> הערה: כדי להריץ פקודות אלה, עברו לתיקיית הפרויקט של OmniRoute (אם שיבטתם אותו) והפעילו אותן. לחלופין, אם הוא הותקן באופן גלובלי, ניתן פשוט להריץ `npm uninstall -g omniroute`.
+> הערה: כדי להפעיל את הפקודות הללו, נווט לתיקיית OmniRoute project (אם שיבטת אותה) והפעל אותן. לחלופין, אם מותקן ברחבי העולם, אתה יכול פשוט להפעיל `npm uninstall -g omniroute`.
 
-### פריסה ב-VPS
+### פריסת VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -444,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# או: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### פריסה באמצעות PM2 (צריכת זיכרון נמוכה)
+### פריסת PM2 (זיכרון נמוך)
 
-עבור שרתים עם זיכרון RAM מוגבל, השתמשו באפשרות הגבלת הזיכרון:
+עבור שרתים עם RAM מוגבל, השתמש באפשרות הגבלת הזיכרון:
 
 ```bash
-# עם מגבלה של 512MB (ברירת המחדל)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# או עם מגבלת זיכרון מותאמת אישית
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# או באמצעות ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-צרו את `ecosystem.config.js`:
+צור `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# בניית image (ברירת המחדל = runner-cli עם codex/claude/droid מותקנים מראש)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# מצב נייד (מומלץ)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-למצב המשולב עם המארח וכולל קובצי CLI בינאריים, ראו את סעיף Docker בתיעוד הראשי.
+עבור מצב משולב מארח עם קבצים בינאריים CLI, עיין בסעיף Docker במסמכים הראשיים.
 
 ### Void Linux (xbps-src)
 
-משתמשי Void Linux יכולים לארוז ולהתקין את OmniRoute באופן מקורי באמצעות מסגרת ההידור הצולב `xbps-src`. מסגרת זו הופכת לאוטומטיים את בניית החבילה העצמאית של Node.js ואת הקישורים המקוריים הנדרשים של `better-sqlite3`.
+משתמשי Void Linux יכולים לארוז ולהתקין OmniRoute באופן מקורי באמצעות מסגרת ההידור הצולבת `xbps-src`. זה הופך את הבנייה העצמאית Node.js לאוטומטית יחד עם הכריכות המקוריות `better-sqlite3` הנדרשות.
 
 <details>
-<summary><b>הצגת תבנית xbps-src</b></summary>
+<summary><b>צפה בתבנית xbps-src</b></summary>
 
 ```bash
-# קובץ תבנית עבור 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# קביעת ארכיטקטורת המעבד היעד עבור node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) התקנת כל יחסי התלות – דילוג על סקריפטים
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) בניית החבילה העצמאית של Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) העתקת נכסים סטטיים אל החבילה העצמאית
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) הידור הקישור המקורי של better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) הצבת הקישור המהודר בחבילה העצמאית
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) הסרת חבילות sharp ייעודיות לארכיטקטורה
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) העתקת יחסי התלות בזמן הריצה של pino שהושמטו בניתוח הסטטי של Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# מניעת הסרת תיקיות ריקות של נתב היישום של Next.js באמצעות וו שלאחר ההתקנה
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### משתני סביבה
 
-| משתנה                                   | ברירת מחדל                           | תיאור                                                                                                   |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | סוד לחתימת JWT (**יש לשנות בסביבת ייצור**)                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | סיסמת ההתחברות הראשונה                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | ספריית הנתונים (מסד נתונים, שימוש, יומנים)                                                              |
-| `PORT`                                  | ברירת המחדל של המסגרת                | יציאת השירות (`20128` בדוגמאות)                                                                         |
-| `HOSTNAME`                              | ברירת המחדל של המסגרת                | כתובת המארח להאזנה (ברירת המחדל של Docker היא `0.0.0.0`)                                                |
-| `NODE_ENV`                              | ברירת המחדל של סביבת הריצה           | יש להגדיר `production` לפריסה                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | כתובת ה-URL הבסיסית הציבורית המוצגת בלוח הבקרה ונחשפת לשרת (מחליפה את `BASE_URL` הישנה)                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | כתובת ה-URL הבסיסית של נקודת הקצה לסנכרון בענן (מחליפה את `CLOUD_URL` הישנה)                            |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | סוד HMAC עבור מפתחות API שנוצרו                                                                         |
-| `REQUIRE_API_KEY`                       | `false`                              | אכיפת מפתח API מסוג Bearer ב-`/v1/*`                                                                    |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | מתן אפשרות למשתמשים מאומתים בלוח הבקרה לחשוף לפי דרישה את הערכים המלאים של מפתחות API שמורים            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | תדירות הרענון בצד השרת עבור נתוני Provider Limits במטמון; כפתורי הרענון בממשק עדיין מפעילים סנכרון ידני |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | השבתת תמונות מצב אוטומטיות של SQLite לפני כתיבה/ייבוא/שחזור; גיבויים ידניים עדיין פועלים                |
-| `APP_LOG_TO_FILE`                       | `true`                               | הפעלת פלט של יומני היישום והביקורת לדיסק                                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | אילוץ מאפיין `Secure` עבור קובץ Cookie לאימות (מאחורי פרוקסי הפוך מסוג HTTPS)                           |
-| `CLOUDFLARED_BIN`                       | לא מוגדר                             | שימוש בקובץ בינארי קיים של `cloudflared` במקום בהורדה מנוהלת                                            |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | תעבורה עבור Quick Tunnels מנוהלות (`http2`,‏ `quic` או `auto`)                                          |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | מגבלת ערימת הזיכרון של Node.js ב-MB                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | המספר המרבי של רשומות במטמון ההנחיות                                                                    |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | המספר המרבי של רשומות במטמון הסמנטי                                                                     |
+| מִשְׁתַנֶה                              | בְּרִירַת מֶחדָל         | תֵאוּר                                                                                                             |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(נוצר אוטומטי)_         | סוד חתימת JWT — נוצר אוטומטית בהפעלה הראשונה ונמשך ל- `server.env`; הגדר אותו במפורש כאשר ספריית הנתונים היא ארעית |
+| `INITIAL_PASSWORD`                      | _(לא מוגדר)_             | סיסמת כניסה ראשונה. התקנות npm/source מתחילות ב- `CHANGEME`: החלף אותו. לא מוגדר: אשף ההטמעה                       |
+| `DATA_DIR`                              | `~/.omniroute`           | ספריית נתונים (db, שימוש, יומנים)                                                                                  |
+| `PORT`                                  | ברירת המחדל של המסגרת    | יציאת שירות (`20128` בדוגמאות)                                                                                     |
+| `HOSTNAME`                              | ברירת המחדל של המסגרת    | מארח קשר (Docker ברירת המחדל ל- `0.0.0.0`)                                                                         |
+| `NODE_ENV`                              | ברירת המחדל של זמן ריצה  | הגדר `production` לפריסה                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | הבסיס הציבורי URL עלה ללוח המחוונים ונחשף לשרת (מחליף `BASE_URL` מדור קודם)                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | בסיס נקודת קצה של סנכרון ענן URL (מחליף `CLOUD_URL` מדור קודם)                                                     |
+| `API_KEY_SECRET`                        | _(נוצר אוטומטי)_         | סוד HMAC למפתחות API שנוצרו — נוצר אוטומטית בהפעלה הראשונה ונמשך ל- `server.env`                                   |
+| `REQUIRE_API_KEY`                       | `false`                  | לאכוף את מפתח ה-Bearer API על `/v1/*`                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | אפשר למשתמשי לוח מחוונים מאומתים לחשוף ערכי מפתח API מאוחסנים מלאים לפי דרישה                                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | קצב רענון בצד השרת עבור נתוני מגבלות ספקים המאוחסנים במטמון; לחצני הרענון UI עדיין מפעילים סנכרון ידני             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | השבת צילומי SQLite אוטומטיים לפני writes/import/restore; גיבויים ידניים עדיין עובדים                               |
+| `APP_LOG_TO_FILE`                       | `true`                   | מאפשר פלט של יומן אפליקציות וביקורת לדיסק                                                                          |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | כפה קובץ Cookie של `Secure` (מאחורי HTTPS proxy הפוך)                                                              |
+| `CLOUDFLARED_BIN`                       | לא מוגדר                 | השתמש בקובץ בינארי `cloudflared` קיים במקום בהורדה מנוהלת                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | הובלה עבור מנהרות מהירות מנוהלות (`http2`, `quic` או `auto`)                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | מגבלת ערימת Node.js ב- MB                                                                                          |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | מקסימום ערכי מטמון פקודות                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | מקסימום ערכי מטמון סמנטי                                                                                           |
 
-לעיון ברשימה המלאה של משתני הסביבה, ראו את [README](../README.md).
+להתייחסות מלאה למשתנה הסביבה, עיין ב- [README](../README.md).
 
 ---
 

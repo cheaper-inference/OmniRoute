@@ -18,6 +18,7 @@ import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
+import { isDeliberateEmptyResponsesTerminal } from "../../translator/helpers/responsesTerminalStatus.ts";
 import type { ComboRetryAfter } from "./types.ts";
 import {
   classifyPreContentReadFailure,
@@ -97,6 +98,18 @@ export function toRetryAfterDisplayValue(value: ComboRetryAfter): string | Date 
 const EXHAUSTION_MARKER_PATTERN =
   /\b(insufficient\s+credit|insufficient\s+balance|quota\s+exceeded|out\s+of\s+credits?|credit\s+exhausted)\b/i;
 
+// Issue #19278: some providers (observed: Pollinations) go further — the billing
+// error IS the assistant content of an otherwise clean 200 completion ("The
+// account behind this API key doesn't have enough credits"). The envelope check
+// above cannot see it. This pattern is deliberately NARROWER than the envelope
+// one: billing-action phrases only ("enough credits", "top up", "purchase
+// credits"), never generic terms like "quota" or "insufficient credits" that
+// also appear in legitimate explanatory prose (the #6427 control case must keep
+// passing). It is additionally gated on absent/zero completion_tokens, so real
+// generated prose — which always carries usage — cannot trip it.
+const CONTENT_EXHAUSTION_PATTERN =
+  /\b(enough\s+credits?|not\s+enough\s+credits?|please\s+top\s+up|top\s+up\s+to\s+continue|purchase\s+(more\s+)?credits?|add\s+credits?\s+to\s+continue|credit\s+balance\s+(is\s+)?(too\s+low|exhausted|empty)|recharge\s+(your|the)\s+account|out\s+of\s+funds)\b/i;
+
 /**
  * Collect the small set of top-level "error envelope" strings a 200 response may
  * carry alongside (or instead of) a normal completion: the OpenAI-shape `error`
@@ -119,6 +132,28 @@ function extractEnvelopeErrorText(json: Record<string, unknown>): string | null 
   if (typeof json.message === "string") parts.push(json.message);
   if (typeof json.detail === "string") parts.push(json.detail);
   return parts.length > 0 ? parts.join(" ") : null;
+}
+
+/**
+ * Issue #19278: extract the assistant text of `choices[0]` for the content-level
+ * exhaustion scan — string `content` verbatim, or the joined `text` parts of a
+ * multimodal content array. Returns "" for any other shape; the caller treats
+ * "" as "nothing to scan".
+ */
+function extractFirstChoiceText(json: Record<string, unknown>): string {
+  const choices = json.choices;
+  if (!Array.isArray(choices) || choices.length === 0) return "";
+  const firstChoice = choices[0];
+  if (!isRecord(firstChoice)) return "";
+  const message = isRecord(firstChoice.message) ? firstChoice.message : null;
+  const content = message?.content;
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => (isRecord(part) && typeof part.text === "string" ? part.text : ""))
+      .join(" ");
+  }
+  return "";
 }
 
 /** Mutable lifecycle flags threaded through {@link applySseLifecycleEvent}. */
@@ -946,12 +981,29 @@ export async function validateResponseQuality(
       return { valid: false, reason: `upstream exhaustion marker in 200 body: ${snippet}` };
     }
   }
+  {
+    // Issue #19278: masked 200 whose billing failure lives inside the assistant
+    // content itself. The narrow CONTENT_EXHAUSTION_PATTERN plus the zero/absent
+    // completion_tokens gate keeps the #6427 anti-false-positive contract —
+    // prose that merely discusses quota/credits always carries real usage.
+    const usage = isRecord(json.usage) ? json.usage : null;
+    const completionTokens =
+      typeof usage?.completion_tokens === "number" ? (usage.completion_tokens as number) : 0;
+    const contentText = extractFirstChoiceText(json);
+    if (completionTokens <= 0 && contentText && CONTENT_EXHAUSTION_PATTERN.test(contentText)) {
+      const snippet = contentText.length > 80 ? `${contentText.slice(0, 80)}…` : contentText;
+      return {
+        valid: false,
+        reason: `upstream exhaustion marker in assistant content: ${snippet}`,
+      };
+    }
+  }
 
   const choices = json?.choices;
   if (json?.object === "response") {
     if (
       !responsesApiOutputHasContent(json.output) &&
-      !(json.status === "completed" && permitsEmptyTurn())
+      !(isDeliberateEmptyResponsesTerminal(json) && permitsEmptyTurn())
     )
       return { valid: false, reason: "empty_choices" };
     const status = typeof json.status === "string" ? json.status : "";
@@ -1032,9 +1084,12 @@ export async function validateResponseQuality(
     // same case the Claude shape exempts as stop_reason "max_tokens" (#12968).
     // A thinking model that spends the whole budget before any visible token
     // is a valid response, not a reason to fail the combo target over.
+    // "content_filter" with native trust is a translated Claude refusal: the model
+    // declined, so the next target would only be asked to answer what it refused.
     if (
       firstChoice?.finish_reason === "length" ||
-      (firstChoice?.finish_reason === "stop" && permitsEmptyTurn())
+      ((firstChoice?.finish_reason === "stop" || firstChoice?.finish_reason === "content_filter") &&
+        permitsEmptyTurn())
     ) {
       return {
         valid: true,

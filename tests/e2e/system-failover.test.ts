@@ -553,9 +553,7 @@ test("maxSetRetries: both A and B fail first pass, A 429 again, B 200 on retry",
     buildCompletion("server B ok on retry", { model: "sys-b/test-model" }),
   ]);
 
-  const result = await postChat(app.baseUrl, "sys-priority-setretry", "test max set retries", {
-    "x-internal-test": "combo-health-check",
-  });
+  const result = await postChat(app.baseUrl, "sys-priority-setretry", "test max set retries");
 
   // Set try 0: A 429, B 500 → both fail
   // Set try 1: A 429, B 200 → B succeeds

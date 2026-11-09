@@ -3,7 +3,9 @@
 import { getDbInstance } from "../core";
 import {
   MODEL_COMPAT_PROTOCOL_KEYS,
+  isThinkingReplayMode,
   type ModelCompatProtocolKey,
+  type ThinkingReplayMode,
 } from "@/shared/constants/modelCompat";
 import { isForbiddenUpstreamHeaderName } from "@/shared/constants/upstreamHeaders";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
@@ -128,6 +130,9 @@ export type ModelCompatOverride = {
   apiFormat?: string;
   targetFormat?: string;
   supportsVision?: boolean;
+  /** Thinking-replay contract for this node's upstream — "redacted" | "text" | "none"
+   *  (see open-sse/translator/helpers/thinkingReplayMode.ts). */
+  thinkingReplay?: ThinkingReplayMode;
 };
 
 /** Nested provider → model map of explicit model-compat vision overrides. */
@@ -283,6 +288,7 @@ export type ModelCompatPatch = {
   apiFormat?: string | null;
   targetFormat?: string | null;
   supportsVision?: boolean | null;
+  thinkingReplay?: ThinkingReplayMode | null;
 };
 
 export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined): boolean {
@@ -302,6 +308,13 @@ export function mergeModelCompatOverride(
   const idx = list.findIndex((e) => e.id === modelId);
   const prev = idx >= 0 ? { ...list[idx] } : { id: modelId };
   const next: ModelCompatOverride = { ...prev, id: modelId };
+  if ("thinkingReplay" in patch) {
+    if (patch.thinkingReplay === null) {
+      delete next.thinkingReplay; // unset: revert to default prefix-assumed behavior
+    } else if (isThinkingReplayMode(patch.thinkingReplay)) {
+      next.thinkingReplay = patch.thinkingReplay;
+    }
+  }
   if ("normalizeToolCallId" in patch) {
     if (patch.normalizeToolCallId) next.normalizeToolCallId = true;
     else delete next.normalizeToolCallId;
@@ -382,6 +395,7 @@ export function mergeModelCompatOverride(
   const hasApiFormat = Object.prototype.hasOwnProperty.call(next, "apiFormat");
   const hasTargetFormat = Object.prototype.hasOwnProperty.call(next, "targetFormat");
   const hasVisionFlag = Object.prototype.hasOwnProperty.call(next, "supportsVision");
+  const hasThinkingReplayFlag = Object.prototype.hasOwnProperty.call(next, "thinkingReplay");
   if (
     next.normalizeToolCallId ||
     hasPreserveFlag ||
@@ -389,6 +403,7 @@ export function mergeModelCompatOverride(
     hasHiddenFlag ||
     hasApiFormat ||
     hasTargetFormat ||
+    hasThinkingReplayFlag ||
     hasVisionFlag ||
     compatByProtocolHasEntries(next.compatByProtocol) ||
     hasTopUpstream
