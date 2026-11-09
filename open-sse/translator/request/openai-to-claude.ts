@@ -492,6 +492,12 @@ export function openaiToClaudeRequest(
   } else if (body.tool_choice) {
     result.tool_choice = convertOpenAIToolChoice(body.tool_choice);
   }
+  // A forced tool must use the prefixed name `tools` declares, or Claude rejects the request.
+  const forced = result.tool_choice;
+  const prefixedForced = typeof forced === "object" && CLAUDE_OAUTH_TOOL_PREFIX + forced.name;
+  if (prefixedForced && forced.type === "tool" && toolNameMap.has(prefixedForced)) {
+    result.tool_choice = { ...forced, name: prefixedForced };
+  }
 
   // OpenAI `parallel_tool_calls: false` ↔ Claude `tool_choice.disable_parallel_tool_use`.
   // Claude carries the flag on tool_choice, so synthesize `auto` when none was sent; it is
@@ -942,6 +948,17 @@ function openaiToClaudeRequestForAntigravity(model, body, stream) {
       }
       return tool;
     });
+  }
+  const forced = result.tool_choice;
+  if (
+    typeof forced === "object" &&
+    forced.type === "tool" &&
+    String(forced.name).startsWith(CLAUDE_OAUTH_TOOL_PREFIX)
+  ) {
+    result.tool_choice = {
+      ...forced,
+      name: String(forced.name).slice(CLAUDE_OAUTH_TOOL_PREFIX.length),
+    };
   }
 
   // Strip prefix from tool_use in messages
