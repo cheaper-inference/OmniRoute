@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { DEFAULT_DATABASE_SETTINGS, type DatabaseSettings } from "@/types/databaseSettings";
 
 import { backupDbFile, setDbBackupMaxFiles } from "./backup";
+import { toBooleanSetting, toStrictBooleanSetting } from "./booleanSetting";
 import { DATA_DIR, SQLITE_FILE, applyDatabaseOptimizationSettings, getDbInstance } from "./core";
 import { invalidateDbCache } from "./readCache";
 import { registerDbStateResetter } from "./stateReset";
@@ -111,17 +112,6 @@ function parseStoredValue(rawValue: unknown): unknown {
   }
 }
 
-function toBooleanSetting(value: unknown): boolean | null {
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return !Number.isNaN(value) && value !== 0;
-  if (typeof value !== "string") return null;
-
-  const normalized = value.trim().toLowerCase();
-  if (["1", "true", "yes", "on"].includes(normalized)) return true;
-  if (["0", "false", "no", "off"].includes(normalized)) return false;
-  return null;
-}
-
 function normalizeOptimizationSettings(settings: UserDatabaseSettings) {
   const fallback = DEFAULT_DATABASE_SETTINGS.optimization.cacheSize;
   const numericCacheSize = Number(settings.optimization.cacheSize);
@@ -168,9 +158,12 @@ function mergeTopLevelSections(target: UserDatabaseSettings, values: Record<stri
 }
 
 function mergeRuntimeLogSettings(target: UserDatabaseSettings, values: Record<string, unknown>) {
-  const pipelineEnabled = toBooleanSetting(values.call_log_pipeline_enabled);
-  if (pipelineEnabled !== null) {
-    target.logs.callLogPipelineEnabled = pipelineEnabled;
+  // The panel reads the toggle through the same strict parser as the request
+  // path. A stored value the parser rejects therefore shows as off, instead of
+  // displaying a truthy string as on while requests capture nothing.
+  if (values.call_log_pipeline_enabled !== undefined) {
+    target.logs.callLogPipelineEnabled =
+      toStrictBooleanSetting(values.call_log_pipeline_enabled) === true;
   }
 
   const legacyDetailedEnabled = toBooleanSetting(values.detailed_logs_enabled);
