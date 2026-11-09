@@ -383,7 +383,7 @@ Narzędzie do pobierania nosi obecnie nazwę `omniroute_ccr_retrieve` (przedrost
 
 ### Cykl życia sesji
 
-Sesje Streamable-HTTP są bezczynne i serwer je zbiera; oknem bezczynności jest stała `MCP_SESSION_IDLE_MS` (do której odwołuje się nazwa, a nie zakodowana na stałe wartość, więc ta strona nie zmienia się, gdy się zmienia). Objawem bezczynnej sesji jest HTTP 404 z `Unknown Mcp-Session-Id` — rozwiązaniem jest ponowne połączenie lub ponowne uruchomienie sesji,** nie** aby obrócić klucz, zmienić zakres lub zmienić nazwę narzędzia.
+Sesje Streamable-HTTP są bezczynne i serwer je zbiera; okno bezczynności jest ustawiane przez `OMNIROUTE_MCP_SESSION_IDLE_MS` (domyślnie 5 minut; odniesienie do nazwy, a nie wartości zakodowanej na stałe, więc ta strona nie dryfuje, gdy się zmienia). Objawem bezczynnej sesji jest HTTP 404 z `Unknown Mcp-Session-Id` — rozwiązaniem jest ponowne połączenie lub ponowne uruchomienie sesji,** nie** aby obrócić klucz, zmienić zakres lub zmienić nazwę narzędzia.
 
 ## Interfejs API
 
