@@ -304,16 +304,15 @@ async function dispatchExecutors(
   return lastFailure;
 }
 
-export async function handleAgenticPipelineChat({
-  body,
-  steps,
-  handleSingleModel,
-  log,
-  comboName,
-  config,
-}: HandleAgenticPipelineOptions): Promise<Response> {
-  const dispatch: HandleSingleModel = async (request, model, target) => {
-    const compacted = compactAgenticBody(request, model, config?.contextCompaction);
+/** Wrap a model dispatcher so every planner/executor body is compacted to its model budget first. */
+function createCompactingDispatch(
+  handleSingleModel: HandleSingleModel,
+  log: ComboLogger,
+  config: AgenticOrchestrationConfig | undefined
+): HandleSingleModel {
+  const compaction = config?.contextCompaction;
+  return async (request, model, target) => {
+    const compacted = compactAgenticBody(request, model, compaction);
     if (compacted.overLimit)
       return errorResponse(
         413,
@@ -326,6 +325,17 @@ export async function handleAgenticPipelineChat({
       );
     return handleSingleModel(compacted.body, model, target);
   };
+}
+
+export async function handleAgenticPipelineChat({
+  body,
+  steps,
+  handleSingleModel,
+  log,
+  comboName,
+  config,
+}: HandleAgenticPipelineOptions): Promise<Response> {
+  const dispatch = createCompactingDispatch(handleSingleModel, log, config);
   const chain = steps.filter((step) => Boolean(step && stepModel(step)));
   if (chain.length < 2) {
     return errorResponse(400, "Agentic pipeline requires a planner and at least one tool executor");
