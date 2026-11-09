@@ -1,0 +1,1 @@
+- **fix(claude-code):** The Claude Code body signature (`cch`) now hashes the same view of the request as the native client: it skips `max_tokens`, `fallbacks` and `fallback_credit_token`, empties `model` values, and uses the native hash seed, so signed requests pass the upstream integrity check.
