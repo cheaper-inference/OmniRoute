@@ -176,7 +176,7 @@ src/
 | `cloudAgent/`                               | وكلاء السحابة (Codex Cloud، Devin، Jules) — راجع `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                     |
 | `combos/`                                   | دقة التحرير والسرد + إعادة ترتيب المساعدين                                                                                                                                                                                                                                                                            |
 | `audit/`                                    | مساعدو موجز النشاط: `highLevelActions.ts` (القائمة المسموح بها + `isHighLevelAction()`)، `activityIcons.ts` (خريطة الإجراء → icon/verb )، `timeline.ts` (groupByDay/relativeTime) — راجع `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
-| `compliance/`                               | سجل التدقيق، تدقيق مزود + — ، راجع `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
+| `compliance/`                               | سجل التدقيق، تدقيق موفر + — راجع `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
 | `compression/`                              | غراء محرك الضغط (المحركات تعيش في `open-sse/services/compression/`)                                                                                                                                                                                                                                                   |
 | `config/`                                   | مساعدو تكوين وقت التشغيل                                                                                                                                                                                                                                                                                              |
 | `db/`                                       | 120 + domain وحدات DB + 168 عمليات الترحيل (انتقل دائمًا من هنا لـ SQLite)                                                                                                                                                                                                                                            |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | مكون لوحة المعلومات API: المحولات عبر `packages/ui-kit` — راجع `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: أسماء الأيقونات المستخدمة من قبل مكونات الشاشات → Lucide (`<Icon>`)                     |
-| `constants/providers.ts`         | **380 مقدم** مع التحقق من صحة Zod (مصدر الحقيقة)                                                    |
+| `constants/providers.ts`         | **381 مقدم** مع التحقق من صحة Zod (مصدر الحقيقة)                                                    |
 | `constants/cliTools.ts`          | تسجيل أداة CLI الخارجية                                                                             |
 | `constants/routingStrategies.ts` | **20 استراتيجية توجيه** مع الأولويات                                                                |
 | `constants/publicApiRoutes.ts`   | الطرق التي تتطلب مصادقة الحامل (مقابل الإدارة).                                                     |
@@ -395,24 +395,24 @@ open-sse/
 
 ### أدلة المستوى الأعلى
 
-| وثيقة                       | غاية                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | بنية عالية المستوى، خريطة النظام الفرعي، سطح لوحة القيادة                           |
-| `CODEBASE_DOCUMENTATION.md` | المرجع الهندسي: الدلائل والوحدات والاتفاقيات                                        |
-| `FEATURES.md`               | مصفوفة الميزات مع ميزات الإصدار 3.8                                                 |
-| `USER_GUIDE.md`             | دليل المستخدم النهائي (الإعداد، النماذج، المجموعات، CLIs، الصوت، إلخ.)              |
-| `API_REFERENCE.md`          | مرجع نقطة النهاية API مع نموذج المصادقة                                             |
-| `openapi.yaml`              | مواصفات OpenAPI 3.0 (121 مسارًا)                                                    |
-| `SETUP_GUIDE.md`            | طرق التثبيت (npm، npx، Docker، Electron، Termux، source)                            |
-| `ENVIRONMENT.md`            | جميع صيغ env (~ 800 موثقة، ~ 3,050 سطر `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | الأخطاء الشائعة + v3.8.0 المشكلات المعروفة                                          |
-| `RELEASE_CHECKLIST.md`      | تدفق الإصدار الكامل (المهارات، الهاسكي، الالتزامات التقليدية، النشر)                |
-| `COVERAGE_PLAN.md`          | أهداف التغطية والحالة الراهنة                                                       |
-| `FREE_TIERS.md`             | موفرو الطبقة المجانية المنسقون (48 + مجانًا + 11 OAuth)                             |
-| `CLI-TOOLS.md`              | تكاملات CLI الخارجية + الداخلية OmniRoute CLI                                       |
-| `I18N.md`                   | بنية i18n، إضافة لغة، 67 لغة                                                        |
-| `UNINSTALL.md`              | خطوات إلغاء التثبيت النظيفة                                                         |
-| `PROVIDER_REFERENCE.md`     | **تم إنشاؤها تلقائيًا** كتالوج 380 مزودًا (regen: `npm run gen:provider-reference`) |
+| وثيقة                       | غاية                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | بنية عالية المستوى، خريطة النظام الفرعي، سطح لوحة القيادة                                 |
+| `CODEBASE_DOCUMENTATION.md` | المرجع الهندسي: الدلائل والوحدات والاتفاقيات                                              |
+| `FEATURES.md`               | مصفوفة الميزات مع ميزات الإصدار 3.8                                                       |
+| `USER_GUIDE.md`             | دليل المستخدم النهائي (الإعداد، النماذج، المجموعات، CLIs، الصوت، إلخ.)                    |
+| `API_REFERENCE.md`          | مرجع نقطة النهاية API مع نموذج المصادقة                                                   |
+| `openapi.yaml`              | مواصفات OpenAPI 3.0 (121 مسارًا)                                                          |
+| `SETUP_GUIDE.md`            | طرق التثبيت (npm، npx، Docker، Electron، Termux، source)                                  |
+| `ENVIRONMENT.md`            | جميع صيغ env (~ 800 موثقة، ~ 3,050 سطر `.env.example`)                                    |
+| `TROUBLESHOOTING.md`        | الأخطاء الشائعة + v3.8.0 المشكلات المعروفة                                                |
+| `RELEASE_CHECKLIST.md`      | تدفق الإصدار الكامل (المهارات، الهاسكي، الالتزامات التقليدية، النشر)                      |
+| `COVERAGE_PLAN.md`          | أهداف التغطية والحالة الراهنة                                                             |
+| `FREE_TIERS.md`             | موفرو الطبقة المجانية المنسقون (48 + مجانًا + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | تكاملات CLI الخارجية + الداخلية OmniRoute CLI                                             |
+| `I18N.md`                   | بنية i18n، إضافة لغة، 67 لغة                                                              |
+| `UNINSTALL.md`              | خطوات إلغاء التثبيت النظيفة                                                               |
+| `PROVIDER_REFERENCE.md`     | **تم إنشاؤها تلقائيًا** كتالوج 381 مقدمي الخدمة (regen: `npm run gen:provider-reference`) |
 
 ### الغوص العميق في النظام الفرعي
 
@@ -422,7 +422,7 @@ open-sse/
 | `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC، 6 مهارات، مساعدين REST ، بطاقة الوكيل                             |
 | `AGENT_PROTOCOLS_GUIDE.md`                 | الدليل الموحد: A2A vs ACP vs Cloud Agents                                             |
 | `CLOUD_AGENT.md`                           | تنسيق Codex Cloud / Devin / Jules                                                     |
-| `SKILLS.md`                                | إطار المهارات (سوق + المدمج + SkillsSH + وضع الحماية)                                 |
+| `SKILLS.md`                                | إطار المهارات (سوق + المدمج + SkillsSH + رمل)                                         |
 | `RADAR.md`                                 | تراكب كتالوج النموذج الحر للرادار (`RADAR_ENABLED`، متوقف بشكل افتراضي)               |
 | `MEMORY.md`                                | نظام الذاكرة (SQLite FTS5 + Qdrant)                                                   |
 | `EVALS.md`                                 | إطار التقييم (الأجنحة، والتشغيل، وقواعد التقييم)                                      |

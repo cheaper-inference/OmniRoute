@@ -186,7 +186,7 @@ src/
 | `embeddings/`                            | Aiutanti del servizio di incorporamento                                                                                                                                                                                                                                                                                                    |
 | `env/`                                   | Variabile di ambiente che analizza la convalida +                                                                                                                                                                                                                                                                                          |
 | `evals/`                                 | Framework di valutazione (suite, runner, runtime) — vedi `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                        |
-| `guardrails/`                            | PII mascheratore, iniezione rapida, ponte visivo — vedi `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                      |
+| `guardrails/`                            | PII mascheratore, iniezione rapida, ponte visivo — vedere `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                    |
 | `jobs/`                                  | Lavori in background (simili a cron)                                                                                                                                                                                                                                                                                                       |
 | `memory/`                                | Memoria di conversazione (SQLite FTS5 + sqlite-vec ibrido RRF + Qdrant tier 2) — vedere `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                        |
 | `memory/embedding/`                      | Livello di incorporamento multi-sorgente: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (piano 21)                                                                                                                                                                                 |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente dashboard API: adattatori su `packages/ui-kit` — vedere `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nomi delle icone utilizzate dalle schermate → Componenti Lucide (`<Icon>`)                  |
-| `constants/providers.ts`         | **380 fornitori** con convalida Zod (fonte di verità)                                                   |
+| `constants/providers.ts`         | **381 fornitori** con convalida Zod (fonte di verità)                                                   |
 | `constants/cliTools.ts`          | Registro degli strumenti CLI esterno                                                                    |
 | `constants/routingStrategies.ts` | **20 strategie di routing** con priorità                                                                |
 | `constants/publicApiRoutes.ts`   | Percorsi che richiedono l'autenticazione del portatore (rispetto alla gestione).                        |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazioni CLI esterne + OmniRoute interne CLI                                                 |
 | `I18N.md`                   | Architettura i18n, aggiunta di una lingua, 67 localizzazioni                                     |
 | `UNINSTALL.md`              | Passaggi di disinstallazione puliti                                                              |
-| `PROVIDER_REFERENCE.md`     | **Generato automaticamente** catalogo di 380 fornitori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generato automaticamente** catalogo di 381 fornitori (regen: `npm run gen:provider-reference`) |
 
 ### Approfondimenti sul sottosistema
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Sottodirectory
 
-| Sottodir              | Scopo                                                                                                                                                                                                             |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traduzioni di documenti localizzati (41 lingue)                                                                                                                                                                   |
-| `docs/screenshots/`   | Risorse di immagini per le guide                                                                                                                                                                                  |
-| `_tasks/superpowers/` | Plans/specs da superpoteri (`writing-plans`/`brainstorming`) + ricerca — repository isolato, con versioni separate, gitignorato dall'albero principale. Vedi CLAUDE.md → "Artefatti di pianificazione e ricerca". |
+| Sottodir              | Scopo                                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Traduzioni di documenti localizzati (41 lingue)                                                                                                                                                                    |
+| `docs/screenshots/`   | Risorse di immagini per le guide                                                                                                                                                                                   |
+| `_tasks/superpowers/` | Plans/specs dai superpoteri (`writing-plans`/`brainstorming`) + ricerca — repository isolato, con versioni separate, gitignorato dall'albero principale. Vedi CLAUDE.md → "Artefatti di pianificazione e ricerca". |
 
 ---
 

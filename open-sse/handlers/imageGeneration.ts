@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { falSelectionEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -415,6 +416,9 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  // FAL_NATIVE_ENABLED, injected by the routes (the flag lives in src/). Null keeps the
+  // established Fal request shape; a preparer selects the schema-driven native path.
+  prepareFalInput = null,
   onCredentialsRefreshed = undefined,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
@@ -535,6 +539,7 @@ export async function handleImageGeneration({
       signal,
       generateOne: (taskBody) =>
         handleImageGeneration({
+          prepareFalInput,
           body: taskBody,
           credentials,
           log,
@@ -663,12 +668,14 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "fal-ai") {
     return handleFalAIImageGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -1759,18 +1766,20 @@ export async function handleOpenRouterImageEdit({
 }
 
 async function handleFalAIImageGeneration({
+  prepareFalInput,
   model,
   provider,
   providerConfig,
   body,
   credentials,
   log,
+  signal,
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  const falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  let falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
   const { imageUrl, imageUrls } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     sync_mode: body.sync_mode ?? true,
   };
@@ -1814,14 +1823,29 @@ async function handleFalAIImageGeneration({
   }
 
   try {
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`, {
+    if (prepareFalInput) {
+      falModel = falSelectionEndpoint(model);
+      if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+        upstreamBody = await prepareFalInput(
+          falModel,
+          falCompatibilityBody(body, imageUrls),
+          credentials,
+          signal
+        );
+      }
+    }
+    const url = `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`;
+    const request = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Key ${token}`,
       },
       body: JSON.stringify(upstreamBody),
-    });
+    };
+    const response = prepareFalInput
+      ? await fetchWithTimeout(url, { ...request, signal, redirect: "error" })
+      : await fetch(url, request);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -1838,7 +1862,9 @@ async function handleFalAIImageGeneration({
     }
 
     const payload = await response.json();
-    const images = await normalizeProviderImagePayload(payload, body, log, "b64_json");
+    // The native path honors an explicit `url`; the established path always returns base64.
+    const defaultFormat = prepareFalInput && body.response_format === "url" ? "url" : "b64_json";
+    const images = await normalizeProviderImagePayload(payload, body, log, defaultFormat);
     return saveImageSuccessResult({
       provider,
       model,
@@ -1853,11 +1879,20 @@ async function handleFalAIImageGeneration({
     return saveImageErrorResult({
       provider,
       model,
-      status: 502,
+      status: /Invalid fal input|Unsupported fal|(?:This|A) fal endpoint/.test(String(err.message))
+        ? 400
+        : 502,
       startTime,
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });
   }
+}
+
+/** References reach the schema adapter once, under the name it maps per endpoint. */
+function falCompatibilityBody(body, imageUrls) {
+  if (imageUrls.length === 0) return body;
+  const { image: _image, image_url: _imageUrl, imageUrls: _camelCase, ...rest } = body;
+  return { ...rest, image_urls: imageUrls };
 }
 
 async function handleStabilityAIImageGeneration({

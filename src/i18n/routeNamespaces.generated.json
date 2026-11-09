@@ -554,6 +554,7 @@
       "trafficInspector"
     ],
     "combos": [
+      "accountPreferences",
       "agentSkills",
       "analytics",
       "breadcrumbs",
@@ -1399,6 +1400,7 @@
       "cursorAuthModal",
       "darioPanel",
       "embeddedServices",
+      "falNative",
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
@@ -1406,6 +1408,7 @@
       "miniPlayground",
       "noAuthProvider",
       "oauthModal",
+      "playground",
       "providerTest",
       "providers",
       "proxyConfigModal",
