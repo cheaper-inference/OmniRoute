@@ -1,0 +1,1 @@
+- **fix(sse):** `requestQueue.maxWaitMs=0` no longer trips the queue-budget gate: connections with rate-limit protection and the "no queue deadline" sentinel are served again instead of getting an immediate `503 queue budget` on every request. ([#18995](https://github.com/cheaper-inference/OmniRoute/pull/18995))

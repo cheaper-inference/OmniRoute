@@ -1,0 +1,1 @@
+- **fix(sse):** encrypted `reasoning_details` payloads (e.g. OpenRouter) stay byte-for-byte in their protocol field instead of flowing through the credential/PII answer-text processing, so streamed answers contain only the model's visible text ([#19249](https://github.com/cheaper-inference/OmniRoute/pull/19249)) — thanks @trespassmk
