@@ -451,7 +451,7 @@ try {
   const program = createProgram();
   await program.parseAsync(process.argv);
 } catch (err) {
-  if (err.exitCode !== undefined) process.exit(err.exitCode);
+  if (err?.exitCode !== undefined) process.exit(err.exitCode);
   console.error("\x1b[31m✖", formatCliError(err), "\x1b[0m");
   process.exit(1);
 }
