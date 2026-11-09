@@ -81,6 +81,18 @@ Selv utenfor blokkerte regioner er proxyer nyttige for:
 
 ---
 
+## Standard proxy-status for nye kontoer
+
+I** Innstillinger → Proxy → Global konfigurasjon** , bruk** Aktiver proxy som standard for nye tilkoblinger** for å velge den opprinnelige proxy-statusen for nylig lagt til leverandørkontoer.
+
+Den nye innstillingen kontrollerer den opprinnelige proxy-statusen til nylig lagt til leverandørkontoer. Den endrer ikke eksisterende kontoer eller erstatter den globale proxy-svitsjen. Startverdien bevarer den forrige oppførselen. Slå den av én gang for å opprette fremtidige kontoer med proxy deaktivert som standard.
+
+Preferansen lagres som `defaultNewConnectionProxyEnabled` gjennom de eksisterende innstillingene API. Den er standard til `true` når den aldri lagres. Lagring av `false` trer i kraft for påfølgende nye kontoer uten omstart. `POST /api/providers` aksepterer en valgfri streng boolsk `proxyEnabled`; en eksplisitt `true` eller `false` har forrang over opprettelsesstandarden. Utelatelse av en duplikatkonto eller OAuth reconnect bevarer kontoens lagrede tilstand. Individuelle kontoer kan fortsatt aktiveres eller deaktiveres etterpå.
+
+Selektive leverandøroverføringer bruker destinasjonsinstallasjonens standard for nye kontoer og bevarer destinasjonspolicyen når de erstatter eksisterende kontoer. Proxy-vekslere er ikke bærbare overføringsfelt. Full sikkerhetskopigjenoppretting og historisk JSON/SQL -migrering beholder sin eksisterende gjenopprettingssemantikk, inkludert lagrede kontoverdier og eldre skjemastandarder; en fullstendig gjenoppretting av innstillinger kan også gjenopprette denne preferansen.
+
+Denne preferansen tildeler ikke en proxy eller fastslår at en er sunn eller i bruk. Faktisk ruting avhenger fortsatt av den globale proxy-svitsjen og gjeldende proxy-konfigurasjon. Syntetiske leverandører uten en vedvarende konto, OAuth -trafikk før kontooppretting, environment/system proxyer og eksterne backends nettverk er utenfor omfanget.
+
 ## 4-nivåers proxysystem
 
 OmniRoute støtter proxykonfigurasjon på **fire uavhengige nivåer**, som løses i prioritert rekkefølge:

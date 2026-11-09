@@ -128,6 +128,27 @@ Automatsko bodovanje odabire najboljeg pružatelja/model za svaki zahtjev
 | `src/sse/handlers/chat.ts`                                | Integracija: prečac za automatski prefiks                |
 | `src/shared/constants/providers.ts`                       | Sistemski unos `SYSTEM_PROVIDERS.auto`                   |
 
+## Postavke računa za spremljene automatske kombinacije
+
+Inteligentni automatski uređivač nudi opciju** Postavke računa** odjeljak. Svaka veza može biti Preferirana, Normalna (zadano), Rezervirana ili Isključena. Višestruke veze mogu dijeliti razinu. Automatski odabire unutar prve prihvatljive razine, zadržavajući tamo svoje scoring/router ponašanje; neuspjeli pokušaji padaju na preostale konkretne račune, preferirani prije normalnog prije rezerve. Ova kombinacija nikada ne koristi izuzete veze.
+
+Postavka je pohranjena kao `config.accountPreferences`, ključana vezom ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Izostavljena ili prazna karta zadržava postojeću rutu. Postavke ne omogućuju onemogućene veze, ne odobravaju pristup API-ključu, ne vraćaju kandidate blokirane kvotom niti zaobilaze provjere proračuna. Svaki je pokušaj ograničen na svoju konkretnu vezu, tako da rezervni račun ne može preskočiti razine iza kombiniranog usmjerivača. Postojeći afinitet sesije može zadržati kvalificirani račun; isključujući račun vezan za nativni red zaustavlja taj red umjesto tihe promjene računa.
+
+Konfigurirane postavke koriste automatski put koji je svjestan računa: nevezani predmemorija konteksta, pametni cjevovod, kaos i prečaci u sjeni se ne šalju. Špekulativna zaštita je onemogućena za ove zahtjeve tako da se rezervni računi ne mogu natjecati s preferiranim. Druge kombinirane strategije ne tumače ovu postavku. Promjena kombinacije s Automatski zadržava spremljene postavke za kasnije vraćanje.
+
 ## Nazivi Kombija Koji Se Podudaraju s Pravim ID-om Modela
 
 Kombij čiji je `name` identičan golom ID-u modela (npr. kombij nazvan

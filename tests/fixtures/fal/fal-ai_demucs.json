@@ -1,0 +1,442 @@
+{
+  "endpoint_id": "fal-ai/demucs",
+  "metadata": {
+    "display_name": "Demucs",
+    "category": "audio-to-audio",
+    "description": "SOTA stemming model for voice, drums, bass, guitar and more.",
+    "status": "active",
+    "tags": ["audio"],
+    "updated_at": "2026-04-21T17:44:58.841Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://v3b.fal.media/files/b/tiger/WAcACXLL5-atiw1MGvH4g_7cb10ff246844b9c9298bbe98e431df7.jpg",
+    "model_url": "https://fal.run/fal-ai/demucs",
+    "license_type": "commercial",
+    "date": "2025-10-27T21:40:53.677Z",
+    "highlighted": false,
+    "kind": "inference",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/demucs",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/demucs queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/demucs",
+        "category": "audio-to-audio",
+        "thumbnailUrl": "https://v3b.fal.media/files/b/tiger/WAcACXLL5-atiw1MGvH4g_7cb10ff246844b9c9298bbe98e431df7.jpg",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/demucs",
+        "documentationUrl": "https://fal.ai/models/fal-ai/demucs/api",
+        "about": "Separate audio into different stems (vocals, drums, bass, other) using Demucs."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "DemucsInput": {
+          "properties": {
+            "shifts": {
+              "type": "integer",
+              "title": "Shifts",
+              "minimum": 1,
+              "description": "Number of random shifts for equivariant stabilization. Higher values improve quality but increase processing time.",
+              "maximum": 10,
+              "default": 1
+            },
+            "segment_length": {
+              "title": "Segment Length",
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Length in seconds of each segment for processing (minimum 1). Smaller values use less memory but may reduce quality. Default is model-specific."
+            },
+            "overlap": {
+              "type": "number",
+              "title": "Overlap",
+              "minimum": 0,
+              "description": "Overlap between segments (0.0 to 1.0). Higher values may improve quality but increase processing time.",
+              "maximum": 1,
+              "default": 0.25
+            },
+            "output_format": {
+              "enum": ["wav", "mp3"],
+              "title": "Output Format",
+              "examples": ["mp3"],
+              "description": "Output audio format for the separated stems",
+              "type": "string",
+              "default": "mp3"
+            },
+            "stems": {
+              "title": "Stems",
+              "examples": [["vocals", "drums", "bass", "other", "guitar", "piano"]],
+              "description": "Specific stems to extract. If None, extracts all available stems. Available stems depend on model: vocals, drums, bass, other, guitar, piano (for 6s model)",
+              "anyOf": [
+                {
+                  "items": {
+                    "enum": ["vocals", "drums", "bass", "other", "guitar", "piano"],
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": ["vocals", "drums", "bass", "other", "guitar", "piano"]
+            },
+            "model": {
+              "enum": [
+                "htdemucs",
+                "htdemucs_ft",
+                "htdemucs_6s",
+                "hdemucs_mmi",
+                "mdx",
+                "mdx_extra",
+                "mdx_q",
+                "mdx_extra_q"
+              ],
+              "title": "Model",
+              "examples": ["htdemucs_6s"],
+              "description": "Demucs model to use for separation",
+              "type": "string",
+              "default": "htdemucs_6s"
+            },
+            "audio_url": {
+              "title": "Audio Url",
+              "examples": [
+                "https://storage.googleapis.com/falserverless/model_tests/audio-understanding/Title_%20Running%20on%20Fal.mp3"
+              ],
+              "description": "URL of the audio file to separate into stems",
+              "type": "string"
+            }
+          },
+          "required": ["audio_url"],
+          "title": "DemucsInput",
+          "x-fal-order-properties": [
+            "audio_url",
+            "model",
+            "stems",
+            "segment_length",
+            "shifts",
+            "overlap",
+            "output_format"
+          ],
+          "type": "object"
+        },
+        "DemucsOutput": {
+          "properties": {
+            "bass": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated bass audio file"
+            },
+            "guitar": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated guitar audio file (only available for 6s models)"
+            },
+            "drums": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated drums audio file"
+            },
+            "other": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated other instruments audio file"
+            },
+            "piano": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated piano audio file (only available for 6s models)"
+            },
+            "vocals": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Separated vocals audio file"
+            }
+          },
+          "title": "DemucsOutput",
+          "x-fal-order-properties": ["vocals", "drums", "bass", "other", "guitar", "piano"],
+          "type": "object"
+        },
+        "File": {
+          "properties": {
+            "file_size": {
+              "title": "File Size",
+              "examples": [4404019],
+              "description": "The size of the file in bytes.",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "file_name": {
+              "title": "File Name",
+              "examples": ["z9RV14K95DvU.png"],
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "content_type": {
+              "title": "Content Type",
+              "examples": ["image/png"],
+              "description": "The mime type of the file.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "title": "Url",
+              "description": "The URL where the file can be downloaded from.",
+              "type": "string"
+            }
+          },
+          "required": ["url"],
+          "title": "File",
+          "x-fal-order-properties": ["url", "content_type", "file_name", "file_size"],
+          "type": "object"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/demucs/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/demucs/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/demucs": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemucsInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/demucs/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DemucsOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}
