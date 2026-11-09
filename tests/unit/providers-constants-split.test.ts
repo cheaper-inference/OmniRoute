@@ -91,13 +91,13 @@ test("barrel still exports every catalog + key helpers", () => {
   }
 });
 
-test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi and atlascloud extracts into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
+test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi, empiriolabs and atlascloud extracts into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
   const keys = Object.keys((P as Record<string, object>).APIKEY_PROVIDERS);
   assert.equal(keys.length, APIKEY_PROVIDER_COUNT);
   assert.equal(new Set(keys).size, APIKEY_PROVIDER_COUNT, "duplicate keys after spread-merge");
   assert.ok(keys.includes("ainetcafe"), "ainetcafe must be in APIKEY_PROVIDERS");
   // the merged object's entry-count equals the sum of the 6 semantic family files plus the
-  // beatapi and atlascloud overflow extracts; they are a strict partition (every provider in exactly one),
+  // beatapi, empiriolabs and atlascloud overflow extracts; they are a strict partition (every provider in exactly one),
   // so the sum must be exactly APIKEY_PROVIDER_COUNT.
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
