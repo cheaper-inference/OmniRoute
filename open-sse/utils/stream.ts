@@ -1031,6 +1031,14 @@ export function createSSEStream(options: StreamOptions = {}) {
   // Guard against duplicate [DONE] events — ensures exactly one per stream
   let doneSent = false;
   let upstreamErrorForwarded = false;
+  // Wire format of the chunks pushed into providerPayloadCollector. TRANSLATE mode receives the raw
+  // provider response (targetFormat). PASSTHROUGH forwards the provider's chunks unchanged, so their
+  // format is the client's -- but passthrough callers (createPassthroughStreamWithLogger) pass only
+  // clientResponseFormat, never sourceFormat. Falling back to clientResponseFormat keeps the
+  // dashboard's Provider Response from collapsing to an empty chat.completion for a Responses
+  // passthrough (e.g. Mistral's native /v1/responses).
+  const providerWireFormat =
+    mode === STREAM_MODE.TRANSLATE ? targetFormat : (sourceFormat ?? clientResponseFormat);
   const providerPayloadCollector = createStructuredSSECollector({
     stage: "provider_response",
     // #9315: compute the summary live from every pushed chunk (not just the
@@ -1053,8 +1061,8 @@ export function createSSEStream(options: StreamOptions = {}) {
     // mode has no separate provider/client format split — nothing gets
     // translated, so the provider's raw chunks genuinely ARE in sourceFormat
     // (and real passthrough callers, e.g. createPassthroughStreamWithLogger,
-    // don't even pass targetFormat) — keep using sourceFormat there.
-    format: mode === STREAM_MODE.TRANSLATE ? targetFormat : sourceFormat,
+    // don't even pass targetFormat, nor sourceFormat) — see providerWireFormat above.
+    format: providerWireFormat,
     fallbackModel: model,
   });
   const clientPayloadCollector = createStructuredSSECollector({
@@ -3180,14 +3188,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // reasoning-heavy stream (live incident 2026-09-04) -- see
                   // providerPayloadCollector's own `format:` construction comment above.
                   providerPayload: providerPayloadCollector.build(
-                    sourceFormat === FORMATS.OPENAI_RESPONSES
+                    providerWireFormat === FORMATS.OPENAI_RESPONSES
                       ? providerPayloadCollector.getSummary()
                       : { object: "chat.completion", ...responseBody },
                     { includeEvents: false }
                   ),
                   // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
                   // clientResponseFormat (what the client actually receives) rather than
-                  // sourceFormat (what the upstream sent) -- they're equal in passthrough
+                  // providerWireFormat (what the upstream sent) -- they're equal in passthrough
                   // mode but conceptually distinct. Without this, `entry.responseId` in
                   // src/lib/usage/callLogs.ts is always null for a Responses-API client
                   // (extractResponsesId reads `clientResponse.id`, which the chat-shaped

@@ -1,0 +1,2 @@
+- Add `OMNIROUTE_RESPONSES_STRICT_TOOL_HISTORY` (off by default): when on, inconsistent Responses tool history (orphan outputs, unanswered calls, missing, overlong or invalid call ids, malformed historical arguments) is rejected with a 400 before upstream dispatch instead of repaired, keeping literal call ids and valid JSON argument strings as sent, without echoing private ids or payloads. With the flag off the existing repairs, including the empty output for unanswered calls (#15216), are unchanged.
+- Retire the pending request when final request finalization fails.
