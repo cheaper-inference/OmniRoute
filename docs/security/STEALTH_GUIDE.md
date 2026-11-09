@@ -188,17 +188,27 @@ authorized for proxy/router use") warns about before a connection is added. None
 recommendations above make that usage authorized; they only reduce how much traffic one account
 carries.
 
-**ToS-compliant alternative for Gemini models.** Google's sanctioned path for programmatic access
-is an API key, which OmniRoute supports as ordinary API-key providers:
+**Authorized API interfaces for Gemini models.** Google offers programmatic access to Gemini
+through its APIs, which OmniRoute supports as ordinary API-key providers:
 
 | Provider id | Dashboard name            | Credential                                                                  |
 | ----------- | ------------------------- | --------------------------------------------------------------------------- |
 | `gemini`    | Gemini (Google AI Studio) | Gemini API key from Google AI Studio (free tier available)                  |
 | `vertex`    | Vertex AI                 | Service Account JSON, OAuth access token or Vertex Express API key (Gemini) |
 
-Pricing and quotas follow Google's API terms rather than an Antigravity subscription. Operators who
-cannot risk a Google account suspension should route Gemini traffic through one of these
-providers instead of `antigravity` / `agy`.
+These providers use credentials Google issues for API access, unlike the Antigravity product
+session. They do not make every use compliant or remove the risk of enforcement: each is governed
+by its own terms, which the operator has to check for their deployment. For example, the
+[Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms) allow only Paid
+Services when API clients are made available to users in the European Economic Area, Switzerland
+or the United Kingdom, and content sent to Unpaid Services may be used to improve Google's
+products. Vertex AI falls under the Google Cloud terms instead
+([Service Specific Terms](https://cloud.google.com/terms/service-terms)). Pricing and quotas
+follow those API terms rather than an Antigravity subscription.
+
+Operators who want to avoid the Antigravity suspensions described above should route Gemini
+traffic through one of these providers instead of `antigravity` / `agy`, after checking that their
+use fits the provider's terms.
 
 Touch points:
 
