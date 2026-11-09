@@ -1,0 +1,1 @@
+- **fix(sse):** After GitHub Copilot falls back from the denied CLI identity to `copilot-chat`, every later retry of the same request keeps `copilot-chat`. Before, a 400 or 429 retry went back to the denied identity and the client got a 403. ([#19024](https://github.com/cheaper-inference/OmniRoute/pull/19024))

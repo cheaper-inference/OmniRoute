@@ -191,6 +191,10 @@ export async function validateProviderApiKey({
   // pass `false` for non-loopback callers; direct/internal callers keep the
   // permissive default. See validateDevinCloudAgentProvider for the rationale.
   allowLocalSpawn = true,
+  // A stored connection's own token columns (accessToken / refreshToken / expiresAt), so a
+  // specialty validator judges the token the executor will actually use, not a stale paste.
+  // Omitted when validating a credential that is not stored yet.
+  credentials = {},
 }: any) {
   provider = typeof provider === "string" ? resolveProviderId(provider) : provider;
   const requiresApiKey = !providerAllowsOptionalApiKey(provider);
@@ -427,6 +431,7 @@ export async function validateProviderApiKey({
         apiKey,
         providerSpecificData,
         allowLocalSpawn,
+        credentials,
       });
     } catch (error: any) {
       return toValidationErrorResult(error);
