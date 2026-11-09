@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Account preferences",
+    "description": "Prefer multiple accounts or keep them in reserve for this combo. Auto routing ranks accounts within each tier. Unlisted accounts are normal. Permissions, quota limits and existing turn bindings still apply.",
+    "preferred": "Preferred",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Excluded",
+    "loading": "Loading accounts…",
+    "error": "Could not load accounts. Reopen the editor to retry.",
+    "missing": "Unavailable account ({id})"
+  },
   "teamCosts": {
     "title": "Team costs",
     "subtitle": "Manage shared soft budgets and catalog cost estimates.",
