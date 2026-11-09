@@ -35,6 +35,7 @@ import {
 } from "./optimizationSettings";
 import {
   buildArtifactRelativePath,
+  hasRoomForCallLogArtifact,
   writeCallArtifact,
   type CallLogArtifact,
 } from "../usage/callLogArtifacts";
@@ -771,8 +772,14 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
   `);
 
   let failed = 0;
+  let deferred = 0;
   const tx = db.transaction(() => {
     for (const row of pendingRows) {
+      // Below the free-disk floor the row stays legacy-inline; the next startup retries it.
+      if (!hasRoomForCallLogArtifact()) {
+        deferred++;
+        continue;
+      }
       const artifact: CallLogArtifact = {
         schemaVersion: 5,
         summary: {
@@ -830,9 +837,9 @@ function offloadLegacyCallLogDetails(db: SqliteDatabase) {
 
   tx();
 
-  if (failed > 0) {
+  if (failed > 0 || deferred > 0) {
     console.warn(
-      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed row(s)).`
+      `[DB] Kept call_logs_v1_legacy after partial call log offload (${failed} failed, ${deferred} waiting for free disk space).`
     );
     return;
   }

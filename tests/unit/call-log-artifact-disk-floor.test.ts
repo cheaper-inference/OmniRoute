@@ -123,3 +123,57 @@ test("the probe measures the call_logs volume, not an unrelated path", () => {
     `probed ${seen[0]}, expected a path under DATA_DIR`
   );
 });
+
+test("a fractional or partly numeric CALL_LOG_MIN_FREE_DISK_MB keeps the default floor, it does not turn the check off", () => {
+  artifacts.setFreeBytesProbeForTest(() => DEFAULT_FLOOR - 1);
+  try {
+    for (const bad of ["0.5", "0.9", "1e3", "12abc", "-5"]) {
+      process.env.CALL_LOG_MIN_FREE_DISK_MB = bad;
+      assert.equal(artifacts.hasRoomForCallLogArtifact(), false, `"${bad}" must keep the default`);
+    }
+  } finally {
+    delete process.env.CALL_LOG_MIN_FREE_DISK_MB;
+  }
+});
+
+function seedLegacyInlineRow(id: string) {
+  const db = core.getDbInstance();
+  db.exec(`CREATE TABLE IF NOT EXISTS call_logs_v1_legacy (
+    id TEXT PRIMARY KEY, timestamp TEXT, method TEXT, path TEXT, status INTEGER, model TEXT,
+    requested_model TEXT, provider TEXT, account TEXT, connection_id TEXT, duration INTEGER,
+    tokens_in INTEGER, tokens_out INTEGER, tokens_cache_read INTEGER, tokens_cache_creation INTEGER,
+    tokens_reasoning INTEGER, tokens_compressed INTEGER, request_type TEXT, source_format TEXT,
+    target_format TEXT, api_key_id TEXT, api_key_name TEXT, combo_name TEXT, combo_step_id TEXT,
+    combo_execution_key TEXT, request_body TEXT, response_body TEXT, error TEXT)`);
+  db.prepare(
+    `INSERT INTO call_logs (id, timestamp, method, path, status, model, provider, detail_state)
+     VALUES (?, '2026-03-30T12:34:56.789Z', 'POST', '/v1/chat/completions', 200, 'm', 'p', 'legacy-inline')`
+  ).run(id);
+  db.prepare(
+    `INSERT INTO call_logs_v1_legacy (id, timestamp, request_body, response_body) VALUES (?, '2026-03-30T12:34:56.789Z', '{"a":1}', '{"b":2}')`
+  ).run(id);
+}
+
+function legacyState(id: string) {
+  const db = core.getDbInstance();
+  const row = db.prepare("SELECT detail_state FROM call_logs WHERE id = ?").get(id) as
+    { detail_state: string } | undefined;
+  const legacyTable = db
+    .prepare("SELECT 1 AS present FROM sqlite_master WHERE name = 'call_logs_v1_legacy'")
+    .get();
+  return { state: row?.detail_state, legacyTable: Boolean(legacyTable) };
+}
+
+test("the legacy offload at startup honours the floor: the row stays legacy-inline and is offloaded later", () => {
+  seedLegacyInlineRow("legacy_floor");
+  artifacts.setFreeBytesProbeForTest(() => DEFAULT_FLOOR - 1);
+
+  core.resetDbInstance();
+  assert.deepEqual(legacyState("legacy_floor"), { state: "legacy-inline", legacyTable: true });
+  assert.deepEqual(artifactFiles(), [], "no artifact file may be written below the floor");
+
+  artifacts.setFreeBytesProbeForTest(() => DEFAULT_FLOOR);
+  core.resetDbInstance();
+  assert.deepEqual(legacyState("legacy_floor"), { state: "ready", legacyTable: false });
+  assert.equal(artifactFiles().length, 1);
+});

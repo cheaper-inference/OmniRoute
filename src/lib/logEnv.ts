@@ -151,11 +151,10 @@ export function getCallLogPipelineMaxSizeBytes(): number {
 
 /** Free bytes on the call_logs volume under which artifact writes are skipped. 0 disables the check. */
 export function getCallLogMinFreeDiskBytes(): number {
-  return (
-    parseNonNegativeInt(process.env.CALL_LOG_MIN_FREE_DISK_MB, DEFAULT_CALL_LOG_MIN_FREE_DISK_MB) *
-    1024 *
-    1024
-  );
+  // Whole digits only: "0.5" must not parse to 0 and turn the check off.
+  const raw = process.env.CALL_LOG_MIN_FREE_DISK_MB?.trim();
+  const mb = raw && /^\d+$/.test(raw) ? Number(raw) : DEFAULT_CALL_LOG_MIN_FREE_DISK_MB;
+  return mb * 1024 * 1024;
 }
 
 export function getProxyLogsTableMaxRows(): number {
