@@ -411,8 +411,10 @@ async function main(): Promise<void> {
   }
   const manifest = await loadJson(manifestPath!, videoBridgePromotionManifestSchema);
   const runFile = await loadJson(observationsPath!, videoBridgePromotionRunFileSchema);
+  // The schema mirrors PromotionRunReceipt field for field; with `strict: false` zod infers every
+  // key as optional, so the parsed value is narrowed back to the interface here.
   const previous = previousPath
-    ? await loadJson(previousPath, promotionRunReceiptSchema)
+    ? ((await loadJson(previousPath, promotionRunReceiptSchema)) as PromotionRunReceipt)
     : undefined;
   console.log(
     JSON.stringify(buildVideoBridgePromotionReport(manifest, runFile, previous), null, 2)
