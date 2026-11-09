@@ -29,6 +29,24 @@ test("alias keeps a small basis so the actions wrap before the alias takes its o
   assert.match(source, /className="flex min-w-0 flex-1 basis-16 items-center text-\[10px\] gap-1"/);
 });
 
+test("a long combo name truncates inside its pill instead of widening the card", () => {
+  const badge = readFileSync(
+    new URL(
+      "../../src/app/(dashboard)/dashboard/providers/[id]/components/ModelComboBadge.tsx",
+      import.meta.url
+    ),
+    "utf8"
+  );
+  // Combo names allow `_` and `.`, which are not break opportunities, so a long name is
+  // one unbreakable word; the pill must be able to shrink and the name must truncate.
+  assert.match(badge, /className="flex min-w-0 max-w-full flex-wrap items-center gap-1"/);
+  assert.match(
+    badge,
+    /className="inline-flex min-w-0 max-w-full items-center gap-0\.5 rounded-full/
+  );
+  assert.match(badge, /<span className="min-w-0 truncate">\{name\}<\/span>/);
+});
+
 test("combo badges render on their own line, not inside line 2", () => {
   const comboIdx = source.indexOf("<ModelComboBadge combos={combos} t={t} />");
   assert.ok(comboIdx > 0, "ModelComboBadge must still be rendered");
