@@ -280,6 +280,9 @@ type ToolCall = {
 
 type UsageTokenRecord = Record<string, number>;
 
+/** A held textual-call header longer than this is prose, not a call: release it, never slide it. */
+const MAX_HELD_TEXTUAL_CALL_CHARS = 64 * 1024;
+
 /** Calls of a Claude client summary, as chat tool calls: the exact calls the client received. */
 function toolCallsFromClaudeSummary(summary: unknown): ToolCall[] {
   const content = asRecord(summary).content;
@@ -1160,6 +1163,21 @@ export function createSSEStream(options: StreamOptions = {}) {
     passthroughEventPrefix.clear();
   };
 
+  // Send a held, unfinished textual-call header as plain text. Called before the terminal
+  // frame so the client never gets content after finish_reason / response.completed.
+  const releaseHeldTextualCallContent = (controller: TransformStreamDefaultController) => {
+    const held = passthroughBufferedTextualToolCallContent;
+    if (!held) return;
+    passthroughBufferedTextualToolCallContent = "";
+    const frame = clientExpectsResponsesStream
+      ? { type: "response.output_text.delta", delta: held }
+      : buildSyntheticChatChunk(passthroughResponsesId, model, { content: held });
+    const output = `data: ${JSON.stringify(frame)}\n\n`;
+    reqLogger?.appendConvertedChunk?.(output);
+    forward(controller, encoder.encode(output));
+    passthroughAccumulatedContent = appendBoundedText(passthroughAccumulatedContent, held);
+  };
+
   const applyTextualToolCallStreamingGuard = (parsed: Record<string, unknown>) => {
     const choice = Array.isArray((parsed as JsonRecord).choices)
       ? (((parsed as JsonRecord).choices as unknown[])[0] as JsonRecord | undefined)
@@ -1191,12 +1209,19 @@ export function createSSEStream(options: StreamOptions = {}) {
           textualToolCallConverted = true;
           passthroughBufferedTextualToolCallContent = "";
         } else if (parsedCandidate?.kind === "partial") {
-          passthroughBufferedTextualToolCallContent = appendBoundedText(
-            passthroughBufferedTextualToolCallContent,
-            incomingContent
-          );
           textualToolCallConverted = true;
-          delta.content = "";
+          if (bufferedCandidate.length > MAX_HELD_TEXTUAL_CALL_CHARS) {
+            // Too long to be a call: send every held character instead of sliding the head out.
+            delta.content = bufferedCandidate;
+            passthroughAccumulatedContent = appendBoundedText(
+              passthroughAccumulatedContent,
+              bufferedCandidate
+            );
+            passthroughBufferedTextualToolCallContent = "";
+          } else {
+            passthroughBufferedTextualToolCallContent = bufferedCandidate;
+            delta.content = "";
+          }
         } else {
           if (passthroughBufferedTextualToolCallContent) {
             delta.content = passthroughBufferedTextualToolCallContent + incomingContent;
@@ -1778,6 +1803,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                     continue;
                   }
 
+                  if (
+                    parsed.type === "response.completed" ||
+                    parsed.type === "response.incomplete" ||
+                    parsed.type === "response.failed"
+                  ) {
+                    releaseHeldTextualCallContent(controller);
+                  }
+
                   const responsesIdsNormalized = normalizeResponsesSseIds(parsed as JsonRecord);
                   const parsedResponse =
                     parsed.response &&
@@ -1849,11 +1882,18 @@ export function createSSEStream(options: StreamOptions = {}) {
                         parsed.delta = "";
                         if (collectedToolCall) continue;
                       } else if (parsedCandidate?.kind === "partial") {
-                        passthroughBufferedTextualToolCallContent = appendBoundedText(
-                          passthroughBufferedTextualToolCallContent,
-                          incomingDelta
-                        );
-                        parsed.delta = "";
+                        if (bufferedCandidate.length > MAX_HELD_TEXTUAL_CALL_CHARS) {
+                          // Too long to be a call: send every held character instead of sliding.
+                          parsed.delta = bufferedCandidate;
+                          passthroughAccumulatedContent = appendBoundedText(
+                            passthroughAccumulatedContent,
+                            bufferedCandidate
+                          );
+                          passthroughBufferedTextualToolCallContent = "";
+                        } else {
+                          passthroughBufferedTextualToolCallContent = bufferedCandidate;
+                          parsed.delta = "";
+                        }
                         output = `data: ${JSON.stringify(parsed)}\n\n`;
                         injectedUsage = true;
                       } else {
@@ -2461,6 +2501,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                         ...failureBoundaryOptions(),
                       });
                     passthroughSawFinishReason = true;
+                    releaseHeldTextualCallContent(controller);
                   }
 
                   if (isFinishChunk && passthroughHasToolCalls) {
