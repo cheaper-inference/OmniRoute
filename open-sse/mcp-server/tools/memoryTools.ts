@@ -1,7 +1,13 @@
 import { z } from "zod";
 import type { MemoryType as MemoryTypeT } from "@/lib/memory/types";
-// Lazy-loaded: the memory store/retrieval chain pulls in qdrant + embeddings
-// (~58 MB retained heap at import). Loaded on first memory tool invocation.
+/**
+ * Lazily loads the memory store/retrieval chain on first memory tool invocation.
+ *
+ * The memory modules pull in qdrant + embeddings (~58 MB retained heap), so
+ * loading is deferred until needed.
+ *
+ * @returns {Promise<{ retrieveMemories: Function, createMemory: Function, deleteMemory: Function, listMemories: Function, MemoryType: unknown, getMemorySettings: Function, toMemoryRetrievalConfig: Function, DEFAULT_MEMORY_SETTINGS: unknown }>}
+ */
 async function loadMemoryModules() {
   const [retrieval, store, settings] = await Promise.all([
     import("@/lib/memory/retrieval"),

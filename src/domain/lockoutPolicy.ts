@@ -204,12 +204,17 @@ export function forceUnlock(identifier) {
 export function getLockedIdentifiers() {
   const now = Date.now();
 
-  // Merge cache and DB
+  // Build a merged view of cached states and active locked identifiers from the DB,
+  // without writing incomplete (empty-attempts) state into the shared cache.
+  const merged = new Map<string, { attempts: number[]; lockedUntil: number | null }>();
+  for (const [id, state] of lockoutCache.entries()) {
+    merged.set(id, state);
+  }
   try {
     const fromDb = loadAllLockedIdentifiers();
     for (const entry of fromDb) {
-      if (!lockoutCache.has(entry.identifier)) {
-        cacheSet(entry.identifier, {
+      if (!merged.has(entry.identifier)) {
+        merged.set(entry.identifier, {
           attempts: [],
           lockedUntil: entry.lockedUntil,
         });
@@ -220,7 +225,7 @@ export function getLockedIdentifiers() {
   }
 
   const locked = [];
-  for (const [id, state] of lockoutCache.entries()) {
+  for (const [id, state] of merged.entries()) {
     if (state.lockedUntil && state.lockedUntil > now) {
       locked.push({
         identifier: id,
