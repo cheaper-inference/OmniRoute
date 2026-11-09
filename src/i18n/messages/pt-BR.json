@@ -1,4 +1,92 @@
 {
+  "accountPreferences": {
+    "title": "Preferências de contas",
+    "description": "Prefira várias contas ou mantenha-as como reserva para esta configuração de roteamento. O roteamento automático classifica as contas dentro de cada nível. Contas não listadas são normais. As permissões, os limites de cota e os vínculos existentes com turnos ainda se aplicam.",
+    "preferred": "Preferida",
+    "normal": "Normal",
+    "reserve": "Reserva",
+    "excluded": "Excluída",
+    "loading": "Carregando contas…",
+    "error": "Não foi possível carregar as contas. Reabra o editor para tentar novamente.",
+    "missing": "Conta indisponível ({id})"
+  },
+  "teamCosts": {
+    "title": "Custos da equipe",
+    "subtitle": "Gerencie orçamentos flexíveis compartilhados e estimativas de custo do catálogo.",
+    "refresh": "Atualizar",
+    "create": "Criar equipe",
+    "edit": "Editar equipe",
+    "archive": "Arquivar",
+    "selectTeam": "Equipes",
+    "searchTeams": "Pesquisar equipes",
+    "statusFilter": "Status da equipe",
+    "active": "Ativa",
+    "archived": "Arquivada · somente leitura",
+    "allTeams": "Todas as equipes",
+    "noTeams": "Nenhuma equipe correspondente.",
+    "selectHint": "Crie ou selecione uma equipe para ver os custos.",
+    "loading": "Carregando custos da equipe…",
+    "budgetTitle": "Orçamento flexível atual",
+    "budgetSubtitle": "Uso bem-sucedido confirmado · janela móvel · independente das datas do relatório",
+    "archivedBudget": "Arquivada: a aplicação do orçamento está inativa. Os relatórios históricos continuam disponíveis.",
+    "unlimited": "Ilimitado — nenhum orçamento flexível compartilhado configurado.",
+    "budgetUnavailable": "O status do orçamento está indisponível. Atualize para tentar novamente.",
+    "used": "Uso bem-sucedido",
+    "maximum": "Máximo do orçamento",
+    "remaining": "Restante conhecido",
+    "resets": "Reinicia em",
+    "unpricedBudget": "Parte do uso bem-sucedido tem preço desconhecido. A soma conhecida está incompleta; a aplicação do orçamento considera esta janela excedida.",
+    "overBudget": "Orçamento atingido ou excedido · {amount} acima",
+    "reportTitle": "Relatório de uso",
+    "reportSubtitle": "Todas as tentativas · estimativa do catálogo em USD, não uma fatura · datas UTC inteiras",
+    "reportPeriod": "Período do relatório",
+    "day1": "1 dia",
+    "day7": "7 dias",
+    "day30": "30 dias",
+    "allTime": "Todo o período",
+    "reportSpend": "Gasto estimado do relatório",
+    "requests": "Requisições",
+    "assignedKeys": "Chaves atribuídas",
+    "unpricedReport": "Este relatório contém preços desconhecidos. O gasto estimado está incompleto.",
+    "breakdown": "Custo por chave de API",
+    "noUsage": "Sem uso neste período do relatório.",
+    "keyName": "Nome da chave de API",
+    "tokens": "Tokens de entrada + saída",
+    "unnamedKey": "Chave sem nome ou excluída",
+    "unpriced": "Preço desconhecido",
+    "members": "Associação",
+    "memberSubtitle": "Alterar a associação mantém o gasto histórico com a equipe original.",
+    "searchKeys": "Pesquisar chaves ou proprietários atuais",
+    "chooseKey": "Escolha uma chave de API",
+    "unassigned": "Não atribuída",
+    "ownership": "Equipe de cobrança atual: {team}",
+    "assign": "Atribuir",
+    "remove": "Remover",
+    "noMembers": "Sem membros atuais. O uso histórico ainda pode contar para o orçamento.",
+    "assignedAt": "Atribuída em {date} (UTC)",
+    "name": "Nome da equipe",
+    "description": "Descrição",
+    "enableBudget": "Ativar orçamento flexível compartilhado",
+    "amount": "Valor do orçamento (USD)",
+    "duration": "Janela móvel do orçamento",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "confirm": "Confirmar",
+    "transferTitle": "Confirmar transferência de chave",
+    "transferMessage": "Mover esta chave de “{source}” para “{destination}”? O gasto histórico permanece com a equipe original.",
+    "removeTitle": "Remover atribuição de chave",
+    "removeMessage": "Remover esta chave de “{team}”? O gasto histórico permanece nesta equipe.",
+    "archiveTitle": "Arquivar equipe",
+    "archiveMessage": "Arquivar “{team}”? Todos os vínculos atuais são encerrados e a aplicação do orçamento para. Os relatórios históricos continuam disponíveis.",
+    "invalidName": "Informe um nome (1–200 caracteres) e uma descrição de no máximo 2.000 caracteres.",
+    "invalidAmount": "Informe um valor de orçamento finito maior que zero.",
+    "unauthorized": "Entre no painel de gerenciamento para continuar.",
+    "forbidden": "Você não tem permissão para gerenciar equipes. Sua entrada foi preservada.",
+    "notFound": "Esta equipe ou atribuição não existe mais.",
+    "conflict": "A atribuição ou a equipe mudou. Atualize e confirme a propriedade atual antes de tentar novamente.",
+    "failed": "A requisição falhou. Sua entrada foi preservada; tente novamente.",
+    "partialBudget": "Alguns buckets diários retidos se sobrepõem ao limite da janela e não podem ser rateados com exatidão. O gasto exibido está incompleto; a margem restante está indisponível. A política de orçamento flexível existente não muda."
+  },
   "codexKeyServiceMode": {
     "title": "Modo de serviço do Codex para esta chave de API",
     "description": "Aplica-se às solicitações do Codex, incluindo modelos Codex em combos. Os modos forçados substituem as configurações do cliente e globais, bem como os padrões da conexão. Os demais provedores permanecem inalterados.",
@@ -784,6 +872,13 @@
     "batchDetailWindow": "Janela",
     "batchDetailCreated": "Criado",
     "providerTopologyEmpty": "Nenhum provedor conectado ainda",
+    "topologyModels": "Modelos",
+    "topologyModelsOn": "Ligado",
+    "topologyModelsOnHint": "Mostrar modelos com requisições ativas ou recentes",
+    "topologyModelsAuto": "Automático",
+    "topologyModelsAutoHint": "Mostrar apenas modelos com requisição em andamento",
+    "topologyModelsOff": "Desligado",
+    "topologyModelsOffHint": "Ocultar os nós de modelos",
     "badgeToastUnlocked": "Selo desbloqueado!",
     "batchListSearchPlaceholder": "Pesquise por ID, endpoint, modelo…",
     "batchListDeleteAllCompletedTitle": "Excluir todos os lotes concluídos",
@@ -916,6 +1011,8 @@
     "batchListTitle": "Lotes",
     "batchListCount": "{count} lotes",
     "batchListRemovingCompleted": "Removendo…",
+    "batchListRemoveCompletedPartial": "Um grande número de lotes foi removido. Clique novamente para limpar o restante.",
+    "batchListRemoveCompletedFailed": "Ocorreu um erro ao remover os lotes.",
     "batchListRemoveCompleted": "Remover concluídos",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -954,6 +1051,12 @@
     "batchListRefreshing": "Atualizando…",
     "batchListRefresh": "Atualizar",
     "uploadFileModalRemove": "Remover",
+    "fileInputChoose": "Escolher arquivo",
+    "fileInputChooseMultiple": "Escolher arquivos",
+    "fileInputEmpty": "Nenhum arquivo escolhido",
+    "fileInputSelectedCount": "{count, plural, one {# arquivo selecionado} other {# arquivos selecionados}}",
+    "fileDropLabel": "Solte um arquivo aqui ou escolha um",
+    "fileDropLabelMultiple": "Solte arquivos aqui ou escolha arquivos",
     "uploadFileModalUploading": "Enviando…",
     "wizardInputReading": "Lendo arquivo…",
     "wizardInputReady": "Pronto",
@@ -1028,7 +1131,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Envie a impressão digital do cliente CLI OpenCode v2 nas solicitações do OpenCode Zen/Go: o User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli e, nas solicitações do nível gratuito, os cabeçalhos de sessão v2, os esquemas das ferramentas read/shell da CLI v2 e nenhum tool_choice \"none\". Desativado por padrão: todas as solicitações do OpenCode mantêm a identidade, os cabeçalhos e o corpo atuais inalterados.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Quando o conjunto de candidatos de uma combinação automática já estiver vazio antes da execução do pré-filtro de chamadas de ferramentas (todos os destinos ignorados devido a períodos de espera, bloqueios ou esgotamento), responder com 503 no_eligible_targets em vez do 400 legado \"Nenhum destino oferece suporte a chamadas de ferramentas\" capability_mismatch. Desativado por padrão: o conjunto vazio mantém o 400 legado.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Imponha tags confiáveis de endpoint de modelo (declaradas pelo catálogo do provedor, inferidas a partir do ID de um modelo especializado ou definidas pelo operador): rejeite com HTTP 400, antes do encaminhamento, uma solicitação enviada a um endpoint que não é atendido pelo modelo em /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations e /v1/audio/*; oculte de /v1/models os modelos cujos endpoints marcados não tenham um adaptador do OmniRoute; e responda ao teste de modelo do painel com 422 para esses modelos. Desativado por padrão: as tags de endpoint permanecem informativas e as solicitações são encaminhadas exatamente como antes.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Em retransmissores simples compatíveis com a Anthropic, mantenha as mensagens de sistema no meio da conversa dentro da lista de mensagens, em vez de movê-las para o prompt de sistema de nível superior, para que o prefixo do prompt armazenado em cache permaneça estável entre as interações. Aplica-se somente quando o próprio cliente tiver enviado a versão beta mid-conversation-system-2026-04-07. Desativado por padrão: todas as mensagens de sistema são movidas para o prompt de sistema exatamente como antes, pois retransmissores sem essa versão beta rejeitam mensagens de sistema na lista de mensagens.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Use os níveis de esforço de raciocínio publicados pelo models.dev quando nem uma substituição do operador nem o registro do provedor declarar algum, mantendo apenas os níveis de esforço conhecidos e tratando uma lista vazia de níveis declarados como \"sem níveis\". Desativado por padrão: o catálogo de modelos e os níveis de esforço resolvidos permanecem exatamente como antes.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite que as requisições auto/* montem o pool de candidatos com as capacidades de modelo resolvidas (visão, raciocínio, pensamento) e as pontuações de qualidade observadas, lidas em uma única leitura em lote. Desativado por padrão: os pesos dos candidatos no momento da requisição permanecem exatamente como antes. Ativado: esses sinais alimentam os pesos do snapshot, então os pesos dos candidatos e a seleção podem mudar.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permita que a verificação de integridade das credenciais teste novamente as conexões que o gateway desativou automaticamente (no máximo uma vez a cada 6 horas por conexão, 5 por verificação) e reative uma delas quando o novo teste for bem-sucedido. Desativado por padrão: essas conexões permanecem desativadas até que um operador tome uma ação. Conexões desativadas por um operador e conexões banidas permanentemente nunca são testadas novamente.",
@@ -1345,7 +1447,9 @@
       "open": "abrir",
       "close": "fechar"
     },
-    "noResults": "Nenhum resultado"
+    "noResults": "Nenhum resultado",
+    "costsTeams": "Equipes",
+    "costsTeamsSubtitle": "Centros de custo da equipe"
   },
   "webhooks": {
     "title": "Webhooks",
@@ -1598,6 +1702,7 @@
     "dismissError": "Dispensar erro"
   },
   "header": {
+    "teamsDescription": "Estimativas de custo da equipe e orçamentos flexíveis compartilhados",
     "logout": "Sair",
     "quickNavigation": "Navegação rápida",
     "quickNavigationTitle": "Navegação rápida (⌘K / Ctrl+K)",
@@ -1922,7 +2027,23 @@
     "readinessStep3": "Copie seu endpoint",
     "readinessStep4": "Envie uma requisição de teste",
     "readinessContinue": "Continuar configuração",
-    "readinessDismiss": "Dispensar por agora"
+    "readinessDismiss": "Dispensar por agora",
+    "unpricedUsageTitle": "{count, plural, one {# modelo} other {# modelos}} com uso recente mas sem preço configurado",
+    "unpricedUsageFailClosed": "{keys, plural, one {# chave API com limite de uso} other {# chaves API com limite de uso}} usaram esses modelos nos últimos 8 dias. Enquanto esse uso estiver dentro da janela diária ou semanal da chave, a chave é considerada com cota excedida e suas requisições são bloqueadas (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Esse uso conta como $0 para os limites de uso por chave (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# requisição} other {# requisições}}, {keys, plural, one {# chave limitada} other {# chaves limitadas}}",
+    "unpricedUsageMore": "…e mais {count}",
+    "unpricedUsageConfigure": "Configurar preços",
+    "unpricedUsageDismiss": "Fechar",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Análises",
@@ -2959,6 +3080,14 @@
     "openClawManualConfiguration": "Open Claw - Configuração manual",
     "clineManualConfiguration": "Configuração manual do Cline",
     "kiloManualConfiguration": "Configuração manual do Kilo Code",
+    "piManualConfiguration": "Pi - Configuração Manual",
+    "piConfigInvalidTitle": "Pi models.json é ilegível",
+    "piOmnirouteConfigured": "OmniRoute está configurado como um provedor personalizado Pi",
+    "piModelHelp": "Pi não descobre automaticamente modelos para endpoints personalizados — o modelo escolhido é gravado explicitamente em models.json.",
+    "piManualConfigTitle": "Ou edite ~/.pi/agent/models.json manualmente",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Em seguida, inicie o Pi e selecione o provedor omniroute. Configure PI_CODING_AGENT_DIR para mover todo o diretório do agente.",
+    "piUnownedNote": "Esta entrada foi adicionada fora do OmniRoute (por exemplo, endpoints personalizados do pi-gui). A inscrição irá adotá-lo; A redefinição remove apenas as entradas OmniRoute escreveu.",
     "whenToUseLabel": "Quando usar",
     "openToolDocs": "Abrir documentos de ferramentas",
     "toolUseCases": {
@@ -2978,6 +3107,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Use quando precisar de um assistente leve de IA nativo do terminal para tarefas rápidas.",
       "hermes-agent": "Use quando precisar do Hermes Agent (pela Nousresearch) com modelos padrão, delegação, visão e auxiliares roteados pelo OmniRoute.",
+      "whycodes": "Use quando quiser o WhyCodes como agente CLI autônomo de uso geral (TUI, agentes nomeados, memória, swarm) apontado para o OmniRoute.",
       "custom": "Use quando seu CLI ou SDK não estiver hardcoded no OmniRoute, mas ainda aceitar base URL, chave de API e model string compatíveis com OpenAI."
     },
     "toolDescriptions": {
@@ -2987,6 +3117,7 @@
       "grok-build": "Agente de codificação TUI xAI Grok Build com suporte a provedor personalizado",
       "droid": "Assistente de IA Factory Droid",
       "openclaw": "Assistente de IA Open Claw",
+      "openclaude": "CLI do agente de codificação OpenClaude com suporte a provedor compatível com OpenAI",
       "cline": "CLI assistente de codificação Cline",
       "kilo": "CLI assistente de IA Kilo Code",
       "qwen": "CLI Alibaba Qwen Code",
@@ -3018,6 +3149,7 @@
       "warp": "Terminal de IA Warp com suporte a provedor personalizado",
       "agent-deck": "Orquestrador multi-agente Agent Deck",
       "5dive": "5dive — frota auto-hospedada de agentes de codificação; um perfil de autenticação aponta todos para o OmniRoute",
+      "whycodes": "Agente CLI autônomo WhyCodes com URL base compatível com OpenAI",
       "zed": "Editor de código Zed — agente nativo por meio de um provedor compatível com OpenAI"
     },
     "guides": {
@@ -3275,6 +3407,17 @@
     "cliproxyapiUpdate": "Atualizar",
     "cliproxyapiUpdateAvailable": "Atualização disponível: v{current} → v{latest}",
     "cliproxyapiVersion": "Versão",
+    "piInstallTitle": "Instale o agente de codificação Pi",
+    "piInstallInstructions": "Instale o Pi CLI e retorne aqui para conectá-lo ao OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Use o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
+    "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute com models.json para que seus outros provedores e configurações permaneçam intactos.",
+    "customUrl": "URL personalizada",
+    "customEndpointAria": "Endpoint personalizado",
+    "useDefaultKey": "Usar a chave padrão da OmniRoute",
+    "mainModelAria": "Modelo principal",
+    "manualConfigTitle": "Configuração manual do Grok Build",
     "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
@@ -3339,6 +3482,18 @@
     "maxMembersPlaceholder": "ex.: 10",
     "testSelected": "Testar selecionados ({count})",
     "testAllFiltered": "Testar todos os filtrados ({count})",
+    "visibility": "Visibilidade",
+    "allVisibility": "Visíveis e ocultos",
+    "visibleOnly": "Visíveis",
+    "hiddenOnly": "Ocultos",
+    "visibleColumn": "Visível",
+    "hideModel": "Ocultar {name} do /v1/models",
+    "showModel": "Mostrar {name} no /v1/models",
+    "hiddenBadge": "Oculto",
+    "hideFiltered": "Ocultar filtrados ({count})",
+    "showFiltered": "Mostrar filtrados ({count})",
+    "visibilityCounts": "{visible} visíveis · {hidden} ocultos · {total} no total",
+    "visibilityUpdateFailed": "Falha ao atualizar a visibilidade do modelo",
     "cancel": "Cancelar",
     "clearResults": "Limpar resultados",
     "testing": "Testando...",
@@ -3394,7 +3549,44 @@
     "httpError": "A requisição falhou com HTTP {status}",
     "testFailedNoDetail": "O teste falhou sem uma mensagem de erro",
     "additionalCapabilities": "Capacidades adicionais: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Acesso da chave de API",
+    "allowedInKeys": "Permitido em: {count, plural, one {# chave} other {# chaves}}",
+    "keysLoading": "Carregando chaves de API…",
+    "keysRetry": "Tentar carregar chaves novamente",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Bloqueado por {pattern}",
+    "editKeyAccess": "Editar acesso da chave",
+    "toggleKeyAccess": "Permitir {item} em {name}",
+    "resultNetworkError": "Falha na atribuição",
+    "resultWouldEmptyModels": "Deixaria esta chave sem modelos permitidos — em vez disso, edite o acesso da chave",
+    "resultWouldEmptyCombos": "Deixaria esta chave sem combos permitidos — em vez disso, edite o acesso da chave",
+    "keyUpdatePending": "{name} ainda está sendo atualizado. Tente novamente em instantes.",
+    "assignToKeys": "Atribuir a chaves de API…",
+    "assignApply": "Aplicar alterações",
+    "assignComplete": "Acesso da chave de API atualizado",
+    "assignFailed": "Falha ao atualizar algumas chaves de API",
+    "assignNoChanges": "Nenhum acesso de chave de API foi alterado",
+    "selectedAccessItems": "Itens selecionados: {count}",
+    "assignExcludedCombos": "{count, plural, one {# linha de combo selecionada não é um modelo e será ignorada aqui} other {# linhas de combo selecionadas não são modelos e serão ignoradas aqui}}. Atribua combos a partir da aba Combos.",
+    "assignActionAdd": "Adicionar",
+    "assignActionRemove": "Remover",
+    "searchKeys": "Buscar chaves de API",
+    "selectApiKey": "Selecionar chave de API {name}",
+    "allModelsAccess": "Todos os modelos",
+    "allCombosAccess": "Todos os combos",
+    "modelAccessCount": "Modelos: {count}",
+    "comboAccessCount": "Combos: {count}",
+    "keyInactive": "Inativo",
+    "keyBanned": "Banido",
+    "keyRevoked": "Revogado",
+    "switchRestrictedConfirm": "Mudar esta chave para acesso restrito: apenas os itens selecionados serão permitidos",
+    "removeNoChangeHint": "Esta chave permite tudo; remover os itens selecionados não fará nenhuma alteração",
+    "removeStaysAllowedHint": "Ainda permitido nesta chave por meio de {patterns}",
+    "resultChanged": "Alterado",
+    "resultUnchanged": "Sem alterações",
+    "resultSkipped": "Ignorado",
+    "resultNeedsSwitch": "Precisa mudar para restrito"
   },
   "combos": {
     "title": "Combinações",
@@ -3418,6 +3610,19 @@
     "autoComboTestTruncated": "{tested} de {total} candidatos ativos testados (maiores pesos primeiro).",
     "controlCenter": "Centro de Controle",
     "createCombo": "Criar Combo",
+    "exportCombos": "Exportar",
+    "exportCombosFailed": "Falha ao exportar combos",
+    "importCombos": "Importar",
+    "importCombosTitle": "Importar combos",
+    "importCombosInvalidFile": "Este arquivo não é uma exportação de combos válida.",
+    "importCombosSummary": "Combos no arquivo: {total} ({fresh} novos, {conflicting} com um nome que já existe).",
+    "importCombosMergeHint": "Mesclar mantém todos os combos existentes e ignora os que têm um nome que já existe. Conexões e credenciais nunca são importadas.",
+    "importCombosReplaceHint": "Substituir tudo exclui seus combos existentes ({current}) e importa o arquivo no lugar. Isso não pode ser desfeito.",
+    "importCombosMerge": "Mesclar",
+    "importCombosReplace": "Substituir tudo",
+    "importCombosDone": "Combos importados: {created}. Ignorados: {skipped}.",
+    "importCombosFailed": "Falha ao importar combos",
+    "importCombosWarnings": "Importado com avisos",
     "editCombo": "Editar Combo",
     "deleteCombo": "Excluir Combo",
     "noModels": "Sem modelos",
@@ -3448,12 +3653,19 @@
     "errorUpdating": "Erro ao atualizar combo",
     "errorDeleting": "Erro ao excluir combo",
     "testFailed": "Requisição de teste falhou",
+    "removeErrorModels": "Excluir {count} modelo(s) com falha",
+    "removingErrorModels": "Removendo…",
+    "errorModelsRemoved": "{count} modelo(s) com falha removido(s) do combo",
+    "noErrorModelsFound": "Nenhum modelo com falha encontrado entre as etapas do próprio combo",
+    "cannotRemoveAllModels": "Não é possível remover todos os modelos do combo",
+    "removeErrorModelsConfirm": "Remover {count} modelo(s) com falha de “{name}”? Timeouts e limites de taxa não são contados.",
     "failedToggle": "Falha ao alternar combo",
     "testResults": "Resultados do Teste — {name}",
     "resolvedBy": "Resolvido por:",
     "more": "+{count} mais",
     "reqs": "solicitações",
     "success": "sucesso",
+    "fallbackSummary": "{rate}% das solicitações usaram fallback, ~{skips} alvos ignorados por cada uma",
     "proxyConfigured": "Proxy configurado",
     "copyComboName": "Copiar nome do combo",
     "enableCombo": "Ativar combo",
@@ -3515,7 +3727,12 @@
     "moveUp": "Mover para cima",
     "moveDown": "Mover para baixo",
     "removeModel": "Remover",
+    "testStep": "Testar este modelo",
+    "testStepRunning": "Testando…",
+    "testStepNotTestable": "Só é possível testar etapas com um único modelo",
     "saving": "Salvando...",
+    "liveAccountLabel": "conta: {id}",
+    "liveAccountTooltip": "Conta: {id}",
     "liveNoProviders": "Nenhum provedor observado ainda.",
     "liveFleetDataHint": "Os dados da frota chegam por meio de eventos de combo em tempo real.",
     "liveActiveCount": "Ativos ({count})",
@@ -4796,7 +5013,15 @@
     },
     "totalEntries": "Total de Entradas",
     "type": "Tipo",
-    "memoryEnabled": "Memória ativada"
+    "memoryEnabled": "Memória ativada",
+    "qdrantTutorialTitle": "Tutorial rápido: memória com Qdrant",
+    "qdrantTutorialIntro": "O Qdrant armazena os vetores e metadados das memórias para que o contexto relevante possa ser recuperado. Ele não comprima tokens diretamente; as economias são indiretas, evitando o contexto não relacionado à solicitação.",
+    "qdrantTutorialStep1": "Proteja o servidor com HTTPS e uma chave de API antes do uso em produção.",
+    "qdrantTutorialStep2": "Insira host, porta, coleção e um modelo no formato provedor/modelo com uma credencial configurada.",
+    "qdrantTutorialStep3": "A dimensão da coleção deve corresponder à dimensão produzida pelo modelo. Uma coleção existente de 2048 dimensões não aceita embeddings de 1536 dimensões.",
+    "qdrantTutorialStep4": "Salve, teste a conexão e execute o teste de pesquisa. Só então, ative o Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Créditos: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Habilidades",
@@ -5195,6 +5420,10 @@
       "disableAutoScroll": "Desativar rolagem automática",
       "enableAutoScroll": "Ativar rolagem automática",
       "autoScroll": "Rolagem automática",
+      "pauseLogs": "Pausar",
+      "resumeLogs": "Continuar",
+      "paused": "Pausado",
+      "scanLimited": "Limite de leitura atingido",
       "entryCount": "{count, plural, one {# entrada} other {# entradas}}",
       "lastHour": "Última 1h",
       "updatedAt": "Atualizado {time}",
@@ -5334,6 +5563,27 @@
     "importFromFileDownloadTemplate": "Baixar modelo CSV",
     "importFromFileMoreErrors": "+{count} mais",
     "importFromFileSchemaHint": "As colunas CSV são posicionais: provider, name, apiKey, baseUrl (opcional), priority (opcional). A coluna provider deve ser o id de um provedor gerenciado existente ou o id de um nó compatível com OpenAI/Anthropic já registrado — esta importação não cria novos nós de endpoint.",
+    "importOAuthExport": "Importar exportação OAuth",
+    "oauthExportTitle": "Importar exportação do gerenciador de contas",
+    "oauthExportDescription": "Envie uma exportação em texto puro de um gerenciador de contas (ex.: a exportação cloud-accounts do Antigravity Manager). Os tokens são renovados no servidor e cada conta vira uma conexão OAuth — duplicadas são atualizadas no lugar.",
+    "oauthExportProviderLabel": "Provedor",
+    "oauthExportChoose": "Escolher arquivo",
+    "oauthExportFileAria": "Arquivo JSON de exportação de contas",
+    "oauthExportSchemaHint": "Aceito: um documento com um array \"accounts\", um array simples ou um único registro. Os tokens podem estar em um objeto token aninhado ou diretamente no registro.",
+    "oauthExportDetected": "{count} conta(s) detectada(s)",
+    "oauthExportSelectAll": "Selecionar todas as contas",
+    "oauthExportSelectAccount": "Selecionar conta {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Provedor",
+    "oauthExportColRefresh": "Token de atualização",
+    "oauthExportNoEmail": "(sem e-mail)",
+    "oauthExportYes": "sim",
+    "oauthExportNo": "não",
+    "oauthExportImporting": "Importando…",
+    "oauthExportImport": "Importar {count} conta(s)",
+    "oauthExportResult": "Importadas {imported}/{total} — {failed} com falha",
+    "oauthExportParseError": "Não foi possível ler nenhuma conta deste arquivo.",
+    "oauthExportUnknownError": "erro desconhecido",
     "adaptaTutorial": {
       "title": "Como conectar o Adapta Web",
       "introPrefix": "Adapta autentica através do Clerk. O token",
@@ -5560,6 +5810,7 @@
     "filterError": "Erro",
     "filterBanned": "Banido",
     "filterCreditsExhausted": "Créditos esgotados",
+    "filterVerificationRequired": "Verificação pendente",
     "accountSearchPlaceholder": "Pesquisar contas…",
     "noFilteredConnections": "Nenhuma conexão corresponde ao filtro atual.",
     "failedSetAlias": "Falha ao definir alias",
@@ -5584,6 +5835,7 @@
     "allModelsAlreadyImported": "Todos os modelos já foram importados",
     "noNewModelsToImport": "Nenhum modelo novo para importar — todos os modelos já estão no registro ou na lista de modelos personalizados",
     "localCatalogFallbackStatus": "Não foi possível acessar a lista de modelos do provedor — exibindo o catálogo integrado",
+    "discoveryDegradedStatus": "Falha na descoberta do modelo {time}",
     "skippingExistingModels": "Ignorando {count} modelos existentes",
     "autoSync": "Sincronização automática",
     "autoSyncShort": "Sincronizar",
@@ -5844,6 +6096,25 @@
     "ccAliasAddModelButton": "Adicionar substituição",
     "ccAliasLoadError": "Falha ao carregar as configurações de discovery-alias: {error}",
     "ccAliasSaveError": "Falha ao salvar a configuração de discovery-alias: {error}",
+    "cliVersionSectionTitle": "Versão anunciada do cliente CLI",
+    "cliVersionEffectiveLabel": "Anunciada atualmente",
+    "cliVersionSourceLabel": "Origem: {source}",
+    "cliVersionPinnedLabel": "Padrão capturado: {pinned}",
+    "cliVersionSourceSettings": "substituição no dashboard",
+    "cliVersionSourceEnv": "variável de ambiente",
+    "cliVersionSourceDiscovered": "última versão descoberta automaticamente",
+    "cliVersionSourceDefault": "padrão capturado",
+    "cliVersionInputLabel": "Versão de substituição",
+    "cliVersionInputPlaceholder": "Versão de substituição; em branco limpa",
+    "cliVersionSaveButton": "Salvar",
+    "cliVersionResetButton": "Redefinir para o padrão",
+    "cliVersionLoadError": "Falha ao carregar as configurações de versão do CLI: {error}",
+    "cliVersionSaveError": "Falha ao salvar a versão do CLI: {error}",
+    "cliVersionLoadFailed": "Não foi possível carregar as configurações atuais de versão do CLI.",
+    "cliVersionHintClaude": "A Anthropic restringe os modelos Claude mais novos pela versão do cliente Claude Code que ela vê. Esta é a versão que o OmniRoute anuncia em toda requisição enviada à Anthropic.",
+    "cliVersionCaveatClaude": "Ressalva de billing: a versão de billing é '<version>'.'<build-revision>', e a build revision é uma constante capturada separadamente. Anunciar 2.1.260 reporta 2.1.260.1e2, que não é o que um binário 2.1.260 real envia.",
+    "cliVersionHintCodex": "A OpenAI restringe os modelos mais novos pela versão do cliente Codex que ela vê, por exemplo o erro: The 'gpt-6-astra' model requires a newer version of Codex.",
+    "cliVersionCaveatCodex": "Ressalva de inferência: uma versão informada pelo seu próprio caller ainda prevalece sobre a variável de ambiente CODEX_CLIENT_VERSION, mas esta substituição prevalece sobre ambas, porque é uma intenção explícita do operador.",
     "compatUpstreamHeadersLabel": "Cabeçalhos upstream adicionais",
     "compatUpstreamHeadersHint": "Configuração de alto privilégio — tem o mesmo nível de confiança que a edição das credenciais de API do provedor; somente administradores confiáveis devem usá-la. Mesclada após o OmniRoute adicionar a autenticação usando a chave de API do provedor. Se um cabeçalho personalizado usar o mesmo nome de um existente (por exemplo, Authorization), seu valor substituirá completamente o cabeçalho gerado automaticamente (incluindo o token Bearer) — o upstream verá apenas o que você digitou, não a chave das configurações. Uma configuração incorreta pode causar o erro 401 ou interromper a autenticação upstream. Uma linha por cabeçalho (por exemplo, Authentication adicional para alguns gateways). Passe o cursor sobre o valor ou dê foco a ele para visualizar. Salva ao perder o foco, clicar fora ou fechar este painel.",
     "compatUpstreamHeaderName": "Nome do cabeçalho",
@@ -5855,6 +6126,7 @@
     "perModelQuotaDescription": "Per Model Quota Description",
     "importFreeModelsOnlyLabel": "Importar apenas modelos gratuitos",
     "importFreeModelsOnlyHint": "Quando ativado, importa somente os modelos gratuitos deste provedor. Modelos pagos são ignorados.",
+    "importFreeModelsOnlyCompatibleHint": "Quando ativado, importa somente os modelos que a lista /models deste endpoint marca como gratuitos (um id com :free, uma flag de gratuito ou preços zerados). Modelos pagos e modelos sem dados de preço são ignorados.",
     "perModelQuotaToggle": "Alternar cota por modelo",
     "modelId": "ID do Modelo",
     "customModelPlaceholder": "ex.: gpt-4.5-turbo",
@@ -5913,6 +6185,53 @@
     "applyClaudeAuthLocal": "Aplicar autenticação",
     "exportClaudeAuthFile": "Exportar autenticação",
     "importClaudeAuth": "Importar autenticação",
+    "importAgyAuth": "Importar autenticação",
+    "agyImportTitle": "Conecte Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "CLI local com 1 clique",
+    "agyImportTabSingle": "Arquivo/Colar Token",
+    "agyImportTabBulk": "Importação em massa",
+    "agyImportLocalHeading": "Detectar automaticamente a sessão ativa",
+    "agyImportLocalIntro": "Detecta um login Google Cloud Code / Antigravity CLI ativo de:",
+    "agyImportLocalSourceEnv": "O arquivo de token nomeado pela variável de ambiente AGY_TOKEN_FILE",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / chaveiro (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Perfis de token CLI locais (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "Não é necessário fazer login no navegador, pop-up ou cópia manual do código OAuth. O token permanece em OmniRoute mesmo se você sair do CLI.",
+    "agyImportLocalOverwrite": "Substitua/atualize a conexão existente se já tiver sido importada",
+    "agyImportLocalSubmit": "Importar do Antigravity local",
+    "agyImportLocalNotFound": "Nenhum login local Antigravity CLI detectado.",
+    "agyImportLocalCreated": "Conta Antigravity conectada a partir da sessão local.",
+    "agyImportLocalRefreshed": "Conexão Antigravity local atualizada.",
+    "agyImportLocalFailed": "Falha ao conectar a sessão Antigravity local",
+    "agyImportInvalidToken": "Formato de token inválido (ausente access_token ou refresh_token)",
+    "agyImportParseFileFailed": "Não foi possível analisar o arquivo como JSON",
+    "agyImportParsePasteFailed": "Não foi possível analisar o conteúdo colado como JSON",
+    "agyImportDuplicate": "A conta já existe. Marque \"Substituir existente\" para substituí-lo.",
+    "agyImportFailed": "Falha ao importar credenciais Antigravity",
+    "agyImportSuccess": "Conta Antigravity importada.",
+    "agyImportInvalidJson": "JSON inválido",
+    "agyImportAccountN": "Conta #{index}",
+    "agyImportNoValidEntries": "Não há entradas válidas para importar",
+    "agyImportBulkFailed": "Falha na importação em massa",
+    "agyImportBulkSuccess": "Contas Antigravity importadas: {count}",
+    "agyImportBulkRunFailed": "Falha ao executar a importação em massa",
+    "agyImportUploadFile": "Carregar arquivo",
+    "agyImportPasteJson": "Colar JSON",
+    "agyImportFileHint": "Selecione o arquivo antigravity-oauth-token ou um arquivo JSON de token exportado",
+    "agyImportValidToken": "Token válido detectado:",
+    "agyImportConnectionName": "Nome da conexão (opcional)",
+    "agyImportConnectionNamePlaceholder": "por exemplo, conta de trabalho",
+    "agyImportEmailLabel": "E-mail (substituição opcional)",
+    "agyImportReplaceSingle": "Substitua a conexão existente se o e-mail já existir",
+    "agyImportSubmitSingle": "Importar conta",
+    "agyImportUploadFiles": "Carregar arquivos",
+    "agyImportPasteJsonArray": "Colar matriz JSON",
+    "agyImportBulkFileHint": "Selecione um ou mais arquivos de token JSON",
+    "agyImportStaged": "Arquivos preparados: {count}",
+    "agyImportValid": "Válido",
+    "agyImportResults": "Resultados de importação:",
+    "agyImportResultsSummary": "Sucesso: {success} · Falha: {failed} · Total: {total}",
+    "agyImportReplaceBulk": "Substitua as conexões existentes na correspondência de e-mail",
+    "agyImportSubmitBulk": "Importar tudo",
     "claudeApplyModalTitle": "Aplicar ao Código Claude Local",
     "claudeApplyTargetLabel": "Caminho de destino",
     "claudeApplyBackupLabel": "Cópias de segurança",
@@ -6050,6 +6369,10 @@
     "hideEmails": "Ocultar todos os e-mails",
     "a": "A",
     "accountConcurrencyCapHint": "Account Concurrency Cap Hint",
+    "aiCreditsLimit": "Limite de créditos de IA por período de cobrança",
+    "aiCreditsLimitPlaceholder": "Sem limite local",
+    "aiCreditsLimitHint": "Pula esta conexão quando os créditos de IA (AI Credits) informados pelo GitHub atingem este valor, e o roteamento recorre às suas outras conexões. Vazio desativa; 0 sempre pula. Uma leitura de uso ausente ou desatualizada nunca bloqueia — não é um teto de gastos garantido.",
+    "aiCreditsLimitInvalid": "O limite de créditos de IA deve ser um número não negativo, ou vazio para desativar.",
     "accountConcurrencyCapLabel": "Account Concurrency Cap Label",
     "accountIdHint": "Encontre isso na URL do dashboard da Cloudflare ou nas configurações.",
     "accountIdLabel": "ID da conta",
@@ -6092,8 +6415,21 @@
     "failedUpdateCodexPaidCredits": "Falha ao atualizar a política de créditos pagos do Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos pagos do Codex",
     "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado.",
+    "quotaRefreshCurrent": "Atualizar quota atual",
+    "quotaRefreshCurrentHint": "Consulta a quota atual desta conta sem gastar créditos de redefinição.",
+    "quotaRefreshing": "Consultando quota…",
+    "quotaRefreshFresh": "Quota consultada. O servidor determina a disponibilidade da conta.",
+    "quotaRefreshFailed": "Não foi possível consultar a quota. Os dados anteriores foram mantidos.",
+    "quotaRefreshStale": "O servidor retornou dados antigos de quota. Esta não é uma observação nova.",
+    "quotaRefreshPartial": "Apenas parte dos dados de quota está disponível.",
+    "quotaWindowUnavailable": "Quota de {window} indisponível",
+    "quotaConnectionRefreshFailed": "A consulta de quota terminou, mas não foi possível atualizar a lista de contas.",
     "disableCoolingDescription": "Ignore o tempo de espera transitório para que esta conexão permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado ainda se aplicam).",
     "disableCoolingLabel": "Desativar o tempo de espera para esta conexão",
+    "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de movê-las para o prompt de nível superior do sistema, para que o cache de prompts continue atingindo os turnos. Habilite apenas se este upstream aceitar a função \"sistema\" dentro das mensagens (caso contrário, ele responderá 400).",
+    "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversa em vigor",
+    "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar sua resposta anterior.",
+    "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do usuário",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",
@@ -6130,6 +6466,8 @@
     "newApiUserIdLabel": "ID de Usuário New-API",
     "newApiUserIdPlaceholder": "ex.: 12345",
     "newApiUserIdHint": "Valor do cabeçalho New-Api-User do AgentRouter, usado junto com a chave de API do console para consultar o saldo de cota.",
+    "tokenrouterManagementKeyLabel": "Chave de gerenciamento (opcional)",
+    "tokenrouterManagementKeyHint": "Chave da conta no painel do TokenRouter (Settings → Management Key). Usada só para ler cota e saldo, nunca para requisições. A chave salva não é exibida; deixe em branco para mantê-la.",
     "newApiAggregatorToggleLabel": "Gateway agregador",
     "newApiAggregatorToggleHint": "Ativa a detecção de saldo para nós agregadores New-API / One-API / Sub2API. O painel passa a mostrar o selo de saldo e o roteamento com quota-preflight pula contas esgotadas.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token para o endpoint /api/user/self do agregador. Não é a chave de API de roteamento.",
@@ -6143,6 +6481,8 @@
     "customUserAgentLabel": "User-Agent Customizado",
     "huggingfaceBillToHint": "Opcional. O identificador da sua conta de faturamento do Hugging Face, enviado como cabeçalho X-HF-Bill-To para atribuição de custos.",
     "huggingfaceBillToLabel": "Conta Bill-To do Hugging Face",
+    "commandCodeZdrLabel": "Exigir retenção zero de dados (ZDR)",
+    "commandCodeZdrHint": "Envia x-cmd-zdr: 1 em toda requisição feita com esta chave de API. Modelos sem um upstream com ZDR podem ficar indisponíveis.",
     "databricksBaseUrlHint": "Obrigatório: cole a URL base do serving-endpoints do Databricks. O app adicionará /chat/completions.",
     "defaultThinkingStrengthHint": "Usada quando o cliente não envia reasoning effort e o modo global Thinking Budget está em passthrough.",
     "defaultThinkingStrengthLabel": "Intensidade de raciocínio padrão",
@@ -6189,6 +6529,9 @@
     "localProviders": "Local / Self-Hosted",
     "maxConcurrentWholeNumberError": "Max concurrent deve ser um número inteiro maior ou igual a 0.",
     "m365TierLabel": "Nível do Copilot",
+    "m365RefreshTokenLabel": "Token de atualização (opcional)",
+    "m365RefreshTokenHint": "Usado para atualizar automaticamente o token de acesso do Microsoft 365.",
+    "m365RefreshTokenEditHint": "Deixe em branco para manter o token existente. Cole um novo token para substituí-lo.",
     "m365TierHint": "Escolha qual superfície do Microsoft 365 Copilot esta conexão usa. Individual é o BizChat padrão para consumidores; Educação e Empresarial (trabalho) usam as superfícies do respectivo tenant.",
     "m365TierIndividualOption": "Individual (padrão)",
     "m365TierEduOption": "Educação",
@@ -6735,6 +7078,11 @@
     "anonymousFallbackEnabled": "Fallback anônimo ativado para {provider}",
     "anonymousFallbackDisabled": "Fallback anônimo desativado para {provider} — conexões esgotadas ignorarão este provedor",
     "anonymousFallbackUpdateFailed": "Falha ao atualizar a configuração de fallback anônimo",
+    "retryDelayTitle": "Atraso de nova tentativa",
+    "retryDelayDesc": "Quanto tempo uma conexão descansa após um erro de limite de taxa quando o provedor não informa quando tentar de novo. Automático usa o backoff embutido; um horário de reset enviado pelo provedor sempre prevalece.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Atraso de nova tentativa salvo",
+    "retryDelayUpdateFailed": "Falha ao atualizar o atraso de nova tentativa",
     "batchDeleteFailed": "A exclusão em lote falhou",
     "batchDeleteNetworkError": "Erro de rede durante a exclusão em lote",
     "batchUpdateFailed": "Atualização em lote falhou",
@@ -6814,9 +7162,54 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limites de concorrência por modelo",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcional: um modelo=limite por linha, comparado com o ID exato do modelo no provedor. As solicitações excedentes ficam em fila localmente; em branco significa sem limite por modelo.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}.",
+    "usedInComboTooltip": "Usado em {count} combinação(ões): {combos}",
+    "openComboTooltip": "Abrir Combinações — usado por {combo}",
+    "claudeCodeRoutingTitle": "Rotulação de proxy upstream para o tráfego do Claude Code",
+    "routingNative": "Nativo",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "Vídeo",
+    "markFreeTierTitle": "Marcar como plano gratuito (exibido mesmo quando a ocultação de modelos pagos está ativada)",
+    "codexTunnelTitle": "Conexão da ferramenta Codex",
+    "codexTunnelDescription": "O túnel permanece estritamente de saída. As ferramentas locais ainda são executadas apenas pelo Codex, sob seu sandbox e política de aprovação.",
+    "tunnelIdLabel": "ID do túnel",
+    "tunnelRuntimeKeyLabel": "Chave de runtime do túnel",
+    "tunnelRuntimeKeyPlaceholder": "Chave de runtime",
+    "tunnelRuntimeKeyHint": "Armazenada criptografada junto com o cookie e nunca gravada nos logs.",
+    "tunnelRuntimeKeyNewLabel": "Nova chave de runtime do túnel",
+    "tunnelRuntimeKeyNewHint": "Informe apenas junto com um novo cookie. O valor é armazenado criptografado.",
+    "chatgptConnectorLabel": "Conector personalizado do ChatGPT",
+    "doctorChecking": "Verificando status…",
+    "doctorCheck": "Verificar status do doctor",
+    "fallbackRetryBackendTitle": "Backend de nova tentativa de fallback"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Parte do tráfego não pôde ser salva neste processo. Os totais persistidos estão incompletos; verifique os diagnósticos do servidor.",
+      "title": "Tráfego de dados úteis do OmniRoute",
+      "description": "Corpos de upload submetidos para envio e bytes de download lidos pelo OmniRoute. Não é tráfego de rede no enlace nem faturamento do provedor. O total inclui tráfego direto e sem atribuição, identificados separadamente.",
+      "coverageNote": "Totais acumulados desde o início da medição. Uploads de tamanho desconhecido (fluxos, FormData, corpos de Request) ficam fora dos totais de bytes. Downloads não lidos ou não concluídos estão incompletos; falhas de envio não comprovam a entrega do upload. Redirecionamentos/tentativas internas do transporte e transportes que contornam a medição não são medidos separadamente.",
+      "refresh": "Atualizar",
+      "overall": "Total (todas as rotas observadas)",
+      "proxied": "Subtotal dos proxies (sem tráfego direto/sem atribuição)",
+      "direct": "Direto (sem proxy)",
+      "unattributed": "Despachante sem atribuição",
+      "removed": "Proxy removido ({id})",
+      "legacy": "Proxy legado/do ambiente ({id})",
+      "route": "Rota",
+      "upload": "Upload submetido para envio",
+      "download": "Download lido",
+      "attempts": "Tentativas",
+      "knownUpload": "Uploads de tamanho conhecido / tentativas",
+      "completed": "Downloads concluídos / tentativas",
+      "failed": "Falhas de envio",
+      "cancelled": "Downloads cancelados",
+      "errored": "Erros de download",
+      "loading": "Carregando tráfego de dados úteis…",
+      "empty": "Nenhum tráfego de dados úteis medido ainda.",
+      "error": "Não foi possível carregar o tráfego de dados úteis. Tente atualizar."
+    },
     "title": "Configurações",
     "general": "Geral",
     "security": "Segurança",
@@ -6898,6 +7291,7 @@
     "proxySubTabsAria": "Seções de proxy",
     "requestBodyLimitTitle": "Limite do corpo da solicitação",
     "requestBodyLimitDescription": "Tamanho máximo da carga útil da API aceito antes que o corpo da solicitação seja analisado. As rotas dedicadas de upload mantêm pelo menos o limite integrado de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions e Responses aceitam até 50 MB até você salvar um limite aqui. O limite salvo também se aplica a essas APIs, seja menor ou maior.",
     "requestBodyLimitInputLabel": "Limite do corpo da solicitação em MB",
     "requestBodyLimitEmptyError": "Insira um limite em MB",
     "requestBodyLimitWholeNumberError": "Use um número inteiro",
@@ -7048,6 +7442,8 @@
     "enableThinking": "Ativar Raciocínio",
     "maxThinkingTokens": "Máximo de Tokens de Raciocínio",
     "enableProxy": "Ativar Proxy",
+    "defaultNewConnectionProxyEnabled": "Ativar proxy por padrão para novas conexões",
+    "defaultNewConnectionProxyEnabledDesc": "Define o estado inicial do proxy das novas contas de provedores, salvo escolha explícita diferente. As conexões existentes não mudam. O roteamento ainda depende das configurações globais e da configuração do proxy. Cada conta pode ser alterada depois.",
     "perKeyProxyEnabled": "Ativar atribuição de proxy por tecla",
     "perKeyProxyEnabledDesc": "Quando habilitado, cada conexão de provedor pode usar sua própria atribuição de proxy",
     "proxyUrl": "URL do Proxy",
@@ -7083,6 +7479,13 @@
     "themeLight": "Claro",
     "themeDark": "Escuro",
     "themeSystem": "Sistema",
+    "paletteTitle": "Paleta de cores",
+    "paletteDesc": "Editions é o visual padrão. Classic traz de volta o destaque verde-limão anterior.",
+    "paletteSelectionAria": "Seleção da paleta de cores",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Tons neutros quentes com um destaque acobreado",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Tons neutros frios com um destaque verde-limão",
     "endpointTunnelVisibility": "Visibilidade do túnel de endpoint",
     "endpointTunnelVisibilityDesc": "Oculte os controles do túnel na página Endpoint sem alterar o estado do túnel.",
     "showCloudflareTunnel": "Túnel rápido Cloudflare",
@@ -7696,6 +8099,11 @@
     "pricingShowingProviders": "Mostrando {visible} de {total}",
     "pricingFilteredFrom": "(filtrado de {count})",
     "pricingShowMoreProviders": "Mostrar mais {count} ({remaining} restantes)",
+    "pricingView": "Ver",
+    "pricingViewByProvider": "Por provedor",
+    "pricingViewCompare": "Comparar modelos",
+    "pricingUnpriced": "Sem preço",
+    "pricingCompareEmpty": "Nenhum modelo é oferecido por mais de um desses provedores. Pesquise por um modelo para ver ofertas individuais.",
     "modelOverridesTitle": "Substituições de Modelo",
     "modelOverridesDesc": "Substitui as capacidades de provedor/modelo usadas pelo roteamento e pela formatação de requisições. Os alvos usam o mesmo formato provedor/modelo dos combos.",
     "searchModelOverrideTargets": "Buscar provedor/modelo...",
@@ -8221,6 +8629,7 @@
     "compressionAdaptivePolicyPercentage": "Porcentagem da janela",
     "compressionAdaptivePolicyAbsolute": "Orçamento absoluto de tokens",
     "compressionOutputStylesDescription": "Injeta instruções de modelagem de resposta sem reescrever a saída do provedor. Combine livremente.",
+    "compressionOutputStylesPreviewNote": "Uma solicitação injeta apenas um idioma: o idioma detectado, caso contrário, o primeiro pacote. Os blocos acima são variantes por embalagem, não uma injeção combinada.",
     "mcpAccessibilityDescription": "Delimita o escopo das saídas de ferramentas MCP (armazenamento separado).",
     "compressionStylesTileSummary": "{tokens, number} tokens economizados · {runs, plural, one {# execução estilizada} other {# execuções estilizadas}}",
     "compressionStylesTileEmpty": "Ainda não há execuções estilizadas.",
@@ -8394,6 +8803,86 @@
     "codexAutoPingWarning": "Consome uma pequena quantidade da cota real do Codex a cada ping. Desativado por padrão — ative apenas para conexões das quais você depende ativamente.",
     "codexAutoPingSaveError": "Falha ao atualizar a configuração de ping automático do Codex",
     "codexAutoPingToggleAria": "Alternar o ping automático da cota do Codex para {connection}",
+    "bankedResetAutoApplyTitle": "Aplicar automaticamente redefinições bancárias",
+    "bankedResetAutoApplyDesc": "Opt-in: resgata automaticamente créditos de redefinição Codex, bolsas bancárias de Claude e redefinição de sessão semanal de Claude para contas que estão fora da cota, dentro dos guardas e limites abaixo.",
+    "bankedResetAutoApplyWarning": "Resgatar uma redefinição consome um crédito que não pode ser devolvido. Desativado por padrão, e o modo de teste registra apenas o que faria.",
+    "bankedResetAutoApplySaveError": "Falha ao atualizar a configuração de redefinições bancárias de aplicação automática",
+    "bankedResetAutoApplyLoadError": "Falha ao carregar a configuração de redefinições bancárias de aplicação automática",
+    "bankedResetAutoApplyModeTitle": "Alternar e modo",
+    "bankedResetAutoApplyEnabledLabel": "Habilitar redefinições bancárias de aplicação automática",
+    "bankedResetAutoApplyEnabledHelp": "Interruptor mestre. Quando desativado, nada é resgatado automaticamente.",
+    "bankedResetAutoApplyModeDryRun": "Teste a seco",
+    "bankedResetAutoApplyModeDryRunHelp": "Registra o que seria resgatado no histórico abaixo, mas nunca resgata nada.",
+    "bankedResetAutoApplyModeLastResort": "Último recurso",
+    "bankedResetAutoApplyModeLastResortHelp": "Resgata somente quando nenhuma outra conta no pool tiver espaço restante.",
+    "bankedResetAutoApplyModeEager": "Ansioso",
+    "bankedResetAutoApplyModeEagerHelp": "Resgata assim que uma conta atinge um limite ou um crédito está prestes a expirar, mesmo que outras contas tenham espaço.",
+    "bankedResetAutoApplyCreditTypesTitle": "Tipos de crédito",
+    "bankedResetAutoApplyCreditTypesDesc": "Quais tipos de redefinições podem ser resgatadas automaticamente.",
+    "bankedResetAutoApplyCreditCodex": "Codex redefinir créditos",
+    "bankedResetAutoApplyCreditCodexHelp": "Créditos de redefinição bancários em contas Codex.",
+    "bankedResetAutoApplyCreditClaude": "Claude financiou doações",
+    "bankedResetAutoApplyCreditClaudeHelp": "Doações de redefinição bancária nas contas de Claude.",
+    "bankedResetAutoApplyCreditClaudeSession": "Redefinição da sessão semanal de Claude",
+    "bankedResetAutoApplyCreditClaudeSessionHelp": "A redefinição que as contas de Claude recebem uma vez por semana para uma janela de sessão murada.",
+    "bankedResetAutoApplyClaudeSessionNote": "Quando ativado, esse recurso substitui os alternadores de \"redefinição automática de limite\" por conta. No modo de simulação, ele registra apenas o que faria.",
+    "bankedResetAutoApplyScopeTitle": "Escopo da conta",
+    "bankedResetAutoApplyScopeDesc": "Quais contas Codex e Claude OAuth se aplicam automaticamente podem atuar.",
+    "bankedResetAutoApplyScopeAll": "Todas as contas",
+    "bankedResetAutoApplyScopeAllHelp": "Cada conta está coberta. Desative uma conta abaixo para excluí-la.",
+    "bankedResetAutoApplyScopeSelected": "Contas selecionadas",
+    "bankedResetAutoApplyScopeSelectedHelp": "Somente as contas ativadas abaixo são cobertas.",
+    "bankedResetAutoApplyNoConnections": "Nenhuma conta Codex ou Claude OAuth está conectada.",
+    "bankedResetAutoApplyConnectionAria": "Incluir {connection} nas redefinições bancárias de aplicação automática",
+    "bankedResetAutoApplyTimingTitle": "Protetores de cronometragem",
+    "bankedResetAutoApplyTimingDesc": "Ignorar um resgate quando esperar seria quase tão bom ou quando desperdiçaria o crédito.",
+    "bankedResetAutoApplySessionGuardLabel": "Proteção de redefinição de 5 horas (minutos)",
+    "bankedResetAutoApplySessionGuardHint": "Pule quando a janela de 5 horas for reiniciada sozinha dentro de alguns minutos.",
+    "bankedResetAutoApplyWeeklyGuardLabel": "Proteção de redefinição semanal (horas)",
+    "bankedResetAutoApplyWeeklyGuardHint": "Ignore quando a janela semanal for redefinida sozinha dentro de algumas horas.",
+    "bankedResetAutoApplyWeeklyFloorLabel": "Piso semanal (%)",
+    "bankedResetAutoApplyWeeklyFloorHint": "Pule uma redefinição de 5 horas quando a janela semanal tiver menos do que essa porcentagem restante.",
+    "bankedResetAutoApplyExpiringHoursLabel": "Janela de crédito expirada (horas)",
+    "bankedResetAutoApplyExpiringHoursHint": "Um crédito que expira dentro de tantas horas pode ser resgatado mesmo sem limite.",
+    "bankedResetAutoApplyExpiringUsedLabel": "Uso mínimo de crédito expirado (%)",
+    "bankedResetAutoApplyExpiringUsedHint": "Para créditos expirados, a conta deve ter utilizado pelo menos esta porcentagem de sua janela mais movimentada.",
+    "bankedResetAutoApplyPoolTitle": "Piscina",
+    "bankedResetAutoApplyPoolDesc": "Usado apenas no modo de último recurso.",
+    "bankedResetAutoApplyPoolHeadroomLabel": "Altura livre da piscina (%)",
+    "bankedResetAutoApplyPoolHeadroomHint": "Outra conta conta como tendo headroom quando ainda resta pelo menos essa porcentagem em ambas as janelas. Aplica-se apenas no modo de último recurso.",
+    "bankedResetAutoApplyLimitsTitle": "Limites de segurança",
+    "bankedResetAutoApplyLimitsDesc": "Limites rígidos sobre a frequência com que as redefinições são resgatadas, contadas a partir do histórico.",
+    "bankedResetAutoApplyMaxPerAccountLabel": "Máximo por conta por dia",
+    "bankedResetAutoApplyMaxPerAccountHint": "Resgates permitidos por conta em 24 horas.",
+    "bankedResetAutoApplyMaxPerDayLabel": "Máximo por dia",
+    "bankedResetAutoApplyMaxPerDayHint": "Resgates permitidos em todas as contas em 24 horas.",
+    "bankedResetAutoApplyMinSpacingLabel": "Espaçamento mínimo (minutos)",
+    "bankedResetAutoApplyMinSpacingHint": "Tempo mínimo entre quaisquer dois resgates.",
+    "bankedResetAutoApplyScheduleTitle": "Agendar",
+    "bankedResetAutoApplyScheduleDesc": "Opcionalmente, restrinja os resgates a uma janela diária, em UTC.",
+    "bankedResetAutoApplyScheduleEnabledLabel": "Resgate apenas dentro da janela diária",
+    "bankedResetAutoApplyScheduleStartLabel": "Início da janela (hora, UTC, 0-24)",
+    "bankedResetAutoApplyScheduleEndLabel": "Fim da janela (hora, UTC, 0-24)",
+    "bankedResetAutoApplyScheduleEndHint": "Um início posterior ao fim ultrapassa a meia-noite.",
+    "bankedResetAutoApplyHistoryTitle": "História",
+    "bankedResetAutoApplyHistoryDesc": "Resgates automáticos recentes e decisões de simulação.",
+    "bankedResetAutoApplyHistoryCounts": "Últimas 24 horas: {success} bem-sucedido, {failed} falhou, simulação {dryRun}.",
+    "bankedResetAutoApplyHistoryRefresh": "Atualizar",
+    "bankedResetAutoApplyHistoryEmpty": "Ainda não há resgates automáticos ou decisões de simulação.",
+    "bankedResetAutoApplyHistoryError": "Falha ao carregar o histórico",
+    "bankedResetAutoApplyHistoryTime": "Tempo",
+    "bankedResetAutoApplyHistoryAccount": "Conta",
+    "bankedResetAutoApplyHistoryCreditType": "Tipo de crédito",
+    "bankedResetAutoApplyHistoryReason": "Gatilho/motivo",
+    "bankedResetAutoApplyHistoryResult": "Resultado",
+    "bankedResetAutoApplyTriggerSession": "Janela murada de 5 horas",
+    "bankedResetAutoApplyTriggerWeekly": "Janela semanal murada",
+    "bankedResetAutoApplyTriggerExpiring": "Crédito expirado",
+    "bankedResetAutoApplyResultSuccess": "Sucesso",
+    "bankedResetAutoApplyResultFailed": "Fracassado",
+    "bankedResetAutoApplyResultDryRun": "Teste a seco",
+    "bankedResetAutoApplyResultUnknown": "Resultado desconhecido (contado dentro dos limites)",
+    "bankedResetAutoApplyRedeemNowLink": "Resgate agora manualmente nos Limites do Provedor",
     "codexWakeups": {
       "title": "Despertares agendados",
       "desc": "Envia ping às contas selecionadas em um horário definido para que a janela de cota comece quando você quiser. Cada execução consome um pouco de cota real do Codex.",
@@ -8798,6 +9287,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Coleção",
     "catalogVisibilityHint": "Os IDs de modelos ocultos continuam disponíveis para chamadas com as mesmas permissões de acesso.",
+    "exposeCombosOnly": "Listar somente combos em /v1/models",
+    "exposeCombosOnlyDesc": "Clientes que descobrem modelos automaticamente veem seus combos (e auto/*, a menos que estejam ocultos) em vez dos modelos brutos dos provedores. IDs explícitos provider/model continuam sendo roteados.",
     "catalogScopeTitle": "Listagem da API de modelos",
     "catalogScopeDesc": "O que GET /v1/models anuncia para esta chave. Restringir a lista nunca altera o que a chave pode chamar.",
     "catalogScopeAll": "Ambos",
@@ -8905,6 +9396,17 @@
     "resilienceTokenRefreshScopeConnection": "Conexão (cada conta tem seu próprio disjuntor)",
     "resilienceTokenRefreshThreshold": "Falhas antes de pausar",
     "resilienceTokenRefreshCooldown": "Pausa após acionamento",
+    "mfaTitle": "Autenticação em dois fatores",
+    "mfaDesc": "Exigir um código de um aplicativo autenticador, além da senha, para entrar no painel ou conectar a CLI.",
+    "mfaScanQr": "Escaneie este QR code com seu aplicativo autenticador (ou digite a chave de configuração manualmente) e depois digite o código de 6 dígitos exibido.",
+    "mfaManualKey": "Chave de configuração",
+    "mfaCodeLabel": "Código de verificação",
+    "mfaBackupCodesTitle": "Salve seus códigos de recuperação",
+    "mfaBackupCodesDesc": "Cada código permite entrar uma vez caso você perca o acesso ao autenticador. Eles não serão exibidos novamente.",
+    "mfaBackupCodesRemaining": "Códigos de recuperação restantes: {count}",
+    "mfaDisableDesc": "Digite sua senha e um código atual (ou um código de recuperação) para desativar a autenticação em dois fatores.",
+    "mfaRecoveryHint": "Recuperação de dispositivo perdido: inicie o servidor com OMNIROUTE_DISABLE_MFA=true e entre a partir do próprio host.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA está definido: logins a partir deste host pulam o segundo fator. Remova-o assim que recuperar o acesso.",
     "piiMasking": {
       "title": "Mascaramento de PII",
       "description": "Escolha quais tipos de dados pessoais são mascarados e adicione seus próprios padrões. O mascaramento fica desligado até você ativar as feature flags mostradas abaixo.",
@@ -8917,6 +9419,8 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
+        "gdpr": "GDPR (UE)",
+        "popia": "POPIA (África do Sul)",
         "full": "Completo"
       },
       "builtinTypes": "Tipos integrados",
@@ -8931,7 +9435,19 @@
         "ip_address": "Endereços IPv4",
         "ipv6_address": "Endereços IPv6",
         "aws_key": "Chaves de acesso da AWS",
-        "api_key_generic": "Chaves de API e tokens"
+        "api_key_generic": "Chaves de API e tokens",
+        "iban": "Números de conta bancária IBAN",
+        "eu_vat": "Números de IVA da UE",
+        "es_dni_nie": "DNI / NIE espanhol",
+        "it_codice_fiscale": "Codice Fiscale italiano",
+        "pl_pesel": "PESEL polonês",
+        "nl_bsn": "BSN holandês",
+        "de_steuer_id": "Steuer-ID alemão",
+        "se_personnummer": "Personnummer sueco",
+        "za_id": "Números de identidade sul-africanos",
+        "za_phone": "Números de telefone sul-africanos",
+        "za_vat": "Números de IVA sul-africanos",
+        "za_tax_ref": "Referências fiscais sul-africanas"
       },
       "customPatterns": "Padrões personalizados",
       "customPatternsDesc": "As ocorrências são substituídas por [CUSTOM_REDACTED]. Até {max} padrões. Padrões com risco de backtracking catastrófico são recusados.",
@@ -8949,7 +9465,12 @@
       "statsTitle": "Detecções desde a reinicialização",
       "statsEmpty": "Nenhuma detecção ainda.",
       "statsRequest": "Requisições"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Reter frames derivados do vídeo",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Permitir retenção temporária de JPEGs somente quando a requisição autenticada também informar drilldown: true. O vídeo original nunca é retido.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir consulta autenticada dos frames",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que cada chave de API consulte e exclua apenas seus próprios handles opacos. Sem acesso anônimo ou entre chaves.",
+    "modalityBridgeVideoDrilldownUsage": "JPEGs retidos / bytes"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -9841,6 +10362,10 @@
     "healthExtraUsageBypass": "Cota esgotada; o uso extra está permitido, então o serviço continua.",
     "healthPaidCreditsBypass": "Cota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Cota esgotada; a filtragem local de cotas está desativada, então o serviço continua.",
+    "codexPaidCreditsLabel": "Créditos pagos do Codex",
+    "codexPaidCreditsAvailable": "Disponível (saldo não informado)",
+    "codexPaidCreditsUnavailable": "Indisponível ou limite de gastos atingido",
+    "codexPaidCreditsUnlimited": "Ilimitado",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de uso extra",
     "grokAutoTopUp": "Recarga automática",
@@ -10062,6 +10587,7 @@
     "purchaseOauthFree": "OAuth Gratuito",
     "purchaseApiKey": "Chave de API",
     "creditsLabel": "Créditos",
+    "aiCreditsUsed": "{count} créditos de IA usados",
     "creditBalanceHint": "Saldo restante",
     "unlimitedLabel": "Ilimitado",
     "refreshing": "Atualizando",
@@ -10297,10 +10823,6 @@
     "confirmRedeemClaudeResetCredit": "O resgate redefine imediatamente os limites de uso elegíveis do Claude e consome este crédito permanentemente.",
     "claudeResetCreditsModalTitle": "Créditos de redefinição do Claude",
     "claudeResetCreditsModalExplainer": "Créditos de redefinição do Claude disponíveis e redefinições semanais de sessão para esta conta.",
-    "codexPaidCreditsLabel": "Créditos pagos do Codex",
-    "codexPaidCreditsAvailable": "Disponível (saldo não informado)",
-    "codexPaidCreditsUnavailable": "Indisponível ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Ilimitado",
     "healthAccountHint": "Com base nas observações recentes, não em um teste ao vivo. Selecione uma conta para ver detalhes.",
     "healthRecovery": "Recuperação prevista",
     "healthAvailable": "Disponível",
@@ -10575,7 +11097,11 @@
     "deleteAndRelaunch": "Excluir",
     "settingsJson": "settings.json",
     "fromDataDir": "do diretório de dados",
-    "relaunchApp": "Reinicie o aplicativo de desktop OmniRoute"
+    "relaunchApp": "Reinicie o aplicativo de desktop OmniRoute",
+    "mfaPrompt": "Digite o código do seu aplicativo autenticador",
+    "mfaCodeLabel": "Código de verificação",
+    "mfaCodePlaceholder": "Código de 6 dígitos ou código de recuperação",
+    "mfaBackupCodeHint": "Perdeu o dispositivo? Digite um dos seus códigos de recuperação."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -11433,9 +11959,37 @@
     "gitlabDuoSetupMessage": "O OAuth Duo do GitLab não está configurado. Registre um aplicativo OAuth em {applicationsUrl} com a URI de redirecionamento {redirectUri} e escopos \"{scopes}\", em seguida, defina {clientIdEnv} (e opcionalmente {clientSecretEnv}) e reinicie.",
     "gitlabDuoSetupDescription": "Após o registro do aplicativo e a configuração das variáveis de ambiente nesta instância do OmniRoute, clique em Continuar para iniciar o login OAuth.",
     "continue": "Continuar",
+    "copilotPolicyTitle": "Provedor experimental — status da política é ambíguo",
+    "copilotPolicyLine1": "O OmniRoute se conecta via api.githubcopilot.com, uma API que o GitHub não publicou como uma API de inferência de terceiros de uso geral. Esta integração é experimental e pode mudar sem aviso prévio.",
+    "copilotPolicyLine2": "Apenas sua própria conta do GitHub pode ser conectada. Nunca compartilhe credenciais, agrupe contas ou tente exceder os limites do seu plano.",
+    "copilotPolicyLine3": "Usuários dos planos Free e Student recebem apenas seleção automática de modelo. Os termos do seu plano Copilot e quaisquer limites de uso continuam sendo de sua responsabilidade.",
+    "copilotPolicyAcknowledge": "Entendi — Conectar",
     "tabPasteSetupToken": "Token de configuração",
     "claudeSetupTokenDescription": "Execute `claude setup-token` em um terminal e cole o token que ele exibe. Ele é válido por um ano e não tem token de atualização. O OmniRoute envia uma requisição de teste à Anthropic antes de salvá-lo.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Token de atualização",
+    "antigravityRefreshTokenDescription": "Cole seu token de atualização Google OAuth para Antigravity. OmniRoute valida e troca antes de salvar.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Login no Microsoft 365 Copilot",
+    "m365UrlExpiredHint": "Inicie uma nova tentativa se ele expirar antes de você terminar.",
+    "m365UrlExpires": "Esta URL de autorização expira às",
+    "m365AuthUrlCopyHint": "Selecione a URL de autorização completa e copie com Ctrl+C (Command+C no Mac), ou use o menu de cópia do seu navegador. Cole na aba em branco somente depois de ativar Preserve log.",
+    "m365AuthUrlLabel": "URL de autorização (copie para a aba preparada)",
+    "m365StepNavigate": "Copie a URL de autorização abaixo e cole na barra de endereços da aba preparada; depois, pressione Enter para fazer login.",
+    "m365StepPrepare": "Prepare o login na Microsoft para iniciar uma nova tentativa.",
+    "m365StepOpen": "Abra uma aba em branco no seu próprio navegador usando o link abaixo. Ainda não acesse a Microsoft.",
+    "m365StepNetwork": "Nessa aba em branco, abra DevTools → Network e ative Preserve log antes de navegar. Mantenha DevTools aberto.",
+    "m365StepCopy": "Depois de fazer login, encontre a solicitação para https://login.microsoftonline.com/common/oauth2/nativeclient em Network e copie a Request URL completa dela. Não copie a URL final de wrongplace da barra de endereços.",
+    "m365PrivateUrlHint": "A URL da solicitação contém uma credencial de uso único. Cole apenas aqui; nunca compartilhe nem inclua em logs.",
+    "m365Prepare": "Preparar login na Microsoft",
+    "m365Preparing": "Preparando login…",
+    "m365OpenSignIn": "Abrir aba em branco",
+    "m365CallbackLabel": "Request URL completa de nativeclient",
+    "m365Connecting": "Conectando…",
+    "m365NewAttempt": "Iniciar nova tentativa",
+    "m365PrepareError": "Não foi possível preparar o login na Microsoft. Tente novamente.",
+    "m365ExchangeError": "Não foi possível concluir o login na Microsoft. Inicie uma nova tentativa.",
+    "m365InvalidCallback": "Cole a Request URL completa de nativeclient com um único code e o state correspondente desta tentativa. Códigos isolados e URLs de wrongplace não são aceitos."
   },
   "cursorAuthModal": {
     "title": "Conecte o Cursor IDE",
@@ -11947,6 +12501,10 @@
     "messageInputAria": "Mensagem"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor de origem {status}",
+    "noHttpResponse": "Nenhuma resposta HTTP foi observada",
+    "transportError": "Erro de transporte",
     "recording": "Gravando",
     "paused": "Pausado",
     "pipelineLogsOn": "Logs do pipeline ativados",
@@ -12030,6 +12588,8 @@
       "increase": "Aumentar intervalo"
     },
     "status": {
+      "recoveredAttemptsTitle": "Solicitação recuperada após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente da solicitação falhou",
       "inProgress": "Em andamento",
       "recoveredByRetry": "Recuperado por tentativa novamente",
       "goToParent": "Ir para a solicitação pai",
@@ -12042,6 +12602,9 @@
     },
     "attempts": "tentativas",
     "detail": {
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Nenhuma resposta HTTP foi observada",
+      "transportError": "Erro de transporte",
       "collapse": "Recolher {title}",
       "expand": "Expanda {title}",
       "copyTitle": "Copiar {title}",
@@ -12142,7 +12705,11 @@
       "viewConversation": "ver conversa",
       "openConversation": "Abrir conversa {id}"
     },
-    "tableLabel": "Logs de requisições"
+    "tableLabel": "Logs de requisições",
+    "throughputPostFirstToken": "Pós-primeiro token",
+    "throughputEndToEnd": "Ponta a ponta",
+    "throughputRate": "{value} tokens/s",
+    "throughputExplanation": "Ambas as taxas usam o maior valor entre as contagens de tokens de saída e de raciocínio. A taxa pós-primeiro token exclui um TTFT válido; caso contrário, usa a duração total. A taxa ponta a ponta sempre usa a duração total. Uma resposta em buffer pode ter uma alta taxa de entrega em rajada sem uma geração mais rápida pelo modelo."
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -12785,7 +13352,8 @@
     "title": "Estatísticas de provedores",
     "description": "Tráfego, latência e taxa de sucesso por provedor e por modelo",
     "combo": "Combo",
-    "toggleModels": "Mostrar modelos de {provider}"
+    "toggleModels": "Mostrar modelos de {provider}",
+    "windowSince": "Desde {date}"
   },
   "relay": {
     "title": "Proxies de Relay Serverless",
@@ -13062,7 +13630,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "Códigos da CLI",
     "pageSubtitle": "Ferramentas de código que apontam para o OmniRoute",
     "searchPlaceholder": "Buscar CLI…",
     "filterDetectionLabel": "Detecção",
@@ -13072,7 +13639,8 @@
     "detectionNotFound": "Não detectadas",
     "baseUrlAll": "Todas",
     "baseUrlFull": "Completa",
-    "baseUrlPartial": "Parcial"
+    "baseUrlPartial": "Parcial",
+    "title": "Código de CLI"
   },
   "cliAgents": {
     "pageTitle": "Agentes de CLI",
@@ -13730,7 +14298,9 @@
       "disabled": "Desativado",
       "dual": "Duplo",
       "alias": "Alias",
-      "canonical": "Canônico"
+      "canonical": "Canônico",
+      "fail_closed": "Bloquear (fail_closed)",
+      "count_as_zero": "Contar como $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13877,6 +14447,290 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Interrupções de infraestrutura com prioridade protegida como 502",
         "description": "Responda com 502 em vez de 503 quando um destino prioritário com fallback apenas por cota interromper o combo por uma causa comprovadamente não relacionada à cota: um disjuntor de provedor aberto ou uma omissão preditiva por latência."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Registrar IDs de Conta",
+        "description": "Incluir prefixo da conta nas linhas de log de AUTH (ex.: \"Usando a conta '<provider>': abc12345...'). Desativado por padrão para que identificadores de conta sejam ocultados em logs compartilhados/de múltiplos tenants. Independente do Modo de Depuração; alternar o Modo de Depuração não revela isso."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Desativar login por senha com OIDC",
+        "description": "Quando o OIDC estiver ativado, desative o login por senha para que os usuários só possam se autenticar via Single Sign-On do OIDC. Quando desativado (padrão), tanto o login por senha quanto o OIDC estarão disponíveis."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Nós remotos de provedores de áudio",
+        "description": "Permite que as rotas /v1/audio/* usem nós de provedores compatíveis com a OpenAI hospedados fora do localhost. Desativado por padrão — o roteamento de áudio para um host remoto altera a identidade de saída e deve ser uma decisão explícita do operador. Nós de loopback são sempre permitidos e não são afetados."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Nós remotos de provedores de rerank",
+        "description": "Permite que POST /v1/rerank (e a etapa de rerank do mecanismo de memória, que o chama via loopback) use nós de provedores compatíveis com a OpenAI hospedados fora do localhost — uma máquina na LAN ou um peer do Tailscale executando TEI, Infinity, vLLM, etc. Desativado por padrão — o roteamento para um host remoto altera a identidade de saída e deve ser uma decisão explícita do operador. Nós de loopback são sempre permitidos e não são afetados. Os nós remotos também devem atender à política de URLs de saída do provedor."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Proteção de saída compartilhada na rotação de rede",
+        "description": "Em caso de exceção de rede (timeout, conexão recusada/redefinida) para um executor de rotação multi-contas, quando a conta com falha não possuir um proxy dedicado, aplica um breve cooldown e ignora outras contas sem proxy durante o restante da requisição em vez de tentar novamente cada uma. Ativado por padrão (seguro: nenhuma alteração de IP de saída, apenas reduz a latência e o risco de cooldown em contas com saída compartilhada). Desative para restaurar a propagação imediata na primeira exceção lançada sem proxy."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Ignorar proxies com falhas recentes",
+        "description": "Os pools de proxy e a rotação por conta do opencode deixam de fornecer novamente um proxy que acabou de falhar (sonda TCP recusada ou um 429 recebido por ele) por um período por processo que dobra a cada repetição, até um limite. Nenhum status de proxy é gravado; com todos os candidatos deixados de lado, a escolha permanece inalterada. Ativado por padrão: a ordem de seleção é exatamente a rotação comum apenas com PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Ordem do pool por saída compartilhada",
+        "description": "Para provedores cuja cota é agrupada por endereço de saída, classifica um membro do pool que compartilha o endereço de saída observado de um membro recusado recentemente logo abaixo dos membros saudáveis. Apenas ordenação, nunca exclusão. Requer PROXY_SKIP_RECENTLY_FAILED, que produz o sinal de recusa que ele lê. Desativado por padrão: a ordem de seleção é exatamente a rotação comum."
+      },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Recusas de cotas no escopo do modelo",
+        "description": "Aplique uma cota opencode 429 apenas ao modelo que a atingiu, para que a mesma saída continue servindo outros modelos e limpe-a somente quando esse modelo for bem-sucedido. Os consumidores que não possuem modelo (rotação de pool, estacionamento e repetição, visibilidade do administrador, acionador de seletor, varredura de integridade) ainda o verão. Precisa de PROXY_SKIP_RECENTLY_FAILED, que produz a recusa. Desativado por padrão: a cota 429 de um modelo reserva a saída para cada modelo."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Busca de proxy: reprodução POST estrita",
+        "description": "Para uma solicitação não idempotente (POST, PUT, PATCH, DELETE), reenvie após um erro de transporte (soquete novo, substituto de proxy, substituto nativo) somente quando o erro provar que nada foi enviado: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ou um tempo limite de conexão. Um erro de soquete após a gravação pode significar que o upstream aceitou a solicitação, portanto, um reenvio pode gerar e cobrar duas vezes. Desativado por padrão: um corpo reproduzível é reenviado uma vez em qualquer erro de transporte, o que também recupera um soquete em pool obsoleto."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Log de atribuição de rotação",
+        "description": "A rotação do Opencode registra qual conta atendeu ou foi ignorada (apenas IDs mascarados, nunca IDs de conta completos) e vincula as entradas de log do proxy à sua requisição, para que o operador possa diferenciar contas ignoradas de contas não utilizadas. Desativado por padrão: nenhuma linha extra de log, nenhuma coluna extra gravada."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Observação de saída do pool de proxies",
+        "description": "Exibe, sob um pool de proxies no painel, quantos IPs de saída observados atenderam seus membros nas últimas 24 h, quantas conexões os usaram e o maior número visto atrás de um único IP. Somente leitura, calculado a partir do log do proxy, nunca usado para roteamento. Desativado por padrão: o editor do pool permanece inalterado e a rota de observação responde null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Saída do operador de proxy",
+        "description": "Aceita endereços observados datados enviados pelo operador por membro do pool e os mescla com a leitura do journal para exibição e ordenação do pool. Desativado por padrão: a rota de push responde 404 e as leituras do pool se comportam exatamente como antes."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Rotação por Estagnação de Responses do OpenCode",
+        "description": "Para o executor do OpenCode, monitora o primeiro byte do corpo de uma resposta de Responses transmitida por streaming (janela: RESPONSES_FIRST_BYTE_TIMEOUT_MS, padrão 15000). Um stream 2xx de Responses que permanecer em silêncio além da janela é tratado como estagnado: a conta é colocada em cooldown e a requisição é rotacionada para a próxima conta uma vez; uma segunda estagnação falha rapidamente. Desativado por padrão: streams estagnados mantêm a espera atual até o tempo limite de prontidão do stream."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Rotação por user_blocked do OpenCode",
+        "description": "Para o executor do OpenCode, quando um upstream responder 403 ou 451 com uma recusa user_blocked (não um bloqueio geográfico, nem uma rejeição de fingerprint do Cloudflare), coloca a conta recusada em cooldown e rotaciona para a próxima conta no máximo uma vez por requisição; uma segunda recusa é retornada como está, sem marcação de sucesso. Desativado por padrão: contornar um bloqueio de usuário do upstream pode parecer evasão e propagar o sinalizador por toda a frota de contas, portanto a recusa é retornada inalterada, a menos que o operador ative essa opção."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Backoff de Failover Transitório do OpenCode",
+        "description": "Para a rotação de múltiplas contas do OpenCode, faz uma pausa antes de despachar para a próxima conta assim que duas tentativas consecutivas falharem com um erro transitório do upstream (5xx ou uma rejeição 400 vazia). A pausa começa em 1,5s, dobra a cada falha consecutiva adicional, é limitada a 6s por pausa e 10s por requisição, é ignorada quando o cliente se desconecta, e o corpo da resposta com falha é liberado antes da espera. Desativado por padrão: o failover permanece imediato."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Nova Tentativa para Turno Vazio no Flush",
+        "description": "Em turnos de streaming traduzidos, quando o turno do upstream não contiver nenhum conteúdo utilizável (conclusão apenas com raciocínio ou nenhum chunk útil), executa novas tentativas limitadas através do caminho de credenciais normal (até `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) antes que qualquer coisa seja exposta ao cliente. Desativado por padrão: turnos vazios mantêm o comportamento atual (200 vazio ou 502 de empty-content)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Recuperação de Stream Vazio via Sibling",
+        "description": "Streaming Claude/Codex: após o primeiro evento de ciclo de vida, sonda brevemente (até 1s / 64 KiB) por uma saída utilizável; um stream que termina sem conteúdo torna-se uma falha de empty_content que utiliza a nova tentativa limitada existente em outra conexão elegível (sem cooldown, sem bloqueio de modelo), e combos round-robin param de tentar novamente assim que o cliente se desconecta. Também trata refusal, pause_turn e model_context_window_exceeded como terminais vazios legítimos dentro da sondagem. Desativado por padrão: prontidão, tratamento de empty-content e novas tentativas de combo permanecem exatamente como antes."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Sonda de Saída Tardia de Stream",
+        "description": "Sonda de saída de streaming: após os primeiros 64 chunks encaminhados, continua amostrando um a cada 16 chunks para a primeira saída visível, de modo que uma saída iniciada tardiamente ainda marque o stream como tendo emitido saída. Um 5xx isolado após esse ponto permanece no escopo da requisição em vez de registrar um bloqueio exclusivo do modelo, e o firstOutputMs é retroativamente preenchido com o primeiro chunk de saída do intervalo de amostragem atual. Desativado por padrão: apenas os primeiros 64 chunks encaminhados são sondados, exatamente como antes."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "Parada Antecipada em 429 por Limite de Taxa do OpenCode",
+        "description": "Para a rotação multicontas do OpenCode, interrompe a onda de contas no primeiro 429 classificado como um limite de taxa real (um cabeçalho Retry-After analisável ou um corpo indicando um limite de taxa/uso) e retorna esse 429 upstream inalterado (status, corpo, Retry-After e cabeçalhos de cota), em vez de tentar cada conta restante. 429s não classificados continuam rotacionando. Desativado por padrão: o nível gratuito é limitado por IP de saída (#9611), portanto, cada 429 rotaciona para a próxima conta, e uma onda esgotada retorna o último 429 upstream."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "Estacionar e Retomar em 429 do OpenCode",
+        "description": "Para a rotação multicontas do OpenCode, estaciona a requisição após 429s transitórios repetidos (ou um novo marcador de sobrecarga do pool) com um heartbeat e, em seguida, executa novamente uma etapa limitada de até 3 contas sequenciais em vez de acionar toda a frota. Desativado por padrão: cada 429 rotaciona para a próxima conta exatamente como antes."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Nova Tentativa por Travamento de Prontidão do Stream",
+        "description": "Para requisições de chat com streaming, quando o primeiro corpo upstream travar antes de produzir um evento utilizável, emite uma segunda tentativa limitada pelo mesmo caminho de roteamento com o mesmo orçamento de prontidão e sem penalidade de conta. Desativado por padrão: um primeiro corpo travado causa a falha da requisição sem nova tentativa."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "Resseleção de Pool em 429 do OpenCode",
+        "description": "Para a rotação multicontas do OpenCode, após um 429 de um provedor agrupado por saída em uma conta sem proxy sob um contexto de pool ambiente, solicita ao pool de conexões outro membro para a próxima tentativa em vez de tentar novamente o mesmo endereço de saída. Ordena, nunca exclui: um pool esgotado mantém o comportamento atual. Desativado por padrão: cada 429 rotaciona para a próxima conta exatamente como antes."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sondagem de Saída do Free Tier do OpenCode",
+        "description": "Para o executor do OpenCode, quando uma requisição via proxy recebe 403 ou 451 FreeTierError e a nova tentativa com ferramentas observadas falhou ou não se aplicou, envia a requisição uma vez por outro proxy (proxy de outra conta ou outro membro do pool, nunca uma conexão direta). Somente quando essa sondagem responde 200 a primeira saída é posta de lado na memória de recusa de proxy e a resposta da sondagem é servida; quando ambas recusam, a recusa original é devolvida e nada é registrado. O mesmo texto de recusa cobre um IP de saída sinalizado e um formato de requisição recusado, então a sondagem os distingue por evidência. Desligado por padrão: a recusa é devolvida sem alteração."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Fingerprint de cliente do OpenCode v2",
+        "description": "Envia o fingerprint de cliente da CLI do OpenCode v2 em requisições do OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli, um User-Agent de cliente mantido apenas quando for um cliente OpenCode 2.x e, em requisições de nível gratuito restritas, nenhum x-opencode-request, a sessão espelhada em x-opencode-session-id/x-session-affinity/x-session-id, os esquemas read/shell da CLI v2 em ferramentas de placeholder injetadas e um tool_choice de \"none\" descartado. Desativado por padrão: cada requisição do OpenCode mantém a identidade, cabeçalhos e corpo atuais byte a byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Bloqueio por IP de saída do OpenCode Zen",
+        "description": "Adiciona o OpenCode Zen (opencode-zen) à família padrão de bloqueio por IP de saída, para que um 429 em uma conexão Zen também aplique cooldown a todas as conexões Zen irmãs que compartilham seu IP de saída. Desativado por padrão: o Zen é indexado por chave e cada conexão entra em cooldown por conta própria, exatamente como antes. Um valor explícito de OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS sempre prevalece sobre esta flag."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Regras de erro de texto completo do OpenCode",
+        "description": "Permite que as regras de erro integradas do OpenCode (opencode-zen, opencode-go, opencode-cli) façam correspondência no texto completo do erro de upstream, para que marcadores no corpo como organization_quota_exceeded ou \"monthly usage limit reached\" classifiquem um 429 como cota esgotada com um bloqueio no escopo da conexão. Desativado por padrão: essas regras veem apenas o código de erro estruturado e tal 429 permanece como um rate limit curto, exatamente como antes."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Regras de erro de texto completo do Cloudflare Workers AI",
+        "description": "Permite que a regra de erro integrada do Cloudflare Workers AI faça correspondência no texto completo do erro de upstream, para que o corpo de 429 com \"daily free allocation\" seja classificado como cota esgotada em vez de um rate limit curto. Desativado por padrão: a regra vê apenas o código de erro estruturado, exatamente como antes."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Filtro de capacidades",
+        "description": "Rejeita requisições antes do envio quando o modelo de destino não possui as capacidades necessárias (vision, tools, structured output, context window). Protege requisições diretas de provedor único que ignoram o filtro de compatibilidade da camada combo."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ignorar uso não precificado em cotas em USD",
+        "description": "Contabiliza o uso de modelos sem preço como $0 nas cotas de uso em USD por chave, em vez de tratar a cota como excedida. Desativado por padrão: um modelo não precificado ou alias de roteamento pode ocultar gastos reais, portanto a cota falha fechada."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Habilita o módulo OmniRoute Radar (telas de feed do catálogo e sincronização). Desativado por padrão; a habilitação apenas desbloqueia a interface — a sincronização de dados permanece como um opt-in separado."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Gate de capacidade de endpoints de modelo",
+        "description": "Aplica tags confiáveis de endpoints de modelo (declaradas pelo catálogo do provedor, inferidas a partir do ID de um modelo especializado ou definidas pelo operador): rejeita com HTTP 400 requisições enviadas a um endpoint que o modelo não atende antes do despacho em /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations e /v1/audio/*; oculta de /v1/models modelos cujos endpoints com tags não possuem adaptador OmniRoute; e responde ao teste de modelo do painel com 422 para esses modelos. Desativado por padrão: as tags de endpoint permanecem informativas e as requisições são despachadas exatamente como antes."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Transferência universal de contexto",
+        "description": "Gera e injeta resumos de conversa quando o roteamento de combo alterna modelos. Desative para tratar trocas de modelo de forma independente e evitar solicitações de transferência em segundo plano para todos os combos existentes e futuros."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reprodução de raciocínio",
+        "description": "Armazena em cache e reproduz o raciocínio do modelo em conversas de vários turnos. Desative para interromper o armazenamento e a reinjeção do raciocínio."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Transporte App-Server do Codex",
+        "description": "Permite que o Codex use o transporte WebSocket JSON-RPC do app-server local (codexTransport=app-server). Quando desativado, as conexões configuradas para app-server voltam a usar os outros transportes do Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Aliases de Descoberta do Claude Code",
+        "description": "Exibir ids de espelho claude/'<provider>'/'<model>' em /v1/models para que a descoberta de modelos do gateway Claude Code liste modelos não-Claude. Aviso: duplica as entradas do catálogo para todos os clientes quando ativado globalmente."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Aliases de Modelos Sem Ponderação",
+        "description": "Interruptor principal para os aliases de gateway no-think/'<provider>'/'<model>'. Ligado (padrão): /v1/models exibe uma variante sem ponderação para cada modelo Claude elegível que suporta ponderação, e um id no-think/ enviado em uma solicitação é resolvido para o modelo real com a ponderação suprimida. Desligado: nenhuma variante é exibida e um id no-think/ é tratado como qualquer outro id de modelo desconhecido. A opção de opt-in/opt-out por modelo no ModelSpec.noThinkingAlias continua valendo enquanto isso estiver ligado."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Desativar Variantes de Nível de Pensamento",
+        "description": "Desativa a geração de variantes de nível de pensamento (ex.: -low, -medium, -high) no catálogo /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Faixas Virtuais de Admissão Adaptativas",
+        "description": "Habilita faixas virtuais de admissão adaptativas por locatário para o despacho de provedores (#9654): o pico de tráfego de um locatário não causa mais erro 503 em outro. A variável de ambiente OMNIROUTE_CHAT_VIRTUAL_LANES tem precedência sobre esta substituição do painel; as alterações entram em vigor na reinicialização do servidor."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Espelhos Funcionais do Gateway",
+        "description": "Exibir ids de espelho '<gateway-alias>'/'<model>' em /v1/models para modelos cujo proprietário canônico não tem credencial ativa, mas um gateway de passagem com credencial ativa os roteia. Aviso: adiciona entradas ao catálogo para todos os clientes quando ativado globalmente."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Saldo do Agregador New-API",
+        "description": "Ativar a detecção de saldo para nós compatíveis com os agregadores New-API / One-API / Sub2API. Quando ativado, nós compatíveis com a flag de agregador definida relatarão seu saldo no painel e no roteamento de pré-verificação de cota."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Ocultar Conexões de Pesquisa Excluídas",
+        "description": "As estatísticas de pesquisa e pesquisas recentes contam apenas provedores que ainda possuem uma conexão ativa (provedores sem chave, como duckduckgo-free, sempre contam). Desativado mantém todas as linhas de pesquisa retidas com um ID de provedor."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Selo Gratuito Estrito",
+        "description": "Páginas de provedores no painel: exibe o selo Gratuito apenas em sinais que o provedor respeita — descarta a heurística de display-name, campos free não booleanos e sufixos :free em provedores registrados sem um nível gratuito documentado. Desativado mantém a regra histórica de selos."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Pool Vazio Responde 503",
+        "description": "Quando o pool de candidatos de um auto combo já estiver vazio antes da execução do pré-filtro de tool-calling (todos os destinos ignorados por cooldowns, bloqueios ou esgotamento), responde 503 no_eligible_targets em vez do legado 400 \"No target supports tool calling\" capability_mismatch. Desativado por padrão: o pool vazio mantém o 400 legado."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Bloqueio Suave para 401 Ambíguo da Mistral",
+        "description": "Um erro 401 da Mistral simples ('{\"detail\":\"Unauthorized\"}', sem sinal explícito de autenticação) é idêntico byte a byte para uma chave revogada e para cota esgotada. Quando ativado, esse 401 reduz a conexão em vez de pará-la como expirada, até 3 vezes por hora; o próximo a ser recebido ainda a para como expirada, de modo que uma chave revogada converge. Desligado por padrão: todos os erros 401 simples da Mistral param a conexão como expirada, como antes."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Limpeza automática de lotes e arquivos",
+        "description": "Permite que a rotina de limpeza automática exclua jobs da Batch API em estado terminal (completed/failed/cancelled/expired) mais antigos que OMNIROUTE_BATCH_RETENTION_DAYS, juntamente com seus checkpoints por linha, e limpe o conteúdo BLOB de arquivos enviados que tenham ultrapassado seu próprio expires_at. Desativado por padrão: todas as instalações existentes mantêm esses dados exatamente como antes até que um operador ative a opção. A rota DELETE /api/v1/batches/delete-completed acionada pelo operador não é afetada em nenhum dos casos — trata-se de um contrato de API pública separado e incondicional."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Lease de conta Antigravity",
+        "description": "Reserva a conta Antigravity selecionada para o ciclo de vida de streaming da requisição que a escolheu, para que uma nova tentativa concorrente ou a transferência de credenciais não possa escolher novamente uma conta já comprometida com um stream em andamento. O escopo da reserva é (connection, callable upstream model), de modo que uma conta ainda possa atender a dois modelos diferentes simultaneamente. Quando todas as contas qualificadas já estiverem sob lease para esse modelo, a requisição retornará um 503 POOL_BUSY estruturado com um Retry-After delimitado, em vez de sobrecarregar uma conta ocupada. Desativado por padrão: a seleção de contas permanece exatamente como antes e nenhuma reserva é feita."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Poda automática de etapas obsoletas do combo",
+        "description": "Após uma sincronização de modelos bem-sucedida em relação a um catálogo ativo autoritativo, remove as etapas do combo fixadas em modelos que o catálogo não lista mais, com uma entrada de auditoria para cada etapa removida. Nunca realiza a poda em sincronizações com falha, degradadas ou do tipo free-only, e nunca esvazia um combo. Desativado por padrão: etapas obsoletas são apenas sinalizadas."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Pensamento resumido do Claude OAuth",
+        "description": "Permite que uma requisição Claude OAuth que solicita pensamento legível (thinking.display \"summarized\") remova o beta redact-thinking-2026-02-12 da Anthropic, que, caso contrário, faz com que a Anthropic retorne blocos de pensamento vazios, apenas com a assinatura. Desativado por padrão: esse beta faz parte do wire fingerprint do Claude Code OAuth, portanto as requisições OAuth o mantêm inalterado. Requisições do Claude via chave de API já respeitam o pensamento resumido sem essa flag; OMNIROUTE_REDACT_THINKING=false também só afeta o OAuth quando essa flag está ativada."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Reparo de Chamada de Ferramenta do Kiro",
+        "description": "Quando uma resposta em streaming do Kiro emitir um wrapper tool_call malformado (com input.name ou input.arguments ausente) antes de qualquer saída visível, suprima-o e reenvie a requisição uma vez com uma instrução corretiva em vez de encerrar o turno com invalid_kiro_tool_call. A nova tentativa custa uma requisição adicional do Kiro; uma segunda falha encerra o turno com kiro_tool_call_repair_retry_failed. Ativado por padrão. Defina como false para falhar o turno no primeiro wrapper malformado."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Níveis de Esforço do models.dev",
+        "description": "Use os níveis de esforço de raciocínio publicados pelo models.dev (restringidos ao vocabulário de esforço conhecido) quando nem uma sobreposição do operador nem o registro do provedor declararem nenhum, e trate uma lista de níveis vazia declarada como \"sem níveis\" em effort_tiers de /v1/models e em interseções de níveis combinados. Desativado por padrão: effort_tiers e supportedThinkingEfforts resolvidos permanecem exatamente como antes."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Telemetria cx Sintetizada da Arena",
+        "description": "Anexe um blob programático sintetizado de interação do cliente cx (o valor que o próprio arena.ai envia para uma página sem interação registrada) a cada requisição create-evaluation da Arena (lmarena) que não tenha providerSpecificData.cx fornecido pelo operador. Desativado por padrão: o campo cx é um sinal anti-automação da Arena, portanto o OmniRoute apenas encaminha um valor que o operador capturou de uma sessão real do navegador (providerSpecificData.cx) e, caso contrário, não envia nenhum cx. Benefício upstream não comprovado; ative somente se a Arena começar a rejeitar requisições sem cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Compactação Reativa Nativa do Codex",
+        "description": "Permita que as etapas de compactação de contexto reativa (limite) e de último recurso também reescrevam históricos de passthrough nativos do Codex (POST /v1/responses para o provedor codex) quando excederem o orçamento de contexto, usando o adaptador input[] do Responses. Desativado por padrão: os históricos nativos do Codex pertencem ao cliente Codex e nunca são reescritos pela compactação; requisições com tamanho excessivo continuam falhando na verificação do orçamento de contexto exatamente como antes. Requer que a compressão global esteja ativada e que o modelo não seja excluído."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Janela de Cota: Respeitar Pausa Delimitada",
+        "description": "Permita que a política de cota por janela (limites de sessão/semanais usados pela seleção de contas) respeite a pausa delimitada por esgotamento: assim que o prazo limite da pausa tiver passado, ou a observação de cota em cache for mais antiga do que o teto da pausa, a janela deixará de excluir a conta até uma nova consulta de cota. Desativado por padrão: uma janela em cache continua bloqueando com base na sua última porcentagem informada até seu próprio tempo de redefinição."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Geração de imagens: tarefas longas",
+        "description": "Para geração de imagens compatível com a OpenAI: use o tempo limite da conexão (providerSpecificData.timeoutMs) ou, caso contrário, o tempo limite central de busca upstream (FETCH_TIMEOUT_MS, depois REQUEST_TIMEOUT_MS, padrão de 600 s) em vez do orçamento fixo de 120 s para imagens; encerre com 499 uma solicitação que o chamador cancelou; e permita que o Playground receba tarefas longas de imagem como um stream SSE com heartbeats de keepalive. Desativado por padrão: o orçamento fixo se aplica e o cancelamento pelo chamador não é propagado. O prazo limite que cobre a leitura do corpo da resposta permanece sempre ativo."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Refinamentos no espelhamento de catálogo",
+        "description": "Refina os espelhos de descoberta claude/ e functional-gateway em /v1/models. Desativado por padrão: ambas as etapas de espelho se comportam exatamente como antes. Ativado: os espelhos de descoberta claude/ também cobrem variantes listadas de reasoning-effort (-low/-medium/-high/-xhigh), ignoram IDs auto/* integrados que o caminho da solicitação não pode materializar e ignoram um alias já listado; os espelhos de functional-gateway ignoram combos e IDs sintetizados pelo OmniRoute (claude/, no-think/), obtêm o proprietário a partir de owned_by, nunca usam o proprietário como seu próprio gateway, ignoram gateways desativados em blockedProviders e modelos fora do catálogo ativo autoritativo de um gateway."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Saúde do proxy: recusa redefine sequência de falhas",
+        "description": "Na verificação de integridade do proxy, permite que uma sonda recusada pelo destino (401/403/429: o proxy retransmitiu, o destino recusou este IP de saída) redefina a sequência de falhas consecutivas do proxy, assim como uma sonda atendida. Desativado por padrão: uma recusa permanece neutra e mantém a sequência (#10654). Um 5xx permanece inconclusivo de qualquer forma, e uma recusa nunca remove, desativa ou reativa um proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Imagens de assinatura do Grok",
+        "description": "Registra as rotas de imagem xai-oauth (xao) e grok-cli e mapeia a qualidade high/hd da OpenAI para medium da xAI. Desativado por padrão: o caminho de imagem da xAI via chave de API permanece na solicitação compatível com OpenAI existente e as rotas de assinatura não são registradas."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Descoberta de modelos em tempo real via xAI OAuth",
+        "description": "Busca o catálogo de modelos em tempo real da xAI para conexões xai-oauth em https://api.x.ai/v1/models usando o token bearer OAuth, em vez do seed estático congelado. Ativado por padrão. Defina a flag como false para continuar fornecendo o seed estático. Falhas de HTTP recorrem ao seed na rota de descoberta; o getter da flag em si não emite requisições HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Turnos de sistema no meio da conversa compatíveis com Anthropic",
+        "description": "Em relays simples anthropic-compatible-* (passthrough claude → claude), mantenha os turnos role:system no meio da conversa dentro de messages[] em vez de elevá-los para o parâmetro system de nível superior, para que o prefixo de prompt em cache permaneça estável entre os turnos. Aplica-se apenas quando o próprio cliente tiver enviado o anthropic-beta mid-conversation-system-2026-04-07 (encaminhado ao upstream como está). Desativado por padrão: todos os turnos de sistema são elevados exatamente como antes, pois relays que não suportam a versão beta rejeitam mensagens role:system com 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Verificação de integridade do BD: adiar varredura de inicialização",
+        "description": "Execute a verificação de integridade/saúde do BD de inicialização após o servidor começar a aceitar requisições (via setImmediate), em vez de bloquear a inicialização até a sua conclusão. Desativado por padrão: a inicialização é bloqueada na verificação exatamente como antes de #13717, garantindo que um banco de dados corrompido ainda seja detectado antes do atendimento da primeira requisição. Ativado: a inicialização retorna imediatamente e a verificação (agora delimitada/paginada e, para um BD real baseado em arquivo, isolada em um processo filho cancelável) é executada logo em seguida."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Roteamento pelo catálogo publicado do OpenCode",
+        "description": "Permita que modelos OpenCode Zen e OpenCode Go sem um endpoint de registro explícito obtenham sua superfície de requisição (Responses para @ai-sdk/openai, Messages para @ai-sdk/anthropic) a partir do catálogo publicado models.opencode.ai, lido em segundo plano a cada 6 h. Desativado por padrão: o endpoint é obtido pelas heurísticas do registro exatamente como antes e o catálogo nunca é consultado."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Requisições auto: pesos de capacidades resolvidas",
+        "description": "Permita que requisições auto/* (resolveModelOrError e o wrapper de roteamento automático) criem o pool de candidatos com capacidades resolvidas de modelo (vision, reasoning, thinking) e pontuações de qualidade observadas, lidos em uma única passagem em lote como o catálogo /v1/models. Desativado por padrão: os pesos de snapshot em tempo de requisição permanecem exatamente como antes (as capacidades são resolvidas sob demanda e não alimentam os pesos). Ativado: esses sinais alimentam os pesos de snapshot, podendo alterar os pesos dos candidatos e, consequentemente, a seleção."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Porta de Transporte Sem Chave",
+        "description": "Retém provedores keyless (sem autenticação) cujo transporte requer um navegador local (browserBacked) ou um CLI instalado localmente (isLocalCli), excluindo-os do pool de candidatos auto/*, para que um membro pendurado não interrompa uma solicitação auto até o tempo limite por destino (#17036). Desativado por padrão: todos os provedores sem autenticação com chamada de ferramenta emulada permanecem no pool exatamente como antes. As chamadas diretas '<alias>'/'<model>' funcionam de qualquer forma."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Releitura de Raciocínio Inline",
+        "description": "Para modelos de raciocínio codebuddy-cn (as famílias DeepSeek-V4 / Kimi-K2 que requerem releitura de raciocínio), insere cada reasoning_content do assistente reutilizado como um bloco visível '<thought>' no início do conteúdo da mensagem, para que ele sobreviva a um gateway que descarta o campo reasoning_content (#13632). Desativado por padrão: as solicitações codebuddy-cn são enviadas inalteradas; o campo reasoning_content em si é sempre mantido."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Paradas de Segurança do Provedor: Terminal",
+        "description": "Mantém uma parada de segurança explícita do provedor (misalignment_policy_violation, content_policy_violation ou a rejeição legada exata 'blocked by our safety systems' rotulada como provider_safety_rejection) como uma recusa terminal no escopo da requisição: seu código é preservado através de erros de HTTP, Responses, WebSocket e completed-stream, e um combo para nela em vez de tentar outros alvos novamente, cancelando siblings já admitidos (#17049). Desativado por padrão: esses erros mantêm seu tratamento existente e o roteamento do combo não é alterado."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Saúde das Credenciais: Retestar Conexões Desativadas Automaticamente",
+        "description": "Permite que a varredura de integridade de credenciais reteste as conexões que o gateway desativou por conta própria (marcadas como autoDisabledAt; no máximo uma vez a cada 6 h cada e 5 por varredura) e reative uma conexão quando seu reteste for bem-sucedido (#16190). Desativado por padrão: conexões desativadas permanecem desligadas até que um operador as reative ou as reteste, exatamente como antes. Conexões desativadas por operador e conexões desligadas após um banimento permanente nunca são retestadas."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Gate de Credenciais: Apenas Diagnósticos de Autenticação",
+        "description": "Restringe o gate de credenciais do combo para que uma sondagem de credencial com falha em cache bloqueie uma conexão apenas quando seu diagnóstico comprovar credenciais inválidas (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Falhas inconclusivas (timeouts, limites de taxa, interrupções, sondagens não suportadas e erros não tipados do agendador) são então tratadas como desconhecidas e a conexão continua recebendo tráfego. Desativado por padrão: qualquer erro de sondagem em cache bloqueia a conexão durante o TTL do cache (5 minutos)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Parar na Recusa por Política de Conteúdo",
+        "description": "Quando um alvo do combo responder com uma recusa exata por política de conteúdo (código ou tipo cyber_policy / content_policy_violation), para o combo e retorna essa recusa mesmo quando os alvos restantes forem modelos diferentes, em vez de avançar para o próximo alvo. Desativado por padrão: a recusa nunca aplica resfriamento à conta nem desarma o disjuntor do provedor, e o combo avança para o próximo alvo exatamente como antes."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Respostas: keepalive apenas no transporte",
+        "description": "Envie manutenções de atividade de respostas como uma linha em branco em vez de um evento response.in_progress, para que um instantâneo sintético nunca possa substituir a resposta real no SDK oficial. Uma linha em branco não despacha nenhum evento SSE, portanto, um watchdog do cliente que reinicializa apenas em eventos não seria reinicializado durante uma longa fase silenciosa. Desativado por padrão: os temporizadores enviam o evento response.in_progress com especificação válida."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Nova tentativa de cooldown: ignorar recusas 403/410",
+        "description": "Quando todas as contas estiverem em cooldown e o cooldown que terminar primeiro tiver sido causado por um 403 (acesso recusado) ou um 410 (removido), retorna essa recusa imediatamente em vez de aguardar o término do cooldown e reenviar a requisição; um 403 de cota com escopo de conexão do agentrouter em renovação é então persistido com errorCode 429 para que continue passível de nova tentativa. Desativado por padrão: apenas um 401 ignora a espera, e cada recusa é persistida com o status com o qual chegou."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de Orçamento de Uso Sem Preço",
+        "description": "Como os limites diários/semanais por chave em USD tratam o uso bem-sucedido cujo provedor/modelo não tem uma linha de precificação. fail_closed (padrão) marca a janela como excedida, de modo que um custo desconhecido nunca ultrapasse um limite rígido. count_as_zero conta esse uso como $0 e continua aplicando o gasto precificado. Modelos sem preço são listados na página inicial do painel de qualquer forma."
       }
     }
   },
@@ -13975,6 +14829,8 @@
     "usdUsageQuotaDescription": "Bloqueia esta chave com um erro de API 400 depois que o gasto local em USD atinge a cota diária ou semanal configurada.",
     "dailyQuotaUsd": "Cota diária (USD)",
     "weeklyQuotaUsd": "Cota semanal (USD)",
+    "fiveHourQuotaUsd": "Cota de 5 horas (USD)",
+    "fiveHourQuotaHint": "Janela móvel: o gasto de cada requisição conta por 5 horas e depois é liberado.",
     "quotaWindowDescription": "A cota semanal segue a redefinição semanal em cache do Claude quando disponível; caso contrário, recorre a uma janela contínua de 7 dias. A cota diária usa o dia de calendário de Fortaleza.",
     "apiKeyUsdQuota": "Cota em USD da chave de API",
     "apiKeyUsdQuotaDescription": "Quando ativado, @@om-usage retorna cota diária, cota semanal, gasto diário e gasto semanal em USD. A semanal segue a redefinição em cache do Claude quando disponível.",
@@ -14044,7 +14900,11 @@
       "ok": "Geralmente permissivo"
     },
     "allProviders": "Todos os provedores",
-    "noApiKeyRequired": "Nenhuma chave de API necessária"
+    "noApiKeyRequired": "Nenhuma chave de API necessária",
+    "searchPlaceholder": "Pesquisar modelo, provedor…",
+    "searchAria": "Pesquisar modelos gratuitos",
+    "filterProviderAria": "Filtrar por provedor",
+    "keylessOnly": "Somente sem chave"
   },
   "providerHealthAutopilot": {
     "title": "Piloto Automático de Saúde do Provedor",
@@ -14574,6 +15434,63 @@
       "saved": "Regras de cooldown salvas",
       "saveFailed": "Não foi possível salvar as regras de cooldown"
     },
+    "errorRules": {
+      "title": "Regras de cooldown por erro",
+      "subtitle": "Identifique erros do provedor por status HTTP, texto do erro ou ambos, e escolha o que pausar e por quanto tempo. Estas regras rodam antes das embutidas.",
+      "rulesHeading": "Regras",
+      "rulesEmpty": "Nenhuma regra ainda.",
+      "addRule": "Adicionar regra",
+      "provider": "Provedor",
+      "providerPlaceholder": "ex.: openai",
+      "status": "Status HTTP",
+      "statusPlaceholder": "Qualquer",
+      "match": "Texto do erro contém",
+      "matchPlaceholder": "Qualquer texto",
+      "matchHint": "Vale a primeira regra que bater. O texto do erro é texto simples, sem diferenciar maiúsculas, e não uma expressão regular. Deixe um campo vazio para aceitar qualquer coisa.",
+      "scope": "Pausar",
+      "scopes": {
+        "connection": "Esta conexão",
+        "model": "Só este modelo",
+        "provider": "Provedor inteiro"
+      },
+      "reason": "Motivo",
+      "reasonAuto": "Automático",
+      "reasons": {
+        "quota_exhausted": "Cota esgotada",
+        "rate_limit_exceeded": "Limite de requisições atingido",
+        "auth_error": "Erro de autenticação",
+        "model_capacity": "Modelo sem capacidade",
+        "server_error": "Erro do servidor",
+        "unknown": "Outro"
+      },
+      "duration": "Duração",
+      "durations": {
+        "auto": "Padrão",
+        "30m": "30 minutos",
+        "1h": "1 hora",
+        "5h": "5 horas",
+        "24h": "24 horas",
+        "custom": "Personalizada"
+      },
+      "customMinutes": "Minutos (1 a 43200)",
+      "remove": "Remover",
+      "defaultsHeading": "Padrão para falhas sem regra",
+      "defaultsHint": "Opcional, por provedor. Vale só quando nenhuma regra bate com um erro 402, 403, 408, 429 ou 5xx. Erros de requisição como 400 nunca são afetados.",
+      "defaultsEmpty": "Nenhum padrão definido. Erros sem regra mantêm o comportamento embutido.",
+      "addDefault": "Adicionar padrão",
+      "errors": {
+        "provider": "Informe um provedor.",
+        "condition": "Defina um status HTTP, um texto de erro ou ambos.",
+        "status": "Use um status entre 100 e 599.",
+        "duration": "Informe de 1 a 43200 minutos.",
+        "duplicateDefault": "Este provedor já tem um padrão.",
+        "tooMany": "No máximo 50 regras."
+      },
+      "save": "Salvar regras de erro",
+      "saved": "Regras de erro salvas",
+      "saveFailed": "Não foi possível salvar as regras de erro",
+      "loadFailed": "Não foi possível carregar as regras de erro"
+    },
     "list": {
       "title": "Conexões fora do roteamento",
       "subtitle": "Cooldowns e bloqueios de modelo expiram sozinhos. Limpe-os para colocar uma conexão de volta no roteamento agora.",
@@ -14907,6 +15824,7 @@
     "upstreamStatus": "Status ascendente",
     "noResponse": "Sem resposta",
     "egressIp": "IP de Egressão",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Cabeçalhos após",
     "firstChunkAfter": "Primeiro bloco após",
     "servedBy": "Atendido por",
@@ -15216,5 +16134,141 @@
     "importButton": "Importar",
     "importFailed": "Falha na importação.",
     "importSuccess": "{connections} contas e {nodes} nós de provedor importados; {skipped} ignorados."
+  },
+  "conversations": {
+    "title": "Conversas",
+    "countSummary": "{total, plural, one {# conversa} other {# conversas}} com 2+ turnos",
+    "autoRefreshTitle": "Com que frequência esta lista é atualizada no servidor.",
+    "autoRefresh": "Atualização automática",
+    "loading": "Carregando conversas...",
+    "colConversation": "Conversa",
+    "colTurns": "Turnos",
+    "colContinuation": "Continuação",
+    "colLastModel": "Último Modelo",
+    "colProvider": "Provedor",
+    "colStatus": "Status",
+    "colLastSeen": "Última Visão",
+    "drawerTitle": "Conversa",
+    "prevConversation": "Conversa anterior",
+    "nextConversation": "Próxima conversa",
+    "gotoLatestRequest": "Ir para a última solicitação",
+    "goToBottom": "Ir para o final",
+    "statusInProgress": "Em andamento",
+    "continuationGenuineTitle": "A última etapa usou previous_response_id e foi resolvida no servidor",
+    "continuationBadge": "continuação",
+    "stalledTitle": "A última etapa não terminou com stop e nada foi continuado há mais de 5 minutos",
+    "stalledBadge": "atrasada",
+    "noTurns": "Nenhuma etapa registrada para esta conversa."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Começar na posição atual (ignorar os logs existentes)",
+    "pageTitle": "Exportar logs",
+    "pageSubtitle": "Envie continuamente os registros de chamadas da aba Logs para um armazenamento de analytics externo.",
+    "addDestination": "Adicionar destino",
+    "scheduleTitle": "Agendamento",
+    "cronLabel": "Cron",
+    "notScheduled": "sem agendamento",
+    "lastScheduledRun": "Última execução agendada",
+    "lastRunSummary": "{startedAt} — {status}, {rows} linhas",
+    "never": "nunca",
+    "highWaterMark": "Marca máxima dos registros de chamadas",
+    "rowPrefix": "linha {id}",
+    "noDestinations": "Nenhum destino de exportação",
+    "noDestinationsHint": "Adicione um destino para começar a exportar logs de chamadas no horário programado.",
+    "errLoadStatus": "Falha ao carregar o status da exportação",
+    "errSaveDestination": "Falha ao salvar o destino",
+    "msgDestinationSaved": "Destino salvo.",
+    "errConnectionTest": "Falha no teste de conexão",
+    "msgRunInFlight": "Uma execução para este destino já está em andamento; nada foi enviado duas vezes.",
+    "errExportRun": "Falha na execução de exportação",
+    "errUpdateDestination": "Falha ao atualizar o destino",
+    "errDeleteDestination": "Falha ao excluir o destino",
+    "deleteTitle": "Excluir destino",
+    "deleteConfirm": "Excluir \"{name}\"? O cursor de exportação também será removido, então ao reativá-lo, a execução começará pelo log de chamadas mais antigo retido.",
+    "statusDisabled": "Desativado",
+    "statusFailing": "Falhando",
+    "statusHealthy": "Saudável",
+    "statusNotRunYet": "Ainda não executado",
+    "typeNotInstalled": "Tipo não instalado",
+    "metaLine": "Última execução {lastRun} · {exported} linhas exportadas · {pending} pendentes · cursor {cursor}",
+    "btnTest": "Teste",
+    "btnRunNow": "Executar agora",
+    "btnDisable": "Desativar",
+    "btnEnable": "Ativar",
+    "btnEdit": "Editar",
+    "btnDelete": "Excluir"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Contas do CLIProxyAPI",
+    "cardSubtitle": "Status somente leitura da API de gerenciamento autenticada",
+    "btnRefresh": "Atualizar",
+    "listAria": "Saúde da conta do CLIProxyAPI",
+    "noAccounts": "Nenhuma conta do CLIProxyAPI encontrada.",
+    "loading": "Carregando saúde das contas…",
+    "stateReady": "Saúde da conta",
+    "stateDisabled": "CLIProxyAPI não está instalado",
+    "stateMissingKey": "A chave de gerenciamento não está configurada",
+    "stateUnreachable": "A API de gerenciamento está inacessível",
+    "stateUnauthorized": "A chave de gerenciamento foi rejeitada",
+    "stateUnsupported": "Esta versão do CLIProxyAPI não expõe a saúde da conta",
+    "stateInvalidResponse": "A API de gerenciamento retornou uma resposta não suportada"
+  },
+  "darioPanel": {
+    "title": "Contas Claude",
+    "description": "Autentique o Dario com sua assinatura Claude Pro/Max. O tráfego é faturado no pool da sua assinatura. Pelo menos uma conta é obrigatória antes que o Dario possa rotear as solicitações (até lá, /health reporta degradado).",
+    "noAccounts": "Nenhuma conta configurada ainda.",
+    "importTitle": "Importar do OmniRoute",
+    "importDescription": "Reutilize os tokens OAuth de uma conexão Claude existente do OmniRoute em vez de fazer login novamente — pula a etapa de aprovação no navegador.",
+    "importPendingTooltip": "Fica ativo quando uma conexão Claude existir no OmniRoute.",
+    "btnImport": "Importar",
+    "btnImporting": "Importando…",
+    "aliasPlaceholder": "alias (opcional)",
+    "btnStartLogin": "Iniciar Login",
+    "btnStarting": "Iniciando…",
+    "btnCompleteLogin": "Concluir Login",
+    "btnCompleting": "Concluindo…",
+    "codePlaceholder": "code#state ou code simples",
+    "noticeImported": "Importado como a conta \"{alias}\" — Dario reiniciou para reconhecê-lo.",
+    "noticeAdded": "Conta \"{alias}\" adicionada.",
+    "expiresInHours": "expira em ~{hours}h",
+    "expiresInMinutes": "expira em ~{minutes}m",
+    "expiresAt": "expira em {date}",
+    "scopes": "{count, plural, one {# escopo} other {# escopos}}",
+    "btnRemove": "Remover",
+    "btnRefresh": "Atualizar",
+    "loginStep1": "1. Abra esta URL no seu navegador e aprove o acesso para a conta <mono>{alias}</mono>:",
+    "pendingExpires": "O login pendente expira em {time}",
+    "loginStep2": "2. Cole o código exibido pela Anthropic:"
+  },
+  "miniapp": {
+    "title": "Mini App OmniRoute",
+    "errTelegramOnly": "Esta página deve ser aberta dentro do Mini App do Telegram.",
+    "greeting": "👋 Olá {name}! Envie uma mensagem para conversar pelo seu gateway OmniRoute.",
+    "greetingFallbackName": "ali",
+    "errNoReply": "⚠️ Sem resposta do gateway.",
+    "btnSend": "Enviar"
+  },
+  "falNative": {
+    "title": "Modelos nativos do Fal",
+    "description": "Descubra um endpoint, carregue seu esquema e execute-o com as entradas documentadas. O status da fila e o streaming nativo permanecem separados.",
+    "connectionRequired": "Primeiro, adicione uma conexão com uma chave de API do Fal.",
+    "category": "Categoria",
+    "endpoint": "ID do endpoint",
+    "reasoning": "Controle de raciocínio",
+    "input": "Entrada JSON nativa (os arrays mantêm sua ordem)",
+    "transport": "Transporte",
+    "run": "Executar modelo",
+    "job": "ID do trabalho salvo",
+    "register": "Registrar endpoint ou substituição de esquema",
+    "schema": "Esquema OpenAPI 3",
+    "download": "Baixar arquivo de saída",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

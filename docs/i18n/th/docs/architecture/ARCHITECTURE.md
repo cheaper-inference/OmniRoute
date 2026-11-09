@@ -8,79 +8,78 @@
 
 _อัปเดตล่าสุด: 2026-06-28_
 
-## บทสรุปสำหรับผู้บริหาร
+## บทสรุปผู้บริหาร
 
-OmniRoute คือเกตเวย์กำหนดเส้นทาง AI แบบโลคัลและแดชบอร์ดที่สร้างบน Next.js
-โดยมีปลายทางเดียวที่เข้ากันได้กับ OpenAI (`/v1/*`) และกำหนดเส้นทางทราฟฟิกไปยังผู้ให้บริการต้นทางหลายราย พร้อมการแปลงรูปแบบ การสลับไปใช้ตัวเลือกสำรอง การรีเฟรชโทเค็น และการติดตามการใช้งาน
+OmniRoute เป็นเกตเวย์การกำหนดเส้นทาง AI ภายในและแดชบอร์ดที่สร้างขึ้นบน Next.js โดยให้จุดสิ้นสุดที่เข้ากันได้กับ OpenAI (`/v1/*`) จุดเดียว และกำหนดเส้นทางการรับส่งข้อมูลผ่านผู้ให้บริการอัปสตรีมหลายรายพร้อมการแปล ทางเลือกสำรอง การรีเฟรชโทเค็น และการติดตามการใช้งาน
 
 ความสามารถหลัก:
 
-- พื้นผิว API ที่เข้ากันได้กับ OpenAI สำหรับ CLI/เครื่องมือ (ผู้ให้บริการ 376 ราย, โมดูลตัวดำเนินการ 156 โมดูล)
-- การแปลงคำขอ/การตอบกลับระหว่างรูปแบบของผู้ให้บริการ
-- การสลับโมเดลสำรองแบบคอมโบ (ลำดับหลายโมเดล)
-- ขั้นตอนคอมโบแบบมีโครงสร้าง (`provider + model + connection`) พร้อมการจัดลำดับขณะรันด้วย `compositeTiers`
-- การสลับบัญชีสำรองในระดับบัญชี (หลายบัญชีต่อผู้ให้บริการ)
-- การตรวจสอบโควตาล่วงหน้าและการเลือกบัญชีแบบ P2C ที่คำนึงถึงโควตาในเส้นทางแชตหลัก
-- การจัดการการเชื่อมต่อผู้ให้บริการผ่าน OAuth + คีย์ API (โมดูลผู้ให้บริการ OAuth 27 โมดูล)
-- การสร้างเวกเตอร์ฝังผ่าน `/v1/embeddings` (ผู้ให้บริการ 18 ราย)
-- การสร้างรูปภาพผ่าน `/v1/images/generations` (ผู้ให้บริการมากกว่า 10 ราย, โมเดลมากกว่า 20 โมเดล)
+- พื้นผิว API ที่เข้ากันได้กับ OpenAI สำหรับ CLI/tools (ผู้ให้บริการ 381 ราย, โมดูลปฏิบัติการ 159 รายการ)
+- การแปล Request/response ข้ามรูปแบบของผู้ให้บริการ
+- ทางเลือกคำสั่งผสมโมเดล (ลำดับหลายโมเดล)
+- ขั้นตอนคอมโบที่มีโครงสร้าง (`provider + model + connection`) พร้อมการเรียงลำดับรันไทม์โดย `compositeTiers`
+- ทางเลือกระดับบัญชี (หลายบัญชีต่อผู้ให้บริการ)
+- การเลือกบัญชี preflight โควต้าและบัญชี P2C ที่รับรู้โควต้าในเส้นทางแชทหลัก
+- OAuth + การจัดการการเชื่อมต่อผู้ให้บริการคีย์ API (27 โมดูลผู้ให้บริการ OAuth )
+- การสร้างการฝังผ่าน `/v1/embeddings` (ผู้ให้บริการ 18 ราย)
+- การสร้างอิมเมจผ่าน `/v1/images/generations` (ผู้ให้บริการ 10 +, โมเดล + 20 รุ่น)
 - การถอดเสียงผ่าน `/v1/audio/transcriptions` (ผู้ให้บริการ 18 ราย)
-- การแปลงข้อความเป็นเสียงพูดผ่าน `/v1/audio/speech` (ผู้ให้บริการในตัว 24 ราย)
+- การอ่านออกเสียงข้อความผ่าน `/v1/audio/speech` (ผู้ให้บริการในตัว 24 ราย)
 - การสร้างวิดีโอผ่าน `/v1/videos/generations` (ComfyUI + SD WebUI)
 - การสร้างเพลงผ่าน `/v1/music/generations` (ComfyUI)
-- การค้นหาเว็บผ่าน `/v1/search` (ผู้ให้บริการ 20 ราย)
-- การตรวจสอบเนื้อหาผ่าน `/v1/moderations`
+- ค้นหาเว็บผ่าน `/v1/search` (ผู้ให้บริการ 20 ราย)
+- การกลั่นกรองผ่าน `/v1/moderations`
 - การจัดอันดับใหม่ผ่าน `/v1/rerank`
-- การแยกวิเคราะห์แท็ก Think (`<think>...</think>`) สำหรับโมเดลการให้เหตุผล
-- การปรับข้อมูลตอบกลับให้ปลอดภัยเพื่อให้เข้ากันได้อย่างเคร่งครัดกับ OpenAI SDK
-- การทำให้บทบาทเป็นมาตรฐาน (developer→system, system→user) เพื่อความเข้ากันได้ระหว่างผู้ให้บริการ
-- การแปลงเอาต์พุตแบบมีโครงสร้าง (json_schema → Gemini responseSchema)
-- การจัดเก็บข้อมูลแบบโลคัลสำหรับผู้ให้บริการ คีย์ นามแฝง คอมโบ การตั้งค่า และราคา (โมดูล DB 122 โมดูล)
-- การติดตามการใช้งาน/ต้นทุนและการบันทึกคำขอ
-- การซิงค์กับคลาวด์แบบเลือกใช้ได้สำหรับการซิงค์สถานะ/หลายอุปกรณ์
-- รายการอนุญาต/รายการบล็อก IP สำหรับควบคุมการเข้าถึง API
-- การจัดการงบประมาณการคิด (ส่งผ่าน/อัตโนมัติ/กำหนดเอง/ปรับเปลี่ยนได้)
-- การแทรกพรอมต์ระบบส่วนกลาง
-- การติดตามเซสชันและการทำลายนิ้วมือ
-- การจำกัดอัตราขั้นสูงแยกตามบัญชี พร้อมโปรไฟล์เฉพาะผู้ให้บริการ
-- รูปแบบวงจรตัดการทำงานเพื่อเพิ่มความยืดหยุ่นของผู้ให้บริการ
-- การป้องกันการร้องขอพร้อมกันจำนวนมากด้วยการล็อกแบบ mutex
-- แคชขจัดคำขอซ้ำที่อิงตามลายเซ็น
-- เลเยอร์โดเมน: กฎต้นทุน นโยบายการสลับสำรอง และนโยบายการล็อกไม่ให้ใช้งาน
-- Context Relay: สรุปการส่งต่อเซสชันเพื่อรักษาความต่อเนื่องเมื่อหมุนเวียนบัญชี
-- การคงอยู่ของสถานะโดเมน (แคช SQLite แบบเขียนผ่านสำหรับการสลับสำรอง งบประมาณ การล็อกไม่ให้ใช้งาน และวงจรตัดการทำงาน)
-- เอนจินนโยบายสำหรับการประเมินคำขอแบบรวมศูนย์ (การล็อกไม่ให้ใช้งาน → งบประมาณ → การสลับสำรอง)
-- เทเลเมทรีคำขอพร้อมการรวมเวลาแฝงแบบ p50/p95/p99
-- เทเลเมทรีเป้าหมายคอมโบและประวัติสถานะความพร้อมของเป้าหมายคอมโบผ่าน `combo_execution_key` / `combo_step_id`
-- ID สหสัมพันธ์ (X-Request-Id) สำหรับการติดตามตั้งแต่ต้นทางถึงปลายทาง
-- การบันทึกการตรวจสอบการปฏิบัติตามข้อกำหนด พร้อมตัวเลือกปิดใช้งานแยกตามคีย์ API
-- เฟรมเวิร์กการประเมินสำหรับการประกันคุณภาพ LLM
-- แดชบอร์ดสถานะพร้อมสถานะวงจรตัดการทำงานของผู้ให้บริการแบบเรียลไทม์
-- เซิร์ฟเวอร์ MCP (เครื่องมือ 110 รายการ) พร้อมการขนส่ง 3 รูปแบบ (stdio/SSE/Streamable HTTP)
-- เซิร์ฟเวอร์ A2A (JSON-RPC 2.0 + SSE) พร้อมทักษะและวงจรชีวิตของงาน
-- ระบบหน่วยความจำ (การแยก การแทรก การดึงคืน และการสรุป)
-- ระบบทักษะ (รีจิสทรี ตัวดำเนินการ แซนด์บ็อกซ์ และทักษะในตัว)
-- พร็อกซี MITM พร้อมการจัดการใบรับรองและการจัดการ DNS
-- มิดเดิลแวร์ป้องกันการแทรกพรอมต์
-- ไปป์ไลน์การบีบอัดพรอมต์ พร้อม Caveman, RTK, ไปป์ไลน์แบบซ้อน คอมโบการบีบอัด ชุดภาษา และการวิเคราะห์
-- รีจิสทรี ACP (Agent Communication Protocol)
-- ผู้ให้บริการ OAuth แบบโมดูลาร์ (โมดูลแยก 22 โมดูลภายใต้ `src/lib/oauth/providers/`)
-- สคริปต์ถอนการติดตั้ง/ถอนการติดตั้งทั้งหมด
+- คิดว่าการแยกวิเคราะห์แท็ก (`<think>...</think>`) สำหรับโมเดลการให้เหตุผล
+- การตอบสนองการฆ่าเชื้อเพื่อความเข้ากันได้ของ OpenAI SDK ที่เข้มงวด
+- การทำให้บทบาทเป็นมาตรฐาน (ระบบ → ของผู้พัฒนา, ผู้ใช้ระบบ →) สำหรับความเข้ากันได้ระหว่างผู้ให้บริการ
+- การแปลงเอาต์พุตที่มีโครงสร้าง (json_schema → Gemini responseSchema)
+- การคงอยู่ในท้องถิ่นสำหรับผู้ให้บริการ คีย์ นามแฝง คอมโบ การตั้งค่า ราคา (โมดูล 122 DB )
+- การติดตาม Usage/cost และขอบันทึก
+- การซิงค์บนคลาวด์เสริมสำหรับการซิงค์ multi-device/state
+- IP allowlist/blocklist สำหรับการควบคุมการเข้าถึง API
+- การคิดการบริหารงบประมาณ (passthrough/auto/custom/adaptive)
+- ระบบฉีดพร้อมท์ทั่วโลก
+- การติดตามเซสชันและการพิมพ์ลายนิ้วมือ
+- การจำกัดอัตราขั้นสูงต่อบัญชีด้วยโปรไฟล์เฉพาะของผู้ให้บริการ
+- รูปแบบเซอร์กิตเบรกเกอร์เพื่อความยืดหยุ่นของผู้ให้บริการ
+- ป้องกันฝูงฟ้าผ่าพร้อมระบบล็อค mutex
+- แคชการขจัดข้อมูลซ้ำซ้อนของคำขอตามลายเซ็น
+- ชั้นโดเมน: กฎต้นทุน, นโยบายสำรอง, นโยบายการล็อก
+- การถ่ายทอดบริบท: สรุปเซสชันสำหรับการหมุนเวียนบัญชีอย่างต่อเนื่อง
+- การคงอยู่ของสถานะโดเมน (แคชการเขียนผ่าน SQLite สำหรับทางเลือกสำรอง งบประมาณ การล็อคเอาต์ เซอร์กิตเบรกเกอร์)
+- กลไกนโยบายสำหรับการประเมินคำขอแบบรวมศูนย์ (การล็อกงบประมาณ → → สำรอง)
+- ขอการตรวจวัดทางไกลด้วยการรวมเวลาแฝง p50/p95/p99
+- การวัดระยะไกลเป้าหมายคอมโบและสุขภาพเป้าหมายคอมโบในอดีตผ่าน `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) สำหรับการติดตามจากต้นทางถึงปลายทาง
+- การบันทึกการตรวจสอบการปฏิบัติตามข้อกำหนดโดยเลือกไม่ใช้ต่อคีย์ API
+- กรอบการประเมินสำหรับการประกันคุณภาพ LLM
+- แดชบอร์ดสุขภาพพร้อมสถานะเบรกเกอร์ของผู้ให้บริการแบบเรียลไทม์
+- เซิร์ฟเวอร์MCP (110 เครื่องมือ) พร้อม 3 การขนส่ง (stdio/SSE/Streamable HTTP)
+- เซิร์ฟเวอร์A2A (JSON-RPC 2.0 + SSE) พร้อมทักษะและวงจรชีวิตของงาน
+- ระบบหน่วยความจำ (การสกัด การฉีด การดึงข้อมูล การสรุป)
+- ระบบทักษะ (รีจิสทรี, ผู้ดำเนินการ, แซนด์บ็อกซ์, ทักษะในตัว)
+- พร็อกซีMITM พร้อมการจัดการใบรับรองและการจัดการ DNS
+- มิดเดิลแวร์ตัวป้องกันการฉีดพร้อมท์
+- ไปป์ไลน์การบีบอัดพร้อมท์ด้วย Caveman, RTK, ไปป์ไลน์แบบสแต็ก, คอมโบการบีบอัด, ชุดภาษา และการวิเคราะห์
+- รีจิสทรีACP (Agent Communication Protocol)
+- ผู้ให้บริการ OAuth แบบโมดูลาร์ (22 โมดูลแต่ละโมดูลภายใต้ `src/lib/oauth/providers/`)
+- สคริปต์Uninstall/full-uninstall
 - การดำเนินการซ่อมแซมสภาพแวดล้อม OAuth
-- บริดจ์ WebSocket สำหรับไคลเอนต์ WS ที่เข้ากันได้กับ OpenAI (`/v1/ws`)
-- การจัดการโทเค็นการซิงค์ (ออก/เพิกถอน, ดาวน์โหลดบันเดิลการกำหนดค่าที่กำหนดเวอร์ชันด้วย ETag)
-- พรีเซ็ตผู้ให้บริการระดับเฟิร์สคลาส GLM Thinking (`glmt`)
-- การนับโทเค็นแบบไฮบริด (`/messages/count_tokens` ฝั่งผู้ให้บริการ พร้อมการประมาณค่าเป็นตัวเลือกสำรอง)
-- การสร้างข้อมูลตั้งต้นสำหรับนามแฝงโมเดลโดยอัตโนมัติ (การปรับรูปแบบภาษาถิ่นข้ามพร็อกซีให้เป็นมาตรฐานมากกว่า 30 รายการเมื่อเริ่มทำงาน)
-- การดึงข้อมูลขาออกอย่างปลอดภัย พร้อมการป้องกัน SSRF การบล็อก URL ส่วนตัว และการลองใหม่ที่กำหนดค่าได้
-- การลองแชตใหม่ที่คำนึงถึงช่วงพัก พร้อม `requestRetry` และ `maxRetryIntervalSec` ที่กำหนดค่าได้
-- การตรวจสอบความถูกต้องของสภาพแวดล้อมรันไทม์ด้วย Zod เมื่อเริ่มทำงาน
-- การตรวจสอบการปฏิบัติตามข้อกำหนด v2 พร้อมการแบ่งหน้า เหตุการณ์ CRUD ของผู้ให้บริการ และการบันทึกการตรวจสอบความถูกต้องที่ถูกบล็อกโดย SSRF
+- สะพาน WebSocket สำหรับไคลเอนต์ WS ที่เข้ากันได้กับ OpenAI (`/v1/ws`)
+- การจัดการโทเค็นการซิงค์ (issue/revoke, ดาวน์โหลดบันเดิลการกำหนดค่าเวอร์ชัน ETag)
+- GLM Thinking (`glmt`) ผู้ให้บริการชั้นหนึ่งที่ตั้งไว้ล่วงหน้า
+- การนับโทเค็นแบบไฮบริด ( `/messages/count_tokens` ฝั่งผู้ให้บริการพร้อมการประมาณทางเลือกสำรอง)
+- การสร้างโมเดลนามแฝงอัตโนมัติ (การปรับมาตรฐานภาษาข้ามพร็อกซี 30 + เมื่อเริ่มต้น)
+- การดึงข้อมูลขาออกอย่างปลอดภัยด้วย SSRF guard การบล็อก URL ส่วนตัว และการลองอีกครั้งที่กำหนดค่าได้
+- การแชทที่ทราบถึงคูลดาวน์จะพยายามอีกครั้งด้วย `requestRetry` และ `maxRetryIntervalSec` ที่กำหนดค่าได้
+- การตรวจสอบสภาพแวดล้อมรันไทม์ด้วย Zod เมื่อเริ่มต้น
+- การตรวจสอบการปฏิบัติตามข้อกำหนด v2 พร้อมการแบ่งหน้า เหตุการณ์ CRUD ของผู้ให้บริการ และการบันทึกการตรวจสอบความถูกต้องที่บล็อก SSRF
 
 โมเดลรันไทม์หลัก:
 
-- เส้นทางแอป Next.js ภายใต้ `src/app/api/*` ใช้งานทั้ง API ของแดชบอร์ดและ API สำหรับความเข้ากันได้
-- แกนกลาง SSE/การกำหนดเส้นทางที่ใช้ร่วมกันใน `src/sse/*` + `open-sse/*` จัดการการดำเนินงานของผู้ให้บริการ การแปลงรูปแบบ การสตรีม การสลับสำรอง และการใช้งาน
+- เส้นทางแอป Next.js ภายใต้ `src/app/api/*` ใช้ทั้งแดชบอร์ด APIs และความเข้ากันได้ APIs
+- SSE/routing core ที่ใช้ร่วมกันใน `src/sse/*` + `open-sse/*` จัดการการดำเนินการของผู้ให้บริการ การแปล การสตรีม ทางเลือกสำรอง และการใช้งาน
 
 ## ไดอะแกรมอ้างอิง
 
@@ -266,73 +265,73 @@ flowchart LR
 - บันเดิลการกำหนดค่า: `src/app/api/sync/bundle` (GET, สแนปช็อตของการตั้งค่า/ผู้ให้บริการ/คอมโบ/คีย์ที่กำหนดเวอร์ชันด้วย ETag)
 - WebSocket: `src/app/api/v1/ws/route.ts` — ตัวจัดการ Upgrade สำหรับไคลเอนต์ WS ที่เข้ากันได้กับ OpenAI
 
-## 2) SSE + แกนกลางการแปล
+## 2) SSE + แกนหลักการแปล
 
-โมดูลของโฟลว์หลัก:
+โมดูลโฟลว์หลัก:
 
 - จุดเริ่มต้น: `src/sse/handlers/chat.ts`
 - การประสานงานหลัก: `open-sse/handlers/chatCore.ts`
-- อะแดปเตอร์การรัน provider: `open-sse/executors/*`
-- การตรวจจับรูปแบบ/การตั้งค่า provider: `open-sse/services/provider.ts`
+- อะแดปเตอร์สำหรับดำเนินการกับผู้ให้บริการ: `open-sse/executors/*`
+- การตรวจหารูปแบบ/การกำหนดค่าผู้ให้บริการ: `open-sse/services/provider.ts`
 - การแยกวิเคราะห์/แก้ไขโมเดล: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- ตรรกะ fallback ของบัญชี: `open-sse/services/accountFallback.ts`
+- ตรรกะการสลับบัญชีสำรอง: `open-sse/services/accountFallback.ts`
 - รีจิสทรีการแปล: `open-sse/translator/index.ts`
 - การแปลงสตรีม: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- การดึง/ทำให้ usage เป็นมาตรฐาน: `open-sse/utils/usageTracking.ts`
-- ตัวแยกวิเคราะห์ think tag: `open-sse/utils/thinkTagParser.ts`
-- ตัวจัดการ embedding: `open-sse/handlers/embeddings.ts`
-- รีจิสทรี provider ของ embedding: `open-sse/config/embeddingRegistry.ts`
-- ตัวจัดการการสร้างภาพ: `open-sse/handlers/imageGeneration.ts`
-- รีจิสทรี provider ของภาพ: `open-sse/config/imageRegistry.ts`
-- การทำความสะอาด response: `open-sse/handlers/responseSanitizer.ts`
-- การทำ role ให้เป็นมาตรฐาน: `open-sse/services/roleNormalizer.ts`
+- การดึงข้อมูล/ปรับรูปแบบการใช้งานให้เป็นมาตรฐาน: `open-sse/utils/usageTracking.ts`
+- ตัวแยกวิเคราะห์แท็ก Think: `open-sse/utils/thinkTagParser.ts`
+- ตัวจัดการ Embedding: `open-sse/handlers/embeddings.ts`
+- รีจิสทรีผู้ให้บริการ Embedding: `open-sse/config/embeddingRegistry.ts`
+- ตัวจัดการการสร้างรูปภาพ: `open-sse/handlers/imageGeneration.ts`
+- รีจิสทรีผู้ให้บริการรูปภาพ: `open-sse/config/imageRegistry.ts`
+- การปรับแต่งการตอบกลับให้ปลอดภัย: `open-sse/handlers/responseSanitizer.ts`
+- การปรับบทบาทให้เป็นมาตรฐาน: `open-sse/services/roleNormalizer.ts`
 
-เซอร์วิส (ตรรกะทางธุรกิจ):
+บริการ (ตรรกะทางธุรกิจ):
 
 - การเลือก/ให้คะแนนบัญชี: `open-sse/services/accountSelector.ts`
-- การจัดการวงจรชีวิตของ context: `open-sse/services/contextManager.ts`
+- การจัดการวงจรชีวิตของบริบท: `open-sse/services/contextManager.ts`
 - การบังคับใช้ตัวกรอง IP: `open-sse/services/ipFilter.ts`
 - การติดตามเซสชัน: `open-sse/services/sessionManager.ts`
 - การกำจัดคำขอซ้ำ: `open-sse/services/signatureCache.ts`
-- การแทรก system prompt: `open-sse/services/systemPrompt.ts`
-- การจัดการงบประมาณ thinking: `open-sse/services/thinkingBudget.ts`
-- การกำหนดเส้นทางโมเดล wildcard: `open-sse/services/wildcardRouter.ts`
-- การจัดการ rate limit: `open-sse/services/rateLimitManager.ts`
+- การแทรกพรอมต์ระบบ: `open-sse/services/systemPrompt.ts`
+- การจัดการงบประมาณการคิด: `open-sse/services/thinkingBudget.ts`
+- การกำหนดเส้นทางโมเดลด้วยไวลด์การ์ด: `open-sse/services/wildcardRouter.ts`
+- การจัดการขีดจำกัดอัตรา: `open-sse/services/rateLimitManager.ts`
 - เซอร์กิตเบรกเกอร์: `src/shared/utils/circuitBreaker.ts`
-- การส่งต่อ context: `open-sse/services/contextHandoff.ts` — การสร้างและแทรกสรุป handoff สำหรับกลยุทธ์ context-relay
-- การบีบอัด: `open-sse/services/compression/*` — การบีบอัดเชิงรุกก่อนการแปลของ provider;
-  รวมถึงกฎ Caveman, ตัวกรอง RTK, ไปป์ไลน์แบบซ้อน, คอมโบการบีบอัด, สถิติ และการตรวจสอบ
-- ตัวดึงโควต้า Codex: `open-sse/services/codexQuotaFetcher.ts` — ดึงโควต้า Codex สำหรับการตัดสินใจ handoff ของ context-relay
-- การ retry ที่รับรู้ cooldown: `src/sse/services/cooldownAwareRetry.ts` — การ retry ตาม cooldown รายโมเดล พร้อม `requestRetry` / `maxRetryIntervalSec` ที่ปรับแต่งได้
-- การ fetch ขาออกที่ปลอดภัย: `src/shared/network/safeOutboundFetch.ts` — การ fetch provider/โมเดลที่มีการป้องกัน ด้วยการป้องกัน SSRF, การบล็อก URL ส่วนตัว, การ retry และ timeout
-- ตัวป้องกัน URL ขาออก: `src/shared/network/outboundUrlGuard.ts` — การตรวจสอบ host บน URL ของ provider; `src/shared/network/outboundUrlGuardPolicy.ts` เลือกโหมดจาก `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` และสวิตช์ในแดชบอร์ด (ดู `docs/reference/ENVIRONMENT.md`)
-- ค่าเริ่มต้นของคำขอ provider: `open-sse/services/providerRequestDefaults.ts` — ค่าเริ่มต้นระดับ provider สำหรับ `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- ค่าคงที่ของ GLM provider: `open-sse/config/glmProvider.ts` — โมเดล GLM ที่ใช้ร่วมกัน, URL โควต้า, timeout/ค่าเริ่มต้นของ GLMT
-- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — ค่าคงที่ของ base URL และเส้นทาง discovery
-- ค่าคงที่ของ Codex client: `open-sse/config/codexClient.ts` — ค่า user-agent และ client-version ที่มีเวอร์ชัน
-- Seed ของ model alias: `src/lib/modelAliasSeed.ts` — เพาะ alias ของภาษาถิ่นข้าม proxy กว่า 30 รายการตอนเริ่มต้นระบบ
+- การส่งต่อบริบท: `open-sse/services/contextHandoff.ts` — การสร้างและแทรกข้อมูลสรุปการส่งต่อสำหรับกลยุทธ์ถ่ายทอดบริบท
+- การบีบอัด: `open-sse/services/compression/*` — การบีบอัดเชิงรุกก่อนการแปลของผู้ให้บริการ;
+  ประกอบด้วยกฎ Caveman, ตัวกรอง RTK, ไปป์ไลน์แบบซ้อน, ชุดผสมการบีบอัด, สถิติ และการตรวจสอบความถูกต้อง
+- ตัวดึงโควตา Codex: `open-sse/services/codexQuotaFetcher.ts` — ดึงโควตา Codex เพื่อใช้ตัดสินใจส่งต่อบริบท
+- การลองใหม่โดยคำนึงถึงช่วงพัก: `src/sse/services/cooldownAwareRetry.ts` — การลองใหม่ตามช่วงพักของแต่ละโมเดล โดยกำหนดค่าได้ผ่าน `requestRetry` / `maxRetryIntervalSec`
+- การดึงข้อมูลขาออกอย่างปลอดภัย: `src/shared/network/safeOutboundFetch.ts` — การดึงข้อมูลผู้ให้บริการ/โมเดลที่มีการป้องกัน SSRF, การบล็อก URL ส่วนตัว, การลองใหม่ และการหมดเวลา
+- ตัวควบคุม URL ขาออก: `src/shared/network/outboundUrlGuard.ts` — การตรวจสอบโฮสต์ใน URL ของผู้ให้บริการ; `src/shared/network/outboundUrlGuardPolicy.ts` เลือกโหมดจาก `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` และตัวเลือกสลับบนแดชบอร์ดที่เกี่ยวข้อง (ดู `docs/reference/ENVIRONMENT.md`)
+- ค่าเริ่มต้นของคำขอผู้ให้บริการ: `open-sse/services/providerRequestDefaults.ts` — ค่าเริ่มต้นระดับผู้ให้บริการสำหรับ `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- ค่าคงที่ของผู้ให้บริการ GLM: `open-sse/config/glmProvider.ts` — โมเดล GLM, URL โควตา, การหมดเวลา/ค่าเริ่มต้นของ GLMT ที่ใช้ร่วมกัน
+- ต้นทาง Antigravity: `open-sse/config/antigravityUpstream.ts` — URL ฐานและค่าคงที่ของพาธการค้นหา
+- ค่าคงที่ของไคลเอนต์ Codex: `open-sse/config/codexClient.ts` — ค่า user-agent และเวอร์ชันไคลเอนต์แบบระบุเวอร์ชัน
+- ข้อมูลเริ่มต้นของนามแฝงโมเดล: `src/lib/modelAliasSeed.ts` — เพิ่มข้อมูลเริ่มต้นของนามแฝงข้ามภาษาถิ่นของพร็อกซีมากกว่า 30 รายการเมื่อเริ่มทำงาน
 
-โมดูลของชั้นโดเมน:
+โมดูลชั้นโดเมน:
 
-- กฎค่าใช้จ่าย/งบประมาณ: `src/domain/costRules.ts`
-- นโยบาย fallback: `src/domain/fallbackPolicy.ts`
-- สัญญาการแก้ไขคอมโบที่สงวนไว้: `src/domain/comboResolver.ts`; การกำหนดเส้นทางจริงใช้ `open-sse/services/combo.ts`
-- นโยบายการล็อกเอาต์: `src/domain/lockoutPolicy.ts`
-- สัญญาการประเมินนโยบายที่สงวนไว้: `src/domain/policyEngine.ts`; เส้นทางคำขอบังคับใช้นโยบาย API key ผ่าน `src/shared/utils/apiKeyPolicy.ts` และการอนุญาตเป้าหมายที่แก้ไขแล้วผ่าน `src/sse/handlers/chat/resolvedModelPolicy.ts`
-- แคตตาล็อกรหัสข้อผิดพลาด: `src/shared/constants/errorCodes.ts`
-- Request ID: `src/shared/utils/requestId.ts`
-- Timeout ของ fetch: `src/shared/utils/fetchTimeout.ts`
-- Telemetry ของคำขอ: `src/shared/utils/requestTelemetry.ts`
-- การปฏิบัติตาม/การตรวจสอบ: `src/lib/compliance/index.ts`
-- ตัวรัน eval: `src/lib/evals/evalRunner.ts`
-- การคงอยู่ของสถานะโดเมน: `src/lib/db/domainState.ts` — SQLite CRUD สำหรับห่วงโซ่ fallback, งบประมาณ, ประวัติค่าใช้จ่าย, สถานะล็อกเอาต์, เซอร์กิตเบรกเกอร์
+- กฎต้นทุน/งบประมาณ: `src/domain/costRules.ts`
+- นโยบายการสลับไปใช้ตัวสำรอง: `src/domain/fallbackPolicy.ts`
+- ตัวแก้ไขชุดผสม: `src/domain/comboResolver.ts`
+- นโยบายการล็อกไม่ให้ใช้งาน: `src/domain/lockoutPolicy.ts`
+- กลไกนโยบาย: `src/domain/policyEngine.ts` — การประเมินแบบรวมศูนย์ตามลำดับ การล็อกไม่ให้ใช้งาน → งบประมาณ → การสลับไปใช้ตัวสำรอง
+- แค็ตตาล็อกรหัสข้อผิดพลาด: `src/shared/constants/errorCodes.ts`
+- ID คำขอ: `src/shared/utils/requestId.ts`
+- การหมดเวลาของการดึงข้อมูล: `src/shared/utils/fetchTimeout.ts`
+- เทเลเมทรีของคำขอ: `src/shared/utils/requestTelemetry.ts`
+- การปฏิบัติตามข้อกำหนด/การตรวจสอบ: `src/lib/compliance/index.ts`
+- ตัวรันการประเมิน: `src/lib/evals/evalRunner.ts`
+- การจัดเก็บสถานะโดเมนถาวร: `src/lib/db/domainState.ts` — SQLite CRUD สำหรับเชนตัวสำรอง, งบประมาณ, ประวัติต้นทุน, สถานะการล็อกไม่ให้ใช้งาน และเซอร์กิตเบรกเกอร์
 
-โมดูล OAuth provider (27 ไฟล์แยกกันภายใต้ `src/lib/oauth/providers/`):
+โมดูลผู้ให้บริการ OAuth (ไฟล์แยกกัน 27 ไฟล์ภายใต้ `src/lib/oauth/providers/`):
 
 - ดัชนีรีจิสทรี: `src/lib/oauth/providers/index.ts`
-- Provider แต่ละราย: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- ตัวช่วยที่ใช้ร่วมกัน: `codebuddyDeviceAuth.ts` (device flow ของ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
-- Wrapper แบบบาง: `src/lib/oauth/providers.ts` — re-export จากโมดูลแต่ละตัว
+- ผู้ให้บริการแต่ละราย: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- ตัวช่วยที่ใช้ร่วมกัน: `codebuddyDeviceAuth.ts` (โฟลว์อุปกรณ์ CodeBuddy CN/สากล), `museCodeDeviceResponse.ts`
+- แรปเปอร์แบบบาง: `src/lib/oauth/providers.ts` — ส่งออกซ้ำจากแต่ละโมดูล
 
 ## 5) บริการแบบฝังตัว (v3.8.4)
 
@@ -359,177 +358,122 @@ OmniRoute สามารถติดตั้ง กำกับดูแล �
 
 ## ระบบย่อยหลัก (v3.8.0)
 
-### A. Auto Combo Engine
+### ก. เครื่องยนต์ออโต้คอมโบ
 
-Auto Combo จะให้คะแนนและเลือกเป้าหมายการเราต์แบบไดนามิก ณ เวลาที่มีคำขอเข้ามา แทนที่จะ
-พึ่งพานิยามคอมโบแบบคงที่ มันขับเคลื่อนกลุ่มพรีฟิกซ์โมเดล `auto/*`
+คอมโบอัตโนมัติจะให้คะแนนและเลือกเป้าหมายการกำหนดเส้นทางตามเวลาที่ร้องขอ แทนที่จะอาศัยคำจำกัดความของคอมโบแบบคงที่ โดยจะขับเคลื่อนกลุ่มคำนำหน้าโมเดล `auto/*`
 
-- จุดเข้าของเอนจิน: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- จุดเข้าของคอมโบสด: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`) ถูกเรียกโดย `src/sse/handlers/chat.ts`
+- รายการเครื่องยนต์: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- ตัวแก้ไข: `src/domain/comboResolver.ts` (การตรวจจับคำนำหน้า `auto/` อัตโนมัติ)
 - แดชบอร์ด: `/dashboard/auto-combo`
-- เทเลเมทรี: ตาราง SQLite ชื่อ `auto_combo_decisions`
+- การวัดและส่งข้อมูลทางไกล: ตาราง `auto_combo_decisions` SQLite
 
-ความสามารถหลัก:
+ความสามารถที่สำคัญ:
 
-- **กลยุทธ์การเราต์ 20 แบบ** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto คือสิ่งเด่นที่เพิ่มเข้ามาใน v3.8.0; ส่วน `fusion` (การกระจายงานแบบ panel fan-out พร้อม
-  การสังเคราะห์ผลโดย judge, `open-sse/services/fusion.ts`) เพิ่มเข้ามาใหม่ใน v3.8.36
-- **การให้คะแนน 16 ปัจจัย**: โควตา, สถานะสุขภาพ, ต้นทุนแบบผกผัน, เวลาแฝงแบบผกผัน, ความเหมาะสมกับงาน
-  และอีกสิบปัจจัย ตารางมาตรฐานของปัจจัยและน้ำหนักเริ่มต้นอยู่ที่
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — การเขียนซ้ำไว้ที่นี่จะ
-  ทำให้มันมีอีกจุดหนึ่งที่อาจล้าสมัยได้
-- **Virtual factory** สร้างคอมโบชั่วคราวขึ้นมาเมื่อไม่มีคอมโบที่ตั้งชื่อไว้ตรงกัน
-  โดยดึงตัวเลือกมาจากการเชื่อมต่อผู้ให้บริการที่ใช้งานอยู่และมีสถานะปกติ
-- **พรีฟิกซ์ Auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — แต่ละตัวรองรับด้วยโปรไฟล์น้ำหนักที่ปรับจูนมาแล้ว
-- **6 ชุดโหมด (mode packs)**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` และ `chaos-mode` — ค่าตั้งต้นของการกำหนดน้ำหนักที่เรียกใช้ได้จาก
-  แดชบอร์ด (อย่าสับสนกับพรีฟิกซ์ `auto/*` ด้านบน ซึ่งเป็น
-  ตัวแปรแบบ ณ เวลาคำขอ)
+- **20 กลยุทธ์การกำหนดเส้นทาง** (ลำดับความสำคัญ, ถ่วงน้ำหนัก, เติมก่อน, ปัดเศษ, P2C, สุ่ม, ใช้น้อยที่สุด, ปรับต้นทุนให้เหมาะสม, รับรู้การรีเซ็ต, รีเซ็ตหน้าต่าง, ห้องว่าง, ถ่วงน้ำหนักโควต้า, สุ่มเข้มงวด,** อัตโนมัติ** , lkgp, ปรับบริบทให้เหมาะสม, ปรับแคชให้เหมาะสม, ถ่ายทอดบริบท,** ฟิวชั่น** , ไปป์ไลน์) — auto คือการเพิ่มพาดหัวใน v3.8.0; `fusion` (การสังเคราะห์ผู้พิพากษา + ของแผง fan-out, `open-sse/services/fusion.ts`) เป็นสิ่งใหม่ใน v3.8.36
+- **การให้คะแนน 16 ปัจจัย** : โควต้า สุขภาพ ต้นทุนผกผัน เวลาแฝงผกผัน ความพอดีของงาน และอื่นๆ อีกสิบรายการ ตารางปัจจัยที่เป็นที่ยอมรับและน้ำหนักเริ่มต้นอยู่ใน [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — การทำซ้ำที่นี่จะทำให้เป็นสถานที่ที่สองที่จะล้าสมัย
+- **โรงงานเสมือนจริง** ทำให้เกิดคอมโบชั่วคราวเมื่อไม่มีคอมโบที่มีชื่อตรงกัน จัดหาผู้สมัครจากการเชื่อมต่อผู้ให้บริการที่ดี
+- **คำนำหน้าอัตโนมัติ** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — แต่ละรายการได้รับการสนับสนุนโดยโปรไฟล์น้ำหนักที่ปรับแล้ว
+- **6 โหมดแพ็ค** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` และ `chaos-mode` — การกำหนดค่าน้ำหนักที่ตั้งไว้ล่วงหน้าสามารถเรียกได้จากแดชบอร์ด (อย่าสับสนกับคำนำหน้า `auto/*` ด้านบน ซึ่งเป็นตัวแปรตามเวลาร้องขอ)
 
-สำหรับรายละเอียดเชิงอัลกอริทึมทั้งหมด (สูตรของปัจจัย การปรับจูนน้ำหนัก) ดูที่
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)
+สำหรับรายละเอียดอัลกอริธึมแบบเต็ม (สูตรตัวประกอบ การปรับน้ำหนัก) โปรดดู [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)
 
-### B. Cloud Agents
+### B. ตัวแทนระบบคลาวด์
 
-Cloud Agents ห่อหุ้มแพลตฟอร์มเอเจนต์เขียนโค้ดแบบโฮสต์ของบุคคลที่สาม (Codex Cloud, Devin,
-Jules) ไว้เบื้องหลังวงจรชีวิตของงาน (task lifecycle) แบบเดียวกันที่สำรองด้วยฐานข้อมูล เอนด์พอยต์
-ทั้งหมดสำหรับสร้าง/ตรวจสอบงานจำเป็นต้องมีการยืนยันตัวตนระดับการจัดการ
+Cloud Agents ล้อมแพลตฟอร์มโค้ดเอเจนต์ที่โฮสต์โดยบุคคลที่สาม (Codex Cloud, Devin, Jules) ไว้เบื้องหลังวงจรงานที่ได้รับการสนับสนุนจาก DB ที่เป็นหนึ่งเดียวกัน ตำแหน่งข้อมูล creation/inspection ของงานทั้งหมดจำเป็นต้องมีการตรวจสอบสิทธิ์การจัดการ
 
-- รากของโมดูล: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` รวมถึงไดเรกทอรีย่อยตามเอเจนต์แต่ละตัวภายใต้ `agents/`)
-- การใช้งานตามเอเจนต์แต่ละตัว: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- เอนด์พอยต์สาธารณะ: `/api/v1/agents/tasks/*` (list/create/get/cancel)
-- เอนด์พอยต์การจัดการ: `/api/cloud/*` (การจัดเตรียม, สถานะ, แบตช์)
+- รูทโมดูล: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus per-agent subdirectories ภายใต้ `agents/`)
+- การใช้งานต่อเอเจนต์: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- จุดสิ้นสุดสาธารณะ: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- จุดสิ้นสุดการจัดการ: `/api/cloud/*` (การจัดเตรียม สถานะ แบทช์)
 - แดชบอร์ด: `/dashboard/cloud-agents`
-- ที่จัดเก็บ: ตาราง `cloud_agent_tasks`
+- ที่เก็บของ: โต๊ะ `cloud_agent_tasks`
 
-สำหรับการจัดเตรียมตามเอเจนต์แต่ละตัวและรายละเอียดเฉพาะของ OAuth ดูที่
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)
+สำหรับการจัดเตรียมต่อเอเจนต์และข้อมูลเฉพาะของ OAuth โปรดดูที่ [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)
 
-### C. Guardrails
+### ค. ราวกันตก
 
-โมดูล guardrails เป็นเลเยอร์มิดเดิลแวร์ที่โหลดใหม่ขณะทำงานได้ (hot-reloadable) ซึ่งตรวจสอบคำขอ
-และการตอบกลับเพื่อหา PII, prompt injection และเนื้อหา vision ที่ไม่ปลอดภัย การละเมิด
-จะตัดวงจรคำขอทันทีด้วย HTTP **503** พร้อมรหัสข้อผิดพลาดที่มีโครงสร้าง ทำให้
-ผู้เรียกฝั่งปลายทางสามารถลองใหม่หรือแยกเส้นทางได้
+โมดูล Guardrails เป็นเลเยอร์มิดเดิลแวร์ที่สามารถรีโหลดได้ทันที ซึ่งจะตรวจสอบคำขอและการตอบกลับสำหรับ PII การแทรกพร้อมท์ และเนื้อหาการมองเห็นที่ไม่ปลอดภัย การละเมิดลัดวงจรคำขอด้วย HTTP** 503** พร้อมรหัสข้อผิดพลาดที่มีโครงสร้าง ช่วยให้ผู้โทรดาวน์สตรีมลองใหม่หรือแยกสาขาได้
 
-- รากของโมดูล: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- การโหลดใหม่ขณะทำงาน: registry เฝ้าดูการเปลี่ยนแปลงของคอนฟิกและสร้างเชนใหม่ในที่เดิม
-- จุดเชื่อมต่อ: จุดเข้าของตัวจัดการแชต, ตัวจัดการสร้างภาพ, ตัวทำความสะอาดการตอบกลับ
-- สัญญา HTTP: การละเมิดจะปรากฏเป็น `503` พร้อม `error.code = "GUARDRAIL_VIOLATION"`
+- รูทโมดูล: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- โหลดซ้ำด่วน: รีจิสทรีคอยดูการเปลี่ยนแปลงการกำหนดค่าและสร้างห่วงโซ่ใหม่
+- จุดเชื่อมต่อ: การเข้าสู่ตัวจัดการแชท, ตัวจัดการการสร้างรูปภาพ, เครื่องมือฆ่าเชื้อในการตอบกลับ
+- สัญญา HTTP : การละเมิดปรากฏเป็น `503` กับ `error.code = "GUARDRAIL_VIOLATION"`
 
-สำหรับการเขียนชุดกฎและการปรับจูนค่าเกณฑ์ ดูที่
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)
+สำหรับการเขียนชุดกฎและการปรับแต่งเกณฑ์ โปรดดู [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)
 
-### D. Domain Layer
+### D. เลเยอร์โดเมน
 
-เนมสเปซ `src/domain/` บรรจุบริการโดเมนและสัญญาการประเมินที่สงวนไว้
-มันไม่ใช่จุดเข้านโยบายบังคับเพียงจุดเดียวสำหรับทุกคำขอ
+เนมสเปซ `src/domain/` รวมศูนย์การตัดสินใจนโยบาย ดังนั้นตัวจัดการเส้นทางจึงไม่จำเป็นต้องประกอบตรรกะ lockout/budget/fallback ด้วยตนเอง
 
-เส้นทางแชตที่ใช้งานจริงเรียก `enforceApiKeyPolicy()` จาก
-`src/shared/utils/apiKeyPolicy.ts`; การอนุญาตโมเดลที่ resolve แล้วและสมาชิกคอมโบ
-ถูกใช้งานใน `src/sse/handlers/chat/resolvedModelPolicy.ts` จุดเข้าแบบ self-hosted
-ใน `src/app/api/v1/chat/completions/route.ts` ก็บังคับใช้นโยบาย API key ก่อน
-ส่งต่อเช่นกัน การ resolve คอมโบทำงานผ่าน `open-sse/services/combo.ts`
-
-`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` และ `src/lib/container.ts`
-ยังคงเป็นสัญญาที่มีการทดสอบ ไม่ใช่สายการเชื่อมต่อของเส้นทางคำขอนั้น คอนเทนเนอร์ลงทะเบียน
-policy engine ไว้ แต่เส้นทางคำขอโปรดักชันที่ตรวจสอบแล้วไม่ได้ resolve มัน
-การเปลี่ยนสัญญาเหล่านั้นเพียงอย่างเดียวไม่ได้เปลี่ยนนโยบายแชตสดหรือการเราต์คอมโบ;
-การเชื่อมต่อหรือลบมันออกจำเป็นต้องมีการตัดสินใจเชิงออกแบบแยกต่างหาก
-
-- Policy engine ที่สงวนไว้: `src/domain/policyEngine.ts` — การประเมิน lockout → budget → fallback
+- กลไกจัดการนโยบาย: `src/domain/policyEngine.ts` — จุดเข้าเดียวสำหรับการประเมินก่อนดำเนินการ (ล็อกเอาต์งบประมาณ → ลำดับสำรอง → )
 - กฎต้นทุน: `src/domain/costRules.ts`
-- นโยบาย fallback: `src/domain/fallbackPolicy.ts`
-- นโยบาย lockout: `src/domain/lockoutPolicy.ts`
-- การเราต์ตามแท็ก: `src/domain/tagRouter.ts`
-- ตัว resolve คอมโบที่สงวนไว้: `src/domain/comboResolver.ts` — สัญญาการเลือกแบบสแตนด์อโลน; การเราต์คอมโบสดถูกใช้งานใน `open-sse/services/combo.ts`
-- ตัวรวมกฎการเชื่อมต่อ/โมเดล: `src/domain/connectionModelRules.ts`
-- สแน็ปช็อตความพร้อมใช้งานของโมเดล: `src/domain/modelAvailability.ts`
+- นโยบายสำรอง: `src/domain/fallbackPolicy.ts`
+- นโยบายการล็อก: `src/domain/lockoutPolicy.ts`
+- การกำหนดเส้นทางตามแท็ก: `src/domain/tagRouter.ts`
+- ตัวแก้ไขคำสั่งผสม: `src/domain/comboResolver.ts` — แก้ไขชื่อคำสั่งผสม คำนำหน้า auto/\* และเป้าหมายโมเดลไวด์การ์ดเพื่อแผนการดำเนินการที่เป็นรูปธรรม
+- ตัวเชื่อมกฎ Connection/model : `src/domain/connectionModelRules.ts`
+- สแนปช็อตความพร้อมใช้งานของโมเดล: `src/domain/modelAvailability.ts`
 - การติดตามการหมดอายุของผู้ให้บริการ: `src/domain/providerExpiration.ts`
-- แคชโควตา: `src/domain/quotaCache.ts`
-- สถานะการลดทอน: `src/domain/degradation.ts`
+- แคชโควต้า: `src/domain/quotaCache.ts` ผู้ให้บริการเพิ่มและลบหน้าต่างโควต้า (OpenAI ทิ้งหน้าต่าง Codex 5 ชั่วโมงสำหรับบางแผน) ดังนั้นการใช้งานที่อ่านอะแดปเตอร์ของผู้ให้บริการยืนยันว่าเสร็จสมบูรณ์ (`quotasComplete` ดู `src/lib/usage/usageReading.ts`) คือชุดหน้าต่างแบบเต็มของบัญชี: หน้าต่างที่รู้จักก่อนหน้านี้แต่หายไปจากหน้าต่างนั้นถูกยกเลิก ในแคช ใน `quota_snapshots` การรีสตาร์ท rehydrated (บันทึกการเกษียณอายุที่ต่อท้าย) ในสถานะโควต้า Codex ที่คงอยู่ และใน ถังความอิ่มตัวของ Claude หลักฐานบางส่วน (ส่วนหัวการตอบกลับ สำเนาเก่า) จะอัปเดตเฉพาะหน้าต่างที่มีเท่านั้น
+- สถานะการย่อยสลาย: `src/domain/degradation.ts`
 - การตรวจสอบการกำหนดค่า: `src/domain/configAudit.ts`
-- ตัวสร้างเมทาดาทาการตอบกลับ OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- ระบบย่อยการประเมิน: `src/domain/assessment/` — งานประเมินตามรอบเวลา
+- ตัวสร้างข้อมูลเมตาการตอบกลับ OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- ระบบย่อยการประเมิน: `src/domain/assessment/` — งานการประเมินเป็นระยะ
 
-### E. Authorization Pipeline
+### E. ช่องทางการอนุญาต
 
-ไปป์ไลน์การอนุญาตจะจำแนกทุกคำขอขาเข้าและใช้
-เชนนโยบายที่เหมาะสมก่อนส่งต่อ
+ไปป์ไลน์การอนุญาตจะจัดประเภทคำขอที่เข้ามาทุกคำขอและใช้ห่วงโซ่นโยบายที่เหมาะสมก่อนส่ง
 
-- จุดเริ่มต้นของ pipeline: `src/server/authz/pipeline.ts`
-- ตัวจำแนก request: `src/server/authz/classify.ts` — ใช้แยก route แบบ public
-  compatibility ออกจาก route แบบ management
-- รายการ route สาธารณะ: `src/shared/constants/publicApiRoutes.ts`
-- นโยบาย: `src/server/authz/policies/` — predicate ที่นำมาประกอบกันได้
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` ฯลฯ)
-- ยูทิลิตีสำหรับ header: `src/server/authz/headers.ts`
-- ตัวช่วยสำหรับ assertion: `src/server/authz/assertAuth.ts`
-- บริบทของ request: `src/server/authz/context.ts`
+- รายการไปป์ไลน์: `src/server/authz/pipeline.ts`
+- ตัวแยกประเภทคำขอ: `src/server/authz/classify.ts` — แยกเส้นทางความเข้ากันได้สาธารณะจากเส้นทางการจัดการ
+- สินค้าคงคลังเส้นทางสาธารณะ: `src/shared/constants/publicApiRoutes.ts`
+- นโยบาย: เพรดิเคตที่ประกอบได้ `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth` ฯลฯ )
+- ยูทิลิตี้ส่วนหัว: `src/server/authz/headers.ts`
+- ผู้ช่วยยืนยัน: `src/server/authz/assertAuth.ts`
+- บริบทคำขอ: `src/server/authz/context.ts`
 
-route แบบ public กับ management เป็นเส้นแบ่งที่เข้มงวด: API ของ agent/cooldown และ
-การเปลี่ยนแปลง provider จำเป็นต้องใช้การยืนยันตัวตนแบบ management (HTTP 401 หากไม่มี)
+เส้นทางสาธารณะและการจัดการนั้นเป็นขอบเขตที่ยาก: agent/cooldown APIs และการกลายพันธุ์ของผู้ให้บริการจำเป็นต้องมีการตรวจสอบสิทธิ์การจัดการ (HTTP 401 หากหายไป)
 
-สำหรับกฎการจำแนก route ฉบับเต็ม ดูที่
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)
+สำหรับกฎการแบ่งประเภทเส้นทางทั้งหมด โปรดดู [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)
 
-### F. Workflow FSM และ Task-Aware Router
+### F. เวิร์กโฟลว์ FSM และเราเตอร์ Task-Aware
 
-Router ที่ขับเคลื่อนด้วย finite-state machine ซึ่งวางซ้อนอยู่เหนือการเลือก combo เพื่อกำหนดเส้นทาง
-ทราฟฟิกตามขั้นตอนของ workflow ที่ตรวจพบ (planning, execution,
-review) และความสัมพันธ์กับ background task
+เราเตอร์ที่ขับเคลื่อนด้วยไฟไนต์สเตทซึ่งวางอยู่เหนือการเลือกคอมโบเพื่อกำหนดทิศทางการรับส่งข้อมูลตามขั้นตอนเวิร์กโฟลว์ที่ตรวจพบ (การวางแผน การดำเนินการ การตรวจสอบ) และความสัมพันธ์ระหว่างงานเบื้องหลัง
 
-- Workflow FSM: `open-sse/services/workflowFSM.ts`
-- Task-aware router: `open-sse/services/taskAwareRouter.ts`
-- ตัวตรวจจับ background task: `open-sse/services/backgroundTaskDetector.ts`
-- ตัวจำแนก intent: `open-sse/services/intentClassifier.ts`
+- เวิร์กโฟลว์ FSM: `open-sse/services/workflowFSM.ts`
+- เราเตอร์ที่รับรู้งาน: `open-sse/services/taskAwareRouter.ts`
+- เครื่องตรวจจับงานพื้นหลัง: `open-sse/services/backgroundTaskDetector.ts`
+- ตัวแยกประเภทเจตนา: `open-sse/services/intentClassifier.ts`
 
-การเปลี่ยนสถานะของ FSM จะถูกป้อนเข้าสู่การให้คะแนนของ Auto Combo โดยเอนไปทางโมเดลที่ถูกกว่า
-สำหรับงาน background/automation และเอนไปทางโมเดลที่แข็งแกร่งกว่าสำหรับเทิร์น
-planning/review แบบโต้ตอบ
+การเปลี่ยนผ่าน FSM จะป้อนเข้าสู่การให้คะแนนของ Auto Combo โดยมุ่งไปที่โมเดลที่ถูกกว่าสำหรับงาน background/automation และไปสู่โมเดลที่แข็งแกร่งกว่าสำหรับการเปลี่ยน planning/review แบบโต้ตอบ
 
-### G. ความทนทานเฉพาะผู้ให้บริการ (Provider-Specific Resilience)
+### G. ความยืดหยุ่นเฉพาะของผู้ให้บริการ
 
-ผู้ให้บริการหลายรายมาพร้อมโมดูลด้านความทนทานและ stealth เฉพาะตัว ซึ่งทำงานต่อยอดจาก
-ชั้น circuit breaker / connection cooldown / model lockout ระดับ global:
+ผู้ให้บริการหลายรายจัดส่งโมดูลความยืดหยุ่นและการซ่อนตัวโดยเฉพาะซึ่งเชื่อมต่อเข้ากับเซอร์กิตเบรกเกอร์ส่วนกลาง / คูลดาวน์การเชื่อมต่อ / ชั้นล็อคโมเดล:
 
-- Antigravity 429 engine: `open-sse/services/antigravity429Engine.ts` (หมุนเวียน
-  ตัวตน, ลบ header ของ response, ขับเคลื่อนการติดตามเครดิต/เวอร์ชันผ่าน
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- นโยบายโควต้าของ ModelScope: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
-  พร้อมด้วย `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- การปรับรูป fingerprint ของ Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- การทำ obfuscation ของ Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- เครื่องยนต์Antigravity 429: `open-sse/services/antigravity429Engine.ts` (หมุนข้อมูลประจำตัว, ขัดส่วนหัวการตอบสนอง, ขับเคลื่อนการติดตาม credits/version ผ่าน `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (งบประมาณต่อคำขอของอัปสตรีม 429s ทั่วทั้งโฮสต์ `ANTIGRAVITY_MAX_429_ATTEMPTS` การส่งซ้ำที่เหมือนกันของเนื้อหาที่ถูกปฏิเสธจะได้รับคำตอบในเครื่อง `src/sse/handlers/chat.ts` จะไม่รีสตาร์ทคำขอดังกล่าวผ่านการลองอีกครั้งโดยคำนึงถึงคูลดาวน์)
+- นโยบายโควต้า ModelScope : `open-sse/services/modelscopePolicy.ts`
+- รหัส Claude CCH (การจับมือช่องสัญญาณที่เข้ากันได้): `open-sse/services/claudeCodeCCH.ts`, บวก `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- การสร้างลายนิ้วมือรหัส Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- รหัส Claude ทำให้สับสน: `open-sse/services/claudeCodeObfuscation.ts`
 
-สำหรับคู่มือ stealth ฉบับเต็มและแนวทางการปฏิบัติงาน ดูที่
-`docs/security/STEALTH_GUIDE.md` (อยู่ใน git; ไม่ได้คอมไพล์เข้า `/docs`)
+สำหรับ Playbook การลักลอบฉบับเต็มและคำแนะนำในการปฏิบัติงาน โปรดดูที่ `docs/security/STEALTH_GUIDE.md` (git; ไม่ได้คอมไพล์เป็น `/docs`)
 
-### H. Webhooks, Reasoning Cache และ Read Cache
+### H. Webhooks, แคชเหตุผล, อ่านแคช
 
-- **Webhooks** — การส่งข้อมูลขาออกสำหรับเหตุการณ์ของ provider/บัญชี/งาน
-  - ตัวส่ง (Dispatcher): `src/lib/webhookDispatcher.ts`
-  - ที่จัดเก็บ: ตาราง SQLite ชื่อ `webhooks` (ผ่าน `src/lib/db/webhooks.ts`)
-  - แดชบอร์ด: `/dashboard/webhooks` (การสมัครรับข้อมูล, secret, ประวัติการลองใหม่)
-  - สำหรับอนุกรมวิธานของเหตุการณ์และความหมายของการลองใหม่ ดูที่ [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)
-- **Reasoning Cache** — บล็อก reasoning ที่เล่นซ้ำได้สำหรับผู้ให้บริการที่ส่งออก
-  thinking token (Claude, GLMT ฯลฯ) เพื่อให้เทิร์นที่ต่อเนื่องกันสามารถข้ามการคิดซ้ำได้
-  - ชั้น DB: `src/lib/db/reasoningCache.ts`
+- **เว็บฮุค** การจัดส่งขาออก — สำหรับกิจกรรม provider/account/task
+  - ผู้จัดส่ง: `src/lib/webhookDispatcher.ts`
+  - ที่เก็บข้อมูล: ตาราง `webhooks` SQLite (ผ่าน `src/lib/db/webhooks.ts`)
+  - แดชบอร์ด: `/dashboard/webhooks` (การสมัครสมาชิก ข้อมูลลับ ประวัติการลองใหม่)
+  - สำหรับอนุกรมวิธานเหตุการณ์และลองความหมายอีกครั้ง ดูที่ [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)
+- **แคชเหตุผล** บล็อกการใช้เหตุผลแบบเล่นซ้ำได้ — สำหรับผู้ให้บริการที่ปล่อยโทเค็นการคิด (Claude, GLMT ฯลฯ ) เพื่อให้การผลัดกันติดต่อกันสามารถข้ามการคิดใหม่ได้
+  - เลเยอร์DB : `src/lib/db/reasoningCache.ts`
   - ชั้นบริการ: `open-sse/services/reasoningCache.ts`
-  - สำหรับความหมายของการเล่นซ้ำ ดูที่ [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)
-- **Read Cache** — แคช response อายุสั้นที่ใช้ signature เป็นคีย์ และใช้เพื่อ
-  รวมการลองใหม่ที่เหมือนกันจาก upstream SDK ที่มีปัญหา
-  - ชั้น DB: `src/lib/db/readCache.ts`
-  - endpoint สถิติ: `GET /api/cache/stats`, แดชบอร์ดที่ `/dashboard/cache`
+  - สำหรับความหมายการเล่นซ้ำ ดูที่ [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)
+- **อ่านแคช** แคชการตอบสนองอายุสั้น — คีย์โดยลายเซ็น และใช้เพื่อยุบการลองซ้ำที่เหมือนกันจากอัพสตรีมที่เสียหาย SDKs
+  - เลเยอร์DB : `src/lib/db/readCache.ts`
+  - จุดสิ้นสุดสถิติ: `GET /api/cache/stats` แดชบอร์ดที่ `/dashboard/cache`
 
 ## 3) เลเยอร์การจัดเก็บข้อมูลถาวร
 

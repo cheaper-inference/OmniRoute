@@ -1,3 +1,4 @@
+import { logicalCallSql } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 
 export type ComboForecastUsageRow = {
@@ -88,7 +89,7 @@ export function getComboForecastUsageRows(opts: {
          COALESCE(AVG(duration), 0) as avgLatencyMs,
          MAX(timestamp) as lastUsedAt
        FROM call_logs
-       WHERE ${conditions.join(" AND ")}
+       WHERE ${logicalCallSql()} AND ${conditions.join(" AND ")}
        GROUP BY combo_name, executionKey, combo_step_id, provider, model, requested_model, connection_id
        ORDER BY combo_name ASC, requests DESC`
     )

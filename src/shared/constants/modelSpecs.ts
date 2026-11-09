@@ -122,6 +122,11 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode-go/deepseek-v4.1-flash", 1000000],
   ["opencode-go/deepseek-flash", 1000000],
   ["opencode-go/minimax-m2.5", 204800],
+  // #17386: Cursor's standard Grok 4.7 window is 256k (500k is the separate
+  // `cursor-grok-4.7-<effort>-500k` variant). Without this row a bare `cursor/grok-4.7`
+  // resolves to no window and falls back to the provider's 200000 default.
+  // Mirrors GROK_47_CONTEXTS["256k"] (open-sse/config/providers/registry/cursor/grok47.ts).
+  ["cursor/grok-4.7", 256000],
   // The opposite direction: models.dev lists OpenCode's free DeepSeek V4.1
   // Flash at 1M, but the free backend rejects prompts above ~330k tokens
   // (measured 2026-10-26). Advertising 1M stops clients from compacting and
@@ -472,7 +477,7 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsTools: true,
     supportsVision: true,
     adaptiveThinkingOnly: true,
-    aliases: BEDROCK_CLAUDE_ALIASES("claude-haiku-5-5"),
+    aliases: BEDROCK_CLAUDE_ALIASES("claude-haiku-5-5", "claude-haiku-5.5"),
   },
 
   // ── Claude Sonnet 5.5 ───────────────────────────────────────────
@@ -635,8 +640,10 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     aliases: ["k3"],
   },
 
-  // ── Kimi K3.1 Pro (OpenCode Go — 1M context, 131K output, native vision) ──
-  // Separate from kimi-k3: K3.1 Pro caps output at 131072, not 1M.
+  // ── Kimi K3.1 Pro (+ Highspeed) — 1M context, native vision/video ──
+  // Separate from kimi-k3. The provider-neutral output cap is OpenCode Go's
+  // published 131072; Moonshot / Kimi Coding raise it to 1M through their
+  // registry rows (KIMI_K31_MODELS.maxOutputTokens) and the moonshot executor.
   "kimi-k3.1-pro": {
     maxOutputTokens: 131072,
     contextWindow: 1048576,
@@ -644,6 +651,8 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: true,
     supportsTools: true,
     supportsVision: true,
+    supportsVideo: true,
+    aliases: ["k3.1-pro", "kimi-k3.1-pro-highspeed", "k3.1-pro-highspeed"],
   },
 
   // ── Kimi K2.6 (Moonshot API — 262K native) ──────────────────────

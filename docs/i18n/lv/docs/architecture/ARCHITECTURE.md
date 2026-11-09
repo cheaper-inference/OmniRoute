@@ -10,77 +10,76 @@ _Pēdējoreiz atjaunināts: 2026-06-28_
 
 ## Kopsavilkums
 
-OmniRoute ir lokāla AI maršrutēšanas vārteja un informācijas panelis, kas izveidots uz Next.js bāzes.
-Tas nodrošina vienotu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē datplūsmu starp vairākiem augšupējiem pakalpojumu sniedzējiem, veicot formātu pārveidošanu, rezerves pārslēgšanu, pilnvaru atsvaidzināšanu un lietojuma uzskaiti.
+OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, kas izveidots uz Next.js. Tas nodrošina vienu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē trafiku starp vairākiem augšupējiem pakalpojumu sniedzējiem, izmantojot tulkošanu, atkāpšanos, marķiera atsvaidzināšanu un lietojuma izsekošanu.
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API saskarne CLI/rīkiem (376 pakalpojumu sniedzēji, 156 izpildītāju moduļi)
-- Pieprasījumu/atbilžu formātu pārveidošana starp pakalpojumu sniedzējiem
-- Modeļu kombināciju rezerves pārslēgšana (vairāku modeļu secība)
-- Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secības noteikšanu pēc `compositeTiers`
-- Konta līmeņa rezerves pārslēgšana (vairāki konti katram pakalpojumu sniedzējam)
-- Kvotas priekšpārbaude un kvotu ņemoša vērā P2C konta atlase galvenajā tērzēšanas plūsmā
-- OAuth un API atslēgu pakalpojumu sniedzēju savienojumu pārvaldība (27 OAuth pakalpojumu sniedzēju moduļi)
-- Iegultņu ģenerēšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
-- Attēlu ģenerēšana, izmantojot `/v1/images/generations` (vairāk nekā 10 pakalpojumu sniedzēji, vairāk nekā 20 modeļi)
-- Audio transkribēšana, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
+- Ar OpenAI saderīga API virsma CLI/tools (381 nodrošinātājs, 159 izpildītāja moduļi)
+- Request/response tulkojums starp pakalpojumu sniedzēju formātiem
+- Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
+- Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`
+- Atkāpšanās konta līmenī (vairāki konti vienam pakalpojumu sniedzējam)
+- Kvotas pirmspārbaudes un kvotas P2C konta atlase galvenajā tērzēšanas ceļā
+- OAuth + API atslēgas nodrošinātāja savienojuma pārvaldība (27 OAuth nodrošinātāja moduļi)
+- Iegulšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
+- Attēlu ģenerēšana, izmantojot `/v1/images/generations` (10 + nodrošinātāji, 20 + modeļi)
+- Audio transkripcija, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
 - Teksta pārvēršana runā, izmantojot `/v1/audio/speech` (24 iebūvēti pakalpojumu sniedzēji)
 - Video ģenerēšana, izmantojot `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Mūzikas ģenerēšana, izmantojot `/v1/music/generations` (ComfyUI)
 - Meklēšana tīmeklī, izmantojot `/v1/search` (20 pakalpojumu sniedzēji)
-- Satura moderēšana, izmantojot `/v1/moderations`
-- Rezultātu atkārtota ranžēšana, izmantojot `/v1/rerank`
-- Domāšanas tagu (`<think>...</think>`) parsēšana spriešanas modeļiem
-- Atbilžu sanitizēšana stingrai saderībai ar OpenAI SDK
-- Lomu normalizēšana (developer→system, system→user), lai nodrošinātu saderību starp pakalpojumu sniedzējiem
-- Strukturētās izvades pārveidošana (json_schema → Gemini responseSchema)
-- Pakalpojumu sniedzēju, atslēgu, aizstājvārdu, kombināciju, iestatījumu un cenu lokāla pastāvīga glabāšana (122 DB moduļi)
-- Lietojuma/izmaksu uzskaite un pieprasījumu žurnalēšana
-- Neobligāta mākoņsinhronizācija vairāku ierīču/stāvokļa sinhronizācijai
-- IP atļauto/bloķēto adrešu saraksti API piekļuves kontrolei
-- Domāšanas budžeta pārvaldība (nemainīta pārsūtīšana/automātisks/pielāgots/adaptīvs)
-- Globālās sistēmas uzvednes ievietošana
-- Sesiju izsekošana un digitālo nospiedumu veidošana
-- Uzlabota ātruma ierobežošana katram kontam ar pakalpojumu sniedzējam specifiskiem profiliem
-- Ķēdes pārtraucēja modelis pakalpojumu sniedzēju noturībai
-- Aizsardzība pret vienlaicīgu pieprasījumu lavīnu, izmantojot mutex bloķēšanu
-- Uz parakstiem balstīta pieprasījumu dublikātu novēršanas kešatmiņa
-- Domēna slānis: izmaksu noteikumi, rezerves pārslēgšanas politika, bloķēšanas politika
-- Context Relay: sesiju nodošanas kopsavilkumi nepārtrauktības nodrošināšanai kontu rotācijas laikā
-- Domēna stāvokļa pastāvīga glabāšana (SQLite tūlītējas ierakstīšanas kešatmiņa rezerves pārslēgšanas stāvokļiem, budžetiem, bloķējumiem un ķēdes pārtraucējiem)
-- Politiku dzinis centralizētai pieprasījumu izvērtēšanai (bloķēšana → budžets → rezerves pārslēgšana)
-- Pieprasījumu telemetrija ar p50/p95/p99 latentuma apkopošanu
-- Kombināciju mērķu telemetrija un kombināciju mērķu vēsturiskais veselības stāvoklis, izmantojot `combo_execution_key` / `combo_step_id`
-- Korelācijas ID (X-Request-Id) pilnīgai izsekošanai no sākuma līdz beigām
-- Atbilstības audita žurnalēšana ar iespēju to atspējot katrai API atslēgai
-- Izvērtēšanas ietvars LLM kvalitātes nodrošināšanai
-- Veselības stāvokļa informācijas panelis ar pakalpojumu sniedzēju ķēdes pārtraucēju statusu reāllaikā
-- MCP serveris (110 rīki) ar 3 transportiem (stdio/SSE/Streamable HTTP)
+- Moderēšana, izmantojot `/v1/moderations`
+- Pārkārtošana, izmantojot `/v1/rerank`
+- Padomājiet par tagu parsēšanu (`<think>...</think>`) argumentācijas modeļiem
+- Atbildes dezinfekcija stingrai OpenAI SDK saderībai
+- Lomas normalizēšana (izstrādātāja → sistēma, sistēmas → lietotājs) vairāku pakalpojumu sniedzēju saderībai
+- Strukturētās izvades konvertēšana (json_schema → Gemini responseSchema)
+- Vietējā noturība pakalpojumu sniedzējiem, atslēgas, aizstājvārdi, kombinācijas, iestatījumi, cenas (122 DB moduļi)
+- Usage/cost izsekošana un pieprasījumu reģistrēšana
+- Izvēles mākoņa sinhronizācija multi-device/state sinhronizācijai
+- IP allowlist/blocklist API piekļuves kontrolei
+- Domājoša budžeta vadība (passthrough/auto/custom/adaptive)
+- Globālās sistēmas tūlītēja injekcija
+- Sesijas izsekošana un pirkstu nospiedumu noņemšana
+- Uzlabots tarifu ierobežojums katram kontam ar pakalpojumu sniedzēja profiliem
+- Strāvas slēdža modelis nodrošinātāja noturībai
+- Ganāmpulka aizsardzība pret pērkonu ar mutex bloķēšanu
+- Uz parakstu balstīta pieprasījuma dedublikācijas kešatmiņa
+- Domēna slānis: izmaksu noteikumi, rezerves politika, bloķēšanas politika
+- Konteksta relejs: sesijas nodošanas kopsavilkumi konta rotācijas nepārtrauktībai
+- Domēna stāvokļa noturība (SQLite ierakstīšanas kešatmiņa atkāpšanās gadījumiem, budžetiem, bloķēšanām, slēdžiem)
+- Politikas dzinējs centralizētai pieprasījumu novērtēšanai (lockout → budget → rezerves)
+- Pieprasīt telemetriju ar p50/p95/p99 latentuma apkopošanu
+- Kombinētā mērķa telemetrija un vēsturiskā kombinētā mērķa veselība, izmantojot `combo_execution_key` / `combo_step_id`
+- Korelācija ID (X-Request-Id) pilnīgai izsekošanai
+- Atbilstības audita reģistrēšana ar atteikšanos no katras API atslēgas
+- Eval ietvars LLM kvalitātes nodrošināšanai
+- Veselības informācijas panelis ar reāllaika nodrošinātāja ķēdes pārtraucēja statusu
+- MCP serveris (110 rīki) ar 3 transportiem (stdio/SSE/Streamable HTTP)
 - A2A serveris (JSON-RPC 2.0 + SSE) ar prasmēm un uzdevumu dzīves ciklu
-- Atmiņas sistēma (izgūšana, ievietošana, atlase, apkopošana)
-- Prasmju sistēma (reģistrs, izpildītājs, smilškaste, iebūvētas prasmes)
+- Atmiņas sistēma (izvilkšana, injekcija, izguve, apkopošana)
+- Prasmju sistēma (reģistrs, izpildītājs, smilškaste, iebūvētās prasmes)
 - MITM starpniekserveris ar sertifikātu pārvaldību un DNS apstrādi
-- Uzvedņu injekciju aizsardzības starpprogrammatūra
-- Uzvedņu saspiešanas konveijers ar Caveman, RTK, sakrautiem konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analītiku
+- Ātra injekcijas aizsarga starpprogrammatūra
+- Ātra saspiešanas konveijers ar Caveman, RTK, stacked konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analīzi
 - ACP (Agent Communication Protocol) reģistrs
-- Modulāri OAuth pakalpojumu sniedzēji (22 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
-- Atinstalēšanas/pilnīgas atinstalēšanas skripti
-- OAuth vides labošanas darbība
+- Moduļu OAuth nodrošinātāji (22 atsevišķi moduļi zem `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripti
+- OAuth vides remonta darbība
 - WebSocket tilts ar OpenAI saderīgiem WS klientiem (`/v1/ws`)
-- Sinhronizācijas pilnvaru pārvaldība (izsniegšana/atsaukšana, ar ETag versijota konfigurācijas komplekta lejupielāde)
-- GLM Thinking (`glmt`) kā pilnvērtīgs pakalpojumu sniedzēja sākotnējais iestatījums
-- Hibrīda pilnvaru skaitīšana (pakalpojumu sniedzēja puses `/messages/count_tokens` ar rezerves novērtēšanu)
-- Modeļu aizstājvārdu automātiska sākotnējā izveide (vairāk nekā 30 starpniekserveru dialektu normalizācijas startēšanas laikā)
-- Droša izejošā datu izgūšana ar SSRF aizsardzību, privāto URL bloķēšanu un konfigurējamiem atkārtotiem mēģinājumiem
-- Dzesēšanas periodu ņemoši vērā tērzēšanas atkārtotie mēģinājumi ar konfigurējamiem `requestRetry` un `maxRetryIntervalSec`
+- Sinhronizācijas pilnvaru pārvaldība (issue/revoke, ETag versijas konfigurācijas komplekta lejupielāde)
+- GLM Thinking (`glmt`) pirmās klases nodrošinātāja iepriekšiestatījums
+- Hibrīda pilnvaru skaitīšana (pakalpojumu sniedzēja puses `/messages/count_tokens` ar aprēķinu atkāpšanos)
+- Modeļa aizstājvārda automātiskā iesēšana (30 + starpniekservera dialektu normalizēšana startēšanas laikā)
+- Droša izejošā ielāde ar SSRF aizsargu, privātu URL bloķēšanu un konfigurējamu atkārtotu mēģinājumu
+- Atkārtoti tērzēšanas mēģinājumi ar atdzišanu, izmantojot konfigurējamus `requestRetry` un `maxRetryIntervalSec`
 - Izpildlaika vides validācija ar Zod startēšanas laikā
-- Atbilstības audits v2 ar lapošanu, pakalpojumu sniedzēju CRUD notikumiem un SSRF bloķētas validācijas žurnalēšanu
+- Atbilstības audits v2 ar lappušu noteikšanu, pakalpojumu sniedzēja CRUD notikumiem un SSRF bloķētu validācijas reģistrēšanu
 
 Primārais izpildlaika modelis:
 
-- Next.js lietotnes maršruti zem `src/app/api/*` realizē gan informācijas paneļa API, gan saderības API
-- Kopīgs SSE/maršrutēšanas kodols mapēs `src/sse/*` un `open-sse/*` apstrādā pakalpojumu sniedzēju izpildi, formātu pārveidošanu, straumēšanu, rezerves pārslēgšanu un lietojumu
+- Next.js lietotņu maršruti zem `src/app/api/*` ievieš gan informācijas paneli APIs, gan saderības APIs
+- Koplietots SSE/routing kodols pakalpojumā `src/sse/*` + `open-sse/*` nodrošina nodrošinātāja izpildi, tulkošanu, straumēšanu, atkāpšanos un lietošanu
 
 ## Atsauces diagrammas
 
@@ -271,68 +270,68 @@ Pārvaldības jomas:
 Galvenās plūsmas moduļi:
 
 - Ieejas punkts: `src/sse/handlers/chat.ts`
-- Kodola orķestrācija: `open-sse/handlers/chatCore.ts`
-- Nodrošinātāju izpildes adapteri: `open-sse/executors/*`
-- Formāta noteikšana/nodrošinātāja konfigurācija: `open-sse/services/provider.ts`
+- Galvenā orķestrācija: `open-sse/handlers/chatCore.ts`
+- Pakalpojumu sniedzēju izpildes adapteri: `open-sse/executors/*`
+- Formāta noteikšana/pakalpojumu sniedzēja konfigurācija: `open-sse/services/provider.ts`
 - Modeļa parsēšana/atrisināšana: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Kontu rezerves loģika: `open-sse/services/accountFallback.ts`
+- Konta atkāpšanās loģika: `open-sse/services/accountFallback.ts`
 - Tulkošanas reģistrs: `open-sse/translator/index.ts`
-- Plūsmas transformācijas: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Lietojuma izguve/normalizācija: `open-sse/utils/usageTracking.ts`
-- Think taga parsētājs: `open-sse/utils/thinkTagParser.ts`
-- Ieguldījumu apstrādātājs: `open-sse/handlers/embeddings.ts`
-- Ieguldījumu nodrošinātāju reģistrs: `open-sse/config/embeddingRegistry.ts`
+- Straumes transformācijas: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- Lietojuma datu izgūšana/normalizēšana: `open-sse/utils/usageTracking.ts`
+- Domāšanas tagu parsētājs: `open-sse/utils/thinkTagParser.ts`
+- Iegultņu apstrādātājs: `open-sse/handlers/embeddings.ts`
+- Iegultņu pakalpojumu sniedzēju reģistrs: `open-sse/config/embeddingRegistry.ts`
 - Attēlu ģenerēšanas apstrādātājs: `open-sse/handlers/imageGeneration.ts`
-- Attēlu nodrošinātāju reģistrs: `open-sse/config/imageRegistry.ts`
-- Atbilžu attīrīšana: `open-sse/handlers/responseSanitizer.ts`
-- Lomu normalizācija: `open-sse/services/roleNormalizer.ts`
+- Attēlu pakalpojumu sniedzēju reģistrs: `open-sse/config/imageRegistry.ts`
+- Atbildes sanitizācija: `open-sse/handlers/responseSanitizer.ts`
+- Lomu normalizēšana: `open-sse/services/roleNormalizer.ts`
 
-Servisi (biznesa loģika):
+Pakalpojumi (biznesa loģika):
 
 - Kontu atlase/vērtēšana: `open-sse/services/accountSelector.ts`
 - Konteksta dzīves cikla pārvaldība: `open-sse/services/contextManager.ts`
-- IP filtra īstenošana: `open-sse/services/ipFilter.ts`
+- IP filtra piemērošana: `open-sse/services/ipFilter.ts`
 - Sesiju izsekošana: `open-sse/services/sessionManager.ts`
-- Pieprasījumu deduplikācija: `open-sse/services/signatureCache.ts`
-- Sistēmas uzvednes injekcija: `open-sse/services/systemPrompt.ts`
+- Pieprasījumu dublikātu novēršana: `open-sse/services/signatureCache.ts`
+- Sistēmas uzvednes ievietošana: `open-sse/services/systemPrompt.ts`
 - Domāšanas budžeta pārvaldība: `open-sse/services/thinkingBudget.ts`
-- Aizstājējzīmju modeļu maršrutēšana: `open-sse/services/wildcardRouter.ts`
-- Pieprasījumu ātruma ierobežojumu pārvaldība: `open-sse/services/rateLimitManager.ts`
+- Modeļu maršrutēšana ar aizstājējzīmēm: `open-sse/services/wildcardRouter.ts`
+- Ātruma ierobežojumu pārvaldība: `open-sse/services/rateLimitManager.ts`
 - Ķēdes pārtraucējs: `src/shared/utils/circuitBreaker.ts`
-- Konteksta nodošana: `open-sse/services/contextHandoff.ts` — nodošanas kopsavilkuma ģenerēšana un injekcija konteksta-releja stratēģijai
-- Saspiešana: `open-sse/services/compression/*` — proaktīva saspiešana pirms nodrošinātāja tulkošanas;
-  ietver Caveman noteikumus, RTK filtrus, slāņotus cauruļvadus, saspiešanas kombinācijas, statistiku un validāciju
-- Codex kvotu ieguvējs: `open-sse/services/codexQuotaFetcher.ts` — iegūst Codex kvotu konteksta-releja nodošanas lēmumiem
-- Ar dzesēšanu saistīta atkārtota mēģināšana: `src/sse/services/cooldownAwareRetry.ts` — atkārtoti mēģinājumi ar dzesēšanas periodu katram modelim un konfigurējamu `requestRetry` / `maxRetryIntervalSec`
-- Droša izejošā iegūšana: `src/shared/network/safeOutboundFetch.ts` — aizsargāta nodrošinātāju/modeļu iegūšana ar SSRF aizsargu, privātu URL bloķēšanu, atkārtošanu un noilgumu
-- Izejošo URL aizsargs: `src/shared/network/outboundUrlGuard.ts` — resursdatoru pārbaudes nodrošinātāju URL; `src/shared/network/outboundUrlGuardPolicy.ts` izvēlas režīmu no `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` un to vadības paneļa slēdžiem (skatīt `docs/reference/ENVIRONMENT.md`)
-- Nodrošinātāja pieprasījumu noklusējumi: `open-sse/services/providerRequestDefaults.ts` — nodrošinātāja līmeņa `maxTokens`, `temperature`, `thinkingBudgetTokens` noklusējuma vērtības
-- GLM nodrošinātāja konstantes: `open-sse/config/glmProvider.ts` — koplietotie GLM modeļi, kvotu URL, GLMT noilgums/noklusējumi
-- Antigravity augštece: `open-sse/config/antigravityUpstream.ts` — pamata URL un atklāšanas ceļa konstantes
-- Codex klienta konstantes: `open-sse/config/codexClient.ts` — ar versijām apzīmētas user-agent un klienta versijas vērtības
-- Modeļu aizstājvārdu sēkla: `src/lib/modelAliasSeed.ts` — startēšanas laikā ievieto 30+ starp-proksi dialektu aizstājvārdus
+- Konteksta nodošana: `open-sse/services/contextHandoff.ts` — nodošanas kopsavilkuma ģenerēšana un ievietošana konteksta pārsūtīšanas stratēģijai
+- Saspiešana: `open-sse/services/compression/*` — proaktīva saspiešana pirms tulkošanas pakalpojumu sniedzējam;
+  ietver Caveman kārtulas, RTK filtrus, sakrautus konveijerus, saspiešanas kombinācijas, statistiku un validāciju
+- Codex kvotas izgūšanas modulis: `open-sse/services/codexQuotaFetcher.ts` — izgūst Codex kvotu konteksta pārsūtīšanas nodošanas lēmumiem
+- Atkārtota mēģināšana, ņemot vērā atdzišanas periodu: `src/sse/services/cooldownAwareRetry.ts` — katram modelim atsevišķi atkārtoti mēģinājumi pēc atdzišanas perioda ar konfigurējamiem `requestRetry` / `maxRetryIntervalSec`
+- Droša izejošo datu izgūšana: `src/shared/network/safeOutboundFetch.ts` — aizsargāta pakalpojumu sniedzēja/modeļa datu izgūšana ar SSRF aizsardzību, privāto URL bloķēšanu, atkārtotiem mēģinājumiem un taimautu
+- Izejošo URL aizsardzība: `src/shared/network/outboundUrlGuard.ts` — resursdatoru pārbaudes pakalpojumu sniedzēju URL; `src/shared/network/outboundUrlGuardPolicy.ts` izvēlas režīmu no `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` un to vadības paneļa pārslēgiem (skatiet `docs/reference/ENVIRONMENT.md`)
+- Pakalpojumu sniedzēja pieprasījumu noklusējuma vērtības: `open-sse/services/providerRequestDefaults.ts` — pakalpojumu sniedzēja līmeņa `maxTokens`, `temperature`, `thinkingBudgetTokens` noklusējuma vērtības
+- GLM pakalpojumu sniedzēja konstantes: `open-sse/config/glmProvider.ts` — koplietojami GLM modeļi, kvotu URL, GLMT taimauts/noklusējuma vērtības
+- Antigravity augšupstraumes konfigurācija: `open-sse/config/antigravityUpstream.ts` — bāzes URL un atklāšanas ceļa konstantes
+- Codex klienta konstantes: `open-sse/config/codexClient.ts` — versijām piesaistītas lietotāja aģenta un klienta versijas vērtības
+- Modeļu aizstājvārdu sākotnējie dati: `src/lib/modelAliasSeed.ts` — palaišanas laikā izveido vairāk nekā 30 starpniekserveru dialektu aizstājvārdus
 
 Domēna slāņa moduļi:
 
-- Izmaksu noteikumi/budžeti: `src/domain/costRules.ts`
-- Rezerves politika: `src/domain/fallbackPolicy.ts`
-- Rezervētais kombināciju atrisināšanas kontrakts: `src/domain/comboResolver.ts`; reāllaika maršrutēšana izmanto `open-sse/services/combo.ts`
+- Izmaksu kārtulas/budžeti: `src/domain/costRules.ts`
+- Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
+- Kombināciju atrisinātājs: `src/domain/comboResolver.ts`
 - Bloķēšanas politika: `src/domain/lockoutPolicy.ts`
-- Rezervētais politikas izvērtēšanas kontrakts: `src/domain/policyEngine.ts`; pieprasījuma ceļš īsteno API atslēgas politiku, izmantojot `src/shared/utils/apiKeyPolicy.ts`, un atrisinātā mērķa autorizāciju, izmantojot `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Politiku dzinis: `src/domain/policyEngine.ts` — centralizēta bloķēšanas → budžeta → atkāpšanās izvērtēšana
 - Kļūdu kodu katalogs: `src/shared/constants/errorCodes.ts`
 - Pieprasījuma ID: `src/shared/utils/requestId.ts`
-- Iegūšanas noilgums: `src/shared/utils/fetchTimeout.ts`
+- Izgūšanas taimauts: `src/shared/utils/fetchTimeout.ts`
 - Pieprasījumu telemetrija: `src/shared/utils/requestTelemetry.ts`
 - Atbilstība/audits: `src/lib/compliance/index.ts`
 - Novērtējumu izpildītājs: `src/lib/evals/evalRunner.ts`
-- Domēna stāvokļa noturība: `src/lib/db/domainState.ts` — SQLite CRUD rezerves ķēdēm, budžetiem, izmaksu vēsturei, bloķēšanas stāvoklim, ķēdes pārtraucējiem
+- Domēna stāvokļa pastāvīga glabāšana: `src/lib/db/domainState.ts` — SQLite CRUD atkāpšanās ķēdēm, budžetiem, izmaksu vēsturei, bloķēšanas stāvoklim un ķēdes pārtraucējiem
 
-OAuth nodrošinātāju moduļi (27 atsevišķi faili mapē `src/lib/oauth/providers/`):
+OAuth pakalpojumu sniedzēju moduļi (27 atsevišķi faili direktorijā `src/lib/oauth/providers/`):
 
 - Reģistra indekss: `src/lib/oauth/providers/index.ts`
-- Atsevišķie nodrošinātāji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Koplietotie palīgi: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intl ierīču plūsma), `museCodeDeviceResponse.ts`
-- Plāns iesaiņojums: `src/lib/oauth/providers.ts` — pāreksportē no atsevišķajiem moduļiem
+- Atsevišķi pakalpojumu sniedzēji: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Koplietojamie palīgmoduļi: `codebuddyDeviceAuth.ts` (CodeBuddy CN/starptautiskā ierīces plūsma), `museCodeDeviceResponse.ts`
+- Vienkāršs ietinējs: `src/lib/oauth/providers.ts` — atkārtoti eksportē no atsevišķajiem moduļiem
 
 ## 5) Iegultie pakalpojumi (v3.8.4)
 
@@ -359,181 +358,122 @@ Padziļināts apraksts: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Galvenās apakšsistēmas (v3.8.0)
 
-### A. Auto Combo dzinējs
+### A. Auto Combo Engine
 
-Auto Combo dinamiski vērtē un izvēlas maršrutēšanas mērķus pieprasījuma brīdī, nevis
-paļaujoties uz statisku kombinācijas definīciju. Tas darbina `auto/*` modeļu prefiksu saimi.
+Automātiskā kombinācija dinamiski novērtē un izvēlas maršrutēšanas mērķus pēc pieprasījuma, nevis paļaujas uz statisku kombinācijas definīciju. Tas nodrošina `auto/*` modeļu prefiksu saimi.
 
-- Dzinēja ieeja: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Produkcijas kombināciju ieeja: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), ko izsauc `src/sse/handlers/chat.ts`
-- Vadības panelis: `/dashboard/auto-combo`
+- Dzinēja ieeja: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Atrisinātājs: `src/domain/comboResolver.ts` (automātiska `auto/` prefiksa noteikšana)
+- Informācijas panelis: `/dashboard/auto-combo`
 - Telemetrija: `auto_combo_decisions` SQLite tabula
 
 Galvenās iespējas:
 
-- **20 maršrutēšanas stratēģijas** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto ir galvenais jaunums versijā v3.8.0; `fusion` (paneļa fan-out + vērtētāja sintēze,
-  `open-sse/services/fusion.ts`) ir jaunums versijā v3.8.36.
-- **16 faktoru vērtēšana**: kvota, veselības stāvoklis, apgrieztās izmaksas, apgrieztā
-  aizture, uzdevuma atbilstība un vēl desmit citi faktori. Kanoniskā faktoru un to
-  noklusējuma svaru tabula atrodas
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — tās atkārtošana šeit
-  dotu tai vēl vienu vietu, kur novecot.
-- **Virtuālā rūpnīca** materializē īslaicīgas kombinācijas, kad neeksistē atbilstoša
-  nosaukta kombinācija, ņemot kandidātus no veseliem aktīviem pakalpojumu sniedzēju savienojumiem.
-- **Auto prefiksi**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — katrs ar noregulētu svaru profilu.
-- **6 režīmu pakas**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` un `chaos-mode` — iepriekš iestatītas svaru konfigurācijas, ko var
-  izsaukt no vadības paneļa. (Nejaukt ar iepriekš minētajiem `auto/*` prefiksiem, kas ir
-  pieprasījuma brīža varianti.)
+- **20 maršrutēšanas stratēģijas** (prioritāte, svērtais, aizpildiet vispirms, round-robin, P2C, izlases veidā, vismazāk izmantots, izmaksu optimizēts, reset-aware, atiestatīšanas logs, brīvā telpa, kvotas svērtais, stingri nejaušs,** auto** , lkgp, konteksta optimizēta, optimizēta kešatmiņai, konteksta pārraide,** saplūšana** , konveijera) — auto ir virsraksta papildinājums v3.8.0; `fusion` (paneļa ventilatora izvadīšanas + tiesnešu sintēze, `open-sse/services/fusion.ts`) ir jaunums versijā 3.8.36.
+- **16 faktoru punktu skaits** : kvota, veselība, apgrieztās izmaksas, apgrieztais latentums, uzdevuma atbilstība un vēl desmit. Kanoniskā faktoru tabula un to noklusējuma svērumi ir [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ja to šeit atkārto, tas dotu otro vietu, lai novecotu.
+- **Virtuālā rūpnīca** materializē īslaicīgas kombinācijas, ja nepastāv atbilstoša nosaukta kombinācija, iegūstot kandidātus no veselīgiem aktīviem pakalpojumu sniedzēju savienojumiem.
+- **Automātiskie prefiksi** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — katram no tiem ir pielāgots svara profils.
+- **6 režīmu paketes** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` un `chaos-mode` — iepriekš iestatītas svara konfigurācijas, kuras var izsaukt no informācijas paneļa. (Nejaukt ar iepriekš minētajiem `auto/*` prefiksiem, kas ir pieprasījuma laika varianti.)
 
-Pilnu algoritma detaļu aprakstu (faktoru formulas, svaru regulēšana) skatiet
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Lai iegūtu pilnu algoritma informāciju (faktoru formulas, svara regulēšana), skatiet [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Mākoņa aģenti (Cloud Agents)
+### B. Mākoņu aģenti
 
-Cloud Agents iesaiņo trešo pušu mitētās koda aģentu platformas (Codex Cloud, Devin,
-Jules) aiz vienota, datubāzē balstīta uzdevumu dzīves cikla. Visiem uzdevumu
-izveides/izpētes galapunktiem ir nepieciešama pārvaldības autentifikācija.
+Cloud Agents aptver trešo pušu mitinātās koda aģentu platformas (Codex Cloud, Devin, Jules) aiz vienota DB nodrošināta uzdevumu dzīves cikla. Visiem uzdevuma creation/inspection galapunktiem ir nepieciešama pārvaldības autentifikācija.
 
-- Moduļa sakne: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, kā arī katram aģentam paredzētas apakšmapes zem `agents/`)
-- Katra aģenta implementācijas: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Publiskie galapunkti: `/api/v1/agents/tasks/*` (saraksts/izveide/iegūšana/atcelšana)
-- Pārvaldības galapunkti: `/api/cloud/*` (nodrošināšana, statuss, pakešoperācijas)
-- Vadības panelis: `/dashboard/cloud-agents`
-- Glabātuve: `cloud_agent_tasks` tabula
+- Moduļa sakne: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, kā arī katra aģenta apakšdirektorijas zem `agents/`)
+- Katra aģenta ieviešana: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Publiskie galapunkti: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Pārvaldības galapunkti: `/api/cloud/*` (nodrošināšana, statuss, grupa)
+- Informācijas panelis: `/dashboard/cloud-agents`
+- Uzglabāšana: `cloud_agent_tasks` galds
 
-Informāciju par katra aģenta nodrošināšanu un OAuth specifiku skatiet
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Lai iegūtu informāciju par katra aģenta nodrošināšanu un OAuth specifiku, skatiet [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Aizsargbarjeras (Guardrails)
+### C. Aizsargi
 
-Aizsargbarjeru modulis ir karstās pārlādes iespējota starpprogrammatūras kārta, kas
-pārbauda pieprasījumus un atbildes, meklējot personas identificējamu informāciju (PII),
-uzvedņu injekcijas un nedrošu vizuālo saturu. Pārkāpumi nekavējoties pārtrauc
-pieprasījumu ar HTTP **503** un strukturētu kļūdas kodu, ļaujot lejupplūsmas izsaucējiem
-mēģināt vēlreiz vai izvēlēties citu zaru.
+Aizsargmargu modulis ir karsti atkārtoti ielādējams starpprogrammatūras slānis, kas pārbauda pieprasījumus un atbildes attiecībā uz PII, tūlītēju injekciju un nedrošu redzes saturu. Pārkāpumi īssavieno pieprasījumu ar HTTP** 503** plus strukturēts kļūdas kods, kas ļauj pakārtotajiem zvanītājiem mēģināt vēlreiz vai sazaroties.
 
-- Moduļa sakne: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Karstā pārlāde: reģistrs seko konfigurācijas izmaiņām un pārbūvē ķēdi uz vietas
-- Iesaistes punkti: tērzēšanas apstrādātāja ieeja, attēlu ģenerēšanas apstrādātājs, atbilžu attīrītājs
+- Moduļa sakne: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Karstā pārlādēšana: reģistrs novēro konfigurācijas izmaiņas un atjauno ķēdi vietā
+- Savienojuma punkti: tērzēšanas apdarinātāja ievade, attēlu ģenerēšanas apstrādātājs, atbildes dezinfekcijas līdzeklis
 - HTTP līgums: pārkāpumi parādās kā `503` ar `error.code = "GUARDRAIL_VIOLATION"`
 
-Informāciju par noteikumu kopu veidošanu un sliekšņu regulēšanu skatiet
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Lai iegūtu informāciju par kārtulu kopas izveidi un sliekšņa regulēšanu, skatiet [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Domēna slānis
 
-`src/domain/` vārdu telpa satur domēna pakalpojumus un rezervētus novērtēšanas līgumus.
-Tas nav viens obligāts politikas ieejas punkts katram pieprasījumam.
+`src/domain/` nosaukumtelpa centralizē politikas lēmumus, tāpēc maršruta apstrādātājiem pašiem nav jāmontē lockout/budget/fallback loģika.
 
-Produkcijas tērzēšanas ceļš izsauc `enforceApiKeyPolicy()` no
-`src/shared/utils/apiKeyPolicy.ts`; atrisināto modeļu un kombinācijas locekļu autorizācija
-ir implementēta `src/sse/handlers/chat/resolvedModelPolicy.ts`. Pašmitētā ieeja
-`src/app/api/v1/chat/completions/route.ts` pirms nosūtīšanas arī piemēro API atslēgas
-politiku. Kombināciju atrisināšana notiek, izmantojot `open-sse/services/combo.ts`.
-
-`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` un `src/lib/container.ts`
-joprojām ir pārbaudīti līgumi, nevis šī pieprasījuma ceļa saslēgumi. Konteiners reģistrē
-politikas dzinēju, taču pārbaudītais produkcijas pieprasījuma ceļš to neatrisina.
-Tikai pašu šo līgumu mainīšana nemaina produkcijas tērzēšanas politiku vai kombināciju
-maršrutēšanu; to pieslēgšanai vai noņemšanai nepieciešams atsevišķs projektēšanas lēmums.
-
-- Rezervētais politikas dzinējs: `src/domain/policyEngine.ts` — bloķēšanas → budžeta → rezerves novērtēšana
+- Politikas dzinējs: `src/domain/policyEngine.ts` — vienots ieejas punkts pirmsizpildes novērtēšanai (lokauts → budžeta → rezerves pasūtīšana)
 - Izmaksu noteikumi: `src/domain/costRules.ts`
-- Rezerves politika: `src/domain/fallbackPolicy.ts`
-- Bloķēšanas politika: `src/domain/lockoutPolicy.ts`
-- Uz birkām balstīta maršrutēšana: `src/domain/tagRouter.ts`
-- Rezervētais kombināciju atrisinātājs: `src/domain/comboResolver.ts` — autonoms atlases līgums; produkcijas kombināciju maršrutēšana ir implementēta `open-sse/services/combo.ts`
-- Savienojumu/modeļu noteikumu apvienotājs: `src/domain/connectionModelRules.ts`
+- Atkāpšanās politika: `src/domain/fallbackPolicy.ts`
+- Lokauta politika: `src/domain/lockoutPolicy.ts`
+- Uz tagiem balstīta maršrutēšana: `src/domain/tagRouter.ts`
+- Kombinētais atrisinātājs: `src/domain/comboResolver.ts` — atrisina kombinētos nosaukumus, auto/\* prefiksus un aizstājējzīmju modeļa mērķus konkrētiem izpildes plāniem
+- Connection/model noteikumu galdnieks: `src/domain/connectionModelRules.ts`
 - Modeļu pieejamības momentuzņēmumi: `src/domain/modelAvailability.ts`
-- Pakalpojumu sniedzēju derīguma termiņa izsekošana: `src/domain/providerExpiration.ts`
-- Kvotu kešatmiņa: `src/domain/quotaCache.ts`
-- Degradācijas stāvoklis: `src/domain/degradation.ts`
+- Pakalpojumu sniedzēja derīguma termiņa izsekošana: `src/domain/providerExpiration.ts`
+- Kvotas kešatmiņa: `src/domain/quotaCache.ts`. Pakalpojumu sniedzēji pievieno un noņem kvotu logus (dažos plānos OpenAI atcēla 5 stundu Codex logu), tāpēc pakalpojumu sniedzēja adaptera izmantošanas nolasīšana apliecina, ka tā ir pilnīga (`quotasComplete`, sk. `src/lib/usage/usageReading.ts`) ir visa konta logu kopa: logs, kas bija zināms agrāk, bet tajā nav Claude `quota_snapshots` Codex. Daļēji pierādījumi (atbilžu galvenes, novecojušas kopijas) atjaunina tikai tajā esošos logus.
+- Noārdīšanās stāvoklis: `src/domain/degradation.ts`
 - Konfigurācijas audits: `src/domain/configAudit.ts`
-- OmniRoute atbilžu metadatu veidotājs: `src/domain/omnirouteResponseMeta.ts`
-- Novērtēšanas apakšsistēma: `src/domain/assessment/` — periodiski novērtēšanas uzdevumi
+- OmniRoute atbildes metadatu veidotājs: `src/domain/omnirouteResponseMeta.ts`
+- Novērtēšanas apakšsistēma: `src/domain/assessment/` — periodiskas novērtēšanas darbi
 
-### E. Autorizācijas konveijers
+### E. Autorizācijas sistēma
 
-Autorizācijas konveijers klasificē katru ienākošo pieprasījumu un pirms nosūtīšanas
-piemēro atbilstošo politiku ķēdi.
+Autorizācijas konveijers klasificē katru ienākošo pieprasījumu un piemēro atbilstošo politikas ķēdi pirms nosūtīšanas.
 
-- Konveyera ieejas punkts: `src/server/authz/pipeline.ts`
-- Pieprasījumu klasifikators: `src/server/authz/classify.ts` — atšķir publiskos
-  saderības maršrutus no pārvaldības maršrutiem
-- Publisko maršrutu reģistrs: `src/shared/constants/publicApiRoutes.ts`
-- Politikas: `src/server/authz/policies/` — kombinējami predikāti
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` utt.)
-- Galveņu utilītas: `src/server/authz/headers.ts`
-- Aserciju palīgs: `src/server/authz/assertAuth.ts`
+- Cauruļvada ievade: `src/server/authz/pipeline.ts`
+- Pieprasījuma klasifikators: `src/server/authz/classify.ts` — atšķir publiskos saderības maršrutus no pārvaldības maršrutiem
+- Publiskā maršruta inventārs: `src/shared/constants/publicApiRoutes.ts`
+- Politikas: `src/server/authz/policies/` — komponējami predikāti (`requireApiKey`, `requireManagement`, `requireFreshAuth` utt.)
+- Galvenes utilītas: `src/server/authz/headers.ts`
+- Apgalvojumu palīgs: `src/server/authz/assertAuth.ts`
 - Pieprasījuma konteksts: `src/server/authz/context.ts`
 
-Publiskie un pārvaldības maršruti ir stingra robeža: aģentu/dzesēšanas API un
-nodrošinātāju mutācijas pieprasa pārvaldības autentifikāciju (ja tās nav — HTTP 401).
+Publiskie un pārvaldības maršruti ir stingra robeža: agent/cooldown APIs un nodrošinātāja mutācijām ir nepieciešama pārvaldības autentifikācija (ja trūkst HTTP 401).
 
-Pilnus maršrutu klasifikācijas noteikumus skatiet
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Pilnus maršrutu klasifikācijas noteikumus skatiet [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Darbplūsmas FSM un uzdevumjūtīgs maršrutētājs
+### F. Workflow FSM un Task-Aware Router
 
-Ar galīgu stāvokļu automātu vadīts maršrutētājs, kas izvietots virs kombināciju
-atlases, lai virzītu trafiku atkarībā no noteiktā darbplūsmas posma (plānošana,
-izpilde, pārskatīšana) un fona uzdevumu tuvuma.
+Ierobežota stāvokļa mašīnas vadīts maršrutētājs, kas ir slāņots virs kombinētās atlases, lai novirzītu trafiku, pamatojoties uz konstatēto darbplūsmas posmu (plānošana, izpilde, pārskatīšana) un fona uzdevuma afinitāti.
 
-- Darbplūsmas FSM: `open-sse/services/workflowFSM.ts`
-- Uzdevumjūtīgs maršrutētājs: `open-sse/services/taskAwareRouter.ts`
+- Darbplūsma FSM: `open-sse/services/workflowFSM.ts`
+- Uzdevumu apzinošs maršrutētājs: `open-sse/services/taskAwareRouter.ts`
 - Fona uzdevumu detektors: `open-sse/services/backgroundTaskDetector.ts`
 - Nolūku klasifikators: `open-sse/services/intentClassifier.ts`
 
-FSM pārejas tiek ņemtas vērā Auto Combo vērtēšanā, dodot priekšroku lētākiem
-modeļiem fona/automatizācijas uzdevumiem un spēcīgākiem modeļiem interaktīvām
-plānošanas/pārskatīšanas maiņām.
+FSM pārejas tiek iekļautas Auto Combo vērtēšanā, orientējoties uz lētākiem modeļiem background/automation uzdevumiem un uz spēcīgākiem modeļiem interaktīviem planning/review pagriezieniem.
 
-### G. Nodrošinātājiem specifiska noturība
+### G. Pakalpojumu sniedzējam specifiskā noturība
 
-Vairāki nodrošinātāji piegādā īpašus noturības un stealth moduļus, kas balstās uz
-globālajiem ķēdes pārtraucēja / savienojuma dzesēšanas / modeļa bloķēšanas slāņiem:
+Vairāki pakalpojumu sniedzēji piegādā īpašus elastīguma un slepenības moduļus, kas nodrošina globālo automātisko slēdžu / savienojuma dzesēšanas / modeļa bloķēšanas slāņus:
 
-- Antigravity 429 dzinējs: `open-sse/services/antigravity429Engine.ts` (rotē
-  identitāti, attīra atbilžu galvenes, vada kredītu/versiju izsekošanu, izmantojot
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 dzinējs: `open-sse/services/antigravity429Engine.ts` (pagriež identitāti, notīra atbildes galvenes, veic credits/version izsekošanu, izmantojot `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 aizsargs: `open-sse/services/antigravity429Guard.ts` (pēc pieprasījuma budžets augšpus 429s visos saimniekdatoros, `ANTIGRAVITY_MAX_429_ATTEMPTS`; uz identisku atkārtotu atteiktā teksta sūtīšanu tiek atbildēts lokāli; `src/sse/handlers/chat.ts` nerestartē šādu pieprasījumu, izmantojot atdzišanas mēģinājumu)
 - ModelScope kvotu politika: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (saderības kanāla rokasspiediens): `open-sse/services/claudeCodeCCH.ts`,
-  kā arī `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Claude Code pirkstnospiedumu formēšana: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code obfuskācija: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude kods CCH (saderības kanāla rokasspiediens): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Koda pirkstu nospiedumu veidošana: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Koda neskaidrība: `open-sse/services/claudeCodeObfuscation.ts`
 
-Pilnu stealth rokasgrāmatu un ekspluatācijas vadlīnijas skatiet
-`docs/security/STEALTH_GUIDE.md` (git; netiek kompilēts iekš `/docs`).
+Pilnu slepeno rokasgrāmatu un darbības norādījumus skatiet `docs/security/STEALTH_GUIDE.md` (git; nav apkopots `/docs`).
 
-### H. Webhooks, spriešanas kešatmiņa, lasīšanas kešatmiņa
+### H. Webhooks, argumentācijas kešatmiņa, lasīšanas kešatmiņa
 
-- **Webhooks** — izejoša nosūtīšana nodrošinātāja/konta/uzdevuma notikumiem.
-  - Nosūtītājs: `src/lib/webhookDispatcher.ts`
-  - Glabātuve: `webhooks` SQLite tabula (izmantojot `src/lib/db/webhooks.ts`)
-  - Vadības panelis: `/dashboard/webhooks` (abonementi, slepenās atslēgas, atkārtojumu vēsture)
-  - Notikumu taksonomiju un atkārtošanas semantiku skatiet [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Spriešanas kešatmiņa** — atkārtojami spriešanas bloki nodrošinātājiem, kas
-  ģenerē domāšanas tokenus (Claude, GLMT utt.), lai nākamās sarunas maiņas varētu
-  izlaist atkārtotu domāšanu.
+- **Tīmekļa aizķeres** — izejošs sūtījums provider/account/task pasākumiem.
+  - Dispečers: `src/lib/webhookDispatcher.ts`
+  - Uzglabāšana: `webhooks` SQLite galds (izmantojot `src/lib/db/webhooks.ts`)
+  - Informācijas panelis: `/dashboard/webhooks` (abonementi, noslēpumi, atkārtota mēģinājuma vēsture)
+  - Lai uzzinātu par notikumu taksonomiju un atkārtotas mēģinājuma semantiku, skatiet [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Sprieduma kešatmiņa** — atkārtoti atskaņojami argumentācijas bloki pakalpojumu sniedzējiem, kuri izstaro domāšanas marķierus (Claude, GLMT u.c.), tāpēc secīgi pagriezieni var izlaist pārdomāšanu.
   - DB slānis: `src/lib/db/reasoningCache.ts`
   - Servisa slānis: `open-sse/services/reasoningCache.ts`
   - Atkārtošanas semantiku skatiet [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Lasīšanas kešatmiņa** — īslaicīga atbilžu kešatmiņa, kas indeksēta pēc
-  paraksta un tiek izmantota, lai sapludinātu identiskus atkārtotus mēģinājumus
-  no bojātiem augšupējās plūsmas SDK.
+- **Lasīt kešatmiņu** — īslaicīga atbildes kešatmiņa ar parakstu un tiek izmantota, lai sakļautu identiskus atkārtotus mēģinājumus no bojāta augšpus SDKs.
   - DB slānis: `src/lib/db/readCache.ts`
-  - Statistikas galapunkts: `GET /api/cache/stats`, vadības panelis: `/dashboard/cache`
+  - Statistikas galapunkts: `GET /api/cache/stats`, informācijas panelis pie `/dashboard/cache`
 
 ## 3) Noturības slānis
 

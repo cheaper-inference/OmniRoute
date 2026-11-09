@@ -8,79 +8,78 @@
 
 _Paskutinį kartą atnaujinta: 2026-06-28_
 
-## Santrauka vadovams
+## Santrauka
 
-„OmniRoute“ yra vietinis dirbtinio intelekto užklausų maršruto parinkimo šliuzas ir valdymo skydelis, sukurtas naudojant „Next.js“.
-Jis suteikia vieną su „OpenAI“ suderinamą galinį tašką (`/v1/*`) ir nukreipia srautą keliems pirminiams paslaugų teikėjams, užtikrindamas formatų konvertavimą, atsarginį perjungimą, prieigos raktų atnaujinimą ir naudojimo stebėjimą.
+OmniRoute yra vietinis AI maršruto parinkimo šliuzas ir prietaisų skydelis, sukurtas naudojant Next.js. Jis suteikia vieną su OpenAI suderinamą galinį tašką (`/v1/*`) ir nukreipia srautą tarp kelių tiekėjų, naudodamas vertimą, atsarginį kodą, prieigos rakto atnaujinimą ir naudojimo stebėjimą.
 
 Pagrindinės galimybės:
 
-- Su „OpenAI“ suderinama API sąsaja, skirta CLI ir įrankiams (376 paslaugų teikėjai, 156 vykdymo moduliai)
-- Užklausų ir atsakymų konvertavimas tarp paslaugų teikėjų formatų
-- Modelių derinio atsarginis perjungimas (kelių modelių seka)
-- Struktūrizuoti derinio žingsniai (`provider + model + connection`) su vykdymo metu nustatoma tvarka pagal `compositeTiers`
-- Paskyros lygmens atsarginis perjungimas (kelios paskyros vienam paslaugų teikėjui)
-- Išankstinis kvotos tikrinimas ir į kvotą atsižvelgiantis P2C paskyros parinkimas pagrindiniame pokalbių sraute
-- OAuth ir API raktais pagrįstas paslaugų teikėjų ryšių valdymas (27 OAuth paslaugų teikėjų moduliai)
-- Įterpinių generavimas per `/v1/embeddings` (18 paslaugų teikėjų)
-- Vaizdų generavimas per `/v1/images/generations` (daugiau nei 10 paslaugų teikėjų, daugiau nei 20 modelių)
-- Garso transkribavimas per `/v1/audio/transcriptions` (18 paslaugų teikėjų)
-- Teksto vertimas į kalbą per `/v1/audio/speech` (24 integruoti paslaugų teikėjai)
-- Vaizdo įrašų generavimas per `/v1/videos/generations` („ComfyUI“ ir „SD WebUI“)
-- Muzikos generavimas per `/v1/music/generations` („ComfyUI“)
-- Paieška žiniatinklyje per `/v1/search` (20 paslaugų teikėjų)
-- Turinio moderavimas per `/v1/moderations`
-- Pakartotinis reitingavimas per `/v1/rerank`
-- Mąstymo žymų analizė (`<think>...</think>`), skirta samprotavimo modeliams
-- Atsakymų išvalymas, užtikrinantis griežtą suderinamumą su „OpenAI“ SDK
-- Vaidmenų normalizavimas (developer→system, system→user), užtikrinantis skirtingų paslaugų teikėjų suderinamumą
-- Struktūrizuotos išvesties konvertavimas (json_schema → Gemini responseSchema)
-- Vietinis paslaugų teikėjų, raktų, alternatyviųjų pavadinimų, derinių, nustatymų ir kainodaros duomenų saugojimas (122 DB moduliai)
-- Naudojimo ir išlaidų stebėjimas bei užklausų registravimas
-- Pasirinktinis debesų sinchronizavimas, skirtas kelių įrenginių ir būsenos sinchronizavimui
-- Leidžiamų ir blokuojamų IP adresų sąrašai, skirti API prieigai valdyti
-- Mąstymo biudžeto valdymas (tiesioginis perdavimas / automatinis / pasirinktinis / adaptyvus)
-- Visuotinės sistemos instrukcijos įterpimas
-- Seansų stebėjimas ir skaitmeninių atspaudų nustatymas
-- Patobulintas paskyros lygmens užklausų dažnio ribojimas naudojant konkretiems paslaugų teikėjams skirtus profilius
-- Grandinės pertraukiklio šablonas, didinantis paslaugų teikėjų atsparumą
-- Apsauga nuo vienalaikių užklausų antplūdžio naudojant abipusio blokavimo mechanizmą
-- Parašais pagrįsta pasikartojančių užklausų šalinimo podėlio sistema
-- Domeno sluoksnis: išlaidų taisyklės, atsarginio perjungimo politika, blokavimo politika
-- Konteksto perdavimas: seanso perdavimo santraukos, užtikrinančios tęstinumą keičiant paskyras
-- Domeno būsenos saugojimas (tiesioginio įrašymo „SQLite“ podėlis, skirtas atsarginiams perjungimams, biudžetams, blokavimams ir grandinės pertraukikliams)
-- Centralizuoto užklausų vertinimo strategijų variklis (blokavimas → biudžetas → atsarginis perjungimas)
-- Užklausų telemetrija su p50/p95/p99 delsos agregavimu
-- Derinio paskirties telemetrija ir istorinė derinio paskirties būklė naudojant `combo_execution_key` / `combo_step_id`
-- Koreliacijos ID (X-Request-Id), skirtas visos užklausos eigos sekimui
-- Atitikties audito registravimas su galimybe atsisakyti kiekvienam API raktui
-- Vertinimo sistema, skirta LLM kokybei užtikrinti
-- Būklės valdymo skydelis su realiuoju laiku rodoma paslaugų teikėjų grandinės pertraukiklių būsena
-- MCP serveris (110 įrankių) su 3 perdavimo būdais (stdio/SSE/srautinis HTTP)
-- A2A serveris (JSON-RPC 2.0 ir SSE) su gebėjimais ir užduočių gyvavimo ciklu
-- Atminties sistema (išgavimas, įterpimas, gavimas, apibendrinimas)
-- Gebėjimų sistema (registras, vykdyklė, izoliuota aplinka, integruoti gebėjimai)
-- MITM tarpinis serveris su sertifikatų valdymu ir DNS apdorojimu
-- Apsaugos nuo instrukcijų įterpimo tarpinė programinė įranga
-- Instrukcijų glaudinimo konvejeris su „Caveman“, RTK, sudėtiniais konvejeriais, glaudinimo deriniais, kalbų paketais ir analitika
-- ACP (agentų komunikacijos protokolo) registras
-- Moduliniai OAuth paslaugų teikėjai (22 atskiri moduliai kataloge `src/lib/oauth/providers/`)
-- Pašalinimo ir visiško pašalinimo scenarijai
-- OAuth aplinkos taisymo veiksmas
-- „WebSocket“ tiltas, skirtas su „OpenAI“ suderinamiems WS klientams (`/v1/ws`)
-- Sinchronizavimo prieigos raktų valdymas (išdavimas / atšaukimas, ETag versijuojamo konfigūracijos paketo atsisiuntimas)
-- GLM mąstymas (`glmt`) kaip visavertė paslaugų teikėjo išankstinė parinktis
-- Hibridinis žetonų skaičiavimas (paslaugų teikėjo pusės `/messages/count_tokens` su atsarginiu apytiksliu vertinimu)
-- Automatinis modelių alternatyviųjų pavadinimų pradinis užpildymas (daugiau nei 30 skirtingų tarpinių serverių dialektų normalizavimų paleidimo metu)
-- Saugus siunčiamųjų užklausų vykdymas su SSRF apsauga, privačių URL blokavimu ir konfigūruojamais pakartotiniais bandymais
-- Į laukimo laikotarpius atsižvelgiantys pakartotiniai pokalbių užklausų bandymai su konfigūruojamais `requestRetry` ir `maxRetryIntervalSec`
-- Vykdymo aplinkos tikrinimas naudojant „Zod“ paleidimo metu
-- Atitikties audito 2 versija su puslapiavimu, paslaugų teikėjų CRUD įvykiais ir SSRF užblokuotų tikrinimų registravimu
+- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (381 teikėjas, 159 vykdymo moduliai)
+- Request/response vertimas tarp tiekėjo formatų
+- Atsarginis modelio derinys (kelių modelių seka)
+- Struktūriniai kombinuoti žingsniai (`provider + model + connection`) su vykdymo laiko tvarka pagal `compositeTiers`
+- Atsarginis paskyros lygis (kelios paskyros vienam teikėjui)
+- Kvotos išankstinis patikrinimas ir P2C paskyros pasirinkimas pagal kvotą pagrindiniame pokalbio kelyje
+- OAuth + API rakto teikėjo ryšio valdymas (27 OAuth teikėjo moduliai)
+- Generavimo įterpimas per `/v1/embeddings` (18 teikėjų)
+- Vaizdo generavimas per `/v1/images/generations` (10 + teikėjų, 20 + modelių)
+- Garso transkripcija per `/v1/audio/transcriptions` (18 teikėjų)
+- Tekstas į kalbą per `/v1/audio/speech` (24 integruoti teikėjai)
+- Vaizdo įrašų generavimas per `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Muzikos generavimas per `/v1/music/generations` (ComfyUI)
+- Interneto paieška per `/v1/search` (20 teikėjų)
+- Moderavimas per `/v1/moderations`
+- Reitingavimas per `/v1/rerank`
+- Pagalvokite apie žymų analizavimą (`<think>...</think>`) samprotavimo modeliams
+- Reagavimo dezinfekcija siekiant griežto OpenAI SDK suderinamumo
+- Vaidmenų normalizavimas (kūrėjo → sistema, sistemos → vartotojas), kad būtų suderinti keli teikėjai
+- Struktūrinės išvesties konvertavimas (json_schema → Gemini responseSchema)
+- Vietinis teikėjų, raktų, slapyvardžių, derinių, nustatymų, kainodaros (122 DB modulių) patvarumas
+- Usage/cost sekimas ir užklausų registravimas
+- Pasirenkamas debesies sinchronizavimas, skirtas multi-device/state sinchronizavimui
+- IP allowlist/blocklist, skirtas API prieigos kontrolei
+- Mąstantis biudžeto valdymas (passthrough/auto/custom/adaptive)
+- Visuotinės sistemos greitas įpurškimas
+- Sesijos stebėjimas ir pirštų atspaudų ėmimas
+- Patobulintas tarifų ribojimas kiekvienai paskyrai naudojant konkretaus teikėjo profilius
+- Grandinės pertraukiklio modelis, užtikrinantis teikėjo atsparumą
+- Apsauga nuo griaustinio su mutex užraktu
+- Parašu pagrįsta užklausos dubliavimosi talpykla
+- Domeno sluoksnis: išlaidų taisyklės, atsarginė politika, blokavimo politika
+- Konteksto perdavimas: seanso perdavimo suvestinės, skirtos paskyros rotacijos tęstinumui
+- Domeno būsenos išlikimas (SQLite įrašymo talpykla, skirta atsarginėms priemonėms, biudžetams, blokavimui, grandinės pertraukikliams)
+- Centralizuoto užklausų vertinimo politikos variklis (atsarginis blokavimas → budget → )
+- Prašyti telemetrijos su p50/p95/p99 delsos agregavimu
+- Kombinuota tikslinė telemetrija ir istorinė kombinuota tikslinė būklė per `combo_execution_key` / `combo_step_id`
+- Koreliacija ID (X-Request-Id) sekimui nuo galo iki galo
+- Atitikties audito registravimas su atsisakymu pagal API raktą
+- „Eval“ LLM kokybės užtikrinimo sistema
+- Sveikatos prietaisų skydelis su realaus laiko teikėjo grandinės pertraukiklio būsena
+- MCP serveris (110 įrankių) su 3 pernešimais (stdio/SSE/Streamable HTTP)
+- A2A serveris (JSON-RPC 2.0 + SSE) su įgūdžių ir užduočių gyvavimo ciklu
+- Atminties sistema (ištraukimas, įpurškimas, iškvietimas, apibendrinimas)
+- Įgūdžių sistema (registras, vykdytojas, smėlio dėžė, integruoti įgūdžiai)
+- MITM tarpinis serveris su sertifikatų valdymu ir DNS tvarkymu
+- Greita įpurškimo apsaugos tarpinė programinė įranga
+- Greitas glaudinimo vamzdynas su „Caveman“, RTK, sudėtiniais vamzdynais, glaudinimo kombinacijomis, kalbų paketais ir analize
+- ACP (Agent Communication Protocol) registras
+- Moduliniai OAuth tiekėjai (22 atskiri moduliai pagal `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall scenarijus
+- OAuth aplinkos remonto veiksmas
+- WebSocket tiltas, skirtas su OpenAI suderinamiems WS klientams (`/v1/ws`)
+- Sinchronizavimo prieigos rakto valdymas (issue/revoke, ETag versijos konfigūracijos paketo atsisiuntimas)
+- GLM Thinking (`glmt`) pirmos klasės teikėjo iš anksto nustatytas
+- Hibridinis prieigos raktų skaičiavimas (tiekėjo pusės `/messages/count_tokens` su atsarginiu įvertinimu)
+- Modelio slapyvardžio automatinis sėjimas (30 + kryžminio tarpinio serverio dialekto normalizavimas paleidžiant)
+- Saugus išsiunčiamas gavimas su SSRF apsauga, privatus URL blokavimas ir konfigūruojamas pakartotinis bandymas
+- Atvėsus pokalbiui su konfigūruojamais `requestRetry` ir `maxRetryIntervalSec`
+- Vykdymo aplinkos patvirtinimas naudojant Zod paleidžiant
+- Atitikties auditas v2 su puslapiais, teikėjo CRUD įvykiais ir SSRF blokuojamu patvirtinimo registravimu
 
-Pagrindinis vykdymo modelis:
+Pirminis vykdymo laikas:
 
-- „Next.js“ programos maršrutai kataloge `src/app/api/*` įgyvendina ir valdymo skydelio API, ir suderinamumo API
-- Bendras SSE ir maršruto parinkimo branduolys kataloguose `src/sse/*` ir `open-sse/*` apdoroja paslaugų teikėjų vykdymą, konvertavimą, srautinį perdavimą, atsarginį perjungimą ir naudojimo apskaitą
+- Next.js programos maršrutai pagal `src/app/api/*` įgyvendina ir prietaisų skydelio APIs, ir suderinamumo APIs
+- Bendrinamas SSE/routing branduolys `src/sse/*` + `open-sse/*` tvarko teikėjo vykdymą, vertimą, srautinį perdavimą, atsarginę dalį ir naudojimą
 
 ## Etaloninės diagramos
 
@@ -268,71 +267,71 @@ Administravimo sritys:
 
 ## 2) SSE + vertimo branduolys
 
-Pagrindiniai srauto moduliai:
+Pagrindinio srauto moduliai:
 
 - Įėjimo taškas: `src/sse/handlers/chat.ts`
-- Pagrindinė orkestracija: `open-sse/handlers/chatCore.ts`
-- Tiekėjų vykdymo adapteriai: `open-sse/executors/*`
-- Formato aptikimas / tiekėjo konfigūracija: `open-sse/services/provider.ts`
-- Modelio analizė / nustatymas: `src/sse/services/model.ts`, `open-sse/services/model.ts`
-- Paskyros atsarginės (fallback) logika: `open-sse/services/accountFallback.ts`
-- Vertimo registras: `open-sse/translator/index.ts`
+- Pagrindinis orkestravimas: `open-sse/handlers/chatCore.ts`
+- Teikėjų vykdymo adapteriai: `open-sse/executors/*`
+- Formato aptikimas / teikėjo konfigūracija: `open-sse/services/provider.ts`
+- Modelio analizavimas / nustatymas: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- Paskyros atsarginio parinkimo logika: `open-sse/services/accountFallback.ts`
+- Vertimų registras: `open-sse/translator/index.ts`
 - Srauto transformacijos: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- Naudojimo išskyrimas / normalizavimas: `open-sse/utils/usageTracking.ts`
-- Think žymų analizatorius: `open-sse/utils/thinkTagParser.ts`
-- Įterpimų (embedding) apdorojimo modulis: `open-sse/handlers/embeddings.ts`
-- Įterpimų tiekėjų registras: `open-sse/config/embeddingRegistry.ts`
-- Vaizdų generavimo apdorojimo modulis: `open-sse/handlers/imageGeneration.ts`
-- Vaizdų tiekėjų registras: `open-sse/config/imageRegistry.ts`
+- Naudojimo duomenų išgavimas / normalizavimas: `open-sse/utils/usageTracking.ts`
+- „Think“ žymų analizatorius: `open-sse/utils/thinkTagParser.ts`
+- Įterpinių apdorojimo programa: `open-sse/handlers/embeddings.ts`
+- Įterpinių teikėjų registras: `open-sse/config/embeddingRegistry.ts`
+- Vaizdų generavimo apdorojimo programa: `open-sse/handlers/imageGeneration.ts`
+- Vaizdų teikėjų registras: `open-sse/config/imageRegistry.ts`
 - Atsakymų išvalymas: `open-sse/handlers/responseSanitizer.ts`
-- Rolių normalizavimas: `open-sse/services/roleNormalizer.ts`
+- Vaidmenų normalizavimas: `open-sse/services/roleNormalizer.ts`
 
 Paslaugos (verslo logika):
 
-- Paskyrų pasirinkimas / vertinimas: `open-sse/services/accountSelector.ts`
+- Paskyrų parinkimas / vertinimas: `open-sse/services/accountSelector.ts`
 - Konteksto gyvavimo ciklo valdymas: `open-sse/services/contextManager.ts`
-- IP filtro vykdymas: `open-sse/services/ipFilter.ts`
-- Seansų sekimas: `open-sse/services/sessionManager.ts`
-- Užklausų deduplikacija: `open-sse/services/signatureCache.ts`
-- Sisteminio prompto įterpimas: `open-sse/services/systemPrompt.ts`
-- Mąstymo (thinking) biudžeto valdymas: `open-sse/services/thinkingBudget.ts`
-- Pakaitos simbolių (wildcard) modelių maršrutizavimas: `open-sse/services/wildcardRouter.ts`
-- Užklausų dažnio apribojimo valdymas: `open-sse/services/rateLimitManager.ts`
-- Grandinės pertraukiklis (circuit breaker): `src/shared/utils/circuitBreaker.ts`
-- Konteksto perdavimas: `open-sse/services/contextHandoff.ts` — perdavimo (handoff) santraukos generavimas ir įterpimas context-relay strategijai
-- Glaudinimas: `open-sse/services/compression/*` — aktyvus glaudinimas prieš tiekėjo vertimą;
-  apima Caveman taisykles, RTK filtrus, sujungtus pipeline'us, glaudinimo kombinacijas, statistiką ir validavimą
-- Codex kvotų gavėjas: `open-sse/services/codexQuotaFetcher.ts` — gauna Codex kvotas context-relay perdavimo sprendimams
-- Pakartojimas atsižvelgiant į atvėsimą (cooldown): `src/sse/services/cooldownAwareRetry.ts` — pakartojimai pagal modelį su atvėsimu, konfigūruojamais per `requestRetry` / `maxRetryIntervalSec`
-- Saugus išeinantis fetch: `src/shared/network/safeOutboundFetch.ts` — saugomas tiekėjo/modelio fetch su SSRF apsauga, privačių URL blokavimu, pakartojimais ir laiko limitu
-- Išeinančių URL apsauga: `src/shared/network/outboundUrlGuard.ts` — mazgų (host) patikros tiekėjų URL; `src/shared/network/outboundUrlGuardPolicy.ts` pasirenka režimą pagal `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ir jų perjungiklius valdymo panelėje (žr. `docs/reference/ENVIRONMENT.md`)
-- Tiekėjų užklausų numatytieji nustatymai: `open-sse/services/providerRequestDefaults.ts` — tiekėjo lygio numatytieji `maxTokens`, `temperature`, `thinkingBudgetTokens`
-- GLM tiekėjo konstantos: `open-sse/config/glmProvider.ts` — bendri GLM modeliai, kvotų URL, GLMT laiko limitai / numatytieji nustatymai
-- Antigravity upstream: `open-sse/config/antigravityUpstream.ts` — bazinio URL ir aptikimo (discovery) kelio konstantos
-- Codex kliento konstantos: `open-sse/config/codexClient.ts` — versijuotos user-agent ir client-version reikšmės
-- Modelių pseudonimų sėkla: `src/lib/modelAliasSeed.ts` — paleisties metu sukuria 30+ kryžminių proxy dialektų pseudonimų
+- IP filtro taikymas: `open-sse/services/ipFilter.ts`
+- Seansų stebėjimas: `open-sse/services/sessionManager.ts`
+- Užklausų dubliavimosi šalinimas: `open-sse/services/signatureCache.ts`
+- Sisteminės instrukcijos įterpimas: `open-sse/services/systemPrompt.ts`
+- Mąstymo biudžeto valdymas: `open-sse/services/thinkingBudget.ts`
+- Modelių nukreipimas pagal pakaitos simbolius: `open-sse/services/wildcardRouter.ts`
+- Užklausų dažnio ribojimo valdymas: `open-sse/services/rateLimitManager.ts`
+- Grandinės pertraukiklis: `src/shared/utils/circuitBreaker.ts`
+- Konteksto perdavimas: `open-sse/services/contextHandoff.ts` — perdavimo santraukos generavimas ir įterpimas, skirtas konteksto perdavimo strategijai
+- Glaudinimas: `open-sse/services/compression/*` — išankstinis glaudinimas prieš vertimą į teikėjo formatą;
+  apima „Caveman“ taisykles, RTK filtrus, nuosekliąsias konvejerines grandines, glaudinimo derinius, statistiką ir tikrinimą
+- „Codex“ kvotos gavimo priemonė: `open-sse/services/codexQuotaFetcher.ts` — gauna „Codex“ kvotą konteksto perdavimo sprendimams priimti
+- Pakartotiniai bandymai atsižvelgiant į atvėsimo laikotarpį: `src/sse/services/cooldownAwareRetry.ts` — kiekvienam modeliui skirti pakartotiniai bandymai po atvėsimo laikotarpio su konfigūruojamais `requestRetry` / `maxRetryIntervalSec`
+- Saugus išeinantis duomenų gavimas: `src/shared/network/safeOutboundFetch.ts` — apsaugotas teikėjo / modelio duomenų gavimas su SSRF apsauga, privačių URL blokavimu, pakartotiniais bandymais ir skirtuoju laiku
+- Išeinančių URL apsauga: `src/shared/network/outboundUrlGuard.ts` — teikėjų URL pagrindinių kompiuterių patikros; `src/shared/network/outboundUrlGuardPolicy.ts` parenka režimą pagal `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` ir atitinkamus jų valdymo skydelio perjungiklius (žr. `docs/reference/ENVIRONMENT.md`)
+- Numatytosios teikėjo užklausų reikšmės: `open-sse/services/providerRequestDefaults.ts` — teikėjo lygmens numatytosios `maxTokens`, `temperature`, `thinkingBudgetTokens` reikšmės
+- GLM teikėjo konstantos: `open-sse/config/glmProvider.ts` — bendrinami GLM modeliai, kvotų URL, GLMT skirtasis laikas / numatytosios reikšmės
+- „Antigravity“ pirminė tarnyba: `open-sse/config/antigravityUpstream.ts` — bazinio URL ir aptikimo kelio konstantos
+- „Codex“ kliento konstantos: `open-sse/config/codexClient.ts` — versijuotos naudotojo agento ir kliento versijos reikšmės
+- Modelių alternatyviųjų pavadinimų pradiniai duomenys: `src/lib/modelAliasSeed.ts` — paleidimo metu užpildo daugiau kaip 30 skirtingų tarpinių serverių dialektų alternatyviųjų pavadinimų
 
 Domeno sluoksnio moduliai:
 
-- Kainų taisyklės / biudžetai: `src/domain/costRules.ts`
-- Atsarginė (fallback) politika: `src/domain/fallbackPolicy.ts`
-- Rezervuota kombinacijų išsprendimo sutartis: `src/domain/comboResolver.ts`; realus maršrutizavimas naudoja `open-sse/services/combo.ts`
+- Sąnaudų taisyklės / biudžetai: `src/domain/costRules.ts`
+- Atsarginio parinkimo politika: `src/domain/fallbackPolicy.ts`
+- Derinių sprendimo priemonė: `src/domain/comboResolver.ts`
 - Blokavimo politika: `src/domain/lockoutPolicy.ts`
-- Rezervuota politikos vertinimo sutartis: `src/domain/policyEngine.ts`; užklausų kelyje API rakto politika vykdoma per `src/shared/utils/apiKeyPolicy.ts`, o išspręsto tikslo autorizacija — per `src/sse/handlers/chat/resolvedModelPolicy.ts`
+- Politikos variklis: `src/domain/policyEngine.ts` — centralizuotas blokavimo → biudžeto → atsarginio parinkimo vertinimas
 - Klaidų kodų katalogas: `src/shared/constants/errorCodes.ts`
 - Užklausos ID: `src/shared/utils/requestId.ts`
-- Fetch laiko limitas: `src/shared/utils/fetchTimeout.ts`
+- Duomenų gavimo skirtasis laikas: `src/shared/utils/fetchTimeout.ts`
 - Užklausų telemetrija: `src/shared/utils/requestTelemetry.ts`
 - Atitiktis / auditas: `src/lib/compliance/index.ts`
-- Vertinimų (eval) vykdytojas: `src/lib/evals/evalRunner.ts`
-- Domeno būsenos išsaugojimas: `src/lib/db/domainState.ts` — SQLite CRUD atsarginėms grandinėms, biudžetams, kainų istorijai, blokavimo būsenai, grandinės pertraukikliams
+- Vertinimų vykdymo priemonė: `src/lib/evals/evalRunner.ts`
+- Domeno būsenos išlaikymas: `src/lib/db/domainState.ts` — SQLite CRUD operacijos, skirtos atsarginio parinkimo grandinėms, biudžetams, sąnaudų istorijai, blokavimo būsenai ir grandinės pertraukikliams
 
-OAuth tiekėjų moduliai (27 atskiri failai kataloge `src/lib/oauth/providers/`):
+OAuth teikėjų moduliai (27 atskiri failai kataloge `src/lib/oauth/providers/`):
 
-- Registro indeksas: `src/lib/oauth/providers/index.ts`
-- Atskiri tiekėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- Bendri pagalbiniai įrankiai: `codebuddyDeviceAuth.ts` (CodeBuddy CN/tarptautinis įrenginio srautas), `museCodeDeviceResponse.ts`
-- Plonas apvalkalas: `src/lib/oauth/providers.ts` — reeksportuoja iš atskirų modulių
+- Registro rodyklė: `src/lib/oauth/providers/index.ts`
+- Atskiri teikėjai: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- Bendrinamos pagalbinės priemonės: `codebuddyDeviceAuth.ts` („CodeBuddy“ CN / tarptautinis įrenginio srautas), `museCodeDeviceResponse.ts`
+- Plonas apvalkalas: `src/lib/oauth/providers.ts` — pakartotinai eksportuoja iš atskirų modulių
 
 ## 5) Įterptosios paslaugos (v3.8.4)
 
@@ -357,179 +356,124 @@ Architektūros sluoksniai:
 
 Išsamiau: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Pagrindinės posistemės (v3.8.0)
+## Pagrindiniai posistemiai (v3.8.0)
 
-### A. „Auto Combo“ variklis
+### A. Kombinuotas automatinis variklis
 
-„Auto Combo“ dinamiškai vertina balais ir parenka maršrutizavimo tikslus užklausos metu, o ne remiasi statiniu combo aprašymu. Jis palaiko `auto/*` modelių prefiksų šeimą.
+„Auto Combo“ dinamiškai įvertina ir parenka maršruto taikinius užklausos metu, o ne pasikliauja statiniu derinio apibrėžimu. Tai suteikia `auto/*` modelio priešdėlių šeimą.
 
-- Variklio įėjimo taškas: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Faktinis combo įėjimo taškas: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), kurį kviečia `src/sse/handlers/chat.ts`
-- Valdymo skydas: `/dashboard/auto-combo`
+- Variklio įvadas: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Sprendimas: `src/domain/comboResolver.ts` (automatinis `auto/` priešdėlio aptikimas)
+- Prietaisų skydelis: `/dashboard/auto-combo`
 - Telemetrija: `auto_combo_decisions` SQLite lentelė
 
 Pagrindinės galimybės:
 
-- **20 maršrutizavimo strategijų** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto yra svarbiausia v3.8.0 versijos naujovė; `fusion` (išplatinimas į panelę (fan-out) + vertintojo sintezė,
-  `open-sse/services/fusion.ts`) yra naujovė v3.8.36 versijoje.
-- **16 faktorių vertinimas**: kvota, sveikatos būsena, atvirkštinės sąnaudos, atvirkštinė delsa, tinkamumas užduočiai
-  ir dar dešimt kitų. Kanoninė faktorių ir jų numatytųjų svorių lentelė pateikta
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ją pakartojus čia atsirastų
-  dar viena vieta, kurioje informacija galėtų pasenti.
-- **Virtuali gamykla** suformuoja efemerinius combo, kai nėra atitinkamo pavadinto combo,
-  kandidatus imdama iš sveikų aktyvių tiekėjų jungčių.
-- **Auto prefiksai**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — kiekvieną iš jų palaiko suderintas svorių profilis.
-- **6 režimų paketai**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` ir `chaos-mode` — iš anksto nustatytos svorių konfigūracijos, kurias galima
-  iškviesti iš valdymo skydo. (Nepainioti su aukščiau minėtais `auto/*` prefiksais, kurie yra
-  užklausos metu taikomi variantai.)
+- **20 maršruto parinkimo strategijų** (prioritetinis, svertinis, užpildomas pirmiausia, apvalus, P2C, atsitiktinis, mažiausiai naudojamas, optimizuotas sąnaudoms, atpažįstamas iš naujo, nustatymo iš naujo langas, aukštis, svertinis pagal kvotą, griežtas atsitiktinis,** auto** , lkgp, optimizuotas kontekstui, optimizuotas talpyklai, konteksto perdavimas,** susiliejimas** , vamzdynas) — auto yra antraštės papildymas 3.8.0 versijoje; `fusion` (panel fan-out + teisėj synthesis, `open-sse/services/fusion.ts`) yra nauja 3.8.36 versijoje.
+- **16 faktorių balas** : kvota, sveikata, atvirkštinė kaina, atvirkštinė delsa, užduoties pritaikymas ir dar dešimt. Kanoninė veiksnių lentelė ir numatytieji jų svoriai yra [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — jei ją čia pakartojus, ji būtų antroje vietoje.
+- **Virtuali gamykla** materializuojasi trumpalaikiai deriniai, kai nėra atitinkamo pavadinimo derinio, kandidatai tiekiami iš sveikų aktyvių paslaugų teikėjų ryšių.
+- **Automatiniai priešdėliai** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kiekvienas paremtas suderintu svorio profiliu.
+- **6 režimų paketai** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` ir `chaos-mode` — iš anksto nustatytos svorio konfigūracijos, kurias galima iškviesti iš prietaisų skydelio. (Nereikia painioti su anksčiau pateiktais `auto/*` priešdėliais, kurie yra užklausos laiko variantai.)
 
-Išsamios algoritminės informacijos (faktorių formulių, svorių derinimo) rasite
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Išsamią algoritmo informaciją (faktorių formules, svorio derinimą) rasite [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Debesijos agentai
+### B. Debesų agentai
 
-Debesijos agentai apgaubia trečiųjų šalių talpinamas kodo agentų platformas (Codex Cloud, Devin,
-Jules) vieningu, duomenų baze paremtu užduočių gyvavimo ciklu. Visi užduočių kūrimo / tikrinimo
-galiniai taškai reikalauja valdymo autentifikavimo.
+„Cloud Agents“ apima trečiųjų šalių priglobtas kodų agentų platformas (Codex Cloud, Devin, Jules) pagal vienodą DB palaikomą užduočių gyvavimo ciklą. Visiems užduočių creation/inspection galutiniams taškams reikalingas valdymo autentifikavimas.
 
-- Modulio šaknis: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, taip pat atskirų agentų pakatalogiai kataloge `agents/`)
-- Atskiri agentų įgyvendinimai: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Viešieji galiniai taškai: `/api/v1/agents/tasks/*` (sąrašas/kūrimas/gavimas/atšaukimas)
-- Valdymo galiniai taškai: `/api/cloud/*` (aprūpinimas, būsena, paketinės operacijos)
-- Valdymo skydas: `/dashboard/cloud-agents`
-- Saugykla: `cloud_agent_tasks` lentelė
+- Modulio šaknis: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plius kiekvieno agento pakatalogiai, esantys `agents/`)
+- Įdiegimai per agentą: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Viešieji galiniai taškai: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Valdymo galutiniai taškai: `/api/cloud/*` (teikimas, būsena, paketas)
+- Prietaisų skydelis: `/dashboard/cloud-agents`
+- Sandėliavimas: `cloud_agent_tasks` staliukas
 
-Informacijos apie kiekvieno agento aprūpinimą ir OAuth ypatybes rasite
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Norėdami sužinoti apie kiekvieno agento aprūpinimą ir OAuth specifiką, žr. [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Apsaugos
+### C. Apsauginiai turėklai
 
-Apsaugų (guardrails) modulis yra karštąjį perkrovimą palaikantis tarpinės programinės įrangos sluoksnis, kuris tikrina užklausas
-ir atsakymus, ar juose nėra asmens tapatybę atskleidžiančios informacijos (PII), raginimų injekcijos (prompt injection) ir nesaugaus vaizdinio turinio. Pažeidimai
-nedelsdami nutraukia užklausą, grąžindami HTTP **503** ir struktūrizuotą klaidos kodą, todėl
-tolimesni kvietėjai gali bandyti dar kartą arba pasirinkti kitą šaką.
+Apsauginių turėklų modulis yra karštai įkeliamas tarpinės programinės įrangos sluoksnis, kuris tikrina užklausas ir atsakymus dėl PII, greito įpurškimo ir nesaugaus regėjimo turinio. Pažeidimai trumpai sujungia prašymą su HTTP** 503** plius struktūrinis klaidos kodas, leidžiantis tolesniems skambintojams bandyti dar kartą arba išsišakoti.
 
-- Modulio šaknis: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Karštasis perkrovimas: registras stebi konfigūracijos pakeitimus ir vietoje iš naujo suformuoja grandinę
-- Prijungimo taškai: pokalbių apdorojimo programos įėjimas, vaizdų generavimo apdorojimo programa, atsakymų valytojas
-- HTTP sutartis: pažeidimai pateikiami kaip `503` su `error.code = "GUARDRAIL_VIOLATION"`
+- Modulio šaknis: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Karštas perkrovimas: registras stebi konfigūracijos pakeitimus ir atkuria grandinę vietoje
+- Prijungimo taškai: pokalbių tvarkyklės įėjimas, vaizdų generavimo tvarkyklė, atsako dezinfekavimo priemonė
+- HTTP sutartis: pažeidimai matomi kaip `503` su `error.code = "GUARDRAIL_VIOLATION"`
 
-Informacijos apie taisyklių rinkinių kūrimą ir slenksčių derinimą rasite
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Dėl taisyklių rinkinio kūrimo ir slenksčio derinimo žr. [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Domeno sluoksnis
 
-`src/domain/` vardų erdvėje yra domeno paslaugos ir rezervuotos vertinimo sutartys.
-Tai nėra vienas privalomas politikos įėjimo taškas kiekvienai užklausai.
+`src/domain/` vardų erdvė centralizuoja politikos sprendimus, todėl maršruto tvarkytojams nereikės patiems rinkti lockout/budget/fallback logikos.
 
-Faktinis pokalbių kelias kviečia `enforceApiKeyPolicy()` iš
-`src/shared/utils/apiKeyPolicy.ts`; išsklaidytų modelių ir combo narių
-autorizavimas įgyvendintas `src/sse/handlers/chat/resolvedModelPolicy.ts`. Savarankiškai talpinamas (self-hosted)
-įėjimo taškas `src/app/api/v1/chat/completions/route.ts` taip pat taiko API rakto politiką prieš
-perduodamas užklausą. Combo išskaidymas vyksta per `open-sse/services/combo.ts`.
-
-`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` ir `src/lib/container.ts`
-išlieka ištestuotomis sutartimis, o ne šio užklausos kelio sujungimais. Konteineris registruoja
-politikos variklį, tačiau patikrintas produkcinis užklausos kelias jo neišsklaido.
-Vien šių sutarčių pakeitimas nepakeičia faktinės pokalbių politikos ar combo maršrutizavimo;
-norint juos prijungti arba pašalinti, reikalingas atskiras projektavimo sprendimas.
-
-- Rezervuotas politikos variklis: `src/domain/policyEngine.ts` — blokavimo → biudžeto → atsarginio varianto vertinimas
-- Sąnaudų taisyklės: `src/domain/costRules.ts`
-- Atsarginio varianto politika: `src/domain/fallbackPolicy.ts`
-- Blokavimo politika: `src/domain/lockoutPolicy.ts`
-- Žymomis pagrįstas maršrutizavimas: `src/domain/tagRouter.ts`
-- Rezervuotas combo išskaidymo modulis: `src/domain/comboResolver.ts` — savarankiška atrankos sutartis; faktinis combo maršrutizavimas įgyvendintas `open-sse/services/combo.ts`
-- Jungčių ir modelių taisyklių apjungimo modulis: `src/domain/connectionModelRules.ts`
-- Modelių prieinamumo momentinės kopijos: `src/domain/modelAvailability.ts`
-- Tiekėjų galiojimo pabaigos stebėjimas: `src/domain/providerExpiration.ts`
-- Kvotų talpykla: `src/domain/quotaCache.ts`
-- Degradacijos būsena: `src/domain/degradation.ts`
+- Politikos variklis: `src/domain/policyEngine.ts` — vienas įėjimo taškas, skirtas išankstiniam vykdymui įvertinti (blokavimo → biudžeto → atsarginis užsakymas)
+- Išlaidų taisyklės: `src/domain/costRules.ts`
+- Atsarginė politika: `src/domain/fallbackPolicy.ts`
+- Lokauto politika: `src/domain/lockoutPolicy.ts`
+- Žymėmis pagrįstas maršrutas: `src/domain/tagRouter.ts`
+- Kombinuotas sprendimas: `src/domain/comboResolver.ts` — išsprendžia kombinuotųjų pavadinimų, auto/\* priešdėlių ir pakaitos simbolių modelio taikinius pagal konkrečius vykdymo planus
+- Connection/model taisyklių stalius: `src/domain/connectionModelRules.ts`
+- Modelio prieinamumo momentinės nuotraukos: `src/domain/modelAvailability.ts`
+- Teikėjo galiojimo pabaigos stebėjimas: `src/domain/providerExpiration.ts`
+- Kvotos talpykla: `src/domain/quotaCache.ts`. Teikėjai prideda ir pašalina kvotų langus (kai kuriuose planuose OpenAI atmetė 5 valandų Codex langą), todėl paslaugų teikėjo adapterio naudojimas patvirtina, kad jis yra baigtas (`quotasComplete`, žr. `src/lib/usage/usageReading.ts`) yra visas paskyros langų rinkinys: langas, žinomas anksčiau, bet jame nėra Claude yra pašalintas, talpykloje, atnaujintame įraše (prid. išliko Codex kvotos būsena ir `quota_snapshots` prisotinimo segmentuose. Daliniai įrodymai (atsakymų antraštės, pasenusios kopijos) atnaujina tik turimus langus.
+- Skilimo būsena: `src/domain/degradation.ts`
 - Konfigūracijos auditas: `src/domain/configAudit.ts`
-- OmniRoute atsakymo metaduomenų kūrimo modulis: `src/domain/omnirouteResponseMeta.ts`
-- Vertinimo posistemė: `src/domain/assessment/` — periodinės vertinimo užduotys
+- OmniRoute atsako metaduomenų kūrimo priemonė: `src/domain/omnirouteResponseMeta.ts`
+- Vertinimo posistemis: `src/domain/assessment/` — periodinio vertinimo darbai
 
-### E. Autorizavimo vamzdynas
+### E. Leidimų sistema
 
-Autorizavimo vamzdynas klasifikuoja kiekvieną gaunamą užklausą ir prieš perduodamas ją tolyn
-taiko atitinkamą politikos grandinę.
+Prieigos sistema klasifikuoja kiekvieną gaunamą užklausą ir taiko atitinkamą politikos grandinę prieš išsiuntimą.
 
-- Konvejerio įėjimo taškas: `src/server/authz/pipeline.ts`
-- Užklausų klasifikatorius: `src/server/authz/classify.ts` — skiria viešuosius
-  suderinamumo maršrutus nuo valdymo maršrutų
-- Viešųjų maršrutų sąrašas: `src/shared/constants/publicApiRoutes.ts`
-- Politikos: `src/server/authz/policies/` — komponuojami predikatai
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` ir kt.)
-- Antraščių pagalbinės funkcijos: `src/server/authz/headers.ts`
-- Patvirtinimo pagalbinė funkcija: `src/server/authz/assertAuth.ts`
+- Dujotiekio įvadas: `src/server/authz/pipeline.ts`
+- Užklausos klasifikatorius: `src/server/authz/classify.ts` — atskiria viešus suderinamumo maršrutus nuo valdymo maršrutų
+- Viešo maršruto inventorius: `src/shared/constants/publicApiRoutes.ts`
+- Politika: `src/server/authz/policies/` — sudaromi predikatai (`requireApiKey`, `requireManagement`, `requireFreshAuth` ir kt.)
+- Antraštės komunalinės paslaugos: `src/server/authz/headers.ts`
+- Tvirtinimo pagalbininkas: `src/server/authz/assertAuth.ts`
 - Užklausos kontekstas: `src/server/authz/context.ts`
 
-Viešieji ir valdymo maršrutai yra griežta riba: agentų/cooldown API ir
-teikėjų pakeitimai reikalauja valdymo autentifikacijos (HTTP 401, jei jos nėra).
+Viešieji ir valdymo maršrutai yra griežta riba: agent/cooldown APIs ir teikėjo mutacijos reikalauja valdymo autentifikavimo (jei jo nėra HTTP 401).
 
-Išsamias maršrutų klasifikavimo taisykles žr.
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Visas maršruto klasifikavimo taisykles žr. [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. Darbo eigos FSM ir užduotis įvertinantis maršrutizatorius
+### F. Darbo eigos FSM ir Task-Aware Router
 
-Baigtinių būsenų automato valdomas maršrutizatorius, įdėtas kaip sluoksnis virš
-kombinacijų pasirinkimo, kad nukreiptų srautą pagal aptiktą darbo eigos etapą
-(planavimas, vykdymas, peržiūra) ir susijimą su fono užduotimis.
+Baigtinės būsenos mašina valdomas maršruto parinktuvas, sudarytas virš kombinuoto pasirinkimo, kad nukreiptų srautą pagal aptiktą darbo eigos etapą (planavimas, vykdymas, peržiūra) ir foninės užduoties giminingumą.
 
-- Darbo eigos FSM: `open-sse/services/workflowFSM.ts`
-- Užduotis įvertinantis maršrutizatorius: `open-sse/services/taskAwareRouter.ts`
+- Darbo eiga FSM: `open-sse/services/workflowFSM.ts`
+- Užduotį suprantantis maršrutizatorius: `open-sse/services/taskAwareRouter.ts`
 - Fono užduočių detektorius: `open-sse/services/backgroundTaskDetector.ts`
-- Ketinimų klasifikatorius: `open-sse/services/intentClassifier.ts`
+- Tikslų klasifikatorius: `open-sse/services/intentClassifier.ts`
 
-FSM perėjimai įeina į „Auto Combo“ balų skaičiavimą, pakreipdami jį link pigesnių
-modelių fono / automatizavimo užduotims ir link galingesnių modelių interaktyviems
-planavimo / peržiūros ėjimams.
+FSM perėjimai įtraukiami į „Auto Combo“ balus, nukreipdami į pigesnius modelius atliekant background/automation užduotis ir į stipresnius modelius, skirtus interaktyviems planning/review posūkiams.
 
-### G. Konkrečių teikėjų atsparumas
+### G. Paslaugų teikėjui būdingas atsparumas
 
-Kai kurie teikėjai turi specialius atsparumo ir slėpymosi modulius, kurie remiasi
-globaliais grandinės pertraukiklio / ryšio atvėsimo / modelio blokavimo sluoksniais:
+Keletas paslaugų teikėjų pristato specialius atsparumo ir slaptumo modulius, kurie palaiko visuotinio grandinės pertraukiklio / ryšio aušinimo / modelio blokavimo sluoksnius:
 
-- Antigravity 429 variklis: `open-sse/services/antigravity429Engine.ts` (rotuoja
-  tapatybę, valo atsakymo antraštes, valdo kreditų / versijų sekimą per
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- ModelScope kvotos politika: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (suderinamumo kanalo inicijavimas): `open-sse/services/claudeCodeCCH.ts`,
-  taip pat `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Claude Code skaitmeninio atspaudo formavimas: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code obfuskacija: `open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 variklis: `open-sse/services/antigravity429Engine.ts` (pasuka tapatybę, išvalo atsakymų antraštes, valdo credits/version sekimą per `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 apsauga: `open-sse/services/antigravity429Guard.ts` (pagal užklausą 429s biudžetas prieš srovę visuose pagrindiniuose kompiuteriuose, `ANTIGRAVITY_MAX_429_ATTEMPTS`; identiškas pakartotinis atmesto kūno siuntimas atsakomas vietoje; `src/sse/handlers/chat.ts` nepaleidžia tokios užklausos iš naujo, kai bandoma atvėsti)
+- ModelScope kvotų politika: `open-sse/services/modelscopePolicy.ts`
+- Claude kodas CCH (suderinamumo kanalo rankos paspaudimas): `open-sse/services/claudeCodeCCH.ts`, plius `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kodo pirštų atspaudų formavimas: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Kodo užmaskavimas: `open-sse/services/claudeCodeObfuscation.ts`
 
-Išsamų slėpymosi veiksmų vadovą ir eksploatavimo rekomendacijas žr.
-`docs/security/STEALTH_GUIDE.md` (git; nekompiliuojama į `/docs`).
+Išsamų slaptų veiksmų knygą ir naudojimo gaires rasite `docs/security/STEALTH_GUIDE.md` (git; nesudaryta į `/docs`).
 
-### H. Webhookai, samprotavimų talpykla, skaitymo talpykla
+### H. Webhooks, samprotavimo talpykla, skaitymo talpykla
 
-- **Webhookai** — išeinantis teikėjų / paskyrų / užduočių įvykių išsiuntimas.
+- **Webhooks** — išsiuntimas provider/account/task renginiams.
   - Dispečeris: `src/lib/webhookDispatcher.ts`
-  - Saugykla: `webhooks` SQLite lentelė (per `src/lib/db/webhooks.ts`)
-  - Valdymo skydas: `/dashboard/webhooks` (prenumeratos, slaptieji raktai, pakartojimų istorija)
-  - Įvykių taksonomiją ir pakartojimų semantiką žr. [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Samprotavimų talpykla** — pakartotinai atkurtini samprotavimo blokai teikėjams,
-  generuojantiems mąstymo žetonus (Claude, GLMT ir kt.), kad iš eilės einantys
-  ėjimai galėtų praleisti pakartotinį mąstymą.
+  - Saugykla: `webhooks` SQLite stalas (per `src/lib/db/webhooks.ts`)
+  - Prietaisų skydelis: `/dashboard/webhooks` (prenumeratos, paslaptys, pakartotinių bandymų istorija)
+  - Norėdami sužinoti įvykių taksonomiją ir pakartotinio bandymo semantiką, žr. [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Samprotavimo talpykla** — atkuriami samprotavimo blokai teikėjams, kurie skleidžia mąstymo žetonus (Claude, GLMT ir kt.), todėl nuoseklūs posūkiai gali praleisti permąstymą.
   - DB sluoksnis: `src/lib/db/reasoningCache.ts`
-  - Paslaugos sluoksnis: `open-sse/services/reasoningCache.ts`
-  - Pakartotinio atkūrimo semantiką žr. [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Skaitymo talpykla** — trumpalaikė atsakymų talpykla, indeksuojama pagal parašą
-  ir naudojama sujungti identiškus pakartotinius bandymus iš sugedusių pirmtakinių SDK.
+  - Aptarnavimo sluoksnis: `open-sse/services/reasoningCache.ts`
+  - Norėdami sužinoti pakartojimo semantiką, žr. [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Skaityti talpyklą** — trumpalaikė atsako talpykla, įvedama parašu ir naudojama identiškiems pakartotiniams bandymams iš sugadinto SDKs sutraukti.
   - DB sluoksnis: `src/lib/db/readCache.ts`
-  - Statistikos galinis taškas: `GET /api/cache/stats`, valdymo skydas adresu `/dashboard/cache`
+  - Statistikos galutinis taškas: `GET /api/cache/stats`, prietaisų skydelis prie `/dashboard/cache`
 
 ## 3) Išliekamumo sluoksnis
 

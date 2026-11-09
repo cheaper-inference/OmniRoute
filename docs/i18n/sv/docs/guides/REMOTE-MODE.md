@@ -44,37 +44,42 @@ din bärbara dator                       OmniRoute på fjärrservern (VPS)
 
 ---
 
-## Anslutning
+## Ansluta
 
-### Med hanteringslösenordet (bootstrap)
+### Med administrationslösenordet (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Hanteringslösenord för http://192.168.0.15:20128: ********
-# ✔ Ansluten till http://192.168.0.15:20128 — kontext '192.168.0.15' (omfång: admin)
+# Administrationslösenord för http://192.168.0.15:20128: ********
+# ✔ Ansluten till http://192.168.0.15:20128 — kontext '192.168.0.15' (omfattning: admin)
 ```
 
-Lösenordsflödet utfärdar som standard en **admin**-token (du har lösenordet och
-har därför redan fullständig kontroll). Begränsa omfånget med `--scope`:
+Lösenordsflödet utfärdar som standard en **admin**-token (du har lösenordet, så
+du har redan full kontroll). Begränsa omfattningen med `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
 Alternativ: `--port <p>` (när värden saknar port), `--name <ctx>` (kontextnamn),
-`--scope read|write|admin`. En fullständig URL respekteras som den är:
+`--scope read|write|admin`. En fullständig URL används som den är:
 `omniroute connect https://omni.example.com`.
+
+När servern har aktiverat tvåfaktorsautentisering för instrumentpanelen (Settings →
+Security) avvisas lösenordet ensamt: CLI:t frågar då efter koden från
+autentiseringsappen (eller en återställningskod). Ange den i förväg med `--totp <code>` för
+icke-interaktiv användning.
 
 ### Med en förgenererad token
 
-Generera en omfångsbegränsad token i kontrollpanelen (eller med `omniroute tokens create`) och
+Generera en token med begränsad omfattning i instrumentpanelen (eller med `omniroute tokens create`) och
 klistra in den — inget lösenord behövs:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI-verktyget validerar den via `GET /api/cli/whoami` och sparar den som aktiv kontext.
+CLI:t validerar den via `GET /api/cli/whoami` och sparar den som den aktiva kontexten.
 
 ---
 
@@ -443,12 +448,12 @@ omniroute contexts remove 192-168-0-15 --yes   # ta bort den lokala kontexten (�
 
 ## API-slutpunkter (referens)
 
-| Metod  | Rutt                  | Autentisering           | Behörighetsområde               |
-| ------ | --------------------- | ----------------------- | ------------------------------- |
-| POST   | `/api/cli/connect`    | administrationslösenord | — (offentlig, lösenordsskyddad) |
-| GET    | `/api/cli/whoami`     | åtkomsttoken            | läsning                         |
-| GET    | `/api/cli/tokens`     | åtkomsttoken            | administration                  |
-| POST   | `/api/cli/tokens`     | åtkomsttoken            | administration                  |
-| DELETE | `/api/cli/tokens/:id` | åtkomsttoken            | administration                  |
+| Metod  | Sökväg                | Autentisering              | Omfattning                      |
+| ------ | --------------------- | -------------------------- | ------------------------------- |
+| POST   | `/api/cli/connect`    | lösenord; 2FA om aktiverat | — (offentlig, lösenordsskyddad) |
+| GET    | `/api/cli/whoami`     | åtkomsttoken               | read                            |
+| GET    | `/api/cli/tokens`     | åtkomsttoken               | admin                           |
+| POST   | `/api/cli/tokens`     | åtkomsttoken               | admin                           |
+| DELETE | `/api/cli/tokens/:id` | åtkomsttoken               | admin                           |
 
 Se [openapi.yaml](../openapi.yaml) för fullständiga scheman.

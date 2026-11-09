@@ -116,7 +116,7 @@ Rochtain trí: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Socrú Soláthraithe
 
-Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, úsáid **Deais → Soláthraithe → Iompórtáil ó chomhad**. Tá na colúin de réir suímh (`provider,name,apiKey,baseUrl,priority`); ní mór do `provider` a bheith ann cheana mar sholáthraí bainistithe nó mar nód comhoiriúnach. Féach [Soláthraithe a iompórtáil ó chomhad CSV nó JSON](../providers/CSV-IMPORT.md).
+Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, úsáid **Deais → Soláthraithe → Iompórtáil ó chomhad**. Tá na colúin suite de réir a suímh (`provider,name,apiKey,baseUrl,priority`); ní mór do `provider` a bheith ann cheana mar sholáthraí bainistithe nó mar nód comhoiriúnach. Féach [Iompórtáil soláthraithe ó chomhad CSV nó JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Soláthraithe Síntiúis
 
@@ -124,31 +124,31 @@ Chun naisc eochracha API a chur leis ar an mórchóir ó chomhad CSV nó JSON, �
 
 ```bash
 Deais → Soláthraithe → Ceangail Claude Code
-→ Logáil isteach OAuth → Athnuachan uathoibríoch comhartha
-→ Rianú cuóta 5 huaire + seachtainiúil
+→ Logáil isteach le OAuth → Athnuachan uathoibríoch comhartha
+→ Rianú cuóta 5 uair an chloig + seachtainiúil
 
-Samhlacha:
+Múnlaí:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Leid Ghairmiúil:** Úsáid Opus le haghaidh tascanna casta, agus Sonnet le haghaidh luais. Rianaíonn OmniRoute an cuóta de réir samhla!
+**Leid Pro:** Úsáid Opus le haghaidh tascanna casta, agus Sonnet ar mhaithe le luas. Rianaíonn OmniRoute an cuóta de réir an mhúnla!
 
-Nach bhfuil brabhsálaí ar óstach OmniRoute? Rith `claude setup-token` áit ar bith a bhfuil Claude Code logáilte isteach agus greamaigh an comhartha bliana sa chluaisín **Comhartha Socraithe**. Féach [Claude Code le comhartha socraithe](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Níl brabhsálaí ar óstach OmniRoute? Rith `claude setup-token` áit ar bith ina bhfuil Claude Code logáilte isteach agus greamaigh an comhartha bliana amháin sa chluaisín **Comhartha Socraithe**. Féach [Claude Code le comhartha socraithe](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Caomhnaíonn bealaí atá comhoiriúnach le Claude agus Claude Code an iarracht smaointeoireachta `max` do shamhlacha Opus agus Sonnet.
-Ní ghlacann samhlacha Haiku leis an tsraith iarrachta `max`, mar sin íslíonn OmniRoute an t-iarratas sin
-go buiséad ard smaointeoireachta sula seoltar ar aghaidh é.
+Caomhnaíonn bealaí atá comhoiriúnach le Claude agus Claude Code an iarracht smaointeoireachta `max` do mhúnlaí
+Opus agus Sonnet. Ní ghlacann múnlaí Haiku leis an tsraith iarrachta `max`, mar sin íslíonn OmniRoute an
+t-iarratas sin go buiséad ard smaointeoireachta sula seoltar ar aghaidh é.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Deais → Soláthraithe → Ceangail Codex
-→ Logáil isteach OAuth (port 1455)
-→ Athshocrú 5 huaire + seachtainiúil
+→ Logáil isteach le OAuth (port 1455)
+→ Athshocrú 5 uair an chloig + seachtainiúil
 
-Samhlacha:
+Múnlaí:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -160,9 +160,9 @@ Samhlacha:
 ```bash
 Deais → Soláthraithe → Ceangail GitHub
 → OAuth trí GitHub
-→ Athshocrú míosúil (1ú lá den mhí)
+→ Athshocrú míosúil (an 1ú lá den mhí)
 
-Samhlacha:
+Múnlaí:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -170,57 +170,72 @@ Samhlacha:
   gh/gemini-3.1-pro-preview
 ```
 
+**Creidmheasanna AI (billeáil bunaithe ar chomharthaí).** Nuair a thuairiscíonn GitHub `credits_used` don
+chuntas, taispeánann an cárta Teorainneacha Soláthraí sraith **Creidmheasanna AI** leis na creidmheasanna
+a úsáideadh sa tréimhse bhilleála reatha, lena n-áirítear ar phleananna eagraíochta neamhtheoranta.
+
+**Teorainn áitiúil Creidmheasanna AI.** Cuir nasc GitHub in eagar agus socraigh **teorainn Creidmheasanna AI in aghaidh
+na tréimhse billeála** (`providerSpecificData.githubCreditLimit`). Díchumasaíonn réimse folamh é; scipeálann `0`
+an nasc i gcónaí. Nuair atá an léamh úsáide is déanaí cothrom leis an teorainn nó os a cionn, ní roghnaíonn
+an cuntas an nasc sin agus filleann an ródú ar do naisc eile, ar an mbealach céanna le scoith bheartais
+cuóta. Léann an tseiceáil an úsáid a bhailíonn an t-athnuachan thréimhsiúil cuóta cheana féin — ní ghlaonn
+sé ar GitHub ar chosán na hiarrata riamh — agus fágann sé oscailte é i gcás teipe: ní chuireann léamh atá
+ar iarraidh nó seanléamh (níos sine ná 15 nóiméad, nó ó thréimhse bhilleála a athshocraíodh cheana) bac ar
+an nasc. Is cosaint áitiúil é seo, **ní uasteorainn chaiteachais ráthaithe**: d’fhéadfadh moilleanna i
+dtuairisciú GitHub, an t-eatramh athnuachana, iarratais atá ar siúl agus úsáid lasmuigh de OmniRoute dul
+thar an teorainn. Úsáid rialuithe caiteachais GitHub féin le haghaidh teorainn chrua.
+
 ### 💰 Soláthraithe Saora
 
 #### GLM-4.7 (Athshocrú laethúil, $0.6/1M)
 
 1. Cláraigh: [Zhipu AI](https://open.bigmodel.cn)
-2. Faigh eochair API ó Coding Plan
-3. Deais → Cuir Eochair API Leis: Soláthraí: `glm`, Eochair API: `your-key`
+2. Faigh eochair API ón bPlean Códaithe
+3. Deais → Cuir Eochair API leis: Soláthraí: `glm`, Eochair API: `your-key`
 
-**Úsáid:** `glm/glm-4.7` — **Leid Ghairmiúil:** Cuireann Coding Plan cuóta 3× ar fáil ar 1/7 den chostas! Athshocraítear go laethúil ag 10:00 AM.
+**Úsáid:** `glm/glm-4.7` — **Leid Pro:** Cuireann an Plean Códaithe cuóta 3× ar fáil ar 1/7 den chostas! Athshocraítear go laethúil é ag 10:00 AM.
 
-#### MiniMax M2.1 (Athshocrú 5 uair, $0.20/1M)
+#### MiniMax M2.1 (Athshocrú 5 uair an chloig, $0.20/1M)
 
 1. Cláraigh: [MiniMax](https://www.minimax.io)
-2. Faigh eochair API → Deais → Cuir Eochair API Leis
+2. Faigh eochair API → Deais → Cuir Eochair API leis
 
-**Úsáid:** `minimax/MiniMax-M2.1` — **Leid Ghairmiúil:** An rogha is saoire do chomhthéacs fada (1M comhartha)!
+**Úsáid:** `minimax/MiniMax-M2.1` — **Leid Pro:** An rogha is saoire le haghaidh comhthéacs fada (1M comhartha)!
 
-#### Kimi K2 ($9/mí ar ráta seasta)
+#### Kimi K2 ($9/mí ar ráta comhréidh)
 
 1. Liostáil: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Faigh eochair API → Deais → Cuir Eochair API Leis
+2. Faigh eochair API → Deais → Cuir Eochair API leis
 
-**Úsáid:** `kimi/kimi-k2.5` — **Leid Ghairmiúil:** $9/mí seasta ar 10M comhartha = costas éifeachtach $0.90/1M!
+**Úsáid:** `kimi/kimi-k2.5` — **Leid Pro:** $9/mí seasta le haghaidh 10M comhartha = costas éifeachtach $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Cláraigh: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Cruthaigh eochair API Qianfan → Deais → Cuir Eochair API Leis: Soláthraí: `qianfan`
+2. Cruthaigh eochair API Qianfan → Deais → Cuir Eochair API leis: Soláthraí: `qianfan`
 
-**Úsáid:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, nó ID samhla eile Qianfan atá comhoiriúnach le OpenAI.
+**Úsáid:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, nó aitheantas samhla eile atá comhoiriúnach le OpenAI Qianfan.
 
 ### 🆓 Soláthraithe SAOR IN AISCE
 
-Tá lasc taobh le **Ní theastaíonn fíordheimhniú** ag soláthraithe saor in aisce nach dteastaíonn fíordheimhniú uathu ar leathanach a soláthraí.
-Má mhúchtar é, díchumasaítear an soláthraí sin, baintear é de na hamhairc chumraithe/dhlútha Soláthraithe, agus
-baintear a shamhlacha ó `/v1/models`.
+Tá lasc in aice le **Níl fíordheimhniú riachtanach** ag soláthraithe saor in aisce gan fíordheimhniú ar a leathanach soláthraí.
+Má mhúchtar é, díchumasaítear an soláthraí sin, baintear é de na hamhairc Soláthraithe cumraithe/dhlúth, agus
+baintear a mhúnlaí de `/v1/models`.
 
-#### Qoder (9 samhail SAOR IN AISCE)
+#### Qoder (9 múnla SAOR IN AISCE)
 
 ```bash
-Deais → Ceangail Qoder → Logáil isteach OAuth → Tá rochtain faoi réir theorainneacha reatha an tsoláthraí
+Deais → Ceangail Qoder → Logáil isteach le OAuth → Tá rochtain faoi réir theorainneacha reatha an tsoláthraí
 
-Samhlacha: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Múnlaí: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude SAOR IN AISCE)
 
 ```bash
-Deais → Ceangail Kiro → AWS Builder ID nó Google/GitHub → ~50 creidiúint/mí
+Deais → Ceangail Kiro → AWS Builder ID nó Google/GitHub → ~50 creidmheas/mí
 
-Samhlacha: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Múnlaí: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -333,63 +348,63 @@ Samhail: cc/claude-opus-4-7
 
 ## 🚀 Imscaradh
 
-### npm suiteáil domhain (Molta)
+### Suiteáil npm domhanda (Molta)
 
 ```bash
 npm install -g omniroute
 
-# Cruthaigh eolaire cumraíochta
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Cruthaigh comhad .env (féach .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Tosaigh an freastalaí
+# Start server
 omniroute
-# Nó le port saincheaptha:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-Lódann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`.
+Lódálann an CLI `.env` go huathoibríoch ó `~/.omniroute/.env` nó `./.env`. Ní féidir le `./.env` san eolaire oibre ach liosta ceadaithe gearr eochracha a shocrú (socruithe poirt, `REQUIRE_API_KEY`, locale agus dath); cuir gach rud eile i `~/.omniroute/.env`. Féach [conarthaí seolta CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Mód trá
+### Mód tráidire
 
-Tosaigh OmniRoute sa tray córais:
+Tosaigh OmniRoute sa tráidire córais:
 
 ```bash
 omniroute serve --tray
 ```
 
-Filleann an t-ordú tar éis don fhreastalaí agus don tray a bheith réidh.
+Filleann an t-ordú nuair a bhíonn an freastalaí agus an tráidire réidh.
 
-Leanann an freastalaí ar aghaidh gan an teirminéal.
+Leanann an freastalaí gan an teirminéal.
 
-Tacaíonn an mód tray le macOS, Windows, agus seisiúin Linux grafaiciúla. Ní oscailtear an deais go huathoibríoch i mód tray.
+Tacaíonn modh tráidire le seisiúin macOS, Windows, agus Linux grafacha. Ní osclaíonn mód an tráidire an painéal go huathoibríoch.
 
-Bain úsáid as an roghchlár tray le haghaidh na ngníomhartha seo:
+Úsáid roghchlár an tráidire do na gníomhartha seo:
 
-- Oscail an deais.
+- Oscail an painéal.
 - Oscail `/dashboard/logs`.
-- Athraigh tosú uathoibríoch.
+- Athraigh uath-tús.
 - Stop OmniRoute.
 
-Ná cuir `--tray` leis na roghanna seo:
+Ná comhcheangail `--tray` leis na roghanna seo:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Tá na modhanna seo ag teastáil ó sheilbh éagsúla próiseálaí.
+Éilíonn na modhanna seo úinéireacht próisis éagsúla.
 
-Cumas tosú ag an chéad logáil isteach ar an meaisín eile:
+Cumasaigh am tosaithe ag an gcéad logáil isteach meaisín eile:
 
 ```bash
 omniroute autostart enable
 ```
 
-Úsáideann an tosú uathoibríoch mód tray ar macOS, Windows, agus seisiúin Linux grafaiciúla. Úsáideann Linux ceanntaisc an tseirbhís úsáideora systemd atá ann cheana féin.
+Úsáideann Auto-tús mód tráidire ar sheisiúin macOS, Windows, agus Linux grafacha. Úsáideann Linux Headless an tseirbhís úsáideora systemd atá ann cheana féin.
 
-Díchumasigh tosú ag logáil isteach:
+Díchumasaigh am tosaithe ag logáil isteach:
 
 ```bash
 omniroute autostart disable
@@ -397,16 +412,16 @@ omniroute autostart disable
 
 ### Díshuiteáil
 
-Nuair nach bhfuil OmniRoute de dhíth ort a thuilleadh, cuirimid dhá script tapa ar fáil le haghaidh baint ghlan:
+Nuair nach bhfuil OmniRoute ag teastáil uait a thuilleadh, cuirimid dhá script thapa ar fáil chun é a bhaint glan:
 
-| Ordú                     | Gníomh                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Baineann an app córais ach **coinníonn sé do bhunachar sonraí agus cumraíochtaí** i `~/.omniroute`. |
-| `npm run uninstall:full` | Baineann an app AGUS scriostar go buan **gach cumraíocht, eochracha, agus bunachar sonraí**.        |
+| Ordú                     | Gníomh                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Bain an app córais ach** Coinníonn do DB agus cumraíochtaí** i `~/.omniroute`.                    |
+| `npm run uninstall:full` | Baintear an AND app go buan** scriosann sé gach cumraíocht, eochracha, agus bunachair shonraí** . |
 
-> Nóta: Le haghaidh na n-orduithe seo, téigh go dtí an fillteán tionscadail OmniRoute (más ghearraigh tú é) agus rith iad. Ar an mbealach eile, má tá sé suiteáilte go domhain, is féidir leat `npm uninstall -g omniroute` a rith go simplí.
+> Nóta: Chun na horduithe seo a rith, déan nascleanúint chuig an bhfillteán tionscadail OmniRoute (má chlónáil tú é) agus rith iad. Nó, má tá tú suiteáilte go domhanda, is féidir leat `npm uninstall -g omniroute`.
 
-### Imscaradh VPS
+### VPS Imscaradh
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -422,21 +437,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Nó: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### Imscaradh PM2 (Cuimhne Íseal)
 
-Do fhreastalaithe le RAM teoranta, bain úsáid as an rogha teorainn cuimhne:
+Maidir le freastalaithe le RAM teoranta , úsáid an rogha teorainn chuimhne:
 
 ```bash
-# Le teorainn 512MB (réamhshocrú)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Nó le teorainn cuimhne saincheaptha
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Nó ag úsáid ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -465,24 +480,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Tóg íomhá (réamhshocrú = runner-cli le codex/claude/droid suiteáilte roimh ré)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mód iniompartha (molta)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Le haghaidh mód comhtháthaithe óstach le binréidh CLI, féach an rannán Docker sa phríomhcháipéisíocht.
+Le haghaidh mód óstach-chomhtháite le binaries CLI, féach an roinn Docker sna príomhdhoiciméid.
 
-### Void Linux (xbps-src)
+### Folús Linux (xbps-src)
 
-Is féidir le húsáideoirí Void Linux OmniRoute a phacáistiú agus a shuiteáil go dúchasach ag baint úsáide as an chreat traschomhshóite `xbps-src`. Léiríonn sé seo an t-ábhar stand-alone Node.js in éineacht le ceangail dhúchasacha `better-sqlite3" atá de dhíth.
+Is féidir le húsáideoirí neamhní Linux OmniRoute a phacáistiú agus a shuiteáil go dúchais ag baint úsáide as an gcreat tras-thiomsaithe `xbps-src`. Déanann sé seo an tógáil neamhspleách Node.js a uathoibriú mar aon leis na ceangail dhúchasacha `better-sqlite3` riachtanacha.
 
 <details>
-<summary><b>Féach samhail xbps-src</b></summary>
+<summary><b>Féach ar an teimpléad xbps-src</b></summary>
 
 ```bash
-# Comhad samhail le haghaidh 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -503,7 +518,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# DéanCumh anailís ar cuspóir CPU le haghaidh node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -512,29 +527,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Suiteáil gach spleáchadh – scipeáil scripteanna
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Tóg an bunchlár Next.js stand-alone
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Cóipeáil sócmhainní statacha isteach sa stand-alone
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Tiomsaigh ceangal dúchasach better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Cuir an ceangal tiomsaithe sa bhundíol stand-alone
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Bain pacáistí sharp ar aon chuspóir
-	rm -rf .next/steamline/node_modules/@img
+	# 6) Remove arch-specific sharp bundles
+	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Cóipeáil spleáchanna rithime pino nach bhfuil san anailís statach Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -548,7 +563,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Cosc ar bhaint folaíteacha eolaire rautaire app Next.js ag an hook post-suiteáil
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -574,51 +589,51 @@ post_install() {
 
 </details>
 
-### Athróga Timpeallachta
+### Athróga Comhshaoil
 
-| Athróg                                  | Réamhshocrú                          | Cur Síos                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Rúndacht síniú JWT (**athrú i bhforbairt**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pasfhocal logála isteach den chéad uair                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Eolaire sonraí (bunachar sonraí, úsáid, logaí)                                                                                                    |
-| `PORT`                                  | réamhshocrú fréamhchórais            | Port seirbhíse (`20128` san fholláin                                                                                                              |
-| `HOSTNAME`                              | réamhshocrú fréamhchórais            | Ceangal óstach (réamhshocrú Docker `0.0.0.0`)                                                                                                     |
-| `NODE_ENV`                              | réamhshocrú rithime                  | Socraigh `production` le haghaidh imscartha                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL bonn poiblí a thaispeántar don deais agus a nochtar don fhreastalaí (athraíonn `BASE_URL` seanmhod)                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL bonn críochphointe sioncronú scamall (athraíonn `CLOUD_URL` seanmhod)                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Rúndacht HMAC le haghaidh eochracha API ginte                                                                                                     |
-| `REQUIRE_API_KEY`                       | `false`                              | Éileamh eochair API Bearer ar `/v1/*`                                                                                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Ceadaigh d'úsáideoirí deise deimhnithe na luachanna iomlán eochair API stóráilte a nochtadh ar éileamh                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Rith tuisceana freastalaí le haghaidh sonraí Teorainneacha Soláthraí stóráilte; cuirfidh cnaipí athnuachana an deais fós sioncronú láimhe ar siúl |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Díchumasigh ceapacha SQLite uathoibríoch roimh scríbh/Iompórtáil/athchóiriú; oibríonn cóipeanna cúltaca láimhe fós                                |
-| `APP_LOG_TO_FILE`                       | `true`                               | Cumasaigh aschur logaí iarratais agus iniúchta ar diosca                                                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fórsaigh fíorordú `Secure` (taobh thiar de seirbhíse frithbheochana HTTPS)                                                                        |
-| `CLOUDFLARED_BIN`                       | gan socraigh                         | Úsáid bineár `cloudflared` atá ann cheana in ionad íoslódáil bhainistithe                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Iompar le haghaidh Tunnealla Tapa Bainistithe (`http2`, `quic`, nó `auto`)                                                                        |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Teorainn cuimhne Node.js i MB                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Méid uasta iontrálacha taisce luaslaíochta                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Méid uasta iontrálacha taisce séimeantacha                                                                                                        |
+| Athróg                                  | Réamhshocrú              | Cur síos                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(uathghinte)_           | JWT síniú rúnda — uathghinte ar an gcéad rith agus fós ag `server.env`; socraigh go sonrach é nuair atá an t-eolaire sonraí gearrthéarmach                      |
+| `INITIAL_PASSWORD`                      | _(díshuiteáil)_          | An chéad phasfhocal logáil isteach. Tosaíonn npm/source installs le `CHANGEME`: cuir ina ionad. Unset: draoi bordála                                            |
+| `DATA_DIR`                              | `~/.omniroute`           | Eolaire sonraí (db, úsáid, logaí)                                                                                                                               |
+| `PORT`                                  | réamhshocraithe creata   | Port seirbhíse (`20128` i samplaí)                                                                                                                              |
+| `HOSTNAME`                              | réamhshocraithe creata   | Ceangail óstach (Docker réamhshocraithe le `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | réamhshocraithe am rite  | Socraigh `production` le haghaidh imscaradh                                                                                                                     |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Dromchla poiblí URL ar an deais agus nochtaithe don fhreastalaí (a ionadaíonn oidhreacht `BASE_URL`)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | bonn críochphointe scamall sioncronaithe URL (a ionadaíonn oidhreacht `CLOUD_URL`)                                                                              |
+| `API_KEY_SECRET`                        | _(uathghinte)_           | rún HMAC le haghaidh eochracha API ginte — uathghinte ar an gcéad rith agus lean sé go `server.env`                                                             |
+| `REQUIRE_API_KEY`                       | `false`                  | Íosluchtaigh eochair Iompróir API ar `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Ceadaigh d’úsáideoirí fíordheimhnithe ar an deais eochairluachanna API stóráilte iomlána a nochtadh ar éileamh                                                  |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Dúnta athnuachana ar thaobh an fhreastalaí le haghaidh sonraí i dtaisce maidir le Teorainneacha Soláthraí; Spreagann cnaipí athnuachana UI sioncronú láimhe fós |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Díchumasaigh seatanna uathoibríocha SQLite roimh writes/import/restore; cúltacaí láimhe fós ag obair                                                            |
+| `APP_LOG_TO_FILE`                       | `true`                   | Cumasaíonn sé aschur logála feidhmchláir agus iniúchta chuig diosca                                                                                             |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Force `Secure` auth fianán (ar chúl seachfhreastalaí HTTPS )                                                                                                    |
+| `CLOUDFLARED_BIN`                       | neamhshuite              | Bain úsáid as dénártha `cloudflared` atá ann cheana féin in ionad íoslódáil bainistithe                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Iompar do Tholláin Mhearbhainistithe (`http2`, `quic`, nó `auto`)                                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | teorainn carn Node.js i MB                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Uasmhéid iontrálacha taisce pras                                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Uasmhéid iontrálacha taisce shéimeantacha                                                                                                                       |
 
-Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../README.md).
+Le haghaidh tagartha iomlán an athróg timpeallachta, féach an [README](../README.md).
 
 ---
 
-## 📊 Samhail atá ar Fáil
+## 📊 Múnlaí atá ar fáil
 
 <details>
-<summary><b>Féach ar na samhail go léir atá ar fáil</b></summary>
+<summary><b>Féach ar na múnlaí go léir atá ar fáil</b></summary>
 
-> Coimeádtar an liosta thíos as `open-sse/config/providerRegistry.ts` do v3.8.0. Sioncrónaítear catalóga scamall (Gemini, OpenRouter, srl.) go dinimiciúil — don chatalóg beo iomlán, oscail **Deais → Soláthraithe → [soláthraí] → Samhail atá ar Fáil** nó cuir glao ar `GET /api/models/catalog`.
+> Tiomsaíodh an liosta thíos ó `open-sse/config/providerRegistry.ts` do v3.8.0. Déantar catalóga néil (Gemini, OpenRouter, srl.) a shioncronú go dinimiciúil — chun an catalóg bheo iomlán a fheiceáil, oscail **Deaischlár → Soláthraithe → [provider] → Múnlaí atá ar fáil** nó glaoigh ar `GET /api/models/catalog`.
 >
-> Má tá liosta ionsuite soláthraí tar éis dul as sync, úsáid **Iompórtáil ó /models** ar an leathanach sin (nó cumasaigh **Uath-Shioncrónú**) chun an catalóg beo uastaighreach a tharraingt anuas. Fíoraíodh é seo i v3.8.50 do LLM7.io (`gemini-3.1-flash-lite`) agus do UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); d'fhan rochtain anaithnid Pollinations teoranta ón uastaigre le linn na rith tástála chéanna.
+> Má tá liosta ionsuite soláthraí imithe as sioncronú, úsáid **Iompórtáil ó /models** ar an leathanach sin (nó cumasaigh **Uath-Shioncronú**) chun catalóg bheo an fhoinseacháin réamhtheachtach a fháil. Fíoraíodh é seo i v3.8.50 le LLM7.io (`gemini-3.1-flash-lite`) agus UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); bhí rochtain anaithnid Pollinations teoranta ag an bhfoinseachán réamhtheachtach le linn an bhabhta tástála chéanna.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ leibhéil iarrachta: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ sraitheanna iarrachta: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth SAOR IN AISCE: úsáid an catalóg beo a thaispeántar faoi **Deais → Soláthraithe → Kiro → Samhail atá ar Fáil**. Braitheann an infhaighteacht ar an gcuntas agus ar an bplean.
+**Kiro (`kr/`)** — OAuth SAOR IN AISCE: bain úsáid as an gcatalóg bheo a thaispeántar faoi **Deaischlár → Soláthraithe → Kiro → Múnlaí atá ar fáil**. Braitheann an infhaighteacht ar an gcuntas agus ar an bplean.
 
 **Qoder (`if/`)** — OAuth SAOR IN AISCE: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -626,37 +641,37 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mí comhráta nó de réir úsáide: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mí cothrom nó de réir úsáide: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Eochair API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Fíorthapa: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Sárthapa: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok dúchais: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok dúchasach: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Óstáilte san AE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Óstáilte san AE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Feabhsaithe le cuardach: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Cuardach feabhsaithe: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Foinse oscailte: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (saor in aisce), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Tátal tapa: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Scála wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ar scála sliseog: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Dírithe ar RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Fiontar: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Fiontraíoch: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sioncrónaítear go beo de réir eochair API ó Google — gan aon liosta statach. Ceangail eochair i **Deais → Soláthraithe** agus ansin úsáid **Samhail atá ar Fáil** chun an catalóg reatha a iompórtáil (m.sh. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Déantar é a shioncronú beo de réir eochair API ó Google — níl aon liosta statach ann. Ceangail eochair faoi **Deaischlár → Soláthraithe** agus ansin úsáid **Múnlaí atá ar fáil** chun an chatalóg reatha a iompórtáil (e.g. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (trí `aws-bedrock`), `azure-ai`, `openrouter` (catalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann a liosta samhail féin i `providerRegistry.ts` agus is féidir é a uath-shioncrónú nuair a nochtann an soláthraí críochphointe `/models`.
+**Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (trí `aws-bedrock`), `azure-ai`, `openrouter` (catalóg passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann acu a liosta múnlaí féin in `providerRegistry.ts` agus is féidir é a shioncronú go huathoibríoch nuair a chuireann an soláthraí críochphointe `/models` ar fáil.
 
-**Nóta faoi IDanna samhail:** Úsáideann OmniRoute IDanna atá dúchais don tsoláthraí (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Áirítear leaganacha poncaithe i roinnt IDanna mar sin an chaoi a nglacann an API uastaighreach leo. Mura bhfuil samhail liostaithe thuas, rith `omniroute models --search <term>` nó cuir glao ar `GET /api/models/catalog` chun an infhaighteacht a dhearbhú.
+**Nóta faoi aitheantóirí na múnlaí:** Úsáideann OmniRoute aitheantóirí dúchasacha soláthraithe (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Tá leaganacha poncaithe i roinnt aitheantóirí toisc gurb é sin an fhormáid a bhfuil súil ag an API réamhtheachtach leis. Mura bhfuil múnla liostaithe thuas, rith `omniroute models --search <term>` nó buail `GET /api/models/catalog` chun a dheimhniú an bhfuil sé ar fáil.
 
 </details>
 
@@ -664,70 +679,75 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 ## 🧩 Ardghnéithe
 
-### Samhlacha Saincheaptha
+### Múnlaí Saincheaptha
 
-Cuir aon ID samhla le haon soláthraí gan fanacht le nuashonrú ar an aip:
+Cuir aon mhúnla ID le haon soláthraí gan fanacht le nuashonrú aip:
 
 ```bash
-# Tríd an API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Liosta: curl http://localhost:20128/api/provider-models?provider=openai
-# Bain: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Nó úsáid an Painéal: **Soláthraithe → [Soláthraí] → Samhlacha Saincheaptha**.
+Nó bain úsáid as an Deais:** Soláthraithe → [Soláthraí] → Múnlaí Saincheaptha** .
 
 Nótaí:
 
-- Déantar soláthraithe OpenRouter agus soláthraithe atá comhoiriúnach le OpenAI/Anthropic a bhainistiú ó **Samhlacha atá ar Fáil** amháin. Cuirtear samhlacha a chuirtear leis de láimh, a iompórtáiltear nó a shioncronaítear go huathoibríoch ar an liosta céanna de shamhlacha atá ar fáil, mar sin níl rannán ar leith Samhlacha Saincheaptha ann do na soláthraithe sin.
-- Tá an rannán **Samhlacha Saincheaptha** beartaithe do sholáthraithe nach gcuireann iompórtálacha bainistithe de shamhlacha atá ar fáil ar fáil.
+- déantar soláthraithe OpenRouter agus OpenAI/Anthropic-compatible a bhainistiú ó** Múnlaí ar Fáil** amháin. Cuir leis, iompórtáil agus sioncronú uathoibríoch gach talamh sa liosta samhlacha céanna atá ar fáil, mar sin níl aon roinn ar leith ar Mhúnlaí Custaim do na soláthraithe sin.
+- Tá an** Múnlaí Saincheaptha** Tá an rannán seo dírithe ar sholáthróirí nach nochtar allmhairí bainistithe de réir samhlacha.
 
-### Soláthraithe Saincheaptha atá Comhoiriúnach le OpenAI
+### Soláthraithe Comhoiriúnacha OpenAI Saincheaptha
 
-Is féidir aon gheata a úsáideann API OpenAI (seachfhreastalaí féinóstáilte, vLLM, comhbhailitheoir tríú páirtí)
-a chur leis mar nód soláthraí dá chuid féin:
+Is féidir aon gheata a labhraíonn an OpenAI API (seachfhreastalaí féin-óstach, vLLM, comhbhailitheoir tríú páirtí) a chur leis mar nód an tsoláthraí féin:
 
-1. **Soláthraithe → Cuir Soláthraí Comhoiriúnach le OpenAI Leis**.
-2. **Ainm**: lipéad taispeána don nód.
-3. **Réimír**: an t-ainm ródúcháin. Glaonn cliaint ar shamhlacha mar `<prefix>/<model>`, mar sin freastalaíonn nód leis an
-   réimír `mygw` ar `mygw/gpt-4o-mini`. Riachtanach; níl aon srian ar charachtair.
-4. **Cineál API**: an teaghlach críochphointí a bhfreastalaíonn an geata air (Comhlánuithe Comhrá, Freagraí,
-   Leabuithe, fuaim, íomhánna).
-5. **Bun-URL**: fréamh an API, suas go dtí `/v1` agus é sin san áireamh (mar shampla
-   `https://gateway.example.com/v1`), seachas an chonair iomlán `/chat/completions`. Socraíonn geataí a bhfuil
-   conairí neamhchaighdeánacha acu iad faoi **Ardsocruithe** (conair chomhrá, conair samhlacha).
-6. Ní dhéanann an réimse **Eochair API (le Seiceáil)** ach an nasc a thástáil. Tar éis duit an nód a chruthú,
-   oscail é agus úsáid **Cuir Nasc Leis** chun an eochair a úsáidfidh iarratais a stóráil.
+1. **Soláthraithe → Cuir OpenAI Comhoiriúnach** .
+2. **Ainm** : lipéad taispeána don nód.
+3. **Réimír** : an t-ainm ródaithe. Glaonn cliaint ar mhúnlaí mar `<prefix>/<model>`, mar sin feidhmíonn nód le réimír `mygw` `mygw/gpt-4o-mini`. Riachtanach; níl aon srian carachtar ann.
+4. **API Cineál** : an teaghlach críochphointe a bhfreastalaíonn an geata air (Críochnaithe Comhrá, Freagraí, Leabaithe, fuaime, íomhánna).
+5. **Bonn URL** : an fhréamh API, suas go dtí agus lena n-áirítear `/v1` (mar shampla `https://gateway.example.com/v1`), ní an cosán iomlán `/chat/completions`. Leagann geataí le cosáin neamhchaighdeánacha fúthu** Ardsocruithe** (cosán comhrá, cosán samhlacha).
+6. Tá an** Eochair API (do Sheiceáil)** réimse amháin a dhéanann tástáil ar an nasc. Tar éis an nód a chruthú, é a oscailt agus a úsáid** Cuir Ceangal leis** chun an eochair a úsáidfidh iarratais a stóráil.
 
-Faigheann an nód ID inmheánach den fhoirm `openai-compatible-<apiType>-<uuid>`; ní gá duit é a
-chlóscríobh choíche, mar is í an réimír an t-ainm poiblí.
+Faigheann an nód aitheantas inmheánach den fhoirm `openai-compatible-<apiType>-<uuid>`; ní gá duit é a chlóscríobh riamh, is é an réimír an t-ainm poiblí.
 
 #### Réimíreanna forchoimeádta
 
-Ní féidir le réimír a bheith mar ID ná mar ailias de sholáthraí ionsuite (mar shampla `openai`, `cf`), ná
-mar ID de sholáthraí scortha. Seiceálann réiteoir na samhlacha IDanna agus ailiasanna ionsuite roimh
-nóid shaincheaptha, mar sin ní bhfaigheadh nód a úsáideann ceann de na réimíreanna sin trácht choíche:
-rachadh `<prefix>/model` chuig an soláthraí ionsuite ina ionad sin, nó theipfeadh sé go dúnta dá mbeadh an soláthraí sin
-scortha. Diúltaítear do chruthú nó d'eagarthóireacht nóid lena leithéid de réimír leis seo:
+Ní féidir le haitheantas nó ailias soláthraí ionsuite a bheith i réimír (mar shampla `openai`, `cf`), ná id soláthraí scortha. Seiceálann an réititheoir múnla aitheantais agus ailiasanna ionsuite roimh nóid shaincheaptha, mar sin ní bhfaigheadh nód a úsáideann ceann de na réimírí sin trácht choíche: rachadh `<prefix>/model` chuig an soláthraí ionsuite ina ionad sin, nó theipfeadh dúnta dá gcuirfí an soláthraí sin ar scor. Diúltaítear do chruthú nó d’eagarthóireacht nód le réimír dá leithéid le:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Roghnaigh réimír ar leith (`mygw`, `acme-proxy`). Má theipeann ar iarratais chuig nód saincheaptha le
-hearráid a ainmníonn soláthraí ionsuite nó a dhintiúir, seiceáil an bhfuil réimír an nóid
-forchoimeádta: tá nóid a sábháladh sula raibh an riail seo ann fós stóráilte, ach ródálann a réimír chuig
-an soláthraí ionsuite. Cuir an nód in eagar agus tabhair réimír nua dó.
+Roghnaigh réimír ar leith (`mygw`, `acme-proxy`). Má theipeann ar iarratais ar nód saincheaptha le hearráid a ainmníonn soláthraí ionsuite nó a dhintiúir, seiceáil an bhfuil réimír an nód in áirithe: tá nóid a sábháladh sula raibh an riail seo ann fós stóráilte, ach tá a mbealaí réimír chuig an soláthraí ionsuite fós. Cuir an nód in eagar agus tabhair réimír nua dó.
 
-### Piaraí OmniRoute a Shlabhrú
+#### Roghanna geata in aghaidh an naisc
 
-Is féidir geata OmniRoute eile a chur leis mar sholáthraí **Saincheaptha atá comhoiriúnach le OpenAI**. Úsáid
-bun-URL `/v1` an phiara agus eochair API thiomnaithe leis na pribhléidí is lú, arna heisiúint ag an bpiara sin.
+Téann na heochracha seo isteach i `providerSpecificData` naisc (mar shampla trí `PUT /api/providers/{id}`):
 
-I gcás slabhraí cómhalartacha nó ilchéime, cumasaigh an chosaint roghnach ar lúba ar gach geata:
+- `toolNameMaxLength` (slánuimhir, 1–1024) — le haghaidh naisc atá comhoiriúnach le formáid comhrá OpenAI a ndiúltaíonn a ngeata ainmneacha uirlisí fada. Seoltar ainmneacha níos faide mar ailiasanna gearra agus cuirtear ar ais iad sa fhreagra.
+- `quotaEndpoint` — críochphointe quota/credits an gheata, léigh le haghaidh stiall cuóta an deais agus ródú atá feasach ar chuóta. Oibreacha ar naisc OpenAI-comhoiriúnacha agus Antraipeacha; tá an cruth iomlán doiciméadaithe i `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Slabhraing OmniRoute Peers
+
+Is féidir geata OmniRoute eile a chur leis mar** Saincheaptha OpenAI-comhoiriúnach** soláthraí. Úsáid bonn `/v1` URL an chomhghleacaí agus eochair API tiomnaithe is lú pribhléid arna eisiúint ag an bpiaraí sin.
+
+Le haghaidh slabhraí cómhalartacha nó il-hop, cumasaigh an garda lúb rogha an diúltaithe ar gach geata:
 
 ```bash
 # gateway-a
@@ -743,18 +763,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Ní fhaigheann ach iarratais a sheoltar chuig URL piara atá ar an liosta ceada go sainráite an ceanntásc
-`X-OmniRoute-Peer-Trace`. Diúltaíonn geata d'ID ásc a tharla arís nó do bhuiséad léimeanna atá ídithe
-le HTTP `508 Loop Detected`; ní fhaigheann gnáthsholáthraithe réamhtheachtacha aon mheiteashonraí piara.
+Ní fhaigheann ach iarratais a sheoltar chuig piara URL atá liostaithe go sainráite an ceanntásc `X-OmniRoute-Peer-Trace`. Diúltaíonn geata do chás arís agus arís eile ID nó buiséad hop ídithe le HTTP `508 Loop Detected`; Ní fhaigheann gnáthsholáthraithe réamhtheachtacha aon mheiteashonraí piaraí.
 
-Ní macasamhlú bunachair sonraí ná teipaistriú óstaigh é slabhriú piaraí. Coinníonn gach geata a staid
-SQLite, a thaiscí, a áiritheoirí ráta agus a sheisiúin féin. Úsáid seachfhreastalaí droim ar ais le seiceálacha sláinte nó
-teipaistriú cliaint le haghaidh infhaighteachta gníomhaí/éighníomhaí nó gníomhaí/gníomhaí, agus ná gléas aon bhunachar sonraí SQLite amháin
-riamh i roinnt ásc OmniRoute atá ag rith.
+Ní macasamhlú bunachar sonraí nó teip óstach é slabhraiú piaraí. Coinníonn gach geata stát SQLite neamhspleách, caches, cuntair rátaí, agus seisiúin. Bain úsáid as seachvótálaí droim ar ais atá seiceáilte ag an tsláinte nó teip tharchuir cliant le haghaidh infhaighteacht active/passive nó active/active, agus ná cuir aon bhunachar sonraí SQLite amháin isteach i gcásanna éagsúla OmniRoute reatha.
 
-### Bealaí Tiomnaithe Soláthraí
+### Bealaí Soláthraí Tiomnaithe
 
-Ródáil iarratais go díreach chuig soláthraí sonrach le bailíochtú samhla:
+Iarratais bealaigh go díreach chuig soláthraí sonrach le bailíochtú samhla:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -762,140 +777,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Cuirtear réimír an tsoláthraí leis go huathoibríoch má tá sí ar iarraidh. Tugann samhlacha nach bhfuil ag teacht le chéile `400` ar ais.
+Cuirtear an réimír soláthraí leis go huathoibríoch má tá sé in easnamh. Tugann samhlacha mímheaitseála ar ais `400`.
 
 ### Cumraíocht Seachfhreastalaí Líonra
 
 ```bash
-# Socraigh an seachfhreastalaí domhanda
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Seachfhreastalaí de réir soláthraí
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Tástáil an seachfhreastalaí
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Tosaíocht:** Sonrach don eochair → Sonrach don teaglaim → Sonrach don soláthraí → Domhanda → Timpeallacht.
+**Tosaíocht:** Eochair-shonrach → Combo-shonrach → Soláthraí-shonrach → Comhshaol Domhanda →.
 
-### API Chatalóg na Samhlacha
+### Catalóg Múnla API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Tugann sé samhlacha ar ais atá grúpáilte de réir soláthraí agus cineálacha acu (`chat`, `embedding`, `image`).
+Samhlacha tuairisceáin grúpáilte de réir soláthraí le cineálacha (`chat`, `embedding`, `image`).
 
-### Sioncronú Néalbhunaithe
+### Cloud Sync
 
-- Sioncronaigh soláthraithe, teaglamaí agus socruithe thar ghléasanna
-- Sioncronú uathoibríoch sa chúlra le teorainn ama + teip thapa
-- Tabhair tús áite do `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ar thaobh an fhreastalaí i dtáirgeadh
+- Sioncronaigh soláthraithe, combos, agus socruithe thar gléasanna
+- Sioncronú cúlra uathoibríoch le teorainn ama + teip-tapa
+- Is fearr le freastalaí-taobh `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` i dtáirgeadh
 
-### Tollán Tapa Cloudflare
+### Cloudflare Tollán Tapa
 
-- Ar fáil in **Deais → Críochphointí** le haghaidh Docker agus imscaradh féinóstáilte eile
-- Cruthaíonn sé URL sealadach `https://*.trycloudflare.com` a chuireann ar aghaidh chuig do chríochphointe reatha `/v1` atá comhoiriúnach le OpenAI
-- Suiteálann an chéad chumasú `cloudflared` nuair is gá amháin; úsáideann atosuití ina dhiaidh sin an dénártha bainistithe céanna arís
-- Ní athchóirítear Tolláin Thapa go huathoibríoch tar éis atosú OmniRoute nó coimeádáin; cumasaigh arís iad ón deais nuair is gá
-- Tá URLanna tolláin gearrshaolach agus athraíonn siad gach uair a stopann nó a thosaíonn tú an tollán
-- Úsáideann Tolláin Thapa bhainistithe iompar HTTP/2 de réir réamhshocraithe chun rabhaidh fhothramacha faoi mhaolán UDP QUIC a sheachaint i gcoimeádáin shrianta
-- Socraigh `CLOUDFLARED_PROTOCOL=quic` nó `auto` más mian leat rogha an iompair bhainistithe a shárú
-- Socraigh `CLOUDFLARED_BIN` más fearr leat dénártha `cloudflared` réamhshuiteáilte a úsáid in ionad an íoslódála bhainistithe
-- Is féidir painéil Tollán Tapa Cloudflare, Tonnadóir Tailscale, agus Tollán ngrok a thaispeáint nó a cheilt in **Socruithe → Cuma**. Ní stopann painéal a cheilt tollán atá ag rith.
+- Ar fáil i** Deais → Críochphointí** le haghaidh Docker agus imscaradh féin-óstáilte eile
+- Cruthaítear `https://*.trycloudflare.com` URL sealadach a chuireann ar aghaidh chuig do chríochphointe `/v1` reatha OpenAI-comhoiriúnach
+- An Chéad chumas installs `cloudflared` ach amháin nuair is gá; athúsáidfidh restarts níos déanaí an dénártha bainistithe céanna
+- Ní dhéantar Tolláin Mheara a athchóiriú go huathoibríoch tar éis do OmniRoute nó coimeádán a atosú; athchumasaigh iad ón deais nuair is gá
+- Tollán Tá URLs gearrshaolach agus athraíonn siad gach uair a stop/start tú an tollán
+- Réamhshocrú Tapa Bainistithe maidir le hiompar HTTP/2 chun rabhaidh maoláin QUIC UDP a sheachaint i gcoimeádáin srianta
+- Socraigh `CLOUDFLARED_PROTOCOL=quic` nó `auto` más mian leat an rogha iompair bainistithe a shárú
+- Socraigh `CLOUDFLARED_BIN` más fearr leat dénártha `cloudflared` réamhshuiteáilte a úsáid in ionad an íoslódála bainistithe
+- Is féidir painéil Thapa Cloudflare, Tonnadóir Tailscale, agus ngrok Tollán a thaispeáint nó a chur i bhfolach i** Socruithe → Dealramh** . Ní stopann tollán reatha nuair a chuirtear painéal i bhfolach.
 
-### Faisnéis Gheata LLM (Céim 9)
+### LLM Gateway Intelligence (Céim 9)
 
-- **Taisce Shéimeantach** — Cuireann sé freagraí neamhshruthaithe le temperature=0 sa taisce go huathoibríoch (seachain é le `X-OmniRoute-No-Cache: true`)
-- **Idéimpitéinseacht Iarratais** — Dí-dhúblaíonn sé iarratais laistigh de 5s trí cheanntásc `Idempotency-Key` nó `X-Request-Id`
-- **Rianú Dul Chun Cinn** — Imeachtaí roghnacha SSE `event: progress` trí cheanntásc `X-OmniRoute-Progress: true`
+- **Taisce Shéimeantach** — Neamhshruthú taisce uathoibríoch, freagairtí teocht = 0 (seachbhóthar le `X-OmniRoute-No-Cache: true`)
+- **Neamhláithreacht Iarratas** — Déantar iarratais laistigh de 5s a dhúbláil trí cheanntásc `Idempotency-Key` nó `X-Request-Id`
+- **Rianú Dul Chun Cinn** — Imeachtaí rogha an diúltaithe isteach SSE `event: progress` trí cheanntásc `X-OmniRoute-Progress: true`
 
 ---
 
-### Clós Súgartha an Aistritheora
+### Clós Súgartha Aistritheoir
 
-Faigh rochtain air trí **Deais → Aistritheoir**. Dífhabhtaigh agus léirshamhlaigh an chaoi a n-aistríonn OmniRoute iarratais API idir soláthraithe.
+Rochtain trí** Aistritheoir → Deasc** . Dífhabhtaigh agus léirshamhlú conas a aistríonn OmniRoute iarratais API idir soláthraithe.
 
-| Mód                 | Cuspóir                                                                                                          |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Clós Súgartha**   | Roghnaigh formáidí foinse/sprice, greamaigh iarratas, agus féach an t-aschur aistrithe láithreach                |
-| **Tástálaí Comhrá** | Seol teachtaireachtaí beo comhrá tríd an seachfhreastalaí agus scrúdaigh timthriall iomlán an iarratais/fhreagra |
-| **Binse Tástála**   | Rith baiscthástálacha thar iliomad teaglamaí formáide chun cruinneas an aistriúcháin a dheimhniú                 |
-| **Monatóir Beo**    | Breathnaigh ar aistriúcháin fíor-ama de réir mar a shreabhann iarratais tríd an seachfhreastalaí                 |
+| Mód                 | Cuspóir                                                                                                        |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Clós Súgartha**   | Roghnaigh formáidí source/target, greamaigh iarratas, agus féach ar an aschur aistrithe láithreach             |
+| **Tástálaí Comhrá** | Seol teachtaireachtaí comhrá beo tríd an seachfhreastalaí agus scrúdaigh an timthriall iomlán request/response |
+| **Binse Tástála**   | Rith baisc-thástálacha trasna comhcheangail ilfhormáide chun cruinneas an aistriúcháin a fhíorú                |
+| **Monatóir Beo**    | Féach ar aistriúcháin fíor-ama de réir mar a shreabhann iarratais tríd an seachfhreastalaí                     |
 
 **Cásanna úsáide:**
 
-- Dífhabhtaigh an fáth a dteipeann ar theaglaim shonrach cliaint/soláthraí
-- Deimhnigh go n-aistrítear clibeanna smaointeoireachta, glaonna uirlise, agus leid chórais i gceart
-- Déan comparáid idir na difríochtaí formáide i bhformáidí OpenAI, Claude, Gemini, agus Responses API
+- Dífhabhtaigh cén fáth go mainneoidh teaglaim client/provider ar leith
+- Fíoraigh go n-aistríonn clibeanna smaointeoireachta, glaonna uirlisí agus leideanna córais i gceart
+- Déan comparáid idir na difríochtaí formáide idir formáidí OpenAI, Claude, Gemini, agus API
 
 ---
 
-### Straitéisí Ródaithe
+### Straitéisí Ródúcháin
 
-Cumraigh trí **Deais → Socruithe → Ródú**. Taispeánann an deais na sé straitéis is mó úsáid; tacaíonn teaglamaí agus an t-uath-ródaire le tacar níos leithne go hinmheánach.
+Cumraigh via** Socruithe Painéal → → Ródú** . Nochtann an painéal na sé straitéis is mó a úsáidtear; Tacaíonn combos agus an ródaire uathoibríoch go hinmheánach le sraith níos leithne.
 
-**Straitéisí atá le feiceáil ar an deais (ródú ar leibhéal an chuntais):**
+**Straitéisí atá le feiceáil ar an bpainéal (ródú ar leibhéal cuntais):**
 
-| Straitéis                          | Cur síos                                                                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **Líon an Chéad Cheann**           | Úsáideann sé cuntais in ord tosaíochta — láimhseálann an príomhchuntas gach iarratas go dtí nach mbíonn sé ar fáil                     |
-| **Spól-Ródaíocht**                 | Rothlaíonn sé trí gach cuntas le teorainn ghreamaitheach inchumraithe (réamhshocrú: 3 ghlao in aghaidh an chuntais)                    |
-| **P2C (Cumhacht Dhá Rogha)**       | Roghnaíonn sé 2 chuntas randamacha agus ródaíonn chuig an gceann is sláintiúla — cothromaíonn sé ualach agus sláinte á cur san áireamh |
-| **Randamach**                      | Roghnaíonn sé cuntas go randamach do gach iarratas trí shuaitheadh Fisher-Yates                                                        |
-| **Is Lú Úsáidte**                  | Ródaíonn sé chuig an gcuntas leis an stampa ama `lastUsedAt` is sine, agus dáileann sé trácht go cothrom                               |
-| **Optamaithe ó thaobh Costais de** | Ródaíonn sé chuig an gcuntas leis an luach tosaíochta is ísle, ag optamú do na soláthraithe is saoire                                  |
+| Straitéis                    | Cur síos                                                                                                                                |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Fill ar dtús**             | Úsáideann sé cuntais in ord tosaíochta — láimhseálann an príomhchuntas gach iarratas go dtí nach mbíonn siad ar fáil                    |
+| **Babhta Robin**             | Rothaíonn sé trí gach cuntas a bhfuil teorainn ghreamaitheach inchumraithe aige (réamhshocraithe: 3 ghlao in aghaidh an chuntais)       |
+| **P2C (Cumhacht Dhá Rogha)** | Roghnaíonn sé 2 chuntas randamacha agus bealach chuig an gceann is sláintiúla — déantar an t-ualach a chothromú le feasacht ar shláinte |
+| **randamach**                | Roghnaíonn randamach cuntas do gach iarratas trí úsáid a bhaint as suaitheadh Fisher-Yates                                              |
+| **Is Lú Úsáidte**            | Bealaí chuig an gcuntas leis an stampa ama `lastUsedAt` is sine, ag dáileadh an tráchta go cothrom                                      |
+| **Costas Optamaithe**        | Bealaí chuig an gcuntas leis an luach tosaíochta is ísle, ag barrfheabhsú do sholáthraithe ar chostas is ísle                           |
 
-**Ardteaglamaí agus uathstraitéisí** (inchumraithe de réir teaglama nó trí réimíreanna `auto/*` — féach [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Ardstraitéisí teaglama agus uathoibríoch** (inchumraithe de réir teaglama nó trí réimíreanna `auto/*` — féach [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — ord docht, ní úsáideann sé spól-ródaíocht riamh
-- `weighted` — scoilt chomhréireach tráchta de réir meáchain gach samhla
-- `fill-first` — ídigh an chéad samhail go dtí go mbaintear teorainneacha amach
+- `priority` — ordú dian, ní róbaí cruinn
+- `weighted` — trácht comhréireach roinnte de réir meáchain in aghaidh an mhúnla
+- `fill-first` - taosc an chéad mhúnla go dtí go mbuaileann teorainneacha
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Cumhacht Dhá Rogha)
 - `least-used` agus `cost-optimized`
-- `auto` — bunaithe ar scóir thar gach iarrthóir
-- `lkgp` (An Soláthraí Deireanach ar Eol a Bheith Maith) — ceanglaíonn sé leis an soláthraí rathúil deireanach, ansin téann sé siar chuig rialacha
-- `context-optimized` — roghnaíonn sé an tsamhail leis an bhfuinneog chomhthéacs shaor is mó
-- `context-relay` — nascann sé samhlacha fad-chomhthéacs le chéile do shealanna leantacha
+- `auto` — scór-tiomáinte ar fud na n-iarrthóirí go léir
+- `lkgp` (Soláthraí Dea-Aitheanta Deiridh) — bioráin don soláthraí deireanach ar éirigh leis, agus ansin tagann sé ar ais chuig na rialacha
+- `context-optimized` - roghnaíonn sé an tsamhail leis an bhfuinneog comhthéacs saor in aisce is mó
+- `context-relay` — slabhraí samhlacha comhthéacs fada le haghaidh casadh leantacha
 
-#### Ceanntásc Seisiúin Ghreamaithigh Sheachtraigh
+#### Ceanntásc Seachtrach Seisiún Greamaitheach
 
-Le haghaidh cleamhnas seisiúin seachtrach (mar shampla, gníomhairí Claude Code/Codex taobh thiar de sheachfhreastalaithe droim ar ais), seol:
+Maidir le cleamhnas seisiún seachtrach (mar shampla, gníomhairí Claude Code/Codex taobh thiar de sheachvótálaithe droim ar ais), seol:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-Glacann OmniRoute le `x_session_id` freisin agus seolann sé eochair éifeachtach an tseisiúin ar ais in `X-OmniRoute-Session-Id`.
+Glacann OmniRoute le `x_session_id` freisin agus cuireann sé ar ais an eochair seisiúin éifeachtach i `X-OmniRoute-Session-Id`.
 
-Má úsáideann tú Nginx agus má sheolann tú ceanntásca ina bhfuil fostríoca, cumasaigh:
+Má úsáideann tú Nginx agus má sheolann tú ceanntásca foscór-fhoirm, cumasaigh:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Ailiasanna Samhla le Saoróg
+#### Ailiasanna Múnla saoróg
 
-Cruthaigh patrúin saoróige chun ainmneacha samhlacha a athmhapáil:
+Cruthaigh patrúin saoróg chun ainmneacha samhlacha a athmhapáil:
 
 ```
-Patrún: claude-sonnet-*     →  Sprioc: cc/claude-sonnet-4-6
-Patrún: gpt-*               →  Sprioc: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
 Tacaíonn saoróga le `*` (carachtair ar bith) agus `?` (carachtar aonair).
 
-#### Slabhraí Cúltaca
+#### Slabhraí Fallback
 
-Sainigh slabhraí cúltaca domhanda a bhaineann le gach iarratas:
+Sainmhínigh slabhraí cúltaca domhanda a bhaineann le gach iarratas:
 
 ```
-Slabhra: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -903,22 +918,22 @@ Slabhra: production-fallback
 
 ---
 
-### Teaglamaí Coitianta Soláthraithe & Patrúin Ródaithe
+### Comhcheangail Soláthraí Coitianta & Patrúin Ródú
 
-Seo patrúin shamplacha chun iliomad soláthraithe a chomhcheangal agus ródú eatarthu in OmniRoute:
+Seo samplaí de phatrúin chun soláthraithe iolracha a chomhcheangal agus chun ródú eatarthu in OmniRoute:
 
-#### 1. Teaglaim Gníomhaire Códúcháin: Réasúnaíocht Ardleibhéil le Cúltaca Costais/Luais
+#### 1. Teaglama Gníomhaire Códaithe: Réasúnaíocht Ard-Deireadh le Cost/Speed Fallback
 
-Oiriúnach do ghníomhairí códúcháin (OpenCode, Claude Code, Cursor, Cline). Ródaíonn sé ar dtús chuig samhlacha réasúnaíochta ceannródaíocha, agus téann sé siar chuig samhlacha tapa códúcháin nuair a ídítear cuóta nó nuair a tharlaíonn earráidí.
+Ideal do ghníomhairí códaithe (OpenCode, Claude Code , Cursor, Cline). Bealaí chuig samhlacha réasúnaíochta teorann ar dtús, ag titim siar go samhlacha mearchódaithe maidir le hídiú cuóta nó earráidí.
 
-- **Deais**: Teaglamaí → Teaglaim Nua → Ainm: `agent-coding` → Straitéis: `Priority`
-- **Samhlacha**:
-  1. `claude/claude-sonnet-4-6` (Príomhghníomhaire códúcháin)
-  2. `openai/gpt-4o` (Cúltaca tánaisteach ardacmhainne)
-  3. `deepseek/deepseek-v4-flash` (Cúltaca ardéifeachtúlachta, cost-éifeachtach)
+- **Deais** : Combos → Teaglama Nua → Ainm: `agent-coding` → : `Priority`
+- **Múnlaí** :
+  1. `claude/claude-sonnet-4-6` (príomhghníomhaire códaithe)
+  2. `openai/gpt-4o` (tuilleamh tánaisteach ardchumais)
+  3. `deepseek/deepseek-v4-flash` (Aischur ardéifeachtúlachta, cost-éifeachtach)
 
 ```bash
-# Sampla tríd an API
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -933,183 +948,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Teaglaim Uath-Theipaistrithe Saorchise
+#### 2. Saor-Sraith Auto Teip Teaglama
 
-Slabhraíonn sé soláthraithe saorchise agus soláthraithe gan eochair chun an t-aga fónaimh a uasmhéadú gan costais API.
+Slabhraí soláthraithe ilshraith saor in aisce agus gan eochair chun am aga fónaimh a uasmhéadú gan costais API.
 
-- **Straitéis**: `Least Used` nó `Round Robin` (dáiltear an t-ualach ar fud cuótaí)
-- **Samhlacha**:
+- **Straitéis** : `Least Used` nó `Round Robin` (dáileann sé ualach thar chuótaí)
+- **Múnlaí** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Sampla tríd an CLI
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Píblíne Ilmhódach / Amhairc & Téacs
+#### 3. Píblíne Ilmhódach / Fís & Téacs
 
-Samhlacha speisialaithe amhairc a phéireáil le giniúint téacs ardluais le haghaidh sreafaí oibre ina mbíonn tuiscint íomhánna agus giniúint cóid i gceist.
+Múnlaí físe speisialaithe a phéireáil le giniúint téacs ardluais le haghaidh sreafaí oibre a bhaineann le tuiscint íomhá agus giniúint cód.
 
-- **Patrún**: Teaglaim `Priority` ina liostaítear samhlacha atá in ann fís a phróiseáil ar dtús agus samhail téacs/cóid ardtréchuir ar deireadh.
-- **Samhlacha**:
-  1. `gemini/gemini-2.5-pro` (Tuiscint láidir ar íomhánna/ar ábhar ilmhódach)
-  2. `openai/gpt-4o` (Úsáid chothromaithe físe agus uirlisí)
-  3. `deepseek/deepseek-v4-flash` (Giniúint téacs/cóid)
+- **Patrún** : Teaglama `Priority` a liostaíonn samhlacha fís-chumasacha ar dtús agus múnla ard-thréchuir text/code ar deireadh.
+- **Múnlaí** :
+  1. `gemini/gemini-2.5-pro` (tuiscint láidir image/multimodal )
+  2. `openai/gpt-4o` (Fís Chothrom agus úsáid uirlisí)
+  3. `deepseek/deepseek-v4-flash` ( giniúint Text/code )
 
 ---
 
-### Athléimneacht & Scoradáin Chiorcaid
+### Athléimneacht & Briste Cuarda
 
-Cumraigh trí **Painéal → Socruithe → Athléimneacht**.
+Cumraigh via** Socruithe Painéal → → Athléimneacht** .
 
 Cuireann OmniRoute athléimneacht ar leibhéal an tsoláthraí i bhfeidhm le cúig chomhpháirt:
 
-1. **Ciú Iarratas & Rialú Luais** — Múnlú iarratas ar leibhéal an chórais:
-   - **Iarratais sa Nóiméad (RPM)** — Uasmhéid iarratas sa nóiméad in aghaidh an chuntais
-   - **Íosmhéid Ama Idir Iarratais** — An bhearna íosta i milleasoicindí idir iarratais
-   - **Uasmhéid Iarratas Comhreathach** — Uasmhéid iarratas comhuaineach in aghaidh an chuntais
+1. **Iarratas ar scuaine & luascadh** — Múnlú iarratais ar leibhéal an chórais:
+   - **Iarratais sa Nóiméad (RPM)** — Uasmhéid iarratais in aghaidh an nóiméid in aghaidh an chuntais
+   - **Am Íosta Idir Iarratais** — An bhearna íosta sna milleasoicindí idir iarratais
+   - **Iarratais Chomhthráthacha Uasta** — Uasmhéid iarratais chomhuaineacha in aghaidh an chuntais
 
-2. **Tréimhse Shuaimhnithe Naisc** — Cumraíocht de réir cineáil fíordheimhnithe do nasc aonair tar éis teipeanna ar féidir atriail a dhéanamh orthu:
-   - **Buntréimhse Shuaimhnithe** — An tréimhse shuaimhnithe réamhshocraithe le haghaidh teipeanna in aghaidh srutha ar féidir atriail a dhéanamh orthu
-   - **Úsáid Leideanna Atrialach In Aghaidh Srutha** — Cloítear le leideanna údarásacha `Retry-After` nó athshocraithe nuair a chuirtear ar fáil iad
-   - **Uasmhéid Céimeanna Cúlaithe** — An t-uasleibhéal cúlaithe easpónantúil le haghaidh teipeanna arís agus arís eile
+2. **Ceangal Fuarú** — Cumraíocht in aghaidh an údaráis le haghaidh nasc aonair tar éis teipeanna in-triail:
+   - **Bonn Cooldown** — Fuinneog fuarú réamhshocraithe le haghaidh teipeanna in-athsholáthair in aghaidh an tsrutha
+   - **Úsáid Leideanna Atriail In aghaidh an tSrutha** — Onóracha `Retry-After` údarásach nó leideanna a athshocrú nuair a chuirtear ar fáil iad
+   - **Céimeanna Cúltaca Max** — Uasleibhéal aistarraingthe easpónantúil i gcás teipeanna arís agus arís eile
 
-3. **Scoradán Ciorcaid Soláthraí** — Rianaíonn sé teipeanna soláthraí ó cheann ceann, marcálann sé soláthraí mar dhíghrádaithe ag an tairseach rabhaidh chumraithe, agus osclaíonn sé an scoradán nuair a shroichtear an tairseach teipe cumraithe:
-   - **Tairseach Díghrádaithe** — Líon na dteipeanna soláthraí as a chéile sula dtéitear isteach i `DEGRADED`
-   - **Tairseach Teipe** — Líon na dteipeanna soláthraí as a chéile sula dtéitear isteach i `OPEN`
-   - **Teorainn Ama Athshocraithe** — An tréimhse ama sula ndéantar an soláthraí a thástáil arís
-   - **CLOSED** (Sláintiúil) — Sreabhann iarratais mar is gnách
-   - **DEGRADED** — Leanann iarratais ag sreabhadh agus teipeanna méadaithe á rianú
+3. **Soláthraí Circuit Breaker** — Rianaíonn sé teipeanna soláthraithe ceann go ceann, marcáil soláthraí díghrádaithe ag an tairseach rabhaidh cumraithe, agus osclaíonn sé an scoradán nuair a shroichtear an tairseach teipe cumraithe:
+   - **Tairseach Díghrádaithe** — Teipeanna soláthraí as a chéile roimh dhul isteach `DEGRADED`
+   - **Tairseach Teip** — Teipeanna soláthraí as a chéile roimh dhul isteach `OPEN`
+   - **Athshocraigh Teorainn Ama** — Fuinneog ama sula ndéantar an soláthraí a thástáil arís
+   - **CLOSED** (Sláintiúil) — Sreabhann iarratais de ghnáth
+   - **DEGRADED** — Tá iarratais fós ar siúl agus teipeanna ardaithe á rianú
    - **OPEN** — Cuirtear bac sealadach ar an soláthraí tar éis teipeanna arís agus arís eile
-   - **HALF_OPEN** — Ag tástáil an bhfuil an soláthraí téarnaithe
+   - **HALF_OPEN** — Tástáil an bhfuil téarnamh ag an soláthraí
 
-   Fanann teorainneacha ráta `429` atá sonrach do nasc sa **Tréimhse Shuaimhnithe Naisc** agus ní áirítear iad i dtreo scoradán an tsoláthraí.
+   Fanann teorainneacha ráta `429` nasctha le scóip nasctha i** Ceangal Fuarú** agus nach n-áirítear i dtreo an soláthróir breaker.
 
-   Ní thaispeántar staid reatha scoradán an tsoláthraí ach ar **Painéal → Sláinte**.
+   Taispeántar staid ama rite an bhriseora an tsoláthraí ar** Dashboard → Sláinte** amháin.
 
-4. **Fan leis an Tréimhse Shuaimhnithe** — Má tá gach nasc iarrthach i dtréimhse shuaimhnithe cheana féin, is féidir le OmniRoute fanacht go dtí an tréimhse shuaimhnithe is túisce agus an t-iarratas cliaint céanna a atriail go huathoibríoch.
+4. **Fan le haghaidh Cooldown** — Má tá gach nasc iarrthóra ag fuarú cheana féin, is féidir le OmniRoute fanacht leis an bhfionnuarú is luaithe agus an t-iarratas cliant céanna a dhéanamh arís go huathoibríoch.
 
-5. **Uathbhraite Teorann Ráta** — Nuair a sheolann soláthraithe in aghaidh srutha tréimhsí feithimh sainráite ar ais, sáraíonn na leideanna sin tréimhse shuaimhnithe áitiúil an naisc nuair atá an socrú cumasaithe.
+5. **Uath-bhrath Teorainn Ráta** — Nuair a sheolann soláthraithe in aghaidh an tsrutha fuinneoga feithimh follasacha ar ais, sáraíonn na leideanna sin fuarú an naisc áitiúil nuair atá an socrú cumasaithe.
 
-**Leid Ghairmiúil:** Úsáid an leathanach **Sláinte** chun scoradáin bheo soláthraithe a iniúchadh agus a athshocrú tar éis briste. Ní athraíonn an leathanach Athléimneachta ach an chumraíocht.
+**Leid Pro:** Bain úsáid as an** Sláinte** leathanach chun scoradáin soláthraithe beo a iniúchadh agus a athshocrú tar éis briseadh amach. Ní athraíonn an leathanach Resilience ach cumraíocht.
 
 ---
 
-### Easpórtáil / Iompórtáil Bunachair Sonraí
+### Easpórtáil / Iompórtáil Bunachar Sonraí
 
-Bainistigh cúltacaí bunachair sonraí in **Painéal → Socruithe → Córas & Stóras**.
+Bainistigh cúltacaí bunachar sonraí i** Socruithe Painéal → → & Stóráil** .
 
-| Gníomh                            | Cur Síos                                                                                                                                                                    |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Easpórtáil Bunachar Sonraí**    | Íoslódálann sé bunachar sonraí reatha SQLite mar chomhad `.sqlite`                                                                                                          |
-| **Easpórtáil Gach Rud (.tar.gz)** | Íoslódálann sé cartlann chúltaca iomlán lena n-áirítear: bunachar sonraí, socruithe, teaglamaí, naisc soláthraithe (gan dintiúir), meiteashonraí eochracha API              |
-| **Iompórtáil Bunachar Sonraí**    | Uaslódálann sé comhad `.sqlite` chun an bunachar sonraí reatha a ionadú. Cruthaítear cúltaca réamhiompórtála go huathoibríoch mura bhfuil `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Gníomh                         | Cur síos                                                                                                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Bunachar Sonraí Easpórtála** | Íoslódáil bunachar sonraí SQLite mar chomhad `.sqlite`                                                                                                                            |
+| **Easpórtáil Uile (.tar.gz)**  | Íoslódálann sé cartlann chúltaca iomlán lena n-áirítear: bunachar sonraí, socruithe, teaglama, naisc soláthraithe (gan dintiúir), meiteashonraí eochair API                       |
+| **Bunachar Sonraí Iompórtála** | Uaslódáil comhad `.sqlite` chun an bunachar sonraí reatha a athsholáthar. Cruthaítear cúltaca réamh-allmhairithe go huathoibríoch mura rud é go `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Easpórtáil bunachar sonraí
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Easpórtáil gach rud (cartlann iomlán)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Iompórtáil bunachar sonraí
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Bailíochtú Iompórtála:** Déantar sláine an chomhaid iompórtáilte (seiceáil pragma SQLite), na táblaí riachtanacha (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), agus a mhéid (uasmhéid 100MB) a bhailíochtú.
+**Bailíochtú Iompórtála:** Tá an comhad iompórtáilte bailíochtaithe maidir le sláine ( seiceáil pragma SQLite ), táblaí riachtanacha (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), agus méid (uasmhéid 100MB).
 
 **Cásanna Úsáide:**
 
-- OmniRoute a aistriú idir ríomhairí
-- Cúltacaí seachtracha a chruthú le haghaidh athshlánú ó thubaiste
-- Cumraíochtaí a chomhroinnt idir baill foirne (easpórtáil gach rud → comhroinn an chartlann)
+- Imirce OmniRoute idir na meaisíní
+- Cruthaigh cúltacaí seachtracha le haghaidh athshlánú tubaiste
+- Comhroinn cumraíochtaí idir baill foirne (easpórtáil gach cartlann scaireanna → )
 
 ---
 
-### Painéal Socruithe
+### Painéal na Socruithe
 
-Tá an leathanach socruithe eagraithe ina **7 gcluaisín** chun nascleanúint éasca a dhéanamh:
+Eagraítear leathanach na socruithe isteach** 7 cluaisín** le haghaidh loingseoireachta éasca:
 
-| Cluaisín          | Ábhar                                                                                                                                                                                                            |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ginearálta**    | Uirlisí stórála córais, iompar réamhshocraithe, infheictheacht tolláin Críochphointe                                                                                                                             |
-| **Cuma**          | Rialuithe téama (geal/dorcha/córas), infheictheacht an taobhbharra, scoráin painéil do chártaí tolláin Cloudflare/Tailscale/ngrok                                                                                |
-| **AI**            | Buiséad smaointeoireachta (pas tríd / baint uathoibríoch / saincheaptha / oiriúnaitheach — féach [THINKING_BUDGET.md](./THINKING_BUDGET.md)), leid chórais dhomhanda, staitisticí taisce leid                    |
-| **Slándáil**      | Socruithe Logála Isteach/Focail Faire, Rialú Rochtana IP, fíordheimhniú API do `/models`, Soláthraithe a Bhlocáil, cosaint ar ionsá leid                                                                         |
-| **Ródú**          | Straitéis ródaithe dhomhanda (Líon an Chéad Cheann / Spideog-Róbhabhta / P2C / Randamach / Is Lú Úsáid / Optamaithe de réir Costais), ailiasanna samhlacha le saoróg, slabhraí cúltaca, réamhshocruithe teaglama |
-| **Athléimneacht** | Ciú iarratas, tréimhse shuaimhnithe naisc, cumraíocht scoradáin soláthraí, agus iompar feithimh ar an tréimhse shuaimhnithe                                                                                      |
-| **Ardsocruithe**  | Cumraíocht seachfhreastalaí dhomhanda (HTTP/SOCKS5), sáruithe seachfhreastalaí de réir soláthraí                                                                                                                 |
+| Cluaisín          | Clár ábhair                                                                                                                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ginearálta**    | Uirlisí stórála córais, iompar réamhshocraithe, Infheictheacht tollán Endpoint                                                                                                                  |
+| **Dealramh**      | Rialuithe téama (light/dark/system), infheictheacht an bharra taoibh, scoránaigh painéil le haghaidh cártaí tolláin Cloudflare/Tailscale/ngrok                                                  |
+| **AI**            | Buiséad smaointeoireachta (pas tríd / auto-stiall / saincheaptha / oiriúnaitheach — féach [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), leid córais dhomhanda, stats taisce pras                |
+| **Slándáil**      | socruithe Login/Password, Rialú Rochtana IP, API auth le haghaidh `/models`, Blocáil Soláthraí, garda pras-instealladh                                                                          |
+| **Ródú**          | Straitéis ródaithe dhomhanda (Líon an Chéad Bhabhta / Babhta Robin / P2C / Randamach / Is Lú Úsáidte / Optamaithe Costas), ailiasanna samhail saoróg, slabhraí cúl-ais, mainneachtainí teaglama |
+| **Athléimneacht** | Iarratas scuaine, fuarú nasc, cumraíocht an soláthróir breaker, agus fanacht-le-fuarú iompar                                                                                                    |
+| **Casta**         | Sáraíonn cumraíocht seachfhreastalaí dhomhanda (HTTP/SOCKS5), seachfhreastalaí in aghaidh an tsoláthraí                                                                                         |
 
-Ní dhéanann Ginearálta nótaí inléite amháin maidir le logáil agus taisce a dhúbláil a thuilleadh. Déantar socruithe coinneála agus
-optamaithe an bhunachair sonraí a bhuanú trí `/api/settings/database`; úsáidtear
-`DELETE /api/cache` chun an taisce a ghlanadh de láimh. Rialaítear uasteorainneacha rónna na logaí iarratas agus seachfhreastalaí le
-`CALL_LOGS_TABLE_MAX_ROWS` agus `PROXY_LOGS_TABLE_MAX_ROWS`.
+Ní dhúblaíonn Ginearálta logáil inléite amháin agus nótaí taisce a thuilleadh. Leantar le socruithe coinneála agus barrfheabhsú bunachar sonraí trí `/api/settings/database`; Úsáideann imréitigh taisce láimhe `DELETE /api/cache`. Is iad `CALL_LOGS_TABLE_MAX_ROWS` agus `PROXY_LOGS_TABLE_MAX_ROWS` a rialaíonn caipíní ró loga iarratais agus seachfhreastalaí.
 
 ---
 
-### Bainistíocht Costas & Buiséid
+### Costais & Bainistiú Buiséid
 
-Faigh rochtain air trí **Deais → Costais**.
+Rochtain trí** Costais Painéal → nIonstraimí** .
 
-| Cluaisín      | Cuspóir                                                                                                                             |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Buiséad**   | Socraigh teorainneacha caiteachais de réir eochair API le buiséid laethúla/seachtainiúla/míosúla agus rianú fíor-ama                |
-| **Praghsáil** | Féach ar iontrálacha praghsála samhlacha agus cuir in eagar iad — costas in aghaidh 1K comhartha ionchuir/aschuir de réir soláthraí |
+| Cluaisín      | Cuspóir                                                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Buiséad**   | Socraigh teorainneacha caiteachais in aghaidh an eochair API le buiséid daily/weekly/monthly agus rianú fíor-ama                  |
+| **Praghsáil** | Féach ar agus cuir in eagar iontrálacha praghsála samhail — costas in aghaidh 1K input/output comharthaí in aghaidh an tsoláthraí |
 
 ```bash
-# API: Socraigh buiséad
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Faigh stádas reatha an bhuiséid
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Rianú Costais:** Logálann gach iarratas úsáid comharthaí agus ríomhann sé an costas de réir an tábla praghsála. Féach ar mhiondealuithe in **Deais → Úsáid** de réir soláthraí, samhla agus eochrach API.
+**Rianú Costas:** Déanann gach iarratas logáil ar úsáid chomharthaí agus ríomhtar costas ag baint úsáide as an tábla praghsála. Féach ar mhiondealuithe i** Úsáid Painéal na →** de réir soláthraí, múnla, agus eochair API.
 
 ---
 
-### Tras-scríobh Fuaime
+### Trascríobh Fuaime
 
-Tacaíonn OmniRoute le tras-scríobh fuaime tríd an gcríochphointe atá comhoiriúnach le OpenAI:
+tacaíonn OmniRoute le trascríobh fuaime tríd an gcríochphointe atá comhoiriúnach le OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Sampla le curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-Is é `deepgram/nova-3` an bealach dúchasach Deepgram agus teastaíonn eochair API Deepgram uaidh.
-Mura bhfuil ach OpenRouter cumraithe, úsáid `openrouter/deepgram/nova-3`.
+Is é `deepgram/nova-3` an bealach Deepgram dúchais agus tá eochair Deepgram API ag teastáil uaidh. Mura bhfuil ach OpenRouter cumraithe, úsáid `openrouter/deepgram/nova-3`.
 
-Soláthraithe **Urlabhra-go-Téacs (tras-scríobh)**:
+**Óráid go Téacs (trascríobh)** soláthraithe:
 
-- `openai/` (comhoiriúnach le whisper)
+- `openai/` (comhoiriúnach)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (teaghlach Nova)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (leaganacha whisper)
+- `nvidia/` (Parakeet, Canárach)
+- `huggingface/` (leagan cogarna)
 - `qwen/`
 
-Soláthraithe **Téacs-go-hUrlabhra (`POST /v1/audio/speech`)**:
+**Téacs-go-Caint (`POST /v1/audio/speech`)** soláthraithe:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `nvidia/` ( Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1121,55 +1132,45 @@ Soláthraithe **Téacs-go-hUrlabhra (`POST /v1/audio/speech`)**:
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Formáidí fuaime a dtacaítear leo le haghaidh tras-scríofa: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Braitheann formáidí aschuir TTS ar an soláthraí (mp3, wav, opus, pcm, mulaw).
+Formáidí fuaime le tacaíocht le haghaidh trascríobh: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Braitheann formáidí aschuir TTS ar an soláthraí (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Straitéisí Cothromaithe Teaglama
+### Straitéisí Comhardaithe Teaglama
 
-Cumraigh cothromú de réir teaglama in **Deais → Teaglamaí → Cruthaigh/Cuir in Eagar → Straitéis**.
+Cumraigh in aghaidh na teaglama cothromú i** Painéal na nIonstraimí → combos → Create/Edit →** .
 
-| Straitéis                      | Cur Síos                                                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------------------- |
-| **Spideog-Róbhabhta**          | Rothlaíonn trí na samhlacha go seicheamhach                                                       |
-| **Tosaíocht**                  | Baineann triail as an gcéad samhail i gcónaí; ní théann sé chuig cúltaca ach amháin ar earráid    |
-| **Randamach**                  | Roghnaíonn samhail randamach ón teaglama le haghaidh gach iarratais                               |
-| **Ualaithe**                   | Ródálann go comhréireach bunaithe ar mheáchain a shanntar de réir samhla                          |
-| **Is Lú Úsáid**                | Ródálann chuig an tsamhail leis an líon is lú iarratas le déanaí (úsáideann méadrachtaí teaglama) |
-| **Optamaithe de réir Costais** | Ródálann chuig an tsamhail is saoire atá ar fáil (úsáideann an tábla praghsála)                   |
+| Straitéis             | Cur síos                                                                                      |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| **Babhta-Robin**      | Rothlaíonn sé trí mhúnlaí go seicheamhach                                                     |
+| **Tosaíocht**         | Déanann sé iarracht an chéad mhúnla i gcónaí; thiteann ar ais ach amháin trí earráid          |
+| **randamach**         | Roghnaíonn sé samhail randamach as an teaglama do gach iarratas                               |
+| **ualaithe**          | Bealaí bunaithe go comhréireach ar mheáchan sannta in aghaidh na samhla                       |
+| **Is Lú-Úsáidte**     | Bealaí chuig an tsamhail leis an líon is lú iarratas le déanaí (úsáidtear méadracht teaglama) |
+| **Costas-Optamaithe** | Bealaí chuig an tsamhail is saoire atá ar fáil (úsáidí tábla praghsála)                       |
 
-Is féidir réamhshocruithe teaglama domhanda a shocrú in **Deais → Socruithe → Ródú → Réamhshocruithe Teaglama**.
-Faigheann teorainneacha ama spriocanna teaglama an teorainn ama iarratais reatha le hoidhreacht de réir réamhshocraithe. Ná húsáid **Teorainn ama sprice
-(soicindí)** sna réamhshocruithe teaglama nó i dteaglama aonair ach amháin nuair ba cheart do theorainn níos giorra in aghaidh na sprice
-cúltaca níos tapúla a spreagadh.
+Is féidir mainneachtainí teaglama domhanda a shocrú isteach** Socruithe Deais → → Routing → Teaglama Réamhshocruithe** . Faightear teorainn ama an iarratais reatha mar oidhreacht réamhshocraithe. Úsáid** Sprioc-am istigh (soicindí)** maidir le mainneachtainí teaglama nó teaglama aonair ach amháin nuair ba cheart go spreagfadh teorainn in aghaidh an sprice níos giorra cúlú níos tapúla.
 
-Ní mór optamuithe teaglama gan mhoill a roghnú go sainráite. Fág **Optamuithe gan mhoill** díchumasaithe chun
-cosc a chur ar na gnéithe moille seo spriocanna cúltaca a rásáil, spriocanna a scipeáil bunaithe ar stair TTFT,
-nó iarratais chúltaca a chomhbhrú; má chumasaítear é, ceadaítear fálú cumraithe, scipeanna réamh-mheastacha TTFT,
-agus comhbhrú réamhghníomhach cúltaca chun dílseacht ródaithe/iarratais a mhalartú ar mhoill eireabaill níos ísle.
+Is rogha an diúltaithe iad optamaithe teaglama nialais-latency. Fág** Optimizations nialais-latency** díchumasaithe chun na gnéithe latency seo a chosc ó spriocanna aisghabhála rásaíochta, gan bacadh le spriocanna bunaithe ar stair TTFT, nó iarratais chúltaca a chomhbhrú; ag cur ar a chumas fálaithe cumraithe, scipeanna tuarthacha TTFT, agus comhbhrú réamhghníomhach aisiompaithe chun dílseacht routing/request a thrádáil le haghaidh latency eireaball níos ísle.
 
-Díchumasaigh an **maolán comharthaí réasúnaíochta** nuair a éilíonn soláthraithe réamhtheachtacha teorainneacha dochta
-`max_tokens` / `maxOutputTokens`. Nuair a bhíonn sé cumasaithe, ní chuireann ródú teaglama spás breise
-do shamhlacha réasúnaíochta ach le haghaidh samhlacha a bhfuil uasteorainn aschuir aitheanta acu agus fágann sé teorainn chomharthaí an chliaint gan athrú nuair a
-sháródh an luach sábháilte maolánaithe an uasteorainn sin. Má tá teorainn an chliaint os cionn uasteorann aitheanta cheana féin,
-laghdaíonn OmniRoute í go dtí an uasteorainn sin sula seoltar an t-iarratas réamhtheachtach.
+Díchumasaigh** Maolán comharthaí réasúnaíochta** nuair a éilíonn soláthraithe in aghaidh an tsrutha teorainneacha dochta `max_tokens` / `maxOutputTokens`. Nuair a bhíonn sé cumasaithe, ní chuireann ródú teaglama ach spás cúltaca réasúnaíochta do mhúnlaí a bhfuil caipín aschuir aitheanta acu agus fágann sé teorainn chomharthaí an chliaint gan athrú nuair a sháródh an luach maolánach sábháilte an teorainn sin. Má tá teorainn na gcliant os cionn na caidhpe atá ar eolas cheana féin, teannann OmniRoute síos go dtí an caipín sin é sula seoltar an t-iarratas in aghaidh an tsrutha.
 
 ---
 
-### Deais Sláinte
+### Painéal na Sláinte
 
-Faigh rochtain uirthi trí **Deais → Sláinte**. Forbhreathnú fíor-ama ar shláinte an chórais ina bhfuil 6 chárta:
+Rochtain trí** Dashboard → Sláinte** . Forbhreathnú ar shláinte an chórais fíor-ama le 6 chárta:
 
-| Cárta                      | An Méid a Thaispeánann Sé                                                      |
-| -------------------------- | ------------------------------------------------------------------------------ |
-| **Stádas an Chórais**      | Aga fónaimh, leagan, úsáid cuimhne, eolaire sonraí                             |
-| **Sláinte Soláthraithe**   | Staid ama rite dhomhanda scoradán ciorcaid na soláthraithe                     |
-| **Teorainneacha Ráta**     | Tréimhsí fuaraithe gníomhacha ceangail de réir cuntais agus an t-am atá fágtha |
-| **Frithdhúnadh Gníomhach** | Frithdhúnadh gníomhach atá scóipithe de réir samhla agus eisiaimh shealadacha  |
-| **Taisce Sínithe**         | Staitisticí na taisce dí-dhúblála (eochracha gníomhacha, ráta amas)            |
-| **Teiliméadracht Folaigh** | Comhiomlánú folaigh p50/p95/p99 de réir soláthraí                              |
+| Cárta                      | Cad a thaispeánann sé                                                |
+| -------------------------- | -------------------------------------------------------------------- |
+| **Stádas an Chórais**      | Aga fónaimh, leagan, úsáid chuimhne, eolaire sonraí                  |
+| **Sláinte Soláthraí**      | Staid rite briseora ciorcaid soláthraí domhanda                      |
+| **Teorainneacha Ráta**     | Fuarú naisc ghníomhacha in aghaidh an chuntais leis an am atá fágtha |
+| **Frithdhúnadh Gníomhach** | Frithdhúnadh gníomhach le scóip samhail agus eisiaimh shealadacha    |
+| **Taisce Síniú**           | Staitisticí taisce dídhúbailt (eochracha gníomhacha, ráta buailte)   |
+| **Teiliméadracht Latency** | p50/p95/p99 comhiomlánú latency in aghaidh an tsoláthraí             |
 
-**Leid Ghairmiúil:** Athnuachan an leathanach Sláinte é féin gach 10 soicind. Úsáid cárta an scoradáin chiorcaid chun na soláthraithe a bhfuil fadhbanna acu a aithint.
+**Leid Pro:** Athnuachann an leathanach Sláinte go huathoibríoch gach 10 soicind. Úsáid an cárta scoradáin chiorcaid chun na soláthraithe a bhfuil fadhbanna acu a shainaithint.
 
 ---
 

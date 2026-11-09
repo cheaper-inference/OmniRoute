@@ -15,50 +15,67 @@ Pelaksanaannya terdapat dalam `src/lib/compliance/index.ts` (T-43 — "Kawalan P
 
 ### Peristiwa audit pentadbiran (`audit_log`)
 
-Setiap panggilan kepada `logAuditEvent({ action, actor, target, details, ... })` menghasilkan satu baris. Rentetan tindakan mengikut corak `domain.verb` (atau `domain.verb.outcome`). Jenis tindakan yang disahkan dalam pepohon sumber termasuk:
+Setiap panggilan kepada `logAuditEvent({ action, actor, target, details, ... })` menghasilkan
+satu baris. Rentetan tindakan mengikut corak
+`domain.verb` (atau `domain.verb.outcome`). Jenis tindakan yang disahkan dalam pepohon sumber termasuk:
 
-| Tindakan                             | Sumber                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Tindakan                             | Sumber                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Setiap entri merekodkan `action`, `actor` (lalai kepada `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, dan `timestamp`. Kunci sensitif (`apiKey`, `accessToken`, `refreshToken`, `password`, apa-apa yang sepadan dengan `*token`/`*secret`/`*apikey`, dan sebagainya) disunting secara rekursif kepada `"[redacted]"` sebelum baris tersebut ditulis.
+Setiap entri merekodkan `action`, `actor` (lalai kepada `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, dan `timestamp`. Kunci sensitif (`apiKey`, `accessToken`,
+`refreshToken`, `password`, apa-apa sahaja yang sepadan dengan `*token`/`*secret`/`*apikey`,
+dsb.) disunting secara rekursif kepada `"[redacted]"` sebelum baris ditulis.
+
+Baris `api_key.auth.touch` merekodkan metadata kunci API yang berjaya dan pembacaan
+penemuan (GET/HEAD) yang tidak pernah sampai ke log permintaan: kunci yang digunakan, bila,
+serta laluan yang dinormalkan, digabungkan dan dihadkan kepada 1,000 baris. Kunci dengan
+`noLog` dan kunci persekitaran dilangkau. Alamat IP dan ejen pengguna pemanggil hanya
+ditambahkan apabila bendera ciri `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` diaktifkan (dimatikan secara
+lalai).
 
 ### Panggilan alat MCP (`mcp_tool_audit`)
 
-Setiap pemanggilan alat MCP menulis satu baris melalui `open-sse/mcp-server/audit.ts`. Skema (daripada `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Setiap penggunaan alat MCP menulis satu baris melalui
+`open-sse/mcp-server/audit.ts`. Skema (daripada
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Lajur            | Catatan                                      |
-| ---------------- | -------------------------------------------- |
-| `id`             | penambahan automatik                         |
-| `tool_name`      | pengecam alat MCP                            |
-| `input_hash`     | sha256 input (tiada muatan disimpan)         |
-| `output_summary` | ringkasan pendek yang dipenggal              |
-| `duration_ms`    | masa sebenar                                 |
-| `api_key_id`     | pemanggil (boleh `null`)                     |
-| `success`        | `1` / `0`                                    |
-| `error_code`     | kod ralat terminal apabila berlaku kegagalan |
-| `created_at`     | cap masa ISO                                 |
+| Lajur            | Catatan                              |
+| ---------------- | ------------------------------------ |
+| `id`             | autonaik                             |
+| `tool_name`      | pengecam alat MCP                    |
+| `input_hash`     | sha256 input (tiada muatan disimpan) |
+| `output_summary` | ringkasan pendek yang dipendekkan    |
+| `duration_ms`    | masa dinding                         |
+| `api_key_id`     | pemanggil (boleh kosong)             |
+| `success`        | `1` / `0`                            |
+| `error_code`     | kod ralat terminal apabila gagal     |
+| `created_at`     | cap masa ISO                         |
 
 ### Log permintaan / penggunaan
 
-Ini ialah telemetri operasi (bukan audit pentadbiran dalam erti kata yang ketat), tetapi berkongsi saluran pengekalan yang sama:
+Ini ialah telemetri operasi (bukan audit pentadbiran yang ketat) tetapi berkongsi
+saluran pengekalan yang sama:
 
-- `usage_history` — ringkasan penggunaan bagi setiap permintaan
-- `call_logs` — log penuh bagi setiap permintaan (tertakluk pada had baris, lihat di bawah)
-- `proxy_logs` — log trafik proksi (tertakluk pada had baris)
+- `usage_history` — penggabungan penggunaan bagi setiap permintaan
+- `call_logs` — log penuh bagi setiap permintaan (tertakluk kepada had baris, lihat di bawah)
+- `proxy_logs` — log trafik proksi (tertakluk kepada had baris)
 - `request_detail_logs` — log permintaan terperinci legasi (masih dipangkas jika wujud)
 
 ## Skema Storan

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import dns from "node:dns";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-image-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -229,6 +230,7 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
   assert.deepEqual(
     ids.filter((id) => id.startsWith("codex/")),
     [
+      "codex/gpt-6.1-sol-image",
       "codex/gpt-5.6-sol-image",
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
@@ -242,8 +244,12 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
   assert.ok(!ids.some((id: string) => id.startsWith("xai/")));
 });
 
-test("v1 image generation POST accepts promptless requests for image-only models", async () => {
+test("v1 image generation POST accepts promptless requests for image-only models", async (t) => {
   await seedConnection("topaz", { apiKey: "topaz-key" });
+  t.mock.method(dns.promises, "lookup", async (hostname) => {
+    assert.equal(hostname, "example.com");
+    return [{ address: "93.184.216.34", family: 4 }];
+  });
 
   const mockFetchImpl = async (url, options: RequestInit = {}) => {
     const stringUrl = String(url);
@@ -594,6 +600,35 @@ test("v1 image edit POST keeps non-Codex providers single-reference", async () =
   const body = (await response.json()) as ErrorResponseBody;
   assert.equal(response.status, 400);
   assert.match(body.error.message, /only one reference image/i);
+});
+
+test("v1 image edit POST accepts Codex cx/gpt-6.1-sol (#18687)", async () => {
+  await seedConnection("codex", { apiKey: "codex-oauth-token" });
+
+  let upstreamModel: unknown = null;
+  globalThis.fetch = async (_url, options: RequestInit = {}) => {
+    upstreamModel = JSON.parse(String(options.body || "{}")).model;
+    const event = {
+      type: "response.output_item.done",
+      item: { type: "image_generation_call", id: "ig_sol", status: "completed", result: "c29s" },
+    };
+    return new Response(`data: ${JSON.stringify(event)}\n\ndata: [DONE]\n\n`, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+  };
+
+  const response = await imageEditRoute.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      body: createCodexEditForm("make the apple green", { model: "cx/gpt-6.1-sol" }),
+    })
+  );
+  const body = (await response.json()) as ImageResponseBody;
+
+  assert.equal(response.status, 200);
+  assert.equal(body.data[0].b64_json, "c29s");
+  assert.equal(upstreamModel, "gpt-6.1-sol");
 });
 
 test("v1 image edit POST rejects unsupported Codex models and MIME mismatches", async () => {
@@ -964,6 +999,14 @@ test("v1 image generation POST refreshes an expired Antigravity token before dis
   assert.equal(calls.filter((call) => call.url.includes("oauth2.googleapis.com/token")).length, 1);
 });
 
+// grok-cli (Grok Build OAuth, #15305) sends the same xAI image body through the Grok Build
+// proxy with the CLI token-auth header; xai-oauth and xai keep api.x.ai.
+const GROK_IMAGE_ENDPOINTS: Record<string, string> = {
+  "grok-cli": "https://cli-chat-proxy.grok.com/v1/images/generations",
+  "xai-oauth": "https://api.x.ai/v1/images/generations",
+  xai: "https://api.x.ai/v1/images/generations",
+};
+
 for (const [provider, alias] of [
   ["grok-cli", "gc"],
   ["xai-oauth", "xao"],
@@ -982,7 +1025,10 @@ for (const [provider, alias] of [
     );
     let imageCalls = 0;
     globalThis.fetch = async (url, options = {}) => {
-      assert.equal(String(url), "https://api.x.ai/v1/images/generations");
+      assert.equal(String(url), GROK_IMAGE_ENDPOINTS[provider]);
+      if (provider === "grok-cli") {
+        assert.equal(new Headers(options.headers).get("X-XAI-Token-Auth"), "xai-grok-cli");
+      }
       imageCalls += 1;
       assert.equal(
         new Headers(options.headers).get("Authorization"),
@@ -1046,7 +1092,7 @@ test("Grok image route refreshes and persists OAuth credentials before generatio
         expires_in: 3600,
       });
     }
-    assert.equal(String(url), "https://api.x.ai/v1/images/generations");
+    assert.equal(String(url), GROK_IMAGE_ENDPOINTS["grok-cli"]);
     assert.equal(new Headers(options.headers).get("Authorization"), "Bearer fresh-grok-token");
     return Response.json({ data: [{ url: "https://example.com/grok-image.jpg" }] });
   };
@@ -1061,10 +1107,7 @@ test("Grok image route refreshes and persists OAuth credentials before generatio
     })
   );
   assert.equal(response.status, 200, await response.clone().text());
-  assert.deepEqual(calls, [
-    "https://auth.x.ai/oauth2/token",
-    "https://api.x.ai/v1/images/generations",
-  ]);
+  assert.deepEqual(calls, ["https://auth.x.ai/oauth2/token", GROK_IMAGE_ENDPOINTS["grok-cli"]]);
   const saved = await providersDb.getProviderConnectionById(connection.id);
   assert.equal(saved?.accessToken, "fresh-grok-token");
   assert.equal(saved?.refreshToken, "rotated-grok-token");

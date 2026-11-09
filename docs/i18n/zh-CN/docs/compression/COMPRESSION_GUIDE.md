@@ -34,90 +34,81 @@ OmniRoute 实现了一套模块化提示词压缩管线，会在请求到达上�
 
 ### 关闭
 
-不应用任何压缩。所有消息原样通过。
+不应用压缩。所有消息均原样传递。
 
-### Lite 模式（节省约 15%，延迟 <1ms）
+### Lite 模式（约节省 15%，延迟 <1ms）
 
-最安全的模式——零语义变更，仅进行格式清理：
+最安全的模式 — 清理格式。其工具结果截断功能具有损耗性，因此默认路径（无 `allow-lossy`、`engine:lite` 或命名组合选择加入）运行 Lite 模式，并设置
+`compressToolResults: false`：较早的工具结果会原样传递给提供者。
 
-| 技术                     | 描述                      |
-| ------------------------ | ------------------------- |
-| `collapseWhitespace`     | 合并连续空行和行尾空格    |
-| `dedupSystemPrompt`      | 移除重复的系统消息        |
-| `compressToolResults`    | 压缩冗长的工具/函数输出   |
-| `removeRedundantContent` | 删除重复的指令            |
-| `replaceImageUrls`       | 缩短 base64 图片 data URI |
+| 技术                     | 描述                                                             |
+| ------------------------ | ---------------------------------------------------------------- |
+| `collapseWhitespace`     | 合并连续的空行和行尾空格                                         |
+| `dedupSystemPrompt`      | 删除重复的系统消息                                               |
+| `compressToolResults`    | 将较早的工具结果截断至 Lite 上限（有损：仅在请求选择加入时启用） |
+| `removeRedundantContent` | 删除重复的指令                                                   |
+| `replaceImageUrls`       | 缩短 base64 图像数据 URI                                         |
 
-**适用场景：** 常驻启用、对安全性要求极高的工作流。
+**最适合：** 始终启用的使用场景、安全关键型工作流。
 
-### 标准模式（节省约 30%）
+### Standard 模式（约节省 30%）
 
-灵感来自 [Caveman](https://github.com/JuliusBrussee/caveman)——在保留语义的前提下移除填充词和冗长措辞：
+受 [Caveman](https://github.com/JuliusBrussee/caveman) 启发 — 删除填充词和冗长措辞，同时保留原意：
 
-- 移除填充词（如 "please"、"I think"、"basically"、"actually"）
-- 精简冗长短语（"in order to" → "to"，"as a result of" → "because"）
-- 删除礼貌性的弱化措辞（如 "Would you mind..."、"If you could possibly..."）
-- 30+ 条针对编码提示调优的正则规则
+- 删除填充词（“please”“I think”“basically”“actually”）
+- 压缩冗长短语（“in order to” → “to”，“as a result of” → “because”）
+- 删除礼貌性模糊表达（“Would you mind...”“If you could possibly...”）
+- 针对编码提示优化的 30 多条正则规则
 
-**适用场景：** 日常编码工作流、注重成本的团队。
+**最适合：** 日常编码工作流、注重成本的团队。
 
-### 激进模式（节省约 50%）
+### Aggressive 模式（约节省 50%）
 
-面向长会话的智能历史管理：
+针对长会话的智能历史记录管理：
 
-- **消息老化（Message Aging）**——较早的消息会被逐步压缩
-- **工具结果压缩**——过长的工具输出会被截断或省略（保留首/尾行、
-  匹配行过滤、JSON 键压缩）
-- **结构完整性保护**——确保 `tool_use` 与 `tool_result` 成对保持一致
-- **上下文窗口感知**——遵守各模型的 token 上限
+- **消息老化** — 较早的消息会逐步压缩
+- **工具结果压缩** — 截断或省略较长的工具输出（首尾行、匹配行筛选、JSON 键压缩）
+- **结构完整性保护** — 确保 `tool_use` + `tool_result` 对保持一致
+- **上下文窗口感知** — 遵循每个模型的 token 限制
 
-**适用场景：** 长时间的调试会话、大型代码库。
+**最适合：** 长时间调试会话、大型代码库。
 
-### 极限模式（节省约 75%）
+### Ultra 模式（约节省 75%）
 
-面向 token 紧张场景的最大化压缩：
+面向 token 关键场景的最大压缩：
 
-- **启发式剪枝**——基于评分对叙述性文本进行 token 剪枝
-- **结构保留**——围栏代码块、行内代码、URL 和标识符会被打上墓碑标记
-  （tombstone）并按原样重新拼接，绝不会被剪枝
-- **可选 SLM 层**——配置后可由小型本地模型优化剪枝效果
-- 独立于激进模式：不运行消息老化、工具结果压缩或回退摘要器
-  （仅当 SLM 层失败时，回退处理才可能经由激进模式执行）
+- **启发式裁剪** — 基于评分裁剪 prose token
+- **结构保留** — 围栏代码块、内联代码、URL 和标识符会被标记并原样重新拼接，绝不会被裁剪
+- **可选 SLM 层** — 配置后，小型本地模型可以优化裁剪结果
+- 独立于 Aggressive 模式：不会运行消息老化、工具结果压缩或备用摘要器（只有 SLM 层失败时，才可能通过 Aggressive 运行备用处理）
 
-**适用场景：** 当你反复触及上下文上限时。
+**最适合：** 反复触及上下文限制时。
 
-### RTK 模式（上游区间 60-90%）
+### RTK 模式（上游范围内节省 60-90%）
 
-RTK 模式针对编码代理会话中常见的冗长工具输出进行了优化：
+RTK 模式针对编码代理会话中出现的冗长工具输出进行了优化：
 
-- 可检测多种命令/输出类别，例如 `git status`、`git diff`、`git log`、测试运行器、
-  TypeScript/Vite/Webpack 构建、ESLint/Biome/Prettier、npm audit/install、Docker 日志、
-  基础设施输出以及通用 shell 输出
-- 应用来自 `open-sse/services/compression/engines/rtk/filters/` 的 JSON 过滤器包
-- 从项目级或全局 `filters.toml` 文件导入 RTK TOML schema v1 过滤器，
-  支持内联测试验证，并对项目文件实施信任门控
-- 内置 56 个过滤器，均附带内联验证示例
-- 移除 ANSI 控制序列、进度条、重复行以及无操作价值的噪音
-- 保留失败、错误、警告、变更文件、摘要以及长输出的尾部
-- 支持信任门控的项目过滤器、全局过滤器，以及可选的脱敏原始输出恢复
+- 检测 `git status`、`git diff`、`git log`、测试运行器、TypeScript/Vite/Webpack 构建、ESLint/Biome/Prettier、npm audit/installs、Docker 日志、基础设施输出以及通用 shell 输出等命令/输出类别
+- 应用来自 `open-sse/services/compression/engines/rtk/filters/` 的 JSON 筛选器包
+- 从项目或全局 `filters.toml` 文件导入 RTK TOML schema v1 筛选器，并对项目文件执行内联测试验证和信任门控
+- 内置 56 个带内联验证样例的筛选器
+- 删除 ANSI 控制序列、进度条、重复行和无行动价值的噪声
+- 保留失败信息、错误、警告、已更改文件、摘要以及长输出的末尾内容
+- 支持受信任门控的项目筛选器、全局筛选器以及可选的已编辑原始输出恢复
 
-**适用场景：** 包含 shell、构建、测试、git、grep 及文件输出记录的代理会话。
+**最适合：** 包含 shell、构建、测试、git、grep 和文件输出记录的代理会话。
 
-### 堆叠模式（符合条件部分可达 78-95%）
+### Stacked 模式（符合条件范围内节省 78-95%）
 
-堆叠模式按确定性顺序运行多个压缩引擎。默认流水线为：
+Stacked 模式按确定性顺序运行多个压缩引擎。默认管道为：
 
 ```txt
 RTK -> Caveman
 ```
 
-该顺序先压缩终端/工具输出，再对剩余的自然语言提示应用 Caveman 语义精简。
-堆叠流水线可以全局配置，也可以通过分配给路由组合（routing combos）的压缩组合
-（compression combos）来配置。
+该顺序会先压缩终端/工具输出，然后对剩余的自然语言提示应用 Caveman 语义压缩。Stacked 管道可以全局配置，也可以通过分配给路由组合的压缩组合进行配置。
 
-**适用场景：** 混合上下文——既有大量工具日志，又有人工指令或助手摘要。
-
----
+**最适合：** 同时包含大量工具日志以及人工指令或助手摘要的混合上下文。
 
 ## 上游节省量计算
 
@@ -172,46 +163,48 @@ RTK -> Caveman
 
 ### 仪表板
 
-前往 `Dashboard → Context & Cache`：
+导航至 `Dashboard → Context & Cache`：
 
 - **Caveman** — 模式选择、语言包、预览和全局默认值
 - **RTK** — 命令过滤器预览、RTK 安全设置和过滤器目录
-- **Compression Combos** — 分配给路由组合的命名引擎管线
-- **Auto-Trigger Threshold** — 当 token 数量超过阈值时自动启用压缩
+- **Compression Combos** — 分配给路由组合的命名引擎管道
+- **Auto-Trigger Threshold** — 当令牌数量超过阈值时自动启用压缩
 
-### 按组合覆盖
+### 每个组合的覆盖设置
 
-在 `Dashboard → Context & Cache → Compression Combos` 中，将压缩组合分配给一个路由组合：
+在 `Dashboard → Context & Cache → Compression Combos` 中，为路由组合分配压缩组合：
 
 ```txt
-组合: "free-tier-fallback"
-  压缩组合: "coding-agent-stack"
-  管线: RTK -> Caveman
-  目标:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-这样，你可以在免费/编程服务提供者上使用堆叠压缩，同时在付费订阅上保持精简模式。
+这样，你可以在免费/编程提供者上使用堆叠压缩，同时在付费订阅上保持 lite 模式。
 
-此“按组合覆盖”分配与**路由组合压缩模式**覆盖是不同的控制项（Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses——该字段的 schema 也接受 `rtk`、`stacked` 和 `omniglyph`）——后者不会选择命名的压缩组合管线；它只会设置由 `resolveCompressionPlan` 读取的 `compressionMode` 字段。它既可以在组合卡片（`Dashboard → Combos`）上设置，也可以从 #6760 起，在 `Dashboard → Context & Cache → Compression Combos` 的“Assign to routing”列表中，紧邻上述管线分配复选框，针对每个路由组合进行设置。两个界面的设置都通过同一个 `PUT /api/combos/{id}` 端点持久化。
+此“Per-Combo Override”分配与**路由组合压缩模式**覆盖设置是不同的控制项（Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses——该字段的架构还接受 `rtk`、`stacked` 和 `omniglyph`）。后者不会选择命名的压缩组合管道；它只会设置由 `resolveCompressionPlan` 使用的 `compressionMode` 字段。该设置既可以在组合卡片（`Dashboard → Combos`）上配置，也可以自 #6760 起，在 `Dashboard → Context & Cache → Compression Combos` 的“Assign to routing”列表中为每个路由组合配置，就位于上述管道分配复选框旁边。这两个界面都通过相同的 `PUT /api/combos/{id}` 端点持久化设置。
 
-### 按请求覆盖
+### 每个请求的覆盖设置
 
-发送 `x-omniroute-compression` 请求标头，可针对单个请求覆盖压缩计划。它具有最高优先级——优先于路由组合覆盖、活动配置文件、自动触发和面板中的 Default。未知值将被忽略（请求绝不会因此被拒绝），并且全局主开关仍控制所有压缩功能：当全局关闭压缩时，无法通过该标头将其开启。可用值：
+发送 `x-omniroute-compression` 请求标头，可以覆盖单个请求的压缩计划。它具有最高优先级——优先于路由组合覆盖设置、活动配置文件、自动触发和面板 Default。未知值会被忽略（请求不会被拒绝），并且全局主开关仍会控制所有功能：当全局关闭压缩时，该标头无法将其开启。可用值：
 
-| 值            | 效果                                                                        |
-| ------------- | --------------------------------------------------------------------------- |
-| `off`         | 不对此请求进行压缩。                                                        |
-| `default`     | 使用面板派生的 Default 配置文件（忽略活动配置文件）。有损引擎保持关闭。     |
-| `safe`        | 与省略该标头相同：仅执行去重和空白折叠。                                    |
-| `allow-lossy` | 保留此请求的操作员计划，包括摘要、相关性过滤器和样式重写。                  |
-| `engine:<id>` | 启用时使用单个引擎，例如 `engine:rtk`。这是针对该引擎的按请求选择启用方式。 |
-| `<combo>`     | 命名组合：先按名称匹配（不区分大小写），再按 id 匹配。                      |
+| Value         | Effect                                                                          |
+| ------------- | ------------------------------------------------------------------------------- |
+| `off`         | 此请求不进行压缩。                                                              |
+| `default`     | 面板派生的 Default 配置文件（忽略活动配置文件）。不会启用有损引擎。             |
+| `safe`        | 与省略该标头相同。                                                              |
+| `allow-lossy` | 保留此请求的操作员计划，包括摘要、相关性过滤器和样式重写。                      |
+| `engine:<id>` | 在启用时使用单个引擎，例如 `engine:rtk`。这是针对该引擎的每个请求选择加入设置。 |
+| `<combo>`     | 按名称（不区分大小写）优先匹配，然后按 ID 匹配的命名组合。                      |
 
-如果未指定 `allow-lossy`、`engine:<id>` 或命名组合，则不会应用有损引擎。启用压缩时，请求仍会进行会话去重和空白折叠。
+如果没有使用 `allow-lossy`、`engine:<id>` 或命名组合，则不会应用有损引擎。当有损 Default、自动触发或路由覆盖设置被降级时，OmniRoute 会按照配置顺序保留已配置堆叠管道中可识别的无损步骤。只有在没有任何已配置的无损步骤保留时，才会回退到 `session-dedup → lite`。
 
-所应用的计划会通过 `X-OmniRoute-Compression: <mode>; source=<source>` 响应标头返回，其中 `<source>` 是 `request-header`、`routing-override`、`active-profile`、`auto-trigger`、`default` 或 `off` 之一。
+Settings 面板的**Effective pipeline**预览显示通常的静态计划。当可以运行自动触发时，同一预览还会显示其条件有效管道，以便面板和不带标头的运行时解析保持一致。
+
+应用的计划会通过 `X-OmniRoute-Compression: <mode>; source=<source>` 响应标头返回，其中 `<source>` 为 `request-header`、`routing-override`、`active-profile`、`auto-trigger`、`default` 或 `off` 之一。
 
 ### API
 
@@ -224,7 +217,7 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# 预览特定的 RTK/stacked 载荷
+# 预览特定的 RTK/stacked 负载
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
@@ -232,7 +225,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
 # 列出 RTK 过滤器包
 curl http://localhost:20128/api/context/rtk/filters
 
-# 使用可选的命令元数据直接测试 RTK
+# 直接测试 RTK，可选命令元数据
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
@@ -256,9 +249,9 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 ---
 
-## 压缩统计信息
+## 压缩统计
 
-每个压缩请求都会在服务器日志中包含统计信息：
+每个经过压缩的请求都会在服务器日志中包含统计信息：
 
 ```json
 {

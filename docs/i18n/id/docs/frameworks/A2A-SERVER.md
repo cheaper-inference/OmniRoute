@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Skill yang Tersedia
+## Keterampilan yang Tersedia
 
-OmniRoute mengekspos 6 skill A2A yang terhubung di `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul skill berada di `src/lib/a2a/skills/`.
+OmniRoute memperlihatkan 6 keterampilan A2A yang dihubungkan ke `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul keterampilan ada di `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Deskripsi                                                                                                                                                       | Tag                        | Contoh                                      |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
-| Smart Routing      | `smart-routing`      | Merutekan prompt melalui provider/kombo optimal menggunakan mesin combo + scoring milik OmniRoute                                                               | routing, providers         | "Rutekan prompt ini melalui model terbaik"  |
-| Quota Management   | `quota-management`   | Melaporkan status kuota per provider, membantu pemanggil memutuskan kapan melakukan throttle/berpindah                                                          | quota, providers           | "Periksa kuota untuk anthropic"             |
-| Provider Discovery | `provider-discovery` | Menampilkan daftar provider yang terpasang beserta kapabilitas, flag free-tier, dan status OAuth                                                                | providers, discovery       | "Provider apa saja yang tersedia?"          |
-| Cost Analysis      | `cost-analysis`      | Memperkirakan biaya sebuah permintaan/percakapan berdasarkan katalog + penggunaan terkini                                                                       | cost, usage                | "Perkirakan biaya untuk percakapan ini"     |
-| Health Report      | `health-report`      | Mengagregasi status circuit breaker, cooldown, dan lockout per provider                                                                                         | health, resilience         | "Tampilkan status kesehatan semua provider" |
-| List Capabilities  | `list-capabilities`  | Mengembalikan katalog Agent Skills lengkap berisi 45 entri (23 API + 21 CLI + 1 config) sebagai tabel markdown dengan URL SKILL.md mentah untuk injeksi konteks | catalog, discovery, skills | "Tampilkan semua kapabilitas OmniRoute"     |
+| Keahlian          | ID                   | Keterangan                                                                                                                                                        | Tag                             | Contoh                                         |
+| :---------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :--------------------------------------------- |
+| Perutean Cerdas   | `smart-routing`      | Merutekan prompt melalui provider/combo optimal menggunakan skor + mesin kombo OmniRoute                                                                          | perutean, penyedia              | "Rutekan permintaan ini melalui model terbaik" |
+| Manajemen Kuota   | `quota-management`   | Melaporkan status kuota per penyedia, membantu penelepon memutuskan kapan harus melakukan throttle/switch                                                         | kuota, penyedia                 | "Periksa kuota untuk antropik"                 |
+| Penemuan Penyedia | `provider-discovery` | Mencantumkan penyedia terinstal dengan kemampuan, tanda tingkat gratis, status OAuth                                                                              | penyedia, penemuan              | “Penyedia apa saja yang tersedia?”             |
+| Analisis Biaya    | `cost-analysis`      | Memperkirakan biaya request/conversation berdasarkan katalog + penggunaan terkini                                                                                 | biaya, penggunaan               | "Perkirakan biaya untuk percakapan ini"        |
+| Laporan Kesehatan | `health-report`      | Agregat pemutus sirkuit, cooldown, status penguncian per penyedia                                                                                                 | kesehatan, ketahanan            | "Tampilkan status kesehatan semua penyedia"    |
+| Daftar Kemampuan  | `list-capabilities`  | Mengembalikan 45 entri katalog Keahlian Agen lengkap (23 API + 21 CLI + 1 config) sebagai tabel penurunan harga dengan SKILL.md URLs mentah untuk injeksi konteks | katalog, penemuan, keterampilan | "Daftar semua kemampuan OmniRoute "            |
 
-> Agent Card harus tetap selaras dengan katalog 376 provider yang aktif; jumlah provider serta metadata free/no-auth bersumber dari registry runtime.
+> Kartu Agen harus tetap selaras dengan katalog penyedia 381 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
 
-### Detail Skill `list-capabilities`
+### `list-capabilities` Detail Keterampilan
 
-Skill `list-capabilities` sangat berguna bagi agen eksternal yang perlu menemukan apa saja yang diekspos OmniRoute sebelum mengirim panggilan API. Skill ini mengembalikan artefak tabel markdown terstruktur:
+Keterampilan `list-capabilities` sangat berguna bagi agen eksternal yang perlu mengetahui apa yang diekspos OmniRoute sebelum mengirim panggilan API. Ini mengembalikan artefak tabel penurunan harga terstruktur:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,60 +176,68 @@ Skill `list-capabilities` sangat berguna bagi agen eksternal yang perlu menemuka
 ...
 ```
 
-Setiap baris menyertakan kolom `rawUrl` sehingga agen dapat langsung mengambil SKILL.md lengkap. Field `metadata.totalSkills` mencerminkan ukuran katalog (45 saat ini). Implementasi: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris menyertakan kolom `rawUrl` sehingga agen dapat segera mengambil SKILL.md secara lengkap. Bidang `metadata.totalSkills` mencerminkan ukuran katalog (45 hari ini). Implementasi: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (tambahan)
 
-Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah ini menyediakan akses tambahan untuk dasbor dan alat eksternal:
+Titik akhir JSON-RPC `/a2a` adalah titik masuk A2A kanonik. Titik akhir REST di bawah menyediakan akses tambahan untuk dasbor dan peralatan eksternal:
 
-| Endpoint                     | Metode | Deskripsi                                                  | Autentikasi                                  |
-| :--------------------------- | :----- | :--------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Status server, skill yang terdaftar                        | (publik)                                     |
-| `/api/a2a/tasks`             | GET    | Daftar tugas dengan filter                                 | manajemen                                    |
-| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugas berdasarkan ID                              | manajemen                                    |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugas yang sedang berjalan                        | manajemen                                    |
-| `/.well-known/agent.json`    | GET    | Agent Card (penemuan A2A)                                  | (publik, di-cache selama 3600 detik)         |
-| `/api/a2a/tasks`             | POST   | Delegasi masuk ke armada OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Titik akhir                  | Metode | Keterangan                                                 | Penulis                                                                                                 |
+| :--------------------------- | :----- | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| `/api/a2a/status`            | GET    | Status server, keterampilan terdaftar                      | (publik)                                                                                                |
+| `/api/a2a/tasks`             | GET    | Buat daftar tugas dengan filter                            | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/api/a2a/tasks/[id]`        | GET    | Dapatkan tugas dengan ID                                   | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Batalkan tugas yang sedang berjalan                        | manajemen atau kunci API (lihat di bawah)                                                               |
+| `/.well-known/agent.json`    | GET    | Kartu Agen (penemuan A2A )                                 | (publik, cache 3600an)                                                                                  |
+| `/api/a2a/tasks`             | POST   | Delegasi masuk ke armada OmniConductor (Konduktor PRD RF5) | sama seperti `GET`, ditambah `OMNIROUTE_API_KEY` jika disetel saat `REQUIRE_API_KEY` mati; `a2aEnabled` |
 
-**Delegasi Conductor masuk (`POST /api/a2a/tasks`):** agen A2A eksternal mendelegasikan pekerjaan pemrograman ke armada OmniConductor melalui OmniRoute. Isi: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — hanya skill armada Conductor (yang diumumkan pada Agent Card) yang dapat didelegasikan; `metadata.conductor.repo.url` wajib diisi (armada bekerja pada repositori git). Rute ini menerjemahkan permintaan menjadi `POST /v1/tasks` milik hub menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` sisi server (dengan fallback `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; status tugas mengalir kembali melalui cermin SSE→A2A (RF1) dan dapat dilihat melalui `GET /api/a2a/tasks?skill=conductor`.
+Siapa yang dapat mengakses rute `/api/a2a/tasks*` bergantung pada login dan pengaturan kunci API:
+
+- `requireLogin=true` (default): middleware hanya menerima kredensial manajemen (sesi dasbor, kunci `manage` -scope API, token akses `oma_` ) dan `OMNIROUTE_API_KEY`. Kunci inferensi biasa mendapat `403`. Di header `Authorization` middleware hanya menggunakan `OMNIROUTE_API_KEY` sebagai `Bearer <key>`; kunci kosong atau tab setelahnya `Bearer` mendapat `401`.
+- `requireLogin=false`, atau jendela loopback sebelum orientasi: dengan `REQUIRE_API_KEY=true` kunci OmniRoute API atau kredensial manajemen apa pun yang valid diterima dan penelepon anonim mendapatkan `401`; dengan `REQUIRE_API_KEY` off rute terbuka.
+- `POST /api/a2a/tasks` juga memerlukan `OMNIROUTE_API_KEY` di header `Authorization` ketika variabel tersebut disetel dan `REQUIRE_API_KEY` tidak aktif. Header lain, seperti `x-api-key`, tidak dihitung di sana. Dengan login nonaktif atau sebelum orientasi, kunci diteruskan dengan atau tanpa awalan `Bearer` ; dengan login aktif, hanya `Bearer <key>` yang bisa melewati middleware.
+
+Jika kredensial diperlukan, token `read` -scope `oma_` hanya berfungsi untuk `GET`.
+
+**Delegasi Konduktor Masuk (`POST /api/a2a/tasks`):** agen A2A eksternal mendelegasikan pekerjaan pengkodean ke armada OmniConductor melalui OmniRoute. Isi: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — saja Keahlian armada Konduktor (yang diumumkan di Kartu Agen) dapat didelegasikan; `metadata.conductor.repo.url` diperlukan (armada bekerja pada repo git). Rute diterjemahkan ke `POST /v1/tasks` hub menggunakan `CONDUCTOR_ORCHESTRATOR_TOKEN` sisi server (fallback `CONDUCTOR_HUB_TOKEN`) dan mengembalikan `201 { conductor_task_id, state: "submitted" }`; status tugas mengalir kembali melalui cermin SSE→A2A (RF1) dan terlihat melalui `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Menambahkan Skill Baru
+## Menambahkan Keterampilan Baru
 
-1. **Buat file skill:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Buat file keterampilan:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspor fungsi asinkron `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur skill yang sudah ada seperti `smartRouting.ts`.
+   Ekspor fungsi async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Ikuti bentuk skill yang ada seperti `smartRouting.ts`. Jika keterampilan memanggil kembali OmniRoute melalui HTTP, buat header dengan `buildSelfLoopHeaders(caller)` dari `src/lib/a2a/selfLoopAuth.ts` sehingga panggilan berjalan dengan kunci pemanggil A2A, bukan `OMNIROUTE_API_KEY`, dan teruskan `redirect: "error"` ke `fetch` sehingga pengalihan tidak pernah mendapatkan kuncinya. Pembantu hanya membuat header; setiap keahlian menetapkan kebijakan pengalihan itu sendiri. Itu melempar `UnsafeSelfLoopTargetError` daripada melampirkan kunci ketika URL dasar yang diselesaikan adalah http biasa di luar jaringan pribadi (loopback, nama wadah atau layanan, dan alamat pribadi baik-baik saja) atau memegang kredensial, jadi keterampilan yang menelan panggilan yang ditolak harus menampilkan kembali kesalahan itu.
 
-2. **Daftarkan handler:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
+2. **Daftarkan pengendali:** di `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...skill yang sudah ada
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Ekspos dalam Agent Card:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan ke array `skills`:
+3. **Eksposur di Kartu Agen:** di `src/lib/a2a/agentCardMetadata.ts` (dibagikan oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Skill Anda",
-     "description": "Deskripsi singkat yang berfokus pada tujuan",
-     "tags": ["perutean", "kuota"],
-     "examples": ["Contoh pemanggilan dengan bahasa alami"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tulis pengujian:** `tests/unit/a2a-<your-skill>.test.ts`. Cakup alur sukses + alur kesalahan.
+4. **Tes tulis:** `tests/unit/a2a-<your-skill>.test.ts`. Tutupi jalur bahagia jalur kesalahan +.
 
-5. **Dokumentasikan** skill baru dalam tabel `Available Skills` pada file ini.
+5. **Dokumen** keterampilan baru dalam tabel `Available Skills` file ini.
 
 ---
 
@@ -268,7 +276,7 @@ dikirim → sedang diproses → selesai
 
 ## Contoh Integrasi
 
-### Python (requests)
+### Python (permintaan)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (mengambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -120,39 +120,40 @@ $20 ပေးပြီး ကန့်သတ်ချက်များနှင
 
 ## 📖 Provider စနစ်ထည့်သွင်းခြင်း
 
-CSV သို့မဟုတ် JSON ဖိုင်တစ်ခုမှ API-key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများကို အစဉ်လိုက် သတ်မှတ်ထားသည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider သို့မဟုတ် ကိုက်ညီမှုရှိသော node တစ်ခုအဖြစ် ရှိနှင့်ပြီးသား ဖြစ်ရမည်။ [CSV သို့မဟုတ် JSON ဖိုင်မှ provider များ ထည့်သွင်းခြင်း](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
+CSV သို့မဟုတ် JSON ဖိုင်မှ API key ချိတ်ဆက်မှုများကို အစုလိုက်ထည့်ရန် **Dashboard → Providers → Import from file** ကို အသုံးပြုပါ။ ကော်လံများသည် အစဉ်လိုက်ဖြစ်သည် (`provider,name,apiKey,baseUrl,priority`)။ `provider` သည် စီမံခန့်ခွဲထားသော provider တစ်ခု သို့မဟုတ် ကိုက်ညီသည့် node တစ်ခုအဖြစ် ကြိုတင်ရှိရမည်။ [Import providers from a CSV or JSON file](../providers/CSV-IMPORT.md) ကို ကြည့်ပါ။
 
-### 🔐 စာရင်းသွင်းမှုအခြေပြု Provider များ
+### 🔐 Subscription Provider များ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Dashboard → Providers → Claude Code ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ → Token အလိုအလျောက် ပြန်လည်စတင်ခြင်း
-→ ၅ နာရီစာ + အပတ်စဉ် quota စောင့်ကြည့်ခြင်း
+Dashboard → Providers → Claude Code ချိတ်ဆက်ရန်
+→ OAuth login → Token အလိုအလျောက် refresh
+→ ၅ နာရီ + အပတ်စဉ် quota ခြေရာခံခြင်း
 
-မော်ဒယ်များ:
+Models:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှုပ်ထွေးသော လုပ်ငန်းများအတွက် Opus ကို အသုံးပြုပြီး မြန်နှုန်းအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် မော်ဒယ်တစ်ခုချင်းစီအလိုက် quota ကို စောင့်ကြည့်ပေးသည်!
+**အသုံးဝင်သော အကြံပြုချက်:** ရှုပ်ထွေးသောလုပ်ငန်းများအတွက် Opus၊ မြန်ဆန်မှုအတွက် Sonnet ကို အသုံးပြုပါ။ OmniRoute သည် model တစ်ခုချင်းစီအလိုက် quota ကို ခြေရာခံပေးသည်။
 
-OmniRoute host ပေါ်တွင် browser မရှိပါသလား။ Claude Code ဖြင့် ဝင်ရောက်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို လုပ်ဆောင်ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ ကူးထည့်ပါ။ [Setup token ဖြင့် Claude Code အသုံးပြုခြင်း](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
+OmniRoute host တွင် browser မရှိပါက Claude Code login ဝင်ထားသည့် မည်သည့်နေရာတွင်မဆို `claude setup-token` ကို run ပြီး တစ်နှစ်သက်တမ်းရှိ token ကို **Setup Token** tab ထဲသို့ paste လုပ်ပါ။ [Claude Code with a setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ကို ကြည့်ပါ။
 
-Claude နှင့် Claude Code နှင့် ကိုက်ညီသော route များသည် Opus နှင့် Sonnet
-မော်ဒယ်များအတွက် `max` thinking effort ကို ဆက်လက်ထိန်းသိမ်းထားသည်။ Haiku မော်ဒယ်များသည် `max` effort အဆင့်ကို လက်မခံသောကြောင့် OmniRoute သည်
-ထို request ကို upstream သို့ မပို့မီ high thinking budget အဖြစ် လျှော့ချပေးသည်။
+Claude နှင့် Claude Code-compatible route များသည် Opus နှင့် Sonnet
+model များအတွက် `max` thinking effort ကို ထိန်းသိမ်းပေးသည်။ Haiku model များသည် `max`
+effort tier ကို လက်မခံသောကြောင့် OmniRoute သည် အဆိုပါ request ကို upstream သို့ မပို့မီ
+မြင့်မားသော thinking budget သို့ လျှော့ချပြောင်းလဲပေးသည်။
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
-→ OAuth ဖြင့် ဝင်ရောက်ပါ (port 1455)
-→ ၅ နာရီစာ + အပတ်စဉ် ပြန်လည်သတ်မှတ်ခြင်း
+Dashboard → Providers → Codex ချိတ်ဆက်ရန်
+→ OAuth login (port 1455)
+→ ၅ နာရီ + အပတ်စဉ် reset
 
-မော်ဒယ်များ:
+Models:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Dashboard → Providers → Codex ကို ချိတ်ဆက်ပါ
 #### GitHub Copilot
 
 ```bash
-Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
+Dashboard → Providers → GitHub ချိတ်ဆက်ရန်
 → GitHub မှတစ်ဆင့် OAuth
-→ လစဉ် ပြန်လည်သတ်မှတ်ခြင်း (လတိုင်း၏ ၁ ရက်နေ့)
+→ လစဉ် reset (လ၏ ၁ ရက်နေ့)
 
-မော်ဒယ်များ:
+Models:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,57 +175,63 @@ Dashboard → Providers → GitHub ကို ချိတ်ဆက်ပါ
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (token အခြေပြု ငွေတောင်းခံခြင်း)။** GitHub မှ account အတွက်
+`credits_used` ကို report လုပ်သောအခါ Provider Limits card တွင် **AI Credits** row ကို
+ပြသပြီး လက်ရှိငွေတောင်းခံကာလအတွင်း အသုံးပြုထားသည့် credits ကို ဖော်ပြသည်။ unlimited
+organization plan များတွင်လည်း အလားတူဖြစ်သည်။
+
+**Local AI Credits limit။** GitHub connection ကို edit လုပ်ပြီး billing period တစ်ခုလျှင်
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) ကို သတ်မှတ်ပါ။ ဗလာထားပါက ပိတ်ထားမည်ဖြစ်ပြီး `0` ဖြစ်ပါက အဆိုပါ connection ကို အမြဲကျော်သွားမည်။ နောက်ဆုံး usage reading သည် limit နှင့် တူညီခြင်း သို့မဟုတ် ကျော်လွန်ခြင်းရှိပါက account ရွေးချယ်မှုသည် ထို connection ကို ကျော်သွားပြီး quota-policy cutoff ကဲ့သို့ပင် routing သည် သင့်အခြား connection များသို့ fallback လုပ်မည်။ ဤစစ်ဆေးမှုသည် ပုံမှန် quota refresh က စုဆောင်းထားပြီးသား usage ကိုသာ ဖတ်ရှုသည် — request path တွင် GitHub ကို မည်သည့်အခါမျှ မခေါ်ပါ — ထို့အပြင် fail open လုပ်သည်။ ဆိုလိုသည်မှာ usage reading ပျောက်ဆုံးနေခြင်း သို့မဟုတ် ဟောင်းနွမ်းနေခြင်း (၁၅ မိနစ်ထက်ပိုဟောင်းခြင်း၊ သို့မဟုတ် reset ပြုလုပ်ပြီးသည့် billing period မှ ဖြစ်ခြင်း) သည် connection ကို ပိတ်ဆို့မည်မဟုတ်ပါ။ ဤသည်မှာ local safeguard တစ်ခုသာဖြစ်ပြီး **အသုံးစရိတ်ကို အာမခံကန့်သတ်ပေးသည့် ceiling မဟုတ်ပါ**။ GitHub ၏ reporting နှောင့်နှေးမှု၊ refresh interval၊ လက်ရှိလုပ်ဆောင်နေသော request များနှင့် OmniRoute ပြင်ပအသုံးပြုမှုများကြောင့် သတ်မှတ်ချက်ကို ကျော်လွန်နိုင်သည်။ တိကျသော အမြင့်ဆုံးကန့်သတ်ချက်အတွက် GitHub ၏ ကိုယ်ပိုင် spending controls များကို အသုံးပြုပါ။
+
 ### 💰 စျေးသက်သာသော Provider များ
 
-#### GLM-4.7 (နေ့စဉ် ပြန်လည်သတ်မှတ်ခြင်း၊ $0.6/1M)
+#### GLM-4.7 (နေ့စဉ် reset၊ $0.6/1M)
 
 1. စာရင်းသွင်းရန်: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan မှ API key ရယူပါ
 3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**အသုံးပြုရန်:** `glm/glm-4.7` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota 3× ပေးသည်! နေ့စဉ် နံနက် 10:00 တွင် ပြန်လည်သတ်မှတ်သည်။
+**အသုံးပြုရန်:** `glm/glm-4.7` — **အသုံးဝင်သော အကြံပြုချက်:** Coding Plan သည် ကုန်ကျစရိတ် 1/7 ဖြင့် quota ၃ ဆ ပေးသည်။ နေ့စဉ် မနက် ၁၀:၀၀ နာရီတွင် reset လုပ်သည်။
 
-#### MiniMax M2.1 (၅ နာရီတိုင်း ပြန်လည်သတ်မှတ်ခြင်း၊ $0.20/1M)
+#### MiniMax M2.1 (၅ နာရီ reset၊ $0.20/1M)
 
 1. စာရင်းသွင်းရန်: [MiniMax](https://www.minimax.io)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** ရှည်လျားသော context (1M tokens) အတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှုဖြစ်သည်!
+**အသုံးပြုရန်:** `minimax/MiniMax-M2.1` — **အသုံးဝင်သော အကြံပြုချက်:** context ရှည်လျားသော လုပ်ငန်းများအတွက် စျေးအသက်သာဆုံး ရွေးချယ်မှု (tokens 1M) ဖြစ်သည်။
 
-#### Kimi K2 (တစ်လလျှင် ပုံသေ $9)
+#### Kimi K2 ($9/month flat)
 
 1. စာရင်းသွင်းရန်: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key ရယူပါ → Dashboard → Add API Key
+2. API key ရယူရန် → Dashboard → Add API Key
 
-**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **ကျွမ်းကျင်သူ အကြံပြုချက်:** 10M tokens အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သဖြင့် ထိရောက်သော ကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်!
+**အသုံးပြုရန်:** `kimi/kimi-k2.5` — **အသုံးဝင်သော အကြံပြုချက်:** tokens 10M အတွက် တစ်လလျှင် ပုံသေ $9 ဖြစ်သောကြောင့် ထိရောက်သောကုန်ကျစရိတ်မှာ $0.90/1M ဖြစ်သည်။
 
 #### Baidu Qianfan / ERNIE
 
 1. စာရင်းသွင်းရန်: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key တစ်ခု ဖန်တီးပါ → Dashboard → Add API Key: Provider: `qianfan`
+2. Qianfan API key ဖန်တီးရန် → Dashboard → Add API Key: Provider: `qianfan`
 
 **အသုံးပြုရန်:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` သို့မဟုတ် အခြား Qianfan OpenAI-compatible model ID တစ်ခု။
 
 ### 🆓 အခမဲ့ Provider များ
 
-Authentication မလိုအပ်သော အခမဲ့ provider များ၏ provider စာမျက်နှာတွင် **No authentication required** ဘေး၌ ခလုတ်တစ်ခု ရှိသည်။
-၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို ပိတ်ထားမည်ဖြစ်ပြီး Providers configured/compact view များမှ ဖယ်ရှားကာ
-၎င်း၏ မော်ဒယ်များကိုလည်း `/v1/models` မှ ဖယ်ရှားမည်ဖြစ်သည်။
+Authentication မလိုအပ်သော အခမဲ့ provider များတွင် ၎င်းတို့၏ provider စာမျက်နှာရှိ **No authentication required** ဘေးတွင် switch တစ်ခု ပါရှိသည်။ ၎င်းကို ပိတ်လိုက်ပါက ထို provider ကို disable လုပ်မည်၊ Providers configured/compact view များမှ ဖယ်ရှားမည်၊ ထို့အပြင် ၎င်း၏ model များကို `/v1/models` မှ ဖယ်ရှားမည်။
 
-#### Qoder (အခမဲ့ မော်ဒယ် ၉ ခု)
+#### Qoder (အခမဲ့ model ၉ ခု)
 
 ```bash
-Dashboard → Qoder ကို ချိတ်ဆက်ပါ → OAuth ဖြင့် ဝင်ရောက်ပါ → အသုံးပြုခွင့်သည် provider ၏ လက်ရှိ ကန့်သတ်ချက်များအပေါ် မူတည်သည်
+Dashboard → Qoder ချိတ်ဆက်ရန် → OAuth login → လက်ရှိ provider limits များအပေါ် မူတည်၍ အသုံးပြုခွင့်ရှိသည်
 
-မော်ဒယ်များ: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
 #### Kiro (Claude အခမဲ့)
 
 ```bash
-Dashboard → Kiro ကို ချိတ်ဆက်ပါ → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credit ~50
+Dashboard → Kiro ချိတ်ဆက်ရန် → AWS Builder ID သို့မဟုတ် Google/GitHub → တစ်လလျှင် credits ~၅၀
 
-မော်ဒယ်များ: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
 
 ---
@@ -336,82 +343,82 @@ API သော့: [ဒက်ရှ်ဘုတ်မှ]
 
 ---
 
-## 🚀 ဖြန့်ကျက်တပ်ဆင်ခြင်း
+## 🚀 ဖြန့်ကျက်ခြင်း။
 
 ### Global npm ထည့်သွင်းခြင်း (အကြံပြုထားသည်)
 
 ```bash
 npm install -g omniroute
 
-# ဖွဲ့စည်းမှုလမ်းညွှန်ကို ဖန်တီးပါ
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ဖိုင်ကို ဖန်တီးပါ (.env.example ကို ကြည့်ပါ)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# ဆာဗာကို စတင်ပါ
+# Start server
 omniroute
-# သို့မဟုတ် စိတ်ကြိုက် port ဖြင့်:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI သည် `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ `.env` ကို အလိုအလျောက် ဖွင့်ပေးသည်။
+CLI သည် `.env` `~/.omniroute/.env` သို့မဟုတ် `./.env` မှ အလိုအလျောက်တင်ပေးသည်။ အလုပ်လုပ်သောလမ်းညွှန်ရှိ `./.env` သည် သော့များ၏ခွင့်ပြုချက်စာရင်းတို (ports၊ `REQUIRE_API_KEY`၊ ဒေသနှင့် အရောင်ဆက်တင်များ) ကိုသာ သတ်မှတ်နိုင်သည်။ အခြားအရာအားလုံးကို `~/.omniroute/.env` တွင်ထည့်ပါ။ [CLI မိတ်ဆက်စာချုပ်များကို](CLI-LAUNCH-CONTRACTS.md#working-directory-env) ကြည့်ပါ။
 
-### Tray မုဒ်
+### ဗန်းမုဒ်
 
-OmniRoute ကို စနစ် tray တွင် စတင်ပါ:
+စနစ်ဗန်းတွင် OmniRoute စတင်ပါ။
 
 ```bash
 omniroute serve --tray
 ```
 
-ဆာဗာနှင့် tray အသင့်ဖြစ်ပြီးနောက် command သည် ပြန်လည်ပြီးဆုံးသည်။
+ဆာဗာနှင့် ဗန်းအဆင်သင့်ဖြစ်ပြီးနောက် အမိန့်ပြန်တက်လာသည်။
 
-ဆာဗာသည် terminal မရှိဘဲ ဆက်လက်လည်ပတ်နေသည်။
+ဆာဗာသည် terminal မပါဘဲ ဆက်လက်လုပ်ဆောင်သည်။
 
-Tray မုဒ်သည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux session များကို ပံ့ပိုးသည်။ Tray မုဒ်သည် dashboard ကို အလိုအလျောက် မဖွင့်ပေးပါ။
+ဗန်းမုဒ်သည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux ဆက်ရှင်များကို ပံ့ပိုးပေးသည်။ ဗန်းမုဒ်သည် ဒက်ရှ်ဘုတ်ကို အလိုအလျောက် မဖွင့်ပါ။
 
-အောက်ပါလုပ်ဆောင်ချက်များအတွက် tray မီနူးကို အသုံးပြုပါ:
+ဤလုပ်ဆောင်ချက်များအတွက် ဗန်းမီနူးကို အသုံးပြုပါ-
 
-- Dashboard ကို ဖွင့်ရန်။
-- `/dashboard/logs` ကို ဖွင့်ရန်။
-- အလိုအလျောက်စတင်မှုကို ပြောင်းလဲရန်။
-- OmniRoute ကို ရပ်တန့်ရန်။
+- ဒက်ရှ်ဘုတ်ကိုဖွင့်ပါ။
+- `/dashboard/logs` ကိုဖွင့်ပါ။
+- အလိုအလျောက်စတင်ခြင်းကို ပြောင်းလဲပါ။
+- OmniRoute။
 
-`--tray` ကို အောက်ပါရွေးချယ်စရာများနှင့် တွဲဖက်မသုံးပါနှင့်:
+`--tray` ဤရွေးချယ်မှုများနှင့် မပေါင်းစပ်ပါနှင့်။
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-ဤမုဒ်များသည် မတူညီသော process ပိုင်ဆိုင်မှု လိုအပ်သည်။
+ဤမုဒ်များသည် မတူညီသော လုပ်ငန်းစဉ် ပိုင်ဆိုင်မှုကို လိုအပ်သည်။
 
-စက်ထဲသို့ နောက်တစ်ကြိမ် login ဝင်သည့်အခါ စတင်ရန် ဖွင့်ပါ:
+နောက်စက်ဝင်ရောက်မှုတွင် စတင်ခြင်းအား ဖွင့်ပါ-
 
 ```bash
 omniroute autostart enable
 ```
 
-အလိုအလျောက်စတင်မှုသည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux session များတွင် tray မုဒ်ကို အသုံးပြုသည်။ မျက်နှာပြင်မဲ့ Linux သည် လက်ရှိ systemd အသုံးပြုသူဝန်ဆောင်မှုကို အသုံးပြုသည်။
+အလိုအလျောက်စတင်ခြင်းသည် macOS၊ Windows နှင့် ဂရပ်ဖစ် Linux စက်ရှင်များတွင် ဗန်းမုဒ်ကို အသုံးပြုသည်။ Headless Linux သည် ရှိပြီးသား systemd အသုံးပြုသူဝန်ဆောင်မှုကို အသုံးပြုသည်။
 
-Login ဝင်ချိန် စတင်မှုကို ပိတ်ပါ:
+အကောင့်ဝင်ချိန်တွင် စတင်ခြင်းကို ပိတ်ပါ
 
 ```bash
 omniroute autostart disable
 ```
 
-### ဖယ်ရှားခြင်း
+### ဖြုတ်နေသည်
 
-OmniRoute ကို မလိုအပ်တော့သည့်အခါ ရှင်းလင်းစွာဖယ်ရှားရန် အမြန် script နှစ်ခု ပံ့ပိုးထားသည်:
+OmniRoute မလိုအပ်တော့သည့်အခါ၊ ရှင်းလင်းဖယ်ရှားရန်အတွက် အမြန် script နှစ်ခုကို ကျွန်ုပ်တို့ ပံ့ပိုးပေးသည်-
 
-| Command                  | လုပ်ဆောင်ချက်                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | စနစ်အက်ပ်ကို ဖယ်ရှားသော်လည်း `~/.omniroute` ရှိ **သင့် DB နှင့် ဖွဲ့စည်းမှုများကို ထိန်းသိမ်းထားသည်**။ |
-| `npm run uninstall:full` | အက်ပ်ကို ဖယ်ရှားပြီး **ဖွဲ့စည်းမှုများ၊ သော့များနှင့် database အားလုံးကို အပြီးတိုင် ဖျက်ပစ်သည်**။     |
+| အမိန့်ပေးသည်။            | အက်ရှင်                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | စနစ်အက်ပ်ကို ဖယ်ရှားသော်လည်း၊** သင်၏ DB နှင့် configurations များကိုသိမ်းဆည်းထားသည်။** `~/.omniroute` တွင် |
+| `npm run uninstall:full` | အက်ပ် AND အပြီးတိုင် ဖယ်ရှားသည်။** ဖွဲ့စည်းမှုပုံစံများ၊ သော့များနှင့် ဒေတာဘေ့စ်အားလုံးကို ဖျက်ပါ။** .     |
 
-> မှတ်ချက်: ဤ command များကို လုပ်ဆောင်ရန် OmniRoute ပရောဂျက်ဖိုင်တွဲသို့ သွားပြီး (clone ပြုလုပ်ထားပါက) ၎င်းတို့ကို လုပ်ဆောင်ပါ။ သို့မဟုတ် global အဖြစ် ထည့်သွင်းထားပါက `npm uninstall -g omniroute` ကို ရိုးရှင်းစွာ လုပ်ဆောင်နိုင်သည်။
+> မှတ်ချက်- ဤအမိန့်များကို လုပ်ဆောင်ရန်၊ OmniRoute ပရောဂျက်ဖိုင်တွဲသို့ သွားပါ (၎င်းကို ကလိုလ်လုပ်ထားလျှင်) နှင့် ၎င်းတို့ကို လုပ်ဆောင်ပါ။ တနည်းအားဖြင့်၊ တစ်ကမ္ဘာလုံးတွင်ထည့်သွင်းပါက၊ သင်သည် `npm uninstall -g omniroute` ရိုးရှင်းစွာ run နိုင်သည်။
 
-### VPS ဖြန့်ကျက်တပ်ဆင်ခြင်း
+### VPS ဖြန့်ကျက်ခြင်း။
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -427,25 +434,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# သို့မဟုတ်: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 ဖြန့်ကျက်တပ်ဆင်ခြင်း (Memory နည်းပါးမှု)
+### PM2 ဖြန့်ကျက်မှု (မှတ်ဉာဏ်နည်း)
 
-RAM ကန့်သတ်ထားသော ဆာဗာများအတွက် memory limit ရွေးချယ်စရာကို အသုံးပြုပါ:
+RAM ကန့်သတ်ထားသောဆာဗာများအတွက်၊ မှတ်ဉာဏ်ကန့်သတ်ရွေးချယ်မှုကို အသုံးပြုပါ-
 
 ```bash
-# 512MB ကန့်သတ်ချက်ဖြင့် (မူလသတ်မှတ်ချက်)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# သို့မဟုတ် စိတ်ကြိုက် memory ကန့်သတ်ချက်ဖြင့်
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# သို့မဟုတ် ecosystem.config.js ကို အသုံးပြု၍
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` ကို ဖန်တီးပါ:
+`ecosystem.config.js` ဖန်တီးပါ
 
 ```javascript
 module.exports = {
@@ -470,24 +477,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Image တည်ဆောက်ပါ (မူလသတ်မှတ်ချက် = codex/claude/droid ကြိုတင်ထည့်သွင်းထားသော runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# သယ်ဆောင်အသုံးပြုနိုင်သော မုဒ် (အကြံပြုထားသည်)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI binary များပါဝင်သော host-integrated မုဒ်အတွက် ပင်မစာရွက်စာတမ်းများရှိ Docker ကဏ္ဍကို ကြည့်ပါ။
+CLI binaries ဖြင့် host-integrated mode အတွက်၊ main docs ရှိ Docker အပိုင်းကို ကြည့်ပါ။
 
-### Void Linux (xbps-src)
+### ပျက်ပြယ် Linux (xbps-src)
 
-Void Linux အသုံးပြုသူများသည် `xbps-src` ဖြတ်ကျော်ကွန်ပိုင်လုပ်ခြင်း မူဘောင်ကို အသုံးပြု၍ OmniRoute ကို မူရင်းစနစ်နှင့် ကိုက်ညီသည့် ပက်ကေ့ချ်အဖြစ် ဖန်တီးပြီး ထည့်သွင်းနိုင်သည်။ ၎င်းသည် လိုအပ်သော `better-sqlite3` မူရင်း bindings များနှင့်အတူ Node.js standalone build ကို အလိုအလျောက် ပြုလုပ်ပေးသည်။
+Void Linux အသုံးပြုသူများသည် `xbps-src` cross-compilation မူဘောင်ကို အသုံးပြု၍ OmniRoute မူရင်းအတိုင်း ထုပ်ပိုးပြီး ထည့်သွင်းနိုင်သည်။ ၎င်းသည် လိုအပ်သော `better-sqlite3` ဇာတိနှောင်ကြိုးများနှင့်အတူ Node.js သီးသန့်တည်ဆောက်မှုကို အလိုအလျောက်လုပ်ဆောင်ပေးသည်။
 
 <details>
-<summary><b>xbps-src template ကို ကြည့်ရန်</b></summary>
+<summary><b>xbps-src နမူနာပုံစံကို ကြည့်ပါ။</b></summary>
 
 ```bash
-# 'omniroute' အတွက် template ဖိုင်
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -508,7 +515,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp အတွက် ပစ်မှတ် CPU architecture ကို သတ်မှတ်ပါ
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -517,29 +524,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) မှီခိုပက်ကေ့ချ်အားလုံးကို ထည့်သွင်းပါ – scripts များကို ကျော်ပါ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js standalone bundle ကို build လုပ်ပါ
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) static assets များကို standalone ထဲသို့ ကူးယူပါ
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 မူရင်း binding ကို compile လုပ်ပါ
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) compile လုပ်ထားသော binding ကို standalone bundle ထဲသို့ ထည့်ပါ
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) architecture အလိုက် သီးခြားဖြစ်သော sharp bundles များကို ဖယ်ရှားပါ
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js static analysis က ချန်လှပ်ထားသည့် pino runtime မှီခိုပက်ကေ့ချ်များကို ကူးယူပါ-
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -553,7 +560,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# ထည့်သွင်းပြီးနောက် hook ကြောင့် အလွတ် Next.js app router လမ်းညွှန်များကို ဖယ်ရှားခြင်းမှ ကာကွယ်ပါ
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -579,51 +586,51 @@ post_install() {
 
 </details>
 
-### ပတ်ဝန်းကျင် ကိန်းရှင်များ
+### ပတ်ဝန်းကျင် အပြောင်းအလဲများ
 
-| Variable                                | Default                              | Description                                                                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT လက်မှတ်ရေးထိုးခြင်းအတွက် လျှို့ဝှက်ချက် (**ထုတ်လုပ်ရေးပတ်ဝန်းကျင်တွင် ပြောင်းလဲပါ**)                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | ပထမဆုံး ဝင်ရောက်အသုံးပြုရန် စကားဝှက်                                                                                                                              |
-| `DATA_DIR`                              | `~/.omniroute`                       | ဒေတာလမ်းညွှန် (ဒေတာဘေ့စ်၊ အသုံးပြုမှု၊ မှတ်တမ်းများ)                                                                                                              |
-| `PORT`                                  | မူဘောင်၏ မူလသတ်မှတ်ချက်              | ဝန်ဆောင်မှု ပေါ့တ် (`20128` ကို နမူနာများတွင် အသုံးပြုထားသည်)                                                                                                     |
-| `HOSTNAME`                              | မူဘောင်၏ မူလသတ်မှတ်ချက်              | ချိတ်ဆက်မည့် ဟို့စ် (Docker တွင် မူလအတိုင်း `0.0.0.0`)                                                                                                            |
-| `NODE_ENV`                              | လည်ပတ်မှုပတ်ဝန်းကျင်၏ မူလသတ်မှတ်ချက် | ဖြန့်ကျက်အသုံးပြုရန် `production` ဟု သတ်မှတ်ပါ                                                                                                                    |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ဒက်ရှ်ဘုတ်တွင် ပြသပြီး ဆာဗာသို့လည်း ဖော်ထုတ်ပေးသည့် အများသုံး အခြေခံ URL (အမွေဆက်ခံထားသော `BASE_URL` ကို အစားထိုးသည်)                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Cloud စင့်ခ် အဆုံးမှတ်၏ အခြေခံ URL (အမွေဆက်ခံထားသော `CLOUD_URL` ကို အစားထိုးသည်)                                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ထုတ်လုပ်ထားသော API key များအတွက် HMAC လျှို့ဝှက်ချက်                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` တွင် Bearer API key ကို မဖြစ်မနေ အသုံးပြုစေသည်                                                                                                            |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | အထောက်အထားစိစစ်ပြီးသော ဒက်ရှ်ဘုတ်အသုံးပြုသူများအား သိမ်းဆည်းထားသည့် API key တန်ဖိုးအပြည့်အစုံကို လိုအပ်ချိန်တွင် ဖော်ပြခွင့်ပြုသည်                                |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ကက်ရှ်လုပ်ထားသော Provider Limits ဒေတာအတွက် ဆာဗာဘက်မှ ပြန်လည်စစ်ဆေးသည့် ကြိမ်နှုန်း၊ UI ပြန်လည်စစ်ဆေးရေး ခလုတ်များက ကိုယ်တိုင် စင့်ခ်လုပ်ခြင်းကို ဆက်လက်စတင်ပေးသည် |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ရေးသားခြင်း/တင်သွင်းခြင်း/ပြန်လည်ရယူခြင်းမပြုမီ အလိုအလျောက် SQLite snapshot များဖန်တီးခြင်းကို ပိတ်သည်၊ ကိုယ်တိုင် အရန်သိမ်းခြင်းမှာ ဆက်လက်အလုပ်လုပ်သည်           |
-| `APP_LOG_TO_FILE`                       | `true`                               | အပလီကေးရှင်းနှင့် စာရင်းစစ်မှတ်တမ်း ရလဒ်များကို ဒစ်ခ်သို့ ရေးသားခြင်း ဖွင့်ပေးသည်                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` အထောက်အထားစိစစ်ရေး cookie ကို မဖြစ်မနေ အသုံးပြုစေသည် (HTTPS reverse proxy နောက်ကွယ်တွင်)                                                                 |
-| `CLOUDFLARED_BIN`                       | မသတ်မှတ်ထားပါ                        | စီမံထိန်းချုပ်ထားသော ဒေါင်းလုဒ်အစား ရှိပြီးသား `cloudflared` binary ကို အသုံးပြုသည်                                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | စီမံထိန်းချုပ်ထားသော Quick Tunnels အတွက် ပို့ဆောင်ရေး ပရိုတိုကော (`http2`၊ `quic` သို့မဟုတ် `auto`)                                                               |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js heap ကန့်သတ်ချက်ကို MB ဖြင့် သတ်မှတ်သည်                                                                                                                   |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | prompt cache ထည့်သွင်းချက် အများဆုံးအရေအတွက်                                                                                                                      |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | semantic cache ထည့်သွင်းချက် အများဆုံးအရေအတွက်                                                                                                                    |
+| ပြောင်းလဲနိုင်သော                       | ပုံသေ                     | ဖော်ပြချက်                                                                                                                                                                 |
+| --------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(အလိုအလျောက်ထုတ်ပေးသည်)_ | JWT လက်မှတ်ထိုးခြင်း လျှို့ဝှက် — ပထမအပြေးတွင် အလိုအလျောက်ထုတ်ပေးပြီး `server.env` တွင် ဆက်လက်တည်ရှိနေပါသည်။ ဒေတာလမ်းညွှန်သည် ပေါ်ပင်ဖြစ်သောအခါ ၎င်းကို အတိအလင်းသတ်မှတ်ပါ။ |
+| `INITIAL_PASSWORD`                      | _(မသတ်မှတ်ရသေး)_          | ပထမဦးစွာ login စကားဝှက်။ npm/source ထည့်သွင်းမှုများကို `CHANGEME` ဖြင့် စတင်သည်- ၎င်းကို အစားထိုးပါ။ Unset: စတင်အသုံးပြုခြင်း wizard                                      |
+| `DATA_DIR`                              | `~/.omniroute`            | ဒေတာလမ်းညွှန် (db၊ အသုံးပြုမှု၊ မှတ်တမ်းများ)                                                                                                                              |
+| `PORT`                                  | မူဘောင်ပုံစံ              | ဝန်ဆောင်မှုဆိပ်ကမ်း (ဥပမာတွင်`20128` )                                                                                                                                     |
+| `HOSTNAME`                              | မူဘောင်ပုံစံ              | host ကို စည်းပါ (Docker မူရင်းမှာ `0.0.0.0`)                                                                                                                               |
+| `NODE_ENV`                              | runtime မူရင်း            | ဖြန့်ကျက်ရန်အတွက် `production` သတ်မှတ်ပါ။                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | အများသူငှာ အခြေခံ URL ဒက်ရှ်ဘုတ်တွင် ပေါ်လာပြီး ဆာဗာနှင့် ထိတွေ့သည် (အမွေအနှစ် `BASE_URL` ကို အစားထိုးသည်)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud စင့်ခ်လုပ်ခြင်း အဆုံးမှတ်အခြေခံ URL (အမွေအနှစ် `CLOUD_URL` ကို အစားထိုးသည်)                                                                                          |
+| `API_KEY_SECRET`                        | _(အလိုအလျောက်ထုတ်ပေးသည်)_ | ထုတ်လုပ်လိုက်တဲ့ API သော့များအတွက်HMAC လျှို့ဝှက်ချက် — ပထမဆုံး run တွင် အလိုအလျောက်ထုတ်ပေးပြီး `server.env` သို့ ဆက်လက်တည်ရှိနေသည်                                        |
+| `REQUIRE_API_KEY`                       | `false`                   | `/v1/*` တွင် Bearer API ကီးကို တွန်းအားပေးပါ။                                                                                                                              |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | စစ်မှန်သော ဒက်ရှ်ဘုတ်အသုံးပြုသူများကို ဝယ်လိုအားတွင် သိမ်းဆည်းထားသော API သော့တန်ဖိုးများကို အပြည့်အစုံဖော်ပြခွင့်ပြုပါ။                                                    |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | ကက်ရှ်လုပ်ထားသော ပံ့ပိုးပေးသူ ကန့်သတ်ဒေတာအတွက် ဆာဗာ-ဘေးမှ ပြန်လည်ဆန်းသစ်သည့် အပိုင်း၊ UI refresh ခလုတ်များသည် လူကိုယ်တိုင် စင့်ခ်လုပ်ခြင်းကို အစပျိုးဆဲဖြစ်သည်။            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | writes/import/restore မတိုင်မီ အလိုအလျောက် SQLite လျှပ်တစ်ပြက်ရိုက်ချက်များကို ပိတ်ပါ။ လူကိုယ်တိုင် မိတ္တူကူးခြင်းများသည် အလုပ်မဖြစ်သေးပါ။                                 |
+| `APP_LOG_TO_FILE`                       | `true`                    | အပလီကေးရှင်းကိုဖွင့်ပြီး စာရင်းစစ်မှတ်တမ်းအထွက်ကို ဒစ်ခ်သို့ဖွင့်ပါ။                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | `Secure` auth cookie ကို အတင်းအကျပ် ( HTTPS ပြောင်းပြန် proxy နောက်တွင်)                                                                                                   |
+| `CLOUDFLARED_BIN`                       | သတ်မှတ်မထားပါ။            | စီမံခန့်ခွဲထားသောဒေါင်းလုဒ်အစား ရှိပြီးသား `cloudflared` ဒွိဒွိတစ်ခုကို သုံးပါ။                                                                                            |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | စီမံခန့်ခွဲထားသော အမြန်လိုဏ်ခေါင်းများ (`http2`၊ `quic`၊ သို့မဟုတ် `auto`)                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap ကန့်သတ်ချက် MB                                                                                                                                                |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | အမြင့်ဆုံးအချက်ပြ ကက်ရှ် ထည့်သွင်းမှုများ                                                                                                                                  |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | အများဆုံး semantic cache ထည့်သွင်းမှုများ                                                                                                                                  |
 
-ပတ်ဝန်းကျင် variable အပြည့်အစုံကို ကိုးကားရန် [README](../README.md) ကို ကြည့်ပါ။
+ပတ်ဝန်းကျင် ပြောင်းလဲနိုင်သော အကိုးအကား အပြည့်အစုံအတွက် [README](../README.md) ကို ကြည့်ပါ။
 
 ---
 
-## 📊 ရနိုင်သော မော်ဒယ်များ
+## 📊 ရရှိနိုင်သော မော်ဒယ်များ
 
 <details>
-<summary><b>ရနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
+<summary><b>ရရှိနိုင်သော မော်ဒယ်အားလုံးကို ကြည့်ရန်</b></summary>
 
-> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်း ဖြစ်ပါသည်။ Cloud catalog များ (Gemini, OpenRouter စသည်) ကို dynamic ပုံစံဖြင့် sync လုပ်ထားပါသည် — live catalog အပြည့်အစုံကို ကြည့်ရန် **ဒက်ရှ်ဘုတ် → Providers → [provider] → ရနိုင်သော မော်ဒယ်များ** ကို ဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပါ။
+> အောက်ပါစာရင်းကို v3.8.0 အတွက် `open-sse/config/providerRegistry.ts` မှ ရွေးချယ်စုစည်းထားခြင်းဖြစ်သည်။ Cloud catalog များ (Gemini၊ OpenRouter စသည်) ကို အလိုအလျောက် synchronize လုပ်ထားသည် — လက်ရှိ live catalog အပြည့်အစုံအတွက် **Dashboard → Providers → [provider] → Available Models** ကိုဖွင့်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 >
-> ပံ့ပိုးပေးသူတစ်ခုခု၏ built-in စာရင်းမှာ ပြောင်းလဲသွားနေပါက၊ live upstream catalog ကို ဆွဲယူရန် ထိုစာမျက်နှာရှိ **/models မှ ထည့်သွင်းရန်** ကို အသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကို ဖွင့်ပါ)။ ဤအချက်ကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုပြီးဖြစ်ပြီး၊ Pollinations ၏ အမည်မသိ ဝင်ရောက်မှုမှာ တူညီသော စမ်းသပ်မှုအတွင်းပင် upstream ကန့်သတ်ချက် ရှိနေဆဲဖြစ်ပါသည်။
+> Provider တစ်ခု၏ built-in list သည် နောက်ကျကျန်နေပါက ထိုစာမျက်နှာရှိ **Import from /models** ကိုအသုံးပြုပါ (သို့မဟုတ် **Auto-Sync** ကိုဖွင့်ပါ)၊ ထို့နောက် live upstream catalog ကို ရယူပါ။ ၎င်းကို v3.8.50 တွင် LLM7.io (`gemini-3.1-flash-lite`) နှင့် UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) အတွက် အတည်ပြုထားသည်။ တူညီသော စမ်းသပ်မှုအတွင်း Pollinations ၏ anonymous access သည် upstream ကန့်သတ်ချက်အောက်တွင် ဆက်လက်ရှိနေခဲ့သည်။
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort အဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ အားထုတ်မှုအဆင့်များ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — အခမဲ့ OAuth: **ဒက်ရှ်ဘုတ် → Providers → Kiro → ရနိုင်သော မော်ဒယ်များ** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရနိုင်မှုမှာ အကောင့်နှင့် plan ပေါ် မူတည်ပါသည်။
+**Kiro (`kr/`)** — အခမဲ့ OAuth: **Dashboard → Providers → Kiro → Available Models** အောက်တွင် ပြသထားသော live catalog ကို အသုံးပြုပါ။ ရရှိနိုင်မှုသည် account နှင့် plan ပေါ်မူတည်သည်။
 
 **Qoder (`if/`)** — အခမဲ့ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -631,17 +638,17 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — လစဉ် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — တစ်လလျှင် $9 flat သို့မဟုတ် အသုံးပြုမှုအလိုက်: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — အလွန်မြန်ဆန်: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — အလွန်မြန်ဆန်သော: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — မူရင်း Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU တွင် host လုပ်ထား: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU တွင် host ပြုထားသော: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — ရှာဖွေမှု ပံ့ပိုးထား: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Search ဖြင့် အထောက်အကူပြုထားသော: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (အခမဲ့), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -649,90 +656,95 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG အဓိက: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG ကို အဓိကထားသော: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — လုပ်ငန်းသုံး: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live sync လုပ်ထားပါသည် — static စာရင်း မရှိပါ။ **ဒက်ရှ်ဘုတ် → Providers** တွင် key တစ်ခု ချိတ်ဆက်ပါ၊ ပြီးနောက် လက်ရှိ catalog ကို ထည့်သွင်းရန် **ရနိုင်သော မော်ဒယ်များ** ကို အသုံးပြုပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
+**Gemini (Google Cloud `gemini/`)**: Google မှ API key တစ်ခုချင်းစီအလိုက် live အနေဖြင့် synchronize လုပ်ထားသည် — static list မရှိပါ။ **Dashboard → Providers** တွင် key တစ်ခုချိတ်ဆက်ပြီး **Available Models** ကိုအသုံးပြု၍ လက်ရှိ catalog ကို import လုပ်ပါ (ဥပမာ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)။
 
-**အခြား သဟဇာတဖြစ်သော ပံ့ပိုးပေးသူများ** (ရွေးချယ်ထားသော): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် မော်ဒယ်စာရင်းကို ထိန်းသိမ်းထားပြီး၊ ပံ့ပိုးပေးသူက `/models` endpoint ကို ပုံပေါ်စေပါက auto-sync လုပ်နိုင်ပါသည်။
+**အခြား ကိုက်ညီသော provider များ** (ရွေးချယ်ထားသည်): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` မှတစ်ဆင့်), `azure-ai`, `openrouter` (passthrough catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`။ တစ်ခုချင်းစီသည် `providerRegistry.ts` တွင် ကိုယ်ပိုင် model list ကို ထိန်းသိမ်းထားပြီး provider က `/models` endpoint ကို ဖော်ပြပေးပါက အလိုအလျောက် synchronize လုပ်နိုင်သည်။
 
-**မော်ဒယ် ID များဆိုင်ရာ မှတ်ချက်:** OmniRoute သည် provider-native ID များ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ကို အသုံးပြုပါသည်။ အချို့ ID များတွင် အစက်အပြောက်ပါ ဗားရှင်းများ ပါဝင်သည်မှာ upstream API က ထိုပုံစံအတိုင်း တောင်းဆိုသောကြောင့် ဖြစ်ပါသည်။ မော်ဒယ်တစ်ခုခုသည် အထက်ပါစာရင်းတွင် မပါဝင်ပါက `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကို ခေါ်ဆိုပြီး ရနိုင်မှုကို အတည်ပြုပါ။
+**Model ID များအကြောင်း မှတ်ချက်:** OmniRoute သည် provider-native ID များကို အသုံးပြုသည် (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)။ အချို့ ID များတွင် dotted version များ ပါဝင်သည်၊ အကြောင်းမှာ upstream API က ထိုပုံစံအတိုင်း မျှော်လင့်ထားသောကြောင့် ဖြစ်သည်။ မော်ဒယ်တစ်ခုကို အထက်ပါစာရင်းတွင် မတွေ့ပါက ရရှိနိုင်မှုကို အတည်ပြုရန် `omniroute models --search <term>` ကို run လုပ်ပါ သို့မဟုတ် `GET /api/models/catalog` ကိုခေါ်ပါ။
 
 </details>
 
 ---
 
-## 🧩 အဆင့်မြင့် လုပ်ဆောင်ချက်များ
+## 🧩 အဆင့်မြင့်အင်္ဂါရပ်များ
 
-### စိတ်ကြိုက် မော်ဒယ်များ
+### စိတ်ကြိုက်မော်ဒယ်များ
 
-အက်ပ်အပ်ဒိတ်ကို စောင့်စရာမလိုဘဲ မည်သည့် provider တွင်မဆို မည်သည့် model ID ကိုမဆို ထည့်သွင်းနိုင်သည်-
+အက်ပ်အပ်ဒိတ်ကို မစောင့်ဘဲ မည်သည့်ဝန်ဆောင်မှုပေးသူထံမဆို မော်ဒယ် ID ကို ထည့်ပါ-
 
 ```bash
-# API မှတစ်ဆင့်
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# စာရင်းပြရန်- curl http://localhost:20128/api/provider-models?provider=openai
-# ဖယ်ရှားရန်- curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-သို့မဟုတ် Dashboard ရှိ **Providers → [Provider] → Custom Models** ကို အသုံးပြုပါ။
+သို့မဟုတ် Dashboard ကိုသုံးပါ-** ပံ့ပိုးပေးသူများ → [Provider] → စိတ်ကြိုက်မော်ဒယ်များ** .
 
-မှတ်ချက်များ-
+မှတ်စုများ-
 
-- OpenRouter နှင့် OpenAI/Anthropic-compatible provider များကို **Available Models** မှသာ စီမံခန့်ခွဲသည်။ ကိုယ်တိုင်ထည့်သွင်းခြင်း၊ import လုပ်ခြင်းနှင့် အလိုအလျောက် sync လုပ်ခြင်းအားလုံးသည် တူညီသော available-model စာရင်းထဲသို့ ရောက်ရှိသောကြောင့် အဆိုပါ provider များအတွက် သီးခြား Custom Models ကဏ္ဍ မရှိပါ။
-- **Custom Models** ကဏ္ဍသည် စီမံခန့်ခွဲနိုင်သော available-model import များကို မပေးသည့် provider များအတွက် ရည်ရွယ်သည်။
+- OpenRouter နှင့် OpenAI/Anthropic-compatible ဝန်ဆောင်မှုပေးသူများထံမှ စီမံခန့်ခွဲသည်။** ရနိုင်သောမော်ဒယ်များ** အားလုံးအတွက် တူညီသောရရှိနိုင်သည့် မော်ဒယ်စာရင်းတွင် မြေအားလုံးကို ကိုယ်တိုင်ထည့်သွင်းခြင်း၊ တင်သွင်းခြင်းနှင့် အလိုအလျောက် စင့်ခ်လုပ်ခြင်းတို့ကြောင့် ၎င်းတို့အတွက် သီးခြား Custom Models ကဏ္ဍ မရှိပါ။
+- ဟိ** စိတ်ကြိုက်မော်ဒယ်များ** အပိုင်းသည် စီမံရရှိနိုင်သော မော်ဒယ်တင်သွင်းမှုများကို မဖော်ပြသော ဝန်ဆောင်မှုပေးသူများအတွက် ရည်ရွယ်ပါသည်။
 
-### စိတ်ကြိုက် OpenAI-Compatible Provider များ
+### စိတ်ကြိုက် OpenAI-လိုက်ဖက်သောဝန်ဆောင်မှုပေးသူများ
 
-OpenAI API ကို အသုံးပြုနိုင်သည့် မည်သည့် gateway ကိုမဆို (ကိုယ်တိုင် host လုပ်ထားသော proxy၊ vLLM သို့မဟုတ် ပြင်ပ aggregator)
-သီးခြား provider node အဖြစ် ထည့်သွင်းနိုင်သည်-
+OpenAI API (ကိုယ်တိုင်လက်ခံဆောင်ရွက်ပေးထားသည့် ပရောက်စီ၊ vLLM၊ ပြင်ပအဖွဲ့အစည်းပေါင်းစည်းခြင်း) ကို ၎င်း၏ကိုယ်ပိုင်ဝန်ဆောင်မှုပေးသူ ညွှန်ပြသည့် မည်သည့်ဂိတ်ဝေးကိုမဆို ထည့်သွင်းနိုင်သည်-
 
-1. **Providers → Add OpenAI Compatible**။
-2. **Name**: node အတွက် ပြသမည့် အမည်။
-3. **Prefix**: routing အမည်။ Client များက model များကို `<prefix>/<model>` ပုံစံဖြင့် ခေါ်ယူသဖြင့်
-   prefix `mygw` ရှိသော node သည် `mygw/gpt-4o-mini` ကို ဝန်ဆောင်မှုပေးသည်။ မဖြစ်မနေ လိုအပ်ပြီး စာလုံးအက္ခရာ ကန့်သတ်ချက် မရှိပါ။
-4. **API Type**: gateway က ဝန်ဆောင်မှုပေးသည့် endpoint အုပ်စု (Chat Completions၊ Responses၊
-   Embeddings၊ audio၊ images)။
-5. **Base URL**: `/v1` အထိ ပါဝင်သော API root (ဥပမာ
-   `https://gateway.example.com/v1`) ဖြစ်ပြီး `/chat/completions` လမ်းကြောင်းအပြည့် မဟုတ်ပါ။ စံမဟုတ်သော
-   လမ်းကြောင်းများရှိသည့် gateway များအတွက် ၎င်းတို့ကို **Advanced Settings** အောက်တွင် သတ်မှတ်ပါ (chat path၊ models path)။
-6. **API Key (for Check)** အကွက်သည် ချိတ်ဆက်မှုကိုသာ စမ်းသပ်သည်။ Node ကို ဖန်တီးပြီးနောက်
-   ၎င်းကိုဖွင့်ကာ request များက အသုံးပြုမည့် key ကို သိမ်းဆည်းရန် **Add Connection** ကို အသုံးပြုပါ။
+1. **ပံ့ပိုးပေးသူများ → Add OpenAI Compatible** .
+2. **နာမည်** : node အတွက် ပြကွက် အညွှန်း။
+3. **ရှေ့ဆက်** : လမ်းကြောင်းအမည်။ ဖောက်သည်များသည် မော်ဒယ်များကို `<prefix>/<model>` ဟုခေါ်သည်၊ ထို့ကြောင့် ရှေ့ဆက် `mygw` ပါသော node သည် `mygw/gpt-4o-mini` လုပ်ဆောင်သည်။ လိုအပ်သည်; ဇာတ်ကောင်ကန့်သတ်ချက်မရှိပါ။
+4. **API အမျိုးအစား** : တံခါးပေါက်မှ ဆောင်ရွက်ပေးသော အဆုံးမှတ်မိသားစု (ချတ်ပြီးစီးမှုများ၊ တုံ့ပြန်မှုများ၊ ထည့်သွင်းမှုများ၊ အသံ၊ ရုပ်ပုံများ)။
+5. **အခြေခံ URL** API root၊ အထိနှင့် `/v1` အပါအဝင် (ဥပမာ `https://gateway.example.com/v1`) သည် `/chat/completions` လမ်းကြောင်း အပြည့်အစုံမဟုတ်ပါ။ စံမမီသော လမ်းကြောင်းများပါရှိသော ဂိတ်ဝများသည် ၎င်းတို့ကို အောက်တွင်ထားရှိသည်။** အဆင့်မြင့် ဆက်တင်များ** (စကားပြောလမ်းကြောင်း၊ မော်ဒယ်လမ်းကြောင်း)။
+6. ဟိ**API သော့ (စစ်ဆေးရန်)** အကွက်သည် ချိတ်ဆက်မှုကိုသာ စမ်းသပ်သည်။ node ကိုဖန်တီးပြီးနောက်၎င်းကိုဖွင့်ပြီးအသုံးပြုပါ။** ချိတ်ဆက်မှုထည့်ပါ။** တောင်းဆိုမှုများအသုံးပြုမည့်သော့ကိုသိမ်းဆည်းရန်။
 
-Node သည် `openai-compatible-<apiType>-<uuid>` ပုံစံရှိသည့် အတွင်းပိုင်း id တစ်ခု ရရှိမည်ဖြစ်သည်။ ၎င်းကို မည်သည့်အခါမျှ
-ရိုက်ထည့်ရန် မလိုအပ်ဘဲ prefix သည် အများသုံးအမည် ဖြစ်သည်။
+node သည် ပုံစံ `openai-compatible-<apiType>-<uuid>`၏ အတွင်း id ကို ရရှိသည် . ၎င်းကိုသင်ရိုက်ရန်မလိုအပ်ပါ၊ ရှေ့ဆက်သည် အများသူငှာအမည်ဖြစ်သည်။
 
-#### သီးသန့်ဖယ်ထားသော prefix များ
+#### သီးသန့်ရှေ့ဆက်များ
 
-Prefix တစ်ခုသည် built-in provider ၏ id သို့မဟုတ် alias (ဥပမာ `openai`၊ `cf`) မဖြစ်ရသကဲ့သို့
-ရပ်ဆိုင်းထားသော provider ၏ id လည်း မဖြစ်ရပါ။ Model resolver သည် custom node များမတိုင်မီ
-built-in id များနှင့် alias များကို စစ်ဆေးသောကြောင့် ထို prefix မျိုးကို အသုံးပြုသည့် node သည် traffic ကို မည်သည့်အခါမျှ လက်ခံရရှိမည် မဟုတ်ပါ-
-`<prefix>/model` သည် built-in provider ထံသို့သာ သွားမည် သို့မဟုတ် ထို provider ကို ရပ်ဆိုင်းထားပါက fail closed ဖြစ်မည်။
-ထိုသို့သော prefix ဖြင့် node တစ်ခု ဖန်တီးခြင်း သို့မဟုတ် တည်းဖြတ်ခြင်းကို အောက်ပါ error ဖြင့် ငြင်းပယ်မည်-
+နောက်ဆက်တွဲတစ်ခုသည် တပ်ဆင်ထားသောဝန်ဆောင်မှုပေးသူ၏ id သို့မဟုတ် alias (ဥပမာ `openai`၊ `cf`) နှင့် အငြိမ်းစားဝန်ဆောင်မှုပေးသူ၏ id မဟုတ်ပါ။ မော်ဒယ်ဖြေရှင်းသူသည် စိတ်ကြိုက် node များရှေ့တွင် built-in ids နှင့် aliases ကို စစ်ဆေးသည်၊ ထို့ကြောင့် အဆိုပါ prefix များထဲမှ တစ်ခုကို အသုံးပြုသော node သည် traffic ကို ဘယ်တော့မှ လက်ခံမည်မဟုတ်ပါ- `<prefix>/model` ၎င်းအစား built-in ဝန်ဆောင်မှုပေးသူထံသွားလိမ့်မည်၊ သို့မဟုတ် ထိုပေးဆောင်သူမှ အနားယူသွားပါက ပိတ်သွားမည်မဟုတ်ပါ။ ထိုကဲ့သို့သော ရှေ့ဆက်တွဲပါရှိသော node တစ်ခုကို ဖန်တီးခြင်း သို့မဟုတ် တည်းဖြတ်ခြင်းကို ငြင်းပယ်သည်-
 
 ```text
-prefix: "<prefix>" သည် သီးသန့်ဖယ်ထားသော provider prefix ဖြစ်သည် — အခြား prefix တစ်ခုကို ရွေးချယ်ပါ (သီးသန့်ဖယ်ထားသော id/alias များကို custom node များအတွက် အသုံးမပြုနိုင်ပါ၊ အကြောင်းမှာ <prefix>/model ကဲ့သို့ request များသည် built-in provider တစ်ခုသို့ route လုပ်မည် သို့မဟုတ် ရပ်ဆိုင်းထားပါက fail closed ဖြစ်မည်)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-မတူညီသော prefix တစ်ခု (`mygw`၊ `acme-proxy`) ကို ရွေးချယ်ပါ။ Custom node တစ်ခုထံ ပေးပို့သော request များသည်
-built-in provider သို့မဟုတ် ၎င်း၏ credential များကို အမည်ဖော်ပြသည့် error ဖြင့် မအောင်မြင်ပါက node ၏ prefix သည်
-သီးသန့်ဖယ်ထားခြင်း ရှိမရှိ စစ်ဆေးပါ။ ဤစည်းမျဉ်း မရှိမီက သိမ်းဆည်းထားသော node များကို ဆက်လက်သိမ်းဆည်းထားသော်လည်း ၎င်းတို့၏ prefix သည်
-built-in provider သို့ route လုပ်မည်ဖြစ်သည်။ Node ကို တည်းဖြတ်ပြီး prefix အသစ်တစ်ခု သတ်မှတ်ပါ။
+ထူးခြားသောရှေ့ဆက် (`mygw`, `acme-proxy`) ကို ရွေးပါ။ Built-in ပံ့ပိုးပေးသူ သို့မဟုတ် ၎င်း၏အထောက်အထားများကို အမည်ပေးသည့် စိတ်ကြိုက် node တစ်ခုသို့ တောင်းဆိုမှုများ မအောင်မြင်ပါက၊ node ၏ရှေ့ဆက်ကို သိမ်းဆည်းထားခြင်းရှိမရှိ စစ်ဆေးပါ- ဤစည်းမျဉ်းမတည်ရှိမီက သိမ်းဆည်းထားသော ဆုံမှတ်များကို သိမ်းဆည်းထားဆဲဖြစ်သော်လည်း ၎င်းတို့၏ ရှေ့ဆက်လမ်းကြောင်းများကို တပ်ဆင်ပေးသူထံသို့ ပေးပို့ပါ။ node ကို တည်းဖြတ်ပြီး ရှေ့ဆက်အသစ်တစ်ခု ပေးလိုက်ပါ။
 
-### OmniRoute Peer များကို ဆက်တိုက်ချိတ်ဆက်ခြင်း
+#### ချိတ်ဆက်မှုအလိုက် ဂိတ်ဝေးရွေးချယ်မှုများ
 
-အခြား OmniRoute gateway တစ်ခုကို **Custom OpenAI-compatible** provider အဖြစ် ထည့်သွင်းနိုင်သည်။
-Peer ၏ `/v1` base URL နှင့် ထို peer မှ ထုတ်ပေးထားသော သီးသန့်၊ အနည်းဆုံးအခွင့်အရေးရှိသည့် API key ကို အသုံးပြုပါ။
+ဤသော့များသည် ချိတ်ဆက်မှု၏ `providerSpecificData` တွင်သွားသည် (ဥပမာ `PUT /api/providers/{id}` မှတဆင့်):
 
-အပြန်အလှန် သို့မဟုတ် multi-hop chain များအတွက် gateway တိုင်းတွင် opt-in loop guard ကို ဖွင့်ပါ-
+- `toolNameMaxLength` (ကိန်းပြည့်၊ 1–1024) — OpenAI ချတ်ဖော်မတ် တွဲဖက်ချိတ်ဆက်မှုများအတွက် တံခါးပေါက်ရှည်လျားသောကိရိယာအမည်များကို ငြင်းပယ်သော။ ရှည်လျားသောအမည်များကို နာမည်တိုများအဖြစ် ပေးပို့ပြီး တုံ့ပြန်မှုတွင် ပြန်လည်ရယူသည်။
+- `quotaEndpoint` — gateway ၏ quota/credits အဆုံးမှတ်၊ ဒက်ရှ်ဘုတ်ခွဲတမ်းအကန့်နှင့် quota-aware လမ်းကြောင်းအတွက် ဖတ်ပါ။ OpenAI- နှင့် Anthropic-သဟဇာတချိတ်ဆက်မှုနှစ်ခုလုံးတွင်အလုပ်လုပ်သည်; ပုံသဏ္ဍာန်အပြည့်အစုံကို `open-sse/services/usage/openaiCompatible.ts` တွင် မှတ်တမ်းတင်ထားသည်။
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### ချိတ်ဆွဲခြင်း OmniRoute ရွယ်တူများ
+
+နောက်ထပ် OmniRoute gateway ကို a အဖြစ်ထည့်နိုင်သည်။** စိတ်ကြိုက် OpenAI-သဟဇာတဖြစ်သည်။** ပံ့ပိုးပေးသူ။ မျိုးတူချင်း၏ `/v1` အခြေခံ URL နှင့် ထိုရွယ်တူမှထုတ်ပေးသော အထူးအခွင့်အရေးအနည်းဆုံး API ကီးကို အသုံးပြုပါ။
+
+အပြန်အလှန် (သို့) မျိုးစုံ-ဟော့ပ်ကွင်းဆက်များအတွက်၊ တံခါးဝတိုင်းတွင် opt-in loop guard ကိုဖွင့်ပါ-
 
 ```bash
 # gateway-a
@@ -748,17 +760,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-အတိအလင်း allowlist ထည့်ထားသော peer URL ထံ ပေးပို့သည့် request များသာ
-`X-OmniRoute-Peer-Trace` header ကို ရရှိသည်။ Gateway သည် ထပ်နေသော instance ID သို့မဟုတ် ကုန်ဆုံးသွားသော hop
-အကန့်အသတ်ကို HTTP `508 Loop Detected` ဖြင့် ငြင်းပယ်သည်။ ပုံမှန် upstream provider များသည် peer metadata ကို မရရှိပါ။
+အတိအလင်း ဖော်ပြထားသော မျိုးတူ URL သို့ ပေးပို့သော တောင်းဆိုချက်များသာလျှင် `X-OmniRoute-Peer-Trace` ခေါင်းစီးကို လက်ခံရရှိသည် ။ တံခါးပေါက်တစ်ခုသည် HTTP `508 Loop Detected` ဖြင့် ထပ်ခါတလဲလဲ ဥပမာ ID သို့မဟုတ် ကုန်ဆုံးသွားသော ဟော့ပ်ဘတ်ဂျက်ကို ငြင်းပယ်သည်။ သာမန်အထက်ပိုင်းဝန်ဆောင်မှုပေးသူများသည် မျိုးတူမက်တာဒေတာကို မရရှိပါ။
 
-Peer chaining သည် database replication သို့မဟုတ် host failover မဟုတ်ပါ။ Gateway တစ်ခုစီသည် သီးခြား
-SQLite state၊ cache များ၊ rate counter များနှင့် session များကို ထိန်းသိမ်းထားသည်။ Active/passive သို့မဟုတ် active/active availability အတွက် health-check ပါသော reverse proxy သို့မဟုတ် client
-failover ကို အသုံးပြုပြီး လည်ပတ်နေသော OmniRoute instance အများအပြားတွင် SQLite database တစ်ခုတည်းကို မည်သည့်အခါမျှ mount မလုပ်ပါနှင့်။
+Peer chaining သည် database replication သို့မဟုတ် host failover မဟုတ်ပါ။ တံခါးပေါက်တစ်ခုစီသည် သီးခြား SQLite ပြည်နယ်၊ ကက်ရှ်များ၊ အဆင့်သတ်မှတ်ကောင်တာများနှင့် ဆက်ရှင်များကို သိမ်းဆည်းထားသည်။ active/passive သို့မဟုတ် active/active ရရှိနိုင်မှုအတွက် ကျန်းမာရေး-စစ်ဆေးထားသော ပြောင်းပြန်ပရောက်စီ သို့မဟုတ် ကလိုင်းယင့်ကျရှုံးမှုကို အသုံးပြုပါ၊ SQLite ဒေတာဘေ့စ်တစ်ခုအား လုပ်ဆောင်နေသည့် OmniRoute ဖြစ်ရပ်များစွာတွင် ဘယ်သောအခါမှ မထည့်ပါ။
 
-### Provider သီးသန့် Route များ
+### သီးသန့်ပံ့ပိုးပေးသည့် လမ်းကြောင်းများ
 
-Model validation ဖြင့် သတ်မှတ်ထားသော provider တစ်ခုထံ request များကို တိုက်ရိုက် route လုပ်ပါ-
+မော်ဒယ်အတည်ပြုချက်ဖြင့် တိကျသောပံ့ပိုးပေးသူထံ တိုက်ရိုက်လမ်းကြောင်းတောင်းဆိုမှုများ-
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -766,137 +774,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Provider prefix မပါရှိပါက အလိုအလျောက် ထည့်သွင်းပေးသည်။ ကိုက်ညီမှုမရှိသော model များအတွက် `400` ကို ပြန်ပေးသည်။
+ပျောက်နေပါက ပံ့ပိုးပေးသူ၏ရှေ့ဆက်သည် အလိုအလျောက်ထည့်ပါသည်။ မကိုက်ညီသော မော်ဒယ်များသည် `400` ပြန်ပေးသည်။
 
-### Network Proxy ဖွဲ့စည်းသတ်မှတ်ခြင်း
+### Network Proxy ဖွဲ့စည်းမှု
 
 ```bash
-# Global proxy ကို သတ်မှတ်ရန်
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Provider အလိုက် proxy
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Proxy ကို စမ်းသပ်ရန်
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**ဦးစားပေးအစဉ်:** Key-specific → Combo-specific → Provider-specific → Global → Environment။
+**ရှေ့တန်း-** သော့သီးသန့် → Combo-specific → ဝန်ဆောင်မှုပေးသူ-တိကျသော → Global → ပတ်ဝန်းကျင်။
 
-### Model Catalog API
+### မော်ဒယ် ကတ်တလောက် API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Provider အလိုက် အမျိုးအစားများ (`chat`၊ `embedding`၊ `image`) ဖြင့် အုပ်စုဖွဲ့ထားသော model များကို ပြန်ပေးသည်။
+အမျိုးအစားများ (`chat`၊ `embedding`၊ `image`) ဖြင့် ပံ့ပိုးပေးသူမှ အုပ်စုဖွဲ့ထားသော မော်ဒယ်များကို ပြန်ပေးသည်။
 
 ### Cloud Sync
 
-- စက်များအကြား provider များ၊ combo များနှင့် setting များကို sync လုပ်ခြင်း
-- Timeout + fail-fast ပါဝင်သော အလိုအလျောက် နောက်ခံ sync
-- Production တွင် server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ကို ဦးစားပေးအသုံးပြုပါ
+- ပံ့ပိုးပေးသူများ၊ ပေါင်းစပ်မှုများနှင့် ဆက်တင်များကို စက်များတစ်လျှောက် စင့်ခ်လုပ်ပါ။
+- - အချိန်ကုန်သွားသဖြင့် အလိုအလျောက် နောက်ခံစင့်ခ်လုပ်ခြင်း
+- ထုတ်လုပ်မှုတွင် ဆာဗာဘက် `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ကို ဦးစားပေးပါ။
 
-### Cloudflare Quick Tunnel
+### Cloudflare အမြန်လိုဏ်ခေါင်း
 
-- Docker နှင့် အခြား ကိုယ်တိုင်ဟို့စ်လုပ်ထားသော deployment များအတွက် **Dashboard → Endpoints** တွင် ရရှိနိုင်သည်
-- သင့်လက်ရှိ OpenAI-compatible `/v1` endpoint သို့ လွှဲပို့ပေးသည့် ယာယီ `https://*.trycloudflare.com` URL တစ်ခုကို ဖန်တီးပေးသည်
-- ပထမဆုံး ဖွင့်သည့်အခါ လိုအပ်မှသာ `cloudflared` ကို ထည့်သွင်းပေးပြီး နောက်ပိုင်း restart များတွင် အလားတူ စီမံထားသော binary ကို ပြန်လည်အသုံးပြုသည်
-- OmniRoute သို့မဟုတ် container ကို restart လုပ်ပြီးနောက် Quick Tunnels များကို အလိုအလျောက် ပြန်လည်ဖွင့်ပေးမည်မဟုတ်ပါ။ လိုအပ်သည့်အခါ dashboard မှ ပြန်လည်ဖွင့်ပါ
-- Tunnel URL များသည် ယာယီသာဖြစ်ပြီး tunnel ကို ရပ်တန့်/စတင်သည့်အခါတိုင်း ပြောင်းလဲသည်
-- အရင်းအမြစ်ကန့်သတ်ထားသော container များတွင် ဆူညံသော QUIC UDP buffer သတိပေးချက်များကို ရှောင်ရှားရန် စီမံထားသော Quick Tunnels များသည် ပုံသေအားဖြင့် HTTP/2 transport ကို အသုံးပြုသည်
-- စီမံထားသော transport ရွေးချယ်မှုကို ပြောင်းလဲအသုံးပြုလိုပါက `CLOUDFLARED_PROTOCOL=quic` သို့မဟုတ် `auto` ဟု သတ်မှတ်ပါ
-- စီမံထားသော download အစား ကြိုတင်ထည့်သွင်းထားသည့် `cloudflared` binary ကို အသုံးပြုလိုပါက `CLOUDFLARED_BIN` ကို သတ်မှတ်ပါ
-- Cloudflare Quick Tunnel၊ Tailscale Funnel နှင့် ngrok Tunnel panel များကို **Settings → Appearance** တွင် ပြသနိုင်သလို ဖျောက်ထားနိုင်သည်။ Panel တစ်ခုကို ဖျောက်ခြင်းသည် လည်ပတ်နေသော tunnel ကို ရပ်တန့်စေမည်မဟုတ်ပါ။
+- တွင်ရရှိနိုင်ပါသည်။** ဒက်ရှ်ဘုတ် → အဆုံးမှတ်များ** Docker နှင့် အခြား self-hosted ဖြန့်ကျက်မှုများအတွက်
+- သင်၏လက်ရှိ OpenAI-သဟဇာတ `/v1` အဆုံးမှတ်သို့ ပေးပို့သော ယာယီ `https://*.trycloudflare.com` URL ဖန်တီးပါ။
+- ပထမဦးစွာ လိုအပ်သည့်အခါမှသာ `cloudflared` ထည့်သွင်းမှုကို ဖွင့်ပါ။ နောက်ပိုင်းတွင် ပြန်လည်စတင်သည်တွင် တူညီသောစီမံထားသော ဒွိစုံကို ပြန်လည်အသုံးပြုပါ။
+- OmniRoute သို့မဟုတ် ကွန်တိန်နာပြန်လည်စတင်ပြီးနောက် အမြန်လိုဏ်ခေါင်းများကို အလိုအလျောက်ပြန်လည်ရယူမည်မဟုတ်ပါ။ လိုအပ်သည့်အခါ ၎င်းတို့ကို ဒက်ရှ်ဘုတ်မှ ပြန်လည်ဖွင့်ပါ။
+- ဥမင် URLs ပေါ်ပင်ဖြစ်ပြီး သင်ဥမင်လိုဏ်ခေါင်းကို stop/start တိုင်း ပြောင်းလဲပါသည်။
+- ကန့်သတ်ထားသော ကွန်တိန်နာများတွင် ဆူညံသော QUIC UDP ကြားခံသတိပေးချက်များကို ရှောင်ရှားရန် စီမံကွပ်ကဲသည့် အမြန်ဥမင်လိုဏ်ခေါင်းများသည် HTTP/2 သယ်ယူပို့ဆောင်ရေးတွင် မူလပုံစံဖြစ်သည်
+- စီမံခန့်ခွဲထားသော သယ်ယူပို့ဆောင်ရေးရွေးချယ်မှုကို အစားထိုးလိုပါက `CLOUDFLARED_PROTOCOL=quic` သို့မဟုတ် `auto` သတ်မှတ်ပါ။
+- စီမံခန့်ခွဲထားသောဒေါင်းလုဒ်အစား ကြိုတင်ထည့်သွင်းထားသော `cloudflared` ဒွိစုံကို အသုံးပြုလိုပါက `CLOUDFLARED_BIN` သတ်မှတ်ပါ။
+- Cloudflare Quick Tunnel၊ Tailscale Funnel နှင့် ngrok Tunnel အကန့်များကို ပြနိုင်သည် သို့မဟုတ် ဝှက်ထားနိုင်သည်။** ဆက်တင်များ → ပုံပန်းသဏ္ဍာန်** . အကန့်ကို ဝှက်ထားခြင်းသည် လည်ပတ်နေသည့် ဥမင်လိုဏ်ခေါင်းကို မရပ်တန့်စေပါ။
 
-### LLM Gateway ဉာဏ်ရည်မြှင့်လုပ်ဆောင်ချက်များ (အဆင့် 9)
+### LLM Gateway Intelligence (Phase 9)
 
-- **Semantic Cache** — Streaming မဟုတ်သော temperature=0 response များကို အလိုအလျောက် cache လုပ်သည် (`X-OmniRoute-No-Cache: true` ဖြင့် ကျော်နိုင်သည်)
-- **Request Idempotency** — `Idempotency-Key` သို့မဟုတ် `X-Request-Id` header မှတစ်ဆင့် 5s အတွင်းရှိ request အထပ်များကို ဖယ်ရှားသည်
-- **Progress Tracking** — `X-OmniRoute-Progress: true` header မှတစ်ဆင့် ရွေးချယ်ဖွင့်နိုင်သော SSE `event: progress` event များ
-
----
-
-### Translator စမ်းသပ်ကွင်း
-
-**Dashboard → Translator** မှ ဝင်ရောက်ပါ။ OmniRoute က provider များအကြား API request များကို မည်သို့ ဘာသာပြန်ပေးသည်ကို အမှားရှာပြီး ပုံဖော်ကြည့်ရှုပါ။
-
-| မုဒ်             | ရည်ရွယ်ချက်                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Playground**   | မူရင်း/ပစ်မှတ် format များကို ရွေးချယ်ပြီး request တစ်ခုကို ကူးထည့်ကာ ဘာသာပြန်ထားသော output ကို ချက်ချင်းကြည့်ရှုပါ |
-| **Chat Tester**  | Proxy မှတစ်ဆင့် တိုက်ရိုက် chat message များ ပေးပို့ပြီး request/response စက်ဝန်းအပြည့်အစုံကို စစ်ဆေးပါ             |
-| **Test Bench**   | ဘာသာပြန်မှုမှန်ကန်ကြောင်း အတည်ပြုရန် format ပေါင်းစပ်မှုများစွာအတွက် batch test များကို လုပ်ဆောင်ပါ                 |
-| **Live Monitor** | Proxy မှတစ်ဆင့် request များ စီးဆင်းနေစဉ် အချိန်နှင့်တစ်ပြေးညီ ဘာသာပြန်မှုများကို ကြည့်ရှုပါ                        |
-
-**အသုံးပြုနိုင်သော အခြေအနေများ:**
-
-- သတ်မှတ်ထားသော client/provider ပေါင်းစပ်မှုတစ်ခု အဘယ်ကြောင့် မအောင်မြင်သည်ကို အမှားရှာရန်
-- Thinking tag များ၊ tool call များနှင့် system prompt များ မှန်ကန်စွာ ဘာသာပြန်ထားကြောင်း အတည်ပြုရန်
-- OpenAI၊ Claude၊ Gemini နှင့် Responses API format များအကြား format ကွာခြားချက်များကို နှိုင်းယှဉ်ရန်
+- **Semantic Cache** — တိုက်ရိုက်လွှင့်ခြင်းမဟုတ်သော၊ အပူချိန်= 0 တုံ့ပြန်မှုများကို အလိုအလျောက် ကက်ရှ်လုပ်ခြင်း ( `X-OmniRoute-No-Cache: true` ဖြင့် ရှောင်ကွင်း)
+- **Ideempotency တောင်းဆိုခြင်း။** - `Idempotency-Key` သို့မဟုတ် `X-Request-Id` ခေါင်းစီးမှတစ်ဆင့် 5s အတွင်း တောင်းဆိုမှုများ ထပ်ပွားသည်။
+- **တိုးတက်မှု ခြေရာခံခြင်း။** — `X-OmniRoute-Progress: true` ခေါင်းစီးမှတစ်ဆင့် SSE `event: progress` ဖြစ်ရပ်များကို ရွေးချယ်ပါ။
 
 ---
 
-### Routing နည်းဗျူဟာများ
+### ဘာသာပြန်သူ ကစားကွင်း
 
-**Dashboard → Settings → Routing** မှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်ပါ။ Dashboard တွင် အသုံးအများဆုံး နည်းဗျူဟာ ခြောက်ခုကို ဖော်ပြထားပြီး combo များနှင့် auto-router သည် အတွင်းပိုင်း၌ ပိုမိုကျယ်ပြန့်သော နည်းဗျူဟာများကို ပံ့ပိုးသည်။
+မှတဆင့်ဝင်ရောက်ပါ။** ဒက်ရှ်ဘုတ် → ဘာသာပြန်သူ** . အမှားရှာပြင်ပြီး ဝန်ဆောင်မှုပေးသူများကြား OmniRoute API တောင်းဆိုချက်များကို မည်သို့ဘာသာပြန်ဆိုသည်ကို မြင်ယောင်ကြည့်ပါ။
 
-**Dashboard တွင် မြင်ရသော နည်းဗျူဟာများ (account အဆင့် routing):**
+| မုဒ်                      | ရည်ရွယ်ချက်                                                                                                          |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **ကစားကွင်း**             | source/target ဖော်မတ်များကို ရွေးချယ်ပါ၊ တောင်းဆိုချက်တစ်ခုကို ကူးထည့်ကာ ဘာသာပြန်ထားသော ရလဒ်ကို ချက်ချင်းကြည့်ရှုပါ။ |
+| **Chat Tester**           | ပရောက်စီမှတဆင့် တိုက်ရိုက်ချတ်မက်ဆေ့ချ်များ ပေးပို့ပြီး request/response သံသရာတစ်ခုလုံးကို စစ်ဆေးပါ။                 |
+| **Test Bench**            | ဘာသာပြန်ခြင်းမှန်ကန်မှုကို အတည်ပြုရန် ဖော်မတ်အများအပြားပေါင်းစပ်မှုများတွင် အတွဲလိုက်စမ်းသပ်မှုများကို လုပ်ဆောင်ပါ။  |
+| **တိုက်ရိုက်စောင့်ကြည့်** | တောင်းဆိုချက်များ ပရောက်စီမှတဆင့် စီးဆင်းနေသဖြင့် အချိန်နှင့်တပြေးညီ ဘာသာပြန်ချက်များကို ကြည့်ပါ။                    |
 
-| နည်းဗျူဟာ                      | ဖော်ပြချက်                                                                                                                                    |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Account များကို ဦးစားပေးအစီအစဉ်အတိုင်း အသုံးပြုသည် — မရနိုင်တော့သည့်အချိန်အထိ ပင်မ account က request အားလုံးကို ကိုင်တွယ်သည်                  |
-| **Round Robin**                | ပြင်ဆင်သတ်မှတ်နိုင်သော sticky ကန့်သတ်ချက်ဖြင့် account အားလုံးကို အလှည့်ကျအသုံးပြုသည် (ပုံသေ- account တစ်ခုလျှင် call 3 ကြိမ်)                |
-| **P2C (Power of Two Choices)** | ကျပန်း account 2 ခုကို ရွေးချယ်ပြီး ပိုမိုကျန်းမာသောတစ်ခုသို့ route လုပ်သည် — ကျန်းမာရေးအခြေအနေကို ထည့်သွင်းစဉ်းစားကာ load ကို ချိန်ညှိပေးသည် |
-| **Random**                     | Fisher-Yates shuffle ကို အသုံးပြု၍ request တစ်ခုစီအတွက် account တစ်ခုကို ကျပန်းရွေးချယ်သည်                                                    |
-| **Least Used**                 | သက်တမ်းအကြာဆုံး `lastUsedAt` timestamp ရှိသော account သို့ route လုပ်ပြီး traffic ကို ညီမျှစွာ ဖြန့်ဝေသည်                                     |
-| **Cost Optimized**             | ဦးစားပေးတန်ဖိုး အနိမ့်ဆုံးရှိသော account သို့ route လုပ်ကာ ကုန်ကျစရိတ်အနည်းဆုံး provider များအတွက် အကောင်းဆုံးဖြစ်အောင် ဆောင်ရွက်သည်          |
+**အသုံးပြုပုံ-**
 
-**အဆင့်မြင့် combo နှင့် auto နည်းဗျူဟာများ** (combo တစ်ခုစီအလိုက် သို့မဟုတ် `auto/*` prefix များမှတစ်ဆင့် ပြင်ဆင်သတ်မှတ်နိုင်သည် — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ကို ကြည့်ပါ):
+- တိကျသော client/provider ပေါင်းစပ်မှု ဘာကြောင့် မအောင်မြင်ရတာလဲ
+- စဉ်းစားတွေးခေါ်မှု တဂ်များ၊ ကိရိယာခေါ်ဆိုမှုများနှင့် စနစ်သတိပေးချက်များသည် မှန်ကန်စွာ ဘာသာပြန်ဆိုကြောင်း အတည်ပြုပါ။
+- OpenAI၊ Claude၊ Gemini နှင့် Responses API ဖော်မတ်များအကြား ဖော်မတ်ကွာခြားချက်များကို နှိုင်းယှဉ်ပါ
 
-- `priority` — တင်းကျပ်သောအစီအစဉ်ကို အသုံးပြုပြီး round-robin လုံးဝမလုပ်ပါ
-- `weighted` — model တစ်ခုစီ၏ weight အလိုက် traffic ကို အချိုးကျခွဲဝေသည်
-- `fill-first` — ကန့်သတ်ချက်ပြည့်သည်အထိ ပထမ model ကို အပြည့်အဝ အသုံးပြုသည်
+---
+
+### လမ်းကြောင်းဗျူဟာများ
+
+မှတဆင့် configure** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → Routing** . ဒက်ရှ်ဘုတ်သည် အသုံးအများဆုံး ဗျူဟာခြောက်ခုကို ဖော်ထုတ်ပေးသည်။ combos နှင့် auto-router တို့သည် ကျယ်ပြန့်သောအစုံကို အတွင်းပိုင်း၌ ပံ့ပိုးပေးသည်။
+
+**ဒက်ရှ်ဘုတ်-မြင်ရသော နည်းဗျူဟာများ (အကောင့်အဆင့်လမ်းကြောင်းသတ်မှတ်ခြင်း-**
+
+| ဗျူဟာ                                                   | ဖော်ပြချက်                                                                                                                      |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **အရင်ဆုံးဖြည့်ပါ။**                                    | ဦးစားပေး အစီအစဉ်အတိုင်း အကောင့်များကို အသုံးပြုသည် — ပင်မအကောင့်သည် တောင်းဆိုမှုအားလုံးကို မရရှိနိုင်မချင်း ကိုင်တွယ်သည်။       |
+| **ရော်ဘင်ဝိုင်း**                                       | ပြင်ဆင်သတ်မှတ်နိုင်သော စေးကပ်သော ကန့်သတ်ချက်ဖြင့် အကောင့်အားလုံးကို လည်ပတ်နေသည် (ပုံမှန်- အကောင့်တစ်ခုလျှင် ခေါ်ဆိုမှု ၃ ကြိမ်) |
+| **P2C (ရွေးချယ်မှုနှစ်ခု၏ပါဝါ)**                        | ကျပန်းအကောင့်နှင့် လမ်းကြောင်း 2 ခုကို ရွေးပါ — ကျန်းမာရေးအသိနှင့် ချိန်ခွင်လျှာညှိပါ။                                          |
+| **ကြုံသလို**                                            | Fisher-Yates shuffle ကို အသုံးပြု၍ တောင်းဆိုမှုတစ်ခုစီအတွက် အကောင့်တစ်ခုကို ကျပန်းရွေးချယ်သည်။                                  |
+| **အသုံးအနည်းဆုံး**                                      | အသွားအလာကို အညီအမျှ ဖြန့်ဝေပေးသည့် ရှေးအကျဆုံး `lastUsedAt` အချိန်တံဆိပ်ဖြင့် အကောင့်သို့ လမ်းကြောင်းများ                       |
+| **ကုန်ကျစရိတ်ကို ပိုမိုကောင်းမွန်အောင် ပြုလုပ်ထားသည်။** | ကုန်ကျစရိတ်အနည်းဆုံးဝန်ဆောင်မှုပေးသူများအတွက် အနိမ့်ဆုံးဦးစားပေးတန်ဖိုးဖြင့် အကောင့်သို့လမ်းကြောင်းများ                         |
+
+**အဆင့်မြင့်တွဲဖက်များနှင့် အလိုအလျောက်ဗျူဟာများ** (combo တစ်ခုစီ သို့မဟုတ် `auto/*` ရှေ့ဆက်များမှတစ်ဆင့် ပြင်ဆင်နိုင်သည် — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ကြည့်ပါ)
+
+- `priority` - တင်းကျပ်သောအမိန့်၊ ဘယ်တော့မှ လှည့်ပတ်မတိုက်ပါနဲ့။
+- `weighted` — မော်ဒယ်အလိုက် အလေးများအလိုက် အချိုးကျအသွားအလာ
+- `fill-first` — ကန့်သတ်ချက်မပြည့်မချင်း ပထမမော်ဒယ်ကို ရေထုတ်လိုက်ပါ။
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (ရွေးချယ်မှုနှစ်ခု၏ပါဝါ)
 - `least-used` နှင့် `cost-optimized`
-- `auto` — candidate အားလုံးကို score အခြေခံ၍ ရွေးချယ်သည်
-- `lkgp` (Last Known Good Provider) — နောက်ဆုံးအောင်မြင်ခဲ့သော provider ကို ဆက်လက်အသုံးပြုပြီးနောက် မအောင်မြင်ပါက စည်းမျဉ်းများအတိုင်း fallback လုပ်သည်
-- `context-optimized` — လွတ်နေသော context window အကြီးဆုံးရှိသည့် model ကို ရွေးချယ်သည်
-- `context-relay` — နောက်ဆက်တွဲ turn များအတွက် long-context model များကို ဆက်တိုက်ချိတ်ဆက်သည်
+- `auto` — ကိုယ်စားလှယ်လောင်းအားလုံးတွင် ရမှတ်ဖြင့် မောင်းနှင်သည်။
+- `lkgp` (Last Known Good Provider) — နောက်ဆုံးအောင်မြင်သော ဝန်ဆောင်မှုပေးသူကို တွယ်ကပ်ပြီးနောက် စည်းမျဉ်းများအတိုင်း ပြန်သွားပါ။
+- `context-optimized` — အကြီးဆုံး အခမဲ့ ဆက်စပ်ဝင်းဒိုးဖြင့် မော်ဒယ်ကို ရွေးသည်။
+- `context-relay` — နောက်ဆက်တွဲ အလှည့်အပြောင်းများအတွက် ရှည်လျားသော ဆက်စပ်ပုံစံများကို ကွင်းဆက်ထားသည်။
 
-#### ပြင်ပ Sticky Session Header
+#### ပြင်ပ Sticky Session ခေါင်းစီး
 
-ပြင်ပ session affinity အတွက် (ဥပမာ reverse proxy များ၏ နောက်ကွယ်ရှိ Claude Code/Codex agent များ) အောက်ပါတို့ကို ပေးပို့ပါ:
+ပြင်ပဆက်ရှင်ဆက်စပ်မှုအတွက် (ဥပမာ၊ ပြောင်းပြန် proxy နောက်ကွယ်ရှိ Claude Code/Codex အေးဂျင့်များ) ပေးပို့ပါ-
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute သည် `x_session_id` ကိုလည်း လက်ခံပြီး အမှန်တကယ်အသုံးပြုသည့် session key ကို `X-OmniRoute-Session-Id` တွင် ပြန်ပေးသည်။
+OmniRoute `x_session_id` လက်ခံပြီး `X-OmniRoute-Session-Id` တွင် ထိရောက်သော session key ကို ပြန်ပေးသည်။
 
-Nginx ကို အသုံးပြုပြီး underscore ပုံစံ header များ ပေးပို့ပါက အောက်ပါတို့ကို ဖွင့်ပါ:
+အကယ်၍ သင်သည် Nginx ကိုအသုံးပြုပြီး အမှတ်အသားပုံစံ ခေါင်းစီးများကို ပေးပို့ပါက၊ ဖွင့်ပါ-
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Alias များ
+#### Wildcard မော်ဒယ် နာမည်များ
 
-Model အမည်များကို ပြန်လည်သတ်မှတ်ရန် wildcard pattern များကို ဖန်တီးပါ:
+မော်ဒယ်အမည်များကို ပြန်လည်ပုံဖော်ရန် သင်္ကေတပုံစံများကို ဖန်တီးပါ-
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcard များသည် `*` (မည်သည့် character မဆို) နှင့် `?` (character တစ်လုံး) ကို ပံ့ပိုးသည်။
+သင်္ကေတများသည် `*` (မည်သည့်အက္ခရာမဆို) နှင့် `?` (စာလုံးတစ်လုံးတည်း) ကို ပံ့ပိုးပေးသည်။
 
-#### Fallback Chain များ
+#### Fallback Chains
 
-Request အားလုံးတွင် သက်ရောက်မည့် global fallback chain များကို သတ်မှတ်ပါ:
+တောင်းဆိုမှုအားလုံးတွင် သက်ရောက်သည့် ကမ္ဘာလုံးဆိုင်ရာ လှည့်စားကွင်းဆက်များကို သတ်မှတ်သတ်မှတ်ပါ-
 
 ```
 Chain: production-fallback
@@ -907,22 +915,22 @@ Chain: production-fallback
 
 ---
 
-### အသုံးများသော Provider ပေါင်းစပ်မှုများနှင့် Routing Pattern များ
+### အသုံးများသော ဝန်ဆောင်မှုပေးသူ ပေါင်းစပ်မှုများနှင့် လမ်းကြောင်းသတ်မှတ်ခြင်း ပုံစံများ
 
-OmniRoute တွင် provider များစွာကို ပေါင်းစပ်ပြီး ၎င်းတို့အကြား route လုပ်ရန် နမူနာ pattern များမှာ အောက်ပါအတိုင်းဖြစ်သည်:
+ဤသည်မှာ ပံ့ပိုးသူအများအပြားကို ပေါင်းစပ်ခြင်းနှင့် OmniRoute တွင် ၎င်းတို့ကြားလမ်းကြောင်းပေးခြင်းအတွက် ဥပမာပုံစံများဖြစ်သည်။
 
-#### 1. Coding Agent Combo: ကုန်ကျစရိတ်/မြန်နှုန်း Fallback ပါဝင်သော အဆင့်မြင့် ကျိုးကြောင်းဆင်ခြင်မှု
+#### 1. Coding Agent Combo- Cost/Speed Fallback ဖြင့် High-End Reasoning
 
-Coding agent များ (OpenCode၊ Claude Code၊ Cursor၊ Cline) အတွက် အထူးသင့်လျော်သည်။ ကနဦးတွင် frontier reasoning model များသို့ route လုပ်ပြီး quota ကုန်ဆုံးသွားသည့်အခါ သို့မဟုတ် error ဖြစ်သည့်အခါ မြန်ဆန်သော coding model များသို့ fallback လုပ်သည်။
+coding အေးဂျင့်များ (OpenCode၊ Claude Code ၊ Cursor၊ Cline) အတွက် စံပြ ခွဲတမ်းကုန်ခန်းခြင်း သို့မဟုတ် အမှားအယွင်းများကြောင့် အမြန်ကုဒ်ရေးနည်းမော်ဒယ်များဆီသို့ အစပိုင်းတွင် ရှေ့တန်းရောက် ကျိုးကြောင်းဆင်ခြင်ခြင်း မော်ဒယ်များဆီသို့ လမ်းကြောင်းပြောင်းသည်။
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **Models**:
-  1. `claude/claude-sonnet-4-6` (ပင်မ coding agent)
-  2. `openai/gpt-4o` (ဒုတိယအဆင့် စွမ်းဆောင်ရည်မြင့် fallback)
-  3. `deepseek/deepseek-v4-flash` (ထိရောက်မှုမြင့်ပြီး ကုန်ကျစရိတ်သက်သာသော fallback)
+- **ဒိုင်ခွက်** : Combos → New Combo → Name: `agent-coding` → ဗျူဟာ: `Priority`
+- **မော်ဒယ်များ** :
+  1. `claude/claude-sonnet-4-6` (မူလကုဒ်နံပါတ် အေးဂျင့်)
+  2. `openai/gpt-4o` (စွမ်းရည်မြင့် အလယ်တန်း ကျောထောက်နောက်ခံ)
+  3. `deepseek/deepseek-v4-flash` (ထိရောက်မှု၊ ကုန်ကျစရိတ်သက်သာသော ဆုတ်ယုတ်မှု)
 
 ```bash
-# API မှတစ်ဆင့် နမူနာ
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -937,180 +945,176 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. အခမဲ့အဆင့် အလိုအလျောက် အစားထိုးအသုံးပြုသည့် Combo
+#### 2. Free-Tier Auto Failover Combo
 
-API ကုန်ကျစရိတ်မရှိဘဲ ရရှိနိုင်မှုကို အမြင့်ဆုံးဖြစ်စေရန် အခမဲ့အဆင့်နှင့် key မလိုအပ်သော provider များစွာကို ဆက်တိုက်ချိတ်ဆက်အသုံးပြုသည်။
+API ကုန်ကျစရိတ်မပါဘဲ အလုပ်ချိန်ကို တိုးမြှင့်ရန်အတွက် အခမဲ့အဆင့်နှင့် သော့မရှိသော ပံ့ပိုးပေးသူအများအပြားကို ချိတ်ဆက်ပါ။
 
-- **နည်းဗျူဟာ**: `Least Used` သို့မဟုတ် `Round Robin` (quota များတစ်လျှောက် load ကို ဖြန့်ဝေသည်)
-- **မော်ဒယ်များ**:
+- **ဗျူဟာ** : `Least Used` သို့မဟုတ် `Round Robin` (ဝန်အားခွဲတမ်းများတစ်လျှောက် ဖြန့်ဝေသည်)
+- **မော်ဒယ်များ** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# CLI မှတစ်ဆင့် နမူနာ
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. မာလ်တီမိုဒယ် / ရုပ်ပုံနှင့် စာသား Pipeline
+#### 3. Multimodal / Vision & Text Pipeline
 
-ပုံများကို နားလည်ခြင်းနှင့် code ထုတ်လုပ်ခြင်း ပါဝင်သည့် workflow များအတွက် အထူးပြု vision မော်ဒယ်များကို မြန်နှုန်းမြင့် စာသားထုတ်လုပ်မှုနှင့် တွဲဖက်အသုံးပြုခြင်း။
+ရုပ်ပုံနားလည်မှုနှင့် ကုဒ်ထုတ်လုပ်ခြင်းပါ၀င်သော အလုပ်အသွားအလာများအတွက် မြန်နှုန်းမြင့် စာသားဖန်တီးမှုဖြင့် အထူးပြုအမြင်မော်ဒယ်များကို တွဲချိတ်ခြင်း။
 
-- **ပုံစံ**: vision စွမ်းရည်ရှိသော မော်ဒယ်များကို ဦးစွာစာရင်းပြုစုပြီး throughput မြင့်မားသော စာသား/code မော်ဒယ်ကို နောက်ဆုံးထားသည့် `Priority` combo တစ်ခု။
-- **မော်ဒယ်များ**:
-  1. `gemini/gemini-2.5-pro` (ပုံနှင့် မာလ်တီမိုဒယ်အကြောင်းအရာများကို နားလည်နိုင်စွမ်းကောင်းမွန်သည်)
-  2. `openai/gpt-4o` (ရုပ်ပုံနားလည်မှုနှင့် tool အသုံးပြုမှု မျှတသည်)
-  3. `deepseek/deepseek-v4-flash` (စာသား/code ထုတ်လုပ်မှု)
-
----
-
-### ခံနိုင်ရည်ရှိမှုနှင့် Circuit Breaker များ
-
-**Dashboard → Settings → Resilience** မှတစ်ဆင့် စီစဉ်သတ်မှတ်ပါ။
-
-OmniRoute သည် အစိတ်အပိုင်းငါးခုဖြင့် provider အဆင့် ခံနိုင်ရည်ရှိမှုကို အကောင်အထည်ဖော်ထားသည်-
-
-1. **တောင်းဆိုမှု Queue နှင့် အရှိန်ထိန်းညှိခြင်း** — စနစ်အဆင့် တောင်းဆိုမှု ပုံသွင်းခြင်း-
-   - **တစ်မိနစ်လျှင် တောင်းဆိုမှုများ (RPM)** — account တစ်ခုစီအတွက် တစ်မိနစ်လျှင် အများဆုံး တောင်းဆိုမှုအရေအတွက်
-   - **တောင်းဆိုမှုများကြား အနည်းဆုံးအချိန်** — တောင်းဆိုမှုများကြား millisecond ဖြင့် သတ်မှတ်ထားသော အနည်းဆုံးအချိန်ကွာဟချက်
-   - **တစ်ပြိုင်နက် တောင်းဆိုမှု အများဆုံးအရေအတွက်** — account တစ်ခုစီအတွက် တစ်ပြိုင်နက် ပြုလုပ်နိုင်သော တောင်းဆိုမှု အများဆုံးအရေအတွက်
-
-2. **ချိတ်ဆက်မှု Cooldown** — ပြန်လည်ကြိုးစားနိုင်သော ချို့ယွင်းမှုများပြီးနောက် ချိတ်ဆက်မှုတစ်ခုအတွက် auth type တစ်ခုစီအလိုက် စီစဉ်သတ်မှတ်မှု-
-   - **အခြေခံ Cooldown** — ပြန်လည်ကြိုးစားနိုင်သော upstream ချို့ယွင်းမှုများအတွက် မူလ cooldown ကာလ
-   - **Upstream Retry Hint များကို အသုံးပြုရန်** — ပေးထားပါက တရားဝင် `Retry-After` သို့မဟုတ် reset hint များကို လိုက်နာသည်
-   - **Backoff အဆင့် အများဆုံး** — ထပ်ခါတလဲလဲ ချို့ယွင်းမှုများအတွက် exponential backoff အမြင့်ဆုံးအဆင့်
-
-3. **Provider Circuit Breaker** — provider ၏ အစမှအဆုံး ချို့ယွင်းမှုများကို ခြေရာခံပြီး စီစဉ်သတ်မှတ်ထားသော သတိပေးချက်အဆင့်သို့ ရောက်သောအခါ provider ကို အရည်အသွေးကျဆင်းနေသည်ဟု သတ်မှတ်ကာ စီစဉ်သတ်မှတ်ထားသော ချို့ယွင်းမှုအဆင့်သို့ ရောက်သောအခါ breaker ကို ဖွင့်သည်-
-   - **အရည်အသွေးကျဆင်းမှု အဆင့်သတ်မှတ်ချက်** — `DEGRADED` သို့ မဝင်မီ ဆက်တိုက်ဖြစ်ပေါ်သော provider ချို့ယွင်းမှု အရေအတွက်
-   - **ချို့ယွင်းမှု အဆင့်သတ်မှတ်ချက်** — `OPEN` သို့ မဝင်မီ ဆက်တိုက်ဖြစ်ပေါ်သော provider ချို့ယွင်းမှု အရေအတွက်
-   - **Reset ကြာချိန်** — provider ကို ထပ်မံစမ်းသပ်ခြင်းမပြုမီ စောင့်ဆိုင်းရမည့် အချိန်ကာလ
-   - **CLOSED** (ကောင်းမွန်သည်) — တောင်းဆိုမှုများ ပုံမှန်အတိုင်း စီးဆင်းသည်
-   - **DEGRADED** — မြင့်တက်နေသော ချို့ယွင်းမှုများကို ခြေရာခံနေစဉ် တောင်းဆိုမှုများ ဆက်လက်စီးဆင်းသည်
-   - **OPEN** — ထပ်ခါတလဲလဲ ချို့ယွင်းမှုများဖြစ်ပြီးနောက် provider ကို ယာယီပိတ်ဆို့ထားသည်
-   - **HALF_OPEN** — provider ပြန်လည်ကောင်းမွန်လာခြင်းရှိမရှိ စမ်းသပ်နေသည်
-
-   ချိတ်ဆက်မှုတစ်ခုချင်းနှင့် သက်ဆိုင်သော `429` rate limit များသည် **ချိတ်ဆက်မှု Cooldown** ထဲတွင်သာ ရှိနေပြီး provider breaker တွင် ထည့်သွင်းရေတွက်မည်မဟုတ်ပါ။
-
-   provider breaker ၏ လက်ရှိ runtime အခြေအနေကို **Dashboard → Health** တွင်သာ ပြသသည်။
-
-4. **Cooldown ကို စောင့်ဆိုင်းရန်** — ရွေးချယ်နိုင်သော ချိတ်ဆက်မှုအားလုံး cooldown ဖြစ်နေပြီးသားဆိုလျှင် OmniRoute သည် အစောဆုံးပြီးဆုံးမည့် cooldown ကို စောင့်ဆိုင်းပြီး တူညီသော client တောင်းဆိုမှုကို အလိုအလျောက် ပြန်လည်ကြိုးစားနိုင်သည်။
-
-5. **Rate Limit အလိုအလျောက် ရှာဖွေခြင်း** — upstream provider များက တိကျသော စောင့်ဆိုင်းရမည့်အချိန်ကာလကို ပြန်ပေးသောအခါ ထို setting ကို ဖွင့်ထားပါက ယင်း hint များသည် local connection cooldown ကို အစားထိုးအသုံးပြုသည်။
-
-**ကျွမ်းကျင်သူ အကြံပြုချက်:** ပြတ်တောက်မှုတစ်ခုဖြစ်ပြီးနောက် လက်ရှိအသုံးပြုနေသော provider breaker များကို စစ်ဆေးရန်နှင့် reset လုပ်ရန် **Health** စာမျက်နှာကို အသုံးပြုပါ။ Resilience စာမျက်နှာသည် စီစဉ်သတ်မှတ်မှုများကိုသာ ပြောင်းလဲပေးသည်။
+- **ပုံစံ** : အမြင်အာရုံခံနိုင်သော မော်ဒယ်များကို ဦးစွာစာရင်းပြုစုပြီး စွမ်းဆောင်ရည်မြင့် text/code မော်ဒယ်နောက်ဆုံးကို ဖော်ပြသည့် `Priority` ပေါင်းစပ်မှု။
+- **မော်ဒယ်များ** :
+  1. `gemini/gemini-2.5-pro` (ပြင်းထန်သော image/multimodal နားလည်နိုင်စွမ်း)
+  2. `openai/gpt-4o` (မျှတသောအမြင်နှင့် ကိရိယာအသုံးပြုမှု)
+  3. `deepseek/deepseek-v4-flash` (Text/code မျိုးဆက်)
 
 ---
 
-### Database Export / Import
+### ခံနိုင်ရည်ရှိမှု နှင့် Circuit Breakers များ
 
-Database backup များကို **Dashboard → Settings → System & Storage** တွင် စီမံပါ။
+မှတဆင့် configure** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → ခံနိုင်ရည်ရှိမှု** .
 
-| လုပ်ဆောင်ချက်                           | ဖော်ပြချက်                                                                                                                                                                 |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Database ကို Export လုပ်ရန်**         | လက်ရှိ SQLite database ကို `.sqlite` file အဖြစ် download လုပ်ပေးသည်                                                                                                        |
-| **အားလုံးကို Export လုပ်ရန် (.tar.gz)** | database၊ setting များ၊ combo များ၊ provider ချိတ်ဆက်မှုများ (credential မပါဝင်ပါ) နှင့် API key metadata တို့ပါဝင်သော backup archive အပြည့်အစုံကို download လုပ်ပေးသည်    |
-| **Database ကို Import လုပ်ရန်**         | လက်ရှိ database ကို အစားထိုးရန် `.sqlite` file တစ်ခုကို upload လုပ်သည်။ `DISABLE_SQLITE_AUTO_BACKUP=true` မဟုတ်ပါက import မလုပ်မီ backup တစ်ခုကို အလိုအလျောက် ဖန်တီးပေးသည် |
+OmniRoute အစိတ်အပိုင်းငါးခုဖြင့် ပံ့ပိုးပေးသူအဆင့် ခံနိုင်ရည်အားကို အကောင်အထည်ဖော်သည်-
+
+1. **Queue & Pacing တောင်းဆိုပါ။** — စနစ်အဆင့် တောင်းဆိုမှုပုံစံ-
+   - **တစ်မိနစ်လျှင် တောင်းဆိုမှုများ (RPM)** - အကောင့်တစ်ခုလျှင် တစ်မိနစ်လျှင် အများဆုံးတောင်းဆိုမှုများ
+   - **တောင်းဆိုမှုများကြားရှိ အနည်းဆုံးအချိန်** - တောင်းဆိုမှုများကြားတွင် မီလီစက္ကန့်အတွင်း အနည်းဆုံးကွာဟချက်
+   - **အများဆုံး တစ်ပြိုင်တည်း တောင်းဆိုမှုများ** - အကောင့်တစ်ခုလျှင် အများဆုံး တပြိုင်နက် တောင်းဆိုမှုများ
+
+2. **ချိတ်ဆက်မှု Cooldown** — ပြန်လည်ကြိုးစား၍မရသော ချို့ယွင်းမှုများပြီးနောက် ချိတ်ဆက်မှုတစ်ခုအတွက် တစ်ခုချင်း-auth-type configuration-
+   - **အခြေခံ Cooldown** — ပြန်လည်စမ်းသုံးနိုင်သော အထက်ရေစီးကြောင်းကျရှုံးမှုအတွက် မူရင်းအအေးခံဝင်းဒိုး
+   - **အထက်စီးကြောင်း ပြန်စမ်းကြည့်ရန် အရိပ်အမြွက်များကို သုံးပါ။** — ပေးအပ်သည့်အခါတွင် တရားဝင်သော `Retry-After` ကို ဂုဏ်ပြုပါ သို့မဟုတ် အရိပ်အမြွက်များကို ပြန်လည်သတ်မှတ်ပါ။
+   - **Max Backoff အဆင့်များ** - ထပ်ခါတလဲလဲ ကျရှုံးမှုအတွက် အမြင့်ဆုံး exponential backoff အဆင့်
+
+3. **ပံ့ပိုးသူ Circuit Breaker** — အဆုံးမှအစအဆုံးပံ့ပိုးပေးသူ၏ပျက်ကွက်မှုများကိုခြေရာခံပြီး၊ စီစဉ်သတ်မှတ်ထားသောသတိပေးသတ်မှတ်ချက်အဆင့်တွင် ဝန်ဆောင်မှုပေးသူအား ဆုတ်ယုတ်သွားကြောင်း အမှတ်အသားပြုပြီး ပြင်ဆင်သတ်မှတ်ထားသော ချို့ယွင်းမှုအဆင့်သို့ရောက်ရှိသောအခါ ဘရိတ်ကာကိုဖွင့်သည်-
+   - **ပျက်စီးခြင်းအဆင့်** — `DEGRADED` မဝင်မီ ဆက်တိုက်ပံ့ပိုးပေးသူ ပျက်ကွက်မှုများ
+   - **ရှုံးနိမ့်မှုအဆင့်** — `OPEN` မဝင်မီ ဆက်တိုက်ပံ့ပိုးပေးသူ ပျက်ကွက်မှုများ
+   - **ကုန်ဆုံးချိန်ကို ပြန်လည်သတ်မှတ်ပါ။** — ဝန်ဆောင်မှုပေးသူကို ထပ်မံမစမ်းသပ်မီ အချိန်ပြတင်းပေါက်
+   - **CLOSED** (ကျန်းမာသည်) — တောင်းဆိုမှုများ ပုံမှန်အတိုင်း လည်ပတ်နေသည်။
+   - **DEGRADED** - မြင့်မားသောကျရှုံးမှုများကို ခြေရာခံနေချိန်တွင် တောင်းဆိုမှုများ ဆက်လက်စီးဆင်းနေပါသည်။
+   - **OPEN** — ထပ်ခါတလဲလဲ မအောင်မြင်ပြီးနောက် ဝန်ဆောင်မှုပေးသူကို ယာယီပိတ်ဆို့ထားသည်။
+   - **HALF_OPEN** - ဝန်ဆောင်မှုပေးသူ ပြန်ကောင်းလာသလား စစ်ဆေးခြင်း။
+
+   ချိတ်ဆက်မှုအတိုင်းအတာ `429` နှုန်းကန့်သတ်ချက်များသည် ဆက်လက်တည်ရှိနေပါသည်။** ချိတ်ဆက်မှု Cooldown** ဝန်ဆောင်မှုပေးသူ ဖောက်ဖျက်သူကို ထည့်သွင်းမတွက်ပါနှင့်။
+
+   ဝန်ဆောင်မှုပေးသူ breaker runtime အခြေအနေအား ဖွင့်ပြထားသည်။** ဒက်ရှ်ဘုတ် → ကျန်းမာရေး** အားလုံးအတွက်
+
+4. **Cooldown ကိုစောင့်ပါ။** — အကယ်၍ ကိုယ်စားလှယ်လောင်းတစ်ဦးစီ၏ချိတ်ဆက်မှုသည် အေးသွားပါက၊ OmniRoute အစောဆုံး cooldown ကိုစောင့်နိုင်ပြီး တူညီသော client တောင်းဆိုမှုကို အလိုအလျောက်ပြန်လည်ကြိုးစားနိုင်သည်။
+
+5. **အလိုအလျောက် ထောက်လှမ်းမှုကို ကန့်သတ်မှု အဆင့်သတ်မှတ်ပါ။** — အထက်ရေစီးကြောင်းဝန်ဆောင်မှုပေးသူများသည် တိကျပြတ်သားသောစောင့်ဆိုင်းဝင်းဒိုးများပြန်လာသောအခါ၊ အဆိုပါအရိပ်အမြွက်များသည် ဆက်တင်ကိုဖွင့်ထားသည့်အခါ စက်တွင်းချိတ်ဆက်မှုအအေးခံမှုကို လွှမ်းမိုးသွားမည်ဖြစ်သည်။
+
+**အကြံပြုချက်-** ကိုသုံးပါ။** ကျန်းမာရေး** ပြတ်တောက်ပြီးနောက် တိုက်ရိုက်ဝန်ဆောင်မှုပေးသူ ဘရိတ်များကို စစ်ဆေးပြီး ပြန်လည်သတ်မှတ်ရန် စာမျက်နှာ။ Resilience စာမျက်နှာသည် ဖွဲ့စည်းမှုပုံစံကိုသာ ပြောင်းလဲသည်။
+
+---
+
+### ဒေတာဘေ့စ် ပို့ကုန်/သွင်းကုန်
+
+ဒေတာဘေ့စ် အရန်သိမ်းဆည်းမှုများကို စီမံပါ။** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → စနစ်နှင့် သိုလှောင်မှု** .
+
+| အက်ရှင်                            | ဖော်ပြချက်                                                                                                                                                                |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ဒေတာဘေ့စ်ကို ထုတ်ယူပါ။**         | လက်ရှိ SQLite ဒေတာဘေ့စ်ကို `.sqlite` ဖိုင်အဖြစ် ဒေါင်းလုဒ်လုပ်သည်။                                                                                                        |
+| **(.tar.gz) အားလုံးကို ထုတ်ယူရန်** | ဒေတာဘေ့စ်၊ ဆက်တင်များ၊ ပေါင်းစပ်မှုများ၊ ပံ့ပိုးပေးသူချိတ်ဆက်မှုများ (အထောက်အထားများမရှိ)၊ API သော့မက်တာဒေတာအပါအဝင် အပြည့်အဝ အရန်သိမ်းမှုတစ်ခုကို ဒေါင်းလုဒ်လုပ်သည်       |
+| **ဒေတာဘေ့စ်ကို တင်သွင်းပါ။**       | လက်ရှိဒေတာဘေ့စ်ကိုအစားထိုးရန် `.sqlite` ဖိုင်ကို အပ်လုဒ်လုပ်ပါ။ `DISABLE_SQLITE_AUTO_BACKUP=true` မဟုတ်ပါက ကြိုတင်တင်သွင်းထားသော အရန်ကူးယူမှုကို အလိုအလျောက် ဖန်တီးပါသည်။ |
 
 ```bash
-# API: Database ကို Export လုပ်ရန်
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: အားလုံးကို Export လုပ်ရန် (archive အပြည့်အစုံ)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Database ကို Import လုပ်ရန်
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Import စစ်ဆေးအတည်ပြုခြင်း:** Import လုပ်ထားသော file ကို မှန်ကန်ပြည့်စုံမှု (SQLite pragma စစ်ဆေးမှု)၊ လိုအပ်သော table များ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) နှင့် အရွယ်အစား (အများဆုံး 100MB) အတွက် စစ်ဆေးအတည်ပြုသည်။
+**တင်သွင်းအတည်ပြုချက်-** တင်သွင်းထားသောဖိုင်သည် ခိုင်မာမှု (SQLite pragma စစ်ဆေးခြင်း)၊ လိုအပ်သောဇယားများ (`provider_connections`၊ `provider_nodes`၊ `combos`၊ `api_keys`) နှင့် အရွယ်အစား (အများဆုံး 100MB) အတွက် တရားဝင်အတည်ပြုထားသည်။
 
-**အသုံးပြုနိုင်သည့် အခြေအနေများ:**
+**အသုံးအဆောင်များ-**
 
-- OmniRoute ကို စက်များအကြား ရွှေ့ပြောင်းခြင်း
-- ဘေးအန္တရာယ်ဖြစ်ပြီးနောက် ပြန်လည်ရယူရန် ပြင်ပ backup များ ဖန်တီးခြင်း
-- အဖွဲ့ဝင်များအကြား စီစဉ်သတ်မှတ်မှုများကို မျှဝေခြင်း (အားလုံးကို export လုပ်ရန် → archive ကို မျှဝေရန်)
-
----
-
-### Settings Dashboard
-
-လွယ်ကူစွာ လမ်းညွှန်ကြည့်ရှုနိုင်ရန် settings စာမျက်နှာကို **tab 7 ခု** အဖြစ် စီစဉ်ထားသည်-
-
-| တက်ဘ်                       | အကြောင်းအရာ                                                                                                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **အထွေထွေ**                 | စနစ်သိုလှောင်မှုကိရိယာများ၊ မူလအပြုအမူ၊ Endpoint tunnel မြင်နိုင်မှု                                                                                                                        |
-| **အသွင်အပြင်**              | Theme ထိန်းချုပ်မှုများ (အလင်း/အမှောင်/စနစ်)၊ ဘေးဘားမြင်နိုင်မှု၊ Cloudflare/Tailscale/ngrok tunnel ကတ်များအတွက် panel အဖွင့်အပိတ်များ                                                      |
-| **AI**                      | စဉ်းစားမှု budget (passthrough / auto-strip / custom / adaptive — [THINKING_BUDGET.md](./THINKING_BUDGET.md) ကိုကြည့်ပါ)၊ ကမ္ဘာလုံးဆိုင်ရာ system prompt၊ prompt cache စာရင်းအင်းများ       |
-| **လုံခြုံရေး**              | အကောင့်ဝင်ခြင်း/စကားဝှက် ဆက်တင်များ၊ IP ဝင်ရောက်ခွင့်ထိန်းချုပ်မှု၊ `/models` အတွက် API စစ်မှန်ကြောင်းအတည်ပြုမှု၊ Provider ပိတ်ဆို့ခြင်း၊ prompt-injection ကာကွယ်မှု                        |
-| **လမ်းကြောင်းသတ်မှတ်ခြင်း** | ကမ္ဘာလုံးဆိုင်ရာ လမ်းကြောင်းသတ်မှတ်မှုနည်းဗျူဟာ (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)၊ wildcard model alias များ၊ fallback အစဉ်များ၊ combo မူလတန်ဖိုးများ |
-| **ခံနိုင်ရည်ရှိမှု**        | တောင်းဆိုမှုတန်းစီစနစ်၊ ချိတ်ဆက်မှု cooldown၊ provider breaker ဖွဲ့စည်းမှုနှင့် cooldown ပြီးဆုံးသည်အထိ စောင့်ဆိုင်းသည့် အပြုအမူ                                                            |
-| **အဆင့်မြင့်**              | ကမ္ဘာလုံးဆိုင်ရာ proxy ဖွဲ့စည်းမှု (HTTP/SOCKS5)၊ provider တစ်ခုချင်းအလိုက် proxy override များ                                                                                             |
-
-အထွေထွေကဏ္ဍတွင် ဖတ်ရှုရန်သီးသန့် logging နှင့် cache မှတ်ချက်များကို ထပ်မံဖော်ပြတော့မည်မဟုတ်ပါ။ Database ထိန်းသိမ်းထားမှုနှင့်
-အကောင်းဆုံးဖြစ်အောင်လုပ်ဆောင်မှု ဆက်တင်များကို `/api/settings/database` မှတစ်ဆင့် သိမ်းဆည်းထားပြီး၊ cache ကို ကိုယ်တိုင်ရှင်းလင်းရန်
-`DELETE /api/cache` ကို အသုံးပြုသည်။ တောင်းဆိုမှုနှင့် proxy log row အများဆုံးကန့်သတ်ချက်များကို
-`CALL_LOGS_TABLE_MAX_ROWS` နှင့် `PROXY_LOGS_TABLE_MAX_ROWS` တို့ဖြင့် ထိန်းချုပ်သည်။
+- စက်များအကြား OmniRoute ရွှေ့ပြောင်းပါ။
+- ဘေးအန္တရာယ်ပြန်လည်ရယူရန်အတွက် ပြင်ပအရန်များကို ဖန်တီးပါ။
+- အဖွဲ့၀င်များအကြား ဖွဲ့စည်းမှုပုံစံများကို မျှဝေပါ ( → မျှဝေမှုမှတ်တမ်းအားလုံးကို ထုတ်ယူပါ)
 
 ---
 
-### ကုန်ကျစရိတ်နှင့် Budget စီမံခန့်ခွဲမှု
+### ဆက်တင်များ ဒိုင်ခွက်
 
-**Dashboard → Costs** မှတစ်ဆင့် ဝင်ရောက်ပါ။
+ဆက်တင်များစာမျက်နှာတွင် စုစည်းထားသည်။** တက်ဘ် ၇ ခု** လွယ်ကူသောလမ်းညွှန်မှုအတွက်
 
-| တက်ဘ်          | ရည်ရွယ်ချက်                                                                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Budget**     | နေ့စဉ်/အပတ်စဉ်/လစဉ် budget များနှင့် အချိန်နှင့်တစ်ပြေးညီ ခြေရာခံမှုကို အသုံးပြု၍ API key တစ်ခုချင်းအလိုက် သုံးစွဲမှုကန့်သတ်ချက်များ သတ်မှတ်ပါ |
-| **စျေးနှုန်း** | Model စျေးနှုန်းစာရင်းများကို ကြည့်ရှုပြင်ဆင်ပါ — provider တစ်ခုချင်းအလိုက် input/output token 1K အတွက် ကုန်ကျစရိတ်                            |
+| တက်ဘ်                   | မာတိကာ                                                                                                                                                                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **အထွေထွေ**             | စနစ်သိုလှောင်မှုကိရိယာများ၊ မူရင်းအပြုအမူ၊ အဆုံးမှတ်ဥမင်လိုဏ်ခေါင်း မြင်နိုင်စွမ်း                                                                                                                                         |
+| **အသွင်အပြင်**          | အပြင်အဆင် ထိန်းချုပ်မှုများ (light/dark/system)၊ ဘေးဘားမြင်နိုင်မှု၊ Cloudflare/Tailscale/ngrok ဥမင်လိုဏ်ခေါင်းကတ်များအတွက် အကန့်ခလုတ်များ                                                                                 |
+| **AI**                  | ဘတ်ဂျက်စဉ်းစားခြင်း (passthrough/auto-strip/ custom/adaptive — [THINKING_BUDGET.md](./THINKING_BUDGET.md) ကိုကြည့်ပါ)၊ ကမ္ဘာလုံးဆိုင်ရာစနစ်အချက်ပြမှု၊ အချက်ပြ cache ကိန်းဂဏန်းများ                                        |
+| **လုံခြုံရေး**          | Login/Password ဆက်တင်များ၊ IP Access Control၊ `/models` အတွက် API auth၊ ပံ့ပိုးသူ ပိတ်ဆို့ခြင်း၊ ချက်ခြင်းထိုးသွင်းခြင်း                                                                                                   |
+| **လမ်းကြောင်းပေး**      | ကမ္ဘာလုံးဆိုင်ရာလမ်းကြောင်းသတ်မှတ်ခြင်းဗျူဟာ (ပထမ/အဝိုင်း Robin/ P2C /ကျပန်း/အနည်းဆုံးအသုံးပြုသည်/ကုန်ကျစရိတ်ကို ပိုမိုကောင်းမွန်အောင်ပြုလုပ်ခြင်း)၊ သင်္ကေတပုံစံအတုအယောင်များ၊ နောက်ပြန်ဆွဲကြိုးများ၊ ပေါင်းစပ်မူရင်းများ |
+| **ခံနိုင်ရည်ရှိခြင်း။** | တန်းစီတောင်းဆိုမှု၊ ချိတ်ဆက်မှုအအေးပေးစနစ်၊ ဝန်ဆောင်မှုပေးသူ ဖြတ်ပိုင်းပြင်ဆင်မှု နှင့် စောင့်ဆိုင်း-for-cooldown အပြုအမူ                                                                                                  |
+| **အဆင့်မြင့်**          | ကမ္ဘာလုံးဆိုင်ရာ ပရောက်စီဖွဲ့စည်းပုံ (HTTP/SOCKS5)၊ ဝန်ဆောင်မှုပေးသူ ပရောက်စီကို အစားထိုးမှုများ                                                                                                                           |
+
+ယေဘူယျအားဖြင့် ဖတ်ရန်သပ်သပ်မှတ်တမ်းနှင့် ကက်ရှ်မှတ်စုများကို ထပ်နေတော့မည်မဟုတ်ပါ။ ဒေတာဘေ့စ်ထိန်းသိမ်းခြင်းနှင့် ပိုမိုကောင်းမွန်အောင်ပြုလုပ်ခြင်းဆက်တင်များကို `/api/settings/database` မှတစ်ဆင့် ဆက်လက်လုပ်ဆောင်နေပါသည်။ manual cache ရှင်းလင်းခြင်းသည် `DELETE /api/cache` အသုံးပြုသည်။ တောင်းဆိုချက်နှင့် ပရောက်စီမှတ်တမ်း အတန်းထုပ်များကို `CALL_LOGS_TABLE_MAX_ROWS` နှင့် `PROXY_LOGS_TABLE_MAX_ROWS` တို့က ထိန်းချုပ်ထားသည်။
+
+---
+
+### ကုန်ကျစရိတ်နှင့် ဘတ်ဂျက်စီမံခန့်ခွဲမှု
+
+မှတဆင့်ဝင်ရောက်ပါ။** ဒက်ရှ်ဘုတ် → ကုန်ကျစရိတ်များ** .
+
+| တက်ဘ်         | ရည်ရွယ်ချက်                                                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **ဘတ်ဂျက်**   | daily/weekly/monthly ဘတ်ဂျက်များနှင့် အချိန်နှင့်တစ်ပြေးညီ ခြေရာခံခြင်းဖြင့် API သော့တစ်ခုအတွက် အသုံးစရိတ်ကန့်သတ်ချက် သတ်မှတ်ပါ။       |
+| **ဈေးနှုန်း** | မော်ဒယ်စျေးနှုန်းထည့်သွင်းမှုများကို ကြည့်ရှုပြီး တည်းဖြတ်ပါ — ဝန်ဆောင်မှုပေးသူတစ်ဦးလျှင် 1K input/output တိုကင်တစ်ခုအတွက် ကုန်ကျစရိတ် |
 
 ```bash
-# API: Budget တစ်ခု သတ်မှတ်ရန်
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: လက်ရှိ budget အခြေအနေကို ရယူရန်
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**ကုန်ကျစရိတ်ခြေရာခံခြင်း:** တောင်းဆိုမှုတိုင်းသည် token အသုံးပြုမှုကို မှတ်တမ်းတင်ပြီး စျေးနှုန်းဇယားကို အသုံးပြု၍ ကုန်ကျစရိတ်ကို တွက်ချက်သည်။ Provider၊ model နှင့် API key အလိုက် ခွဲခြမ်းစိတ်ဖြာချက်များကို **Dashboard → Usage** တွင် ကြည့်ရှုပါ။
+**ကုန်ကျစရိတ်ခြေရာခံခြင်း-** တောင်းဆိုမှုတိုင်းသည် တိုကင်အသုံးပြုမှုကို မှတ်တမ်းတင်ပြီး စျေးနှုန်းဇယားကို အသုံးပြု၍ ကုန်ကျစရိတ်ကို တွက်ချက်သည်။ ခွဲခြမ်းစိတ်ဖြာမှုများကို ကြည့်ရှုပါ။** ဒက်ရှ်ဘုတ် → အသုံးပြုမှု** ဝန်ဆောင်မှုပေးသူ၊ မော်ဒယ်နှင့် API သော့ဖြင့်။
 
 ---
 
-### အသံမှ စာသားသို့ ပြောင်းလဲခြင်း
+### အသံမှတ်တမ်း
 
-OmniRoute သည် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော endpoint မှတစ်ဆင့် အသံမှ စာသားသို့ ပြောင်းလဲခြင်းကို ပံ့ပိုးသည်-
+OmniRoute OpenAI-သဟဇာတရှိသော အဆုံးမှတ်မှတစ်ဆင့် အသံကူးယူခြင်းကို ပံ့ပိုးသည်-
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl ဖြင့် ဥပမာ
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` သည် မူရင်း Deepgram လမ်းကြောင်းဖြစ်ပြီး Deepgram API key လိုအပ်သည်။
-OpenRouter ကိုသာ ဖွဲ့စည်းထားပါက `openrouter/deepgram/nova-3` ကို အသုံးပြုပါ။
+`deepgram/nova-3` သည် မူရင်း Deepgram လမ်းကြောင်းဖြစ်ပြီး Deepgram API သော့တစ်ခု လိုအပ်ပါသည်။ OpenRouter သာ configure လုပ်ထားပါက `openrouter/deepgram/nova-3` သုံးပါ။
 
-**အသံမှ စာသားသို့ (transcription)** provider များ-
+**စကားမှ စာသား (စာသားမှတ်တမ်း)** ဝန်ဆောင်မှုပေးသူများ-
 
-- `openai/` (whisper နှင့် တွဲဖက်အသုံးပြုနိုင်သည်)
+- `openai/` (တိုးတိုးဖြင့်လိုက်ဖက်သည်)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova မိသားစု)
+- `deepgram/` (နိုဗာမိသားစု)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper မူကွဲများ)
+- `nvidia/` (ပါရာကက်၊ ကိန္နရီ)
+- `huggingface/` (တိုးတိုးမူကွဲများ)
 - `qwen/`
 
-**စာသားမှ အသံသို့ (`POST /v1/audio/speech`)** provider များ-
+**စာသားမှ စကားပြော (`POST /v1/audio/speech`)** ဝန်ဆောင်မှုပေးသူများ-
 
-- `openai/` (tts-1, tts-1-hd)
+- `openai/` (tts-1၊ tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
 - `nvidia/` (Magpie TTS)
@@ -1125,51 +1129,45 @@ OpenRouter ကိုသာ ဖွဲ့စည်းထားပါက `openroute
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Transcription အတွက် ပံ့ပိုးထားသော အသံဖော်မတ်များမှာ `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm` ဖြစ်သည်။ TTS output ဖော်မတ်များသည် provider ပေါ်မူတည်သည် (mp3, wav, opus, pcm, mulaw)။
+စာသားမှတ်တမ်းအတွက် ပံ့ပိုးထားသော အသံဖော်မတ်များ- `mp3`၊ `wav`၊ `m4a`၊ `flac`၊ `ogg`၊ `webm`. TTS အထွက်ဖော်မတ်များ (mp3၊ wav၊ opus၊ pcm၊ mulaw) ပေါ်တွင်မူတည်သည်။
 
 ---
 
-### Combo ချိန်ညှိမှုနည်းဗျူဟာများ
+### Combo Balancing Strategies များ
 
-Combo တစ်ခုချင်းအလိုက် ချိန်ညှိမှုကို **Dashboard → Combos → Create/Edit → Strategy** တွင် ဖွဲ့စည်းပါ။
+တစ်ခုချင်း ပေါင်းစပ်ချိန်ညှိမှုကို စီစဉ်သတ်မှတ်ပါ။** ဒက်ရှ်ဘုတ် → Combos → Create/Edit → ဗျူဟာ** .
 
-| နည်းဗျူဟာ          | ဖော်ပြချက်                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------- |
-| **Round-Robin**    | Model များကို အစဉ်လိုက် အလှည့်ကျ အသုံးပြုသည်                                                            |
-| **Priority**       | ပထမ model ကို အမြဲဦးစွာ စမ်းသပ်ပြီး error ဖြစ်သည့်အခါမှသာ fallback ပြုလုပ်သည်                           |
-| **Random**         | တောင်းဆိုမှုတစ်ခုစီအတွက် combo ထဲမှ ကျပန်း model တစ်ခုကို ရွေးချယ်သည်                                   |
-| **Weighted**       | Model တစ်ခုချင်းအလိုက် သတ်မှတ်ထားသော weight များအပေါ် အချိုးကျ လမ်းကြောင်းပေးသည်                        |
-| **Least-Used**     | လတ်တလော တောင်းဆိုမှုအနည်းဆုံးရှိသော model သို့ လမ်းကြောင်းပေးသည် (combo metric များကို အသုံးပြုသည်)     |
-| **Cost-Optimized** | ရရှိနိုင်သော model များထဲမှ စျေးအသက်သာဆုံး model သို့ လမ်းကြောင်းပေးသည် (စျေးနှုန်းဇယားကို အသုံးပြုသည်) |
+| ဗျူဟာ                                | ဖော်ပြချက်                                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| **ရော်ဘင်ဝိုင်း**                    | မော်ဒယ်များအလိုက် လှည့်ပတ်သည်။                                                                         |
+| **ဦးစားပေး**                         | ပထမမော်ဒယ်ကို အမြဲကြိုးစားတယ်။ error ပေါ်တွင်သာ ပြန်ကျသည်။                                             |
+| **ကြုံသလို**                         | တောင်းဆိုမှုတစ်ခုစီအတွက် ပေါင်းစပ်မှုမှ ကျပန်းပုံစံတစ်ခုကို ရွေးပါ။                                    |
+| **တွက်ဆသည်။**                        | မော်ဒယ်အလိုက် သတ်မှတ်ထားသော အလေးများပေါ်မူတည်၍ အချိုးကျ လမ်းကြောင်းများ                                |
+| **အသုံးအနည်းဆုံး**                   | မကြာသေးမီက တောင်းဆိုမှုအနည်းငယ်ဖြင့် မော်ဒယ်သို့ လမ်းကြောင်းများ (ပေါင်းစပ်မက်ထရစ်များကို အသုံးပြုသည်) |
+| **ကုန်ကျစရိတ်-အကောင်းဆုံးဖြစ်အောင်** | အသက်သာဆုံး ရနိုင်သော မော်ဒယ်သို့ လမ်းကြောင်းများ (စျေးနှုန်းဇယားကို အသုံးပြုသည်)                       |
 
-ကမ္ဘာလုံးဆိုင်ရာ combo မူလတန်ဖိုးများကို **Dashboard → Settings → Routing → Combo Defaults** တွင် သတ်မှတ်နိုင်သည်။
-Combo target timeout များသည် မူလအားဖြင့် လက်ရှိတောင်းဆိုမှု timeout ကို ဆက်ခံသည်။ Target တစ်ခုချင်းအလိုက် ပိုတိုသောကန့်သတ်ချက်က
-ပိုမိုမြန်ဆန်သော fallback ကို စတင်စေလိုသည့်အခါမှသာ combo မူလတန်ဖိုးများ သို့မဟုတ် combo တစ်ခုချင်းစီတွင် **Target timeout
-(seconds)** ကို အသုံးပြုပါ။
+Global combo defaults တွင် ထည့်သွင်းနိုင်ပါသည်။** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → Routing → Combo မူရင်းများ** . ပေါင်းစည်းပစ်မှတ် အချိန်ကုန်ခြင်းများသည် မူရင်းအားဖြင့် လက်ရှိတောင်းဆိုမှု အချိန်ကုန်ဆုံးမှုကို အမွေဆက်ခံပါသည်။ သုံးပါ။** ပစ်မှတ်အချိန်ကုန် (စက္ကန့်)** ပိုတိုသော ပစ်မှတ်တစ်ခုအတွက် ကန့်သတ်ချက်သည် ပိုမိုမြန်ဆန်သော ဆုတ်ယုတ်မှုကို အစပျိုးသင့်သောအခါတွင်သာ ပေါင်းစပ်မူရင်းများ သို့မဟုတ် တစ်ဦးချင်းပေါင်းစပ်မှုတစ်ခု။
 
-Zero-latency combo အကောင်းဆုံးဖြစ်အောင်လုပ်ဆောင်မှုများသည် ကိုယ်တိုင်ရွေးချယ်ဖွင့်ရသော လုပ်ဆောင်ချက်များဖြစ်သည်။ ဤ latency လုပ်ဆောင်ချက်များက fallback target များနှင့်
-အပြိုင်လုပ်ဆောင်ခြင်း၊ TTFT မှတ်တမ်းအပေါ် အခြေခံ၍ target များကို ကျော်ခြင်း သို့မဟုတ် fallback တောင်းဆိုမှုများကို ချုံ့ခြင်းတို့ မဖြစ်စေရန် **Zero-latency optimizations** ကို ပိတ်ထားပါ။
-၎င်းကို ဖွင့်ထားပါက ဖွဲ့စည်းထားသော hedging၊ ကြိုတင်ခန့်မှန်းသည့် TTFT ကျော်ခြင်းနှင့် တက်ကြွသော fallback ချုံ့ခြင်းတို့က routing/request တိကျမှုနှင့် အစားထိုး၍ tail
-latency ကို လျှော့ချနိုင်သည်။
+Zero-latency ပေါင်းစပ်ခြင်း ပိုမိုကောင်းမွန်အောင်ပြုလုပ်ခြင်းကို ရွေးချယ်ဝင်ရောက်ပါသည်။ ထားခဲ့ပါ။** Zero-latency ပိုမိုကောင်းမွန်အောင် လုပ်ဆောင်မှုများ** ဤ latency အင်္ဂါရပ်များကို ပြိုင်ဖက်နောက်ပြန်ပစ်မှတ်များ၊ TTFT မှတ်တမ်းအပေါ်အခြေခံ၍ ပစ်မှတ်များကို ကျော်သွားခြင်း သို့မဟုတ် ဆုတ်ယုတ်မှုတောင်းဆိုမှုများကို ချုံ့ခြင်းမှ ကာကွယ်ရန် ပိတ်ထားသည် ။ ၎င်းသည် configured hedging၊ ကြိုတင်ခန့်မှန်းထားသော TTFT ကျော်သွားခြင်းနှင့် အမြီးကြာချိန်နည်းခြင်းအတွက် routing/request သစ္စာရှိမှုကို ကုန်သွယ်မှုပြုရန်အတွက် proactive fallback ချုံ့မှုကို ခွင့်ပြုသည်။
 
-အထက်ပိုင်းပံ့ပိုးသူများက တိကျသော `max_tokens` / `maxOutputTokens` ကန့်သတ်ချက်များ လိုအပ်သည့်အခါ **Reasoning token buffer** ကို ပိတ်ပါ။ ဖွင့်ထားသည့်အခါ ပေါင်းစပ်လမ်းကြောင်းရွေးချယ်မှုသည် သိရှိထားသော output အများဆုံးကန့်သတ်ချက်ရှိသည့် မော်ဒယ်များအတွက်သာ reasoning-model အပိုနေရာကို ထည့်ပေးပြီး၊ လုံခြုံသော ကြားခံတန်ဖိုးသည် ထိုကန့်သတ်ချက်ကို ကျော်လွန်မည့်အခြေအနေတွင် client token ကန့်သတ်ချက်ကို မပြောင်းလဲဘဲ ထားရှိသည်။ Client ကန့်သတ်ချက်သည် သိရှိထားသော အများဆုံးကန့်သတ်ချက်ထက် ကျော်လွန်နေပြီးသားဖြစ်ပါက၊ OmniRoute သည် အထက်ပိုင်းတောင်းဆိုချက်ကို မပို့မီ ထိုကန့်သတ်ချက်အထိ လျှော့ချသတ်မှတ်ပေးသည်။
+ပိတ်ပါ။** ကျိုးကြောင်းဆင်ခြင်ခြင်း တိုကင်ကြားခံ** အထက်ပိုင်းပံ့ပိုးပေးသူများသည် တင်းကျပ်သော `max_tokens` / `maxOutputTokens` ကန့်သတ်ချက်များ လိုအပ်သောအခါ။ ဖွင့်ထားသောအခါတွင်၊ ပေါင်းစပ်လမ်းကြောင်းပြခြင်းသည် လူသိများသော အထွက်ထုပ်တစ်ခုပါသည့် မော်ဒယ်များအတွက် ကျိုးကြောင်းဆင်ခြင်ခြင်း-မော်ဒယ် headroom ကိုသာ ပေါင်းထည့်ပြီး ဘေးကင်းသောကြားခံတန်ဖိုးသည် ထိုထုပ်ကိုကျော်လွန်သောအခါတွင် သုံးစွဲသူ တိုကင်ကန့်သတ်ချက်ကို မပြောင်းလဲစေပါ။ အကယ်၍ client ကန့်သတ်ချက်သည် သိပြီးသား cap ထက်ကျော်လွန်နေပါက၊ OmniRoute upstream တောင်းဆိုချက်ကို မပေးပို့မီ ၎င်းကို ထို cap တွင် ကပ်ထားသည်။
 
 ---
 
-### စနစ်ကျန်းမာရေး ဒက်ရှ်ဘုတ်
+### ကျန်းမာရေးဒိုင်ခွက်
 
-**Dashboard → Health** မှတစ်ဆင့် ဝင်ရောက်ပါ။ ကတ် ၆ ခုဖြင့် အချိန်နှင့်တစ်ပြေးညီ စနစ်ကျန်းမာရေး အခြေအနေခြုံငုံသုံးသပ်ချက်ကို ပြသသည်-
+မှတဆင့်ဝင်ရောက်ပါ။** ဒက်ရှ်ဘုတ် → ကျန်းမာရေး** . ကတ် 6 ခုပါသော အချိန်နှင့်တပြေးညီ စနစ်ကျန်းမာရေး ခြုံငုံသုံးသပ်ချက်-
 
-| ကတ်                       | ပြသသည့်အကြောင်းအရာ                                                                            |
-| ------------------------- | --------------------------------------------------------------------------------------------- |
-| **စနစ်အခြေအနေ**           | အလုပ်လုပ်နေသည့်ကြာချိန်၊ ဗားရှင်း၊ မမ်မိုရီအသုံးပြုမှု၊ ဒေတာလမ်းညွှန်                         |
-| **ပံ့ပိုးသူ ကျန်းမာရေး**  | ကမ္ဘာလုံးဆိုင်ရာ ပံ့ပိုးသူ circuit breaker ၏ လက်ရှိ runtime အခြေအနေ                           |
-| **နှုန်းကန့်သတ်ချက်များ** | အကောင့်တစ်ခုချင်းစီအလိုက် လက်ကျန်အချိန်နှင့်အတူ လက်ရှိအသုံးပြုနေသော ချိတ်ဆက်မှု cooldown များ |
-| **လက်ရှိ Lockout များ**   | လက်ရှိအသုံးပြုနေသော မော်ဒယ်အလိုက် lockout များနှင့် ယာယီဖယ်ထုတ်မှုများ                        |
-| **Signature Cache**       | ထပ်တူဖယ်ရှားရေး cache စာရင်းအင်းများ (လက်ရှိ key များ၊ hit rate)                              |
-| **Latency Telemetry**     | ပံ့ပိုးသူတစ်ခုချင်းစီအလိုက် p50/p95/p99 latency စုစည်းချက်                                    |
+| ကတ်                       | အဲဒါက ဘာကိုပြတာလဲ။                                                  |
+| ------------------------- | ------------------------------------------------------------------- |
+| **စနစ်အခြေအနေ**           | အလုပ်ချိန်၊ ဗားရှင်း၊ မှတ်ဉာဏ်အသုံးပြုမှု၊ ဒေတာလမ်းညွှန်            |
+| **ပံ့ပိုးသူ ကျန်းမာရေး**  | ကမ္ဘာလုံးဆိုင်ရာဝန်ဆောင်မှုပေးသူ circuit breaker runtime အခြေအနေ    |
+| **နှုန်းကန့်သတ်ချက်များ** | လက်ကျန်အချိန်နှင့်အတူ အကောင့်တစ်ခုစီအတွက် ချိတ်ဆက်မှုအအေးပေးမှုများ |
+| **Active Lockouts များ**  | အသက်ဝင်သော မော်ဒယ်-ကန့်သတ်ချက်များနှင့် ယာယီချန်လှပ်မှုများ         |
+| **လက်မှတ် Cache**         | ကူးယူထားသော ကက်ရှ် ကိန်းဂဏာန်းများ (အသက်ဝင်သောသော့များ၊ hit နှုန်း) |
+| **Latency Telemetry**     | ပံ့ပိုးသူ တစ်ဦးစီအတွက်p50/p95/p99 latency စုစည်းမှု                 |
 
-**ကျွမ်းကျင်သူအကြံပြုချက်:** Health စာမျက်နှာသည် ၁၀ စက္ကန့်တိုင်း အလိုအလျောက် ပြန်လည်စတင်ပြသသည်။ ပြဿနာများ ကြုံတွေ့နေသည့် ပံ့ပိုးသူများကို ဖော်ထုတ်ရန် circuit breaker ကတ်ကို အသုံးပြုပါ။
+**အကြံပြုချက်-** ကျန်းမာရေး စာမျက်နှာသည် ၁၀ စက္ကန့်တိုင်း အလိုအလျောက် ပြန်လည်စတင်သည်။ မည်သည့်ဝန်ဆောင်မှုပေးသူများ ကြုံတွေ့နေရသော ပြဿနာများကို ဖော်ထုတ်ရန် circuit breaker ကတ်ကို အသုံးပြုပါ။
 
 ---
 

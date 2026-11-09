@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OmniRoute API
-  version: 3.8.53
+  version: 3.8.54
   description: |
     OmniRoute is a local-first AI API proxy router. It provides an OpenAI-compatible
     endpoint that routes requests to multiple AI providers with load balancing,
@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: Decisions
+    description: System One typed decisions (Jev)
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -58,6 +60,8 @@ tags:
       background scheduler tick.
   - name: API Keys
     description: API key management
+  - name: Teams
+    description: Billing cost-center, temporal assignment, soft-budget, and usage management
   - name: Session Leases
     description: Client-neutral exclusive managed session connection leases
   - name: Combos
@@ -1563,6 +1567,9 @@ paths:
         "200":
           description: Chat completion response (or SSE stream)
           headers:
+            X-OmniRoute-Video-Drilldown:
+              description: Up to four comma-separated opaque handles after explicitly consented authenticated video analysis; absent without retained frames. Also available on SSE success responses.
+              schema: { type: string, maxLength: 259 }
             X-OmniRoute-Response-Cost:
               schema:
                 type: string
@@ -1729,7 +1736,7 @@ paths:
             `POST /api/v1/chat/completions`), including `X-OmniRoute-Request-Id`
             and `X-OmniRoute-Version`.
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/messages/count_tokens:
     post:
@@ -1746,6 +1753,8 @@ paths:
       responses:
         "200":
           description: Token count
+        "401":
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/responses:
     post:
@@ -2327,9 +2336,64 @@ paths:
     get:
       tags: [Models]
       summary: List models (management)
+      parameters:
+        - name: all
+          in: query
+          description: "`true` lists every model, not only those with an active provider connection."
+          schema:
+            type: string
+        - name: withLimits
+          in: query
+          description: >-
+            Opt-in. `1`/`true` adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and
+            `capsSource` (per-limit provenance) to each model row. Omitted or `0`/`false`
+            keeps the default payload unchanged.
+          schema:
+            type: string
+            enum: ["1", "true", "0", "false"]
       responses:
         "200":
           description: Internal model list with aliases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider:
+                          type: string
+                        model:
+                          type: string
+                        name:
+                          type: string
+                        fullModel:
+                          type: string
+                        alias:
+                          type: string
+                        available:
+                          type: boolean
+                        supportsVision:
+                          type: boolean
+                        contextWindow:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxInputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxOutputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        capsSource:
+                          $ref: "#/components/schemas/ModelLimitSources"
+        "400":
+          description: Invalid `withLimits` value
 
   /api/models/alias:
     post:
@@ -2565,6 +2629,7 @@ paths:
     post:
       tags: [Providers]
       summary: Auto-detect and import the local Antigravity CLI (agy) login from disk
+      x-loopback-only: true
       x-always-protected: true
       responses:
         "200":
@@ -2631,6 +2696,33 @@ paths:
       responses:
         "200":
           description: Provider model list
+    post:
+      tags: [Provider Nodes]
+      summary: Add a custom model
+      description: >-
+        Requires management authentication. On a compatible provider node the
+        stored modelId is the bare upstream id: a leading copy of the node's
+        prefix is stripped (and canonical providers' slashed ids pass through
+        untouched). The response echoes the stored id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, modelId]
+              properties:
+                provider:
+                  type: string
+                modelId:
+                  type: string
+                modelName:
+                  type: string
+      responses:
+        "200":
+          description: Model added (echoes the stored id)
+        "400":
+          description: Invalid request body
     put:
       tags: [Provider Nodes]
       summary: Update model metadata or per-model overrides
@@ -2678,6 +2770,8 @@ paths:
         exact JSON model field. Specialized executors and other providers are unsupported;
         session pools, extra-key rotation, HTTP redirects and credential refresh are refused.
         Active runtime plugins also fail closed; plugin policies are not silently skipped.
+        On a compatible provider node the inserted modelId is stored as the
+        bare upstream id (a leading copy of the node's prefix is stripped).
       security:
         - BearerAuth: []
       requestBody:
@@ -2822,6 +2916,137 @@ paths:
           description: Created API key (includes full key value)
         "401":
           description: Authentication required
+
+  /api/keys/import:
+    post:
+      tags: [API Keys]
+      summary: Import a caller-supplied API key without replacing existing keys
+      description: |
+        Uses the same management authentication as POST /api/keys: dashboard session,
+        local CLI credential, manage/admin-scoped API key, or an admin oma_ access token.
+        read/write oma_ tokens are insufficient. When login is disabled, inference-only
+        imports may be anonymous, but importing manage/admin scopes requires a real
+        management credential, including retries against an existing management-scoped key.
+
+        Accepts a 32–256 character ASCII key beginning with sk-, followed only by
+        A–Z, a–z, 0–9, underscore or hyphen. No machine-id or CRC validation is performed.
+        Whitespace is rejected, never trimmed. Configured environment API keys and the
+        internal self-loop credential cannot be imported because they bypass row policy.
+
+        An explicit existing id with the same key hash returns 200 and the existing
+        stored policy without mutation; requested name/policy changes are ignored.
+        An existing id with a different value, or the same value at another id, returns
+        409 without disclosing another id. Without id, a UUID is generated and duplicate
+        values return 409, not 200. New imports return 201. No rekey is performed.
+
+        Identity checks and the complete policy insert run in one synchronous SQLite
+        IMMEDIATE transaction. Uses create-key defaults and scope normalization (adds
+        self:usage and removes duplicates). Unknown fields, including isActive, are
+        ignored just as on create; change active state through the existing PATCH route.
+        No settings, providers, combos or session state is imported. This does not change
+        the operator-only import-json restore permissions. Cloud sync is best-effort and
+        asynchronous for new imports only. Secrets use enc:v1 encryption at rest when
+        storage encryption is configured; otherwise upstream plaintext storage applies.
+        Responses contain only id/name, a masked key and whitelisted stored policy fields,
+        never the full secret, hash, key prefix column or machine identifier.
+      security:
+        - ManagementSessionAuth: []
+        - BearerAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              description: |
+                Policy fields and refinements match createKeySchema. modelAccessMode all
+                requires empty/omitted allowedModels; lease:exclusive requires connections.
+                Without a mode, nonempty allowedModels implies restricted, otherwise all.
+                Omitted combos default to ["combo/*"]; explicit [] denies all combos.
+                Zero/null usage limits mean no cap for that period. Unknown fields ignored.
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                key:
+                  type: string
+                  minLength: 32
+                  maxLength: 256
+                  pattern: '^sk-[A-Za-z0-9_-]+$(?![\s\S])'
+                  writeOnly: true
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                modelAccessMode:
+                  type: string
+                  enum: [all, restricted]
+                allowedModels:
+                  type: array
+                  maxItems: 1000
+                  items: { type: string, minLength: 1 }
+                allowedCombos:
+                  type: array
+                  maxItems: 500
+                  items: { type: string, minLength: 1, maxLength: 200 }
+                allowedConnections:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items: { type: string, format: uuid }
+                preferredConnections:
+                  type: array
+                  maxItems: 100
+                  description: Ordered preference; must be a subset of allowedConnections when both are set
+                  items: { type: string, format: uuid }
+                scopes:
+                  type: array
+                  maxItems: 32
+                  items: { type: string, minLength: 1, maxLength: 64 }
+                noLog: { type: boolean, default: false }
+                allowUsageCommand: { type: boolean, default: false }
+                usageLimitEnabled: { type: boolean, default: false }
+                dailyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                weeklyUsageLimitUsd:
+                  type: [number, string, "null"]
+                  description: Nonnegative number or numeric string; zero/null clears the cap
+                chaosModeEnabled: { type: boolean, default: false }
+                expiresAt:
+                  type: [string, "null"]
+                  format: date-time
+      responses:
+        "200":
+          description: |
+            Idempotent retry, no mutation. Returns existing id, name, masked key and stored
+            policy (model/connection/combo access, scopes, active/banned/revoked/expiry state,
+            logging, rate/usage/session/IP limits, endpoints, proxy, stream/cache/compression,
+            auto-combo/catalog/forced-model and Codex service policy). Never returns key hash.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "201":
+          description: New fully configured key imported; same masked response fields as 200
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportedApiKey"
+        "400":
+          description: Malformed JSON or invalid key, UUID, name or create-policy fields/refinements
+        "401":
+          description: Missing required credential or invalid/expired oma_ access token
+        "403":
+          description: Invalid management API key or insufficient API-key/access-token scope
+        "409":
+          description: ID/value conflict, duplicate value or reserved credential; no other ID disclosed
+        "500":
+          description: Sanitized import/storage failure; transaction rolls back on insertion failure
+        "503":
+          description: Management authentication backend temporarily unavailable
 
   /api/keys/{id}:
     get:
@@ -3802,6 +4027,74 @@ paths:
         "200":
           description: Updated thinking budget configuration
 
+  /api/settings/cli-versions:
+    get:
+      tags: [Settings]
+      summary: Get advertised CLI client versions
+      description: >-
+        The CLI client version OmniRoute advertises for the Claude Code and
+        Codex identity presets. Each row reports the operator override, the
+        version actually advertised, which layer produced it (`settings` >
+        `env` > `discovered` > `default`), and the captured pin it resets to.
+        `discovered` is the auto-discovered latest release, used only when it
+        is newer than the pin. The `source`
+        field exists because the usual support question is why an override is
+        not taking effect, and the answer is the precedence order.
+      responses:
+        "200":
+          description: CLI client-version overrides
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CliVersionStatus"
+    put:
+      tags: [Settings]
+      summary: Set advertised CLI client versions
+      description: >-
+        Sets one global override per provider kind. `null` clears a key, and an
+        omitted key keeps its current value. A malformed version is rejected
+        with 400 rather than silently ignored, which is the difference from the
+        CLAUDE_CODE_CLIENT_VERSION and CODEX_CLIENT_VERSION env vars.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                claude:
+                  type: string
+                  nullable: true
+                  pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+                  description: Override for the Claude Code preset, or null to clear it.
+                codex:
+                  type: string
+                  nullable: true
+                  pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+                  description: Override for the Codex preset, or null to clear it.
+      responses:
+        "200":
+          description: Updated CLI client-version overrides
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CliVersionStatus"
+        "400":
+          description: Invalid version token, unknown key, or an update with no fields.
+
   /api/rate-limit:
     get:
       tags: [Settings]
@@ -3882,6 +4175,15 @@ paths:
                 url:
                   type: string
                   minLength: 1
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Optional extra feed URLs fetched next to `url`. Entries
+                    are trimmed and deduplicated, the primary URL is dropped
+                    and the first 5 are kept.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -3971,6 +4273,15 @@ paths:
                   type: string
                 url:
                   type: string
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Replaces the extra feed URLs (trimmed, deduplicated,
+                    primary dropped, first 5 kept). A redacted mirror sent
+                    back as returned keeps its stored credentials.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -4197,6 +4508,90 @@ paths:
       responses:
         "200":
           description: Connection usage data
+
+  /api/v0/management/auth-files:
+    get:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible OAuth account list
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/auth-files`).
+        Lists the Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider,
+        email, disabled, id_token }] }`. Never includes tokens. Requires a dashboard session or
+        a `manage`-scoped API key, even when login is disabled.
+      x-always-protected: true
+      responses:
+        "200":
+          description: "`{ files }`"
+        "401":
+          description: Authentication required
+        "403":
+          description: API key lacks the `manage` scope
+
+  /api/v0/management/api-call:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible upstream usage call
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/api-call`). Sends
+        one allowlisted request (Claude `GET /api/oauth/usage`; Codex `GET /backend-api/wham/usage`,
+        `GET /backend-api/wham/rate-limit-reset-credits`, `POST .../consume`) with the
+        connection's OAuth token injected server-side, and returns the raw upstream
+        `{ status_code, body }`. Any other method, URL or provider is refused with 403.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index, method, url]
+              properties:
+                auth_index:
+                  type: string
+                method:
+                  type: string
+                  enum: [GET, POST]
+                url:
+                  type: string
+                header:
+                  type: object
+                  additionalProperties:
+                    type: string
+                data:
+                  type: string
+                  description: JSON-encoded request body (POST only)
+      responses:
+        "200":
+          description: "`{ status_code, body }`"
+        "403":
+          description: Request not allowlisted, or API key lacks the `manage` scope
+        "404":
+          description: Unknown auth_index
+
+  /api/v0/management/reset-quota:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible cooldown reset
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/reset-quota`).
+        Lifts the connection cooldown and model lockouts of one Claude or Codex OAuth account
+        (and the Codex per-scope cooldowns). Terminal states are left alone.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index]
+              properties:
+                auth_index:
+                  type: string
+      responses:
+        "200":
+          description: "`{ ok, auth_index, cleared, lockouts_cleared, skipped_terminal }`"
+        "404":
+          description: Unknown auth_index
 
   /api/usage/history:
     get:
@@ -4480,6 +4875,24 @@ paths:
         "200":
           description: Per-model pricing data
 
+  /api/pricing/unpriced-usage:
+    get:
+      tags: [Pricing]
+      summary: List recent usage with no configured price
+      description: >-
+        Successful usage in the last 8 days whose provider/model has no pricing row,
+        with request counts, affected API keys (and how many of those have a per-key
+        USD limit enabled), and the active UNPRICED_USAGE_BUDGET_POLICY. Under the
+        default `fail_closed` policy those limited keys are blocked until the model
+        is priced or the window rolls over.
+      responses:
+        "200":
+          description: Unpriced usage report
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
+
   # ─── Translator ────────────────────────────────────────────────
 
   /api/translator/detect:
@@ -4579,11 +4992,18 @@ paths:
                 name: { type: string }
                 scope: { type: string, enum: [read, write, admin] }
                 expiresInDays: { type: integer, minimum: 1, maximum: 3650 }
+                totp:
+                  type: string
+                  description: >
+                    Required while dashboard two-factor authentication is enabled — a
+                    6-digit TOTP code or a single-use recovery code.
       responses:
         "200":
           description: Token minted (token returned once)
         "401":
-          description: Invalid password
+          description: >
+            Invalid password, or two-factor authentication is enabled and `totp` is
+            missing or wrong (body carries `mfaRequired: true`)
         "429":
           description: Too many failed attempts
 
@@ -6454,6 +6874,186 @@ paths:
         "500":
           description: Update failed
 
+  /api/services/singbox/install:
+    post:
+      tags: [Embedded Services]
+      summary: Install sing-box
+      description: >-
+        Downloads the pinned sing-box release binary from GitHub
+        (SagerNet/sing-box) and verifies its SHA256 against a checksum baked
+        into `src/lib/services/installers/singbox.ts` before writing it to
+        DATA_DIR/services/singbox/. Any version other than the pinned one is
+        rejected. **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+                  default: latest
+      responses:
+        "200":
+          description: Install succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  installedVersion:
+                    type: string
+        "400":
+          description: Invalid request body, or a version with no pinned checksum
+        "500":
+          description: Download failed or checksum verification failed
+
+  /api/services/singbox/start:
+    post:
+      tags: [Embedded Services]
+      summary: Start sing-box
+      description: >-
+        Spawns `sing-box run -c config.json`. Idempotent if already running.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+        "409":
+          description: sing-box is not installed
+        "503":
+          description: Start failed
+
+  /api/services/singbox/stop:
+    post:
+      tags: [Embedded Services]
+      summary: Stop sing-box
+      description: >-
+        Gracefully stops sing-box. Idempotent.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/restart:
+    post:
+      tags: [Embedded Services]
+      summary: Restart sing-box
+      description: >-
+        stop() then start() under the operation lock.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service restarted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/update:
+    post:
+      tags: [Embedded Services]
+      summary: Re-verify/reinstall the pinned sing-box release
+      description: >-
+        Stops, re-downloads and checksum-verifies the pinned release, restarts.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Update succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  installedVersion:
+                    type: string
+        "500":
+          description: Update failed
+
+  /api/services/singbox/status:
+    get:
+      tags: [Embedded Services]
+      summary: Get sing-box status
+      description: >-
+        Returns live supervisor state and DB metadata.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Status response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/auto-start:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle sing-box auto-start
+      description: >-
+        When enabled, sing-box starts automatically on the next OmniRoute boot.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "200":
+          description: Auto-start flag updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  autoStart:
+                    type: boolean
+        "400":
+          description: Invalid request body
+
+  /api/services/singbox/auto-restart-adopted:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle sing-box auto-restart-when-adopted
+      description: >-
+        When enabled, an externally-adopted (not OmniRoute-spawned) sing-box
+        process is restarted under OmniRoute's own supervisor on the next
+        health-check cycle instead of being left as adopted-only.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "204":
+          description: Flag updated
+        "400":
+          description: Invalid request body
+        "500":
+          description: Update failed
+
   /api/services/{name}/logs:
     get:
       tags: [Embedded Services]
@@ -6746,13 +7346,140 @@ paths:
                   minLength: 1
       responses:
         "200":
-          description: JWT token returned
+          description: >
+            Session cookie set. When two-factor authentication is enabled the body is
+            `{ success: false, mfaRequired: true }` instead and only a short-lived
+            MFA-pending cookie is set; finish with `POST /api/auth/mfa/verify`.
         "400":
           description: Invalid login request
         "401":
           description: Invalid password
         "403":
           description: Password setup required
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/verify:
+    post:
+      tags: [System]
+      summary: Complete a two-factor sign-in
+      description: >
+        Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login`
+        plus a TOTP or recovery code for the dashboard session cookie. Shares the
+        login brute-force lockout; a TOTP step and a recovery code are each accepted once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, minLength: 1, maxLength: 64 }
+      responses:
+        "200":
+          description: Session cookie set (`method` is `totp` or `backup_code`)
+        "400":
+          description: Invalid request body
+        "401":
+          description: Invalid code, or the pending sign-in expired (`mfaExpired`)
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/status:
+    get:
+      tags: [System]
+      summary: Two-factor authentication status
+      responses:
+        "200":
+          description: "`enabled`, `backupCodesRemaining`, `enabledAt`, `recoverySwitchSet`"
+        "401":
+          description: Authentication required
+
+  /api/auth/mfa/setup:
+    post:
+      tags: [System]
+      summary: Start two-factor enrollment
+      description: >
+        Re-authenticates with the current password and returns a candidate TOTP secret,
+        its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1 }
+      responses:
+        "200":
+          description: Enrollment secret, otpauth URI and QR code
+        "401":
+          description: Invalid password
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/enable:
+    post:
+      tags: [System]
+      summary: Finish two-factor enrollment
+      description: >
+        Persists the secret (encrypted at rest) once the current password and a code
+        generated from it both verify. Returns ten single-use recovery codes, shown once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, secret, code]
+              properties:
+                password: { type: string, minLength: 1 }
+                secret: { type: string, description: Base32 secret from /api/auth/mfa/setup }
+                code: { type: string }
+      responses:
+        "200":
+          description: Enabled; `backupCodes` returned once
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is already enabled
+        "429":
+          description: Too many failed attempts
+
+  /api/auth/mfa/disable:
+    post:
+      tags: [System]
+      summary: Turn two-factor authentication off
+      description: |
+        Requires the current password and a live TOTP or recovery code. While
+        `OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
+        peer and loopback `Host`) may omit `code` to remove a factor that can no longer
+        be verified; the session and password are still required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string, minLength: 1 }
+                code:
+                  type: string
+                  description: Required unless the host recovery switch applies.
+      responses:
+        "200":
+          description: Disabled; secret and recovery codes removed
+        "400":
+          description: Invalid body, or `code` missing outside the host recovery switch
+        "401":
+          description: Invalid password or code
+        "409":
+          description: Two-factor authentication is not enabled
         "429":
           description: Too many failed attempts
 
@@ -7320,6 +8047,58 @@ paths:
         "200":
           description: Health status
 
+  /api/monitoring/model-health:
+    get:
+      tags: [System]
+      summary: Get per-model health states
+      description: >-
+        Management-only report that classifies every synced model on every provider
+        connection as HEALTHY, DEGRADED, RATE_LIMITED, AUTH_FAILED, PROVIDER_DOWN,
+        CONNECTION_BLOCKED, MODEL_LOCKED or UNKNOWN, from the connection state, the
+        provider circuit breaker and the per-model lockout. Includes connection ids
+        and names, so it requires a management principal.
+      parameters:
+        - name: provider
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Only report this provider id
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              [
+                HEALTHY,
+                DEGRADED,
+                RATE_LIMITED,
+                AUTH_FAILED,
+                PROVIDER_DOWN,
+                CONNECTION_BLOCKED,
+                MODEL_LOCKED,
+                UNKNOWN,
+              ]
+          description: Only report models in this state
+        - name: unhealthy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["1"]
+          description: Set to `1` to omit HEALTHY models
+      responses:
+        "200":
+          description: >-
+            `{ timestamp, summary, providers }` — `summary` counts models per state;
+            `providers[]` carries `circuitBreakerState`, `canExecute`, optional
+            `retryAfterMs` and `connections[]` with their `models[]`
+        "401":
+          description: Not a management principal
+        "500":
+          description: Health report failed (sanitized message)
+
   /api/monitoring/compression:
     get:
       tags: [System]
@@ -7505,7 +8284,7 @@ paths:
       x-loopback-only: true
       tags: [System]
       summary: Read a bounded Video Bridge drill-down slice
-      description: Internal loopback/token-authenticated lookup into a short-lived cache isolated by an opaque principal, session, and media reference. It never downloads media or starts a subprocess; start/end and frame count only select already materialized, canonicalized JPEG frames whose dimensions were derived from their bytes. This cache substrate is not yet wired to the transparent Video Bridge request path and does not yet expose multi-resolution selection.
+      description: Internal loopback/token-authenticated raw cache substrate, isolated by an opaque principal, session and media reference. It never downloads media or starts a subprocess. The transparent producer and authenticated public variant consumer use their own shared opaque-handle lifecycle at /api/v1/video-bridge/drilldown; this raw endpoint does not expose multi-resolution selection.
       security: []
       parameters:
         - in: header
@@ -11132,6 +11911,52 @@ paths:
       responses:
         "200":
           description: OK
+  /api/intelligence/overrides:
+    delete:
+      tags:
+        - Intelligence
+      summary: "DELETE intelligence › overrides"
+      description: Removes a `user_override` fitness entry for a model and task category. `model` and `category` come from the query string or a JSON body. Idempotent.
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Override removed (`deleted` is false when none existed)
+        "400":
+          description: model or category missing
+        "401":
+          description: Management authentication required
+    post:
+      tags:
+        - Intelligence
+      summary: "POST intelligence › overrides"
+      description: Sets a `user_override` fitness score (0..1) for a model and task category and invalidates the in-memory fitness cache.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, category, score]
+              additionalProperties: false
+              properties:
+                model: { type: string, minLength: 1 }
+                category:
+                  type: string
+                  enum: [coding, review, planning, analysis, debugging, documentation, default]
+                score: { type: number, minimum: 0, maximum: 1 }
+      responses:
+        "200":
+          description: Override stored
+        "400":
+          description: Invalid request body
+        "401":
+          description: Management authentication required
   /api/intelligence/sync:
     delete:
       tags:
@@ -11151,9 +11976,25 @@ paths:
       tags:
         - Intelligence
       summary: "POST intelligence › sync"
+      description: Triggers an intelligence sync. A body without a source flag runs the Arena ELO sync (`dryRun` previews it without writing); `rebuildTier` rebuilds only the persisted `models_dev_tier` source; `syncArenaElo` forces the Arena sync alongside it.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                dryRun: { type: boolean }
+                rebuildTier: { type: boolean, default: false }
+                syncArenaElo: { type: boolean, default: false }
       responses:
         "200":
-          description: OK
+          description: Sync completed; `tier` carries `{ upserted, pruned }` when `rebuildTier` was set
+        "400":
+          description: Invalid request body
+        "502":
+          description: The Arena ELO sync failed
   /api/internal/codex-responses-ws:
     post:
       tags:
@@ -11203,6 +12044,93 @@ paths:
       responses:
         "200":
           description: OK
+  /api/keys/{id}/self-service:
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › <id> › self service"
+      description: >-
+        Self-service settings, what the key holder can see through /v1/me/status, the providers
+        the key can reach, and an admin preview of its /v1/me/status body (always includes
+        limits and settings-filtered accountQuotas, regardless of scopes).
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Settings and preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    $ref: "#/components/schemas/ApiKeySelfServiceSettings"
+                  visibility:
+                    type: object
+                    properties:
+                      selfUsage:
+                        type: boolean
+                      accountQuota:
+                        type: boolean
+                  availableProviders:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider:
+                          type: string
+                        connectionCount:
+                          type: integer
+                        quotaSupported:
+                          type: boolean
+                  status:
+                    $ref: "#/components/schemas/ApiKeySelfServiceStatus"
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Keys
+      summary: "PUT keys › <id> › self service"
+      description: Update the key's self-service settings. Omitted fields keep their value.
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                sharedQuotaProviders:
+                  type: array
+                  nullable: true
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 64
+                anthropicRateLimitHeaders:
+                  type: string
+                  enum: [auto, forward, strip]
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    $ref: "#/components/schemas/ApiKeySelfServiceSettings"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /api/keys/groups:
     get:
       tags:
@@ -11329,10 +12257,70 @@ paths:
     get:
       tags:
         - Logs
-      summary: "GET logs › console"
+      summary: Read retained application console history
+      description: >-
+        Requires management access. Reads the active file and retained OmniRoute
+        timestamped rotations, returning the newest page in display order. The
+        default range is all retained history, not only the last hour. Reads are
+        bounded to 64 files, 4096 directory entries and 8 MiB per request; individual
+        lines above 256 KiB are skipped. A cursor continues older pages and is bound
+        to the original filters and file identity. Deleted or replaced history
+        requires a fresh request. Retention settings are unchanged.
+      parameters:
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [1h, 24h, 7d, all]
+            default: all
+        - in: query
+          name: level
+          schema:
+            type: string
+            enum: [all, trace, debug, info, warn, error, fatal]
+            default: all
+        - in: query
+          name: component
+          schema:
+            type: string
+            maxLength: 128
+        - in: query
+          name: limit
+          description: Positive integer; values above 2000 are clamped.
+          schema:
+            type: integer
+            minimum: 1
+            default: 500
+        - in: query
+          name: cursor
+          description: Opaque value returned by X-Console-Next-Cursor.
+          schema:
+            type: string
+            maxLength: 1800
       responses:
         "200":
-          description: OK
+          description: Console entries in display order; an empty page can still have a cursor.
+          headers:
+            X-Console-Next-Cursor:
+              description: Opaque cursor for older retained history, when available.
+              schema:
+                type: string
+            X-Console-Truncated:
+              description: Whether a scan, directory, file or line bound was reached.
+              schema:
+                type: string
+                enum: ["true", "false"]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        "400":
+          description: Invalid query or cursor/filter mismatch.
+        "410":
+          description: Retained history changed; refresh without a cursor.
   /api/logs/detail:
     get:
       tags:
@@ -11586,6 +12574,123 @@ paths:
       responses:
         "200":
           description: OK
+  /api/oauth/{provider}/import-export:
+    post:
+      tags:
+        - Oauth
+      summary: Import OAuth accounts from a third-party account-manager export
+      description: >
+        Bulk-imports OAuth accounts from a plaintext account-manager export (for example
+        Antigravity Manager's cloud-accounts export). The body is the export document itself:
+        `{ "accounts": [...] }`, a bare array, or a single record, with at most 100 accounts and
+        at most 5 MiB. Tokens may live under a nested `token` object or flat on the record, in
+        snake_case or camelCase. Each record is refreshed and finalized through the same path as
+        `paste-credentials`, only an upstream-verified account email takes part in de-duplication,
+        and re-importing refreshes an existing connection in place. Supported providers are those
+        accepted by `paste-credentials` (`antigravity`, `agy`). Requires management authentication.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - antigravity
+              - agy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    accounts:
+                      type: array
+                      maxItems: 100
+                      items:
+                        type: object
+                        additionalProperties: true
+                - type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    additionalProperties: true
+                - type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Per-record import summary (also returned when some or all records failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - imported
+                  - failed
+                  - total
+                  - results
+                properties:
+                  success:
+                    type: boolean
+                    description: True only when no record failed.
+                  imported:
+                    type: integer
+                  failed:
+                    type: integer
+                  total:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - index
+                        - ok
+                      properties:
+                        index:
+                          type: integer
+                        email:
+                          type: string
+                        ok:
+                          type: boolean
+                        connectionId:
+                          type: string
+                        connectionEmail:
+                          type: string
+                        error:
+                          type: string
+        "400":
+          description: Unsupported provider, invalid or empty JSON body, or no accounts in the payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Missing or invalid management credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "413":
+          description: Account export exceeds the 5 MiB request body limit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
   /api/oauth/cliproxy-import:
     get:
       tags:
@@ -13703,6 +14808,71 @@ paths:
       responses:
         "200":
           description: OK
+  /api/system/metrics:
+    get:
+      tags:
+        - System
+      summary: Host and OmniRoute process CPU and memory
+      description: >-
+        Management-tier (dashboard session or management API key) snapshot behind the home-page
+        system metrics cards. CPU percentages are deltas since the previous call that was at least
+        400 ms earlier, so the first call after process start (and any call inside the 400 ms
+        window) returns the last computed value, which is `0` before the first delta. Host values
+        come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a
+        container limit; the process CPU percentage is normalised by the host core count. Sent
+        with `Cache-Control: no-store, no-cache, must-revalidate`.
+      responses:
+        "200":
+          description: Host and process metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [host, process]
+                properties:
+                  host:
+                    type: object
+                    required: [cpuPercent, memory, cpuCount, platform]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: Host CPU busy share since the previous sample, 0-100.
+                      memory:
+                        type: object
+                        required: [totalBytes, usedBytes, freeBytes, usedPercent]
+                        properties:
+                          totalBytes: { type: integer }
+                          usedBytes: { type: integer }
+                          freeBytes: { type: integer }
+                          usedPercent: { type: number, minimum: 0, maximum: 100 }
+                      cpuCount: { type: integer, minimum: 0 }
+                      platform:
+                        type: string
+                        description: Node.js `process.platform`.
+                  process:
+                    type: object
+                    required: [cpuPercent, memory, uptimeSeconds, pid]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: OmniRoute process CPU share of the whole host, 0-100.
+                      memory:
+                        type: object
+                        required: [rssBytes, heapUsedBytes, heapTotalBytes]
+                        properties:
+                          rssBytes: { type: integer }
+                          heapUsedBytes: { type: integer }
+                          heapTotalBytes: { type: integer }
+                      uptimeSeconds: { type: integer }
+                      pid: { type: integer }
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/system/version:
     get:
       tags:
@@ -14229,16 +15399,36 @@ paths:
       tags:
         - V1 Accounts
       summary: "GET accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Accounts
       summary: "PUT accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/agents/credentials:
     get:
       tags:
@@ -14486,9 +15676,19 @@ paths:
       tags:
         - V1 Issues
       summary: "POST issues › report"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/management/proxies:
     delete:
       tags:
@@ -14554,9 +15754,29 @@ paths:
       tags:
         - V1 Me
       summary: "GET me › status"
+      description: >-
+        Self-service usage status for the calling API key (also served at /v1/me/status).
+        Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope
+        `self:usage`. `accountQuotas` / `accountQuota` are included only with scope
+        `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting.
+        `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly`
+        are cached per key for 60 s, so they may lag by up to 60 s.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
       responses:
         "200":
-          description: OK
+          description: Status for the calling key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeySelfServiceStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: The key lacks the self:usage scope
+        "500":
+          description: Status could not be built
   /api/v1/models/{model}:
     get:
       tags:
@@ -14593,16 +15813,85 @@ paths:
       tags:
         - V1 Providers
       summary: "GET providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Providers
       summary: "PUT providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
+  /api/v1/quota-recoveries/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+        description: Recovery ticket id returned in the `202` body of an opted-in request.
+    get:
+      tags:
+        - V1 Quota Recoveries
+      summary: Poll a quota recovery ticket
+      description: >-
+        Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or
+        `POST /api/v1/responses` turn that failed with a terminal quota error. A request
+        opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and
+        `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be
+        `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a
+        connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for
+        up to 24 h). Instead of the quota error the caller then receives `202` with
+        `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Completed: the recovered upstream response body (header
+            `X-OmniRoute-Recovery-State: completed`). Other final states (`failed`,
+            `needs_confirmation`, `cancelled`, `expired`) return `{ recovery }`.
+        "202":
+          description: "Still `pending` or `running`; body is `{ recovery }`."
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+    delete:
+      tags:
+        - V1 Quota Recoveries
+      summary: Cancel a quota recovery ticket
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: 'Cancelled; body is `{ recovery: { id, state: "cancelled" } }`.'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: No ticket with this id for the calling API key.
+        "409":
+          description: "Only `pending` or `needs_confirmation` tickets can be cancelled."
   /api/v1/quotas/check:
     get:
       tags:
@@ -14739,21 +16028,147 @@ paths:
       responses:
         "200":
           description: OK
-  /api/v1/video-bridge/drilldown:
-    delete:
-      tags:
-        - V1 Video-bridge
-      summary: "DELETE video bridge › drilldown"
+  /api/v1/systemone:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions
+      description: >-
+        One `state` plus typed `questions` (`noul` / `choice` / `score`); the
+        backend is selected by the model id — `typesafe/jev-*` or a bare
+        `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
+        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        probabilities and usage (tokens, cost) pass through untouched.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
       responses:
         "200":
-          description: OK
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
     get:
-      tags:
-        - V1 Video-bridge
-      summary: "GET video bridge › drilldown"
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
       responses:
         "200":
-          description: OK
+          description: Model list (same shape as GET /api/v1/models).
+  /api/v1/video-bridge/drilldown:
+    get:
+      tags: [System]
+      summary: Read authenticated tenant-bound video frame variants
+      description: Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+        - in: query
+          name: variant
+          schema: { type: string, enum: [preview, standard, detail], default: detail }
+          description: JPEG maximum dimension 320, 640 or 1280 respectively; never upscaled.
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          description: Page frame limit; cannot be combined with the legacy frames alias.
+        - in: query
+          name: frames
+          schema: { type: integer, minimum: 1, maximum: 8 }
+          deprecated: true
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: start
+          schema: { type: number, minimum: 0 }
+        - in: query
+          name: end
+          schema: { type: number, minimum: 0 }
+          description: Must follow start when both bounds are supplied. Duplicate or unknown query keys are rejected.
+      responses:
+        "200":
+          description: No-store page with actual variant derivation metadata and bounded JPEG frames
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [derivation, durationSeconds, frames, hasMore, page, variant]
+                properties:
+                  derivation:
+                    {
+                      type: object,
+                      description: "Content hash, parent hash, policy, version, creation time and actual JPEG resolution.",
+                    }
+                  durationSeconds: { type: number }
+                  focusWindow: { type: object }
+                  frames:
+                    type: array
+                    maxItems: 8
+                    items:
+                      type: object
+                      required: [dataUri, timestampSeconds, width, height]
+                      properties:
+                        dataUri: { type: string }
+                        timestampSeconds: { type: number }
+                        width: { type: integer }
+                        height: { type: integer }
+                  hasMore: { type: boolean }
+                  page: { type: integer, minimum: 0 }
+                  variant: { type: string, enum: [preview, standard, detail] }
+        "400": { description: Invalid or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "404": { description: "Unknown, expired or cross-key handle" }
+        "413": { description: Serialized response exceeds 32 MiB; request fewer frames }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
+    delete:
+      tags: [System]
+      summary: Delete an authenticated owner's video drill-down handle
+      description: Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: handle
+          required: true
+          schema: { type: string, pattern: "^(?:v1\\.[A-Za-z0-9_-]{43}|[0-9a-f]{64})$" }
+      responses:
+        "200":
+          description: No-store deletion result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [removed]
+                properties:
+                  removed: { type: integer, minimum: 0, maximum: 1 }
+        "400": { description: Invalid handle or ambiguous query }
+        "401": { description: Authentication required or invalid API key }
+        "403": { description: Remote access disabled or API-key policy denied }
+        "499": { description: Request cancelled }
+        "503": { description: Temporarily unavailable; sanitized error }
   /api/v1/videos/generations:
     get:
       tags:
@@ -15116,6 +16531,351 @@ paths:
         "200":
           description: OK
 
+  # --- Team billing cost centers ---------------------------------------------
+
+  /api/teams:
+    get:
+      tags: [Teams]
+      summary: List billing Teams
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: includeArchived
+          schema: { type: boolean, default: false }
+        - in: query
+          name: includeKeyOptions
+          description: Include all existing API-key id/name choices and active billing team id/name; no credential fields.
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Team list; keyOptions is omitted unless requested.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teams: { type: array, items: { type: object } }
+                  keyOptions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        name: { type: string, nullable: true }
+                        teamId: { type: string, nullable: true }
+                        teamName: { type: string, nullable: true }
+        "401": { description: Unauthorized }
+    post:
+      tags: [Teams]
+      summary: Create a billing Team with an optional soft shared budget
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamCreate"
+      responses:
+        "201": { description: Team created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "409": { description: Team name already exists }
+
+  /api/teams/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: Get a billing Team and its active API-key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200":
+          description: Team and members plus authoritative current successful-usage budgetStatus; null for unlimited or archived teams. Backend errors return 500.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  team: { type: object }
+                  members: { type: array, items: { type: object } }
+                  budgetStatus:
+                    $ref: "#/components/schemas/TeamBudgetStatus"
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    patch:
+      tags: [Teams]
+      summary: Update a billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamUpdate"
+      responses:
+        "200": { description: Team updated }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+        "409": { description: Team name already exists or the Team is archived }
+    delete:
+      tags: [Teams]
+      summary: Archive a billing Team and close its active key assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team archived }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
+  /api/teams/{id}/members:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [Teams]
+      summary: List active API-key billing assignments
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Active assignments }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+    put:
+      tags: [Teams]
+      summary: Assign an API key to this billing Team
+      security:
+        - ManagementSessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberAssignment"
+      responses:
+        "200": { description: Assignment created }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Team or API key not found }
+        "409": { description: Assignment timestamp conflict }
+    delete:
+      tags: [Teams]
+      summary: Close an API-key billing assignment
+      security:
+        - ManagementSessionAuth: []
+      parameters:
+        - in: query
+          name: apiKeyId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Assignment closed }
+        "400": { description: Invalid request }
+        "401": { description: Unauthorized }
+        "404": { description: Assignment not found }
+
+  /api/teams/{id}/usage:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string, format: uuid }
+      - in: query
+        name: startDate
+        schema: { type: string, format: date-time }
+      - in: query
+        name: endDate
+        schema: { type: string, format: date-time }
+    get:
+      tags: [Teams]
+      summary: Get immutable Team usage attribution with per-key drill-down
+      description: >-
+        Attribution is resolved when each terminal usage row is persisted and
+        is immutable thereafter. Estimated list cost comes from the local model
+        catalog; actual provider cost, subscription quota, and compression
+        savings are null when unavailable. The budget is a soft committed-usage
+        check and can overshoot under concurrency. Retained daily data is included
+        only for complete UTC days inside the requested range.
+      security:
+        - ManagementSessionAuth: []
+      responses:
+        "200": { description: Team usage report }
+        "400": { description: Invalid range }
+        "401": { description: Unauthorized }
+        "404": { description: Team not found }
+
+  /api/v1/fal/models:
+    get:
+      x-agent-skill-excluded: true
+      tags: [Models]
+      summary: Discover Fal endpoints or load one endpoint's validated schema
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: endpoint_id, schema: { type: string } }
+        - { in: query, name: connection_id, schema: { type: string } }
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: cursor, schema: { type: string } }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1 } }
+        - { in: query, name: refresh, schema: { type: boolean } }
+      responses:
+        "200": { description: Catalog page or endpoint schema and capabilities }
+        "400": { description: Invalid endpoint or schema }
+        "502": { description: Upstream discovery unavailable or incomplete }
+  /api/v1/fal/run:
+    post:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Execute validated native Fal model inputs
+      security:
+        - BearerAuth: []
+      parameters:
+        - {
+            in: header,
+            name: Idempotency-Key,
+            schema: { type: string },
+            description: Stable queue submission key,
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [endpoint_id, input]
+              properties:
+                endpoint_id:
+                  {
+                    type: string,
+                    description: Canonical owner/app/subpath without gateway provider prefix,
+                  }
+                connection_id: { type: string }
+                transport:
+                  {
+                    type: string,
+                    enum: [queue, direct, stream, realtime, http-websocket],
+                    default: queue,
+                  }
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Native output and artifacts, or native SSE/realtime events }
+        "202": { description: Persisted queue job receipt with gateway tracking URLs }
+        "400": { description: Invalid inputs or undocumented transport }
+        "401": { description: Missing authentication or Fal credentials }
+        "403": { description: Model, endpoint or connection scope refused }
+        "429": { description: Rate, quota or budget limit }
+        "502":
+          {
+            description: Upstream failure; recover uncertain queue submissions with the same idempotency key,
+          }
+        "504": { description: Upstream wait timed out }
+  /api/v1/fal/jobs/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Poll a saved Fal job or retrieve its result without resubmission
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: result, schema: { type: boolean } }
+        - {
+            in: query,
+            name: artifact,
+            schema: { type: string },
+            description: Authenticated binary file ID; same worker,
+            expires after 10 minutes,
+          }
+      responses:
+        "200":
+          {
+            description: Job status,
+            native output and artifacts,
+            or an authenticated binary download with upstream content type,
+          }
+        "202": { description: Submission outcome is still unknown }
+        "403": { description: Connection is outside the caller's scope }
+        "404": { description: Job not found or not owned by caller }
+    post:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Send one authorized invocation to an active Fal realtime or HTTP WebSocket
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              additionalProperties: false
+              properties:
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Input sent; results arrive on the original native SSE connection }
+        "409": { description: Previous HTTP WebSocket invocation has not ended }
+        "410": { description: WebSocket session expired or belongs to another worker }
+        "429": { description: Rate, quota or budget limit }
+    delete:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Cancel a saved Fal job or close its realtime session
+      security:
+        - BearerAuth: []
+      responses:
+        "200": { description: Queued job cancelled or realtime socket closed }
+        "202": { description: Cancellation requested; upstream may still finish }
+        "409": { description: Upstream did not provide cancellation for this job }
+  /api/providers/{id}/fal:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Search Fal models or load a schema for a managed connection
+      responses:
+        "200": { description: Catalog page or validated endpoint schema }
+    put:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Register a validated native Fal endpoint or schema override
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint_id, openapi]
+              additionalProperties: false
+              properties:
+                endpoint_id: { type: string }
+                openapi: { type: object, additionalProperties: true }
+                metadata: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Schema validated and saved with native execution path }
+        "400": { description: Invalid registration or input schema }
+    delete:
+      x-agent-skill-excluded: true
+      tags: [Providers]
+      summary: Remove a Fal endpoint override and cached schema
+      parameters:
+        - { in: query, name: endpoint_id, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Cached schema or override removed }
+
 components:
   securitySchemes:
     BearerAuth:
@@ -15128,6 +16888,11 @@ components:
         includes `manage` or `admin` scope. See docs/guides/MANAGEMENT-AUTH.md.
         Bearer credentials are accepted on management routes that use this scheme;
         they are not rejected solely for being Bearer.
+    XApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status).
     ManagementSessionAuth:
       type: apiKey
       in: cookie
@@ -15153,6 +16918,34 @@ components:
               error:
                 type: string
                 example: Unauthorized
+    AnthropicUnauthorized:
+      description: >-
+        Missing or invalid API key on the Anthropic Messages endpoints, returned in
+        Anthropic's error envelope so Anthropic clients (Claude Code, Anthropic SDKs)
+        show the message. The correlation id is on the `x-request-id` header.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [type, error]
+            properties:
+              type:
+                type: string
+                enum: [error]
+              error:
+                type: object
+                required: [type, message]
+                properties:
+                  type:
+                    type: string
+                    enum: [authentication_error]
+                  message:
+                    type: string
+          example:
+            type: error
+            error:
+              type: authentication_error
+              message: Invalid API key
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:
@@ -15216,6 +17009,129 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    ImportedApiKey:
+      type: object
+      additionalProperties: false
+      required: [id, name, key, scopes, modelAccessMode, isActive]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        key: { type: string, description: Masked key only; never a usable bearer }
+        modelAccessMode: { type: string, enum: [all, restricted] }
+        allowedModels: { type: array, items: { type: string } }
+        blockedModels: { type: array, items: { type: string } }
+        allowedCombos: { type: array, items: { type: string } }
+        allowedConnections: { type: array, items: { type: string } }
+        preferredConnections: { type: array, items: { type: string } }
+        allowedQuotas: { type: array, items: { type: string } }
+        scopes: { type: array, items: { type: string } }
+        noLog: { type: boolean }
+        autoResolve: { type: boolean }
+        isActive: { type: boolean }
+        isBanned: { type: boolean }
+        revokedAt: { type: [string, "null"] }
+        expiresAt: { type: [string, "null"] }
+        accessSchedule: { type: [object, "null"] }
+        maxRequestsPerDay: { type: [integer, "null"] }
+        maxRequestsPerMinute: { type: [integer, "null"] }
+        throttleDelayMs: { type: [integer, "null"] }
+        rateLimits: { type: [array, "null"], items: { type: object } }
+        maxSessions: { type: integer }
+        ipAllowlist:
+          description: Stored IP allowlist representation
+          type: [string, array, "null"]
+          items: { type: string }
+        proxyId: { type: [string, "null"] }
+        allowedEndpoints: { type: array, items: { type: string } }
+        streamDefaultMode: { type: string, enum: [legacy, json] }
+        cacheDefaultMode: { type: string, enum: [legacy, bypass] }
+        codexServiceMode: { type: string, enum: [inherit, default, priority, flex] }
+        disableNonPublicModels: { type: boolean }
+        allowUsageCommand: { type: boolean }
+        usageLimitEnabled: { type: boolean }
+        dailyUsageLimitUsd: { type: [number, "null"] }
+        weeklyUsageLimitUsd: { type: [number, "null"] }
+        chaosModeEnabled: { type: boolean }
+        compressionEnabled: { type: boolean }
+        allowAutoCombos: { type: boolean }
+        allowCcDiscoveryAliases: { type: boolean }
+        catalogScope: { type: string, enum: [all, combos, models] }
+        forcedModel: { type: [string, "null"] }
+    CliVersionStatus:
+      type: object
+      description: >-
+        One provider kind as the dashboard sees it. `version` is the operator
+        override, `effective` is what actually goes on the wire, and `source`
+        names the layer that won.
+      required: [key, version, effective, source, pinned]
+      properties:
+        key: { type: string, enum: [claude, codex] }
+        version:
+          type: [string, "null"]
+          description: The operator override, or null when none is set.
+        effective: { type: string, description: The version advertised upstream. }
+        source: { type: string, enum: [settings, env, discovered, default] }
+        pinned:
+          type: string
+          description: The captured pin the override can be reset to.
+    TeamCreate:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: maxBudgetUsd and budgetDuration must be configured or cleared together.
+
+    TeamUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, maxLength: 2000 }
+        maxBudgetUsd: { type: number, exclusiveMinimum: 0, nullable: true }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d], nullable: true }
+      description: >-
+        Either budget field may be edited while the other retains its current
+        value; send both as null to clear the budget. Edits preserve the
+        established rolling-window reset cadence.
+
+    TeamMemberAssignment:
+      type: object
+      additionalProperties: false
+      required: [apiKeyId]
+      properties:
+        apiKeyId: { type: string, format: uuid }
+        expectedTeamId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optional expected current billing team, or null for unassigned. A mismatch returns 409 without changing history. Omission retains legacy behavior.
+
+    TeamBudgetStatus:
+      type: object
+      nullable: true
+      properties:
+        teamId: { type: string }
+        teamName: { type: string }
+        enforcementMode: { type: string, enum: [soft_committed_usage] }
+        maxBudgetUsd: { type: number }
+        budgetDuration: { type: string, enum: [1d, 7d, 30d] }
+        windowStartIso: { type: string, format: date-time }
+        resetAtIso: { type: string, format: date-time }
+        estimatedListCostUsd: { type: number }
+        hasUnpricedUsage: { type: boolean }
+        hasPartialRetainedUsage:
+          type: boolean
+          description: Retained daily buckets overlap a rolling-window boundary. Displayed spend is incomplete; the existing soft-budget enforcement policy is unchanged.
+        exceeded: { type: boolean }
+        actualProviderCostUsd: { nullable: true }
+        subscriptionQuotaUsed: { nullable: true }
+        compressionSavingsUsd: { nullable: true }
+
     ElevenLabsSoundGeneration:
       type: object
       additionalProperties: true
@@ -16612,6 +18528,9 @@ components:
       description: >-
         Per-model pause state. `ok` means no pause observed by this instance;
         `unknown` marks ids that resolve to no routable provider model.
+        `none_honored` reports whether reasoning_effort=none was honored in
+        the trailing call_logs window (`true` honored, `false` not honored,
+        `null` unknown when the sample is empty or too small).
       properties:
         id:
           type: string
@@ -16625,6 +18544,16 @@ components:
         observed_at:
           type: string
           format: date-time
+        none_honored:
+          type: boolean
+          nullable: true
+          description: Whether reasoning_effort=none was honored; null when unknown.
+        none_sample_size:
+          type: integer
+          description: Number of none requests counted in the window.
+        none_window_hours:
+          type: integer
+          description: Trailing window in hours backing none_honored.
 
     Model:
       type: object
@@ -16636,6 +18565,16 @@ components:
           example: model
         owned_by:
           type: string
+        name:
+          type: string
+          description: >-
+            Human-readable display name. Built-in models use the registry name and
+            synced models the provider's published name; a model with neither gets
+            a name derived from its id (for example `claude-opus-5-5` becomes
+            `Claude Opus 5.5`). A name shared by several providers is prefixed with
+            the provider (`gh/GPT-5.5`). Omitted when the `MODEL_CATALOG_INCLUDE_NAMES`
+            feature flag is off.
+          example: GLM 5.3 Flash
         pricing:
           $ref: "#/components/schemas/ModelPricing"
 
@@ -16707,6 +18646,16 @@ components:
             are allowed by default (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`);
             cloud-metadata / link-local endpoints (169.254.0.0/16) are always
             blocked.
+        mirrorUrls:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+          description: >-
+            Extra feed URLs, redacted like `url`. Each feed is fetched
+            on its own; a partial failure keeps the unavailable feeds'
+            last nodes.
         enabled:
           type: boolean
         mode:
@@ -16763,6 +18712,23 @@ components:
           type: string
           format: date-time
 
+    ModelLimitSources:
+      type: object
+      description: >-
+        Which rule supplied each resolved token limit (`GET /api/models?withLimits=1`).
+        Values: `override:context`, `override:max_input`, `override:max_output`,
+        `static-authoritative:<provider>/<model>`, `synced:<provider>/<model>` (models.dev),
+        `registry:<provider>/<model>`, `spec:<model>`, optionally prefixed with `effort-base:`
+        when borrowed from an effort variant's base model, or `none`.
+      properties:
+        contextWindow:
+          type: string
+        maxInputTokens:
+          type: string
+        maxOutputTokens:
+          type: string
+      required: [contextWindow, maxInputTokens, maxOutputTokens]
+
     ProviderConnection:
       type: object
       properties:
@@ -16810,6 +18776,233 @@ components:
           nullable: true
           minimum: 0
 
+    ApiKeySelfServiceSettings:
+      type: object
+      properties:
+        sharedQuotaProviders:
+          type: array
+          nullable: true
+          description: Providers whose account quotas the key holder may see. null = all, [] = none.
+          items:
+            type: string
+        anthropicRateLimitHeaders:
+          type: string
+          enum: [auto, forward, strip]
+    ApiKeySelfServiceUsageWindow:
+      type: object
+      properties:
+        periodStartAt:
+          type: string
+          format: date-time
+        resetAt:
+          type: string
+          format: date-time
+        costUsd:
+          type: number
+          description: >-
+            Metered spend in the window from the budget ledger (what budgets and usage limits
+            count). Flat-rate / subscription providers count $0.
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the window, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests that used tokens but have no known price for their provider /
+            model; they add $0 to listPriceUsd.
+        requests:
+          type: integer
+        tokens:
+          type: object
+          properties:
+            input:
+              type: integer
+            output:
+              type: integer
+            cacheRead:
+              type: integer
+            cacheCreation:
+              type: integer
+            reasoning:
+              type: integer
+            total:
+              type: integer
+    ApiKeySelfServiceCost:
+      type: object
+      description: >-
+        Spend in the key's budget period (the current UTC month when the key has no budget).
+      properties:
+        period:
+          type: string
+          description: The budget's reset interval, or monthly without a budget.
+        currency:
+          type: string
+          example: USD
+        usedUsd:
+          type: number
+          description: >-
+            Metered spend in the period from the budget ledger (what the budget counts).
+            Flat-rate / subscription providers count $0.
+        limitUsd:
+          type: number
+          nullable: true
+        remainingUsd:
+          type: number
+          nullable: true
+        usedPercent:
+          type: number
+          nullable: true
+        warningThreshold:
+          type: number
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the same period, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests in the period that used tokens but have no known price for their
+            provider / model; they add $0 to listPriceUsd.
+    ApiKeySelfServiceLimit:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usage_limit:daily
+        source:
+          type: string
+          enum: [usage_limit, budget, token_limit, key_quota]
+        metric:
+          type: string
+          enum: [usd, tokens, requests]
+        window:
+          type: string
+          enum: [minute, daily, weekly, monthly]
+        scope:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [global, provider, model]
+            value:
+              type: string
+              nullable: true
+        limit:
+          type: number
+        used:
+          type: number
+        remaining:
+          type: number
+        utilization:
+          type: number
+          minimum: 0
+          maximum: 1
+        exceeded:
+          type: boolean
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+    ApiKeySelfServiceAccountQuota:
+      type: object
+      properties:
+        provider:
+          type: string
+        connectionId:
+          type: string
+        label:
+          type: string
+          description: Account display name; email-like names are masked.
+        shared:
+          type: boolean
+        plan: {}
+        quotas:
+          type: object
+          additionalProperties:
+            type: object
+            description: >-
+              One quota window as a percentage. Windows without a known fraction (for example a
+              credit balance) are omitted.
+            properties:
+              usedPercentage:
+                type: number
+                minimum: 0
+                maximum: 100
+              remainingPercentage:
+                type: number
+                minimum: 0
+                maximum: 100
+              resetAt:
+                type: string
+                format: date-time
+                nullable: true
+        fetchedAt:
+          type: string
+          format: date-time
+          nullable: true
+        stale:
+          type: boolean
+          description: true when the last refresh failed and cached data is served.
+        available:
+          type: boolean
+        reason:
+          type: string
+          enum: [connection_lookup_failed, not_supported, fetch_failed, not_available]
+    ApiKeySelfServiceStatus:
+      type: object
+      properties:
+        apiKey:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        generatedAt:
+          type: string
+          format: date-time
+        usage:
+          type: object
+          properties:
+            cost:
+              $ref: "#/components/schemas/ApiKeySelfServiceCost"
+            tokens:
+              type: object
+              additionalProperties: true
+            daily:
+              $ref: "#/components/schemas/ApiKeySelfServiceUsageWindow"
+            weekly:
+              $ref: "#/components/schemas/ApiKeySelfServiceUsageWindow"
+        limits:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKeySelfServiceLimit"
+        accountQuotas:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
+        accountQuota:
+          $ref: "#/components/schemas/ApiKeySelfServiceAccountQuota"
     ApiKey:
       type: object
       properties:

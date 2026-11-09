@@ -8,14 +8,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { writeNodeCliFixture } from "../helpers/nodeCliFixture.ts";
 
 const TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auggie-spawn-"));
 process.env.DATA_DIR = TEST_DIR;
 const MARKER = path.join(TEST_DIR, "spawned");
-const FAKE_AUGGIE = path.join(TEST_DIR, "auggie");
-fs.writeFileSync(FAKE_AUGGIE, `#!/bin/sh\ntouch "${MARKER}"\necho "auggie 1.2.3"\n`, {
-  mode: 0o755,
-});
+const FAKE_AUGGIE = writeNodeCliFixture(
+  TEST_DIR,
+  "auggie",
+  `require("node:fs").writeFileSync(${JSON.stringify(MARKER)}, ""); console.log("auggie 1.2.3");`
+);
 
 const savedBin = process.env.AUGGIE_BIN;
 process.env.AUGGIE_BIN = FAKE_AUGGIE;
@@ -23,8 +25,10 @@ process.env.AUGGIE_BIN = FAKE_AUGGIE;
 const { validateAuggieProvider } =
   await import("../../src/lib/providers/validation/specialtyInline.ts");
 const { validateProviderApiKey } = await import("../../src/lib/providers/validation.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 test.after(() => {
+  resetDbInstance();
   if (savedBin === undefined) delete process.env.AUGGIE_BIN;
   else process.env.AUGGIE_BIN = savedBin;
   fs.rmSync(TEST_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });

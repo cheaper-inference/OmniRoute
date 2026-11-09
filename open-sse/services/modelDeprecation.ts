@@ -61,6 +61,12 @@ const BUILT_IN_ALIASES: Record<string, string> = {
   // `400 Model is unavailable`. Clients pinned to the old id keep working.
   "deepseek-v4-flash-free": "deepseek-v4.1-flash-free",
 
+  // OpenCode Zen deprecated its free MiMo V2.5 snapshot on 2026-10-21: the
+  // upstream answers the old id with `410 Model mimo-v2.5-free has been
+  // deprecated. Use mimo-v2.6-flash-free instead.` Clients pinned to the old id
+  // keep working.
+  "mimo-v2.5-free": "mimo-v2.6-flash-free",
+
   // Mistral short aliases
   "mistral-large": "mistral-large-latest",
   "mistral-small": "mistral-small-latest",

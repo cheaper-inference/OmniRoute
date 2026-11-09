@@ -1,6 +1,6 @@
 ---
 title: "Design System & Visual Identity"
-lastUpdated: 2026-10-27
+lastUpdated: 2026-11-03
 ---
 
 # OmniRoute — Design System & Visual Identity
@@ -8,10 +8,14 @@ lastUpdated: 2026-10-27
 > **Status:** the dashboard is built on the **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
 > `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
-> theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) is the UI family, Instrument Serif only for large sparse
-> display text (`.ci-dashboard-display`), IBM Plex Mono for code — all self-hosted through the
-> `@fontsource/*` imports at the top of `src/app/globals.css`. Every icon is a Lucide glyph.
+> theme; the default preference is `system`. The default palette is the kit's **Editions** appearance
+> (warm paper neutrals and the copper accent `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Settings →
+> Appearance → Color palette offers **Classic**, the kit's base tokens with the lime accent. Switzer is
+> the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
+> `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
+> imported by `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`):
+> Inter for Cyrillic, Greek and Vietnamese and, only under `html[dir="rtl"]`, Vazirmatn for Arabic script.
+> Every icon is a Lucide glyph.
 
 ## 1. Where things live
 
@@ -23,25 +27,52 @@ lastUpdated: 2026-10-27
   kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
   through the `@omniroute/ui-kit` barrel: the barrel pulls every component (including the date picker)
   into each importer. The kit stylesheet enters through `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, the complete sheet: the core `ci-ui.css` plus every pattern family).
 - **Tokens.** `packages/ui-kit/src/ci-tokens.css` declares the `--ci-*` tokens; `src/app/globals.css`
   bridges them to the legacy OmniRoute names (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
   `--table-*`, `--orch-status-*`, `--color-fd-*`), so the existing `var(--color-*)` reads and Tailwind
   utilities keep working. New code uses the Tailwind utilities (`bg-surface`, `text-text-muted`,
   `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) or kit classes — never a hex value
   (`tests/unit/design-kit-bridge.test.ts` enforces the bridge). `text-primary` resolves to
-  `--color-primary-ink` through `--text-color-primary` (lime-800 in light, the lime accent in dark), so
-  primary text stays readable while `bg-primary`/`border-primary` keep the lime surface. Chart series use
-  `--color-chart-1` … `--color-chart-5`.
+  `--color-primary-ink` through `--text-color-primary`, so primary text stays readable while
+  `bg-primary`/`border-primary` keep the accent surface: under Editions it is the kit's
+  `--ci-color-accent-active` (the deep copper `#99562f` in light, the copper accent in dark); under Classic,
+  lime-800 in light and the lime accent in dark. Chart series use
+  `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
+  `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
 - **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
-  `src/store/themeStore.ts` (mirrored by the inline bootstrap script in `src/app/layout.tsx`, which runs
+  `src/store/themeStore.ts` (mirrored by `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, which runs
   before hydration) sets `data-theme="dark"|"light"` and toggles the `.dark` class on `<html>` together.
   The kit's dark token set is keyed on `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
   OmniRoute's own dark overrides (the `.dark` block in `globals.css`) and the legacy Tailwind `dark:`
   utilities key on the `.dark` class. There are no accent color presets: the accent always comes from the
   kit, and a persisted preset from an older build is dropped when the store loads.
+- **Palettes.** Two, both from the kit (`src/shared/constants/appearancePalette.ts`): `editions`, the
+  default, and `classic`. Editions is the kit's `data-ci-appearance="editions"` attribute on `<html>`, which
+  `ci-editions.css` (imported by `ci-ui.css`) combines with `data-theme`; Classic is the attribute's
+  absence. The root layout server-renders the attribute, so a visitor with nothing stored (or no JS) gets
+  Editions on every surface — dashboard, login, `/status`, error pages, `/docs` and the PWA. The choice is
+  persisted next to the theme in the same `theme` store (`palette`, `setPalette()`, `applyPalette()` in
+  `src/store/themeStore.ts`) and applied before paint by `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`, inlined in the layout's `<head>`), which removes the attribute
+  only when the stored palette is `"classic"`; `src/app/global-error.tsx`, outside the root layout, applies
+  it from the same store. Do not put `data-ci-appearance` on any other element: the kit matches it with
+  `html:root:has([data-ci-appearance="editions"])`, so one descendant would switch the whole document.
+  The Editions `data-ci-editions-variant="landing"` variant is for marketing pages, not the dashboard.
+  Browser chrome: the server renders the default, Editions, in `viewport.themeColor` (one tag per
+  `prefers-color-scheme`) and the web manifest — `PWA_THEME_COLORS` in
+  `src/shared/constants/pwaThemeColors.ts`, the one mirror of the Editions `--ci-color-background`
+  (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by `tests/unit/pwa-theme-colors.test.ts`. The live
+  `<meta name="theme-color">` then follows the stored palette and mode: `THEME_BOOT_SCRIPT` rewrites the
+  tags before paint and the theme store's actions do it on every change (`resolveThemeColor()` /
+  `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, with `CLASSIC_PAGE_BACKGROUND` read from
+  the kit's `ciTokens`). An explicit light/dark theme sets every tag to that mode; `system` keeps one
+  colour per scheme. The manifest stays Editions: it is fetched once per install, without the
+  preference. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
+  under Editions the probe read flips the root `data-theme` for one synchronous pass, because the kit
+  resolves Editions light/dark from the root.
 - **Components (adapters).** `src/shared/components/index.tsx` keeps the OmniRoute component API (same
   names, default exports and props), and the primitives behind it are adapters over the kit: forms
   (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays and feedback
@@ -50,9 +81,9 @@ lastUpdated: 2026-10-27
   (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). An adapter imports the kit
   component by subpath and maps the legacy props onto it — for example `Button variant="primary"` is the
   kit `default` button (`--ci-button-primary-*`: the inverse surface in light, the accent with its
-  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is `outline` plus
-  the `.ci-button--warning` extension. The `.ci-button--warning` and `.ci-badge[data-tone]` rules at the
-  end of `globals.css` (`@layer components`) are OmniRoute extensions on top of the kit classes.
+  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
+  button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
+  `NativeSelect`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
 - **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
@@ -85,7 +116,8 @@ lastUpdated: 2026-10-27
 1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
    `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
    palette for callers that need a literal hex. The categorical palettes are no exception any more:
-   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   they ride on the kit's eight chart tokens (`--color-chart-1..8`, plus `-ink`/`-subtle`), in the
+   kit series order, through
    `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
    canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).
@@ -99,8 +131,8 @@ lastUpdated: 2026-10-27
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
    spacing and layout, not to re-color kit components.
-5. Headings: `.ci-heading` (Inter, no tracking) for page and section titles; `.ci-dashboard-display`
-   (Instrument Serif) only for large, sparse display text such as the error-page status code.
+5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
+   display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
    `src/app` or `src/shared/components`; in the dashboard tree (`src/app/(dashboard)` and
    `src/shared/components`) no raw `<select>`, `<textarea>` or `<table>` and no hand-rolled
@@ -143,11 +175,35 @@ lastUpdated: 2026-10-27
 
 ## 5. Updating the kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copies the upstream `src/` at that commit into
-`packages/ui-kit/src` and applies the single allowed transformation (it drops the `.js` suffix from
-relative imports). Then: review `git diff packages/ui-kit`, do a visual pass on providers, settings, combos,
-usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and `npm run test:vitest:ui`, and
-open the PR with the upstream changelog.
+`npm run check:ui-kit-upstream` compares the version pinned in `packages/ui-kit/UPSTREAM.md` with the
+newest `v*` tag of the upstream repo and prints the sync command when a release is out.
+
+The daily `UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) runs the same
+check. While the pin is behind, `scripts/ci/ui-kit-sync-pr.sh` keeps one sync PR open against the highest
+`release/vX.Y.Z` branch, on the rolling branch `chore/ui-kit-sync-latest`. It never merges: every kit
+release still needs a visual check on the local VPS. The branch is rebuilt when a newer release is out and
+left alone otherwise. An open PR with commits pushed by hand isn't overwritten, and a PR for a version
+that a maintainer closed unmerged stays closed until a newer release.
+
+When no PR can be opened (the target release is frozen, the PR has commits pushed by hand, the PR was
+closed, or no PR token is set) the workflow keeps one tracking issue open that says why.
+
+The workflow uses two secrets:
+
+- `secrets.UI_KIT_READ_TOKEN`: a read-only token for the private upstream repo. When the workflow can't
+  read upstream (no token, a token that stopped working, or GitHub unreachable) the run stays green but
+  writes a warning and keeps one separate issue open, which closes itself once a later run can read
+  upstream again.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: a fine-grained token on this repository with Contents and Pull requests
+  write access. The default `GITHUB_TOKEN` can't create PRs here, and a PR it opened wouldn't trigger CI.
+  Without this token the workflow only pushes the branch.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copies the upstream `src/` at that commit (`latest`
+= the newest `v*` tag) into `packages/ui-kit/src`, applies the single allowed transformation (it drops
+the `.js` suffix from relative imports), and sets the workspace version in `packages/ui-kit/package.json`
+and `package-lock.json` to the upstream one. Then: review `git diff packages/ui-kit`, do a visual pass on
+providers, settings, combos, usage and endpoint in both themes, run `npm run check:ui-kit-snapshot` and
+`npm run test:vitest:ui`, and open the PR with the upstream changelog.
 
 ## 6. README diagrams
 
@@ -157,17 +213,23 @@ image, and they are generated, not drawn by hand: 13 generator files at `scripts
 `tests/unit/docs/readme-*-svg.test.ts`, one per diagram, each byte-comparing the committed file with its
 generator's output (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the palette from `packages/ui-kit/src/ci-tokens.css`
-  (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`) and defines the text roles on
-  the kit faces — Instrument Serif for display, Inter for UI text, IBM Plex Mono for figures and code, the
-  same `@fontsource` packages `src/app/globals.css` loads for the dashboard. Light values sit on `:root`, dark
-  values behind `prefers-color-scheme: dark`, inside the file, so each image follows the viewer's scheme on
-  GitHub.
-- **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
-  embeds them as `@font-face` `data:` URIs — the only way kit typography reaches a README image, since
-  GitHub Markdown carries no CSS and the camo proxy blocks every external fetch. The subsets are latin-only;
-  the symbol glyphs that fall back to the system stack are allowed one by one in `SYMBOL_FALLBACKS`, and any
-  other uncovered glyph throws.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copies the Editions palette (the default look) from
+  `packages/ui-kit/src/ci-editions.css` (pinned against that file by
+  `tests/unit/docs/readme-diagram-theme.test.ts`, which also checks WCAG AA for every text colour on every
+  surface in both schemes; the one exception, light `warn`, is the kit warning darkened 10 % because the kit
+  value is 4.46:1 on the canvas) and defines the text roles on the kit's type scale (`ci-tokens.css`): Switzer at the kit's weights (400/500/600, display at 500) and tracking for
+  everything, except the code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), which
+  are IBM Plex Mono and are only for commands, URLs, identifiers and terminal screens.
+  Light values sit on `:root`, dark values behind `prefers-color-scheme: dark`, inside the file, so each
+  image follows the viewer's scheme on GitHub.
+- **Fonts.** GitHub Markdown carries no CSS and the camo proxy blocks every external fetch, so kit type has
+  to travel inside the file. `scripts/docs/readme-outline.mjs`, the last step of every generator, shapes the
+  Switzer roles with HarfBuzz and draws them as vector outlines (`<defs>` paths and `<use>`), with the arrows
+  and geometric symbols Switzer lacks drawn on its own metrics. Outlines, never an embedded font: Switzer's
+  licence (`packages/ui-kit/src/fonts/FFL.txt`) forbids subsetting and format conversion without written
+  consent and allows vector drawings, so do not reintroduce a Switzer `@font-face` or `data:` URI. The one
+  font left in a file is the OFL IBM Plex Mono subset for what stays real code text
+  (`scripts/docs/readme-fonts.mjs`), built from those characters; any glyph it cannot embed throws.
 - **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
   file with its size. A single generator also runs on its own (`node scripts/docs/gen-readme-<name>.mjs`;
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
@@ -180,7 +242,8 @@ generator's output (job `test-unit`).
   image (the SVG studio validator's rule).
 - **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
-  drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`
+  drawn text and the input of the outlining step. Canonical figures stay in `<text>` nodes (invisible once
+  outlined, `fill-opacity:0`), read by `check:docs-counts`
   (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run
   its validators on the generated file, so a figure that drifts from the code fails the test — fix the
   source the gate reads, never the number in the generator.
@@ -189,13 +252,16 @@ generator's output (job `test-unit`).
 
 - `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
 - `packages/ui-kit/UPSTREAM.md` — pinned upstream commit and license authorization; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
+  `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` and the adapters next to it; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
+  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
   `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

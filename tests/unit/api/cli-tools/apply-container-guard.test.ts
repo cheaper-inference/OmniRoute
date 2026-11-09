@@ -15,8 +15,27 @@ import { createManagementSessionToken } from "../../../helpers/managementSession
  * off for the whole suite would hide a regression in the guard itself.
  */
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-apply-guard-data-"));
-const TEST_XDG_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-apply-guard-xdg-"));
+function createRunnerIndependentTempDir(prefix: string): string {
+  // Evidence collectors may place TMPDIR inside a bind-mounted worktree. That is
+  // persistent by definition, so it is the wrong fixture for an ephemeral-target
+  // test. Use the platform default temp root while preserving the runner's env;
+  // if that root is also bind-mounted, the real guard assertions still fail.
+  const keys = ["TMPDIR", "TMP", "TEMP"] as const;
+  const original = new Map(keys.map((key) => [key, process.env[key]]));
+  for (const key of keys) delete process.env[key];
+  try {
+    return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  } finally {
+    for (const key of keys) {
+      const value = original.get(key);
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
+const TEST_DATA_DIR = createRunnerIndependentTempDir("omniroute-apply-guard-data-");
+const TEST_XDG_DIR = createRunnerIndependentTempDir("omniroute-apply-guard-xdg-");
 const originalDataDir = process.env.DATA_DIR;
 const originalXdg = process.env.XDG_CONFIG_HOME;
 // Fresh DB without a configured password → management auth is open, so these
@@ -287,13 +306,47 @@ describe("POST /api/cli-tools/apply — container guard", () => {
     assert.strictEqual(body.success, true);
     assert.strictEqual(body.configPath, OPENCODE_CONFIG);
     assert.ok(fs.existsSync(OPENCODE_CONFIG), "host write must land");
-    assert.strictEqual(
-      fs.statSync(OPENCODE_CONFIG).mode & 0o777,
-      0o600,
-      "generated CLI config must be private"
-    );
+    // NTFS does not represent POSIX owner/group/other bits. The writer's mode
+    // requests are checked on every platform in cli-helper/private-config-file.test.ts.
+    if (process.platform !== "win32") {
+      assert.strictEqual(
+        fs.statSync(OPENCODE_CONFIG).mode & 0o777,
+        0o600,
+        "generated CLI config must be private"
+      );
+    }
     const written = fs.readFileSync(OPENCODE_CONFIG, "utf-8");
     assert.ok(written.includes(catalogBaseUrl));
+  });
+
+  it("refuses a WhyCodes write in container mode with hostSetupCommand setup-whycodes", async () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-whycodes-apply-"));
+    const originalHome = process.env.WHYCODES_HOME;
+    process.env.WHYCODES_HOME = home;
+    try {
+      const res = await withContainerMode("1", () =>
+        POST(
+          applyRequest({
+            toolId: "whycodes",
+            baseUrl: catalogBaseUrl,
+            apiKey: "sk-test-guard",
+            model: "glm/glm-5.2",
+          })
+        )
+      );
+      assert.strictEqual(res.status, 422);
+      const body = await res.json();
+      assert.ok(body.containerEphemeralTarget, "422 must be keyed as containerEphemeralTarget");
+      assert.strictEqual(body.hostSetupCommand, "omniroute setup-whycodes");
+      assert.ok(typeof body.error === "string" && body.error.length > 0);
+      assert.ok(!body.error.includes("at /"), "error must not leak a stack trace");
+      assert.ok(!body.error.includes("sk-test-guard"), "error must not leak the API key");
+      assert.strictEqual(fs.existsSync(path.join(home, "config.toml")), false);
+    } finally {
+      if (originalHome === undefined) delete process.env.WHYCODES_HOME;
+      else process.env.WHYCODES_HOME = originalHome;
+      fs.rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
   });
 
   it("rejects malformed JSON and unknown write options without caching", async () => {

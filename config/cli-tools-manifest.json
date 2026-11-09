@@ -27,14 +27,15 @@
       "omp": [".omp/agent/models.yml"],
       "openclaw": [".openclaw/openclaw.json"],
       "opencode": [".config/opencode/opencode.json", ".config/opencode/opencode.jsonc"],
-      "pi": [".pi/config.json"],
+      "pi": [".pi/agent/models.json"],
       "prime-agent": [".prime-agent/config.json"],
       "qoder": [".qoder/settings.json"],
       "qwen": [".qwen/settings.json"],
       "smelt": [".smelt/config.json"],
       "windsurf": [],
       "zcode": [".zcode"],
-      "5dive": ["auth-profiles"]
+      "5dive": ["auth-profiles"],
+      "whycodes": ["config.toml"]
     }
   },
   "tools": {
@@ -516,6 +517,18 @@
         "generate": false
       }
     },
+    "openclaude": {
+      "displayName": "OpenClaude",
+      "aliases": [],
+      "binaries": ["openclaude"],
+      "surfaces": {
+        "catalog": true,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false
+      }
+    },
     "openclaw": {
       "displayName": "Open Claw",
       "aliases": [],
@@ -723,6 +736,28 @@
         "mode": "module",
         "module": "./setup-5dive.mjs",
         "exportName": "runSetup5diveCommand"
+      }
+    },
+    "whycodes": {
+      "displayName": "WhyCodes",
+      "aliases": ["why-codes", "why"],
+      "binaries": ["whycodes"],
+      "surfaces": {
+        "catalog": true,
+        "detect": true,
+        "run": true,
+        "configure": true,
+        "generate": true
+      },
+      "configureRecipe": {
+        "mode": "module",
+        "module": "./setup-whycodes.mjs",
+        "exportName": "runSetupWhyCodesCommand"
+      },
+      "runModel": {
+        "flag": "-m",
+        "prefix": "",
+        "required": false
       }
     }
   }

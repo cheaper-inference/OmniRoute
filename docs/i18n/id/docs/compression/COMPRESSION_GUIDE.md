@@ -32,93 +32,95 @@ Permintaan Klien
 
 ## Mode Kompresi
 
-### Off
+### Nonaktif
 
 Tidak ada kompresi yang diterapkan. Semua pesan diteruskan tanpa perubahan.
 
-### Lite Mode (penghematan ~15%, latensi <1ms)
+### Mode Lite (~15% penghematan, latensi <1ms)
 
-Mode paling aman — nol perubahan semantik, hanya pembersihan format:
+Mode paling aman — pembersihan format. Pemotongan hasil alat bersifat lossy, sehingga jalur default
+(tanpa opt-in `allow-lossy`, `engine:lite` atau kombinasi bernama) menjalankan lite dengan
+`compressToolResults: false`: hasil alat sebelumnya diteruskan ke provider tanpa perubahan.
 
-| Teknik                   | Deskripsi                                                     |
-| ------------------------ | ------------------------------------------------------------- |
-| `collapseWhitespace`     | Menggabungkan baris kosong berurutan dan spasi di akhir baris |
-| `dedupSystemPrompt`      | Menghapus pesan sistem yang duplikat                          |
-| `compressToolResults`    | Mengompresi output tool/fungsi yang bertele-tele              |
-| `removeRedundantContent` | Menghapus instruksi yang berulang                             |
-| `replaceImageUrls`       | Memendekkan data URI gambar base64                            |
+| Teknik                   | Deskripsi                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `collapseWhitespace`     | Menggabungkan baris kosong berurutan dan spasi di akhir                              |
+| `dedupSystemPrompt`      | Menghapus pesan sistem duplikat                                                      |
+| `compressToolResults`    | Memotong hasil alat sebelumnya ke batas lite (lossy: hanya dengan opt-in permintaan) |
+| `removeRedundantContent` | Menghapus instruksi yang berulang                                                    |
+| `replaceImageUrls`       | Memperpendek URI data gambar base64                                                  |
 
-**Cocok untuk:** Penggunaan yang selalu aktif, alur kerja yang kritis terhadap keamanan.
+**Terbaik untuk:** Penggunaan yang selalu aktif, alur kerja yang kritis terhadap keselamatan.
 
-### Standard Mode (penghematan ~30%)
+### Mode Standard (~30% penghematan)
 
-Terinspirasi oleh [Caveman](https://github.com/JuliusBrussee/caveman) — menghapus kata-kata pengisi dan frasa bertele-tele sambil mempertahankan makna:
+Terinspirasi oleh [Caveman](https://github.com/JuliusBrussee/caveman) — menghapus kata pengisi dan
+frasa yang bertele-tele sambil mempertahankan makna:
 
-- Menghapus kata-kata pengisi ("please", "I think", "basically", "actually")
-- Memadatkan frasa bertele-tele ("in order to" → "to", "as a result of" → "because")
-- Menghapus basa-basi sopan ("Would you mind...", "If you could possibly...")
-- 30+ aturan regex yang disetel untuk prompt coding
+- Menghapus kata pengisi ("please", "I think", "basically", "actually")
+- Memadatkan frasa yang bertele-tele ("in order to" → "to", "as a result of" → "because")
+- Menghapus ungkapan kesantunan yang bersifat ragu-ragu ("Would you mind...", "If you could possibly...")
+- Lebih dari 30 aturan regex yang disesuaikan untuk prompt coding
 
-**Cocok untuk:** Alur kerja coding harian, tim yang sadar biaya.
+**Terbaik untuk:** Alur kerja coding sehari-hari, tim yang memperhatikan biaya.
 
-### Aggressive Mode (penghematan ~50%)
+### Mode Aggressive (~50% penghematan)
 
-Manajemen riwayat pintar untuk sesi yang panjang:
+Manajemen riwayat cerdas untuk sesi yang panjang:
 
-- **Message Aging** — pesan yang lebih lama dikompresi secara bertahap
-- **Tool Result Compression** — output tool yang panjang dipotong atau dielisiasi (baris pertama/terakhir,
-  pemfilteran baris yang cocok, pemadatan key JSON)
-- **Structural Integrity Guards** — memastikan pasangan `tool_use` + `tool_result` tetap konsisten
-- **Context Window Awareness** — mematuhi batas token per model
+- **Penuaan Pesan** — pesan yang lebih lama dikompresi secara bertahap
+- **Kompresi Hasil Alat** — output alat yang panjang dipotong atau dihilangkan (baris pertama/terakhir,
+  pemfilteran baris yang cocok, pemadatan kunci JSON)
+- **Penjaga Integritas Struktural** — memastikan pasangan `tool_use` + `tool_result` tetap konsisten
+- **Kesadaran Jendela Konteks** — mematuhi batas token per model
 
-**Cocok untuk:** Sesi debugging yang panjang, basis kode besar.
+**Terbaik untuk:** Sesi debugging yang panjang, codebase besar.
 
-### Ultra Mode (penghematan ~75%)
+### Mode Ultra (~75% penghematan)
 
-Kompresi maksimum untuk skenario kritis token:
+Kompresi maksimum untuk skenario yang kritis terhadap token:
 
-- **Heuristic Pruning** — pemangkasan token prosa berbasis skor
-- **Structure Preservation** — blok kode berpagar, kode inline, URL, dan identifier
-  diberi tombstone dan dirangkai ulang secara verbatim, tidak pernah dipangkas
-- **Tingkat SLM opsional** — model lokal kecil dapat menyempurnakan pemangkasan saat dikonfigurasi
-- Independen dari mode Aggressive: tidak menjalankan message aging, kompresi hasil tool,
-  atau peringkas fallback (hanya kegagalan tingkat SLM yang dapat mengarahkan
-  proses fallback melalui aggressive)
+- **Pemangkasan Heuristik** — pemangkasan token berbasis skor pada teks prosa
+- **Pelestarian Struktur** — blok kode berpagar, kode inline, URL, dan identifier ditandai dan
+  disusun kembali secara verbatim, tidak pernah dipangkas
+- **Tingkat SLM Opsional** — model lokal kecil dapat menyempurnakan pemangkasan saat dikonfigurasi
+- Independen dari mode Aggressive: mode ini tidak menjalankan penuaan pesan, kompresi hasil alat,
+  atau summarizer fallback (hanya kegagalan tingkat SLM yang dapat merutekan pass fallback melalui
+  aggressive)
 
-**Cocok untuk:** Saat Anda berulang kali mencapai batas konteks.
+**Terbaik untuk:** Saat Anda berulang kali mencapai batas konteks.
 
-### RTK Mode (rentang upstream 60-90%)
+### Mode RTK (rentang upstream 60-90%)
 
-Mode RTK dioptimalkan untuk output tool yang bertele-tele yang muncul dalam sesi agen coding:
+Mode RTK dioptimalkan untuk output alat yang bertele-tele dan muncul dalam sesi coding-agent:
 
 - Mendeteksi kelas perintah/output seperti `git status`, `git diff`, `git log`, test runner,
-  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, output
-  infra, dan output shell umum
+  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audit/instalasi npm, log Docker, output
+  infrastruktur, dan output shell generik
 - Menerapkan paket filter JSON dari `open-sse/services/compression/engines/rtk/filters/`
-- Mengimpor filter RTK TOML skema v1 dari file `filters.toml` proyek atau global, dengan validasi
-  uji inline dan trust-gating untuk file proyek
-- Dilengkapi 56 filter bawaan dengan sampel verifikasi inline
-- Menghapus urutan kontrol ANSI, progress bar, baris berulang, dan noise yang tidak dapat ditindaklanjuti
-- Mempertahankan kegagalan, error, peringatan, file yang berubah, ringkasan, dan bagian akhir dari output panjang
-- Mendukung filter proyek dengan trust-gating, filter global, dan pemulihan output mentah tersamarkan opsional
+- Mengimpor filter skema TOML RTK v1 dari file `filters.toml` proyek atau global, dengan validasi
+  inline-test dan gating kepercayaan untuk file proyek
+- Menyertakan 56 filter bawaan dengan sampel verifikasi inline
+- Menghapus urutan kontrol ANSI, bilah progres, baris berulang, dan noise yang tidak dapat ditindaklanjuti
+- Mempertahankan kegagalan, error, peringatan, file yang berubah, ringkasan, dan bagian akhir output yang panjang
+- Mendukung filter proyek dengan gating kepercayaan, filter global, dan pemulihan output mentah
+  yang telah disamarkan secara opsional
 
-**Cocok untuk:** Sesi agen dengan transkrip shell, build, test, git, grep, dan output file.
+**Terbaik untuk:** Sesi agent dengan transkrip shell, build, test, git, grep, dan output file.
 
-### Stacked Mode (rentang yang memenuhi syarat 78-95%)
+### Mode Stacked (rentang yang memenuhi syarat 78-95%)
 
-Mode Stacked menjalankan beberapa mesin kompresi dalam urutan deterministik. Pipeline default-nya adalah:
+Mode Stacked menjalankan beberapa mesin kompresi dalam urutan deterministik. Pipeline default adalah:
 
 ```txt
 RTK -> Caveman
 ```
 
-Urutan tersebut menjaga output terminal/tool tetap ringkas terlebih dahulu, lalu menerapkan kondensasi
-semantik Caveman pada prompt bahasa alami yang tersisa. Pipeline Stacked dapat dikonfigurasi secara global
-atau melalui kombo kompresi yang ditetapkan ke kombo routing.
+Urutan tersebut terlebih dahulu membuat output terminal/alat menjadi ringkas, lalu menerapkan pemadatan
+semantik Caveman pada prompt bahasa alami yang tersisa. Pipeline Stacked dapat dikonfigurasi secara
+global atau melalui kombinasi kompresi yang ditetapkan ke kombinasi perutean.
 
-**Cocok untuk:** Konteks campuran dengan log tool besar ditambah instruksi manusia atau ringkasan asisten.
-
----
+**Terbaik untuk:** Konteks campuran dengan log alat yang besar serta instruksi manusia atau ringkasan assistant.
 
 ## Perhitungan Penghematan Upstream
 
@@ -188,62 +190,70 @@ Dengan Stacked:      10K-2.5K token dikirim     (rentang RTK+Caveman yang memenu
 
 ### Dasbor
 
-Buka `Dashboard → Context & Cache`:
+Navigasikan ke `Dashboard → Context & Cache`:
 
-- **Caveman** — pemilihan mode, paket bahasa, pratinjau, dan pengaturan bawaan global
+- **Caveman** — pemilihan mode, paket bahasa, pratinjau, dan default global
 - **RTK** — pratinjau filter perintah, pengaturan keamanan RTK, dan katalog filter
-- **Kombinasi Kompresi** — pipeline mesin bernama yang ditetapkan ke kombinasi perutean
-- **Ambang Pemicu Otomatis** — secara otomatis mengaktifkan kompresi ketika jumlah token melebihi ambang batas
+- **Compression Combos** — pipeline engine bernama yang ditetapkan ke combo perutean
+- **Auto-Trigger Threshold** — secara otomatis mengaktifkan kompresi ketika jumlah token melebihi ambang batas
 
-### Penggantian Per Kombinasi
+### Penggantian Per-Combo
 
-Di `Dashboard → Context & Cache → Compression Combos`, tetapkan kombinasi kompresi ke kombinasi
+Di `Dashboard → Context & Cache → Compression Combos`, tetapkan combo kompresi ke combo
 perutean:
 
 ```txt
-Kombinasi: "free-tier-fallback"
-  Kombinasi Kompresi: "coding-agent-stack"
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
   Pipeline: RTK -> Caveman
-  Target:
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Hal ini memungkinkan Anda menggunakan kompresi bertumpuk pada penyedia gratis/pemrograman sambil mempertahankan mode ringan pada
-langganan berbayar.
+Ini memungkinkan Anda menggunakan kompresi bertingkat pada penyedia gratis/pengodean, sambil tetap
+menggunakan mode ringan pada langganan berbayar.
 
-Penetapan "Penggantian Per Kombinasi" ini merupakan kontrol yang berbeda dari penggantian **mode kompresi
-kombinasi perutean** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — skema bidang tersebut
+Penetapan "Per-Combo Override" ini merupakan kontrol yang berbeda dari penggantian **mode kompresi
+combo perutean** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — skema field tersebut
 juga menerima `rtk`, `stacked`, dan `omniglyph`) — penggantian tersebut tidak memilih pipeline
-kombinasi kompresi bernama; penggantian itu hanya menetapkan bidang `compressionMode` yang digunakan oleh
-`resolveCompressionPlan`. Penggantian ini dapat ditetapkan pada kartu kombinasi (`Dashboard → Combos`) atau, sejak
-#6760, per kombinasi perutean dalam daftar "Assign to routing" di
-`Dashboard → Context & Cache → Compression Combos`, tepat di sebelah kotak centang penetapan pipeline
-yang didokumentasikan di atas. Kedua antarmuka menyimpan perubahan melalui endpoint `PUT /api/combos/{id}` yang sama.
+compression-combo bernama; penggantian tersebut hanya menetapkan field `compressionMode` yang
+digunakan oleh `resolveCompressionPlan`. Pengaturan ini dapat diterapkan pada kartu combo
+(`Dashboard → Combos`) atau, sejak #6760, per combo perutean dalam daftar "Assign to routing" di
+`Dashboard → Context & Cache → Compression Combos`, tepat di samping kotak centang penetapan pipeline
+yang didokumentasikan di atas. Kedua tampilan tersebut disimpan melalui endpoint `PUT /api/combos/{id}`
+yang sama.
 
 ### Penggantian per permintaan
 
-Kirim header permintaan `x-omniroute-compression` untuk mengganti rencana kompresi bagi satu
-permintaan. Header ini memiliki prioritas tertinggi — mengesampingkan penggantian kombinasi perutean, profil aktif,
-pemicu otomatis, dan pengaturan Default pada panel. Nilai yang tidak dikenal akan diabaikan (permintaan tidak pernah ditolak) dan
-sakelar utama global tetap mengendalikan semuanya: ketika kompresi dinonaktifkan secara global, header tidak dapat
-mengaktifkannya. Nilai:
+Kirim header permintaan `x-omniroute-compression` untuk mengganti rencana kompresi pada satu
+permintaan. Header ini memiliki prioritas tertinggi — mengesampingkan penggantian combo perutean,
+profil aktif, pemicu otomatis, dan Default panel. Nilai yang tidak dikenal akan diabaikan (permintaan
+tidak pernah ditolak), dan sakelar utama global tetap mengatur semuanya: ketika kompresi dinonaktifkan
+secara global, header ini tidak dapat mengaktifkannya. Nilai:
 
-| Nilai         | Efek                                                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Tidak ada kompresi untuk permintaan ini.                                                                            |
-| `default`     | Profil Default yang berasal dari panel (mengabaikan profil aktif). Mesin lossy tetap dinonaktifkan.                 |
-| `safe`        | Sama seperti tidak menyertakan header: hanya deduplikasi dan peringkasan spasi kosong.                              |
-| `allow-lossy` | Pertahankan rencana operator permintaan ini, termasuk ringkasan, filter relevansi, dan penulisan ulang gaya.        |
-| `engine:<id>` | Satu mesin ketika diaktifkan, misalnya `engine:rtk`. Ini adalah persetujuan per permintaan untuk mesin tersebut.    |
-| `<combo>`     | Kombinasi bernama, dicocokkan terlebih dahulu berdasarkan nama (tidak peka huruf besar/kecil), lalu berdasarkan id. |
+| Value         | Effect                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Tidak ada kompresi untuk permintaan ini.                                                                              |
+| `default`     | Profil Default yang diturunkan dari panel (mengabaikan profil aktif). Engine lossy tetap dinonaktifkan.               |
+| `safe`        | Sama seperti tidak menyertakan header.                                                                                |
+| `allow-lossy` | Mempertahankan rencana operator permintaan ini, termasuk ringkasan, filter relevansi, dan penulisan ulang gaya.       |
+| `engine:<id>` | Satu engine ketika diaktifkan, misalnya `engine:rtk`. Ini adalah opt-in per permintaan untuk engine tersebut.         |
+| `<combo>`     | Combo bernama, dicocokkan berdasarkan nama (tidak membedakan huruf besar-kecil) terlebih dahulu, lalu berdasarkan id. |
 
-Tanpa `allow-lossy`, `engine:<id>`, atau kombinasi bernama, mesin lossy tidak diterapkan.
-Permintaan tetap mendapatkan deduplikasi sesi dan peringkasan spasi kosong ketika kompresi diaktifkan.
+Tanpa `allow-lossy`, `engine:<id>`, atau combo bernama, engine lossy tidak akan diterapkan. Ketika
+Default lossy, pemicu otomatis, atau penggantian perutean diturunkan, OmniRoute mempertahankan
+langkah lossless yang dikenali dari pipeline bertingkat yang dikonfigurasi, dalam urutan yang
+dikonfigurasi. OmniRoute hanya kembali ke `session-dedup → lite` ketika tidak ada langkah lossless
+yang dikonfigurasi yang tersisa.
 
-Rencana yang diterapkan dikembalikan dalam header respons `X-OmniRoute-Compression: <mode>; source=<source>`,
-dengan `<source>` berupa salah satu dari `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default`, atau `off`.
+Pratinjau **Effective pipeline** pada panel Settings menampilkan rencana biasa saat tidak aktif.
+Ketika pemicu otomatis dapat dijalankan, pratinjau yang sama juga menampilkan pipeline efektif
+bersyaratnya agar resolusi runtime pada panel dan tanpa header tetap selaras.
+
+Rencana yang diterapkan dikembalikan melalui header respons
+`X-OmniRoute-Compression: <mode>; source=<source>`, dengan `<source>` berupa salah satu dari
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default`, atau `off`.
 
 ### API
 
@@ -261,7 +271,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Cantumkan paket filter RTK
+# Daftar paket filter RTK
 curl http://localhost:20128/api/context/rtk/filters
 
 # Uji RTK secara langsung dengan metadata perintah opsional

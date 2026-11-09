@@ -8,79 +8,78 @@
 
 _最終更新日: 2026-06-28_
 
-## 概要
+## エグゼクティブサマリー
 
-OmniRoute は、Next.js を基盤とするローカル AI ルーティングゲートウェイおよびダッシュボードです。
-単一の OpenAI 互換エンドポイント（`/v1/*`）を提供し、形式変換、フォールバック、トークン更新、使用量追跡を行いながら、複数の上流プロバイダーにトラフィックをルーティングします。
+OmniRouteは、ローカルAIルーティング ゲートウェイおよびNext.js上に構築されたダッシュボードです。単一の OpenAI 互換エンドポイント (`/v1/*`) を提供し、変換、フォールバック、トークン更新、使用状況追跡を使用して複数の上流プロバイダー間でトラフィックをルーティングします。
 
-主な機能：
+コア機能:
 
-- CLI／ツール向けの OpenAI 互換 API サーフェス（376 プロバイダー、156 エグゼキューターモジュール）
-- プロバイダー形式間でのリクエスト／レスポンス変換
-- モデルコンボのフォールバック（複数モデルのシーケンス）
-- 構造化されたコンボステップ（`provider + model + connection`）と、`compositeTiers` によるランタイム順序付け
-- アカウント単位のフォールバック（プロバイダーごとの複数アカウント）
-- メインチャット処理におけるクォータの事前チェックと、クォータを考慮した P2C アカウント選択
-- OAuth および API キーによるプロバイダー接続管理（27 の OAuth プロバイダーモジュール）
-- `/v1/embeddings` による埋め込み生成（18 プロバイダー）
-- `/v1/images/generations` による画像生成（10 以上のプロバイダー、20 以上のモデル）
-- `/v1/audio/transcriptions` による音声文字起こし（18 プロバイダー）
-- `/v1/audio/speech` によるテキスト読み上げ（24 の組み込みプロバイダー）
-- `/v1/videos/generations` による動画生成（ComfyUI + SD WebUI）
-- `/v1/music/generations` による音楽生成（ComfyUI）
-- `/v1/search` による Web 検索（20 プロバイダー）
-- `/v1/moderations` によるモデレーション
-- `/v1/rerank` によるリランキング
-- 推論モデル向けの Think タグ解析（`<think>...</think>`）
-- 厳密な OpenAI SDK 互換性のためのレスポンスサニタイズ
-- プロバイダー間の互換性を確保するためのロール正規化（developer→system、system→user）
-- 構造化出力の変換（json_schema → Gemini responseSchema）
-- プロバイダー、キー、エイリアス、コンボ、設定、料金情報のローカル永続化（122 の DB モジュール）
-- 使用量／コストの追跡とリクエストログ記録
-- 複数デバイス間／状態同期のためのオプションのクラウド同期
-- API アクセス制御用の IP 許可リスト／ブロックリスト
-- 思考バジェット管理（パススルー／自動／カスタム／適応型）
-- グローバルシステムプロンプトの注入
+- OpenAI 互換のAPI surface for CLI/tools (381 プロバイダー、159 エクゼキューター モジュール)
+- プロバイダ形式間のRequest/response変換
+- モデル コンボ フォールバック (マルチモデル シーケンス)
+- `compositeTiers`によるランタイム順序付けを備えた構造化コンボ ステップ (`provider + model + connection`)
+- アカウントレベルのフォールバック (プロバイダーごとにマルチアカウント)
+- メイン チャット パスでのクォータ プリフライトとクォータ対応P2Cアカウントの選択
+- OAuth + API キープロバイダー接続管理 (27 OAuthプロバイダーモジュール)
+- `/v1/embeddings`による埋め込み生成 (18 プロバイダー)
+- `/v1/images/generations`によるイメージ生成 (10 の+プロバイダー、20 の+モデル)
+- `/v1/audio/transcriptions`経由の音声文字起こし (18 プロバイダー)
+- `/v1/audio/speech`経由のテキスト読み上げ (24 の組み込みプロバイダー)
+- `/v1/videos/generations`によるビデオ生成 (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) による音楽生成
+- `/v1/search`経由の Web 検索 (20 プロバイダー)
+- `/v1/moderations`によるモデレーション
+- `/v1/rerank`による再ランキング
+- 推論モデルのためのタグ解析 (`<think>...</think>`) を考える
+- 厳密なOpenAI SDK互換性のための応答のサニタイズ
+- プロバイダ間の互換性のための役割の正規化 (開発者→システム、システム→ユーザー)
+- 構造化出力変換 (json_schema → Gemini responseSchema)
+- プロバイダー、キー、エイリアス、コンボ、設定、価格設定のローカル永続化 (122 DBモジュール)
+- Usage/cost追跡とリクエストのロギング
+- multi-device/state同期用のオプションのクラウド同期
+- APIアクセス制御の場合はIP allowlist/blocklist
+- 考える予算管理 (passthrough/auto/custom/adaptive)
+- グローバル システム プロンプト インジェクション
 - セッション追跡とフィンガープリンティング
-- プロバイダー固有のプロファイルを使用した、アカウント単位の強化されたレート制限
-- プロバイダーの耐障害性を高めるサーキットブレーカーパターン
-- ミューテックスロックによるサンダリングハード対策
-- シグネチャベースのリクエスト重複排除キャッシュ
-- ドメインレイヤー：コストルール、フォールバックポリシー、ロックアウトポリシー
-- Context Relay：アカウントローテーション時の継続性を確保するセッション引き継ぎサマリー
-- ドメイン状態の永続化（フォールバック、バジェット、ロックアウト、サーキットブレーカー向け SQLite ライトスルーキャッシュ）
-- 一元的なリクエスト評価を行うポリシーエンジン（ロックアウト → バジェット → フォールバック）
-- p50／p95／p99 レイテンシ集計を備えたリクエストテレメトリ
-- `combo_execution_key`／`combo_step_id` によるコンボターゲットのテレメトリと、過去のコンボターゲットの健全性
-- エンドツーエンドのトレーシングに使用する相関 ID（X-Request-Id）
-- API キーごとのオプトアウトに対応したコンプライアンス監査ログ
-- LLM の品質保証向け評価フレームワーク
-- プロバイダーのサーキットブレーカー状態をリアルタイム表示するヘルスダッシュボード
-- 3 種類のトランスポート（stdio／SSE／Streamable HTTP）を備えた MCP Server（110 ツール）
-- スキルとタスクライフサイクルを備えた A2A Server（JSON-RPC 2.0 + SSE）
-- メモリシステム（抽出、注入、取得、要約）
-- スキルシステム（レジストリ、エグゼキューター、サンドボックス、組み込みスキル）
-- 証明書管理と DNS 処理を備えた MITM プロキシ
-- プロンプトインジェクション防止ミドルウェア
-- Caveman、RTK、スタック型パイプライン、圧縮コンボ、言語パック、分析機能を備えたプロンプト圧縮パイプライン
-- ACP（Agent Communication Protocol）レジストリ
-- モジュール式 OAuth プロバイダー（`src/lib/oauth/providers/` 配下の 22 個の個別モジュール）
-- アンインストール／完全アンインストールスクリプト
-- OAuth 環境修復アクション
-- OpenAI 互換 WS クライアント向け WebSocket ブリッジ（`/v1/ws`）
-- 同期トークン管理（発行／失効、ETag でバージョン管理された設定バンドルのダウンロード）
-- GLM Thinking（`glmt`）をファーストクラスのプロバイダープリセットとしてサポート
-- ハイブリッドトークンカウント（プロバイダー側の `/messages/count_tokens` と推定フォールバック）
-- モデルエイリアスの自動シード（起動時に 30 以上のクロスプロキシ方言を正規化）
-- SSRF ガード、プライベート URL のブロック、設定可能な再試行機能を備えた安全なアウトバウンドフェッチ
-- 設定可能な `requestRetry` と `maxRetryIntervalSec` を使用する、クールダウンを考慮したチャット再試行
-- 起動時の Zod によるランタイム環境検証
-- ページネーション、プロバイダー CRUD イベント、SSRF ブロック検証ログを備えたコンプライアンス監査 v2
+- プロバイダー固有のプロファイルによるアカウントごとの強化されたレート制限
+- プロバイダーの回復力を高めるサーキット ブレーカー パターン
+- ミューテックスロックによるアンチサンダーリングハード保護
+- 署名ベースのリクエスト重複排除キャッシュ
+- ドメイン層: コスト ルール、フォールバック ポリシー、ロックアウト ポリシー
+- コンテキスト リレー: アカウント ローテーションの継続性のためのセッション ハンドオフの概要
+- ドメイン状態の永続性 (フォールバック、バジェット、ロックアウト、サーキット ブレーカー用のSQLiteライトスルー キャッシュ)
+- 一元化されたリクエスト評価のためのポリシー エンジン (ロックアウト→バジェット→フォールバック)
+- p50/p95/p99レイテンシ集約を使用したテレメトリのリクエスト
+- `combo_execution_key` / `combo_step_id`を介したコンボ ターゲット テレメトリと履歴コンボ ターゲット ヘルス
+- エンドツーエンド トレース用の相関ID (X-Request-Id)
+- APIキーごとのオプトアウトによるコンプライアンス監査ログ
+- LLM品質保証の評価フレームワーク
+- リアルタイムのプロバイダーのサーキット ブレーカー ステータスを表示するヘルス ダッシュボード
+- 3 つのトランスポート (stdio/SSE/Streamable HTTP) を備えたMCPサーバー (110 ツール)
+- スキルとタスクのライフサイクルを備えたA2Aサーバー (JSON-RPC 2.0 + SSE)
+- 記憶システム（抽出、挿入、検索、要約）
+- スキル システム (レジストリ、エグゼキューター、サンドボックス、組み込みスキル)
+- 証明書管理とDNS処理を備えたMITMプロキシ
+- プロンプトインジェクションガードミドルウェア
+- Caveman、 RTK、スタックされたパイプライン、圧縮コンボ、言語パック、分析を使用したプロンプト圧縮パイプライン
+- ACP (エージェント通信プロトコル) レジストリ
+- モジュラーOAuthプロバイダー ( `src/lib/oauth/providers/`の下に 22 個の個別モジュール)
+- Uninstall/full-uninstallスクリプト
+- OAuth環境修復アクション
+- OpenAI 互換のWSクライアント用のWebSocketブリッジ (`/v1/ws`)
+- 同期トークン管理 (issue/revoke、ETag バージョンの構成バンドルのダウンロード)
+- GLM Thinking (`glmt`) ファーストクラスプロバイダーのプリセット
+- ハイブリッド トークン カウンティング (推定フォールバックを備えたプロバイダー側の`/messages/count_tokens` )
+- モデルエイリアスの自動シード (起動時に 30 の+クロスプロキシ方言正規化)
+- SSRFガード、プライベートURLブロッキング、構成可能な再試行による安全なアウトバウンドフェッチ
+- 構成可能な`requestRetry`および`maxRetryIntervalSec`によるクールダウンを意識したチャットの再試行
+- 起動時にZodを使用したランタイム環境の検証
+- ページネーション、プロバイダーCRUDイベント、SSRF ブロックされた検証ログを備えたコンプライアンス監査 v2
 
-主要なランタイムモデル：
+プライマリ ランタイム モデル:
 
-- `src/app/api/*` 配下の Next.js アプリルートが、ダッシュボード API と互換 API の両方を実装
-- `src/sse/*` + `open-sse/*` の共有 SSE／ルーティングコアが、プロバイダーの実行、変換、ストリーミング、フォールバック、使用量処理を担当
+- `src/app/api/*`の下のNext.jsアプリ ルートは、ダッシュボードAPIsと互換性APIs両方を実装します。
+- `src/sse/*` + `open-sse/*`の共有SSE/routingコアは、プロバイダーの実行、変換、ストリーミング、フォールバック、および使用を処理します。
 
 ## 参照図
 
@@ -271,69 +270,69 @@ flowchart LR
 
 メインフローモジュール:
 
-- エントリ: `src/sse/handlers/chat.ts`
+- エントリーポイント: `src/sse/handlers/chat.ts`
 - コアオーケストレーション: `open-sse/handlers/chatCore.ts`
 - プロバイダー実行アダプター: `open-sse/executors/*`
 - フォーマット検出/プロバイダー設定: `open-sse/services/provider.ts`
-- モデル解析/解決: `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- モデルの解析/解決: `src/sse/services/model.ts`, `open-sse/services/model.ts`
 - アカウントフォールバックロジック: `open-sse/services/accountFallback.ts`
 - 翻訳レジストリ: `open-sse/translator/index.ts`
 - ストリーム変換: `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
-- 使用量抽出/正規化: `open-sse/utils/usageTracking.ts`
+- 使用量の抽出/正規化: `open-sse/utils/usageTracking.ts`
 - Thinkタグパーサー: `open-sse/utils/thinkTagParser.ts`
 - 埋め込みハンドラー: `open-sse/handlers/embeddings.ts`
 - 埋め込みプロバイダーレジストリ: `open-sse/config/embeddingRegistry.ts`
 - 画像生成ハンドラー: `open-sse/handlers/imageGeneration.ts`
 - 画像プロバイダーレジストリ: `open-sse/config/imageRegistry.ts`
-- レスポンスサニタイズ: `open-sse/handlers/responseSanitizer.ts`
-- ロール正規化: `open-sse/services/roleNormalizer.ts`
+- レスポンスのサニタイズ: `open-sse/handlers/responseSanitizer.ts`
+- ロールの正規化: `open-sse/services/roleNormalizer.ts`
 
-サービス(ビジネスロジック):
+サービス（ビジネスロジック）:
 
-- アカウント選択/スコアリング: `open-sse/services/accountSelector.ts`
-- コンテキストライフサイクル管理: `open-sse/services/contextManager.ts`
-- IPフィルター適用: `open-sse/services/ipFilter.ts`
+- アカウントの選択/スコアリング: `open-sse/services/accountSelector.ts`
+- コンテキストのライフサイクル管理: `open-sse/services/contextManager.ts`
+- IPフィルターの適用: `open-sse/services/ipFilter.ts`
 - セッション追跡: `open-sse/services/sessionManager.ts`
-- リクエスト重複排除: `open-sse/services/signatureCache.ts`
-- システムプロンプト注入: `open-sse/services/systemPrompt.ts`
-- Thinkingバジェット管理: `open-sse/services/thinkingBudget.ts`
+- リクエストの重複排除: `open-sse/services/signatureCache.ts`
+- システムプロンプトの挿入: `open-sse/services/systemPrompt.ts`
+- 思考バジェット管理: `open-sse/services/thinkingBudget.ts`
 - ワイルドカードモデルルーティング: `open-sse/services/wildcardRouter.ts`
 - レート制限管理: `open-sse/services/rateLimitManager.ts`
 - サーキットブレーカー: `src/shared/utils/circuitBreaker.ts`
-- コンテキストハンドオフ: `open-sse/services/contextHandoff.ts` — context-relay戦略向けのハンドオフサマリー生成と注入
-- 圧縮: `open-sse/services/compression/*` — プロバイダー翻訳前のプロアクティブ圧縮;
-  Cavemanルール、RTKフィルター、スタックパイプライン、圧縮コンボ、統計、検証を含む
-- Codexクォータフェッチャー: `open-sse/services/codexQuotaFetcher.ts` — context-relayハンドオフ判定用にCodexクォータを取得
-- クールダウン対応リトライ: `src/sse/services/cooldownAwareRetry.ts` — 設定可能な `requestRetry` / `maxRetryIntervalSec` によるモデルごとのクールダウンリトライ
-- 安全な外部fetch: `src/shared/network/safeOutboundFetch.ts` — SSRFガード、プライベートURLブロック、リトライ、タイムアウトを備えた保護されたプロバイダー/モデルfetch
-- 外部URLガード: `src/shared/network/outboundUrlGuard.ts` — プロバイダーURLのホストチェック; `src/shared/network/outboundUrlGuardPolicy.ts` は `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`、およびそれらのダッシュボードトグルからモードを選択(参照: `docs/reference/ENVIRONMENT.md`)
-- プロバイダーリクエストデフォルト: `open-sse/services/providerRequestDefaults.ts` — プロバイダーレベルの `maxTokens`、`temperature`、`thinkingBudgetTokens` デフォルト
-- GLMプロバイダー定数: `open-sse/config/glmProvider.ts` — 共有GLMモデル、クォータURL、GLMTタイムアウト/デフォルト
-- Antigravityアップストリーム: `open-sse/config/antigravityUpstream.ts` — ベースURLとディスカバリーパス定数
-- Codexクライアント定数: `open-sse/config/codexClient.ts` — バージョン付きuser-agentとclient-versionの値
-- モデルエイリアスシード: `src/lib/modelAliasSeed.ts` — 起動時に30以上のクロスプロキシ方言エイリアスをシード
+- コンテキスト引き継ぎ: `open-sse/services/contextHandoff.ts` — コンテキストリレー戦略向けの引き継ぎ要約の生成と挿入
+- 圧縮: `open-sse/services/compression/*` — プロバイダー変換前のプロアクティブな圧縮。
+  Cavemanルール、RTKフィルター、スタック型パイプライン、圧縮の組み合わせ、統計、検証を含む
+- Codexクォータ取得: `open-sse/services/codexQuotaFetcher.ts` — コンテキストリレーの引き継ぎ判定用にCodexクォータを取得
+- クールダウン対応リトライ: `src/sse/services/cooldownAwareRetry.ts` — 設定可能な`requestRetry` / `maxRetryIntervalSec`を使用するモデル単位のクールダウンリトライ
+- 安全なアウトバウンドフェッチ: `src/shared/network/safeOutboundFetch.ts` — SSRFガード、プライベートURLのブロック、リトライ、タイムアウトを備えた、保護されたプロバイダー/モデルフェッチ
+- アウトバウンドURLガード: `src/shared/network/outboundUrlGuard.ts` — プロバイダーURLのホストチェック。`src/shared/network/outboundUrlGuardPolicy.ts`は、`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`、およびそれらのダッシュボードトグルからモードを選択（`docs/reference/ENVIRONMENT.md`を参照）
+- プロバイダーリクエストのデフォルト値: `open-sse/services/providerRequestDefaults.ts` — プロバイダー単位の`maxTokens`、`temperature`、`thinkingBudgetTokens`のデフォルト値
+- GLMプロバイダー定数: `open-sse/config/glmProvider.ts` — 共有GLMモデル、クォータURL、GLMTのタイムアウト/デフォルト値
+- Antigravityアップストリーム: `open-sse/config/antigravityUpstream.ts` — ベースURLおよび検出パスの定数
+- Codexクライアント定数: `open-sse/config/codexClient.ts` — バージョン付きユーザーエージェントおよびクライアントバージョンの値
+- モデルエイリアスのシード: `src/lib/modelAliasSeed.ts` — 起動時に30以上のクロスプロキシ方言エイリアスをシード
 
-ドメイン層モジュール:
+ドメインレイヤーモジュール:
 
 - コストルール/バジェット: `src/domain/costRules.ts`
 - フォールバックポリシー: `src/domain/fallbackPolicy.ts`
-- 予約済みコンボ解決コントラクト: `src/domain/comboResolver.ts`; 実際のルーティングは `open-sse/services/combo.ts` を使用
+- コンボリゾルバー: `src/domain/comboResolver.ts`
 - ロックアウトポリシー: `src/domain/lockoutPolicy.ts`
-- 予約済みポリシー評価コントラクト: `src/domain/policyEngine.ts`; リクエストパスは `src/shared/utils/apiKeyPolicy.ts` を通じてAPIキーポリシーを、`src/sse/handlers/chat/resolvedModelPolicy.ts` を通じて解決ターゲット認可を適用
+- ポリシーエンジン: `src/domain/policyEngine.ts` — ロックアウト → バジェット → フォールバックの評価を一元化
 - エラーコードカタログ: `src/shared/constants/errorCodes.ts`
 - リクエストID: `src/shared/utils/requestId.ts`
-- Fetchタイムアウト: `src/shared/utils/fetchTimeout.ts`
+- フェッチタイムアウト: `src/shared/utils/fetchTimeout.ts`
 - リクエストテレメトリ: `src/shared/utils/requestTelemetry.ts`
 - コンプライアンス/監査: `src/lib/compliance/index.ts`
 - 評価ランナー: `src/lib/evals/evalRunner.ts`
-- ドメイン状態永続化: `src/lib/db/domainState.ts` — フォールバックチェーン、バジェット、コスト履歴、ロックアウト状態、サーキットブレーカー用のSQLite CRUD
+- ドメイン状態の永続化: `src/lib/db/domainState.ts` — フォールバックチェーン、バジェット、コスト履歴、ロックアウト状態、サーキットブレーカーに対するSQLite CRUD
 
-OAuthプロバイダーモジュール(`src/lib/oauth/providers/` 配下の27個の個別ファイル):
+OAuthプロバイダーモジュール（`src/lib/oauth/providers/`配下の個別ファイル27個）:
 
 - レジストリインデックス: `src/lib/oauth/providers/index.ts`
 - 個別プロバイダー: `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
-- 共有ヘルパー: `codebuddyDeviceAuth.ts` (CodeBuddy CN/intlデバイスフロー), `museCodeDeviceResponse.ts`
-- 薄いラッパー: `src/lib/oauth/providers.ts` — 個別モジュールからの再エクスポート
+- 共有ヘルパー: `codebuddyDeviceAuth.ts`（CodeBuddy CN/intlデバイスフロー）、`museCodeDeviceResponse.ts`
+- 薄いラッパー: `src/lib/oauth/providers.ts` — 個別モジュールから再エクスポート
 
 ## 5) 組み込みサービス (v3.8.4)
 
@@ -348,180 +347,124 @@ OmniRoute は、**組み込みサービス**と呼ばれるローカル実行の
 
 詳細: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## 主要サブシステム (v3.8.0)
+## 主要なサブシステム (v3.8.0)
 
-### A. Auto Combo エンジン
+### A. オートコンボエンジン
 
-Auto Combo は、静的なコンボ定義に依存するのではなく、リクエスト時にルーティング先を動的にスコアリングして選択します。`auto/*` モデルプレフィックスファミリーを支える仕組みです。
+自動コンボは、静的なコンボ定義に依存するのではなく、リクエスト時に動的にスコアを付けてルーティング ターゲットを選択します。これは、 `auto/*`モデル プレフィックス ファミリを強化します。
 
-- エンジンのエントリ: `open-sse/services/autoCombo/`（`autoComboEngine.ts`、
-  `scoringEngine.ts`、`virtualFactory.ts`、`modePacks.ts`）
-- ライブコンボのエントリ: `open-sse/services/combo.ts`（`handleComboChat`、`resolveComboTargets`）。`src/sse/handlers/chat.ts` から呼び出されます
+- エンジン エントリ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`、 `scoringEngine.ts`、 `virtualFactory.ts`、 `modePacks.ts`)
+- リゾルバー: `src/domain/comboResolver.ts` ( `auto/`プレフィックスの自動検出)
 - ダッシュボード: `/dashboard/auto-combo`
-- テレメトリ: `auto_combo_decisions` SQLite テーブル
+- テレメトリ: `auto_combo_decisions` SQLiteテーブル
 
 主な機能:
 
-- **20 のルーティング戦略**（priority、weighted、fill-first、round-robin、P2C、random、
-  least-used、cost-optimized、reset-aware、reset-window、headroom、quota-weighted、
-  strict-random、**auto**、lkgp、context-optimized、cache-optimized、context-relay、**fusion**、
-  pipeline）—
-  auto は v3.8.0 の目玉となる追加機能です。`fusion`（パネルのファンアウト + ジャッジによる統合、
-  `open-sse/services/fusion.ts`）は v3.8.36 で新規追加されました。
-- **16 ファクタースコアリング**: クォータ、ヘルス、コストの逆数、レイテンシの逆数、タスク適合度、
-  およびその他 10 項目。ファクターとそのデフォルト重みの正規テーブルは
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) にあります。ここに再掲すると、
-  陳腐化する場所が 2 か所になってしまいます。
-- **仮想ファクトリー**は、一致する名前付きコンボが存在しない場合に短命のコンボを実体化し、
-  正常なアクティブプロバイダー接続から候補を取得します。
-- **Auto プレフィックス**: `auto/coding`、`auto/cheap`、`auto/fast`、`auto/offline`、
-  `auto/smart`、`auto/lkgp` — それぞれが調整済みの重みプロファイルに支えられています。
-- **6 つのモードパック**: `ship-fast`、`cost-saver`、`quality-first`、`offline-friendly`、
-  `reliability-first`、`chaos-mode` — ダッシュボードから呼び出せる
-  プリセットの重み設定です。（上記の `auto/*` プレフィックスと混同しないでください。
-  あちらはリクエスト時のバリアントです。）
+- **20 のルーティング戦略**(優先順位、加重、フィルファースト、ラウンドロビン、 P2C、ランダム、最も使用されていない、コスト最適化、リセット対応、リセットウィンドウ、ヘッドルーム、クォータ加重、厳密ランダム、**自動**、lkgp、コンテキスト最適化、キャッシュ最適化、コンテキストリレー、**融合**、パイプライン) — auto は v3.8.0 で追加されたヘッドラインです。 `fusion` (パネル ファンアウト+ジャッジ合成、 `open-sse/services/fusion.ts`) は v3.8.36 の新機能です。
+- **16 要素スコアリング**: クォータ、ヘルス、逆コスト、逆レイテンシ、タスク フィット、その他 10 項目。因子とそのデフォルトの重みの正規表は[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —にあり、それをここで再記述すると、それが 2 番目に陳腐化することになります。
+- **バーチャルファクトリー**一致する名前付きコンボが存在しない場合に一時的なコンボを実現し、健全なアクティブなプロバイダー接続から候補を取得します。
+- **自動プレフィックス**: `auto/coding`、 `auto/cheap`、 `auto/fast`、 `auto/offline`、 `auto/smart`、 `auto/lkgp` —はそれぞれ調整された重みプロファイルによって裏付けられています。
+- **6つのモードパック**: `ship-fast`、 `cost-saver`、 `quality-first`、 `offline-friendly`、 `reliability-first`および`chaos-mode` —プリセット重み設定はダッシュボードから呼び出し可能です。 (要求時の変形である上記の`auto/*`プレフィックスと混同しないでください。)
 
-アルゴリズムの詳細（ファクターの計算式、重みの調整）については、
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) を参照してください。
+アルゴリズムの詳細 (係数式、重み調整) については、 [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)参照してください。
 
-### B. Cloud Agents
+### B. クラウドエージェント
 
-Cloud Agents は、サードパーティのホステッドコードエージェントプラットフォーム（Codex Cloud、Devin、
-Jules）を、統一された DB バックのタスクライフサイクルの背後にラップします。すべてのタスク作成/参照
-エンドポイントは管理認証が必要です。
+Cloud Agents は、統一された DB ベースのタスク ライフサイクルの背後で、サードパーティがホストするコード エージェント プラットフォーム (Codex Cloud、 Devin、 Jules) をラップします。すべてのタスクcreation/inspectionエンドポイントには管理認証が必要です。
 
-- モジュールルート: `src/lib/cloudAgent/`（`baseAgent.ts`、`registry.ts`、`api.ts`、
-  `types.ts`、`db.ts`、および `agents/` 配下のエージェントごとのサブディレクトリ）
-- エージェントごとの実装: `agents/codex/`、`agents/devin/`、`agents/jules/`
-- 公開エンドポイント: `/api/v1/agents/tasks/*`（一覧/作成/取得/キャンセル）
-- 管理エンドポイント: `/api/cloud/*`（プロビジョニング、ステータス、バッチ）
+- モジュールルート: `src/lib/cloudAgent/` (`baseAgent.ts`、 `registry.ts`、 `api.ts`、 `types.ts`、 `db.ts`、および`agents/`の下のエージェントごとのサブディレクトリ)
+- エージェントごとの実装: `agents/codex/`、 `agents/devin/`、 `agents/jules/`
+- パブリック エンドポイント: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- 管理エンドポイント: `/api/cloud/*` (プロビジョニング、ステータス、バッチ)
 - ダッシュボード: `/dashboard/cloud-agents`
-- ストレージ: `cloud_agent_tasks` テーブル
+- ストレージ: `cloud_agent_tasks`テーブル
 
-エージェントごとのプロビジョニングと OAuth の詳細については、
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) を参照してください。
+エージェントごとのプロビジョニングとOAuthの詳細については、 [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)を参照してください。
 
-### C. Guardrails
+### C. ガードレール
 
-ガードレールモジュールは、リクエストとレスポンスを PII、プロンプトインジェクション、
-安全でないビジョンコンテンツについて検査する、ホットリロード可能なミドルウェア層です。違反が
-検出されると、HTTP **503** と構造化エラーコードでリクエストを短絡させ、下流の呼び出し元が
-リトライや分岐を行えるようにします。
+ガードレール モジュールは、 PII、プロンプト インジェクション、および安全でないビジョン コンテンツのリクエストとレスポンスを検査するホット リロード可能なミドルウェア層です。違反があると、 HTTPでリクエストがショートします。** 503**加えて、構造化されたエラー コードにより、下流の呼び出し元が再試行または分岐できるようになります。
 
-- モジュールルート: `src/lib/guardrails/`（`base.ts`、`registry.ts`、`piiMasker.ts`、
-  `promptInjection.ts`、`visionBridge.ts`、`visionBridgeHelpers.ts`）
-- ホットリロード: レジストリが設定変更を監視し、チェーンをその場で再構築します
-- 組み込みポイント: チャットハンドラーのエントリ、画像生成ハンドラー、レスポンスサニタイザー
-- HTTP コントラクト: 違反は `error.code = "GUARDRAIL_VIOLATION"` を伴う `503` として表面化します
+- モジュールルート: `src/lib/guardrails/` (`base.ts`、 `registry.ts`、 `piiMasker.ts`、 `promptInjection.ts`、 `visionBridge.ts`、 `visionBridgeHelpers.ts`)
+- ホットリロード: レジストリは構成の変更を監視し、適切な場所にチェーンを再構築します。
+- ワイヤーイン ポイント: チャット ハンドラー エントリ、画像生成ハンドラー、応答サニタイザー
+- HTTP契約: 違反は`503`と`error.code = "GUARDRAIL_VIOLATION"`として表面化します
 
-ルールセットの作成としきい値の調整については、
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) を参照してください。
+ルールセットの作成としきい値の調整については、 [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)参照してください。
 
 ### D. ドメイン層
 
-`src/domain/` 名前空間には、ドメインサービスと予約済みの評価コントラクトが含まれます。
-これは、すべてのリクエストに対する単一の必須ポリシーエントリポイントではありません。
+`src/domain/`名前空間はポリシーの決定を一元化するため、ルート ハンドラーはlockout/budget/fallbackロジック自体を組み立てる必要がありません。
 
-実稼働のチャットパスは `src/shared/utils/apiKeyPolicy.ts` の `enforceApiKeyPolicy()` を
-呼び出します。解決済みモデルとコンボメンバーの認可は
-`src/sse/handlers/chat/resolvedModelPolicy.ts` に実装されています。
-`src/app/api/v1/chat/completions/route.ts` のセルフホストエントリも、ディスパッチ前に
-API キーポリシーを適用します。コンボ解決は `open-sse/services/combo.ts` を通じて実行されます。
-
-`src/domain/policyEngine.ts`、`src/domain/comboResolver.ts`、`src/lib/container.ts` は、
-テスト済みのコントラクトとして残っており、そのリクエストパスの配線ではありません。コンテナは
-ポリシーエンジンを登録しますが、検査した本番リクエストパスはそれを解決しません。
-これらのコントラクトを変更するだけでは、実稼働のチャットポリシーやコンボルーティングは
-変わりません。それらを接続または削除するには、別途設計上の判断が必要です。
-
-- 予約済みポリシーエンジン: `src/domain/policyEngine.ts` — ロックアウト → バジェット → フォールバック評価
+- ポリシー エンジン: `src/domain/policyEngine.ts` —実行前評価用の単一エントリ ポイント (ロックアウト→バジェット→フォールバック順序付け)
 - コストルール: `src/domain/costRules.ts`
-- フォールバックポリシー: `src/domain/fallbackPolicy.ts`
-- ロックアウトポリシー: `src/domain/lockoutPolicy.ts`
-- タグベースルーティング: `src/domain/tagRouter.ts`
-- 予約済みコンボリゾルバ: `src/domain/comboResolver.ts` — スタンドアロンの選択コントラクト。実稼働のコンボルーティングは `open-sse/services/combo.ts` に実装されています
-- 接続/モデルルールジョイナー: `src/domain/connectionModelRules.ts`
-- モデル可用性スナップショット: `src/domain/modelAvailability.ts`
-- プロバイダー有効期限追跡: `src/domain/providerExpiration.ts`
-- クォータキャッシュ: `src/domain/quotaCache.ts`
-- デグラデーション状態: `src/domain/degradation.ts`
-- 設定監査: `src/domain/configAudit.ts`
-- OmniRoute レスポンスメタデータビルダー: `src/domain/omnirouteResponseMeta.ts`
-- アセスメントサブシステム: `src/domain/assessment/` — 定期的な評価ジョブ
+- フォールバック ポリシー: `src/domain/fallbackPolicy.ts`
+- ロックアウト ポリシー: `src/domain/lockoutPolicy.ts`
+- タグベースのルーティング: `src/domain/tagRouter.ts`
+- コンボ リゾルバー: `src/domain/comboResolver.ts` —は、コンボ名、auto/\* プレフィックス、およびワイルドカード モデル ターゲットを具体的な実行プランに解決します。
+- Connection/modelルール結合者: `src/domain/connectionModelRules.ts`
+- モデルの可用性スナップショット: `src/domain/modelAvailability.ts`
+- プロバイダーの有効期限追跡: `src/domain/providerExpiration.ts`
+- クォータ キャッシュ: `src/domain/quotaCache.ts`。プロバイダーはクォータ ウィンドウを追加および削除します (OpenAI 、一部のプランでは 5 時間のCodexウィンドウを削除しました)。そのため、プロバイダーのアダプターが完了したことを証明する使用状況 (`quotasComplete`、 `src/lib/usage/usageReading.ts`参照) がアカウントのフル ウィンドウ セットになります。以前に知られていたが存在しないウィンドウはキャッシュ内でリタイアされ、 `quota_snapshots`では再起動によってリハイドレートされ (追加されたリタイアメント レコード)、永続化されたCodexクォータ状態とClaudeでリタイアされます。の飽和バケット。部分的な証拠 (応答ヘッダー、古いコピー) は、それが保持するウィンドウのみを更新します。
+- 劣化状態: `src/domain/degradation.ts`
+- 構成監査: `src/domain/configAudit.ts`
+- OmniRoute応答メタデータ ビルダー: `src/domain/omnirouteResponseMeta.ts`
+- 評価サブシステム: `src/domain/assessment/` —定期評価ジョブ
 
 ### E. 認可パイプライン
 
-認可パイプラインは、受信したすべてのリクエストを分類し、ディスパッチ前に適切な
-ポリシーチェーンを適用します。
+認可パイプラインは、すべての受信リクエストを分類し、ディスパッチ前に適切なポリシー チェーンを適用します。
 
-- パイプラインエントリ: `src/server/authz/pipeline.ts`
-- リクエスト分類器: `src/server/authz/classify.ts` — パブリックな
-  互換性ルートと管理ルートを区別する
-- パブリックルート一覧: `src/shared/constants/publicApiRoutes.ts`
-- ポリシー: `src/server/authz/policies/` — 合成可能な述語
-  （`requireApiKey`、`requireManagement`、`requireFreshAuth` など）
+- パイプライン エントリ: `src/server/authz/pipeline.ts`
+- リクエスト分類子: `src/server/authz/classify.ts` — 、パブリック互換性ルートと管理ルートを区別します。
+- パブリックルートインベントリ: `src/shared/constants/publicApiRoutes.ts`
+- ポリシー: `src/server/authz/policies/` —コンポーズ可能な述語 (`requireApiKey`、 `requireManagement`、 `requireFreshAuth`など)
 - ヘッダーユーティリティ: `src/server/authz/headers.ts`
 - アサーションヘルパー: `src/server/authz/assertAuth.ts`
 - リクエストコンテキスト: `src/server/authz/context.ts`
 
-パブリックルートと管理ルートの境界は厳格なものです。agent/cooldown API と
-プロバイダーの変更操作には管理認証が必要です（未認証の場合は HTTP 401）。
+パブリックAPIs agent/cooldownプロバイダーの変更には管理認証が必要です (欠落している場合はHTTP 401)。
 
-ルート分類ルールの全文については、
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) を参照してください。
+完全なルート分類ルールについては、 [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)を参照してください。
 
-### F. ワークフロー FSM とタスク認識ルーター
+### F. ワークフローFSMとタスク認識ルーター
 
-コンボ選択の上層に配置された有限状態マシン駆動のルーターで、検出された
-ワークフローステージ（計画、実行、レビュー）とバックグラウンドタスクの
-親和性に基づいてトラフィックを振り分けます。
+検出されたワークフローの段階 (計画、実行、レビュー) とバックグラウンド タスクのアフィニティに基づいてトラフィックを誘導する、コンボ選択の上に階層化された有限ステート マシン駆動のルーター。
 
-- ワークフロー FSM: `open-sse/services/workflowFSM.ts`
+- ワークフローFSM: `open-sse/services/workflowFSM.ts`
 - タスク認識ルーター: `open-sse/services/taskAwareRouter.ts`
 - バックグラウンドタスク検出器: `open-sse/services/backgroundTaskDetector.ts`
-- インテント分類器: `open-sse/services/intentClassifier.ts`
+- 意図分類子: `open-sse/services/intentClassifier.ts`
 
-FSM の遷移は Auto Combo のスコアリングに反映され、バックグラウンド／自動化
-タスクでは安価なモデルへ、インタラクティブな計画／レビューのターンでは
-より強力なモデルへとバイアスがかかります。
+FSMトランジションはオート コンボのスコアリングに反映され、 background/automationタスクではより安価なモデルに、インタラクティブなplanning/reviewターンではより強力なモデルに偏ります。
 
-### G. プロバイダー固有のレジリエンス
+### G. プロバイダー固有の復元力
 
-一部のプロバイダーには専用のレジリエンスおよびステルスモジュールが同梱されており、
-グローバルなサーキットブレーカー／接続クールダウン／モデルロックアウトの各レイヤーに
-相乗りする形で動作します:
+いくつかのプロバイダーは、グローバル サーキット ブレーカー / 接続クールダウン / モデル ロックアウト レイヤに便乗する専用のレジリエンスおよびステルス モジュールを出荷しています。
 
-- Antigravity 429 エンジン: `open-sse/services/antigravity429Engine.ts`（アイデンティティの
-  ローテーション、レスポンスヘッダーのスクラブを行い、
-  `antigravityCredits.ts`、`antigravityHeaderScrub.ts`、`antigravityHeaders.ts`、
-  `antigravityIdentity.ts`、`antigravityVersion.ts` を介してクレジット／バージョンの
-  追跡を駆動）
-- ModelScope クォータポリシー: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH（互換性チャネルハンドシェイク）: `open-sse/services/claudeCodeCCH.ts`、
-  および `claudeCodeCompatible.ts`、`claudeCodeConstraints.ts`、`claudeCodeExtraRemap.ts`、
-  `claudeCodeToolRemapper.ts`
-- Claude Code フィンガープリント整形: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code 難読化: `open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 エンジン: `open-sse/services/antigravity429Engine.ts` (ID をローテーションし、応答ヘッダーをスクラブし、 `antigravityCredits.ts`、 `antigravityHeaderScrub.ts`、 `antigravityHeaders.ts`、 `antigravityIdentity.ts`、 `antigravityVersion.ts`を介してcredits/version追跡を駆動します)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-request budget of upstream 429s across all hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; an identical re-send of a refused body is answered locally; `src/sse/handlers/chat.ts` does not restart such a request through the cooldown-aware retry)
+- ModelScopeクォータ ポリシー: `open-sse/services/modelscopePolicy.ts`
+- ClaudeコードCCH (互換性チャネル ハンドシェイク): `open-sse/services/claudeCodeCCH.ts`、および`claudeCodeCompatible.ts`、 `claudeCodeConstraints.ts`、 `claudeCodeExtraRemap.ts`、 `claudeCodeToolRemapper.ts`
+- Claudeコードフィンガープリント整形: `open-sse/services/claudeCodeFingerprint.ts`
+- Claudeコード難読化: `open-sse/services/claudeCodeObfuscation.ts`
 
-ステルスの完全なプレイブックと運用ガイダンスについては、
-`docs/security/STEALTH_GUIDE.md`（git 内。`/docs` にはコンパイルされません）を参照してください。
+完全なステルス プレイブックと運用ガイダンスについては、 `docs/security/STEALTH_GUIDE.md` (git; `/docs`にはコンパイルされていません) を参照してください。
 
 ### H. Webhook、推論キャッシュ、読み取りキャッシュ
 
-- **Webhook** — プロバイダー／アカウント／タスクイベントの外向きディスパッチ。
+- **Webhook** provider/account/taskイベントの—アウトバウンドディスパッチ。
   - ディスパッチャー: `src/lib/webhookDispatcher.ts`
-  - ストレージ: `webhooks` SQLite テーブル（`src/lib/db/webhooks.ts` 経由）
-  - ダッシュボード: `/dashboard/webhooks`（サブスクリプション、シークレット、リトライ履歴）
-  - イベント分類とリトライセマンティクスについては、[`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) を参照してください。
-- **推論キャッシュ** — thinking トークンを出力するプロバイダー（Claude、GLMT など）向けの
-  リプレイ可能な推論ブロックで、連続するターンで再思考をスキップできるようにします。
-  - DB レイヤー: `src/lib/db/reasoningCache.ts`
-  - サービスレイヤー: `open-sse/services/reasoningCache.ts`
-  - リプレイセマンティクスについては、[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) を参照してください。
-- **読み取りキャッシュ** — シグネチャをキーとする短期間有効なレスポンスキャッシュで、
-  壊れたアップストリーム SDK からの同一リトライを集約するために使用されます。
-  - DB レイヤー: `src/lib/db/readCache.ts`
-  - 統計エンドポイント: `GET /api/cache/stats`、ダッシュボードは `/dashboard/cache`
+  - ストレージ: `webhooks` SQLiteテーブル ( `src/lib/db/webhooks.ts`経由)
+  - ダッシュボード: `/dashboard/webhooks` (サブスクリプション、シークレット、再試行履歴)
+  - イベントの分類と再試行のセマンティクスについては、 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)参照してください。
+- **推論キャッシュ**—思考トークン (Claude、 GLMTなど) を発行するプロバイダー用の再生可能な推論ブロックです。これにより、連続するターンで再思考をスキップできます。
+  - DBレイヤー: `src/lib/db/reasoningCache.ts`
+  - サービス層: `open-sse/services/reasoningCache.ts`
+  - 再生セマンティクスについては、 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)参照してください。
+- **リードキャッシュ**— 、署名によってキー化された有効期間の短い応答キャッシュで、壊れた上流のSDKsからの同一の再試行を折りたたむために使用されます。
+  - DBレイヤー: `src/lib/db/readCache.ts`
+  - 統計エンドポイント: `GET /api/cache/stats`、 `/dashboard/cache`のダッシュボード
 
 ## 3) 永続化レイヤー
 

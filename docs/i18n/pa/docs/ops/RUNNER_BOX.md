@@ -28,13 +28,12 @@ build, Release-Green webpack build ਅਤੇ lint job ਇੱਕੋ ਸਮੇਂ 
 | swap      | 16 GB                           | `omniroute-113-5` swap ਬੰਦ ਰੱਖ ਕੇ ਚੱਲਦਾ ਹੈ (`MemorySwapMax=0`), ਇਸ ਲਈ ਕਾਬੂ ਤੋਂ ਬਾਹਰ build ਬਾਕਸ ਨੂੰ swap ਕਰਵਾਉਣ ਦੀ ਬਜਾਏ ਆਪਣੀ cap ਉੱਤੇ ਰੋਕ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ                                                                                                                                                                                                                                |
 | `/tmp`    | **12 GB tmpfs = RAM**           | ਉੱਥੇ ਰੱਖੀ ਹਰ ਚੀਜ਼ memory ਵਰਤਦੀ ਹੈ; ਬਚੀਆਂ ਹੋਈਆਂ ਚੀਜ਼ਾਂ 3 ਘੰਟਿਆਂ ਬਾਅਦ ਹਟਾ ਦਿੱਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ                                                                                                                                                                                                                                                                                             |
 | CPU       | 32 cores ਉੱਤੇ load 60 ਦੇਖਿਆ ਗਿਆ | quotas ਤੋਂ ਪਹਿਲਾਂ, ਇੱਕ Turbopack build (~1166 % CPU) ਅਤੇ ਉਸੇ ਬਾਕਸ ਉੱਤੇ coverage suite ਨੇ ਹੋਰ listeners ਦੇ heartbeats ਲਈ ਸਰੋਤ ਨਹੀਂ ਛੱਡੇ (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                           |
-| runners   | **6 listeners**                 | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` ਅਸਮਰੱਥ ਹਨ (`systemctl enable --now` ਕਿਸੇ ਇੱਕ ਨੂੰ ਮੁੜ ਚਾਲੂ ਕਰਦਾ ਹੈ)                                                                                                                                                                                                                                                     |
+| runners   | **7 listeners** (2026-10-28)    | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build` ਵੀ ਚੁੱਕਦਾ ਹੈ; `omniroute-113-3/-4/-8` ਰਿਪੋਜ਼ਟਰੀ ਤੋਂ ਮਿਟਾ ਦਿੱਤੇ ਗਏ (2026-10-28)                                                                                                                                                                                                                                     |
 
 ਸੀਮਾਵਾਂ ਹਰੇਕ unit ਦੀ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ਵਿੱਚ ਹਨ
 (ਪਿਛਲੇ ਮੁੱਲ `override.conf.bak-20261018` ਵਜੋਂ ਰੱਖੇ ਗਏ ਹਨ) ਅਤੇ ਚੱਲਦੇ ਸਿਸਟਮ ਉੱਤੇ
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ਨਾਲ ਲਾਗੂ ਕੀਤੀਆਂ ਗਈਆਂ ਸਨ — ਕੋਈ restart ਨਹੀਂ ਹੋਇਆ, ਇਸ ਲਈ
-ਕਿਸੇ ਵੀ ਚੱਲ ਰਹੇ job ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ। Labels ਨੂੰ runners API ਰਾਹੀਂ ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+ਕਿਸੇ ਵੀ ਚੱਲ ਰਹੇ job ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ। Labels ਨੂੰ runners API ਰਾਹੀਂ ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ਉਹ ਵੀ ਚੱਲਦੇ ਸਿਸਟਮ ਉੱਤੇ ਹੀ।
 
 ## janitor ਇੰਸਟਾਲ ਕਰੋ (ਸਿਰਫ਼ ਇੱਕ ਵਾਰ, ਮਸ਼ੀਨ ਉੱਤੇ)
@@ -43,7 +42,7 @@ build, Release-Green webpack build ਅਤੇ lint job ਇੱਕੋ ਸਮੇਂ 
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ਹਰ 30 ਮਿੰਟ ਬਾਅਦ, ਲੌਗ /var/log/runner-janitor.log ਵਿੱਚ
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` ਲੋੜੀਂਦਾ ਹੈ: janitor ਕਿਸੇ ਪਾਥ ਨੂੰ ਹਟਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਖੁੱਲ੍ਹੀਆਂ ਫ਼ਾਈਲਾਂ ਦੇ ਇੱਕ ਸਨੈਪਸ਼ਾਟ ਨਾਲ ਸਾਬਤ ਕਰਦਾ ਹੈ ਕਿ ਉਹ ਨਿਸ਼ਕਿਰਿਆ ਹੈ, ਅਤੇ ਇਸ ਟੂਲ ਤੋਂ ਬਿਨਾਂ ਇਹ ਕੁਝ ਵੀ ਨਹੀਂ ਹਟਾਉਂਦਾ ਅਤੇ ਇਸ ਬਾਰੇ ਦੱਸਦਾ ਹੈ (exit 1)। ਕੋਈ ਵੀ ਤਬਦੀਲੀ ਪਹਿਲਾਂ `--dry-run` ਨਾਲ ਅਜ਼ਮਾਓ — ਇਹ ਬਿਲਕੁਲ ਉਹੀ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ ਜੋ ਇਹ ਕਰੇਗਾ ਅਤੇ ਕਿਸੇ ਚੀਜ਼ ਨੂੰ ਛੂੰਹਦਾ ਨਹੀਂ।
@@ -95,8 +94,9 @@ Runner ਦਾ ਮੂਲ `KillMode=process`, unit ਨੂੰ ਬੰਦ ਜਾਂ r
   ਉੱਤੇ 2026-10-18 ਤੱਕ `MemoryHigh=4G` ਸੀ — ਉੱਥੇ promptfoo ਬਿਲਡ ਨੇ 54 ਮਿੰਟ ਤੱਕ ਮੈਮੋਰੀ ਰੀਕਲੇਮ ਨਾਲ ਜੂਝਦਿਆਂ
   ਆਪਣਾ ਰਸਤਾ ਬਣਾਇਆ; 8 GB ਥਰੌਟਲਿੰਗ ਖਤਮ ਕਰਦਾ ਹੈ।
 - **ਜਾਣਬੁੱਝ ਕੇ ਘੱਟ listeners।** ਚਾਰ OmniRoute ਯੂਨਿਟ 2026-08-29 ਨੂੰ ਅਯੋਗ ਕੀਤੇ ਗਏ ਸਨ — ਹਰ ਵਾਧੂ
-  listener ਉਪਰੋਕਤ ਮੈਮੋਰੀ ਬਜਟ ਦਾ ਇੱਕ ਹੋਰ ਖਪਤਕਾਰ ਹੈ। ਜੈਨਿਟਰ ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਹੱਦ 6 ਹੈ (`MAX_ACTIVE_RUNNERS=6` in cron): ਇਹ ਬਾਕਸ ਉੱਤੇ
-  ਹਰ `Runner.Listener` ਨੂੰ ਗਿਣਦਾ ਹੈ, ਅਤੇ OmniHeuris + OmniMind ਸਾਡੇ ਚਾਰ ਵਿੱਚ ਦੋ ਹੋਰ ਜੋੜਦੇ ਹਨ।
+  listener ਉਪਰੋਕਤ ਮੈਮੋਰੀ ਬਜਟ ਦਾ ਇੱਕ ਹੋਰ ਖਪਤਕਾਰ ਹੈ। ਜੈਨਿਟਰ ਦੀ ਵੱਧ ਤੋਂ ਵੱਧ ਹੱਦ 8 ਹੈ (cron ਵਿੱਚ `MAX_ACTIVE_RUNNERS=8`): ਇਹ ਬਾਕਸ ਉੱਤੇ
+  ਹਰ `Runner.Listener` ਨੂੰ ਗਿਣਦਾ ਹੈ, ਅਤੇ OmniHeuris + OmniMind ਸਾਡੇ ਪੰਜ ਵਿੱਚ ਦੋ ਹੋਰ ਜੋੜਦੇ ਹਨ।
+- **Unit ਅਤੇ Vitest ਜੌਬਾਂ ਹੋਸਟ ਕੀਤੀਆਂ ਹੀ ਰਹਿੰਦੀਆਂ ਹਨ।** `ci.yml` ਆਪਣੇ unit shards ਅਤੇ Vitest ਜੌਬ ਨੂੰ `[self-hosted, omni-ci]` ਉੱਤੇ ਸਿਰਫ਼ ਉਦੋਂ ਭੇਜਦਾ ਹੈ ਜਦੋਂ ਰਿਪੋਜ਼ਟਰੀ ਵੇਰੀਏਬਲ `vars.USE_VPS_TEST_RUNNER` `true` ਹੋਵੇ, ਅਤੇ ਉਦੋਂ ਵੀ ਸਿਰਫ਼ ਉਸੇ ਰਿਪੋਜ਼ਟਰੀ ਦੀਆਂ `pull_request` ਰਨਾਂ ਲਈ; forks, `merge_group` ਅਤੇ ਪੁਸ਼ `ubuntu-latest` ਉੱਤੇ ਹੀ ਰਹਿੰਦੇ ਹਨ (`tests/unit/vps-runner-variable-scope.test.ts`)। ਇਹ ਵੇਰੀਏਬਲ `false` ਹੈ। 2026-10-28 ਨੂੰ ਤਿੰਨ 4-ਕੋਰ `omni-ci` listeners ਨੂੰ `npm ci` ਲਈ 250–270 s ਲੱਗੇ ਅਤੇ ਹਰ unit shard 30 ਮਿੰਟ ਦੀ ਜੌਬ ਹੱਦ ਤੱਕ ਪਹੁੰਚ ਗਿਆ, ਜਦਕਿ ਹੋਸਟ ਕੀਤੇ shard ਨੂੰ ~634 s ਲੱਗਦੇ ਹਨ; ਉਸ ਵੇਲੇ ਬਾਕਸ ਦਾ load 17–24 ਸੀ। ਉਹ listeners ਮਿਟਾ ਦਿੱਤੇ ਗਏ। unit shard ਲਈ ਢੁਕਵੇਂ ਆਕਾਰ ਦੇ listeners ਤੋਂ ਬਿਨਾਂ ਇਹ ਵੇਰੀਏਬਲ ਦੁਬਾਰਾ ਚਾਲੂ ਨਾ ਕਰੋ।
 - **ਜਦੋਂ ਕੋਈ ਵੀ runner ਰੁੱਝਿਆ ਹੋਵੇ ਤਾਂ `/tmp` ਜਾਂ `_work` ਨੂੰ ਕਦੇ ਵੀ ਹੱਥੀਂ ਸਾਫ਼ ਨਾ ਕਰੋ।**
   ਜਾਂਚ ਅਤੇ ਮਿਟਾਉਣ ਦੇ ਵਿਚਕਾਰ ਵਕਫ਼ਾ ਰੱਖਣ ਵਾਲੀ check-then-delete ਕਾਰਵਾਈ ਕਰਕੇ ਹੀ 2026-08-27 ਨੂੰ ਇੱਕ ਚੱਲ ਰਹੀ Build ਜੌਬ ਨੇ ਆਪਣਾ
   `_work` ਗੁਆ ਦਿੱਤਾ ਸੀ। ਜੈਨਿਟਰ ਜਾਂਚ ਅਤੇ ਹਟਾਉਣ ਦਾ ਕੰਮ ਇੱਕੋ ਪੜਾਅ ਵਿੱਚ ਕਰਦਾ ਹੈ;
@@ -110,8 +110,7 @@ Runner ਦਾ ਮੂਲ `KillMode=process`, unit ਨੂੰ ਬੰਦ ਜਾਂ r
 
 ## ਹੋਸਟ ਕੀਤੀ ਲੇਨ (GitHub ਵੱਲੋਂ ਹੋਸਟ ਕੀਤੇ ਰਨਰ)
 
-ਖਾਤਾ **Pro** ਯੋਜਨਾ 'ਤੇ ਹੈ: **40 ਸਮਕਾਲੀ ਹੋਸਟ ਕੀਤੀਆਂ ਜੌਬਾਂ**, ਜੋ ਹਰੇਕ PR ਜਾਂਚ,
-ਹਰੇਕ ਪੁਸ਼-ਟ੍ਰਿਗਰ ਵਰਕਫ਼ਲੋ ਅਤੇ CodeQL ਦੇ ਡਿਫੌਲਟ ਸੈੱਟਅੱਪ ਵੱਲੋਂ ਸਾਂਝੀਆਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। 2026-10-18 ਨੂੰ
+ਰਿਪੋਜ਼ਟਰੀ `cheaper-inference` ਸੰਗਠਨ ਦੀ ਹੈ, ਜੋ **Team** ਯੋਜਨਾ 'ਤੇ ਹੈ: **60 ਸਮਕਾਲੀ ਹੋਸਟ ਕੀਤੀਆਂ ਜੌਬਾਂ**, ਜੋ ਸੰਗਠਨ ਦੀ ਹਰੇਕ ਰਿਪੋਜ਼ਟਰੀ, ਹਰੇਕ PR ਜਾਂਚ, ਹਰੇਕ ਪੁਸ਼-ਟ੍ਰਿਗਰ ਵਰਕਫ਼ਲੋ ਅਤੇ CodeQL ਦੇ ਡਿਫੌਲਟ ਸੈੱਟਅੱਪ ਵੱਲੋਂ ਸਾਂਝੀਆਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਹੇਠਲੇ ਅੰਕੜੇ **Pro** ਯੋਜਨਾ (40 ਸਮਕਾਲੀ ਹੋਸਟ ਕੀਤੀਆਂ ਜੌਬਾਂ) 'ਤੇ ਮਾਪੇ ਗਏ ਸਨ। 2026-10-18 ਨੂੰ
 ਇੱਕ ਮਰਜ ਮੁਹਿੰਮ (~10 ਮਰਜ/ਘੰਟਾ `release/v3.8.52` ਉੱਤੇ) ਦੌਰਾਨ ਮਾਪਿਆ ਗਿਆ: **2,500 ਵਰਕਫ਼ਲੋ ਰਨ
 24 ਘੰਟਿਆਂ ਵਿੱਚ ਬਣੇ**, 6 ਘੰਟਿਆਂ ਵਿੱਚ ਬ੍ਰਾਂਚ 'ਤੇ 44 ਪੁਸ਼, **106 ਹੋਸਟ ਕੀਤੀਆਂ ਜੌਬਾਂ ਕਤਾਰ ਵਿੱਚ** ਜਦੋਂ PR ਜਾਂਚਾਂ ਨੇ
 ਘੰਟਿਆਂ ਤੱਕ ਉਡੀਕ ਕੀਤੀ ਅਤੇ PR ਉਹਨਾਂ ਤੋਂ ਬਿਨਾਂ ਹੀ ਮਰਜ ਕਰ ਦਿੱਤੇ ਗਏ। ਬ੍ਰਾਂਚ 'ਤੇ ਹਰ ਪੁਸ਼ ਨਾਲ ਨੌਂ ਵਰਕਫ਼ਲੋ ਚੱਲੇ:

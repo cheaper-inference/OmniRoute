@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { falSelectionEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -12,6 +13,9 @@ import {
 } from "@/shared/constants/designerWebRetirement";
 
 import { getImageProvider, parseImageModel } from "../config/imageRegistry.ts";
+import { handleGrokImageGeneration } from "./grokMedia.ts";
+import { saveCallLog, saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
+export { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { applyAntigravityClientProfileHeaders } from "../services/antigravityClientProfile.ts";
 import { getAntigravityEnvelopeUserAgent } from "../services/antigravityIdentity.ts";
@@ -19,9 +23,9 @@ import { kieExecutor } from "../executors/kie.ts";
 import { mapImageSize } from "../translator/image/sizeMapper.ts";
 import { getCodexClientVersion, getCodexUserAgent } from "../config/codexClient.ts";
 import { isCodexFreePlan } from "../executors/codex/tools.ts";
-import { saveCallLog } from "@/lib/usageDb";
 import { sleep } from "../utils/sleep.ts";
-import { normalizeImageBuffer } from "../utils/imageNormalize.ts";
+import { codexReferenceImageUrl } from "./imageGeneration/providers/codexReferences.ts";
+export { shrinkCodexReferenceImage } from "./imageGeneration/providers/codexReferences.ts";
 import {
   getKieErrorMessage,
   getKieErrorStatus,
@@ -43,9 +47,6 @@ import {
   getConfiguredTimeout,
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
-// Shared with imageUpscale/shared.ts — see imageErrorLog.ts for why a bare
-// String(value) is unsafe here (null-prototype sanitizeUpstreamDetails() payloads, #12506).
-import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
@@ -75,6 +76,7 @@ import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihord
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.ts";
 import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
+import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image.ts";
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
 import {
@@ -396,6 +398,8 @@ const FAL_PRESET_SIZES = {
  * @param {object} options.credentials - Provider credentials { apiKey, accessToken }
  * @param {object} options.log - Logger
  * @param {string} [options.resolvedProvider] - Pre-resolved provider ID (from route layer custom model resolution)
+ * @param {function} [options.onCredentialsRefreshed] - Persists credentials a provider refreshed
+ *   while serving the request (a rotated OAuth refresh token); providers that refresh call it.
  * @param {string|null} [options.peerLocality] - Trusted "loopback"|"lan"|"remote" verdict
  *   forwarded from `AUTHZ_HEADER_PEER_LOCALITY` (src/server/authz/headers.ts). Only consumed by
  *   spawn-capable providers (e.g. cursor-agent-image) to enforce Hard Rules #15/#17 without
@@ -412,6 +416,10 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  // FAL_NATIVE_ENABLED, injected by the routes (the flag lives in src/). Null keeps the
+  // established Fal request shape; a preparer selects the schema-driven native path.
+  prepareFalInput = null,
+  onCredentialsRefreshed = undefined,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -531,6 +539,7 @@ export async function handleImageGeneration({
       signal,
       generateOne: (taskBody) =>
         handleImageGeneration({
+          prepareFalInput,
           body: taskBody,
           credentials,
           log,
@@ -542,6 +551,10 @@ export async function handleImageGeneration({
     });
   }
 
+  if (providerConfig.format === "grok-image") {
+    return handleGrokImageGeneration({ model, providerConfig, body, credentials, signal });
+  }
+
   if (providerConfig.format === "zenmux-image") {
     return handleZenmuxImageGeneration({
       model,
@@ -551,6 +564,19 @@ export async function handleImageGeneration({
       credentials,
       log,
       signal,
+    });
+  }
+
+  if (providerConfig.format === "m365-image") {
+    return handleM365ImageGeneration({
+      model,
+      provider,
+      body,
+      credentials,
+      log,
+      signal,
+      onCredentialsRefreshed,
+      deps: { saveCallLog },
     });
   }
 
@@ -642,12 +668,14 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "fal-ai") {
     return handleFalAIImageGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -1738,18 +1766,20 @@ export async function handleOpenRouterImageEdit({
 }
 
 async function handleFalAIImageGeneration({
+  prepareFalInput,
   model,
   provider,
   providerConfig,
   body,
   credentials,
   log,
+  signal,
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  const falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  let falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
   const { imageUrl, imageUrls } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     sync_mode: body.sync_mode ?? true,
   };
@@ -1793,14 +1823,29 @@ async function handleFalAIImageGeneration({
   }
 
   try {
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`, {
+    if (prepareFalInput) {
+      falModel = falSelectionEndpoint(model);
+      if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+        upstreamBody = await prepareFalInput(
+          falModel,
+          falCompatibilityBody(body, imageUrls),
+          credentials,
+          signal
+        );
+      }
+    }
+    const url = `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`;
+    const request = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Key ${token}`,
       },
       body: JSON.stringify(upstreamBody),
-    });
+    };
+    const response = prepareFalInput
+      ? await fetchWithTimeout(url, { ...request, signal, redirect: "error" })
+      : await fetch(url, request);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -1817,7 +1862,9 @@ async function handleFalAIImageGeneration({
     }
 
     const payload = await response.json();
-    const images = await normalizeProviderImagePayload(payload, body, log, "b64_json");
+    // The native path honors an explicit `url`; the established path always returns base64.
+    const defaultFormat = prepareFalInput && body.response_format === "url" ? "url" : "b64_json";
+    const images = await normalizeProviderImagePayload(payload, body, log, defaultFormat);
     return saveImageSuccessResult({
       provider,
       model,
@@ -1832,11 +1879,20 @@ async function handleFalAIImageGeneration({
     return saveImageErrorResult({
       provider,
       model,
-      status: 502,
+      status: /Invalid fal input|Unsupported fal|(?:This|A) fal endpoint/.test(String(err.message))
+        ? 400
+        : 502,
       startTime,
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });
   }
+}
+
+/** References reach the schema adapter once, under the name it maps per endpoint. */
+function falCompatibilityBody(body, imageUrls) {
+  if (imageUrls.length === 0) return body;
+  const { image: _image, image_url: _imageUrl, imageUrls: _camelCase, ...rest } = body;
+  return { ...rest, image_urls: imageUrls };
 }
 
 async function handleStabilityAIImageGeneration({
@@ -2473,24 +2529,6 @@ export function mapLegacyImageQualityToImageTool(value: string): string {
   return normalized;
 }
 
-// The Codex backend answers 503 when an inline reference image is large (seen above ~400 KB);
-// a 1024px long edge keeps edits working without changing what the model sees in practice.
-const CODEX_REFERENCE_MAX_BYTES = 400_000;
-const CODEX_REFERENCE_MAX_LONG_EDGE = 1024;
-
-export async function shrinkCodexReferenceImage(image: {
-  bytes: Buffer;
-  mime?: string;
-}): Promise<{ bytes: Buffer; mime: string }> {
-  const mime = image.mime || "image/png";
-  if (image.bytes.length <= CODEX_REFERENCE_MAX_BYTES) return { bytes: image.bytes, mime };
-  const out = await normalizeImageBuffer(image.bytes, {
-    maxLongEdge: CODEX_REFERENCE_MAX_LONG_EDGE,
-  });
-  if (!out.resized) return { bytes: image.bytes, mime };
-  return { bytes: out.buffer, mime: out.mime || mime };
-}
-
 async function handleCodexImageGeneration({
   model,
   provider,
@@ -2574,10 +2612,9 @@ async function handleCodexImageGeneration({
 
   const inputContent: Array<Record<string, unknown>> = [{ type: "input_text", text: prompt }];
   for (const image of referenceImages) {
-    const reference = await shrinkCodexReferenceImage(image);
     inputContent.push({
       type: "input_image",
-      image_url: `data:${reference.mime};base64,${reference.bytes.toString("base64")}`,
+      image_url: await codexReferenceImageUrl(model, image),
     });
   }
 
@@ -2782,80 +2819,6 @@ export async function handleCodexImageEdit({
     logPath: "/v1/images/edits",
   });
   return result as CodexImageEditResult;
-}
-
-export function saveImageSuccessResult({
-  provider,
-  model,
-  startTime,
-  requestBody = null,
-  responseBody = null,
-  created = null,
-  images,
-  path = "/v1/images/generations",
-}) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status: 200,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    requestBody,
-    responseBody,
-  }).catch(() => {});
-
-  return {
-    success: true,
-    data: {
-      created: created || Math.floor(Date.now() / 1000),
-      data: images,
-    },
-  };
-}
-
-export function saveImageErrorResult({
-  provider,
-  model,
-  status,
-  startTime,
-  error,
-  requestBody = null,
-  path = "/v1/images/generations",
-  // #8307: opt-in signal for executeImageWithCredentialFallback — set by a
-  // provider handler when the failure is account/session-specific (expired
-  // or blocked credentials) rather than a generic request/provider error, so
-  // the retry loop tries the next eligible account even when the upstream
-  // status isn't a plain 401. Defaults to unset (existing 401-only behavior
-  // for every other provider is unchanged).
-  retryable = undefined,
-}: {
-  provider: string;
-  model: string;
-  status: number;
-  startTime: number;
-  error: unknown;
-  requestBody?: unknown;
-  path?: string;
-  retryable?: boolean;
-}) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    error: stringifyImageErrorForLog(error).slice(0, 500),
-    requestBody,
-  }).catch(() => {});
-
-  return {
-    success: false,
-    status,
-    error,
-    ...(retryable !== undefined ? { retryable } : {}),
-  };
 }
 
 /**

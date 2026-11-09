@@ -10,77 +10,76 @@ _آخرین بهروزرسانی: 2026-06-28_
 
 ## خلاصه اجرایی
 
-OmniRoute یک درگاه مسیریابی محلی هوش مصنوعی و داشبورد مبتنی بر Next.js است.
-این سامانه یک نقطه پایانی واحد و سازگار با OpenAI (`/v1/*`) فراهم میکند و ترافیک را با قابلیتهای تبدیل، جایگزینی، نوسازی توکن و ردیابی مصرف، میان چندین ارائهدهنده بالادستی مسیریابی میکند.
+OmniRoute یک دروازه مسیریابی محلی AI و داشبورد است که بر روی Next.js ساخته شده است. این یک نقطه پایانی منفرد سازگار با OpenAI (`/v1/*`) ارائه میکند و ترافیک را در چندین ارائهدهنده بالادستی با ترجمه، بازگشت، بهروزرسانی نشانه و ردیابی استفاده هدایت میکند.
 
-قابلیتهای اصلی:
+قابلیت های اصلی:
 
-- سطح API سازگار با OpenAI برای CLI/ابزارها (376 ارائهدهنده، 156 ماژول اجرایی)
-- تبدیل درخواست/پاسخ میان قالبهای ارائهدهندگان
-- جایگزینی ترکیب مدلها (توالی چندمدلی)
-- گامهای ترکیبی ساختاریافته (`provider + model + connection`) با ترتیبدهی زمان اجرا بر اساس `compositeTiers`
-- جایگزینی در سطح حساب (چند حساب برای هر ارائهدهنده)
-- پیشبررسی سهمیه و انتخاب حساب P2C آگاه از سهمیه در مسیر اصلی چت
-- مدیریت اتصال ارائهدهندگان با OAuth و کلید API (27 ماژول ارائهدهنده OAuth)
-- تولید تعبیهسازی از طریق `/v1/embeddings` (18 ارائهدهنده)
-- تولید تصویر از طریق `/v1/images/generations` (بیش از 10 ارائهدهنده، بیش از 20 مدل)
-- رونویسی صوت از طریق `/v1/audio/transcriptions` (18 ارائهدهنده)
-- تبدیل متن به گفتار از طریق `/v1/audio/speech` (24 ارائهدهنده داخلی)
-- تولید ویدئو از طریق `/v1/videos/generations` (ComfyUI و SD WebUI)
+- سطح API سازگار با OpenAI برای CLI/tools (381 ارائه دهنده، 159 ماژول اجرایی)
+- ترجمه Request/response در قالب های ارائه دهنده
+- مدل بازگشتی ترکیبی (توالی چند مدل)
+- مراحل ترکیبی ساختاریافته (`provider + model + connection`) با ترتیب زمان اجرا توسط `compositeTiers`
+- بازگشتی در سطح حساب (چند حساب در هر ارائه دهنده)
+- Quota preflight and quota-aware P2C account selection in the main chat path
+- مدیریت اتصال ارائه دهنده کلید API OAuth + (27 ماژول ارائه دهنده OAuth )
+- جاسازی تولید از طریق `/v1/embeddings` (18 ارائه دهنده)
+- تولید تصویر از طریق `/v1/images/generations` (10 ارائه دهنده + ، 20 مدل + )
+- رونویسی صوتی از طریق `/v1/audio/transcriptions` (18 ارائه دهنده)
+- تبدیل متن به گفتار از طریق `/v1/audio/speech` (24 ارائه دهنده داخلی)
+- تولید ویدیو از طریق `/v1/videos/generations` (ComfyUI + SD WebUI)
 - تولید موسیقی از طریق `/v1/music/generations` (ComfyUI)
-- جستوجوی وب از طریق `/v1/search` (20 ارائهدهنده)
-- تعدیل محتوا از طریق `/v1/moderations`
-- بازرتبهبندی از طریق `/v1/rerank`
-- تجزیه برچسبهای تفکر (`<think>...</think>`) برای مدلهای استدلالی
-- پاکسازی پاسخ برای سازگاری سختگیرانه با OpenAI SDK
-- نرمالسازی نقشها (developer→system، system→user) برای سازگاری میان ارائهدهندگان
+- جستجوی وب از طریق `/v1/search` (20 ارائه دهنده)
+- تعدیل از طریق `/v1/moderations`
+- رتبه بندی مجدد از طریق `/v1/rerank`
+- Think tag parsing (`<think>...</think>`) for reasoning models
+- پاکسازی پاسخ برای سازگاری دقیق OpenAI SDK
+- عادی سازی نقش (سیستم → توسعه دهنده، کاربر سیستم →) برای سازگاری بین ارائه دهندگان
 - تبدیل خروجی ساختاریافته (json_schema → Gemini responseSchema)
-- ماندگاری محلی ارائهدهندگان، کلیدها، نامهای مستعار، ترکیبها، تنظیمات و قیمتگذاری (122 ماژول DB)
-- ردیابی مصرف/هزینه و ثبت درخواستها
-- همگامسازی ابری اختیاری برای همگامسازی وضعیت میان چند دستگاه
-- فهرست مجاز/مسدود IP برای کنترل دسترسی API
-- مدیریت بودجه تفکر (عبور مستقیم/خودکار/سفارشی/تطبیقی)
-- تزریق سراسری اعلان سیستمی
-- ردیابی نشست و انگشتنگاری
-- محدودسازی نرخ پیشرفته برای هر حساب با پروفایلهای مختص ارائهدهنده
-- الگوی قطعکننده مدار برای تابآوری ارائهدهنده
-- محافظت در برابر ازدحام ناگهانی با قفلگذاری mutex
-- حافظه نهان حذف درخواستهای تکراری مبتنی بر امضا
-- لایه دامنه: قواعد هزینه، سیاست جایگزینی، سیاست قفلکردن
-- Context Relay: خلاصههای تحویل نشست برای حفظ پیوستگی هنگام چرخش حسابها
-- ماندگاری وضعیت دامنه (حافظه نهان SQLite با نوشتن همزمان برای جایگزینیها، بودجهها، قفلها و قطعکنندههای مدار)
-- موتور سیاستگذاری برای ارزیابی متمرکز درخواستها (قفلکردن ← بودجه ← جایگزینی)
-- تلهمتری درخواست با تجمیع تأخیر p50/p95/p99
-- تلهمتری مقصد ترکیب و سلامت تاریخی مقصدهای ترکیب از طریق `combo_execution_key` / `combo_step_id`
-- شناسه همبستگی (X-Request-Id) برای ردیابی سرتاسری
-- ثبت ممیزی انطباق با امکان انصراف برای هر کلید API
+- تداوم محلی برای ارائه دهندگان، کلیدها، نام های مستعار، ترکیب ها، تنظیمات، قیمت گذاری (122 ماژول DB )
+- ردیابی Usage/cost و ثبت درخواست
+- همگام سازی ابری اختیاری برای همگام سازی multi-device/state
+- IP allowlist/blocklist برای کنترل دسترسی API
+- مدیریت بودجه فکری (passthrough/auto/custom/adaptive)
+- تزریق سریع سیستم جهانی
+- ردیابی جلسات و انگشت نگاری
+- محدودیت نرخ افزایش یافته برای هر حساب با نمایههای ارائهدهنده خاص
+- الگوی مدار شکن برای انعطاف پذیری ارائه دهنده
+- حفاظت گله ضد رعد و برق با قفل mutex
+- کش حذف مجدد درخواست مبتنی بر امضا
+- لایه دامنه: قوانین هزینه، سیاست بازگشتی، سیاست قفل
+- Context Relay: خلاصههای انتقال جلسه برای تداوم چرخش حساب
+- تداوم وضعیت دامنه (حافظه ذخیره سازی از طریق SQLite برای بازگشت، بودجه، قفل، قطع کننده مدار)
+- موتور خط مشی برای ارزیابی متمرکز درخواست (lockout → budget → backback)
+- درخواست تله متری با تجمع تاخیر p50/p95/p99
+- تله متری هدف ترکیبی و سلامت هدف ترکیبی تاریخی از طریق `combo_execution_key` / `combo_step_id`
+- همبستگی ID (X-Request-Id) برای ردیابی سرتاسر
+- ثبت حسابرسی انطباق با انصراف از هر کلید API
 - چارچوب ارزیابی برای تضمین کیفیت LLM
-- داشبورد سلامت با وضعیت بلادرنگ قطعکننده مدار ارائهدهندگان
-- MCP Server (با 110 ابزار) و 3 روش انتقال (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 و SSE) با مهارتها و چرخه عمر وظایف
-- سامانه حافظه (استخراج، تزریق، بازیابی، خلاصهسازی)
-- سامانه مهارتها (رجیستری، اجراکننده، محیط ایزوله، مهارتهای داخلی)
-- پراکسی MITM با مدیریت گواهی و رسیدگی به DNS
-- میانافزار محافظت در برابر تزریق اعلان
-- خط لوله فشردهسازی اعلان با Caveman، RTK، خطوط لوله انباشته، ترکیبهای فشردهسازی، بستههای زبانی و تحلیلها
-- رجیستری ACP (Agent Communication Protocol)
-- ارائهدهندگان ماژولار OAuth (22 ماژول مجزا در `src/lib/oauth/providers/`)
-- اسکریپتهای حذف نصب/حذف نصب کامل
-- اقدام ترمیم محیط OAuth
-- پل WebSocket برای کلاینتهای WS سازگار با OpenAI (`/v1/ws`)
-- مدیریت توکن همگامسازی (صدور/ابطال، دانلود بسته پیکربندی نسخهبندیشده با ETag)
-- پیشتنظیم ارائهدهنده درجهیک GLM Thinking (`glmt`)
-- شمارش ترکیبی توکنها (سمت ارائهدهنده از طریق `/messages/count_tokens` با روش تخمینی جایگزین)
-- مقداردهی خودکار نامهای مستعار مدل (بیش از 30 نرمالسازی گویش میانپراکسی هنگام راهاندازی)
-- واکشی خروجی امن با محافظ SSRF، مسدودسازی URLهای خصوصی و تلاش مجدد قابل پیکربندی
-- تلاشهای مجدد چت آگاه از دوره انتظار با `requestRetry` و `maxRetryIntervalSec` قابل پیکربندی
-- اعتبارسنجی محیط زمان اجرا با Zod هنگام راهاندازی
-- ممیزی انطباق v2 با صفحهبندی، رویدادهای CRUD ارائهدهنده و ثبت اعتبارسنجیهای مسدودشده توسط SSRF
+- داشبورد سلامت با وضعیت قطع کننده مدار ارائه دهنده در زمان واقعی
+- سرور MCP (110 ابزار) با 3 انتقال (stdio/SSE/Streamable HTTP)
+- سرور A2A (JSON-RPC 2.0 + SSE) با مهارت ها و چرخه عمر کار
+- سیستم حافظه (استخراج، تزریق، بازیابی، خلاصه سازی)
+- سیستم مهارت ها (رجیستری، مجری، جعبه شنی، مهارت های داخلی)
+- پروکسی MITM با مدیریت گواهی و مدیریت DNS
+- Prompt injection guard middleware
+- خط لوله فشرده سازی سریع با Caveman، RTK، خطوط لوله انباشته، ترکیب های فشرده سازی، بسته های زبان، و تجزیه و تحلیل
+- رجیستری ACP (پروتکل ارتباطی عامل).
+- ارائه دهندگان مدولار OAuth (22 ماژول جداگانه تحت `src/lib/oauth/providers/`)
+- اسکریپت های Uninstall/full-uninstall
+- اقدام تعمیر محیط OAuth
+- پل WebSocket برای مشتریان WS سازگار با OpenAI (`/v1/ws`)
+- مدیریت نشانه همگام سازی (issue/revoke، دانلود بسته پیکربندی نسخه ETag)
+- GLM Thinking (`glmt`) از پیش تعیین شده ارائه دهنده درجه یک
+- شمارش توکن ترکیبی ( `/messages/count_tokens` سمت ارائه دهنده با تخمین برگشتی)
+- مدل مستعار auto-seeding (30 نرمال سازی گویش متقابل + در هنگام راه اندازی)
+- واکشی ایمن خروجی با محافظ SSRF ، مسدود کردن URL خصوصی، و تلاش مجدد قابل تنظیم
+- چت با آگاهی از خنک شدن مجدد با `requestRetry` و `maxRetryIntervalSec` قابل تنظیم دوباره امتحان می کند
+- Runtime environment validation with Zod at startup
+- ممیزی انطباق نسخه 2 با صفحهبندی، رویدادهای CRUD ارائهدهنده، و ثبت اعتبارسنجی مسدود شده با SSRF
 
-مدل اصلی زمان اجرا:
+مدل زمان اجرا اولیه:
 
-- مسیرهای برنامه Next.js در `src/app/api/*`، هم APIهای داشبورد و هم APIهای سازگاری را پیادهسازی میکنند
-- یک هسته مشترک SSE/مسیریابی در `src/sse/*` و `open-sse/*`، اجرای ارائهدهنده، تبدیل، استریم، جایگزینی و مصرف را مدیریت میکند
+- مسیرهای برنامه Next.js تحت `src/app/api/*` هم داشبورد APIs و هم سازگاری APIs را پیادهسازی میکنند
+- یک هسته مشترک SSE/routing در `src/sse/*` + `open-sse/*` اجرای ارائه دهنده، ترجمه، استریم، بازگشت مجدد و استفاده را انجام می دهد.
 
 ## نمودارهای مرجع
 
@@ -266,73 +265,73 @@ flowchart LR
 - بسته پیکربندی: `src/app/api/sync/bundle` (GET، اسنپشات نسخهبندیشده با ETag از تنظیمات/ارائهدهندگان/ترکیبها/کلیدها)
 - WebSocket: `src/app/api/v1/ws/route.ts` — کنترلکننده Upgrade برای کلاینتهای WS سازگار با OpenAI
 
-## 2) SSE + هسته ترجمه
+## 2) SSE + هستهٔ ترجمه
 
 ماژولهای جریان اصلی:
 
-- نقطه ورود: `src/sse/handlers/chat.ts`
+- نقطهٔ ورود: `src/sse/handlers/chat.ts`
 - هماهنگسازی هسته: `open-sse/handlers/chatCore.ts`
 - آداپتورهای اجرای ارائهدهنده: `open-sse/executors/*`
-- تشخیص فرمت/پیکربندی ارائهدهنده: `open-sse/services/provider.ts`
+- تشخیص قالب/پیکربندی ارائهدهنده: `open-sse/services/provider.ts`
 - تجزیه/تفکیک مدل: `src/sse/services/model.ts`، `open-sse/services/model.ts`
 - منطق جایگزینی حساب: `open-sse/services/accountFallback.ts`
 - رجیستری ترجمه: `open-sse/translator/index.ts`
-- تبدیلهای استریم: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
-- استخراج/نرمالسازی مصرف: `open-sse/utils/usageTracking.ts`
-- تجزیهکننده تگ think: `open-sse/utils/thinkTagParser.ts`
-- کنترلکننده embedding: `open-sse/handlers/embeddings.ts`
-- رجیستری ارائهدهنده embedding: `open-sse/config/embeddingRegistry.ts`
-- کنترلکننده تولید تصویر: `open-sse/handlers/imageGeneration.ts`
-- رجیستری ارائهدهنده تصویر: `open-sse/config/imageRegistry.ts`
+- تبدیلهای جریان: `open-sse/utils/stream.ts`، `open-sse/utils/streamHandler.ts`
+- استخراج/نرمالسازی میزان استفاده: `open-sse/utils/usageTracking.ts`
+- تجزیهگر تگ Think: `open-sse/utils/thinkTagParser.ts`
+- هندلر تعبیهسازی: `open-sse/handlers/embeddings.ts`
+- رجیستری ارائهدهندگان تعبیهسازی: `open-sse/config/embeddingRegistry.ts`
+- هندلر تولید تصویر: `open-sse/handlers/imageGeneration.ts`
+- رجیستری ارائهدهندگان تصویر: `open-sse/config/imageRegistry.ts`
 - پاکسازی پاسخ: `open-sse/handlers/responseSanitizer.ts`
 - نرمالسازی نقش: `open-sse/services/roleNormalizer.ts`
 
 سرویسها (منطق کسبوکار):
 
 - انتخاب/امتیازدهی حساب: `open-sse/services/accountSelector.ts`
-- مدیریت چرخه حیات کانتکست: `open-sse/services/contextManager.ts`
+- مدیریت چرخهٔ حیات زمینه: `open-sse/services/contextManager.ts`
 - اعمال فیلتر IP: `open-sse/services/ipFilter.ts`
 - ردیابی نشست: `open-sse/services/sessionManager.ts`
 - حذف درخواستهای تکراری: `open-sse/services/signatureCache.ts`
 - تزریق پرامپت سیستم: `open-sse/services/systemPrompt.ts`
-- مدیریت بودجه تفکر: `open-sse/services/thinkingBudget.ts`
-- مسیریابی مدل وایلدکارت: `open-sse/services/wildcardRouter.ts`
+- مدیریت بودجهٔ تفکر: `open-sse/services/thinkingBudget.ts`
+- مسیریابی مدل با نویسهٔ عام: `open-sse/services/wildcardRouter.ts`
 - مدیریت محدودیت نرخ: `open-sse/services/rateLimitManager.ts`
-- قطعکننده مدار: `src/shared/utils/circuitBreaker.ts`
-- انتقال کانتکست: `open-sse/services/contextHandoff.ts` — تولید و تزریق خلاصه انتقال برای استراتژی context-relay
-- فشردهسازی: `open-sse/services/compression/*` — فشردهسازی پیشفعال پیش از ترجمه ارائهدهنده؛
-  شامل قوانین Caveman، فیلترهای RTK، پایپلاینهای انباشته، ترکیبهای فشردهسازی، آمار و اعتبارسنجی
-- واکشیکننده سهمیه Codex: `open-sse/services/codexQuotaFetcher.ts` — سهمیه Codex را برای تصمیمگیریهای انتقال context-relay واکشی میکند
-- تلاش مجدد آگاه از cooldown: `src/sse/services/cooldownAwareRetry.ts` — تلاشهای مجدد cooldown بهازای هر مدل با `requestRetry` / `maxRetryIntervalSec` قابل پیکربندی
-- واکشی خروجی امن: `src/shared/network/safeOutboundFetch.ts` — واکشی محافظتشده ارائهدهنده/مدل با محافظ SSRF، مسدودسازی URLهای خصوصی، تلاش مجدد و تایماوت
-- محافظ URL خروجی: `src/shared/network/outboundUrlGuard.ts` — بررسیهای هاست روی URLهای ارائهدهنده؛ `src/shared/network/outboundUrlGuardPolicy.ts` حالت را از `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`، `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` و کلیدهای داشبورد آنها انتخاب میکند (به `docs/reference/ENVIRONMENT.md` مراجعه کنید)
-- پیشفرضهای درخواست ارائهدهنده: `open-sse/services/providerRequestDefaults.ts` — پیشفرضهای سطح ارائهدهنده برای `maxTokens`، `temperature`، `thinkingBudgetTokens`
-- ثابتهای ارائهدهنده GLM: `open-sse/config/glmProvider.ts` — مدلهای مشترک GLM، URLهای سهمیه، تایماوت/پیشفرضهای GLMT
-- آپاستریم Antigravity: `open-sse/config/antigravityUpstream.ts` — ثابتهای URL پایه و مسیر discovery
-- ثابتهای کلاینت Codex: `open-sse/config/codexClient.ts` — مقادیر نسخهدار user-agent و client-version
-- سید نام مستعار مدل: `src/lib/modelAliasSeed.ts` — بیش از ۳۰ نام مستعار گویش متقاطع-پراکسی را هنگام راهاندازی سید میکند
+- قطعکنندهٔ مدار: `src/shared/utils/circuitBreaker.ts`
+- تحویل زمینه: `open-sse/services/contextHandoff.ts` — تولید و تزریق خلاصهٔ تحویل برای راهبرد انتقال زمینه
+- فشردهسازی: `open-sse/services/compression/*` — فشردهسازی پیشدستانه پیش از ترجمهٔ ارائهدهنده؛
+  شامل قواعد Caveman، فیلترهای RTK، خطلولههای پشتهای، ترکیبهای فشردهسازی، آمار و اعتبارسنجی
+- واکشیکنندهٔ سهمیهٔ Codex: `open-sse/services/codexQuotaFetcher.ts` — سهمیهٔ Codex را برای تصمیمگیریهای تحویل در انتقال زمینه واکشی میکند
+- تلاش مجدد آگاه از دورهٔ انتظار: `src/sse/services/cooldownAwareRetry.ts` — تلاشهای مجدد دورهٔ انتظار بهازای هر مدل، با `requestRetry` / `maxRetryIntervalSec` قابلپیکربندی
+- واکشی خروجی امن: `src/shared/network/safeOutboundFetch.ts` — واکشی محافظتشدهٔ ارائهدهنده/مدل با محافظ SSRF، مسدودسازی URL خصوصی، تلاش مجدد و مهلت زمانی
+- محافظ URL خروجی: `src/shared/network/outboundUrlGuard.ts` — بررسی میزبان در URLهای ارائهدهنده؛ `src/shared/network/outboundUrlGuardPolicy.ts` حالت را از `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`، `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` و گزینههای متناظر آنها در داشبورد انتخاب میکند (به `docs/reference/ENVIRONMENT.md` مراجعه کنید)
+- پیشفرضهای درخواست ارائهدهنده: `open-sse/services/providerRequestDefaults.ts` — پیشفرضهای سطح ارائهدهنده برای `maxTokens`، `temperature` و `thinkingBudgetTokens`
+- ثابتهای ارائهدهندهٔ GLM: `open-sse/config/glmProvider.ts` — مدلهای مشترک GLM، URLهای سهمیه و مهلت زمانی/پیشفرضهای GLMT
+- بالادستی Antigravity: `open-sse/config/antigravityUpstream.ts` — ثابتهای URL پایه و مسیر اکتشاف
+- ثابتهای کلاینت Codex: `open-sse/config/codexClient.ts` — مقادیر نسخهدار عامل کاربر و نسخهٔ کلاینت
+- مقداردهی اولیهٔ نامهای مستعار مدل: `src/lib/modelAliasSeed.ts` — بیش از 30 نام مستعار میانپروکسی با گویشهای مختلف را هنگام راهاندازی مقداردهی میکند
 
-ماژولهای لایه دامنه:
+ماژولهای لایهٔ دامنه:
 
-- قوانین هزینه/بودجه: `src/domain/costRules.ts`
+- قواعد هزینه/بودجهها: `src/domain/costRules.ts`
 - سیاست جایگزینی: `src/domain/fallbackPolicy.ts`
-- قرارداد تفکیک ترکیب رزروشده: `src/domain/comboResolver.ts`؛ مسیریابی زنده از `open-sse/services/combo.ts` استفاده میکند
-- سیاست قفلکردن: `src/domain/lockoutPolicy.ts`
-- قرارداد ارزیابی سیاست رزروشده: `src/domain/policyEngine.ts`؛ مسیر درخواست، سیاست کلید API را از طریق `src/shared/utils/apiKeyPolicy.ts` و مجوز هدف تفکیکشده را از طریق `src/sse/handlers/chat/resolvedModelPolicy.ts` اعمال میکند
-- کاتالوگ کدهای خطا: `src/shared/constants/errorCodes.ts`
-- شناسه درخواست: `src/shared/utils/requestId.ts`
-- تایماوت واکشی: `src/shared/utils/fetchTimeout.ts`
+- تفکیککنندهٔ ترکیب: `src/domain/comboResolver.ts`
+- سیاست قفلسازی: `src/domain/lockoutPolicy.ts`
+- موتور سیاست: `src/domain/policyEngine.ts` — ارزیابی متمرکز قفلسازی ← بودجه ← جایگزینی
+- فهرست کدهای خطا: `src/shared/constants/errorCodes.ts`
+- شناسهٔ درخواست: `src/shared/utils/requestId.ts`
+- مهلت زمانی واکشی: `src/shared/utils/fetchTimeout.ts`
 - تلهمتری درخواست: `src/shared/utils/requestTelemetry.ts`
 - انطباق/ممیزی: `src/lib/compliance/index.ts`
-- اجراکننده ارزیابی: `src/lib/evals/evalRunner.ts`
-- ماندگاری وضعیت دامنه: `src/lib/db/domainState.ts` — عملیات CRUD در SQLite برای زنجیرههای جایگزینی، بودجهها، تاریخچه هزینه، وضعیت قفل، قطعکنندههای مدار
+- اجراکنندهٔ ارزیابی: `src/lib/evals/evalRunner.ts`
+- ماندگارسازی وضعیت دامنه: `src/lib/db/domainState.ts` — عملیات CRUD در SQLite برای زنجیرههای جایگزینی، بودجهها، تاریخچهٔ هزینه، وضعیت قفلسازی و قطعکنندههای مدار
 
-ماژولهای ارائهدهنده OAuth (۲۷ فایل جداگانه در `src/lib/oauth/providers/`):
+ماژولهای ارائهدهندهٔ OAuth (27 فایل مجزا در `src/lib/oauth/providers/`):
 
 - ایندکس رجیستری: `src/lib/oauth/providers/index.ts`
-- ارائهدهندگان جداگانه: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
-- توابع کمکی مشترک: `codebuddyDeviceAuth.ts` (جریان دستگاه CodeBuddy نسخه CN/intl)، `museCodeDeviceResponse.ts`
-- رپر نازک: `src/lib/oauth/providers.ts` — صادرات مجدد از ماژولهای جداگانه
+- ارائهدهندگان مجزا: `agy.ts`، `antigravity.ts`، `claude.ts`، `cline.ts`، `codebuddy-cn.ts`، `codebuddy-intl.ts`، `codex.ts`، `cursor.ts`، `devin-desktop.ts`، `ghe-copilot.ts`، `github.ts`، `gitlab-duo.ts`، `grok-cli-oauth.ts`، `grok-cli.ts`، `kilocode.ts`، `kimi-coding.ts`، `kiro.ts`، `muse-code.ts`، `openference.ts`، `qoder.ts`، `trae.ts`، `workbuddy.ts`، `xai-oauth.ts`، `zed-hosted.ts`، `zed.ts`
+- توابع کمکی مشترک: `codebuddyDeviceAuth.ts` (جریان دستگاه CodeBuddy CN/intl)، `museCodeDeviceResponse.ts`
+- پوششدهندهٔ سبک: `src/lib/oauth/providers.ts` — صادرات مجدد از ماژولهای مجزا
 
 ## 5) سرویسهای تعبیهشده (v3.8.4)
 
@@ -357,168 +356,123 @@ OmniRoute میتواند فرایندهای ابزار هوش مصنوعیِ د�
 
 بررسی عمیق: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## زیرسیستمهای اصلی (v3.8.0)
+## زیرسیستم های اصلی (نسخه 3.8.0)
 
-### الف. موتور Auto Combo
+### A. Auto Combo Engine
 
-Auto Combo بهجای تکیه بر یک تعریف ایستای combo، در زمان درخواست بهصورت پویا اهداف مسیریابی را امتیازدهی و انتخاب میکند. این موتور زیربنای خانواده پیشوندهای مدل `auto/*` است.
+Auto Combo بهجای تکیه بر تعریف ترکیبی استاتیک، بهصورت پویا اهداف مسیریابی را در زمان درخواست امتیاز میدهد و انتخاب میکند. این خانواده پیشوند مدل `auto/*` را نیرو می دهد.
 
-- نقطه ورود موتور: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- نقطه ورود combo زنده: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`) که توسط `src/sse/handlers/chat.ts` فراخوانی میشود
+- ورودی موتور: `open-sse/services/autoCombo/` (`autoComboEngine.ts`، `scoringEngine.ts`، `virtualFactory.ts`، `modePacks.ts`)
+- حلکننده: `src/domain/comboResolver.ts` (تشخیص خودکار پیشوند `auto/` )
 - داشبورد: `/dashboard/auto-combo`
-- تلهمتری: جدول `auto_combo_decisions` در SQLite
+- تله متری: جدول `auto_combo_decisions` SQLite
 
-قابلیتهای کلیدی:
+قابلیت های کلیدی:
 
-- **۲۰ راهبرد مسیریابی** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto مهمترین افزونه v3.8.0 است؛ `fusion` (ارسال موازی به پنل + ترکیب نتایج توسط داور،
-  `open-sse/services/fusion.ts`) در v3.8.36 جدید است.
-- **امتیازدهی ۱۶ عاملی**: quota، health، هزینه معکوس (inverse cost)، تأخیر معکوس (inverse latency)، تناسب با وظیفه (task fit) و
-  ده عامل دیگر. جدول مرجع عوامل و وزنهای پیشفرض آنها در
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) نگهداری میشود — بازگویی آن در اینجا
-  باعث میشود جای دومی برای کهنه شدن آن وجود داشته باشد.
-- **کارخانه مجازی (Virtual factory)** وقتی هیچ combo نامدار منطبقی وجود ندارد، comboهای
-  زودگذر ایجاد میکند و نامزدها را از اتصالات سالم و فعال ارائهدهندهها تأمین میکند.
-- **پیشوندهای auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — هر یک با یک پروفایل وزنی تنظیمشده پشتیبانی میشوند.
-- **۶ بسته حالت (mode pack)**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` و `chaos-mode` — پیکربندیهای از پیش تنظیمشده وزن که از
-  داشبورد قابل فراخوانی هستند. (نباید با پیشوندهای `auto/*` بالا اشتباه گرفته شوند؛ آنها
-  گونههای زمانِ درخواست هستند.)
+- **20 استراتژی مسیریابی** (اولویت، وزن دار، اول پر کردن، دور روبین، P2C، تصادفی، کم استفاده، بهینه سازی هزینه، آگاه مجدد، بازنشانی پنجره، فضای سر، سهمیه بندی، دقیق تصادفی،** خودکار** lkgp، زمینه بهینه، حافظه پنهان، رله زمینه،** همجوشی** , pipeline) — auto عنوان اضافه شده در نسخه 3.8.0 است. `fusion` (پانل پنل بیرونی + قاضی سنتز، `open-sse/services/fusion.ts`) در نسخه 3.8.36 جدید است.
+- **امتیاز دهی 16 عاملی** : سهمیه، سلامت، هزینه معکوس، تأخیر معکوس، تناسب وظیفه و ده مورد دیگر. جدول متعارف فاکتورها و وزنهای پیشفرض آنها در [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — زندگی میکند، با تکرار آن در اینجا، جایگاه دومی برای کهنه شدن به آن میدهد.
+- **کارخانه مجازی** ترکیبهای زودگذر را زمانی که هیچ ترکیبی با نام تطبیقی وجود نداشته باشد، تحقق میبخشد و نامزدها را از اتصالات ارائهدهنده فعال سالم تامین میکند.
+- **پیشوندهای خودکار** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — که هر کدام توسط یک نمایه وزن تنظیم شده پشتیبانی می شوند.
+- **6 بسته حالت** : `ship-fast`، `cost-saver`، `quality-first`، `offline-friendly`، `reliability-first` و `chaos-mode` — پیکربندی های وزن از پیش تعیین شده قابل فراخوانی از داشبورد. (با پیشوندهای `auto/*` در بالا که انواع زمان درخواست هستند اشتباه گرفته نشود.)
 
-برای جزئیات کامل الگوریتمی (فرمولهای عوامل، تنظیم وزنها)، به
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) مراجعه کنید.
+برای جزئیات کامل الگوریتمی (فرمول های فاکتور، تنظیم وزن)، به [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) مراجعه کنید.
 
-### ب. Cloud Agents
+### ب. عوامل ابری
 
-Cloud Agents پلتفرمهای میزبانشده عامل کدِ متعلق به شخص ثالث (Codex Cloud، Devin،
-Jules) را پشت یک چرخه عمر وظیفه یکدستِ مبتنی بر پایگاه داده قرار میدهد. همه نقاط پایانی
-ایجاد/بازرسی وظیفه به احراز هویت مدیریتی نیاز دارند.
+Cloud Agents پلتفرمهای عامل کد میزبان شخص ثالث (Codex Cloud، Devin، Jules) را در پشت یک چرخه حیات یکنواخت با پشتیبانی DB قرار میدهد. تمام نقاط پایانی task creation/inspection نیاز به احراز هویت مدیریت دارند.
 
-- ریشه ماژول: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, بهعلاوه زیرشاخههای مخصوص هر عامل زیر `agents/`)
-- پیادهسازیهای هر عامل: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- ریشه ماژول: `src/lib/cloudAgent/` (`baseAgent.ts`، `registry.ts`، `api.ts`، `types.ts`، `db.ts`، به علاوه زیر شاخههای هر عامل تحت `agents/`)
+- اجرای هر عامل: `agents/codex/`، `agents/devin/`، `agents/jules/`
 - نقاط پایانی عمومی: `/api/v1/agents/tasks/*` (list/create/get/cancel)
-- نقاط پایانی مدیریتی: `/api/cloud/*` (provisioning, status, batch)
+- نقاط پایانی مدیریت: `/api/cloud/*` (تامین، وضعیت، دسته)
 - داشبورد: `/dashboard/cloud-agents`
-- ذخیرهسازی: جدول `cloud_agent_tasks`
+- ذخیره سازی: میز `cloud_agent_tasks`
 
-برای جزئیات تأمین (provisioning) و OAuth مخصوص هر عامل، به
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) مراجعه کنید.
+برای تهیه هر عامل و مشخصات OAuth ، به [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) مراجعه کنید.
 
-### ج. Guardrails
+### ج. نرده های محافظ
 
-ماژول Guardrails یک لایه میانافزار با قابلیت بارگذاری مجدد داغ (hot-reload) است که درخواستها
-و پاسخها را از نظر PII، تزریق پرامپت (prompt injection) و محتوای بینایی ناامن بررسی میکند. نقضها
-درخواست را با HTTP **503** بههمراه یک کد خطای ساختیافته قطع میکنند، بهگونهای که
-فراخوانندههای پاییندست بتوانند دوباره تلاش کنند یا مسیر متفاوتی در پیش گیرند.
+ماژول guardrails یک لایه میانافزار قابل شارژ مجدد است که درخواستها و پاسخها را برای PII، تزریق سریع و محتوای دید ناامن بررسی میکند. تخلفات درخواست را با HTTP اتصال کوتاه می کند** 503** به علاوه یک کد خطای ساختاریافته، به تماس گیرندگان پایین دستی اجازه می دهد دوباره تلاش کنند یا شعبه کنند.
 
-- ریشه ماژول: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- بارگذاری مجدد داغ: رجیستری تغییرات پیکربندی را زیر نظر میگیرد و زنجیره را درجا بازسازی میکند
-- نقاط اتصال: ورودی کنترلکننده چت، کنترلکننده تولید تصویر، پاکساز پاسخ
-- قرارداد HTTP: نقضها بهصورت `503` با `error.code = "GUARDRAIL_VIOLATION"` نمایان میشوند
+- ریشه ماژول: `src/lib/guardrails/` (`base.ts`، `registry.ts`، `piiMasker.ts`، `promptInjection.ts`، `visionBridge.ts`، `visionBridgeHelpers.ts`)
+- بارگذاری مجدد داغ: رجیستری تغییرات پیکربندی را مشاهده می کند و زنجیره را در جای خود بازسازی می کند
+- نقاط اتصال سیمی: ورود کنترل کننده چت، کنترل کننده تولید تصویر، ضدعفونی کننده پاسخ
+- عقد HTTP : تخلفات به صورت `503` با `error.code = "GUARDRAIL_VIOLATION"` ظاهر می شود
 
-برای نگارش قواعد و تنظیم آستانهها، به
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) مراجعه کنید.
+برای نوشتن مجموعه قوانین و تنظیم آستانه، به [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) مراجعه کنید.
 
 ### د. لایه دامنه
 
-فضای نام `src/domain/` شامل سرویسهای دامنه و قراردادهای ارزیابی رزروشده است.
-این فضا نقطه ورود سیاستی اجباریِ واحدی برای تمام درخواستها نیست.
+فضای نام `src/domain/` تصمیمات خط مشی را متمرکز می کند تا کنترل کننده های مسیر مجبور نباشند خودشان منطق lockout/budget/fallback جمع آوری کنند.
 
-مسیر زنده چت، تابع `enforceApiKeyPolicy()` را از
-`src/shared/utils/apiKeyPolicy.ts` فراخوانی میکند؛ مجوزدهی مدلها و اعضای combo تعیینشده
-در `src/sse/handlers/chat/resolvedModelPolicy.ts` پیادهسازی شده است. نقطه ورود
-self-hosted در `src/app/api/v1/chat/completions/route.ts` نیز پیش از توزیع (dispatch)، سیاست
-API key را اعمال میکند. تعیین combo از طریق `open-sse/services/combo.ts` انجام میشود.
-
-`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` و `src/lib/container.ts`
-همچنان قراردادهای آزمونشدهای هستند، نه سیمکشی آن مسیر درخواست. کانتینر موتور
-سیاست را ثبت میکند، اما مسیر درخواست تولیدیِ بررسیشده آن را resolve نمیکند.
-تغییر صرفِ این قراردادها، سیاست چت زنده یا مسیریابی combo را تغییر نمیدهد؛
-اتصال یا حذف آنها به یک تصمیم طراحی جداگانه نیاز دارد.
-
-- موتور سیاست رزروشده: `src/domain/policyEngine.ts` — ارزیابی lockout ← budget ← fallback
-- قواعد هزینه: `src/domain/costRules.ts`
-- سیاست جایگزین (fallback): `src/domain/fallbackPolicy.ts`
-- سیاست قفل (lockout): `src/domain/lockoutPolicy.ts`
+- موتور خط مشی: `src/domain/policyEngine.ts` — نقطه ورودی واحد برای ارزیابی قبل از اجرا (قفل کردن → بودجه → سفارش مجدد)
+- قوانین هزینه: `src/domain/costRules.ts`
+- سیاست بازگشتی: `src/domain/fallbackPolicy.ts`
+- سیاست قفل: `src/domain/lockoutPolicy.ts`
 - مسیریابی مبتنی بر برچسب: `src/domain/tagRouter.ts`
-- تعیینکننده combo رزروشده: `src/domain/comboResolver.ts` — قرارداد انتخاب مستقل؛ مسیریابی زنده combo در `open-sse/services/combo.ts` پیادهسازی شده است
-- پیونددهنده قواعد اتصال/مدل: `src/domain/connectionModelRules.ts`
-- اسنپشاتهای دسترسپذیری مدل: `src/domain/modelAvailability.ts`
-- ردیابی انقضای ارائهدهنده: `src/domain/providerExpiration.ts`
-- کش سهمیه: `src/domain/quotaCache.ts`
-- وضعیت تخریب (degradation): `src/domain/degradation.ts`
+- حلکننده ترکیبی: `src/domain/comboResolver.ts` — نامهای ترکیبی، پیشوندهای خودکار/\* و اهداف مدل وایلد را به برنامههای اجرایی مشخص حل میکند.
+- وصال قاعده Connection/model : `src/domain/connectionModelRules.ts`
+- عکسهای فوری در دسترس بودن مدل: `src/domain/modelAvailability.ts`
+- ردیابی انقضای ارائه دهنده: `src/domain/providerExpiration.ts`
+- حافظه نهان سهمیه: `src/domain/quotaCache.ts`. ارائهدهندگان پنجرههای سهمیه را اضافه و حذف میکنند (OpenAI پنجره Codex 5 ساعته را برای برخی از طرحها حذف کرد)، بنابراین استفاده از خواندن آداپتور ارائهدهنده بهعنوان کامل تأیید میکند (`quotasComplete`، به `src/lib/usage/usageReading.ts` مراجعه کنید) مجموعه پنجره کامل حساب است: پنجرهای که قبلاً شناخته شده بود اما وجود ندارد، بازنشسته شده است، در `quota_snapshots` پنهان، در rehydrates rehydrates a ثبت شده است. وضعیت سهمیه Codex و در سطل های اشباع Claude ادامه داشت. شواهد جزئی (سرصفحههای پاسخ، کپیهای قدیمی) فقط پنجرههایی را که دارند بهروزرسانی میکنند.
+- حالت تنزل: `src/domain/degradation.ts`
 - ممیزی پیکربندی: `src/domain/configAudit.ts`
-- سازنده متادیتای پاسخ OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- زیرسیستم ارزیابی: `src/domain/assessment/` — کارهای ارزیابی دورهای
+- سازنده ابرداده پاسخ OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- زیر سیستم ارزیابی: مشاغل ارزیابی دوره ای `src/domain/assessment/` —
 
-### هـ. خط لوله مجوزدهی
+### E. خط لوله مجوز
 
-خط لوله مجوزدهی هر درخواست ورودی را طبقهبندی میکند و پیش از توزیع،
-زنجیره سیاست مناسب را بر آن اعمال میکند.
+خط لوله مجوز هر درخواست دریافتی را طبقه بندی می کند و زنجیره خط مشی مناسب را قبل از ارسال اعمال می کند.
 
-- نقطه ورود پایپلاین: `src/server/authz/pipeline.ts`
-- طبقهبندیکننده درخواست: `src/server/authz/classify.ts` — مسیرهای سازگاری عمومی را از مسیرهای مدیریتی متمایز میکند
-- فهرست مسیرهای عمومی: `src/shared/constants/publicApiRoutes.ts`
-- سیاستها: `src/server/authz/policies/` — گزارههای قابل ترکیب
-  (`requireApiKey`، `requireManagement`، `requireFreshAuth` و غیره)
+- ورودی خط لوله: `src/server/authz/pipeline.ts`
+- طبقه بندی کننده درخواست: `src/server/authz/classify.ts` — مسیرهای سازگاری عمومی را از مسیرهای مدیریتی متمایز می کند
+- موجودی مسیر عمومی: `src/shared/constants/publicApiRoutes.ts`
+- خط مشی ها: محمولات انشاپذیر `src/server/authz/policies/` — (`requireApiKey`، `requireManagement`، `requireFreshAuth`، و غیره)
 - ابزارهای هدر: `src/server/authz/headers.ts`
-- کمککننده تأیید: `src/server/authz/assertAuth.ts`
-- زمینه درخواست: `src/server/authz/context.ts`
+- مددکار ادعا: `src/server/authz/assertAuth.ts`
+- متن درخواست: `src/server/authz/context.ts`
 
-مسیرهای عمومی در برابر مسیرهای مدیریتی یک مرز سخت هستند: APIهای agent/cooldown و تغییرات (mutation) ارائهدهنده نیازمند احراز هویت مدیریتی هستند (در صورت عدم وجود، HTTP 401).
+مسیرهای عمومی در مقابل مدیریت یک مرز سخت هستند: agent/cooldown APIs و جهشهای ارائهدهنده به اعتبار مدیریت نیاز دارند (در صورت عدم وجود HTTP 401).
 
-برای قوانین کامل طبقهبندی مسیرها، به
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) مراجعه کنید.
+برای قوانین طبقه بندی کامل مسیر، به [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) مراجعه کنید.
 
-### F. FSM گردش کار و مسیریاب آگاه از وظیفه
+### F. گردش کار FSM و روتر Task-Aware
 
-مسیریابی مبتنی بر ماشین حالت متناهی که بالای انتخاب combo لایهبندی شده تا ترافیک را بر اساس مرحله گردش کار تشخیصدادهشده (برنامهریزی، اجرا،
-بازبینی) و میل به وظایف پسزمینه هدایت کند.
+یک روتر حالت محدود با ماشین رانده لایهای بالای انتخاب ترکیبی برای هدایت ترافیک بر اساس مرحله گردش کار شناساییشده (برنامهریزی، اجرا، بررسی) و وابستگی پسزمینه کار.
 
-- FSM گردش کار: `open-sse/services/workflowFSM.ts`
-- مسیریاب آگاه از وظیفه: `open-sse/services/taskAwareRouter.ts`
-- آشکارساز وظیفه پسزمینه: `open-sse/services/backgroundTaskDetector.ts`
-- طبقهبندیکننده قصد: `open-sse/services/intentClassifier.ts`
+- گردش کار FSM: `open-sse/services/workflowFSM.ts`
+- روتر آگاه از وظایف: `open-sse/services/taskAwareRouter.ts`
+- آشکارساز کار پس زمینه: `open-sse/services/backgroundTaskDetector.ts`
+- طبقه بندی قصد: `open-sse/services/intentClassifier.ts`
 
-گذارهای FSM وارد امتیازدهی Auto Combo میشوند و برای وظایف پسزمینه/خودکارسازی بهسمت مدلهای ارزانتر و برای نوبتهای برنامهریزی/بازبینی تعاملی بهسمت مدلهای قویتر سوگیری ایجاد میکنند.
+انتقالهای FSM به امتیازدهی Auto Combo میخورند، به سمت مدلهای ارزانتر برای کارهای background/automation و به سمت مدلهای قویتر برای چرخشهای تعاملی planning/review سوگیری میکنند.
 
-### G. تابآوری اختصاصی ارائهدهنده
+### G. انعطاف پذیری خاص ارائه دهنده
 
-چندین ارائهدهنده ماژولهای اختصاصی تابآوری و پنهانکاری ارائه میدهند که بر پشت لایههای سراسری قطعکن مدار / سرد کردن اتصال / قفلکردن مدل سوار میشوند:
+چندین ارائهدهنده ماژولهای انعطافپذیری و مخفیکاری اختصاصی را ارسال میکنند که روی لایههای قفل مدار جهانی / خنککردن اتصال / مدلسازی لایههای قفل مدار سراسری بازمیگردند:
 
-- موتور 429 Antigravity: `open-sse/services/antigravity429Engine.ts` (هویت را میچرخاند، هدرهای پاسخ را پاکسازی میکند، ردیابی اعتبار/نسخه را از طریق
-  `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`،
-  `antigravityIdentity.ts`، `antigravityVersion.ts` هدایت میکند)
-- سیاست سهمیه ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH کلود کد (دستدادن کانال سازگاری): `open-sse/services/claudeCodeCCH.ts`،
-  بهعلاوه `claudeCodeCompatible.ts`، `claudeCodeConstraints.ts`، `claudeCodeExtraRemap.ts`،
-  `claudeCodeToolRemapper.ts`
-- شکلدهی اثر انگشت Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- مبهمسازی Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- موتور Antigravity 429: `open-sse/services/antigravity429Engine.ts` (هویت را میچرخاند، هدرهای پاسخ را پاک میکند، ردیابی credits/version را از طریق `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`، `antigravityIdentity.ts`، `antigravityVersion.ts` هدایت میکند)
+- نگهبان Antigravity 429: `open-sse/services/antigravity429Guard.ts` (بودجه به ازای درخواست 429s بالادست در همه میزبانها، `ANTIGRAVITY_MAX_429_ATTEMPTS`؛ ارسال مجدد یکسانی از بدن رد شده به صورت محلی پاسخ داده میشود؛ `src/sse/handlers/chat.ts` چنین درخواستی را از طریق تلاش مجدد با آگاهی از سرد کردن مجدد راهاندازی نمیکند)
+- سیاست سهمیه ModelScope : `open-sse/services/modelscopePolicy.ts`
+- کد Claude CCH (کانال سازگاری دست دادن): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- شکل دادن اثر انگشت کد Claude : `open-sse/services/claudeCodeFingerprint.ts`
+- کد Claude مبهم: `open-sse/services/claudeCodeObfuscation.ts`
 
-برای راهنمای کامل پنهانکاری و دستورالعملهای عملیاتی، به
-`docs/security/STEALTH_GUIDE.md` مراجعه کنید (git؛ در `/docs` کامپایل نشده است).
+برای راهنمای کامل مخفی کاری و راهنمای عملیاتی، به `docs/security/STEALTH_GUIDE.md` (git؛ در `/docs` کامپایل نشده) مراجعه کنید.
 
-### H. وبهوکها، کش استدلال، کش خواندن
+### H. Webhooks، Reasoning Cache، Read Cache
 
-- **وبهوکها** — ارسال خروجی برای رویدادهای ارائهدهنده/حساب/وظیفه.
-  - توزیعکننده: `src/lib/webhookDispatcher.ts`
-  - ذخیرهسازی: جدول SQLite `webhooks` (از طریق `src/lib/db/webhooks.ts`)
-  - داشبورد: `/dashboard/webhooks` (اشتراکها، رازها، تاریخچه تلاش مجدد)
-  - برای طبقهبندی رویدادها و معناشناسی تلاش مجدد، به [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) مراجعه کنید.
-- **کش استدلال** — بلوکهای استدلال قابل بازپخش برای ارائهدهندگانی که توکنهای تفکر صادر میکنند (Claude، GLMT و غیره) تا نوبتهای متوالی بتوانند از تفکر مجدد صرفنظر کنند.
-  - لایه پایگاه داده: `src/lib/db/reasoningCache.ts`
+- **وب هوک ها** ارسال خروجی — برای رویدادهای provider/account/task.
+  - اعزام کننده: `src/lib/webhookDispatcher.ts`
+  - ذخیره سازی: جدول `webhooks` SQLite (از طریق `src/lib/db/webhooks.ts`)
+  - داشبورد: `/dashboard/webhooks` (اشتراکها، اسرار، سابقه امتحان مجدد)
+  - برای طبقه بندی رویدادها و معناشناسی مجدد، به [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) مراجعه کنید.
+- **کش استدلال** بلوکهای استدلال قابل پخش — برای ارائهدهندگانی که نشانههای تفکر (Claude، GLMT، و غیره) منتشر میکنند، بنابراین چرخشهای متوالی میتوانند از تفکر مجدد صرفنظر کنند.
+  - لایه DB : `src/lib/db/reasoningCache.ts`
   - لایه سرویس: `open-sse/services/reasoningCache.ts`
   - برای معناشناسی بازپخش، به [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) مراجعه کنید.
-- **کش خواندن** — کش پاسخ کوتاهمدت که با امضا کلید میخورد و برای ادغام تلاشهای مجدد یکسانِ ناشی از SDKهای بالادستی معیوب استفاده میشود.
-  - لایه پایگاه داده: `src/lib/db/readCache.ts`
+- **کش را بخوانید** حافظه پنهان پاسخ کوتاه مدت — با امضا کلید می خورد و برای جمع کردن مجدد تکرارهای مشابه از SDKs بالادست شکسته استفاده می شود.
+  - لایه DB : `src/lib/db/readCache.ts`
   - نقطه پایانی آمار: `GET /api/cache/stats`، داشبورد در `/dashboard/cache`
 
 ## 3) لایهٔ ماندگاری

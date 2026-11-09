@@ -98,11 +98,54 @@ function parseEvent(event: string): ParsedEvent {
       protectedPhase = true;
     }
   }
+  const gemini = scanGeminiCandidates(record);
+  if (gemini.protectedPhase) protectedPhase = true;
+  if (gemini.useful) useful += gemini.useful;
   if (protectedPhase) useful = "";
   return {
     usefulBytes: useful ? new TextEncoder().encode(useful).byteLength : 0,
     protectedPhase,
   };
+}
+
+function extractCandidateParts(candidate: unknown): unknown[] {
+  if (!candidate || typeof candidate !== "object") return [];
+  const content = (candidate as Record<string, unknown>).content;
+  if (!content || typeof content !== "object") return [];
+  const parts = (content as Record<string, unknown>).parts;
+  return Array.isArray(parts) ? parts : [];
+}
+
+function isProtectedGeminiPart(part: Record<string, unknown>): boolean {
+  return Boolean(
+    part.thought === true ||
+    typeof part.thoughtSignature === "string" ||
+    part.functionCall ||
+    part.executableCode ||
+    part.codeExecutionResult
+  );
+}
+
+function scanGeminiCandidates(record: Record<string, unknown>): {
+  useful: string;
+  protectedPhase: boolean;
+} {
+  const direct = record.candidates;
+  const resp = record.response;
+  const nested =
+    resp && typeof resp === "object" ? (resp as Record<string, unknown>).candidates : undefined;
+  const candidates = Array.isArray(direct) ? direct : Array.isArray(nested) ? nested : [];
+  let useful = "";
+  let protectedPhase = false;
+  for (const candidate of candidates) {
+    for (const part of extractCandidateParts(candidate)) {
+      if (!part || typeof part !== "object") continue;
+      const partRecord = part as Record<string, unknown>;
+      if (isProtectedGeminiPart(partRecord)) protectedPhase = true;
+      else if (typeof partRecord.text === "string") useful += partRecord.text;
+    }
+  }
+  return { useful, protectedPhase };
 }
 
 export class ThroughputWatchdog {

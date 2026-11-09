@@ -16,6 +16,7 @@
 import { isFeatureFlagEnabled, resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import { getPiiRuleConfig, type PiiRuleConfig } from "@/lib/pii/piiRuleConfig";
 import { recordPiiDetections } from "@/lib/pii/piiDetectionStats";
+import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 const isEnabled = () => isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION");
 
@@ -47,6 +48,8 @@ interface PIIPattern {
   regex: RegExp;
   replacement: string;
   severity: "high" | "medium" | "low";
+  /** When present, a regex match is redacted only if this accepts it (checksum / structure / context). */
+  validate?: (match: string, context: string) => boolean;
 }
 
 const PII_PATTERNS: PIIPattern[] = [
@@ -69,6 +72,10 @@ const PII_PATTERNS: PIIPattern[] = [
     replacement: "[CC_REDACTED]",
     severity: "high",
   },
+  // GDPR (EU) and POPIA (ZA) identifiers, shared with the request-side sanitizer
+  // (src/shared/utils/piiPatterns.ts). Every match goes through its validator, and the
+  // group sits ahead of the generic phone patterns so a validated ID keeps its own label.
+  ...buildGdprPopiaRules(),
   {
     name: "phone_us",
     regex:
@@ -239,6 +246,13 @@ export function sanitizePII(
       const cleanEnd = cleanStart + match[0].length;
       const start = cleanToOrig[cleanStart];
       const end = cleanToOrig[cleanEnd];
+
+      if (
+        pattern.validate &&
+        !pattern.validate(match[0], precedingContext(cleanText, cleanStart))
+      ) {
+        continue;
+      }
 
       // Perform checksum validation to minimize false positives
       if (pattern.name === "credit_card" && !isValidLuhn(match[0].replace(/[-\s]/g, ""))) {

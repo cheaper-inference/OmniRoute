@@ -11,6 +11,7 @@
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
+import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
@@ -242,7 +243,13 @@ export async function executeProviderFetch(
 
   try {
     const response = await fetchWithSearchProxy(proxy, () =>
-      fetch(url, { ...init, signal: controller.signal })
+      fetchWithCheckedRedirects(
+        url,
+        { ...init, signal: controller.signal },
+        config.id,
+        // The fixed registry origin keeps the pooled dispatcher on the first hop.
+        !isRegistryEndpoint(url, config.baseUrl)
+      )
     );
     clearTimeout(timer);
 

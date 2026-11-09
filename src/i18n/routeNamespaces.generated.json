@@ -1,5 +1,5 @@
 {
-  "root": ["auth", "common", "docs", "endpoint", "header", "landing", "publicSystem"],
+  "root": ["auth", "common", "docs", "endpoint", "header", "landing", "miniapp", "publicSystem"],
   "chrome": [
     "agentSkills",
     "analytics",
@@ -25,6 +25,7 @@
     "sharedComponents",
     "sidebar",
     "stats",
+    "teamCosts",
     "traeAuthModal",
     "trafficInspector"
   ],
@@ -56,6 +57,7 @@
     "sharedComponents",
     "sidebar",
     "stats",
+    "teamCosts",
     "traeAuthModal",
     "trafficInspector",
     "usage",
@@ -88,6 +90,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -119,6 +122,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -148,6 +152,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -176,6 +181,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -204,6 +210,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "usage"
@@ -234,6 +241,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -265,6 +273,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "usageLimits"
@@ -295,6 +304,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -323,6 +333,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -351,6 +362,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -382,6 +394,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -411,6 +424,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -440,6 +454,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -471,6 +486,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -502,6 +518,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -531,10 +548,12 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
     "combos": [
+      "accountPreferences",
       "agentSkills",
       "analytics",
       "breadcrumbs",
@@ -562,6 +581,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -592,6 +612,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -621,6 +642,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -655,6 +677,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -666,6 +689,7 @@
       "cloudSyncStatus",
       "codexKeyServiceMode",
       "common",
+      "conversations",
       "costs",
       "cursorAuthModal",
       "header",
@@ -683,6 +707,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -714,6 +739,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "usage",
@@ -745,6 +771,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -776,6 +803,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -805,6 +833,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -834,6 +863,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -862,6 +892,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -894,6 +925,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "telemetry",
       "traeAuthModal",
       "trafficInspector"
@@ -924,6 +956,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -952,6 +985,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -968,6 +1002,7 @@
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
+      "logExport",
       "noAuthProvider",
       "oauthModal",
       "providers",
@@ -980,6 +1015,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1010,6 +1046,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1039,6 +1076,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1069,6 +1107,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1098,6 +1137,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1106,6 +1146,7 @@
       "analytics",
       "breadcrumbs",
       "cache",
+      "cliTools",
       "cloudSyncStatus",
       "codexKeyServiceMode",
       "common",
@@ -1127,6 +1168,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1156,6 +1198,7 @@
       "sidebar",
       "skills",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1185,6 +1228,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1215,6 +1259,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1244,6 +1289,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "translator"
@@ -1274,6 +1320,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1303,6 +1350,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1332,6 +1380,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1340,6 +1389,7 @@
       "analytics",
       "breadcrumbs",
       "cache",
+      "cliproxyHealth",
       "cliproxyProviderExposure",
       "cloudSyncStatus",
       "codexKeyServiceMode",
@@ -1347,7 +1397,9 @@
       "connectionTest",
       "costs",
       "cursorAuthModal",
+      "darioPanel",
       "embeddedServices",
+      "falNative",
       "header",
       "kiroAuthModal",
       "kiroSocialOAuthModal",
@@ -1355,6 +1407,7 @@
       "miniPlayground",
       "noAuthProvider",
       "oauthModal",
+      "playground",
       "providerTest",
       "providers",
       "proxyConfigModal",
@@ -1367,6 +1420,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1396,6 +1450,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "usage",
@@ -1431,6 +1486,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1460,6 +1516,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1490,6 +1547,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1520,6 +1578,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1550,6 +1609,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1587,6 +1647,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1618,6 +1679,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1646,6 +1708,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1676,6 +1739,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector"
     ],
@@ -1705,6 +1769,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "translator"
@@ -1736,6 +1801,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "usage",
@@ -1766,6 +1832,7 @@
       "sharedComponents",
       "sidebar",
       "stats",
+      "teamCosts",
       "traeAuthModal",
       "trafficInspector",
       "webhooks"

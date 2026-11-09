@@ -24,7 +24,11 @@ import { boundedMap } from "../../../src/lib/quota/boundedMap.ts";
 import { sanitizeErrorMessage } from "../../utils/errorSanitization.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { toRecord } from "./scalars.ts";
-import { normalizeClaudeUsageQuotas, type NormalizedClaudeUsageQuotas } from "./claudeQuota.ts";
+import {
+  claudeUsageWindowsComplete,
+  normalizeClaudeUsageQuotas,
+  type NormalizedClaudeUsageQuotas,
+} from "./claudeQuota.ts";
 
 /** Run one usage request through the proxy when an id is present, else directly. */
 async function proxiedOrDirect(
@@ -61,6 +65,8 @@ export interface ClaudeUsageResult {
   extraUsage?: unknown;
   message?: string;
   bootstrap: ClaudeBootstrap | null;
+  /** The payload listed every window the account has (see isCompleteUsageReading). */
+  quotasComplete?: boolean;
   /** Set when the quota is the last known value served during a 429 cooldown. */
   _stale?: boolean;
   _staleSince?: string;
@@ -225,6 +231,8 @@ async function fetchClaudeUsage(
           typeof data.tier === "string" ? data.tier : null,
           typeof data.plan === "string" ? data.plan : null,
           typeof data.subscription_type === "string" ? data.subscription_type : null,
+          // A Team seat's own tier (e.g. max_5x) before the org's base tier (raven).
+          bootstrap?.user_rate_limit_tier,
           bootstrap?.organization_rate_limit_tier
         ) ?? undefined;
 
@@ -232,6 +240,8 @@ async function fetchClaudeUsage(
         ...(plan ? { plan } : {}),
         quotas,
         modelQuotas,
+        // The adapter alone knows the wire format: see isCompleteUsageReading.
+        ...(claudeUsageWindowsComplete(data) ? { quotasComplete: true } : {}),
         extraUsage: data.extra_usage ?? null,
         bootstrap,
       };
@@ -270,6 +280,20 @@ async function fetchClaudeUsage(
       );
       const legacy = await getClaudeUsageLegacy(accessToken, connectionId);
       return { ...legacy, bootstrap: await bootstrapPromise };
+    }
+
+    if (oauthResponse.status === 403) {
+      const body = toRecord(await oauthResponse.json().catch(() => null));
+      const errorCode = toRecord(toRecord(body.error).details).error_code;
+      // The org refuses OAuth for this account on every call, inference included.
+      // Measured cause on a Team: the member has no seat assigned.
+      if (errorCode === "oauth_not_allowed_for_organization") {
+        return {
+          message:
+            "Claude organization does not allow OAuth for this account (oauth_not_allowed_for_organization); on a Team this usually means the member has no seat assigned.",
+          bootstrap: await bootstrapPromise,
+        };
+      }
     }
 
     return {

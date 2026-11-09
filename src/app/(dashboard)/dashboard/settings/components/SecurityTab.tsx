@@ -10,6 +10,7 @@ import IPFilterSection from "./IPFilterSection";
 import PiiMaskingCard from "./PiiMaskingCard";
 import SessionInfoCard from "./SessionInfoCard";
 import AuthzSection from "./AuthzSection";
+import MfaSection from "./MfaSection";
 import { useTranslations } from "next-intl";
 
 export default function SecurityTab() {
@@ -311,6 +312,8 @@ export default function SecurityTab() {
         </div>
       </Card>
 
+      <MfaSection />
+
       <IPFilterSection />
 
       <PiiMaskingCard />
@@ -385,8 +388,7 @@ export default function SecurityTab() {
                             <ProviderIcon
                               providerId={provider.id}
                               size={14}
-                              className="shrink-0"
-                              style={{ color: provider.color }}
+                              className="shrink-0 text-text-muted"
                             />
                           )}
                           <span className="truncate">{provider.name}</span>

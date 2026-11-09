@@ -20,10 +20,15 @@ coverage, र reconciliation चरणहरूसँग नक्साङ्�
 - **Node.js** `>=22.22.2 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि, नेटिभ मोड्युलहरू स्थापना भएका छन् भनी प्रमाणित गर्नुहोस्:
-> `node -e "require('better-sqlite3')"`. यदि यो `MODULE_NOT_FOUND` सहित असफल भयो भने,
-> `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। हेर्नुहोस्
-> [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **Node 24 सहित Windows:** हालको 24 LTS प्याच रिलिज (कम्तीमा 24.20.0) प्रयोग गर्नुहोस्।
+> पहिलेका रिलिजहरूले `--test-force-exit` ले प्रक्रिया बन्द गरेपछि सफल परीक्षणहरू पश्चात्
+> abort गर्न सक्छन्। Node को [Windows libuv fix](https://github.com/nodejs/node/pull/61999) ले
+> यो runtime crash समाधान गर्छ; परीक्षण assertions र runner exit checks सक्षम नै राख्नुहोस्।
+
+> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि native modules स्थापना भएको
+> प्रमाणित गर्नुहोस्: `node -e "require('better-sqlite3')"`. यदि यो `MODULE_NOT_FOUND` सहित
+> असफल भएमा, `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। हेर्नुहोस्
+> [समस्या समाधान](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
 
@@ -35,94 +40,94 @@ cd OmniRoute
 npm install
 ```
 
-### वातावरण चरहरू
+### वातावरणीय चरहरू
 
 ```bash
 # टेम्प्लेटबाट आफ्नो .env सिर्जना गर्नुहोस्
 cp .env.example .env
 
-# आवश्यक गोप्य मानहरू उत्पन्न गर्नुहोस्
+# आवश्यक secrets सिर्जना गर्नुहोस्
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 विकासका लागि मुख्य चरहरू:
 
-| चर                     | विकासको पूर्वनिर्धारित मान | विवरण                   |
-| ---------------------- | -------------------------- | ----------------------- |
-| `PORT`                 | `20128`                    | सर्भर पोर्ट             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | फ्रन्टएन्डको आधार URL   |
-| `JWT_SECRET`           | (माथि उत्पन्न गर्नुहोस्)   | JWT हस्ताक्षर गोप्य मान |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | पहिलो लगइनको पासवर्ड    |
-| `APP_LOG_LEVEL`        | `info`                     | लगको विस्तृतताको स्तर   |
+| Variable               | Development Default      | Description           |
+| ---------------------- | ------------------------ | --------------------- |
+| `PORT`                 | `20128`                  | सर्भर पोर्ट           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | फ्रन्टएन्डको आधार URL |
+| `JWT_SECRET`           | (generate above)         | JWT signing secret    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | पहिलो लगइन पासवर्ड    |
+| `APP_LOG_LEVEL`        | `info`                   | लगको विस्तृतता स्तर   |
 
 ### ड्यासबोर्ड सेटिङहरू
 
-ड्यासबोर्डले वातावरण चरहरूमार्फत पनि कन्फिगर गर्न सकिने सुविधाहरूका लागि UI टगलहरू प्रदान गर्छ:
+ड्यासबोर्डले वातावरणीय चरमार्फत पनि कन्फिगर गर्न सकिने सुविधाहरूका लागि UI toggles प्रदान गर्छ:
 
-| सेटिङको स्थान      | टगल               | विवरण                                   |
-| ------------------ | ----------------- | --------------------------------------- |
-| सेटिङहरू → उन्नत   | डिबग मोड          | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI)  |
-| सेटिङहरू → सामान्य | साइडबारको दृश्यता | साइडबार खण्डहरू देखाउनुहोस्/लुकाउनुहोस् |
+| Setting Location    | Toggle             | Description                               |
+| ------------------- | ------------------ | ----------------------------------------- |
+| Settings → Advanced | Debug Mode         | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI)    |
+| Settings → General  | Sidebar Visibility | साइडबारका खण्डहरू देखाउनुहोस्/लुकाउनुहोस् |
 
-यी सेटिङहरू डेटाबेसमा भण्डारण हुन्छन् र पुनः सुरु गरेपछि पनि कायम रहन्छन्। सेट गरिएका बेला तिनले वातावरण चरका पूर्वनिर्धारित मानहरूलाई अधिलेखन गर्छन्।
+यी सेटिङहरू database मा भण्डारण हुन्छन् र restart पछि पनि कायम रहन्छन्, तथा सेट गरिएमा env var defaults लाई override गर्छन्।
 
 ### स्थानीय रूपमा चलाउने
 
 ```bash
-# विकास मोड (हट रिलोड)
+# विकास मोड (hot reload)
 npm run dev
 
-# उत्पादन बिल्ड
-npm run build    # next build → .build/next/ त्यसपछि assembleStandalone → dist/
+# उत्पादन build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ताका परिवर्तनहरूका लागि द्रुत ब्याकएन्ड/API-मात्र कम्पाइल
+# contributor परिवर्तनहरूका लागि छिटो backend/API-only compile
 npm run build:contributor
 
-# रिलिज बिल्ड (सफा पुनःबिल्ड + HEAD सेन्टिनेल — डिप्लोयका लागि आवश्यक)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लेख्छ
+# Release build (clean rebuild + HEAD sentinel — deploy का लागि आवश्यक)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # सामान्य पोर्ट कन्फिगरेसन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-योगदानकर्ता बिल्डले कम्पाइल-मात्र प्रमाणीकरण गर्छ: यसले standalone
-वितरण तयार गर्दैन वा वैकल्पिक नेटिभ प्याकेजिङ एसेटहरू बिल्ड गर्दैन। वितरण गर्न मिल्ने बन्डल प्रमाणित गर्न
-आवश्यक हुँदा नियमित उत्पादन बिल्ड प्रयोग गर्नुहोस्।
+contributor build ले compile-only validation गर्छ: यसले standalone distribution assemble गर्दैन
+वा वैकल्पिक native packaging assets build गर्दैन। पठाउन मिल्ने bundle validate गर्नुपर्ने
+हुँदा नियमित production build प्रयोग गर्नुहोस्।
 
-### बिल्ड आउटपुटको संरचना
+### Build Output Layout
 
-| डाइरेक्टरी | सामग्री                                                                             | ट्र्याक गरिएको |
-| ---------- | ----------------------------------------------------------------------------------- | -------------- |
-| `src/`     | एप्लिकेसन स्रोत (TypeScript / TSX)                                                  | हो             |
-| `.build/`  | मध्यवर्ती फाइलहरू — `next build` आउटपुट (gitignore गरिएको, `distDir = .build/next`) | होइन           |
-| `dist/`    | वितरणयोग्य बन्डल — `assembleStandalone` द्वारा तयार गरिएको (gitignore गरिएको)       | होइन           |
+| Directory | Contents                                                                  | Tracked |
+| --------- | ------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                     | Yes     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`) | No      |
+| `dist/`   | Shippable bundle — assembled by `assembleStandalone` (gitignored)         | No      |
 
-बिल्ड पाइपलाइन एकल पासमा चल्छ:
+Build pipeline एकल pass हो:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js आउटपुट)
-  └─ assembleStandalone()                 (standalone + static + public + नेटिभ एसेटहरू प्रतिलिपि गर्छ)
-       └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ले थप रूपमा पहिले दुवै डाइरेक्टरी सफा गर्छ र
-डिप्लोयको अखण्डता सेन्टिनेलका रूपमा `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लेख्छ।
+`npm run build:release` ले पहिले दुवै directory सफा गर्नुका साथै
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लाई deploy integrity sentinel का रूपमा लेख्छ।
 
-`npm run build:contributor` ले ब्याकएन्ड-मात्र बिल्ड प्रोफाइल प्रयोग गर्छ। यसले बिल्ड गर्दा अस्थायी रूपमा
-ड्यासबोर्ड UI फाइलहरूलाई स्टब गर्छ, API रुट ह्यान्डलरहरू कायम राख्छ, र बिल्डपछि मूल फाइलहरू
-पुनर्स्थापित गर्छ। ड्यासबोर्ड UI लाई असर गर्ने परिवर्तनहरू वा पूर्ण रिलिज प्रमाणीकरणका लागि `npm run build`
-प्रयोग गर्नुहोस्; योगदानकर्ता प्रोफाइल रिलिज बिल्डको प्रतिस्थापन होइन।
+`npm run build:contributor` ले backend-only build profile प्रयोग गर्छ। यसले build गर्दा dashboard
+UI files लाई अस्थायी रूपमा stub गर्छ, API route handlers कायम राख्छ, र build पछि मूल files
+पुनर्स्थापित गर्छ। ड्यासबोर्ड UI मा प्रभाव पार्ने परिवर्तनहरू वा पूर्ण release validation का लागि
+`npm run build` प्रयोग गर्नुहोस्; contributor profile release build को विकल्प होइन।
 
-> **VPS डिप्लोय टिप्पणी:** रिमोट इमेज डाइरेक्टरी `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित छ। डिप्लोय स्किलहरूले `dist/` का सामग्रीहरू यसमा rsync गर्छन्।
-> रिपोजिटरीभित्रको बिल्ड आउटपुट पथ मात्र सारिएको हो (`app/` → `dist/`)।
+> **VPS deploy note:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> अपरिवर्तित रहन्छ। deploy skills ले `dist/` का contents त्यसमा rsync गर्छन्।
+> Repo भित्रको build output path मात्र परिवर्तन भएको हो (`app/` → `dist/`)।
 
-पूर्वनिर्धारित URL हरू:
+पूर्वनिर्धारित URLs:
 
-- **ड्यासबोर्ड**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---

@@ -30,6 +30,7 @@
  * and the way back: the forced stream is rebuilt into a JSON body for a caller that asked
  * for JSON, reusing the shared event-stream parsers.
  */
+import { isLoopbackHostname } from "../utils/urlHost.ts";
 import { parseSSEToOpenAIResponse, parseSSEToResponsesOutput } from "../handlers/sseParser.ts";
 import { readSyncedOpencodeFamilyModelIds } from "@/lib/db/models";
 import { getModelCatalogCacheVersion } from "@/lib/db/readCache";
@@ -39,10 +40,12 @@ import {
   getObservedToolNames,
   noteRefusedBorrowedToolNames,
   recordAcceptedToolNames,
+  recordedToolParameters,
   resolvePlaceholderNames,
 } from "./opencodeToolObservation.ts";
 import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
 import { sanitizeToolChoice, v2PlaceholderTool } from "../utils/opencodeFingerprintSchemas.ts";
+import { OPENCODE_CLI_PROMPT_TEMPLATE, OPENCODE_CLI_TOOLS } from "./opencodeCliPrompt.ts";
 import {
   forgetAttempt,
   planShape,
@@ -51,6 +54,13 @@ import {
   rememberAttempt,
   shapeKeyOf,
 } from "./opencodeRequestShape.ts";
+
+/** Which conversation a placeholder's recorded schema belongs to. */
+export interface ToolSchemaScope {
+  readonly provider: string;
+  readonly model: string;
+  readonly session?: string;
+}
 
 /**
  * What one gated request declared, kept until its outcome is known.
@@ -65,6 +75,12 @@ export interface FreeTierContractAttempt {
   readonly session: string | undefined;
   readonly borrowed: boolean;
   readonly clientToolNames: readonly string[];
+  /**
+   * The parameter object each client tool declared, parsed once from the request body. Kept
+   * as references for the lifetime of the request only, so an accepted attempt can hand the
+   * observation store the shape the upstream just took.
+   */
+  readonly clientParameters?: ReadonlyMap<string, Record<string, unknown>>;
   /** A refusal may still be replayed in the other shape: its outcome is noted afterwards. */
   readonly probe?: boolean;
   /**
@@ -73,6 +89,11 @@ export interface FreeTierContractAttempt {
    * `borrowed` means it came from the observation store.
    */
   readonly injectedPlaceholders?: boolean;
+  /**
+   * Names of OpenCode CLI tools this layer declared that the caller had not: a model call to
+   * one of them is dropped from the response (see `opencodeInjectedToolFilter.ts`).
+   */
+  readonly injectedToolNames?: readonly string[];
 }
 
 /**
@@ -117,12 +138,13 @@ interface OpencodeFreeCatalog {
  * Legacy free ids kept only as the unsynced-catalog fallback (see the block above).
  *
  * `deepseek-v4.1-flash-free` replaced the delisted `deepseek-v4-flash-free` in the zen
- * registry; the rotating `-free` ids are covered by the suffix rule alongside this set.
+ * registry and `mimo-v2.6-flash-free` replaced the deprecated `mimo-v2.5-free`; the
+ * rotating `-free` ids are covered by the suffix rule alongside this set.
  */
 const OPENCODE_LEGACY_FREE_MODELS = new Set([
   "big-pickle",
   "deepseek-v4.1-flash-free",
-  "mimo-v2.5-free",
+  "mimo-v2.6-flash-free",
   "hy3-free",
   "nemotron-3-ultra-free",
   "north-mini-code-free",
@@ -226,6 +248,46 @@ const GO_SURFACE_BASE_URL = "https://opencode.ai/zen/go/v1";
 export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
 
 /**
+ * Where OpenCode Go serves its Gemini-wire models (e.g. `gemini-4-argon`):
+ * `<base>/models/<model>:streamGenerateContent?alt=sse` keyed by `x-goog-api-key`. The
+ * `/zen/go/v1` chat host does not serve those models.
+ */
+const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
+
+/**
+ * OpenCode Go's Gemini wire: its own inference host, keyed by `x-goog-api-key`. Never gated:
+ * the free tier exists only on the Zen surface (`isGatedFreeTierRequest`).
+ */
+export function isGoGeminiWire(requestFormat: string | null, surface: OpencodeSurface): boolean {
+  return requestFormat === "gemini" && surface === "go";
+}
+
+/**
+ * The upstream URL of one request, by wire format, under the `base` the caller resolved. The
+ * Go Gemini wire has a fixed host, so that lane ignores `base`, published catalog included.
+ */
+export function opencodeEndpointUrl(
+  requestFormat: string | null,
+  surface: OpencodeSurface,
+  base: string,
+  model: string,
+  stream: boolean
+): string {
+  switch (requestFormat) {
+    case "claude":
+      return `${base}/messages`;
+    case "openai-responses":
+      return `${base}/responses`;
+    case "gemini": {
+      const root = isGoGeminiWire(requestFormat, surface) ? GO_GEMINI_INFERENCE_BASE_URL : base;
+      return `${root}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
+    }
+    default:
+      return `${base}/chat/completions`;
+  }
+}
+
+/**
  * The credential the gated free-tier lane serves.
  *
  * Measured live on 2026-10-21 against `https://opencode.ai/inference/v1` (Chat
@@ -277,6 +339,35 @@ export function resolveGatedCredential(
 ): string | undefined {
   if (!freeTier || freeTier.mode === "key") return operatorKey();
   return freeTier.mode === "literal" ? freeTier.value : undefined;
+}
+
+/**
+ * Base URL of the Bun relay (`scripts/ops/opencode-free-relay.ts`), from
+ * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Throws when the
+ * URL is plaintext `http://` on a non-loopback host. Read per call.
+ *
+ * Measured 2026-11-05: the free models answer 429 FreeUsageLimitError to any request not sent
+ * by Bun's native fetch, so gated requests are sent through a Bun process when one is set up.
+ */
+export function freeTierRelayUrl(): string | null {
+  const raw = (process.env.OPENCODE_FREE_TIER_RELAY_URL || "").trim().replace(/\/+$/, "");
+  if (!raw) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  // The relay request carries the upstream authorization header and the egress proxy
+  // credentials, so plaintext HTTP is only acceptable on a loopback host.
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new Error(
+      "OPENCODE_FREE_TIER_RELAY_URL must use https:// unless the relay host is loopback " +
+        "(localhost, 127.0.0.0/8 or ::1)"
+    );
+  }
+  return raw;
 }
 
 /** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */
@@ -370,16 +461,40 @@ const PLACEHOLDER_TOOL_PARAMETER_SCHEMAS: Readonly<Record<string, Record<string,
 };
 
 /**
- * Parameter schema for an injected placeholder tool named `name`. With the opt-in v2
- * fingerprint (`OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED`, #16571) a name the v2 CLI declares
- * (`read`, `shell`) carries that CLI's verbatim schema instead.
+ * Parameter schema for an injected placeholder tool named `name`. Precedence: the opt-in v2
+ * CLI schema (`isOpencodeV2ClientFingerprintEnabled()`, #16571, which pins the quartet
+ * verbatim), then the schema the client already sent and the upstream accepted (recorded by
+ * the caller through `scope`), then the pinned quartet schema, then the empty object. A
+ * name with no recorded schema and outside the quartet keeps the empty object exactly as
+ * before.
  */
 export function placeholderToolParameters(
   name: string,
-  v2Fingerprint = false
+  v2Fingerprint = false,
+  recorded?: Record<string, unknown>
 ): Record<string, unknown> {
   const v2 = v2Fingerprint ? v2PlaceholderTool(name) : undefined;
-  return v2?.parameters ?? PLACEHOLDER_TOOL_PARAMETER_SCHEMAS[name] ?? PLACEHOLDER_TOOL_PARAMETERS;
+  return (
+    v2?.parameters ??
+    recorded ??
+    PLACEHOLDER_TOOL_PARAMETER_SCHEMAS[name] ??
+    PLACEHOLDER_TOOL_PARAMETERS
+  );
+}
+
+/**
+ * The parameters an injected entry carries, reading the recorded schema for this scope when
+ * one is known. Both construction sites (first dispatch and retry) go through this, so a
+ * borrowed name never falls back to the empty object while a recorded schema exists.
+ */
+function injectedToolParameters(
+  name: string,
+  v2Fingerprint: boolean,
+  scope: ToolSchemaScope | undefined
+): Record<string, unknown> {
+  const recorded =
+    scope && recordedToolParameters(scope.provider, scope.model, scope.session, name);
+  return placeholderToolParameters(name, v2Fingerprint, recorded);
 }
 
 /** Description for an injected placeholder tool; the v2 CLI's own text under the v2 flag. */
@@ -409,14 +524,15 @@ export function applyFreeTierRequestContract<T>(
   body: T,
   requestFormat: string | null,
   placeholderNames: readonly string[] = [PLACEHOLDER_TOOL_NAME],
-  v2Fingerprint = false
+  v2Fingerprint = false,
+  scope?: ToolSchemaScope
 ): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const record = body as Record<string, unknown>;
   const next: Record<string, unknown> = { ...record, stream: true };
   if (v2Fingerprint) sanitizeToolChoice(next);
 
-  const existingNames = new Set(clientToolNamesOf(next));
+  const existingNames = new Set(clientToolsOf(next).names);
   const baseNames = placeholderNames.length > 0 ? placeholderNames : [PLACEHOLDER_TOOL_NAME];
   const namesToAdd = baseNames.filter((name) => !existingNames.has(name));
 
@@ -431,7 +547,7 @@ export function applyFreeTierRequestContract<T>(
         type: "function",
         name,
         description: placeholderToolDescription(name, v2Fingerprint),
-        parameters: placeholderToolParameters(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -445,7 +561,7 @@ export function applyFreeTierRequestContract<T>(
         function: {
           name,
           description: placeholderToolDescription(name, v2Fingerprint),
-          parameters: placeholderToolParameters(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -488,9 +604,10 @@ export function mergeClientToolsWithObserved<T>(
   if (!Array.isArray(record.tools) || record.tools.length === 0) return body;
   const own = session ? getObservedToolNames(provider, model, session) : null;
   const observed = own ?? getObservedToolNames(provider, model) ?? configured;
-  const have = new Set(clientToolNamesOf(body));
+  const have = new Set(clientToolsOf(body).names);
   const missing = observed.filter((name) => !have.has(name));
   if (missing.length === 0) return body;
+  const scope: ToolSchemaScope = { provider, model, session };
   const next: Record<string, unknown> = { ...(record as Record<string, unknown>) };
   if (requestFormat === "openai-responses") {
     next.tools = [
@@ -499,7 +616,7 @@ export function mergeClientToolsWithObserved<T>(
         type: "function",
         name,
         description: placeholderToolDescription(name, v2Fingerprint),
-        parameters: placeholderToolParameters(name, v2Fingerprint),
+        parameters: injectedToolParameters(name, v2Fingerprint, scope),
       })),
     ];
     return next as T;
@@ -512,7 +629,7 @@ export function mergeClientToolsWithObserved<T>(
         function: {
           name,
           description: placeholderToolDescription(name, v2Fingerprint),
-          parameters: placeholderToolParameters(name, v2Fingerprint),
+          parameters: injectedToolParameters(name, v2Fingerprint, scope),
         },
       })),
     ];
@@ -521,18 +638,47 @@ export function mergeClientToolsWithObserved<T>(
   return body;
 }
 
-function clientToolNamesOf(body: unknown): string[] {
-  if (!body || typeof body !== "object" || Array.isArray(body)) return [];
-  const tools = (body as Record<string, unknown>).tools;
-  if (!Array.isArray(tools)) return [];
+/**
+ * The tools a request declares, in one pass: their names (for the observation store and the
+ * existing-name check) and the parameter object each one carried, by name. Chat Completions
+ * nests the fields under `function`; the Responses surface keeps them flat.
+ */
+function clientToolsOf(body: unknown): {
+  names: string[];
+  parameters: Map<string, Record<string, unknown>>;
+} {
   const names: string[] = [];
+  const parameters = new Map<string, Record<string, unknown>>();
+  if (!body || typeof body !== "object" || Array.isArray(body)) return { names, parameters };
+  const tools = (body as Record<string, unknown>).tools;
+  if (!Array.isArray(tools)) return { names, parameters };
   for (const tool of tools) {
-    if (!tool || typeof tool !== "object") continue;
-    const entry = tool as { name?: unknown; function?: { name?: unknown } };
-    const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
-    if (typeof name === "string") names.push(name);
+    const declared = clientToolOf(tool);
+    if (!declared) continue;
+    names.push(declared.name);
+    if (declared.parameters) parameters.set(declared.name, declared.parameters);
   }
-  return names;
+  return { names, parameters };
+}
+
+/** One tool entry's name, and the parameter object it carries when it is a plain object. */
+function clientToolOf(tool: unknown): {
+  name: string;
+  parameters?: Record<string, unknown>;
+} | null {
+  if (!tool || typeof tool !== "object") return null;
+  const entry = tool as {
+    name?: unknown;
+    parameters?: unknown;
+    function?: { name?: unknown; parameters?: unknown };
+  };
+  const name = typeof entry.name === "string" ? entry.name : entry.function?.name;
+  if (typeof name !== "string") return null;
+  const schema = entry.function?.parameters ?? entry.parameters;
+  if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+    return { name, parameters: schema as Record<string, unknown> };
+  }
+  return { name };
 }
 
 /**
@@ -555,6 +701,67 @@ function isTrackable(value: unknown): value is object {
   return typeof value === "object" && value !== null;
 }
 
+/** The OpenCode CLI build-agent prompt for `model`, with a neutral environment block. */
+export function canonicalOpencodeSystemPrompt(model: string, now: Date = new Date()): string {
+  return OPENCODE_CLI_PROMPT_TEMPLATE.split("{{MODEL}}")
+    .join(model.replace(/^opencode[^/]*\//, ""))
+    .split("{{DATE}}")
+    .join(now.toDateString());
+}
+
+/**
+ * Relay mode body: the upstream answers a free model only when messages[0] is the genuine
+ * OpenCode system prompt and the CLI's full tool set is declared (anything shorter is 429).
+ * The caller's own system messages follow the canonical one and its tools keep their shape;
+ * only CLI tools it did not declare are added, and those are recorded as injected.
+ */
+function applyCanonicalRelayContract(
+  body: unknown,
+  model: string
+): { body: unknown; injected: string[] } | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const record = body as Record<string, unknown>;
+  if (!Array.isArray(record.messages)) return null;
+  const canonical = canonicalOpencodeSystemPrompt(model);
+  const first = record.messages[0] as { role?: unknown; content?: unknown } | undefined;
+  const already = first?.role === "system" && first.content === canonical;
+  const messages = already
+    ? record.messages
+    : [{ role: "system", content: canonical }, ...record.messages];
+  const have = new Set(clientToolsOf(record).names);
+  const missing = OPENCODE_CLI_TOOLS.filter((tool) => !have.has(tool.function.name));
+  const tools = [...(Array.isArray(record.tools) ? record.tools : []), ...missing];
+  return {
+    body: { ...record, stream: true, messages, tools },
+    injected: missing.map((tool) => tool.function.name),
+  };
+}
+
+function prepareRelayRequest<T>(
+  body: T,
+  requestFormat: string | null,
+  provider: string,
+  model: string,
+  session: string | undefined,
+  origin: object | undefined
+): { body: T; attempt: FreeTierContractAttempt } | null {
+  if (!freeTierRelayUrl() || (requestFormat !== "openai" && requestFormat !== null)) return null;
+  const canonical = applyCanonicalRelayContract(body, model);
+  if (!canonical) return null;
+  const clientTools = clientToolsOf(body);
+  const attempt: FreeTierContractAttempt = {
+    provider,
+    model,
+    session,
+    borrowed: false,
+    clientToolNames: clientTools.names,
+    clientParameters: clientTools.parameters,
+    injectedToolNames: canonical.injected,
+  };
+  if (isTrackable(origin)) rememberAttempt(origin, attempt);
+  return { body: canonical.body as T, attempt };
+}
+
 export function prepareFreeTierRequest<T>(
   body: T,
   requestFormat: string | null,
@@ -565,11 +772,14 @@ export function prepareFreeTierRequest<T>(
   origin?: object,
   v2Fingerprint = false
 ): { body: T; attempt: FreeTierContractAttempt | null } {
-  const clientToolNames = clientToolNamesOf(body);
+  const clientTools = clientToolsOf(body);
+  const clientToolNames = clientTools.names;
   if (!requiresFreeTierRequestContract(surface, provider, model)) {
     if (isTrackable(origin)) forgetAttempt(origin);
     return { body, attempt: null };
   }
+  const relayed = prepareRelayRequest(body, requestFormat, provider, model, session, origin);
+  if (relayed) return relayed;
   const eligible = isTrackable(origin) && clientToolNames.length === 0;
   const key = eligible ? shapeKeyOf(provider, model, body) : "";
   const plan =
@@ -579,12 +789,14 @@ export function prepareFreeTierRequest<T>(
   const chosen = plan.shape;
   const names = resolvePlaceholderNames(provider, model, session, configuredPlaceholderToolNames());
   const borrowed = clientToolNames.length === 0 && names.length > 0 && chosen === "tools";
+  const scope: ToolSchemaScope = { provider, model, session };
   const attempt: FreeTierContractAttempt = {
     provider,
     model,
     session,
     borrowed,
     clientToolNames,
+    clientParameters: clientTools.parameters,
     probe: plan.probe,
   };
   if (isTrackable(origin)) rememberAttempt(origin, attempt);
@@ -600,7 +812,7 @@ export function prepareFreeTierRequest<T>(
     body:
       chosen === "bare"
         ? withStreaming(body, v2Fingerprint)
-        : applyFreeTierRequestContract(body, requestFormat, names, v2Fingerprint),
+        : applyFreeTierRequestContract(body, requestFormat, names, v2Fingerprint, scope),
     attempt,
   };
 }
@@ -645,7 +857,8 @@ export function noteFreeTierOutcome(
         attempt.provider,
         attempt.model,
         attempt.session,
-        attempt.clientToolNames
+        attempt.clientToolNames,
+        attempt.clientParameters
       );
     } else if (attempt.borrowed && !attempt.probe) {
       confirmBorrowedToolNames(attempt.provider, attempt.model, attempt.session);

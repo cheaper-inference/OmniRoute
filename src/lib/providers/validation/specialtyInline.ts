@@ -102,11 +102,25 @@ export async function validateCursorApiProvider({ apiKey }: { apiKey?: string })
   }
 }
 
-export async function validateQoderProvider({ apiKey, providerSpecificData }: any) {
+export async function validateQoderProvider({
+  apiKey,
+  providerSpecificData,
+  allowLocalSpawn = true,
+}: any) {
   // Bifurcate validation: PAT tokens use Cosy auth against api1.qoder.sh;
   // regular API keys validate against dashscope (OpenAI-compatible endpoint).
   const key = (apiKey || "").trim();
   if (key.startsWith("pt-")) {
+    // The PAT probe runs the local `qodercli`; remote-reachable routes pass
+    // `allowLocalSpawn: false` for non-loopback callers (Hard Rules #15/#17).
+    if (!allowLocalSpawn) {
+      return {
+        valid: false,
+        error:
+          "Qoder Personal Access Tokens are validated with the local qodercli, which runs only for requests from this machine. Validate the connection locally.",
+        unsupported: false,
+      };
+    }
     return validateQoderCliPat({ apiKey: key, providerSpecificData });
   }
   // Non-PAT token → validate against dashscope (Alibaba Cloud).
