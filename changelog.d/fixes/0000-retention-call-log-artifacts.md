@@ -1,0 +1,1 @@
+- **fix(db):** the scheduled call-log retention pass now also deletes the request/response body files of the rows it removes, so an idle gateway no longer keeps expired bodies on disk.
