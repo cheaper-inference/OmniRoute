@@ -126,9 +126,10 @@ test("named-combo allow-list reaches its configured concrete target through hand
   assert.equal(body.choices[0].message.content, "combo policy passed");
 });
 
-// A stored combo named in the key's allowedCombos (default `combo/*`) grants its
-// own targets, overriding blockedModels (#14197 — see the next test). The
-// live-test marker must still grant nothing when the combo is NOT granted.
+// A stored combo granted by allowedCombos admits its own targets past
+// allowedModels (#14197). Only a combo named there also overrides blockedModels;
+// the default `combo/*` does not (see the next two tests). The live-test marker
+// must still grant nothing when the combo is NOT granted.
 test("live-test marker does not let a non-granted named combo dispatch a blocked target", async () => {
   const key = await seedNamedComboKey();
   await apiKeysDb.updateApiKeyPermissions(key.id, {
@@ -152,7 +153,7 @@ test("live-test marker does not let a non-granted named combo dispatch a blocked
   assert.equal(upstreamCalls, 0);
 });
 
-test("allowedCombos still grants a combo's blocked direct-model target at dispatch (#14197)", async () => {
+test("a combo named in allowedCombos reaches its blocked direct-model target at dispatch", async () => {
   const key = await seedNamedComboKey();
   await apiKeysDb.updateApiKeyPermissions(key.id, {
     modelAccessMode: "restricted",
@@ -174,4 +175,26 @@ test("allowedCombos still grants a combo's blocked direct-model target at dispat
   assert.equal(response.status, 200);
   assert.equal(upstreamCalls, 1);
   assert.equal(body.choices[0].message.content, "explicit combo grant");
+});
+
+test("combo/* does not grant a combo's blocked direct-model target at dispatch", async () => {
+  const key = await seedNamedComboKey();
+  await apiKeysDb.updateApiKeyPermissions(key.id, {
+    modelAccessMode: "restricted",
+    allowedModels: ["gemini/*"],
+    allowedCombos: ["combo/*"],
+    blockedModels: [TARGET],
+  });
+  let upstreamCalls = 0;
+  globalThis.fetch = async () => {
+    upstreamCalls += 1;
+    return upstreamResponse("must not dispatch");
+  };
+
+  const response = await handleChat(comboRequest(key.key));
+  const body = (await response.json()) as { error?: { message?: string } };
+
+  assert.notEqual(response.status, 200);
+  assert.equal(upstreamCalls, 0);
+  assert.ok(body.error?.message, "the rejection carries an error message");
 });

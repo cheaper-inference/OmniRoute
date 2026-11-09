@@ -178,6 +178,36 @@ test("Provider: gemini-web has correct models", async () => {
   );
 });
 
+// #16573: gemini-4-argon is opt-in until its mode selectors are checked live.
+test("Provider: gemini-web lists gemini-4-argon only with its opt-in switch on", async () => {
+  const env = "OMNIROUTE_GEMINI_WEB_ARGON_ENABLED";
+  const previous = process.env[env];
+  try {
+    process.env[env] = "1";
+    const on =
+      await import("../../open-sse/config/providers/registry/gemini/web/index.ts?argon=on");
+    assert.deepEqual(
+      on.gemini_webProvider.models.map((m: { id: string; name: string }) => [m.id, m.name]),
+      [
+        ["gemini-3.1-pro", "Gemini 3.1 Pro"],
+        ["gemini-4-argon", "Gemini 4 Argon"],
+        ["gemini-3.7-flash", "Gemini 3.7 Flash"],
+        ["gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"],
+      ]
+    );
+    process.env[env] = "0";
+    const off =
+      await import("../../open-sse/config/providers/registry/gemini/web/index.ts?argon=off");
+    assert.equal(
+      off.gemini_webProvider.models.some((m: { id: string }) => m.id === "gemini-4-argon"),
+      false
+    );
+  } finally {
+    if (previous === undefined) delete process.env[env];
+    else process.env[env] = previous;
+  }
+});
+
 // ─── Regression: #2832 / #3516 — Playwright missing in Docker (runner-base) ──
 //
 // When the `runner-base` Docker image is used (no Playwright browsers installed),
