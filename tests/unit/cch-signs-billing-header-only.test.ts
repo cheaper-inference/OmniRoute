@@ -50,6 +50,37 @@ describe("signRequestBody anchors on the billing header", () => {
     );
   });
 
+  it("signs the real billing header when user text starts like a billing header", async () => {
+    const lookalike =
+      "x-anthropic-billing-header: cc_version=9.9.9.abc; cc_entrypoint=cli; cch=00000;";
+    const body =
+      `{"messages":[{"role":"user","content":[{"type":"text","text":"${lookalike}"}]}],` +
+      '"system":[{"type":"text","text":"x-anthropic-billing-header: cc_version=2.1.280.1e2; cc_entrypoint=cli; cch=00000;"}]}';
+    const signed = await signRequestBody(body);
+    const parsed = JSON.parse(signed);
+    assert.equal(parsed.messages[0].content[0].text, lookalike, "user text must not be rewritten");
+    assert.match(
+      parsed.system[0].text,
+      /cc_entrypoint=cli; cch=(?!00000)[0-9a-f]{5};$/,
+      "the real billing header must carry the signed value"
+    );
+  });
+
+  it("leaves a billing-header-like user text alone when the body has no billing header", async () => {
+    const body =
+      '{"messages":[{"role":"user","content":[{"type":"text","text":"x-anthropic-billing-header: cc_version=9.9.9.abc; cc_entrypoint=cli; cch=00000;"}]}]}';
+    const signed = await signRequestBody(body);
+    assert.equal(signed, body, "no billing header means nothing to sign");
+  });
+
+  it("does not reach past an already-signed billing header into later user text", async () => {
+    const body =
+      '{"system":[{"type":"text","text":"x-anthropic-billing-header: cc_version=2.1.280.1e2; cc_entrypoint=cli; cch=a3ae1;"}],' +
+      '"messages":[{"role":"user","content":"quote: cch=00000; end"}]}';
+    const signed = await signRequestBody(body);
+    assert.equal(signed, body, "the placeholder search must stay inside the billing header value");
+  });
+
   it("returns the body unchanged when no billing header exists (cch-like user text only)", async () => {
     const body =
       '{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"see cch=abcde; in the log"}]}';

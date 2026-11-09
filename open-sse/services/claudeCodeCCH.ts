@@ -18,11 +18,59 @@ const CCH_SEED = 0x6e52736ac806831en;
 const CCH_PATTERN = /\bcch=([0-9a-f]{5});/;
 
 // The billing header is the only place a `cch=` value must be rewritten. It is
-// injected as a system text block (or a legacy top-level key). Both anchors
-// contain unescaped quotes, so they cannot occur inside a JSON string value —
-// user text that merely looks like `cch=xxxxx;` can never match them.
-const BILLING_ANCHORS = ['"text":"x-anthropic-billing-header', '"x-anthropic-billing-header":"'];
+// injected as a text block of the top-level `system` array (or a legacy
+// top-level key). The legacy anchor has unescaped quotes, so it cannot occur
+// inside a JSON string value. The system text anchor can: a user message may
+// start with the same words, and `messages` serialises before `system`. So
+// that anchor only counts inside the top-level `system` value.
+const LEGACY_ANCHOR = '"x-anthropic-billing-header":"';
+const SYSTEM_TEXT_ANCHOR = '"text":"x-anthropic-billing-header';
 const CCH_PLACEHOLDER = "cch=00000;";
+
+/** [start, end) of the value of the top-level `system` key in a JSON object string. */
+function systemValueRange(json: string): [number, number] | null {
+  let depth = 0;
+  let start = -1;
+  for (let i = 0; i < json.length; i++) {
+    const c = json[i];
+    if (c === '"') {
+      let end = i + 1;
+      while (end < json.length && json[end] !== '"') end += json[end] === "\\" ? 2 : 1;
+      let next = end + 1;
+      while (json[next] === " " || json[next] === "\n" || json[next] === "\t") next++;
+      if (depth === 1 && json[next] === ":") {
+        if (start >= 0) return [start, i];
+        if (json.slice(i + 1, end) === "system") start = next + 1;
+      }
+      i = end;
+    } else if (c === "{" || c === "[") {
+      depth++;
+    } else if (c === "}" || c === "]") {
+      depth--;
+      if (depth === 0 && start >= 0) return [start, i];
+    }
+  }
+  return null;
+}
+
+/** Index of the billing header's `cch=00000;` placeholder, or -1. */
+function findBillingPlaceholder(body: string): number {
+  // Cheap exit: most bodies carry no billing header, so skip the scan below.
+  if (!body.includes("x-anthropic-billing-header")) return -1;
+  let from = body.indexOf(LEGACY_ANCHOR);
+  if (from >= 0) {
+    from += LEGACY_ANCHOR.length;
+  } else {
+    const system = systemValueRange(body);
+    const at = system ? body.indexOf(SYSTEM_TEXT_ANCHOR, system[0]) : -1;
+    if (!system || at < 0 || at >= system[1]) return -1;
+    from = at + SYSTEM_TEXT_ANCHOR.length;
+  }
+  // The placeholder must sit inside this one string value.
+  const valueEnd = body.indexOf('"', from);
+  const placeholderAt = body.indexOf(CCH_PLACEHOLDER, from);
+  return placeholderAt >= 0 && (valueEnd < 0 || placeholderAt < valueEnd) ? placeholderAt : -1;
+}
 
 let xxhashPromise: Promise<void> | null = null;
 let xxhash64Fn: ((input: Uint8Array, seed: bigint) => bigint) | null = null;
@@ -49,13 +97,7 @@ export async function signRequestBody(bodyString: string): Promise<string> {
   // Sign only the literal placeholder inside the billing header. A first-match
   // `cch=[0-9a-f]{5};` rewrite can hit user text (messages serialise before
   // system), leaving the real billing header unsigned.
-  let anchor = -1;
-  for (const a of BILLING_ANCHORS) {
-    const at = bodyString.indexOf(a);
-    if (at >= 0 && (anchor < 0 || at < anchor)) anchor = at;
-  }
-  if (anchor < 0) return bodyString;
-  const placeholderAt = bodyString.indexOf(CCH_PLACEHOLDER, anchor);
+  const placeholderAt = findBillingPlaceholder(bodyString);
   if (placeholderAt < 0) return bodyString;
   const encoder = new TextEncoder();
   const bodyBytes = encoder.encode(bodyString);
