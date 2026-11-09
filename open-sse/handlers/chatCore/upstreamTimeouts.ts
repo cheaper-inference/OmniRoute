@@ -76,13 +76,13 @@ export function computeBillableTokens(usage: unknown): number {
   // Cache read/creation tokens are a BREAKDOWN already contained inside
   // getLoggedInputTokens (prompt_tokens / input_tokens). Adding them here would
   // double-count. Reasoning tokens are a SUBSET of completion tokens for every shape the
-  // usage extractors fold (usageExtractor.ts, usageTracking.ts), so billable total =
-  // input + max(output, reasoning): the same rule costCalculator.ts applies (#15496), where a
-  // reasoning count above completion can only be a provider that reports separate buckets.
+  // usage extractors fold (usageExtractor.ts, usageTracking.ts), so they are not added again.
+  // A reasoning count above completion can only be a provider that reports separate buckets;
+  // then both are billed - the same rule costCalculator.ts applies (#15496).
   // Keep in sync with seedWindowUsageFromHistory (services/tokenLimitCounter.ts).
-  return (
-    getLoggedInputTokens(usage) + Math.max(getLoggedOutputTokens(usage), getReasoningTokens(usage))
-  );
+  const output = getLoggedOutputTokens(usage);
+  const reasoning = getReasoningTokens(usage);
+  return getLoggedInputTokens(usage) + (reasoning > output ? output + reasoning : output);
 }
 
 /** Resolves the model-level `timeoutMs` registry override, when both

@@ -1,8 +1,9 @@
 // Per-key token limits: reasoning tokens are a SUBSET of completion tokens for every usage shape the
 // extractors fold (OpenAI, Anthropic, Gemini). The billable total must not add them twice, and the live
 // counter (computeBillableTokens) must agree with the history seed (seedWindowUsageFromHistory).
-// Rule: input + max(output, reasoning) - the same rule costCalculator uses (#15496): a reasoning count
-// larger than completion can only come from a provider that reports separate buckets.
+// Rule: reasoning inside completion is not added again; a reasoning count larger than completion can only
+// come from a provider that reports separate buckets, and then both are billed - the same rule
+// costCalculator uses (#15496).
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -48,10 +49,10 @@ test("reasoning inside output is not added again (Responses shape)", () => {
   );
 });
 
-test("reasoning larger than completion is a separate bucket and is billed (#15496 rule)", () => {
+test("reasoning larger than completion is a separate bucket: output AND reasoning are billed (#15496 rule)", () => {
   assert.equal(
     computeBillableTokens({ prompt_tokens: 100, completion_tokens: 10, reasoning_tokens: 40 }),
-    140
+    150
   );
 });
 
@@ -76,6 +77,6 @@ test("history seed matches the live total for a row with reasoning inside output
   );
   const ts = new Date(Date.UTC(2026, 0, 12)).toISOString();
   insert.run(100, 50, 40, ts); // reasoning inside output: 150
-  insert.run(100, 10, 40, ts); // separate bucket: 140
-  assert.equal(counter.seedWindowUsageFromHistory(limit, NOW), 290);
+  insert.run(100, 10, 40, ts); // separate bucket: 100 + 10 + 40 = 150
+  assert.equal(counter.seedWindowUsageFromHistory(limit, NOW), 300);
 });

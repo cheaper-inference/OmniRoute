@@ -34,7 +34,7 @@ test("only Antigravity outer header watchdog receives the private pre-response m
   assert.equal((codex as Error & { code?: string }).code, undefined);
 });
 
-test("computeBillableTokens is input + max(output, reasoning) (no cache or reasoning double-count)", () => {
+test("computeBillableTokens does not add reasoning already inside output (no cache or reasoning double-count)", () => {
   const total = computeBillableTokens({
     prompt_tokens: 10,
     completion_tokens: 5,
