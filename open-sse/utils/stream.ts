@@ -280,6 +280,26 @@ type ToolCall = {
 
 type UsageTokenRecord = Record<string, number>;
 
+/** Calls of a Claude client summary, as chat tool calls: the exact calls the client received. */
+function toolCallsFromClaudeSummary(summary: unknown): ToolCall[] {
+  const content = asRecord(summary).content;
+  const calls: ToolCall[] = [];
+  for (const block of Array.isArray(content) ? content : []) {
+    const b = asRecord(block);
+    if (b.type !== "tool_use") continue;
+    calls.push({
+      id: typeof b.id === "string" ? b.id : null,
+      index: calls.length,
+      type: "function",
+      function: {
+        name: typeof b.name === "string" ? b.name : "",
+        arguments: typeof b.input === "string" ? b.input : JSON.stringify(b.input ?? {}),
+      },
+    });
+  }
+  return calls;
+}
+
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
@@ -3554,7 +3574,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
               let content = (state?.accumulatedContent ?? "").trim() || "";
-              const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
+              const stateToolCalls: ToolCall[] = state?.toolCalls?.size
                 ? [...state.toolCalls.values()]
                     .map((tc: Record<string, unknown>): ToolCall => ({
                       id: tc.id != null ? String(tc.id) : null,
@@ -3567,6 +3587,16 @@ export function createSSEStream(options: StreamOptions = {}) {
                     }))
                     .sort((a, b) => a.index - b.index)
                 : [];
+              // Translators keep tool state in different shapes (a Claude client's entries carry
+              // argBuffer, a Gemini upstream keeps none), so a Claude client reads its calls from
+              // the client summary: the exact calls it received.
+              const claudeClientCalls =
+                sourceFormat === FORMATS.CLAUDE
+                  ? toolCallsFromClaudeSummary(clientPayloadCollector.getSummary())
+                  : [];
+              const normalizedToolCalls = claudeClientCalls.length
+                ? claudeClientCalls
+                : stateToolCalls;
               const textualToolCall = parseTextualToolCallFromContent(content);
               if (textualToolCall) {
                 normalizedToolCalls.push({
