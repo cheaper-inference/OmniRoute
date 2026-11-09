@@ -986,28 +986,26 @@ dan bukannya dihantar dua kali. Sumber: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Penggunaan layan diri (`/api/usage/om-usage`)
 
-Mana-mana kunci API boleh membaca penggunaan dan kuotanya **sendiri** — tanpa pengesahan pengurusan. Inilah titik akhir yang
-digunakan oleh klien (CLI, panel OmniCopilot) untuk menunjukkan perbelanjaan pemegang kunci.
+Mana-mana kunci API boleh baca** miliknya** penggunaan dan kuota — tiada pengesahan pengurusan. Ini ialah titik akhir yang digunakan oleh pelanggan (CLI, panel OmniCopilot ) untuk menunjukkan perbelanjaan mereka kepada pemegang kunci.
 
 ```bash
-# Bentuk teks (kontrak sejarah — teks biasa untuk terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Bentuk berstruktur — perkara yang digunakan oleh UI
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kunci tersebut mesti mempunyai **`allowUsageCommand`** yang didayakan (dilumpuhkan secara lalai — pengurus kunci API
-papan pemuka menogolkannya untuk setiap kunci). Tanpanya, titik akhir ini akan memberikan respons `403`.
+Kuncinya mesti ada**`allowUsageCommand`** didayakan (dimatikan secara lalai — pengurus kunci API papan pemuka menogolnya setiap kekunci). Tanpanya titik akhir menjawab `403`.
 
-`?format=json` mengembalikan bentuk terbeza supaya pemanggil tidak akan membaca medan data daripada penolakan. Apabila berjaya:
+`?format=json` mengembalikan bentuk yang didiskriminasi supaya pemanggil tidak pernah membaca medan data daripada penolakan. Mengenai kejayaan:
 
 ```jsonc
 {
   "allowed": true,
-  // hadir hanya apabila kunci memilih masuk kepada had penggunaan setiap kunci (USD harian/mingguan):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1016,9 +1014,9 @@ papan pemuka menogolkannya untuk setiap kunci). Tanpanya, titik akhir ini akan m
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // petikan kuota pembekal yang dipilih, atau null apabila belum ada apa-apa yang dicache:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // petikan setiap sambungan, supaya UI boleh memaparkan beberapa pembekal bersebelahan:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1026,56 +1024,49 @@ papan pemuka menogolkannya untuk setiap kunci). Tanpanya, titik akhir ini akan m
 }
 ```
 
-Apabila ditolak (kunci `401` tidak sah / `403` tidak dibenarkan), laluan yang sama mengembalikan
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` yang hadir tetapi kosong
-(kunci dibenarkan, belum ada maklumat yang diperoleh) ialah keadaan yang berbeza daripada penolakan, dan hanya bentuk JSON
-membezakannya.
+Apabila penolakan ( kunci `401` buruk / `403` tidak dibenarkan) laluan yang sama mengembalikan `{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` yang sekarang-tetapi-kosong (kunci dibenarkan, tiada apa yang dipelajari lagi) ialah keadaan yang berbeza daripada penolakan, dan hanya bentuk JSON yang membezakannya.
 
-**Pengesahan:** kunci API Bearer milik pemanggil, disahkan menggunakan `isValidApiKey` — ini _bukan_ permukaan
-pengurusan (`/api/keys/…`), yang kekal dilindungi oleh `requireManagementAuth`.
+**Pengesahan:** kunci API Pembawa pemanggil sendiri, disahkan dengan `isValidApiKey` — ini _bukan_ permukaan pengurusan (`/api/keys/…`), yang kekal di belakang `requireManagementAuth`.
 
-### Peratusan Kuota Mentah berbanding Kuota yang Diselaraskan dengan Ambang
+### Peratusan Kuota Dilaraskan Mentah lwn Cutoff
 
-Apabila menggunakan `/api/usage/om-usage`, pemanggil perlu mengambil perhatian terhadap perbezaan antara
-peratusan yang dipaparkan oleh **output teks biasa** dan output **JSON berstruktur**:
+Apabila menggunakan `/api/usage/om-usage`, pemanggil harus perhatikan perbezaan antara peratusan yang dikemukakan oleh** output teks biasa** dan berstruktur** keluaran JSON** :
 
-| Aspek                 | Format teks biasa (`/api/usage/om-usage` / `@@om-usage`)                                              | Format JSON (`?format=json`)                                                      |
-| :-------------------- | :---------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
-| **Medan output**      | `NN% left` (contohnya, `20% left`)                                                                    | `provider.quotas` / `providers[].quotas`                                          |
-| **Pengukuran**        | **Elaun boleh guna yang diselaraskan dengan ambang**: kapasiti yang tinggal di atas ambang pemotongan | **Kuota hulu mentah**: pengukuran pembekal yang tidak diselaraskan                |
-| **Penskalaan ambang** | Diskalakan melalui `effectiveRemainingPercent()` supaya rizab terlindung dibaca sebagai `0% left`     | Tiada (nilai petikan mentah seperti yang dilaporkan oleh pembekal)                |
-| **Data ambang**       | Dimasukkan ke dalam peratusan yang dipaparkan                                                         | Disimpan dalam `quotaWindowThresholds` bagi setiap sambungan (atau lalai pelayan) |
-| **Pengguna utama**    | CLI interaktif, gesaan terminal, pengendali manusia                                                   | Integrasi berprogram, papan pemuka, analitik, penjejak pengebilan                 |
+| Aspek                | Format teks biasa (`/api/usage/om-usage` / `@@om-usage`)                                          | format JSON (`?format=json`)                                                 |
+| :------------------- | :------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------- |
+| **Medan keluaran**   | `NN% left` (cth, `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                     |
+| **Pengukuran**       | **Elaun boleh guna terlaras cutoff** : baki kapasiti melebihi ambang cutoff                       | **Kuota huluan mentah** : pengukuran pembekal yang tidak diselaraskan        |
+| **Skala pemotongan** | Diskalakan melalui `effectiveRemainingPercent()` supaya rizab dilindungi dibaca sebagai `0% left` | Tiada (nilai syot kilat mentah seperti yang dilaporkan oleh pembekal)        |
+| **Data ambang**      | Digabungkan ke dalam peratusan yang dipaparkan                                                    | Disimpan dalam `quotaWindowThresholds` setiap sambungan (atau lalai pelayan) |
+| **Pengguna utama**   | CLIs interaktif, gesaan terminal, pengendali manusia                                              | Penyepaduan program, papan pemuka, analitik, penjejak pengebilan             |
 
-#### Formula Pelarasan Ambang
+#### Formula Pelarasan Cutoff
 
-OmniRoute menyokong ambang pemotongan kuota proaktif untuk mengelakkan kehabisan kuota hulu (dikonfigurasi melalui sambungan
-`quotaWindowThresholds`, lalai pembekal atau tetapan daya tahan global). Apabila ambang pemotongan
-(contohnya, `cutoff = 25%`) aktif pada tetingkap kuota, pemapar teks mengira elaun yang tinggal seperti berikut:
+OmniRoute menyokong pemotongan kuota proaktif untuk mengelakkan keletihan huluan (dikonfigurasikan melalui sambungan `quotaWindowThresholds`, lalai pembekal atau tetapan daya tahan global). Apabila ambang cutoff (cth, `cutoff = 25%`) aktif pada tetingkap kuota, pemapar teks mengira baki elaun sebagai:
 
-- Jika `remaining <= cutoff`: mengembalikan `0%`.
-- Jika `remaining > cutoff`: `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Jika `remaining <= cutoff`: kembalikan `0%`.
+- Jika `remaining > cutoff`: kembalikan `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Output teks berformat membundarkan nilai ini kepada integer terdekat (`Math.round(...)`).
+Output teks yang diformat membulatkan ini kepada integer terdekat (`Math.round(...)`).
 
 #### Contoh Ilustrasi
 
-Pertimbangkan tetingkap pembekal dengan **penggunaan mentah 60%** (maka **kuota mentah yang berbaki 40%**) dan ambang **25% kuota berbaki** yang dikonfigurasikan:
+Pertimbangkan tetingkap pembekal dengan** 60% penggunaan mentah** (oleh itu** 40% baki kuota mentah** ) dan dikonfigurasikan** Potongan kuota baki 25%.** ambang:
 
-| Perwakilan                       | Pengiraan                                          | Berbaki |           Penggunaan Tersirat            |
-| :------------------------------- | :------------------------------------------------- | :-----: | :--------------------------------------: |
-| **JSON Mentah (`?format=json`)** | Syot kilat huluan (`quotas[window]`)               | **40%** |                 **60%**                  |
-| **Format teks (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (jika mengira `100 - remaining`) |
+| Perwakilan                       | Pengiraan                                          | yang tinggal |            Tersirat Digunakan            |
+| :------------------------------- | :------------------------------------------------- | :----------: | :--------------------------------------: |
+| **JSON mentah (`?format=json`)** | Syot kilat hulu (`quotas[window]`)                 |   **40%**    |                 **60%**                  |
+| **Format teks (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |   **20%**    | **80%** (jika mengira `100 - remaining`) |
 
-- **Mengapa teks menunjukkan 20% berbaki:** Daripada kuota fizikal 40% yang berbaki pada akaun, 25% dikhaskan oleh dasar pemotongan. Pemanggil hanya mempunyai 15% daripada 75% ruang lebihan yang boleh digunakan sebelum penghala berhenti menghala ke sambungan ini. Penskalaan memastikan sambungan menandakan kehabisan (`0% left`) tepat apabila penghalaan akan dihentikan.
-- **Mengapa JSON mengekalkan nilai mentah:** Muatan JSON mengembalikan syot kilat tepat pembekal (`UsageSnapshot`) supaya alat luaran mempunyai akses kepada penggunaan huluan sebenar dan `quotaWindowThresholds` pada peringkat sambungan tanpa penskalaan lossy pada sisi pelayan.
+- **Mengapa teks menunjukkan baki 20%:** Daripada 40% kuota fizikal yang tinggal pada akaun, 25% dikhaskan oleh dasar cutoff. Pemanggil hanya mempunyai 15% daripada 75% ruang kepala yang boleh digunakan sebelum penghala berhenti menghala ke sambungan ini. Penskalaan memastikan sambungan menandakan keletihan (`0% left`) tepat apabila penghalaan akan berhenti.
+- **Mengapa JSON mengekalkan nilai mentah:** Muatan JSON mengembalikan syot kilat pembekal yang tepat (`UsageSnapshot`) supaya alatan luaran mempunyai akses kepada penggunaan huluan kebenaran tanah dan `quotaWindowThresholds` peringkat sambungan tanpa penskalaan lossy sebelah pelayan.
 
 #### Panduan Migrasi Pengguna
 
-Jika integrasi luaran (seperti pemalam editor atau sambungan ejen) sebelum ini mengekstrak kandungan daripada titik akhir teks (`NN% left`) dan mengira peratus penggunaan sebagai `100 - NN`, migrasi ke `?format=json` bermaksud:
+Jika penyepaduan luaran (seperti pemalam editor atau sambungan ejen) sebelum ini mengikis titik akhir teks (`NN% left`) dan mengira peratusan yang digunakan sebagai `100 - NN`, berhijrah ke `?format=json` bermakna:
 
-- Membaca nilai JSON mentah akan mencerminkan **penggunaan sebenar huluan** (60% digunakan dalam contoh di atas).
-- Jika integrasi ingin mengekalkan semantik elaun boleh guna titik akhir teks, integrasi tersebut boleh menilai formula baki efektif pada sisi klien menggunakan `quotaWindowThresholds` untuk penggantian pada peringkat sambungan.
+- Membaca nilai JSON mentah akan mencerminkan** penggunaan huluan sebenar** (60% digunakan dalam contoh di atas).
+- Jika penyepaduan ingin mengekalkan semantik elaun boleh guna titik akhir teks, ia boleh menilai formula yang berkesan di sisi klien menggunakan `quotaWindowThresholds` untuk penggantian peringkat sambungan.
 
 ---
 
@@ -1255,36 +1246,37 @@ Pelaksanaan: `getResolvedModelCapabilitiesWithLimitSources()` dalam `src/lib/mod
 
 `PATCH /api/keys/{id}` mengemas kini kebenaran kunci sedia ada. Seperti setiap laluan `/api/keys*` ia memerlukan kebenaran pengurusan (lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md) ), bukan kunci inferens. Hantar hanya medan yang ingin anda ubah; permintaan dengan tiada satu pun daripadanya ditolak dengan `No valid fields to update`. Medan yang diterima ditakrifkan oleh `updateKeyPermissionsSchema` dalam `src/shared/validation/schemas/keys.ts`.
 
-| Padang                                      | taip                                                                       | Nota                                                                                                                                                         |
-| ------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | rentetan, 1-200 aksara                                                     |                                                                                                                                                              |
-| `isActive`                                  | boolean                                                                    |                                                                                                                                                              |
-| `isBanned`                                  | boolean                                                                    |                                                                                                                                                              |
-| `expiresAt`                                 | ISO 8601 datetime atau `null`                                              | `null` membersihkan tamat tempoh                                                                                                                             |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` mesti kosong apabila mod `all`                                                                                                               |
-| `allowedModels`, `blockedModels`            | tatasusunan rentetan, sehingga 1000                                        |                                                                                                                                                              |
-| `allowedCombos`                             | susunan rentetan, sehingga 500                                             | Pintu yang menggabungkan kunci boleh memanggil; model langsung dikawal oleh `modelAccessMode` / `allowedModels`                                              |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` mestilah tidak kosong apabila `restricted` dan kosong apabila `all`                                                                     |
-| `allowedConnections`                        | susunan UUIDs, sehingga 100                                                |                                                                                                                                                              |
-| `allowAutoCombos`                           | boolean                                                                    | `false` menolak permintaan untuk model `auto/*` dengan kunci ini; kunci yang tidak pernah menetapkannya dibenarkan                                           |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Perkara yang `GET /v1/models` senaraikan untuk kunci ini (kombo sahaja, model sahaja, atau kedua-duanya); ia tidak mengubah apa yang mungkin dipanggil kunci |
-| `forcedModel`                               | rentetan sehingga 300 aksara, atau `null`                                  | Halakan permintaan sembang ke model/combo ini , melalui `X-Route-Model` dan `body.model`; had kunci masih terpakai                                           |
-| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                              |
-| `throttleDelayMs`                           | integer, 0-300000                                                          |                                                                                                                                                              |
-| `maxSessions`                               | integer, 0-10000                                                           |                                                                                                                                                              |
-| `rateLimits`                                | tatasusunan `{ limit, window }` (integer positif, sehingga 50) atau `null` | `null` membersihkan had                                                                                                                                      |
-| `accessSchedule`                            | jadual objek atau `null`                                                   | `null` mengosongkan jadual                                                                                                                                   |
-| `scopes`                                    | tatasusunan rentetan, sehingga 32                                          |                                                                                                                                                              |
-| `allowedEndpoints`                          | susunan rentetan, sehingga 20                                              |                                                                                                                                                              |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                              |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Lihat [Pintasan cache setiap kekunci](#per-key-cache-bypass)                                                                                                 |
-| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                              |
-| `codexServiceMode`                          | salah satu mod perkhidmatan Codex                                          |                                                                                                                                                              |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                              |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                              |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                              |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nombor >= 0 atau `null`                                                    |                                                                                                                                                              |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                              |
+| Padang                                      | taip                                                                       | Nota                                                                                                                                                                                                                                                                         |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | rentetan, 1-200 aksara                                                     |                                                                                                                                                                                                                                                                              |
+| `isActive`                                  | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `isBanned`                                  | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `expiresAt`                                 | ISO 8601 datetime atau `null`                                              | `null` membersihkan tamat tempoh                                                                                                                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` mesti kosong apabila mod `all`                                                                                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | tatasusunan rentetan, sehingga 1000                                        |                                                                                                                                                                                                                                                                              |
+| `allowedCombos`                             | susunan rentetan, sehingga 500                                             | Pintu yang menggabungkan kunci boleh memanggil; model langsung dikawal oleh `modelAccessMode` / `allowedModels`                                                                                                                                                              |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` mestilah tidak kosong apabila `restricted` dan kosong apabila `all`                                                                                                                                                                                     |
+| `allowedConnections`                        | susunan UUIDs, sehingga 100                                                |                                                                                                                                                                                                                                                                              |
+| `allowAutoCombos`                           | boolean                                                                    | `false` menolak permintaan untuk model `auto/*` dengan kunci ini; kunci yang tidak pernah menetapkannya dibenarkan                                                                                                                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Perkara yang `GET /v1/models` senaraikan untuk kunci ini (kombo sahaja, model sahaja, atau kedua-duanya); ia tidak mengubah apa yang mungkin dipanggil kunci                                                                                                                 |
+| `forcedModel`                               | rentetan sehingga 300 aksara, atau `null`                                  | Halakan permintaan sembang ke model/combo ini , melalui `X-Route-Model` dan `body.model`; had kunci masih terpakai                                                                                                                                                           |
+| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `throttleDelayMs`                           | integer, 0-300000                                                          |                                                                                                                                                                                                                                                                              |
+| `maxSessions`                               | integer, 0-10000                                                           |                                                                                                                                                                                                                                                                              |
+| `rateLimits`                                | tatasusunan `{ limit, window }` (integer positif, sehingga 50) atau `null` | `null` membersihkan had                                                                                                                                                                                                                                                      |
+| `accessSchedule`                            | jadual objek atau `null`                                                   | `null` mengosongkan jadual                                                                                                                                                                                                                                                   |
+| `scopes`                                    | tatasusunan rentetan, sehingga 32                                          |                                                                                                                                                                                                                                                                              |
+| `allowedEndpoints`                          | susunan rentetan, sehingga 20                                              |                                                                                                                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Lihat [Pintasan cache setiap kekunci](#per-key-cache-bypass)                                                                                                                                                                                                                 |
+| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `codexServiceMode`                          | salah satu mod perkhidmatan Codex                                          |                                                                                                                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nombor >= 0 atau `null`                                                    |                                                                                                                                                                                                                                                                              |
+| `fiveHourUsageLimitUsd`                     | nombor >= 0 atau `null`                                                    | Belanjawan USD 5 jam, dikuatkuasakan seperti had harian dan mingguan (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` ialah apabila perbelanjaan tertua dalam tetingkap itu sudah tua, yang boleh meninggalkan kunci yang melebihi hadnya masih disekat. |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
