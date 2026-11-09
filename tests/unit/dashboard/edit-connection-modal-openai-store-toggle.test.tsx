@@ -20,6 +20,9 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -66,7 +69,7 @@ function renderModal(connection: Record<string, unknown>) {
 
 function findStoreToggleLabel(): Element | null {
   return (
-    Array.from(container.querySelectorAll("span")).find(
+    Array.from(document.body.querySelectorAll("span")).find(
       (el) => el.textContent === "openaiResponsesStoreLabel"
     ) ?? null
   );
@@ -74,7 +77,7 @@ function findStoreToggleLabel(): Element | null {
 
 function findStoreToggleSwitch(): Element | null {
   const label = findStoreToggleLabel();
-  return label?.closest("div")?.parentElement?.querySelector('button[role="switch"]') ?? null;
+  return label?.closest("div")?.parentElement?.querySelector('[role="switch"]') ?? null;
 }
 
 describe("EditConnectionModal — OpenAI Responses store toggle provider gating", () => {

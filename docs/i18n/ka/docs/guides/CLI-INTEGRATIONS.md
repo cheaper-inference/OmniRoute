@@ -4,30 +4,13 @@
 
 ---
 
-გაზიარებული შესრულებადი ფაილების მანიფესტის, შეზღუდული შვილობილი გარემოებისა და მუდმივი
-Gemini-ის კონფიგურაციისთვის იხილეთ [CLI-ის გაშვების კონტრაქტები](./CLI-LAUNCH-CONTRACTS.md).
+გაზიარებული შესრულებადი მანიფესტის, შეზღუდული ბავშვის გარემოსა და მუდმივი Gemini დაყენებისთვის იხილეთ [CLI გაშვების კონტრაქტები](./CLI-LAUNCH-CONTRACTS.md).
 
-OmniRoute მოიცავს `setup-*` ბრძანებების ოჯახს, რომლებიც კოდირებისთვის განკუთვნილ
-CLI-ს (Codex, Claude Code, OpenCode, Cline, …) აკონფიგურირებს, რათა მან OmniRoute ბეკენდად გამოიყენოს — შედეგად,
-ინსტრუმენტი უკავშირდება **ერთ** საბოლოო წერტილს, ხოლო OmniRoute მოთხოვნას შესაბამის პროვაიდერთან
-ავტომატური სარეზერვო გადართვით მარშრუტიზებს. თითოეული ბრძანება გაშვებული
-OmniRoute-იდან (ლოკალური ან დისტანციური) მოდელების **აქტუალურ** კატალოგს კითხულობს და ინსტრუმენტის საკუთარ კონფიგურაციის ფაილს **თქვენს**
-კომპიუტერში წერს. იქ, სადაც ინსტრუმენტი ამის მხარდაჭერას უზრუნველყოფს, API გასაღები გარემოს ცვლადის მეშვეობით მიეთითება.
-ბრძანებები, რომლებიც ინსტრუმენტისთვის ლოკალურ გარემოს ფაილს მუდმივად ინახავენ, ქვემოთ არის აღნიშნული.
+OmniRoute აგზავნის `setup-*` ბრძანებების ოჯახს, რომელიც აკონფიგურირებს კოდირებულ CLI (Codex, Claude Code, OpenCode, Cline,…) რათა გამოიყენოს OmniRoute როგორც მისი უკანა ნაწილი - ასე რომ, ინსტრუმენტი ესაუბრება** ერთი** საბოლოო წერტილი და OmniRoute მარშრუტები სწორ პროვაიდერთან ავტომატური დაბრუნებით. თითოეული ბრძანება კითხულობს** ცოცხალი** მოდელის კატალოგი გაშვებული OmniRoute დან (ლოკალური ან დისტანციური) და წერს ხელსაწყოს კონფიგურაციის ფაილს** შენი** მანქანა. API კლავიშზე მითითებულია გარემოს ცვლადი, სადაც ხელსაწყო მხარს უჭერს მას. ბრძანებები, რომლებიც შენარჩუნებულია ინსტრუმენტის ლოკალური გარემოს ფაილში, მოცემულია ქვემოთ.
 
-ასევე ხელმისაწვდომია ზოგადი გამშვები — `omniroute run <target>` — რომელიც
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ან `gemini`-ს
-სწორად ჩასმული გარემოს ცვლადებით უშვებს, ყოველგვარი კონფიგურაციის ჩაწერის გარეშე. სამიზნეები და მათი
-ალიასები აღებულია კანონიკური მანიფესტიდან `bin/cli/cli-manifest.mjs`
-(`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), ხოლო `omniroute completion` იმავე
-მანიფესტიდან მიღებულ სამიზნე სიტყვებს გთავაზობთ. თითოეული ინსტრუმენტისთვის განკუთვნილი ძველი გამშვებები —
-`omniroute launch` (Claude Code) და `omniroute launch-codex` (Codex) — კვლავ
-ხელმისაწვდომია.
+ასევე არსებობს ზოგადი გამშვები - `omniroute run <target>` - რომელიც წარმოქმნის `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` ან `whycodes` მარჯვენა env ინექციით, ყოველგვარი კონფიგურაციის დაწერის გარეშე. სამიზნეები და მათი მეტსახელები მომდინარეობს კანონიკური მანიფესტის `bin/cli/cli-manifest.mjs` დან (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`, `why-codes|why`) და `omniroute completion` გვთავაზობს იგივე მანიფესტიდან წარმოშობილ სამიზნე სიტყვებს. თითო ხელსაწყოს გამშვები მემკვიდრეობა - `omniroute launch` (Claude კოდი) და `omniroute launch-codex` (Codex) - რჩება ხელმისაწვდომი.
 
-პროვაიდერის დამატება იმავე ლოკალური/დისტანციური კონტექსტიდან არის შესაძლებელი. ქვემოთ მოცემული,
-API-ზე ორიენტირებული ბრძანებები მართვის ავთენტიფიკაციას პროვაიდერის
-სააღრიცხვო მონაცემებისგან განცალკევებით ინახავს და სტრუქტურირებულ გამომავალში სააღრიცხვო მონაცემებს არასოდეს ბეჭდავს:
+პროვაიდერის ჩართვა ხელმისაწვდომია იმავე local/remote კონტექსტიდან. ქვემოთ მოცემული API-პირველი ბრძანებები ინახავს მენეჯმენტის ავთენტიფიკაციას პროვაიდერის სერთიფიკატებისაგან განცალკევებულად და არასოდეს ბეჭდავს რწმუნებათა სიგელებს სტრუქტურირებულ გამომავალში:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -37,127 +20,69 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-სკრიპტებისთვის უპირატესობა მიანიჭეთ `--credential-stdin`-ს ან `--credential-env`-ს; `--credential`
-შენარჩუნებულია კონტროლირებად ლოკალურ გარემოში გამოსაყენებლად. `providers remove` არაინტერაქტიულ
-ტერმინალში `--yes`-ს მოითხოვს, ხოლო ხუთივე ბრძანება აქტიურ კონტექსტს ან
-გლობალურ `--base-url`/`--api-key` პარამეტრებს ითვალისწინებს.
+სკრიპტებისთვის უპირატესობა მიანიჭეთ `--credential-stdin` ან `--credential-env`; `--credential` ინახება კონტროლირებადი ადგილობრივი გამოყენებისთვის. `providers remove` მოითხოვს `--yes` არაინტერაქტიულ ტერმინალზე და ხუთივე ბრძანება პატივს სცემს აქტიურ კონტექსტს ან გლობალურ `--base-url`/`--api-key` ვარიანტებს.
 
-პროვაიდერის სელექტორები უარყოფენ ორაზროვან ID პრეფიქსებს, სახელებსა და პროვაიდერის სახელებს; როდესაც
-რამდენიმე კავშირი ემთხვევა, გამოიყენეთ კავშირის სრული ID. შექმნისა და რედაქტირების ბრძანებები
-შენახულ კავშირს ხელახლა კითხულობს, ხოლო წაშლის ბრძანება ამოწმებს, რომ ის აღარ იკითხება.
-იმპორტი უკვე არსებული პროვაიდერის/სახელის წყვილს გამოტოვებს. იმპორტირებულ ჩანაწერებს არ შეუძლიათ
-CLI-სთვის მიწოდებული მართვის საბოლოო წერტილის, კონტექსტის ან მართვის სააღრიცხვო მონაცემების
-ჩანაცვლება.
+პროვაიდერის სელექტორები უარყოფენ ID ორაზროვან პრეფიქსებს, სახელებს ან პროვაიდერის სახელებს; გამოიყენეთ სრული კავშირი ID როდესაც რამდენიმე კავშირი ემთხვევა. შექმენით და შეცვალეთ ბრძანებები, რომლებიც წაიკითხავენ შენახულ კავშირს და წაშლა ადასტურებს, რომ ის აღარ იკითხება. იმპორტი გამოტოვებს არსებულ provider/name წყვილს. იმპორტირებული ჩანაწერები ვერ არღვევს CLI ში მიწოდებულ მენეჯმენტის საბოლოო წერტილს, კონტექსტს ან მართვის სერთიფიკატებს.
 
-ორი ყველაზე ფუნქციურად მდიდარი ინტეგრაციის ერთჯერადი, ხელით გაწერილი საბაზისო კონფიგურაციისთვის იხილეთ
-თითოეული ინსტრუმენტის დეტალური სახელმძღვანელო:
+ორი უმდიდრესი ინტეგრაციის ერთჯერადი, ხელით დაწერილი ბაზის დაყენებისთვის იხილეთ თითო ხელსაწყოს ღრმა ჩაყვინთვის:
 
-- [Claude Code-ის კონფიგურაცია](./CLAUDE-CODE-CONFIGURATION.md)
-- [Codex CLI-ის კონფიგურაცია](./CODEX-CLI-CONFIGURATION.md)
+- [Claude კოდის კონფიგურაცია](./CLAUDE-CODE-CONFIGURATION.md)
+- [Codex CLI კონფიგურაცია](./CODEX-CLI-CONFIGURATION.md)
 - [დისტანციური რეჟიმი](./REMOTE-MODE.md) — მართეთ დისტანციური OmniRoute (VPS / Tailnet) თქვენი ლეპტოპიდან
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — OmniCopilot გაფართოება; მას ასევე შეუძლია ეს
-  `setup-*` ბრძანებები თქვენთვის პირდაპირ რედაქტორიდან გაუშვას
+- [VS კოდი Copilot ჩატი](./VSCODE-COPILOT.md) — OmniCopilot გაფართოება; მას ასევე შეუძლია გაუშვას ეს `setup-*` ბრძანებები თქვენთვის რედაქტორის შიგნიდან
 
 ---
 
-## ძირითადი ცხრილი
+## სამაგისტრო მაგიდა
 
-თითოეული ბრძანება ითვალისწინებს **აქტიურ კონტექსტს** (რომელიც `omniroute connect`-ით განისაზღვრება; იხილეთ
-[დისტანციური რეჟიმი](./REMOTE-MODE.md)) ან აშკარად მითითებულ `--remote <url> --api-key <key>` ალმებს.
-ქვემოთ „ლოკალური და დისტანციური“ ნიშნავს: ალმების გარეშე სამიზნეა `http://localhost:20128`;
-`--remote`-ის გამოყენებისას (ან აქტიური დისტანციური კონტექსტის არსებობისას) კატალოგი ამ
-სერვერიდან იტვირთება, ხოლო კონფიგურაცია ლოკალურად იწერება.
+ყოველი ბრძანება პატივს სცემს** აქტიური კონტექსტი** (დაყენებულია `omniroute connect` ით, იხილეთ [დისტანციური რეჟიმი](./REMOTE-MODE.md) ) ან აშკარა `--remote <url> --api-key <key>` დროშებით. ქვემოთ მოცემული "ლოკალური წინააღმდეგ დისტანციური" ნიშნავს: დროშების გარეშე ის მიზნად ისახავს `http://localhost:20128`; `--remote` ით (ან აქტიური დისტანციური კონტექსტით) ის იღებს კატალოგს ამ სერვერიდან და წერს კონფიგურაციას ლოკალურად.
 
-| ბრძანება                   | ხელსაწყო                         | რას წერს                                                                                                                                                                                  | ძირითადი ალმები                                                                                                                            | ლოკალური თუ დისტანციური |
-| -------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI                 | `~/.codex/<name>.config.toml` — თითო პროფილი თითოეული თავსებადი ტექსტური მოდელისთვის (`codex --profile <name>`)                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | ორივე                   |
-| `omniroute setup-claude`   | Claude Code                      | `~/.claude/profiles/<name>/settings.json` — თითო პროფილი თითოეული შესაბამისი მოდელისთვის (`CLAUDE_CONFIG_DIR`)                                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | ორივე                   |
-| `omniroute setup-opencode` | OpenCode (OpenAI-სთან თავსებადი) | `~/.config/opencode/opencode.json` — `omniroute` პროვაიდერი კატალოგის ყველა მოდელით (`opencode -m omniroute/<model>`)                                                                     | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | ორივე                   |
-| `omniroute setup-cline`    | Cline                            | `~/.cline/data/{globalState,secrets}.json` (CLI რეჟიმი) + ბეჭდავს VS Code გაფართოების პარამეტრებს                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | ორივე                   |
-| `omniroute setup-kilo`     | Kilo Code                        | `~/.local/share/kilo/auth.json` (CLI) + არსებობის შემთხვევაში აერთიანებს `kilocode.*`-ს VS Code-ის `settings.json`-ში                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | ორივე                   |
-| `omniroute setup-continue` | Continue / `cn` CLI              | `~/.continue/config.yaml` — `provider: openai` მოდელები, გასაღები `${{ secrets.OMNIROUTE_API_KEY }}`-ის მეშვეობით                                                                         | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | ორივე                   |
-| `omniroute setup-cursor`   | Cursor                           | არაფერი — ბეჭდავს აპლიკაციაში შესასრულებელ ნაბიჯებს (Cursor-ის კონფიგურაცია გაუმჭვირვალე SQLite-შია)                                                                                      | `--remote` `--api-key` `--only` `--port`                                                                                                   | ორივე                   |
-| `omniroute setup-roo`      | Roo Code                         | `~/.omniroute/roo-settings.json` (იმპორტის დოკუმენტი) + VS Code-ის `settings.json`-ის არსებობის შემთხვევაში აყენებს `roo-cline.autoImportSettingsPath`-ს                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | ორივე                   |
-| `omniroute setup-crush`    | Crush                            | `~/.config/crush/crush.json` — `openai-compat` პროვაიდერი, გასაღები `$OMNIROUTE_API_KEY`-ის მეშვეობით                                                                                     | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | ორივე                   |
-| `omniroute setup-goose`    | Goose                            | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + ბეჭდავს გარემოს კონფიგურაციის ინსტრუქციას                                                                  | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                   |
-| `omniroute setup-aider`    | Aider                            | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + ბეჭდავს გარემოს კონფიგურაციის ინსტრუქციას                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                   |
-| `omniroute setup-qwen`     | Qwen Code                        | `~/.qwen/settings.json` — V4 `modelProviders.openai` მასივი + `OMNIROUTE_API_KEY` ფაილში `~/.qwen/.env`                                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | ორივე                   |
-| `omniroute setup-5dive`    | 5dive (აგენტების ფლოტი)          | `$HOME`-ის ქვეშ არაფერი — `5dive agent auth set`-ის მეშვეობით წერს 5dive-ის **ავტორიზაციის პროფილს** (`/var/lib/5dive/auth-profiles/<name>/`); მხოლოდ root-ისთვის, სრულდება ფლოტის ჰოსტზე | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | ორივე                   |
-| `omniroute run <target>`   | შესრულების გაშვება (ზოგადი)      | არაფერი — უშვებს `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`-ს შესაბამისი გარემოთი და არგუმენტებით; Qwen და Gemini იყენებენ დროებით იზოლირებულ საშინაო დირექტორიას        | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ორივე                   |
-| `omniroute launch`         | Claude Code                      | არაფერი — უშვებს `claude`-ს ჩასმული `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`-ით                                                                                                        | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | ორივე                   |
-| `omniroute launch-codex`   | OpenAI Codex CLI                 | არაფერი — უშვებს `codex`-ს `-c` ალმების მეშვეობით ჩასმული `omniroute` პროვაიდერით                                                                                                         | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | ორივე                   |
+| ბრძანება                   | ხელსაწყო                    | რასაც წერს                                                                                                                                                                  | ძირითადი დროშები                                                                                                                           | ადგილობრივი vs დისტანციური |
+| -------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI            | `~/.codex/<name>.config.toml` — ერთი პროფილი თავსებადი ტექსტის მოდელზე (`codex --profile <name>`)                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | ორივე                      |
+| `omniroute setup-claude`   | Claude კოდი                 | `~/.claude/profiles/<name>/settings.json` — ერთი პროფილი თითო შესაბამის მოდელზე (`CLAUDE_CONFIG_DIR`)                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | ორივე                      |
+| `omniroute setup-opencode` | OpenCode (openai-თავსებადი) | `~/.config/opencode/opencode.json` — `omniroute` პროვაიდერი კატალოგის ყველა მოდელით (`opencode -m omniroute/<model>`)                                                       | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | ორივე                      |
+| `omniroute setup-cline`    | Cline                       | `~/.cline/data/{globalState,secrets}.json` (CLI რეჟიმი) + ბეჭდავს VS კოდის გაფართოების პარამეტრებს                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | ორივე                      |
+| `omniroute setup-kilo`     | კილო კოდი                   | `~/.local/share/kilo/auth.json` (CLI) + აერთიანებს `kilocode.*` VS კოდში `settings.json` თუ ეს არის                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | ორივე                      |
+| `omniroute setup-continue` | გაგრძელება / `cn` CLI       | `~/.continue/config.yaml` — `provider: openai` მოდელები, გასაღები `${{ secrets.OMNIROUTE_API_KEY }}` მეშვეობით                                                              | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | ორივე                      |
+| `omniroute setup-cursor`   | Cursor                      | არაფერი — ბეჭდავს აპს-შიდა ნაბიჯებს (Cursor კონფიგურაცია არის გაუმჭვირვალე SQLite)                                                                                          | `--remote` `--api-key` `--only` `--port`                                                                                                   | ორივე                      |
+| `omniroute setup-roo`      | Roo კოდი                    | `~/.omniroute/roo-settings.json` (იმპორტის დოკუმენტი) + აყენებს `roo-cline.autoImportSettingsPath` თუ არსებობს VS კოდი `settings.json`                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | ორივე                      |
+| `omniroute setup-crush`    | დამსხვრევა                  | `~/.config/crush/crush.json` — `openai-compat` პროვაიდერი, გასაღები `$OMNIROUTE_API_KEY` მეშვეობით                                                                          | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | ორივე                      |
+| `omniroute setup-zed`      | Zed                         | `~/.config/zed/settings.json` — `openai_compatible.omniroute` პროვაიდერი (≤ 25 ხელსაწყოებით აღჭურვილი მოდელები), გასაღები `$OMNIROUTE_API_KEY` მეშვეობით                    | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | ორივე                      |
+| `omniroute setup-goose`    | ბატი                        | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + ბეჭდავს env რეცეპტს                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                      |
+| `omniroute setup-aider`    | აიდერი                      | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + ბეჭდავს env რეცეპტი                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                      |
+| `omniroute setup-qwen`     | Qwen კოდი                   | `~/.qwen/settings.json` — V4 `modelProviders.openai` მასივი + `OMNIROUTE_API_KEY` `~/.qwen/.env`                                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | ორივე                      |
+| `omniroute setup-5dive`    | 5 dive (აგენტის ფლოტი)      | არაფერი `$HOME` ქვეშ - წერს 5dive** ავტორიზაციის პროფილი** (`/var/lib/5dive/auth-profiles/<name>/`) `5dive agent auth set` მეშვეობით; Root-only, მუშაობს ფლოტის მასპინძელზე | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | ორივე                      |
+| `omniroute setup-whycodes` | WhyCodes                    | WhyCodes `config.toml` (`[providers.omniroute]` + `[default_model]`); ბილიკი არის `$WHYCODES_HOME/config.toml` ან `~/.whycodes/config.toml`                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | ორივე                      |
+| `omniroute run <target>`   | გაშვების დრო (ზოგადი)       | არაფერი — ქვირითის `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini`/`whycodes` მარჯვენა env და args; Qwen და Gemini იყენებენ დროებით იზოლირებულ სახლს            | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | ორივე                      |
+| `omniroute launch`         | Claude კოდი                 | არაფერი - ქვირითობს `claude` ერთად `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` შეყვანილი                                                                                    | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | ორივე                      |
+| `omniroute launch-codex`   | OpenAI Codex CLI            | არაფერი - წარმოიქმნება `codex` `omniroute` პროვაიდერთან, რომელიც ინექცია ხდება `-c` დროშებით                                                                                | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | ორივე                      |
 
-ფლაგების შესახებ შენიშვნები (გადამოწმებულია ბრძანების საწყის კოდში):
+დროშების შენიშვნები (დამოწმებულია ბრძანების წყაროში):
 
-- `--remote <url>` — კატალოგის მიღება დისტანციური OmniRoute-იდან (`--port`-ისა
-  და აქტიური კონტექსტის უგულებელყოფით). `--api-key <key>` მიუთითებს ამ
-  სერვერის ავტორიზაციის მონაცემს (ნაგულისხმევად გამოიყენება `OMNIROUTE_API_KEY`
-  გარემოს ცვლადი ან აქტიური კონტექსტის ტოკენი).
-- `--only <patterns>` — მძიმეებით გამოყოფილი ქვესტრიქონები; ტოვებს მხოლოდ
-  მოდელების იმ ID-ებს, რომლებიც ემთხვევა (მაგ., `--only glm,kimi`). ხელმისაწვდომია
-  `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`,
-  `setup-cursor`, `setup-crush` ბრძანებებისთვის.
-- `--dry-run` — ფაილურ სისტემაში ცვლილებების შეტანის გარეშე ზუსტად ბეჭდავს,
-  რა ჩაიწერებოდა. ხელმისაწვდომია ყველა `setup-*` ბრძანებისთვის, **გარდა**
-  `setup-cursor`-ისა (რომელიც ფაილში არასდროს წერს).
-- `--model <id>` — სავალდებულოა (ან ინტერაქტიულად შეირჩევა) იმ ხელსაწყოებისთვის,
-  რომლებსაც მოდელების ავტომატური აღმოჩენა არ აქვთ: Cline, Kilo, Roo, Goose,
-  Qwen, Aider, 5dive. არაინტერაქტიული გაშვებისთვის ეს ხელსაწყოები ასევე იღებენ
-  `--yes`-ს (რაც თავის მხრივ `--model`-ს მოითხოვს). `setup-opencode` იღებს
-  `--model`-ს ზედა დონის ნაგულისხმევი მოდელის დასაყენებლად.
-- `omniroute run`-ზე მითითებული `--model <id>` მიჰყვება მანიფესტში თითოეული
-  სამიზნისთვის განსაზღვრულ დაკავშირებას (`bin/cli/cli-manifest.mjs`):
-  **aider** იღებს `--model openai/<id>`-ს, ხოლო **opencode** —
-  `--model omniroute/<id>`-ს (პრეფიქსი ემატება მხოლოდ მაშინ, როდესაც ID-ს ის
-  უკვე არ აქვს); **qwen** და **gemini** ID-ს უცვლელად იღებენ; **claude** მას
-  იღებს `ANTHROPIC_MODEL`-ის, **goose** — `GOOSE_MODEL`-ის, ხოლო **codex** —
-  `-c model_providers.omniroute.*` არგუმენტების მეშვეობით. **Qwen გაშვების
-  ერთადერთი სამიზნეა, რომელიც აუცილებლად მოითხოვს `--model`-ს** —
-  `omniroute run qwen` მის გარეშე სრულდება კოდით `2` და აშკარა შეცდომის
-  შეტყობინებით.
-- `--port <port>` — ლოკალური OmniRoute-ის პორტი (ნაგულისხმევად `20128`;
-  იგნორირდება, როდესაც მითითებულია `--remote`). წარმოდგენილია ყველა `setup-*`
-  ბრძანებასა და ორივე გამშვებში.
-- `omniroute run`-ის დასრულების კოდები: შვილობილი CLI-ის საკუთარი დასრულების
-  კოდი უცვლელად გადაიცემა; `2` = არასწორი არგუმენტები (მხარდაუჭერელი სამიზნე,
-  სავალდებულო `--model`-ის არქონა, კონტეინერის შეზღუდვა); `127` = სამიზნე
-  ბინარული ფაილი `PATH`-ში არ არის; `130`/`143`/`129`, როდესაც გაშვება
-  სრულდება `SIGINT`/`SIGTERM`/`SIGHUP`-ით; `1` = გაშვების დროის სხვა შეცდომა.
-- ორივე გამშვები (`launch`, `launch-codex`) იღებს `--profile <name>`-ს
-  `setup-claude` / `setup-codex`-ის მიერ ჩაწერილი პროფილის ასარჩევად, ასევე
-  საბაზისო `claude` / `codex` ბინარული ფაილისთვის უცვლელად გადასაცემ არგუმენტებს.
+- `--remote <url>` — აიღეთ კატალოგი დისტანციური OmniRoute დან (უგულებელყოფს `--port` და აქტიურ კონტექსტს). `--api-key <key>` აწვდის რწმუნებათა სიგელებს ამ სერვერისთვის (ნაგულისხმევი არის `OMNIROUTE_API_KEY` env var, ან აქტიური კონტექსტის ნიშანი).
+- `--only <patterns>` - მძიმით გამოყოფილი ქვესტრიქონები; შეინახეთ მხოლოდ IDs მოდელი, რომელიც ემთხვევა (მაგ. `--only glm,kimi`). ხელმისაწვდომია `setup-codex`, `setup-claude`, `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — დაბეჭდეთ ზუსტად ის, რაც დაიწერებოდა ფაილურ სისტემასთან შეხების გარეშე. ხელმისაწვდომია ყველა `setup-*` ბრძანებაზე** გარდა** `setup-cursor` (რომელიც არასოდეს წერს ფაილს).
+- `--model <id>` - საჭიროა (ან ინტერაქტიულად შერჩეული) ინსტრუმენტებისთვის, რომლებსაც არ აქვთ მოდელის ავტომატური აღმოჩენა: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive, WhyCodes. ეს ხელსაწყოები ასევე იღებენ `--yes` არაინტერაქტიული გაშვებებისთვის (რაც შემდეგ მოითხოვს `--model`). `setup-opencode` იღებს `--model` ნაგულისხმევი უმაღლესი დონის მოდელის დასაყენებლად.
+- `--model <id>` `omniroute run` ზე მიჰყვება მანიფესტის თითო სამიზნე გაყვანილობას (`bin/cli/cli-manifest.mjs`):** დამხმარე** იღებს `--model openai/<id>` და** ღია კოდი** `--model omniroute/<id>` (პრეფიქსი ემატება მხოლოდ მაშინ, როდესაც ID უკვე არ ატარებს მას);** qwen** და** ტყუპები** პირადობის სიტყვით მიღება;** კლოდ** იღებს მას `ANTHROPIC_MODEL` საშუალებით,** ბატი** `GOOSE_MODEL` საშუალებით,** რატომ კოდები** `-P omniroute -m <id>` მეშვეობით და** კოდექსი** `-c model_providers.omniroute.*` არგის მეშვეობით.**Qwen არის ერთადერთი გაშვებული სამიზნე, რომელიც რთულად მოითხოვს `--model`** — `omniroute run qwen` მის გარეშე გამოდის `2` აშკარა შეცდომით.
+- `--port <port>` — ადგილობრივი OmniRoute პორტი (ნაგულისხმევი `20128`, იგნორირებულია `--remote` დაყენებისას). წარმოდგენილია ყველა `setup-*` ზე და ორივე გამშვებზე.
+- `omniroute run` გასასვლელი კოდები: ბავშვის CLI ის საკუთარი გასვლის კოდი მრავლდება სიტყვასიტყვით; `2` = არასწორი არგუმენტები (მხარდაჭერილი სამიზნე, აკლია საჭირო `--model`, კონტეინერის დაცვა); `127` = სამიზნე ორობითი არ არის `PATH` ში; `130`/`143`/`129` როდესაც გაშვება სრულდება `SIGINT`/`SIGTERM`/`SIGHUP`- ით ; `1` = სხვა გაშვების გაშვების წარუმატებლობა.
+- ორი გამშვები (`launch`, `launch-codex`) ეთანხმება `--profile <name>` `setup-claude` / `setup-codex` მიერ დაწერილი პროფილის ასარჩევად, პლიუს გადასასვლელი არგები ფუძემდებლური `claude` / `codex` ბინარისთვის.
 
-ინტერაქტიული ამრჩევი ასევე საერთოა გამართვის რეცეპტებისთვის:
+ინტერაქტიული ამომრჩევი ასევე გაზიარებულია დაყენების რეცეპტებით:
 
 ```bash
-# აირჩიეთ აქტიური ლოკალური ან დისტანციური მოდელების კატალოგიდან და გამართეთ სამიზნე.
+# Pick from the active local or remote model catalog and configure the target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-`configure` ამჟამად იყენებს გამოცდილი რეცეპტების დელეგირებას `codex`, `claude`,
-`opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` და `5dive`-ისთვის.
-მხოლოდ IDE-სთვის განკუთვნილი,
-MITM და მხოლოდ სახელმძღვანელოს ტიპის კატალოგის ჩანაწერები კვლავ ცალკე
-`setup-*`/ხელით შესასრულებელ პროცესებად რჩება და გაშვებად სამიზნეებად არ არის
-წარმოდგენილი.
+`configure` ამჟამად წარმოადგენს `codex`, `claude`, `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo` და `5dive` შემოწმებულ რეცეპტებს. მხოლოდ IDE, MITM და მხოლოდ სახელმძღვანელოს კატალოგის ჩანაწერები რჩება აშკარა `setup-*`/მექანიკური ნაკადები და არ არის წარმოდგენილი, როგორც გაშვებადი მიზნები.
 
-> `setup-opencode` არის OpenCode-ის **მსუბუქი, openai-compatible** ინტეგრაცია.
-> ასევე არსებობს უფრო ფუნქციური პლაგინის ინტეგრაცია — `omniroute setup opencode` —
-> რომელიც აყენებს `@omniroute/opencode-plugin`-ს. ისინი სხვადასხვა ბრძანებებია;
-> ზემოთ მოცემული ცხრილი აღწერს `setup-opencode`-ს.
+> `setup-opencode` არის** მსუბუქი openai-თან თავსებადი** OpenCode ინტეგრაცია. ასევე არის უფრო მდიდარი დანამატის ინტეგრაცია - `omniroute setup opencode` - რომელიც აინსტალირებს `@omniroute/opencode-plugin`. ისინი სხვადასხვა ბრძანებებია; ზემოთ მოყვანილი ცხრილი დოკუმენტები `setup-opencode`.
 >
-> პლაგინი ორ პაკეტადაა წარმოდგენილი — თითო OpenCode-ის თითოეული ძირითადი
-> ვერსიისთვის — რადგან ორი ჩამტვირთავი განსხვავებულ შესვლის წერტილებს მოელის:
-> `@omniroute/opencode-plugin` OpenCode v1-ისთვის და
-> `@omniroute/opencode-plugin-v2` OpenCode v2-ისთვის. v2 პაკეტი ახალია
-> (`0.1.0`) და მიჰყვება ჰოსტის კონტრაქტს, რომელიც ჯერ კიდევ იცვლება, ამიტომ
-> წინასწარ რაიმე სტრუქტურის დაშვების ნაცვლად ის კითხულობს ფორმას, რომელსაც
-> OpenCode კატალოგის მონახაზში საწყისად ათავსებს. მის დასაყენებლად `opencode.json`-ში
-> დაამატეთ `plugins` ჩანაწერი; `omniroute setup opencode` კვლავ v1 პაკეტს
-> აყენებს. პარამეტრები და ავტორიზაციის მონაცემების მოძიების თანმიმდევრობა
-> მოცემულია პაკეტის README-ში.
+> დანამატი გამოდის ორ პაკეტში, ერთი თითო OpenCode მაჟორზე, რადგან ორი ჩამტვირთველი ელის სხვადასხვა შესასვლელ წერტილებს: `@omniroute/opencode-plugin` OpenCode v1-სთვის და `@omniroute/opencode-plugin-v2` OpenCode v2-სთვის. v2 პაკეტი ახალია (`0.1.0`) და მიჰყვება მასპინძელ კონტრაქტს, რომელიც ჯერ კიდევ მოძრაობს, ასე რომ, ის კითხულობს OpenCode თესლების ფორმას კატალოგის პროექტში, ვიდრე ივარაუდოს. დააინსტალირეთ `plugins` ჩანაწერის დამატებით `opencode.json` ში; `omniroute setup opencode` კვლავ აყენებს v1 პაკეტს. ოფციები და რწმუნებათა სიგელების მოძიება არის README პაკეტში.
 
 ---
 
@@ -278,23 +203,23 @@ API გასაღები 5dive-ს გადაეცემა **stdin**-ზ
 
 ---
 
-## საბაზისო URL-ის გამოყენების წესები (რომელ ხელსაწყოებს სჭირდებათ `/v1`)
+## საბაზისო URL კონვენციები (რომელ ინსტრუმენტებს სურთ `/v1`)
 
-OmniRoute OpenAI-ის ინტერფეისს `/v1` მისამართზე, Anthropic-ის ინტერფეისს ძირეულ მისამართზე,
-ხოლო Gemini-ის ნატიურ ინტერფეისს `/v1beta` მისამართზე გვთავაზობს. თითოეული ინტეგრაცია იმ ფორმაზეა
-მორგებული, რომელსაც შესაბამისი ხელსაწყო მოელის (გადამოწმებულია ბრძანების საწყის კოდში):
+OmniRoute ავლენს OpenAI ზედაპირს `/v1` ზე, Anthropic ზედაპირს ფესვზე და მშობლიურ Gemini ზედაპირს `/v1beta` ზე. თითოეული ინტეგრაცია მიმაგრებულია იმ ფორმით, რომელსაც მისი ინსტრუმენტი მოელის (დამოწმებულია ბრძანების წყაროში):
 
-| ინტეგრაცია                                                                 | ჩაწერილი საბაზისო URL | `/v1`?                                       |
-| -------------------------------------------------------------------------- | --------------------- | -------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | ძირეული               | არა — Cline ამატებს `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | ძირეული               | არა — Goose ამატებს ბილიკს                   |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | ძირეული               | არა — LiteLLM ამატებს `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1`-ით              | დიახ                                         |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | ძირეული               | არა — Claude Code ამატებს `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1`-ით              | დიახ                                         |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1`-ით              | დიახ                                         |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | ძირეული               | არა — SDK ამატებს `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` ავტორიზაციის პროფილში)                 | ძირეული               | არა — Claude Code ამატებს `/v1/messages`     |
+| ინტეგრაცია                                                                 | ფუძე URL დაწერილი | `/v1`?                                        |
+| -------------------------------------------------------------------------- | ----------------- | --------------------------------------------- |
+| `setup-cline` (`openAiBaseUrl`)                                            | ფესვი             | არა — Cline ამაგრებს `/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | ფესვი             | არა - ბატი ამაგრებს გზას                      |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | ფესვი             | არა — LiteLLM ამაგრებს `/v1/chat/completions` |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | `/v1` ერთად       | დიახ                                          |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | `/v1` ერთად       | დიახ                                          |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | ფესვი             | არა — Claude კოდს ანიჭებს `/v1/messages`      |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | `/v1` ერთად       | დიახ                                          |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | `/v1` ერთად       | დიახ                                          |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | ფესვი             | არა - SDK მატებს `/v1beta/models/…`           |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` ავტორიზაციის პროფილში)                 | ფესვი             | არა — Claude კოდს ანიჭებს `/v1/messages`      |
+| `setup-whycodes` (`[providers.omniroute].base_url`)                        | `/v1` ერთად       | დიახ — WhyCodes აქვეყნებს `/chat/completions` |
 
 ---
 

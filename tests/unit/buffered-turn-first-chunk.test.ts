@@ -148,6 +148,35 @@ test("isUsefulSummary is pure content-or-tool", () => {
   assert.equal(isUsefulSummary(null), false);
 });
 
+/**
+ * #17461: draft/system-echo markup is not usable content, so it must not end
+ * the bounded read early — the judge has to see the whole (degenerate) turn.
+ */
+test("isUsefulSummary ignores draft-only content (#17461)", () => {
+  const base = {
+    finishReason: "",
+    reasoningText: "",
+    forwardedValuableChunk: false,
+    hasValidUsage: false,
+  };
+  assert.equal(
+    isUsefulSummary({
+      ...base,
+      contentText: "<summary>draft</summary>\n<analysis>draft</analysis>",
+      toolCallsPresent: false,
+    }),
+    false
+  );
+  assert.equal(
+    isUsefulSummary({
+      ...base,
+      contentText: "<summary>draft</summary>\nreal answer",
+      toolCallsPresent: false,
+    }),
+    true
+  );
+});
+
 test("split pushes agree with the end summary", async () => {
   const full = sse(textChunk("hel") + textChunk("lo"));
   const expected = summarizeReplayedUpstreamTurn(full, TARGET, CLIENT);

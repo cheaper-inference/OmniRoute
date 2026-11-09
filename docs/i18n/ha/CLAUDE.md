@@ -11,17 +11,18 @@
 abubuwan da aka koya game da PII). Karanta shi gaba ɗaya; kada ka sake ƙara ƙa'idojin aikin a nan. Duk abin da ke ƙasa ya shafi Claude Code KAWAI
 — gyare-gyaren gudanarwa na ƙa'idojin da aka riga aka bayyana a cikin `AGENTS.md`.
 
-## Keɓewar worktree — takamaiman bayanai na Claude Code
+## Keɓe worktree — abubuwan musamman na Claude Code
 
-Cikakkiyar ƙa'idar worktree ta dole (tabbatar da reshen tushe, hanyar `.claude/worktrees/` ta ƙa'ida,
-`cp -al` node_modules, ƙa'idojin rushewa) tana cikin `AGENTS.md` → Git Workflow → "Worktree
-isolation". Abubuwan da suka shafi Claude Code kaɗai:
+Cikakken tsarin worktree na tilas (tabbatar da base-branch, hanyar doka ta `.claude/worktrees/`,
+`cp -al` node_modules, dokokin teardown) yana cikin
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (an taƙaita shi a `AGENTS.md` →
+Tsarin Aikin Git → "Keɓe worktree"). Abubuwan musamman na Claude Code:
 
-- Tabbatar da reshen tushe tare da mai gudanarwa ta hanyar `AskUserQuestion` (Ƙa'ida Mai Tsauri #19) sai dai idan ya
-  riga ya gaya maka.
-- Fi son amfani da kayan aikin asali na `EnterWorktree` — ya riga ya ƙirƙiri worktrees a ƙarƙashin
-  `.claude/worktrees/` (hanyar ƙa'ida). Ƙirƙiri worktree da umarnin `git
-worktree add` da aka rubuta, sannan ka kira `EnterWorktree` tare da `path` ɗinsa.
+- Tabbatar da base branch tare da mai amfani ta hanyar `AskUserQuestion` (Doka Mai Ƙarfi #19) sai dai idan
+  sun riga sun gaya maka.
+- Ka fi son kayan aikin `EnterWorktree` na asali — tuni yana ƙirƙirar worktrees a ƙarƙashin
+  `.claude/worktrees/` (hanyar doka). Ƙirƙiri worktree da umarnin `git
+worktree add` da aka rubuta, sannan ka kira `EnterWorktree` da `path` nasa.
 
 ## Tsaro tsakanin zaman aiki — takamaiman bayanai na Claude Code
 

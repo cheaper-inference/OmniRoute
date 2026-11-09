@@ -17,6 +17,15 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
 import { OrchestrationDrawer } from "../drawer/OrchestrationDrawer";
 import { CompareRunsPanel } from "./CompareRunsPanel";
 import { orchStateColor, type OrchNode, type OrchState } from "../model/orchestrationTypes";
@@ -187,17 +196,15 @@ function PresetButtons({
   return (
     <div className="flex gap-1">
       {PRESETS.map((p) => (
-        <button
+        <Button
           key={p}
-          type="button"
+          size="sm"
+          variant={preset === p ? "secondary" : "outline"}
           aria-pressed={preset === p}
-          className={`px-2 py-1 text-xs rounded border ${
-            preset === p ? "border-primary bg-primary/10 font-medium" : "border-border text-muted"
-          }`}
           onClick={() => onSelect(p)}
         >
           {t(PRESET_KEY[p])}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -217,16 +224,14 @@ function CompareToggle({
   onToggle: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      size="sm"
+      variant={compareMode ? "secondary" : "outline"}
       aria-pressed={compareMode}
-      className={`px-2 py-1 text-xs rounded border ${
-        compareMode ? "border-primary bg-primary/10 font-medium" : "border-border text-muted"
-      }`}
       onClick={onToggle}
     >
       {compareMode ? t("compareExit") : t("compareMode")}
-    </button>
+    </Button>
   );
 }
 
@@ -279,63 +284,69 @@ function HistoryGridTable({
     // Kept mounted (with the previous range's rows) while `isLoading` is true for a refetch —
     // only the very first load (no rows yet) falls through to the loading line above instead of
     // an empty bordered table.
-    <div className="flex-1 min-h-0 overflow-x-auto overflow-y-auto border border-border rounded">
-      <table className="text-xs border-collapse w-full">
-        <thead>
-          <tr className="border-b border-border">
-            <th scope="col" className="px-2 py-1 sticky left-0 bg-surface" />
-            {grid.buckets.map((bucket, i) => (
-              <th
-                key={i}
-                scope="col"
-                className="px-0.5 py-1 text-[9px] font-normal text-muted whitespace-nowrap"
-              >
-                {formatBucketLabel(bucket.start, preset)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {grid.rows.map((row) => (
-            <tr key={`${row.source}:${row.identity}`} className="border-b border-border">
-              <th
-                scope="row"
-                className="text-left px-2 py-1 sticky left-0 bg-surface whitespace-nowrap font-normal"
-              >
-                <span className="font-medium">{row.identity}</span>{" "}
-                <span className="text-[9px] uppercase text-muted">{t(SOURCE_KEY[row.source])}</span>
-              </th>
-              {row.cells.map((cell, i) => (
-                <td key={i} className="p-0.5 align-top">
-                  <div className="flex flex-wrap gap-0.5">
-                    {cell.map((item) => {
-                      const meta = `${item.label} · ${formatDuration(item.durationMs)} · ${t(
-                        STATE_KEY[item.state]
-                      )}`;
-                      const isSelected = compareMode && selectedIds.has(item.id);
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          className={`w-3 h-3 rounded-sm motion-reduce:transition-none${
-                            isSelected ? " ring-2 ring-offset-1 ring-primary" : ""
-                          }`}
-                          style={{ backgroundColor: orchStateColor(item.state) }}
-                          title={meta}
-                          aria-label={meta}
-                          aria-pressed={compareMode ? isSelected : undefined}
-                          onClick={() => (compareMode ? onToggleSelect(item) : onSelectItem(item))}
-                        />
-                      );
-                    })}
-                  </div>
-                </td>
-              ))}
-            </tr>
+    <Table
+      className="text-xs"
+      containerClassName="flex-1 min-h-0 overflow-y-auto"
+      scrollbarLabel={t("tabHistory")}
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col" className="px-2 py-1 sticky left-0 z-10 bg-surface" />
+          {grid.buckets.map((bucket, i) => (
+            <TableHead
+              key={i}
+              scope="col"
+              className="px-0.5 py-1 text-[9px] font-normal whitespace-nowrap"
+            >
+              {formatBucketLabel(bucket.start, preset)}
+            </TableHead>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {grid.rows.map((row) => (
+          <TableRow key={`${row.source}:${row.identity}`}>
+            <TableHead
+              scope="row"
+              className="text-left px-2 py-1 sticky left-0 z-10 bg-surface whitespace-nowrap font-normal"
+            >
+              <span className="font-medium">{row.identity}</span>{" "}
+              <span className="text-[9px] uppercase text-text-muted">
+                {t(SOURCE_KEY[row.source])}
+              </span>
+            </TableHead>
+            {row.cells.map((cell, i) => (
+              <TableCell key={i} className="p-0.5 align-top">
+                <div className="flex flex-wrap gap-0.5">
+                  {cell.map((item) => {
+                    const meta = `${item.label} · ${formatDuration(item.durationMs)} · ${t(
+                      STATE_KEY[item.state]
+                    )}`;
+                    const isSelected = compareMode && selectedIds.has(item.id);
+                    return (
+                      // kit-exception: 12px heatmap cell: far below the kit Button's minimum size, so it stays
+                      // a native <button> (named by aria-label, state in aria-pressed).
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`w-3 h-3 rounded-sm motion-reduce:transition-none${
+                          isSelected ? " ring-2 ring-offset-1 ring-primary" : ""
+                        }`}
+                        style={{ backgroundColor: orchStateColor(item.state) }}
+                        title={meta}
+                        aria-label={meta}
+                        aria-pressed={compareMode ? isSelected : undefined}
+                        onClick={() => (compareMode ? onToggleSelect(item) : onSelectItem(item))}
+                      />
+                    );
+                  })}
+                </div>
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 }
 
@@ -356,11 +367,13 @@ function HistoryStatusRows({
   return (
     <>
       {isLoading && (
-        <div role="status" aria-live="polite" className="text-xs text-muted">
+        <div role="status" aria-live="polite" className="text-xs text-text-muted">
           {tCommon("loading")}
         </div>
       )}
-      {hasNoRows && !isLoading && <div className="text-xs text-muted p-4">{t("historyEmpty")}</div>}
+      {hasNoRows && !isLoading && (
+        <div className="text-xs text-text-muted p-4">{t("historyEmpty")}</div>
+      )}
     </>
   );
 }
@@ -443,8 +456,8 @@ export function HistoryTab() {
       <div className="flex items-center gap-2 flex-wrap">
         <PresetButtons preset={preset} t={t} onSelect={onSelectPreset} />
         <CompareToggle compareMode={compareMode} t={t} onToggle={onToggleCompareMode} />
-        {compareMode && <span className="text-[10px] text-muted">{t("compareHint")}</span>}
-        <span className="text-[10px] text-muted">{t("historyConductorNote")}</span>
+        {compareMode && <span className="text-[10px] text-text-muted">{t("compareHint")}</span>}
+        <span className="text-[10px] text-text-muted">{t("historyConductorNote")}</span>
       </div>
 
       <FailedSourcesList failedSources={failedSources} t={t} />

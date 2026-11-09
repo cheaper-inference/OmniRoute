@@ -1,1 +1,0 @@
-- **fix(claude):** the "block extra usage" policy now also parks a Claude connection when extra usage is enabled and a plan window (5h session or weekly) is exhausted, for accounts whose usage API never reports `extraUsage.queued`; it stays blocked until the latest exhausted window resets ([#16464](https://github.com/diegosouzapw/OmniRoute/pull/16464)) — thanks @tiagolabsit

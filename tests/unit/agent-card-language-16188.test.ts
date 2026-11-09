@@ -98,6 +98,22 @@ test("text alignment preserves the legacy protocol envelope and response headers
   ]);
 });
 
+test("shared metadata preserves the current protocol envelope and headers", async () => {
+  const response = await getCurrentCard(request());
+  const card = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "public, max-age=3600");
+  assert.match(response.headers.get("content-type") ?? "", /^application\/json/);
+  assert.deepEqual(card.security, { schemes: ["api-key"], apiKeyHeader: "Authorization" });
+  assert.equal("authentication" in card, false);
+  assert.deepEqual(card.defaultInputModes, ["text/plain"]);
+  assert.deepEqual(card.defaultOutputModes, ["text/plain"]);
+  assert.deepEqual(card.supportedInterfaces, [
+    { url: "https://gateway.example.test/a2a", protocolBinding: "JSONRPC", protocolVersion: "1.0" },
+    { url: "https://gateway.example.test/a2a", protocolBinding: "JSONRPC", protocolVersion: "0.3" },
+  ]);
+});
+
 test("the admin URL override and direct-call fallback still use the existing origin rules", async () => {
   process.env.OMNIROUTE_BASE_URL = "https://public.example.test";
   const override = await (await getLegacyCard(request())).json();

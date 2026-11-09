@@ -142,17 +142,17 @@ omniroute providers validate
 
 1. Mở Dashboard → `Providers` và kết nối ít nhất một nhà cung cấp (OAuth hoặc khóa API).
 2. Mở Dashboard → `Endpoints` và tạo một khóa API.
-3. (Tùy chọn) Mở Dashboard → `Combos` và thiết lập chuỗi dự phòng.
+3. (Không bắt buộc) Mở Dashboard → `Combos` và thiết lập chuỗi dự phòng.
 
 ### 2) Trỏ công cụ lập trình của bạn đến dịch vụ
 
 ```txt
 URL cơ sở: http://localhost:20128/v1
-Khóa API:   [sao chép từ trang Endpoint]
-Mô hình:    if/qwen3.8-max-preview (hoặc bất kỳ tiền tố nhà cung cấp/mô hình nào)
+Khóa API:  [sao chép từ trang Endpoint]
+Mô hình:   if/qwen3.8-max-preview (hoặc bất kỳ tiền tố nhà cung cấp/mô hình nào)
 ```
 
-Nếu trình soạn thảo của bạn không thể gửi `Authorization: Bearer ...`, hãy sử dụng URL cơ sở tương thích có chứa token:
+Nếu trình soạn thảo của bạn không thể gửi `Authorization: Bearer ...`, hãy sử dụng URL cơ sở tương thích có chứa token thay thế:
 
 ```txt
 URL cơ sở: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,26 +165,27 @@ Hoạt động với Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode v
 
 #### Tự động cấu hình bằng `setup-*`
 
-Thay vì dán URL cơ sở và khóa theo cách thủ công, hãy để OmniRoute ghi cấu hình riêng của từng công cụ từ danh mục mô hình trực tiếp. Mỗi công cụ dùng một lệnh:
+Thay vì dán URL cơ sở và khóa theo cách thủ công, hãy để OmniRoute ghi cấu hình riêng của từng công cụ từ danh mục mô hình đang hoạt động. Mỗi công cụ dùng một lệnh:
 
 ```bash
-omniroute setup-codex        # Các hồ sơ ~/.codex/<name>.config.toml
+omniroute setup-codex        # các hồ sơ ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (tương thích với OpenAI)
-omniroute setup-cline        # Cài đặt Cline CLI + tiện ích mở rộng VS Code
+omniroute setup-cline        # cài đặt Cline CLI + tiện ích mở rộng VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # In ra các bước thực hiện trong ứng dụng Cursor
-omniroute setup-roo          # Tệp nhập Roo Code + con trỏ autoImport
+omniroute setup-cursor       # in ra các bước thực hiện trong ứng dụng Cursor
+omniroute setup-roo          # tệp nhập Roo Code + con trỏ autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Mỗi lệnh chấp nhận `--remote <url> --api-key <key>` để cấu hình một công cụ cục bộ dùng với OmniRoute **từ xa**, cùng với `--dry-run` để xem trước. Để khởi chạy CLI với các biến môi trường thích hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy sử dụng trình khởi chạy chung `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); các trình khởi chạy cũ dành riêng cho từng công cụ là `omniroute launch` (Claude Code) và `omniroute launch-codex` (Codex) vẫn khả dụng.
+Mỗi lệnh đều chấp nhận `--remote <url> --api-key <key>` để cấu hình một công cụ cục bộ kết nối với OmniRoute **từ xa**, cùng với `--dry-run` để xem trước. Để khởi chạy CLI với các biến môi trường phù hợp được chèn vào mà hoàn toàn không ghi cấu hình, hãy sử dụng trình khởi chạy chung `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); các trình khởi chạy riêng cho từng công cụ cũ là `omniroute launch` (Claude Code) và `omniroute launch-codex` (Codex) vẫn khả dụng.
 
-Để xem bảng đầy đủ (nội dung được ghi bởi từng lệnh, mọi cờ, chế độ cục bộ so với từ xa, quy ước `/v1` của URL cơ sở), hãy xem **[Tích hợp CLI](./CLI-INTEGRATIONS.md)**.
+Để xem bảng đầy đủ (nội dung mỗi lệnh ghi, tất cả cờ, cục bộ so với từ xa, quy ước `/v1` cho URL cơ sở), hãy xem **[Tích hợp CLI](./CLI-INTEGRATIONS.md)**.
 
 Để biết cấu hình chi tiết cho từng công cụ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot và nhiều công cụ khác), hãy xem **[Hướng dẫn công cụ CLI](../reference/CLI-TOOLS.md)** chuyên biệt.
 
@@ -192,39 +193,39 @@ Mỗi lệnh chấp nhận `--remote <url> --api-key <key>` để cấu hình m�
 
 ## Thiết lập giao thức (MCP + A2A)
 
-### Thiết lập MCP (Model Context Protocol)
+### Thiết lập MCP (Giao thức bối cảnh mô hình)
 
-Khởi động giao thức truyền tải MCP ở chế độ stdio:
+Bắt đầu vận chuyển MCP ở chế độ stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Quy trình xác thực được khuyến nghị:
+Luồng xác thực được đề xuất:
 
 ```bash
-# 1. Khởi động máy chủ MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Từ máy khách MCP của bạn, gọi:
-omniroute_get_health        # Sẽ trả về tình trạng hệ thống
-omniroute_list_combos       # Sẽ trả về các combo đang hoạt động
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Hoặc chạy toàn bộ bộ kiểm thử E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Cấu hình máy khách MCP
 
-**Claude Code:**
+**Mã Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Thêm vào phần cài đặt MCP của bạn:
+Thêm vào cài đặt MCP của bạn (stdio, với khóa để người gọi có hiệu trưởng):
 
 ```json
 {
@@ -232,23 +233,30 @@ Thêm vào phần cài đặt MCP của bạn:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tài liệu MCP đầy đủ:** [README máy chủ MCP](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go.
+Hoặc, khi `mcpTransport` là `streamable-http` (đặt nó trên `/dashboard/mcp` hoặc với `omniroute mcp enable --transport streamable-http`), hãy trỏ mục nhập máy chủ MCP từ xa của khách hàng vào `http://localhost:20128/api/mcp/stream`.
 
-### Thiết lập A2A (Agent-to-Agent Protocol)
+Khóa di chuyển dưới dạng `Authorization: Bearer <api-key>` (xem [MCP Server → Truy cập từ xa](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) dành cho máy chủ từ xa; khóa từ xa cần `mcp:connect` cộng với phạm vi read/write của nó).
 
-Xác minh Agent Card:
+**Tài liệu MCP đầy đủ:** [Máy chủ MCP README](../../open-sse/mcp-server/README.md) — 110 công cụ, cấu hình IDE, máy khách Python/TS/Go. Tham chiếu toán tử cho các công cụ nén CCR/dedup (điểm đánh dấu, điều kiện tiên quyết, phạm vi của mỗi công cụ, phân trang truy xuất, chẩn đoán): [Điều kiện tiên quyết / hướng dẫn vận hành → của Công cụ nén](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Thiết lập A2A (Giao thức giữa tác nhân với tác nhân)
+
+Xác minh thẻ đại lý:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Gửi một tác vụ:
+Gửi một nhiệm vụ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -256,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tài liệu A2A đầy đủ:** [README máy chủ A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, truyền trực tuyến, vòng đời tác vụ.
+**Tài liệu A2A đầy đủ:** [Máy chủ A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, kỹ năng, phát trực tuyến, vòng đời nhiệm vụ.
 
 ---
 
@@ -315,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Mẫu Void Linux (xbps-src)
+## Mẫu Linux (xbps-src)
 
-Đối với người dùng Void Linux, bạn có thể tạo một gói native bằng `xbps-src`. Lưu khối này dưới dạng `srcpkgs/omniroute/template`:
+Đối với người dùng Void Linux, bạn có thể xây dựng gói gốc bằng cách sử dụng `xbps-src`. Lưu khối này dưới dạng `srcpkgs/omniroute/template`:
 
 ```bash
-# Tệp mẫu cho 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Tạo lại checksum cho mỗi bản phát hành bằng:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

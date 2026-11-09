@@ -26,10 +26,7 @@ test("#9279 versioned web_search_20250305 IS intercepted with interceptSearchOve
   );
 
   assert.equal(fallback.enabled, true);
-  assert.equal(
-    fallback.toolName,
-    OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME
-  );
+  assert.equal(fallback.toolName, OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME);
   assert.equal(fallback.convertedToolCount, 1);
 });
 
@@ -51,10 +48,7 @@ test("#9279 versioned web_search_20250305 intercepted even without per-model ove
   );
 
   assert.equal(fallback.enabled, true);
-  assert.equal(
-    fallback.toolName,
-    OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME
-  );
+  assert.equal(fallback.toolName, OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME);
   assert.equal(fallback.convertedToolCount, 1);
 });
 
@@ -75,7 +69,6 @@ test("#9279 tool_choice with web_search_20250305 redirects to omniroute_web_sear
 
   assert.equal(fallback.enabled, true);
   const choice = body.tool_choice as Record<string, unknown>;
-  const fn = choice.function as Record<string, unknown> | undefined;
-  assert.equal(fn?.name, OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME);
-  assert.equal(choice.type, "function");
+  assert.equal(choice.type, "tool");
+  assert.equal(choice.name, OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME);
 });

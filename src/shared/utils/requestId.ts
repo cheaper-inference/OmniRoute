@@ -12,6 +12,7 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "crypto";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 type HeaderReader = {
   get?: (name: string) => string | null | undefined;
@@ -21,14 +22,8 @@ type RequestLike = {
   headers?: HeaderReader | null;
 } | null;
 
-const REQUEST_ID_STORE_KEY = Symbol.for("omniroute.requestId.store");
-type GlobalWithRequestIdStore = typeof globalThis & {
-  [REQUEST_ID_STORE_KEY]?: AsyncLocalStorage<string>;
-};
-
 function getRequestIdStore(): AsyncLocalStorage<string> {
-  return ((globalThis as GlobalWithRequestIdStore)[REQUEST_ID_STORE_KEY] ??=
-    new AsyncLocalStorage<string>());
+  return getProcessStore("requestId.store", () => new AsyncLocalStorage<string>());
 }
 
 function getHeaderValue(request: RequestLike, name: string): string | null {

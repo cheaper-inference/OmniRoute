@@ -34,28 +34,30 @@ Klien (`src/lib/obsidian/api.ts`) membungkus Local REST API dengan:
 
 Tidak ada **variabel lingkungan** untuk token atau URL dasar Obsidian — keduanya
 disimpan dalam tabel SQLite `key_value` (namespace `obsidian`) melalui
-`src/lib/db/obsidian.ts`. Token **dienkripsi saat disimpan** (AES-256-GCM, dengan
-fallback kompatibilitas mundur berupa teks biasa). Konfigurasikan dari tab **Sumber Konteks**
-pada dasbor Endpoint (`ObsidianSourceCard`), atau melalui REST API pengaturan.
+`src/lib/db/obsidian.ts`. Token tersebut **dienkripsi saat disimpan** (AES-256-GCM,
+dengan fallback kompatibilitas mundur berupa teks biasa). Konfigurasikan dari tab
+**Context Sources** pada dasbor Endpoint (`ObsidianSourceCard`), atau melalui REST API
+pengaturan.
 
 > [!IMPORTANT]
-> Plugin **Obsidian Local REST API** harus terinstal dan berjalan. Antarmuka REST-nya
+> Plugin **Obsidian Local REST API** harus diinstal dan dijalankan. Antarmuka REST-nya
 > mendengarkan pada **HTTP `127.0.0.1:27123`** (URL dasar default). Port `27124`
-> merupakan endpoint MCP/HTTPS yang _terpisah_ dan secara eksplisit ditolak oleh route pengaturan.
-> Jika menghubungkan dari perangkat lain, gunakan `http://<tailscale-ip>:27123`.
+> merupakan endpoint MCP/HTTPS yang _terpisah_ dan secara eksplisit ditolak oleh rute
+> pengaturan. Jika menghubungkan dari perangkat lain, gunakan
+> `http://<tailscale-ip>:27123`.
 
 ### Kunci konfigurasi (SQLite `key_value`, namespace `obsidian`)
 
-| Kunci             | Tujuan                                                    | Dienkripsi |
-| ----------------- | --------------------------------------------------------- | ---------- |
-| `api_key`         | Token bearer Local REST API                               | ya         |
-| `base_url`        | URL dasar REST (default `http://127.0.0.1:27123`)         | tidak      |
-| `vault_path`      | Path absolut ke direktori vault (untuk sinkronisasi)      | tidak      |
-| `webdav_username` | Nama pengguna WebDAV yang dihasilkan (sinkronisasi vault) | tidak      |
-| `webdav_password` | Kata sandi WebDAV yang dihasilkan (sinkronisasi vault)    | ya         |
-| `webdav_enabled`  | Apakah sinkronisasi vault WebDAV diaktifkan               | tidak      |
+| Kunci             | Tujuan                                                | Dienkripsi |
+| ----------------- | ----------------------------------------------------- | ---------- |
+| `api_key`         | Token bearer Local REST API                           | ya         |
+| `base_url`        | URL dasar REST (default `http://127.0.0.1:27123`)     | tidak      |
+| `vault_path`      | Jalur absolut ke direktori vault (untuk sinkronisasi) | tidak      |
+| `webdav_username` | Nama pengguna WebDAV yang dibuat (sinkronisasi vault) | tidak      |
+| `webdav_password` | Kata sandi WebDAV yang dibuat (sinkronisasi vault)    | ya         |
+| `webdav_enabled`  | Apakah sinkronisasi vault WebDAV diaktifkan           | tidak      |
 
-### Konfigurasi melalui REST
+### Mengonfigurasi melalui REST
 
 ```bash
 # Simpan + validasi token Local REST API (POST memvalidasi melalui pemeriksaan status)
@@ -70,14 +72,16 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Semua metode memerlukan autentikasi dasbor. `POST` menolak URL apa pun pada port `27124`
-dan memvalidasi token dengan memanggil endpoint status Local REST API sebelum menyimpannya.
+Semua metode memerlukan autentikasi dasbor. `POST` menolak URL apa pun pada port
+`27124` dan memvalidasi token dengan memanggil endpoint status Local REST API sebelum
+menyimpannya.
 
 ### Sinkronisasi vault WebDAV
 
 `src/app/api/settings/obsidian/webdav/route.ts` mengelola sinkronisasi vault opsional
-berbasis WebDAV (dijalankan oleh `src/lib/obsidianSync.ts`). Mengaktifkannya akan
-mengarahkan OmniRoute ke direktori vault lokal dan membuat pasangan nama pengguna/kata sandi WebDAV acak:
+yang didukung WebDAV (dijalankan oleh `src/lib/obsidianSync.ts`). Mengaktifkannya akan
+mengarahkan OmniRoute ke direktori vault lokal dan membuat pasangan nama pengguna/kata
+sandi WebDAV acak:
 
 ```bash
 # Aktifkan sinkronisasi WebDAV untuk direktori vault (membuat nama pengguna/kata sandi)
@@ -94,11 +98,22 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 
 ### Sumber konteks per kunci API (opsional)
 
-Konfigurasi Obsidian dapat dibatasi cakupannya **per kunci API** melalui tabel
+Konfigurasi Obsidian dapat dicakup **per kunci API** melalui tabel
 `api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Ketika panggilan MCP
-membawa id kunci API yang telah diautentikasi, `getObsidianConfigForApiKey()` akan
-memprioritaskan token/URL dasar/path vault milik kunci tersebut (`source: "api_key"`)
-dan jika tidak tersedia, menggunakan konfigurasi global sebagai fallback (`source: "global"`).
+membawa ID kunci API yang terautentikasi, `getObsidianConfigForApiKey()` mengutamakan
+token/URL-dasar/jalur-vault milik kunci tersebut (`source: "api_key"`) dan jika tidak
+tersedia akan menggunakan konfigurasi global sebagai fallback (`source: "global"`).
+
+Alat MCP non-sinkronisasi memerlukan identitas pemanggil yang telah diresolusi sebelum
+membaca konfigurasi ini. Pemanggil tanpa identitas menerima
+`Token API Obsidian belum dikonfigurasi`, dan tidak ada permintaan vault yang dikirim.
+Pemanggil HTTP diresolusi melalui kredensial permintaannya; pemanggil stdio dapat
+diresolusi melalui `OMNIROUTE_API_KEY` atau `ROUTER_API_KEY`. Pemanggil HTTP yang tidak
+dapat diresolusi tidak dapat mewarisi identitas lingkungan server. ID placeholder saja
+tidak memberikan otorisasi akses; kredensial lingkungan valid yang diresolusi menjadi
+`env-key` tetap didukung. Kunci yang terautentikasi tanpa konfigurasi Obsidian per kunci
+tetap menggunakan fallback global. Keempat alat `obsidian_sync_*` mempertahankan perilaku
+token sinkronisasinya yang terpisah.
 
 ## Alat MCP (22)
 

@@ -4,49 +4,52 @@
 
 ---
 
-🌐 **Језици:** 🇺🇸 [Енглески](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Језици:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Основна референца за OmniRoute API. Обухвата јавну `/v1` површину и најчешће коришћене крајње тачке за управљање; машински читљива датотека [`docs/openapi.yaml`](../openapi.yaml) и стабло рута у `src/app/api/` представљају свеобухватне изворе.
+Основна референца за OmniRoute API. Обухвата јавну `/v1` површину и најчешће коришћене управљачке крајње тачке; машински читљиви [`docs/openapi.yaml`](../openapi.yaml) и стабло рута у директоријуму `src/app/api/` представљају потпуне изворе.
 
-За детаљан преглед протокола компатибилног са OpenAI-јем и матрице могућности добављача, погледајте
+За фокусирани протокол компатибилан са OpenAI-јем и матрицу могућности провајдера погледајте
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Свака инсталација нуди сопствену копију спецификације на адреси `/openapi.yaml`, генерисану из `docs/openapi.yaml` током изградње. Она садржи верзију из те изградње и релативни URL сервера (`./`), па захтеви остају на хосту који је послужио документ. Алат који увезе преузету датотеку нема такав хост и потребно је ручно подесити основни URL.
 
 ---
 
 ## Садржај
 
-- [Завршавање ћаскања](#chat-completions)
+- [Довршавања ћаскања](#chat-completions)
 - [Ексклузивни закупи управљаних сесија](#exclusive-managed-session-leases)
 - [Уграђивања](#embeddings)
 - [Генерисање слика](#image-generation)
 - [OCR докумената](#document-ocr)
 - [Листа модела](#list-models)
 - [Манифест додатка добављача](#provider-plugin-manifest)
-- [Крајње тачке за компатибилност](#compatibility-endpoints)
+- [Ендпоинти за компатибилност](#compatibility-endpoints)
 - [API за датотеке](#files-api)
-- [API за пакетну обраду](#batches-api)
+- [API за пакетне захтеве](#batches-api)
 - [API за претрагу](#search-api)
-- [Стримовање путем WebSocket-а](#websocket-streaming)
+- [Стримовање преко WebSocket-а](#websocket-streaming)
 - [Квоте и пријављивање проблема](#quotas--issues-reporting)
 - [Семантички кеш](#semantic-cache)
+- [Компатибилност за управљање CLIProxyAPI-јем](#cliproxyapi-management-compatibility)
 - [Контролна табла и управљање](#dashboard--management)
 - [Управљање комбинацијама](#combo-management)
-- [Веб-хукови](#webhooks)
+- [Вебхукови](#webhooks)
 - [Регистровани кључеви (аутоматско управљање)](#registered-keys-auto-management)
-- [Протокол за агенте](#agents-protocol)
-- [Проксији за управљање](#management-proxies)
+- [Agents протокол](#agents-protocol)
+- [Управљачки проксији](#management-proxies)
 - [Отпорност (проширено)](#resilience-extended)
 - [Вештине](#skills)
 - [Меморија](#memory)
 - [MCP сервер](#mcp-server)
 - [A2A сервер](#a2a-server)
-- [Облак, евалуације и процена](#cloud-evals--assess)
+- [Cloud, Evals и Assess](#cloud-evals--assess)
 - [Обрада захтева](#request-processing)
 - [Аутентификација](#authentication)
 
 ---
 
-## Chat Completions
+## Довршавања ћаскања
 
 ```bash
 POST /v1/chat/completions
@@ -64,40 +67,85 @@ Content-Type: application/json
 
 ### Прилагођена заглавља
 
-| Заглавље                 | Смер    | Опис                                                                                                                                                                                                                                |
-| ------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Захтев  | Поставите на `true` да заобиђете кеш                                                                                                                                                                                                |
-| `x-omniroute-no-memory`  | Захтев  | Поставите на `true` да прескочите убацивање памћења + вештина за овај захтев (по узору на no-cache; избегава додатни трошак токена/цене по позиву)                                                                                  |
-| `X-OmniRoute-Progress`   | Захтев  | Поставите на `true` за догађаје напредовања                                                                                                                                                                                         |
-| `X-Session-Id`           | Захтев  | Стални кључ сесије за спољашњу афинитет сесије                                                                                                                                                                                      |
-| `x_session_id`           | Захтев  | Прихватљива је и варијанта са доњом цртом (директан HTTP)                                                                                                                                                                           |
-| `X-OmniRoute-Session-Id` | Захтев  | Ознака сесије/конверзације коју доставља позивач (такође утиче на памћење). Када је присутна, чува се дословно у `call_logs.session_tag` за атрибуцију трошкова по сесији (#8249) — никада се не генерише самостално када недостаје |
-| `Idempotency-Key`        | Захтев  | Кључ за дедупликацију (прозор од 5с)                                                                                                                                                                                                |
-| `X-Request-Id`           | Захтев  | Алтернативни кључ за дедупликацију                                                                                                                                                                                                  |
-| `X-OmniRoute-Cache`      | Одговор | `HIT` или `MISS` (без стримовања)                                                                                                                                                                                                   |
-| `X-OmniRoute-Idempotent` | Одговор | `true` ако је дедуплицирано                                                                                                                                                                                                         |
-| `X-OmniRoute-Progress`   | Одговор | `enabled` ако је праћење напредовања укључено                                                                                                                                                                                       |
-| `X-OmniRoute-Session-Id` | Одговор | Ефективни ID сесије који користи OmniRoute                                                                                                                                                                                          |
-| `X-OmniRoute-Request-Id` | Одговор | ID корелације захтева (када је познат)                                                                                                                                                                                              |
-| `X-OmniRoute-Version`    | Одговор | Верзија OmniRoute билда (увек присутна)                                                                                                                                                                                             |
-| `X-OmniRoute-Cost-Saved` | Одговор | Износ у USD који је кеш избегао приликом HIT-а (само за кеш погодке)                                                                                                                                                                |
-| `X-OmniRoute-Decision`   | Одговор | Траг рутирања: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` је стратегија комбинације, или `single` за захтев који није комбинован) — увек присутно у одговорима на завршене захтеве                               |
+| Header                   | Smer    | Opis                                                                                                                                                                                                                                  |
+| ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Zahtev  | Postavite na `true` da biste zaobišli keš                                                                                                                                                                                             |
+| `x-omniroute-no-memory`  | Zahtev  | Postavite na `true` da biste preskočili ubacivanje memorije + veština za ovaj zahtev (preslikava ponašanje no-cache; izbegava dodatne tokene/troškove po pozivu)                                                                      |
+| `X-OmniRoute-Progress`   | Zahtev  | Postavite na `true` za događaje napretka                                                                                                                                                                                              |
+| `X-Session-Id`           | Zahtev  | Ključ lepljive sesije za afinitet spoljne sesije                                                                                                                                                                                      |
+| `x_session_id`           | Zahtev  | Varijanta sa donjom crtom je takođe podržana (direktan HTTP)                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Zahtev  | Oznaka sesije/razgovora koju prosleđuje pozivalac (takođe se prosleđuje memoriji). Kada je prisutna, čuva se doslovno u `call_logs.session_tag` radi atribucije troškova po sesiji (#8249) — nikada se ne generiše kada nije prisutna |
+| `Idempotency-Key`        | Zahtev  | Ključ za uklanjanje duplikata (prozor od 5 s)                                                                                                                                                                                         |
+| `X-Request-Id`           | Zahtev  | Alternativni ključ za uklanjanje duplikata                                                                                                                                                                                            |
+| `x-omniroute-connection` | Zahtev  | Usmerite zahtev ka jednom modelu na jednu vezu provajdera (nalog) prema njegovom ID-u — pogledajte [Usmeravanje zahteva na određeni nalog](#account-pinning-per-request)                                                              |
+| `X-OmniRoute-Cache`      | Odgovor | `HIT` ili `MISS` (bez strimovanja)                                                                                                                                                                                                    |
+| `X-OmniRoute-Idempotent` | Odgovor | `true` ako je uklonjen duplikat                                                                                                                                                                                                       |
+| `X-OmniRoute-Progress`   | Odgovor | `enabled` ako je praćenje napretka uključeno                                                                                                                                                                                          |
+| `X-OmniRoute-Session-Id` | Odgovor | Efektivni ID sesije koji koristi OmniRoute                                                                                                                                                                                            |
+| `X-OmniRoute-Request-Id` | Odgovor | ID korelacije zahteva (kada je poznat)                                                                                                                                                                                                |
+| `X-OmniRoute-Version`    | Odgovor | Verzija izdanja OmniRoute-a (uvek prisutna)                                                                                                                                                                                           |
+| `X-OmniRoute-Cost-Saved` | Odgovor | Iznos u USD koji je keš uštedeo pri `HIT`-u (samo pogodci keša)                                                                                                                                                                       |
+| `X-OmniRoute-Decision`   | Odgovor | Trag rutiranja: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` je kombinovana strategija ili `single` za zahtev koji nije kombinovan) — uvek prisutno u odgovorima po završetku                                        |
 
-> Напомена о Nginx-у: ако се ослањате на заглавља са доњом цртом (на пример, `x_session_id`), омогућите `underscores_in_headers on;`.
+> Napomena za Nginx: ako se oslanjate na zaglavlja sa donjom crtom (na primer `x_session_id`), omogućite `underscores_in_headers on;`.
 
-> **Заглавља за телеметрију трошкова:** одговори са успешним завршетком без стримовања такође носе скуп `X-OmniRoute-*` заглавља за телеметрију трошкова — `X-OmniRoute-Response-Cost` (у USD, фиксно на 10 децимала; `0.0000000000` за бесплатне/непроцењене случајеве), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, и `X-OmniRoute-Fallback-Attempts` (само када је > 0), као и `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Ова заглавља генеришу chat completions, `/v1/responses`, `/v1/messages`, **и медијски крајњи endpoint-и** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, и `/v1/moderations` (увек трошак `0`). Трошак медија се израчунава по модалитету (по слици, по секунди, по карактеру, по јединици претраге) када је доступна ценовна информација, у супротном `0` (fail-open — не блокира при грешци).
+#### Usmeravanje zahteva na određeni nalog
 
-> **Семантика трошка код кеш погодка (cache-hit):** приликом семантичког кеш погодка (`X-OmniRoute-Cache-Hit: true`) не позива се провајдер узводно, тако да је `X-OmniRoute-Response-Cost` `0.0000000000` (**инкрементални** трошак опслуживања погодка). Оригинални/потенцијални трошак се пријављује одвојено у `X-OmniRoute-Cost-Saved`. Потрошачи наплате треба да сабирају `X-OmniRoute-Response-Cost` (погоци не коштају ништа); аналитика кеша може агрегирати `X-OmniRoute-Cost-Saved`.
+Kada provajder ima više veza (naloga ili ključeva), OmniRoute obično bira jednu
+pomoću svoje strategije za izbor naloga. Zahtev umesto toga može da usmeri na jednu konkretnu vezu
+pomoću zaglavlja `x-omniroute-connection`:
 
-## Ekskluzivni zakupi upravljanih sesija
+```bash
+curl http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <your OmniRoute API key>" \
+  -H "Content-Type: application/json" \
+  -H "x-omniroute-connection: <connection id>" \
+  -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
+```
 
-Ekskluzivni zakup upravljane sesije je opt-in, klijent-neutralan ugovor o rutiranju: jedan aktivni vlasnik
-drži jednu podobnu OmniRoute vezu. Ne zakupljuje model, ne zahteva OAuth, ne identifikuje
-određenog klijenta, niti zahteva određenog provajdera.
+- **Где пронаћи ID.** Отворите страницу провајдера на контролној табли
+  (**Контролна табла → Провајдери → <provider>**) и кликните на `xxxxxxxx…` чип са ID-јем у реду
+  везе — тиме се копира цео ID везе.
+- **На које захтеве се примењује.** Захтеви за један модел (`provider/model`) на
+  `/v1/chat/completions`, `/v1/messages` и `/v1/responses`. Комбинације занемарују заглавље: закачите
+  налог за сваки корак комбинације преко сопствене везе тог корака.
+- **Закачена веза је обавезујућа, а не само преференција.** Закачена веза се користи искључиво. Ако
+  дође до грешке унутар захтева, бележи се период хлађења налога, али се не прелази на
+  сродни налог истог провајдера.
+- **Период хлађења и квота ослобађају закачену везу.** Док се закачена веза хлади, када је квота
+  исцрпљена или је веза блокирана политиком квоте, каснији захтеви прелазе на друге везе провајдера, баш као и незаквачени саобраћај.
+- **Непознати или онемогућени ID-јеви доводе до грешке.** ID који није у активном скупу провајдера (обрисан,
+  деактивиран или припада другом провајдеру) не оставља ниједан доступан налог, па захтев не успева уместо да се тихо усмери на друго место.
 
-Autentifikacioni API ključ mora imati opseg `lease:exclusive` i eksplicitnu nepraznu
-`allowedConnections` listu. Granica mutacije baze podataka sprovodi oba polja zajedno pri kreiranju ključa
-i delimičnim ažuriranjima.
+Claude Code шаље прилагођена заглавља кроз `ANTHROPIC_CUSTOM_HEADERS`. Поставите га у блок
+`env` датотеке `~/.claude/settings.json`, или у `.claude/settings.json` на нивоу пројекта да бисте закачили други налог по пројекту:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>",
+  },
+}
+```
+
+Извор: `src/sse/handlers/chat.ts` (читање заглавља), `src/sse/services/auth.ts` и
+`src/sse/services/sessionAffinityPin.ts` (ослобађање закачене везе и провера да ли недостаје у скупу).
+
+> **Заглавља телеметрије трошкова:** одговори на успешне захтеве без стримовања такође садрже скуп `X-OmniRoute-*` телеметрије трошкова — `X-OmniRoute-Response-Cost` (USD, фиксно 10 децимала; `0.0000000000` за бесплатне/без цене), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit` и `X-OmniRoute-Fallback-Attempts` (само када је > 0), као и `X-OmniRoute-Request-Id` и `X-OmniRoute-Version`. Ова заглавља се шаљу за довршавања ћаскања, `/v1/responses`, `/v1/messages`, **и крајње тачке за медије** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations` и `/v1/moderations` (увек са трошком `0`). Трошак медија се израчунава по модалитету (по слици, по секунди, по карактеру, по јединици претраге) када је цена доступна, иначе је `0` (fail-open).
+
+> **Семантика трошка при поготку кеша:** код ПОГОТКА семантичког кеша (`X-OmniRoute-Cache-Hit: true`) не упућује се позив према upstream-у, па је `X-OmniRoute-Response-Cost` `0.0000000000` (**инкрементални** трошак испоруке поготка). Оригинални/очекивани трошак се пријављује одвојено у `X-OmniRoute-Cost-Saved`. Потрошачи за обрачун треба да сабирају `X-OmniRoute-Response-Cost` (поготци не коштају ништа); аналитика кеша може да агрегира `X-OmniRoute-Cost-Saved`.
+
+## Ексклузивни управљани закупи сесија
+
+Ексклузивни закуп управљане сесије је опциони уговор о рутирању, независан од клијента: један активни власник
+држи једну подобну OmniRoute везу. Он не закупљује модел, не захтева OAuth, не идентификује
+одређеног клијента нити захтева одређеног добављача.
+
+API кључ за аутентификацију мора имати опсег `lease:exclusive` и експлицитну непразну
+листу `allowedConnections`. Граница измене базе података спроводи оба поља заједно приликом
+креирања кључа и делимичних ажурирања.
 
 ```http
 POST /api/v1/session-leases
@@ -108,9 +156,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Uspešni odgovori za akviziciju, obnavljanje i oslobađanje izlažu vremenske oznake, `state` i tačnu pozitivnu
-`generation`, ali nikada odabranu vezu ili akreditive. Obnavljanje i oslobađanje daju
-generaciju u JSON telu:
+Успешни одговори за преузимање, обнављање и ослобађање излажу временске ознаке, `state` и тачан позитиван
+`generation`, али никада не излажу изабрану везу или акредитиве. Обнављање и ослобађање достављају
+генерацију у JSON телу:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -120,7 +168,7 @@ generaciju u JSON telu:
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Aktivni vlasnik zakupa može eksplicitno zatražiti metapodatke za prikaz koji su sigurni za privatnost za svoje trenutno vezivanje:
+Активни власник закупа може експлицитно да затражи метаподатке за приказ, безбедне по приватност, за своје тренутно повезивање:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -140,35 +188,37 @@ Aktivni vlasnik zakupa može eksplicitno zatražiti metapodatke za prikaz koji s
 }
 ```
 
-Ova opt-in statusna akcija je ograđena neprozirnim vlasnikom, autentifikovanim upravljanim API ključem i tačnom
-aktivnom generacijom u jednoj transakciji baze podataka. `displayName` je samo skraćeni konfigurisani
-naziv veze; `null` je kada ne postoji siguran konfigurisani naziv. OmniRoute nikada ne zamenjuje
-e-poštu ili generisani identitet naloga. Vrednost provajdera je neosetljiva oznaka za prikaz i nikada
-generisani identifikator kompatibilnog provajdera. Akreditivi, tokeni, kolačići, sirovi ID-ovi veze ili API ključeva, heševi vlasnika, tajne ograde i interni podaci o rutiranju su isključeni.
+Ова опционa радња за статус заштићена је непрозирним власником, аутентификованим управљаним API кључем и тачном
+активном генерацијом у једној трансакцији базе података. `displayName` је само скраћени подешени
+назив везе; `null` се користи када не постоји безбедан подешени назив. OmniRoute никада не замењује
+овај назив имејлом или генерисаним идентитетом налога. Вредност добављача је неосетљива ознака за приказ и никада
+није генерисани идентификатор компатибилног добављача. Акредитиви, токени, колачићи, необрађени идентификатори веза или
+API кључева, хешеви власника, тајне за ограђивање и интерни подаци о рутирању су изузети.
 
-Pogrešan ključ, pogrešan vlasnik, zastarela generacija, nedostajući, istekli, oslobođeni i poništeni upiti svi
-vraćaju istu grešku `409 LEASE_FENCE_STALE` bez metapodataka veze. Klijent koji je primio odgovor o čekanju kapaciteta nema aktivno vezivanje za inspekciju. Kada rutiranje prebacuje aktivni zakup,
-ista generacija ostaje važeća i status atomski vraća novo vezivanje, nikada staro.
-Postojeći klijenti ostaju nepromenjeni jer odgovori za akviziciju, obnavljanje, oslobađanje i čekanje zadržavaju
-svoje prethodne oblike.
+Погрешан кључ, погрешан власник, застарела генерација, непостојећи, истекли, ослобођени и поништени прегледи сви
+враћају исту грешку `409 LEASE_FENCE_STALE`, без метаподатака о вези. Клијент који је примио одговор о чекању на капацитет нема активно повезивање које може да прегледа. Када рутирање промени активни закуп,
+иста генерација остаје важећа, а статус атомски враћа ново повезивање, никада старо.
+Постојећи клијенти остају непромењени јер одговори за преузимање, обнављање, ослобађање и чекање задржавају
+своје претходне облике.
 
-Ovaj serverski ugovor ne menja standardni OpenAI Codex `/status`. Standardni Codex trenutno izveštava o svom
-provajderu modela i ugrađenom stanju autentifikacije/naloga, ali ne prikazuje proizvoljne prilagođene
-metapodatke naloga provajdera; kasnija klijentska integracija mora pozvati ovu akciju i odlučiti kako
-da prikaže `connection.displayName`.
+Овај уговор сервера не мења стандардни OpenAI Codex `/status`. Стандардни Codex тренутно пријављује свог
+добављача модела и уграђено стање аутентификације/налога, али не приказује произвољне метаподатке о налогу прилагођеног
+добављача; каснија интеграција клијента мора да позове ову радњу и одлучи како да
+прикаже `connection.displayName`.
 
-Svaki zahtev za upravljano zaključivanje tada dostavlja oba kontrolna zaglavlja:
+Сваки управљани захтев за инференцу затим доставља оба контролна заглавља:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Tačan vlasnik, generacija, aktivna veza i autentifikovani API ključ su ograđeni odmah
-pre svakog podržanog pokušaja uzvodno. Ponovno korišćenje vlasnika i generacije sa drugim ključem ne uspeva čak
-i kada taj ključ dozvoljava istu vezu. Sirovi vlasnici se ne čuvaju, ne loguju, ne zadržavaju u snimku zahteva, niti se prosleđuju uzvodno.
+Тачни власник, генерација, активна веза и аутентификовани API кључ проверавају се непосредно
+пре сваког подржаног покушаја ка узводном систему. Поновно слање власника и генерације са другим кључем не успева
+чак и када тај кључ дозвољава исту везу. Необрађени власници се не чувају, не евидентирају, не задржавају
+у снимку захтева нити прослеђују узводном систему.
 
-Privremena konkurencija vraća HTTP `429` sa `Retry-After` i:
+Привремена конкуренција враћа HTTP `429` са `Retry-After` и:
 
 ```json
 {
@@ -179,42 +229,42 @@ Privremena konkurencija vraća HTTP `429` sa `Retry-After` i:
 }
 ```
 
-Ovaj odgovor samo znači da je uobičajeni skup podobnih bio neprazan i da je svaki slobodan kandidat bio
-zauzet stranim aktivnim zakupom. Nepodržani modeli/provajderi, neusklađenost politike, hlađenje, kvota,
-zdravlje i drugi uobičajeni neuspesi podobnosti zadržavaju svoje postojeće OmniRoute odgovore.
+Овај одговор само значи да скуп уобичајено подобних веза није био празан и да је сваки слободан кандидат
+био заузет активним закупом другог власника. Неподржани модели/добављачи, неподударање са смерницама, период хлађења, квота,
+здравствено стање и други уобичајени неуспеси подобности задржавају своје постојеће OmniRoute одговоре.
 
 ### `x-omniroute-compression`
 
-Premošćavanje plana kompresije po zahtevu. Najviši prioritet — nadjačava premošćavanje kombinacije rutiranja,
-aktivni profil, automatsko pokretanje i podrazumevani panel. Vrednosti:
+Замена плана компресије за појединачни захтев. Највиши приоритет — има предност над заменом рутинг-комбинације,
+активним профилом, аутоматским покретачем и подразумеваном вредношћу панела. Вредности:
 
-| Vrednost      | Efekat                                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------------------- |
-| `off`         | Nema kompresije za ovaj zahtev.                                                                      |
-| `default`     | Podrazumevani profil izveden iz panela (ignoriše aktivni profil). Gubitni motori su isključeni.      |
-| `safe`        | Samo deduplikacija i savijanje belina.                                                               |
-| `allow-lossy` | Zadržite plan operatora za ovaj zahtev, uključujući sažetke i prepravke stila.                       |
-| `engine:<id>` | Jedan motor kada je omogućen, npr. `engine:rtk`. Opt-in po zahtevu za taj motor.                     |
-| `<combo>`     | Imenovana kombinacija, prvo se podudara po imenu (bez obzira na velika i mala slova), zatim po ID-u. |
+| Value         | Effect                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| `off`         | Без компресије за овај захтев.                                                                             |
+| `default`     | Подразумевани профил изведен из панела (занемарује активни профил). Губитнички механизми остају искључени. |
+| `safe`        | Само уклањање дупликата и сажимање размака.                                                                |
+| `allow-lossy` | Задржава операторски план за овај захтев, укључујући сажетке и преписивања стила.                          |
+| `engine:<id>` | Један механизам када је омогућен, нпр. `engine:rtk`. Опционо укључивање тог механизма по захтеву.          |
+| `<combo>`     | Именована комбинација, прво упарена по имену (без обзира на величину слова), а затим по идентификатору.    |
 
-Napomene:
+Напомене:
 
-- Nepoznate vrednosti se ignorišu (zahtev se nikada ne odbija); rezolucija se nastavlja na normalan prioritet operatora.
-- Ako više kombinacija deli ime, prosledite **ID** kombinacije za determinističko podudaranje.
-- Kombinacija čije je ime `off` ili `default` ne može biti odabrana po imenu (te ključne reči se prvo interpretiraju); referencirajte takvu kombinaciju po njenom ID-u.
-- Glavni prekidač za kompresiju je čvrsta kapija: kada je kompresija globalno onemogućena, ovo zaglavlje je ne može omogućiti.
+- Непознате вредности се занемарују (захтев се никада не одбија); разрешење се наставља кроз уобичајени приоритет оператора.
+- Ако више комбинација има исто име, проследите **id** комбинације за детерминистичко подударање.
+- Комбинација чије је име `off` или `default` не може се изабрати по имену (те кључне речи се тумаче прве); такву комбинацију упутите преко њеног идентификатора.
+- Главни прекидач компресије је строга капија: када је компресија глобално онемогућена, ово заглавље не може да је омогући.
 
-Primenjeni plan se vraća u zaglavlju odgovora:
+Примењени план се враћа у заглављу одговора:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-gde je `<source>` jedno od `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default`, ili `off`.
+где је `<source>` једна од вредности `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` или `off`.
 
 ---
 
-## Уграђивања
+## Ембедовања
 
 ```bash
 POST /v1/embeddings
@@ -229,16 +279,14 @@ Content-Type: application/json
 
 Доступни провајдери: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-Идентификатори у каталогу имају облик `provider/model` (пример: `jina-ai/jina-embeddings-v5-omni-small`). Сирови идентификатори Jina модела који се појављују у регистру (на пример `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) такође се разрешавају. Jina операције уграђивања/поновног рангирања/класификације/сегментације најпре користе `jina-ai` акредитиве са контролне табле; `JINA_AI_API_KEY` се користи као резервна опција само када не постоји кључ са контролне табле. Картица `jina-reader` служи искључиво за Reader / `r.jina.ai` (`POST /v1/web/fetch`) и никада не пружа уграђивања нити поновно рангирање.
+Идентификатори каталога су `provider/model` (пример: `jina-ai/jina-embeddings-v5-omni-small`). Основни Jina идентификатори модела који се појављују у регистру (на пример, `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) такође се разрешавају. Jina embed/rerank/classify/segment најпре користе акредитиве `jina-ai` са контролне табле; `JINA_AI_API_KEY` је резервна опција само када не постоји кључ са контролне табле. Картица `jina-reader` је намењена искључиво за Reader / `r.jina.ai` (`POST /v1/web/fetch`) и никада не пружа ембедовања или rerank.
 
-Модели у регистру који наводе подршку за више модалитета такође прихватају до 32 структуриране
-ставке независне од провајдера. Типови медијских ставки су `text`, `image`, `audio`, `video` и `document`. Њихов медијски `source`
-је или `{"type":"url","url":"https://..."}` или
+Модели из регистра који наводе подршку за мултимодалност такође прихватају до 32 структуриране ставке независне од провајдера. Типови медијских ставки су `text`, `image`, `audio`, `video` и `document`. Њихов медијски `source` је или `{"type":"url","url":"https://..."}` или
 `{"type":"base64","data":"...","media_type":"..."}`.
 
-Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
-као и алијас породице `jina-ai/jina-embeddings-v5-omni` → omni-small) такође прихвата изворне Jina
-EmbeddingsV5Request документе и **прослеђује их неизмењене** на `https://api.jina.ai/v1/embeddings`:
+Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`
+и псеудоним породице `jina-ai/jina-embeddings-v5-omni` → omni-small) такође прихвата Jina-ину изворну
+документацију за EmbeddingsV5Request и **прослеђује је без измена** на `https://api.jina.ai/v1/embeddings`:
 
 ```json
 {
@@ -248,40 +296,36 @@ EmbeddingsV5Request документе и **прослеђује их неизм
   "input": [
     { "text": "a red bicycle" },
     { "image": "https://example.com/bike.png" },
-    {
-      "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }]
-    }
+    { "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }] }
   ]
 }
 ```
 
 Изворне вредности `{ image | audio | video | pdf }` могу бити јавни HTTPS URL, `data:` URI или сирови
-base64. OmniRoute не претвара те објекте у ниске нити преузима изворне URL-ове слика — Jina сама преузима
-јавне медије. Додатна Jina поља (`task`, `normalized`, `truncate`, `embedding_type`) се
-прослеђују. Jina SKU-ови намењени искључиво тексту и даље одбијају документе који нису текстуални.
+base64. OmniRoute не претвара те објекте у стрингове нити преузима изворне URL адресе слика — Jina
+сама преузима јавне медије. Додатна Jina поља (`task`, `normalized`, `truncate`, `embedding_type`) се
+прослеђују. Jina SKU-ови намењени само тексту и даље одбијају документе који нису текстуални.
 
 Безбедносна и транспортна ограничења:
 
-- URL-ови удаљених медија морају бити јавни HTTPS. Канонске ставке `{type,source:url}` преузимају се
-  на страни сервера (поновна валидација преусмеравања, временско ограничење, ограничења величине, јавни DNS, фиксирање везе) и
-  умећу се непосредно пре позива провајдера. Jina изворне ставке `{image:"https://..."}` прослеђују се непромењене
-  након исте провере јавног HTTPS-а; Jina преузима URL.
-- Уметнути base64 медији ограничени су на 8 MiB декодираних података по ставци и 16 MiB декодираних података у оквиру захтева.
+- Удаљене URL адресе медија морају бити јавни HTTPS URL-ови. Канонске ставке `{type,source:url}` преузимају се
+  на страни сервера (поновна валидација преусмеравања, ограничење времена, ограничења величине, јавни DNS, везивање везе) и уграђују пре позива провајдеру. Jina изворне ставке `{image:"https://..."}` прослеђују се непромењене након исте провере јавног HTTPS-а; Jina преузима URL.
+- Уграђени base64 медији ограничени су на 8 MiB декодираних података по ставци и 16 MiB декодираних података по захтеву.
 
-Превођење за провајдере (канонске ставке се никада не прослеђују неизмењене):
+Превођење за провајдере (канонске ставке се никада не прослеђују непромењене):
 
-- Jina мултимодални модели: свака ставка највишег нивоа постаје један објекат са кључем модалитета
-  (`text` / `image` / `audio` / `video` / `pdf`), уз коришћење data URI-ја за уметнуте медије; један вектор по
+- Jina мултимодални модели: свака ставка највишег нивоа постаје један објекат са кључем за модалитет
+  (`text` / `image` / `audio` / `video` / `pdf`), који користи data URI-је за уграђене медије; један вектор по
   ставци највишег нивоа.
-- Породица Gemini Embedding 2: један низ највишег нивоа постаје један изворни
-  `models/{model}:embedContent` захтев са `content.parts` (`text` или `inline_data`).
-- llama.cpp (`llama-cpp/<model>`, било који модел који је локални сервер учитао): канонске `text` ставке
-  постају обичне ниске, док `image` / `audio` / `video` постају по један
-  `{"content": [part]}` објекат, користећи делове садржаја ћаскања llama-server-а (`image_url`,
-  `input_audio` са форматом `wav` / `mp3` / `flac`, `input_video`) са уметнутим подацима; један вектор
-  по ставци највишег нивоа. Сервер мора бити покренут са `--embedding --mmproj …`; без пројектора
-  сам одбија медије. `document` није подржан.
-- Непознати/динамички модели без експлицитних метаподатака о модалитетима одбијају структурирани унос уз HTTP 400.
+- Породица Gemini Embedding 2: један низ највишег нивоа постаје један изворни захтев
+  `models/{model}:embedContent` са `content.parts` (`text` или `inline_data`).
+- llama.cpp (`llama-cpp/<model>`, било који модел који је локални сервер учитао): канонске ставке `text`
+  постају обични стрингови, а `image` / `audio` / `video` постају по један објекат
+  `{"content": [part]}`, користећи делове садржаја за ћаскање llama-server-а (`image_url`,
+  `input_audio` са форматом `wav` / `mp3` / `flac`, `input_video`) са уграђеним подацима; један вектор по
+  ставци највишег нивоа. Сервер мора да се покрене са `--embedding --mmproj …`; без пројектора он сам
+  одбија медије. `document` није подржан.
+- Непознати/динамички модели без експлицитних метаподатака о модалитетима одбијају структурирани улаз са HTTP 400.
 
 ```json
 {
@@ -298,17 +342,17 @@ base64. OmniRoute не претвара те објекте у ниске нит
 }
 ```
 
-Неподржане комбинације модела и модалитета враћају HTTP 400 уместо принудног претварања ставке. Поља проширења
-која нису улазна у застарелим захтевима са нискама/токенима и даље се прослеђују непромењена.
+Неподржане комбинације модела и модалитета враћају HTTP 400 уместо да прилагоде ставку. Поља екстензија
+која нису улазна, код старих захтева са стринговима/токенима и даље се прослеђују без измена.
 
 ```bash
-# Прикажи све моделе за уграђивање
+# Наведи све моделе за ембедовање
 GET /v1/embeddings
 ```
 
 ---
 
-## Генерисање слика
+## Имаге Генератион
 
 ```bash
 POST /v1/images/generations
@@ -317,40 +361,33 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "Прелеп залазак сунца изнад планина",
+  "prompt": "A beautiful sunset over mountains",
   "size": "1024x1024"
 }
 ```
 
-Доступни добављачи обухватају OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (локално), ComfyUI (локално).
+Доступни провајдери укључују OpenAI (GPT слика 2), xAI (Grok слика), Together AI (FLUX), Fireworks AI, Небиус (FLUX), Хиперболиц, NanoBanana,**OpenRouter** ,**ZenMux** , SD WebUI (локално), ComfyUI (локално).
 
-ZenMux поново користи постојећу везу са API кључем и прихвата префиксе `zenmux/` или `zm/`:
+`n` враћа `n` слике у `data[]`. Провајдери чији упстреам API враћа једну слику по позиву (Блацк Форест Лабс, Стабилити AI, Леонардо, Идеограм, Хаипер, Хиперболиц, Magnific/Freepik, NVIDIA NIM, Cloudflare Воркерс AI) добијају `n` одвојена упстреам позива, највише 4 у лету. Фиксни `seed` је померен индексом позива (`seed`, `seed + 1`, …), тако да се слике разликују, али остају поновљиве. `n` је ограничен на 10. Захтев не успе у целини ако било који позив не успе. Листа формата за одвајање је `SINGLE_IMAGE_FANOUT_FORMATS` у `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-- `zenmux/openai/gpt-image-2` користи ZenMux-ов OpenAI Images API. Опције обухватају `size`,
-  `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
-- Други издавачи, као што је `zm/meta/muse-image-1.0`, користе ZenMux-ову Vertex AI `:predict`
-  крајњу тачку. `n` се мапира на `sampleCount`, `aspect_ratio` на `aspectRatio`, а `image_size`
-  (`1K`, `2K`, `4K`) на `sampleImageSize`. Вредност `size` у пикселима задаје само однос страница,
-  а не гарантоване димензије у пикселима. Подржани односи, резолуције и бројеви разликују се у зависности од модела.
-- `zm/inclusionai/ming-image-0.1-design` сам бира своје димензије. Изоставите `size`,
-  `aspect_ratio` и `image_size`; експлицитне вредности враћају HTTP 400. PNG, JPEG и WebP
-  могу се затражити помоћу `output_format`.
+ZenMux поново користи постојећу везу са АПИ кључем и прихвата `zenmux/` или `zm/` префиксе:
 
-Ова интеграција подржава генерисање слика из текста, али не и уређивање на основу референтне слике. Vertex
-излаз се нормализује у `data[].b64_json`; `response_format: "url"` враћа изворни
-HTTPS URL или URL са base64 подацима када су доступни само бајтови слике. Празни/филтрирани излази
-враћају грешку уместо празног успешног одговора. Приступ моделима зависи од ZenMux налога.
-Погледајте [ZenMux-ов Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) и
-[OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
+- `zenmux/openai/gpt-image-2` користи ZenMuxOpenAI слике API. Опције укључују `size`, `quality`, `n`, `output_format`, `output_compression`, `background` и `response_format`.
+- Други издавачи, као што је `zm/meta/muse-image-1.0`, користе ZenMux-ову крајњу тачку AI `:predict` Вертек. `n` се пресликава у `sampleCount`, `aspect_ratio` у `aspectRatio` и `image_size` (`1K`, `2K`, `4K`) у `sampleImageSize`. Пиксел `size` даје само однос ширине и висине, а не гарантоване димензије пиксела. Подржани односи, резолуције и број се разликују у зависности од модела.
+- `zm/inclusionai/ming-image-0.1-design` бира своје димензије. Изоставите `size`, `aspect_ratio` и `image_size`; експлицитне вредности враћају HTTP 400. PNG, JPEG и WebP се могу захтевати помоћу `output_format`.
+
+Ова интеграција подржава генерисање текста у слику, а не уређивање референтне слике. Излаз темена је нормализован на `data[].b64_json`; `response_format: "url"` враћа упстреам HTTPS URL или басе64 податке URL када су доступни само бајтови слике. Empty/filtered излази враћају грешку, а не празан успех. Приступ моделу зависи од ZenMux налога. Погледајте [ZenMux теме API](https://docs.zenmux.ai/api/vertexai/generate-images) и [OpenAI слике API](https://docs.zenmux.ai/api/openai/generate-an-image).
+
+Microsoft 365 Copilot веза за пријављивање служи `copilot-m365-web/m365-copilot-image` преко уграђене алатке за слике Copilot: један Copilot окрет по слици (`n` 1–4), `size` управља само оријентацијом, а слике се враћају у линији (`b64_json`, или подаци URL за `response_format: "url"`). Види [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
 
 ```bash
-# Наведите све моделе за слике
+# List all image models
 GET /v1/images/generations
 ```
 
 ---
 
-## OCR за документе
+## OCR dokumenata
 
 ```bash
 POST /v1/ocr
@@ -366,218 +403,387 @@ Content-Type: application/json
 }
 ```
 
-`model` бира OCR провајдера преко префикса `provider/model`; чист идентификатор модела (нпр.
-`mistral-ocr-latest`) разрешава се до свог регистрованог провајдера, а ако је `model` изостављен, подразумевано се користи
-Mistral (`mistral-ocr-latest`). Регистровани провајдери (`open-sse/config/ocrRegistry.ts`):
+`model` bira OCR provajdera putem prefiksa `provider/model`; samostalni ID modela (npr.
+`mistral-ocr-latest`) razrešava se na registrovanog provajdera, a ako je `model` izostavljen,
+podrazumeva se Mistral (`mistral-ocr-latest`). Registrovani provajderi (`open-sse/config/ocrRegistry.ts`):
 
-| ID провајдера                 | ID модела            | Вредност `model`                                              | Напомене                                                                                                                  |
-| ----------------------------- | -------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (или чисто `mistral-ocr-latest`) | Синхроно — одговор се враћа директно из једног позива upstream-у.                                                         |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                   | Асинхрони upstream (`analyze` + polling) — погледајте испод.                                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                       | Синхроно, преко Vertex AI-евог партнерског endpoint-а `openapi/chat/completions` — погледајте испод за аутентикацију/URL. |
+| ID provajdera                 | ID modela            | Vrednost `model`                                                   | Napomene                                                                                                                             |
+| ----------------------------- | -------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ili samostalni `mistral-ocr-latest`) | Sinhrono — odgovor se direktno vraća iz jednog upstream poziva.                                                                      |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                        | Asinhroni upstream (`analyze` + polling) — pogledajte u nastavku.                                                                    |
+| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                            | Sinhrono, putem Vertex AI partnerske krajnje tačke `openapi/chat/completions` — detalje o autentikaciji/URL-u pogledajte u nastavku. |
 
-Сва три провајдера одговарају у истом облику као Mistral:
+Sva tri provajdera odgovaraju telom istog oblika kao kod Mistral-a:
 
 ```json
 {
-  "pages": [{ "index": 0, "markdown": "# Извучени текст..." }],
+  "pages": [{ "index": 0, "markdown": "# Extracted text..." }],
   "model": "mistral-ocr-latest",
   "usage_info": { "pages_processed": 1 }
 }
 ```
 
-### Ток анкетирања (poll) за Azure Document Intelligence
+### Tok polling-a za Azure Document Intelligence
 
-Azure Document Intelligence-ов `analyze` API је асинхрон: почетни захтев враћа заглавље
-`Operation-Location` уместо тела одговора, а резултат се мора добавити анкетирањем (polling). Handler
-(`open-sse/handlers/ocr.ts`) анкетира тај URL сваке секунде до 30 покушаја, брзо прекида (не наставља
-анкетирање) уколико одговор анкетирања није `ok` или је статус `"failed"`, и враћа `504` уколико
-операција још траје након што се потроши буџет покушаја. Коначни Azure одговор се
-нормализује у исти облик `pages`/`markdown` који користи Mistral пре него што се врати
-позиваоцу, тако да клијентски код не мора посебно обрађивати овог провајдера.
+Azure Document Intelligence `analyze` API je asinhron: početni zahtev vraća zaglavlje
+`Operation-Location` umesto tela, a rezultat se mora dobiti polling-om. Handler
+(`open-sse/handlers/ocr.ts`) proverava tu URL adresu svake sekunde, do 30 pokušaja, odmah
+prekida rad (ne nastavlja polling) ako odgovor na polling nema status `ok` ili ako je status
+`"failed"`, a vraća `504` ako je operacija i dalje u toku nakon iscrpljivanja budžeta pokušaja.
+Konačni Azure odgovor se normalizuje u isti oblik `pages`/`markdown` koji koristi Mistral pre
+nego što se vrati pozivaocu, tako da klijentski kod ne mora posebno da obrađuje ovog provajdera.
 
-### Vertex AI DeepSeek OCR аутентикација и разрешавање endpoint-а
+### Autentikacija i razrešavanje krajnje tačke za Vertex AI DeepSeek OCR
 
-`vertex-deepseek-ocr` користи исту Vertex AI аутентикацију која OmniRoute већ подржава за
-chat/image саобраћај (`open-sse/executors/vertex.ts`): API кључ конекције је или Service Account JSON
-акредитив (који се размењује за краткотрајан OAuth приступни токен путем JWT-bearer
-тока), или већ издат OAuth приступни токен који се користи такав какав је. Upstream endpoint URL је Vertex-ов
-генерички партнерски endpoint `openapi/chat/completions`, изграђен на основу пројекта и
-региона конекције — експлицитни `providerSpecificData.project`/`providerSpecificData.region` увек има приоритет;
-у супротном, пројекат се изводи из `project_id` вредности Service Account JSON-а, а регион
-подразумевано постаје `us-central1`. Оба разрешавања се дешавају у `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), а користи их
-`src/app/api/v1/ocr/route.ts` пре прослеђивања ка `handleOcr`.
+`vertex-deepseek-ocr` ponovo koristi istu Vertex AI autentikaciju koju OmniRoute već podržava za
+chat/saobraćaj sa slikama (`open-sse/executors/vertex.ts`): API ključ veze je ili JSON akreditiv
+Service Account-a (razmenjen za kratkotrajni OAuth pristupni token putem JWT-bearer
+toka) ili već izdat OAuth pristupni token koji se koristi bez izmena. URL upstream krajnje tačke je
+Vertex-ova generička partnerska krajnja tačka `openapi/chat/completions`, izgrađena na osnovu
+projekta i regiona veze — eksplicitne vrednosti `providerSpecificData.project`/`providerSpecificData.region`
+uvek imaju prednost; u suprotnom se projekat izvodi iz `project_id` JSON-a Service Account-a, a
+region podrazumevano postaje `us-central1`. Oba razrešavanja odvijaju se u `open-sse/handlers/ocr.ts`
+(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), a koriste se u
+`src/app/api/v1/ocr/route.ts` pre prosleđivanja poziva funkciji `handleOcr`.
 
 ---
 
-## Листа модела
+## Списак модела
 
 ```bash
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Враћа све моделе за ћаскање, уграђивање и слике + комбинације у OpenAI формату
+→ Враћа све chat, embedding и image моделе + комбинације у OpenAI формату
 ```
 
-### Префикси ID-ова модела (`?prefix=`)
+### Цене модела (`pricing`)
 
-Већина модела се оглашава под **префиксом добављача**. Префикс који добијате контролише
-функционална заставица `MODELS_CATALOG_PREFIX_MODE`, а може се заменити **за сваки захтев појединачно** помоћу
-параметра упита — корисно за клијента који жели чисту листу без промене подешавања
-на нивоу целог сервера за све остале:
+Унос садржи објекат `pricing` када OmniRoute познаје цену модела. Цена потиче
+из табеле цена коју користи обрачун трошкова: уграђених подразумеваних вредности, синхронизованих цена и
+замена подешених преко `/api/pricing`. Ово су каталошке цене, па и провајдери са претплатом приказују цену по токену.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Поља                                                            | Јединица                        | Напомене                                                                                                                                            |
+| --------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD по токену, децимални стринг | Компатибилно са OpenRouter-ом, никада у експоненцијалном запису. Два поља за кеш појављују се само када постоји цена кеша.                          |
+| `input`, `output`, `cached`, `cache_creation`                   | USD на 1M токена, број          | Поља из ранијих верзија каталога, задржана ради постојећих клијената. `reasoning` и `long_context` се такође појављују када их ред са ценом садржи. |
+
+- **Комбинације** носе цену свог првог видљивог циља. Уграђене `auto/*` комбинације бирају
+  циљ у тренутку захтева, па немају `pricing`.
+- **Бесплатни модели** приказују `"0"` (и `0`) када им је цена нула. Модел без реда са ценом
+  такође приказује `"0"` када га каталог означава као бесплатан (`free: true`) или га наводи уграђени каталог бесплатних модела.
+- **Непозната цена:** унос нема кључ `pricing`.
+- **Провајдери који наплаћују кредите** (као што је Kiro) наплаћују по захтеву, а не по токену. Њихови
+  уноси задржавају нумеричка поља по 1M која су раније имали и не садрже стринг поља по токену.
+- **Варијанте** (идентификатори за ниво напора резоновања, алијаси без размишљања, огледала за откривање и gateway огледала)
+  копирају цену модела на који усмеравају.
+- Поља садрже само основне тарифе. Нивои за дугачак контекст (нумеричко поље `long_context`) и
+  множиоци нивоа услуге (на пример Codex fast или flex) не мењају `prompt` или
+  `completion`.
+- Објекат је исти за сваки стил аутентикације, укључујући захтев у Anthropic стилу са `x-api-key` и `anthropic-version` (одговор остаје `{ "object": "list",
+"data": [...] }`). Имплементација: `src/app/api/v1/models/catalogPricing.ts`.
+
+### Префикси ID-ја модела (`?prefix=`)
+
+Већина модела се објављује под **префиксом провајдера**. Који префикс добијате контролише
+заставица функционалности `MODELS_CATALOG_PREFIX_MODE`, а може се заменити **по захтеву**
+параметром упита — корисно за клијента који жели чисту листу без промене подешавања сервера за све остале:
 
 ```bash
-GET /v1/models?prefix=alias        # један ID по моделу — кратки префикс псеудонима
-GET /v1/models?prefix=dual         # оба облика (подразумевана вредност сервера)
-GET /v1/models?prefix=canonical    # само пуни префикс ID-а добављача
+GET /v1/models?prefix=alias        # један id по моделу — префикс кратког алијаса
+GET /v1/models?prefix=dual         # оба облика (подразумевано за сервер)
+GET /v1/models?prefix=canonical    # само пуни префикс provider-id
 ```
 
-| Режим       | Емитује                                                 | Напомене                                                                                                                                                                                          |
-| ----------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **и** `claude/claude-sonnet-4-6` | **Подразумевано.** Оба ID-а усмеравају ка истом моделу; задржана су како би конфигурације клијената у којима је било који облик чврсто кодиран наставиле да раде. Приближно удвостручује каталог. |
-| `alias`     | `cc/claude-sonnet-4-6`                                  | Један унос по моделу. Добављачи без засебног псеудонима и даље емитују свој унос, тако да се ништа не губи.                                                                                       |
-| `canonical` | `claude/claude-sonnet-4-6`                              | Један унос по моделу под пуним префиксом ID-а добављача. Добављачи без засебног псеудонима (нпр. `antigravity/…`, `agy/…`) и овде емитују свој једини ID, тако да се ништа не губи.               |
+| Режим       | Емитује                                                 | Напомене                                                                                                                                                                                       |
+| ----------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **и** `claude/claude-sonnet-4-6` | **Подразумевано.** Оба ID-ја усмеравају на исти модел; задржана су да би конфигурације клијената које су директно навеле било који облик наставиле да раде. Каталог се приближно удвостручује. |
+| `alias`     | `cc/claude-sonnet-4-6`                                  | Један унос по моделу. Провајдери без засебног алијаса и даље емитују свој унос, тако да се ништа не губи.                                                                                      |
+| `canonical` | `claude/claude-sonnet-4-6`                              | Један унос по моделу под пуним префиксом provider-id. Провајдери без засебног алијаса (нпр. `antigravity/…`, `agy/…`) и овде емитују свој једини ID, тако да се ништа не губи.                 |
 
-Пресликан унос у режиму `dual` може се препознати и без параметра упита: садржи поље `parent`
-које указује на примарни ID.
+Огледало у режиму `dual` може се препознати и без параметра упита: оно садржи поље `parent`
+које упућује на примарни ID.
 
-Клијенти који приказују бирач модела треба да захтевају `?prefix=alias` — то ради
-[OmniCopilot проширење за VS Code](../guides/VSCODE-COPILOT.md).
+Клијенти који приказују избор модела треба да затраже `?prefix=alias` — то ради и
+[OmniCopilot VS Code екстензија](../guides/VSCODE-COPILOT.md).
 
-### Појединачно скривени модели за ћаскање
+### Филтери за откривање (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-Модел означен као **Скривен** на страници свог добављача изоставља се из каталога и одбија
-се са HTTP `404` / `model_not_found` када се изричито затражи. Провера користи разрешеног
-добављача и модел, укључујући псеудониме добављача, префиксе чворова компатибилних добављача и
-подразумеване вредности везе. Комбинација прескаче скривене циљеве и може да користи видљив сродни модел; када не
-преостане ниједан извршив циљ, враћа исти кôд грешке. Откривање ступа на снагу при следећем
-захтеву. Замене видљивости које се односе само на слике не скривају модел за ћаскање са истим ID-ом.
+`GET /v1/models` прихвата опционе филтере за откривање. Без њих се одговор
+не мења. Они сужавају каталог који позивалац већ види (дозволе API кључа се примењују прве),
+а извршавају се пре пагинације у OpenAI стилу `limit` / `after`:
 
-Ово појединачно подешавање модела одвојено је од
-[листа дозвола/забрана за излагање модела](../routing/MODEL_EXPOSURE_LIST.md), које филтрирају оглашавање
-каталога и кандидате за аутоматско усмеравање, уз задржавање изричитог прослеђивања. Дозволе модела
-за API кључеве настављају да се примењују независно. Подразумевани режим префикса каталога остаје `dual`.
+```bash
+GET /v1/models?capability=vision&capability=tool_calling   # свака наведена могућност мора бити true
+GET /v1/models?capability=vision,reasoning&min_context=200000
+GET /v1/models?kind=embedding                              # каталог `type`; редови без њега су `chat`
+GET /v1/models?q=sonnet&limit=10                           # подударање без обзира на величину слова у id-ју или називу
+```
 
-### Варијанте модела без размишљања
+| Parametar     | Vrednosti                                                                                           |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
+| `min_context` | ceo broj koji nije negativan, poredi se sa `context_length`                                         |
+| `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
+| `q`           | 1–200 znakova                                                                                       |
 
-За Claude моделе који подржавају размишљање, `/v1/models` такође оглашава варијанту **без размишљања** чији ID има префикс `claude-3-omniroute-no-thinking/`:
+Nepoznata vrednost ili `min_context` koji nije ceo broj koji nije negativan (na primer `1.5`),
+vraća HTTP `400`, a poruka navodi važeće vrednosti. Implementacija:
+`src/app/api/v1/models/catalogFilters.ts`.
+
+### Izbor modela (`POST /v1/models/query`)
+
+`POST /v1/models/query` vraća kratku, determinističku listu iz istog kataloga, sa istom
+autentifikacijom i vidljivošću po ključu kao `GET /v1/models`:
+
+```bash
+POST /v1/models/query
+Authorization: Bearer your-api-key
+Content-Type: application/json
+
+{ "capabilities": ["vision", "tool_calling"], "min_context": 128000, "max_output": 16000,
+  "kind": "chat", "q": "gpt", "owned_by": "openai", "exclude": ["openai/gpt-4o"], "limit": 5 }
+
+→ { "object": "list", "data": [ ...models ] }
+```
+
+Svako polje je opciono. `capabilities` i `exclude` prihvataju niz ili string vrednosti razdvojenih
+zarezima; `max_output` se poredi sa `max_output_tokens`. Rezultati su sortirani po `owned_by`, a
+zatim po `id`. `limit` podrazumevano iznosi `20`, a vrednosti veće od `100` ograničavaju se na
+`100`. Nevažeći JSON, nepoznato polje ili nevažeća vrednost vraćaju HTTP `400`.
+
+### Pojedinačno skriveni chat modeli
+
+Model označen kao **Skriven** na stranici svog provajdera izostavlja se iz kataloga i odbija se
+uz HTTP `404` / `model_not_found` kada se eksplicitno zatraži. Provera koristi razrešenog
+provajdera i model, uključujući alijase provajdera, prefikse čvorova kompatibilnih provajdera i
+podrazumevane vrednosti konekcije. Kombinacija preskače skrivene ciljeve i može da koristi vidljivi
+srodni model; kada ne preostane nijedan izvršiv cilj, vraća isti kôd greške. Uklanjanje skrivanja
+stupa na snagu pri sledećem zahtevu. Nadjačavanja vidljivosti koja važe samo za slike ne skrivaju
+chat model sa istim ID-om.
+
+Ova pojedinačna postavka modela odvojena je od
+[spiskova dozvoljenih/zabranjenih modela za izlaganje](../routing/MODEL_EXPOSURE_LIST.md), koji
+filtriraju oglašavanje u katalogu i kandidate za automatsko rutiranje, uz zadržavanje eksplicitnog
+slanja. Dozvole modela za API ključ nastavljaju da se primenjuju nezavisno. Podrazumevani režim
+prefiksa kataloga i dalje je `dual`.
+
+### Varijante modela bez razmišljanja
+
+Za Claude modele koji podržavaju razmišljanje, `/v1/models` takođe oglašava varijantu **bez
+razmišljanja**, čiji ID ima prefiks `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Избор овог ID-а (нпр. у Claude Code конфигурацији која увек додаје блок `thinking`) разрешава се назад на стварни `<provider>/<model>` са потиснутим резоновањем — `thinking:{type:"disabled"}` на путањи `/v1/messages`, или се поља `reasoning`/`reasoning_effort` изостављају на путањи `/v1/chat/completions`. Варијанта се наводи само за моделе из породице Claude који подржавају размишљање **и** поштују `disabled` (тако да су, нпр. модели који подржавају само адаптивни режим и одбијају `disabled` изостављени). Оператери могу принудно укључити или искључити варијанту за сваки модел путем `ModelSpec.noThinkingAlias`.
+Izbor ovog ID-a (npr. u konfiguraciji Claude Code-a koja uvek dodaje blok `thinking`) razrešava se
+nazad na stvarni `<provider>/<model>`, uz potisnuto rezonovanje — `thinking:{type:"disabled"}` na
+putanji `/v1/messages`, ili se polja `reasoning`/`reasoning_effort` izostavljaju na putanji
+`/v1/chat/completions`. Varijanta se navodi samo za modele iz porodice Claude koji podržavaju
+razmišljanje **i** prihvataju `disabled` (zato su, na primer, modeli koji podržavaju samo
+adaptivni režim i odbijaju `disabled` izuzeti). Operateri mogu prinudno uključiti ili isključiti
+varijantu za svaki model pomoću `ModelSpec.noThinkingAlias`.
 
 ---
 
-## Manifest utičnih modula provajdera (Provider Plugin Manifest)
+## Манифест додатка провајдера
 
 ```bash
 GET /api/v1/provider-plugin-manifest
 ```
 
-Vraća JSON-bezbedan manifest utičnih modula provajdera koji koriste Bifrost, CLIProxyAPI i
-budući sidecar rutere. Odgovor se generiše iz TypeScript registra provajdera
-i namerno isključuje OAuth klijentske tajne, resolveovanje runtime okruženja,
-izvršne (executor) funkcije, request zaglavlja i podatke o nalozima.
+Враћа JSON-безбедан манифест додатка провајдера који користе Bifrost, CLIProxyAPI и
+будући бочни рутери. Одговор се генерише из TypeScript регистра провајдера и намерно
+изузима OAuth тајне клијента, разрешавање окружења током рада, функције извршилаца,
+заглавља захтева и податке о налозима.
 
-Koristite ovaj endpoint kada sidecar radi izvan procesa (out-of-process) i ne može direktno da uveze
-`open-sse/config/providerPluginManifestRegistry.ts`.
+Користите ову крајњу тачку када бочни рутер ради изван процеса и не може директно да
+увезе `open-sse/config/providerPluginManifestRegistry.ts`.
 
 ---
 
-## Компатибилне крајње тачке
+## Генерисање звука преко ElevenLabs-а
 
-| Метод | Путања                                    | Формат                               |
-| ----- | ----------------------------------------- | ------------------------------------ |
-| POST  | `/v1/chat/completions`                    | OpenAI                               |
-| POST  | `/v1/messages`                            | Anthropic                            |
-| POST  | `/v1/responses`                           | OpenAI Responses                     |
-| POST  | `/v1/embeddings`                          | OpenAI                               |
-| POST  | `/v1/images/generations`                  | OpenAI Images                        |
-| POST  | `/v1/images/edits`                        | OpenAI Images (уређивање/inpaint)    |
-| POST  | `/v1/videos/generations`                  | Генерисање видеа у OpenAI стилу      |
-| POST  | `/v1/music/generations`                   | Генерисање музике у OpenAI стилу     |
-| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (враћа аудио-садржај)     |
-| POST  | `/v1/rerank`                              | Рерангирање у Cohere/Voyage стилу    |
-| POST  | `/v1/classify`                            | Jina класификација (`api.jina.ai`)   |
-| POST  | `/v1/segment`                             | Jina сегментатор (`segment.jina.ai`) |
-| POST  | `/v1/moderations`                         | OpenAI Moderations                   |
-| GET   | `/v1/models`                              | OpenAI                               |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                            |
-| GET   | `/v1beta/models`                          | Gemini                               |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent               |
-| POST  | `/v1/api/chat`                            | Ollama                               |
-| GET   | `/api/v1/vscode/{token}/`                 | Алијас OpenAI каталога               |
-| GET   | `/api/v1/vscode/{token}/models`           | Алијас OpenAI модела                 |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | OpenAI алијас са токеном             |
-| POST  | `/api/v1/vscode/{token}/responses`        | OpenAI Responses алијас са токеном   |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Ollama алијас са токеном             |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Ollama алијас ознака са токеном      |
+Конфигуришите везу провајдера `elevenlabs` у OmniRoute-у са својим ElevenLabs API кључем.
+Клијенти се аутентификују својим **OmniRoute** кључем (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+gateway прослеђује сачувани кључ провајдера као `xi-api-key`. Никада не шаљите ElevenLabs кључ
+као bearer токен gateway-а.
 
-Све POST руте имају исти облик: `Bearer your-api-key` + JSON тело валидирано помоћу Zod-а (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` итд.; погледајте `src/shared/validation/schemas.ts`). При неуспешној валидацији шеме враћа се 4xx.
+| Метод | Путања                      | Одговор                                    | Категорија крајње тачке API кључа |
+| ----- | --------------------------- | ------------------------------------------ | --------------------------------- |
+| POST  | `/v1/sound-generation`      | Нативни аудио бајтови                      | `elevenlabs`                      |
+| POST  | `/v1/music`                 | Нативни аудио бајтови                      | `music`                           |
+| POST  | `/v1/music/stream`          | Стримујући аудио бајтови                   | `music`                           |
+| POST  | `/v1/music/detailed`        | Нативни multipart аудио и план композиције | `music`                           |
+| POST  | `/v1/music/detailed/stream` | Нативни SSE метаподаци и аудио делови      | `music`                           |
+| POST  | `/v1/music/plan`            | JSON план композиције                      | `music`                           |
 
-За клијенте који не могу да додају `Authorization: Bearer ...`, OmniRoute такође прихвата API кључеве у URL-у, било путем компатибилних параметара упитног низа (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`), било путем наменских крајњих тачака `/api/v1/vscode/{token}/...` документованих у наставку.
+Ове крајње тачке допуњују постојеће руте `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` и `/v1/speech-to-text`. Нативна JSON поља
+и параметри упита као што су `output_format` и `enable_logging` се задржавају.
+Одговори крајње тачке `/v1/music/detailed` задржавају своје multipart границе; обрадите их као multipart.
+`/v1/music/detailed/stream` враћа `text/event-stream` са метаподацима композиције и
+base64 аудио деловима у SSE догађајима. Свих шест рута подржава CORS preflight.
 
 ```bash
-# Рерангирање (добављач из регистра у облаку или чвор добављача компатибилан са OpenAI-јем као "<prefix>/<model>")
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# Кратак звучни ефекат. Трајање: од 0.5 до 30 секунди.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Трајање музике изражава се у милисекундама: од 3000 до 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+Користите `/v1/music/stream` са истим JSON телом за постепену испоруку аудио садржаја. Композиција
+прихвата тачно једно од поља `prompt` или `composition_plan`; `/v1/music/plan` захтева `prompt`
+и опционално прихвата `source_composition_plan`. Нативне шеме задржавају додатна поља
+провајдера како би верзије планова композиције и опције финог подешавања стигле до ElevenLabs-а.
+
+Обједињена крајња тачка `/v1/music/generations` такође прихвата
+`elevenlabs/music_v1`, `elevenlabs/music_v2` и `elevenlabs/music_v2_5`. Са активном ElevenLabs везом,
+ови модели су изложени у каталогу музике. Ова крајња тачка враћа
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Њено поље `duration` је у
+секундама и пресликава се у `music_length_ms`; експлицитно поље `music_length_ms` има предност.
+`instrumental` се пресликава у `force_instrumental`, при чему нативно поље има предност.
+За стримовање користите нативне крајње тачке за стримовање, а за захтеве вођене искључиво
+планом композиције користите нативну крајњу тачку за композицију.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Ограничења крајње тачке, модела, буџета и везе примењују се пре позива узводног сервиса. Нативне
+рутe враћају статусне кодове узводног сервиса и тела грешака непромењене, укључујући `402` за
+ограничење плана и `429` за ограничење квоте. Заглавља `character-cost`, `song-id`, `request-id` и `retry-after`
+задржавају се када су присутна. Позитивно стање бесплатних кредита не гарантује приступ сваком
+музичком моделу, излазном формату или API функцији: ElevenLabs одређује права приступа за сваки захтев.
+Обједињена крајња тачка задржава статусне кодове грешака у OmniRoute-овом нормализованом омоту грешке.
+
+Уговори узводног сервиса: [звучни ефекти](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[композиција музике](https://elevenlabs.io/docs/api-reference/music/compose) и
+[детаљи стримовања музике](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
+
+---
+
+## Kompatibilne krajnje tačke
+
+| Metod | Putanja                                   | Format                                  |
+| ----- | ----------------------------------------- | --------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                  |
+| POST  | `/v1/messages`                            | Anthropic                               |
+| POST  | `/v1/responses`                           | OpenAI Responses                        |
+| POST  | `/v1/embeddings`                          | OpenAI                                  |
+| POST  | `/v1/images/generations`                  | OpenAI Images                           |
+| POST  | `/v1/images/edits`                        | OpenAI Images (uređivanje/inpainting)   |
+| POST  | `/v1/videos/generations`                  | Generisanje video zapisa u OpenAI stilu |
+| POST  | `/v1/music/generations`                   | Generisanje muzike u OpenAI stilu       |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                      |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (vraća audio telo)           |
+| POST  | `/v1/rerank`                              | Rangiranje u stilu Cohere/Voyage        |
+| POST  | `/v1/classify`                            | Jina klasifikacija (`api.jina.ai`)      |
+| POST  | `/v1/segment`                             | Jina segmentator (`segment.jina.ai`)    |
+| POST  | `/v1/moderations`                         | OpenAI Moderations                      |
+| GET   | `/v1/models`                              | OpenAI                                  |
+| POST  | `/v1/models/query`                        | Filtrirani uži izbor modela             |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                               |
+| GET   | `/v1beta/models`                          | Gemini                                  |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                  |
+| POST  | `/v1/api/chat`                            | Ollama                                  |
+| GET   | `/api/v1/vscode/{token}/`                 | OpenAI pseudonim kataloga               |
+| GET   | `/api/v1/vscode/{token}/models`           | Pseudonim OpenAI modela                 |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | Tokenizovani pseudonim OpenAI-ja        |
+| POST  | `/api/v1/vscode/{token}/responses`        | Tokenizovani pseudonim OpenAI Responses |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Tokenizovani pseudonim Ollama           |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Tokenizovani pseudonim Ollama oznaka    |
+
+Sve POST rute prate isti oblik: `Bearer your-api-key` + JSON telo validirano pomoću Zod-a (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema` itd.; pogledajte `src/shared/validation/schemas.ts`). Kod neuspešne validacije šeme vraća se odgovor 4xx.
+
+Za klijente koji ne mogu da dodaju `Authorization: Bearer ...`, OmniRoute takođe prihvata API ključeve u URL-u putem kompatibilnosti sa niskom upita (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ili putem namenskih `/api/v1/vscode/{token}/...` krajnjih tačaka dokumentovanih u nastavku.
+
+```bash
+# Rangiranje (provajder iz cloud registra ili čvor provajdera kompatibilan sa OpenAI-jem kao "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Jina класификација (акредитиви за Foundation API)
+# Jina klasifikacija (akreditivi Foundation API-ja)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Jina сегментатор
+# Jina segmentator
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Jina претрага (s.jina.ai; алијаси добављача: jina-search, jina-ai, jina)
+# Jina pretraga (s.jina.ai; pseudonimi provajdera: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Модерација
+# Moderacija
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — враћа тело у формату audio/mpeg (или у захтеваном формату)
+# TTS — vraća telo audio/mpeg formata (ili traženog formata)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS захтева језик и глас: `language` подразумевано има вредност "en"; ако глас
-# недостаје или је наведен назив стандардног OpenAI гласа (alloy, nova, …), користи се "Adrian"
+# Soniox TTS zahteva jezik i glas: `language` podrazumevano ima vrednost "en"; ako nedostaje
+# glas ili je navedeno OpenAI podrazumevano ime glasa (alloy, nova, …), koristi se "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Уређивање слике (multipart)
+# Uređivanje slike (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Генерисање видеа / музике (ID модела са префиксом добављача)
+# Generisanje video zapisa / muzike (ID modela sa prefiksom provajdera)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Чворови добављача за рерангирање:** `POST /v1/rerank` такође усмерава захтеве ка чворовима добављача
-> компатибилним са OpenAI-јем (oMLX, vLLM, Infinity, TEI иза мрежног пролаза, …), адресираним као `<node-prefix>/<model>`. Чворови
-> повратне петље (`localhost`, `127.0.0.1`, `172.16.0.0/12`) увек испуњавају услове, као и имена хостова која
-> оператор наведе у `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (нпр. назив Docker/Compose сервиса као што је
-> `http://reranker:8080/v1`; они се позивају директно, никада преко `HTTP(S)_PROXY` нити преко
-> проксија фиксно везаног за везу). Чворови на било ком другом
-> хосту — рачунару у LAN-у или Tailscale равноправном чвору — испуњавају услове само када оператор омогући
-> заставицу функције `RERANK_REMOTE_PROVIDER_NODES` **и** основни URL чвора прође смернице добављача
-> за одлазне URL адресе (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Корак рерангирања механизма за меморију позива ову руту преко
-> повратне петље, па исто правило одређује и понашање `rerankProviderModel` у подешавањима меморије.
+> **Čvorovi provajdera za rerangiranje:** `POST /v1/rerank` takođe rutira ka čvorovima provajdera kompatibilnim sa OpenAI-jem
+> (oMLX, vLLM, Infinity, TEI iza gejtveja, …) adresiranim kao `<node-prefix>/<model>`. Loopback
+> čvorovi (`localhost`, `127.0.0.1`, `172.16.0.0/12`) su uvek prihvatljivi, kao i imena hostova koje
+> operator navede u `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (npr. naziv Docker/Compose servisa kao što je
+> `http://reranker:8080/v1`; njima se pristupa direktno, nikada preko `HTTP(S)_PROXY` niti preko
+> zakačenog proksija konekcije). Čvorovi na bilo kom drugom
+> hostu — računaru u LAN-u ili Tailscale peer-u — prihvatljivi su samo kada operator omogući
+> oznaku funkcionalnosti `RERANK_REMOTE_PROVIDER_NODES` **i** osnovni URL čvora prođe politiku odlaznih URL-ova provajdera
+> (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
+> Korak rerangiranja memorijskog mehanizma poziva ovu rutu preko
+> loopback-a, tako da isto pravilo važi za `rerankProviderModel` u podešavanjima memorije.
 >
-> **Облици локалног сервера:** чвор се позива на `<base>/v1/rerank`, а у случају одговора 404 на `<base>/rerank`
-> (Infinity, TEI). Тело узводног захтева садржи и Cohere/OpenAI називе (`documents`,
-> `return_documents`) и TEI називе (`texts`, `return_text`), док се узводни одговор
-> нормализује у Cohere омотач: TEI-јев непосредни `[{index, score, text}]`, `{results: [{index, score}]}`
-> из једноставних мрежних пролаза и Voyage-ов облик `{data: [...]}` враћају се клијенту као
-> `{results: [{index, relevance_score, document?}]}`, сортирани по резултату и ограничени на `top_n`.
+> **Oblici lokalnog servera:** čvor se poziva na `<base>/v1/rerank` i, pri odgovoru 404, na `<base>/rerank`
+> (Infinity, TEI). Telo zahteva ka upstream-u sadrži oba naziva kompatibilna sa Cohere/OpenAI
+> (`documents`, `return_documents`) i naziva kompatibilna sa TEI-jem (`texts`, `return_text`), a odgovor upstream-a
+> normalizuje se u Cohere omotač: TEI-jev neupakovan odgovor `[{index, score, text}]`, `{results: [{index, score}]}`
+> tankih gejtveja i Voyage-ov oblik `{data: [...]}` svi se klijentu vraćaju kao
+> `{results: [{index, relevance_score, document?}]}`, sortirani po skoru i ograničeni na `top_n`.
 
-> **Откривање чворова добављача:** модели на чвору добављача компатибилном са OpenAI-јем појављују се у `GET /v1/models`
-> под префиксом чвора. Редови који не садрже метаподатке о крајњој тачки (што је типично за локалне `/v1/models` листинге)
-> наслеђују `apiType` чвора, тако да модели `embeddings` чвора имају `type: "embedding"`, а модели
-> `rerank` чвора имају `type: "rerank"` уместо да подразумевано буду подешени за ћаскање; експлицитни
-> `supportedEndpoints` у синхронизованом или ручно додатом реду и даље има предност.
+> **Otkrivanje čvorova provajdera:** modeli na čvoru provajdera kompatibilnom sa OpenAI-jem pojavljuju se u `GET /v1/models`
+> pod prefiksom čvora. Redovi koji ne sadrže metapodatke o krajnjoj tački (što je uobičajeno za lokalne `/v1/models` liste)
+> nasleđuju `apiType` čvora, tako da su modeli čvora `embeddings` tipa `type: "embedding"`, a
+> modeli čvora `rerank` tipa `type: "rerank"`, umesto da podrazumevano budu tipa chat; eksplicitni
+> `supportedEndpoints` u sinhronizovanom ili ručno dodatom redu i dalje ima prednost.
 
-### Наменске руте добављача
+### Namenske rute provajdera
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -585,199 +791,246 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Префикс добављача се аутоматски додаје ако недостаје. Неусклађени модели враћају `400`.
+Prefiks provajdera se automatski dodaje ako nedostaje. Neusklađeni modeli vraćaju `400`.
 
 ---
 
-## Files API
+## API za datoteke
 
-OpenAI-компатибилна крајња тачка за датотеке намењена групном улазу/излазу и отпремању датотека према намени.
+Endpoint za datoteke kompatibilan sa OpenAI-jem, za grupni ulaz/izlaz i otpremanje datoteka sa određenom namenom.
 
-| Метод  | Путања                   | Опис                                                                                                                 |
-| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| POST   | `/v1/files`              | Отпрема датотеку (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — највише 512 MiB |
-| GET    | `/v1/files`              | Наводи датотеке за аутентификовани API кључ                                                                          |
-| GET    | `/v1/files/[id]`         | Преузима метаподатке датотеке                                                                                        |
-| DELETE | `/v1/files/[id]`         | Брише датотеку                                                                                                       |
-| GET    | `/v1/files/[id]/content` | Стримује необрађени садржај датотеке назад                                                                           |
+| Metod  | Putanja                  | Opis                                                                                                                    |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/files`              | Otpremanje datoteke (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — najviše 512 MiB |
+| GET    | `/v1/files`              | Izlistavanje datoteka za autentifikovani API ključ                                                                      |
+| GET    | `/v1/files/[id]`         | Preuzimanje metapodataka datoteke                                                                                       |
+| DELETE | `/v1/files/[id]`         | Brisanje datoteke                                                                                                       |
+| GET    | `/v1/files/[id]/content` | Prosleđivanje neobrađenog sadržaja datoteke                                                                             |
 
-**Аутентификација:** Bearer API кључ — датотеке су ограничене на појединачни API кључ путем `getApiKeyRequestScope`. Кључ
-види, преузима и брише само сопствене датотеке; сесија контролне табле без кључа чита
-целу инстанцу; датотека без власника (анонимно отпремање или отпремање из сесије контролне табле) недоступна је сваком
-позиваоцу без сесије. `GET /v1/files` одбија анонимног позиваоца — као и прослеђени кључ који
-није могуће разрешити — статусом `401` чак и када је `REQUIRE_API_KEY=false`, уместо да наведе датотеке
-свих закупаца (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
-
----
-
-## Batches API
-
-Пакетна обрада компатибилна са OpenAI-јем.
-
-| Метод  | Путања                    | Опис                                                                                                             |
-| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| POST   | `/v1/batches`             | Креира пакет — тело се проверава помоћу `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
-| GET    | `/v1/batches`             | Приказује листу пакета                                                                                           |
-| GET    | `/v1/batches/[id]`        | Преузима статус пакета + `request_counts`                                                                        |
-| DELETE | `/v1/batches/[id]`        | Брише завршен/неуспешан пакет                                                                                    |
-| POST   | `/v1/batches/[id]/cancel` | Отказује пакет чија је обрада у току                                                                             |
-
-**Аутентификација:** Bearer API кључ. Пакети су ограничени на појединачни API кључ према истом тросмерном правилу као и
-датотеке: приступ је могућ само помоћу сопственог кључа, сесија контролне табле има приступ на нивоу целе инстанце, док су записи без власника недоступни сваком
-позиваоцу без сесије (при преузимању, брисању, отказивању и провери `input_file_id` током креирања).
-`GET /v1/batches` одбија анонимног позиваоца са статусом `401` чак и када је `REQUIRE_API_KEY=false`.
+**Autentifikacija:** Bearer API ključ — datoteke su ograničene po API ključu putem `getApiKeyRequestScope`. Ključ
+može da vidi, preuzima i briše samo sopstvene datoteke; sesija kontrolne table bez ključa čita celu
+instancu; datoteka bez vlasnika (otpremljena anonimno ili putem sesije kontrolne table) uskraćuje se
+svakom pozivaocu koji nije sesija. `GET /v1/files` odbija anonimnog pozivaoca — kao i prosleđeni ključ
+koji nije razrešen — sa `401` čak i kada je `REQUIRE_API_KEY=false`, umesto da izlista datoteke svih
+zakupaca (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
 
-## Search API
+## API za grupnu obradu
 
-Апстракција провајдера за веб претрагу (Tavily, Brave, Exa, Serper, итд.).
+Obrada u grupama kompatibilna sa OpenAI-jem.
 
-| Метод | Путања                 | Описание                                                                                                                       |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| GET   | `/v1/search`           | Листа конфигурисаних провајдера претраге + могућности                                                                          |
-| POST  | `/v1/search`           | Извршавање упита за претрагу — тело захтева се валидира преко `v1SearchSchema`, подржава кеширање/спајање захтева (coalescing) |
-| GET   | `/v1/search/analytics` | Статистика по провајдеру (број погодака/латенција/кеш)                                                                         |
+| Metod  | Putanja                   | Opis                                                                                                               |
+| ------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| POST   | `/v1/batches`             | Kreiranje grupe — telo se validira pomoću `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
+| GET    | `/v1/batches`             | Izlistavanje grupa                                                                                                 |
+| GET    | `/v1/batches/[id]`        | Preuzimanje statusa grupe i `request_counts`                                                                       |
+| DELETE | `/v1/batches/[id]`        | Brisanje završene/neuspešne grupe                                                                                  |
+| POST   | `/v1/batches/[id]/cancel` | Otkazivanje grupe čija je obrada u toku                                                                            |
 
-**Аутентификација:** Bearer API кључ (`extractApiKey` + `isValidApiKey`). Политика претраге се примењује преко `enforceApiKeyPolicy`.
+**Autentifikacija:** Bearer API ključ. Grupe su ograničene po API ključu prema istom pravilu sa tri
+moguća ishoda kao datoteke: samo sopstveni ključ, sesija kontrolne table za celu instancu, a zapisi bez
+vlasnika uskraćuju se svakom pozivaocu koji nije sesija (preuzimanje, brisanje, otkazivanje i provera
+`input_file_id` prilikom kreiranja). `GET /v1/batches` odbija anonimnog pozivaoca sa `401` čak i kada je
+`REQUIRE_API_KEY=false`.
+
+---
+
+## Сеарцх API
+
+апстракција Web/search провајдера (Тавили, Браве, Ека, Серпер, итд.).
+
+| Метод | Пут                    | Опис                                                                                                |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Наведите + могућности конфигурисаних добављача претраге                                             |
+| POST  | `/v1/search`           | Покрените упит за претрагу — тело потврђено од стране `v1SearchSchema`, подржава caching/coalescing |
+| GET   | `/v1/search/analytics` | hit/latency/cache статистика по провајдеру                                                          |
+
+**Аутх:** Носилац API кључа (`extractApiKey` + `isValidApiKey`). Политика претраге се спроводи преко `enforceApiKeyPolicy`.
+
+**Аутоматски избор:** без `provider`, најјефтинији провајдер са конфигурисаном везом ради први, а следећи најјефтинији је прелазак на грешку. Бесплатни крајњи провајдери (`duckduckgo-free`) се користе само када ништа друго није конфигурисано. Самохостовани SearXNG се рачуна као конфигурисан када његова конекција складишти прави `baseUrl` (а не подразумевани `http://localhost:8888/search` каталога): он се затим рангира као добављач 0 долара испред оних са кључем, са најјефтинијим провајдером са кључем као преласком на грешку, укључујући када SearXNG одговори на 400, 401, 403 или 401, 403 или 401, 403 или 401 зкгх, то је `baseUrl` `http(s)` што није з а URL. адреса метаподатака у облаку се не рачуна. SearXNG веза која чува токен рангира се на овај начин само преко `https://` или `http://` повратне петље. Преко удаљеног обичног `http://` то никада није прелазак на грешку и остаје последње средство, користи се само када ниједан други провајдер није конфигурисан или када се захтева по имену, тако да у та два случаја шаље токен у отвореном тексту.
+
+### Ека и Тавили `provider_options`
+
+Ека и Тавили читају поља специфична за провајдера из врећице са простором за имена: `provider_options.exa` (или `provider_options["exa-search"]`) и `provider_options.tavily` (или `provider_options["tavily-search"]`). Само доле наведени кључеви се прослеђују. Сваки се проверава у односу на своју Zod шему у `open-sse/handlers/search/providerOptionsPassthrough.ts`, а кључ погрешног типа се испушта. Било који други кључ се игнорише, укључујући аутх, басе URL, `stream` и `outputSchema`. Равни тастери које користе други провајдери (`cx`, `depth`, ...) раде као и раније.
+
+| Провајдер | Поља највишег нивоа                                                                                                                                                                                                                                                                                                                                                       | Нестед                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ека       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (равни примитиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` спојен преко подразумеваног `{ text: true, highlights: true }` |
+| Тавили    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
+
+Генеричка поља увек побеђују: `query`, `max_results`, `filters` (домени), `country` и тема изведена из `search_type`. На Ека, `search_type: "news"` задржава `category: "news"`. Тавили такође прихвата `search_type: "finance"` (`topic: "finance"`).
+
+Трошкови Фирецравл претраге се евидентирају по започетим блоку од 10 враћених резултата, по 0,002 УСД (2 кредита) по блоку и најмање једном блоку по позиву ( [Фирецравл наплата](https://docs.firecrawl.dev/billing) ): 11 резултата кошта 0,004 УСД.
+
+Генерички `time_range` сада стиже до оба провајдера: Ека добија `startPublishedDate` (ISO временску ознаку) и Тавили добија `start_date` (`YYYY-MM-DD`). Експлицитни датум у `provider_options` замењује мапирани.
+
+Ека резултати задржавају `id`, `highlights` (сваки истакнути део, а не само први који се користи као `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у `provider_raw`. Тавили резултати задржавају `images` и `favicon`.
+
+Цена претраге везе је 0,005 УСД за `depth` `fast` и `standard` и 0,05 УСД за `deep` ( [цене везе](https://docs.linkup.so/pages/documentation/development/pricing) ), без обзира да ли `depth` долази из `provider_options` или подешавања везе.
+
+Ека `type: "lite"` (Ека 3.0) прихвата мањи скуп поља и одбија цео захтев када се постави било које друго поље. За лите, `additionalQueries`, `systemPrompt` и сваки `contents` тастер осим `text` и `highlights` се испуштају пре позива. Застарели `subpages`, `subpageTarget`, `highlights.numSentences` и `highlights.highlightsPerUrl` се више не прослеђују.
+
+Рачуноводство трошкова је равни регистар `costPerQuery`, осим за Ека, који прати Ека-е сопствене цене: 0,007 долара по позиву за `auto` (и застарели `fast`) или 0,004 долара за `lite` (и застарели `instant`), покривајући 10 резултата; 0,001 $ за сваки даљи резултат; и 0,001 $ по враћеном резултату када је `contents.summary` подешен. Тавили је забележен на 1 кредит (0,008 УСД) за `search_depth` `basic`, `fast` и `ultra-fast` и 2 кредита (0,016 УСД) за `advanced` ( [Тавили API кредити](https://docs.tavily.com/documentation/api-credits) ). Позив са `auto_parameters: true` који Тавили надогради на напредни и даље се снима на 1 кредит.
 
 ---
 
 ## Web Fetch API
 
-Izvlačenje sadržaja sa URL-a preko konfigurisanog web-fetch provajdera (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract).
+Извуците садржај са URL-а путем конфигурисаног добављача за преузимање са веба (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
-| Metod | Putanja         | Opis                                                                  |
-| ----- | --------------- | --------------------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | Preuzimanje/scraping URL-a — telo validirano preko `v1WebFetchSchema` |
+Parallel Extract (`parallel-search`, са истим API кључем као Parallel Search) враћа само Markdown
+— сваки други `format` даје `400` — и ограничава садржај на 100.000 знакова. Када циљна страница
+не може да се издвоји, upstream то пријављује унутар HTTP 200 одговора;
+OmniRoute то приказује као `422` са фиксном поруком.
 
-**Autentifikacija:** Bearer API ključ (`extractApiKey` + `isValidApiKey`). Politika se sprovodi preko `enforceApiKeyPolicy`.
+| Метод | Путања          | Опис                                                           |
+| ----- | --------------- | -------------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Преузимање/издвајање URL-а — тело потврђује `v1WebFetchSchema` |
 
-**Fallback svestan kvota (#8297):** kada nije naveden eksplicitan `provider`, skup
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search`) se
-obilazi u fiksnom
-prioritetnom redosledu (fill-first) — provajder koji je ograničen brzinom, ali je konfigurisan, se preskače
-umesto da se zahtev prekine, a otkazivi/kvota-povezani otpremni neuspeh
-(HTTP 429 uvek; 402/403 za besplatne planove Firecrawl/Tavily/TinyFish tipa kvote —
-ne za Jina Reader, i nikad za običan 400 loš zahtev) prelazi na
-sledećeg neisprobanog provajdera sa akreditivima u trenutku zahteva. Kada su svi provajderi u
-skupu iscrpljeni, endpoint vraća jedinstven `429` (sa `Retry-After`
-zaglavljem) umesto prethodnog generičkog `400`. Kada je zahtevan eksplicitan `provider`,
-**nema** tihog fallback-a — eksplicitni provajder koji je ograničen brzinom ili ne radi
-prikazuje svoju sopstvenu grešku (`429` ako je ograničen brzinom, inače status sa strane provajdera).
+**Аутентификација:** Bearer API кључ (`extractApiKey` + `isValidApiKey`). Политика се примењује путем `enforceApiKeyPolicy`.
+
+**Резервни избор узимајући у обзир квоту (#8297):** када није наведен експлицитни `provider`, скуп
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search`) се
+обилази по фиксном
+редоследу приоритета (fill-first) — добављач који је ограничен брзином, али конфигурисан, прескаче се
+уместо да се захтев прекине, а поновљива грешка upstream-а/грешка због квоте (HTTP 429 увек; 402/403 за Firecrawl/Tavily/TinyFish квотне бесплатне нивое —
+не за Jina Reader, и никада за обичан 400 са неисправним захтевом) прелази на следећи
+провајдер са акредитивима који још није испробан у тренутку захтева. Када се исцрпе сви провајдери у
+скупу, крајња тачка враћа један `429` (са заглављем `Retry-After`) уместо претходног општег
+`400`. Када се захтева експлицитни `provider`, нема тихог резервног избора — добављач који је
+ограничен брзином или неуспешан приказује сопствену грешку (`429` ако је ограничен брзином,
+у супротном upstream статус).
 
 ---
 
-## WebSocket Streaming
+## WebSocket стримовање
 
 ```bash
 GET /v1/ws?handshake=1
 ```
 
-Validira WebSocket upgrade handshake i vraća primere poruka žičnog protokola (`request`, `cancel`). Stvarni WS okviri se obrađuju putem ugrađenog WS servera izvan Next.js tabele ruta.
+Проверава WebSocket handshake и враћа примере порука жичаног протокола (`request`, `cancel`). Стварним WS оквирима управља укључени WS сервер изван табеле рута за Next.js.
 
-**Autentifikacija:** Bearer API ključ prilikom handshake-a.
+**Аутентификација:** Bearer API кључ током handshake-а.
 
-### Responses API preko WebSocket-a (samo codex)
+### Responses API преко WebSocket-а (само codex)
 
 ```bash
-# Isti host:port kao HTTP API (podrazumevano 20128); upgrade-ujte konekciju:
+# Исти host:port као код HTTP API-ја (подразумевано 20128); надоградите везу:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
-# (ili: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
+# (или: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
-# Prvi okvir MORA biti response.create:
+# Први оквир МОРА бити response.create:
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-Responses-API-preko-WebSocket-a proxy je povezan **isključivo na `codex`** (ChatGPT
-backend). On sluša na istom portu kao API/dashboard na putanjama `/v1/responses`,
-`/responses`, i `/api/v1/responses`. Na prvi `response.create` okvir on
-autentifikuje + priprema preko internog `codex-responses-ws` bridge-a, bira
-codex OAuth konekciju, i tunelira do `wss://chatgpt.com/backend-api/codex/responses`
-preko `wreq-js` transporta. **Modeli koji nisu codex se odbijaju** (`codex_ws_provider_required`).
-Za rutiranje sa deljenjem kvote koristite `model: "qtSd/<group>/codex/<model>"`. Implementirano u
+Прокси за Responses-API-преко-WebSocket-а повезан је **искључиво са `codex`-ом** (ChatGPT
+backend). Слуша на истом порту као API/контролна табла на путањама `/v1/responses`,
+`/responses` и `/api/v1/responses`. При првом оквиру `response.create` врши
+аутентификацију + припрему путем интерног моста `codex-responses-ws`, бира codex OAuth везу
+и тунелује до `wss://chatgpt.com/backend-api/codex/responses`
+путем транспорта `wreq-js`. **Модели који нису codex се одбијају** (`codex_ws_provider_required`).
+За усмеравање дељења квоте користите `model: "qtSd/<group>/codex/<model>"`. Имплементирано у
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
-**Autentifikacija:** Bearer API ključ prilikom handshake-a. Ugrađeni HTTP server (`server-ws.mjs`)
-mora biti aktivna ulazna tačka (jeste, po podrazumevanoj vrednosti, kada `app/server-ws.mjs` postoji).
+**Аутентификација:** Bearer API кључ током handshake-а. Укључени HTTP сервер (`server-ws.mjs`)
+мора бити активна улазна тачка (подразумевано јесте када постоји `app/server-ws.mjs`).
 
-#### ID modela: koristite goli ChatGPT id (bez `codex/` prefiksa)
+#### ИД модела: користите основни ChatGPT ID (без префикса `codex/`)
 
-OpenAI **Codex CLI** validira naziv modela na strani klijenta kada je
-`supports_websockets = true` i **odbija id-ove sa prefiksom provajdera** kao
-`codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
-a ChatGPT account`). Pošaljite **goli** id (npr. `gpt-5.5`). OmniRoute-ov bridge je
-samo za codex, tako da ponovo razrešava goli id kao codex model
-(`resolveCodexWsModelInfo`) prije tuneliranja ka nadređenom serveru — čak i ako bi
-goli `gpt-5.5` inače usmerio ka drugom provajderu preko HTTP-a.
+OpenAI **Codex CLI** проверава назив модела на страни клијента када је
+`supports_websockets = true` и **одбија ID-јеве са префиксом добављача**
+попут `codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
+a ChatGPT account`). Пошаљите **основни** ID (нпр. `gpt-5.5`). OmniRoute-ов мост је
+ограничен на codex, па поново разрешава основни ID као codex модел
+(`resolveCodexWsModelInfo`) пре тунеловања upstream-у — иако би основни
+`gpt-5.5` иначе био усмерен другом добављачу преко HTTP-а.
 
-#### Konfigurisanje OpenAI Codex CLI-ja
+#### Конфигурисање OpenAI Codex CLI-ја
 
-Usmerite Codex CLI ka OmniRoute-u dodavanjem prilagođenog provajdera sa WebSocket
-podrškom u `~/.codex/config.toml` (koristite odvojeni `CODEX_HOME` da izbegnete diranje
-postojeće konfiguracije):
+Усмерите Codex CLI на OmniRoute додавањем прилагођеног добављача са подршком за WebSocket у
+`~/.codex/config.toml` (користите засебан `CODEX_HOME` да бисте избегли измену постојеће конфигурације):
 
 ```toml
-model = "gpt-5.5"                 # goli id — NE "codex/gpt-5.5"
+model = "gpt-5.5"                 # основни ID — НЕ "codex/gpt-5.5"
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
-base_url = "http://localhost:20128/v1"   # bez pratećeg slash-a; WS URL se izvodi (koristite https/wss u produkciji)
-wire_api = "responses"                    # jedina podržana vrednost od februara 2026
-supports_websockets = true                # omogućava Responses-over-WS transport
-env_key = "OMNIROUTE_API_KEY"             # sadrži OmniRoute API ključ (Bearer)
+base_url = "http://localhost:20128/v1"   # без косе црте на крају; WS URL се изводи (у продукцији користите https/wss)
+wire_api = "responses"                    # једина подржана вредност од фебруара 2026.
+supports_websockets = true                # омогућава Responses-over-WS транспорт
+env_key = "OMNIROUTE_API_KEY"             # садржи OmniRoute API кључ (Bearer)
 ```
 
 ```bash
-export OMNIROUTE_API_KEY=sk-...           # OmniRoute API ključ (bilo koji ključ ako je REQUIRE_API_KEY=false)
+export OMNIROUTE_API_KEY=sk-...           # OmniRoute API кључ (било који кључ ако је REQUIRE_API_KEY=false)
 codex exec "Responda apenas: PONG"
 ```
 
-CLI podiže `base_url + /responses` na WebSocket i OmniRoute to tunelira
-do izabrane codex OAuth konekcije. Validirano end-to-end na lokalnom
-serveru: ChatGPT vraća `codex.rate_limits` + `response.created` i strimuje
-kompletiranje.
+CLI надограђује `base_url + /responses` на WebSocket, а OmniRoute га тунелује
+до изабране codex OAuth везе. Провера од почетка до краја извршена је на локалном
+серверу: ChatGPT враћа `codex.rate_limits` + `response.created` и стримује
+завршетак.
 
 ---
 
 ## Извештавање о квотама и проблемима
 
-| Метод | Путања              | Опис                                                                                    |
-| ----- | ------------------- | --------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Претходна валидација квоте за `provider` + `accountId` пре издавања регистрованог кључа |
-| POST  | `/v1/issues/report` | Пријава грешке у квоти/издавању кључа на GitHub (захтева `GITHUB_ISSUES_REPO` + токен)  |
+| Метод | Путања              | Опис                                                                                          |
+| ----- | ------------------- | --------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Претходна валидација квоте за `provider` + `accountId` пре издавања регистрованог кључа       |
+| POST  | `/v1/issues/report` | Пријављивање неуспешног издавања квоте/кључа на GitHub (захтева `GITHUB_ISSUES_REPO` + токен) |
 
-**Аутентикација:** Bearer API кључ (`isAuthenticated`).
+**Аутентификација:** Bearer API кључ (`isAuthenticated`).
+
+### Опоравак сесије квоте (опционо)
+
+Нестримајући `POST /v1/chat/completions` или `POST /v1/responses` који не успе са
+коначном грешком квоте (`402`/`429`/`503` чије тело наводи да су квота или кредити исцрпљени)
+може бити привремено сачуван и поново покренут касније, уместо да врати грешку. Позивалац укључује ову опцију по захтеву помоћу три заглавља:
+
+| Заглавље                     | Вредност                                           |
+| ---------------------------- | -------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                             |
+| `x-omniroute-session`        | ID сесије, `[A-Za-z0-9._:-]{1,128}`                |
+| `x-omniroute-recovery-turn`  | ID обрта јединствен у оквиру сесије (исто правило) |
+
+Само обрти са `stream: false`, без алата, историје алата или `previous_response_id`, као и без
+`x-omniroute-connection` закачења, испуњавају услове, а `STORAGE_ENCRYPTION_KEY` мора бити подешен
+(захтев се чува шифрован до 24 часа). Одговор је затим `202` са
+`recovery.poll`; позовите `GET /v1/quota-recoveries/{id}` (`202` док је на чекању, `200` са
+опорављеним телом по завршетку) или откажите помоћу `DELETE`. Картице су видљиве само API
+кључу који их је креирао. Поновно покретање чији је исход неизвестан завршава у стању
+`needs_confirmation` уместо да буде послато два пута. Извор: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
-## Самоуслужно коришћење (`/api/usage/om-usage`)
+## Самоуслужна употреба (`/api/usage/om-usage`)
 
-Било који API кључ може да прочита **сопствену** потрошњу и квоте — без управљачке ауторизације. Ово је крајња тачка коју
-клијент (CLI, OmniCopilot панел) користи да би власнику кључа приказао његову потрошњу.
+Сваки API кључ може да чита** свој сопствени** коришћење и квоте — без управљања аутх. Ово је крајња тачка коју клијент (CLI, OmniCopilot панел) користи да покаже власнику кључева њихову потрошњу.
 
 ```bash
-# Текстуални облик (историјски уговор — обичан текст за терминал)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Структурирани облик — оно што кориснички интерфејс користи
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Кључ мора да има омогућен **`allowUsageCommand`** (подразумевано је искључено — менаџер API кључева на контролној табли
-укључује или искључује ову опцију за сваки кључ појединачно). Без тога, крајња тачка одговара статусом `403`.
+Кључ мора имати**`allowUsageCommand`** омогућено (подразумевано искључено — АПИ-менаџер кључева контролне табле га пребацује по кључу). Без тога крајња тачка одговара `403`.
 
-`?format=json` враћа дискриминисани облик, тако да позивалац никада не чита поље са подацима из
-одбијеног одговора. При успеху:
+`?format=json` враћа дискриминисани облик тако да позивалац никада не чита поље података са одбијања. О успеху:
 
 ```jsonc
 {
   "allowed": true,
-  // присутно само када су за кључ укључена ограничења потрошње по кључу (дневна/недељна у USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -786,14 +1039,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // снимак квоте изабраног добављача или null када још ништа није кеширано:
-  "provider": {
-    "connectionId": "…",
-    "provider": "claude",
-    "plan": "…",
-    "quotas": {/* … */},
-  },
-  // снимак за сваку везу, тако да кориснички интерфејс може да прикаже више добављача једног поред другог:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
+  "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -801,74 +1049,59 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-При одбијању (`401` неисправан кључ / `403` није дозвољено), иста рута враћа
-`{ "allowed": false, "error": { "message": "…" } }` — присутно, али празно поље `personal`/`provider`
-(кључ је дозвољен, али још ништа није сазнато) представља другачије стање од одбијања, а само JSON облик
-прави разлику између њих.
+У случају одбијања (`401` бад кеи / `403` нот алловед) иста рута враћа `{ "allowed": false, "error": { "message": "…" } }` — садашњи али празан `personal`/`provider` (кључ дозвољен, још ништа није научено) је другачије стање од одбијања, и само их облик JSON разликује.
 
-**Ауторизација:** сопствени Bearer API кључ позиваоца, проверен помоћу `isValidApiKey` — ово _није_
-управљачка површина (`/api/keys/…`), која остаје заштићена помоћу `requireManagementAuth`.
+**Аутх:** сопствени Носилац API кључ позиваоца, потврђен са `isValidApiKey` — ово _није_ управљачка површина (`/api/keys/…`), која остаје иза `requireManagementAuth`.
 
-### Необрађени проценти квоте у односу на проценте прилагођене граничној вредности
+### Рав у односу на процентуално прилагођене квоте
 
-При коришћењу `/api/usage/om-usage`, позиваоци треба да обрате пажњу на разлику између
-процената приказаних у **излазу у облику обичног текста** и структурираном **JSON излазу**:
+Када конзумирају `/api/usage/om-usage`, позиваоци треба да примете разлику између процената представљених од стране** излаз у облику обичног текста** и структурираним**JSON оутпут** :
 
-| Аспект                           | Формат обичног текста (`/api/usage/om-usage` / `@@om-usage`)                                             | JSON формат (`?format=json`)                                                                       |
-| :------------------------------- | :------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| **Излазно поље**                 | `NN% left` (нпр. `20% left`)                                                                             | `provider.quotas` / `providers[].quotas`                                                           |
-| **Мерење**                       | **Употребљиво ограничење прилагођено граничној вредности**: преостали капацитет изнад граничне вредности | **Необрађена квота извора**: неприлагођена мера добављача                                          |
-| **Скалирање граничне вредности** | Скалирано помоћу `effectiveRemainingPercent()`, тако да се заштићена резерва приказује као `0% left`     | Нема га (необрађене вредности снимка које је пријавио добављач)                                    |
-| **Подаци о прагу**               | Урачунати у приказани проценат                                                                           | Чувају се у `quotaWindowThresholds` за сваку везу (или се користе подразумеване вредности сервера) |
-| **Примарни корисник**            | Интерактивни CLI алати, терминалски упити, људски оператери                                              | Програмске интеграције, контролне табле, аналитика, праћење наплате                                |
+| Аспецт                | Формат обичног текста (`/api/usage/om-usage` / `@@om-usage`)                                       | JSON формат (`?format=json`)                                                         |
+| :-------------------- | :------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| **Излазно поље**      | `NN% left` (нпр. `20% left`)                                                                       | `provider.quotas` / `providers[].quotas`                                             |
+| **Меасуремент**       | **Употребни додатак прилагођен граничним вредностима** : преостали капацитет изнад граничног прага | **Сирова квота узводно** : неприлагођено мерење провајдера                           |
+| **Цутофф сцалинг**    | Скалирано преко `effectiveRemainingPercent()` тако да се заштићена резерва чита као `0% left`      | Ништа (необрађене вредности снимка према извештају добављача)                        |
+| **Подаци о прагу**    | Укључено у приказани проценат                                                                      | Чува се у `quotaWindowThresholds` по конекцији (или подразумеване вредности сервера) |
+| **Примарни потрошач** | Интерактивни CLIs, терминалски промпти, људски оператери                                           | Програмске интеграције, контролне табле, аналитика, праћење наплате                  |
 
-#### Формула за прилагођавање граничној вредности
+#### Формула за подешавање пресека
 
-OmniRoute подржава проактивне граничне вредности квоте ради спречавања исцрпљивања ресурса извора (конфигурисане путем
-`quotaWindowThresholds` везе, подразумеваних вредности добављача или глобалних поставки отпорности). Када је гранична вредност
-(нпр. `cutoff = 25%`) активна за прозор квоте, приказивач текста израчунава преостало ограничење на следећи начин:
+OmniRoute подржава проактивно одсецање квота како би се спречило исцрпљивање узводно (конфигурисано преко везе `quotaWindowThresholds`, подразумеваних подешавања провајдера или подешавања глобалне отпорности). Када је гранична вредност (нпр. `cutoff = 25%`) активна у прозору квоте, приказивач текста израчунава преостали износ као:
 
-- Ако је `remaining <= cutoff`: враћа `0%`.
-- Ако је `remaining > cutoff`: враћа `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Ако `remaining <= cutoff`: враћа `0%`.
+- Ако `remaining > cutoff`: враћа `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
 Форматирани текстуални излаз заокружује ово на најближи цео број (`Math.round(...)`).
 
 #### Илустративни пример
 
-Размотрите прозор добављача са **60% необрађене потрошње** (дакле, **40% необрађене преостале квоте**) и конфигурисаним
-прагом **граничне вредности од 25% преостале квоте**:
+Размислите о прозору добављача са** 60% сирове употребе** (дакле** 40% сирове преостале квоте** ) и конфигурисана** 25% преостале квоте** праг:
 
-| Приказ                               | Израчунавање                                       | Преостало |           Подразумевано искоришћено           |
-| :----------------------------------- | :------------------------------------------------- | :-------: | :-------------------------------------------: |
-| **Необрађени JSON (`?format=json`)** | Снимак извора (`quotas[window]`)                   |  **40%**  |                    **60%**                    |
-| **Текстуални формат (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (ако се рачуна као `100 - remaining`) |
+| Репрезентација                 | Калкулација                                        | Преостало |               Имплиед Усед                |
+| :----------------------------- | :------------------------------------------------- | :-------: | :---------------------------------------: |
+| **Рав JSON (`?format=json`)**  | Узводни снимак (`quotas[window]`)                  |  **40%**  |                  **60%**                  |
+| **Формат текста (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |  **20%**  | **80%** (ако се рачуна `100 - remaining`) |
 
-- **Зашто текст приказује да је преостало 20%:** Од 40% физичке квоте преостале на налогу, 25% је резервисано
-  политиком граничне вредности. Позиваоцу је преостало само 15% од 75% употребљивог простора пре него што рутер престане
-  да усмерава саобраћај ка овој вези. Скалирање обезбеђује да веза сигнализира исцрпљеност (`0% left`) тачно онда када
-  усмеравање престаје.
-- **Зашто JSON задржава необрађене вредности:** JSON садржај враћа тачан снимак добављача (`UsageSnapshot`),
-  тако да спољни алати имају приступ стварној искоришћености извора и вредностима
-  `quotaWindowThresholds` на нивоу везе, без скалирања са губитком података на страни сервера.
+- **Зашто текст приказује 20% преостало:** Од 40% физичке квоте која је остала на рачуну, 25% је резервисано полисом искључења. Позивалац има само 15% од 75% употребљивог простора преосталог простора пре него што рутер престане да усмерава на ову везу. Скалирање осигурава исцрпљивање сигнала везе (`0% left`) тачно када ће рутирање престати.
+- **Зашто JSON чува сирове вредности:** Корисно оптерећење JSON враћа тачан снимак добављача (`UsageSnapshot`) тако да спољни алати имају приступ узводном коришћењу земаљске истине и `quotaWindowThresholds` на нивоу везе без скалирања са губицима на страни сервера.
 
-#### Смернице за миграцију корисника
+#### Смернице за миграцију потрошача
 
-Ако је спољна интеграција (као што је додатак за уређивач или проширење агента) раније издвајала податке из текстуалне
-крајње тачке (`NN% left`) и израчунавала проценат потрошње као `100 - NN`, прелазак на `?format=json` значи:
+Ако је екстерна интеграција (као што је додатак за уређивач или екстензија агента) претходно уклонила крајњу тачку текста (`NN% left`) и израчунала употребљени проценат као `100 - NN`, миграција на `?format=json` значи:
 
-- Читање необрађених JSON вредности одражаваће **стварну потрошњу извора** (60% искоришћено у горњем примеру).
-- Ако интеграција жели да задржи семантику употребљивог ограничења текстуалне крајње тачке, може на клијентској страни
-  да примени формулу за ефективни преостали проценат, користећи `quotaWindowThresholds` за замене на нивоу везе.
+- Читање сирових JSON вредности ће се одразити** стварна потрошња узводно** (60% коришћено у горњем примеру).
+- Ако интеграција жели да сачува семантику употребљиве дозволе крајње тачке текста, може проценити ефективну преосталу формулу на страни клијента користећи `quotaWindowThresholds` за замена нивоа везе.
 
 ---
 
 ## Семантички кеш
 
 ```bash
-# Добијање статистике кеша
+# Преузми статистику кеша
 GET /api/cache/stats
 
-# Брисање свих кешева
+# Обриши све кешеве
 DELETE /api/cache/stats
 ```
 
@@ -889,37 +1122,36 @@ DELETE /api/cache/stats
 }
 ```
 
-### Утицај на кашњење
+### Утицај на латенцију
 
-Погодак (HIT) семантичког кеша служи одговор из кеша **без позива ка upstream-у**,
-тако да пријављено `X-OmniRoute-Response-Latency` буде близу нуле
-(без обзира на стварно upstream кашњење). Клијенти осетљиви на кашњење
-(benchmarking, p50/p99 мониторинг) треба да провере
-`X-OmniRoute-Cache-Latency` заглавље одговора:
+Погодак семантичког кеша служи одговор из кеша **без позива upstream сервиса**, па је пријављена вредност `X-OmniRoute-Response-Latency` приближно нула
+(без обзира на првобитну латенцију upstream сервиса). Клијенти осетљиви на латенцију
+(бенчмарковање, надгледање p50/p99) требало би да провере заглавље одговора
+`X-OmniRoute-Cache-Latency`:
 
-| Вредност    | Значење                                                          |
-| ----------- | ---------------------------------------------------------------- |
-| `synthetic` | Одговор је послужен из кеша; кашњење није стварно upstream време |
-| _(одсутно)_ | Одговор из стварног upstream позива                              |
+| Вредност    | Значење                                                                    |
+| ----------- | -------------------------------------------------------------------------- |
+| `synthetic` | Одговор је послужен из кеша; латенција није стварно време upstream сервиса |
+| _(absent)_  | Одговор потиче из стварног upstream позива                                 |
 
 ### Заобилажење кеша по кључу
 
-API кључеви могу да искључе читање из семантичког кеша путем `cacheDefaultMode`:
+API кључеви могу да искључе читање из семантичког кеша помоћу `cacheDefaultMode`:
 
-| Вредност | Понашање                                                 |
-| -------- | -------------------------------------------------------- |
-| `legacy` | Нормално понашање кеша (подразумевано)                   |
-| `bypass` | Потпуно прескочи претрагу кеша; увек контактира upstream |
+| Вредност | Понашање                                                         |
+| -------- | ---------------------------------------------------------------- |
+| `legacy` | Уобичајено понашање кеша (подразумевано)                         |
+| `bypass` | У потпуности прескаче претрагу кеша; увек позива upstream сервис |
 
-Подешава се приликом креирања кључа (`POST /api/keys`) или ажурирања (`PATCH /api/keys/[id]`):
+Подесите приликом креирања кључа (`POST /api/keys`) или ажурирања (`PATCH /api/keys/[id]`):
 
 ```json
 { "cacheDefaultMode": "bypass" }
 ```
 
-### Заобилажење по захтеву
+### Заобилажење кеша по захтеву
 
-Сваки захтев може заобићи кеш без обзира на подешавања кључа:
+Сваки захтев може да заобиђе кеш без обзира на подешавања кључа:
 
 ```
 X-OmniRoute-No-Cache: true
@@ -927,52 +1159,75 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+## Компатибилност управљања са CLIProxyAPI
+
+OmniRoute одговара на три управљачка ендпоинта система [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+које контролне табле коришћења позивају ради очитавања ограничења Claude и Codex претплата
+(на пример, извор ограничења коришћења `cliproxy` у систему T3 Code). Подесите основни URL клијента на
+OmniRoute и користите API кључ са опсегом `manage` као управљачки кључ. Руте су
+доступне на `/v0/management/*` и на `/api/v0/management/*`.
+
+| Метод | Путања                       | Опис                                                                                                                                            |
+| ----- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude и Codex OAuth везе у облику `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Без токена                           |
+| POST  | `/v0/management/api-call`    | Тело `{ auth_index, method, url, header?, data? }`. Шаље један захтев са дозвољене листе користећи токен налога и враћа `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | Тело `{ auth_index }`. Брише период хлађења везе, блокаде модела и периоде хлађења по опсегу за Codex за један налог                            |
+
+- `auth_index` је ID везе система OmniRoute. `provider` је `claude` или `codex` (само OAuth
+  везе; провајдер API кључа `anthropic` није наведен). За Codex,
+  `id_token.chatgpt_account_id` је сачувани ID радног простора, а `plan_type` сачувани план.
+- `api-call` није генерички прокси. Прихвата само Claude `GET
+https://api.anthropic.com/api/oauth/usage` и Codex `GET https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` и
+  `POST .../wham/rate-limit-reset-credits/consume`, и то само за налог одговарајућег
+  провајдера. Све остало враћа `403` без контактирања upstream сервиса. Заглавље
+  `Authorization` позиваоца (укључујући чувар места `$TOKEN$`) се занемарује: OmniRoute убацује
+  приступни токен везе, прво га освежава ако је близу истека, и прослеђује само
+  заглавља са дозвољене листе (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). Ако недостаје `Chatgpt-Account-Id`, подразумевано се користи сачувани ID радног простора.
+  Захтеви истичу после 15 секунди и користе прокси везе.
+- `reset-quota` оставља терминална стања (`banned`, `expired`, `credits_exhausted`) непромењеним. Непознат
+  `auth_index` враћа `404`.
+
+**Аутентификација:** сесија контролне табле или API кључ са опсегом `manage`, обавезни чак и када је пријављивање онемогућено
+(путање се налазе у `ALWAYS_PROTECTED_API_PATHS`). Кључеви намењени само за inference добијају `403`. Извор:
+`src/lib/cliproxyCompat/managementApi.ts`.
+
+---
+
 ## Контролна табла и управљање
 
-Руте за управљање (`/api/*`, осим јавне аутентификације/пријављивања) **нису** ауторизоване
-обичним API кључевима за инференцију. Породице акредитива, опсези и curl примери:
-[Аутентификација за управљање](../guides/MANAGEMENT-AUTH.md).
+Руте управљања (`/api/*` осим јавних auth/login) су** не** ауторизован обичним API кључевима за закључивање. Породице акредитива, опсег и примери цурл-а: [Потврда идентитета управљања](../guides/MANAGEMENT-AUTH.md).
 
 ### Аутентификација
 
-| Крајња тачка                  | Метод   | Опис                                          |
-| ----------------------------- | ------- | --------------------------------------------- |
-| `/api/auth/login`             | POST    | Пријављивање                                  |
-| `/api/auth/logout`            | POST    | Одјављивање                                   |
-| `/api/settings/require-login` | GET/PUT | Укључивање/искључивање обавезног пријављивања |
+| Крајња тачка                  | Метод    | Опис                                                                                                                                                                                                                                                                                     |
+| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Логин                                                                                                                                                                                                                                                                                    |
+| `/api/auth/logout`            | POST     | Одјава                                                                                                                                                                                                                                                                                   |
+| `/api/settings/require-login` | GET/POST | Статус пријаве (GET, јавно). POST поставља лозинку/искључује пријаву: оператор-само када лозинка постоји (сесија на контролној табли, локални CLI или пријава онемогућена — API кључеви и `oma_` токени добијају `403`); сесија контролне табле шаље `currentPassword` да замени лозинку |
 
-### Управљање провајдерима
+### Провидер Манагемент
 
-| Крајња тачка                            | Метод                     | Опис                                                                                                                                                                    |
-| --------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Приказ листе / креирање провајдера                                                                                                                                      |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Управљање провајдером                                                                                                                                                   |
-| `/api/providers/[id]/test`              | POST                      | Тестирање везе са провајдером                                                                                                                                           |
-| `/api/providers/[id]/models`            | GET                       | Приказ листе модела провајдера                                                                                                                                          |
-| `/api/providers/validate`               | POST                      | Валидација конфигурације провајдера                                                                                                                                     |
-| `/api/providers/bulk`                   | POST                      | Групно додавање API кључева за ЈЕДНОГ провајдера                                                                                                                        |
-| `/api/providers/import`                 | POST                      | Увоз хетерогене ЛИСТЕ провајдера из парсиране CSV/JSON датотеке (#6836); резултати делимичних неуспеха за сваки ред                                                     |
-| `/api/provider-nodes*`                  | Разни                     | Управљање чворовима провајдера                                                                                                                                          |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Прилагођени модели и подешавања по моделу која замењују подразумевана (додавање, ажурирање, скривање/приказивање, брисање)                                              |
-| `/api/provider-models/validate-and-add` | POST                      | Опциона строга валидација везе, аутентификована за управљање, и атомска регистрација прилагођеног модела; погледајте [Валидација модела](../guides/MODEL-VALIDATION.md) |
+| Крајња тачка                            | Метод                     | Опис                                                                                                                                                                         |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Листа / креирање провајдера                                                                                                                                                  |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Управљајте провајдером                                                                                                                                                       |
+| `/api/providers/[id]/test`              | POST                      | Тестирајте везу са провајдером                                                                                                                                               |
+| `/api/providers/[id]/models`            | GET                       | Наведите моделе добављача                                                                                                                                                    |
+| `/api/providers/validate`               | POST                      | Потврдите конфигурацију добављача                                                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | Групно додајте API кључеве за ONE провајдера                                                                                                                                 |
+| `/api/providers/import`                 | POST                      | Увезите хетерогеног провајдера LIST из рашчлањене CSV/JSON датотеке (#6836); резултати делимичног квара по реду                                                              |
+| `/api/provider-nodes*`                  | Разно                     | Управљање чворовима добављача                                                                                                                                                |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Прилагођени модели и замене по моделу (додавање, ажурирање, hide/show, брисање)                                                                                              |
+| `/api/provider-models/validate-and-add` | POST                      | Провера аутентичности менаџмента, валидација стриктног повезивања и регистрација атомског прилагођеног модела; погледајте [валидацију модела](../guides/MODEL-VALIDATION.md) |
 
-За синхронизоване/увезене моделе, `PUT /api/provider-models` прихвата `provider`, `modelId` и
-`maxOutputTokenOverride`: позитиван цео број поставља ручно ограничење излазних токена, док га `null`
-уклања и враћа подразумевану вредност. `GET /api/provider-models?provider=<provider>` враћа ове
-вредности у `modelOutputOverrides`, укључујући моделе без реда прилагођеног модела. Ова замена
-користи могућност `max_output_tokens` током извршавања и задржава се након поновне синхронизације модела. Страница
-провајдера компатибилног са OpenAI-јем нуди исте контроле за измену/уклањање и означава моделе са експлицитном подршком за вид.
+За моделе synced/imported, `PUT /api/provider-models` прихвата `provider`, `modelId` и `maxOutputTokenOverride`: позитиван цео број поставља ограничење ручног излазног токена, а `null` га брише да би вратио подразумеване вредности. `GET /api/provider-models?provider=<provider>` враћа ове вредности у `modelOutputOverrides`, укључујући моделе без реда прилагођеног модела. Замена користи `max_output_tokens` могућност извођења и преживљава поновну синхронизацију модела. Страница добављача компатибилна са ОпенАИ-ом нуди исте edit/clear контроле и означава моделе експлицитном подршком за визију.
 
-Прилагођени Chat Completions чворови прилагођавају експлицитно искључивање резоновања позадинском систему. Успешан
-тест везе аутоматски бира контроле шаблона ћаскања за сваки тачан ID модела
-чији унос у `/models` потврђује препознату вредност `owned_by`: `vllm`, `sglang` или `llamacpp`.
-Транспарентни омотачи компатибилни са OpenAI-јем могу да сачувају оригинални унос модела унутар угнежђеног
-објекта `openai`; откривање прати највише три таква омотача. Модели са недостајућим, непознатим или
-неусаглашеним власништвом задржавају уобичајено OpenAI понашање. Откривање поново користи постојећи захтев за каталог,
-не генерише токене довршавања и поништава се када се промени крајња тачка везе.
+На компатибилном провајдерском чвору, путање писања (`POST`, `PUT`, `PATCH`, `DELETE` и `/api/provider-models/validate-and-add`) чувају ид модела као голи узводни ид: ид који је налепљен из листе са префиксом има све водећи стек сопственог префикса чвора срушен, а одговори одражавају сачувани ид. Исечени ИД-ови канонских добављача (нпр. `nvidia/nemotron-…`) се чувају дословно. `/v1/models` никада не емитује наслагани `<prefix>/<prefix>/<model>` ид.
 
-Да бисте фиксирали понашање за позадински систем који не излаже те метаподатке, користите постојећи API
-за делимично ажурирање провајдера:
+Чворови прилагођених довршавања ћаскања прилагођавају онемогућавање експлицитног образложења на узводну позадину. Успешан тест везе аутоматски бира контроле шаблона за ћаскање за сваки тачан модел ID чији унос `/models` доказује препознату вредност `owned_by` : `vllm`, `sglang` или `llamacpp`. Транспарентни ОпенАИ-компатибилни омоти могу сачувати оригинални унос модела унутар угнежђеног `openai` објекта; детекција прати до три такве коверте. Модели са недостајућим, непознатим или конфликтним власништвом задржавају уобичајено OpenAI понашање. Детекција поново користи постојећи каталошки захтев, не генерише токене завршетка и поништава се када се крајња тачка везе промени.
+
+Да бисте закачили понашање за позадину која не излаже те метаподатке, користите постојеће делимично ажурирање добављача API:
 
 ```json
 {
@@ -982,82 +1237,91 @@ X-OmniRoute-No-Cache: true
 }
 ```
 
-Пошаљите то тело са `PUT /api/providers/<connection-id>`. На тој вези се експлицитни
-ниво резоновања `none` шаље као `chat_template_kwargs.thinking=false` и
-`chat_template_kwargs.enable_thinking=false`. Експлицитне изворне вредности шаблона задржавају приоритет,
-осим ако правило резоновања на страни сервера не наметне ниво. Подешавање се примењује само када прилагођена
-веза компатибилна са OpenAI-јем прослеђује Chat Completions тело; Responses захтеви и обични
-провајдери задржавају свој изворни облик захтева. Поставите `reasoningControl` на `openai` да бисте наметнули уобичајено OpenAI
-прослеђивање вредности `reasoning_effort`, или га изоставите/поставите на `null` да бисте користили аутоматско откривање.
+Пошаљи то тело са `PUT /api/providers/<connection-id>`. На тој вези, експлицитни покушај резоновања `none` се шаље као `chat_template_kwargs.thinking=false` и `chat_template_kwargs.enable_thinking=false`. Експлицитне изворне вредности шаблона остају меродавне осим ако правило резоновања на страни сервера не изнуди напор. Поставка се примењује само када прилагођена веза компатибилна са ОпенАИ-ом пошаље тело Довршених ћаскања; Захтеви за одговоре и обични добављачи задржавају свој изворни облик захтева. Поставите `reasoningControl` на `openai` да бисте присилили обичан OpenAI `reasoning_effort` пролаз, или изоставите it/set на `null` да бисте користили аутоматско откривање.
 
-Захтеви класификатора за аутоматски режим у Claude Code подразумевано онемогућавају изворно размишљање када не садрже
-експлицитне контроле резоновања. Откривање користи системску ознаку класификатора у захтевима Claude формата,
-а не називе модела или ограничења довршавања. Експлицитне контроле у телу захтева, подржана заглавља за ниво напора/размишљање,
-правила усмеравања и разрешени ниво напора модела задржавају свој постојећи приоритет. Обе фазе класификатора
-задржавају своје промптове, ограничења довршавања, секвенце за заустављање и стварне одлуке о дозволама узводног система;
-друга фаза и даље може да произведе затражено видљиво резоновање као обичан текст.
+Claude кодни класификатор у аутоматском режиму захтева да се онемогући подразумевано природно размишљање када не садржи експлицитне контроле резоновања. Детекција користи системски маркер класификатора у захтевима у формату Цлауде, а не имена модела или ограничења завршетка. Експлицитне контроле тела, подржана effort/thinking заглавља, правила рутирања и решени напори модела задржавају свој постојећи приоритет. Обе фазе класификатора задржавају своје упите, границе завршетка, секвенце заустављања и стварне пресуде о дозволама узводно; друга фаза још увек може да произведе своје тражено видљиво резоновање као обичан текст.
 
-### OAuth токови
+### OAuth Фловс
 
-| Крајња тачка                     | Метод | Опис                         |
-| -------------------------------- | ----- | ---------------------------- |
-| `/api/oauth/[provider]/[action]` | Разни | OAuth специфичан за пружаоца |
+| Крајња тачка                     | Метод | Опис                           |
+| -------------------------------- | ----- | ------------------------------ |
+| `/api/oauth/[provider]/[action]` | Разно | OAuth специфичан за провајдера |
 
-### Усмеравање и конфигурација
+### Роутинг & Цонфиг
 
 | Крајња тачка          | Метод    | Опис                             |
 | --------------------- | -------- | -------------------------------- |
-| `/api/models/alias`   | GET/POST | Алијаси модела                   |
-| `/api/models/catalog` | GET      | Сви модели према пружаоцу и типу |
-| `/api/combos*`        | Разни    | Управљање комбинацијама          |
-| `/api/keys*`          | Разни    | Управљање API кључевима          |
-| `/api/pricing`        | GET      | Цене модела                      |
+| `/api/models`         | GET/PUT  | Ажурирање листе модела / алијаса |
+| `/api/models/alias`   | GET/POST | Модел алиаси                     |
+| `/api/models/catalog` | GET      | Сви модели по провајдеру + тип   |
+| `/api/combos*`        | Разно    | Комбиновано управљање            |
+| `/api/keys*`          | Разно    | API управљање кључевима          |
+| `/api/pricing`        | GET      | Модел цена                       |
 
-### Коришћење и аналитика
+#### Модел ограничава порекло
 
-| Крајња тачка                     | Метод           | Опис                                                                                                                                                                                                                                                                                                     |
-| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Историја коришћења                                                                                                                                                                                                                                                                                       |
-| `/api/usage/logs`                | GET             | Евиденције коришћења                                                                                                                                                                                                                                                                                     |
-| `/api/usage/request-logs`        | GET             | Евиденције на нивоу захтева                                                                                                                                                                                                                                                                              |
-| `/api/usage/[connectionId]`      | GET             | Коришћење по вези                                                                                                                                                                                                                                                                                        |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Буџети ограничења токена по API кључу                                                                                                                                                                                                                                                                    |
-| `/api/usage/model-latency-stats` | GET             | Покретни агрегат кашњења по пружаоцу/моделу (просек/p50/p95/p99, стопа успешности); филтери: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                             |
-| `/api/usage/cache-health`        | GET             | Резиме стања кеша промптова над `call_logs` — однос уписа/читања, p50/p90/p99 расподела величине уписа, концентрација обимних уписа, подела по моделу и оцена `healthy`/`degraded`/`thrash`/`no-data`; параметри упита `range` (`1h`\|`24h`\|`7d`\|`30d`, подразумевано `24h`) и опциони `model` (#8827) |
+`GET /api/models?withLimits=1` (такође `true`; `0`/`false` или ако га изоставите, подразумевано оптерећење остаје непромењено) додаје `contextWindow`, `maxInputTokens`, `maxOutputTokens` и `capsSource` објекат сваком реду модела. `capsSource` именује правило које је обезбедило свако ограничење, тако да се изненађујуће ограничење (на пример 128к на 1М моделу) може пратити до његовог порекла. Решене вредности су исте оне које користи рутирање; заставица само додаје поља и никада не мења вредност. Било која друга вредност `withLimits` се одбија са `400`.
 
-### Дозволе API кључа
+| `capsSource` валуе                           | Порекло                                                                |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Трајно замена прозора контекста (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | Трајно надјачавање `max_input_tokens` / `max_output_tokens` могућности |
+| `static-authoritative:<provider>/<model>`    | Статичка меродавна табела контекст-прозора                             |
+| `synced:<provider>/<model>`                  | ред за синхронизоване могућности моделс.дев                            |
+| `registry:<provider>/<model>`                | Унос у регистар провајдера                                             |
+| `spec:<model>`                               | Спецификација статичког модела                                         |
+| `effort-base:` префик                        | Ред позајмљен из основног модела варијанте са суфиксом напора          |
+| `none`                                       | Ниједан извор не декларише ограничење (вредност је `null`)             |
 
-`PATCH /api/keys/{id}` ажурира дозволе постојећег кључа. Као и свака рута `/api/keys*`, захтева овлашћење за управљање (погледајте [Аутентификација за управљање](../guides/MANAGEMENT-AUTH.md)), а не кључ за инференцију. Пошаљите само поља која желите да промените; захтев без иједног од њих одбија се поруком `No valid fields to update`. Прихваћена поља дефинише `updateKeyPermissionsSchema` у `src/shared/validation/schemas/keys.ts`.
+Имплементација: `getResolvedModelCapabilitiesWithLimitSources()` у `src/lib/modelCapabilities.ts` и ланци приоритета у `src/lib/modelCapabilityLimits.ts`.
 
-| Поље                                        | Тип                                                                         | Напомене                                                                                                                          |
-| ------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | стринг, 1–200 знакова                                                       |                                                                                                                                   |
-| `isActive`                                  | логичка вредност                                                            |                                                                                                                                   |
-| `isBanned`                                  | логичка вредност                                                            |                                                                                                                                   |
-| `expiresAt`                                 | ISO 8601 датум и време или `null`                                           | `null` уклања датум истека                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                                       | `allowedModels` мора бити празан када је режим `all`                                                                              |
-| `allowedModels`, `blockedModels`            | низ стрингова, до 1000                                                      |                                                                                                                                   |
-| `allowedCombos`                             | низ стрингова, до 500                                                       | Одређује које комбинације кључ може да позива; директни модели су регулисани помоћу `modelAccessMode` / `allowedModels`           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                       | `allowedConnections` не сме бити празан када је режим `restricted`, а мора бити празан када је режим `all`                        |
-| `allowedConnections`                        | низ UUID-ова, до 100                                                        |                                                                                                                                   |
-| `allowAutoCombos`                           | логичка вредност                                                            | `false` одбија захтеве за моделе `auto/*` са овим кључем; кључевима за које ова вредност никада није подешена приступ је дозвољен |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                               | Одређује шта `GET /v1/models` приказује за овај кључ (само комбинације, само модели или обоје); не мења шта кључ може да позива   |
-| `noLog`, `autoResolve`                      | логичка вредност                                                            |                                                                                                                                   |
-| `throttleDelayMs`                           | цео број, 0–300000                                                          |                                                                                                                                   |
-| `maxSessions`                               | цео број, 0–10000                                                           |                                                                                                                                   |
-| `rateLimits`                                | низ објеката `{ limit, window }` (позитивни цели бројеви, до 50) или `null` | `null` уклања ограничења                                                                                                          |
-| `accessSchedule`                            | објекат распореда или `null`                                                | `null` уклања распоред                                                                                                            |
-| `scopes`                                    | низ стрингова, до 32                                                        |                                                                                                                                   |
-| `allowedEndpoints`                          | низ стрингова, до 20                                                        |                                                                                                                                   |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                          |                                                                                                                                   |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                        | Погледајте [Заобилажење кеша по кључу](#per-key-cache-bypass)                                                                     |
-| `compressionEnabled`                        | логичка вредност                                                            |                                                                                                                                   |
-| `codexServiceMode`                          | један од режима услуге Codex                                                |                                                                                                                                   |
-| `disableNonPublicModels`                    | логичка вредност                                                            |                                                                                                                                   |
-| `allowUsageCommand`                         | boolean                                                                     |                                                                                                                                   |
-| `usageLimitEnabled`                         | boolean                                                                     |                                                                                                                                   |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 или `null`                                                      |                                                                                                                                   |
-| `chaosModeEnabled`                          | boolean                                                                     |                                                                                                                                   |
+### Употреба и аналитика
+
+| Крајња тачка                     | Метод           | Опис                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Историја коришћења                                                                                                                                                                                                                                                                                                |
+| `/api/usage/logs`                | GET             | Дневници коришћења                                                                                                                                                                                                                                                                                                |
+| `/api/usage/request-logs`        | GET             | Дневници на нивоу захтева                                                                                                                                                                                                                                                                                         |
+| `/api/usage/[connectionId]`      | GET             | Употреба по конекцији                                                                                                                                                                                                                                                                                             |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Буџети са ограничењем токена по кључу АПИ-ја                                                                                                                                                                                                                                                                      |
+| `/api/usage/model-latency-stats` | GET             | Роллинг per-provider/model латенци агрегат (avg/p50/p95/p99, стопа успеха); филтери: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                              |
+| `/api/usage/cache-health`        | GET             | Сажетак здравља брзог кеша преко `call_logs` — write/read односа, p50/p90/p99 дистрибуције величине писања, концентрације тешке писања, поделе по моделу и пресуде `healthy`/`degraded`/`thrash`/`no-data` ; параметри упита `range` (`1h`\| `24h`\| `7d`\| `30d`, подразумевано `24h`) и опционо `model` (#8827) |
+
+### API кључне дозволе
+
+`PATCH /api/keys/{id}` ажурира дозволе постојећег кључа. Као и свака `/api/keys*` рута, потребна му је ауторизација управљања (погледајте [Потврда идентитета управљања](../guides/MANAGEMENT-AUTH.md) ), а не кључ за закључивање. Пошаљите само поља која желите да промените; захтев са ниједним од њих се одбија са `No valid fields to update`. Прихваћена поља су дефинисана са `updateKeyPermissionsSchema` у `src/shared/validation/schemas/keys.ts`.
+
+| Поље                                        | Тип                                                                  | Напомене                                                                                                                                                                                                                                                        |
+| ------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | стринг, 1-200 знакова                                                |                                                                                                                                                                                                                                                                 |
+| `isActive`                                  | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `isBanned`                                  | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 датетиме или `null`                                         | `null` брише истек                                                                                                                                                                                                                                              |
+| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` мора бити празан када је режим `all`                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | низ стрингова, до 1000                                               |                                                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | низ стрингова, до 500                                                | Капије које комбинују кључ могу да позову; директним моделима управља `modelAccessMode` / `allowedModels`                                                                                                                                                       |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` мора бити непразан када `restricted` и празан када `all`                                                                                                                                                                                   |
+| `allowedConnections`                        | низ UUIDs, до 100                                                    |                                                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | боолеан                                                              | `false` одбија захтеве за `auto/*` моделе са овим кључем; дозвољени су тастери који га никада не постављају                                                                                                                                                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                        | Шта `GET /v1/models` наводи за овај кључ (само комбинације, само модели или обоје); не мења оно што кључ може да зове                                                                                                                                           |
+| `forcedModel`                               | стринг до 300 знакова, или `null`                                    | Усмерава захтеве за ћаскање на овај model/combo, преко `X-Route-Model` и `body.model`; ограничења кључа и даље важе                                                                                                                                             |
+| `noLog`, `autoResolve`                      | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | цео број, 0-300000                                                   |                                                                                                                                                                                                                                                                 |
+| `maxSessions`                               | цео број, 0-10000                                                    |                                                                                                                                                                                                                                                                 |
+| `rateLimits`                                | низ `{ limit, window }` (позитивних целих бројева, до 50) или `null` | `null` брише границе                                                                                                                                                                                                                                            |
+| `accessSchedule`                            | распоред објеката или `null`                                         | `null` брише распоред                                                                                                                                                                                                                                           |
+| `scopes`                                    | низ стрингова, до 32                                                 |                                                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | низ стрингова, до 20                                                 |                                                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | Погледајте [Заобилажење кеша по кључу](#per-key-cache-bypass)                                                                                                                                                                                                   |
+| `compressionEnabled`                        | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | један од режима услуге Codex                                         |                                                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | боолеан                                                              |                                                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | број >= 0 или `null`                                                 |                                                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | број >= 0 или `null`                                                 | Покретни 5-часовни USD буџет, који се примењује као дневна и недељна ограничења (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` је када најстарији троше у прозору стари, што може оставити кључ далеко изнад свог лимита и даље блокиран. |
+| `chaosModeEnabled`                          | боолеан                                                              |                                                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1068,151 +1332,163 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Подешавања
 
-| Крајња тачка                          | Метод         | Опис                                                                                                                                                                                                           |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Општа подешавања                                                                                                                                                                                               |
-| `/api/settings/proxy`                 | GET/PUT       | Конфигурација мрежног проксија                                                                                                                                                                                 |
-| `/api/settings/proxy/test`            | POST          | Тестирање прокси везе                                                                                                                                                                                          |
-| `/api/settings/ip-filter`             | GET/PUT       | Листа дозвољених/блокираних IP адреса                                                                                                                                                                          |
-| `/api/settings/thinking-budget`       | GET/PUT       | Режим преписивања **захтева** за размишљање/резоновање (прослеђивање / аутоматско уклањање / прилагођено / адаптивно). Независно од компресије. Погледајте [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md). |
-| `/api/settings/system-prompt`         | GET/PUT       | Глобални системски упит                                                                                                                                                                                        |
-| `/api/settings/compression`           | GET/PUT       | Глобална конфигурација компресије                                                                                                                                                                              |
-| `/api/settings/purge-request-history` | POST          | Брисање редова евиденције захтева и локалних артефаката евиденције позива                                                                                                                                      |
+| Крајња тачка                          | Метод         | Опис                                                                                                                                                                                                                                                                                     |
+| ------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Општа подешавања. Кључеви безбедносне политике (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) требају `currentPassword` и акредитив оператера — API кључеви и `oma_` токени добијају `403`; свакој мутацији је потребан опсег `admin` токена за приступ |
+| `/api/settings/proxy`                 | GET/PUT       | Конфигурација мрежног проксија                                                                                                                                                                                                                                                           |
+| `/api/settings/proxy/test`            | POST          | Тестирајте прокси везу                                                                                                                                                                                                                                                                   |
+| `/api/settings/ip-filter`             | GET/PUT       | IP allowlist/blocklist                                                                                                                                                                                                                                                                   |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning** захтев** режим поновног писања (пасстхроугх / ауто-стрип / цустом / адаптиве). Независно од компресије. Погледајте [THINKING_BUDGET.мд](../guides/THINKING_BUDGET.md).                                                                                              |
+| `/api/settings/system-prompt`         | GET/PUT       | Глобални системски промпт                                                                                                                                                                                                                                                                |
+| `/api/settings/compression`           | GET/PUT       | Глобална конфигурација компресије                                                                                                                                                                                                                                                        |
+| `/api/settings/purge-request-history` | POST          | Обришите редове дневника захтева и локалне артефакте дневника позива                                                                                                                                                                                                                     |
 
 ### Контекст и компресија
 
-| Крајња тачка                           | Метод          | Опис                                                                                         |
-| -------------------------------------- | -------------- | -------------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Преглед off/lite/standard/aggressive/ultra/RTK/stacked компресије                            |
-| `/api/compression/language-packs`      | GET            | Приказ листе доступних Caveman језичких пакета                                               |
-| `/api/compression/rules`               | GET            | Приказ листе метаподатака Caveman правила                                                    |
-| `/api/context/caveman/config`          | GET/PUT        | Псеудоним подешавања специфичних за Caveman                                                  |
-| `/api/context/rtk/config`              | GET/PUT        | Подешавања специфична за RTK, укључујући прилагођене филтере и задржавање необрађеног излаза |
-| `/api/context/rtk/filters`             | GET            | Каталог RTK филтера и дијагностика прилагођених филтера                                      |
-| `/api/context/rtk/test`                | POST           | Покретање RTK прегледа/теста над текстуалним садржајем                                       |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Читање задржаног редигованог необрађеног излаза према ID-у показивача                        |
-| `/api/context/combos`                  | GET/POST       | Приказ листе/креирање комбинација компресије                                                 |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Детаљи/ажурирање/брисање комбинације компресије                                              |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Додељивање комбинација компресије комбинацијама рутирања                                     |
-| `/api/context/analytics`               | GET            | Псеудоним аналитике компресије                                                               |
+| Крајња тачка                           | Метод          | Опис                                                                                   |
+| -------------------------------------- | -------------- | -------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Прегледајте off/lite/standard/aggressive/ultra/RTK/stacked компресију                  |
+| `/api/compression/language-packs`      | GET            | Наведите доступне језичке пакете Цавеман                                               |
+| `/api/compression/rules`               | GET            | Наведите метаподатке правила Цавеман                                                   |
+| `/api/context/caveman/config`          | GET/PUT        | Алиас подешавања специфичних за Пећинског човека                                       |
+| `/api/context/rtk/config`              | GET/PUT        | Поставке специфичне за РТК, укључујући прилагођене филтере и задржавање сировог излаза |
+| `/api/context/rtk/filters`             | GET            | RTK каталог филтера и дијагностика прилагођених филтера                                |
+| `/api/context/rtk/test`                | POST           | Покрените RTK preview/test на текстуалном садржају                                     |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Прочитајте задржани редиговани необрађени излаз према ИД-у показивача                  |
+| `/api/context/combos`                  | GET/POST       | Цомпрессион цомбо list/create                                                          |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Цомпрессион цомбо detail/update/delete                                                 |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Додели комбо компресије комбинацијама за рутирање                                      |
+| `/api/context/analytics`               | GET            | Алиас аналитике компресије                                                             |
 
-### Надгледање
+### Мониторинг
 
-| Крајња тачка                         | Метод      | Опис                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Праћење активних сесија                                                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/rate-limits`                   | GET        | Ограничења броја захтева по налогу                                                                                                                                                                                                                                                                                                                                                                                |
-| `/api/monitoring/health`             | GET        | Провера стања + резиме добављача (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Приказ за управљање укључује `credentialHealth`: скаларне вредности кеша провера, `failedConnections` када је `failed>0` и `staleDbNonOkCount` (трајни SQLite `test_status`, а не мерач). Погледајте [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Статистика кеша / брисање                                                                                                                                                                                                                                                                                                                                                                                         |
-| `/api/modality-bridge/stats`         | GET        | Вредности `attempts` у меморији, успеси/`bridged`, неуспеси, погоци кеша, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` израчунат на основу броја узорака и време последње употребе (ресетује се при поновном покретању; аутентификација за управљање)                                                                                                                                                   |
-| `/api/modality-bridge/video/runtime` | GET        | Строга провера поузданог loopback интерфејса пре аутентификације/провере за управљање; пречишћени подаци о доступности и верзијама FFmpeg/ffprobe (без складиштења)                                                                                                                                                                                                                                               |
-| `/api/modality-bridge/video/extract` | POST       | Интерни аутентификовани посредник за бајтове преко поузданог loopback интерфејса; улаз од 50 MiB, ограничени ред/излаз од 32 MiB, `503` за попуњен капацитет, `499` за прекид везе, `504` за прекорачење рока; није јавни API за отпремање                                                                                                                                                                        |
+| Крајња тачка                         | Метод      | Опис                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Активно праћење сесије                                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/rate-limits`                   | GET        | Ограничења стопе по налогу                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/monitoring/health`             | GET        | Провера здравља + провајдера резиме (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Управљачки приказ укључује `credentialHealth`: пробе-кеш скаларе, `failedConnections` када `failed>0` и `staleDbNonOkCount` (SQLite лепљиви `test_status`, а не мерач). Погледајте [MONITORING_GUIDE.мд](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Кеш статистика / брисање                                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/stats`         | GET        | `attempts` у меморији, успеси/`bridged`, неуспеси, погоци у кеш, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` деноминирани узорком и време последње употребе (ресетовање при поновном покретању; ауторизација управљања)                                                                                                                                                                 |
+| `/api/modality-bridge/video/runtime` | GET        | Строга провера поуздане петље пре управљања auth/probe; дезинфицирана доступност и верзије FFmpeg/ffprobe (без продавнице)                                                                                                                                                                                                                                                                         |
+| `/api/modality-bridge/video/extract` | POST       | Интерни провјерени брокер бајтова са поузданом петљом; 50 MiB улаз, ограничени queue/32 MiB излаз, `503` капацитет, `499` дисцоннецт, `504` рок; није јавно отпремање API                                                                                                                                                                                                                          |
 
-### Резервне копије и извоз/увоз
+### Детаљна анализа видео оквира
 
-| Крајња тачка                | Метод | Опис                                                |
-| --------------------------- | ----- | --------------------------------------------------- |
-| `/api/db-backups`           | GET   | Наводи доступне резервне копије                     |
-| `/api/db-backups`           | PUT   | Прави ручну резервну копију                         |
-| `/api/db-backups`           | POST  | Враћа податке из одређене резервне копије           |
-| `/api/db-backups/export`    | GET   | Преузима базу података као .sqlite датотеку         |
-| `/api/db-backups/import`    | POST  | Отпрема .sqlite датотеку ради замене базе података  |
-| `/api/db-backups/exportAll` | GET   | Преузима потпуну резервну копију као .tar.gz архиву |
+`GET /api/v1/video-bridge/drilldown` чита непрозирну ручку везану за станара враћену у `x-omniroute-video-drilldown` након изричито одобреног захтева за Видео Бридге. И реадс и `DELETE` увек захтевају важећи API кључ и операторову независну `modalityBridgeVideoDrilldownRemoteEnabled` дозволу. Задржавање производње додатно захтева `modalityBridgeVideoDrilldownEnabled` и строги `drilldown: true` по делу. Ако кључ има непразну листу дозвољених крајњих тачака, мора да садржи `video` и за GET и DELETE, без обзира да ли позивалац користи `/v1` или `/api/v1`.
 
-### Синхронизација у облаку
+GET упит: потребан `handle`; опционо `variant` (`preview`, `standard`, `detail`), `limit` (1–8; застарели `frames` је прихваћен, али се не може комбиновати са `limit`), `page` заснован на нули и `start`/`end` секунде. Када се обезбеде обе границе фокуса, `end` мора бити већи од `start`. Duplicate/unknown кључеви упита су одбијени. Успешни одговори садрже `derivation`, `durationSeconds`, `frames`, `hasMore`, `page`, `variant` и опционо `focusWindow`; но-сторе JSON је ограничен на 32 MiB укључујући Басе64. Превелики излаз враћа 413; захтевајте мање оквира.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` враћа `{ "removed": 0|1 }`. Непознати, истекли и GETs са унакрсним кључем се не могу разликовати 404 одговора; цросс-кеи DELETE не може уклонити унос власника. Онемогућени приступ враћа 403, missing/invalid аутентификацију 401, неважеће упите 400, отказивање 499 и привремене грешке 503. Ручке су локалне за процес, истичу након десет минута и не преживљавају поновно покретање. Нове ручке користе `v1.` плус 32-бајтни насумични Base64URL токен; задржавају се само хешеви токена. Застарели 64-хек токени остају синтактички читљиви ради компатибилности. Погледајте [ограде Видео Бридгеа](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets) за детаље о сагласности, квотама и варијантама.
+
+### Бацкуп & Export/Import
+
+| Крајња тачка                | Метод  | Опис                                                                               |
+| --------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET    | Наведите доступне резервне копије                                                  |
+| `/api/db-backups`           | PUT    | Направите ручну резервну копију                                                    |
+| `/api/db-backups`           | POST   | Враћање из одређене резервне копије                                                |
+| `/api/db-backups`           | PATCH  | Сачувајте подешавања задржавања резервних копија (само за оператера)               |
+| `/api/db-backups`           | DELETE | Смањите сачуване резервне копије на подешавања задржавања (само за оператера)      |
+| `/api/db-backups/export`    | GET    | Преузмите базу података као .склите датотеку                                       |
+| `/api/db-backups/import`    | POST   | Отпремите .склите датотеку за замену базе података (само `?dryRun=true` проверава) |
+| `/api/db-backups/exportAll` | GET    | Преузмите пуну резервну копију као .тар.гз архиву                                  |
+
+`/api/db-backups/export`, `/api/db-backups/exportAll` и `/api/settings/export-json` дају сваки сачувани акредитив, тако да им је потребна сесија контролне табле или локални CLI (или онемогућена пријава). API кључеви било ког обима и `oma_` приступни токени добијају `403`. Враћања имају исту границу: `POST /api/db-backups/import` (`dryRun=true` укључен), `POST /api/db-backups` (враћање по ид-у) и `POST /api/settings/import-json` замењују живу базу података или подешавања, тако да акредитив машине такође добија `403` ; `omniroute sync import` шаље локални CLI акредитив. Исто урадите `DELETE /api/db-backups` (уклоните сачуване резервне копије) и `PATCH /api/db-backups` (подешавање задржавања: трајне вредности покрећу аутоматско смањење након сваке резервне копије). Листинг (`GET`) и креирање ручне резервне копије (`PUT`) задржавају уобичајену ауторизацију управљања.
+
+### Цлоуд Синц
 
 | Крајња тачка           | Метод | Опис                              |
 | ---------------------- | ----- | --------------------------------- |
-| `/api/sync/cloud`      | Разни | Операције синхронизације у облаку |
-| `/api/sync/initialize` | POST  | Покреће синхронизацију            |
-| `/api/cloud/*`         | Разни | Управљање облаком                 |
+| `/api/sync/cloud`      | Разно | Операције синхронизације у облаку |
+| `/api/sync/initialize` | POST  | Покрени синхронизацију            |
+| `/api/cloud/*`         | Разно | Управљање облаком                 |
 
 ### Тунели
 
-| Крајња тачка               | Метод | Опис                                                                            |
-| -------------------------- | ----- | ------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET   | Чита статус инсталације/извршавања Cloudflare Quick Tunnel-а за контролну таблу |
-| `/api/tunnels/cloudflared` | POST  | Омогућава или онемогућава Cloudflare Quick Tunnel (`action=enable/disable`)     |
-| `/api/tunnels/ngrok`       | GET   | Чита статус извршавања ngrok Tunnel-а за контролну таблу                        |
-| `/api/tunnels/ngrok`       | POST  | Омогућава или онемогућава ngrok Tunnel (`action=enable/disable`)                |
+| Крајња тачка               | Метод | Опис                                                                         |
+| -------------------------- | ----- | ---------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET   | Прочитајте статус Cloudflare Куицк Туннел install/runtime за контролну таблу |
+| `/api/tunnels/cloudflared` | POST  | Омогућите или онемогућите Cloudflare брзи тунел (`action=enable/disable`)    |
+| `/api/tunnels/ngrok`       | GET   | Прочитајте статус времена извођења ngrok тунела за контролну таблу           |
+| `/api/tunnels/ngrok`       | POST  | Омогућите или онемогућите ngrok тунел (`action=enable/disable`)              |
 
-### CLI алати
+### CLI Тоолс
 
-| Крајња тачка                       | Метод | Опис                                 |
-| ---------------------------------- | ----- | ------------------------------------ |
-| `/api/cli-tools/claude-settings`   | GET   | Статус Claude CLI-ја                 |
-| `/api/cli-tools/codex-settings`    | GET   | Статус Codex CLI-ја                  |
-| `/api/cli-tools/droid-settings`    | GET   | Статус Droid CLI-ја                  |
-| `/api/cli-tools/openclaw-settings` | GET   | Статус OpenClaw CLI-ја               |
-| `/api/cli-tools/runtime/[toolId]`  | GET   | Генеричко CLI окружење за извршавање |
+| Крајња тачка                       | Метод | Опис                         |
+| ---------------------------------- | ----- | ---------------------------- |
+| `/api/cli-tools/claude-settings`   | GET   | Claude CLI статус            |
+| `/api/cli-tools/codex-settings`    | GET   | Codex CLI статус             |
+| `/api/cli-tools/droid-settings`    | GET   | Дроид CLI статус             |
+| `/api/cli-tools/openclaw-settings` | GET   | OpenClaw CLI статус          |
+| `/api/cli-tools/runtime/[toolId]`  | GET   | Генеричко CLI време извођења |
 
-CLI одговори садрже: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI одговори укључују: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### ACP агенти
+### ACP Агентс
 
-| Крајња тачка      | Метод  | Опис                                                                  |
-| ----------------- | ------ | --------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Приказ свих откривених агената (уграђених и прилагођених) са статусом |
-| `/api/acp/agents` | POST   | Додавање прилагођеног агента или освежавање кеша откривања            |
-| `/api/acp/agents` | DELETE | Уклањање прилагођеног агента преко параметра упита `id`               |
+| Крајња тачка      | Метод  | Опис                                                          |
+| ----------------- | ------ | ------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Наведите све откривене агенте (уграђени + цустом) са статусом |
+| `/api/acp/agents` | POST   | Додајте прилагођени агент или кеш за откривање освежавања     |
+| `/api/acp/agents` | DELETE | Уклоните прилагођеног агента помоћу `id` параметра упита      |
 
-GET одговор садржи `agents[]` (id, name, binary, version, installed, protocol, isCustom) и `summary` (total, installed, notFound, builtIn, custom).
+GET одговор укључује `agents[]` (ид, име, бинарни, верзија, инсталиран, протокол, isCustom) и `summary` (укупно, инсталирано, notFound, builtIn, прилагођено).
 
 ### Отпорност и ограничења брзине
 
-| Крајња тачка                      | Метод     | Опис                                                                                      |
-| --------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Преузимање/ажурирање реда захтева, паузе везе, прекидача добављача и подешавања чекања    |
-| `/api/resilience/reset`           | POST      | Ресетовање аутоматских прекидача добављача                                                |
-| `/api/resilience/model-cooldowns` | GET       | Приказ активних блокада по (добављачу, вези, моделу), сортираних према преосталом времену |
-| `/api/resilience/model-cooldowns` | DELETE    | Уклањање блокаде модела — тело `{provider, model}` или `{all: true}` за брисање свега     |
-| `/api/rate-limits`                | GET       | Статус ограничења брзине по налогу                                                        |
-| `/api/rate-limit`                 | GET       | Глобална конфигурација ограничења брзине                                                  |
+| Крајња тачка                      | Метод     | Опис                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Get/update ред захтева, хлађење везе, прекидач провајдера и подешавања чекања                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/resilience/reset`           | POST      | Ресетујте прекидаче добављача                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/resilience/model-cooldowns` | GET       | Наведите активна блокада по (провајдеру, вези, моделу), сортирано према преосталом времену                                                                                                                                                                                                                                                                                                                                                        |
+| `/api/resilience/model-cooldowns` | DELETE    | Обришите закључавање модела — боди `{provider, model}` или `{all: true}` да бисте обрисали све                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/rate-limits`                | GET/POST  | Статус ограничења брзине по налогу (GET) или укључивање/искључивање заштите ограничења брзине за везу (POST `{connectionId, enabled}`). Подржана путања писања за `rateLimitProtection` (никада није модификована преко `PUT /api/providers/[id]`). Напомена: `enabled: false` онемогућава експлицитну заштиту, али не искључује активну везу са АПИ кључем из глобалне сигурносне мреже за аутоматско омогућавање (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Глобална конфигурација ограничења стопе (застарело; псеудоним за `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                              |
 
-> Све четири руте `/api/resilience/*` захтевају **администраторску аутентификацију** (`requireManagementAuth`). За потпун преглед разлика између прекидача добављача, паузе везе и блокаде модела погледајте [Отпорност (проширено)](#resilience-extended).
+> Све четири `/api/resilience/*` руте захтевају** менаџмент аут** (`requireManagementAuth`). Погледајте [Отпорност (проширено)](#resilience-extended) за потпуни слом прекидача провајдера у односу на хлађење везе у односу на закључавање модела.
 
-### Евалуације
+### Евалс
 
-| Крајња тачка | Метод    | Опис                                             |
-| ------------ | -------- | ------------------------------------------------ |
-| `/api/evals` | GET/POST | Приказ скупова евалуација / покретање евалуације |
+| Крајња тачка | Метод    | Опис                                              |
+| ------------ | -------- | ------------------------------------------------- |
+| `/api/evals` | GET/POST | Наведите пакете за процену / евалуацију покретања |
 
 ### Политике
 
-| Крајња тачка    | Метод           | Опис                          |
-| --------------- | --------------- | ----------------------------- |
-| `/api/policies` | GET/POST/DELETE | Управљање политикама рутирања |
+| Крајња тачка    | Метод           | Опис                           |
+| --------------- | --------------- | ------------------------------ |
+| `/api/policies` | GET/POST/DELETE | Управљајте смерницама рутирања |
 
 ### Усклађеност
 
 | Крајња тачка                | Метод | Опис                                       |
 | --------------------------- | ----- | ------------------------------------------ |
-| `/api/compliance/audit-log` | GET   | Дневник провере усклађености (последњих N) |
+| `/api/compliance/audit-log` | GET   | Дневник ревизије усклађености (последњи Н) |
 
-### v1beta (компатибилно са Gemini-јем)
+### в1бета (компатибилно са Гемини)
 
 | Крајња тачка               | Метод | Опис                                  |
 | -------------------------- | ----- | ------------------------------------- |
-| `/v1beta/models`           | GET   | Приказ модела у Gemini формату        |
-| `/v1beta/models/{...path}` | POST  | Gemini крајња тачка `generateContent` |
+| `/v1beta/models`           | GET   | Наведите моделе у Gemini формату      |
+| `/v1beta/models/{...path}` | POST  | Gemini `generateContent` крајња тачка |
 
-Ове крајње тачке прате формат Gemini API-ја за клијенте којима је потребна изворна компатибилност са Gemini SDK-ом.
+Ове крајње тачке одражавају GeminiAPI формат за клијенте који очекују изворну Gemini SDK компатибилност.
 
-### Интерни / системски API-ји
+### Интерни / Систем APIs
 
-| Крајња тачка             | Метод | Опис                                                                  |
-| ------------------------ | ----- | --------------------------------------------------------------------- |
-| `/api/init`              | GET   | Провера иницијализације апликације (користи се при првом покретању)   |
-| `/api/tags`              | GET   | Ознаке модела компатибилне са Ollama-ом (за Ollama клијенте)          |
-| `/api/restart`           | POST  | Покретање контролисаног поновног покретања сервера                    |
-| `/api/shutdown`          | POST  | Покретање контролисаног искључивања сервера                           |
-| `/api/system/env/repair` | POST  | Поправка променљивих окружења OAuth добављача                         |
-| `/api/system/version`    | GET   | Тренутна/најновија верзија, статус ажурирања, канал издања            |
-| `/api/system/version`    | POST  | Покретање ажурирања на најновију верзију, прилагођеног начину примене |
+| Крајња тачка             | Метод | Опис                                                           |
+| ------------------------ | ----- | -------------------------------------------------------------- |
+| `/api/init`              | GET   | Покрените услуге синхронизације у позадини (потврда управљања) |
+| `/api/tags`              | GET   | Ознаке модела компатибилне са Оллама (за Ollama клијенте)      |
+| `/api/restart`           | POST  | Покрени грациозно поновно покретање сервера                    |
+| `/api/shutdown`          | POST  | Активирајте елегантно гашење сервера                           |
+| `/api/system/env/repair` | POST  | Поправите променљиве окружења OAuth провајдера                 |
+| `/api/system/version`    | GET   | Current/latest верзија, статус ажурирања, канал издања         |
+| `/api/system/version`    | POST  | Започните ажурирање на најновију верзију са свешћу о примени   |
 
-> **Напомена:** Ове крајње тачке систем користи интерно или ради компатибилности са Ollama клијентима. Крајњи корисници их обично не позивају.
+> **Напомена:** Ове крајње тачке систем користи интерно или за компатибилност Ollama клијента. Крајњи корисници их обично не зову.
 
-### Поправка OAuth окружења _(v3.6.1+)_
+### OAuth Енвиронмент Репаир _(в3.6.1 +)_
 
 ```bash
 POST /api/system/env/repair
@@ -1223,7 +1499,7 @@ Content-Type: application/json
 }
 ```
 
-Поправља недостајуће или оштећене променљиве OAuth окружења за одређеног добављача. Враћа:
+Поправља недостајуће или оштећене OAuth променљиве окружења за одређеног провајдера. враћа:
 
 ```json
 {
@@ -1239,10 +1515,7 @@ Content-Type: application/json
 GET /api/system/version
 ```
 
-Администраторска рута доступна само преко повратне петље (администраторска аутентификација). Враћа активну верзију, најновију
-објављену верзију и статус аутоматског ажурирања. `releaseChannel` и `channels` су додатна
-поља (грана 3.8.54); `channel` задржава своје значење — режим примене који користи алатка за ажурирање
-контролне табле (`npm`, `source` или `docker-compose`).
+Рута управљања само са повратном петљом (админ аутх). Враћа покренуту верзију, најновију објављену верзију и статус аутоматског ажурирања. `releaseChannel` и `channels` су адитивна поља (раил 3.8.54); `channel` задржава своје значење — режим имплементације који користи програм за ажурирање контролне табле (`npm`, `source` или `docker-compose`).
 
 ```json
 {
@@ -1258,21 +1531,14 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — npm канал активне верзије: `nightly` за верзије `-nightly.*`,
-  `next` за остала претходна издања (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` за стабилну верзију
-  старије главне верзије од `channels.latest`, а у супротном `latest`. Иста правила као у
-  `scripts/release/dist-tag.mjs`, који бира npm dist-tag приликом објављивања.
-- `channels` — објављена водећа верзија сваког dist-tag-а, из `npm view omniroute dist-tags` (уз
-  резервни HTTP приступ регистру), кеширана са истим TTL-ом од 10 минута као `latest`. `latest` је увек
-  присутан (резервно користи поље `latest`, а затим `"unavailable"`); `next`, `nightly` и `lts` се
-  појављују само када тај dist-tag постоји. Захтев `Cache-Control: no-cache` освежава обе провере.
+- `releaseChannel` — нпм канал текуће верзије: `nightly` за `-nightly.*` верзије, `next` за друга пре-издања (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` за стабилну верзију старијег мајора од `channels.latest`, иначе `latest`. Иста правила као `scripts/release/dist-tag.mjs`, који бира нпм дист-ознаку у време објављивања.
+- `channels` — је објавио главу сваке дист-ознаке, из `npm view omniroute dist-tags` (замена регистра HTTP ), кеширан са истим 10-минутним TTL као `latest`. `latest` је увек присутан (враћа се у поље `latest`, а затим `"unavailable"`); `next`, `nightly` и `lts` се појављују само када постоји та дист-таг. `Cache-Control: no-cache` захтев освежава обе претраге.
 
-Модел канала (`latest` = v3 до 4.0 GA издања, `next` = rc, `nightly` = верзије са гране `develop`,
-`lts` = v3 закрпе након 4.0 GA издања) описан је у `docs/ops/RELEASE_STRATEGY.md`.
+Модел канала (`latest` = в3 до 4.0 GA, `next` = рц, `nightly` = `develop` буилд, `lts` = в3 закрпе након 4.0 GA) је описан у `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
-## Транскрипција аудио записа
+## Transkripcija audio zapisa
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1280,10 +1546,10 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Транскрибујте аудио фајлове коришћењем било ког конфигурисаног STT провајдера. Први сегмент путање бира native провајдера (`openai/…`, `deepgram/…`). Gateway-и који реекспортују модел другог вендора користе квалификовани id
+Transkribujte audio datoteke koristeći bilo kog konfigurisanog STT provajdera. Prvi segment putanje bira nativnog provajdera (`openai/…`, `deepgram/…`). Gejtveji koji ponovo izlažu model drugog proizvođača koriste kvalifikovani ID
 (`openrouter/deepgram/nova-3`).
 
-**Захтев:**
+**Zahtev:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1292,7 +1558,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**Одговор:**
+**Odgovor:**
 
 ```json
 {
@@ -1303,43 +1569,51 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Примери id-ова модела:** `openai/whisper-1` (захтева OpenAI кључ),
-`openrouter/deepgram/nova-3` (захтева OpenRouter кључ),
-`deepgram/nova-3` (захтева native Deepgram кључ). Обичан
-`deepgram/nova-3` захтев **не** користи OpenRouter.
+**Primeri ID-jeva modela:** `openai/whisper-1` (zahteva OpenAI ključ),
+`openrouter/deepgram/nova-3` (zahteva OpenRouter ključ),
+`deepgram/nova-3` (zahteva nativni Deepgram ključ). Zahtev sa samim
+`deepgram/nova-3` **ne** koristi OpenRouter.
 
-**Подржани формати:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**Podržani formati:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripcija u režimu datoteke preko Gemini Live
+WebSocket-a (zahteva Gemini API ključ). Otpremljena datoteka se konvertuje u mono PCM frekvencije 16 kHz pomoću `ffmpeg`
+(mora biti na `PATH`-u, osim ako je datoteka već WAV u mono PCM formatu frekvencije 16 kHz), prosleđuje se sesiji, a
+konačni tekst se vraća kao `{ "text": "..." }`. Opciona polja obrasca `language` i `prompt`
+prosleđuju se dalje. Ograničenja: za otpremanja veća od 25 MiB ili dekodirani audio duži od 10 minuta vraća se
+`413`; konverzija koja traje duže od 60 s se prekida i vraća `504`. API ključ se šalje samo u zaglavlju
+`x-goog-api-key`, nikada u URL-u WebSocket-a.
 
 ---
 
-## Ollama компатибилност
+## Компатибилност са Ollama
 
-За клијенте који користе Ollama-ов API формат:
+За клијенте који користе Ollama формат API-ја:
 
 ```bash
-# Chat endpoint (Ollama формат)
+# Крајња тачка за ћаскање (Ollama формат)
 POST /v1/api/chat
 
-# Листа модела (Ollama формат)
+# Навођење модела (Ollama формат)
 GET /api/tags
 ```
 
 Захтеви се аутоматски преводе између Ollama и интерних формата.
 
-## Tokenized VS Code / Headerless алијаси
+## Токенизовани VS Code / псеудоними без заглавља
 
-Користите ове алијасе када интеграција не може да убаци `Authorization` заглавље и потребно је да API кључ буде уграђен у base URL.
+Користите ове псеудониме када интеграција не може да убаци заглавље `Authorization` и захтева да API кључ буде уграђен у основни URL.
 
 ```bash
-# OpenAI-style алијас за каталог
+# Псеудоним каталога у OpenAI стилу
 GET /api/v1/vscode/{token}/
 GET /api/v1/vscode/{token}/models
 
-# OpenAI-style chat алијаси
+# Псеудоними за ћаскање у OpenAI стилу
 POST /api/v1/vscode/{token}/chat/completions
 POST /api/v1/vscode/{token}/responses
 
-# Ollama-style алијаси
+# Псеудоними у Ollama стилу
 POST /api/v1/vscode/{token}/api/chat
 GET /api/v1/vscode/{token}/api/tags
 ```
@@ -1355,16 +1629,16 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 
 Напомене:
 
-- Tokenized алијаси користе исте handler-е као `/v1/*` и `/api/tags`; облици одговора остају идентични.
-- Дајте приоритет `Authorization: Bearer ...` заглављу кад год клијент подржава custom заглавља.
-- Токени засновани на URL-у могу се појавити у reverse-proxy логовима, историји браузера и телеметрији изван OmniRoute. Третирајте их као опцију компатибилности, а не подразумевани режим аутентикације.
+- Токенизовани псеудоними поново користе исте обрађиваче као `/v1/*` и `/api/tags`; облици одговора остају идентични.
+- Користите `Authorization: Bearer ...` кад год клијент подржава прилагођена заглавља.
+- Токени засновани на URL-у могу се појавити у евиденцијама обрнутог проксија, историји прегледача и телеметрији изван OmniRoute-а. Третирајте их као опцију за компатибилност, а не као подразумевани режим аутентификације.
 
 ---
 
 ## Телеметрија
 
 ```bash
-# Преузми сажетак телеметрије кашњења (p50/p95/p99 по провајдеру)
+# Преузимање сажетка телеметрије латенције (p50/p95/p99 по провајдеру)
 GET /api/telemetry/summary
 ```
 
@@ -1384,10 +1658,10 @@ GET /api/telemetry/summary
 ## Буџет
 
 ```bash
-# Преузми статус буџета за све API кључеве
+# Преузимање статуса буџета за све API кључеве
 GET /api/usage/budget
 
-# Постави или ажурирај буџет
+# Постављање или ажурирање буџета
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1401,17 +1675,17 @@ Content-Type: application/json
 }
 ```
 
-> **Напомене о схеми** (`setBudgetSchema`): `apiKeyId` је обавезан; бар једно од `dailyLimitUsd`, `weeklyLimitUsd` или `monthlyLimitUsd` мора бити веће од нуле. Опциона поља: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Стари облик `{keyId, limit, period}` враћа `400 Bad Request`.
+> **Напомене о шеми** (`setBudgetSchema`): `apiKeyId` је обавезан; најмање једно од поља `dailyLimitUsd`, `weeklyLimitUsd` или `monthlyLimitUsd` мора бити веће од нуле. Опционална поља: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Застарели облик `{keyId, limit, period}` враћа `400 Bad Request`.
 
 ## Ограничења токена
 
-Буџети **токена** по API кључу (различити од USD буџета описаног изнад). Спроводе се директно на путу обраде захтева: када тренутна потрошња у оквиру прозора достигне лимит кључа, захтеви се одбијају уз `429 Too Many Requests`. Ограничења могу бити везана за конкретан `model`, `provider`, или примењена `global`но на цео кључ; када више ограничења одговара захтеву, побеђује најрестриктивније.
+Буџети **токена** по API кључу (различити од горенаведеног буџета заснованог на USD-у). Примењују се директно на путањи захтева: када тренутна употреба у прозору за кључ достигне његово ограничење, захтеви се одбијају са `429 Too Many Requests`. Ограничења могу бити обухваћена одређеним `model`-ом, `provider`-ом или примењена на нивоу `global` за цео кључ; када се на захтев подудара више ограничења, примењује се најрестриктивније.
 
 ```bash
-# Приказ ограничења токена за кључ (укључује живу потрошњу у прозору)
+# Наведи ограничења токена за кључ (укључује тренутну употребу у прозору)
 GET /api/usage/token-limits?apiKeyId=key-123
 
-# Креирање или ажурирање ограничења токена
+# Креирај или ажурирај ограничење токена
 POST /api/usage/token-limits
 Content-Type: application/json
 
@@ -1424,95 +1698,95 @@ Content-Type: application/json
   "enabled": true
 }
 
-# Брисање ограничења токена по id-у
+# Обриши ограничење токена према ID-у
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Напомене о шеми** (`setTokenLimitSchema`): `apiKeyId` и `scopeType` (`model` | `provider` | `global`) су обавезни. `scopeValue` је обавезан осим ако је `scopeType` `global` (нпр. id модела за `model` опсег, id провајдера за `provider` опсег). `tokenLimit` мора бити позитиван цео број (коерција из стринга). Опционо: `id` (изостави за креирање, наведи за ажурирање), `resetInterval` (`daily` | `weekly` | `monthly`, подразумевано `monthly`), `resetTime` (`HH:MM`), `enabled` (подразумевано `true`). `GET` одговори обогаћују свако ограничење пољима `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` и `nextResetAt`. Ово је крајња тачка управљачке класе (аутентикација се централно спроводи кроз authz канал).
+> **Напомене о шеми** (`setTokenLimitSchema`): `apiKeyId` и `scopeType` (`model` | `provider` | `global`) су обавезни. `scopeValue` је обавезан осим када је `scopeType` једнак `global` (нпр. ID модела за опсег `model`, ID добављача за опсег `provider`). `tokenLimit` мора бити позитиван цео број (конвертује се из ниске). Опционо: `id` (изоставити при креирању, навести при ажурирању), `resetInterval` (`daily` | `weekly` | `monthly`, подразумевано `monthly`), `resetTime` (`HH:MM`), `enabled` (подразумевано `true`). Одговори за `GET` допуњују свако ограничење пољима `tokensUsed`, `remaining`, `windowStart`, `periodStartAt` и `nextResetAt`. Ово је крајња тачка класе за управљање (аутентификација се централно спроводи кроз authz цевовод).
 
 ## Обрада захтева
 
 1. Клијент шаље захтев на `/v1/*`
-2. Route handler позива `handleChat`, `handleEmbedding`, `handleAudioTranscription`, или `handleImageGeneration`
-3. Модел се разрешава (директан provider/model или alias/combo)
-4. Креденцијали се бирају из локалне базе уз филтрирање доступности налога
-5. За chat: `handleChatCore` провера семантички/потписни кеш и разрешава подешавања компресије за combo
-6. Проактивна компресија се извршава пре превода за провајдера када је укључена (`lite`, Caveman, RTK, или наслагано)
-7. Извршилац провајдера шаље upstream захтев
-8. Одговор се преводи назад у формат клијента (chat) или враћа непромењен (embeddings/images/audio)
-9. Записују се потрошња, аналитика компресије и логови захтева
-10. Fallback се примењује на грешке према правилима combo-а
+2. Обрађивач руте позива `handleChat`, `handleEmbedding`, `handleAudioTranscription` или `handleImageGeneration`
+3. Модел се разрешава (директни добављач/модел или псеудоним/комбинација)
+4. Акредитиви се бирају из локалне базе података уз филтрирање доступности налога
+5. За chat: `handleChatCore` проверава семантички/потписни кеш и разрешава подешавања компресије комбинације
+6. Проактивна компресија се покреће пре превођења за добављача када је омогућена (`lite`, Caveman, RTK или наслагана)
+7. Извршилац добављача шаље захтев upstream-у
+8. Одговор се преводи назад у формат клијента (chat) или се враћа без измена (embeddings/images/audio)
+9. Бележе се употреба, аналитика компресије и евиденције захтева
+10. Резервни механизам се примењује у случају грешака у складу са правилима комбинације
 
 Потпуна референца архитектуре: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
 ---
 
-## Управљање Combo-има
+## Управљање комбинацијама
 
-Комбинације рутирања на вишем нивоу (већ сумиране под `/api/combos*`) могу такође бити мапиране 1:1 из шаблона id-а модела, дозвољавајући транспарентно преусмеравање id-а модела у OpenAI стилу на combo.
+Комбинације за рутирање вишег нивоа (већ сумиране у оквиру `/api/combos*`) такође се могу мапирати 1:1 према обрасцу ID-а модела, што омогућава транспарентно преусмеравање OpenAI-јевског ID-а модела на комбинацију.
 
 | Метод  | Путања                           | Опис                                                                              |
 | ------ | -------------------------------- | --------------------------------------------------------------------------------- |
-| GET    | `/api/model-combo-mappings`      | Приказ свих мапирања модел→combo                                                  |
+| GET    | `/api/model-combo-mappings`      | Навођење свих мапирања модел→комбинација                                          |
 | POST   | `/api/model-combo-mappings`      | Креирање мапирања — тело: `{pattern, comboId, priority?, enabled?, description?}` |
 | GET    | `/api/model-combo-mappings/[id]` | Преузимање једног мапирања                                                        |
 | PUT    | `/api/model-combo-mappings/[id]` | Ажурирање поља постојећег мапирања                                                |
 | DELETE | `/api/model-combo-mappings/[id]` | Уклањање мапирања                                                                 |
 
-**Аутентикација:** управљачка сесија/API кључ (`requireManagementAuth`).
+**Аутентификација:** управљачка сесија/API кључ (`requireManagementAuth`).
 
 ---
 
-## Webhooks
+## Vebhukovi
 
-Odlazne webhook pretplate za OmniRoute događaje (završetak zahteva, potrošnja kvote, rotacija ključeva, itd.).
+Odlazne pretplate na vebhukove za OmniRoute događaje (dovršavanje zahteva, iscrpljivanje kvote, rotacija ključa itd.).
 
-| Metod  | Putanja                   | Opis                                                                  |
-| ------ | ------------------------- | --------------------------------------------------------------------- |
-| GET    | `/api/webhooks`           | Lista webhook-ova (tajni ključevi su maskirani u `<prefix>...`)       |
-| POST   | `/api/webhooks`           | Kreira webhook — telo: `{url, events?: ["*"], secret?, description?}` |
-| GET    | `/api/webhooks/[id]`      | Preuzima webhook                                                      |
-| PUT    | `/api/webhooks/[id]`      | Ažurira url/events/secret/description                                 |
-| DELETE | `/api/webhooks/[id]`      | Uklanja webhook                                                       |
-| POST   | `/api/webhooks/[id]/test` | Šalje test payload na webhook URL i vraća status isporuke             |
+| Metod  | Putanja                   | Opis                                                                 |
+| ------ | ------------------------- | -------------------------------------------------------------------- |
+| GET    | `/api/webhooks`           | Navodi vebhukove (tajne su maskirane u obliku `<prefix>...`)         |
+| POST   | `/api/webhooks`           | Kreira vebhuk — telo: `{url, events?: ["*"], secret?, description?}` |
+| GET    | `/api/webhooks/[id]`      | Preuzima vebhuk                                                      |
+| PUT    | `/api/webhooks/[id]`      | Ažurira URL/događaje/tajnu/opis                                      |
+| DELETE | `/api/webhooks/[id]`      | Uklanja vebhuk                                                       |
+| POST   | `/api/webhooks/[id]/test` | Šalje testni sadržaj na URL vebhuka i vraća status isporuke          |
 
-**Autentikacija:** management sesija/API ključ (`requireManagementAuth`).
+**Autentifikacija:** sesija/ključ API-ja za upravljanje (`requireManagementAuth`).
 
 ---
 
 ## Registrovani ključevi (automatsko upravljanje)
 
-Koristi ga podsistem za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema podržavajućem provajderu/nalogu, sa dnevnim/satnim kvotama.
+Koristi ga podsistem za automatsko upravljanje ključevima za izdavanje i rotaciju API ključeva prema pomoćnom provajderu/nalogu, sa dnevnim/satnim kvotama.
 
-| Metod  | Putanja                               | Opis                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Lista registrovanih ključeva (samo maskirani prefiks)                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys`             | Izdaje novi registrovani ključ — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća sirovi ključ **jednom**. Vraća `429` u slučaju odbijanja usled kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Preuzima metapodatke registrovanog ključa (bez sirovog materijala)                                                                                                                                            |
-| DELETE | `/api/v1/registered-keys/[id]`        | Opoziva registrovani ključ                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja tačka za opoziv (isti efekat kao DELETE)                                                                                                                                                  |
+| Metod  | Putanja                               | Opis                                                                                                                                                                                                        |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Navodi registrovane ključeve (samo maskirani prefiks)                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys`             | Izdaje novi registrovani ključ — telo: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Vraća sirovi ključ **samo jednom**. Vraća `429` pri odbijanju zbog kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Preuzima metapodatke registrovanog ključa (bez sirovog materijala)                                                                                                                                          |
+| DELETE | `/api/v1/registered-keys/[id]`        | Opoziva registrovani ključ                                                                                                                                                                                  |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicitna krajnja tačka za opoziv (isti efekat kao DELETE)                                                                                                                                                |
 
-**Autentikacija:** Bearer API ključ (`isAuthenticated`). Pogledajte i `/v1/quotas/check` i `/v1/issues/report`.
+**Autentifikacija:** sesija/ključ API-ja za upravljanje (`requireManagementAuth`) — ista zaštita kao za `/api/keys`: sesija kontrolne table, lokalni CLI token ili ključ API-ja sa opsegom `manage`/`admin`; API ključevi koji služe samo za inferenciju dobijaju `403`. Pogledajte takođe `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 
 ## Протокол агената
 
-Задаци облак-агента (Claude Code, Codex Cloud, OpenHands, итд.) који се извршавају удаљено у име корисника OmniRoute.
+Задаци cloud агената (Claude Code, Codex Cloud, OpenHands итд.) који се извршавају удаљено у име корисника OmniRoute-а.
 
-| Метод  | Путања                        | Опис                                                                                                                                                |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/agents/tasks`        | Листа задатака — опционо `?provider=`, `?status=`, `?limit=` (1–500, подразумевано 50)                                                              |
-| POST   | `/api/v1/agents/tasks`        | Креирање задатка — тело валидирано преко `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Враћа `201` са омотом задатка |
-| DELETE | `/api/v1/agents/tasks?id=...` | Брисање задатка                                                                                                                                     |
-| GET    | `/api/v1/agents/tasks/[id]`   | Читање задатка — синхронизовано освежава статус са надлежног облак-агента када је постављен `external_id`                                           |
-| POST   | `/api/v1/agents/tasks/[id]`   | Дискриминисана акција: `{action: "approve"}`, `{action: "message", message}`, или `{action: "cancel"}`                                              |
-| DELETE | `/api/v1/agents/tasks/[id]`   | Брисање конкретног задатка по id-у                                                                                                                  |
+| Метод  | Путања                        | Опис                                                                                                                                                 |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/agents/tasks`        | Наводи задатке — опционално `?provider=`, `?status=`, `?limit=` (1–500, подразумевано 50)                                                            |
+| POST   | `/api/v1/agents/tasks`        | Креира задатак — тело се проверава помоћу `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Враћа `201` са омотом задатка |
+| DELETE | `/api/v1/agents/tasks?id=...` | Брише задатак                                                                                                                                        |
+| GET    | `/api/v1/agents/tasks/[id]`   | Чита задатак — синхроно освежава статус од upstream cloud агента када је постављен `external_id`                                                     |
+| POST   | `/api/v1/agents/tasks/[id]`   | Дискриминисана радња: `{action: "approve"}`, `{action: "message", message}` или `{action: "cancel"}`                                                 |
+| DELETE | `/api/v1/agents/tasks/[id]`   | Брише одређени задатак према ID-ју                                                                                                                   |
 
-> **Аутентификација:** обавезна управљачка аутентификација на свакој методи (`requireCloudAgentManagementAuth`). Пре верзије v3.8.0 ови позиви су били неаутентификовани — погледајте commit `588a0333` за прекидну промену.
+> **Аутентикација:** управљачка аутентикација је обавезна за сваки метод (`requireCloudAgentManagementAuth`). Пре верзије v3.8.0 ове руте су биле без аутентикације — погледајте commit `588a0333` за промену која нарушава компатибилност.
 
 ```bash
-# Креирање облак-задатка за Claude Code
+# Креирајте cloud задатак Claude Code-а
 curl -X POST http://localhost:20128/api/v1/agents/tasks \
   -H "Authorization: Bearer your-management-key" \
   -H "Content-Type: application/json" \
@@ -1525,120 +1799,126 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 Одлазни HTTP(S)/SOCKS проксији који се могу доделити провајдерима, налозима или глобално.
 
-| Метод  | Путања                                       | Опис                                                                                                                                              |
-| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/management/proxies`                 | Листа проксија (уз `?id=` враћа један; уз `?id=&where_used=1` враћа граф доделa)                                                                  |
-| POST   | `/api/v1/management/proxies`                 | Креирање проксија — тело валидирано преко `createProxyRegistrySchema`                                                                             |
-| PATCH  | `/api/v1/management/proxies`                 | Ажурирање проксија — тело валидирано преко `updateProxyRegistrySchema` (захтева `id`)                                                             |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Брисање проксија (користите `force=1` за одвајање доделa)                                                                                         |
-| GET    | `/api/v1/management/proxies/assignments`     | Листа доделa — може се филтрирати по `proxy_id`, `scope`, `scope_id`; проследите `resolve_connection_id=<id>` да разрешите активни проксy за везу |
-| PUT    | `/api/v1/management/proxies/assignments`     | Додела — тело валидирано преко `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Чисти кеш дистрибутера                                    |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | Масовна додела — тело валидирано преко `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                              |
-| GET    | `/api/v1/management/proxies/health?hours=24` | Агрегирано здравствено стање проксија (број успеха/неуспеха, латенција) у оквиру временског прозора                                               |
+| Метод  | Путања                                       | Опис                                                                                                                                                        |
+| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/management/proxies`                 | Наводи проксије (са `?id=` враћа један; са `?id=&where_used=1` враћа граф додела)                                                                           |
+| POST   | `/api/v1/management/proxies`                 | Креира прокси — тело се проверава помоћу `createProxyRegistrySchema`                                                                                        |
+| PATCH  | `/api/v1/management/proxies`                 | Ажурира прокси — тело се проверава помоћу `updateProxyRegistrySchema` (захтева `id`)                                                                        |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Брише прокси (користите `force=1` за уклањање додела)                                                                                                       |
+| GET    | `/api/v1/management/proxies/assignments`     | Наводи доделе — може се филтрирати према `proxy_id`, `scope`, `scope_id`; проследите `resolve_connection_id=<id>` да бисте разрешили активни прокси за везу |
+| PUT    | `/api/v1/management/proxies/assignments`     | Додељује — тело се проверава помоћу `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Чисти кеш диспечера                                            |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | Масовно додељује — тело се проверава помоћу `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                   |
+| GET    | `/api/v1/management/proxies/health?hours=24` | Агрегирано стање проксија (број успешних и неуспешних захтева, кашњење) током периода                                                                       |
 
-**Аутентификација:** управљачка сесија/API кључ на свакој рути (`requireManagementAuth`).
+**Аутентикација:** управљачка сесија/API кључ за сваку руту (`requireManagementAuth`).
 
-> Рутe `POST /api/v1/management/proxies/[id]/assignments` и `POST /api/v1/management/proxies/[id]/health` из описа задатка опслужују равне (flat) руте `/assignments` и `/health` приказане изнад — у кодној бази не постоје подруте по id-у.
+> Опис задатка наводи `POST /api/v1/management/proxies/[id]/assignments` и `POST /api/v1/management/proxies/[id]/health`, али њих опслужују равне руте `/assignments` и `/health` приказане изнад — у бази кода не постоје подрутe по ID-ју.
 
 ---
 
-## Otpornost (proširena)
+## Otpornost (prošireno)
 
-OmniRoute izlaže tri nezavisna mehanizma za privremene otkaze; upravljački krajnji punkti u nastavku omogućavaju operatorima da čitaju i preklapaju te mehanizme:
+OmniRoute izlaže tri nezavisna mehanizma za privremene greške; krajnje tačke za upravljanje u nastavku omogućavaju operatorima da ih pročitaju i zamene:
 
-| Opseg               | Skladištenje stanja                        | Čitanje                                   | Resetovanje / brisanje                                  |
-| ------------------- | ------------------------------------------ | ----------------------------------------- | ------------------------------------------------------- |
-| Provider breaker    | `domain_circuit_breakers` + u memoriji     | `/api/monitoring/health`                  | `POST /api/resilience/reset`                            |
-| Connection cooldown | `rateLimitedUntil` na provider konekcijama | `/api/rate-limits`, `/api/providers/[id]` | (ponovo se aktivira lenjo; brisanje putem provider PUT) |
-| Model lockout       | Registar dostupnosti modela u memoriji     | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                |
+| Opseg               | Skladište stanja                        | Čitanje                                   | Resetovanje / brisanje                                       |
+| ------------------- | --------------------------------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| Prekidač dobavljača | `domain_circuit_breakers` + memorija    | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                 |
+| Hlađenje veze       | `rateLimitedUntil` na vezama dobavljača | `/api/rate-limits`, `/api/providers/[id]` | (ponovo se omogućava lenjo; briše se putem PUT-a dobavljača) |
+| Blokada modela      | Registar dostupnosti modela u memoriji  | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                     |
 
-`PATCH /api/resilience` prihvata preklapanja provider breaker-a pod `providerBreaker.oauth` i `providerBreaker.apikey`. Svaki profil podržava `degradationThreshold`, `failureThreshold` i `resetTimeoutMs`; ista polja su izložena u Dashboard → Settings → Resilience.
+`PATCH /api/resilience` prihvata zamene za prekidač dobavljača pod `providerBreaker.oauth` i `providerBreaker.apikey`. Svaki profil podržava `degradationThreshold`, `failureThreshold` i `resetTimeoutMs`; ista polja su dostupna u Kontrolna tabla → Podešavanja → Otpornost.
 
 ```bash
-# Brisanje jednog model lockout-a
+# Obriši blokadu jednog modela
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Brisanje svih lockout-ova
+# Obriši sve blokade
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Kompletna konceptualna referenca i podrazumevane vrednosti breaker-a: pogledajte [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State".
+Potpuni konceptualni referentni materijal i podrazumevane vrednosti prekidača: pogledajte [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State" i [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+
+### Red za ograničenje brzine i zaštitni mehanizam za automatsko omogućavanje
+
+- **Podržani put za upis**: `POST /api/rate-limits` sa telom `{"connectionId": "<id>", "enabled": true|false}` je podržana krajnja tačka za upravljanje uključivanjem ili isključivanjem zaštite od ograničenja brzine za vezu. `PUT /api/providers/[id]` namerno ne menja niti prebacuje `rateLimitProtection` (#11278).
+- **Semantika vrednosti `enabled: false`**: Postavljanje vrednosti `enabled: false` uklanja eksplicitnu zaštitu za vezu, ali **ne isključuje** aktivnu vezu sa API ključem iz globalnog zaštitnog mehanizma za automatsko omogućavanje (`autoEnableApiKeyProviders = true`). U `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` i `undefined` su ekvivalentni; aktivne veze sa API ključem bez eksplicitne zaštite ostaju zaštićene u okviru zaštitnog mehanizma za automatsko omogućavanje.
+- **Globalno isključivanje**: Da biste pokrenuli veze sa API ključem bez redova za ograničenje brzine, globalno isključite zaštitni mehanizam putem `RATE_LIMIT_AUTO_ENABLE=false` (env) ili `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Podešavanja → Otpornost / `PATCH /api/resilience`).
 
 ---
 
-## Skills (Vештине)
+## Veštine
 
-Skill framework za proširivanje OmniRoute-a prilagođenim izvršnim handler-ima, uz integracije sa marketplace-om.
+Okvir veština za proširivanje OmniRoute-a prilagođenim izvršnim rukovaocima, uz integracije sa marketplace-om.
 
-| Metod  | Putanja                           | Opis                                                                                                                                         |
-| ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/skills`                     | Listanje instaliranih skill-ova — moguće filtriranje preko `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, sa paginacijom |
-| GET    | `/api/skills/[id]`                | Preuzimanje jednog skill-a                                                                                                                   |
-| PUT    | `/api/skills/[id]`                | Ažuriranje skill-a (naziv, opis, mode, schema, handler, tags)                                                                                |
-| DELETE | `/api/skills/[id]`                | Deinstaliranje skill-a                                                                                                                       |
-| POST   | `/api/skills/install`             | Instaliranje skill-a iz sirovog manifesta — body: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`             |
-| GET    | `/api/skills/executions`          | Listanje nedavnih izvršavanja skill-ova (audit trag sa inputima/outputima/trajanjem)                                                         |
-| GET    | `/api/skills/marketplace?q=...`   | Pretraga/popularna lista iz SkillsMP marketplace-a (zahteva podešavanje `skillsmpApiKey`)                                                    |
-| POST   | `/api/skills/marketplace/install` | Instaliranje skill-a po id-u sa SkillsMP-a                                                                                                   |
-| GET    | `/api/skills/skillssh?q=&limit=`  | Pretraga registra skills.sh                                                                                                                  |
-| POST   | `/api/skills/skillssh/install`    | Instaliranje skill-a po id-u sa skills.sh                                                                                                    |
+| Metod  | Putanja                           | Opis                                                                                                                            |
+| ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`                     | Izlistaj instalirane veštine — filtriranje po `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, sa paginacijom |
+| GET    | `/api/skills/[id]`                | Preuzmi jednu veštinu                                                                                                           |
+| PUT    | `/api/skills/[id]`                | Ažuriraj veštinu (naziv, opis, režim, šema, rukovalac, oznake)                                                                  |
+| DELETE | `/api/skills/[id]`                | Deinstaliraj veštinu                                                                                                            |
+| POST   | `/api/skills/install`             | Instaliraj veštinu iz sirovog manifesta — telo: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`  |
+| GET    | `/api/skills/executions`          | Izlistaj nedavna izvršavanja veština (trag revizije sa ulazima/izlazima/trajanjem)                                              |
+| GET    | `/api/skills/marketplace?q=...`   | Pretraži listu popularnih veština sa SkillsMP marketplace-a (zahteva podešavanje `skillsmpApiKey`)                              |
+| POST   | `/api/skills/marketplace/install` | Instaliraj veštinu prema ID-u sa SkillsMP-a                                                                                     |
+| GET    | `/api/skills/skillssh?q=&limit=`  | Pretraži registar skills.sh                                                                                                     |
+| POST   | `/api/skills/skillssh/install`    | Instaliraj veštinu prema ID-u sa skills.sh                                                                                      |
 
-**Autentifikacija:** upravljačka sesija/API ključ. Rute za pretragu marketplace-a prihvataju bilo upravljačku autentifikaciju bilo Bearer API ključ (`isAuthenticated`).
-
----
-
-## Меморија
-
-Трајна складишна јединица за конверзацијску/чињеничну меморију, ограничена по API кључу / сесији.
-
-| Метод  | Путања               | Опис                                                                                                                  |
-| ------ | -------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/memory`        | Листа меморија — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, са `offset/limit` или `page/limit` пагинацијом         |
-| POST   | `/api/memory`        | Креирање меморије — тело валидирано помоћу Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}` |
-| GET    | `/api/memory/[id]`   | Преузимање једне меморије                                                                                             |
-| DELETE | `/api/memory/[id]`   | Брисање меморије                                                                                                      |
-| GET    | `/api/memory/health` | Здравствено стање подсистема меморије (повезаност са базом података, embeddings backend, статус векторског индекса)   |
-
-**Аутентификација:** управљачка сесија/API кључ (`requireManagementAuth`). Енумерација `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (види `MemoryType` у `src/lib/memory/types.ts`).
+**Autentifikacija:** sesija za upravljanje/API ključ. Rute za pretragu marketplace-a prihvataju ili autentifikaciju za upravljanje ili Bearer API ključ (`isAuthenticated`).
 
 ---
 
-## MCP сервер
+## Memorija
 
-OmniRoute долази са уграђеним Model Context Protocol сервером са 3 транспорта (stdio, SSE, streamable-http) и алаткама ограниченог опсега. Испод наведене крајње тачке контролне табле читају статус/audit податке и посредују (proxy) HTTP транспорте.
+Trajna memorija konverzacije/činjenica, ograničena na API ključ / sesiju.
 
-| Метод | Путања | Опис |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Heartbeat, транспорт, статус повезаности, последњи позив, најкориснији алати, стопа успешности за 24ч |
-| GET | `/api/mcp/tools` | Листа MCP алата са `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Отвара SSE ток за SSE транспорт (враћа `503` ако је MCP онеспособљен или ако транспорт не одговара) |
-| POST | `/api/mcp/sse` | Слање JSON-RPC оквира преко SSE транспорта |
-| GET | `/api/mcp/stream` | Отвара SSE страну Streamable HTTP транспорта (поруке иницирање од сервера) |
-| POST | `/api/mcp/stream` | Слање JSON-RPC оквира преко Streamable HTTP транспорта |
-| DELETE | `/api/mcp/stream` | Завршава Streamable HTTP сесију |
-| GET | `/api/mcp/audit` | Упит над audit логом — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Агрегатне audit статистике (укупни бројеви, стопа успешности, просечно трајање, најкориснији алати) |
+| Metod  | Putanja              | Opis                                                                                                                                |
+| ------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/memory`        | Izlistavanje memorija — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, sa paginacijom `offset/limit` ili `page/limit`                |
+| POST   | `/api/memory`        | Kreiranje memorije — telo se validira pomoću Zod-a: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`           |
+| GET    | `/api/memory/[id]`   | Preuzimanje jedne memorije                                                                                                          |
+| DELETE | `/api/memory/[id]`   | Brisanje memorije                                                                                                                   |
+| GET    | `/api/memory/health` | Zdravstveno stanje podsistema memorije (povezanost sa bazom podataka, pozadinski sistem za ugnežđavanje, status vektorskog indeksa) |
 
-**Аутентификација:** транспорти `sse`/`stream` поштују MCP-специфичну аутентификациону површину (Bearer API кључ са `mcp` опсегом); руте `status`/`tools`/`audit*` су читљиве са контролне табле (без потребе за додатном аутентификацијом осим приступа домаћину контролне табле).
+**Autentifikacija:** sesija/klјuč API-ja za upravljanje (`requireManagementAuth`). Enumeracija `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (pogledajte `MemoryType` u `src/lib/memory/types.ts`).
 
-> Оба HTTP транспорта су контролисана поставкама `settings.mcpEnabled` и `settings.mcpTransport` — неусклађеност транспорта враћа `400`, а онеспособљено стање MCP-а враћа `503`.
+---
+
+## MCP server
+
+OmniRoute isporučuje ugrađeni server Model Context Protocol-a sa 3 transporta (stdio, SSE, streamable-http) i alatima ograničenim opsegom. Krajnje tačke kontrolne table u nastavku čitaju podatke o statusu i reviziji i prosleđuju HTTP transporte.
+
+| Metod  | Putanja                | Opis                                                                                                                        | -------------------- |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| GET    | `/api/mcp/status`      | Signal potvrde, transport, stanje na mreži, poslednji poziv, najčešće korišćeni alati, stopa uspešnosti u poslednja 24 časa |
+| GET    | `/api/mcp/tools`       | Spisak MCP alata sa `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints`                               |
+| GET    | `/api/mcp/sse`         | Otvaranje SSE toka za SSE transport (vraća `503` ako je MCP onemogućen ili ako se transporti ne podudaraju)                 |
+| POST   | `/api/mcp/sse`         | Slanje JSON-RPC okvira putem SSE transporta                                                                                 |
+| GET    | `/api/mcp/stream`      | Otvaranje SSE strane Streamable HTTP transporta (poruke koje pokreće server)                                                |
+| POST   | `/api/mcp/stream`      | Slanje JSON-RPC okvira putem Streamable HTTP transporta                                                                     |
+| DELETE | `/api/mcp/stream`      | Završavanje Streamable HTTP sesije                                                                                          |
+| GET    | `/api/mcp/audit`       | Upit nad zapisnikom revizije — `?limit=`, `?offset=`, `?tool=`, `?success=true                                              | false`, `?apiKeyId=` |
+| GET    | `/api/mcp/audit/stats` | Objedinjena statistika revizije (ukupan broj, stopa uspešnosti, prosečno trajanje, najčešće korišćeni alati)                |
+
+**Autentifikacija:** transporti `sse`/`stream` koriste MCP-specifičnu površinu za autentifikaciju (Bearer API ključ sa opsegom `mcp`); rute `status`/`tools`/`audit*` mogu se čitati sa kontrolne table (nije potrebna dodatna autentifikacija osim pristupa hostu kontrolne table).
+
+> Oba HTTP transporta su uslovljena podešavanjima `settings.mcpEnabled` i `settings.mcpTransport` — neusklađenost transporta vraća `400`, a onemogućeno MCP stanje vraća `503`.
 
 ---
 
 ## A2A сервер
 
-OmniRoute излаже A2A (Agent-to-Agent) JSON-RPC 2.0 крајњу тачку плус REST омотач за инспекцију/употребу на контролној табли.
+OmniRoute излаже A2A (Agent-to-Agent) JSON-RPC 2.0 крајњу тачку, као и REST омотач за инспекцију и коришћење на контролној табли.
 
 ### JSON-RPC
 
 ```bash
 POST /a2a
-Authorization: Bearer your-api-key   # опционо осим ако је постављен OMNIROUTE_API_KEY
+Authorization: Bearer your-api-key   # опционо, осим ако је OMNIROUTE_API_KEY подешен
 Content-Type: application/json
 
 {
@@ -1652,68 +1932,65 @@ Content-Type: application/json
 }
 ```
 
-Подржани методи (сви условљени поставком `settings.a2aEnabled`):
+Подржане методе (све зависе од подешавања `settings.a2aEnabled`):
 
 | Метод            | Опис                                                             |
 | ---------------- | ---------------------------------------------------------------- |
-| `message/send`   | Синхроно извршавање skill-а; враћа `{task, artifacts, metadata}` |
-| `message/stream` | Стриминг SSE извршавање истог скупа skill-ова                    |
-| `tasks/get`      | Преузимање задатка по `taskId`                                   |
-| `tasks/cancel`   | Отказивање задатка по `taskId`                                   |
+| `message/send`   | Синхроно извршавање вештине; враћа `{task, artifacts, metadata}` |
+| `message/stream` | SSE стриминг извршавања истог скупа вештина                      |
+| `tasks/get`      | Преузимање задатка према `taskId`                                |
+| `tasks/cancel`   | Отказивање задатка према `taskId`                                |
 
-Уграђени skill-ови: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
+Уграђене вештине: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
-### Agent Card
+### Картица агента
 
 ```bash
 GET /.well-known/agent.json
 ```
 
-Враћа јавну A2A agent картицу (назив, опис, могућности, каталог skill-ова, шему аутентикације) — кеширано јавно на 1h. Аутентикација није потребна.
+Враћа јавну A2A картицу агента (назив, опис, могућности, каталог вештина, шема аутентикације) — јавно се кешира 1 ч. Аутентикација није потребна.
 
-### REST помагала
+### REST помоћне крајње тачке
 
-| Метод | Путања                       | Опис                                                                                                                |
-| ----- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/a2a/status`            | A2A укључено + статистика задатака + кеширани резиме agent картице                                                  |
-| GET   | `/api/a2a/tasks`             | Листа задатака — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
-| POST  | `/api/a2a/tasks`             | (Није имплементирано као REST помагало — креира се преко JSON-RPC `message/send`)                                   |
-| GET   | `/api/a2a/tasks/[id]`        | Преузимање једног задатка                                                                                           |
-| POST  | `/api/a2a/tasks/[id]/cancel` | Отказивање задатка                                                                                                  |
+| Метод | Путања                       | Опис                                                                                                                   |
+| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/a2a/status`            | Да ли је A2A омогућен + статистика задатака + сажетак кеширане картице агента                                          |
+| GET   | `/api/a2a/tasks`             | Навођење задатака — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
+| POST  | `/api/a2a/tasks`             | (Није имплементирано као REST помоћна крајња тачка — креирајте преко JSON-RPC методе `message/send`)                   |
+| GET   | `/api/a2a/tasks/[id]`        | Преузимање једног задатка                                                                                              |
+| POST  | `/api/a2a/tasks/[id]/cancel` | Отказивање задатка                                                                                                     |
 
-**Аутентикација:** REST помагала се извршавају без управљачке аутентикације (читљиво на контролној табли); JSON-RPC `/a2a` рута користи Bearer `OMNIROUTE_API_KEY` ако је конфигурисан.
+**Аутентикација:** REST помоћне крајње тачке раде без управљачке аутентикације (доступне су за читање на контролној табли); JSON-RPC рута `/a2a` користи Bearer `OMNIROUTE_API_KEY` ако је конфигурисан.
 
 ---
 
-## Cloud, евалуације и процена
+## Cloud, Evals и Assess
 
 | Метод | Путања | Опис |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Проверава Bearer кључ и враћа маскиране везе са добављачима + алијасе модела за клијенте синхронизације са облаком |
-| POST | `/api/cloud/credentials/update` | Ажурира шифроване акредитиве за добављача синхронизованог са облаком |
-| POST | `/api/cloud/model/resolve` | Разрешава логички ID модела у конкретног добављача/модел користећи локалну табелу усмеравања |
-| GET | `/api/cloud/models/alias` | Наводи алијасе модела онако како су изложени синхронизацији са облаком |
-| GET | `/api/assess` | Чита најновије категоризације процене (по добављачу/моделу) |
+| POST | `/api/cloud/auth` | Верификује Bearer кључ и враћа маскиране везе са провајдерима и алијасе модела за клијенте синхронизоване са cloud-ом |
+| POST | `/api/cloud/credentials/update` | Ажурира шифроване акредитиве за провајдера синхронизованог са cloud-ом |
+| POST | `/api/cloud/model/resolve` | Разрешава логички ID модела у конкретног провајдера/модел користећи локалну табелу рутирања |
+| GET | `/api/cloud/models/alias` | Наводи алијасе модела доступне cloud синхронизацији |
+| GET | `/api/assess` | Чита најновије категorizације процене (по провајдеру/моделу) |
 | POST | `/api/assess` | Покреће процену — тело: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Наводи уграђене пакете евалуација + најновија покретања |
-| POST | `/api/evals` | Покреће извршавање евалуације |
-| POST | `/api/evals/suites` | Креира прилагођени пакет евалуација — тело се валидира помоћу `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Преузима прилагођени пакет евалуација |
+| GET | `/api/evals` | Наводи уграђене скупове евалуација + најновија покретања |
+| POST | `/api/evals` | Покреће евалуацију |
+| POST | `/api/evals/suites` | Креира прилагођени скуп евалуација — тело се проверава помоћу `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Преузима прилагођени скуп евалуација |
 
-**Аутентификација:** `/api/cloud/auth` директно валидира Bearer кључ и враћа маскирани кључ и `projectId` сваке везе само за кључ са опсегом `manage` / `admin`; остале руте `/api/cloud/*`, `/api/evals/*` и `/api/assess` захтевају управљачку сесију/API кључ. POST захтев за `/api/assess` користи `validateBody` са шемом опсега заснованом на дискриминисаној унији.
+**Аутентикација:** `/api/cloud/auth` директно проверава Bearer кључ и враћа маскирани кључ и `projectId` сваке везе само за кључ са опсегом `manage` / `admin`; остале руте `/api/cloud/*`, `/api/evals/*` и `/api/assess` захтевају управљачку сесију/API кључ. POST захтев `/api/assess` користи `validateBody` са шемом опсега заснованом на дискриминисаној унији.
 
----
+## Управљање ACP-ом (Agent Client Protocol)
 
-## Управљање ACP (Agent Client Protocol)
+као подређеним процесима. Ове крајње тачке управљају откривањем ACP агената и регистрацијом прилагођених агената.
 
-као подпроцеси. Ови крајњи чворови (endpoints) управљају детекцијом ACP агента и
-регистрацијом прилагођеног агента.
-
-| Метод  | Путања            | Опис                                                                                                                                                                |
-| ------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/acp/agents` | Листа свих познатих CLI агената (уграђени + прилагођени) са статусом инсталације, верзијом, извршном датотеком                                                      |
-| POST   | `/api/acp/agents` | Регистрација прилагођеног ACP агента или освежавање кеша — тело: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` или `{action: "refresh"}` |
-| DELETE | `/api/acp/agents` | Уклањање прилагођеног ACP агента — упитни параметар: `?id=<agentId>`                                                                                                |
+| Метод  | Путања            | Опис                                                                                                                                                           |
+| ------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/acp/agents` | Наводи све познате CLI агенте (уграђене + прилагођене) са статусом инсталације, верзијом и бинарном датотеком                                                  |
+| POST   | `/api/acp/agents` | Региструје прилагођеног ACP агента или освежава кеш — тело: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` или `{action: "refresh"}` |
+| DELETE | `/api/acp/agents` | Уклања прилагођеног ACP агента — параметар упита: `?id=<agentId>`                                                                                              |
 
 **Пример одговора** (`GET /api/acp/agents`):
 
@@ -1744,24 +2021,22 @@ GET /.well-known/agent.json
 }
 ```
 
-**Ауторизација:** Захтева менаџмент сесију (dashboard `auth_token` колачић) или
-API кључ са менаџмент обимом (scope).
+**Аутентификација:** Захтева управљачку сесију (колачић `auth_token` контролне табле) или API кључ ограничен на управљање.
 
 Погледајте [ACP оквир](../frameworks/ACP.md) за све детаље.
 
 ---
 
-## Аналитика и осматрање (Observability)
+## Аналитика и уочљивост
 
-Крајњи чворови за аналитику у реалном времену за праћење рутирања, компресије и
-разноликости провајдера. Они покрећу странице `/dashboard/analytics/*`.
+Крајње тачке за аналитику у реалном времену ради надгледања усмеравања, компресије и разноврсности добављача. Оне покрећу странице `/dashboard/analytics/*`.
 
-### Аналитика аутоматског рутирања
+### Аналитика аутоматског усмеравања
 
-| Метод | Путања                               | Опис                                                                                                                              |
-| ----- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/auto-routing`        | Агрегатне статистике аутоматског рутирања: укупан број позива, дистрибуција стратегија, дистрибуција нивоа (tier), топ провајдери |
-| GET   | `/api/analytics/auto-routing?days=7` | Статистике у временском прозору (подразумевано 24ч)                                                                               |
+| Метод | Путања                               | Опис                                                                                                                      |
+| ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/auto-routing`        | Обједињена статистика аутоматског усмеравања: укупан број позива, расподела стратегија, расподела нивоа, водећи добављачи |
+| GET   | `/api/analytics/auto-routing?days=7` | Статистика за одређени временски период (подразумевано 24 ч)                                                              |
 
 **Пример одговора**:
 
@@ -1791,9 +2066,9 @@ API кључ са менаџмент обимом (scope).
 
 ### Аналитика компресије
 
-| Метод | Путања                       | Опис                                                                                                     |
-| ----- | ---------------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/compression` | Агрегатне статистике компресије: сачувани токени, проценат уштеде, дистрибуција режима, коришћење енгина |
+| Метод | Путања                       | Опис                                                                                                      |
+| ----- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/compression` | Обједињена статистика компресије: уштеђени токени, проценат уштеде, расподела режима, употреба механизама |
 
 **Пример одговора**:
 
@@ -1818,11 +2093,11 @@ API кључ са менаџмент обимом (scope).
 }
 ```
 
-### Праћење разноликости провајдера
+### Праћење разноврсности добављача
 
-| Метод | Путања                     | Опис                                                                                                                 |
-| ----- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/diversity` | Праћење разноликости на основу Шенонове ентропије: спречава тачке појединачног квара мерењем распршености провајдера |
+| Метод | Путања                     | Опис                                                                                                                  |
+| ----- | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/diversity` | Праћење разноврсности засновано на Шеноновој ентропији: спречава појединачне тачке отказа мерењем расподеле добављача |
 
 **Пример одговора**:
 
@@ -1842,187 +2117,187 @@ API кључ са менаџмент обимом (scope).
 }
 ```
 
-**Ауторизација:** Захтева менаџмент сесију или API кључ са менаџмент обимом (scope).
+**Аутентификација:** Захтева управљачку сесију или API кључ ограничен на управљање.
 
 ---
 
-## Admin операције
+## Администраторске операције
 
 Ендпоинти доступни само администраторима за оперативно управљање.
 
 | Method | Path                     | Description                                                                                           |
 | ------ | ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| GET    | `/api/admin/concurrency` | Читање тренутних ограничења конкурентности (глобалних + по провајдеру)                                |
-| POST   | `/api/admin/concurrency` | Ажурирање ограничења конкурентности — body: `{global?: number, perProvider?: Record<string, number>}` |
+| GET    | `/api/admin/concurrency` | Читање тренутних ограничења конкурентности (глобалних и по добављачу)                                 |
+| POST   | `/api/admin/concurrency` | Ажурирање ограничења конкурентности — тело: `{global?: number, perProvider?: Record<string, number>}` |
 
-**Auth:** Захтева management сесију са admin scope.
+**Аутентификација:** Захтева управљачку сесију са администраторским опсегом.
 
 ---
 
 ## Управљање CLI алатима
 
-Управљајте CLI алатима који се интегришу са OmniRoute-ом (antigravity, commandCode,
-devin-cli итд.). Погледајте [Референтну документацију добављача](./PROVIDER_REFERENCE.md) за комплетну листу.
+Управљање CLI алатима који се интегришу са OmniRoute-ом (antigravity, commandCode,
+devin-cli итд.). Погледајте [референцу добављача](./PROVIDER_REFERENCE.md) за потпун списак.
 
-| Метод | Путања                                  | Опис                                                                                                                                                                                    |
-| ----- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/cli-tools/all-statuses`           | Статус свих CLI алата (инсталираност, верзија, последње коришћење)                                                                                                                      |
-| GET   | `/api/cli-tools/status`                 | Детаљи статуса једног CLI алата (`?tool=` упит)                                                                                                                                         |
-| POST  | `/api/cli-tools/apply`                  | Уписује генерисану конфигурацију алата (`dryRun` приказује преглед; `422` + `containerEphemeralTarget` када је у контејнеру; `migration` указује на застарелу Codex YAML конфигурацију) |
-| GET   | `/api/cli-tools/backups`                | Наводи резервне копије конфигурација CLI алата                                                                                                                                          |
-| POST  | `/api/cli-tools/backups`                | Прави резервну копију конфигурација свих CLI алата                                                                                                                                      |
-| POST  | `/api/cli-tools/backups`                | Враћање: исти крајњи приступ са `{tool, backupId}` у телу захтева враћа ту резервну копију                                                                                              |
-| GET   | `/api/cli-tools/antigravity-mitm`       | Статус Antigravity MITM проксија (CLI алат „antigravity-mitm“)                                                                                                                          |
-| POST  | `/api/cli-tools/antigravity-mitm/alias` | Конфигурише antigravity-mitm алијасе                                                                                                                                                    |
+| Method | Path                                    | Description                                                                                                                                                                  |
+| ------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cli-tools/all-statuses`           | Статус свих CLI алата (инсталиран, верзија, последњи пут виђен)                                                                                                              |
+| GET    | `/api/cli-tools/status`                 | Детаљи статуса једног CLI алата (упит `?tool=`)                                                                                                                              |
+| POST   | `/api/cli-tools/apply`                  | Уписивање генерисане конфигурације алата (`dryRun` приказује преглед; `422` + `containerEphemeralTarget` када се извршава у контејнеру; `migration` наводи стари Codex YAML) |
+| GET    | `/api/cli-tools/backups`                | Навођење резервних копија конфигурација CLI алата                                                                                                                            |
+| POST   | `/api/cli-tools/backups`                | Креирање резервне копије свих конфигурација CLI алата                                                                                                                        |
+| POST   | `/api/cli-tools/backups`                | Враћање: исти ендпоинт са `{tool, backupId}` у телу враћа ту резервну копију                                                                                                 |
+| GET    | `/api/cli-tools/antigravity-mitm`       | Статус MITM проксија за antigravity (CLI алат „antigravity-mitm“)                                                                                                            |
+| POST   | `/api/cli-tools/antigravity-mitm/alias` | Конфигурисање псеудонима за antigravity-mitm                                                                                                                                 |
 
-**Аутентификација:** Захтева сесију за управљање.
+**Аутентификација:** Захтева управљачку сесију.
 
 ---
 
-## Agent Skills
+## Вештине агената
 
-Управљајте вештинама AI агента (слично OpenAI-јевим custom GPT-овима, али за агенте).
+Управљање вештинама AI агената (слично прилагођеним GPT-овима компаније OpenAI, али за агенте).
 
-| Method | Path                         | Description                                                                                    |
-| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------- |
-| GET    | `/api/agent-skills`          | Листа свих agent skills (уграђених + прилагођених)                                             |
-| GET    | `/api/agent-skills/[id]`     | Преузимање конкретне agent skill-a                                                             |
-| POST   | `/api/agent-skills`          | Креирање прилагођене agent skill-a — body: `{name, description, prompt, model?, temperature?}` |
-| PUT    | `/api/agent-skills/[id]`     | Ажурирање прилагођене agent skill-a                                                            |
-| DELETE | `/api/agent-skills/[id]`     | Брисање прилагођене agent skill-a                                                              |
-| GET    | `/api/agent-skills/[id]/raw` | Преузимање sirovog prompt-a + metapodataka (без извршавања)                                    |
-| POST   | `/api/agent-skills/generate` | AI генерисање нове skill-a на основу описа на природном језику                                 |
+| Method | Path                         | Description                                                                                     |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/api/agent-skills`          | Навођење свих вештина агената (уграђених и прилагођених)                                        |
+| GET    | `/api/agent-skills/[id]`     | Преузимање одређене вештине агента                                                              |
+| POST   | `/api/agent-skills`          | Креирање прилагођене вештине агента — тело: `{name, description, prompt, model?, temperature?}` |
+| PUT    | `/api/agent-skills/[id]`     | Ажурирање прилагођене вештине агента                                                            |
+| DELETE | `/api/agent-skills/[id]`     | Брисање прилагођене вештине агента                                                              |
+| GET    | `/api/agent-skills/[id]/raw` | Преузимање сировог упита и метаподатака (без извршавања)                                        |
+| POST   | `/api/agent-skills/generate` | Генерисање нове вештине помоћу AI-ја из описа на природном језику                               |
 
-**Auth:** Захтева management сесију или management-scoped API кључ.
+**Аутентификација:** Захтева управљачку сесију или API кључ са опсегом управљања.
 
 ---
 
 ## Управљање кешом
 
-Управљање семантичким кешом и кешом закључивања.
+Управљајте семантичким кешом и кешом за резоновање.
 
-| Метод  | Путања                 | Опис                                                                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/cache`           | Преглед кеша: укупан број уноса, стопа погодака, величина на диску                                                 |
-| GET    | `/api/cache/entries`   | Листа кешираних уноса (са паginацијом)                                                                             |
-| DELETE | `/api/cache/entries`   | Брисање уноса кеша (филтрирано по параметрима упита)                                                               |
-| GET    | `/api/cache/stats`     | Детаљна статистика кеша (по провајдеру, по моделу)                                                                 |
-| GET    | `/api/cache/reasoning` | Статус кеша закључивања (за реплеј закључивања)                                                                    |
-| DELETE | `/api/cache/reasoning` | Брисање кеша закључивања — параметри упита: `?toolCallId=<id>` (један) или `?provider=<p>` (без параметара за све) |
+| Метод  | Путања                 | Опис                                                                                                                     |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/cache`           | Преглед кеша: укупан број уноса, стопа погодака, величина на диску                                                       |
+| GET    | `/api/cache/entries`   | Навођење кешираних уноса (са пагинацијом)                                                                                |
+| DELETE | `/api/cache/entries`   | Брисање кешираних уноса (филтрирање помоћу параметара упита)                                                             |
+| GET    | `/api/cache/stats`     | Детаљна статистика кеша (по добављачу, по моделу)                                                                        |
+| GET    | `/api/cache/reasoning` | Статус кеша за резоновање (за поновно репродуковање резоновања)                                                          |
+| DELETE | `/api/cache/reasoning` | Брисање кеша за резоновање — параметри упита: `?toolCallId=<id>` (појединачно), `?provider=<p>` или без параметара (све) |
 
-**Ауторизација:** Захтева management сесију.
+**Аутентификација:** Захтева управљачку сесију.
 
 ---
 
 ## Систем меморије
 
-Управљање перзистентном меморијом (FTS5 + векторски embeddinzi).
+Управљајте трајном меморијом (FTS5 + векторска уграђивања).
 
-| Метод  | Путања             | Опис                                                                              |
-| ------ | ------------------ | --------------------------------------------------------------------------------- |
-| GET    | `/api/memory`      | Листа уноса меморије (филтрирано по опсегу, типу, упиту претраге)                 |
-| POST   | `/api/memory`      | Креирање новог уноса меморије — тело захтева: `{scope, type, content, metadata?}` |
-| GET    | `/api/memory/[id]` | Преузимање одређеног уноса меморије                                               |
-| PUT    | `/api/memory/[id]` | Ажурирање уноса меморије                                                          |
-| DELETE | `/api/memory/[id]` | Брисање уноса меморије                                                            |
-| GET    | `/api/memory?q=`   | Претрага меморије (FTS5 + вектор) — статистика је укључена у истом одговору       |
+| Метод  | Путања             | Опис                                                                           |
+| ------ | ------------------ | ------------------------------------------------------------------------------ |
+| GET    | `/api/memory`      | Навођење уноса меморије (филтрирање према опсегу, типу, упиту за претрагу)     |
+| POST   | `/api/memory`      | Креирање новог уноса меморије — тело: `{scope, type, content, metadata?}`      |
+| GET    | `/api/memory/[id]` | Преузимање одређеног уноса меморије                                            |
+| PUT    | `/api/memory/[id]` | Ажурирање уноса меморије                                                       |
+| DELETE | `/api/memory/[id]` | Брисање уноса меморије                                                         |
+| GET    | `/api/memory?q=`   | Претрага меморије (FTS5 + векторска) — статистика је укључена у истом одговору |
 
-**Ауторизација:** Захтева management сесију или management-scoped API кључ.
-
----
-
-## Webhook-ови
-
-Управљање webhook претплатама за догађаје.
-
-| Метод  | Путања                          | Опис                                                                           |
-| ------ | ------------------------------- | ------------------------------------------------------------------------------ |
-| GET    | `/api/webhooks`                 | Листа свих webhook претплата                                                   |
-| POST   | `/api/webhooks`                 | Креирање webhook претплате — тело захтева: `{url, events[], secret?, active?}` |
-| GET    | `/api/webhooks/[id]`            | Преузимање одређене webhook претплате                                          |
-| PUT    | `/api/webhooks/[id]`            | Ажурирање webhook претплате                                                    |
-| DELETE | `/api/webhooks/[id]`            | Брисање webhook претплате                                                      |
-| GET    | `/api/webhooks/[id]/deliveries` | Листа историје достава за webhook (лог успеха/неуспеха)                        |
-| POST   | `/api/webhooks/[id]/test`       | Слање тест догађаја на webhook                                                 |
-
-**Ауторизација:** Захтева management сесију.
-
-Погледајте [Webhooks Framework](../frameworks/WEBHOOKS.md) за све типове догађаја.
+**Аутентификација:** Захтева управљачку сесију или API кључ са опсегом управљања.
 
 ---
 
-## Skills Framework (Оквир вештина)
+## Вебхукови
 
-Управљајте вештинама (агентски оквир екстензија).
+Управљајте претплатама на вебхукове за догађаје.
 
-| Метод  | Путања                   | Опис                                                                                                    |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/skills`            | Излистава све инсталиране вештине (уграђене + прилагођене)                                              |
-| POST   | `/api/skills/install`    | Инсталира вештину са локалне путање или URL адресе                                                      |
-| DELETE | `/api/skills/[id]`       | Деинсталира вештину                                                                                     |
-| PUT    | `/api/skills/[id]`       | Омогућава или онемогућава вештину — тело захтева: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
-| POST   | `/api/skills/executions` | Извршава вештину — тело захтева: `{skillName, apiKeyId, input?, sessionId?}`                            |
-| GET    | `/api/skills/executions` | Излистава историју извршавања за све вештине (филтрирање помоћу `?apiKeyId=`)                           |
+| Метод  | Путања                          | Опис                                                                             |
+| ------ | ------------------------------- | -------------------------------------------------------------------------------- |
+| GET    | `/api/webhooks`                 | Навођење свих претплата на вебхукове                                             |
+| POST   | `/api/webhooks`                 | Креирање претплате на вебхук — тело: `{url, events[], secret?, active?}`         |
+| GET    | `/api/webhooks/[id]`            | Преузимање одређене претплате на вебхук                                          |
+| PUT    | `/api/webhooks/[id]`            | Ажурирање претплате на вебхук                                                    |
+| DELETE | `/api/webhooks/[id]`            | Брисање претплате на вебхук                                                      |
+| GET    | `/api/webhooks/[id]/deliveries` | Навођење историје испоруке за вебхук (евиденција успешних и неуспешних испорука) |
+| POST   | `/api/webhooks/[id]/test`       | Слање пробног догађаја вебхуку                                                   |
 
-**Аутентикација:** Захтева менаџмент сесију или API кључ са менаџмент овлашћењима.
+**Аутентификација:** Захтева управљачку сесију.
 
-Погледајте [Skills Framework](../frameworks/SKILLS.md) за све детаље.
-
----
-
-## Plugins (Додаци)
-
-Управљајте OmniRoute додацима (екстензије трећих страна).
-
-| Метод  | Путања                             | Опис                               |
-| ------ | ---------------------------------- | ---------------------------------- |
-| GET    | `/api/plugins`                     | Излистава инсталиране додатке      |
-| POST   | `/api/plugins/marketplace/install` | Инсталира додатак из marketplace-а |
-| DELETE | `/api/plugins/[name]`              | Деинсталира додатак                |
-| POST   | `/api/plugins/[name]/activate`     | Активира додатак                   |
-| POST   | `/api/plugins/[name]/deactivate`   | Деактивира додатак                 |
-| GET    | `/api/plugins/[name]/config`       | Преузима конфигурацију додатка     |
-| PUT    | `/api/plugins/[name]/config`       | Ажурира конфигурацију додатка      |
-
-**Аутентикација:** Захтева менаџмент сесију.
-
-Погледајте [Plugins Framework](../frameworks/PLUGIN_SDK.md) за све детаље.
+Погледајте [Оквир за вебхукове](../frameworks/WEBHOOKS.md) за потпуни списак типова догађаја.
 
 ---
 
-## Shadow Routing (Сенка рутирање)
+## Okvir veština
 
-Сенка / A-B поређење провајдера **није самостални REST интерфејс** — конфигурише се преко комбо рутирања (погледајте [Auto-Combo](../routing/AUTO-COMBO.md)). Метрике поређења по комбинацији доступне су преко `GET /api/combos/metrics`.
+Upravljanje veštinama (okvir agentskih proširenja).
 
----
+| Metod  | Putanja                  | Opis                                                                                                  |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`            | Izlistavanje svih instaliranih veština (ugrađenih + prilagođenih)                                     |
+| POST   | `/api/skills/install`    | Instaliranje veštine iz lokalne putanje ili URL-a                                                     |
+| DELETE | `/api/skills/[id]`       | Deinstaliranje veštine                                                                                |
+| PUT    | `/api/skills/[id]`       | Omogućavanje ili onemogućavanje veštine — telo: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
+| POST   | `/api/skills/executions` | Izvršavanje veštine — telo: `{skillName, apiKeyId, input?, sessionId?}`                               |
+| GET    | `/api/skills/executions` | Izlistavanje istorije izvršavanja za sve veštine (filtriranje pomoću `?apiKeyId=`)                    |
 
-## Guardrails (Заштитне мере)
+**Autentifikacija:** Zahteva upravljačku sesiju ili API ključ sa opsegom za upravljanje.
 
-Прегледајте заштитне мере рантајма (детекција личних података, детекција убризгавања упита, повезивање визуелних података). Заштитне мере се примењују на сваки захтев; одустајање по позиву врши се преко заглавља захтева `x-omniroute-disabled-guardrails` — не постоји трајни интерфејс за омогућавање/онемогућавање.
-
-| Метод | Путања                 | Опис                                                                                                                    |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/guardrails`      | Излистава регистроване заштитне мере и њихов статус (назив / омогућено / приоритет)                                     |
-| POST  | `/api/guardrails/test` | Тестира сувим погоном (dry-run) пре-позивни ток обраде над узорком уноса — тело захтева: `{input, disabledGuardrails?}` |
-
-**Аутентикација:** Захтева менаџмент сесију.
-
-Погледајте [Security > Guardrails](../security/GUARDRAILS.md) за све детаље.
+Pogledajte [Okvir veština](../frameworks/SKILLS.md) za sve detalje.
 
 ---
 
+## Dodaci
+
+Upravljanje OmniRoute dodacima (proširenjima trećih strana).
+
+| Metod  | Putanja                            | Opis                                  |
+| ------ | ---------------------------------- | ------------------------------------- |
+| GET    | `/api/plugins`                     | Izlistavanje instaliranih dodataka    |
+| POST   | `/api/plugins/marketplace/install` | Instaliranje dodatka sa marketplace-a |
+| DELETE | `/api/plugins/[name]`              | Deinstaliranje dodatka                |
+| POST   | `/api/plugins/[name]/activate`     | Aktiviranje dodatka                   |
+| POST   | `/api/plugins/[name]/deactivate`   | Deaktiviranje dodatka                 |
+| GET    | `/api/plugins/[name]/config`       | Dobavljanje konfiguracije dodatka     |
+| PUT    | `/api/plugins/[name]/config`       | Ažuriranje konfiguracije dodatka      |
+
+**Autentifikacija:** Zahteva upravljačku sesiju.
+
+Pogledajte [Okvir dodataka](../frameworks/PLUGIN_SDK.md) za sve detalje.
+
 ---
 
-## Аутентикација
+## Senkovano rutiranje
 
-Погледајте [Management Authentication](../guides/MANAGEMENT-AUTH.md) за четири
-породице акредитива (dashboard сесија, локални CLI токен, `oma_live_…` Access
-Token, manage-scoped API кључ) и по чему се разликују од inference кључева.
+Senkovano / A-B poređenje provajdera **nije samostalna REST površina** — konfiguriše se putem kombinovanog rutiranja (pogledajte [Automatsko kombinovanje](../routing/AUTO-COMBO.md)). Metrike poređenja po kombinaciji dostupne su putem `GET /api/combos/metrics`.
 
-- Dashboard руте (`/dashboard/*`) користе `auth_token` колачић (cookie)
-- Пријава користи сачувани хеш лозинке; резервно решење је `INITIAL_PASSWORD`
-- `requireLogin` се може укључити/искључити преко `/api/settings/require-login`
-- `/v1/*` руте опционо захтевају Bearer API кључ када је `REQUIRE_API_KEY=true`
-- „management token" / „management-scoped API кључ" у овом документу значи једно од породица из тог водича — а не недефинисан додатни тип тајне
+---
 
-> **Промена која нарушава компатибилност (v3.8.0)** — `/api/v1/agents/tasks/*` и крајње тачке за управљање cooldown-ом сада захтевају **management аутентикацију** (dashboard `auth_token` колачић или manage-scoped API кључ). Клијенти који су раније позивали ове руте без аутентикације добиће `401 Unauthorized`. Погледајте commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+## Zaštitne mere
+
+Pregledajte zaštitne mere tokom izvršavanja (otkrivanje PII podataka, otkrivanje ubacivanja prompta, povezivanje vizuelnih sadržaja). Zaštitne mere se izvršavaju za svaki zahtev; onemogućavanje po pozivu vrši se putem zaglavlja zahteva `x-omniroute-disabled-guardrails` — ne postoji trajna površina za omogućavanje/onemogućavanje.
+
+| Metod | Putanja                | Opis                                                                                           |
+| ----- | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET   | `/api/guardrails`      | Izlistavanje registrovanih zaštitnih mera i njihovog statusa (naziv / omogućeno / prioritet)   |
+| POST  | `/api/guardrails/test` | Probno izvršavanje procesa pre poziva nad uzorkom unosa — telo: `{input, disabledGuardrails?}` |
+
+**Autentifikacija:** Zahteva upravljačku sesiju.
+
+Pogledajte [Bezbednost > Zaštitne mere](../security/GUARDRAILS.md) za sve detalje.
+
+---
+
+---
+
+## Аутентификација
+
+Погледајте [Аутентификација за управљање](../guides/MANAGEMENT-AUTH.md) за четири
+породице акредитива (сесија контролне табле, локални CLI токен, `oma_live_…` приступни
+токен, API кључ са опсегом за управљање) и по чему се разликују од кључева за инференцију.
+
+- Руте контролне табле (`/dashboard/*`) користе колачић `auth_token`
+- Пријављивање користи сачувани хеш лозинке; резервна опција је `INITIAL_PASSWORD`
+- Прекидачем `requireLogin` може се управљати преко `/api/settings/require-login`
+- Руте `/v1/*` опционално захтевају Bearer API кључ када је `REQUIRE_API_KEY=true`
+- „management token“ / „management-scoped API key“ у овој референци означава једну од породица из тог водича — не неки додатни, недефинисани тип тајне
+
+> **Промена која нарушава компатибилност (v3.8.0)** — `/api/v1/agents/tasks/*` и крајње тачке за управљање периодом хлађења сада захтевају **аутентификацију за управљање** (колачић контролне табле `auth_token` или API кључ са опсегом за управљање). Клијенти који су претходно позивали ове руте без аутентификације добиће `401 Unauthorized`. Погледајте commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).

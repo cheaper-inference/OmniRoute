@@ -4,38 +4,38 @@
 
 ---
 
-OmniRoute hutatua kiendeshi chake cha SQLite wakati wa kuanzishwa kupitia mfululizo wa hatua 5 za mbadala:
+OmniRoute huchagua kiendeshi chake cha SQLite wakati wa kuanza kupitia mnyororo wa hatua 5 wa chaguo mbadala:
 
 1. **`better-sqlite3` iliyojumuishwa** (kupitia `dependencies` katika `package.json`)
-   — ndiyo ya kasi zaidi, ina faili asili ya binari, na husakinishwa na `npm install` wakati zana za uundaji zinapatikana.
+   — ndiyo ya kasi zaidi, hutumia faili asili ya mfumo, na husakinishwa na `npm install` zana za uundaji zinapopatikana.
 
 2. **`better-sqlite3` iliyosakinishwa wakati wa utekelezaji** (katika `~/.omniroute/runtime/`)
-   — husakinishwa inapohitajika wakati wa uendeshaji wa kwanza **AU** na `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Huhakiki baiti bainishi za faili asili ya `.node` (ELF / Mach-O / PE) kabla ya kuipakia
-   ili kujilinda dhidi ya faili za binari zilizoharibika au za mfumo usio sahihi.
+   — husakinishwa kwa kucheleweshwa wakati wa utekelezaji wa kwanza **AU** na `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Huthibitisha baiti bainifu za faili asili ya `.node` (ELF / Mach-O / PE) kabla ya kuipakia
+   ili kujilinda dhidi ya faili zilizoharibika au za mfumo usio sahihi.
 
-3. **`node:sqlite`** (maktaba sanifu ya Node ≥22.5) — haihitaji uundaji asili; hutumika wakati
+3. **`node:sqlite`** (maktaba ya kawaida ya Node ≥22.5) — haihitaji uundaji asili; hutumika wakati
    njia zote mbili za better-sqlite3 zinaposhindwa. Ina seti ndogo ya vipengele.
 
-4. **`sql.js`** (WASM) — mbadala wa mwisho. Hufanya kazi kila mahali lakini ni ya polepole zaidi
+4. **`sql.js`** (WASM) — chaguo la mwisho. Hufanya kazi kila mahali lakini ni polepole zaidi
    na huandika data kwa vipindi badala ya kwa usawazishaji.
 
-## Kwa nini kuna ugumu huu?
+## Kwa nini kuna utata huu?
 
 - **Windows EBUSY**: `npm install -g omniroute@latest` inaweza kushindwa ikiwa
   `better_sqlite3.node` ya toleo la awali imefungwa na mchakato unaoendelea. Usakinishaji
-  wa wakati wa utekelezaji katika `~/.omniroute/runtime/` huepuka akiba ya kimataifa ya npm.
-- **Hakuna zana za uundaji**: Baadhi ya mazingira (Windows za kampuni zisizo na VS Build
-  Tools, taswira ndogo za Docker) hayawezi kukusanya `better-sqlite3`. Kisakinishaji cha wakati
-  wa utekelezaji hupata faili ya binari iliyoundwa awali kutoka kwenye sajili ya npm; viendeshi
-  mbadala huhakikisha kuwa OmniRoute bado inaanza hata ikiwa hilo litashindwa.
-- **Mifumo isiyounganishwa na mtandao**: Ikiwa sajili ya npm haipatikani, `node:sqlite`
+  wa wakati wa utekelezaji katika `~/.omniroute/runtime/` huepuka kache ya kimataifa ya npm.
+- **Hakuna zana za uundaji**: Baadhi ya mazingira (Windows za mashirika zisizo na VS Build
+  Tools, picha ndogo za Docker) hayawezi kukusanya `better-sqlite3`. Kisakinishaji cha wakati
+  wa utekelezaji hupata faili iliyoundwa mapema kutoka sajili ya npm; viendeshi mbadala
+  huhakikisha OmniRoute bado inaanza hata hilo likishindwa.
+- **Mifumo isiyo na muunganisho wa nje**: Ikiwa sajili ya npm haipatikani, `node:sqlite`
   au `sql.js` huhakikisha utendaji wa msingi.
 
-## Uhakikishaji wa baiti bainishi
+## Uthibitishaji wa baiti bainifu
 
 Kabla ya kupakia faili ya `.node` iliyosakinishwa wakati wa utekelezaji, OmniRoute husoma baiti 8
-za kwanza na kuzilinganisha na baiti bainishi zinazojulikana za majukwaa:
+za kwanza na kuzilinganisha na baiti bainifu zinazojulikana za majukwaa:
 
 | Jukwaa                | Baiti (hex)   | Lebo        |
 | --------------------- | ------------- | ----------- |
@@ -45,7 +45,7 @@ za kwanza na kuzilinganisha na baiti bainishi zinazojulikana za majukwaa:
 | macOS fat (universal) | `CA FE BA BE` | `macho-fat` |
 | Windows               | `4D 5A` (MZ)  | `pe`        |
 
-Baiti bainishi zisizolingana → faili hupuuzwa, na mchakato wa kutumia mbadala huendelea hadi hatua inayofuata.
+Baiti bainifu zisizolingana → faili hupuuzwa, na mchakato wa kutumia chaguo mbadala huendelea hadi hatua inayofuata.
 
 ## Kukagua kiendeshi kinachotumika
 
@@ -57,39 +57,59 @@ const info = getDriverInfo();
 //   kind: "better-sqlite3" | "node-sqlite" | "sql-js" }
 ```
 
-## Udhibiti wa moja kwa moja
+## Udhibiti wa mikono
 
 ```bash
-# Ruka maandalizi ya postinstall (kwa usakinishaji wa haraka wa CI)
+# Ruka maandalizi ya awali baada ya usakinishaji (kwa usakinishaji wa haraka wa CI)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
 # Lazimisha usakinishaji upya wa better-sqlite3 ya wakati wa utekelezaji
 rm -rf ~/.omniroute/runtime
-omniroute  # itasakinishwa upya wakati wa uanzishaji unaofuata
+omniroute  # itasakinishwa upya wakati wa kuanza tena
 
-# Kagua ni kiendeshi gani kinachotumika
+# Kagua kiendeshi kinachotumika
 omniroute config db-info  # (ikiwa amri ya CLI ipo)
 ```
+
+## Kutambua kusimama kwa shughuli za usawazishaji
+
+Ukitumia `better-sqlite3`, weka `OMNIROUTE_SQLITE_SLOW_MS=200` kabla ya kuanza ili
+kuwasha upimaji wa muda wa adapta ya usawazishaji. Kwa chaguo-msingi, kipengele hiki kimezimwa. Operesheni iliyokamilika inayochukua
+angalau idadi hiyo ya milisekunde hutoa onyo la `[SQLITE-SLOW]`, si zaidi ya mara moja kwa
+kila sekunde kumi kwa kila adapta. Onyo huwa na kiendeshi, aina ya operesheni
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, muamala au matengenezo), na
+milisekunde zilizopita pekee: halijumuishi SQL, vifungo vya thamani, safu, njia au maandishi ya hitilafu.
+
+Hiki ni kifaa cha uchunguzi, si kikomo cha muda au uboreshaji wa hoja. Hakiwezi kuripoti
+operesheni ambayo hairudi kamwe, kutofautisha kazi ya CPU na kusubiri diski, kutambua
+SQL halisi, au kufuatilia operesheni zinazotekelezwa kupitia kishikio ghafi cha kiendeshi.
+Muda wa uhifadhi nakala usio wa usawazishaji umeondolewa kimakusudi; viendeshi vingine vya SQLite
+havifuatiliwi na kipengele hiki cha hiari. Kuzima kigezo hiki hurejesha adapta ya awali
+bila vifungashio vya kupima muda. Hakuna mabadiliko yanayofanywa kwenye muundo wa hifadhidata au usanidi uliohifadhiwa.
+
+Onyo la ucheleweshaji la `/healthz` huripoti kilele cha ucheleweshaji wa kitanzi cha matukio tangu sampuli iliyotangulia,
+si wastani wa muda wote. Linganisha mihuri yake ya muda na maonyo ya operesheni polepole
+pamoja na vipimo vya seva/hifadhi kabla ya kuhusisha kusimama na SQLite au hitilafu ya diski.
 
 ## Marejeleo
 
 Utekelezaji:
 
-- `bin/cli/runtime/magicBytes.mjs` — visaidizi vya uhakikishaji wa baiti bainishi za binari
-- `bin/cli/runtime/sqliteRuntime.mjs` — kitatuzi cha wakati wa utekelezaji cha hatua 5 + kisakinishaji kinachotumika kinapohitajika
-- `bin/cli/runtime/index.mjs` — kipangaji cha uanzishaji (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — ndoano ya npm ya baada ya usakinishaji (maandalizi yasiyosababisha hitilafu kubwa)
-- `src/lib/db/core.ts` — uhamishaji wa `ensureDbInitialized()` / `getDriverInfo()`
+- `bin/cli/runtime/magicBytes.mjs` — visaidizi vya kuthibitisha baiti bainifu za faili
+- `bin/cli/runtime/sqliteRuntime.mjs` — kichaguzi cha wakati wa utekelezaji cha hatua 5 + kisakinishaji cha kucheleweshwa
+- `bin/cli/runtime/index.mjs` — kiratibu cha kuanza (`warmUpRuntimes()`)
+- `scripts/postinstall.mjs` — ndoano ya npm ya baada ya usakinishaji (maandalizi ya awali yasiyosababisha hitilafu kuu)
+- `src/lib/db/core.ts` — vipengele vinavyohamishwa vya `ensureDbInitialized()` / `getDriverInfo()`
 
 ## Topolojia ya mwandishi mmoja (HA haitumiki)
 
-Mfululizo wa viendeshi mbadala ulio hapo juu bado huendeshwa katika **mchakato mmoja**. Kwa SQLite
+Mnyororo wa viendeshi mbadala hapo juu bado huendeshwa katika **mchakato mmoja**. Kwa SQLite
 chaguo-msingi, OmniRoute ni **mwandishi mmoja**:
 
 - Usiunganishe nakala mbili za OmniRoute kwenye faili moja ya `storage.sqlite`.
-- Kuwashwa upya kwa kontena, utekelezaji wa Recreate, kusitishwa kwa sababu ya OOM, au kuwashwa
-  upya na HEALTHCHECK hukatisha kila kipindi cha SSE kinachoendelea. Hakuna uondoaji wa taratibu wa vipindi katika njia ya kawaida.
-- Ukaguzi wa uhai wa kiratibu unaochukulia `/healthz` iliyo polepole kuwa imekufa utasitisha nakala
-  pekee. Pendelea ukaguzi wa uhai wa TCP + utayari wa HTTP `/healthz`. Tazama
+- Kuanzishwa upya kwa kontena, usambazaji wa Recreate, kuzimwa kwa sababu ya OOM, au kuanzishwa upya na HEALTHCHECK hukatisha
+  kila kipindi cha SSE kinachoendelea. Hakuna uondoaji taratibu wa vipindi kwenye njia ya kawaida.
+- Ukaguzi wa uhai wa kiratibu unaochukulia `/healthz` yenye mwitikio wa polepole kuwa imekufa utazima
+  nakala pekee. Pendelea ukaguzi wa uhai wa TCP + ukaguzi wa utayari wa HTTP `/healthz`. Tazama
   [Mwongozo wa Docker — upatikanaji](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  na [mapendekezo ya uchunguzi wa Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+  na [mapendekezo ya ukaguzi wa Kubernetes](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

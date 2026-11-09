@@ -113,29 +113,29 @@ automatikusan, címke nélkül is kihagyják az E2E-mátrixot.
 
 ### Kiadás előtt
 
-- [ ] A kiadáshoz tartozó összes PR be van olvasztva a `release/vX.Y.0` ágba
-- [ ] Az ehhez a verzióhoz tartozó összes nyitott Linear-/issue-elem le van zárva, vagy át van helyezve a következő mérföldkőhöz
-- [ ] A CI zöld a `release/vX.Y.0` ágon
+- [ ] A kiadáshoz tartozó összes PR beolvasztva a `release/vX.Y.0` ágba
+- [ ] Az ehhez a verzióhoz tartozó összes nyitott Linear-/hibaelem lezárva vagy a következő mérföldkőhöz áthelyezve
+- [ ] A CI sikeres a `release/vX.Y.0` ágon
 - [ ] Nincsenek `TODO(release)` jelölők a kódban: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] A Docker alaplemezkép naprakész (jelenleg `node:24.15.0-trixie-slim`)
 
 ### Verzió és változásnapló
 
-- [ ] Futtassa a `/version-bump-cc <patch|minor|major>` parancsot (Claude Code-képesség)
-  - Frissíti a verziót a `package.json` és `electron/package.json` fájlokban
-  - Újragenerálja a `CHANGELOG.md` fájlt az utolsó címke óta létrejött git-commitokból
+- [ ] Futtasd a `/version-bump-cc <patch|minor|major>` parancsot (Claude Code-képesség)
+  - Frissíti a verziót a `package.json` és az `electron/package.json` fájlban
+  - Újragenerálja a `CHANGELOG.md` fájlt az utolsó címke óta létrejött git commitok alapján
   - Frissíti a README.md jelvényeit
-- [ ] Kézzel ellenőrizze a CHANGELOG.md fájlt, és szükség esetén tisztázza a commitüzeneteket
-- [ ] Győződjön meg arról, hogy a `CHANGELOG.md` legújabb semver-szakasza megegyezik a `package.json` verziójával
-- [ ] A következő munkák számára maradjon a `## [Unreleased]` a változásnapló első szakasza
-- [ ] Frissítse a `docs/openapi.yaml` fájlt → az `info.version` értékének meg kell egyeznie a `package.json` verziójával
+- [ ] Kézzel ellenőrizd a CHANGELOG.md fájlt, és szükség esetén tisztítsd meg a commitüzeneteket
+- [ ] Győződj meg arról, hogy a `CHANGELOG.md` legújabb semver-szakasza megegyezik a `package.json` verziójával
+- [ ] A közelgő munkákhoz tartsd meg a `## [Unreleased]` részt a változásnapló első szakaszaként
+- [ ] Frissítsd a `docs/openapi.yaml` fájlt → az `info.version` értékének meg kell egyeznie a `package.json` verziójával
 
 ### Kódminőség
 
 - [ ] `npm run lint` — 0 hiba (a figyelmeztetések már korábban is léteztek)
 - [ ] `npm run typecheck:core` — hibamentes
 - [ ] `npm run typecheck:noimplicit:core` — hibamentes (szigorú)
-- [ ] `npm run check:cycles` — nincsenek körkörös függőségek
+- [ ] `npm run check:cycles:ratchet` — a rögzített `metrics.cycles` felső határon belül (az önmagában futtatott `check:cycles` bármilyen ciklus esetén 1-es kóddal lép ki, #15281)
 - [ ] `npm run check:any-budget:t11` — a kereten belül
 - [ ] `npm run check:route-validation:t06` — hibamentes
 - [ ] `npm run check:node-runtime` — a támogatott minimális futtatókörnyezeti követelmény teljesül (`>=22.22.2 <23`, `>=24.0.0 <27`, a `src/shared/utils/nodeRuntimeSupport.ts` fájlban található `SUPPORTED_NODE_RANGE` szerint; összhangban a `package.json` `engines` mezőjével)
@@ -144,26 +144,26 @@ automatikusan, címke nélkül is kihagyják az E2E-mátrixot.
 
 - [ ] `npm run test:unit` — sikeres
 - [ ] `npm run test:vitest` — sikeres (MCP-kiszolgáló, autoCombo, gyorsítótár)
-- [ ] `npm run test:coverage` — a 60/60/60/60 küszöb teljesül (utasítások/sorok/függvények/elágazások)
-- [ ] `npm run test:integration` — sikeres (ha a módosítások érintik az adatbázist / kezelőket)
-- [ ] `npm run test:combo:matrix` — sikeres (kombinált stratégiamátrix: determinisztikusan igazolja mind a 19 nyilvános útválasztási stratégia kiválasztási döntéseit; a kombinált útválasztás, a stratégiafeloldás vagy a tartaléklogika módosításakor futtatandó)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opcionális/kézi** (kapuval védett, valódi upstreamet használó füstteszt; csak olvasható adatbázis-pillanatképet tölt be a `root@192.168.0.15` VPS-ről; valódi szolgáltatókat ér el, és krediteket használ; CI-ben soha nem fut; a kapu nélkül szabályosan kimarad)
-- [ ] `npm run test:combo:live:vps` — **opcionális/kézi** (3. fázisú élő VPS-füstteszt: 7 HTTP-forgatókönyv az élő `.15` kiszolgáló ellen egyszerű Node ESM-en keresztül; `ssh root@192.168.0.15` szükséges hozzá; kizárólag `__live_test__*` kombinációkat hoz létre és töröl; valódi szolgáltatókat ér el; CI-ben soha nem fut)
-- [ ] `npm run test:e2e` — sikeres (felhasználói felületet érintő módosítások)
-- [ ] `npm run test:protocols:e2e` — sikeres (MCP/A2A-módosítások)
+- [ ] `npm run test:coverage` — a 60/60/60/60 lefedettségi küszöb teljesül (utasítások/sorok/függvények/elágazások)
+- [ ] `npm run test:integration` — sikeres (ha a módosítások érintik az adatbázist vagy a kezelőket)
+- [ ] `npm run test:combo:matrix` — sikeres (kombinált stratégiamátrix: determinisztikusan igazolja mind a 19 nyilvános útválasztási stratégia kiválasztási döntéseit; futtasd, ha a módosítások érintik a kombinált útválasztást, a stratégiafeloldást vagy a tartaléklogikát)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opcionális/manuális** (kapuval védett, valós upstreamet használó smoke teszt; csak olvasható adatbázis-pillanatképet tölt be a `root@192.168.0.15` VPS-ről; valós szolgáltatókat ér el, krediteket használ; soha nem fut a CI-ben; a kapu nélkül szabályosan kihagyásra kerül)
+- [ ] `npm run test:combo:live:vps` — **opcionális/manuális** (3. fázisú élő VPS smoke teszt: 7 HTTP-forgatókönyv az élő `.15` kiszolgálóval szemben, egyszerű Node ESM használatával; `ssh root@192.168.0.15` hozzáférést igényel; kizárólag `__live_test__*` kombinációkat hoz létre és töröl; valós szolgáltatókat ér el; soha nem fut a CI-ben)
+- [ ] `npm run test:e2e` — sikeres (felhasználói felületet érintő módosítások esetén)
+- [ ] `npm run test:protocols:e2e` — sikeres (MCP/A2A-módosítások esetén)
 - [ ] `npm run test:ecosystem` — sikeres
 
 ### Hookok (Husky által ellenőrizve)
 
-A Husky-hookok a `.husky/` könyvtárban találhatók, és automatikusan lefutnak a git-műveletek során.
+A Husky hookok a `.husky/` könyvtárban találhatók, és automatikusan lefutnak a git-műveletek során.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** gyors, determinisztikus ellenőrzések — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiválva: 2026-06-13). Szándékosan nem tartalmazza a `test:unit` feladatot (lassú; a CI `test-unit` feladata lefedi).
-  - A release ágak pusholása előtt futtassa kézzel az `npm run test:unit` parancsot.
+- **pre-push:** gyors, determinisztikus ellenőrzőkapuk — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiválva: 2026-06-13). Szándékosan nem tartalmazza a `test:unit` tesztet (lassú; a CI `test-unit` feladata lefedi).
+  - A kiadási ágak feltöltése előtt manuálisan futtasd az `npm run test:unit` parancsot.
 
-Ha egy hook sikertelen: javítsa a kiváltó problémát, ne kerülje meg a `--no-verify` kapcsolóval.
+Ha egy hook sikertelen: javítsd ki a kiváltó problémát, ne kerüld meg a `--no-verify` kapcsolóval.
 
-### Conventional Commits
+### Hagyományos commitok
 
 Minden kiadásba kerülő commitnak a `type(scope): subject` formátumot kell követnie.
 
@@ -171,48 +171,48 @@ Minden kiadásba kerülő commitnak a `type(scope): subject` formátumot kell k�
 
 **Érvényes hatókörök:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Visszamenőleg nem kompatibilis módosítások: adjon hozzá `BREAKING CHANGE:` láblécet vagy `!` jelet a hatókör után (például `feat(api)!: drop /v0`).
+Visszamenőleg nem kompatibilis módosítások: adj hozzá `BREAKING CHANGE:` láblécet vagy egy `!` jelet a hatókör után (például `feat(api)!: drop /v0`).
 
 ### Dokumentáció
 
-- [ ] Az `npm run check:docs-sync` sikeresen lefut (a pre-commit automatikusan futtatja)
-- [ ] Az `npm run check:docs-all` sikeresen lefut (gyűjtőparancs: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] Az `npm run check:env-doc-sync` 0-s kilépési kóddal fejeződik be — a kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` környezeti szerződés sértetlen
-- [ ] Az `npm run check:doc-links` 0-s kilépési kóddal fejeződik be — az átszervezés után nincsenek hibás belső markdown-hivatkozások
-- [ ] A `docs/architecture/ARCHITECTURE.md` áttekintve a tárolási/futásidejű eltérések szempontjából
-- [ ] A `docs/guides/TROUBLESHOOTING.md` áttekintve a környezeti változók és az üzemeltetési eltérések szempontjából
-- [ ] Ha a `.env.example` módosult: a `docs/reference/ENVIRONMENT.md` frissítve
+- [ ] Az `npm run check:docs-sync` sikeres (a pre-commit automatikusan futtatja)
+- [ ] Az `npm run check:docs-all` sikeres (összesített ellenőrzés: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] Az `npm run check:env-doc-sync` 0-s kóddal lép ki — a kód ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` környezetiváltozó-szerződés sértetlen
+- [ ] Az `npm run check:doc-links` 0-s kóddal lép ki — az átszervezés után nincsenek hibás belső markdown-hivatkozások
+- [ ] A `docs/architecture/ARCHITECTURE.md` felülvizsgálva a tárolási és futtatókörnyezeti eltérések szempontjából
+- [ ] A `docs/guides/TROUBLESHOOTING.md` felülvizsgálva a környezeti változók és az üzemeltetési eltérések szempontjából
+- [ ] Ha az `.env.example` módosult: a `docs/reference/ENVIRONMENT.md` frissítve
 - [ ] Ha az új funkció rendelkezik felhasználói felülettel: a `docs/guides/USER_GUIDE.md` megemlíti
-- [ ] Ha az új funkció rendelkezik API-val: a `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` frissítve
+- [ ] Ha az új funkció rendelkezik API-val: a `docs/reference/API_REFERENCE.md` és a `docs/openapi.yaml` frissítve
 - [ ] Ha az új funkció egy modul: létezik hozzá külön `docs/<MODULE>.md`
-- [ ] Ha visszafelé nem kompatibilis változás történt: a `docs/guides/TROUBLESHOOTING.md` tartalmaz migrációs megjegyzést
+- [ ] Visszamenőleg nem kompatibilis módosítás esetén: a `docs/guides/TROUBLESHOOTING.md` tartalmaz migrációs megjegyzést
 
 ### i18n
 
-- [ ] Az `npm run i18n:check` 0-s kilépési kóddal fejeződik be — a fordítási állapot (`.i18n-state.json`) szinkronban van a forrásdokumentációval (szigorú módban nincsenek eltérő források; a figyelmeztetési mód tájékoztató jelzése elfogadható az utolsó pillanatban végzett dokumentációs javításokhoz, de címkézés előtt az eredménynek 0-nak kell lennie)
-- [ ] Az `npm run i18n:check-ui-coverage` 0-s kilépési kóddal fejeződik be — minden felhasználói felületi területi beállítás eléri vagy meghaladja a 80%-os lefedettségi küszöböt
-- [ ] Az `npm run i18n:sync-ui:dry` 0 hiányzó kulcsot jelez mind a 42 területi beállításban
-- [ ] Ha az angol forrásdokumentáció módosult, címkézés előtt futtassa az `npm run i18n:run` parancsot (az `.env` fájlban megadott `OMNIROUTE_TRANSLATION_API_KEY` szükséges)
-- [ ] A kisebb fordítási hozzájárulások elhalaszthatók a következő kiadásig (kövesse nyomon a CHANGELOG-ban)
+- [ ] Az `npm run i18n:check` 0-s kóddal lép ki — a fordítási állapot (`.i18n-state.json`) szinkronban van a forrásdokumentumokkal (szigorú módban nincsenek eltérő források; a figyelmeztetési mód tájékoztató jelzése elfogadható az utolsó pillanatban végzett dokumentációs javításoknál, de címkézés előtt 0-nak kell lennie)
+- [ ] Az `npm run i18n:check-ui-coverage` 0-s kóddal lép ki — minden felhasználóifelület-területi beállítás eléri vagy meghaladja a 80%-os lefedettségi küszöböt
+- [ ] Az `npm run i18n:sync-ui:dry` 0 hiányzó kulcsot jelez mind a 66 célterületi beállításban (az `en` forrás kivételével minden területi beállításban)
+- [ ] Ha az angol forrásdokumentumok módosultak, címkézés előtt futtasd az `npm run i18n:run` parancsot (az `.env` fájlban megadott `OMNIROUTE_TRANSLATION_API_KEY` szükséges)
+- [ ] A fordítási hozzájárulások kisebb módosítások esetén elhalaszthatók a következő kiadásra (kövesd nyomon a CHANGELOG fájlban)
 
 ### Adatbázis-migrációk
 
 - [ ] Ha a `src/lib/db/migrations/` új fájlokat tartalmaz:
   - [ ] Minden migráció idempotens (`CREATE TABLE IF NOT EXISTS` stb.)
   - [ ] A migrációk tranzakciókba vannak csomagolva
-  - [ ] A számozás helyes (nincsenek hézagok a sorrendben)
-- [ ] Tesztelés friss telepítésen: törölje a `~/.omniroute/omniroute.db` fájlt, majd futtassa az `npm run dev` parancsot
-- [ ] Tesztelés meglévő telepítésen: készítsen biztonsági másolatot az adatbázisról, futtassa a migrációt, majd ellenőrizze a sémát
-- [ ] A WAL-fájlok (`-wal`, `-shm`) megfelelően kezelve, ha a migráció újraírja a táblákat
+  - [ ] A számozás helyes (nincsenek hiányok a sorozatban)
+- [ ] Tesztelés friss telepítésen: töröld a `~/.omniroute/omniroute.db` fájlt, majd futtasd az `npm run dev` parancsot
+- [ ] Tesztelés meglévő telepítésen: készíts biztonsági mentést az adatbázisról, futtasd a migrációt, majd ellenőrizd a sémát
+- [ ] A WAL-fájlok (`-wal`, `-shm`) megfelelően kezelve, ha a migráció táblákat ír újra
 
-### Szolgáltatói katalógus (Zod által validálva)
+### Szolgáltatókatalógus (Zod-validált)
 
 - [ ] A `src/shared/constants/providers.ts` Zod-sémája betöltéskor érvényes
   - [ ] Minden szolgáltató rendelkezik a kötelező mezőkkel (`id`, `label`, `kind` stb.)
-  - [ ] Az új ingyenes szolgáltatóknál a `freeNote` meg van adva
-  - [ ] Az OAuth-szolgáltatók `oauthConfig` beállítása regisztrálva van a `src/lib/oauth/constants/oauth.ts` fájlban
-- [ ] Új szolgáltató hozzáadása esetén: megfelelő végrehajtó az `open-sse/executors/` könyvtárban
-- [ ] Nem OpenAI-formátum esetén: fordító az `open-sse/translator/` könyvtárban
+  - [ ] Az új ingyenes szolgáltatókhoz meg van adva a `freeNote`
+  - [ ] Az OAuth-szolgáltatók `oauthConfig` konfigurációja regisztrálva van a `src/lib/oauth/constants/oauth.ts` fájlban
+- [ ] Új szolgáltató hozzáadásakor: tartozik hozzá végrehajtó az `open-sse/executors/` könyvtárban
+- [ ] Nem OpenAI-formátum esetén: tartozik hozzá fordító az `open-sse/translator/` könyvtárban
 - [ ] A modellek regisztrálva vannak az `open-sse/config/providerRegistry.ts` fájlban
 - [ ] A `tests/unit/` egységtesztjei lefedik a szolgáltatók osztályozását és az útválasztást
 
@@ -221,51 +221,51 @@ Visszamenőleg nem kompatibilis módosítások: adjon hozzá `BREAKING CHANGE:` 
 Ha az `electron/` módosult:
 
 - [ ] Az `npm run electron:smoke:packaged` sikeresen lefut
-- [ ] A buildek tesztelve legalább az alábbiak egyikére: `:win`, `:mac`, `:linux`
-- [ ] A kódaláírási tanúsítványok nem jártak le (ha történik aláírás)
-- [ ] Az `electron/package.json` verziója megegyezik a gyökérszintű `package.json` verziójával
-- [ ] Az automatikus frissítési csatorna mutatója frissítve, ha a kiadás a `stable` csatornára történik
+- [ ] A buildek tesztelve lettek legalább az egyik célra: `:win`, `:mac`, `:linux`
+- [ ] A kódaláíró tanúsítványok nem jártak le (ha van aláírás)
+- [ ] Az `electron/package.json` verziója megegyezik a gyökérben lévő `package.json` verziójával
+- [ ] Automatikus frissítési kiadás esetén a csatornamutató frissítve lett a `stable` csatornára
 
-### Buildkönyvtárak felépítése
+### Buildkönyvtárak elrendezése
 
-A tároló három különálló kimeneti könyvtárat használ — soha ne keverje össze őket:
+A repository három különálló kimeneti könyvtárat használ — ezeket soha ne keverd össze:
 
-| Könyvtár  | Rendeltetés                                                     | Követett?        |
-| --------- | --------------------------------------------------------------- | ---------------- |
-| `src/`    | Alkalmazás forráskódja (TypeScript / TSX)                       | Igen             |
-| `.build/` | Köztes buildfájlok — a `next build` kimenete (`distDir`)        | Nem (gitignored) |
-| `dist/`   | Terjeszthető npm-csomag — az `assembleStandalone` állítja össze | Nem (gitignored) |
+| Könyvtár  | Rendeltetés                                                     | Követett?            |
+| --------- | --------------------------------------------------------------- | -------------------- |
+| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                    | Igen                 |
+| `.build/` | Köztes buildfájlok — a `next build` kimenete (`distDir`)        | Nem (gitignore-olva) |
+| `dist/`   | Terjeszthető npm-csomag — az `assembleStandalone` állítja össze | Nem (gitignore-olva) |
 
 > **Üzemeltetői megjegyzés:** a távoli VPS lemezképkönyvtára továbbra is `/usr/lib/node_modules/omniroute/app/`.
-> Csak a tárolón **belüli** buildkimenet helye változott (`app/` → `dist/`). A telepítési folyamatok rsync használatával
-> a `dist/` tartalmát a távoli `app/` könyvtárba másolják — nincs szükség a VPS elérési útjainak módosítására.
+> Csak a repositoryn **belüli** buildkimenet került át (`app/` → `dist/`). A telepítési skillek a
+> `dist/` tartalmát rsync segítségével a távoli `app/` könyvtárba másolják — nincs szükség a VPS elérési útjainak módosítására.
 
-**Egyszeri buildfolyamat:**
+**Egyszeres buildfolyamat:**
 
 ```
 npm run build:release
   └─ rm -rf .build dist          (tisztítás)
   └─ next build → .build/next/   (köztes fájlok)
-  └─ assembleStandalone          (az önálló csomag + statikus fájlok + nyilvános fájlok + natív összetevők másolása → dist/)
-  └─ writes dist/BUILD_SHA       (HEAD ellenőrzőjel)
+  └─ assembleStandalone          (átmásolja az önálló buildet, a statikus és nyilvános fájlokat, valamint a natív modulokat → dist/)
+  └─ létrehozza a dist/BUILD_SHA fájlt       (HEAD-jelző)
 ```
 
-Telepítéshez NE futtassa az `npm run build` parancsot, majd külön az `npm run build:cli` parancsot — használja az
-`npm run build:release` parancsot, amely egyetlen paranccsal tiszta újrabuildelést végez, és létrehozza az ellenőrzőjelet.
+Telepítéshez NE futtasd az `npm run build` parancsot, majd külön az `npm run build:cli` parancsot — használd az
+`npm run build:release` parancsot, amely egyetlen paranccsal végez tiszta újraépítést és hozza létre a jelzőt.
 
 ### Műtermék ellenőrzése
 
-- [ ] Az `npm run build:release` sikeresen lefut, és `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Az `npm run check:pack-artifact` tiszta eredményt ad — nincs `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vagy más helyi maradvány
-- [ ] A `dist/server.js` a build után létezik
-- [ ] Opcionális helyi, csomagolt futtatókörnyezeti füstteszt: az `npm run dev:candidate -- build` után az `npm run dev:candidate -- validate` elindítja a csomagolt tarballt egy elkülönített `DATA_DIR` használatával, és ellenőrzi az `/api/health` + `/v1/models` végpontokat (lásd: [Hozzájárulási aranyút](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] Az `npm run build:release` sikeresen lefut, és a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Az `npm run check:pack-artifact` eredménye tiszta — nincs `app.__qa_backup`, `scripts/scratch`, `package-lock.json` vagy más helyi maradvány
+- [ ] A build után létezik a `dist/server.js`
+- [ ] Opcionális helyi, csomagolt futtatókörnyezeti füstteszt: az `npm run dev:candidate -- build` után az `npm run dev:candidate -- validate` elindítja a csomagolt tarballt egy elkülönített `DATA_DIR` használatával, és ellenőrzi az `/api/health` + `/v1/models` végpontokat (lásd: [Közreműködési ajánlott folyamat](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
 ### Címkézés és kiadás
 
-- [ ] Futtassa a `/generate-release-cc` parancsot (Claude Code-készség):
+- [ ] Futtasd a `/generate-release-cc` parancsot (Claude Code-skill):
   - Létrehozza a `vX.Y.Z` címkét
-  - Feltölti a címkét és az ágat
-  - Megnyitja a GitHub-kiadást a változásnapló szövegével
+  - Feltölti a címkét és a branchet
+  - Létrehozza a GitHub-kiadást a változásnapló szövegével
   - Csatolja az Electron-telepítőket (ha elkészültek)
 - [ ] Vagy manuálisan:
   ```bash
@@ -276,44 +276,44 @@ Telepítéshez NE futtassa az `npm run build` parancsot, majd külön az `npm ru
 
 ### Telepítés
 
-A telepítési folyamatok a könnyű rsync-megoldást használják — nincs `npm pack`, nincs `npm i -g`:
+A telepítési skillek a könnyített rsync-folyamatot használják — nincs `npm pack`, nincs `npm i -g`:
 
 - [ ] Használd a célkörnyezetnek megfelelő telepítési skillt:
   - `/deploy-vps-local-cc` — helyi VPS (192.168.0.15)
   - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — mindkettő
-- [ ] Telepítés előtt ellenőrizd, hogy `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] A buildet olyan helyen kell futtatni, ahol a `node_modules` valódi (fő munkapéldány vagy `npm ci` használatával előkészített worktree — NEM szimbolikus hivatkozással csatolt worktree)
-- [ ] Végezz smoke tesztet a telepített példányon:
-  - Nyisd meg a `/dashboard/health` oldalt → ellenőrizd, hogy a verziókarakterlánc megfelel-e a kiadásnak
+- [ ] Telepítés előtt győződj meg arról, hogy a `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] A buildet olyan helyen kell futtatni, ahol a `node_modules` valódi (a fő checkoutban vagy egy `npm ci` paranccsal előkészített worktree-ben — NEM szimbolikus linkkel csatolt worktree-ben)
+- [ ] Végezz füsttesztet a telepített példányon:
+  - Nyisd meg a `/dashboard/health` oldalt → ellenőrizd, hogy a verziószöveg megegyezik a kiadással
   - Futtass egy `/v1/chat/completions` kérést egy ismert szolgáltatóval
-  - Ellenőrizd, hogy az `/api/monitoring/health` `CLOSED` állapotú megszakítókat ad-e vissza
-  - Ellenőrizd, hogy az MCP-transzportok válaszolnak-e (`/mcp` HTTP, `/mcp-sse` SSE)
+  - Ellenőrizd, hogy az `/api/monitoring/health` `CLOSED` állapotú megszakítókat ad vissza
+  - Győződj meg arról, hogy az MCP-transzportok válaszolnak (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Kiadás után
 
-- [ ] Futtasd a `/capture-release-evidences-cc` parancsot (Claude Code skill)
+- [ ] Futtasd a `/capture-release-evidences-cc` parancsot (Claude Code-skill)
   - WebP-képernyőképeket/-felvételeket készít az új funkciókról
-  - Csatolja őket a kiadási megjegyzésekhez/blogbejegyzéshez
-- [ ] Frissítsd a GitHub Discussions-oldalt/Discordot a kiadási bejelentéssel
+  - Csatolja őket a kiadási megjegyzésekhez / blogbejegyzéshez
+- [ ] Frissítsd a GitHub Discussions / Discord felületét a kiadási bejelentéssel
 - [ ] Nyiss mérföldkövet a következő verzióhoz
-- [ ] Ha kritikus fontosságú: tűzd ki a beszélgetést, vagy tedd közzé a `news.json` fájlban az alkalmazáson belüli szalagcímhez
+- [ ] Kritikus esetben: rögzítsd a beszélgetést, vagy tedd közzé a `news.json` fájlban az alkalmazáson belüli szalagcímhez
 
-### A Radar nyilvános indulásának feltételei
+### A Radar nyilvános indulásának kapuja
 
-A Radar bejelentése szándékosan `active: false` értékkel lett véglegesítve. Az aktiválás külön
-módosításként történik, miután az alábbi elemek mindegyike igazolt:
+A Radar bejelentése szándékosan `active: false` értékkel lett commitolva. Az aktiválás külön
+módosítás, amelyre csak az alábbi elemek mindegyikének igazolása után kerülhet sor:
 
-- [ ] Minden egymásra épülő Radar PR be lett olvasztva, és a kiadás csúcsverziójának CI-je zöld
-- [ ] Telepítsd és végezz smoke tesztet a nyílt forráskódú Radar-útvonalakon úgy, hogy a `RADAR_ENABLED` alapértelmezés szerint továbbra is ki legyen kapcsolva
-- [ ] Végezz smoke tesztet a `GET /planos`, `/termos`, `/privacidade` és `/reembolso` útvonalakon a megnevezett Radar-gazdagépen
-- [ ] Rögzítsd az üzemeltető személyazonosságát/kapcsolattartási adatait/címét, valamint a tulajdonos által jóváhagyott jogi felülvizsgálatot a privát szolgáltatásban
-- [ ] Teszteld a Stripe Checkoutot és az aláírt webhookot kizárólag tesztmódban
-- [ ] Tesztelj egy titkosított tranzakciós e-mail-kézbesítést a jóváhagyott feladóval/domainnel
-- [ ] Igazold a biztonsági mentés visszaállítását és egy felügyelt, költségkorlátos kutatási futtatást
-- [ ] Hagyd jóvá a BRL/PIX felülvizsgálati szabályzatot az adományigazolások elfogadása előtt
-- [ ] Csak az előző feltételek teljesülése után engedélyezd a nyilvános Checkoutot, majd aktiváld az új `news.json`-azonosítót
-- [ ] Ellenőrizd, hogy a Home szalagcíme lokalizált szöveget használ-e, és hogy egy új azonosító ismét megjelenik-e egy régebbi azonosító bezárása után
+- [ ] Minden egymásra épülő Radar PR össze lett olvasztva, és a kiadási csúcshoz tartozó CI zöld
+- [ ] Telepítsd és végezz füsttesztet a nyílt forráskódú Radar-útvonalakon úgy, hogy a `RADAR_ENABLED` alapértelmezés szerint továbbra is ki legyen kapcsolva
+- [ ] Végezz füsttesztet a `GET /planos`, `/termos`, `/privacidade` és `/reembolso` végpontokon a megnevezett Radar-gazdagépen
+- [ ] Rögzítsd az üzemeltető személyazonosságát/kapcsolattartási adatait/címét és a tulajdonos által jóváhagyott jogi felülvizsgálatot a privát szolgáltatásban
+- [ ] Teszt módban próbáld ki a Stripe Checkoutot és az aláírt webhookot
+- [ ] Próbálj ki egy titkosított tranzakciós e-mail-kézbesítést a jóváhagyott feladóval/domainnel
+- [ ] Igazold a biztonsági mentés visszaállítását és egy felügyelt, költségkerettel korlátozott kutatási futtatást
+- [ ] Az adományigazolások elfogadása előtt hagyd jóvá a BRL/PIX felülvizsgálati szabályzatot
+- [ ] Csak az előző kapuk teljesítése után engedélyezd a nyilvános Checkoutot, majd aktiváld az új `news.json`-azonosítót
+- [ ] Ellenőrizd, hogy a Kezdőlap szalagcíme lokalizált szöveget használ, és hogy egy új azonosító ismét megjelenik egy korábbi azonosító elutasítása után
 
 ## Beágyazott szolgáltatások füsttesztje (v3.8.4+)
 
@@ -384,53 +384,56 @@ Bármely v3.8.x kiadás közzététele előtt ellenőrizze ezeket a további ele
 
 ---
 
-## 3.9.0 LTS-elágaztatás (begyakorolva a 3.8.58-ban)
+## 3.9.0 LTS elágazás (próba a 3.8.58-ban)
 
-A v3.8.59 után a következő verzió a 3.9.0, és annak csúcsa két hosszú életű ággá válik:
+A v3.8.59 után a következő verzió a 3.9.0, amelynek csúcsából két hosszú életű ág jön létre:
 `stable/v3` (a v3 LTS-vonal, npm `latest`) és `develop` (v4, 4.0.0-ra emelve, npm
-`nightly`). Az ág-/csatornamodell, az előre portolás és a címkék leírása a
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) fájlban található; a terv a [ROADMAP](../../ROADMAP.md) dokumentumban szerepel (3. fázis). Az elágaztatás egyszer fut le;
-a 3.8.58 egy elágaztatott tárolón az elejétől a végéig begyakorolja, a 3.8.59 pedig a
+`nightly`). Az ág-/csatornamodellt, az előre portolást és a címkéket a
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) tartalmazza; a terv a [ROADMAP](../../ROADMAP.md) dokumentumban található (3. fázis). Az elágazás egyszer fut le;
+a 3.8.58 egy forkban próbálja el a teljes folyamatot, a 3.8.59 pedig a
 [GO/NO-GO ellenőrzőlistával](./LTS_GO_NO_GO.md) zárul.
 
 ### Próbafuttatás (csak olvasás, bármikor biztonságos)
 
 ```bash
-npm run release:dry-run-lts-cut                       # a valódi elágaztatás: 3.9.0 a HEAD-ből, előző címke: v3.8.59
+npm run release:dry-run-lts-cut                       # a valódi elágazás: 3.9.0 a HEAD-ből, előző címke: v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # a forrás-commit rögzítése
 ```
 
-A `scripts/release/dry-run-lts-cut.mjs` semmit sem hajt végre: beolvassa a git és a `gh` adatait, majd kiírja a
-teljes műveletsort — az előfeltételeket (a forrás feloldható, az előző címke létezik, a `package.json` a
-célverziót tartalmazza, van nyitott `release-freeze` probléma, nincs nyitott `Release branch not green` probléma
-egy meglévő kiadási ágon — egy nem létező ág állapota `?` ismeretlen, sohasem
-zöld —, a Mergify `release` várólistája konfigurálva van (G11: `queue_rules`, `checks_timeout`,
+A `scripts/release/dry-run-lts-cut.mjs` nem hajt végre semmit: beolvassa a git és a `gh` adatait, majd kiírja a
+teljes folyamatot — az előfeltételeket (a forrás feloldható, a forrástároló teljes előzményekkel rendelkezik —
+egy sekély klón nem tudja feltölteni a `stable/v3` ágat, mert a fogadó oldal az első
+beillesztett szülőnél elutasítja a csomagot, ezért teljes klónból végezze az elágazást, vagy előbb futtassa a `git fetch --unshallow origin` parancsot —
+az előző címke létezik, a `package.json` a célverziót tartalmazza, nyitva van egy `release-freeze` ügy, nincs nyitott
+`Release branch not green` ügy
+egy meglévő kiadási ágon — egy nem létező ág `?` ismeretlen állapotot jelez, soha nem
+zöld — a Mergify `release` várólistája konfigurálva van (G11: `queue_rules`, `checks_timeout`,
 `queue` címke), a `release/*` szabálykészlet továbbra is tiltja a törlést és a kényszerített feltöltést, valamint
-a `stable/v3` és a `develop` még nem létezik), a két áglépést, azt, hogy mely inaktív munkafolyamatok
-aktiválói és `if:` feltételei válnak igazzá (és melyek maradnak egy adattároló-változó által korlátozva vagy
-a kanonikus adattárolóhoz rögzítve), a várt dist-tageket (`latest` → 3.9.0, a `next` és a
-`nightly` üres), valamint a visszaállítást. A `0` kilépési kód jelentése: `RESULT: READY`, az `1` azt jelenti, hogy egy blokkoló előfeltétel
-sikertelen (`✗`), a `2` pedig használati hiba. A `--advisory <id,...>` egy ellenőrzést figyelmeztetéssé (`!`)
+a `stable/v3` és a `develop` még nem létezik), a két áglépést, hogy mely inaktív munkafolyamatok
+triggerei és `if:` feltételei válnak igazzá (és melyek maradnak egy tárolóváltozó által korlátozva vagy
+a kanonikus tárolóhoz rögzítve), a várt dist-tageket (`latest` → 3.9.0, a `next` és a
+`nightly` üres), valamint a visszaállítást. A `0` kilépési kód jelentése `RESULT: READY`, az `1` azt jelzi, hogy egy blokkoló előfeltétel
+meghiúsult (`✗`), a `2` pedig használati hibát jelent. Az `--advisory <id,...>` egy ellenőrzést figyelmeztetéssé (`!`)
 minősít vissza anélkül, hogy elrejtené.
 
-A valódi elágaztatás próbafuttatását akkor végezze el, amikor a 3.9.0 kiadás befagyasztása még érvényben van — az ágak
-a címke után és a 12c fázis befagyasztást feloldó lépése előtt jönnek létre.
+A valódi elágazás próbafuttatását akkor végezze el, amikor a 3.9.0 kiadás befagyasztása még érvényben van — az ágak
+a címke után és azelőtt jönnek létre, hogy a 12c fázis feloldaná a befagyasztást.
 
-### 3.8.58-as próba (csak elágaztatott tárolón)
+### 3.8.58-próba (csak forkban)
 
 ```bash
 # 1. Próbafuttatás az aktuális csúcson, a próba paramétereivel
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Végrehajtás egy ELÁGAZTATOTT TÁROLÓ távoli hivatkozásán (az origin vagy bármely olyan távoli hivatkozás,
-#    amelynek URL-je a kanonikus adattárolóé, elutasításra kerül; minden lépés megerősítést kér a terminálon)
+# 2. Végrehajtás egy FORK távoli tárolóján (az origin, illetve bármely olyan távoli tároló,
+#    amelynek URL-je a kanonikus tárolóra mutat, vissza lesz utasítva; minden lépés megerősítést kér a terminálon)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Az inaktív munkafolyamatok kipróbálása az elágaztatott tárolóban (`workflow_dispatch` ott, ahol a próbafuttatás
-#    kanonikusadattároló-rögzítést jelez), majd visszaállítás
+# 3. Az inaktív munkafolyamatok kipróbálása a forkban (workflow_dispatch ott, ahol a próbafuttatás
+#    a kanonikus tárolóhoz való rögzítést jelez), majd visszaállítás
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
@@ -438,13 +441,13 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
 A develop verzióemelő commit git plumbing használatával készül (a munkafa érintése nélkül), és
 ugyanazt az öt fájlt frissíti, mint egy ciklusnyitó commit: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` és `docs/openapi.yaml`. A `[4.0.0]`
-CHANGELOG-szakasz és annak i18n-tükörpéldányai ezt követően, az első PR előtt nyílnak meg a `develop` ágon.
-A szkript soha nem módosítja az npm dist-tageket — ezeket egy tesztcsomagon gyakorolja be.
+CHANGELOG-szakasz és annak i18n-tükörpéldányai ezt követően, az első
+PR előtt nyílnak meg a `develop` ágon. A szkript soha nem módosítja az npm dist-tageket — ezeket egy ideiglenes csomagon próbálja el.
 
-### PR-előnézeti műtermék (egyszer építse meg, ugyanazokat a bájtokat léptesse elő)
+### PR-előnézeti műtermék (egyszeri build, ugyanazon bájtok előléptetése)
 
-A `.github/workflows/preview-artifact.yml` egyetlen éles tarballt épít egy PR csúcsából, és
-pontosan ezt a buildet ellenőrzi (#8084, (a) rész). Csak azonos adattárolóból származó PR-ekhez; semmi sem kerül közzétételre.
+A `.github/workflows/preview-artifact.yml` egyetlen éles tarballt készít egy PR csúcsából, és
+pontosan ezt a buildet ellenőrzi (#8084, (a) rész). Csak azonos tárolóból származó PR-ek esetén; semmi nem kerül közzétételre.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # vagy adja hozzá a `preview-artifact` címkét
@@ -454,35 +457,35 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # előnézeti telepítés
 ```
 
-A futtatás végrehajtja az `npm ci`, az `npm run build:release` és az `npm run check:pack-artifact` parancsot, becsomagolja a
-tarballt, futtatja az `npm run check:pack-boot` parancsot (hamis titkos értékekkel és ideiglenes adatkönyvtárral), újracsomagolja, és
-sikertelen lesz, ha a kivonat nem azonos, majd rögzíti az `artifact-identity.json` fájlt (csúcs-SHA, alap-SHA,
-lockfile-kivonat, platform, architektúra, node ABI, csomagoló, buildszabályzat —
-`scripts/release/artifact-identity.mjs`), és egy külön feladatban tanúsítja a tarballt. Egy előnézet előléptetése
-ennek a tarballnak a telepítését jelenti: soha ne építse újra forrásból.
+A futtatás végrehajtja az `npm ci`, `npm run build:release` és `npm run check:pack-artifact` parancsokat, becsomagolja a
+tarballt, futtatja az `npm run check:pack-boot` parancsot (ál-hitelesítő adatokkal, ideiglenes adatkönyvtárral), újracsomagolja, és
+meghiúsul, ha a kivonat nem azonos; ezután rögzíti az `artifact-identity.json` fájlt (csúcs-SHA, alap-
+SHA, lockfile-kivonat, platform, architektúra, node ABI, csomagoló, buildszabályzat —
+`scripts/release/artifact-identity.mjs`), majd egy külön feladatban igazolja a tarballt. Egy
+előnézet előléptetése az adott tarball telepítését jelenti: soha ne készítsen új buildet a forrásból.
 
-### Az elágaztatás (3.9.0, a GO után)
+### Az elágazás (3.9.0, a GO után)
 
-1. A GO rögzítve van az [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) fájlban.
+1. A GO rögzítve van az [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) dokumentumban.
 2. Az `npm run release:dry-run-lts-cut -- --from v3.9.0` kiírja a `RESULT: READY` eredményt.
-3. Hozza létre kézzel az ágakat az `origin` távoli tárolón a próbafuttatás által kiírt parancsokkal — a
-   szkript nem hajlandó az `origin` távoli tárolóba feltölteni. Egy felülvizsgált develop-commit újrafelhasználásához először futtassa
-   a `--execute` próbát a 3.9.0 csúcsán a saját elágaztatott tárolójával; ez mindkét SHA-t kiírja, és
+3. Hozza létre kézzel az ágakat az `origin` tárolón a próbafuttatás által kiírt parancsokkal — a
+   szkript nem hajlandó feltölteni az `origin` tárolóba. Egy ellenőrzött develop commit újrafelhasználásához először futtassa a
+   `--execute` próbát a 3.9.0 csúcson a saját forkja ellen; ez kiírja mindkét SHA-t, és
    ugyanazok a commitok tölthetők fel:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Védje le a `stable/v3` és a `develop` ágakat (szabálykészletek + egyesítési várólista), mielőtt az első PR bekerül.
-5. Az inaktív munkafolyamatok az ágak létezése alapján aktiválódnak: `forward-port.yml` (feltöltés a
-   `stable/v3` ágra), `validate-stable-pr.yml` (a `stable/v3` ágra irányuló PR-ek) és `nightly-v4-build.yml`
-   (a `develop` buildjei). Az élesítés előtt állítsa be a `secrets.FORWARD_PORT_TOKEN` adattároló-titkot (hogy a CI fusson az
-   előre portoló PR-eken); az éjszakai közzététel kikapcsolva marad, amíg a tulajdonos a `vars.NIGHTLY_PUBLISH`
-   adattároló-változót `true` értékre nem állítja, és az npm Trusted Publishing el nem fogadja a
-   `nightly-v4-build.yml` fájlt. A csatornafeloldást a `scripts/release/dist-tag.mjs` végzi, ugyanaz a
-   feloldó, amelyet az `npm-publish.yml` is használ.
-6. Ellenőrizze a csatornákat: az `npm view omniroute dist-tags --json` kimenetében a `latest` = 3.9.0, és nincs
+4. Védd le a `stable/v3` és a `develop` ágakat (szabálykészletek + egyesítési várólista), mielőtt az első PR beérkezik.
+5. A nyugalmi állapotban lévő munkafolyamatok az ágak megléte alapján kapcsolnak be: `forward-port.yml` (push a
+   `stable/v3` ágra), `validate-stable-pr.yml` (PR-ok a `stable/v3` ágra) és `nightly-v4-build.yml`
+   (a `develop` ágat buildeli). Az élesítés előtt állítsd be a `secrets.FORWARD_PORT_TOKEN` adattitkot a repositoryban (hogy a CI fusson a
+   forward-port PR-okon); az éjszakai közzététel kikapcsolva marad, amíg a tulajdonos a repository
+   `vars.NIGHTLY_PUBLISH` változóját `true` értékre nem állítja, és az npm Trusted Publishing el nem fogadja a
+   `nightly-v4-build.yml` fájlt. A csatorna feloldását a `scripts/release/dist-tag.mjs` végzi, ugyanaz a
+   feloldó, amelyet az `npm-publish.yml` használ.
+6. Ellenőrizd a csatornákat: az `npm view omniroute dist-tags --json` kimenetében a `latest` = 3.9.0, és nincs
    `next` / `nightly`, amíg a v4 közzététele meg nem történik.
 7. Visszaállítás, ha szükséges: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    és `npm dist-tag add omniroute@3.8.59 latest`.

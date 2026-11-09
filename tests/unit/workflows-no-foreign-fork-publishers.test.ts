@@ -34,8 +34,18 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const workflowDir = path.join(repoRoot, ".github/workflows");
 
-/** The only owner whose namespaces this repository may publish to or gate on. */
-const OWNER = "diegosouzapw";
+/**
+ * The GitHub owner of this repository (transferred to the organization on 2026-10-21): every
+ * `github.repository` guard and every GHCR namespace must name it.
+ */
+const OWNER = "cheaper-inference";
+/** Docker Hub is a separate account that did not move with the repository. */
+const DOCKERHUB_OWNER = "diegosouzapw";
+const REGISTRY_OWNER: Record<string, string> = {
+  "ghcr.io": OWNER,
+  "docker.io": DOCKERHUB_OWNER,
+  "index.docker.io": DOCKERHUB_OWNER,
+};
 
 function workflowFiles(): string[] {
   return fs
@@ -51,9 +61,9 @@ test("no workflow publishes to another owner's container registry", () => {
     const text = fs.readFileSync(file, "utf-8");
     // ghcr.io/<owner>/... and index.docker.io/<owner>/... — the owner is the segment
     // right after the registry host.
-    for (const m of text.matchAll(/\b(?:ghcr\.io|(?:index\.)?docker\.io)\/([A-Za-z0-9_.-]+)/g)) {
-      const owner = m[1];
-      if (owner.toLowerCase() !== OWNER) {
+    for (const m of text.matchAll(/\b(ghcr\.io|(?:index\.)?docker\.io)\/([A-Za-z0-9_.-]+)/g)) {
+      const [, host, owner] = m;
+      if (owner.toLowerCase() !== REGISTRY_OWNER[host]) {
         offenders.push(`${path.basename(file)} → ${m[0]}`);
       }
     }
@@ -62,7 +72,7 @@ test("no workflow publishes to another owner's container registry", () => {
   assert.deepEqual(
     offenders,
     [],
-    `workflow(s) target a registry namespace that is not ${OWNER}'s:\n  ${offenders.join("\n  ")}\n` +
+    `workflow(s) target a registry namespace that is not ours (${JSON.stringify(REGISTRY_OWNER)}):\n  ${offenders.join("\n  ")}\n` +
       `A fork's publish workflow does not belong in the canonical repository — it cannot ` +
       `authenticate anyway, and it pollutes every release check board.`
   );

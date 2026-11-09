@@ -43,11 +43,11 @@ A2A በ**Endpoints → A2A** መቀያየሪያ የሚቆጣጠር ሲሆን በ
 
 ---
 
-## የJSON-RPC 2.0 ስልቶች
+## JSON-RPC 2.0 ዘዴዎች
 
 ### `message/send` — የተመሳሰለ አፈጻጸም
 
-መልዕክትን ወደ ክህሎት ይልካል እና ሙሉውን ምላሽ ይጠብቃል።
+ወደ ችሎታ መልእክት ይልካል እና የተሟላውን ምላሽ ይጠብቃል።
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,7 +65,11 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**ምላሽ፦**
+ለ `smart-routing`፣ `metadata.combo` ለበረንዳ ጥያቄ የ `metadata.model` ግልጽ መሻር ነው። የተላከው እንደ እውነተኛው `model` ነው እንጂ እንደ ተረሳ `x-combo` JSON መስክ አይደለም። የመግቢያ መንገዱ መደበኛ ኤፒአይ-ቁልፍ እና በየዒላማው ፈቃድ አሁንም ተፈጻሚ ነው። ልክ ያልሆነ ወይም ባዶ ጥምር ውድቅ ተደርጓል።
+
+ውጤቱ `requested_combo` (የደዋይ ሐሳብ)፣ `dispatched_model` (ትክክለኛው የመግቢያ ጥያቄ)፣ `response_model` (የበረንዳ ምላሽ) እና `confirmed_combo` ያጋልጣል። የመግቢያ መንገዱ ጥምርን በግልፅ ካልለየ በስተቀር የመጨረሻው መስክ `null` ነው። A2A ውሳኔ የባህሪ አፈፃፀምን በተረጋገጠ ጥምር ብቻ ይመዘግባል፣ ያልተረጋገጠ ጥያቄን እንደ `requestedCombo` ይይዛል።
+
+**ምላሽ፡-**
 
 ```json
 {
@@ -76,30 +80,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — የSSE ዥረት ማስተላለፍ
+### `message/stream` — SSE ዥረት
 
-ከ`message/send` ጋር ተመሳሳይ ነው፣ ነገር ግን ለቅጽበታዊ ዥረት ማስተላለፍ በአገልጋይ የሚላኩ ክስተቶችን ይመልሳል።
+ልክ እንደ `message/send` ተመሳሳይ ነገር ግን በአገልጋይ የተላኩ ክስተቶችን ለእውነተኛ ጊዜ ዥረት ይመልሳል።
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +113,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**የSSE ክስተቶች፦**
+**SSE ክስተቶች**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +123,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — የተግባር ሁኔታን መጠየቅ
+### `tasks/get` — የመጠይቅ ተግባር ሁኔታ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +132,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — ተግባርን መሰረዝ
+### `tasks/cancel` — አንድ ተግባር ሰርዝ
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,86 +143,94 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## የሚገኙ ክህሎቶች
+## የሚገኙ ችሎታዎች
 
-OmniRoute በ`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተገናኙ 6 A2A ክህሎቶችን ያቀርባል። እያንዳንዱ የክህሎት ሞጁል በ`src/lib/a2a/skills/` ውስጥ ይገኛል።
+OmniRoute የሚያጋልጥ 6 A2A ችሎታዎች በ `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ ሽቦ . እያንዳንዱ የክህሎት ሞጁል በ `src/lib/a2a/skills/` ውስጥ ይኖራል።
 
-| ክህሎት         | ID                   | መግለጫ                                                                                                                      | መለያዎች            | ምሳሌዎች                        |
-| :----------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------ | :--------------- | :--------------------------- |
-| ብልህ ማዘዋወር    | `smart-routing`      | የOmniRouteን ጥምር ሞተር + የውጤት አሰጣጥ በመጠቀም ጥያቄን በተመቻቸው አቅራቢ/ጥምር በኩል ያዘዋውራል                                                     | ማዘዋወር፣ አቅራቢዎች    | "ይህን ጥያቄ በምርጡ ሞዴል በኩል አዘዋውር" |
-| የኮታ አስተዳደር   | `quota-management`   | የእያንዳንዱን አቅራቢ የኮታ ሁኔታ ሪፖርት ያደርጋል፤ ጠሪዎች መቼ ፍጥነትን መገደብ/መቀየር እንዳለባቸው እንዲወስኑ ይረዳል                                             | ኮታ፣ አቅራቢዎች       | "የanthropicን ኮታ ፈትሽ"         |
-| የአቅራቢ ግኝት    | `provider-discovery` | የተጫኑ አቅራቢዎችን ከችሎታዎቻቸው፣ የነፃ ደረጃ ጠቋሚዎቻቸው እና የOAuth ሁኔታቸው ጋር ይዘረዝራል                                                          | አቅራቢዎች፣ ግኝት      | "ምን አቅራቢዎች ይገኛሉ?"            |
-| የወጪ ትንተና     | `cost-analysis`      | ካታሎጉን + የቅርብ ጊዜ አጠቃቀምን በመጠቀም የጥያቄ/ውይይት ወጪን ይገምታል                                                                          | ወጪ፣ አጠቃቀም        | "የዚህን ውይይት ወጪ ገምት"           |
-| የጤና ሪፖርት     | `health-report`      | ለእያንዳንዱ አቅራቢ የወረዳ ሰባሪ፣ የማቀዝቀዣ ጊዜ እና የመቆለፍ ሁኔታን ያጠቃልላል                                                                     | ጤና፣ የመቋቋም ችሎታ    | "የሁሉንም አቅራቢዎች የጤና ሁኔታ አሳይ"   |
-| ችሎታዎችን መዘርዘር | `list-capabilities`  | ሙሉውን 45-ግቤት ያለውን የAgent Skills ካታሎግ (23 API + 21 CLI + 1 config) ለዐውድ ማስገባት ከጥሬ SKILL.md URLs ጋር እንደ markdown ሰንጠረዥ ይመልሳል | ካታሎግ፣ ግኝት፣ ክህሎቶች | "ሁሉንም የOmniRoute ችሎታዎች ዘርዝር" |
+| ችሎታ         | ID                   | መግለጫ                                                                                                        | መለያዎች            | ምሳሌዎች                        |
+| :---------- | :------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------- | :--------------------------- |
+| ብልጥ ማዘዋወር   | `smart-routing`      | OmniRoute ጥምር ሞተር + ነጥብን በመጠቀም መጠየቂያውን በጥሩ provider/combo በኩል ያዞራል።                                         | ማዞሪያ, አቅራቢዎች     | "ይህን መጠየቂያ በምርጥ ሞዴል ያዙሩ"     |
+| የኮታ አስተዳደር  | `quota-management`   | ሪፖርቶች በአቅራቢው ኮታ ሁኔታ፣ ደዋዮች መቼ throttle/switch እንዳለባቸው እንዲወስኑ ይረዳል                                            | ኮታ, አቅራቢዎች       | "ለአንትሮፖክቲክ ኮታ ያረጋግጡ"         |
+| የአቅራቢ ግኝት   | `provider-discovery` | የተጫኑ አቅራቢዎችን በችሎታ፣በነጻ ደረጃ ባንዲራዎች፣ OAuth ሁኔታ ይዘረዝራል።                                                         | አቅራቢዎች, ግኝት      | "ምን አቅራቢዎች ይገኛሉ?"            |
+| ወጪ ትንተና     | `cost-analysis`      | በቅርብ ጊዜ ጥቅም ላይ የዋለው + ካታሎግ የተሰጠው የአንድ request/conversation ዋጋ ይገምታል።                                        | ወጪ, አጠቃቀም        | "የዚህ ውይይት ወጪ ይገምቱ"           |
+| የጤና ሪፖርት    | `health-report`      | የወረዳ የሚላተም ድምር, cooldown, መቆለፊያ ሁኔታ በአንድ አቅራቢ                                                               | ጤና, የመቋቋም ችሎታ    | "የሁሉም አቅራቢዎች የጤና ሁኔታን አሳይ"   |
+| የዝርዝር ችሎታዎች | `list-capabilities`  | ሙሉውን ባለ 45-የግቤት ወኪል ችሎታ ካታሎግ (23 API + 21 CLI + 1 ውቅር) እንደ ማርክ ማድረጊያ ሠንጠረዥ ከጥሬ SKILL.md URLs ለአውድ መርፌ ይመልሳል | ካታሎግ, ግኝት, ክህሎቶች | "ሁሉንም OmniRoute ችሎታዎች ይዘርዝሩ" |
 
-> Agent Card ከቀጥታው 352-አቅራቢ ካታሎግ ጋር የተጣጣመ መሆን አለበት፤ የአቅራቢዎች ብዛት እና የነፃ/ማረጋገጫ-የማይፈልግ ሜታዳታ ከruntime registry ይገኛሉ።
+> የኤጀንት ካርዱ ከቀጥታ 381 አቅራቢ ካታሎግ ጋር ተስተካክሎ መቀመጥ አለበት። የአቅራቢ ቆጠራዎች እና free/no-auth ሜታዳታ የሚመነጩት ከአሂድ ጊዜ መዝገብ ነው።
 
-### የ`list-capabilities` ክህሎት ዝርዝር
+### `list-capabilities` የክህሎት ዝርዝር
 
-የ`list-capabilities` ክህሎት፣ API ጥሪዎችን ከመላካቸው በፊት OmniRoute ምን እንደሚያቀርብ ማወቅ ለሚፈልጉ ውጫዊ ወኪሎች በተለይ ጠቃሚ ነው። የተዋቀረ የmarkdown ሰንጠረዥ አርቲፋክት ይመልሳል፦
+`list-capabilities` ክህሎት በተለይ OmniRoute ጥሪዎችን API በፊት ምን እንደሚያጋልጥ ማወቅ ለሚፈልጉ ውጫዊ ወኪሎች ጠቃሚ ነው። የተዋቀረ የማርክ ማድረጊያ ሰንጠረዥ ቅርስ ይመልሳል፡-
 
 ```
-| ID | ስም | ምድብ | አካባቢ | Endpoints/Commands | ጥሬ URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | ማረጋገጫ እና ክፍለ-ጊዜዎች | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-እያንዳንዱ ረድፍ የ`rawUrl` ዓምድን ያካትታል፣ ስለዚህ ወኪሎች ሙሉውን SKILL.md ወዲያውኑ ማምጣት ይችላሉ። የ`metadata.totalSkills` መስክ የካታሎጉን መጠን (ዛሬ 45) ያንጸባርቃል። አተገባበር፦ `src/lib/a2a/skills/listCapabilities.ts`። እንዲሁም [AGENT-SKILLS.md](./AGENT-SKILLS.md)ን ይመልከቱ።
+እያንዳንዱ ረድፍ `rawUrl` አምድ ያካትታል ስለዚህ ወኪሎች ወዲያውኑ ሙሉውን SKILL.md ማምጣት ይችላሉ። የ `metadata.totalSkills` መስክ የካታሎግ መጠኑን ያንጸባርቃል (ዛሬ 45)። ትግበራ `src/lib/a2a/skills/listCapabilities.ts`. በተጨማሪም [AGENT-SKILLS.md](./AGENT-SKILLS.md) ተመልከት.
 
 ---
 
 ## REST API (ረዳት)
 
-የJSON-RPC መገናኛ ነጥብ `/a2a` መደበኛው የA2A መግቢያ ነጥብ ነው። ከታች ያሉት የREST መገናኛ ነጥቦች ለዳሽቦርዶች እና ለውጫዊ መሣሪያዎች ረዳት መዳረሻ ይሰጣሉ፦
+የJSON-RPC የመጨረሻ ነጥብ `/a2a` ቀኖናዊ A2A መግቢያ ነጥብ ነው። ከታች ያሉት የ REST የመጨረሻ ነጥቦች ለዳሽቦርዶች እና ለውጫዊ መሳሪያዎች ረዳት መዳረሻ ይሰጣሉ፡-
 
-| መገናኛ ነጥብ                     | ዘዴ   | መግለጫ                                               | ማረጋገጫ                                         |
-| :--------------------------- | :--- | :------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET  | የአገልጋይ ሁኔታ፣ የተመዘገቡ ክህሎቶች                           | (ይፋዊ)                                         |
-| `/api/a2a/tasks`             | GET  | ተግባራትን ከማጣሪያዎች ጋር ዘርዝር                             | አስተዳደር                                        |
-| `/api/a2a/tasks/[id]`        | GET  | ተግባርን በID አግኝ                                      | አስተዳደር                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST | እየተከናወነ ያለን ተግባር ሰርዝ                               | አስተዳደር                                        |
-| `/.well-known/agent.json`    | GET  | የወኪል ካርድ (የA2A ግኝት)                                | (ይፋዊ፣ ለ3600s የተሸጎጠ)                           |
-| `/api/a2a/tasks`             | POST | ወደ OmniConductor ቡድን የሚገባ ውክልና (Conductor PRD RF5) | Bearer ከ`OMNIROUTE_API_KEY` + `a2aEnabled` ጋር |
+| የመጨረሻ ነጥብ                    | ዘዴ   | መግለጫ                                              | እውነት                                                                        |
+| :--------------------------- | :--- | :------------------------------------------------ | :-------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | የአገልጋይ ሁኔታ, የተመዘገቡ ክህሎቶች                          | (የህዝብ)                                                                      |
+| `/api/a2a/tasks`             | GET  | ስራዎችን ከማጣሪያዎች ጋር ይዘርዝሩ                            | አስተዳደር ወይም API ቁልፍ (ከዚህ በታች ይመልከቱ)                                          |
+| `/api/a2a/tasks/[id]`        | GET  | ተግባር በ ID ያግኙ                                     | አስተዳደር ወይም API ቁልፍ (ከዚህ በታች ይመልከቱ)                                          |
+| `/api/a2a/tasks/[id]/cancel` | POST | የማሄድ ተግባር ሰርዝ                                     | አስተዳደር ወይም API ቁልፍ (ከዚህ በታች ይመልከቱ)                                          |
+| `/.well-known/agent.json`    | GET  | ወኪል ካርድ (A2A ግኝት)                                 | (የወል፣ የተሸጎጡ 3600ዎች)                                                         |
+| `/api/a2a/tasks`             | POST | ወደ OmniConductor መርከቦች የሚገቡ ውክልና (አስተዳዳሪ PRD RF5) | `GET` `REQUIRE_API_KEY` ሳለ ከተዋቀረ `OMNIROUTE_API_KEY` ጋር ተመሳሳይ፣ `a2aEnabled` |
 
-**ወደ Conductor የሚገባ ውክልና (`POST /api/a2a/tasks`)፦** ውጫዊ የA2A ወኪሎች በOmniRoute በኩል የኮድ ሥራን ለOmniConductor ቡድን ይወክላሉ። የጥያቄ አካል፦ `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ውክልና ሊሰጥባቸው የሚችሉት የConductor ቡድን ክህሎቶች ብቻ ናቸው (በወኪል ካርዱ ላይ የታወጁት)፤ `metadata.conductor.repo.url` ያስፈልጋል (ቡድኑ በgit repos ላይ ይሠራል)። መንገዱ በአገልጋይ በኩል ያለውን `CONDUCTOR_ORCHESTRATOR_TOKEN` (ተተኪ፦ `CONDUCTOR_HUB_TOKEN`) በመጠቀም ወደ hub `POST /v1/tasks` ይተረጉማል እና `201 { conductor_task_id, state: "submitted" }` ይመልሳል፤ የተግባር ሁኔታዎች በSSE→A2A መስታወት (RF1) በኩል ወደኋላ ይፈሳሉ፣ እንዲሁም በ`GET /api/a2a/tasks?skill=conductor` በኩል ሊታዩ ይችላሉ።
+ወደ `/api/a2a/tasks*` መንገዶች የሚሄደው በመግቢያ እና በኤፒአይ-ቁልፍ ቅንጅቶች ላይ ነው፡-
+
+- `requireLogin=true` (ነባሪ)፡ መካከለኛው ዌር የአስተዳደር ምስክርነቶችን ብቻ ይቀበላል (ዳሽቦርድ ክፍለ ጊዜ፣ `manage` -scope API ቁልፍ፣ `oma_` መዳረሻ ቶከን) እና `OMNIROUTE_API_KEY`። ግልጽ የሆነ የማመሳከሪያ ቁልፍ `403` ያገኛል። በ `Authorization` ራስጌ መካከለኛ ዌር `OMNIROUTE_API_KEY` እንደ `Bearer <key>` ብቻ ነው የሚወስደው; `Bearer` `401` ካገኘ በኋላ ባዶ ቁልፍ ወይም ትር።
+- `requireLogin=false`፣ ወይም ከመሳፈሩ በፊት የ loopback መስኮት: በ `REQUIRE_API_KEY=true` ማንኛውም ትክክለኛ OmniRoute API ቁልፍ ወይም የአስተዳደር ምስክርነት ተቀባይነት አለው እና ማንነታቸው ያልታወቁ ደዋዮች `401` ያገኛሉ። በ `REQUIRE_API_KEY` ከመንገዶቹ ውጭ ክፍት ናቸው።
+- `POST /api/a2a/tasks` በተጨማሪ በ `Authorization` ራስጌ ላይ ያ ተለዋዋጭ ሲዘጋጅ እና `REQUIRE_API_KEY` ሲጠፋ `OMNIROUTE_API_KEY` ያስፈልገዋል። እንደ `x-api-key` ያሉ ሌሎች ራስጌዎች እዚያ አይቆጠሩም። ከመግባትዎ በፊት ወይም ከመሳፈርዎ በፊት ቁልፉ በ `Bearer` ቅድመ ቅጥያ ወይም ያለሱ ያልፋል። ከመግባት ጋር፣ `Bearer <key>` ብቻ ነው መካከለኛውን የሚያልፈው።
+
+ምስክርነት በሚያስፈልግበት ጊዜ፣ `read` -scope `oma_` token ለ `GET` ብቻ ይሰራል።
+
+**ወደ ውስጥ የመግባት መሪ ልዑካን (`POST /api/a2a/tasks`):** የውጭ A2A ወኪሎች የኮድ ሥራን በ OmniRoute በኩል ወደ OmniConductor መርከቦች ይወክላሉ። አካል `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ብቻ የመምራት ችሎታ (በወኪሉ ካርድ ላይ የተገለጹት) ውክልና ያላቸው ናቸው። `metadata.conductor.repo.url` ያስፈልጋል (መርከቦቹ በ git repos ላይ ይሰራሉ)። መንገዱ በአገልጋዩ በኩል `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) በመጠቀም ወደ hub's `POST /v1/tasks` ይተረጎማል እና `201 { conductor_task_id, state: "submitted" }` ይመለሳል። የተግባር ሁኔታዎች በ SSE→A2A መስታወት (RF1) በኩል ይመለሳሉ እና በ `GET /api/a2a/tasks?skill=conductor` በኩል ይታያሉ።
 
 ---
 
-## አዲስ ክህሎት ማከል
+## አዲስ ችሎታ መጨመር
 
-1. **የክህሎት ፋይል ይፍጠሩ፦** `src/lib/a2a/skills/<your-skill>.ts`
+1. **የክህሎት ፋይል ይፍጠሩ፡** `src/lib/a2a/skills/<your-skill>.ts`
 
-   async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` ወደ ውጭ ይላኩ። እንደ `smartRouting.ts` ያሉ ነባር ክህሎቶችን ቅርጽ ይከተሉ።
+   ያልተመሳሰለ ተግባር `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` ወደ ውጪ ላክ። እንደ `smartRouting.ts` ያሉ የነባር ክህሎቶችን ቅርፅ ይከተሉ። ክህሎቱ ወደ OmniRoute በ HTTP ላይ ከደወለ፣ ራስጌዎቹን በ `buildSelfLoopHeaders(caller)` ከ `src/lib/a2a/selfLoopAuth.ts` ይገንቡ ስለዚህ ጥሪው በ A2A ደዋይ ቁልፍ እንጂ `OMNIROUTE_API_KEY` አይደለም፣ እና `redirect: "error"` ወደ `fetch` ያስተላልፉ ስለዚህ ማዘዋወር ቁልፉን በጭራሽ አያገኝም። ረዳቱ ራስጌዎችን ብቻ ይገነባል; እያንዳንዱ ክህሎት የማዘዋወር ፖሊሲውን ራሱ ያዘጋጃል። ከግል አውታረመረብ ውጭ የተፈታው ቤዝ URL ግልጽ በሆነ http (loopback፣container or service name እና የግል አድራሻዎች ጥሩ ናቸው) ወይም ምስክርነቶችን ሲይዝ ቁልፍ ከማያያዝ ይልቅ `UnsafeSelfLoopTargetError` ይጥላል፣ስለዚህ ውድቅ የተደረገ ጥሪን የሚውጥ ክህሎት ያንን ስህተት መሻር አለበት።
 
-2. **መቆጣጠሪያውን ይመዝግቡ፦** በ`src/lib/a2a/taskExecution.ts` ውስጥ ወደ `A2A_SKILL_HANDLERS` ግቤት ያክሉ፦
+2. **መመዝገቢያ ተቆጣጣሪ፡-** `src/lib/a2a/taskExecution.ts` ውስጥ፣ ወደ `A2A_SKILL_HANDLERS` ግቤት ያክሉ፡-
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ነባር ክህሎቶች
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **በወኪል ካርድ ላይ ያጋልጡ፦** በ`src/app/.well-known/agent.json/route.ts` ውስጥ ወደ `skills` ድርድር ያክሉ፦
+3. **በወኪል ካርድ ውስጥ መጋለጥ;** በ `src/lib/a2a/agentCardMetadata.ts` (በ `/.well-known/agent.json` እና `/.well-known/agent-card.json` የተጋራ)፣ ከ `skills` አደራደር ጋር አባሪ፡-
 
    ```json
    {
      "id": "your-skill",
-     "name": "የእርስዎ ክህሎት",
-     "description": "አጭር፣ በዓላማ ላይ ያተኮረ መግለጫ",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["የተፈጥሮ ቋንቋ ጥሪ ምሳሌ"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **ሙከራዎችን ይጻፉ፦** `tests/unit/a2a-<your-skill>.test.ts`። የተሳካ መንገድን + የስህተት መንገድን ይሸፍኑ።
+4. **ፈተናዎችን ይፃፉ;** `tests/unit/a2a-<your-skill>.test.ts`. የደስታ መንገድን ይሸፍኑ + የስህተት መንገድ።
 
-5. አዲሱን ክህሎት በዚህ ፋይል `Available Skills` ሰንጠረዥ ውስጥ **ይመዝግቡ**።
+5. **ሰነድ** በዚህ ፋይል `Available Skills` ሰንጠረዥ ውስጥ ያለው አዲሱ ችሎታ።
 
 ---
 
@@ -264,7 +269,7 @@ OmniRoute በ`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተ
 
 ## የውህደት ምሳሌዎች
 
-### Python (requests)
+### Python (ጥያቄዎች)
 
 ```python
 import requests
@@ -283,7 +288,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (አምጣ)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

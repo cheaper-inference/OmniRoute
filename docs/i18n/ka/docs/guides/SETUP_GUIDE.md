@@ -136,102 +136,103 @@ omniroute providers validate
 
 ---
 
-## CLI ინსტრუმენტის კონფიგურაცია
+## CLI ხელსაწყოს კონფიგურაცია
 
 ### 1) პროვაიდერების დაკავშირება და API გასაღების შექმნა
 
-1. გახსენით Dashboard → `Providers` და დააკავშირეთ მინიმუმ ერთი პროვაიდერი (OAuth ან API გასაღები).
+1. გახსენით Dashboard → `Providers` და დააკავშირეთ მინიმუმ ერთი პროვაიდერი (OAuth-ით ან API გასაღებით).
 2. გახსენით Dashboard → `Endpoints` და შექმენით API გასაღები.
-3. (არასავალდებულო) გახსენით Dashboard → `Combos` და დააყენეთ სარეზერვო ჯაჭვი.
+3. (არასავალდებულო) გახსენით Dashboard → `Combos` და დააყენეთ სარეზერვო გადართვის ჯაჭვი.
 
-### 2) თქვენი კოდირების ინსტრუმენტის მითითება
+### 2) თქვენი კოდირების ხელსაწყოს მითითება
 
 ```txt
 საბაზისო URL: http://localhost:20128/v1
-API გასაღები:  [დააკოპირეთ Endpoint გვერდიდან]
+API გასაღები:  [დააკოპირეთ Endpoint-ის გვერდიდან]
 მოდელი:        if/qwen3.8-max-preview (ან ნებისმიერი პროვაიდერის/მოდელის პრეფიქსი)
 ```
 
-თუ თქვენს რედაქტორს არ შეუძლია `Authorization: Bearer ...`-ის გაგზავნა, სანაცვლოდ გამოიყენეთ ტოკენიზებული თავსებადობის საბაზისო მისამართი:
+თუ თქვენს რედაქტორს არ შეუძლია `Authorization: Bearer ...`-ის გაგზავნა, ამის ნაცვლად გამოიყენეთ ტოკენიზებული თავსებადობის საბაზისო მისამართი:
 
 ```txt
 საბაზისო URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 მოდელების URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 ჩატის URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Ollama Tags-ის URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-მუშაობს Claude Code-თან, Codex CLI-თან, Cursor-თან, Cline-თან, OpenClaw-თან, OpenCode-თან და OpenAI-თან თავსებად SDK-ებთან.
+მუშაობს Claude Code-თან, Codex CLI-სთან, Cursor-თან, Cline-თან, OpenClaw-თან, OpenCode-თან და OpenAI-თან თავსებად SDK-ებთან.
 
-#### ავტომატური კონფიგურაცია `setup-*`-ით
+#### ავტომატური კონფიგურაცია `setup-*`-ის გამოყენებით
 
-საბაზისო URL-ისა და გასაღების ხელით ჩასმის ნაცვლად, მიეცით OmniRoute-ს საშუალება, მოდელების მიმდინარე კატალოგის საფუძველზე თითოეული ინსტრუმენტისთვის
-საკუთარი კონფიგურაცია შექმნას. თითო ინსტრუმენტზე ერთი ბრძანება:
+საბაზისო URL-ისა და გასაღების ხელით ჩასმის ნაცვლად, მიეცით OmniRoute-ს საშუალება, მოდელების აქტიური კატალოგიდან თითოეული ხელსაწყოს
+საკუთარი კონფიგურაცია ჩაწეროს. თითო ხელსაწყოზე ერთი ბრძანება:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml პროფილები
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-თან თავსებადი)
-omniroute setup-cline        # Cline CLI + VS Code გაფართოების პარამეტრები
+omniroute setup-cline        # Cline CLI-ისა და VS Code გაფართოების პარამეტრები
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # ბეჭდავს Cursor-ში შესასრულებელ ნაბიჯებს
-omniroute setup-roo          # Roo Code-ის იმპორტი + autoImport მაჩვენებელი
+omniroute setup-roo          # Roo Code-ის იმპორტი და autoImport მაჩვენებელი
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-თითოეული იღებს `--remote <url> --api-key <key>` პარამეტრებს, რათა ლოკალური ინსტრუმენტი
-**დისტანციურ** OmniRoute-თან სამუშაოდ დააკონფიგურიროს, ასევე `--dry-run` პარამეტრს წინასწარი გადახედვისთვის. CLI-ის საჭირო
-გარემოს ცვლადებით, საერთოდ რაიმე კონფიგურაციის ჩაწერის გარეშე გასაშვებად გამოიყენეთ უნივერსალური გამშვები
+თითოეული მათგანი იღებს `--remote <url> --api-key <key>` პარამეტრებს, რათა ლოკალური ხელსაწყო
+**დისტანციურ** OmniRoute-ზე სამუშაოდ დააკონფიგურიროს, ასევე `--dry-run`-ს წინასწარი დათვალიერებისთვის. CLI-ის სწორი
+გარემოს ცვლადებით გასაშვებად, კონფიგურაციის საერთოდ ჩაწერის გარეშე, გამოიყენეთ ზოგადი გამშვები
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-ძველი, ცალკეული ინსტრუმენტებისთვის განკუთვნილი გამშვებები `omniroute launch` (Claude Code) და
+ძველი, კონკრეტული ხელსაწყოებისთვის განკუთვნილი გამშვებები `omniroute launch` (Claude Code) და
 `omniroute launch-codex` (Codex) კვლავ ხელმისაწვდომია.
 
-სრული ცხრილისთვის (რას წერს თითოეული ბრძანება, ყველა პარამეტრი, ლოკალური და დისტანციური რეჟიმები, საბაზისო URL-ის
-`/v1` შეთანხმებები) იხილეთ **[CLI ინტეგრაციები](./CLI-INTEGRATIONS.md)**.
+სრული ცხრილის სანახავად (რას წერს თითოეული ბრძანება, ყველა ალამი, ლოკალური და დისტანციური რეჟიმები, საბაზისო URL-ის
+`/v1`-თან დაკავშირებული წესები), იხილეთ **[CLI ინტეგრაციები](./CLI-INTEGRATIONS.md)**.
 
-ცალკეული ინსტრუმენტების დეტალური კონფიგურაციისთვის (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot და სხვა) იხილეთ სპეციალური **[CLI ინსტრუმენტების სახელმძღვანელო](../reference/CLI-TOOLS.md)**.
+თითოეული ხელსაწყოს დეტალური კონფიგურაციისთვის (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot და სხვა), იხილეთ სპეციალური **[CLI ხელსაწყოების სახელმძღვანელო](../reference/CLI-TOOLS.md)**.
 
 ---
 
-## პროტოკოლების დაყენება (MCP + A2A)
+## პროტოკოლის დაყენება (MCP + A2A)
 
-### MCP-ის დაყენება (Model Context Protocol)
+### MCP Setup (მოდელის კონტექსტური პროტოკოლი)
 
-გაუშვით MCP ტრანსპორტი stdio რეჟიმში:
+დაიწყეთ MCP ტრანსპორტი stdio რეჟიმში:
 
 ```bash
 omniroute --mcp
 ```
 
-რეკომენდებული შემოწმების პროცესი:
+რეკომენდებული ვალიდაციის ნაკადი:
 
 ```bash
-# 1. გაუშვით MCP სერვერი
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. თქვენი MCP კლიენტიდან გამოიძახეთ:
-omniroute_get_health        # უნდა დააბრუნოს სისტემის მდგომარეობა
-omniroute_list_combos       # უნდა დააბრუნოს აქტიური კომბინაციები
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. ან გაუშვით სრული E2E ნაკრები:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP კლიენტის კონფიგურაცია
 
-**Claude Code:**
+**Claude კოდი:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-დაამატეთ თქვენს MCP პარამეტრებში:
+დაამატეთ თქვენს MCP პარამეტრებს (stdio, გასაღებით, რათა აბონენტს ჰქონდეს მთავარი):
 
 ```json
 {
@@ -239,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**MCP-ის სრული დოკუმენტაცია:** [MCP სერვერის README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტი, IDE კონფიგურაციები, Python/TS/Go კლიენტები.
+ან, როდესაც `mcpTransport` არის `streamable-http` (დააყენეთ იგი `/dashboard/mcp` ზე ან `omniroute mcp enable --transport streamable-http` ზე), მიუთითეთ კლიენტის დისტანციური MCP სერვერის ჩანაწერი `http://localhost:20128/api/mcp/stream` ზე.
 
-### A2A-ის დაყენება (Agent-to-Agent Protocol)
+გასაღები მოძრაობს როგორც `Authorization: Bearer <api-key>` (იხ. [MCP სერვერი → დისტანციური წვდომა](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) დისტანციური ჰოსტებისთვის; დისტანციურ გასაღებს სჭირდება `mcp:connect` პლუს მისი read/write არეები).
 
-შეამოწმეთ Agent Card:
+**სრული MCP დოკუმენტაცია:** [MCP სერვერი README](../../open-sse/mcp-server/README.md) — 110 ინსტრუმენტები, IDE კონფიგურაციები, Python/TS/Go კლიენტები. ოპერატორის მითითება შეკუმშვის CCR/dedup ხელსაწყოებისთვის (მარკერები, წინაპირობები, თითო ხელსაწყოს სკოპი, მოძიების პაგინაცია, დიაგნოსტიკა): [შეკუმშვის ძრავები → წინაპირობები / ოპერატორის სახელმძღვანელო](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Setup (აგენტიდან აგენტის პროტოკოლი)
+
+გადაამოწმეთ აგენტის ბარათი:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-გაგზავნეთ დავალება:
+დავალების გაგზავნა:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**A2A-ის სრული დოკუმენტაცია:** [A2A სერვერის README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, ნაკადური გადაცემა, დავალების სასიცოცხლო ციკლი.
+**სრული A2A დოკუმენტაცია:** [A2A სერვერი README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, უნარები, სტრიმინგი, დავალების სასიცოცხლო ციკლი.
 
 ---
 
@@ -322,23 +330,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux-ის (xbps-src) შაბლონი
+## Void Linux (xbps-src) შაბლონი
 
-Void Linux-ის მომხმარებლებს შეუძლიათ შექმნან ნატიური პაკეტი `xbps-src`-ის გამოყენებით. შეინახეთ ეს ბლოკი, როგორც `srcpkgs/omniroute/template`:
+Void Linux მომხმარებლებისთვის შეგიძლიათ შექმნათ მშობლიური პაკეტი `xbps-src` გამოყენებით. შეინახეთ ეს ბლოკი, როგორც `srcpkgs/omniroute/template`:
 
 ```bash
-# შაბლონის ფაილი 'omniroute'-ისთვის
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="უნივერსალური AI-კარიბჭე გონივრული მარშრუტიზაციით მრავალი LLM-პროვაიდერისთვის"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# თითოეული გამოშვებისთვის თავიდან შექმენით საკონტროლო ჯამი შემდეგი ბრძანებით:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

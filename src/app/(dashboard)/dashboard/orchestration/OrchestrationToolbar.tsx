@@ -7,6 +7,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 import { isEmptyFilter } from "./model/filterSnapshot";
 import { toggleCsv } from "./model/urlParams";
 import type { OrchFilter } from "./model/filterSnapshot";
@@ -31,11 +33,6 @@ const SOURCE_KEY: Record<(typeof SOURCES)[number], string> = {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const chipClass = (active: boolean) =>
-  `text-[10px] px-2 py-0.5 rounded-full border whitespace-nowrap ${
-    active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted"
-  }`;
-
 /**
  * One labeled row of toggle chips (states / sources / providers). Pure presentation:
  * `active` drives the pressed style + `aria-pressed`, `onToggle` writes the URL param
@@ -56,17 +53,18 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-[10px] text-muted">{label}</span>
+      <span className="text-[10px] text-text-muted">{label}</span>
       {values.map((v) => (
-        <button
+        <Button
           key={v}
-          type="button"
-          className={chipClass(active.has(v))}
+          size="sm"
+          variant={active.has(v) ? "primary" : "outline"}
+          className="h-6 min-h-6 rounded-full px-2 text-[10px]"
           aria-pressed={active.has(v)}
           onClick={() => onToggle(v)}
         >
           {renderLabel(v)}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -121,13 +119,13 @@ export function OrchestrationToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2">
-      <input
+      <Input
         type="search"
         value={text}
         onChange={(e) => handleSearchChange(e.target.value)}
         placeholder={t("searchPlaceholder")}
         aria-label={t("searchPlaceholder")}
-        className="text-xs px-2 py-1 rounded border border-border bg-transparent min-w-[160px]"
+        className="min-w-[160px]"
       />
       <ChipGroup
         label={t("filterStates")}
@@ -153,13 +151,9 @@ export function OrchestrationToolbar({
         />
       )}
       {!isEmptyFilter(filter) && (
-        <button
-          type="button"
-          className="text-[10px] underline text-muted ml-auto"
-          onClick={handleClear}
-        >
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={handleClear}>
           {t("clearFilters")}
-        </button>
+        </Button>
       )}
     </div>
   );

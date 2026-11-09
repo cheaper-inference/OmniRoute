@@ -138,70 +138,71 @@ omniroute providers validate
 
 ## Nhazi Ngwaọrụ CLI
 
-### 1) Jikọọ Ndị Na-eweta Ọrụ ma Mepụta Igodo API
+### 1) Jikọọ Ndị Na-eweta Ọrụ ma Mepụta API Key
 
-1. Mepee Dashboard → `Providers` ma jikọọ opekata mpe otu onye na-eweta ọrụ (OAuth ma ọ bụ igodo API).
-2. Mepee Dashboard → `Endpoints` ma mepụta igodo API.
-3. (Nhọrọ) Mepee Dashboard → `Combos` ma hazie usoro ndabere gị.
+1. Mepee Dashboard → `Providers` wee jikọọ opekata mpe otu onye na-eweta ọrụ (OAuth ma ọ bụ API key).
+2. Mepee Dashboard → `Endpoints` wee mepụta API key.
+3. (Nhọrọ) Mepee Dashboard → `Combos` wee hazie usoro fallback gị.
 
-### 2) Tụnye Ngwaọrụ Ide Koodu Gị Aka
-
-```txt
-URL Ntọala: http://localhost:20128/v1
-Igodo API:   [detuo site na ibe Endpoint]
-Ụdị:         if/qwen3.8-max-preview (ma ọ bụ nganiihu onye na-eweta ọrụ/ụdị ọ bụla)
-```
-
-Ọ bụrụ na editọ gị enweghị ike izipu `Authorization: Bearer ...`, jiri ntọala ndakọrịta nwere token kama:
+### 2) Tụọ Ngwaọrụ Ide Koodu Gị Aka Ebe Kwesịrị Ekwesị
 
 ```txt
-URL Ntọala: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL Ụdị: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL Mkparịta ụka: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL Mkpado Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/v1
+API Key:  [detuo site na ibe Endpoint]
+Model:    if/qwen3.8-max-preview (ma ọ bụ prefix provider/model ọ bụla)
 ```
 
-Ọ na-arụ ọrụ na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK ndị kwekọrọ na OpenAI.
+Ọ bụrụ na editọ gị enweghị ike izipu `Authorization: Bearer ...`, jiri base ndakọrịta nwere token kama:
+
+```txt
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
+
+Ọ na-arụ ọrụ na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK ndị dakọtara na OpenAI.
 
 #### Jiri `setup-*` hazie ya na-akpaghị aka
 
-Kama iji aka mado URL ntọala na igodo ahụ, kwe ka OmniRoute dee nhazi nke
-ngwaọrụ ọ bụla site na katalọgụ ụdị dị ugbu a. Otu iwu maka ngwaọrụ ọ bụla:
+Kama iji aka mado base URL na key, kwe ka OmniRoute dee nhazi nke ngwaọrụ ọ bụla
+site na katalọgụ model dị ugbu a. Otu command maka ngwaọrụ ọ bụla:
 
 ```bash
 omniroute setup-codex        # profaịlụ ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (dakọtara na openai)
-omniroute setup-cline        # Cline CLI + ntọala ndọtị VS Code
+omniroute setup-cline        # Ntọala Cline CLI + ndọtị VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # na-ebipụta usoro ndị a ga-eme n'ime ngwa Cursor
-omniroute setup-roo          # mbubata Roo Code + nrụtụ aka autoImport
+omniroute setup-cursor       # na-ebipụta usoro ime ya n'ime ngwa Cursor
+omniroute setup-roo          # mbubata Roo Code + ntụaka autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Nke ọ bụla na-anabata `--remote <url> --api-key <key>` iji hazie ngwaọrụ mpaghara ka ọ rụọ ọrụ megide
-OmniRoute **dị anya**, tinyere `--dry-run` maka ịhụchalụ. Iji malite CLI ebe etinyere
-env kwesịrị ekwesị na-edeghị nhazi ọ bụla ma ọlị, jiri onye mmalite izugbe
+Nke ọ bụla na-anabata `--remote <url> --api-key <key>` iji hazie ngwaọrụ mpaghara ka ọ jiri
+OmniRoute **dị anya**, yana `--dry-run` iji hụ ihe ga-eme tupu emee ya. Iji malite CLI nwere
+env ziri ezi etinyere n’ebughị ụzọ dee nhazi ọ bụla, jiri launcher izugbe
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-ndị mmalite ochie akọwapụtara maka ngwaọrụ ọ bụla, `omniroute launch` (Claude Code) na
-`omniroute launch-codex` (Codex), ka dị.
+launcher ochie ndị akọwapụtara maka ngwaọrụ ọ bụla, `omniroute launch` (Claude Code) na
+`omniroute launch-codex` (Codex), ka dịkwa.
 
-Maka tebụl zuru ezu (ihe iwu ọ bụla na-ede, ọkọlọtọ niile, mpaghara megide nke dị anya, usoro URL ntọala
-`/v1`), lee **[Njikọta CLI](./CLI-INTEGRATIONS.md)**.
+Maka tebụl zuru ezu (ihe command ọ bụla na-ede, flag niile, mpaghara megide nke dị anya, ụkpụrụ base-URL
+`/v1`), lee **[Njikọ CLI](./CLI-INTEGRATIONS.md)**.
 
-Maka nkọwa nhazi nke ngwaọrụ ọ bụla (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, na ndị ọzọ), lee **[Ntuziaka Ngwaọrụ CLI](../reference/CLI-TOOLS.md)** a raara nye ya.
+Maka nkọwa nhazi zuru ezu maka ngwaọrụ ọ bụla (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, na ndị ọzọ), lee **[Ntuziaka Ngwaọrụ CLI](../reference/CLI-TOOLS.md)** a raara nye ya.
 
 ---
 
-## Nhazi Protokọl (MCP + A2A)
+## Ntọala Protocol (MCP + A2A)
 
-### Nhazi MCP (Model Context Protocol)
+### Ntọlite MCP (Protocol Context Model)
 
-Malite mbufe MCP na ọnọdụ stdio:
+Bido njem MCP na ọnọdụ stdio:
 
 ```bash
 omniroute --mcp
@@ -210,28 +211,28 @@ omniroute --mcp
 Usoro nkwado akwadoro:
 
 ```bash
-# 1. Malite sava MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Site na klayenti MCP gị, kpọọ:
-omniroute_get_health        # Kwesịrị iweghachi ọnọdụ ahụike sistemụ
-omniroute_list_combos       # Kwesịrị iweghachi combos ndị na-arụ ọrụ
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ma ọ bụ mee usoro E2E zuru ezu:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Nhazi Klayenti MCP
+#### MCP Nhazi onye ahịa
 
-**Claude Code:**
+**Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Tinye na ntọala MCP gị:
+Tinye na ntọala MCP gị (stdio, jiri igodo mee ka onye na-akpọ oku nwee onye isi):
 
 ```json
 {
@@ -239,31 +240,38 @@ Tinye na ntọala MCP gị:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Akwụkwọ MCP zuru ezu:** [README Sava MCP](../../open-sse/mcp-server/README.md) — ngwaọrụ 110, nhazi IDE, klayenti Python/TS/Go.
+Ma ọ bụ, mgbe `mcpTransport` bụ `streamable-http` (tọọ ya na `/dashboard/mcp` ma ọ bụ jiri `omniroute mcp enable --transport streamable-http`), rụtụ aka nbanye ihe nkesa MCP dịpụrụ adịpụ nke onye ahịa na `http://localhost:20128/api/mcp/stream`.
 
-### Nhazi A2A (Agent-to-Agent Protocol)
+Igodo ahụ na-eme njem dị ka `Authorization: Bearer <api-key>` (lee [MCP Server → ohere dịpụrụ adịpụ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) maka ndị ọbịa dịpụrụ adịpụ; igodo dịpụrụ adịpụ chọrọ `mcp:connect` gbakwunyere read/write scopes ya).
 
-Nyochaa Agent Card:
+**Akwụkwọ MCP zuru ezu:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 ngwaọrụ, IDE configs, Python/TS/Go ahịa. Onye na-arụ ọrụ maka mkpakọ CCR/dedup ngwaọrụ (akara akara, ihe ndị a chọrọ, oghere nke ngwaọrụ ọ bụla, pagination iweghachi, nchọpụta nchọpụta): [Mkpakọ Engines → Prerequisites / onye ọrụ ntuziaka](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Ntọala A2A (Protocol onye nnọchite anya na onye nnọchi anya)
+
+Nyochaa kaadị onye nnọchi anya:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Zipụ ọrụ:
+Zipu ọrụ:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Nye m nchịkọta oke ojiji dị nkenke."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Akwụkwọ A2A zuru ezu:** [README Sava A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, nka, nnyefe na-aga n'ihu, usoro ndụ ọrụ.
+**Akwụkwọ A2A zuru ezu:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, nkà, nkwanye, ọrụ ndụ okirikiri.
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Template Void Linux (xbps-src)
+## Ndebiri Linux (xbps-src) efu
 
-Maka ndị ọrụ Void Linux, ị nwere ike iji `xbps-src` wuo package nke sistemụ ahụ. Chekwaa ngọngọ a dịka `srcpkgs/omniroute/template`:
+Maka ndị ọrụ Void Linux, ị nwere ike iji `xbps-src` wuo ngwugwu ala. Chekwaa ngọngọ a ka `srcpkgs/omniroute/template`:
 
 ```bash
-# Faịlụ template maka 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Mepụta checksum ahụ ọzọ maka mwepụta ọ bụla site na:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -18,7 +18,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import type { SqliteAdapter } from "./adapters/types";
-import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import {
   LEGACY_VERSION_SLOT_MIGRATIONS,
@@ -427,6 +426,13 @@ function ensureColumn(db: SqliteAdapter, tableName: string, columnName: string, 
   }
 }
 
+function triggerHasWhenClause(db: SqliteAdapter, triggerName: string): boolean {
+  const trigger = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'trigger' AND name = ?")
+    .get(triggerName) as { sql: string } | undefined;
+  return trigger !== undefined && /\bWHEN\b/i.test(trigger.sql);
+}
+
 function isSchemaAlreadyApplied(
   db: SqliteAdapter,
   migration: { version: string; name: string }
@@ -594,6 +600,11 @@ function isSchemaAlreadyApplied(
         hasColumn(db, "provider_nodes", "daily_quota_reset_timezone") &&
         hasColumn(db, "provider_nodes", "daily_quota_reset_hour")
       );
+    case "178":
+      // 178 only exists to give memory_fts_au a WHEN clause. A released ledger slot
+      // (#18952) can replay it long after 203 rewrote that trigger, and the replay would
+      // drop 203's memory_id condition, which is what indexes new memories (#15707).
+      return triggerHasWhenClause(db, "memory_fts_au");
     case "179":
       // proxy_logs.upstream_status may already exist if ensureProxyLogsColumns ran first;
       // a bare ADD COLUMN would then throw. Renumbering the migration means renaming this case
@@ -620,9 +631,36 @@ function isSchemaAlreadyApplied(
       // would answer for another migration's schema and skip it.
       return hasColumn(db, "proxy_logs", "attempt_number");
     case "194":
-      // Same shape as 179/181/183/184/187: ensureProxyLogsColumns may have
-      // added headers_ms at boot. Keyed by version only.
-      return hasColumn(db, "proxy_logs", "headers_ms");
+      // 194 adds TWO timing columns. Boot-time ensureProxyLogsColumns can
+      // independently install either one; the presence of headers_ms alone
+      // must not mark first_chunk_ms as migrated. The migration runner can
+      // replay only the missing ADD COLUMN via stripExistingAddColumns.
+      return (
+        hasColumn(db, "proxy_logs", "headers_ms") && hasColumn(db, "proxy_logs", "first_chunk_ms")
+      );
+    case "212":
+      // Provider-reported cost columns (#16087, renumbered 206 -> 212: the 206 slot
+      // went to 206_codex_wakeup_tasks first). A DB that already applied the old
+      // 206 file has both columns, and a bare ADD COLUMN would throw on the re-run.
+      return (
+        hasColumn(db, "usage_history", "provider_credits") &&
+        hasColumn(db, "usage_history", "provider_cost_usd")
+      );
+    case "230":
+      // Cache-write tier columns (#17307, renumbered 213 -> 217 -> 226 -> 227 -> 228 -> 229 -> 230:
+      // the 213 slot went to 213_api_key_preferred_connections first, the 217 slot to
+      // 217_quota_recovery_tickets, the 226 slot to 226_request_cost_ledger_read_indexes, the
+      // 227 slot to 227_quota_recovery_due_cover, the 228 slot to
+      // 228_purge_orphaned_provider_catalogs and the 229 slot to 229_api_key_five_hour_limit,
+      // none of which has a guard here). Keyed by version
+      // only: a stale number would skip those migrations.
+      return [
+        "tokens_cache_creation_5m",
+        "tokens_cache_creation_1h",
+        "cache_creation_tier_status",
+        "cache_write_cost_usd",
+        "cache_write_priced_tokens",
+      ].every((column) => hasColumn(db, "call_logs", column));
     default:
       return false;
   }
@@ -640,6 +678,31 @@ function applyApiKeyLifecycleMigration(db: SqliteAdapter): void {
     CREATE INDEX IF NOT EXISTS idx_api_keys_revoked_at ON api_keys(revoked_at);
     CREATE INDEX IF NOT EXISTS idx_api_keys_expires_at ON api_keys(expires_at);
   `);
+}
+
+// 207_remove_opencode_free_provider reads every credential column of provider_connections to
+// tell keyed OpenCode rows (moved to opencode-zen) from keyless ones (dropped). Those columns
+// come from the core.ts table definition, not from a numbered migration, so a database whose
+// provider_connections predates them aborted the whole migration run with "no such column".
+// Add the missing nullable TEXT columns first; an existing column is left untouched.
+const OPENCODE_FREE_REMOVAL_CREDENTIAL_COLUMNS = [
+  "api_key",
+  "access_token",
+  "refresh_token",
+  "id_token",
+  "provider_specific_data",
+] as const;
+
+function ensureOpencodeFreeRemovalColumns(db: SqliteAdapter): void {
+  if (!hasTable(db, "provider_connections")) return;
+  for (const column of OPENCODE_FREE_REMOVAL_CREDENTIAL_COLUMNS) {
+    ensureColumn(
+      db,
+      "provider_connections",
+      column,
+      `ALTER TABLE provider_connections ADD COLUMN ${column} TEXT`
+    );
+  }
 }
 
 function isSearchRequestTypeMigration(migration: { version: string; name: string }): boolean {
@@ -1103,6 +1166,9 @@ export function runMigrations(
       } else if (migration.version === "042") {
         applyCompressionCombosMigration(db, migration.path);
       } else {
+        if (migration.name === "remove_opencode_free_provider") {
+          ensureOpencodeFreeRemovalColumns(db);
+        }
         const sql = fs.readFileSync(migration.path, "utf-8");
         genericSql = sql;
         db.exec(sql);
@@ -1145,41 +1211,15 @@ export function runMigrations(
     console.log(`[Migration] ${count} migration(s) applied successfully.`);
   }
 
-  // After applying all migrations, insert default settings if we just ran migration 46
-  try {
-    if (appliedRecords.some((m) => m.name.startsWith("051_"))) {
-      insertDefaultDatabaseSettings(db);
-    }
-  } catch (error) {
-    console.error("Error inserting default database settings:", error);
-  }
+  // #17186: the "insert default settings after migration 051" guard that used
+  // to live here was unreachable — `name` is the filename's SECOND capture group
+  // (text after the numeric prefix), so it never starts with "051_". The seeded
+  // defaults were also redundant: the read path (optimizationSettings.ts) merges
+  // DEFAULT_DATABASE_SETTINGS on read, so absent rows are the normal case.
+  // Removed along with the dead insertDefaultDatabaseSettings() helper and its
+  // now-unused import.
 
   return count;
-}
-
-function insertDefaultDatabaseSettings(db: SqliteAdapter) {
-  const tx = db.transaction(() => {
-    // Insert all default settings
-    for (const [section, values] of Object.entries(DEFAULT_DATABASE_SETTINGS)) {
-      for (const [key, value] of Object.entries(values as Record<string, unknown>)) {
-        db.prepare("INSERT OR IGNORE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-          "databaseSettings",
-          `${section}.${key}`,
-          JSON.stringify(value)
-        );
-      }
-    }
-  });
-
-  // Run in an immediate transaction to avoid nested transactions
-  try {
-    runImmediateTransaction(db, () => {
-      tx();
-    });
-  } catch (error) {
-    console.error("Transaction error inserting default settings:", error);
-    throw error;
-  }
 }
 
 /**

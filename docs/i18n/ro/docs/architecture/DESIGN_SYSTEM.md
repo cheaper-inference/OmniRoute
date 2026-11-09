@@ -4,229 +4,92 @@
 
 ---
 
-> **Stare:** referință — standardizarea descrisă aici este **implementată** (fazele 1–6: fundal tip grilă, primitive, centralizarea culorilor de stare, token mono, migrarea tokenurilor DataTable, focus-ring → accent, primitive Checkbox/Textarea, `cn()` → tailwind-merge, grilă pe fiecare ecran independent, container de conținut fluid pentru 4K, suprafețe opace pentru tabelele de date). Acest document reprezintă descrierea canonică a tokenurilor de design, componentelor și convențiilor dashboardului; structurarea pe faze de mai jos este păstrată pentru a explica raționamentul fiecărei decizii.
-> **Domeniu de aplicare:** dashboardul OmniRoute (`src/`) și site-ul de marketing (`_mono_repo/omnirouteSite/`) împărtășesc **o singură identitate vizuală** — același fundal tip hârtie milimetrică (32px), aceleași tokenuri de culoare, componente standardizate.
->
-> Note practice pentru mentenanță:
->
-> - Câteva valori hex codificate direct care au rămas sunt **intenționate** (terminalul consolei mereu întunecat, contururile SVG ReactFlow) și **NU** trebuie înlocuite cu tokenuri.
-> - O grilă „mai mare” pe o instanță care rulează indică un build învechit, nu o problemă în cod — dimensiunea grilei este 32px, identică cu cea a site-ului.
-> - Valorile `--table-*` pentru tema întunecată sunt identice la nivel de octet cu valorile rgba codificate direct înainte de migrare; tema luminoasă a fost corectată (era în mod eronat mereu întunecată din cauza valorilor de rezervă `var()` inactive).
+> **Stare:** tabloul de bord este construit pe** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vândut ca spațiu de lucru `packages/ui-kit` (`@omniroute/ui-kit`; instantaneul din amonte este fixat în `packages/ui-kit/UPSTREAM.md` și protejat de `npm run check:ui-kit-snapshot`). Lumina este tema canonică; preferința implicită este `system`. Paleta implicită este cea a trusei** Ediții** aspect (neutre de hârtie caldă și accentul de cupru `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Setări → Aspect → Paleta de culori oferă** Clasic** , jetoanele de bază ale trusei cu accent de var. Switzer este singura familie pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Scripturi Switzer lipsesc prin glif cu glif (`src/app/globals.css`): Inter pentru chirilic, greacă și vietnameză și, numai sub `html[dir="rtl"]`, Vazirmatn pentru scrierea arabă. Fiecare pictogramă este un glif Lucide.
 
----
+## 1. Unde trăiesc lucrurile
 
-## 1. Scop
+- **Kit.** `packages/ui-kit/src` este o copie octet-cu-octet a `src/` din amonte la commit-ul fixat în `packages/ui-kit/UPSTREAM.md` (care înregistrează și autorizarea licenței); `PATCHES.md` listează patch-uri locale (nici unul). Este consumat ca sursă, fără build: `next.config.mjs` îl transpilează și `tsconfig.json` mapează `@omniroute/ui-kit` → `packages/ui-kit/src` și `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` și `vitest.mcp.config.ts` poartă același alias). Importați o componentă a kit-ului după calea secundară (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`...), niciodată prin butoiul `@omniroute/ui-kit` : butoiul trage fiecare componentă (inclusiv selectorul de date) în fiecare importator. Foaia de stil kit intră prin `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, foaia completă: `ci-ui.css` de bază plus fiecare familie de modele).
+- **Jetoane.** `packages/ui-kit/src/ci-tokens.css` declară jetoanele `--ci-*` ; `src/app/globals.css` le face legătura cu numele OmniRoute moștenite (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), astfel încât citirile `var(--color-*)` existente și utilitarele Tailwind continuă să funcționeze. Codul nou folosește utilitățile Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) sau clasele de kit — niciodată o valoare hex (`tests/unit/design-kit-bridge.test.ts` impune puntea). `text-primary` se rezolvă la `--color-primary-ink` prin `--text-color-primary`, astfel încât textul primar rămâne lizibil în timp ce `bg-primary`/`border-primary` păstrează suprafața de accent: sub Editions este `--ci-color-accent-active` kit-ului ( `#99562f` cupru adânc în lumină, accentul cupru în întuneric); sub Clasic, lime-800 în lumină și accentul de var în întuneric. Seria de diagrame utilizează `--color-chart-1` … `--color-chart-8`, fiecare cu o nuanță `--color-chart-N-ink` sigură pentru text și o nuanță de cip `--color-chart-N-subtle` opac, atribuite în ordinea seriei kit (`ciChartSeriesOrder`).
+- **Teme.** `<html className="ci-theme">` (`src/app/layout.tsx`) include documentul în tema kit-ului. Preferința este `light`, `dark` sau `system` (`THEME_CONFIG.defaultTheme = "system"` în `src/shared/constants/appConfig.ts`; `system` urmează `prefers-color-scheme`). `applyTheme()` în `src/store/themeStore.ts` (oglindit de `THEME_BOOT_SCRIPT`, înliniat în `src/app/layout.tsx`, care rulează înainte de hidratare) setează `data-theme="dark"|"light"` și comută clasa `.dark` pe `<html>` împreună. Setul de jetoane întunecate al kitului este introdus pe `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Supracrierile întunecate proprii ale lui OmniRoute(blocul `.dark` din `globals.css`) și cheia de utilitare Tailwind `dark:` moștenită din clasa `.dark`. Nu există presetări de culoare de accent: accentul vine întotdeauna din kit, iar o presetare persistentă dintr-o versiune mai veche este eliminată atunci când magazinul se încarcă.
+- **Palete.** Două, ambele din kit (`src/shared/constants/appearancePalette.ts`): `editions`, implicit și `classic`. Editions este atributul `data-ci-appearance="editions"` al kit-ului pe `<html>`, pe care `ci-editions.css` (importat de `ci-ui.css`) îl combină cu `data-theme`; Clasic este absența atributului. Serverul de aspect rădăcină redă atributul, astfel încât un vizitator fără nimic stocat (sau fără JS) primește ediții pe fiecare tablou de bord — de suprafață, autentificare, `/status`, pagini de eroare, `/docs` și PWA. Alegerea se persistă lângă tema în același magazin `theme` (`palette`, `setPalette()`, `applyPalette()` în `src/store/themeStore.ts`) și se aplică înainte de vopsea prin `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, aliniat în `<head>` layout-ului ), care elimină atributul doar când paleta stocată este `"classic"`; `src/app/global-error.tsx`, în afara aspectului rădăcină, îl aplică din același magazin. Nu puneți `data-ci-appearance` pe niciun alt element: kit-ul îl potrivește cu `html:root:has([data-ci-appearance="editions"])`, astfel încât un descendent ar schimba întregul document. Varianta Editions `data-ci-editions-variant="landing"` este pentru paginile de marketing, nu pentru tabloul de bord. Browser chrome: serverul redă versiunea implicită, Editions, în `viewport.themeColor` (o etichetă per `prefers-color-scheme`) și manifestul web — `PWA_THEME_COLORS` în `src/shared/constants/pwaThemeColors.ts`, singura oglindă a Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), fixată la `ci-editions.css` de `tests/unit/pwa-theme-colors.test.ts`. `<meta name="theme-color">` live urmează apoi paleta și modul stocate: `THEME_BOOT_SCRIPT` rescrie etichetele înainte de vopsire, iar acțiunile magazinului de teme o fac la fiecare modificare (`resolveThemeColor()` / `applyThemeColor()` în `src/shared/utils/themeColorMeta.ts`, cu `CLASSIC_PAGE_BACKGROUND` citit din `ciTokens` din kit). O temă explicită light/dark setează fiecare etichetă în acel mod; `system` păstrează o culoare per schemă. Manifestul rămâne Ediții: este preluat o dată pe instalare, fără preferință. Monaco își citește culorile de pe o sondă (`monacoKitTheme.ts`); sub Editions, sonda citită întoarce rădăcina `data-theme` pentru o trecere sincronă, deoarece kitul rezolvă Editions light/dark de la rădăcină.
+- **Componente (adaptoare).** `src/shared/components/index.tsx` păstrează componenta OmniRoute API (aceleași nume, exporturi implicite și elemente de recuzită), iar primitivele din spatele acesteia sunt adaptoare peste kit: forme (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays /`Modal`, /`ConfirmModal` `NotificationToast` `Tooltip`,`InfoTooltip`, `EmptyState`, `Loading`), structura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) și tabele (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Un adaptor importă componenta kit-ului după o cale secundară și mapează elementele de recuzită moștenite pe ea — de exemplu, `Button variant="primary"` este butonul kit `default` (`--ci-button-primary-*`: suprafața inversă în lumină, accentul cu cerneala sa `--ci-color-accent-foreground` în întuneric), `danger` este `destructive` și `warning` este butonul `warning`. Variantele de stare `Badge` sunt tonuri de kit, iar `Select` cu copii `<option>` redă kit-ul `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin fiecare adaptor.
+- **Coajă.** `src/app/(dashboard)/layout.tsx` redă `DashboardLayout`, care redă `src/shared/components/layouts/DashboardShell.tsx`: kitul `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), cu logica de navigare a lui OmniRoute în `src/shared/components/Sidebar.tsx`. Un link „săriți la conținut” către `#main-content` este primul element focalizat. `src/shared/components/Header.tsx` deține kitul `SidebarTrigger` (singurul comutator al barei laterale a shell-ului), Keak `ProductSwitcher` și deschiderea paletei de comandă; arată titlul rutei numai în timp ce nici un kit `PageHeader` (`.ci-page-header`) nu este montat în interiorul `#main-content`, deci o pagină cu propriul `PageHeader` are un singur `h1`. `src/shared/components/CommandPalette.tsx` este un kit `Dialog`.
+- **icoane.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) rezolvă numele (vocabulul Simbolurilor materiale pe care îl utilizează ecranele) prin `ICON_MAP` (`src/shared/constants/iconMap.ts`) într-un glif Lucide. Fontul și pachetul Material Symbols au dispărut: un nume care lipsește de pe hartă redă un glif de substituent neutru (`data-icon-missing="true"`) și înregistrează un avertisment de consolă în afara producției. `npm run gen:icon-map` afișează numele în uz care lipsesc de pe hartă (`tests/unit/icon-map-coverage.test.ts` eșuează pe orice nume fără o pictogramă Lucide; `tests/unit/icon-map-object-values.test.ts` acoperă numele stocate în obiectele de căutare); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` rescrie literal `<span className="material-symbols-outlined">` se întinde la `<Icon>`.
+- **Marca.** `src/shared/components/OmniRouteLogo.tsx` înfășoară kit-ul: exportul implicit `OmniRouteLogo` redă `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) și `OmniRouteLockup` redă `ProductLockup product="omniroute"` (nume accesibil „Keak OmniRoute”) sau, pentru operatorii cu etichetă albă, propriul lor `name`/`logoSrc`. Destinațiile de comutare de produse locuiesc în `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Ecranele independente — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` și `src/shared/components/ErrorPageScaffold.tsx` — arată blocarea; `tests/unit/brand-pages-static.test.ts` îl păzește.
 
-Site-ul de marketing (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) și dashboardul produsului trebuie să arate ca **un singur produs**. Site-ul și-a preluat deja paleta din dashboard — fișierul său `css/tokens.css` spune chiar _„Paleta o reflectă pe cea a dashboardului OmniRoute (src/app/globals.css)”_. Prin urmare, cele două sunt deja aliniate în proporție de aproximativ 80% la nivelul culorilor. Ce lipsește din dashboard:
+## 2. Reguli
 
-1. **Fundalul tip hârtie milimetrică** pe care site-ul îl folosește pe fiecare pagină.
-2. Câteva **tokenuri de design comune** pe care site-ul le are, dar care lipsesc din dashboard (scara razelor, gradientul de brand, `surface-2`, fontul mono).
-3. **Consecvență la nivelul componentelor** — mai multe componente ale dashboardului ocolesc tokenurile temei folosind valori hex/rgba codificate direct.
+1. Jetoane, niciodată literale. Excepții păstrate intenționat: terminalul de consolă mereu întunecat și `STATUS_HEX` (`src/shared/constants/statusColors.ts`), oglinda hexadecimală rezolvată a paletei de stare a kit-ului pentru apelanții care au nevoie de un hex literal. Paletele categorice nu mai fac excepție: ele călătoresc pe cele opt jetoane de diagramă ale trusei (`--color-chart-1..8`, plus `-ink`/`-subtle`), în ordinea serii de kit, prin `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; marginile ReactFlow și pânza de orchestrare citesc variabilele `--orch-status-*` care țin cont de temă (`src/shared/components/flow/edgeStyles.ts`).
+2. Nu corectați niciodată `packages/ui-kit/src` manual: sincronizați cu `scripts/dev/sync-ui-kit.sh <commit>`; poarta pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează pe orice octet care diferă de commit-ul în amonte fixat (sare cu un avertisment când clona din amonte, `UI_KIT_CLONE` sau `_references/cheaper-inference-ui-kit`, este absentă). Când kit-ului îi lipsește ceva, rezolvați-l în adaptor sau ecran și cereți-l în amonte.
+3. Valorile implicite ale textului kit-ului sunt engleză (`label = "Loading"`, `loadingLabel = "Loading table"`...) — trece șiruri traduse din `useTranslations(...)` ori de câte ori o componentă a kit-ului redă text.
+4. Utilitarele Tailwind câștigă clasele de componente ale kit-ului (kit-ul declară `@layer theme, base, components, utilities` și regulile sale trăiesc în `components`) — utilizează utilitare pentru spațiere și aspect, nu pentru a recolora componentele kit-ului.
+5. Titluri: `.ci-heading` pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display` numai pentru textul de afișare mare și rar, cum ar fi codul de stare a paginii de eroare. Ambele folosesc Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protejează adoptarea kit-ului: nu Material ligatură span sub `src/app` sau `src/shared/components`; în arborele tabloului de bord (`src/app/(dashboard)` și `src/shared/components`) nu `<select>` brut , `<textarea>` sau `<table>` și nici un `role="dialog"` rulat manual în afara excepțiilor enumerate (ramura nativă a adaptorului `Select`, `RequestLoggerDetail`); fiecare `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care să conțină `kit-exception:` (cu motivul) care se termină cu cel mult 3 rânduri deasupra acestuia; nuanțe de paletă și variante `dark:` numai în fișierele listele de testare.
+7. Verificați ambele teme și fereastra de vizualizare de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts` aleargă axe.
 
-Acest document reprezintă analiza și planul.
+## 3. Adăugarea unui ecran
 
----
+1. Deschideți pagina cu `PageHeader` din kit (`@omniroute/ui-kit/page-header`, `compact` în interiorul
+   dashboardului) — titlu, descriere și `actions`. Antetul shell-ului renunță apoi la propriul titlu.
+2. Construiți controalele din `@/shared/components` (adaptoarele) și folosiți componente kit pe subcăi acolo unde
+   nu există un adaptor (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Iconițe: `<Icon name="…" />`. Un nume nou se adaugă în `ICON_MAP` cu componenta Lucide care corespunde semantic;
+   `npm run gen:icon-map` listează numele care încă lipsesc.
+4. Culori: utilitare semantice (`text-success`, `bg-warning-bg`, `border-border`…) și
+   `var(--color-chart-N)` pentru seriile de grafice; fără valori hex și fără variante `dark:` care doar repetă o culoare.
+5. Text: fiecare șir, inclusiv etichetele pe care le transmiteți componentelor kit, provine din `useTranslations`. Cheile
+   noi se adaugă în `src/i18n/messages/en.json`, `pt-BR.json` și `vi.json` (testul de paritate vietnameză fixează
+   fiecare cheie engleză); celelalte localizări sunt completate de sincronizarea i18n.
+6. Rulați verificările de protecție înainte de PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (singura verificare care detectează un import duplicat în `iconMap.ts`),
+   `npm run check:ui-icu` și testele proprii ale ecranului.
 
-## 2. Principii
+## 4. Adăugarea sau modificarea unui adaptor
 
-- **Sursa unică de adevăr = `src/app/globals.css`.** Site-ul reflectă dashboardul, niciodată invers. Tokenurile noi sunt adăugate mai întâi în `globals.css`.
-- **Tokenuri, niciodată valori literale.** Componentele utilizează tokenuri semantice (`bg-surface`, `text-primary`, `border-border`), niciodată valori `#hex` brute.
-- **Discret, nu strident.** Grila este un fundal subtil, amplasat în spatele conținutului — nu trebuie niciodată să reducă contrastul textului sau să intre în conflict vizual cu interfața.
-- **Adaptat temei.** Totul funcționează atât în `.dark` (aspectul distinctiv al produsului), cât și în tema luminoasă.
-- **Implementare graduală și precisă.** Publicăm mai întâi grila și tokenurile (risc redus, vizibilitate ridicată), apoi curățăm componentele în etape.
+1. Păstrează API-ul public al `src/shared/components/index.tsx`: aceleași nume de exporturi, exporturi implicite și
+   props acceptate. Mapează props-urile legacy pe kit în interiorul adaptorului (vezi `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Importă kit-ul prin subcale (`@omniroute/ui-kit/<component>`).
+3. Soluțiile de ocolire pentru lipsurile kit-ului trăiesc în adaptor (sau în `globals.css` `@layer components` atunci când remedierea este un
+   stil), niciodată în `packages/ui-kit/src`.
+4. Adaugă sau actualizează `tests/unit/ui/adapters/<name>.test.tsx`. Pentru un adaptor cu mulți apelanți, compară
+   marcajul randat înainte și după modificare — schimbările de padding sau de wrapper se propagă pe fiecare ecran.
 
----
+## 5. Actualizarea trusei
 
-## 3. Starea actuală — ce este deja aliniat și ce nu
+`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune.
 
-### 3.1 Culori — deja unificate ✅
+Fluxul de lucru zilnic `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) rulează aceeași verificare. În timp ce pinul este în urmă, `scripts/ci/ui-kit-sync-pr.sh` menține un PR sincronizat deschis față de cea mai înaltă ramură `release/vX.Y.Z`, pe ramura rulantă `chore/ui-kit-sync-latest`. Nu se îmbină niciodată: fiecare lansare de kit are nevoie de o verificare vizuală a VPS local. Ramura este reconstruită când apare o versiune mai nouă și este lăsată în pace în caz contrar. Un PR deschis cu commit-uri împinse manual nu este suprascris, iar un PR pentru o versiune pe care un întreținător a închis-o nefusionată rămâne închis până la o versiune mai nouă.
 
-Fiecare culoare de brand și fiecare suprafață corespund deja site-ului **ca valoare** (doar denumirile diferă — dashboardul folosește prefixul `--color-`). Verificat în `src/app/globals.css:30-128`:
+Când nu poate fi deschis niciun PR (ediția țintă este înghețată, PR are commit-uri împinse manual, PR a fost închis sau nu este setat niciun simbol PR ), fluxul de lucru păstrează deschisă o problemă de urmărire care spune de ce.
 
-| Concept                                 | Tokenul site-ului (`tokens.css`)            | Tokenul dashboardului (`globals.css`) | Potrivire      |
-| --------------------------------------- | ------------------------------------------- | ------------------------------------- | -------------- |
-| principală                              | `--primary #e54d5e`                         | `--color-primary #e54d5e`             | ✅             |
-| principală-hover                        | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`       | ✅             |
-| accent                                  | `--accent #6366f1`                          | `--color-accent #6366f1`              | ✅             |
-| accent-2                                | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`        | ✅ (redenumit) |
-| accent-3                                | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`        | ✅ (redenumit) |
-| succes / avertisment / eroare           | `#22c55e / #f59e0b / #ef4444`               | identic                               | ✅             |
-| semafoare                               | `#ff5f56 / #ffbd2e / #27c93f`               | identic                               | ✅             |
-| fundal / suprafață / bordură întunecate | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identic                               | ✅             |
-| fundal / suprafață / text luminoase     | `#f9f9fb / #fff / #1a1a2e`                  | identic                               | ✅             |
+Fluxul de lucru folosește două secrete:
 
-**Concluzie:** nu este necesară nicio migrare a culorilor. Identitatea este deja comună; o _finalizăm_, nu o reconstruim.
+- `secrets.UI_KIT_READ_TOKEN`: un token numai pentru citire pentru depozitul privat din amonte. Când fluxul de lucru nu poate citi în amonte (nici un token, un token care a încetat să funcționeze sau GitHub inaccesibil), rularea rămâne verde, dar scrie un avertisment și menține deschisă o problemă separată, care se închide singură odată ce o rulare ulterioară poate citi din nou în amonte.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un token cu granulație fină pe acest depozit cu acces la scriere la conținut și la solicitări Pull. `GITHUB_TOKEN` implicit nu poate crea PRs aici, iar un PR pe care l-a deschis nu ar declanșa CI. Fără acest simbol, fluxul de lucru împinge doar ramura.
 
-### 3.2 Lacune — ce lipsește din dashboard
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copiază `src/` din amonte la acel commit (`latest` = cea mai nouă etichetă `v*` ) în `packages/ui-kit/src`, aplică transformarea unică permisă (elimină sufixul `.js` din importurile relative) și setează versiunea spațiului de lucru în `packages/ui-kit/package.json` și `package-lock.json` la cea din amonte. Apoi: revizuiți `git diff packages/ui-kit`, faceți o trecere vizuală asupra furnizorilor, setărilor, combo-urilor, utilizării și punctului final în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și deschideți PR cu jurnalul de modificări din amonte.
 
-| Lacună                       | Site-ul are                                                                           | Panou de control                                                                 | Acțiune                     |
-| ---------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------- |
-| **Fundal tip grilă**         | hârtie milimetrică `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ adăugat (Faza 1)**                                                          | **Partea A**                |
-| **Scală pentru raze**        | `--radius 14px`, `--radius-sm 9px`                                                    | `--radius 14px` adăugat; `-sm` + redirecționarea componentelor sunt în așteptare | **Partea B / Faza 2**       |
-| **Gradient de brand**        | `--grad-brand 135deg primary→accent-3`                                                | **✅ token adăugat (Faza 1)**; utilizat în Faza 2                                | **Partea B**                |
-| **Suprafață imbricată**      | `--surface-2 #1c2230`                                                                 | **✅ adăugat (Faza 1)**                                                          | **Partea B**                |
-| **Font monospațiat**         | `--font-mono` (stivă ui-monospace)                                                    | în așteptare (Faza 4, împreună cu utilizatorii săi)                              | **Partea B**                |
-| **`text-muted` (întunecat)** | `#8b8b9e`                                                                             | `#a1a1aa` (zinc-400)                                                             | reconciliere — **Partea B** |
+## 6. diagrame README
 
-### 3.3 Mecanismele temelor (pentru a nu strica nimic)
+Cele douăsprezece diagrame pe care le încorporează rădăcina `README.md` (`docs/diagrams/*.svg`) sunt kitul aplicat unei imagini statice și sunt generate, nu desenate manual: 13 fișiere generatoare la `scripts/docs/gen-readme-*.mjs` (douăsprezece diagrame plus driverul `gen-readme-diagrams.mjs` ) și 12 teste de staleness la `tests/unit/docs/readme-*-svg.test.ts`, câte unul pe diagramă, fiecare octet comparând fișierul generat `test-unit` cu ieșirea lui jobqf.
 
-- **Tailwind v4, CSS-first** (fără `tailwind.config.*`). Tokenurile sunt definite în `:root`/`.dark` și expuse utilitarelor prin `@theme inline` (`globals.css:130-179`).
-- **Mod întunecat prin clasa `.dark`** pe `<html>` (`@custom-variant dark` în `globals.css:22`), comutat de un store Zustand personalizat (`src/store/themeStore.ts`), tema implicită = `system` (`src/shared/constants/appConfig.ts:11`). Site-ul folosește în schimb `html[data-theme="light"]` — **mecanismele diferă, dar nu se intersectează niciodată** (origini separate), deci nu există niciun conflict. Păstrăm mecanismul `.dark` al panoului de control.
-- **Există o suprascriere a culorii primare în timpul rulării** (`themeStore.ts:85-97`, presetări în `COLOR_THEMES`) — utilizatorii pot schimba `--color-primary`. Orice token nou (gradient etc.) care face referire la `--color-primary` moștenește automat acele suprascrieri. ✅
-- **Nume rezervate pentru raze în Tailwind v4:** `--radius-sm/md/lg/...` stau la baza utilitarelor `rounded-*`. Redefinirea lor modifică retroactiv fiecare utilizare existentă a `rounded-*` (de exemplu, `rounded-sm` este utilizat în 12 fișiere). Prin urmare, valoarea razei mici și redirecționarea componentelor sunt amânate în mod deliberat până în Faza 2, când utilizatorii se schimbă împreună.
+- **Jetoane.** `scripts/docs/readme-diagram-theme.mjs` copie paleta Editions (aspectul implicit) din `packages/ui-kit/src/ci-editions.css` (fixat pe acel fișier de `tests/unit/docs/readme-diagram-theme.test.ts`, care verifică, de asemenea WCAG AA pentru fiecare culoare de text de pe fiecare suprafață în ambele scheme; singura excepție, light `warn`, este avertismentul de kit întunecat cu 10% deoarece valoarea kit-ului este 4.46:1 pe scara tipului de text ale kiturii)`ci-tokens.css`): Switzer la greutățile kit-ului (400/500/600, afișare la 500) și urmărire pentru tot, cu excepția rolurilor de cod (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), care sunt IBM Plex Mono și sunt doar pentru comenzi, URLs și ecran de terminal. Valorile luminii stau pe `:root`, valorile întunecate în spatele `prefers-color-scheme: dark`, în interiorul fișierului, astfel încât fiecare imagine urmează schema privitorului pe GitHub.
+- **Fonturi.** GitHub Markdown nu poartă CSS, iar proxy-ul camo blochează fiecare preluare externă, așa că tipul de kit trebuie să călătorească în interiorul fișierului. `scripts/docs/readme-outline.mjs`, ultimul pas al fiecărui generator, modelează rolurile Switzer cu HarfBuzz și le desenează ca contururi vectoriale (`<defs>` paths și `<use>`), cu săgețile și simbolurile geometrice ale lui Switzer desenate pe propriile metrice. Contururi, niciodată un font încorporat: licența Switzer (`packages/ui-kit/src/fonts/FFL.txt`) interzice subsetarea și conversia formatului fără acordul scris și permite desene vectoriale, așa că nu reintroduceți un Switzer `@font-face` sau `data:` URI. Singurul font rămas într-un fișier este subsetul OFL IBM Plex Mono pentru ceea ce rămâne text de cod real (`scripts/docs/readme-fonts.mjs`), construit din acele caractere; orice glifă pe care nu o poate încorpora aruncă.
+- **Regenera.** `npm run docs:readme-diagrams` rescrie toate cele doisprezece în ordine README și tipărește o linie pe fișier cu dimensiunea acestuia. De asemenea, un singur generator funcționează singur (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` are nevoie `node --import tsx/esm` deoarece cifrele sale provin din încărcătorul de catalog live în `open-sse/config/freeModelCatalog.ts`; consecința CI a unei modificări de catalog este în `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Angajați generatorul și SVG împreună.
+- **Dovada.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` redă un fișier așa cum îl servește GitHub (o etichetă `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), captează un cadru deschis și unul întunecat și raportează solicitările de font extern făcute de pagină (trebuie să fie 0).
+- **Buget.** Sub 200 KB pe dosar (fiecare test de învechire îl afirmă); 500 KB este limita pentru orice imagine README (regula validatorului SVG studio).
+- **Copie neschimbată, numără de la poartă.** Rebrand-ul a schimbat tipul și paleta, nu cuvinte: fiecare generator își poartă copia diagramei într-o constantă `*_COPY` (sau o construiește din catalogul live) care este atât textul desenat, cât și intrarea pasului de conturare. Figurile canonice rămân în noduri `<text>` (invizibile odată conturate, `fill-opacity:0`), citite de `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testele de staleness ale diagramelor pe care le citește poarta rulează și validatorii săi pe fișierul generat, așa că o cifră care se deplasează de la cod eșuează testul — fixează sursa pe care o citește poarta, niciodată numărul din generator.
 
----
+## 7. Indice de referință
 
-## 4. Partea A — Fundalul cu grilă de hârtie milimetrică (cerința principală) — IMPLEMENTAT (Faza 1)
-
-### 4.1 Ce este
-
-Rețeta exactă de pe site (`_mono_repo/omnirouteSite/css/base.css`): un **pseudo-element fix, pe întregul viewport**, care desenează două gradiente cu linii de 1px și este poziționat la `z-index:-1` în spatele întregului conținut.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**De ce funcționează chiar dacă `body` are un `background-color` opac:** un `::before` cu `z-index:-1` este desenat _deasupra_ fundalului propriu al elementului, dar _sub_ conținutul său din flux. Astfel, `--color-bg` reprezintă umplerea de bază, grila este suprapusă peste aceasta, iar aplicația este randată deasupra grilei.
-
-### 4.2 Precedent existent deja în baza de cod
-
-`src/app/landing/page.tsx:16-26` **implementează deja aceeași grilă la nivel de pagină** — dar cu linii **roșii** (`#E54D5E`, opacitate `0.06`) la fiecare **50px**, plus sfere animate. Așadar, modelul este deja validat în produs; această modificare îl promovează la statutul de fundal **global, adaptat temei**.
-
-### 4.3 Tokenuri adăugate (în `globals.css`)
-
-```css
-:root {
-  /* tema deschisă — opacitatea grilei a fost mărită față de valoarea 0.045 a site-ului,
-     astfel încât fundalul să fie efectiv vizibil în dashboardul dens
-     (cardurile/elementele de interfață acoperă cea mai mare parte a viewportului) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tema întunecată — mărită față de 0.035 din același motiv */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Singurul obstacol — eliminat
-
-Grila este globală prin construcție (acoperă panoul, paginile `auth`/`login`, paginile de eroare — toate rutele — dintr-o dată). Exact **un** element o ascundea în interiorul panoului:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — containerul exterior desena un `bg-bg` opac. Tot ce se află sub el este deja transparent (`<main>`, containerul cu derulare, elementul interior `max-w-7xl`), astfel încât **eliminarea `bg-bg`** permite grilei de pe body să fie vizibilă prin zona de conținut (`--color-bg` de pe body rămâne umplerea de bază).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interacțiunea cu elementele de interfață (bara laterală / antetul)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) și `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) rămân **opace** → grila este vizibilă **doar în zona de conținut**, încadrată de elemente de interfață cu fundal solid. O variantă implicită discretă, care corespunde modului în care site-ul separă elementele de interfață de suprafața de conținut (decizia D3 = fundal solid).
-
-### 4.6 Pagini de autentificare / conectare / eroare
-
-Acestea sunt randate direct sub `<body>` (fără elementele de interfață ale panoului), astfel încât grila globală ar trebui să apară automat în spatele lor. **Faza 5 — FINALIZATĂ:** containerele autonome pe întregul ecran erau, de fapt, opace (`min-h-screen … bg-bg`, unde `bg-bg` este aceeași umplere solidă ca pentru `<body>`), ceea ce ascundea grila pe toate ecranele din afara dashboardului — nu doar pe pagina de conectare. Toate sunt acum transparente, astfel încât fundalul comun să fie vizibil prin ele: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` și `ErrorPageScaffold` (acoperă `400`/`401`). Aceasta încheie **D4** (extinsă de la pagina de conectare la toate ecranele autonome). Protejat prin `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Pagina de prezentare
-
-`landing/page.tsx` își păstrează fundalul animat mai bogat (sfere + vignetă) — propriul ecran de prezentare pentru marketing (decizia D5 = rămâne neschimbat).
-
----
-
-## 5. Partea B — Unificarea tokenurilor
-
-Faza 1 adaugă tokenurile de identitate inerte, fără coliziuni (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Faza 2 conectează scara razelor în Tailwind și redirecționează componentele; Faza 4 adaugă `--font-mono` împreună cu elementele care îl utilizează.
-
-| Token                       | Motiv                                                                                  | Fază                                         |
-| --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `--radius` / `--radius-sm`  | O singură scară a razelor (14/9), în loc de valori ad-hoc 6/8/12                       | 1 (valoare) / 2 (conectare + redirecționare) |
-| `--grad-brand`              | Gradient de brand pentru CTA-urile principale (roșu→violet), în concordanță cu site-ul | 1 (token) / 2 (Button)                       |
-| `--surface-2`               | Panouri imbricate / antete de tabel / rânduri inserate                                 | 1                                            |
-| `--font-mono`               | Blocuri de cod, terminal, ID-uri, endpointuri                                          | 4                                            |
-| `--text-muted` reconciliere | Alegerea unei singure valori site↔panou (`#a1a1aa` recomandat)                         | 2                                            |
-
-**D2 (text-muted):** site `#8b8b9e` vs. tablou de bord `#a1a1aa`. Se recomandă păstrarea valorii **`#a1a1aa` din tabloul de bord** și actualizarea _site-ului_ pentru a corespunde. Modificare cosmetică.
-
----
-
-## 6. Partea C — Standardizarea componentelor (Fazele 2–4)
-
-Componente personalizate (fără shadcn/Radix), Tailwind v4, tokenuri semantice adoptate **în mare parte** (195 de fișiere importă modulul-baril comun). Activitatea constă în eliminarea **ocolirilor**. Locație principală: `src/shared/components/`.
-
-| #   | Element                                               | Fișier(e)                                                                                                                          | Problemă → Obiectiv                                                                                                                                                            | Fază |
-| --- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
-| C1  | **Alinierea razelor**                                 | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                          | amestec de 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                                          | 2    |
-| C2  | **Gradientul butonului + varianta `accent`**          | `Button.tsx:5-12`                                                                                                                  | varianta principală folosește un gradient uniform roșu→roșu; aliniere la `--grad-brand`; adăugarea variantei `accent` care lipsește. ~195 de importatori — vizibilitate maximă | 2    |
-| C3  | **Tabele**                                            | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                                | valori rgba hardcodate 100% inline + variabile inexistente; migrare la tokenuri, eliminarea stilurilor divergente                                                              | 3    |
-| C4  | **Centralizarea culorilor de stare**                  | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 funcții auxiliare | peste 6 copii ale acelorași valori hex → un singur modul bazat pe `--color-success/warning/error`                                                                              | 3    |
-| C5  | **Chenarul cardului**                                 | `Card.tsx:39`                                                                                                                      | `border-white/5` → brand `/8`                                                                                                                                                  | 2    |
-| C6  | **Reconcilierea inelului de focalizare** ✅ FINALIZAT | `globals.css` `--focus-ring` (accent) vs. `ring-primary/30` al controalelor de formular                                            | unificat pe **accent (violet)** pentru a corespunde inelului global + a se diferenția de inelul roșu pentru erori; eroarea rămâne roșie                                        | 4    |
-| C7  | **Adăugarea `Checkbox` + `Textarea`**                 | `<input>`/`<textarea>` brute cu `accentColor:#6366f1` inline                                                                       | primitive bazate pe tokenuri                                                                                                                                                   | 4    |
-| C8  | **Eliminarea valorilor hex hardcodate**               | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, punctele din Modal, ~14 fișiere de grafice                                  | literali → tokenuri                                                                                                                                                            | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**                    | `src/shared/utils/cn.ts`                                                                                                           | clasele conflictuale se suprapun; necesar pentru suprascrierile din C1                                                                                                         | 2    |
-
-**Deja conforme cu brandul (bazate pe tokenuri, necesită doar ajustarea razei):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plan de lansare
-
-- **Faza 1 — Grilă + tokenuri de identitate (ACEST PR).** Grila din `globals.css` + tokenurile `--surface-2`/`--grad-brand`/`--radius`; fundalul `body::before`; eliminarea blocajului `bg-bg`; test static de protecție. Risc redus, reversibil printr-un singur commit.
-- **Faza 2 — Primitive (C1, C2, C5) — FINALIZATĂ în acest PR.** Utilitarele de rază semantice `rounded-card` (14px) / `rounded-control` (9px) au fost adăugate prin `@theme` (nume personalizate, astfel încât valorile implicite `rounded-sm/md/lg/xl` rămân neatinse — fără modificări masive în 400 de fișiere); Card/Modal → 14px, Button/Input/Select → 9px; Button principal → `--grad-brand` (roșu→violet) + noua variantă `accent`; bordurile Card → tokenul `border-border` (0.08). **Amânat:** `cn()`→tailwind-merge (C9) necesită dependențe noi; înlocuirea generală a utilizărilor ad-hoc de `rounded-lg` (326 de fișiere) rămâne neschimbată, deoarece primitivele acoperă cea mai mare parte a suprafeței.
-- **Faza 3 — Culori de stare + tabele (C3, C4) — FINALIZATĂ în acest PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` drept sursă unică; `flow/edgeStyles.ts` + `TokenHealthBadge` redirecționate către aceasta, fidel/aceleași valori hex). ✅ Tokenul **`--font-mono`**. ✅ **C3 (DataTable)** — fiecare valoare rgba inline și fallbackurile neutilizate `var(--bg-table-header)` / `var(--text-secondary)` au fost înlocuite cu un set de tokenuri `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), ale cărui **valori pentru tema întunecată sunt exact egale cu vechile valori rgba hardcodate** (tema întunecată este identică la nivel de octet), iar valorile pentru tema luminoasă repară tema luminoasă care anterior era întotdeauna întunecată. Bordura antetului → `--color-border`, textul secundar → `--color-text-muted`. **Necesită o verificare vizuală înainte de îmbinare.** (Neatinse: `logTableStyles.ts` și regulile Ant vechi `.ant-table` — separate, cu prioritate mai mică.)
-- **Faza 4 — Curățare (C6, C7, C9 finalizate; C8 în așteptare).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge adăugate ca dependențe) — proprietatea `className` a unui apelant acum _înlocuiește_ corect clasa conflictuală a unei primitive, în loc să fie suprapusă. ✅ **C7** primitive noi `Checkbox` + `Textarea` (bazate pe tokenuri, exportate din barrel; aditive — adoptarea celor 32 de checkboxuri brute / 41 de textarea brute poate continua incremental). ✅ **C6** armonizarea inelului de focalizare — controalele formularului (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) folosesc acum la focalizare inelul **accentuat (violet)**, pentru a corespunde valorii globale `--focus-ring` și a evita suprapunerea cu inelul roșu de eroare; starea roșie de eroare rămâne neschimbată. ⏳ **C8, înlocuirea generală a valorilor hex, NU este o operațiune automată de căutare/înlocuire** — utilizări neconforme confirmate, care sunt _intenționate_ și trebuie păstrate: `ConsoleLogViewer.tsx:240` (terminal permanent întunecat), fereastra popover `TokenHealthBadge`, contururile SVG ReactFlow. Migrați numai valorile hex care trebuie într-adevăr să țină cont de temă.
-
-Fiecare fază: `npm run lint` + `npm run typecheck:core` + o verificare vizuală.
-
----
-
-## 8. Decizii deschise (recomandări)
-
-- **D1 — Button principal:** păstrăm roșu→roșu sau trecem la **roșu→violet `--grad-brand`**? Recomandare: **roșu→violet** (Faza 2).
-- **D2 — Culoarea liniilor grilei:** **neutră** (stilul site-ului) — aleasă — în loc de roșul mărcii. Dimensiune **32px** (redusă cu ~30% față de valoarea inițială de 46px, în urma feedbackului proprietarului — celulele de 46px păreau prea mari în aspectul panoului de control).
-- **D3 — Intensitatea cromatică a elementelor de interfață:** bară laterală/antet **opace** — variantă aleasă.
-- **D4 — Grila de autentificare/login:** ✅ **FINALIZATĂ (Faza 5)** — clasa opacă `bg-bg` a fost eliminată din fiecare wrapper independent pe tot ecranul (nu doar din login), astfel încât grila este vizibilă pe toate ecranele. Consultați §4.6.
-- **D5 — Pagina de destinație:** păstrați ecranul animat de introducere fără modificări. Variantă aleasă.
-- **D6 — Raze 14/9 la nivelul întregului produs:** Recomandare: da (Faza 2).
-- **D7 — Faza 1 este livrată prima:** Variantă aleasă.
-- **D8 — Lățimea aspectului (Faza 5):** containerul de conținut al panoului de control era limitat la `max-w-7xl` (1280px), fiind centrat cu margini laterale mari și goale pe monitoarele late. ✅ **FINALIZAT** — limita a fost mărită la valoarea fluidă `max-w-[3840px]` (4K real): conținutul urmează acum lățimea ferestrei de vizualizare până la ~4K și este centrat numai dincolo de această valoare (`DashboardLayout.tsx`). Paginile menținute intenționat înguste rămân înguste prin proiectare (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Tabele de date opace (Faza 6):** după ce zona de conținut a panoului de control a devenit transparentă (pentru ca fundalul cu grilă să fie vizibil, Faza 5), tabelele de date al căror container _nu_ era o suprafață opacă permiteau grilei să se vadă prin rândurile pare transparente / efectul zebră cu opacitate redusă. ✅ **FINALIZAT** — fiecare tabel fără Card afișează acum `bg-surface` (sau, pentru primitiva `<DataTable>`, `background: var(--color-surface)` pe containerul său cu derulare). Remediate: `DataTable` (primitivă), `ProxyLogger`/`RequestLoggerV2` (nuanța `bg-black/5 dark:bg-black/20` a elementului lor `<Card>` avea prioritate față de `bg-surface` din Card prin tailwind-merge → ~95% transparent), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, plus cele două „tabele” CSS-grid din vizualizările cache (`bg-surface/35` → `bg-surface`). Tabelele aflate deja într-un `<Card>`/Modal au fost verificate ca fiind opace și lăsate intenționat neatinse (`bg-surface` ar fi o operațiune redundantă acolo). Grila propriu-zisă **nu a necesitat nicio modificare** — `body::before` din panoul de control este identic la nivel de octet cu cel al site-ului (`--grid-size: 32px`); orice „grilă mai mare” observată pe o instanță în execuție provine dintr-un build învechit, anterior versiunii `#4143`, nu din cod. Protejat prin `tests/unit/design-grid-background.test.ts` (blocul Faza 6).
-
----
-
-## 9. În afara domeniului de aplicare / riscuri
-
-- **Nicio modificare a paletei** — culorile se potrivesc deja; adăugăm doar tokenurile lipsă. Risc zero de recolorare a produsului.
-- **Nicio modificare a motorului de teme** — păstrăm `.dark` + store-ul Zustand.
-- **Modificarea razei (Faza 2) este amplă** — afectează fiecare card/buton/câmp de intrare; verificați vizual ecranele aglomerate (tabele, ferestre modale) înainte de îmbinare.
-- **Tabelele (C3)** conțin cele mai multe stiluri definite direct în cod și prezintă cea mai mare suprafață de regresie — izolați-le într-un PR separat.
-
----
-
-## 10. Index de referință
-
-| Zonă                                           | Cale                                                                                                                 |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Tokenuri pentru panoul de control              | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Store pentru temă                              | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Structura panoului (grila este deblocată aici) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Elemente de interfață                          | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Precedent pentru grilă                         | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Componente primitive                           | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Surse pentru culorile de stare                 | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utilitarul `cn`                                | `src/shared/utils/cn.ts`                                                                                             |
-| Test de protecție pentru Faza 1                | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referință pentru site                          | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge, suprascrieri `.dark`, extensii OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — fixat în amonte commit și autorizație de licență; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` și adaptoarele de lângă el; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

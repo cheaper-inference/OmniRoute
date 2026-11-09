@@ -65,10 +65,16 @@ describe("prepareClaudeRequest — keeps unknown-block turns", () => {
     const out = prepareClaudeRequest(body, "anthropic", false, "claude-sonnet-5");
     const messages = out.messages as Msg[];
     assert.equal(messages.length, 3);
-    assert.deepEqual(messages[0], {
-      role: "user",
-      content: [{ type: "container_upload", file_id: "file-abc" }],
-    });
+    // The prompt-cache breakpoint on the second-to-last user turn is not part of the block.
+    const [block] = messages[0].content as Array<Record<string, unknown>>;
+    const { cache_control: _marker, ...rest } = block;
+    assert.deepEqual(
+      { ...messages[0], content: [rest] },
+      {
+        role: "user",
+        content: [{ type: "container_upload", file_id: "file-abc" }],
+      }
+    );
   });
 });
 

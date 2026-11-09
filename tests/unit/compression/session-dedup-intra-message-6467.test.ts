@@ -30,7 +30,17 @@ function singleMessageBody(repeats: number): Record<string, unknown> {
     parts.push(`--- section ${i} ---`);
     parts.push(BLOCK);
   }
-  return { messages: [{ role: "user", content: parts.join("\n") }] };
+  return {
+    messages: [
+      { role: "user", content: parts.join("\n") },
+      // Turn closed: sole message is in completed history (no text slots in assistant turn).
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [{ id: "c1", type: "function", function: { name: "tool", arguments: "{}" } }],
+      },
+    ],
+  };
 }
 
 describe("session-dedup intra-message dedup (#6467)", () => {
@@ -73,12 +83,26 @@ describe("session-dedup intra-message dedup (#6467)", () => {
       (_, i) =>
         `    {\\"id\\":\\"memory-${i}\\",\\"text\\":\\"${"Meta Ads [cost] ".repeat(80)}\\$${i}.00 + regex? chars.*\\"}`
     ).join("\n");
-    const content = [`first copy`, escapedJsonLikeLines, `second copy`, escapedJsonLikeLines].join("\n");
+    const content = [`first copy`, escapedJsonLikeLines, `second copy`, escapedJsonLikeLines].join(
+      "\n"
+    );
 
     try {
       globalThis.RegExp = GuardedRegExp as RegExpConstructor;
       const result = sessionDedupEngine.apply(
-        { messages: [{ role: "user", content }] },
+        {
+          messages: [
+            { role: "user", content },
+            // Turn closed: sole message is in completed history.
+            {
+              role: "assistant",
+              content: null,
+              tool_calls: [
+                { id: "c1", type: "function", function: { name: "tool", arguments: "{}" } },
+              ],
+            },
+          ],
+        },
         { stepConfig: { minBlockChars: 80 } }
       );
 

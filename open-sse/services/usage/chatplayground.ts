@@ -5,6 +5,7 @@
  * Lifetime subscription provides 300 credits daily.
  */
 import { type UsageQuota } from "./quota.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { resolveChatPlaygroundAuth } from "../chatplaygroundAuth.ts";
 import { CHATPLAYGROUND_USER_URL } from "../chatplaygroundModels.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
@@ -234,7 +235,8 @@ export function buildChatPlaygroundQuotas(
 
 export async function getChatPlaygroundUsage(
   apiKey?: string,
-  providerSpecificData?: Record<string, unknown> | null
+  providerSpecificData?: Record<string, unknown> | null,
+  connectionId?: string
 ): Promise<{
   plan?: string;
   quotas?: Record<string, UsageQuota>;
@@ -246,10 +248,18 @@ export async function getChatPlaygroundUsage(
       providerSpecificData,
     });
 
-    const res = await fetch(CHATPLAYGROUND_USER_URL, {
-      method: "GET",
-      headers: auth.headers,
-    });
+    const res = connectionId
+      ? await fetchWithConnectionProxy(connectionId, CHATPLAYGROUND_USER_URL, {
+          method: "GET",
+          headers: auth.headers,
+        })
+      : await globalThis.fetch(CHATPLAYGROUND_USER_URL, {
+          method: "GET",
+          headers: auth.headers,
+        });
+    if (!res) {
+      throw new Error("proxied request failed");
+    }
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");

@@ -25,7 +25,8 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Button } from "@/shared/components";
+import { useTranslations } from "next-intl";
+import { Button, Card, Input } from "@/shared/components";
 import Tooltip from "@/shared/components/Tooltip";
 
 interface DarioAccount {
@@ -52,15 +53,15 @@ interface OmniConnection {
   organizationRateLimitTier: string | null;
 }
 
-function formatExpiry(acc: DarioAccount): string {
+function formatExpiry(acc: DarioAccount, t: ReturnType<typeof useTranslations>): string {
   if (typeof acc.expiresInMs === "number") {
     const mins = Math.max(0, Math.round(acc.expiresInMs / 60000));
-    if (mins >= 60) return `expires in ~${Math.round(mins / 60)}h`;
-    return `expires in ~${mins}m`;
+    if (mins >= 60) return t("expiresInHours", { hours: Math.round(mins / 60) });
+    return t("expiresInMinutes", { minutes: mins });
   }
   if (acc.expiresAt) {
     const d = new Date(acc.expiresAt);
-    if (!Number.isNaN(d.getTime())) return `expires ${d.toLocaleString()}`;
+    if (!Number.isNaN(d.getTime())) return t("expiresAt", { date: d.toLocaleString() });
   }
   return "";
 }
@@ -100,6 +101,7 @@ async function fetchOmniConnectionsList(): Promise<OmniConnection[] | null> {
 }
 
 export function DarioAccountPanel() {
+  const t = useTranslations("darioPanel");
   const [accounts, setAccounts] = useState<DarioAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -172,7 +174,7 @@ export function DarioAccountPanel() {
       if (!res.ok || !json?.imported) {
         throw new Error(json?.error || `HTTP ${res.status}`);
       }
-      setNotice(`Imported as account "${json.alias}" — Dario restarted to pick it up.`);
+      setNotice(t("noticeImported", { alias: json.alias }));
       await refreshAccounts();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -232,7 +234,7 @@ export function DarioAccountPanel() {
       if (!res.ok) {
         throw new Error(json?.error || `HTTP ${res.status}`);
       }
-      setNotice(`Account "${json?.alias ?? pending.alias}" added.`);
+      setNotice(t("noticeAdded", { alias: json?.alias ?? pending.alias }));
       setPending(null);
       setCodeInput("");
       setAliasInput("");
@@ -272,12 +274,8 @@ export function DarioAccountPanel() {
     <Card padding="md">
       <div className="space-y-4">
         <div>
-          <p className="text-sm font-medium">Claude accounts</p>
-          <p className="text-xs text-text-muted mt-0.5">
-            Authenticate Dario with your Claude Pro/Max subscription. Traffic bills to your
-            subscription pool. At least one account is required before Dario can route requests
-            (until then /health reports degraded).
-          </p>
+          <p className="text-sm font-medium">{t("title")}</p>
+          <p className="text-xs text-text-muted mt-0.5">{t("description")}</p>
         </div>
 
         {/* Account list */}
@@ -285,7 +283,7 @@ export function DarioAccountPanel() {
           {loading && accounts.length === 0 ? (
             <div className="h-10 animate-pulse bg-bg-subtle rounded" />
           ) : accounts.length === 0 ? (
-            <p className="text-xs text-text-muted">No accounts configured yet.</p>
+            <p className="text-xs text-text-muted">{t("noAccounts")}</p>
           ) : (
             accounts.map((acc) => (
               <div
@@ -296,10 +294,10 @@ export function DarioAccountPanel() {
                   <p className="text-sm font-mono truncate">{acc.alias}</p>
                   <p className="text-xs text-text-muted truncate">
                     {[
-                      formatExpiry(acc),
+                      formatExpiry(acc, t),
                       acc.status,
                       Array.isArray(acc.scopes) && acc.scopes.length
-                        ? `${acc.scopes.length} scope(s)`
+                        ? t("scopes", { count: acc.scopes.length })
                         : "",
                     ]
                       .filter(Boolean)
@@ -307,7 +305,7 @@ export function DarioAccountPanel() {
                   </p>
                 </div>
                 <Button size="sm" variant="outline" onClick={() => removeAccount(acc.alias)}>
-                  Remove
+                  {t("btnRemove")}
                 </Button>
               </div>
             ))
@@ -316,11 +314,8 @@ export function DarioAccountPanel() {
 
         {/* Import from OmniRoute */}
         <div className="space-y-2 border-t border-border pt-3">
-          <p className="text-xs font-medium">Import from OmniRoute</p>
-          <p className="text-xs text-text-muted">
-            Reuse an existing OmniRoute Claude connection&apos;s OAuth tokens instead of logging in
-            again — skips the browser approval step entirely.
-          </p>
+          <p className="text-xs font-medium">{t("importTitle")}</p>
+          <p className="text-xs text-text-muted">{t("importDescription")}</p>
           {omniLoading && omniConnections.length === 0 ? (
             <div className="h-8 animate-pulse bg-bg-subtle rounded" />
           ) : omniConnections.length === 0 ? (
@@ -328,7 +323,7 @@ export function DarioAccountPanel() {
               <p className="text-xs text-text-muted">
                 No eligible OmniRoute Claude connections found.
               </p>
-              <Tooltip content="Will be active once a Claude connection exists in OmniRoute.">
+              <Tooltip content={t("importPendingTooltip")}>
                 <Button size="sm" disabled>
                   Import
                 </Button>
@@ -351,7 +346,7 @@ export function DarioAccountPanel() {
                   disabled={importBusyId !== null}
                   onClick={() => void importFromOmniroute(c.id)}
                 >
-                  {importBusyId === c.id ? "Importing…" : "Import"}
+                  {importBusyId === c.id ? t("btnImporting") : t("btnImport")}
                 </Button>
               </div>
             ))
@@ -361,15 +356,15 @@ export function DarioAccountPanel() {
         {/* Login flow */}
         {!pending ? (
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            <input
-              type="text"
-              placeholder="alias (optional)"
+            <Input
+              placeholder={t("aliasPlaceholder")}
+              aria-label={t("aliasPlaceholder")}
               value={aliasInput}
               onChange={(e) => setAliasInput(e.target.value)}
-              className="flex-1 min-w-[140px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted"
+              className="min-w-[140px] flex-1"
             />
             <Button size="sm" disabled={busy !== null} onClick={startLogin}>
-              {busy === "start" ? "Starting…" : "Start Login"}
+              {busy === "start" ? t("btnStarting") : t("btnStartLogin")}
             </Button>
             <Button
               size="sm"
@@ -377,14 +372,16 @@ export function DarioAccountPanel() {
               disabled={loading}
               onClick={handleRefreshAccountsClick}
             >
-              Refresh
+              {t("btnRefresh")}
             </Button>
           </div>
         ) : (
           <div className="space-y-2 border-t border-border pt-3">
             <p className="text-xs text-text-muted">
-              1. Open this URL in your browser and approve access for account{" "}
-              <span className="font-mono">{pending.alias}</span>:
+              {t.rich("loginStep1", {
+                alias: pending.alias,
+                mono: (chunks) => <span className="font-mono">{chunks}</span>,
+              })}
             </p>
             <a
               href={pending.authorizeUrl}
@@ -396,24 +393,27 @@ export function DarioAccountPanel() {
             </a>
             {pending.expiresAt && (
               <p className="text-[11px] text-text-muted">
-                Pending login expires {new Date(pending.expiresAt).toLocaleTimeString()}
+                {t("pendingExpires", {
+                  time: new Date(pending.expiresAt).toLocaleTimeString(),
+                })}
               </p>
             )}
-            <p className="text-xs text-text-muted">2. Paste the code Anthropic displays:</p>
+            <p className="text-xs text-text-muted">{t("loginStep2")}</p>
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
-                placeholder="code#state or bare code"
+              <Input
+                placeholder={t("codePlaceholder")}
+                aria-label={t("codePlaceholder")}
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
-                className="flex-1 min-w-[180px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted font-mono"
+                className="min-w-[180px] flex-1"
+                inputClassName="font-mono"
               />
               <Button
                 size="sm"
                 disabled={busy !== null || !codeInput.trim()}
                 onClick={completeLogin}
               >
-                {busy === "complete" ? "Completing…" : "Complete Login"}
+                {busy === "complete" ? t("btnCompleting") : t("btnCompleteLogin")}
               </Button>
               <Button
                 size="sm"
@@ -430,8 +430,8 @@ export function DarioAccountPanel() {
           </div>
         )}
 
-        {notice && <p className="text-xs text-green-600 dark:text-green-400">{notice}</p>}
-        {error && <p className="text-xs text-red-600 dark:text-red-400 break-words">{error}</p>}
+        {notice && <p className="text-xs text-success">{notice}</p>}
+        {error && <p className="text-xs text-error break-words">{error}</p>}
       </div>
     </Card>
   );

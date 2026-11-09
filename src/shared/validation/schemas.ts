@@ -15,5 +15,6 @@ export * from "./schemas/translator";
 export * from "./schemas/cloud";
 export * from "./schemas/misc";
 export * from "./schemas/reasoningRouting";
+export * from "./schemas/teams";
 export { validateBody, isValidationFailure } from "./helpers";
 export type { ValidationResult } from "./helpers";

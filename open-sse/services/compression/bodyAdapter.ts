@@ -2,6 +2,7 @@ type MessageLike = {
   role?: unknown;
   content?: unknown;
   [COMPRESSION_INPUT_INDEX]?: number;
+  [DEVELOPER_ROLE_NORMALIZED]?: boolean;
   [KIRO_TOOL_RESULT_PATH]?: KiroToolResultPath;
   [key: string]: unknown;
 };
@@ -16,6 +17,13 @@ export type CodexResponseItemMeta = {
 type CodexMessageLike = MessageLike & {
   [CODEX_RESPONSE_ITEM_META]?: CodexResponseItemMeta;
 };
+
+/** True for a synthesized `role:"tool"` message created from a Responses output item. */
+export function isResponsesToolOutputMessage(message: unknown): boolean {
+  if (!isRecord(message)) return false;
+  const m = message as CodexMessageLike;
+  return m.role === "tool" && m[CODEX_RESPONSE_ITEM_META] !== undefined;
+}
 
 type ResponsesItem = {
   type?: unknown;
@@ -33,6 +41,9 @@ const RESPONSES_MESSAGE_TYPES = new Set([
   "apply_patch_call_output",
 ]);
 const COMPRESSION_INPUT_INDEX = Symbol("compressionInputIndex");
+// Set on a chat-shape message whose `developer` role was relabeled to `system` for the
+// engines, so `restore` can hand the original role back to the provider payload.
+const DEVELOPER_ROLE_NORMALIZED = Symbol("compressionDeveloperRoleNormalized");
 
 // Kiro envelope path back to the original tool-result text inside
 // `conversationState.{history|currentMessage}[].userInputMessage.userInputMessageContext.toolResults[N].content[M].text`.
@@ -56,7 +67,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function normalizeRole(role: unknown, fallback: string): string {
-  return typeof role === "string" && role.length > 0 ? role : fallback;
+  if (typeof role !== "string" || role.length === 0) return fallback;
+  // OpenAI's `developer` role is the modern spelling of `system` (Responses API, and newer
+  // chat completions). Every engine role gate keys off `system` — and the rest of the
+  // pipeline already folds the two together (translator/helpers/openaiHelper.ts) — so fold
+  // them here, at the single boundary both wire shapes cross, instead of at every gate.
+  return role === "developer" ? "system" : role;
 }
 
 function toChatContent(content: unknown, fallbackOutput?: unknown): unknown {
@@ -226,6 +242,14 @@ function messageToResponsesItem(message: MessageLike, originalItem: ResponsesIte
     content: fromChatContent(message.content, originalItem.content),
   };
 }
+/**
+ * Engines can inject messages that have no source `input[]` item (CCR prepends its
+ * protocol instruction). Restore them as new input items instead of dropping them.
+ */
+function injectedMessageToResponsesItem(message: MessageLike): ResponsesItem {
+  const role = typeof message.role === "string" && message.role.length > 0 ? message.role : "user";
+  return { type: "message", role, content: message.content };
+}
 
 function hasTextContent(message: MessageLike): boolean {
   if (typeof message.content === "string") return message.content.length > 0;
@@ -284,16 +308,71 @@ export type CompressionBodyAdapter = {
   ): Record<string, unknown>;
 };
 
+/**
+ * Chat-shape bodies reach the engines as-is, so a `developer` role never matched an engine
+ * role gate — the same gap the Responses `input[]` mapping has. Relabel only when such a
+ * message exists (every other request keeps the zero-copy pass-through), and hand the
+ * original role back on restore, so the payload that leaves for the provider is unchanged.
+ */
+function adaptChatBodyForCompression(body: Record<string, unknown>): CompressionBodyAdapter {
+  const messages = body.messages as MessageLike[];
+  if (!messages.some((message) => isRecord(message) && message.role === "developer")) {
+    return { body, adapted: false, restore: (compressedBody) => compressedBody };
+  }
+  const normalized = messages.map((message) =>
+    isRecord(message) && message.role === "developer"
+      ? { ...message, role: "system", [DEVELOPER_ROLE_NORMALIZED]: true }
+      : message
+  );
+  return {
+    body: { ...body, messages: normalized },
+    adapted: true,
+    restore: (compressedBody) => {
+      const compressedMessages = compressedBody.messages;
+      if (!Array.isArray(compressedMessages)) return compressedBody;
+      return {
+        ...compressedBody,
+        messages: compressedMessages.map((message) =>
+          isRecord(message) && (message as MessageLike)[DEVELOPER_ROLE_NORMALIZED]
+            ? { ...message, role: "developer" }
+            : message
+        ),
+      };
+    },
+  };
+}
+
+/**
+ * Re-attach the restored `input` to a Responses body. A string `input` collapses back to a
+ * string unless an engine injected messages, in which case it becomes an array of items with
+ * the injected items first.
+ */
+function finalizeResponsesInput(
+  rest: Record<string, unknown>,
+  originalInput: unknown,
+  items: unknown[],
+  injectedItems: unknown[]
+): Record<string, unknown> {
+  if (typeof originalInput === "string") {
+    const first = items[0];
+    const content = isRecord(first) ? (first.content ?? originalInput) : originalInput;
+    return {
+      ...rest,
+      input:
+        injectedItems.length === 0
+          ? content
+          : [...injectedItems, { type: "message", role: "user", content }],
+    };
+  }
+  return { ...rest, input: [...injectedItems, ...items] };
+}
+
 export function adaptBodyForCompression(
   body: Record<string, unknown>,
   preserveToolNames: string[] = []
 ): CompressionBodyAdapter {
   if (Array.isArray(body.messages)) {
-    return {
-      body,
-      adapted: false,
-      restore: (compressedBody) => compressedBody,
-    };
+    return adaptChatBodyForCompression(body);
   }
 
   // Kiro / AWS CodeWhisperer envelope: tool results live deep inside
@@ -346,13 +425,18 @@ export function adaptBodyForCompression(
     restore(compressedBody, options = {}) {
       const dropMissingMappedItems = options.dropMissingMappedItems === true;
       const compressedMessagesByIndex = new Map<number, MessageLike>();
+      const injectedMessages: MessageLike[] = [];
       if (Array.isArray(compressedBody.messages)) {
         for (const message of compressedBody.messages as MessageLike[]) {
           if (typeof message[COMPRESSION_INPUT_INDEX] === "number") {
             compressedMessagesByIndex.set(message[COMPRESSION_INPUT_INDEX], message);
+          } else if (isRecord(message)) {
+            injectedMessages.push(message);
           }
         }
       }
+      // Messages an engine injected have no source item (CCR prepends its protocol instruction).
+      const injectedItems = injectedMessages.map(injectedMessageToResponsesItem);
 
       if (!dropMissingMappedItems) {
         // Legacy restore: patch survivors in place; leave missing mapped items untouched
@@ -365,11 +449,7 @@ export function adaptBodyForCompression(
         });
         const rest = { ...compressedBody };
         delete rest.messages;
-        if (typeof body.input === "string") {
-          const first = nextInput[0];
-          return { ...rest, input: isRecord(first) ? (first.content ?? body.input) : body.input };
-        }
-        return { ...rest, input: nextInput };
+        return finalizeResponsesInput(rest, body.input, nextInput, injectedItems);
       }
 
       // Compaction restore (#8560): rebuild input so Layer-3 history drops actually shrink
@@ -429,11 +509,7 @@ export function adaptBodyForCompression(
 
       const rest = { ...compressedBody };
       delete rest.messages;
-      if (typeof body.input === "string") {
-        const first = cleanedInput[0];
-        return { ...rest, input: isRecord(first) ? (first.content ?? body.input) : body.input };
-      }
-      return { ...rest, input: cleanedInput };
+      return finalizeResponsesInput(rest, body.input, cleanedInput, injectedItems);
     },
   };
 }

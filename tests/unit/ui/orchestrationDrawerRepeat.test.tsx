@@ -19,8 +19,10 @@ function render(el: React.ReactElement) {
   document.body.appendChild(c);
   const root = createRoot(c);
   act(() => root.render(el));
+  // The drawer is the kit Sheet (KEA-7886), portalled to document.body: queries run against the
+  // whole body (which also holds the render host), the host is still what gets removed.
   return {
-    c,
+    c: document.body,
     cleanup: () => {
       act(() => root.unmount());
       c.remove();
@@ -621,6 +623,12 @@ describe("OrchestrationDrawer repeat action (two-click confirm)", () => {
     expect(vi.getTimerCount()).toBeGreaterThan(0);
 
     cleanup();
+    // The kit Sheet (Radix FocusScope) schedules its focus-restore with a 0 ms timeout on
+    // unmount; flush only those (1 ms is far below the 3 s confirm window) so the count below
+    // still proves the confirm timer itself was cleared.
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
     expect(vi.getTimerCount()).toBe(0);
   });
 

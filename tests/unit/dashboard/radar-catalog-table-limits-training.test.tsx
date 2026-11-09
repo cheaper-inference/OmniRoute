@@ -29,6 +29,13 @@ import {
   compactCount,
 } from "@/app/(dashboard)/dashboard/radar/RadarCatalogTable";
 
+// The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 describe("formatLimits", () => {
   it("shows every limit the feed gives, and only those", () => {
     expect(formatLimits({ limits: { rpm: 60, rpd: 1000, tpm: null, tpd: null } })).toBe(

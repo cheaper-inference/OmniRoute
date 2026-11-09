@@ -3,6 +3,9 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Switch } from "@omniroute/ui-kit/switch";
+import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import MemoryConceptCard from "./components/MemoryConceptCard";
 import MemoriesTab from "./components/tabs/MemoriesTab";
 import PlaygroundTab from "./components/tabs/PlaygroundTab";
@@ -15,6 +18,7 @@ const TABS: TabId[] = ["memories", "engine", "playground"];
 
 function MemoryPageContent() {
   const t = useTranslations("memory");
+  const tSidebar = useTranslations("sidebar");
   const searchParams = useSearchParams();
   const router = useRouter();
   const { settings, save } = useMemorySettings();
@@ -31,47 +35,35 @@ function MemoryPageContent() {
 
   return (
     <div className="space-y-6">
+      {/* Page title (lote 7 pendência 12): the shell title hides when a PageHeader is present. */}
+      <PageHeader compact title={tSidebar("memory")} description={tSidebar("memorySubtitle")} />
       {/* Concept card */}
       <MemoryConceptCard />
 
       {/* Tab navigation + memory enable toggle */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-1 p-1 rounded-lg bg-surface/50 border border-border/60 w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              data-testid={`tab-${tab}`}
-              onClick={() => setTab(tab)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === tab
-                  ? "bg-bg text-text-main shadow-sm"
-                  : "text-text-muted hover:text-text-main"
-              }`}
-            >
-              {t(`tabs.${tab}`)}
-            </button>
-          ))}
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <span className="text-sm font-medium text-text-muted">{t("memoryEnabled")}</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={memoryEnabled}
-            data-testid="memory-enabled-toggle"
-            onClick={() => void save({ enabled: !memoryEnabled })}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              memoryEnabled ? "bg-violet-500" : "bg-border"
-            }`}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                memoryEnabled ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </label>
+        <Tabs variant="capsule" value={activeTab} onValueChange={(next) => setTab(next as TabId)}>
+          <TabsList aria-label={t("title")}>
+            {TABS.map((tab) => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                data-testid={`tab-${tab}`}
+                // The panels below are rendered by this page, not by TabsContent.
+                aria-controls={undefined}
+              >
+                {t(`tabs.${tab}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+        <Switch
+          data-testid="memory-enabled-toggle"
+          label={t("memoryEnabled")}
+          side="right"
+          checked={memoryEnabled}
+          onCheckedChange={() => void save({ enabled: !memoryEnabled })}
+        />
       </div>
 
       {/* Tab content */}

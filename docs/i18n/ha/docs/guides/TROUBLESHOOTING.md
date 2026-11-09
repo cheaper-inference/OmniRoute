@@ -33,37 +33,43 @@ Matsalolin da aka fi fuskanta da hanyoyin magance su na OmniRoute.
 
 ---
 
-## Cikakken Warware Matsaloli
+## Cikakken Binciken Matsaloli
 
 ---
 
-### Ƙayyade Yawan Buƙatu a Masu Samarwa na Kyauta (429 / 400 / 401)
+### Ƙayyade Yawan Buƙatu ga Masu Bayarwa na Kyauta (429 / 400 / 401)
 
-**Alama**: Lokacin amfani da `model: "auto"` tare da masu samarwa na kyauta/marasa buƙatar tantancewa (opencode, auggie, da sauransu), lokaci-lokaci kana samun `HTTP 429`, `400`, ko `401` maimakon amsoshi. Buƙatun suna yin nasara idan aka sake gwada saƙon umarni iri ɗaya bayan ƴan daƙiƙu, amma sarrafa kai (ayyukan cron, agents, scripts) yana lalacewa a gazawar farko.
+**Alama**: Lokacin amfani da `model: "auto"` tare da masu bayarwa na kyauta/waɗanda ba sa buƙatar tantancewa (auggie, da sauransu), lokaci-lokaci kana samun `HTTP 429`, `400`, ko `401` maimakon amsoshi. Buƙatun suna yin nasara idan aka sake aika wannan tambayar bayan ɗan lokaci, amma sarrafa kansa (ayyukan cron, agents, scripts) yana tsayawa tun daga gazawar farko.
 
-**Asalin matsalar**: Nau'ikan gazawa guda uku masu zaman kansu suna haɗuwa:
+**Tushen matsalar**: Hanyoyin gazawa guda uku masu zaman kansu suna taruwa:
 
-1. **Ƙayyade yawan buƙatu daga mai samarwa (`429`)**: Matakan kyauta na iya tilasta ƙayyadadden kaso a cikin kowane zangon lokaci. Aika tarin kiraye-kiraye a lokaci guda yana ƙare shi, don haka za a ƙi buƙata ta gaba har sai zangon ya sake farawa.
-2. **Model mai matsala a passthrough (`400`/`401`)**: Rukunonin `auto/*` na iya ƙunsar passthrough models daga `opencode` waɗanda aka yi wa rajista a kundin amma ba su da ingantattun bayanan shiga (misali `oc/north-mini-code-free` → `401`). Auto-router yana gwada ɗaya, ya gaza, sannan kuskuren ya bazu kafin komawa madadin ya fara aiki.
-3. **Ƙaruwa sakamakon aiki lokaci guda (`429` a ƙarƙashin nauyi)**: Lokacin da zaman agent/cron da yawa suka aika buƙatu zuwa `auto` lokaci guda, jimillar saurin buƙatu yana wuce abin da masu samarwa na kyauta za su iya jurewa, don haka ana yi wa sahihan kiraye-kiraye alamar cin zarafi.
+1. **Ƙayyade yawan buƙatun mai bayarwa (`429`)**: Matakan kyauta na iya tilasta iyakar adadin buƙatu a cikin wani lokaci. Yawan kira a lokaci guda yana ƙare wannan iyakar, saboda haka ana ƙin buƙata ta gaba har sai lokacin ya sake farawa.
+2. **Karyayyen model a passthrough (`400`/`401`)**: Rukunin `auto/*` na iya ƙunsar passthrough models waɗanda aka yi rajista a cikin kundin, amma ba su da ingantattun bayanan shiga kai tsaye (→ `401`). Mai tura buƙatun auto yana gwada ɗaya daga cikinsu, ya gaza, kuma kuskuren yana wucewa kafin a fara fallback.
+3. **Ƙaruwa saboda yawan haɗin kai (`429` ƙarƙashin nauyi)**: Lokacin da sessions na agent/cron da yawa suka aika zuwa `auto` lokaci guda, jimillar yawan buƙatu ta wuce abin da masu bayarwa na kyauta za su iya jurewa, don haka ana yi wa halastattun kira alamar cin zarafi.
 
-**Tabbataccen gyara (al'umma ta bayar da rahoto, 2026-08-10)**: daidaita environment variables guda uku domin juyawa, aiki lokaci guda, da komawa madadin su ɗauki sauye-sauyen matakin kyauta maimakon tsarin ya gaza saboda su:
+**Gyaran da aka tabbatar (rahoton al'umma, 2026-08-10)**: daidaita masu canjin muhalli guda uku domin juyawa, yawan haɗin kai, da fallback su sha tasirin sauye-sauyen matakin kyauta maimakon su mutu a kansu:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # tsallaka zuwa wani model/mai samarwa a kan 400/401 (yana tsallake passthrough models masu matsala)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # bayyanannen iyakar karɓar ayyuka masu nauyi (ba a saita ta ta asali: babu iyakar adadin buƙatu, duba bayanin da ke ƙasa)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ƙara iyakantaccen lokacin jira fiye da tsohuwar ƙimar RATE_LIMIT_MAX_WAIT_MS don upstreams masu jinkiri
+export OMNIROUTE_ROTATE_ON_400=true           # koma wani model/mai bayarwa idan an samu 400/401 (yana tsallake karyayyun passthrough models)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # iyakar shigar da manyan buƙatu a sarari (ba a saita shi ta tsohuwa: babu iyakar adadin buƙatu, duba bayanin da ke ƙasa)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ƙara lokacin jira mai iyaka ya wuce tsohuwar RATE_LIMIT_MAX_WAIT_MS domin masu bayarwa na sama masu jinkiri
 ```
 
-Saita waɗannan a muhallin process na OmniRoute (daemon ɗin, misali ta LaunchAgent plist ko `systemctl edit`), sannan ka sake kunna OmniRoute. Alamar juyawa ita ce hanya guda mafi tasiri: tana mayar da gazawa kai tsaye zuwa sake gwadawa a ɓoye ta hanyar ingantaccen mai samarwa da ke cikin rukunin.
+Saita waɗannan a cikin yanayin aikin OmniRoute (daemon ɗin, misali ta hanyar LaunchAgent plist ko `systemctl edit`), sannan ka sake kunna OmniRoute. Alamar juyawa ita ce mafi tasiri guda ɗaya: tana mayar da gazawa mai tsauri zuwa sake gwadawa a bayyane ga lafiyayyen mai bayarwa a cikin rukunin.
 
-**Lura**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` yana iyakance adadin buƙatu masu nauyi — masu dogon mahalli — da ke gudana lokaci guda; wannan iyaka ƙofar karɓa ce, ba mai ƙayyade yawan buƙatun mai samarwa ba. **Sabuntawar #503-fanout:** ba a ƙara saita wannan var ta asali ba (yanzu yana aiki ne kawai idan an saita shi kai tsaye, kamar yadda ke sama) — maimakon haka, ana sarrafa karɓar ayyuka masu nauyi ta kasafin bytes da ake samarwa ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) wanda yake daidaita kansa bisa ainihin iyakar memory na host, saboda haka sabon deployment ya kamata ya ga raguwar ƙin buƙatun `503 chat_admission_busy` sosai ba tare da saita wannan var ko kaɗan ba; saita shi kai tsaye a nan har yanzu yana aiki daidai kamar yadda aka bayyana. Takamaiman sauye-sauyen kasafin bytes suna takaita zuwa 8 MiB–2 GiB. `413 body_exceeds_budget` ba kuskure na ɗan lokaci ba ne: ƙara wannan kasafin bytes, rage `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, ko ƙara iyakar memory na process. Zubar da `inflight_bytes_budget` cunkoso ne na ɗan lokaci kuma har yanzu ana iya sake gwadawa. Ana sarrafa ƙayyade yawan buƙatu ga kowane mai samarwa (`open-sse/services/rateLimitManager.ts`) dabam ta `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, da `RATE_LIMIT_AUTO_ENABLE` — duba `.env.example`.
+**Lura**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` yana ƙayyade adadin manyan buƙatu — masu dogon mahallin aiki — da za su gudana lokaci guda; wannan iyaka ƙofar shigarwa ce, ba mai ƙayyade yawan buƙatun mai bayarwa ba. **Sabuntawar #503-fanout:** ba a ƙara saita wannan canji ta tsohuwa ba (yanzu yana aiki ne kawai idan an saita shi a sarari, kamar yadda yake sama) — a maimakon haka, ana sarrafa shigar da manyan buƙatu ta kasafin byte wanda ake samo ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), wanda ke daidaita kansa daga ainihin iyakar ƙwaƙwalwar host, don haka sabon turawa ya kamata ya ga ƙarancin ƙin `503 chat_admission_busy` ba tare da saita wannan canji ba; saita shi a sarari a nan har yanzu yana aiki daidai kamar yadda aka rubuta. Ƙayyadaddun kasafin byte na zahiri suna takaita zuwa 8 MiB–2 GiB. `413 body_exceeds_budget` ba na ɗan lokaci ba ne: ƙara wannan kasafin byte, rage `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ko iyakar girman jikin buƙatar da aka ajiye, ko ƙara iyakar ƙwaƙwalwar aikin. Rage buƙatu saboda `inflight_bytes_budget` cunkoso ne na ɗan lokaci kuma ana iya sake gwada shi. Ƙayyade yawan buƙatun kowane mai bayarwa (`open-sse/services/rateLimitManager.ts`) ana sarrafa shi daban ta `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, da `RATE_LIMIT_AUTO_ENABLE` — duba `.env.example`.
 
-**Yadda za a tabbatar ya yi aiki**: gudanar da agent/cron ɗinka sau biyu a jere cikin gajeren lokaci, sannan ka tabbatar dukansu sun yi nasara. Kafin gyaran, gudanarwa ta biyu galibi tana fitar da kuskuren `429`/`401`. Bayan gyaran, ana sake gwada gazawar (idan akwai) a ɓoye, kuma kiran yana kammala. Haka kuma za ka iya yin `curl /monitoring/health` sannan ka lura da filin `rateLimitedUntil` a haɗin masu samarwa da kuma `circuitBreakers.providerBreakers[].state` na masu samarwar da abin ya shafa — matsayin yana ɗaya daga cikin `CLOSED`, `DEGRADED`, `OPEN`, ko `HALF_OPEN` (duba `src/shared/utils/circuitBreaker.ts`), kuma mai samarwar da ke ci gaba da gazawa zai sauya daga `CLOSED → DEGRADED → OPEN` kafin lokacin sake saiti ya ba da damar gwaji ya wuce (`HALF_OPEN`).
+**Lura game da haɓakawa: iyakar jikin buƙatar da aka ajiye yanzu tana aiki ga chat ma.** Iyakar da aka ajiye a baya ƙarƙashin Settings > Advanced > Request Body Limit (`maxBodySizeMb`) yanzu tana aiki ga `/v1/chat/completions` da `/v1/responses` ma. Kafin wannan canjin, waɗannan hanyoyin biyu suna karɓar har zuwa 50 MB ko da menene aka ajiye, don haka girkin da ke da ƙaramar iyaka da aka ajiye zai fara ƙin jikin chat da ya wuce ta. Girkin da bai taɓa ajiye iyaka ba zai ci gaba da amfani da tsohuwar iyakar 50 MB.
 
-**Idan har yanzu kana ganin 429**: asusun da ke aiki na wannan mai samarwar ya ƙare da gaske da _quota_ ɗinsa (ba iyakar yawan buƙatu kawai ba). Ƙara asusu na biyu na wannan mai samarwar a OmniRoute dashboard → Providers → Accounts, ko haɗa wani mai samarwa na kyauta (misali `routeway`, `auggie`). Juyawa tsakanin asusu yana taimakawa ne kawai ga matsalolin wucin-gadi na iyakar yawan buƙatu/400/401; ƙarewar ƙayyadadden _quota_ gaba ɗaya na buƙatar bayanan shaidar shiga na biyu ko wani mai samarwa daban.
+Ƙin buƙatar yana da HTTP `413`, tare da saita `error.code` zuwa `PAYLOAD_TOO_LARGE` da `error.type` zuwa `payload_too_large`. Saƙon yana nuna iyakar da ake aiki da ita: `Request body too large. Maximum allowed: 10 MB` idan `Content-Length` da aka ayyana ya wuce ta, ko `Request body too large for chat completions (max 10 MB).` idan adadin bytes da aka karanta a zahiri ya wuce ta. Wannan ba ɗaya yake da `413 body_exceeds_budget` da aka ambata a sama ba, wanda yake fitowa daga kasafin ƙwaƙwalwa kuma wannan saitin ba ya canza shi.
 
-**Idan kana ganin 403 a kan samfuran vision (`auto/vision`, `bazaarlink/*`)**: asusun da aka haɗa ba shi da tsarin biyan kuɗi da ya haɗa da vision, ko kuma maɓallin API ba shi da isassun izini. Tabbatar a dashboard na mai samarwar cewa iyakar izinin maɓallin ta haɗa da vision/multimodal, ko ka haɗa asusun matakin biyan kuɗi sannan ka bar shi a matsayin wurin da ake tura buƙatun vision.
+Don ƙara iyakar, ajiye ƙima mafi girma a `/dashboard/settings/advanced`, ko aika `PATCH /api/settings` tare da `{"maxBodySizeMb": 50}`. Ana karɓar ƙimomi daga 1 zuwa 500 MB, kuma tana aiki ba tare da sake kunnawa ba; 50 yana dawo da tsohuwar iyakar chat. Wasu iyakoki biyu har yanzu na iya dakatar da babban jiki: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, idan an saita shi, shi ma yana takaita iyakar da aka ajiye, kuma bayanin Kubernetes ingress `proxy-body-size` (`50m` a cikin manifests da aka bayar) dole ne a ƙara shi daban domin duk wani abu da ya wuce 50 MB.
+
+**Yadda za a tabbatar da cewa ya yi aiki**: gudanar da agent/cron ɗinka sau biyu a jere cikin ɗan lokaci, sannan ka tabbatar cewa duka sun yi nasara. Kafin gyaran, gudu na biyu yawanci yana jefa `429`/`401`. Bayan gyaran, gazawa (idan ta faru) ana sake gwada ta a bayyane kuma kiran ya kammala. Hakanan za ka iya amfani da `curl /monitoring/health` sannan ka duba filin `rateLimitedUntil` a haɗin masu bayarwa da `circuitBreakers.providerBreakers[].state` ga masu bayarwar da abin ya shafa — yanayin na ɗaya daga cikin `CLOSED`, `DEGRADED`, `OPEN`, ko `HALF_OPEN` (duba `src/shared/utils/circuitBreaker.ts`), kuma mai bayarwa da ke ci gaba da gazawa zai sauya daga `CLOSED → DEGRADED → OPEN` kafin taga sake farawa ta ba da damar gwajin shiga (`HALF_OPEN`).
+
+**Idan har yanzu kana ganin 429**: asusun da ke aiki na wannan mai bayarwa ya ƙare _quota_ ɗinsa da gaske (ba ƙayyadadden yawan kira kawai ba). Ƙara asusu na biyu na wannan mai bayarwa a cikin dashboard na OmniRoute → Providers → Accounts, ko haɗa wani mai bayarwa na kyauta (misali `routeway`, `auggie`). Juyawa tana taimakawa ne kawai ga ƙayyadadden yawan kira na ɗan lokaci da 400/401; ƙarewar quota gaba ɗaya tana buƙatar wata shaidar shiga ko wani mai bayarwa.
+
+**Idan ka ga 403 a kan vision models (`auto/vision`, `bazaarlink/*`)**: asusun da aka haɗa ba shi da tsarin biyan kuɗi wanda ya ƙunshi vision, ko maɓallin API ba shi da isassun izini. Tabbatar a dashboard na mai bayarwa cewa iyakar maɓallin ta ƙunshi vision/multimodal, ko haɗa asusun matakin biyan kuɗi sannan ka bar shi a matsayin makasudin vision.
 
 ---
 
@@ -94,7 +100,7 @@ Gargadin yana fitowa ne daga tsofaffin iyakokin peer-dependency a cikin fakitin 
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Lokacin gudanar da `npm install -g omniroute`, sababbin nau'ikan npm (v11+ da v12+) suna toshe package lifecycle scripts ta tsohuwa kuma suna nuna gargadin install-scripts:
+Lokacin gudanar da `npm install -g omniroute`, sababbin nau'ikan npm (v11+ da v12+) suna toshe rubutun lifecycle na package ta tsohuwa kuma suna nuna gargadin install-scripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +110,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Za a iya yin watsi da wannan gargadin?
 
-**A wani ɓangare, amma ba a ba da shawarar gudanarwa ba tare da scripts ba.** OmniRoute yana ƙunshe da hanyoyin madadin da ke aiki cikin sauƙi: idan ba za a iya loda native bindings na `better-sqlite3` daga standalone bundle ba, manhajar za ta koma ga wasu drivers kamar `node:sqlite` ko `sql.js` (duba [Warware SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Har yanzu uwar garken za ta fara aiki, amma amfani da hanyoyin madadin WASM kamar `sql.js` yana kashe yanayin SQLite WAL (Write-Ahead Logging) kuma yana ƙara nauyin ƙwaƙwalwar ajiya da daidaitawar faifai.
+**A wani ɓangare, amma ba a ba da shawarar gudanarwa ba tare da scripts ba.** OmniRoute yana da hanyoyin madadin da ke aiki ba tare da katsewa ba: idan ba za a iya loda native bindings na `better-sqlite3` daga standalone bundle ba, manhajar za ta koma amfani da wasu drivers kamar `node:sqlite` ko `sql.js` (duba [Warware SQLite Runtime](../ops/SQLITE_RUNTIME.md)). Har yanzu server zai fara aiki, amma gudanarwa a kan hanyoyin madadin WASM kamar `sql.js` tana kashe yanayin SQLite WAL (Write-Ahead Logging) kuma tana ƙara yawan amfani da memory da nauyin disk-sync.
 
-### Waɗanne scripts ne ake buƙata da gaske?
+### Waɗanne scripts ne ainihin ake buƙata?
 
-Ba duk scripts da aka toshe ba ne suke da muhimmanci wajen gudanar da OmniRoute:
+Ba duk scripts da aka toshe ba ne suke da muhimmanci don gudanar da OmniRoute:
 
-- **Masu muhimmanci (`omniroute`, `better-sqlite3`):** OmniRoute yana gudana daga Next.js standalone application bundle (`dist/`). Yayin shigarwa, npm yana sauke ko harhaɗa native SQLite driver da ya dace da host a cikin babban `node_modules/better-sqlite3/`. Sannan `postinstall` script na OmniRoute (`scripts/build/postinstall.mjs`) yana tabbatarwa da kwafe waɗannan binaries na musamman ga host zuwa `dist/node_modules/` domin standalone server ya iya samun damar amfani da su. Idan an toshe postinstall script na `omniroute`, za a tsallake wannan matakin kwafewa.
-- **Na zaɓi/waɗanda aka dogara da su kai tsaye ba (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Waɗannan mataimakan build ne, kayan aikin watcher, ko kayan aikin system keychain. Ba su izini yana hana gargadin build, amma ba a buƙatar su don ainihin aikin routing.
-- **Wanda aka ware (`onnxruntime-node`):** Dependency ne na zaɓi don local AI embeddings kuma **ba** a buƙatarsa domin OmniRoute ya yi aiki. Postinstall script ɗinsa yana sauke kusan 300MB na CUDA assets daga NuGet; kada ka saka shi cikin allow-list sai idan kana da niyyar amfani da local ONNX acceleration a kan hardware da ake tallafawa.
+- **Masu muhimmanci (`omniroute`, `better-sqlite3`):** OmniRoute yana aiki daga Next.js standalone application bundle (`dist/`). Yayin shigarwa, npm yana sauke ko compile native SQLite driver da ya dace da host a cikin babban `node_modules/better-sqlite3/`. Sannan script ɗin `postinstall` na OmniRoute (`scripts/build/postinstall.mjs`) yana tabbatarwa tare da kwafe waɗannan binaries da suka dace da host zuwa `dist/node_modules/` domin standalone server ya iya samun damar amfani da su. Idan an toshe postinstall script na `omniroute`, za a tsallake wannan matakin kwafewa.
+- **Na zaɓi/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Waɗannan mataimakan build ne, kayan aikin watcher, ko utilities na system keychain. Ba su izini yana hana gargadin build, amma ba a buƙatar su don ainihin aikin routing.
+- **Wanda aka cire (`onnxruntime-node`):** Wannan optional dependency ne don local AI embeddings kuma **ba** a buƙatarsa domin OmniRoute ya yi aiki. Postinstall script ɗinsa yana sauke kusan 300MB na kadarorin CUDA daga NuGet; kada a saka shi cikin allow-list sai dai idan kana da niyyar amfani da local ONNX acceleration a kan hardware mai goyon bayansa.
 
 ### Gyaran da aka ba da shawara
 
-Don ba wa install scripts da ake buƙata izini yayin shigarwa ta global da kuma ɓoye gargadi, tura `--allow-scripts` don OmniRoute da native dependencies nasa:
+Don ba da izinin install scripts da ake buƙata yayin global install da kuma kawar da gargadin, yi amfani da `--allow-scripts` don OmniRoute da native dependencies nasa:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-A madadin haka, don saita wannan na dindindin ga duk shigarwar global a asusun mai amfani naka:
+A madadin haka, don saita wannan na dindindin ga duk global installations a kan user account ɗinka:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Tabbatar da shigarwarka
 
-Bayan shigarwa, gudanar da kayan aikin bincike na ciki don tabbatar da cewa native bindings da runtime environment suna aiki yadda ya kamata:
+Bayan shigarwa, gudanar da built-in diagnostic tool don tabbatar da cewa native bindings da runtime environment suna cikin ƙoshin lafiya:
 
 ```bash
 omniroute doctor
@@ -830,6 +836,30 @@ za ta ci gaba da farawa a bango kuma za a iya samunta da zarar farawa ya kammala
 
 Duba [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) don cikakkun
 bayanai game da `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## CCR /deup al'amurran da suka shafi
+
+Matrix na bincike don matsawa CCR (`ccr`) da kayan aikin `session-dedup`. Don cikakken bayanin mai aiki (alamomi, abubuwan da ake buƙata, madaidaicin kowane kayan aiki, fakitin maidowa) duba [Injin Matsi → Prerequisites / jagorar mai aiki](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Alama                                                                                                      | Mai yiwuwa dalili                                                                                                                                            | Tabbatar                                                                                                                | Gyara                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                             | Madaidaicin madaidaicin hanyar hanya, ba kwaro na sufuri ba. Babu `Bearer`, ko maɓalli ba tare da `mcp:connect`/`manage`/`admin`, ya isa hanyar `/api/mcp/`. | Buƙatar ta ɗauki taken no/invalid `Authorization`.                                                                      | Aika maɓalli `Bearer` inganci. Maɓalli mai nisa na iya riƙe `mcp:connect` (yana ba da izini ga `/api/mcp/` na gida-kawai) da takamaiman iyakar read/write da yake buƙata.                                                                                                                      |
+| **toshe ba a samu ba** — `omniroute_ccr_retrieve` ya ƙi zanta                                              | Hash ba darajar hex 24 ba ne ko kuma an kwafe shi ba daidai ba, ko katangar ta riga ta ƙare/kore.                                                            | Kwatanta hash akan ƙimar hex 24 a cikin alamar `[CCR retrieve hash=…]` ; duba `omniroute_ccr_stats` don yanayin kantin. | Kwafi hash 24 hex verbatim daga alamar. Idan tubalan ya tafi da gaske, ya wuce TTL ɗinsa ko kuma bai taɓa isa wurin adanawa mai ɗorewa ba (toshe sama da 512 KB, da kowane toshe akan lokacin aikin gajimare, zama ƙwaƙwalwar ajiya-kawai kuma kar ku tsira daga sake farawa).                 |
+| **CCR ba-op** — toshe ba a matsawa (rubutu ya dawo baya canzawa)                                           | Toshe ƙasa da bakin kofa, ko injin CCR / yanayin ba ya aiki.                                                                                                 | Bincika matsi mai aiki `strategy`/`enabled` da girman toshe vs bakin kofa.                                              | Kunna CCR (ko yanayin da aka tara wanda ke tafiyar da shi) kuma tabbatar da toshe ya isa ya cancanci adanawa. A no-op ba kuskure ba — "babu abin da za a damfara."                                                                                                                             |
+| **alamar dedup** — `[dedup:ref sha=…]` yana bayyana a cikin fitarwa                                        | **Kallon baya na niyya** , ba asara ko kuskure ba. `session-dedup` riga an aika da rubutun da aka goge a farkon juyi na wannan zama.                         | Tabbatar da wannan rubutu ya bayyana a baya a cikin zaman.                                                              | Kada ku yi kome — kada ku kira kayan aiki kuma kada ku yi ƙoƙarin sake gina shi. Farkon abin da ya faru shine kwafin canonical; juzu'i na yanzu ba a sake rubutawa ba, ana cire shi akan juzu'i na gaba.                                                                                       |
+| **Yanayin Code** — `omniroute_ccr_*` kayan aikin ba sa cikin koyarwar `tools[]` / CCR ba allura (OpenCode) | Yanayin lambar OpenCode (tsoho) yana tallata kayan aikin asali kawai zuwa ƙirar, yana ɓoye kayan aikin MCP daga `tools[]`.                                   | Duba shigarwar uwar garken OpenCode MCP don `codemode`.                                                                 | Saita `codemode: false` akan shigarwar uwar garken (a** abokin ciniki** saitin) don haka ana tallata kayan aikin MCP. Umarnin dawo da yarjejeniya na CCR ya tsaya a kashe: uwar garken mai suna `omniroute` yana fallasa `omniroute_omniroute_ccr_retrieve`, kuma `_` ba mai raba daidai bane. |
+
+Ƙarin alamomi:
+
+| Alama                                                                                                            | Mai yiwuwa dalili                                                                                                                                                                                     | Gyara                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                          | Sakamakon kuskuren kayan aikin MCP (`isError: true`), ba HTTP 403 ba. Maɓallin mai kira ya rasa iyakar da ake bukata.                                                                                 | Ƙara iyaka daga teburin kowane kayan aiki (duba jagorar mai aiki). Misali `omniroute_ccr_retrieve` na bukatar `read:compression`.                                                                     |
+| `Unknown Mcp-Session-Id`                                                                                         | Streamable-HTTP zaman ya fita kuma aka girbe (`OMNIROUTE_MCP_SESSION_IDLE_MS`); uwar garken ya amsa HTTP 404.                                                                                         | Sake haɗawa ko sake kunna zaman — yi** ba** juya maɓalli, canza iyaka, ko sake suna kayan aiki. Ba 401/403. ba ne                                                                                     |
+| `JSON Parse error` / `Unterminated string` a cikin sakamakon kayan aiki                                          | Rubutun kayan aikin MCP da aka yanke a kusa da `mcpAccessibility.maxTextChars` (tsoho `50000`) tsakiyar JSON.                                                                                         | Yi amfani da `mode` mai shafi maimakon cikakkiya: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, ko `mode:"stats"`. Dokokin babban yatsan hannu: `chars > 40000` → yi amfani da `mode`. |
+| `Failed to open SSE stream`                                                                                      | Abokin ciniki ya buga gadon `/api/mcp/sse` singleton yayin da sufurin yake `streamable`.                                                                                                              | Nuna abokin ciniki a `/api/mcp/stream` (madaidaicin ƙarshen rafi) maimakon `/api/mcp/sse`.                                                                                                            |
+| **Matattu stdio bugun zuciya** — `mcp-heartbeat.json` yana nuna `pidAlive: false` yayin da sufurin HTTP ya tashi | Fayil ɗin bugun zuciya ragowar stdio ne ( stale PID, ko wani nau'i na daban); zirga-zirgar HTTP suna cikin aiki kuma suna ba da rahoton jihar daga `getMcpHttpStatus()` maimakon (babu rubuta fayil). | Babu aikin — sufurin yana da lafiya. Gaskiyar ita ce `httpTransport.online` / `startedAt` daga `/api/mcp/status`, ba fayil ɗin bugun zuciya ba. Kar a sake kunna uwar garken ko juya maɓalli.         |
 
 ---
 

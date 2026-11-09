@@ -1,1 +1,0 @@
-- **feat(providers):** add the mainland BigModel.cn (Zhipu) chat-completions provider and correct Z.AI platform links ([#12343](https://github.com/diegosouzapw/OmniRoute/pull/12343)) — thanks @jackjinke

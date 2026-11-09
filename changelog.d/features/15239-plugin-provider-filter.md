@@ -1,1 +1,0 @@
-- **feat(plugin):** filter the published catalog by provider (`providersAllow`, empty means full catalog) with an explicit empty-result guard ([#15239](https://github.com/diegosouzapw/OmniRoute/pull/15239)) — thanks @maxmad64bis

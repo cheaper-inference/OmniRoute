@@ -8,13 +8,22 @@ import {
   OPENAPI_VERSION,
   type OpenApiEndpoint,
 } from "../lib/openapi.generated";
+import { Field } from "@omniroute/ui-kit/field";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
+import Textarea from "@/shared/components/Textarea";
+import { cn } from "@/shared/utils/cn";
 
-const METHOD_COLORS: Record<string, string> = {
-  GET: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  POST: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  PUT: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  DELETE: "bg-red-500/10 text-red-600 border-red-500/20",
-  PATCH: "bg-purple-500/10 text-purple-600 border-purple-500/20",
+// HTTP method → status tone of the Badge adapter (kit badge `data-tone`).
+const METHOD_TONES: Record<string, "success" | "info" | "warning" | "error" | "default"> = {
+  GET: "success",
+  POST: "info",
+  PUT: "warning",
+  DELETE: "error",
+  // Lime-tinted "primary" fails contrast on the dark surface; PATCH reads as the neutral tone.
+  PATCH: "default",
 };
 
 /**
@@ -161,49 +170,55 @@ export function ApiExplorerClient() {
             </span>
           </div>
           <div className="flex flex-wrap gap-1.5 mb-4">
-            <button
+            <Button
+              size="sm"
+              variant={!filterTag ? "secondary" : "ghost"}
+              aria-pressed={!filterTag}
               onClick={() => setFilterTag(null)}
-              className={`px-2.5 py-1 text-xs rounded-full border transition-colors
-                ${!filterTag ? "bg-primary/10 text-primary border-primary/20" : "border-border text-text-muted hover:text-text-main"}`}
             >
               {te("all")}
-            </button>
+            </Button>
             {OPENAPI_TAGS.map((tag) => (
-              <button
+              <Button
                 key={tag}
+                size="sm"
+                variant={filterTag === tag ? "secondary" : "ghost"}
+                aria-pressed={filterTag === tag}
                 onClick={() => setFilterTag(filterTag === tag ? null : tag)}
-                className={`px-2.5 py-1 text-xs rounded-full border transition-colors
-                  ${filterTag === tag ? "bg-primary/10 text-primary border-primary/20" : "border-border text-text-muted hover:text-text-main"}`}
               >
                 {tag}
-              </button>
+              </Button>
             ))}
           </div>
 
           <div className="space-y-1 max-h-96 overflow-y-auto">
-            {filteredEndpoints.map((endpoint) => (
-              <button
-                key={`${endpoint.method}-${endpoint.path}`}
-                onClick={() => handleSelect(endpoint)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors
-                  ${
-                    selected?.path === endpoint.path && selected?.method === endpoint.method
-                      ? "bg-primary/10 border border-primary/20"
-                      : "hover:bg-bg-subtle border border-transparent"
-                  }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-1.5 py-0.5 text-[10px] font-mono font-bold rounded border ${METHOD_COLORS[endpoint.method] || "border-border"}`}
+            {filteredEndpoints.map((endpoint) => {
+              const active =
+                selected?.path === endpoint.path && selected?.method === endpoint.method;
+              return (
+                <Button
+                  key={`${endpoint.method}-${endpoint.path}`}
+                  variant="ghost"
+                  aria-pressed={active}
+                  onClick={() => handleSelect(endpoint)}
+                  className={cn(
+                    "h-auto w-full justify-start px-3 py-2 text-left",
+                    active && "bg-bg-subtle"
+                  )}
+                >
+                  <Badge
+                    size="sm"
+                    variant={METHOD_TONES[endpoint.method] ?? "default"}
+                    className="font-mono font-bold"
                   >
                     {endpoint.method}
-                  </span>
+                  </Badge>
                   <span className="truncate text-text-muted font-mono text-xs">
                     {endpoint.path}
                   </span>
-                </div>
-              </button>
-            ))}
+                </Button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -212,16 +227,17 @@ export function ApiExplorerClient() {
         {selected ? (
           <div className="space-y-4">
             <div className="flex items-center gap-3 flex-wrap">
-              <span
-                className={`px-2 py-1 text-xs font-mono font-bold rounded border ${METHOD_COLORS[selected.method]}`}
+              <Badge
+                variant={METHOD_TONES[selected.method] ?? "default"}
+                className="font-mono font-bold"
               >
                 {selected.method}
-              </span>
+              </Badge>
               <span className="font-mono text-sm text-text-main">{selected.path}</span>
               {selected.requiresAuth && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono rounded border border-amber-500/30 bg-amber-500/10 text-amber-600">
+                <Badge size="sm" variant="warning" className="font-mono">
                   {t("apiExplorerAuth")}
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-sm text-text-muted">{selected.summary || selected.description}</p>
@@ -230,64 +246,54 @@ export function ApiExplorerClient() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-text-muted block mb-1">{te("baseUrl")}</label>
-                <input
-                  type="text"
-                  value={baseUrl}
-                  onChange={(e) => setBaseUrl(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-bg-subtle border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-text-muted block mb-1">{te("apiKey")}</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-..."
-                  className="w-full px-3 py-2 text-sm bg-bg-subtle border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
+              <Input
+                label={te("baseUrl")}
+                type="text"
+                value={baseUrl}
+                onChange={(e) => setBaseUrl(e.target.value)}
+              />
+              <Input
+                label={te("apiKey")}
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-..."
+              />
             </div>
 
             {selected.method !== "GET" && selected.hasRequestBody && (
-              <div>
-                <label className="text-xs text-text-muted block mb-1">{te("requestBody")}</label>
-                <textarea
+              <Field label={te("requestBody")} htmlFor="api-explorer-request-body">
+                <Textarea
+                  id="api-explorer-request-body"
                   value={requestBody}
                   onChange={(e) => setRequestBody(e.target.value)}
                   rows={8}
-                  className="w-full px-3 py-2 text-sm font-mono bg-bg-subtle border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="font-mono"
                 />
-              </div>
+              </Field>
             )}
 
-            <button
-              onClick={handleTryIt}
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-            >
+            <Button onClick={handleTryIt} loading={loading}>
               {loading ? te("sending") : te("sendRequest")}
-            </button>
+            </Button>
 
             {response !== null && (
-              <div>
-                <label className="text-xs text-text-muted block mb-1">
+              <section aria-labelledby="api-explorer-response">
+                <p id="api-explorer-response" className="text-xs text-text-muted mb-1">
                   {t("apiExplorerResponseLabel")}
-                </label>
-                <pre className="bg-bg-subtle p-4 rounded-lg overflow-x-auto text-xs font-mono text-text-main max-h-80">
+                </p>
+                <pre className="bg-bg-subtle border border-border p-4 rounded-lg overflow-x-auto text-xs font-mono text-text-main max-h-80">
                   {response}
                 </pre>
-              </div>
+              </section>
             )}
           </div>
         ) : (
-          <div className="text-center py-16 text-text-muted">
-            <span className="material-symbols-outlined text-4xl mb-2 block">api</span>
-            <p className="text-lg font-medium">{t("apiExplorerSelectEndpoint")}</p>
-            <p className="text-sm mt-1">{t("apiExplorerChooseApi")}</p>
-          </div>
+          <EmptyState
+            icon="api"
+            title={t("apiExplorerSelectEndpoint")}
+            description={t("apiExplorerChooseApi")}
+          />
         )}
       </div>
     </div>

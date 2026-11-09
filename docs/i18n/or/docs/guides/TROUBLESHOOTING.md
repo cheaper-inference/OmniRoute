@@ -33,37 +33,43 @@ OmniRoute ପାଇଁ ସାଧାରଣ ସମସ୍ୟା ଏବଂ ସମା
 
 ---
 
-## ବିସ୍ତୃତ ସମସ୍ୟା ନିବାରଣ
+## ବିସ୍ତୃତ ସମସ୍ୟାନିରାକରଣ
 
 ---
 
-### ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ ଉପରେ ହାର ସୀମିତକରଣ (429 / 400 / 401)
+### ମାଗଣା ପ୍ରଦାତାମାନଙ୍କରେ ରେଟ୍ ସୀମା (429 / 400 / 401)
 
-**ଲକ୍ଷଣ**: ମାଗଣା/ପ୍ରମାଣୀକରଣ-ବିହୀନ ପ୍ରଦାନକାରୀ (opencode, auggie, ଇତ୍ୟାଦି) ସହ `model: "auto"` ବ୍ୟବହାର କରିବାବେଳେ, ଆପଣ ମଧ୍ୟେମଧ୍ୟେ ଉତ୍ତର ପରିବର୍ତ୍ତେ `HTTP 429`, `400`, କିମ୍ବା `401` ପାଆନ୍ତି। କିଛି କ୍ଷଣ ପରେ ସମାନ ପ୍ରମ୍ପ୍ଟ୍କୁ ପୁନଃଚେଷ୍ଟା କଲେ ଅନୁରୋଧଗୁଡ଼ିକ ସଫଳ ହୁଏ, କିନ୍ତୁ ପ୍ରଥମ ବିଫଳତାରେ ସ୍ୱୟଂଚାଳନ (cron jobs, agents, scripts) ବନ୍ଦ ହୋଇଯାଏ।
+**ଲକ୍ଷଣ**: ମାଗଣା/ଅଥେଣ୍ଟିକେସନ୍-ବିହୀନ ପ୍ରଦାତାମାନଙ୍କ (auggie ଇତ୍ୟାଦି) ସହିତ `model: "auto"` ବ୍ୟବହାର କରିବାବେଳେ, ଉତ୍ତର ପରିବର୍ତ୍ତେ ମଧ୍ୟେମଧ୍ୟେ `HTTP 429`, `400`, କିମ୍ବା `401` ମିଳେ। କିଛି ମୁହୂର୍ତ୍ତ ପରେ ସେହି ପ୍ରମ୍ପ୍ଟକୁ ପୁଣି ଚେଷ୍ଟା କଲେ ଅନୁରୋଧ ସଫଳ ହୁଏ, କିନ୍ତୁ ପ୍ରଥମ ବିଫଳତାରେ automation (cron jobs, agents, scripts) ବିଘ୍ନିତ ହୁଏ।
 
-**ମୂଳ କାରଣ**: ତିନୋଟି ସ୍ୱାଧୀନ ବିଫଳତା ଧାରା ଏକାଠି ହୁଏ:
+**ମୂଳ କାରଣ**: ତିନୋଟି ସ୍ୱତନ୍ତ୍ର ବିଫଳତା ମୋଡ୍ ଏକାଠି ହୁଏ:
 
-1. **ପ୍ରଦାନକାରୀ ହାର-ସୀମା (`429`)**: ମାଗଣା ସ୍ତରଗୁଡ଼ିକ ପ୍ରତି-ୱିଣ୍ଡୋ କୋଟା ଲାଗୁ କରିପାରନ୍ତି। ସମାନ୍ତରାଳ କଲ୍ର ହଠାତ୍ ବୃଦ୍ଧି ଏହାକୁ ଶେଷ କରିଦିଏ, ତେଣୁ ୱିଣ୍ଡୋ ରିସେଟ୍ ହେବା ପର୍ଯ୍ୟନ୍ତ ପରବର୍ତ୍ତୀ ଅନୁରୋଧ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
-2. **ପାସ୍ଥ୍ରୁରେ ତ୍ରୁଟିପୂର୍ଣ୍ଣ ମଡେଲ୍ (`400`/`401`)**: `auto/*` ପୁଲ୍ଗୁଡ଼ିକରେ `opencode` ର ପାସ୍ଥ୍ରୁ ମଡେଲ୍ ସାମିଲ ହୋଇପାରେ, ଯେଉଁଗୁଡ଼ିକ କ୍ୟାଟାଲଗ୍ରେ ପଞ୍ଜୀକୃତ କିନ୍ତୁ ସେମାନଙ୍କର ସକ୍ରିୟ ପରିଚୟପତ୍ର ନାହିଁ (ଉଦାହରଣ ସ୍ୱରୂପ `oc/north-mini-code-free` → `401`)। ଅଟୋ-ରାଉଟର୍ ଗୋଟିଏକୁ ଚେଷ୍ଟା କରେ, ବିଫଳ ହୁଏ, ଏବଂ ଫଲ୍ବ୍ୟାକ୍ ସକ୍ରିୟ ହେବା ପୂର୍ବରୁ ତ୍ରୁଟି ପ୍ରସାରିତ ହୁଏ।
-3. **ସମବର୍ତ୍ତିତା ବୃଦ୍ଧି (`429` ଲୋଡ୍ରେ)**: ଯେତେବେଳେ ଏକାଧିକ agent/cron ସେସନ୍ ଏକାସାଙ୍ଗରେ `auto` କୁ ଅନୁରୋଧ ପଠାନ୍ତି, ସମୁଦାୟ ଅନୁରୋଧ ହାର ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ ସହନଶୀଳତାକୁ ଅତିକ୍ରମ କରେ, ତେଣୁ ବୈଧ କଲ୍ଗୁଡ଼ିକୁ ମଧ୍ୟ ଅପବ୍ୟବହାର ଭାବେ ଚିହ୍ନଟ କରାଯାଏ।
+1. **ପ୍ରଦାତା ରେଟ୍-ସୀମା (`429`)**: ମାଗଣା ସ୍ତରଗୁଡ଼ିକ ପ୍ରତ୍ୟେକ ସମୟ-ଅବଧି ପାଇଁ ଏକ କୋଟା ଲାଗୁ କରିପାରନ୍ତି। ସମାନ୍ତରାଳ ଅନୁରୋଧର ଏକ burst ଏହାକୁ ଶେଷ କରିଦିଏ, ତେଣୁ ସମୟ-ଅବଧି ପୁନଃସେଟ୍ ହେବା ପର୍ଯ୍ୟନ୍ତ ପରବର୍ତ୍ତୀ ଅନୁରୋଧ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।
+2. **passthrough ରେ ଭଙ୍ଗା ମଡେଲ୍ (`400`/`401`)**: `auto/*` pool ଗୁଡ଼ିକରେ ଏପରି passthrough ମଡେଲ୍ ଥାଇପାରେ, ଯେଉଁଗୁଡ଼ିକ catalog ରେ ପଞ୍ଜୀକୃତ ହୋଇଥାଏ କିନ୍ତୁ ସେମାନଙ୍କର ସକ୍ରିୟ credentials ନଥାଏ (→ `401`)। auto-router ଗୋଟିଏ ମଡେଲ୍ ଚେଷ୍ଟା କରି ବିଫଳ ହୁଏ, ଏବଂ fallback ଆରମ୍ଭ ହେବା ପୂର୍ବରୁ ତ୍ରୁଟି ପ୍ରସାରିତ ହୁଏ।
+3. **ସମାନ୍ତରାଳତା ବୃଦ୍ଧି (`429` under load)**: ଏକାଧିକ agent/cron session ଏକାସାଙ୍ଗରେ `auto` ବ୍ୟବହାର କଲେ, ସମୁଦାୟ ଅନୁରୋଧ ହାର ମାଗଣା ପ୍ରଦାତାମାନେ ସହ୍ୟ କରୁଥିବା ସୀମାକୁ ଅତିକ୍ରମ କରେ, ଫଳରେ ବୈଧ ଅନୁରୋଧଗୁଡ଼ିକୁ abusive ଭାବେ ଚିହ୍ନଟ କରାଯାଏ।
 
-**ଯାଞ୍ଚିତ ସମାଧାନ (ସମୁଦାୟ ଦ୍ୱାରା ରିପୋର୍ଟ କରାଯାଇଛି, 2026-08-10)**: ତିନୋଟି environment variables କୁ ଏପରି ଟ୍ୟୁନ୍ କରନ୍ତୁ ଯାହାଦ୍ୱାରା rotation, concurrency ଏବଂ fallback ମାଗଣା-ସ୍ତରର ଅସ୍ଥିରତାକୁ ବିଫଳ ହେବା ପରିବର୍ତ୍ତେ ସମ୍ଭାଳିପାରିବ:
+**ଯାଞ୍ଚିତ ସମାଧାନ (community-reported, 2026-08-10)**: ତିନୋଟି environment variable ସମଯୋଜନ କରନ୍ତୁ, ଯାହାଦ୍ୱାରା rotation, concurrency ଏବଂ fallback ମାଗଣା-ସ୍ତରର ଏହି ପରିବର୍ତ୍ତନଶୀଳତାକୁ ସମ୍ଭାଳିବ, ତାହାରେ ବିଫଳ ହେବ ନାହିଁ:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 ରେ ଅନ୍ୟ ମଡେଲ୍/ପ୍ରଦାନକାରୀକୁ ଯାଆନ୍ତୁ (ତ୍ରୁଟିପୂର୍ଣ୍ଣ ପାସ୍ଥ୍ରୁ ମଡେଲ୍ଗୁଡ଼ିକୁ ଏଡ଼ାଇଯାଏ)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ସ୍ପଷ୍ଟ ହେଭିୱେଟ୍ ପ୍ରବେଶ ସୀମା (ଡିଫଲ୍ଟ ଭାବେ ସେଟ୍ ହୋଇନାହିଁ: କୌଣସି ଅନୁରୋଧ-ଗଣନା ସୀମା ନାହିଁ, ନିମ୍ନର ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ଧୀର ଅପ୍ଷ୍ଟ୍ରିମ୍ ପାଇଁ ସୀମିତ ଅପେକ୍ଷାକୁ RATE_LIMIT_MAX_WAIT_MS ଡିଫଲ୍ଟଠାରୁ ଅଧିକ ବଢ଼ାନ୍ତୁ
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 ରେ ଅନ୍ୟ ମଡେଲ୍/ପ୍ରଦାତାକୁ ବଦଳାନ୍ତୁ (ଭଙ୍ଗା passthrough ମଡେଲ୍ଗୁଡ଼ିକୁ ଏଡ଼ାଇଥାଏ)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ସ୍ପଷ୍ଟ heavyweight admission ସୀମା (ଡିଫଲ୍ଟ ଭାବେ unset: କୌଣସି request-count cap ନାହିଁ, ତଳେ ଥିବା ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ଧୀର upstream ପାଇଁ RATE_LIMIT_MAX_WAIT_MS ଡିଫଲ୍ଟଠାରୁ bounded wait ବଢ଼ାନ୍ତୁ
 ```
 
-ଏଗୁଡ଼ିକୁ OmniRoute ପ୍ରକ୍ରିୟା environment ରେ ସେଟ୍ କରନ୍ତୁ (daemon ରେ, ଉଦାହରଣ ସ୍ୱରୂପ LaunchAgent plist କିମ୍ବା `systemctl edit` ମାଧ୍ୟମରେ), ତା'ପରେ OmniRoute ପୁନଃଚାଳୁ କରନ୍ତୁ। rotation flag ହେଉଛି ସର୍ବାଧିକ ପ୍ରଭାବଶାଳୀ ବ୍ୟବସ୍ଥା: ଏହା ଏକ କଠିନ ବିଫଳତାକୁ ପୁଲ୍ରେ ଥିବା ଏକ ସୁସ୍ଥ ପ୍ରଦାନକାରୀ ବିରୁଦ୍ଧରେ ସ୍ୱଚ୍ଛ ପୁନଃଚେଷ୍ଟାରେ ପରିଣତ କରେ।
+ଏଗୁଡ଼ିକୁ OmniRoute process environment ରେ (daemon ରେ, ଯଥା LaunchAgent plist କିମ୍ବା `systemctl edit` ମାଧ୍ୟମରେ) ସେଟ୍ କରନ୍ତୁ, ତାପରେ OmniRoute କୁ ପୁନଃଆରମ୍ଭ କରନ୍ତୁ। Rotation flag ସବୁଠାରୁ ଅଧିକ ପ୍ରଭାବଶାଳୀ ଏକକ ପଦକ୍ଷେପ: ଏହା hard failure କୁ pool ମଧ୍ୟରେ ଥିବା ଏକ ସୁସ୍ଥ ପ୍ରଦାତା ବିରୋଧରେ ସ୍ୱଚ୍ଛ retry ରେ ପରିଣତ କରେ।
 
-**ଟିପ୍ପଣୀ**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଏକାସାଙ୍ଗରେ କେତେ ହେଭିୱେଟ୍ — ଦୀର୍ଘ-କଣ୍ଟେକ୍ସ୍ଟ — ଅନୁରୋଧ ଚାଲିବ ତାହା ସୀମିତ କରେ; ଏହି ସୀମା ଏକ ପ୍ରବେଶ ଗେଟ୍, ପ୍ରଦାନକାରୀ ହାର ସୀମାକାରୀ ନୁହେଁ। **#503-fanout ଅପଡେଟ୍:** ଏହି var ଆଉ ଡିଫଲ୍ଟ ଭାବେ ସେଟ୍ ହୁଏନାହିଁ (ଏବେ ଏହା କେବଳ ସ୍ପଷ୍ଟ ଭାବେ କନଫିଗର୍ କରାଗଲେ, ଉପରୋକ୍ତ ପରି, ବାଧ୍ୟ ହୁଏ) — ଏହା ପରିବର୍ତ୍ତେ ହେଭିୱେଟ୍ ପ୍ରବେଶ ଏକ ସ୍ୱୟଂ-ବ୍ୟୁତ୍ପନ୍ନ byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ ହୁଏ, ଯାହା host ର ପ୍ରକୃତ memory ceiling ଆଧାରରେ ନିଜକୁ ସ୍କେଲ୍ କରେ; ତେଣୁ ଏକ ନୂଆ deployment ରେ ଏହି var କୁ ଆଦୌ ସେଟ୍ ନ କରି ମଧ୍ୟ ଅତ୍ୟନ୍ତ କମ୍ `503 chat_admission_busy` ପ୍ରତ୍ୟାଖ୍ୟାନ ଦେଖାଯିବା ଉଚିତ; ଏଠାରେ ଏହାକୁ ସ୍ପଷ୍ଟ ଭାବେ ସେଟ୍ କଲେ ମଧ୍ୟ ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା ପରି ଠିକ୍ ଭାବେ କାମ କରେ। ସ୍ପଷ୍ଟ byte-budget override ଗୁଡ଼ିକ 8 MiB–2 GiB ମଧ୍ୟରେ ସୀମିତ ହୁଏ। ଏକ `413 body_exceeds_budget` ଅସ୍ଥାୟୀ ନୁହେଁ: ସେହି byte budget ବଢ଼ାନ୍ତୁ, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` କମାନ୍ତୁ, କିମ୍ବା process memory ceiling ବଢ଼ାନ୍ତୁ। ଏକ `inflight_bytes_budget` shed ହେଉଛି ଅସ୍ଥାୟୀ contention ଏବଂ ଏହା ପୁନଃଚେଷ୍ଟାଯୋଗ୍ୟ ରହେ। ପ୍ରତି-ପ୍ରଦାନକାରୀ ହାର ସୀମିତକରଣ (`open-sse/services/rateLimitManager.ts`) `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, ଏବଂ `RATE_LIMIT_AUTO_ENABLE` ଦ୍ୱାରା ପୃଥକ ଭାବେ ପରିଚାଳିତ ହୁଏ — `.env.example` ଦେଖନ୍ତୁ।
+**ଟିପ୍ପଣୀ**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ଏକାସାଙ୍ଗରେ ଚାଲୁଥିବା heavyweight — ଅର୍ଥାତ୍ ଦୀର୍ଘ-ପରିପ୍ରେକ୍ଷିତ — ଅନୁରୋଧର ସଂଖ୍ୟାକୁ ସୀମିତ କରେ; ଏହି ସୀମା ଏକ admission gate, provider rate limiter ନୁହେଁ। **#503-fanout update:** ଏହି var ଏବେ ଡିଫଲ୍ଟ ଭାବେ ସେଟ୍ ହୁଏ ନାହିଁ (ଉପରେ ଦେଖାଯାଇଥିବା ପରି ସ୍ପଷ୍ଟ ଭାବେ configure କଲେ ମାତ୍ର ଏହା କାର୍ଯ୍ୟକାରୀ ହୁଏ) — heavyweight admission ବଦଳରେ ଏକ auto-derived byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ ହୁଏ, ଯାହା host ର ପ୍ରକୃତ memory ceiling ଅନୁସାରେ ନିଜକୁ scale କରେ। ତେଣୁ ଏହି var ସେଟ୍ ନକରିଥିବା ଏକ ନୂତନ deployment ରେ `503 chat_admission_busy` ପ୍ରତ୍ୟାଖ୍ୟାନ ବହୁତ କମ୍ ଦେଖାଯିବ; ଏଠାରେ ଏହାକୁ ସ୍ପଷ୍ଟ ଭାବେ ସେଟ୍ କଲେ ମଧ୍ୟ ଦଲିଲଭୁକ୍ତ ଭାବେ ସମ୍ପୂର୍ଣ୍ଣ ଠିକ୍ ଭାବରେ କାମ କରିବ। ସ୍ପଷ୍ଟ byte-budget override ଗୁଡ଼ିକ 8 MiB–2 GiB ପର୍ଯ୍ୟନ୍ତ ସୀମିତ ହୁଏ। `413 body_exceeds_budget` transient ନୁହେଁ: ସେହି byte budget ବଢ଼ାନ୍ତୁ, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` କିମ୍ବା saved request body limit କମାନ୍ତୁ, କିମ୍ବା process memory ceiling ବଢ଼ାନ୍ତୁ। `inflight_bytes_budget` shed ଅସ୍ଥାୟୀ contention ଅଟେ ଏବଂ ଏହା retry କରାଯୋଗ୍ୟ ରହେ। ପ୍ରତ୍ୟେକ ପ୍ରଦାତା ପାଇଁ rate limiting (`open-sse/services/rateLimitManager.ts`) ପୃଥକ ଭାବରେ `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, ଏବଂ `RATE_LIMIT_AUTO_ENABLE` ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ ହୁଏ — `.env.example` ଦେଖନ୍ତୁ।
 
-**ଏହା କାମ କରିଛି କି ନାହିଁ କିପରି ଯାଞ୍ଚ କରିବେ**: ଅତି କମ୍ ସମୟ ବ୍ୟବଧାନରେ ଆପଣଙ୍କ agent/cronକୁ ଦୁଇଥର ଚଲାନ୍ତୁ ଏବଂ ଉଭୟ ସଫଳ ହେଉଛି କି ନାହିଁ ନିଶ୍ଚିତ କରନ୍ତୁ। ସମାଧାନ ପୂର୍ବରୁ, ଦ୍ୱିତୀୟ ରନ୍ରେ ସାଧାରଣତଃ `429`/`401` ତ୍ରୁଟି ଆସେ। ସମାଧାନ ପରେ, ବିଫଳତାଗୁଡ଼ିକ (ଯଦି କିଛି ଥାଏ) ସ୍ୱଚ୍ଛ ଭାବରେ ପୁନଃଚେଷ୍ଟା କରାଯାଏ ଏବଂ କଲ୍ଟି ସମ୍ପୂର୍ଣ୍ଣ ହୁଏ। ଆପଣ `curl /monitoring/health` ମଧ୍ୟ ଚଲାଇପାରିବେ ଏବଂ provider ସଂଯୋଗଗୁଡ଼ିକରେ `rateLimitedUntil` ଫିଲ୍ଡ ସହିତ ପ୍ରଭାବିତ providerଗୁଡ଼ିକ ପାଇଁ `circuitBreakers.providerBreakers[].state` ଉପରେ ନଜର ରଖିପାରିବେ — stateଟି `CLOSED`, `DEGRADED`, `OPEN`, କିମ୍ବା `HALF_OPEN` ମଧ୍ୟରୁ ଗୋଟିଏ ହୋଇଥାଏ (`src/shared/utils/circuitBreaker.ts` ଦେଖନ୍ତୁ), ଏବଂ ବାରମ୍ବାର ବିଫଳ ହେଉଥିବା providerଟି reset window ଗୋଟିଏ probeକୁ ଅନୁମତି ଦେବା ପୂର୍ବରୁ `CLOSED → DEGRADED → OPEN`କୁ ପରିବର୍ତ୍ତିତ ହେବ (`HALF_OPEN`)।
+**Upgrade note: ଏକ saved request body limit ଏବେ chat ଉପରେ ମଧ୍ୟ ପ୍ରୟୋଗ ହୁଏ।** Settings > Advanced > Request Body Limit ଅଧୀନରେ ପୂର୍ବରୁ ସେଭ୍ ହୋଇଥିବା ଏକ ସୀମା (`maxBodySizeMb`) ଏବେ `/v1/chat/completions` ଏବଂ `/v1/responses` ଉପରେ ମଧ୍ୟ ପ୍ରୟୋଗ ହୁଏ। ଏହି ପରିବର୍ତ୍ତନ ପୂର୍ବରୁ, ସେଭ୍ ହୋଇଥିବା ମୂଲ୍ୟ ଯେତେ ହେଉନା କାହିଁକି, ଏହି ଦୁଇଟି route 50 MB ପର୍ଯ୍ୟନ୍ତ ଗ୍ରହଣ କରୁଥିଲା; ତେଣୁ କମ୍ saved limit ଥିବା ଏକ install ଏହାଠାରୁ ବଡ଼ chat body ପ୍ରତ୍ୟାଖ୍ୟାନ କରିବା ଆରମ୍ଭ କରେ। ଯେଉଁ install ରେ କେବେ ମଧ୍ୟ କୌଣସି limit ସେଭ୍ ହୋଇନାହିଁ, ସେଠାରେ 50 MB ଡିଫଲ୍ଟ ରହେ।
 
-**ଯଦି ତଥାପି 429 ଦେଖନ୍ତି**: ସେହି provider ପାଇଁ ସକ୍ରିୟ accountଟି ବାସ୍ତବରେ ତାହାର _quota_ ଶେଷ କରିଦେଇଛି (କେବଳ rate ନୁହେଁ)। OmniRoute dashboard → Providers → Accountsରେ ସେହି provider ପାଇଁ ଏକ ଦ୍ୱିତୀୟ account ଯୋଡ଼ନ୍ତୁ, କିମ୍ବା ଅନ୍ୟ ଏକ ମାଗଣା provider (ଯଥା `routeway`, `auggie`) ମିଶାନ୍ତୁ। Rotation କେବଳ ଅସ୍ଥାୟୀ rate/400/401 ସମସ୍ୟାରେ ସାହାଯ୍ୟ କରେ; quota ସମ୍ପୂର୍ଣ୍ଣ ଶେଷ ହୋଇଗଲେ ଏକ ଦ୍ୱିତୀୟ credential କିମ୍ବା ଭିନ୍ନ provider ଆବଶ୍ୟକ।
+ପ୍ରତ୍ୟାଖ୍ୟାନଟି ଏକ HTTP `413`, ଯେଉଁଥିରେ `error.code` `PAYLOAD_TOO_LARGE` ଏବଂ `error.type` `payload_too_large` ଭାବେ ସେଟ୍ ହୋଇଥାଏ। ଏହାର message କାର୍ଯ୍ୟକାରୀ limit ର ନାମ ଦେଖାଏ: ଘୋଷିତ `Content-Length` ଯଦି ଏହାଠାରୁ ଅଧିକ ହୁଏ, ତେବେ `Request body too large. Maximum allowed: 10 MB`; କିମ୍ବା ପ୍ରକୃତରେ ପଢ଼ାଯାଇଥିବା bytes ଯଦି ଅଧିକ ହୁଏ, ତେବେ `Request body too large for chat completions (max 10 MB).`। ଏହା ଉପରୋକ୍ତ `413 body_exceeds_budget` ସହିତ ସମାନ ନୁହେଁ; ସେହିଟି memory budget ରୁ ଆସେ ଏବଂ ଏହି setting ଦ୍ୱାରା ପରିବର୍ତ୍ତିତ ହୁଏ ନାହିଁ।
 
-**ଯଦି vision modelଗୁଡ଼ିକରେ (`auto/vision`, `bazaarlink/*`) 403 ଦେଖନ୍ତି**: ସଂଯୁକ୍ତ accountରେ vision ସମ୍ମିଳିତ ଥିବା ଏକ paid plan ନାହିଁ, କିମ୍ବା API keyରେ ପର୍ଯ୍ୟାପ୍ତ permission ନାହିଁ। provider dashboardରେ ଯାଞ୍ଚ କରନ୍ତୁ ଯେ key scopeରେ vision/multimodal ସମ୍ମିଳିତ ଅଛି, କିମ୍ବା ଏକ paid tier account ସଂଯୋଗ କରି ତାହାକୁ vision target ଭାବେ ରଖନ୍ତୁ।
+Limit ବଢ଼ାଇବା ପାଇଁ `/dashboard/settings/advanced` ରେ ଏକ ଅଧିକ ମୂଲ୍ୟ ସେଭ୍ କରନ୍ତୁ, କିମ୍ବା `PATCH /api/settings` ସହିତ `{"maxBodySizeMb": 50}` ପଠାନ୍ତୁ। 1 ରୁ 500 MB ପର୍ଯ୍ୟନ୍ତ ମୂଲ୍ୟ ଗ୍ରହଣ କରାଯାଏ, ଏହା ପୁନଃଆରମ୍ଭ ବିନା ପ୍ରୟୋଗ ହୁଏ, ଏବଂ 50 ପୂର୍ବତନ chat limit କୁ ପୁନଃସ୍ଥାପନ କରେ। ଆଉ ଦୁଇଟି limit ଏକ ବଡ଼ body କୁ ଅଟକାଇପାରେ: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` ସେଟ୍ ଥିଲେ saved limit କୁ ମଧ୍ୟ ସୀମିତ କରେ, ଏବଂ Kubernetes ingress annotation `proxy-body-size` (ପ୍ରଦତ୍ତ manifests ରେ `50m`) କୁ 50 MB ଠାରୁ ଅଧିକ ପାଇଁ ପୃଥକ ଭାବେ ବଢ଼ାଇବାକୁ ପଡ଼ିବ।
+
+**ଏହା କାମ କରିଛି କିପରି ଯାଞ୍ଚ କରିବେ**: ନିଜର agent/cron କୁ ଅତି କମ୍ ସମୟ ମଧ୍ୟରେ ଦୁଇଥର ଚଲାନ୍ତୁ ଏବଂ ଉଭୟ ସଫଳ ହେଉଛି କି ନିଶ୍ଚିତ କରନ୍ତୁ। ସମାଧାନ ପୂର୍ବରୁ, ଦ୍ୱିତୀୟ run ସାଧାରଣତଃ `429`/`401` ଦେଖାଉଥିଲା। ସମାଧାନ ପରେ, ବିଫଳତା ହେଲେ ମଧ୍ୟ ସ୍ୱଚ୍ଛ ଭାବେ retry ହୁଏ ଏବଂ call ସମ୍ପୂର୍ଣ୍ଣ ହୁଏ। ଆପଣ `curl /monitoring/health` ମଧ୍ୟ ଚଲାଇପାରିବେ ଏବଂ provider connections ରେ ଥିବା `rateLimitedUntil` field ଏବଂ ପ୍ରଭାବିତ ପ୍ରଦାତାମାନଙ୍କ ପାଇଁ `circuitBreakers.providerBreakers[].state` ନିରୀକ୍ଷଣ କରିପାରିବେ — state ମଧ୍ୟରୁ ଗୋଟିଏ `CLOSED`, `DEGRADED`, `OPEN`, କିମ୍ବା `HALF_OPEN` ହୁଏ (`src/shared/utils/circuitBreaker.ts` ଦେଖନ୍ତୁ), ଏବଂ ନିରନ୍ତର ବିଫଳ ହେଉଥିବା ପ୍ରଦାତା reset window ଏକ probe କୁ ଅନୁମତି ଦେବା ପୂର୍ବରୁ `CLOSED → DEGRADED → OPEN` କୁ ବଦଳିଯିବ (`HALF_OPEN`)।
+
+**ଯଦି ଏବେ ମଧ୍ୟ 429 ଦେଖୁଛନ୍ତି**: ସେହି ପ୍ରଦାତା ପାଇଁ ସକ୍ରିୟ account ପ୍ରକୃତରେ ଏହାର _quota_ ଶେଷ କରିଦେଇଛି (କେବଳ rate ନୁହେଁ)। OmniRoute dashboard → Providers → Accounts ରେ ସେହି ପ୍ରଦାତା ପାଇଁ ଦ୍ୱିତୀୟ account ଯୋଡ଼ନ୍ତୁ, କିମ୍ବା ଅନ୍ୟ ଏକ ମାଗଣା ପ୍ରଦାତା (ଯଥା `routeway`, `auggie`) ସହିତ ମିଶାନ୍ତୁ। Rotation କେବଳ transient rate/400/401 ରେ ସାହାଯ୍ୟ କରେ; hard quota exhaustion ପାଇଁ ଦ୍ୱିତୀୟ credential କିମ୍ବା ଭିନ୍ନ ପ୍ରଦାତା ଆବଶ୍ୟକ।
+
+**ଯଦି vision models (`auto/vision`, `bazaarlink/*`) ରେ 403 ଦେଖୁଛନ୍ତି**: ସଂଯୁକ୍ତ account ରେ vision ଅନ୍ତର୍ଭୁକ୍ତ କରୁଥିବା paid plan ନାହିଁ, କିମ୍ବା API key ର permissions ପର୍ଯ୍ୟାପ୍ତ ନୁହେଁ। Provider dashboard ରେ key scope ରେ vision/multimodal ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି କି ଯାଞ୍ଚ କରନ୍ତୁ, କିମ୍ବା ଏକ paid tier account ସଂଯୋଗ କରି ଏହାକୁ vision target ଭାବେ ରଖନ୍ତୁ।
 
 ---
 
@@ -90,48 +96,48 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm install-scripts ଅବରୋଧିତ ଚେତାବନୀ (global install)
+## npm install-scripts ଅବରୋଧିତ ଚେତାବନୀ (ଗ୍ଲୋବାଲ୍ ଇନ୍ଷ୍ଟଲ୍)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` ଚଲାଇବାବେଳେ, ନୂତନ npm ସଂସ୍କରଣଗୁଡ଼ିକ (v11+ ଏବଂ v12+) package lifecycle script-ଗୁଡ଼ିକୁ ଡିଫଲ୍ଟ ଭାବେ ଅବରୋଧ କରନ୍ତି ଏବଂ ଏକ install-scripts ଚେତାବନୀ ପ୍ରଦର୍ଶନ କରନ୍ତି:
+`npm install -g omniroute` ଚଲାଇବା ସମୟରେ, ନୂତନ npm ସଂସ୍କରଣଗୁଡ଼ିକ (v11+ ଏବଂ v12+) ଡିଫଲ୍ଟ ଭାବେ ପ୍ୟାକେଜ୍ ଲାଇଫସାଇକେଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ଅବରୋଧ କରନ୍ତି ଏବଂ ଏକ install-scripts ଚେତାବନୀ ପ୍ରଦର୍ଶନ କରନ୍ତି:
 
 ```
-npm warn install-scripts 7ଟି package-ର install script ଅବରୋଧ କରାଯାଇଛି, କାରଣ ସେଗୁଡ଼ିକ allowScripts ଦ୍ୱାରା ଅନ୍ତର୍ଭୁକ୍ତ ନୁହେଁ:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### ଏହି ଚେତାବନୀକୁ ଅଣଦେଖା କରାଯାଇପାରିବ କି?
 
-**ଆଂଶିକ ଭାବେ, କିନ୍ତୁ script ବିନା ଚଲାଇବା ସୁପାରିସ କରାଯାଏ ନାହିଁ।** OmniRoute-ରେ ସୁଚାରୁ fallback ବ୍ୟବସ୍ଥା ଅନ୍ତର୍ଭୁକ୍ତ: standalone bundle-ରୁ native `better-sqlite3` binding ଲୋଡ୍ କରାଯାଇ ନ ପାରିଲେ, applicationଟି `node:sqlite` କିମ୍ବା `sql.js` ପରି ବିକଳ୍ପ driver ମାଧ୍ୟମରେ fallback କରେ ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) ଦେଖନ୍ତୁ)। Serverଟି ତଥାପି ଆରମ୍ଭ ହେବ, କିନ୍ତୁ `sql.js` ପରି WASM fallback-ରେ ଚଲାଇବା ଦ୍ୱାରା SQLite WAL (Write-Ahead Logging) mode ଅକ୍ଷମ ହୁଏ ଏବଂ memory ଓ disk-sync overhead ବୃଦ୍ଧି ପାଏ।
+**ଆଂଶିକ ଭାବେ, କିନ୍ତୁ ସ୍କ୍ରିପ୍ଟ ବିନା ଚଲାଇବା ସୁପାରିସ କରାଯାଏ ନାହିଁ।** OmniRoute ରେ ସୁଚାରୁ ଫଲ୍ବ୍ୟାକ୍ ବ୍ୟବସ୍ଥା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି: ଯଦି ସ୍ୱତନ୍ତ୍ର ବଣ୍ଡଲ୍ରୁ ନେଟିଭ୍ `better-sqlite3` ବାଇଣ୍ଡିଂଗୁଡ଼ିକୁ ଲୋଡ୍ କରାଯାଇପାରେ ନାହିଁ, ତେବେ ଆପ୍ଲିକେସନ୍ଟି `node:sqlite` କିମ୍ବା `sql.js` ପରି ବିକଳ୍ପ ଡ୍ରାଇଭର୍ଗୁଡ଼ିକୁ ଫଲ୍ବ୍ୟାକ୍ କରେ ([SQLite ରନ୍ଟାଇମ୍ ରିଜୋଲ୍ୟୁସନ୍](../ops/SQLITE_RUNTIME.md) ଦେଖନ୍ତୁ)। ସର୍ଭର୍ ତଥାପି ଆରମ୍ଭ ହେବ, କିନ୍ତୁ `sql.js` ପରି WASM ଫଲ୍ବ୍ୟାକ୍ରେ ଚଲାଇବା SQLite WAL (Write-Ahead Logging) ମୋଡ୍କୁ ଅକ୍ଷମ କରେ ଏବଂ ମେମୋରି ଓ ଡିସ୍କ-ସିଙ୍କ୍ ଓଭର୍ହେଡ୍ ବଢ଼ାଏ।
 
-### ପ୍ରକୃତରେ କେଉଁ script-ଗୁଡ଼ିକ ଆବଶ୍ୟକ?
+### ପ୍ରକୃତରେ କେଉଁ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକ ଆବଶ୍ୟକ?
 
-ଅବରୋଧିତ ସମସ୍ତ script OmniRoute ଚଲାଇବା ପାଇଁ ଅତ୍ୟାବଶ୍ୟକ ନୁହେଁ:
+OmniRoute ଚଲାଇବା ପାଇଁ ସମସ୍ତ ଅବରୋଧିତ ସ୍କ୍ରିପ୍ଟ ଅତ୍ୟାବଶ୍ୟକ ନୁହେଁ:
 
-- **ଅତ୍ୟାବଶ୍ୟକ (`omniroute`, `better-sqlite3`):** OmniRoute ଏକ Next.js standalone application bundle (`dist/`) ରୁ ଚାଲେ। ଇନଷ୍ଟଲେସନ୍ ସମୟରେ, npm top-level `node_modules/better-sqlite3/` ମଧ୍ୟରେ host-specific native SQLite driver ଡାଉନଲୋଡ୍ କିମ୍ବା compile କରେ। ତା’ପରେ OmniRoute-ର `postinstall` script (`scripts/build/postinstall.mjs`) ଏହି host-specific binary-ଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରି `dist/node_modules/` ମଧ୍ୟକୁ କପି କରେ, ଯାହାଦ୍ୱାରା standalone server ସେଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରେ। `omniroute`-ର postinstall script ଅବରୋଧିତ ହେଲେ, ଏହି copy ପଦକ୍ଷେପଟି ଏଡ଼ାଇ ଦିଆଯାଏ।
-- **ଇଚ୍ଛାଧୀନ/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** ଏଗୁଡ଼ିକ build helper, watcher tool କିମ୍ବା system keychain utility। ସେଗୁଡ଼ିକୁ ଅନୁମତି ଦେଲେ build ଚେତାବନୀଗୁଡ଼ିକ ପ୍ରତିରୋଧ ହୁଏ, କିନ୍ତୁ ମୂଳ routing କାର୍ଯ୍ୟକାରିତା ପାଇଁ ସେଗୁଡ଼ିକ ଆବଶ୍ୟକ ନୁହେଁ।
-- **ବାଦ୍ ଦିଆଯାଇଛି (`onnxruntime-node`):** ସ୍ଥାନୀୟ AI embedding ପାଇଁ ଏକ ଇଚ୍ଛାଧୀନ dependency ଏବଂ OmniRoute ଚଲାଇବା ପାଇଁ ଏହା **ଆବଶ୍ୟକ ନୁହେଁ**। ଏହାର postinstall script NuGet ରୁ ପ୍ରାୟ ~300MB CUDA asset ଡାଉନଲୋଡ୍ କରେ; ସମର୍ଥିତ hardware-ରେ ସ୍ଥାନୀୟ ONNX acceleration ବ୍ୟବହାର କରିବାକୁ ଆପଣ ସ୍ପଷ୍ଟ ଭାବେ ଇଚ୍ଛା କରୁ ନଥିଲେ, ଏହାକୁ allow-list-ରେ ସାମିଲ କରନ୍ତୁ ନାହିଁ।
+- **ଅତ୍ୟାବଶ୍ୟକ (`omniroute`, `better-sqlite3`):** OmniRoute ଏକ Next.js ସ୍ୱତନ୍ତ୍ର ଆପ୍ଲିକେସନ୍ ବଣ୍ଡଲ୍ (`dist/`) ରୁ ଚାଲେ। ଇନ୍ଷ୍ଟଲେସନ୍ ସମୟରେ, npm ଶୀର୍ଷ-ସ୍ତରୀୟ `node_modules/better-sqlite3/` ମଧ୍ୟରେ ହୋଷ୍ଟ-ନିର୍ଦ୍ଦିଷ୍ଟ ନେଟିଭ୍ SQLite ଡ୍ରାଇଭର୍କୁ ଡାଉନ୍ଲୋଡ୍ କିମ୍ବା କମ୍ପାଇଲ୍ କରେ। ତା’ପରେ OmniRoute ର `postinstall` ସ୍କ୍ରିପ୍ଟ (`scripts/build/postinstall.mjs`) ଏହି ହୋଷ୍ଟ-ନିର୍ଦ୍ଦିଷ୍ଟ ବାଇନାରିଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରି `dist/node_modules/` ମଧ୍ୟକୁ କପି କରେ, ଯାହାଦ୍ୱାରା ସ୍ୱତନ୍ତ୍ର ସର୍ଭର୍ ସେଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରେ। ଯଦି `omniroute` ର postinstall ସ୍କ୍ରିପ୍ଟ ଅବରୋଧିତ ହୁଏ, ତେବେ ଏହି କପି ପଦକ୍ଷେପଟି ଛାଡ଼ି ଦିଆଯାଏ।
+- **ଇଚ୍ଛାଧୀନ/ଟ୍ରାନ୍ଜିଟିଭ୍ (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** ଏଗୁଡ଼ିକ ବିଲ୍ଡ ସହାୟକ, ୱାଚର୍ ଟୁଲ୍ କିମ୍ବା ସିଷ୍ଟମ୍ କିଚେନ୍ ଉପଯୋଗିତା। ସେଗୁଡ଼ିକୁ ଅନୁମତି ଦେବା ବିଲ୍ଡ ଚେତାବନୀକୁ ପ୍ରତିରୋଧ କରେ, କିନ୍ତୁ ମୂଳ ରାଉଟିଂ କାର୍ଯ୍ୟକାରିତା ପାଇଁ ସେଗୁଡ଼ିକ ଆବଶ୍ୟକ ନୁହେଁ।
+- **ବହିଷ୍କୃତ (`onnxruntime-node`):** ସ୍ଥାନୀୟ AI ଏମ୍ବେଡିଂ ପାଇଁ ଏକ ଇଚ୍ଛାଧୀନ ଡିପେଣ୍ଡେନ୍ସି ଏବଂ OmniRoute ଚଲାଇବା ପାଇଁ ଏହା **ଆବଶ୍ୟକ ନୁହେଁ**। ଏହାର postinstall ସ୍କ୍ରିପ୍ଟ NuGet ରୁ ~300MB CUDA ଆସେଟ୍ ଡାଉନ୍ଲୋଡ୍ କରେ; ସମର୍ଥିତ ହାର୍ଡୱେର୍ରେ ସ୍ଥାନୀୟ ONNX ତ୍ୱରଣ ବ୍ୟବହାର କରିବାକୁ ଆପଣ ସ୍ପଷ୍ଟ ଭାବେ ଇଚ୍ଛା ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହାକୁ ଅନୁମତି-ତାଲିକାରେ ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ ନାହିଁ।
 
 ### ସୁପାରିସକୃତ ସମାଧାନ
 
-global install ସମୟରେ ଆବଶ୍ୟକ install script-ଗୁଡ଼ିକୁ ଅନୁମତି ଦେବା ଏବଂ ଚେତାବନୀଗୁଡ଼ିକୁ ନିରବ କରିବା ପାଇଁ, OmniRoute ଓ ଏହାର native dependency-ଗୁଡ଼ିକ ପାଇଁ `--allow-scripts` ପାସ୍ କରନ୍ତୁ:
+ଗ୍ଲୋବାଲ୍ ଇନ୍ଷ୍ଟଲ୍ ସମୟରେ ଆବଶ୍ୟକ ଇନ୍ଷ୍ଟଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ଅନୁମତି ଦେବା ଏବଂ ଚେତାବନୀଗୁଡ଼ିକୁ ନିରବ କରିବା ପାଇଁ, OmniRoute ଏବଂ ଏହାର ନେଟିଭ୍ ଡିପେଣ୍ଡେନ୍ସିଗୁଡ଼ିକ ପାଇଁ `--allow-scripts` ପାସ୍ କରନ୍ତୁ:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-ବିକଳ୍ପ ଭାବେ, ଆପଣଙ୍କ user account-ର ସମସ୍ତ global installation ପାଇଁ ଏହାକୁ ସ୍ଥାୟୀ ଭାବେ configure କରିବାକୁ:
+ବିକଳ୍ପ ଭାବେ, ଆପଣଙ୍କ ବ୍ୟବହାରକାରୀ ଆକାଉଣ୍ଟରେ ସମସ୍ତ ଗ୍ଲୋବାଲ୍ ଇନ୍ଷ୍ଟଲେସନ୍ ପାଇଁ ଏହାକୁ ସ୍ଥାୟୀ ଭାବେ କନଫିଗର୍ କରିବାକୁ:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### ଆପଣଙ୍କ ଇନଷ୍ଟଲେସନ୍ ଯାଞ୍ଚ କରନ୍ତୁ
+### ଆପଣଙ୍କ ଇନ୍ଷ୍ଟଲେସନ୍ ଯାଞ୍ଚ କରନ୍ତୁ
 
-ଇନଷ୍ଟଲେସନ୍ ପରେ, native binding ଏବଂ runtime environment ସଠିକ୍ ଅବସ୍ଥାରେ ଅଛି ବୋଲି ନିଶ୍ଚିତ କରିବାକୁ built-in diagnostic tool ଚଲାନ୍ତୁ:
+ଇନ୍ଷ୍ଟଲେସନ୍ ପରେ, ନେଟିଭ୍ ବାଇଣ୍ଡିଂ ଏବଂ ରନ୍ଟାଇମ୍ ପରିବେଶ ସୁସ୍ଥ ଅଛି ବୋଲି ନିଶ୍ଚିତ କରିବା ପାଇଁ ବିଲ୍ଟ-ଇନ୍ ଡାଇଗ୍ନୋଷ୍ଟିକ୍ ଟୁଲ୍ ଚଲାନ୍ତୁ:
 
 ```bash
 omniroute doctor
@@ -840,6 +846,30 @@ omniroute serve --ready-timeout 180000
 
 `OMNIROUTE_READY_TIMEOUT_MS` ବିଷୟରେ ସମ୍ପୂର୍ଣ୍ଣ ବିବରଣୀ ପାଇଁ
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ଦେଖନ୍ତୁ।
+
+---
+
+## CCR / dedup ଇସ୍ୟୁ।
+
+ସଙ୍କୋଚନ CCR (`ccr`) ଏବଂ `session-dedup` ଉପକରଣଗୁଡ଼ିକ ପାଇଁ ଡାଇଗ୍ନୋଷ୍ଟିକ୍ ମ୍ୟାଟ୍ରିକ୍ସ। ପୂର୍ଣ୍ଣ ଅପରେଟର୍ ରେଫରେନ୍ସ ପାଇଁ (ମାର୍କର୍ସ, ପୂର୍ବ ସର୍ତ୍ତ, ପ୍ରତି ଟୁଲ୍ ସ୍କୋପ୍, ପୁନରୁଦ୍ଧାର ପୃଷ୍ଠା) [ସଙ୍କୋଚନ ଇଞ୍ଜିନ୍ → ପ୍ରାକ୍ / ଅପରେଟର୍ ଗାଇଡ୍](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ଦେଖନ୍ତୁ।
+
+| ଲକ୍ଷଣ                                                                                         | ସମ୍ଭବତ cause କାରଣ।                                                                                                                                     | ଯାଞ୍ଚ କରନ୍ତୁ।                                                                                                                 | ଠିକ କରନ୍ତୁ।                                                                                                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                | ମାର୍ଗ-ଗାର୍ଡ ଲୁପ୍ ବ୍ୟାକ୍ auth, ପରିବହନ ତ୍ରୁଟି ନୁହେଁ। କ q ଣସି `Bearer`, କିମ୍ବା `mcp:connect`/`manage`/`admin` ବିନା ଏକ ଚାବି, `/api/mcp/` ମାର୍ଗରେ ପହଞ୍ଚିଲା। | ଅନୁରୋଧ no/invalid `Authorization` ହେଡର୍ ବହନ କଲା।                                                                              | ଏକ ବ valid ଧ `Bearer` କି ପଠାନ୍ତୁ। ଏକ ସୁଦୂର ଚାବି `mcp:connect` ଧାରଣ କରିପାରିବ ( `/api/mcp/` ଲୋକାଲ୍-କେବଳ ଖୋଦ-ଆଉଟ୍) ଏବଂ ଏହା ଆବଶ୍ୟକ କରୁଥିବା ନିର୍ଦ୍ଦିଷ୍ଟ read/write ପରିସରକୁ ଧାରଣ କରିପାରିବ।                                                                                     |
+| **ବ୍ଲକ ମିଳିଲା ନାହିଁ** — `omniroute_ccr_retrieve` ହ୍ୟାଶକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ।                    | ହ୍ୟାସ୍ ଏକ 24-ହେକ୍ସ ମୂଲ୍ୟ ନୁହେଁ କିମ୍ବା ଭୁଲ୍ କପି କରାଯାଇଥିଲା, କିମ୍ବା ବ୍ଲକ୍ ପୂର୍ବରୁ ମିଆଦ ପୂର୍ଣ୍ଣ ହୋଇଛି / ବାହାର କରାଯାଇଛି।                                   | `[CCR retrieve hash=…]` ମାର୍କର 24-ହେକ୍ସ ମୂଲ୍ୟ ସହିତ ହ୍ୟାସ୍ ତୁଳନା କରନ୍ତୁ। ଷ୍ଟୋର ସ୍ଥିତି ପାଇଁ `omniroute_ccr_stats` ଯାଞ୍ଚ କରନ୍ତୁ। | ମାର୍କରରୁ 24-ହେକ୍ସ ହ୍ୟାସ୍ ଭର୍ବାଟିମ୍ କପି କରନ୍ତୁ। ଯଦି ବ୍ଲକ୍ ପ୍ରକୃତରେ ଚାଲିଯାଇଛି, ଏହା ଏହାର TTL ଅତିକ୍ରମ କରିସାରିଛି କିମ୍ବା ସ୍ଥାୟୀ ଷ୍ଟୋର୍ରେ ପହଞ୍ଚି ନାହିଁ (512 KB ରୁ ଅଧିକ ବ୍ଲକ୍, ଏବଂ କ୍ଲାଉଡ୍ ଚାଲିବା ସମୟରେ ପ୍ରତ୍ୟେକ ବ୍ଲକ୍, କେବଳ ସ୍ମୃତି ରଖନ୍ତୁ ଏବଂ ପୁନ rest ଆରମ୍ଭରୁ ବଞ୍ଚନ୍ତୁ ନାହିଁ)। |
+| **CCR no-op** — ଏକ ବ୍ଲକ ସଙ୍କୋଚିତ ନୁହେଁ (ପାଠ୍ୟ ଅପରିବର୍ତ୍ତିତ ଫେରି ଆସେ)                          | ସଙ୍କୋଚନ ସୀମା ତଳେ ଅବରୋଧ କରନ୍ତୁ, କିମ୍ବା CCR ଇଞ୍ଜିନ୍ / ମୋଡ୍ ନିଷ୍କ୍ରିୟ ଅଟେ।                                                                                | ସକ୍ରିୟ ସଙ୍କୋଚନ `strategy`/`enabled` ଏବଂ ବ୍ଲକ ଆକାର ବନାମ ସୀମା ଯାଞ୍ଚ କରନ୍ତୁ।                                                     | CCR ସକ୍ଷମ କରନ୍ତୁ (କିମ୍ବା ଏକ ଷ୍ଟାକଡ୍ ମୋଡ୍ ଯାହା ଏହାକୁ ଚଲାଇଥାଏ) ଏବଂ ନିଶ୍ଚିତ କରନ୍ତୁ ଯେ ବ୍ଲକଟି ସଂରକ୍ଷଣ ପାଇଁ ଯଥେଷ୍ଟ ବଡ଼। ଏକ ନୋ-ଅପ୍ ଏକ ତ୍ରୁଟି ନୁହେଁ — ଏହା "ସଙ୍କୋଚନ କରିବାର କିଛି ନୁହେଁ।"                                                                                          |
+| **dedup marker** — `[dedup:ref sha=…]` ଆଉଟପୁଟ୍ ରେ ଦେଖାଯାଏ।                                    | **ଉଦ୍ଦେଶ୍ୟମୂଳକ ଲୁକ୍-ବ୍ୟାକ୍।** , କ୍ଷତି କିମ୍ବା ତ୍ରୁଟି ନୁହେଁ। `session-dedup` ଏଲିଡ୍ ଟେକ୍ସଟ୍ ପୂର୍ବରୁ ସମାନ ଅଧିବେଶନର ପୂର୍ବ ପର୍ଯ୍ୟାୟରେ ପଠାଯାଇଥିଲା।            | ସମାନ ପାଠ୍ୟ ଅଧିବେଶନରେ ପୂର୍ବରୁ ଦେଖାଯାଉଥିବା ନିଶ୍ଚିତ କରନ୍ତୁ।                                                                      | — କିଛି କରନ୍ତୁ ନାହିଁ ଏକ ଉପକରଣକୁ ଡାକନ୍ତୁ ନାହିଁ ଏବଂ ଏହାକୁ ପୁନ str ନିର୍ମାଣ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ ନାହିଁ। ପ୍ରଥମ ଘଟଣା ହେଉଛି କାନୋନିକାଲ୍ କପି; ସାମ୍ପ୍ରତିକ ଟର୍ନ କେବେ ପୁନ rew ଲିଖିତ ନୁହେଁ, ଏହା ପରବର୍ତ୍ତୀ ପର୍ଯ୍ୟାୟରେ କଟାଯାଇଥାଏ।                                                       |
+| **କୋଡ୍ ମୋଡ୍** — `omniroute_ccr_*` ସାଧନଗୁଡ଼ିକ `tools[]` / CCR ନିର୍ଦ୍ଦେଶରେ ଅନୁପସ୍ଥିତ (OpenCode) | OpenCode କୋଡ୍ ମୋଡ୍ (ଡିଫଲ୍ଟ) `tools[]` ରୁ MCP ଉପକରଣଗୁଡ଼ିକୁ ଲୁଚାଇ ମଡେଲକୁ କେବଳ ଦେଶୀ ଉପକରଣଗୁଡ଼ିକୁ ବିଜ୍ଞାପନ କରେ।                                            | `codemode` ପାଇଁ OpenCode MCP ସର୍ଭର ପ୍ରବେଶକୁ ଯାଞ୍ଚ କରନ୍ତୁ।                                                                     | ସର୍ଭର ଏଣ୍ଟ୍ରିରେ `codemode: false` ସେଟ୍ କରନ୍ତୁ (a** କ୍ଲାଏଣ୍ଟ** ସେଟିଂ) ତେଣୁ MCP ଉପକରଣଗୁଡିକ ବିଜ୍ଞାପନ କରାଯାଏ। CCR ପୁନରୁଦ୍ଧାର-ପ୍ରୋଟୋକଲ୍ ନିର୍ଦ୍ଦେଶ ବନ୍ଦ ହୋଇଯାଏ: `omniroute` ନାମକ ଏକ ସର୍ଭର `omniroute_omniroute_ccr_retrieve` ଏକ୍ସପୋଜର୍ କରେ, ଏବଂ `_` ଏକ ମେଳକ ବିଛିନ୍ନକାରୀ ନୁହେଁ। |
+
+ଅଧିକ ଲକ୍ଷଣ:
+
+| ଲକ୍ଷଣ                                                                                              | ସମ୍ଭବତ cause କାରଣ।                                                                                                                                                                                     | ଠିକ କରନ୍ତୁ।                                                                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                            | ଏକ MCP ସାଧନ ତ୍ରୁଟି ଫଳାଫଳ (`isError: true`), HTTP 403 ନୁହେଁ। କଲ୍ କରୁଥିବା ବ୍ୟକ୍ତିଙ୍କ ଚାବିରେ ଆବଶ୍ୟକ ପରିସର ଅଭାବ।                                                                                           | ପ୍ରତି ଟୁଲ୍ ଟେବୁଲରୁ ପରିସର ଯୋଡନ୍ତୁ (ଅପରେଟର୍ ଗାଇଡ୍ ଦେଖନ୍ତୁ)। ଯଥା `omniroute_ccr_retrieve` `read:compression` ଆବଶ୍ୟକ କରେ।                                                                                             |
+| `Unknown Mcp-Session-Id`                                                                           | ଷ୍ଟ୍ରିମେବଲ୍- HTTP ଅଧିବେଶନ ନିଷ୍କ୍ରିୟ ହୋଇଗଲା ଏବଂ ଅମଳ ହେଲା (`OMNIROUTE_MCP_SESSION_IDLE_MS`); ସର୍ଭର HTTP 404 ର ଉତ୍ତର ଦେଇଥାଏ।                                                                              | — do ଅଧିବେଶନକୁ ପୁନ on ସଂଯୋଗ କିମ୍ବା ପୁନ rest ଆରମ୍ଭ କରନ୍ତୁ।** ନୁହେଁ** ଏକ ଚାବି ଘୂର୍ଣ୍ଣନ କରନ୍ତୁ, ଏକ ପରିସର ପରିବର୍ତ୍ତନ କରନ୍ତୁ, କିମ୍ବା ଏକ ଉପକରଣର ନାମ ପରିବର୍ତ୍ତନ କରନ୍ତୁ। ଏହା ଏକ 401/403. ନୁହେଁ।                           |
+| ଏକ ଉପକରଣ ଫଳାଫଳରେ`JSON Parse error` / `Unterminated string`।                                        | MCP ଟୁଲ୍ ଟେକ୍ସଟ୍ `mcpAccessibility.maxTextChars` (ଡିଫଲ୍ଟ `50000`) ମଧ୍ୟ- JSON ଚାରିପାଖରେ କ୍ଲିପ୍ ହୋଇଛି।                                                                                                   | ଖାଲି ପୂର୍ଣ୍ଣ ପରିବର୍ତ୍ତେ ଏକ ପେଜେଡ୍ `mode` ବ୍ୟବହାର କରନ୍ତୁ: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, କିମ୍ବା `mode:"stats"`। ଆଙ୍ଗୁଠିର ନିୟମ: `chars > 40000` → ଏକ `mode` ବ୍ୟବହାର କରନ୍ତୁ।           |
+| `Failed to open SSE stream`                                                                        | ପରିବହନ `streamable` ଥିବାବେଳେ ଗ୍ରାହକ ଉତ୍ତରାଧିକାରୀ `/api/mcp/sse` ସିଙ୍ଗଲେଟନ୍ ହିଟ୍ କରିଛନ୍ତି।                                                                                                              | କ୍ଲାଏଣ୍ଟକୁ `/api/mcp/sse` ପରିବର୍ତ୍ତେ `/api/mcp/stream` (ଷ୍ଟ୍ରିମେବଲ୍ ଏଣ୍ଡପଏଣ୍ଟ) ରେ ସୂଚିତ କରନ୍ତୁ।                                                                                                                   |
+| **ମୃତ stdio ହୃଦସ୍ପନ୍ଦନ।** HTTP ପରିବହନ ଚାଲିଥିବାବେଳେ — `mcp-heartbeat.json` `pidAlive: false` ଦେଖାଏ। | ହୃତପିଣ୍ଡ ଫାଇଲ ହେଉଛି ଏକ stdio ଅବଶିଷ୍ଟ (stale PID, କିମ୍ବା ଏକ ଭିନ୍ନ ସଂସ୍କରଣ); HTTP ପରିବହନ ପ୍ରକ୍ରିୟା ଚାଲିଛି ଏବଂ ଏହା ପରିବର୍ତ୍ତେ `getMcpHttpStatus()` ରୁ ସ୍ଥିତି ରିପୋର୍ଟ କରନ୍ତୁ (କ file ଣସି ଫାଇଲ ଲେଖା ନାହିଁ)। | କ action ଣସି କାର୍ଯ୍ୟ — ପରିବହନ ସୁସ୍ଥ ନୁହେଁ। ସତ୍ୟ ହେଉଛି `/api/mcp/status` ରୁ `httpTransport.online` / `startedAt`, ହୃଦସ୍ପନ୍ଦନ ଫାଇଲ ନୁହେଁ। ସର୍ଭରକୁ ପୁନ rest ଆରମ୍ଭ କରନ୍ତୁ ନାହିଁ କିମ୍ବା ଏକ ଚାବି ଘୂର୍ଣ୍ଣନ କରନ୍ତୁ ନାହିଁ। |
 
 ---
 

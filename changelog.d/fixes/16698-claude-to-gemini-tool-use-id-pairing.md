@@ -1,1 +1,0 @@
-- **fix(translator):** Claude → Gemini/Antigravity pairs each tool_result with its own tool_use when an id is reused across turns, ending a persistent 400 INVALID_ARGUMENT in long sessions ([#16698](https://github.com/diegosouzapw/OmniRoute/pull/16698)) — thanks @WYSTAF

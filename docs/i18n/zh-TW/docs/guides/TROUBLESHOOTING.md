@@ -39,31 +39,37 @@ OmniRoute 的常見問題與解決方案。
 
 ### 免費提供者的速率限制（429 / 400 / 401）
 
-**症狀**：搭配免費／無須驗證的提供者（opencode、auggie 等）使用 `model: "auto"` 時，您會間歇性收到 `HTTP 429`、`400` 或 `401`，而非正常回答。稍後使用相同提示詞重試時，請求會成功，但自動化作業（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
+**症狀**：使用 `model: "auto"` 搭配免費／無驗證提供者（auggie 等）時，偶爾會收到 `HTTP 429`、`400` 或 `401`，而不是答案。稍後片刻重試相同提示時請求會成功，但自動化工作流程（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
 
-**根本原因**：三種獨立的失敗模式會疊加發生：
+**根本原因**：三種獨立的失敗模式疊加在一起：
 
-1. **提供者速率限制（`429`）**：免費方案可能會針對每個時間區段強制執行配額。突發的大量平行呼叫會耗盡配額，因此後續請求會遭到拒絕，直到時間區段重設為止。
-2. **直通模式中的故障模型（`400`/`401`）**：`auto/*` 集區可能包含來自 `opencode` 的直通模型；這些模型雖已登錄於目錄中，卻沒有有效的認證資訊（例如 `oc/north-mini-code-free` → `401`）。自動路由器會嘗試其中一個模型，但該模型失敗後，錯誤會在備援機制啟動前就向外傳播。
-3. **並行放大效應（負載下出現 `429`）**：當多個代理程式／cron 工作階段同時呼叫 `auto` 時，彙總請求速率會超過免費提供者可容許的範圍，導致合法呼叫被標記為濫用。
+1. **提供者速率限制（`429`）**：免費方案可能會執行每個時間視窗的配額限制。大量平行呼叫會耗盡配額，因此下一個請求會遭拒，直到時間視窗重設。
+2. **直通模式中的損壞模型（`400`/`401`）**：`auto/*` 集合可能包含已在目錄中註冊、但沒有有效認證資訊的直通模型（→ `401`）。自動路由器嘗試使用其中一個模型並失敗，錯誤會在啟動回退機制前向外傳播。
+3. **並行放大效應（負載下的 `429`）**：當多個代理程式／cron 工作階段同時呼叫 `auto` 時，累積請求速率會超過免費提供者可承受的程度，因此正常請求也會被標記為濫用。
 
-**已驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行控制與備援機制吸收免費方案的不穩定狀況，而不是因此失敗：
+**已驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行處理與回退機制吸收免費方案的波動，而不是因此失敗：
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 遇到 400/401 時切換至其他模型／提供者（略過故障的直通模型）
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確設定重量級請求的准入上限（預設未設定：無請求數量上限，請參閱下方註記）
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 將有限的等待時間提高至超過慢速上游的 RATE_LIMIT_MAX_WAIT_MS 預設值
+export OMNIROUTE_ROTATE_ON_400=true           # 在 400/401 時切換至其他模型／提供者（略過損壞的直通模型）
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確的高負載請求上限（預設未設定：不限制請求數量，請參閱下方注意事項）
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 將有限等待時間提高到高於慢速上游的 RATE_LIMIT_MAX_WAIT_MS 預設值
 ```
 
-請在 OmniRoute 程序的環境中設定這些變數（常駐程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是單一效益最高的調整項目：它能將硬性失敗轉換為對集區內健康提供者的透明重試。
+請在 OmniRoute 程序環境中設定這些變數（守護程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是影響力最高的單一設定：它會將硬性失敗轉換為針對集合中健康提供者的透明重試。
 
-**註記**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 會限制可同時執行的重量級（長上下文）請求數量；此限制是准入閘門，而不是提供者速率限制器。**#503-fanout 更新：**此變數不再預設設定（現在只有在明確設定時才會生效，如上所示）——重量級請求的准入改由自動衍生的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）管控；該預算會根據主機的實際記憶體上限自動調整，因此全新部署即使完全不設定此變數，也應該會大幅減少 `503 chat_admission_busy` 拒絕；在此明確設定仍會完全依照文件所述運作。明確指定的位元組預算覆寫值會被限制在 8 MiB–2 GiB 之間。`413 body_exceeds_budget` 並非暫時性問題：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`，或提高程序的記憶體上限。`inflight_bytes_budget` 卸載是暫時性的資源爭用，仍可重試。各提供者的速率限制（`open-sse/services/rateLimitManager.ts`）則由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 與 `RATE_LIMIT_AUTO_ENABLE` 分別控制——請參閱 `.env.example`。
+**注意**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 限制同時執行的高負載（長內容）請求數量；此限制是請求准入閘門，而不是提供者速率限制。**#503-fanout 更新：** 此變數現在預設不再設定（只有在明確設定時才會生效，如上所示）——高負載請求准入現在改由自動衍生的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控制，該預算會根據主機的實際記憶體上限自行調整。因此，新的部署即使完全不設定此變數，也應該會大幅減少 `503 chat_admission_busy` 拒絕；在此處明確設定仍完全按照文件說明運作。明確的位元組預算覆寫值會限制在 8 MiB–2 GiB。`413 body_exceeds_budget` 並非暫時性錯誤：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` 或已儲存的請求本文限制，或提高程序的記憶體上限。`inflight_bytes_budget` 造成的卸載是暫時性競爭，仍可重試。每個提供者的速率限制（`open-sse/services/rateLimitManager.ts`）則由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 和 `RATE_LIMIT_AUTO_ENABLE` 分別管理——請參閱 `.env.example`。
 
-**如何驗證修正是否生效**：快速連續執行兩次代理程式／cron，並確認兩次都成功。修正前，第二次執行通常會拋出 `429`／`401`。修正後，系統會自動重試失敗的請求（若有），並完成呼叫。你也可以執行 `curl /monitoring/health`，觀察提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——狀態會是 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會依序從 `CLOSED → DEGRADED → OPEN` 切換，直到重設時間窗允許探測請求通過（`HALF_OPEN`）。
+**升級注意事項：已儲存的請求本文限制現在也會套用至聊天功能。** 先前在 Settings > Advanced > Request Body Limit 下儲存的限制（`maxBodySizeMb`），現在也會套用至 `/v1/chat/completions` 和 `/v1/responses`。在此變更之前，無論儲存了什麼設定，這兩個路由最多都接受 50 MB，因此儲存較低限制的安裝現在會開始拒絕超過該限制的聊天本文。從未儲存限制的安裝則會維持 50 MB 預設值。
 
-**如果仍然看到 429**：該提供者目前使用中的帳戶確實已耗盡其_配額_（而不只是觸及速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為同一提供者新增第二個帳戶，或混用另一個免費提供者（例如 `routeway`、`auggie`）。輪替機制只對暫時性的速率限制／400／401 有幫助；若配額已完全耗盡，則需要第二組憑證或改用其他提供者。
+拒絕回應的 HTTP 狀態碼為 `413`，其中 `error.code` 設為 `PAYLOAD_TOO_LARGE`，`error.type` 設為 `payload_too_large`。訊息會指出目前生效的限制：當宣告的 `Content-Length` 超過限制時，訊息為 `Request body too large. Maximum allowed: 10 MB`；當實際讀取的位元組超過限制時，訊息為 `Request body too large for chat completions (max 10 MB).`。這與上方的 `413 body_exceeds_budget` 不同；後者來自記憶體預算，不會受到此設定變更影響。
 
-**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶沒有包含視覺功能的付費方案，或 API 金鑰的權限不足。請在提供者儀表板中確認金鑰的權限範圍包含視覺／多模態功能，或連線至付費方案帳戶，並將其保留為視覺模型的目標帳戶。
+若要提高限制，請在 `/dashboard/settings/advanced` 儲存較高的值，或傳送 `PATCH /api/settings` 並附上 `{"maxBodySizeMb": 50}`。接受的值為 1 至 500 MB，套用時不需要重新啟動，而設定為 50 可還原先前的聊天限制。另外仍有兩個限制可能會阻止較大的本文：設定後的限制還會受到 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`（若已設定）的上限限制；此外，Kubernetes ingress 註解 `proxy-body-size`（隨附資訊清單中為 `50m`）也必須另外提高，才能允許超過 50 MB 的內容。
+
+**如何驗證是否生效**：快速連續執行代理程式／cron 工作兩次，確認兩次都成功。在修正前，第二次執行通常會擲出 `429`／`401`。修正後，即使發生失敗，也會透明地進行重試並完成呼叫。你也可以執行 `curl /monitoring/health`，並查看提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——狀態值為 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會在重設視窗允許探測請求通過（`HALF_OPEN`）之前，依序從 `CLOSED → DEGRADED → OPEN` 轉換。
+
+**如果仍然看到 429**：該提供者的作用中帳戶確實已耗盡其 _配額_（不只是速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為相同提供者新增第二個帳戶，或混用其他免費提供者（例如 `routeway`、`auggie`）。輪替只能協助處理暫時性的速率／400／401 問題；硬性配額耗盡則需要第二組認證資訊或改用其他提供者。
+
+**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶缺少包含視覺功能的付費方案，或 API 金鑰的權限不足。請在提供者儀表板中確認金鑰範圍包含視覺／多模態功能，或連線至付費方案帳戶，並將其保留為視覺目標。
 
 ---
 
@@ -90,11 +96,11 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm 安裝指令碼遭封鎖警告（全域安裝）
+## npm install-scripts 遭封鎖警告（全域安裝）
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-執行 `npm install -g omniroute` 時，較新的 npm 版本（v11+ 和 v12+）預設會封鎖套件生命週期指令碼，並顯示安裝指令碼警告：
+執行 `npm install -g omniroute` 時，較新版本的 npm（v11+ 和 v12+）預設會封鎖套件生命週期指令碼，並顯示 install-scripts 警告：
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +110,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### 可以忽略此警告嗎？
 
-**可以部分忽略，但不建議在不執行指令碼的情況下運作。** OmniRoute 內含平穩的備援機制：如果無法從獨立套件組合載入原生 `better-sqlite3` 繫結，應用程式會依序改用其他驅動程式，例如 `node:sqlite` 或 `sql.js`（請參閱 [SQLite 執行階段解析](../ops/SQLITE_RUNTIME.md)）。伺服器仍可啟動，但使用 `sql.js` 之類的 WASM 備援方案時，會停用 SQLite WAL（預寫式記錄）模式，並增加記憶體與磁碟同步負擔。
+**部分可以，但不建議在不執行指令碼的情況下運作。** OmniRoute 包含完善的後備機制：如果無法從獨立套件載入原生 `better-sqlite3` 繫結，應用程式會改用 `node:sqlite` 或 `sql.js` 等替代驅動程式（請參閱 [SQLite 執行階段解析](../ops/SQLITE_RUNTIME.md)）。伺服器仍會啟動，但使用 `sql.js` 這類 WASM 後備方案時，將停用 SQLite WAL（預寫式記錄）模式，並增加記憶體與磁碟同步的額外負擔。
 
 ### 實際需要哪些指令碼？
 
 並非所有遭封鎖的指令碼都是執行 OmniRoute 所必需的：
 
-- **必要（`omniroute`、`better-sqlite3`）：** OmniRoute 從 Next.js 獨立應用程式套件組合（`dist/`）執行。安裝期間，npm 會在頂層 `node_modules/better-sqlite3/` 中下載或編譯主機專用的原生 SQLite 驅動程式。接著，OmniRoute 的 `postinstall` 指令碼（`scripts/build/postinstall.mjs`）會驗證這些主機專用的二進位檔，並將其複製到 `dist/node_modules/`，讓獨立伺服器可以存取它們。如果 `omniroute` 的 postinstall 指令碼遭到封鎖，便會略過此複製步驟。
-- **選用／遞移（`keytar`、`@parcel/watcher`、`@swc/core`、`protobufjs`、`esbuild`）：** 這些是建置輔助工具、監看工具或系統鑰匙圈公用程式。允許執行這些指令碼可避免建置警告，但核心路由功能不需要它們。
-- **排除（`onnxruntime-node`）：** 這是用於本機 AI 嵌入的選用依賴項，OmniRoute 的執行**不需要**它。其 postinstall 指令碼會從 NuGet 下載約 300MB 的 CUDA 資源；除非您明確打算在支援的硬體上使用本機 ONNX 加速，否則請勿將它加入允許清單。
+- **必要（`omniroute`、`better-sqlite3`）：** OmniRoute 從 Next.js 獨立應用程式套件（`dist/`）執行。安裝期間，npm 會下載或編譯頂層 `node_modules/better-sqlite3/` 中主機專用的原生 SQLite 驅動程式。接著，OmniRoute 的 `postinstall` 指令碼（`scripts/build/postinstall.mjs`）會驗證這些主機專用二進位檔，並將其複製到 `dist/node_modules/`，讓獨立伺服器可以存取。如果 `omniroute` 的 postinstall 指令碼遭到封鎖，就會略過此複製步驟。
+- **選用／遞移相依套件（`keytar`、`@parcel/watcher`、`@swc/core`、`protobufjs`、`esbuild`）：** 這些是建置輔助工具、檔案監看工具或系統鑰匙圈公用程式。允許其執行可避免建置警告，但核心路由功能並不需要它們。
+- **排除（`onnxruntime-node`）：** 這是用於本機 AI 嵌入的選用相依套件，OmniRoute 執行時**不需要**它。其 postinstall 指令碼會從 NuGet 下載約 300MB 的 CUDA 資產；除非您明確打算在支援的硬體上使用本機 ONNX 加速，否則請勿將其加入允許清單。
 
 ### 建議的修正方式
 
-若要在全域安裝期間允許執行必要的安裝指令碼並消除警告，請針對 OmniRoute 及其原生依賴項傳入 `--allow-scripts`：
+若要在全域安裝期間允許執行必要的安裝指令碼並消除警告，請為 OmniRoute 及其原生相依套件傳入 `--allow-scripts`：
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-或者，若要為您使用者帳戶下的所有全域安裝永久設定此選項：
+或者，若要針對您使用者帳戶中的所有全域安裝永久設定此選項：
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### 驗證您的安裝
 
-安裝後，請執行內建診斷工具，確認原生繫結及執行階段環境均正常：
+安裝後，請執行內建的診斷工具，以確保原生繫結與執行階段環境皆運作正常：
 
 ```bash
 omniroute doctor
@@ -799,6 +805,30 @@ omniroute serve --ready-timeout 180000
 預設值為 60 000 毫秒（60 秒）。此警告僅供參考；伺服器會繼續在背景啟動，並在啟動完成後可供存取。
 
 如需 `OMNIROUTE_READY_TIMEOUT_MS` 的完整詳細資訊，請參閱 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)。
+
+---
+
+## CCR / 重複資料刪除問題
+
+壓縮CCR (`ccr`) 和`session-dedup`工具的診斷矩陣。有關完整的運算子參考（標記、先決條件、每個工具範圍、檢索分頁），請參閱[壓縮引擎→先決條件/運算子指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+| 症狀                                                                            | 可能的原因                                                                                                      | 核實                                                                                                   | 使固定                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                  | 路由保護環回身份驗證，不是傳輸錯誤。沒有`Bearer`或沒有`mcp:connect`/`manage`/`admin`的密鑰到達`/api/mcp/`路線。 | 該請求攜帶no/invalid `Authorization` header。                                                          | 發送有效的`Bearer`鑰。遠端密鑰可以保存`mcp:connect` （授權`/api/mcp/`僅本地剝離）及其所需的特定read/write範圍。                                                                                 |
+| **未找到區塊**— `omniroute_ccr_retrieve`拒絕哈希                                | 哈希值不是 24 十六進制值或複製錯誤，或區塊已過期/被驅逐。                                                       | 將雜湊值與`[CCR retrieve hash=…]`標記中的 24 十六進位值進行比較；檢查`omniroute_ccr_stats`的儲存狀態。 | 從標記中逐字複製 24 十六進位雜湊值。如果該區塊確實消失了，則它已超過其TTL或從未到達持久儲存（超過 512 KB區塊，以及雲端運行時上的每個區塊，僅保留記憶體，並且無法在重新啟動後倖存）。            |
+| **CCR無操作**—塊未壓縮（文字回傳不變）                                          | 阻止低於壓縮閾值，或CCR引擎/模式處於非活動狀態。                                                                | 檢查主動壓縮`strategy`/`enabled`以及區塊大小與閾值。                                                   | 啟用CCR （或運行它的堆疊模式）並確認該區塊足夠大以至於值得儲存。無操作不是錯誤—它是「沒有可壓縮的內容」。                                                                                       |
+| **去重標記**— `[dedup:ref sha=…]`出現在輸出中                                   | **有意回頭看**，不是損失或錯誤。 `session-dedup`刪除了在同一會話的較早回合中已發送的文字。                      | 確認會話早期出現了相同的文字。                                                                         | —什麼都不做，不呼叫工具，也不嘗試重建它。第一次出現的是規範副本；當前回合永遠不會被重寫，它會在以後的回合中進行重複資料刪除。                                                                   |
+| **代碼模式**`tools[]` / CCR指令中缺少— `omniroute_ccr_*`工具，未註入 (OpenCode) | OpenCode程式碼模式（預設）僅向模型通告本機工具，對`tools[]`隱藏MCP工具。                                        | 檢查OpenCode MCP伺服器條目中的`codemode`。                                                             | 在伺服器條目上設定`codemode: false` （a**客戶**設定），以便宣傳MCP工具。 CCR -protocol 指令保持關閉狀態：名為`omniroute`伺服器公開`omniroute_omniroute_ccr_retrieve`，且`_`不是匹配的分隔符號。 |
+
+更多症狀：
+
+| 症狀                                                                         | 可能的原因                                                                                                                  | 使固定                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                      | MCP工具錯誤結果 (`isError: true`)，而不是HTTP 403。呼叫者的密鑰缺少所需的範圍。                                             | 從每個工具表中新增範圍（請參閱操作員指南）。例如`omniroute_ccr_retrieve`需要`read:compression`。                                                          |
+| `Unknown Mcp-Session-Id`                                                     | Streamable-HTTP 會話閒置並被收穫 (`OMNIROUTE_MCP_SESSION_IDLE_MS`)；伺服器回答HTTP 404。                                    | 重新連線或重新啟動會話— do**不是**旋轉密鑰、更改範圍或重新命名工具。這不是401/403.                                                                        |
+| 工具結果中的`JSON Parse error` / `Unterminated string`                       | MCP工具文字剪輯在`mcpAccessibility.maxTextChars` （預設`50000`）中間 JSON 周圍。                                            | 使用分頁`mode`而不是裸露的完整： `mode:"grep"`、 `mode:"lines"`、 `mode:"head"`、 `mode:"tail"`或`mode:"stats"`。經驗法則： `chars > 40000` →使用`mode`。 |
+| `Failed to open SSE stream`                                                  | 當傳輸為`streamable`時，客戶端使用舊版`/api/mcp/sse`單例。                                                                  | 將客戶端指向`/api/mcp/stream` （可串流端點）而不是`/api/mcp/sse`。                                                                                        |
+| **死 stdio 心跳**— `mcp-heartbeat.json`在HTTP傳輸啟動時顯示`pidAlive: false` | 心跳檔案是 stdio 剩餘的檔案（過時的PID或不同的版本）； HTTP傳輸正在進行中，並從`getMcpHttpStatus()`報告狀態（無檔案寫入）。 | 沒有採取任何行動—運輸是健康的。事實是來自`/api/mcp/status` `httpTransport.online` / `startedAt` ，而不是心跳檔。不要重新啟動伺服器或輪換密鑰。            |
 
 ---
 

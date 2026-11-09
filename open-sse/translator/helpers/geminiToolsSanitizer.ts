@@ -1,6 +1,11 @@
 import { createHash } from "crypto";
 
 import { cleanJSONSchemaForAntigravity } from "./geminiHelper.ts";
+import { createSchemaBudget } from "./schemaBudget.ts";
+import type { SchemaBudget } from "./schemaBudget.ts";
+import { logger } from "../../utils/logger.ts";
+
+const toolsLog = logger("GEMINI_TOOLS");
 
 type GeminiFunctionDeclaration = {
   name: string;
@@ -16,6 +21,8 @@ type GeminiTool = {
 type GeminiToolSanitizationOptions = {
   stripNamespace?: boolean;
   toolNameMap?: Map<string, string> | null;
+  /** Request-wide `$ref` expansion budget; one is created per call when absent. */
+  schemaBudget?: SchemaBudget;
 };
 
 const MAX_GEMINI_TOOL_NAME_LENGTH = 64;
@@ -61,7 +68,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * schema becomes an empty object schema. Only the top level is touched — nested property
  * schemas are left to cleanJSONSchemaForAntigravity.
  */
-function toGeminiParametersSchema(raw: unknown): Record<string, unknown> {
+export function toGeminiParametersSchema(raw: unknown): Record<string, unknown> {
   if (!isRecord(raw)) {
     return { type: "object", properties: {} };
   }
@@ -217,6 +224,26 @@ function toGeminiGoogleSearchTool(tool: Record<string, unknown>): GeminiTool | n
   return null;
 }
 
+/**
+ * Function declarations win over native `googleSearch`: Gemini rejects mixing them, and dropping
+ * the caller's tools would break agent clients. Native search is only kept when there are no
+ * declarations; when it is dropped, say so instead of failing silently.
+ */
+function assembleGeminiTools(
+  functionDeclarations: GeminiFunctionDeclaration[],
+  googleSearchTool: GeminiTool | null
+): GeminiTool[] | undefined {
+  if (functionDeclarations.length > 0) {
+    if (googleSearchTool) {
+      toolsLog.warn(
+        "native web search dropped: Gemini cannot mix googleSearch with function declarations, keeping function tools"
+      );
+    }
+    return [{ functionDeclarations }];
+  }
+  return googleSearchTool ? [googleSearchTool] : undefined;
+}
+
 export function buildGeminiTools(
   tools: unknown,
   options: GeminiToolSanitizationOptions = {}
@@ -231,6 +258,7 @@ export function buildGeminiTools(
   // sanitized form, or the same raw name repeated across tool groups).
   const seenToolNames = new Set<string>();
   let googleSearchTool: GeminiTool | null = null;
+  const schemaOptions = { budget: options.schemaBudget ?? createSchemaBudget(), location: "tools" };
 
   for (const rawTool of tools) {
     if (!isRecord(rawTool)) {
@@ -255,7 +283,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -268,7 +299,10 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof rawTool.description === "string" ? rawTool.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(rawTool.input_schema)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(rawTool.input_schema),
+            schemaOptions
+          ),
         });
       }
       continue;
@@ -286,21 +320,14 @@ export function buildGeminiTools(
         functionDeclarations.push({
           name: sanitizedName,
           description: typeof fn.description === "string" ? fn.description : "",
-          parameters: cleanJSONSchemaForAntigravity(toGeminiParametersSchema(fn.parameters)),
+          parameters: cleanJSONSchemaForAntigravity(
+            toGeminiParametersSchema(fn.parameters),
+            schemaOptions
+          ),
         });
       }
     }
   }
 
-  const result: GeminiTool[] = [];
-
-  if (googleSearchTool) {
-    return [googleSearchTool];
-  }
-
-  if (functionDeclarations.length > 0) {
-    result.push({ functionDeclarations });
-  }
-
-  return result.length > 0 ? result : undefined;
+  return assembleGeminiTools(functionDeclarations, googleSearchTool);
 }

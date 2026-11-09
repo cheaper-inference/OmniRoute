@@ -3,6 +3,7 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import type { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix.ts";
 import {
   AUTO_TEMPLATE_VARIANTS,
+  FLAT_TIER_OVERLAY_IDS,
   VALID_AUTO_VARIANTS,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import {
@@ -15,6 +16,7 @@ import {
   type ModelFamily,
 } from "@omniroute/open-sse/services/autoCombo/modelFamily.ts";
 import { getCachedSettings } from "@/lib/db/readCache";
+import { isAutoRequestResolvedCapabilitiesEnabled } from "@/shared/utils/featureFlags";
 import {
   createInvocationId,
   startAutoEvaluationTrace,
@@ -37,11 +39,8 @@ function classifyAutoModel(
   const recognizedBuiltInAuto =
     model === "auto" || Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model);
   if (Object.prototype.hasOwnProperty.call(AUTO_TEMPLATE_VARIANTS, model)) {
-    // auto/best-free must carry spec.tier="free" so virtualFactory applies the
-    // free-tier candidate filter (excludes paid backends). Mirrors the
-    // hardcoded spec in builtinCatalog.ts:createBuiltinAutoCombo. Without this,
-    // chat.ts routes auto/best-free as plain auto/cheap (no tier filter).
-    const spec = model === "auto/best-free" ? { tier: "free" as const } : undefined;
+    const tier = FLAT_TIER_OVERLAY_IDS[model];
+    const spec = tier ? { tier } : undefined;
     return { variant: AUTO_TEMPLATE_VARIANTS[model], spec, recognizedBuiltInAuto: true };
   }
   if (!model.startsWith("auto/")) return { recognizedBuiltInAuto };
@@ -150,7 +149,9 @@ export async function createVirtualAutoCombo(
       state.spec,
       apiKeyId,
       state.model,
-      invocationId
+      invocationId,
+      // #16419 opt-in: resolved capabilities also feed the snapshot weights.
+      isAutoRequestResolvedCapabilitiesEnabled()
     );
     virtualCombo.name = state.model;
     virtualCombo.id = state.model;

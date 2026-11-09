@@ -1,1 +1,0 @@
-- **fix(logging):** request capture now masks credential query parameters (e.g. `?key=`) in logged provider URLs and the live pending-request detail, masks `*-secret`/`*-password` headers, and writes call-log artifacts and log archives with 0600/0700 permissions ([#16484](https://github.com/diegosouzapw/OmniRoute/pull/16484)) — thanks @ryanngit, @omar-nahhas

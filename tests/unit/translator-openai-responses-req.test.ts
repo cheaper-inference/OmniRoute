@@ -76,10 +76,12 @@ test("Responses -> Chat converts instructions, inputs, function calls, outputs, 
         name: "read_file",
         description: "Read",
         parameters: { type: "object" },
-        strict: undefined,
       },
     },
   ]);
+  // An undeclared Responses `strict` must not leak into Chat as a `strict` key.
+  const firstTool = (result as { tools: Array<{ function: object }> }).tools[0];
+  assert.equal("strict" in firstTool.function, false);
   (assert as any).deepEqual((result as any).tool_choice, {
     type: "function",
     function: { name: "read_file" },

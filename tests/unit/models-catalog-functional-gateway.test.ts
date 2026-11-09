@@ -35,7 +35,11 @@ test("catalog post-filters do not add mirrors when gate off (default)", async ()
     prefixMode: "dual",
     aliasToProviderId: {},
   });
-  assert.deepEqual(out, models);
+  // Post-filters also attach `pricing` (catalogPricing.ts); compare everything else.
+  assert.deepEqual(
+    out.map(({ pricing: _pricing, ...entry }) => entry),
+    models
+  );
 });
 
 test("final catalog permission filtering does not let a mirror inherit base access", async () => {

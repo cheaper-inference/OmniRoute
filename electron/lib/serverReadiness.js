@@ -11,6 +11,37 @@ function buildReadinessUrl(baseUrl) {
   return `${baseUrl.replace(/\/+$/, "")}/api/health/ping`;
 }
 
+/**
+ * One-shot health probe. Resolves true on any successful HTTP response.
+ * @param {string} url
+ * @param {{ fetchFn?: typeof fetch, requestTimeoutMs?: number }} [options]
+ * @returns {Promise<boolean>}
+ */
+async function probeServer(url, options = {}) {
+  const { fetchFn = globalThis.fetch, requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS } = options;
+
+  const controller = new AbortController();
+  let timeoutId;
+
+  try {
+    const response = await Promise.race([
+      fetchFn(url, { signal: controller.signal }),
+      new Promise((resolve) => {
+        timeoutId = setTimeout(() => {
+          controller.abort();
+          resolve(null);
+        }, requestTimeoutMs);
+      }),
+    ]);
+
+    return response?.ok === true;
+  } catch {
+    return false;
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+  }
+}
+
 async function waitForServer(url, timeoutMs = DEFAULT_TIMEOUT_MS, options = {}) {
   const {
     fetchFn = globalThis.fetch,
@@ -25,26 +56,8 @@ async function waitForServer(url, timeoutMs = DEFAULT_TIMEOUT_MS, options = {}) 
   while (nowFn() - startedAt < timeoutMs) {
     const remainingMs = timeoutMs - (nowFn() - startedAt);
     const attemptTimeoutMs = Math.max(1, Math.min(requestTimeoutMs, remainingMs));
-    const controller = new AbortController();
-    let timeoutId;
 
-    try {
-      const response = await Promise.race([
-        fetchFn(url, { signal: controller.signal }),
-        new Promise((resolve) => {
-          timeoutId = setTimeout(() => {
-            controller.abort();
-            resolve(null);
-          }, attemptTimeoutMs);
-        }),
-      ]);
-
-      if (response?.ok) return true;
-    } catch {
-      /* server not ready yet */
-    } finally {
-      if (timeoutId !== undefined) clearTimeout(timeoutId);
-    }
+    if (await probeServer(url, { fetchFn, requestTimeoutMs: attemptTimeoutMs })) return true;
 
     const pollRemainingMs = timeoutMs - (nowFn() - startedAt);
     if (pollRemainingMs <= 0) break;
@@ -57,5 +70,6 @@ async function waitForServer(url, timeoutMs = DEFAULT_TIMEOUT_MS, options = {}) 
 
 module.exports = {
   buildReadinessUrl,
+  probeServer,
   waitForServer,
 };

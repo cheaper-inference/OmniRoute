@@ -1,5 +1,5 @@
 import { cloneLogPayload } from "@/lib/logPayloads";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "./numeric.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { jsonLength } from "./jsonSize.ts";
 
@@ -393,6 +393,7 @@ type ResponseSnapshot = {
   output: unknown;
   usage: JsonRecord | null;
   metadata: JsonRecord;
+  error?: unknown;
 };
 
 function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
@@ -423,6 +424,7 @@ function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
     output: cloneLogPayload(Array.isArray(resp.output) ? resp.output : []),
     usage: resp.usage && typeof resp.usage === "object" ? { ...asRecord(resp.usage) } : null,
     metadata: cloneLogPayload(asRecord(resp.metadata)),
+    ...(resp.error !== undefined ? { error: cloneLogPayload(resp.error) } : {}),
   });
 
   return {
@@ -472,6 +474,7 @@ function createResponsesReducer(fallbackModel?: string | null): SummaryReducer {
           status: picked.status || (completedSnapshot ? "completed" : "in_progress"),
           created_at: picked.created_at || Math.floor(Date.now() / 1000),
           metadata: picked.metadata,
+          ...(picked.error !== undefined ? { error: picked.error } : {}),
         };
       }
 
@@ -950,6 +953,10 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
 
     getEvents() {
       return events.map((event) => cloneLogPayload(event));
+    },
+
+    getEventCount() {
+      return events.length + droppedEvents;
     },
 
     // The reducer-computed summary, built incrementally from EVERY pushed

@@ -52,6 +52,7 @@ type LMArenaExecutorTestAccess = {
     modelAMessageId: string;
     modelBMessageId?: string;
     recaptchaV3Token: string | null;
+    cx?: string;
     userMessage: {
       content: string;
       experimental_attachments: unknown[];
@@ -287,6 +288,11 @@ describe("LMArena Executor", () => {
     assert.equal(arenaBody.modelBId, undefined, "Should not set modelBId for direct mode");
     assert.equal(arenaBody.modelBMessageId, undefined, "Should not set modelBMessageId");
     assert.equal(arenaBody.recaptchaV3Token, null);
+    assert.equal(
+      "cx" in arenaBody,
+      false,
+      "Should not attach a cx blob unless the operator supplied one (or opted in, #16895)"
+    );
     assert.deepEqual(arenaBody.userMessage.experimental_attachments, []);
     assert.deepEqual(arenaBody.userMessage.metadata, {});
     assert.ok(

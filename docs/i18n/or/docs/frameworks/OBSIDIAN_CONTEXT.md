@@ -30,36 +30,35 @@ OmniRoute ଏକ **Obsidian** ଭଲ୍ଟ ସହିତ **ପ୍ରସଙ୍ଗ 
   (HTTP `27123`ରେ, `27124`ରେ ଥିବା MCP ଏଣ୍ଡପଏଣ୍ଟରେ **ନୁହେଁ**) ଏବଂ Tailscale ଫର୍ମକୁ ଉଲ୍ଲେଖ କରେ।
 - ଭଲ୍ଟ-ସାପେକ୍ଷ **ପାଥ୍ ଏନ୍କୋଡିଂ**, ଯାହାଦ୍ୱାରା ସ୍ପେସ୍/ସ୍ଲାସ୍ ଥିବା ନୋଟ୍ ପାଥ୍ଗୁଡ଼ିକ ସୁରକ୍ଷିତ ରହେ।
 
-## ସେଟ୍ଅପ୍
+## ସେଟଅପ୍
 
-Obsidian ଟୋକେନ୍ କିମ୍ବା ମୂଳ URL ପାଇଁ **କୌଣସି ପରିବେଶ ଭେରିଏବଲ୍ ନାହିଁ** — ଉଭୟକୁ
-`src/lib/db/obsidian.ts` ମାଧ୍ୟମରେ SQLite `key_value` ଟେବୁଲ୍ରେ (ନେମସ୍ପେସ୍ `obsidian`)
-ସଂରକ୍ଷଣ କରାଯାଏ। ଟୋକେନ୍ଟି **ସ୍ଥିର ଅବସ୍ଥାରେ ଏନ୍କ୍ରିପ୍ଟ ହୋଇଥାଏ** (AES-256-GCM,
-ପ୍ଲେନ୍ଟେକ୍ସ୍ଟ ପଶ୍ଚାତ୍-ସୁସଙ୍ଗତତା ଫଲ୍ବ୍ୟାକ୍ ସହିତ)। Endpoint ଡ୍ୟାସ୍ବୋର୍ଡର
-**ପ୍ରସଙ୍ଗ ଉତ୍ସଗୁଡ଼ିକ** ଟ୍ୟାବ୍ (`ObsidianSourceCard`)ରୁ, କିମ୍ବା ସେଟିଂସ୍ REST API ମାଧ୍ୟମରେ
-ବିନ୍ୟାସ କରନ୍ତୁ।
+Obsidian ଟୋକେନ୍ କିମ୍ବା ମୂଳ URL ପାଇଁ **କୌଣସି environment variable ନାହିଁ** — ଉଭୟକୁ
+`src/lib/db/obsidian.ts` ମାଧ୍ୟମରେ SQLite `key_value` ଟେବୁଲ୍ରେ (namespace `obsidian`)
+ସଂରକ୍ଷଣ କରାଯାଏ। ଟୋକେନ୍ଟି **ସଂରକ୍ଷିତ ଅବସ୍ଥାରେ ଏନ୍କ୍ରିପ୍ଟ କରାଯାଏ** (AES-256-GCM,
+ସହିତ plaintext backward-compat fallback)। Endpoint ଡ୍ୟାସ୍ବୋର୍ଡର **Context Sources**
+ଟ୍ୟାବ୍ (`ObsidianSourceCard`) ରୁ, କିମ୍ବା settings REST API ମାଧ୍ୟମରେ ବିନ୍ୟାସ କରନ୍ତୁ।
 
 > [!IMPORTANT]
-> **Obsidian Local REST API** ପ୍ଲଗ୍ଇନ୍ ନିଶ୍ଚିତ ଭାବେ ଇନ୍ଷ୍ଟଲ୍ ହୋଇ ଚାଲୁଥିବା ଆବଶ୍ୟକ। ଏହାର REST
+> **Obsidian Local REST API** ପ୍ଲଗଇନ୍ ଇନ୍ଷ୍ଟଲ୍ ହୋଇ ଚାଲୁଥିବା ଆବଶ୍ୟକ। ଏହାର REST
 > ଇଣ୍ଟରଫେସ୍ **HTTP `127.0.0.1:27123`**ରେ ଶୁଣେ (ଡିଫଲ୍ଟ ମୂଳ URL)। ପୋର୍ଟ `27124`
-> ଏକ _ପୃଥକ_ MCP/HTTPS ଏଣ୍ଡପଏଣ୍ଟ ଏବଂ ସେଟିଂସ୍ ରୁଟ୍ ଦ୍ୱାରା ସ୍ପଷ୍ଟ ଭାବେ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
+> ଏକ _ପୃଥକ_ MCP/HTTPS endpoint ଏବଂ settings route ଦ୍ୱାରା ଏହାକୁ ସ୍ପଷ୍ଟ ଭାବେ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
 > ଅନ୍ୟ ଡିଭାଇସ୍ରୁ ସଂଯୋଗ କରୁଥିଲେ, `http://<tailscale-ip>:27123` ବ୍ୟବହାର କରନ୍ତୁ।
 
-### ବିନ୍ୟାସ କୀଗୁଡ଼ିକ (SQLite `key_value`, ନେମସ୍ପେସ୍ `obsidian`)
+### ବିନ୍ୟାସ କୀଗୁଡ଼ିକ (SQLite `key_value`, namespace `obsidian`)
 
-| କୀ                | ଉଦ୍ଦେଶ୍ୟ                                               | ଏନ୍କ୍ରିପ୍ଟ ହୋଇଛି |
-| ----------------- | ------------------------------------------------------ | ---------------- |
-| `api_key`         | Local REST API ବିୟରର୍ ଟୋକେନ୍                           | ହଁ               |
-| `base_url`        | REST ମୂଳ URL (ଡିଫଲ୍ଟ `http://127.0.0.1:27123`)         | ନା               |
-| `vault_path`      | ଭଲ୍ଟ ଡିରେକ୍ଟୋରୀର ସମ୍ପୂର୍ଣ୍ଣ ପାଥ୍ (ସିଙ୍କ୍ ପାଇଁ)         | ନା               |
-| `webdav_username` | ସୃଷ୍ଟି କରାଯାଇଥିବା WebDAV ବ୍ୟବହାରକାରୀ ନାମ (ଭଲ୍ଟ ସିଙ୍କ୍) | ନା               |
-| `webdav_password` | ସୃଷ୍ଟି କରାଯାଇଥିବା WebDAV ପାସ୍ୱାର୍ଡ (ଭଲ୍ଟ ସିଙ୍କ୍)       | ହଁ               |
-| `webdav_enabled`  | WebDAV ଭଲ୍ଟ ସିଙ୍କ୍ ସକ୍ଷମ ଅଛି କି ନାହିଁ                  | ନା               |
+| କୀ                | ଉଦ୍ଦେଶ୍ୟ                                       | ଏନ୍କ୍ରିପ୍ଟ କରାଯାଇଛି |
+| ----------------- | ---------------------------------------------- | ------------------- |
+| `api_key`         | Local REST API bearer ଟୋକେନ୍                   | ହଁ                  |
+| `base_url`        | REST ମୂଳ URL (ଡିଫଲ୍ଟ `http://127.0.0.1:27123`) | ନା                  |
+| `vault_path`      | vault ଡିରେକ୍ଟୋରୀର absolute path (sync ପାଇଁ)    | ନା                  |
+| `webdav_username` | ସୃଷ୍ଟି କରାଯାଇଥିବା WebDAV username (vault sync) | ନା                  |
+| `webdav_password` | ସୃଷ୍ଟି କରାଯାଇଥିବା WebDAV password (vault sync) | ହଁ                  |
+| `webdav_enabled`  | WebDAV vault sync ସକ୍ଷମ କି ନାହିଁ               | ନା                  |
 
-### REST ମାଧ୍ୟମରେ ବିନ୍ୟାସ
+### REST ମାଧ୍ୟମରେ ବିନ୍ୟାସ କରନ୍ତୁ
 
 ```bash
-# Local REST API ଟୋକେନ୍ ସଂରକ୍ଷଣ + ବୈଧତା ଯାଞ୍ଚ (POST ଏକ ସ୍ଥିତି ଯାଞ୍ଚ ମାଧ୍ୟମରେ ବୈଧତା ପରୀକ୍ଷା କରେ)
+# Local REST API ଟୋକେନ୍ ସଂରକ୍ଷଣ + ବୈଧତା ଯାଞ୍ଚ କରନ୍ତୁ (POST ଏକ status check ମାଧ୍ୟମରେ ବୈଧତା ଯାଞ୍ଚ କରେ)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
@@ -71,37 +70,43 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-ସମସ୍ତ ମେଥଡ୍ ପାଇଁ ଡ୍ୟାସ୍ବୋର୍ଡ ପ୍ରାମାଣିକରଣ ଆବଶ୍ୟକ। `POST` ପୋର୍ଟ `27124`ରେ ଥିବା ଯେକୌଣସି URLକୁ
-ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ ଏବଂ ସ୍ଥାୟୀ ଭାବେ ସଂରକ୍ଷଣ କରିବା ପୂର୍ବରୁ Local REST API ସ୍ଥିତି ଏଣ୍ଡପଏଣ୍ଟକୁ
-କଲ୍ କରି ଟୋକେନ୍ର ବୈଧତା ଯାଞ୍ଚ କରେ।
+ସମସ୍ତ method ପାଇଁ ଡ୍ୟାସ୍ବୋର୍ଡ authentication ଆବଶ୍ୟକ। `POST` ପୋର୍ଟ `27124`ରେ ଥିବା ଯେକୌଣସି URLକୁ
+ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ ଏବଂ ସଂରକ୍ଷଣ କରିବା ପୂର୍ବରୁ Local REST API status endpointକୁ କଲ୍ କରି ଟୋକେନ୍ର ବୈଧତା ଯାଞ୍ଚ କରେ।
 
-### WebDAV ଭଲ୍ଟ ସିଙ୍କ୍
+### WebDAV vault sync
 
-`src/app/api/settings/obsidian/webdav/route.ts` ଏକ ଇଚ୍ଛାଧୀନ WebDAV-ଆଧାରିତ
-ଭଲ୍ଟ ସିଙ୍କ୍ ପରିଚାଳନା କରେ (`src/lib/obsidianSync.ts` ଦ୍ୱାରା ଚାଳିତ)। ଏହାକୁ ସକ୍ଷମ କରିଲେ
-OmniRouteକୁ ଏକ ସ୍ଥାନୀୟ ଭଲ୍ଟ ଡିରେକ୍ଟୋରୀ ଦିଗରେ ନିର୍ଦ୍ଦେଶ କରାଯାଏ ଏବଂ ଏକ ଯାଦୃଚ୍ଛିକ
-WebDAV ବ୍ୟବହାରକାରୀ ନାମ/ପାସ୍ୱାର୍ଡ ଯୁଗଳ ସୃଷ୍ଟି କରାଯାଏ:
+`src/app/api/settings/obsidian/webdav/route.ts` ଏକ ଇଚ୍ଛାଧୀନ WebDAV-backed
+vault sync ପରିଚାଳନା କରେ (`src/lib/obsidianSync.ts` ଦ୍ୱାରା ଚାଳିତ)। ଏହାକୁ ସକ୍ଷମ କଲେ OmniRouteକୁ ଏକ
+ସ୍ଥାନୀୟ vault ଡିରେକ୍ଟୋରୀ ଦିଗରେ ନିର୍ଦ୍ଦେଶ କରାଯାଏ ଏବଂ ଏକ ଯାଦୃଚ୍ଛିକ WebDAV username/password ଯୁଗଳ ସୃଷ୍ଟି ହୁଏ:
 
 ```bash
-# ଏକ ଭଲ୍ଟ ଡିରେକ୍ଟୋରୀ ପାଇଁ WebDAV ସିଙ୍କ୍ ସକ୍ଷମ କରନ୍ତୁ (ବ୍ୟବହାରକାରୀ ନାମ/ପାସ୍ୱାର୍ଡ ସୃଷ୍ଟି କରେ)
+# ଏକ vault ଡିରେକ୍ଟୋରୀ ପାଇଁ WebDAV sync ସକ୍ଷମ କରନ୍ତୁ (username/password ସୃଷ୍ଟି କରେ)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# WebDAV ସିଙ୍କ୍ ସ୍ଥିତି ପ୍ରାପ୍ତ କରନ୍ତୁ (କ୍ରେଡେନ୍ସିଆଲ୍ଗୁଡ଼ିକ କେବଳ ସକ୍ଷମ ଥିବା ସମୟରେ ଫେରାଯାଏ)
+# WebDAV sync ସ୍ଥିତି ପ୍ରାପ୍ତ କରନ୍ତୁ (କେବଳ ସକ୍ଷମ ଥିବା ସମୟରେ credentials ଫେରାଯାଏ)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# WebDAV ସିଙ୍କ୍ ଅକ୍ଷମ କରନ୍ତୁ (କ୍ରେଡେନ୍ସିଆଲ୍ଗୁଡ଼ିକ + ପରିଚାଳିତ .stignore ସଫା କରେ)
+# WebDAV sync ଅକ୍ଷମ କରନ୍ତୁ (credentials + ପରିଚାଳିତ .stignore ସଫା କରେ)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### ପ୍ରତି-API-କୀ ପ୍ରସଙ୍ଗ ଉତ୍ସ (ଇଚ୍ଛାଧୀନ)
+### ପ୍ରତି-API-key context source (ଇଚ୍ଛାଧୀନ)
 
-Obsidian ବିନ୍ୟାସକୁ `api_key_context_sources` ଟେବୁଲ୍
-(`src/lib/db/apiKeyContextSources.ts`) ମାଧ୍ୟମରେ **ପ୍ରତି API କୀ** ଅନୁଯାୟୀ ସ୍କୋପ୍ କରାଯାଇପାରେ।
-ଯେତେବେଳେ ଏକ MCP କଲ୍ ଏକ ପ୍ରାମାଣିକୃତ API କୀ id ବହନ କରେ, `getObsidianConfigForApiKey()`
-ସେହି କୀର ନିଜସ୍ୱ ଟୋକେନ୍/ମୂଳ-URL/ଭଲ୍ଟ-ପାଥ୍ (`source: "api_key"`)କୁ ପ୍ରାଥମିକତା ଦିଏ ଏବଂ
-ଅନ୍ୟଥା ଗ୍ଲୋବାଲ୍ ବିନ୍ୟାସକୁ (`source: "global"`) ଫଲ୍ବ୍ୟାକ୍ କରେ।
+`api_key_context_sources` ଟେବୁଲ୍ ମାଧ୍ୟମରେ Obsidian ବିନ୍ୟାସକୁ **ପ୍ରତ୍ୟେକ API key ପାଇଁ**
+ସୀମିତ କରାଯାଇପାରିବ (`src/lib/db/apiKeyContextSources.ts`)। ଯେତେବେଳେ ଏକ MCP କଲ୍ ଏକ authenticated API
+key id ବହନ କରେ, `getObsidianConfigForApiKey()` ସେହି କୀର ନିଜସ୍ୱ token/base-URL/vault-pathକୁ
+(`source: "api_key"`) ପ୍ରାଥମିକତା ଦିଏ ଏବଂ ତାହା ନଥିଲେ global configକୁ (`source: "global"`) fallback କରେ।
+
+Non-sync MCP tools ଏହି ବିନ୍ୟାସ ପଢ଼ିବା ପୂର୍ବରୁ ଏକ ସମାଧାନ ହୋଇଥିବା caller identity ଆବଶ୍ୟକ କରେ।
+ପରିଚୟ ନଥିବା ଏକ caller `Obsidian API token not configured` ପ୍ରାପ୍ତ କରେ, ଏବଂ କୌଣସି vault
+request ପଠାଯାଏ ନାହିଁ। HTTP callerମାନଙ୍କର ପରିଚୟ ସେମାନଙ୍କ request credentials ମାଧ୍ୟମରେ ସମାଧାନ ହୁଏ; stdio callerମାନଙ୍କର
+ପରିଚୟ `OMNIROUTE_API_KEY` କିମ୍ବା `ROUTER_API_KEY` ମାଧ୍ୟମରେ ସମାଧାନ ହୋଇପାରେ। ଏକ ଅସମାଧାନୀୟ HTTP caller
+ସର୍ଭର୍ର environment identity ଉତ୍ତରାଧିକାର ସୂତ୍ରରେ ପାଇପାରିବ ନାହିଁ। କେବଳ placeholder IDଗୁଡ଼ିକ accessକୁ ଅନୁମୋଦନ
+କରନ୍ତି ନାହିଁ; `env-key`କୁ resolve ହେଉଥିବା ଏକ ବୈଧ environment credential ପାଇଁ ସମର୍ଥନ ଜାରି ରହିଛି।
+ପ୍ରତି-key Obsidian ବିନ୍ୟାସ ନଥିବା authenticated keyଗୁଡ଼ିକ global fallback ବଜାୟ ରଖନ୍ତି।
+ଚାରିଟି `obsidian_sync_*` tool ସେମାନଙ୍କର ପୃଥକ sync-token ଆଚରଣ ବଜାୟ ରଖେ।
 
 ## MCP ଟୁଲ୍ଗୁଡ଼ିକ (22)
 

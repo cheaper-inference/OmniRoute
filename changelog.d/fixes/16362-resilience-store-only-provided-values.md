@@ -1,1 +1,0 @@
-- **fix(resilience):** saving resilience settings now stores only the values set in the request, so documented variables keep taking effect until their own value is changed ([#16362](https://github.com/diegosouzapw/OmniRoute/pull/16362)) — thanks @maxmad64bis (with thanks to @KooshaPari for the diagnosis in #4165)

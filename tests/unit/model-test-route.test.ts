@@ -146,3 +146,21 @@ test("model test route ignores forwarded hosts and works in strict API-key mode"
   assert.equal(fetchCalls.length, 1);
   assert.match(fetchCalls[0], /\/chat\/completions$/);
 });
+
+test("#17071 model test route forwards the skipped flag for image-only models", async () => {
+  globalThis.fetch = async () => {
+    throw new Error("an image-only model must not be dispatched");
+  };
+
+  const response = await route.POST(
+    await makeManagementSessionRequest("http://localhost/api/models/test", {
+      method: "POST",
+      body: { providerId: "agnes", modelId: "agnes-image-2.5-flash" },
+    })
+  );
+  const body = (await response.json()) as { status: string; skipped?: boolean };
+
+  assert.equal(response.status, 422);
+  assert.equal(body.status, "error");
+  assert.equal(body.skipped, true);
+});

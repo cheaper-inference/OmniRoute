@@ -38,88 +38,88 @@ Traffic Inspector shi ne mai gyara matsalolin zirga-zirgar HTTPS da aka gina a c
 
 ---
 
-## §2 Hanyoyin kama bayanai
+## §2 Hanyoyin kama zirga-zirga
 
-Traffic Inspector yana goyon bayan **tushen kama bayanai guda 5 a lokaci guda**. Ana iya kunna ko kashe kowannensu daban. Filin `source` da ke kan kowane `InterceptedRequest` (`src/mitm/inspector/types.ts`) yana ɗaya daga cikin `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, ko `"tproxy"`.
+Traffic Inspector yana goyon bayan **tushen kama guda 5 a lokaci guda**. Ana iya kunna ko kashe kowannensu daban. Filin `source` a kowane `InterceptedRequest` (`src/mitm/inspector/types.ts`) yana ɗaya daga cikin `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"`, ko `"tproxy"`.
 
-### Hanya ta 1 — AgentBridge (tsoho, koyaushe a kunne)
+### Hanya ta 1 — AgentBridge (ta asali, kullum a kunne)
 
 **Tushe:** Masu sarrafa AgentBridge (`src/mitm/handlers/base.ts`)
-**Tsari:** Kowane kiran `intercept()` a cikin `MitmHandlerBase` yana kiran `hookBufferStart()` kafin turawa, sannan `hookBufferUpdate()` bayan kammalawa. Babu ƙarin saitin da ake buƙata — yana aiki da zarar AgentBridge ya fara gudana.
-**Iyaka:** Wakilan IDE guda 9 da aka saita a cikin AgentBridge
+**Tsari:** Kowane kiran `intercept()` a cikin `MitmHandlerBase` yana kiran `hookBufferStart()` kafin tura buƙatar, sannan ya kira `hookBufferUpdate()` bayan kammalawa. Ba a buƙatar ƙarin saiti — yana aiki da zarar AgentBridge yana gudana.
+**Iyakar aiki:** Wakilan IDE guda 9 da aka saita a AgentBridge
 **Lura:** Filin `source` a cikin `InterceptedRequest` = `"agent-bridge"`
 
-### Hanya ta 2 — Keɓaɓɓun Hosts (juya alkiblar DNS)
+### Hanya ta 2 — Custom Hosts (juya alkiblar DNS)
 
-**Tushe:** Jerin hosts da mai amfani ya ayyana (teburin `inspector_custom_hosts`)
+**Tushe:** Jerin host da mai amfani ya ayyana (teburin `inspector_custom_hosts`)
 **Tsari:** Ƙara host ta UI yana ƙara `127.0.0.1 <host>` zuwa `/etc/hosts` (yana buƙatar sudo). Sabar MITM ta AgentBridge da ake da ita (port 443) tana samar da takardar shaidar SNI kai tsaye don sabon host.
-**Iyaka:** Duk wani manhaja da ke amfani da host ɗin da aka ƙara — ba a buƙatar canza saitin manhajar
+**Iyakar aiki:** Duk wani application da ke amfani da host ɗin da aka ƙara — ba a buƙatar canza saitin application
 **Lura:** `source` = `"custom-host"`
 
-Misalan amfani:
+Misalan yanayin amfani:
 
 - Sa ido kan `api.openai.com` daga rubutun Python
 - Gano matsala a `my-internal-llm.company.com`
-- Kama zirga-zirga daga na'urorin hannu da ke kan hanyar sadarwa ɗaya (ta hanyar yaudarar ARP — na ci gaba)
+- Kama zirga-zirga daga na'urorin hannu da ke kan network ɗaya (ta hanyar kwaikwayon ARP — na ƙwararru)
 
 ### Hanya ta 3 — Mai sauraron HTTP_PROXY (port 8080)
 
-**Tushe:** Manhajojin da ke amfani da environment variables na `HTTP_PROXY`/`HTTPS_PROXY`
-**Tsari:** Mai sauraro na biyu a port 8080 (`src/mitm/inspector/httpProxyServer.ts`) wanda ke aiki a matsayin daidaitaccen explicit proxy na HTTP/HTTPS. Yana karɓar ramukan `CONNECT` (HTTPS) da buƙatun HTTP kai tsaye.
-**Iyaka:** Duk wani manhaja da ke bin env na `HTTP_PROXY` — babu canjin DNS, babu sudo
+**Tushe:** Applications masu amfani da environment variables na `HTTP_PROXY`/`HTTPS_PROXY`
+**Tsari:** Mai sauraro na biyu a port 8080 (`src/mitm/inspector/httpProxyServer.ts`) wanda ke aiki a matsayin daidaitaccen explicit proxy na HTTP/HTTPS. Yana karɓar tunnels na `CONNECT` (HTTPS) da buƙatun HTTP kai tsaye.
+**Iyakar aiki:** Duk wani application da ke bin env na `HTTP_PROXY` — babu canjin DNS, babu sudo
 **Lura:** `source` = `"http-proxy"`
 
 ```bash
-# Kama bayanai cikin sauri don umarni guda:
+# Kama zirga-zirga cikin sauri don umarni guda:
 HTTPS_PROXY=http://127.0.0.1:8080 curl https://api.openai.com/v1/models
 
-# Ci gaba da kama bayanai a zaman shell:
+# Kama zirga-zirga na dindindin a zaman shell:
 export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**Ƙuntatawar TLS:** Ana kama ramukan `CONNECT` na HTTPS a matsayin metadata kawai (host, port, lokaci) — ba a warware ɓoyewar bayanan TLS ta tsohuwa.
+**Iyakancin TLS:** HTTPS yana ratsawa ta tunnel na `CONNECT` mara sarrafawa: mai sauraron yana isar da encrypted bytes ba tare da taɓa su ba, kuma yana yin rikodin metadata kawai (host, port, lokaci). Ba ya taɓa decrypting HTTPS, kuma babu wani saiti da ke kunna decryption a wannan hanyar. Don kama bodies na HTTPS, bi da host ɗin ta Hanya ta 1 (AgentBridge), Hanya ta 2 (Custom Hosts), ko Hanya ta 5 (TPROXY decrypt).
 
-**Rikicin port:** Idan ana amfani da port 8080, AgentBridge yana mayar da 409 tare da kuskure mai tsari. Canja port ɗin ta hanyar env var na `INSPECTOR_HTTP_PROXY_PORT`.
+**Rikicin port:** Idan ana amfani da port 8080, AgentBridge yana mayar da 409 tare da kuskure mai tsari. Canza port ɗin ta hanyar env var na `INSPECTOR_HTTP_PROXY_PORT`.
 
-### Hanya ta 4 — Proxy na dukkan tsarin (na ci gaba, na zaɓi)
+### Hanya ta 4 — Proxy na dukkan system (na ƙwararru, sai an zaɓa)
 
-**Tushe:** Saitunan proxy na matakin OS (yana aiki ga dukkan manhajojin da ke kan na'urar)
-**Tsari:** Yana amfani da APIs na OS don karkatar da duk zirga-zirgar HTTP/HTTPS ta cikin mai sauraron HTTP_PROXY:
+**Tushe:** Saitunan proxy na matakin OS (yana aiki ga duk applications da ke kan na'urar)
+**Tsari:** Yana amfani da APIs na OS don karkatar da duk zirga-zirgar HTTP/HTTPS ta mai sauraron HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Iyaka:** Kowane manhaja da ke kan na'urar wanda ke bin saitunan proxy na tsarin
+  **Iyakar aiki:** Kowane application da ke kan na'urar wanda ke bin saitunan system proxy
   **Lura:** `source` = `"system-proxy"`
 
-**Hanyoyin kariya:**
+**Matakan kariya:**
 
-- Mai ƙidayar kashewa kai tsaye (tsoho minti 30, ana iya saita shi ta `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Ana adana yanayin proxy na tsarin da ya gabata a DB kuma a dawo da shi lokacin maido da canji
-- Dashboard yana nuna saƙon "Ana maido da proxy na tsarin" idan mai amfani ya bar shafin yayin da yake aiki
-- UI yana nuna alamar `⚠ Na ci gaba` + akwatin tabbatarwa a sarari
+- Mai ƙidayar lokacin kashewa kai tsaye (minti 30 ta asali, ana iya saitawa ta `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Ana adana yanayin system proxy na baya a DB kuma a dawo da shi yayin mayarwa
+- Dashboard yana nuna saƙon "Ana mayar da system proxy" idan mai amfani ya bar shafin yayin da yake aiki
+- UI yana nuna alamar `⚠ Na ƙwararru` + akwatin tabbatarwa a sarari
 
-### Hanya ta 5 — Warware ɓoye ta TPROXY ba tare da tsaka-tsaki ba (Linux, root, na zaɓi)
+### Hanya ta 5 — TPROXY transparent decrypt (Linux, root, sai an zaɓa)
 
-**Tushe:** TPROXY na kernel + policy routing (`src/mitm/tproxy/`)
-**Tsari:** Yana yi wa sabbin haɗin TCP masu fita daga na'urar zuwa port da aka nufa (tsoho `443`) alama a cikin `mangle OUTPUT`, wani `ip rule` yana sake tura fakitocin da aka yi wa alama zuwa isarwa ta cikin na'urar, sannan makasudin `TPROXY` na `mangle PREROUTING` yana miƙa su ga mai sauraro na transparent (**IP_TRANSPARENT**) (tsohon port `8443`). Mai sauraron yana kawo ƙarshen TLS da takardar shaidar leaf wadda dynamic CA ke bayarwa **ga kowane hostname na SNI a lokacin da ake buƙata**, yana kama musayar bayanan da aka warware ɓoyewarsu, sannan ya tura buƙatar zuwa asalin wurin da aka nufa bayan sake ɓoye ta.
-**Iyaka:** Hosts na wuraren da aka nufa **na kowace iri** a kan port ɗin da aka zaɓa — babu yaudarar `/etc/hosts`, babu env na `HTTP_PROXY`, babu sauya proxy na dukkan tsarin. Process ɗin da aka katse ba ya buƙatar canjin saiti, amma dole ne ya amince da dynamic CA.
+**Tushe:** Kernel TPROXY + policy routing (`src/mitm/tproxy/`)
+**Tsari:** Yana yi wa sabbin local outbound TCP connections zuwa target port (ta asali `443`) alama a cikin `mangle OUTPUT`, sai `ip rule` ya sake karkatar da packets masu alamar zuwa local delivery, sannan target na `TPROXY` na `mangle PREROUTING` ya miƙa su ga transparent listener (**IP_TRANSPARENT**) (port na asali `8443`). Mai sauraron yana ƙare TLS da leaf certificate da dynamic CA ta bayar **ga kowane SNI hostname lokacin da ake buƙata**, yana kama decrypted exchange, sannan ya tura buƙatar bayan sake encrypting ɗinta zuwa asalin destination.
+**Iyakar aiki:** Hosts na destination **ko waɗanne iri** a target port — babu kwaikwayon `/etc/hosts`, babu env na `HTTP_PROXY`, babu sauya system-wide proxy. Process ɗin da ake intercepting ba ya buƙatar canjin saiti, amma dole ne ya amince da dynamic CA.
 **Lura:** `source` = `"tproxy"`
 
-**Abubuwan da ake buƙata:** Linux kawai (**IP_TRANSPARENT** na Linux ne kawai), capability na **CAP_NET_ADMIN** (root), da native N-API addon wanda dole ne a gina shi da C toolchain (`npm run build:native:tproxy`). Idan babu su, ana kashe toggle ɗin dashboard tare da tooltip mai cewa "Warware ɓoye ta TPROXY yana buƙatar Linux + root + native addon". Ana amfani da kuma maido da dokokin firewall ta hanyar transaction (crash ba zai taɓa barin dokar `mangle` a baya ba), kuma ana share su bayan sake kunna na'ura. Tsarin anti-loop mai amfani da SO_MARK yana hana proxy sake katse turawar da ya sake ɓoyewa da kansa.
+**Abubuwan da ake buƙata:** Linux kawai (**IP_TRANSPARENT** na Linux ne kawai), damar **CAP_NET_ADMIN** (root), da native N-API addon wanda dole ne a gina shi da C toolchain (`npm run build:native:tproxy`). Idan babu su, ana kashe toggle na dashboard tare da tooltip mai cewa "TPROXY decrypt yana buƙatar Linux + root + native addon". Ana aiwatarwa da mayar da firewall rules a matsayin transaction (crash ba zai taɓa barin `mangle` rule a baya ba), kuma ana share su lokacin reboot. Tsarin anti-loop mai amfani da SO_MARK yana hana proxy sake intercepting nasa re-encrypted forward.
 
-Wannan babban ƙaramin-tsari ne mai nasa jagorar masu gudanarwa — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba) don cikakken tsarin firewall, dynamic CA na kowane SNI + mai girka trust-store, route na cikin na'ura kawai, bayanan anti-loop, da tsarin configuration. Ana sarrafa toggle ɗin ta `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (lura: route ɗin yana ƙarƙashin prefix na AgentBridge, ba prefix na Traffic Inspector ba).
+Wannan babban subsystem ne mai nasa keɓantaccen jagorar operator — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a compile shi cikin `/docs` ba) don cikakken tsarin firewall, per-SNI dynamic CA + trust-store installer, local-only route, bayanan anti-loop, da configuration schema. `GET / POST / DELETE /api/tools/agent-bridge/tproxy` ne ke sarrafa toggle ɗin (lura: route ɗin yana ƙarƙashin prefix na AgentBridge, ba prefix na Traffic Inspector ba).
 
-### Kwatancen hanyoyin kama bayanai
+### Kwatanta hanyoyin kama zirga-zirga
 
-| Yanayi            | Saiti                                |          Sudo?           | Iyaka                                        | Bayanan kula                                                                                                                                           |
-| ----------------- | ------------------------------------ | :----------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge    | Ta atomatik                          |  Sau ɗaya (cert+hosts)   | Wakilan IDE 9                                | A kunne ta tsohuwa                                                                                                                                     |
-| 2. Custom Hosts   | Shigarwa ga kowane host              |   Eh (fayil ɗin hosts)   | Duk wata manhaja da ke amfani da wannan host | Ana adanawa a DB                                                                                                                                       |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`             |           A'a            | Manhajojin da ke bin env                     | Port 8080, babu warware TLS ta tsohuwa                                                                                                                 |
-| 4. System-wide    | Kunna/kashewa + tabbatarwa           |            Eh            | Duk manhajojin da ke kan na'urar             | Kashewa ta atomatik bayan minti 30                                                                                                                     |
-| 5. TPROXY decrypt | Kunna/kashewa (Linux + native addon) | Eh (root + shigar da CA) | Duk wani host a kan port ɗin da aka nufa     | Yana warware ɓoyewar hosts na daban-daban; a kashe yake ta tsohuwa — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba) |
+| Yanayi            | Saitawa                            |          Sudo?           | Iya isa ga                                 | Bayanan kula                                                                                                                                           |
+| ----------------- | ---------------------------------- | :----------------------: | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge    | Ta atomatik                        |  Sau ɗaya (cert+hosts)   | Wakilan IDE 9                              | A kunne ne ta tsohuwa                                                                                                                                  |
+| 2. Custom Hosts   | Shigarwa ga kowane host            |   I, (fayil ɗin hosts)   | Duk wata manhaja mai amfani da wannan host | An adana a DB                                                                                                                                          |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`           |           A'a            | Manhajojin da ke bin env                   | Port 8080; ana tura HTTPS ta ramin CONNECT (metadata kawai, ba a taɓa warware ɓoyewarsa ba)                                                            |
+| 4. System-wide    | Kunna/kashe + tabbatarwa           |            I,            | Duk manhajojin da ke kan na'urar           | Zai kashe kansa bayan minti 30                                                                                                                         |
+| 5. TPROXY decrypt | Kunna/kashe (Linux + native addon) | I, (root + shigar da CA) | Duk wani host a port ɗin da aka nufa       | Yana warware ɓoyewar hosts na daban-daban; a kashe yake ta tsohuwa — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba) |
 
 ---
 
@@ -340,29 +340,29 @@ Yi fitarwa ta `GET /api/tools/traffic-inspector/sessions/{id}/export.har` ko ma�
 
 ## §6 Tsaro
 
-Traffic Inspector yana nuna **duk zirga-zirgar HTTPS da aka katse**, ciki har da kanun izini da jikin buƙatu. Ana amfani da waɗannan matakan sarrafawa:
+Traffic Inspector yana nuna **duk zirga-zirgar HTTPS da aka kama**, ciki har da kanun izini da jikin buƙatu. Ana amfani da matakan kariya masu zuwa:
 
-| Matakin sarrafawa           | Cikakkun bayanai                                                                                                                                                                       |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**              | Duk hanyoyi da maƙurar WebSocket na loopback ne kawai (ana tilasta hakan a cikin `routeGuard.ts` kafin tantancewa)                                                                     |
-| **Rufe sirri**              | Na'urar binciken layi-layi `maskSecret()` tana ɓoye shaidun Bearer na RFC 6750, maɓallan da ke da gabatarwar mai samarwa, da dogayen token marasa bayyana kafin `TrafficBuffer.push()` |
-| **Iyakar girman jiki**      | Jikin da ya wuce `INSPECTOR_MAX_BODY_KB` (tsoho 1024 KB) ana yanke shi tare da sanarwar `"(an yanke saboda inganci)"`                                                                  |
-| **Tsabtace kanun bayanai**  | Ana mayar da sunaye zuwa ƙananan haruffa; ana yar da kanun tsara saƙo/hop-by-hop da na tantance proxy; ana ɓoye cookies gaba ɗaya; ƙimomin shaidar shiga suna amfani da `maskSecret()` |
-| **CSP**                     | Tsauraran Manufofin Tsaron Abun Ciki a shafukan Traffic Inspector don hana XSS ta hanyar jikin amsa da aka shigar                                                                      |
-| **Babu adanawa ta tsohuwa** | `TrafficBuffer` yana cikin ƙwaƙwalwa kuma zai ɓace idan aka sake kunna sabar. Ana adana zaman zama ne kawai idan an yi rikodinsu a sarari                                              |
+| Matakin kariya              | Cikakkun bayanai                                                                                                                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**              | Duk hanyoyi da endpoint na WebSocket suna karɓar haɗi ne kawai daga loopback (ana tilasta hakan a cikin `routeGuard.ts` kafin tantancewa)                                                    |
+| **Ɓoye sirrika**            | Na'urar binciken `maskSecret()` mai layi tana ɓoye bayanan shaidar Bearer na RFC 6750, maɓallan da ke da prefix na mai samarwa, da dogayen token marasa bayyana kafin `TrafficBuffer.push()` |
+| **Iyakar girman jiki**      | Ana taƙaita jikin da ya haura `INSPECTOR_MAX_BODY_KB` (tsoho 1024 KB) tare da sanarwar `"(an taƙaita saboda inganci)"`                                                                       |
+| **Tsabtace kanun bayanai**  | Ana mayar da sunaye zuwa ƙananan haruffa; ana cire kanun framing/hop-by-hop da proxy-auth; ana ɓoye cookies gaba ɗaya; ana miƙa ƙimomin bayanan shaida zuwa `maskSecret()`                   |
+| **CSP**                     | Ana amfani da tsauraran Content Security Policy a shafukan Traffic Inspector don hana XSS ta hanyar jikin amsa da aka shigar                                                                 |
+| **Babu adanawa ta tsohuwa** | `TrafficBuffer` yana cikin ƙwaƙwalwar ajiya kuma yana ɓacewa idan aka sake kunna uwar garken. Ana adana zaman ne kawai idan an yi rikodinsu a fili                                           |
 
-### Ƙa'idoji masu tsauri da ake amfani da su
+### Tsauraran Ka'idojin da ake amfani da su
 
-| Ƙa'ida                            | Aiwatarwa                                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------ |
-| **#12** `sanitizeErrorMessage`    | Ana tsabtace duk amsoshin kuskuren HTTP daga hanyoyin Traffic Inspector                    |
-| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` na LOCAL_ONLY + SPAWN_CAPABLE ne (umarnin proxy na tsarin) |
+| Ka'ida                            | Yadda ake amfani da ita                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------------------- |
+| **#12** `sanitizeErrorMessage`    | Ana tsabtace duk amsoshin kuskuren HTTP daga hanyoyin Traffic Inspector                      |
+| **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` yana da LOCAL_ONLY + SPAWN_CAPABLE (umarnin proxy na tsarin) |
 
 ### Sanannun iyakoki
 
-- **Yanayin proxy na dukkan tsarin** yana shafar duk manhajojin da ke kan na'urar, ciki har da abokan cinikin VPN da SSO. Koyaushe yi amfani da shi tare da mai ƙidayar lokaci na kashewa ta atomatik. Kada a yi amfani da shi a kan na'urorin da ake rabawa.
-- **HTTPS na ramin CONNECT**: Yanayi na 3 (HTTP_PROXY) yana kama bayanan metadata na rami kawai don wuraren HTTPS sai idan an kunna katsalandan na TLS. Hakan an tsara shi ne haka — kamawa a bayyane ba tare da amincewa da takardar shaidar AgentBridge ba zai karya tabbatar da TLS ga waɗannan manhajojin.
-- **Kafaffun kirtani a wasu sassa**: Wasu sassan UI (F7/F8) suna da ƴan kafaffun kirtani waɗanda maɓallan i18n ba su rufe ba tukuna. An rubuta waɗannan a matsayin Sanannen Iyaka a rahoton giɓin i18n; za a ƙaura da su a wani zagaye na gaba. Kirtanin da abin ya shafa alamomin ado ne na UI waɗanda ba sa buƙatar fassara don amfani mai aiki.
+- **Yanayin proxy na faɗin tsarin** yana shafar duk manhajojin da ke kan na'urar, ciki har da abokan hulɗar VPN da SSO. A koyaushe a yi amfani da shi tare da mai ƙidayar lokaci na kashewa ta atomatik. Kada a yi amfani da shi a kan na'urorin da ake amfani da su tare.
+- **CONNECT tunnel HTTPS**: Mode 3 (HTTP_PROXY) yana kama bayanan metadata na tunnel kawai don wuraren HTTPS, kuma ba ya taɓa warware ɓoyewarsu. Haka aka tsara shi — warware ɓoyewar zai buƙaci kowane abokin hulɗa ya amince da takardar shaidar MITM, saboda haka listener yana barin HTTPS da ɓoyewar end-to-end. Yi amfani da AgentBridge, Custom Hosts ko TPROXY decrypt lokacin da kake buƙatar jikin HTTPS.
+- **Rubutun da aka dasa kai tsaye a wasu components**: Wasu UI components (F7/F8) suna da ƴan rubutu da aka dasa kai tsaye waɗanda maɓallan i18n ba su rufe ba tukuna. An rubuta bayaninsu a matsayin Sanannen Iyaka a cikin rahoton gibin i18n; za a mayar da su a wani zagaye na gaba. Rubutun da abin ya shafa alamomin ado ne na UI waɗanda ba sa buƙatar fassara don amfani na aiki.
 
 ---
 
@@ -425,71 +425,71 @@ Lokacin da ma’ajiyar wucin gadi ta kai `INSPECTOR_BUFFER_SIZE` (tsoho 1000), s
 
 ---
 
-## §8 Manazartar API
+## §8 Bayanin API
 
-Duk hanyoyin su ne `LOCAL_ONLY` (na loopback kaɗai) da `SPAWN_CAPABLE` (umarnin wakilin tsarin). Duba `src/server/authz/routeGuard.ts`.
+Dukkan hanyoyin suna da `LOCAL_ONLY` (loopback kawai) da `SPAWN_CAPABLE` (umarnin wakilin tsarin). Duba `src/server/authz/routeGuard.ts`.
 
-Tushen hanya: `/api/tools/traffic-inspector/`
+Asalin hanya: `/api/tools/traffic-inspector/`
 
 ### Gudanar da buƙatu
 
-| Hanya  | Tafarki                     | Bayani                                                                               |
+| Hanya  | Path                        | Bayani                                                                               |
 | ------ | --------------------------- | ------------------------------------------------------------------------------------ |
 | GET    | `/requests`                 | Jera buƙatu (ana iya tacewa: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET    | `/requests/{id}`            | Cikakkun bayanan buƙata guda ɗaya                                                    |
-| DELETE | `/requests`                 | Share ma’ajiyar wucin gadi ta ƙwaƙwalwa                                              |
-| POST   | `/requests/{id}/replay`     | Sake aiwatar da wannan buƙatar ta hanyar na’ura mai ba da hanya ta OmniRoute         |
-| PUT    | `/requests/{id}/annotation` | Ajiye ko sabunta bayanin kula a kan buƙata                                           |
+| DELETE | `/requests`                 | Share ma'ajiyar wucin gadi ta cikin ƙwaƙwalwa                                        |
+| POST   | `/requests/{id}/replay`     | Sake aiwatar da buƙatar iri ɗaya ta na'ura mai ba da hanya ta OmniRoute              |
+| PUT    | `/requests/{id}/annotation` | Ajiye ko sabunta bayanin kula kan wata buƙata                                        |
 
 ### WebSocket
 
-| Hanya | Tafarki | Bayani                                                                                                                         |
-| ----- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| GET   | `/ws`   | Gudanar bayanan WebSocket kai tsaye. Yana aika `snapshot` yayin haɗuwa, sannan abubuwan da suka faru na `new`/`update`/`clear` |
+| Hanya | Path  | Bayani                                                                                                  |
+| ----- | ----- | ------------------------------------------------------------------------------------------------------- |
+| GET   | `/ws` | Watsawar WebSocket kai-tsaye. Yana aika `snapshot` yayin haɗawa, sannan abubuwan `new`/`update`/`clear` |
 
 ### Fitarwa
 
-| Hanya | Tafarki       | Bayani                                              |
-| ----- | ------------- | --------------------------------------------------- |
-| GET   | `/export.har` | Fitar da jerin da aka tace yanzu a matsayin HAR 1.2 |
+| Hanya | Path          | Bayani                                        |
+| ----- | ------------- | --------------------------------------------- |
+| GET   | `/export.har` | Fitar da jerin da aka tace a matsayin HAR 1.2 |
 
-### Keɓaɓɓun hosts
+### Rundunoni na musamman
 
-| Hanya  | Tafarki         | Bayani                                          |
-| ------ | --------------- | ----------------------------------------------- |
-| GET    | `/hosts`        | Jera keɓaɓɓun hosts                             |
-| POST   | `/hosts`        | Ƙara host (yana gyara `/etc/hosts` ta atomatik) |
-| DELETE | `/hosts/{host}` | Cire host                                       |
-| PATCH  | `/hosts/{host}` | Kunna ko kashe `enabled`                        |
+| Hanya  | Path            | Bayani                                           |
+| ------ | --------------- | ------------------------------------------------ |
+| GET    | `/hosts`        | Jera rundunoni na musamman                       |
+| POST   | `/hosts`        | Ƙara runduna (yana gyara `/etc/hosts` kai tsaye) |
+| DELETE | `/hosts/{host}` | Cire runduna                                     |
+| PATCH  | `/hosts/{host}` | Sauya yanayin `enabled`                          |
 
-### Hanyoyin kama bayanai
+### Yanayin kamawa
 
-| Hanya | Tafarki                       | Bayani                                                                    |
-| ----- | ----------------------------- | ------------------------------------------------------------------------- |
-| GET   | `/capture-modes`              | Halin hanyoyin AgentBridge / keɓaɓɓun-hosts / HTTP_PROXY / wakilin-tsarin |
-| POST  | `/capture-modes/http-proxy`   | Fara/tsayar da mai sauraron HTTP_PROXY (`{action: "start"\|"stop"}`)      |
-| POST  | `/capture-modes/system-proxy` | Aiwatar/mayar da wakilin gabaɗayan tsarin (`{action: "apply"\|"revert"}`) |
+| Hanya | Path                          | Bayani                                                                             |
+| ----- | ----------------------------- | ---------------------------------------------------------------------------------- |
+| GET   | `/capture-modes`              | Matsayin yanayin AgentBridge / rundunoni na musamman / HTTP_PROXY / wakilin tsarin |
+| POST  | `/capture-modes/http-proxy`   | Fara/tsayar da mai sauraron HTTP_PROXY (`{action: "start"\|"stop"}`)               |
+| POST  | `/capture-modes/system-proxy` | Aiwatar/janye wakilin tsarin gaba ɗaya (`{action: "apply"\|"revert"}`)             |
 
-> **Warware-rufin TPROXY** (yanayin kama bayanai na 5) ana sarrafa shi ta wata hanya
-> **dabam** a ƙarƙashin prefix na AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ba
-> a ƙarƙashin `/api/tools/traffic-inspector/` ba. Duba
+> **Warware ɓoyewar TPROXY** (yanayin kamawa na 5) ana sarrafa shi ta wata hanya
+> **dabam** ƙarƙashin prefix ɗin AgentBridge — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ba
+> ƙarƙashin `/api/tools/traffic-inspector/` ba. Duba
 > `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba).
 
-### Zamanni
+### Zama
 
-| Hanya  | Tafarki                     | Bayani                                                            |
+| Hanya  | Path                        | Bayani                                                            |
 | ------ | --------------------------- | ----------------------------------------------------------------- |
 | POST   | `/sessions`                 | Fara rikodi (`{name?: string}`)                                   |
 | PATCH  | `/sessions/{id}`            | Tsayar ko sake suna (`{action: "stop"\|"rename", name?: string}`) |
-| GET    | `/sessions`                 | Jera duk zamannin da aka ajiye                                    |
+| GET    | `/sessions`                 | Jera duk zaman da aka ajiye                                       |
 | GET    | `/sessions/{id}`            | Hoton zaman (duk buƙatu)                                          |
-| DELETE | `/sessions/{id}`            | Share zaman                                                       |
-| GET    | `/sessions/{id}/export.har` | Fitar da zaman a matsayin HAR 1.2                                 |
+| DELETE | `/sessions/{id}`            | Share zama                                                        |
+| GET    | `/sessions/{id}/export.har` | Fitar da zama a matsayin HAR 1.2                                  |
 
-### Karɓar bayanai na ciki (madadin D4)
+### Shigarwar ciki (madadin D4)
 
-| Hanya | Tafarki            | Bayani                                                                                                                   |
-| ----- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| POST  | `/internal/ingest` | Yana karɓar buƙatar da aka kama daga hanyar wucewa ta `server.cjs`; yana buƙatar taken `INSPECTOR_INTERNAL_INGEST_TOKEN` |
+| Hanya | Path               | Bayani                                                                                                                         |
+| ----- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| POST  | `/internal/ingest` | Yana karɓar buƙatar da aka katse daga hanyar wucewa ta `server.cjs`; yana buƙatar header ɗin `INSPECTOR_INTERNAL_INGEST_TOKEN` |
 
 Cikakkun tsare-tsaren OpenAPI: `docs/openapi.yaml` → alamar `Traffic Inspector`.

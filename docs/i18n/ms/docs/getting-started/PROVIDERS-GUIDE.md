@@ -10,50 +10,49 @@
 
 ## Apakah Itu Penyedia?
 
-Bayangkan penyedia seperti **syarikat telekomunikasi**. Sebagaimana anda memerlukan syarikat telekomunikasi untuk membuat panggilan, anda memerlukan penyedia AI untuk menggunakan model AI. OmniRoute ibarat telefon yang berfungsi dengan **semua syarikat telekomunikasi** — anda boleh bertukar antara mereka secara automatik.
+Anggap penyedia seperti **syarikat telekomunikasi**. Sama seperti anda memerlukan syarikat telekomunikasi untuk membuat panggilan, anda memerlukan penyedia AI untuk menggunakan model AI. OmniRoute ibarat telefon yang berfungsi dengan **semua syarikat telekomunikasi** — anda boleh bertukar antara mereka secara automatik.
 
 ### Jenis Penyedia
 
-| Jenis         | Apakah Ia                     | Contoh                            | Kos                         |
-| ------------- | ----------------------------- | --------------------------------- | --------------------------- |
-| **Percuma**   | Tiada bayaran diperlukan      | Kiro, OpenCode Free, Pollinations | $0                          |
-| **Kunci API** | Anda memerlukan kunci API     | OpenAI, Anthropic, Google         | Bayar mengikut penggunaan   |
-| **OAuth**     | Log masuk dengan akaun anda   | Claude Code, GitHub Copilot       | Langganan                   |
-| **Kuki Web**  | Menggunakan sesi pelayar anda | ChatGPT Web (Codex), Gemini Web   | $0 (menggunakan akaun anda) |
+| Jenis         | Apakah Itu                    | Contoh                          | Kos                         |
+| ------------- | ----------------------------- | ------------------------------- | --------------------------- |
+| **Percuma**   | Tiada bayaran diperlukan      | Kiro, Pollinations              | $0                          |
+| **Kunci API** | Anda memerlukan kunci API     | OpenAI, Anthropic, Google       | Bayar mengikut penggunaan   |
+| **OAuth**     | Log masuk dengan akaun anda   | Claude Code, GitHub Copilot     | Langganan                   |
+| **Kuki Web**  | Menggunakan sesi pelayar anda | ChatGPT Web (Codex), Gemini Web | $0 (menggunakan akaun anda) |
 
 ### Penyedia Kuki Web
 
-Lihat **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** untuk arahan persediaan umum, batasan, penyelesaian masalah dan panduan pengesahan khusus penyedia.
+Lihat **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** untuk arahan persediaan umum, pengehadan, penyelesaian masalah dan panduan pengesahan khusus untuk setiap penyedia.
 ---
 
 ## Mula Pantas: Sambungkan Penyedia Pertama Anda
 
-### Persediaan pilihan penyedia percuma pada penggunaan pertama
+### Persediaan penyedia percuma pilihan semasa penggunaan pertama
 
-Wizard penggunaan pertama menawarkan kad **Sediakan penyedia percuma** secara jelas. Ia memperoleh senarai
-layak semasa daripada daftar penyedia tanpa pengesahan OmniRoute, kemudian membolehkan anda menyemak dan menyahpilih setiap
-penyedia sebelum mengesahkan. OmniRoute memaparkan notis peringatan penyedia dan pautan ke laman mereka
+Wizard penggunaan pertama menawarkan kad **Sediakan penyedia percuma** secara jelas. Ia mendapatkan senarai
+penyedia yang layak pada masa ini daripada daftar penyedia tanpa pengesahan OmniRoute, kemudian membolehkan anda menyemak dan menyahpilih setiap
+penyedia sebelum membuat pengesahan. OmniRoute memaparkan notis peringatan penyedia dan pautan ke laman mereka
 supaya anda boleh menyemak terma pihak ketiga, privasi, ketersediaan dan had kadar terlebih dahulu.
 
-Tindakan ini adalah pilihan: melengkapkan wizard tidak akan sekali-kali mewujudkan sambungan penyedia percuma secara senyap.
-Ia hanya mewujudkan penyedia yang masih belum tersedia, membiarkan sambungan tersuai sedia ada
-tanpa perubahan dan melaporkan penyedia yang berjaya diwujudkan, telah dikonfigurasikan dan gagal secara berasingan. Anda boleh
-mencuba semula hanya penyedia yang gagal dengan selamat selepas mendapat hasil separa.
+Tindakan ini adalah pilihan: melengkapkan wizard tidak akan membuat sambungan penyedia percuma secara senyap.
+Ia hanya membuat sambungan bagi penyedia yang masih belum ditambahkan, membiarkan sambungan sedia ada yang telah disesuaikan
+tanpa perubahan, serta melaporkan secara berasingan penyedia yang telah dibuat, telah dikonfigurasikan dan gagal. Anda boleh
+mencuba semula kegagalan sahaja dengan selamat selepas menerima hasil separa.
 
 ### Pilihan A: Penyedia Percuma (Tanpa Kad Kredit)
 
 1. Buka papan pemuka di `http://localhost:20128`
 2. Pergi ke **Penyedia** → **Tambah Penyedia**
 3. Pilih salah satu penyedia percuma berikut:
-   - **Kiro AI** — Model Claude percuma (tiada pengesahan diperlukan)
-   - **OpenCode Free** — Model GPT percuma (tiada pengesahan diperlukan)
-   - **Pollinations** — GPT-5, Claude, Gemini percuma (tiada kunci diperlukan)
+   - **Kiro AI** — Model Claude percuma (pengesahan tidak diperlukan)
+   - **Pollinations** — GPT-5, Claude, Gemini percuma (kunci tidak diperlukan)
    - **LongCat** — 10M token percuma (pemberian sekali sahaja, memerlukan akaun + KYC)
    - **Cloudflare AI** — 50+ model, 10K neuron/hari
    - **MLX Gemma 26B** — Model Apple Silicon setempat (~38.5 token/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Model Apple Silicon setempat (~9.1 token/s, ~13.1GB RAM)
 4. Klik **Sambung**
-5. Selesai! Anda kini mempunyai akses AI percuma.
+5. Selesai! Kini anda mempunyai akses AI percuma.
 
 ### Pilihan B: Penyedia Kunci API (Berbayar)
 
@@ -68,20 +67,20 @@ mencuba semula hanya penyedia yang gagal dengan selamat selepas mendapat hasil s
 4. Pilih penyedia anda
 5. Tampalkan kunci API anda
 6. Klik **Sambung**
-7. Selesai! Anda kini mempunyai akses kepada model penyedia tersebut.
+7. Selesai! Kini anda mempunyai akses kepada model penyedia tersebut.
 
 ### Pilihan C: Penyedia OAuth (Langganan)
 
 1. Buka papan pemuka di `http://localhost:20128`
 2. Pergi ke **Penyedia** → **Tambah Penyedia**
-3. Pilih penyedia anda (contohnya, Claude Code, GitHub Copilot)
+3. Pilih penyedia anda (cth., Claude Code, GitHub Copilot)
 4. Klik **Sambung dengan OAuth**
-5. Log masuk dengan akaun anda
-6. Selesai! Anda kini mempunyai akses kepada model langganan anda.
+5. Log masuk menggunakan akaun anda
+6. Selesai! Kini anda mempunyai akses kepada model langganan anda.
 
 ### Pilihan D: Model MLX Setempat (Apple Silicon)
 
-Untuk Mac Apple Silicon dengan memori bersepadu, OmniRoute menyokong penyambungan kepada model MLX setempat yang dijalankan melalui `mlx-lm.server` sebagai penyedia setempat serasi OpenAI biasa.
+Untuk Mac Apple Silicon dengan memori bersepadu, OmniRoute menyokong sambungan kepada model MLX setempat yang berjalan melalui `mlx-lm.server` sebagai penyedia setempat biasa yang serasi dengan OpenAI.
 
 #### Prasyarat
 
@@ -111,10 +110,10 @@ Untuk Mac Apple Silicon dengan memori bersepadu, OmniRoute menyokong penyambunga
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Sambungkan dalam Papan Pemuka OmniRoute**:
+3. **Sambung dalam Papan Pemuka OmniRoute**:
    - Pergi ke **Penyedia** → **Tambah Penyedia**
    - Pilih **MLX Gemma 26B** atau **MLX Qwen 3.8 27B**
-   - Klik **Sambung** (tiada kunci API diperlukan)
+   - Klik **Sambung** (kunci API tidak diperlukan)
 
 4. **Gunakan dengan OpenCode**:
    ```bash
@@ -129,18 +128,18 @@ Untuk Mac Apple Silicon dengan memori bersepadu, OmniRoute menyokong penyambunga
 
 #### Pengurusan Memori
 
-**Penting**: Dengan memori bersepadu 24GB, hanya **satu model MLX besar boleh dijalankan pada satu-satu masa**.
+**Penting**: Dengan memori bersepadu 24GB, hanya **satu model MLX yang besar boleh dijalankan pada satu-satu masa**.
 
-- Gemma 26B: ~15.9GB penggunaan memori puncak
-- Qwen 3.8 27B: ~13.1GB penggunaan memori puncak
+- Gemma 26B: penggunaan memori puncak ~15.9GB
+- Qwen 3.8 27B: penggunaan memori puncak ~13.1GB
 
-Anda mesti menguruskan perkara ini secara manual:
+Anda mesti mengurus perkara ini secara manual:
 
 - Jalankan hanya satu pelayan MLX pada satu-satu masa, atau
 - Jalankan kedua-duanya pada mesin berasingan, atau
 - Hentikan satu sebelum memulakan yang lain
 
-OmniRoute tidak mengurus proses pelayan MLX secara automatik — ia hanya menghalakan permintaan kepada titik akhir serasi OpenAI yang anda konfigurasikan.
+OmniRoute tidak mengurus proses pelayan MLX secara automatik — ia hanya menghalakan permintaan ke titik akhir serasi OpenAI yang anda konfigurasikan.
 
 #### Sokongan Panggilan Alat
 
@@ -159,13 +158,13 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 #### Penyelesaian Masalah
 
-| Isu                   | Penyelesaian                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| Pelayan tidak bermula | Semak `uv run mlx_lm.server --help` dan sahkan ID model                                           |
-| Kehabisan memori      | Pastikan hanya satu model berjalan; tutup aplikasi lain; semak Activity Monitor                   |
-| Sambungan ditolak     | Sahkan pelayan sedang berjalan pada port yang betul (11435/11436)                                 |
-| Respons perlahan      | Permintaan pertama memuatkan model ke dalam memori (~30-60s); permintaan seterusnya adalah pantas |
-| Panggilan alat gagal  | Pastikan model menyokong alat; semak log OmniRoute untuk ralat terjemahan                         |
+| Isu                   | Penyelesaian                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------ |
+| Pelayan tidak bermula | Semak `uv run mlx_lm.server --help` dan sahkan ID model                                    |
+| Kehabisan memori      | Pastikan hanya satu model berjalan; tutup aplikasi lain; semak Activity Monitor            |
+| Sambungan ditolak     | Sahkan pelayan berjalan pada port yang betul (11435/11436)                                 |
+| Respons perlahan      | Permintaan pertama memuatkan model ke dalam memori (~30-60s); permintaan seterusnya pantas |
+| Panggilan alat gagal  | Pastikan model menyokong alat; semak log OmniRoute untuk ralat terjemahan                  |
 
 ---
 
@@ -176,14 +175,13 @@ Penyedia ini menawarkan **akses percuma** tanpa kad kredit:
 | Penyedia          | Kuota Percuma          | Model                                    | Cara Menyambung             |
 | ----------------- | ---------------------- | ---------------------------------------- | --------------------------- |
 | **Kiro AI**       | 50 kredit/bulan        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Tiada pengesahan diperlukan |
-| **OpenCode Free** | Tanpa had              | GPT-4o, Claude, Gemini                   | Tiada pengesahan diperlukan |
 | **Pollinations**  | Tiada kunci diperlukan | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Tiada pengesahan diperlukan |
-| **LongCat**       | 10J sekali sahaja      | LongCat-2.0                              | Kunci API + KYC             |
+| **LongCat**       | 10M sekali sahaja      | LongCat-2.0                              | Kunci API + KYC             |
 | **Cloudflare AI** | 10K neuron/hari        | 50+ model                                | Tiada pengesahan diperlukan |
 | **NVIDIA NIM**    | ~40 RPM                | 129 model                                | Kunci API diperlukan        |
 | **Cerebras**      | Kredit pendaftaran $5  | GLM 4.7, GPT-OSS 120B                    | Kunci API + kad             |
 
-**Petua**: Sambungkan berbilang penyedia percuma untuk mendapatkan **AI percuma tanpa had** dengan sandaran automatik!
+**Petua**: Sambungkan beberapa penyedia percuma untuk mendapatkan **AI percuma tanpa had** dengan sandaran automatik!
 
 ---
 
@@ -241,19 +239,19 @@ Penyedia anda kini telah disambungkan. Anda boleh menggunakannya dengan `model: 
 OmniRoute berfungsi paling baik dengan **berbilang penyedia**. Ini memberikan anda:
 
 - **Sandaran automatik** — Jika satu penyedia gagal, OmniRoute mencuba penyedia seterusnya
-- **Pengoptimuman kos** — OmniRoute memilih penyedia paling murah bagi setiap permintaan
-- **Pengoptimuman kelajuan** — OmniRoute memilih penyedia paling pantas bagi setiap permintaan
-- **Pengoptimuman kualiti** — OmniRoute memilih penyedia terbaik bagi setiap tugas
+- **Pengoptimuman kos** — OmniRoute memilih penyedia yang paling murah untuk setiap permintaan
+- **Pengoptimuman kelajuan** — OmniRoute memilih penyedia yang paling pantas untuk setiap permintaan
+- **Pengoptimuman kualiti** — OmniRoute memilih penyedia yang terbaik untuk setiap tugas
 
 ### Persediaan yang Disyorkan
 
 Sambungkan sekurang-kurangnya **3 penyedia** untuk pengalaman terbaik:
 
-1. **Satu penyedia percuma** (Kiro, OpenCode Free, atau Pollinations) — Sentiasa tersedia
-2. **Satu penyedia pantas** (Groq, Cerebras) — Untuk respons pantas
-3. **Satu penyedia berkualiti** (OpenAI, Anthropic, Google) — Untuk tugas kompleks
+1. **Satu penyedia percuma** (Kiro atau Pollinations) — Sentiasa tersedia
+2. **Satu penyedia pantas** (Groq, Cerebras) — Untuk respons yang pantas
+3. **Satu penyedia berkualiti** (OpenAI, Anthropic, Google) — Untuk tugas yang kompleks
 
-Kemudian gunakan `model: "auto"` dan OmniRoute akan memilih penyedia terbaik secara automatik bagi setiap permintaan.
+Kemudian gunakan `model: "auto"` dan OmniRoute akan memilih penyedia yang terbaik secara automatik untuk setiap permintaan.
 
 ---
 
@@ -335,23 +333,23 @@ dan had masa yang boleh dikonfigurasikan merupakan penambahbaikan berasingan; ti
 
 ### "Adakah saya perlu membayar untuk menggunakan OmniRoute?"
 
-**Tidak!** OmniRoute adalah percuma dan bersumber terbuka. Anda boleh menggunakan penyedia percuma (Kiro, OpenCode Free, Pollinations) tanpa membayar apa-apa. Anda hanya perlu membayar jika memilih untuk menggunakan penyedia berbayar.
+**Tidak!** OmniRoute adalah percuma dan bersumber terbuka. Anda boleh menggunakan penyedia percuma (Kiro, Pollinations) tanpa perlu membayar apa-apa. Anda hanya perlu membayar jika anda memilih untuk menggunakan penyedia berbayar.
 
-### "Penyedia manakah yang patut saya gunakan terlebih dahulu?"
+### "Penyedia manakah yang patut saya gunakan dahulu?"
 
-Mulakan dengan **Kiro AI** — ia percuma, tidak memerlukan kunci API dan memberi anda akses kepada model Claude. Kemudian, tambah lebih banyak penyedia mengikut keperluan.
+Mulakan dengan **Kiro AI** — ia percuma, tidak memerlukan kunci API dan memberikan anda akses kepada model Claude. Kemudian, tambahkan lebih banyak penyedia mengikut keperluan.
 
 ### "Bolehkah saya menggunakan berbilang penyedia serentak?"
 
 **Ya!** Itulah tujuan utama OmniRoute. Sambungkan berbilang penyedia dan gunakan `model: "auto"` untuk membolehkan OmniRoute memilih penyedia terbaik bagi setiap permintaan.
 
-### "Bagaimana jika sesebuah penyedia tidak dapat beroperasi?"
+### "Bagaimana jika penyedia mengalami gangguan?"
 
-OmniRoute akan melangkau penyedia yang gagal secara automatik dan mencuba penyedia yang seterusnya. Anda tidak perlu melakukan apa-apa.
+OmniRoute melangkau penyedia yang gagal secara automatik dan mencuba penyedia seterusnya. Anda tidak perlu melakukan apa-apa.
 
 ### "Bagaimanakah cara untuk memutuskan sambungan penyedia?"
 
-Pergi ke Penyedia → klik penyedia tersebut → klik **Putuskan Sambungan**.
+Pergi ke Providers → klik penyedia tersebut → klik **Disconnect**.
 
 ### "Bolehkah saya menggunakan kunci API sedia ada?"
 

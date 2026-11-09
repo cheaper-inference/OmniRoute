@@ -141,97 +141,91 @@ omniroute providers validate
 ### 1) 連接提供者並建立 API 金鑰
 
 1. 開啟儀表板 → `Providers`，並連接至少一個提供者（OAuth 或 API 金鑰）。
-2. 開啟儀表板 → `Endpoints`，並建立 API 金鑰。
+2. 開啟儀表板 → `Endpoints`，並建立一組 API 金鑰。
 3. （選用）開啟儀表板 → `Combos`，並設定備援鏈。
 
-### 2) 將程式設計工具指向服務
+### 2) 將程式開發工具指向 OmniRoute
 
 ```txt
-基礎 URL： http://localhost:20128/v1
-API 金鑰： [從 Endpoint 頁面複製]
-模型：     if/qwen3.8-max-preview（或任何提供者/模型前綴）
+基礎 URL：http://localhost:20128/v1
+API 金鑰：[從 Endpoint 頁面複製]
+模型：    if/qwen3.8-max-preview（或任何提供者/模型前綴）
 ```
 
-如果您的編輯器無法傳送 `Authorization: Bearer ...`，請改用包含權杖的相容性基礎位址：
+如果您的編輯器無法傳送 `Authorization: Bearer ...`，請改用包含權杖的相容性基礎網址：
 
 ```txt
-基礎 URL： http://localhost:20128/api/v1/vscode/YOUR_KEY/
-模型 URL： http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-聊天 URL： http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama 標籤 URL： http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+基礎 URL：http://localhost:20128/api/v1/vscode/YOUR_KEY/
+模型 URL：http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+聊天 URL：http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama 標籤 URL：http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-適用於 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode，以及相容 OpenAI 的 SDK。
+支援 Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode，以及與 OpenAI 相容的 SDK。
 
 #### 使用 `setup-*` 自動設定
 
-無須手動貼上基礎 URL 和金鑰，讓 OmniRoute 根據即時模型目錄寫入各工具
-自己的設定。每個工具使用一個命令：
+無需手動貼上基礎 URL 和金鑰，讓 OmniRoute 根據即時模型目錄，為每個工具寫入各自的設定。每個工具使用一個命令：
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml 設定檔
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json（相容 openai）
+omniroute setup-opencode     # ~/.config/opencode/opencode.json（與 OpenAI 相容）
 omniroute setup-cline        # Cline CLI + VS Code 擴充功能設定
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml（Continue / cn）
 omniroute setup-cursor       # 顯示 Cursor 的應用程式內操作步驟
 omniroute setup-roo          # Roo Code 匯入 + autoImport 指標
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json（openai_compatible）
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-每個命令都接受 `--remote <url> --api-key <key>`，可設定本機工具以連線至
-**遠端** OmniRoute，並可使用 `--dry-run` 進行預覽。若要在完全不寫入設定的情況下，
-注入正確的環境變數並啟動 CLI，請使用通用啟動器
-`omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；
-舊版的各工具啟動器 `omniroute launch`（Claude Code）和
-`omniroute launch-codex`（Codex）仍可使用。
+每個命令都接受 `--remote <url> --api-key <key>`，以便將本機工具設定為連接至**遠端** OmniRoute，並可使用 `--dry-run` 預覽。若要注入正確的環境變數來啟動 CLI，且完全不寫入任何設定，請使用通用啟動器 `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）；舊版的各工具啟動器 `omniroute launch`（Claude Code）和 `omniroute launch-codex`（Codex）仍然可用。
 
-如需完整表格（每個命令會寫入的內容、所有旗標、本機與遠端模式、基礎 URL
-`/v1` 慣例），請參閱 **[CLI 整合](./CLI-INTEGRATIONS.md)**。
+如需完整表格（每個命令會寫入的內容、所有旗標、本機與遠端的差異，以及基礎 URL 的 `/v1` 慣例），請參閱 **[CLI 整合](./CLI-INTEGRATIONS.md)**。
 
-如需各工具的詳細設定（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot 等），請參閱專門的 **[CLI 工具指南](../reference/CLI-TOOLS.md)**。
+如需各工具的詳細設定方式（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot 等），請參閱專門的 **[CLI 工具指南](../reference/CLI-TOOLS.md)**。
 
 ---
 
-## 通訊協定設定（MCP + A2A）
+## 協定設定 (MCP + A2A)
 
-### MCP 設定（模型上下文通訊協定）
+### MCP設定（模型上下文協定）
 
-以 stdio 模式啟動 MCP 傳輸：
+以 stdio 模式啟動MCP傳輸：
 
 ```bash
 omniroute --mcp
 ```
 
-建議的驗證流程：
+推薦的驗證流程：
 
 ```bash
-# 1. 啟動 MCP 伺服器
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. 從您的 MCP 用戶端呼叫：
-omniroute_get_health        # 應傳回系統健康狀態
-omniroute_list_combos       # 應傳回作用中的組合
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. 或執行完整的 E2E 測試套件：
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### MCP 用戶端設定
+#### MCP客戶端配置
 
-**Claude Code：**
+**Claude代碼：**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
-**Cursor / Cline：**
+**Cursor / Cline:**
 
-新增至您的 MCP 設定：
+新增到您的MCP設定（stdio，帶有金鑰，以便呼叫者擁有主體）：
 
 ```json
 {
@@ -239,31 +233,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**完整 MCP 文件：** [MCP 伺服器 README](../../open-sse/mcp-server/README.md) — 110 個工具、IDE 設定，以及 Python/TS/Go 用戶端。
+或者，當`mcpTransport`為`streamable-http` （在`/dashboard/mcp`上設定或使用`omniroute mcp enable --transport streamable-http`進行設定）時，將客戶端的遠端MCP伺服器項目指向`http://localhost:20128/api/mcp/stream`。
 
-### A2A 設定（代理程式對代理程式通訊協定）
+密鑰作為`Authorization: Bearer <api-key>`傳輸（請參閱[MCP伺服器→遠端主機的遠端存取](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass)；遠端密鑰需要`mcp:connect`及其read/write範圍）。
 
-驗證 Agent Card：
+**完整的MCP文件：** [MCP伺服器README](../../open-sse/mcp-server/README.md) — 110 工具、 IDE設定、 Python/TS/Go客戶端。壓縮CCR/dedup工具的操作員參考（標記、先決條件、每個工具範圍、擷取分頁、診斷）：[壓縮引擎→先決條件/操作員指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)。
+
+### A2A設定（代理到代理協定）
+
+驗證代理卡：
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-傳送工作：
+發送任務：
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"請提供簡短的配額摘要。"}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**完整 A2A 文件：** [A2A 伺服器 README](../../src/lib/a2a/README.md) — JSON-RPC 2.0、技能、串流，以及工作生命週期。
+**完整的A2A文件：** [A2A伺服器README](../../src/lib/a2a/README.md) — JSON-RPC 2.0，技能，串流媒體，任務生命週期。
 
 ---
 
@@ -322,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux（xbps-src）範本
+## 作廢Linux (xbps-src) 模板
 
-Void Linux 使用者可使用 `xbps-src` 建置原生套件。請將此區塊儲存為 `srcpkgs/omniroute/template`：
+對於 Void Linux用戶，您可以使用`xbps-src`建置原生包。將此區塊儲存為`srcpkgs/omniroute/template`：
 
 ```bash
-# 'omniroute' 的範本檔案
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# 每次發行時，請使用以下指令重新產生總和檢查碼：
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

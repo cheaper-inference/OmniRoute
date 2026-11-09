@@ -10,3 +10,4 @@ export { default as CopilotToolCard } from "./CopilotToolCard";
 export { default as CustomCliCard } from "./CustomCliCard";
 export { default as HermesAgentToolCard } from "./HermesAgentToolCard";
 export { default as GrokBuildToolCard } from "./GrokBuildToolCard";
+export { default as PiToolCard } from "./PiToolCard";

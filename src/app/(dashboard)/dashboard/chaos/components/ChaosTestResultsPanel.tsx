@@ -44,7 +44,7 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
   );
 
   return (
-    <div className="p-3 rounded-lg border border-border bg-surface/40 space-y-3">
+    <div className="p-3 rounded-lg border border-border bg-surface space-y-3">
       <h3 className="text-sm font-bold text-text-main">{resultsTitle}</h3>
       <div className="text-xs text-text-muted">{startedLabel}</div>
       {result.models.map((model, idx) => (
@@ -52,16 +52,14 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
           key={idx}
           className={`p-2 rounded-md text-xs ${
             model.status === "success"
-              ? "bg-green-500/5 border border-green-500/20"
-              : "bg-red-500/5 border border-red-500/20"
+              ? "bg-success-bg border border-success/30"
+              : "bg-error-bg border border-error/30"
           }`}
         >
           <div className="font-medium text-text-main">
             [{idx + 1}] {model.providerName} / {model.modelId}
             <span className="ml-2 text-text-muted">({model.durationMs}ms)</span>
-            <span
-              className={`ml-2 ${model.status === "success" ? "text-green-500" : "text-red-500"}`}
-            >
+            <span className={`ml-2 ${model.status === "success" ? "text-success" : "text-error"}`}>
               {model.status}
             </span>
           </div>
@@ -71,7 +69,7 @@ export function ChaosTestResultsPanel({ result }: { result: ChaosTestResult }) {
               {model.content.length > 300 ? "..." : ""}
             </div>
           )}
-          {model.error && <div className="mt-1 text-red-500">{model.error}</div>}
+          {model.error && <div className="mt-1 text-error">{model.error}</div>}
         </div>
       ))}
     </div>

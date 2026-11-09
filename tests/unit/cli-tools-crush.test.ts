@@ -10,6 +10,19 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+// ── /api/cli-tools/crush-settings round-trip ─────────────────────────────────
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-crush-settings-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+process.env.API_KEY_SECRET = "test-api-key-secret-crush";
+process.env.JWT_SECRET = "test-jwt-secret-crush";
+
+const core = await import("../../src/lib/db/core.ts");
+const { updateSettings } = await import("@/lib/db/settings");
+const localDb = { updateSettings };
+
+const { GET, POST, DELETE } = await import("../../src/app/api/cli-tools/crush-settings/route.ts");
+
 // ── Catalog shape ────────────────────────────────────────────────────────────
 
 test("CLI_TOOLS contains a 'crush' entry modeled on 'pi'", async () => {
@@ -47,19 +60,6 @@ test("getCliConfigPaths('crush') resolves to ~/.config/crush/crush.json (matches
     `Expected config path to end with .config/crush/crush.json, got: ${paths.config}`
   );
 });
-
-// ── /api/cli-tools/crush-settings round-trip ─────────────────────────────────
-
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-crush-settings-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-process.env.API_KEY_SECRET = "test-api-key-secret-crush";
-process.env.JWT_SECRET = "test-jwt-secret-crush";
-
-const core = await import("../../src/lib/db/core.ts");
-const { updateSettings } = await import("@/lib/db/settings");
-const localDb = { updateSettings };
-
-const { GET, POST, DELETE } = await import("../../src/app/api/cli-tools/crush-settings/route.ts");
 
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;

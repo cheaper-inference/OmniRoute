@@ -10,15 +10,10 @@
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import crypto from "crypto";
-
-const CORRELATION_STORE_KEY = Symbol.for("omniroute.correlationId.store");
-type GlobalWithCorrelationStore = typeof globalThis & {
-  [CORRELATION_STORE_KEY]?: AsyncLocalStorage<string | undefined>;
-};
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 function getCorrelationStore(): AsyncLocalStorage<string | undefined> {
-  return ((globalThis as GlobalWithCorrelationStore)[CORRELATION_STORE_KEY] ??=
-    new AsyncLocalStorage<string | undefined>());
+  return getProcessStore("correlationId.store", () => new AsyncLocalStorage<string | undefined>());
 }
 
 /**

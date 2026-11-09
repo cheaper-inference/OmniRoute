@@ -115,33 +115,33 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API kalitini import qilish oqimi
+## API kalitini import qilish jarayoni
 
-API kaliti orqali autentifikatsiya uzoq muddat amal qiladigan Kiro / AWS CodeWhisperer bearer hisob maʼlumotlari uchun moʻljallangan. U
-OAuth yangilashidan foydalanmaydi, shuning uchun umumiy OIDC seansi bekor qilinishining oldini oladi.
+API kaliti orqali autentifikatsiya uzoq muddat amal qiladigan Kiro / AWS CodeWhisperer bearer hisob maʼlumotlari uchun moʻljallangan. U OAuth yangilanishidan foydalanmaydi, shu sababli umumiy OIDC seansining bekor qilinishiga yoʻl qoʻymaydi.
 
 ### Boshqaruv paneli
 
 1. **Boshqaruv paneli -> Provayderlar -> Kiro** boʻlimini oching.
 2. **API kaliti**ni tanlang.
-3. API kalitini va ixtiyoriy AWS hududini kiriting (standart qiymat — `us-east-1`).
-4. OmniRoute kalitni tekshiradi va ulanishni saqlaydi.
+3. API kalitini kiriting va AWS mintaqasini tanlang: **Avtomatik aniqlash** (standart), **AQSH Sharqi
+   (Shimoliy Virjiniya)** yoki **Yevropa (Frankfurt)**.
+4. OmniRoute kalitni tekshiradi va ulanishni kalit ishlaydigan mintaqaga biriktirib saqlaydi.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` qiymati sifatida `auto` (standart), `us-east-1` yoki `eu-central-1` qabul qilinadi; boshqa har qanday qiymat HTTP 400 bilan rad etiladi.
 
 ### Ichki shartnoma
 
-API marshruti kalitni `KiroService.validateApiKey()` funksiyasini chaqirish orqali tekshiradi; bu funksiya
-hududga mos CodeWhisperer/Amazon Q soʻnggi nuqtasiga `ListAvailableProfiles` soʻrovini yuboradi
-va `profileArn` qiymatini aniqlaydi.
+API marshruti kalitni `KiroService.validateApiKey()` chaqiruvi orqali tekshiradi; bu metod har bir mintaqa uchun 10 soniyalik kutish vaqti bilan `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR` manziliga (API kaliti asosidagi inferensiya foydalanadigan Amazon Q interfeysi) soʻrov yuboradi. `auto` rejimida avval `us-east-1`, soʻng `eu-central-1` tekshiriladi va kalitni qabul qilgan birinchi mintaqa saqlanadi. Barcha nomzod mintaqalarda rad etilgan kalitni import qilish HTTP 400 bilan yakunlanadi. Shundan soʻng ixtiyoriy `profileArn`ni aniqlash uchun imkon qadar `ListAvailableProfiles` chaqiriladi (AWS aksariyat API kalitlari uchun bunga ruxsat bermaydi).
 
-Saqlangan ulanish quyidagilardan foydalanadi:
+Saqlangan ulanish quyidagi koʻrinishga ega:
 
 ```json
 {
@@ -154,10 +154,7 @@ Saqlangan ulanish quyidagilardan foydalanadi:
 }
 ```
 
-Ishlash vaqtida `KiroExecutor.buildHeaders()` kalitni
-`Authorization: Bearer <key>` sifatida yuboradi va `tokentype: API_KEY` qiymatini qoʻshadi. Kvota/profil chaqiruvlari
-ham xuddi shu belgidan foydalanadi, shuning uchun AWS bearer maʼlumotini OIDC yoki ijtimoiy tarmoq kirish tokeni sifatida emas,
-balki uzoq muddat amal qiladigan API kaliti sifatida qabul qiladi.
+Ishlash vaqtida `KiroExecutor.buildHeaders()` kalitni `Authorization: Bearer <key>` koʻrinishida yuboradi va `tokentype: API_KEY`ni qoʻshadi. Kvota/profil chaqiruvlari ham xuddi shu belgidan foydalanadi, shuning uchun AWS bearer hisob maʼlumotini OIDC yoki ijtimoiy kirish tokeni sifatida emas, balki uzoq muddat amal qiladigan API kaliti sifatida qabul qiladi. `KiroExecutor.execute()` API kaliti asosidagi inferensiya soʻrovlarini faqat `https://q.<region>.amazonaws.com/generateAssistantResponse` manziliga — jumladan `us-east-1` uchun ham — yuboradi, chunki Kiro IDE shlyuzi `TokenType=API_KEY`ni rad etadi, `codewhisperer.us-east-1` esa API kaliti yuklamalarini notoʻgʻri soʻrov tanasi sifatida rad etadi (HTTP 400).
 
 ---
 

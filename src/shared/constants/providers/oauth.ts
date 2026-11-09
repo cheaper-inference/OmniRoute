@@ -51,7 +51,7 @@ export const OAUTH_PROVIDERS = {
   },
   "grok-cli": {
     id: "grok-cli",
-    serviceKinds: ["llm"],
+    serviceKinds: ["llm", "image", "video", "tts", "stt"],
     alias: "gc",
     name: "Grok Build",
     icon: "bolt",
@@ -59,7 +59,7 @@ export const OAUTH_PROVIDERS = {
     subscriptionRisk: true,
     riskNoticeVariant: "oauth",
     authHint:
-      "Sign in with your browser, or paste your ~/.grok/auth.json (or the JWT access token) from the Grok Build CLI; refresh_token is rotated automatically either way.",
+      "Sign in with your browser, or paste your ~/.grok/auth.json (or the JWT access token) from the Grok Build CLI; refresh_token is rotated automatically either way. Imagine image/video and TTS/STT reuse this login where your account is entitled.",
   },
   qoder: {
     id: "qoder",
@@ -358,5 +358,23 @@ export const OAUTH_PROVIDERS = {
     passthroughModels: true,
     authHint:
       "Sign in with the Muse Code device flow (same as `muse login` / CLIProxyAPI `-meta-login`) to use a Muse subscription, or paste a META_API_KEY. Device login keeps the durable dca token and mints the inference key; a 401 remints that key. Wire format is OpenAI Responses (POST /responses).",
+  },
+  freebuff: {
+    id: "freebuff",
+    serviceKinds: ["llm"],
+    alias: "freebuff",
+    name: "Freebuff",
+    icon: "terminal",
+    color: "#10B981",
+    textIcon: "FB",
+    website: "https://freebuff.com",
+    hasFree: true,
+    // #15058: the upstream suspends free-mode accounts used outside its official clients.
+    subscriptionRisk: true,
+    riskNoticeVariant: "official-client-only",
+    freeNote: "Free Freebuff models (official client only); paid API: freebuff.com/account/api.",
+    passthroughModels: true,
+    authHint:
+      "Sign in with the Freebuff browser login (same as `freebuff login`), or paste an existing Freebuff / Codebuff auth token. The token has no refresh grant — when it expires, sign in again.",
   },
 };

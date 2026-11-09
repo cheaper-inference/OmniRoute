@@ -18,21 +18,20 @@ const source = readFileSync(
   "utf8"
 );
 
-// Isolate the update-step status-icon block: the `warning` material symbol icon span.
-// Match the className on the span immediately preceding the `warning` glyph.
-const warningIconMatch = source.match(
-  /className="material-symbols-outlined ([^"]*)"[^>]*>\s*warning\s*</
-);
+// Isolate the update-step status-icon block: the `warning` <Icon> (KEA-7886 — the Material
+// span became <Icon name="warning" …/>). Match the className on that element.
+const warningIconMatch = source.match(/<Icon name="warning"[^>]*className="([^"]*)"/);
 
 test("update-step warning icon renders with an amber color, not bare yellow", () => {
   assert.ok(
     warningIconMatch,
-    "expected to find the update-step `warning` material-symbols icon span in HomePageClient.tsx"
+    "expected to find the update-step `warning` <Icon> in HomePageClient.tsx"
   );
   const className = warningIconMatch![1];
   assert.ok(
-    className.includes("text-amber-500"),
-    `warning icon should use the project's amber warning convention; got: "${className}"`
+    // The amber convention is now the kit's warning token (amber in both themes).
+    className.includes("text-warning"),
+    `warning icon should use the project's warning (amber) token; got: "${className}"`
   );
   assert.ok(
     !className.includes("text-yellow-500"),

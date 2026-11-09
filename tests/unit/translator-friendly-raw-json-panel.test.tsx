@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -365,8 +366,8 @@ describe("RawJsonPanel", () => {
     // Swap button has title/aria-label
     const swapBtn = container.querySelector("button[title]");
     // There should be at least one swap_horiz icon
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("swap_horiz");
   });
 

@@ -15,6 +15,13 @@ export function generateCodeChallenge(verifier) {
 }
 
 /**
+ * Challenge method published on the wire with the code challenge (RFC 7636 section 4.2):
+ * "S" plus the digest size in bits of the hash `generateCodeChallenge` applies to the verifier.
+ */
+export const PKCE_CHALLENGE_METHOD =
+  "S" + String(crypto.createHash("sha256").update("").digest().length * 8);
+
+/**
  * Generate random state for CSRF protection
  */
 export function generateState() {

@@ -37,33 +37,39 @@ OmniRouten yleisiä ongelmia ja niiden ratkaisuja.
 
 ---
 
-### Ilmaisten palveluntarjoajien pyyntömäärän rajoitukset (429 / 400 / 401)
+### Maksuttomien palveluntarjoajien nopeusrajoitus (429 / 400 / 401)
 
-**Oire**: Kun käytät asetusta `model: "auto"` ilmaisten tai tunnistautumista vaatimattomien palveluntarjoajien (opencode, auggie jne.) kanssa, saat ajoittain vastausten sijaan virheen `HTTP 429`, `400` tai `401`. Pyynnöt onnistuvat, kun sama kehote lähetetään uudelleen hetkeä myöhemmin, mutta automaatio (cron-tehtävät, agentit, komentosarjat) keskeytyy ensimmäiseen virheeseen.
+**Oire**: Kun käytät `model: "auto"` maksuttomien/todennusta vaatimattomien palveluntarjoajien (auggie jne.) kanssa, saat ajoittain `HTTP 429`-, `400`- tai `401`-vastauksia vastausten sijaan. Pyynnöt onnistuvat, kun samaa kehotetta yritetään uudelleen hetkeä myöhemmin, mutta automaatio (cron-työt, agentit, komentosarjat) epäonnistuu ensimmäisellä yrityksellä.
 
-**Perimmäinen syy**: Kolme toisistaan riippumatonta virhetilannetta kasaantuu:
+**Perimmäinen syy**: Kolme toisistaan riippumatonta virhetilaa kasaantuu:
 
-1. **Palveluntarjoajan pyyntömäärärajoitus (`429`)**: Ilmaistasot voivat käyttää aikajaksoittaista kiintiötä. Rinnakkaisten kutsujen purske kuluttaa sen loppuun, joten seuraava pyyntö hylätään, kunnes aikajakso nollautuu.
-2. **Rikkinäinen malli passthrough-tilassa (`400`/`401`)**: `auto/*`-poolit voivat sisältää `opencode`-palvelun passthrough-malleja, jotka on rekisteröity luetteloon mutta joilla ei ole toimivia tunnistetietoja (esim. `oc/north-mini-code-free` → `401`). Automaattinen reititin kokeilee sellaista, epäonnistuu ja välittää virheen eteenpäin ennen kuin varajärjestely ehtii käynnistyä.
-3. **Rinnakkaisuuden voimistava vaikutus (`429` kuormituksessa)**: Kun useat agentti- tai cron-istunnot käyttävät `auto`-asetusta samanaikaisesti, pyyntöjen kokonaismäärä ylittää ilmaisten palveluntarjoajien sietokyvyn, jolloin hyväksyttävätkin kutsut merkitään väärinkäytöksiksi.
+1. **Palveluntarjoajan nopeusrajoitus (`429`)**: Maksuttomat tasot voivat asettaa kiintiön tietylle aikavälille. Useat rinnakkaiset kutsut kuluttavat kiintiön loppuun, joten seuraava pyyntö hylätään, kunnes aikaväli nollautuu.
+2. **Rikkoutunut malli passthrough-tilassa (`400`/`401`)**: `auto/*`-poolit voivat sisältää passthrough-malleja, jotka on rekisteröity luetteloon mutta joilla ei ole toimivia tunnistetietoja (→ `401`). Auto-reititin yrittää käyttää tällaista mallia, epäonnistuu, ja virhe välittyy eteenpäin ennen varamalliin siirtymistä.
+3. **Samanaikaisuuden voimistuminen (`429` kuormituksen aikana)**: Kun useat agentti-/cron-istunnot käyttävät `auto`-mallia yhtä aikaa, yhteenlaskettu pyyntömäärä ylittää sen, mitä maksuttomat palveluntarjoajat sietävät, joten oikeutetut kutsut tulkitaan väärinkäytöksiksi.
 
-**Vahvistettu korjaus (yhteisön raportoima, 2026-08-10)**: säädä kolmea ympäristömuuttujaa niin, että kierrätys, rinnakkaisuus ja varajärjestely vaimentavat ilmaistason epävakauden sen sijaan, että prosessi keskeytyisi siihen:
+**Vahvistettu korjaus (yhteisön raportoima, 2026-08-10)**: Säädä kolme ympäristömuuttujaa niin, että kierrätys, samanaikaisuus ja varamallit käsittelevät maksuttoman tason vaihtelua sen sijaan, että prosessi pysähtyy:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # siirry toiseen malliin tai palveluntarjoajaan virheessä 400/401 (ohittaa rikkinäiset passthrough-mallit)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # raskaiden pyyntöjen eksplisiittinen enimmäismäärä (oletusarvoisesti määrittämätön: ei pyyntömäärärajaa, katso huomautus alta)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # pidennä rajattu odotusaika hitaiden ylävirran palvelujen RATE_LIMIT_MAX_WAIT_MS-oletusarvoa pidemmäksi
+export OMNIROUTE_ROTATE_ON_400=true           # siirry toiseen malliin/palveluntarjoajaan 400/401-virheiden yhteydessä (ohittaa rikkoutuneet passthrough-mallit)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # eksplisiittinen raskaiden pyyntöjen samanaikaisuuden yläraja (oletuksena määrittämätön: pyyntömäärää ei rajoiteta, katso alla oleva huomautus)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # pidennä rajattua odotusaikaa RATE_LIMIT_MAX_WAIT_MS-oletusarvon yli hitaita ylävirran palveluja varten
 ```
 
-Aseta nämä OmniRoute-prosessin ympäristöön (demoniin, esimerkiksi LaunchAgent plist -tiedoston tai `systemctl edit` -komennon kautta) ja käynnistä sitten OmniRoute uudelleen. Kierrätyslippu on yksittäisistä asetuksista vaikutukseltaan merkittävin: se muuntaa vakavan virheen läpinäkyväksi uudelleenyritykseksi poolin toimivalla palveluntarjoajalla.
+Aseta nämä OmniRoute-prosessin ympäristöön (daemon-palvelulle, esimerkiksi LaunchAgent plist -tiedoston tai `systemctl edit`-komennon avulla) ja käynnistä OmniRoute uudelleen. Kierrätysasetus on vaikutukseltaan merkittävin yksittäinen asetus: se muuttaa kovan virheen läpinäkyväksi uudelleenyritykseksi poolissa olevan toimivan palveluntarjoajan kanssa.
 
-**Huomautus**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` rajoittaa samanaikaisesti suoritettavien raskaiden eli pitkän kontekstin pyyntöjen määrää. Raja on sisäänpääsyportti, ei palveluntarjoajan pyyntömäärärajoitin. **#503-fanout-päivitys:** tätä muuttujaa ei enää aseteta oletusarvoisesti (se vaikuttaa nyt vain, kun se määritetään eksplisiittisesti yllä esitetyllä tavalla). Raskaiden pyyntöjen sisäänpääsyä hallitsee sen sijaan automaattisesti johdettu tavubudjetti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), joka skaalautuu isäntäkoneen todellisen muistirajan perusteella. Siksi uudessa käyttöönotossa pitäisi ilmetä huomattavasti vähemmän `503 chat_admission_busy` -hylkäyksiä ilman tämän muuttujan asettamista; sen eksplisiittinen asettaminen tässä toimii edelleen täsmälleen dokumentoidulla tavalla. Tavubudjetin eksplisiittiset ohitukset rajataan välille 8 MiB–2 GiB. `413 body_exceeds_budget` ei ole tilapäinen virhe: kasvata tavubudjettia, pienennä `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`-arvoa tai kasvata prosessin muistirajaa. `inflight_bytes_budget`-kuormanpudotus johtuu tilapäisestä resurssikilpailusta, ja pyyntö voidaan edelleen yrittää uudelleen. Palveluntarjoajakohtaista pyyntömäärän rajoitusta (`open-sse/services/rateLimitManager.ts`) hallitaan erikseen muuttujilla `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ja `RATE_LIMIT_AUTO_ENABLE` — katso `.env.example`.
+**Huomautus**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` rajoittaa samanaikaisesti suoritettavien raskaiden — pitkän kontekstin — pyyntöjen määrää; kyseessä on pyyntöjen hyväksymisrajoitus, ei palveluntarjoajan nopeusrajoitin. **#503-fanout-päivitys:** tätä muuttujaa ei enää aseteta oletuksena (se rajoittaa nyt vain, kun se määritetään nimenomaisesti, kuten yllä) — raskaiden pyyntöjen hyväksymistä ohjataan sen sijaan automaattisesti johdetulla tavubudjetilla (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), joka skaalautuu isäntäkoneen todellisen muistirajan mukaan. Siksi uuden käyttöönoton pitäisi tuottaa huomattavasti vähemmän `503 chat_admission_busy` -hylkäyksiä ilman tämän muuttujan asettamista; sen nimenomainen asettaminen tässä toimii edelleen täsmälleen dokumentoidulla tavalla. Nimenomaiset tavubudjetin ohitukset rajoitetaan välille 8 MiB–2 GiB. `413 body_exceeds_budget` ei ole väliaikainen virhe: suurenna kyseistä tavubudjettia, pienennä `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`-arvoa tai tallennettua pyynnön rungon rajaa tai suurenna prosessin muistirajaa. `inflight_bytes_budget`-rajoitteen vuoksi tapahtuva pyyntöjen karsiminen on tilapäistä kilpailua resursseista, ja siihen voi edelleen yrittää uudelleen. Palveluntarjoajakohtaista nopeusrajoitusta (`open-sse/services/rateLimitManager.ts`) ohjataan erikseen muuttujilla `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` ja `RATE_LIMIT_AUTO_ENABLE` — katso `.env.example`.
 
-**Näin varmistat, että korjaus toimii**: suorita agenttisi/cron-tehtäväsi kahdesti nopeasti peräkkäin ja varmista, että molemmat suoritukset onnistuvat. Ennen korjausta toinen suoritus aiheuttaa yleensä virheen `429`/`401`. Korjauksen jälkeen virheitä (jos niitä ilmenee) yritetään automaattisesti uudelleen, ja kutsu suoritetaan loppuun. Voit myös suorittaa komennon `curl /monitoring/health` ja tarkkailla palveluntarjoajayhteyksien `rateLimitedUntil`-kenttää sekä ongelmallisten palveluntarjoajien `circuitBreakers.providerBreakers[].state`-kenttää — tila on jokin seuraavista: `CLOSED`, `DEGRADED`, `OPEN` tai `HALF_OPEN` (katso `src/shared/utils/circuitBreaker.ts`). Jatkuvasti epäonnistuvan palveluntarjoajan tila vaihtuu `CLOSED → DEGRADED → OPEN`, ennen kuin nollausikkuna päästää testipyynnön läpi (`HALF_OPEN`).
+**Päivityshuomautus: tallennettu pyynnön rungon raja koskee nyt myös chattia.** Aiemmin kohdassa Settings > Advanced > Request Body Limit (`maxBodySizeMb`) tallennettu raja koskee nyt myös reittejä `/v1/chat/completions` ja `/v1/responses`. Ennen tätä muutosta nämä kaksi reittiä hyväksyivät tallennetusta arvosta riippumatta enintään 50 Mt, joten asennus, jossa on tallennettu tätä pienempi raja, alkaa hylätä sen ylittävät chat-rungot. Asennus, jossa rajaa ei ole koskaan tallennettu, säilyttää 50 Mt:n oletusarvon.
 
-**Jos virhe 429 näkyy edelleen**: kyseisen palveluntarjoajan aktiivinen tili on aidosti käyttänyt _kiintiönsä_ loppuun (kyse ei ole pelkästä pyyntötiheysrajoituksesta). Lisää samalle palveluntarjoajalle toinen tili OmniRoute-hallintapaneelissa kohdassa Providers → Accounts tai ota mukaan toinen maksuton palveluntarjoaja (esim. `routeway` tai `auggie`). Kierrätys auttaa vain tilapäisiin pyyntötiheysrajoituksiin sekä 400- ja 401-virheisiin. Kiintiön loppuminen edellyttää toista tunnistetietoa tai eri palveluntarjoajaa.
+Hylkäys on HTTP-virhe `413`, jossa `error.code`-arvoksi on asetettu `PAYLOAD_TOO_LARGE` ja `error.type`-arvoksi `payload_too_large`. Viesti ilmoittaa käytössä olevan rajan: `Request body too large. Maximum allowed: 10 MB`, kun ilmoitettu `Content-Length` ylittää rajan, tai `Request body too large for chat completions (max 10 MB).`, kun tosiasiassa luetut tavut ylittävät rajan. Tämä ei ole sama asia kuin edellä mainittu `413 body_exceeds_budget`, joka johtuu muistibudjetista eikä muutu tällä asetuksella.
 
-**Jos konenäkömalleissa (`auto/vision`, `bazaarlink/*`) näkyy virhe 403**: yhdistettyyn tiliin ei kuulu maksullista sopimusta, joka sisältää konenäköominaisuudet, tai API-avaimella ei ole riittäviä käyttöoikeuksia. Varmista palveluntarjoajan hallintapaneelista, että avaimen käyttöoikeusalue sisältää konenäön/monimodaalisuuden, tai yhdistä maksullisen tason tili ja pidä se konenäön kohteena.
+Nosta rajaa tallentamalla suurempi arvo osoitteessa `/dashboard/settings/advanced` tai lähettämällä `PATCH /api/settings`-pyyntö, jonka runko on `{"maxBodySizeMb": 50}`. Hyväksytyt arvot ovat 1–500 Mt, muutos tulee voimaan ilman uudelleenkäynnistystä, ja arvo 50 palauttaa aiemman chat-rajan. Kaksi muuta rajaa voi edelleen pysäyttää suuremman rungon: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` rajoittaa tallennettua rajaa myös silloin, kun se on asetettu, ja Kubernetes-ingressin annotaatio `proxy-body-size` (toimitetuissa manifesteissa `50m`) on nostettava erikseen, jos haluat sallia yli 50 Mt:n rungot.
+
+**Näin varmistat toimivuuden**: suorita agentti/cron-työ kahdesti nopeasti peräkkäin ja varmista, että molemmat onnistuvat. Ennen korjausta toinen suoritus tuottaa tyypillisesti `429`-/`401`-virheen. Korjauksen jälkeen virheet (jos niitä ilmenee) yritetään läpinäkyvästi uudelleen ja kutsu valmistuu. Voit myös suorittaa `curl /monitoring/health`-pyynnön ja seurata palveluntarjoajayhteyksien `rateLimitedUntil`-kenttää sekä kyseisten palveluntarjoajien `circuitBreakers.providerBreakers[].state`-kenttää — tila on jokin seuraavista: `CLOSED`, `DEGRADED`, `OPEN` tai `HALF_OPEN` (katso `src/shared/utils/circuitBreaker.ts`). Jatkuvasti epäonnistuva palveluntarjoaja siirtyy tilasta `CLOSED → DEGRADED → OPEN`, ennen kuin nollausikkuna päästää testipyynnön läpi (`HALF_OPEN`).
+
+**Jos näet edelleen 429-virheitä**: kyseisen palveluntarjoajan aktiivinen tili on todella käyttänyt _kiintiönsä_ loppuun, eikä kyse ole vain nopeusrajoituksesta. Lisää toinen tili samalle palveluntarjoajalle OmniRouten koontinäytössä: Providers → Accounts, tai ota käyttöön toinen maksuton palveluntarjoaja (esimerkiksi `routeway`, `auggie`). Kierrätys auttaa vain tilapäisiin nopeusrajoitus-, 400- ja 401-virheisiin; kiintiön lopullinen täyttyminen edellyttää toisia tunnistetietoja tai toista palveluntarjoajaa.
+
+**Jos näet 403-virheen näkömalleilla (`auto/vision`, `bazaarlink/*`)**: yhdistetyllä tilillä ei ole näköominaisuudet sisältävää maksullista tilausta tai API-avaimella ei ole riittäviä käyttöoikeuksia. Varmista palveluntarjoajan koontinäytössä, että avaimen käyttöoikeus kattaa näkö-/multimodaaliominaisuudet, tai yhdistä maksullisen tason tili ja pidä se näkömallien kohteena.
 
 ---
 
@@ -97,32 +103,32 @@ Varoitukset johtuvat vanhentuneista vertaisriippuvuuksien versioalueista kolmann
 Kun suoritat komennon `npm install -g omniroute`, uudemmat npm-versiot (v11+ ja v12+) estävät oletusarvoisesti pakettien elinkaarikomentosarjat ja näyttävät install-scripts-varoituksen:
 
 ```
-npm warn install-scripts 7 paketin asennuskomentosarjat estettiin, koska allowScripts ei kata niitä:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Voiko tämän varoituksen jättää huomiotta?
 
-**Osittain, mutta suorittamista ilman komentosarjoja ei suositella.** OmniRoute sisältää hallitut vararatkaisut: jos natiiveja `better-sqlite3`-sidoksia ei voida ladata itsenäisestä sovelluspaketista, sovellus siirtyy käyttämään vaihtoehtoisia ajureita, kuten `node:sqlite` tai `sql.js` (katso [SQLite-ajonaikainen ratkaisu](../ops/SQLITE_RUNTIME.md)). Palvelin käynnistyy silti, mutta WASM-vararatkaisujen, kuten `sql.js`, käyttäminen poistaa SQLite WAL (Write-Ahead Logging) -tilan käytöstä ja lisää muistin käyttöä sekä levysynkronoinnin kuormitusta.
+**Osittain, mutta käyttöä ilman komentosarjoja ei suositella.** OmniRoute sisältää hallitut varamekanismit: jos natiiveja `better-sqlite3`-sidoksia ei voida ladata itsenäisestä sovelluspaketista, sovellus siirtyy käyttämään vaihtoehtoisia ajureita, kuten `node:sqlite` tai `sql.js` (katso [SQLite-ajonaikaisen toteutuksen valinta](../ops/SQLITE_RUNTIME.md)). Palvelin käynnistyy silti, mutta WASM-varatoteutusten, kuten `sql.js`, käyttäminen poistaa SQLite WAL (Write-Ahead Logging) -tilan käytöstä sekä lisää muistin käyttöä ja levysynkronoinnin kuormitusta.
 
-### Mitkä komentosarjat ovat oikeasti pakollisia?
+### Mitkä komentosarjat todella vaaditaan?
 
-Kaikki estetyt komentosarjat eivät ole välttämättömiä OmniRouten suorittamiseksi:
+Kaikki estetyt komentosarjat eivät ole välttämättömiä OmniRouten käyttämiseen:
 
-- **Välttämättömät (`omniroute`, `better-sqlite3`):** OmniRoute suoritetaan itsenäisestä Next.js-sovelluspaketista (`dist/`). Asennuksen aikana npm lataa tai kääntää isäntäkohtaisen natiivin SQLite-ajurin ylätason hakemistoon `node_modules/better-sqlite3/`. OmniRouten `postinstall`-komentosarja (`scripts/build/postinstall.mjs`) tarkistaa ja kopioi sitten nämä isäntäkohtaiset binäärit hakemistoon `dist/node_modules/`, jotta itsenäinen palvelin voi käyttää niitä. Jos `omniroute`-paketin postinstall-komentosarja estetään, tämä kopiointivaihe ohitetaan.
-- **Valinnaiset/epäsuorat (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Nämä ovat kääntämisen apuohjelmia, tiedostomuutosten seurantatyökaluja tai järjestelmän avainnipun apuohjelmia. Niiden salliminen estää käännösvaroitukset, mutta niitä ei tarvita reitityksen ydintoimintoihin.
-- **Pois jätettävä (`onnxruntime-node`):** Valinnainen riippuvuus paikallisia tekoälyupotuksia varten, eikä sitä **tarvita** OmniRouten suorittamiseen. Sen postinstall-komentosarja lataa NuGetistä noin 300 Mt CUDA-resursseja. Älä lisää sitä sallittujen luetteloon, ellet nimenomaisesti aio käyttää paikallista ONNX-kiihdytystä tuetulla laitteistolla.
+- **Välttämättömät (`omniroute`, `better-sqlite3`):** OmniRoute suoritetaan itsenäisestä Next.js-sovelluspaketista (`dist/`). Asennuksen aikana npm lataa tai kääntää isäntäjärjestelmäkohtaisen natiivin SQLite-ajurin ylätason hakemistoon `node_modules/better-sqlite3/`. OmniRouten `postinstall`-komentosarja (`scripts/build/postinstall.mjs`) tarkistaa ja kopioi sitten nämä isäntäjärjestelmäkohtaiset binäärit hakemistoon `dist/node_modules/`, jotta itsenäinen palvelin voi käyttää niitä. Jos `omniroute`-paketin postinstall-komentosarja estetään, tämä kopiointivaihe ohitetaan.
+- **Valinnaiset/transitiiviset (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Nämä ovat koontiapuohjelmia, tiedostomuutosten tarkkailutyökaluja tai järjestelmän avainnipun apuohjelmia. Niiden salliminen estää koontivaroitukset, mutta niitä ei tarvita reitityksen ydintoimintoihin.
+- **Pois jätettävä (`onnxruntime-node`):** Tämä on paikallisten tekoälyupotusten valinnainen riippuvuus, eikä sitä **tarvita** OmniRouten suorittamiseen. Sen postinstall-komentosarja lataa NuGetistä noin 300 Mt CUDA-resursseja. Älä sisällytä sitä sallittujen luetteloon, ellet nimenomaisesti aio käyttää paikallista ONNX-kiihdytystä tuetulla laitteistolla.
 
 ### Suositeltu korjaus
 
-Voit sallia vaaditut asennuskomentosarjat globaalin asennuksen aikana ja piilottaa varoitukset antamalla `--allow-scripts`-valitsimelle OmniRouten ja sen natiivien riippuvuuksien nimet:
+Salli tarvittavat asennuskomentosarjat globaalin asennuksen aikana ja poista varoitukset välittämällä `--allow-scripts` OmniRoutelle ja sen natiiveille riippuvuuksille:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Vaihtoehtoisesti voit määrittää tämän pysyvästi kaikille käyttäjätilisi globaaleille asennuksille:
+Vaihtoehtoisesti voit määrittää tämän pysyvästi käyttäjätilisi kaikkia globaaleja asennuksia varten:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Tarkista asennus
 
-Suorita asennuksen jälkeen sisäänrakennettu diagnostiikkatyökalu varmistaaksesi, että natiivisidokset ja ajoympäristö toimivat oikein:
+Suorita asennuksen jälkeen sisäänrakennettu diagnostiikkatyökalu varmistaaksesi, että natiivit sidokset ja ajoympäristö toimivat oikein:
 
 ```bash
 omniroute doctor
@@ -848,6 +854,30 @@ käynnistyminen jatkuu taustalla, ja palvelin on tavoitettavissa käynnistyksen 
 
 Katso täydelliset tiedot muuttujasta `OMNIROUTE_READY_TIMEOUT_MS` tiedostosta
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md).
+
+---
+
+## CCR / dedup -ongelmia
+
+Diagnostinen matriisi pakkaus CCR (`ccr`) ja `session-dedup` työkaluille. Katso täydelliset käyttäjätiedot (merkit, edellytykset, työkalukohtaiset laajuudet, hakusivut) kohdasta [Compression Engines → Edellytykset / käyttäjän opas](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Oire                                                                                                    | Todennäköinen syy                                                                                                                                  | Vahvista                                                                                                               | Korjata                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                          | Reittivartijan silmukkatodennus, ei kuljetusvirhe. Ei `Bearer`, tai avain ilman `mcp:connect`/`manage`/`admin`, saavutti `/api/mcp/` -reitin.      | Pyynnössä oli no/invalid `Authorization` -otsikko.                                                                     | Lähetä kelvollinen `Bearer` -avain. Kaukosäätimessä voi olla `mcp:connect` (valtuuttaa `/api/mcp/` vain paikallisen carve-out-toiminnon) sekä sen tarvitseman tietyn read/write alueen.                                                                               |
+| **lohkoa ei löydy** — `omniroute_ccr_retrieve` hylkää hashin                                            | Hash ei ole 24-heksadesimaaliarvo tai se on kopioitu väärin, tai lohko on jo vanhentunut / häädetty.                                               | Vertaa tiivistettä `[CCR retrieve hash=…]` merkin 24-heksaan arvoon; tarkista myymälän tila `omniroute_ccr_stats` stä. | Kopioi 24-heksaaninen hash sanatarkasti merkistä. Jos lohko on todella poissa, se ylitti TTL arvon tai ei koskaan saavuttanut kestävää varastoa (yli 512 KB lohkot ja jokainen lohko pilvikäyttöaikana, pysyvät vain muistissa, eivätkä kestä uudelleenkäynnistystä). |
+| **CCR no-op** — lohkoa ei ole pakattu (teksti tulee takaisin muuttumattomana)                           | Estä puristuskynnyksen alapuolella tai CCR moottori/tila ei ole aktiivinen.                                                                        | Tarkista aktiivinen pakkaus `strategy`/`enabled` ja lohkon koko vs. kynnys.                                            | Ota CCR käyttöön (tai pinottu tila, joka käyttää sitä) ja varmista, että lohko on tarpeeksi suuri tallentamisen arvoiseksi. No-op ei ole virhe — se on "ei mitään pakattavaa".                                                                                        |
+| **dedup-merkki** — `[dedup:ref sha=…]` näkyy ulostulossa                                                | **Tahallinen katse taaksepäin** , ei menetys tai virhe. `session-dedup` elided teksti, joka on jo lähetetty saman istunnon aikaisemmassa vuorossa. | Varmista, että sama teksti näkyy aiemmin istunnossa.                                                                   | Älä tee mitään — älä kutsu työkalua äläkä yritä rekonstruoida sitä. Ensimmäinen esiintyminen on kanoninen kopio; nykyistä vuoroa ei koskaan kirjoiteta uudelleen, se poistetaan myöhemmässä vuorossa.                                                                 |
+| **Kooditila** — `omniroute_ccr_*` työkalut puuttuvat `tools[]` / CCR käskystä ei ruiskutettu (OpenCode) | OpenCode Code Mode (oletus) mainostaa vain alkuperäisiä työkaluja mallille piilottaen MCP -työkalut `tools[]` ltä.                                 | Tarkista OpenCode MCP palvelimen merkintä `codemode`.                                                                  | Aseta `codemode: false` palvelinmerkintään (a** asiakas** asetus), joten MCP työkaluja mainostetaan. CCR retrieve-protocol -käsky pysyy pois päältä: palvelin nimeltä `omniroute` paljastaa `omniroute_omniroute_ccr_retrieve`, ja `_` ei ole sovitettu erotin.       |
+
+Lisää oireita:
+
+| Oire                                                                                                            | Todennäköinen syy                                                                                                                                                                | Korjata                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                         | MCP -työkaluvirhetulos (`isError: true`), ei HTTP 403. Soittajan avaimesta puuttuu vaadittu laajuus.                                                                             | Lisää kiikari työkalukohtaisesta taulukosta (katso käyttäjän opas). Esimerkiksi `omniroute_ccr_retrieve` tarvitsee `read:compression`.                                               |
+| `Unknown Mcp-Session-Id`                                                                                        | Streamable-HTTP-istunto tyhjennettiin ja korjattiin (`OMNIROUTE_MCP_SESSION_IDLE_MS`); palvelin vastaa HTTP 404.                                                                 | Yhdistä tai käynnistä uudelleen istunto — do** ei** kiertää avainta, muuttaa laajuutta tai nimetä työkalu uudelleen. Se ei ole 401/403.                                              |
+| `JSON Parse error` / `Unterminated string` työkalutuloksessa                                                    | MCP -työkaluteksti leikattu `mcpAccessibility.maxTextChars` (oletus `50000`) mid-JSON ympärille.                                                                                 | Käytä sivuttua `mode` paljaan täysmerkin sijaan: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` tai `mode:"stats"`. Nyrkkisääntö: `chars > 40000` → käytä `mode`.       |
+| `Failed to open SSE stream`                                                                                     | Asiakas osui perintöön `/api/mcp/sse` singleton kun kuljetus on `streamable`.                                                                                                    | Osoita asiakas `/api/mcp/stream` :han (suoratoiston päätepisteeseen) `/api/mcp/sse` n sijaan.                                                                                        |
+| **Kuollut stdio sydämenlyönti** — `mcp-heartbeat.json` näyttää `pidAlive: false`, kun HTTP -siirto on käynnissä | Heartbeat-tiedosto on stdio-jäännös (vanhentunut PID tai eri versio); HTTP -siirrot ovat kesken ja raportoivat tilan sen sijaan `getMcpHttpStatus()` (ei tiedoston kirjoitusta). | Ei toimia — kuljetus on terve. Totuus on `httpTransport.online` / `startedAt` tiedostosta `/api/mcp/status`, ei syketiedosto. Älä käynnistä palvelinta uudelleen tai kierrä avainta. |
 
 ---
 

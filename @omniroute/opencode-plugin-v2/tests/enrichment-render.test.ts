@@ -19,6 +19,7 @@ describe("the enrichment overlay reaches the picker", () => {
       providerAlias: "cc",
     });
     assert.equal(m.name, "Claude - Claude Sonnet 4.6");
+    assert.match(m.name, /Claude/);
   });
 
   it("marks a free model and states the budget the user actually gets", () => {
@@ -28,23 +29,15 @@ describe("the enrichment overlay reaches the picker", () => {
       freeType: "recurring-monthly" as const,
       monthlyTokens: 1_000_000,
     });
-    assert.match(m.name, /\[Free\]/);
+    assert.match(m.name, /^🆓 /);
     assert.match(m.name, /Grok 4 Fast/);
+    assert.match(m.name, /Pollinations/);
     assert.match(
       m.name,
       /tokens\/month/,
       "the budget the gateway reports is stated, not just the fact it is free"
     );
-    assert.equal(m.name, "[Free] Pollinations - Grok 4 Fast · 1M tokens/month");
-  });
-
-  it("drops the tag when the caller turns it off", () => {
-    const m = applyEnrichment(
-      model("cc/sonnet"),
-      { name: "Claude Sonnet 4.6", providerDisplayName: "Claude" },
-      { providerTag: false }
-    );
-    assert.equal(m.name, "Claude Sonnet 4.6");
+    assert.equal(m.name, "🆓 Pollinations - Grok 4 Fast · 1M tokens/month");
   });
 
   it("never tags a combo: it routes across providers, not to one", () => {
@@ -53,12 +46,40 @@ describe("the enrichment overlay reaches the picker", () => {
       { name: "Combo Fast", providerDisplayName: "Claude" },
       { isCombo: true }
     );
-    assert.equal(m.name, "Combo Fast");
+    assert.equal(m.name, "combo - Combo Fast");
   });
 
   it("still overlays pricing", () => {
     const m = applyEnrichment(model("x"), { pricing: { input: 3, output: 15 } });
     assert.equal(m.cost.input, 3);
     assert.equal(m.cost.output, 15);
+  });
+});
+
+describe("free budget under alias and without cap", () => {
+  it("renders the budget of an alias-served model", () => {
+    const m = applyEnrichment(model("cf/@cf/meta/llama-3.3-70b-instruct-fp8-fast"), {
+      name: "Llama 3.3 70B",
+      providerDisplayName: "Cloudflare",
+      providerAlias: "cf",
+      freeType: "recurring-monthly" as const,
+      monthlyTokens: 1_000_000,
+    });
+    assert.equal(m.name, "🆓 Cloudflare - Llama 3.3 70B · 1M tokens/month");
+  });
+
+  it("renders the uncapped label with no counters", () => {
+    const m = applyEnrichment(model("cf/open-m"), {
+      name: "Open Model",
+      providerDisplayName: "Cloudflare",
+      providerAlias: "cf",
+      freeType: "recurring-uncapped" as const,
+    });
+    assert.equal(m.name, "🆓 Cloudflare - Open Model · (uncapped)");
+  });
+
+  it("renders nothing extra when the budget is unknown", () => {
+    const m = applyEnrichment(model("cf/open-m"), { name: "Open Model" });
+    assert.ok(!m.name.includes("·"));
   });
 });

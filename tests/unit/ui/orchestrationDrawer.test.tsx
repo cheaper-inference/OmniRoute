@@ -18,8 +18,10 @@ function render(el: React.ReactElement) {
   document.body.appendChild(c);
   const root = createRoot(c);
   act(() => root.render(el));
+  // The drawer is the kit Sheet (KEA-7886), portalled to document.body: queries run against the
+  // whole body (which also holds the render host), the host is still what gets removed.
   return {
-    c,
+    c: document.body,
     cleanup: () => {
       act(() => root.unmount());
       c.remove();

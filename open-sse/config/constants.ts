@@ -1,4 +1,7 @@
-import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
+import {
+  getUpstreamTimeoutConfig,
+  readStreamActiveTimeoutOverrideMs,
+} from "@/shared/utils/runtimeTimeouts";
 import { resolvePublicCred } from "../utils/publicCreds.ts";
 import type { LegacyProvider } from "./providerRegistry.ts";
 import { loadProviderCredentials } from "./credentialLoader.ts";
@@ -29,9 +32,19 @@ export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 export const STREAM_DISCONNECT_GRACE_PERIOD_MS = upstreamTimeouts.streamDisconnectGracePeriodMs;
 
 // Hard cap for a connected upstream stream. This timer never resets on
-// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Set
-// STREAM_ACTIVE_TIMEOUT_MS=0 to disable it.
+// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Left unset,
+// a target that declares a longer budget raises its own cap above the default
+// (resolveStreamActiveTimeoutMs). A positive STREAM_ACTIVE_TIMEOUT_MS is a hard
+// cap for every target; 0 disables it.
 export const STREAM_ACTIVE_TIMEOUT_MS = upstreamTimeouts.streamActiveTimeoutMs;
+// The operator's own value, or undefined when unset (see readStreamActiveTimeoutOverrideMs).
+export const STREAM_ACTIVE_TIMEOUT_OVERRIDE_MS = readStreamActiveTimeoutOverrideMs(process.env);
+// Re-exported so the engine reads them through this module instead of importing src.
+export {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
+} from "@/shared/utils/runtimeTimeouts";
 
 // Timeout for the first non-ping SSE event. Inherits REQUEST_TIMEOUT_MS when
 // set, unless STREAM_READINESS_TIMEOUT_MS is specified directly. This must stay
@@ -48,6 +61,8 @@ export const STREAM_READINESS_MAX_TIMEOUT_MS = upstreamTimeouts.streamReadinessM
 // headers are returned. Keep it shared so executor, core normalization and
 // account fallback detection cannot drift.
 export const ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE = "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT";
+// A trusted caller shortened this request only; do not cool shared provider accounts.
+export const REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE = "REQUEST_SCOPED_UPSTREAM_TIMEOUT";
 
 // Heartbeat interval for synthetic SSE keepalive emission toward the downstream
 // client (Capy, Claude Code, OpenAI SDK, etc). Keeps strict proxies from
@@ -212,6 +227,20 @@ export const HTTP_STATUS = {
  * `open-sse/services/` can import it without creating a cycle.
  */
 export const EXECUTOR_CONTRACT_VIOLATION_CODE = "executor_contract_violation";
+
+/**
+ * #18019: a local executor refusing to start because its operator configuration is
+ * missing or unsafe (the Devin agentic bridge with DEVIN_AGENTIC_HOME unset or outside
+ * the sandbox). Decided before any spawn and identical on every retry until the operator
+ * fixes the env and restarts, so it must not cool the shared no-auth connection, trip the
+ * provider breaker, or be replayed on the same account; a combo just moves on.
+ */
+export const DEVIN_BRIDGE_NOT_CONFIGURED_CODE = "devin_bridge_not_configured";
+export const UNSAFE_DEVIN_HOME_CODE = "unsafe_devin_home";
+export const LOCAL_CONFIGURATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  DEVIN_BRIDGE_NOT_CONFIGURED_CODE,
+  UNSAFE_DEVIN_HOME_CODE,
+]);
 
 export {
   BACKOFF_CONFIG,

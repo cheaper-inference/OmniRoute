@@ -1,0 +1,34 @@
+@layer components {
+  .ci-invoice { background: #fff; color: #17211d; color-scheme: light; font-family: var(--ci-font-ui); border: 1px solid #dce7e1; border-radius: var(--ci-radius-surface); padding: clamp(20px, 4vw, 40px); font-size: 12px; line-height: var(--ci-type-body-leading); overflow-wrap: anywhere; box-shadow: var(--ci-shadow-sm); font-weight: var(--ci-font-weight-regular); letter-spacing: var(--ci-type-body-tracking); }
+  .ci-invoice p, .ci-invoice h3, .ci-invoice dl, .ci-invoice dd { margin: 0; }
+  .ci-invoice__header { display: flex; gap: 16px; justify-content: space-between; padding-bottom: 24px; border-bottom: 3px solid #16a16d; }
+  .ci-invoice__brand { font-size: 19px; font-weight: var(--ci-font-weight-medium); letter-spacing: var(--ci-type-heading-tracking); line-height: var(--ci-type-heading-leading); }
+  .ci-invoice__eyebrow { color: #66736d; letter-spacing: var(--ci-type-caption-tracking); font-size: 10px; padding-top: 8px; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); }
+  .ci-invoice__number { text-align: right; display: flex; flex-direction: column; justify-content: center; }
+  .ci-invoice__number span { color: #66736d; font-size: 10px; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  .ci-invoice__parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px 0; }
+  .ci-invoice h3 { color: #66736d; font-size: 10px; font-weight: var(--ci-font-weight-medium); text-transform: uppercase; letter-spacing: var(--ci-type-heading-tracking); padding-bottom: 8px; line-height: var(--ci-type-heading-leading); }
+  .ci-invoice__parties strong { font-size: 13px; font-weight: var(--ci-font-weight-semibold); }
+  .ci-invoice__dates { display: flex; flex-wrap: wrap; gap: 16px 32px; padding-bottom: 24px; }
+  .ci-invoice dt { color: #66736d; }
+  .ci-invoice__dates dd { font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-data-leading); letter-spacing: var(--ci-type-data-tracking); }
+  .ci-invoice__table-wrap { overflow-x: auto; }
+  .ci-invoice table { border-collapse: collapse; width: 100%; min-width: 340px; table-layout: auto; }
+  .ci-invoice th { background: #f1f7f4; color: #66736d; font-size: 10px; font-weight: var(--ci-font-weight-medium); padding: 10px 8px; text-align: right; line-height: var(--ci-type-control-leading); letter-spacing: var(--ci-type-control-tracking); }
+  .ci-invoice th:first-child { text-align: left; width: 45%; }
+  .ci-invoice td { padding: 12px 8px; border-bottom: 1px solid #dce7e1; text-align: right; vertical-align: top; font-variant-numeric: tabular-nums; }
+  .ci-invoice td:first-child { text-align: left; }
+  .ci-invoice td:not(:first-child), .ci-invoice th:not(:first-child) { white-space: nowrap; }
+  .ci-invoice__totals { max-width: 300px; margin: 16px 0 24px auto !important; }
+  .ci-invoice__totals > div { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; }
+  .ci-invoice__total { border-top: 1px solid #dce7e1; margin-top: 8px; padding-top: 12px !important; font-size: 18px; font-weight: var(--ci-font-weight-semibold); line-height: var(--ci-type-data-leading); letter-spacing: 0em; }
+  .ci-invoice__total dt { color: #17211d; }
+  .ci-invoice__payment { padding: 16px; background: #f1f7f4; border-radius: 8px; }
+  .ci-invoice__payment dl > div, .ci-invoice__customer-bank dl > div { display: grid; grid-template-columns: minmax(90px, 1fr) 2fr; gap: 12px; padding: 3px 0; }
+  .ci-invoice__payment dd, .ci-invoice__customer-bank dd { white-space: pre-wrap; }
+  .ci-invoice__payment > p { padding-top: 10px; font-weight: 600; }
+  .ci-invoice__notes, .ci-invoice__customer-bank { padding-top: 20px; white-space: pre-wrap; }
+  .ci-invoice__footer { border-top: 1px solid #dce7e1; margin-top: 24px; padding-top: 16px; display: flex; justify-content: space-between; gap: 16px; color: #66736d; font-size: 10px; font-weight: var(--ci-font-weight-regular); line-height: var(--ci-type-caption-leading); letter-spacing: var(--ci-type-caption-tracking); }
+  @media (max-width: 480px) { .ci-invoice__header { flex-direction: column; } .ci-invoice__number { text-align: left; } .ci-invoice__parties { gap: 12px; } .ci-invoice th, .ci-invoice td { padding-left: 4px; padding-right: 4px; } }
+  @media print { .ci-invoice { border: 0; box-shadow: none; border-radius: 0; } }
+}

@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import type { default as BaseExecutorType } from "./base.ts";
 import {
   configuredPlaceholderToolNames,
@@ -31,6 +32,8 @@ type RetryCtx = {
   clientSession: string | undefined;
   borrowed: boolean | undefined;
   clientToolNames: readonly string[];
+  /** Opt-in OpenCode v2 fingerprint (#16571): the appended names carry the v2 CLI schemas. */
+  v2Fingerprint?: boolean;
 };
 
 /** Scope guards: refusal status, gated surface+model, own (non-borrowed) tools, object body. */
@@ -64,7 +67,7 @@ async function readRefusalBody(
   log: ExecutorLog
 ): Promise<string | null> {
   try {
-    const text = await first.response.clone().text();
+    const text = await readResponseTextWithinCap(first.response.clone());
     return isOwnToolsRetryableRefusal(status, text) ? text : null;
   } catch {
     log?.debug?.("OPENCODE", "body read failed on free-tier retry check");
@@ -121,7 +124,8 @@ export async function retryFreeTierRefusalWithObservedTools(
     ctx.provider,
     model,
     ctx.clientSession,
-    configured
+    configured,
+    ctx.v2Fingerprint === true
   );
   if (merged === input.body) return null;
   if (addsNothingBeyondFirstDispatch(ctx, model, configured, merged)) return null;
@@ -156,6 +160,8 @@ export async function handleLoopFreeTierRefusal(
   hooks: {
     dispatch: (retryInput: ExecutorInput) => Promise<{ response: Response }>;
     noteServed: (account: unknown) => void;
+    /** Opt-in egress probe once the retry failed or did not apply (opencodeFreeTierEgressProbe). */
+    probe?: () => Promise<{ response: Response } | null>;
   }
 ): Promise<ShapedResult> {
   const retried = await retryFreeTierRefusalWithObservedTools(
@@ -166,6 +172,8 @@ export async function handleLoopFreeTierRefusal(
     cid,
     hooks.dispatch
   );
+  const probed = hooks.probe && !retried?.response.ok ? await hooks.probe() : null;
+  if (probed) return shape(probed);
   if (retried) {
     return shape(retried);
   }

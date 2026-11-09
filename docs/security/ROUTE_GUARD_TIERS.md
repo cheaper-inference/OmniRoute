@@ -159,6 +159,25 @@ operator responsibilities remain:
 - A `403 LOCAL_ONLY` in OmniRoute's logs for one of these paths is the guard
   working as intended, not an error to suppress.
 
+#### Remote-reachable routes with a call-site probe gate
+
+Some routes must stay reachable from a remote dashboard but run a host-side probe
+(`which <binary>`, `<binary> --version`, `tailscale status --json`) for local callers.
+They are not LOCAL_ONLY for `GET`; instead the handler reads the trusted peer verdict
+with `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) and only runs the probe
+for `loopback` / `lan` callers. A `remote` caller gets the same response shape built from
+non-spawning sources (persisted state, settings, fs checks), flagged `probed: false`.
+
+| Route                                                            | Probe skipped for remote callers                                    |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) and CLI-fallback spawn |
+| `GET /api/headroom/status`                                       | `which headroom` and the python `--version` probes                  |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`   |
+| `GET /api/tunnels/cloudflared` (GET-exempt from LOCAL_ONLY)      | `which cloudflared` PATH lookup                                     |
+
+A new read route that probes the host follows the same pattern, or is classified
+LOCAL_ONLY outright.
+
 ### Tier 2 — ALWAYS_PROTECTED
 
 **Enforced by:** `isAlwaysProtectedPath(path)` → skip `requireLogin=false` bypass
@@ -177,6 +196,13 @@ server process.
 | `/api/settings/import-json`               | Replaces the full settings blob                |
 | `/api/providers/health-autopilot/actions` | Executes autopilot remediation actions         |
 | `/api/settings/obsidian`                  | Mints reusable WebDAV creds for any vault root |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens   |
+| `/api/cli-tools/apply`                    | Rewrites the operator's host CLI config        |
+| `/api/cli-tools/guide-settings`           | Writes guide-driven CLI config files           |
+| `/api/cli-tools/hermes-agent-settings`    | Writes the Hermes agent config                 |
+| `/api/cli-tools/backups`                  | Restores and deletes CLI config backups        |
+| `/api/log-export`                         | Ships call logs to a configured destination    |
+| `/api/restart`                            | Restarts the server process                    |
 
 **Response on violation:** `401 Authentication required`
 
@@ -187,7 +213,7 @@ the Obsidian REST API token. GHSA-62vw only masked the `GET` password reveal; th
 still on the fail-open tier (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` additionally
 refuses a vault that is, sits inside, or contains the data directory.
 
-#### Credential exports are operator-only
+#### Credential exports and restores are operator-only
 
 The tier above only decides whether _some_ credential is required. The routes that download
 stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
@@ -195,8 +221,18 @@ provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite
 `GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
 (`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
 an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. Sync token issuance (`POST /api/sync/tokens`) uses the
-same helper, plus the trusted loopback internal-service token.
+and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
+`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
+(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
+replace the live database or the whole settings/connections/API-key set, so a machine credential
+cannot trigger them either. Destroying restore points holds the same boundary:
+`DELETE /api/db-backups` (cleanup — keep the latest N / drop older than D days) and
+`PATCH /api/db-backups` (retention settings), because the persisted retention is exactly what
+`cleanupDbBackups()` applies after every automatic backup (`src/lib/db/backup.ts`), so a machine
+credential that could save `keepLatest: 1` would prune everything on the next snapshot. Listing
+and creating backups (`GET`/`PUT /api/db-backups`) keep ordinary management auth. Sync token
+issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
+internal-service token.
 
 ### Fresh-install bootstrap is loopback-only — by real peer, not `Host`
 

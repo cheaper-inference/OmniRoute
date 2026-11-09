@@ -29,23 +29,24 @@ Jika Anda menemukan kerentanan keamanan di OmniRoute, harap laporkan secara bert
 | 3.7.x   | ✅ Keamanan                                              |
 | < 3.7.0 | ❌ Tidak didukung                                        |
 
-## Periode dukungan LTS (v3.9.x)
+## Jangka waktu dukungan LTS (v3.9.x)
 
-Setelah 3.8.59, versi berikutnya adalah **3.9.0**, yang membuka lini dukungan jangka panjang pada
-branch `stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
+Setelah 3.8.59, versi berikutnya adalah **3.9.0**, yang membuka jalur dukungan jangka panjang pada cabang
+`stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — LTS v3.9.0").
 
 - **Yang diterima `stable/v3`:** perbaikan bug, patch keamanan, dan pembaruan penyedia. Fitur
-  baru masuk ke kanal v4; lini LTS mengutamakan stabilitas. `npm install omniroute`
-  (dist-tag `latest`) tetap berada di v3 selama seluruh siklus v4.
-- **Durasi periode:** `<T-GAP-3: keputusan pemilik masih tertunda — lihat ROADMAP.md>`. Durasi
-  periode setelah v4.0 GA (ketika `latest` beralih ke v4) **belum diputuskan**; bagian ini
-  diperbarui saat pengelola mengumumkannya. Hingga saat itu, jangan mengasumsikan tanggal berakhir.
-- **Melaporkan kerentanan pada lini LTS:** gunakan kanal yang sama seperti versi lainnya —
+  baru masuk ke kanal v4; jalur LTS mengutamakan stabilitas. `npm install omniroute`
+  (`latest` dist-tag) tetap berada di v3 selama seluruh siklus v4.
+- **Durasi jangka waktu:** `stable/v3` menerima **perbaikan keamanan dan regresi kritis selama
+  12 bulan setelah rilis 3.9.0, atau hingga 90 hari setelah v4.0.0 dipublikasikan sebagai `latest` —
+  mana pun yang lebih akhir**. Tanggal berakhir yang dihasilkan dicatat dalam catatan rilis 3.9.0 dan di
+  [`ROADMAP.md`](ROADMAP.md) saat rilis dilakukan.
+- **Melaporkan kerentanan di jalur LTS:** gunakan kanal yang sama seperti versi lainnya —
   [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privat,
-  bukan issue publik. Sebutkan versi yang Anda uji (misalnya `3.9.2`); perbaikan diterapkan ke
-  `stable/v3` dan diteruskan ke v4.
-- **Baseline keamanan saat pemisahan LTS:** status pemindai terukur, perlindungan rute, dan
-  bukti kredensial publik dicatat dalam
+  jangan pernah menggunakan issue publik. Sebutkan versi yang Anda uji (misalnya `3.9.2`); perbaikan diterapkan pada
+  `stable/v3` dan di-porting ke depan ke v4.
+- **Baseline keamanan saat rilis LTS:** status pemindai yang diukur, bukti penjaga rute, dan
+  bukti kredensial publik dicatat di
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

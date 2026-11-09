@@ -1,1 +1,0 @@
-- fix(i18n): reject invalid UI message syntax in CI and repair five rich-text translations without exposing markup (#12560).

@@ -149,10 +149,10 @@ omniroute providers validate
 ```txt
 Temel URL: http://localhost:20128/v1
 API Anahtarı:  [Endpoint sayfasından kopyalayın]
-Model:    if/qwen3.8-max-preview (veya herhangi bir sağlayıcı/model ön eki)
+Model:    if/qwen3.8-max-preview (veya herhangi bir sağlayıcı/model öneki)
 ```
 
-Editörünüz `Authorization: Bearer ...` gönderemiyorsa bunun yerine belirteç içeren uyumluluk temel adresini kullanın:
+Editörünüz `Authorization: Bearer ...` gönderemiyorsa bunun yerine token içeren uyumluluk temel adresini kullanın:
 
 ```txt
 Temel URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,34 +165,29 @@ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode ve OpenAI uyumlu SDK'l
 
 #### `setup-*` ile otomatik yapılandırma
 
-Temel URL'yi ve anahtarı elle yapıştırmak yerine OmniRoute'un canlı model kataloğundan her aracın
-kendi yapılandırmasını yazmasına izin verin. Her araç için bir komut:
+Temel URL'yi ve anahtarı elle yapıştırmak yerine OmniRoute'un canlı model kataloğundan yararlanarak her aracın kendi yapılandırmasını yazmasına izin verin. Her araç için tek komut:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilleri
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI uyumlu)
-omniroute setup-cline        # Cline CLI + VS Code uzantısı ayarları
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai uyumlu)
+omniroute setup-cline        # Cline CLI + VS Code eklentisi ayarları
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor'ın uygulama içi adımlarını yazdırır
 omniroute setup-roo          # Roo Code içe aktarma + autoImport işaretçisi
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Her biri, yerel bir aracı **uzak** bir OmniRoute'a göre yapılandırmak için `--remote <url> --api-key <key>` parametrelerini ve önizleme için `--dry-run` parametresini kabul eder. Doğru
-ortam değişkenleri eklenmiş ve hiçbir yapılandırma yazılmamış şekilde bir CLI başlatmak için genel başlatıcı
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) komutunu kullanın;
-eski araç başına başlatıcılar olan `omniroute launch` (Claude Code) ve
-`omniroute launch-codex` (Codex) kullanılabilir olmaya devam eder.
+Her biri, yerel bir aracı **uzak** bir OmniRoute'a göre yapılandırmak için `--remote <url> --api-key <key>` seçeneklerini ve önizleme için `--dry-run` seçeneğini kabul eder. Bir CLI'yi doğru ortam değişkenleri eklenmiş ve hiçbir yapılandırma yazılmamış şekilde başlatmak için genel başlatıcı `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) komutunu kullanın; araç başına eski başlatıcılar olan `omniroute launch` (Claude Code) ve `omniroute launch-codex` (Codex) kullanılmaya devam edilebilir.
 
-Tam tablo (her komutun ne yazdığı, tüm parametreler, yerel ve uzak kullanım, temel URL
-`/v1` kuralları) için **[CLI Entegrasyonları](./CLI-INTEGRATIONS.md)** bölümüne bakın.
+Tam tablo için (her komutun ne yazdığı, tüm seçenekler, yerel ve uzak kullanım, temel URL `/v1` kuralları) **[CLI Entegrasyonları](./CLI-INTEGRATIONS.md)** belgesine bakın.
 
-Araç bazında ayrıntılı yapılandırma (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ve daha fazlası) için özel **[CLI Araçları Kılavuzu](../reference/CLI-TOOLS.md)** bölümüne bakın.
+Araç bazında ayrıntılı yapılandırma (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ve daha fazlası) için özel **[CLI Araçları Kılavuzu](../reference/CLI-TOOLS.md)** belgesine bakın.
 
 ---
 
@@ -209,28 +204,28 @@ omniroute --mcp
 Önerilen doğrulama akışı:
 
 ```bash
-# 1. MCP sunucusunu başlatın
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. MCP istemcinizden şunları çağırın:
-omniroute_get_health        # Sistem durumunu döndürmelidir
-omniroute_list_combos       # Etkin kombinasyonları döndürmelidir
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Veya E2E paketinin tamamını çalıştırın:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### MCP İstemci Yapılandırması
 
-**Claude Code:**
+**Claude Kodu:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-MCP ayarlarınıza ekleyin:
+MCP ayarlarınıza ekleyin (stdio, arayanın bir anaparaya sahip olması için anahtarla birlikte):
 
 ```json
 {
@@ -238,23 +233,30 @@ MCP ayarlarınıza ekleyin:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Tam MCP dokümantasyonu:** [MCP Sunucusu README](../../open-sse/mcp-server/README.md) — 110 araç, IDE yapılandırmaları, Python/TS/Go istemcileri.
+Veya `mcpTransport`, `streamable-http` olduğunda ( `/dashboard/mcp` veya `omniroute mcp enable --transport streamable-http` ile ayarlayın), istemcinin uzak MCP sunucusu girişini `http://localhost:20128/api/mcp/stream` yönlendirin.
 
-### A2A Kurulumu (Aracıdan Aracıya Protokolü)
+Anahtar `Authorization: Bearer <api-key>` olarak hareket eder (bkz. [MCP Sunucusu → Uzak ana bilgisayarlar için uzaktan erişim](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) ; uzak anahtarın `mcp:connect` artı read/write kapsamlarına ihtiyacı vardır).
 
-Agent Card'ı doğrulayın:
+**Tam MCP belgeleri:** [MCP Sunucusu README](../../open-sse/mcp-server/README.md) — 110 araçları, IDE yapılandırmaları, Python/TS/Go istemcileri. Sıkıştırma CCR/dedup araçları için operatör referansı (işaretçiler, önkoşullar, araç başına kapsamlar, erişim sayfalandırması, tanılama): [Sıkıştırma Motorları → Önkoşullar / operatör kılavuzu](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A Kurulumu (Ajan-Ajan Protokolü)
+
+Temsilci Kartını Doğrulayın:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Bir görev gönderin:
+Bir görev gönder:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -262,7 +264,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Tam A2A dokümantasyonu:** [A2A Sunucusu README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, beceriler, akış, görev yaşam döngüsü.
+**Tam A2A belgeleri:** [A2A Sunucusu README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, beceriler, akış, görev yaşam döngüsü.
 
 ---
 
@@ -321,12 +323,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) Şablonu
+## Geçersiz Linux (xbps-src) Şablonu
 
-Void Linux kullanıcıları, `xbps-src` kullanarak yerel bir paket oluşturabilir. Bu bloğu `srcpkgs/omniroute/template` olarak kaydedin:
+Void Linux kullanıcıları için `xbps-src` kullanarak yerel bir paket oluşturabilirsiniz. Bu bloğu `srcpkgs/omniroute/template` olarak kaydedin:
 
 ```bash
-# 'omniroute' için şablon dosyası
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -337,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Her sürüm için sağlama toplamını şu komutla yeniden oluşturun:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

@@ -1,1 +1,0 @@
-- **fix(i18n):** Localize cache and access-token settings, feedback, scopes, and dates across all 67 UI catalogs, preserving technical identifiers and API values ([#15189](https://github.com/diegosouzapw/OmniRoute/pull/15189)) — thanks @xiaoyaner0201

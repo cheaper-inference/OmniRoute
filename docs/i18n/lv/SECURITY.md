@@ -31,21 +31,22 @@ Ja atklājat drošības ievainojamību OmniRoute, lūdzu, ziņojiet par to atbil
 
 ## LTS atbalsta periods (v3.9.x)
 
-Pēc 3.8.59 nākamā versija ir **3.9.0**, kas atver ilgtermiņa atbalsta atzaru
-`stable/v3` zarā (skatiet [`ROADMAP.md`](ROADMAP.md) → "3. posms — v3.9.0 LTS").
+Pēc 3.8.59 nākamā versija ir **3.9.0**, ar kuru zarā
+`stable/v3` tiek sākta ilgtermiņa atbalsta līnija (skatiet [`ROADMAP.md`](ROADMAP.md) → „3. posms — v3.9.0 LTS”).
 
 - **Ko saņem `stable/v3`:** kļūdu labojumus, drošības ielāpus un nodrošinātāju atjauninājumus. Jaunas
-  funkcijas tiek pievienotas v4 kanālam; LTS atzarā prioritāte ir stabilitāte. `npm install omniroute`
-  (`latest` izplatīšanas tags) paliek v3 visā v4 cikla laikā.
-- **Perioda ilgums:** `<T-GAP-3: gaida īpašnieka lēmumu — skatiet ROADMAP.md>`. Perioda ilgums
-  pēc v4.0 vispārējās pieejamības (kad `latest` pārslēdzas uz v4) **vēl nav noteikts**; šī
-  sadaļa tiks atjaunināta, kad uzturētājs par to paziņos. Līdz tam nepieņemiet, ka pastāv beigu datums.
-- **Ziņošana par ievainojamību LTS atzarā:** izmantojiet to pašu kanālu, ko jebkurai citai versijai —
+  funkcijas tiek pievienotas v4 kanālam; LTS līnijas galvenā prioritāte ir stabilitāte. `npm install omniroute`
+  (`latest` dist-tag) visā v4 ciklā paliek pie v3.
+- **Atbalsta perioda ilgums:** `stable/v3` saņem **drošības labojumus un kritisku regresiju labojumus
+  12 mēnešus pēc 3.9.0 izveides vai līdz brīdim, kad pagājušas 90 dienas kopš v4.0.0 publicēšanas ar `latest` —
+  atkarībā no tā, kurš termiņš iestājas vēlāk**. Iegūtais beigu datums tiek ierakstīts 3.9.0 laidiena piezīmēs un
+  failā [`ROADMAP.md`](ROADMAP.md), kad tiek izveidots laidiens.
+- **Ievainojamības ziņošana LTS līnijā:** izmantojiet to pašu kanālu kā jebkurai citai versijai —
   privātu [GitHub drošības ieteikumu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nekad publisku problēmas pieteikumu. Norādiet, kuru versiju testējāt (piemēram, `3.9.2`); labojumi tiek ieviesti
-  `stable/v3` un pārnesti uz priekšu uz v4.
-- **Drošības bāzlīnija LTS atzara izveides brīdī:** izmērītais skenera stāvoklis, maršrutu aizsardzības un
-  publisko akreditācijas datu pārbaudes ir reģistrētas
+  nekad publisku problēmas pieteikumu. Norādiet, kuru versiju pārbaudījāt (piemēram, `3.9.2`); labojumi tiek
+  iekļauti `stable/v3` un pārnesti uz priekšu uz v4.
+- **Drošības bāzes līmenis LTS izveides brīdī:** izmērītais skenera stāvoklis, maršrutu aizsardzības un
+  publisko akreditācijas datu apliecinājumi ir dokumentēti failā
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

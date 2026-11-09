@@ -2,7 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { DataTableFooter, DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import { Badge, Button, EmptyState, Input, Select } from "@/shared/components";
 import type { A2ATask, TaskState } from "@/lib/a2a/taskManager";
 
 type TaskListResponse = {
@@ -14,12 +25,12 @@ type TaskListResponse = {
 
 const A2A_PAGE_SIZE = 25;
 
-const STATE_STYLES: Record<TaskState, string> = {
-  submitted: "border-amber-500/30 bg-amber-500/10 text-amber-600",
-  working: "border-blue-500/30 bg-blue-500/10 text-blue-600",
-  completed: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
-  failed: "border-red-500/30 bg-red-500/10 text-red-600",
-  cancelled: "border-border bg-sidebar/40 text-text-muted",
+const STATE_TONES: Record<TaskState, "warning" | "info" | "success" | "error" | "default"> = {
+  submitted: "warning",
+  working: "info",
+  completed: "success",
+  failed: "error",
+  cancelled: "default",
 };
 
 function taskDuration(task: A2ATask): string {
@@ -71,57 +82,46 @@ export default function A2aAuditTab() {
 
   return (
     <div className="space-y-5">
-      <Card className="p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-text-main">{t("a2aAudit")}</h2>
-            <p className="mt-1 text-sm text-text-muted">{t("a2aAuditDesc")}</p>
-            <p className="mt-2 text-xs text-text-muted">
-              {t("a2aShowingTasks", { count: data.tasks.length, total: data.total })}
-            </p>
-          </div>
-          <button
+      <PageHeader
+        compact
+        title={t("a2aAudit")}
+        description={t("a2aAuditDesc")}
+        actions={
+          <Button
+            variant="outline"
+            icon="refresh"
+            loading={loading}
             onClick={() => void fetchTasks()}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
           >
-            <span
-              className={`material-symbols-outlined text-[16px] ${loading ? "animate-spin" : ""}`}
-            >
-              refresh
-            </span>
             {t("refresh")}
-          </button>
-        </div>
-      </Card>
+          </Button>
+        }
+      />
 
-      <Card className="p-4">
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("a2aSkill")}
-            </span>
-            <input
+      <DataTableShell
+        filterAlignment="end"
+        resultCount={data.total}
+        resultLabel={() => t("a2aShowingTasks", { count: data.tasks.length, total: data.total })}
+        filters={
+          <>
+            <Input
+              label={t("a2aSkill")}
               value={skillFilter}
               onChange={(e) => {
                 setOffset(0);
                 setSkillFilter(e.target.value);
               }}
               placeholder={t("a2aSkillPlaceholder")}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-56"
             />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-muted">
-              {t("a2aState")}
-            </span>
-            <select
+            <Select
+              label={t("a2aState")}
               value={stateFilter}
               onChange={(e) => {
                 setOffset(0);
                 setStateFilter(e.target.value as TaskState | "all");
               }}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="w-full sm:w-44"
             >
               <option value="all">{t("a2aAllStates")}</option>
               <option value="submitted">{t("a2aStateSubmitted")}</option>
@@ -129,91 +129,85 @@ export default function A2aAuditTab() {
               <option value="completed">{t("a2aStateCompleted")}</option>
               <option value="failed">{t("a2aStateFailed")}</option>
               <option value="cancelled">{t("a2aStateCancelled")}</option>
-            </select>
-          </label>
-          <div className="flex items-end">
-            <button
+            </Select>
+            <Button
+              variant="ghost"
               onClick={() => {
                 setSkillFilter("");
                 setStateFilter("all");
                 setOffset(0);
               }}
-              className="w-full rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar"
             >
               {t("clearFilters")}
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      <Card className="overflow-hidden">
+            </Button>
+          </>
+        }
+        pagination={
+          <DataTableFooter
+            pagination={
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOffset((c) => Math.max(0, c - A2A_PAGE_SIZE))}
+                  disabled={offset === 0 || loading}
+                >
+                  {t("previous")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOffset((c) => c + A2A_PAGE_SIZE)}
+                  disabled={offset + A2A_PAGE_SIZE >= data.total || loading}
+                >
+                  {t("next")}
+                </Button>
+              </div>
+            }
+          />
+        }
+      >
         {loading ? (
-          <div className="p-8 text-center text-sm text-text-muted">{t("a2aLoadingTasks")}</div>
+          <TableLoadingState label={t("a2aLoadingTasks")} />
         ) : data.tasks.length === 0 ? (
-          <div className="p-10 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted">
-              device_hub
-            </span>
-            <p className="mt-3 text-sm text-text-muted">{t("a2aNoTasks")}</p>
-          </div>
+          <EmptyState icon="device_hub" title={t("a2aNoTasks")} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="border-b border-border bg-sidebar/40 text-xs uppercase tracking-wider text-text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-medium">{t("timestamp")}</th>
-                  <th className="px-4 py-3 font-medium">{t("a2aTaskId")}</th>
-                  <th className="px-4 py-3 font-medium">{t("a2aSkill")}</th>
-                  <th className="px-4 py-3 font-medium">{t("a2aState")}</th>
-                  <th className="px-4 py-3 font-medium">{t("duration")}</th>
-                  <th className="px-4 py-3 font-medium">{t("a2aEvents")}</th>
-                  <th className="px-4 py-3 font-medium">{t("a2aArtifacts")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data.tasks.map((task) => (
-                  <tr key={task.id} className="transition-colors hover:bg-sidebar/30">
-                    <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-text-muted">
-                      {new Date(task.createdAt).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-muted">
-                      {task.id.slice(0, 8)}&hellip;
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-text-main">{task.skill}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full border px-2 py-1 text-xs font-medium ${STATE_STYLES[task.state]}`}
-                      >
-                        {t(`a2aState${task.state.charAt(0).toUpperCase()}${task.state.slice(1)}`)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-text-muted">{taskDuration(task)}</td>
-                    <td className="px-4 py-3 text-text-muted">{task.events.length}</td>
-                    <td className="px-4 py-3 text-text-muted">{task.artifacts.length}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table scrollbarLabel={t("a2aAudit")} className="min-w-[760px] text-left">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("timestamp")}</TableHead>
+                <TableHead>{t("a2aTaskId")}</TableHead>
+                <TableHead>{t("a2aSkill")}</TableHead>
+                <TableHead>{t("a2aState")}</TableHead>
+                <TableHead>{t("duration")}</TableHead>
+                <TableHead>{t("a2aEvents")}</TableHead>
+                <TableHead>{t("a2aArtifacts")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.tasks.map((task) => (
+                <TableRow key={task.id}>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {new Date(task.createdAt).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-muted">
+                    {task.id.slice(0, 8)}&hellip;
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-text-main">{task.skill}</TableCell>
+                  <TableCell>
+                    <Badge size="sm" variant={STATE_TONES[task.state]}>
+                      {t(`a2aState${task.state.charAt(0).toUpperCase()}${task.state.slice(1)}`)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-text-muted">{taskDuration(task)}</TableCell>
+                  <TableCell className="text-text-muted">{task.events.length}</TableCell>
+                  <TableCell className="text-text-muted">{task.artifacts.length}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
-      </Card>
-
-      <div className="flex items-center justify-end gap-2">
-        <button
-          onClick={() => setOffset((c) => Math.max(0, c - A2A_PAGE_SIZE))}
-          disabled={offset === 0 || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("previous")}
-        </button>
-        <button
-          onClick={() => setOffset((c) => c + A2A_PAGE_SIZE)}
-          disabled={offset + A2A_PAGE_SIZE >= data.total || loading}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-main transition-colors hover:bg-sidebar disabled:opacity-40"
-        >
-          {t("next")}
-        </button>
-      </div>
+      </DataTableShell>
     </div>
   );
 }

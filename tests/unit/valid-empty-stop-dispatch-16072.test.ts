@@ -254,6 +254,27 @@ await test.describe("#16072 executed empty-terminal contract", async () => {
     assert.equal(calls.length, 1);
   });
 
+  test("#16438 flag on: Codex created then EOF spends the bounded empty-turn recovery attempt", async () => {
+    const previous = process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED;
+    process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED = "true";
+    try {
+      const { response, text, calls } = await requestStream(
+        "codex/gpt-5.4",
+        createdResponses,
+        "https://chatgpt.com/backend-api/codex/responses"
+      );
+      assert.ok(response.status >= 400 || text.includes('"error"'), text);
+      assert.equal(
+        calls.length,
+        2,
+        "the malformed empty lifecycle must use the bounded recovery attempt"
+      );
+    } finally {
+      if (previous === undefined) delete process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED;
+      else process.env.EMPTY_STREAM_SIBLING_RECOVERY_ENABLED = previous;
+    }
+  });
+
   test("#16072 HTTP JSON-to-SSE combo preserves a native normal terminal", async () => {
     await createCombo({
       name: "empty-json-to-sse",

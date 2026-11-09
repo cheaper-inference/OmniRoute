@@ -33,37 +33,43 @@ Běžné problémy a jejich řešení pro OmniRoute.
 
 ---
 
-## Podrobné řešení problémů
+## Podrobné řešení potíží
 
 ---
 
-### Omezování počtu požadavků u bezplatných poskytovatelů (429 / 400 / 401)
+### Omezení rychlosti u bezplatných poskytovatelů (429 / 400 / 401)
 
-**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli nebo poskytovateli bez ověřování (opencode, auggie atd.) občas místo odpovědí obdržíte `HTTP 429`, `400` nebo `401`. Pokud stejný dotaz o několik okamžiků později zopakujete, požadavek uspěje, ale automatizace (úlohy cron, agenti, skripty) skončí při prvním selhání.
+**Příznak**: Při použití `model: "auto"` s bezplatnými poskytovateli bez autentizace (auggie apod.) občas místo odpovědí obdržíte `HTTP 429`, `400` nebo `401`. Po opakování stejného požadavku o chvíli později požadavky uspějí, ale automatizace (úlohy cron, agenti, skripty) selže při prvním pokusu.
 
-**Hlavní příčina**: Kombinují se tři nezávislé režimy selhání:
+**Kořenová příčina**: Kombinují se tři nezávislé režimy selhání:
 
-1. **Limit požadavků poskytovatele (`429`)**: Bezplatné tarify mohou vynucovat kvótu pro určité časové období. Dávka souběžných volání ji vyčerpá, takže další požadavek je odmítnut, dokud se limit neobnoví.
-2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Fondy `auto/*` mohou zahrnovat modely passthrough od `opencode`, které jsou zaregistrované v katalogu, ale nemají platné přihlašovací údaje (např. `oc/north-mini-code-free` → `401`). Automatický směrovač některý z nich vyzkouší, selže a chyba se rozšíří dříve, než se aktivuje záložní řešení.
-3. **Zesílení souběžností (`429` při zatížení)**: Když k `auto` přistupuje více relací agentů či úloh cron současně, celková frekvence požadavků překročí míru tolerovanou bezplatnými poskytovateli, takže jsou legitimní volání označena jako zneužívající.
+1. **Omezení rychlosti poskytovatele (`429`)**: Bezplatné tarify mohou vynucovat kvótu pro každé časové okno. Náraz paralelních volání ji vyčerpá, takže další požadavek je odmítnut, dokud se okno neresetuje.
+2. **Nefunkční model v režimu passthrough (`400`/`401`)**: Pooly `auto/*` mohou obsahovat passthrough modely, které jsou registrované v katalogu, ale nemají platné přihlašovací údaje (→ `401`). Automatický router jeden z nich zkusí, selže a chyba se před aktivací fallbacku propaguje dál.
+3. **Zesílení souběžnosti (`429` při zatížení)**: Když více relací agentů nebo cron úloh současně narazí na `auto`, souhrnná četnost požadavků překročí toleranci bezplatných poskytovatelů, takže legitimní volání jsou označena jako zneužití.
 
-**Ověřená oprava (hlášeno komunitou, 2026-08-10)**: Nastavte tři proměnné prostředí tak, aby rotace, souběžnost a záložní řešení zvládly nestabilitu bezplatného tarifu namísto ukončení s chybou:
+**Ověřená oprava (hlášení komunity, 2026-08-10)**: Nastavte tři proměnné prostředí tak, aby rotace, souběžnost a fallback absorbovaly změny u bezplatné úrovně namísto selhání:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # při 400/401 přejde na jiný model či poskytovatele (přeskočí nefunkční modely passthrough)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit přijímání náročných požadavků (ve výchozím nastavení není nastaven: počet požadavků není omezen, viz poznámka níže)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # prodlouží omezené čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé upstreamy
+export OMNIROUTE_ROTATE_ON_400=true           # přejít na jiný model/poskytovatele při 400/401 (přeskočí nefunkční passthrough modely)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # explicitní limit souběžného spuštění náročných požadavků (ve výchozím nastavení není nastaven: žádný limit počtu požadavků, viz poznámka níže)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # prodloužit omezené čekání nad výchozí hodnotu RATE_LIMIT_MAX_WAIT_MS pro pomalé nadřazené služby
 ```
 
-Nastavte je v prostředí procesu OmniRoute (v démonu, např. prostřednictvím souboru plist LaunchAgent nebo `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace má ze všech nastavení největší účinek: převádí závažné selhání na transparentní opakování požadavku u funkčního poskytovatele ve fondu.
+Nastavte je v prostředí procesu OmniRoute (démona, například prostřednictvím plist LaunchAgent nebo pomocí `systemctl edit`) a poté OmniRoute restartujte. Příznak rotace je nejúčinnější opatření: převede tvrdé selhání na transparentní opakování požadavku vůči zdravému poskytovateli v poolu.
 
-**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — tedy požadavků s dlouhým kontextem — spuštěných současně; tento limit představuje vstupní bránu, nikoli omezení počtu požadavků poskytovatele. **Aktualizace #503-fanout:** Tato proměnná již není nastavena ve výchozím nastavení (nyní se uplatní pouze tehdy, když je explicitně nakonfigurována jako výše) — přijímání náročných požadavků je místo toho řízeno automaticky odvozeným bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se přizpůsobuje skutečnému limitu paměti hostitele. Nové nasazení by proto mělo zaznamenat mnohem méně odmítnutí `503 chat_admission_busy`, aniž by bylo nutné tuto proměnnou vůbec nastavovat; její explicitní nastavení zde stále funguje přesně podle dokumentace. Explicitní přepsání bajtového rozpočtu je omezeno na 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není přechodná: zvyšte tento bajtový rozpočet, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo zvyšte limit paměti procesu. Odmítnutí `inflight_bytes_budget` způsobuje dočasné soupeření o prostředky a požadavek lze nadále opakovat. Omezení počtu požadavků pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) se řídí samostatně pomocí `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
+**Poznámka**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` omezuje počet náročných požadavků — s dlouhým kontextem — spuštěných současně; tento limit je vstupní brána, nikoli omezovač rychlosti poskytovatele. **#503-fanout aktualizace:** tato proměnná se již ve výchozím nastavení nenastavuje (nyní se uplatní pouze při explicitní konfiguraci, jak je uvedeno výše) — vstup náročných požadavků je místo toho řízen automaticky odvozeným rozpočtem bajtů (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), který se sám přizpůsobuje skutečnému limitu paměti hostitele, takže nové nasazení by mělo zaznamenat výrazně méně odmítnutí `503 chat_admission_busy` i bez nastavení této proměnné; její explicitní nastavení zde však nadále funguje přesně podle dokumentace. Explicitní přepsání rozpočtu bajtů je omezeno na 8 MiB–2 GiB. Chyba `413 body_exceeds_budget` není dočasná: zvyšte tento rozpočet bajtů, snižte `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` nebo uložený limit těla požadavku, případně zvyšte limit paměti procesu. Omezení `inflight_bytes_budget` je dočasné omezení kvůli souběhu a nadále umožňuje opakování. Omezení rychlosti pro jednotlivé poskytovatele (`open-sse/services/rateLimitManager.ts`) se řídí samostatně pomocí `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` a `RATE_LIMIT_AUTO_ENABLE` — viz `.env.example`.
 
-**Jak ověřit, že oprava funguje**: spusťte svého agenta/cron dvakrát rychle po sobě a ověřte, že obě spuštění proběhnou úspěšně. Před opravou druhé spuštění obvykle vyvolá chybu `429`/`401`. Po opravě se neúspěšné požadavky (pokud nějaké nastanou) automaticky opakují a volání se dokončí. Můžete také zavolat `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav může být `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, u kterého opakovaně dochází k selhání, přejde přes stavy `CLOSED → DEGRADED → OPEN`, než po uplynutí intervalu pro reset povolí zkušební požadavek (`HALF_OPEN`).
+**Poznámka k aktualizaci: uložený limit těla požadavku se nyní vztahuje také na chat.** Limit dříve uložený v Settings > Advanced > Request Body Limit (`maxBodySizeMb`) se nyní vztahuje také na `/v1/chat/completions` a `/v1/responses`. Před touto změnou tyto dvě trasy přijímaly až 50 MB bez ohledu na uloženou hodnotu, takže instalace s nižším uloženým limitem začne odmítat těla chatu, která jej překračují. Instalace, ve které nebyl žádný limit nikdy uložen, si zachovává výchozí limit 50 MB.
 
-**Pokud se stále zobrazuje chyba 429**: aktivní účet daného poskytovatele skutečně vyčerpal svou _kvótu_ (nejde pouze o omezení frekvence požadavků). Přidejte druhý účet stejného poskytovatele v řídicím panelu OmniRoute → Providers → Accounts, nebo přidejte jiného bezplatného poskytovatele (např. `routeway`, `auggie`). Rotace pomáhá pouze s dočasnými chybami omezení frekvence/400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
+Odmítnutí je HTTP `413` s hodnotou `PAYLOAD_TOO_LARGE` v `error.code` a hodnotou `payload_too_large` v `error.type`. Zpráva uvádí platný limit: `Request body too large. Maximum allowed: 10 MB`, pokud je deklarovaná hodnota `Content-Length` vyšší, nebo `Request body too large for chat completions (max 10 MB).`, pokud jsou skutečně načtené bajty vyšší. Nejde o totéž jako výše uvedené `413 body_exceeds_budget`, které pochází z rozpočtu paměti a toto nastavení jej nemění.
 
-**Pokud se u modelů pro zpracování obrazu (`auto/vision`, `bazaarlink/*`) zobrazuje chyba 403**: připojený účet nemá placený tarif, který zahrnuje zpracování obrazu, nebo API klíč nemá dostatečná oprávnění. V řídicím panelu poskytovatele ověřte, že rozsah oprávnění klíče zahrnuje zpracování obrazu/multimodální funkce, případně připojte účet s placeným tarifem a ponechte jej jako cíl pro zpracování obrazu.
+Chcete-li limit zvýšit, uložte vyšší hodnotu na `/dashboard/settings/advanced` nebo odešlete `PATCH /api/settings` s `{"maxBodySizeMb": 50}`. Přijímají se hodnoty od 1 do 500 MB, změna se projeví bez restartu a hodnota 50 obnoví předchozí limit chatu. Větší tělo mohou stále zastavit další dva limity: `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, pokud je nastaven, také omezuje uložený limit, a anotaci Kubernetes ingress `proxy-body-size` (`50m` v dodávaných manifestech) je nutné pro cokoli nad 50 MB zvýšit samostatně.
+
+**Jak ověřit, že oprava funguje**: Spusťte agenta nebo úlohu cron dvakrát rychle po sobě a ověřte, že oba běhy uspějí. Před opravou druhý běh obvykle skončí chybou `429`/`401`. Po opravě se případná selhání transparentně opakují a volání se dokončí. Můžete také použít `curl /monitoring/health` a sledovat pole `rateLimitedUntil` u připojení poskytovatelů a `circuitBreakers.providerBreakers[].state` u dotčených poskytovatelů — stav je jedním z `CLOSED`, `DEGRADED`, `OPEN` nebo `HALF_OPEN` (viz `src/shared/utils/circuitBreaker.ts`) a poskytovatel, který opakovaně selhává, přejde z `CLOSED → DEGRADED → OPEN`, než resetovací okno umožní průchod testovacímu požadavku (`HALF_OPEN`).
+
+**Pokud stále vidíte 429**: Aktivní účet tohoto poskytovatele skutečně vyčerpal svou _kvótu_ (nikoli pouze rychlostní limit). Přidejte druhý účet pro stejného poskytovatele v řídicím panelu OmniRoute → Providers → Accounts nebo kombinujte jiného bezplatného poskytovatele (např. `routeway`, `auggie`). Rotace pomáhá pouze s dočasnými omezeními rychlosti a chybami 400/401; úplné vyčerpání kvóty vyžaduje druhé přihlašovací údaje nebo jiného poskytovatele.
+
+**Pokud u vizuálních modelů (`auto/vision`, `bazaarlink/*`) vidíte 403**: Připojený účet nemá placený tarif zahrnující vizuální funkce nebo klíč API nemá dostatečná oprávnění. Ověřte na řídicím panelu poskytovatele, že rozsah klíče zahrnuje vizuální/multimodální funkce, nebo připojte účet s placeným tarifem a ponechte jej jako cíl pro vizuální modely.
 
 ---
 
@@ -90,39 +96,39 @@ Varování pocházejí ze zastaralých rozsahů partnerských závislostí v bal
 
 ---
 
-## Varování o zablokovaných instalačních skriptech npm (globální instalace)
+## Upozornění na zablokované instalační skripty npm (globální instalace)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Při spuštění `npm install -g omniroute` novější verze npm (v11+ a v12+) ve výchozím nastavení blokují skripty životního cyklu balíčků a zobrazují varování týkající se instalačních skriptů:
+Při spuštění `npm install -g omniroute` novější verze npm (v11+ a v12+) ve výchozím nastavení blokují skripty životního cyklu balíčků a zobrazí upozornění na instalační skripty:
 
 ```
-npm warn install-scripts 7 balíčků mělo zablokované instalační skripty, protože nejsou zahrnuty v allowScripts:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Lze toto varování ignorovat?
+### Lze toto upozornění ignorovat?
 
-**Částečně, ale spuštění bez skriptů se nedoporučuje.** OmniRoute obsahuje bezpečné záložní mechanismy: pokud nelze ze samostatného balíčku načíst nativní vazby `better-sqlite3`, aplikace postupně použije alternativní ovladače, například `node:sqlite` nebo `sql.js` (viz [Řešení běhového prostředí SQLite](../ops/SQLITE_RUNTIME.md)). Server se přesto spustí, ale použití záložních řešení WASM, jako je `sql.js`, vypne režim SQLite WAL (Write-Ahead Logging) a zvýší režii paměti a synchronizace disku.
+**Částečně, ale spuštění bez skriptů se nedoporučuje.** OmniRoute obsahuje bezpečné záložní mechanismy: pokud nelze načíst nativní vazby `better-sqlite3` ze samostatného balíčku, aplikace přejde na alternativní ovladače, například `node:sqlite` nebo `sql.js` (viz [Výběr běhového prostředí SQLite](../ops/SQLITE_RUNTIME.md)). Server se přesto spustí, ale použití záložních řešení založených na WASM, jako je `sql.js`, zakáže režim WAL (Write-Ahead Logging) databáze SQLite a zvýší režii paměti a synchronizace disku.
 
 ### Které skripty jsou skutečně vyžadovány?
 
-Ne všechny blokované skripty jsou pro spuštění OmniRoute nezbytné:
+Ne všechny zablokované skripty jsou pro běh OmniRoute nezbytné:
 
-- **Nezbytné (`omniroute`, `better-sqlite3`):** OmniRoute běží ze samostatného aplikačního balíčku Next.js (`dist/`). Během instalace npm stáhne nebo zkompiluje nativní ovladač SQLite specifický pro hostitelský systém do `node_modules/better-sqlite3/` na nejvyšší úrovni. Skript `postinstall` projektu OmniRoute (`scripts/build/postinstall.mjs`) následně ověří a zkopíruje tyto binární soubory specifické pro hostitelský systém do `dist/node_modules/`, aby k nim měl samostatný server přístup. Pokud je skript postinstall balíčku `omniroute` zablokován, tento krok kopírování se přeskočí.
-- **Volitelné/tranzitivní (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Jde o pomocné nástroje pro sestavení, nástroje pro sledování změn nebo nástroje systémové klíčenky. Jejich povolení zabrání varováním při sestavení, ale nejsou vyžadovány pro základní funkce směrování.
-- **Vyloučeno (`onnxruntime-node`):** Volitelná závislost pro lokální embeddingy AI, která **není** pro běh OmniRoute vyžadována. Její skript postinstall stáhne z NuGet přibližně 300 MB prostředků CUDA; nezahrnujte ji do seznamu povolených položek, pokud výslovně neplánujete používat lokální akceleraci ONNX na podporovaném hardwaru.
+- **Nezbytné (`omniroute`, `better-sqlite3`):** OmniRoute se spouští ze samostatného aplikačního balíčku Next.js (`dist/`). Během instalace npm stáhne nebo zkompiluje nativní ovladač SQLite určený pro hostitelský systém do adresáře nejvyšší úrovně `node_modules/better-sqlite3/`. Skript `postinstall` systému OmniRoute (`scripts/build/postinstall.mjs`) poté tyto binární soubory specifické pro hostitelský systém ověří a zkopíruje do `dist/node_modules/`, aby k nim měl samostatný server přístup. Pokud je skript postinstall balíčku `omniroute` zablokován, tento krok kopírování se přeskočí.
+- **Volitelné/tranzitivní (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Jde o pomocné nástroje pro sestavení, nástroje pro sledování změn nebo nástroje systémové klíčenky. Jejich povolením předejdete upozorněním při sestavení, ale pro základní funkce směrování nejsou vyžadovány.
+- **Vyloučené (`onnxruntime-node`):** Jde o volitelnou závislost pro lokální embeddingy AI, která **není** pro běh OmniRoute vyžadována. Její skript postinstall stáhne z NuGet přibližně 300 MB komponent CUDA; nezařazujte ji na seznam povolených balíčků, pokud výslovně neplánujete používat lokální akceleraci ONNX na podporovaném hardwaru.
 
 ### Doporučené řešení
 
-Chcete-li během globální instalace povolit požadované instalační skripty a potlačit varování, předejte `--allow-scripts` pro OmniRoute a jeho nativní závislosti:
+Chcete-li během globální instalace povolit požadované instalační skripty a potlačit upozornění, předejte pro OmniRoute a jeho nativní závislosti parametr `--allow-scripts`:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Případně to můžete trvale nakonfigurovat pro všechny globální instalace ve svém uživatelském účtu:
+Případně můžete toto nastavení nakonfigurovat trvale pro všechny globální instalace v rámci svého uživatelského účtu:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +137,7 @@ npm install -g omniroute
 
 ### Ověření instalace
 
-Po instalaci spusťte vestavěný diagnostický nástroj a ověřte, že jsou nativní vazby i běhové prostředí v pořádku:
+Po instalaci spusťte vestavěný diagnostický nástroj a ověřte, že nativní vazby i běhové prostředí fungují správně:
 
 ```bash
 omniroute doctor
@@ -809,6 +815,30 @@ pokračuje ve spouštění na pozadí a bude dostupný po dokončení startu.
 
 Úplné podrobnosti o `OMNIROUTE_READY_TIMEOUT_MS` najdete v souboru
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md).
+
+---
+
+## problémy CCR / dedup
+
+Diagnostická matice pro kompresní nástroje CCR (`ccr`) a `session-dedup`. Úplné informace pro operátora (značky, předpoklady, rozsahy pro jednotlivé nástroje, stránkování načítání) viz [Předpoklady / příručka operátora Compression Engines →](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Příznak                                                                                                    | Pravděpodobná příčina                                                                                                                                | Ověřte                                                                                                                      | Opravit                                                                                                                                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                             | Ověření zpětné smyčky Route-guard, není to chyba transportu. Žádné `Bearer` nebo klíč bez `mcp:connect`/`manage`/`admin` nedosáhl trasy `/api/mcp/`. | Požadavek nesl hlavičku no/invalid `Authorization`.                                                                         | Pošlete platný klíč `Bearer`. Vzdálený klíč může obsahovat `mcp:connect` (autorizuje pouze místní vyjmutí `/api/mcp/` ) plus specifický rozsah read/write který potřebuje.                                                                                              |
+| **blok nenalezen** — `omniroute_ccr_retrieve` odmítne hash                                                 | Hash není 24hexová hodnota nebo byl zkopírován špatně, nebo blok již vypršel / byl vyřazen.                                                          | Porovnejte hash s hodnotou 24 hex ve značce `[CCR retrieve hash=…]` ; zkontrolujte `omniroute_ccr_stats` pro stav úložiště. | Zkopírujte doslovně 24hexový hash ze značky. Pokud je blok skutečně pryč, překročil svou TTL nebo se nikdy nedostal do úložiště trvalé životnosti (bloky nad 512 KB a každý blok v cloudovém běhu, zůstávají pouze v paměti a nepřežijí restart).                       |
+| **CCR ne-op** — blok není zkomprimován (text se vrátí beze změny)                                          | Blok pod prahovou hodnotou komprese nebo je motor / režim CCR neaktivní.                                                                             | Zkontrolujte aktivní kompresi `strategy`/`enabled` a velikost bloku vs. práh.                                               | Povolte CCR (nebo skládaný režim, který jej spouští) a potvrďte, že blok je dostatečně velký, aby stál za uložení. Neoperace není chyba — není to nic ke kompresi.                                                                                                      |
+| **dedup marker** ve výstupu se objeví — `[dedup:ref sha=…]`                                                | **Záměrné ohlédnutí** , není to ztráta nebo chyba. `session-dedup` elidovaný text již odeslaný v dřívějším kole stejné relace.                       | Potvrďte, že se stejný text objeví dříve v relaci.                                                                          | Nedělejte nic — nevolejte nástroj a nepokoušejte se jej rekonstruovat. První výskyt je kanonická kopie; aktuální tah se nikdy nepřepisuje, při pozdějším tahu se deduplikuje.                                                                                           |
+| **Režim kódu** Nástroje — `omniroute_ccr_*` chybí v instrukcích `tools[]` / CCR, nejsou vloženy (OpenCode) | Režim kódu OpenCode (výchozí) inzeruje pouze nativní nástroje modelu a skrývá nástroje MCP před `tools[]`.                                           | Zkontrolujte záznam serveru OpenCode MCP pro `codemode`.                                                                    | Nastavte `codemode: false` na záznam serveru (a** klienta** nastavení), takže nástroje MCP jsou inzerovány. Instrukce CCR retrieve-protocol zůstává vypnutá: server s názvem `omniroute` odhaluje `omniroute_omniroute_ccr_retrieve` a `_` není odpovídající oddělovač. |
+
+Další příznaky:
+
+| Příznak                                                                                          | Pravděpodobná příčina                                                                                                                                                             | Opravit                                                                                                                                                                                |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                          | Výsledek chyby nástroje MCP (`isError: true`), nikoli HTTP 403. Klíč volajícího postrádá požadovaný rozsah.                                                                       | Přidejte rozsah z tabulky pro jednotlivé nástroje (viz návod k obsluze). Např. `omniroute_ccr_retrieve` potřebuje `read:compression`.                                                  |
+| `Unknown Mcp-Session-Id`                                                                         | Relace streamovatelného HTTP byla nečinná a byla sklizena (`OMNIROUTE_MCP_SESSION_IDLE_MS`); server odpoví HTTP 404.                                                              | Znovu připojte nebo restartujte relaci — do** ne** otočit klíč, změnit rozsah nebo přejmenovat nástroj. Není to 401/403.                                                               |
+| `JSON Parse error` / `Unterminated string` ve výsledku nástroje                                  | Text nástroje MCP oříznutý kolem `mcpAccessibility.maxTextChars` (výchozí `50000`) uprostřed JSON.                                                                                | Použijte stránkovaný `mode` namísto holé úplné: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"` nebo `mode:"stats"`. Základní pravidlo: `chars > 40000` → použijte `mode`. |
+| `Failed to open SSE stream`                                                                      | Klient narazil na starší `/api/mcp/sse` singleton, zatímco transport je `streamable`.                                                                                             | Nasměrujte klienta na `/api/mcp/stream` (koncový bod pro streamování) namísto `/api/mcp/sse`.                                                                                          |
+| **Mrtvý stdio tep** — `mcp-heartbeat.json` ukazuje `pidAlive: false` když je přenos HTTP aktivní | Soubor srdečního tepu je pozůstatkem stdio (zastaralé PID nebo jiná verze); Přenosy HTTP jsou v procesu a místo toho hlásí stav ze `getMcpHttpStatus()` (žádný zápis do souboru). | Žádná akce — doprava je zdravá. Pravda je `httpTransport.online` / `startedAt` ze `/api/mcp/status`, ne ze souboru srdečního tepu. Nerestartujte server ani neotáčejte klíčem.         |
 
 ---
 

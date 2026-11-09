@@ -13,11 +13,12 @@
  *    rotated credential cannot come back from an older backup.
  */
 
-import { createHash } from "crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import type { SqliteAdapter } from "../adapters/types";
 import { parseModelAccessMode } from "../apiKeys/modelAccessMode";
 import { parseAllowedModels, parseIsActive, parseIsBanned } from "../apiKeys/rowParsers";
 import { ensureApiKeyFallbackColumns } from "../apiKeyColumnFallbacks";
+import { decryptApiKeySecret, encryptApiKeySecret } from "../apiKeys/secretAtRest";
 import {
   getTableColumns,
   mapBackupRecordToColumns,
@@ -61,12 +62,18 @@ function applyModelAccess(values: ColumnValues, apiKey: JsonRecord, existing?: C
 function applyNewKeyDefaults(values: ColumnValues, columns: string[]) {
   if (values.created_at == null) values.created_at = new Date().toISOString();
   if (!hasText(values.key)) return;
+  // The export carries the raw key (getApiKeys decrypts it); a raw column dump carries the
+  // envelope. Hash and prefix come from the plaintext; the stored value goes back through
+  // the envelope. An envelope this instance cannot decrypt is kept as carried.
+  const rawKey = decryptApiKeySecret(values.key);
+  if (!hasText(rawKey)) return;
   if (!hasText(values.key_hash) && columns.includes("key_hash")) {
-    values.key_hash = createHash("sha256").update(values.key).digest("hex");
+    values.key_hash = opaqueTokenFingerprint(rawKey);
   }
   if (!hasText(values.key_prefix) && columns.includes("key_prefix")) {
-    values.key_prefix = values.key.slice(0, 12);
+    values.key_prefix = rawKey.slice(0, 12);
   }
+  values.key = encryptApiKeySecret(rawKey);
 }
 
 function applyStricterLifecycle(values: ColumnValues, existing: ColumnValues) {

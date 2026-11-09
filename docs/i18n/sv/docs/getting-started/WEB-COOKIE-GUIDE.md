@@ -6,23 +6,23 @@
 
 Web Cookie-leverantörer låter OmniRoute använda en AI-tjänst via din befintliga webbläsarsession i stället för en API-nyckel. De är användbara när du redan har åtkomst till en tjänst via dess webbplats och vill att OmniRoute ska använda samma autentiserade session.
 
-Till skillnad från leverantörer som använder API-nycklar autentiserar Web Cookie-leverantörer med hjälp av de autentiseringsuppgifter som din webbläsare skickar till webbplatsen.
+Till skillnad från leverantörer med API-nycklar autentiserar Web Cookie-leverantörer med hjälp av de autentiseringsuppgifter som din webbläsare skickar till webbplatsen.
 
 ---
 
 # Innan du börjar
 
-> **Viktigt:** Kopiera alltid autentiseringsuppgifter från en **aktiv nätverksbegäran**, **inte** från webbläsarens cookie-lagring.
+> **Viktigt:** Kopiera alltid autentiseringsuppgifter från en **aktiv nätverksbegäran**, **inte** från webbläsarens cookielagring.
 
-Många autentiseringsproblem orsakas av att cookies kopieras från fel ställe.
+Många autentiseringsproblem orsakas av att cookies kopieras från fel plats.
 
-## Kopiera INTE från cookie-lagringen
+## Kopiera INTE från cookielagringen
 
 De flesta webbläsare visar lagrade cookies via:
 
 ```
 DevTools
-→ Application (eller Storage)
+→ Application (or Storage)
 → Cookies
 ```
 
@@ -32,7 +32,7 @@ DevTools
 - ofullständiga
 - utan cookies som endast skickas vid autentiserade begäranden
 
-Att använda dessa värden kan orsaka autentiseringsfel även om de verkar vara giltiga.
+Om du använder dessa värden kan autentiseringen misslyckas även om de verkar vara giltiga.
 
 ## Kopiera från en aktiv begäran
 
@@ -41,15 +41,15 @@ Använd i stället cookies från en lyckad begäran:
 ```
 DevTools
 → Network
-→ Uppdatera sidan
-→ Öppna en chatt- eller konversationsbegäran
+→ Refresh the page
+→ Open a chat or conversation request
 → Request Headers
 → Cookie
 ```
 
-Begärandehuvudet `Cookie` innehåller exakt den autentiseringsinformation som din webbläsare använde.
+Begärandehuvudet `Cookie` innehåller exakt den autentiseringsinformation som webbläsaren använde.
 
-För de flesta Web Cookie-leverantörer är detta värdet som ska klistras in i OmniRoute.
+För de flesta Web Cookie-leverantörer är det detta värde som ska klistras in i OmniRoute.
 
 ---
 
@@ -59,15 +59,15 @@ Konfigurationsprocessen är densamma för de flesta Web Cookie-leverantörer.
 
 1. Logga in på leverantörens webbplats.
 2. Öppna webbläsarens utvecklarverktyg.
-3. Öppna fliken **Network**.
+3. Öppna fliken **Nätverk**.
 4. Uppdatera sidan.
 5. Öppna en autentiserad chatt- eller konversationsbegäran.
 6. Kopiera de autentiseringsuppgifter som krävs.
 7. Öppna OmniRoute.
-8. Gå till **Providers → Add Provider**.
+8. Gå till **Leverantörer → Lägg till leverantör**.
 9. Välj din Web Cookie-leverantör.
 10. Klistra in autentiseringsuppgifterna.
-11. Klicka på **Test Connection**.
+11. Klicka på **Testa anslutning**.
 12. Spara leverantören.
 
 Vilka autentiseringsuppgifter som krävs beror på leverantören.
@@ -76,7 +76,7 @@ Vilka autentiseringsuppgifter som krävs beror på leverantören.
 
 # Format för leverantörsuppgifter
 
-Olika webbplatser lagrar autentisering på olika sätt. Vissa kräver endast cookies, medan andra kan kräva ytterligare huvuden eller tokens.
+Olika webbplatser lagrar autentiseringsinformation på olika sätt. Vissa kräver endast cookies, medan andra kan kräva ytterligare huvuden eller tokens.
 
 | Leverantör                      | Format för autentiseringsuppgifter | Leverantörsguide                 |
 | ------------------------------- | ---------------------------------- | -------------------------------- |
@@ -92,59 +92,59 @@ Olika webbplatser lagrar autentisering på olika sätt. Vissa kräver endast coo
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) är en kostnadsfri chattplattform för konsumenter som inte kräver registrering — sessionen skapas anonymt vid det första besöket och bevaras via tre cookies: `uid`, `si_usr_id` och `si_ses_id`. OmniRoute vidarebefordrar samma slutpunkt `/api/dispatch` via ett enda modell-id (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) är en kostnadsfri chattplattform för konsumenter som inte kräver någon registrering — sessionen skapas anonymt vid det första besöket och sparas via tre cookies: `uid`, `si_usr_id` och `si_ses_id`. OmniRoute proxyförmedlar samma slutpunkt `/api/dispatch` via ett enda modell-ID (`notrack-c`, alias `ntw`).
 
-### Steg för att ansluta
+### Anslutningssteg
 
-1. Öppna [notrack.ai](https://notrack.ai) i webbläsaren och låt den anonyma sessionscookien ställas in.
+1. Öppna [notrack.ai](https://notrack.ai) i webbläsaren och låt den anonyma sessionscookien skapas.
 2. Öppna **Utvecklarverktyg → Nätverk**, uppdatera sidan och klicka på valfri `/api`-begäran.
-3. Kopiera hela värdet för `Cookie`-headern under **Begärandehuvuden**.
+3. Under **Begäranderubriker** kopierar du hela värdet för rubriken `Cookie`.
 4. Gå till **Leverantörer → Lägg till leverantör → NoTrack Web (kostnadsfri)** i OmniRoute.
-5. Klistra in cookie-strängen i fältet `apiKey` och **Spara**.
+5. Klistra in cookiesträngen i fältet `apiKey` och klicka på **Spara**.
 
-OmniRoute extraherar `uid`, `si_usr_id` och `si_ses_id` från den inklistrade strängen och bygger en ren `Cookie`-header med endast dessa par — plus `nt_session` (`ntk_…`-token som ställs in för inloggade konton) när den finns. Om någon av de tre saknas vidarebefordras den inklistrade råsträngen oförändrad, så att operatörer kan experimentera med alternativa format.
+OmniRoute extraherar `uid`, `si_usr_id` och `si_ses_id` från den inklistrade strängen och skapar en ren `Cookie`-rubrik med endast dessa par — plus `nt_session` (`ntk_…`-token som anges för inloggade konton), när den finns. Om något av de tre värdena saknas vidarebefordras den inklistrade råsträngen oförändrad, så att operatörer kan experimentera med alternativa format.
 
-### Modell-id:n
+### Modell-ID:n
 
-| Modell-id   | Visningsnamn | Anmärkningar                                            |
-| ----------- | ------------ | ------------------------------------------------------- |
-| `notrack-c` | NoTrack C    | Standard — uppströmsmodellen `C` för dirigering.        |
-| `C`         | NoTrack C    | Alias för `notrack-c` (rå uppströmskod för dirigering). |
-| `notrack`   | NoTrack C    | Alias för `notrack-c`.                                  |
-| `ntw`       | NoTrack C    | Kort alias för `notrack-c`.                             |
+| Modell-ID   | Visningsnamn | Kommentarer                                           |
+| ----------- | ------------ | ----------------------------------------------------- |
+| `notrack-c` | NoTrack C    | Standard — den bakomliggande dispatchmodellen `C`.    |
+| `C`         | NoTrack C    | Alias för `notrack-c` (rå bakomliggande dispatchkod). |
+| `notrack`   | NoTrack C    | Alias för `notrack-c`.                                |
+| `ntw`       | NoTrack C    | Kort alias för `notrack-c`.                           |
 
-Alla fyra modell-id:n mappar till samma uppströmsmodell för dirigering (`C`).
+Alla fyra modell-ID:n mappas till samma bakomliggande dispatchmodell (`C`).
 
-### Begärandealternativ
+### Alternativ för begäran
 
-Exekveraren accepterar följande valfria fält i begärandetexten:
+Exekveraren accepterar följande valfria fält i begärandekroppen:
 
-| Fält i begärandetexten | Standard | Syfte                                                                    |
-| ---------------------- | -------- | ------------------------------------------------------------------------ |
-| `notrack_mode`         | `usual`  | Dirigeringsläge (fritextsträng; uppströmstjänsten accepterar `usual`, …) |
-| `notrack_max_turns`    | `6`      | Antal interna turer som uppströmstjänsten får ta innan den svarar.       |
-| `notrack_chat_id`      | `null`   | Återuppta en befintlig uppströmschatt (utelämna för en ny chatt).        |
-| `notrack_attachments`  | `[]`     | Direktöverförd matris med uppströmsbeskrivningar av bilagor.             |
-| `notrack_regenerate`   | `false`  | Ange `true` för att begära ett omgenererat svar för föregående tur.      |
+| Fält i begärandekroppen | Standardvärde | Syfte                                                                               |
+| ----------------------- | ------------- | ----------------------------------------------------------------------------------- |
+| `notrack_mode`          | `usual`       | Dispatchläge (fri textsträng; den bakomliggande tjänsten accepterar `usual`, …)     |
+| `notrack_max_turns`     | `6`           | Antal interna turer som den bakomliggande tjänsten får genomföra innan den svarar.  |
+| `notrack_chat_id`       | `null`        | Återuppta en befintlig bakomliggande chatt (utelämna för en ny chatt).              |
+| `notrack_attachments`   | `[]`          | Vidarebefordrad matris med beskrivningar av bilagor för den bakomliggande tjänsten. |
+| `notrack_regenerate`    | `false`       | Ange `true` för att begära ett återskapat svar för föregående tur.                  |
 
 ### Funktioner
 
 - Chattkompletteringar **med och utan strömning**.
-- **Verktygsanrop** — ange `tools: [...]` i begäran; exekveraren serialiserar dem till ett kontrakt för verktygsanropskuvert och tolkar modellens svar tillbaka till OpenAI-`tool_calls`.
+- **Verktygsanrop** — ange `tools: [...]` i begäran. Exekveraren serialiserar dem till ett omslutande kontrakt för verktygsanrop och tolkar modellens svar tillbaka till OpenAI `tool_calls`.
 - **`response_format`** — `json_object` och `json_schema` stöds. Exekveraren extraherar det första JSON-objektet från modellens svar och konverterar det till en sträng innan det returneras.
-- **Resonemangsindikering** — exekveraren skickar ett `reasoning`-delta när uppströmstjänsten skickar en `thinking`-händelse.
+- **Resonemangsindikering** — exekveraren skickar ett `reasoning`-delta när den bakomliggande tjänsten skickar en `thinking`-händelse.
 
 ### Begränsningar
 
-- Uppströmstjänsten tillämpar användningskvoter för anonyma användare — när de överskrids returnerar exekveraren statuskod 429 med ett användarvänligt meddelande.
-- Alla modell-id:n pekar på samma uppströmsmodell för dirigering; det finns inget modellspecifikt byte.
-- Exekveraren anropar inte uppströmstjänstens `/api/chats`-slutpunkt, så chatthistorik/sessioner hanteras inte automatiskt. Använd `notrack_chat_id` för att återuppta en befintlig uppströmschatt.
+- Den bakomliggande tjänsten tillämpar användningskvoter för anonyma användare — när de överskrids returnerar exekveraren statuskoden 429 med ett lättbegripligt meddelande.
+- Alla modell-ID:n hänvisar till samma bakomliggande dispatchmodell; det finns inget val per modell.
+- Exekveraren anropar inte den bakomliggande tjänstens slutpunkt `/api/chats`, så chatthistorik och sessioner hanteras inte automatiskt. Använd `notrack_chat_id` för att återuppta en befintlig bakomliggande chatt.
 
 ---
 
-# Vad leverantörer med webbcookies kan och inte kan göra
+# Vad leverantörer som använder webbcookies kan och inte kan göra
 
-Leverantörer med webbcookies återanvänder en webbplats chattgränssnitt. De erbjuder **inte** samma funktioner som officiella API:er.
+Leverantörer som använder webbcookies återanvänder en webbplats chattgränssnitt. De erbjuder **inte** samma funktioner som officiella API:er.
 
 ## Stöds
 
@@ -161,19 +161,19 @@ Leverantörer med webbcookies återanvänder en webbplats chattgränssnitt. De e
 - Agentbaserade IDE-arbetsflöden
 - Funktioner som endast är tillgängliga via API
 
-Detta är förväntat beteende och är **inte** ett fel.
+Detta är förväntat beteende och är **inte** en bugg.
 
-Om du behöver verktygskörning, automatisk filredigering eller andra agentbaserade arbetsflöden ska du använda en **leverantör med API-nyckel** i stället för en Web Cookie-leverantör.
+Om du behöver verktygskörning, automatisk filredigering eller andra agentbaserade arbetsflöden ska du använda en **API-nyckelleverantör** i stället för en Web Cookie-leverantör.
 
 ---
 
-# Begränsning vid validering
+# Förbehåll vid validering
 
-En lyckad **Test Connection** eller cookie-validering verifierar endast att de angivna autentiseringsuppgifterna verkar vara i det förväntade formatet.
+En lyckad **Testa anslutning** eller cookie-validering verifierar endast att de angivna autentiseringsuppgifterna verkar ha det förväntade formatet.
 
-Tills Issue #7857 är löst innebär en lyckad validering **ingen garanti** för att leverantören kan autentisera.
+Tills Issue #7857 har lösts **garanterar inte** en lyckad validering att leverantören kan autentisera korrekt.
 
-Om autentiseringen fortfarande misslyckas bör du kontrollera att du kopierade autentiseringsuppgifterna från en aktiv nätverksbegäran och inte från webbläsarens cookie-lagring.
+Om autentiseringen fortfarande misslyckas ska du kontrollera att du kopierade autentiseringsuppgifterna från en aktiv nätverksbegäran och inte från webbläsarens cookie-lagring.
 
 ---
 
@@ -200,9 +200,9 @@ Application
 
 ## Cookien fungerar i webbläsaren men inte i OmniRoute
 
-Vissa leverantörer inkluderar cookies som endast skickas vid autentiserade begäranden.
+Vissa leverantörer inkluderar cookies som endast skickas under autentiserade begäranden.
 
-Kopiera autentiseringsuppgifterna på nytt från en ny nätverksbegäran efter att du har öppnat en konversation.
+Kopiera autentiseringsuppgifterna igen från en ny nätverksbegäran efter att du har öppnat en konversation.
 
 ---
 
@@ -210,15 +210,32 @@ Kopiera autentiseringsuppgifterna på nytt från en ny nätverksbegäran efter a
 
 Web Cookie-leverantörer använder din befintliga webbläsarsession.
 
-Om webbläsarsessionen löper ut eller om du loggar ut måste du kopiera en ny uppsättning autentiseringsuppgifter. Information om hur du automatiserar cookie-förnyelse för webbleverantörer som stöds finns i det kompletterande verktyget [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
+Om webbläsarsessionen löper ut eller om du loggar ut måste du kopiera en ny uppsättning autentiseringsuppgifter. Information om hur du automatiserar förnyelse av cookies för webbleverantörer som stöds finns i det tillhörande verktyget [Tillägg för synkronisering av webbläsarsessioner](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-## Test Connection lyckas men begäranden misslyckas
+## Testet av anslutningen lyckas men begäranden misslyckas
 
-Tills Issue #7857 är löst innebär en godkänd validering ingen garanti för att autentiseringsbegäran kommer att lyckas.
+Tills Issue #7857 har lösts garanterar inte en godkänd validering att autentiseringsbegäran lyckas.
 
-Kopiera autentiseringsuppgifterna på nytt från en ny autentiserad begäran innan du fortsätter felsökningen.
+Kopiera autentiseringsuppgifterna igen från en ny autentiserad begäran innan du fortsätter felsökningen.
+
+---
+
+## ChatGPT Web misslyckas med "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Autentiseringsuppgiften är korrekt — felet kommer från bryggan, inte från sessionen. chatgpt.com tilldelar sina
+modul-ID:n vid varje driftsättning, och bryggan brukade låsa ID:t för Sentinel-hjälpmodulen som den instansierar. Därför
+gjorde en ombyggnad av chatgpt.com som döpte om hjälpmodulen att varje tur misslyckades, medan cookien förblev giltig. En ny auktorisering
+av anslutningen kan inte åtgärda detta.
+
+Versioner som löser modulen genom sidans egen körningsmiljö låser inget ID och påverkas inte av detta. Om du ser
+felet ska du uppgradera OmniRoute och köra anslutningskontrollen igen.
 
 ---
 
@@ -232,10 +249,10 @@ Claude Web-guiden visar hela konfigurationsprocessen för en Web Cookie-leverant
 
 ---
 
-# Rekommenderade metoder
+# Bästa praxis
 
 - Kopiera autentiseringsuppgifter från en ny autentiserad begäran.
 - Undvik att återanvända gamla cookies.
 - Håll webbläsarsessionen aktiv medan du använder Web Cookie-leverantörer.
 - Behandla kopierade cookies som känsliga autentiseringsuppgifter.
-- Använd leverantörer med API-nyckel när du behöver funktionsanrop eller agentbaserade arbetsflöden.
+- Använd API-nyckelleverantörer när du behöver funktionsanrop eller agentbaserade arbetsflöden.

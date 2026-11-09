@@ -36,78 +36,81 @@ Cuimsíonn an cliant (`src/lib/obsidian/api.ts`) an Local REST API leis na gnéi
 
 ## Socrú
 
-Níl **aon athróg timpeallachta** ann don chomhartha Obsidian ná don bhun-URL — stóráiltear
-an dá cheann sa tábla SQLite `key_value` (ainmspás `obsidian`) trí
-`src/lib/db/obsidian.ts`. Tá an comhartha **criptithe agus é stóráilte** (AES-256-GCM,
-le cúl-taca comhoiriúnachta siar do ghnáth-théacs). Cumraigh é ón gcluaisín
-**Foinsí Comhthéacs** ar dheais an Chríochphointe (`ObsidianSourceCard`), nó trí REST API
-na socruithe.
+Níl **aon athróg timpeallachta** ann do cheadchomhartha Obsidian ná don bhun-URL — stóráiltear
+an dá cheann i dtábla SQLite `key_value` (ainmspás `obsidian`) trí
+`src/lib/db/obsidian.ts`. Tá an ceadchomhartha **criptithe agus é stóráilte** (AES-256-GCM, le
+cúltaca comhoiriúnachta siarghabhála i ngnáth-théacs). Cumraigh é ón gcluaisín **Foinsí Comhthéacs**
+ar phainéal Endpoint (`ObsidianSourceCard`), nó trí REST API na socruithe.
 
 > [!IMPORTANT]
-> Ní mór an breiseán **Obsidian Local REST API** a bheith suiteáilte agus ag rith.
-> Éisteann a chomhéadan REST ar **HTTP `127.0.0.1:27123`** (an bun-URL réamhshocraithe).
-> Is críochphointe MCP/HTTPS _ar leith_ é port `27124` agus diúltaíonn bealach na socruithe
-> dó go sainráite. Má táthar ag nascadh ó ghléas eile, úsáid
-> `http://<tailscale-ip>:27123`.
+> Ní mór an breiseán **Obsidian Local REST API** a bheith suiteáilte agus ag rith. Éisteann a chomhéadan
+> REST ar **HTTP `127.0.0.1:27123`** (an bun-URL réamhshocraithe). Is críochphointe
+> MCP/HTTPS _ar leith_ é port `27124`, agus diúltaíonn bealach na socruithe dó go sainráite.
+> Má táthar ag nascadh ó ghléas eile, úsáid `http://<tailscale-ip>:27123`.
 
 ### Eochracha cumraíochta (SQLite `key_value`, ainmspás `obsidian`)
 
-| Eochair           | Cuspóir                                                | Criptithe |
-| ----------------- | ------------------------------------------------------ | --------- |
-| `api_key`         | Comhartha iompróra Local REST API                      | tá        |
-| `base_url`        | Bun-URL REST (réamhshocrú `http://127.0.0.1:27123`)    | níl       |
-| `vault_path`      | Conair absalóideach chuig comhadlann na taisce (sionc) | níl       |
-| `webdav_username` | Ainm úsáideora WebDAV ginte (sioncronú taisce)         | níl       |
-| `webdav_password` | Focal faire WebDAV ginte (sioncronú taisce)            | tá        |
-| `webdav_enabled`  | An bhfuil sioncronú taisce WebDAV cumasaithe           | níl       |
+| Eochair           | Cuspóir                                                                      | Criptithe |
+| ----------------- | ---------------------------------------------------------------------------- | --------- |
+| `api_key`         | Ceadchomhartha iompróra don Local REST API                                   | tá        |
+| `base_url`        | Bun-URL REST (réamhshocrú `http://127.0.0.1:27123`)                          | níl       |
+| `vault_path`      | Conair absalóideach chuig eolaire an taisceadáin (le haghaidh sioncronaithe) | níl       |
+| `webdav_username` | Ainm úsáideora WebDAV ginte (sioncronú taisceadáin)                          | níl       |
+| `webdav_password` | Focal faire WebDAV ginte (sioncronú taisceadáin)                             | tá        |
+| `webdav_enabled`  | Cé acu atá sioncronú taisceadáin WebDAV cumasaithe                           | níl       |
 
 ### Cumrú trí REST
 
 ```bash
-# Sábháil + bailíochtaigh an comhartha Local REST API (bailíochtaíonn POST é trí sheiceáil stádais)
+# Sábháil + bailíochtaigh ceadchomhartha an Local REST API (bailíochtaíonn POST trí sheiceáil stádais)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Seiceáil stádas an naisc (tugtar connected, hasToken, baseUrl, vaultPath ar ais)
+# Seiceáil stádas an naisc (seoltar connected, hasToken, baseUrl, vaultPath ar ais)
 curl http://localhost:20128/api/settings/obsidian
 
-# Dícheangail (glantar an comhartha stóráilte)
+# Dícheangail (glanann sé an ceadchomhartha stóráilte)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Teastaíonn fíordheimhniú na deaise ó gach modh. Diúltaíonn `POST` d'aon URL ar phort
-`27124` agus bailíochtaíonn sé an comhartha trí chríochphointe stádais Local REST API
-a ghlaoch sula ndéantar é a bhuanú.
+Éilíonn gach modh fíordheimhniú don phainéal. Diúltaíonn `POST` d'aon URL ar phort `27124`
+agus bailíochtaíonn sé an ceadchomhartha trí chríochphointe stádais an Local REST API a ghlaoch sula ndéantar é a bhuanú.
 
-### Sioncronú taisce WebDAV
+### Sioncronú taisceadáin WebDAV
 
-Bainistíonn `src/app/api/settings/obsidian/webdav/route.ts` sioncronú roghnach taisce
-le tacaíocht WebDAV (arna thiomáint ag `src/lib/obsidianSync.ts`). Nuair a chumasaítear
-é, dírítear OmniRoute ar chomhadlann áitiúil taisce agus gintear péire randamach
-ainm úsáideora/focal faire WebDAV:
+Bainistíonn `src/app/api/settings/obsidian/webdav/route.ts` sioncronú roghnach taisceadáin
+le tacaíocht WebDAV (arna thiomáint ag `src/lib/obsidianSync.ts`). Nuair a chumasaítear é, dírítear OmniRoute ar
+eolaire taisceadáin áitiúil agus gintear péire randamach ainm úsáideora/focal faire WebDAV:
 
 ```bash
-# Cumasaigh sioncronú WebDAV do chomhadlann taisce (gintear ainm úsáideora/focal faire)
+# Cumasaigh sioncronú WebDAV d'eolaire taisceadáin (gintear ainm úsáideora/focal faire)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Faigh stádas shioncronú WebDAV (ní thugtar dintiúir ar ais ach nuair atá sé cumasaithe)
+# Faigh stádas sioncronaithe WebDAV (ní sheoltar dintiúir ar ais ach nuair atá sé cumasaithe)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Díchumasaigh sioncronú WebDAV (glantar dintiúir + .stignore bainistithe)
+# Díchumasaigh sioncronú WebDAV (glanann sé dintiúir + .stignore bainistithe)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Foinse comhthéacs in aghaidh na heochrach API (roghnach)
+### Foinse chomhthéacs de réir eochair API (roghnach)
 
-Is féidir cumraíocht Obsidian a scópáil **in aghaidh na heochrach API** tríd an tábla
-`api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Nuair a bhíonn
-aitheantas eochrach API fíordheimhnithe ag glao MCP, tugann
-`getObsidianConfigForApiKey()` tús áite do chomhartha/bhun-URL/chonair taisce na
-heochrach féin (`source: "api_key"`); murach sin, úsáidtear an chumraíocht dhomhanda
-mar chúltaca (`source: "global"`).
+Is féidir cumraíocht Obsidian a scóipeáil **de réir eochair API** tríd an tábla `api_key_context_sources`
+(`src/lib/db/apiKeyContextSources.ts`). Nuair a bhíonn aitheantas eochrach API fíordheimhnithe ag glao MCP,
+tugann `getObsidianConfigForApiKey()` tús áite do cheadchomhartha/bhun-URL/conair-taisceadáin na heochrach sin féin
+(`source: "api_key"`) agus, murach sin, téann sé ar ais chuig an gcumraíocht dhomhanda (`source: "global"`).
+
+Éilíonn uirlisí MCP nach mbaineann le sioncronú aitheantas glaoiteora réitithe sula léitear an chumraíocht seo.
+Faigheann glaoiteoir gan aitheantas `Obsidian API token not configured`, agus ní sheoltar aon iarratas chuig an taisceadán.
+Réitíonn glaoiteoirí HTTP trí dhintiúir a n-iarratais; is féidir le glaoiteoirí stdio réiteach trí
+`OMNIROUTE_API_KEY` nó `ROUTER_API_KEY`. Ní féidir le glaoiteoir HTTP neamhréitithe
+aitheantas timpeallachta an fhreastalaí a oidhreacht. Ní údaraíonn aitheantais ionadchoinneála amháin
+rochtain; tá tacaíocht fós ann do dhintiúr bailí timpeallachta a réitíonn go `env-key`.
+Coinníonn eochracha fíordheimhnithe nach bhfuil cumraíocht Obsidian in aghaidh na heochrach acu an cúltaca domhanda.
+Coinníonn na ceithre uirlis `obsidian_sync_*` a n-iompar ceadchomhartha sioncronaithe ar leith.
 
 ## Uirlisí MCP (22)
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **요약**: 설치 → 무료 제공업체 연결 → IDE가 OmniRoute를 가리키도록 설정. 끝입니다.
+> **요약**: 설치 → 지원되는 공급자 연결 → IDE가 OmniRoute를 사용하도록 설정. 완료.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute는 `http://localhost:20128`에서 시작됩니다. 대시보드가 자
 
 ---
 
-## 3단계: 무료 제공업체 연결
+## 3단계: 적합한 제공업체 연결
 
-무료 제공업체를 연결하면 비용을 **전혀 지불하지 않고도** OmniRoute를 사용할 수 있습니다.
+약관과 할당량이 요구 사항에 맞는 제공업체를 선택하세요. **Dashboard → Providers**에서 본인의 계정 또는 API 키를 연결한 다음, 연결을 테스트하세요. 무료 액세스 및 키 없는 사용 가능 여부는 보장되지 않습니다.
 
-### 옵션 A: Kiro(무료 Claude — 신용카드 불필요)
-
-1. `http://localhost:20128`에서 대시보드를 엽니다
-2. **Providers** → **Add Provider**로 이동합니다
-3. **Kiro AI**를 선택합니다
-4. **Connect**를 클릭합니다(API 키 불필요!)
-5. 완료되었습니다! 이제 Claude 모델을 무료로 사용할 수 있습니다.
-
-### 옵션 B: OpenCode Free(인증 불필요)
-
-1. `http://localhost:20128`에서 대시보드를 엽니다
-2. **Providers** → **Add Provider**로 이동합니다
-3. **OpenCode Free**를 선택합니다
-4. **Connect**를 클릭합니다(API 키 불필요!)
-5. 완료되었습니다! 이제 여러 모델을 무료로 사용할 수 있습니다.
-
-### 옵션 C: Pollinations(키 불필요)
-
-1. `http://localhost:20128`에서 대시보드를 엽니다
-2. **Providers** → **Add Provider**로 이동합니다
-3. **Pollinations**를 선택합니다
-4. **Connect**를 클릭합니다(API 키 불필요!)
-5. 완료되었습니다! 이제 GPT-5, Claude, Gemini 등을 무료로 사용할 수 있습니다.
+`auto`는 기본적으로 Kiro를 비롯해 `tos: avoid`로 표시된 제공업체를 제외합니다. 계정을 연결해도 이 정책은 변경되지 않습니다. **Dashboard → Combos**의 옵트인 설정은 모든 자동 콤보에 적용됩니다. 제공업체를 선택하기 전에 [무료 티어 가이드](./FREE-TIERS-GUIDE.md)를 검토하세요.
 
 ---
 
@@ -152,9 +130,9 @@ omniroute launch-codex --model auto
 
 ## 다음 단계
 
-- **[Auto-Combo 가이드](./AUTO-COMBO-GUIDE.md)** — OmniRoute가 최적의 AI를 선택하도록 설정
+- **[자동 조합 가이드](./AUTO-COMBO-GUIDE.md)** — OmniRoute가 최적의 AI를 선택하도록 설정
 - **[제공업체 가이드](./PROVIDERS-GUIDE.md)** — 더 많은 제공업체 연결(무료 및 유료)
-- **[무료 티어 가이드](./FREE-TIERS-GUIDE.md)** — 신용카드 없이 무료 AI 사용
+- **[무료 등급 가이드](./FREE-TIERS-GUIDE.md)** — 제공업체 약관 및 무료 등급 한도 검토
 - **[문제 해결](../guides/TROUBLESHOOTING.md)** — 일반적인 문제 해결
 
 ---
@@ -163,23 +141,23 @@ omniroute launch-codex --model auto
 
 ### "API 키가 필요한가요?"
 
-**아니요!** 무료 제공업체(Kiro, OpenCode Free, Pollinations)는 API 키 없이 사용할 수 있습니다. 대시보드에서 연결하기만 하면 됩니다.
+OmniRoute API 키는 도구를 인증하는 데 사용됩니다. 업스트림 자격 증명은 제공업체에 따라 다릅니다. 일부 제공업체는 API 키 또는 계정 로그인을 요구합니다. 무료 액세스가 보장되는 것은 아닙니다.
 
 ### "`auto`란 무엇인가요?"
 
-`auto`는 각 요청에 가장 적합한 제공업체를 OmniRoute가 자동으로 선택하도록 합니다. 속도, 비용, 품질 및 가용성을 고려합니다. 자세한 내용은 [Auto-Combo 가이드](./AUTO-COMBO-GUIDE.md)를 참조하세요.
+`auto`는 OmniRoute가 각 요청에 가장 적합한 제공업체를 자동으로 선택하도록 합니다. 속도, 비용, 품질 및 가용성을 고려합니다. 자세한 내용은 [Auto-Combo 가이드](./AUTO-COMBO-GUIDE.md)를 참조하세요.
 
 ### "비용은 얼마인가요?"
 
-OmniRoute 자체는 **무료 오픈 소스**입니다. 사용하는 제공업체에 대해서만 비용을 지불하면 됩니다. 많은 제공업체가 무료 티어를 제공합니다. [무료 티어 가이드](./FREE-TIERS-GUIDE.md)를 참조하세요.
+OmniRoute 자체는 **무료 오픈 소스**입니다. 사용하는 제공업체에 대해서만 비용을 지불하면 됩니다. 많은 제공업체가 무료 티어를 제공합니다. 자세한 내용은 [무료 티어 가이드](./FREE-TIERS-GUIDE.md)를 참조하세요.
 
 ### "Claude Code / Cursor / Copilot과 함께 사용할 수 있나요?"
 
-**네!** OmniRoute는 OpenAI 형식을 지원하는 모든 도구와 함께 사용할 수 있습니다. Base URL을 `http://localhost:20128/v1`로 설정하기만 하면 됩니다. 구체적인 설정 방법은 [CLI 도구 가이드](../reference/CLI-TOOLS.md)를 참조하세요.
+**예!** OmniRoute는 OpenAI 형식을 지원하는 모든 도구와 호환됩니다. 기본 URL을 `http://localhost:20128/v1`로 설정하기만 하면 됩니다. 구체적인 설정 방법은 [CLI 도구 가이드](../reference/CLI-TOOLS.md)를 참조하세요.
 
 ### "제공업체에 장애가 발생하면 어떻게 되나요?"
 
-OmniRoute는 장애가 발생한 제공업체를 자동으로 건너뛰고 다음 제공업체를 시도합니다. 별도로 조치할 필요가 없습니다. 자세한 내용은 [Auto-Combo 가이드](./AUTO-COMBO-GUIDE.md)를 참조하세요.
+OmniRoute는 장애가 발생한 제공업체를 자동으로 건너뛰고 다음 제공업체를 시도합니다. 별도로 수행할 작업은 없습니다. 자세한 내용은 [Auto-Combo 가이드](./AUTO-COMBO-GUIDE.md)를 참조하세요.
 
 ---
 

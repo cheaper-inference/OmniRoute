@@ -128,7 +128,7 @@ export function generateSessionId(
   // Tools signature (sorted names)
   if (body.tools && Array.isArray(body.tools) && body.tools.length > 0) {
     const toolNames = body.tools
-      .map((t) => t.name || t.function?.name || "")
+      .map((t) => (t && typeof t === "object" ? t.name || t.function?.name : "") || "")
       .filter(Boolean)
       .sort()
       .join(",");
@@ -359,7 +359,7 @@ function extractSystemPrompt(body: SessionBody | null | undefined): string | nul
   }
   // OpenAI format: messages[0].role === "system"
   if (Array.isArray(body.messages)) {
-    const sys = body.messages.find((m) => m.role === "system" || m.role === "developer");
+    const sys = body.messages.find((m) => m?.role === "system" || m?.role === "developer");
     if (sys) {
       return typeof sys.content === "string" ? sys.content : JSON.stringify(sys.content);
     }
@@ -372,7 +372,7 @@ function extractFirstUserMessage(body: SessionBody | null | undefined): string |
   const messages = body.messages || body.input || [];
   if (!Array.isArray(messages)) return null;
   for (const msg of messages) {
-    if (msg.role === "user") {
+    if (msg?.role === "user") {
       return typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content);
     }
   }

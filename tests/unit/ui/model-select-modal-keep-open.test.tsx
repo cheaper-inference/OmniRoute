@@ -11,6 +11,10 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so each render hands back the dialog it just opened (the newest one)
+// as the query root.
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -39,7 +43,8 @@ async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelec
   });
 
   await act(async () => {});
-  return container;
+  const dialogs = document.body.querySelectorAll<HTMLElement>('[role="dialog"]');
+  return dialogs[dialogs.length - 1];
 }
 
 beforeEach(() => {

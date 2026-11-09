@@ -86,17 +86,14 @@ afterEach(() => {
 
 // ── Component import ──────────────────────────────────────────────────────────
 
-const { default: NewBatchWizard } = await import(
-  "../../../../../src/app/(dashboard)/dashboard/batch/components/NewBatchWizard"
-);
+const { default: NewBatchWizard } =
+  await import("../../../../../src/app/(dashboard)/dashboard/batch/components/NewBatchWizard");
 
 // ── Render helpers ────────────────────────────────────────────────────────────
 
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
-const DEFAULT_PROVIDERS = [
-  { id: "openai", name: "OpenAI", models: ["gpt-4o-mini", "gpt-4o"] },
-];
+const DEFAULT_PROVIDERS = [{ id: "openai", name: "OpenAI", models: ["gpt-4o-mini", "gpt-4o"] }];
 
 function renderWizard(props?: {
   onClose?: () => void;
@@ -122,7 +119,10 @@ function renderWizard(props?: {
   });
 
   containers.push({ root, el });
-  return { el, onClose, onCreated };
+  // The wizard is the kit Dialog (Modal adapter), portaled to <body>: queries go to the dialog.
+  const dialog = document.body.querySelector<HTMLDivElement>('[role="dialog"]');
+  if (!dialog) throw new Error("NewBatchWizard dialog not rendered");
+  return { el: dialog, onClose, onCreated };
 }
 
 // Helper: wait for a condition to be true with retries
@@ -226,13 +226,19 @@ describe("NewBatchWizard", () => {
   });
 
   // 5. Overlay click → onClose
-  it("calls onClose when overlay backdrop is clicked", () => {
+  it("calls onClose when overlay backdrop is clicked", async () => {
     const onClose = vi.fn();
-    const { el } = renderWizard({ onClose });
-    // Overlay has the backdrop-blur-sm + bg-black/40 class
-    const overlay = el.querySelector(".backdrop-blur-sm");
+    renderWizard({ onClose });
+    // The kit Dialog overlay (portaled next to the content). Radix registers its outside
+    // listener one macrotask after mount and dismisses on pointerdown + click (as the
+    // Modal adapter tests do).
+    const overlay = document.body.querySelector('[data-slot="dialog-overlay"]');
     expect(overlay).not.toBeNull();
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
     act(() => {
+      overlay!.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 }));
       overlay!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -435,7 +441,10 @@ describe("NewBatchWizard", () => {
     expect(onClose).toHaveBeenCalled();
 
     // Assert fetch shapes
-    expect(mockFetch).toHaveBeenCalledWith("/api/v1/files", expect.objectContaining({ method: "POST" }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/v1/files",
+      expect.objectContaining({ method: "POST" })
+    );
     const batchCall = mockFetch.mock.calls.find((c) => c[0] === "/api/v1/batches");
     expect(batchCall).toBeDefined();
     const body = JSON.parse(batchCall![1].body as string) as Record<string, unknown>;
@@ -452,7 +461,9 @@ describe("NewBatchWizard", () => {
           ok: false,
           status: 500,
           json: async () => ({
-            error: { message: "Internal error at /home/user/server/files.ts:42 — stack at line 42" },
+            error: {
+              message: "Internal error at /home/user/server/files.ts:42 — stack at line 42",
+            },
           }),
         };
       }

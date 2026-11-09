@@ -157,9 +157,18 @@ function parseGeneric(data: any) {
 }
 
 function parseGithub(data: any) {
+  // The AI Credits row is an unbounded counter when no local limit is set —
+  // keep it even though it looks "unlimited & empty", and carry the figure.
   return quotaEntries(data)
-    .filter(([, quota]) => !isUnlimitedEmpty(quota))
-    .map(([name, quota]) => normalizeQuotaEntry(name, quota));
+    .filter(([, quota]) => quota?.creditsUsed !== undefined || !isUnlimitedEmpty(quota))
+    .map(([name, quota]) =>
+      quota?.creditsUsed !== undefined
+        ? normalizeQuotaEntry(name, quota, {
+            creditsUsed: Number(quota.creditsUsed) || 0,
+            unlimited: quota.unlimited === true,
+          })
+        : normalizeQuotaEntry(name, quota)
+    );
 }
 
 function parseGlmFamily(data: any) {
@@ -288,14 +297,27 @@ function parseClaude(data: any) {
     quotas: Record<string, { fractionReported?: boolean } | null> | null | undefined
   ) =>
     Object.fromEntries(
-      Object.entries(quotas ?? {}).filter(([, quota]) => quota?.fractionReported !== false)
+      Object.entries(quotas ?? {}).filter(
+        ([, quota]) => quota != null && quota.fractionReported !== false
+      )
     );
   const quotas = quotaEntries({
     quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },
-  }).map(([name, quota]) => normalizeQuotaEntry(name, quota, { isPercentageOnly: true }));
+  }).map(([name, quota]) =>
+    normalizeQuotaEntry(name, quota, {
+      isPercentageOnly: true,
+      // usage/claudeQuota.ts puts weekly_scoped into modelQuotas, not account quotas.
+      modelScoped: Object.hasOwn(data.modelQuotas ?? {}, name),
+    })
+  );
 
   if (data?.extraUsage?.is_enabled) {
     quotas.push(buildClaudeExtraUsageQuota(data.extraUsage));
+  }
+
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits > 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
   }
 
   return quotas;
@@ -334,6 +356,24 @@ function parseAgentrouterQuota(quotaKey: string, quota: any) {
 
 function parseAgentrouter(data: any) {
   return quotaEntries(data).map(([quotaKey, quota]) => parseAgentrouterQuota(quotaKey, quota));
+}
+
+// Ollama Cloud `/api/balance` (open-sse/services/ollamaCloudBalance.ts) reports purchased
+// credits as a `credits` USD balance next to the monthly/session/weekly percent windows. Route
+// that row through buildCreditsQuota() so it renders as "$X.XX", not as a percentage bar.
+function normalizeOllamaWindow(name: string, quota: any) {
+  if (quota?.ollamaApiBalance !== true) return normalizeQuotaEntry(name, quota);
+  // A fresh API balance is authoritative even when the reported period end is in the past.
+  return normalizeQuotaEntry(name, { ...quota, resetAt: null }, { resetAt: quota.resetAt });
+}
+
+function parseOllamaCloud(data: any) {
+  return quotaEntries(data).map(([quotaKey, quota]) => {
+    if (quotaKey !== "credits") return normalizeOllamaWindow(quotaKey, quota);
+    const remaining = Math.max(0, Number(quota?.remaining ?? 0) || 0);
+    const currency = quota?.currency || "USD";
+    return buildCreditsQuota("credits", remaining, remaining > 0 ? 100 : 0, { currency });
+  });
 }
 
 // OpenRouter is credit-based, not subscription-based: the `credits` quota entry
@@ -509,7 +549,9 @@ function parseProviderQuotas(providerId: string, data: any) {
   if (providerId === "claude") return parseClaude(data);
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
-  if (providerId === "agentrouter") return parseAgentrouter(data);
+  // TokenRouter shares the `quotas.balance` USD credits-row shape (usage/tokenrouter.ts).
+  if (providerId === "agentrouter" || providerId === "tokenrouter") return parseAgentrouter(data);
+  if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);
 }

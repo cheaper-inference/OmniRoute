@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Za `smart-routing` je `metadata.combo` izrecna preglasitev vrednosti
+`metadata.model` za zahtevo prehodu; poslana je kot dejanski `model`,
+ne kot prezrto polje JSON `x-combo`. Še vedno veljajo običajni ključ API prehoda in
+pooblastila za posamezen cilj. Neveljavna ali prazna kombinacija je zavrnjena.
+
+Rezultat vsebuje `requested_combo` (namen klicatelja), `dispatched_model`
+(dejansko zahtevo prehodu), `response_model` (odgovor prehoda) in
+`confirmed_combo`. Zadnje polje je `null`, razen če prehod izrecno
+identificira kombinacijo. Dnevniki odločitev A2A pripišejo izvajanje samo
+potrjeni kombinaciji, nepotrjeno zahtevo pa ohranijo kot `requestedCombo`.
+
 **Odgovor:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Pretočno pošiljanje SSE
+### `message/stream` — Pretakanje SSE
 
-Enako kot `message/send`, vendar vrne dogodke, ki jih pošilja strežnik, za pretočno pošiljanje v realnem času.
+Enako kot `message/send`, vendar vrača dogodke, ki jih pošilja strežnik, za pretakanje v realnem času.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Razpoložljive veščine
+## Razpoložljive spretnosti
 
-OmniRoute izpostavlja 6 veščin A2A, povezanih v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Vsak modul veščine se nahaja v `src/lib/a2a/skills/`.
+OmniRoute razkriva 6 veščin A2A, povezanih z `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Vsak modul spretnosti živi v `src/lib/a2a/skills/`.
 
-| Veščina               | ID                   | Opis                                                                                                                                                                 | Oznake                       | Primeri                                   |
-| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------- |
-| Pametno usmerjanje    | `smart-routing`      | Usmeri poziv prek optimalnega ponudnika/kombinacije z uporabo kombinacijskega mehanizma in ocenjevanja OmniRoute                                                     | usmerjanje, ponudniki        | "Usmeri ta poziv prek najboljšega modela" |
-| Upravljanje kvot      | `quota-management`   | Poroča o stanju kvot posameznih ponudnikov in klicateljem pomaga pri odločitvi, kdaj omejiti hitrost ali zamenjati ponudnika                                         | kvote, ponudniki             | "Preveri kvoto za anthropic"              |
-| Odkrivanje ponudnikov | `provider-discovery` | Navede nameščene ponudnike z njihovimi zmogljivostmi, oznakami brezplačne ravni in stanjem OAuth                                                                     | ponudniki, odkrivanje        | "Kateri ponudniki so na voljo?"           |
-| Analiza stroškov      | `cost-analysis`      | Oceni stroške zahteve/pogovora na podlagi kataloga in nedavne uporabe                                                                                                | stroški, uporaba             | "Oceni stroške tega pogovora"             |
-| Poročilo o stanju     | `health-report`      | Združi stanje odklopnika, obdobja ohlajanja in zaklepa za posameznega ponudnika                                                                                      | stanje, odpornost            | "Prikaži stanje vseh ponudnikov"          |
-| Seznam zmogljivosti   | `list-capabilities`  | Vrne celoten katalog Agent Skills s 45 vnosi (23 API + 21 CLI + 1 konfiguracija) kot tabelo markdown z neobdelanimi URL-ji datotek SKILL.md za vstavljanje konteksta | katalog, odkrivanje, veščine | "Navedi vse zmogljivosti OmniRoute"       |
+| Spretnost            | ID                   | Opis                                                                                                                                                              | Oznake                     | Primeri                                     |
+| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
+| Pametno usmerjanje   | `smart-routing`      | Usmeri poziv skozi optimalni provider/combo z uporabo OmniRoute-jevega kombiniranega mehanizma + točkovanja                                                       | usmerjanje, ponudniki      | "Usmeri ta poziv prek najboljšega modela"   |
+| Upravljanje kvot     | `quota-management`   | Poroča o stanju kvote posameznega ponudnika, klicateljem pomaga pri odločitvi, kdaj naj throttle/switch                                                           | kvota, ponudniki           | "Preveri kvoto za anthropic"                |
+| Odkritje ponudnika   | `provider-discovery` | Navaja nameščene ponudnike z zmožnostmi, zastavicami brezplačne ravni in statusom OAuth                                                                           | ponudniki, odkrivanje      | "Kateri ponudniki so na voljo?"             |
+| Analiza stroškov     | `cost-analysis`      | Ocenjuje stroške request/conversation glede na nedavno uporabo + v katalogu                                                                                       | stroški, uporaba           | "Ocena stroškov za ta pogovor"              |
+| Zdravstveno poročilo | `health-report`      | Odklopnik agregatov, ohlajanje, stanje zaklepanja na ponudnika                                                                                                    | zdravje, odpornost         | "Pokaži zdravstveno stanje vseh ponudnikov" |
+| Seznam zmogljivosti  | `list-capabilities`  | Vrne celoten katalog spretnosti agenta s 45 vnosi (konfiguracija 23 API + 21 CLI + 1) kot tabelo označevanja z neobdelanim SKILL.md URLs za vstavljanje konteksta | katalog, odkritje, veščine | "Seznam vseh zmogljivosti OmniRoute "       |
 
-> Kartica agenta mora ostati usklajena z aktivnim katalogom 352 ponudnikov; število ponudnikov in metapodatki o brezplačnem dostopu oziroma dostopu brez preverjanja pristnosti izvirajo iz registra med izvajanjem.
+> Kartica agenta mora biti usklajena s katalogom ponudnikov 381 v živo; število ponudnikov in metapodatki free/no-auth izvirajo iz registra izvajalnega okolja.
 
-### Podrobnosti veščine `list-capabilities`
+### `list-capabilities` podrobnosti spretnosti
 
-Veščina `list-capabilities` je posebej uporabna za zunanje agente, ki morajo pred pošiljanjem klicev API odkriti, kaj OmniRoute izpostavlja. Vrne strukturiran artefakt v obliki tabele markdown:
+Veščina `list-capabilities` je še posebej uporabna za zunanje agente, ki morajo odkriti, kaj razkrije OmniRoute preden pošljejo klice API. Vrne artefakt strukturirane tabele označevanja:
 
 ```
-| ID | Ime | Kategorija | Področje | Končne točke/ukazi | Neobdelani URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Preverjanje pristnosti in seje | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Vsaka vrstica vključuje stolpec `rawUrl`, zato lahko agenti takoj pridobijo celotno datoteko SKILL.md. Polje `metadata.totalSkills` odraža velikost kataloga (danes 45). Implementacija: `src/lib/a2a/skills/listCapabilities.ts`. Glejte tudi [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Vsaka vrstica vključuje stolpec `rawUrl` tako da lahko agenti takoj pridobijo celoten SKILL.md. Polje `metadata.totalSkills` odraža velikost kataloga (45 danes). Izvedba: `src/lib/a2a/skills/listCapabilities.ts`. Glej tudi [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -180,38 +184,46 @@ Vsaka vrstica vključuje stolpec `rawUrl`, zato lahko agenti takoj pridobijo cel
 
 Končna točka JSON-RPC `/a2a` je kanonična vstopna točka A2A. Spodnje končne točke REST zagotavljajo pomožni dostop za nadzorne plošče in zunanja orodja:
 
-| Končna točka                 | Metoda | Opis                                                       | Avtentikacija                                      |
-| :--------------------------- | :----- | :--------------------------------------------------------- | :------------------------------------------------- |
-| `/api/a2a/status`            | GET    | Stanje strežnika, registrirane veščine                     | (javno)                                            |
-| `/api/a2a/tasks`             | GET    | Seznam opravil s filtri                                    | upravljanje                                        |
-| `/api/a2a/tasks/[id]`        | GET    | Pridobitev opravila po ID-ju                               | upravljanje                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Preklic izvajajočega se opravila                           | upravljanje                                        |
-| `/.well-known/agent.json`    | GET    | Kartica agenta (odkrivanje A2A)                            | (javno, predpomnjeno 3600 s)                       |
-| `/api/a2a/tasks`             | POST   | Vhodno delegiranje floti OmniConductor (Conductor PRD RF5) | Bearer glede na `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Končna točka                 | Metoda | Opis                                                       | Auth                                                                                                         |
+| :--------------------------- | :----- | :--------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Stanje strežnika, registrirane veščine                     | (javno)                                                                                                      |
+| `/api/a2a/tasks`             | GET    | Seznam opravil s filtri                                    | upravljanje ali ključ API (glejte spodaj)                                                                    |
+| `/api/a2a/tasks/[id]`        | GET    | Pridobite nalogo z ID                                      | upravljanje ali ključ API (glejte spodaj)                                                                    |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Prekliči tekoče opravilo                                   | upravljanje ali ključ API (glejte spodaj)                                                                    |
+| `/.well-known/agent.json`    | GET    | Kartica agenta (odkritje A2A )                             | (javno, predpomnjeno 3600s)                                                                                  |
+| `/api/a2a/tasks`             | POST   | Dohodno delegiranje floti OmniConductor (dirigent PRD RF5) | enako kot `GET`, plus `OMNIROUTE_API_KEY` če je nastavljen, ko je `REQUIRE_API_KEY` izklopljen; `a2aEnabled` |
 
-**Vhodno delegiranje Conductor (`POST /api/a2a/tasks`):** zunanji agenti A2A prek OmniRoute delegirajo programsko delo floti OmniConductor. Telo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — delegirati je mogoče samo veščine flote Conductor (tiste, ki so objavljene na kartici agenta); `metadata.conductor.repo.url` je obvezen (flota dela z repozitoriji git). Pot se prevede v `POST /v1/tasks` vozlišča z uporabo strežniškega žetona `CONDUCTOR_ORCHESTRATOR_TOKEN` (nadomestno `CONDUCTOR_HUB_TOKEN`) in vrne `201 { conductor_task_id, state: "submitted" }`; stanja opravil se prenašajo nazaj prek zrcaljenja SSE→A2A (RF1) in so vidna prek `GET /api/a2a/tasks?skill=conductor`.
+Kdo pride do poti `/api/a2a/tasks*` je odvisno od prijave in nastavitev ključa API:
+
+- `requireLogin=true` (privzeto): vmesna programska oprema priznava samo poverilnice za upravljanje (sejo nadzorne plošče, ključ `manage` -scope API, žeton dostopa `oma_` ) in `OMNIROUTE_API_KEY`. Navadni sklepni ključ dobi `403`. V glavi `Authorization` vmesna programska oprema sprejme samo `OMNIROUTE_API_KEY` kot `Bearer <key>`; gola tipka ali zavihek po `Bearer` dobi `401`.
+- `requireLogin=false` ali okno povratne zanke pred vkrcanjem: z `REQUIRE_API_KEY=true` je sprejet vsak veljaven ključ OmniRoute API ali poverilnica za upravljanje in anonimni klicatelji prejmejo `401`; z izklopom `REQUIRE_API_KEY` so poti odprte.
+- `POST /api/a2a/tasks` dodatno zahteva `OMNIROUTE_API_KEY` v glavi `Authorization`, ko je ta spremenljivka nastavljena in je `REQUIRE_API_KEY` izklopljen. Druge glave, kot je `x-api-key`, tam ne štejejo. Ko je prijava izključena ali pred vkrcanjem, ključ prehaja s predpono `Bearer` ali brez nje; z vključeno prijavo samo `Bearer <key>` preide vmesno programsko opremo.
+
+Če je zahtevana poverilnica, žeton `read` -scope `oma_` deluje samo za `GET`.
+
+**Delegiranje vhodnega dirigenta (`POST /api/a2a/tasks`):** zunanji agenti A2A prenesejo delo kodiranja na floto OmniConductor prek OmniRoute. Telo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — samo spretnosti voznega parka dirigenta (tiste, ki so objavljene na kartici agenta) so prenosljive; potreben je `metadata.conductor.repo.url` (flota deluje na git repos). Pot se prevede v `POST /v1/tasks` vozlišča z uporabo `CONDUCTOR_ORCHESTRATOR_TOKEN` na strani strežnika (nadomestni `CONDUCTOR_HUB_TOKEN`) in vrne `201 { conductor_task_id, state: "submitted" }`; stanja nalog tečejo nazaj skozi ogledalo SSE→A2A (RF1) in so vidna prek `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Dodajanje nove veščine
+## Dodajanje nove spretnosti
 
-1. **Ustvarite datoteko veščine:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ustvari datoteko spretnosti:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvozite asinhrono funkcijo `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Upoštevajte obliko obstoječih veščin, kot je `smartRouting.ts`.
+   Izvozi asinhrono funkcijo `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Sledite obliki obstoječih spretnosti, kot je `smartRouting.ts`. Če spretnost pokliče nazaj v OmniRoute prek HTTP, zgradite glave z `buildSelfLoopHeaders(caller)` iz `src/lib/a2a/selfLoopAuth.ts`, tako da klic teče s ključem klicatelja A2A, ne `OMNIROUTE_API_KEY`, in posredujte `redirect: "error"` v `fetch` tako da preusmeritev nikoli ne dobi ključa. Pomočnik gradi samo glave; vsaka veščina sama nastavi politiko preusmeritve. Namesto da bi priložil ključ vrže `UnsafeSelfLoopTargetError`, ko je razrešen osnovni URL navaden http zunaj zasebnega omrežja (povratna zanka, vsebnik ali ime storitve in zasebni naslovi so v redu) ali ima poverilnice, tako da mora spretnost, ki pogoltne zavrnjene klice, znova vrniti to napako.
 
-2. **Registrirajte obravnavalnik:** v `src/lib/a2a/taskExecution.ts` dodajte vnos v `A2A_SKILL_HANDLERS`:
+2. **Upravljavec registra:** v `src/lib/a2a/taskExecution.ts` dodajte vnos v `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...obstoječe veščine
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Objavite na kartici agenta:** v `src/app/.well-known/agent.json/route.ts` dodajte v polje `skills`:
+3. **Razkrij v agentski kartici:** v `src/lib/a2a/agentCardMetadata.ts` (v skupni rabi z `/.well-known/agent.json` in `/.well-known/agent-card.json`), dodajte v polje `skills` :
 
    ```json
    {
@@ -223,9 +235,9 @@ Končna točka JSON-RPC `/a2a` je kanonična vstopna točka A2A. Spodnje končne
    }
    ```
 
-4. **Napišite teste:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspešno pot in pot z napako.
+4. **Napišite teste:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Dokumentirajte** novo veščino v tabeli `Razpoložljive veščine` v tej datoteki.
+5. **Dokument** nova spretnost v tabeli `Available Skills` te datoteke.
 
 ---
 
@@ -264,7 +276,7 @@ submitted → working → completed
 
 ## Primeri integracije
 
-### Python (requests)
+### Python (zahteve)
 
 ```python
 import requests
@@ -283,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (pridobi)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

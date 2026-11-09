@@ -140,9 +140,9 @@ omniroute providers validate
 
 ### 1) Tilslut udbydere, og opret en API-nøgle
 
-1. Åbn Dashboard → `Providers`, og tilslut mindst én udbyder (OAuth eller API-nøgle).
-2. Åbn Dashboard → `Endpoints`, og opret en API-nøgle.
-3. (Valgfrit) Åbn Dashboard → `Combos`, og konfigurer din fallback-kæde.
+1. Åbn Kontrolpanel → `Providers`, og tilslut mindst én udbyder (OAuth eller API-nøgle).
+2. Åbn Kontrolpanel → `Endpoints`, og opret en API-nøgle.
+3. (Valgfrit) Åbn Kontrolpanel → `Combos`, og konfigurer din fallback-kæde.
 
 ### 2) Konfigurer dit kodeværktøj
 
@@ -152,7 +152,7 @@ API-nøgle: [kopiér fra Endpoint-siden]
 Model:     if/qwen3.8-max-preview (eller et vilkårligt udbyder-/modelpræfiks)
 ```
 
-Hvis din editor ikke kan sende `Authorization: Bearer ...`, skal du i stedet bruge den tokeniserede kompatibilitetsbasis:
+Hvis din editor ikke kan sende `Authorization: Bearer ...`, skal du i stedet bruge den tokeniserede kompatibilitetsbase:
 
 ```txt
 Basis-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -163,75 +163,76 @@ Ollama Tags-URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 Fungerer med Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode og OpenAI-kompatible SDK'er.
 
-#### Automatisk konfiguration med `setup-*`
+#### Konfigurer automatisk med `setup-*`
 
 I stedet for manuelt at indsætte basis-URL'en og nøglen kan du lade OmniRoute skrive hvert værktøjs
-egen konfiguration ud fra det aktive modelkatalog. Én kommando pr. værktøj:
+egen konfiguration ud fra det aktuelle modelkatalog. Én kommando pr. værktøj:
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml-profiler
+omniroute setup-codex        # profiler i ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-kompatibel)
-omniroute setup-cline        # Indstillinger for Cline CLI + VS Code-udvidelsen
+omniroute setup-cline        # indstillinger for Cline CLI + VS Code-udvidelsen
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # udskriver trinnene i Cursor-appen
-omniroute setup-roo          # Roo Code-import + autoImport-markør
+omniroute setup-cursor       # viser trinnene i Cursor-appen
+omniroute setup-roo          # Roo Code-import + autoImport-reference
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Hver kommando accepterer `--remote <url> --api-key <key>` til konfiguration af et lokalt værktøj mod en
-**ekstern** OmniRoute samt `--dry-run` til forhåndsvisning. Hvis du vil starte en CLI med de korrekte
-miljøvariabler indsat uden overhovedet at skrive en konfiguration, skal du bruge den generiske starter
+**fjernbaseret** OmniRoute samt `--dry-run` til forhåndsvisning. Hvis du vil starte en CLI med det korrekte
+miljø indsat uden overhovedet at skrive nogen konfiguration, skal du bruge den generiske launcher
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-de ældre værktøjsspecifikke startere `omniroute launch` (Claude Code) og
+de ældre værktøjsspecifikke launchere `omniroute launch` (Claude Code) og
 `omniroute launch-codex` (Codex) er fortsat tilgængelige.
 
-Se **[CLI-integrationer](./CLI-INTEGRATIONS.md)** for den komplette tabel (hvad hver kommando skriver, alle flag, lokal kontra ekstern samt basis-URL-
-`/v1`-konventioner).
+Du kan finde den komplette tabel (hvad hver kommando skriver, alle flag, lokal kontra fjernbaseret samt konventioner for basis-URL'ens
+`/v1`) under **[CLI-integrationer](./CLI-INTEGRATIONS.md)**.
 
-Se den dedikerede **[vejledning til CLI-værktøjer](../reference/CLI-TOOLS.md)** for detaljeret konfiguration af hvert værktøj (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot med flere).
+Detaljeret konfiguration for hvert værktøj (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot med flere) findes i den dedikerede **[vejledning til CLI-værktøjer](../reference/CLI-TOOLS.md)**.
 
 ---
 
-## Protokolkonfiguration (MCP + A2A)
+## Protokolopsætning (MCP + A2A)
 
-### MCP-konfiguration (Model Context Protocol)
+### MCP -opsætning (modelkontekstprotokol)
 
-Start MCP-transporten i stdio-tilstand:
+Start MCP -transport i stdio-tilstand:
 
 ```bash
 omniroute --mcp
 ```
 
-Anbefalet valideringsforløb:
+Anbefalet valideringsflow:
 
 ```bash
-# 1. Start MCP-serveren
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Kald følgende fra din MCP-klient:
-omniroute_get_health        # Bør returnere systemets tilstand
-omniroute_list_combos       # Bør returnere aktive kombinationer
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Eller kør hele E2E-testsuiten:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Konfiguration af MCP-klient
+#### MCP klientkonfiguration
 
-**Claude Code:**
+**Claude kode:**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Føj følgende til dine MCP-indstillinger:
+Tilføj til dine MCP -indstillinger (stdio, med tasten, så den, der ringer op) har en hovedperson):
 
 ```json
 {
@@ -239,17 +240,24 @@ Føj følgende til dine MCP-indstillinger:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Komplet MCP-dokumentation:** [README til MCP-serveren](../../open-sse/mcp-server/README.md) — 110 værktøjer, IDE-konfigurationer samt Python-/TS-/Go-klienter.
+Eller, når `mcpTransport` er `streamable-http` (indstil den på `/dashboard/mcp` eller med `omniroute mcp enable --transport streamable-http`), peg klientens eksterne MCP serverindgang mod `http://localhost:20128/api/mcp/stream`.
 
-### A2A-konfiguration (Agent-to-Agent Protocol)
+Nøglen kører som `Authorization: Bearer <api-key>` (se [MCP Server → Fjernadgang](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) for fjernværter; en fjernnøgle har brug for `mcp:connect` plus dens read/write -omfang).
 
-Bekræft Agent Card:
+**Fuld MCP dokumentation:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 værktøjer, IDE configs, Python/TS/Go klienter. Operatørreference for kompressions- CCR/dedup -værktøjerne (markører, forudsætninger, omfang pr. værktøj, paginering til hentning, diagnostik): [Kompressionsmotorer → Forudsætninger / operatørvejledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### A2A opsætning (agent-til-agent-protokol)
+
+Bekræft agentkortet:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
@@ -263,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Komplet A2A-dokumentation:** [README til A2A-serveren](../../src/lib/a2a/README.md) — JSON-RPC 2.0, færdigheder, streaming og opgavers livscyklus.
+**Fuld A2A dokumentation:** [A2A Server README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, færdigheder, streaming, opgavelivscyklus.
 
 ---
 
@@ -322,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Skabelon til Void Linux (xbps-src)
+## Ugyldig Linux (xbps-src) skabelon
 
-Void Linux-brugere kan bygge en oprindelig pakke ved hjælp af `xbps-src`. Gem denne blok som `srcpkgs/omniroute/template`:
+For Void Linux -brugere kan du bygge en indbygget pakke ved hjælp af `xbps-src`. Gem denne blok som `srcpkgs/omniroute/template`:
 
 ```bash
-# Skabelonfil til 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -338,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Generér kontrolsummen igen for hver udgivelse med:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

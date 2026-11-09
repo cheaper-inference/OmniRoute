@@ -92,6 +92,24 @@ export type CloudflaredTunnelStatus = {
   phase: TunnelPhase;
   lastError: string | null;
   logPath: string;
+  /**
+   * Present (and `false`) only when the PATH lookup was skipped for a remote caller:
+   * `installed`/`binaryPath` then reflect only the env/managed candidates, and the
+   * phase never claims `not_installed`. A probed status omits the field so the local
+   * response shape is unchanged.
+   */
+  probed?: false;
+};
+
+/**
+ * Whether the caller may spawn the PATH lookup (`which`/`where cloudflared`). Route
+ * handlers pass the trusted peer-locality verdict (loopback/LAN only); the GET status
+ * route stays remote-reachable for the dashboard, so the spawn is gated here at its
+ * call site (GHSA-35fw-cv32-2373 class, GHSA-jmq6-8j86-8xqj pattern). Defaults to true
+ * for in-process callers.
+ */
+export type CloudflaredStatusOptions = {
+  allowLocalProbe?: boolean;
 };
 
 const CLOUDFLARED_SAFE_ENV_KEYS = [
@@ -647,7 +665,9 @@ async function resolvePathCommand(command: string) {
   }
 }
 
-async function resolveBinary(): Promise<BinaryResolution> {
+async function resolveBinary({
+  allowPathLookup = true,
+}: { allowPathLookup?: boolean } = {}): Promise<BinaryResolution> {
   const envPath = String(process.env.CLOUDFLARED_BIN || "").trim();
   if (envPath && fsSync.existsSync(envPath)) {
     return { binaryPath: envPath, source: "env", managed: false };
@@ -658,7 +678,8 @@ async function resolveBinary(): Promise<BinaryResolution> {
     return { binaryPath: managedPath, source: "managed", managed: true };
   }
 
-  const pathBinary = await resolvePathCommand("cloudflared");
+  // The PATH lookup spawns `which`/`where`; the other candidates are plain fs checks.
+  const pathBinary = allowPathLookup ? await resolvePathCommand("cloudflared") : null;
   if (pathBinary) {
     return { binaryPath: pathBinary, source: "path", managed: false };
   }
@@ -818,19 +839,24 @@ async function stopExistingTunnel() {
   }
 }
 
-export async function getCloudflaredTunnelStatus(): Promise<CloudflaredTunnelStatus> {
+export async function getCloudflaredTunnelStatus({
+  allowLocalProbe = true,
+}: CloudflaredStatusOptions = {}): Promise<CloudflaredTunnelStatus> {
   const state = await readStateFile();
-  const resolved = await resolveBinary();
+  const resolved = await resolveBinary({ allowPathLookup: allowLocalProbe });
+  // Without the PATH lookup a missing binary is "not checked", not "absent".
+  const binaryPresentOrUnchecked = allowLocalProbe ? !!resolved.binaryPath : true;
   const pidFromState =
     tunnelPid || (isStateOwnedByCurrentProcess(state) ? state.pid || (await readPidFile()) : null);
   const running = isProcessAlive(pidFromState);
   const needsColdStartReset =
     !running && !isStateOwnedByCurrentProcess(state) && hasTransientRuntimeState(state);
   const effectiveState = needsColdStartReset
-    ? buildStoppedState(state, !!resolved.binaryPath)
+    ? buildStoppedState(state, binaryPresentOrUnchecked)
     : state;
 
-  if (needsColdStartReset) {
+  // An unprobed read stays read-only: it must not persist a guess about the binary.
+  if (needsColdStartReset && allowLocalProbe) {
     await writeStateFile(effectiveState);
   }
 
@@ -842,13 +868,13 @@ export async function getCloudflaredTunnelStatus(): Promise<CloudflaredTunnelSta
         ? publicUrl
           ? "running"
           : "starting"
-        : resolved.binaryPath
+        : binaryPresentOrUnchecked
           ? effectiveState.lastError
             ? "error"
             : "stopped"
           : "not_installed";
 
-  if (!running && state.pid) {
+  if (!running && state.pid && allowLocalProbe) {
     await clearPidFile();
   }
 
@@ -866,6 +892,7 @@ export async function getCloudflaredTunnelStatus(): Promise<CloudflaredTunnelSta
     phase,
     lastError: running ? null : effectiveState.lastError || null,
     logPath: getLogFilePath(),
+    ...(allowLocalProbe ? {} : { probed: false as const }),
   };
 }
 

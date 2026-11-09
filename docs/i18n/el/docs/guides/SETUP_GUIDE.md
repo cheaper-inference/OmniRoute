@@ -136,36 +136,37 @@ omniroute providers validate
 
 ---
 
-## Διαμόρφωση εργαλείων CLI
+## Ρύθμιση εργαλείων CLI
 
-### 1) Σύνδεση παρόχων και δημιουργία κλειδιού API
+### 1) Συνδέστε παρόχους και δημιουργήστε κλειδί API
 
-1. Ανοίξτε το Dashboard → `Providers` και συνδέστε τουλάχιστον έναν πάροχο (OAuth ή κλειδί API).
-2. Ανοίξτε το Dashboard → `Endpoints` και δημιουργήστε ένα κλειδί API.
-3. (Προαιρετικά) Ανοίξτε το Dashboard → `Combos` και ορίστε την αλυσίδα εφεδρείας σας.
+1. Ανοίξτε τον Πίνακα ελέγχου → `Πάροχοι` και συνδέστε τουλάχιστον έναν πάροχο (OAuth ή κλειδί API).
+2. Ανοίξτε τον Πίνακα ελέγχου → `Τελικά σημεία` και δημιουργήστε ένα κλειδί API.
+3. (Προαιρετικά) Ανοίξτε τον Πίνακα ελέγχου → `Συνδυασμοί` και ορίστε την αλυσίδα εφεδρείας σας.
 
-### 2) Ρύθμιση του εργαλείου προγραμματισμού σας
-
-```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
-```
-
-Εάν το πρόγραμμα επεξεργασίας σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε αντ’ αυτού τη βάση συμβατότητας με ενσωματωμένο διακριτικό:
+### 2) Κατευθύνετε το εργαλείο προγραμματισμού σας
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Βασικό URL: http://localhost:20128/v1
+Κλειδί API: [αντιγράψτε από τη σελίδα Τελικού σημείου]
+Μοντέλο:     if/qwen3.8-max-preview (ή οποιοδήποτε πρόθεμα παρόχου/μοντέλου)
 ```
 
-Λειτουργεί με Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDK συμβατά με το OpenAI.
+Αν το πρόγραμμα επεξεργασίας σας δεν μπορεί να στείλει `Authorization: Bearer ...`, χρησιμοποιήστε αντ’ αυτού τη βασική διεύθυνση συμβατότητας με ενσωματωμένο διακριτικό:
 
-#### Αυτόματη διαμόρφωση με `setup-*`
+```txt
+Βασικό URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL μοντέλων: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL συνομιλίας: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL ετικετών Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
 
-Αντί να επικολλήσετε χειροκίνητα το βασικό URL και το κλειδί, επιτρέψτε στο OmniRoute να δημιουργήσει τη διαμόρφωση κάθε εργαλείου από τον ενεργό κατάλογο μοντέλων. Μία εντολή ανά εργαλείο:
+Λειτουργεί με τα Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode και SDK συμβατά με το OpenAI.
+
+#### Αυτόματη ρύθμιση με `setup-*`
+
+Αντί να επικολλήσετε χειροκίνητα το βασικό URL και το κλειδί, αφήστε το OmniRoute να γράψει τη
+ρύθμιση κάθε εργαλείου από τον ενεργό κατάλογο μοντέλων. Μία εντολή ανά εργαλείο:
 
 ```bash
 omniroute setup-codex        # Προφίλ ~/.codex/<name>.config.toml
@@ -177,54 +178,61 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Εμφανίζει τα βήματα εντός της εφαρμογής Cursor
 omniroute setup-roo          # Εισαγωγή Roo Code + δείκτης autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Καθεμία δέχεται `--remote <url> --api-key <key>` για τη διαμόρφωση ενός τοπικού εργαλείου ώστε να χρησιμοποιεί ένα **απομακρυσμένο** OmniRoute, καθώς και `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με εισαγωγή του κατάλληλου περιβάλλοντος χωρίς να εγγραφεί καμία διαμόρφωση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini). Τα παλαιότερα προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και `omniroute launch-codex` (Codex) παραμένουν διαθέσιμα.
+Καθεμία δέχεται `--remote <url> --api-key <key>` για τη ρύθμιση ενός τοπικού εργαλείου ώστε να χρησιμοποιεί ένα
+**απομακρυσμένο** OmniRoute, καθώς και `--dry-run` για προεπισκόπηση. Για να εκκινήσετε ένα CLI με το σωστό
+περιβάλλον ενσωματωμένο και χωρίς να γραφτεί καμία ρύθμιση, χρησιμοποιήστε το γενικό πρόγραμμα εκκίνησης
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini)·
+τα παλαιού τύπου προγράμματα εκκίνησης ανά εργαλείο `omniroute launch` (Claude Code) και
+`omniroute launch-codex` (Codex) παραμένουν διαθέσιμα.
 
-Για τον πλήρη πίνακα (τι εγγράφει κάθε εντολή, όλες τις σημαίες, τοπική έναντι απομακρυσμένης λειτουργίας, συμβάσεις `/v1` για τα βασικά URL), ανατρέξτε στις **[Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)**.
+Για τον πλήρη πίνακα (τι γράφει κάθε εντολή, κάθε σημαία, τοπική έναντι απομακρυσμένης λειτουργίας, συμβάσεις βασικού URL
+`/v1`), ανατρέξτε στις **[Ενσωματώσεις CLI](./CLI-INTEGRATIONS.md)**.
 
-Για λεπτομερή διαμόρφωση ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στον ειδικό **[Οδηγό εργαλείων CLI](../reference/CLI-TOOLS.md)**.
+Για λεπτομερείς ρυθμίσεις ανά εργαλείο (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot και άλλα), ανατρέξτε στον ειδικό **[Οδηγό εργαλείων CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
-## Ρύθμιση πρωτοκόλλων (MCP + A2A)
+## Ρύθμιση πρωτοκόλλου (MCP + A2A)
 
-### Ρύθμιση MCP (Model Context Protocol)
+### Ρύθμιση MCP (Πρωτόκολλο περιβάλλοντος μοντέλου)
 
-Εκκινήστε τη μεταφορά MCP σε λειτουργία stdio:
+Ξεκινήστε τη μεταφορά MCP σε λειτουργία stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Προτεινόμενη ροή επαλήθευσης:
+Προτεινόμενη ροή επικύρωσης:
 
 ```bash
-# 1. Εκκινήστε τον διακομιστή MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Από τον πελάτη MCP σας, καλέστε:
-omniroute_get_health        # Θα πρέπει να επιστρέψει την κατάσταση εύρυθμης λειτουργίας του συστήματος
-omniroute_list_combos       # Θα πρέπει να επιστρέψει τους ενεργούς συνδυασμούς
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Εναλλακτικά, εκτελέστε την πλήρη σουίτα E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Διαμόρφωση πελάτη MCP
 
-**Claude Code:**
+**Κωδικός Claude :**
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 ```
 
 **Cursor / Cline:**
 
-Προσθέστε το εξής στις ρυθμίσεις MCP:
+Προσθέστε στις ρυθμίσεις σας MCP (stdio, με το κλειδί ώστε ο καλών να έχει έναν κύριο):
 
 ```json
 {
@@ -232,23 +240,30 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Πλήρης τεκμηρίωση MCP:** [README διακομιστή MCP](../../open-sse/mcp-server/README.md) — 110 εργαλεία, διαμορφώσεις IDE, πελάτες Python/TS/Go.
+Ή, όταν `mcpTransport` είναι `streamable-http` (ρυθμίστε το σε `/dashboard/mcp` ή με `omniroute mcp enable --transport streamable-http`), τοποθετήστε την καταχώρηση απομακρυσμένου διακομιστή MCP του πελάτη στο `http://localhost:20128/api/mcp/stream`.
 
-### Ρύθμιση A2A (Πρωτόκολλο μεταξύ πρακτόρων)
+Το κλειδί ταξιδεύει ως `Authorization: Bearer <api-key>` (δείτε [MCP Server → Απομακρυσμένη πρόσβαση](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) για απομακρυσμένους κεντρικούς υπολογιστές· ένα απομακρυσμένο κλειδί χρειάζεται `mcp:connect` συν τα πεδία read/write του).
 
-Επαληθεύστε την κάρτα πράκτορα:
+**Πλήρης τεκμηρίωση MCP :** [Διακομιστής MCP README](../../open-sse/mcp-server/README.md) — 110 εργαλεία, ρυθμίσεις παραμέτρων IDE, πελάτες Python/TS/Go. Αναφορά χειριστή για τα εργαλεία συμπίεσης CCR/dedup (δείκτες, προαπαιτούμενα, πεδία ανά εργαλείο, σελιδοποίηση ανάκτησης, διαγνωστικά): [Μηχανές συμπίεσης → Προαπαιτούμενα / οδηγός χειριστή](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Ρύθμιση A2A (Πρωτόκολλο Agent-to-Agent)
+
+Επαληθεύστε την κάρτα αντιπροσώπου:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Στείλτε μια εργασία:
+Αποστολή εργασίας:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -256,7 +271,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Πλήρης τεκμηρίωση A2A:** [README διακομιστή A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή δεδομένων, κύκλος ζωής εργασιών.
+**Πλήρης τεκμηρίωση A2A :** [Διακομιστής A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, δεξιότητες, ροή, κύκλος ζωής εργασιών.
 
 ---
 
@@ -315,12 +330,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Πρότυπο για Void Linux (xbps-src)
+## Κενό πρότυπο Linux (xbps-src).
 
-Οι χρήστες του Void Linux μπορούν να δημιουργήσουν ένα εγγενές πακέτο χρησιμοποιώντας το `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
+Για χρήστες Void Linux, μπορείτε να δημιουργήσετε ένα εγγενές πακέτο χρησιμοποιώντας `xbps-src`. Αποθηκεύστε αυτό το μπλοκ ως `srcpkgs/omniroute/template`:
 
 ```bash
-# Αρχείο προτύπου για το 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -331,7 +346,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Δημιουργήστε ξανά το άθροισμα ελέγχου για κάθε έκδοση με:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

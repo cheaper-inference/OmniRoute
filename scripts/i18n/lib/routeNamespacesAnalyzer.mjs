@@ -9,8 +9,9 @@
  *                client components).
  *  - `chrome`  — namespaces needed by the shared dashboard shell rendered by
  *                `src/app/(dashboard)/layout.tsx` (Header, Sidebar, …).
- *  - `home`    — the dashboard home route (`/dashboard` page.tsx + the
- *                component files that live directly under `dashboard/`).
+ *  - `home`    — the dashboard home route: the `/dashboard` redirect page plus
+ *                the component files that live directly under `dashboard/` and
+ *                the `/home` route directory that renders them.
  *  - `sections`— one entry per top-level section directory under
  *                `src/app/(dashboard)/dashboard/` that (recursively) contains
  *                a page.tsx.
@@ -42,12 +43,18 @@ const SRC_ROOT = join(REPO_ROOT, "src");
 const APP_ROOT = join(SRC_ROOT, "app");
 const DASHBOARD_ROOT = join(APP_ROOT, "(dashboard)");
 const SECTIONS_ROOT = join(DASHBOARD_ROOT, "dashboard");
+// The real post-redirect home route (`/dashboard` → `/home`). It renders the
+// companion components that live directly under `dashboard/` and therefore
+// shares the `home` namespace set (#16321). Sibling of dashboard/, not a
+// section beneath it, so the section loop never sees it (#16056).
+export const HOME_ROUTE_DIR = join(DASHBOARD_ROOT, "home");
+const HOME_ROUTE_ROOT = HOME_ROUTE_DIR;
 
 const SKIP_DIRS = new Set(["node_modules", ".next", ".claude", ".git", "_tasks", "__pycache__"]);
 
 const CLIENT_DIRECTIVE = /["']use client["']/;
 
-function walkFiles(dir, out = []) {
+export function walkFiles(dir, out = []) {
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -157,7 +164,7 @@ function readCached(file) {
 }
 
 /** BFS over the import graph from entry files; unions client namespaces. */
-function closureNamespaces(entryFiles) {
+export function closureNamespaces(entryFiles) {
   const namespaces = new Set();
   const visited = new Set();
   const queue = [...entryFiles];
@@ -228,12 +235,15 @@ export function analyzeRouteNamespaces() {
   // Dashboard chrome: everything reachable from the (dashboard) root layout.
   const chrome = closureNamespaces([join(DASHBOARD_ROOT, "layout.tsx")]);
 
-  // Dashboard home: files directly under dashboard/ (page + companions).
+  // Dashboard home: files directly under dashboard/ (page + companions) AND the
+  // real /home route directory that renders them — `/dashboard` redirects to
+  // `/home`, and `/home` imports the same companion components (#16321).
   const homeFiles = readdirSync(SECTIONS_ROOT)
     .filter((name) => /\.(tsx|ts)$/.test(name))
     .map((name) => join(SECTIONS_ROOT, name));
+  const homeRouteFiles = walkFiles(HOME_ROUTE_ROOT);
   const home = new Set([...chrome]);
-  for (const ns of closureNamespaces(homeFiles)) home.add(ns);
+  for (const ns of closureNamespaces([...homeFiles, ...homeRouteFiles])) home.add(ns);
 
   // Sections: one entry per top-level dir under dashboard/ with a page.
   const sections = {};

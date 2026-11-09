@@ -1,1 +1,0 @@
-- **test(mcp):** Follow quota validation through the extracted operational handler and verify its scope-protected registration instead of requiring the endpoint literal in the registration module ([#16175](https://github.com/diegosouzapw/OmniRoute/pull/16175)).

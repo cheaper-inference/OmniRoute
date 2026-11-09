@@ -7,47 +7,47 @@
 OmniRoute は起動時に、5 段階のフォールバックチェーンを通じて SQLite ドライバーを解決します。
 
 1. **同梱の `better-sqlite3`**（`package.json` の `dependencies` 経由）
-   — 最速のネイティブバイナリで、ビルドツールが存在する場合に `npm install` によってインストールされます。
+   — 最も高速なネイティブバイナリで、ビルドツールが存在する場合に `npm install` によってインストールされます。
 
 2. **実行時にインストールされる `better-sqlite3`**（`~/.omniroute/runtime/` 内）
    — 初回実行時に遅延インストールされるか、**または** `scripts/build/postinstall.mjs → scripts/postinstall.mjs` によってインストールされます。
-   読み込み前にネイティブ `.node` のマジックバイト（ELF / Mach-O / PE）を検証し、
-   破損したバイナリや異なるプラットフォーム向けのバイナリが読み込まれるのを防ぎます。
+   読み込む前にネイティブ `.node` のマジックバイト（ELF / Mach-O / PE）を検証し、
+   破損したバイナリや対象プラットフォームが異なるバイナリから保護します。
 
-3. **`node:sqlite`**（Node ≥22.5 の標準ライブラリ）— ネイティブビルドは不要です。両方の
-   better-sqlite3 パスが失敗した場合に使用されます。機能セットは限定されています。
+3. **`node:sqlite`**（Node ≥22.5 の標準ライブラリ）— ネイティブビルドは不要です。
+   両方の better-sqlite3 パスが失敗した場合に使用されます。機能セットは限定的です。
 
-4. **`sql.js`**（WASM）— 最終フォールバックです。あらゆる環境で動作しますが、速度が遅く、
-   データは同期的ではなく一定間隔で書き込まれます。
+4. **`sql.js`**（WASM）— 最後のフォールバックです。あらゆる環境で動作しますが、低速であり、
+   データは同期的にではなく一定間隔で書き込まれます。
 
-## なぜこのように複雑なのか？
+## なぜこれほど複雑なのか？
 
-- **Windows の EBUSY**: 以前のバージョンの `better_sqlite3.node` が実行中のプロセスによって
-  ロックされている場合、`npm install -g omniroute@latest` が失敗することがあります。
-  `~/.omniroute/runtime/` への実行時インストールにより、グローバル npm キャッシュを回避できます。
-- **ビルドツールがない環境**: 一部の環境（VS Build Tools がない企業向け Windows 環境や、
+- **Windows EBUSY**：実行中のプロセスによって以前のバージョンの
+  `better_sqlite3.node` がロックされている場合、`npm install -g omniroute@latest` が失敗することがあります。
+  `~/.omniroute/runtime/` への実行時インストールにより、グローバル npm キャッシュを迂回できます。
+- **ビルドツールがない環境**：一部の環境（VS Build Tools がない企業向け Windows 環境、
   最小構成の Docker イメージ）では、`better-sqlite3` をコンパイルできません。実行時
-  インストーラーは npm レジストリからビルド済みバイナリを取得します。それに失敗した場合でも、
+  インストーラーは npm レジストリからビルド済みバイナリを解決します。これに失敗した場合でも、
   フォールバックドライバーによって OmniRoute を起動できます。
-- **エアギャップ環境**: npm レジストリに到達できない場合でも、`node:sqlite`
+- **エアギャップ環境**：npm レジストリに到達できない場合でも、`node:sqlite`
   または `sql.js` によって基本機能が保証されます。
 
 ## マジックバイトの検証
 
 実行時にインストールされた `.node` ファイルを読み込む前に、OmniRoute は先頭 8
-バイトを読み取り、既知のプラットフォームのマジック値と照合します。
+バイトを読み取り、既知のプラットフォーム固有マジックと照合します。
 
-| プラットフォーム       | バイト（16 進数） | ラベル      |
-| ---------------------- | ----------------- | ----------- |
-| Linux                  | `7F 45 4C 46`     | `elf`       |
-| macOS 64-bit BE        | `FE ED FA CF`     | `macho`     |
-| macOS 64-bit LE        | `CF FA ED FE`     | `macho-le`  |
-| macOS fat（universal） | `CA FE BA BE`     | `macho-fat` |
-| Windows                | `4D 5A` (MZ)      | `pe`        |
+| プラットフォーム          | バイト（16 進数） | ラベル      |
+| ------------------------- | ----------------- | ----------- |
+| Linux                     | `7F 45 4C 46`     | `elf`       |
+| macOS 64 ビット BE        | `FE ED FA CF`     | `macho`     |
+| macOS 64 ビット LE        | `CF FA ED FE`     | `macho-le`  |
+| macOS fat（ユニバーサル） | `CA FE BA BE`     | `macho-fat` |
+| Windows                   | `4D 5A` (MZ)      | `pe`        |
 
-マジック値が一致しない場合 → ファイルは無視され、次のステップへのフォールバックが続行されます。
+マジックが一致しない場合 → ファイルは無視され、次のステップへフォールバックが続行されます。
 
-## アクティブなドライバーの確認
+## 使用中のドライバーの確認
 
 ```typescript
 import { getDriverInfo } from "@/lib/db/core";
@@ -60,36 +60,56 @@ const info = getDriverInfo();
 ## 手動制御
 
 ```bash
-# postinstall のウォームアップをスキップ（高速な CI インストール向け）
+# 高速な CI インストールのため、postinstall のウォームアップをスキップ
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
 # 実行時の better-sqlite3 を強制的に再インストール
 rm -rf ~/.omniroute/runtime
-omniroute  # 次回起動時に再インストールされます
+omniroute  # 次回起動時に再インストールされる
 
-# アクティブなドライバーを確認
+# 使用中のドライバーを確認
 omniroute config db-info  # （CLI コマンドが存在する場合）
 ```
 
+## 同期処理の停止状態を診断する
+
+`better-sqlite3` では、起動前に `OMNIROUTE_SQLITE_SLOW_MS=200` を設定すると、
+同期アダプターの計測を明示的に有効化できます。デフォルトでは無効です。完了した処理に
+指定されたミリ秒以上かかった場合、アダプターごとに 10 秒あたり最大 1 回、
+`[SQLITE-SLOW]` 警告が出力されます。この警告に含まれるのは、ドライバー、処理クラス
+（`prepare`、`get`、`all`、`run`、`exec`、`pragma`、トランザクション、またはメンテナンス）、
+および経過ミリ秒だけです。SQL、バインディング、行、パス、例外テキストは含まれません。
+
+これは診断補助機能であり、タイムアウトやクエリ最適化ではありません。戻ることのない
+処理を報告したり、CPU 処理とディスク待機を区別したり、正確な SQL を特定したり、
+生のドライバーハンドルを通じて実行された処理を監視したりすることはできません。
+非同期バックアップの所要時間は意図的に除外されています。他の SQLite ドライバーは、
+この明示的に有効化する計測の対象ではありません。変数を無効にすると、タイミングラッパーのない
+元のアダプターに戻ります。データベーススキーマや保存済み設定は変更されません。
+
+`/healthz` の遅延警告は、全期間の平均ではなく、前回のサンプル以降における
+イベントループのピーク値を報告します。停止状態の原因を SQLite またはディスク障害と判断する前に、
+そのタイムスタンプを低速処理の警告およびホスト／ストレージのメトリクスと照合してください。
+
 ## リファレンス
 
-実装:
+実装：
 
 - `bin/cli/runtime/magicBytes.mjs` — バイナリのマジックバイト検証ヘルパー
-- `bin/cli/runtime/sqliteRuntime.mjs` — 5 段階の実行時リゾルバー + 遅延インストーラー
+- `bin/cli/runtime/sqliteRuntime.mjs` — 5 段階の実行時リゾルバーと遅延インストーラー
 - `bin/cli/runtime/index.mjs` — 起動オーケストレーター（`warmUpRuntimes()`）
-- `scripts/postinstall.mjs` — npm のインストール後フック（失敗しても致命的ではないウォームアップ）
+- `scripts/postinstall.mjs` — npm のインストール後フック（非致命的なウォームアップ）
 - `src/lib/db/core.ts` — `ensureDbInitialized()` / `getDriverInfo()` のエクスポート
 
 ## シングルライター構成（HA 非対応）
 
-上記のドライバーフォールバックチェーンも、引き続き **1 つのプロセス** 内で実行されます。デフォルトの SQLite
-を使用する OmniRoute は **シングルライター** です。
+上記のドライバーフォールバックチェーンは、引き続き **1 つのプロセス**内で実行されます。
+デフォルトの SQLite を使用する OmniRoute は**シングルライター**です。
 
 - 2 つの OmniRoute レプリカを同じ `storage.sqlite` ファイルに接続しないでください。
 - コンテナの再起動、Recreate デプロイ、OOM kill、または HEALTHCHECK による再起動が発生すると、
-  処理中のすべての SSE セッションが切断されます。標準構成にはセッションドレインがありません。
-- 遅い `/healthz` を停止状態と見なすオーケストレーターの liveness チェックは、唯一の
-  レプリカを終了させます。liveness には TCP を、readiness には HTTP `/healthz` を使用することを推奨します。
+  処理中のすべての SSE セッションが切断されます。標準構成にはセッションのドレイン機能がありません。
+- 低速な `/healthz` を異常とみなすオーケストレーターの liveness チェックは、唯一の
+  レプリカを終了させます。TCP liveness と HTTP `/healthz` readiness の組み合わせを推奨します。
   [Docker ガイド — 可用性](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
   および [Kubernetes プローブの推奨事項](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)を参照してください。

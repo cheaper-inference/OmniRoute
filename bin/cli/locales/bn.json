@@ -123,7 +123,9 @@
       "maxCostOpt": "প্রতিদিনের সর্বোচ্চ খরচ (USD)",
       "allowedModelsOpt": "অনুমোদিত মডেলগুলোর কমা-বিভাজিত তালিকা",
       "nothingToSet": "কোনো নীতি ফিল্ড দেওয়া হয়নি। --rate-limit, --max-cost, অথবা --allowed-models ব্যবহার করুন।",
-      "updated": "নীতি আপডেট করা হয়েছে।"
+      "updated": "নীতি আপডেট করা হয়েছে।",
+      "modelAccessModeOpt": "মডেল অ্যাক্সেস মোড (all | restricted)",
+      "unrestrictedOpt": "সব মডেল অনুমোদন করুন (--model-access-mode all)"
     },
     "expiration": {
       "title": "কী-এর মেয়াদ শেষ হওয়া",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "OmniRoute ইনস্ট্যান্সগুলোর মধ্যে কনফিগারেশন সিঙ্ক করুন",
     "push": {
-      "description": "কনফিগ ক্লাউড বা রিমোট ইনস্ট্যান্সে পুশ করুন",
-      "target": "লক্ষ্য (cloud বা context:name)",
-      "bundle": "সিঙ্ক করার জন্য বান্ডেলের অংশসমূহ",
-      "dryRun": "প্রয়োগ না করে পূর্বরূপ দেখুন"
+      "description": "কনফিগ ক্লাউড বা রিমোট ইনস্ট্যান্সে পুশ করুন"
     },
     "pull": {
-      "description": "ক্লাউড বা রিমোট থেকে কনফিগ আনুন",
-      "source": "উৎস (ক্লাউড বা context:name)",
-      "merge": "বিদ্যমান কনফিগের সঙ্গে মার্জ করুন",
-      "replace": "বিদ্যমান কনফিগ প্রতিস্থাপন করুন",
-      "dryRun": "প্রয়োগ না করে পূর্বরূপ দেখুন"
-    },
-    "diff": {
-      "source": "উৎস কনটেক্সট",
-      "target": "লক্ষ্য কনটেক্সট"
+      "description": "ক্লাউড বা রিমোট থেকে কনফিগ আনুন"
     },
     "bundle": {
       "description": "কনফিগ একটি বান্ডেল ফাইল হিসেবে এক্সপোর্ট করুন",
-      "include": "অন্তর্ভুক্ত করার অংশসমূহ (কমা দিয়ে পৃথক করা)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "একটি বান্ডেল ফাইল ইমপোর্ট করুন",
       "dryRun": "প্রয়োগ না করে যাচাই করুন"
-    },
-    "initialize": {
-      "fromCloud": "ক্লাউড ব্যাকআপ থেকে শুরু করুন"
     },
     "tokens": {
       "description": "সিঙ্ক টোকেন পরিচালনা করুন",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "নিশ্চিতকরণ এড়িয়ে যান"
       }
-    },
-    "resolve": {
-      "description": "ইন্টারঅ্যাক্টিভভাবে সিঙ্ক দ্বন্দ্ব সমাধান করুন"
     }
   },
   "config": {

@@ -6,46 +6,46 @@
 
 OmniRoute 在啟動時會透過 5 步驟的備援鏈解析其 SQLite 驅動程式：
 
-1. **隨附的 `better-sqlite3`**（透過 `package.json` 中的 `dependencies`）
-   — 速度最快、使用原生二進位檔；當建置工具可用時，由 `npm install` 安裝。
+1. **內附的 `better-sqlite3`**（透過 `package.json` 中的 `dependencies`）
+   — 速度最快，使用原生二進位檔；當環境中具備建置工具時，由 `npm install` 安裝。
 
 2. **執行階段安裝的 `better-sqlite3`**（位於 `~/.omniroute/runtime/`）
-   — 在首次執行時延遲安裝，**或**由 `scripts/build/postinstall.mjs → scripts/postinstall.mjs` 安裝。
-   載入前會驗證原生 `.node` 魔術位元組（ELF / Mach-O / PE），
-   以防止載入損毀或屬於錯誤平台的二進位檔。
+   — 首次執行時延遲安裝，**或**由 `scripts/build/postinstall.mjs → scripts/postinstall.mjs` 安裝。
+   載入前會驗證原生 `.node` 的魔術位元組（ELF / Mach-O / PE），
+   以防止載入損毀或平台不符的二進位檔。
 
 3. **`node:sqlite`**（Node ≥22.5 標準函式庫）— 不需要原生建置；當
-   兩個 better-sqlite3 路徑都失敗時使用。功能集有限。
+   兩個 better-sqlite3 路徑都失敗時使用。功能集較受限。
 
-4. **`sql.js`**（WASM）— 最終備援方案。可在任何環境中運作，但速度較慢，
-   且會按固定時間間隔寫入資料，而非同步寫入。
+4. **`sql.js`**（WASM）— 最終備援方案。可在所有環境中運作，但速度較慢，
+   且會定期寫入資料，而非同步寫入。
 
-## 為什麼需要這麼複雜？
+## 為何如此複雜？
 
-- **Windows EBUSY**：如果先前版本的 `better_sqlite3.node` 被執行中的處理程序
-  鎖定，`npm install -g omniroute@latest` 可能會失敗。安裝至
-  `~/.omniroute/runtime/` 的執行階段安裝方式可避開全域 npm 快取。
-- **缺少建置工具**：某些環境（沒有 VS Build Tools 的企業 Windows 環境、
-  最小化 Docker 映像）無法編譯 `better-sqlite3`。執行階段安裝程式會從 npm
-  登錄檔解析預先建置的二進位檔；即使此步驟失敗，備援驅動程式仍可確保
-  OmniRoute 能夠啟動。
+- **Windows EBUSY**：如果先前版本的 `better_sqlite3.node` 被執行中的程序鎖定，
+  `npm install -g omniroute@latest` 可能會失敗。在 `~/.omniroute/runtime/`
+  中執行階段安裝可避開全域 npm 快取。
+- **缺少建置工具**：某些環境（沒有 VS Build Tools 的企業 Windows、
+  最小化 Docker 映像檔）無法編譯 `better-sqlite3`。執行階段安裝程式會從
+  npm 登錄檔解析預先建置的二進位檔；即使失敗，備援驅動程式也能確保
+  OmniRoute 仍可啟動。
 - **實體隔離系統**：如果無法連線至 npm 登錄檔，`node:sqlite`
-  或 `sql.js` 可確保基本功能仍然可用。
+  或 `sql.js` 可確保基本功能。
 
 ## 魔術位元組驗證
 
-載入執行階段安裝的 `.node` 檔案前，OmniRoute 會讀取前 8 個
-位元組，並與已知的平台魔術位元組進行比對：
+載入執行階段安裝的 `.node` 檔案之前，OmniRoute 會讀取前 8 個
+位元組，並比對已知的平台魔術位元組：
 
-| 平台                  | 位元組（十六進位） | 標籤        |
-| --------------------- | ------------------ | ----------- |
-| Linux                 | `7F 45 4C 46`      | `elf`       |
-| macOS 64 位元 BE      | `FE ED FA CF`      | `macho`     |
-| macOS 64 位元 LE      | `CF FA ED FE`      | `macho-le`  |
-| macOS fat（通用格式） | `CA FE BA BE`      | `macho-fat` |
-| Windows               | `4D 5A` (MZ)       | `pe`        |
+| 平台              | 位元組（十六進位） | 標籤        |
+| ----------------- | ------------------ | ----------- |
+| Linux             | `7F 45 4C 46`      | `elf`       |
+| macOS 64 位元 BE  | `FE ED FA CF`      | `macho`     |
+| macOS 64 位元 LE  | `CF FA ED FE`      | `macho-le`  |
+| macOS fat（通用） | `CA FE BA BE`      | `macho-fat` |
+| Windows           | `4D 5A` (MZ)       | `pe`        |
 
-若魔術位元組不相符 → 忽略該檔案，並繼續執行下一個備援步驟。
+若魔術位元組不符 → 忽略該檔案，並繼續進行下一個備援步驟。
 
 ## 檢查使用中的驅動程式
 
@@ -60,22 +60,41 @@ const info = getDriverInfo();
 ## 手動控制
 
 ```bash
-# 略過 postinstall 預熱（適用於快速 CI 安裝）
+# 略過安裝後的預熱（用於快速 CI 安裝）
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
-# 強制重新安裝執行階段 better-sqlite3
+# 強制重新安裝執行階段的 better-sqlite3
 rm -rf ~/.omniroute/runtime
 omniroute  # 將於下次啟動時重新安裝
 
 # 檢查目前使用中的驅動程式
-omniroute config db-info  # （如果 CLI 命令存在）
+omniroute config db-info  # （若此 CLI 命令存在）
 ```
+
+## 診斷同步停滯
+
+使用 `better-sqlite3` 時，請在啟動前設定 `OMNIROUTE_SQLITE_SLOW_MS=200`，
+以選擇啟用同步配接器計時。預設為停用。若已完成的操作耗時至少達到指定的
+毫秒數，便會發出 `[SQLITE-SLOW]` 警告，每個配接器最多每十秒一次。
+警告僅包含驅動程式、操作類別（`prepare`、`get`、`all`、`run`、`exec`、
+`pragma`、交易或維護）以及經過的毫秒數：不包含 SQL、繫結、資料列、
+路徑或例外狀況文字。
+
+這是一項診斷輔助功能，而非逾時或查詢最佳化機制。它無法回報永不傳回的
+操作、區分 CPU 工作與磁碟等待、識別確切的 SQL，或觀察透過原始驅動程式
+控制代碼執行的操作。非同步備份的持續時間會刻意排除；其他 SQLite 驅動程式
+不受此選擇性功能檢測。停用此變數會還原不含計時包裝函式的原始配接器。
+資料庫結構描述或已儲存的組態不會發生任何變更。
+
+`/healthz` 的延遲警告會回報自上次取樣以來的事件迴圈峰值，而非整個存續期間
+的平均值。將其時間戳記與慢速操作警告及主機／儲存裝置指標相互比對後，
+再將停滯歸因於 SQLite 或磁碟故障。
 
 ## 參考資料
 
 實作：
 
-- `bin/cli/runtime/magicBytes.mjs` — 二進位魔術位元組驗證輔助工具
+- `bin/cli/runtime/magicBytes.mjs` — 二進位魔術位元組驗證輔助函式
 - `bin/cli/runtime/sqliteRuntime.mjs` — 5 步驟執行階段解析器 + 延遲安裝程式
 - `bin/cli/runtime/index.mjs` — 啟動協調器（`warmUpRuntimes()`）
 - `scripts/postinstall.mjs` — npm 安裝後掛鉤（非致命性預熱）
@@ -83,13 +102,13 @@ omniroute config db-info  # （如果 CLI 命令存在）
 
 ## 單一寫入者拓撲（不支援 HA）
 
-上述驅動程式備援鏈仍在**單一處理程序**中執行。使用預設 SQLite
-的 OmniRoute 是**單一寫入者**：
+上述驅動程式備援鏈仍在**單一程序**中執行。採用預設 SQLite 的
+OmniRoute 是**單一寫入者**：
 
-- 請勿將兩個 OmniRoute 複本連接至相同的 `storage.sqlite` 檔案。
-- 容器重新啟動、Recreate 部署、OOM 終止或 HEALTHCHECK 重新啟動，都會中斷
-  所有進行中的 SSE 工作階段。預設路徑不提供工作階段排空機制。
-- 如果協調器的存活性檢查將回應緩慢的 `/healthz` 視為故障，便會終止唯一的
-  複本。存活性檢查建議使用 TCP，而就緒狀態檢查則使用 HTTP `/healthz`。請參閱
+- 請勿將兩個 OmniRoute 複本連接至同一個 `storage.sqlite` 檔案。
+- 容器重新啟動、Recreate 部署、OOM 終止或 HEALTHCHECK 重新啟動，
+  都會中斷所有進行中的 SSE 工作階段。預設路徑不會排空工作階段。
+- 若協調器的存活探測將回應緩慢的 `/healthz` 視為停止運作，便會終止唯一的
+  複本。建議使用 TCP 存活探測 + HTTP `/healthz` 就緒探測。請參閱
   [Docker 指南 — 可用性](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
-  和 [Kubernetes 探查建議](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)。
+  和 [Kubernetes 探測建議](./MONITORING_GUIDE.md#kubernetes-probe-recommendations)。

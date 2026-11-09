@@ -4,37 +4,37 @@
 
 ---
 
-Nire-resolve ng OmniRoute ang SQLite driver nito sa startup sa pamamagitan ng 5-hakbang na fallback chain:
+Nire-resolve ng OmniRoute ang SQLite driver nito sa pagsisimula sa pamamagitan ng 5-hakbang na fallback chain:
 
 1. **Naka-bundle na `better-sqlite3`** (sa pamamagitan ng `dependencies` sa `package.json`)
-   — pinakamabilis, native binary, ini-install ng `npm install` kapag may mga build tool.
+   — pinakamabilis, native binary, ini-install ng `npm install` kapag mayroong mga build tool.
 
-2. **Na-install sa runtime na `better-sqlite3`** (sa `~/.omniroute/runtime/`)
-   — tamad na ini-install sa unang pagpapatakbo **O** ng `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
-   Bine-validate ang mga magic byte ng native na `.node` (ELF / Mach-O / PE) bago i-load
-   upang maprotektahan laban sa mga sira o para sa maling platform na binary.
+2. **Runtime-installed na `better-sqlite3`** (sa `~/.omniroute/runtime/`)
+   — ini-install nang lazy sa unang pagpapatakbo **O** ng `scripts/build/postinstall.mjs → scripts/postinstall.mjs`.
+   Bine-validate ang magic bytes ng native na `.node` (ELF / Mach-O / PE) bago i-load
+   upang maprotektahan laban sa sira o para sa maling platform na mga binary.
 
-3. **`node:sqlite`** (Node ≥22.5 stdlib) — hindi kailangan ng native build; ginagamit kapag
-   nabigo ang parehong path ng better-sqlite3. Limitado ang hanay ng mga feature.
+3. **`node:sqlite`** (Node ≥22.5 stdlib) — walang kinakailangang native build; ginagamit kapag
+   pumalya ang parehong better-sqlite3 path. Limitado ang hanay ng mga feature.
 
 4. **`sql.js`** (WASM) — panghuling fallback. Gumagana kahit saan ngunit mas mabagal
-   at nagsusulat ng data batay sa isang interval sa halip na sabay-sabay.
+   at nagsusulat ng data sa takdang pagitan sa halip na sabay-sabay.
 
 ## Bakit ganito kakomplikado?
 
-- **Windows EBUSY**: Maaaring mabigo ang `npm install -g omniroute@latest` kung ang
-  `better_sqlite3.node` ng nakaraang bersyon ay naka-lock ng isang tumatakbong proseso.
-  Nilalampasan ng runtime install sa `~/.omniroute/runtime/` ang global npm cache.
-- **Walang mga build tool**: Hindi makapag-compile ng `better-sqlite3` ang ilang environment
-  (corporate Windows na walang VS Build Tools, mga minimal na Docker image). Kumukuha ang
-  runtime installer ng pre-built binary mula sa npm registry; tinitiyak ng mga fallback
-  driver na makakapag-boot pa rin ang OmniRoute kahit mabigo iyon.
-- **Mga air-gapped system**: Kung hindi maabot ang npm registry, ginagarantiya ng
-  `node:sqlite` o `sql.js` ang baseline na functionality.
+- **Windows EBUSY**: Maaaring pumalya ang `npm install -g omniroute@latest` kung naka-lock
+  ng tumatakbong proseso ang `better_sqlite3.node` ng nakaraang bersyon. Iniiwasan
+  ng runtime install sa `~/.omniroute/runtime/` ang global npm cache.
+- **Walang mga build tool**: Hindi kayang i-compile ng ilang environment (corporate Windows na walang VS Build
+  Tools, minimal na Docker images) ang `better-sqlite3`. Kumukuha ang runtime
+  installer ng pre-built na binary mula sa npm registry; tinitiyak ng mga fallback
+  driver na makakapagsimula pa rin ang OmniRoute kahit pumalya iyon.
+- **Mga air-gapped system**: Kung hindi maabot ang npm registry, ginagarantiya ng `node:sqlite`
+  o `sql.js` ang pangunahing functionality.
 
 ## Pag-validate ng magic byte
 
-Bago mag-load ng `.node` file na na-install sa runtime, binabasa ng OmniRoute ang unang 8
+Bago mag-load ng runtime-installed na `.node` file, binabasa ng OmniRoute ang unang 8
 byte at itinutugma ang mga ito sa mga kilalang magic ng platform:
 
 | Platform              | Mga byte (hex) | Label       |
@@ -45,9 +45,9 @@ byte at itinutugma ang mga ito sa mga kilalang magic ng platform:
 | macOS fat (universal) | `CA FE BA BE`  | `macho-fat` |
 | Windows               | `4D 5A` (MZ)   | `pe`        |
 
-Kapag hindi tugma ang magic → binabalewala ang file, at nagpapatuloy ang fallback sa susunod na hakbang.
+Kapag hindi tumugma ang magic → binabalewala ang file, at nagpapatuloy ang fallback sa susunod na hakbang.
 
-## Pagsusuri sa aktibong driver
+## Pagsuri sa aktibong driver
 
 ```typescript
 import { getDriverInfo } from "@/lib/db/core";
@@ -60,16 +60,36 @@ const info = getDriverInfo();
 ## Manu-manong kontrol
 
 ```bash
-# Laktawan ang postinstall warm-up (para sa mabilis na pag-install sa CI)
+# Laktawan ang postinstall warm-up (para sa mabibilis na CI install)
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute
 
 # Sapilitang muling i-install ang runtime better-sqlite3
 rm -rf ~/.omniroute/runtime
-omniroute  # muling mag-i-install sa susunod na pagsisimula
+omniroute  # muling i-install sa susunod na pagsisimula
 
-# Tingnan kung anong driver ang aktibo
+# Suriin kung aling driver ang aktibo
 omniroute config db-info  # (kung umiiral ang CLI command)
 ```
+
+## Pag-diagnose ng mga synchronous stall
+
+Sa `better-sqlite3`, itakda ang `OMNIROUTE_SQLITE_SLOW_MS=200` bago magsimula upang mag-opt in
+sa pagsukat ng oras ng synchronous adapter. Naka-off ito bilang default. Ang nakumpletong operation na tumatagal
+nang hindi bababa sa ganoong karaming millisecond ay naglalabas ng `[SQLITE-SLOW]` warning, nang hindi hihigit sa isang beses kada
+sampung segundo para sa bawat adapter. Ang warning ay naglalaman lamang ng driver, klase ng operation
+(`prepare`, `get`, `all`, `run`, `exec`, `pragma`, transaction o maintenance), at
+lumipas na mga millisecond: walang SQL, bindings, rows, paths o exception text.
+
+Isa itong tulong sa pag-diagnose, hindi timeout o query optimization. Hindi nito maiuulat
+ang isang operation na hindi kailanman bumabalik, maihihiwalay ang CPU work sa paghihintay sa disk, matutukoy
+ang eksaktong SQL, o mamamasdan ang mga operation na isinagawa sa pamamagitan ng raw driver handle.
+Sadyang hindi kasama ang tagal ng async backup; hindi nilalagyan ng instrumentation ng opt-in na ito ang iba pang SQLite driver.
+Kapag na-disable ang variable, ibinabalik ang orihinal na adapter
+nang walang mga timing wrapper. Walang pagbabago sa database schema o naka-store na configuration.
+
+Iniuulat ng `/healthz` lag warning ang pinakamataas na event-loop lag mula noong nakaraang sample,
+hindi ang lifetime average. Iugnay ang mga timestamp nito sa mga slow-operation warning
+at host/storage metric bago ipalagay na ang stall ay dulot ng SQLite o pagkasira ng disk.
 
 ## Sanggunian
 
@@ -78,18 +98,18 @@ Implementasyon:
 - `bin/cli/runtime/magicBytes.mjs` — mga helper para sa pag-validate ng binary magic byte
 - `bin/cli/runtime/sqliteRuntime.mjs` — 5-hakbang na runtime resolver + lazy installer
 - `bin/cli/runtime/index.mjs` — startup orchestrator (`warmUpRuntimes()`)
-- `scripts/postinstall.mjs` — npm post-install hook (hindi nakamamatay na warm-up)
+- `scripts/postinstall.mjs` — npm post-install hook (hindi fatal na warm-up)
 - `src/lib/db/core.ts` — mga export na `ensureDbInitialized()` / `getDriverInfo()`
 
-## Topolohiyang may iisang writer (hindi suportado ang HA)
+## Single-writer na topology (hindi suportado ang HA)
 
-Tumatakbo pa rin ang driver fallback chain sa itaas sa **iisang proseso**. Ang default na SQLite
+Gumagana pa rin ang driver fallback chain sa itaas sa **iisang proseso**. Ang default na SQLite
 OmniRoute ay may **iisang writer**:
 
-- Huwag ikabit ang dalawang replica ng OmniRoute sa parehong `storage.sqlite` file.
-- Kapag nag-restart ang container, may Recreate deploy, OOM kill, o HEALTHCHECK restart, napuputol
+- Huwag ikonekta ang dalawang OmniRoute replica sa iisang `storage.sqlite` file.
+- Kapag nag-restart ang container, may Recreate deploy, OOM kill, o HEALTHCHECK restart, mapuputol
   ang bawat kasalukuyang SSE session. Walang session drain sa karaniwang path.
-- Papatayin ng orchestrator liveness na itinuturing na patay ang isang mabagal na `/healthz` ang
-  nag-iisang replica. Mas piliin ang TCP liveness + HTTP `/healthz` readiness. Tingnan ang
+- Papatayin ng orchestrator liveness na itinuturing na dead ang mabagal na `/healthz` ang nag-iisang
+  replica. Mas piliin ang TCP liveness + HTTP `/healthz` readiness. Tingnan ang
   [Gabay sa Docker — availability](../guides/DOCKER_GUIDE.md#availability-default-sqlite-is-single-replica)
   at [mga rekomendasyon sa Kubernetes probe](./MONITORING_GUIDE.md#kubernetes-probe-recommendations).

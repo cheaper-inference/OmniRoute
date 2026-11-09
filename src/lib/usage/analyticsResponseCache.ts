@@ -15,6 +15,8 @@
  * Tuning:
  *   OMNIROUTE_ANALYTICS_CACHE_TTL_MS          (default 60000; 0 disables)
  *   OMNIROUTE_ANALYTICS_CACHE_MIN_COMPUTE_MS  (default 1000)
+ *   OMNIROUTE_CACHE_METRICS_MIN_COMPUTE_MS    (unset by default = off; opt-in for
+ *                                             the history part of GET /api/cache)
  */
 
 type CachedBody = {
@@ -49,6 +51,18 @@ export function getAnalyticsCacheMinComputeMs(): number {
   );
 }
 
+/**
+ * Opt-in threshold for caching the history part of GET /api/cache. Returns
+ * `null` (caching off, every read is live) unless the env var holds a
+ * non-negative integer, so the default behavior of the cache page is unchanged.
+ */
+export function getCacheMetricsMinComputeMs(): number | null {
+  const raw = process.env.OMNIROUTE_CACHE_METRICS_MIN_COMPUTE_MS;
+  if (raw === undefined || raw.trim() === "" || !/^\d+$/.test(raw.trim())) return null;
+  const parsed = Number.parseInt(raw.trim(), 10);
+  return Number.isSafeInteger(parsed) ? parsed : null;
+}
+
 function toResponse(cached: CachedBody, cacheState: "hit" | "miss"): Response {
   return new Response(cached.body, {
     status: cached.status,
@@ -62,14 +76,17 @@ function toResponse(cached: CachedBody, cacheState: "hit" | "miss"): Response {
 
 /**
  * Serve `compute()` through the cache, keyed by `key` (the request's query
- * string). Callers must authenticate before calling this.
+ * string). Callers must authenticate before calling this. Per-call `options`
+ * win over the shared settings; without options the shared settings apply.
  */
 export async function serveAnalyticsCached(
   key: string,
-  compute: () => Promise<Response>
+  compute: () => Promise<Response>,
+  options?: { ttlMs?: number; minComputeMs?: number }
 ): Promise<Response> {
-  const ttlMs = getAnalyticsCacheTtlMs();
+  const ttlMs = options?.ttlMs ?? getAnalyticsCacheTtlMs();
   if (ttlMs <= 0) return compute();
+  const minComputeMs = options?.minComputeMs ?? getAnalyticsCacheMinComputeMs();
 
   const now = Date.now();
   const hit = entries.get(key);
@@ -90,12 +107,17 @@ export async function serveAnalyticsCached(
           body: await response.text(),
         };
         const computeMs = performance.now() - startedAt;
-        if (result.status === 200 && computeMs >= getAnalyticsCacheMinComputeMs()) {
-          if (entries.size >= MAX_ENTRIES) {
-            const oldest = entries.keys().next().value;
-            if (oldest !== undefined) entries.delete(oldest);
+        if (result.status === 200 && computeMs >= minComputeMs) {
+          // The computation may have been invalidated while running (prefix
+          // invalidation or full clear drops its inFlight registration). Storing
+          // its stale payload now would hide the deletion for a full TTL.
+          if (inFlight.get(key) === computation) {
+            if (entries.size >= MAX_ENTRIES) {
+              const oldest = entries.keys().next().value;
+              if (oldest !== undefined) entries.delete(oldest);
+            }
+            entries.set(key, { ...result, expiresAt: Date.now() + ttlMs });
           }
-          entries.set(key, { ...result, expiresAt: Date.now() + ttlMs });
         }
         return result;
       } finally {
@@ -112,4 +134,14 @@ export async function serveAnalyticsCached(
 export function clearAnalyticsResponseCache(): void {
   entries.clear();
   inFlight.clear();
+}
+
+export function invalidateAnalyticsCachePrefix(prefix: string): void {
+  if (!prefix) return;
+  for (const key of [...entries.keys()]) {
+    if (key.startsWith(prefix)) entries.delete(key);
+  }
+  for (const key of [...inFlight.keys()]) {
+    if (key.startsWith(prefix)) inFlight.delete(key);
+  }
 }

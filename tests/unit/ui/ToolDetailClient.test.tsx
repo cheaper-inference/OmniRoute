@@ -95,6 +95,17 @@ vi.mock("@/shared/constants/cliTools", () => ({
       baseUrlSupport: "full",
       defaultModels: [],
     },
+    pi: {
+      id: "pi",
+      name: "Pi",
+      icon: "terminal",
+      color: "#F59E0B",
+      category: "code",
+      configType: "custom",
+      vendor: "OSS (M. Zechner)",
+      baseUrlSupport: "full",
+      defaultModels: [],
+    },
     forge: {
       id: "forge",
       name: "Forge",
@@ -137,6 +148,7 @@ vi.mock("../../../src/app/(dashboard)/dashboard/cli-code/components/index", () =
   CustomCliCard: () => <div data-testid="CustomCliCard" />,
   HermesAgentToolCard: () => <div data-testid="HermesAgentToolCard" />,
   GrokBuildToolCard: () => <div data-testid="GrokBuildToolCard" />,
+  PiToolCard: () => <div data-testid="PiToolCard" />,
 }));
 
 vi.mock("../../../src/app/(dashboard)/dashboard/cli-code/components/CliproxyapiToolCard", () => ({
@@ -304,6 +316,13 @@ describe("ToolDetailClient", () => {
     const container = renderDetail("grok-build", "code");
     await act(async () => {});
     expect(container.querySelector("[data-testid='GrokBuildToolCard']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='DefaultToolCard']")).toBeNull();
+  });
+
+  it("renders PiToolCard for pi (no longer falls back to DefaultToolCard)", async () => {
+    const container = renderDetail("pi", "code");
+    await act(async () => {});
+    expect(container.querySelector("[data-testid='PiToolCard']")).not.toBeNull();
     expect(container.querySelector("[data-testid='DefaultToolCard']")).toBeNull();
   });
 

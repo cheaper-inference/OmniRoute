@@ -95,3 +95,46 @@ test("pagination limit+offset is reflected in list but not count", async () => {
   assert.equal(page.length, 2);
   assert.equal(await freeProxiesDb.countFreeProxies({}), 5);
 });
+
+test("list and count share combined filters, zero quality and pool exclusions", async () => {
+  await reset();
+  const first = await freeProxiesDb.upsertFreeProxy(make("alpha.example", 90, 100));
+  await freeProxiesDb.upsertFreeProxy({
+    ...make("beta.example", 0, 200),
+    source: "proxifly",
+    type: "socks5",
+    countryCode: "DE",
+  });
+  await freeProxiesDb.upsertFreeProxy({ ...make("gamma.example", 70, 300), countryCode: "DE" });
+  await freeProxiesDb.markFreeProxyInPool(first.id, "test-pool");
+  const cases: Array<[Parameters<typeof freeProxiesDb.countFreeProxies>[0], string[]]> = [
+    [{ sources: [] }, ["alpha.example", "gamma.example", "beta.example"]],
+    [
+      { sources: ["1proxy", "proxifly"], country: "de", minQuality: 0 },
+      ["gamma.example", "beta.example"],
+    ],
+    [
+      {
+        sources: ["proxifly"],
+        protocol: "socks5",
+        country: "de",
+        minQuality: 0,
+        onlyNotInPool: true,
+        search: "beta",
+      },
+      ["beta.example"],
+    ],
+    [{ onlyInPool: true }, ["alpha.example"]],
+    [{ onlyInPool: true, onlyNotInPool: true }, []],
+    [{ minQuality: 1, onlyNotInPool: true }, ["gamma.example"]],
+    [{ search: "' OR 1=1 --" }, []],
+  ];
+  for (const [filter, expected] of cases) {
+    const rows = await freeProxiesDb.listFreeProxies(filter);
+    assert.deepEqual(
+      rows.map((row) => row.host),
+      expected
+    );
+    assert.equal(await freeProxiesDb.countFreeProxies(filter), expected.length);
+  }
+});

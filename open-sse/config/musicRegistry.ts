@@ -29,6 +29,18 @@ interface MusicProvider {
 }
 
 export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
+  elevenlabs: {
+    id: "elevenlabs",
+    baseUrl: "https://api.elevenlabs.io/v1/music",
+    authType: "apikey",
+    authHeader: "xi-api-key",
+    format: "elevenlabs-music",
+    models: [
+      { id: "music_v1", name: "Eleven Music V1" },
+      { id: "music_v2", name: "Eleven Music V2" },
+      { id: "music_v2_5", name: "Eleven Music V2.5" },
+    ],
+  },
   vertex: {
     id: "vertex",
     baseUrl: "https://us-central1-aiplatform.googleapis.com/v1",
@@ -108,6 +120,26 @@ export const MUSIC_PROVIDERS: Record<string, MusicProvider> = {
     authHeader: "bearer",
     format: "syntx-music",
     models: toSyntxMusicModels(),
+  },
+  /**
+   * Lyria 3 on the Gemini API (`generativelanguage.googleapis.com`), not Vertex.
+   * Shares the `gemini` chat connection's key but none of the contracts already
+   * handled here: `vertex-lyria` is `:predict` (Lyria 2 only), and the chat path
+   * answers with a `content[]` part typed `image_url`. AI Studio's Lyria 3 is
+   * `:generateContent` and returns the finished track as an inline audio part, so
+   * there is no task id to poll.
+   */
+  gemini: {
+    id: "gemini",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
+    authType: "apikey",
+    authHeader: "x-goog-api-key",
+    format: "gemini-lyria",
+    models: [
+      { id: "lyria-3-pro-preview", name: "Lyria 3 Pro (preview)" },
+      { id: "lyria-3-clip-preview", name: "Lyria 3 Clip (preview)" },
+      { id: "lyria-3.5", name: "Lyria 3.5" },
+    ],
   },
 };
 

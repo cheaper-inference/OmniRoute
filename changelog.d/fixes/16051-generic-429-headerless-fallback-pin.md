@@ -1,1 +1,0 @@
-- **test:** pin the generic headerless 429 fallback so it keeps rotating accounts instead of locking a model ([#16051](https://github.com/diegosouzapw/OmniRoute/pull/16051)) — thanks @maxmad64bis

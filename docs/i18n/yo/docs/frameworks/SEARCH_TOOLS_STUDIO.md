@@ -34,38 +34,38 @@ Studio onítàbù mẹ́ta tí ó ṣọ̀kan ìṣàwárí wẹ́ẹ̀bù, yíy
 
 ---
 
-## Àwọn Tàbù
+## Àwọn Táàbù
 
-### Tàbù Ìṣàwárí
+### Táàbù Ìṣàwárí
 
-Ó mú `SearchForm` + `ResultsPanel` + `RerankPanel` tó ti wà tẹ́lẹ̀ dàgbà sí tàbù kan:
+Ṣe àtúnṣe `SearchForm` + `ResultsPanel` + `RerankPanel` tó wà tẹ́lẹ̀ sí táàbù kan:
 
-- Ìbéèrè → àwọn èsì (àkọlé, URL, àkótán, àmì ìbámu).
-- Métádátà olùpèsè nínú pánẹ́ẹ̀lì Ìṣètò (iye owó, iye ààyè lílò, ipò).
-- Abala àtúnṣètò: yan àwòṣe àtúnṣètò kan, tún àwọn èsì tò, kí o sì fi `positionDelta` hàn.
-- Ipò òfìfo pẹ̀lú CTA nígbà tí kò sí olùpèsè ìṣàwárí kankan tí a ti ṣètò.
+- Ìbéèrè → àwọn àbájáde (àkọlé, URL, àkótán, ìwọ̀n ìbámu).
+- Metadata olùpèsè nínú páànù Config (ìnáwó, quota, ipò).
+- Abala àtúntò-ipò: yan model àtúntò-ipò kan, tún àwọn àbájáde tò, fi `positionDelta` hàn.
+- Ipò òfìfo pẹ̀lú CTA nígbà tí kò sí àwọn olùpèsè ìṣàwárí tí a ti ṣètò.
 - Ìtàn ìṣàwárí nípasẹ̀ `SearchHistory.tsx`.
-- Ó ń pe `POST /v1/search` (endpoint tó ti wà tẹ́lẹ̀, kò sí àyípadà).
+- Pe `POST /v1/search` (endpoint tó wà tẹ́lẹ̀, kò sí ìyípadà).
 
-### Tàbù Yíyọ Àkóónú
+### Táàbù Ìyọ̀jáde
 
-Tàbù tuntun fún yíyọ àkóónú láti inú URL nípasẹ̀ `POST /v1/web/fetch` (tí a ṣẹ̀dá nínú ètò 05):
+Táàbù tuntun fún yíyọ àkóónú jáde láti URL kan nípasẹ̀ `POST /v1/web/fetch` (tí a ṣẹ̀dá nínú ètò 05):
 
-- Àgbéwọlé: URL + yíyí ojú-ìwé kíkún + olùyan fọ́ọ̀mù (markdown / text / HTML).
-- Fìdí múlẹ̀ → gbà á → ṣàfihàn `ScrapeResult.tsx`.
-- `ScrapeResult` ń ṣàfihàn àwòtẹ́lẹ̀ markdown + yíyí sí àkóónú àìṣe.
-- Ààlà: bí ara èsì bá ju **256 KB**, UI yóò fi `(a ti gé e kúrú, wo àkóónú àìṣe)` hàn, yóò sì ṣí àkóónú àìṣe náà nínú módàlì Monaco kan (D21).
-- Pánẹ́ẹ̀lì métádátà: olùpèsè (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), àkókò ìdádúró, iye owó, ìwọ̀n èsì, iye àwọn ìjápọ̀.
-- Ó ń lo hook `useScrapeFetch.ts`.
+- Ìṣàfilọ́lẹ̀: URL + yíyan ojú-ìwé-kíkún + aṣàyàn format (markdown / text / HTML).
+- Firanṣẹ́ → mú wá → ṣàfihàn `ScrapeResult.tsx`.
+- `ScrapeResult` ń ṣàfihàn àkọ́kọ́ markdown + yíyan raw.
+- Ààlà: bí body ìdáhùn bá ju **256 KB**, UI yóò fi `(a ti gé kúrú, wo raw)` hàn, yóò sì ṣí raw nínú Monaco modal kan (D21).
+- Páànù metadata: olùpèsè (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), àkókò ìdádúró, ìnáwó, ìwọ̀n ìdáhùn, iye àwọn link.
+- Lo hook `useScrapeFetch.ts`.
 
-### Tàbù Àfiwé
+### Táàbù Ìfiwéra
 
-Ó ń ṣiṣẹ́ ìbéèrè/URL kan náà lórí àwọn olùpèsè tó pọ̀ jù lọ sí **4 ní ìgbà kan náà** (D22):
+Ṣiṣe ìbéèrè/URL kan náà lórí àwọn olùpèsè tó pọ̀ jù lọ **4 ní ìgbakanna** (D22):
 
 - Àwọn ọ̀wọ̀n ẹ̀gbẹ́-ẹgbẹ́ fún olùpèsè kọ̀ọ̀kan.
-- Àwọn òṣùwọ̀n: àkókò ìdádúró, iye owó, iye èsì, ìwọ̀n èsì.
-- Ìṣírò ìbójúpọ̀ URL fún ìṣàwárí (iye àwọn URL tí wọ́n jọ pín ní ìfiwéra pẹ̀lú èsì àkọ́kọ́).
-- Ó ń pe `POST /v1/search` (ìṣàwárí) tàbí `POST /v1/web/fetch` (yíyọ àkóónú) fún olùpèsè kọ̀ọ̀kan.
+- Àwọn òṣùwọ̀n: àkókò ìdádúró, ìnáwó, iye àbájáde, ìwọ̀n ìdáhùn.
+- Ìṣirò ìkọjá ara wọn àwọn URL fún ìṣàwárí (iye àwọn URL tí wọ́n pín papọ̀ ní ìfiwéra pẹ̀lú àbájáde àkọ́kọ́).
+- Pe `POST /v1/search` (ìṣàwárí) tàbí `POST /v1/web/fetch` (ìyọ̀jáde) fún olùpèsè kọ̀ọ̀kan.
 
 ---
 
@@ -100,13 +100,13 @@ Tàbù tuntun fún yíyọ àkóónú láti inú URL nípasẹ̀ `POST /v1/web/f
 
 ## Kátálọ́ọ̀gù Olùpèsè
 
-`ProviderCatalog.tsx` ń ṣàfihàn gbogbo àtòjọ àwọn olupèsè láti `GET /api/search/providers`
-(tí a fẹ̀ sí i nínú F4 láti fi àwọn olupèsè ìgbàwá kún un):
+`ProviderCatalog.tsx` ń ṣàfihàn àtòjọ àwọn olùpèsè ní ẹ̀kúnrẹ́rẹ́ láti inú `GET /api/search/providers`
+(tí a mú gbòòrò sí i nínú F4 láti fi àwọn olùpèsè ìgbàwálẹ̀ kún un):
 
-| `kind` | `"search"` (20 àwọn olupèsè) tàbí `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (olùpèsè 20) tàbí `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-A máa ń **ṣe ìṣirò ipò náà ní àkókò ìbéèrè** nípa ṣíṣàyẹ̀wò bóyá àwọn ẹ̀rí ìdánimọ̀ wà àti bóyá
-gbogbo àwọn kọ́kọ́rọ́ wà ní àkókò ìsinmi lọ́wọ́lọ́wọ́.
+A máa ń **ṣírò ipò náà ní àkókò ìbéèrè** nípa ṣíṣàyẹ̀wò bóyá àwọn ẹ̀rí ìdánimọ̀ wà àti bóyá
+gbogbo àwọn kọ́kọ́rọ́ wà nínú àkókò ìdádúró lọ́wọ́lọ́wọ́.
 
 ---
 
@@ -126,10 +126,10 @@ gbogbo àwọn kọ́kọ́rọ́ wà ní àkókò ìsinmi lọ́wọ́lọ́w�
 
 A fẹ̀ `src/app/api/search/providers/route.ts` sí i láti:
 
-- Fi gbogbo àwọn olupèsè ìgbàwá 6 náà kún àkójọpọ̀ (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`).
-- Fi `kind: "search" | "fetch"` kún ohun kọ̀ọ̀kan.
-- Fi `status: "configured" | "missing" | "rate_limited"` tí a ṣe ìṣirò rẹ̀ láti ipò ẹ̀rí ìdánimọ̀ lọ́wọ́lọ́wọ́ kún un.
-- Pa ìbámu sẹ́yìn mọ́ — àwọn ààyè tó ti wà tẹ́lẹ̀ (`id`, `name`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) kò yí padà.
+- Fi gbogbo olùpèsè fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) sínú array náà.
+- Ṣàfikún `kind: "search" | "fetch"` sí gbogbo item.
+- Ṣàfikún `status: "configured" | "missing" | "rate_limited"` tí a mú jáde láti inú ipò credential lọ́wọ́lọ́wọ́.
+- Ṣètọ́jú ìbámu sẹ́yìn — àwọn field tó ti wà tẹ́lẹ̀ (`id`, `name`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) kò yí padà.
 
 ---
 
