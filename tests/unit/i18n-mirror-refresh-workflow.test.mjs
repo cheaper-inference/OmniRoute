@@ -41,7 +41,7 @@ function report(bucket = null) {
   };
   if (bucket) {
     value[bucket] = [{ rel: "README.md", locale: "pt-BR" }];
-    value.ok = !buckets.slice(0, 3).includes(bucket);
+    value.ok = false;
   }
   return value;
 }

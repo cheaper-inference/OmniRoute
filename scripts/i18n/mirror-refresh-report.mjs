@@ -45,7 +45,7 @@ export function readRefreshReport(report) {
     }
   }
   const counts = Object.fromEntries(REFRESH_BUCKETS.map((key) => [key, report[key].length]));
-  if (report.ok !== REFRESH_BUCKETS.slice(0, 3).every((key) => counts[key] === 0)) {
+  if (report.ok !== REFRESH_BUCKETS.every((key) => counts[key] === 0)) {
     throw new Error("contradictory-checker-verdict");
   }
   return {

@@ -373,7 +373,7 @@ for (const kind of ["staleTargets", "inconsistentSectionCaches"]) {
   test(`partial refresh: ${kind} is excused only for the exact failed unit`, () => {
     const failed = { rel: "docs/A.md", locale: "fr" };
     const untouched = { rel: "docs/A.md", locale: "ja" };
-    const report = { ...driftReport(), [kind]: [failed, untouched] };
+    const report = { ...driftReport(), ok: false, [kind]: [failed, untouched] };
     assert.deepEqual(runner.blockingDrift(report, [failed]), [{ ...untouched, kind }]);
     assert.equal(runner.blockingDrift(report, []).length, 2);
   });

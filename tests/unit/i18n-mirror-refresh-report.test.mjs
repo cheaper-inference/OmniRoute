@@ -20,11 +20,16 @@ for (const bucket of REFRESH_BUCKETS) {
   test(`includes ${bucket} in the work order and refuses a clean verdict`, () => {
     const report = clean();
     report[bucket] = [{ rel: "docs/guides/I18N.md", locale: "pt-BR" }];
-    report.ok = !REFRESH_BUCKETS.slice(0, 3).includes(bucket);
+    report.ok = false;
     const result = readRefreshReport(report);
     assert.deepEqual(result.files, ["docs/guides/I18N.md"]);
     assert.equal(result.clean, false);
     assert.equal(result.counts[bucket], 1);
+  });
+  test(`rejects a clean checker verdict with ${bucket} entries`, () => {
+    const report = clean();
+    report[bucket] = [{ rel: "README.md", locale: "ja" }];
+    assert.throws(() => readRefreshReport(report), /contradictory-checker-verdict/);
   });
   test(`rejects an absent ${bucket} instead of treating it as empty`, () => {
     const report = clean();
@@ -35,6 +40,7 @@ for (const bucket of REFRESH_BUCKETS) {
 
 test("deduplicates and sorts sources without discarding any bucket", () => {
   const report = clean();
+  report.ok = false;
   report.staleTargets = [{ rel: "README.md", locale: "pt-BR" }];
   report.inconsistentSectionCaches = [
     { rel: "README.md", locale: "ja" },
@@ -88,6 +94,7 @@ test("CLI distinguishes complete clean, drift and incomplete input", () => {
     writeFileSync(file, JSON.stringify(clean()));
     assert.equal(spawnSync(process.execPath, [cli, "check", file]).status, 0);
     const drift = clean();
+    drift.ok = false;
     drift.inconsistentSectionCaches = [{ rel: "README.md", locale: "ja" }];
     writeFileSync(file, JSON.stringify(drift));
     assert.equal(spawnSync(process.execPath, [cli, "check", file]).status, 1);
