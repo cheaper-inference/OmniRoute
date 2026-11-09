@@ -100,6 +100,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "src/lib/embeddings/service.ts": 5,
+    // Fal inference uses the scoped quota-preflight resolver; existing-job reads
+    // cannot dispatch. Ownership, connection limits and later-message budgets are route-tested.
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/images/adobeFireflyEdit.ts": 1,
     // PR #11390: second site is the generic derived-provider listing fallback —
     // read-only key presence probe used to decide whether a configured chat
@@ -175,6 +178,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
     // connections itself (class C).
     "src/app/api/providers/[id]/test-message/route.ts": 3,
+    // Fal management reads its pinned account only for catalog/schema discovery (class C).
+    "src/app/api/providers/[id]/fal/route.ts": 1,
     "src/lib/providers/volcPlanAutoSyncBackfill.ts": 1,
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/app/(dashboard)/dashboard/tools/agent-bridge/page.tsx": 1,
@@ -270,6 +275,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // connections whose default model does not conflict with the requested one; the
     // connection itself is still selected by getProviderCredentials (class C).
     "src/lib/embeddings/service.ts": 1,
+    // Read-only validation of a pinned Fal row. New inference still goes through
+    // the credential resolver above; existing receipts never choose another account (class C).
+    "src/lib/fal/runtime.ts": 1,
     "src/lib/freeProviderRankings.ts": 1,
     "src/lib/guardrails/visionBridgeCredentials.ts": 2,
     "src/lib/kimi/tokenRefresh.ts": 1,
@@ -296,6 +304,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/lib/proxyEgress.ts": 1,
     "src/lib/quota/connectionRecovery.ts": 2,
+    // #18630: the opt-in reset-credit auto-spend sweep lists the active Codex OAuth
+    // connections only to hand each id to spendExpiringResetCredits() in
+    // codexResetCredits.ts, whose loadCodexConnection() carries the auxiliary-lease
+    // fence (class B there). The listing itself never selects or dispatches (class C).
+    "src/lib/services/codexResetCreditAutospend.ts": 1,
     "src/lib/sync/bundle.ts": 1,
     // #11495: verify-only sweep queries oauth + cookie connections
     // #13874: the health check re-reads the row inside the refresh lane to see whether

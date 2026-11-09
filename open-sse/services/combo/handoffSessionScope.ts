@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 
 /**
  * Session ids come from a client header or a content fingerprint, so two API
@@ -12,8 +12,6 @@ export function scopeHandoffSessionId(
   apiKeyId: string | null | undefined
 ): string | null {
   if (!sessionId) return null;
-  const owner = apiKeyId
-    ? `k:${createHash("sha256").update(apiKeyId).digest("hex").slice(0, 16)}`
-    : "anon";
+  const owner = apiKeyId ? `k:${opaqueTokenFingerprint(apiKeyId, { length: 16 })}` : "anon";
   return `${owner}:${sessionId}`;
 }
