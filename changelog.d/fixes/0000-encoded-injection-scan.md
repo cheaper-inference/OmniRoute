@@ -1,0 +1,1 @@
+- **fix(security):** the prompt-injection guard now decodes base64, hex and percent-encoded text in a request and scans the result, so an instruction hidden in an encoded string is scored like the same instruction in plain text.
