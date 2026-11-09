@@ -4,6 +4,7 @@
 
 import path from "path";
 import fs from "fs";
+import { createHash } from "crypto";
 import {
   getDbInstance,
   resetDbInstance,
@@ -24,6 +25,7 @@ import {
   resolveDbBackupRetention,
 } from "./backupRetention";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import { isEncryptionEnabled } from "./encryption";
 
 type CountRow = { cnt?: number };
 
@@ -59,6 +61,58 @@ export function setDbBackupRetentionDays(value: number): void {
 
 export function getDbBackupRetentionDays() {
   return resolveDbBackupRetention(getDbInstance()).retentionDays;
+}
+
+const KEY_FINGERPRINT_KEY = "keyFingerprint";
+
+/**
+ * `sha256:` plus the first 16 hex of SHA-256 of the storage key, or null when encryption is off.
+ * A truncated hash is safe to print; it cannot be turned back into the key.
+ */
+function currentKeyFingerprint(): string | null {
+  if (!isEncryptionEnabled()) return null;
+  const key = process.env.STORAGE_ENCRYPTION_KEY;
+  return key ? `sha256:${createHash("sha256").update(key).digest("hex").slice(0, 16)}` : null;
+}
+
+/** Record which storage key is running, so the snapshot taken next carries it (restore checks it). */
+function stampKeyFingerprint(): void {
+  try {
+    const db = getDbInstance();
+    const fingerprint = currentKeyFingerprint();
+    if (fingerprint) {
+      db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+        DB_BACKUP_SETTINGS_NAMESPACE,
+        KEY_FINGERPRINT_KEY,
+        JSON.stringify(fingerprint)
+      );
+    } else {
+      db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(
+        DB_BACKUP_SETTINGS_NAMESPACE,
+        KEY_FINGERPRINT_KEY
+      );
+    }
+  } catch (err) {
+    // The backup is still worth taking: it then has no fingerprint and restores unchecked.
+    console.warn(
+      "[DB] Could not record the storage-key fingerprint in the backup:",
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+
+function readBackupKeyFingerprint(backupDb: {
+  prepare: (sql: string) => { get: (...params: unknown[]) => unknown };
+}): string | null {
+  try {
+    const row = backupDb
+      .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+      .get(DB_BACKUP_SETTINGS_NAMESPACE, KEY_FINGERPRINT_KEY) as { value?: string } | undefined;
+    const parsed = row?.value ? JSON.parse(row.value) : null;
+    return typeof parsed === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 function getBackupDir() {
@@ -402,6 +456,8 @@ export function backupDbFile(reason = "auto") {
       }
     }
 
+    stampKeyFingerprint(); // the copy below carries the running key's fingerprint
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupFile = path.join(backupDir, `db_${timestamp}_${reason}.sqlite`);
 
@@ -474,7 +530,10 @@ export async function listDbBackups() {
 
 // ──────────────── Restore Backup ────────────────
 
-export async function restoreDbBackup(backupId: string) {
+export async function restoreDbBackup(
+  backupId: string,
+  options: { allowKeyMismatch?: boolean } = {}
+) {
   const backupDir = getBackupDir();
 
   // Validate format: must be db_<timestamp>_<reason>.sqlite, no path separators
@@ -501,6 +560,7 @@ export async function restoreDbBackup(backupId: string) {
   }
 
   // Validate backup integrity
+  let backupKeyFingerprint: string | null = null;
   try {
     const { tryOpenSync } = await import("@/lib/db/adapters/driverFactory");
     const testDb = tryOpenSync(backupPath, { readonly: true });
@@ -510,6 +570,7 @@ export async function restoreDbBackup(backupId: string) {
     let result: Array<{ integrity_check?: string }>;
     try {
       result = testDb.pragma("integrity_check") as Array<{ integrity_check?: string }>;
+      backupKeyFingerprint = readBackupKeyFingerprint(testDb);
     } finally {
       testDb.close();
     }
@@ -520,6 +581,22 @@ export async function restoreDbBackup(backupId: string) {
     if (e instanceof Error && e.message === "Backup integrity check failed") throw e;
     const message = e instanceof Error ? e.message : String(e);
     throw new Error(`Backup file is corrupt: ${message}`);
+  }
+
+  // Credentials in the backup are encrypted under the key it was made with. Under another key they
+  // load but cannot be read, so refuse before anything is touched. A key rotation passes
+  // `allowKeyMismatch`. A backup with no fingerprint (older, or made with encryption off) restores.
+  const runningKeyFingerprint = currentKeyFingerprint();
+  if (
+    backupKeyFingerprint &&
+    backupKeyFingerprint !== runningKeyFingerprint &&
+    !options.allowKeyMismatch
+  ) {
+    throw new Error(
+      `Backup was made under storage key ${backupKeyFingerprint}, but the running key is ` +
+        `${runningKeyFingerprint ?? "not set"}. Its stored credentials would be unreadable. ` +
+        `Run with the matching STORAGE_ENCRYPTION_KEY, or restore with allowKeyMismatch for a key rotation.`
+    );
   }
 
   // Force pre-restore backup (bypass throttle) and await so the DB is not closed while backup runs
@@ -535,6 +612,7 @@ export async function restoreDbBackup(backupId: string) {
           backupDirForPre,
           `db_${new Date().toISOString().replace(/[:.]/g, "-")}_pre-restore.sqlite`
         );
+        stampKeyFingerprint();
         const dbForBackup = getDbInstance();
         await dbForBackup.backup(preBackupPath);
         chmodQuiet(preBackupPath, DB_SECRET_FILE_MODE);

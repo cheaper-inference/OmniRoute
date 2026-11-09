@@ -1,0 +1,1 @@
+- **fix(db):** restoring a database backup made under a different `STORAGE_ENCRYPTION_KEY` is refused with a message that names both key fingerprints, instead of loading credentials that cannot be read. Pass `allowKeyMismatch` for a key rotation.
