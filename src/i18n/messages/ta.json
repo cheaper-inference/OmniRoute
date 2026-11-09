@@ -7906,6 +7906,7 @@
     "systemActor": "அமைப்பு",
     "ipAccessControl": "IP அணுகல் கட்டுப்பாடு",
     "ipAccessControlDesc": "குறிப்பிட்ட IP முகவரிகளைத் தடுக்கவும் அல்லது அனுமதிக்கவும்",
+    "ipAccessMode": "அணுகல் பயன்முறை",
     "ipModeDisabled": "முடக்கப்பட்டது",
     "ipModeBlacklist": "தடுப்புப் பட்டியல்",
     "ipModeWhitelist": "அனுமதிப்பட்டியல்",

@@ -7906,6 +7906,7 @@
     "systemActor": "sistema",
     "ipAccessControl": "Controllo dell'accesso IP",
     "ipAccessControlDesc": "Blocca o consenti indirizzi IP specifici",
+    "ipAccessMode": "Modalità di accesso",
     "ipModeDisabled": "Disabilitato",
     "ipModeBlacklist": "Lista nera",
     "ipModeWhitelist": "Lista bianca",

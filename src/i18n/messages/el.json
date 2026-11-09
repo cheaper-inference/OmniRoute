@@ -7906,6 +7906,7 @@
     "systemActor": "σύστημα",
     "ipAccessControl": "Έλεγχος Πρόσβασης IP",
     "ipAccessControlDesc": "Αποκλεισμός ή έγκριση πρόσβασης για συγκεκριμένες διευθύνσεις IP",
+    "ipAccessMode": "Λειτουργία πρόσβασης",
     "ipModeDisabled": "Απενεργοποιημένο",
     "ipModeBlacklist": "Μαύρη Λίστα",
     "ipModeWhitelist": "Λίστα επιτρεπόμενων",
