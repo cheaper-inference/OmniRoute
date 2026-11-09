@@ -1,0 +1,1 @@
+- **fix(db):** automatic and manual backup pruning now skips a migration restore point that a running upgrade still holds, once the upgrade takes its lease; a lease left by a dead process is ignored.
