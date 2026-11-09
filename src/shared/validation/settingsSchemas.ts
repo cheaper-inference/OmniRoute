@@ -107,6 +107,18 @@ const transformObfuscateWordsSchema = z.object({
     .optional(),
 });
 
+/** Operator error rules accept a custom cooldown of up to 30 days. */
+const OPERATOR_ERROR_MAX_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const operatorErrorScopeSchema = z.enum(["model", "provider", "connection"]);
+const operatorErrorReasonSchema = z.enum([
+  "auth_error",
+  "quota_exhausted",
+  "rate_limit_exceeded",
+  "model_capacity",
+  "server_error",
+  "unknown",
+]);
+
 export const updateSettingsSchema = z.object({
   connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
   /** #13917: per-request proxy bulk-import ceiling; resolved by resolveProxyBulkImportLimit. */
@@ -332,6 +344,24 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
+  // master switch (default false in src/lib/db/settings.ts); `connections` narrows
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
+  // `horizonHours` sets how close to expiry a credit must be to be spendable.
+  codexSpendExpiringResetCredits: z
+    .object({
+      enabled: z.boolean().optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
+      maxPerDay: z.number().int().min(1).max(50).optional(),
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
   // #8848: opt-in per-connection Claude proactive warmup. `connections` maps a
   // provider_connections id -> enabled; default is an empty map (off for everyone)
   // until the operator flips a specific OAuth connection on from the settings UI.
@@ -367,28 +397,24 @@ export const updateSettingsSchema = z.object({
    * editing the catalog. Matches are plain case-insensitive SUBSTRINGS of the
    * error body (never RegExp) to keep the classification hot path ReDoS-safe.
    * Bounded to 50 rules total so a misconfigured setting cannot blow up the
-   * matcher.
+   * matcher. `status` and `match` are each optional (omitted = any) but a rule
+   * must set at least one of them; when both are set, both must match.
    */
   providerErrorRules: z
     .record(
       z.string().trim().min(1).max(100),
       z.array(
-        z.object({
-          status: z.number().int().min(100).max(599),
-          match: z.string().min(1).max(200),
-          scope: z.enum(["model", "provider", "connection"]),
-          reason: z
-            .enum([
-              "auth_error",
-              "quota_exhausted",
-              "rate_limit_exceeded",
-              "model_capacity",
-              "server_error",
-              "unknown",
-            ])
-            .optional(),
-          cooldownMs: z.number().int().min(0).max(86_400_000).optional(),
-        })
+        z
+          .object({
+            status: z.number().int().min(100).max(599).optional(),
+            match: z.string().min(1).max(200).optional(),
+            scope: operatorErrorScopeSchema,
+            reason: operatorErrorReasonSchema.optional(),
+            cooldownMs: z.number().int().min(0).max(OPERATOR_ERROR_MAX_COOLDOWN_MS).optional(),
+          })
+          .refine((rule) => rule.status !== undefined || rule.match !== undefined, {
+            message: "providerErrorRules: each rule needs a status, a match, or both",
+          })
       )
     )
     .optional()
@@ -401,6 +427,24 @@ export const updateSettingsSchema = z.object({
           message: `providerErrorRules: at most 50 rules total, got ${total}`,
         });
       }
+    }),
+  /**
+   * Opt-in per-provider catch-all cooldown for failures no operator rule and no
+   * built-in rule matched. Applies to 402/403/408/429/5xx only — request-shape
+   * 4xx errors and bare 401s keep their own handling. Absent = current behavior.
+   */
+  providerErrorDefaults: z
+    .record(
+      z.string().trim().min(1).max(100),
+      z.object({
+        cooldownMs: z.number().int().min(60_000).max(OPERATOR_ERROR_MAX_COOLDOWN_MS),
+        scope: operatorErrorScopeSchema.optional(),
+        reason: operatorErrorReasonSchema.optional(),
+      })
+    )
+    .optional()
+    .refine((value) => !value || Object.keys(value).length <= 100, {
+      message: "providerErrorDefaults: at most 100 providers",
     }),
   // #6168: global session-stickiness opt-out (per-combo config overrides this).
   disableSessionStickiness: z.boolean().optional(),
@@ -424,6 +468,12 @@ export const updateSettingsSchema = z.object({
   quotaVisibility: z
     .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
     .optional(),
+  /**
+   * Per-operator provider group order on the Quota Tracker (drag-to-reorder).
+   * Display-only — never feeds routing priority. Ported from upstream
+   * decolua/9router#4920.
+   */
+  quotaProviderOrder: z.array(z.string().trim().min(1).max(64)).max(200).optional(),
   requestRetry: z.number().int().min(0).max(10).optional(),
   maxRetryIntervalSec: z.number().int().min(0).max(300).optional(),
   maxBodySizeMb: z
@@ -548,6 +598,9 @@ export const updateSettingsSchema = z.object({
   // Audio Bridge STT over Video Bridge audio extraction — defaults false
   // (Hard Rule #20). A request-side opt-in is required in addition to this.
   modalityBridgeVideoAudioTranscriptionEnabled: z.boolean().optional(),
+  // Independent retention and remote-read consent; both are off unless explicitly enabled.
+  modalityBridgeVideoDrilldownEnabled: z.boolean().optional(),
+  modalityBridgeVideoDrilldownRemoteEnabled: z.boolean().optional(),
   modalityBridgeCacheEnabled: z.boolean().optional(),
   modalityBridgeCacheTtlMinutes: z.number().int().min(1).max(1440).optional(),
   modalityBridgeCacheMaxEntries: z.number().int().min(10).max(5000).optional(),

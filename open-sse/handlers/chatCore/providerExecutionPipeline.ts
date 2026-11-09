@@ -29,6 +29,7 @@ import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -212,7 +213,7 @@ async function recordUpstreamRateLimit(
   }
   let capacity429 = false;
   try {
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     capacity429 =
       provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
@@ -289,7 +290,7 @@ async function toOutcome(
   try {
     // clone() is the drain. sendProviderAttempt must not cancel() a streaming
     // non-2xx body before we get here (BYOP 422 / Codex 429 Retry-After).
-    const text = await attempt.response.clone().text();
+    const text = await readResponseTextWithinCap(attempt.response.clone());
     try {
       body = JSON.parse(text);
       fields = readUpstreamErrorFields(body);
@@ -495,10 +496,7 @@ export async function runProviderExecutionPipeline(
     if (canRotateAccount && target.provider === "antigravity" && status === 422) {
       // Same drain as toOutcome: clone the Response. A prior body.cancel()
       // makes this throw "Body has already been consumed" and skips rotate.
-      const byopBody = await attempt.response
-        .clone()
-        .text()
-        .catch(() => "");
+      const byopBody = await readResponseTextWithinCap(attempt.response.clone()).catch(() => "");
       if (byopBody.includes("gcp_project_required")) {
         const failedId = currentConnectionId(connection);
         if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
@@ -541,7 +539,7 @@ export async function runProviderExecutionPipeline(
     {
       let signatureMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {
@@ -592,7 +590,7 @@ export async function runProviderExecutionPipeline(
             let message = response.statusText || "upstream error";
             let responseBody: unknown = null;
             try {
-              responseBody = JSON.parse(await response.clone().text());
+              responseBody = JSON.parse(await readResponseTextWithinCap(response.clone()));
               const err = (responseBody as { error?: { message?: unknown } } | null)?.error;
               if (typeof err?.message === "string" && err.message) message = err.message;
             } catch {
@@ -661,7 +659,7 @@ export async function runProviderExecutionPipeline(
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
       try {
-        const parsed = JSON.parse(await attempt.response.clone().text()) as {
+        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
           error?: { message?: unknown };
         };
         if (typeof parsed?.error?.message === "string" && parsed.error.message) {

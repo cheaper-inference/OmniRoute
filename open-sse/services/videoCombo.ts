@@ -15,6 +15,7 @@
  * combo targets may be prompt-optional I2V models), so it is treated as a
  * retryable skip rather than a terminal failure.
  */
+import type { PrepareFalInput } from "../handlers/fal/compatibility.ts";
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
@@ -55,6 +56,7 @@ export async function executeVideoCombo(
   comboName: string,
   body: Record<string, unknown>,
   auth: {
+    prepareFalInput?: PrepareFalInput | null;
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
     /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
@@ -243,6 +245,7 @@ export async function executeVideoCombo(
       }
 
       const result: MediaGenerationResultLike = await handleVideoGeneration({
+        prepareFalInput: auth.prepareFalInput,
         body: { ...body, model: modelStr },
         credentials,
         log,

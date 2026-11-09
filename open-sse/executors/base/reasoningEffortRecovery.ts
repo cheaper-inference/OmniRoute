@@ -8,6 +8,7 @@
 // requests clamp proactively via sanitizeReasoningEffortForProvider →
 // getLearnedReasoningEffort), clamp the live request body by re-running the
 // sanitizer, and retry the SAME url once.
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   nextProbeReasoningEffort,
@@ -94,10 +95,7 @@ export async function applyReasoningEffortRecovery(
     return notRecoverable;
   }
 
-  const errText = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
   const acceptedValues = parseReasoningEffortEnum(errText);
   if (!acceptedValues) {
     return probeOneTierDown(params, body, notRecoverable);
