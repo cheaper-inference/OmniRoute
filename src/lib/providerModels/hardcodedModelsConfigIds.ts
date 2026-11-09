@@ -20,6 +20,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "command-code",
   "cpl",
   "deepseek",
+  "empiriolabs",
   "fenayai",
   "fireworks",
   "gemini",

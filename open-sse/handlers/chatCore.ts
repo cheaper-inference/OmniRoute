@@ -4,6 +4,7 @@ import type {
 } from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
 import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
+import { enforceResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
@@ -200,6 +201,7 @@ import { getKimiTemporaryRateLimitResetAt } from "./chatCore/kimiQuotaRecovery.t
 import {
   getCallLogPipelineCaptureStreamChunks,
   getCallLogPipelineMaxSizeBytes,
+  resolveCallLogPipelineEnabled,
 } from "@/lib/logEnv";
 import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
@@ -364,6 +366,7 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
   return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
 }
 
+/** Process a chat request through admission, translation, dispatch, and response handling. */
 async function handleChatCoreInner({
   body,
   modelInfo,
@@ -406,6 +409,7 @@ async function handleChatCoreInner({
   // the model-bound `body` itself is never touched.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
   allowedConnections = null, // routing allowlist; in-request account rotation must stay inside it
   previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
@@ -897,11 +901,9 @@ async function handleChatCoreInner({
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
   echoModel = resolveNoAuthEchoModel(requestedModel, provider) ?? echoModel;
-  const detailedLoggingEnabled =
-    !noLogEnabled &&
-    (settings.call_log_pipeline_enabled === true ||
-      settings.call_log_pipeline_enabled === "1" ||
-      settings.call_log_pipeline_enabled === "true");
+  // Same resolver as isDetailedLoggingEnabled(): ENABLE_REQUEST_LOGS first, then
+  // the stored value parsed the way the dashboard parses it (#17998).
+  const detailedLoggingEnabled = !noLogEnabled && resolveCallLogPipelineEnabled(settings);
   const capturePipelineStreamChunks =
     detailedLoggingEnabled && getCallLogPipelineCaptureStreamChunks();
   const skillRequestId = generateRequestId();
@@ -2221,6 +2223,9 @@ async function handleChatCoreInner({
     );
 
   try {
+    if (sourceFormat === FORMATS.OPENAI_RESPONSES) {
+      enforceResponsesToolHistory(body as Record<string, unknown>);
+    }
     if (nativeResponsesPassthrough) {
       translatedBody = stampNativeResponsesPassthroughBody(
         applyReasoningRuleDirective(body, "openai-responses") as Record<string, unknown>,
@@ -2274,6 +2279,7 @@ async function handleChatCoreInner({
         effectiveModel,
         targetFormat,
         preserveCacheControl,
+        connectionCacheOverride,
         normalizeClaudeUpstreamMessages,
         applyReasoningRuleDirective,
         log,
@@ -2426,19 +2432,35 @@ async function handleChatCoreInner({
   // Request tool metadata, Kiro/Claude tool dispatch fixes, the response tool-name map, the
   // upstream model id, the previous_response_id policy and the Codex effort guard: extracted to
   // chatCore/translatedRequestFinalize.ts (chatCore slice 2).
-  const finalizedRequest = finalizeTranslatedRequest({
-    translatedBody,
-    body,
-    provider,
-    alias,
-    effectiveModel,
-    sourceFormat,
-    targetFormat,
-    isClaudePassthrough,
-    credentials,
-    previousResponseIdMode: settings.responsesPreviousResponseIdMode,
-    log,
-  });
+  let finalizedRequest: ReturnType<typeof finalizeTranslatedRequest>;
+  try {
+    finalizedRequest = finalizeTranslatedRequest({
+      translatedBody,
+      body,
+      provider,
+      alias,
+      effectiveModel,
+      sourceFormat,
+      targetFormat,
+      isClaudePassthrough,
+      credentials,
+      previousResponseIdMode: settings.responsesPreviousResponseIdMode,
+      log,
+    });
+  } catch (error) {
+    // Final continuation policy can invalidate otherwise valid source history.
+    // Release this request's owner before invoking fallible error/plugin handling.
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
+    return await buildRequestTranslationErrorResult({
+      error,
+      traceId,
+      body,
+      model,
+      provider,
+      apiKeyInfo,
+      log,
+    });
+  }
   translatedBody = finalizedRequest.translatedBody;
   const { requestToolIdentityMap, toolNameMap } = finalizedRequest;
 
@@ -2570,16 +2592,15 @@ async function handleChatCoreInner({
   });
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
-  const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key AND the selected provider connection: dedup
-  // hands the SAME response object to every joiner, so a shared hash across keys
-  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
-  // across connections serves the request from an account the caller did not
-  // select — a pin on another account would silently be ignored while its
-  // response header still named the pinned one. Keyless installs keep dedup
-  // within a connection: identical requests that select the same connection
-  // still join. The hash is computed once, before dispatch; rotation inside the
-  // pipeline is handled by `allowDedup` (first attempt only), not here.
+  // A request-scoped deadline changes the executor contract; never let it
+  // join, or be joined by, an ordinary request through in-flight deduplication.
+  const dedupEnabled =
+    requestUpstreamStartTimeoutMs === undefined && shouldDeduplicate(dedupRequestBody);
+  // Namespace ordinary dedup by both API key and selected provider connection:
+  // cross-key reuse leaks principal responses, while cross-connection reuse can
+  // silently serve a pinned request using another account. Keyless requests
+  // still deduplicate when their connection matches. Rotation within a single
+  // execution is constrained by the first-attempt-only allowDedup policy.
   const dedupHash = dedupEnabled
     ? computeRequestHash(
         dedupRequestBody,
@@ -2622,6 +2643,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,
@@ -2733,6 +2755,7 @@ async function handleChatCoreInner({
 
   let credentialRefreshPersistRan = false;
   const hadStreamOptions =
+    provider !== "codex" &&
     targetFormat === FORMATS.OPENAI_RESPONSES &&
     translatedBody &&
     typeof translatedBody === "object" &&

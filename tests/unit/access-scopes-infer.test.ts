@@ -33,6 +33,24 @@ test("admin-mutation prefixes: GET stays read, mutations become admin", () => {
   assert.equal(inferRequiredScope("POST", "/api/cli-tools/apply"), "admin");
 });
 
+test("resilience inspection is read-only but mutations require operator admin", () => {
+  for (const path of [
+    "/api/resilience",
+    "/api/resilience/cooldowns",
+    "/api/resilience/reset",
+    "/api/resilience/model-cooldowns",
+  ]) {
+    assert.equal(inferRequiredScope("GET", path), "read", path);
+    assert.equal(inferRequiredScope("HEAD", path), "read", path);
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      assert.equal(inferRequiredScope(method, path), "admin", method + " " + path);
+    }
+  }
+  // The inference helper uses path-segment boundaries, not startsWith.
+  assert.equal(inferRequiredScope("PATCH", "/api/resilience-reports"), "write");
+  assert.equal(inferRequiredScope("GET", "/api/resilience-reports"), "read");
+});
+
 test("a brand-new mutating route is write by default (not admin)", () => {
   assert.equal(inferRequiredScope("POST", "/api/some-future-route"), "write");
   assert.equal(inferRequiredScope("GET", "/api/some-future-route"), "read");
