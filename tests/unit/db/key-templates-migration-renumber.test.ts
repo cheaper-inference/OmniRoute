@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
 import { createNodeSqliteAdapterFromDatabase } from "../../../src/lib/db/adapters/nodeSqliteShared.ts";
 
-// key_templates was published by PR #19311 in slots 228, 231 and 232 before the
+// key_templates was published by PR #19311 in slots 228, 230, 231, 232 and 234 before the
 // release claimed them. The canonical migration lives at 236; databases that
 // recorded an earlier slot must be rehomed so the release migrations still run.
 fs.mkdirSync(path.resolve("_artifacts"), { recursive: true });
@@ -29,11 +29,13 @@ Object.assign(process.env, {
   OMNIROUTE_MIGRATIONS_DIR: fixture,
 });
 
-const PUBLISHED_SLOTS = ["228", "231", "232"] as const;
+const PUBLISHED_SLOTS = ["228", "230", "231", "232", "234"] as const;
 const CANONICAL_OCCUPANTS: Record<(typeof PUBLISHED_SLOTS)[number], string> = {
   "228": "purge_orphaned_provider_catalogs",
+  "230": "call_logs_cache_write_tiers",
   "231": "daily_cached_input",
   "232": "proxy_payload_traffic",
+  "234": "agent_sessions",
 };
 for (const [version, name] of Object.entries(CANONICAL_OCCUPANTS)) {
   fs.writeFileSync(
@@ -64,8 +66,10 @@ const ledger = (db: ReturnType<typeof makeDb>) =>
 
 const EXPECTED_LEDGER = [
   { version: "228", name: "purge_orphaned_provider_catalogs" },
+  { version: "230", name: "call_logs_cache_write_tiers" },
   { version: "231", name: "daily_cached_input" },
   { version: "232", name: "proxy_payload_traffic" },
+  { version: "234", name: "agent_sessions" },
   { version: "236", name: "key_templates" },
 ];
 
@@ -83,7 +87,7 @@ const assertCanonicalOccupantsRan = (db: ReturnType<typeof makeDb>) => {
 test("fresh database applies key_templates at 236 next to the canonical slots", () => {
   const db = makeDb();
   try {
-    assert.equal(runMigrations(db, { isNewDb: true }), 4);
+    assert.equal(runMigrations(db, { isNewDb: true }), PUBLISHED_SLOTS.length + 1);
     assert.deepEqual(ledger(db), EXPECTED_LEDGER);
     assertCanonicalOccupantsRan(db);
     assert.equal(
@@ -113,7 +117,11 @@ test("databases that applied key_templates in a published slot are rehomed to 23
         ).run(version, "key_templates", "fixture-applied");
       }
 
-      assert.equal(runMigrations(db, { isNewDb: true }), 3, `slots ${versions.join(",")}`);
+      assert.equal(
+        runMigrations(db, { isNewDb: true }),
+        PUBLISHED_SLOTS.length,
+        `slots ${versions.join(",")}`
+      );
       assert.deepEqual(ledger(db), EXPECTED_LEDGER, `slots ${versions.join(",")}`);
       assertCanonicalOccupantsRan(db);
       assert.equal(
