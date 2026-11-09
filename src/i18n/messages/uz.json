@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Hisob sozlamalari",
+    "description": "Bu yo‘naltirish konfiguratsiyasi uchun bir nechta hisobni afzal ko‘ring yoki ularni zaxirada saqlang. Avtomatik yo‘naltirish har bir toifadagi hisoblarni saralaydi. Ro‘yxatga kiritilmagan hisoblar odatdagidek ishlatiladi. Ruxsatlar, kvota cheklovlari va mavjud so‘rovga biriktirilgan hisoblar baribir amal qiladi.",
+    "preferred": "Afzal",
+    "normal": "Oddiy",
+    "reserve": "Zaxira",
+    "excluded": "Chiqarib tashlangan",
+    "loading": "Hisoblar yuklanmoqda…",
+    "error": "Hisoblarni yuklab bo‘lmadi. Qayta urinish uchun muharrirni qayta oching.",
+    "missing": "Mavjud bo‘lmagan hisob ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ushbu API kaliti uchun Codex xizmat rejimi",
     "description": "Codex so‘rovlariga, jumladan kombinatsiyalar ichidagi Codex modellariga ham qo‘llanadi. Majburiy rejimlar mijoz, global sozlamalar va ulanishning standart sozlamalaridan ustun turadi. Boshqa provayderlar o‘zgarishsiz qoladi.",

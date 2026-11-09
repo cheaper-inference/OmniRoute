@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferințe pentru conturi",
+    "description": "Acordați prioritate mai multor conturi sau păstrați-le ca rezervă pentru această configurație de rutare. Rutarea automată ordonează conturile în cadrul fiecărui nivel. Conturile nelistate sunt normale. Permisiunile, limitele de cotă și asocierile existente cu turele se aplică în continuare.",
+    "preferred": "Cu prioritate",
+    "normal": "Normal",
+    "reserve": "Rezervă",
+    "excluded": "Exclus",
+    "loading": "Se încarcă conturile…",
+    "error": "Nu s-au putut încărca conturile. Redeschideți editorul pentru a reîncerca.",
+    "missing": "Cont indisponibil ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Modul de serviciu Codex pentru această cheie API",
     "description": "Se aplică solicitărilor Codex, inclusiv modelelor Codex din combinații. Modurile impuse suprascriu setările clientului, setările globale și valorile implicite ale conexiunii. Ceilalți furnizori rămân neschimbați.",
