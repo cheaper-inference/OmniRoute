@@ -818,14 +818,10 @@ export function lockModel(
     // An authoritative upstream reset (structured body field or header) shortens
     // a longer guessed lock — the provider's own clock wins (#CO-402).
     if (options.authoritativeReset === true) {
-      modelLockouts.set(key, {
-        reason,
-        until: newUntil,
-        lockedAt: Date.now(),
-        failureCount: Math.max(metadata.failureCount ?? existing.failureCount, 1),
-        lastFailureAt: metadata.lastFailureAt ?? Date.now(),
-        resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
-      });
+      modelLockouts.set(
+        key,
+        exactModelLock.buildAuthoritativeShortenedLockEntry(existing, reason, newUntil, metadata)
+      );
       return;
     }
     if (metadata.failureCount && metadata.failureCount > existing.failureCount) {
