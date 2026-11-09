@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
@@ -178,7 +179,6 @@ export default function ProfilePage() {
   const nextLevelCumulative = cumulativeXpForLevel(level + 1);
   const xpInCurrentLevel = totalXp - currentLevelCumulative;
   const xpForNext = nextLevelCumulative - currentLevelCumulative;
-  const xpProgress = xpForNext > 0 ? (xpInCurrentLevel / xpForNext) * 100 : 0;
   const tier = getLevelTier(level);
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.bronze;
   const earnedIds = new Set(earnedBadges.map((b) => b.badgeId));
@@ -242,19 +242,12 @@ export default function ProfilePage() {
                 {xpInCurrentLevel.toLocaleString(locale)} / {xpForNext.toLocaleString(locale)} XP
               </span>
             </div>
-            <div
-              role="progressbar"
+            {/* Kit Progress clamps the value to [0, max] for both the bar and aria-valuenow. */}
+            <Progress
               aria-label={tg("levelProgress", { current: level, next: level + 1 })}
-              aria-valuemin={0}
-              aria-valuemax={xpForNext}
-              aria-valuenow={Math.min(Math.max(xpInCurrentLevel, 0), xpForNext)}
-              className="w-full h-3 rounded-full bg-border overflow-hidden"
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-chart-3 to-chart-5 transition-all duration-500"
-                style={{ width: `${Math.min(xpProgress, 100)}%` }}
-              />
-            </div>
+              value={xpInCurrentLevel}
+              max={xpForNext}
+            />
             <p className="text-xs text-text-muted mt-1">
               {tg("totalXpEarned", { count: totalXp.toLocaleString(locale) })}
             </p>

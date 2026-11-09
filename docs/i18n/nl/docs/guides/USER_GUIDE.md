@@ -631,9 +631,9 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 <details>
 <summary><b>Alle beschikbare modellen weergeven</b></summary>
 
-> De onderstaande lijst is samengesteld uit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter enzovoort) worden dynamisch gesynchroniseerd — open voor de volledige actuele catalogus **Dashboard → Providers → [provider] → Beschikbare modellen** of roep `GET /api/models/catalog` aan.
+> De onderstaande lijst is samengesteld uit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter enzovoort) worden dynamisch gesynchroniseerd — open voor de volledige actuele catalogus **Dashboard → Providers → [provider] → Available Models** of roep `GET /api/models/catalog` aan.
 >
-> Als de ingebouwde lijst van een provider niet meer overeenkomt, gebruik dan **Importeren uit /models** op die pagina (of schakel **Automatische synchronisatie** in) om de actuele upstream-catalogus op te halen. Dit is geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonieme toegang tot Pollinations bleef tijdens dezelfde testronde beperkt door upstream-beperkingen.
+> Als de ingebouwde lijst van een provider niet meer overeenkomt, gebruik dan **Import from /models** op die pagina (of schakel **Auto-Sync** in) om de actuele upstream-catalogus op te halen. Dit is geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonieme toegang tot Pollinations bleef tijdens dezelfde testronde beperkt door upstream-beperkingen.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -641,7 +641,7 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: gebruik de actuele catalogus onder **Dashboard → Providers → Kiro → Beschikbare modellen**. De beschikbaarheid is afhankelijk van het account en abonnement.
+**Kiro (`kr/`)** — GRATIS OAuth: gebruik de actuele catalogus die wordt weergegeven onder **Dashboard → Providers → Kiro → Available Models**. Beschikbaarheid is afhankelijk van het account en abonnement.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -653,7 +653,7 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **DeepSeek (`ds/`)** — API-sleutel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ul razendsnel: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Supersnel: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Native Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
@@ -669,17 +669,17 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **Cohere (`cohere/`)** — Gericht op RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Voor ondernemingen: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Voor ondernemingen: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Live gesynchroniseerd per API-sleutel vanuit Google — geen statische lijst. Verbind een sleutel via **Dashboard → Providers** en gebruik vervolgens **Beschikbare modellen** om de actuele catalogus te importeren (bijvoorbeeld `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Live gesynchroniseerd per API-sleutel vanuit Google — geen statische lijst. Verbind een sleutel via **Dashboard → Providers** en gebruik vervolgens **Available Models** om de actuele catalogus te importeren (bijvoorbeeld `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andere compatibele providers** (selectie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (doorgeefcatalogus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elke provider onderhoudt zijn eigen modellijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models`-endpoint beschikbaar stelt.
+**Andere compatibele providers** (geselecteerd): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (catalogus zonder wijzigingen door te geven), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elke provider beheert zijn eigen modellenlijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models`-endpoint beschikbaar stelt.
 
-**Opmerking over model-ID's:** OmniRoute gebruikt provider-native ID's (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige ID's bevatten versies met punten, omdat de upstream-API deze indeling verwacht. Als een model hierboven niet wordt vermeld, voer je `omniroute models --search <term>` uit of roep je `GET /api/models/catalog` aan om de beschikbaarheid te controleren.
+**Opmerking over model-ID's:** OmniRoute gebruikt provider-native ID's (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige ID's bevatten versies met punten, omdat de upstream-API deze zo verwacht. Als een model hierboven niet wordt vermeld, voer dan `omniroute models --search <term>` uit of roep `GET /api/models/catalog` aan om de beschikbaarheid te bevestigen.
 
 </details>
 

@@ -634,55 +634,55 @@ post_install() {
 <details>
 <summary><b>Դիտել բոլոր հասանելի մոդելները</b></summary>
 
-> Ստորև ներկայացված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամեցվում են դինամիկ եղանակով — ամբողջական ընթացիկ կատալոգը բացելու համար անցեք **Dashboard → Providers → [provider] → Available Models** կամ կանչեք `GET /api/models/catalog`։
+> Ստորև բերված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամացվում են դինամիկ եղանակով — ամբողջական ընթացիկ կատալոգը բացելու համար անցեք **Dashboard → Providers → [provider] → Available Models** կամ կանչեք `GET /api/models/catalog`։
 >
-> Եթե մատակարարի ներկառուցված ցանկը շեղվել է, այդ էջում օգտագործեք **Import from /models** (կամ միացրեք **Auto-Sync**)՝ ընթացիկ վերին հոսքի կատալոգը ներբեռնելու համար։ Սա հաստատվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն թեստավորման ընթացքում Pollinations-ի անանուն հասանելիությունը շարունակում էր սահմանափակված լինել վերին հոսքի կողմից։
+> Եթե մատակարարի ներկառուցված ցանկը հնացել է, այդ էջում օգտագործեք **Import from /models** (կամ միացրեք **Auto-Sync**)՝ ընթացիկ upstream կատալոգը ներբեռնելու համար։ Սա ստուգվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն փորձարկման ընթացքում Pollinations-ի անանուն հասանելիությունը մնացել էր upstream-ի կողմից սահմանափակված։
 
-**Claude Code (`cc/`)** — Pro/Max OAuth՝ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth․ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth՝ `cx/gpt-5.5` (գործողության մակարդակներ՝ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth․ `cx/gpt-5.5` (+ ջանքի մակարդակներ․ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth՝ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth․ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth՝ օգտագործեք **Dashboard → Providers → Kiro → Available Models** բաժնում ցուցադրված ընթացիկ կատալոգը։ Հասանելիությունը կախված է հաշվից և փաթեթից։
+**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth․ օգտագործեք ընթացիկ կատալոգը, որը ցուցադրվում է **Dashboard → Providers → Kiro → Available Models** բաժնում։ Հասանելիությունը կախված է հաշվից և պլանից։
 
-**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth՝ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth․ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M՝ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M․ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M՝ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M․ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս հաստատագրված կամ ըստ օգտագործման՝ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս հաստատագրված կամ ըստ օգտագործման․ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API բանալի՝ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API բանալի․ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Գերարագ՝ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Գերարագ․ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-ի բնիկ՝ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-ի բնիկ աջակցություն․ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Հոսթինգ ԵՄ-ում՝ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Հոսթինգ ԵՄ-ում․ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված՝ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված․ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Բաց կոդով՝ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Բաց կոդով․ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Արագ եզրակացություն՝ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Արագ inference․ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբով՝ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբով․ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Կենտրոնացած RAG-ի վրա՝ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Կենտրոնացած RAG-ի վրա․ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Ձեռնարկությունների համար՝ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Կորպորատիվ․ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE՝ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE․ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**՝ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**՝ Համաժամեցվում է ընթացիկ վիճակով՝ ըստ Google-ի API բանալու — ստատիկ ցանկ չկա։ Միացրեք բանալին **Dashboard → Providers** բաժնում, ապա օգտագործեք **Available Models**-ը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
+**Gemini (Google Cloud `gemini/`)**՝ համաժամացվում է ընթացիկ վիճակով՝ ըստ Google-ի API բանալու․ ստատիկ ցանկ չկա։ Միացրեք բանալին **Dashboard → Providers** բաժնում, այնուհետև օգտագործեք **Available Models**-ը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
 
-**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (անցումային կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է իր մոդելների ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամեցվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
+**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (passthrough կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է իր մոդելների ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամացվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
 
-**Նշում մոդելների ID-ների վերաբերյալ․** OmniRoute-ն օգտագործում է մատակարարի բնիկ ID-ներ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ ներառում են կետերով գրված տարբերակներ, քանի որ վերին հոսքի API-ն դրանք այդպես է ակնկալում։ Եթե մոդելը վերևում նշված չէ, գործարկեք `omniroute models --search <term>` կամ կանչեք `GET /api/models/catalog`՝ հասանելիությունը հաստատելու համար։
+**Նշում մոդելների ID-ների վերաբերյալ․** OmniRoute-ն օգտագործում է մատակարարների բնիկ ID-ները (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ պարունակում են կետով գրված տարբերակներ, քանի որ upstream API-ն հենց այդ ձևաչափն է ակնկալում։ Եթե որևէ մոդել վերևում նշված չէ, գործարկեք `omniroute models --search <term>` կամ ուղարկեք `GET /api/models/catalog` հարցումը՝ հասանելիությունը հաստատելու համար։
 
 </details>
 

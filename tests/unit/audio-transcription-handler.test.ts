@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import dns from "node:dns";
+
+import { setSafeOutboundPinnedFetchTestOverride } from "../../src/shared/network/safeOutboundFetch.ts";
 
 const { handleAudioTranscription } = await import("../../open-sse/handlers/audioTranscription.ts");
 
@@ -10,6 +13,29 @@ function buildFile(contents, name, type) {
 function immediateTimeout(callback, _ms, ...args) {
   if (typeof callback === "function") callback(...args);
   return 0;
+}
+
+// The Gladia poll goes through safeOutboundFetch, whose DNS deadline is itself a timer, so
+// only the 2s poll interval is skipped here; the host resolves to a public TEST-NET address
+// and the pinned connection is routed back to the test's fetch mock.
+const realSetTimeout = globalThis.setTimeout;
+function pollIntervalOnlyTimeout(callback, ms, ...args) {
+  return ms === 2000
+    ? immediateTimeout(callback, ms, ...args)
+    : realSetTimeout(callback, ms, ...args);
+}
+
+function stubGladiaPollSeams() {
+  const originalLookup = dns.promises.lookup;
+  (dns.promises as { lookup: unknown }).lookup = (async (host: string, options?: unknown) =>
+    host === "api.gladia.io"
+      ? [{ address: "203.0.113.30", family: 4 }]
+      : originalLookup(host, options as never)) as typeof dns.promises.lookup;
+  setSafeOutboundPinnedFetchTestOverride(() => (input, init) => globalThis.fetch(input, init));
+  return () => {
+    (dns.promises as { lookup: unknown }).lookup = originalLookup;
+    setSafeOutboundPinnedFetchTestOverride(undefined);
+  };
 }
 
 test("handleAudioTranscription requires model", async () => {
@@ -751,7 +777,8 @@ test("handleAudioTranscription routes Gladia uploads and polls result_url until 
   const originalSetTimeout = globalThis.setTimeout;
   const calls = [];
 
-  globalThis.setTimeout = immediateTimeout;
+  globalThis.setTimeout = pollIntervalOnlyTimeout as unknown as typeof globalThis.setTimeout;
+  const restoreGladiaSeams = stubGladiaPollSeams();
   globalThis.fetch = async (url, options = {}) => {
     const stringUrl = String(url);
     calls.push({ url: stringUrl, method: options?.method || "GET", headers: options?.headers });
@@ -812,6 +839,7 @@ test("handleAudioTranscription routes Gladia uploads and polls result_url until 
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
+    restoreGladiaSeams();
   }
 });
 
@@ -819,7 +847,8 @@ test("handleAudioTranscription returns an error when Gladia reports a terminal f
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;
 
-  globalThis.setTimeout = immediateTimeout;
+  globalThis.setTimeout = pollIntervalOnlyTimeout as unknown as typeof globalThis.setTimeout;
+  const restoreGladiaSeams = stubGladiaPollSeams();
   globalThis.fetch = async (url) => {
     const stringUrl = String(url);
 
@@ -863,6 +892,7 @@ test("handleAudioTranscription returns an error when Gladia reports a terminal f
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
+    restoreGladiaSeams();
   }
 });
 

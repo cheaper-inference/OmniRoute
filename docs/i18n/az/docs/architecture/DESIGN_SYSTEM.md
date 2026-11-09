@@ -16,98 +16,23 @@
 > kiril, yunan və vyetnam yazıları üçün Inter, ərəb yazısı üçün isə yalnız `html[dir="rtl"]` daxilində Vazirmatn istifadə olunur.
 > Hər bir ikon Lucide qlifidir.
 
-## 1. Elementlərin yerləşdiyi yer
+## 1. Əşyaların yaşadığı yer
 
-- **Kit.** `packages/ui-kit/src`, `packages/ui-kit/UPSTREAM.md` faylında sabitlənmiş commit-dəki yuxarı axın `src/` qovluğunun bayt-bayt surətidir (`packages/ui-kit/UPSTREAM.md` həmçinin lisenziya icazəsini qeydə alır); `PATCHES.md` lokal
-  yamaları sadalayır (heç biri yoxdur). O, heç bir yığım olmadan mənbə kimi istifadə edilir: `next.config.mjs` onu transpilasiya edir,
-  `tsconfig.json` isə `@omniroute/ui-kit` → `packages/ui-kit/src` və `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` uyğunlaşdırmalarını müəyyən edir (`vitest.config.ts` və `vitest.mcp.config.ts` eyni aliası ehtiva edir). Kit
-  komponentini onun alt yolundan (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) import edin, heç vaxt
-  `@omniroute/ui-kit` barrel-i vasitəsilə yox: barrel hər komponenti (tarix seçici də daxil olmaqla)
-  hər import edən modulun içinə çəkir. Kit-in stil cədvəli `src/app/globals.css` vasitəsilə daxil edilir
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenlər.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` tokenlərini elan edir; `src/app/globals.css`
-  onları köhnə OmniRoute adları ilə (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) əlaqələndirir, beləliklə mövcud `var(--color-*)` oxunuşları və Tailwind
-  utilitiləri işləməyə davam edir. Yeni kod Tailwind utilitilərindən (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) və ya kit siniflərindən istifadə edir — heç vaxt hex dəyərindən
-  istifadə etmir (`tests/unit/design-kit-bridge.test.ts` bu əlaqəni məcburi edir). `text-primary`,
-  `--text-color-primary` vasitəsilə `--color-primary-ink` dəyərinə həll olunur, beləliklə əsas mətn oxunaqlı qalır,
-  `bg-primary`/`border-primary` isə aksent səthini qoruyur: Editions altında bu, kit-in
-  `--ci-color-accent-active` dəyəridir (işıqlı rejimdə tünd mis rəngli `#99562f`, qaranlıq rejimdə mis aksent); Classic altında isə
-  işıqlı rejimdə lime-800, qaranlıq rejimdə laym aksentdir. Diaqram seriyaları
-  `--color-chart-1` … `--color-chart-5` istifadə edir.
-- **Temalar.** `<html className="ci-theme">` (`src/app/layout.tsx`) sənədi kit temasına daxil edir.
-  Seçim `light`, `dark` və ya `system` ola bilər (`src/shared/constants/appConfig.ts` daxilində `THEME_CONFIG.defaultTheme = "system"`;
-  `system`, `prefers-color-scheme` parametrini izləyir). `src/store/themeStore.ts` daxilindəki `applyTheme()` (hidratasiyadan
-  əvvəl işləyən və `src/app/layout.tsx` daxilində sətirdaxili yerləşdirilmiş `THEME_BOOT_SCRIPT` tərəfindən təkrarlanan) eyni vaxtda
-  `data-theme="dark"|"light"` təyin edir və `<html>` üzərində `.dark` sinfini aktivləşdirib-deaktivləşdirir.
-  Kit-in qaranlıq token dəsti `data-theme="dark"` əsasında seçilir (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute-un öz qaranlıq rejim əvəzləmələri (`globals.css` daxilindəki `.dark` bloku) və köhnə Tailwind `dark:`
-  utilitiləri `.dark` sinfinə əsaslanır. Aksent rəng presetləri yoxdur: aksent həmişə kit-dən gəlir
-  və daha köhnə yığımdan saxlanmış preset anbar yüklənəndə silinir.
-- **Palitralar.** Hər ikisi kit-dən gələn iki palitra var (`src/shared/constants/appearancePalette.ts`): standart
-  `editions` və `classic`. Editions, `<html>` üzərində kit-in `data-ci-appearance="editions"` atributudur və
-  `ci-editions.css` (`ci-ui.css` tərəfindən import edilir) bunu `data-theme` ilə birləşdirir; Classic isə bu atributun
-  olmamasıdır. Kök düzən atributu serverdə render edir, buna görə heç nə saxlamamış (və ya JS-i olmayan) ziyarətçi
-  hər səthdə — idarəetmə paneli, giriş, `/status`, xəta səhifələri, `/docs` və PWA-da — Editions əldə edir. Seçim
-  tema ilə yanaşı eyni `theme` anbarında saxlanılır (`src/store/themeStore.ts` daxilində `palette`, `setPalette()`, `applyPalette()`)
-  və ilk rəngləmədən əvvəl `THEME_BOOT_SCRIPT` tərəfindən tətbiq edilir
-  (`src/shared/utils/themeBootScript.ts`, düzənin `<head>` bölməsində sətirdaxili yerləşdirilib); o, yalnız saxlanmış palitra
-  `"classic"` olduqda atributu silir; kök düzəndən kənarda olan `src/app/global-error.tsx` bunu eyni anbardan
-  tətbiq edir. `data-ci-appearance` atributunu başqa heç bir elementə yerləşdirməyin: kit onu
-  `html:root:has([data-ci-appearance="editions"])` ilə uyğunlaşdırır, buna görə bir alt element bütün sənədi dəyişər.
-  Editions üçün `data-ci-editions-variant="landing"` variantı idarəetmə paneli deyil, marketinq səhifələri üçündür.
-  Brauzer interfeysi (`viewport.themeColor`, veb manifesti) CSS-i və ya saxlanmış seçimi oxuya bilməz, buna görə
-  standartı izləyir: `src/shared/constants/pwaThemeColors.ts` daxilindəki `PWA_THEME_COLORS`, Editions
-  `--ci-color-background` dəyərinin (`#f3f1e9` / `#11120f`) yeganə surətidir və
-  `tests/unit/pwa-theme-colors.test.ts` tərəfindən `ci-editions.css` faylına sabitlənib. Monaco rənglərini bir yoxlama elementindən
-  oxuyur (`monacoKitTheme.ts`); Editions altında kit Editions işıqlı/qaranlıq rejimini kökdən həll etdiyi üçün yoxlama oxunuşu
-  bir sinxron keçid ərzində kök `data-theme` dəyərini dəyişir.
-- **Komponentlər (adapterlər).** `src/shared/components/index.tsx` OmniRoute komponent API-sini (eyni
-  adlar, standart eksportlar və proplar) qoruyur, onun arxasındakı primitivlər isə kit üzərində qurulmuş adapterlərdir: formalar
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), üst qatlar və geribildirim
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) və cədvəllər
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter kit
-  komponentini alt yol vasitəsilə import edir və köhnə propları ona uyğunlaşdırır — məsələn, `Button variant="primary"` kit-in
-  `default` düyməsidir (`--ci-button-primary-*`: işıqlı rejimdə tərs səth, qaranlıq rejimdə isə
-  `--ci-color-accent-foreground` mətn rəngi ilə aksent), `danger` — `destructive`, `warning` isə `outline` və
-  `.ci-button--warning` genişləndirməsidir. `globals.css` faylının sonundakı (`@layer components`)
-  `.ci-button--warning` və `.ci-badge[data-tone]` qaydaları kit sinifləri üzərində OmniRoute genişləndirmələridir.
-  `tests/unit/ui/adapters/*.test.tsx` hər adapteri sabitləyir.
-- **Qabıq.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` render edir, o isə
-  `src/shared/components/layouts/DashboardShell.tsx` faylını render edir: kit-in `SidebarProvider` / `Sidebar` /
-  `SidebarInset` komponentləri (`packages/ui-kit/src/sidebar.tsx`) və OmniRoute-un naviqasiya məntiqi
-  `src/shared/components/Sidebar.tsx` daxilindədir. `#main-content` ünvanına aparan "məzmunu keç" keçidi fokuslana bilən
-  ilk elementdir. `src/shared/components/Header.tsx`, kit-in `SidebarTrigger` komponentini (qabığın yeganə yan panel
-  dəyişdiricisi), Keak `ProductSwitcher` komponentini və əmr palitrasını açan elementi saxlayır; o, marşrut başlığını yalnız
-  `#main-content` daxilində kit `PageHeader` (`.ci-page-header`) montaj edilmədikdə göstərir, beləliklə öz
-  `PageHeader` komponenti olan səhifədə yalnız bir `h1` olur. `src/shared/components/CommandPalette.tsx` kit `Dialog` komponentidir.
-- **İkonlar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) adı (ekranlarda istifadə edilən
-  Material Symbols söz ehtiyatını) `ICON_MAP` (`src/shared/constants/iconMap.ts`) vasitəsilə Lucide qlifinə
-  uyğunlaşdırır. Material Symbols şrifti və paketi artıq yoxdur: xəritədə olmayan ad neytral əvəzedici qlif
-  (`data-icon-missing="true"`) göstərir və production mühitindən kənarda konsol xəbərdarlığı qeydə alır.
-  `npm run gen:icon-map` istifadə olunan, lakin xəritədə olmayan adları göstərir
-  (`tests/unit/icon-map-coverage.test.ts` Lucide ikonu olmayan istənilən adda uğursuz olur;
-  `tests/unit/icon-map-object-values.test.ts` axtarış obyektlərində saxlanılan adları əhatə edir);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
-  `<span className="material-symbols-outlined">` span-larını `<Icon>` ilə əvəz edir.
-- **Brend.** `src/shared/components/OmniRouteLogo.tsx` dəsti əhatələyir: standart ixrac `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` render edir (sətirdaxili SVG, `basePath` ilə təhlükəsizdir) və
-  `OmniRouteLockup` `ProductLockup product="omniroute"` render edir (əlçatan ad: "Keak OmniRoute"); ağ etiketli
-  operatorlar üçün isə onların öz `name`/`logoSrc` dəyərlərini render edir. Məhsul dəyişdiricisinin təyinatları
-  `src/shared/constants/keakProducts.ts` faylında yerləşir (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Müstəqil
-  ekranlar — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` və `src/shared/components/ErrorPageScaffold.tsx`
-  — lokapı göstərir; `tests/unit/brand-pages-static.test.ts` bunu qoruyur.
+- **Kit.** `packages/ui-kit/src` `packages/ui-kit/UPSTREAM.md` bərkidilmiş icraatda yuxarı axın `src/` -nin bayt-bayt surətidir (o, həmçinin lisenziya icazəsini qeyd edir); `PATCHES.md` yerli yamaqları siyahıya alır (heç biri). O, heç bir quruluş olmadan mənbə kimi istehlak olunur: `next.config.mjs` onu köçürür və `tsconfig.json` xəritələri `@omniroute/ui-kit` → `packages/ui-kit/src` və `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` və `vitest.mcp.config.ts` eyni ləqəbi daşıyır). Kit komponentini heç vaxt `@omniroute/ui-kit` çəlləkindən keçməyərək, alt yolu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) ilə idxal edin: barel hər bir komponenti (tarix seçici daxil olmaqla) hər bir idxalçıya çəkir. Dəstin üslub cədvəli `src/app/globals.css` vasitəsilə daxil olur (`@import "../../packages/ui-kit/src/ci-styles.css"`, tam vərəq: əsas `ci-ui.css` plus hər model ailəsi).
+- **Tokenlər.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlərini elan edir; `src/app/globals.css` onları köhnə OmniRoute adlarına (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) körpü edir, buna görə də mövcud `var(--color-*)` oxuyur və Tailwind utilitləri işləməyə davam edir. Yeni kod Tailwind utilitlərindən (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) və ya dəst siniflərindən — heç vaxt hex dəyərindən istifadə edir (`tests/unit/design-kit-bridge.test.ts` körpünü tətbiq edir). `text-primary` `--text-color-primary` vasitəsilə `--color-primary-ink` -ə həll edir, buna görə də `bg-primary`/`border-primary` vurğu səthini saxlayarkən əsas mətn oxunaqlı qalır: Nəşrlər altında bu dəstin `--ci-color-accent-active` dir (işıqda dərin mis `#99562f`, qaranlıqda mis vurğu); Klassik altında, işıqda lime-800 və qaranlıqda əhəng vurğusu. Diaqram seriyası `--color-chart-1` … `--color-chart-8` istifadə edir, hər biri mətn üçün təhlükəsiz `--color-chart-N-ink` və qeyri-şəffaf `--color-chart-N-subtle` çip rəngi ilə dəst seriyası sırası ilə təyin olunur (`ciChartSeriesOrder`).
+- **Mövzular.** `<html className="ci-theme">` (`src/app/layout.tsx`) sənədi dəst mövzusuna daxil edir. Üstünlük `light`, `dark` və ya `system` (`THEME_CONFIG.defaultTheme = "system"` -də `src/shared/constants/appConfig.ts`; `system` `prefers-color-scheme` izləyir). `src/store/themeStore.ts` -da `applyTheme()` ( `THEME_BOOT_SCRIPT` ilə əks olunur, nəmlənmədən əvvəl işləyən `src/app/layout.tsx` ilə daxil edilir) `data-theme="dark"|"light"` təyin edir və `<html>` -də `.dark` sinfini birlikdə dəyişdirir. Kitin tünd işarə dəsti `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ilə bağlıdır; OmniRoute-in öz qaranlıq ləğvetmələri ( `globals.css` dakı `.dark` bloku) və `.dark` sinfində köhnə Tailwind `dark:` utilitləri açarı. Vurğu rənginin ilkin təyinləri yoxdur: vurğu həmişə dəstdən gəlir və mağaza yükləndikdə köhnə quruluşdan davamlı əvvəlcədən qurulur.
+- **Palitralar.** İki, hər ikisi dəstdən (`src/shared/constants/appearancePalette.ts`): `editions`, default və `classic`. Nəşrlər dəstin `<html>` üzərindəki `data-ci-appearance="editions"` atributudur və `ci-editions.css` ( `ci-ui.css` tərəfindən idxal olunur) `data-theme` ilə birləşir; Klassik atributun yoxluğudur. Kök layout server-atributu göstərir, beləliklə, heç nə saxlanmayan (və ya JS olmayan) ziyarətçi hər bir səthdə — tablosunda, girişdə, `/status`, səhv səhifələrində, `/docs` və PWA də Nəşrlər əldə edir. Seçim eyni `theme` mağazasındakı mövzunun yanında saxlanılır ( `src/store/themeStore.ts`-da `palette`, `setPalette()`, `applyPalette()` ) və `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, tərtibatın `<head>` na daxil edilmiş) ilə rənglənmədən əvvəl tətbiq edilir, bu atributu yalnız saxlanılan palitra `"classic"` olduqda silir; `src/app/global-error.tsx`, kök düzümü xaricində onu eyni mağazadan tətbiq edir. Heç bir başqa elementə `data-ci-appearance` qoymayın: dəst ona `html:root:has([data-ci-appearance="editions"])` ilə uyğun gəlir, ona görə də bir nəsil bütün sənədi dəyişəcək. Editions `data-ci-editions-variant="landing"` variantı idarə paneli üçün deyil, marketinq səhifələri üçündür. Brauzer xromu: server standart Nəşrləri `viewport.themeColor` (hər `prefers-color-scheme` üçün bir teq) və veb manifest — `PWA_THEME_COLORS` `src/shared/constants/pwaThemeColors.ts`-də, `tests/unit/pwa-theme-colors.test.ts` tərəfindən `ci-editions.css` -ə bərkidilmiş Nəşrlərin bir güzgüsü `--ci-color-background` (`#f3f1e9` / `#11120f`) təqdim edir. Canlı `<meta name="theme-color">` daha sonra saxlanılan palitraya və rejimi izləyir: `THEME_BOOT_SCRIPT` boyadan əvvəl teqləri yenidən yazır və mövzu mağazasının hərəkətləri bunu hər dəyişiklikdə edir (`resolveThemeColor()` / `applyThemeColor()` `src/shared/utils/themeColorMeta.ts`-da, `CLASSIC_PAGE_BACKGROUND` dəstin `ciTokens`-dan oxunması ilə). Açıq light/dark mövzusu hər bir teqi həmin rejimə qoyur; `system` hər sxem üçün bir rəng saxlayır. Manifest Nəşrlər olaraq qalır: üstünlük verilmədən hər quraşdırmada bir dəfə alınır. Monako öz rənglərini zonddan oxuyur (`monacoKitTheme.ts`); Nəşrlər altında oxunan zond bir sinxron keçid üçün `data-theme` kökünü çevirir, çünki dəst light/dark Nəşrlərini kökdən həll edir.
+- **Komponentlər (adapterlər).** `src/shared/components/index.tsx` OmniRoute komponentini API (eyni adlar, defolt ixraclar və rekvizitlər) saxlayır və onun arxasındakı primitivlər dəst üzərindəki adapterlərdir: formalar (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`Modal`/ əks `ConfirmModal` `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState`), struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) və cədvəllər (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter dəst komponentini alt yol ilə idxal edir və köhnə rekvizitləri onun üzərinə qoyur — məsələn `Button variant="primary"` dəst `default` düyməsidir (`--ci-button-primary-*`: işıqda tərs səth, qaranlıqda `--ci-color-accent-foreground` mürəkkəbi ilə vurğu), `danger` `destructive` `warning` `warning` kit düyməsidir. `Badge` status variantları dəst tonlarıdır və `<option>` uşaqları olan `Select` dəsti `NativeSelect` göstərir. hər adapterə `tests/unit/ui/adapters/*.test.tsx` pin.
+- **Shell.** `src/app/(dashboard)/layout.tsx` `src/shared/components/layouts/DashboardShell.tsx`-ni göstərən `DashboardLayout` ni göstərir: OmniRoute-nin `src/shared/components/Sidebar.tsx`-də naviqasiya məntiqi ilə `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) dəsti. `#main-content` ə "məzmuna keçmək" bağlantısı diqqəti cəlb edən ilk elementdir. `src/shared/components/Header.tsx` dəsti `SidebarTrigger` (qabığın yeganə yan panel keçidi), Keak `ProductSwitcher` və komanda palitrası açıcısını saxlayır; o, yalnız `#main-content` daxilində heç bir dəst `PageHeader` (`.ci-page-header`) quraşdırılmadıqda marşrutun başlığını göstərir, ona görə də öz `PageHeader` olan səhifənin tək `h1` var. `src/shared/components/CommandPalette.tsx` `Dialog` dəstidir.
+- **Nişanlar.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) adı (ekranların istifadə etdiyi Material Simvol lüğəti) `ICON_MAP` (`src/shared/constants/iconMap.ts`) vasitəsilə Lucide qlifinə həll edir. Material Symbols şrifti və paketi yox oldu: xəritədə olmayan ad neytral yertutan qlifi (`data-icon-missing="true"`) göstərir və istehsaldan kənar konsol xəbərdarlığını qeyd edir. `npm run gen:icon-map` xəritədə əskik olan istifadə olunan adları çap edir (`tests/unit/icon-map-coverage.test.ts` Lucide işarəsi olmayan hər hansı adda uğursuz olur; `tests/unit/icon-map-object-values.test.ts` axtarış obyektlərində saxlanılan adları əhatə edir); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` hərfi `<span className="material-symbols-outlined">` spanlarını `<Icon>`-a yenidən yazır.
+- **Brend.** `src/shared/components/OmniRouteLogo.tsx` dəsti əhatə edir: defolt ixrac `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (daxili SVG, `basePath` -safe) və `OmniRouteLockup` `ProductLockup product="omniroute"` (əlçatan ad "Keak OmniRoute") və ya ağ etiketli operatorlar üçün öz `name`/`logoSrc` göstərir. Məhsul dəyişdirici təyinatları `src/shared/constants/keakProducts.ts` -də yaşayır (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Müstəqil ekranlar — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` və `src/shared/components/ErrorPageScaffold.tsx` — kilidləməni göstərir; `tests/unit/brand-pages-static.test.ts` onu qoruyur.
 
 ## 2. Qaydalar
 
-1. Tokens, heç vaxt hərfi deyil. İstisnalar məqsədyönlü şəkildə saxlanılır: həmişə qaranlıq olan konsol terminalı və `STATUS_HEX` (`src/shared/constants/statusColors.ts`), hərfi hex ehtiyacı olan zəng edənlər üçün kit status palitrasının həll edilmiş hex güzgüsü. Kateqorik palitralar artıq istisna deyil: onlar `src/shared/utils/categoricalPalette.ts` vasitəsilə dəstin beş diaqram nişanı (`--color-chart-1..5`) üzərində işləyirlər və marşrutlaşdırma strategiyaları üçün `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow kənarları və orkestrasiya kətan mövzudan xəbərdar olan `--orch-status-*` dəyişənlərini (`src/shared/components/flow/edgeStyles.ts`) oxuyur.
+1. Tokens, heç vaxt hərfi deyil. İstisnalar məqsədyönlü şəkildə saxlanılır: həmişə qaranlıq olan konsol terminalı və `STATUS_HEX` (`src/shared/constants/statusColors.ts`), hərfi hex ehtiyacı olan zəng edənlər üçün kit status palitrasının həll edilmiş hex güzgüsü. Kateqoriyalı palitralar artıq istisna deyil: onlar dəstin səkkiz diaqram nişanı (`--color-chart-1..8`, plus `-ink`/`-subtle`), `src/shared/utils/categoricalPalette.ts` vasitəsilə dəstin seriyası sırası ilə və marşrutlaşdırma strategiyaları üçün `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow kənarları və orkestrasiya kətan mövzudan xəbərdar `--orch-status-*` dəyişənlərini (`src/shared/components/flow/edgeStyles.ts`) oxuyur.
 2. Heç vaxt `packages/ui-kit/src` əl ilə yamaq etməyin: `scripts/dev/sync-ui-kit.sh <commit>` ilə sinxronizasiya edin; əvvəlcədən icra qapısı `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) bərkidilmiş yuxarı commitdən fərqlənən hər hansı baytda uğursuz olur (yuxarı axın klonu, `UI_KIT_CLONE` və ya `_references/cheaper-inference-ui-kit` olmadıqda, xəbərdarlıqla ötürülür). Dəstdə bir şey çatışmırsa, adapterdə və ya ekranda onun ətrafında işləyin və onu yuxarıdan soruşun.
-3. Kit mətninin defoltları ingilis dilidir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — dəst komponenti mətni təqdim etdikdə `useTranslations(...)` dən tərcümə edilmiş sətirləri ötürün.
-4. Tailwind utilitləri dəst komponent sinifləri üzərində qalib gəlir (kit `@layer theme, base, components, utilities` elan edir və onun qaydaları `components` də yaşayır) — dəst komponentlərini yenidən rəngləmək üçün deyil, boşluqlar və yerləşdirmə üçün utilitlərdən istifadə edin.
+3. Kit mətninin defoltları ingiliscədir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti mətni hər dəfə təqdim etdikdə `useTranslations(...)` dən tərcümə edilmiş sətirləri keçir.
+4. Tailwind utilitləri dəst komponent sinifləri üzərində qalib gəlir (kit `@layer theme, base, components, utilities` elan edir və onun qaydaları `components`-də yaşayır) — dəst komponentlərini yenidən rəngləndirmək üçün deyil, boşluqlar və yerləşdirmə üçün utilitlərdən istifadə edir.
 5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` ; `.ci-dashboard-display` yalnız səhv səhifəsi status kodu kimi böyük, seyrək ekran mətni üçün. Hər ikisi Switzer istifadə edir.
 6. `tests/unit/dashboard-kit-sweep.test.ts` kitin qəbulunu qoruyur: `src/app` və ya `src/shared/components` altında heç bir Material ligature span; tablosuna ağacda (`src/app/(dashboard)` və `src/shared/components`) heç bir xam `<select>`, `<textarea>` və ya `<table>` və sadalanan istisnalar xaricində əl ilə yuvarlanan `role="dialog"` yoxdur ( `Select` adapterinin yerli filialı, `RequestLoggerDetail`); orada hər xam `<button>` və ya `<input>` yuxarıda ən çox 3 sətirlə bitən `kit-exception:` (səbəbi ilə) olan şərhə ehtiyac duyur; palitra çalarları və `dark:` variantları yalnız testin sadaladığı fayllarda.
 7. PR dan əvvəl həm mövzuları, həm də 390 px görüntü pəncərəsini yoxlayın (skrinşotlar); `tests/e2e/a11y.spec.ts` balta işlədir.

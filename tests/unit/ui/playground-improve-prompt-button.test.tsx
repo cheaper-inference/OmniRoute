@@ -47,7 +47,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// KEA-7886: the confirmation is the kit Dialog (ConfirmModal adapter), portaled to
+// KEA-7886: the confirmation is the kit AlertDialog (ConfirmModal adapter), portaled to
 // document.body — dialog queries go to the document, not to the render container.
 describe("ImprovePromptButton", () => {
   it("renders the Improve prompt button", () => {
@@ -78,7 +78,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = document.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='alertdialog']");
     expect(modal).not.toBeNull();
     expect(modal?.textContent).toContain("Improve prompt");
   });
@@ -91,7 +91,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = document.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='alertdialog']");
     expect(modal?.textContent).toContain("quota");
   });
 
@@ -103,7 +103,7 @@ describe("ImprovePromptButton", () => {
       btn.click();
     });
 
-    const modal = document.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='alertdialog']");
     expect(modal?.textContent).toContain("openai/gpt-4o");
   });
 
@@ -117,14 +117,14 @@ describe("ImprovePromptButton", () => {
     });
 
     const cancelBtn = document.querySelector(
-      "[role='dialog'] button:first-child"
+      "[role='alertdialog'] button:first-child"
     ) as HTMLButtonElement;
     await act(async () => {
       cancelBtn.click();
     });
 
     // Modal should close
-    expect(document.querySelector("[role='dialog']")).toBeNull();
+    expect(document.querySelector("[role='alertdialog']")).toBeNull();
     expect(vi.mocked(fetch)).not.toHaveBeenCalled();
   });
 
@@ -156,7 +156,7 @@ describe("ImprovePromptButton", () => {
     });
 
     // Click confirm (Improve button)
-    const modal = document.querySelector("[role='dialog']");
+    const modal = document.querySelector("[role='alertdialog']");
     const allBtns = modal?.querySelectorAll("button") ?? [];
     const improveBtn = Array.from(allBtns).find(
       (b) => b.textContent?.includes("Improve") && !b.textContent?.includes("Improve prompt")

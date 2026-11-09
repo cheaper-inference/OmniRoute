@@ -1,3 +1,4 @@
+import { logicalCallSql } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
 import { SEARCH_PROVIDERS } from "@omniroute/open-sse/config/searchRegistry.ts";
@@ -84,7 +85,7 @@ export const PROVIDER_CALL_STATS_SQL = `SELECT
   SUM(c.tokens_out) AS totalTokensOut
 FROM call_logs c
 LEFT JOIN provider_nodes pn ON pn.id = c.provider
-WHERE c.provider IS NOT NULL AND c.provider != '-'
+WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL AND c.provider != '-'
   AND c.timestamp >= @since
   AND (${LIVE_PROVIDER_SQL})
 GROUP BY c.provider
@@ -103,7 +104,8 @@ export const MODEL_CALL_STATS_SQL = `SELECT
   SUM(CASE WHEN c.status >= 200 AND c.status < 400 THEN 1 ELSE 0 END) AS successfulRequests
 FROM call_logs c
 LEFT JOIN provider_nodes pn ON pn.id = c.provider
-WHERE c.provider IS NOT NULL AND c.model IS NOT NULL
+WHERE NOT EXISTS (SELECT 1 FROM call_logs c2 WHERE c2.id = c.id AND NOT ${logicalCallSql("c2")})
+  AND c.provider IS NOT NULL AND c.model IS NOT NULL
   AND c.timestamp >= @since
   AND (${LIVE_PROVIDER_SQL})
 GROUP BY c.provider, c.model

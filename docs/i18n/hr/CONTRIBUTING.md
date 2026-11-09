@@ -17,13 +17,18 @@ pokrivenost i korake usklađivanja.
 
 ### Preduvjeti
 
-- **Node.js** `>=22.22.2 <23` ili `>=24.0.0 <27` (preporučeno: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Korisnici verzije npm v11+ (Node 24+):** Nakon naredbe `npm install` provjerite jesu li nativni moduli instalirani:
-> `node -e "require('better-sqlite3')"`. Ako naredba ne uspije uz pogrešku `MODULE_NOT_FOUND`,
+> **Windows s Node 24:** koristite trenutačno izdanje zakrpe 24 LTS (najmanje 24.20.0).
+> Ranija izdanja mogu prekinuti rad nakon uspješnih testova kada `--test-force-exit` zatvori
+> proces. Nodeov [Windows libuv ispravak](https://github.com/nodejs/node/pull/61999) rješava
+> ovaj pad tijekom izvođenja; provjere tvrdnji testova i izlaza pokretača ostavite uključene.
+
+> **Korisnici npm v11+ (Node 24+):** nakon `npm install` provjerite jesu li izvorni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako ne uspije s `MODULE_NOT_FOUND`,
 > pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
-> [Rješavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> [Otklanjanje poteškoća](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -38,86 +43,85 @@ npm install
 ### Varijable okruženja
 
 ```bash
-# Izradite svoj .env prema predlošku
+# Izradite svoj .env iz predloška
 cp .env.example .env
 
-# Generirajte potrebne tajne ključeve
+# Generirajte potrebne tajne
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Ključne varijable za razvoj:
 
-| Varijabla              | Zadana razvojna vrijednost | Opis                              |
-| ---------------------- | -------------------------- | --------------------------------- |
-| `PORT`                 | `20128`                    | Port poslužitelja                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za sučelje            |
-| `JWT_SECRET`           | (generirajte iznad)        | Tajni ključ za potpisivanje JWT-a |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Lozinka za prvu prijavu           |
-| `APP_LOG_LEVEL`        | `info`                     | Razina opširnosti zapisnika       |
+| Varijabla              | Zadana vrijednost za razvoj | Opis                        |
+| ---------------------- | --------------------------- | --------------------------- |
+| `PORT`                 | `20128`                     | Port poslužitelja           |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Osnovni URL za sučelje      |
+| `JWT_SECRET`           | (generirajte iznad)         | Tajna za potpisivanje JWT-a |
+| `INITIAL_PASSWORD`     | `CHANGEME`                  | Lozinka za prvu prijavu     |
+| `APP_LOG_LEVEL`        | `info`                      | Razina opširnosti zapisnika |
 
 ### Postavke nadzorne ploče
 
-Nadzorna ploča pruža kontrole korisničkog sučelja za značajke koje se također mogu konfigurirati putem varijabli okruženja:
+Nadzorna ploča pruža UI prekidače za značajke koje se također mogu konfigurirati putem varijabli okruženja:
 
-| Lokacija postavke   | Kontrola                            | Opis                                                       |
-| ------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| Postavke → Napredno | Način rada za otklanjanje pogrešaka | Omogućuje zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
-| Postavke → Općenito | Vidljivost bočne trake              | Prikazuje/skriva odjeljke bočne trake                      |
+| Lokacija postavke   | Prekidač           | Opis                                                     |
+| ------------------- | ------------------ | -------------------------------------------------------- |
+| Settings → Advanced | Debug Mode         | Omogući zapisnike zahtjeva za otklanjanje poteškoća (UI) |
+| Settings → General  | Sidebar Visibility | Prikaži/sakrij odjeljke bočne trake                      |
 
-Te se postavke pohranjuju u bazu podataka i zadržavaju nakon ponovnih pokretanja, pri čemu, ako su postavljene, nadjačavaju zadane vrijednosti varijabli okruženja.
+Te se postavke pohranjuju u bazi podataka i zadržavaju nakon ponovnog pokretanja, nadjačavajući zadane vrijednosti varijabli okruženja kada su postavljene.
 
 ### Lokalno pokretanje
 
 ```bash
-# Razvojni način rada (automatsko ponovno učitavanje)
+# Razvojni način (ponovno učitavanje bez ponovnog pokretanja)
 npm run dev
 
 # Produkcijska izgradnja
-npm run build    # next build → .build/next/, zatim assembleStandalone → dist/
+npm run build    # next build → .build/next/ zatim assembleStandalone → dist/
 npm run start
 
-# Brzo kompajliranje samo pozadinskog sustava/API-ja za izmjene suradnika
+# Brza kompilacija samo pozadine/API-ja za promjene suradnika
 npm run build:contributor
 
-# Izgradnja izdanja (čista ponovna izgradnja + kontrolna oznaka HEAD — obavezno za implementaciju)
-npm run build:release   # rm -rf .build dist && izgradnja + zapisuje dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + HEAD sentinel — potrebno za implementaciju)
+npm run build:release   # rm -rf .build dist && build + zapisuje dist/BUILD_SHA
 
 # Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Izgradnja za suradnike provodi samo provjeru kompajliranjem: ne sastavlja samostalnu
-distribuciju niti izrađuje dodatne nativne resurse za pakiranje. Upotrijebite uobičajenu produkcijsku izgradnju kada
+Izgradnja za suradnike obavlja provjeru samo kompilacije: ne sastavlja samostalnu
+distribuciju niti izgrađuje neobavezna izvorna sredstva za pakiranje. Koristite uobičajenu produkcijsku izgradnju kada
 trebate provjeriti paket spreman za isporuku.
 
-### Raspored izlaznih datoteka izgradnje
+### Raspored izlaza izgradnje
 
-| Direktorij | Sadržaj                                                                                | Prati se |
-| ---------- | -------------------------------------------------------------------------------------- | -------- |
-| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                              | Da       |
-| `.build/`  | Međurezultati — izlaz naredbe `next build` (zanemaren u Gitu, `distDir = .build/next`) | Ne       |
-| `dist/`    | Paket spreman za isporuku — sastavlja ga `assembleStandalone` (zanemaren u Gitu)       | Ne       |
+| Direktorij | Sadržaj                                                                          | Praćen |
+| ---------- | -------------------------------------------------------------------------------- | ------ |
+| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                        | Da     |
+| `.build/`  | Međurezultati — izlaz `next build` (zanemaren u Gitu, `distDir = .build/next`)   | Ne     |
+| `dist/`    | Paket spreman za isporuku — sastavlja ga `assembleStandalone` (zanemaren u Gitu) | Ne     |
 
 Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (izlaz alata Next.js)
-  └─ assembleStandalone()                 (kopira samostalnu verziju + statičke + javne + nativne resurse)
-       └─ izlaz: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (izlaz Next.jsa)
+  └─ assembleStandalone()                 (kopira standalone + static + public + native assets)
+       └─ izlaz: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` dodatno najprije čisti oba direktorija i zapisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolnu oznaku integriteta implementacije.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao sentinel integriteta za implementaciju.
 
-`npm run build:contributor` koristi profil izgradnje samo za pozadinski sustav. Tijekom izgradnje privremeno zamjenjuje
-datoteke korisničkog sučelja nadzorne ploče pomoćnim datotekama, zadržava rukovatelje API ruta i vraća izvorne datoteke
-nakon izgradnje. Upotrijebite `npm run build` za izmjene koje utječu na korisničko sučelje nadzorne ploče ili za potpunu
-provjeru izdanja; profil za suradnike nije zamjena za izgradnju izdanja.
+`npm run build:contributor` koristi profil izgradnje samo za pozadinu. Privremeno zamjenjuje
+datoteke UI-ja nadzorne ploče pomoćnim datotekama tijekom izgradnje, zadržava rukovatelje API ruta
+i vraća izvorne datoteke nakon izgradnje. Koristite `npm run build` za promjene koje utječu na UI nadzorne ploče ili za potpunu provjeru izdanja; profil za suradnike nije zamjena za izgradnju izdanja.
 
-> **Napomena o implementaciji na VPS-u:** udaljeni direktorij slike `/usr/lib/node_modules/omniroute/app/`
-> ostaje nepromijenjen. Postupci implementacije pomoću alata rsync sinkroniziraju sadržaj direktorija `dist/` s njim.
+> **Napomena o implementaciji na VPS-u:** udaljeni direktorij slika `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromijenjen. Vještine implementacije rsyncaju sadržaj direktorija `dist/` u njega.
 > Promijenjena je samo putanja izlaza izgradnje unutar repozitorija (`app/` → `dist/`).
 
 Zadani URL-ovi:

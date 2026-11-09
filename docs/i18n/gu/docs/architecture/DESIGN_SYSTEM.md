@@ -16,100 +16,25 @@
 > સિરિલિક, ગ્રીક અને વિયેતનામી માટે Inter અને માત્ર `html[dir="rtl"]` હેઠળ અરબી લિપિ માટે Vazirmatn વપરાય છે.
 > દરેક આઇકન Lucide ગ્લિફ છે.
 
-## 1. વસ્તુઓ ક્યાં સ્થિત છે
+## 1. જ્યાં વસ્તુઓ રહે છે
 
-- **કિટ.** `packages/ui-kit/src`, `packages/ui-kit/UPSTREAM.md`માં પિન કરેલા કમિટ પરના અપસ્ટ્રીમ `src/`ની બાઇટ-દર-બાઇટ નકલ છે (જે લાઇસન્સ અધિકૃતતાની નોંધ પણ રાખે છે); `PATCHES.md` સ્થાનિક
-  પૅચોની યાદી આપે છે (કોઈ નથી). તેનો કોઈ બિલ્ડ વિના સ્રોત તરીકે ઉપયોગ થાય છે: `next.config.mjs` તેને ટ્રાન્સપાઇલ કરે છે, અને
-  `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` તથા `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` મેપ કરે છે (`vitest.config.ts` અને `vitest.mcp.config.ts`માં પણ આ જ ઉપનામ છે). કિટ કમ્પોનન્ટને
-  તેના સબપાથ દ્વારા ઇમ્પોર્ટ કરો (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ક્યારેય
-  `@omniroute/ui-kit` બેરલ મારફતે નહીં: બેરલ દરેક ઇમ્પોર્ટરમાં બધા કમ્પોનન્ટ (તારીખ પિકર સહિત)
-  ખેંચી લાવે છે. કિટ સ્ટાઇલશીટ `src/app/globals.css` મારફતે આવે છે
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **ટોકન્સ.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` ટોકન્સ જાહેર કરે છે; `src/app/globals.css`
-  તેમને લેગસી OmniRoute નામો (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) સાથે જોડે છે, જેથી હાલનાં `var(--color-*)` રીડ્સ અને Tailwind
-  યુટિલિટીઝ કાર્યરત રહે. નવો કોડ Tailwind યુટિલિટીઝ (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) અથવા કિટ ક્લાસનો ઉપયોગ કરે છે — હેક્સ મૂલ્યનો ક્યારેય નહીં
-  (`tests/unit/design-kit-bridge.test.ts` આ બ્રિજને અમલમાં રાખે છે). `text-primary`,
-  `--text-color-primary` મારફતે `--color-primary-ink` તરીકે રિઝોલ્વ થાય છે, જેથી પ્રાથમિક ટેક્સ્ટ વાંચી શકાય તેવું રહે છે, જ્યારે
-  `bg-primary`/`border-primary` એક્સન્ટ સપાટી જાળવી રાખે છે: Editions હેઠળ તે કિટનું
-  `--ci-color-accent-active` છે (લાઇટમાં ઘેરો કોપર `#99562f`, ડાર્કમાં કોપર એક્સન્ટ); Classic હેઠળ,
-  લાઇટમાં lime-800 અને ડાર્કમાં લાઇમ એક્સન્ટ. ચાર્ટ શ્રેણીઓ
-  `--color-chart-1` … `--color-chart-5`નો ઉપયોગ કરે છે.
-- **થીમ્સ.** `<html className="ci-theme">` (`src/app/layout.tsx`) દસ્તાવેજને કિટ થીમમાં સામેલ કરે છે.
-  પસંદગી `light`, `dark` અથવા `system` છે (`src/shared/constants/appConfig.ts`માં `THEME_CONFIG.defaultTheme = "system"`;
-  `system`, `prefers-color-scheme`ને અનુસરે છે). `src/store/themeStore.ts`માંનું `applyTheme()` (
-  `THEME_BOOT_SCRIPT` દ્વારા પ્રતિબિંબિત, `src/app/layout.tsx`માં ઇનલાઇન કરેલું, જે હાઇડ્રેશન પહેલાં ચાલે છે)
-  `data-theme="dark"|"light"` સેટ કરે છે અને સાથે `<html>` પર `.dark` ક્લાસ ટૉગલ કરે છે.
-  કિટનો ડાર્ક ટોકન સેટ `data-theme="dark"` પર આધારિત છે (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRouteના પોતાના ડાર્ક ઓવરરાઇડ્સ (`globals.css`માંનો `.dark` બ્લોક) અને લેગસી Tailwind `dark:`
-  યુટિલિટીઝ `.dark` ક્લાસ પર આધારિત છે. કોઈ એક્સન્ટ રંગ પ્રીસેટ નથી: એક્સન્ટ હંમેશાં કિટમાંથી આવે છે,
-  અને સ્ટોર લોડ થાય ત્યારે જૂના બિલ્ડમાંથી પર્સિસ્ટ થયેલું પ્રીસેટ દૂર કરવામાં આવે છે.
-- **પૅલેટ્સ.** બે છે, બંને કિટમાંથી (`src/shared/constants/appearancePalette.ts`): `editions`, જે
-  ડિફૉલ્ટ છે, અને `classic`. Editions એ `<html>` પર કિટનું `data-ci-appearance="editions"` એટ્રિબ્યુટ છે, જેને
-  `ci-editions.css` (`ci-ui.css` દ્વારા ઇમ્પોર્ટ થયેલું) `data-theme` સાથે સંયોજિત કરે છે; Classic એટલે આ એટ્રિબ્યુટની
-  ગેરહાજરી. રૂટ લેઆઉટ આ એટ્રિબ્યુટને સર્વર-રેન્ડર કરે છે, જેથી કશું સંગ્રહિત ન ધરાવતા મુલાકાતીને (અથવા JS ન હોય તો)
-  દરેક સપાટી પર Editions મળે છે — ડૅશબોર્ડ, લૉગિન, `/status`, ભૂલ પૃષ્ઠો, `/docs` અને PWA. પસંદગી
-  એ જ `theme` સ્ટોરમાં થીમની બાજુમાં પર્સિસ્ટ થાય છે (`src/store/themeStore.ts`માં `palette`, `setPalette()`, `applyPalette()`)
-  અને પેઇન્ટ પહેલાં `THEME_BOOT_SCRIPT` દ્વારા લાગુ થાય છે
-  (`src/shared/utils/themeBootScript.ts`, લેઆઉટના `<head>`માં ઇનલાઇન કરેલું), જે એટ્રિબ્યુટને
-  માત્ર ત્યારે દૂર કરે છે જ્યારે સંગ્રહિત પૅલેટ `"classic"` હોય; રૂટ લેઆઉટની બહારનું `src/app/global-error.tsx`, તેને
-  એ જ સ્ટોરમાંથી લાગુ કરે છે. અન્ય કોઈ એલિમેન્ટ પર `data-ci-appearance` મૂકશો નહીં: કિટ તેને
-  `html:root:has([data-ci-appearance="editions"])` વડે મેચ કરે છે, તેથી એક ડિસેન્ડન્ટ આખા દસ્તાવેજને સ્વિચ કરી દેશે.
-  Editionsનું `data-ci-editions-variant="landing"` વેરિઅન્ટ માર્કેટિંગ પૃષ્ઠો માટે છે, ડૅશબોર્ડ માટે નહીં.
-  બ્રાઉઝર ક્રોમ (`viewport.themeColor`, વેબ મેનિફેસ્ટ) CSS અથવા સંગ્રહિત પસંદગી વાંચી શકતું નથી, તેથી તે
-  ડિફૉલ્ટને અનુસરે છે: `src/shared/constants/pwaThemeColors.ts`માં `PWA_THEME_COLORS`, Editionsના
-  `--ci-color-background` (`#f3f1e9` / `#11120f`)નું એકમાત્ર પ્રતિબિંબ છે, જેને
-  `tests/unit/pwa-theme-colors.test.ts` દ્વારા `ci-editions.css` સાથે પિન કરેલું છે. Monaco તેના રંગો એક પ્રોબમાંથી વાંચે છે (`monacoKitTheme.ts`);
-  Editions હેઠળ પ્રોબ રીડ એક સિંક્રોનસ પાસ માટે રૂટ `data-theme`ને ફ્લિપ કરે છે, કારણ કે કિટ
-  રૂટમાંથી Editionsનું લાઇટ/ડાર્ક રિઝોલ્વ કરે છે.
-- **કમ્પોનન્ટ્સ (એડેપ્ટર્સ).** `src/shared/components/index.tsx`, OmniRoute કમ્પોનન્ટ API (એ જ
-  નામો, ડિફૉલ્ટ એક્સપોર્ટ્સ અને પ્રોપ્સ) જાળવી રાખે છે, અને તેની પાછળના પ્રિમિટિવ્સ કિટ પરના એડેપ્ટર્સ છે: ફોર્મ્સ
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), ઓવરલેઝ અને ફીડબૅક
-  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
-  માળખું (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) અને કોષ્ટકો
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). એડેપ્ટર કિટ
-  કમ્પોનન્ટને સબપાથ દ્વારા ઇમ્પોર્ટ કરે છે અને લેગસી પ્રોપ્સને તેના પર મેપ કરે છે — ઉદાહરણ તરીકે `Button variant="primary"` એ
-  કિટનું `default` બટન છે (`--ci-button-primary-*`: લાઇટમાં ઇન્વર્સ સપાટી, ડાર્કમાં તેના
-  `--ci-color-accent-foreground` ઇંક સાથેનો એક્સન્ટ), `danger` એટલે `destructive`, અને `warning` એટલે `outline` સાથે
-  `.ci-button--warning` એક્સ્ટેન્શન. `globals.css`ના અંતે (`@layer components`) રહેલા
-  `.ci-button--warning` અને `.ci-badge[data-tone]` નિયમો કિટ ક્લાસ પરનાં OmniRoute એક્સ્ટેન્શન્સ છે.
-  `tests/unit/ui/adapters/*.test.tsx` દરેક એડેપ્ટરને પિન કરે છે.
-- **શેલ.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` રેન્ડર કરે છે, જે
-  `src/shared/components/layouts/DashboardShell.tsx` રેન્ડર કરે છે: કિટના `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), જેમાં OmniRouteનું નેવિગેશન લૉજિક
-  `src/shared/components/Sidebar.tsx`માં છે. `#main-content` તરફની "કન્ટેન્ટ પર જાઓ" લિંક પ્રથમ ફોકસ કરી શકાય તેવું
-  એલિમેન્ટ છે. `src/shared/components/Header.tsx`માં કિટનું `SidebarTrigger` (શેલનું એકમાત્ર સાઇડબાર
-  ટૉગલ), Keak `ProductSwitcher` અને કમાન્ડ-પૅલેટ ઓપનર છે; તે રૂટ શીર્ષક માત્ર ત્યારે દર્શાવે છે જ્યારે
-  `#main-content`ની અંદર કોઈ કિટ `PageHeader` (`.ci-page-header`) માઉન્ટ થયેલું ન હોય, જેથી પોતાનું
-  `PageHeader` ધરાવતા પૃષ્ઠમાં એક જ `h1` રહે. `src/shared/components/CommandPalette.tsx` એ કિટનું `Dialog` છે.
-- **ચિહ્નો.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) નામને (સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતી
-  Material Symbols શબ્દાવલી) `ICON_MAP` (`src/shared/constants/iconMap.ts`) મારફતે
-  Lucide ગ્લિફમાં રૂપાંતરિત કરે છે. Material Symbols ફોન્ટ અને પૅકેજ દૂર કરવામાં આવ્યાં છે: મૅપમાં ન હોય તેવું નામ
-  તટસ્થ પ્લેસહોલ્ડર ગ્લિફ (`data-icon-missing="true"`) રેન્ડર કરે છે અને productionની બહાર કન્સોલ ચેતવણી લૉગ કરે છે.
-  `npm run gen:icon-map` ઉપયોગમાં હોય પરંતુ મૅપમાં ન હોય તેવાં નામ પ્રિન્ટ કરે છે
-  (`tests/unit/icon-map-coverage.test.ts` Lucide ચિહ્ન વિનાના કોઈપણ નામ પર નિષ્ફળ જાય છે;
-  `tests/unit/icon-map-object-values.test.ts` લુકઅપ ઑબ્જેક્ટમાં સંગ્રહિત નામોને આવરી લે છે);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` લિટરલ
-  `<span className="material-symbols-outlined">` સ્પૅનને `<Icon>` તરીકે ફરી લખે છે.
-- **બ્રાન્ડ.** `src/shared/components/OmniRouteLogo.tsx` કિટને આવરે છે: ડિફૉલ્ટ એક્સપોર્ટ `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"` (ઇનલાઇન SVG, `basePath`-સુરક્ષિત) રેન્ડર કરે છે અને
-  `OmniRouteLockup`, `ProductLockup product="omniroute"` (ઍક્સેસિબલ નામ "Keak OmniRoute") અથવા
-  વ્હાઇટ-લેબલ ઑપરેટરો માટે તેમનું પોતાનું `name`/`logoSrc` રેન્ડર કરે છે. પ્રોડક્ટ-સ્વિચરનાં ગંતવ્યો
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`)માં છે. સ્વતંત્ર
-  સ્ક્રીનો — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` અને `src/shared/components/ErrorPageScaffold.tsx`
-  — લૉકઅપ દર્શાવે છે; `tests/unit/brand-pages-static.test.ts` તેનું રક્ષણ કરે છે.
+- **કિટ.** `packages/ui-kit/src` એ `packages/ui-kit/UPSTREAM.md` માં પિન કરેલ કમીટ પર અપસ્ટ્રીમ `src/` ની બાઈટ-બદ-બાઈટ નકલ છે (જે લાયસન્સ અધિકૃતતા પણ રેકોર્ડ કરે છે); `PATCHES.md` સ્થાનિક પેચોની યાદી આપે છે (કોઈ નહીં). તે સ્ત્રોત તરીકે ઉપયોગમાં લેવાય છે, જેમાં કોઈ બિલ્ડ નથી: `next.config.mjs` તેને ટ્રાન્સપીલ કરે છે, અને `tsconfig.json` નકશા `@omniroute/ui-kit` → `packages/ui-kit/src` અને `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` અને `vitest.mcp.config.ts` સમાન ઉપનામ ધરાવે છે). કિટ ઘટકને તેના સબપાથ દ્વારા આયાત કરો (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ક્યારેય `@omniroute/ui-kit` બેરલ દ્વારા: બેરલ દરેક આયાતકારમાં દરેક ઘટક (તારીખ પીકર સહિત) ખેંચે છે. કીટ સ્ટાઈલશીટ `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, સંપૂર્ણ શીટ: કોર `ci-ui.css` વત્તા દરેક પેટર્ન કુટુંબ) દ્વારા પ્રવેશે છે.
+- **ટોકન્સ.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` ટોકન્સ જાહેર કરે છે; `src/app/globals.css` તેમને લેગસી OmniRoute નામો (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) સાથે જોડે છે, તેથી હાલની `var(--color-*)` રીડ અને Tailwind ઉપયોગિતાઓ કામ કરતી રહે છે. નવો કોડ Tailwind ઉપયોગિતાઓનો ઉપયોગ કરે છે (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) અથવા કિટ વર્ગો — ક્યારેય હેક્સ મૂલ્ય નથી (`tests/unit/design-kit-bridge.test.ts` પુલને લાગુ કરે છે). `text-primary` એ `--text-color-primary` દ્વારા `--color-primary-ink` ને ઉકેલે છે, તેથી પ્રાથમિક લખાણ વાંચી શકાય તેવું રહે છે જ્યારે `bg-primary`/`border-primary` ઉચ્ચાર સપાટી રાખે છે: આવૃત્તિઓ હેઠળ તે કિટનું `--ci-color-accent-active` છે (પ્રકાશમાં ઊંડા કોપર `#99562f`, અંધારામાં કોપર ઉચ્ચાર); ક્લાસિક હેઠળ, પ્રકાશમાં lime-800 અને અંધારામાં ચૂનો ઉચ્ચાર. ચાર્ટ સિરીઝ `--color-chart-1` … `--color-chart-8` ઉપયોગ કરે છે, પ્રત્યેક ટેક્સ્ટ-સેફ `--color-chart-N-ink` અને અપારદર્શક `--color-chart-N-subtle` ચિપ ટિન્ટ સાથે, કિટ શ્રેણીના ક્રમમાં સોંપેલ છે (`ciChartSeriesOrder`).
+- **થીમ્સ.** `<html className="ci-theme">` (`src/app/layout.tsx`) દસ્તાવેજને કીટ થીમમાં પસંદ કરે છે. પસંદગી `light`, `dark` અથવા `system` છે ( `src/shared/constants/appConfig.ts` માં`THEME_CONFIG.defaultTheme = "system"` ; `system` `prefers-color-scheme` ને અનુસરે છે). `src/store/themeStore.ts` માં `applyTheme()` ( `THEME_BOOT_SCRIPT` દ્વારા પ્રતિબિંબિત, `src/app/layout.tsx` માં ઇનલાઇન, જે હાઇડ્રેશન પહેલા ચાલે છે) `data-theme="dark"|"light"` સેટ કરે છે અને `<html>` પર `.dark` ક્લાસને એકસાથે ટૉગલ કરે છે. કીટનો ડાર્ક ટોકન સેટ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute ની પોતાની ડાર્ક ઓવરરાઇડ્સ ( `globals.css` માં `.dark` બ્લોક) અને `.dark` ક્લાસ પર લેગસી Tailwind `dark:` યુટિલિટીઝ કી. ત્યાં કોઈ ઉચ્ચારણ રંગ પ્રીસેટ્સ નથી: ઉચ્ચાર હંમેશા કીટમાંથી આવે છે, અને જ્યારે સ્ટોર લોડ થાય છે ત્યારે જૂની બિલ્ડમાંથી સતત પ્રીસેટ છોડવામાં આવે છે.
+- **પૅલેટ્સ.** બે, બંને કીટમાંથી (`src/shared/constants/appearancePalette.ts`): `editions`, ડિફોલ્ટ અને `classic`. એડિશન એ `<html>` પર કિટની `data-ci-appearance="editions"` વિશેષતા છે, જે `ci-editions.css` ( `ci-ui.css` દ્વારા આયાત કરેલ) `data-theme` સાથે જોડાય છે; ક્લાસિક એ વિશેષતાની ગેરહાજરી છે. રુટ લેઆઉટ સર્વર એટ્રિબ્યુટને રેન્ડર કરે છે, તેથી કોઈ મુલાકાતીને કંઈપણ સંગ્રહિત નથી (અથવા કોઈ JS નથી) દરેક સપાટી પર — ડેશબોર્ડ, લૉગિન, `/status`, ભૂલ પૃષ્ઠો, `/docs` અને PWA પર આવૃત્તિઓ મળે છે. પસંદગી એ જ `theme` સ્ટોરમાં થીમની બાજુમાં રહે છે (`palette`, `setPalette()`, `src/store/themeStore.ts` માં `applyPalette()` ) અને `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, લેઆઉટના `<head>` માં ઇનલાઇન કરેલ) દ્વારા પેઇન્ટ પહેલાં લાગુ કરવામાં આવે છે, જે સંગ્રહિત પેલેટ `"classic"` હોય ત્યારે જ લક્ષણને દૂર કરે છે; `src/app/global-error.tsx`, રૂટ લેઆઉટની બહાર, તે જ સ્ટોરમાંથી લાગુ થાય છે. અન્ય કોઈપણ ઘટક પર `data-ci-appearance` નાખશો નહીં: કિટ તેની સાથે `html:root:has([data-ci-appearance="editions"])` સાથે મેળ ખાય છે, તેથી એક વંશજ સમગ્ર દસ્તાવેજને સ્વિચ કરશે. આવૃત્તિઓ `data-ci-editions-variant="landing"` વેરિઅન્ટ માર્કેટિંગ પૃષ્ઠો માટે છે, ડેશબોર્ડ માટે નહીં. બ્રાઉઝર ક્રોમ: સર્વર ડિફૉલ્ટ, એડિશનને `viewport.themeColor` ( `prefers-color-scheme` દીઠ એક ટૅગ) અને `src/shared/constants/pwaThemeColors.ts` માં વેબ મેનિફેસ્ટ — `PWA_THEME_COLORS` રેન્ડર કરે છે, આવૃત્તિઓ `--ci-color-background` (`#f3f1e9` / `#11120f`), `tests/unit/pwa-theme-colors.test.ts` દ્વારા `ci-editions.css` પર પિન કરેલ છે. લાઇવ `<meta name="theme-color">` પછી સંગ્રહિત પેલેટ અને મોડને અનુસરે છે: `THEME_BOOT_SCRIPT` પેઇન્ટ કરતા પહેલા ટૅગ્સને ફરીથી લખે છે અને થીમ સ્ટોરની ક્રિયાઓ દરેક ફેરફાર પર કરે છે ( `src/shared/utils/themeColorMeta.ts` માં`resolveThemeColor()` / `applyThemeColor()`, કિટના `ciTokens` માંથી `CLASSIC_PAGE_BACKGROUND` વાંચવા સાથે). એક સ્પષ્ટ light/dark થીમ દરેક ટેગને તે મોડ પર સેટ કરે છે; `system` યોજના દીઠ એક રંગ રાખે છે. મેનિફેસ્ટ આવૃત્તિઓ રહે છે: તે પસંદગી વિના, ઇન્સ્ટોલ દીઠ એકવાર મેળવવામાં આવે છે. મોનાકો તેના રંગોને ચકાસણી (`monacoKitTheme.ts`); આવૃત્તિઓ હેઠળ ચકાસણી રીડ રૂટ `data-theme` એક સિંક્રનસ પાસ માટે ફ્લિપ કરે છે, કારણ કે કિટ રુટમાંથી આવૃત્તિઓ light/dark ઉકેલે છે.
+- **ઘટકો (એડેપ્ટરો).** `src/shared/components/index.tsx` એ OmniRoute ઘટક API (સમાન નામો, ડિફૉલ્ટ નિકાસ અને પ્રોપ્સ) રાખે છે, અને તેની પાછળના આદિમ કીટ પર એડેપ્ટર છે: ફોર્મ્સ (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge` `EmptyState` `Loading` `Modal` `ConfirmModal` `Tooltip` `InfoTooltip` `NotificationToast` `Card` `Collapsible` `CollapsibleSection` `SegmentedControl`, `Breadcrumbs`, `Avatar`) અને કોષ્ટકો (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). એડેપ્ટર સબપાથ દ્વારા કીટ ઘટકને આયાત કરે છે અને તેના પર — પર લેગસી પ્રોપ્સનો નકશો બનાવે છે ઉદાહરણ તરીકે `Button variant="primary"` એ કીટ `default` બટન છે (`--ci-button-primary-*`: પ્રકાશમાં વિપરીત સપાટી, અંધારામાં તેની `--ci-color-accent-foreground` શાહી સાથેનો ઉચ્ચાર), `danger` એ `destructive` છે , અને `warning` બટન `warning` છે. `Badge` સ્ટેટસ વેરિઅન્ટ્સ કિટ ટોન છે, અને `<option>` બાળકો સાથે `Select` કિટ `NativeSelect` રેન્ડર કરે છે. `tests/unit/ui/adapters/*.test.tsx` દરેક એડેપ્ટરને પિન કરો.
+- **શેલ.** `src/app/(dashboard)/layout.tsx` રેન્ડર કરે છે `DashboardLayout`, જે `src/shared/components/layouts/DashboardShell.tsx` રેન્ડર કરે છે : કિટ `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), `src/shared/components/Sidebar.tsx` માં OmniRoute ના નેવિગેશન લોજિક સાથે. `#main-content` ની "સામગ્રી પર જાઓ" લિંક એ પ્રથમ ધ્યાન કેન્દ્રિત કરવા યોગ્ય તત્વ છે. `src/shared/components/Header.tsx` કીટ `SidebarTrigger` (શેલનું એકમાત્ર સાઇડબાર ટૉગલ), Keak `ProductSwitcher` અને કમાન્ડ-પેલેટ ઓપનર ધરાવે છે; તે રૂટ શીર્ષક માત્ર ત્યારે જ બતાવે છે જ્યારે `#main-content` અંદર કોઈ કીટ `PageHeader` (`.ci-page-header`) માઉન્ટ થયેલ ન હોય, તેથી તેના પોતાના `PageHeader` સાથેના પૃષ્ઠમાં એક જ `h1` હોય છે. `src/shared/components/CommandPalette.tsx` એ કિટ `Dialog` છે.
+- **ચિહ્નો.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) `ICON_MAP` (`src/shared/constants/iconMap.ts`) દ્વારા લ્યુસાઇડ ગ્લિફમાં નામ (મટીરિયલ સિમ્બોલ્સ શબ્દભંડોળ જે સ્ક્રીનનો ઉપયોગ કરે છે) ઉકેલે છે. મટીરીયલ સિમ્બોલ્સ ફોન્ટ અને પેકેજ અદૃશ્ય થઈ ગયા છે: નકશામાંથી ખૂટતું નામ તટસ્થ પ્લેસહોલ્ડર ગ્લિફ (`data-icon-missing="true"`) રેન્ડર કરે છે અને ઉત્પાદનની બહાર કન્સોલ ચેતવણી લૉગ કરે છે. `npm run gen:icon-map` ઉપયોગમાં લેવાતા નામોને છાપે છે જે નકશામાંથી ખૂટે છે (`tests/unit/icon-map-coverage.test.ts` લ્યુસાઇડ આઇકન વિના કોઈપણ નામ પર નિષ્ફળ જાય છે; `tests/unit/icon-map-object-values.test.ts` લુકઅપ ઑબ્જેક્ટ્સમાં સંગ્રહિત નામોને આવરી લે છે); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` શાબ્દિક `<span className="material-symbols-outlined">` ને `<Icon>` સુધી ફરીથી લખે છે.
+- **બ્રાન્ડ.** `src/shared/components/OmniRouteLogo.tsx` કીટને લપેટી લે છે: ડિફૉલ્ટ નિકાસ `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (ઇનલાઇન SVG, `basePath` -safe) રેન્ડર કરે છે અને `OmniRouteLockup` રેન્ડર કરે છે `ProductLockup product="omniroute"` (ઍક્સેસિબલ નામ "Keak OmniRoute") અથવા, વ્હાઇટ-લેબલ ઑપરેટરો માટે, તેમના પોતાના `name`/`logoSrc`. પ્રોડક્ટ-સ્વિચર ગંતવ્ય `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) માં રહે છે. સ્ટેન્ડઅલોન સ્ક્રીન્સ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` અને `src/shared/components/ErrorPageScaffold.tsx` — લોકઅપ દર્શાવે છે; `tests/unit/brand-pages-static.test.ts` તેની રક્ષા કરે છે.
 
 ## 2. નિયમો
 
-1. ટોકન્સ, શાબ્દિક ક્યારેય નહીં. અપવાદો હેતુસર રાખવામાં આવે છે: હંમેશા-શ્યામ કન્સોલ ટર્મિનલ અને `STATUS_HEX` (`src/shared/constants/statusColors.ts`), કોલર્સ માટે કીટ સ્ટેટસ પેલેટનો ઉકેલાયેલ-હેક્સ મિરર કે જેને શાબ્દિક હેક્સની જરૂર હોય છે. સ્પષ્ટ પેલેટ હવે કોઈ અપવાદ નથી: તેઓ કિટના પાંચ ચાર્ટ ટોકન્સ (`--color-chart-1..5`) પર `src/shared/utils/categoricalPalette.ts` અને રૂટીંગ વ્યૂહરચનાઓ માટે, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ધાર અને ઓર્કેસ્ટ્રેશન કેનવાસ થીમ-અવેર `--orch-status-*` ચલો (`src/shared/components/flow/edgeStyles.ts`) વાંચે છે.
+1. ટોકન્સ, શાબ્દિક ક્યારેય નહીં. અપવાદો હેતુસર રાખવામાં આવે છે: હંમેશા-શ્યામ કન્સોલ ટર્મિનલ અને `STATUS_HEX` (`src/shared/constants/statusColors.ts`), કોલર્સ માટે કીટ સ્ટેટસ પેલેટનો ઉકેલાયેલ-હેક્સ મિરર કે જેને શાબ્દિક હેક્સની જરૂર હોય છે. સ્પષ્ટ પેલેટ હવે કોઈ અપવાદ નથી: તેઓ કિટના આઠ ચાર્ટ ટોકન્સ (`--color-chart-1..8`, વત્તા `-ink`/`-subtle`), કિટ શ્રેણીના ક્રમમાં, `src/shared/utils/categoricalPalette.ts` દ્વારા અને, રૂટીંગ વ્યૂહરચનાઓ માટે, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` પર સવારી કરે છે; ReactFlow એજ અને ઓર્કેસ્ટ્રેશન કેનવાસ થીમ-અવેર `--orch-status-*` ચલ (`src/shared/components/flow/edgeStyles.ts`) વાંચે છે.
 2. `packages/ui-kit/src` ક્યારેય હાથથી પેચ કરશો નહીં: `scripts/dev/sync-ui-kit.sh <commit>` સાથે સમન્વયિત કરો; પ્રી-કમિટ ગેટ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) કોઈપણ બાઈટ પર નિષ્ફળ જાય છે જે પિન કરેલા અપસ્ટ્રીમ કમિટથી અલગ હોય છે (જ્યારે અપસ્ટ્રીમ ક્લોન, `UI_KIT_CLONE` અથવા `_references/cheaper-inference-ui-kit`, ગેરહાજર હોય ત્યારે તે ચેતવણી સાથે છોડી દે છે). જ્યારે કીટમાં કંઈક અભાવ હોય, ત્યારે તેની આસપાસ એડેપ્ટર અથવા સ્ક્રીનમાં કામ કરો અને તેના માટે અપસ્ટ્રીમ પૂછો.
-3. કિટ ટેક્સ્ટ ડિફોલ્ટ અંગ્રેજી છે (`label = "Loading"`, `loadingLabel = "Loading table"`…) — જ્યારે પણ કિટ ઘટક ટેક્સ્ટ રેન્ડર કરે છે ત્યારે `useTranslations(...)` માંથી અનુવાદિત શબ્દમાળાઓ પસાર કરો.
-4. Tailwind ઉપયોગિતાઓ કીટ ઘટકોના વર્ગો પર વિજય મેળવે છે (કીટ `@layer theme, base, components, utilities` જાહેર કરે છે અને તેના નિયમો `components` માં રહે છે) — કીટના ઘટકોને ફરીથી રંગ આપવા માટે નહીં, અંતર અને લેઆઉટ માટે ઉપયોગિતાઓનો ઉપયોગ કરો.
+3. કિટ ટેક્સ્ટ ડિફોલ્ટ્સ અંગ્રેજી છે (`label = "Loading"`, `loadingLabel = "Loading table"`…) — પાસ જ્યારે પણ કિટ ઘટક ટેક્સ્ટ રેન્ડર કરે છે ત્યારે `useTranslations(...)` માંથી અનુવાદિત સ્ટ્રિંગ્સ.
+4. Tailwind ઉપયોગિતાઓ કીટ ઘટકોના વર્ગો પર વિજય મેળવે છે (કિટ `@layer theme, base, components, utilities` જાહેર કરે છે અને તેના નિયમો `components` માં રહે છે) — કીટ ઘટકોને ફરીથી રંગ આપવા માટે નહીં, અંતર અને લેઆઉટ માટે ઉપયોગિતાઓનો ઉપયોગ કરે છે.
 5. શીર્ષકો: પૃષ્ઠ અને વિભાગના શીર્ષકો માટે `.ci-heading` ; `.ci-dashboard-display` માત્ર મોટા, છૂટાછવાયા ડિસ્પ્લે ટેક્સ્ટ માટે જેમ કે એરર-પેજ સ્ટેટસ કોડ. બંને સ્વિત્ઝરનો ઉપયોગ કરે છે.
-6. `tests/unit/dashboard-kit-sweep.test.ts` કીટ અપનાવવાની રક્ષા કરે છે: `src/app` અથવા `src/shared/components` હેઠળ કોઈ મટીરીયલ લિગેચર સ્પેન નથી; ડેશબોર્ડ ટ્રીમાં (`src/app/(dashboard)` અને `src/shared/components`) કોઈ કાચો `<select>`, `<textarea>` અથવા `<table>` નથી અને સૂચિબદ્ધ અપવાદોની બહાર કોઈ હેન્ડ-રોલ્ડ `role="dialog"` નથી ( `Select` એડેપ્ટરની મૂળ શાખા, `RequestLoggerDetail`); દરેક કાચા `<button>` અથવા `<input>` `kit-exception:` (કારણ સાથે) તેની ઉપરની વધુમાં વધુ 3 લીટીઓ સમાપ્ત થતી હોય તેવી ટિપ્પણીની જરૂર છે; પેલેટ રંગછટા અને `dark:` વેરિઅન્ટ્સ ફક્ત પરીક્ષણ સૂચિની ફાઇલોમાં.
+6. `tests/unit/dashboard-kit-sweep.test.ts` કીટ અપનાવવાની રક્ષા કરે છે: `src/app` અથવા `src/shared/components` હેઠળ કોઈ મટીરીયલ લિગેચર સ્પેન નથી; ડેશબોર્ડ ટ્રીમાં (`src/app/(dashboard)` અને `src/shared/components`) કોઈ કાચો `<select>`, `<textarea>` અથવા `<table>` નથી અને સૂચિબદ્ધ અપવાદોની બહાર કોઈ હેન્ડ-રોલ્ડ `role="dialog"` નથી ( `Select` એડેપ્ટરની મૂળ શાખા, `RequestLoggerDetail`); દરેક કાચા `<button>` અથવા `<input>` `kit-exception:` (કારણ સાથે) તેની ઉપરની વધુમાં વધુ 3 લીટીઓ પર સમાપ્ત થતી ટીપ્પણીની જરૂર છે; પેલેટ રંગછટા અને `dark:` વેરિઅન્ટ્સ ફક્ત પરીક્ષણ સૂચિની ફાઇલોમાં.
 7. PR (સ્ક્રીનશોટ) પહેલા થીમ્સ અને 390 px વ્યૂપોર્ટ બંનેને ચકાસો; `tests/e2e/a11y.spec.ts` કુહાડી ચલાવે છે.
 
 ## 3. સ્ક્રીન ઉમેરવી

@@ -631,17 +631,17 @@ Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md
 <details>
 <summary><b>Näytä kaikki saatavilla olevat mallit</b></summary>
 
-> Alla oleva luettelo on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiota v3.8.0 varten. Pilvipalveluluettelot (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — avaa koko ajantasainen luettelo valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Saatavilla olevat mallit** tai kutsumalla `GET /api/models/catalog`.
+> Alla oleva luettelo on koottu tiedostosta `open-sse/config/providerRegistry.ts` versiota v3.8.0 varten. Pilvipalveluluettelot (Gemini, OpenRouter jne.) synkronoidaan dynaamisesti — avaa täydellinen ajantasainen luettelo valitsemalla **Hallintapaneeli → Palveluntarjoajat → [palveluntarjoaja] → Saatavilla olevat mallit** tai kutsumalla `GET /api/models/catalog`.
 >
-> Jos palveluntarjoajan sisäänrakennettu luettelo on vanhentunut, tuo ajantasainen upstream-luettelo käyttämällä kyseisellä sivulla toimintoa **Tuo lähteestä /models** (tai ottamalla käyttöön **Automaattinen synkronointi**). Tämä vahvistettiin versiossa v3.8.50 palveluille LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö oli saman testikierroksen aikana edelleen upstreamin rajoittamaa.
+> Jos palveluntarjoajan sisäinen luettelo on vanhentunut, käytä kyseisellä sivulla toimintoa **Tuo osoitteesta /models** (tai ota käyttöön **Automaattinen synkronointi**) ladataksesi ajantasaisen ylemmän tason luettelon. Tämä vahvistettiin versiossa v3.8.50 palveluille LLM7.io (`gemini-3.1-flash-lite`) ja UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinationsin anonyymi käyttö oli saman testikierroksen aikana edelleen ylemmän tason rajoittamaa.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ suoritustasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ tehokkuustasot: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ILMAINEN OAuth: käytä ajantasaista luetteloa, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Saatavilla olevat mallit**. Saatavuus riippuu tilistä ja palvelupaketista.
+**Kiro (`kr/`)** — ILMAINEN OAuth: käytä ajantasaista luetteloa, joka näkyy kohdassa **Hallintapaneeli → Palveluntarjoajat → Kiro → Saatavilla olevat mallit**. Saatavuus riippuu tilistä ja tilauksesta.
 
 **Qoder (`if/`)** — ILMAINEN OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -649,7 +649,7 @@ Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — kiinteä 9 $/kk tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/kk kiinteänä hintana tai käytön mukaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-avain: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -657,29 +657,29 @@ Täydellinen ympäristömuuttujien luettelo on [README-tiedostossa](../README.md
 
 **xAI (`xai/`)** — Grok-natiivi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU:ssa isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-isännöity: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Hakutoiminnolla täydennetty: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Hakua hyödyntävä: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Avoimen lähdekoodin: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ilmainen), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Nopea päättely: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-mittakaavassa: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Wafer-mittakaavainen: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-keskeinen: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Yrityskäyttöön: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliaikaisesti Googlelta API-avaimen perusteella — staattista luetteloa ei ole. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo sitten nykyinen luettelo valitsemalla **Saatavilla olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkronoidaan reaaliaikaisesti Googlelta API-avaimen perusteella — staattista luetteloa ei ole. Yhdistä avain kohdassa **Hallintapaneeli → Palveluntarjoajat** ja tuo nykyinen luettelo valitsemalla **Saatavilla olevat mallit** (esim. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
 **Muut yhteensopivat palveluntarjoajat** (valikoima): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (palvelun `aws-bedrock` kautta), `azure-ai`, `openrouter` (välitetty luettelo), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kukin ylläpitää omaa malliluetteloaan tiedostossa `providerRegistry.ts`, ja luettelo voidaan synkronoida automaattisesti, jos palveluntarjoaja tarjoaa `/models`-päätepisteen.
 
-**Huomautus mallien tunnisteista:** OmniRoute käyttää palveluntarjoajien natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Joihinkin tunnisteisiin sisältyy pisteellä eroteltuja versioita, koska upstream-API odottaa niitä tässä muodossa. Jos mallia ei ole lueteltu yllä, vahvista saatavuus suorittamalla `omniroute models --search <term>` tai kutsumalla `GET /api/models/catalog`.
+**Huomautus mallitunnisteista:** OmniRoute käyttää palveluntarjoajan natiiveja tunnisteita (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Joissakin tunnisteissa on pisteitä sisältäviä versioita, koska ylemmän tason API odottaa niitä tässä muodossa. Jos mallia ei ole lueteltu yllä, suorita `omniroute models --search <term>` tai kutsu `GET /api/models/catalog` varmistaaksesi saatavuuden.
 
 </details>
 

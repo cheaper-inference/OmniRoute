@@ -52,7 +52,6 @@ const PUBLIC_API_ROUTES_EXACT = new Set([
   // it is what tells them how to obtain one.
   // EXACT, not a prefix: nothing else under /api/auth/sso/ is public.
   "/api/auth/sso/config",
-  "/api/init",
   "/api/sync/bundle",
   // Remote-mode bootstrap: exchange the management password for a scoped CLI
   // access token. The handler enforces its own password check + lockout — there

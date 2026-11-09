@@ -31,23 +31,23 @@ Pokretanje testova: pogledajte [Testiranje](#testing) u nastavku (prvo pokrenite
 
 ---
 
-## Pregled projekta
+## Projekat ukratko
 
-**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 380 LLM provajdera, automatski fallback.
+**OmniRoute** — objedinjeni AI proxy/ruter. Jedna krajnja tačka, 380 LLM provajdera, automatski rezervni prelaz.
 
-- API rute — `src/app/api/v1/` (ulazne tačke Next.js App Routera)
-- Rukovatelji — `open-sse/handlers/` (obrada zahtjeva: chat, embeddings itd.)
-- Izvršitelji — `open-sse/executors/` (HTTP slanje specifično za provajdera)
+- API rute — `src/app/api/v1/` (ulazne tačke App Routera za Next.js)
+- Rukovaoci — `open-sse/handlers/` (obrada zahtjeva: chat, ugrađivanja itd.)
+- Izvršioci — `open-sse/executors/` (HTTP usmjeravanje specifično za provajdera)
 - Prevoditelji — `open-sse/translator/` (konverzija formata OpenAI↔Claude↔Gemini)
 - Transformator — `open-sse/transformer/` (Responses API ↔ Chat Completions)
-- Servisi — `open-sse/services/` (kombinovano rutiranje, ograničenja zahtjeva, keširanje itd.)
-- Baza podataka — `src/lib/db/` (domenski moduli SQLite baze, 221 migracija)
-- Domen/pravila — `src/domain/` (mehanizam pravila, pravila troškova, fallback logika)
-- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + moduli memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
+- Servisi — `open-sse/services/` (kombinovano usmjeravanje, ograničenja brzine, keširanje itd.)
+- Baza podataka — `src/lib/db/` (domenski moduli za SQLite, 222 migracije)
+- Domena/pravila — `src/domain/` (mehanizam pravila, pravila troškova, logika rezervnog prelaza)
+- MCP server — `open-sse/mcp-server/` (110 alata: 45 kanonskih + memory/skill/GitHub/pool/gamification/plugin/Notion/Obsidian/local-corpus/RTK modula; 3 transporta: stdio / SSE / Streamable HTTP; 33 opsega)
 - A2A server — `src/lib/a2a/` (protokol agenata JSON-RPC 2.0)
 - Vještine — `src/lib/skills/` (proširivi okvir vještina); Memorija — `src/lib/memory/` (trajna konverzacijska memorija)
 
-Monorepo: `src/` (Next.js 16 aplikacija), `open-sse/` (radni prostor streaming mehanizma), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
+Monorepozitorij: `src/` (aplikacija Next.js 16), `open-sse/` (radni prostor za mehanizam strimovanja), `electron/` (desktop aplikacija), `tests/`, `bin/` (ulazna tačka CLI-ja).
 
 ---
 

@@ -15,10 +15,16 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23` sau `>=24.0.0 <27` (recomandat: 24 LTS)
 - **npm** 10+
 
-> **Utilizatorii npm v11+ (Node 24+):** După `npm install`, verificați dacă modulele native au fost instalate:
+> **Windows cu Node 24:** utilizați versiunea curentă de patch 24 LTS (cel puțin 24.20.0).
+> Versiunile anterioare se pot închide după teste reușite atunci când `--test-force-exit` închide
+> procesul. [Remedierea Windows libuv](https://github.com/nodejs/node/pull/61999) din Node
+> soluționează această eroare de execuție; păstrați activate aserțiunile testelor și verificările
+> de ieșire ale runnerului.
+
+> **Utilizatorii npm v11+ (Node 24+):** după `npm install`, verificați dacă modulele native au fost instalate:
 > `node -e "require('better-sqlite3')"`. Dacă eșuează cu `MODULE_NOT_FOUND`,
 > rulați `npm approve-scripts better-sqlite3 && npm install`. Consultați
-> [Depanare](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> [Depanarea](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -41,26 +47,26 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Variabile principale pentru dezvoltare:
+Variabile importante pentru dezvoltare:
 
 | Variabilă              | Valoare implicită pentru dezvoltare | Descriere                          |
 | ---------------------- | ----------------------------------- | ---------------------------------- |
 | `PORT`                 | `20128`                             | Portul serverului                  |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`            | URL de bază pentru interfața web   |
-| `JWT_SECRET`           | (generați mai sus)                  | Secret pentru semnarea JWT         |
+| `JWT_SECRET`           | (generați mai sus)                  | Secretul de semnare JWT            |
 | `INITIAL_PASSWORD`     | `CHANGEME`                          | Parola pentru prima autentificare  |
 | `APP_LOG_LEVEL`        | `info`                              | Nivelul de detaliere al jurnalelor |
 
-### Setările panoului de control
+### Setările tabloului de bord
 
-Panoul de control oferă comutatoare în interfața cu utilizatorul pentru funcționalități care pot fi configurate și prin intermediul variabilelor de mediu:
+Tabloul de bord oferă comutatoare în interfața utilizatorului pentru funcții care pot fi configurate și prin variabile de mediu:
 
-| Locația setării   | Comutator                    | Descriere                                             |
-| ----------------- | ---------------------------- | ----------------------------------------------------- |
-| Setări → Avansate | Mod de depanare              | Activează jurnalele cererilor de depanare (interfață) |
-| Setări → Generale | Vizibilitatea barei laterale | Afișează/ascunde secțiunile barei laterale            |
+| Locația setării     | Comutator          | Descriere                                                                |
+| ------------------- | ------------------ | ------------------------------------------------------------------------ |
+| Settings → Advanced | Debug Mode         | Activează jurnalele de depanare ale cererilor (interfața utilizatorului) |
+| Settings → General  | Sidebar Visibility | Afișează/ascunde secțiunile barei laterale                               |
 
-Aceste setări sunt stocate în baza de date și persistă după reporniri, suprascriind valorile implicite ale variabilelor de mediu atunci când sunt configurate.
+Aceste setări sunt stocate în baza de date și persistă după reporniri, înlocuind valorile implicite ale variabilelor de mediu atunci când sunt definite.
 
 ### Rularea locală
 
@@ -69,55 +75,55 @@ Aceste setări sunt stocate în baza de date și persistă după reporniri, supr
 npm run dev
 
 # Compilare pentru producție
-npm run build    # next build → .build/next/, apoi assembleStandalone → dist/
-npm run start
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 
-# Compilare rapidă doar pentru backend/API, pentru modificările contribuitorilor
+# Compilare rapidă doar pentru backend/API pentru modificările contribuitorilor
 npm run build:contributor
 
-# Compilare pentru lansare (recompilare curată + santinelă HEAD — necesară pentru implementare)
-npm run build:release   # rm -rf .build dist, apoi compilare + scrierea dist/BUILD_SHA
+# Compilare pentru lansare (recompilare curată + sentinelă HEAD — necesară pentru implementare)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Configurație uzuală a portului
+# Configurarea uzuală a portului
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Compilarea pentru contribuitori efectuează doar validarea prin compilare: aceasta nu asamblează
-distribuția autonomă și nici nu compilează resursele native opționale pentru împachetare. Folosiți compilarea obișnuită pentru producție atunci când
-trebuie să validați pachetul distribuibil.
+Compilarea pentru contribuitori efectuează validarea exclusivă a compilării: nu asamblează
+distribuția autonomă și nu compilează activele opționale pentru împachetarea nativă. Utilizați
+compilarea obișnuită pentru producție atunci când trebuie să validați pachetul pregătit pentru livrare.
 
-### Structura rezultatelor compilării
+### Structura rezultatului compilării
 
-| Director  | Conținut                                                                                 | Urmărit |
-| --------- | ---------------------------------------------------------------------------------------- | ------- |
-| `src/`    | Codul sursă al aplicației (TypeScript / TSX)                                             | Da      |
-| `.build/` | Fișiere intermediare — rezultatul `next build` (ignorat de git, `distDir = .build/next`) | Nu      |
-| `dist/`   | Pachet distribuibil — asamblat de `assembleStandalone` (ignorat de git)                  | Nu      |
+| Director  | Conținut                                                                           | Urmărit |
+| --------- | ---------------------------------------------------------------------------------- | ------- |
+| `src/`    | Codul sursă al aplicației (TypeScript / TSX)                                       | Da      |
+| `.build/` | Intermediare — rezultatul `next build` (ignorat de git, `distDir = .build/next`)   | Nu      |
+| `dist/`   | Pachet pregătit pentru livrare — asamblat de `assembleStandalone` (ignorat de git) | Nu      |
 
-Fluxul de compilare constă dintr-o singură trecere:
+Conducta de compilare are o singură trecere:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (rezultatul Next.js)
-  └─ assembleStandalone()                 (copiază resursele autonome + statice + publice + native)
+  └─ assembleStandalone()                 (copiază standalone + static + public + active native)
        └─ rezultat: dist/                 (server.js, .next/static/, public/, node_modules/)
 ```
 
-În plus, `npm run build:release` curăță mai întâi ambele directoare și scrie
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca fișier-santinelă pentru integritatea implementării.
+`npm run build:release` curăță suplimentar ambele directoare mai întâi și scrie
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ca sentinelă pentru integritatea implementării.
 
-`npm run build:contributor` utilizează profilul de compilare exclusiv pentru backend. Acesta înlocuiește temporar cu substituenți
-fișierele interfeței panoului de control în timpul compilării, păstrează gestionarii rutelor API și restaurează fișierele originale
-după compilare. Folosiți `npm run build` pentru modificările care afectează interfața panoului de control sau pentru validarea completă
-a lansării; profilul pentru contribuitori nu înlocuiește compilarea pentru lansare.
+`npm run build:contributor` utilizează profilul de compilare exclusiv pentru backend. Înlocuiește temporar
+fișierele interfeței tabloului de bord în timpul compilării, păstrează gestionarele rutelor API și restaurează
+fișierele originale după compilare. Utilizați `npm run build` pentru modificări care afectează interfața
+tabloului de bord sau pentru validarea completă a lansării; profilul pentru contribuitori nu înlocuiește
+compilarea pentru lansare.
 
-> **Notă privind implementarea pe VPS:** directorul imaginii de la distanță `/usr/lib/node_modules/omniroute/app/`
-> rămâne neschimbat. Automatizările de implementare sincronizează prin rsync conținutul directorului `dist/` în acesta.
-> S-a schimbat doar calea rezultatului compilării din depozit (`app/` → `dist/`).
+> **Notă privind implementarea pe VPS:** directorul imaginii la distanță `/usr/lib/node_modules/omniroute/app/`
+> rămâne neschimbat. Abilitățile de implementare sincronizează prin rsync conținutul `dist/` în acesta.
+> S-a mutat doar calea rezultatului compilării din depozit (`app/` → `dist/`).
 
 URL-uri implicite:
 
-- **Panou de control**: `http://localhost:20128/dashboard`
+- **Tablou de bord**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---

@@ -629,60 +629,60 @@ post_install() {
 
 ---
 
-## 📊 የሚገኙ ሞዴሎች
+## 📊 ያሉ ሞዴሎች
 
 <details>
-<summary><b>ሁሉንም የሚገኙ ሞዴሎች ይመልከቱ</b></summary>
+<summary><b>ያሉ ሁሉንም ሞዴሎች ይመልከቱ</b></summary>
 
-> ከ v3.8.0 የ`open-sse/config/providerRegistry.ts` የተመረጠ ዝርዝር ነው። የCloud ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ሁኔታ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለማየት **Dashboard → Providers → [provider] → Available Models** ይክፈቱ ወይም `GET /api/models/catalog` ይጠቀሙ።
+> ከ `open-sse/config/providerRegistry.ts` ለ v3.8.0 የተመረጠ ዝርዝር ነው። የCloud ካታሎጎች (Gemini፣ OpenRouter፣ ወዘተ) በተለዋዋጭ ይመሳሰላሉ — ሙሉውን የቀጥታ ካታሎግ ለመክፈት **ዳሽቦርድ → አቅራቢዎች → [provider] → ያሉ ሞዴሎች** ይሂዱ ወይም `GET /api/models/catalog` ይጥሩ።
 >
-> የአንድ አቅራቢ አብሮ የተሰራ ዝርዝር ከቀጥታ ካታሎጉ ጋር ካልተጣጣመ፣ የቀጥታ የupstream ካታሎጉን ለማስገባት በዚያ ገጽ ላይ **Import from /models** ይጠቀሙ (ወይም **Auto-Sync** ያንቁ)። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ በተመሳሳይ የሙከራ ዙር Pollinations ያልታወቀ መዳረሻ በupstream የተገደበ ሆኖ ቀጥሏል።
+> የአንድ አቅራቢ አብሮ የተሰራ ዝርዝር ከቀጥታ ካታሎጉ ጋር ካልተመሳሰለ፣ በዚያ ገጽ ላይ **ከ /models አስመጣ** የሚለውን ይጠቀሙ (ወይም **ራስ-ሰር ማመሳሰል**ን ያንቁ)፤ ይህም የቀጥታ የupstream ካታሎግን ያመጣል። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል፤ Pollinations የማይታወቅ መዳረሻ በዚያው የሙከራ ዙር ወቅት በupstream የተገደበ ሆኖ ቀርቷል።
 
-**Claude Code (`cc/`)** — የPro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth፦ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — የPlus/Pro OAuth: `cx/gpt-5.5` (+ የeffort ደረጃዎች: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth፦ `cx/gpt-5.5` (+ የጥረት ደረጃዎች፦ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth፦ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ነፃ OAuth: በ**Dashboard → Providers → Kiro → Available Models** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። የሚገኝነቱ በመለያው እና በዕቅዱ ላይ ይመረኮዛል።
+**Kiro (`kr/`)** — ነፃ OAuth፦ በ **ዳሽቦርድ → አቅራቢዎች → Kiro → ያሉ ሞዴሎች** ስር የሚታየውን የቀጥታ ካታሎግ ይጠቀሙ። ተገኝነቱ በመለያው እና በዕቅዱ ይወሰናል።
 
-**Qoder (`if/`)** — ነፃ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ነፃ OAuth፦ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M፦ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M፦ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — በወር $9 ቋሚ ክፍያ ወይም በአጠቃቀም: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ወር ቋሚ ክፍያ ወይም በአጠቃቀም፦ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — የAPI ቁልፍ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — የAPI ቁልፍ፦ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — እጅግ ፈጣን: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — እጅግ ፈጣን፦ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ቤተኛ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — ተፈጥሯዊ Grok፦ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — በEU የሚስተናገድ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — በEU የሚስተናገድ፦ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — በፍለጋ የተጨመረ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — በፍለጋ የተጨመረ፦ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ክፍት ምንጭ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነፃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ክፍት ምንጭ፦ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነፃ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ፈጣን ማስኬድ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ፈጣን ኢንፈረንስ፦ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — በwafer ሚዛን: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — በዋፈር ሚዛን፦ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — በRAG ላይ ያተኮረ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — በRAG ላይ ያተኮረ፦ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ለድርጅት: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ለድርጅቶች፦ `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE፦ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**፦ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: በGoogle የሚገኘውን የAPI ቁልፍ በመጠቀም በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለውም። ቁልፍ በ**Dashboard → Providers** ያገናኙ፣ ከዚያም **Available Models** በመጠቀም የአሁኑን ካታሎግ ያስገቡ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
+**Gemini (Google Cloud `gemini/`)**፦ በGoogle በኩል ለእያንዳንዱ API ቁልፍ በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለውም። ቁልፍ በ **ዳሽቦርድ → አቅራቢዎች** ያገናኙ፣ ከዚያ **ያሉ ሞዴሎች**ን በመጠቀም የአሁኑን ካታሎግ ያስመጡ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
 
-**ሌሎች ተኳሃኝ አቅራቢዎች** (የተመረጡ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ`aws-bedrock` በኩል), `azure-ai`, `openrouter` (የpassthrough ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ`providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ያስተዳድራል፣ እንዲሁም አቅራቢው `/models` የሚለውን endpoint ካቀረበ በራስ-ሰር ሊመሳሰል ይችላል።
+**ሌሎች ተኳኋኝ አቅራቢዎች** (የተመረጡ)፦ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ `aws-bedrock` በኩል), `azure-ai`, `openrouter` (የሚያልፍ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ በ `providerRegistry.ts` ውስጥ የራሱን የሞዴል ዝርዝር ያስተዳድራል፣ እና አቅራቢው `/models` የሚል endpoint ካቀረበ በራስ-ሰር ሊመሳሰል ይችላል።
 
-**ስለ ሞዴል IDዎች ማስታወሻ:** OmniRoute የአቅራቢውን ቤተኛ IDዎች ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ IDዎች በነጥብ የተለዩ የስሪት ቁጥሮችን ያካትታሉ፣ ምክንያቱም የupstream API የሚጠብቀው እንደዚያ ስለሆነ ነው። አንድ ሞዴል ከላይ በተዘረዘረው ውስጥ ካልተካተተ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>` ያስኬዱ ወይም `GET /api/models/catalog` ይጠቀሙ።
+**ስለ ሞዴል መለያዎች ማስታወሻ፦** OmniRoute የአቅራቢውን ተፈጥሯዊ መለያዎች ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ መለያዎች ነጥብ የያዙ ስሪቶችን ያካትታሉ፤ ምክንያቱም የupstream API እንዲሁ እንዲሆኑ ስለሚጠብቅ ነው። አንድ ሞዴል ከላይ በተዘረዘረው ውስጥ ካልተካተተ፣ ተገኝነቱን ለማረጋገጥ `omniroute models --search <term>` ያስኪዱ ወይም `GET /api/models/catalog` ይጠቀሙ።
 
 </details>
 

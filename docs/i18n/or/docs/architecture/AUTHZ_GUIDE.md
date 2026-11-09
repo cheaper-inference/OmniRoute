@@ -13,111 +13,144 @@ OmniRoute ରେ ଏକ ରୁଟ୍-ସଚେତନ ଅନୁମତି ପା�
 
 > ଉତ୍ସ: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## ଦୁଇଟି ପ୍ରାମାଣିକରଣ ମୋଡ୍
+## ଦୁଇଟି Auth ମୋଡ୍
 
-### 1. API କୀ (Bearer)
+### 1. API Key (Bearer)
 
-OpenAI/Anthropic/Gemini-ସୁସଙ୍ଗତ କ୍ଲାଏଣ୍ଟ APIଗୁଡ଼ିକ ଏବଂ କୀରେ `manage` ସ୍କୋପ୍ ଥିବାବେଳେ କିଛି ପରିଚାଳନା ରୁଟ୍ ପାଇଁ ବ୍ୟବହୃତ ହୁଏ।
+OpenAI/Anthropic/Gemini-ସୁସଙ୍ଗତ client API ଏବଂ key-ରେ `manage` scope ଥିଲେ କିଛି management route ପାଇଁ ବ୍ୟବହୃତ ହୁଏ।
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-`src/sse/services/auth.ts` ରେ ଥିବା `isValidApiKey()` / `extractApiKey()` ଦ୍ୱାରା ଏହାକୁ ବୈଧତା ଯାଞ୍ଚ କରାଯାଏ ଏବଂ `src/shared/utils/apiAuth.ts` ମାଧ୍ୟମରେ ପୁନଃ-ରପ୍ତାନି କରାଯାଏ। ବୈଧତା ଯାଞ୍ଚକାରୀ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env varsକୁ ସ୍ଥାୟୀ passthrough କୀ ଭାବରେ ମଧ୍ୟ ଗ୍ରହଣ କରେ (ପ୍ରସଙ୍ଗ #1350)।
+`src/sse/services/auth.ts` ରେ `isValidApiKey()` / `extractApiKey()` ଦ୍ୱାରା ଯାଞ୍ଚ କରାଯାଏ ଏବଂ `src/shared/utils/apiAuth.ts` ମାଧ୍ୟମରେ ପୁନଃ-ରପ୍ତାନି କରାଯାଏ। Validator `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` env vars-କୁ persistent passthrough key ଭାବରେ ମଧ୍ୟ ଗ୍ରହଣ କରେ (issue #1350)।
 
-### 2. ଡ୍ୟାସବୋର୍ଡ ସେସନ୍ (auth_token କୁକି)
+### 2. Dashboard Session (auth_token cookie)
 
-ଡ୍ୟାସବୋର୍ଡ ପୃଷ୍ଠା ଏବଂ ଆଡମିନ୍ କାର୍ଯ୍ୟଗୁଡ଼ିକ ପାଇଁ।
+Dashboard ପୃଷ୍ଠା ଏବଂ admin operation ପାଇଁ।
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-JWTର ବୈଧତା ଯାଞ୍ଚ **ଏବଂ** ଏଥିରେ `authenticated: true` ଥିଲେ ମାତ୍ର ଗୋଟିଏ କୁକିକୁ ସେସନ୍ ଭାବରେ ଗ୍ରହଣ କରାଯାଏ
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। କୁକିର ପ୍ରତ୍ୟେକ
-ଉପଭୋକ୍ତା (ଡ୍ୟାସବୋର୍ଡ ରୁଟ୍ ଗାର୍ଡ (`isDashboardSessionAuthenticated()`), authz ପାଇପଲାଇନ୍ ରିଫ୍ରେଶ୍, WebSocket ହ୍ୟାଣ୍ଡଶେକ୍, ଲାଇଭ୍
-ସର୍ଭର୍, `/api/settings/require-login`, `/api/auth/status`) ସେହି ହେଲ୍ପର୍ ମାଧ୍ୟମରେ ଯାଏ।
-`JWT_SECRET` ସହ ସାଇନ୍ ହୋଇଥିବା ଅନ୍ୟ JWTଗୁଡ଼ିକ ମଧ୍ୟ ରହିଛି — Cursor CLI passthrough କୀ ଧାରକମାନଙ୍କ ପାଇଁ
-`iss "omniroute" / aud "cursor-cli"` ଟୋକେନ୍ ସୃଷ୍ଟି କରେ — ଏବଂ ସେଗୁଡ଼ିକ କେବେବି ସେସନ୍ ନୁହେଁ
+JWT ଯାଞ୍ଚ ହେବା **ଏବଂ** ଏଥିରେ `authenticated: true` ଥିବାବେଳେ ମାତ୍ର cookie ଏକ session ହୁଏ
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)। Cookie-ର ପ୍ରତ୍ୟେକ consumer (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
+server, `/api/settings/require-login`, `/api/auth/status`) ସେହି helper ମାଧ୍ୟମରେ ଯାଏ।
+`JWT_SECRET` ଦ୍ୱାରା sign ହୋଇଥିବା ଅନ୍ୟ JWT ମଧ୍ୟ ରହିଛି — key holder-ମାନଙ୍କ ପାଇଁ Cursor CLI passthrough
+`iss "omniroute" / aud "cursor-cli"` token mint କରେ — ଏବଂ ସେଗୁଡ଼ିକ କେବେବି session ନୁହେଁ
 (#13298)।
 
-`src/shared/utils/apiAuth.ts` ରେ ଥିବା `isDashboardSessionAuthenticated()` ଦ୍ୱାରା ବୈଧତା ଯାଞ୍ଚ କରାଯାଏ। JWTର 30-ଦିନିଆ ଜୀବନକାଳରୁ 7 ଦିନରୁ କମ୍ ସମୟ ବାକି ଥିଲେ ପାଇପଲାଇନ୍ ସ୍ୱୟଂଚାଳିତ ଭାବରେ ଏହାକୁ ରିଫ୍ରେଶ୍ କରେ।
+`src/shared/utils/apiAuth.ts` ରେ `isDashboardSessionAuthenticated()` ଦ୍ୱାରା ଯାଞ୍ଚ କରାଯାଏ। 30-ଦିନିଆ lifetime-ରେ 7 ଦିନରୁ କମ୍ ସମୟ ବାକି ଥିଲେ pipeline ସ୍ୱୟଂଚାଳିତ ଭାବରେ JWT-କୁ refresh କରେ।
 
-ଗୋଟିଏ ସେସନ୍ ଏହାର 30 ଦିନ ପୂର୍ଣ୍ଣ ହେବା ପୂର୍ବରୁ ମଧ୍ୟ ସମାପ୍ତ ହୋଇପାରେ, କାରଣ ପ୍ରତ୍ୟେକ ଟୋକେନ୍ ସୃଷ୍ଟିକାରୀ `mintDashboardSessionToken` ମାଧ୍ୟମରେ ଯାଏ (ଗୋଟିଏ ଜାରି ସମୟ `iat` ଏବଂ ଗୋଟିଏ ଆଇଡି `jti`) ଏବଂ ବୈଧତା ଯାଞ୍ଚକାରୀ ଦୁଇଟି ସେଟିଂ ଯାଞ୍ଚ କରେ: `sessionsValidAfter`, ଯାହାକୁ ପାସୱାର୍ଡ ପରିବର୍ତ୍ତନ ସମୟରେ ସେଟ୍ କରାଯାଏ, ଫଳରେ ଏହା ପୂର୍ବରୁ ଜାରି ହୋଇଥିବା ପ୍ରତ୍ୟେକ ସେସନ୍ର ବୈଧତା ଯାଞ୍ଚ ବନ୍ଦ ହୁଏ (ପାସୱାର୍ଡ ପରିବର୍ତ୍ତନ କରିଥିବା ବ୍ରାଉଜର୍କୁ ଗୋଟିଏ ନୂଆ କୁକି ମିଳେ), ଏବଂ `revokedDashboardSessions`, ଯେଉଁଥିରେ `POST /api/auth/logout` ସାଇନ୍-ଆଉଟ୍ ହୋଇଥିବା ସେସନ୍ର `jti` ଯୋଡ଼େ। ପୁରୁଣା ରିଲିଜ୍ ଦ୍ୱାରା ସୃଷ୍ଟି ହୋଇଥିବା ସେସନ୍ଗୁଡ଼ିକରେ ଏହି ଦୁଇଟି ମଧ୍ୟରୁ କୌଣସି କ୍ଲେମ୍ ନଥାଏ ଏବଂ ପ୍ରଥମ ପାସୱାର୍ଡ ପରିବର୍ତ୍ତନ ପର୍ଯ୍ୟନ୍ତ ବୈଧ ରହେ। ସେଟିଂଗୁଡ଼ିକୁ ପଢ଼ାଯାଇ ନପାରିଲେ, ସେସନ୍କୁ ବିଶ୍ୱସନୀୟ ଭାବରେ ଗ୍ରହଣ କରାଯାଏ ନାହିଁ।
+ଏହାର 30 ଦିନ ପୂର୍ଣ୍ଣ ହେବା ପୂର୍ବରୁ ମଧ୍ୟ session ଶେଷ ହୋଇପାରେ, କାରଣ ପ୍ରତ୍ୟେକ minter `mintDashboardSessionToken` ମାଧ୍ୟମରେ ଯାଏ (ଏକ issue time `iat` ଏବଂ ଏକ id `jti` ସହିତ) ଏବଂ verifier ଦୁଇଟି setting ଯାଞ୍ଚ କରେ: `sessionsValidAfter`, ଯାହା password ପରିବର୍ତ୍ତନ ସମୟରେ set ହୁଏ, ତେଣୁ ଏହା ପୂର୍ବରୁ issue ହୋଇଥିବା ପ୍ରତ୍ୟେକ session ଯାଞ୍ଚରେ ବିଫଳ ହୁଏ (password ପରିବର୍ତ୍ତନ କରିଥିବା browser ଏକ ନୂତନ cookie ପାଏ), ଏବଂ `revokedDashboardSessions`, ଯେଉଁଥିରେ `POST /api/auth/logout` sign-out କରାଯାଇଥିବା session-ର `jti` ଯୋଡ଼େ। ପୁରୁଣା release ଦ୍ୱାରା mint ହୋଇଥିବା session-ମାନଙ୍କର କୌଣସି claim ନଥାଏ ଏବଂ ପ୍ରଥମ password ପରିବର୍ତ୍ତନ ପର୍ଯ୍ୟନ୍ତ ସେଗୁଡ଼ିକ valid ରହେ। Setting ପଢ଼ିହେବା ନଥିଲେ session-କୁ trust କରାଯାଏ ନାହିଁ।
 
-କିଛି ପରିଚାଳନା ରୁଟ୍ **ଯେକୌଣସି ଗୋଟିଏ** ମୋଡ୍ ଗ୍ରହଣ କରେ: କୁକି କିମ୍ବା API କୀରେ `manage` (ଅଥବା `admin`) ସ୍କୋପ୍ ଥିବାବେଳେ `Bearer <key>`। ଏହାହିଁ v3.8ରେ ଯୋଡ଼ାଯାଇଥିବା "API କଲ୍ଗୁଡ଼ିକ ମାଧ୍ୟମରେ ବିନ୍ୟାସଯୋଗ୍ୟ" କାର୍ଯ୍ୟପ୍ରବାହକୁ ସକ୍ଷମ କରେ।
+କିଛି management route **ଯେକୌଣସି** mode ଗ୍ରହଣ କରେ: cookie କିମ୍ବା `Bearer <key>`, ଯେତେବେଳେ API key-ରେ `manage` (କିମ୍ବା `admin`) scope ଥାଏ। v3.8 ରେ ଯୋଡ଼ାଯାଇଥିବା "configurable via API calls" workflow-କୁ ଏହା ସକ୍ଷମ କରେ।
 
-#### ଇଚ୍ଛାଧୀନ OIDC ଲଗଇନ୍ ଗେଟ୍ (#6973)
+#### ବୈକଳ୍ପିକ OIDC login gate (#6973)
 
-ଡ୍ୟାସବୋର୍ଡ ଆଡମିନ୍ ଲଗଇନ୍ ଡିଫଲ୍ଟ ପାସୱାର୍ଡ ଲଗଇନ୍ ସହିତ ଏକ **ଇଚ୍ଛାଧୀନ** OIDC (OpenID Connect) ପ୍ରବାହକୁ ମଧ୍ୟ ସମର୍ଥନ କରେ — ପାସୱାର୍ଡ ଲଗଇନ୍କୁ କେବେବି ହଟାଯାଏ ନାହିଁ, କେବଳ
-ଏହାର ପୂରକ ଭାବରେ ଯୋଡ଼ାଯାଏ:
+Dashboard admin login ଡିଫଲ୍ଟ password login ସହିତ ଏକ **opt-in** OIDC (OpenID Connect) flow-କୁ ମଧ୍ୟ ସମର୍ଥନ କରେ
+— password login କେବେବି ହଟାଯାଏ ନାହିଁ, କେବଳ ଏହା ସହିତ ଯୋଡ଼ାଯାଏ:
 
 - `settings.oidcEnabled === true` **ଏବଂ** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` ସମସ୍ତେ ବିନ୍ୟାସିତ ଥିଲେ ମାତ୍ର ଏହା ସକ୍ଷମ ହୁଏ (ସେଟିଂସ୍ → ପ୍ରମାଣୀକରଣ)।
-  ନଚେତ୍ `GET /api/auth/oidc/login` `400` ଫେରାଏ।
-- `GET /api/auth/oidc/login`, issuerର
-  `/.well-known/openid-configuration`ରୁ `authorization_endpoint` ଖୋଜିଥାଏ (`<issuer>/authorize`କୁ
-  fallback କରେ), ଆସୁଥିବା ଅନୁରୋଧରୁ redirect URI ତିଆରି କରେ
-  (`x-forwarded-proto` ବିଷୟରେ ସଚେତନ), ଏବଂ ଏକ `httpOnly` `oidc_state` cookieରେ
-  ସଂରକ୍ଷିତ ଯାଦୃଚ୍ଛିକ `state` ସହିତ IdPକୁ redirect କରେ।
-- `GET /api/auth/oidc/callback`, `state`କୁ ବୈଧ କରେ, authorization
-  code ବିନିମୟ କରେ, ଏବଂ issuerର JWKS ମାଧ୍ୟମରେ ID tokenର signature ଯାଞ୍ଚ କରେ
-  (`jose`ର `createRemoteJWKSet`, ପ୍ରତ୍ୟେକ JWKS URI ପାଇଁ cache ହୋଇଥିବା), ଏହା ସହିତ `issuer`/`audience`
-  ଯାଞ୍ଚ କରେ। Dashboardରେ ପ୍ରବେଶ ପାଇଁ ଏକ ଖାଲି ନଥିବା `oidcAllowedSubjects` ତାଲିକା,
-  ଏକ `oidcAdmissionClaim` ନୀତି, କିମ୍ବା ଉଭୟ ଆବଶ୍ୟକ। Subject ତାଲିକାଟି `sub` କିମ୍ବା
-  `email` ସହିତ କେବଳ `email_verified === true` ଥିଲେ ମେଳ ଖାଏ। ବୈକଳ୍ପିକ claim ନୀତିଟି
-  ଏକ dot-separated ID-token claim path (ଉଦାହରଣ ସ୍ୱରୂପ, `realm_access.roles`) ଏବଂ
-  ଗ୍ରହଣୀୟ valueଗୁଡ଼ିକର ଏକ array ନିଏ; resolve ହୋଇଥିବା claimଟି stringଗୁଡ଼ିକର ଏକ array
-  ହେବା ଆବଶ୍ୟକ, ଯେଉଁଥିରେ ଅତି କମରେ ଗୋଟିଏ ଗ୍ରହଣୀୟ value ଥିବ। ଉଭୟ ନୀତି ବିନ୍ୟାସିତ ଥିଲେ,
-  ଉଭୟକୁ ସଫଳ ହେବାକୁ ପଡ଼ିବ। ଅନୁପସ୍ଥିତ/ତ୍ରୁଟିପୂର୍ଣ୍ଣ claimଗୁଡ଼ିକ fail-closed ହୁଏ, ଏବଂ କୌଣସି
-  ନୀତି ନଥିଲେ callback loginକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ (`not_configured`)। ପୂର୍ବରୁ ଥିବା subject-only
-  ବିନ୍ୟାସଗୁଡ଼ିକ ଅପରିବର୍ତ୍ତିତ ଭାବେ କାର୍ଯ୍ୟ କରିଚାଲେ।
-- Keycloak ସାଧାରଣତଃ realm roleଗୁଡ଼ିକୁ access tokenରେ map କରେ, ID
-  tokenରେ ଅବଶ୍ୟ ନୁହେଁ। realm role `admin` ଆବଶ୍ୟକ କରିବା ପାଇଁ,
-  ଏହି client ପାଇଁ ଏକ protocol mapper ବିନ୍ୟାସ କରନ୍ତୁ, ଯାହା ତାହାର **ID token**ରେ
-  `realm_access.roles` ସାମିଲ କରେ, ତା'ପରେ `oidcAdmissionClaim`କୁ
+  `oidcClientId` / `oidcClientSecret` ସମସ୍ତେ କନଫିଗର୍ ହୋଇନଥିଲେ ଏହା ନିଷ୍କ୍ରିୟ ରହେ (Settings → Auth)।
+  ଅନ୍ୟଥା `GET /api/auth/oidc/login` `400` ଫେରାଏ।
+- `GET /api/auth/oidc/login` issuerର `/.well-known/openid-configuration` ଠାରୁ
+  `authorization_endpoint` ଖୋଜେ (`<issuer>/authorize` fallback ଭାବେ ବ୍ୟବହାର କରେ), ଆସୁଥିବା
+  ଅନୁରୋଧରୁ redirect URI ତିଆରି କରେ (`x-forwarded-proto`-ସଚେତନ), ଏବଂ
+  `httpOnly` `oidc_state` cookieରେ ସଞ୍ଚିତ ଏକ ରାଣ୍ଡମ୍ `state` ସହିତ IdPକୁ redirect କରେ।
+- `GET /api/auth/oidc/callback` `state`କୁ ଯାଞ୍ଚ କରେ, authorization
+  code ବଦଳାଏ, ଏବଂ issuerର JWKS ମାଧ୍ୟମରେ ID tokenର signature ଯାଞ୍ଚ କରେ
+  (`jose`ର `createRemoteJWKSet`, ପ୍ରତ୍ୟେକ JWKS URI ପାଇଁ cached), ସହିତ
+  `issuer`/`audience` ଯାଞ୍ଚ କରେ। Dashboardରେ ପ୍ରବେଶ ପାଇଁ ଏକ ଖାଲି ନଥିବା
+  `oidcAllowedSubjects` ତାଲିକା, ଏକ `oidcAdmissionClaim` policy, କିମ୍ବା ଉଭୟ
+  ଆବଶ୍ୟକ। Subject ତାଲିକା `sub` କିମ୍ବା `email` ସହିତ କେବଳ
+  `email_verified === true` ଥିଲେ ମେଳ ଖାଏ। ଇଚ୍ଛାଧୀନ claim policy ଏକ
+  dot-separated ID-token claim path (ଉଦାହରଣସ୍ୱରୂପ, `realm_access.roles`) ଏବଂ
+  ଗ୍ରହଣଯୋଗ୍ୟ ମୂଲ୍ୟଗୁଡ଼ିକର ଏକ array ନିଏ; ନିର୍ଦ୍ଧାରିତ claimଟି stringsର ଏକ
+  array ହୋଇଥିବା ସହିତ ଅତି କମରେ ଗୋଟିଏ ଗ୍ରହଣଯୋଗ୍ୟ ମୂଲ୍ୟ ଧାରଣ କରିଥିବା
+  ଆବଶ୍ୟକ। ଉଭୟ policy କନଫିଗର୍ ହୋଇଥିଲେ, ଉଭୟ ସଫଳ ହେବା ଆବଶ୍ୟକ।
+  ନଥିବା/ଭୁଲ ଆକୃତିର claimଗୁଡ଼ିକ ସୁରକ୍ଷା ଦୃଷ୍ଟିରୁ ବିଫଳ ହୁଅନ୍ତି, ଏବଂ
+  ଉଭୟ policy ନଥିଲେ callback loginକୁ ଅସ୍ୱୀକାର କରେ (`not_configured`)।
+  ପୂର୍ବରୁ ଥିବା କେବଳ-subject କନଫିଗରେସନଗୁଡ଼ିକ ଅପରିବର୍ତ୍ତିତ ଭାବେ ଚାଲୁ ରହେ।
+- Keycloak ସାଧାରଣତଃ realm rolesକୁ access tokenରେ map କରେ, ID tokenରେ
+  ଅବଶ୍ୟ ନୁହେଁ। realm role `admin` ଆବଶ୍ୟକ କରିବାକୁ, ଏହି client ପାଇଁ ଏକ
+  protocol mapper କନଫିଗର୍ କରନ୍ତୁ ଯାହା `realm_access.roles`କୁ ଏହାର
+  **ID token**ରେ ସାମିଲ କରେ, ତାପରେ `oidcAdmissionClaim`କୁ
   `{ "path": "realm_access.roles", "values": ["admin"] }` ଭାବେ ସେଟ୍ କରନ୍ତୁ।
-  କେବଳ role-ଆଧାରିତ ପ୍ରବେଶ ସକ୍ଷମ କରିବା ପୂର୍ବରୁ ଏହି client ପାଇଁ ପ୍ରକୃତ ID-token claim
-  ଯାଞ୍ଚ କରନ୍ତୁ; applicationଟି access-token roleଗୁଡ଼ିକ ପଢ଼େ ନାହିଁ। IdP ପକ୍ଷର token
-  ପ୍ରତ୍ୟାଖ୍ୟାନ ଏହି application-side ଯାଞ୍ଚକୁ ପରିପୂରକ କରିପାରେ, କିନ୍ତୁ ଏହାକୁ ପ୍ରତିସ୍ଥାପନ କରେ ନାହିଁ।
-- ସଫଳ ହେଲେ, ଏହା password login ଦ୍ୱାରା ଜାରି ହେଉଥିବା **ଠିକ୍ ସେହି** 30-ଦିନିଆ `auth_token`
-  JWT ଜାରି କରେ (`src/app/api/auth/login/route.ts`), ତେଣୁ dashboard
-  session pipelineର ଅବଶିଷ୍ଟ ଅଂଶ (auto-refresh, cookie flagଗୁଡ଼ିକ) ଅପରିବର୍ତ୍ତିତ ରହେ —
-  OIDC କେବଳ cookieଟି କିପରି ଜାରି ହୁଏ ତାହା ପ୍ରତିସ୍ଥାପନ କରେ, ଏହା କେଉଁ ଅନୁମତି ଦିଏ ତାହା ନୁହେଁ। IdP
-  role/groupଗୁଡ଼ିକର ପରିବର୍ତ୍ତନ ବିଦ୍ୟମାନ OmniRoute sessionଗୁଡ଼ିକୁ ଅବୈଧ କରେ ନାହିଁ; logout,
-  password rotation କିମ୍ବା sessionର ମିଆଦ ସମାପ୍ତି ଏବେ ମଧ୍ୟ ସେଗୁଡ଼ିକର ଜୀବନକାଳ ନିୟନ୍ତ୍ରଣ କରେ।
+  role-only admission ସକ୍ରିୟ କରିବା ପୂର୍ବରୁ ଏହି client ପାଇଁ ପ୍ରକୃତ ID-token
+  claim ଯାଞ୍ଚ କରନ୍ତୁ; application access-token roles ପଢ଼େ ନାହିଁ। IdP-ପକ୍ଷର
+  token ଅସ୍ୱୀକାର ଏହି application-ପକ୍ଷର ଯାଞ୍ଚକୁ ପୂରକ କରିପାରେ, କିନ୍ତୁ
+  ଏହାର ପରିବର୍ତ୍ତେ ବ୍ୟବହୃତ ହୋଇପାରେ ନାହିଁ।
+- ସଫଳତା ପରେ ଏହା password login ଦ୍ୱାରା ଜାରି ହେଉଥିବା **ଠିକ୍ ସେହି**
+  30-ଦିନିଆ `auth_token` JWT (`src/app/api/auth/login/route.ts`) ତିଆରି କରେ,
+  ତେଣୁ dashboard session pipelineର ଅନ୍ୟାନ୍ୟ ଅଂଶ (auto-refresh, cookie flags)
+  ଅପରିବର୍ତ୍ତିତ ରହେ — OIDC କେବଳ cookie କିପରି ତିଆରି ହୁଏ ତାହାକୁ ବଦଳାଏ,
+  ଏହା କଣ ଅନୁମତି ଦିଏ ତାହାକୁ ନୁହେଁ। IdP roles/groupsର ପରିବର୍ତ୍ତନ
+  ପୂର୍ବରୁ ଥିବା OmniRoute sessionsକୁ ଅବୈଧ କରେ ନାହିଁ; logout, password
+  rotation କିମ୍ବା session expiry ହିଁ ସେମାନଙ୍କର ଅବଧି ନିର୍ଦ୍ଧାରଣ କରେ।
 - ପ୍ରତ୍ୟେକ `oidc*` setting (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) `SECURITY_IMPACTING_SETTINGS_KEYS`ରେ ଅଛି
-  (`src/shared/constants/securityImpactingSettings.ts`): bodyରେ management
-  passwordଟି `currentPassword` ଭାବେ ନଥିଲେ `PATCH /api/settings`
-  `400 PASSWORD_REQUIRED` ଉତ୍ତର ଦିଏ (ଏହା ଭୁଲ୍ ଥିଲେ `401 PASSWORD_MISMATCH`)।
-  `oidcDisablePasswordLogin`, password _login_ (`POST /api/auth/login`)କୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ,
-  କିନ୍ତୁ ସଂରକ୍ଷିତ password hashକୁ ରଖେ, ଏବଂ ପୁନଃ-ପ୍ରମାଣୀକରଣ ଏବେ ମଧ୍ୟ
-  `currentPassword`କୁ ଏହା ସହିତ ଯାଞ୍ଚ କରେ।
-- `corsOrigins` ଏବଂ `bruteForceProtection` ମଧ୍ୟ `SECURITY_IMPACTING_SETTINGS_KEYS`ରେ
-  ଅଛି: ଏମାନଙ୍କ ମଧ୍ୟରୁ କୌଣସିଟିକୁ ଶିଥିଳ କଲେ login ପ୍ରତିରକ୍ଷା ଦୁର୍ବଳ ହୁଏ, ତେଣୁ ସେଗୁଡ଼ିକ ପାଇଁ ସମାନ
-  `currentPassword` ପୁନଃ-ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ (ସୁରକ୍ଷା tab ଏହା ମାଗେ) ଏବଂ JSON import
-  ସେଗୁଡ଼ିକୁ ବାଦ ଦିଏ।
-- ପ୍ରତ୍ୟେକ security-policy key — `SECURITY_IMPACTING_SETTINGS_KEYS` entryଗୁଡ଼ିକ,
-  ପ୍ରତ୍ୟେକ `oidc*` key ଏବଂ dashboard session state — `PATCH /api/settings`ରେ
-  **କେବଳ operator ପାଇଁ** ଉପଲବ୍ଧ: manage-scoped API key କିମ୍ବା ଏକ `oma_` access token
-  ସଠିକ୍ `currentPassword` ପଠାଇଲେ ମଧ୍ୟ `403` ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ, ଏବଂ ଏହି
-  ପ୍ରତ୍ୟାଖ୍ୟାନଟି `reason: OPERATOR_REQUIRED` ସହିତ `settings.update_failed` ଭାବେ audit ହୁଏ
-  (`src/lib/api/operatorCredential.ts`ରେ `requireOperatorCredential()`)।
-  ସାଧାରଣ settingଗୁଡ଼ିକ (theme, display preferenceଗୁଡ଼ିକ) ଏକ `manage` key
-  କିମ୍ବା `admin` access token ଦ୍ୱାରା ଏବେ ମଧ୍ୟ ଲେଖାଯାଇପାରିବ। `/api/settings`ର ପ୍ରତ୍ୟେକ mutation
-  (ଏବଂ `/api/settings/require-login`ର ମଧ୍ୟ) ପାଇଁ `admin` access-token scope
-  ମଧ୍ୟ ଆବଶ୍ୟକ (`src/server/authz/accessScopes.ts`ରେ `ADMIN_MUTATION_EXACT_PATHS`, exact-path
-  match); `GET` `read` ହିଁ ରହେ, ଏବଂ ଅନ୍ୟ `/api/settings/*` sub-routeଗୁଡ଼ିକ (proxy,
-  combo default, model alias, compression, purge…) methodରୁ ଅନୁମାନିତ
-  `write` scope ବଜାୟ ରଖନ୍ତି।
-- `POST /api/settings/import-json` ସେହି ପୁନଃ-ପ୍ରମାଣୀକରଣକୁ ଏଡ଼ାଇଯାଏ, ତେଣୁ ଲେଖିବା ପୂର୍ବରୁ ଏହା
-  `IMPORT_STRIPPED_SETTINGS_KEYS`ରେ ଥିବା ପ୍ରତ୍ୟେକ keyକୁ (ସେହି file) ବାଦ ଦିଏ: password ଏବଂ
-  `currentPassword`, ପ୍ରତ୍ୟେକ `SECURITY_IMPACTING_SETTINGS_KEYS` entry, ଏବଂ
-  dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`)।
-  ତେଣୁ ଏକ ପୁରୁଣା backup import କରିବା ଦ୍ୱାରା password ପରିବର୍ତ୍ତନ କିମ୍ବା sign-out ଯୋଗୁଁ
-  ପୂର୍ବରୁ ସମାପ୍ତ ହୋଇଥିବା session ପୁନଃସକ୍ରିୟ ହୋଇପାରିବ ନାହିଁ।
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`)କୁ
+  `SECURITY_IMPACTING_SETTINGS_KEYS`ରେ ରଖାଯାଇଛି
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  `400 PASSWORD_REQUIRED` ଉତ୍ତର ଦିଏ, ଯଦିନା bodyରେ management password
+  `currentPassword` ଭାବେ ରହିଥାଏ (`401 PASSWORD_MISMATCH` ଯେତେବେଳେ ଏହା
+  ଭୁଲ ଥାଏ)। `oidcDisablePasswordLogin` password _login_କୁ
+  (`POST /api/auth/login`) ଅସ୍ୱୀକାର କରେ, କିନ୍ତୁ ସଞ୍ଚିତ password hashକୁ
+  ରଖିଥାଏ, ଏବଂ re-auth ଏହା ବିରୋଧରେ `currentPassword` ଯାଞ୍ଚ କରେ।
+- `corsOrigins` ଏବଂ `bruteForceProtection` ମଧ୍ୟ
+  `SECURITY_IMPACTING_SETTINGS_KEYS`ରେ ଅଛି: ଯେକୌଣସିଟିକୁ ଶିଥିଳ କରିବା
+  login defensesକୁ ଦୁର୍ବଳ କରେ, ତେଣୁ ସେମାନଙ୍କ ପାଇଁ ମଧ୍ୟ ସମାନ
+  `currentPassword` re-auth ଆବଶ୍ୟକ (Security tab ଏହା ମାଗେ) ଏବଂ JSON
+  import ସେମାନଙ୍କୁ ଛାଡ଼ି ଦିଏ।
+- ପ୍ରତ୍ୟେକ security-policy key — `SECURITY_IMPACTING_SETTINGS_KEYS`ର
+  entries, ପ୍ରତ୍ୟେକ `oidc*` key ଏବଂ dashboard session state — `PATCH /api/settings`
+  ଉପରେ **କେବଳ operator ପାଇଁ**: manage-scoped API key କିମ୍ବା `oma_` access
+  token, ସଠିକ୍ `currentPassword` ପଠାଇଲେ ମଧ୍ୟ, `403` ସହିତ ଅସ୍ୱୀକୃତ ହୁଏ,
+  ଏବଂ ଏହି ଅସ୍ୱୀକାରକୁ `reason: OPERATOR_REQUIRED` ସହିତ
+  `settings.update_failed` ଭାବେ audit କରାଯାଏ
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`)।
+  ସାଧାରଣ settings (theme, display preferences) `manage` key କିମ୍ବା
+  `admin` access token ପାଇଁ ଲେଖିବାଯୋଗ୍ୟ ରହେ। `/api/settings` ନିଜେ
+  (ଏବଂ `/api/settings/require-login`)ର ପ୍ରତ୍ୟେକ mutation ପାଇଁ ମଧ୍ୟ
+  `admin` access-token scope ଆବଶ୍ୟକ
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`,
+  exact-path match); `GET` ଏବେ ମଧ୍ୟ `read` ରହେ, ଏବଂ ଅନ୍ୟ
+  `/api/settings/*` sub-routes (proxies, combo defaults, model aliases,
+  compression, purges…) method-inferred `write` scope ରଖନ୍ତି।
+- `POST /api/settings/import-json` ସେହି re-authକୁ ଏଡ଼ାଇଯାଏ, ତେଣୁ ଲେଖିବା
+  ପୂର୍ବରୁ `IMPORT_STRIPPED_SETTINGS_KEYS`ରେ ଥିବା ପ୍ରତ୍ୟେକ keyକୁ (ସେହି
+  fileରେ) ଛାଡ଼ି ଦିଏ: password ଏବଂ `currentPassword`,
+  `SECURITY_IMPACTING_SETTINGS_KEYS`ର ପ୍ରତ୍ୟେକ entry, ଏବଂ dashboard
+  session state (`sessionsValidAfter`, `revokedDashboardSessions`)।
+  ତେଣୁ ପୁରୁଣା backup import କଲେ ମଧ୍ୟ password ପରିବର୍ତ୍ତନ କିମ୍ବା sign-out
+  ଦ୍ୱାରା ପୂର୍ବରୁ ସମାପ୍ତ ହୋଇଥିବା sessionକୁ ପୁନର୍ଜୀବିତ କରିହେବ ନାହିଁ।
+
+#### ଇଚ୍ଛାଧୀନ TOTP ଦୁଇ-ସ୍ତରୀୟ login (#16619)
+
+Settings → Securityରୁ enroll କରାଯାଏ; operator ଏହାକୁ ସକ୍ରିୟ ନକରିବା ପର୍ଯ୍ୟନ୍ତ
+ଏହା ବନ୍ଦ ରହେ (`src/server/auth/dashboardMfa.ts`)।
+
+- **ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ:** ପାସୱାର୍ଡ ଲଗଇନ୍ (`POST /api/auth/login`, ଯାହା ପରେ
+  `POST /api/auth/mfa/verify` ଆବଶ୍ୟକ କରେ) ଏବଂ `omniroute connect` (`POST /api/cli/connect`,
+  ଯାହା କେବଳ ପାସୱାର୍ଡ ଆଧାରିତ ବିନିମୟକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ ଏବଂ କୋଡ୍କୁ `totp` ଭାବେ ଗ୍ରହଣ କରେ)।
+- **ଏଥିରେ ଅନ୍ତର୍ଭୁକ୍ତ ନୁହେଁ:** OIDC / SSO ସାଇନ୍-ଇନ୍ (`/api/auth/oidc/callback`) OmniRoute TOTP
+  ଚାହେଁ ନାହିଁ। ଏହା ପରିଚୟ ପ୍ରଦାନକାରୀଙ୍କ ନିଜସ୍ୱ ଦ୍ୱିତୀୟ ପ୍ରମାଣୀକରଣ ଉପରେ ନିର୍ଭର କରେ, ତେଣୁ OIDC ସକ୍ଷମ
+  ଥିଲେ IdP ରେ MFA ବାଧ୍ୟତାମୂଳକ କରନ୍ତୁ।
+- **ପୁନରୁଦ୍ଧାର** (ଡିଭାଇସ୍ ହଜିଗଲେ, କୌଣସି ପୁନରୁଦ୍ଧାର କୋଡ୍ ବାକି ନଥିଲେ, କିମ୍ବା ଯେପରିକି
+  `STORAGE_ENCRYPTION_KEY` ପରିବର୍ତ୍ତନ ହେବା ପରେ କୌଣସି ଫ୍ୟାକ୍ଟର୍କୁ ଆଉ ପ୍ରମାଣିତ
+  କରାଯାଇପାରୁ ନଥିଲେ):
+  1. `OMNIROUTE_DISABLE_MFA=true` ସହ ସର୍ଭର୍କୁ ପୁନରାରମ୍ଭ କରନ୍ତୁ।
+  2. ନିଜେ ହୋଷ୍ଟ୍ରେ (ଲୁପ୍ବ୍ୟାକ୍ ପିୟର୍ ଏବଂ ଲୁପ୍ବ୍ୟାକ୍ `Host`, ଯେପରିକି
+     `http://localhost:20128`) ପାସୱାର୍ଡ ସହ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ। କେବଳ ସେହି ଅରିଜିନ୍ ପାଇଁ ଦ୍ୱିତୀୟ
+     ଫ୍ୟାକ୍ଟର୍ ଛାଡ଼ି ଦିଆଯାଏ; ଅନ୍ୟ ପ୍ରତ୍ୟେକ ଅରିଜିନ୍ ପାଇଁ ଏବେ ମଧ୍ୟ କୋଡ୍ ଆବଶ୍ୟକ।
+  3. ସେଟିଂସ୍ → ସୁରକ୍ଷା → ନିଷ୍କ୍ରିୟ କରନ୍ତୁକୁ ଯାଇ, ପାସୱାର୍ଡ ଦିଅନ୍ତୁ ଏବଂ କୋଡ୍କୁ ଖାଲି ରଖନ୍ତୁ।
+     `POST /api/auth/mfa/disable` କେବଳ ଭେରିଏବଲ୍ ସେଟ୍ ଥିବାବେଳେ ଏବଂ ଅନୁରୋଧଟି ହୋଷ୍ଟ୍ରୁ
+     ଆସିଥିଲେ `code` ବିନା ଏକ ବଡି ଗ୍ରହଣ କରେ; ଏଥିପାଇଁ ଡ୍ୟାସ୍ବୋର୍ଡ୍ ସେସନ୍ ଏବଂ ବର୍ତ୍ତମାନର
+     ପାସୱାର୍ଡ ଏବେ ମଧ୍ୟ ଆବଶ୍ୟକ, ଏବଂ ଏହାକୁ `auth.mfa.disabled` ଭାବେ
+     `secondFactor: "recovery_switch"` ସହ ଅଡିଟ୍ କରାଯାଏ।
+  4. `OMNIROUTE_DISABLE_MFA` ଅନସେଟ୍ କରନ୍ତୁ, ପୁନରାରମ୍ଭ କରନ୍ତୁ ଏବଂ ଆବଶ୍ୟକ ହେଲେ ପୁଣିଥରେ
+     ନିବନ୍ଧନ କରନ୍ତୁ।
 
 ## ରାଉଟ୍ ଶ୍ରେଣୀ
 
@@ -160,31 +193,32 @@ Incoming request → src/proxy.ts
 
 ଏକ ସଫଳ ନୀତି `AuthSubject` ସହିତ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ଫେରସ୍ତ କରେ \| ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡେଲର୍ମାନେ auth ତର୍କକୁ ପୁନ running ଚଲାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts` ରେ `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ପ read ିପାରିବେ \|
 
-## ସାର୍ବଜନୀନ ରୁଟ୍ଗୁଡ଼ିକର ତାଲିକା
+## ସାର୍ବଜନୀନ ରୁଟ୍ ତାଲିକା
 
 `src/shared/constants/publicApiRoutes.ts` ହେଉଛି ସ୍ପଷ୍ଟ ଅନୁମୋଦିତ ତାଲିକା:
 
-ତାଲିକାଟି **ଆକୃତି** ଅନୁସାରେ ବିଭକ୍ତ, ଏବଂ ଏହି ବିଭାଜନଟି ଅତ୍ୟନ୍ତ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ (GHSA-74g9-q8f6-793h): ଏକ ଉପସର୍ଗକୁ
-`startsWith()` ସହିତ ମେଳ କରାଯାଏ, ତେଣୁ ଏହାର ପ୍ରାରମ୍ଭିକ ଅକ୍ଷରଗୁଡ଼ିକ ସମାନ ଥିବା ପ୍ରତ୍ୟେକ ସଂଲଗ୍ନ ପଥ ସହିତ ମଧ୍ୟ ଏହା ମେଳ ଖାଏ।
-ଉପସର୍ଗ ଭାବରେ `/api/usage/om-usage`, `/api/usage/om-usage<anything>`କୁ ସାର୍ବଜନୀନ ଭାବେ ଚିହ୍ନିତ କରିଥିଲା, ଏବଂ Next ଏହାକୁ
-`/api/usage/[connectionId]` ଭାବରେ ସମାଧାନ କରେ — ଏପରି ଏକ ହ୍ୟାଣ୍ଡଲର୍ ଯାହାର ନିଜସ୍ୱ ପ୍ରମାଣୀକରଣ ନାହିଁ।
+ତାଲିକାଟି **ଆକୃତି** ଅନୁସାରେ ବିଭକ୍ତ, ଏବଂ ଏହି ବିଭାଜନଟି ଅତ୍ୟନ୍ତ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ (GHSA-74g9-q8f6-793h): ଏକ prefix କୁ
+`startsWith()` ଦ୍ୱାରା ମେଳ କରାଯାଏ, ତେଣୁ ଏହା ଆରମ୍ଭିକ ଅକ୍ଷରଗୁଡ଼ିକ ସମାନ ଥିବା ପ୍ରତ୍ୟେକ ସନ୍ନିହିତ path ସହିତ ମଧ୍ୟ ମେଳ ଖାଏ।
+`/api/usage/om-usage` କୁ prefix ଭାବେ ଚିହ୍ନିତ କରି `/api/usage/om-usage<anything>` କୁ PUBLIC କରାଯାଇଛି, ଏବଂ Next ଏହାକୁ
+`/api/usage/[connectionId]` ରେ resolve କରେ — ଯାହାର ନିଜସ୍ୱ auth ନାହିଁ।
 
 ```ts
-// ପ୍ରକୃତ ଉପବୃକ୍ଷଗୁଡ଼ିକ। ପ୍ରତ୍ୟେକ ଏଣ୍ଟ୍ରି "/"ରେ ଶେଷ ହେବା ଆବଶ୍ୟକ (ଏକ ୟୁନିଟ୍ ପରୀକ୍ଷା ଦ୍ୱାରା ଏହା ନିଶ୍ଚିତ କରାଯାଇଛି)।
+// ପ୍ରକୃତ subtrees। ପ୍ରତ୍ୟେକ entry ନିଶ୍ଚିତ ଭାବେ "/" ରେ ଶେଷ ହେବା ଆବଶ୍ୟକ (ଏକ unit test ଦ୍ୱାରା ଯାଞ୍ଚିତ)।
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classifyରେ CLIENT_API ଭାବେ ବିବେଚିତ, "ପ୍ରମାଣୀକରଣ-ବିହୀନ ସାର୍ବଜନୀନ" ଭାବେ ନୁହେଁ
+  "/api/v1/", // classify ରେ CLIENT_API ଭାବେ ବିବେଚିତ, "no-auth public" ଭାବେ ନୁହେଁ
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// ଏକକ ରୁଟ୍ଗୁଡ଼ିକ, ଠିକ୍ ଭାବରେ ମେଳ କରାଯାଏ (ଶେଷରେ ସ୍ଲାସ୍ ଥାଉ କିମ୍ବା ନଥାଉ)।
+// କେବଳ ଏକକ ରୁଟ୍, ନିଖୁତ ଭାବେ ମେଳ କରାଯାଏ (ଶେଷରେ trailing slash ଥାଉ କିମ୍ବା ନଥାଉ)।
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // opt-in TOTP ପାଇଁ login ପଦକ୍ରମ 2; MFA-pending cookie ଆବଶ୍ୟକ
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -192,20 +226,20 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/skills/collect/chaos",
 ]);
 
-// କେବଳ-ପଠନୀୟ ଏକକ ରୁଟ୍ଗୁଡ଼ିକ, ଯେଉଁଗୁଡ଼ିକ CORS ଉତ୍ସ ଶିଥିଳତା ମଧ୍ୟ ପାଆନ୍ତି।
+// କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ଏକକ ରୁଟ୍, ଯେଉଁଗୁଡ଼ିକ CORS origin relaxation ମଧ୍ୟ ଗ୍ରହଣ କରନ୍ତି।
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS ଶିଥିଳତା ବିନା କେବଳ-ପଠନୀୟ ଏକକ ରୁଟ୍।
+// CORS relaxation ବିନା କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ଏକକ ରୁଟ୍।
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-କେବଳ-ପଠନୀୟ ରୁଟ୍ଗୁଡ଼ିକ ସୁରକ୍ଷିତ ପଦ୍ଧତି ପାଇଁ **କେବଳ** ସାର୍ବଜନୀନ। ଧ୍ୟାନ ଦିଅନ୍ତୁ: `classifyRoute()`, `/api/v1/*` ଏବଂ `/api/v1beta/*`କୁ PUBLIC ଫଲ୍-ଥ୍ରୁରୁ ବାଦ ଦିଏ — ସେଗୁଡ଼ିକ ସର୍ବଦା `CLIENT_API`, ତେଣୁ Bearer-କୀ ନୀତି ଏବେ ମଧ୍ୟ ପ୍ରୟୋଗ ହୁଏ।
+କେବଳ ସୁରକ୍ଷିତ methods ପାଇଁ ହିଁ କେବଳ ପଢ଼ିବାଯୋଗ୍ୟ ରୁଟ୍ଗୁଡ଼ିକ ସାର୍ବଜନୀନ। ଟିପ୍ପଣୀ: `classifyRoute()` PUBLIC fall-through ରୁ `/api/v1/*` ଏବଂ `/api/v1beta/*` କୁ ବାଦ ଦିଏ — ତେଣୁ ସେଗୁଡ଼ିକ ସର୍ବଦା `CLIENT_API`, ଏବଂ Bearer-key policy ଏଥିରେ ପ୍ରୟୋଗ ହୁଏ।
 
 ## ଏକ ନୂତନ ରୁଟ୍ ଯୋଡ଼ିବା
 

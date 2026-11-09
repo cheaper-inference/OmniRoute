@@ -65,38 +65,37 @@ importación del HAR descodifica la caducidad del JWT y muestra el tiempo de val
 > **Nunca confirme en un repositorio una exportación HAR real, un token de acceso ni un token de actualización.** Los valores de prueba y
 > documentación siempre deben ser marcadores de posición.
 
-## Duración y actualización del token
+## Duración y renovación del token
 
-El `access_token` tiene una duración breve (normalmente **~75 minutos**). Tras caducar, el proveedor
-informa de un error de conexión y debe volver a obtener la credencial.
+El `access_token` tiene una duración corta (normalmente **~75 minutos**). Sin un token de
+renovación utilizable, debes volver a capturar la credencial cuando caduque.
 
-### Actualización automática con `refreshToken`
+### Renovación automática con `refreshToken`
 
-Para evitar tener que volver a obtenerla manualmente, puede almacenar un token de actualización de Microsoft en
-**Advanced Settings → providerSpecificData** de la conexión:
+En el cuadro de diálogo **Añadir conexión** o **Editar conexión** del proveedor de Microsoft 365, abre
+**Configuración avanzada → Token de renovación (opcional)**. Pega un token de renovación de Microsoft OAuth
+para el ámbito `substrate.office.com/sydney` y guarda. La entrada está enmascarada y nunca se
+rellena previamente con el token almacenado. Al editar, déjala en blanco para conservar el token existente;
+pega un token nuevo para reemplazarlo.
 
-| Campo          | Descripción                                                                            |
-| -------------- | -------------------------------------------------------------------------------------- |
-| `refreshToken` | Token de actualización OAuth de Microsoft para el ámbito `substrate.office.com/sydney` |
-| `tier`         | `individual` (predeterminado), `edu` o `enterprise`                                    |
+Obtén el token de renovación mediante un flujo de código de dispositivo o de código de autorización de Microsoft
+con el ámbito `substrate.office.com/sydney`; el panel no lo obtiene por ti.
+Con un token de renovación configurado, OmniRoute comprueba el `access_token` antes de las solicitudes
+y lo renueva solo cuando necesita renovarlo. Una renovación correcta también conserva el token de renovación
+rotado, lo que evita tener que volver a capturarlo manualmente mientras el token de renovación siga siendo válido.
 
-Obtenga el token de actualización mediante un flujo de código de dispositivo o de código de autorización de Microsoft
-con el ámbito `substrate.office.com/sydney`. Con `refreshToken` configurado, OmniRoute
-actualiza previamente el `access_token` antes de cada solicitud, por lo que no es necesario
-volver a obtenerlo tras cada caducidad de ~75 minutos.
-
-Si `refreshToken` no está configurado, deberá volver a obtener manualmente la credencial de WebSocket
+Si no se ha establecido `refreshToken`, debes volver a capturar manualmente la credencial de WebSocket
 después de cada caducidad.
 
 ### Selección del nivel
 
-| Nivel        | Alias              | Superficie                     |
-| ------------ | ------------------ | ------------------------------ |
-| `individual` | _(predeterminado)_ | M365 Copilot para consumidores |
-| `edu`        | `included`         | M365 Copilot para educación    |
-| `enterprise` | `work`             | M365 Copilot para el trabajo   |
+| Nivel        | Alias              | Interfaz                          |
+| ------------ | ------------------ | --------------------------------- |
+| `individual` | _(predeterminado)_ | Copilot de M365 para consumidores |
+| `edu`        | `included`         | Copilot de M365 para educación    |
+| `enterprise` | `work`             | Copilot de M365 para el trabajo   |
 
-Configure el nivel en **Advanced Settings → providerSpecificData → tier**. El nivel afecta
+Establece el nivel en **Configuración avanzada → Nivel de Copilot**. El nivel afecta
 al enrutamiento de BizChat y al acceso a los modelos.
 
 ## Modelo de seguridad
@@ -114,28 +113,28 @@ al enrutamiento de BizChat y al acceso a los modelos.
 
 ### La autenticación falla inmediatamente
 
-- Verifique que lo haya copiado de la **URL de WebSocket**, no de una solicitud XHR/Fetch. La
-  credencial se encuentra en el parámetro de consulta `access_token` de la conexión WebSocket
-  de Chathub, no en un encabezado `Authorization: Bearer`.
-- Asegúrese de que `chathubPath` incluya el segmento completo `<oid>@<tenant>` de la ruta
-  de la URL.
+- Verifica que hayas copiado desde la **URL de WebSocket**, no desde una solicitud XHR/Fetch. La
+  credencial se encuentra en el parámetro de consulta `access_token` de la conexión WebSocket de Chathub,
+  no en un encabezado `Authorization: Bearer`.
+- Asegúrate de que `chathubPath` incluya el segmento completo `<oid>@<tenant>` de la ruta de la URL.
 
 ### El token caduca después de unos 75 minutos
 
-Esto es normal. Sin un `refreshToken`, el token de acceso tiene una duración limitada. Puede:
+Esto es lo esperado. Sin un `refreshToken`, el token de acceso tiene una duración breve. Puedes:
 
 - Volver a capturar la credencial desde DevTools, o
-- Configurar un `refreshToken` en Configuración avanzada para que se actualice automáticamente.
+- Configurar **Configuración avanzada → Token de actualización (opcional)** en el cuadro de diálogo Agregar o editar
+  conexión para actualizarlo automáticamente.
 
-### La prueba de conexión se supera, pero el chat devuelve 401
+### La prueba de conexión se realiza correctamente, pero el chat devuelve 401
 
-Es posible que el token haya caducado entre la validación y la primera solicitud. Vuelva a capturar una
-credencial nueva.
+Es posible que el token haya caducado entre la validación y la primera solicitud. Vuelve a capturar una credencial
+nueva.
 
 ### Copilot no aparece en la lista de proveedores
 
-Asegúrese de que `copilot-m365-web` esté habilitado en **Panel de control → Proveedores**. Es posible que el proveedor
-esté oculto de forma predeterminada en algunos niveles.
+Asegúrate de que `copilot-m365-web` esté habilitado en **Panel → Proveedores**. El proveedor puede
+estar oculto de forma predeterminada en algunos niveles.
 
 ## Referencias
 

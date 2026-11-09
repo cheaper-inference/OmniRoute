@@ -630,17 +630,17 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 <details>
 <summary><b>Lihat semua model yang tersedia</b></summary>
 
-> Daftar di bawah ini dikurasi dari `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog cloud (Gemini, OpenRouter, dll.) disinkronkan secara dinamis — untuk melihat katalog live lengkap, buka **Dasbor → Penyedia → [penyedia] → Model yang Tersedia** atau panggil `GET /api/models/catalog`.
+> Daftar di bawah ini dikurasi dari `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog cloud (Gemini, OpenRouter, dll.) disinkronkan secara dinamis — untuk katalog live lengkap, buka **Dashboard → Providers → [provider] → Available Models** atau panggil `GET /api/models/catalog`.
 >
-> Jika daftar bawaan suatu penyedia sudah tidak sesuai, gunakan **Impor dari /models** pada halaman tersebut (atau aktifkan **Sinkronisasi Otomatis**) untuk mengambil katalog upstream live. Hal ini diverifikasi pada v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses anonim Pollinations tetap dibatasi oleh upstream selama rangkaian pengujian yang sama.
+> Jika daftar bawaan suatu provider sudah tidak sesuai, gunakan **Import from /models** di halaman tersebut (atau aktifkan **Auto-Sync**) untuk mengambil katalog upstream live. Hal ini diverifikasi di v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses anonim Pollinations tetap dibatasi oleh upstream selama rangkaian pengujian yang sama.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ tingkat upaya: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ tingkat effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATIS: gunakan katalog live yang ditampilkan di **Dasbor → Penyedia → Kiro → Model yang Tersedia**. Ketersediaan bergantung pada akun dan paket.
+**Kiro (`kr/`)** — OAuth GRATIS: gunakan katalog live yang ditampilkan di **Dashboard → Providers → Kiro → Available Models**. Ketersediaan bergantung pada akun dan paket.
 
 **Qoder (`if/`)** — OAuth GRATIS: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -650,7 +650,7 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 **Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/bln tetap atau berdasarkan penggunaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — Kunci API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — kunci API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Sangat cepat: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
@@ -660,7 +660,7 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 **Perplexity (`pplx/`)** — Dilengkapi pencarian: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Sumber terbuka: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inferensi cepat: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -668,17 +668,17 @@ Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
 
 **Cohere (`cohere/`)** — Berfokus pada RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Disinkronkan secara live berdasarkan kunci API dari Google — tidak ada daftar statis. Hubungkan kunci di **Dasbor → Penyedia**, lalu gunakan **Model yang Tersedia** untuk mengimpor katalog terbaru (misalnya `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Disinkronkan secara live berdasarkan kunci API dari Google — tidak ada daftar statis. Hubungkan kunci di **Dashboard → Providers**, lalu gunakan **Available Models** untuk mengimpor katalog terbaru (misalnya `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Penyedia kompatibel lainnya** (yang dipilih): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (melalui `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Masing-masing mengelola daftar modelnya sendiri di `providerRegistry.ts` dan dapat disinkronkan otomatis jika penyedia tersebut menyediakan endpoint `/models`.
+**Provider kompatibel lainnya** (pilihan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (melalui `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Masing-masing mempertahankan daftar modelnya sendiri di `providerRegistry.ts` dan dapat disinkronkan secara otomatis jika provider menyediakan endpoint `/models`.
 
-**Catatan tentang ID model:** OmniRoute menggunakan ID native penyedia (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Beberapa ID menyertakan versi bertitik karena API upstream mengharuskannya demikian. Jika model tidak tercantum di atas, jalankan `omniroute models --search <term>` atau akses `GET /api/models/catalog` untuk mengonfirmasi ketersediaannya.
+**Catatan tentang ID model:** OmniRoute menggunakan ID native provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Beberapa ID menyertakan versi bertitik karena itulah format yang diharapkan oleh API upstream. Jika model tidak tercantum di atas, jalankan `omniroute models --search <term>` atau akses `GET /api/models/catalog` untuk mengonfirmasi ketersediaannya.
 
 </details>
 

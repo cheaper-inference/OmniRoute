@@ -1,1 +1,0 @@
-- **fix(providers):** Dashboard Test Message accepts Cloudflare Workers AI model IDs beginning with `@cf/` ([#18752](https://github.com/cheaper-inference/OmniRoute/pull/18752)) — thanks @trespassmk

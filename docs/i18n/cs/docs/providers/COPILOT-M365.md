@@ -65,39 +65,39 @@ importu HAR se dekóduje doba vypršení platnosti JWT a zobrazí se zbývajíc�
 > **Nikdy neukládejte skutečný export HAR, přístupový token ani obnovovací token do repozitáře.** Testovací
 > a dokumentační hodnoty musí být vždy zástupné.
 
-## Doba platnosti a obnovení tokenu
+## Životnost tokenu a obnovení
 
-`access_token` má krátkou dobu platnosti (obvykle **~75 minut**). Po vypršení platnosti poskytovatel
-ohlásí chybu připojení a přihlašovací údaj musíte získat znovu.
+`access_token` má krátkou životnost (obvykle **~75 minut**). Bez použitelného tokenu
+pro obnovení musíte po jeho vypršení přihlašovací údaje znovu zachytit.
 
 ### Automatické obnovení pomocí `refreshToken`
 
-Abyste nemuseli přihlašovací údaj získávat znovu ručně, můžete uložit obnovovací token Microsoftu v části
-**Advanced Settings → providerSpecificData** daného připojení:
+V dialogovém okně poskytovatele Microsoft 365 **Přidat připojení** nebo **Upravit připojení** otevřete
+**Pokročilá nastavení → Token pro obnovení (volitelné)**. Vložte token pro obnovení Microsoft OAuth
+pro obor `substrate.office.com/sydney` a uložte jej. Vstup je maskovaný a uložený token se nikdy
+nepředvyplňuje. Při úpravách ponechte pole prázdné, pokud chcete zachovat stávající token;
+vložením nového tokenu jej nahradíte.
 
-| Pole           | Popis                                                                     |
-| -------------- | ------------------------------------------------------------------------- |
-| `refreshToken` | Obnovovací token Microsoft OAuth pro rozsah `substrate.office.com/sydney` |
-| `tier`         | `individual` (výchozí), `edu` nebo `enterprise`                           |
+Token pro obnovení získáte z toku s kódem zařízení Microsoft nebo z toku s autorizačním kódem
+s oborem `substrate.office.com/sydney`; řídicí panel jej za vás nezíská.
+S nakonfigurovaným tokenem pro obnovení kontroluje OmniRoute před požadavky `access_token`
+a obnoví jej pouze v případě, že je obnovení potřeba. Úspěšné obnovení také uloží
+otočený token pro obnovení, takže není nutné přihlašovací údaje znovu ručně zachycovat,
+dokud token pro obnovení zůstává platný.
 
-Obnovovací token získejte prostřednictvím toku s kódem zařízení Microsoftu nebo toku s autorizačním kódem
-s rozsahem `substrate.office.com/sydney`. Pokud je nastaven `refreshToken`, OmniRoute
-preventivně obnoví `access_token` před každým požadavkem, takže jej po každém vypršení platnosti přibližně po 75 minutách
-nemusíte získávat znovu.
-
-Pokud `refreshToken` není nastaven, musíte po každém vypršení platnosti přihlašovací údaj WebSocketu
-získat znovu ručně.
+Pokud `refreshToken` není nastaven, musíte přihlašovací údaje WebSocketu po každém vypršení
+platnosti znovu zachytit ručně.
 
 ### Výběr úrovně
 
-| Úroveň       | Alias       | Varianta                    |
-| ------------ | ----------- | --------------------------- |
-| `individual` | _(výchozí)_ | Spotřebitelský M365 Copilot |
-| `edu`        | `included`  | M365 Copilot pro vzdělávání |
-| `enterprise` | `work`      | M365 Copilot pro práci      |
+| Úroveň       | Alias       | Rozhraní                          |
+| ------------ | ----------- | --------------------------------- |
+| `individual` | _(výchozí)_ | Spotřebitelský M365 Copilot       |
+| `edu`        | `included`  | Vzdělávací M365 Copilot           |
+| `enterprise` | `work`      | M365 Copilot pro pracovní použití |
 
-Nastavte úroveň v části **Advanced Settings → providerSpecificData → tier**. Úroveň ovlivňuje
-směrování BizChat a přístup k modelům.
+Úroveň nastavte v části **Pokročilá nastavení → Úroveň Copilotu**. Úroveň ovlivňuje
+směrování BizChatu a přístup k modelům.
 
 ## Bezpečnostní model
 
@@ -112,30 +112,25 @@ směrování BizChat a přístup k modelům.
 
 ## Řešení problémů
 
-### Ověření selže okamžitě
+### Ověření se nezdaří okamžitě
 
-- Ověřte, že jste údaj zkopírovali z **adresy URL WebSocketu**, nikoli z požadavku XHR/Fetch.
-  Přihlašovací údaj se nachází v parametru dotazu `access_token` připojení Chathub WebSocket
-  — nikoli v hlavičce `Authorization: Bearer`.
-- Ujistěte se, že `chathubPath` obsahuje celý segment `<oid>@<tenant>` z cesty
-  adresy URL.
+- Ověřte, že jste zkopírovali z **WebSocket URL**, nikoli z požadavku XHR/Fetch. Přihlašovací údaje jsou v parametru dotazu `access_token` připojení Chathub WebSocket — nikoli v hlavičce `Authorization: Bearer`.
+- Ujistěte se, že `chathubPath` obsahuje celý segment `<oid>@<tenant>` z cesty URL.
 
 ### Platnost tokenu vyprší přibližně po 75 minutách
 
-Jedná se o očekávané chování. Bez `refreshToken` má přístupový token krátkou platnost. Buď:
+To je očekávané. Bez `refreshToken` má přístupový token krátkou platnost. Buď:
 
-- Získejte přihlašovací údaj znovu pomocí DevTools, nebo
-- Nakonfigurujte `refreshToken` v Rozšířených nastaveních pro automatické obnovení.
+- Znovu zachyťte přihlašovací údaje z DevTools, nebo
+- Nakonfigurujte **Advanced Settings → Refresh token (optional)** v dialogu pro přidání nebo úpravu připojení, aby probíhalo automatické obnovení.
 
-### Test připojení projde, ale chat vrací chybu 401
+### Test Connection proběhne úspěšně, ale chat vrací 401
 
-Platnost tokenu mohla vypršet mezi ověřením a prvním požadavkem. Získejte znovu
-aktuální přihlašovací údaj.
+Platnost tokenu mohla vypršet mezi ověřením a prvním požadavkem. Znovu zachyťte aktuální přihlašovací údaje.
 
 ### Copilot se nezobrazuje v seznamu poskytovatelů
 
-Ujistěte se, že je `copilot-m365-web` povolen v části **Řídicí panel → Poskytovatelé**. Poskytovatel může
-být v některých úrovních ve výchozím nastavení skrytý.
+Ujistěte se, že je `copilot-m365-web` povolený v **Dashboard → Providers**. V některých úrovních může být poskytovatel ve výchozím nastavení skrytý.
 
 ## Reference
 

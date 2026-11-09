@@ -6,42 +6,44 @@
 
 🌐 **ဘာသာစကားများ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API အတွက် အဓိက ရည်ညွှန်းစာတမ်း ဖြစ်သည်။ အများပြည်သူအသုံးပြုနိုင်သော `/v1` မျက်နှာပြင်နှင့် အများဆုံးအသုံးပြုသည့် စီမံခန့်ခွဲမှု endpoint များကို ဖော်ပြထားသည်။ စက်ဖြင့်ဖတ်ရှုနိုင်သော [`docs/openapi.yaml`](../openapi.yaml) နှင့် `src/app/api/` အောက်ရှိ route tree တို့သည် အပြည့်အစုံဆုံး အရင်းအမြစ်များ ဖြစ်သည်။
+OmniRoute API အတွက် အဓိကရည်ညွှန်းစာတမ်း ဖြစ်သည်။ အများပြည်သူအသုံးပြုနိုင်သော `/v1` မျက်နှာပြင်နှင့် အသုံးများဆုံး စီမံခန့်ခွဲမှု endpoint များကို ဖော်ပြထားပြီး၊ စက်ဖြင့်ဖတ်ရှုနိုင်သော [`docs/openapi.yaml`](../openapi.yaml) နှင့် `src/app/api/` အောက်ရှိ route tree တို့သည် အပြည့်စုံဆုံး အရင်းအမြစ်များ ဖြစ်သည်။
 
-အာရုံစိုက်ထားသော OpenAI-compatible protocol နှင့် provider capability matrix အတွက်
+OpenAI နှင့် ကိုက်ညီသော protocol နှင့် provider စွမ်းဆောင်ရည် matrix အတွက် သီးသန့်ရည်ရွယ်ထားသော ရည်ညွှန်းချက်ကို ကြည့်ရန်
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) ကို ကြည့်ပါ။
+
+Deployment တစ်ခုစီသည် build ပြုလုပ်စဉ် `docs/openapi.yaml` မှ ထုတ်လုပ်ထားသော spec မိတ္တူကို `/openapi.yaml` တွင် ကိုယ်ပိုင်ပေးဆောင်သည်။ ၎င်းတွင် build ၏ version နှင့် relative server URL (`./`) ပါဝင်သောကြောင့် request များသည် စာရွက်စာတမ်းကို ပေးဆောင်ခဲ့သော host ပေါ်တွင်သာ ဆက်လက်ရှိနေသည်။ ဒေါင်းလုဒ်လုပ်ထားသောဖိုင်ကို import ပြုလုပ်သည့် tool တွင် ထိုကဲ့သို့သော host မရှိသဖြင့် base URL ကို ကိုယ်တိုင် သတ်မှတ်ပေးရန် လိုအပ်သည်။
 
 ---
 
 ## အကြောင်းအရာများ
 
 - [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
+- [သီးသန့် စီမံထားသော Session Lease များ](#exclusive-managed-session-leases)
 - [Embeddings](#embeddings)
 - [Image Generation](#image-generation)
 - [Document OCR](#document-ocr)
-- [List Models](#list-models)
+- [Model များစာရင်း](#list-models)
 - [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
+- [လိုက်ဖက်ညီမှု Endpoints များ](#compatibility-endpoints)
 - [Files API](#files-api)
 - [Batches API](#batches-api)
 - [Search API](#search-api)
 - [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
+- [Quotas နှင့် Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
 - [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
+- [Dashboard နှင့် Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
+- [မှတ်ပုံတင်ထားသော Keys (အလိုအလျောက် စီမံခန့်ခွဲမှု)](#registered-keys-auto-management)
 - [Agents Protocol](#agents-protocol)
 - [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
+- [Resilience (တိုးချဲ့ထားသော)](#resilience-extended)
 - [Skills](#skills)
 - [Memory](#memory)
 - [MCP Server](#mcp-server)
 - [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
+- [Cloud၊ Evals နှင့် Assess](#cloud-evals--assess)
 - [Request Processing](#request-processing)
 - [Authentication](#authentication)
 

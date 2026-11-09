@@ -618,17 +618,17 @@ post_install() {
 <details>
 <summary><b>Переглянути всі доступні моделі</b></summary>
 
-> Наведений нижче список укладено на основі `open-sse/config/providerRegistry.ts` для v3.8.0. Хмарні каталоги (Gemini, OpenRouter тощо) синхронізуються динамічно — щоб переглянути повний актуальний каталог, відкрийте **Панель керування → Постачальники → [постачальник] → Доступні моделі** або виконайте запит `GET /api/models/catalog`.
+> Наведений нижче список укладено на основі `open-sse/config/providerRegistry.ts` для v3.8.0. Хмарні каталоги (Gemini, OpenRouter тощо) синхронізуються динамічно — щоб переглянути повний актуальний каталог, відкрийте **Панель керування → Постачальники → [provider] → Доступні моделі** або виконайте запит `GET /api/models/catalog`.
 >
-> Якщо вбудований список постачальника застарів, скористайтеся пунктом **Імпортувати з /models** на цій сторінці (або ввімкніть **Автосинхронізацію**), щоб отримати актуальний каталог від постачальника. Це було перевірено у v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) і UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонімний доступ до Pollinations залишався обмеженим постачальником під час того самого циклу тестування.
+> Якщо вбудований список постачальника застарів, скористайтеся пунктом **Імпортувати з /models** на цій сторінці (або ввімкніть **Автосинхронізацію**), щоб отримати актуальний каталог із джерела. Це було перевірено у v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) і UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонімний доступ Pollinations під час того самого тестування залишався обмеженим джерелом.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ рівні зусиль: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ рівні effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — БЕЗКОШТОВНИЙ OAuth: скористайтеся актуальним каталогом у розділі **Панель керування → Постачальники → Kiro → Доступні моделі**. Доступність залежить від облікового запису й тарифного плану.
+**Kiro (`kr/`)** — БЕЗКОШТОВНИЙ OAuth: використовуйте актуальний каталог, наведений у розділі **Панель керування → Постачальники → Kiro → Доступні моделі**. Доступність залежить від облікового запису й тарифного плану.
 
 **Qoder (`if/`)** — БЕЗКОШТОВНИЙ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -636,11 +636,11 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — фіксована плата $9/міс. або оплата за використання: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — фіксована плата $9/місяць або оплата за використання: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — ключ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — надшвидкий: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — надзвичайно швидкий: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — нативний Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
@@ -648,25 +648,25 @@ post_install() {
 
 **Perplexity (`pplx/`)** — доповнений пошуком: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — з відкритим кодом: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безкоштовна), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — із відкритим кодом: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безкоштовна), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — швидкий інференс: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — швидкий висновок: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — ваферного масштабу: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — орієнтований на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — корпоративний: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — для підприємств: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: синхронізується в реальному часі для кожного ключа API з Google — статичного списку немає. Підключіть ключ у **Панель керування → Постачальники**, а потім скористайтеся пунктом **Доступні моделі**, щоб імпортувати актуальний каталог (наприклад, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: синхронізується в реальному часі за ключем API від Google — статичного списку немає. Підключіть ключ у **Панель керування → Постачальники**, а потім скористайтеся пунктом **Доступні моделі**, щоб імпортувати актуальний каталог (наприклад, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
 **Інші сумісні постачальники** (вибрані): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (через `aws-bedrock`), `azure-ai`, `openrouter` (каталог із наскрізною передачею), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Кожен із них підтримує власний список моделей у `providerRegistry.ts` і може автоматично синхронізуватися, якщо постачальник надає кінцеву точку `/models`.
 
-**Примітка щодо ідентифікаторів моделей:** OmniRoute використовує нативні для постачальників ідентифікатори (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Деякі ідентифікатори містять версії з крапками, оскільки саме такого формату очікує API постачальника. Якщо моделі немає в списку вище, виконайте `omniroute models --search <term>` або надішліть запит `GET /api/models/catalog`, щоб перевірити її доступність.
+**Примітка щодо ідентифікаторів моделей:** OmniRoute використовує нативні ідентифікатори постачальників (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Деякі ідентифікатори містять версії з крапками, оскільки саме такого формату очікує висхідний API. Якщо моделі немає у списку вище, виконайте `omniroute models --search <term>` або надішліть запит `GET /api/models/catalog`, щоб перевірити її доступність.
 
 </details>
 

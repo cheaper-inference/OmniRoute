@@ -17,7 +17,7 @@ OmniRoute heeft een route-bewuste autorisatiepipeline die elke API-aanvraag afsc
 
 ### 1. API-sleutel (Bearer)
 
-Wordt gebruikt voor de OpenAI-/Anthropic-/Gemini-compatibele client-API's en enkele beheerroutes wanneer de sleutel het bereik `manage` heeft.
+Wordt gebruikt voor de met OpenAI/Anthropic/Gemini compatibele client-API's en enkele beheer-routes wanneer de sleutel de scope `manage` heeft.
 
 ```
 Authorization: Bearer <api-key>
@@ -27,96 +27,132 @@ Gevalideerd door `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth
 
 ### 2. Dashboardsessie (auth_token-cookie)
 
-Voor dashboardpagina's en beheerbewerkingen.
+Voor dashboardpagina's en beheerdersbewerkingen.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Een cookie is alleen een sessie wanneer de JWT is geverifieerd **en** `authenticated: true` bevat
+Een cookie is alleen een sessie wanneer de JWT wordt geverifieerd **en** `authenticated: true` bevat
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Elke
-gebruiker van de cookie (dashboardroutebeveiliging (`isDashboardSessionAuthenticated()`), vernieuwing van de autorisatiepipeline, WebSocket-handshake, live
-server, `/api/settings/require-login`, `/api/auth/status`) gebruikt die helper.
-Er bestaan andere JWT's die met `JWT_SECRET` zijn ondertekend — de Cursor CLI-passthrough maakt
-`iss "omniroute" / aud "cursor-cli"`-tokens aan voor sleutelhouders — maar deze zijn nooit sessies
+gebruiker van de cookie (de routebeveiliging van het dashboard (`isDashboardSessionAuthenticated()`), het vernieuwen van de authz-pipeline, de WebSocket-handshake, de live
+server, `/api/settings/require-login`, `/api/auth/status`) gebruikt deze helper.
+Er bestaan ook andere JWT's die zijn ondertekend met `JWT_SECRET` — de Cursor CLI-passthrough maakt tokens aan met
+`iss "omniroute" / aud "cursor-cli"` voor sleutelhouders — en dit zijn nooit sessies
 (#13298).
 
-Geverifieerd door `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. De pipeline vernieuwt de JWT automatisch wanneer er minder dan 7 dagen resteren van de geldigheidsduur van 30 dagen.
+Gecontroleerd door `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. De pipeline vernieuwt de JWT automatisch wanneer deze nog minder dan 7 dagen geldig is binnen de levensduur van 30 dagen.
 
-Een sessie kan ook eindigen voordat de 30 dagen zijn verstreken, omdat elke tokenuitgever `mintDashboardSessionToken` gebruikt (met een uitgiftetijd `iat` en een id `jti`) en de verifier twee instellingen controleert: `sessionsValidAfter`, die bij een wachtwoordwijziging wordt ingesteld, zodat elke eerder uitgegeven sessie niet langer wordt geverifieerd (de browser waarin het wachtwoord is gewijzigd, ontvangt een nieuwe cookie), en `revokedDashboardSessions`, waaraan `POST /api/auth/logout` de `jti` van de afgemelde sessie toevoegt. Sessies die door een oudere release zijn aangemaakt, bevatten geen van beide claims en blijven geldig tot de eerste wachtwoordwijziging. Als de instellingen niet kunnen worden gelezen, wordt de sessie niet vertrouwd.
+Een sessie kan ook eindigen voordat die 30 dagen voorbij zijn, omdat elke aanmaker via `mintDashboardSessionToken` gaat (een uitgiftetijdstip `iat` en een id `jti`) en de verifier twee instellingen controleert: `sessionsValidAfter`, ingesteld bij een wachtwoordwijziging zodat elke sessie die daarvoor is uitgegeven niet meer wordt geverifieerd (de browser waarin het wachtwoord is gewijzigd krijgt een nieuwe cookie), en `revokedDashboardSessions`, waaraan `POST /api/auth/logout` de `jti` van de afgemelde sessie toevoegt. Sessies die door een oudere release zijn aangemaakt, bevatten geen van beide claims en blijven geldig tot de eerste wachtwoordwijziging. Als de instellingen niet kunnen worden gelezen, wordt de sessie niet vertrouwd.
 
-Sommige beheerroutes accepteren **beide** modi: cookie OF `Bearer <key>` wanneer de API-sleutel het bereik `manage` (of `admin`) heeft. Dit maakt de in v3.8 toegevoegde workflow "configureerbaar via API-aanroepen" mogelijk.
+Sommige beheerroutes accepteren **een van beide** modi: cookie OF `Bearer <key>` wanneer de API-sleutel de scope `manage` (of `admin`) heeft. Dit maakt de workflow "configureerbaar via API-aanroepen" mogelijk die in v3.8 is toegevoegd.
 
-#### Optionele OIDC-inlogbeveiliging (#6973)
+#### Optionele OIDC-aanmeldingsbeperking (#6973)
 
-De beheerdersaanmelding voor het dashboard ondersteunt naast de standaardaanmelding met een wachtwoord ook een **optionele** OIDC-flow (OpenID Connect) — de aanmelding met een wachtwoord wordt nooit verwijderd, maar alleen
-aangevuld:
+De aanmelding bij het dashboardbeheer ondersteunt ook een **opt-in** OIDC-stroom (OpenID Connect)
+naast de standaardaanmelding met een wachtwoord — aanmelden met een wachtwoord wordt nooit verwijderd, maar
+alleen aangevuld:
 
 - Uitgeschakeld tenzij `settings.oidcEnabled === true` **en** `oidcIssuer` /
   `oidcClientId` / `oidcClientSecret` allemaal zijn geconfigureerd (Instellingen → Authenticatie).
-  Anders retourneert `GET /api/auth/oidc/login` de status `400`.
-- `GET /api/auth/oidc/login` haalt het `authorization_endpoint` op uit de
-  `/.well-known/openid-configuration` van de issuer (met
-  `<issuer>/authorize` als terugvaloptie), stelt de redirect-URI samen op basis van het inkomende verzoek
-  (met ondersteuning voor `x-forwarded-proto`) en leidt door naar de IdP met een willekeurige `state`
-  die wordt opgeslagen in een `httpOnly`-cookie met de naam `oidc_state`.
-- `GET /api/auth/oidc/callback` valideert `state`, wisselt de autorisatiecode
-  in en verifieert de handtekening van het ID-token via de JWKS van de issuer
-  (`createRemoteJWKSet` van `jose`, gecachet per JWKS-URI), met controles voor `issuer`/`audience`.
-  Toegang tot het dashboard vereist een niet-lege lijst `oidcAllowedSubjects`,
-  een beleid in `oidcAdmissionClaim`, of beide. De lijst met subjects vergelijkt `sub` of
-  `email` alleen wanneer `email_verified === true`. Het optionele claimbeleid gebruikt
-  een door punten gescheiden pad naar een claim in het ID-token (bijvoorbeeld `realm_access.roles`) en
-  een array met geaccepteerde waarden; de gevonden claim moet een array van strings zijn
-  die ten minste één geaccepteerde waarde bevat. Als beide beleidsregels zijn geconfigureerd,
-  moeten beide slagen. Ontbrekende of onjuist gevormde claims worden standaard geweigerd, en zonder een van beide
-  beleidsregels weigert de callback de aanmelding (`not_configured`). Bestaande configuraties
-  die alleen subjects gebruiken, blijven ongewijzigd werken.
-- Keycloak neemt realmrollen normaal gesproken op in access tokens, maar niet noodzakelijk in ID-
-  tokens. Om de realmrol `admin` te vereisen, configureert u voor
-  deze client een protocolmapper die `realm_access.roles` in het **ID-token** opneemt en stelt u vervolgens
-  `oidcAdmissionClaim` in op `{ "path": "realm_access.roles", "values": ["admin"] }`.
-  Controleer de daadwerkelijke claim in het ID-token voor deze client voordat u toegang uitsluitend op basis van rollen
-  inschakelt; de applicatie leest geen rollen uit access tokens. Weigering van tokens
-  aan de IdP-zijde kan deze controle aanvullen, maar vervangt deze controle aan de applicatiezijde niet.
-- Bij succes genereert dit **exact dezelfde** `auth_token`-JWT met een geldigheidsduur van 30 dagen als
-  de wachtwoordaanmelding (`src/app/api/auth/login/route.ts`), zodat de rest van de
-  dashboardsessiepijplijn (automatisch vernieuwen, cookiekenmerken) ongewijzigd blijft —
-  OIDC vervangt alleen de manier waarop de cookie wordt gegenereerd, niet welke rechten deze verleent. Wijzigingen
-  in IdP-rollen/-groepen maken bestaande OmniRoute-sessies niet ongeldig; afmelden,
-  wachtwoordrotatie of het verlopen van de sessie bepalen nog steeds hun levensduur.
+  `GET /api/auth/oidc/login` retourneert anders `400`.
+- `GET /api/auth/oidc/login` ontdekt het `authorization_endpoint` vanuit de
+  `/.well-known/openid-configuration` van de issuer (valt terug op
+  `<issuer>/authorize`), bouwt de omleidings-URI op basis van het inkomende verzoek
+  (`x-forwarded-proto`-bewust) en stuurt door naar de IdP met een willekeurige `state`
+  die wordt opgeslagen in een `httpOnly`-cookie `oidc_state`.
+- `GET /api/auth/oidc/callback` valideert `state`, wisselt de autorisatiecode uit en
+  verifieert de handtekening van het ID-token via de JWKS van de issuer
+  (`jose`'s `createRemoteJWKSet`, gecachet per JWKS-URI) met controles op `issuer` en
+  `audience`. Toegang tot het dashboard vereist een niet-lege lijst
+  `oidcAllowedSubjects`, een beleid voor `oidcAdmissionClaim`, of beide. De
+  subjectlijst komt alleen overeen met `sub` of `email` wanneer
+  `email_verified === true`. Het optionele claimbeleid gebruikt een
+  puntgescheiden pad naar een ID-token-claim (bijvoorbeeld,
+  `realm_access.roles`) en een array met geaccepteerde waarden; de opgeloste claim
+  moet een array van tekenreeksen zijn die ten minste één geaccepteerde waarde
+  bevat. Als beide beleidsregels zijn geconfigureerd, moeten beide slagen.
+  Ontbrekende of verkeerd gevormde claims leiden tot een weigering en zonder
+  een van beide beleidsregels weigert de callback de aanmelding
+  (`not_configured`). Bestaande configuraties die alleen op subjects zijn gebaseerd,
+  blijven ongewijzigd.
+- Keycloak koppelt realm-rollen normaal gesproken aan access-tokens, en niet
+  noodzakelijkerwijs aan ID-tokens. Als je de realm-rol `admin` wilt vereisen,
+  configureer je voor deze client een protocolmapper die `realm_access.roles`
+  opneemt in het **ID-token** en stel je `oidcAdmissionClaim` in op
+  `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Controleer de daadwerkelijke ID-token-claim voor deze client voordat je
+  toelating uitsluitend op rollen baseert; de applicatie leest geen rollen uit
+  access-tokens. Weigering van tokens aan de kant van de IdP kan deze controle
+  aan de kant van de applicatie aanvullen, maar niet vervangen.
+- Bij succes geeft het precies dezelfde 30 dagen geldige `auth_token`-JWT uit als
+  de aanmelding met een wachtwoord (`src/app/api/auth/login/route.ts`), zodat de
+  rest van de sessiepijplijn van het dashboard (automatisch vernieuwen,
+  cookievlaggen) ongewijzigd blijft — OIDC vervangt alleen de manier waarop de
+  cookie wordt uitgegeven, niet wat deze toestaat. Wijzigingen in IdP-rollen of
+  -groepen maken bestaande OmniRoute-sessies niet ongeldig; uitloggen, het
+  wijzigen van het wachtwoord of het verlopen van de sessie bepaalt nog steeds
+  de levensduur ervan.
 - Elke `oidc*`-instelling (`oidcEnabled`, `oidcDisablePasswordLogin`,
   `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
-  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) staat in `SECURITY_IMPACTING_SETTINGS_KEYS`
-  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
-  antwoordt met `400 PASSWORD_REQUIRED`, tenzij de body het beheerwachtwoord
-  als `currentPassword` bevat (`401 PASSWORD_MISMATCH` wanneer dit onjuist is).
-  `oidcDisablePasswordLogin` weigert _aanmelding_ met een wachtwoord (`POST /api/auth/login`),
-  maar behoudt de opgeslagen wachtwoordhash, en bij herauthenticatie wordt
-  `currentPassword` nog steeds hiertegen gecontroleerd.
-- `corsOrigins` en `bruteForceProtection` staan ook in `SECURITY_IMPACTING_SETTINGS_KEYS`:
-  het versoepelen van een van beide verzwakt de aanmeldbeveiliging, waardoor hiervoor dezelfde
-  herauthenticatie met `currentPassword` vereist is (het tabblad Beveiliging vraagt erom) en de JSON-import
-  deze instellingen weglaat.
-- Elke beveiligingsbeleidssleutel — de vermeldingen in `SECURITY_IMPACTING_SETTINGS_KEYS`,
-  elke `oidc*`-sleutel en de dashboardsessiestatus — is **alleen voor operators** bij
-  `PATCH /api/settings`: een API-sleutel met het bereik manage of een `oma_`-access token wordt
-  geweigerd met `403`, zelfs wanneer deze het juiste `currentPassword` meestuurt, en de
-  weigering wordt in het auditlog vastgelegd als `settings.update_failed` met `reason: OPERATOR_REQUIRED`
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) staat in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`):
+  `PATCH /api/settings` antwoordt met `400 PASSWORD_REQUIRED` tenzij de body het
+  beheerderswachtwoord bevat als `currentPassword` (`401 PASSWORD_MISMATCH`
+  wanneer dit onjuist is). `oidcDisablePasswordLogin` weigert
+  wachtwoordaanmelding (`POST /api/auth/login`), maar behoudt de opgeslagen
+  wachtwoordhash; bij herauthenticatie wordt `currentPassword` nog steeds
+  daartegen gecontroleerd.
+- `corsOrigins` en `bruteForceProtection` staan ook in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: het versoepelen van een van beide verzwakt
+  de aanmeldingsbeveiliging, dus hiervoor is dezelfde herauthenticatie met
+  `currentPassword` nodig (het tabblad Beveiliging vraagt hierom) en bij het
+  importeren van JSON worden ze verwijderd.
+- Elke sleutel voor beveiligingsbeleid — de vermeldingen in
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, elke `oidc*`-sleutel en de sessiestatus van
+  het dashboard — is **uitsluitend voor operators** bij `PATCH /api/settings`:
+  een API-sleutel met manage-scope of een `oma_`-access-token wordt geweigerd met
+  `403`, zelfs wanneer deze de juiste `currentPassword` meestuurt, en de weigering
+  wordt geaudit als `settings.update_failed` met
+  `reason: OPERATOR_REQUIRED`
   (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
-  Gewone instellingen (thema, weergavevoorkeuren) blijven beschrijfbaar met een `manage`-sleutel
-  of een `admin`-access token. Elke mutatie van `/api/settings` zelf (en van
-  `/api/settings/require-login`) vereist ook het access-tokenbereik `admin`
-  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, overeenkomst
-  op het exacte pad); `GET` blijft `read`, en de andere subroutes van `/api/settings/*` (proxy's,
-  standaardwaarden voor combo's, modelaliassen, compressie, opschoningsacties…) behouden het uit de methode afgeleide
-  bereik `write`.
-- `POST /api/settings/import-json` slaat die herauthenticatie over en verwijdert daarom vóór
-  het schrijven elke sleutel in `IMPORT_STRIPPED_SETTINGS_KEYS` (hetzelfde bestand): het wachtwoord en
-  `currentPassword`, elke vermelding in `SECURITY_IMPACTING_SETTINGS_KEYS` en de
-  dashboardsessiestatus (`sessionsValidAfter`, `revokedDashboardSessions`).
-  Het importeren van een oudere back-up kan daarom geen sessie herstellen die al door een
-  wachtwoordwijziging of afmelding was beëindigd.
+  Gewone instellingen (thema, weergavevoorkeuren) blijven schrijfbaar voor een
+  `manage`-sleutel of een `admin`-access-token. Voor elke mutatie van
+  `/api/settings` zelf (en van `/api/settings/require-login`) is ook de
+  `admin`-access-tokenscope vereist
+  (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, met
+  exacte padvergelijking); `GET` blijft `read`, en de andere
+  `/api/settings/*`-subroutes (proxies, standaardwaarden voor combinaties,
+  modelaliassen, compressie, opschoningen…) behouden de op de methode
+  gebaseerde `write`-scope.
+- `POST /api/settings/import-json` slaat die herauthenticatie over en verwijdert
+  daarom elke sleutel in `IMPORT_STRIPPED_SETTINGS_KEYS` (hetzelfde bestand)
+  voordat er wordt geschreven: het wachtwoord en `currentPassword`, elke
+  vermelding in `SECURITY_IMPACTING_SETTINGS_KEYS` en de sessiestatus van het
+  dashboard (`sessionsValidAfter`, `revokedDashboardSessions`).
+  Het importeren van een oudere back-up kan daardoor geen sessie herstellen die
+  al door een wachtwoordwijziging of afmelding is beëindigd.
+
+#### Optionele TOTP-aanmelding met twee factoren (#16619)
+
+Wordt ingeschakeld via Instellingen → Beveiliging; staat uit totdat de operator
+dit activeert (`src/server/auth/dashboardMfa.ts`).
+
+- **Wat het omvat:** inloggen met een wachtwoord (`POST /api/auth/login`, waarvoor vervolgens
+  `POST /api/auth/mfa/verify` nodig is) en `omniroute connect` (`POST /api/cli/connect`,
+  dat een uitwisseling met alleen een wachtwoord weigert en de code als `totp` gebruikt).
+- **Wat het niet omvat:** OIDC-/SSO-aanmelding (`/api/auth/oidc/callback`) vraagt niet om de OmniRoute TOTP. Deze
+  gebruikt de eigen tweede factor van de identityprovider. Schakel MFA daarom afgedwongen in de IdP in als OIDC is ingeschakeld.
+- **Herstel** (kwijtgeraakt apparaat, geen herstelcodes meer, of een factor die niet langer
+  kan worden geverifieerd, bijvoorbeeld nadat `STORAGE_ENCRYPTION_KEY` is gewijzigd):
+  1. Start de server opnieuw met `OMNIROUTE_DISABLE_MFA=true`.
+  2. Meld u op de host zelf aan (loopback-peer en loopback `Host`, zoals
+     `http://localhost:20128`) met het wachtwoord. De tweede factor wordt alleen voor die oorsprong overgeslagen; voor elke andere oorsprong is de code nog steeds vereist.
+  3. Ga naar Instellingen → Beveiliging → Uitschakelen, voer het wachtwoord in en laat de code leeg. `POST /api/auth/mfa/disable` accepteert alleen zonder `code` een body terwijl
+     de variabele is ingesteld en het verzoek afkomstig is van de host; de dashboard-sessie en het huidige wachtwoord blijven vereist, en de actie wordt geregistreerd als
+     `auth.mfa.disabled` met `secondFactor: "recovery_switch"`.
+  4. Hef de instelling van `OMNIROUTE_DISABLE_MFA` op, start opnieuw en registreer MFA indien nodig opnieuw.
 
 ## Routeklassen
 
@@ -161,27 +197,30 @@ Een succesvol beleid retourneert `AuthSubject` met `kind ∈ { client_api_key, d
 
 ## Lijst met openbare routes
 
-`src/shared/constants/publicApiRoutes.ts` is de expliciete toelatingslijst:
+`src/shared/constants/publicApiRoutes.ts` is de expliciete allowlist:
 
-De lijst is opgesplitst op basis van **vorm**, en deze opsplitsing is essentieel (GHSA-74g9-q8f6-793h): een prefix wordt vergeleken met `startsWith()`, waardoor deze ook overeenkomt met elk aangrenzend pad dat dezelfde begintekens heeft.
-Met `/api/usage/om-usage` als prefix werd `/api/usage/om-usage<anything>` OPENBAAR, en Next herleidt dat tot `/api/usage/[connectionId]` — een handler zonder eigen authenticatie.
+De lijst is opgesplitst op basis van **vorm**, en die opsplitsing is essentieel (GHSA-74g9-q8f6-793h): een prefix
+wordt gematcht met `startsWith()`, dus deze matcht ook elk aangrenzend pad dat dezelfde begintekens deelt.
+`/api/usage/om-usage` als prefix gemarkeerd `/api/usage/om-usage<anything>` PUBLIC, en Next resolveert
+dat naar `/api/usage/[connectionId]` — een handler zonder eigen authenticatie.
 
 ```ts
-// Echte substructuren. Elk item MOET eindigen op "/" (gecontroleerd door een unit-test).
+// Echte subtrees. Elke entry MOET eindigen op "/" (afgedwongen door een unit-test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // behandeld als CLIENT_API in classify, niet als openbaar zonder authenticatie
+  "/api/v1/", // behandeld als CLIENT_API in classify, niet als "openbaar zonder authenticatie"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Afzonderlijke routes, die EXACT overeenkomen (met of zonder afsluitende slash).
+// Enkele routes, EXACT gematcht (met of zonder afsluitende slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // loginstap 2 voor opt-in-TOTP; heeft het MFA-pending-cookie nodig
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -189,20 +228,20 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/skills/collect/chaos",
 ]);
 
-// Alleen-lezen afzonderlijke routes waarvoor ook de CORS-originversoepeling geldt.
+// Alleen-lezen-routes die ook de versoepeling voor de CORS-origin krijgen.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Alleen-lezen afzonderlijke route ZONDER de CORS-versoepeling.
+// Alleen-lezen-route ZONDER de versoepeling voor CORS.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Alleen-lezen routes zijn uitsluitend openbaar voor **veilige** methoden. Let op: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de terugval naar PUBLIC — deze zijn altijd `CLIENT_API`, zodat het beleid voor Bearer-sleutels van toepassing blijft.
+Alleen-lezen-routes zijn alleen openbaar voor veilige methoden. Opmerking: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de PUBLIC-fallback — deze zijn altijd `CLIENT_API`, zodat het Bearer-key-beleid van toepassing blijft.
 
 ## Een nieuwe route toevoegen
 

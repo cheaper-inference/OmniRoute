@@ -19,7 +19,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
-import { providerHasFreeModels } from "@/shared/utils/freeModels";
+import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
@@ -76,7 +76,10 @@ import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
-import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
+import QuotaScrapingFields, {
+  assignQuotaScrapingProviderData,
+  EMPTY_QUOTA_SCRAPING_FIELDS,
+} from "./QuotaScrapingFields";
 import { useGitHubCreditLimitDraft } from "./GitHubCreditLimitField";
 import ConnectionEmailCard from "./ConnectionEmailCard";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
@@ -127,7 +130,10 @@ export default function EditConnectionModal({
   const provider = connection?.provider || providerId;
   const connectionAuthType = connection?.authType;
   const connectionProviderSpecificData = connection?.providerSpecificData;
-  const showFreeModelsToggle = providerHasFreeModels(provider);
+  // A retired offer must not trap an existing free-only preference or clear it silently.
+  const showFreeModelsToggle =
+    providerSupportsFreeOnlyImport(provider) ||
+    connectionProviderSpecificData?.importFreeModelsOnly === true;
   const [formData, setFormData] = useState({
     name: "",
     priority: 1,
@@ -141,6 +147,7 @@ export default function EditConnectionModal({
     rateLimitMaxConcurrent: "",
     modelConcurrency: "",
     apiKey: "",
+    m365RefreshToken: "",
     healthCheckInterval: "" as number | "",
     baseUrl: "",
     targetFormat: "",
@@ -179,6 +186,8 @@ export default function EditConnectionModal({
     allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
+    requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
+    keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
@@ -256,6 +265,7 @@ export default function EditConnectionModal({
   const apiKeyOptional =
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
+  const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
   const isCompatible =
     isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
@@ -408,6 +418,9 @@ export default function EditConnectionModal({
         allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
+        requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
+        keepMidConversationSystem:
+          connection?.providerSpecificData?.keepMidConversationSystem === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
@@ -416,6 +429,7 @@ export default function EditConnectionModal({
           stringField(connection.providerSpecificData?.connectorName) ||
           CHATGPT_WEB_CODEX_CONNECTOR_NAME,
         m365Tier: normalizeM365TierValue(connection.providerSpecificData?.tier) as M365TierValue,
+        m365RefreshToken: "",
         peakHourProtection: {
           ...EMPTY_PEAK_HOUR_PROTECTION,
           ...((connection.providerSpecificData?.peakHourProtection as PeakHourProtectionConfig) ||
@@ -669,6 +683,10 @@ export default function EditConnectionModal({
           tags: parseRoutingTagsInput(formData.routingTags),
           excludedModels: parseExcludedModelsInput(formData.excludedModels),
         };
+        // zed-hosted is OAuth-only, so its optional billing portal link would
+        // otherwise never reach the API-key branch above. The helper guards per
+        // provider, so other OAuth providers are unaffected.
+        assignQuotaScrapingProviderData(provider, formData, updates.providerSpecificData);
         if (isClaude) {
           Object.assign(updates.providerSpecificData, claudeConnectionFieldPatch(formData));
         }
@@ -706,6 +724,15 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
+            ? true
+            : undefined;
+        }
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.keepMidConversationSystem =
+            formData.keepMidConversationSystem ? true : undefined;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -766,6 +793,38 @@ export default function EditConnectionModal({
         t,
         "preserveEncryptedReasoningDescription",
         "Forward encrypted Responses reasoning items supplied by the client."
+      )}
+    />
+  ) : null;
+  const requireUserLastMessageToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.requireUserLastMessage}
+      onChange={(checked) => setFormData({ ...formData, requireUserLastMessage: checked })}
+      label={providerText(
+        t,
+        "requireUserLastMessageLabel",
+        "Require conversation to end with a user message"
+      )}
+      description={providerText(
+        t,
+        "requireUserLastMessageDescription",
+        "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer."
+      )}
+    />
+  ) : null;
+  const keepMidConversationSystemToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.keepMidConversationSystem}
+      onChange={(checked) => setFormData({ ...formData, keepMidConversationSystem: checked })}
+      label={providerText(
+        t,
+        "keepMidConversationSystemLabel",
+        "Keep mid-conversation system messages in place"
+      )}
+      description={providerText(
+        t,
+        "keepMidConversationSystemDescription",
+        'Leave system messages sent mid-conversation inside the message list instead of moving them into the top-level system prompt, so the prompt cache keeps hitting across turns. Enable only if this upstream accepts role "system" inside messages (otherwise it answers 400).'
       )}
     />
   ) : null;
@@ -848,11 +907,13 @@ export default function EditConnectionModal({
               checked={formData.importFreeModelsOnly}
               onChange={(checked) => setFormData({ ...formData, importFreeModelsOnly: checked })}
               label={t("importFreeModelsOnlyLabel")}
-              description={t("importFreeModelsOnlyHint")}
+              description={t(freeOnlyImportHintKey(provider))}
             />
           )}
           {preserveEncryptedReasoningToggle}
           {openaiResponsesStoreToggle}
+          {requireUserLastMessageToggle}
+          {keepMidConversationSystemToggle}
           <CommandCodeZdrToggle
             provider={provider}
             checked={formData.commandCodeZdrEnabled}
@@ -1190,6 +1251,16 @@ export default function EditConnectionModal({
                   />
                 )}
                 <ProviderTierField provider={provider} />
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenEditHint")}
+                  />
+                )}
                 {isM365TierCapable && (
                   <Select
                     label={t("m365TierLabel")}
