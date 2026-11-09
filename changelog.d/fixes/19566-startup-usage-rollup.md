@@ -1,0 +1,1 @@
+- **fix(compliance):** Startup log cleanup now archives expired usage history into the daily summary before it deletes the raw rows, so requests that expire while the server is stopped keep their totals and cost in analytics. If the archive step fails, the raw rows stay. ([#19566](https://github.com/cheaper-inference/OmniRoute/pull/19566))

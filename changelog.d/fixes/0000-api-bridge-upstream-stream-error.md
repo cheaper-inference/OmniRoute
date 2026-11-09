@@ -1,1 +1,0 @@
-- **fix(api-bridge):** the API port now closes the client connection when the dashboard stream fails after the response started, so streaming clients fail fast instead of waiting for their own timeout.
