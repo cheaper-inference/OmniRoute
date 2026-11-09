@@ -988,31 +988,26 @@ au lieu d’être envoyée deux fois. Source : `src/lib/quota/quotaSessionRecove
 
 ## Utilisation en libre-service (`/api/usage/om-usage`)
 
-Toute clé API peut consulter sa propre utilisation et ses quotas — aucune authentification de gestion n’est
-requise. Il s’agit du point de terminaison utilisé par un client (CLI, panneau OmniCopilot) pour afficher les
-dépenses du détenteur d’une clé.
+N'importe quelle clé API peut lire** le sien** utilisation et quotas — pas d'autorisation de gestion. Il s'agit du point de terminaison qu'un client (CLI, le panneau OmniCopilot ) utilise pour montrer à un détenteur de clé ses dépenses.
 
 ```bash
-# Format texte (le contrat historique — texte brut pour un terminal)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Format structuré — celui consommé par une interface utilisateur
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-La clé doit avoir **`allowUsageCommand`** activé (désactivé par défaut — le gestionnaire de clés API du
-tableau de bord l’active ou le désactive pour chaque clé). Sans cette autorisation, le point de terminaison
-répond `403`.
+La clé doit avoir**`allowUsageCommand`** activé (désactivé par défaut — le gestionnaire de clés API du tableau de bord le bascule par clé). Sans cela, le point final répond `403`.
 
-`?format=json` renvoie une structure discriminée afin qu’un appelant ne lise jamais un champ de données
-dans un refus. En cas de succès :
+`?format=json` renvoie une forme discriminée afin qu'un appelant ne lise jamais un champ de données suite à un refus. Sur le succès :
 
 ```jsonc
 {
   "allowed": true,
-  // présent uniquement lorsque la clé a activé les limites d'utilisation par clé (USD quotidien/hebdomadaire) :
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1021,9 +1016,9 @@ dans un refus. En cas de succès :
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // instantané du quota du fournisseur sélectionné, ou null lorsqu'aucune donnée n'est encore mise en cache :
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // instantané de chaque connexion, afin qu'une interface puisse afficher plusieurs fournisseurs côte à côte :
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1031,63 +1026,49 @@ dans un refus. En cas de succès :
 }
 ```
 
-En cas de refus (clé `401` incorrecte / `403` non autorisé), la même route renvoie
-`{ "allowed": false, "error": { "message": "…" } }` — un champ `personal`/`provider`
-présent mais vide (clé autorisée, aucune information encore obtenue) représente un état différent d’un
-refus, et seul le format JSON permet de les distinguer.
+Sur refus (`401` bad key / `403` not approved) le même itinéraire renvoie `{ "allowed": false, "error": { "message": "…" } }` — un `personal`/`provider` présent mais vide (clé autorisée, rien appris pour l'instant) est un état différent d'un refus, et seule la forme JSON les distingue.
 
-**Authentification :** la clé API Bearer propre à l’appelant, validée avec `isValidApiKey` — il ne s’agit
-pas de l’interface de gestion (`/api/keys/…`), qui reste protégée par `requireManagementAuth`.
+**Authentification :** la propre clé Bearer API de l'appelant, validée avec `isValidApiKey` — ce n'est _pas_ la surface de gestion (`/api/keys/…`), qui reste derrière `requireManagementAuth`.
 
-### Pourcentages de quota bruts et ajustés selon le seuil
+### Pourcentages de quota bruts et ajustés au seuil
 
-Lorsqu’ils consomment `/api/usage/om-usage`, les appelants doivent prendre en compte la distinction entre les
-pourcentages présentés par la **sortie en texte brut** et ceux de la **sortie JSON structurée** :
+Lors de la consommation `/api/usage/om-usage`, les appelants doivent noter la distinction entre les pourcentages présentés par le** sortie en texte brut** et la structure** sortie JSON** :
 
-| Aspect                        | Format texte brut (`/api/usage/om-usage` / `@@om-usage`)                                                      | Format JSON (`?format=json`)                                                                            |
-| :---------------------------- | :------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------ |
-| **Champ de sortie**           | `NN% left` (par ex. `20% left`)                                                                               | `provider.quotas` / `providers[].quotas`                                                                |
-| **Mesure**                    | **Allocation utilisable ajustée selon le seuil** : capacité restante au-dessus du seuil de coupure            | **Quota brut en amont** : mesure du fournisseur non ajustée                                             |
-| **Mise à l’échelle du seuil** | Mise à l’échelle via `effectiveRemainingPercent()` afin que la réserve protégée soit affichée comme `0% left` | Aucune (valeurs brutes de l’instantané telles que signalées par le fournisseur)                         |
-| **Données de seuil**          | Intégrées au pourcentage affiché                                                                              | Stockées dans `quotaWindowThresholds` pour chaque connexion (ou dans les valeurs par défaut du serveur) |
-| **Consommateur principal**    | CLI interactives, invites de terminal, opérateurs humains                                                     | Intégrations programmatiques, tableaux de bord, analyses, outils de suivi de la facturation             |
+| Aspect                        | Format de texte brut (`/api/usage/om-usage` / `@@om-usage`)                                              | format JSON (`?format=json`)                                                    |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| **Champ de sortie**           | `NN% left` (par exemple, `20% left`)                                                                     | `provider.quotas` / `providers[].quotas`                                        |
+| **Mesures**                   | **Allocation utilisable ajustée en fonction du seuil** : capacité restante au dessus du seuil de coupure | **Quota brut en amont** : mesure non ajustée du fournisseur                     |
+| **Mise à l'échelle du seuil** | Mis à l'échelle via `effectiveRemainingPercent()` pour que la réserve protégée se lit comme `0% left`    | Aucun (valeurs brutes des instantanés telles que signalées par le fournisseur)  |
+| **Données de seuil**          | Incorporé au pourcentage affiché                                                                         | Stocké dans `quotaWindowThresholds` par connexion (ou par défaut du serveur)    |
+| **Consommateur principal**    | CLIs interactif, invites de terminal, opérateurs humains                                                 | Intégrations programmatiques, tableaux de bord, analyses, suivis de facturation |
 
-#### Formule d’ajustement selon le seuil
+#### La formule d'ajustement du seuil
 
-OmniRoute prend en charge des seuils de coupure de quota proactifs afin d’éviter l’épuisement en amont (configurés via
-`quotaWindowThresholds` de la connexion, les valeurs par défaut du fournisseur ou les paramètres globaux de résilience). Lorsqu’un seuil de coupure
-(par ex. `cutoff = 25%`) est actif sur une fenêtre de quota, le générateur de texte calcule l’allocation restante comme suit :
+OmniRoute prend en charge les coupures de quota proactives pour éviter l'épuisement en amont (configuré via la connexion `quotaWindowThresholds`, les paramètres par défaut du fournisseur ou les paramètres de résilience globaux). Lorsqu'un seuil de coupure (par exemple, `cutoff = 25%`) est actif sur une fenêtre de quota, le moteur de rendu de texte calcule l'allocation restante comme :
 
-- Si `remaining <= cutoff` : renvoie `0%`.
-- Si `remaining > cutoff` : renvoie `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Si `remaining <= cutoff`: renvoie `0%`.
+- Si `remaining > cutoff`: renvoie `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-La sortie texte formatée arrondit cette valeur à l’entier le plus proche (`Math.round(...)`).
+La sortie texte formatée arrondit à l'entier le plus proche (`Math.round(...)`).
 
 #### Exemple illustratif
 
-Considérons une fenêtre de fournisseur avec une **utilisation brute de 60 %** (et donc un **quota restant brut de 40 %**) ainsi qu’un seuil configuré de **25 % de quota restant** :
+Considérons une fenêtre de fournisseur avec** 60 % d'utilisation brute** (ainsi** 40 % de quota brut restant** ) et un configuré** Seuil de 25 % du quota restant** seuil:
 
-| Représentation                 | Calcul                                             | Restant  |             Utilisation implicite             |
-| :----------------------------- | :------------------------------------------------- | :------: | :-------------------------------------------: |
-| **JSON brut (`?format=json`)** | Instantané en amont (`quotas[window]`)             | **40 %** |                   **60 %**                    |
-| **Format texte (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20 %** | **80 %** (si calculé comme `100 - remaining`) |
+| Représentation                 | Calcul                                             | Restant |              Implicite utilisé               |
+| :----------------------------- | :------------------------------------------------- | :-----: | :------------------------------------------: |
+| **JSON brut (`?format=json`)** | Instantané en amont (`quotas[window]`)             | **40%** |                   **60%**                    |
+| **Format texte (`NN% left`)**  | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (si vous calculez `100 - remaining`) |
 
-- **Pourquoi le texte affiche 20 % restants :** Sur les 40 % de quota physique restants sur le compte, 25 % sont réservés par la
-  stratégie de seuil. L’appelant ne dispose plus que de 15 % sur les 75 % de marge utilisable avant que le routeur cesse
-  d’acheminer les requêtes vers cette connexion. Cette mise à l’échelle garantit que la connexion signale l’épuisement
-  (`0% left`) exactement au moment où l’acheminement cesse.
-- **Pourquoi JSON conserve les valeurs brutes :** La charge utile JSON renvoie l’instantané exact du fournisseur (`UsageSnapshot`)
-  afin que les outils externes aient accès à l’utilisation réelle en amont et aux `quotaWindowThresholds` au niveau de la connexion,
-  sans mise à l’échelle avec perte côté serveur.
+- **Pourquoi le texte indique qu'il reste 20 % :** Sur le quota physique de 40 % restant sur le compte, 25 % sont réservés par la politique de coupure. L'appelant ne dispose que de 15 % de marge utilisable sur 75 % avant que le routeur n'arrête le routage vers cette connexion. La mise à l'échelle garantit l'épuisement des signaux de connexion (`0% left`) exactement au moment où le routage cessera.
+- **Pourquoi JSON préserve les valeurs brutes :** La charge utile JSON renvoie l'instantané exact du fournisseur (`UsageSnapshot`) afin que les outils externes aient accès à l'utilisation en amont de la vérité terrain et `quotaWindowThresholds` au niveau de la connexion sans mise à l'échelle avec perte côté serveur.
 
-#### Guide de migration pour les consommateurs
+#### Conseils de migration des consommateurs
 
-Si une intégration externe (telle qu’un plugin d’éditeur ou une extension d’agent) analysait auparavant le point de terminaison texte
-(`NN% left`) et calculait le pourcentage utilisé comme `100 - NN`, migrer vers `?format=json` signifie :
+Si une intégration externe (telle qu'un plugin d'éditeur ou une extension d'agent) a précédemment supprimé le point de terminaison du texte (`NN% left`) et calculé le pourcentage utilisé comme `100 - NN`, la migration vers `?format=json` signifie :
 
-- La lecture des valeurs JSON brutes reflétera la **consommation réelle en amont** (60 % utilisés dans l’exemple ci-dessus).
-- Si l’intégration souhaite conserver la sémantique de marge utilisable du point de terminaison texte, elle peut évaluer
-  la formule de quota restant effectif côté client à l’aide de `quotaWindowThresholds` pour les remplacements au niveau de la connexion.
+- La lecture des valeurs JSON brutes reflétera** consommation réelle en amont** (60% utilisés dans l'exemple ci-dessus).
+- Si l'intégration souhaite préserver la sémantique d'allocation utilisable du point de terminaison de texte, elle peut évaluer la formule restante efficace côté client en utilisant `quotaWindowThresholds` pour les remplacements au niveau de la connexion.
 
 ---
 
@@ -1289,36 +1270,37 @@ Implémentation : `getResolvedModelCapabilitiesWithLimitSources()` dans `src/li
 
 `PATCH /api/keys/{id}` met à jour les autorisations d'une clé existante. Comme toute route `/api/keys*` elle nécessite une autorisation de gestion (voir [Management Authentication](../guides/MANAGEMENT-AUTH.md) ), et non une clé d'inférence. Envoyez uniquement les champs que vous souhaitez modifier ; une demande sans aucun d'entre eux est rejetée avec `No valid fields to update`. Les champs acceptés sont définis par `updateKeyPermissionsSchema` dans `src/shared/validation/schemas/keys.ts`.
 
-| Champ                                       | Taper                                                                   | Remarques                                                                                                                                   |
-| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | chaîne, 1-200 caractères                                                |                                                                                                                                             |
-| `isActive`                                  | booléen                                                                 |                                                                                                                                             |
-| `isBanned`                                  | booléen                                                                 |                                                                                                                                             |
-| `expiresAt`                                 | ISO 8601 datetime ou `null`                                             | `null` efface l'expiration                                                                                                                  |
-| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` doit être vide lorsque le mode est `all`                                                                                    |
-| `allowedModels`, `blockedModels`            | tableau de chaînes, jusqu'à 1000                                        |                                                                                                                                             |
-| `allowedCombos`                             | tableau de chaînes, jusqu'à 500                                         | Portes quelles combinaisons la clé peut appeler ; les modèles directs sont régis par `modelAccessMode` / `allowedModels`                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` doit être non vide lorsque `restricted` et vide lorsque `all`                                                          |
-| `allowedConnections`                        | tableau de UUIDs, jusqu'à 100                                           |                                                                                                                                             |
-| `allowAutoCombos`                           | booléen                                                                 | `false` rejette les demandes de modèles `auto/*` avec cette clé ; les clés qui ne le définissent jamais sont autorisées                     |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Ce que `GET /v1/models` répertorie pour cette clé (combos uniquement, modèles uniquement ou les deux) ; cela ne change pas le nom de la clé |
-| `forcedModel`                               | chaîne jusqu'à 300 caractères, ou `null`                                | Achemine les demandes de discussion vers ce model/combo, via `X-Route-Model` et `body.model`; les limites de la clé s'appliquent toujours   |
-| `noLog`, `autoResolve`                      | booléen                                                                 |                                                                                                                                             |
-| `throttleDelayMs`                           | entier, 0-300000                                                        |                                                                                                                                             |
-| `maxSessions`                               | entier, 0-10000                                                         |                                                                                                                                             |
-| `rateLimits`                                | tableau de `{ limit, window }` (entiers positifs, jusqu'à 50) ou `null` | `null` efface les limites                                                                                                                   |
-| `accessSchedule`                            | objet de planification ou `null`                                        | `null` efface le planning                                                                                                                   |
-| `scopes`                                    | tableau de chaînes, jusqu'à 32                                          |                                                                                                                                             |
-| `allowedEndpoints`                          | tableau de chaînes, jusqu'à 20                                          |                                                                                                                                             |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                             |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Voir [Contournement du cache par clé](#per-key-cache-bypass)                                                                                |
-| `compressionEnabled`                        | booléen                                                                 |                                                                                                                                             |
-| `codexServiceMode`                          | l'un des modes de service Codex                                         |                                                                                                                                             |
-| `disableNonPublicModels`                    | booléen                                                                 |                                                                                                                                             |
-| `allowUsageCommand`                         | booléen                                                                 |                                                                                                                                             |
-| `usageLimitEnabled`                         | booléen                                                                 |                                                                                                                                             |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numéro >= 0 ou `null`                                                   |                                                                                                                                             |
-| `chaosModeEnabled`                          | booléen                                                                 |                                                                                                                                             |
+| Champ                                       | Taper                                                                   | Remarques                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | chaîne, 1-200 caractères                                                |                                                                                                                                                                                                                                                                                                                     |
+| `isActive`                                  | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `isBanned`                                  | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `expiresAt`                                 | ISO 8601 datetime ou `null`                                             | `null` efface l'expiration                                                                                                                                                                                                                                                                                          |
+| `modelAccessMode`                           | `all` \| `restricted`                                                   | `allowedModels` doit être vide lorsque le mode est `all`                                                                                                                                                                                                                                                            |
+| `allowedModels`, `blockedModels`            | tableau de chaînes, jusqu'à 1000                                        |                                                                                                                                                                                                                                                                                                                     |
+| `allowedCombos`                             | tableau de chaînes, jusqu'à 500                                         | Portes quelles combinaisons la clé peut appeler ; les modèles directs sont régis par `modelAccessMode` / `allowedModels`                                                                                                                                                                                            |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                   | `allowedConnections` doit être non vide lorsque `restricted` et vide lorsque `all`                                                                                                                                                                                                                                  |
+| `allowedConnections`                        | tableau de UUIDs, jusqu'à 100                                           |                                                                                                                                                                                                                                                                                                                     |
+| `allowAutoCombos`                           | booléen                                                                 | `false` rejette les demandes de modèles `auto/*` avec cette clé ; les clés qui ne le définissent jamais sont autorisées                                                                                                                                                                                             |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                           | Ce que `GET /v1/models` répertorie pour cette clé (combos uniquement, modèles uniquement ou les deux) ; cela ne change pas le nom de la clé                                                                                                                                                                         |
+| `forcedModel`                               | chaîne jusqu'à 300 caractères, ou `null`                                | Achemine les demandes de discussion vers ce model/combo, via `X-Route-Model` et `body.model`; les limites de la clé s'appliquent toujours                                                                                                                                                                           |
+| `noLog`, `autoResolve`                      | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `throttleDelayMs`                           | entier, 0-300000                                                        |                                                                                                                                                                                                                                                                                                                     |
+| `maxSessions`                               | entier, 0-10000                                                         |                                                                                                                                                                                                                                                                                                                     |
+| `rateLimits`                                | tableau de `{ limit, window }` (entiers positifs, jusqu'à 50) ou `null` | `null` efface les limites                                                                                                                                                                                                                                                                                           |
+| `accessSchedule`                            | objet de planification ou `null`                                        | `null` efface le planning                                                                                                                                                                                                                                                                                           |
+| `scopes`                                    | tableau de chaînes, jusqu'à 32                                          |                                                                                                                                                                                                                                                                                                                     |
+| `allowedEndpoints`                          | tableau de chaînes, jusqu'à 20                                          |                                                                                                                                                                                                                                                                                                                     |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                      |                                                                                                                                                                                                                                                                                                                     |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                    | Voir [Contournement du cache par clé](#per-key-cache-bypass)                                                                                                                                                                                                                                                        |
+| `compressionEnabled`                        | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `codexServiceMode`                          | l'un des modes de service Codex                                         |                                                                                                                                                                                                                                                                                                                     |
+| `disableNonPublicModels`                    | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `allowUsageCommand`                         | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `usageLimitEnabled`                         | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | numéro >= 0 ou `null`                                                   |                                                                                                                                                                                                                                                                                                                     |
+| `fiveHourUsageLimitUsd`                     | numéro >= 0 ou `null`                                                   | Budget USD glissant sur 5 heures, appliqué comme les limites quotidiennes et hebdomadaires (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` correspond au moment où la dépense la plus ancienne dans la fenêtre expire, ce qui peut laisser une clé bien au-delà de sa limite toujours bloquée. |
+| `chaosModeEnabled`                          | booléen                                                                 |                                                                                                                                                                                                                                                                                                                     |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
