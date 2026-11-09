@@ -37,6 +37,12 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
   const valid: Record<string, unknown> = {};
   const ignoredKeys: string[] = [];
   for (const [key, value] of Object.entries(settings)) {
+    // Old backups store the Codex tier as a bare boolean. PATCH no longer accepts it, but
+    // resolveCodexGlobalFastServiceTier still reads it, so keep it.
+    if (key === "codexServiceTier" && typeof value === "boolean") {
+      valid[key] = value;
+      continue;
+    }
     if (settingsKeySchema.safeParse({ [key]: value }).success) valid[key] = value;
     else ignoredKeys.push(key);
   }

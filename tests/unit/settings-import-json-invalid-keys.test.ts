@@ -17,6 +17,8 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const importJsonRoute = await import("../../src/app/api/settings/import-json/route.ts");
+const { resolveCodexGlobalFastServiceTier } =
+  await import("../../src/lib/providers/codexFastTier.ts");
 
 test.beforeEach(() => {
   core.resetDbInstance();
@@ -68,4 +70,14 @@ test("import-json keeps keys outside the PATCH schema that other routes write", 
   assert.deepEqual(body.ignoredKeys, ["hidePaidModels"]);
   const stored = (await settingsDb.getSettings()) as Record<string, unknown>;
   assert.equal(stored.tailscaleUrl, "https://example.ts.net");
+});
+
+test("import-json keeps the legacy boolean codexServiceTier that the Codex resolver reads", async () => {
+  for (const legacy of [true, false]) {
+    const body = await importSettings({ codexServiceTier: legacy });
+    assert.equal("ignoredKeys" in body, false, `boolean ${legacy} is not reported as ignored`);
+    const stored = (await settingsDb.getSettings()) as Record<string, unknown>;
+    assert.equal(stored.codexServiceTier, legacy, "the boolean is stored as is");
+    assert.equal(resolveCodexGlobalFastServiceTier(stored).enabled, legacy);
+  }
 });
