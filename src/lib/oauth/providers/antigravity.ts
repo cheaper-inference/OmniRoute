@@ -165,7 +165,7 @@ async function postExchangeAntigravity(
   tokens: AntigravityTokenPayload
 ): Promise<AntigravityPostExchange> {
   const headers = getPostExchangeHeaders(clientProfile, tokens.access_token);
-  const metadata = getAntigravityLoadCodeAssistMetadata();
+  const metadata = getAntigravityLoadCodeAssistMetadata(clientProfile);
   const userInfoResponse = await fetch(`${config.userInfoUrl}?alt=json`, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
     signal: AbortSignal.timeout(POSTEXCHANGE_TIMEOUT_MS),
@@ -278,6 +278,136 @@ function mapAntigravityTokens(
   };
 }
 
+export class AntigravityRefreshTokenError extends Error {
+  readonly status = 400;
+}
+
+function trimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function refreshTokenFromRecord(record: Record<string, unknown>): string {
+  const nested =
+    record.token && typeof record.token === "object"
+      ? (record.token as Record<string, unknown>)
+      : {};
+  const candidates = [
+    record.refresh_token,
+    record.refreshToken,
+    nested.refresh_token,
+    nested.refreshToken,
+  ];
+  return candidates.map(trimmedString).find(Boolean) ?? "";
+}
+
+function refreshTokenFromString(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed.startsWith("{") || !trimmed.endsWith("}")) return trimmed;
+  try {
+    return extractRefreshToken(JSON.parse(trimmed));
+  } catch {
+    return trimmed;
+  }
+}
+
+function extractRefreshToken(input: unknown): string {
+  if (typeof input === "string") return refreshTokenFromString(input);
+  if (input && typeof input === "object" && !Array.isArray(input)) {
+    return refreshTokenFromRecord(input as Record<string, unknown>);
+  }
+  return "";
+}
+
+function googleErrorDetail(errorText: string): string {
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed.error_description || parsed.error || errorText;
+  } catch {
+    return errorText;
+  }
+}
+
+function toAntigravityTokenPayload(
+  tokenData: Record<string, unknown>,
+  submittedRefreshToken: string
+): AntigravityTokenPayload {
+  const accessToken = typeof tokenData.access_token === "string" ? tokenData.access_token : "";
+  if (!accessToken) {
+    throw new AntigravityRefreshTokenError(
+      "Google OAuth token exchange did not return an access token"
+    );
+  }
+  return {
+    access_token: accessToken,
+    expires_in: typeof tokenData.expires_in === "number" ? tokenData.expires_in : undefined,
+    refresh_token: trimmedString(tokenData.refresh_token) || submittedRefreshToken,
+    scope: typeof tokenData.scope === "string" ? tokenData.scope : undefined,
+  };
+}
+
+async function exchangeAntigravityRefreshToken(
+  config: AntigravityOAuthConfig,
+  clientProfile: AntigravityClientProfile,
+  refreshToken: string
+): Promise<AntigravityTokenPayload> {
+  const bodyParams: Record<string, string> = {
+    grant_type: "refresh_token",
+    client_id: config.clientId,
+    refresh_token: refreshToken,
+  };
+  if (config.clientSecret) bodyParams.client_secret = config.clientSecret;
+
+  const response = await fetch(config.tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json",
+      "User-Agent": getAntigravityOAuthUserAgent(clientProfile),
+    },
+    body: new URLSearchParams(bodyParams),
+  });
+
+  if (!response.ok) {
+    const detail = googleErrorDetail(await response.text());
+    throw new AntigravityRefreshTokenError(
+      `Google OAuth refresh token validation failed: ${detail}`
+    );
+  }
+
+  return toAntigravityTokenPayload(
+    (await response.json()) as Record<string, unknown>,
+    refreshToken
+  );
+}
+
+async function importAntigravityRefreshToken(
+  config: AntigravityOAuthConfig,
+  clientProfile: AntigravityClientProfile,
+  rawToken: unknown
+) {
+  const refreshToken = extractRefreshToken(rawToken);
+  if (!refreshToken) {
+    throw new AntigravityRefreshTokenError("Refresh token is missing or empty");
+  }
+
+  const tokens = await exchangeAntigravityRefreshToken(config, clientProfile, refreshToken);
+  const extra = await postExchangeAntigravity(config, clientProfile, tokens);
+  // Without an email the import route can only match rows by the freshly minted access
+  // token, so every re-import of the same account would add a duplicate row. Persist
+  // only a token that resolves to a real account identity.
+  if (!extra.userInfo?.email) {
+    throw new AntigravityRefreshTokenError(
+      "Google accepted the refresh token but did not return an account identity; nothing was saved"
+    );
+  }
+  const extraWithClient: AntigravityPostExchange = {
+    ...extra,
+    oauthClient: isCustomAntigravityClient(config) ? `custom:${config.clientId}` : "builtin",
+  };
+
+  return mapAntigravityTokens(clientProfile, tokens, extraWithClient);
+}
+
 export function createAntigravityOAuthProvider(
   config: AntigravityOAuthConfig,
   clientProfile: AntigravityClientProfile
@@ -297,11 +427,11 @@ export function createAntigravityOAuthProvider(
         // env-level custom client later on. Compare by value against the
         // embedded default: `config` may be the very same object as
         // ANTIGRAVITY_CONFIG when no runtime override exists.
-        oauthClient: isCustomAntigravityClient(config)
-          ? `custom:${config.clientId}`
-          : "builtin",
+        oauthClient: isCustomAntigravityClient(config) ? `custom:${config.clientId}` : "builtin",
       })),
     mapTokens: (tokens, extra) => mapAntigravityTokens(clientProfile, tokens, extra),
+    importToken: (rawToken: unknown) =>
+      importAntigravityRefreshToken(config, clientProfile, rawToken),
   };
 }
 

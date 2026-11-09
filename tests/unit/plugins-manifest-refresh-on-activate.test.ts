@@ -91,6 +91,7 @@ function makePluginDir(name: string): { tmp: string; pluginDir: string } {
   const tmp = mkdtempSync(join(tmpdir(), "manifest-refresh-"));
   const pluginDir = join(tmp, name);
   mkdirSync(pluginDir, { recursive: true });
+  writeFileSync(join(pluginDir, "package.json"), JSON.stringify({ type: "commonjs" }), "utf8");
   return { tmp, pluginDir };
 }
 
@@ -99,86 +100,92 @@ describe("activate() refreshes the stored manifest from disk (pre-#11934 install
     getDbInstance(); // ensure the plugins table migration has run
   });
 
-  test("a hook field the old schema stripped registers after activate()", async (t) => {
-    const NAME = "sc-manifest-refresh";
-    const outFile = join(tmpdir(), `omniroute-manifest-refresh-${process.pid}.json`);
-    rmSync(outFile, { force: true });
-    const { tmp, pluginDir } = makePluginDir(NAME);
+  test(
+    "a hook field the old schema stripped registers after activate()",
+    { timeout: 10000 },
+    async (t) => {
+      const NAME = "sc-manifest-refresh";
+      const { tmp, pluginDir } = makePluginDir(NAME);
+      const outFile = join(tmp, "stream-complete.json");
 
-    // On DISK the plugin declares the new hook (its author always shipped it)…
-    writeFileSync(
-      join(pluginDir, "plugin.json"),
-      JSON.stringify({
-        name: NAME,
-        version: "1.0.0",
-        main: "index.js",
-        hooks: { onStreamComplete: true },
-      })
-    );
-    writeFileSync(
-      join(pluginDir, "index.js"),
-      `const fs = require("fs");
+      // On DISK the plugin declares the new hook (its author always shipped it)…
+      writeFileSync(
+        join(pluginDir, "plugin.json"),
+        JSON.stringify({
+          name: NAME,
+          version: "1.0.0",
+          main: "index.js",
+          hooks: { onStreamComplete: true },
+        })
+      );
+      writeFileSync(
+        join(pluginDir, "index.js"),
+        `const fs = require("fs");
 const OUT = ${JSON.stringify(outFile)};
 module.exports = {
-  onStreamComplete: async (payload) => { fs.writeFileSync(OUT, JSON.stringify(payload)); },
+  onStreamComplete: async (payload) => {
+    fs.writeFileSync(OUT + ".tmp", JSON.stringify(payload), "utf8");
+    fs.renameSync(OUT + ".tmp", OUT);
+  },
 };
 `
-    );
+      );
 
-    // …but the DB row was persisted by the OLD schema: the flag is gone.
-    try {
-      db.deletePlugin(NAME);
-    } catch {}
-    insertLegacyRow(NAME, pluginDir, {});
-
-    t.after(async () => {
-      await mgr.pluginManager.deactivate(NAME).catch(() => {});
+      // …but the DB row was persisted by the OLD schema: the flag is gone.
       try {
         db.deletePlugin(NAME);
       } catch {}
-      rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-      rmSync(outFile, { force: true });
-    });
+      insertLegacyRow(NAME, pluginDir, {});
 
-    await mgr.pluginManager.activate(NAME);
+      t.after(async () => {
+        await mgr.pluginManager.deactivate(NAME).catch(() => {});
+        try {
+          db.deletePlugin(NAME);
+        } catch {}
+        rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+        rmSync(outFile, { force: true });
+      });
 
-    // Drive the REAL producer entry point used by chatCore.ts.
-    await runPluginOnStreamCompleteHook({
-      status: 200,
-      usage: { prompt_tokens: 7, completion_tokens: 13 },
-      ttft: 80,
-      model: "claude-3-opus",
-      provider: "anthropic",
-      errorCode: undefined,
-      startTime: Date.now() - 250,
-      requestId: "trace-manifest-refresh",
-    });
+      await mgr.pluginManager.activate(NAME);
 
-    await waitFor(() => existsSync(outFile));
-    assert.ok(
-      existsSync(outFile),
-      "onStreamComplete never reached the plugin — activate() used the stale DB manifest " +
-        "(hooks.onStreamComplete stripped at install time) instead of re-reading plugin.json"
-    );
-    const payload = JSON.parse(readFileSync(outFile, "utf-8")) as Record<string, unknown>;
-    assert.equal(payload.requestId, "trace-manifest-refresh");
+      // Drive the REAL producer entry point used by chatCore.ts.
+      await runPluginOnStreamCompleteHook({
+        status: 200,
+        usage: { prompt_tokens: 7, completion_tokens: 13 },
+        ttft: 80,
+        model: "claude-3-opus",
+        provider: "anthropic",
+        errorCode: undefined,
+        startTime: Date.now() - 250,
+        requestId: "trace-manifest-refresh",
+      });
 
-    // The refreshed manifest must also be persisted so the row stays coherent.
-    const row = db.getPluginByName(NAME);
-    assert.ok(row, "plugin row should exist");
-    const storedManifest = JSON.parse(row!.manifest) as {
-      hooks: Record<string, boolean | undefined>;
-    };
-    assert.equal(
-      storedManifest.hooks.onStreamComplete,
-      true,
-      "stored manifest should be refreshed from disk on activate()"
-    );
-    assert.ok(
-      (JSON.parse(row!.hooks) as string[]).includes("onStreamComplete"),
-      "stored hooks list should be refreshed alongside the manifest"
-    );
-  });
+      await waitFor(() => existsSync(outFile));
+      assert.ok(
+        existsSync(outFile),
+        "onStreamComplete never reached the plugin — activate() used the stale DB manifest " +
+          "(hooks.onStreamComplete stripped at install time) instead of re-reading plugin.json"
+      );
+      const payload = JSON.parse(readFileSync(outFile, "utf-8")) as Record<string, unknown>;
+      assert.equal(payload.requestId, "trace-manifest-refresh");
+
+      // The refreshed manifest must also be persisted so the row stays coherent.
+      const row = db.getPluginByName(NAME);
+      assert.ok(row, "plugin row should exist");
+      const storedManifest = JSON.parse(row!.manifest) as {
+        hooks: Record<string, boolean | undefined>;
+      };
+      assert.equal(
+        storedManifest.hooks.onStreamComplete,
+        true,
+        "stored manifest should be refreshed from disk on activate()"
+      );
+      assert.ok(
+        (JSON.parse(row!.hooks) as string[]).includes("onStreamComplete"),
+        "stored hooks list should be refreshed alongside the manifest"
+      );
+    }
+  );
 
   test("a corrupt plugin.json on disk falls back to the stored manifest (never bricks)", async (t) => {
     const NAME = "sc-manifest-fallback";

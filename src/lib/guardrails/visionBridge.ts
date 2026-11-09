@@ -327,6 +327,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     this.deps = options?.deps ?? {};
   }
 
+  /** Apply the configured vision bridge while preserving ordinary non-image content. */
   async preCall(payload: unknown, context: GuardrailContext): Promise<GuardrailResult<unknown>> {
     // 1. Check if disabled at guardrail level
     if (!this.enabled) {
@@ -371,13 +372,20 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         ? "process"
         : this.deps.resolveComboVisionDecision
           ? await this.deps.resolveComboVisionDecision(model)
-        : this.deps.checkModelHasComboMapping
-          ? (await this.deps.checkModelHasComboMapping(model))
-            ? "process"
-            : "skip"
-          : await getComboVisionBridgeDecision(model);
+          : this.deps.checkModelHasComboMapping
+            ? (await this.deps.checkModelHasComboMapping(model))
+              ? "process"
+              : "skip"
+            : await getComboVisionBridgeDecision(model);
 
-      if (comboVisionBridgeDecision === "skip") {
+      // #18008: "skip" = every step proven vision-capable. "process" (mixed, no forced
+      // bridge) also keeps raw images — combo dispatch filters text-only targets.
+      const usesRealComboResolver =
+        !this.deps.resolveComboVisionDecision && !this.deps.checkModelHasComboMapping;
+      if (
+        comboVisionBridgeDecision === "skip" ||
+        (comboVisionBridgeDecision === "process" && !forceVisionBridge && usesRealComboResolver)
+      ) {
         return { block: false };
       }
 
@@ -407,6 +415,13 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         ? body.input
         : null;
     if (!messages || messages.length === 0) {
+      return { block: false };
+    }
+
+    // The image-only router cannot qualify a destination for other attachments.
+    // Auto's compatibility pass checks every required modality (including after
+    // catalog expansion); let it keep the complete mixed request intact.
+    if (isAuto && detectMediaParts(messages).some((part) => part.kind !== "image")) {
       return { block: false };
     }
 
@@ -772,12 +787,11 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       (allNull && comboVisionBridgeDecision === "process")
     ) {
       const totalImagesToReplace =
-        confirmedTextOnlyDirectTarget || noVisionCombo
-          ? imageParts.length
-          : descriptions.length;
+        confirmedTextOnlyDirectTarget || noVisionCombo ? imageParts.length : descriptions.length;
       for (let i = 0; i < totalImagesToReplace; i++) {
         if (descriptions[i] == null) {
-          descriptions[i] = `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+          descriptions[i] =
+            `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
         }
       }
     }

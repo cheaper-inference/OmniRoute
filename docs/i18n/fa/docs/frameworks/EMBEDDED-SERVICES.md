@@ -4,13 +4,9 @@
 
 ---
 
-> **نسخه:** v3.8.44
-> **آخرین بهروزرسانی:** 2026-09-16
-> **مخاطبان:** مهندسانی که سرویسهای تعبیهشده (9Router، CLIProxyAPI، Mux، Bifrost، open-wa، LLMLingua) را اضافه، نگهداری یا اشکالزدایی میکنند.
+> **نسخه:** نسخه 3.8.44** آخرین به روز رسانی:** 2026-10-28** مخاطب:** مهندسانی که سرویسهای تعبیهشده را اضافه، نگهداری یا اشکالزدایی میکنند (9Router، CLIProxyAPI، Mux، Bifrost، open-wa، LLMLingua، sing-box).
 
-سرویسهای تعبیهشده، ابزارهای فرایند جانبیِ نصبشده بهصورت محلی هستند که OmniRoute آنها را نصب و نظارت میکند و
-بهعنوان مقصدهای مسیریابی درجهیک در دسترس قرار میدهد. برخلاف ارائهدهندگان خارجی (که از طریق اینترنت و
-با استفاده از کلیدهای API به آنها متصل میشود)، سرویسهای تعبیهشده روی همان دستگاهی اجرا میشوند که OmniRoute روی آن اجرا شده است و از طریق رابط loopback ارتباط برقرار میکنند.
+سرویسهای جاسازیشده، ابزارهای فرعی فرآیند نصبشده محلی هستند که OmniRoute را به عنوان اهداف مسیریابی درجه یک نصب، نظارت و در معرض دید قرار میدهد. بر خلاف ارائه دهندگان خارجی (که از طریق اینترنت از طریق کلیدهای API در دسترس قرار می گیرند)، سرویس های جاسازی شده در همان دستگاه OmniRoute اجرا می شوند و از طریق حلقه بک ارتباط برقرار می کنند.
 
 ---
 
@@ -27,60 +23,61 @@
 
 ---
 
-## 1. مرور کلی
+## 1. بررسی اجمالی
 
-### چرا سرویسهای تعبیهشده؟
+### چرا خدمات تعبیه شده؟
 
-هفت سرویس تعبیه شدهاند:
+هشت سرویس تعبیه شده است:
 
-| سرویس           | بسته npm                               | پورت پیشفرض | هدف                                                                                                                                                                                                                                                                                                                                                         |
-| --------------- | -------------------------------------- | :---------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                              |    20130    | مسیریاب هوش مصنوعی که OmniRoute میتواند از آن بهعنوان یک ارائهدهنده فرعی استفاده کند. مدلها با قالب `9router/{sub}/{model}` ارائه میشوند                                                                                                                                                                                                                    |
-| **CLIProxyAPI** | فایل اجرایی انتشار GitHub (`cliproxy`) |    8317     | آداپتور پراکسی محلی برای جریانهای احراز هویت Anthropic CLI. هنگامی که توکنهای OAuth منقضی میشوند، مسیریابی جایگزین را فراهم میکند                                                                                                                                                                                                                           |
-| **Mux**         | `mux` (`mux server` بدون رابط گرافیکی) |    8322     | دیمن محلی هماهنگسازی عاملها (coder/mux). فقط چرخه عمر آن مدیریت میشود — هدف مسیریابی نیست (هیچ پراکسی LLM انجام نمیدهد).                                                                                                                                                                                                                                    |
-| **Bifrost**     | `@maximhq/bifrost`                     |    8080     | بکاند رله درگاه هوش مصنوعی مبتنی بر Go. هنگام اجرا، بهطور خودکار توسط مسیر رله (`/v1/relay/`) انتخاب میشود                                                                                                                                                                                                                                                  |
-| **Dario**       | `@askalf/dario`                        |    3456     | پراکسی اشتراک Claude — جایگزین/پشتیبان CLIProxyAPI برای ترافیک با ساختار Claude Code؛ کلید تزریقشده به `DARIO_ADMIN_TOKEN` تبدیل میشود که دسترسی به صفحه کنترل OAuth در `/admin/*` را محدود میکند                                                                                                                                                           |
-| **open-wa**     | `@open-wa/wa-automate`                 |    8323     | خودکارسازی WhatsApp Web (Chromium بدون رابط گرافیکی از طریق Puppeteer). فقط چرخه عمر آن مدیریت میشود — هدف مسیریابی نیست.                                                                                                                                                                                                                                   |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                   |    20135    | سرویس جانبی فشردهسازی پرامپت — مدل واقعی LLMLingua-2 ONNX (پورت JS/TS الگوریتم Microsoft). فایل `open-sse/services/compression/engines/llmlingua/index.ts` درخواستهای `/compress` را از طریق HTTP به آن هدایت میکند و در صورت از دسترس خارج شدن سرویس جانبی، به بکاند worker-thread درونفرآیندی برمیگردد. فقط چرخه عمر آن مدیریت میشود — هدف مسیریابی نیست. |
+| خدمات           | بسته npm                          | پورت پیش فرض | هدف                                                                                                                                                                                                                                                                                                                      |
+| --------------- | --------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9 روتر**      | `9router`                         |    20130     | روتر AI که OmniRoute می تواند به عنوان یک ارائه دهنده فرعی از آن استفاده کند. مدل هایی که به صورت `9router/{sub}/{model}` در معرض دید قرار می گیرند                                                                                                                                                                      |
+| **CLIProxyAPI** | باینری انتشار GitHub (`cliproxy`) |     8317     | آداپتور پروکسی محلی برای جریان های اعتبار Anthropic CLI. هنگامی که توکن های OAuth منقضی می شوند، مسیریابی بازگشتی را ارائه می دهد                                                                                                                                                                                        |
+| **ماکس**        | `mux` ( `mux server` بی سر)       |     8322     | دیمون عامل ارکستراسیون محلی (coder/mux). فقط — مدیریت شده توسط چرخه حیات و نه یک هدف مسیریابی (بدون پروکسی LLM ).                                                                                                                                                                                                        |
+| **بیفراست**     | `@maximhq/bifrost`                |     8080     | باطن رله AI-gateway بروید. هنگام اجرا، توسط مسیر رله به طور خودکار انتخاب می شود (`/v1/relay/`)                                                                                                                                                                                                                          |
+| **داریو**       | `@askalf/dario`                   |     3456     | پروکسی Claude-subscription — alternative/failover to CLIProxyAPI برای ترافیک کلود-کد. کلید تزریق شده `DARIO_ADMIN_TOKEN` تبدیل می شود که صفحه کنترل `/admin/*` OAuth خود را باز می کند                                                                                                                                   |
+| **open-wa**     | `@open-wa/wa-automate`            |     8323     | اتوماسیون وب WhatsApp (Chromium بدون هد از طریق Puppeteer). فقط — مدیریت چرخه حیات، هدف مسیریابی نیست.                                                                                                                                                                                                                   |
+| **LLMLingua**   | `@atjsh/llmlingua-2`              |    20135     | فشرده سازی سریع مدل sidecar — real LLMLingua-2 ONNX (پورت JS/TS الگوریتم Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` از طریق HTTP به آن ارسال میکند، و هنگامی که کاروان کناری خاموش است، به پشتیبان موضوع کارگر در فرآیند بازمیگردد. مدیریت چرخه حیات فقط — یک هدف مسیریابی نیست. |
+| **جعبه آواز**   | باینری انتشار GitHub (`singbox`)  |    20140     | TPROXY sidecar پشتیبان رهگیری شفاف پراکسی `applyTproxy()`(`src/mitm/tproxy/setup.ts`). نصبکننده نسخه پینشده و تأییدشده با جمع کنترلی را دانلود میکند. فقط — مدیریت شده توسط چرخه حیات و نه هدف مسیریابی (بدون پروکسی LLM )                                                                                               |
 
-هر هفت سرویس از یک مدل نظارتی یکسان پیروی میکنند:
+هر هشت نفر از یک مدل نظارتی پیروی می کنند:
 
-- OmniRoute آنها را در `DATA_DIR/services/{name}/` نصب میکند (جدا از `package.json` متعلق به OmniRoute)
-- OmniRoute آنها را بهعنوان فرایندهای فرزند اجرا و پایش میکند
-- OmniRoute یک کلید API موقت را به محیط فرایند فرزند تزریق میکند و آن را بدون توقف سرویس میچرخاند (در موارد قابلاعمال)
-- تمام مسیرهای مدیریتی (`/api/services/*`) **LOCAL_ONLY** هستند — فقط از رابط loopback قابل دسترسیاند (قانون قطعی شماره 17)
+- OmniRoute آنها را تحت `DATA_DIR/services/{name}/` نصب می کند (جدا شده از OmniRoute خود `package.json`)
+- OmniRoute تخم ریزی می کند و آنها را به عنوان فرآیندهای کودک نظارت می کند
+- OmniRoute یک کلید زودگذر API را به محیط کودک تزریق می کند و آن را بدون توقف (در صورت لزوم) می چرخاند.
+- تمامی مسیرهای مدیریت (`/api/services/*`) هستند**LOCAL_ONLY** — فقط از طریق Loopback قابل دسترسی است (قانون سخت شماره 17)
 
-### تصمیمهای کلیدی (برگرفته از طرح طراحی)
+### تصمیمات کلیدی (از طرح طراحی)
 
-| تصمیم                                      | مقدار                                                                                                |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| دسترسی داشبورد به رابط کاربری بومی 9Router | پراکسی معکوس در `/dashboard/providers/services/9router/embed/*`                                      |
-| سازوکار نصب                                | `npm install {package}` از طریق `execFile` (بدون درونیابی shell)                                     |
-| حالت استفاده                               | ارائهدهنده با قالب `9router/{sub}/{model}` در موتور مسیریابی ثبت میشود                               |
-| مدیریت کلید API                            | OmniRoute آن را تولید میکند، در حالت ذخیرهشده رمزنگاری میکند (AES-256-GCM) و از طریق env تزریق میکند |
-| محل داشبورد                                | `/dashboard/providers/services` (سه زبانه)                                                           |
-| شروع خودکار                                | کلید تغییر وضعیت مجزا برای هر سرویس، بهطور پیشفرض خاموش                                              |
+| تصمیم گیری                       | ارزش                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------ |
+| دسترسی داشبورد به UI بومی 9 روتر | پروکسی معکوس در `/dashboard/providers/services/9router/embed/*`                                  |
+| مکانیزم نصب                      | `npm install {package}` از طریق `execFile` (بدون درون یابی پوسته)                                |
+| حالت مصرف                        | ارائه دهنده به عنوان `9router/{sub}/{model}` در موتور مسیریابی ثبت شده است                       |
+| مدیریت کلید API                  | OmniRoute تولید می کند، در حالت استراحت (AES-256-GCM) رمزگذاری می کند و از طریق env تزریق می کند |
+| محل داشبورد                      | `/dashboard/providers/services` (سه زبانه)                                                       |
+| شروع خودکار                      | تغییر وضعیت در هر سرویس، OFF پیشفرض                                                              |
 
 ---
 
-## 2. معماری — ۴ لایه
+## 2. معماری — 4 لایه
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  لایه ۱ — رابط کاربری                                              │
-│  /dashboard/providers/services  (زبانهها: CLIProxyAPI | 9Router | Mux)│
-│  گزارشهای زنده (SSE)، شروع/توقف/راهاندازی مجدد/بهروزرسانی، تنظیمات، نصب│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               پوسته + مسیریابی زبانه با ?tab=      │
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (واکشی Next.js)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  لایه ۲ — API (LOCAL_ONLY — فقط loopback)                          │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -89,74 +86,74 @@
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (پراکسی معکوس HTTP + WebSocket ← بالادست 9Router)               │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  دروازه: LOCAL_ONLY_API_PREFIXES شامل "/api/services/" و           │
-│          "/dashboard/providers/services/*/embed/" است              │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
+│        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ فراخوانیهای درونپردازشی
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  لایه ۳ — ServiceSupervisor (src/lib/services/)                    │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   ناظر عمومی (child_process.spawn)           │
-│    ├── نصب:        execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── شروع:       spawn(node, [entrypoint], {env, cwd})           │
-│    ├── کلید API:   crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── پورت:       20130 برای 9Router (قابل پیکربندی)              │
-│    ├── گزارشها:   بافر حلقوی stdio با ظرفیت ۵ مگابایت → رویدادهای SSE│
-│    ├── سلامت:      HTTP GET /health هر ۲ تا ۵ ثانیه، بازیابی تنبل  │
-│    └── چرخه عمر:   SIGTERM بهمدت ۱۵ ثانیه → SIGKILL               │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       راهاندازی اولیه همه SERVICES[] هنگام شروع پردازش│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET دورهای /v1/models → جدول service_models  │
-│  ringBuffer.ts      بافر حلقوی گزارشها (۵ مگابایت برای هر سرویس) │
-│  healthCheck.ts     کاوش دورهای سلامت HTTP                        │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (آداپتورهای نصبکننده)                        │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP سازگار با OpenAI (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  لایه ۴ — ارائهدهنده / مسیریابی                                   │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    پورت و کلید API را برای هر درخواست دوباره جستوجو میکند (بدون کش).│
-│    پیشوند "9router/" را پیش از پراکسیکردن از شناسه مدل حذف میکند.│
-│    اگر ناظر در وضعیت "running" نباشد، 503 service_not_running را برمیگرداند.│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    ورودی مربوط به "9router": isEmbeddedService: true               │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    مدلها بهشکل "9router/{sub}/{model}" ذخیره میشوند (با پیشوند).│
-│    هر ۵ دقیقه توسط modelSync.ts همگامسازی میشوند.                │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux فقط از نظر چرخه عمر مدیریت میشود (لایههای ۱ تا ۳) — این یک   │
-│  دیمون هماهنگسازی عاملها است، نه یک پراکسی LLM؛ بنابراین هیچ ورودی│
-│  اجراکننده/ارائهدهندهای در لایه ۴ ندارد و هرگز هدف مسیریابی نیست.│
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### فایلهای منبع کلیدی
+### فایل های منبع کلیدی
 
-| فایل                                        | نقش                                                    |
-| ------------------------------------------- | ------------------------------------------------------ |
-| `src/lib/services/ServiceSupervisor.ts`     | کلاس اصلی: چرخه حیات، قفل، سلامت، بافر حلقوی           |
-| `src/lib/services/bootstrap.ts`             | ثبت در سطح فرایند و شروع خودکار                        |
-| `src/lib/services/registry.ts`              | نگاشت تکنمونهای `tool → supervisor`                    |
-| `src/lib/services/apiKey.ts`                | تولید کلید، رمزنگاری AES-256-GCM برای دادههای ذخیرهشده |
-| `src/lib/services/modelSync.ts`             | همگامسازی دورهای مدل (۵ دقیقه) + درخواستی              |
-| `src/lib/services/ringBuffer.ts`            | بافر حلقوی گزارش ۵ مگابایتی با اشتراک SSE              |
-| `src/lib/services/healthCheck.ts`           | کاوش سلامت HTTP (با فاصله زمانی قابل پیکربندی)         |
-| `src/lib/services/installers/ninerouter.ts` | نصب/بهروزرسانی/حذف 9Router با npm                      |
-| `src/lib/services/installers/cliproxy.ts`   | نصب/بهروزرسانی/حذف CLIProxyAPI با npm                  |
-| `src/lib/services/installers/mux.ts`        | نصب/بهروزرسانی/حذف Mux با npm                          |
-| `src/lib/services/installers/openwa.ts`     | نصب/بهروزرسانی/حذف open-wa با npm                      |
-| `src/lib/services/installers/llmlingua.ts`  | نصب/بهروزرسانی/حذف LLMLingua با npm                    |
-| `src/app/api/services/9router/_lib.ts`      | تابع کمکی `getOrInitSupervisor()`                      |
-| `src/app/api/services/[name]/logs/route.ts` | نقطه پایانی مشترک گزارشهای SSE                         |
-| `open-sse/executors/ninerouter.ts`          | اجراکننده ارائهدهنده (لایه ۴)                          |
+| فایل                                        | نقش                                              |
+| ------------------------------------------- | ------------------------------------------------ |
+| `src/lib/services/ServiceSupervisor.ts`     | کلاس اصلی: چرخه زندگی، قفل، سلامت، بافر حلقه     |
+| `src/lib/services/bootstrap.ts`             | ثبت نام و شروع خودکار در سطح فرآیند              |
+| `src/lib/services/registry.ts`              | نقشه سینگلتون `tool → supervisor`                |
+| `src/lib/services/apiKey.ts`                | تولید کلید، رمزگذاری AES-256-GCM در حالت استراحت |
+| `src/lib/services/modelSync.ts`             | همگام سازی مدل دوره ای (5 دقیقه) + بر حسب تقاضا  |
+| `src/lib/services/ringBuffer.ts`            | 5 بافر ورود به سیستم دایره ای MB با اشتراک SSE   |
+| `src/lib/services/healthCheck.ts`           | پروب سلامت HTTP (فاصله قابل تنظیم)               |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall برای 9 روتر         |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall برای CLIProxyAPI    |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall برای Mux            |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall برای open-wa        |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall برای LLMLingua      |
+| `src/app/api/services/9router/_lib.ts`      | یاور `getOrInitSupervisor()`                     |
+| `src/app/api/services/[name]/logs/route.ts` | نقطه پایانی گزارش های مشترک SSE                  |
+| `open-sse/executors/ninerouter.ts`          | مجری ارائه دهنده (لایه 4)                        |
 
 ---
 
@@ -212,56 +209,52 @@
 
 ## 4. مرجع API
 
-تمام مسیرهای زیرمجموعهٔ `/api/services/` فقط بهصورت **LOCAL_ONLY** در دسترس هستند (فقط loopback، قانون قطعی #17).
-درخواستهای غیر-loopback، صرفنظر از توکن احراز هویت، پاسخ `403 LOCAL_ONLY` دریافت میکنند.
+تمام مسیرهای تحت `/api/services/` هستند**LOCAL_ONLY** (فقط حلقه بک، قانون سخت شماره 17). درخواستهای غیرحلقهای بدون توجه به توکن اعتبار، `403 LOCAL_ONLY` دریافت میکنند.
 
-### 4.1 نقاط پایانی 9Router (11 مسیر)
+### 4.1 9 نقاط پایانی روتر (11 مسیر)
 
 #### `POST /api/services/9router/install`
 
-9Router را از npm نصب میکند. مسیر `DATA_DIR/services/9router/` را همراه با
-`package.json` و `node_modules/` اختصاصی آن ایجاد میکند. با وابستگیهای خود OmniRoute تداخلی ندارد.
+9 روتر را از npm نصب کنید. `DATA_DIR/services/9router/` با `package.json` و `node_modules/` خود ایجاد می کند. با دپ های خود OmniRoute در تضاد نیست.
 
-**بدنهٔ درخواست** (همه اختیاری):
+**درخواست بدن** (همه اختیاری):
 
 ```json
 { "version": "latest" }
 ```
 
-| فیلد      | نوع      | پیشفرض     | توضیحات                         |
-| --------- | -------- | ---------- | ------------------------------- |
-| `version` | `string` | `"latest"` | تگ نسخهٔ npm یا semver برای نصب |
+| میدان     | تایپ کنید | پیش فرض    | توضیحات                        |
+| --------- | --------- | ---------- | ------------------------------ |
+| `version` | `string`  | `"latest"` | تگ نسخه npm یا semver برای نصب |
 
-**پاسخها:**
+**پاسخ ها:**
 
-| وضعیت | توضیحات                                                     |
-| ----- | ----------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`      |
-| `400` | بدنهٔ درخواست نامعتبر (شکست اعتبارسنجی Zod)                 |
-| `409` | نصب دیگری در حال انجام است (قفل نگه داشته شده است)          |
-| `500` | نصب npm ناموفق بود — برای خطای قابلفهم، `message` را ببینید |
+| وضعیت | توضیحات                                                  |
+| ----- | -------------------------------------------------------- |
+| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`   |
+| `400` | بدنه درخواست نامعتبر (عدم اعتبار سنجی Zod )              |
+| `409` | قبلاً نصب شده است (قفل نگه داشته شده است)                |
+| `500` | npm نصب نشد — برای خطای دوستانه به `message` مراجعه کنید |
 
-**نکات:** از `execFile('npm', [...])` استفاده میکند — بدون shell و بدون interpolation (قانون قطعی #13).
-خطاهای EACCES بهصورت پیامهای قابلفهم ارائه میشوند.
+**یادداشت ها:** `execFile('npm', [...])` — بدون پوسته، بدون درون یابی استفاده می کند (قانون سخت شماره 13). خطاهای EACCES به عنوان پیام های دوستانه ظاهر می شوند.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-9Router را راهاندازی میکند. اگر supervisor قبلاً ثبت نشده باشد، آن را ثبت میکند و سپس
-`supervisor.start()` را فراخوانی میکند. اگر سرویس از قبل در حال اجرا باشد، عملیات idempotent است.
+9 روتر را راه اندازی کنید. اگر ناظر قبلا ثبت نام نکرده باشد، با `supervisor.start()` تماس می گیرد. زمانی که در حال حاضر در حال دویدن هستید، ناتوان است.
 
-**بدنهٔ درخواست:** ندارد
+**بدن درخواستی:** هیچ کدام
 
-**پاسخها:**
+**پاسخ ها:**
 
-| وضعیت | توضیحات                                                    |
-| ----- | ---------------------------------------------------------- |
-| `200` | شیء `ServiceStatus` (طرحوارهٔ زیر را ببینید)               |
-| `409` | 9Router نصب نشده است (`status: "not_installed"`)           |
-| `503` | راهاندازی ناموفق بود (خطای فرایند — `lastError` را ببینید) |
+| وضعیت | توضیحات                                           |
+| ----- | ------------------------------------------------- |
+| `200` | شی `ServiceStatus` (شکل زیر را ببینید)            |
+| `409` | 9 روتر نصب نشده است (`status: "not_installed"`)   |
+| `503` | شروع ناموفق (خطای فرآیند — را ببینید `lastError`) |
 
-**طرحوارهٔ ServiceStatus:**
+**طرح ServiceStatus :**
 
 ```json
 {
@@ -279,84 +272,78 @@
 
 #### `POST /api/services/9router/stop`
 
-9Router را بهصورت کنترلشده متوقف میکند. SIGTERM را ارسال میکند، 15 ثانیه منتظر میماند و اگر فرایند همچنان فعال باشد، SIGKILL را ارسال میکند.
-اگر سرویس از قبل متوقف شده باشد، عملیات idempotent است.
+9 روتر را به آرامی متوقف کنید. SIGTERM را ارسال می کند، 15 ثانیه صبر می کند، سپس اگر هنوز زنده است، SIGKILL. زمانی که قبلا متوقف شده بود، ناتوان است.
 
-**بدنهٔ درخواست:** ندارد
+**بدن درخواستی:** هیچ کدام
 
-**پاسخها:**
+**پاسخ ها:**
 
 | وضعیت | توضیحات                            |
 | ----- | ---------------------------------- |
-| `200` | `ServiceStatus` (state: "stopped") |
-| `503` | توقف بهطور غیرمنتظرهای ناموفق بود  |
+| `200` | `ServiceStatus` (وضعیت: "توقف")    |
+| `503` | توقف به طور غیرمنتظره ای شکست خورد |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-معادل اجرای `stop()` و سپس `start()` تحت قفل عملیات است.
+معادل `stop()` سپس `start()` زیر قفل عملیات.
 
-**بدنهٔ درخواست:** ندارد
+**بدن درخواستی:** هیچ کدام
 
-**پاسخها:** مشابه `start` است (`ServiceStatus` نهایی را برمیگرداند).
+**پاسخ ها:** همان `start` ( `ServiceStatus` نهایی را برمی گرداند).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-9Router را به نسخهٔ جدیدتری از npm بهروزرسانی میکند. اگر سرویس در حال اجرا باشد، ابتدا متوقف میشود،
-نصب npm اجرا میشود (نسخهٔ جدیدتر را در همان محل نصب میکند) و سپس
-سرویس دوباره راهاندازی میشود.
+9 روتر را به نسخه جدیدتر npm به روز می کند. اگر سرویس در حال اجرا باشد، ابتدا متوقف میشود، npm install اجرا میشود (نسخه جدیدتر را در محل نصب میکنید)، و سپس سرویس راهاندازی مجدد میشود.
 
-**بدنهٔ درخواست** (همه اختیاری):
+**درخواست بدن** (همه اختیاری):
 
 ```json
 { "version": "latest" }
 ```
 
-**پاسخها:**
+**پاسخ ها:**
 
 | وضعیت | توضیحات                                                         |
 | ----- | --------------------------------------------------------------- |
 | `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | بدنه نامعتبر است                                                |
-| `500` | بهروزرسانی npm ناموفق بود                                       |
+| `400` | بدن نامعتبر                                                     |
+| `500` | به روز رسانی npm ناموفق بود                                     |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-یک کلید API جدید برای 9Router تولید میکند، آن را هنگام ذخیرهسازی رمزنگاری میکند و سرویس را
-(اگر در حال اجرا باشد) دوباره راهاندازی میکند تا کلید جدید را از محیط خود دریافت کند. کلید قدیمی
-بلافاصله نامعتبر میشود.
+یک کلید API جدید برای 9Router ایجاد میکند، آن را در حالت استراحت رمزگذاری میکند، و سرویس را مجدداً راهاندازی میکند (در صورت اجرا) تا کلید جدید را از محیط خود دریافت کند. کلید قدیمی بلافاصله باطل می شود.
 
-**بدنهٔ درخواست:** ندارد
+**بدن درخواستی:** هیچ کدام
 
-**پاسخها:**
+**پاسخ ها:**
 
 | وضعیت | توضیحات                                    |
 | ----- | ------------------------------------------ |
 | `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | چرخش کلید ناموفق بود                       |
+| `500` | چرخش ناموفق بود                            |
 
-**امنیت:** کلید جدید هرگز در پاسخ برگردانده نمیشود (بدون افشای اطلاعات محرمانه).
-این کلید بهصورت رمزنگاریشده (AES-256-GCM) در جدول `version_manager` ذخیره میشود.
+**امنیت:** کلید جدید هرگز در پاسخ بازگردانده نمی شود (بدون نشت اعتبار). به صورت رمزگذاری شده (AES-256-GCM) در جدول `version_manager` ذخیره می شود.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-وضعیت ترکیبی زنده + DB را شامل فرادادهٔ نسخه و پیشنمایش کلید API برمیگرداند.
+وضعیت + DB زنده ترکیبی از جمله ابرداده نسخه و پیشنمایش کلید API را برمیگرداند.
 
-**پاسخها:**
+**پاسخ ها:**
 
-| وضعیت | توضیحات                 |
-| ----- | ----------------------- |
-| `200` | طرحوارهٔ زیر را ببینید  |
-| `500` | خواندن وضعیت ناموفق بود |
+| وضعیت | توضیحات           |
+| ----- | ----------------- |
+| `200` | طرح زیر را ببینید |
+| `500` | وضعیت خوانده نشد  |
 
-**طرحوارهٔ پاسخ:**
+**طرح پاسخ:**
 
 ```json
 {
@@ -380,231 +367,197 @@
 
 #### `POST /api/services/9router/auto-start`
 
-پرچم راهاندازی خودکار را تغییر میدهد. وقتی `enabled: true` باشد، دفعهٔ بعد که OmniRoute راهاندازی میشود،
-سرویس نیز بهطور خودکار شروع به کار میکند (بهشرط اینکه سرویس نصب شده باشد).
+پرچم شروع خودکار را تغییر دهید. وقتی `enabled: true`، دفعه بعد که OmniRoute بوت می شود، سرویس به طور خودکار شروع می شود (در صورت نصب سرویس).
 
-**بدنهٔ درخواست:**
+**بدن درخواستی:**
 
 ```json
 { "enabled": true }
 ```
 
-**پاسخها:**
+**پاسخ ها:**
 
 | وضعیت | توضیحات               |
 | ----- | --------------------- |
 | `200` | `{ autoStart: true }` |
-| `400` | بدنه نامعتبر است      |
+| `400` | بدن نامعتبر           |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-جریان SSE از لاگهای زندهٔ بافر حلقوی stdout/stderr متعلق به 9Router.
+جریان SSE از لاگ های زنده از بافر حلقه stdout/stderr 9Router.
 
-**پارامترهای پرسوجو:**
+**پارامترهای پرس و جو:**
 
-| پارامتر  | نوع       | پیشفرض | توضیحات                                                                              |
-| -------- | --------- | ------ | ------------------------------------------------------------------------------------ |
-| `tail`   | `integer` | 200    | تعداد خطوط تاریخی که ابتدا ارسال میشوند (حداکثر 1000)                                |
-| `filter` | `string`  | ندارد  | فیلتر زیررشتهای بدون حساسیت به بزرگی و کوچکی حروف (بدون regex — ایمن در برابر ReDoS) |
+| پارام    | تایپ کنید | پیش فرض  | توضیحات                                                         |
+| -------- | --------- | -------- | --------------------------------------------------------------- |
+| `tail`   | `integer` | 200      | ابتدا چند خط تاریخی ارسال شود (حداکثر 1000)                     |
+| `filter` | `string`  | هیچ کدام | فیلتر زیر رشته ای حساس به کوچک و بزرگ (بدون regex — ReDoS-safe) |
 
-**رویدادهای SSE:**
+**رویدادهای SSE :**
 
-| رویداد      | داده        | توضیحات                          |
-| ----------- | ----------- | -------------------------------- |
-| `snapshot`  | `LogLine[]` | بخش انتهایی اولیهٔ لاگهای تاریخی |
-| `log`       | `LogLine`   | خط لاگ زنده                      |
-| `heartbeat` | `{}`        | پیام حفظ اتصال هر 15 ثانیه       |
+| رویداد      | داده ها     | توضیحات                 |
+| ----------- | ----------- | ----------------------- |
+| `snapshot`  | `LogLine[]` | دم تاریخی اولیه         |
+| `log`       | `LogLine`   | خط ورود به سیستم زنده   |
+| `heartbeat` | `{}`        | هر 15 ثانیه زنده بمانید |
 
-**طرحوارهٔ LogLine:**
+**طرح LogLine :**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
-**پاسخها:**
+**پاسخ ها:**
 
-| وضعیت | توضیحات                                           |
-| ----- | ------------------------------------------------- |
-| `200` | `text/event-stream`                               |
-| `400` | پارامتر `filter` بیشازحد طولانی است (> 200 نویسه) |
-| `404` | سرویس یافت نشد (سرپرست ثبت نشده است)              |
-
----
-
-### 4.2 نقاط پایانی CLIProxyAPI (10 مسیر)
-
-CLIProxyAPI ساختار نقاط پایانی یکسانی با 9Router دارد، با این تفاوت که `rotate-key`
-را ندارد و شامل `accounts`،‏ `provider-expose` و `auto-restart-adopted` است. اکنون
-یک کلید API اختصاصی برای صفحهٔ داده دریافت میکند که هنگام ایجاد فرایند تزریق میشود
-(`needsApiKey: true` در `bootstrap.ts`، مورد استفاده برای همگامسازی مدل)؛ `status`
-شامل فیلدهای کمتری است.
-
-| متد    | مسیر                                | توضیحات                                        |
-| ------ | ----------------------------------- | ---------------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | نصب CLIProxyAPI از npm                         |
-| `POST` | `/api/services/cliproxy/start`      | راهاندازی CLIProxyAPI                          |
-| `POST` | `/api/services/cliproxy/stop`       | توقف CLIProxyAPI                               |
-| `POST` | `/api/services/cliproxy/restart`    | راهاندازی مجدد CLIProxyAPI                     |
-| `POST` | `/api/services/cliproxy/update`     | بهروزرسانی به نسخهای جدیدتر                    |
-| `GET`  | `/api/services/cliproxy/status`     | وضعیت زنده + پایگاه داده (بدون `apiKeyMasked`) |
-| `POST` | `/api/services/cliproxy/auto-start` | فعال یا غیرفعالکردن شروع خودکار                |
-
-نقطهٔ پایانی مشترک `GET /api/services/{name}/logs` (به §4.1 مراجعه کنید) با استفاده
-از بخش پویای `[name]` برای هر چهار سرویس کار میکند.
+| وضعیت | توضیحات                                        |
+| ----- | ---------------------------------------------- |
+| `200` | `text/event-stream`                            |
+| `400` | پارامتر `filter` خیلی طولانی است (> 200 نویسه) |
+| `404` | سرویس یافت نشد (ناظر ثبت نشده است)             |
 
 ---
 
-### 4.3 نقاط پایانی Mux (8 مسیر)
+### 4.2 نقطه پایانی CLIProxyAPI (10 مسیر)
 
-Mux ساختار نقاط پایانی یکسانی با CLIProxyAPI دارد — در سطح API هیچ مسیر
-`rotate-key` وجود ندارد (توکن bearer مانند توکن 9Router از طریق
-`getOrCreateApiKey("mux")` تولید و با متغیر محیطی `MUX_SERVER_AUTH_TOKEN` تزریق
-میشود، اما هنوز نقطهٔ پایانی اختصاصی برای چرخش آن وجود ندارد). Mux فقط از نظر
-چرخهٔ حیات مدیریت میشود: برخلاف 9Router، هیچ اجراکنندهٔ لایهٔ 4 ندارد و هرگز
-بهعنوان ارائهدهندهٔ مسیریابی ثبت نمیشود.
+CLIProxyAPI شکل نقطه پایانی مشابه 9Router منهای `rotate-key` به اضافه `accounts`، `provider-expose` و `auto-restart-adopted` دارد. اکنون یک کلید API صفحه داده اختصاصی را دریافت می کند که در هنگام تخم ریزی تزریق می شود (`needsApiKey: true` در `bootstrap.ts`، برای همگام سازی مدل استفاده می شود). `status` شامل فیلدهای کمتری است.
 
-| متد    | مسیر                           | توضیحات                         |
-| ------ | ------------------------------ | ------------------------------- |
-| `POST` | `/api/services/mux/install`    | نصب Mux از npm (`npm i mux`)    |
-| `POST` | `/api/services/mux/start`      | راهاندازی Mux (`mux server`)    |
-| `POST` | `/api/services/mux/stop`       | توقف Mux                        |
-| `POST` | `/api/services/mux/restart`    | راهاندازی مجدد Mux              |
-| `POST` | `/api/services/mux/update`     | بهروزرسانی به نسخهٔ جدیدتر npm  |
-| `GET`  | `/api/services/mux/status`     | وضعیت زنده + پایگاه داده        |
-| `POST` | `/api/services/mux/auto-start` | فعال یا غیرفعالکردن شروع خودکار |
+| روش    | مسیر                                | توضیحات                               |
+| ------ | ----------------------------------- | ------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | CLIProxyAPI از npm نصب کنید           |
+| `POST` | `/api/services/cliproxy/start`      | CLIProxyAPI را شروع کنید              |
+| `POST` | `/api/services/cliproxy/stop`       | CLIProxyAPI متوقف کنید                |
+| `POST` | `/api/services/cliproxy/restart`    | CLIProxyAPI مجددا راه اندازی کنید     |
+| `POST` | `/api/services/cliproxy/update`     | به نسخه جدیدتر آپدیت کنید             |
+| `GET`  | `/api/services/cliproxy/status`     | وضعیت + DB زنده (بدون `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | روشن کردن شروع خودکار                 |
+
+نقطه پایانی مشترک `GET /api/services/{name}/logs` (به §4.1 مراجعه کنید) برای هر چهار سرویس با استفاده از بخش پویا `[name]` کار می کند.
+
+---
+
+### 4.3 نقطه پایانی Mux (8 مسیر)
+
+Mux شکل نقطه پایانی مشابه مسیر CLIProxyAPI — no `rotate-key` در سطح API دارد (توکن حامل به همان روشی که روتر 9 از طریق `getOrCreateApiKey("mux")` تولید میشود و از طریق `MUX_SERVER_AUTH_TOKEN` env var تزریق میشود، اما هنوز نقطه پایانی چرخش اختصاصی وجود ندارد). Mux فقط توسط چرخه حیات مدیریت می شود: برخلاف 9Router، هیچ اجراکننده لایه 4 ندارد و هرگز به عنوان یک ارائه دهنده مسیریابی ثبت نمی شود.
+
+| روش    | مسیر                           | توضیحات                              |
+| ------ | ------------------------------ | ------------------------------------ |
+| `POST` | `/api/services/mux/install`    | نصب Mux از npm (`npm i mux`)         |
+| `POST` | `/api/services/mux/start`      | شروع Mux (`mux server`)              |
+| `POST` | `/api/services/mux/stop`       | ماکس را متوقف کنید                   |
+| `POST` | `/api/services/mux/restart`    | Mux را مجدداً راه اندازی کنید        |
+| `POST` | `/api/services/mux/update`     | به نسخه جدیدتر npm به روز رسانی کنید |
+| `GET`  | `/api/services/mux/status`     | وضعیت + DB زنده                      |
+| `POST` | `/api/services/mux/auto-start` | روشن کردن شروع خودکار                |
 
 ---
 
 ### 4.4 نقاط پایانی Bifrost (8 مسیر)
 
-Bifrost یک بکاند رلهٔ درگاه هوش مصنوعی نوشتهشده با Go است
-(`@maximhq/bifrost`). این سرویس از همان ساختار نقاط پایانی CLIProxyAPI استفاده
-میکند (بدون `rotate-key` —‏ Bifrost کلیدهای ارائهدهندگان خود را در `config.json`
-و زیر `-app-dir` مدیریت میکند).
+Bifrost یک باطن رله گیتوی Go AI (`@maximhq/bifrost`) است. از همان شکل نقطه پایانی CLIProxyAPI استفاده می کند (هیچ `rotate-key` — Bifrost کلیدهای ارائه دهنده خود را در `config.json` تحت `-app-dir` خود مدیریت نمی کند).
 
-| متد    | مسیر                               | توضیحات                                                    |
-| ------ | ---------------------------------- | ---------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | نصب Bifrost از npm (`@maximhq/bifrost`)                    |
-| `POST` | `/api/services/bifrost/start`      | راهاندازی Bifrost روی پورت 8080 (پیشفرض)                   |
-| `POST` | `/api/services/bifrost/stop`       | توقف Bifrost                                               |
-| `POST` | `/api/services/bifrost/restart`    | راهاندازی مجدد Bifrost                                     |
-| `POST` | `/api/services/bifrost/update`     | بهروزرسانی به نسخهای جدیدتر                                |
-| `GET`  | `/api/services/bifrost/status`     | وضعیت زنده + پایگاه داده                                   |
-| `POST` | `/api/services/bifrost/auto-start` | فعال یا غیرفعالکردن شروع خودکار                            |
-| `GET`  | `/api/services/bifrost/logs`       | دنبالهٔ گزارش SSE (از طریق مسیر پویای مشترک `[name]/logs`) |
+| روش    | مسیر                               | توضیحات                                           |
+| ------ | ---------------------------------- | ------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | نصب Bifrost از npm (`@maximhq/bifrost`)           |
+| `POST` | `/api/services/bifrost/start`      | شروع Bifrost در پورت 8080 (پیشفرض)                |
+| `POST` | `/api/services/bifrost/stop`       | Bifrost را متوقف کنید                             |
+| `POST` | `/api/services/bifrost/restart`    | Bifrost را مجدداً راه اندازی کنید                 |
+| `POST` | `/api/services/bifrost/update`     | به نسخه جدیدتر آپدیت کنید                         |
+| `GET`  | `/api/services/bifrost/status`     | وضعیت + DB زنده                                   |
+| `POST` | `/api/services/bifrost/auto-start` | روشن کردن شروع خودکار                             |
+| `GET`  | `/api/services/bifrost/logs`       | دم لگ SSE (از طریق مسیر پویا `[name]/logs` مشترک) |
 
-**اتصال مسیریابی:** هنگامی که `BIFROST_BASE_URL` تنظیم نشده و نمونهٔ تحت نظارت
-Bifrost در حال اجرا است، `getBifrostRoutingConfig()` (در `routingBackend.ts`)
-بهطور خودکار از `http://127.0.0.1:{port}` بهعنوان URL پایهٔ رله استفاده میکند.
-متغیر محیطی `BIFROST_BASE_URL` که بهصراحت تنظیم شده باشد، همیشه اولویت دارد.
+**سیم کشی مسیریابی:** هنگامی که `BIFROST_BASE_URL` تنظیم نشده است و نمونه نظارت شده Bifrost در حال اجرا است، `getBifrostRoutingConfig()` (در `routingBackend.ts`) به طور خودکار `http://127.0.0.1:{port}` به عنوان پایه رله URL استفاده می کند. `BIFROST_BASE_URL` env صریح همیشه اولویت دارد.
 
 ---
 
-### 4.5 نقاط پایانی Dario (12 مسیر)
+### 4.5 نقطه پایانی داریو (12 مسیر)
 
-دارای همان ساختار چرخهٔ حیات سایر سرویسها است (`install`،‏ `start`،‏ `stop`،
-`restart`،‏ `update`،‏ `status`،‏ `auto-start`،‏ `auto-restart-adopted`) و علاوه
-بر آن، یک صفحهٔ کنترل OAuth محافظتشده با توکن در زیر `admin/` دارد:
-`admin/accounts`،‏ `admin/import-from-omniroute`،‏ `admin/login-start`،
-`admin/login-complete` (همگی در پشت `DARIO_ADMIN_TOKEN`).
+شکل چرخه حیات مشابه سایر سرویسها (`install`، `start`، `stop`، `restart`، `update`، `status`، `auto-start`، `auto-restart-adopted`) بهعلاوه یک صفحه کنترلی OAuth دارای دروازهدار در زیر `admin/`: `admin/accounts`، `admin/import-from-omniroute`، `admin/login-start`، `admin/login-complete` (همه پشت `DARIO_ADMIN_TOKEN`).
 
-### 4.6 نقاط پایانی open-wa (7 مسیر)
+### 4.6 نقطه پایانی open-wa (7 مسیر)
 
-open-wa (`@open-wa/wa-automate`) یک نمونهٔ بدون رابط گرافیکی Chromium را
-(از طریق Puppeteer) برای خودکارسازی WhatsApp Web کنترل میکند. این سرویس از همان
-ساختار نقاط پایانی Mux استفاده میکند (هنوز بدون مسیر `rotate-key`). این سرویس فقط
-از نظر چرخهٔ حیات مدیریت میشود — هدف مسیریابی نیست و هیچ اجراکنندهٔ لایهٔ 4 یا
-ورودی ارائهدهندهای ندارد.
+open-wa (`@open-wa/wa-automate`) یک نمونه Chromium بدون هد (از طریق Puppeteer) را برای خودکارسازی وب WhatsApp درایو می کند. از همان شکل نقطه پایانی Mux استفاده می کند (هنوز مسیر `rotate-key` وجود ندارد). این فقط — توسط چرخه حیات مدیریت می شود نه یک هدف مسیریابی، نه ورودی executor/provider لایه 4.
 
-| متد    | مسیر                              | توضیحات                                                             |
-| ------ | --------------------------------- | ------------------------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | نصب open-wa از npm (`@open-wa/wa-automate`)                         |
-| `POST` | `/api/services/openwa/start`      | راهاندازی open-wa روی پورت 8323 (پیشفرض)                            |
-| `POST` | `/api/services/openwa/stop`       | توقف open-wa                                                        |
-| `POST` | `/api/services/openwa/restart`    | راهاندازی مجدد open-wa                                              |
-| `POST` | `/api/services/openwa/update`     | بهروزرسانی به نسخه جدیدتر                                           |
-| `GET`  | `/api/services/openwa/status`     | وضعیت زنده + پایگاه داده                                            |
-| `POST` | `/api/services/openwa/auto-start` | فعال یا غیرفعال کردن راهاندازی خودکار                               |
-| `GET`  | `/api/services/openwa/logs`       | دنباله زنده لاگها با SSE (از طریق مسیر پویای اشتراکی `[name]/logs`) |
+| روش    | مسیر                              | توضیحات                                           |
+| ------ | --------------------------------- | ------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | نصب open-wa از npm (`@open-wa/wa-automate`)       |
+| `POST` | `/api/services/openwa/start`      | شروع open-wa در پورت 8323 (پیشفرض)                |
+| `POST` | `/api/services/openwa/stop`       | باز کردن را متوقف کنید                            |
+| `POST` | `/api/services/openwa/restart`    | راه اندازی مجدد open-wa                           |
+| `POST` | `/api/services/openwa/update`     | به نسخه جدیدتر آپدیت کنید                         |
+| `GET`  | `/api/services/openwa/status`     | وضعیت + DB زنده                                   |
+| `POST` | `/api/services/openwa/auto-start` | روشن کردن شروع خودکار                             |
+| `GET`  | `/api/services/openwa/logs`       | دم لگ SSE (از طریق مسیر پویا `[name]/logs` مشترک) |
 
-**کلید API:** بهصورت `WA_KEY` تزریق میشود — بازنویسی عمومی متغیرهای محیطی open-wa با
-پیشوند `WA_*`، آن را به گزینه CLI یعنی `--key`/`-k` نگاشت میکند
-(`dist/cli/setup.js::envArgs()`، با پکیج نصبشده نسخه 4.76.0
-تأیید شده است). هنگام تولید توسط `generateServiceApiKey()`، پیشوند `ow_`
-اضافه میشود. open-wa کلید را از هدر HTTP با نام `key`/`api_key` میخواند
-(نه `Authorization: Bearer`)؛ مسیر `/api-docs*` صراحتاً از این بررسی
-مستثنا شده است (`setupAuthenticationLayer` در `dist/cli/server.js`)، بنابراین پروب سلامت
-به هدر احراز هویت نیاز ندارد.
+**کلید API :** به عنوان `WA_KEY` — open-wa's `WA_*` -prefixed env override عمومی آن را روی گزینه `--key`/`-k` CLI نگاشت میکند (`dist/cli/setup.js::envArgs()`، تأیید شده در برابر بسته 4.76.0 نصب شده). پیشوند `ow_` زمانی که توسط `generateServiceApiKey()` تولید می شود. open-wa کلید را از هدر `key`/`api_key` HTTP می خواند (نه `Authorization: Bearer`) . `/api-docs*` به صراحت از بررسی مستثنی است (`setupAuthenticationLayer` در `dist/cli/server.js`)، بنابراین کاوشگر سلامت نیازی به هدر تأیید اعتبار ندارد.
 
-**جفتسازی:** open-wa غیررسمی است و هیچ وابستگیای به WhatsApp ندارد — شماره
-متصلشده بهدلیل تشخیص خودکارسازی توسط خود WhatsApp در معرض خطر مسدود شدن قرار دارد.
-در اولین راهاندازی، کد QR جفتسازی در stdout چاپ میشود و از طریق
-پنل موجود Logs/جریان SSE نمایش داده میشود — هنوز هیچ نقطه پایانی اختصاصی برای تصویر QR
-در این یکپارچهسازی وجود ندارد.
+**جفت شدن:** open-wa غیر رسمی است و با WhatsApp — غیروابسته است، شماره متصل خطر ممنوعیت تشخیص اتوماسیون خود WhatsApp را به همراه دارد. در اولین شروع، کد QR جفتشده در stdout چاپ میشود و از طریق جریان Logs panel/SSE موجود — ظاهر میشود. هنوز نقطه پایانی تصویر QR اختصاصی در این ادغام وجود ندارد.
 
 ---
 
-### 4.7 نقاط پایانی LLMLingua (۸ مسیر)
+### 4.7 نقطه پایانی LLMLingua (8 مسیر)
 
-LLMLingua یک سرویس جانبی فشردهسازی پرامپت است که `@atjsh/llmlingua-2` را در بر میگیرد (مدل واقعی
-طبقهبندی توکن ONNX که در اولین فراخوانی
-`/compress` از Hugging Face دانلود میشود). این سرویس از همان ساختار نقطه پایانی Bifrost استفاده میکند (بدون کلید API —
-`needsApiKey: false`، و هرگز اطلاعات احراز هویت را مدیریت نمیکند).
+LLMLingua یک `@atjsh/llmlingua-2` با فشرده سازی سریع است (مدل طبقه بندی نشانه ONNX واقعی، در اولین تماس `/compress` از Hugging Face دانلود شده است). از همان شکل نقطه پایانی Bifrost استفاده می کند (بدون کلید API — `needsApiKey: false`، هرگز اعتبارنامه ها را کنترل نمی کند).
 
-| متد    | مسیر                                           | توضیحات                                                                            |
-| ------ | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST` | `/api/services/llmlingua/install`              | نصب `@atjsh/llmlingua-2` و وابستگیهای همتا با npm و نوشتن اسکریپت سرور سرویس جانبی |
-| `POST` | `/api/services/llmlingua/start`                | راهاندازی سرویس جانبی روی پورت 20135 (پیشفرض)                                      |
-| `POST` | `/api/services/llmlingua/stop`                 | توقف سرویس جانبی                                                                   |
-| `POST` | `/api/services/llmlingua/restart`              | راهاندازی مجدد سرویس جانبی                                                         |
-| `POST` | `/api/services/llmlingua/update`               | بهروزرسانی به نسخه جدیدتر پکیج                                                     |
-| `GET`  | `/api/services/llmlingua/status`               | وضعیت زنده + پایگاه داده                                                           |
-| `POST` | `/api/services/llmlingua/auto-start`           | فعال یا غیرفعال کردن راهاندازی خودکار                                              |
-| `POST` | `/api/services/llmlingua/auto-restart-adopted` | فعال یا غیرفعال کردن راهاندازی مجدد خودکار یک نمونه پذیرفتهشده (از قبل موجود)      |
-| `GET`  | `/api/services/llmlingua/logs`                 | دنباله زنده لاگها با SSE (از طریق مسیر پویای اشتراکی `[name]/logs`)                |
+| روش    | مسیر                                           | توضیحات                                                                           |
+| ------ | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm - همتایان `@atjsh/llmlingua-2` + را نصب کنید، اسکریپت سرور sidecar را بنویسید |
+| `POST` | `/api/services/llmlingua/start`                | راه اندازی سایدکار در پورت 20135 (پیش فرض)                                        |
+| `POST` | `/api/services/llmlingua/stop`                 | ماشین کناری را متوقف کنید                                                         |
+| `POST` | `/api/services/llmlingua/restart`              | ماشین کناری را دوباره راه اندازی کنید                                             |
+| `POST` | `/api/services/llmlingua/update`               | به نسخه بسته جدیدتر به روز رسانی کنید                                             |
+| `GET`  | `/api/services/llmlingua/status`               | وضعیت + DB زنده                                                                   |
+| `POST` | `/api/services/llmlingua/auto-start`           | روشن کردن شروع خودکار                                                             |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | راه اندازی مجدد خودکار یک نمونه پذیرفته شده (از قبل موجود) را تغییر دهید          |
+| `GET`  | `/api/services/llmlingua/logs`                 | دم لگ SSE (از طریق مسیر پویا `[name]/logs` مشترک)                                 |
 
-**قرارداد سرویس جانبی:** اسکریپت سرور، `GET /health` (فوری — منتظر
-مدل نمیماند) و `POST /compress` (`{ text, rate }` →
-`{ text, compressed, ratio }`) را ارائه میکند. مدل هنگام اولین فراخوانی
-`/compress` بهصورت تنبل بارگذاری میشود.
+**قرارداد سایدکار:** اسکریپت سرور `GET /health` ( — فوری روی مدل منتظر نمی ماند) و `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`) را آشکار می کند. مدل در اولین تماس `/compress` به صورت تنبل بارگیری می شود.
 
-**سیمکشی فشردهسازی:** `httpSidecarBackend` در
-`open-sse/services/compression/engines/llmlingua/index.ts`، متغیر `LLMLINGUA_BASE_URL` (با مقدار پیشفرض
-`http://127.0.0.1:20135`) را فراخوانی میکند و پاسخ سرویس جانبی را تنها زمانی میپذیرد که
-بهطور قطعی کوتاهتر از ورودی باشد؛ هرگونه شکست (اجرا نبودن سرویس، پایان مهلت، پاسخ
-بدون تغییر) به بکاند درونپردازشی مبتنی بر worker-thread (`./worker.ts`) بازمیگردد.
+**سیم کشی فشرده:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` `LLMLINGUA_BASE_URL` (پیشفرض `http://127.0.0.1:20135`) را فراخوانی میکند و تنها زمانی پاسخ خودروی کناری را میپذیرد که به شدت کوتاهتر از ورودی باشد. هر گونه خرابی (اجرا نشدن، مهلت زمانی، پاسخ بدون عملیات) به باطن موضوع کارگر در فرآیند (`./worker.ts`) برمی گردد.
 
 ---
 
-### 4.8 پراکسی معکوس (تعبیه داشبورد 9Router)
+### 4.8 نقطه پایانی جعبه صدا (8 مسیر)
 
-داشبورد، رابط وب 9Router را از طریق یک پراکسی معکوس داخلی درون iframe
-تعبیه میکند:
+sing-box همان شکل نقطه پایانی Mux — بدون مسیر `rotate-key` ، بدون تزریق کلید API (`needsApiKey: false` در `bootstrap.ts`) دارد. این فقط توسط چرخه حیات مدیریت می شود: هرگز یک ارائه دهنده routing/LLM. `install()` باینری رسمی انتشار GitHub (`SagerNet/sing-box`) را برای نسخه پین شده (`SINGBOX_PINNED_VERSION` در `src/lib/services/installers/singbox.ts`) دانلود میکند و SHA256 آن را در برابر یک جمعبندی کنترلی که در همان فایل پخته شده است، قبل از نوشتن آن بر روی دیسک — تأیید میکند. هر نسخه درخواستی دیگری رد شود.
+
+| روش    | مسیر                                         | توضیحات                                                                        |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST` | `/api/services/singbox/install`              | دانلود + تایید نسخه sing-box پین شده                                           |
+| `POST` | `/api/services/singbox/start`                | شروع sing-box (`sing-box run -c config.json`)                                  |
+| `POST` | `/api/services/singbox/stop`                 | Stop Sing-box                                                                  |
+| `POST` | `/api/services/singbox/restart`              | sing-box را مجدداً راه اندازی کنید                                             |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall انتشار پین شده                                             |
+| `GET`  | `/api/services/singbox/status`               | وضعیت + DB زنده                                                                |
+| `POST` | `/api/services/singbox/auto-start`           | روشن کردن شروع خودکار                                                          |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | راه اندازی مجدد خودکار را برای یک فرآیند پذیرفته شده (از قبل موجود) تغییر دهید |
+| `GET`  | `/api/services/singbox/logs`                 | دم لگ SSE (از طریق مسیر پویا `[name]/logs` مشترک)                              |
+
+**سیم کشی TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` TPROXY `applyTproxy()` میکند. اگر ناظر گم شده باشد یا نتواند به `running` برسد، اکنون در سطح خطا ثبت میشود (بهجای اینکه بیصدا شکست را ببلعد) بنابراین اپراتور میتواند بگوید قوانین TPROXY بدون شنونده فعال در پشت آنها اعمال شدهاند.
+
+---
+
+### 4.9 پروکسی معکوس (9 جاسازی داشبورد روتر)
+
+داشبورد 9Router web UI از طریق یک پروکسی معکوس داخلی در داخل یک iframe جاسازی می کند:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-این پراکسی:
+این پروکسی:
 
-- درخواست را به `http://127.0.0.1:{port}/{path}` هدایت میکند (فقط loopback)
-- هدرهای ورودی `cookie` و `authorization` را حذف میکند (جلوگیری از نشت نشست OmniRoute)
-- برای احراز هویت 9Router، هدر `Authorization: Bearer {apiKey}` را تزریق میکند
-- هدرهای `set-cookie`، `content-security-policy`، `x-frame-options` و `cross-origin-*` را از پاسخ حذف میکند
-- پاسخهای HTML را بازنویسی میکند تا `<base href>` تزریق و مسیرهای مطلق عادیسازی شوند (`/foo` → `/dashboard/.../embed/foo`)
+- درخواست را به `http://127.0.0.1:{port}/{path}` منتقل می کند (فقط حلقه بک)
+- هدرهای `cookie` و `authorization` ورودی را حذف می کند (بدون نشتی از جلسه OmniRoute )
+- `Authorization: Bearer {apiKey}` برای احراز هویت 9 روتر تزریق می کند
+- `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` را از پاسخ جدا می کند
+- پاسخ های HTML را برای تزریق `<base href>` و عادی سازی مسیرهای مطلق بازنویسی می کند (`/foo` → `/dashboard/.../embed/foo`)
 
-ارتقاهای WebSocket برای داشبورد تعبیهشده توسط یک سرور همراه روی
-پورتی اختصاصی مدیریت میشوند (به `src/lib/services/embedWsProxy.ts` مراجعه کنید).
+ارتقاء WebSocket برای داشبورد تعبیه شده توسط یک سرور همراه در یک پورت اختصاصی انجام می شود (به `src/lib/services/embedWsProxy.ts` مراجعه کنید).
 
-**امنیت:** مسیرهای پراکسی تعبیهشده در `LOCAL_ONLY_API_PREFIXES`
-دستهبندی میشوند و فقط از loopback قابل دسترسی هستند. مهاجمی که از طریق یک
-تونل Cloudflare/Ngrok به JWT دست یابد، نمیتواند از طریق پراکسی به سرویسهای تعبیهشده دسترسی پیدا کند.
+**امنیت:** مسیرهای پروکسی embed تحت `LOCAL_ONLY_API_PREFIXES` طبقه بندی می شوند و فقط از طریق Loopback قابل دسترسی هستند. مهاجمی که JWT از طریق تونل Cloudflare/Ngrok به دست می آورد، نمی تواند به سرویس های جاسازی شده پروکسی کند.
 
 ---
 

@@ -8,21 +8,26 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Thiết lập môi trường phát triển
+## Thiết lập phát triển
 
 ### Điều kiện tiên quyết
 
 - **Node.js** `>=22.22.2 <23`, hoặc `>=24.0.0 <27` (khuyến nghị: 24 LTS)
 - **npm** 10+
 
-> **Người dùng npm v11+ (Node 24+):** Sau khi chạy `npm install`, hãy xác minh rằng các mô-đun native đã được cài đặt:
-> `node -e "require('better-sqlite3')"`. Nếu lệnh thất bại với lỗi `MODULE_NOT_FOUND`,
+> **Windows với Node 24:** sử dụng bản vá 24 LTS hiện tại (ít nhất 24.20.0).
+> Các bản phát hành cũ hơn có thể kết thúc đột ngột sau khi kiểm thử thành công khi `--test-force-exit` đóng
+> tiến trình. [Bản sửa lỗi Windows libuv của Node](https://github.com/nodejs/node/pull/61999) khắc phục
+> lỗi crash thời gian chạy này; hãy giữ nguyên các assertion kiểm thử và kiểm tra thoát của runner.
+
+> **Người dùng npm v11+ (Node 24+):** Sau khi `npm install`, hãy xác minh các mô-đun native đã được cài đặt:
+> `node -e "require('better-sqlite3')"`. Nếu lệnh này thất bại với `MODULE_NOT_FOUND`,
 > hãy chạy `npm approve-scripts better-sqlite3 && npm install`. Xem
 > [Khắc phục sự cố](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Sao chép & Cài đặt
+### Sao chép và cài đặt
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -33,89 +38,86 @@ npm install
 ### Biến môi trường
 
 ```bash
-# Tạo tệp .env từ mẫu
+# Tạo .env từ mẫu
 cp .env.example .env
 
-# Tạo các khóa bí mật bắt buộc
+# Tạo các secret bắt buộc
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Các biến chính dành cho môi trường phát triển:
+Các biến chính cho quá trình phát triển:
 
 | Biến                   | Giá trị mặc định khi phát triển | Mô tả                       |
 | ---------------------- | ------------------------------- | --------------------------- |
 | `PORT`                 | `20128`                         | Cổng máy chủ                |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL cơ sở cho frontend      |
-| `JWT_SECRET`           | (tạo ở trên)                    | Khóa bí mật để ký JWT       |
+| `JWT_SECRET`           | (tạo ở trên)                    | Secret ký JWT               |
 | `INITIAL_PASSWORD`     | `CHANGEME`                      | Mật khẩu đăng nhập lần đầu  |
 | `APP_LOG_LEVEL`        | `info`                          | Mức độ chi tiết của nhật ký |
 
 ### Cài đặt bảng điều khiển
 
-Bảng điều khiển cung cấp các nút bật/tắt trên giao diện người dùng cho những tính năng cũng có thể được cấu hình thông qua biến môi trường:
+Bảng điều khiển cung cấp các nút chuyển đổi UI cho những tính năng cũng có thể được cấu hình thông qua các biến môi trường:
 
-| Vị trí cài đặt     | Nút bật/tắt                 | Mô tả                                  |
-| ------------------ | --------------------------- | -------------------------------------- |
-| Cài đặt → Nâng cao | Chế độ gỡ lỗi               | Bật nhật ký yêu cầu gỡ lỗi (giao diện) |
-| Cài đặt → Chung    | Khả năng hiển thị thanh bên | Hiển thị/ẩn các phần của thanh bên     |
+| Vị trí cài đặt      | Nút chuyển đổi     | Mô tả                           |
+| ------------------- | ------------------ | ------------------------------- |
+| Settings → Advanced | Debug Mode         | Bật nhật ký yêu cầu gỡ lỗi (UI) |
+| Settings → General  | Sidebar Visibility | Hiện/ẩn các phần của thanh bên  |
 
-Các cài đặt này được lưu trong cơ sở dữ liệu và duy trì qua các lần khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
+Các cài đặt này được lưu trong cơ sở dữ liệu và vẫn giữ nguyên sau khi khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
 
 ### Chạy cục bộ
 
 ```bash
-# Chế độ phát triển (tự động tải lại)
+# Chế độ phát triển (tải lại nóng)
 npm run dev
 
 # Bản dựng production
 npm run build    # next build → .build/next/ rồi assembleStandalone → dist/
 npm run start
 
-# Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của người đóng góp
+# Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của contributor
 npm run build:contributor
 
-# Bản dựng phát hành (dựng lại từ đầu + dấu kiểm tra HEAD — bắt buộc để triển khai)
+# Bản dựng phát hành (dựng lại sạch + sentinel HEAD — bắt buộc khi deploy)
 npm run build:release   # rm -rf .build dist && build + ghi dist/BUILD_SHA
 
-# Cấu hình cổng thường dùng
+# Cấu hình cổng phổ biến
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bản dựng dành cho người đóng góp chỉ thực hiện xác thực biên dịch: nó không đóng gói bản phân phối độc lập
-hoặc dựng các tài nguyên đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường khi
-bạn cần xác thực gói có thể phát hành.
+Bản dựng dành cho contributor chỉ thực hiện kiểm tra biên dịch: bản dựng này không tập hợp
+bản phân phối standalone hoặc xây dựng các asset đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường
+khi cần xác thực bundle có thể phát hành.
 
 ### Bố cục đầu ra bản dựng
 
-| Thư mục   | Nội dung                                                                          | Được theo dõi |
-| --------- | --------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                              | Có            |
-| `.build/` | Tệp trung gian — đầu ra của `next build` (bị git bỏ qua, `distDir = .build/next`) | Không         |
-| `dist/`   | Gói có thể phát hành — được tạo bởi `assembleStandalone` (bị git bỏ qua)          | Không         |
+| Thư mục   | Nội dung                                                                           | Được theo dõi |
+| --------- | ---------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                               | Có            |
+| `.build/` | Các tệp trung gian — đầu ra của `next build` (gitignored, `distDir = .build/next`) | Không         |
+| `dist/`   | Bundle có thể phát hành — được tập hợp bởi `assembleStandalone` (gitignored)       | Không         |
 
-Quy trình dựng chỉ gồm một lượt:
+Pipeline bản dựng chỉ gồm một lượt:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (đầu ra Next.js)
-  └─ assembleStandalone()                 (sao chép bản độc lập + tệp tĩnh + public + tài nguyên native)
-       └─ đầu ra: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (sao chép standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` còn dọn sạch cả hai thư mục trước tiên và ghi
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm dấu kiểm tra tính toàn vẹn khi triển khai.
+`npm run build:release` bổ sung việc dọn dẹp cả hai thư mục trước, sau đó ghi
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm sentinel kiểm tra tính toàn vẹn khi deploy.
 
-`npm run build:contributor` sử dụng cấu hình dựng chỉ dành cho backend. Nó tạm thời thay thế
-các tệp giao diện bảng điều khiển bằng tệp giả trong khi dựng, giữ nguyên các trình xử lý tuyến API và khôi phục các tệp gốc
-sau khi dựng. Hãy sử dụng `npm run build` cho những thay đổi ảnh hưởng đến giao diện bảng điều khiển hoặc để
-xác thực đầy đủ bản phát hành; cấu hình dành cho người đóng góp không thay thế cho bản dựng phát hành.
+`npm run build:contributor` sử dụng profile bản dựng chỉ dành cho backend. Profile này tạm thời thay thế các tệp UI của bảng điều khiển bằng stub trong quá trình xây dựng, giữ lại các trình xử lý route API và khôi phục các tệp ban đầu sau khi bản dựng hoàn tất. Hãy sử dụng `npm run build` cho các thay đổi ảnh hưởng đến UI bảng điều khiển hoặc để xác thực đầy đủ bản phát hành; profile dành cho contributor không thay thế cho bản dựng phát hành.
 
-> **Lưu ý khi triển khai VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
-> không thay đổi. Các kỹ năng triển khai dùng rsync để đồng bộ nội dung của `dist/` vào thư mục đó.
-> Chỉ đường dẫn đầu ra bản dựng trong kho lưu trữ thay đổi (`app/` → `dist/`).
+> **Lưu ý khi deploy lên VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
+> không thay đổi. Các skill deploy sẽ rsync nội dung của `dist/` vào thư mục này.
+> Chỉ đường dẫn đầu ra của bản dựng trong repository đã thay đổi (`app/` → `dist/`).
 
-Các URL mặc định:
+URL mặc định:
 
 - **Bảng điều khiển**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -178,10 +180,10 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Chỉ các kiểm thử đơn vị bị ảnh hưởng bởi thay đổi của bạn (cùng bộ chọn TIA như cổng CI, #8084)
 npm run test:scoped            # các thay đổi trong commit gần nhất (hoặc cây làm việc)
-npm run test:scoped:staged     # chỉ các thay đổi đã staged — phù hợp để chạy cùng pre-commit
-npm run test:scoped:full       # xây dựng lại ánh xạ đồ thị nhập trước (sau khi thêm/di chuyển tệp)
-# Mã thoát 1 + "run the full suite" có nghĩa là một tệp trung tâm (tsconfig, package.json, …) hoặc
-# nguồn chưa được ánh xạ đã thay đổi — bộ chọn chuyển sang chế độ an toàn, không bao giờ âm thầm bỏ qua.
+npm run test:scoped:staged     # chỉ các thay đổi đã được staged — phù hợp để chạy trước khi commit
+npm run test:scoped:full       # trước tiên dựng lại bản đồ đồ thị nhập (sau khi thêm/di chuyển tệp)
+# Mã thoát 1 + "chạy toàn bộ bộ kiểm thử" nghĩa là một tệp trung tâm (tsconfig, package.json, …) hoặc
+# nguồn chưa được ánh xạ đã thay đổi — bộ chọn sẽ chuyển sang trạng thái an toàn, không bao giờ âm thầm bỏ qua.
 
 # Vitest (máy chủ MCP, autoCombo, bộ nhớ đệm)
 npm run test:vitest
@@ -189,7 +191,7 @@ npm run test:vitest
 # Kiểm thử E2E (yêu cầu Playwright)
 npm run test:e2e
 
-# E2E cho các máy khách giao thức (phương thức truyền tải MCP, A2A)
+# E2E cho các máy khách giao thức (các phương thức truyền tải MCP, A2A)
 npm run test:protocols:e2e
 
 # Kiểm thử khả năng tương thích hệ sinh thái
@@ -203,16 +205,16 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Kiểm thử nhanh tổ hợp thực tế có kiểm soát với upstream (yêu cầu quyền truy cập VPS + tín dụng nhà cung cấp thực)
-# Gọi các nhà cung cấp THỰC — tốn một ít chi phí. KHÔNG BAO GIỜ chạy trong CI. Bỏ qua an toàn nếu không có cổng kiểm soát.
+# Kiểm thử nhanh tổ hợp với upstream thực có kiểm soát (yêu cầu quyền truy cập VPS + tín dụng từ nhà cung cấp thực)
+# Gọi các nhà cung cấp THỰC — tốn một khoản nhỏ. KHÔNG BAO GIỜ chạy trong CI. Bỏ qua an toàn nếu không có cổng kiểm soát.
 # Yêu cầu: quyền truy cập ssh root@192.168.0.15 (nạp ảnh chụp nhanh DB chỉ đọc từ VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Kiểm thử nhanh trực tiếp VPS giai đoạn 3 — các tập lệnh Node ESM thuần túy, gọi trực tiếp máy chủ .15 đang hoạt động.
-# Yêu cầu: quyền truy cập ssh root@192.168.0.15 (các tổ hợp được tạo/xóa qua SSH sqlite).
+# Kiểm thử nhanh trực tiếp trên VPS giai đoạn 3 — các tập lệnh Node ESM thuần, gọi trực tiếp máy chủ .15 đang hoạt động.
+# Yêu cầu: quyền truy cập ssh root@192.168.0.15 (các tổ hợp được tạo/gỡ bỏ qua SSH sqlite).
 # Gọi các nhà cung cấp THỰC (chi phí nhỏ). Chỉ tạo/xóa các tổ hợp __live_test__*. KHÔNG BAO GIỜ chạy trong CI.
 # REQUIRE_API_KEY=false trên .15 nên không cần khóa API, nhưng vẫn tuân theo COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nếu được đặt.
-npm run test:combo:live:vps              # 7 kịch bản HTTP (ưu tiên/luân phiên/có trọng số/chi phí/hợp nhất/tự động + trạng thái)
+npm run test:combo:live:vps              # 7 kịch bản HTTP (ưu tiên/luân phiên/có trọng số/chi phí/hợp nhất/tự động + tình trạng)
 npm run test:combo:live:vps:failover     # thêm một kịch bản chuyển đổi dự phòng thực giữa các nhà cung cấp (tổng cộng 8)
 ```
 
@@ -220,34 +222,35 @@ Ghi chú về độ bao phủ:
 
 - `npm run test:coverage` đo độ bao phủ mã nguồn cho bộ kiểm thử đơn vị chính, loại trừ `tests/**` và bao gồm `open-sse/**`
 - Các pull request phải duy trì ngưỡng độ bao phủ ở mức **60%+** đối với câu lệnh/dòng/hàm/nhánh
-- Nếu một PR thay đổi mã production trong `src/`, `open-sse/`, `electron/` hoặc `bin/`, PR đó phải thêm hoặc cập nhật các kiểm thử tự động trong cùng PR
+- Nếu một PR thay đổi mã nguồn production trong `src/`, `open-sse/`, `electron/` hoặc `bin/`, PR đó phải thêm hoặc cập nhật các kiểm thử tự động
 - `npm run coverage:report` in báo cáo chi tiết theo từng tệp từ lần chạy độ bao phủ gần nhất
-- `npm run test:coverage:legacy` giữ lại chỉ số cũ để so sánh theo lịch sử
+- `npm run test:coverage:legacy` giữ lại chỉ số cũ để so sánh lịch sử
 - Xem `docs/ops/COVERAGE_PLAN.md` để biết lộ trình cải thiện độ bao phủ theo từng giai đoạn
 
 ### Yêu cầu đối với Pull Request
 
-Trước khi mở một PR, hãy sử dụng
-[Quy trình chuẩn để đóng góp](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) để chạy vòng lặp tập trung cho
+Trước khi mở PR, hãy sử dụng
+[Lộ trình chuẩn để đóng góp](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) để chạy vòng lặp tập trung cho
 những gì bạn đã thay đổi. Toàn bộ bộ kiểm thử đơn vị (4 phân đoạn CI), Vitest, ngưỡng độ bao phủ **60%+** và
-bản dựng production thuộc trách nhiệm của CI — việc chạy chúng cục bộ không cung cấp thêm tín hiệu nào ngoài
-những gì các bước kiểm tra PR đã cung cấp, đồng thời trên các máy cấu hình thấp hơn, việc này có thể làm quá tải máy chủ (#8084):
+bản dựng production thuộc trách nhiệm của CI — chạy chúng cục bộ không cung cấp thêm tín hiệu nào ngoài những gì
+các bước kiểm tra PR đã cung cấp, đồng thời trên các máy cấu hình thấp hơn, việc này có thể làm hệ thống quá tải (#8084):
 
 - Chạy các tệp kiểm thử bao phủ thay đổi của bạn: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Chạy `npm run lint`
 - Thêm hoặc cập nhật các kiểm thử tự động trong cùng PR bất cứ khi nào mã production thay đổi
-- Liệt kê các tệp kiểm thử đã thay đổi hoặc được thêm vào trong phần mô tả PR khi mã production thay đổi
+- Trong các tệp `node:test`, hãy đặt mọi `await` ở cấp cao nhất (chẳng hạn như `await import(...)`) trước `test()` / `describe()` đầu tiên: khi dùng `--test-force-exit`, các kiểm thử được đăng ký sau đó có thể âm thầm không bao giờ chạy (#18045; được thực thi bởi `npm run check:test-tla-order`)
+- Khi mã production thay đổi, hãy liệt kê các tệp kiểm thử đã thay đổi hoặc được thêm vào trong phần mô tả PR
 - Kiểm tra kết quả SonarQube trên PR khi các secret của dự án được cấu hình trong CI
 
 Trạng thái kiểm thử hiện tại: **122 tệp kiểm thử đơn vị** bao phủ:
 
 - Các trình chuyển đổi nhà cung cấp và chuyển đổi định dạng
 - Giới hạn tốc độ, bộ ngắt mạch và khả năng phục hồi
-- Bộ nhớ đệm ngữ nghĩa, tính lũy đẳng, theo dõi tiến độ
+- Bộ nhớ đệm ngữ nghĩa, tính lũy đẳng và theo dõi tiến trình
 - Các thao tác cơ sở dữ liệu và schema (21 mô-đun DB)
 - Các luồng OAuth và xác thực
 - Xác thực endpoint API (Zod v4)
-- Các công cụ máy chủ MCP và thực thi phạm vi
+- Các công cụ máy chủ MCP và việc thực thi phạm vi
 - Các hệ thống Memory và Skills
 
 ---

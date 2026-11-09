@@ -20,6 +20,13 @@
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 import { isRetiredGitHubCopilotModelId } from "../config/providers/registry/github/retiredModels.ts";
 
+/**
+ * Why the GHE live catalog was not used: a code of the closed vocabulary, or an
+ * HTTP status. Never a message, a body or an URL — the reason is published to
+ * the operator, so it must not carry what the upstream sent.
+ */
+type DiscoveryFailure = { status?: number; code?: string };
+
 export const GITHUB_COPILOT_MODELS_URL = "https://api.githubcopilot.com/models";
 
 // Static fallback catalog. Used ONLY when live discovery is unavailable
@@ -395,13 +402,15 @@ export type FetchGheCopilotModelsOptions = {
  * Discover the GHE Copilot model catalog live from `<apiUrl>/models`.
  * Returns an empty list (no fallback catalog) when discovery is unavailable —
  * GHE model IDs are enterprise-specific, so a static fallback would be wrong.
+ * The reason of the empty list is reported next to it.
  */
 export async function fetchGheCopilotModels(
   options: FetchGheCopilotModelsOptions
-): Promise<GitHubCopilotModel[]> {
+): Promise<{ models: GitHubCopilotModel[]; failure?: DiscoveryFailure }> {
   const { apiUrl, token, fetchImpl = fetch } = options;
   const base = toNonEmptyString(apiUrl);
-  if (!base || !toNonEmptyString(token)) return [];
+  if (!base) return { models: [], failure: { code: "NO_ENDPOINT" } };
+  if (!toNonEmptyString(token)) return { models: [], failure: { code: "NO_CREDENTIAL" } };
 
   try {
     const response = await fetchImpl(`${base.replace(/\/+$/, "")}/models`, {
@@ -412,10 +421,12 @@ export async function fetchGheCopilotModels(
       },
     });
 
-    if (!response.ok) return [];
+    if (!response.ok) return { models: [], failure: { status: response.status } };
     const data = await response.json();
-    return parseGheCopilotModels(data);
+    const models = parseGheCopilotModels(data);
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+    return { models };
   } catch {
-    return [];
+    return { models: [], failure: {} };
   }
 }

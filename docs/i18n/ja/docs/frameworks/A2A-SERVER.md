@@ -152,86 +152,90 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 利用可能なスキル
 
-OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に配線された 6 つの A2A スキルを公開しています。各スキルモジュールは `src/lib/a2a/skills/` ディレクトリに配置されています。
+OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に接続された 6 つの A2A スキルを公開しています。各スキルモジュールは `src/lib/a2a/skills/` にあります。
 
-| スキル                     | ID                   | 説明                                                                                                                                                  | タグ                       | 例                                                   |
-| :------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
-| スマートルーティング       | `smart-routing`      | OmniRoute のコンボエンジン + スコアリングを使用して、プロンプトを最適なプロバイダー/コンボ経由でルーティングします                                    | routing, providers         | "このプロンプトを最適なモデル経由でルーティングして" |
-| クォータ管理               | `quota-management`   | プロバイダーごとのクォータ状態を報告し、呼び出し元がスロットル/切り替えを行うタイミングを判断するのに役立ちます                                       | quota, providers           | "anthropic のクォータを確認して"                     |
-| プロバイダーディスカバリー | `provider-discovery` | 機能、無料枠フラグ、OAuth ステータスを含む、インストール済みプロバイダーを一覧表示します                                                              | providers, discovery       | "利用可能なプロバイダーは？"                         |
-| コスト分析                 | `cost-analysis`      | カタログと最近の使用状況をもとに、リクエスト/会話のコストを見積もります                                                                               | cost, usage                | "この会話のコストを見積もって"                       |
-| ヘルスレポート             | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウト状態を集約します                                                                    | health, resilience         | "すべてのプロバイダーのヘルスステータスを表示して"   |
-| ケイパビリティ一覧         | `list-capabilities`  | 45 エントリの Agent Skills カタログ全体（API 23 + CLI 21 + 設定 1）を、コンテキスト注入用の raw SKILL.md URL を含むマークダウンテーブルとして返します | catalog, discovery, skills | "OmniRoute のすべてのケイパビリティを一覧表示して"   |
+| スキル               | ID                   | 説明                                                                                                                                                          | タグ                       | 例                                                     |
+| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :----------------------------------------------------- |
+| スマートルーティング | `smart-routing`      | OmniRoute のコンボエンジンとスコアリングを使用して、プロンプトを最適なプロバイダーまたはコンボ経由でルーティングします                                        | routing, providers         | 「このプロンプトを最適なモデル経由でルーティングして」 |
+| クォータ管理         | `quota-management`   | プロバイダーごとのクォータ状態を報告し、呼び出し元がスロットリングまたは切り替えを行うタイミングを判断できるよう支援します                                    | quota, providers           | 「anthropic のクォータを確認して」                     |
+| プロバイダー検出     | `provider-discovery` | インストール済みプロバイダーを、機能、無料枠フラグ、OAuth ステータスとともに一覧表示します                                                                    | providers, discovery       | 「利用可能なプロバイダーは？」                         |
+| コスト分析           | `cost-analysis`      | カタログと最近の使用状況に基づいて、リクエストまたは会話のコストを見積もります                                                                                | cost, usage                | 「この会話のコストを見積もって」                       |
+| ヘルスレポート       | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウトの状態を集約します                                                                          | health, resilience         | 「すべてのプロバイダーのヘルスステータスを表示して」   |
+| 機能一覧             | `list-capabilities`  | コンテキスト注入用の SKILL.md の raw URL を含む、45 件すべての Agent Skills カタログ（API 23 件 + CLI 21 件 + config 1 件）を Markdown テーブルとして返します | catalog, discovery, skills | 「OmniRoute の機能をすべて一覧表示して」               |
 
-> Agent Card は、稼働中の 375 プロバイダーのカタログと常に整合させておく必要があります。プロバイダー数や無料/認証不要のメタデータは、ランタイムレジストリから取得されます。
+> Agent Card は、稼働中の 381 プロバイダーのカタログと常に整合させておく必要があります。プロバイダー数と無料／認証不要のメタデータは、ランタイムレジストリを情報源としています。
 
 ### `list-capabilities` スキルの詳細
 
-`list-capabilities` スキルは、API 呼び出しを送信する前に OmniRoute が公開している機能を把握する必要がある外部エージェントにとって特に便利です。このスキルは、構造化されたマークダウンテーブルのアーティファクトを返します:
+`list-capabilities` スキルは、API 呼び出しを送信する前に OmniRoute が公開している機能を検出する必要がある外部エージェントに特に役立ちます。このスキルは、構造化された Markdown テーブルアーティファクトを返します。
 
 ```
-| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
+| ID | 名前 | カテゴリ | 領域 | エンドポイント／コマンド | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | 認証とセッション | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-各行には `rawUrl` 列が含まれており、エージェントは完全な SKILL.md をすぐに取得できます。`metadata.totalSkills` フィールドはカタログのサイズ（現在は 45）を反映します。実装: `src/lib/a2a/skills/listCapabilities.ts`。詳細は [AGENT-SKILLS.md](./AGENT-SKILLS.md) も参照してください。
+各行には `rawUrl` 列が含まれているため、エージェントは完全な SKILL.md をすぐに取得できます。`metadata.totalSkills` フィールドはカタログのサイズ（現在は 45）と一致します。実装: `src/lib/a2a/skills/listCapabilities.ts`。[AGENT-SKILLS.md](./AGENT-SKILLS.md) も参照してください。
 
 ---
 
 ## REST API（補助）
 
-JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイントです。以下の REST エンドポイントは、ダッシュボードや外部ツール向けの補助的なアクセスを提供します。
+JSON-RPC エンドポイント `/a2a` が正式な A2A エントリーポイントです。以下の REST エンドポイントは、ダッシュボードや外部ツール向けの補助的なアクセスを提供します。
 
-| エンドポイント               | メソッド | 説明                                                            | 認証                                         |
-| :--------------------------- | :------- | :-------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET      | サーバーのステータス、登録済みスキル                            | （公開）                                     |
-| `/api/a2a/tasks`             | GET      | フィルターを使用してタスクを一覧表示                            | 管理用                                       |
-| `/api/a2a/tasks/[id]`        | GET      | ID でタスクを取得                                               | 管理用                                       |
-| `/api/a2a/tasks/[id]/cancel` | POST     | 実行中のタスクをキャンセル                                      | 管理用                                       |
-| `/.well-known/agent.json`    | GET      | Agent Card（A2A ディスカバリー）                                | （公開、3600s キャッシュ）                   |
-| `/api/a2a/tasks`             | POST     | OmniConductor フリートへのインバウンド委任（Conductor PRD RF5） | Bearer と `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Endpoint                     | Method | Description                                                     | Auth                                                                                    |
+| :--------------------------- | :----- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | サーバーの状態、登録済みスキル                                  | （公開）                                                                                |
+| `/api/a2a/tasks`             | GET    | フィルター付きでタスクを一覧表示                                | 管理用認証または API キー（下記参照）                                                   |
+| `/api/a2a/tasks/[id]`        | GET    | ID でタスクを取得                                               | 管理用認証または API キー（下記参照）                                                   |
+| `/api/a2a/tasks/[id]/cancel` | POST   | 実行中のタスクをキャンセル                                      | 管理用認証または API キー（下記参照）                                                   |
+| `/.well-known/agent.json`    | GET    | エージェントカード（A2A ディスカバリー）                        | （公開、3600 秒間キャッシュ）                                                           |
+| `/api/a2a/tasks`             | POST   | OmniConductor フリートへのインバウンド委任（Conductor PRD RF5） | `GET` と同じ。`REQUIRE_API_KEY` がオフの場合は `OMNIROUTE_API_KEY` も必要；`a2aEnabled` |
 
-**インバウンド Conductor 委任（`POST /api/a2a/tasks`）：** 外部の A2A エージェントは、OmniRoute を介してコーディング作業を OmniConductor フリートに委任します。本文：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 委任できるのは Conductor フリートのスキル（Agent Card で公開されているもの）のみです。フリートは git リポジトリ上で作業するため、`metadata.conductor.repo.url` は必須です。このルートは、サーバー側の `CONDUCTOR_ORCHESTRATOR_TOKEN`（フォールバックは `CONDUCTOR_HUB_TOKEN`）を使用して、ハブの `POST /v1/tasks` に変換し、`201 { conductor_task_id, state: "submitted" }` を返します。タスクの状態は SSE→A2A ミラー（RF1）を介して反映され、`GET /api/a2a/tasks?skill=conductor` で確認できます。
+`/api/a2a/tasks*` ルートを通過できるユーザーは、ログインおよび API キーの設定によって決まります。
 
----
+- `requireLogin=true`（デフォルト）の場合、ミドルウェアは管理用認証情報（ダッシュボードセッション、`manage` スコープの API キー、`oma_` アクセストークン）と `OMNIROUTE_API_KEY` のみを許可します。通常の推論キーでは `403` になります。`Authorization` ヘッダーでは、ミドルウェアは `OMNIROUTE_API_KEY` を `Bearer <key>` として指定した場合のみ受け付けます。キーのみを指定した場合や `Bearer` の後にタブを入れた場合は `401` になります。
+- `requireLogin=false`、またはオンボーディング前のループバックウィンドウの場合：`REQUIRE_API_KEY=true` では、有効な OmniRoute API キーまたは管理用認証情報が受け付けられ、匿名の呼び出し元は `401` になります。`REQUIRE_API_KEY` がオフの場合、ルートは公開されます。
+- `POST /api/a2a/tasks` では、`REQUIRE_API_KEY` がオフでその変数が設定されている場合、`Authorization` ヘッダーに `OMNIROUTE_API_KEY` も必要です。`x-api-key` などの他のヘッダーはここでは認証情報として扱われません。ログインがオフの場合、またはオンボーディング前は、`Bearer` プレフィックスの有無にかかわらずキーが受け付けられます。ログインがオンの場合、ミドルウェアを通過できるのは `Bearer <key>` の形式のみです。
+
+認証情報が必要な場合、`read` スコープの `oma_` トークンは `GET` に対してのみ機能します。
+
+**インバウンド Conductor 委任（`POST /api/a2a/tasks`）：** 外部の A2A エージェントは、OmniRoute を介して OmniConductor フリートにコーディング作業を委任します。本文：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 委任できるのは Conductor フリートのスキル（Agent Card で告知されているもの）のみです。`metadata.conductor.repo.url` は必須です（フリートは git リポジトリ上で作業します）。このルートは、サーバー側の `CONDUCTOR_ORCHESTRATOR_TOKEN`（フォールバックは `CONDUCTOR_HUB_TOKEN`）を使用してハブの `POST /v1/tasks` に変換し、`201 { conductor_task_id, state: "submitted" }` を返します。タスクの状態は SSE→A2A ミラー（RF1）経由で返され、`GET /api/a2a/tasks?skill=conductor` で確認できます。
 
 ## 新しいスキルの追加
 
-1. **スキルファイルを作成：** `src/lib/a2a/skills/<your-skill>.ts`
+1. **スキルファイルを作成:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` などの既存スキルの構成に従ってください。
+   `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` という非同期関数をエクスポートします。`smartRouting.ts` などの既存スキルの形式に従ってください。スキルが HTTP 経由で OmniRoute にコールバックする場合は、`src/lib/a2a/selfLoopAuth.ts` の `buildSelfLoopHeaders(caller)` を使用してヘッダーを構築し、`OMNIROUTE_API_KEY` ではなく A2A 呼び出し元のキーで呼び出しが実行されるようにします。また、リダイレクトによってキーが送信されないよう、`fetch` に `redirect: "error"` を渡してください。ヘルパーはヘッダーのみを構築するため、各スキルでリダイレクトポリシーを設定します。解決されたベース URL が、プライベートネットワーク外の平文の http（ループバック、コンテナまたはサービス名、プライベートアドレスは使用可能）である場合、または認証情報を含む場合、キーを付与する代わりに `UnsafeSelfLoopTargetError` をスローします。そのため、拒否された呼び出しを握りつぶすスキルでは、このエラーを再スローする必要があります。
 
-2. **ハンドラーを登録：** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
+2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` の `A2A_SKILL_HANDLERS` にエントリを追加します。
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...既存のスキル
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent Card で公開：** `src/app/.well-known/agent.json/route.ts` で、`skills` 配列に追加します。
+3. **Agent Card に公開:** `/.well-known/agent.json` および `/.well-known/agent-card.json` で共有される `src/lib/a2a/agentCardMetadata.ts` の `skills` 配列に追加します。
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "スキル名",
+     "description": "簡潔で意図に沿った説明",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["自然言語による呼び出しの例"]
    }
    ```
 
-4. **テストを作成：** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系をカバーします。
+4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系をカバーします。
 
-5. このファイルの `利用可能なスキル` テーブルに新しいスキルを**記載**します。
-
----
+5. このファイルの `Available Skills` テーブルに新しいスキルを**文書化**します。
 
 ## タスクの TTL
 

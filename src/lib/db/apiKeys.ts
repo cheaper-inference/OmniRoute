@@ -25,6 +25,7 @@ import { setNoLog } from "../compliance/noLog";
 import { resolveModelAlias } from "@omniroute/open-sse/services/modelDeprecation.ts";
 import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
+import { evaluateModelAccess } from "@/domain/modelAccessPolicy";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
 import {
   backfillApiKeySecretsAtRest,
@@ -44,7 +45,6 @@ import {
   addModelCandidate,
   addProviderAliasScopedCandidates,
   modelPatternMatches,
-  hasClaudeCodeWildcardPermission,
   matchesWildcardPattern,
 } from "./apiKeys/modelPermissions";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
@@ -68,6 +68,7 @@ import {
   parseChaosModeEnabled,
   parseCompressionEnabled,
   parseAllowAutoCombos,
+  parseAllowCcDiscoveryAliases,
   parseCatalogScope,
   parseForcedModel,
   parseModelAccessMode,
@@ -145,9 +146,11 @@ interface ApiKeyMetadata {
   usageLimitEnabled: boolean;
   dailyUsageLimitUsd: number | null;
   weeklyUsageLimitUsd: number | null;
+  fiveHourUsageLimitUsd: number | null;
   chaosModeEnabled: boolean;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
+  allowCcDiscoveryAliases: boolean;
   catalogScope: "all" | "combos" | "models";
   forcedModel: string | null;
 }
@@ -197,12 +200,16 @@ interface ApiKeyRow extends JsonRecord {
   dailyUsageLimitUsd?: unknown;
   weekly_usage_limit_usd?: unknown;
   weeklyUsageLimitUsd?: unknown;
+  five_hour_usage_limit_usd?: unknown;
+  fiveHourUsageLimitUsd?: unknown;
   chaos_mode_enabled?: unknown;
   chaosModeEnabled?: unknown;
   compression_enabled?: unknown;
   compressionEnabled?: unknown;
   allow_auto_combos?: unknown;
   allowAutoCombos?: unknown;
+  allow_cc_discovery_aliases?: unknown;
+  allowCcDiscoveryAliases?: unknown;
   catalog_scope?: unknown;
   catalogScope?: unknown;
   forced_model?: unknown;
@@ -257,11 +264,22 @@ interface ApiKeyView extends JsonRecord {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
+  allowCcDiscoveryAliases: boolean;
   catalogScope: "all" | "combos" | "models";
   forcedModel: string | null;
+}
+
+/**
+ * `bypassCache` reads the row from SQLite and leaves this process's cache (and the Redis
+ * copy) alone: nothing is read from it and nothing is written to it. For callers that
+ * must see a revoke made by another process (the cache is only cleared locally).
+ */
+export interface ApiKeyLookupOptions {
+  bypassCache?: boolean;
 }
 
 // LRU cache for API key validation (valid keys only)
@@ -493,7 +511,7 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
       "SELECT id, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key_hash = ?"
     );
     _stmtGetKeyMetadata = db.prepare<ApiKeyRow>(
-      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
+      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, five_hour_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, allow_cc_discovery_aliases, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
     );
     _stmtInsertKey = db.prepare(
       "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, preferred_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -520,6 +538,20 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
     insertKey: _stmtInsertKey,
     deleteKey: _stmtDeleteKey,
   };
+}
+
+/**
+ * Blank the secret of an SSO-provisioned shadow key before it leaves the DB
+ * layer. Its holder authenticates with an Entra token; the row's `key` is an
+ * internal implementation detail. Surfacing it would mint a permanent static
+ * credential that bypasses SSO — usable after the user is offboarded in Entra,
+ * and invisible to the group policy that is supposed to govern them.
+ */
+function redactSsoSecret(view: ApiKeyView): ApiKeyView {
+  if ((view as JsonRecord).source === "sso") {
+    (view as JsonRecord).key = "";
+  }
+  return view;
 }
 
 export async function getApiKeys(limit?: number, offset?: number) {
@@ -568,13 +600,16 @@ export async function getApiKeys(limit?: number, offset?: number) {
       (camelRow as JsonRecord).compressionEnabled
     );
     camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
+    camelRow.allowCcDiscoveryAliases = parseAllowCcDiscoveryAliases(
+      (camelRow as JsonRecord).allowCcDiscoveryAliases
+    );
     camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
     camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
     Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
     if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
       setNoLog(camelRow.id, camelRow.noLog === true);
     }
-    return camelRow;
+    return redactSsoSecret(camelRow);
   });
 }
 
@@ -677,10 +712,13 @@ export async function pickApiKeyForInternalUse(
   }
 }
 
-export async function getApiKeyById(id: string) {
+export async function getApiKeyById(id: string, options: { readOnly?: boolean } = {}) {
   const db = getDbInstance() as ApiKeysDbLike;
-  const stmt = getPreparedStatements(db);
-  const row = stmt.getKeyById.get(id);
+  // Import retries must not trigger the first-use legacy secret backfill (on any row).
+  // The import domain has already ensured the schema before entering its transaction.
+  const row = options.readOnly
+    ? db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?").get(id)
+    : getPreparedStatements(db).getKeyById.get(id);
   if (!row) return null;
   const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
   // Raw secret for the admin reveal route and by-id consumers; stored encrypted.
@@ -714,13 +752,16 @@ export async function getApiKeyById(id: string) {
     (camelRow as JsonRecord).compressionEnabled
   );
   camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
+  camelRow.allowCcDiscoveryAliases = parseAllowCcDiscoveryAliases(
+    (camelRow as JsonRecord).allowCcDiscoveryAliases
+  );
   camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
   camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
   Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
   if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
     setNoLog(camelRow.id, camelRow.noLog === true);
   }
-  return camelRow;
+  return redactSsoSecret(camelRow);
 }
 
 async function hashKey(key: string): Promise<string> {
@@ -851,6 +892,7 @@ export async function updateApiKeyPermissions(
     normalized.allowedQuotas !== undefined ||
     normalized.disableNonPublicModels !== undefined ||
     normalized.allowAutoCombos !== undefined ||
+    normalized.allowCcDiscoveryAliases !== undefined ||
     normalized.catalogScope !== undefined ||
     normalized.forcedModel !== undefined;
 
@@ -885,6 +927,7 @@ export async function updateApiKeyPermissions(
     normalized.chaosModeEnabled === undefined &&
     normalized.compressionEnabled === undefined &&
     normalized.allowAutoCombos === undefined &&
+    normalized.allowCcDiscoveryAliases === undefined &&
     normalized.catalogScope === undefined &&
     normalized.forcedModel === undefined &&
     !hasUsageLimitUpdate(normalized as Record<string, unknown>)
@@ -924,9 +967,11 @@ export async function updateApiKeyPermissions(
     usageLimitEnabled?: number;
     dailyUsageLimitUsd?: number | null;
     weeklyUsageLimitUsd?: number | null;
+    fiveHourUsageLimitUsd?: number | null;
     chaosModeEnabled?: number;
     compressionEnabled?: number;
     allowAutoCombos?: number;
+    allowCcDiscoveryAliases?: number;
     catalogScope?: string;
     forcedModel?: string | null;
   } = { id };
@@ -1054,6 +1099,11 @@ export async function updateApiKeyPermissions(
   if (normalized.allowAutoCombos !== undefined) {
     updates.push("allow_auto_combos = @allowAutoCombos");
     params.allowAutoCombos = normalized.allowAutoCombos ? 1 : 0;
+  }
+
+  if (normalized.allowCcDiscoveryAliases !== undefined) {
+    updates.push("allow_cc_discovery_aliases = @allowCcDiscoveryAliases");
+    params.allowCcDiscoveryAliases = normalized.allowCcDiscoveryAliases ? 1 : 0;
   }
 
   if (normalized.catalogScope !== undefined) {
@@ -1336,7 +1386,10 @@ export async function setApiKeyExpiry(id: string, expiresAt: string | null): Pro
  * effect within at most CACHE_TTL even without an explicit clear in the
  * caller.
  */
-export async function validateApiKey(key: string | null | undefined) {
+export async function validateApiKey(
+  key: string | null | undefined,
+  options: ApiKeyLookupOptions = {}
+) {
   if (!key || typeof key !== "string") return false;
 
   if (isConfiguredEnvApiKey(key) || isSelfLoopBearer(key)) return true;
@@ -1345,7 +1398,7 @@ export async function validateApiKey(key: string | null | undefined) {
   const hashedKey = await hashKey(key);
   const cacheKey = hashedKey;
 
-  const cached = _keyValidationCache.get(cacheKey);
+  const cached = options.bypassCache ? undefined : _keyValidationCache.get(cacheKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
     return cached.valid;
   }
@@ -1374,6 +1427,17 @@ export async function validateApiKey(key: string | null | undefined) {
   if (typeof expiresAt === "string" && expiresAt.trim() !== "") {
     const expiresMs = Date.parse(expiresAt);
     if (Number.isFinite(expiresMs) && expiresMs <= now) return false;
+  }
+
+  if (options.bypassCache) {
+    // last_used_at is bookkeeping: a write lock held by another process must not fail
+    // a check whose reads succeeded (the Live WS heartbeat would close a valid client).
+    try {
+      markApiKeyUsed(db, row.id, now);
+    } catch {
+      // retried on the next lookup: the throttle entry is only set after a write
+    }
+    return true;
   }
 
   evictIfNeeded(_keyValidationCache);
@@ -1413,7 +1477,8 @@ export async function validateApiKey(key: string | null | undefined) {
  * Get API key metadata with caching for performance
  */
 export async function getApiKeyMetadata(
-  key: string | null | undefined
+  key: string | null | undefined,
+  options: ApiKeyLookupOptions = {}
 ): Promise<ApiKeyMetadata | null> {
   if (!key || typeof key !== "string") return null;
 
@@ -1479,9 +1544,11 @@ export async function getApiKeyMetadata(
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       compressionEnabled: true,
       allowAutoCombos: true,
+      allowCcDiscoveryAliases: true,
       catalogScope: "all",
       forcedModel: null,
       ...selfLoopKeyOverrides(key),
@@ -1490,7 +1557,7 @@ export async function getApiKeyMetadata(
 
   // Check cache first
   const hashedKey = await hashKey(key);
-  const cached = _keyMetadataCache.get(hashedKey);
+  const cached = options.bypassCache ? undefined : _keyMetadataCache.get(hashedKey);
   if (cached && now - cached.timestamp < CACHE_TTL) {
     return cached.value;
   }
@@ -1581,6 +1648,10 @@ export async function getApiKeyMetadata(
     allowAutoCombos: parseAllowAutoCombos(
       (record as JsonRecord).allow_auto_combos ?? (record as JsonRecord).allowAutoCombos
     ),
+    allowCcDiscoveryAliases: parseAllowCcDiscoveryAliases(
+      (record as JsonRecord).allow_cc_discovery_aliases ??
+        (record as JsonRecord).allowCcDiscoveryAliases
+    ),
     catalogScope: parseCatalogScope(
       (record as JsonRecord).catalog_scope ?? (record as JsonRecord).catalogScope
     ),
@@ -1595,8 +1666,10 @@ export async function getApiKeyMetadata(
   setNoLog(metadata.id, metadata.noLog === true);
 
   // Cache the result
-  evictIfNeeded(_keyMetadataCache);
-  _keyMetadataCache.set(hashedKey, { value: metadata, timestamp: now });
+  if (!options.bypassCache) {
+    evictIfNeeded(_keyMetadataCache);
+    _keyMetadataCache.set(hashedKey, { value: metadata, timestamp: now });
+  }
 
   return metadata;
 }
@@ -1641,93 +1714,27 @@ export async function isModelAllowedForKey(
   // SECURITY: Key not found in database = deny access (invalid/non-existent key)
   if (!metadata) return false;
 
-  const { modelAccessMode, allowedModels, blockedModels, disableNonPublicModels } = metadata;
-  // Preserve requested aliases for allow-list matching while applying resolved
-  // target candidates to deny rules and group access checks.
-  const modelPermissionCandidates = Array.from(
-    new Set([
-      ...(await getModelPermissionCandidates(modelId)),
-      ...(resolvedModelId ? await getModelPermissionCandidates(resolvedModelId) : []),
-    ])
+  const decision = await evaluateModelAccess(
+    metadata,
+    { modelId, resolvedModelId },
+    {
+      getCandidates: getModelPermissionCandidates,
+      resolveAlias: resolveModelAlias,
+      getPublishedTarget: getPublishedModelLookupTarget,
+      findPublishedModel,
+      isPublishedModelHidden,
+      checkGroupAccess: checkKeyModelAccess,
+      isDeniedUnderCanonicalProvider,
+    }
   );
 
-  // Deny-list patterns win over any allow-list entry. This lets operators keep
-  // broad dynamic scopes like cc/* while excluding expensive families.
-  if (blockedModels?.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates))) {
-    return false;
-  }
-
-  // Check disableNonPublicModels flag
-  if (disableNonPublicModels) {
-    const effectiveModelId = resolvedModelId || resolveModelAlias(modelId) || modelId;
-    const publicationCandidates = resolvedModelId
-      ? await getModelPermissionCandidates(resolvedModelId)
-      : modelPermissionCandidates;
-
-    if (!hasClaudeCodeWildcardPermission(allowedModels, publicationCandidates)) {
-      const lookupTarget = await getPublishedModelLookupTarget(effectiveModelId);
-      const providerOrAlias = lookupTarget?.providerId || effectiveModelId.split("/")[0];
-      const shortModelId = lookupTarget?.modelId || effectiveModelId.split("/").slice(1).join("/");
-      if (!providerOrAlias || !shortModelId) return false;
-
-      const published = await findPublishedModel(providerOrAlias, shortModelId);
-      if (!published) return false;
-      const { providerId, publishedModelId } = published;
-
-      // An effort variant dispatches to its base model, so a deny rule on the
-      // base model must also deny the variant.
-      if (publishedModelId !== shortModelId && blockedModels?.length) {
-        const baseCandidates = await getModelPermissionCandidates(
-          `${providerId}/${publishedModelId}`
-        );
-        if (blockedModels.some((pattern) => modelPatternMatches(pattern, baseCandidates))) {
-          return false;
-        }
-      }
-
-      // A model hidden under the alias the client used stays hidden.
-      if (isPublishedModelHidden(providerId, providerOrAlias, publishedModelId)) return false;
-    }
-  }
-
-  // Only explicit allow-all permits an empty list; restricted + [] is deny-all.
-  // No early return here: group deny rules (checked below) must still apply to
-  // keys with an empty per-key allow-list (#8817 regression guard — groups only
-  // AND-deny, so restricted+[] stays deny-all).
-  // Support exact match and prefix match (e.g., "openai/*" allows all OpenAI models)
-  let allowed =
-    !allowedModels || allowedModels.length === 0
-      ? modelAccessMode !== "restricted"
-      : allowedModels.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates));
-
-  // Group rules must see the requested alias and the concrete target. An allowed
-  // alias cannot hide a resolved target denied by group policy.
-  if (metadata.id) {
-    for (const groupModelId of new Set([modelId, ...(resolvedModelId ? [resolvedModelId] : [])])) {
-      const hasGroupProviderPrefix = groupModelId.includes("/");
-      const groupProvider = hasGroupProviderPrefix ? groupModelId.split("/")[0] : undefined;
-      const groupModelTarget = hasGroupProviderPrefix
-        ? groupModelId.split("/").slice(1).join("/")
-        : groupModelId;
-      const targetOk = checkKeyModelAccess(metadata.id, groupModelTarget, groupProvider).allowed;
-      const fullOk = checkKeyModelAccess(metadata.id, groupModelId, groupProvider).allowed;
-      if (!targetOk || !fullOk) allowed = false;
-
-      if (
-        allowed &&
-        (await isDeniedUnderCanonicalProvider(metadata.id, groupProvider, groupModelTarget))
-      ) {
-        allowed = false;
-      }
-    }
-  }
-  // Cache the result
-  if (!usesSettingDependentClaudeRouting) {
+  // Preserve the cache boundary: early block/publication denials were never cached.
+  if (decision.reason === "permissions" && !usesSettingDependentClaudeRouting) {
     evictModelPermissionCache();
-    setCachedModelPermission(cacheKey, allowed, now, catalogGeneration);
+    setCachedModelPermission(cacheKey, decision.allowed, now, catalogGeneration);
   }
 
-  return allowed;
+  return decision.allowed;
 }
 
 /**

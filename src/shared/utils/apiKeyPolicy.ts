@@ -11,9 +11,9 @@
 import { extractApiKey } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
-import { getComboByName } from "@/lib/db/combos";
+import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
-import { resolveComboForModel } from "@/lib/db/modelComboMappings";
+import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
 import { checkBudget } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
@@ -24,6 +24,8 @@ import {
 } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { checkRateLimit, RateLimitRule } from "./rateLimiter";
 import {
   resolveCanonicalEndpointPath,
@@ -32,6 +34,7 @@ import {
 import { resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import { buildApiKeyUsageLimitPolicyRejection } from "@/lib/usage/apiKeyUsageLimits";
+import { buildTeamUsageLimitPolicyRejection } from "@/lib/usage/teamUsageLimits";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
@@ -106,6 +109,7 @@ export interface ApiKeyMetadata {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
@@ -224,17 +228,6 @@ export function isComboNameAllowedForKey(
   return allowedCombos.some((rule) => matchesComboAccessRule(comboName, comboName, rule));
 }
 
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-
-  try {
-    const url = new URL(request.url);
-    return url.pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
-}
-
 function policyErrorResponse(
   request: Request,
   statusCode: number,
@@ -264,16 +257,16 @@ function policyErrorResponse(
 }
 
 async function resolveRequestedComboName(modelStr: string): Promise<string | null> {
-  const exact = await getComboByName(modelStr);
+  const exact = await getCachedComboByName(modelStr);
   if (exact && typeof exact.name === "string") return exact.name;
 
   if (modelStr.startsWith("combo/")) {
     const withoutPrefix = modelStr.slice(6);
-    const prefixed = await getComboByName(withoutPrefix);
+    const prefixed = await getCachedComboByName(withoutPrefix);
     if (prefixed && typeof prefixed.name === "string") return prefixed.name;
   }
 
-  const mapped = await resolveComboForModel(modelStr);
+  const mapped = await getCachedComboForModel(modelStr);
   const mappedName = normalizeComboAccessName(mapped?.name);
   return mappedName;
 }
@@ -443,7 +436,12 @@ export interface ApiKeyPolicyResult {
   rejection: Response | null;
 }
 
+type PolicyValidationStage =
+  "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
+
 export interface EnforceApiKeyPolicyOptions {
+  /** Existing fal jobs do not dispatch inference. Authorization still applies after spend limits. */
+  existingFalJob?: boolean;
   /**
    * Where the metered dollar budget is enforced for this request.
    *
@@ -460,6 +458,8 @@ export interface EnforceApiKeyPolicyOptions {
    * entirely. Every other check on this path is unaffected.
    */
   meteredBudget?: "enforce" | "defer-to-candidate";
+  /** Test/diagnostic observer; it cannot alter policy outcomes. */
+  validationObserver?: (stage: PolicyValidationStage) => void;
 }
 
 /**
@@ -530,8 +530,8 @@ function validateKeyStatus(context: PolicyContext): Response | null {
   return null;
 }
 
-async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
-  const { request, apiKeyInfo } = context;
+function validateKeyAccessSchedule(context: PolicyContext): Response | null {
+  const { apiKeyInfo } = context;
   if (apiKeyInfo.accessSchedule?.enabled && !isWithinSchedule(apiKeyInfo.accessSchedule)) {
     const { from, until, tz } = apiKeyInfo.accessSchedule;
     return errorResponse(
@@ -539,6 +539,13 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       `Access denied outside allowed hours (${from}–${until} ${tz})`
     );
   }
+  return null;
+}
+
+async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
+  const { request, apiKeyInfo } = context;
+  const schedule = validateKeyAccessSchedule(context);
+  if (schedule) return schedule;
   if (apiKeyInfo.usageLimitEnabled !== true) return null;
 
   try {
@@ -547,11 +554,21 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       usageLimitEnabled: apiKeyInfo.usageLimitEnabled,
       dailyUsageLimitUsd: apiKeyInfo.dailyUsageLimitUsd,
       weeklyUsageLimitUsd: apiKeyInfo.weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd: apiKeyInfo.fiveHourUsageLimitUsd,
     });
     return rejection;
   } catch (error) {
     log.error("API_POLICY", "API key USD usage limit check failed. Request blocked.", { error });
     return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key usage limit unavailable");
+  }
+}
+
+async function validateTeamUsage(context: PolicyContext): Promise<Response | null> {
+  try {
+    return await buildTeamUsageLimitPolicyRejection(context.request, context.apiKeyInfo.id);
+  } catch (error) {
+    log.error("API_POLICY", "Team shared usage limit check failed. Request blocked.", { error });
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Team usage limit unavailable");
   }
 }
 
@@ -865,6 +882,33 @@ function extractUngatedClientApiKey(request: Request): string | null {
 }
 
 /**
+ * Resolve an SSO-authenticated request onto its shadow API key, using the
+ * subject the auth layer already verified and stamped. The stamps are
+ * trustworthy because the pipeline strips any client-supplied copy before
+ * classification (src/server/authz/pipeline.ts).
+ *
+ * MUST be consulted before extractApiKey()/extractUngatedClientApiKey(): Claude
+ * Code sends an apiKeyHelper credential in BOTH `Authorization: Bearer` and
+ * `x-api-key`, so both extractors would return the raw Entra JWT, which hashes
+ * to no key and silently drops the user's entire policy — the same
+ * auth-vs-policy divergence as GHSA-2phc-xp22-9f56 above.
+ */
+function resolveSsoApiKeySecret(request: Request): string | null {
+  const kind = request.headers.get(AUTHZ_HEADER_AUTH_KIND);
+  if (kind !== "sso_user") return null;
+
+  const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID);
+  if (!oid || !oid.trim()) return null;
+
+  try {
+    return getSsoShadowSecret(oid.trim());
+  } catch (error) {
+    log.error("API_POLICY", "Failed to resolve SSO shadow key", { error });
+    return null;
+  }
+}
+
+/**
  * The API key the policy layer evaluates for a request. The credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
  * not hide that key's policy); then a real bearer key; then a bare
@@ -873,6 +917,9 @@ function extractUngatedClientApiKey(request: Request): string | null {
  * policy by id (resolved server-side, secret never sent).
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
+  const ssoSecret = resolveSsoApiKeySecret(request);
+  if (ssoSecret) return ssoSecret;
   const resolved = await resolveClientApiKey(request);
   return (
     (resolved.valid ? resolved.apiKey : null) ||
@@ -969,6 +1016,28 @@ function unresolvedScopedKeyRejection(selfLoopScope: SelfLoopScope): Response | 
 }
 
 /**
+ * Endpoint, Team usage, quota and model access checks, in this fixed order (endpoint
+ * authorization must precede any Team budget lookup). The first rejection wins.
+ */
+async function runAccessValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const stages: Array<[PolicyValidationStage, () => Response | null | Promise<Response | null>]> = [
+    ["validateEndpointAccess", () => validateEndpointAccess(context)],
+    ["validateTeamUsage", () => validateTeamUsage(context)],
+    ["validateQuotaAccess", () => validateQuotaAccess(context)],
+    ["validateModelAccess", () => validateModelAccess(context)],
+  ];
+  for (const [stage, validate] of stages) {
+    options?.validationObserver?.(stage);
+    const rejection = await validate();
+    if (rejection) return rejection;
+  }
+  return null;
+}
+
+/**
  * Internal sub-request of a parent request that already passed the full policy
  * (schedule, budget, limits): re-check authorization only, so the key's
  * allowances are not charged twice.
@@ -977,6 +1046,26 @@ async function validateSelfLoopScopedAccess(
   context: Parameters<typeof validateQuotaAccess>[0]
 ): Promise<Response | null> {
   return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
+}
+
+function isFalReceiptRead(request: Request, options?: EnforceApiKeyPolicyOptions): boolean {
+  const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
+  return (
+    options?.existingFalJob === true &&
+    ((["GET", "DELETE"].includes(request.method) &&
+      /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)) ||
+      (request.method === "POST" &&
+        canonicalPath === "/v1/fal/run" &&
+        request.headers.has("idempotency-key")))
+  );
+}
+async function validateFalReceiptPolicy(context: PolicyContext) {
+  return (
+    validateKeyAccessSchedule(context) ??
+    validateEndpointAccess(context) ??
+    (await validateQuotaAccess(context)) ??
+    (await validateModelAccess(context))
+  );
 }
 
 export async function enforceApiKeyPolicy(
@@ -1016,18 +1105,17 @@ export async function enforceApiKeyPolicy(
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
+  if (isFalReceiptRead(request, options)) {
+    // Receipt lookup cannot dispatch; the run route reapplies full policy for new inference.
+    return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
+  }
   if (selfLoopScope.key) {
     return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
-  const endpointRejection = validateEndpointAccess(context);
-  if (endpointRejection) return { apiKey, apiKeyInfo, rejection: endpointRejection };
-
-  const quotaRejection = await validateQuotaAccess(context);
-  if (quotaRejection) return { apiKey, apiKeyInfo, rejection: quotaRejection };
-  const modelRejection = await validateModelAccess(context);
-  if (modelRejection) return { apiKey, apiKeyInfo, rejection: modelRejection };
+  const accessRejection = await runAccessValidators(context, options);
+  if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
   if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };

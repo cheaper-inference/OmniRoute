@@ -14,6 +14,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
+const { getCallLogs, waitForCallLogSaves, closeCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
 const { STREAM_RECOVERY } = await import("../../open-sse/config/constants.ts");
 
 const ENV_KEYS = ["STREAM_RECOVERY_ENABLED", "STREAM_RECOVERY_MIDSTREAM_ENABLED"] as const;
@@ -35,12 +37,13 @@ before(() => {
   process.env.STREAM_RECOVERY_MIDSTREAM_ENABLED = "true";
 });
 
-after(() => {
+after(async () => {
   globalThis.fetch = originalFetch;
   for (const key of ENV_KEYS) {
     if (originalEnv[key] === undefined) delete process.env[key];
     else process.env[key] = originalEnv[key];
   }
+  await closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -120,4 +123,94 @@ test("handleChatCore routes continuation logs through buildContinuationLogHooks"
     ),
     info.filter((l) => l.startsWith("STREAM_RECOVERY")).join(" | ")
   );
+  assert.equal(await waitForCallLogSaves(20_000), true);
+  const rows = await getCallLogs({ correlationId: "req-wiring-1", limit: 20 });
+  assert.equal(
+    rows.length,
+    3,
+    "composite continuation retains both physical sends plus the logical outcome"
+  );
+  const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.equal(logical?.upstreamHttp?.send, null);
+  assert.equal(logical?.upstreamHttp?.total, 2);
+});
+
+async function coreStream(correlationId: string) {
+  const body = {
+    model: "gpt-4o-mini",
+    stream: true,
+    messages: [{ role: "user", content: "hello" }],
+  };
+  const result = await handleChatCore({
+    body,
+    modelInfo: { provider: "openai", model: "gpt-4o-mini", extendedContext: false },
+    credentials: { apiKey: "fixture" },
+    clientRawRequest: {
+      endpoint: "/v1/chat/completions",
+      body,
+      headers: new Headers({ accept: "text/event-stream" }),
+    },
+    userAgent: "unit-test",
+    isCombo: false,
+    correlationId,
+    log: { info() {}, error() {}, warn() {}, debug() {} },
+  } as unknown as Parameters<typeof handleChatCore>[0]);
+  return (result as { response: Response }).response;
+}
+
+test("accepted early replacement selects its own send through actual stream finalization", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    const body =
+      calls === 1
+        ? new ReadableStream<Uint8Array>({
+            pull(controller) {
+              controller.error(new Error("socket hang up"));
+            },
+          })
+        : new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(enc.encode(chunk("recovered") + "data: [DONE]\n\n"));
+              controller.close();
+            },
+          });
+    return new Response(body, { headers: { "content-type": "text/event-stream" } });
+  }) as typeof fetch;
+  const response = await coreStream("selected-early-replacement");
+  assert.match(await response.text(), /recovered/);
+  assert.equal(await waitForCallLogSaves(20_000), true);
+  const rows = await getCallLogs({ correlationId: "selected-early-replacement", limit: 20 });
+  const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.equal(calls, 2);
+  assert.equal(rows.length, 2);
+  assert.equal(logical?.upstreamHttp?.send?.ordinal, 2);
+  assert.equal(logical?.status, 200);
+});
+
+test("rejected replacements preserve the original selected upstream200 on terminal stream failure", async () => {
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    if (calls > 1)
+      return Response.json({ error: { message: "replacement rejected" } }, { status: 503 });
+    return new Response(
+      new ReadableStream<Uint8Array>({
+        pull(controller) {
+          controller.error(new Error("socket hang up"));
+        },
+      }),
+      { headers: { "content-type": "text/event-stream" } }
+    );
+  }) as typeof fetch;
+  const response = await coreStream("selected-rejected-replacement");
+  await response.text().catch(() => "");
+  assert.equal(await waitForCallLogSaves(20_000), true);
+  const rows = await getCallLogs({ correlationId: "selected-rejected-replacement", limit: 20 });
+  const logical = rows.find((row) => row.requestType !== "upstream_http_attempt");
+  assert.ok(calls > 1);
+  assert.equal(rows.length, calls);
+  assert.equal(logical?.upstreamHttp?.send?.ordinal, 1);
+  assert.equal(logical?.upstreamHttp?.send?.status, 200);
+  assert.ok(Number(logical?.status) >= 400);
 });

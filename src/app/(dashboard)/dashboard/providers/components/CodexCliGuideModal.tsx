@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -170,8 +171,8 @@ export default function CodexCliGuideModal({ isOpen, onClose }: CodexCliGuideMod
     <Modal isOpen={isOpen} title={text("codexCliGuideTitle", "Codex CLI Guide")} onClose={onClose}>
       <div className="max-h-[70vh] overflow-y-auto pr-1">
         {loading && (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <Icon name="sync" size={28} className="animate-spin text-text-muted/50" />
+          <div role="status" className="flex flex-col items-center justify-center py-16 gap-3">
+            <Spinner decorative size="md" className="text-text-muted/50" />
             <p className="text-sm text-text-muted">
               {text("codexCliGuideLoading", "Loading guide...")}
             </p>

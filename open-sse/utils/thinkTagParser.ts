@@ -117,6 +117,13 @@ export function extractThinkTags(text) {
   };
 }
 
+function consumeSafeTagPrefix(ctx: { buffer: string }, tag: string): string {
+  if (ctx.buffer.length <= tag.length) return "";
+  const safe = ctx.buffer.slice(0, -(tag.length - 1));
+  ctx.buffer = ctx.buffer.slice(-(tag.length - 1));
+  return safe;
+}
+
 /**
  * Process a streaming delta chunk and extract think content.
  * Maintains state across chunks using a context object.
@@ -138,11 +145,7 @@ export function processStreamingThinkDelta(delta, ctx) {
       const closeIdx = ctx.buffer.indexOf(THINK_CLOSE);
       if (closeIdx === -1) {
         // Might be a partial tag at the end — keep last few chars
-        if (ctx.buffer.length > THINK_CLOSE.length) {
-          const safe = ctx.buffer.slice(0, -(THINK_CLOSE.length - 1));
-          reasoningDelta += safe;
-          ctx.buffer = ctx.buffer.slice(-(THINK_CLOSE.length - 1));
-        }
+        reasoningDelta += consumeSafeTagPrefix(ctx, THINK_CLOSE);
         break;
       }
       reasoningDelta += ctx.buffer.slice(0, closeIdx);
@@ -153,11 +156,7 @@ export function processStreamingThinkDelta(delta, ctx) {
       const openIdx = ctx.buffer.indexOf(THINK_OPEN);
       if (openIdx === -1) {
         // Might be a partial tag at the end
-        if (ctx.buffer.length > THINK_OPEN.length) {
-          const safe = ctx.buffer.slice(0, -(THINK_OPEN.length - 1));
-          contentDelta += safe;
-          ctx.buffer = ctx.buffer.slice(-(THINK_OPEN.length - 1));
-        }
+        contentDelta += consumeSafeTagPrefix(ctx, THINK_OPEN);
         break;
       }
       contentDelta += ctx.buffer.slice(0, openIdx);

@@ -31,10 +31,12 @@ test("providers page mounts the leftover banner", () => {
 });
 
 // KEA-7886 (lote 2b): the kit migration (SectionHeader / Modal / EmptyState) shrank the page
-// from 2020 to 2010 lines. Further reductions are valid; growth past that cap is not.
-test("providers page does not regrow past the 2010-line cap", () => {
+// from 2020 to 2010 lines; the freeze is re-pinned at the measured size.
+// KEA-7886 P8 (#18144): section-header dots moved to <CategoryDot category=…>, shrinking it
+// again from 2010 to 1989 lines; re-pinned at the measured size.
+test("providers page stays frozen at 1989 lines", () => {
   const lines = fs.readFileSync(pagePath, "utf8").split("\n").length;
-  assert.ok(lines <= 2010, `providers page grew to ${lines} lines (cap: 2010)`);
+  assert.equal(lines, 1989);
 });
 
 test("purge surfaces notify.error when POST is not ok", () => {

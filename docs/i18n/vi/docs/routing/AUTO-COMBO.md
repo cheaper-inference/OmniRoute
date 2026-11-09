@@ -129,6 +129,27 @@ Tính điểm tự động chọn nhà cung cấp/mô hình tốt nhất cho m�
 | `src/sse/handlers/chat.ts`                                | Tích hợp: xử lý tắt sớm đối với tiền tố tự động |
 | `src/shared/constants/providers.ts`                       | Mục hệ thống `SYSTEM_PROVIDERS.auto`            |
 
+## Tùy chọn tài khoản cho các combo tự động đã lưu
+
+Trình chỉnh sửa Tự động thông minh cung cấp một tùy chọn** Tùy chọn tài khoản** phần. Mỗi kết nối có thể là Ưu tiên, Bình thường (mặc định), Dự trữ hoặc Bị loại trừ. Nhiều kết nối có thể chia sẻ một tầng. Tự động chọn trong cấp đủ điều kiện đầu tiên, duy trì hành vi scoring/router ở đó; những lần thử thất bại sẽ chuyển sang các tài khoản cụ thể còn lại, được ưu tiên trước bình thường trước khi dự trữ. Các kết nối bị loại trừ không bao giờ được sử dụng bởi combo này.
+
+Cài đặt được lưu dưới dạng `config.accountPreferences`, được khóa bằng kết nối ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Bản đồ bị bỏ qua hoặc trống sẽ giữ lại định tuyến hiện có. Tùy chọn không bật các kết nối bị vô hiệu hóa, cấp quyền truy cập khóa API, khôi phục các ứng viên bị chặn hạn ngạch hoặc bỏ qua việc kiểm tra ngân sách. Mỗi lần thử bị giới hạn ở kết nối cụ thể, do đó, dự phòng tài khoản không thể nhảy các cấp phía sau bộ định tuyến kết hợp. Mối quan hệ phiên hiện tại có thể giữ lại một tài khoản đủ điều kiện; loại trừ tài khoản bị ràng buộc với lượt gốc sẽ dừng lượt đó thay vì âm thầm thay đổi tài khoản.
+
+Tùy chọn được định cấu hình sử dụng Đường dẫn tự động nhận biết tài khoản: bộ đệm ngữ cảnh không liên kết, đường dẫn thông minh, hỗn loạn và các phím tắt bóng không được gửi đi. Phòng ngừa rủi ro đầu cơ bị vô hiệu hóa đối với những yêu cầu này nên các tài khoản dự trữ không thể chạy đua với những yêu cầu ưu tiên. Các chiến lược kết hợp khác không giải thích được cài đặt này. Việc thay đổi kết hợp khỏi Tự động sẽ giữ lại các tùy chọn đã lưu để chuyển trở lại sau này.
+
 ## Tên combo trùng với ID mô hình thực
 
 Một combo có `name` giống hệt một ID mô hình thuần túy (ví dụ: combo có tên
@@ -279,69 +300,53 @@ giá trị đã phân giải được truyền vào các đầu vào `config.mod
 `config.budgetFallback` hiện có của engine. `config.budgetFallback` được lưu trữ của một combo ("strict" |
 "cheapest") thiết lập chính sách lâu dài; header sẽ ghi đè chính sách đó cho một yêu cầu duy nhất.
 
-## Tất cả chiến lược định tuyến
+## Tất cả các chiến lược định tuyến
 
-Công cụ combo của OmniRoute hỗ trợ **20 chiến lược định tuyến** (được khai báo trong `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Bản thân công cụ Auto Combo được cung cấp dưới chiến lược `auto`; các chiến lược còn lại khả dụng cho các combo đã được lưu.
+Hỗ trợ công cụ kết hợp của OmniRoute** 20 chiến lược định tuyến** (được khai báo trong `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Bản thân công cụ Auto Combo được hiển thị theo chiến lược `auto` ; những cái khác có sẵn cho các combo liên tục.
 
-| Chiến lược          | Mô tả                                                                                                                                                                                                                 |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Danh sách có thứ tự ưu tiên mục tiêu đầu tiên, với mức ưu tiên được chỉ định rõ ràng                                                                                                                                  |
-| `weighted`          | Chọn ngẫu nhiên có trọng số theo trọng số của từng mục tiêu                                                                                                                                                           |
-| `round-robin`       | Luân phiên qua các mục tiêu theo thứ tự (theo lô; xem bên dưới)                                                                                                                                                       |
-| `context-relay`     | Chuyển tiếp ngữ cảnh giữa các mục tiêu (các cuộc hội thoại dài)                                                                                                                                                       |
-| `fill-first`        | Dùng hết hạn ngạch của từng mục tiêu trước khi chuyển sang mục tiêu tiếp theo                                                                                                                                         |
-| `p2c`               | Cân bằng tải ngẫu nhiên theo phương pháp chọn 2 phương án                                                                                                                                                             |
-| `random`            | Chọn ngẫu nhiên đồng đều                                                                                                                                                                                              |
-| `least-used`        | Chọn mục tiêu có tải hiện tại thấp nhất                                                                                                                                                                               |
-| `cost-optimized`    | Giảm thiểu chi phí $ cho mỗi yêu cầu dựa trên giá trong danh mục                                                                                                                                                      |
-| `reset-aware` ⭐    | Ưu tiên theo thời điểm đặt lại hạn ngạch — các cửa sổ đặt lại ngắn được xếp hạng cao hơn                                                                                                                              |
-| `reset-window`      | Ưu tiên các mục tiêu có cửa sổ hạn ngạch sắp được đặt lại nhất                                                                                                                                                        |
-| `headroom`          | Chọn mục tiêu có phần hạn ngạch còn lại lớn nhất                                                                                                                                                                      |
-| `quota-weighted`    | Bỏ qua các tài khoản đã hết hạn ngạch, sau đó chọn trong số còn lại theo tỷ lệ hạn ngạch còn lại chia cho tải đang xử lý; các cuộc hội thoại hiện có vẫn được ghim                                                    |
-| `strict-random`     | Chọn ngẫu nhiên mà không loại bỏ các lần lặp                                                                                                                                                                          |
-| `auto`              | Sử dụng cách tính điểm Auto Combo (16 yếu tố) — **khuyến nghị**                                                                                                                                                       |
-| `lkgp`              | Tuyến hoạt động tốt gần nhất (ghim vào nhà cung cấp thành công gần nhất, sau đó dự phòng theo các quy tắc)                                                                                                            |
-| `context-optimized` | Chọn mục tiêu phù hợp nhất với kích thước ngữ cảnh hiện tại                                                                                                                                                           |
-| `cache-optimized`   | Sắp xếp lại các mục tiêu theo mức độ phù hợp với bộ nhớ đệm prompt — kết nối có khả năng cao nhất đã lưu tiền tố được đệm của yêu cầu này sẽ được thử trước (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Gửi đồng thời đến một nhóm mô hình, sau đó tổng hợp thành một câu trả lời thông qua mô hình phân xử (xem bên dưới)                                                                                                    |
-| `pipeline`          | Chạy tuần tự các mục tiêu, truyền đầu ra của mỗi bước vào đầu vào của bước tiếp theo; chỉ trả về câu trả lời cuối cùng (#6396)                                                                                        |
+| Chiến lược          | Sự miêu tả                                                                                                                                                                                                                         |
+| :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Danh sách đặt hàng mục tiêu đầu tiên với mức độ ưu tiên rõ ràng                                                                                                                                                                    |
+| `weighted`          | Trọng số ngẫu nhiên theo trọng lượng mỗi mục tiêu                                                                                                                                                                                  |
+| `round-robin`       | Duyệt qua các mục tiêu theo thứ tự (theo đợt; xem bên dưới)                                                                                                                                                                        |
+| `context-relay`     | Phân bổ bối cảnh cho các mục tiêu (cuộc trò chuyện dài)                                                                                                                                                                            |
+| `fill-first`        | Điền vào hạn ngạch của từng mục tiêu trước khi chuyển sang mục tiêu tiếp theo                                                                                                                                                      |
+| `p2c`               | cân bằng tải ngẫu nhiên Power-of-2-choices                                                                                                                                                                                         |
+| `random`            | Lựa chọn ngẫu nhiên thống nhất                                                                                                                                                                                                     |
+| `least-used`        | Chọn mục tiêu có tải hiện tại thấp nhất                                                                                                                                                                                            |
+| `cost-optimized`    | Giảm thiểu $ cho mỗi yêu cầu theo giá danh mục                                                                                                                                                                                     |
+| `reset-aware` ⭐    | Ưu tiên theo thời gian đặt lại hạn ngạch — cửa sổ đặt lại ngắn được xếp hạng cao hơn                                                                                                                                               |
+| `reset-window`      | Ưu tiên các mục tiêu có thời hạn hạn ngạch được đặt lại sớm nhất                                                                                                                                                                   |
+| `headroom`          | Chọn mục tiêu có khoảng trống hạn ngạch còn lại nhiều nhất                                                                                                                                                                         |
+| `quota-weighted`    | Bỏ qua các tài khoản đã cạn kiệt, sau đó chọn trong số những tài khoản còn lại theo tỷ lệ hạn ngạch còn lại chia cho tải trong chuyến bay; các cuộc trò chuyện hiện có vẫn được ghim                                               |
+| `strict-random`     | Ngẫu nhiên mà không trùng lặp lặp lại                                                                                                                                                                                              |
+| `auto`              | Sử dụng tính điểm Tự động kết hợp (16 yếu tố) —** khuyến khích**                                                                                                                                                                   |
+| `lkgp`              | Đường dẫn tốt được biết đến lần cuối (ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại các quy tắc)                                                                                                                     |
+| `context-optimized` | Chọn mục tiêu phù hợp nhất với kích thước bối cảnh hiện tại                                                                                                                                                                        |
+| `cache-optimized`   | Sắp xếp lại các mục tiêu theo mối quan hệ bộ nhớ đệm nhắc nhở — kết nối có khả năng giữ tiền tố được lưu trong bộ nhớ cache của yêu cầu này cao nhất được thử trước tiên (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Phân phát song song một nhóm người mẫu, sau đó tổng hợp một câu trả lời thông qua giám khảo (xem bên dưới)                                                                                                                         |
+| `pipeline`          | Chạy các mục tiêu một cách tuần tự, xâu chuỗi đầu ra của từng bước thành đầu vào của bước tiếp theo; chỉ có câu trả lời cuối cùng được trả lại (#6396)                                                                             |
 
 ⭐ = Mới trong v3.8.0 · 🧬 = Mới trong v3.8.36
 
-### Ngữ nghĩa của `weighted`
+### ngữ nghĩa `weighted`
 
-`weighted` là một **phép chọn ngẫu nhiên theo tỷ lệ cho mỗi yêu cầu**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), không phải cơ chế cân bằng:
+`weighted` là một** rút ngẫu nhiên theo tỷ lệ theo yêu cầu** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), không phải bộ cân bằng:
 
-- Mỗi yêu cầu chọn **một** bước với xác suất `weight / totalWeight`; các bước còn lại
-  được sắp xếp theo trọng số giảm dần để làm chuỗi dự phòng cho yêu cầu đó.
-- Một bước có trọng số là `0` (hoặc không được chỉ định) sẽ **không bao giờ được chọn** khi bất kỳ bước nào khác có
-  trọng số > 0 — bước đó chỉ có thể đóng vai trò dự phòng sau khi bước được chọn thất bại. Chỉ khi **tất cả**
-  trọng số đều bằng 0 thì việc lựa chọn mới trở thành đồng đều.
-- Các bước có toàn bộ mục tiêu không khả dụng — bộ ngắt mạch của nhà cung cấp ở trạng thái `OPEN`, kết nối
-  đang trong thời gian chờ, mô hình bị khóa — sẽ bị loại khỏi phép chọn trước khi phép chọn diễn ra
-  (`open-sse/services/combo/targetResolution.ts`), vì vậy một bước khỏe mạnh duy nhất có thể tạm thời
-  được chọn cho mọi yêu cầu.
-- `stickyWeightedLimit` (cấu hình combo, mặc định `1` = tắt) ghim bước được chọn trong số lượng
-  lần thành công liên tiếp tương ứng trước khi chọn lại.
+- Mỗi yêu cầu rút ra** một** bước có xác suất `weight / totalWeight`; các bước còn lại được sắp xếp theo trọng số giảm dần làm chuỗi dự phòng cho yêu cầu đó.
+- Một bước có trọng số là `0` (hoặc thiếu) là** không bao giờ vẽ** trong khi bất kỳ bước nào khác có trọng số > 0 — thì nó chỉ có thể đóng vai trò dự phòng sau khi bước rút ra không thành công. Chỉ khi** tất cả** trọng số là 0 thì việc lựa chọn có trở nên thống nhất hay không.
+- Các bước có mục tiêu là tất cả các bước không có sẵn của nhà cung cấp — ngắt mạch `OPEN`, thời gian hồi chiêu kết nối, khóa mô hình — đều bị xóa khỏi lượt rút thăm trước khi nó xảy ra (`open-sse/services/combo/targetResolution.ts`), vì vậy, một bước lành mạnh có thể tạm thời giành được mọi yêu cầu.
+- `stickyWeightedLimit` (cấu hình kết hợp, tắt `1` = mặc định) ghim bước đã vẽ để đạt được nhiều thành công liên tiếp trước khi vẽ lại.
 
-Để xoay vòng nghiêm ngặt, hãy dùng `round-robin`; trọng số bằng nhau với `weighted` chỉ mang lại sự cân bằng theo thống kê — không phải
-nghiêm ngặt.
+Để xoay vòng nghiêm ngặt, hãy sử dụng `round-robin`; trọng số bằng nhau trên `weighted` cho — thống kê không cân bằng — nghiêm ngặt.
 
-### Chế độ pipeline tác tử
+### Chế độ đường ống đại lý
 
-Một combo `pipeline` có ít nhất hai mô hình có thể chọn sử dụng định tuyến bộ lập kế hoạch/bộ thực thi bằng
-`config.agenticOrchestration.enabled`. Mục tiêu đầu tiên đảm nhiệm việc lập kế hoạch và câu trả lời cuối cùng;
-mục tiêu thứ hai phát ra các lệnh gọi công cụ nguyên bản của máy khách. OmniRoute phát hiện các lượt tiếp nối
-chứa kết quả công cụ từ giao thức yêu cầu, hỏi bộ lập kế hoạch xem có cần thêm một vòng công cụ hay không
-và tự động chọn bộ thực thi hoặc bộ lập kế hoạch làm bước cuối cùng hướng tới máy khách.
+Một tổ hợp `pipeline` có ít nhất hai mô hình có thể chọn tham gia định tuyến planner/executor bằng `config.agenticOrchestration.enabled`. Mục tiêu đầu tiên sở hữu kế hoạch và câu trả lời cuối cùng; mục tiêu thứ hai phát ra các lệnh gọi công cụ gốc của máy khách. OmniRoute phát hiện các phần tiếp theo của kết quả công cụ từ giao thức yêu cầu, hỏi người lập kế hoạch xem có cần một vòng công cụ khác hay không và tự động chuyển người thực thi hoặc người lập kế hoạch thành bước cuối cùng đối mặt với khách hàng.
 
-Các mô hình bổ sung sau mục tiêu thứ hai được sắp xếp làm phương án dự phòng cho bộ thực thi. Một phản hồi
-HTTP thất bại hoặc ngoại lệ truyền tải sẽ chuyển sang bộ thực thi tiếp theo, giữ nguyên
-quyết định của bộ lập kế hoạch và các công cụ nguyên bản nhưng sử dụng prompt bước riêng và
-kết nối đã phân giải của bộ thực thi đó. Phản hồi thành công đầu tiên được trả về không thay đổi, bao gồm cả
-luồng SSE; không thể thử lại tại đây nếu lỗi xảy ra sau khi luồng thành công đã bắt đầu.
-Nếu tất cả bộ thực thi đều thất bại, lỗi cuối cùng sẽ được trả về. Việc máy khách hủy yêu cầu sẽ dừng điều phối.
+Khi tiếp tục kết quả công cụ, OmniRoute cũng dừng thực thi khi hai vòng hoàn thành liên tiếp lặp lại cùng một lệnh gọi công cụ với kết quả không thay đổi hoặc khi mọi kết quả được đánh dấu rõ ràng trong hai vòng liên tiếp đều không thành công. Kết quả đã thay đổi cho phép các cuộc gọi lặp lại (ví dụ: bỏ phiếu). Trình bảo vệ đặt lại theo yêu cầu mới của người dùng, nhóm các cuộc gọi song song thành một vòng và hỗ trợ lịch sử Anthropic, Hoàn thành trò chuyện, Phản hồi và Gemini. Người lập kế hoạch nhận được lý do và có câu trả lời cuối cùng ngay cả khi yêu cầu một vòng công cụ khác.
+
+Các mô hình bổ sung sau mục tiêu thứ hai được yêu cầu sao lưu người thực thi. Phản hồi HTTP không thành công hoặc ngoại lệ vận chuyển sẽ chuyển sang người thực thi tiếp theo, mang theo cùng một quyết định của người lập kế hoạch và các công cụ gốc nhưng lời nhắc bước của chính người thực thi đó và giải quyết kết nối. Phản hồi thành công đầu tiên được trả về không thay đổi, bao gồm cả phát trực tuyến SSE ; không thể thử lại lỗi sau khi bắt đầu phát trực tiếp thành công tại đây. Nếu tất cả người thi hành đều thất bại, lỗi cuối cùng sẽ được trả về. Khách hàng hủy bỏ việc dừng gửi đi.
 
 ```json
 {
@@ -353,35 +358,17 @@ Nếu tất cả bộ thực thi đều thất bại, lỗi cuối cùng sẽ đ
 }
 ```
 
-Bộ thực thi có thể phát ra nhiều lệnh gọi độc lập trong một phản hồi. Các lệnh gọi phụ thuộc được
-xử lý trong những lượt kết quả công cụ tiếp theo của máy khách, với bộ lập kế hoạch xem xét từng kết quả.
-`maxToolRounds` mặc định là `8` và chấp nhận `1`–`32`; khi đạt đến giới hạn, bộ lập kế hoạch phải
-tạo ra câu trả lời cuối cùng tốt nhất hiện có. Các quyết định nội bộ của bộ lập kế hoạch được lưu vào bộ đệm, trong khi
-phản hồi đã chọn để gửi tới máy khách vẫn giữ nguyên tùy chọn truyền luồng ban đầu.
+Người thực thi có thể phát ra nhiều lệnh gọi độc lập trong một phản hồi. Các cuộc gọi phụ thuộc được xử lý trong các lượt kết quả công cụ khách hàng sau này, với người lập kế hoạch xem xét mọi kết quả. `maxToolRounds` mặc định là `8` và chấp nhận `1`–`32`; Sau khi đạt được, người lập kế hoạch phải đưa ra câu trả lời cuối cùng tốt nhất hiện có. Các quyết định của người lập kế hoạch nội bộ được lưu vào bộ đệm, trong khi phản hồi hướng tới khách hàng đã chọn sẽ giữ nguyên tùy chọn phát trực tuyến ban đầu.
 
-### Lô cố định `round-robin` và mở rộng tài khoản
+### hàng loạt dính `round-robin` và mở rộng tài khoản
 
-Round-robin hoạt động theo lô, không phải mỗi yêu cầu một bước:
+Vòng tròn được thực hiện theo đợt, không phải một yêu cầu mỗi bước:
 
-- `stickyRoundRobinLimit` (cấu hình combo, sau đó là `comboStickyRoundRobinLimit`, rồi
-  `settings.stickyRoundRobinLimit`, mặc định **3**) giữ nguyên một mục tiêu trong số lượng lần
-  thành công liên tiếp đó trước khi xoay vòng. Đặt giá trị ghi đè của combo thành `1` để xoay vòng theo từng yêu cầu.
-  Trình chỉnh sửa combo hiển thị giá trị có hiệu lực và lớp cung cấp giá trị đó.
-- `connectionAwareExpansion` (cấu hình combo, sau đó là cài đặt, mặc định **false**) mở rộng
-  mỗi bước ở cấp nhà cung cấp thành các mục tiêu theo từng tài khoản trước khi xoay vòng. Các chiến lược Nhóm B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) duy trì chế độ xem ở cấp nhà cung cấp cho đến khi tùy chọn này được bật. Trình chỉnh sửa combo cung cấp
-  các tùy chọn kế thừa / bật / tắt; tùy chọn kế thừa sử dụng giá trị mặc định toàn cục (tắt).
-- Định tuyến theo tính cục bộ của bộ nhớ đệm prompt (`promptCacheAffinityEnabled`, mặc định **true**) sắp xếp lại
-  các kết nối được ghim để các khóa bộ nhớ đệm khớp nhau vẫn nằm trên cùng một tài khoản. Tính năng này được ưu tiên hơn
-  việc xoay vòng round-robin và weighted giữa các bước theo từng tài khoản được ghim. Hãy tắt tính năng này trong
-  Settings → Combo defaults nếu bạn cần xoay vòng nghiêm ngặt. Không có tùy chọn ghi đè theo từng combo.
+- `stickyRoundRobinLimit` (cấu hình kết hợp, sau đó `comboStickyRoundRobinLimit`, sau đó `settings.stickyRoundRobinLimit`, mặc định** 3** ) giữ nguyên mục tiêu cho nhiều thành công liên tiếp trước khi quay. Đặt ghi đè kết hợp thành `1` để xoay vòng một yêu cầu. Trình chỉnh sửa kết hợp hiển thị giá trị hiệu quả và giá trị đó đến từ lớp nào.
+- `connectionAwareExpansion` (cấu hình kết hợp, sau đó cài đặt, mặc định** SAI** ) mở rộng từng bước cấp nhà cung cấp thành mục tiêu cho mỗi tài khoản trước khi xoay vòng. Các chiến lược nhóm B (ưu tiên, có trọng số, quay vòng, ngẫu nhiên, p2c, ít được sử dụng nhất, tối ưu hóa chi phí, lkgp, điền trước, ngẫu nhiên nghiêm ngặt, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ nhớ đệm, chuyển tiếp ngữ cảnh, tổng hợp, quy trình) duy trì chế độ xem ở cấp nhà cung cấp cho đến khi tính năng này được bật. Trình chỉnh sửa kết hợp hiển thị tính năng kế thừa/bật/tắt; kế thừa sử dụng mặc định chung (tắt).
+- Định tuyến cục bộ bộ đệm nhắc nhở (`promptCacheAffinityEnabled`, mặc định** ĐÚNG VẬY** ) sắp xếp lại các kết nối được ghim để các khóa bộ đệm phù hợp vẫn ở trên một tài khoản. Nó được ưu tiên hơn so với luân chuyển vòng tròn và có trọng số trên các bước được ghim trên mỗi tài khoản. Tắt nó trong Cài đặt mặc định → Combo nếu bạn cần xoay vòng nghiêm ngặt. Không có ghi đè cho mỗi combo.
 
-Để xoay vòng nhiều tài khoản trên một mô hình, hãy ưu tiên **một bước tài khoản động** (`connectionId` trống,
-toàn bộ nhóm) với giới hạn cố định là `1`, thay vì ba `connectionId` được ghim.
-Các bước được ghim kết hợp với tính năng liên kết sẽ hội tụ vào cùng một tài khoản ngay cả khi bộ đếm RR
-vẫn tăng.
+Để xoay vòng nhiều tài khoản trên một mô hình, hãy ưu tiên** một bước tài khoản động** (trống `connectionId`, toàn bộ nhóm) với giới hạn cố định `1`, không phải ba `connectionId` s được ghim. Các bước được ghim cộng với mối quan hệ thu gọn vào cùng một tài khoản ngay cả khi bộ đếm RR tiến lên.
 
 ## Chiến lược Fusion
 
@@ -481,13 +468,13 @@ Công cụ Auto Combo không yêu cầu các combo được định nghĩa sẵn
 
 ## API
 
-**Không có endpoint `POST /api/combos/auto` chuyên biệt** — Auto-Combo được sử dụng theo hai cách:
+**Không có endpoint chuyên dụng `POST /api/combos/auto`** — Auto-Combo được sử dụng theo hai cách:
 
-1. **Không cần cấu hình (khuyến nghị):** Gửi bất kỳ yêu cầu hoàn thành hội thoại nào với `model: "auto"` hoặc `model: "auto/<variant>"`. Factory ảo sẽ xây dựng combo cho từng yêu cầu — không cần lưu trữ lâu dài hay gọi API.
+1. **Không cần cấu hình (khuyến nghị):** Gửi bất kỳ yêu cầu hoàn thành hội thoại nào với `model: "auto"` hoặc `model: "auto/<variant>"`. Factory ảo sẽ tạo combo cho từng yêu cầu — không cần lưu trữ lâu dài, không cần gọi API.
 
 2. **Combo được lưu trữ với `strategy: "auto"`:** Tạo một combo thông thường qua `POST /api/combos` và đặt `strategy: "auto"` cùng với `config.auto.weights` / `config.auto.candidatePool`. Cùng một công cụ chấm điểm sẽ được sử dụng; combo được lưu trong `combos` và có thể tái sử dụng bằng ID.
 
-Để khám phá, `GET /api/combos/auto` liệt kê mọi biến thể cùng với nhóm ứng viên đã được phân giải, cộng thêm `context_length` / `max_output_tokens` — giá trị MAX trên toàn bộ các cửa sổ của nhóm ứng viên. Các client (ví dụ: plugin opencode) phải công bố những giá trị này thay vì `0`: context bằng 0 sẽ vô hiệu hóa hoàn toàn tính năng tự động rút gọn của opencode, khiến các phiên tiếp tục tăng kích thước cho đến khi cơ chế xóa lịch sử của gateway phá hủy context. Có thể công bố MAX một cách an toàn vì bộ lọc trước theo context của auto-combo sẽ định tuyến các yêu cầu quá lớn đến những ứng viên có cửa sổ lớn.
+Để khám phá, `GET /api/combos/auto` liệt kê mọi biến thể cùng với nhóm ứng viên đã được phân giải và `context_length` / `max_output_tokens` — giá trị MAX trên tất cả cửa sổ trong nhóm ứng viên. Các client (ví dụ: plugin opencode) phải công bố những giá trị này thay vì `0`: context bằng không sẽ vô hiệu hóa hoàn toàn tính năng tự động nén của opencode, khiến phiên tiếp tục tăng kích thước cho đến khi cơ chế xóa lịch sử của gateway làm mất context. Có thể công bố MAX một cách an toàn vì bộ lọc trước theo context của auto-combo sẽ định tuyến các yêu cầu quá lớn đến những ứng viên có cửa sổ lớn.
 
 ```bash
 # Sử dụng không cần cấu hình (không tạo combo)
@@ -496,39 +483,39 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo auto được lưu trữ thông qua endpoint combos thông thường
+# Combo tự động được lưu trữ thông qua endpoint combos thông thường
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Các chiến lược bộ định tuyến auto
+### Các chiến lược router tự động
 
-Các combo được lưu trữ có `strategy: "auto"` có thể đặt `config.routerStrategy` (hoặc trường cũ
+Các combo `strategy: "auto"` được lưu trữ có thể đặt `config.routerStrategy` (hoặc dạng cũ
 `config.auto.routerStrategy`) thành một trong các giá trị sau:
 
 - `rules` — chấm điểm có trọng số mặc định
-- `score` — chọn điểm có trọng số đã cấu hình cao nhất. Khi điểm bằng nhau hoàn toàn, thứ tự
+- `score` — chọn điểm có trọng số được cấu hình cao nhất. Khi điểm hoàn toàn bằng nhau, thứ tự
   ứng viên đã cấu hình được giữ nguyên; `explorationRate` hiện có lấy mẫu từ toàn bộ nhóm đã xếp hạng.
-- `cost` / `eco` — nhà cung cấp hoạt động tốt có chi phí thấp nhất
+- `cost` / `eco` — nhà cung cấp khỏe mạnh có chi phí thấp nhất
 - `latency` / `fast` — độ trễ p95 thấp nhất kèm hệ số phạt về độ tin cậy
-- `sla-aware` / `sla` — ưu tiên các ứng viên đáp ứng SLO về độ trễ p95, tỷ lệ lỗi và tùy chọn
-  chi phí
+- `sla-aware` / `sla` — ưu tiên các ứng viên đáp ứng SLO về độ trễ p95, tỷ lệ lỗi và
+  chi phí tùy chọn
 - `lkgp` — ưu tiên nhà cung cấp hoạt động tốt gần nhất
-- `nadir` — yêu cầu API quyết định của [Nadir](https://getnadir.com) xác định prompt cần mô hình nào trong nhóm;
-  phải chủ động bật, khi lỗi sẽ chuyển sang `rules`
+- `nadir` — yêu cầu API quyết định của [Nadir](https://getnadir.com) xác định mô hình nào trong nhóm mà
+  prompt cần; cần chủ động bật, khi lỗi sẽ chuyển sang `rules`
 
-### Chi tiết về các chiến lược bộ định tuyến
+### Chi tiết các chiến lược router
 
-Công cụ auto-combo cung cấp 7 phần triển khai **RouterStrategy** có thể cắm thay thế,
-mà bạn có thể chuyển đổi qua `config.routerStrategy` (hoặc trường cũ `config.auto.routerStrategy`).
-Mỗi chiến lược chọn một nhà cung cấp từ nhóm ứng viên dựa trên một `RoutingContext`
-(loại tác vụ, gợi ý về công cụ/thị giác, ước tính token, chính sách SLA tùy chọn, nhà cung cấp
-hoạt động tốt gần nhất tùy chọn).
+Công cụ auto-combo cung cấp 7 cách triển khai **RouterStrategy** có thể thay thế
+thông qua `config.routerStrategy` (hoặc dạng cũ `config.auto.routerStrategy`).
+Mỗi chiến lược chọn một nhà cung cấp từ nhóm ứng viên dựa trên `RoutingContext`
+(loại tác vụ, gợi ý về công cụ/thị giác, ước tính token, chính sách SLA tùy chọn,
+nhà cung cấp hoạt động tốt gần nhất tùy chọn).
 
 #### 1. `rules` (mặc định) — chấm điểm có trọng số theo 16 yếu tố
 
-Bao bọc công cụ chấm điểm hiện có. Lọc bỏ các ứng viên circuit breaker ở trạng thái `OPEN`,
+Bao bọc công cụ chấm điểm hiện có. Lọc bỏ các ứng viên có circuit breaker ở trạng thái `OPEN`,
 sau đó chạy `scorePool()` với loại tác vụ hiện tại và `getTaskFitness()`,
 rồi chọn nhà cung cấp có điểm cao nhất.
 
@@ -550,16 +537,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên sử dụng**: Mặc định. Sử dụng khi bạn muốn có sự cân bằng giữa tất cả các tín hiệu.
+**Khi nào nên sử dụng**: Mặc định. Sử dụng khi bạn muốn cân bằng giữa tất cả các tín hiệu.
 
 **Bí danh**: `rules` (không có bí danh)
 
 ---
 
-#### 2. `cost` / `eco` — nhà cung cấp hoạt động tốt có chi phí thấp nhất
+#### 2. `cost` / `eco` — nhà cung cấp khỏe mạnh có chi phí thấp nhất
 
 Sắp xếp nhóm ứng viên theo `costPer1MTokens` (tăng dần) và chọn ứng viên có chi phí thấp nhất.
-Lọc bỏ các ứng viên `OPEN` trước.
+Trước tiên, lọc bỏ các ứng viên `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -574,7 +561,8 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên sử dụng**: Khối lượng công việc nhạy cảm về chi phí, xử lý hàng loạt hoặc các tác vụ nền.
+**Khi nào nên sử dụng**: Khối lượng công việc nhạy cảm về chi phí, xử lý hàng loạt hoặc
+các tác vụ nền.
 
 **Bí danh**: `cost`, `eco`
 
@@ -611,13 +599,13 @@ trợ lý lập trình tương tác.
 
 Chấm điểm từng ứng viên dựa trên mức độ đáp ứng chính sách SLO đã cấu hình:
 
-| Yếu tố        | Trọng số | Công thức                                                |
-| ------------- | -------- | -------------------------------------------------------- |
-| Điểm độ trễ   | 35%      | `threshold / max(value, ε)`                              |
-| Điểm lỗi      | 35%      | `threshold / max(value, ε)`                              |
-| Điểm sức khỏe | 15%      | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Điểm chi phí  | 10%      | `threshold / max(value, ε)` hoặc nghịch đảo đã chuẩn hóa |
-| Điểm ổn định  | 5%       | độ lệch chuẩn độ trễ được chuẩn hóa nghịch đảo           |
+| Yếu tố        | Trọng số | Công thức                                             |
+| ------------- | -------- | ----------------------------------------------------- |
+| Điểm độ trễ   | 35%      | `threshold / max(value, ε)`                           |
+| Điểm lỗi      | 35%      | `threshold / max(value, ε)`                           |
+| Điểm sức khỏe | 15%      | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
+| Điểm chi phí  | 10%      | `threshold / max(value, ε)` hoặc chuẩn hóa nghịch đảo |
+| Điểm ổn định  | 5%       | độ lệch chuẩn độ trễ được chuẩn hóa nghịch đảo        |
 
 Khi `hardConstraints: true`, các ứng viên được sắp xếp chủ yếu theo **điểm vi phạm**
 (mức độ vượt quá bất kỳ SLO nào), sau đó theo điểm tổng hợp. Nếu không, chúng chỉ được
@@ -627,7 +615,7 @@ sắp xếp theo điểm tổng hợp.
 class SLAStrategyImpl implements RouterStrategy {
   readonly name = "sla-aware";
   readonly description =
-    "Chọn nhà cung cấp có khả năng đáp ứng tốt nhất các SLO về độ trễ, tỷ lệ lỗi và chi phí";
+    "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
     // ... chấm điểm từng ứng viên theo chính sách: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
@@ -650,23 +638,22 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên dùng**: Các khối lượng công việc production có ngân sách nghiêm ngặt về độ trễ, tỷ lệ lỗi hoặc chi phí.
+**Khi nào nên sử dụng**: Khối lượng công việc production có yêu cầu nghiêm ngặt về độ trễ, tỷ lệ lỗi hoặc ngân sách chi phí.
 
 **Bí danh**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — ưu tiên nhà cung cấp tốt gần nhất đã biết
+#### 5. `lkgp` — ưu tiên nhà cung cấp tốt gần nhất được biết
 
-Trước tiên thử **nhà cung cấp tốt gần nhất đã biết** (nếu được thiết lập), sau đó chuyển sang
-chiến lược `rules`. Hữu ích để duy trì tính gắn kết của phiên — cùng một nhà cung cấp xử lý
+Thử **nhà cung cấp tốt gần nhất được biết** (nếu đã đặt) trước, sau đó chuyển dự phòng sang
+chiến lược `rules`. Hữu ích để duy trì tính nhất quán trong phiên — cùng một nhà cung cấp xử lý
 các yêu cầu tiếp theo trong một cuộc hội thoại.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
   readonly name = "lkgp";
-  readonly description =
-    "Trước tiên thử nhà cung cấp tốt gần nhất đã biết, sau đó chuyển sang rules";
+  readonly description = "Tries last known good provider first, then falls back to rules";
 
   select(pool, context) {
     if (context.lkgpEnabled === false) {
@@ -682,27 +669,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Chuyển sang chiến lược rules
+    // Chuyển dự phòng sang chiến lược rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Khi nào nên dùng**: Các cuộc hội thoại nhiều lượt mà bạn muốn cùng một nhà cung cấp xử lý
-các yêu cầu tiếp theo (ví dụ: để lưu bộ nhớ đệm, duy trì tính liên tục của ngữ cảnh hoặc tính nhất quán về giá).
+**Khi nào nên sử dụng**: Các cuộc hội thoại nhiều lượt mà bạn muốn cùng một nhà cung cấp xử lý
+các yêu cầu tiếp theo (ví dụ: để lưu vào bộ nhớ đệm, duy trì tính liên tục của ngữ cảnh hoặc tính nhất quán về giá).
 
 **Bí danh**: `lkgp` (không có bí danh)
 
 ---
 
-#### 6. `nadir` — lựa chọn mô hình nhận biết prompt thông qua Nadir
+#### 6. `nadir` — lựa chọn mô hình có nhận biết prompt thông qua Nadir
 
 Mỗi chiến lược ở trên đều xếp hạng các ứng viên dựa trên dữ liệu đo từ xa riêng; không chiến lược nào đọc
-yêu cầu. `nadir` gửi lượt cuối của người dùng cùng với các id mô hình trong pool tới
-API quyết định của [Nadir](https://getnadir.com) (`POST /v1/bucket`) và định tuyến tới mô hình
-mà Nadir chọn từ danh sách đó (`simple` → mô hình có năng lực phù hợp với chi phí thấp nhất, `complex` → mô hình
+yêu cầu. `nadir` gửi lượt người dùng cuối cùng cùng với các ID mô hình trong pool đến
+API quyết định của [Nadir](https://getnadir.com) (`POST /v1/bucket`) và định tuyến đến mô hình
+mà Nadir chọn từ danh sách đó (`simple` → mô hình có khả năng đáp ứng với chi phí thấp nhất, `complex` → mô hình
 frontier). Kết nối phục vụ mô hình đó vẫn được `rules` lựa chọn, vì vậy hạn ngạch,
-tình trạng sức khỏe và chi phí vẫn quyết định tài khoản nào được dùng.
+tình trạng và chi phí vẫn quyết định tài khoản nào được dùng.
 
 ```json
 {
@@ -719,28 +706,31 @@ tình trạng sức khỏe và chi phí vẫn quyết định tài khoản nào 
 ```
 
 `OMNIROUTE_NADIR_API_KEY` và `OMNIROUTE_NADIR_BASE_URL` là các giá trị dự phòng từ môi trường cho hai
-chuỗi này. `baseUrl` chỉ cần thiết đối với Nadir tự lưu trữ (đuôi `/v1` vẫn được chấp nhận).
-Các lệnh gọi không có khóa sẽ được chuyển đến tầng ẩn danh của Nadir, vốn bị giới hạn tốc độ theo IP.
+chuỗi này. `baseUrl` chỉ cần thiết đối với Nadir tự lưu trữ (dấu `/v1` ở cuối vẫn được chấp nhận).
+Các lệnh gọi không có khóa sẽ sử dụng gói ẩn danh của Nadir, vốn bị giới hạn tốc độ theo từng IP. Khi có khóa
+([tạo khóa](https://app.getnadir.com/dashboard/api-keys)), mỗi quyết định sẽ được
+ghi lại vào bảng điều khiển Nadir của bạn. Hướng dẫn thiết lập và xác minh đầy đủ:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Dữ liệu được gửi ra ngoài: văn bản của tin nhắn cuối cùng từ người dùng (16k ký tự đầu tiên), các
-id mô hình ứng viên và thẻ kênh `source: "omniroute"`. Không có system prompt, lịch sử, công cụ hoặc
+Dữ liệu được gửi ra ngoài: nội dung văn bản của tin nhắn người dùng cuối cùng (16k ký tự đầu tiên), các ID
+mô hình ứng viên và thẻ kênh `source: "omniroute"`. Không có system prompt, lịch sử, công cụ hoặc
 header nào được gửi.
 
-Cơ chế xử lý lỗi là fail-open: hết thời gian chờ (mặc định 2000 ms), phản hồi không phải 2xx, máy chủ
-không thể truy cập, phản hồi không hợp lệ hoặc lựa chọn nằm ngoài pool đều được chuyển sang quyết định của `rules`
+Cơ chế xử lý lỗi là fail-open: timeout (mặc định 2000 ms), phản hồi không phải 2xx, máy chủ
+không thể truy cập, phản hồi sai định dạng hoặc lựa chọn nằm ngoài pool đều sẽ được chuyển thành quyết định của `rules`
 và lý do được thêm tiền tố `NadirStrategy: fallback (…)`. Sau một lệnh gọi thất bại, chiến lược sẽ
-bỏ qua mạng trong 30 giây, nhờ đó sự cố ngừng hoạt động chỉ gây ra một lần hết thời gian chờ mỗi 30 giây thay vì
-mỗi yêu cầu. Các sự kiện định tuyến chỉ báo cáo `strategy: "nadir"` khi Nadir thực sự đưa ra
+bỏ qua mạng trong 30 giây, vì vậy một sự cố ngừng hoạt động chỉ gây ra một lần timeout mỗi 30 giây thay vì
+một lần cho mỗi yêu cầu. Các sự kiện định tuyến chỉ báo cáo `strategy: "nadir"` khi Nadir thực sự đưa ra
 lựa chọn.
 
-**Khi nào nên dùng**: lưu lượng có độ khó hỗn hợp trên một pool bao gồm nhiều tầng mô hình (một mô hình nhỏ, một mô hình
-tầm trung và một mô hình frontier), khi bạn muốn cắt giảm chi phí do luôn sử dụng mô hình frontier.
+**Khi nào nên sử dụng**: lưu lượng có độ khó hỗn hợp trên một pool bao gồm nhiều cấp mô hình (một mô hình nhỏ, một mô hình tầm trung
+và một mô hình frontier), khi bạn muốn cắt giảm chi phí do luôn sử dụng mô hình frontier.
 
 **Bí danh**: `nadir` (không có bí danh)
 
 ---
 
-### Chiến lược router tùy chỉnh
+### Chiến lược bộ định tuyến tùy chỉnh
 
 Bạn có thể đăng ký phần triển khai `RouterStrategy` của riêng mình thông qua API công khai:
 
@@ -752,10 +742,10 @@ import {
 
 class MyCustomStrategy implements RouterStrategy {
   readonly name = "my-custom";
-  readonly description = "Chiến lược định tuyến tùy chỉnh của tôi";
+  readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Logic định tuyến của bạn tại đây
+    // Logic định tuyến của bạn ở đây
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -783,16 +773,16 @@ Sau đó sử dụng chiến lược này:
 
 ---
 
-### Hướng dẫn lựa chọn chiến lược router
+### Hướng dẫn lựa chọn chiến lược bộ định tuyến
 
-| Trường hợp sử dụng            | Chiến lược  | Lý do                                     |
-| ----------------------------- | ----------- | ----------------------------------------- |
-| Khối lượng công việc cân bằng | `rules`     | Mặc định — xem xét tất cả các yếu tố      |
-| Giảm thiểu chi phí            | `cost`      | Luôn chọn phương án rẻ nhất               |
-| Giảm thiểu độ trễ             | `latency`   | Chọn nhà cung cấp đáng tin cậy nhanh nhất |
-| SLO nghiêm ngặt               | `sla-aware` | Lọc theo ngưỡng p95/lỗi/chi phí           |
-| Hội thoại nhiều lượt          | `lkgp`      | Duy trì tính gắn kết của phiên            |
-| Độ khó hỗn hợp                | `nadir`     | Chọn tầng mô hình cho từng prompt         |
+| Trường hợp sử dụng            | Chiến lược  | Lý do                                        |
+| ----------------------------- | ----------- | -------------------------------------------- |
+| Khối lượng công việc cân bằng | `rules`     | Mặc định — xem xét tất cả các yếu tố         |
+| Giảm thiểu chi phí            | `cost`      | Luôn chọn phương án rẻ nhất                  |
+| Giảm thiểu độ trễ             | `latency`   | Chọn nhà cung cấp nhanh và đáng tin cậy nhất |
+| SLO nghiêm ngặt               | `sla-aware` | Lọc theo ngưỡng p95/lỗi/chi phí              |
+| Trò chuyện nhiều lượt         | `lkgp`      | Duy trì tính nhất quán trong phiên           |
+| Độ khó hỗn hợp                | `nadir`     | Chọn cấp độ mô hình cho từng prompt          |
 
 Các trường nhận biết SLA:
 

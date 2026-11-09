@@ -62,6 +62,27 @@ describe("CheaperInferenceSponsorBanner", () => {
     expect(link?.getAttribute("title")).toBe("partnerLinkNote");
   });
 
+  it("keeps the partner-link note and the CTA ink at AA contrast (KEA-7886 P7)", async () => {
+    const container = await renderBanner();
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "partnerLinkNote"
+    );
+    expect(note).toBeDefined();
+    // Was text-[9px] text-text-muted/70 (axe color-contrast on /dashboard).
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
+  });
+
+  it("tints the banner with the partner brand and leaves the CTA to the kit button", async () => {
+    const container = await renderBanner();
+    const banner = container.querySelector<HTMLElement>("[role='complementary']");
+    expect(banner?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(banner?.style.getPropertyValue("--ci-brand")).toBe("#31f889");
+    const cta = container.querySelector("a[href]");
+    expect(cta?.className).toContain("ci-button");
+    expect(cta?.className).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+  });
+
   it("hides after dismissal and stays hidden on re-render", async () => {
     const first = await renderBanner();
     const button = first.querySelector("button");

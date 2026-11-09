@@ -232,7 +232,7 @@ export function injectSystemPromptPostTranslation<T>(
   // early-return and silently got zero injection.
   // An anthropic-compatible relay can still carry system-role turns inside
   // messages[] when the opt-in mid-conversation-system passthrough kept them in
-  // place (#16236 — ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM + client beta;
+  // place (#16236 — per-connection keepMidConversationSystem opt-in;
   // with it off every turn is hoisted before this point, so nothing changes);
   // those are conversation turns, not the prompt carrier — writing the suffix
   // onto the LAST one would move it every turn and break the cached prefix.

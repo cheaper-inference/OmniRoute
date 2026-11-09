@@ -1,3 +1,4 @@
+import { logicalCallSql } from "./logicalCallSql";
 /**
  * db/costLedger.ts — Per-request cost ledger (RIC-741 / M3 D2).
  *
@@ -219,6 +220,19 @@ export function sumSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): n
   return getAggRow(row).amountUsd;
 }
 
+/** Oldest search-ledger spend in the window, or null when there is none. */
+export function getOldestSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): string | null {
+  if (!apiKeyId) return null;
+  const row = getDbInstance()
+    .prepare(
+      `SELECT MIN(timestamp) AS oldest
+       FROM request_cost_ledger
+       WHERE api_key_id = ? AND timestamp >= ? AND service_tier = ?`
+    )
+    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER) as { oldest?: unknown } | undefined;
+  return typeof row?.oldest === "string" && row.oldest ? row.oldest : null;
+}
+
 /**
  * Return ledger rows for an api key within a window (descending timestamp).
  * Used by tests and future dashboard surfaces. `limit` is clamped to 500.
@@ -300,7 +314,7 @@ export function getCostBySessionTag(sessionTag: string): RunCostRow[] {
               r.amount_usd, r.request_id, r.timestamp
        FROM call_logs c
        JOIN request_cost_ledger r ON r.request_id = c.correlation_id
-       WHERE c.session_tag = ?
+       WHERE ${logicalCallSql("c")} AND c.session_tag = ?
        ORDER BY r.timestamp DESC`
     )
     .all(sessionTag) as unknown as Array<Record<string, unknown>>;

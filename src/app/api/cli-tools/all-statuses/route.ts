@@ -47,9 +47,9 @@ async function extractEndpointFromConfig(
       return parseGrokBuildConfig(content).model?.base_url ?? null;
     }
 
-    // TOML-based tools (codex) — do a best-effort text search
-    if (toolId === "codex") {
-      const match = content.match(/base_url\s*=\s*["']([^"'\n]+)["']/i);
+    // TOML-based tools (codex, WhyCodes) — do a best-effort text search
+    if (toolId === "codex" || toolId === "whycodes") {
+      const match = content.match(/(?:base_url|api_base)\s*=\s*["']([^"'\n]+)["']/i);
       return match ? match[1] : null;
     }
 
@@ -82,12 +82,26 @@ async function extractEndpointFromConfig(
         return match ? match[1] : null;
       }
       case "omp": {
-        const omnirouteBlock = content.match(/omniroute:\s*\n(?:[^\n]+\n)*?\s*baseUrl:\s*["']?([^"'\r\n]+)["']?/i);
+        const omnirouteBlock = content.match(
+          /omniroute:\s*\n(?:[^\n]+\n)*?\s*baseUrl:\s*["']?([^"'\r\n]+)["']?/i
+        );
         if (omnirouteBlock) return omnirouteBlock[1].trim();
         const match =
           content.match(/baseUrl:\s*["']?([^"'\r\n]*(?:omniroute|20128)[^"'\r\n]*)["']?/i) ||
           content.match(/baseUrl:\s*["']?([^"'\r\n]+)["']?/i);
         return match ? match[1].trim() : null;
+      }
+      case "pi": {
+        // models.json: providers.<name>.baseUrl. Prefer the OmniRoute entry,
+        // fall back to the first provider that looks like us.
+        const piConfig = config as { providers?: Record<string, { baseUrl?: string }> };
+        const providers = piConfig.providers || {};
+        const omniroute = providers.omniroute;
+        if (omniroute?.baseUrl) return omniroute.baseUrl;
+        const firstMatch = Object.values(providers).find(
+          (provider) => typeof provider?.baseUrl === "string" && provider.baseUrl.startsWith("http")
+        );
+        return firstMatch?.baseUrl ?? null;
       }
       default:
         return null;

@@ -186,6 +186,44 @@ test("a recorded completion wins: the disconnect finalizer neither reads nor wri
 
 // ── pure resolver ───────────────────────────────────────────────────────────────────────────
 
+test("resolvePartialStreamUsage: preserves positive detail counters and omits empty details", () => {
+  const base = { prompt_tokens: 100, completion_tokens: 20 };
+  assert.deepEqual(
+    resolvePartialStreamUsage({
+      reported: {
+        ...base,
+        cache_read_input_tokens: 30,
+        cache_creation_input_tokens: 10,
+        reasoning_tokens: 5,
+      },
+      contentLength: 0,
+      body: REQUEST_BODY,
+    }),
+    {
+      ...base,
+      total_tokens: 120,
+      cache_read_input_tokens: 30,
+      cache_creation_input_tokens: 10,
+      reasoning_tokens: 5,
+    }
+  );
+  assert.deepEqual(
+    resolvePartialStreamUsage({
+      reported: {
+        ...base,
+        cache_read_input_tokens: 0,
+        cache_creation_input_tokens: -1,
+        reasoning_tokens: 0,
+      },
+      contentLength: 0,
+      body: REQUEST_BODY,
+    }),
+    // Empty/negative counters are still omitted; the negative cache-write total is kept only
+    // as its diagnostic tier status (#17307), never as a counter.
+    { ...base, total_tokens: 120, cache_creation_tier_status: "invalid" }
+  );
+});
+
 test("resolvePartialStreamUsage: reported usage is returned verbatim, not estimated", () => {
   const usage = resolvePartialStreamUsage({
     reported: { prompt_tokens: 100, completion_tokens: 42, total_tokens: 142 },
