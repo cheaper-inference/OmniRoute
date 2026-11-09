@@ -161,7 +161,9 @@ test("migrated media billing counts stored charges once in five-hour budgets aft
       { version: "228", name: "purge_orphaned_provider_catalogs" },
       { version: "229", name: "api_key_five_hour_limit" },
       { version: "230", name: "call_logs_cache_write_tiers" },
-      { version: "231", name: "usage_history_calculated_cost" },
+      { version: "231", name: "daily_cached_input" },
+      { version: "232", name: "proxy_payload_traffic" },
+      { version: "233", name: "usage_history_calculated_cost" },
     ]
   );
   assert.equal(runMigrations(db), 0);

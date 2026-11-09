@@ -573,6 +573,7 @@ export async function createEmbeddingResponse(
         options.connectionId ||
         connectionIdForProxy ||
         null,
+      connectionProvider: credentialsProviderId,
     });
 
   const result = connectionIdForProxy
@@ -607,11 +608,15 @@ export async function createEmbeddingResponse(
     typeof credentials.connectionId === "string" &&
     HARD_ERROR_STATUSES.has(result.status)
   ) {
+    // Classify against the connection's own provider id. For a custom node the
+    // request `provider` is the model prefix (e.g. "my-embed"), which is not a
+    // compatible-provider id, so a node's rate-limit 429 was judged by API-key wallet
+    // rules and parked as credits_exhausted instead of a model-scoped cooldown.
     markAccountUnavailable(
       credentials.connectionId,
       result.status,
       result.error || "Embedding provider error",
-      provider,
+      credentialsProviderId,
       resolvedModel || null
     ).catch((err) => {
       log.debug(

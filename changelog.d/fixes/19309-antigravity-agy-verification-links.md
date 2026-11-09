@@ -1,0 +1,1 @@
+- **fix(antigravity):** store Google verification and appeal links for Antigravity CLI (`agy`) connections on `403` responses, ensuring the unlock/appeal button appears in the dashboard for `agy` connections just as it does for `antigravity` ([#19309](https://github.com/cheaper-inference/OmniRoute/pull/19309)) — thanks @bufftop25
