@@ -349,9 +349,25 @@ function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record
   return next;
 }
 
+/**
+ * True for Mistral models that take no `reasoning_effort`: the Devstral family, and models
+ * Mistral's own catalog lists without `supportsReasoning`. Reads that catalog directly because
+ * `getProviderModel()` falls through to other providers' entries and fuzzy matches, which would
+ * judge an uncatalogued reasoning model such as `mistral-small-2603` by an unrelated entry.
+ * Uncatalogued ids keep the field, so a new upstream model is not silently downgraded.
+ */
+function mistralRejectsReasoningEffort(model: string): boolean {
+  if (MISTRAL_NO_REASONING_EFFORT_PATTERN.test(model)) return true;
+  const modelId = model.startsWith("mistral/") ? model.slice("mistral/".length) : model;
+  const catalogued = getProviderModels("mistral").find(
+    (entry) => entry.id === modelId || entry.aliases?.includes(modelId)
+  );
+  return catalogued !== undefined && catalogued.supportsReasoning !== true;
+}
+
 /** Providers/models that reject `reasoning_effort` outright, so it is stripped rather than clamped. */
 function rejectsReasoningEffort(provider: string, modelStr: string): boolean {
-  if (provider === "mistral") return MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr);
+  if (provider === "mistral") return mistralRejectsReasoningEffort(modelStr);
   return (
     provider === "github" &&
     !GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr) &&
@@ -383,6 +399,17 @@ function rejectsCloudflareNoneEffort(provider: string, modelStr: string, effortS
   );
 }
 
+/**
+ * Normalizes, caps, or strips `reasoning_effort` across carriers (`reasoning_effort`,
+ * `reasoningEffort`, `reasoning.effort`, `output_config.effort`) according to the
+ * resolved upstream provider and model capabilities.
+ *
+ * @param body - The request payload to sanitize.
+ * @param provider - The upstream provider ID (e.g. "mistral", "openai").
+ * @param model - The resolved model ID string.
+ * @param log - Optional logger for sanitize events.
+ * @returns The sanitized request body with unsupported effort values clamped or stripped.
+ */
 export function sanitizeReasoningEffortForProvider(
   body: unknown,
   provider: string,

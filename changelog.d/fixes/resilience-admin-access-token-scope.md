@@ -1,0 +1,1 @@
+- Require operator admin scope for mutating resilience settings and cooldown state through remote access tokens, while keeping read-only inspection available.

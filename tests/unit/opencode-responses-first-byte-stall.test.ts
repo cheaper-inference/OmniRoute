@@ -6,7 +6,7 @@ import {
   resolveOpencodeTargetFormat,
 } from "../../open-sse/executors/opencode.ts";
 import type { ExecutorLog, ProviderCredentials } from "../../open-sse/executors/base.ts";
-import { resolveProxyForRequest } from "../../open-sse/utils/proxyFetch.ts";
+import { resolveProxyForRequest, runWithProxyContext } from "../../open-sse/utils/proxyFetch.ts";
 import { RESPONSES_FIRST_BYTE_TIMEOUT_CODE } from "../../open-sse/utils/firstByteWatchdog.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 import {
@@ -316,9 +316,13 @@ describe("OpencodeExecutor Responses first-byte stall", () => {
     async () => {
       const exec = new OpencodeExecutor("opencode-zen");
       installFetch(["stall", "ok"]);
-      const result = await run(exec, RESPONSES_MODEL, proxylessCredentials(3));
+      // Accounts without their own proxy share the caller's egress. Pin that
+      // context so this assertion also holds when the runner has an env proxy.
+      const result = await runWithProxyContext(`http://127.0.0.1:${ports[2]}`, () =>
+        run(exec, RESPONSES_MODEL, proxylessCredentials(3))
+      );
       assert.equal(result.response.status, 200);
-      assert.deepEqual(calls, ["direct", "direct"]);
+      assert.deepEqual(calls, [String(ports[2]), String(ports[2])]);
       assert.equal(cooledDown(exec).length, 1, "only the stalled account is cooled down");
       await result.response.body?.cancel();
     }
