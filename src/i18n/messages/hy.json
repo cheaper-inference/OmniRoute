@@ -7906,6 +7906,7 @@
     "systemActor": "համակարգ",
     "ipAccessControl": "IP հասցեներով մուտքի վերահսկում",
     "ipAccessControlDesc": "Արգելափակել կամ թույլատրել որոշակի IP հասցեներից մուտքը",
+    "ipAccessMode": "Մուտքի ռեժիմ",
     "ipModeDisabled": "Անջատված",
     "ipModeBlacklist": "Սև ցուցակ",
     "ipModeWhitelist": "Սպիտակ ցուցակ",
