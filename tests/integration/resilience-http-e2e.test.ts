@@ -563,7 +563,10 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
   // `p2cLatency` is the opt-in latency weight for p2c account selection.
   // `streamRecovery` joined the projection with this change: the route stores the
   // block on every PATCH, so GET exposes it like every other stored block.
+  // `antigravityTimingTelemetry` is the stored opt-in for sanitized physical-send timing
+  // (`{ enabled }`, open-sse/services/antigravityTimingConfig.ts), not runtime state.
   assert.deepEqual(Object.keys(json).sort(), [
+    "antigravityTimingTelemetry",
     "comboCooldownWait",
     "connectionCooldown",
     "credentialHealthCheck",
