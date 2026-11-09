@@ -716,6 +716,8 @@ test("same-millisecond priced image attempts each persist usage and spend", asyn
     assert.equal((await callLogRows("/v1/images/generations")).length, 2);
     assert.equal(usageRows().length, 2);
     assert.ok(usageRows().every((row) => row.connection_id === connection.id));
+    // The clock is frozen; a key's window spend is reused for a few seconds, so step past that.
+    t.mock.timers.tick(5_000);
     assert.equal((await spendOf(key.key)).weeklySpentUsd, EXPECTED_CALL_USD * 2);
   } finally {
     t.mock.timers.reset();
