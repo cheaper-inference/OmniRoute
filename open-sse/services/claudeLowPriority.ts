@@ -555,6 +555,36 @@ export function observeClaudeLowPriorityResponse(
   return observeSuccessResponse(ctx, slowStatus);
 }
 
+/** The lane is already active: observe the response, or rejoin a raced sibling. */
+function handleActiveLaneResponse(
+  opts: {
+    key: string;
+    response: { status: number; headers: HeaderSource };
+    wait: ClaudeLowPriorityWait;
+    sentSlow?: boolean;
+    waitCeilingMs?: number;
+    random?: () => number;
+  },
+  now: number,
+  atWall: boolean
+): ClaudeUsageLimitDecision {
+  const { key, response, wait } = opts;
+  // Raced activation (see `sentSlow`): a header-less sibling's outcome is not lane
+  // telemetry. Re-send it on the lane if it hit the wall, otherwise ignore it.
+  if (opts.sentSlow === false) {
+    const rejoin = response.status === 429 && atWall;
+    return rejoin ? { kind: "retry", delayMs: 0, via: "low-priority-accepted" } : { kind: "none" };
+  }
+  return observeClaudeLowPriorityResponse(
+    key,
+    response,
+    wait,
+    now,
+    opts.random,
+    opts.waitCeilingMs
+  );
+}
+
 /**
  * One call per upstream response, from the Claude OAuth executor. Decides whether the
  * executor should retry the same account (`retry`) instead of surfacing the response.
@@ -596,22 +626,7 @@ export async function handleClaudeUsageLimitResponse(opts: {
   const atWall = isClaudeUsageWall(headers) || parseClaudeSlowOffer(headers) !== undefined;
 
   if (isClaudeLowPriorityActive(key, now)) {
-    // Raced activation (see `sentSlow`): a header-less sibling's outcome is not lane
-    // telemetry. Re-send it on the lane if it hit the wall, otherwise ignore it.
-    if (opts.sentSlow === false) {
-      const rejoin = response.status === 429 && atWall;
-      return rejoin
-        ? { kind: "retry", delayMs: 0, via: "low-priority-accepted" }
-        : { kind: "none" };
-    }
-    return observeClaudeLowPriorityResponse(
-      key,
-      response,
-      wait,
-      now,
-      opts.random,
-      opts.waitCeilingMs
-    );
+    return handleActiveLaneResponse(opts, now, atWall);
   }
 
   // A present gate may opt the account in; it decides (or defers) inside shouldClaimLimitReset.
