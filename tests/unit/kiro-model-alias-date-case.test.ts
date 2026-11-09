@@ -23,6 +23,11 @@ test("resolveKiroModelAlias keeps unknown ids and does not map every sonnet to 4
   assert.equal(resolveKiroModelAlias("deepseek-3.2").upstream, "deepseek-3.2");
 });
 
+test("resolveKiroModelAlias keeps an 8-digit suffix on a non-Claude id", () => {
+  assert.equal(resolveKiroModelAlias("example-20250101").upstream, "example-20250101");
+  assert.equal(resolveKiroModelAlias("Custom-Model-20250101").upstream, "custom-model-20250101");
+});
+
 test("resolveKiroModelAlias still handles -thinking on a dated, mixed-case id", () => {
   const r = resolveKiroModelAlias("Claude-Opus-5-20260101-thinking");
   assert.deepEqual(r, { upstream: "claude-opus-5", thinking: true });

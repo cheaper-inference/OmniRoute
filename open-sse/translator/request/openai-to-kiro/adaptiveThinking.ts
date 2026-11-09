@@ -44,7 +44,8 @@ export function resolveKiroModelAlias(model: unknown): { upstream: string; think
   const thinking = upstream.endsWith("-thinking");
   if (thinking) upstream = upstream.slice(0, -"-thinking".length);
   // Strip the -YYYYMMDD snapshot suffix (claude-sonnet-4-5-20250929) before the minor-version rewrite.
-  upstream = upstream.replace(/-\d{8}$/, "");
+  // Claude ids only: another model's id can end in eight digits that belong to its name.
+  if (upstream.startsWith("claude-")) upstream = upstream.replace(/-\d{8}$/, "");
   upstream = upstream.replace(/^(claude-(?:opus|sonnet|haiku|3-\d+)-\d+)-(\d{1,2})$/, "$1.$2");
 
   if (thinking && !supportsKiroAdaptiveThinking(upstream)) {
