@@ -235,6 +235,21 @@ export function isUpstreamNetworkError(err) {
   if (!err || typeof err !== "object") return false;
   const e = /** @type {NodeJS.ErrnoException} */ (err);
   if (e.name === "TypeError" && e.message === "fetch failed") return true;
+  if (e.name === "TypeError" && e.message === "terminated") {
+    const cause = /** @type {{ code?: string } | undefined} */ (e.cause);
+    if (cause && typeof cause === "object" && typeof cause.code === "string") {
+      switch (cause.code) {
+        case "ECONNRESET":
+        case "EPIPE":
+        case "UND_ERR_SOCKET":
+        case "UND_ERR_BODY_TIMEOUT":
+          return true;
+        default:
+          return false;
+      }
+    }
+    return false;
+  }
   switch (e.code) {
     case "PROXY_UNREACHABLE":
     case "PROXY_REQUEST_FAILED":
