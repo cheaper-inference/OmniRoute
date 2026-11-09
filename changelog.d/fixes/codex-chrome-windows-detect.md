@@ -1,0 +1,1 @@
+- **fix(providers):** ChatGPT Web Codex now finds Chrome in its default Windows install locations (`%PROGRAMFILES%`, `%PROGRAMFILES(X86)%`, `%LOCALAPPDATA%`), the same places the ChatGPT Web provider already checks, so the connection can be added on Windows without setting `CHROME_PATH` ([#18850](https://github.com/cheaper-inference/OmniRoute/issues/18850)) — thanks @stanescuradu

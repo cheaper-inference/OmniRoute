@@ -13,13 +13,13 @@
 
 ## Kini O Jẹ
 
-OmniRoute forukọsilẹ awọn olupese 377, pẹlu awọn titẹ sii katalogi 155 ti samisi**free/no-auth** (ko si-auth, OAuth-ọfẹ, tabi bọtini API ipele-ọfẹ — wo [Itọsọna Tiers Ọfẹ](../getting-started/FREE-TIERS-GUIDE.md) ati [itọsọna Awọn ipele Ọfẹ](../reference/FREE_TIERS.md) ni kikun). Awọn apeja: awọn olupese ọfẹ yatọ pupọ ni didara awoṣe. Olupese ti kii ṣe iwe-aṣẹ ti n ṣiṣẹ awoṣe aala jẹ iwulo pupọ diẹ sii ju ọkan ti n ṣiṣẹ awoṣe injogun kekere kan.
+OmniRoute forukọsilẹ awọn olupese 381, pẹlu awọn titẹ sii katalogi 155 ti samisi**free/no-auth** (ko si-auth, OAuth-ọfẹ, tabi bọtini-ọfẹ API bọtini — wo [Itọsọna Tiers Ọfẹ](../getting-started/FREE-TIERS-GUIDE.md) ati [itọsọna Awọn Tiers ọfẹ](../reference/FREE_TIERS.md) ni kikun). Awọn apeja: awọn olupese ọfẹ yatọ pupọ ni didara awoṣe. Olupese ti kii ṣe iwe-aṣẹ ti n ṣiṣẹ awoṣe aala jẹ iwulo pupọ diẹ sii ju ọkan ti n ṣiṣẹ awoṣe injogun kekere kan.
 
-**Awọn ipo Olupese Ọfẹ** idahun"** eyi ti free olupese yoo fun mi ti o dara ju awoṣe?** "nipa didapọ mọ katalogi olupese ọfẹ kọọkan pẹlu** enia-orisun didara ikun** lati awọn** Arena AI olori** (eniyan-ààyò ELO, kanna agutan sile LMArena chatbot arena). Awọn olupese lẹhinna wa ni ipo nipasẹ agbara ti wọn** ti o dara ju free awoṣe** .
+**Awọn ipo Olupese Ọfẹ** idahun"** eyi ti free olupese yoo fun mi ti o dara ju awoṣe?** "nipa didapọ mọ katalogi olupese ọfẹ kọọkan pẹlu** enia-orisun didara ikun** lati awọn** Arena AI olori** (ènìyàn-ààyò ELO, kanna agutan sile awọn LMArena chatbot arena). Awọn olupese lẹhinna wa ni ipo nipasẹ agbara ti wọn** ti o dara ju free awoṣe** .
 
 A ṣe iṣiro ipo naa lati awọn orisun gidi mẹta:
 
-1. Awọn atokọ Olupese ọfẹ - `NOAUTH_PROVIDERS`, pẹlu awọn titẹ sii `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ti asia ti `hasFree` (`src/shared/constants/providers.ts`).
+1. Olupese ọfẹ ṣe atokọ — `NOAUTH_PROVIDERS`, pẹlu awọn titẹ sii `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ti asia ti `hasFree` (`src/shared/constants/providers.ts`).
 2. Katalogi awoṣe olupese kọọkan lati iforukọsilẹ olupese (`open-sse/config/providerRegistry.ts`).
 3. Awọn ikun ibamu-ṣiṣe-ṣiṣe ti ELO ti a fipamọ sinu tabili `model_intelligence` DB nipasẹ ẹrọ amuṣiṣẹpọ Arena ELO (`src/lib/arenaEloSync.ts`).
 

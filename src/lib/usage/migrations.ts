@@ -461,6 +461,7 @@ export function migrateUsageJsonToSqlite() {
                     out: log.tokens?.out ?? 0,
                     cacheRead: null,
                     cacheWrite: null,
+                    compressed: 0,
                     reasoning: null,
                   },
                   requestType: log.requestType || null,

@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
 import { FLOW_EDGE_COLORS, flowColorAlpha } from "@/shared/components/flow/edgeStyles";
@@ -94,6 +95,7 @@ export interface ProviderCascadeNodeData {
   cooldownCount?: number;
   cooldownTotal?: number;
   cooldownRetryAfterMs?: number;
+  connectionId?: string | null;
   [key: string]: unknown;
 }
 
@@ -110,6 +112,21 @@ export interface ProviderCascadeNodeData {
  *
  * Has Left (target) and Right (source) Handles for the cascade flow.
  */
+/** Which account served this target. Connection ids are UUIDs, so the node shows a short prefix. */
+function ConnectionLabel({ connectionId }: { connectionId: string }) {
+  const t = useTranslations("combos");
+  const shortId = connectionId.length > 8 ? `${connectionId.slice(0, 8)}...` : connectionId;
+  return (
+    <span
+      className="text-[9px] text-text-muted font-mono truncate"
+      title={t("liveAccountTooltip", { id: connectionId })}
+      data-testid="connection-id"
+    >
+      {t("liveAccountLabel", { id: shortId })}
+    </span>
+  );
+}
+
 export function ProviderCascadeNode({ data }: NodeProps) {
   const {
     provider,
@@ -123,6 +140,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
     cooldownCount,
     cooldownTotal,
     cooldownRetryAfterMs,
+    connectionId,
   } = data as ProviderCascadeNodeData;
 
   const borderColor = getStateBorderColor(state as TargetState);
@@ -170,7 +188,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         )}
       </div>
 
-      {/* Body: model + latency */}
+      {/* Body: model + latency + account */}
       <div className="px-2.5 py-1.5 flex flex-col gap-0.5">
         <span
           className="text-[10px] text-text-muted font-mono truncate"
@@ -179,6 +197,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         >
           {model as string}
         </span>
+        {connectionId && <ConnectionLabel connectionId={connectionId as string} />}
         {latencyMs != null && (
           <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}

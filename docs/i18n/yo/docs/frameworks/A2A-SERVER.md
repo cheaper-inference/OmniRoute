@@ -163,7 +163,7 @@ OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/task
 | Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
 | Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 377 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 381 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
 ### `list-capabilities` Skill Apejuwe
 
@@ -180,42 +180,50 @@ Lara kọọkan pẹlu iwe `rawUrl` ki awọn aṣoju le mu SKILL.md ni kikun l�
 
 ---
 
-## REST API (àfikún)
+## REST API (oluranlọwọ)
 
-Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-ọ̀nà REST tó wà nísàlẹ̀ ń pèsè ààyè ìráyè àfikún fún àwọn pátákó ìṣàkóso àti irinṣẹ́ ìta:
+JSON-RPC ipari `/a2a` jẹ aaye titẹsi A2A canonical. Awọn aaye ipari REST ti o wa ni isalẹ pese iraye si iranlọwọ fun awọn dasibodu ati ohun elo ita:
 
-| Ojú-ọ̀nà                      | Ọ̀nà  | Àpèjúwe                                                     | Ìfàṣẹsí                                        |
-| :--------------------------- | :--- | :---------------------------------------------------------- | :--------------------------------------------- |
-| `/api/a2a/status`            | GET  | Ipò olupin, àwọn ọgbọ́n tí a forúkọsílẹ̀                      | (gbangba)                                      |
-| `/api/a2a/tasks`             | GET  | Ṣàkójọ àwọn iṣẹ́ pẹ̀lú àwọn àsẹ                               | ìṣàkóso                                        |
-| `/api/a2a/tasks/[id]`        | GET  | Gba iṣẹ́ nípasẹ̀ ID                                           | ìṣàkóso                                        |
-| `/api/a2a/tasks/[id]/cancel` | POST | Fagilé iṣẹ́ tó ń lọ lọ́wọ́                                     | ìṣàkóso                                        |
-| `/.well-known/agent.json`    | GET  | Káàdì Aṣojú (àwárí A2A)                                     | (gbangba, a pa á mọ́ fún 3600s)                 |
-| `/api/a2a/tasks`             | POST | Ìfúnniṣẹ́ tó ń wọlé sí ikọ̀ OmniConductor (Conductor PRD RF5) | Bearer pẹ̀lú `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Opin ojuami                  | Ọna  | Apejuwe                                                            | Òótọ́                                                                                                      |
+| :--------------------------- | :--- | :----------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET  | Ipo olupin, awọn ogbon ti a forukọsilẹ                             | (gbangba)                                                                                                 |
+| `/api/a2a/tasks`             | GET  | Ṣe atokọ awọn iṣẹ ṣiṣe pẹlu awọn asẹ                               | iṣakoso tabi bọtini API (wo isalẹ)                                                                        |
+| `/api/a2a/tasks/[id]`        | GET  | Gba iṣẹ-ṣiṣe nipasẹ ID                                             | iṣakoso tabi bọtini API (wo isalẹ)                                                                        |
+| `/api/a2a/tasks/[id]/cancel` | POST | Fagilee iṣẹ ṣiṣe                                                   | iṣakoso tabi bọtini API (wo isalẹ)                                                                        |
+| `/.well-known/agent.json`    | GET  | Kaadi Aṣoju (ṣawari A2A )                                          | (gbangba, cache 3600s)                                                                                    |
+| `/api/a2a/tasks`             | POST | Awọn aṣoju ti nwọle si ọkọ oju-omi OmniConductor (Oludari PRD RF5) | kanna bi `GET`, pẹlu `OMNIROUTE_API_KEY` ti o ba ṣeto nigba ti `REQUIRE_API_KEY` wa ni pipa; `a2aEnabled` |
 
-**Ìfúnniṣẹ́ Conductor tó ń wọlé (`POST /api/a2a/tasks`):** àwọn aṣojú A2A ìta ń fi iṣẹ́ kíkọ kóòdù lé ikọ̀ OmniConductor lọ́wọ́ nípasẹ̀ OmniRoute. Ara: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — àwọn ọgbọ́n ikọ̀ Conductor nìkan (àwọn tí a kéde lórí Káàdì Aṣojú) ni a lè fi iṣẹ́ lé lọ́wọ́; `metadata.conductor.repo.url` jẹ́ dandan (ikọ̀ náà ń ṣiṣẹ́ lórí àwọn ibi ìpamọ́ git). Ojú-ọ̀nà náà ń yí ìbéèrè padà sí `POST /v1/tasks` ti hub nípa lílo `CONDUCTOR_ORCHESTRATOR_TOKEN` ní ẹ̀gbẹ́ olupin (àṣàyàn ìgbàkugbà `CONDUCTOR_HUB_TOKEN`) ó sì ń dá `201 { conductor_task_id, state: "submitted" }` padà; àwọn ipò iṣẹ́ ń padà wá nípasẹ̀ àwòrán SSE→A2A (RF1), a sì lè rí wọn nípasẹ̀ `GET /api/a2a/tasks?skill=conductor`.
+Tani o gba si awọn ipa ọna `/api/a2a/tasks*` da lori wiwọle ati awọn eto bọtini API:
+
+- `requireLogin=true` (aiyipada): middleware nikan gba awọn iwe eri iṣakoso (akoko dasibodu, bọtini `manage` -scope API, ami wiwọle `oma_` ) ati `OMNIROUTE_API_KEY`. Bọtini itọka itele kan gba `403`. Ninu akọsori `Authorization` agbedemeji nikan gba `OMNIROUTE_API_KEY` bi `Bearer <key>`; bọtini igboro tabi taabu kan lẹhin ti `Bearer` gba `401`.
+- `requireLogin=false`, tabi ferese loopback ṣaaju ki o to wọ: pẹlu `REQUIRE_API_KEY=true` eyikeyi bọtini OmniRoute API ti o wulo tabi iwe-ẹri iṣakoso ti gba ati awọn olupe ailorukọ gba `401`; pẹlu `REQUIRE_API_KEY` pa awọn ipa-ọna wa ni sisi.
+- `POST /api/a2a/tasks` ni afikun si nilo `OMNIROUTE_API_KEY` ninu akọsori `Authorization` nigbati a ṣeto oniyipada yẹn ati pe `REQUIRE_API_KEY` wa ni pipa. Awọn akọle miiran, gẹgẹbi `x-api-key`, ko ka sibẹ. Pẹlu iwọle kuro tabi ṣaaju ki o to wọ inu bọtini naa kọja pẹlu tabi laisi ìpele `Bearer` ; pẹlu wiwọle lori, nikan `Bearer <key>` gba ti o ti kọja awọn middleware.
+
+Nibiti o ti nilo iwe-ẹri, ami `read` -scope `oma_` kan ṣiṣẹ fun `GET` nikan.
+
+**Awọn aṣoju oludari ti nwọle (`POST /api/a2a/tasks`):** awọn aṣoju A2A ti ita ṣe aṣoju iṣẹ ifaminsi si awọn ọkọ oju-omi OmniConductor nipasẹ OmniRoute. Ara: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — nikan Awọn ọgbọn ọkọ oju-omi adari (awọn ti a kede lori Kaadi Aṣoju) jẹ aṣoju; `metadata.conductor.repo.url` nilo (awọn ọkọ oju-omi kekere n ṣiṣẹ lori git repos). Ọna naa tumọ si `POST /v1/tasks` ibudo nipa lilo apa olupin `CONDUCTOR_ORCHESTRATOR_TOKEN` (fallback `CONDUCTOR_HUB_TOKEN`) ati dapada `201 { conductor_task_id, state: "submitted" }`; awọn ipinlẹ iṣẹ-ṣiṣe nṣàn pada nipasẹ SSE→A2A digi (RF1) ati pe o han nipasẹ `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Fí Ìmọ̀ Tuntun Kún Un
+## Fifi Olorijori Tuntun kan
 
-1. **Ṣẹ̀dá fáìlì ìmọ̀:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ṣẹda faili ogbon:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ṣe àgbéjáde iṣẹ́ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìṣètò àwọn ìmọ̀ tó ti wà tẹ́lẹ̀ bíi `smartRouting.ts`.
+   Ṣe okeere iṣẹ async `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Tẹle apẹrẹ ti awọn ọgbọn ti o wa tẹlẹ bii `smartRouting.ts`. Ti ọgbọn ba pe pada sinu OmniRoute lori HTTP, kọ awọn akọle pẹlu `buildSelfLoopHeaders(caller)` lati `src/lib/a2a/selfLoopAuth.ts` nitorina ipe naa nṣiṣẹ pẹlu bọtini olupe A2A, kii ṣe `OMNIROUTE_API_KEY`, ki o kọja `redirect: "error"` si `fetch` nitorinaa àtúnjúwe ko gba bọtini naa rara. Oluranlọwọ nikan kọ awọn akọle; kọọkan olorijori ṣeto awọn àtúnjúwe eto imulo ara. O ju `UnsafeSelfLoopTargetError` kuku ju so bọtini kan nigbati ipilẹ ipinnu URL jẹ itele http ni ita nẹtiwọki aladani (loopback, apo eiyan tabi orukọ iṣẹ, ati awọn adirẹsi ikọkọ jẹ itanran) tabi mu awọn iwe-ẹri mu, nitorinaa ọgbọn ti o gbe awọn ipe ti a kọ silẹ gbọdọ tunṣe aṣiṣe yẹn.
 
-2. **Forúkọsílẹ̀ olùṣàkóso:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
+2. **Olutọju iforukọsilẹ:** ni `src/lib/a2a/taskExecution.ts`, ṣafikun titẹ sii si `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...àwọn ìmọ̀ tó ti wà tẹ́lẹ̀
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Ṣàfihàn rẹ̀ nínú Káàdì Agent:** nínú `src/lib/a2a/agentCardMetadata.ts` (tí `/.well-known/agent.json` àti `/.well-known/agent-card.json` ń lò papọ̀), fi kún àkójọpọ̀ `skills`:
+3. **Fi han ni Kaadi Aṣoju:** ni `src/lib/a2a/agentCardMetadata.ts` (pín nipasẹ `/.well-known/agent.json` ati `/.well-known/agent-card.json`), fi kun si eto `skills` :
 
    ```json
    {
@@ -227,9 +235,9 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    }
    ```
 
-4. **Kọ àwọn àyẹ̀wò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ọ̀nà àṣeyọrí àti ọ̀nà àṣìṣe.
+4. **Kọ awọn idanwo:** `tests/unit/a2a-<your-skill>.test.ts`. Bo dun ona + aṣiṣe ona.
 
-5. **Ṣàkọsílẹ̀ àlàyé** ìmọ̀ tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
+5. **Iwe aṣẹ** titun olorijori ni yi faili ká `Available Skills` tabili.
 
 ---
 

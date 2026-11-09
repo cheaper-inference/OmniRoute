@@ -4,25 +4,25 @@
 //
 //   node scripts/docs/gen-readme-hero.mjs [--out path.svg]      (npm run docs:readme-hero)
 //
-// Everything the hero draws lives in HERO_COPY: it is both the drawn text and the subset input
-// for the embedded fonts, so a glyph can never be drawn without being embedded. Numbers stay in
+// Everything the hero draws lives in HERO_COPY: it is both the drawn text and what the
+// outlining step shapes (scripts/docs/readme-outline.mjs). Numbers stay in
 // <text> nodes because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { buildFontFaceCss } from "./readme-fonts.mjs";
+import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 
 export const HERO_COPY = {
   kicker: ["OMNIROUTE — THE FREE AI GATEWAY"],
   headline: ["Never stop coding."],
-  sub: ["Every AI tool → 380 providers — 150+ free —", "through one endpoint."],
+  sub: ["Every AI tool → 384 providers — 150+ free —", "through one endpoint."],
   tools: [
     "Claude Code · Codex · Cursor · Cline · Copilot · Antigravity  →  FREE Claude / GPT / Gemini · auto-fallback",
   ],
   cmd: ["$ npm i -g omniroute"],
   foot: ["RTK + CAVEMAN · STACKED COMPRESSION · ONE ENDPOINT · /v1"],
   stats: [
-    "380",
+    "384",
     "AI PROVIDERS",
     "150+",
     "FREE TIERS",
@@ -39,13 +39,7 @@ export const HERO_COPY = {
 
 export async function renderReadmeHero() {
   const C = HERO_COPY;
-  const { css } = await buildFontFaceCss({
-    display: C.headline.join(""),
-    ui: [...C.sub, ...C.tools].join(""),
-    mono: [...C.kicker, ...C.cmd, ...C.foot, ...C.stats].join(""),
-  });
-
-  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, lime edge).
+  // Right column: 2 × 3 stats on a kit card (surface, border, 12px radius, accent edge).
   const cardX = 760;
   const cardY = 96;
   const cardW = 380;
@@ -62,32 +56,31 @@ export async function renderReadmeHero() {
     );
   }
 
-  return (
+  return outlineSvg(
     svgOpen({
       viewBox: "0 0 1200 548",
       title:
-        "OmniRoute — Never stop coding. Every AI tool to 380 providers, 150+ free, through one endpoint.",
-      desc: "Hero card in the Cheaper Inference UI Kit style: Instrument Serif headline, Inter body, IBM Plex Mono figures. Claims: 380 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
-      fontFaceCss: css,
+        "OmniRoute — Never stop coding. Every AI tool to 384 providers, 150+ free, through one endpoint.",
+      desc: "Hero card in the Cheaper Inference UI Kit style: Switzer drawn as outlines, IBM Plex Mono for the install command. Claims: 384 AI providers, 150+ free tiers, ~1.62B free tokens per month, 15–95% token savings, 20 routing strategies, $0 to start. Light and dark follow the viewer's color scheme.",
     }) +
-    gridDefs("heroGrid") +
-    `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +
-    `  <rect x="0" y="0" width="1200" height="548" fill="url(#heroGrid)"/>\n` +
-    `  <text x="60" y="110" class="kicker">${esc(C.kicker[0])}</text>\n` +
-    `  <text x="60" y="206" class="headline">${esc(C.headline[0])}</text>\n` +
-    `  <line x1="60" y1="236" x2="300" y2="236" class="rule" stroke-width="1"/>\n` +
-    `  <circle cx="60" cy="236" r="5" class="accent">` +
-    `<animate attributeName="opacity" values="1;0.35;1" dur="3s" repeatCount="indefinite"/></circle>\n` +
-    `  <text x="60" y="284" class="sub">${esc(C.sub[0])}</text>\n` +
-    `  <text x="60" y="316" class="sub">${esc(C.sub[1])}</text>\n` +
-    `  <text x="60" y="350" class="body">${esc(C.tools[0])}</text>\n` +
-    `  <rect x="60" y="392" width="262" height="44" rx="8" class="accent"/>\n` +
-    `  <text x="80" y="420" class="cmd">${esc(C.cmd[0])}</text>\n` +
-    `  <text x="60" y="490" class="foot">${esc(C.foot[0])}</text>\n` +
-    `  <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="12" class="surface" stroke-width="1"/>\n` +
-    `  <rect x="${cardX}" y="${cardY}" width="6" height="${cardH}" rx="3" class="accent"/>\n` +
-    stats.join("\n") +
-    "\n</svg>\n"
+      gridDefs("heroGrid") +
+      `  <rect class="bg" x="0" y="0" width="1200" height="548"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="548" fill="url(#heroGrid)"/>\n` +
+      `  <text x="60" y="110" class="kicker">${esc(C.kicker[0])}</text>\n` +
+      `  <text x="60" y="206" class="headline">${esc(C.headline[0])}</text>\n` +
+      `  <line x1="60" y1="236" x2="300" y2="236" class="rule" stroke-width="1"/>\n` +
+      `  <circle cx="60" cy="236" r="5" class="accent">` +
+      `<animate attributeName="opacity" values="1;0.35;1" dur="3s" repeatCount="indefinite"/></circle>\n` +
+      `  <text x="60" y="284" class="sub">${esc(C.sub[0])}</text>\n` +
+      `  <text x="60" y="316" class="sub">${esc(C.sub[1])}</text>\n` +
+      `  <text x="60" y="350" class="body">${esc(C.tools[0])}</text>\n` +
+      `  <rect x="60" y="392" width="262" height="44" rx="8" class="accent"/>\n` +
+      `  <text x="80" y="420" class="cmd">${esc(C.cmd[0])}</text>\n` +
+      `  <text x="60" y="490" class="foot">${esc(C.foot[0])}</text>\n` +
+      `  <rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <rect x="${cardX}" y="${cardY}" width="6" height="${cardH}" rx="3" class="accent"/>\n` +
+      stats.join("\n") +
+      "\n</svg>\n"
   );
 }
 

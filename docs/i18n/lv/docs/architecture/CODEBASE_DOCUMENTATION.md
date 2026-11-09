@@ -444,7 +444,7 @@ Sadalīts mērķorientētās apakšdirektorijās:
 
 ---
 
-## 4. `open-sse/` — straumēšanas programmas darbvieta
+## 4. `open-sse/` — Straumēšanas dzinēja darbvieta
 
 Atsevišķa npm darbvieta publicēta kā `@omniroute/open-sse`. Pieder pieprasījumu apstrāde, izpildītāji, tulki, pakalpojumi, transformators un MCP serveris.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 augstākā līmeņa izpildītāju moduļi (`*.ts` mīnus `base.ts`, `index.ts` un testi — `npm run check:docs-counts` skaitīšanas pasākumi). Katra izpildītāja klase paplašina `BaseExecutor` (`base.ts`), tieši vai caur `DefaultExecutor` vai citu izpildītāju; pārējie moduļi ir pakalpojumu sniedzēja palīgi (rīku shēmas, fetch/TTS adapteri, quirk apstrādātāji). Izpildītāju vidū ir:
+159 augstākā līmeņa izpildītāju moduļi (`*.ts` mīnus `base.ts`, `index.ts` un testi — skaitīšanas `npm run check:docs-counts` pasākumi). Katra izpildītāja klase paplašina `BaseExecutor` (`base.ts`), tieši vai caur `DefaultExecutor` vai citu izpildītāju; pārējie moduļi ir pakalpojumu sniedzēja palīgi (rīku shēmas, fetch/TTS adapteri, savdabīgie apstrādātāji). Izpildītāju vidū ir:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder` `vertex`, kā arī `devin-desktop`(koplietotās identitātes palīgs) un `claudeIdentity.ts` ( `index.ts` ).
 
-> Piezīme: pakalpojumu sniedzējus, kas šeit nav norādīti, apkalpo `default.ts`, izmantojot vispārējo ar OpenAI saderīgu izpildītāju. Pilns pakalpojumu sniedzēju katalogs (377 pakalpojumu sniedzēji) atrodas `src/shared/constants/providers.ts`.
+> Piezīme: pakalpojumu sniedzējus, kas šeit nav norādīti, apkalpo `default.ts`, izmantojot vispārējo ar OpenAI saderīgu izpildītāju. Pilns pakalpojumu sniedzēju katalogs (381 pakalpojumu sniedzējs) atrodas `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Rumbas un spieķu tulkojums (OpenAI ir centrs).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based atbildes API ↔ tērzēšanas pabeigšanas pārveidotājs (izmanto `responses/` maršruta visaptverošais).
+- `responsesTransformer.ts` — `TransformStream` -based atbildes API ↔ tērzēšanas pabeigšanas pārveidotājs (ko izmanto `responses/` maršruta visaptverošais).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Svarīgākie punkti (pilns saraksts zem `open-sse/services/`):
 | Kešatmiņa                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Maršrutēšanas inteliģence | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modeļu apstrāde           | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Saspiešana                | `compression/` — pilna kompresijas dzinēja elektroinstalācija                                                                                                                                                                                            |
+| Saspiešana                | `compression/` — pilnas kompresijas dzinēja elektroinstalācija                                                                                                                                                                                           |
 | Token + sesija            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Līmenis / manifests       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / tīkls                | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ Svarīgākie punkti (pilns saraksts zem `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikāli instrumenti** `server.ts` vadu (45 kanoniskie `schemas/tools.ts` + atmiņa, prasmes, GitHub prasmes, baseins, gamification, spraudnis, Notion, Obsidian, lokālais korpuss un saspiešanas moduļi — savienojums tiek skaitīts pēc `countUniqueMcpTools`).
+- **110 unikāli instrumenti** `server.ts` vadu (45 kanoniskie `schemas/tools.ts` + atmiņa, prasmes, GitHub prasmes, baseins, gamification, spraudnis, Notion, Obsidian, lokālā korpusa un kompresijas moduļi — savienība, ko skaita ar `countUniqueMcpTools`).
 - **3 transporti** : stdio, HTTP straumējams, SSE.
-- **33 tvērumi** izpildīts izpildlaikā — `src/shared/constants/mcpScopes.ts` bāzes saraksts, pilna kopa ir katra rīka moduļa deklarēto tvērumu savienība.
+- **33 tvērumi** tiek ieviests izpildlaikā — bāzes sarakstā `src/shared/constants/mcpScopes.ts`, pilna kopa ir katra rīka moduļa deklarēto tvērumu savienība.
 - Revīzijas tabula: `mcp_tool_audit` (apdzīvo ar `audit.ts`).
 - Faili: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, kā arī testi zem `__tests__/`.
 - Pilnu instrumentu katalogu skatiet [MCP-SERVER.md](../frameworks/MCP-SERVER.md).

@@ -73,11 +73,15 @@ export function createPinnedFetch(address: string, family: number): typeof fetch
       // breaking every pinned fetch — verified by
       // `tests/unit/remote-image-fetch-pin-dns-connection.test.ts`.
       lookup: (_hostname, options, callback) => {
-        if (options && typeof options === "object" && "all" in options && options.all) {
-          callback(null, [{ address, family }]);
-          return;
-        }
-        callback(null, address, family);
+        // Answer on the next tick, as dns.lookup does. A synchronous answer lets an
+        // immediate connect error (ENETUNREACH) fire before undici has wrapped the socket in
+        // TLS; undici then fails on a null socket and the connect error escapes as an
+        // uncaughtException instead of rejecting this fetch.
+        const all = options && typeof options === "object" && "all" in options && options.all;
+        process.nextTick(() => {
+          if (all) callback(null, [{ address, family }]);
+          else callback(null, address, family);
+        });
       },
     },
   });

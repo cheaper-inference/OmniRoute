@@ -19,6 +19,8 @@ import { AI_HORDE_IMAGE_PROVIDER } from "./providers/registry/aihorde/imageModel
 import { toRegistryImageModels as toSyntxImageModels } from "../services/syntxMediaCatalog.ts";
 import { ZENMUX_IMAGE_PROVIDER } from "./providers/registry/zenmux/imageModels.ts";
 import { MUSE_CODE_IMAGE_PROVIDER } from "./providers/registry/muse-code/imageModels.ts";
+import { COPILOT_M365_IMAGE_PROVIDER } from "./providers/registry/copilot-m365-web/imageModels.ts";
+import { CODEX_IMAGE_PROVIDER } from "./providers/registry/codex/imageModels.ts";
 import { GROK_BUILD_PROXY_BASE_URL } from "./grokBuildEndpoints.ts";
 
 export interface ImageModelEntry {
@@ -184,6 +186,7 @@ export const IMAGE_MODEL_ALIASES: Record<string, ImageModelAliasEntry> = {
 export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   zenmux: ZENMUX_IMAGE_PROVIDER,
   "muse-code": MUSE_CODE_IMAGE_PROVIDER,
+  "copilot-m365-web": COPILOT_M365_IMAGE_PROVIDER,
   agnes: {
     id: "agnes",
     baseUrl: "https://apihub.agnes-ai.com/v1/images/generations",
@@ -253,40 +256,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },
 
-  // Codex serves images under ChatGPT OAuth two ways (handleCodexImageGeneration):
-  //  - `gpt-image-*` ids use the dedicated `/backend-api/codex/images/{generations,edits}`
-  //    routes, which take the image model as a request field (codexImages.ts);
-  //  - the GPT-5.6 ids call `/responses` with the hosted `image_generation` tool, whose
-  //    image model the backend pins to `gpt-image-2-codex`.
-  codex: {
-    id: "codex",
-    alias: "cx",
-    baseUrl: "https://chatgpt.com/backend-api/codex/responses",
-    authType: "oauth",
-    authHeader: "bearer",
-    format: "codex-responses",
-    models: [
-      {
-        id: "gpt-5.6-sol",
-        catalogId: "gpt-5.6-sol-image",
-        name: "GPT 5.6 Sol (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-terra",
-        catalogId: "gpt-5.6-terra-image",
-        name: "GPT 5.6 Terra (Codex Image)",
-      },
-      {
-        id: "gpt-5.6-luna",
-        catalogId: "gpt-5.6-luna-image",
-        name: "GPT 5.6 Luna (Codex Image)",
-      },
-      { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
-      { id: "gpt-image-2.5-sunburst", name: "GPT Image 2.5 Sunburst (Codex)" },
-      { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
-    ],
-    supportedSizes: ["1024x1024", "1024x1536", "1536x1024"],
-  },
+  codex: CODEX_IMAGE_PROVIDER,
 
   // Cursor plan image generation via the Agent CLI native `generateImage` tool.
   // Reuses the same OAuth/API-key connection as chat (`provider: "cursor"`).
@@ -689,6 +659,33 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
 
   // Segmind (#6656): 200+ models, `POST /v1/{model}`, x-api-key, raw image bytes.
   segmind: SEGMIND_IMAGE_PROVIDER,
+
+  // deAPI OpenAI-compatible gateway (https://docs.deapi.ai/openai-compatibility).
+  // Native model ids only (no dall-e-3 alias); `size` is validated per model and
+  // `quality` maps to a per-model step preset. Output is always PNG.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      // Z-Image models accept square sizes only (gateway returns size_not_supported otherwise).
+      {
+        id: "ZImageTurbo_INT8",
+        name: "Z-Image Turbo (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
+      { id: "Flux_2_Klein_4B_BF16", name: "FLUX.2 Klein 4B (deAPI)" },
+      { id: "Flux1schnell", name: "FLUX.1 schnell (deAPI)" },
+      {
+        id: "ZAnimeDistill_8Step_INT8",
+        name: "Z-Anime (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
+    ],
+    supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
+  },
   nanogpt: {
     id: "nanogpt",
     baseUrl: "https://nano-gpt.com/api/v1/images/generations",

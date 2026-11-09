@@ -8,6 +8,7 @@
 // requests clamp proactively via sanitizeReasoningEffortForProvider →
 // getLearnedReasoningEffort), clamp the live request body by re-running the
 // sanitizer, and retry the SAME url once.
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   nextProbeReasoningEffort,
@@ -16,6 +17,7 @@ import {
   recordLearnedProbeReasoningEffort,
   recordLearnedReasoningEffort,
 } from "../../services/learnedReasoningEffortCaps.ts";
+import { hasUnsupportedK31Effort, isKimiK31Model } from "../../utils/kimiK31.ts";
 import {
   readBodyReasoningEffort,
   sanitizeReasoningEffortForProvider,
@@ -61,6 +63,15 @@ export interface ReasoningEffortRecoveryResult {
 }
 
 /**
+ * No object body to clamp, or a K3.1 body whose explicit effort is not one K3.1
+ * accepts: that value must reach the client as the upstream's 400, not a clamp.
+ */
+function isUnrecoverableEffortBody(body: unknown, model: string | undefined): boolean {
+  if (!body || typeof body !== "object") return true;
+  return isKimiK31Model(model) && hasUnsupportedK31Effort(body);
+}
+
+/**
  * Detect an upstream 400/422 naming a rejected reasoning_effort enum, clamp
  * the body to the nearest accepted value, and retry the same URL once.
  * Returns the original response/body unchanged (retried: false) when the
@@ -80,14 +91,11 @@ export async function applyReasoningEffortRecovery(
   ) {
     return notRecoverable;
   }
-  if (!body || typeof body !== "object") {
+  if (isUnrecoverableEffortBody(body, model)) {
     return notRecoverable;
   }
 
-  const errText = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
   const acceptedValues = parseReasoningEffortEnum(errText);
   if (!acceptedValues) {
     return probeOneTierDown(params, body, notRecoverable);

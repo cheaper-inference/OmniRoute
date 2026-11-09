@@ -444,7 +444,7 @@ Suskirstyta į konkrečios paskirties pakatalogius:
 
 ---
 
-## 4. `open-sse/` – srautinio perdavimo variklio darbo sritis
+## 4. `open-sse/` — Srautinio perdavimo variklio darbo sritis
 
 Atskira npm darbo sritis paskelbta kaip `@omniroute/open-sse`. Turi užklausų apdorojimą, vykdytojus, vertėjus, paslaugas, transformatorių ir MCP serverį.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 aukščiausio lygio vykdymo moduliai (`*.ts` atėmus `base.ts`, `index.ts` ir testai – `npm run check:docs-counts` skaičiavimo priemonės). Kiekviena vykdytojų klasė išplečia `BaseExecutor` (`base.ts`), tiesiogiai arba per `DefaultExecutor` ar kitą vykdytoją; likę moduliai yra kiekvieno teikėjo pagalbininkai (įrankių schemos, fetch/TTS adapteriai, keiksmažodžiai). Vykdytojai apima:
+159 aukščiausio lygio vykdymo moduliai (`*.ts` minus `base.ts`, `index.ts` ir testai — `npm run check:docs-counts` matavimai). Kiekviena vykdytojų klasė išplečia `BaseExecutor` (`base.ts`) tiesiogiai arba per `DefaultExecutor` ar kitą vykdytoją; likę moduliai yra kiekvieno teikėjo pagalbininkai (įrankių schemos, fetch/TTS adapteriai, keiksmažodžiai). Vykdytojai apima:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, plius `devin-desktop`(bendras tapatybės pagalbininkas) ir `claudeIdentity.ts` (registras) `index.ts`
 
-> Pastaba: čia neišvardytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį su OpenAI suderinamą vykdytoją. Visas teikėjų katalogas (377 teikėjai) yra `src/shared/constants/providers.ts`.
+> Pastaba: čia neišvardytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį su OpenAI suderinamą vykdytoją. Visas teikėjų katalogas (381 teikėjas) yra `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Vertimas pagal stipiną (OpenAI yra centras).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based atsakymai API ↔ pokalbių užbaigimų keitiklis (naudojamas `responses/` maršruto sutvirtinimui).
+- `responsesTransformer.ts` — `TransformStream` -based atsakymai API ↔ pokalbių užbaigimų keitiklis (naudojamas `responses/` maršruto gamyboje).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Svarbiausi dalykai (visas sąrašas po `open-sse/services/`):
 | Talpykla                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Maršrutizavimo žvalgyba | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modelio valdymas        | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Suspaudimas             | `compression/` – pilna suspaudimo variklio laidai                                                                                                                                                                                                        |
+| Suspaudimas             | `compression/` — pilno suspaudimo variklio laidai                                                                                                                                                                                                        |
 | Žetonų + sesija         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Pakopa / manifestas     | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / tinklas            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,16 +528,16 @@ Svarbiausi dalykai (visas sąrašas po `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikalių įrankių** laidinis `server.ts` (45 kanoniniai `schemas/tools.ts` + atmintis, įgūdžiai, GitHub įgūdžiai, telkinys, žaidimai, papildinys, Notion, Obsidian, vietinis korpusas ir glaudinimo moduliai – sąjunga skaičiuojama pagal `countUniqueMcpTools`).
+- **110 unikalių įrankių** laidinis `server.ts` (45 kanoniniai `schemas/tools.ts` + atmintis, įgūdžiai, GitHub įgūdžiai, telkinys, žaidimai, papildinys, Notion, Obsidian, vietinio korpuso ir glaudinimo moduliai — sąjunga, skaičiuojama pagal `countUniqueMcpTools`).
 - **3 pervežimai** : stdio, HTTP Streamable, SSE.
-- **33 taikikliai** vykdoma vykdymo metu – bazinis sąrašas `src/shared/constants/mcpScopes.ts`, visas rinkinys yra kiekvieno įrankio modulio deklaruojamų apimčių sąjunga.
+- **33 taikikliai** vykdomas — baziniame sąraše `src/shared/constants/mcpScopes.ts`, visas rinkinys yra kiekvieno įrankio modulio deklaruojamų apimčių sąjunga.
 - Audito lentelė: `mcp_tool_audit` (užpildyta `audit.ts`).
 - Failai: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plius testai pagal `__tests__/`.
 - Visą įrankių katalogą rasite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
-Teikėjų registrai (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), modelių registrai pagal formatą (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts` `cliFingerprints.ts` `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), tapatybės pagalbininkai (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts` `antigravityUpstream.ts`, `antigravityModelAliases.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, kredencialų pagalbininkus (`credentialLoader.ts`, `codexClient.ts`) ir debesies adapterius (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, zqy , `oci.ts` `petals.ts` `glmProvider.ts`, `maritalk.ts`, `runway.ts`, `watsonx.ts` `sap.ts` `ollamaModels.ts` `errorConfig.ts`, `constants.ts` `registryUtils.ts`.
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

@@ -458,7 +458,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -488,11 +488,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ٹاپ لیول ایگزیکیوٹر ماڈیولز (`*.ts` مائنس `base.ts`, `index.ts` اور ٹیسٹ - گنتی `npm run check:docs-counts` اقدامات)۔ ہر ایگزیکیوٹر کلاس `BaseExecutor` (`base.ts`) کو براہ راست یا `DefaultExecutor` یا کسی اور ایگزیکیوٹر کے ذریعے بڑھاتا ہے۔ بقیہ ماڈیول فی فراہم کنندہ مددگار ہیں (ٹول اسکیماس، fetch/TTS اڈاپٹر، quirk ہینڈلرز)۔ ایگزیکیوٹرز میں شامل ہیں:
+159 ٹاپ لیول ایگزیکیوٹر ماڈیولز (`*.ts` مائنس `base.ts`، `index.ts` اور ٹیسٹ — the count `npm run check:docs-counts` اقدامات)۔ ہر ایگزیکیوٹر کلاس `BaseExecutor` (`base.ts`) کو براہ راست یا `DefaultExecutor` یا کسی اور ایگزیکیوٹر کے ذریعے بڑھاتا ہے۔ بقیہ ماڈیول فی فراہم کنندہ مددگار ہیں (ٹول اسکیماس، fetch/TTS اڈاپٹر، quirk ہینڈلرز)۔ ایگزیکیوٹرز میں شامل ہیں:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `vertex` `devin-desktop` plus `claudeIdentity.ts` (مشترکہ شناخت مددگار) اور `index.ts` `qoder` رجسٹری)۔
 
-> نوٹ: فراہم کنندگان جو یہاں درج نہیں ہیں وہ `default.ts` کے ذریعہ عام OpenAI- موافق ایگزیکیوٹر کا استعمال کرتے ہوئے پیش کیے جاتے ہیں۔ مکمل فراہم کنندہ کیٹلاگ (377 فراہم کنندگان) `src/shared/constants/providers.ts` میں رہتے ہیں۔
+> نوٹ: فراہم کنندگان جو یہاں درج نہیں ہیں وہ `default.ts` کے ذریعہ عام OpenAI- مطابقت پذیر ایگزیکیوٹر کا استعمال کرتے ہوئے پیش کیے جاتے ہیں۔ مکمل فراہم کنندہ کیٹلاگ (381 فراہم کنندگان) `src/shared/constants/providers.ts` میں رہتے ہیں۔
 
 ### 4.3 `open-sse/translator/`
 
@@ -521,7 +521,7 @@ open-sse/
 | کیشنگ            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | روٹنگ انٹیلی جنس | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ماڈل ہینڈلنگ     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| کمپریشن          | `compression/` - مکمل کمپریشن انجن کی وائرنگ                                                                                                                                                                                                             |
+| کمپریشن          | `compression/` — مکمل کمپریشن انجن کی وائرنگ                                                                                                                                                                                                             |
 | ٹوکن + سیشن      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | درجے / ظاہر      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / نیٹ ورک     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,9 +530,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 منفرد ٹولز** `server.ts` میں وائرڈ ( `schemas/tools.ts` + میموری میں 45 کینونیکل، مہارت، GitHub-Skills، pool، gamification، plugin، Notion، Obsidian، لوکل کارپس اور کمپریشن ماڈیولز — یونین کا شمار `countUniqueMcpTools` کے ذریعے کیا جاتا ہے)۔
-- **3 ٹرانسپورٹ** : stdio، HTTP سٹریم ایبل، SSE۔
-- **33 دائرہ کار** رن ٹائم پر نافذ - `src/shared/constants/mcpScopes.ts` میں بنیادی فہرست، مکمل سیٹ ہر ٹول ماڈیول کے ذریعہ اعلان کردہ اسکوپس کا اتحاد ہے۔
+- **110 منفرد ٹولز** `server.ts` میں وائرڈ ( `schemas/tools.ts` + میموری میں 45 کینونیکل، مہارت، GitHub-Skills، pool، gamification، plugin، Notion، Obsidian، لوکل کارپس اور کمپریشن ماڈیولز — یونین جن کا شمار `countUniqueMcpTools` کے ذریعے کیا جاتا ہے)۔
+- **3 ٹرانسپورٹ** : stdio، HTTP اسٹریم ایبل، SSE۔
+- **33 دائرہ کار** `src/shared/constants/mcpScopes.ts` میں رن ٹائم — بیس لسٹ پر نافذ، مکمل سیٹ ہر ٹول ماڈیول کے ذریعہ اعلان کردہ اسکوپس کا اتحاد ہے۔
 - آڈٹ ٹیبل: `mcp_tool_audit` ( `audit.ts` سے آباد)۔
 - فائلیں: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus `__tests__/` کے تحت ٹیسٹ۔
 - مکمل ٹول کیٹلاگ کے لیے [MCP-SERVER.md](../frameworks/MCP-SERVER.md) دیکھیں۔

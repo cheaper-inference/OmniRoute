@@ -107,41 +107,42 @@ OmniRoute कंटेनर के अंदर निष्पादित ए
 
 ---
 
-## 1. CLI Code की सूची (27 टूल)
+## 1. CLI कोड की सूची (28 उपकरण)
 
-वे सभी टूल जो `/dashboard/cli-code` में दिखाई देते हैं। जिनमें `baseUrlSupport: none` है, उन्हें कस्टम बेस URL के बजाय MITM या मैन्युअल गाइड के माध्यम से जोड़ा गया है:
+सभी उपकरण जो `/dashboard/cli-code` में दिखाई देते हैं। `baseUrlSupport: none` वाले लोगों को कस्टम बेस URL के बजाय MITM या मैन्युअल गाइड के माध्यम से वायर्ड किया जाता है:
 
-| id           | नाम                     | विक्रेता               | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ---------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic              | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                 | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                   | none           | custom         | false        |
-| cline        | Cline                   | OSS (पूर्व-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org               | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)              | full           | guide          | false        |
-| continue     | Continue                | continue.dev           | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)      | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ            | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)         | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)      | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)           | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (पूर्व-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI             | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS              | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere              | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)      | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)       | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries         | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research          | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                 | none           | mitm           | false        |
-| custom       | Custom CLI              | —                      | full           | custom-builder | false        |
+| पहचान             | नाम                      | विक्रेता               | baseUrlSupport | configType   | acpSpawnable |
+| ----------------- | ------------------------ | ---------------------- | -------------- | ------------ | ------------ |
+| क्लाउड            | Claude कोड               | Anthropic              | भरा हुआ        | env          | सत्य         |
+| कोडेक्स           | OpenAI Codex CLI         | OpenAI                 | भरा हुआ        | रिवाज़       | सत्य         |
+| zcode             | ZCode (GLM कोडिंग योजना) | Z.ai                   | कोई नहीं       | रिवाज़       | असत्य        |
+| क्लाइन            | Cline                    | OSS (पूर्व-क्लाउड देव) | भरा हुआ        | रिवाज़       | सत्य         |
+| किलो              | किलो कोड                 | किलो-संगठन             | भरा हुआ        | रिवाज़       | असत्य        |
+| रू                | रू कोड                   | रू (OSS)               | भरा हुआ        | मार्गदर्शक   | असत्य        |
+| जारी रखना         | जारी रखना                | जारी रखें.देव          | भरा हुआ        | मार्गदर्शक   | असत्य        |
+| सहायक             | सहायक                    | OSS (पी. गौथियर)       | भरा हुआ        | मार्गदर्शक   | सत्य         |
+| फोर्ज             | ForgeCode                | एंटीनॉमी HQ            | भरा हुआ        | रिवाज़       | सत्य         |
+| jcode             | jcode                    | 1जेहुआंग (OSS)         | भरा हुआ        | रिवाज़       | असत्य        |
+| डीपसीक-तुई        | DeepSeek TUI             | हंटर बोउन (OSS)        | भरा हुआ        | रिवाज़       | असत्य        |
+| कोडव्हेल          | CodeWhale                | ह्म्बाऊन (OSS)         | भरा हुआ        | रिवाज़       | असत्य        |
+| opencode          | OpenCode                 | विसंगति (पूर्व-एसएसटी) | भरा हुआ        | मार्गदर्शक   | सत्य         |
+| Droid             | फ़ैक्टरी ड्रॉइड          | फैक्टरी AI             | आंशिक          | मार्गदर्शक   | असत्य        |
+| सह पायलट          | GitHub Copilot CLI       | GitHub/MS              | भरा हुआ        | रिवाज़       | असत्य        |
+| कर्सर-सीएलआई      | Cursor CLI               | कहीं भी                | आंशिक          | मार्गदर्शक   | सत्य         |
+| गलाना             | गलाना                    | लियोनार्डसेसर (OSS)    | भरा हुआ        | रिवाज़       | असत्य        |
+| अनुकरणीय          | पाई (पीआई-कोडिंग-एजेंट)  | एम. ज़ेचनर (OSS)       | भरा हुआ        | रिवाज़       | असत्य        |
+| ग्रोक-बिल्ड       | Grok बिल्ड               | xAI                    | भरा हुआ        | रिवाज़       | असत्य        |
+| कुचलना            | कुचलना                   | OSS (आकर्षण)           | भरा हुआ        | रिवाज़       | असत्य        |
+| क्वेन             | Qwen कोड                 | Alibaba                | भरा हुआ        | मार्गदर्शक   | सत्य         |
+| openclaude        | OpenClaude               | गिटलॉब (OSS)           | भरा हुआ        | मार्गदर्शक   | असत्य        |
+| जेड               | Zed                      | Zed इंडस्ट्रीज         | भरा हुआ        | मार्गदर्शक   | असत्य        |
+| कर्सर             | Cursor                   | कहीं भी                | कोई नहीं       | मार्गदर्शक   | असत्य        |
+| गुरुत्वाकर्षणरोधी | Antigravity              | Google                 | कोई नहीं       | mitm         | असत्य        |
+| हेमीज़            | हेमीज़                   | नौ अनुसंधान            | कोई नहीं       | मार्गदर्शक   | असत्य        |
+| किरो              | Kiro AI                  | Amazon                 | कोई नहीं       | mitm         | असत्य        |
+| रिवाज़            | कस्टम CLI                | —                      | भरा हुआ        | कस्टम-बिल्डर | असत्य        |
 
-`baseUrlSupport: "partial"` वाले टूल के डैशबोर्ड कार्ड पर "⚠ आंशिक बेस URL" बैज दिखाई देता है।
+`baseUrlSupport: "partial"` वाले उपकरण डैशबोर्ड कार्ड में एक बैज "⚠ बेस URL पार्सियल" दिखाते हैं।
 ---
 
 ## 2. CLI एजेंट कैटलॉग (11 उपकरण)
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. नए टूल्स के लिए सेटिंग्स हैंडलर
+## 6. नए टूल के लिए सेटिंग्स हैंडलर
 
-`configType: "custom"` वाले नए टूल्स के लिए समर्पित सेटिंग्स API रूट हैं:
+`configType: "custom"` के साथ नए टूल में समर्पित सेटिंग्स API मार्ग हैं:
 
-| रूट                                         | टूल                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                           |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url फ्लैग)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, लेगेसी)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, प्राथमिक + लेगेसी `~/.deepseek` सिंक) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                             |
-| `POST /api/cli-tools/pi-settings`           | Pi कोडिंग एजेंट                                                   |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)             |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + समर्पित `.env` कुंजी)        |
+| मार्ग                                       | औजार                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ध्वज)                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, विरासत)                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, प्राथमिक + विरासत `~/.deepseek` सिंक)  |
+| `POST /api/cli-tools/smelt-settings`        | गलाना                                                              |
+| `POST /api/cli-tools/pi-settings`           | Pi कोडिंग एजेंट (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok बिल्ड (~/.grok/config.toml, `[model.omniroute]`)              |
+| `POST /api/cli-tools/qwen-settings`         | Qwen कोड (`~/.qwen/settings.json` + समर्पित `.env` कुंजी)          |
 
-सभी रूट त्रुटि प्रतिक्रियाओं के लिए `sanitizeErrorMessage()` का उपयोग करते हैं (कठोर नियम #12)।
+सभी रूट त्रुटि प्रतिक्रियाओं के लिए `sanitizeErrorMessage()` उपयोग करते हैं (हार्ड नियम #12)।
 
 ---
 
@@ -293,19 +294,19 @@ interface ToolBatchStatus {
 
 ## 9. त्वरित शुरुआत
 
-### चरण 1 — OmniRoute API कुंजी प्राप्त करें
+### चरण 1 — एक OmniRoute API कुंजी प्राप्त करें
 
-1. `/dashboard/api-manager` खोलें → **API कुंजी बनाएँ**
-2. इसे एक नाम दें (उदा. `cli-tools`) और सभी अनुमतियाँ चुनें
-3. कुंजी कॉपी करें — नीचे दिए गए प्रत्येक CLI के लिए आपको इसकी आवश्यकता होगी
+1. `/dashboard/api-manager` → खोलें** API कुंजी बनाएं**
+2. इसे एक नाम दें (जैसे `cli-tools`) और सभी अनुमतियाँ चुनें
+3. कुंजी — कॉपी करें जिसकी आपको नीचे दिए गए प्रत्येक CLI के लिए आवश्यकता होगी
 
-> आपकी कुंजी ऐसी दिखाई देती है: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> आपकी कुंजी इस प्रकार दिखती है: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### चरण 2 — CLI टूल इंस्टॉल करें
+### चरण 2 — CLI उपकरण स्थापित करें
 
-सभी npm-आधारित टूल्स के लिए Node.js 22.22.2+ या 24.x आवश्यक है:
+सभी एनपीएम-आधारित उपकरणों के लिए Node.js 22.22.2 + या 24.x की आवश्यकता होती है:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,20 +327,20 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini` के माध्यम से लॉन्च किया जा सकता है → /v1beta सरफ़ेस)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-आधारित
+cargo install smelt  # Rust-based
 
-# Pi कोडिंग एजेंट
-# इंस्टॉल करने के लिए https://github.com/zechnerj/pi-coding-agent देखें
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# इंस्टॉल करने के लिए https://github.com/1jehuang/jcode देखें
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
@@ -347,37 +348,36 @@ cargo install smelt  # Rust-आधारित
 ### चरण 3 — डैशबोर्ड के माध्यम से कॉन्फ़िगर करें
 
 1. `http://localhost:20128/dashboard/cli-code` पर जाएँ
-2. ग्रिड में अपना टूल खोजें
-3. टूल का विवरण पेज खोलने के लिए कार्ड पर क्लिक करें
-4. अपनी API कुंजी और बेस URL चुनें
-5. **कॉन्फ़िग लागू करें** पर क्लिक करें या मैन्युअल कॉन्फ़िग स्निपेट कॉपी करें
+2. ग्रिड में अपना टूल ढूंढें
+3. टूल विवरण पृष्ठ खोलने के लिए कार्ड पर क्लिक करें
+4. अपनी API कुंजी और आधार URL चुनें
+5. क्लिक** कॉन्फ़िगरेशन लागू करें** या मैन्युअल कॉन्फ़िगरेशन स्निपेट की प्रतिलिपि बनाएँ
 
 ---
 
-### चरण 4 — वैश्विक एनवायरनमेंट वेरिएबल सेट करें
+### चरण 4 — वैश्विक पर्यावरण चर सेट करें
 
 ```bash
-# OmniRoute यूनिवर्सल एंडपॉइंट
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI रूट पर GOOGLE_GEMINI_BASE_URL पढ़ता है (इसका SDK स्वयं /v1beta/... जोड़ता है)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **रिमोट सर्वर** के लिए `localhost:20128` को सर्वर IP या डोमेन से बदलें,
-> उदा. `http://<your-server-ip>:20128`।
+> एक के लिए** दूरस्थ सर्वर** `localhost:20128` सर्वर IP या डोमेन से बदलें, उदाहरण के लिए `http://<your-server-ip>:20128`।
 
 ---
 
-### चरण 4 — प्रत्येक टूल को कॉन्फ़िगर करें
+### चरण 4 प्रत्येक टूल — कॉन्फ़िगर करें
 
-#### Claude Code
+#### Claude कोड
 
 ```bash
-# ~/.claude/settings.json बनाएँ:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code के लिए एकीकृत Anthropic गेटवे रूट का उपयोग करें। यहाँ `/v1` न जोड़ें।
+Claude कोड के लिए एकीकृत Anthropic गेटवे रूट का उपयोग करें। यहां `/v1` न जोड़ें.
 
-**परीक्षण:** `claude "say hello"`
+**परीक्षा:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-आधुनिक Codex (v0.137+) केवल `~/.codex/config.toml` पढ़ता है — पुराना
-`config.yaml` लेगेसी npm CLI से संबंधित है और इसे बिना किसी सूचना के अनदेखा कर दिया जाता है। API
-कुंजी `OMNIROUTE_API_KEY` एनवायरनमेंट वेरिएबल (`env_key`) में रहती है, फ़ाइल
-के अंदर कभी नहीं:
+आधुनिक Codex (v0.137 +) `~/.codex/config.toml` केवल — पढ़ता है, पुराना `config.yaml` विरासत npm CLI से संबंधित है और इसे चुपचाप अनदेखा कर दिया गया है। API कुंजी `OMNIROUTE_API_KEY` पर्यावरण चर (`env_key`) में रहती है, फ़ाइल के अंदर कभी नहीं:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,9 +411,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-संपूर्ण संदर्भ (प्रोफ़ाइल, `wire_api`, कॉन्टेक्स्ट विंडो): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)।
+पूर्ण संदर्भ (प्रोफ़ाइल, `wire_api`, संदर्भ विंडो): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md) ।
 
-**परीक्षण:** `codex "what is 2+2?"`
+**परीक्षा:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,14 +442,44 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**परीक्षण:** `opencode`
+**परीक्षा:** `opencode`
 
-> थिंकिंग वेरिएंट भेजने के लिए
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` का उपयोग करें।
+> सोच वेरिएंट भेजने के लिए `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` उपयोग करें।
 
 ---
 
-#### Cline (CLI या VS Code)
+#### पाई कोडिंग एजेंट
+
+`npm install -g --ignore-scripts @earendil-works/pi-coding-agent` के साथ आधिकारिक Pi कोडिंग एजेंट पैकेज स्थापित करें। Pi `~/.pi/agent/models.json` से कस्टम प्रदाताओं को पढ़ता है; संपूर्ण एजेंट निर्देशिका को स्थानांतरित करने के लिए `PI_CODING_AGENT_DIR` सेट करें। डैशबोर्ड उस ओवरराइड का अनुसरण करता है। Pi कस्टम एंडपॉइंट से मॉडल की खोज नहीं करता है, इसलिए OmniRoute Pi के `openai-completions` API और OmniRoute OpenAI-संगत `/v1` एंडपॉइंट का उपयोग करके `models[]` में चयनित मॉडल लिखता है।
+
+में**CLI उपकरण → Pi** , एक समापन बिंदु, API कुंजी और मॉडल चुनें, प्रदाता पूर्वावलोकन की समीक्षा करें, फिर आवेदन करें। पूर्वावलोकन एक प्रदाता खंड है: Pi को मैन्युअल रूप से कॉन्फ़िगर करते समय `providers.omniroute` अपने मौजूदा `models.json` में मर्ज करें ताकि अन्य प्रदाता और सेटिंग्स बरकरार रहें।
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+जब आप `/model` खोलते हैं तो Pi `models.json` पुनः लोड करता है। आपके द्वारा चयनित प्रदाता आईडी और मॉडल आईडी के साथ कॉन्फ़िगर किए गए मार्ग का परीक्षण करें:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+संदर्भ: [पीआई मॉडल और कस्टम प्रदाता](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [पीआई पर्यावरण चर](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [पीआई इंस्टॉल निर्देश](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md) ।
+
+---
+
+#### Cline (CLI या VS कोड)
 
 **CLI मोड:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code मोड:**
-Cline एक्सटेंशन सेटिंग्स → API प्रदाता: `OpenAI Compatible` → बेस URL: `http://localhost:20128/v1`
+**VS कोड मोड:** Cline एक्सटेंशन सेटिंग्स → API प्रदाता: `OpenAI Compatible` → आधार URL: `http://localhost:20128/v1`
 
-या OmniRoute डैशबोर्ड → **CLI टूल्स → Cline → कॉन्फ़िग लागू करें** का उपयोग करें।
+या OmniRoute डैशबोर्ड → उपयोग करें**CLI उपकरण → Cline → कॉन्फ़िगरेशन लागू करें** .
 
 ---
 
-#### KiloCode (CLI या VS Code)
+#### KiloCode (CLI या VS कोड)
 
 **CLI मोड:**
 
@@ -481,7 +507,7 @@ Cline एक्सटेंशन सेटिंग्स → API प्रद�
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code सेटिंग्स:**
+**VS कोड सेटिंग्स:**
 
 ```json
 {
@@ -490,11 +516,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-या OmniRoute डैशबोर्ड → **CLI टूल्स → KiloCode → कॉन्फ़िग लागू करें** का उपयोग करें।
+या OmniRoute डैशबोर्ड → उपयोग करें**CLI उपकरण → KiloCode → कॉन्फ़िगरेशन लागू करें** .
 
 ---
 
-#### Continue (VS Code एक्सटेंशन)
+#### जारी रखें (VS कोड एक्सटेंशन)
 
 `~/.continue/config.yaml` संपादित करें:
 
@@ -508,13 +534,13 @@ models:
     default: true
 ```
 
-संपादन के बाद VS Code को पुनः आरंभ करें।
+संपादन के बाद VS कोड पुनः आरंभ करें।
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### VS कोड अंदरूनी सूत्र (`chatLanguageModels.json`)
 
-इसका उपयोग तब करें जब VS Code Insiders को कस्टम एंडपॉइंट मॉडल के लिए कॉन्फ़िगर किया गया हो और आप चाहते हों कि OmniRoute कस्टम हेडर फ़ील्ड के बिना काम करे।
+इसका उपयोग तब करें जब VS कोड इनसाइडर कस्टम एंडपॉइंट मॉडल के लिए कॉन्फ़िगर किया गया हो और आप चाहते हैं कि OmniRoute कस्टम हेडर फ़ील्ड के बिना काम करे।
 
 **अनुशंसित स्थान:**
 
@@ -545,27 +571,26 @@ models:
 
 **टिप्पणियाँ:**
 
-- `sk-your-omniroute-key` को OmniRoute में बनाई गई API कुंजी से बदलें।
+- `sk-your-omniroute-key` OmniRoute में बनाई गई API कुंजी से बदलें।
 - `url` फ़ील्ड को `/api/v1/vscode/{token}/chat/completions` की ओर इंगित करना चाहिए।
 - `modelsUrl` फ़ील्ड को `/api/v1/vscode/{token}/models` की ओर इंगित करना चाहिए।
-- जब क्लाइंट कस्टम हेडर का समर्थन करता हो, तो सामान्य `/v1` + Bearer हेडर प्रवाह को प्राथमिकता दें।
-- URL में अंतःस्थापित टोकन एक संगतता फ़ॉलबैक हैं और वे एडिटर लॉग या प्रॉक्सी इतिहास में दिखाई दे सकते हैं।
+- जब क्लाइंट कस्टम हेडर का समर्थन करता है तो सामान्य `/v1` + बियरर हेडर प्रवाह को प्राथमिकता दें।
+- यूआरएल-एम्बेडेड टोकन एक संगतता फ़ॉलबैक हैं और संपादक लॉग या प्रॉक्सी इतिहास में दिखाई दे सकते हैं।
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# अपने AWS/Kiro खाते में लॉग इन करें:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI अपने स्वयं के प्रमाणीकरण का उपयोग करता है—स्वयं Kiro CLI के बैकएंड के रूप में OmniRoute की आवश्यकता नहीं है।
-# अन्य टूल के लिए OmniRoute के साथ kiro-cli का उपयोग करें।
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** डेस्कटॉप ऐप के लिए, OmniRoute द्वारा प्रदर्शित MITM एंडपॉइंट का उपयोग करें, जो
-`/dashboard/cli-tools → Kiro` के अंतर्गत उपलब्ध है।
+के लिए**Kiro IDE** डेस्कटॉप ऐप, `/dashboard/cli-tools → Kiro` के अंतर्गत OmniRoute द्वारा उजागर MITM एंडपॉइंट का उपयोग करें।
 
 ---
 
