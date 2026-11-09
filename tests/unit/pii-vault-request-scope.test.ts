@@ -146,7 +146,7 @@ test("a Responses body forced to SSE reaches the exit as SSE and is restored", a
     { log: silentLog }
   );
   const text = await response.text();
-  assert.match(text, new RegExp(`"delta":"to ${EMAIL.replace(/\./g, "\\.")}"`));
+  assert.ok(text.includes(`"delta":"to ${EMAIL}"`), text);
   assert.doesNotMatch(text, /<<PII_/);
 });
 
