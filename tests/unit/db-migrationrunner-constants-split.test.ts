@@ -184,19 +184,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-6), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-5), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-4), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-3), {
@@ -208,13 +208,13 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-2), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-1), {
-      fromVersion: "229",
+      fromVersion: "228",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
   });

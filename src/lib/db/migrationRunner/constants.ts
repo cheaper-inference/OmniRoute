@@ -209,7 +209,7 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // A later pushed #14771 build used the upstream mirror-URL slot.
     fromVersion: "218",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
@@ -280,21 +280,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
@@ -309,15 +309,14 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
     fromVersion: "213",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
-    // The last #14771 builds before the release/v3.8.54 merge used 229; 228 was the next
-    // free slot once 223-227 landed, so a future 229 must not be skipped on those databases.
-    fromVersion: "229",
+    // #14771 builds then used 228, now purge_orphaned_provider_catalogs.
+    fromVersion: "228",
     fromName: "api_key_self_service_settings",
-    toVersion: "228",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
 ] as const;
