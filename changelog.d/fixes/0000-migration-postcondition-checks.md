@@ -1,0 +1,1 @@
+- **fix(db):** a migration that was left out of the ledger now repairs every missing column and index it adds, no longer adds cache tokens to usage history a second time, and no longer gets recorded as applied when a column it adds is still missing.
