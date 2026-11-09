@@ -104,9 +104,10 @@ test("#12105: unsigned thinking block on the latest assistant turn with tool_use
 
   const outbound = prepareClaudeRequest(translated, "claude");
   const assistant = outbound.messages.find((m) => m.role === "assistant");
-  assert.ok(assistant, "expected assistant message");
+  assert.ok(assistant && Array.isArray(assistant.content), "expected assistant message");
+  const blocks = assistant.content as Exclude<typeof assistant.content, string>;
 
-  const fabricated = assistant.content.find(
+  const fabricated = blocks.find(
     (b) => b && b.type === "thinking" && b.signature === DEFAULT_THINKING_CLAUDE_SIGNATURE
   );
   assert.equal(
@@ -115,26 +116,21 @@ test("#12105: unsigned thinking block on the latest assistant turn with tool_use
     "a `thinking` block with the fabricated signature must never reach the Anthropic upstream"
   );
   assert.equal(
-    assistant.content.find((b) => b && b.type === "thinking"),
+    blocks.find((b) => b && b.type === "thinking"),
     undefined,
     "no `thinking`-typed block may survive on the latest assistant turn"
   );
 
-  // Anthropic's schema still needs a thinking-ish precursor before tool_use when
-  // thinking is enabled; prepareClaudeRequest supplies the signature-less
-  // redacted_thinking placeholder (accepted without signature validation).
+  // No placeholder is injected: the final tool_use turn has no genuine thinking block, so
+  // manual thinking is switched off for this request instead.
   assert.equal(
-    assistant.content[0].type,
-    "redacted_thinking",
-    "precursor must be redacted_thinking"
-  );
-  assert.equal(
-    assistant.content[0].signature,
+    blocks.find((b) => b && b.type === "redacted_thinking"),
     undefined,
-    "redacted_thinking must carry no signature"
+    "no redacted_thinking placeholder may be injected"
   );
+  assert.equal(outbound.thinking, undefined, "manual thinking is disabled for this request");
   assert.ok(
-    assistant.content.some((b) => b.type === "tool_use"),
+    blocks.some((b) => b.type === "tool_use"),
     "tool_use block must be preserved"
   );
 });

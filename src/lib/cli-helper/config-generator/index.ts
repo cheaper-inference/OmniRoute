@@ -2,6 +2,7 @@ import path from "node:path";
 import os from "node:os";
 
 import { getHermesConfigPath } from "./hermesHome.ts";
+import { getWhyCodesConfigPath } from "./whycodesHome.ts";
 import { generateClaudeConfig } from "./claude";
 import { generateClineConfig } from "./cline";
 import { generateCodexConfig, findLegacyCodexYaml } from "./codex";
@@ -10,6 +11,7 @@ import { generateHermesConfig } from "./hermes";
 import { generateHermesAgentConfig } from "./hermes-agent";
 import { generateKilocodeConfig } from "./kilocode";
 import { generateOpencodeConfig } from "./opencode";
+import { generateWhyCodesConfig } from "./whycodes";
 import { resolveOpencodeConfigPath } from "../../../shared/services/opencodeConfigPath";
 import { normalizeCliToolId } from "../../../shared/services/cliRuntime";
 
@@ -65,6 +67,9 @@ function getToolConfigPath(toolId: string): string {
   if (toolId === "opencode") {
     return resolveOpencodeConfigPath();
   }
+  if (toolId === "whycodes") {
+    return getWhyCodesConfigPath();
+  }
   return STATIC_TOOL_CONFIG_PATHS[toolId] ?? "";
 }
 
@@ -79,6 +84,17 @@ const GENERATORS: Record<string, ConfigGenerator> = {
   continue: generateContinueConfig,
   hermes: generateHermesConfig,
   "hermes-agent": generateHermesAgentConfig as any, // rich multi-role version
+  whycodes: generateWhyCodesConfig,
+};
+
+// Generators that need the resolved config path (to merge into an existing file).
+const PATH_AWARE_GENERATORS: Record<
+  string,
+  (options: GenerateOptions & { configPath: string }) => string | Promise<string>
+> = {
+  opencode: generateOpencodeConfig,
+  codex: generateCodexConfig,
+  whycodes: generateWhyCodesConfig,
 };
 
 export async function generateConfig(
@@ -104,12 +120,10 @@ export async function generateConfig(
       return { success: false, configPath: "", error: `Unknown tool: ${toolId}` };
     }
     const configPath = getToolConfigPath(canonicalToolId);
-    const content =
-      canonicalToolId === "opencode"
-        ? await generateOpencodeConfig({ ...options, configPath })
-        : canonicalToolId === "codex"
-          ? await generateCodexConfig({ ...options, configPath })
-          : await generate(options);
+    const pathAware = PATH_AWARE_GENERATORS[canonicalToolId];
+    const content = pathAware
+      ? await pathAware({ ...options, configPath })
+      : await generate(options);
 
     let migration: string | undefined;
     if (canonicalToolId === "codex") {

@@ -8,21 +8,26 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Configuração de Desenvolvimento
+## Configuração do Desenvolvimento
 
 ### Pré-requisitos
 
 - **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recomendado: 24 LTS)
 - **npm** 10+
 
-> **Utilizadores do npm v11+ (Node 24+):** Após executar `npm install`, confirme que os módulos nativos foram instalados:
+> **Windows com Node 24:** utilize a versão de patch atual do 24 LTS (pelo menos 24.20.0).
+> As versões anteriores podem terminar abruptamente após testes bem-sucedidos quando `--test-force-exit` fecha o
+> processo. A [correção do libuv para Windows](https://github.com/nodejs/node/pull/61999) do Node resolve
+> este erro de execução; mantenha as asserções dos testes e as verificações de saída do executor ativadas.
+
+> **Utilizadores do npm v11+ (Node 24+):** após `npm install`, verifique se os módulos nativos foram instalados:
 > `node -e "require('better-sqlite3')"`. Se falhar com `MODULE_NOT_FOUND`,
 > execute `npm approve-scripts better-sqlite3 && npm install`. Consulte
 > [Resolução de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clonar e Instalar
+### Clonar e instalar
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,7 +35,7 @@ cd OmniRoute
 npm install
 ```
 
-### Variáveis de Ambiente
+### Variáveis de ambiente
 
 ```bash
 # Crie o seu .env a partir do modelo
@@ -41,83 +46,83 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Principais variáveis para desenvolvimento:
+Variáveis principais para o desenvolvimento:
 
-| Variável               | Predefinição de Desenvolvimento | Descrição                                  |
+| Variável               | Predefinição de desenvolvimento | Descrição                                  |
 | ---------------------- | ------------------------------- | ------------------------------------------ |
 | `PORT`                 | `20128`                         | Porta do servidor                          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL base para a interface                  |
-| `JWT_SECRET`           | (gerado acima)                  | Segredo de assinatura JWT                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL base do frontend                       |
+| `JWT_SECRET`           | (gerar acima)                   | Segredo de assinatura JWT                  |
 | `INITIAL_PASSWORD`     | `CHANGEME`                      | Palavra-passe do primeiro início de sessão |
-| `APP_LOG_LEVEL`        | `info`                          | Nível de detalhe dos registos              |
+| `APP_LOG_LEVEL`        | `info`                          | Nível de verbosidade dos registos          |
 
-### Definições do Painel
+### Definições do dashboard
 
-O painel disponibiliza controlos da interface para funcionalidades que também podem ser configuradas através de variáveis de ambiente:
+O dashboard disponibiliza opções na interface para funcionalidades que também podem ser configuradas através de variáveis de ambiente:
 
-| Localização da Definição | Controlo                      | Descrição                                    |
+| Localização da definição | Opção                         | Descrição                                    |
 | ------------------------ | ----------------------------- | -------------------------------------------- |
-| Definições → Avançadas   | Modo de Depuração             | Ativar registos de pedidos de depuração (IU) |
-| Definições → Geral       | Visibilidade da Barra Lateral | Mostrar/ocultar secções da barra lateral     |
+| Definições → Avançadas   | Modo de depuração             | Ativar registos de pedidos de depuração (IU) |
+| Definições → Geral       | Visibilidade da barra lateral | Mostrar/ocultar secções da barra lateral     |
 
-Estas definições são armazenadas na base de dados e persistem entre reinícios, substituindo as predefinições das variáveis de ambiente quando configuradas.
+Estas definições são armazenadas na base de dados e persistem após reinícios, substituindo as predefinições das variáveis de ambiente quando definidas.
 
-### Execução Local
+### Executar localmente
 
 ```bash
-# Modo de desenvolvimento (recarregamento automático)
+# Modo de desenvolvimento (atualização automática)
 npm run dev
 
 # Compilação de produção
-npm run build    # next build → .build/next/ e, depois, assembleStandalone → dist/
+npm run build    # next build → .build/next/ e depois assembleStandalone → dist/
 npm run start
 
-# Compilação rápida apenas do backend/API para alterações de colaboradores
+# Compilação rápida apenas do backend/API para alterações de contribuidores
 npm run build:contributor
 
-# Compilação de lançamento (recompilação limpa + sentinela HEAD — necessária para a implementação)
-npm run build:release   # rm -rf .build dist && compilação + grava dist/BUILD_SHA
+# Compilação de lançamento (compilação limpa + sentinela HEAD — necessária para a implementação)
+npm run build:release   # rm -rf .build dist e depois build + escreve dist/BUILD_SHA
 
 # Configuração comum da porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A compilação de colaborador efetua uma validação apenas de compilação: não monta a
-distribuição autónoma nem compila recursos opcionais de empacotamento nativo. Utilize a compilação de produção normal quando
-precisar de validar o pacote distribuível.
+A compilação de contribuidores executa uma validação apenas de compilação: não monta a
+distribuição autónoma nem compila recursos opcionais de empacotamento nativo. Utilize a compilação
+de produção normal quando precisar de validar o pacote pronto para distribuição.
 
-### Estrutura do Resultado da Compilação
+### Estrutura do resultado da compilação
 
-| Diretório | Conteúdo                                                                                | Controlado |
-| --------- | --------------------------------------------------------------------------------------- | ---------- |
-| `src/`    | Código-fonte da aplicação (TypeScript / TSX)                                            | Sim        |
-| `.build/` | Intermediários — resultado de `next build` (ignorado pelo Git, `distDir = .build/next`) | Não        |
-| `dist/`   | Pacote distribuível — montado por `assembleStandalone` (ignorado pelo Git)              | Não        |
+| Diretório | Conteúdo                                                                               | Rastreado |
+| --------- | -------------------------------------------------------------------------------------- | --------- |
+| `src/`    | Código-fonte da aplicação (TypeScript / TSX)                                           | Sim       |
+| `.build/` | Intermédios — resultado de `next build` (ignorado pelo git, `distDir = .build/next`)   | Não       |
+| `dist/`   | Pacote pronto para distribuição — montado por `assembleStandalone` (ignorado pelo git) | Não       |
 
-O pipeline de compilação consiste numa única passagem:
+O pipeline de compilação é executado numa única passagem:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (resultado do Next.js)
-  └─ assembleStandalone()                 (copia o pacote autónomo + ficheiros estáticos + públicos + recursos nativos)
+  └─ assembleStandalone()                 (copia standalone + static + public + recursos nativos)
        └─ resultado: dist/                (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` também limpa primeiro ambos os diretórios e grava
+`npm run build:release` limpa adicionalmente ambos os diretórios primeiro e escreve
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como sentinela de integridade da implementação.
 
-`npm run build:contributor` utiliza o perfil de compilação apenas do backend. Durante a compilação, substitui temporariamente
-os ficheiros da IU do painel por stubs, mantém os processadores de rotas da API e restaura os ficheiros originais
-após a compilação. Utilize `npm run build` para alterações que afetem a IU do painel ou para uma validação
-completa do lançamento; o perfil de colaborador não substitui a compilação de lançamento.
+`npm run build:contributor` utiliza o perfil de compilação apenas do backend. Cria temporariamente stubs
+para os ficheiros da IU do dashboard durante a compilação, mantém os processadores de rotas da API
+e repõe os ficheiros originais após a compilação. Utilize `npm run build` para alterações que afetem a IU
+do dashboard ou para a validação completa de uma versão; o perfil de contribuidores não substitui a compilação de lançamento.
 
-> **Nota sobre a implementação em VPS:** o diretório remoto da imagem `/usr/lib/node_modules/omniroute/app/`
-> permanece inalterado. As ferramentas de implementação sincronizam o conteúdo de `dist/` para esse diretório através de rsync.
+> **Nota sobre a implementação no VPS:** o diretório de imagens remoto `/usr/lib/node_modules/omniroute/app/`
+> não é alterado. As ferramentas de implementação sincronizam através de rsync o conteúdo de `dist/` para esse diretório.
 > Apenas o caminho do resultado da compilação no repositório foi alterado (`app/` → `dist/`).
 
 URLs predefinidos:
 
-- **Painel**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---

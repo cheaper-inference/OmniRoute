@@ -171,8 +171,9 @@ export function resolvePlanValue(plan, providerSpecificData, providerId) {
     psd.tier,
     psd.accountTier,
     // Claude OAuth bootstrap: rate_limit_tier has the Max 5x/20x multiplier.
-    psd.organizationRateLimitTier,
+    // The account's own (seat) tier first: a Team org's base tier is not the seat's.
     psd.rateLimitTier,
+    psd.organizationRateLimitTier,
     psd.organizationType,
     // Codex OAuth bootstrap: chatgpt_plan_type is captured at import time
     // (src/lib/oauth/services/codexImport.ts) and is the only source of the

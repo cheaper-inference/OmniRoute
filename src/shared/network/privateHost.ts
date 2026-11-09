@@ -151,6 +151,9 @@ export function isPrivateHost(hostname: string) {
     // fabric address.
     if (a === 192 && b === 0 && c === 0) return true;
     if (a >= 224 && a <= 239) return true;
+    // 240.0.0.0/4 reserved ("Class E"), whose top address is the limited broadcast
+    // 255.255.255.255. Never a public destination; some cloud networks use it as private space.
+    if (a >= 240) return true;
     if (a === 168 && b === 63 && c === 129 && d === 16) return true;
     return false;
   }

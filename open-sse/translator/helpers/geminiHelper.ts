@@ -1,6 +1,7 @@
 // Gemini helper functions for translator
 
 import { safeParseJSON } from "./jsonUtil.ts";
+import { videoPartToGemini } from "./mediaContentParts.ts";
 import { coerceSchemaValueShapes } from "./schemaValueShapes.ts";
 import { createSchemaBudget, createSchemaMeter } from "./schemaBudget.ts";
 import type { SchemaBudget, SchemaMeter } from "./schemaBudget.ts";
@@ -198,7 +199,31 @@ function normalizeAudioMimeType(format: unknown): string {
   return `audio/${normalized}`;
 }
 
+const GEMINI_MEDIA_RESOLUTIONS = new Set([
+  "MEDIA_RESOLUTION_UNSPECIFIED",
+  "MEDIA_RESOLUTION_LOW",
+  "MEDIA_RESOLUTION_MEDIUM",
+  "MEDIA_RESOLUTION_HIGH",
+  "MEDIA_RESOLUTION_ULTRA_HIGH",
+]);
+
+function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | undefined {
+  for (const value of values) {
+    if (typeof value !== "string" || !value.trim()) continue;
+    let normalized = value
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_");
+    if (!normalized.startsWith("MEDIA_RESOLUTION_")) {
+      normalized = `MEDIA_RESOLUTION_${normalized}`;
+    }
+    if (GEMINI_MEDIA_RESOLUTIONS.has(normalized)) return { level: normalized };
+  }
+  return undefined;
+}
+
 // Convert OpenAI content to Gemini parts
+/** Translate OpenAI content to Gemini parts while retaining typed media carriers. */
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
@@ -209,6 +234,9 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
       const rec = toRecord(item);
       if (rec.type === "text") {
         parts.push({ text: rec.text });
+      } else if (rec.type === "video_url" || rec.type === "input_video") {
+        const video = videoPartToGemini(rec);
+        if (video) parts.push(video);
       } else if (rec.type === "input_audio" || rec.type === "audio") {
         const audio = toRecord(rec.input_audio || rec.audio);
         if (typeof audio.data === "string" && audio.data) {
@@ -315,6 +343,18 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           fileUrl?.url ||
           fileObj?.url ||
           docObj?.url;
+        // Gemini 3 supports per-media-part resolution up to ULTRA_HIGH. OpenAI
+        // Chat Completions has no standard equivalent, so OmniRoute accepts the
+        // provider extension on either the content part or nested image_url.
+        // This is deliberately separate from OpenAI's `detail` field: mapping
+        // detail=high implicitly would change tokenization for every existing
+        // Gemini request, while media_resolution is explicit opt-in.
+        const mediaResolution = normalizeGeminiMediaResolution(
+          rec.media_resolution,
+          rec.mediaResolution,
+          imageUrl?.media_resolution,
+          imageUrl?.mediaResolution
+        );
         if (typeof fileData === "string" && fileData.startsWith("data:")) {
           const commaIndex = fileData.indexOf(",");
           if (commaIndex !== -1) {
@@ -324,6 +364,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
 
             parts.push({
               inlineData: { mimeType, data },
+              ...(mediaResolution ? { mediaResolution } : {}),
             });
           }
         } else if (typeof fileData === "string" && /^https?:\/\//i.test(fileData)) {
@@ -335,6 +376,7 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
           // a HEAD request to sniff it; Gemini infers the concrete type on fetch.
           parts.push({
             fileData: { fileUri: fileData, mimeType: "image/*" },
+            ...(mediaResolution ? { mediaResolution } : {}),
           });
         }
       }
@@ -539,6 +581,13 @@ function forEachSubschema(record: JsonRecord, visitor: (sub: unknown) => void): 
       visitor(value);
     }
   }
+}
+
+// Helper: an object `items` schema with no `type` that is not a union/enum Gemini can type itself.
+function isTypelessItemsSchema(items: unknown): boolean {
+  if (!items || typeof items !== "object" || Array.isArray(items)) return false;
+  const record = items as JsonRecord;
+  return !record.type && record.anyOf === undefined && record.enum === undefined;
 }
 
 function resolveLocalReference(root: unknown, ref: unknown): unknown | null {
@@ -846,6 +895,16 @@ function flattenAnyOfOneOf(obj: unknown): void {
   forEachSubschema(record, flattenAnyOfOneOf);
 }
 
+// Gemini only accepts `items` on an ARRAY node and `properties` on an OBJECT node
+// ("items: field predicate failed: $type == Type.ARRAY", 9router #5000),
+// so a union that keeps those keywords must collapse to the member they belong to.
+function pickUnionType(types: unknown[], record: JsonRecord): unknown {
+  const nonNullTypes = types.filter((t) => t !== "null");
+  if (record.items !== undefined && nonNullTypes.includes("array")) return "array";
+  if (record.properties !== undefined && nonNullTypes.includes("object")) return "object";
+  return nonNullTypes.length > 0 ? nonNullTypes[0] : "string";
+}
+
 // Flatten type arrays
 function flattenTypeArrays(obj: unknown): void {
   if (!obj || typeof obj !== "object") return;
@@ -859,8 +918,7 @@ function flattenTypeArrays(obj: unknown): void {
 
   const record = obj as JsonRecord;
   if (record.type && Array.isArray(record.type)) {
-    const nonNullTypes = record.type.filter((t) => t !== "null");
-    record.type = nonNullTypes.length > 0 ? nonNullTypes[0] : "string";
+    record.type = pickUnionType(record.type, record);
   }
 
   forEachSubschema(record, flattenTypeArrays);
@@ -958,6 +1016,13 @@ function preserveNullable(obj: unknown): void {
   }
 }
 
+/** Property Phase 6 adds to an empty object schema (stripped again by geminiPlaceholderArgs.ts). */
+export const GEMINI_PLACEHOLDER_KEY = "reason";
+export const GEMINI_PLACEHOLDER_SCHEMA = Object.freeze({
+  type: "string",
+  description: "Brief explanation of why you are calling this tool",
+});
+
 export function cleanJSONSchemaForAntigravity(
   schema: unknown,
   options: {
@@ -1047,7 +1112,10 @@ export function cleanJSONSchemaForAntigravity(
 
   cleanupRequired(cleaned);
 
-  // Phase 6: Add placeholder for empty object schemas (Antigravity requirement).
+  // Phase 6: Add placeholder for empty object schemas. It stays on the request:
+  // Gemini rejects an OBJECT with empty `properties` ("should be non-empty for OBJECT
+  // type") and Claude on Antigravity (VALIDATED mode) needs one required property.
+  // The model fills it, so geminiPlaceholderArgs.ts drops it from the tool-call args.
   function addPlaceholders(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
 
@@ -1061,13 +1129,8 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (record.type === "object") {
       if (!record.properties || Object.keys(toRecord(record.properties)).length === 0) {
-        record.properties = {
-          reason: {
-            type: "string",
-            description: "Brief explanation of why you are calling this tool",
-          },
-        };
-        record.required = ["reason"];
+        record.properties = { [GEMINI_PLACEHOLDER_KEY]: { ...GEMINI_PLACEHOLDER_SCHEMA } };
+        record.required = [GEMINI_PLACEHOLDER_KEY];
       }
     }
 
@@ -1094,6 +1157,9 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (!record.type && (record.properties !== undefined || record.required !== undefined)) {
       record.type = "object";
+    } else if (!record.type && record.items !== undefined) {
+      // Gemini rejects `items` on an untyped node (9router #5000).
+      record.type = "array";
     }
 
     forEachSubschema(record, injectObjectType);
@@ -1117,6 +1183,10 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (record.type === "array" && !record.items) {
       record.items = { type: "string" };
+    } else if (record.type === "array" && isTypelessItemsSchema(record.items)) {
+      // `items: {}` (or one emptied by Phase 4 keyword stripping) is still typeless —
+      // Gemini rejects it. Phase 7 already typed object/array-shaped nodes.
+      (record.items as JsonRecord).type = "string";
     }
 
     forEachSubschema(record, ensureArrayItems);

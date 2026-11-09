@@ -37,6 +37,7 @@ import { buildJinaSearchRequest, extractJinaSearchItems } from "./search/jinaSea
 import * as xSearch from "./search/xSearch.ts";
 import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
+import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -157,6 +158,15 @@ function resolveGlobalTimeoutMs(override?: number): number {
 
 // Non-retriable HTTP status codes — fail immediately, don't try alternate
 const NON_RETRIABLE = new Set([400, 401, 403, 404]);
+
+/**
+ * Only auto-select passes an alternate, so this never applies to a provider requested by name.
+ * A self-hosted engine's 4xx describes that instance (its JSON output left off, a wrong path),
+ * not the request, so the keyed failover still has a chance of answering it.
+ */
+function isFailoverStatus(primary: SearchProviderConfig, status: number | undefined): boolean {
+  return primary.primaryWhenConfigured === true || !NON_RETRIABLE.has(status || 0);
+}
 
 // ── Input Sanitization ──────────────────────────────────────────────────
 
@@ -763,6 +773,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "perplexity-search": buildPerplexityRequest,
   "exa-search": buildExaRequest,
   "tavily-search": buildTavilyRequest,
+  "kimi-search": kimiSearch.buildKimiSearchRequest,
   "nimble-search": buildNimbleRequest,
   firecrawl: fcSearch.buildFirecrawlSearchRequest,
   "google-pse-search": buildGooglePseRequest,
@@ -853,6 +864,8 @@ function normalizeExaResponse(
         text_format: "text",
         provider_raw: compactProviderRaw({
           id: item.id,
+          // The snippet only shows the first highlight; keep all of them next to their scores.
+          highlights: item.highlights,
           highlight_scores: item.highlightScores,
           summary: item.summary,
           subpages: item.subpages,
@@ -1393,6 +1406,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "perplexity-search": normalizePerplexityResponse,
   "exa-search": normalizeExaResponse,
   "tavily-search": normalizeTavilyResponse,
+  "kimi-search": (data: unknown) => kimiSearch.normalizeKimiSearchResponse(data, makeResult),
   "nimble-search": normalizeNimbleResponse,
   firecrawl: (data: FirecrawlSearchEnvelope, _query: string, searchType: string) =>
     fcSearch.normalizeFirecrawlSearchResponse(data, searchType, makeResult),
@@ -1615,7 +1629,7 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
   if (
     alternateConfig &&
     alternateCredentials &&
-    !NON_RETRIABLE.has(result.status || 0) &&
+    isFailoverStatus(primaryConfig, result.status) &&
     Date.now() - startTime < globalTimeoutMs
   ) {
     if (log) {

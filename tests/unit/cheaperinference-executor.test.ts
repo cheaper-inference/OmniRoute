@@ -11,6 +11,33 @@ import { CheaperInferenceExecutor } from "@omniroute/open-sse/executors/cheaperi
 
 const CREDENTIALS = { apiKey: "ir_live_test" } as never;
 
+test("direct PDF/video requests cannot silently enter unverified CI transports", async () => {
+  const executor = new CheaperInferenceExecutor();
+  for (const [model, part] of [
+    [
+      "gpt-4o-mini-transcribe",
+      { type: "input_audio", input_audio: { data: "fixture", format: "wav" } },
+    ],
+    [
+      "gpt-4o-mini",
+      {
+        type: "file",
+        file: { filename: "test.pdf", file_data: "data:application/pdf;base64,JVBER" },
+      },
+    ],
+    ["gemini-2.5-flash", { type: "video_url", video_url: { url: "https://example.com/test.mp4" } }],
+  ] as const) {
+    const result = await executor.execute({
+      model,
+      body: { messages: [{ role: "user", content: [part] }] },
+      stream: false,
+      credentials: CREDENTIALS,
+    });
+    assert.equal(result.response.status, 400);
+    assert.match(await result.response.text(), /verified .* input transport/);
+  }
+});
+
 test("injects store:false on a Responses-tagged model", () => {
   const executor = new CheaperInferenceExecutor();
   // gpt-5.5 is tagged targetFormat:"openai-responses" in the registry.
@@ -84,4 +111,37 @@ test("preserves the body the base executor already sanitized", () => {
   ) as Record<string, unknown>;
   assert.equal(out.model, "gpt-5.5");
   assert.equal(out.temperature, 0.3);
+});
+
+test("execute compresses the final serialized CI body on both inference surfaces", async () => {
+  const { gunzipSync } = await import("node:zlib");
+  const originalFetch = globalThis.fetch;
+  const sent: { url: string; body: Record<string, unknown> }[] = [];
+  globalThis.fetch = (async (target, init) => {
+    const headers = new Headers(init?.headers);
+    assert.equal(headers.get("content-encoding"), "gzip");
+    const decoded = gunzipSync(Buffer.from(init?.body as Uint8Array)).toString();
+    sent.push({ url: String(target), body: JSON.parse(decoded) });
+    return Response.json({ id: "fixture", choices: [] });
+  }) as typeof fetch;
+  try {
+    for (const model of ["gpt-5.5", "deepseek-v4-flash"]) {
+      const result = await new CheaperInferenceExecutor().execute({
+        model,
+        credentials: CREDENTIALS,
+        body: { model, messages: [{ role: "user", content: "important context ".repeat(6000) }] },
+        stream: false,
+      });
+      assert.ok(result);
+    }
+    assert.equal(sent.length, 2);
+    assert.equal(sent[0].url, "https://api.cheaperinference.com/v1/responses");
+    assert.equal(sent[0].body.store, false);
+    assert.equal(sent[1].url, "https://api.cheaperinference.com/v1/chat/completions");
+    assert.deepEqual(sent[1].body.messages, [
+      { role: "user", content: "important context ".repeat(6000) },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

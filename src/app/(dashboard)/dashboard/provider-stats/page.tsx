@@ -26,6 +26,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import { Button, Card } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 interface ProviderStat {
   provider: string;
@@ -96,8 +97,10 @@ export default function ProviderStatsPage() {
     comboMetrics: Record<string, unknown>;
     telemetry: Record<string, unknown>;
     toolLatency: Record<string, ToolLatencyStat>;
+    windowSince?: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorDismissed, setErrorDismissed] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("totalRequests");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -116,13 +119,35 @@ export default function ProviderStatsPage() {
     }
   }, [t]);
 
+  // An explicit retry reopens a dismissed error; periodic polling does not.
+  const retry = () => {
+    setErrorDismissed(false);
+    void fetchData();
+  };
+
   useEffect(() => {
     // Async continuation — see react-hooks/set-state-in-effect.
     void (async () => {
       await fetchData();
     })();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
+    // Skip ticks while the tab is hidden; a hidden tab gets nothing from a
+    // refetch, so the poll only costs the server. The interval keeps running —
+    // hosts that report a permanent "hidden" state without ever firing a
+    // visibilitychange still refresh, and a real background tab stops costing
+    // a computation every tick.
+    const interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      void fetchData();
+    }, 30000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      void fetchData();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [fetchData]);
 
   // Compute summary stats
@@ -160,11 +185,7 @@ export default function ProviderStatsPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center" role="status" aria-live="polite">
-          <Icon
-            name="progress_activity"
-            size={32}
-            className="mx-auto animate-spin text-text-muted"
-          />
+          <Spinner decorative size="lg" className="text-text-muted" />
           <p className="text-text-muted mt-4">{t("loading")}</p>
         </div>
       </div>
@@ -189,7 +210,7 @@ export default function ProviderStatsPage() {
             variant="ghost"
             size="icon"
             icon="refresh"
-            onClick={fetchData}
+            onClick={retry}
             title={t("refresh")}
             aria-label={t("refresh")}
           />
@@ -202,20 +223,22 @@ export default function ProviderStatsPage() {
     return (
       <div className="space-y-6">
         {pageHeader}
-        {/* Re-keyed on the message: a new failure re-shows a dismissed alert. The header's
-            refresh button stays as the retry affordance after a dismiss. */}
-        <Alert
-          key={error}
-          variant="critical"
-          icon={<Icon name="error" size={20} />}
-          title={t("loadFailed", { error })}
-          dismissLabel={tc("close")}
-          actions={
-            <Button variant="secondary" size="sm" icon="refresh" onClick={fetchData}>
-              {t("retry")}
-            </Button>
-          }
-        />
+        {/* Keep dismissed errors hidden during polling. Explicit refresh resets dismissal. */}
+        {!errorDismissed && (
+          <Alert
+            key={error}
+            variant="critical"
+            icon={<Icon name="error" size={20} />}
+            title={t("loadFailed", { error })}
+            dismissLabel={tc("close")}
+            onDismiss={() => setErrorDismissed(true)}
+            actions={
+              <Button variant="secondary" size="sm" icon="refresh" onClick={retry}>
+                {t("retry")}
+              </Button>
+            }
+          />
+        )}
       </div>
     );
   }
@@ -272,6 +295,13 @@ export default function ProviderStatsPage() {
         <SectionHeader
           className="mb-4"
           title={t("providerBreakdown")}
+          description={
+            data.windowSince
+              ? t("windowSince", {
+                  date: new Date(data.windowSince).toLocaleDateString(),
+                })
+              : undefined
+          }
           actions={
             <span className="text-xs text-text-muted">
               {t("providerCount", { count: activeProviders })}

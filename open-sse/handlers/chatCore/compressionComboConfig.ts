@@ -64,6 +64,10 @@ export function mergeCompressionComboIntoConfig(
       enabled: compressionCombo.outputMode,
       intensity: comboOutputIntensity,
     },
+    // A combo's own selection wins over the global panel; empty keeps the panel's.
+    ...(compressionCombo.outputStyles && compressionCombo.outputStyles.length > 0
+      ? { outputStyles: compressionCombo.outputStyles }
+      : {}),
     comboOverrides,
   };
 }

@@ -4,61 +4,47 @@
 
 ---
 
-> Önkéntesen bekapcsolható, alapértelmezés szerint ki van kapcsolva (ha a `modelVisibilityAllowlist`/`modelVisibilityDenylist` mindkettő üres, akkor
-> a `/v1/models` katalógus ÉS minden `auto/*` jelöltkészlet bájtszinten változatlan marad). A
-> `hidePaidModels`/`hideAutoCombos` testvérbeállítása (`src/lib/db/settings.ts`) azon üzemeltetők számára, akik
-> a költségektől független okokból válogatott modelllistát szeretnének.
+> Feliratkozás, alapértelmezés szerint kikapcsolva (`modelVisibilityAllowlist`/`modelVisibilityDenylist` mindkét üres elhagyja a `/v1/models` katalógust AND minden `auto/*` jelölt készlet bájtja azonos). `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) testvére azoknak az operátoroknak, akik válogatott modelllistát szeretnének olyan okokból, amelyeknek semmi közük a költségekhez.
 
-## Miért létezik ez?
+## Miért létezik ez
 
-A `hidePaidModels` arra a kérdésre válaszol, hogy „ingyenes-e ez a modell?”, a `hideAutoCombos` pedig arra, hogy „egyáltalán meg kell-e
-jeleníteni az `auto/*` virtuális azonosítókat?” — egyik sem teszi lehetővé, hogy az üzemeltető a
-modellek tetszőleges részhalmazát válogassa össze (például pontosan azokat a modelleket jelenítse meg, amelyeket egy adott Claude Code / OpenCode kliensnek látnia kell,
-az árképzéstől függetlenül). A #11481 ezt két független, önkéntesen bekapcsolható karakterlánctömb-beállítással valósítja meg.
+`hidePaidModels` válaszol "ez a modell ingyenes?" `hideAutoCombos` pedig azt válaszolja, hogy `auto/*` virtuális azonosítókat kell egyáltalán hirdetni? — sem engedi, hogy az operátor a modellek tetszőleges részhalmazát kurálja (pl. pontosan azokat a modelleket mutassa be, amelyeket egy adott Claude Code / OpenCode kliensnek látnia kell, az áraktól függetlenül). #11481 hozzáteszi, hogy két független, választható karakterlánc-tömb beállításként.
 
-## Beállítások
+## Beállítások elemre
 
-| Kulcs                      | Típus      | Alapérték | Jelentés                                                                         |
-| -------------------------- | ---------- | --------- | -------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`      | A jelöltre illeszkedő bejegyzések elrejtik azt a katalógusból/jelöltkészletből.  |
-| `modelVisibilityAllowlist` | `string[]` | `[]`      | Ha nem üres, CSAK a valamely bejegyzésre illeszkedő jelöltek maradnak elérhetők. |
+| Kulcsfontosságú            | Írja be    | Alapértelmezett | Jelentése                                                                  |
+| -------------------------- | ---------- | --------------- | -------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`            | A jelöltnek megfelelő bejegyzések elrejtik a catalog/candidate készletből. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`            | Ha nem üres, a jelöltnek megfelelő ONLY bejegyzések láthatóak maradnak.    |
 
-Mindkettő legfeljebb 500, egyenként maximum 200 karakteres bejegyzést fogad el (Zod által ellenőrizve a
-`src/shared/validation/settingsSchemas.ts` fájlban). Egy bejegyzés az alábbiak egyike lehet:
+Mindkettő legfeljebb 500, egyenként legfeljebb 200 karakter hosszúságú bejegyzést fogad el (Zod-validated in `src/shared/validation/settingsSchemas.ts`). A bejegyzés a következő:
 
-- pontos katalógusazonosító — `"gpt-4o"` (egyszerű modellazonosító) vagy `"openai/gpt-4o"` (szolgáltató-előtaggal), vagy
-- `*`/`?` karaktereket használó glob minta — például `"openai/gpt-4*"` vagy `"anthropic/*"` —, amelynek feloldása ugyanazzal a
-  megosztott `globToRegex()` illesztővel (`src/shared/utils/globPattern.ts`) történik, amelyet már a
-  `ModelRoutingSection` modellenkénti kombinációleképezései és a `freeModels.ts::matchesOnlyPaidModels` is használnak.
+- egy pontos katalógusazonosító — `"gpt-4o"` (csupasz modellazonosító) vagy `"openai/gpt-4o"` (szolgáltató előtaggal), vagy
+- egy glob minta `*`/`?` — használatával, pl. `"openai/gpt-4*"` vagy `"anthropic/*"` — ugyanazon megosztott `globToRegex()` matcher (`src/shared/utils/globPattern.ts`) segítségével feloldva, amelyet a `ModelRoutingSection` modellenkénti kombinált leképezései és `freeModels.ts::matchesOnlyPaidModels` már használnak.
 
-Elsőbbség: először a tiltólista ellenőrzése történik meg (egy tiltott bejegyzés mindig rejtve marad, még akkor is, ha
-az engedélyezési listára is illeszkedik); ha az engedélyezési lista nem üres, csak a rá illeszkedő bejegyzések maradnak meg.
+Elsőbbség: először a tiltólistát kell bejelölni (a megtagadott bejegyzés mindig rejtett, még akkor is, ha az engedélyezési listával is egyezik); ha az engedélyezési lista nem üres, csak azok a bejegyzések maradnak fenn, amelyeknek megfelel.
 
-## Két ellenőrzési pont, nem egy
+## Két fojtópont, nem egy
 
-A #6512 tanulsága (egy kizárólag `hidePaidModels`-alapú katalógusszűrő továbbra is lehetővé tette, hogy az `auto/*` egy
-fizetős modellhez irányítson, mivel a kombináció jelöltkészlete ettől függetlenül épült fel) itt ugyanúgy érvényes.
-Az `isModelExposureAllowed()` illesztési predikátum (`src/shared/utils/modelExposureList.ts`) MINDKÉT helyen
-meghívásra kerül:
+A #6512 tanulsága (a `hidePaidModels` -only katalógusszűrő továbbra is lehetővé tette, hogy `auto/*` egy fizetős modellhez irányítson, mivel a kombinált jelöltkészlet önállóan épült) itt is ugyanúgy érvényes. A megfelelő `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) predikátumot a BOTH hívják :
 
-- `src/app/api/v1/models/catalog.ts` — magában a `/v1/models` listázásban, ugyanazon az 5 forrásonkénti
-  ellenőrzési ponton, amelyeket a `shouldHidePaid()` már most is felügyel (statikus `PROVIDER_MODELS`, szinkronizált szolgáltatói sorok,
-  egyéni sorok, aliasalapú sorok, felügyelt tartaléksorok).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — a
-  `virtualFactory.ts::buildPreparedPool` hívja meg közvetlenül az ennek megfelelő
-  `filterPaidOnlyCandidates()` hívás után, így egy tiltott modell soha nem kerülhet be egy `auto/*`
-  jelöltkészletbe sem.
+- `src/app/api/v1/models/catalog.ts` — magát a `/v1/models` listát, ugyanazon forrásonkénti 5 fojtóponton `shouldHidePaid()` már kapuk (statikus `PROVIDER_MODELS`, szinkronizált szolgáltatói sorok, egyéni sorok, álnévvel támogatott sorok, felügyelt tartalék sorok).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — hívott `virtualFactory.ts::buildPreparedPool`-ből, közvetlenül az egyenértékű `filterPaidOnlyCandidates()` hívás után, így a denied modell soha nem választható ki a `auto/*` jelöltkészletbe.
 
-## Mi NINCS szűrve?
+## Mi a NOT szűrt
 
-A `hideAutoCombos` meglévő működését tükrözi: a **kifejezetten** megadott modellazonosító (nem `auto/*` útján,
-és nem a katalóguslistán keresztül felfedezve) soha nincs blokkolva a továbbításkor — csak a
-megjelenítés/jelöltkészlet-tagság van szűrve. Ez független a `hidePaidModels` beállítástól;
-egy üzemeltető a költségektől független okokból is válogatott készletet akarhat, ezért a két
-beállítás egymástól független, ÉS kapcsolatban összekapcsolt szűrőként működik, ugyanúgy, mint a
-`catalog.ts` meglévő, több jelzőből álló kompozíciója.
+Tükrözi `hideAutoCombos` meglévő viselkedését: modellazonosító elküldve** kifejezetten** (nem `auto/*` keresztül, és nem fedezhető fel a katalógus listán keresztül) soha nem blokkolja kiküldéskor — csak advertisement/candidate-pool tagságot szűri. Ez független `hidePaidModels` től; az operátorok olyan okok miatt akarhatnak kurált halmazt, amelyeknek semmi közük a költségekhez, ezért mindkét beállítás független ÉS-ed szűrőként működik, ugyanúgy, mint a `catalog.ts` meglévő többjelzős összetétele.
 
-A beállítások exportja (`GET /api/settings/export-json`) mindkét tömböt változtatás nélkül tartalmazza, akárcsak bármely más
-beállításmezőt — a `hidePaidModels` kombinációlépéseket érintő exportszűrőjével ellentétben itt nincs újrahidratálási
-kockázat: az exportált kombinációlépésbe ágyazott tiltott azonosító az üzemeltető saját, explicit útválasztási
-döntése, nem pedig olyasmi, amit az exportálási határnak el kellene távolítania.
+A beállítások exportálása (`GET /api/settings/export-json`) szó szerint tartalmazza mindkét tömböt, mint bármely más — beállítási mező, `hidePaidModels` kombinált lépéses exportszűrőjétől eltérően, itt nincs újrahidratálási kockázat: az exportált kombinált lépésbe ágyazott megtagadott azonosító a kezelő saját explicit útválasztási választása, nem pedig az exporthatárnak kell lecsupaszítania.
+
+## Csak kombók listája (`exposeCombosOnly`)
+
+Külön logikai érték, alapértelmezés szerint opt-in és `false` is az olyan telepítésekhez, ahol a kombók a nyilvános modellfelületek, a szolgáltatók pedig csak háttérprogramok. Ha `true`, akkor a nyilvános lista (`GET /v1/models`, `GET /v1` és a `getUnifiedModelsResponse()`-re épülő többi `/v1` felfedezési útvonal) csak `owned_by: "combo"`: felhasználói kombókat és a beépített `auto/*` kombókat tartalmazza (hacsak `hideAutoCombos` el nem rejti őket). Ugyanazt a sortesztet használja, mint a kulcsonkénti `catalogScope: "combos"`, és a kulcs saját allow/deny/scope szűrői továbbra is érvényesek a tetején.
+
+Kapcsolja be** Beállítások → Útválasztás → Modellek API lista** , vagy `PATCH /api/settings {"exposeCombosOnly": true}` vel.
+
+A fenti listákhoz hasonlóan ez is csak a hirdetést módosítja:
+
+- egy explicit `provider/model` id továbbra is elküldi, és `GET /v1/models/{id}` továbbra is feloldja;
+- a műszerfali katalógus (`GET /api/models/catalog`, a modellválasztók által használt) nincs szűkítve;
+- nem tükröződik a `auto/*` jelölt készletekben, így `auto/*` kombók megtartják a teljes készletüket.

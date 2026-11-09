@@ -40,22 +40,17 @@ diġà ntgħażlet. Tista' tibdel biss l-isforz u l-baġit.
 
 ## Sforz u Baġit
 
-`sourceEffort` jaċċetta `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, u
-`ultra`. `missing` tfisser li t-talba la fiha sforz diskret u lanqas swiċċ tal-ħsieb
-jew baġit tal-ħsieb. Għalhekk, sinjal ta' baġit biss jaqbel biss ma' `any`.
+`sourceEffort` jaċċetta `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, u `ultra`. `missing` tfisser li t-talba la fiha sforz diskret u lanqas toggle ta' ħsieb jew baġit ta' ħsieb. Sinjal tal-baġit biss huwa għalhekk imqabbel biss minn `any`.
 
-`effortMode` għandu tliet varjanti:
+`effortMode` għandha tliet varjanti:
 
 - `inherit` iżomm l-isforz tal-klijent filwaqt li xorta jippermetti li l-mudell jew il-combo jinbidel.
-- `default` jistabbilixxi `targetEffort` biss meta ma jkun preżenti l-ebda sinjal espliċitu ta' raġunament.
-- `force` jissostitwixxi l-isforz diskret b'`targetEffort`.
+- `default` jistabbilixxi `targetEffort` biss meta ma jkun preżenti l-ebda sinjal ta' raġunament espliċitu.
+- `force` jissostitwixxi l-isforz diskret ma `targetEffort`.
 
-Indipendentement, `budgetAction` jista' jkun `preserve`, `remove`, jew `set`. `force` b'`none` ineħħi
-l-oqsma kollha rikonoxxuti tal-isforz u tal-baġit. `none` flimkien ma' `set` mhuwiex validu.
+Indipendentement, `budgetAction` jista' jkun `preserve`, `remove`, jew `set`. `force` ma `none` ineħħi l-isforz u l-oqsma tal-baġit rikonoxxuti kollha, imbagħad jistabbilixxi `reasoning_effort: "none"`, għaliex xi fornituri jduru l-ħsieb meta l-qasam ikun assenti. Fornituri li jirrifjutaw l- `none` litterali huma aġġustati meta jintbagħtu `open-sse/executors/base/reasoningEffort.ts`. Kodiċi tal-Kmand jimmappah ma' `low`, ħlief fuq talbiet f'forma ta' Rispons (`input` mingħajr `messages`), fejn iżomm `none`. Fuq Cloudflare Ħaddiema AI (`cloudflare-ai`), il-mudelli li jirrifjutaw `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) jiksbu `low`; Ħaddiema oħra AI mudelli iżommu `none`. It-twaqqigħ tal-qasam mhuwiex għażla hemmhekk, minħabba li sforz assenti jmexxi l-livell default tal-mudell. `none` flimkien ma' `set` huwa invalidu.
 
-Talbiet immirati lejn mudelli magħrufa bħala inkompatibbli jiġu rrifjutati qabel is-sejħa upstream. Għal miri
-combo, l-entrati inkompatibbli jitneħħew; jekk ma jibqa' l-ebda wieħed, it-talba tirritorna l-istatus `400`.
-Dejta mhux magħrufa dwar il-kapaċitajiet tipproduċi twissija u tħalli r-regola attiva.
+Talbiet li jimmiraw għal mudelli magħrufa li huma inkompatibbli huma miċħuda qabel is-sejħa upstream. Għall-miri combo, l-entrati inkompatibbli jitneħħew; jekk ma jibqa' xejn, it-talba tirritorna status `400`. Data tal-kapaċità mhux magħrufa tipproduċi twissija u tħalli r-regola attiva.
 
 ## Sigurtà u Trasporti
 

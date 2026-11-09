@@ -29,22 +29,22 @@ Vaihteluväli:     1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Mitä se pakkaa
 
-Sisäänrakennettu luettelo sisältää tällä hetkellä 49 suodatinta seuraavissa luokissa:
+Sisäänrakennettu katalogi sisältää tällä hetkellä 56 suodatinta seuraavissa kategorioissa:
 
-| Luokka    | Esimerkkejä                                                   |
+| Kategoria | Esimerkkejä                                                   |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-testit, Cargo-testit     |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-testit   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, yleiset komentotulkkilokit              |
+| `shell`   | `ls`, `find`, `grep`, yleiset komentotulkin lokit             |
 | `docker`  | `docker ps`, Docker-lokit                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-tuloste, pinojäljitykset, yleinen tulosteen vararatkaisu |
+| `generic` | JSON-tuloste, pinojäljet, yleinen tulosteen varakäsittely     |
 
 Tunnistin tiedostossa `open-sse/services/compression/engines/rtk/commandDetector.ts` luokittelee tulosteen
-ennen suodattimen valintaa. Suodattimet voivat täsmätä myös komentomallin tai tulosteen säännöllisen lausekkeen perusteella, kun komentoluokka
-ei riitä.
+ennen suodattimen valintaa. Suodattimet voivat myös täsmätä komentokuvion tai tulosteen säännöllisen
+lausekkeen perusteella, kun komentoluokka ei yksin riitä.
 
 ## Suodattimien ratkaiseminen
 
@@ -354,15 +354,15 @@ node --import tsx/esm --test \
 
 ## Intensiteettitasot (v3.8.16+)
 
-RTK tukee **kolmea intensiteettitasoa**, jotka tasapainottavat **pakkauksen aggressiivisuutta** ja **turvallisuutta**. Taso asetetaan moottorin määrityksen `config.intensity`-arvolla.
+RTK tukee **3 intensiteettitasoa**, jotka tasapainoilevat **pakkauksen aggressiivisuuden** ja **turvallisuuden** välillä. Taso asetetaan moottorin konfiguraatiossa `config.intensity`-asetuksella.
 
 ### Kolme tasoa
 
-| Taso                | Katkaisukynnys         | Tunnistesäästö | Riski          | Soveltuu parhaiten                        |
-| ------------------- | ---------------------- | -------------- | -------------- | ----------------------------------------- |
-| `minimal`           | 24 riviä osiota kohden | ~20-40%        | Erittäin pieni | Tuotantoon, jossa konteksti on kriittinen |
-| `standard` (oletus) | 24 riviä osiota kohden | ~50-70%        | Pieni          | Päivittäisiin koodausistuntoihin          |
-| `aggressive`        | 16 riviä osiota kohden | ~70-90%        | Keskisuuri     | Pitkiin istuntoihin ja maksimisäästöihin  |
+| Taso                | Katkaisukynnys         | Token-säästöt | Riski           | Sopii parhaiten                             |
+| ------------------- | ---------------------- | ------------- | --------------- | ------------------------------------------- |
+| `minimal`           | 24 riviä osiota kohden | ~20-40%       | Erittäin matala | Tuotantokäyttö kriittisen kontekstin kanssa |
+| `standard` (oletus) | 24 riviä osiota kohden | ~50-70%       | Matala          | Päivittäiset koodausistunnot                |
+| `aggressive`        | 16 riviä osiota kohden | ~70-90%       | Keskitaso       | Pitkät istunnot, maksimaaliset säästöt      |
 
 ### Missä katkaisu tapahtuu
 
@@ -374,40 +374,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Kunkin osion **alku** ja **loppu** säilytetään; keskellä oleva sisältö poistetaan, kun katkaisu aktivoituu.
+Sekä kunkin osion **alku** että **loppu** säilytetään; keskiosa poistetaan, kun katkaisu aktivoituu.
 
 ### Mikä säilyy ja mikä poistetaan
 
-| Sisältö                         | minimal         | standard        | aggressive      |
-| ------------------------------- | --------------- | --------------- | --------------- |
-| Virheet / pinojäljet            | ✅ säilytetään  | ✅ säilytetään  | ✅ säilytetään  |
-| Testien epäonnistumiset         | ✅ säilytetään  | ✅ säilytetään  | ✅ säilytetään  |
-| Koontivirheet                   | ✅ säilytetään  | ✅ säilytetään  | ✅ säilytetään  |
-| Läpäistyt testit (monisanaiset) | ✅ säilytetään  | 🟡 tiivistetään | 🟡 tiivistetään |
-| Rutiinituloste (infolokit)      | 🟡 tiivistetään | 🟡 tiivistetään | ❌ poistetaan   |
-| Edistymispalkit                 | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
-| Bannerit / ASCII-taide          | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
+| Sisältö                              | minimal         | standard        | aggressive      |
+| ------------------------------------ | --------------- | --------------- | --------------- |
+| Virheet / stack tracet               | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Epäonnistuneet testit                | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Build-virheet                        | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Läpäistyt testit (verbose)           | ✅ säilyy       | 🟡 tiivistetään | 🟡 tiivistetään |
+| Rutiininomainen tuloste (info-lokit) | 🟡 tiivistetään | 🟡 tiivistetään | ❌ poistetaan   |
+| Edistymispalkit                      | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
+| Banneri / ASCII-grafiikka            | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
 
 ### Oikean intensiteetin valitseminen
 
 ```
-                  Onko kontekstin menettäminen katastrofaalista?
+                  Onko kontekstin menetys katastrofaalista?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    KYLLÄ        EI          EN OSAA SANOA
+    KYLLÄ        EI          EN VARMA
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kuinka tärkeää  Kokeile ensin `standard`-tasoa
-      │      suorituskyky    (toimii 80 %:ssa
-      │      on?             tapauksista)
-      │           │
+      │      Kuinka tärkeä   Kokeile ensin
+      │      läpimeno on?    `standard`-tasoa
+      │           │          (toimii 80 %:ssa
+      │           │          tapauksista)
       │      ┌────┴────┐
       │      │         │
-      │    VÄHÄINEN  SUURI
+      │   MATALA    KORKEA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -417,7 +417,7 @@ Kunkin osion **alku** ja **loppu** säilytetään; keskellä oleva sisältö poi
 
 ### Intensiteetin määrittäminen
 
-**Yhdistelmäkohtaisesti** (yhdistelmän määrityksessä):
+**Kombokohtaisesti** (kombon konfiguraatiossa):
 
 ```json
 {
@@ -433,8 +433,8 @@ Kunkin osion **alku** ja **loppu** säilytetään; keskellä oleva sisältö poi
 **Ohjelmallisesti**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) on
-`CompressionEngine`, eikä sillä ole `updateConfig`-metodia. Päivitä moottorin määritys
-sen sijaan rekisterin apufunktion kautta:
+`CompressionEngine`, eikä sillä ole `updateConfig`-metodia. Päivitä moottorin
+konfiguraatio sen sijaan rekisterin apufunktion avulla:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,16 +442,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Vaikutuksen varmentaminen
+### Vaikutuksen varmistaminen
 
-Varmista **varmennusportin** avulla (katso jäljempänä), että suodatin on turvallinen valitsemallasi intensiteetillä:
+Käytä **Verify Gate** -tarkistusta (katso alla) varmistaaksesi, että suodattimesi on turvallinen valitsemallasi intensiteetillä:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Suodattimet epäonnistuivat aggressive-intensiteetillä");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

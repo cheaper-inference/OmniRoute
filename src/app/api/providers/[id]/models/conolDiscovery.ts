@@ -7,10 +7,13 @@ import {
   type ConolModel,
 } from "@omniroute/open-sse/services/conolModels.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { toDiscoveryFailure, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;
   localWarning?: string;
+  /** Why the discovery failed — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 }
 
 interface ConolDiscoveryRouteOptions {
@@ -52,6 +55,7 @@ export async function maybeHandleConolModelDiscovery(
     const fallback = options.buildDiscoveryFallbackResponse({
       cacheWarning: "No Conol cookie configured — using cached catalog",
       localWarning: "No Conol cookie configured — using local catalog",
+      failure: { code: "NO_CREDENTIAL" },
     });
     if (fallback) return fallback;
     return options.buildResponse({
@@ -83,6 +87,7 @@ export async function maybeHandleConolModelDiscovery(
     const fallback = options.buildDiscoveryFallbackResponse({
       cacheWarning: "Conol model discovery failed — using cached catalog",
       localWarning: "Conol model discovery failed — using seed catalog",
+      failure: toDiscoveryFailure(error),
     });
     if (fallback) return fallback;
     return options.buildResponse({

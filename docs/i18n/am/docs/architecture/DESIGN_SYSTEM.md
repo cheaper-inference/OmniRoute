@@ -4,156 +4,93 @@
 
 ---
 
-> **ሁኔታ:** ዳሽቦርዱ በ**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ላይ የተገነባ ሲሆን፣
-> እንደ workspace `packages/ui-kit` (`@omniroute/ui-kit`) በፕሮጀክቱ ውስጥ ተካቷል፤ የ upstream snapshot ስሪት በ
-> `packages/ui-kit/UPSTREAM.md` ውስጥ ተወስኗል፣ እንዲሁም በ`npm run check:ui-kit-snapshot` ይጠበቃል። Light መደበኛው
-> ገጽታ ሲሆን፣ ነባሪ ምርጫው `system` ነው። የማድመቂያ ቀለሙ Keak lime (`--ci-color-accent`) ነው። Inter
-> (የፊደል ክፍተት 0፣ `--ci-letter-spacing-ui`) የUI የፊደል ቤተሰብ ሲሆን፣ Instrument Serif ለትልቅና ያልተጨናነቀ
-> የማሳያ ጽሑፍ (`.ci-dashboard-display`) ብቻ ይጠቀማል፤ IBM Plex Mono ደግሞ ለኮድ ይውላል—ሁሉም
-> በ`src/app/globals.css` አናት ላይ ባሉት `@fontsource/*` imports አማካኝነት በራስ አገልጋይ ላይ ይስተናገዳሉ። እያንዳንዱ አዶ የLucide glyph ነው።
+> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` ላይ ተሰክቷል እና በ `npm run check:ui-kit-snapshot` ይጠበቃል)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ነባሪው ቤተ-ስዕል የኪት ነው።** እትሞች** መልክ (ሞቃታማ የወረቀት ገለልተኝነቶች እና የመዳብ ዘዬ `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); ቅንብሮች → መልክ → የቀለም ቤተ-ስዕል ያቀርባል** ክላሲክ** ፣ የኪቱ መሠረት ቶከኖች ከኖራ ዘዬ ጋር። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። ስክሪፕቶች ስዊዘርላንድ ይጎድላቸዋል glyph በ glyph (`src/app/globals.css`): ኢንተር ለሲሪሊክ፣ ግሪክ እና ቬትናምኛ እና፣ በ `html[dir="rtl"]` ስር ብቻ፣ ቫዚርማትን ለአረብኛ ፊደል። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
 
-## 1. ነገሮች የሚገኙበት ቦታ
+## 1. ነገሮች በሚኖሩበት ቦታ
 
-- **ኪት።** `packages/ui-kit/src` በ
-  `packages/ui-kit/UPSTREAM.md` ውስጥ በተወሰነው commit ላይ ያለው የupstream `src/` ባይት-በ-ባይት ቅጂ ነው (ይህም የፈቃድ ማረጋገጫውን ይመዘግባል)፤ `PATCHES.md` የአካባቢ
-  patchesን ይዘረዝራል (ምንም የሉም)። ያለ build እንደ source ጥቅም ላይ ይውላል፦ `next.config.mjs` transpile ያደርገዋል፣ እና
-  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` እና `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` በማለት map ያደርጋል (`vitest.config.ts` እና `vitest.mcp.config.ts` ተመሳሳዩን alias ይይዛሉ)። የኪት
-  componentን በsubpath ያስመጡ (`@omniroute/ui-kit/table`፣ `@omniroute/ui-kit/page-header`…)፤ በ
-  `@omniroute/ui-kit` barrel በኩል ፈጽሞ አያስመጡ፦ barrelው ሁሉንም component (date pickerን ጨምሮ)
-  ወደ እያንዳንዱ importer ያስገባል። የኪቱ stylesheet በ`src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`) በኩል ይገባል።
-- **Tokens።** `packages/ui-kit/src/ci-tokens.css` የ`--ci-*` tokensን ይገልጻል፤ `src/app/globals.css`
-  እነሱን ከቀድሞዎቹ የOmniRoute ስሞች (`--color-*`፣ `--radius-*`፣ `--font-sans`/`--font-mono`፣
-  `--table-*`፣ `--orch-status-*`፣ `--color-fd-*`) ጋር ያገናኛል፤ በዚህም ነባሮቹ `var(--color-*)` reads እና Tailwind
-  utilities መስራታቸውን ይቀጥላሉ። አዲስ code የTailwind utilitiesን (`bg-surface`፣ `text-text-muted`፣
-  `border-border`፣ `text-success`፣ `bg-success-bg`፣ `bg-chart-1`…) ወይም የኪት classesን ይጠቀማል — hex valueን
-  ፈጽሞ አይጠቀምም (`tests/unit/design-kit-bridge.test.ts` bridgeውን ያስገድዳል)። `text-primary` በ
-  `--text-color-primary` በኩል ወደ `--color-primary-ink` resolve ይደረጋል (በlight ውስጥ lime-800፣ በdark ውስጥ የlime accent)፤ ስለዚህ
-  primary text በቀላሉ የሚነበብ ሆኖ ሲቆይ `bg-primary`/`border-primary` የlime surfaceን ይዘው ይቆያሉ። የChart series
-  `--color-chart-1` … `--color-chart-5`ን ይጠቀማሉ።
-- **Themes።** `<html className="ci-theme">` (`src/app/layout.tsx`) documentውን በኪቱ theme ውስጥ ያስገባል።
-  preferenceው `light`፣ `dark` ወይም `system` ነው (`THEME_CONFIG.defaultTheme = "system"` በ
-  `src/shared/constants/appConfig.ts` ውስጥ፤ `system` `prefers-color-scheme`ን ይከተላል)። በ
-  `src/store/themeStore.ts` ውስጥ ያለው `applyTheme()` (ከhydration በፊት በሚሰራው በ`src/app/layout.tsx` ውስጥ ባለው inline bootstrap script የተንጸባረቀ)
-  `data-theme="dark"|"light"`ን ያዘጋጃል እና በ`<html>` ላይ ያለውን `.dark` class አብሮ ይቀያይራል።
-  የኪቱ dark token set በ`data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ላይ keyed ነው፤
-  የOmniRoute የራሱ dark overrides (በ`globals.css` ውስጥ ያለው `.dark` block) እና የቀድሞዎቹ Tailwind `dark:`
-  utilities በ`.dark` class ላይ keyed ናቸው። የaccent color presets የሉም፦ accentው ሁልጊዜ ከኪቱ
-  ይመጣል፣ እና ከአሮጌ build የቀረ persisted preset storeው ሲጫን ይወገዳል።
-- **Components (adapters)።** `src/shared/components/index.tsx` የOmniRoute component APIን (ተመሳሳይ
-  ስሞች፣ default exports እና props) እንዳለ ያቆያል፤ ከጀርባው ያሉት primitives ደግሞ በኪቱ ላይ የተገነቡ adapters ናቸው፦ forms
-  (`Button`፣ `Input`፣ `Textarea`፣ `Checkbox`፣ `Select`፣ `Toggle`፣ `Badge`፣ `Card`)፣ overlays እና feedback
-  (`Modal`/`ConfirmModal`፣ `Tooltip`/`InfoTooltip`፣ `NotificationToast`፣ `EmptyState`፣ `Loading`)፣
-  structure (`Collapsible`፣ `CollapsibleSection`፣ `SegmentedControl`፣ `Breadcrumbs`፣ `Avatar`) እና tables
-  (`DataTable`፣ `FilterBar`፣ `ColumnToggle`፣ `FilterPills`፣ `PresetSlider`)። Adapter የኪቱን
-  component በsubpath ያስመጣና የቀድሞዎቹን props ወደ እሱ map ያደርጋል — ለምሳሌ `Button variant="primary"` የኪቱ
-  `default` button ነው (`--ci-button-primary-*`፦ በlight ውስጥ inverse surface፣ በdark ውስጥ accent ከ
-  `--ci-color-accent-foreground` ink ጋር)፣ `danger` `destructive` ነው፣ እና `warning` `outline` ከ
-  `.ci-button--warning` extension ጋር ነው። በ`globals.css` መጨረሻ (`@layer components`) ላይ ያሉት
-  `.ci-button--warning` እና `.ci-badge[data-tone]` rules በኪቱ classes ላይ የተጨመሩ የOmniRoute extensions ናቸው።
-  `tests/unit/ui/adapters/*.test.tsx` እያንዳንዱን adapter ይወስናል።
-- **Shell።** `src/app/(dashboard)/layout.tsx` `DashboardLayout`ን render ያደርጋል፤ እሱም
-  `src/shared/components/layouts/DashboardShell.tsx`ን render ያደርጋል፦ የኪቱ `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)፣ ከOmniRoute navigation logic በ
-  `src/shared/components/Sidebar.tsx` ውስጥ ጋር። ወደ `#main-content` የሚወስድ “ወደ ይዘት ዝለል” link የመጀመሪያው focusable
-  element ነው። `src/shared/components/Header.tsx` የኪቱን `SidebarTrigger` (የshellው ብቸኛ sidebar
-  toggle)፣ የKeak `ProductSwitcher`ን እና የcommand-palette openerን ይይዛል፤ በ`#main-content` ውስጥ የኪቱ
-  `PageHeader` (`.ci-page-header`) mount ያልተደረገ ጊዜ ብቻ የroute titleን ያሳያል፤ ስለዚህ የራሱ
-  `PageHeader` ያለው page አንድ `h1` ብቻ ይኖረዋል። `src/shared/components/CommandPalette.tsx` የኪቱ `Dialog` ነው።
-- **Icons።** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ስሙን (screens የሚጠቀሙበትን
-  Material Symbols vocabulary) በ`ICON_MAP` (`src/shared/constants/iconMap.ts`) በኩል ወደ
-  Lucide glyph resolve ያደርጋል። Material Symbols font እና package ተወግደዋል፦ ከmapው የጎደለ ስም
-  neutral placeholder glyph (`data-icon-missing="true"`) render ያደርጋል፣ እና ከproduction ውጭ console warning
-  ይመዘግባል። `npm run gen:icon-map` ከmapው የጎደሉትን ጥቅም ላይ ያሉ ስሞች ያትማል
-  (`tests/unit/icon-map-coverage.test.ts` Lucide icon በሌለው ማንኛውም ስም ላይ fail ይሆናል፤
-  `tests/unit/icon-map-object-values.test.ts` በlookup objects ውስጥ የተከማቹ ስሞችን ይሸፍናል)፤
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
-  `<span className="material-symbols-outlined">` spansን ወደ `<Icon>` ይቀይራል።
-- **Brand።** `src/shared/components/OmniRouteLogo.tsx` ኪቱን wrap ያደርጋል፦ default export የሆነው `OmniRouteLogo`
-  `ProductIcon product="omniroute" variant="glyph"`ን (inline SVG፣ `basePath`-safe) render ያደርጋል፣ እና
-  `OmniRouteLockup` `ProductLockup product="omniroute"`ን (accessible name “Keak OmniRoute”) ወይም፣ ለ
-  white-label operators፣ የራሳቸውን `name`/`logoSrc` render ያደርጋል። የProduct-switcher destinations በ
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`፣ `KEAK_ACTIVE_PRODUCT`) ውስጥ ይገኛሉ። Standalone
-  screens — `src/app/login/page.tsx`፣ `src/app/status/page.tsx`፣ `src/app/maintenance/page.tsx`፣
-  `src/app/offline/page.tsx`፣ `src/app/not-found.tsx` እና `src/shared/components/ErrorPageScaffold.tsx`
-  — lockupውን ያሳያሉ፤ `tests/unit/brand-pages-static.test.ts` ይህን ይጠብቃል።
+- **ኪት.** `packages/ui-kit/src` በ `packages/ui-kit/UPSTREAM.md` ውስጥ በተሰካው የላይኛው ተፋሰስ `src/` ባይት-ባይት ቅጂ ነው (ይህም የፍቃድ ፍቃዱን ይመዘግባል)። `PATCHES.md` የአካባቢ ንጣፎችን ይዘረዝራል (ምንም)። እንደ ምንጭ ነው የሚበላው፣ ምንም ግንባታ የለውም `next.config.mjs` ይቀይረዋል፣ እና `tsconfig.json` ካርታዎች `@omniroute/ui-kit` → `packages/ui-kit/src` እና `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` እና `vitest.mcp.config.ts` ተመሳሳይ ቅጽል ይይዛሉ)። የኪት አካልን በንዑስ መንገዱ አስመጣ (`@omniroute/ui-kit/table`፣ `@omniroute/ui-kit/page-header`…)፣ በጭራሽ በ `@omniroute/ui-kit` በርሜል በኩል፡ በርሜሉ እያንዳንዱን አካል (ቀን መራጭን ጨምሮ) ወደ እያንዳንዱ አስመጪ ይጎትታል። የኪት ስታይል ሉህ በ `src/app/globals.css` በኩል ይገባል (`@import "../../packages/ui-kit/src/ci-styles.css"`፣ ሙሉው ሉህ፡ ዋናው `ci-ui.css` እና እያንዳንዱ የስርዓተ-ጥለት ቤተሰብ)።
+- **ማስመሰያዎች** `packages/ui-kit/src/ci-tokens.css` የ `--ci-*` ምልክቶችን ያስታውቃል; `src/app/globals.css` ወደ ውርስ OmniRoute ስሞች (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) ያገናኛቸዋል, ስለዚህ ያለው `var(--color-*)` ያነባል እና Tailwind መገልገያዎች መስራታቸውን ይቀጥላሉ. አዲስ ኮድ የ Tailwind መገልገያዎችን ይጠቀማል (`bg-surface`፣ `text-text-muted`፣ `border-border`፣ `text-success`፣ `bg-success-bg`፣ `bg-chart-1`…) ወይም ኪት ክፍሎች — በጭራሽ ሄክስ እሴት (`tests/unit/design-kit-bridge.test.ts` ድልድዩን ያስገድዳል)። `text-primary` ወደ `--color-primary-ink` በ `--text-color-primary` ወስኗል፣ስለዚህ ዋናው ጽሁፍ ተነባቢ ሆኖ ይቆያል `bg-primary`/`border-primary` የአነጋገር ፅሁፉን ሲይዝ፡ በ እትሞች ስር የኪቲው `--ci-color-accent-active` ነው (ጥልቀቱ መዳብ `#99562f` በብርሃን፣ የመዳብ አነጋገር በጨለማ)። ክላሲክ ስር፣ lime-800 በብርሃን እና የኖራ አነጋገር በጨለማ። የገበታ ተከታታዮች `--color-chart-1` … `--color-chart-8` ን ይጠቀማሉ፣ እያንዳንዱ በጽሑፍ ደህንነቱ የተጠበቀ `--color-chart-N-ink` እና ግልጽ ያልሆነ `--color-chart-N-subtle` ቺፕ ቀለም፣ በኪት ተከታታይ ቅደም ተከተል (`ciChartSeriesOrder`) የተመደበ።
+- **ገጽታዎች** `<html className="ci-theme">` (`src/app/layout.tsx`) ሰነዱን ወደ ኪት ጭብጥ መርጦታል። ምርጫው `light`፣ `dark` ወይም `system` ነው (`THEME_CONFIG.defaultTheme = "system"` በ `src/shared/constants/appConfig.ts`፣ `system` `prefers-color-scheme` ይከተላል)። `applyTheme()` በ `src/store/themeStore.ts` (በ `THEME_BOOT_SCRIPT` የተቀረጸ፣ በ `src/app/layout.tsx` ውስጥ የተለጠፈ፣ ከውሃውሽን በፊት የሚሰራ) `data-theme="dark"|"light"` ያዘጋጃል እና `.dark` ክፍልን በ `<html>` ላይ አንድ ላይ ይቀያይራል። የኪቱ የጨለማ ማስመሰያ ስብስብ በ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ላይ ተከፍቷል; `dark:` OmniRoute `.dark` `.dark` Tailwind `globals.css` ምንም የአክሰንት ቀለም ቅድመ-ቅምጦች የሉም፡ ንግግሩ ሁል ጊዜ ከመሳሪያው ነው የሚመጣው፣ እና ከአሮጌ ግንባታ የቀጠለ ቅድመ ዝግጅት ሱቁ ሲጫን ይወርዳል።
+- **Palettes.** ሁለት፣ ሁለቱም ከኪት (`src/shared/constants/appearancePalette.ts`): `editions`፣ ነባሪ እና `classic`። እትሞች በ `<html>` ላይ ያለው የኪት `data-ci-appearance="editions"` ባህሪ ነው፣ እሱም `ci-editions.css` (በ `ci-ui.css` የመጣ) ከ `data-theme` ጋር ይጣመራል፤ ክላሲክ የባህሪው አለመኖር ነው። የስር አቀማመጥ አገልጋይ ባህሪውን ያቀርባል፣ ስለዚህ ምንም ያልተከማቸ ጎብኚ (ወይም ምንም JS የለም) በእያንዳንዱ የገጽታ — ዳሽቦርድ፣ መግቢያ፣ `/status`፣ የስህተት ገጾች፣ `/docs` እና PWA ላይ እትሞችን ያገኛል። ምርጫው ከጭብጡ ቀጥሎ በተመሳሳይ `theme` ሱቅ (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) እና ከቀለም በፊት በ `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, በአቀማመጥ `<head>` ውስጥ የገባ) ይተገበራል, ይህም የተከማቸ ቤተ-ስዕል `"classic"` በሚሆንበት ጊዜ ብቻ ባህሪውን ያስወግዳል; `src/app/global-error.tsx`, ከስር አቀማመጥ ውጭ, ከተመሳሳይ መደብር ይተገበራል. በማንኛውም ሌላ አካል ላይ `data-ci-appearance` አታስቀምጡ፡ ኪቱ ከ `html:root:has([data-ci-appearance="editions"])` ጋር ይዛመዳል፣ ስለዚህ አንድ ዘር ሙሉውን ሰነድ ይቀይራል። እትሞች `data-ci-editions-variant="landing"` ተለዋጭ ለገበያ ገፆች እንጂ ዳሽቦርድ አይደለም። ብሮውዘር ክሮም፡ አገልጋዩ ነባሪውን እትሞችን በ `viewport.themeColor` (አንድ መለያ በ `prefers-color-scheme`) እና የድር መግለጫ — `PWA_THEME_COLORS` በ `src/shared/constants/pwaThemeColors.ts`, የእትም `--ci-color-background` (`#f3f1e9` / `#11120f`) አንድ መስታወት `tests/unit/pwa-theme-colors.test.ts` `ci-editions.css` ተሰክቷል. የቀጥታ `<meta name="theme-color">` ከዚያ የተከማቸ ቤተ-ስዕል እና ሁነታን ይከተላል- `THEME_BOOT_SCRIPT` መለያዎቹን ከቀለም በፊት እንደገና ይጽፋል እና የገጽታ ማከማቻው ድርጊቶች በእያንዳንዱ ለውጥ ላይ ያደርጋሉ (`resolveThemeColor()` / `applyThemeColor()` በ `src/shared/utils/themeColorMeta.ts`, `CLASSIC_PAGE_BACKGROUND` ከኪት `ciTokens` ጋር ይነበባል). ግልጽ የሆነ light/dark ገጽታ እያንዳንዱን መለያ ወደዚያ ሁነታ ያዘጋጃል; `system` በእቅድ አንድ ቀለም ይይዛል። አንጸባራቂው እትሞችን ይቆያል፡ ያለ ምርጫ በአንድ ጭነት አንድ ጊዜ ይመጣል። ሞናኮ ቀለሞቹን ከመርማሪው ላይ ያነባል (`monacoKitTheme.ts`); በኅትመቶች ስር የዳሰሳ ንባብ `data-theme` ስር ለአንድ የተመሳሰለ ማለፊያ ይገለብጣል፣ ምክንያቱም ኪቱ እትሞች light/dark ከሥሩ ስለሚፈታ ነው።
+- **አካላት (አስማሚዎች)።** `src/shared/components/index.tsx` የ OmniRoute አካልን API (ተመሳሳይ ስሞች፣ ነባሪ `Toggle` `Select` የሚላኩ እና ፕሮፖዛል `NotificationToast` ያቆያል፣ እና `EmptyState` ያሉት ፕሪሚቲቭ በመሳሪያው `Tooltip` አስማሚዎች ናቸው፡ ቅጾች `InfoTooltip` `Button` `ConfirmModal` `Modal` `Avatar` `Input` `PresetSlider` `Textarea`, `Checkbox`, `Card`) እና ሰንጠረዦች `DataTable` `Collapsible` `CollapsibleSection` `FilterBar` `Badge` `ColumnToggle` `SegmentedControl` `FilterPills` `Loading` `Breadcrumbs`. አንድ አስማሚ የኪት ክፍሉን በንዑስ መንገድ ያስመጣና የቅርስ መደገፊያዎቹን በ — ላይ ይቀርጻል ለምሳሌ `Button variant="primary"` የኪት `default` ቁልፍ ነው (`--ci-button-primary-*`: በብርሃን ተገላቢጦሽ ላዩን፣ ዘዬው ከ `--ci-color-accent-foreground` ቀለም ጋር በጨለማ)፣ `danger` `destructive` ነው፣ እና `warning` የኪት `warning` ቁልፍ ነው። `Badge` ሁኔታ ተለዋዋጮች ኪት ቶኖች ናቸው፣ እና `Select` ከ `<option>` ልጆች ጋር ኪት `NativeSelect` ይሰጣል። `tests/unit/ui/adapters/*.test.tsx` እያንዳንዱ አስማሚ ፒን.
+- **ዛጎል.** `src/app/(dashboard)/layout.tsx` `DashboardLayout` ይሰጣል፣ እሱም `src/shared/components/layouts/DashboardShell.tsx`: ኪት `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)፣ በ OmniRoute የአሰሳ አመክንዮ በዝቂ ነው `src/shared/components/Sidebar.tsx` ወደ `#main-content` "ወደ ይዘት ዝለል" አገናኝ የመጀመሪያው ትኩረት ሊደረግበት የሚችል አካል ነው። `src/shared/components/Header.tsx` ኪት `SidebarTrigger` (የቅርፊቱ ብቸኛው የጎን አሞሌ መቀየሪያ)፣ Keak `ProductSwitcher` እና የትዕዛዝ-palette መክፈቻን ይይዛል። የመንገዱን ርዕስ የሚያሳየው ምንም ዓይነት ኪት `PageHeader` (`.ci-page-header`) በ `#main-content` ውስጥ ሳይሰቀል ብቻ ነው፣ ስለዚህ የራሱ የሆነ `PageHeader` ያለው ገጽ አንድ ነጠላ `h1` አለው። `src/shared/components/CommandPalette.tsx` ኪት ነው `Dialog`.
+- **አዶዎች** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) በ `ICON_MAP` (`src/shared/constants/iconMap.ts`) በኩል ወደ ሉሲድ ግሊፍ (የቁሳቁስ ምልክቶች መዝገበ-ቃላት) ይፈታዋል። የቁሳቁስ ምልክቶች ቅርጸ-ቁምፊ እና ፓኬጅ ጠፍተዋል፡ ከካርታው ላይ የጠፋ ስም ገለልተኛ የሆነ ቦታ ያዥ glyph (`data-icon-missing="true"`) እና የኮንሶል ማስጠንቀቂያ ከምርት ውጭ ይመዘግባል። `npm run gen:icon-map` ከካርታው ላይ የጠፉትን በጥቅም ላይ ያሉ ስሞችን ያትማል (`tests/unit/icon-map-coverage.test.ts` ያለ ሉሲድ አዶ በማንኛውም ስም ላይ አልተሳካም ፣ `tests/unit/icon-map-object-values.test.ts` በፍለጋ ዕቃዎች ውስጥ የተከማቹ ስሞችን ይሸፍናል) `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ቀጥተኛውን `<span className="material-symbols-outlined">` ወደ `<Icon>` ይጽፋል።
+- **የምርት ስም** `src/shared/components/OmniRouteLogo.tsx` ኪቱን ይጠቀለላል፡ ነባሪ ወደ ውጪ መላክ `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (የውስጥ መስመር SVG፣ `basePath` -safe) እና `OmniRouteLockup` `ProductLockup product="omniroute"` (ተደራሽ ስም "Keak OmniRoute") ወይም፣ ለነጭ መለያ ኦፕሬተሮች የራሳቸውን `name`/`logoSrc` ይሰጣል። የምርት መቀየሪያ መድረሻዎች በ `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`፣ `KEAK_ACTIVE_PRODUCT`) ይኖራሉ። ነጠላ ስክሪኖች — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` እና `src/shared/components/ErrorPageScaffold.tsx` — መቆለፊያውን ያሳያሉ; `tests/unit/brand-pages-static.test.ts` ይጠብቀዋል።
 
 ## 2. ደንቦች
 
-1. ሁልጊዜ tokensን ይጠቀሙ፤ literalsን በፍጹም አይጠቀሙ። ሆን ተብለው የተቀመጡ ልዩ ሁኔታዎች፦ ሁልጊዜ ጨለማ የሆነው የconsole terminal፣ በ`STATUS_HEX` (`src/shared/constants/statusColors.ts`) በኩል የሚተገበሩ የReactFlow SVG
-   strokes፣ እንዲሁም ምድባዊ palettes የሆኑት
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) እና
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) ናቸው።
-2. `packages/ui-kit/src`ን በእጅ ፈጽሞ patch አያድርጉ፦ በ`scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉት፤
-   የpre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተወሰነው upstream commit በአንድ byte እንኳ
-   የተለየ ነገር ካለ አይሳካም (የupstream clone፣
-   `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ከሌለ ከማስጠንቀቂያ ጋር ይዘለዋል)። kit አንድ ነገር ካልያዘ፣
-   በadapter ወይም በscreen ውስጥ አማራጭ መፍትሔ ይጠቀሙ እና upstream እንዲያክለው ይጠይቁ።
-3. የkit ነባሪ ጽሑፎች በእንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — የkit component ጽሑፍ በሚያሳይበት ጊዜ ሁሉ ከ`useTranslations(...)`
-   የተገኙ የተተረጎሙ ሕብረቁምፊዎችን ያስተላልፉ።
-4. የTailwind utilities ከkit component classes ቅድሚያ ያገኛሉ (kit
-   `@layer theme, base, components, utilities` ያውጃል እና ደንቦቹ በ`components` ውስጥ ይገኛሉ) — utilitiesን ለ
-   ክፍተት እና layout ይጠቀሙ፤ የkit componentsን ቀለም ለመቀየር አይጠቀሙባቸው።
-5. ርዕሶች፦ `.ci-heading` (Inter፣ tracking የሌለው) ለገጽ እና ለክፍል ርዕሶች፤ `.ci-dashboard-display`
-   (Instrument Serif) እንደ የerror-page status code ላሉ ትልቅና የተራራቁ display ጽሑፎች ብቻ።
-6. `tests/unit/dashboard-kit-sweep.test.ts` የkit አጠቃቀምን ይቆጣጠራል፦
-   በ`src/app` ወይም `src/shared/components` ስር Material ligature span መኖር የለበትም፤ በdashboard tree (`src/app/(dashboard)` እና
-   `src/shared/components`) ውስጥ raw `<select>`፣ `<textarea>` ወይም `<table>`፣ እንዲሁም ከተዘረዘሩት ልዩ ሁኔታዎች (የ`Select` adapter native branch፣
-   `RequestLoggerDetail`) ውጪ በእጅ የተሠራ
-   `role="dialog"` መኖር የለበትም፤ እያንዳንዱ raw `<button>` ወይም `<input>` ምክንያቱን የሚገልጽ
-   `kit-exception:` የያዘና ከእሱ ቢበዛ 3 መስመሮች በላይ የሚያልቅ comment ሊኖረው ይገባል፤ palette hues እና `dark:` variants
-   testው በዘረዘራቸው files ውስጥ ብቻ መኖር አለባቸው።
-7. PR ከመክፈትዎ በፊት ሁለቱንም themes እና የ390 px viewportን በscreenshots ያረጋግጡ፤ `tests/e2e/a11y.spec.ts`
-   axeን ያስኬዳል።
+1. ማስመሰያዎች፣ በጭራሽ ቃል በቃል። ሆን ተብሎ የተቀመጡ ልዩ ሁኔታዎች፡ ሁልጊዜ ጨለማ ያለው የኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`)፣ የተጠናቀቀ-ሄክስ መስታወት የኪት ሁኔታ ቤተ-ስዕል ቃል በቃል ሄክስ ለሚያስፈልጋቸው ጠሪዎች። የምድጃው ቤተ-ስዕል ከአሁን በኋላ የተለየ አይደለም፡ በኬቲቱ ስምንት ቻርት ቶከኖች (`--color-chart-1..8`፣ plus `-ink`/`-subtle`) ላይ ይጓዛሉ፣ በኪት ተከታታይ ቅደም ተከተል፣ በ `src/shared/utils/categoricalPalette.ts` እና፣ ለመዘዋወር ስልቶች፣ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ጠርዞች እና የኦርኬስትራ ሸራ ጭብጥን የሚያውቁ `--orch-status-*` ተለዋዋጮችን (`src/shared/components/flow/edgeStyles.ts`) ያንብቡ።
+2. `packages/ui-kit/src` በእጅ በጭራሽ አታጥፉ: ከ `scripts/dev/sync-ui-kit.sh <commit>` ጋር ያመሳስሉ; የቅድመ-ኮሚት በር `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተሰካው ወደ ላይ ካለው ቁርጠኝነት በሚለይ በማንኛውም ባይት ላይ አይሳካም (የላይኛው ክሎኑ፣ `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit` በማይኖርበት ጊዜ በማስጠንቀቂያ ይዘላል)። ኪቱ የሆነ ነገር ሲጎድል፣በአስማሚው ወይም በስክሪኑ ዙሪያ ይስሩ እና ወደላይ ይጠይቁት።
+3. የኪት ጽሑፍ ነባሪዎች እንግሊዘኛ ናቸው (`label = "Loading"`፣ `loadingLabel = "Loading table"`…) — የተተረጎሙ ሕብረቁምፊዎችን ከ `useTranslations(...)` ያሳልፋሉ።
+4. Tailwind መገልገያዎች በኪት መለዋወጫ ክፍሎች ላይ ያሸንፋሉ (ኪቲው `@layer theme, base, components, utilities` እና ደንቦቹ በ `components` ውስጥ ይኖራሉ) — መገልገያዎችን ለክፍተት እና አቀማመጥ ይጠቀማሉ እንጂ የኪት ክፍሎችን ቀለም ለመቀባት አይደለም።
+5. ርዕሶች: `.ci-heading` ለገጽ እና ክፍል ርዕሶች; `.ci-dashboard-display` ለትልቅ፣ ትንሽ የማሳያ ጽሑፍ እንደ የስህተት ገጽ ሁኔታ ኮድ። ሁለቱም ስዊዘርላንድን ይጠቀማሉ።
+6. `tests/unit/dashboard-kit-sweep.test.ts` ኪት ጉዲፈቻን ይጠብቃል፡ በ `src/app` ወይም `src/shared/components` ስር ምንም የቁሳቁስ ጅማት ጊዜ የለም፤ በዳሽቦርዱ ዛፍ (`src/app/(dashboard)` እና `src/shared/components`) ውስጥ ምንም ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` እና በእጅ የሚጠቀለል `role="dialog"` የለም ከተዘረዘሩት ልዩ ሁኔታዎች ውጭ ( `Select` አስማሚው ተወላጅ ቅርንጫፍ፣ `RequestLoggerDetail`); እያንዳንዱ ጥሬ `<button>` ወይም `<input>` በዚያ ላይ ቢበዛ 3 መስመሮች የሚያልቅ `kit-exception:` (ምክንያት ጋር) የያዘ አስተያየት ያስፈልገዋል; የፓልቴል ቀለሞች እና `dark:` ልዩነቶች በፋይሎች ውስጥ ብቻ የሙከራ ዝርዝሮች።
+7. ሁለቱንም ገጽታዎች እና የ390 ፒክስል መመልከቻ ከ PR በፊት ያረጋግጡ (ቅጽበታዊ ገጽ እይታዎች)። `tests/e2e/a11y.spec.ts` መጥረቢያ ያስኬዳል.
 
-## 3. Screen ማከል
+## 3. ማያ ገጽ መጨመር
 
-1. ገጹን በkit `PageHeader` (`@omniroute/ui-kit/page-header`፣ በdashboard ውስጥ `compact`) ይክፈቱ — title፣ description እና `actions`። ከዚያ shell header የራሱን title አያሳይም።
-2. Controlsን ከ`@/shared/components` (adapters) ይገንቡ፤ adapter በሌለበት ቦታ ደግሞ የkit componentsን በsubpath ይጠቀሙ (`Table`/`TableScrollArea`/`DataTableShell`፣ `Field`፣ `Alert`፣ `Tabs`፣ `RadioGroup`፣
-   `Slider`…)።
-3. Icons፦ `<Icon name="…" />`። አዲስ name በትርጉም ከሚዛመደው Lucide
-   component ጋር ወደ`ICON_MAP` ይገባል፤ `npm run gen:icon-map` እስካሁን የጎደሉትን names ይዘረዝራል።
-4. ቀለሞች፦ semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) እና
-   ለchart series `var(--color-chart-N)` ይጠቀሙ፤ hex values እና ቀለምን ብቻ የሚደግሙ `dark:` variants አይጠቀሙ።
-5. ጽሑፍ፦ ለkit components የሚያስተላልፏቸውን labels ጨምሮ እያንዳንዱ ሕብረቁምፊ ከ`useTranslations` መምጣት አለበት። አዲስ
-   keys ወደ`src/i18n/messages/en.json`, `pt-BR.json` እና `vi.json` ይገባሉ (የVietnamese parity test
-   እያንዳንዱን English key ያረጋግጣል)፤ ሌሎቹ locales በi18n sync ይሞላሉ።
-6. PR ከመክፈትዎ በፊት እነዚህን guards ያስኪዱ፦ `tests/unit/dashboard-kit-sweep.test.ts`,
-   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (በ`iconMap.ts` ውስጥ duplicated importን የሚያገኘው ብቸኛ check)፣
-   `npm run check:ui-icu`፣ እና የscreenውን የራሱ tests።
+1. ገጹን በ kit `PageHeader` (`@omniroute/ui-kit/page-header`፣ በዳሽቦርዱ ውስጥ `compact`) ጀምር — ርዕስ፣
+   መግለጫ እና `actions`። የ shell ራስጌ ከዚያ የራሱን ርዕስ ያስወግዳል።
+2. መቆጣጠሪያዎችን ከ `@/shared/components` (አዳፕተሮቹ) ግንባ እና አዳፕተር በሌለበት ቦታ የ kit ኮምፖነንቶችን
+   በንዑስ-መንገድ (subpath) ተጠቀም (`Table`/`TableScrollArea`/`DataTableShell`፣ `Field`፣ `Alert`፣
+   `Tabs`፣ `RadioGroup`፣ `Slider`…)።
+3. አዶዎች፡ `<Icon name="…" />`። አዲስ ስም በትርጉም-አንጻራዊነት (semantically) ከሚዛመደው Lucide ኮምፖነንት
+   ጋር ወደ `ICON_MAP` ይገባል፤ `npm run gen:icon-map` እስካሁን የሚጎድሉትን ስሞች ይዘረዝራል።
+4. ቀለሞች፡ ስነ-ትርጉማዊ (semantic) utilities (`text-success`፣ `bg-warning-bg`፣ `border-border`…) እና
+   ለቻርት ተከታታዮች `var(--color-chart-N)`፤ ምንም hex እሴቶች እና ቀለምን ብቻ የሚደግሙ `dark:` variants
+   የሉም።
+5. ጽሑፍ፡ እያንዳንዱ ሕብረቁምፊ — ለ kit ኮምፖነንቶች የምታስተላልፋቸውን መለያዎች ጨምሮ — ከ `useTranslations`
+   ይመነጫል። አዳዲስ ቁልፎች ወደ `src/i18n/messages/en.json`፣ `pt-BR.json` እና `vi.json` ይገባሉ (የቬትናምኛ
+   parity ሙከራ እያንዳንዱን የእንግሊዝኛ ቁልፍ ያጣብቃል)፤ ሌሎቹ locales በ i18n sync ይሞላሉ።
+6. ከ PR በፊት ጥበቃዎቹን አሂድ፡ `tests/unit/dashboard-kit-sweep.test.ts`፣
+   `tests/unit/icon-map-coverage.test.ts`፣ `tests/unit/icon-map-object-values.test.ts`፣
+   `npm run check:dashboard-typecheck` (በ `iconMap.ts` ውስጥ የተደጋገመ importን የሚያገኘው ብቸኛው
+   ማረጋገጫ)፣ `npm run check:ui-icu`፣ እና የራሱ የማያ ገጽ ሙከራዎች።
 
-## 4. አስማሚ ማከል ወይም መቀየር
+## 4. አዳፕተር መጨመር ወይም መለወጥ
 
-1. የ`src/shared/components/index.tsx` ይፋዊ APIን እንዳለ ያቆዩ፦ ተመሳሳይ የወደ ውጭ መላኪያ ስሞች፣ ነባሪ ወደ ውጭ መላኪያዎች እና
-   ተቀባይነት ያላቸው props። የቆዩ propsን በአስማሚው ውስጥ ወደ ኪቱ ያዛምዱ (`Button.tsx`ን ይመልከቱ፦ `VARIANT_TO_KIT`፣
+1. የ `src/shared/components/index.tsx`ን ሕዝባዊ API ይጠብቁ፡ ተመሳሳይ የኤክስፖርት ስሞች፣ ነባሪ ኤክስፖርቶች እና
+   የሚቀበሉ props። ድሮዎቹን (legacy) props በአዳፕተሩ ውስጥ ወደ ኪቱ ያምሩ (ይመልከቱ `Button.tsx`: `VARIANT_TO_KIT`፣
    `SIZE_TO_KIT`)።
-2. ኪቱን በንዑስ ዱካ (`@omniroute/ui-kit/<component>`) ያስመጡ።
-3. ለኪቱ ክፍተቶች የሚደረጉ ጊዜያዊ መፍትሄዎች በአስማሚው ውስጥ (ወይም መፍትሄው ቅጥ ሲሆን በ`globals.css` `@layer components` ውስጥ)
-   መኖር አለባቸው፤ በ`packages/ui-kit/src` ውስጥ ፈጽሞ መኖር የለባቸውም።
-4. `tests/unit/ui/adapters/<name>.test.tsx`ን ያክሉ ወይም ያዘምኑ። ብዙ ጠሪዎች ላሉት አስማሚ፣
-   ከለውጡ በፊትና በኋላ የተቀረጸውን markup ያነጻጽሩ — የpadding ወይም የwrapper ለውጦች ወደ እያንዳንዱ ማያ ገጽ ይዛመታሉ።
+2. ኪቱን በንዑስ-መንገድ (subpath) ያስገቡ (`@omniroute/ui-kit/<component>`)።
+3. የኪት ክፍተቶችን ለማለፍ የሚደረጉ ዙሪያ-መፍትሔዎች (workarounds) በአዳፕተሩ ውስጥ ይኑሩ (ማስተካከያው ቅጥ/ስታይል ከሆነ ወይም
+   በ `globals.css` `@layer components` ውስጥ)፣ በ `packages/ui-kit/src` ውስጥ ግን በፍጹም አይደሉም።
+4. `tests/unit/ui/adapters/<name>.test.tsx`ን ይጨምሩ ወይም ያዘምኑ። ብዙ ጠሪዎች (callers) ላሉት አዳፕተር፣ ከለውጡ
+   በፊት እና በኋላ የተሰራውን ማርክአፕ ያወዳድሩ — የpadding ወይም የማጠቂያ (wrapper) ለውጦች ወደ እያንዳንዱ ማያ ገጽ ይስፋፋሉ።
 
-## 5. ኪቱን ማዘመን
+## 5. ኪት ማዘመን
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` በዚያ commit ላይ ያለውን upstream `src/` ወደ
-`packages/ui-kit/src` ይቀዳል እና የተፈቀደውን ብቸኛ ለውጥ ይተገብራል (የ`.js` ቅጥያውን ከአንጻራዊ
-imports ያስወግዳል)። ከዚያ፦ `git diff packages/ui-kit`ን ይገምግሙ፣ በሁለቱም themes ውስጥ providers፣ settings፣ combos፣
-usage እና endpointን በእይታ ይፈትሹ፣ `npm run check:ui-kit-snapshot`ን እና `npm run test:vitest:ui`ን ያስኪዱ፣ እና
-PRን ከupstream changelog ጋር ይክፈቱ።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል።
 
-## 6. የማጣቀሻ ማውጫ
+የየቀኑ `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ይሰራል። ፒኑ ከኋላ እያለ፣ `scripts/ci/ui-kit-sync-pr.sh` አንድ የማመሳሰል PR ከከፍተኛው `release/vX.Y.Z` ቅርንጫፍ ጋር፣ በሚንከባለል ቅርንጫፍ `chore/ui-kit-sync-latest` ላይ ክፍት ያደርገዋል። በፍፁም አይዋሃድም፡ እያንዳንዱ ኪት መለቀቅ አሁንም በአካባቢው VPS ላይ የእይታ ፍተሻ ያስፈልገዋል። ቅርንጫፉ የሚገነባው አዲስ ልቀት ሲወጣ እና ካልሆነ ብቻውን ሲተው ነው። የተከፈተ PR በእጅ የተገፈፈ አልተፃፈም፣ እና ጠባቂ የተዘጋው አንድ PR አዲስ እስኪወጣ ድረስ ተዘግቶ ይቆያል።
 
-- `src/app/globals.css` — የtoken ድልድይ፣ `.dark` overrides፣ OmniRoute `@layer components` ቅጥያዎች
-- `packages/ui-kit/UPSTREAM.md` — የተወሰነ upstream commit እና የፈቃድ ማረጋገጫ፤ `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` እና ከጎኑ ያሉት አስማሚዎች፤ `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+ምንም PR መክፈት በማይቻልበት ጊዜ (የታለመው መልቀቅ በረዶ ሲሆን, PR በእጅ ተገፋ, PR ተዘግቷል, ወይም ምንም PR ቶከን አልተዘጋጀም) የስራ ሂደቱ ለምን እንደሆነ የሚገልጽ አንድ የመከታተያ ጉዳይ ይከፍታል.
+
+የአሰራር ሂደቱ ሁለት ምስጢሮችን ይጠቀማል-
+
+- `secrets.UI_KIT_READ_TOKEN`፡ ለግል ወደ ላይ ለሚደረገው ሪፖ ተነባቢ-ብቻ ማስመሰያ። የስራ ፍሰቱ ወደ ላይ ማንበብ በማይችልበት ጊዜ (ምንም ማስመሰያ፣ መስራት ያቆመ ቶከን፣ ወይም GitHub የማይደረስበት) ሩጫው አረንጓዴ ሆኖ ይቆያል ነገር ግን ማስጠንቀቂያ ይጽፋል እና አንድ የተለየ እትም ክፍት ያደርገዋል፣ ይህም አንድ ጊዜ ራሱን ይዘጋል፣ በኋላ ሩጫ እንደገና ወደላይ ማንበብ ይችላል።
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: በዚህ ማከማቻ ላይ ከይዘት እና የመጎተት ጥያቄዎች ጋር የመዳረሻ መፃፍ ያለው ጥሩ-ጥራጥሬ ማስመሰያ። ነባሪው `GITHUB_TOKEN` እዚህ PRs መፍጠር አይችልም፣ እና የተከፈተው PR CI አያነሳሳም። ያለዚህ ማስመሰያ የስራ ሂደቱ ቅርንጫፉን ብቻ ይገፋፋል.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = the new `v*` tag) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
+
+## 6. README ንድፎችን
+
+አሥራ ሁለቱ ሥዕላዊ መግለጫዎች `README.md` መክተቻ ሥር (`docs/diagrams/*.svg`) በማይንቀሳቀስ ምስል ላይ የሚተገበረው ኪት ናቸው፣ እና የሚመነጩ እንጂ በእጅ የተሳሉ አይደሉም፡ 13 የጄነሬተር ፋይሎች በ `scripts/docs/gen-readme-*.mjs` (አሥራ ሁለት ሥዕላዊ መግለጫዎች እና የ `gen-readme-diagrams.mjs` ሾፌር) እና 12 የዝግታ ፈተናዎች በ `tests/unit/docs/readme-*-svg.test.ts`፣ አንድ በሥዕላዊ መግለጫ፣ እያንዳንዱ ባይት-ውፅዓት ከጄኔሬተሩ ጋር በማወዳደር ( `test-unit`)።
+
+- **ማስመሰያዎች** `scripts/docs/readme-diagram-theme.mjs` የ እትሞች ቤተ-ስዕል (ነባሪው እይታ) ከ `packages/ui-kit/src/ci-editions.css` ይገለበጣል (በዚያ ፋይል ላይ በ `tests/unit/docs/readme-diagram-theme.test.ts` ተያይዟል፣ ይህ ደግሞ WCAG AA በእያንዳንዱ ገጽ ላይ በሁለቱም ዕቅዶች ላይ ላለው የጽሑፍ ቀለም ይፈትሻል፤ ከአንደኛው በስተቀር፣ ብርሃን `warn`፣ የኪት ማስጠንቀቂያው 10 % ጨልሟል ምክንያቱም የኪት ዋጋው 4.46:1 በሸራው ላይ 4.46:1 ነው) እና የጽሁፉን ፅሁፍ `ci-tokens.css`' መለኪያ ይገልፃል። የኪቱ ክብደቶች (400/500/600፣ ማሳያ በ500) እና ለሁሉም ነገር መከታተል፣ ከኮድ ሚናዎች (`.cmd`፣ `.term`፣ `.term-lg`፣ `.mono`፣ `.mono-sm`፣ `.mono-xs`) በስተቀር፣ IBM Plex Mono እና ለትእዛዞች፣ URLs፣ መለያዎች እና ተርሚናል ስክሪኖች ብቻ ናቸው። የብርሃን እሴቶች በ `:root` ላይ ይቀመጣሉ፣ ጨለማ እሴቶች ከ `prefers-color-scheme: dark` ጀርባ፣ በፋይሉ ውስጥ፣ ስለዚህ እያንዳንዱ ምስል የተመልካቹን እቅድ በ GitHub ላይ ይከተላል።
+- **ቅርጸ ቁምፊዎች.** GitHub Markdown ምንም CSS አልያዘም እና የ camo proxy እያንዳንዱን የውጭ ማምጣትን ያግዳል፣ ስለዚህ የኪት አይነት በፋይሉ ውስጥ መጓዝ አለበት። የጄኔሬተር ሁሉ የመጨረሻ ደረጃ `scripts/docs/readme-outline.mjs` የስዊዘርላቹን ሚናዎች በ HarfBuzz ይቀርፃቸዋል እና እንደ ቬክተር ዝርዝር (`<defs>` paths እና `<use>`) ይሳሉ፣ ቀስቶቹ እና ጂኦሜትሪክ ምልክቶች ስዊዘርላንድ በራሱ መለኪያዎች አልተሳለም። ዝርዝር መግለጫዎች፣ መቼም የተከተተ ቅርጸ-ቁምፊ፡ የስዊዘርላንድ ፍቃድ (`packages/ui-kit/src/fonts/FFL.txt`) ያለ የጽሁፍ ስምምነት ንዑስ ቅንብር እና ቅርጸት መቀየርን ይከለክላል እና የቬክተር ስዕሎችን ይፈቅዳል፣ ስለዚህ Switzer `@font-face` ወይም `data:` URI ዳግም አያስተዋውቁ። በፋይል ውስጥ የቀረው አንድ ቅርጸ-ቁምፊ የ OFL IBM Plex Mono ንዑስ ስብስብ ነው እውነተኛ የኮድ ጽሑፍ (`scripts/docs/readme-fonts.mjs`) ፣ ከእነዚያ ቁምፊዎች የተሰራ። ማንኛውንም ግሊፍ መወርወርን መክተት አይችልም።
+- **እንደገና ማመንጨት።** `npm run docs:readme-diagrams` አስራ ሁለቱን በ README ቅደም ተከተል እንደገና ይጽፋል እና በአንድ ፋይል አንድ መስመር በመጠን ያትማል። ነጠላ ጀነሬተር እንዲሁ በራሱ ይሰራል (`node scripts/docs/gen-readme-<name>.mjs`፣ `free-tier-budget` `node --import tsx/esm` ይፈልጋል ምክንያቱም አሃዞቹ በ `open-sse/config/freeModelCatalog.ts` ውስጥ ካለው የቀጥታ ካታሎግ ጫኝ ነው ፣ የካታሎግ ለውጥ የ CI ውጤት `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ውስጥ ነው)። ጄነሬተሩን እና SVG አንድ ላይ ያድርጉ።
+- **ማረጋገጫ።** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` አንድን ፋይል GitHub በሚያገለግልበት መንገድ (የ `<img>` መለያ፣ camo's `Content-Security-Policy`፣ `image/svg+xml`)፣ ብርሃን እና ጨለማ ፍሬም ይይዛል እና ገጹ የተሰራውን የውጭ ቅርጸ-ቁምፊ ጥያቄ ሪፖርት ያደርጋል (0 መሆን አለበት)።
+- **በጀት።** በአንድ ፋይል ከ 200 KB በታች (እያንዳንዱ የዝግታ ሙከራ ያረጋግጣል); 500 KB ለማንኛውም README ምስል (የ SVG ስቱዲዮ አረጋጋጭ ህግ) ጠንካራ ቆብ ነው።
+- **ቅዳ ሳይለወጥ፣ ከበሩ ላይ ይቆጠራል።** የዳግም ብራንድ ተቀይሯል አይነት እና ቤተ-ስዕል እንጂ ቃላት አይደለም፡ እያንዳንዱ ጀነሬተር የዲያግራሙን ግልባጭ በ `*_COPY` ቋሚ (ወይንም ከቀጥታ ካታሎግ ይገነባዋል) ይህም የተሳለው ጽሁፍ እና የመግለጫው ደረጃ ግብአት ነው። ቀኖናዊ አኃዞች በ `<text>` ኖዶች ውስጥ ይቆያሉ (አንድ ጊዜ ተዘርዝረዋል ፣ `fill-opacity:0`) ፣ በ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) የተነበበ; በር የሚያነቡት የሥዕላዊ መግለጫዎች የቆይታ ፈተናዎች አረጋጋጮችን በተፈጠረው ፋይል ላይ ያካሂዳሉ፣ ስለዚህ ከኮዱ የወጣ አሃዝ ሙከራው አልተሳካም — በሩ የሚያነበውን ምንጭ ያስተካክላል እንጂ በጄነሬተር ውስጥ ያለው ቁጥር የለም።
+
+## 7. የማጣቀሻ መረጃ ጠቋሚ
+
+- `src/app/globals.css` — ማስመሰያ ድልድይ፣ `.dark` ይሽራል፣ OmniRoute `@layer components` ቅጥያዎች
+- `packages/ui-kit/UPSTREAM.md` — ወደ ላይ የተለጠፈ ቁርጠኝነት እና የፍቃድ ፍቃድ; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` እና ከእሱ ቀጥሎ ያሉት አስማሚዎች; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

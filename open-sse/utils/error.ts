@@ -11,10 +11,11 @@ import { getDefaultErrorMessage, getErrorInfo } from "../config/errorConfig.ts";
 import { normalizePayloadForLog } from "@/lib/logPayloads";
 import type { ModelCooldownErrorPayload } from "@/types";
 import { buildPassthroughErrorResponse } from "./upstreamErrorPassthrough.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
 import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
+import { NonStreamingResponseTooLargeError, readResponseTextWithinCap } from "./responseBodyCap.ts";
 
 import {
   isSafePublicErrorIdentifier,
@@ -378,7 +379,7 @@ function normalizeRetryAfterSeconds(retryAfter?: string | number | Date | null):
  */
 export function isRetryAfterProvenanceEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("RETRY_AFTER_PROVENANCE_ENABLED");
+    return isRegisteredFeatureFlagEnabled("RETRY_AFTER_PROVENANCE_ENABLED");
   } catch {
     return false;
   }
@@ -392,7 +393,7 @@ export function isRetryAfterProvenanceEnabled(): boolean {
  */
 export function isContentPolicyRefusalComboStopEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED");
+    return isRegisteredFeatureFlagEnabled("CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED");
   } catch {
     return false;
   }
@@ -489,7 +490,7 @@ export async function parseUpstreamError(response: Response, provider: string | 
   let rawText = "";
 
   try {
-    const text = await response.text();
+    const text = await readResponseTextWithinCap(response);
     rawText = text;
     responseBody = normalizePayloadForLog(text);
 
@@ -513,8 +514,13 @@ export async function parseUpstreamError(response: Response, provider: string | 
     } catch {
       message = text;
     }
-  } catch {
-    message = `Upstream error: ${response.status}`;
+  } catch (err) {
+    // Every caller relies on this returning the upstream status, so an over-cap body
+    // is reported in the message: nothing of it is parsed, and the read closed the body.
+    message =
+      err instanceof NonStreamingResponseTooLargeError
+        ? "Provider error body exceeded response size limit"
+        : `Upstream error: ${response.status}`;
     responseBody = { _rawText: message };
   }
 

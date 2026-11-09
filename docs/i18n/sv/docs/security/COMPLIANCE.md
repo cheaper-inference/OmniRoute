@@ -15,50 +15,68 @@ Implementationen finns i `src/lib/compliance/index.ts` (T-43 — ”Efterlevnads
 
 ### Administrativa granskningshändelser (`audit_log`)
 
-Varje anrop till `logAuditEvent({ action, actor, target, details, ... })` skapar en rad. Åtgärdssträngar följer mönstret `domain.verb` (eller `domain.verb.outcome`). Bekräftade åtgärdstyper i källträdet omfattar:
+Varje anrop till `logAuditEvent({ action, actor, target, details, ... })` skapar
+en rad. Åtgärdssträngar följer ett
+`domain.verb`- (eller `domain.verb.outcome`-)mönster.
+Bekräftade åtgärdstyper i kodbasen omfattar:
 
-| Åtgärd                               | Källa                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Åtgärd                               | Källa                                    |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Varje post registrerar `action`, `actor` (standardvärdet är `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` och `timestamp`. Känsliga nycklar (`apiKey`, `accessToken`, `refreshToken`, `password`, allt som matchar `*token`/`*secret`/`*apikey` osv.) maskeras rekursivt som `"[redacted]"` innan raden skrivs.
+Varje post innehåller `action`, `actor` (standardvärdet är `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` och `timestamp`. Känsliga nycklar (`apiKey`, `accessToken`,
+`refreshToken`, `password`, allt som matchar `*token`/`*secret`/`*apikey`,
+etc.) maskeras rekursivt till `"[redacted]"` innan raden skrivs.
+
+Rader med `api_key.auth.touch` registrerar lyckade läsningar av API-nyckelmetadata
+och upptäcktsläsningar (GET/HEAD) som aldrig når begärandeloggen: vilken nyckel,
+när och den normaliserade sökvägen, sammanslagna och begränsade till 1 000 rader.
+Nycklar med `noLog` samt miljönyckeln hoppas över. Den anropande klientens
+IP-adress och user-agent läggs endast till när funktionsflaggan
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` är aktiverad (inaktiverad som standard).
 
 ### MCP-verktygsanrop (`mcp_tool_audit`)
 
-Varje anrop av ett MCP-verktyg skriver en rad via `open-sse/mcp-server/audit.ts`. Schema (från `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Varje anrop av ett MCP-verktyg skriver en rad via
+`open-sse/mcp-server/audit.ts`. Schema (från
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-| Kolumn           | Anmärkningar                               |
-| ---------------- | ------------------------------------------ |
-| `id`             | automatisk inkrementering                  |
-| `tool_name`      | identifierare för MCP-verktyget            |
-| `input_hash`     | sha256 för indata (ingen nyttolast lagras) |
-| `output_summary` | kort, trunkerad sammanfattning             |
-| `duration_ms`    | faktisk förfluten tid                      |
-| `api_key_id`     | anropare (kan vara null)                   |
-| `success`        | `1` / `0`                                  |
-| `error_code`     | slutlig felkod vid misslyckande            |
-| `created_at`     | ISO-tidsstämpel                            |
+| Kolumn           | Anmärkningar                              |
+| ---------------- | ----------------------------------------- |
+| `id`             | automatisk inkrementering                 |
+| `tool_name`      | MCP-verktygsidentifierare                 |
+| `input_hash`     | sha256 av indata (ingen nyttolast lagras) |
+| `output_summary` | kort, trunkerad sammanfattning            |
+| `duration_ms`    | faktisk förfluten tid                     |
+| `api_key_id`     | anropare (kan vara null)                  |
+| `success`        | `1` / `0`                                 |
+| `error_code`     | slutlig felkod vid fel                    |
+| `created_at`     | ISO-tidsstämpel                           |
 
-### Begärande-/användningsloggar
+### Begärande- och användningsloggar
 
-Dessa utgör drifttelemetri (inte strikt administrativ granskning) men delar samma pipeline för bevarande:
+Dessa är operativ telemetri (inte strikt administrativa granskningsloggar), men
+delar samma lagringspipeline:
 
-- `usage_history` — aggregerad användning per begäran
-- `call_logs` — fullständig logg per begäran (omfattas av radgränsen, se nedan)
-- `proxy_logs` — logg över proxytrafik (omfattas av radgränsen)
+- `usage_history` — sammanställning av användning per begäran
+- `call_logs` — fullständig logg per begäran (omfattas av radbegränsning, se nedan)
+- `proxy_logs` — logg över proxyt trafik (omfattas av radbegränsning)
 - `request_detail_logs` — äldre detaljerad begärandelogg (rensas fortfarande om den finns)
 
 ## Lagringsschema

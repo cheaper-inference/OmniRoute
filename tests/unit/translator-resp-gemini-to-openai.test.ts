@@ -7,6 +7,16 @@ const { translateNonStreamingResponse } =
   await import("../../open-sse/handlers/responseTranslator.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 
+type OpenAIUsage = {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  prompt_tokens_details?: { cached_tokens?: number };
+};
+
+type OpenAIResponse = { usage?: OpenAIUsage };
+type OpenAIStreamEvent = { usage?: OpenAIUsage };
+
 function createStreamingState() {
   return {
     toolCalls: new Map(),
@@ -49,6 +59,69 @@ test("Gemini non-stream: single candidate text maps to one OpenAI choice", () =>
     completion_tokens: 5,
     total_tokens: 8,
   });
+});
+
+test("Gemini non-stream: cached input remains a subset of prompt input", () => {
+  const result = translateNonStreamingResponse(
+    {
+      response: {
+        responseId: "resp-cache",
+        modelVersion: "gemini-3.7-flash",
+        candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 46212,
+          candidatesTokenCount: 4,
+          totalTokenCount: 46216,
+          cachedContentTokenCount: 40929,
+        },
+      },
+    },
+    FORMATS.GEMINI,
+    FORMATS.OPENAI
+  );
+
+  assert.deepEqual((result as OpenAIResponse).usage, {
+    prompt_tokens: 46212,
+    completion_tokens: 4,
+    total_tokens: 46216,
+    prompt_tokens_details: { cached_tokens: 40929 },
+  });
+});
+
+test("Gemini non-stream: explicit zero cached input remains reported", () => {
+  const result = translateNonStreamingResponse(
+    {
+      candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }],
+      usageMetadata: {
+        promptTokenCount: 5,
+        candidatesTokenCount: 1,
+        totalTokenCount: 6,
+        cachedContentTokenCount: 0,
+      },
+    },
+    FORMATS.GEMINI,
+    FORMATS.OPENAI
+  );
+
+  assert.deepEqual((result as OpenAIResponse).usage?.prompt_tokens_details, { cached_tokens: 0 });
+});
+
+test("Gemini non-stream: invalid cached input is not exposed as a hit", () => {
+  const result = translateNonStreamingResponse(
+    {
+      candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }],
+      usageMetadata: {
+        promptTokenCount: 5,
+        candidatesTokenCount: 1,
+        totalTokenCount: 6,
+        cachedContentTokenCount: 6,
+      },
+    },
+    FORMATS.GEMINI,
+    FORMATS.OPENAI
+  );
+
+  assert.equal((result as OpenAIResponse).usage?.prompt_tokens_details, undefined);
 });
 
 test("Gemini non-stream: multiple candidates keep multimodal content, reasoning and tool calls", () => {
@@ -1126,6 +1199,151 @@ test("Gemini stream: checks lastParen before lastBracket when identifying partia
 // #3821-review LEDGER-4 — a signed native functionCall arriving while a textual
 // `<thinking>` wrapper opened in an earlier chunk is still buffered must flush that
 // buffered reasoning as reasoning_content, not silently discard it.
+test("Gemini stream: late usage without cache metadata preserves an earlier cache count", () => {
+  const state = createStreamingState();
+
+  geminiToOpenAIResponse(
+    {
+      candidates: [{ content: { parts: [{ text: "ok" }] } }],
+      usageMetadata: {
+        promptTokenCount: 46212,
+        candidatesTokenCount: 2,
+        totalTokenCount: 46214,
+        cachedContentTokenCount: 40929,
+      },
+    },
+    state
+  );
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 46212,
+          candidatesTokenCount: 4,
+          totalTokenCount: 46216,
+        },
+      },
+      state
+    ) || [];
+
+  const finalUsage = result.find((event: OpenAIStreamEvent) => event.usage)?.usage;
+  assert.deepEqual(finalUsage, {
+    prompt_tokens: 46212,
+    completion_tokens: 4,
+    total_tokens: 46216,
+    prompt_tokens_details: { cached_tokens: 40929 },
+  });
+});
+
+test("Gemini stream: explicit zero cache usage remains reported", () => {
+  const state = createStreamingState();
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 5,
+          candidatesTokenCount: 1,
+          totalTokenCount: 6,
+          cachedContentTokenCount: 0,
+        },
+      },
+      state
+    ) || [];
+
+  assert.deepEqual(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    {
+      cached_tokens: 0,
+    }
+  );
+});
+
+test("Gemini stream: absent prompt and total fields preserve earlier usage", () => {
+  const state = createStreamingState();
+  geminiToOpenAIResponse(
+    {
+      candidates: [{ content: { parts: [{ text: "ok" }] } }],
+      usageMetadata: {
+        promptTokenCount: 100,
+        candidatesTokenCount: 2,
+        totalTokenCount: 102,
+        cachedContentTokenCount: 80,
+      },
+    },
+    state
+  );
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
+        usageMetadata: { candidatesTokenCount: 5 },
+      },
+      state
+    ) || [];
+  assert.deepEqual(result.find((event: OpenAIStreamEvent) => event.usage)?.usage, {
+    prompt_tokens: 100,
+    completion_tokens: 5,
+    total_tokens: 102,
+    prompt_tokens_details: { cached_tokens: 80 },
+  });
+});
+
+test("Gemini stream: invalid cache count clears an earlier hit", () => {
+  const state = createStreamingState();
+  geminiToOpenAIResponse(
+    {
+      candidates: [{ content: { parts: [{ text: "ok" }] } }],
+      usageMetadata: {
+        promptTokenCount: 100,
+        candidatesTokenCount: 2,
+        totalTokenCount: 102,
+        cachedContentTokenCount: 80,
+      },
+    },
+    state
+  );
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 100,
+          candidatesTokenCount: 5,
+          cachedContentTokenCount: 200,
+        },
+      },
+      state
+    ) || [];
+  assert.equal(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    undefined
+  );
+});
+
+test("Gemini stream: invalid cached usage is not exposed as a hit", () => {
+  const state = createStreamingState();
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [{ text: "ok" }] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 5,
+          candidatesTokenCount: 1,
+          totalTokenCount: 6,
+          cachedContentTokenCount: 6,
+        },
+      },
+      state
+    ) || [];
+
+  assert.equal(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    undefined
+  );
+});
+
 test("Gemini stream: open textual reasoning is flushed before a signed native tool call", () => {
   const state = createStreamingState();
 
@@ -1174,7 +1392,10 @@ test("Gemini stream: open textual reasoning is flushed before a signed native to
     "buffered textual reasoning must be flushed, not dropped, when a tool call arrives"
   );
   assert.equal(r2[toolIdx]?.choices[0].delta.tool_calls[0].id, "call-flush-1");
-  assert.ok(reasoningIdx >= 0 && toolIdx > reasoningIdx, "reasoning is emitted before the tool call");
+  assert.ok(
+    reasoningIdx >= 0 && toolIdx > reasoningIdx,
+    "reasoning is emitted before the tool call"
+  );
 });
 
 // #3821-review LEDGER-15 — a reasoning-only chunk interrupting a partially-buffered

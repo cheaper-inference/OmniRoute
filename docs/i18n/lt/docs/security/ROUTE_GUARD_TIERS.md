@@ -14,251 +14,221 @@ ir įvertinama prieš vykdant bet kurią kitą autentifikavimo šaką.
 
 ### 1 lygis — LOCAL_ONLY
 
-**Užtikrina:** `isLocalOnlyPath(path)` → grįžtamojo ryšio pagrindinio kompiuterio patikra  
-**Apėjimas:** Pagal numatytąsias nuostatas nėra. Siaura išimtis taikoma keliams, nurodytiems
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, kai užklausoje pateikiamas galiojantis
-API raktas su `manage` aprėptimi (žr. [„manage“ aprėpties išimtį](#manage-scope-carve-out)).
+**Užtikrina:** `isLocalOnlyPath(path)` → loopback mazgo patikra
+**Apejimas:** pagal numatytuosius nustatymus nėra. Siaura išimtis keliams,
+įtrauktiems į `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, kai užklausa pateikiama
+su galiojančiu API raktu, turinčiu `manage` apimtį (žr. [Išimtis dėl manage apimties](#manage-scope-carve-out)).
 
-Šie maršrutai paleidžia antrinius procesus arba vykdo kodą vykdymo aplinkoje. Suteikus
-ne grįžtamojo ryšio srautui prieigą prie jų, galiojantį JWT gavęs užpuolikas (pvz.,
-per Cloudflared/Ngrok tunelį) galėtų inicijuoti procesų paleidimą — tai žinoma CVE
+Šie maršrutai paleidžia antrinius procesus arba vykdo kodą vykdymo metu. Jei jie
+būtų atverti ne loopback srautui, užpuolikas, įgijęs galiojantį JWT (pvz., per
+Cloudflared/Ngrok tunelį), galėtų inicijuoti procesų paleidimą — tai žinoma CVE
 klasė ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**Kas yra GHSA-fhh6-4qxv-rpqj (atakos klasė):** valdymo / agento serveris
-pateikia galinį tašką, kuris paleidžia antrinį procesą (`npm install`, `node`, naršyklę,
-tarpinį serverį, `git`, `tar`, …). Jei šis galinis taškas pasiekiamas ne tik iš pagrindinio
-kompiuterio — nes operatorius patalpino OmniRoute už nginx/Cloudflare/Tailscale tunelio
-ir nutekėjo JWT arba autentifikavimas buvo netinkamai sukonfigūruotas — užpuolikas
-„API iškvietimą“ paverčia „komandos vykdymu pagrindiniame kompiuteryje“ (nuotoliniu
-kodo vykdymu). OmniRoute užkerta tam kelią **besąlygiškai, prieš bet kokią autentifikavimo
-patikrą, atlikdama grįžtamojo ryšio pagrindinio kompiuterio patikrą** kiekviename
-maršrute, galinčiame paleisti procesus: per tunelį panaudotas nutekėjęs prieigos raktas
-vis tiek negali pasiekti procesų paleidimo funkcijos.
+**Kas yra GHSA-fhh6-4qxv-rpqj (užpuolimo klasė):** valdymo/agento serveris
+atveria galinį tašką, kuris paleidžia antrinį procesą (`npm install`, `node`,
+naršyklę, proxy serverį, `git`, `tar`, …). Jei tas galinis taškas pasiekiamas ne
+iš to paties mazgo — nes operatorius patalpino OmniRoute už nginx/Cloudflare/Tailscale
+tunelio ir JWT nutekėjo arba autentifikacija buvo sukonfigūruota neteisingai —
+užpuolikas „API iškvietimą" paverčia „komandos vykdymu mazge" (nuotoliniu kodo
+vykdymu). OmniRoute šią grėsmę pašalina **besąlygiškai, dar prieš bet kokią
+autentifikacijos patikrą, vykdydama loopback mazgo patikrą** kiekviename procesus
+paleisti galinčiame maršrute: net per tunelį nutekėjęs prieigos raktas vis tiek
+negali pasiekti procesų paleidimo.
 
-**Visas LOCAL_ONLY rinkinys.** Autoritetingas šaltinis yra
+**Pilnas LOCAL_ONLY rinkinys.** Autoritetingasis šaltinis yra
 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`, esantys
-`src/server/authz/routeGuard.ts`; toliau pateikta lentelė atspindi dabartinę būseną.
-`check-route-guard-membership` patikra išvardija kiekvieną `route.ts`, esantį
-po procesus galinčiais paleisti prefiksais, ir CI patikra nepavyksta, jei kuris nors
-iš jų nėra klasifikuotas kaip prieinamas tik lokaliai.
+`src/server/authz/routeGuard.ts` faile; toliau pateikta lentelė atspindi dabartinę
+būseną. `check-route-guard-membership` patikra išvardija kiekvieną `route.ts`,
+esantį po procesus paleisti galinčiais prefiksais, ir nutraukia CI su klaida, jei
+kuris nors iš jų nėra klasifikuotas kaip local-only.
 
-| Priešdėlis / šablonas                                                                                    | Kodėl veikia tik lokaliai                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP serveris — paleidžia stdio sąsajas ir SSE apdorojimo programas                                                                                        |
-| `/api/cli-tools/runtime/`                                                                                | CLI įrankių vykdymo aplinka — vykdo savavališką papildinių kodą                                                                                           |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Atskirų įrankių nustatymų įrašymo priemonės, galinčios keisti įrankių vykdomuosius failus / konfigūraciją pagrindiniame kompiuteryje                      |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Tas pats `getCliRuntimeStatus()` paleidimas kaip ir šešiuose pirmiau nurodytuose gimininguose maršrutuose (GHSA-35fw-cv32-2373)                           |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventoriaus patikros — kiekvienam įrankiui paleidžia `command -v` / `--version` (GHSA-35fw-cv32-2373)                                                |
-| `/api/cli-tools/antigravity-mitm`                                                                        | „Antigravity“ MITM tarpinio serverio valdymas (paleidžia / nustato sistemos tarpinį serverį)                                                              |
-| `/api/modality-bridge/video/`                                                                            | Griežtai patikimos atgalinio ryšio sąsajos „Video Bridge“ vykdymo aplinkos patikra ir vidinė išskleidimo sąsaja                                           |
-| `/api/services/`                                                                                         | Įtaisytosios paslaugos (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` ir paleidimas                                                         |
-| `/dashboard/providers/services/`                                                                         | Atvirkštinis tarpinis serveris, skirtas įtaisytųjų paslaugų naudotojo sąsajoms                                                                            |
-| `/api/tunnels/cloudflared`                                                                               | Įdiegia / paleidžia cloudflared vykdomąjį failą                                                                                                           |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Įdiegia / valdo tailscaled pagrindiniame kompiuteryje                                                                                                     |
-| `/api/copilot/`                                                                                          | Autentifikavimo nereikalaujanti LLM tvarkyklė — pagal numatytuosius nustatymus skirta tik CLI                                                             |
-| `/api/tools/agent-bridge/`                                                                               | „AgentBridge“ — paleidžia MITM serverį ir keičia DNS nustatymus                                                                                           |
-| `/api/tools/traffic-inspector/`                                                                          | „Traffic Inspector“ — http-proxy klausyklė ir sistemos tarpinis serveris                                                                                  |
-| `/api/settings/mitm`                                                                                     | Įjungia MITM perėmimą (sistemos lygmens tarpinio serverio būsena)                                                                                         |
-| `/api/issue-agent/`                                                                                      | Užduočių agentas — paleidžia vietinius įrankius saugykloje                                                                                                |
-| `/api/plugins/`, `/api/plugins`                                                                          | Papildiniai — įkeliami / vykdomi naudojant `worker_threads` ir `child_process`                                                                            |
-| `/api/middleware/`                                                                                       | Naudotojo tarpinė programinė įranga — įkelia / vykdo operatoriaus kodą tame pačiame procese                                                               |
-| `/api/system/version`                                                                                    | Automatinis atnaujinimas (tik POST; GET/HEAD/OPTIONS netaikoma) — paleidžia `git checkout` ir `npm install`                                               |
-| `/api/db-backups/exportAll`                                                                              | Paleidžia `tar` eksportuojamam archyvui sukurti                                                                                                           |
-| `/api/local/`                                                                                            | Vieno spustelėjimo vietinės paleidyklės (šiuo metu „Redis“) — paleidžia podman/docker                                                                     |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | „Headroom“ tarpinio serverio gyvavimo ciklas — paleidžia python CLI / siunčia signalus PID                                                                |
-| `/api/jobs`, `/api/jobs/`                                                                                | Užduočių vykdyklės valdymas — vykdo suplanuotus darbus pagrindiniame kompiuteryje                                                                         |
-| `/api/oauth/cursor/auto-import`                                                                          | Prieš importuojant prisijungimo duomenis vykdo `execFile("which", ["cursor"])`                                                                            |
-| `/api/oauth/kiro/auto-import`                                                                            | Skaito „Kiro“ CLI prisijungimo duomenų failus iš pagrindinio kompiuterio                                                                                  |
-| `/api/skills/collect/`                                                                                   | Įgūdžių rinkimas — aptinka / įdiegia vietinius įrankius                                                                                                   |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Įgūdžių apdorojimo programos registravimas ir vykdymas — pasiekia smėlio dėžės konteinerio paleidimą (GHSA-jx89)                                          |
-| `/api/discovery/`                                                                                        | Vietinio tinklo / paslaugų teikėjų aptikimo patikros                                                                                                      |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Paleidžia naršyklę su grafine sąsaja ir VNC seansą interaktyviems prisijungimams                                                                          |
-| `/api/acp/agents`                                                                                        | ACP — aptinka ir paleidžia vietinius CLI agentų vykdomuosius failus                                                                                       |
-| `/api/resilience/connections`                                                                            | Atsparumo JSON kiekvienai paskyrai (atvėsimo laikotarpis, grandinės pertraukiklis, blokavimas). Valdymo skydelio HTML nėra skirtas tik vietinei prieigai. |
-| `/api/providers/cursor/agent-availability`                                                               | Valdymo skydelio diegimo paraginimo patikra — paleidžia `cursor-agent status --format json`                                                               |
-| `/api/providers/{id}/login` (reguliarioji išraiška)                                                      | Paleidžia Playwright Chromium su grafine sąsaja, kad būtų galima prisijungti naudojant žiniatinklio slapukus                                              |
-| `/api/providers/volcengine-plan/connect` (reguliarioji išraiška)                                         | Rankinė eiga su grafine sąsaja ir seansu pagrįstas automatinis prisijungimas telefonu / SMS (paleidžia Playwright)                                        |
-| `/api/providers/{id}/refresh-cursor` (reguliarioji išraiška)                                             | Rankinis Cursor seanso atnaujinimas — paragina `cursor-agent`                                                                                             |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (reguliarioji išraiška)                                   | Diagnozuoja vietinį Codex CLI diegimą (paleidžia vykdomąjį failą)                                                                                         |
+| Priešdėlis / šablonas                                                                                    | Kodėl tai veikia tik vietoje                                                                                              |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP serveris — paleidžia stdio tiltus + SSE apdorotojus                                                                   |
+| `/api/cli-tools/runtime/`                                                                                | CLI įrankių vykdymo aplinka — vykdo savavališką įskiepių kodą                                                             |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | Atskirų įrankių nustatymų rašytojai, galintys liesti įrankių dvejetaines bylas / konfigūraciją pagrindiniame kompiuteryje |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | Tas pats `getCliRuntimeStatus()` paleidimas kaip ir šešių aukščiau išvardytų analogų (GHSA-35fw-cv32-2373)                |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI inventoriaus tikrinimai — kiekvienam įrankiui paleidžia `command -v` / `--version` (GHSA-35fw-cv32-2373)              |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM tarpinio serverio valdymas (paleidžia / nukreipia sisteminį tarpinį serverį)                             |
+| `/api/modality-bridge/video/`                                                                            | Griežtas patikimo loopback režimo „Video Bridge“ vykdymo aplinkos tikrinimas ir vidinis išgavimo tiltas                   |
+| `/api/services/`                                                                                         | Integruotos paslaugos (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + paleidimas                           |
+| `/dashboard/providers/services/`                                                                         | Atvirkštinis tarpinis serveris į integruotų paslaugų naudotojo sąsajas                                                    |
+| `/api/tunnels/cloudflared`                                                                               | Įdiegia / paleidžia cloudflared dvejetainę bylą                                                                           |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | Įdiegia / valdo tailscaled pagrindiniame kompiuteryje                                                                     |
+| `/api/copilot/`                                                                                          | Neautentifikuota LLM tvarkyklė — pagal numatymą tik per CLI                                                               |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — paleidžia MITM serverį + keičia DNS                                                                         |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy klausytojas + sisteminis tarpinis serveris                                                 |
+| `/api/settings/mitm`                                                                                     | Įjungia MITM srauto perėmimą (sisteminio lygio tarpinio serverio būsena)                                                  |
+| `/api/issue-agent/`                                                                                      | Problemų agentas — paleidžia vietinius įrankius, dirbančius su repozitorija                                               |
+| `/api/plugins/`, `/api/plugins`                                                                          | Įskiepiai — įkeliami / vykdomi per `worker_threads` + `child_process`                                                     |
+| `/api/middleware/`                                                                                       | Naudotojo tarpinė programinė įranga — įkelia / vykdo operatoriaus kodą tame pačiame procese                               |
+| `/api/system/version`                                                                                    | Automatinis atnaujinimas (tik POST; GET/HEAD/OPTIONS išimti) — paleidžia `git checkout` + `npm install`                   |
+| `/api/db-backups/exportAll`                                                                              | Paleidžia `tar` eksporto archyvui sukurti                                                                                 |
+| `/api/local/`                                                                                            | Vieno paspaudimo vietiniai paleidikliai (šiandien — Redis) — paleidžia podman/docker                                      |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | „Headroom“ tarpinio serverio gyvavimo ciklas — paleidžia python CLI / siunčia signalą PID                                 |
+| `/api/jobs`, `/api/jobs/`                                                                                | Užduočių vykdytuvo valdymas — vykdo suplanuotus darbus pagrindiniame kompiuteryje                                         |
+| `/api/oauth/cursor/auto-import`                                                                          | `execFile("which", ["cursor"])` prieš importuojant prisijungimo duomenis                                                  |
+| `/api/oauth/kiro/auto-import`                                                                            | Skaito Kiro CLI prisijungimo duomenų bylas iš pagrindinio kompiuterio                                                     |
+| `/api/skills/collect/`                                                                                   | Įgūdžių rinkimas — aptinka / įdiegia vietinius įrankius                                                                   |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill apdorojimo registravimas + vykdymas — pasiekia smėlio dėžės konteinerio paleidimą (GHSA-jx89)                       |
+| `/api/discovery/`                                                                                        | Vietinio tinklo / teikėjų aptikimo užklausos                                                                              |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | Paleidžia naršyklę su grafine sąsaja + VNC seansą interaktyviems prisijungimams                                           |
+| `/api/acp/agents`                                                                                        | ACP — aptinka ir paleidžia vietinius CLI agentų dvejetainius failus                                                       |
+| `/api/resilience/connections`                                                                            | Kiekvienos paskyros atsparumo JSON (cooldown, breaker, lockout). Valdymo skydo HTML nėra skirtas tik vietinei prieigai.   |
+| `/api/providers/cursor/agent-availability`                                                               | Valdymo skydo diegimo priminimo patikra — paleidžia `cursor-agent status --format json`                                   |
+| `/api/providers/{id}/login` (regex)                                                                      | Paleidžia Playwright Chromium su grafine sąsaja prisijungimui per žiniatinklio slapukus                                   |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | Rankinis procesas su grafine sąsaja + seansais pagrįstas automatinis prisijungimas telefonu / SMS (paleidžia Playwright)  |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | Rankinis Cursor seanso atnaujinimas — paskatina `cursor-agent`                                                            |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | Diagnozuoja vietinį Codex CLI diegimą (paleidžia dvejetainį failą)                                                        |
 
 **Atsakas pažeidimo atveju:** `403 LOCAL_ONLY`
 
-#### Išimtis, taikoma `manage` apimčiai
+#### Manage apimties išimtis
 
-LOCAL_ONLY kelių poaibis GALI būti pasiekiamas ir ne iš grįžtamojo ryšio
-sąsajos, jei ir tik jei užklausoje yra `Authorization: Bearer <api-key>`, kurio
-metaduomenys apima `manage` (arba `admin`) apimtį. Išimtis aiškiai įjungiama
-kiekvienam keliui atskirai per `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, todėl
-bet kuriam naujam LOCAL_ONLY keliui pagal numatytąją nuostatą ir toliau taikomas
-griežtas grįžtamojo ryšio sąsajos reikalavimas. Neautentifikuotos užklausos ir
-užklausos su raktais, neturinčiais `manage` apimties, vis tiek atmetamos su
-`403 LOCAL_ONLY`.
+LOCAL_ONLY kelių pogrupį TAIP PAT galima pasiekti iš ne loopback adreso, jei ir
+tik jei užklausa turi `Authorization: Bearer <api-key>`, kurio metaduomenyse yra
+`manage` apimtis (arba `admin`). Išimtis aiškiai kontroliuojama kiekvienam keliui
+per `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`, todėl bet kokio naujo LOCAL_ONLY
+kelio numatytasis nustatymas išlieka griežtas loopback. Neautentifikuotos
+užklausos ir užklausos su raktais, neturinčiais manage apimties, vis tiek
+atmetamos su `403 LOCAL_ONLY`.
 
-Šiuo metu vienintelis prefiksas, kuriam galima taikyti išimtį, yra `/api/mcp/`.
-`/api/cli-tools/runtime/` ir `/api/services/` sąmoningai neįtraukti, nes jie gali
-paleisti savavališkus poprocesius (`npm install`, `node`), o būtent nuo šios CVE
-klasės ir skirta apsaugoti LOCAL_ONLY pakopa.
+Šiuo metu vienintelis apeinamas prefiksas yra `/api/mcp/`. `/api/cli-tools/runtime/`
+ir `/api/services/` sąmoningai išskirti, nes jie gali paleisti savavališkus
+subprocesus (`npm install`, `node`), o tai yra būtent ta CVE klasė, nuo kurios
+LOCAL_ONLY lygmuo skirtas apsaugoti.
 
-**#7895 — siaura `mcp:connect` apimtis:** `/api/mcp/` išimtis TAIP PAT priima
+**#7895 — `mcp:connect` siaura apimtis:** `/api/mcp/` išimtis TAIP PAT priima
 Bearer raktą, turintį siaurą `mcp:connect` apimtį
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), kuri tikrinama
-naudojant `hasMcpConnectOrManageScope()` faile
-`src/server/authz/policies/management.ts`. Tai taikoma TIK `/api/mcp/` —
-`mcp:connect` nesuteikia jokių teisių jokiame kitame valdymo maršrute (įskaitant
-visus kitus LOCAL_ONLY išimčių prefiksus, jei toks kada nors būtų pridėtas), ir
-ji sąmoningai neįtraukta į `MANAGEMENT_API_KEY_SCOPES`. Raktui, turinčiam
-`manage` / `admin`, išimtis ir toliau taikoma lygiai taip pat kaip anksčiau;
-`mcp:connect` yra mažesnių privilegijų alternatyva nuotoliniams, tik MCP
-naudojantiems klientams, kuriems neturėtų reikėti plačios valdymo prieigos.
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), tikrinamą per
+`hasMcpConnectOrManageScope()` faile `src/server/authz/policies/management.ts`.
+Tai taikoma TIK `/api/mcp/` — `mcp:connect` nesuteikia nieko jokiam kitam
+valdymo keliui (įskaitant bet kokį kitą LOCAL_ONLY apeinamą prefiksą, jei toks
+kada nors būtų pridėtas), ir ji sąmoningai išskirta iš
+`MANAGEMENT_API_KEY_SCOPES`. Raktas, turintis `manage`/`admin`, vis tiek praeina
+išimtį lygiai taip pat, kaip anksčiau; `mcp:connect` yra mažesnių teisių
+alternatyva nuotoliniams tik MCP naudojantiems klientams, kuriems neturėtų
+reikėti plačios valdymo prieigos.
 
-| Užklausa                                                           | Kelias                     | Rezultatas                |
-| ------------------------------------------------------------------ | -------------------------- | ------------------------- |
-| Ne iš grįžtamojo ryšio sąsajos, be Bearer                          | `/api/mcp/*`               | 403 LOCAL_ONLY            |
-| Ne iš grįžtamojo ryšio sąsajos, Bearer su `manage` apimtimi        | `/api/mcp/*`               | Leisti                    |
-| Ne iš grįžtamojo ryšio sąsajos, Bearer su `mcp:connect` apimtimi   | `/api/mcp/*`               | Leisti                    |
-| Ne iš grįžtamojo ryšio sąsajos, Bearer be `manage` / `mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY            |
-| Ne iš grįžtamojo ryšio sąsajos, Bearer su `mcp:connect` apimtimi   | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
-| Ne iš grįžtamojo ryšio sąsajos, Bearer su `manage` apimtimi        | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY            |
-| Iš grįžtamojo ryšio sąsajos, su bet kokiu Bearer arba be jo        | bet kuris LOCAL_ONLY       | Leisti (patikra sėkminga) |
+| Užklausa                                      | Kelias                     | Rezultatas                    |
+| --------------------------------------------- | -------------------------- | ----------------------------- |
+| Ne loopback, be Bearer                        | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Ne loopback, Bearer su `manage` apimtimi      | `/api/mcp/*`               | Leidžiama                     |
+| Ne loopback, Bearer su `mcp:connect` apimtimi | `/api/mcp/*`               | Leidžiama                     |
+| Ne loopback, Bearer be `manage`/`mcp:connect` | `/api/mcp/*`               | 403 LOCAL_ONLY                |
+| Ne loopback, Bearer su `mcp:connect` apimtimi | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Ne loopback, Bearer su `manage` apimtimi      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY                |
+| Loopback, bet koks / be Bearer                | bet koks LOCAL_ONLY        | Leidžiama (patikra praeinama) |
 
-#### Rekomendacijos operatoriams ir auditas
+#### Operatoriaus gairės ir auditas
 
-Jei OmniRoute naudojate už atvirkštinio tarpinio serverio ar tunelio (nginx,
-Caddy, Cloudflare Tunnel, Tailscale, Ngrok), grįžtamojo ryšio sąsajos patikra
-vis tiek apsaugo pirmiau nurodytus maršrutus, galinčius paleisti procesus —
-užklausa, kurios kliento adresas nepriklauso grįžtamojo ryšio sąsajai, atmetama
-su `403 LOCAL_ONLY` **prieš autentifikavimą**, todėl nutekėjęs JWT negali
-pasiekti procesų paleidimo funkcijos. Lieka dvi operatoriaus pareigos:
+Jei naudojate OmniRoute už atvirkštinio tarpinio serverio ar tunelio (nginx,
+Caddy, Cloudflare Tunnel, Tailscale, Ngrok), loopback patikra vis tiek apsaugo
+aukščiau nurodytus kelius, galinčius paleisti procesus — užklausa, kurios
+kliento adresas nėra loopback, atmetama su `403 LOCAL_ONLY` **prieš prasidedant
+autentifikavimui**, todėl nutekėjęs JWT negali pasiekti paleidimo. Lieka dvi
+operatoriaus atsakomybės:
 
-- **Nebandykite „ištaisyti“ 403 klaidos suklastodami kliento IP kaip grįžtamojo ryšio adresą.** Nustačius
-  `X-Forwarded-For: 127.0.0.1` arba naudojant tarpinį serverį, kuris perrašo šaltinio adresą į
-  grįžtamojo ryšio adresą, vėl atveriama būtent ta RCE pažeidžiamumų klasė, kurią šis lygis uždaro. Per
-  tarpinį serverį padarykite pasiekiamą valdymo skydelį / API, bet niekada — procesus paleisti galinčius maršrutus.
-- **Išlaikykite valdymo aprėpties apėjimą minimalų.** Apeiti galima tik `/api/mcp/` ir
-  tik naudojant `manage` aprėpties API raktą. `SPAWN_CAPABLE_PREFIXES` niekada negali būti
+- **Ne„taisykite“ 403 klaidos klastodami kliento IP kaip loopback.** Nustačius
+  `X-Forwarded-For: 127.0.0.1` arba naudojant proxy, kuris perrašo šaltinio adresą į
+  loopback, vėl atidaroma būtent ta RCE klasė, kurią šis lygmuo uždaro. Valdymo
+  skydą / API atskleiskite per proxy — niekada ne spawn-capable maršrutus.
+- **Manage apimties apėjimą laikykite minimalų.** Apeinamas tik `/api/mcp/`, ir
+  tik su `manage` apimties API raktu. `SPAWN_CAPABLE_PREFIXES` niekada negali būti
   įtraukti į apėjimo sąrašą — zod schema juos atmeta, o
-  `isLocalOnlyBypassableByManageScope` neleidžia jų vykdymo metu (daugiasluoksnė apsauga);
-  būtent tai valdymo skydelyje reiškia „negalima padaryti apeinamais“. Tame pačiame
-  draudimų sąraše taip pat yra keli LOCAL_ONLY maršrutai, kurie nepaleidžia procesų, tačiau
-  taip pat niekada neturi būti pasiekiami nuotoliniu būdu — `/api/oauth/kiro/auto-import` (skaito
-  vietinius pagrindinio kompiuterio Kiro kredencialų failus), `/api/discovery/` ir `/api/issue-agent/`. Vykdymo metu
-  momentinę kopiją įkelianti priemonė taip pat pašalina tokius įrašus iš išsaugotos nustatymų eilutės, o
-  pasenęs JSON importavimas (`/api/settings/import-json`) niekada neįrašo apėjimo raktų.
-  Kiekvienas `LOCAL_ONLY_API_PREFIXES` įrašas turi būti arba draudimų sąraše, arba
-  peržiūrėtas ir pripažintas tinkamu apeiti (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Dinaminius segmentus
-  ir statinius kelius turintys procesus paleisti galintys maršrutai po `/api/providers/` (pvz., `/login`,
-  `/refresh-cursor`) apimami reguliariosiomis išraiškomis pagrįstų susijusių sąrašų `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS`, esančių
-  `src/shared/constants/spawnCapablePrefixes.ts`, o ne plokščiojo
-  `SPAWN_CAPABLE_PREFIXES` masyvo — kad juos aptiktų, plokščiasis masyvas turėtų apimti
-  visą `/api/providers/` prefiksą, todėl būtų pernelyg išplėsta maršrutų hierarchija,
-  kurią nuotoliniai valdymo skydeliai teisėtai naudoja teikėjų CRUD operacijoms.
+  `isLocalOnlyBypassableByManageScope` juos atmeta vykdymo metu (gynyba gylio principu,
+  angl. defence-in-depth) — būtent tai valdymo skydas reiškia „cannot be made
+  bypassable“. Tas pats draudžiamasis sąrašas (deny-list) taip pat apima kelis
+  LOCAL_ONLY maršrutus, kurie nepaleidžia procesų, bet taip pat niekada neturi būti
+  pasiekiami nuotoliniu būdu — `/api/oauth/kiro/auto-import` (nuskaito pagrindiniame
+  kompiuteryje esančius Kiro kredencialų failus), `/api/discovery/` ir
+  `/api/issue-agent/`. Vykdymo meto momentinės kopijos įkroviklis taip pat išmeta
+  tokius įrašus iš išsaugotos nustatymų eilutės, o senasis JSON importas
+  (`/api/settings/import-json`) niekada neįrašo apėjimo raktų. Kiekvienas
+  `LOCAL_ONLY_API_PREFIXES` įrašas turi būti arba draudžiamajame sąraše, arba
+  peržiūrėtas kaip tinkamas apėjimui
+  (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). Maršrutus su dinaminiais
+  segmentais ir statiniais keliais, galinčius paleisti procesus, esančius po
+  `/api/providers/` (pvz., `/login`, `/refresh-cursor`), apima regex pagrįstos
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` konstantos faile
+  `src/shared/constants/spawnCapablePrefixes.ts`, o ne plokščiasis
+  `SPAWN_CAPABLE_PREFIXES` masyvas — plokščiajam masyvui tektų apimti visą
+  `/api/providers/` prefiksą, kad juos pagautų, ir tai pernelyg išplėstų maršrutų medį,
+  kurį nuotoliniai valdymo skydai teisėtai naudoja tiekėjų CRUD operacijoms.
 
-**Prieigos auditas** — norėdami patikrinti, ar šie maršrutai nėra pasiekiami iš kitų įrenginių:
+**Prieigos auditas** — norint patikrinti, kad joks šaltinis už pagrindinio kompiuterio ribų nepasiekia šių maršrutų:
 
-- Atidarykite **Autorizavimo inventorių** adresu `/dashboard/settings/security`: jame pateikiamas
-  aktyvus LOCAL_ONLY prefiksų sąrašas, nurodoma, kuriuos prefiksus galima apeiti, ir kompiliavimo metu
-  nustatytas procesus paleisti galintis („negalima padaryti apeinamu“) rinkinys.
-- Atvirkštinio tarpinio serverio / prieigos žurnaluose ieškokite pirmiau nurodytų prefiksų, susietų su
-  ne grįžtamojo ryšio kliento adresu. Bet koks toks kreipinys, grąžinęs `200`, o ne
-  `403 LOCAL_ONLY`, reiškia, kad tarpinis serveris užmaskuoja tikrąjį kliento IP — pataisykite tarpinio serverio konfigūraciją.
-- `403 LOCAL_ONLY` OmniRoute žurnaluose vienam iš šių kelių reiškia, kad apsauga
-  veikia kaip numatyta, o ne klaidą, kurią reikia nuslopinti.
+- Atidarykite **Authorization Inventory** (autorizacijos inventorių) adresu `/dashboard/settings/security`: ten
+  rodomas tiesioginis LOCAL_ONLY prefiksų sąrašas, kurie prefiksai yra apeinami, ir
+  kompiliavimo meto spawn-capable („cannot be made bypassable“) aibė.
+- Ieškokite savo reverse-proxy / prieigos žurnaluose aukščiau išvardytų prefiksų,
+  suporuotų su ne-loopback kliento adresu. Bet kuris toks atitikmuo, grąžinęs `200`
+  vietoj `403 LOCAL_ONLY`, reiškia, kad proxy maskuoja tikrąjį kliento IP — pataisykite proxy.
+- `403 LOCAL_ONLY` OmniRoute žurnaluose vienam iš šių kelių — tai apsauga, veikianti
+  kaip numatyta, o ne klaida, kurią reikėtų slopinti.
 
-#### Nuotoliniu būdu pasiekiami maršrutai su iškvietimo vietos tikrinimo užkarda
+#### Nuotoliniu būdu pasiekiami maršrutai su zondo kontrole iškvietimo vietoje
 
-Kai kurie maršrutai turi likti pasiekiami iš nuotolinio valdymo skydelio, tačiau vietiniams
-iškvietėjams jie vykdo pagrindinio kompiuterio tikrinimą
-(`which <binary>`, `<binary> --version`, `tailscale status --json`).
-Naudojant `GET`, jie nėra LOCAL_ONLY; vietoje to apdorojimo programa nuskaito patikimą lygiaverčio mazgo vertinimą
-naudodama `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ir tikrina tik
-`loopback` / `lan` iškvietėjams. `remote` iškvietėjui grąžinamos tokios pačios struktūros iš
-procesų nepaleidžiančių šaltinių (išsaugotos būsenos, nustatymų, failų sistemos patikrų) sudarytas atsakymas, pažymėtas `probed: false`.
+Kai kurie maršrutai turi likti pasiekiami iš nuotolinio valdymo skydo, bet vietiniams
+iškvietėjams vykdo pagrindinio kompiuterio pusės zondą
+(`which <binary>`, `<binary> --version`, `tailscale status --json`). Jie nėra
+LOCAL_ONLY `GET` užklausoms; vietoj to apdorotojas nuskaito patikimo partnerio (peer)
+įvertinimą su `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ir zondą vykdo
+tik `loopback` / `lan` iškvietėjams. `remote` iškvietėjas gauna tą pačią atsakymo
+struktūrą, suformuotą iš šaltinių, nepaleidžiančių procesų (išsaugota būsena, nustatymai,
+failų sistemos patikros), pažymėtą `probed: false`.
 
-| Maršrutas                                                        | Nuotoliniams iškvietėjams praleidžiamas tikrinimas                                              |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI vykdymo aplinkos tikrinimas (`allowLocalRuntimeProbe`) ir CLI atsarginis proceso paleidimas |
-| `GET /api/headroom/status`                                       | `which headroom` ir python `--version` patikros                                                 |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`                               |
-| `GET /api/tunnels/cloudflared` (`GET` netaikomas LOCAL_ONLY)     | `which cloudflared` PATH paieška                                                                |
+| Maršrutas                                                        | Nuotoliniams iškvietėjams praleidžiami zondai                                                          |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI vykdymo aplinkos zondas (`allowLocalRuntimeProbe`) ir CLI atsarginis procesų paleidimas (fallback) |
+| `GET /api/headroom/status`                                       | `which headroom` ir python `--version` zondai                                                          |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`                                      |
+| `GET /api/tunnels/cloudflared` (GET išimtis iš LOCAL_ONLY)       | `which cloudflared` PATH paieška                                                                       |
 
-Naujas skaitymo maršrutas, tikrinantis pagrindinį kompiuterį, turi taikyti tą patį šabloną arba būti iš karto
-priskirtas LOCAL_ONLY.
+Naujas skaitymo maršrutas, kuris zondo pagalba tikrina pagrindinį kompiuterį, turi
+vadovautis tuo pačiu šablonu arba būti iškart klasifikuojamas kaip LOCAL_ONLY.
 
-### 2 lygis — ALWAYS_PROTECTED
+### 2 lygmuo — ALWAYS_PROTECTED
 
-**Užtikrina:** `isAlwaysProtectedPath(path)` → praleidžia `requireLogin=false` apėjimą
-**Apėjimas:** jokio, kai `requireLogin=false`; JWT visada privalomas
+**Įgyvendina:** `isAlwaysProtectedPath(path)` → praleidžiamas `requireLogin=false` apėjimas
+**Apėjimas:** nėra, kai `requireLogin=false`; JWT visada būtinas
 
-Šie maršrutai atlieka naikinamuosius arba negrįžtamus veiksmus. Leidus juos dieginyje
-„be slaptažodžio“, bet kas tame pačiame LAN galėtų išvalyti duomenų bazę arba nutraukti
-serverio procesą.
+Šie maršrutai yra destruktyvūs arba negrįžtami. Leisti juos įdiegime „be slaptažodžio“
+reikštų, kad bet kas tame pačiame LAN tinkle galėtų ištrinti duomenų bazę arba
+nutraukti serverio procesą.
 
-| Kelias                                    | Priežastis                                                                           |
-| ----------------------------------------- | ------------------------------------------------------------------------------------ |
-| `/api/shutdown`                           | Nutraukia serverio procesą                                                           |
-| `/api/settings/database`                  | Duomenų bazės eksportavimas, importavimas ir išvalymas                               |
-| `/api/db-backups`                         | Prieiga prie viso duomenų bazės atsarginės kopijos archyvo                           |
-| `/api/settings/export-json`               | Eksportuoja visą nustatymų objektą (įskaitant paslaptis)                             |
-| `/api/settings/import-json`               | Pakeičia visą nustatymų objektą                                                      |
-| `/api/providers/health-autopilot/actions` | Vykdo automatinio valdymo taisomuosius veiksmus                                      |
-| `/api/settings/obsidian`                  | Sugeneruoja pakartotinai naudojamus WebDAV kredencialus bet kuriai saugyklos šakniai |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                         |
+| Kelias                                    | Priežastis                                                                               |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `/api/shutdown`                           | Nutraukia serverio procesą                                                               |
+| `/api/settings/database`                  | Duomenų bazės eksportas, importas ir ištrynimas                                          |
+| `/api/db-backups`                         | Prieiga prie viso duomenų bazės atsarginių kopijų archyvo                                |
+| `/api/settings/export-json`               | Eksportuoja visą nustatymų bloką (įskaitant paslėptis)                                   |
+| `/api/settings/import-json`               | Pakeičia visą nustatymų bloką                                                            |
+| `/api/providers/health-autopilot/actions` | Vykdo autopilot taisymo veiksmus                                                         |
+| `/api/settings/obsidian`                  | Sukuria pakartotinai naudojamus WebDAV kredencialus bet kurios saugyklos (vault) šakčiai |
+| `/api/relay/tokens`                       | Kuria, išvardija, redaguoja ir atšaukia relay žetonus                                    |
+| `/api/cli-tools/apply`                    | Perrašo operatoriaus pagrindinio kompiuterio CLI konfigūraciją                           |
+| `/api/cli-tools/guide-settings`           | Rašo gido valdomus CLI konfigūracijos failus                                             |
+| `/api/cli-tools/hermes-agent-settings`    | Rašo Hermes agento konfigūraciją                                                         |
+| `/api/cli-tools/backups`                  | Atkuria ir šalina CLI konfigūracijos atsargines kopijas                                  |
+| `/api/log-export`                         | Išsiunčia iškvietimų žurnalus į sukonfigūruotą paskirtį                                  |
+| `/api/restart`                            | Paleidžia serverio procesą iš naujo                                                      |
 
 **Atsakymas pažeidimo atveju:** `401 Authentication required`
 
-`/api/settings/obsidian` apima antrinį `/webdav` kelią: `POST` nukreipia WebDAV failų paslaugą —
-kurią prieš Next.js, už šio apdorojimo konvejerio ribų, aptarnauja pasirinktinis Node sluoksnis — į iškvietėjo pasirinktą šaknį
-ir grąžina ką tik sugeneruotus Basic kredencialus, `DELETE` juos pakeičia, o pirminio kelio `POST` išsaugo
-Obsidian REST API prieigos raktą. GHSA-62vw tik paslėpė slaptažodžio atskleidimą per `GET`; išdavimas
-vis dar priklausė prieigos leidimo gedimo atveju lygiui (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` papildomai
-atmeta saugyklą, kuri yra duomenų katalogas, yra jo viduje arba jį apima.
+`/api/settings/obsidian` apima ir savo `/webdav` antrinį maršrutą: `POST` nukreipia WebDAV failų paslaugą — kurią aptarnauja pasirinktinis Node sluoksnis prieš Next.js, už šio vamzdyno ribų — į skambintojo pasirinktą šaknį ir grąžina ką tik sukurtus Basic kredencialus, `DELETE` juos rotuoja, o tėvinis `POST` išsaugo Obsidian REST API žetoną. GHSA-62vw tik paslėpė slaptažodžio atskleidimą per `GET`; išdavimas vis dar buvo fail-open lygmenyje (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` papildomai atmeta saugyklą, kuri sutampa su duomenų katalogu, yra jame arba jį apima.
 
-#### Kredencialų eksportavimas skirtas tik operatoriui
+#### Kredencialų eksportavimas ir atkūrimas — tik operatoriams
 
-Aukščiau aprašytas lygmuo tik nustato, ar reikalingi _kokie nors_ prisijungimo duomenys. Maršrutai, kuriais atsisiunčiami
-saugomi prisijungimo duomenys, apdorojimo funkcijoje atlieka antrą patikrą: `GET /api/settings/export-json` (iššifruoti
-teikėjų ryšiai ir neapdoroti API raktai), `GET /api/db-backups/export` (SQLite failas) ir
-`GET /api/db-backups/exportAll` (visas archyvas) iškviečia `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). Ji priima valdymo skydelio seansą, vietinį CLI subjektą arba
-egzempliorių, kuriame prisijungimas išjungtas, ir pateikia atsakymą `403` bet kokios aprėpties API raktams (įskaitant `manage`
-ir `admin`) bei `oma_` prieigos prieigos raktams. Sinchronizavimo prieigos raktų išdavimas (`POST /api/sync/tokens`) naudoja tą pačią
-pagalbinę funkciją ir patikimą vidinės paslaugos prieigos raktą iš grįžtamojo ryšio sąsajos.
+Aukščiau esantis lygmuo tik nusprendžia, ar reikalingas _koks nors_ kredencialas. Maršrutai, kurie atsisiunčia saugomus kredencialus, apdorojimo funkcijoje prideda antrą patikrą: `GET /api/settings/export-json` (iššifruoti teikėjų prisijungimai ir grynieji API raktai), `GET /api/db-backups/export` (SQLite failas) ir `GET /api/db-backups/exportAll` (pilnas archyvas) kviečia `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`). Ji priima prietaisų skydelio sesiją, vietinį CLI subjektą arba egzempliorių su išjungtu prisijungimu, o API raktams bet kokios apimties (įskaitant `manage` ir `admin`) bei `oma_` prieigos žetonams atsako `403`. Destruktyvūs atitikmenys laikosi tos pačios ribos: `POST /api/db-backups/import` (įkeltas `.sqlite`, įskaitant `dryRun=true`), `POST /api/db-backups` (saugomos atsarginės kopijos atkūrimas pagal id) ir `POST /api/settings/import-json` (senovinio formato JSON atkūrimas) pakeičia veikiančią duomenų bazę arba visą nustatymų, prisijungimų ir API raktų rinkinį, todėl mašininis kredencialas taip pat negali jų inicijuoti. Atkūrimo taškų naikinimas laikosi tos pačios ribos: `DELETE /api/db-backups` (valymas — palikti naujausias N / atmesti senesnes nei D dienų) ir `PATCH /api/db-backups` (saugojimo nustatymai), nes išsaugota saugojimo trukmė yra būtent tai, ką `cleanupDbBackups()` taiko po kiekvienos automatinės atsarginės kopijos (`src/lib/db/backup.ts`), todėl mašininis kredencialas, galėtų išsaugoti `keepLatest: 1` ir kito kopijavimo metu ištrintų viską. Atsarginių kopijų peržiūra ir kūrimas (`GET`/`PUT /api/db-backups`) išlaiko įprastą valdymo autentifikaciją. Sinchronizavimo žetonų išdavimas (`POST /api/sync/tokens`) naudoja tą patį pagalbinį metodą, kartu su patikimu loopback vidinės tarnybos žetonu.
 
-#### Credential exports and restores are operator-only
+### Naujos diegties pradinis paleidimas — tik loopback, pagal tikrąjį partnerį, o ne `Host`
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Nesukonfigūravus valdymo slaptažodžio (ir be `INITIAL_PASSWORD`), `isAuthRequired()` faile `src/shared/utils/apiAuth.ts` palieka anoniminį pradinį paleidimą atvirą **tik loopback partneriams**. Loopback nustatomas iš patikimų partnerio signalų, tokia tvarka: žetonu paženklintas tikrasis TCP partneris (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ką mato politika), pačio vamzdyno `AUTHZ_HEADER_PEER_LOCALITY` verdiktas (ką mato maršrutų apdorojimo funkcijos, patikimas tik tol, kol nustatytas `OMNIROUTE_PEER_STAMP_TOKEN`), arba tikrasis lizdo partneris tiesioginiams skambintojams. `Host` / `nextUrl.hostname` niekada nėra tikrinami, o pirmojo slaptažodžio įrašymas (`POST /api/settings/require-login`) yra su tuo pačiu apribojimu, o ne atviras kiekvienam tinklo partneriui (GHSA-7pq4-8pvv-rx7r). `managementPolicy` savo `peerContext` verdiktą perduoda žemyn aiškiai, todėl ORIGINALIOS (prieš antraščių nuėmimą) užklausos antraštės to niekada nenusprendžia.
 
-### Pirminis diegimo parengimas galimas tik per grįžtamojo ryšio sąsają — pagal tikrąjį lygiavertį mazgą, o ne `Host`
+### 3 lygmuo — MANAGEMENT (numatytasis)
 
-Kai nesukonfigūruotas joks valdymo slaptažodis (ir nėra `INITIAL_PASSWORD`), `isAuthRequired()` faile
-`src/shared/utils/apiAuth.ts` palieka anoniminį pirminį parengimą pasiekiamą **tik grįžtamojo ryšio sąsajos lygiaverčiams mazgams**.
-Grįžtamojo ryšio sąsaja nustatoma iš patikimų lygiaverčio mazgo signalų tokia eilės tvarka: prieigos raktu pažymėtas tikrasis TCP lygiavertis mazgas
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, kurį mato politika), paties konvejerio
-`AUTHZ_HEADER_PEER_LOCALITY` sprendimas (kurį mato maršrutų apdorojimo funkcijos ir kuriuo pasitikima tik tada, kai
-nustatytas `OMNIROUTE_PEER_STAMP_TOKEN`) arba tikrasis lizdo lygiavertis mazgas tiesioginiams kvietėjams. Į `Host` /
-`nextUrl.hostname` niekada neatsižvelgiama, o pirmojo slaptažodžio įrašymui
-(`POST /api/settings/require-login`) taikomas tas pats apribojimas, užuot palikus jį pasiekiamą kiekvienam
-tinklo lygiaverčiam mazgui (GHSA-7pq4-8pvv-rx7r). `managementPolicy` aiškiai perduoda savo `peerContext` sprendimą
-toliau, todėl PIRMINĖS (prieš antraščių pašalinimą) užklausos antraštės niekada jo nenulemia.
-
-### 3 lygmuo — VALDYMAS (numatytasis)
-
-Visi kiti valdymo maršrutai. Autentifikavimas privalomas, nebent sukonfigūruota
-`requireLogin=false`. CLI prieigos raktais galima autentifikuotis šiuose maršrutuose (grįžtamojo ryšio sąsaja + galiojantis HMAC).
+Visi kiti valdymo maršrutai. Autentifikacija reikalinga, nebent sukonfigūruota `requireLogin=false`. CLI žetonai gali autentifikuoti šiuos maršrutus (loopback + galiojantis HMAC).
 
 ## Vertinimo tvarka
 

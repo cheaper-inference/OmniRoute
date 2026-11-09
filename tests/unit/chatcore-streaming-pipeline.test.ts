@@ -239,3 +239,50 @@ test("performance measure has positive duration", () => {
   assert.equal(entry.entryType, "measure");
   assert.ok(entry.duration >= 0, `duration ${entry.duration} >= 0`);
 });
+
+test("opt-out skips the flag-based PII transform, bytes pass through", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(baseArgs({ piiDisabledGuardrails: ["pii-masker"] }), deps);
+  assert.deepEqual(log, ["heartbeat"]);
+});
+
+test("absent opt-out keeps the flag-based PII transform", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(baseArgs({ piiDisabledGuardrails: undefined }), deps);
+  assert.deepEqual(log, ["pii-flag", "heartbeat"]);
+});
+
+test("flag off with opt-out stays without PII transform", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => false });
+  assembleStreamingPipeline(baseArgs({ piiDisabledGuardrails: ["pii-masker"] }), deps);
+  assert.deepEqual(log, ["heartbeat"]);
+});
+
+test("opt-out skips the explicit PII transform", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  const explicit = () => ({ __tag: "pii-explicit" });
+  assembleStreamingPipeline(
+    baseArgs({ createPiiTransform: explicit, piiDisabledGuardrails: ["pii-masker"] }),
+    deps
+  );
+  assert.deepEqual(log, ["heartbeat"]);
+});
+
+test("unrelated entry alone keeps the PII transform", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(baseArgs({ piiDisabledGuardrails: ["vision-bridge"] }), deps);
+  assert.deepEqual(log, ["pii-flag", "heartbeat"]);
+});
+
+test("opt-out skips PII but keeps the credential transform order", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(
+    baseArgs({
+      piiDisabledGuardrails: ["pii-masker"],
+      credentialRedactionEnabled: true,
+      credentialDisabledGuardrails: [],
+    }),
+    deps
+  );
+  assert.deepEqual(log, ["credential-flag", "heartbeat"]);
+});

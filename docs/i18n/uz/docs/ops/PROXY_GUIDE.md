@@ -81,6 +81,18 @@ Proksilar bloklangan hududlardan tashqarida ham foydalidir:
 
 ---
 
+## Yangi hisoblar uchun standart proksi holati
+
+In** Sozlamalar → Proksi → Global konfiguratsiyasi** , foydalaning** Yangi ulanishlar uchun proksi-serverni sukut bo'yicha yoqing** yangi qo'shilgan provayder hisoblarining dastlabki proksi-server holatini tanlash.
+
+Yangi sozlama yangi qoʻshilgan provayder hisoblarining dastlabki proksi-server holatini boshqaradi. U mavjud hisoblarni o'zgartirmaydi yoki global proksi-serverni almashtirmaydi. Uning boshlang'ich qiymati oldingi xatti-harakatni saqlaydi. Sukut bo'yicha proksi-server o'chirilgan holda kelajakdagi hisoblarni yaratish uchun uni bir marta o'chirib qo'ying.
+
+Afzallik mavjud Sozlamalar API orqali `defaultNewConnectionProxyEnabled` sifatida saqlanadi. Hech qachon saqlanmasa, u sukut bo'yicha `true` bo'ladi. `false` saqlash keyingi yangi hisoblar uchun qayta ishga tushirilmasdan kuchga kiradi. `POST /api/providers` ixtiyoriy qat'iy mantiqiy `proxyEnabled` qabul qiladi; aniq `true` yoki `false` yaratish standartidan ustun turadi. Takroriy hisob qaydnomasi yoki OAuth qayta ulanishi o'tkazib yuborilsa, bu hisobning saqlangan holati saqlanib qoladi. Shaxsiy hisoblar keyin ham faollashtirilishi yoki o'chirilishi mumkin.
+
+Tanlangan provayder o'tkazmalari yangi hisoblar uchun maqsadli o'rnatishning standartidan foydalanadi va mavjud hisoblarni almashtirishda maqsad siyosatini saqlaydi. Proksi-serverlar portativ uzatish maydonlari emas. To'liq zaxira nusxasini tiklash va tarixiy JSON/SQL migratsiyasi mavjud tiklash semantikasini, jumladan saqlangan hisob qiymatlari va eski sxema standartlarini saqlab qoladi; to'liq sozlamalarni tiklash ham ushbu afzallikni tiklashi mumkin.
+
+Bu afzallik proksi-serverni tayinlamaydi yoki uning sog'lom yoki ishlatilayotganligini tasdiqlamaydi. Haqiqiy marshrut hali ham global proksi-serverga va tegishli proksi-server konfiguratsiyasiga bog'liq. Doimiy hisobsiz sintetik provayderlar, hisob yaratishdan oldin OAuth trafiki, environment/system proksi-serverlari va tashqi backendlar tarmog'i uning doirasidan tashqarida.
+
 ## 4 darajali proksi tizimi
 
 OmniRoute proksi konfiguratsiyasini ustuvorlik tartibida aniqlanadigan **toʻrtta mustaqil doirada** qoʻllab-quvvatlaydi:

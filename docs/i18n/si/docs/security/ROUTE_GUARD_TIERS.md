@@ -8,216 +8,232 @@
 
 සියලුම OmniRoute කළමනාකරණ API මාර්ග ආරක්ෂණ මට්ටම් තුනෙන් එකකට වර්ගීකරණය කර ඇත. වර්ගීකරණය ස්ථිතික වන අතර, එය `src/server/authz/routeGuard.ts` තුළ අර්ථ දක්වා ඇති අතර වෙනත් ඕනෑම සත්යාපන ශාඛාවක් ක්රියාත්මක වීමට පෙර ඇගයීමට ලක් කෙරේ.
 
-## මට්ටම්
+## ස්ථර
 
-### මට්ටම 1 — LOCAL_ONLY
+### ස්ථරය 1 — LOCAL_ONLY
 
-**බලාත්මක කරන්නේ:** `isLocalOnlyPath(path)` → loopback සත්කාරක පරීක්ෂාව  
-**මඟහැරීම:** පෙරනිමියෙන් කිසිවක් නැත. ඉල්ලීමෙහි `manage` විෂය පථය සහිත වලංගු API යතුරක් තිබෙන විට, `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` තුළ ඇති මාර්ග සඳහා පමණක් සීමිත ව්යතිරේකයක් ඇත ([Manage විෂය පථ ව්යතිරේකය](#manage-scope-carve-out) බලන්න).
+**බලාත්මක කරන්නේ:** `isLocalOnlyPath(path)` → loopback සත්කාරක පරීක්ෂණය
+**මග හැරීම:** පෙරනිමියෙන් කිසිවක් නැත. ඉල්ලීම `manage` විෂය පථය සහිත වලංගු
+API යතුරක් රැගෙන එන විට `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` හි ඇති
+මාර්ග සඳහා පමණක් පටු ව්යතිරේකයක් (බලන්න [Manage-scope ව්යතිරේකය](#manage-scope-carve-out)).
 
-මෙම මාර්ග අනු ක්රියාවලි ආරම්භ කිරීම හෝ ධාවනකාල කේතය ක්රියාත්මක කිරීම සිදු කරයි. ඒවා loopback නොවන තදබදයට නිරාවරණය කිරීමෙන්, වලංගු JWT එකක් ලබාගත් ප්රහාරකයෙකුට (උදා., Cloudflared/Ngrok උමඟක් හරහා) ක්රියාවලි ආරම්භ කිරීම සක්රිය කිරීමට හැකි වනු ඇත — මෙය දන්නා CVE පන්තියකි ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+මෙම මාර්ග ළමා ක්රියාවලීන් බිහි කරයි හෝ runtime කේතය ක්රියාත්මක කරයි. ඒවා
+loopback නොවන ගමනාගමනයට නිරාවරණය කිරීම, වලංගු JWT එකක් ලබාගත් ප්රහාරකයෙකුට
+(උදා: Cloudflared/Ngrok උමඟක් හරහා) ක්රියාවලි බිහි කිරීමක් අවුලුවාලීමට ඉඩ සලසයි
+— දන්නා CVE පංතියකි
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**GHSA-fhh6-4qxv-rpqj යනු කුමක්ද (ප්රහාර පන්තිය):** කළමනාකරණ/නියෝජිත සේවාදායකයක් අනු ක්රියාවලියක් (`npm install`, `node`, බ්රවුසරයක්, ප්රොක්සියක්, `git`, `tar`, …) ආරම්භ කරන අන්ත ලක්ෂ්යයක් නිරාවරණය කරයි. එම අන්ත ලක්ෂ්යය සත්කාරකයෙන් පිටත සිට ළඟා විය හැකි නම් — ක්රියාකරු OmniRoute, nginx/Cloudflare/Tailscale උමඟක් පසුපස තැබීම සහ JWT එකක් කාන්දු වීම නිසා හෝ සත්යාපනය වැරදි ලෙස වින්යාස කර තිබීම නිසා — ප්රහාරකයා "API එකක් ඇමතීම" යන්න "සත්කාරකය මත විධානයක් ක්රියාත්මක කිරීම" බවට පත් කරයි (දුරස්ථ කේත ක්රියාත්මක කිරීම). ආරම්භ කිරීමේ හැකියාව ඇති සෑම මාර්ගයකම, **ඕනෑම සත්යාපන පරීක්ෂාවකට පෙර, කොන්දේසි විරහිතව loopback සත්කාරක පරීක්ෂාවක්** බලාත්මක කිරීමෙන් OmniRoute මෙය වළක්වයි: උමඟක් හරහා භාවිත කරන කාන්දු වූ ටෝකනයකට වුවද ආරම්භ කිරීම වෙත ළඟා විය නොහැක.
+**GHSA-fhh6-4qxv-rpqj යනු කුමක්ද (ප්රහාර පංතිය):** කළමනාකරණ/නියෝජිත සේවාදායකයක්
+උප-ක්රියාවලියක් දියත් කරන endpoint එකක් නිරාවරණය කරයි (`npm install`, `node`,
+බ්රවුසරයක්, ප්රොක්සියක්, `git`, `tar`, …). එම endpoint එක සත්කාරකයෙන් පිටතින්
+ළඟා විය හැකි නම් — ක්රියාකරු OmniRoute nginx/Cloudflare/Tailscale උමඟක් පිටුපස
+තබා ඇති නිසාත් JWT එකක් කාන්දු වූ නිසාත්, හෝ සත්යාපනය වැරදි ලෙස වින්යාසගත කර
+තිබුණ නිසාත් — ප්රහාරකයා "API එකක් අමතන්න" යන දේ "සත්කාරකය මත විධානයක්
+ක්රියාත්මක කරන්න" බවට පරිවර්තනය කරයි (දුරස්ථ කේත ක්රියාත්මක කිරීම). OmniRoute
+මෙය වසා දමන්නේ **කොන්දේසි රහිතව, ඕනෑම සත්යාපන පරීක්ෂණයකට පෙර loopback සත්කාරක
+පරීක්ෂණය** ක්රියාවලි බිහි කිරීමේ හැකියාව ඇති සෑම මාර්ගයකදීම බලාත්මක කිරීමෙනි:
+උමඟක් හරහා කාන්දු වූ ටෝකනයකටත් ක්රියාවලි බිහි කිරීමට ළඟා විය නොහැක.
 
-**සම්පූර්ණ LOCAL_ONLY කුලකය.** අධිකාරී මූලාශ්රය වන්නේ `src/server/authz/routeGuard.ts` තුළ ඇති `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ය; පහත වගුව වත්මන් තත්ත්වය පිළිබිඹු කරයි. `check-route-guard-membership` ද්වාරය, ආරම්භ කිරීමේ හැකියාව ඇති උපසර්ග යටතේ ඇති සෑම `route.ts` එකක්ම ලැයිස්තුගත කර, ඒවායින් එකක් හෝ local-only ලෙස වර්ගීකරණය කර නොමැති නම් CI අසාර්ථක කරයි.
+**සම්පූර්ණ LOCAL_ONLY කට්ටලය.** බලසම්පන්න මූලාශ්රය වන්නේ
+`src/server/authz/routeGuard.ts` හි ඇති `LOCAL_ONLY_API_PREFIXES` /
+`LOCAL_ONLY_API_PATTERNS` ය; පහත වගුව වත්මන් තත්ත්වය පිළිබිඹු කරයි.
+`check-route-guard-membership` ගේට්ටුව ක්රියාවලි බිහි කිරීමේ හැකියාව ඇති උපසර්ග
+යටතේ ඇති සෑම `route.ts` එකක්ම ගණන් කර, එයින් එකක් හෝ local-only ලෙස වර්ගීකරණය
+කර නොමැති නම් CI අසාර්ථක කරයි.
 
-| උපසර්ගය / රටාව                                                                                           | එය දේශීයව පමණක් භාවිත වන්නේ ඇයි                                                                                              |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP සේවාදායකය — stdio පාලම් + SSE හසුරුවන ක්රියාවලි ආරම්භ කරයි                                                               |
-| `/api/cli-tools/runtime/`                                                                                | CLI මෙවලම් ධාවන පරිසරය — අභිමත ප්ලගිනයක කේතය ක්රියාත්මක කරයි                                                                 |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | සත්කාරකයේ ඇති මෙවලම් ද්විමය ගොනු/වින්යාස ස්පර්ශ කළ හැකි, එක් එක් මෙවලමට අදාළ සැකසුම් ලියන කොටස්                              |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ඉහත සහෝදර කොටස් හය මෙන්ම එකම `getCliRuntimeStatus()` ක්රියාවලි ආරම්භ කිරීම භාවිත කරයි (GHSA-35fw-cv32-2373)                  |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI ඉන්වෙන්ටරි පරීක්ෂණ — එක් එක් මෙවලම සඳහා `command -v` / `--version` ක්රියාවලි ආරම්භ කරයි (GHSA-35fw-cv32-2373)            |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM ප්රොක්සි පාලනය (පද්ධති ප්රොක්සිය ආරම්භ කරයි/යොමු කරයි)                                                      |
-| `/api/modality-bridge/video/`                                                                            | දැඩි ලෙස විශ්වාසිත loopback-පමණක් වන Video Bridge ධාවන පරිසර පරීක්ෂණය සහ අභ්යන්තර උකහාගැනීමේ පාලම                            |
-| `/api/services/`                                                                                         | කාවැද්දූ සේවා (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + ක්රියාවලි ආරම්භ කිරීම                           |
-| `/dashboard/providers/services/`                                                                         | කාවැද්දූ සේවා UI වෙත ප්රතිවර්ත ප්රොක්සිය                                                                                     |
-| `/api/tunnels/cloudflared`                                                                               | cloudflared ද්විමය ගොනුව ස්ථාපනය කර/ක්රියාවලිය ආරම්භ කරයි                                                                    |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | සත්කාරකයේ tailscaled ස්ථාපනය/පාලනය කරයි                                                                                      |
-| `/api/copilot/`                                                                                          | සත්යාපනය නොකළ LLM ධාවකය — පෙරනිමියෙන් CLI සඳහා පමණි                                                                          |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM සේවාදායක ක්රියාවලියක් ආරම්භ කරයි + DNS සංස්කරණ සිදු කරයි                                                  |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy සවන්දෙන්නා + පද්ධති ප්රොක්සිය                                                                 |
-| `/api/settings/mitm`                                                                                     | MITM අවහරණය සබල කරයි (පද්ධති මට්ටමේ ප්රොක්සි තත්ත්වය)                                                                        |
-| `/api/issue-agent/`                                                                                      | ගැටලු නියෝජිතයා — රෙපොසිටරියට එරෙහිව දේශීය මෙවලම් ක්රියාවලි ආරම්භ කරයි                                                       |
-| `/api/plugins/`, `/api/plugins`                                                                          | ප්ලගින — `worker_threads` + `child_process` හරහා පූරණය/ක්රියාත්මක කරයි                                                       |
-| `/api/middleware/`                                                                                       | පරිශීලක middleware — ක්රියාකරුගේ කේතය ක්රියාවලිය තුළම පූරණය/ක්රියාත්මක කරයි                                                  |
-| `/api/system/version`                                                                                    | ස්වයංක්රීය යාවත්කාලීන කිරීම (POST පමණි; GET/HEAD/OPTIONS නිදහස් කර ඇත) — `git checkout` + `npm install` ක්රියාවලි ආරම්භ කරයි |
-| `/api/db-backups/exportAll`                                                                              | අපනයන සංරක්ෂිතය සඳහා `tar` ක්රියාවලිය ආරම්භ කරයි                                                                             |
-| `/api/local/`                                                                                            | එක් ක්ලික් කිරීමකින් දේශීයව දියත් කරන්නන් (දැනට Redis) — podman/docker ක්රියාවලි ආරම්භ කරයි                                  |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom ප්රොක්සි ජීවන චක්රය — python CLI ක්රියාවලිය ආරම්භ කරයි / PID වෙත සංඥා යවයි                                          |
-| `/api/jobs`, `/api/jobs/`                                                                                | කාර්ය ධාවක පාලනය — සත්කාරක පාර්ශ්වයේ නියමිත කාර්ය ක්රියාත්මක කරයි                                                            |
-| `/api/oauth/cursor/auto-import`                                                                          | අක්තපත්ර ආයාත කිරීමට පෙර `execFile("which", ["cursor"])` ක්රියාත්මක කරයි                                                     |
-| `/api/oauth/kiro/auto-import`                                                                            | සත්කාරකයෙන් Kiro CLI අක්තපත්ර ගොනු කියවයි                                                                                    |
-| `/api/skills/collect/`                                                                                   | කුසලතා එකතුව — දේශීය මෙවලම් හඳුනාගෙන/ස්ථාපනය කරයි                                                                            |
-| `/api/skills/install`, `/api/skills/executions`                                                          | Skill හසුරුවන්නා ලියාපදිංචි කිරීම + ක්රියාත්මක කිරීම — sandbox container එක බිහිකිරීම වෙත ළඟා වේ (GHSA-jx89)                 |
-| `/api/discovery/`                                                                                        | දේශීය ජාල/provider සොයාගැනීමේ පරීක්ෂණ                                                                                        |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | අන්තර්ක්රියාකාරී පිවිසුම් සඳහා headful browser එකක් + VNC සැසියක් බිහිකරයි                                                   |
-| `/api/acp/agents`                                                                                        | ACP — දේශීය CLI agent binary සොයාගෙන බිහිකරයි                                                                                |
-| `/api/resilience/connections`                                                                            | එක් එක් ගිණුම සඳහා resilience JSON (cooldown, breaker, lockout). dashboard HTML එක local-only නොවේ.                          |
-| `/api/providers/cursor/agent-availability`                                                               | dashboard ස්ථාපන-මතක්කිරීමේ පරීක්ෂාව — `cursor-agent status --format json` බිහිකරයි                                          |
-| `/api/providers/{id}/login` (regex)                                                                      | web-cookie පිවිසුම සඳහා headful Playwright Chromium එකක් දියත් කරයි                                                          |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | අතින් සිදුකරන headful ප්රවාහය + සැසි-පාදක දුරකථන/SMS ස්වයංක්රීය පිවිසුම (Playwright බිහිකරයි)                                |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | අතින් සිදුකරන Cursor සැසි අලුත් කිරීම — `cursor-agent` වෙත මතක් කරයි                                                         |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | දේශීය Codex CLI ස්ථාපනයේ ගැටලු නිර්ණය කරයි (binary එක බිහිකරයි)                                                              |
+| උපසර්ගය / රටාව                                                                                           | එය දේශීය-පමණක් වන්නේ ඇයි                                                                           |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP සේවාදායකය — stdio පාලම් + SSE හසුරුවන්නන් spawn කරයි                                           |
+| `/api/cli-tools/runtime/`                                                                                | CLI මෙවලම ධාවන කාලය — අභිමත ප්ලගින කේතය ක්රියාත්මක කරයි                                            |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | ධාරකයේ මෙවලම් ද්විමය/වින්යාසය ස්පර්ශ කළ හැකි මෙවලම-අනුව සැකසුම් ලිවන්නන්                           |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ඉහත සහෝදරයන් හය දෙනා මෙන්ම `getCliRuntimeStatus()` spawn කිරීම (GHSA-35fw-cv32-2373)               |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI තොග ගවේෂණ — මෙවලමක් වෙනුවෙන් `command -v` / `--version` spawn කරයි (GHSA-35fw-cv32-2373)       |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM ප්රොක්සි පාලනය (පද්ධති ප්රොක්සිය spawn කරයි/යොමු කරයි)                            |
+| `/api/modality-bridge/video/`                                                                            | දැඩි විශ්වාසදායක-ලූප්බැක් Video Bridge ධාවන කාල ගවේෂණය සහ අභ්යන්තර උපුටාගැනීමේ පාලම                |
+| `/api/services/`                                                                                         | කාවැද්දූ සේවා (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + spawn කිරීම           |
+| `/dashboard/providers/services/`                                                                         | කාවැද්දූ-සේවා UI වෙත ප්රතිලෝම ප්රොක්සිය                                                            |
+| `/api/tunnels/cloudflared`                                                                               | cloudflared ද්විමයය ස්ථාපනය කරයි/spawn කරයි                                                        |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | ධාරකයේ tailscaled ස්ථාපනය කරයි/පාලනය කරයි                                                          |
+| `/api/copilot/`                                                                                          | සත්යාපනය නොකළ LLM ධාවකය — පෙරනිමියෙන් CLI-පමණි                                                     |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM සේවාදායකය + DNS සංස්කරණ spawn කරයි                                              |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy සවන්දෙන්නා + පද්ධති ප්රොක්සිය                                       |
+| `/api/settings/mitm`                                                                                     | MITM බාධාකිරීම සක්රීය කරයි (පද්ධති-මට්ටමේ ප්රොක්සි තත්ත්වය)                                        |
+| `/api/issue-agent/`                                                                                      | Issue නියෝජිතයා — ගබඩාවට එරෙහිව දේශීය මෙවලම් spawn කරයි                                            |
+| `/api/plugins/`, `/api/plugins`                                                                          | ප්ලගින — `worker_threads` + `child_process` හරහා පූරණය/ක්රියාත්මක කරයි                             |
+| `/api/middleware/`                                                                                       | පරිශීලක middleware — ක්රියාකරු කේතය ක්රියාවලිය තුළම පූරණය/ක්රියාත්මක කරයි                          |
+| `/api/system/version`                                                                                    | ස්වයං-යාවත්කාලීනය (POST පමණි; GET/HEAD/OPTIONS බැහැර) — `git checkout` + `npm install` spawn කරයි  |
+| `/api/db-backups/exportAll`                                                                              | අපනයන සංරක්ෂණය සඳහා `tar` spawn කරයි                                                               |
+| `/api/local/`                                                                                            | එක-ක්ලික් දේශීය දියත්කරන්නන් (දැනට Redis) — podman/docker spawn කරයි                               |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom ප්රොක්සි ජීවන චක්රය — python CLI spawn කරයි / PID වෙත සංඥා යවයි                           |
+| `/api/jobs`, `/api/jobs/`                                                                                | Job runner පාලනය — නියමිත ධාරක-පැති වැඩ ක්රියාත්මක කරයි                                            |
+| `/api/oauth/cursor/auto-import`                                                                          | අක්තපත්ර ආයාත කිරීමට පෙර `execFile("which", ["cursor"])`                                           |
+| `/api/oauth/kiro/auto-import`                                                                            | ධාරකයෙන් Kiro CLI අක්තපත්ර ගොනු කියවයි                                                             |
+| `/api/skills/collect/`                                                                                   | කුසලතා එකතුව — දේශීය මෙවලම් හඳුනාගනී/ස්ථාපනය කරයි                                                  |
+| `/api/skills/install`, `/api/skills/executions`                                                          | Skill handler ලියාපදිංචි කිරීම + ක්රියාත්මක කිරීම — sandbox container spawn එකට ළඟා වේ (GHSA-jx89) |
+| `/api/discovery/`                                                                                        | දේශීය ජාල/සැපයුම්කරු discovery probes                                                              |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | අන්තර්ක්රියාකාරී ලොගින සඳහා headful browser + VNC session එකක් spawn කරයි                          |
+| `/api/acp/agents`                                                                                        | ACP — දේශීය CLI agent binaries සොයාගෙන spawn කරයි                                                  |
+| `/api/resilience/connections`                                                                            | ගිණුම අනුව resilience JSON (cooldown, breaker, lockout). Dashboard HTML එක local-only නොවේ.        |
+| `/api/providers/cursor/agent-availability`                                                               | Dashboard install-nudge පරීක්ෂාව — `cursor-agent status --format json` spawn කරයි                  |
+| `/api/providers/{id}/login` (regex)                                                                      | web-cookie login සඳහා headful Playwright Chromium එකක් දියත් කරයි                                  |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | අතින් headful flow + session-පදනම් phone/SMS auto-login (Playwright spawn කරයි)                    |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | අතින් Cursor session අලුත් කිරීම — `cursor-agent` ට nudge කරයි                                     |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | දේශීය Codex CLI install එක diagnose කරයි (binary එක spawn කරයි)                                    |
 
 **උල්ලංඝනයකදී ප්රතිචාරය:** `403 LOCAL_ONLY`
 
-#### Manage scope සඳහා විශේෂ ව්යතිරේකය
+#### Manage-scope ව්යතිරේකය (carve-out)
 
-LOCAL_ONLY path උපකුලකයකට non-loopback වෙතින් ද ප්රවේශ විය හැක්කේ, එම
-ඉල්ලීම සමඟ `manage` scope එක (හෝ `admin`) ඇතුළත් metadata සහිත
-`Authorization: Bearer <api-key>` එකක් තිබේ නම් සහ එසේ තිබේ නම් පමණි. මෙම ව්යතිරේකය
-එක් එක් path එක සඳහා `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` හරහා පැහැදිලිව
-පාලනය කරන බැවින්, ඕනෑම නව LOCAL_ONLY path එකක් සඳහා පෙරනිමිය strict-loopback ලෙසම පවතී.
-සත්යාපනය නොකළ ඉල්ලීම් සහ manage නොවන key සහිත ඉල්ලීම් තවදුරටත්
-`403 LOCAL_ONLY` සමඟ ප්රතික්ෂේප කෙරේ.
+LOCAL_ONLY paths වල උපසමූහයකට, ඉල්ලීම එහි metadata හි `manage` scope (හෝ `admin`) ඇතුළත් `Authorization: Bearer <api-key>` එකක් රැගෙන එන අවස්ථාවේදී පමණක් non-loopback වලින්ද ප්රවේශ විය හැක. මෙම carve-out එක `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` හරහා path අනුව පැහැදිලිවම සීමා කර ඇත, එබැවින් ඕනෑම නව LOCAL_ONLY path එකක පෙරනිමිය strict-loopback ලෙස පවතී. සත්යාපනය නොකළ ඉල්ලීම් සහ non-manage keys සහිත ඉල්ලීම් තවමත් `403 LOCAL_ONLY` ලෙස ප්රතික්ෂේප වේ.
 
-දැනට bypass කළ හැකි එකම prefix එක `/api/mcp/` වේ. `/api/cli-tools/runtime/` සහ
-`/api/services/` හිතාමතාම බැහැර කර ඇත, මන්ද ඒවාට අත්තනෝමතික
-subprocess (`npm install`, `node`) බිහිකළ හැකි අතර, එය LOCAL_ONLY tier එක
-වැළැක්වීම සඳහා පවතින නිශ්චිත CVE පන්තියයි.
+අද වන විට bypass කළ හැකි එකම prefix එක `/api/mcp/` වේ. `/api/cli-tools/runtime/` සහ `/api/services/` හිතාමතාම බැහැර කර ඇත්තේ ඒවාට arbitrary subprocesses (`npm install`, `node`) spawn කළ හැකි නිසාය — එය LOCAL_ONLY tier එක වැළැක්වීම සඳහා පවතින නිශ්චිත CVE පන්තියම වේ.
 
-**#7895 — `mcp:connect` සීමිත scope එක:** `/api/mcp/` ව්යතිරේකය
-සීමිත `mcp:connect` scope එක දරන Bearer key එකක් ද පිළිගනී
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), එය
-`src/server/authz/policies/management.ts` තුළ `hasMcpConnectOrManageScope()` හරහා පරීක්ෂා කෙරේ.
-මෙය `/api/mcp/` සඳහා පමණක් සීමා කර ඇත — `mcp:connect` මඟින් වෙනත් කිසිදු
-management route එකකට (අනාගතයේදී එක් කළහොත්, අනෙකුත් සෑම LOCAL_ONLY bypass prefix එකක් ද ඇතුළුව)
-කිසිවක් ප්රදානය නොකරන අතර, එය හිතාමතාම
-`MANAGEMENT_API_KEY_SCOPES` වෙතින් බැහැර කර ඇත. `manage`/`admin` දරන key එකක් පෙර පරිදිම
-ව්යතිරේකය සමත් වෙයි; පුළුල් management ප්රවේශයක් අවශ්ය නොවිය යුතු
-දුරස්ථ MCP-only ඇමතුම්කරුවන් සඳහා `mcp:connect` යනු අඩු-වරප්රසාද විකල්පයකි.
+**#7895 — `mcp:connect` පටු scope:** `/api/mcp/` carve-out එක පටු `mcp:connect` scope එක දරන Bearer key එකක්ද පිළිගනී (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`), `src/server/authz/policies/management.ts` හි `hasMcpConnectOrManageScope()` හරහා පරීක්ෂා කෙරේ. මෙය `/api/mcp/` වලට පමණක් සීමා වේ — `mcp:connect` වෙනත් කිසිදු management route එකකට (කවරදාක හෝ එක් වූ වෙනත් ඕනෑම LOCAL_ONLY bypass prefix එකක් ඇතුළුව) කිසිවක් ලබා නොදෙන අතර, එය `MANAGEMENT_API_KEY_SCOPES` වලින් හිතාමතාම බැහැර කර ඇත. `manage`/`admin` දරන key එකක් පෙර පරිදිම carve-out එක සමත් වේ; `mcp:connect` යනු පුළුල් management ප්රවේශය අවශ්ය නොවිය යුතු දුරස්ථ MCP-only අමතන්නන් සඳහා අඩු-වරප්රසාද විකල්පයකි.
 
-| ඉල්ලීම                                             | Path එක                    | ප්රතිඵලය                     |
-| -------------------------------------------------- | -------------------------- | ---------------------------- |
-| Non-loopback, Bearer නැත                           | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Non-loopback, `manage` scope සහිත Bearer           | `/api/mcp/*`               | අවසර දෙන්න                   |
-| Non-loopback, `mcp:connect` scope සහිත Bearer      | `/api/mcp/*`               | අවසර දෙන්න                   |
-| Non-loopback, `manage`/`mcp:connect` නොමැති Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY               |
-| Non-loopback, `mcp:connect` scope සහිත Bearer      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Non-loopback, `manage` scope සහිත Bearer           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY               |
-| Loopback, ඕනෑම/කිසිදු Bearer එකක් නොමැති           | ඕනෑම LOCAL_ONLY            | අවසර දෙන්න (gate එක සමත් වේ) |
+| ඉල්ලීම                                             | මාර්ගය                     | ප්රතිඵලය                    |
+| -------------------------------------------------- | -------------------------- | --------------------------- |
+| Non-loopback, Bearer නොමැත                         | `/api/mcp/*`               | 403 LOCAL_ONLY              |
+| Non-loopback, `manage` scope සහිත Bearer           | `/api/mcp/*`               | අවසර දෙයි                   |
+| Non-loopback, `mcp:connect` scope සහිත Bearer      | `/api/mcp/*`               | අවසර දෙයි                   |
+| Non-loopback, `manage`/`mcp:connect` නොමැති Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY              |
+| Non-loopback, `mcp:connect` scope සහිත Bearer      | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
+| Non-loopback, `manage` scope සහිත Bearer           | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY              |
+| Loopback, ඕනෑම/Bearer නොමැත                        | ඕනෑම LOCAL_ONLY            | අවසර දෙයි (gate එක සමත් වේ) |
 
-#### ක්රියාකරු මාර්ගෝපදේශනය සහ විගණනය
+#### ක්රියාකරු මාර්ගෝපදේශය සහ විගණනය
 
-ඔබ OmniRoute එක reverse proxy එකක් හෝ tunnel එකක් (nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) පිටුපස ධාවනය කළහොත්, loopback පරීක්ෂාව තවමත් ඉහත
-spawn-හැකියාව සහිත route ආරක්ෂා කරයි — client address එක non-loopback වන ඉල්ලීමක්,
-**auth ක්රියාත්මක වීමට පෙර** `403 LOCAL_ONLY` සමඟ ප්රතික්ෂේප වන බැවින්, කාන්දු වූ JWT එකකට
-spawn එකක් වෙත ළඟා විය නොහැක. ක්රියාකරු වගකීම් දෙකක් තවමත් පවතී:
+ඔබ OmniRoute reverse proxy එකකට හෝ tunnel එකකට පිටුපසින් (nginx, Caddy, Cloudflare Tunnel, Tailscale, Ngrok) ධාවනය කරන්නේ නම්, loopback පරීක්ෂාව ඉහත spawn-හැකි routes තවමත් ආරක්ෂා කරයි — client ලිපිනය non-loopback වන ඉල්ලීමක් **auth ධාවනය වීමට පෙර** `403 LOCAL_ONLY` ලෙස ප්රතික්ෂේප වේ, එබැවින් කාටු වූ JWT එකකට spawn එකකට ළඟා විය නොහැක. ක්රියාකරු වගකීම් දෙකක් ඉතිරි වේ:
 
-- **403 දෝෂයක් "නිවැරදි" කිරීමට සේවාලාභී IP ලිපිනය loopback ලෙස ව්යාජ ලෙස සකස් නොකරන්න.**
-  `X-Forwarded-For: 127.0.0.1` ලෙස සැකසීම, හෝ මූලාශ්ර ලිපිනය
-  loopback ලෙස නැවත ලියන proxy එකක් භාවිත කිරීම, මෙම ස්තරය වසා දමන RCE පන්තියම නැවත විවෘත කරයි. Proxy එක හරහා
-  dashboard/API නිරාවරණය කරන්න — spawn කළ හැකි routes කිසිවිටෙකත් නිරාවරණය නොකරන්න.
-- **manage-scope bypass එක අවම මට්ටමක තබා ගන්න.** Bypass කළ හැක්කේ `/api/mcp/` පමණක් වන අතර,
-  ඒ ද `manage`-scoped API key එකක් සමඟ පමණි. `SPAWN_CAPABLE_PREFIXES` කිසිවිටෙකත්
-  bypass ලැයිස්තුවට එක් කළ නොහැක — zod schema ඒවා ප්රතික්ෂේප කරන අතර
-  `isLocalOnlyBypassableByManageScope` runtime එකේදී ඒවා ප්රතික්ෂේප කරයි (බහු-ස්තර ආරක්ෂාව),
-  dashboard එකේ "bypass කළ හැකි බවට පත් කළ නොහැක" යන්නෙන් අදහස් කරන්නේ එයයි. එම
-  deny-list එකේ spawn නොකරන නමුත් කිසිවිටෙකත්
-  දුරස්ථව ප්රවේශ විය නොහැකි තවත් LOCAL_ONLY routes කිහිපයක් ද ඇත — `/api/oauth/kiro/auto-import` (ධාරකයට-දේශීය Kiro
-  credential ගොනු කියවයි), `/api/discovery/` සහ `/api/issue-agent/`. Runtime
-  snapshot loader එක ගබඩා කළ settings row එකකින් එවැනි entries ඉවත් කරන අතර,
-  පැරණි JSON import එක (`/api/settings/import-json`) කිසිවිටෙකත් bypass keys ලියන්නේ නැත.
-  සෑම `LOCAL_ONLY_API_PREFIXES` entry එකක්ම deny-list එකේ තිබිය යුතුය, නැතහොත්
-  bypass සඳහා සුදුසු බව සමාලෝචනය කර තිබිය යුතුය (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`). `/api/providers/` යටතේ ඇති dynamic-segment
-  සහ static-path spawn කළ හැකි routes (උදා. `/login`,
-  `/refresh-cursor`) ආවරණය කරන්නේ
-  `src/shared/constants/spawnCapablePrefixes.ts` හි regex-පාදක `SPAWN_CAPABLE_PATTERNS` /
-  `SPAWN_CAPABLE_PATTERN_ANCESTORS` සහායකය මඟිනි, සමතල
-  `SPAWN_CAPABLE_PREFIXES` array එක මඟින් නොවේ — ඒවා හඳුනා ගැනීමට සමතල array එකට
-  සම්පූර්ණ `/api/providers/` prefix එකම ආවරණය කිරීමට සිදු වන අතර, එය
-  දුරස්ථ dashboards විසින් provider CRUD සඳහා සාධාරණ ලෙස භාවිත කරන route tree එකක් අතිශයින් පුළුල් ලෙස ආවරණය කරනු ඇත.
+- **403 එකක් loopback ලෙස client IP එක ව්යාකූල කිරීමෙන් "හදන්න" එපා.**
+  `X-Forwarded-For: 127.0.0.1` සැකසීම, හෝ source address එක loopback බවට
+  නැවත ලියන proxy එකක්, මෙම tier එක වසා දමන RCE පන්තියම නැවත විවෘත කරයි.
+  dashboard/API එක proxy එක හරහා expose කරන්න — spawn කිරීමට හැකි routes කිසිවිටෙක නොවේ.
+- **manage-scope bypass එක අවම මට්ටමේ තබන්න.** bypass කළ හැක්කේ `/api/mcp/` පමණි,
+  එයත් `manage`-scoped API key එකකින් පමණි. `SPAWN_CAPABLE_PREFIXES` කිසිවිටෙක bypass
+  ලැයිස්තුවට එකතු කළ නොහැක — zod schema එක ඒවා ප්රතික්ෂේප කරන අතර
+  `isLocalOnlyBypassableByManageScope` runtime තුළදී ඒවා ප්රතික්ෂේප කරයි (defence-in-depth),
+  dashboard එක "cannot be made bypassable" යන්නෙන් අදහස් කරන්නේ මෙයයි. එම
+  deny-list එකම LOCAL_ONLY routes කිහිපයක් ද තබා ඇත — ඒවා spawn නොකළත්
+  කිසිවිටෙක දුරස්ථව ළඟා විය යුතු නොවේ — `/api/oauth/kiro/auto-import`
+  (host-local Kiro credential ගොනු කියවයි), `/api/discovery/` සහ
+  `/api/issue-agent/`. runtime snapshot loader එක ද ගබඩා කළ settings row එකකින්
+  එවැනි entries ඉවත දමයි, සහ legacy JSON import එක
+  (`/api/settings/import-json`) bypass keys කිසිවිටෙක ලියන්නේ නැත.
+  සෑම `LOCAL_ONLY_API_PREFIXES` entry එකක්ම deny-list එකේ හෝ bypass-eligible ලෙස
+  සමාලෝචනය කර තිබිය යුතුය (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`).
+  `/api/providers/` යටතේ ඇති dynamic-segment සහ static-path spawn-capable routes
+  (උදා. `/login`, `/refresh-cursor`) ආවරණය වන්නේ flat `SPAWN_CAPABLE_PREFIXES`
+  array එකෙන් නොව, `src/shared/constants/spawnCapablePrefixes.ts` හි ඇති regex-පාදක
+  `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` සහකාරියෙනි — ඒවා
+  හඳුනාගැනීමට flat array එකට මුළු `/api/providers/` prefix එකම ආවරණය කිරීමට සිදුවන
+  නිසා, දුරස්ථ dashboard බහාලුම් provider CRUD සඳහා නීත්යනුකූලව භාවිත කරන route
+  ගසක් අධික ලෙස පුළුල් කරනු ඇත.
 
-**ප්රවේශය විගණනය කිරීම** — ධාරකයෙන් පිටත කිසිවක් මෙම routes වෙත ළඟා නොවන බව තහවුරු කිරීමට:
+**ප්රවේශය විගණනය කිරීම** — මෙම routes වෙත host එකෙන් පිටතින් කිසිවක් ළඟා නොවන බව තහවුරු කර ගැනීමට:
 
-- `/dashboard/settings/security` හි **Authorization Inventory** විවෘත කරන්න: එය
-  සජීවී LOCAL_ONLY prefix ලැයිස්තුව, bypass කළ හැකි prefixes සහ compile-time
-  spawn කළ හැකි ("bypass කළ හැකි බවට පත් කළ නොහැකි") කට්ටලය පෙන්වයි.
-- ඉහත prefixes, loopback නොවන සේවාලාභී ලිපිනයක් සමඟ යුගල වූ අවස්ථා සොයා ගැනීමට ඔබේ reverse-proxy / access logs තුළ grep කරන්න.
-  එවැනි request එකක් `403 LOCAL_ONLY` වෙනුවට `200` ලබා දුන්නේ නම්,
-  proxy එක සැබෑ සේවාලාභී IP ලිපිනය සඟවයි — proxy එක නිවැරදි කරන්න.
-- මෙම paths වලින් එකක් සඳහා OmniRoute logs තුළ ඇති `403 LOCAL_ONLY` යනු guard එක
-  අදහස් කළ පරිදි ක්රියා කිරීමක් මිස යටපත් කළ යුතු දෝෂයක් නොවේ.
+- `/dashboard/settings/security` හි **Authorization Inventory** එක විවෘත කරන්න: එය
+  සජීවී LOCAL_ONLY prefix ලැයිස්තුව, bypass කළ හැකි prefix මොනවාද යන්න, සහ compile-time
+  spawn-capable ("cannot be made bypassable") කට්ටලය පෙන්වයි.
+- ඉහත prefix, non-loopback client address එකක් සමඟ යුගල කර ඔබගේ reverse-proxy /
+  access logs තුළ grep කරන්න. `403 LOCAL_ONLY` වෙනුවට `200` ආපසු දුන් එවැනි
+  ගැලපීමක් යනු proxy එක සැබෑ client IP එක සැඟවීමයි — proxy එක නිවැරදි කරන්න.
+- OmniRoute හි logs තුළ මෙම paths වලින් එකක් සඳහා `403 LOCAL_ONLY` එකක් යනු guard එක
+  අපේක්ෂිත පරිදි ක්රියා කිරීමයි, මර්දනය කළ යුතු දෝෂයක් නොවේ.
 
-#### Call-site probe gate එකක් සහිත දුරස්ථව ප්රවේශ විය හැකි routes
+#### Call-site probe gate එකක් සහිත දුරස්ථව ළඟා විය හැකි routes
 
-සමහර routes දුරස්ථ dashboard එකකින් ප්රවේශ විය හැකිව පැවතිය යුතු නමුත් දේශීය callers සඳහා ධාරක-පාර්ශ්වීය probe එකක්
-(`which <binary>`, `<binary> --version`, `tailscale status --json`) ධාවනය කරයි.
-ඒවා `GET` සඳහා LOCAL_ONLY නොවේ; ඒ වෙනුවට handler එක
-`getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) මඟින් විශ්වාසදායක peer තීන්දුව කියවා, probe එක ධාවනය කරන්නේ
-`loopback` / `lan` callers සඳහා පමණි. `remote` caller කෙනෙකුට
-spawn නොකරන මූලාශ්රවලින් (persisted state, settings, fs checks) සෑදූ, `probed: false` ලෙස සලකුණු කළ
-එම response හැඩයම ලැබේ.
+සමහර routes දුරස්ථ dashboard එකකින් ළඟා විය හැකිව තිබිය යුතු නමුත් දේශීය callers සඳහා
+host-පැති probe එකක් (`which <binary>`, `<binary> --version`,
+`tailscale status --json`) ධාවනය කරයි. ඒවා `GET` සඳහා LOCAL_ONLY නොවේ; ඒ වෙනුවට
+handler එක `getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) සමඟ විශ්වාසදායක
+peer තීන්දුව කියවා, `loopback` / `lan` callers සඳහා පමණක් probe එක ධාවනය කරයි.
+`remote` caller කෙනෙකුට spawn නොකරන මූලාශ්රවලින් (persisted state, settings, fs
+පරීක්ෂණ) ගොඩනගන ලද එම response හැඩයම `probed: false` ලෙස සලකුණු කර ලැබේ.
 
-| Route                                                            | දුරස්ථ callers සඳහා මඟහරින probe එක                                |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) සහ CLI-fallback spawn |
-| `GET /api/headroom/status`                                       | `which headroom` සහ python `--version` probes                      |
-| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`  |
-| `GET /api/tunnels/cloudflared` (LOCAL_ONLY වෙතින් GET-නිදහස්)    | `which cloudflared` PATH lookup                                    |
+| Route                                                            | දුරස්ථ callers සඳහා මඟහරින probe එක                                   |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe එක (`allowLocalRuntimeProbe`) සහ CLI-fallback spawn |
+| `GET /api/headroom/status`                                       | `which headroom` සහ python `--version` probes                         |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`     |
+| `GET /api/tunnels/cloudflared` (LOCAL_ONLY වෙතින් GET-නිදහස්)    | `which cloudflared` PATH lookup එක                                    |
 
-ධාරකය probe කරන නව read route එකක් එම රටාවම අනුගමනය කරයි, නැතහොත්
-සෘජුවම LOCAL_ONLY ලෙස වර්ගීකරණය කරයි.
+Host එක probe කරන නව read route එකක් එම රටාවම අනුගමනය කරයි, නැත්නම්
+කෙලින්ම LOCAL_ONLY ලෙස වර්ගීකරණය කෙරේ.
 
-### ස්තරය 2 — ALWAYS_PROTECTED
+### Tier 2 — ALWAYS_PROTECTED
 
 **බලාත්මක කරන්නේ:** `isAlwaysProtectedPath(path)` → `requireLogin=false` bypass එක මඟහරින්න
-**Bypass:** `requireLogin=false` වන විට කිසිවක් නැත; JWT සැමවිටම අවශ්ය වේ
+**Bypass:** `requireLogin=false` වන විට කිසිවක් නැත; JWT සැමවිටම අවශ්යයි
 
-මෙම routes විනාශකාරී හෝ ආපසු හැරවිය නොහැකි ඒවා වේ. "මුරපද-රහිත"
-ස්ථාපනයකදී ඒවාට ඉඩ දීමෙන්, එම LAN එකේ සිටින ඕනෑම අයෙකුට database එක මකා දැමීමට හෝ
-server process එක නවතා දැමීමට හැකි වනු ඇත.
+මෙම routes විනාශකාරී හෝ ආපසු හැරවිය නොහැකි ඒවාය. ඒවා "මුරපදයක්-නැති" ස්ථාපනයක
+ඉඩ දීමෙන් එම LAN එකේ සිටින ඕනෑම අයෙකුට database එක මකා දැමීමට හෝ server
+process එක නැතැත්තීමට හැකි වේ.
 
-| Path                                      | හේතුව                                                                 |
-| ----------------------------------------- | --------------------------------------------------------------------- |
-| `/api/shutdown`                           | Server process එක අවසන් කරයි                                          |
-| `/api/settings/database`                  | Database export, import සහ wipe                                       |
-| `/api/db-backups`                         | සම්පූර්ණ database backup archive වෙත ප්රවේශය                          |
-| `/api/settings/export-json`               | සම්පූර්ණ settings blob එක export කරයි (secrets ඇතුළුව)                |
-| `/api/settings/import-json`               | සම්පූර්ණ settings blob එක ප්රතිස්ථාපනය කරයි                           |
-| `/api/providers/health-autopilot/actions` | Autopilot remediation actions ක්රියාත්මක කරයි                         |
-| `/api/settings/obsidian`                  | ඕනෑම vault root එකක් සඳහා නැවත භාවිත කළ හැකි WebDAV creds නිකුත් කරයි |
-| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                          |
+| Path                                      | හේතුව                                                             |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `/api/shutdown`                           | Server process එක අවසන් කරයි                                      |
+| `/api/settings/database`                  | Database export, import සහ wipe                                   |
+| `/api/db-backups`                         | සම්පූර්ණ database backup archive වෙත ප්රවේශය                      |
+| `/api/settings/export-json`               | සම්පූර්ණ settings blob එක export කරයි (secrets ඇතුළුව)            |
+| `/api/settings/import-json`               | සම්පූර්ණ settings blob එක ප්රතිස්ථාපනය කරයි                       |
+| `/api/providers/health-autopilot/actions` | Autopilot remediation ක්රියා ක්රියාත්මක කරයි                      |
+| `/api/settings/obsidian`                  | ඕනෑම vault root එකකට නැවත භාවිතය හැකි WebDAV creds නිර්මාණය කරයි  |
+| `/api/relay/tokens`                       | Relay tokens නිර්මාණය, ලැයිස්තුගත කිරීම, සංස්කරණය සහ අවලංගු කිරීම |
+| `/api/cli-tools/apply`                    | Operator ගේ host CLI config එක නැවත ලියයි                         |
+| `/api/cli-tools/guide-settings`           | Guide-driven CLI config ගොනු ලියයි                                |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes agent config එක ලියයි                                      |
+| `/api/cli-tools/backups`                  | CLI config backups ප්රතිස්ථාපනය සහ මකා දමයි                       |
+| `/api/log-export`                         | Call logs වින්යාසගත ගමනාන්තයකට යවයි                               |
+| `/api/restart`                            | Server process එක නැවත ආරම්භ කරයි                                 |
 
-**උල්ලංඝනයකදී response එක:** `401 Authentication required`
+**උල්ලංඝනයකදී ප්රතිචාරය:** `401 Authentication required`
 
-`/api/settings/obsidian` එහි `/webdav` child එක ආවරණය කරයි: `POST` මඟින් WebDAV file service එක —
-මෙම pipeline එකෙන් පිටත, Next.js ට පෙර custom Node layer එක මඟින් සපයනු ලබන — caller විසින් තෝරාගත් root එකක් වෙත
-යොමු කර අලුතින් නිකුත් කළ Basic credentials නැවත ප්රතිචාරයේ දක්වයි, `DELETE` මඟින් ඒවා rotate කරයි, සහ parent `POST` මඟින්
-Obsidian REST API token එක ගබඩා කරයි. GHSA-62vw මඟින් සඟවා තිබුණේ `GET` password හෙළිදරව්ව පමණි; credentials නිකුත් කිරීම
-තවමත් fail-open ස්තරයේ පැවතිණි (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` අමතරව
-data directory එකම වන, එය තුළ පිහිටන, හෝ එය අඩංගු කරන vault එකක් ප්රතික්ෂේප කරයි.
+`/api/settings/obsidian` එහි `/webdav` ළමා මාර්ගයද ආවරණය කරයි: `POST` මගින් WebDAV ගොනු සේවාව —
+Next.js ට පෙර අභිරුචි Node ස්ථරය විසින් සේවය කරනු ලබන, මෙම පයිප්ලයිනයට පිටත —
+ඇමතුම්කරු තෝරාගත් මූලයකට යොමු කර, අලුතින් නිර්මාණය කළ Basic අක්තපත්ර ප්රතිචාරයෙන් ආපසු ලබා දෙයි,
+`DELETE` ඒවා කරකවයි, එමෙන්ම මව් `POST` Obsidian REST API ටෝකනය ගබඩා කරයි.
+GHSA-62vw සිදු කළේ `GET` මුරපද හෙළිවීම සැඟවීම පමණි; නිකුත් කිරීම තවමත් fail-open ස්ථරයේ පැවතුණි
+(GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` අමතරව දත්ත නාමාවලියම වන, එය තුළ පිහිටි,
+හෝ එය අඩංගු වෝල්ට් එකක් ප්රතික්ෂේප කරයි.
 
-#### Credential exports operator සඳහා පමණි
+#### අක්තපත්ර නිර්යාත සහ ප්රතිස්ථාපන ක්රියාකරුවන්ට පමණි
 
-ඉහත ස්තරය තීරණය කරන්නේ _යම්_ අක්තපත්රයක් අවශ්යද යන්න පමණි. ගබඩා කළ අක්තපත්ර බාගත කරන මාර්ග, හසුරුවනය තුළ දෙවන පරීක්ෂාවක් එක් කරයි: `GET /api/settings/export-json` (විකේතනය කළ සැපයුම්කරු සම්බන්ධතා සහ අමු API යතුරු), `GET /api/db-backups/export` (SQLite ගොනුව) සහ `GET /api/db-backups/exportAll` (සම්පූර්ණ සංරක්ෂිතය) විසින් `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`) ඇමතුම් කරයි. එය ඩෑෂ්බෝඩ් සැසියක්, දේශීය CLI subject එකක්, හෝ පිවිසීම අක්රිය කර ඇති instance එකක් පිළිගන්නා අතර, ඕනෑම scope එකක (`manage` සහ `admin` ඇතුළුව) API යතුරු සහ `oma_` ප්රවේශ ටෝකන සඳහා `403` ප්රතිචාර දෙයි. සමමුහුර්තකරණ ටෝකන නිකුත් කිරීම (`POST /api/sync/tokens`) ද විශ්වාසදායක loopback අභ්යන්තර-සේවා ටෝකනයට අමතරව එම helper එකම භාවිත කරයි.
+ඉහත ස්ථරය තීරණය කරන්නේ _යම්_ අක්තපත්රයක් අවශ්ය ද යන්න පමණි. ගබඩා කළ අක්තපත්ර
+බාගත කරන මාර්ග හසුරුවන්නා තුළ දෙවන පරීක්ෂාවක් එක් කරයි: `GET /api/settings/export-json`
+(විකේතනය කළ සැපයුම්කරු සම්බන්ධතා සහ අමු API යතුරු), `GET /api/db-backups/export` (SQLite ගොනුව)
+සහ `GET /api/db-backups/exportAll` (සම්පූර්ණ සංරක්ෂණය) `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`) කැඳවයි. එය උපකරණ පුවරු සැසියක්, දේශීය CLI විෂයය,
+හෝ පිවිසීම අක්රිය කළ නිදසුනක් පිළිගනී, එසේම ඕනෑම විෂය පථයක API යතුරු වලට (`manage` සහ `admin`
+ඇතුළුව) සහ `oma_` ප්රවේශ ටෝකන වලට `403` ලෙස පිළිතුරු දෙයි. විනාශකාරී අනුරූප එම මායිමම දරයි:
+`POST /api/db-backups/import` (උඩුගත කළ `.sqlite`, `dryRun=true` ඇතුළුව), `POST /api/db-backups`
+(ගබඩා කළ උපස්ථයක් id මගින් ප්රතිස්ථාපනය කිරීම) සහ `POST /api/settings/import-json` (පැරණි JSON
+ප්රතිස්ථාපනය) සජීවී දත්ත සමුදාය හෝ සම්පූර්ණ සැකසුම්/සම්බන්ධතා/API-යතුරු කට්ටලය ප්රතිස්ථාපනය කරයි,
+එබැවින් යන්ත්ර අක්තපත්රයකටද ඒවා ක්රියාත්මක කළ නොහැක. ප්රතිස්ථාපන ලකුණු විනාශ කිරීමද එම මායිමම දරයි:
+`DELETE /api/db-backups` (පිරිසිදු කිරීම — නවතම N ක් තබා ගැනීම / දින D කට වඩා පැරණි ඒවා ඉවතලීම) සහ
+`PATCH /api/db-backups` (රඳවා තබා ගැනීමේ සැකසුම්), මන්ද ස්ථිරව ගබඩා කළ රඳවා තබා ගැනීම හරියටම
+සෑම ස්වයංක්රීය උපස්ථයකට පසු `cleanupDbBackups()` යොදන දෙය නිසා (`src/lib/db/backup.ts`), එබැවින්
+`keepLatest: 1` සුරැකිය හැකි යන්ත්ර අක්තපත්රයක් ඊළඟ ස්නැප්ෂොටයේදී සියල්ල කපා දමනු ඇත.
+උපස්ථ ලැයිස්තුගත කිරීම සහ නිර්මාණය කිරීම (`GET`/`PUT /api/db-backups`) සාමාන්ය කළමනාකරණ
+සත්යාපනය පවත්වා ගනී. සම්මුහුර්ත ටෝකන නිකුත් කිරීම (`POST /api/sync/tokens`) එම උපකාරකයම
+භාවිතා කරයි, ඊට අමතරව විශ්වාසදායක loopback අභ්යන්තර-සේවා ටෝකනයද.
 
-#### Credential exports and restores are operator-only
+### නව-ස්ථාපන ආරම්භය loopback-පමණි — සැබෑ පීයර් මගින්, `Host` නොව
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+කළමනාකරණ මුරපදයක් වින්යාස කර නොමැති විට (සහ `INITIAL_PASSWORD` නොමැති විට),
+`src/shared/utils/apiAuth.ts` හි `isAuthRequired()` නිර්නාමික ආරම්භය **loopback පීයර් සඳහා පමණක්**
+විවෘතව තබයි. Loopback තීරණය වන්නේ විශ්වාසදායක පීයර් සංකේත වලින්, මෙම පිළිවෙළින්: ටෝකන-මුද්රිත සැබෑ
+TCP පීයර් (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ප්රතිපත්තිය දකින දෙය), පයිප්ලයිනයේම
+`AUTHZ_HEADER_PEER_LOCALITY` තීන්දුව (මාර්ග හසුරුවන්නන් දකින දෙය, `OMNIROUTE_PEER_STAMP_TOKEN`
+සකසා ඇති අතරතුර පමණක් විශ්වාස කරයි), හෝ සෘජු ඇමතුම්කරුවන් සඳහා සැබෑ සොකට් පීයර් එකක්. `Host` /
+`nextUrl.hostname` කිසිවිටෙක සලකා බලනු නොලැබේ, එමෙන්ම පළමු-මුරපද ලිවීම
+(`POST /api/settings/require-login`) සෑම ජාල පීයර් එකකටම විවෘත වීම වෙනුවට එම සීමාවටම යටත් වේ
+(GHSA-7pq4-8pvv-rx7r). `managementPolicy` තමගේම `peerContext` තීන්දුව පහළට පැහැදිලිව යවයි,
+එබැවින් මුල් (ඉවත් කිරීමට පෙර) ඉල්ලීමේ ශීර්ෂක එය කිසිවිටෙක තීරණය නොකරයි.
 
-### නව ස්ථාපන bootstrap එක සැබෑ peer අනුව loopback සඳහා පමණි — `Host` අනුව නොවේ
+### ස්ථරය 3 — කළමනාකරණය (පෙරනිමි)
 
-කළමනාකරණ මුරපදයක් වින්යාස කර නොමැති විට (සහ `INITIAL_PASSWORD` නොමැති විට), `src/shared/utils/apiAuth.ts` හි `isAuthRequired()` විසින් නිර්නාමික bootstrap ප්රවේශය විවෘතව තබන්නේ **loopback peers සඳහා පමණි**. පහත විශ්වාසදායක peer සංඥා අනුපිළිවෙළින් භාවිත කර loopback බව තීරණය කෙරේ: ටෝකනය මඟින් සලකුණු කළ සැබෑ TCP peer එක (`PEER_IP_HEADER` + `VIA_PROXY_HEADER`, ප්රතිපත්තිය දකින දෙය), pipeline එකේම `AUTHZ_HEADER_PEER_LOCALITY` තීන්දුව (route handlers දකින දෙය, `OMNIROUTE_PEER_STAMP_TOKEN` සකසා ඇති අතරතුර පමණක් විශ්වාස කෙරේ), හෝ සෘජු ඇමතුම්කරුවන් සඳහා සැබෑ socket peer එක. `Host` / `nextUrl.hostname` කිසිවිටෙක සලකා බලන්නේ නැති අතර, පළමු මුරපදය ලිවීම (`POST /api/settings/require-login`) සෑම ජාල peer එකකටම විවෘත කිරීම වෙනුවට එම සීමාවටම යටත් වේ (GHSA-7pq4-8pvv-rx7r). `managementPolicy` විසින් එහිම `peerContext` තීන්දුව පැහැදිලිව පහළට යවයි; එබැවින් ORIGINAL (ඉවත් කිරීමට පෙර) ඉල්ලීමේ headers කිසිවිටෙක එය තීරණය නොකරයි.
-
-### ස්තරය 3 — MANAGEMENT (පෙරනිමි)
-
-අනෙකුත් සියලුම කළමනාකරණ මාර්ග. `requireLogin=false` වින්යාස කර නොමැති නම් සත්යාපනය අවශ්ය වේ. CLI ටෝකනවලට මෙම මාර්ග සඳහා සත්යාපනය කළ හැකිය (loopback + වලංගු HMAC).
+අනෙකුත් සියලුම කළමනාකරණ මාර්ග. `requireLogin=false` ලෙස වින්යාස කර නොමැති නම්
+සත්යාපනය අවශ්ය වේ. CLI ටෝකන වලට මෙම මාර්ග සත්යාපනය කළ හැක (loopback + වලංගු HMAC).
 
 ## ඇගයීම් අනුපිළිවෙළ
 

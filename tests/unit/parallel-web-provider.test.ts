@@ -357,8 +357,9 @@ test("search cost follows the mode price plus per-result overage above 10", () =
     assert.equal(computeSearchCostUsd(config, body(mode), count), expected, `${mode}/${count}`);
   }
   // Providers without a mode table keep their flat costPerQuery.
-  const exa = SEARCH_PROVIDERS["exa-search"];
-  assert.equal(computeSearchCostUsd(exa, body("advanced"), 50), exa.costPerQuery);
+  // (Exa has its own table since Exa 3.0 lite, so use Serper here.)
+  const serper = SEARCH_PROVIDERS["serper-search"];
+  assert.equal(computeSearchCostUsd(serper, body("advanced"), 50), serper.costPerQuery);
   assert.equal(computeSearchCostUsd(config, "not json", 3), config.costPerQuery);
 });
 

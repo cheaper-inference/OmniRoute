@@ -1,3 +1,5 @@
+import { mergeCodexQuotaObservation } from "@/lib/providers/codexQuotaDisplay";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
@@ -47,6 +49,23 @@ function mutate(id: string, apply: (data: RecordValue) => void): RecordValue | n
   return result;
 }
 
+/**
+ * A scope has recovered when every window it has is below its limit. A complete reading lists
+ * all of them, so a plan with a single window (no 5-hour session) recovers on that window alone;
+ * otherwise both the session and weekly windows must be shown recovered.
+ */
+function scopeRecovered(
+  windows: readonly RecordValue[],
+  valid: (window: RecordValue) => boolean,
+  complete: boolean
+): boolean {
+  const present = complete ? windows.filter(valid) : windows;
+  return (
+    present.length > 0 &&
+    present.every((window) => valid(window) && Number(window.used) < Number(window.total))
+  );
+}
+
 /** A live usage response hydrates display and releases only fully recovered quota scopes.
  * Compare the pre-fetch state inside the transaction so newer failures win.
  */
@@ -54,6 +73,7 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
   if (usage.message) return null;
   const quotas = toRecord(usage.quotas);
   if (!Object.keys(quotas).length) return null;
+  const complete = isCompleteUsageReading(usage);
   return mutate(id, (data) => {
     const before = toRecord(expected);
     for (const scope of ["codex", "spark"] as const) {
@@ -83,7 +103,7 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
       )
         continue;
       const byScope = { ...toRecord(data.codexQuotaStateByScope) };
-      const snapshot = { ...toRecord(byScope[scope]), observedAt: new Date().toISOString() };
+      const snapshot: RecordValue = { observedAt: new Date().toISOString() };
       for (const [window, suffix] of [
         [session, "5h"],
         [weekly, "7d"],
@@ -95,15 +115,11 @@ export async function syncCodexQuotaObservation(id: string, usage: RecordValue, 
           [`resetAt${suffix}`]: window.resetAt ?? null,
         });
       }
-      byScope[scope] = snapshot;
+      const merged = mergeCodexQuotaObservation(toRecord(byScope[scope]), snapshot, { complete });
+      if (!merged) continue;
+      byScope[scope] = merged;
       data.codexQuotaStateByScope = byScope;
-      if (
-        valid(session) &&
-        valid(weekly) &&
-        Number(session.used) < Number(session.total) &&
-        Number(weekly.used) < Number(weekly.total)
-      )
-        clearScope(data, scope);
+      if (scopeRecovered([session, weekly], valid, complete)) clearScope(data, scope);
     }
   });
 }
