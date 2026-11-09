@@ -122,7 +122,7 @@ test("unknown provider fields survive rebuilding without double counting aliases
   );
 });
 
-test("diagnostic pricing distinguishes tiers while legacy quota cost is unchanged", () => {
+test("diagnostic pricing distinguishes tiers and billing prices a reported 1h share at 2x input", () => {
   const pricing = { input: 1, output: 2, cache_creation: 1.25 };
   const options = { provider: "anthropic", model: "claude-synthetic" };
   const usage = {
@@ -135,11 +135,9 @@ test("diagnostic pricing distinguishes tiers while legacy quota cost is unchange
   assert.equal(diagnostic.pricedTokens, 100);
   assert.ok(Math.abs(diagnostic.knownTierCostUsd! - 0.0001775) < 1e-12);
   const { cache_creation: _tiers, ...legacy } = usage;
-  assert.equal(
-    computeCostFromPricing(pricing, usage, options),
-    computeCostFromPricing(pricing, legacy, options)
-  );
-  assert.ok(Math.abs(computeCostFromPricing(pricing, usage, options) - 0.000139) < 1e-12);
+  // Untiered legacy usage keeps the single write price; a reported 1h share bills at 2x input.
+  assert.ok(Math.abs(computeCostFromPricing(pricing, legacy, options) - 0.000139) < 1e-12);
+  assert.ok(Math.abs(computeCostFromPricing(pricing, usage, options) - 0.0001915) < 1e-12);
   assert.equal(computeCostFromPricing(pricing, { ...usage, cost_usd: 0.42 }, options), 0.42);
   assert.equal(
     computeCostFromPricing(pricing, { ...usage, cost_in_usd_ticks: 100000000 }, options),

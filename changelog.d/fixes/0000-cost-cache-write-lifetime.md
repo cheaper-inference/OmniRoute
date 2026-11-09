@@ -1,0 +1,1 @@
+- **fix(usage):** Native Claude 1-hour cache writes are now billed at 2x the input rate (or the model's `cache_creation_1h` rate) instead of the 5-minute write price; unsplit and untiered writes keep the existing price.
