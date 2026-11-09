@@ -6,6 +6,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -17,7 +18,7 @@ import { pipeline } from "node:stream/promises";
 import { resolveDataDir } from "../data-dir.mjs";
 import { getBaseUrl, isServerUp } from "../api.mjs";
 import { t } from "../i18n.mjs";
-import { backupSqliteFile } from "../sqlite.mjs";
+import { backupSqliteFile, withReadonlySqlite } from "../sqlite.mjs";
 import { CLI_TOKEN_HEADER, getCliToken } from "../utils/cliToken.mjs";
 
 function getBackupDir() {
@@ -446,6 +447,31 @@ export async function runRestoreCommand(backupId, opts = {}) {
     }
   }
 
+  // A running server holds storage.sqlite open and keeps its WAL. Replacing the file under it,
+  // or deleting the WAL, corrupts the database. Restore only while the server is stopped.
+  if (await isServerUp()) {
+    console.error(
+      `A server answers at ${getBaseUrl()}. Stop it (omniroute stop) before restore; nothing was changed.`
+    );
+    return 1;
+  }
+
+  // Check the database inside the backup before the live files are touched.
+  const backupSqlite = join(backupPath, "storage.sqlite");
+  if (existsSync(backupSqlite)) {
+    try {
+      const row = await withReadonlySqlite(backupSqlite, (db) =>
+        db.prepare("PRAGMA integrity_check").get()
+      );
+      if (Object.values(row || {})[0] !== "ok") throw new Error("integrity check failed");
+    } catch (err) {
+      console.error(
+        `Backup ${backupId} has a damaged database (${err instanceof Error ? err.message : String(err)}); nothing was changed.`
+      );
+      return 1;
+    }
+  }
+
   console.log(t("backup.restoring", { path: backupPath }));
 
   const dataDir = resolveDataDir();
@@ -453,6 +479,12 @@ export async function runRestoreCommand(backupId, opts = {}) {
     for (const file of FILES_TO_BACKUP) {
       const sourcePath = join(backupPath, file.name);
       if (existsSync(sourcePath)) {
+        if (file.name === "storage.sqlite") {
+          // A leftover WAL or journal would replay the old database over the restored file.
+          for (const suffix of ["-wal", "-shm", "-journal"]) {
+            rmSync(join(dataDir, `${file.name}${suffix}`), { force: true });
+          }
+        }
         copyFileSync(sourcePath, join(dataDir, file.name));
         console.log(`\x1b[2m  Restored: ${file.name}\x1b[0m`);
       }
