@@ -1,0 +1,1 @@
+- **fix(middleware):** a pre-request hook that throws or times out five times in a row is now switched off with a named error, instead of failing on every request and blocking each one for up to its timeout. Saving the hook again switches it back on.
