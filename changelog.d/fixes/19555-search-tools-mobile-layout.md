@@ -1,0 +1,1 @@
+- **dashboard:** The Search Tools studio (`/dashboard/search-tools`) form, results, and configuration panes now stack vertically below the `lg` breakpoint and allow the page to scroll, preventing horizontal clipping on mobile viewports while preserving the three-column layout on desktop.

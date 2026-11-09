@@ -143,9 +143,9 @@ export default function SearchTab({
   };
 
   return (
-    <div className="flex h-full" data-testid="search-tab">
+    <div className="flex flex-col lg:flex-row h-full" data-testid="search-tab">
       {/* Left: form + history */}
-      <div className="w-[300px] shrink-0 border-r border-border overflow-y-auto flex flex-col bg-bg-alt">
+      <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border lg:overflow-y-auto flex flex-col bg-bg-alt">
         <SearchForm
           onSearch={handleSearch}
           loading={loading}
@@ -157,7 +157,7 @@ export default function SearchTab({
       </div>
 
       {/* Right: results + rerank */}
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="flex-1 lg:overflow-y-auto p-1">
         <ResultsPanel
           response={response}
           rawJson={rawJson}
