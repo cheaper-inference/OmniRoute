@@ -78,9 +78,9 @@ describe("feature-flags-settings count update", () => {
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
     // FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) adds the 120th flag.
-    // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED,
-    // SYSTEMONE_CHAT_GUARD_ENABLED and COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 124.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 124);
+    // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
+    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 123.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 123);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.

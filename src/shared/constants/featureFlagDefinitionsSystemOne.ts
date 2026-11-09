@@ -2,7 +2,7 @@ import type { FeatureFlagDefinition } from "./featureFlagTypes";
 
 /**
  * Default-off flags for the System One decisions backends and the jev combo strategy
- * (#16676, #14667, #14498, #15279). Spread at the end of FEATURE_FLAG_DEFINITIONS;
+ * (#16676, #14667, #15279). Spread at the end of FEATURE_FLAG_DEFINITIONS;
  * kept apart only because featureFlagDefinitions.ts is at its file-size cap.
  */
 export const SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
@@ -24,18 +24,6 @@ export const SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "Let POST /v1/systemone serve ollama-local/<model> decisions models on the local Ollama configured in the existing ollama-local connection (its base URL, default http://localhost:11434/v1, never a request field) (#14667). Ollama's own limits apply before any upstream call: 2-26 candidates per choice/score question, at most 64 questions, no chat sampling fields, raw base64 images only. Off by default: ollama-local/* model ids are refused with a 400 and no upstream call.",
     descriptionI18nKey: "featureFlagSystemOneOllamaLocalBackendEnabledDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "info",
-  },
-  {
-    key: "SYSTEMONE_CHAT_GUARD_ENABLED",
-    label: "System One: Refuse Chat on Decisions-Only Providers",
-    description:
-      "Refuse a chat completion routed to a decisions-only provider (TypeSafe) with a 400 that points at POST /v1/systemone, before any upstream call (#14498). Without it the default chat executor takes the request, falls back to the OpenAI endpoint and sends it the TypeSafe key. Off by default: chat routing to those providers is unchanged.",
-    descriptionI18nKey: "featureFlagSystemOneChatGuardEnabledDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",
