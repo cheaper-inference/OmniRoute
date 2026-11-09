@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Předvolby účtů",
+    "description": "Pro tuto kombinaci nastavte více účtů jako preferované nebo je ponechte v rezervě. Automatické směrování řadí účty v rámci každé úrovně. Neuvedené účty jsou normální. Oprávnění, limity kvót a stávající přiřazení k tahům stále platí.",
+    "preferred": "Preferované",
+    "normal": "Normální",
+    "reserve": "Rezervní",
+    "excluded": "Vyloučené",
+    "loading": "Načítání účtů…",
+    "error": "Účty se nepodařilo načíst. Znovu otevřete editor a zkuste to znovu.",
+    "missing": "Nedostupný účet ({id})"
+  },
   "teamCosts": {
     "title": "Náklady týmu",
     "subtitle": "Spravujte sdílené měkké rozpočty a odhady nákladů z katalogu.",
