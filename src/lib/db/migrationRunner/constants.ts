@@ -501,6 +501,93 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "233",
     toName: "api_key_self_service_settings",
   },
+  // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
+  // as 190/191, 197/198, 198/199, 208/209, 214/215, 230/231 and 229/230. Upstream owns all of
+  // those slots; the migrations now live at 234/235. Each entry is name-locked.
+  {
+    fromVersion: "190",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "191",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "197",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "198",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "198",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "199",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "208",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "209",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "214",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "215",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "229",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "230",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
+  {
+    fromVersion: "230",
+    fromName: "agent_sessions",
+    toVersion: "234",
+    toName: "agent_sessions",
+  },
+  {
+    fromVersion: "231",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "235",
+    toName: "usage_history_agent_session_id",
+  },
 ] as const;
 
 export const LEGACY_VERSION_SLOT_MIGRATIONS = [
