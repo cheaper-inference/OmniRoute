@@ -9,7 +9,8 @@ import { CodexConnectionFields } from "@/app/(dashboard)/dashboard/providers/[id
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string, values?: Record<string, string>) => values?.model || key,
 }));
-vi.mock("@/shared/components", () => ({
+vi.mock("@/shared/components", async () => ({
+  Button: (await import("@/shared/components/Button")).default,
   Card: ({ children }: { children: React.ReactNode }) => <section>{children}</section>,
   Toggle: ({ checked, onChange }: { checked: boolean; onChange: (value: boolean) => void }) => (
     <input
