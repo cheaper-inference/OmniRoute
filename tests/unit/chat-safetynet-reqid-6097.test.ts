@@ -35,6 +35,8 @@ const core = await import("../../src/lib/db/core.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const chatRoute = await import("../../src/app/api/v1/chat/completions/route.ts");
+const { SELF_HOP_HEADER, ownListenerSelfHopToken } =
+  await import("../../open-sse/utils/selfHop.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -104,6 +106,7 @@ test("#6097 safety-net combo redirect does not throw ReferenceError: reqId is no
       // Forces the combo target to be attempted (bypasses availability
       // pre-skipping) so the redirect path is exercised deterministically.
       "X-Internal-Test": "combo-health-check",
+      [SELF_HOP_HEADER]: ownListenerSelfHopToken(),
     },
     body: JSON.stringify({
       model: "nested-auto-6097",

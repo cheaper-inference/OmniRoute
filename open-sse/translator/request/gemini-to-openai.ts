@@ -3,6 +3,7 @@ import { geminiMediaToOpenAI } from "../helpers/mediaContentParts.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
+import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
 
 const newCallId = () => `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -71,7 +72,7 @@ export function geminiToOpenAIRequest(model, body, stream) {
             function: {
               name: func.name,
               description: func.description || "",
-              parameters: func.parameters || { type: "object", properties: {} },
+              parameters: geminiFunctionParameters(func) || { type: "object", properties: {} },
             },
           });
         }
