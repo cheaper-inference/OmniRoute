@@ -108,9 +108,11 @@ describe("ModelCompatPopover — Escape and focus return (#18070)", () => {
     document.body.appendChild(outside);
     outside.focus();
     await act(async () => {
-      // The kit Popover (Radix) attaches its outside-press listener on the next task.
+      // The kit Popover (Radix) listens for outside presses from the next task on and dismisses
+      // on the click that ends a primary-button press.
       await new Promise((resolve) => setTimeout(resolve, 0));
       outside.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      outside.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushEffects();
     expect(panel()).toBeNull();
