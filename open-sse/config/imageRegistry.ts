@@ -74,6 +74,12 @@ function findImageModelConfig(providerId: string, modelId: string): ImageModelEn
 }
 
 function resolveImageProviderModelId(providerId: string, modelId: string): string {
+  // Fal owns both the OmniRoute provider label and some native endpoint owners.
+  // Retained native registry IDs must survive removal of the outer selection prefix.
+  if (providerId === "fal-ai") {
+    const native = findImageModelConfig(providerId, `fal-ai/${modelId}`);
+    if (native) return native.id;
+  }
   return findImageModelConfig(providerId, modelId)?.id || modelId;
 }
 

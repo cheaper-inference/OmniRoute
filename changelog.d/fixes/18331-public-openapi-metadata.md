@@ -1,1 +1,0 @@
-- fix(api): regenerate the public OpenAPI spec with the build version and deployment-relative server URL. Builds generate it, and `npm run gen:public-openapi` refreshes the committed copy (#18331).

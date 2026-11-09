@@ -355,6 +355,24 @@ export function validateProviderSpecificData(
     });
   }
 
+  const requireUserLastMessage = data.requireUserLastMessage;
+  if (requireUserLastMessage !== undefined && typeof requireUserLastMessage !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.requireUserLastMessage must be a boolean",
+      path: ["requireUserLastMessage"],
+    });
+  }
+
+  const keepMidConversationSystem = data.keepMidConversationSystem;
+  if (keepMidConversationSystem !== undefined && typeof keepMidConversationSystem !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.keepMidConversationSystem must be a boolean",
+      path: ["keepMidConversationSystem"],
+    });
+  }
+
   const disableStreamOptions = data.disableStreamOptions;
   if (disableStreamOptions !== undefined && typeof disableStreamOptions !== "boolean") {
     ctx.addIssue({
@@ -440,6 +458,30 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.consoleApiKey must be at most 10000 characters",
       path: ["consoleApiKey"],
+    });
+  }
+
+  // Zed Hosted: the optional Orb billing portal link (or bare portal token).
+  // A bare token is accepted, so no URL shape is enforced here; the usage
+  // fetcher validates it before any request and treats the whole value as a
+  // credential.
+  const billingPortalUrl = data.billingPortalUrl;
+  if (
+    billingPortalUrl !== undefined &&
+    billingPortalUrl !== null &&
+    typeof billingPortalUrl !== "string"
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be a string",
+      path: ["billingPortalUrl"],
+    });
+  }
+  if (typeof billingPortalUrl === "string" && billingPortalUrl.length > 4096) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.billingPortalUrl must be at most 4096 characters",
+      path: ["billingPortalUrl"],
     });
   }
 

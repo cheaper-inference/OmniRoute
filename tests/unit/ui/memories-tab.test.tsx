@@ -3,6 +3,7 @@ import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import MemoriesTab from "../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab";
 
 // The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
 globalThis.ResizeObserver ??= class {
@@ -11,12 +12,13 @@ globalThis.ResizeObserver ??= class {
   disconnect() {}
 } as unknown as typeof ResizeObserver;
 
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string, values?: Record<string, unknown>) => {
+vi.mock("next-intl", () => {
+  const translate = (key: string, values?: Record<string, unknown>) => {
     if (values) return `${key}:${JSON.stringify(values)}`;
     return key;
-  },
-}));
+  };
+  return { useTranslations: () => translate };
+});
 
 // Mock shared components
 vi.mock("@/shared/components", () => ({
@@ -159,6 +161,7 @@ const MOCK_MEMORIES = [
 ];
 
 const cleanupCallbacks: Array<() => void> = [];
+const roots: Array<ReturnType<typeof createRoot>> = [];
 
 function makeContainer(): HTMLElement {
   const container = document.createElement("div");
@@ -188,17 +191,20 @@ describe("MemoriesTab", () => {
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Removing a container alone leaves its React tree and effects mounted.
+    await act(async () => {
+      while (roots.length > 0) roots.pop()?.unmount();
+    });
     while (cleanupCallbacks.length > 0) cleanupCallbacks.pop()?.();
     document.body.innerHTML = "";
     vi.clearAllMocks();
   });
 
   it("renders memories after fetch", async () => {
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });
@@ -211,10 +217,9 @@ describe("MemoriesTab", () => {
   });
 
   it("shows hit rate card when cacheStats.hits + misses > 0", async () => {
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });
@@ -226,7 +231,6 @@ describe("MemoriesTab", () => {
   });
 
   it("does not show hit rate when cacheStats is 0/0", async () => {
-    vi.resetModules();
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -241,10 +245,9 @@ describe("MemoriesTab", () => {
         },
       }),
     });
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });
@@ -256,10 +259,9 @@ describe("MemoriesTab", () => {
   });
 
   it("opens edit modal when pencil button is clicked", async () => {
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });
@@ -277,7 +279,6 @@ describe("MemoriesTab", () => {
   });
 
   it("shows empty state when no memories returned", async () => {
-    vi.resetModules();
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -287,10 +288,9 @@ describe("MemoriesTab", () => {
         stats: { total: 0, tokensUsed: 0, hitRate: 0, cacheStats: { hits: 0, misses: 0 } },
       }),
     });
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });
@@ -322,10 +322,9 @@ describe("MemoriesTab", () => {
       return Promise.resolve({ ok: true, json: async () => ({}) });
     });
     globalThis.fetch = mockFetch as unknown as typeof fetch;
-    const { default: MemoriesTab } =
-      await import("../../../src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab");
     const container = makeContainer();
     const root = createRoot(container);
+    roots.push(root);
     await act(async () => {
       root.render(<MemoriesTab />);
     });

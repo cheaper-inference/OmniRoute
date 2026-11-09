@@ -315,7 +315,9 @@ test.describe("Providers management", () => {
     // #7361 replaced the native window.confirm() with a ConfirmModal, so the old
     // page.once("dialog") handler never fires and the delete request was never sent.
     await page.getByTitle(/^delete$/i).click();
-    const confirmDialog = page.getByRole("dialog").filter({ hasText: /delete this connection/i });
+    const confirmDialog = page
+      .getByRole("alertdialog")
+      .filter({ hasText: /delete this connection/i });
     await expect(confirmDialog).toBeVisible({ timeout: 10000 });
     await confirmDialog.getByRole("button", { name: /^delete$/i }).click();
 

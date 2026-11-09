@@ -38,7 +38,8 @@ lastUpdated: 2026-11-03
   `bg-primary`/`border-primary` keep the accent surface: under Editions it is the kit's
   `--ci-color-accent-active` (the deep copper `#99562f` in light, the copper accent in dark); under Classic,
   lime-800 in light and the lime accent in dark. Chart series use
-  `--color-chart-1` … `--color-chart-5`.
+  `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
+  `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
 - **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
@@ -60,10 +61,16 @@ lastUpdated: 2026-11-03
   it from the same store. Do not put `data-ci-appearance` on any other element: the kit matches it with
   `html:root:has([data-ci-appearance="editions"])`, so one descendant would switch the whole document.
   The Editions `data-ci-editions-variant="landing"` variant is for marketing pages, not the dashboard.
-  Browser chrome (`viewport.themeColor`, the web manifest) cannot read CSS or the stored choice, so it
-  follows the default: `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts` is the one mirror of
-  the Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by
-  `tests/unit/pwa-theme-colors.test.ts`. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
+  Browser chrome: the server renders the default, Editions, in `viewport.themeColor` (one tag per
+  `prefers-color-scheme`) and the web manifest — `PWA_THEME_COLORS` in
+  `src/shared/constants/pwaThemeColors.ts`, the one mirror of the Editions `--ci-color-background`
+  (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by `tests/unit/pwa-theme-colors.test.ts`. The live
+  `<meta name="theme-color">` then follows the stored palette and mode: `THEME_BOOT_SCRIPT` rewrites the
+  tags before paint and the theme store's actions do it on every change (`resolveThemeColor()` /
+  `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, with `CLASSIC_PAGE_BACKGROUND` read from
+  the kit's `ciTokens`). An explicit light/dark theme sets every tag to that mode; `system` keeps one
+  colour per scheme. The manifest stays Editions: it is fetched once per install, without the
+  preference. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
   under Editions the probe read flips the root `data-theme` for one synchronous pass, because the kit
   resolves Editions light/dark from the root.
 - **Components (adapters).** `src/shared/components/index.tsx` keeps the OmniRoute component API (same
@@ -74,9 +81,9 @@ lastUpdated: 2026-11-03
   (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). An adapter imports the kit
   component by subpath and maps the legacy props onto it — for example `Button variant="primary"` is the
   kit `default` button (`--ci-button-primary-*`: the inverse surface in light, the accent with its
-  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is `outline` plus
-  the `.ci-button--warning` extension. The `.ci-button--warning` and `.ci-badge[data-tone]` rules at the
-  end of `globals.css` (`@layer components`) are OmniRoute extensions on top of the kit classes.
+  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
+  button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
+  `NativeSelect`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
 - **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
@@ -109,7 +116,8 @@ lastUpdated: 2026-11-03
 1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
    `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
    palette for callers that need a literal hex. The categorical palettes are no exception any more:
-   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   they ride on the kit's eight chart tokens (`--color-chart-1..8`, plus `-ink`/`-subtle`), in the
+   kit series order, through
    `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
    canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).

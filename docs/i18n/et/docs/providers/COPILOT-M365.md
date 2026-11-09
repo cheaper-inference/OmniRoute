@@ -55,32 +55,38 @@ OmniRoute otsib HAR-ist Chathubi WebSocketi URL-i, eraldab väärtused `access_t
 
 > **Ärge kunagi lisage tegelikku HAR-eksporti, pääsuluba ega värskendusluba koodihoidlasse.** Testides ja dokumentatsioonis kasutatavad väärtused peavad alati olema kohatäitjad.
 
-## Pääsuloa kehtivusaeg ja värskendamine
+## Tokeni kehtivusaeg ja värskendamine
 
-`access_token` on lühikese elueaga (tavaliselt **~75 minutit**). Pärast selle aegumist teatab teenusepakkuja ühenduse veast ja peate mandaadi uuesti hankima.
+`access_token` on lühiajaline (tavaliselt **~75 minutit**). Ilma kasutatava värskendustokenita
+peate mandaadi pärast aegumist uuesti jäädvustama.
 
-### Automaatne värskendamine väljaga `refreshToken`
+### Automaatne värskendamine `refreshToken` abil
 
-Käsitsi uuesti hankimise vältimiseks saate salvestada Microsofti värskendusloa ühenduse jaotises **Advanced Settings → providerSpecificData**:
+Microsoft 365 pakkuja dialoogis **Ühenduse lisamine** või **Ühenduse muutmine** avage
+**Täpsemad sätted → Värskendustoken (valikuline)**. Kleepige `substrate.office.com/sydney`
+ulatuse jaoks Microsoft OAuthi värskendustoken ja salvestage. Sisestusväli on maskeeritud ning
+salvestatud tokenit ei eeltäideta kunagi. Muutmise korral jätke väli tühjaks, et olemasolev token
+säilitada; uue tokeni asendamiseks kleepige uus token.
 
-| Väli           | Kirjeldus                                                                   |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuthi värskendusluba ulatuse `substrate.office.com/sydney` jaoks |
-| `tier`         | `individual` (vaikimisi), `edu` või `enterprise`                            |
+Hankige värskendustoken Microsofti seadmekoodi- või autoriseerimiskoodi voost, mille ulatus on
+`substrate.office.com/sydney`; juhtpaneel ei hangi seda teie eest.
+Kui värskendustoken on konfigureeritud, kontrollib OmniRoute `access_token`-it enne päringuid
+ja värskendab seda ainult siis, kui värskendamine on vajalik. Edukas värskendamine salvestab ka
+pööratud värskendustokeni, vältides käsitsi uuesti jäädvustamist seni, kuni värskendustoken kehtib.
 
-Hankige värskendusluba Microsofti seadmekoodi- või autoriseerimiskoodivoo kaudu, mille ulatus on `substrate.office.com/sydney`. Kui `refreshToken` on määratud, värskendab OmniRoute enne iga päringut ennetavalt väärtust `access_token`, mistõttu ei pea te mandaati pärast iga ~75-minutilist aegumist uuesti hankima.
-
-Kui `refreshToken` pole määratud, peate WebSocketi mandaadi pärast iga aegumist käsitsi uuesti hankima.
+Kui `refreshToken` pole määratud, peate pärast iga aegumist WebSocketi mandaadi käsitsi
+uuesti jäädvustama.
 
 ### Taseme valimine
 
-| Tase         | Alias         | Kasutusliides                    |
-| ------------ | ------------- | -------------------------------- |
-| `individual` | _(vaikimisi)_ | Tarbijatele mõeldud M365 Copilot |
-| `edu`        | `included`    | Hariduse M365 Copilot            |
-| `enterprise` | `work`        | M365 Copilot for Work            |
+| Tase         | Alias         | Liides                 |
+| ------------ | ------------- | ---------------------- |
+| `individual` | _(vaikimisi)_ | Tarbija M365 Copilot   |
+| `edu`        | `included`    | Hariduse M365 Copilot  |
+| `enterprise` | `work`        | M365 Copilot töö jaoks |
 
-Määrake tase jaotises **Advanced Settings → providerSpecificData → tier**. Tase mõjutab BizChati marsruutimist ja mudelitele juurdepääsu.
+Määrake tase jaotises **Täpsemad sätted → Copiloti tase**. Tase mõjutab
+BizChati marsruutimist ja juurdepääsu mudelitele.
 
 ## Turbemudel
 
@@ -95,29 +101,25 @@ Määrake tase jaotises **Advanced Settings → providerSpecificData → tier**.
 
 ## Tõrkeotsing
 
-### Autentimine nurjub kohe
+### Autentimine ebaõnnestub kohe
 
-- Veenduge, et kopeerisite andmed **WebSocketi URL-ist**, mitte XHR/Fetch-päringust.
-  Mandaat asub Chathubi WebSocketi ühenduse päringuparameetris `access_token`
-  — mitte päises `Authorization: Bearer`.
-- Veenduge, et `chathubPath` sisaldaks URL-i teest kogu segmenti `<oid>@<tenant>`.
+- Veenduge, et kopeerisite väärtuse **WebSocket URL-ist**, mitte XHR-/Fetch-päringust. Mandaat asub Chathubi WebSocket-ühenduse `access_token`-i päringuparameetris — mitte `Authorization: Bearer` päises.
+- Veenduge, et `chathubPath` sisaldab URL-i teelt pärit täielikku `<oid>@<tenant>` segmenti.
 
-### Tõend aegub umbes 75 minuti pärast
+### Token aegub umbes 75 minuti pärast
 
-See on ootuspärane. Ilma `refreshToken`-ita on pääsutõend lühikese kehtivusajaga. Tehke ühte järgmistest:
+See on ootuspärane. Ilma `refreshToken`-ita on juurdepääsutoken lühiajaline. Tehke üks järgmistest toimingutest:
 
-- Hõivake mandaat DevToolsi kaudu uuesti või
-- Seadistage täpsemates sätetes automaatseks värskendamiseks `refreshToken`.
+- Jäädvustage mandaat DevToolsis uuesti või
+- Seadistage ühenduse lisamise või muutmise dialoogis **Advanced Settings → Refresh token (optional)** automaatseks värskendamiseks.
 
-### Ühenduse test õnnestub, kuid vestlus tagastab vea 401
+### Ühenduse testimine õnnestub, kuid vestlus tagastab 401
 
-Tõend võis valideerimise ja esimese päringu vahel aeguda. Hõivake
-uus mandaat.
+Token võis aeguda valideerimise ja esimese päringu vahel. Jäädvustage värske mandaat uuesti.
 
-### Copilotit ei kuvata pakkujate loendis
+### Copilotit teenusepakkujate loendis ei kuvata
 
-Veenduge, et `copilot-m365-web` oleks jaotises **Töölaud → Pakkujad** lubatud. Mõnes
-teenusetasemes võib pakkuja olla vaikimisi peidetud.
+Veenduge, et `copilot-m365-web` oleks lubatud jaotises **Dashboard → Providers**. Mõnes paketis võib teenusepakkuja olla vaikimisi peidetud.
 
 ## Viited
 

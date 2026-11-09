@@ -213,6 +213,10 @@ export type DispatchWithCooldownRetryExtra = {
   compatRejectedTargets: ResolvedComboTarget[];
 };
 
+/**
+ * Dispatches ordered targets with bounded set and cooldown retries, returning the first
+ * success or terminal response, or an aggregate failure when eligible targets are exhausted.
+ */
 export async function dispatchWithCooldownRetry(opts: {
   state: AttemptLoopState;
   deps: AttemptLoopDeps;
@@ -376,7 +380,16 @@ export async function dispatchWithCooldownRetry(opts: {
         return extra.executeAttempt({
           index: i,
           state,
-          deps,
+          deps: {
+            ...deps,
+            retryCooldownWait: {
+              attempt: extra.comboCooldownAttempt,
+              budgetLeftMs: extra.comboCooldownBudgetLeftMs,
+              deadline:
+                extra.comboStartTime +
+                (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS),
+            },
+          },
           targetForAttempt: gate.targetForAttempt,
           profile: gate.profile,
           protectedPriorityTarget: gate.protectedPriorityTarget,
@@ -459,10 +472,15 @@ export async function dispatchWithCooldownRetry(opts: {
           dispatchPosition + 1 < dispatchIndices.length
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
+          let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
           const timeoutPromise = new Promise<void>((r) => {
-            setTimeout(r, hedgeDelay);
+            hedgeTimer = setTimeout(r, hedgeDelay);
           });
-          await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
+          try {
+            await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
+          } finally {
+            clearTimeout(hedgeTimer);
+          }
         } else {
           await Promise.race([task, globalPromise, loopSafetyPromise]);
         }
@@ -702,6 +720,7 @@ export async function dispatchWithCooldownRetry(opts: {
               }
             );
             if (compatFallbackResult) {
+              if (!compatFallbackResult.ok) return compatFallbackResult;
               recordComboRequest(deps.combo.name, null, {
                 success: true,
                 latencyMs: Date.now() - deps.startTime,
