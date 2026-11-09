@@ -2,6 +2,7 @@
 // to keep that file under its frozen size cap. When upstream answers 400 because
 // it could not decrypt advisor results carried in the request, those results are
 // replaced with an "unavailable" marker and the SAME url is retried once.
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   isAdvisorUndecryptableError,
@@ -37,10 +38,7 @@ export async function applyAdvisorUndecryptableRecovery(
   if (response.status !== HTTP_STATUS.BAD_REQUEST || !body || typeof body !== "object") {
     return unchanged;
   }
-  const errText = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  const errText = await readResponseTextWithinCap(response.clone()).catch(() => "");
   if (!isAdvisorUndecryptableError(errText)) return unchanged;
   const { body: replacedBody, replaced } = replaceRedactedAdvisorResults(body);
   if (replaced <= 0) return unchanged;
