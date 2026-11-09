@@ -35,6 +35,7 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
+import { applyOpencodeClaudeBeta } from "./opencodeClaudeBeta.ts";
 import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
 import { applyOpencodeToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
@@ -64,8 +65,10 @@ import {
 import {
   attemptFor,
   isGatedFreeTierRequest,
+  isGoGeminiWire,
   isPremiumOpencodeModel,
   noteFreeTierOutcome,
+  opencodeEndpointUrl,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
@@ -1561,16 +1564,7 @@ export class OpencodeExecutor extends BaseExecutor {
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? freeTierDispatchBase()
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    switch (this._requestFormat) {
-      case "claude":
-        return `${base}/messages`;
-      case "openai-responses":
-        return `${base}/responses`;
-      case "gemini":
-        return `${base}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
-      default:
-        return `${base}/chat/completions`;
-    }
+    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
   }
 
   /**
@@ -1612,6 +1606,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
         headers["x-api-key"] = key;
+      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
+        headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
       }
@@ -1619,6 +1615,7 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
+      applyOpencodeClaudeBeta(headers, clientHeaders, model, body);
     }
     // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
     // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and

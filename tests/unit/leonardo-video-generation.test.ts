@@ -7,6 +7,7 @@
  */
 
 import assert from "node:assert/strict";
+import dns from "node:dns";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -27,9 +28,22 @@ const MP4 = new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]);
 const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
+const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
+
 const originalFetch = globalThis.fetch;
+// The result download goes through the guarded media fetch, which resolves the host and then
+// connects through a pinned agent. Resolve cdn.leonardo.ai to a public address and send the
+// pinned request to the mocked globalThis.fetch.
+const originalLookup = dns.promises.lookup;
+(dns.promises as { lookup: unknown }).lookup = (async () => [
+  { address: "93.184.216.34", family: 4 },
+]) as typeof dns.promises.lookup;
+setPinnedFetchTestOverride(((input: string | URL | Request, init?: RequestInit) =>
+  globalThis.fetch(input, init)) as typeof fetch);
 test.after(async () => {
   globalThis.fetch = originalFetch;
+  (dns.promises as { lookup: unknown }).lookup = originalLookup;
+  setPinnedFetchTestOverride(undefined);
   await waitForCallLogSaves(1_000);
   resetDbInstance();
   rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -137,6 +151,24 @@ test("a 480p size picks RESOLUTION_480 and keeps a portrait orientation", async 
     [portrait720?.resolution, portrait720?.width, portrait720?.height],
     ["RESOLUTION_720", 720, 1280]
   );
+});
+
+// Leonardo also takes 512x768 (2:3) and 576x720 (4:5); at RESOLUTION_720 the same pair picks
+// the aspect. Checked live (Motion 2.0 Fast, 2026-11-08): 512x768 at 720p returned a 768x1152
+// mp4, 576x720 at 720p returned 832x1024, and 512x768 at 480p returned 512x768.
+test("2:3 and 4:5 portrait sizes keep their aspect instead of becoming 9:16", async () => {
+  const sent = async (size: string) => {
+    const body = (await generate("motion-2.0-fast", { size })).submitted?.body;
+    return [body?.resolution, body?.width, body?.height];
+  };
+  assert.deepEqual(await sent("512x768"), ["RESOLUTION_480", 512, 768]);
+  assert.deepEqual(await sent("576x720"), ["RESOLUTION_480", 576, 720]);
+  assert.deepEqual(await sent("768x1152"), ["RESOLUTION_720", 512, 768]);
+  assert.deepEqual(await sent("864x1024"), ["RESOLUTION_720", 576, 720]);
+  assert.deepEqual(await sent("832x1024"), ["RESOLUTION_720", 576, 720]);
+  // Sizes Leonardo has no shape for keep the 16:9 / 9:16 mapping.
+  assert.deepEqual(await sent("1024x1024"), ["RESOLUTION_720", 1280, 720]);
+  assert.deepEqual(await sent("768x512"), ["RESOLUTION_720", 1280, 720]);
 });
 
 test("the catalog lists the Motion 2.0 models", () => {
