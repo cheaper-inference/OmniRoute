@@ -1,1 +1,0 @@
-- **fix(sse):** Conversations that reuse a tool call id across turns keep every tool result: the second result is no longer dropped or rewritten as unpaired text, so Anthropic- and OpenAI-format providers stop rejecting the follow-up turn.
