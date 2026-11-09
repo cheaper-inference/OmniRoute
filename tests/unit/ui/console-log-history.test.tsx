@@ -118,6 +118,36 @@ describe("retained console history and pause", () => {
     expect(fetch).toHaveBeenCalledTimes(4);
   });
 
+  for (const failure of ["expired", "network"]) {
+    it(`failed older-page ${failure} requests do not freeze live polling`, async () => {
+      await renderViewer();
+      if (failure === "expired") {
+        vi.mocked(fetch).mockResolvedValueOnce(
+          Response.json(
+            { error: { message: "Log history changed. Refresh and try again." } },
+            { status: 410 }
+          )
+        );
+      } else {
+        vi.mocked(fetch).mockRejectedValueOnce(new Error("Synthetic network failure"));
+      }
+      await click('button[data-console-history="older"]');
+      expect(container.textContent).toContain("first");
+      expect(container.textContent).not.toContain("logs.consoleViewer.paused");
+      if (failure === "expired") {
+        expect(container.textContent).toContain("Log history changed. Refresh and try again.");
+        expect(
+          container.querySelector<HTMLButtonElement>('button[data-console-history="older"]')
+            ?.disabled
+        ).toBe(true);
+      }
+      vi.mocked(fetch).mockResolvedValue(page("fresh live snapshot"));
+      await act(async () => vi.advanceTimersByTimeAsync(5000));
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(container.textContent).toContain("fresh live snapshot");
+    });
+  }
+
   it("invalidates a pending page when filters change and only renders the new range", async () => {
     await renderViewer();
     const pending = Promise.withResolvers<Response>();
