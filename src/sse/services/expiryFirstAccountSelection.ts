@@ -26,6 +26,7 @@ import {
 } from "./expiryFirstMetrics.ts";
 import {
   resolveExpiryFirstConfig,
+  resolveExpiryFirstDeadline,
   scoreExpiryFirstQuota,
 } from "@omniroute/open-sse/services/combo/quotaScoring.ts";
 
@@ -132,6 +133,11 @@ export function selectExpiryFirstConnection<T extends ExpiryFirstCandidate>(
   if (connections.length === 0) return null;
 
   const config = resolveExpiryFirstConfig(settings);
+  if (config.order === "deadline") {
+    const winner = selectByNearestDeadline(connections, config, resolveQuotaView, nowMs);
+    if (winner) return winner;
+    // No account reports both quota and a reset: rank on the rate below instead.
+  }
   const scored = connections.map((candidate) => ({
     candidate,
     score: scoreExpiryFirstQuota(
@@ -153,18 +159,49 @@ export function selectExpiryFirstConnection<T extends ExpiryFirstCandidate>(
 
   const tied = scored.filter((entry) => (bestScore - entry.score) / bestScore <= config.tieBand);
   if (tied.length <= 1) return scored[0].candidate;
+  return pickLeastRecentlyUsed(tied.map((entry) => entry.candidate));
+}
 
-  tied.sort((a, b) => {
-    const aBackoff = a.candidate.backoffLevel || 0;
-    const bBackoff = b.candidate.backoffLevel || 0;
+/** Tie-break inside a band of equivalent accounts: lowest backoff, then least recently used. */
+function pickLeastRecentlyUsed<T extends ExpiryFirstCandidate>(tied: readonly T[]): T {
+  return [...tied].sort((a, b) => {
+    const aBackoff = a.backoffLevel || 0;
+    const bBackoff = b.backoffLevel || 0;
     if (aBackoff !== bBackoff) return aBackoff - bBackoff;
-    if (!a.candidate.lastUsedAt && !b.candidate.lastUsedAt)
-      return (a.candidate.priority || 999) - (b.candidate.priority || 999);
-    if (!a.candidate.lastUsedAt) return -1;
-    if (!b.candidate.lastUsedAt) return 1;
-    return new Date(a.candidate.lastUsedAt).getTime() - new Date(b.candidate.lastUsedAt).getTime();
-  });
-  return tied[0].candidate;
+    if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
+    if (!a.lastUsedAt) return -1;
+    if (!b.lastUsedAt) return 1;
+    return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
+  })[0];
+}
+
+/**
+ * `expiryFirstOrder: "deadline"`: spend the account whose quota is lost first,
+ * for as long as it has quota. Accounts whose deadlines fall within
+ * `deadlineTieMs` of the nearest one are equivalent and rotate least-recently-used.
+ * Returns null when no account reports both usable quota and a reset.
+ */
+function selectByNearestDeadline<T extends ExpiryFirstCandidate>(
+  connections: readonly T[],
+  config: ReturnType<typeof resolveExpiryFirstConfig>,
+  resolveQuotaView: (connectionId: string) => Record<string, unknown> | null,
+  nowMs: number
+): T | null {
+  const eligible = connections
+    .map((candidate) => ({
+      candidate,
+      deadline: resolveExpiryFirstDeadline(resolveQuotaView(candidate.id), config, nowMs),
+    }))
+    .filter(
+      (entry): entry is { candidate: T; deadline: { usable: number; msUntilDeadline: number } } =>
+        entry.deadline !== null && Number.isFinite(entry.deadline.msUntilDeadline)
+    );
+  if (eligible.length === 0) return null;
+  const nearest = Math.min(...eligible.map((entry) => entry.deadline.msUntilDeadline));
+  const tied = eligible.filter(
+    (entry) => entry.deadline.msUntilDeadline - nearest <= config.deadlineTieMs
+  );
+  return pickLeastRecentlyUsed(tied.map((entry) => entry.candidate));
 }
 
 /**

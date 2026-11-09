@@ -411,10 +411,23 @@ const EXPIRY_FIRST_DEFAULTS = {
   tieBandPercent: 5,
   minHours: 0.25,
   exhaustedFloorPercent: 1,
+  deadlineTieMinutes: 60,
 };
+
+/**
+ * How `expiry-first` orders accounts that still hold quota:
+ *  - `rate` (default): by how much each account must spend per hour before its
+ *    deadline (`scoreExpiryFirstQuota`).
+ *  - `deadline`: strictly by the nearest deadline — the account whose quota is
+ *    lost first is spent first, as long as it has quota left. Exhausted accounts
+ *    (including a spent 5h session) are skipped until they refill.
+ */
+export const EXPIRY_FIRST_ORDERS = ["rate", "deadline"] as const;
+export type ExpiryFirstOrder = (typeof EXPIRY_FIRST_ORDERS)[number];
 
 export function resolveExpiryFirstConfig(config: Record<string, unknown> | null | undefined) {
   const minHours = finiteNumberOrNull(config?.expiryFirstMinHours);
+  const deadlineTieMinutes = finiteNumberOrNull(config?.expiryFirstDeadlineTieMinutes);
   return {
     tieBand:
       getPercentConfig(config?.expiryFirstTieBandPercent, EXPIRY_FIRST_DEFAULTS.tieBandPercent) /
@@ -425,6 +438,19 @@ export function resolveExpiryFirstConfig(config: Record<string, unknown> | null 
         config?.expiryFirstExhaustedFloorPercent,
         EXPIRY_FIRST_DEFAULTS.exhaustedFloorPercent
       ) / 100,
+    order: (config?.expiryFirstOrder === "deadline" ? "deadline" : "rate") as ExpiryFirstOrder,
+    deadlineTieMs:
+      Math.min(
+        24 * 60,
+        Math.max(
+          0,
+          deadlineTieMinutes !== null
+            ? deadlineTieMinutes
+            : EXPIRY_FIRST_DEFAULTS.deadlineTieMinutes
+        )
+      ) *
+      60 *
+      1000,
   };
 }
 
@@ -467,6 +493,35 @@ function msUntilWindowReset(window: QuotaWindowSnapshot, nowMs: number): number 
   return Number.isFinite(resetMs) ? resetMs - nowMs : Number.POSITIVE_INFINITY;
 }
 
+/** Nominal length of a longer (non-session) window, read from its name; null when unknown. */
+function nominalLongerWindowMs(key: string): number | null {
+  const name = key.toLowerCase();
+  if (name.startsWith("weekly") || name.includes("(7d)")) return RESET_AWARE_WEEKLY_WINDOW_MS;
+  if (name.startsWith("monthly") || name.includes("(30d)")) return RESET_AWARE_MONTHLY_WINDOW_MS;
+  return null;
+}
+
+/**
+ * Time left until a window's reset, and whether that reset already lapsed.
+ *
+ * A longer window whose reset is in the past comes from a stale quota read: the
+ * window has refilled since, so its old fraction no longer applies and its real
+ * next reset is one nominal period later. Treating the lapsed reset as "expires
+ * now" made a stale account look like the most urgent one and drained it first
+ * (two Claude accounts, 2026-11-06/07). A lapsed window of unknown length keeps
+ * no deadline. Sessions are handled by the caller (a lapsed session is refilled).
+ */
+function resolveWindowReset(
+  entry: ExpiryWindow,
+  nowMs: number
+): { msLeft: number; lapsed: boolean } {
+  const msLeft = msUntilWindowReset(entry.window, nowMs);
+  if (entry.session || !Number.isFinite(msLeft) || msLeft > 0) return { msLeft, lapsed: false };
+  const periodMs = nominalLongerWindowMs(entry.key);
+  if (periodMs === null) return { msLeft: Number.POSITIVE_INFINITY, lapsed: true };
+  return { msLeft: msLeft + periodMs * (Math.floor(-msLeft / periodMs) + 1), lapsed: true };
+}
+
 function resolveUsableAndReset(
   windows: ExpiryWindow[],
   nowMs: number,
@@ -476,12 +531,14 @@ function resolveUsableAndReset(
   let usable = 1;
   let msUntilReset = Number.POSITIVE_INFINITY;
   let msUntilSessionReset = Number.POSITIVE_INFINITY;
-  for (const { window, session } of windows) {
+  for (const entry of windows) {
+    const { window, session } = entry;
     if (window.fractionReported === false && skipUnreported) continue;
-    const msLeft = msUntilWindowReset(window, nowMs);
+    const { msLeft, lapsed } = resolveWindowReset(entry, nowMs);
     const capOnly = session && hasLongerWindow;
     if (capOnly && msLeft <= 0) continue;
-    if (window.fractionReported !== false) {
+    // A lapsed longer window has refilled: its stale fraction caps nothing.
+    if (window.fractionReported !== false && !lapsed) {
       usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
     }
     if (capOnly) msUntilSessionReset = Math.min(msUntilSessionReset, msLeft);
@@ -517,19 +574,22 @@ function projectExpiryScore(
 ): { score: number; hasReset: boolean } {
   let score = 0;
   let hasReset = false;
-  for (const { key, window, session } of windows) {
+  for (const entry of windows) {
+    const { key, window, session } = entry;
     if (window.fractionReported === false && ctx.skipUnreported) continue;
     // A session refills many times before a longer window resets, so its reset is not
     // where quota is lost (#18541); it already caps `usable`. This also covers an
     // unreported longer reset, a conservative deadline fallback that is not evidence
     // that the session's entire balance must be spent in a few hours (#18552).
     if (session && ctx.skipSession) continue;
-    const resetMs = parseResetTimeMs(window.resetAt);
-    if (!Number.isFinite(resetMs)) continue;
+    const { msLeft, lapsed } = resolveWindowReset(entry, ctx.nowMs);
+    if (!Number.isFinite(msLeft)) continue;
     hasReset = true;
-    const hours = Math.max(ctx.config.minHours, (resetMs - ctx.nowMs) / (60 * 60 * 1000));
+    const hours = Math.max(ctx.config.minHours, msLeft / (60 * 60 * 1000));
     const remaining =
-      window.fractionReported === false ? ctx.usable : clamp01(1 - (window.percentUsed ?? 0.5));
+      window.fractionReported === false || lapsed
+        ? ctx.usable
+        : clamp01(1 - (window.percentUsed ?? 0.5));
     const burnRate = Math.max(0, ctx.burnRates[key] ?? 0);
     const projectedRemaining = Math.max(0, remaining - burnRate * hours);
     const predictedWaste = Math.min(ctx.usable, projectedRemaining);
@@ -616,6 +676,32 @@ export function scoreExpiryFirstQuota(
   });
   if (!hasReset) return { score: usable * capacityWeight };
   return { score };
+}
+
+/**
+ * The deadline view `expiry-first` uses in `deadline` order: how much an account
+ * can spend right now (`usable`, the tightest window, a spent session included)
+ * and how long until its quota is lost (the nearest longer-window reset, rolled
+ * forward when it already lapsed; the session reset only when no longer window
+ * reports one). Null when there is no telemetry or nothing left to spend.
+ */
+export function resolveExpiryFirstDeadline(
+  quota: unknown,
+  config: ExpiryConfig,
+  nowMs: number = Date.now()
+): { usable: number; msUntilDeadline: number } | null {
+  if (!quota || !isRecord(quota)) return null;
+  if (quota.limitReached === true) return null;
+  const windows = collectExpiryWindows(quota);
+  if (windows.length === 0) return null;
+  if (windows.every(({ window }) => window.fractionReported === false)) return null;
+  const { usable, msUntilReset } = resolveUsableAndReset(
+    windows,
+    nowMs,
+    hasLongerReset(windows, true)
+  );
+  if (usable <= config.exhaustedFloor) return null;
+  return { usable, msUntilDeadline: msUntilReset };
 }
 
 export function getResetAwareRemainingPercent(quota: unknown): number {

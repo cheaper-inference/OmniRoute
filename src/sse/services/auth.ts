@@ -1792,6 +1792,8 @@ export async function getProviderCredentials(
         fallbackStrategy?: string;
         stickyRoundRobinLimit?: number;
         planWeights?: Record<string, number>;
+        expiryFirstOrder?: "rate" | "deadline";
+        expiryFirstDeadlineTieMinutes?: number;
       }
     >;
     const providerOverride = providerStrategyOverrides[resolvedId] || {};
@@ -1977,11 +1979,16 @@ export async function getProviderCredentials(
       connection = sorted[0];
       // expiry-first (#14533) ranks by the quota closest to being lost; see its leaf module.
       if (strategy === "expiry-first")
-        connection = pickExpiryFirstConnection(orderedConnections, settings, {
-          provider: resolvedId,
-          requestedModel,
-          planWeights: providerOverride.planWeights,
-        });
+        // Provider overrides (e.g. `expiryFirstOrder`) win over the global settings.
+        connection = pickExpiryFirstConnection(
+          orderedConnections,
+          { ...settings, ...providerOverride },
+          {
+            provider: resolvedId,
+            requestedModel,
+            planWeights: providerOverride.planWeights,
+          }
+        );
       // Record the use (#10945). This strategy sorts on the very field it was
       // not writing, so on a pool where every lastUsedAt is null the tie-break
       // fell through to `priority` and returned the SAME connection on every
