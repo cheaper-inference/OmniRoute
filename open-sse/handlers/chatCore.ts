@@ -2752,6 +2752,7 @@ async function handleChatCoreInner({
 
   let credentialRefreshPersistRan = false;
   const hadStreamOptions =
+    provider !== "codex" &&
     targetFormat === FORMATS.OPENAI_RESPONSES &&
     translatedBody &&
     typeof translatedBody === "object" &&
