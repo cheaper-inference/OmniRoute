@@ -83,6 +83,7 @@ function bootHarness({
     "@/lib/proxyHealth/scheduler": [],
     "@/lib/services/quotaAutoPing": ["startQuotaAutoPing"],
     "@/lib/services/codexWakeups": ["startCodexWakeups"],
+    "@/lib/services/codexResetCreditAutospend": ["startCodexResetCreditAutospend"],
     "@omniroute/open-sse/services/batchProcessor": ["initBatchProcessor"],
     "@/lib/db/sessionAccountAffinity": ["startSessionAccountAffinityCleanup"],
     "@omniroute/open-sse/services/thinkingBudget.ts": ["hydrateThinkingBudgetConfig"],
