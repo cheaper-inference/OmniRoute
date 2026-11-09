@@ -3,6 +3,7 @@
  */
 
 import { appendRequestLog } from "@/lib/usageDb";
+import { cacheCreationFields, readCacheWriteUsage } from "./cacheWriteUsage.ts";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
@@ -334,6 +335,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "output_tokens_details",
       "cache_read_input_tokens",
       "cache_creation_input_tokens",
+      "cache_creation",
       "estimated",
       "tokens_per_second",
     ],
@@ -352,6 +354,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "total_tokens",
       "input_tokens_details",
       "output_tokens_details",
+      "cache_creation",
       "estimated",
       "cost_in_usd_ticks",
       "provider_credits",
@@ -372,6 +375,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "prompt_cache_miss_tokens",
       "cache_read_input_tokens",
       "cache_creation_input_tokens",
+      "cache_creation",
       "estimated",
       "cost_in_usd_ticks",
       "provider_credits",
@@ -670,7 +674,7 @@ export function sanitizeUsagePayloadForRequest(
 export function normalizeUsage(usage: UsageLike | null | undefined) {
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return null;
 
-  const normalized: Record<string, number> = {};
+  const normalized: UsageLike = { ...cacheCreationFields(usage) };
   const assignNumber = (key: string, value: unknown) => {
     if (value === undefined || value === null) return;
     const numeric = Number(value);
@@ -683,7 +687,7 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   assignNumber("input_tokens", usage?.input_tokens);
   assignNumber("output_tokens", usage?.output_tokens);
   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
-  assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
+  assignNumber("cache_creation_input_tokens", readCacheWriteUsage(usage).total);
   const reportedCachedTokens =
     usage?.cached_tokens ??
     usage?.prompt_tokens_details?.cached_tokens ??
@@ -849,9 +853,10 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const u = chunk.message.usage;
     const inputTokens = u.input_tokens || u.prompt_tokens || 0;
     const cacheRead = u.cache_read_input_tokens || 0;
-    const cacheCreation = u.cache_creation_input_tokens || 0;
+    const cacheCreation = readCacheWriteUsage(u).total ?? 0;
     if (inputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
       return normalizeUsage({
+        ...cacheCreationFields(u),
         prompt_tokens: inputTokens + cacheRead + cacheCreation,
         completion_tokens: u.output_tokens || u.completion_tokens || 0,
         input_tokens: inputTokens + cacheRead + cacheCreation,
@@ -868,6 +873,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const deltaCacheRead = chunk.usage.cache_read_input_tokens || 0;
     const deltaCacheCreation = chunk.usage.cache_creation_input_tokens || 0;
     return normalizeUsage({
+      ...cacheCreationFields(chunk.usage),
       prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
       completion_tokens: chunk.usage.output_tokens || 0,
       input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
@@ -886,6 +892,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
   ) {
     const usage = chunk.response.usage;
     return normalizeUsage({
+      ...cacheCreationFields(usage),
       provider_credits: usage.provider_credits,
       cost_in_usd_ticks: usage.cost_in_usd_ticks,
       prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
@@ -909,6 +916,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
   ) {
     const normalized = normalizeUsage({
+      ...cacheCreationFields(chunk.usage),
       prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
       completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
       cached_tokens:

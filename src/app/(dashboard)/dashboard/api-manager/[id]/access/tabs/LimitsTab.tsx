@@ -27,6 +27,7 @@ interface LimitsTabProps {
   setUsageLimitEnabled: (enabled: boolean) => void;
   setDailyUsageLimitUsd: (val: string) => void;
   setWeeklyUsageLimitUsd: (val: string) => void;
+  setFiveHourUsageLimitUsd: (val: string) => void;
   errors?: string[];
 }
 
@@ -306,6 +307,7 @@ export default function LimitsTab({
   setUsageLimitEnabled,
   setDailyUsageLimitUsd,
   setWeeklyUsageLimitUsd,
+  setFiveHourUsageLimitUsd,
   errors,
 }: LimitsTabProps) {
   const tc = useTranslations("common");
@@ -345,11 +347,13 @@ export default function LimitsTab({
           enabled={formState.usageLimitEnabled}
           dailyLimitUsd={formState.dailyUsageLimitUsd}
           weeklyLimitUsd={formState.weeklyUsageLimitUsd}
+          fiveHourLimitUsd={formState.fiveHourUsageLimitUsd}
           enabledLabel={tc("enabled")}
           disabledLabel={tc("disabled")}
           onEnabledChange={setUsageLimitEnabled}
           onDailyLimitUsdChange={setDailyUsageLimitUsd}
           onWeeklyLimitUsdChange={setWeeklyUsageLimitUsd}
+          onFiveHourLimitUsdChange={setFiveHourUsageLimitUsd}
         />
       </div>
     </div>
