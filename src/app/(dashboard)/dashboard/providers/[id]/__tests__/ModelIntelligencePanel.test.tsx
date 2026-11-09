@@ -4,6 +4,11 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent } from "@testing-library/react";
 
+// The kit Input adapter reads the "common" namespace (caps-lock hint).
+vi.mock("next-intl", () => ({
+  useTranslations: () => (k: string) => k,
+}));
+
 import ModelIntelligencePanel from "../components/ModelIntelligencePanel";
 import type { ProviderMessageTranslator } from "../providerCredentialText";
 
@@ -112,6 +117,14 @@ describe("ModelIntelligencePanel", () => {
     expect(container.querySelector('input[placeholder="Search models…"]')).toBeTruthy();
     expect(container.textContent).toContain("kimi-k2.6");
     expect(container.textContent).toContain("0.920");
+    // Kit controls, not hand-styled natives: the kit Button/Input/Checkbox classes.
+    const close = container.querySelector('button[aria-label="Close panel"]');
+    expect(close?.className).toContain("ci-button");
+    const search = container.querySelector('input[placeholder="Search models…"]');
+    expect(search?.className).toContain("ci-input");
+    expect(container.querySelector('input[aria-label="Toggle kimi-k2.6"]')?.className).toContain(
+      "ci-checkbox"
+    );
   });
 
   it("calls onClose when the close button is clicked", async () => {
