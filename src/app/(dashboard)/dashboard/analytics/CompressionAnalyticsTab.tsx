@@ -210,7 +210,7 @@ export default function CompressionAnalyticsTab() {
         className="w-fit"
       />
 
-      {/* KPI tiles: kit StatRow (3 columns, 2 below the kit's tablet breakpoint) */}
+      {/* KPI tiles: kit StatRow — 3 columns, 2 up to 64rem and 1 up to 42rem (kit responsive rule) */}
       <StatRow columns={3}>
         <StatCard
           icon="compress"
