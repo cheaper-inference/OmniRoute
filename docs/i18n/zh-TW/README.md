@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 每月約 1.62B 個 Token，涵蓋第三方免費方案
+## 💰 第三方免費方案每月合計約 1.62B Tokens
 
 </div>
 
-> **請使用您自己的服務商帳戶。** 這是分別符合資格的第三方免費方案所彙整出的估算值，並非 OmniRoute 提供的 Token 額度。請註冊、在必要時取得憑證，並連接您可以使用的服務商；每個服務商會自行控管其限制、可用性與條款。
+> **請使用您自己的提供者帳戶。** 這是分別符合資格的第三方免費方案的估計總和，並非 OmniRoute 提供的 token 額度。請註冊、在需要時取得憑證，並連接您可以使用的提供者；每個提供者自行控管其限制、可用性與條款。
 >
-> 手動疊加免費方案十分痛苦——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 已在 **34 個週期性配額池金鑰中整理 465 個免費方案項目**，並根據 **17 個已公布正數月度預算的配額池，加上 Groq 的五個按模型計算的上限**，去除共享配額池的重複計算後，得出 Token 標題數值。只有在完成區域身分驗證後才會開放的配額（目前為 ModelScope）會另外顯示，區域身分驗證後再增加約 6M，且絕不會納入標題總額。結果會持續顯示在儀表板上（`/dashboard/free-tiers`）。
+> 手動疊加免費方案十分繁瑣——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 收錄了 **34 個週期性額度池金鑰中的 465 個免費方案項目**，並根據 **17 個已公布正數每月預算的額度池，加上五個按模型計算的 Groq 額度上限**計算 token 總額，並依共用額度池去重。只有在完成區域身分驗證後才會開放的額度（目前為 ModelScope）會另外顯示，區域身分驗證後約增加 6M，且永遠不會計入總額。結果會持續顯示在儀表板上（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，首月包含註冊點數時最高約 2.22B 個，來自 34 個已記錄的週期性配額池金鑰，涵蓋 465 個已編目的免費方案項目，並透過單一端點提供。誠實且已去除配額池重複計算的數學方式——每個共享配額池只計算一次，其中包括 17 個已公布正數月度 Token 預算的週期性配額池，以及 Groq 的五個按模型計算的上限；條款風險目錄中有 12 個服務商標記為避免使用，由您自行決定。預算列包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個按模型計算的上限）及其他較小的配額池，另有首月註冊點數，以及永久免費且沒有 Token 上限的服務商分開顯示，因此不會膨脹標題數值。在 /dashboard/free-tiers 上查看即時已使用／剩餘額度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 token，第一個月在包含註冊獎勵時最高約 2.22B，來自 34 個已記錄的週期性額度池金鑰，涵蓋 465 個透過單一端點提供的免費方案項目。誠實且依額度池去重的計算方式——每個共用額度池只計算一次，包括 17 個已公布正數每月 token 預算的週期性額度池，以及五個按模型計算的 Groq 額度上限；條款風險目錄中有 12 個提供者被標記為避免使用，由您自行決定。預算列包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個按模型計算的額度上限）及其他較小的額度池，另有第一個月註冊獎勵，以及另外列出的永久免費且無 token 上限的提供者，因此不會讓總額膨脹。`/dashboard/free-tiers` 上會顯示即時已使用／剩餘額度。"/>
 
-> `/dashboard/free-tiers` 即時頁面的動畫摘要。完整方法（配額池去重、點數級距、服務商條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> `/dashboard/free-tiers` 即時頁面的動畫摘要。完整方法說明（額度池去重、信用額度層級、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
-> <sub>這些數據每兩週會根據即時目錄重新稽核，且**可能上升也可能下降**——服務商結束免費方案，數字就會下降；新方案加入，數字就會上升。我們公布的是目錄實際計算出的結果，絕不採用向上取整的最佳情況。</sub>
+> <sub>這些數字每兩週會依據即時目錄重新稽核，並且**可能上升也可能下降**——提供者結束免費方案，數字就會下降；新的方案加入，數字就會上升。我們公布的是目錄實際計算出的結果，絕不會以四捨五入方式誇大最理想情況。</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ 如果 OMNIROUTE 幫助您節省費用並讓工作更輕鬆，請為此儲存庫加星。
+⭐ 如果 OMNIROUTE 幫助您節省費用並讓工作更輕鬆，請為此儲存庫加星號。
 
 </h3>
 
@@ -52,7 +52,7 @@
 
 ### 💬 加入社群
 
-**👋 關注維護者——第一時間取得新服務商、版本更新與技巧：**
+**👋 追蹤維護者——第一時間取得新提供者、版本發布與技巧：**
 
 [![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -63,7 +63,7 @@
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**問題、服務商建議、產品路線圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**問題、提供者推薦、產品路線圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 全球](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 巴西](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 官方頻道](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [入口網站](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1293,20 +1293,20 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 <table>
   <tr><th align="left">層級</th><th align="left">技術</th></tr>
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中沒有任何 <code>any</code>）</td></tr>
+  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中零 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌記錄）+ LowDB（JSON 舊版）— 147 個領域模組、228 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌記錄）+ LowDB（JSON 舊版）— 147 個領域模組、228 個遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、具類型衰減</td></tr>
-  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 合約</td></tr>
+  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 契約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
-  <tr><td nowrap><b>串流</b></td><td>伺服器傳送事件（SSE）+ WebSocket 橋接器（<code>/v1/ws</code>）</td></tr>
+  <tr><td nowrap><b>串流</b></td><td>伺服器發送事件（SSE）+ WebSocket 橋接器（<code>/v1/ws</code>）</td></tr>
   <tr><td nowrap><b>壓縮</b></td><td>12 引擎管線 — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
-  <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API 金鑰 + MCP 範圍限定驗證 · 靜態資料採用 AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API Keys + MCP 範圍限定驗證 · 靜態資料採用 AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>隱匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指紋模擬、3 層代理</td></tr>
-  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防止驚群效應、自動組合自我修復</td></tr>
-  <tr><td nowrap><b>日誌記錄</b></td><td>pino — 具請求內容的結構化 JSON 日誌</td></tr>
-  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 8,400+ 個受追蹤測試檔案中共有 <b>60,000+ 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
-  <tr><td nowrap><b>平台</b></td><td>桌面（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
+  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防止雷鳴群集、自動組合自我修復</td></tr>
+  <tr><td nowrap><b>日誌記錄</b></td><td>pino — 包含請求內容的結構化 JSON 日誌</td></tr>
+  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 8,400 多個受追蹤測試檔案中涵蓋 <b>60,000 多個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
+  <tr><td nowrap><b>平台</b></td><td>桌面版（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發行時自動發布至 npm + Docker Hub</td></tr>
   <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>

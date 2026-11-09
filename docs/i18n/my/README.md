@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 Third-Party Free Tier များမှ တစ်လလျှင် ~1.62B Tokens
+## 💰 တတိယပါတီ အခမဲ့အဆင့်များမှ တစ်လလျှင် ~1.62B တိုကင်များ
 
 </div>
 
-> **သင့်ကိုယ်ပိုင် provider အကောင့်များကို အသုံးပြုပါ။** ဤပမာဏသည် သီးခြားအသုံးပြုခွင့်ရသော third-party free tier များကို စုစုပေါင်း ခန့်မှန်းထားခြင်းသာဖြစ်ပြီး OmniRoute မှ ပေးအပ်သော token ထောက်ပံ့ငွေ မဟုတ်ပါ။ လိုအပ်ပါက စာရင်းသွင်းပြီး အထောက်အထားများရယူကာ သင်အသုံးပြုနိုင်သော provider များကို ချိတ်ဆက်ပါ။ Provider တစ်ခုချင်းစီသည် ၎င်းတို့၏ ကန့်သတ်ချက်များ၊ ရရှိနိုင်မှုနှင့် သတ်မှတ်ချက်များကို ကိုယ်တိုင်ထိန်းချုပ်ပါသည်။
+> **သင့်ကိုယ်ပိုင် provider အကောင့်များကို ယူဆောင်အသုံးပြုပါ။** ၎င်းသည် သီးခြားအရည်အချင်းပြည့်မီသော တတိယပါတီ အခမဲ့အဆင့်များ၏ စုစုပေါင်းခန့်မှန်းချက်ဖြစ်ပြီး OmniRoute မှ ပေးအပ်သော တိုကင်ထောက်ပံ့မှု မဟုတ်ပါ။ အကောင့်ဖွင့်ပါ၊ လိုအပ်ပါက အထောက်အထားများရယူပြီး သင်အသုံးပြုနိုင်သော provider များကို ချိတ်ဆက်ပါ။ Provider တစ်ခုချင်းစီသည် ၎င်း၏ ကန့်သတ်ချက်များ၊ ရရှိနိုင်မှုနှင့် သတ်မှတ်ချက်များကို ကိုယ်တိုင်ထိန်းချုပ်ပါသည်။
 >
-> Free tier များကို ကိုယ်တိုင်ပေါင်းစပ်အသုံးပြုခြင်းသည် ခက်ခဲပါသည် — SDK များ ဒါဇင်နှင့်ချီ၊ rate limit များ ဒါဇင်နှင့်ချီရှိသည့်အပြင် မိမိတွင် အမှန်တကယ် မည်မျှရှိသည်ကိုလည်း မသိနိုင်ပါ။ OmniRoute သည် **34 ခုသော ထပ်တလဲလဲအသုံးပြုသည့် pool key များအတွင်း free-tier entry 465 ခုကို စာရင်းပြုစုထားပြီး၊ ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ်ဘတ်ဂျက်ရှိသော pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq cap 5 ခုမှ token ပမာဏကို တွက်ချက်ပါသည်**။ Shared pool တစ်ခုချင်းစီကို တစ်ကြိမ်သာ ရေတွက်ထားပါသည်။ ဒေသအလိုက် identity စစ်ဆေးပြီးမှသာ ဖွင့်ပေးသည့် quota များ (ယနေ့တွင် ModelScope) ကို သီးခြားဖော်ပြထားပြီး၊ ဒေသဆိုင်ရာ identity အတည်ပြုချက်နောက်တွင် +~6M အဖြစ် ထည့်သွင်းပြသသော်လည်း headline တွင် မပေါင်းထည့်ပါ။ ရလဒ်ကို dashboard (`/dashboard/free-tiers`) တွင် ဆက်လက်မြင်တွေ့နိုင်ပါသည်။
+> အခမဲ့အဆင့်များကို ကိုယ်တိုင်ပေါင်းစပ်အသုံးပြုရခြင်းမှာ ခက်ခဲသည် — SDK များစွာ၊ rate limit များစွာနှင့် သင်အမှန်တကယ် မည်မျှရရှိထားသည်ကို မသိနိုင်ခြင်းတို့ကြောင့် ဖြစ်သည်။ OmniRoute သည် **ထပ်တလဲလဲအသုံးပြုသော pool key 34 ခုအတွင်း အခမဲ့အဆင့် entry 465 ခုကို စုစည်းထားပြီး** ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ်ဘတ်ဂျက်ရှိသော **pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq ကန့်သတ်ချက် 5 ခု** ထံမှ token headline ကို တွက်ချက်ပါသည်။ တူညီသော pool များကို တစ်ကြိမ်သာ ထည့်တွက်ထားပါသည်။ ဒေသဆိုင်ရာ အထောက်အထားစစ်ဆေးမှု ပြီးမှသာ ဖွင့်ပေးသော quota များ (ယနေ့တွင် ModelScope) ကို သီးခြားဖော်ပြထားပြီး၊ ဒေသဆိုင်ရာ အထောက်အထားစစ်ဆေးမှု ပြီးနောက် +~6M ရရှိနိုင်သော်လည်း headline တွင် မည်သည့်အခါမျှ ထည့်မတွက်ပါ။ ရလဒ်ကို dashboard (`/dashboard/free-tiers`) တွင် ဆက်လက်မြင်နိုင်ပါသည်။
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: စာရင်းပြုစုထားသော free-tier entry 465 ခုကို endpoint တစ်ခုတည်းနောက်တွင် လွှမ်းခြုံထားသည့် 34 ခုသော မှတ်တမ်းတင်ထားသည့် ထပ်တလဲလဲအသုံးပြုသည့် pool key များမှ တစ်လလျှင် ပုံမှန် ~1.62B free token များ၊ signup credit ပါဝင်သည့် ပထမလတွင် ~2.22B အထိ ရရှိနိုင်ပါသည်။ မျှတပြီး pool-deduped တွက်ချက်မှုဖြစ်ကာ shared pool တစ်ခုချင်းစီကို တစ်ကြိမ်သာ ရေတွက်ထားပြီး၊ ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ် token ဘတ်ဂျက်ရှိသော recurring pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq cap 5 ခုလည်း ပါဝင်ပါသည်။ Provider 12 ခုကို terms-risk catalog တွင် ရှောင်ရန်ဟု သတ်မှတ်ထားသောကြောင့် သင်ကိုယ်တိုင် ဆုံးဖြတ်နိုင်ပါသည်။ Budget bar တွင် Mistral 1B၊ Nara 210M၊ LLM7 150M၊ xKiro 150M၊ Groq 30M (model တစ်ခုချင်းစီအလိုက် cap 5 ခု) နှင့် ပိုမိုသေးငယ်သော pool များအပြင် ပထမလ signup credit များနှင့် အမြဲတမ်းအခမဲ့ဖြစ်ပြီး token cap မရှိသော provider များကိုလည်း သီးခြားဖော်ပြထားသောကြောင့် headline ကို မတိုးစေပါ။ /dashboard/free-tiers တွင် အသုံးပြုပြီး/ကျန်ရှိသည့် ပမာဏကို တိုက်ရိုက်ပြသထားပါသည်။"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute အခမဲ့အဆင့် ဘတ်ဂျက်ကတ်: တစ်လလျှင် ~1.62B အခမဲ့တိုကင်များကို ပုံမှန်ရရှိနိုင်ပြီး၊ signup ခရက်ဒစ်များပါဝင်သည့် ပထမလတွင် ~2.22B အထိ ရရှိနိုင်သည်။ မှတ်တမ်းတင်ထားသော pool key 34 ခုမှ catalog ထဲတွင် စုစည်းထားသော အခမဲ့အဆင့် entry 465 ခုကို endpoint တစ်ခုတည်းနောက်ကွယ်တွင် လွှမ်းခြုံထားသည်။ Pool တစ်ခုစီကို တစ်ကြိမ်သာ ထည့်တွက်ထားသည့် ရိုးသားသော pool-deduped တွက်ချက်မှုဖြစ်ပြီး၊ ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ်တိုကင်ဘတ်ဂျက်ရှိသော recurring pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq ကန့်သတ်ချက် 5 ခုလည်း ပါဝင်သည်။ Provider 12 ခုကို သတ်မှတ်ချက်ဆိုင်ရာအန္တရာယ် catalog တွင် ရှောင်ရန်အဖြစ် အမှတ်အသားပြုထားသောကြောင့် သင်ကိုယ်တိုင် ဆုံးဖြတ်နိုင်သည်။ ဘတ်ဂျက်ဘားတွင် Mistral 1B၊ Nara 210M၊ LLM7 150M၊ xKiro 150M၊ Groq 30M (model တစ်ခုချင်းစီအလိုက် ကန့်သတ်ချက် 5 ခု) နှင့် ပိုမိုသေးငယ်သော pool များအပြင် ပထမလ signup ခရက်ဒစ်များ၊ အခမဲ့ဖြစ်သော်လည်း တိုကင်ကန့်သတ်ချက်မရှိသော provider များကိုလည်း သီးခြားဖော်ပြထားသဖြင့် headline ကို မတိုးပွားစေပါ။ /dashboard/free-tiers တွင် လက်ရှိအသုံးပြုပြီးသည့်ပမာဏနှင့် ကျန်ရှိသည့်ပမာဏကို တိုက်ရိုက်ကြည့်နိုင်သည်။"/>
 
-> တိုက်ရိုက်ပြောင်းလဲနေသော `/dashboard/free-tiers` စာမျက်နှာ၏ အန်နီမေးရှင်းအကျဉ်းချုပ်။ နည်းလမ်းအပြည့်အစုံ (pool dedupe၊ credit tier များ၊ provider သတ်မှတ်ချက်များ) ကို **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)** တွင် ဖတ်ရှုနိုင်ပါသည်။
+> တိုက်ရိုက်အပ်ဒိတ်ဖြစ်နေသော `/dashboard/free-tiers` စာမျက်နှာ၏ အန်နီမေးရှင်းအကျဉ်းချုပ်။ ပြည့်စုံသော နည်းလမ်းဗေဒ (pool dedupe၊ credit tier များ၊ provider သတ်မှတ်ချက်များ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**။
 >
-> <sub>ဤကိန်းဂဏန်းများကို live catalog နှင့် နှိုင်းယှဉ်၍ နှစ်ပတ်တစ်ကြိမ် ပြန်လည်စစ်ဆေးထားပြီး **အထက်သို့လည်းကောင်း၊ အောက်သို့လည်းကောင်း ပြောင်းလဲနိုင်ပါသည်** — provider တစ်ခုက free tier ကို ရပ်ဆိုင်းပါက ကိန်းဂဏန်း လျော့ကျမည်ဖြစ်ပြီး၊ အသစ်တစ်ခု ထပ်မံရရှိလာပါက တိုးလာမည်ဖြစ်ပါသည်။ Catalog က အမှန်တကယ်တွက်ချက်ထားသည့် ပမာဏကိုသာ ဖော်ပြပြီး အကောင်းဆုံးဖြစ်နိုင်သည့် အခြေအနေအဖြစ် အပေါ်သို့ လုံးဝမဝိုင်းတင်ပါ။</sub>
+> <sub>ဤကိန်းဂဏန်းများကို တိုက်ရိုက် catalog နှင့် နှစ်ပတ်တစ်ကြိမ် ပြန်လည်စစ်ဆေးပါသည်။ ထို့ကြောင့် **နှစ်ဖက်စလုံးသို့ ပြောင်းလဲနိုင်သည်** — provider တစ်ခုက အခမဲ့အဆင့်ကို ရပ်ဆိုင်းပါက ကိန်းဂဏန်း လျော့ကျမည်ဖြစ်ပြီး၊ အသစ်တစ်ခု ထပ်မံရရှိလာပါက တိုးလာမည်ဖြစ်သည်။ Catalog က အမှန်တကယ်တွက်ချက်ထားသည့် တန်ဖိုးကိုသာ ထုတ်ပြန်ပြီး၊ အကောင်းဆုံးဖြစ်နိုင်ခြေကို အပေါ်သို့ လှည့်ပတ်ထားသော တန်ဖိုးကို မည်သည့်အခါမျှ မထုတ်ပြန်ပါ။</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ OMNIROUTE က သင့်ငွေကို ချွေတာပြီး အလုပ်ကို ပိုမိုလွယ်ကူစေရန် အထောက်အကူပြုခဲ့ပါက repo ကို Star ပေးပါ။
+⭐ OMNIROUTE က သင့်ငွေကုန်ကျမှုကို လျှော့ချပြီး အလုပ်ကို ပိုမိုလွယ်ကူစေရန် ကူညီပေးခဲ့ပါက repo ကို Star ပေးပါ။
 
 </h3>
 
@@ -50,9 +50,9 @@
 [![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Community သို့ ဝင်ရောက်ပါ
+### 💬 အသိုင်းအဝိုင်းသို့ ဝင်ရောက်ပါ
 
-**👋 Maintainer ကို Follow လုပ်ပြီး provider အသစ်များ၊ release များနှင့် အကြံပြုချက်များကို အရင်ဆုံး ရယူပါ။**
+**👋 ထိန်းသိမ်းသူကို Follow လုပ်ပါ — provider အသစ်များ၊ release များနှင့် အကြံပြုချက်များကို အရင်ဆုံးရယူပါ:**
 
 [![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -63,7 +63,7 @@
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**မေးခွန်းများ၊ provider အကြံပြုချက်များ၊ roadmap နှင့် support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**မေးခွန်းများ၊ provider အကြံပြုချက်များ၊ roadmap နှင့် အထောက်အပံ့ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Official Channel](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1295,21 +1295,21 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 <table>
   <tr><th align="left">အလွှာ</th><th align="left">နည်းပညာ</th></tr>
   <tr><td nowrap><b>လုပ်ဆောင်မှုပတ်ဝန်းကျင်</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက် <b>TypeScript 100%</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိ)</td></tr>
-  <tr><td nowrap><b>ဖရိမ်းဝေါ့ခ်</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL မှတ်တမ်းရေးသားခြင်း) + LowDB (JSON အမွေအနှစ်စနစ်) — ဒိုမိန်းမော်ဂျူး 147 ခု၊ မိုင်ဂရေးရှင်း 228 ခု</td></tr>
-  <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 စာသားအပြည့်အစုံရှာဖွေမှု + int8-quantized vector embeddings၊ အမျိုးအစားသတ်မှတ်ထားသော decay</td></tr>
-  <tr><td nowrap><b>စကီးမားများ</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
+  <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက် <b>100% TypeScript</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိ)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — domain module 147 ခု၊ migration 228 ခု</td></tr>
+  <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings၊ typed decay</td></tr>
+  <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
   <tr><td nowrap><b>ပရိုတိုကောများ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>စီးကြောင်းပို့ခြင်း</b></td><td>Server-Sent Events (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>ဒေတာစီးဆင်းမှု</b></td><td>Server-Sent Events (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>ချုံ့ခြင်း</b></td><td>အင်ဂျင် 12 ခုပါ pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>အထောက်အထားပြခြင်း &amp; လုံခြုံရေး</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
-  <tr><td nowrap><b>လျှို့ဝှက်ဖုံးကွယ်မှု</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation၊ အဆင့် 3 ဆင့်ပါ proxy</td></tr>
-  <tr><td nowrap><b>ခံနိုင်ရည်ရှိမှု</b></td><td>Circuit breaker၊ exponential backoff၊ anti-thundering-herd၊ auto-combo self-healing</td></tr>
-  <tr><td nowrap><b>မှတ်တမ်းတင်ခြင်း</b></td><td>pino — request context ပါဝင်သော ဖွဲ့စည်းပုံတကျ JSON မှတ်တမ်းများ</td></tr>
-  <tr><td nowrap><b>စမ်းသပ်ခြင်း</b></td><td>Node.js test runner + Vitest — စောင့်ကြည့်မှတ်တမ်းတင်ထားသော စမ်းသပ်ဖိုင် 8,400 ကျော်အတွင်း <b>static test declarations 60,000 ကျော်</b> (unit၊ integration၊ E2E၊ security၊ ecosystem)</td></tr>
+  <tr><td nowrap><b>အထောက်အထားပြခြင်းနှင့် လုံခြုံရေး</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>ဖုံးကွယ်မှု</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation၊ အဆင့် 3 ဆင့် proxy</td></tr>
+  <tr><td nowrap><b>ခံနိုင်ရည်</b></td><td>Circuit breaker၊ exponential backoff၊ anti-thundering-herd၊ auto-combo self-healing</td></tr>
+  <tr><td nowrap><b>မှတ်တမ်းတင်ခြင်း</b></td><td>pino — request context ပါဝင်သော structured JSON logs</td></tr>
+  <tr><td nowrap><b>စမ်းသပ်ခြင်း</b></td><td>Node.js test runner + Vitest — စောင့်ကြည့်မှတ်တမ်းတင်ထားသော test file 8,400 ကျော်တွင် <b>static test declarations 60,000 ကျော်</b> (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>ပလက်ဖောင်းများ</b></td><td>Desktop (Electron) · Android (Termux) · PWA (မည်သည့် browser မဆို)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release ပြုလုပ်ချိန်တွင် npm publish + Docker Hub သို့ အလိုအလျောက်တင်ပို့ခြင်း</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release ပြုလုပ်ချိန်တွင် npm publish အလိုအလျောက်ပြုလုပ်ခြင်း + Docker Hub</td></tr>
   <tr><td nowrap><b>လင့်ခ်များ</b></td><td><a href="https://omniroute.online">ဝဘ်ဆိုက်</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

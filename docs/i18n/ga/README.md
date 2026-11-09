@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B Tócan / Mí Ar fud Sraitheanna Saor in Aisce Tríú Páirtithe
+## 💰 ~1.62B Tóicín / Mí ar fud Sraitheanna Saor in Aisce Tríú Páirtithe
 
 </div>
 
-> **Tabhair do chuntais soláthraithe féin leat.** Is meastachán comhiomlánaithe é seo ar fud sraitheanna saor in aisce tríú páirtithe atá incháilithe ar leithligh, ní deontas tócan ó OmniRoute. Cláraigh, faigh dintiúir nuair is gá, agus ceangail na soláthraithe is féidir leat a úsáid; is é gach soláthraí a rialaíonn a theorainneacha, a infhaighteacht agus a théarmaí.
+> **Tabhair leat cuntais do sholáthraithe féin.** Is meastachán comhiomlán é seo ar fud sraitheanna saor in aisce tríú páirtithe atá incháilithe ar leithligh, ní deontas tóicíní ó OmniRoute. Cláraigh, faigh dintiúir nuair is gá, agus ceangail na soláthraithe is féidir leat a úsáid; is é gach soláthraí a rialaíonn a theorainneacha, a infhaighteacht agus a théarmaí.
 >
-> Is pianmhar sraitheanna saor in aisce a chruachadh de láimh — an iliomad SDKanna, an iliomad teorainneacha ráta, agus gan aon tuairim cé mhéad atá agat i ndáiríre. Déanann OmniRoute catalógú ar **465 iontráil saor-sraithe thar 34 eochair linnte athfhillteacha** agus ríomhann sé an ceannlíne tócan ó na **17 linn a bhfuil buiséad dearfach míosúil foilsithe acu móide cúig theorainn Groq in aghaidh na samhla**, agus iad dí-dúbláilte de réir linn chomhroinnte. Taispeántar ar leithligh cuótaí nach n-osclaíonn ach tar éis seiceáil aitheantais réigiúnaí (inniu: ModelScope), +~6M tar éis fíorú aitheantais réigiúnaí, agus ní chuirtear san áireamh sa cheannlíne riamh iad. Fanann an toradh le feiceáil ar an deais (`/dashboard/free-tiers`).
+> Is pianmhar sraitheanna saor in aisce a chruachadh de láimh — mórán SDKanna, mórán teorainneacha ráta, agus gan tuairim ar bith cé mhéad atá agat i ndáiríre. Déanann OmniRoute catalógú ar **465 iontráil sa tsraith saor in aisce ar fud 34 eochair chomhthiomsaithe athfhillteacha** agus ríomhann sé an príomhuimhir tóicíní ó na **17 gcomhthiomsú a bhfuil buiséad dearfach míosúil foilsithe acu, móide cúig theorainn Groq in aghaidh na samhla**, agus déantar dúbailtí de bharr comhthiomsuithe comhroinnte a bhaint. Taispeántar ar leithligh cuótaí nach n-osclaítear ach tar éis seiceáil aitheantais réigiúnaí (ModelScope inniu), +~6M taobh thiar de fhíorú aitheantais réigiúnaí, agus ní áirítear iad sa phríomhuimhir riamh. Fanann an toradh le feiceáil ar an deais (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cárta buiséid sraithe saor in aisce OmniRoute: ~1.62B tócan saor in aisce in aghaidh na míosa go seasta, suas le ~2.22B sa chéad mhí le creidmheasanna clárúcháin, ó 34 eochair linn athfhillteach doiciméadaithe a chlúdaíonn 465 iontráil saor-sraithe chatalógaithe taobh thiar d'aon chríochphointe amháin. Matamaitic ionraic dí-dúbláilte de réir linne — gach linn chomhroinnte san áireamh uair amháin, lena n-áirítear 17 linn athfhillteacha a bhfuil buiséad dearfach míosúil tócan foilsithe acu móide cúig theorainn Groq in aghaidh na samhla; tá 12 soláthraí marcáilte mar sholáthraithe le seachaint i gcatalóg riosca na dtéarmaí ionas gur féidir leat cinneadh a dhéanamh. Áirítear sa bharra buiséid Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cúig theorainn in aghaidh na samhla) agus linnte níos lú, móide creidmheasanna clárúcháin na chéad míosa agus soláthraithe atá saor in aisce go buan gan teorainn tócan a chuirtear i láthair ar leithligh ionas nach méadóidh siad an ceannlíne choíche. Úsáidte/fágtha beo ar /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cárta buiséid na sraithe saor in aisce de chuid OmniRoute: ~1.62B tóicín saor in aisce in aghaidh na míosa go seasmhach, suas le ~2.22B sa chéad mhí le creidmheasanna clárúcháin, ó 34 eochair chomhthiomsaithe athfhillteacha doiciméadaithe a chlúdaíonn 465 iontráil chatalógaithe sa tsraith saor in aisce taobh thiar d’aon chríochphointe amháin. Matamaitic ionraic bunaithe ar chomhthiomsuithe dí-dhúbláilte — áirítear gach comhthiomsú comhroinnte uair amháin, lena n-áirítear 17 gcomhthiomsú athfhillteacha a bhfuil buiséad dearfach míosúil tóicíní foilsithe acu, móide cúig theorainn Groq in aghaidh na samhla; tá 12 sholáthraí marcáilte mar sholáthraithe le seachaint sa chatalóg riosca téarmaí ionas gur tusa a dhéanann an cinneadh. Áirítear sa bharra buiséid Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cúig theorainn in aghaidh na samhla) agus comhthiomsuithe níos lú, móide creidmheasanna clárúcháin na chéad míosa agus soláthraithe atá saor in aisce go buan gan teorainn tóicíní, a chuirtear ar leithligh sa chomhéadan ionas nach méadóidh siad an phríomhuimhir riamh. Úsáidte/fágtha beo ar /dashboard/free-tiers."/>
 
-> Achoimre bheoite ar an leathanach beo `/dashboard/free-tiers`. Modheolaíocht iomlán (dí-dúbailt linnte, sraitheanna creidmheasa, téarmaí soláthraithe): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Achoimre bheo bheoite ar an leathanach `/dashboard/free-tiers`. Modheolaíocht iomlán (dí-dhúbailt comhthiomsuithe, sraitheanna creidmheasa, téarmaí soláthraithe): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Athiniúchtáiltear na figiúirí seo gach coicís i gcoinne na catalóige beo agus **athraíonn siad sa dá threo** — má chuireann soláthraí deireadh le sraith saor in aisce, titeann an uimhir; má thagann ceann nua i láthair, ardaíonn sí. Foilsímid an méid a ríomhann an chatalóg i ndáiríre, agus ní cás is fearr atá slánaithe suas riamh.</sub>
+> <sub>Déantar na figiúirí seo a athiniúchadh gach coicís i gcoinne na catalóige beo agus **bogann siad sa dá threo** — críochnaíonn soláthraí sraith saor in aisce agus titeann an uimhir; tagann ceann nua agus ardaíonn sí. Foilsímid an méid a ríomhann an chatalóg i ndáiríre, agus ní cás is fearr é a chothromaítear suas riamh.</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ Tabhair réalta don stóras má chuidigh OMNIROUTE leat airgead a shábháil agus do chuid oibre a dhéanamh níos éasca.
+⭐ Cuir réalta leis an stór más rud é gur chabhraigh OMNIROUTE leat airgead a shábháil agus do chuid oibre a dhéanamh níos éasca.
 
 </h3>
 
@@ -59,11 +59,11 @@
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Domhanda](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp na Brasaíle](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Suíomh Gréasáin](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Ceisteanna, leideanna faoi sholáthraithe, treochlár agus tacaíocht → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Domhanda](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 An Bhrasaíl](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Tairseach](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Ceisteanna, leideanna faoi sholáthraithe, treochlár agus tacaíocht → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Domhanda](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Cainéal Oifigiúil](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Tairseach](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1303,22 +1303,22 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
 <table>
   <tr><th align="left">Ciseal</th><th align="left">Teicneolaíocht</th></tr>
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ar fud <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroílár ó v2.0)</td></tr>
+  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ar fud <code>src/</code> agus <code>open-sse/</code> (<code>any</code> nialasach sa chroílár ó v2.0)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 228 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, iriseoireacht WAL) + LowDB (JSON oidhreachtúil) — 147 modúl fearainn, 228 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
   <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/A uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Sruthú</b></td><td>Imeachtaí Seolta ag an bhFreastalaí (SSE) + droichead WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Comhbhrú</b></td><td>Píblíne 12 inneall — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Fíordheimhniú &amp; slándáil</b></td><td>OAuth 2.0 (PKCE) + JWT + Eochracha API + fíordheimhniú MCP le raon feidhme · AES-256-GCM agus é ar fos · DOMPurify</td></tr>
+  <tr><td nowrap><b>Fíordheimhniú &amp; slándáil</b></td><td>OAuth 2.0 (PKCE) + JWT + Eochracha API + fíordheimhniú scóipithe MCP · AES-256-GCM ag an gcuid eile · DOMPurify</td></tr>
   <tr><td nowrap><b>Stealth</b></td><td>wreq-js — pearsanú méarlorg TLS JA3 / JA4, seachfhreastalaí 3 leibhéal</td></tr>
-  <tr><td nowrap><b>Athléimneacht</b></td><td>Bristeoir ciorcaid, cúlchéimniú easpónantúil, frith-throdaí slua, féinleigheas uath-chomhcheangail</td></tr>
+  <tr><td nowrap><b>Athléimneacht</b></td><td>Briseoir ciorcaid, cúlú easpónantúil, frith-thréad-ruathar, féinleigheas uathoibríoch teaglamaí</td></tr>
   <tr><td nowrap><b>Logáil</b></td><td>pino — logaí JSON struchtúrtha le comhthéacs iarratais</td></tr>
-  <tr><td nowrap><b>Tástáil</b></td><td>Rithí tástála Node.js + Vitest — <b>níos mó ná 60,000 dearbhú tástála statach</b> ar fud níos mó ná 8,400 comhad tástála rianaithe (aonaid, comhtháthú, E2E, slándáil, éiceachóras)</td></tr>
+  <tr><td nowrap><b>Tástáil</b></td><td>Rithteoir tástála Node.js + Vitest — <b>níos mó ná 60,000 dearbhú tástála statach</b> i mbreis agus 8,400 comhad tástála rianaithe (aonaid, comhtháthú, E2E, slándáil, éiceachóras)</td></tr>
   <tr><td nowrap><b>Ardáin</b></td><td>Deasc (Electron) · Android (Termux) · PWA (brabhsálaí ar bith)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — foilsiú uathoibríoch npm + Docker Hub nuair a scaoiltear leagan</td></tr>
-  <tr><td nowrap><b>Naisc</b></td><td><a href="https://omniroute.online">Suíomh gréasáin</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — foilsiú uathoibríoch npm + Docker Hub ar eisiúint</td></tr>
+  <tr><td nowrap><b>Naisc</b></td><td><a href="https://omniroute.online">Láithreán gréasáin</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

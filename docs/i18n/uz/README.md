@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 Uchinchi tomon bepul tariflari bo‘yicha oyiga ~1,62 mlrd token
+## 💰 Uchinchi tomon bepul tariflari bo‘yicha oyiga ~1,62B token
 
 </div>
 
-> **Provayder hisoblaringizdan foydalaning.** Bu alohida mos keluvchi uchinchi tomon bepul tariflari bo‘yicha taxminiy jamlanma bo‘lib, OmniRoute tomonidan beriladigan token granti emas. Ro‘yxatdan o‘ting, kerak bo‘lsa hisob ma’lumotlarini oling va foydalanishingiz mumkin bo‘lgan provayderlarni ulang; har bir provayder o‘z limitlari, mavjudligi va shartlarini belgilaydi.
+> **O‘z provayder hisoblaringizdan foydalaning.** Bu alohida mos keluvchi uchinchi tomon bepul tariflari bo‘yicha taxminiy jamlanma bo‘lib, OmniRoute tomonidan beriladigan tokenlar emas. Ro‘yxatdan o‘ting, zarur bo‘lsa hisob ma’lumotlarini oling va foydalanishingiz mumkin bo‘lgan provayderlarni ulang; har bir provayder o‘z limitlari, mavjudligi va shartlarini belgilaydi.
 >
-> Bepul tariflarni qo‘lda jamlash juda noqulay — o‘nlab SDKlar, o‘nlab tezlik cheklovlari va amalda qancha imkoniyatingiz borligini bilmaslik. OmniRoute **34 ta takrorlanuvchi kvota kaliti bo‘yicha 465 ta bepul tarif yozuvini** kataloglaydi va token ko‘rsatkichini **ijobiy e’lon qilingan oylik budjetga ega 17 ta kvota hamda model bo‘yicha beshta Groq limiti** asosida, umumiy kvotani takroran hisoblamagan holda hisoblaydi. Faqat hududiy shaxsni tasdiqlashdan keyin ochiladigan kvotalar (bugungi kunda: ModelScope) alohida ko‘rsatiladi, hududiy shaxsni tasdiqlash ortidagi yana ~6 mln token qo‘shiladi, ammo asosiy ko‘rsatkichga jamlanmaydi. Natija boshqaruv panelida (`/dashboard/free-tiers`) ko‘rinib turadi.
+> Bepul tariflarni qo‘lda jamlash og‘riqli — o‘nlab SDKlar, o‘nlab tezlik limitlari va amalda qancha resursingiz borligini bilmaslik. OmniRoute **34 ta takrorlanuvchi pool kaliti bo‘yicha 465 ta bepul tarif yozuvini** kataloglaydi va token ko‘rsatkichini **ijobiy oylik budjeti e’lon qilingan 17 ta pool hamda har bir model uchun beshta Groq limitidan** hisoblaydi; umumiy poollar dublikat hisoblanmaydi. Faqat mintaqaviy shaxsni tasdiqlashdan keyin ochiladigan kvotalar (bugungi kunda: ModelScope) alohida ko‘rsatiladi, mintaqaviy shaxsni tasdiqlashdan keyingi qo‘shimcha ~6M bilan birga, va asosiy ko‘rsatkichga hech qachon qo‘shilmaydi. Natija boshqaruv panelida (`/dashboard/free-tiers`) doimo ko‘rinib turadi.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute bepul tarif budjeti kartasi: oyiga barqaror ~1,62 mlrd bepul token, ro‘yxatdan o‘tish kreditlari bilan birinchi oyda ~2,22 mlrd gacha; barchasi bitta endpoint ortidagi 34 ta hujjatlashtirilgan takrorlanuvchi kvota kalitini qamrab oluvchi 465 ta kataloglangan bepul tarif yozuvidan iborat. Halol, kvota takrorlanishisiz hisob-kitob — har bir umumiy kvota faqat bir marta hisoblanadi; bunga ijobiy e’lon qilingan oylik token budjetiga ega 17 ta takrorlanuvchi kvota hamda model bo‘yicha beshta Groq limiti kiradi; shartlar xavfi katalogida 12 ta provayderdan foydalanmaslik tavsiya etilgan, shuning uchun qarorni o‘zingiz qabul qilasiz. Budjet paneli Mistral 1 mlrd, Nara 210 mln, LLM7 150 mln, xKiro 150 mln, Groq 30 mln (model bo‘yicha beshta limit) va kichikroq kvotalarni, shuningdek birinchi oy ro‘yxatdan o‘tish kreditlari hamda token limiti bo‘lmagan, doimiy bepul provayderlarni o‘z ichiga oladi; ular asosiy ko‘rsatkichni hech qachon sun’iy ravishda oshirmasligi uchun alohida ko‘rsatiladi. /dashboard/free-tiers sahifasida amaldagi foydalanilgan/qolgan miqdor."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute bepul tarif budjeti kartasi: oyiga barqaror ~1,62B bepul token, ro‘yxatdan o‘tish kreditlari bilan birinchi oyda ~2,22B gacha, bitta endpoint ortida 465 ta kataloglangan bepul tarif yozuvini qamrab oluvchi 34 ta hujjatlashtirilgan takrorlanuvchi pool kalitidan. Halol, pool dublikatlari hisobga olinmagan matematika — har bir umumiy pool bir marta hisoblangan, jumladan ijobiy oylik token budjeti e’lon qilingan 17 ta takrorlanuvchi pool hamda har bir model uchun beshta Groq limiti; shartlardagi xavf katalogida 12 ta provayderdan foydalanmaslik tavsiya etilgan, shuning uchun qarorni o‘zingiz qilasiz. Budjet paneli Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (har bir model uchun beshta limit) va kichikroq poollarni, shuningdek birinchi oy ro‘yxatdan o‘tish kreditlari hamda token limiti bo‘lmagan va doimiy bepul provayderlarni alohida ko‘rsatadi, shuning uchun ular asosiy ko‘rsatkichni sun’iy ravishda oshirmaydi. /dashboard/free-tiers sahifasida real vaqtdagi ishlatilgan/qolgan miqdor."/>
 
-> Jonli `/dashboard/free-tiers` sahifasining animatsiyali xulosasi. To‘liq metodologiya (kvotalarni takroran hisoblamaslik, kredit darajalari, provayder shartlari): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Jonli `/dashboard/free-tiers` sahifasining animatsion xulosasi. To‘liq metodologiya (pool dublikatlarini chiqarib tashlash, kredit darajalari, provayder shartlari): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Bu raqamlar har ikki haftada jonli katalog asosida qayta tekshiriladi va **har ikki yo‘nalishda ham o‘zgaradi** — provayder bepul tarifni bekor qilsa, raqam kamayadi; yangisi qo‘shilsa, oshadi. Biz katalog amalda hisoblagan qiymatni e’lon qilamiz, yaxlitlangan eng yaxshi holatni emas.</sub>
+> <sub>Bu raqamlar har ikki haftada jonli katalog asosida qayta tekshiriladi va **har ikki tomonga ham o‘zgaradi** — provayder bepul tarifni tugatsa, raqam kamayadi; yangisi qo‘shilsa, oshadi. Biz yaxlitlab oshirilgan eng yaxshi holatni emas, katalog amalda hisoblaydigan ko‘rsatkichni e’lon qilamiz.</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa, repoga ⭐ bosing.
+OMNIROUTE pul tejashingizga va ishingizni osonlashtirishingizga yordam bergan bo‘lsa, repoga ⭐ bosing.
 
 </h3>
 
@@ -52,10 +52,10 @@ OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa
 
 ### 💬 Hamjamiyatga qo‘shiling
 
-**👋 Loyiha yurituvchisiga obuna bo‘ling — yangi provayderlar, relizlar va maslahatlarni birinchi bo‘lib oling:**
+**👋 Loyihani yurituvchini kuzating — yangi provayderlar, relizlar va maslahatlarni birinchi bo‘lib oling:**
 
 [![Diegoni LinkedIn’da kuzatish](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHub’da @diegosouzapw’ni kuzatish](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![@diegosouzapw ni GitHub’da kuzatish](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
@@ -63,7 +63,7 @@ OMNIROUTE sizga pul tejash va ishingizni osonlashtirishda yordam bergan bo‘lsa
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Veb-sayt](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Savollar, provayderlar bo‘yicha maslahatlar, yo‘l xaritasi va yordam → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Savollar, provayderlar bo‘yicha maslahatlar, yo‘l xaritasi va yordam → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Rasmiy kanal](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1288,22 +1288,22 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 
 <table>
   <tr><th align="left">Qatlam</th><th align="left">Texnologiya</th></tr>
-  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri core’da nolta <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosiy) — 147 ta domen moduli, 228 ta migratsiya</td></tr>
-  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektor embeddinglari, tiplashtirilgan so‘nish</td></tr>
-  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API kontraktlari</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 228 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan so‘nish</td></tr>
+  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari I/O validatsiyasi + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Oqimlash</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP qamrovi belgilangan autentifikatsiya · AES-256-GCM saqlangan ma’lumotlar uchun · DOMPurify</td></tr>
+  <tr><td nowrap><b>Striming</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Siqish</b></td><td>12 ta dvigateldan iborat pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikatsiya &amp; xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP doirasidagi autentifikatsiya · Saqlanayotgan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint taqlidi, 3 darajali proksi</td></tr>
-  <tr><td nowrap><b>Barqarorlik</b></td><td>O‘chirgich (circuit breaker), eksponensial kechikish, anti-thundering-herd, auto-combo orqali o‘z-o‘zini tiklash</td></tr>
-  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tuzilmali JSON jurnallari</td></tr>
-  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyalari</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
-  <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz paytida npm’ga avtomatik nashr qilish + Docker Hub</td></tr>
+  <tr><td nowrap><b>Barqarorlik</b></td><td>O‘chirgich (circuit breaker), eksponensial kechikish, anti-thundering-herd, avtomatik combo o‘z-o‘zini tiklash</td></tr>
+  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan strukturaviy JSON jurnallari</td></tr>
+  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400+ ta kuzatiladigan test fayli bo‘ylab <b>60 000+ statik test deklaratsiyasi</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Platformalar</b></td><td>Ish stoli (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz paytida avtomatik npm nashri + Docker Hub</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

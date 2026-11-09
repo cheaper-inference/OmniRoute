@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 तृतीय-पक्षाच्या मोफत स्तरांमधून दरमहा ~1.62B टोकन्स
+## 💰 ~1.62B टोकन्स / महिना, तृतीय-पक्षांच्या मोफत स्तरांमध्ये
 
 </div>
 
-> **तुमची provider खाती स्वतः आणा.** हा स्वतंत्रपणे पात्र असलेल्या तृतीय-पक्षाच्या मोफत स्तरांचा अंदाजित एकत्रित हिशोब आहे; OmniRoute कडून मिळणारे token grant नाही. साइन अप करा, आवश्यक असल्यास credentials मिळवा आणि तुम्ही वापरू शकता अशा providers शी कनेक्ट करा; प्रत्येक provider स्वतःच्या मर्यादा, उपलब्धता आणि अटी नियंत्रित करतो.
+> **तुमची स्वतःची प्रदाता खाती वापरा.** हा स्वतंत्रपणे पात्र असलेल्या तृतीय-पक्षांच्या मोफत स्तरांमधील अंदाजित एकत्रित आकडा आहे; हा OmniRoute कडून दिलेला टोकन अनुदान नाही. आवश्यक असल्यास साइन अप करा, क्रेडेन्शियल्स मिळवा आणि तुम्ही वापरू शकणारे प्रदाते कनेक्ट करा; प्रत्येक प्रदाता त्याच्या मर्यादा, उपलब्धता आणि अटी नियंत्रित करतो.
 >
-> मोफत स्तर हाताने एकत्र करणे त्रासदायक आहे — डझनावधी SDKs, डझनावधी rate limits आणि प्रत्यक्षात तुमच्याकडे किती उपलब्ध आहे याची कल्पना नाही. OmniRoute **34 recurring pool keys मधील 465 free-tier entries** सूचीबद्ध करते आणि **सार्वजनिक केलेले सकारात्मक मासिक बजेट असलेल्या 17 pools तसेच प्रत्येक model साठीच्या पाच Groq caps** मधून token headline मोजते; shared pool नुसार duplicate entries काढल्या जातात. प्रादेशिक ओळख पडताळणीनंतरच उपलब्ध होणारे quotas (आज: ModelScope) स्वतंत्रपणे दाखवले जातात, प्रादेशिक ओळख पडताळणीनंतर +~6M, आणि headline मध्ये कधीही बेरीज केली जात नाही. हा परिणाम dashboard वर (`/dashboard/free-tiers`) दिसत राहतो.
+> मोफत स्तर हाताने एकत्र करणे त्रासदायक आहे — डझनावधी SDKs, डझनावधी दर-मर्यादा आणि तुमच्याकडे प्रत्यक्षात किती उपलब्ध आहे याची कल्पना नाही. OmniRoute **34 पुनरावृत्ती होणाऱ्या पूल कीजमधील 465 मोफत-स्तर नोंदींचे** कॅटलॉग तयार करते आणि **सार्वजनिक केलेले सकारात्मक मासिक बजेट असलेल्या 17 पूल्समधून तसेच प्रति-मॉडेलच्या पाच Groq मर्यादांमधून** टोकनचा एकूण आकडा मोजते; सामायिक पूल्सची पुनरावृत्ती टाळली जाते. प्रादेशिक ओळख पडताळणीनंतरच उपलब्ध होणारे कोटा (आज: ModelScope) स्वतंत्रपणे दाखवले जातात — प्रादेशिक ओळख पडताळणीमागे आणखी ~6M — आणि ते एकूण आकड्यात कधीही जोडले जात नाहीत. हा परिणाम डॅशबोर्डवर (`/dashboard/free-tiers`) दृश्यमान राहतो.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute मोफत-स्तर बजेट कार्ड: दरमहा स्थिर ~1.62B मोफत टोकन्स, signup credits मुळे पहिल्या महिन्यात कमाल ~2.22B, 34 दस्तऐवजीकृत recurring pool keys मधील 465 cataloged free-tier entries एका endpoint मागे उपलब्ध. प्रामाणिक pool-deduped गणित — प्रत्येक shared pool एकदाच मोजला जातो; यात सार्वजनिक केलेले सकारात्मक मासिक token budget असलेले 17 recurring pools तसेच प्रत्येक model साठीचे पाच Groq caps समाविष्ट आहेत; terms-risk catalog मध्ये 12 providers टाळण्यासारखे म्हणून चिन्हांकित आहेत, त्यामुळे निर्णय तुम्ही घ्या. Budget bar मध्ये Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (पाच per-model caps) आणि लहान pools समाविष्ट आहेत; तसेच पहिल्या महिन्याचे signup credits आणि कायमस्वरूपी मोफत, token-cap नसलेले providers स्वतंत्रपणे दाखवले जातात, त्यामुळे ते headline वाढवत नाहीत. /dashboard/free-tiers वर थेट वापरलेले/उरलेले प्रमाण.">
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute मोफत-स्तर बजेट कार्ड: दर महिन्याला स्थिर ~1.62B मोफत टोकन्स, साइनअप क्रेडिट्ससह पहिल्या महिन्यात कमाल ~2.22B, एका एंडपॉइंटमागे 34 दस्तऐवजीकृत पुनरावृत्ती होणाऱ्या पूल कीजमध्ये नोंदवलेल्या 465 मोफत-स्तर नोंदींमधून. प्रामाणिक, पूल-डिडुप्लिकेट केलेली गणना — प्रत्येक सामायिक पूल एकदाच मोजला जातो; यात प्रकाशित सकारात्मक मासिक टोकन बजेट असलेले 17 पुनरावृत्ती होणारे पूल्स तसेच प्रति-मॉडेलच्या पाच Groq मर्यादा समाविष्ट आहेत; अटी-जोखीम कॅटलॉगमध्ये 12 प्रदाते टाळण्यास योग्य म्हणून चिन्हांकित आहेत, त्यामुळे निर्णय तुमचा. बजेट बारमध्ये Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (पाच प्रति-मॉडेल मर्यादा) आणि लहान पूल्स, तसेच पहिल्या महिन्याचे साइनअप क्रेडिट्स आणि कायमस्वरूपी मोफत, टोकन-कॅप नसलेले प्रदाते स्वतंत्रपणे दाखवले आहेत, जेणेकरून ते एकूण आकडा कृत्रिमरीत्या वाढवू नयेत. /dashboard/free-tiers वर प्रत्यक्ष वापरलेले/शिल्लक. "/>
 
-> थेट `/dashboard/free-tiers` पेजचा animated सारांश. संपूर्ण कार्यपद्धती (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> लाइव्ह `/dashboard/free-tiers` पेजचा अॅनिमेटेड सारांश. संपूर्ण पद्धत (पूल डिडुप्लिकेशन, क्रेडिट स्तर, प्रदात्याच्या अटी): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>ही आकडेवारी दर दोन आठवड्यांनी live catalog शी पुन्हा तपासली जाते आणि **दोन्ही दिशांनी बदलते** — एखादा provider free tier बंद करतो तेव्हा संख्या कमी होते; नवीन provider उपलब्ध झाल्यावर ती वाढते. Catalog प्रत्यक्षात जे मोजते तेच आम्ही प्रकाशित करतो; rounded-up best case कधीही नाही.</sub>
+> <sub>ही आकडेवारी लाइव्ह कॅटलॉगशी दर दोन आठवड्यांनी पुन्हा तपासली जाते आणि **दोन्ही दिशांनी बदलते** — एखाद्या प्रदात्याचा मोफत स्तर संपला तर आकडा कमी होतो; नवीन प्रदाता जोडला तर तो वाढतो. कॅटलॉग प्रत्यक्षात मोजतो तेच आम्ही प्रकाशित करतो, वरच्या दिशेने गोल केलेला सर्वोत्तम संभाव्य आकडा कधीही नाही.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ OMNIROUTE मुळे पैसे वाचवण्यात आणि तुमचे काम सोपे करण्यात मदत झाली असल्यास repo ला Star द्या.
+OMNIROUTE ने तुमचे पैसे वाचवण्यास आणि काम सोपे करण्यास मदत केली असल्यास ⭐ रिपॉझिटरीला स्टार द्या.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![तारे](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![स्टार इतिहास क्रमांक](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 समुदायात सामील व्हा
 
-**👋 Maintainer ला Follow करा — नवीन providers, releases आणि tips सर्वप्रथम मिळवा:**
+**👋 मेंटेनरला फॉलो करा — नवीन प्रदाते, रिलीज आणि टिप्स सर्वप्रथम मिळवा:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![LinkedIn वर Diego ला फॉलो करा](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![@diegosouzapw ला GitHub वर फॉलो करा](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![वेबसाइट](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**प्रश्न, provider tips, roadmap आणि support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**प्रश्न, प्रदात्यांबद्दलच्या टिप्स, रोडमॅप आणि सहाय्य → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 अधिकृत चॅनेल](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [पोर्टल](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1285,7 +1285,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
 <br/>
 <div align="center">
 
-## 🛠️ तंत्रज्ञान स्टॅक
+## 🛠️ तंत्रज्ञान संच
 
 </div>
 
@@ -1294,17 +1294,17 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> आणि <code>open-sse/</code> मध्ये <b>100% TypeScript</b> (v2.0 पासून कोअरमध्ये शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 228 माइग्रेशन्स</td></tr>
-  <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 पूर्ण-मजकूर + int8-क्वांटाइझ्ड व्हेक्टर एम्बेडिंग्ज, टाइपयुक्त क्षय</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON वारसा) — 147 डोमेन मॉड्यूल्स, 228 स्थलांतर</td></tr>
+  <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 पूर्ण-मजकूर + int8-क्वांटाइझ्ड वेक्टर एम्बेडिंग्स, टाइप केलेला क्षय</td></tr>
   <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O प्रमाणीकरण + API करार</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>स्ट्रीमिंग</b></td><td>सर्व्हर-सेंट इव्हेंट्स (SSE) + WebSocket ब्रिज (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>कॉम्प्रेशन</b></td><td>12-इंजिन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>प्रमाणीकरण आणि सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड ऑथ · AES-256-GCM स्थिर डेटासाठी · DOMPurify</td></tr>
-  <tr><td nowrap><b>स्टेल्थ</b></td><td>wreq-js — JA3 / JA4 TLS फिंगरप्रिंट अनुकरण, 3-स्तरीय प्रॉक्सी</td></tr>
-  <tr><td nowrap><b>लवचिकता</b></td><td>सर्किट ब्रेकर, एक्स्पोनेन्शियल बॅकऑफ, अँटी-थंडरिंग-हर्ड, स्वयंचलित कॉम्बो सेल्फ-हीलिंग</td></tr>
-  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — रिक्वेस्ट संदर्भासह संरचित JSON लॉग्स</td></tr>
-  <tr><td nowrap><b>चाचणी</b></td><td>Node.js टेस्ट रनर + Vitest — 8,400+ ट्रॅक केलेल्या टेस्ट फाइल्समध्ये <b>60,000+ स्थिर टेस्ट घोषणा</b> (युनिट, इंटिग्रेशन, E2E, सुरक्षा, इकोसिस्टम)</td></tr>
+  <tr><td nowrap><b>संपीडन</b></td><td>12-इंजिन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>प्रमाणीकरण वamp; सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड प्रमाणीकरण · AES-256-GCM स्थिर स्थितीत · DOMPurify</td></tr>
+  <tr><td nowrap><b>गुप्तता</b></td><td>wreq-js — JA3 / JA4 TLS फिंगरप्रिंट अनुकरण, 3-स्तरीय प्रॉक्सी</td></tr>
+  <tr><td nowrap><b>प्रतिकारक्षमता</b></td><td>सर्किट ब्रेकर, घातांकीय बॅकऑफ, अँटी-थंडरिंग-हर्ड, स्वयंचलित-कॉम्बो स्वयं-उपचार</td></tr>
+  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — विनंती संदर्भासह संरचित JSON लॉग्स</td></tr>
+  <tr><td nowrap><b>चाचणी</b></td><td>Node.js टेस्ट रनर + Vitest — 8,400+ ट्रॅक केलेल्या चाचणी फाइल्समध्ये <b>60,000+ स्थिर चाचणी घोषणा</b> (युनिट, एकत्रीकरण, E2E, सुरक्षा, इकोसिस्टम)</td></tr>
   <tr><td nowrap><b>प्लॅटफॉर्म्स</b></td><td>डेस्कटॉप (Electron) · Android (Termux) · PWA (कोणताही ब्राउझर)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — रिलीजवेळी स्वयंचलित npm प्रकाशन + Docker Hub</td></tr>
   <tr><td nowrap><b>दुवे</b></td><td><a href="https://omniroute.online">वेबसाइट</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>

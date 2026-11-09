@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B Àwọn Token / Oṣù Kọọkan Kọjá Àwọn Free Tier Ẹni-kẹta
+## 💰 ~1.62B Àwọn Token / Oṣù Kọọkan Láàárín Àwọn Free Tier Ẹni-kẹta
 
 </div>
 
-> **Mú àkáǹtì olupèsè tirẹ wá.** Èyí jẹ́ ìṣírò àpapọ̀ tí a fojú díwọ̀n láàárín àwọn free tier ẹni-kẹta tí ó yẹ lọ́tọ̀ọ̀tọ̀, kì í ṣe ẹ̀bùn token láti ọ̀dọ̀ OmniRoute. Forúkọsílẹ̀, gba àwọn ìwé-ẹ̀rí àṣẹ níbi tí ó bá ṣe pàtàkì, kí o sì so àwọn olupèsè tí o lè lò pọ̀; olupèsè kọ̀ọ̀kan ló ń ṣàkóso àwọn ààlà, ìwàláàyè, àti àwọn òfin rẹ̀.
+> **Mú àwọn àkọọ́lẹ̀ olupese tirẹ wá.** Èyí jẹ́ àkójọpọ̀ àǹfààní tí a fojú díwọ̀n láàárín àwọn free tier ẹni-kẹta tí ó yẹ lọ́tọ̀ọ̀tọ̀, kì í ṣe ìpín token láti ọ̀dọ̀ OmniRoute. Forúkọsílẹ̀, gba àwọn ìwé-ẹ̀rí níbi tí ó bá pọndandan, kí o sì so àwọn olupese tí o lè lò pọ̀; olupese kọ̀ọ̀kan ló ń ṣàkóso àwọn ààlà, wíwà, àti àwọn òfin rẹ̀.
 >
-> Kíkó àwọn free tier jọ pẹ̀lú ọwọ́ máa ń dùn ún — ọ̀pọ̀ SDK, ọ̀pọ̀ ààlà oṣuwọn, àti àìmọ̀ iye tí o ní gan-an. OmniRoute ṣe àkójọpọ̀ **àkọsílẹ̀ free-tier 465 káàkiri àwọn bọ́ọ̀lù adágún tí ń tún ara wọn ṣe 34** ó sì ń ṣírò àkótán token láti inú **àwọn adágún 17 tí ó ní ìṣúná oṣù rere tí a tẹ̀jáde, pẹ̀lú ààlà Groq márùn-ún fún model kọ̀ọ̀kan**, tí a sì yọ àtúnsọ̀rọ̀ kúrò nípasẹ̀ adágún tí wọ́n jọ pín. Àwọn quota tí ó máa ń ṣí lẹ́yìn ìwádìí ìdánimọ̀ agbègbè kan (lónìí: ModelScope) ni a fi hàn lọ́tọ̀, +~6M lẹ́yìn ìmúdájú ìdánimọ̀ agbègbè, a kò sì kà wọ́n sínú àkótán náà láéláé. Àbájáde náà máa ń hàn lórí dashboard (`/dashboard/free-tiers`).
+> Pípọ̀ àwọn free tier pẹ̀lú ọwọ́ jẹ́ ohun tí ó nira — ọ̀pọ̀ SDK, ọ̀pọ̀ ààlà ìwọ̀n, àti àìmọ̀ iye tí o ní gan-an. OmniRoute ṣe àkójọ **àwọn àkọsílẹ̀ free-tier 465 kọjá àwọn kọ́kọ́rọ́ pool 34 tí ń tún ṣẹlẹ̀** ó sì ṣe àṣírò àkọlé token láti inú **pool 17 tí ó ní budget oṣù rere tí a tẹ̀jáde, pẹ̀lú àwọn ààlà Groq márùn-ún fún model kọ̀ọ̀kan**, tí a yọ ìṣírò àtúnlò kúrò nípasẹ̀ pool tí ó jọ. Àwọn quota tí ó ṣí sílẹ̀ lẹ́yìn àyẹ̀wò ìdánimọ̀ agbègbè (lónìí: ModelScope) ni a fi hàn lọ́tọ̀, +~6M lẹ́yìn ìmúdájú ìdánimọ̀ agbègbè, a kò sì kà wọ́n sínú àkọlé náà láé. Àbájáde náà ṣì hàn lórí dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Káàdì ìṣúná free-tier OmniRoute: ~1.62B free token fún oṣù kọọkan ní ìdúróṣinṣin, tó lè dé ~2.22B ní oṣù àkọ́kọ́ pẹ̀lú àwọn kírẹ́dì ìforúkọsílẹ̀, láti inú àwọn bọ́ọ̀lù adágún tí ń tún ara wọn ṣe 34 tí a ṣàkọsílẹ̀, tí wọ́n bo àkọsílẹ̀ free-tier 465 lẹ́yìn endpoint kan. Ìṣírò adágún tí a yọ àtúnsọ̀rọ̀ kúrò pátápátá — a ka adágún tí a pín lẹ́ẹ̀kan ṣoṣo, pẹ̀lú àwọn adágún tí ń tún ara wọn ṣe 17 tí ó ní ìṣúná token oṣù rere tí a tẹ̀jáde, àti ààlà Groq márùn-ún fún model kọ̀ọ̀kan; àwọn olupèsè 12 ni a samisi pé kí a yẹra fún wọn nínú àkójọpọ̀ ewu àwọn òfin, nítorí náà ìwọ ló ń pinnu. Pẹpẹ ìṣúná náà ní Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ààlà márùn-ún fún model kọ̀ọ̀kan) àti àwọn adágún kéékèèké míì, pẹ̀lú àwọn kírẹ́dì ìforúkọsílẹ̀ oṣù àkọ́kọ́ àti àwọn olupèsè tí ó jẹ́ ọ̀fẹ́ títí láé tí kò ní ààlà token, tí a fi hàn lọ́tọ̀ kí wọ́n má bà a ṣe àkótán náà pọ̀ sí i. Iye tí a lò àti èyí tó ṣẹ́kù lórí /dashboard/free-tiers ní àkókò gidi."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kaadi budget free-tier OmniRoute: ~1.62B token ọ̀fẹ́ fún oṣù kọọkan lọ́nà tó dúró ṣinṣin, tó lè dé ~2.22B ní oṣù àkọ́kọ́ pẹ̀lú àwọn credit ìforúkọsílẹ̀, láti inú àwọn kọ́kọ́rọ́ pool 34 tí ń tún ṣẹlẹ̀ tí a ṣe àkọsílẹ̀, tí ó bo àwọn àkọsílẹ̀ free-tier 465 tí a ṣàkójọ lẹ́yìn endpoint kan. Ìṣírò òtítọ́ tí a yọ pool àtúnlò kúrò — a ka pool tí a pín lẹ́ẹ̀kan ṣoṣo, títí kan àwọn pool àtúnlò 17 tí ó ní budget token oṣù rere tí a tẹ̀jáde pẹ̀lú àwọn ààlà Groq márùn-ún fún model kọ̀ọ̀kan; a samisi olupese 12 gẹ́gẹ́ bí avoid nínú àkójọ ewu àwọn òfin kí ìwọ lè ṣe ìpinnu. Pẹpẹ budget náà ní Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (àwọn ààlà márùn-ún fún model kọ̀ọ̀kan) àti àwọn pool kékeré mìíràn, pẹ̀lú àwọn credit ìforúkọsílẹ̀ oṣù àkọ́kọ́ àti àwọn olupese tí ó jẹ́ ọ̀fẹ́ títí láé tí kò ní ààlà token, tí a fi hàn lọ́tọ̀ kí wọn má bà a ṣe àfikún iye àkọlé náà. Iye tí a lò àti èyí tó kù láàyè lórí /dashboard/free-tiers."/>
 
-> Àkótán alágbèéká ti ojú-ìwé `/dashboard/free-tiers` tó ń ṣiṣẹ́ ní àkókò gidi. Ọ̀nà àṣàyẹ̀wò kíkún (yíyọ àtúnsọ̀rọ̀ adágún, àwọn ipele kírẹ́dì, àwọn òfin olupèsè): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Àkótán alárinrin ti ojú-ìwé `/dashboard/free-tiers` tó ń ṣiṣẹ́. Ọ̀nà ìṣirò kíkún (yíyọ pool àtúnlò kúrò, àwọn ipele credit, àwọn òfin olupese): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>A tún ń ṣàyẹ̀wò àwọn nọ́mbà wọ̀nyí ní gbogbo ọ̀sẹ̀ méjì lòdì sí àkójọpọ̀ tó ń ṣiṣẹ́, wọ́n sì **le lọ sókè tàbí sọ̀kalẹ̀** — tí olupèsè bá dá free tier dúró, nọ́mbà náà a dín kù; tí tuntun bá dé, yóò pọ̀ sí i. A ń tẹ̀jáde ohun tí àkójọpọ̀ náà ṣe ìṣírò gan-an, a kì í ṣe àfikún nọ́mbà síi láti ṣe àfihàn ìṣàǹfààní tó dára jù.</sub>
+> <sub>A tún ń ṣàyẹ̀wò àwọn iye wọ̀nyí ní gbogbo ọ̀sẹ̀ méjì sí catalog tó ń ṣiṣẹ́, wọ́n sì **le lọ sókè tàbí lọ sílẹ̀** — bí olupese bá fòpin sí free tier kan, iye náà máa dín kù; bí tuntun bá dé, ó máa pọ̀ sí i. A ń tẹ ohun tí catalog náà ṣe àṣírò gan-an jáde, a kì í lo àǹfààní tó dára jù lọ tí a yíká sí iye tó ga.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Fún repo ní ìràwọ̀ bí OMNIROUTE bá ràn ọ́ lọ́wọ́ láti fi owó pamọ́ àti láti mú iṣẹ́ rẹ rọrùn.
+⭐ Fún repo náà ní ìràwọ̀ bí OMNIROUTE bá ràn ọ́ lọ́wọ́ láti fi owó pamọ́ kí iṣẹ́ rẹ sì rọrùn sí i.
 
 </h3>
 
 [![Àwọn ìràwọ̀](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Ipò Àkọsílẹ̀ Ìtàn Ìràwọ̀](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Ipò Ìtàn Ìràwọ̀](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Darapọ̀ mọ́ àwùjọ
+### 💬 Darapọ̀ mọ́ àwùjọ náà
 
-**👋 Tẹ̀lé ẹni tó ń bójú tó iṣẹ́ náà — gba àwọn olupèsè tuntun, àwọn ìtújáde àti àwọn ìmọ̀ràn kíákíá:**
+**👋 Tẹ̀lé olùtọ́jú náà — gba àwọn olupese tuntun, àwọn ìtusílẹ̀ àti àwọn ìmọ̀ràn kíákíá:**
 
 [![Tẹ̀lé Diego lórí LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Tẹ̀lé @diegosouzapw lórí GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Agbègbè Gbogbo](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Àgbáyé](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Ojú-òpó](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Àwọn ìbéèrè, ìmọ̀ràn nípa olupèsè, ètò ọ̀nà iwájú àti ìrànlọ́wọ́ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Agbègbè Gbogbo](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Àwọn ìbéèrè, ìmọ̀ràn nípa olupese, roadmap àti ìrànlọ́wọ́ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Àgbáyé](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 Channel Àṣẹ](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1294,29 +1294,29 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 <br/>
 <div align="center">
 
-## 🛠️ Àkójọpọ̀ Ìmọ̀ Ẹ̀rọ
+## 🛠️ Àkójọpọ̀ Imọ̀ Ẹ̀rọ
 
 </div>
 
 <table>
-  <tr><th align="left">Àkànṣe</th><th align="left">Ìmọ̀ ẹ̀rọ</th></tr>
-  <tr><td nowrap><b>Ìpẹ̀yà</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (<code>any</code> kò sí nínú kókó láti v2.0)</td></tr>
-  <tr><td nowrap><b>Àgbékalẹ̀</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣíkiri 228</td></tr>
-  <tr><td nowrap><b>Ìrántí</b></td><td>Ìwádìí ọ̀rọ̀-kíkún SQLite FTS5 + àwọn ìfarahàn fákítọ̀ tí a ṣe quantize sí int8, ìparẹ́ tí a tẹ̀wé</td></tr>
-  <tr><td nowrap><b>Àwọn ètò àkàwé</b></td><td>Zod 4 — ìfọwọ́sí ìwọlé/jíjáde irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
+  <tr><th align="left">Àyè</th><th align="left">Imọ̀ ẹ̀rọ</th></tr>
+  <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> jálẹ̀ <code>src/</code> àti <code>open-sse/</code> (ko sí <code>any</code> kankan nínú core láti v2.0)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún) — 147 àwọn module àgbègbè, 228 migrations</td></tr>
+  <tr><td nowrap><b>Ìrántí</b></td><td>Àwárí ọ̀rọ̀-kíkún SQLite FTS5 + int8-quantized vector embeddings, ìdínkù tó ní irú</td></tr>
+  <tr><td nowrap><b>Àwọn schema</b></td><td>Zod 4 — ìmúdájú MCP tool I/O + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Ìfiránṣẹ́ níṣóńṣó</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Ìpọ̀n</b></td><td>Ìlà ẹ́ńjìnnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM nígbà tí ó wà ní ibi ìpamọ́ · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ìfarapamọ́</b></td><td>wreq-js — àfarawé àtẹ̀jáde TLS JA3 / JA4, aṣojú onípò 3</td></tr>
-  <tr><td nowrap><b>Ìfaradà</b></td><td>Alákóso àyípo, ìpadà sẹ́yìn oníìdásílẹ̀, ìdènà thundering-herd, ìmúnisẹ̀dá ara ẹni auto-combo</td></tr>
-  <tr><td nowrap><b>Àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tí a ṣètò pẹ̀lú àyíká ìbéèrè</td></tr>
-  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣàkóso ìdánwò Node.js + Vitest — <b>àwọn ìkéde ìdánwò aláìlásọ̀tẹ́lẹ̀ tó ju 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tó lé ní 8,400 (unit, integration, E2E, ààbò, ecosystem)</td></tr>
-  <tr><td nowrap><b>Àwọn pẹpẹ̀</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyìí)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtújáde</td></tr>
-  <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé wẹ́ẹ̀bù</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Sísẹ̀dáwọ̀n</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Ìfipamọ́</b></td><td>Pipeline ẹ́ńjìnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ìfàṣẹsí MCP tó ní ààlà · AES-256-GCM nígbà tí ó wà ní ibi ìpamọ́ · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ìpamọ́</b></td><td>wreq-js — àfarawé JA3 / JA4 TLS fingerprint, aṣojú ipele 3</td></tr>
+  <tr><td nowrap><b>Ìfaradà</b></td><td>Ìdènà àyíká, ìpadà sẹ́yìn tí ń pọ̀ sí i, ìdènà ìkójọpọ̀ ìbéèrè, ìmúláradá ara-ẹni auto-combo</td></tr>
+  <tr><td nowrap><b>Àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tó ní ìtòlẹ́sẹẹsẹ pẹ̀lú àyíká ìbéèrè</td></tr>
+  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣiṣẹ́ ìdánwò Node.js + Vitest — <b>àwọn ìkéde ìdánwò aimi tó ju 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tí a tọ́pa tó ju 8,400 lọ (unit, integration, E2E, ààbò, ecosystem)</td></tr>
+  <tr><td nowrap><b>Àwọn pẹpẹ̀</b></td><td>Ojú-iṣẹ́ (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyì)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + sí Docker Hub nígbà ìtẹ̀jáde</td></tr>
+  <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé ayélujára</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
