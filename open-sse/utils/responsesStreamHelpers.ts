@@ -195,17 +195,54 @@ export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
     finiteNumber(current.output_tokens) ?? finiteNumber(current.completion_tokens) ?? 0;
   const totalTokens = finiteNumber(current.total_tokens) ?? inputTokens + outputTokens;
 
+  const normalizeDetails = (details: unknown): { record: JsonRecord; changed: boolean } | null => {
+    if (!details || typeof details !== "object" || Array.isArray(details)) {
+      return null;
+    }
+    const source = details as JsonRecord;
+    let detailsChanged = false;
+    const normalizedDetails: JsonRecord = {};
+    for (const [key, value] of Object.entries(source)) {
+      const numeric = finiteNumber(value);
+      if (numeric !== null) {
+        normalizedDetails[key] = numeric;
+        if (numeric !== value) {
+          detailsChanged = true;
+        }
+      } else {
+        // Coerce null/non-finite token counts to integer 0 (fixes Codex serde i64 failure, #19320)
+        normalizedDetails[key] = 0;
+        detailsChanged = true;
+      }
+    }
+    return { record: normalizedDetails, changed: detailsChanged };
+  };
+
   const normalized: JsonRecord = {
     ...current,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
   };
   normalized.total_tokens = totalTokens;
+
+  let detailsChanged = false;
+  const inputDetailsResult = normalizeDetails(current.input_tokens_details);
+  if (inputDetailsResult) {
+    normalized.input_tokens_details = inputDetailsResult.record;
+    if (inputDetailsResult.changed) detailsChanged = true;
+  }
+  const outputDetailsResult = normalizeDetails(current.output_tokens_details);
+  if (outputDetailsResult) {
+    normalized.output_tokens_details = outputDetailsResult.record;
+    if (outputDetailsResult.changed) detailsChanged = true;
+  }
+
   const changed =
     !response.usage ||
     current.input_tokens !== inputTokens ||
     current.output_tokens !== outputTokens ||
-    current.total_tokens !== totalTokens;
+    current.total_tokens !== totalTokens ||
+    detailsChanged;
   response.usage = normalized;
   return changed;
 }
