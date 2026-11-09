@@ -129,6 +129,27 @@ Otomatik puanlama, istek başına en iyi sağlayıcıyı/modeli seçer
 | `src/sse/handlers/chat.ts`                                | Entegrasyon: auto ön eki için kısa devre                 |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` sistem girdisi                   |
 
+## Kaydedilen Otomatik kombinasyonlar için hesap tercihleri
+
+Akıllı Otomatik düzenleyici isteğe bağlı bir özellik sunar** Hesap tercihleri** bölüm. Her bağlantı Tercih Edilen, Normal (varsayılan), Rezerve veya Hariç Tutulan olabilir. Birden çok bağlantı bir katmanı paylaşabilir. Otomatik olarak ilk uygun katman içinde seçim yapar ve burada scoring/router davranışını korur; başarısız girişimler kalan somut hesaplara düşer, yedekten önce normalden önce tercih edilir. Hariç tutulan bağlantılar bu kombinasyon tarafından hiçbir zaman kullanılmaz.
+
+Ayar, ID bağlantısıyla anahtarlanan `config.accountPreferences` olarak saklanır:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Atlanmış veya boş bir harita, mevcut yönlendirmeyi korur. Tercihler, devre dışı bırakılan bağlantıları etkinleştirmez, API anahtarı erişimi sağlamaz, kotası engellenen adayları geri yüklemez veya bütçe kontrollerini atlamaz. Her girişim somut bağlantısıyla sınırlıdır, bu nedenle hesap yedeklemesi birleşik yönlendiricinin arkasındaki katmanları atlayamaz. Mevcut oturum benzeşimi uygun bir hesabı koruyabilir; Yerel bir dönüşe bağlı hesabı hariç tutmak, hesapları sessizce değiştirmek yerine dönüşü durdurur.
+
+Yapılandırılmış tercihler, hesaba duyarlı Otomatik yolu kullanır: ilişkisiz bağlam önbelleği, akıllı işlem hattı, kaos ve gölge kısayolları gönderilmez. Bu talepler için spekülatif riskten korunma devre dışı bırakılmıştır, dolayısıyla yedek hesaplar tercih edilenlerle yarışamaz. Diğer birleşik stratejiler bu ayarı yorumlamaz. Bir komboyu Otomatik'ten uzaklaştırmak, daha sonraki bir geçiş için kayıtlı tercihleri korur.
+
 ## Gerçek Bir Model Kimliğiyle Eşleşen Combo Adları
 
 `name` değeri çıplak bir model kimliğiyle aynı olan bir combo (ör. adı

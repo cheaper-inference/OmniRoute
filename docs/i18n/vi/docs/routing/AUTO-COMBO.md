@@ -129,6 +129,27 @@ Tính điểm tự động chọn nhà cung cấp/mô hình tốt nhất cho m�
 | `src/sse/handlers/chat.ts`                                | Tích hợp: xử lý tắt sớm đối với tiền tố tự động |
 | `src/shared/constants/providers.ts`                       | Mục hệ thống `SYSTEM_PROVIDERS.auto`            |
 
+## Tùy chọn tài khoản cho các combo tự động đã lưu
+
+Trình chỉnh sửa Tự động thông minh cung cấp một tùy chọn** Tùy chọn tài khoản** phần. Mỗi kết nối có thể là Ưu tiên, Bình thường (mặc định), Dự trữ hoặc Bị loại trừ. Nhiều kết nối có thể chia sẻ một tầng. Tự động chọn trong cấp đủ điều kiện đầu tiên, duy trì hành vi scoring/router ở đó; những lần thử thất bại sẽ chuyển sang các tài khoản cụ thể còn lại, được ưu tiên trước bình thường trước khi dự trữ. Các kết nối bị loại trừ không bao giờ được sử dụng bởi combo này.
+
+Cài đặt được lưu dưới dạng `config.accountPreferences`, được khóa bằng kết nối ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Bản đồ bị bỏ qua hoặc trống sẽ giữ lại định tuyến hiện có. Tùy chọn không bật các kết nối bị vô hiệu hóa, cấp quyền truy cập khóa API, khôi phục các ứng viên bị chặn hạn ngạch hoặc bỏ qua việc kiểm tra ngân sách. Mỗi lần thử bị giới hạn ở kết nối cụ thể, do đó, dự phòng tài khoản không thể nhảy các cấp phía sau bộ định tuyến kết hợp. Mối quan hệ phiên hiện tại có thể giữ lại một tài khoản đủ điều kiện; loại trừ tài khoản bị ràng buộc với lượt gốc sẽ dừng lượt đó thay vì âm thầm thay đổi tài khoản.
+
+Tùy chọn được định cấu hình sử dụng Đường dẫn tự động nhận biết tài khoản: bộ đệm ngữ cảnh không liên kết, đường dẫn thông minh, hỗn loạn và các phím tắt bóng không được gửi đi. Phòng ngừa rủi ro đầu cơ bị vô hiệu hóa đối với những yêu cầu này nên các tài khoản dự trữ không thể chạy đua với những yêu cầu ưu tiên. Các chiến lược kết hợp khác không giải thích được cài đặt này. Việc thay đổi kết hợp khỏi Tự động sẽ giữ lại các tùy chọn đã lưu để chuyển trở lại sau này.
+
 ## Tên combo trùng với ID mô hình thực
 
 Một combo có `name` giống hệt một ID mô hình thuần túy (ví dụ: combo có tên
