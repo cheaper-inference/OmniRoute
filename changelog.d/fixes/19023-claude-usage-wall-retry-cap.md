@@ -1,0 +1,1 @@
+- **fix(sse):** With Claude `autoLimitReset` on, a request that still hits the usage wall after a granted session-limit reset is retried once, then the 429 is returned. Before, the request was re-sent with no delay for up to 60 seconds. ([#19023](https://github.com/cheaper-inference/OmniRoute/pull/19023))

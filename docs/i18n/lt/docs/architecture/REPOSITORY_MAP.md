@@ -153,7 +153,7 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge prietaisų skydelio puslapis — serverio kortelė, 9 agento kortelės, sąrankos vedlys, modelio atvaizdavimas, apėjimo sąrašas. i18n PT-BR + EN. Žiūrėkite `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                             |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Eismo inspektoriaus prietaisų skydelio puslapis — DevTools padalintas, 7 detalių skirtukai, 4 fiksavimo režimo perjungikliai, seanso įrašymo priemonė, konteksto spalvinimas. i18n PT-BR + EN. Žiūrėkite `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                 |
 | `app/(dashboard)/dashboard/activity/`                                        | Veiklos informacijos santraukos puslapis (B grupė): `page.tsx` (serveris) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — žr `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotos bendrinimo puslapis (B grupė): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotos dalijimosi puslapis (B grupė): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Teikėjo plano konfigūracijos puslapis (B grupė): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotos matmenys vienam ryšio nepaisymui                                                                                                                                                                                           |
 | `app/docs/`                                                                  | Įterpta dokumentų peržiūros priemonė (pateikiama `docs/*.md`)                                                                                                                                                                                                                                                                    |
 | `app/landing/`                                                               | Rinkodaros nukreipimo puslapis                                                                                                                                                                                                                                                                                                   |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Prietaisų skydelio komponentas API: adapteriai per `packages/ui-kit` — žr `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranuose naudojami piktogramų pavadinimai → Lucide komponentai (`<Icon>`)                         |
-| `constants/providers.ts`         | **380 tiekėjų** su Zod patvirtinimu (tiesos šaltinis)                                                          |
+| `constants/providers.ts`         | **381 teikėjas** su Zod patvirtinimu (tiesos šaltinis)                                                         |
 | `constants/cliTools.ts`          | Išorinis CLI įrankių registras                                                                                 |
 | `constants/routingStrategies.ts` | **20 maršruto parinkimo strategijų** su prioritetais                                                           |
 | `constants/publicApiRoutes.ts`   | Maršrutai, kuriems reikalingas nešiklio (prieš valdymą) autentifikavimas                                       |
@@ -412,9 +412,9 @@ open-sse/
 | `CLI-TOOLS.md`              | Išorinės CLI integracijos + Vidinės OmniRoute CLI                                        |
 | `I18N.md`                   | i18n architektūra, pridedant kalbą, 67 lokalės                                           |
 | `UNINSTALL.md`              | Išvalykite pašalinimo veiksmus                                                           |
-| `PROVIDER_REFERENCE.md`     | **Sukurta automatiškai** 380 tiekėjų katalogas (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Sukurta automatiškai** 381 teikėjo katalogas (regen: `npm run gen:provider-reference`) |
 
-### Posisteminis giluminis nardymas
+### Posistemio giluminiai nardymai
 
 | Dok                                        | Tikslas                                                                                            |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------- |
@@ -433,7 +433,7 @@ open-sse/
 | `AUTHZ_GUIDE.md`                           | Autorizacijos vamzdynas (`classify` → `policies` → `enforce`)                                      |
 | `RESILIENCE_GUIDE.md`                      | Grandinės pertraukiklis + cooldown + modelio blokavimas                                            |
 | `docs/security/STEALTH_GUIDE.md` (tik Git) | TLS pirštų atspaudų ėmimas (JA3/JA4), Claude kodas CCH, MITM cert                                  |
-| `AUTO-COMBO.md`                            | „Auto Combo“ variklis (16 faktorių įvertinimas, 6 režimų paketai, virtuali gamykla)                |
+| `AUTO-COMBO.md`                            | „Auto Combo“ variklis (16 faktorių balas, 6 režimų paketai, virtuali gamykla)                      |
 
 ### Suspaudimas
 

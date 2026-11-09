@@ -15,6 +15,7 @@ import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
 import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
+import { NonStreamingResponseTooLargeError, readResponseTextWithinCap } from "./responseBodyCap.ts";
 
 import {
   isSafePublicErrorIdentifier,
@@ -489,7 +490,7 @@ export async function parseUpstreamError(response: Response, provider: string | 
   let rawText = "";
 
   try {
-    const text = await response.text();
+    const text = await readResponseTextWithinCap(response);
     rawText = text;
     responseBody = normalizePayloadForLog(text);
 
@@ -513,8 +514,13 @@ export async function parseUpstreamError(response: Response, provider: string | 
     } catch {
       message = text;
     }
-  } catch {
-    message = `Upstream error: ${response.status}`;
+  } catch (err) {
+    // Every caller relies on this returning the upstream status, so an over-cap body
+    // is reported in the message: nothing of it is parsed, and the read closed the body.
+    message =
+      err instanceof NonStreamingResponseTooLargeError
+        ? "Provider error body exceeded response size limit"
+        : `Upstream error: ${response.status}`;
     responseBody = { _rawText: message };
   }
 
