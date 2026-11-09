@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import Toggle from "@/shared/components/Toggle";
 
 function useAutoComboTosPolicy(onPolicyChange: () => void) {
@@ -83,16 +84,16 @@ export default function AutoComboTosControl({ onPolicyChange }: { onPolicyChange
       />
       {loadFailed && (
         <div className="mt-2 text-sm">
-          <p role="alert" className="text-red-500">
+          <p role="alert" className="text-error">
             {t("autoTosLoadError")}
           </p>
-          <button type="button" onClick={retryLoad} className="mt-1 text-primary underline">
+          <Button variant="outline" size="sm" onClick={retryLoad} className="mt-1">
             {common("retry")}
-          </button>
+          </Button>
         </div>
       )}
       {saveFailed && (
-        <p role="alert" className="mt-2 text-sm text-red-500">
+        <p role="alert" className="mt-2 text-sm text-error">
           {t("autoTosSaveError")}
         </p>
       )}

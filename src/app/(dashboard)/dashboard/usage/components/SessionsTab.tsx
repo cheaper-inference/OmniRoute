@@ -9,7 +9,16 @@ import {
   type ExclusiveDashboardSession,
   type RecentSessionForDashboard,
 } from "@/lib/sessionObservability";
+import Icon from "@/shared/components/Icon";
 import { Card } from "@/shared/components";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 type SessionsResponse = {
   sessions: RecentSessionForDashboard[];
@@ -70,20 +79,18 @@ export default function SessionsTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            fingerprint
-          </span>
+        <div className="p-2 rounded-lg bg-info/10 text-info">
+          <Icon name="fingerprint" size={20} />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{t("activeSessions")}</h3>
           <p className="text-sm text-text-muted">{t("sessionsTrackedHint")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-info/10 border border-info/20">
+            <span className="w-2 h-2 rounded-full bg-info animate-pulse" />
             <span
-              className="text-sm font-semibold tabular-nums text-cyan-400"
+              className="text-sm font-semibold tabular-nums text-info"
               data-testid="session-count"
             >
               {displaySessions.length}
@@ -94,78 +101,72 @@ export default function SessionsTab() {
 
       {displaySessions.length === 0 ? (
         <div className="text-center py-8 text-text-muted">
-          <span
-            className="material-symbols-outlined text-[40px] mb-2 block opacity-40"
-            aria-hidden="true"
-          >
-            fingerprint
-          </span>
+          <Icon name="fingerprint" size={40} className="mb-2 block opacity-40" />
           <p className="text-sm">{t("noSessions")}</p>
           <p className="text-xs mt-1">{t("sessionsHint")}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border/30">
-                <th className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  {t("session")}
-                </th>
-                <th className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  {t("age")}
-                </th>
-                <th className="text-right py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  {t("requests")}
-                </th>
-                <th className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  {t("connection")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {displaySessions.map((s) => {
-                const leaseBacked = isLeaseBackedSession(s);
-                return (
-                  <tr
-                    key={s.sessionId}
-                    className="border-b border-border/10 hover:bg-surface/20 transition-colors"
-                  >
-                    <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="font-mono text-xs px-2 py-1 rounded bg-surface/40 text-text-muted"
-                          title={s.sessionId}
-                        >
-                          {s.sessionId.slice(0, 12)}…
+        <Table
+          className="text-sm"
+          containerClassName="rounded-none border-0"
+          scrollbarLabel={t("session")}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("session")}
+              </TableHead>
+              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("age")}
+              </TableHead>
+              <TableHead className="text-right py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("requests")}
+              </TableHead>
+              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                {t("connection")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {displaySessions.map((s) => {
+              const leaseBacked = isLeaseBackedSession(s);
+              return (
+                <TableRow key={s.sessionId}>
+                  <TableCell className="py-2.5 px-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-mono text-xs px-2 py-1 rounded bg-surface/40 text-text-muted"
+                        title={s.sessionId}
+                      >
+                        {s.sessionId.slice(0, 12)}…
+                      </span>
+                      {leaseBacked && s.active && (
+                        <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border text-success border-success/30 bg-success/10">
+                          {tCommon("active")}
                         </span>
-                        {leaseBacked && s.active && (
-                          <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border text-green-400 border-green-500/30 bg-green-500/10">
-                            {tCommon("active")}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-3 text-text-muted tabular-nums">
-                      {formatAge(s.ageMs)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <span className="font-semibold tabular-nums">{s.requestCount}</span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      {s.connectionId ? (
-                        <span className="text-xs font-mono text-cyan-400" title={s.connectionId}>
-                          {(leaseBacked && s.connectionName) || s.connectionId.slice(0, 10)}
-                        </span>
-                      ) : (
-                        <span className="text-text-muted/40">{t("notAvailableSymbol")}</span>
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-2.5 px-3 text-text-muted tabular-nums">
+                    {formatAge(s.ageMs)}
+                  </TableCell>
+                  <TableCell className="py-2.5 px-3 text-right">
+                    <span className="font-semibold tabular-nums">{s.requestCount}</span>
+                  </TableCell>
+                  <TableCell className="py-2.5 px-3">
+                    {s.connectionId ? (
+                      <span className="text-xs font-mono text-info" title={s.connectionId}>
+                        {(leaseBacked && s.connectionName) || s.connectionId.slice(0, 10)}
+                      </span>
+                    ) : (
+                      <span className="text-text-muted/40">{t("notAvailableSymbol")}</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       )}
     </Card>
   );

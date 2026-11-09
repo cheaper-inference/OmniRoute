@@ -1,7 +1,9 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 
 type ConceptKey = "search" | "scrape" | "compare" | "rerank" | "auto";
 
@@ -59,49 +61,37 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
       className="bg-surface border border-border rounded-lg overflow-hidden"
       data-testid="search-concept-card"
     >
-      {/* Header */}
-      <button
-        className="flex justify-between items-center w-full px-4 py-2.5 bg-bg-alt border-b border-border hover:bg-bg-alt/80 transition-colors"
-        onClick={() => setCollapsed((c) => !c)}
-        aria-expanded={!collapsed}
-        aria-controls="concept-card-content"
-      >
-        <span className="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2">
-          <span>ⓘ</span>
-          <span>{t("modalitiesGuide")}</span>
-        </span>
-        <span className="text-text-muted text-xs" aria-hidden="true">
-          {collapsed ? "▶" : "▼"}
-        </span>
-      </button>
+      <Disclosure open={!collapsed} onOpenChange={(open) => setCollapsed(!open)}>
+        {/* Header */}
+        <DisclosureTrigger className="rounded-none px-4">
+          <span className="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2">
+            <span>ⓘ</span>
+            <span>{t("modalitiesGuide")}</span>
+          </span>
+        </DisclosureTrigger>
 
-      {/* Body */}
-      {!collapsed && (
-        <div
-          id="concept-card-content"
-          className="p-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-          data-testid="concept-card-content"
-        >
-          {CONCEPTS.map((c) => (
-            <div
-              key={c.key}
-              className="flex gap-3 p-3 bg-bg-alt rounded-lg border border-border"
-              data-testid={`concept-item-${c.key}`}
-            >
-              <span
-                className="material-symbols-outlined shrink-0 text-[20px] text-primary"
-                aria-hidden="true"
+        {/* Body (unmounted while collapsed, as before) */}
+        <DisclosureContent>
+          <div
+            className="p-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 border-t border-border"
+            data-testid="concept-card-content"
+          >
+            {CONCEPTS.map((c) => (
+              <div
+                key={c.key}
+                className="flex gap-3 p-3 bg-bg-alt rounded-lg border border-border"
+                data-testid={`concept-item-${c.key}`}
               >
-                {c.icon}
-              </span>
-              <div>
-                <div className="text-xs font-semibold text-text-main mb-0.5">{t(c.titleKey)}</div>
-                <div className="text-[11px] text-text-muted leading-relaxed">{t(c.descKey)}</div>
+                <Icon name={c.icon} size={20} className="text-primary" />
+                <div>
+                  <div className="text-xs font-semibold text-text-main mb-0.5">{t(c.titleKey)}</div>
+                  <div className="text-[11px] text-text-muted leading-relaxed">{t(c.descKey)}</div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        </DisclosureContent>
+      </Disclosure>
     </div>
   );
 }

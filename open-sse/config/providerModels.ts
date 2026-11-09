@@ -245,7 +245,13 @@ export function findModelName(aliasOrId: string, modelId: string): string {
 // OpenCode's Muse Spark family is Responses-only. Keep this rule provider-scoped
 // and version-agnostic so a newly published Muse Spark model is routed correctly
 // before the static catalog is refreshed.
-const OPENCODE_MUSE_SPARK_ALIASES = new Set(["opencode-zen", "opencode-go"]);
+const OPENCODE_MUSE_SPARK_ALIASES = new Set([
+  "opencode-zen",
+  "opencode-go",
+  // Short aliases that do not normalize via PROVIDER_ID_TO_ALIAS (#12687).
+  "ocg",
+  "ocz",
+]);
 const MUSE_SPARK_MODEL_PATTERN = /^muse-spark(?:-|$)/i;
 
 const OPENCODE_MODEL_PREFIXES = ["opencode/", "opencode-zen/", "opencode-go/"] as const;
@@ -298,6 +304,17 @@ function effortBaseTargetFormat(alias: string, bareModelId: string): string | nu
   return PROVIDER_MODELS[alias]?.find((m) => m.id === effortStripped)?.targetFormat ?? null;
 }
 
+/**
+ * Providers whose executors only speak the Responses wire, for passthrough ids that
+ * post-date the seed catalog.
+ * - gc: Grok Build — GrokCliExecutor always POSTs to /v1/responses and live discovery
+ *   drops non-`responses` backends (grok-4.7 before a sync otherwise ships a
+ *   chat-completions body, which Grok Build rejects with 400).
+ * - mc / muse-code: Muse Code — the registry base URL is /responses (a new Muse id before
+ *   a sync otherwise gets 400 "unknown parameter `messages`").
+ */
+const RESPONSES_ONLY_PROVIDER_ALIASES = new Set(["gc", "mc", "muse-code"]);
+
 export function getModelTargetFormat(aliasOrId: string, modelId: string): string | null {
   // Accept either the public alias ("cmd") or the raw provider id ("command-code"),
   // mirroring getProviderModels (same pattern as #2798/#3870).
@@ -321,11 +338,9 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor's /codex/i routing, 9router#102). Scoped to the openai alias so other
   // providers shipping *-pro ids keep their own endpoint semantics.
   if (alias === "openai" && /-pro$/i.test(bareModelId)) return "openai-responses";
-  // Grok Build only speaks Responses: GrokCliExecutor always POSTs to /v1/responses and
-  // live discovery drops non-`responses` backends. A passthrough id that post-dates the
-  // seed (e.g. grok-4.7 before a sync) otherwise falls back to the provider's "openai"
-  // format and ships a chat-completions body, which Grok Build rejects with 400.
-  if (alias === "gc") return "openai-responses";
+  // Responses-only providers (see RESPONSES_ONLY_PROVIDER_ALIASES): a passthrough id that
+  // post-dates the seed would otherwise fall back to the provider's chat format and 400.
+  if (RESPONSES_ONLY_PROVIDER_ALIASES.has(alias)) return "openai-responses";
   // Vertex uses three protocol families: Gemini generateContent, Anthropic Messages rawPredict,
   // and OpenAI-shaped Mistral/Open-MaaS requests. Resource names retain enough publisher data to
   // route future dynamically-synced models without adding another pinned prefix here.
@@ -341,14 +356,15 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor actually sends the request (same pattern as the openai "-pro" heuristic above,
   // #5842).
   if ((alias === "gh" || alias === "ghe-copilot") && /claude/i.test(bareModelId)) return "claude";
-  // #15499: GheCopilotExecutor.buildUrl sends any unregistered `gpt-6*` id to
-  // /responses (`/^gpt-6/i`, same gate as supportsResponsesEndpoint). A missing
-  // catalog tag otherwise leaves the body on the provider's chat-completions
-  // format (`messages` / `max_tokens`), which /responses rejects. github.com
-  // Copilot does not use that URL regex, so this stays ghe-copilot-only.
+  // #15499: GheCopilotExecutor.buildUrl sends any unregistered `gpt-6*` / `gpt-5.5+`
+  // id to /responses (`/^gpt-(?:[6-9]|5\.[5-9])/i`, same gate as supportsResponsesEndpoint).
+  // A missing catalog tag otherwise leaves the body on the provider's chat-completions
+  // format (`messages` / `max_tokens`), which /responses rejects. github.com Copilot
+  // infers unsynced GPT-6/5.5+ formats in `src/sse/services/githubResponsesFallback.ts`
+  // so explicit chat-capable synced/custom rows on `github` can still stay on chat/completions.
   if (
     alias === "ghe-copilot" &&
-    /^gpt-6/i.test(bareModelId) &&
+    /^gpt-(?:[6-9]|5\.[5-9])/i.test(bareModelId) &&
     !/gemini|claude/i.test(bareModelId)
   ) {
     return "openai-responses";
@@ -401,11 +417,24 @@ export function getModelTimeoutMs(aliasOrId: string, modelId: string): number | 
 }
 
 const CLAUDE_MODEL_PATTERN = /(?:^|[\/._-])claude(?:[._-]|$)/;
-const CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS = [
-  /(?:^|[\/._-])haiku(?:[._-]|$)/,
-  // Sonnet 5.5 caps effort at xhigh; max returns a 400.
-  /(?:^|[\/._-])claude-sonnet-5-5(?:[._-]|$)/,
-] as const;
+// Anthropic effort docs (platform.claude.com/docs/en/build-with-claude/effort), `max`
+// row: Fable and Mythos (every version, incl. Mythos Preview), Opus 4.6+, Sonnet 4.6+
+// and Haiku 5.5+. Versions are encoded as major * 100 + minor. Families not listed
+// here stay allowed so a new Claude family is not blocked before the docs list it.
+const CLAUDE_MAX_EFFORT_MIN_VERSION: ReadonlyMap<string, number> = new Map([
+  ["fable", 0],
+  ["mythos", 0],
+  ["opus", 406],
+  ["sonnet", 406],
+  ["haiku", 505],
+]);
+// The docs also list Sonnet 5.5, but it returned a 400 on `max` when it was added
+// (#15035), so it stays capped at xhigh until that is re-verified.
+const CLAUDE_MAX_EFFORT_EXCLUDED_VERSIONS: ReadonlySet<string> = new Set(["sonnet:505"]);
+const CLAUDE_FAMILY_VERSION_PATTERN =
+  /^claude[._-]([a-z]+)(?:[._-](\d{1,2})(?:[._-](\d{1,2}))?)?(?=[._-]|$)/;
+// Pre-4 ids put the version first (claude-3-5-haiku, claude-2.1); none supports effort.
+const CLAUDE_LEGACY_ID_PATTERN = /^claude[._-]\d/;
 const ANTHROPIC_COMPATIBLE_PREFIX = "anthropic-compatible-";
 
 export function supportsClaudeMaxEffort(modelId: string | null | undefined): boolean {
@@ -413,10 +442,14 @@ export function supportsClaudeMaxEffort(modelId: string | null | undefined): boo
   const normalized = modelId.toLowerCase();
   const claudeMatch = normalized.match(CLAUDE_MODEL_PATTERN);
   if (!claudeMatch) return false;
-  const claudeScopedId = normalized.slice(claudeMatch.index ?? 0);
-  return !CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS.some((pattern) =>
-    pattern.test(claudeScopedId)
-  );
+  const claudeScopedId = normalized.slice(claudeMatch.index ?? 0).replace(/^[\/._-]/, "");
+  if (CLAUDE_LEGACY_ID_PATTERN.test(claudeScopedId)) return false;
+  const familyMatch = claudeScopedId.match(CLAUDE_FAMILY_VERSION_PATTERN);
+  const minVersion = familyMatch ? CLAUDE_MAX_EFFORT_MIN_VERSION.get(familyMatch[1]) : undefined;
+  if (minVersion === undefined || familyMatch?.[2] === undefined) return true;
+  const version = Number(familyMatch[2]) * 100 + Number(familyMatch[3] ?? 0);
+  if (CLAUDE_MAX_EFFORT_EXCLUDED_VERSIONS.has(`${familyMatch[1]}:${version}`)) return false;
+  return version >= minVersion;
 }
 
 // Reasoning-effort suffixes the Claude/Claude-Code model picker appends to a base

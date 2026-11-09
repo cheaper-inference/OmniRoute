@@ -40,6 +40,10 @@ export default defineConfig({
       // resolves to undefined instead of failing loudly — which silently made
       // every provider look credentialed in the free-tier card tests.
       "@omniroute/open-sse": path.resolve(__dirname, "./open-sse"),
+      // Same mapping as vitest.config.ts and tsconfig `@omniroute/ui-kit/*`: the kit adapters
+      // import component subpaths (`@omniroute/ui-kit/button`) that the package `exports`
+      // map does not list, so without the alias any component suite here fails to resolve.
+      "@omniroute/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
     },
   },
 });

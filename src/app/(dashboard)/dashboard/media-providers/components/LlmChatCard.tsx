@@ -9,7 +9,11 @@ import {
   type RefObject,
 } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
 import { cn } from "@/shared/utils/cn";
+import Icon from "@/shared/components/Icon";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { getProviderAlias } from "@/shared/constants/providers";
@@ -450,12 +454,13 @@ export function LlmChatCard({
         <div className="flex flex-wrap items-center gap-2">
           {/* Model select */}
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <label className="text-xs text-text-muted shrink-0">{t("model")}:</label>
-            <select
+            <Select
+              compact
+              label={t("model")}
+              className="min-w-0 flex-1"
               value={model || firstModel}
               onChange={(e) => setModel(e.target.value)}
               disabled={loading}
-              className="min-w-0 flex-1 rounded-md border border-border bg-bg-subtle text-xs px-2 py-1 text-text-main focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-60"
             >
               {modelOptions.length === 0 && !loading && (
                 <option value="">{initialModel || "—"}</option>
@@ -466,30 +471,26 @@ export function LlmChatCard({
                   {m.id}
                 </option>
               ))}
-            </select>
+            </Select>
             {error && (
-              <span className="text-xs text-red-500 flex items-center gap-1" role="alert">
+              <span className="text-xs text-error flex items-center gap-1" role="alert">
                 <span className="truncate max-w-[180px]" title={String(error)}>
                   {String(error)}
                 </span>
-                <button
-                  type="button"
-                  onClick={retry}
-                  className="shrink-0 text-xs text-primary hover:text-primary-strong underline"
-                >
+                <Button variant="ghost" size="sm" className="shrink-0" onClick={retry}>
                   {t("retry") ?? "Retry"}
-                </button>
+                </Button>
               </span>
             )}
           </div>
           {/* Key select */}
           {keys.length > 0 && (
             <div className="flex items-center gap-1.5">
-              <label className="text-xs text-text-muted shrink-0">{t("selectKey")}:</label>
-              <select
+              <Select
+                compact
+                label={t("selectKey")}
                 value={selectedKey}
                 onChange={(e) => setSelectedKey(e.target.value)}
-                className="rounded-md border border-border bg-bg-subtle text-xs px-2 py-1 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="">{t("defaultKey")}</option>
                 {keys.map((k) => (
@@ -497,18 +498,14 @@ export function LlmChatCard({
                     {k.name ?? k.id}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           )}
           {/* Clear button */}
           {messages.length > 0 && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="text-xs text-text-muted hover:text-text-primary transition-colors"
-            >
+            <Button variant="ghost" size="sm" onClick={handleClear}>
               {t("clear")}
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -528,7 +525,7 @@ export function LlmChatCard({
         {messages.length === 0 ? (
           <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-3 p-6 text-center">
             <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-accent text-[22px]">forum</span>
+              <Icon name="forum" size={22} className="text-accent" />
             </div>
             <p className="text-sm text-text-muted">{t("emptyConversation")}</p>
             <p className="text-[11px] text-text-muted/70">{t("sendHint")}</p>
@@ -555,17 +552,17 @@ export function LlmChatCard({
                       isUser
                         ? "bg-primary/15 text-primary"
                         : isError
-                          ? "bg-red-500/15 text-red-400"
+                          ? "bg-error-bg text-error"
                           : "bg-accent/15 text-accent"
                     )}
                     aria-hidden="true"
                   >
                     {isUser ? (
-                      <span className="material-symbols-outlined text-[16px]">person</span>
+                      <Icon name="person" size={16} />
                     ) : isError ? (
-                      <span className="material-symbols-outlined text-[16px]">error</span>
+                      <Icon name="error" size={16} />
                     ) : (
-                      <span className="material-symbols-outlined text-[16px]">smart_toy</span>
+                      <Icon name="smart_toy" size={16} />
                     )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
@@ -585,7 +582,7 @@ export function LlmChatCard({
                     <div
                       className={cn(
                         "text-sm whitespace-pre-wrap break-words leading-relaxed",
-                        isError ? "text-red-400" : "text-text-main"
+                        isError ? "text-error" : "text-text-main"
                       )}
                     >
                       {msg.content}
@@ -602,42 +599,43 @@ export function LlmChatCard({
       </div>
 
       {/* Input row */}
-      <div className="relative flex items-end gap-2 rounded-lg border border-border bg-bg-subtle px-3 py-2 focus-within:ring-1 focus-within:ring-primary focus-within:border-primary/50 transition-colors">
-        <textarea
+      <div className="flex items-end gap-2">
+        <Textarea
           ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
+          aria-label={t("messageInputAria")}
           placeholder={`${t("send")}…`}
-          className="flex-1 bg-transparent text-sm py-1.5 text-text-main placeholder:text-text-muted focus:outline-none resize-none max-h-32"
+          className="min-h-10 flex-1 resize-none max-h-32"
         />
         {streaming ? (
-          <button
-            type="button"
+          <Button
+            variant="danger"
+            size="icon"
+            icon="stop"
             onClick={handleStop}
             title={t("stop")}
-            className="size-8 flex items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">stop</span>
-          </button>
+            aria-label={t("stop")}
+          />
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="icon"
+            icon="arrow_upward"
             onClick={() => void handleSend()}
             disabled={!input.trim()}
             title={t("send")}
-            className="size-8 flex items-center justify-center rounded-md bg-primary text-white hover:opacity-90 disabled:opacity-40 transition-opacity shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">arrow_upward</span>
-          </button>
+            aria-label={t("send")}
+          />
         )}
       </div>
 
       {/* Stats row */}
       {stats && (
         <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
-          <span className="material-symbols-outlined text-[13px]">bolt</span>
+          <Icon name="bolt" size={13} />
           <span>
             {t("statsLine", {
               ms: Math.round(stats.latencyMs),

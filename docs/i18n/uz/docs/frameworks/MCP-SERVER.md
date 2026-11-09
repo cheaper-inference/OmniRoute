@@ -8,38 +8,32 @@
 >
 > Ishonchli manba: `open-sse/mcp-server/server.ts` faylidagi `countUniqueMcpTools()` funksiyasi **110 ta noyob vosita**ni hisoblaydi: 45 ta kanonik ta’rif (jumladan, oltita CCR hayotiy sikl vositasi, agent ko‘nikmalarining uchligi, `omniroute_radar_catalog` va `omniroute_x_search`), shuningdek, xotira (3), ko‘nikmalar (4), GitHub ko‘nikmalari (3), pul (6), geymifikatsiya (8), plaginlar (8), Notion (6), Obsidian (22), mahalliy korpus (3) va faqat RTK uchun mo‘ljallangan ikkita siqish vositasi.
 
-## Oʻrnatish
+## O'rnatish
 
-OmniRoute MCP ichiga o‘rnatilgan. Uni quyidagicha ishga tushiring:
+OmniRoute MCP o'rnatilgan. Uni quyidagicha boshlang:
 
 ```bash
 omniroute --mcp
 ```
 
-Yoki open-sse transporti orqali:
+Yoki ochiq transport orqali:
 
 ```bash
-# Oqimli HTTP transporti (port 20130)
-omniroute --dev  # MCP /mcp endpointida avtomatik ishga tushadi
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-Dashboard serveri tomonidan jarayon ichida xizmat ko‘rsatiladigan HTTP transportlari (`sse` / `streamable-http`) sukut bo‘yicha
-o‘chirilgan va avval ularni faqat `/dashboard/mcp` sahifasidan almashtirish mumkin edi. v3.8.51 versiyasidan
-boshlab CLI ham xuddi shu imkoniyatlarga ega:
+HTTP transportlari (`sse` / `streamable-http`, boshqaruv paneli serveri tomonidan jarayon davomida xizmat qiladi) sukut bo'yicha o'chirilgan va avval faqat `/dashboard/mcp` sahifasidan o'tish mumkin edi. 3.8.51 dan boshlab CLI paritetga ega:
 
 ```bash
-omniroute mcp status                                  # yoqilgan/onlayn holati, transport, vositalar soni
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # faol sse/streamable-http seanslarini qayta tiklaydi
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` buyruqlari dashboard `/api/settings` orqali almashtiradigan ayni `mcpEnabled`
-(va ixtiyoriy ravishda `mcpTransport`) sozlamasiga PATCH so‘rovini yuboradi. `mcp restart` esa
-`POST /api/mcp/restart` ni chaqiradi: u faol `sse`/`streamable-http` seanslarini yakunlaydi, shunda keyingi
-so‘rov toza holatda qayta ishga tushiriladi; MCP o‘chirilgan bo‘lsa `409`, `stdio` transporti uchun esa
-`501` qaytaradi (stdio mijozlari o‘z quyi jarayonlarini o‘zlari boshqaradi — jarayon ichida qayta ishga
-tushirish uchun deskriptor mavjud emas).
+`mcp enable`/`mcp disable` PATCH bir xil `mcpEnabled` (va ixtiyoriy ravishda `mcpTransport`) asboblar panelini sozlash `/api/settings` orqali almashadi. `mcp restart` `POST /api/mcp/restart` chaqiradi: u faol `sse`/`streamable-http` seanslarini buzadi, shuning uchun keyingi so‘rov toza tarzda qayta ishga tushadi, MCP o‘chirilgan bo‘lsa, `409` qaytaradi va `stdio` transporti uchun `501` (stdio mijozlari o‘zlarining subprosessiga ega — qayta ishga tushirish uchun jarayonda ishlov berilmaydi).
 
 ## Transportlar
 
@@ -72,6 +66,16 @@ curl -i \
 ```
 
 `manage` doirasiga ega bo‘lmagan kalit (yoki Bearer mavjud bo‘lmasa) `403 LOCAL_ONLY` javobini qaytaradi. Yonma-yon joylashgan `/api/cli-tools/runtime/*` prefiksini ataylab chetlab o‘tib bo‘lmaydi — [Marshrut himoyasi darajalari — manage doirasi uchun istisno](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) bo‘limiga qarang.
+
+### Origin tekshiruvi
+
+Autentifikatsiyadan so'ng `/api/mcp/*` manziliga yuborilgan har bir so'rovning — transportlar va `status`, `tools`, `audit`, `restart` kabi boshqaruv yo'nalishlarining — `Origin` sarlavhasi chaqiruvchi kimligidan qat'i nazar (API kaliti, CLI tokeni, dashboard sessiyasi yoki kirish o'chirilganda anonim loopback) tekshiriladi. Bu MCP Streamable HTTP spetsifikatsiyasi talab qiladigan DNS rebinding himoyasidir.
+
+- **`Origin` sarlavhasi yo'q** → ruxsat beriladi. OmniRoute CLI, SDK va IDE mijozlari uni yubormaydi.
+- **Ruxsat etilgan `Origin`** → istalgan portdagi `localhost` / `127.0.0.1` / `[::1]` yoki OmniRoute'ning o'z ommaviy origin'i: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ishonchli teskari proksi uzatgan origin (`OMNIROUTE_TRUST_PROXY`, faqat base URL o'rnatilmagan bo'lsa) yoki to'g'ridan-to'g'ri murojaat qilingan loopback/LAN IP xost. Faqat `Host` sarlavhasining o'zi hech qachon origin'ni ishonchli qilmaydi.
+- **`null` ham kiradigan boshqa har qanday `Origin`** → JSON-RPC xato tanasi bilan `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Yaroqli CSRF tokenini taqdim etgan dashboard sessiyasi boshqa dashboard yozuvlaridagi kabi qabul qilinishda davom etadi.
+
+Teskari proksi ortida taqdim etiladigan brauzer MCP mijoziga `OMNIROUTE_PUBLIC_BASE_URL` kerak; boshqa origin'lar uchun ruxsat ro'yxati yo'q. CORS dastlabki so'rovi (`OPTIONS`) Origin bo'yicha tekshirilmaydi; undan keyingi so'rov tekshiriladi.
 
 ## IDE konfiguratsiyasi
 
@@ -121,56 +125,42 @@ Claude Desktop, Cursor, Cline va mos MCP mijozlarini sozlash uchun [MCP mijozini
 | `omniroute_cache_stats` | `read:cache`     | Semantik kesh, prompt keshi va idempotentlik statistikasi |
 | `omniroute_cache_flush` | `write:cache`    | Keshni global miqyosda yoki imzo/model boʻyicha tozalash  |
 
-## Siqish vositalari (13)
+## Siqish asboblari (13)
 
-| Vosita                              | Ruxsat doiralari    | Tavsif                                                                                                                                               |
-| :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Siqish sozlamalari, tahliliy xulosa va keshni hisobga oluvchi statistika (`analytics.mcpDescriptionCompression` metamaʼlumotlarini oʻz ichiga oladi) |
-| `omniroute_compression_configure`   | `write:compression` | Siqish rejimi, chegara qiymati, maqsadli nisbat, tizim promptini saqlash va MCP tavsiflarini siqishni yoqish/oʻchirishni sozlash                     |
-| `omniroute_set_compression_engine`  | `write:compression` | Faol mexanizmni (off/caveman/rtk/stacked) va Caveman/RTK intensivligini tanlash                                                                      |
-| `omniroute_list_compression_combos` | `read:compression`  | Nomlangan siqish combolari va ularning mexanizm konveyerlarini roʻyxatlash                                                                           |
-| `omniroute_compression_combo_stats` | `read:compression`  | Siqish combosi va mexanizm boʻyicha guruhlangan tahliliy maʼlumotlar                                                                                 |
-| `omniroute_ccr_store`               | `write:compression` | Chaqiruvchi boʻyicha ajratilgan kontentni hajmi cheklangan xotiradagi CCR omborida saqlash hamda marker va `ccr://` havolasini qaytarish             |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR kontentini toʻliq yoki boshi, oxiri, satrlari, grep va statistika rejimlarida olish                                                              |
-| `omniroute_ccr_inspect`             | `read:compression`  | Kontentni qaytarmasdan chaqiruvchiga tegishli CCR metamaʼlumotlarini tekshirish                                                                      |
-| `omniroute_ccr_list`                | `read:compression`  | Chaqiruvchiga tegishli CCR bloklarining sahifalangan metamaʼlumotlarini roʻyxatlash                                                                  |
-| `omniroute_ccr_delete`              | `write:compression` | Chaqiruvchiga tegishli CCR blokini oʻchirish                                                                                                         |
-| `omniroute_ccr_stats`               | `read:compression`  | Chaqiruvchi doirasidagi xotira sarfi, hayot sikli hisoblagichlari va ombor cheklovlari haqida hisobot berish                                         |
-| `omniroute_rtk_discover`            | `read:compression`  | Ixtiyoriy ravishda taqdim etilgan RTK chiqish namunalarida takrorlanuvchi shovqinni aniqlash                                                         |
-| `omniroute_rtk_learn`               | `read:compression`  | Ixtiyoriy ravishda taqdim etilgan namunalardan koʻrib chiqish mumkin boʻlgan RTK filtri qoralamasini yaratish                                        |
+| Asbob                               | Qo'llash sohalari   | Tavsif                                                                                                                                          |
+| :---------------------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Siqish sozlamalari, tahlil xulosasi va keshdan xabardor statistika ( `analytics.mcpDescriptionCompression` metamaʼlumotlarini oʻz ichiga oladi) |
+| `omniroute_compression_configure`   | `write:compression` | Siqish rejimini, chegara chegarasini, maqsad nisbatini, tizimni tezkor saqlashni, MCP tavsifini siqish tugmachasini sozlang                     |
+| `omniroute_set_compression_engine`  | `write:compression` | Faol dvigatelni (off/caveman/rtk/stacked) va Caveman/RTK intensivligini tanlang                                                                 |
+| `omniroute_list_compression_combos` | `read:compression`  | Nomlangan siqish kombinatsiyalarini va ularning dvigatel quvurlarini ro'yxati                                                                   |
+| `omniroute_compression_combo_stats` | `read:compression`  | Siqish kombinatsiyasi va dvigatel bo'yicha guruhlangan tahlillar                                                                                |
+| `omniroute_ccr_store`               | `write:compression` | Qo'ng'iroq qiluvchi tomonidan ajratilgan kontentni cheklangan xotiradagi CCR do'konida saqlang va marker va `ccr://` havolasini qaytaring       |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR kontentini toʻliq yoki bosh, quyruq, chiziqlar, grep va statistika rejimlari bilan oling                                                    |
+| `omniroute_ccr_inspect`             | `read:compression`  | Kontentni qaytarmasdan qo'ng'iroq qiluvchiga tegishli CCR metama'lumotlarini tekshiring                                                         |
+| `omniroute_ccr_list`                | `read:compression`  | Qo'ng'iroq qiluvchiga tegishli CCR bloklari uchun sahifalangan metama'lumotlar ro'yxati                                                         |
+| `omniroute_ccr_delete`              | `write:compression` | Qo'ng'iroq qiluvchiga tegishli CCR blokini o'chiring                                                                                            |
+| `omniroute_ccr_stats`               | `read:compression`  | Qo'ng'iroq qiluvchining xotiradan foydalanishi, hayot davri hisoblagichlari va do'kon cheklovlari haqida xabar bering                           |
+| `omniroute_rtk_discover`            | `read:compression`  | RTK chiqish namunalarida takrorlanuvchi shovqinlarni toping                                                                                     |
+| `omniroute_rtk_learn`               | `read:compression`  | Tanlangan namunalardan koʻrib chiqiladigan RTK filtri loyihasini yarating                                                                       |
 
-CCR yozuvlari faqat xotirada saqlanadi va qayta ishga tushirilganda yoʻqoladi. Har bir blok 2 MiB,
-har bir asosiy subyekt 16 MiB, global ombor esa 64 MiB bilan cheklangan. Yozuvlar uchun standart
-TTL 24 soatni tashkil etadi (maksimal yetti kun). MCP orqali toʻliq olish 256 KiB bilan cheklangan;
-kattaroq bloklardan diapazonli va grep rejimlari orqali foydalanish mumkin. Saqlash, olish,
-roʻyxatlash, tekshirish, oʻchirish va statistika autentifikatsiya qilingan API kalitining asosiy subyekti
-boʻyicha ajratilgan. Audit yozuvlari kontentni emas, faqat xeshlar va hajm metamaʼlumotlarini oʻz ichiga oladi.
+CCR yozuvlari ikki bosqichli do'kondan foydalanadi: mahalliy bulutli bo'lmagan ish vaqtlarida, bardoshli SQLite darajasida (`ccr_blocks`, sukut bo'yicha) tomonidan qo'llab-quvvatlanadigan issiq xotira darajasi, shuning uchun blok 512 KB va bulutda ishlaydigan bloklardan tashqari, TTL tugaguncha — quvib chiqarish yoki qayta ishga tushirishdan omon qoladi. Har bir blok 2 MiB, har bir asosiy 16 MiB va global do'kon 64 MiB bilan cheklangan. Yozuvlar sukut bo'yicha 24 soatlik TTL (maksimal etti kun). To'liq MCP olish 256 KiB bilan cheklangan; diapazonli va grep rejimlari orqali kattaroq bloklar mavjud bo'lib qoladi. Saqlash, qidirish, ro'yxatga olish, tekshirish, o'chirish va statistika autentifikatsiya qilingan API kaliti printsipi tomonidan ajratilgan. Audit yozuvlari xeshlar va o'lchamdagi metama'lumotlarni o'z ichiga oladi, hech qachon tarkibga kirmaydi. Operatorga tegishli tafsilotlar (ikkita marker, mijoz uchun zarur shartlar, `codemode:false`, har bir asbob doirasi, sahifalash va diagnostika matritsasi) [Compression Engines → Prerequisites / operator qo‘llanmasida](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) joylashgan.
 
-`omniroute_compression_status` MCP tavsifi siqilishini
-`analytics.mcpDescriptionCompression` ostida alohida hisobot qiladi. Bu qiymatlar MCP roʻyxatga olinadigan
-tavsiflari (`tools`, `prompts`, `resources` va `resourceTemplates`) uchun metadata hajmi hisob-kitoblaridir; ular provayder foydalanish
-kvitansiyalari emas va `source: "mcp_metadata_estimate"` bilan belgilangan.
+`omniroute_compression_status` `analytics.mcpDescriptionCompression` ostida MCP tavsifi siqishni alohida xabar qiladi. Bu qiymatlar MCP roʻyxatidagi tavsiflar (`tools`, `prompts`, `resources` va `resourceTemplates`) uchun metamaʼlumotlar oʻlchamidagi taxminlardir; ular provayderdan foydalanish cheklari emas va `source: "mcp_metadata_estimate"` bilan belgilangan.
 
 ### MCP Maxsus imkoniyatlar daraxti filtri (v3.8.0)
 
-Yuqoridagi siqish vositalaridan alohida ravishda, OmniRoute agentga qaytarilishidan oldin MCP brauzer/maxsus imkoniyatlar vositalarining **vosita natijalarini**
-siqadigan bajarilishdan keyingi filtrni oʻz ichiga oladi.
-Bu filtrning oʻzi vosita emas — u batafsil maxsus imkoniyatlar daraxti yoki brauzer surati matnini (≥2000 belgi) oʻz ichiga olgan har qanday vosita natijasida
-shaffof tarzda ishlaydi.
+Yuqoridagi siqish vositalaridan alohida, OmniRoute faylni siqib chiqaradigan bajarilgandan keyingi filtrni o'z ichiga oladi** vosita natijalari** MCP browser/accessibility asboblari agentga qaytarilgunga qadar. Ushbu filtrning o'zi vosita emas — u batafsil kirishlar daraxti yoki brauzerning oniy tasvirini (≥ 2000 ta belgi) o'z ichiga olgan har qanday vosita natijasida shaffof ishlaydi.
 
 Asosiy xatti-harakatlar:
 
-- Ketma-ket takrorlangan ≥30 ta turdosh satrni bosh qism + oxirgi qism xulosasiga yigʻadi
-- Playwright/kompyuterdan foydalanish uchun zarur boʻlgan `[ref=eXX]` tayanchlarini saqlaydi
-- Haddan tashqari katta matnni (>50,000 belgi) navigatsiya koʻrsatmasi bilan qatʼiy qisqartiradi
-- Kutiladigan tejamkorlik: brauzer surati foydali yuklarida **60–80%**
+- ≥ 30 ta ketma-ket takrorlanuvchi birodarli qatorlarni bosh + quyruq xulosasiga yig‘adi
+- Playwright/computer-use tomonidan talab qilinadigan `[ref=eXX]` langarlarini saqlaydi
+- Katta oʻlchamdagi matnni (> 50 000 ta belgi) navigatsiya boʻyicha maslahat bilan qattiq qisqartiradi
+- Kutilayotgan tejash:** 60–80%** brauzer oniy tasvir yuklamalarida
 
-Sozlash: global sozlamalardagi `compression.mcpAccessibility` (migratsiya 056).
-Amalga oshirish: `open-sse/services/compression/engines/mcpAccessibility/`.
-Toʻliq hujjatlar: [Siqish mexanizmlari — MCP Maxsus imkoniyatlar daraxti filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfiguratsiya: global sozlamalarda `compression.mcpAccessibility` (migratsiya 056). Amalga oshirish: `open-sse/services/compression/engines/mcpAccessibility/`. To'liq hujjatlar: [Siqish dvigatellari — MCP Maxsus imkoniyatlar daraxti filtri](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Ushbu vositalar ortidagi ish vaqtidagi siqish modeli uchun [Siqish mexanizmlari](../compression/COMPRESSION_ENGINES.md) va [RTK siqish](../compression/RTK_COMPRESSION.md) boʻlimlariga
-qarang.
+Ushbu vositalar orqasidagi ish vaqti siqish modeli uchun [Siqish dvigatellari](../compression/COMPRESSION_ENGINES.md) va [RTK siqishni](../compression/RTK_COMPRESSION.md) qarang.
 
 ## 1Proxy vositalari (3)
 
@@ -290,194 +280,119 @@ Sozlamalarda MCP serveri yoqilmaguncha (`mcpEnabled`) va tegishli `mcpTransport`
 
 ---
 
-## Autentifikatsiya va ruxsat doiralari
+## Autentifikatsiya va qamrovlar
 
-MCP vosita chaqiruvlari ruxsat doirasi satrlarini chaqiruvchidan o‘qiydi. Bu tekshiruv uchta mustaqil nomlar fazosidan biridir. Bitta tekshiruvchidan o‘tish boshqalaridan ham o‘tishni anglatmaydi. Qoidalar [Uchta ruxsat doirasi nomlar fazosi](#three-scope-namespaces) bo‘limida keltirilgan.
-Vositalar katalogi [MCP vositalarining ruxsat doiralari](#mcp-tool-scopes) bo‘limida keltirilgan.
+MCP vositasi qo'ng'iroq qiluvchidan o'qish doirasi satrlarini chaqiradi. Bu tekshirish uchta mustaqil nom maydonidan biridir. Bitta shashkadan o'tish boshqasidan pas emas. Qoidalar [uchta nom maydonidir](#three-scope-namespaces). Asboblar katalogi [MCP asboblar doirasi](#mcp-tool-scopes).
 
-### Uchta ruxsat doirasi nomlar fazosi
+### Uchta nom maydoni
 
-API kalitidagi `manage`, MCP vositasidagi `read:compression` va
-`oma_live_…` kirish tokenidagi `read` — uchta turli ruxsatdir. O‘zgartiruvchi boshqaruv marshrutiga `read`
-kirish tokenini yuborgan chaqiruvchilar HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-xatosini oladi. Bu daraja `scopeSatisfies` orqali tekshiriladi. U MCP jadvaliga murojaat qilmaydi, MCP
-moslashtiruvchisi ham unga murojaat qilmaydi.
+API kalitidagi `manage`, MCP asbobidagi `read:compression` va `oma_live_…` kirish tokenidagi `read` uch xil grantdir. Mutatsion boshqaruv marshrutiga `read` kirish tokenini yuborgan qo'ng'iroq qiluvchilar HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` oladilar. Bu daraja `scopeSatisfies`. MCP jadvali bilan maslahatlashmaydi va MCP matcher u bilan maslahatlashmaydi.
 
-| Nomlar fazosi                     | Hisob ma’lumoti                                                       | Tekshiruvchi                        | Tekshiruvdan o‘tish nimaga ruxsat beradi                         |
-| :-------------------------------- | :-------------------------------------------------------------------- | :---------------------------------- | :--------------------------------------------------------------- |
-| API kalitini boshqarish           | `api_keys.scopes`                                                     | `hasManageScope`                    | Shu Bearer kaliti uchun boshqaruv REST interfeysi                |
-| API kalitining qo‘shimcha ruxsati | o‘sha massiv, bitta aniq satr                                         | quyida nomlangan yordamchi funksiya | Faqat o‘sha imkoniyat                                            |
-| MCP vositasi ruxsat doiralari     | o‘sha massiv, aks holda MCP `_meta`, aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Majburiy tekshiruv yoqilgach, o‘sha vosita                       |
-| Kirish tokeni                     | `oma_live_…`                                                          | `scopeSatisfies`                    | Metodi va yo‘li shu darajani talab qiladigan boshqaruv marshruti |
+| Ismlar maydoni             | Hisob ma'lumotlari                                                                        | Tekshiruvchi                  | Pass ruxsat beradi                                               |
+| :------------------------- | :---------------------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------------------- |
+| API kalitlarini boshqarish | `api_keys.scopes`                                                                         | `hasManageScope`              | Ushbu Bearer kaliti uchun boshqaruv REST                         |
+| API kaliti qo'shimchasi    | bir xil massiv, bitta aniq satr                                                           | quyida ko'rsatilgan yordamchi | Faqat bitta qobiliyat                                            |
+| MCP asboblar doiralari     | bir xil massiv, aks holda MCP `_meta` (faqat HTTP/SSE ), aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Amalga oshirish yoqilgandan keyin bu vosita                      |
+| Kirish belgisi             | `oma_live_…`                                                                              | `scopeSatisfies`              | Usuli va yo'li shu darajani talab qiladigan boshqaruv yo'nalishi |
 
-Har bir hisob ma’lumotini yaratish
-[Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) bo‘limida yoritilgan.
+Har bir hisobga olish ma'lumotlarini zarb qilish [boshqaruv autentifikatsiyasida](../guides/MANAGEMENT-AUTH.md) qamrab olingan.
 
-#### API kaliti ruxsat doiralari
+#### API kalitlari doiralari
 
-Bitta `api_keys.scopes` massivi ikkita vazifani bajaradi. Ular turli funksiyalardan foydalanadi.
+Bitta `api_keys.scopes` massivi ikkita ishni ta'minlaydi. Ular turli funktsiyalardan foydalanadilar.
 
-**Boshqaruv REST interfeysi.** `manage` va `admin`
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) a’zolaridir.
-`hasManageScope` shu kalit uchun boshqaruv marshrutlariga ruxsat beradi. `admin` bu
-marshrutlarda boshqaruv imkoniyatiga ega. Bu yerdagi `admin` so‘zi
-kirish tokeni darajasi emas va u MCP vositasi ruxsat doiralariga kengaymaydi.
+**Boshqaruv REST.** `manage` va `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ning a’zolaridir. `hasManageScope` - bu kalit uchun boshqaruv marshrutlariga ruxsat beruvchi narsa. `admin` ushbu marshrutlarni boshqarishga qodir. Bu erda `admin` so'zi kirish tokeni darajasi emas va u MCP asboblar doirasiga kirmaydi.
 
-**Qo‘shimcha satrlar.** Har biri a’zolikning aniq tekshiruvidir va har biri
-`MANAGEMENT_API_KEY_SCOPES` tarkibidan tashqarida qoladi.
+**Qo'shimchalar qatorlari.** Ularning har biri aniq a'zolik testidir va har biri `MANAGEMENT_API_KEY_SCOPES` dan tashqarida qoladi.
 
-| Ruxsat doirasi                 | Tekshiruvdan o‘tish nimaga ruxsat beradi                                                                                                                                               |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Faqat loopback bo‘lmagan `/api/mcp/` uchun LOCAL_ONLY istisnosi (`hasMcpConnectOrManageScope`). `manage` yoki `admin` ruxsatiga ega kalit ham bu istisnodan o‘tadi.                    |
-| `self:usage`                   | Shu kalit uchun `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` yaratish vaqtida bu ruxsat doirasini qo‘shadi (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Shu holat javobi ichidagi yuqori oqim hisobi kvotalari (`src/lib/usage/apiKeySelfService.ts`). Holat marshruti baribir `self:usage` ruxsatini talab qiladi.                            |
-| `policy:bypass-provider-quota` | Bu kalitning inferensiya chaqiruvlari provayder kvotasi siyosatini chetlab o‘tadi (`src/sse/handlers/chat.ts` ichidagi `hasProviderQuotaBypassScope`).                                 |
+| Qo'llash doirasi               | Pass ruxsat beradi                                                                                                                                                        |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Orqaga aylanmaydigan `/api/mcp/` LOCAL_ONLY faqat o'yib chiqariladi (`hasMcpConnectOrManageScope`). `manage` yoki `admin` bilan kalit hali ham o'sha o'yib chiqib ketadi. |
+| `self:usage`                   | bu kalit uchun `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` bu doirani yaratish (`normalizeSelfServiceScopesForCreate`) ga qo'shadi.   |
+| `self:account-quota`           | Ushbu holat yuki (`src/lib/usage/apiKeySelfService.ts`) ichidagi yuqori oqim hisobi kvotalari. Holat marshruti hali ham `self:usage` talab qiladi.                        |
+| `policy:bypass-provider-quota` | Ushbu kalitning xulosa chaqiruvlari provayder-kvota siyosatini o'tkazib yuboradi (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                           |
 
-#### Moslashtirish
+#### Moslash
 
-Katalog [MCP vositalarining ruxsat doiralari](#mcp-tool-scopes) ostidagi jadvaldir.
-`src/shared/constants/mcpScopes.ts` ichidagi `MCP_SCOPE_LIST`ni shu katalog deb
-hisoblamang: u dastlabki tiplashtirilgan qism to‘plamidir. Keyinroq qo‘shilgan vositalar uning yonida
-qo‘shimcha ruxsat doiralarini e’lon qiladi (`read:notion`, `read:skills`, `read:local-corpus` va jadvalning qolgan qismi).
+Katalog [MCP asboblar doirasi](#mcp-tool-scopes) ostidagi jadvaldir. `src/shared/constants/mcpScopes.ts` dagi `MCP_SCOPE_LIST` o'sha katalog sifatida ko'rmang: u asl kiritilgan kichik to'plamdir. Keyinchalik asboblar uning yonida qo'shimcha doiralarni e'lon qiladi (`read:notion`, `read:skills`, `read:local-corpus` va jadvalning qolgan qismi).
 
-`open-sse/mcp-server/scopeEnforcement.ts` ichidagi `evaluateToolScopes` barcha
-talab qilinadigan ruxsat doiralari berilgan ruxsat doiralaridan biriga mos kelganda chaqiruvga ruxsat beradi:
+`open-sse/mcp-server/scopeEnforcement.ts` -dagi `evaluateToolScopes` har bir talab qilinadigan qamrov berilgan doiraga mos kelganda qo'ng'iroq qilishga ruxsat beradi:
 
-- `*` barcha talab qilinadigan ruxsat doiralariga mos keladi.
-- Oxiri `*` bilan tugaydigan berilgan ruxsat doirasi yulduzchadan oldingi
-  prefiks bilan boshlanadigan talab qilinadigan ruxsat doirasiga mos keladi. `read:*` `read:compression`ga mos keladi.
-- Boshqa har qanday berilgan ruxsat doirasi faqat aynan bir xil talab qilinadigan satrga mos keladi.
+- `*` har bir talab qilinadigan doiraga mos keladi.
+- A granted scope that ends in `*` matches a required scope that starts with the prefix before the star. `read:*` matches `read:compression`.
+- Har bir boshqa berilgan qamrov faqat bir xil talab qilingan qatorga mos keladi.
 
-Ruxsat doiralari `["manage"]` bo‘lgan kalit `read:compression` uchun `scopeMatches`
-tekshiruvidan o‘tmaydi. Agar faqat shu satrlar berilgan bo‘lsa, ayni chaqiruv `admin`, `mcp:connect`, `read` va `write` uchun ham muvaffaqiyatsiz tugaydi. MCP vositasi ruxsat doiralari orasida
-oxiridagi `*`dan tashqari hech qanday ierarxiya yo‘q.
+Qo'llash doirasi `["manage"]` bo'lgan kalit `read:compression` uchun `scopeMatches` bajarilmaydi. Xuddi shu qo'ng'iroq `admin`, `mcp:connect`, `read` va `write` uchun bajarilmaydi, agar ular yagona berilgan satrlar bo'lsa. Keyingi `*` dan tashqari MCP asboblar doiralari orasida ierarxiya yo'q.
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` bo‘lmasa, majburiy tekshiruv o‘chiq bo‘ladi (standart qiymat
-`false`). U o‘chiq bo‘lganida, `evaluateToolScopes` chaqiruvga ruxsat beradi va
-katalogni tekshirmaydi. U yoqilganida, HTTP Bearer kalitining `api_keys.scopes` qiymatidan
-`authInfo` sifatida foydalanadi ([Har bir kalit uchun HTTP ruxsat doirasini bog‘lash](#per-key-http-scope-binding-7895) bo‘limiga qarang).
-Hech qanday kalit ruxsat doirasi aniqlanmasa, berilgan ruxsatlar to‘plami avval MCP `_meta`ga, keyin
-`OMNIROUTE_MCP_SCOPES`ga o‘tadi.
+Agar `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standart `false`) boʻlmasa, majburlash oʻchirilgan. U o'chirilgan bo'lsa, `evaluateToolScopes` qo'ng'iroq qilishga ruxsat beradi va katalogni o'tkazib yuboradi. U yoqilgan paytda HTTP Bearer kalitining `api_keys.scopes` `authInfo` sifatida foydalanadi (qarang. [Har bir kalit HTTP doirasini bog'lash](#per-key-http-scope-binding-7895) ). Hech qanday kalit doirasi hal boʻlmasa, berilgan toʻplam MCP `_meta` (faqat HTTP auth kontekstida HTTP/SSE qoʻngʻiroq qiluvchilar uchun moʻljallangan; stdio qoʻngʻiroq qiluvchining `_meta` eʼtiborga olinmaydi, chunki mijoz uni boshqaradi va u har bir qoʻngʻiroq qiluvchining identifikatoriga ega emas), keyin `OMNIROUTE_MCP_SCOPES` ga tushadi.
 
-#### Kirish tokeni ruxsat doiralari
+#### Kirish-token doiralari
 
-`oma_live_…` tokenlari (`src/lib/accessTokens/scopes.ts`) `read`, `write`
-yoki `admin` ruxsatlarini o‘z ichiga oladi. `scopeSatisfies` darajalar tizimidir: `admin` `write` va `read`ni,
-`write` esa `read`ni qamrab oladi. Noma’lum ruxsat doiralari hech narsani qamrab olmaydi.
+`oma_live_…` tokenlari (`src/lib/accessTokens/scopes.ts`) `read`, `write` yoki `admin` ni olib yuradi. `scopeSatisfies` - daraja: `admin` `write` va `read` ni, `write` `read` qamrab oladi. Noma'lum doiralar hech narsani qamrab olmaydi.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) bu darajani
-`inferRequiredScope` (`src/server/authz/accessScopes.ts`) bilan taqqoslaydi:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) bu darajani `inferRequiredScope` (`src/server/authz/accessScopes.ts`) bilan taqqoslaydi:
 
-- `GET`, `HEAD` va `OPTIONS` `read` ruxsatini talab qiladi.
-- Boshqa barcha metodlar `write` ruxsatini talab qiladi.
-- `ADMIN_SCOPE_PREFIXES` ichidagi yo‘llar har bir metod uchun `admin` ruxsatini talab qiladi. `/api/mcp`
-  shu ro‘yxatda, shuning uchun `write` kirish tokeni hali ham MCP HTTP
-  interfeysini chaqira olmaydi.
-- `ADMIN_MUTATION_PREFIXES` ichidagi yo‘llar faqat o‘zgartirishlar uchun `admin` ruxsatini talab qiladi.
-- `ADMIN_MUTATION_EXACT_PATHS` ichidagi yo‘llar (`/api/settings`,
-  `/api/settings/require-login`) faqat o‘zgartirishlar va faqat aynan
-  shu yo‘l uchun `admin` ruxsatini talab qiladi — boshqa `/api/settings/*` quyi marshrutlari uchun `write` yetarli bo‘lib qoladi.
+- `GET`, `HEAD` va `OPTIONS` `read` talab qiladi.
+- Boshqa har qanday usul `write` talab qiladi.
+- `ADMIN_SCOPE_PREFIXES` yo'llar har bir usul uchun `admin` talab qiladi. `/api/mcp` ushbu ro'yxatda, shuning uchun `write` kirish tokeni hali ham MCP HTTP sirtini chaqira olmaydi.
+- `ADMIN_MUTATION_PREFIXES` yo'llar faqat mutatsiyalar uchun `admin` talab qiladi.
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`)dagi yo‘llar faqat mutatsiyalar uchun `admin` talab qiladi va faqat shu aniq yo‘lda — boshqa `/api/settings/*` pastki marshrutlari `write` saqlaydi.
 
-`PATCH /api/keys/{id}` mutatsiya hisoblanadi va ushbu administrator roʻyxatlarida mavjud emas, shuning uchun
-`read` tokeni 403 javobini oladi:
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` yoki `admin` kirish tokeni ushbu marshrut talabini qondiradi. Boshqaruv paneli JWT tokeni,
-loopback CLI machine-id tokeni va `manage` yoki `admin` huquqiga ega API kaliti
-boshqa tarmoqlardan oʻtadi va bu daraja bilan cheklanmaydi.
+`PATCH /api/keys/{id}` mutatsiya bo'lib, u administrator ro'yxatlarida yo'q, shuning uchun `read` tokeni 403 `Access token scope 'read' is insufficient; 'write' required.` oladi A `write` yoki `admin` kirish tokeni ushbu marshrutni qondiradi. Boshqarish paneli JWT, CLI mashina identifikatori tokeni va `manage` yoki `admin` bilan API kaliti boshqa tarmoqlarni oladi va bu daraja bilan toraymaydi.
 
-`/api/mcp` uchun `scopeSatisfies` tekshiruvidan oʻtgan kirish tokeni faqat
-boshqaruv shlyuzidan oʻtgan boʻladi. Vosita chaqiruvlari API kaliti
-doiralariga nisbatan hali ham `scopeMatches` tekshiruvini bajaradi.
-Kirish tokenining darajasi `scopeMatches` uchun kirish parametri emas.
+`/api/mcp` uchun `scopeSatisfies` dan o'tuvchi kirish tokeni faqat boshqaruv eshigini tozaladi. Asbob qo'ng'iroqlari hali ham API kalit doiralariga qarshi `scopeMatches` ishlaydi. Kirish tokeni darajasi `scopeMatches` ga kirish emas.
 
-### MCP vositalari doiralari
+### MCP asboblar doiralari
 
-Doiralarni majburiy tekshirish `open-sse/mcp-server/scopeEnforcement.ts` faylida markazlashtirilgan.
-Har bir vosita muayyan doiralarni talab qiladi:
+Qo'llash doirasi `open-sse/mcp-server/scopeEnforcement.ts` markazlashtirilgan. Har bir vosita maxsus qamrovni talab qiladi:
 
-| Qamrov                | Vositalar                                                                                                                                                                            |
-| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                    |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                            |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                               |
-| `read:quota`          | `check_quota`                                                                                                                                                                        |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                               |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                        |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                   |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                          |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                       |
-| `read:cache`          | `cache_stats`                                                                                                                                                                        |
-| `write:cache`         | `cache_flush`                                                                                                                                                                        |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                           |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                    |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                     |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                               |
-| `read:memory`         | `memory_search`                                                                                                                                                                      |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                         |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                   |
-| `write:skills`        | `skills_enable`                                                                                                                                                                      |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                     |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                     |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                              |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                            |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                     |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                       |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                   |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                      |
-| `read:obsidian`       | 13 ta oʻqish vositasi — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 ta yozish vositasi — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                    |
+| Qo'llash doirasi      | Asboblar                                                                                                                                                                              |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                     |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                             |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                |
+| `read:quota`          | `check_quota`                                                                                                                                                                         |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                |
+| `read:models`         | `list_models_catalog`                                                                                                                                                                 |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                         |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                 |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                    |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                           |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                        |
+| `read:cache`          | `cache_stats`                                                                                                                                                                         |
+| `write:cache`         | `cache_flush`                                                                                                                                                                         |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                            |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                     |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                 |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                      |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                                |
+| `read:memory`         | `memory_search`                                                                                                                                                                       |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                          |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                    |
+| `write:skills`        | `skills_enable`                                                                                                                                                                       |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                      |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                      |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                               |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                             |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                      |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                        |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                    |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                       |
+| `read:obsidian`       | 13 ta oʻqish vositalari — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`,… |
+| `write:obsidian`      | 9 ta yozish vositalari — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                     |
 
-Joker belgili ruxsat doiralari qoʻllab-quvvatlanadi: `read:*` barcha oʻqish doiralariga, `*` esa toʻliq kirish huquqini beradi.
+Joker belgilar doiralari qo'llab-quvvatlanadi: `read:*` barcha o'qish doiralarini beradi, `*` to'liq ruxsat beradi.
 
-### `mcp:connect` — tor doiradagi marshrut imkoniyati (#7895)
+### `mcp:connect` — tor marshrut qobiliyati (#7895)
 
-HTTP/SSE MCP transportiga (`/api/mcp/*`) loopback boʻlmagan manzildan murojaat qilish uchun
-`/api/mcp/` LOCAL_ONLY istisnosi talab etiladi (`docs/security/ROUTE_GUARD_TIERS.md` fayliga qarang). Ilgari
-bu istisno faqat toʻliq `manage`/`admin` doirasiga ega API kalitini qabul qilardi — bu faqat
-MCP bilan muloqot qilishi kerak boʻlgan chaqiruvchi uchun haddan tashqari keng edi. Endi
-`src/shared/constants/managementScopes.ts` fayli `MCP_CONNECT_SCOPE = "mcp:connect"` ni
-eksport qiladi: bu qoʻshimcha, tor doiradagi ruxsat (`SELF_USAGE_SCOPE` bilan bir xil yondashuv) boʻlib,
-`src/server/authz/policies/management.ts` ichidagi FAQAT `/api/mcp/` chetlab oʻtishiga ruxsat beradi
-— u boshqa boshqaruv marshrutlariga hech qanday kirish huquqini bermaydi va ataylab
-`MANAGEMENT_API_KEY_SCOPES` tarkibiga KIRITILMAGAN. `manage`/`admin` ga ega kalit
-istisnodan avvalgidek oʻtadi; `mcp:connect` esa faqat masofaviy MCP chaqiruvchilari uchun
-kamroq imtiyozli muqobil boʻlib, `hasMcpConnectOrManageScope()` orqali tekshiriladi.
+HTTP/SSE MCP transportiga (`/api/mcp/*`) teskari bo'lmagandan erishish uchun `/api/mcp/` LOCAL_ONLY o'yib chiqarish kerak ( `docs/security/ROUTE_GUARD_TIERS.md` ga qarang). Tarixan bu o'yib chiqish faqat to'liq `manage`/`admin` -scope API kalitini qabul qilgan — faqat MCP gaplashishi kerak bo'lgan qo'ng'iroq qiluvchi uchun juda keng. `src/shared/constants/managementScopes.ts` endi `MCP_CONNECT_SCOPE = "mcp:connect"` eksport qiladi: qo‘shimcha, tor doirada ( `SELF_USAGE_SCOPE` bilan bir xil pretsedent), `src/server/authz/policies/management.ts` — `/api/mcp/` aylanib o‘tishni ONLY ruxsat beradi, u boshqa boshqaruv yo‘nalishiga ruxsat bermaydi va ataylab `MANAGEMENT_API_KEY_SCOPES` OUT ni saqlaydi. `manage`/`admin` tugmachasini ushlab turgan kalit hali ham o'zgarmagan holda o'yib ketadi; `mcp:connect` - bu `hasMcpConnectOrManageScope()` orqali tekshiriladigan MCP-dan faqat masofaviy qo'ng'iroq qiluvchilar uchun pastroq imtiyozli muqobildir.
 
-### Har bir kalit uchun HTTP doirasini bogʻlash (#7895)
+### Har bir kalit uchun HTTP qamrovini ulash (#7895)
 
-HTTP/SSE orqali `open-sse/mcp-server/httpTransport.ts` endi chaqiruvchining haqiqiy
-`api_keys.scopes` qiymatini `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-orqali aniqlaydi va uni MCP SDK dagi `transport.handleRequest(req, { authInfo })` ga uzatadi, shunda
-har bir vosita chaqiruviga yetib boradigan `extra.authInfo.scopes` Bearer kalitining oʻz doiralarini
-aks ettiradi. `scopeEnforcement.ts` ichidagi `resolveCallerScopeContext()` allaqachon
-`authInfo` ni `_meta` va `OMNIROUTE_MCP_SCOPES` muhit oʻzgaruvchisiga asoslangan zaxira variantdan
-ustun qoʻyardi — bu oʻzgarish faqat HTTP orqali avval toʻldirilmagan birinchi, eng yuqori
-ustuvorlikdagi manbani toʻldiradi. Hech qanday API kaliti aniqlanmasa
-(sarlavha yoʻq yoki kalit yaroqsiz boʻlsa), `authInfo` `undefined` holida qoladi va aniqlash jarayoni
-avvalgidek mavjud `meta`/muhit zanjiriga oʻtadi. stdio har bir chaqiruvchi uchun alohida identifikatsiyaga
-ega emas (`mcpCallerIdentity.ts` fayliga qarang) va bundan taʼsirlanmaydi — u `_meta`/muhit zaxira
-zanjirida qoladi.
+HTTP/SSE orqali `open-sse/mcp-server/httpTransport.ts` endi `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) orqali qo'ng'iroq qiluvchining haqiqiy `api_keys.scopes` hal qiladi va uni MCP SDK ning `transport.handleRequest(req, { authInfo })` ga uzatadi, shuning uchun `extra.authInfo.scopes` har bir asbob chaqiruviga yetib borishi Bearer kalitining o'z doiralarini aks ettiradi. `scopeEnforcement.ts` ning `resolveCallerScopeContext()` allaqachon `authInfo` `_meta` va `OMNIROUTE_MCP_SCOPES` env zaxira — nisbatan birinchi o‘ringa qo‘ygan, bu faqat o‘sha birinchi, eng yuqori ustuvor manbani to‘ldiradi, u avval HTTP orqali oziqlantirilmagan. Hech qanday API kaliti hal etilmasa (sarlavha yo'q, yaroqsiz kalit), `authInfo` `undefined` bo'lib qoladi va ruxsat mavjud `meta`/env zanjiriga o'zgarishsiz tushadi. stdio har bir qo'ng'iroq qiluvchining identifikatoriga ega emas ( `mcpCallerIdentity.ts` qarang) va har bir kalit — bog'lanishi ta'sir qilmaydi, u `_meta` qadamini o'tkazib yuboradi (`_meta` faqat HTTP auth kontekstida hurmat qilinadi, #15159) va faqat `OMNIROUTE_MCP_SCOPES` env kalitidan hal qiladi.
 
-**Tor doirali HTTP/SSE chaqiruvchilari uchun `OMNIROUTE_MCP_ENFORCE_SCOPES` qiymatidan qatʼi nazar,
-majburiy nazorat yoqiladi.** `OMNIROUTE_MCP_ENFORCE_SCOPES` ning standart qiymati `false` boʻlishi
-faqat mahalliy/stdio yagona operator oqimi uchun xavfsiz, chunki unda doira qoʻllash mumkin boʻlgan
-har bir chaqiruvchiga xos identifikatsiya mavjud emas.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` har bir vosita uchun doira nazoratini
-(`scopeEnforcement.ts` ichidagi `shouldForceScopeEnforcement()`) `resolveCallerScopeContext()`
-`source === "authInfo"` ni aniqlaganida (yaʼni har bir kalitga xos haqiqiy HTTP Authorization sarlavhasi,
-faqat HTTP/SSE uchun) VA ushbu kalit toʻliq `manage`/`admin` doirasiga ega boʻlmaganida
-soʻzsiz yoqadi. Bu faqat tor doiradagi `mcp:connect` chetlab oʻtish doirasiga ega kalit —
-yuqorida faqat `/api/mcp/` LOCAL_ONLY istisnosiga ruxsat berishi hujjatlashtirilgan —
-aks holda operator masofaviy/loopback boʻlmagan MCP kirishini yoqqach, shunchaki
-`OMNIROUTE_MCP_ENFORCE_SCOPES` standart holatda `false` boʻlib taqdim etilgani sababli barcha MCP
-vositalarini chaqira olishi mumkin boʻlgan boʻshliqni yopadi. HTTP orqali toʻliq `manage`/`admin`
-kaliti hamda barcha stdio/mahalliy chaqiruvchilar uchun mavjud
-`OMNIROUTE_MCP_ENFORCE_SCOPES` bilan boshqariladigan xatti-harakat oʻzgarishsiz qoladi.
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
 
 ---
 

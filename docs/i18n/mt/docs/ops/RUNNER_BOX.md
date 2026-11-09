@@ -27,13 +27,12 @@ Kejl tal-2026-10-18:
 | swap      | 16 GB                                       | `omniroute-113-5` jaħdem bis-swap mitfi (`MemorySwapMax=0`) sabiex build li jaħrab mill-kontroll jinqata’ mal-limitu tiegħu minflok ma jġiegħel lill-magna tuża s-swap                                                                                                                                                                                                                                                                         |
 | `/tmp`    | **12 GB tmpfs = RAM**                       | kull ħaġa li titħalla hemm tuża l-memorja; il-fdalijiet jitneħħew wara 3 sigħat                                                                                                                                                                                                                                                                                                                                                                |
 | CPU       | ġiet osservata tagħbija ta’ 60 fuq 32 qalba | qabel il-kwoti, build wieħed ta’ Turbopack (~1166 % CPU) flimkien ma’ sett ta’ testijiet tal-kopertura fuq l-istess magna ċaħħdu s-sinjali ta’ ħajja tal-listeners l-oħra mir-riżorsi (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                    |
-| runners   | **6 listeners**                             | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` huma diżattivati (`systemctl enable --now` jerġa’ jattiva wieħed)                                                                                                                                                                                                                                                                                                              |
+| runners   | **7 listeners** (2026-10-28)                | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` iġorr ukoll `omni-build`; `omniroute-113-3/-4/-8` tħassru mir-repo (2026-10-28)                                                                                                                                                                                                                                                                                                         |
 
 Il-limiti jinsabu fil-fajl `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ta’ kull unità
 (il-valuri preċedenti nżammu bħala `override.conf.bak-20261018`) u ġew applikati waqt it-tħaddim permezz ta’
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — mingħajr restart, għalhekk l-ebda
-job li kien qed jaħdem ma ġie affettwat. It-tikketti jinbidlu permezz tal-API tar-runners
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+job li kien qed jaħdem ma ġie affettwat. It-tikketti jinbidlu permezz tal-API tar-runners (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ukoll waqt it-tħaddim.
 
 ## Installa l-janitor (darba biss, fuq il-magna)
@@ -42,7 +41,7 @@ job li kien qed jaħdem ma ġie affettwat. It-tikketti jinbidlu permezz tal-API 
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): kull 30 minuta, irreġistra f’/var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` huwa meħtieġ: il-janitor jivverifika li path mhuwiex qed jintuża permezz ta’ stampa waħda tal-fajls miftuħa qabel ineħħih, u mingħajr din l-għodda ma jneħħi xejn u jgħid li ma għamel xejn (exit 1). L-ewwel ipprova kwalunkwe bidla b’`--dry-run` — jistampa eżattament x’kien se jagħmel u ma jmiss xejn.
@@ -100,8 +99,9 @@ Il-`KillMode=process` default tar-runner iħalli `Runner.Worker → npm → next
   jirriklama l-memorja hemmhekk; 8 GB ineħħu t-throttling.
 - **Inqas listeners apposta.** Erba’ units ta’ OmniRoute ġew diżattivati fit-2026-08-29 — kull
   listener addizzjonali huwa tenant ieħor għall-baġit tal-memorja ta’ hawn fuq. Il-limitu
-  massimu tal-janitor huwa 6 (`MAX_ACTIVE_RUNNERS=6` fil-cron): jgħodd kull `Runner.Listener`
-  fuq il-magna, u OmniHeuris + OmniMind iżidu tnejn mal-erbgħa tagħna.
+  massimu tal-janitor huwa 8 (`MAX_ACTIVE_RUNNERS=8` fil-cron): jgħodd kull `Runner.Listener`
+  fuq il-magna, u OmniHeuris + OmniMind iżidu tnejn mal-ħamsa tagħna.
+- **Il-jobs ta’ Unit u Vitest jibqgħu ospitati.** `ci.yml` jibgħat ix-shards tal-unit u l-job ta’ Vitest lil `[self-hosted, omni-ci]` biss meta l-varjabbli tar-repository `vars.USE_VPS_TEST_RUNNER` tkun `true`, u anki dakinhar biss għal eżekuzzjonijiet `pull_request` mill-istess repository; il-forks, `merge_group` u l-pushes jibqgħu fuq `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Il-varjabbli hija `false`. Fit-2026-10-28 tliet listeners `omni-ci` b’4 cores ħadu 250–270 s għal `npm ci` u kull shard tal-unit laħaq il-limitu ta’ 30 minuta tal-job, meta mqabbel ma’ ~634 s għal shard ospitat, bil-magna f’load ta’ 17–24. Il-listeners tħassru. Terġax tixgħel il-varjabbli mingħajr listeners ta’ daqs adattat għal shard tal-unit.
 - **Qatt tnaddaf `/tmp` jew `_work` bl-idejn waqt li xi runner ikun okkupat.** Proċess ta’
   verifika u mbagħad tħassir b’intervall bejniethom kien kif job `Build` attiv tilef
   il-`_work` tiegħu fis-2026-08-27. Il-janitor jagħmel il-verifika u t-tneħħija f’pass wieħed;
@@ -116,8 +116,7 @@ Il-`KillMode=process` default tar-runner iħalli `Runner.Worker → npm → next
 
 ## Korsija ospitata (runners ospitati minn GitHub)
 
-Il-kont jinsab fuq il-pjan **Pro**: **40 biċċa xogħol ospitata konkorrenti**, kondiviżi bejn kull kontroll ta’ PR,
-kull workflow skattat minn push u l-konfigurazzjoni predefinita ta’ CodeQL. Imkejjel fit-2026-10-18 waqt
+Ir-repository tappartjeni lill-organizzazzjoni `cheaper-inference`, fuq il-pjan **Team**: **60 biċċa xogħol ospitata konkorrenti**, kondiviżi bejn kull repository fl-organizzazzjoni, kull kontroll ta’ PR, kull workflow skattat minn push u l-konfigurazzjoni predefinita ta’ CodeQL. Iċ-ċifri ta’ hawn taħt tkejlu fuq il-pjan **Pro** (40 biċċa xogħol ospitata konkorrenti). Imkejjel fit-2026-10-18 waqt
 kampanja ta’ merges (~10 merges/siegħa fuq `release/v3.8.52`): **2,500 eżekuzzjoni ta’ workflow maħluqa
 f’24 siegħa**, 44 push lejn il-fergħa f’6 sigħat, **106 biċċiet xogħol ospitati fil-kju** waqt li l-kontrolli tal-PRs stennew
 għal sigħat u l-PRs ġew integrati mingħajrhom. Disa’ workflows ġew skattati ma’ kull push lejn il-fergħa:

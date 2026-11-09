@@ -20,6 +20,8 @@ function jsonResponse(body: unknown): Response {
 }
 
 let root: Root;
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so element queries start there (the container is a child of body).
 let container: HTMLDivElement;
 const fetched: string[] = [];
 
@@ -47,7 +49,7 @@ async function click(element: HTMLElement) {
 }
 
 function findButton(text: string): HTMLButtonElement {
-  const button = Array.from(container.querySelectorAll("button")).find((candidate) =>
+  const button = Array.from(document.body.querySelectorAll("button")).find((candidate) =>
     candidate.textContent?.includes(text)
   );
   if (!button) throw new Error(`Button not found: ${text}`);
@@ -134,17 +136,19 @@ describe("ProxyRegistryManager upstream regime mount", () => {
       });
       await click(findButton("managePool"));
 
-      const scopeIdInput = container.querySelector<HTMLInputElement>(
+      const scopeIdInput = document.body.querySelector<HTMLInputElement>(
         '[data-testid="proxy-registry-pool-scopeid"]'
       );
       expect(scopeIdInput).not.toBeNull();
       setInputValue(scopeIdInput!, "sentinel-provider");
       await click(
-        container.querySelector<HTMLButtonElement>('[data-testid="proxy-registry-pool-load"]')!
+        document.body.querySelector<HTMLButtonElement>('[data-testid="proxy-registry-pool-load"]')!
       );
 
       await waitFor(() => {
-        const line = container.querySelector('[data-testid="proxy-registry-upstream-regime-line"]');
+        const line = document.body.querySelector(
+          '[data-testid="proxy-registry-upstream-regime-line"]'
+        );
         if (!line) throw new Error("regime line not mounted");
         expect(line.textContent).toContain("uniformEgressLine");
       });

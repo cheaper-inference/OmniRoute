@@ -34,6 +34,11 @@ import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import {
+  isTerminalMediaFailure,
+  narrowMediaConnectionScope,
+  pinnedConnectionIds,
+} from "./mediaComboFallback.ts";
 
 /**
  * Execute a full combo strategy for a text-to-speech request.
@@ -92,7 +97,8 @@ export async function executeSpeechCombo(
   let lastError: { status: number; error: string } | null = null;
   let fallbackCount = 0;
 
-  for (const target of speechTargets) {
+  for (let targetIndex = 0; targetIndex < speechTargets.length; targetIndex += 1) {
+    const target = speechTargets[targetIndex];
     const { provider: targetProvider, model: resolvedModel } = parseSpeechModel(
       target.modelStr,
       dynamicProviders
@@ -107,6 +113,10 @@ export async function executeSpeechCombo(
       getSpeechProvider(targetProvider) ||
       dynamicProviders.find((dp) => dp.id === targetProvider) ||
       null;
+    const targetAllowedConnections = narrowMediaConnectionScope(
+      keyScope.allowedConnections,
+      pinnedConnectionIds(target)
+    );
 
     let credentials = null;
     if (providerConfig && providerConfig.authType !== "none") {
@@ -115,7 +125,8 @@ export async function executeSpeechCombo(
         credentials = await getProviderCredentialsWithQuotaPreflight(
           credentialKey,
           null,
-          keyScope.allowedConnections ?? null
+          targetAllowedConnections,
+          resolvedModel
         );
       } catch {
         lastError = { status: 502, error: `Failed to resolve credentials for ${targetProvider}` };
@@ -148,12 +159,13 @@ export async function executeSpeechCombo(
       const keylessCredentialKey = providerConfig.credentialProviderId || targetProvider;
       const keylessRejection = await keylessProviderRejection(
         targetProvider,
-        keyScope.allowedConnections,
+        targetAllowedConnections,
         () =>
           getProviderCredentialsWithQuotaPreflight(
             keylessCredentialKey,
             null,
-            keyScope.allowedConnections ?? null
+            targetAllowedConnections,
+            resolvedModel
           )
       );
       if (keylessRejection) {
@@ -204,7 +216,18 @@ export async function executeSpeechCombo(
       // non-text or already-consumed body — keep the status-line message
     }
 
-    if (status === 400 || status === 401 || status === 403) {
+    if (
+      isTerminalMediaFailure({
+        status,
+        provider: targetProvider,
+        credentials,
+        target,
+        remaining: speechTargets.slice(targetIndex + 1).map((candidate) => ({
+          target: candidate,
+          provider: parseSpeechModel(candidate.modelStr, dynamicProviders).provider,
+        })),
+      })
+    ) {
       return errorResponse(status, `[${targetProvider}] ${error}`);
     }
 

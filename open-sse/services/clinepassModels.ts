@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+/**
+ * Why the live catalog was not used: a code of the closed vocabulary, or an
+ * HTTP status. Never a message, a body or an URL — the reason is published to
+ * the operator, so it must not carry what the upstream sent.
+ */
+type DiscoveryFailure = { status?: number; code?: string };
+
 // ClinePass live catalog resolver. Cline publishes the authoritative picker
 // contents through the public recommended-models endpoint. OmniRoute exposes
 // the subscription bucket on ClinePass and keeps recommended/free entries on
@@ -122,7 +129,7 @@ const recommendedCatalogSchema = z.object({
  */
 export async function resolveClineModels(
   fetchImpl: typeof fetch = fetch
-): Promise<ClinepassModel[] | null> {
+): Promise<{ models: ClinepassModel[]; failure?: DiscoveryFailure }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -135,13 +142,14 @@ export async function resolveClineModels(
         })
       )
     );
-    if (responses.some((response) => !response.ok)) return null;
+    const failed = responses.find((response) => !response.ok);
+    if (failed) return { models: [], failure: { status: failed.status } };
     const [fullPayload, recommendedPayload] = await Promise.all(
       responses.map((response) => response.json())
     );
     const full = fullCatalogSchema.safeParse(fullPayload);
     const recommended = recommendedCatalogSchema.safeParse(recommendedPayload);
-    if (!full.success || !recommended.success) return null;
+    if (!full.success || !recommended.success) return { models: [], failure: {} };
 
     const models = new Map<string, ClinepassModel>();
     for (const model of [
@@ -152,9 +160,9 @@ export async function resolveClineModels(
       if (model.id.startsWith("cline-pass/") || models.has(model.id)) continue;
       models.set(model.id, model);
     }
-    return [...models.values()];
+    return { models: [...models.values()] };
   } catch {
-    return null;
+    return { models: [], failure: {} };
   } finally {
     clearTimeout(timer);
     controller.abort();

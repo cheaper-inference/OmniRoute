@@ -229,6 +229,7 @@ export class JulesAgent extends CloudAgentBase {
       (typeof data.id === "string" && data.id) ||
       (typeof data.name === "string" ? normalizeJulesSessionId(data.name) : "") ||
       taskId;
+    const now = new Date().toISOString();
 
     return {
       id: taskId,
@@ -239,8 +240,8 @@ export class JulesAgent extends CloudAgentBase {
       source: params.source,
       options: params.options,
       activities: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
     };
   }
 

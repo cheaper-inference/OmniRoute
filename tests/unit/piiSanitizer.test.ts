@@ -191,3 +191,205 @@ test("sanitizePIIResponse handles Gemini format", async () => {
 
   delete process.env.PII_RESPONSE_SANITIZATION;
 });
+
+// ── GDPR / EU Pattern Tests ──
+
+test("sanitizePII detects and redacts IBAN", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid IBAN: GB29 NWBK 6016 1331 9268 19 (GB29NWBK60161331926819)
+  const input = "IBAN: GB29NWBK60161331926819";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[IBAN_REDACTED]"), "IBAN should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts ES DNI/NIE", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid DNI: 12345678Z
+  const input = "DNI: 12345678Z";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[ES_DNI_REDACTED]"), "ES DNI should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts IT Codice Fiscale", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid CF: RSSMRA80A01H501U
+  const input = "CF: RSSMRA80A01H501U";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[IT_CF_REDACTED]"), "IT Codice Fiscale should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts PL PESEL", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid PESEL: 85010112345 (checksum valid)
+  const input = "PESEL: 85010112345";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[PL_PESEL_REDACTED]"), "PL PESEL should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts NL BSN", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid BSN: 111222333 (11-proof)
+  const input = "BSN: 111222333";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[NL_BSN_REDACTED]"), "NL BSN should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts DE Steuer-ID", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid Steuer-ID: 65929970489 (ISO 7064 Mod 11,10 + digit-structure rules)
+  const input = "Steuer-ID: 65929970489";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[DE_STEUERID_REDACTED]"), "DE Steuer-ID should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts SE personnummer", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid personnummer: 800101-1009 (Luhn valid on 10 digits)
+  const input = "Personnummer: 800101-1009";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[SE_PNR_REDACTED]"), "SE personnummer should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+// ── POPIA / South Africa Pattern Tests ──
+
+test("sanitizePII detects and redacts ZA ID", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid SA ID: 8001015009087 (standard Luhn over all 13 digits)
+  const input = "SA ID: 8001015009087";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[ZA_ID_REDACTED]"), "ZA ID should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts ZA phone", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid SA phone: +27 82 123 4567
+  const input = "Phone: +27 82 123 4567";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[ZA_PHONE_REDACTED]"), "ZA phone should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts ZA VAT", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid SA VAT: 4000000000 (starts with 4, 10 digits)
+  const input = "VAT: 4000000000";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[ZA_VAT_REDACTED]"), "ZA VAT should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII detects and redacts ZA tax reference", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Valid SA tax ref: 1000000008 (10 digits, Luhn) with a "tax" cue in front of it
+  const input = "Tax Ref: 1000000008";
+  const result = sanitizePII(input);
+
+  assert.ok(result.text.includes("[ZA_TAXREF_REDACTED]"), "ZA tax ref should be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+// ── Validator rejection tests (false positives should not be redacted) ──
+
+test("sanitizePII does not redact invalid IBAN", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Invalid IBAN (wrong check digits)
+  const input = "IBAN: GB29NWBK60161331926818";
+  const result = sanitizePII(input);
+
+  assert.ok(!result.text.includes("[IBAN_REDACTED]"), "Invalid IBAN should not be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII does not redact invalid ES DNI", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Invalid DNI (wrong letter)
+  const input = "DNI: 12345678X";
+  const result = sanitizePII(input);
+
+  assert.ok(!result.text.includes("[ES_DNI_REDACTED]"), "Invalid ES DNI should not be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});
+
+test("sanitizePII does not redact invalid ZA ID", async () => {
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  delete process.env.PII_RESPONSE_SANITIZATION_MODE;
+
+  const { sanitizePII } = await import("@/lib/piiSanitizer");
+  // Invalid SA ID (wrong Luhn)
+  const input = "SA ID: 8001015009088";
+  const result = sanitizePII(input);
+
+  assert.ok(!result.text.includes("[ZA_ID_REDACTED]"), "Invalid ZA ID should not be redacted");
+
+  delete process.env.PII_RESPONSE_SANITIZATION;
+});

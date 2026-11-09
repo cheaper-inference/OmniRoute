@@ -27,13 +27,12 @@ hosted ပတ်ဝန်းကျင်တွင် အလုပ်လုပ်
 | swap      | 16 GB                                             | `omniroute-113-5` သည် swap ပိတ်ထားပြီး (`MemorySwapMax=0`) အလုပ်လုပ်သဖြင့် ထိန်းချုပ်မရသော build တစ်ခုသည် စက်ကို swap အသုံးပြုစေမည့်အစား ၎င်း၏ ကန့်သတ်ချက်သို့ ရောက်သောအခါ ရပ်တန့်ခံရပါသည်                                                                                                                                                                                                                                                                                        |
 | `/tmp`    | **12 GB tmpfs = RAM**                             | ထိုနေရာတွင် သိမ်းထားသည့် မည်သည့်အရာမဆို memory ကို အသုံးပြုပါသည်။ ကျန်ရှိနေသောအရာများကို 3 h ကြာပြီးနောက် ရှင်းလင်းပါသည်                                                                                                                                                                                                                                                                                                                                                          |
 | CPU       | 32 cores ပေါ်တွင် load 60 ရှိသည်ကို တွေ့ရှိခဲ့သည် | quota များ မသတ်မှတ်မီ စက်တစ်ခုတည်းပေါ်ရှိ Turbopack build တစ်ခု (~1166 % CPU) နှင့် coverage suite တစ်ခုတို့က အခြား listener များ၏ heartbeat များအတွက် resource မလုံလောက်စေခဲ့ပါသည် (`The self-hosted runner lost communication`၊ #16853)                                                                                                                                                                                                                                         |
-| runners   | **6 listeners**                                   | OmniRoute 4 ခု + OmniHeuris + OmniMind။ `omniroute-113-3/-4/-7/-8` ကို ပိတ်ထားသည် (`systemctl enable --now` ဖြင့် တစ်ခုကို ပြန်ဖွင့်နိုင်သည်)                                                                                                                                                                                                                                                                                                                                     |
+| runners   | **7 listeners** (2026-10-28)                      | OmniRoute 5 ခု + OmniHeuris + OmniMind။ `omniroute-113-7` သည် `omni-build` ကိုလည်း သယ်ဆောင်သည်။ `omniroute-113-3/-4/-8` ကို repo မှ ဖျက်ပစ်ခဲ့သည် (2026-10-28)                                                                                                                                                                                                                                                                                                                    |
 
 ကန့်သတ်ချက်များကို unit တစ်ခုစီ၏ `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 တွင် ထားရှိပြီး (ယခင်တန်ဖိုးများကို `override.conf.bak-20261018` အဖြစ် သိမ်းထားသည်)၊
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ဖြင့် လက်ရှိအလုပ်လုပ်နေစဉ် တိုက်ရိုက်အသုံးချခဲ့သည် — restart လုပ်ရန် မလိုအပ်သဖြင့်
-လုပ်ဆောင်နေသော job မည်သည့်တစ်ခုကိုမျှ မထိခိုက်ခဲ့ပါ။ Label များကို runners API မှတစ်ဆင့်
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+လုပ်ဆောင်နေသော job မည်သည့်တစ်ခုကိုမျှ မထိခိုက်ခဲ့ပါ။ Label များကို runners API မှတစ်ဆင့် (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ပြောင်းလဲပြီး ယင်းပြောင်းလဲမှုကိုလည်း လက်ရှိအလုပ်လုပ်နေစဉ် တိုက်ရိုက်လုပ်ဆောင်ပါသည်။
 
 ## janitor ကို ထည့်သွင်းခြင်း (စက်ပေါ်တွင် တစ်ကြိမ်သာ)
@@ -42,7 +41,7 @@ hosted ပတ်ဝန်းကျင်တွင် အလုပ်လုပ်
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root) — မိနစ် 30 တိုင်း လုပ်ဆောင်ပြီး /var/log/runner-janitor.log သို့ မှတ်တမ်းတင်ရန်
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` လိုအပ်သည်။ janitor သည် လမ်းကြောင်းတစ်ခုကို ဖယ်ရှားခြင်းမပြုမီ ဖွင့်ထားသော
@@ -128,8 +127,16 @@ idle ဖြစ်နေချိန်တွင်သာ** ပြန်လည်
   တွင် 2026-10-18 အထိ `MemoryHigh=4G` သာ ရှိခဲ့သည် — promptfoo build သည် ထိုနေရာတွင် memory ကို ထပ်ခါတလဲလဲ reclaim လုပ်ရင်း 54 minutes ကြာခဲ့သည်။
   8 GB သည် throttling ကို ဖယ်ရှားပေးသည်။
 - **ရည်ရွယ်ချက်ရှိရှိ listener အရေအတွက် လျှော့ထားသည်။** OmniRoute unit လေးခုကို 2026-08-29 တွင် disable လုပ်ခဲ့သည် — ထပ်တိုး
-  listener တစ်ခုစီသည် အထက်ပါ memory budget ကို မျှဝေသုံးစွဲမည့် tenant နောက်တစ်ခု ဖြစ်သည်။ Janitor ၏ အများဆုံးကန့်သတ်ချက်မှာ 6 ဖြစ်သည် (`MAX_ACTIVE_RUNNERS=6` in cron)။ ၎င်းသည်
-  စက်ပေါ်ရှိ `Runner.Listener` တိုင်းကို ရေတွက်ပြီး OmniHeuris + OmniMind က ကျွန်ုပ်တို့၏ လေးခုအပြင် နောက်ထပ်နှစ်ခု ထည့်ပေးသည်။
+  listener တစ်ခုစီသည် အထက်ပါ memory budget ကို မျှဝေသုံးစွဲမည့် tenant နောက်တစ်ခု ဖြစ်သည်။ Janitor ၏ အများဆုံးကန့်သတ်ချက်မှာ 8 ဖြစ်သည် (`MAX_ACTIVE_RUNNERS=8` in cron)။ ၎င်းသည်
+  စက်ပေါ်ရှိ `Runner.Listener` တိုင်းကို ရေတွက်ပြီး OmniHeuris + OmniMind က ကျွန်ုပ်တို့၏ ငါးခုအပြင် နောက်ထပ်နှစ်ခု ထည့်ပေးသည်။
+- **Unit နှင့် Vitest job များကို hosted runner များပေါ်တွင်သာ ဆက်ထားသည်။** Repository variable `vars.USE_VPS_TEST_RUNNER` သည်
+  `true` ဖြစ်မှသာ `ci.yml` က ၎င်း၏ unit shard များနှင့် Vitest job ကို `[self-hosted, omni-ci]` သို့ ပို့ပြီး၊ ထိုအခါတွင်လည်း
+  repository တစ်ခုတည်းမှ `pull_request` run များအတွက်သာ ဖြစ်သည်။ Fork များ၊ `merge_group` နှင့် push များသည်
+  `ubuntu-latest` ပေါ်တွင် ဆက်ရှိသည် (`tests/unit/vps-runner-variable-scope.test.ts`)။ ယင်း variable သည်
+  `false` ဖြစ်သည်။ 2026-10-28 တွင် 4-core `omni-ci` listener သုံးခုသည် `npm ci` အတွက် 250–270 s ကြာခဲ့ပြီး unit shard
+  တိုင်းသည် မိနစ် 30 job ကန့်သတ်ချက်သို့ ရောက်ခဲ့သည်။ hosted shard တစ်ခုအတွက်မူ ~634 s သာ ကြာပြီး ထိုအချိန်တွင် စက်၏ load မှာ
+  17–24 ဖြစ်သည်။ ထို listener များကို ဖျက်ပစ်ခဲ့သည်။ Unit shard တစ်ခုအတွက် လုံလောက်သော အရွယ်အစားရှိ listener များမရှိဘဲ
+  variable ကို ပြန်မဖွင့်ပါနှင့်။
 - **မည်သည့် runner မဆို အလုပ်များနေစဉ် `/tmp` သို့မဟုတ် `_work` ကို လက်ဖြင့် မည်သည့်အခါမျှ မရှင်းလင်းပါနှင့်။**
   စစ်ဆေးပြီးနောက် ဖျက်ခြင်းနှစ်ခုကြား အချိန်ကွာဟချက်ရှိခဲ့သောကြောင့် live Build job တစ်ခုသည်
   2026-08-27 တွင် ၎င်း၏ `_work` ကို ဆုံးရှုံးခဲ့သည်။ Janitor သည် စစ်ဆေးခြင်းနှင့် ဖယ်ရှားခြင်းကို အဆင့်တစ်ခုတည်းဖြင့် လုပ်ဆောင်သည်။
@@ -143,7 +150,7 @@ idle ဖြစ်နေချိန်တွင်သာ** ပြန်လည်
 
 ## လက်ခံဆောင်ရွက်ပေးထားသော lane (GitHub-hosted runners)
 
-အကောင့်သည် **Pro** အစီအစဉ်တွင်ရှိပြီး **တစ်ပြိုင်နက် လက်ခံဆောင်ရွက်ပေးနိုင်သော job 40 ခု** ကို PR စစ်ဆေးမှုတိုင်း၊ push ကြောင့် စတင်သော workflow တိုင်းနှင့် CodeQL ၏ မူလသတ်မှတ်ချက်တို့က အတူမျှဝေသုံးစွဲကြသည်။ 2026-10-18 ရက်တွင် `release/v3.8.52` ပေါ်၌ merge campaign တစ်ခု (~တစ်နာရီလျှင် merge 10 ခု) လုပ်ဆောင်နေစဉ် တိုင်းတာချက်အရ **24 h အတွင်း workflow run 2,500 ခု ဖန်တီးခဲ့ပြီး**၊ 6 h အတွင်း branch သို့ push 44 ကြိမ် ပြုလုပ်ခဲ့ကာ၊ PR စစ်ဆေးမှုများ နာရီပေါင်းများစွာ စောင့်ဆိုင်းနေချိန်တွင် **လက်ခံဆောင်ရွက်ပေးထားသော job 106 ခု တန်းစီနေခဲ့ပြီး** ယင်းစစ်ဆေးမှုများ မပြီးဆုံးဘဲ PR များကို merge လုပ်ခဲ့သည်။ Branch သို့ push ပြုလုပ်တိုင်း workflow ကိုးခု စတင်ခဲ့သည်-
+Repository သည် `cheaper-inference` organization ပိုင်ဖြစ်ပြီး **Team** အစီအစဉ်တွင်ရှိသည်- **တစ်ပြိုင်နက် လက်ခံဆောင်ရွက်ပေးနိုင်သော job 60 ခု** ကို organization ရှိ repository တိုင်း၊ PR စစ်ဆေးမှုတိုင်း၊ push ကြောင့် စတင်သော workflow တိုင်းနှင့် CodeQL ၏ မူလသတ်မှတ်ချက်တို့က အတူမျှဝေသုံးစွဲကြသည်။ အောက်ပါ ကိန်းဂဏန်းများကို **Pro** အစီအစဉ် (တစ်ပြိုင်နက် လက်ခံဆောင်ရွက်ပေးနိုင်သော job 40 ခု) တွင် တိုင်းတာခဲ့သည်။ 2026-10-18 ရက်တွင် `release/v3.8.52` ပေါ်၌ merge campaign တစ်ခု (~တစ်နာရီလျှင် merge 10 ခု) လုပ်ဆောင်နေစဉ် တိုင်းတာချက်အရ **24 h အတွင်း workflow run 2,500 ခု ဖန်တီးခဲ့ပြီး**၊ 6 h အတွင်း branch သို့ push 44 ကြိမ် ပြုလုပ်ခဲ့ကာ၊ PR စစ်ဆေးမှုများ နာရီပေါင်းများစွာ စောင့်ဆိုင်းနေချိန်တွင် **လက်ခံဆောင်ရွက်ပေးထားသော job 106 ခု တန်းစီနေခဲ့ပြီး** ယင်းစစ်ဆေးမှုများ မပြီးဆုံးဘဲ PR များကို merge လုပ်ခဲ့သည်။ Branch သို့ push ပြုလုပ်တိုင်း workflow ကိုးခု စတင်ခဲ့သည်-
 
 | `release/v*` သို့ push တစ်ကြိမ်လျှင်        | လက်ခံဆောင်ရွက်ပေးထားသော job များ | အလွန်များပြားသည့်အခြေအနေအောက်မှ ရလဒ်                                                                  | 2026-10-18 မှစ၍                                                                                     |
 | ------------------------------------------- | -------------------------------: | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |

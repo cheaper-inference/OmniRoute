@@ -18,6 +18,9 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const featureFlagsDb = await import("../../src/lib/db/featureFlags.ts");
 const modelsDevSync = await import("../../src/lib/modelsDevSync.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const contextWindowResolver = await import("../../src/lib/contextWindowResolver.ts");
+const syncedPersistence =
+  await import("../../src/lib/db/models/syncedAvailableModelPersistence.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -946,6 +949,14 @@ test("v1 models catalog preserves GLM-5.2 limits alongside GitHub Copilot Astra"
       zenmux: {
         "z-ai/glm-5.2": capability({ limit_context: 128000, limit_input: 128000 }),
       },
+    });
+    // The synced 128K window reaches the catalog through the context-window reconcile
+    // (auto:discovery pin). Since #18048 the post-sync reconcile is a 5 s trailing
+    // debounce instead of setTimeout(0), so settle it explicitly — the state production
+    // reaches once the debounce fires — instead of racing the timer against the build.
+    syncedPersistence.cancelPendingPostSyncReconcile();
+    await contextWindowResolver.runContextWindowReconcile({
+      providers: ["huggingface", "cloudflare-ai", "zenmux"],
     });
 
     const response = await v1ModelsCatalog.getUnifiedModelsResponse(

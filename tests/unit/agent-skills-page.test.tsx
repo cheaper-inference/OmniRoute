@@ -157,8 +157,6 @@ beforeEach(() => {
     value: { origin: "http://localhost:20128" },
     configurable: true,
   });
-  // Mock window.confirm
-  vi.spyOn(window, "confirm").mockReturnValue(false);
 });
 
 afterEach(async () => {
@@ -336,13 +334,13 @@ describe("AgentSkillsPageClient", () => {
     // assercao do CLI ficaria verde medindo a barra errada.
     expect(progressBars.length).toBe(3);
 
-    // API bar — 22/22 = 100%, should have emerald color class
+    // API bar — 22/22 = 100%, should have the success tone (token)
     const apiBar = progressBars[0] as HTMLElement;
-    expect(apiBar.className).toContain("bg-emerald-500");
+    expect(apiBar.querySelector('[data-tone="success"]')).not.toBeNull();
 
-    // CLI bar — 20/20 = 100%, should have emerald color class
+    // CLI bar — 20/20 = 100%, should have the success tone (token)
     const cliBar = progressBars[2] as HTMLElement;
-    expect(cliBar.className).toContain("bg-emerald-500");
+    expect(cliBar.querySelector('[data-tone="success"]')).not.toBeNull();
   });
 
   it("generate button is hidden when coverage is 100%", async () => {
@@ -480,7 +478,7 @@ describe("CoverageBar", () => {
 
     const bars = container.querySelectorAll("[role='progressbar']");
     const apiBar = bars[0] as HTMLElement;
-    expect(apiBar.className).toContain("bg-red-500");
+    expect(apiBar.querySelector('[data-tone="danger"]')).not.toBeNull();
 
     await act(async () => localRoot.unmount());
   });
@@ -504,7 +502,7 @@ describe("CoverageBar", () => {
 
     const bars = container.querySelectorAll("[role='progressbar']");
     const apiBar = bars[0] as HTMLElement;
-    expect(apiBar.className).toContain("bg-amber-400");
+    expect(apiBar.querySelector('[data-tone="warning"]')).not.toBeNull();
 
     await act(async () => localRoot.unmount());
   });

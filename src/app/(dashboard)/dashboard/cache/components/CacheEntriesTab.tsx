@@ -1,8 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 
 interface CacheEntry {
   id: string;
@@ -23,6 +33,7 @@ interface Pagination {
 
 export default function CacheEntriesTab() {
   const t = useTranslations("cache");
+  const tc = useTranslations("common");
   const [entries, setEntries] = useState<CacheEntry[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -85,105 +96,108 @@ export default function CacheEntriesTab() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <input
-          type="text"
-          placeholder={t("searchEntries")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && fetchEntries()}
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-surface text-text-main placeholder:text-text-muted"
-        />
-        <Button variant="secondary" size="sm" onClick={() => fetchEntries()}>
-          {t("search")}
-        </Button>
-      </div>
-
-      {loading ? (
-        <div className="text-sm text-text-muted">{t("loading")}</div>
-      ) : error ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
-          <div className="text-sm text-red-300">{error}</div>
+    <DataTableShell
+      loading={loading}
+      loadingLabel={t("loading")}
+      filters={
+        <div className="flex w-full items-end gap-3">
+          <Input
+            type="text"
+            className="flex-1"
+            aria-label={t("searchEntries")}
+            placeholder={t("searchEntries")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && fetchEntries()}
+          />
+          <Button variant="secondary" size="sm" onClick={() => fetchEntries()}>
+            {t("search")}
+          </Button>
+        </div>
+      }
+      pagination={
+        pagination.totalPages > 1 ? (
+          <div className="flex items-center justify-center gap-2 py-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="chevron_left"
+              aria-label={tc("previousPage")}
+              onClick={() => fetchEntries(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+            />
+            <span className="text-sm text-text-muted">
+              {pagination.page} / {pagination.totalPages}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="chevron_right"
+              aria-label={tc("nextPage")}
+              onClick={() => fetchEntries(pagination.page + 1)}
+              disabled={pagination.page >= pagination.totalPages}
+            />
+          </div>
+        ) : undefined
+      }
+    >
+      {error ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-error/30 bg-error-bg px-4 py-3">
+          <div className="text-sm text-error">{error}</div>
           <Button variant="secondary" size="sm" onClick={() => fetchEntries(pagination.page)}>
             {t("refresh")}
           </Button>
         </div>
-      ) : entries.length === 0 ? (
-        <div className="text-sm text-text-muted text-center py-8">{t("noEntries")}</div>
+      ) : !loading && entries.length === 0 ? (
+        <div className="py-8 text-center text-sm text-text-muted">{t("noEntries")}</div>
       ) : (
-        <>
-          <div className="overflow-x-auto bg-surface">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-text-muted border-b border-border/30">
-                  <th className="pb-2 pr-4">{t("signature")}</th>
-                  <th className="pb-2 pr-4">{t("model")}</th>
-                  <th className="pb-2 pr-4">{t("hits")}</th>
-                  <th className="pb-2 pr-4">{t("tokensSaved")}</th>
-                  <th className="pb-2 pr-4">{t("created")}</th>
-                  <th className="pb-2 pr-4">{t("expires")}</th>
-                  <th className="pb-2">{t("actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry) => (
-                  <tr key={entry.id} className="border-b border-border/20">
-                    <td className="py-2 pr-4 font-mono text-xs">
-                      {entry.signature.slice(0, 12)}...
-                    </td>
-                    <td className="py-2 pr-4">{entry.model}</td>
-                    <td className="py-2 pr-4 tabular-nums">{entry.hit_count}</td>
-                    <td className="py-2 pr-4 tabular-nums text-green-500">
-                      {(entry.tokens_saved ?? 0).toLocaleString()}
-                    </td>
-                    <td className="py-2 pr-4 text-xs text-text-muted">
-                      {formatDate(entry.created_at)}
-                    </td>
-                    <td className="py-2 pr-4 text-xs text-text-muted">
-                      {formatDate(entry.expires_at)}
-                    </td>
-                    <td className="py-2">
-                      <button
-                        onClick={() => handleDelete(entry.signature)}
-                        disabled={deleting === entry.signature}
-                        className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
-                      >
-                        {deleting === entry.signature ? "..." : "🗑️"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => fetchEntries(pagination.page - 1)}
-                disabled={pagination.page <= 1}
-              >
-                ←
-              </Button>
-              <span className="text-sm text-text-muted">
-                {pagination.page} / {pagination.totalPages}
-              </span>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => fetchEntries(pagination.page + 1)}
-                disabled={pagination.page >= pagination.totalPages}
-              >
-                →
-              </Button>
-            </div>
-          )}
-        </>
+        <Table className="text-sm" scrollbarLabel={t("entries")}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("signature")}</TableHead>
+              <TableHead>{t("model")}</TableHead>
+              <TableHead>{t("hits")}</TableHead>
+              <TableHead>{t("tokensSaved")}</TableHead>
+              <TableHead>{t("created")}</TableHead>
+              <TableHead>{t("expires")}</TableHead>
+              <TableHead>{t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entries.map((entry) => (
+              <TableRow key={entry.id}>
+                <TableCell className="font-mono text-xs">
+                  {entry.signature.slice(0, 12)}...
+                </TableCell>
+                <TableCell>{entry.model}</TableCell>
+                <TableCell className="tabular-nums">{entry.hit_count}</TableCell>
+                <TableCell className="tabular-nums text-success">
+                  {(entry.tokens_saved ?? 0).toLocaleString()}
+                </TableCell>
+                <TableCell className="text-xs text-text-muted">
+                  {formatDate(entry.created_at)}
+                </TableCell>
+                <TableCell className="text-xs text-text-muted">
+                  {formatDate(entry.expires_at)}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    icon="delete"
+                    className="text-error"
+                    aria-label={tc("delete")}
+                    title={tc("delete")}
+                    onClick={() => handleDelete(entry.signature)}
+                    disabled={deleting === entry.signature}
+                    loading={deleting === entry.signature}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
-    </div>
+    </DataTableShell>
   );
 }

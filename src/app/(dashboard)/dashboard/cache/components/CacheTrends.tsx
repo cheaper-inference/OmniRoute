@@ -1,6 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import { Skeleton } from "@/shared/components/Loading";
 
 export interface CacheTrendPoint {
   timestamp: string;
@@ -37,30 +40,22 @@ export default function CacheTrends({
       className="rounded-xl border border-border bg-surface p-5 flex flex-col gap-4"
     >
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-base text-text-muted" aria-hidden="true">
-          timeline
-        </span>
+        <Icon name="timeline" size={16} className="text-text-muted" />
         <h2 className="font-medium text-sm">{t("trend24h")}</h2>
       </div>
 
       {loading ? (
         <div className="flex flex-col gap-3">
-          <div
-            data-testid="skeleton"
-            className="h-32 w-full rounded bg-text-muted/10 animate-pulse"
-          />
-          <div data-testid="skeleton" className="h-3 w-24 rounded bg-text-muted/10 animate-pulse" />
+          <Skeleton data-testid="skeleton" className="h-32 w-full" />
+          <Skeleton data-testid="skeleton" className="h-3 w-24" />
         </div>
       ) : error ? (
         <div className="flex flex-col items-center gap-3 py-6">
-          <span className="text-sm text-red-500">{error}</span>
+          <span className="text-sm text-error">{error}</span>
           {onRetry && (
-            <button
-              onClick={onRetry}
-              className="px-3 py-1.5 text-xs rounded border border-border hover:bg-surface-raised transition-colors"
-            >
-              Retry
-            </button>
+            <Button variant="outline" size="sm" onClick={onRetry}>
+              {t("retry")}
+            </Button>
           )}
         </div>
       ) : trendData.length === 0 ? (
@@ -74,7 +69,7 @@ export default function CacheTrends({
           {maxCachedRequests > 0 && (
             <div className="text-xs text-text-muted">
               {t("peakCached")}:{" "}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-text-main">
                 {maxCachedRequests} / {maxRequests}
               </span>
             </div>
@@ -97,13 +92,13 @@ export default function CacheTrends({
                   data-testid="trend-bar"
                   className="flex-1 flex flex-col items-center gap-1 group relative"
                 >
-                  <div className="absolute bottom-full mb-1 hidden group-hover:block bg-surface-raised border border-border rounded px-2 py-1 text-xs whitespace-nowrap z-10">
+                  <div className="absolute bottom-full mb-1 hidden group-hover:block bg-surface border border-border rounded px-2 py-1 text-xs whitespace-nowrap z-10">
                     {hour}: {point.requests} {t("requests").toLowerCase()}, {point.cachedRequests}{" "}
                     {t("cached").toLowerCase()}
                   </div>
                   <div className="w-full flex flex-col justify-end h-full gap-px">
                     <div
-                      className="w-full bg-green-500/30 rounded-t"
+                      className="w-full bg-chart-1 rounded-t"
                       style={{ height: `${cachedHeight}%` }}
                     />
                     <div
@@ -125,7 +120,7 @@ export default function CacheTrends({
               <span>{t("total")}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded bg-green-500/30" />
+              <div className="w-3 h-3 rounded bg-chart-1" />
               <span>{t("cached")}</span>
             </div>
           </div>

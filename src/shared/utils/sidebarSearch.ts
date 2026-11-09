@@ -68,6 +68,10 @@ function isGroupChild<TItem extends SearchableLabeled>(
  */
 const IDENTIFIER_NEEDLE_FLOOR = 2;
 
+function containsSearchTerm(value: unknown, needle: string): boolean {
+  return typeof value === "string" && value.toLowerCase().includes(needle);
+}
+
 /**
  * Does any field of `item` contain `needle`?
  *
@@ -80,20 +84,18 @@ const IDENTIFIER_NEEDLE_FLOOR = 2;
  * @param needle already lower-cased and trimmed by the caller
  */
 function matchesCorpus(item: SearchableLabeled, needle: string): boolean {
-  if (typeof item.label === "string" && item.label.toLowerCase().includes(needle)) return true;
-  if (typeof item.subtitle === "string" && item.subtitle.toLowerCase().includes(needle))
-    return true;
-  if (typeof item.description === "string" && item.description.toLowerCase().includes(needle))
-    return true;
+  if (containsSearchTerm(item.label, needle)) return true;
+  if (containsSearchTerm(item.subtitle, needle)) return true;
+  if (containsSearchTerm(item.description, needle)) return true;
   if (Array.isArray(item.keywords)) {
     for (const keyword of item.keywords) {
-      if (typeof keyword === "string" && keyword.toLowerCase().includes(needle)) return true;
+      if (containsSearchTerm(keyword, needle)) return true;
     }
   }
 
   if (needle.length >= IDENTIFIER_NEEDLE_FLOOR) {
-    if (typeof item.id === "string" && item.id.toLowerCase().includes(needle)) return true;
-    if (typeof item.href === "string" && item.href.toLowerCase().includes(needle)) return true;
+    if (containsSearchTerm(item.id, needle)) return true;
+    if (containsSearchTerm(item.href, needle)) return true;
   }
 
   return false;

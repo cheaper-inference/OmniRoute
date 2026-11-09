@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import { Field } from "@omniroute/ui-kit/field";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { buildCurl } from "../../providers/utils/buildCurl";
-import { PLAYGROUND_KEY_ID_HEADER, resolvePlaygroundKeyId } from "../../providers/utils/playgroundAuth";
+import {
+  PLAYGROUND_KEY_ID_HEADER,
+  resolvePlaygroundKeyId,
+} from "../../providers/utils/playgroundAuth";
 import { PlaygroundCard } from "./PlaygroundCard";
 
 interface SuggestedHfModel {
@@ -101,6 +108,8 @@ function ImageResultRenderer(data: unknown, altText: string) {
 
 export function ImageExampleCard({ providerId }: Props) {
   const t = useTranslations("miniPlayground");
+  const textareaId = useId();
+  const suggestedId = useId();
   const tMedia = useTranslations("media");
   const { apiKey, keys } = useApiKey();
   const { models } = useProviderModels(providerId);
@@ -180,69 +189,51 @@ export function ImageExampleCard({ providerId }: Props) {
       resultRenderer={(data) => ImageResultRenderer(data, tMedia("generatedImageAlt"))}
     >
       {/* Model */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("model")}</label>
-        <select
-          value={model || firstModel}
-          onChange={(e) => setModel(e.target.value)}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          {modelOptions.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.id}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("model")}
+        value={model || firstModel}
+        onChange={(e) => setModel(e.target.value)}
+        options={modelOptions.map((m) => ({ value: m.id, label: m.id }))}
+      />
       {/* Suggested models from HuggingFace Hub (image kind only) */}
       {suggestedOnly.length > 0 && (
-        <div>
-          <label className="block text-xs text-text-muted mb-1">{tMedia("suggestedModels")}</label>
+        <div role="group" aria-labelledby={suggestedId}>
+          <span id={suggestedId} className="block text-xs text-text-muted mb-1">
+            {tMedia("suggestedModels")}
+          </span>
           <div className="flex flex-wrap gap-1.5">
             {suggestedOnly.map((m) => (
-              <button
+              <Button
                 key={m.id}
-                type="button"
+                size="sm"
+                variant={effectiveModel === m.id ? "primary" : "outline"}
                 onClick={() => setModel(m.id)}
                 aria-pressed={effectiveModel === m.id}
-                className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                  effectiveModel === m.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-bg-subtle text-text-muted hover:text-text-main"
-                }`}
               >
                 {m.id}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       )}
       {/* Size */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("size")}</label>
-        <select
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          {IMAGE_SIZES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Select
+        label={t("size")}
+        value={size}
+        onChange={(e) => setSize(e.target.value)}
+        options={IMAGE_SIZES.map((s) => ({ value: s, label: s }))}
+      />
       {/* Prompt */}
-      <div>
-        <label className="block text-xs text-text-muted mb-1">{t("prompt")}</label>
-        <textarea
+      <Field label={t("prompt")} htmlFor={textareaId}>
+        <Textarea
+          id={textareaId}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           rows={2}
           placeholder={t("imageSample")}
-          className="w-full rounded-md border border-border bg-bg-subtle text-sm px-2 py-1.5 text-text-main focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+          className="resize-none"
         />
-      </div>
+      </Field>
     </PlaygroundCard>
   );
 }

@@ -3,6 +3,7 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
+import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
@@ -12,6 +13,7 @@ import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalSta
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
+import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 import {
   isInternalReasoningPlaceholder,
@@ -192,13 +194,15 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     const u = chunk.usage;
     const input_tokens = u.input_tokens ?? u.prompt_tokens ?? 0;
     const output_tokens = u.output_tokens ?? u.completion_tokens ?? 0;
-    const cacheDetails = resolveResponsesCacheUsageDetails(u);
+    const cacheFields = mergeCacheCreationFields(state.usage, u);
+    const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
     const rawReasoning =
       u.output_tokens_details?.reasoning_tokens ?? u.completion_tokens_details?.reasoning_tokens;
     const reasoningTokens =
       typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
 
     state.usage = {
+      ...cacheFields,
       // Exact provider-reported cost and its credit provenance; billing reads them.
       ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
       ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
@@ -215,33 +219,26 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     };
   }
 
+  // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
+  // Handle the top-level error before choices so no accompanying delta becomes output.
+  if (chunk.error && typeof chunk.error === "object") {
+    const rawCode = chunk.error.code;
+    const status = typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
+    state.upstreamError = {
+      status,
+      type: status === 429 ? "rate_limit_error" : "server_error",
+      code:
+        typeof chunk.error.metadata?.error_type === "string"
+          ? chunk.error.metadata.error_type
+          : status === 429
+            ? "rate_limit_exceeded"
+            : "bad_gateway",
+      message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
+    };
+    return [];
+  }
+
   if (!chunk.choices?.length) {
-    // Mid-stream aggregator error: OpenRouter (and similar OpenAI-compatible
-    // aggregators) can send an HTTP 200 SSE stream whose body carries a chunk with
-    // empty `choices` and a top-level `error` object instead of any delta — e.g. the
-    // underlying provider hitting its own capacity limit mid-request. Without this
-    // branch the chunk has no choices, so it falls into the awaitingTrailingUsage/
-    // no-op path below and the stream silently ends with a false "completed, empty
-    // output" response, masking the failure and skipping combo fallback. Surface it
-    // as state.upstreamError so stream.ts errors the stream out (mirrors the
-    // Gemini-to-OpenAI translator's #4177 fix).
-    if (chunk.error && typeof chunk.error === "object") {
-      const rawCode = chunk.error.code;
-      const status =
-        typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
-      state.upstreamError = {
-        status,
-        type: status === 429 ? "rate_limit_error" : "server_error",
-        code:
-          typeof chunk.error.metadata?.error_type === "string"
-            ? chunk.error.metadata.error_type
-            : status === 429
-              ? "rate_limit_exceeded"
-              : "bad_gateway",
-        message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
-      };
-      return [];
-    }
     // #6906: a deferred finish_reason (awaitingTrailingUsage, see below) completes here —
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
@@ -369,7 +366,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
       closeReasoning(state, emit);
     }
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-    closeMessage(state, emit, msgIdx);
+    // A post-tool-call message lives at its relocated index (msgIndexAlias);
+    // close it there, or later text would append to it across this call.
+    closeMessage(state, emit, aliasedMessageIndex(state, msgIdx));
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }
@@ -510,10 +509,30 @@ function nextFreeMessageIndex(state, requestedIdx) {
   return candidate;
 }
 
-function emitTextContent(state, emit, idx, content) {
-  if (state.msgItemDone[idx]) {
+// The requested index and the index the message item actually lives at can
+// differ: post-tool-call text is re-homed (below), and a tool call may already
+// hold the requested index. Remember the relocation per requested index so
+// later deltas for the SAME logical message reuse it — without the alias every
+// delta re-ran the relocation scan and opened yet another message item.
+function resolveMessageIndex(state, requestedIdx) {
+  let idx = aliasedMessageIndex(state, requestedIdx);
+  if (
+    state.msgItemDone[idx] ||
+    (!state.msgItemAdded[idx] && state.funcAllocatedOutputIndexes?.[idx])
+  ) {
     idx = nextFreeMessageIndex(state, idx);
+    (state.msgIndexAlias ??= {})[requestedIdx] = idx;
   }
+  return idx;
+}
+
+// Where the message requested at `requestedIdx` actually lives (see above).
+function aliasedMessageIndex(state, requestedIdx) {
+  return state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
+}
+
+function emitTextContent(state, emit, idx, content) {
+  idx = resolveMessageIndex(state, idx);
   if (!state.msgItemAdded[idx]) {
     state.msgItemAdded[idx] = true;
     const msgId = `msg_${state.responseId}_${idx}`;
@@ -673,10 +692,35 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
   }
 }
 
+// Allocate a tool call's output_index ONCE per upstream index and reuse it for
+// the whole lifecycle. The base is recomputed from live message state, so a
+// message opened or relocated after the call's first delta used to shift the
+// close-time index away from the added-time index (clients keying items by
+// output_index see the identity change mid-flight). Also never land on an
+// index a message item already holds.
+function allocateToolOutputIndex(state, tcIdx) {
+  if (!state.funcOutputIndex) state.funcOutputIndex = {};
+  if (state.funcOutputIndex[tcIdx] === undefined) {
+    let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+    while (state.msgItemAdded[candidate]) candidate += 1;
+    state.funcOutputIndex[tcIdx] = candidate;
+  }
+  return state.funcOutputIndex[tcIdx];
+}
+
+// Reuse the index the call was announced at (allocateToolOutputIndex); the
+// fallback covers states built before any emitToolCall ran.
+function announcedToolOutputIndex(state, tcIdx) {
+  return (
+    state.funcOutputIndex?.[tcIdx] ??
+    toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx)
+  );
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
   // Record every allocated tool-call output_index so a post-close text
   // relocation (nextFreeMessageIndex) can never collide with it.
   if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
@@ -740,7 +784,7 @@ function emitToolCall(state, emit, tc) {
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
-    const normalizedIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, idx);
+    const normalizedIndex = announcedToolOutputIndex(state, idx);
     const args = state.funcArgsBuf[idx] || "{}";
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
@@ -870,7 +914,8 @@ function sendCompleted(state, emit) {
     }
 
     if (state.usage) {
-      response.usage = state.usage;
+      // Preserve upstream accounting in state; expose the full context only to Responses clients.
+      response.usage = normalizeResponsesContextUsage(state.usage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
@@ -906,8 +951,16 @@ function flushEvents(state) {
 // the terminal `response.output_item.done` snapshot for that item is NOT re-emitted
 // (which would duplicate the reasoning channel). Keyed by item_id when present, with a
 // global fallback for streams whose deltas carry no item_id.
-function markResponsesReasoningDeltaEmitted(state, itemId) {
+function markResponsesReasoningDeltaEmitted(state, itemId, outputIndex?) {
   state.reasoningDeltaEmitted = true;
+  // GitHub Copilot rotates the encrypted reasoning item id between events, so the
+  // id alone cannot pair a delta with its output_item.done. Record output_index too.
+  if (typeof outputIndex === "number") {
+    if (!(state.reasoningOutputIndexesWithDelta instanceof Set)) {
+      state.reasoningOutputIndexesWithDelta = new Set();
+    }
+    state.reasoningOutputIndexesWithDelta.add(outputIndex);
+  }
   const id = itemId != null ? String(itemId) : "";
   if (!id) return;
   if (!(state.reasoningItemsWithDelta instanceof Set)) {
@@ -1452,6 +1505,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
           : 0);
 
       state.usage = {
+        ...mergeCacheCreationFields(state.usage, responseUsage),
         ...(responseUsage.provider_credits !== undefined && {
           provider_credits: responseUsage.provider_credits,
         }),
@@ -1465,7 +1519,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
 
       // Add prompt_tokens_details if cache tokens exist
       if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
-        state.usage.prompt_tokens_details = {};
+        state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
         if (cacheReadTokens > 0) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }
@@ -1512,7 +1566,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   ) {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     return {
       id: state.chatId,
       object: "chat.completion.chunk",
@@ -1535,7 +1589,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   if (eventType === "response.reasoning_summary_text.delta") {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     const deltaText = buildResponsesReasoningSummaryDelta(state, data, reasoningDelta);
     return buildResponsesReasoningDeltaChunk(state, deltaText);
   }
@@ -1554,7 +1608,12 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const emittedWithoutItemId =
       state.reasoningDeltaEmitted &&
       !(state.reasoningItemsWithDelta instanceof Set && state.reasoningItemsWithDelta.size > 0);
-    if (emittedForItem || emittedWithoutItemId) return null;
+    // Same reasoning item under a rotated id (GitHub Copilot): match by output_index.
+    const emittedForOutputIndex =
+      typeof data.output_index === "number" &&
+      state.reasoningOutputIndexesWithDelta instanceof Set &&
+      state.reasoningOutputIndexesWithDelta.has(data.output_index);
+    if (emittedForItem || emittedWithoutItemId || emittedForOutputIndex) return null;
 
     const replayableReasoning = extractReplayableResponsesReasoningText(item);
     if (replayableReasoning) {

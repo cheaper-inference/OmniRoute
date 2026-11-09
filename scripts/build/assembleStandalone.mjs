@@ -49,6 +49,7 @@
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
+import { writePublicOpenApi } from "./publicOpenApi.mjs";
 import { colocateLlmlinguaOptionals, SEED_PACKAGES } from "./colocateOptionals.mjs";
 import { WREQ_JS_NATIVE_BINDINGS } from "./wreqJsNative.mjs";
 
@@ -514,6 +515,39 @@ export async function syncStandaloneExtraModules(rootDir, fsImpl = fs, log = con
 }
 
 /**
+ * Remove Next.js output-file-tracing manifests after the runtime bundle has
+ * been assembled. Next consumes these files while constructing standalone;
+ * the standalone server never reads them at runtime. Keeping thousands of
+ * manifests in the final tree can add hundreds of megabytes to container
+ * images without adding executable content.
+ *
+ * Symlinked directories are deliberately not traversed, so pruning cannot
+ * escape the assembled artifact.
+ *
+ * @param {string} rootDir assembled standalone root
+ * @returns {number} number of trace manifests removed
+ */
+export function pruneStandaloneTraceManifests(rootDir) {
+  if (!fsSync.existsSync(rootDir)) return 0;
+
+  let removed = 0;
+  const pending = [path.resolve(rootDir)];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    for (const entry of fsSync.readdirSync(current, { withFileTypes: true })) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(entryPath);
+      } else if (entry.name.endsWith(".nft.json")) {
+        fsSync.rmSync(entryPath, { force: true });
+        removed += 1;
+      }
+    }
+  }
+  return removed;
+}
+
+/**
  * Internal: copy native assets to an arbitrary outDir.
  *
  * @param {string} projectRoot
@@ -718,6 +752,7 @@ function copyStaticAndPublic({ distDir, relDistDir, projectRoot, resolvedOutDir 
   const publicSrc = path.join(projectRoot, "public");
   if (fsSync.existsSync(publicSrc)) {
     fsSync.cpSync(publicSrc, path.join(resolvedOutDir, "public"), { recursive: true, force: true });
+    writePublicOpenApi(projectRoot, resolvedOutDir);
     stampServiceWorkerBuildId(resolvedOutDir);
   }
 }
@@ -1215,6 +1250,7 @@ export function assembleStandalone({
     // overwrites the build-id stamp copyStaticAndPublic just wrote. Stamp
     // again after that copy, or sw.js ships with the generic cache name and
     // a browser keeps the previous deploy's worker.
+    writePublicOpenApi(projectRoot, resolvedOutDir);
     stampServiceWorkerBuildId(resolvedOutDir);
     // Repair hollow externalized package dirs in BOTH locations Turbopack's standalone
     // tracer can populate: the top-level bundle node_modules, and — for projects with a
@@ -1243,6 +1279,20 @@ export function assembleStandalone({
       seeds: [...SEED_PACKAGES, "@huggingface/transformers"],
       log: (message) => console.log(`[assembleStandalone] ${message.trim()}`),
     });
+
+    // #18699: the translated /docs pages sanitize through jsdom, an external Next's trace leaves
+    // out of the bundle. Without it every translated page falls back to English. Only bundles that
+    // carry the mirrors can reach that import, so a build without them stays lean. Docker carries
+    // them since 2026-11-03 (.dockerignore re-includes them) and gets jsdom here; the npm tarball
+    // never packs node_modules, so npm installs get it from `dependencies` instead.
+    if (fsSync.existsSync(path.join(resolvedOutDir, "docs", "i18n"))) {
+      colocateLlmlinguaOptionals({
+        rootDir: projectRoot,
+        targetNodeModulesDir: path.join(resolvedOutDir, "node_modules"),
+        seeds: ["jsdom"],
+        log: (message) => console.log(`[assembleStandalone] ${message.trim()}`),
+      });
+    }
   }
 
   // 7. Optionally dereference Turbopack hashed-module symlinks so the bundle is
@@ -1274,5 +1324,13 @@ export function assembleStandalone({
           `${path.relative(resolvedOutDir, nmDir) || "."}: ${aliased.packages.join(", ")}`
       );
     }
+  }
+
+  // 9. Output-file-tracing manifests are build/packaging inputs, not runtime
+  // assets. Prune only after every assembly/repair pass has completed so the
+  // final tree copied into Docker contains executable files, not trace metadata.
+  const prunedTraceManifests = pruneStandaloneTraceManifests(resolvedOutDir);
+  if (prunedTraceManifests > 0) {
+    console.log(`[assembleStandalone] Pruned ${prunedTraceManifests} Next.js trace manifest(s)`);
   }
 }

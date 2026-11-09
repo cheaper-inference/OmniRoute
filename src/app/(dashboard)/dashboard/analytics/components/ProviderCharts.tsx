@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { chartTheme } from "@omniroute/ui-kit/chart-theme";
 
 interface ProviderChartsProps {
   chartData: Array<Record<string, unknown>>;
@@ -35,51 +36,30 @@ export default function ProviderCharts({
   formatTooltipTimestamp,
 }: ProviderChartsProps) {
   return (
-    <div className="h-80 w-full rounded-xl border border-black/5 bg-black/[0.02] px-3 py-4 dark:border-white/5 dark:bg-white/[0.02]">
+    <div className="h-80 w-full rounded-xl border border-border bg-surface-2 px-3 py-4">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
+        <LineChart data={chartData} margin={chartTheme.margin}>
+          <CartesianGrid {...chartTheme.grid} />
           <XAxis
+            {...chartTheme.xAxis}
             dataKey="timestamp"
             tickFormatter={(value) => formatTimestamp(String(value), range)}
-            tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
-            axisLine={{ stroke: "var(--color-border)" }}
-            tickLine={{ stroke: "var(--color-border)" }}
-            minTickGap={24}
           />
-          <YAxis
-            domain={[0, 100]}
-            tickFormatter={formatPercent}
-            tick={{ fill: "var(--color-text-muted)", fontSize: 12 }}
-            axisLine={{ stroke: "var(--color-border)" }}
-            tickLine={{ stroke: "var(--color-border)" }}
-            width={44}
-          />
+          <YAxis {...chartTheme.yAxis} domain={[0, 100]} tickFormatter={formatPercent} />
           <Legend />
           <Tooltip
+            {...chartTheme.tooltip}
             wrapperStyle={{ zIndex: 1000, pointerEvents: "none" }}
             labelFormatter={(value) => formatTooltipTimestamp(String(value), range)}
             formatter={(value: number, name: string) => [formatPercent(value), name]}
-            contentStyle={{
-              backgroundColor: "var(--color-surface)",
-              borderColor: "var(--color-border)",
-              borderRadius: 12,
-              color: "var(--color-text-main)",
-              boxShadow: "var(--shadow-elevated)",
-              opacity: 1,
-            }}
-            itemStyle={{ color: "var(--color-text-main)" }}
-            labelStyle={{ color: "var(--color-text-main)", fontWeight: 600 }}
           />
           {providers.map((provider) => (
             <Line
+              {...chartTheme.line}
               key={provider}
-              type="monotone"
               dataKey={provider}
               name={resolveProviderName(provider, nodeMap)}
               stroke={providerColors.get(provider) ?? "var(--color-primary)"}
-              strokeWidth={2.5}
-              dot={false}
               activeDot={{ r: 4, strokeWidth: 0 }}
               connectNulls
             />

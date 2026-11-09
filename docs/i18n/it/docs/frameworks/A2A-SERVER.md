@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Skill disponibili
+## Competenze disponibili
 
-OmniRoute espone 6 skill A2A collegate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo skill risiede in `src/lib/a2a/skills/`.
+OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo di abilità risiede in `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Descrizione                                                                                                                                                    | Tag                        | Esempi                                               |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
-| Smart Routing      | `smart-routing`      | Instrada un prompt attraverso il provider/combo ottimale usando il motore combo di OmniRoute + scoring                                                         | routing, providers         | "Instrada questo prompt tramite il modello migliore" |
-| Quota Management   | `quota-management`   | Riporta lo stato delle quote per provider, aiuta i chiamanti a decidere quando applicare throttling/cambiare                                                   | quota, providers           | "Controlla la quota per anthropic"                   |
-| Provider Discovery | `provider-discovery` | Elenca i provider installati con capacità, flag free-tier, stato OAuth                                                                                         | providers, discovery       | "Quali provider sono disponibili?"                   |
-| Cost Analysis      | `cost-analysis`      | Stima il costo di una richiesta/conversazione dato il catalogo + l'uso recente                                                                                 | cost, usage                | "Stima il costo di questa conversazione"             |
-| Health Report      | `health-report`      | Aggrega lo stato di circuit breaker, cooldown e lockout per provider                                                                                           | health, resilience         | "Mostra lo stato di salute di tutti i provider"      |
-| List Capabilities  | `list-capabilities`  | Restituisce il catalogo completo delle 45 Agent Skills (23 API + 21 CLI + 1 config) come tabella markdown con URL raw dei SKILL.md per l'iniezione di contesto | catalog, discovery, skills | "Elenca tutte le capacità di OmniRoute"              |
+| Abilità                 | ID                   | Descrizione                                                                                                                                                                                         | Tag                            | Esempi                                                   |
+| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------- |
+| Itinerario intelligente | `smart-routing`      | Instrada un prompt attraverso lo provider/combo ottimale utilizzando il punteggio + del motore combinato di OmniRoute                                                                               | instradamento, fornitori       | "Indirizza questa richiesta tramite il modello migliore" |
+| Gestione delle quote    | `quota-management`   | Riporta lo stato della quota per fornitore e aiuta i chiamanti a decidere quando throttle/switch                                                                                                    | quota, fornitori               | "Verifica quota antropica"                               |
+| Scoperta del fornitore  | `provider-discovery` | Elenca i provider installati con funzionalità, flag di livello gratuito e stato OAuth                                                                                                               | fornitori, scoperta            | "Quali fornitori sono disponibili?"                      |
+| Analisi dei costi       | `cost-analysis`      | Stima del costo di uno request/conversation dato l'utilizzo recente del catalogo +                                                                                                                  | costo, utilizzo                | "Costo stimato per questa conversazione"                 |
+| Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
+| Elenco funzionalità     | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Agent Card dovrebbe essere mantenuta allineata con il catalogo live di 375 provider; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 381; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
-### Dettaglio della skill `list-capabilities`
+### `list-capabilities` Dettaglio abilità
 
-La skill `list-capabilities` è particolarmente utile per gli agenti esterni che devono scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artifact sotto forma di tabella markdown strutturata:
+La skill `list-capabilities` è particolarmente utile per gli agenti esterni che hanno bisogno di scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artefatto della tabella di markdown strutturata:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,60 +176,68 @@ La skill `list-capabilities` è particolarmente utile per gli agenti esterni che
 ...
 ```
 
-Ogni riga include la colonna `rawUrl` così gli agenti possono recuperare immediatamente lo SKILL.md completo. Il campo `metadata.totalSkills` rispecchia la dimensione del catalogo (45 oggi). Implementazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedi anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ogni riga include la colonna `rawUrl` in modo che gli agenti possano recuperare immediatamente l'intero SKILL.md. Il campo `metadata.totalSkills` rispecchia la dimensione del catalogo (45 oggi). Attuazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedi anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## API REST (ausiliaria)
+## REST API (ausiliario)
 
-L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint REST riportati di seguito forniscono un accesso ausiliario per dashboard e strumenti esterni:
+L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint REST seguenti forniscono accesso ausiliario per dashboard e strumenti esterni:
 
-| Endpoint                     | Metodo | Descrizione                                                      | Autenticazione                                       |
-| :--------------------------- | :----- | :--------------------------------------------------------------- | :--------------------------------------------------- |
-| `/api/a2a/status`            | GET    | Stato del server, skill registrate                               | (pubblico)                                           |
-| `/api/a2a/tasks`             | GET    | Elenca le attività con filtri                                    | gestione                                             |
-| `/api/a2a/tasks/[id]`        | GET    | Ottiene un'attività per ID                                       | gestione                                             |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Annulla un'attività in esecuzione                                | gestione                                             |
-| `/.well-known/agent.json`    | GET    | Agent Card (rilevamento A2A)                                     | (pubblico, memorizzato nella cache per 3600s)        |
-| `/api/a2a/tasks`             | POST   | Delega in ingresso alla flotta OmniConductor (Conductor PRD RF5) | Bearer rispetto a `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Punto finale                 | Metodo | Descrizione                                                      | Aut                                                                                                   |
+| :--------------------------- | :----- | :--------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Stato del server, competenze registrate                          | (pubblico)                                                                                            |
+| `/api/a2a/tasks`             | GET    | Elenca le attività con i filtri                                  | gestione o chiave API (vedi sotto)                                                                    |
+| `/api/a2a/tasks/[id]`        | GET    | Ottieni l'attività da ID                                         | gestione o chiave API (vedi sotto)                                                                    |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Annulla l'attività in esecuzione                                 | gestione o chiave API (vedi sotto)                                                                    |
+| `/.well-known/agent.json`    | GET    | Carta Agente (scoperta A2A )                                     | (3600 pubblici, memorizzati nella cache)                                                              |
+| `/api/a2a/tasks`             | POST   | Delega in entrata alla flotta OmniConductor (Conduttore PRD RF5) | come `GET`, più `OMNIROUTE_API_KEY` se impostato mentre `REQUIRE_API_KEY` è disattivato; `a2aEnabled` |
 
-**Delega Conductor in ingresso (`POST /api/a2a/tasks`):** gli agenti A2A esterni delegano il lavoro di programmazione alla flotta OmniConductor tramite OmniRoute. Corpo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — sono delegabili solo le skill della flotta Conductor (quelle annunciate nell'Agent Card); `metadata.conductor.repo.url` è obbligatorio (la flotta opera su repository git). La route viene tradotta nella richiesta `POST /v1/tasks` dell'hub utilizzando `CONDUCTOR_ORCHESTRATOR_TOKEN` lato server (con fallback su `CONDUCTOR_HUB_TOKEN`) e restituisce `201 { conductor_task_id, state: "submitted" }`; gli stati delle attività vengono propagati tramite il mirror SSE→A2A (RF1) e sono visibili mediante `GET /api/a2a/tasks?skill=conductor`.
+Chi accede ai percorsi `/api/a2a/tasks*` dipende dalle impostazioni di accesso e della chiave API:
+
+- `requireLogin=true` (default): il middleware ammette solo credenziali di gestione (sessione dashboard, `manage` -scope API key, `oma_` access token) e `OMNIROUTE_API_KEY`. Una chiave di inferenza semplice ottiene `403`. Nell'intestazione `Authorization` il middleware accetta solo `OMNIROUTE_API_KEY` come `Bearer <key>`; una chiave nuda o una scheda dopo che `Bearer` ottiene `401`.
+- `requireLogin=false` o la finestra di loopback prima dell'onboarding: con `REQUIRE_API_KEY=true` viene accettata qualsiasi chiave OmniRoute API o credenziale di gestione valida e i chiamanti anonimi ottengono `401`; con `REQUIRE_API_KEY` disattivato le tratte sono aperte.
+- `POST /api/a2a/tasks` richiede inoltre `OMNIROUTE_API_KEY` nell'intestazione `Authorization` quando la variabile è impostata e `REQUIRE_API_KEY` è disattivato. Altre intestazioni, come `x-api-key`, non contano qui. Con il login disattivato o prima dell'onboarding la chiave passa con o senza prefisso `Bearer` ; con l'accesso attivo, solo `Bearer <key>` supera il middleware.
+
+Laddove è richiesta una credenziale, un token `read` -scope `oma_` funziona solo per `GET`.
+
+**Delega del conduttore in entrata (`POST /api/a2a/tasks`):** gli agenti A2A esterni delegano il lavoro di codifica alla flotta OmniConductor tramite OmniRoute. Corpo: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — sono delegabili solo le competenze della flotta del Conduttore (quelle annunciate sulla Carta Agente); è richiesto `metadata.conductor.repo.url` (la flotta funziona su repository git). Il percorso si traduce nello `POST /v1/tasks` dell'hub utilizzando `CONDUCTOR_ORCHESTRATOR_TOKEN` lato server (fallback `CONDUCTOR_HUB_TOKEN`) e restituisce `201 { conductor_task_id, state: "submitted" }`; gli stati dei task rifluiscono attraverso lo specchio SSE→A2A (RF1) e sono visibili tramite `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Aggiunta di una nuova skill
+## Aggiunta di una nuova abilità
 
-1. **Crea il file della skill:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Crea file di abilità:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Esporta una funzione asincrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segui la struttura delle skill esistenti, come `smartRouting.ts`.
+   Esporta una funzione asincrona `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Segui la forma delle competenze esistenti come `smartRouting.ts`. Se la competenza richiama OmniRoute su HTTP, crea le intestazioni con `buildSelfLoopHeaders(caller)` da `src/lib/a2a/selfLoopAuth.ts` in modo che la chiamata venga eseguita con la chiave A2A del chiamante, non `OMNIROUTE_API_KEY`, e passa `redirect: "error"` a `fetch` in modo che un reindirizzamento non ottenga mai la chiave. L'helper crea solo intestazioni; ciascuna abilità imposta la politica di reindirizzamento stessa. Genera `UnsafeSelfLoopTargetError` anziché allegare una chiave quando URL di base risolto è un semplice http all'esterno della rete privata (loopback, un nome di contenitore o servizio e indirizzi privati vanno bene) o contiene credenziali, quindi un'abilità che ingoia le chiamate rifiutate deve rilanciare quell'errore.
 
-2. **Registra il gestore:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
+2. **Gestore del registro:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...skill esistenti
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Esponi nell'Agent Card:** in `src/app/.well-known/agent.json/route.ts`, aggiungi all'array `skills`:
+3. **Esporre nella scheda agente:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungi all'array `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "La tua skill",
-     "description": "Breve descrizione incentrata sull'intento",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Esempio di invocazione in linguaggio naturale"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e il percorso di errore.
+4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Coprire il percorso felice del percorso di errore +.
 
-5. **Documenta** la nuova skill nella tabella `Available Skills` di questo file.
+5. **Documento** la nuova abilità nella tabella `Available Skills` di questo file.
 
 ---
 
@@ -268,7 +276,7 @@ submitted → working → completed
 
 ## Esempi di integrazione
 
-### Python (requests)
+### Python (richieste)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (recuperare)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -39,6 +39,10 @@ export type AttemptLoopState = {
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;
   transientRateLimitedProviders: Set<string>;
+  /** Durable exhaustion carried across set retries (quota, credits, auth). */
+  durableExhaustedProviders?: Set<string>;
+  /** Durable exhaustion carried across set retries, keyed `provider:connectionId`. */
+  durableExhaustedConnections?: Set<string>;
   abortControllers: Map<number, AbortController>;
   dispatchedTargets: Set<string>;
   targetFailureTrust: Map<string, { observedFailure: boolean; allObservedFailuresQuota: boolean }>;
@@ -54,6 +58,12 @@ export type AttemptLoopState = {
   /** Normalized provider/model keys already refused request-scoped this dispatch. */
   requestScopedRejectedModelKeys?: Set<string>;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
+  /**
+   * Last result of a target the combo moved on from, returned when no later target
+   * succeeds: a stream cut in transit (#18460 follow-up, `truncatedStreamFailover.ts`) or
+   * an agentic stall (#13954, `agenticStallFailover.ts`).
+   */
+  heldTruncatedResponse?: Response | null;
 };
 
 export type AttemptLoopDeps = {
@@ -92,6 +102,12 @@ export type AttemptLoopDeps = {
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
+  /** Shares the existing request wait limits with an inline, already-authorized retry. */
+  retryCooldownWait?: {
+    attempt: { current: number };
+    budgetLeftMs: { current: number };
+    deadline: number;
+  };
   releaseStickyPinOnFailure: (
     messageHash: string | null | undefined,
     failedConnectionId: string | null | undefined
@@ -117,7 +133,7 @@ export type AttemptLoopDeps = {
   getWeightedStepKeyForTarget?: (target: ResolvedComboTarget) => string | null;
   universalHandoffConfig?: UniversalHandoffConfig;
   sourceFormat?: string | null;
-  relayOptions?: { sessionId?: string | null } | null;
+  relayOptions?: { sessionId?: string | null; apiKeyId?: string | null } | null;
   relayConfig?: ContextRelayConfig | null;
 };
 

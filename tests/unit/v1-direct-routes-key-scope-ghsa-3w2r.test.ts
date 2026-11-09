@@ -57,6 +57,7 @@ const providerImagesRoute =
 const webFetchRoute = await import("../../src/app/api/v1/web/fetch/route.ts");
 const webMapRoute = await import("../../src/app/api/v1/web/map/route.ts");
 const voicesRoute = await import("../../src/app/api/v1/voices/route.ts");
+const { nativeGenerationRoutes } = await import("./helpers/elevenLabsGenerationRoutes.ts");
 const providerVoicesRoute =
   await import("../../src/app/api/v1/providers/[provider]/voices/route.ts");
 
@@ -371,6 +372,23 @@ const ROUTE_CASES: RouteCase[] = [
     call: (bearer) =>
       webMapRoute.POST(jsonRequest("/v1/web/map", bearer, { url: "https://example.com/" })),
   },
+  ...nativeGenerationRoutes.map(({ path: routePath, route, body }) => ({
+    name: `POST ${routePath} (ElevenLabs proxy)`,
+    provider: "elevenlabs",
+    call: (bearer: string) => route.POST(jsonRequest(routePath, bearer, body)),
+  })),
+  {
+    name: "POST /v1/music/generations (ElevenLabs)",
+    provider: "elevenlabs",
+    call: (bearer: string) =>
+      musicRoute.POST(
+        jsonRequest("/v1/music/generations", bearer, {
+          model: "elevenlabs/music_v1",
+          prompt: "calm piano",
+        }),
+        noContext
+      ),
+  },
   {
     name: "GET /v1/voices (ElevenLabs proxy)",
     provider: "elevenlabs",
@@ -525,13 +543,36 @@ test("GHSA-3w2r combos: the per-target model gate follows chat's combo policy", 
   assert.ok(gate);
   assert.equal(await gate(target), false, "a target the key blocks is never dispatched");
 
-  // A stored combo granted by allowedCombos grants its own targets (#14197).
+  // A stored combo granted by allowedCombos grants its own targets past the
+  // allow-list (#14197). blockedModels still applies under `combo/*` (R9-8).
   const granted = createComboTargetKeyGate(
-    { apiKey: "sk-x", apiKeyInfo: { blockedModels: [target], allowedCombos: ["combo/*"] } },
+    {
+      apiKey: "sk-x",
+      apiKeyInfo: {
+        modelAccessMode: "restricted",
+        allowedModels: ["gemini/*"],
+        allowedCombos: ["combo/*"],
+      },
+    },
     "my-combo"
   );
   assert.ok(granted);
   assert.equal(await granted(target), true);
+
+  const grantedButBlocked = createComboTargetKeyGate(
+    { apiKey: "sk-x", apiKeyInfo: { blockedModels: [target], allowedCombos: ["combo/*"] } },
+    "my-combo"
+  );
+  assert.ok(grantedButBlocked);
+  assert.equal(await grantedButBlocked(target), false);
+
+  // Only a combo named in allowedCombos also overrides blockedModels.
+  const named = createComboTargetKeyGate(
+    { apiKey: "sk-x", apiKeyInfo: { blockedModels: [target], allowedCombos: ["my-combo"] } },
+    "my-combo"
+  );
+  assert.ok(named);
+  assert.equal(await named(target), true);
 });
 
 // ── keyless / zero-config providers (chat's #9057 rule) ─────────────────────

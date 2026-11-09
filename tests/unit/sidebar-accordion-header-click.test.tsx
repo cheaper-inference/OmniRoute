@@ -11,6 +11,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE = "1";
+// Render budget, not an import budget. Measured in review: the kit Sidebar mounts about 1.3–2×
+// slower than the legacy one (SidebarMenuButton asChild wrapping, a Radix tooltip per rail item);
+// under 5 s at host load 10–16, 9–16 s for the slowest cases at load 25–48. 30 s is headroom for
+// that load, not a mask for an eager-render bug.
+vi.setConfig({ testTimeout: 30_000 });
 
 vi.mock("next-intl", () => ({
   useTranslations: () => {
@@ -39,11 +44,19 @@ afterEach(() => {
   container.remove();
 });
 
+// The Sidebar renders inside the kit SidebarProvider + kit <Sidebar> (as DashboardShell does).
 async function renderSidebar() {
+  const { SidebarProvider, Sidebar: KitSidebar } = await import("@omniroute/ui-kit/sidebar");
   const { default: Sidebar } = await import("@/shared/components/Sidebar");
   await act(async () => {
     root = createRoot(container);
-    root.render(<Sidebar />);
+    root.render(
+      <SidebarProvider>
+        <KitSidebar collapsible="icon">
+          <Sidebar />
+        </KitSidebar>
+      </SidebarProvider>
+    );
   });
 }
 
@@ -99,7 +112,9 @@ describe("Sidebar accordion header keyboard and focus (UX-1)", () => {
   it("clicking the pin button does NOT toggle the section", async () => {
     await renderSidebar();
     const header = collapsedHeader();
-    const pin = container.querySelector<HTMLButtonElement>("button[title]");
+    // The section pin toggle (aria-pressed); `button[title]` would now hit the sidebar collapse
+    // trigger, which sits first in the kit header.
+    const pin = container.querySelector<HTMLButtonElement>("nav button[aria-pressed]");
     if (!pin) throw new Error("pin button not found");
 
     await click(pin);

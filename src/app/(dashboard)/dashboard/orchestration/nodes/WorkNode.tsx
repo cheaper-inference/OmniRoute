@@ -30,12 +30,14 @@ function WorkNodeImpl({ data }: { data: OrchNode }) {
         <span className="text-xs font-medium truncate">{data.label}</span>
       </div>
       {data.sublabel && (
-        <div className="text-[10px] text-muted truncate mt-0.5">{data.sublabel}</div>
+        <div className="text-[10px] text-text-muted truncate mt-0.5">{data.sublabel}</div>
       )}
       <div className="text-[10px] mt-1" style={{ color }}>
         {t(STATE_KEY[state])}
       </div>
-      {data.mirrorOf && <div className="text-[9px] text-muted mt-0.5">{t("mirroredInA2A")}</div>}
+      {data.mirrorOf && (
+        <div className="text-[9px] text-text-muted mt-0.5">{t("mirroredInA2A")}</div>
+      )}
       <Handle type="target" position={Position.Top} className={HANDLE} />
       <Handle type="source" position={Position.Bottom} className={HANDLE} />
     </div>

@@ -1,9 +1,14 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { credentialCooldownResponse } from "./credentialCooldownResponse";
 import {
   getModelInfo,
   getComboForModel,
   getModelInfoOrRetirementResponse,
 } from "../services/model";
+import {
+  withModalityBridgeResponseHeaders,
+  type ModalityBridgeResponseHeaders,
+} from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import {
   clearAccountError,
   markAccountUnavailable,
@@ -57,7 +62,6 @@ import { resolveUseUpstream429BreakerHints } from "../../shared/utils/providerHi
 import { resolveProviderId } from "../../shared/constants/providers";
 import { classifyProviderProbeResult } from "./providerProbeClassification";
 import { markProviderProbeResponse } from "../../shared/utils/providerProbeResult";
-import { inheritResponsePolicies } from "./chat/responsePolicies.ts";
 import {
   isAutoRequestResolvedCapabilitiesEnabled,
   isFeatureFlagEnabled,
@@ -68,6 +72,7 @@ import { logProxyJournal } from "./proxyJournal";
 import type { AttemptJournalEntry } from "./proxyJournal";
 import { logTranslationEvent } from "../../lib/translatorEvents";
 import { getRuntimeProviderProfile } from "@omniroute/open-sse/services/accountFallback.ts";
+import { recordConnectionOutcome } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import { describeConnectionRestriction } from "../services/credentialSelectionDiagnostics.ts";
 
 // #14960: circuit-open 503 that also names the breaker's classified failure kind.
@@ -466,10 +471,12 @@ export async function executeChatWithBreaker({
   reasoningTransportFallback = "drop",
   sessionAffinityKey = null,
   managedLease = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — undefined for every
   // non-video request. Passed straight through to handleChatCore; see its own destructure default.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null,
   allowedConnections = null,
   // optional resume flag from a rehydrated previous_response_id —
@@ -545,9 +552,11 @@ export async function executeChatWithBreaker({
             sessionAffinityKey,
             reasoningTransportFallback,
             managedLease,
+            beforeUpstreamAttempt,
             videoBridgeLog,
             previousResponseResumed,
             fallbackAttempts,
+            requestUpstreamStartTimeoutMs,
             forcedConnectionId,
             allowedConnections,
             skipResourcePressureGuard: true,
@@ -567,8 +576,12 @@ export async function executeChatWithBreaker({
             },
             onRequestSuccess: async () => {
               if (isShadowTraffic) return;
-              // Only a real success ends the per-request refusal streak (#12859).
-              if (credentials.connectionId) clearRequestRejectedStreak(credentials.connectionId);
+              // Only a real success ends the per-request refusal streak (#12859), and only for
+              // the model that succeeded: a sibling model's success must not reset another
+              // model's refusal count (the streak is keyed by connection + model).
+              if (credentials.connectionId) {
+                clearRequestRejectedStreak(credentials.connectionId, model);
+              }
               await clearAccountError(credentials.connectionId, credentials);
               await clearAntigravityVerificationUrl(
                 provider,
@@ -667,7 +680,8 @@ export async function executeChatWithBreaker({
     let wasProviderProbe = false;
     const probeOptions = {
       classifyResult: chatPathOwnsBreakerAccounting,
-      classifyProbeResult: classifyProviderProbeResult,
+      classifyProbeResult: (value: Parameters<typeof classifyProviderProbeResult>[0]) =>
+        classifyProviderProbeResult(value, provider),
       onProbeAcquired: () => (wasProviderProbe = true),
     };
     const tracked = await breaker.execute(
@@ -1149,6 +1163,8 @@ export async function safeLogEvents({
   } catch {
     // proxy selection feedback is best-effort; never break the request path
   }
+  // Rolling per-connection TTFB/outcome for the opt-in p2c latency term (never throws).
+  recordConnectionOutcome(credentials?.connectionId, model, proxyLatency, result?.success === true);
 
   try {
     await logProxyJournal({
@@ -1182,6 +1198,10 @@ export async function safeLogEvents({
   } catch {}
 }
 
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withSessionHeader(response: Response, sessionId: string | null): Response {
   if (!response || !sessionId) return response;
 
@@ -1195,10 +1215,17 @@ export function withSessionHeader(response: Response, sessionId: string | null):
       headers: response.headers,
     });
     cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withCorrelationId(response: Response, correlationId: string | null): Response {
   if (!response || !correlationId) return response;
 
@@ -1212,7 +1239,10 @@ export function withCorrelationId(response: Response, correlationId: string | nu
       headers: response.headers,
     });
     cloned.headers.set("X-Correlation-Id", correlationId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
@@ -1224,21 +1254,11 @@ export function withCorrelationId(response: Response, correlationId: string | nu
  * Same try-set/clone-fallback shape as withSessionHeader — the clone reuses
  * `response.body`, so SSE streams pass through untouched.
  */
-export function withModalityBridgeHeader(response: Response, value: string | null): Response {
-  if (!response || !value) return response;
-
-  try {
-    response.headers.set("x-omniroute-modality-bridge", value);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("x-omniroute-modality-bridge", value);
-    return cloned;
-  }
+export function withModalityBridgeHeader(
+  response: Response,
+  value: string | ModalityBridgeResponseHeaders | null
+): Response {
+  return withModalityBridgeResponseHeaders(response, value);
 }
 
 export function withConversationId(response: Response, conversationId: string | null): Response {
@@ -1258,22 +1278,4 @@ export function withConversationId(response: Response, conversationId: string | 
   }
 }
 
-export function withSelectedConnectionHeader(
-  response: Response,
-  connectionId: string | null | undefined
-): Response {
-  if (!response || !connectionId) return response;
-  try {
-    response.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    return response;
-  } catch {
-    const cloned = new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
-    });
-    cloned.headers.set("X-OmniRoute-Selected-Connection-Id", connectionId);
-    const trusted = inheritTrustedLocalRateLimitResponse(response, cloned);
-    return inheritResponsePolicies(response, trusted);
-  }
-}
+export { withSelectedConnectionHeader } from "./chat/selectedConnectionHeader.ts";

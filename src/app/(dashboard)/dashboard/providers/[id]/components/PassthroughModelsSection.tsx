@@ -14,7 +14,7 @@ import { filterUnavailableModelRows } from "@/lib/providers/mergeProviderModelLi
  * Never imports from ProviderDetailPageClient.
  */
 import React, { useState, useMemo } from "react";
-import { Button } from "@/shared/components";
+import { Button, Input } from "@/shared/components";
 import { generateUniqueModelAlias } from "./passthroughAlias.ts";
 import {
   matchesModelCatalogQuery,
@@ -25,7 +25,9 @@ import {
   buildCompatMap,
   getDisplayModelAlias,
   providerText,
-  testAllResultsText,
+  recordTestAllOutcome,
+  type TestAllTally,
+  testAllSummaryMessages,
   evaluateTestAllEntry,
   buildPassthroughTestBody,
   shouldSwitchToVisibleFilter,
@@ -50,6 +52,8 @@ export type ModelCompatSavePatchPassthrough = {
 export interface PassthroughModelsSectionProps {
   providerAlias: string;
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   catalogModels?: CompatModelRow[];
   availableModels?: CompatModelRow[];
   syncedCatalogAuthoritative?: boolean;
@@ -98,6 +102,7 @@ function getDefaultModelAlias(model: CompatModelRow): string | null {
 export default function PassthroughModelsSection({
   providerAlias,
   modelAliases,
+  comboUsage,
   catalogModels = [],
   availableModels = [],
   syncedCatalogAuthoritative = false,
@@ -158,8 +163,7 @@ export default function PassthroughModelsSection({
     setTestingAll(true);
     setTestProgress({ done: 0, total: modelsToTest.length });
 
-    let ok = 0;
-    let error = 0;
+    const tally: TestAllTally = { ok: 0, error: 0, skipped: 0 };
     let hiddenCount = 0;
 
     for (const model of modelsToTest) {
@@ -171,6 +175,7 @@ export default function PassthroughModelsSection({
               status?: "ok" | "error" | "slow";
               rateLimited?: boolean;
               isTimeout?: boolean;
+              skipped?: boolean;
               error?: string;
             }
           >;
@@ -190,26 +195,27 @@ export default function PassthroughModelsSection({
 
         const entry = result.results?.[model.modelId];
         const outcome = evaluateTestAllEntry(entry, autoHideFailed);
-        // #9511: paint "quota" status for quota-exhausted models (amber badge),
-        // "ok" for healthy, "error" for genuine failures.
-        onModelTestStatusChange?.(model.modelId, outcome.isQuota ? "quota" : outcome.status);
-        if (outcome.status === "ok") {
-          ok++;
-        } else {
-          error++;
-          if (outcome.shouldHide) {
-            await onToggleHidden(model.modelId, true);
-            hiddenCount++;
-          }
+        recordTestAllOutcome(tally, outcome, entry?.error);
+        // A skipped probe never ran — neither healthy nor broken, so no status icon.
+        if (!outcome.skipped) {
+          // #9511: paint "quota" status for quota-exhausted models (amber badge),
+          // "ok" for healthy, "error" for genuine failures.
+          onModelTestStatusChange?.(model.modelId, outcome.isQuota ? "quota" : outcome.status);
+        }
+        if (outcome.shouldHide) {
+          await onToggleHidden(model.modelId, true);
+          hiddenCount++;
         }
       } catch (e) {
-        error++;
+        tally.error++;
         onModelTestStatusChange?.(model.modelId, "error");
       }
       setTestProgress((prev) => (prev ? { done: prev.done + 1, total: prev.total } : null));
     }
 
-    notify.info(testAllResultsText(t, ok, ok + error));
+    for (const message of testAllSummaryMessages(t, tally)) {
+      notify.info(message);
+    }
     if (hiddenCount > 0) {
       notify.info(providerText(t, "testAllFailedHidden", "{count} hidden", { count: hiddenCount }));
       // Bug #3610 fix 3: switch to "visible" filter so hidden models disappear on-screen
@@ -373,7 +379,7 @@ export default function PassthroughModelsSection({
     // that would otherwise collapse to the same last-segment alias (e.g.
     // enx/gpt-5.5 vs enx/codebuddy/gpt-5.5 → both "gpt-5.5").
     if (Object.values(modelAliases).includes(modelId)) {
-      alert(t("aliasExistsAlert", { alias: modelId }));
+      notify.warning(t("aliasExistsAlert", { alias: modelId }));
       return;
     }
     const defaultAlias = generateUniqueModelAlias(modelId, modelAliases);
@@ -395,20 +401,15 @@ export default function PassthroughModelsSection({
 
       {/* Add new model */}
       <div className="flex items-end gap-2">
-        <div className="flex-1">
-          <label htmlFor="new-model-input" className="text-xs text-text-muted mb-1 block">
-            {inputLabel}
-          </label>
-          <input
-            id="new-model-input"
-            type="text"
-            value={newModel}
-            onChange={(e) => setNewModel(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            placeholder={inputPlaceholder}
-            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
-          />
-        </div>
+        <Input
+          id="new-model-input"
+          label={inputLabel}
+          value={newModel}
+          onChange={(e) => setNewModel(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          placeholder={inputPlaceholder}
+          className="flex-1"
+        />
         <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModel.trim() || adding}>
           {adding ? t("adding") : t("add")}
         </Button>
@@ -480,6 +481,7 @@ export default function PassthroughModelsSection({
                 source={source}
                 isFree={isFree}
                 isHidden={isHidden}
+                combos={comboUsage?.[modelId]}
                 copied={copied}
                 onCopy={onCopy}
                 onDeleteAlias={source === "alias" && alias ? () => onDeleteAlias(alias) : undefined}

@@ -8,7 +8,7 @@
  * - passthrough: leave client fields unchanged (required for Codex visible thinking)
  * - auto: STRIP all thinking/reasoning fields before upstream (not “auto-show thinking”)
  * - custom: force a fixed token budget on every request
- * - adaptive: scale budget from a base effort by request complexity
+ * - adaptive: preserve explicit effort; otherwise scale budget by request complexity
  *
  * Independent of compression, prompt cache, combo routing, and API-key token limits.
  * Does **not** decrypt OpenAI/Codex `encrypted_content` reasoning blobs.
@@ -64,10 +64,22 @@ export const THINKING_LEVEL_MAP: Record<string, number> = {
 
 export type Gemini38ThinkingLevel = "low" | "medium" | "high";
 
-/** Gemini 3.8 Flash, Gemini 4 Argon, and future thinking-level models (e.g. vertex/gemini-4-argon). */
-export function isGemini38Model(model: string): boolean {
-  return /(?:^|[\/])gemini-(?:3\.8|4)(?:$|[-.])/i.test(model);
+/**
+ * Gemini 3.8 Flash and every major version >= 4 (Gemini 4 Argon, future 5/6/10) speak
+ * thinkingLevel; major versions <= 3 only know the numeric thinkingBudget. Provider
+ * prefixes (vertex/, zed-hosted/) are fine; gemma-4-* is not a gemini- id, so it never matches.
+ */
+export function isGeminiThinkingLevelModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:3\.8|[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
 }
+
+/** Gemini major version >= 4 — these reject the numeric thinkingBudget off-switch (#18910). */
+export function isGemini4PlusModel(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:[4-9]|[1-9]\d+)(?:$|[-.])/i.test(model);
+}
+
+/** @deprecated Pre-rename name of {@link isGeminiThinkingLevelModel}; kept for existing tests. */
+export const isGemini38Model = isGeminiThinkingLevelModel;
 
 export function gemini38ThinkingLevelFromBudget(
   model: string,
@@ -93,6 +105,8 @@ function clientAskedForThoughts(body: Record<string, unknown>): boolean {
 
 /**
  * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
+ * Gemini 4+ rejects the numeric budget off-switch, so there it becomes thinkingLevel "low";
+ * versions <= 3 keep { thinkingBudget: 0, includeThoughts: false }.
  * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
  */
 export function gemini38ThinkingConfig(
@@ -103,6 +117,9 @@ export function gemini38ThinkingConfig(
   | { thinkingLevel: Gemini38ThinkingLevel; includeThoughts?: boolean }
   | { thinkingBudget: number; includeThoughts: boolean } {
   if (budget <= 0) {
+    if (isGemini4PlusModel(model)) {
+      return { thinkingLevel: "low" };
+    }
     return { thinkingBudget: 0, includeThoughts: false };
   }
   const thinkingConfig: {
@@ -307,7 +324,7 @@ export function applyThinkingBudget(
       return setCustomBudget(processed, cfg.customBudget ?? DEFAULT_THINKING_CONFIG.customBudget);
 
     case ThinkingMode.ADAPTIVE:
-      return applyAdaptiveBudget(processed, cfg);
+      return hasExplicitReasoningEffort(body) ? processed : applyAdaptiveBudget(processed, cfg);
 
     default:
       return processed;
@@ -395,9 +412,29 @@ function setCustomBudget(body: unknown, budget: number) {
   return result;
 }
 
-/**
- * ADAPTIVE mode: scale budget based on request complexity
- */
+// Inspect original carriers before normalizeThinkingLevel converts discrete levels
+// into numeric budgets. Provider capability validation remains at the executor.
+function hasExplicitReasoningEffort(body: unknown): boolean {
+  const record = toRecord(body);
+  const generationConfig = toRecord(record.generationConfig);
+  const nativeEffort = toRecord(record.output_config).effort;
+  // Match the normalizer's precedence: a shadowed alias is not the chosen level.
+  const levels = [
+    record.thinkingLevel || record.thinking_level,
+    toRecord(generationConfig.thinkingConfig).thinkingLevel ||
+      toRecord(generationConfig.thinking_config).thinkingLevel,
+  ];
+  return (
+    typeof record.reasoning_effort === "string" ||
+    typeof toRecord(record.reasoning).effort === "string" ||
+    (typeof nativeEffort === "string" && nativeEffort.length > 0) ||
+    levels.some(
+      (level) => typeof level === "string" && Object.hasOwn(THINKING_LEVEL_MAP, level.toLowerCase())
+    )
+  );
+}
+
+/** ADAPTIVE mode without explicit effort: scale budget by request complexity. */
 function applyAdaptiveBudget(body: unknown, cfg: Partial<ThinkingBudgetConfig>) {
   const bodyRecord = toRecord(body);
   const messages = Array.isArray(bodyRecord.messages)
@@ -439,9 +476,8 @@ function applyAdaptiveBudget(body: unknown, cfg: Partial<ThinkingBudgetConfig>) 
 
   // The effort→budget table collapses high, xhigh and max onto the same number,
   // and setCustomBudget then reads any budget at that ceiling back as xhigh.
-  // Adaptive only scales a budget. Keep the selected effort when the multiplier
-  // itself did not raise the budget, so a client "high" is not promoted to an
-  // "xhigh" the upstream rejects (#16662). Compare the pre-cap value: a model
+  // Keep the configured effort when the multiplier did not raise the budget.
+  // Compare the pre-cap value: a model
   // cap that pulls a genuinely scaled budget back under the ceiling is not the
   // same as "the request was not complex". Only pin efforts below the ceiling:
   // "max"/"xhigh" already read back as "xhigh", and writing "max" verbatim as

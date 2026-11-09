@@ -3,7 +3,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import { Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
+import Input from "@/shared/components/Input";
+import { cn } from "@/shared/utils/cn";
 
 export interface RadarMergedEntry {
   provider: string;
@@ -107,8 +120,8 @@ function capabilityBadge(
     value === true
       ? trueClass
       : value === false
-        ? "bg-red-500/10 text-red-400"
-        : "bg-gray-500/10 text-gray-400";
+        ? "bg-error/10 text-error"
+        : "bg-surface-2/10 text-text-muted";
   const unknown = value !== true && value !== false;
   return (
     <span
@@ -221,204 +234,202 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
 
   return (
     <>
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-sm text-text-muted border-b border-border">
-                <th className="pb-3 font-medium">{t("colProvider")}</th>
-                <th className="pb-3 font-medium">{t("colModel")}</th>
-                <th className="pb-3 font-medium">{t("colQuota")}</th>
-                <th className="pb-3 font-medium">{t("colLimits")}</th>
-                <th className="pb-3 font-medium">{t("colContext")}</th>
-                <th className="pb-3 font-medium">{t("colCapabilities")}</th>
-                <th className="pb-3 font-medium">{t("colTos")}</th>
-                <th className="pb-3 font-medium text-right">{t("colActions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map((entry) => {
-                const key = `${entry.provider}:${entry.modelId}`;
-                const localState = stateByKey.get(key);
-                const hasOverride =
-                  localState && (localState.displayName !== null || localState.enabled !== null);
-                return (
-                  <tr
-                    key={key}
-                    className={`border-b border-border/50 last:border-b-0 ${
-                      entry.enabled === false ? "opacity-50" : ""
-                    }`}
-                  >
-                    <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{entry.provider}</span>
-                        {entry.origin === "radar" && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-400 font-medium">
-                            {t("newBadge")}
-                          </span>
-                        )}
-                        {entry.origin === "local" && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-medium">
-                            {t("localBadge")}
-                          </span>
-                        )}
-                        {entry.setup?.keyUrl && (
-                          <Link
-                            href={`/dashboard/radar/setup?provider=${encodeURIComponent(entry.provider)}`}
-                            className="text-xs text-violet-400 hover:underline"
-                            title={t("setupGuide")}
-                          >
-                            ⚙
-                          </Link>
-                        )}
-                      </div>
-                      {entry.enabled === false && entry.disabledBy === "radar" && (
-                        <p className="text-xs text-red-400 mt-0.5">{t("disabledByFeed")}</p>
+      <Card padding="none" className="overflow-hidden">
+        <Table aria-label={t("catalogTab")} scrollbarLabel={t("catalogTab")}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("colProvider")}</TableHead>
+              <TableHead>{t("colModel")}</TableHead>
+              <TableHead>{t("colQuota")}</TableHead>
+              <TableHead>{t("colLimits")}</TableHead>
+              <TableHead>{t("colContext")}</TableHead>
+              <TableHead>{t("colCapabilities")}</TableHead>
+              <TableHead>{t("colTos")}</TableHead>
+              <TableHead className="text-right">{t("colActions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entries.map((entry) => {
+              const key = `${entry.provider}:${entry.modelId}`;
+              const localState = stateByKey.get(key);
+              const hasOverride =
+                localState && (localState.displayName !== null || localState.enabled !== null);
+              return (
+                <TableRow key={key} className={cn(entry.enabled === false && "opacity-50")}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{entry.provider}</span>
+                      {entry.origin === "radar" && (
+                        <Badge variant="primary" size="sm">
+                          {t("newBadge")}
+                        </Badge>
                       )}
-                    </td>
-                    <td className="py-3 text-text-muted text-sm font-mono max-w-[240px]">
-                      {editingKey === key ? (
-                        <input
-                          type="text"
-                          value={displayName}
-                          onChange={(event) => setDisplayName(event.target.value)}
-                          aria-label={t("modelDisplayName")}
-                          maxLength={160}
-                          className="w-full min-w-[180px] px-2 py-1 rounded border border-border bg-transparent text-text-main focus:outline-none focus:ring-2 focus:ring-violet-500"
-                        />
-                      ) : (
-                        <span className="block truncate">{entry.displayName}</span>
+                      {entry.origin === "local" && (
+                        <Badge variant="info" size="sm">
+                          {t("localBadge")}
+                        </Badge>
                       )}
-                    </td>
-                    <td className="py-3 text-sm">{budgetLabel(entry)}</td>
-                    <td className="py-3 text-sm text-text-muted">
-                      {(() => {
-                        const limits = formatLimits(entry);
-                        return limits === "—" ? (
-                          <span title={t("limitsUnknownHelp")}>{limits}</span>
-                        ) : (
-                          limits
-                        );
-                      })()}
-                    </td>
-                    <td className="py-3 text-sm text-text-muted">
-                      {entry.contextWindow != null ? (
-                        `${(entry.contextWindow / 1000).toFixed(0)}K`
-                      ) : (
-                        <span title={t("contextUnknownHelp")}>—</span>
-                      )}
-                    </td>
-                    <td className="py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {capabilityBadge(
-                          t("capTools"),
-                          entry.capabilities?.tools,
-                          "bg-blue-500/10 text-blue-400",
-                          t("capabilityUnknownHelp")
-                        )}
-                        {capabilityBadge(
-                          t("capVision"),
-                          entry.capabilities?.vision,
-                          "bg-purple-500/10 text-purple-400",
-                          t("capabilityUnknownHelp")
-                        )}
-                        {capabilityBadge(
-                          t("capThinking"),
-                          entry.capabilities?.thinking,
-                          "bg-amber-500/10 text-amber-400",
-                          t("capabilityUnknownHelp")
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3">
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          entry.tos === "ok"
-                            ? "bg-green-500/10 text-green-400"
-                            : entry.tos === "caution"
-                              ? "bg-yellow-500/10 text-yellow-400"
-                              : entry.tos === "avoid"
-                                ? "bg-red-500/10 text-red-400"
-                                : "bg-gray-500/10 text-gray-400"
-                        }`}
-                      >
-                        {entry.tos}
-                      </span>
-                      {entry.trainsOnPrompts === true && (
-                        <span
-                          className="ml-1 text-xs px-2 py-1 rounded bg-orange-500/10 text-orange-400"
-                          title={t("trainsOnPromptsHelp")}
+                      {entry.setup?.keyUrl && (
+                        <Link
+                          href={`/dashboard/radar/setup?provider=${encodeURIComponent(entry.provider)}`}
+                          className="text-xs text-primary hover:underline"
+                          title={t("setupGuide")}
+                          aria-label={t("setupGuide")}
                         >
-                          {t("trainsOnPrompts")}
-                        </span>
+                          ⚙
+                        </Link>
                       )}
-                    </td>
-                    <td className="py-3 pl-3">
-                      {editingKey === key ? (
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          <label className="inline-flex items-center gap-1 text-xs text-text-muted">
-                            <input
-                              type="checkbox"
-                              checked={enabled}
-                              disabled={entry.disabledBy === "radar"}
-                              onChange={(event) => setEnabled(event.target.checked)}
-                            />
-                            {t("modelEnabled")}
-                          </label>
-                          <button
-                            type="button"
-                            disabled={saving || displayName.trim().length === 0}
-                            onClick={() => void saveOverride(entry)}
-                            className="text-xs text-violet-400 hover:underline disabled:opacity-50"
-                          >
-                            {t("saveModel")}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() => setEditingKey(null)}
-                            className="text-xs text-text-muted hover:text-text-main disabled:opacity-50"
-                          >
-                            {t("cancelEdit")}
-                          </button>
-                        </div>
+                    </div>
+                    {entry.enabled === false && entry.disabledBy === "radar" && (
+                      <p className="text-xs text-error mt-0.5">{t("disabledByFeed")}</p>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-text-muted text-sm font-mono max-w-[240px]">
+                    {editingKey === key ? (
+                      <Input
+                        type="text"
+                        value={displayName}
+                        onChange={(event) => setDisplayName(event.target.value)}
+                        aria-label={t("modelDisplayName")}
+                        maxLength={160}
+                        className="min-w-[180px]"
+                        inputClassName="font-mono text-sm"
+                      />
+                    ) : (
+                      <span className="block truncate">{entry.displayName}</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-sm">{budgetLabel(entry)}</TableCell>
+                  <TableCell className="text-sm text-text-muted">
+                    {(() => {
+                      const limits = formatLimits(entry);
+                      return limits === "—" ? (
+                        <span title={t("limitsUnknownHelp")}>{limits}</span>
                       ) : (
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() => beginEdit(entry)}
-                            className="text-xs text-violet-400 hover:underline disabled:opacity-50"
-                          >
-                            {t("editModel")}
-                          </button>
-                          {hasOverride && (
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={() => void resetOverride(entry)}
-                              className="text-xs text-text-muted hover:text-text-main disabled:opacity-50"
-                            >
-                              {t("resetModel")}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() => void setTombstone(entry.provider, entry.modelId, true)}
-                            className="text-xs text-red-400 hover:underline disabled:opacity-50"
-                          >
-                            {t("hideModel")}
-                          </button>
-                        </div>
+                        limits
+                      );
+                    })()}
+                  </TableCell>
+                  <TableCell className="text-sm text-text-muted">
+                    {entry.contextWindow != null ? (
+                      `${(entry.contextWindow / 1000).toFixed(0)}K`
+                    ) : (
+                      <span title={t("contextUnknownHelp")}>—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {capabilityBadge(
+                        t("capTools"),
+                        entry.capabilities?.tools,
+                        "bg-info/10 text-info",
+                        t("capabilityUnknownHelp")
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {capabilityBadge(
+                        t("capVision"),
+                        entry.capabilities?.vision,
+                        "bg-primary/10 text-primary",
+                        t("capabilityUnknownHelp")
+                      )}
+                      {capabilityBadge(
+                        t("capThinking"),
+                        entry.capabilities?.thinking,
+                        "bg-warning/10 text-warning",
+                        t("capabilityUnknownHelp")
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        entry.tos === "ok"
+                          ? "bg-success/10 text-success"
+                          : entry.tos === "caution"
+                            ? "bg-warning/10 text-warning"
+                            : entry.tos === "avoid"
+                              ? "bg-error/10 text-error"
+                              : "bg-surface-2/10 text-text-muted"
+                      }`}
+                    >
+                      {entry.tos}
+                    </span>
+                    {entry.trainsOnPrompts === true && (
+                      <span
+                        className="ml-1 text-xs px-2 py-1 rounded bg-warning/10 text-warning"
+                        title={t("trainsOnPromptsHelp")}
+                      >
+                        {t("trainsOnPrompts")}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="pl-3">
+                    {editingKey === key ? (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Checkbox
+                          checked={enabled}
+                          disabled={entry.disabledBy === "radar"}
+                          onChange={(event) => setEnabled(event.target.checked)}
+                          label={t("modelEnabled")}
+                          className="text-xs text-text-muted"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={saving || displayName.trim().length === 0}
+                          onClick={() => void saveOverride(entry)}
+                          className="h-7 px-2 text-xs text-primary"
+                        >
+                          {t("saveModel")}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={saving}
+                          onClick={() => setEditingKey(null)}
+                          className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                        >
+                          {t("cancelEdit")}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={saving}
+                          onClick={() => beginEdit(entry)}
+                          className="h-7 px-2 text-xs text-primary"
+                        >
+                          {t("editModel")}
+                        </Button>
+                        {hasOverride && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={saving}
+                            onClick={() => void resetOverride(entry)}
+                            className="h-7 px-2 text-xs text-text-muted hover:text-text-main"
+                          >
+                            {t("resetModel")}
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={saving}
+                          onClick={() => void setTombstone(entry.provider, entry.modelId, true)}
+                          className="h-7 px-2 text-xs text-error hover:bg-error/10"
+                        >
+                          {t("hideModel")}
+                        </Button>
+                      </div>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </Card>
 
       {hiddenModels.length > 0 && (
@@ -436,14 +447,15 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                     {state.displayName ?? state.modelId}
                   </span>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   disabled={saving}
                   onClick={() => void setTombstone(state.provider, state.modelId, false)}
-                  className="text-sm text-violet-400 hover:underline disabled:opacity-50"
+                  className="text-primary"
                 >
                   {t("restoreModel")}
-                </button>
+                </Button>
               </div>
             ))}
           </div>

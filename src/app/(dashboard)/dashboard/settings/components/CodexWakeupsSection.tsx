@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { Button, Checkbox, Input, Select, Toggle } from "@/shared/components";
 
 type Schedule =
@@ -135,17 +136,18 @@ function DailyFields({
           onChange={(e) => onChange({ ...value, timezone: e.target.value })}
         />
       </div>
-      <fieldset className="flex flex-wrap gap-3">
-        <legend className="text-sm font-medium mb-1">{t("codexWakeups.days")}</legend>
-        {WEEKDAYS.map((day) => (
-          <Checkbox
-            key={day}
-            label={dayNames[day]}
-            checked={value.days.includes(day)}
-            onChange={() => onChange({ ...value, days: toggleIn(value.days, day) })}
-          />
-        ))}
-      </fieldset>
+      <CheckboxGroup label={t("codexWakeups.days")}>
+        <div className="flex flex-wrap gap-3">
+          {WEEKDAYS.map((day) => (
+            <Checkbox
+              key={day}
+              label={dayNames[day]}
+              checked={value.days.includes(day)}
+              onChange={() => onChange({ ...value, days: toggleIn(value.days, day) })}
+            />
+          ))}
+        </div>
+      </CheckboxGroup>
     </div>
   );
 }
@@ -161,8 +163,7 @@ function AccountPicker({
 }) {
   const t = useTranslations("settings");
   return (
-    <fieldset className="flex flex-col gap-1">
-      <legend className="text-sm font-medium mb-1">{t("codexWakeups.accounts")}</legend>
+    <CheckboxGroup label={t("codexWakeups.accounts")}>
       {accounts.map((account) => (
         <Checkbox
           key={account.id}
@@ -171,7 +172,7 @@ function AccountPicker({
           onChange={() => onChange(toggleIn(selected, account.id))}
         />
       ))}
-    </fieldset>
+    </CheckboxGroup>
   );
 }
 
@@ -363,8 +364,8 @@ export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAcco
       <WakeupForm accounts={accounts} onCreate={(task) => act({ action: "create", task })} />
       {notice && (
         <p
-          role="status"
-          className={`text-xs ${notice.tone === "ok" ? "text-emerald-500" : "text-rose-500"}`}
+          role={notice.tone === "ok" ? "status" : "alert"}
+          className={`text-xs ${notice.tone === "ok" ? "text-success" : "text-error"}`}
         >
           {notice.text}
         </p>

@@ -9,6 +9,10 @@ import path from "node:path";
 // A registry made mostly of skipped rows was then walked without a single yield. This
 // counts the builder's `setImmediate` yields with and without a large block of rows that
 // the custom-model loop skips (no string id), and requires the skipped rows to yield.
+// The auto-candidate preparation that runs inside the same request now yields on a
+// wall-clock budget, so its yield count differs between the cold baseline run and the warm
+// run and would swamp this difference. The budget slice is pinned to Infinity (it never
+// yields on time) so only the catalog loop's deterministic every-N yields are compared.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-9147-skip-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "catalog-9147-skip-secret";
@@ -17,6 +21,7 @@ process.env.CATALOG_BUILD_TIMEOUT_MS = "120000";
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
+const cooperativeYield = await import("../../open-sse/services/autoCombo/cooperativeYield.ts");
 
 const SKIPPED_ROWS = 2000;
 
@@ -68,8 +73,15 @@ test.after(() => {
 });
 
 test("#9147 — rows skipped by an early `continue` still count toward catalog yields", async () => {
-  const baseline = await countBuildYields(0);
-  const withSkipped = await countBuildYields(SKIPPED_ROWS);
+  cooperativeYield.__setCooperativeYieldSliceMsForTest(Number.POSITIVE_INFINITY);
+  let baseline: number;
+  let withSkipped: number;
+  try {
+    baseline = await countBuildYields(0);
+    withSkipped = await countBuildYields(SKIPPED_ROWS);
+  } finally {
+    cooperativeYield.__setCooperativeYieldSliceMsForTest(null);
+  }
   const extra = withSkipped - baseline;
   // One yield per 5 iterations → ~400 for 2000 skipped rows; allow slack for jitter.
   assert.ok(

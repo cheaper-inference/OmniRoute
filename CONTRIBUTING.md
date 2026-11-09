@@ -16,6 +16,11 @@ coverage, and reconciliation steps.
 - **Node.js** `>=22.22.2 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
 - **npm** 10+
 
+> **Windows with Node 24:** use the current 24 LTS patch release (at least 24.20.0).
+> Earlier releases can abort after successful tests when `--test-force-exit` closes the
+> process. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) addresses
+> this runtime crash; keep the test assertions and runner exit checks enabled.
+
 > **npm v11+ users (Node 24+):** After `npm install`, verify native modules were installed:
 > `node -e "require('better-sqlite3')"`. If it fails with `MODULE_NOT_FOUND`,
 > run `npm approve-scripts better-sqlite3 && npm install`. See
@@ -237,6 +242,7 @@ checks will not already give you, and on smaller machines it can saturate the ho
 - Run the test files that cover your change: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Run `npm run lint`
 - Include or update automated tests in the same PR whenever production code changes
+- In `node:test` files, put every top-level `await` (such as `await import(...)`) before the first `test()` / `describe()`: under `--test-force-exit`, tests registered after it can silently never run (#18045; enforced by `npm run check:test-tla-order`)
 - Include the changed or added test files in the PR description when production code changed
 - Check the SonarQube result on the PR when the project secrets are configured in CI
 

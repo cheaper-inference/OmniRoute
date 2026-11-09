@@ -326,6 +326,35 @@ export function projectStreamFailureEvent(payload: unknown): ProjectedStreamFail
   };
 }
 
+// Anthropic's documented error types. Claude clients treat an unknown type (for example the
+// OpenAI-only `server_error`) like a bad request and fail the turn instead of retrying (9router #5185).
+const ANTHROPIC_ERROR_TYPES = new Set([
+  "invalid_request_error",
+  "authentication_error",
+  "billing_error",
+  "permission_error",
+  "not_found_error",
+  "request_too_large",
+  "rate_limit_error",
+  "api_error",
+  "overloaded_error",
+]);
+
+/** Map a stream failure onto Anthropic's error-type vocabulary (status table per the API docs). */
+function toAnthropicErrorType(type: unknown, status: number): string {
+  if (typeof type === "string" && ANTHROPIC_ERROR_TYPES.has(type)) return type;
+  if (status === 400) return "invalid_request_error";
+  if (status === 401) return "authentication_error";
+  if (status === 402) return "billing_error";
+  if (status === 403) return "permission_error";
+  if (status === 404) return "not_found_error";
+  if (status === 413) return "request_too_large";
+  if (status === 429) return "rate_limit_error";
+  if (status === 529) return "overloaded_error";
+  if (status >= 400 && status < 500) return "invalid_request_error";
+  return "api_error";
+}
+
 export function formatTranslatedStreamError(payload: unknown, sourceFormat?: string): string {
   const failure = normalizeStreamFailurePayload(payload) ?? {
     status: 502,
@@ -358,7 +387,8 @@ export function formatTranslatedStreamError(payload: unknown, sourceFormat?: str
   }
 
   if (sourceFormat === FORMATS.CLAUDE) {
-    return `event: error\ndata: ${JSON.stringify({ type: "error", error: errorBody.error })}\n\n`;
+    const error = { ...errorBody.error, type: toAnthropicErrorType(failure.type, failure.status) };
+    return `event: error\ndata: ${JSON.stringify({ type: "error", error })}\n\n`;
   }
 
   return `data: ${JSON.stringify(errorBody)}\n\ndata: [DONE]\n\n`;

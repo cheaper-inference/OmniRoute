@@ -3,6 +3,7 @@
  */
 
 import { appendRequestLog } from "@/lib/usageDb";
+import { cacheCreationFields, readCacheWriteUsage } from "./cacheWriteUsage.ts";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
@@ -55,6 +56,8 @@ export interface UsageLike {
   candidatesTokenCount?: number;
   totalTokenCount?: number;
   cachedContentTokenCount?: number;
+  /** Internal Gemini cache evidence; removed by filterUsageForFormat. */
+  cache_evidence?: "hit" | "miss" | "unreported" | "invalid";
   thoughtsTokenCount?: number;
   context_budget_input_tokens?: number;
   context_budget_prompt_tokens?: number;
@@ -142,8 +145,8 @@ function getBufferTokens(): number {
 
 async function _loadBufferFromDb(): Promise<void> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const val = settings.usageTokenBuffer;
     if (typeof val === "number" && val >= 0) {
       _cachedBuffer = val;
@@ -332,6 +335,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "output_tokens_details",
       "cache_read_input_tokens",
       "cache_creation_input_tokens",
+      "cache_creation",
       "estimated",
       "tokens_per_second",
     ],
@@ -350,6 +354,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "total_tokens",
       "input_tokens_details",
       "output_tokens_details",
+      "cache_creation",
       "estimated",
       "cost_in_usd_ticks",
       "provider_credits",
@@ -370,6 +375,7 @@ export function filterUsageForFormat(usage: UsageLike | null | undefined, target
       "prompt_cache_miss_tokens",
       "cache_read_input_tokens",
       "cache_creation_input_tokens",
+      "cache_creation",
       "estimated",
       "cost_in_usd_ticks",
       "provider_credits",
@@ -668,7 +674,7 @@ export function sanitizeUsagePayloadForRequest(
 export function normalizeUsage(usage: UsageLike | null | undefined) {
   if (!usage || typeof usage !== "object" || Array.isArray(usage)) return null;
 
-  const normalized: Record<string, number> = {};
+  const normalized: UsageLike = { ...cacheCreationFields(usage) };
   const assignNumber = (key: string, value: unknown) => {
     if (value === undefined || value === null) return;
     const numeric = Number(value);
@@ -681,13 +687,20 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   assignNumber("input_tokens", usage?.input_tokens);
   assignNumber("output_tokens", usage?.output_tokens);
   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
-  assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
-  assignNumber(
-    "cached_tokens",
+  assignNumber("cache_creation_input_tokens", readCacheWriteUsage(usage).total);
+  const reportedCachedTokens =
     usage?.cached_tokens ??
-      usage?.prompt_tokens_details?.cached_tokens ??
-      usage?.input_tokens_details?.cached_tokens
-  );
+    usage?.prompt_tokens_details?.cached_tokens ??
+    usage?.input_tokens_details?.cached_tokens;
+  if (reportedCachedTokens !== undefined) assignNumber("cached_tokens", reportedCachedTokens);
+  if (
+    usage?.cache_evidence === "hit" ||
+    usage?.cache_evidence === "miss" ||
+    usage?.cache_evidence === "unreported" ||
+    usage?.cache_evidence === "invalid"
+  ) {
+    (normalized as UsageLike).cache_evidence = usage.cache_evidence;
+  }
   assignNumber("no_cache_tokens", usage?.no_cache_tokens);
   assignNumber("reasoning_tokens", usage?.reasoning_tokens);
   // Credits metered by a credit-metered provider (see
@@ -840,9 +853,10 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const u = chunk.message.usage;
     const inputTokens = u.input_tokens || u.prompt_tokens || 0;
     const cacheRead = u.cache_read_input_tokens || 0;
-    const cacheCreation = u.cache_creation_input_tokens || 0;
+    const cacheCreation = readCacheWriteUsage(u).total ?? 0;
     if (inputTokens > 0 || cacheRead > 0 || cacheCreation > 0) {
       return normalizeUsage({
+        ...cacheCreationFields(u),
         prompt_tokens: inputTokens + cacheRead + cacheCreation,
         completion_tokens: u.output_tokens || u.completion_tokens || 0,
         input_tokens: inputTokens + cacheRead + cacheCreation,
@@ -859,6 +873,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     const deltaCacheRead = chunk.usage.cache_read_input_tokens || 0;
     const deltaCacheCreation = chunk.usage.cache_creation_input_tokens || 0;
     return normalizeUsage({
+      ...cacheCreationFields(chunk.usage),
       prompt_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
       completion_tokens: chunk.usage.output_tokens || 0,
       input_tokens: deltaInput + deltaCacheRead + deltaCacheCreation,
@@ -877,6 +892,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
   ) {
     const usage = chunk.response.usage;
     return normalizeUsage({
+      ...cacheCreationFields(usage),
       provider_credits: usage.provider_credits,
       cost_in_usd_ticks: usage.cost_in_usd_ticks,
       prompt_tokens: usage.input_tokens || usage.prompt_tokens || 0,
@@ -900,6 +916,7 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     (chunk.usage.prompt_tokens !== undefined || chunk.usage.input_tokens !== undefined)
   ) {
     const normalized = normalizeUsage({
+      ...cacheCreationFields(chunk.usage),
       prompt_tokens: chunk.usage.prompt_tokens ?? chunk.usage.input_tokens ?? 0,
       completion_tokens: chunk.usage.completion_tokens ?? chunk.usage.output_tokens ?? 0,
       cached_tokens:
@@ -932,24 +949,43 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     // Gemini reports thoughts outside candidates. Fold them into completion so
     // every provider keeps reasoning as a subset of completion tokens.
     const thoughts = usageMeta.thoughtsTokenCount || 0;
+    const promptTokens = usageMeta.promptTokenCount || 0;
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
+    const cachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokens
+        ? reportedCachedTokens
+        : undefined;
     return normalizeUsage({
-      prompt_tokens: usageMeta.promptTokenCount || 0,
+      prompt_tokens: promptTokens,
       completion_tokens: (usageMeta.candidatesTokenCount || 0) + thoughts,
       total_tokens: usageMeta.totalTokenCount,
-      cached_tokens: usageMeta.cachedContentTokenCount,
+      ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
+      cache_evidence: !Object.prototype.hasOwnProperty.call(usageMeta, "cachedContentTokenCount")
+        ? "unreported"
+        : cachedTokens === undefined
+          ? "invalid"
+          : cachedTokens > 0
+            ? "hit"
+            : "miss",
       reasoning_tokens: thoughts,
     });
   }
 
   // Ollama NDJSON format (raw from provider, before translation)
   // Ollama sends: { "model": "...", "done": true, "prompt_eval_count": N, "eval_count": M }
+  // and, on newer servers, "prompt_eval_cached_count": C (cache reads, a subset of N).
   if (chunk.done === true && typeof chunk.prompt_eval_count === "number") {
     const promptEvalCount = chunk.prompt_eval_count || 0;
     const evalCount = chunk.eval_count || 0;
+    const cachedCount = chunk.prompt_eval_cached_count;
     return normalizeUsage({
       prompt_tokens: promptEvalCount,
       completion_tokens: evalCount,
       total_tokens: promptEvalCount + evalCount,
+      ...(typeof cachedCount === "number" ? { cached_tokens: cachedCount } : {}),
     });
   }
 

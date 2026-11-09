@@ -11,9 +11,8 @@ vi.mock("next-intl", () => ({
 
 // ── Import component after mocks ─────────────────────────────────────────────
 
-const { default: UploadFileModal } = await import(
-  "../../../../../src/app/(dashboard)/dashboard/batch/components/UploadFileModal"
-);
+const { default: UploadFileModal } =
+  await import("../../../../../src/app/(dashboard)/dashboard/batch/components/UploadFileModal");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -31,7 +30,10 @@ function renderModal(
     root.render(<UploadFileModal onClose={onClose} onUploaded={onUploaded} />);
   });
   containers.push({ root, el });
-  return { el, onClose, onUploaded };
+  // The modal is the kit Dialog (Modal adapter), portaled to <body>: queries go to the dialog.
+  const dialog = document.body.querySelector<HTMLDivElement>('[role="dialog"]');
+  if (!dialog) throw new Error("UploadFileModal dialog not rendered");
+  return { el: dialog, onClose, onUploaded };
 }
 
 function makeFile(name: string, sizeBytes: number, type = "application/x-jsonlines"): File {
@@ -234,9 +236,14 @@ describe("UploadFileModal", () => {
   it("accepts a .jsonl file via drag and drop", () => {
     const { el } = renderModal();
 
-    // Find the drop zone (div with onDrop)
-    const dropZone = el.querySelector("[role='button']") as HTMLDivElement;
+    // Find the drop zone (the kit FileDropZone <label>), named by its title
+    const dropZone = el.querySelector("[data-slot='file-drop-zone']") as HTMLLabelElement;
     expect(dropZone).not.toBeNull();
+    const input = dropZone.querySelector("input[type='file']") as HTMLInputElement;
+    expect(input.accept).toBe(".jsonl");
+    expect(document.getElementById(input.getAttribute("aria-labelledby")!)?.textContent).toBe(
+      "uploadModalDropOrPick"
+    );
 
     const jsonlFile = makeFile("dropped.jsonl", 512);
 
@@ -266,6 +273,39 @@ describe("UploadFileModal", () => {
     const buttons = Array.from(el.querySelectorAll("button"));
     const uploadBtn = buttons.find((b) => b.textContent?.includes("uploadModalUpload"));
     expect(uploadBtn!.disabled).toBe(false);
+  });
+
+  // 8b. Two files dropped on the single-file zone → the first is taken, no error
+  it("takes the first .jsonl of a multi-file drop without showing an error", () => {
+    const { el } = renderModal();
+    const dropZone = el.querySelector("[data-slot='file-drop-zone']") as HTMLLabelElement;
+    act(() => {
+      const dropEvent = new Event("drop", { bubbles: true }) as DragEvent;
+      Object.defineProperty(dropEvent, "dataTransfer", {
+        value: { files: [makeFile("first.jsonl", 10), makeFile("second.jsonl", 10)] },
+        configurable: true,
+      });
+      dropZone.dispatchEvent(dropEvent);
+    });
+    expect(el.textContent).toContain("first.jsonl");
+    expect(el.textContent).not.toContain("second.jsonl");
+    expect(el.querySelector("[role='alert']")).toBeNull();
+  });
+
+  // 8c. A dropped file of the wrong type → same error as the picker path
+  it("shows the error banner when a non-.jsonl file is dropped", () => {
+    const { el } = renderModal();
+    const dropZone = el.querySelector("[data-slot='file-drop-zone']") as HTMLLabelElement;
+    act(() => {
+      const dropEvent = new Event("drop", { bubbles: true }) as DragEvent;
+      Object.defineProperty(dropEvent, "dataTransfer", {
+        value: { files: [makeFile("notes.txt", 10, "text/plain")] },
+        configurable: true,
+      });
+      dropZone.dispatchEvent(dropEvent);
+    });
+    expect(el.querySelector("[role='alert']")?.textContent).toContain("uploadModalError");
+    expect(dropZone.getAttribute("data-invalid")).toBe("true");
   });
 
   // 9. Sanitization assert: 500 with stack trace in body — UI does NOT show path

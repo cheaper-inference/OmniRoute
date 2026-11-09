@@ -5,6 +5,7 @@ import {
   storeGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { caseInsensitiveToolNameLookup } from "../helpers/toolCallHelper.ts";
+import { stripGeminiPlaceholderArgs } from "../helpers/geminiPlaceholderArgs.ts";
 import {
   parseTextualToolCallCandidate,
   containsTextualToolCallMarker,
@@ -15,6 +16,7 @@ import {
 } from "../../utils/finishReason.ts";
 import { stripAnsiCodes } from "../../utils/streamHelpers.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import { GeminiPlanningLeakFilter } from "../../utils/geminiPlanningLeak.ts";
 
 type GeminiToOpenAIState = {
   functionIndex: number;
@@ -27,10 +29,13 @@ type GeminiToOpenAIState = {
   signatureNamespace?: string | null;
   toolCalls: Map<number, unknown>;
   toolNameMap?: Map<string, string>;
+  /** The CLIENT request's tools[], used to drop the synthetic `reason` argument. */
+  clientTools?: unknown;
   textualToolCallBuffer?: string;
   textualReasoningTagBuffer?: string;
   activeTextualReasoningTag?: string;
   textualReasoningContentBuffer?: string;
+  cacheEvidence?: "hit" | "miss" | "unreported" | "invalid";
   usage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -42,6 +47,8 @@ type GeminiToOpenAIState = {
       reasoning_tokens: number;
     };
   };
+  planningLeak?: GeminiPlanningLeakFilter;
+  planningLeakEnabled?: boolean;
 };
 
 type GeminiFunctionCallPart = {
@@ -259,7 +266,11 @@ function emitFunctionCallPart(
 ) {
   const rawToolName = part.functionCall.name;
   const fcName = caseInsensitiveToolNameLookup(rawToolName, state.toolNameMap) ?? rawToolName;
-  const fcArgs = normalizeToolCallArgs(part.functionCall.args || {});
+  const fcArgs = stripGeminiPlaceholderArgs(
+    fcName,
+    normalizeToolCallArgs(part.functionCall.args || {}),
+    state.clientTools
+  );
   const toolCallIndex = state.functionIndex++;
   const toolCall = {
     id: buildToolCallId(part.functionCall, fcName, toolCallIndex),
@@ -410,7 +421,7 @@ export function geminiToOpenAIResponse(chunk, state) {
       // Normalize the part text once: strip ANSI/VT100 escape codes that some
       // upstreams (gemini-cli terminal redraws) inject, so the `<thinking>` /
       // `[Tool call:]` textual parsers below never see stray control bytes (#2273).
-      const partText = stripAnsiCodes(part.text);
+      let partText = stripAnsiCodes(part.text);
       const hasThoughtSig = part.thoughtSignature || part.thought_signature;
       const isThought = part.thought === true;
       if (hasThoughtSig && typeof hasThoughtSig === "string") {
@@ -474,6 +485,16 @@ export function geminiToOpenAIResponse(chunk, state) {
       // back to a structured OpenAI tool call so clients/tools do not see it as
       // assistant prose.
       if (partText !== undefined && partText !== "") {
+        if (state.planningLeakEnabled === undefined) {
+          state.planningLeakEnabled = /gemini.*flash/i.test(state.model || "");
+          if (state.planningLeakEnabled) {
+            state.planningLeak = new GeminiPlanningLeakFilter();
+          }
+        }
+        if (state.planningLeak) {
+          partText = state.planningLeak.feed(partText);
+        }
+        if (!partText) continue;
         const afterReasoning = parseTextualReasoningTags
           ? consumeTextualReasoningTags(partText, state, results)
           : partText;
@@ -648,16 +669,43 @@ export function geminiToOpenAIResponse(chunk, state) {
   // Usage metadata - extract before finish reason so we can include it
   const usageMeta = response.usageMetadata || chunk.usageMetadata;
   if (usageMeta && typeof usageMeta === "object") {
-    const cachedTokens =
-      typeof usageMeta.cachedContentTokenCount === "number" ? usageMeta.cachedContentTokenCount : 0;
+    const previousUsage = state.usage;
     const promptTokenCountRaw =
-      typeof usageMeta.promptTokenCount === "number" ? usageMeta.promptTokenCount : 0;
+      typeof usageMeta.promptTokenCount === "number" &&
+      Number.isFinite(usageMeta.promptTokenCount) &&
+      usageMeta.promptTokenCount >= 0
+        ? usageMeta.promptTokenCount
+        : (previousUsage?.prompt_tokens ?? 0);
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMeta,
+      "cachedContentTokenCount"
+    );
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
+    const cachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokenCountRaw
+        ? reportedCachedTokens
+        : undefined;
     const thoughtsTokens =
-      typeof usageMeta.thoughtsTokenCount === "number" ? usageMeta.thoughtsTokenCount : 0;
+      typeof usageMeta.thoughtsTokenCount === "number" &&
+      Number.isFinite(usageMeta.thoughtsTokenCount) &&
+      usageMeta.thoughtsTokenCount >= 0
+        ? usageMeta.thoughtsTokenCount
+        : 0;
     let candidatesTokens =
-      typeof usageMeta.candidatesTokenCount === "number" ? usageMeta.candidatesTokenCount : 0;
+      typeof usageMeta.candidatesTokenCount === "number" &&
+      Number.isFinite(usageMeta.candidatesTokenCount) &&
+      usageMeta.candidatesTokenCount >= 0
+        ? usageMeta.candidatesTokenCount
+        : (previousUsage?.completion_tokens ?? 0);
     const totalTokens =
-      typeof usageMeta.totalTokenCount === "number" ? usageMeta.totalTokenCount : 0;
+      typeof usageMeta.totalTokenCount === "number" &&
+      Number.isFinite(usageMeta.totalTokenCount) &&
+      usageMeta.totalTokenCount >= 0
+        ? usageMeta.totalTokenCount
+        : (previousUsage?.total_tokens ?? 0);
 
     // prompt_tokens = promptTokenCount (includes cached tokens, matching claude-to-openai.js behavior)
     const promptTokens = promptTokenCountRaw;
@@ -671,17 +719,34 @@ export function geminiToOpenAIResponse(chunk, state) {
     // completion_tokens = candidatesTokenCount + thoughtsTokenCount (match Go code)
     const completionTokens = candidatesTokens + thoughtsTokens;
 
+    const previousCachedTokens = previousUsage?.prompt_tokens_details?.cached_tokens;
+
+    // Usage snapshots are cumulative. Keep the latest valid cache count, and do
+    // not erase it when a later snapshot omits cache metadata.
+    const effectiveCachedTokens =
+      cachedTokens ??
+      (!hasCachedCount &&
+      typeof previousCachedTokens === "number" &&
+      previousCachedTokens <= promptTokens
+        ? previousCachedTokens
+        : undefined);
+    const cacheEvidence = !hasCachedCount
+      ? "unreported"
+      : cachedTokens === undefined
+        ? "invalid"
+        : cachedTokens > 0
+          ? "hit"
+          : "miss";
+    state.cacheEvidence = cacheEvidence;
     state.usage = {
       prompt_tokens: promptTokens,
       completion_tokens: completionTokens,
       // Gemini may omit totalTokenCount; derive it instead of reporting 0.
       total_tokens: totalTokens || promptTokens + completionTokens,
     };
-
-    // Add prompt_tokens_details if cached tokens exist
-    if (cachedTokens > 0) {
+    if (typeof effectiveCachedTokens === "number") {
       state.usage.prompt_tokens_details = {
-        cached_tokens: cachedTokens,
+        cached_tokens: effectiveCachedTokens,
       };
     }
 
@@ -695,6 +760,25 @@ export function geminiToOpenAIResponse(chunk, state) {
 
   // Finish reason - include usage in final chunk
   if (candidate.finishReason) {
+    if (state.planningLeak) {
+      const flushed = state.planningLeak.flush();
+      if (flushed) {
+        state.hasEmittedContent = true;
+        results.push({
+          id: `chatcmpl-${state.messageId}`,
+          object: "chat.completion.chunk",
+          created: Math.floor(Date.now() / 1000),
+          model: state.model,
+          choices: [
+            {
+              index: 0,
+              delta: { content: flushed },
+              finish_reason: null,
+            },
+          ],
+        });
+      }
+    }
     if (parseTextualReasoningTags) {
       flushOpenTextualReasoning(state, results);
     }

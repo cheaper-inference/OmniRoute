@@ -65,13 +65,13 @@ function snapshotWith(
 // (one of them, `turbo`, is not an effort any executor accepts).
 const unregistered = snapshotWith({
   anthropic: {
-    "claude-haiku-5-5": syncedRow(["minimal", "low", "medium", "high", "turbo", "max"]),
+    "claude-haiku-9-9": syncedRow(["minimal", "low", "medium", "high", "turbo", "max"]),
   },
 } as ModelCapabilityResolutionSnapshot["synced"]);
 
 test("flag off (default): synced models.dev tiers are not used — previous behavior", () => {
   const caps = withFlag(undefined, () =>
-    getResolvedModelCapabilities("anthropic/claude-haiku-5-5", undefined, unregistered)
+    getResolvedModelCapabilities("anthropic/claude-haiku-9-9", undefined, unregistered)
   );
   assert.equal(caps.supportsThinking, true);
   assert.equal(caps.supportedThinkingEfforts, null);
@@ -79,7 +79,7 @@ test("flag off (default): synced models.dev tiers are not used — previous beha
 
 test("flag on: synced models.dev tiers reach the resolved model, unknown tiers dropped", () => {
   const caps = withFlag("true", () =>
-    getResolvedModelCapabilities("anthropic/claude-haiku-5-5", undefined, unregistered)
+    getResolvedModelCapabilities("anthropic/claude-haiku-9-9", undefined, unregistered)
   );
   assert.equal(caps.supportsThinking, true);
   assert.deepEqual(caps.supportedThinkingEfforts, ["minimal", "low", "medium", "high", "max"]);
@@ -87,10 +87,10 @@ test("flag on: synced models.dev tiers reach the resolved model, unknown tiers d
 
 test("flag on: a synced list with no known tier resolves to null, not an empty list", () => {
   const onlyUnknown = snapshotWith({
-    anthropic: { "claude-haiku-5-5": syncedRow(["turbo"]) },
+    anthropic: { "claude-haiku-9-9": syncedRow(["turbo"]) },
   } as ModelCapabilityResolutionSnapshot["synced"]);
   const caps = withFlag("true", () =>
-    getResolvedModelCapabilities("anthropic/claude-haiku-5-5", undefined, onlyUnknown)
+    getResolvedModelCapabilities("anthropic/claude-haiku-9-9", undefined, onlyUnknown)
   );
   assert.equal(caps.supportedThinkingEfforts, null);
 });

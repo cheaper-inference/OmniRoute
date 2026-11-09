@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { Button, Input, Modal } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface CloudflareRelayModalProps {
   isOpen: boolean;
@@ -57,109 +59,75 @@ export default function CloudflareRelayModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="cloudflare-relay-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      closeOnOverlay={false}
+      title={
+        <span className="flex items-center gap-2">
+          <Icon name="cloud" />
+          {t("cloudflareRelayModalTitle")}
+        </span>
+      }
+      footer={
+        <>
+          <Button variant="secondary" size="sm" onClick={onClose} disabled={deploying}>
+            {t("cancel")}
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleDeploy} loading={deploying}>
+            {deploying ? t("cloudflareRelayDeploying") : t("cloudflareRelayDeploy")}
+          </Button>
+        </>
+      }
     >
-      <div className="bg-surface rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h2
-            id="cloudflare-relay-title"
-            className="text-lg font-bold flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-primary" aria-hidden="true">
-              cloud
-            </span>
-            {t("cloudflareRelayModalTitle")}
-          </h2>
-          <button
-            onClick={onClose}
-            aria-label={t("close")}
-            className="text-text-muted hover:text-text"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </div>
-
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded p-3 text-xs text-orange-300 space-y-1">
+      <div className="space-y-4">
+        <div className="rounded border border-warning/30 bg-warning-bg p-3 text-xs text-text-main space-y-1">
           <p>{t("cloudflareRelayWarning")}</p>
           <p className="text-text-muted">{t("cloudflareRelayTokenHowto")}</p>
         </div>
 
         <div className="space-y-3">
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="cloudflare-account-id">
-              {t("cloudflareRelayAccountIdLabel")}
-            </label>
-            <input
-              id="cloudflare-account-id"
-              type="text"
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="your-cloudflare-account-id"
-              autoComplete="off"
-            />
-            <p className="text-xs text-text-muted mt-1">
-              {t("cloudflareRelayAccountIdHint")}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="cloudflare-api-token">
-              {t("cloudflareRelayApiTokenLabel")}
-            </label>
-            <input
-              id="cloudflare-api-token"
-              type="password"
-              value={apiToken}
-              onChange={(e) => setApiToken(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="cloudflare-api-token"
-              autoComplete="off"
-            />
-            <p className="text-xs text-text-muted mt-1">
-              {t("cloudflareRelayApiTokenHint")}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium mb-1 block" htmlFor="cloudflare-project-name">
-              {t("cloudflareRelayProjectNameLabel")}
-            </label>
-            <input
-              id="cloudflare-project-name"
-              type="text"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              className="w-full text-sm bg-surface-alt border border-border rounded px-3 py-2 focus:outline-none focus:border-primary"
-              placeholder="omniroute-relay"
-            />
-          </div>
+          <Input
+            id="cloudflare-account-id"
+            type="text"
+            label={t("cloudflareRelayAccountIdLabel")}
+            value={accountId}
+            onChange={(e) => setAccountId(e.target.value)}
+            placeholder="your-cloudflare-account-id"
+            hint={t("cloudflareRelayAccountIdHint")}
+          />
+          <Input
+            id="cloudflare-api-token"
+            type="password"
+            label={t("cloudflareRelayApiTokenLabel")}
+            value={apiToken}
+            onChange={(e) => setApiToken(e.target.value)}
+            placeholder="cloudflare-api-token"
+            hint={t("cloudflareRelayApiTokenHint")}
+            autoComplete="off"
+          />
+          <Input
+            id="cloudflare-project-name"
+            type="text"
+            label={t("cloudflareRelayProjectNameLabel")}
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+            placeholder="omniroute-relay"
+          />
         </div>
 
         {error && (
-          <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">
+          <div
+            role="alert"
+            className="text-sm text-error bg-error-bg border border-error/20 rounded p-2"
+          >
             {error}
           </div>
         )}
 
         <p className="text-xs text-text-muted">{t("cloudflareRelayFreeTierNote")}</p>
-
-        <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" size="sm" onClick={onClose} disabled={deploying}>
-            {t("cancel")}
-          </Button>
-          <Button variant="primary" size="sm" onClick={handleDeploy} disabled={deploying}>
-            {deploying ? t("cloudflareRelayDeploying") : t("cloudflareRelayDeploy")}
-          </Button>
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 }

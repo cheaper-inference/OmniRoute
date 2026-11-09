@@ -141,7 +141,8 @@ test.describe("Combo Unification", () => {
     await expect(
       page
         .locator("button")
-        .filter({ has: page.locator("span", { hasText: "layers" }) })
+        // KEA-7886: icons render as Lucide <svg data-icon>, not Material ligature text.
+        .filter({ has: page.locator('svg[data-icon="layers"]') })
         .filter({ hasText: "All" })
     ).toBeVisible();
     await expect(page.getByRole("button", { name: /intelligent/i })).toBeVisible();

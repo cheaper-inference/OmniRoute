@@ -3,6 +3,38 @@ import assert from "node:assert/strict";
 
 const { handleBypassRequest } = await import("../../open-sse/utils/bypassHandler.ts");
 
+test("a title bypass remains selected when later patterns do not match", () => {
+  const result = handleBypassRequest(
+    {
+      stream: false,
+      max_tokens: 1,
+      messages: [
+        {
+          role: "user",
+          content: "ordinary text",
+        },
+        { role: "assistant", content: [{ type: "text", text: "{" }] },
+      ],
+    },
+    "gpt-5",
+    "claude-cli"
+  );
+  assert.ok(result);
+});
+
+test("a failed warmup check still permits a later quota probe", () => {
+  const result = handleBypassRequest(
+    {
+      stream: false,
+      max_tokens: 1,
+      messages: [{ role: "user", content: "check QUOTA" }],
+    },
+    "gpt-5",
+    "claude-cli"
+  );
+  assert.ok(result);
+});
+
 test("handleBypassRequest returns null for non-Claude clients or missing messages", () => {
   assert.equal(handleBypassRequest({ messages: [] }, "gpt-5", "claude-cli/2.1.89"), null);
   assert.equal(

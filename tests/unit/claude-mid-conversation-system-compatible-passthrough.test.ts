@@ -10,9 +10,10 @@
  * (observed: ~27K cache read / ~105K cache write per turn on a 133K prompt).
  *
  * Keeping those turns in place needs an upstream that accepts `role: "system"` inside
- * messages[] (the `mid-conversation-system-2026-04-07` beta). Relays without it 400, so the
- * in-place shape is opt-in: ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (default off) AND the
- * client's own beta. Flag off, or beta absent, keeps the legacy full hoist byte-for-byte.
+ * messages[]. Relays without it 400, so the in-place shape is a per-connection opt-in:
+ * providerSpecificData.keepMidConversationSystem (default off). It no longer depends on the
+ * client sending the `mid-conversation-system-2026-04-07` beta — some Claude Code builds keep
+ * the turns but never send it. Opt-in off keeps the legacy full hoist byte-for-byte.
  * These tests assert the FINAL body and headers handed to fetch, not the helper in isolation.
  */
 import assert from "node:assert/strict";
@@ -31,12 +32,10 @@ const originalFetch = globalThis.fetch;
 const PROVIDER = "anthropic-compatible-relay-test";
 const MODEL = "claude-opus-5-5";
 const MID_SYSTEM_BETA = "mid-conversation-system-2026-04-07";
-const FLAG = "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM";
-delete process.env[FLAG];
+let keepMidSystem = false;
 
 function setFlag(on) {
-  if (on) process.env[FLAG] = "true";
-  else delete process.env[FLAG];
+  keepMidSystem = on;
 }
 
 // Captured Claude Code shape: it negotiates the beta itself when it sends such turns.
@@ -65,7 +64,7 @@ async function flushAsyncSideEffects() {
 }
 
 test.afterEach(async () => {
-  delete process.env[FLAG];
+  keepMidSystem = false;
   globalThis.fetch = originalFetch;
   await flushAsyncSideEffects();
   core.resetDbInstance();
@@ -74,7 +73,6 @@ test.afterEach(async () => {
 });
 
 test.after(() => {
-  delete process.env[FLAG];
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -83,7 +81,10 @@ test.after(() => {
 function credentials() {
   return {
     apiKey: "sk-relay-test",
-    providerSpecificData: { baseUrl: "https://relay.example.test/v1" },
+    providerSpecificData: {
+      baseUrl: "https://relay.example.test/v1",
+      ...(keepMidSystem ? { keepMidConversationSystem: true } : {}),
+    },
   };
 }
 
@@ -189,7 +190,7 @@ function assertHoisted(call) {
 
 // ── Flag off (default): byte-for-byte legacy hoist ───────────────────────────────────────
 
-test("flag off (default): every system turn is hoisted even when the client sent the beta", async () => {
+test("opt-in off (default): every system turn is hoisted even when the client sent the beta", async () => {
   setFlag(false);
   const body = buildBody(3);
   const call = await send(body);
@@ -202,35 +203,57 @@ test("flag off (default): every system turn is hoisted even when the client sent
   );
 });
 
-test("flag off (default): a beta-less client is hoisted too", async () => {
+test("opt-in off (default): a beta-less client is hoisted too", async () => {
   setFlag(false);
   assertHoisted(await send(buildBody(2), { headers: NO_BETA_HEADERS }));
 });
 
-// ── Flag on, but the client did not negotiate the beta: still the legacy hoist ─────────────
+// ── Opt-in on, client without the beta: still in place (the relay, not the client, decides) ──
 
-test("flag on, client without the beta: turns are hoisted and the beta is never invented", async () => {
+test("opt-in on, client without the beta: turns stay in place and the beta is never invented", async () => {
   setFlag(true);
-  assertHoisted(await send(buildBody(2), { headers: NO_BETA_HEADERS }));
+  const body = buildBody(2);
+  const call = await send(body, { headers: NO_BETA_HEADERS });
+  assertInPlace(call, body);
+  assert.ok(!betaTokens(call).includes(MID_SYSTEM_BETA), `beta: ${betaTokens(call)}`);
 });
 
-test("flag on, client without any anthropic-beta header: hoisted, no beta header invented", async () => {
+test("opt-in on, client without any anthropic-beta header: in place, no beta header invented", async () => {
   setFlag(true);
-  assertHoisted(await send(buildBody(2), { headers: { "user-agent": "curl/8.0" } }));
+  const body = buildBody(2);
+  const call = await send(body, { headers: { "user-agent": "curl/8.0" } });
+  assertInPlace(call, body);
+  assert.ok(!betaTokens(call).includes(MID_SYSTEM_BETA));
 });
 
-test("flag on, a token that only looks like the beta: hoisted and not forwarded", async () => {
+test("opt-in on, a token that only looks like the beta: in place, the look-alike is not forwarded", async () => {
   setFlag(true);
-  const call = await send(buildBody(2), {
+  const body = buildBody(2);
+  const call = await send(body, {
     headers: { ...SDK_HEADERS, "anthropic-beta": `${MID_SYSTEM_BETA}x` },
   });
-  assertHoisted(call);
+  assertInPlace(call, body);
   assert.ok(!betaTokens(call).some((t) => t.toLowerCase() === MID_SYSTEM_BETA));
+});
+
+test("opt-in on, beta-less client: successive turns keep system stable and messages a prefix", async () => {
+  setFlag(true);
+  const bodies = [];
+  for (const turns of [1, 2, 3]) {
+    bodies.push((await send(buildBody(turns), { headers: NO_BETA_HEADERS })).body);
+  }
+  for (let i = 1; i < bodies.length; i++) {
+    assert.deepEqual(bodies[i].system, bodies[i - 1].system);
+    assert.deepEqual(
+      stripCacheControl(bodies[i].messages.slice(0, bodies[i - 1].messages.length)),
+      stripCacheControl(bodies[i - 1].messages)
+    );
+  }
 });
 
 // ── Flag on + client-negotiated beta: turns stay in place ──────────────────────────────────
 
-test("flag on + client beta: mid-conversation system turns stay in place in the final body", async () => {
+test("opt-in on + client beta: mid-conversation system turns stay in place in the final body", async () => {
   setFlag(true);
   const body = buildBody(3);
   const call = await send(body);
@@ -258,7 +281,7 @@ test("flag on + client beta: mid-conversation system turns stay in place in the 
   assert.ok(betaTokens(call).includes("per-turn-control-2026-07-01"), `beta: ${betaTokens(call)}`);
 });
 
-test("flag on + client beta: successive turns keep system stable and earlier messages a prefix", async () => {
+test("opt-in on + client beta: successive turns keep system stable and earlier messages a prefix", async () => {
   setFlag(true);
   const bodies = [];
   for (const turns of [1, 2, 3, 4]) bodies.push((await send(buildBody(turns))).body);
@@ -275,7 +298,7 @@ test("flag on + client beta: successive turns keep system stable and earlier mes
   }
 });
 
-test("flag on: a non-Claude Code client that sent the beta gets the same treatment", async () => {
+test("opt-in on: a non-Claude Code client that sent the beta gets the same treatment", async () => {
   setFlag(true);
   const body = buildBody(2);
   const call = await send(body, { headers: SDK_HEADERS });
@@ -283,7 +306,7 @@ test("flag on: a non-Claude Code client that sent the beta gets the same treatme
   assert.ok(betaTokens(call).includes(MID_SYSTEM_BETA));
 });
 
-test("flag on: the client's beta token is matched case-insensitively and with spaces", async () => {
+test("opt-in on: the client's beta token is matched case-insensitively and with spaces", async () => {
   setFlag(true);
   const body = buildBody(2);
   const call = await send(body, {
@@ -299,7 +322,7 @@ test("flag on: the client's beta token is matched case-insensitively and with sp
   );
 });
 
-test("flag on + beta: a body carrying an OpenAI developer turn keeps the full legacy hoist", async () => {
+test("opt-in on + beta: a body carrying an OpenAI developer turn keeps the full legacy hoist", async () => {
   setFlag(true);
   const body = buildBody(2);
   body.messages.splice(2, 0, { role: "developer", content: "developer note" });
@@ -309,7 +332,7 @@ test("flag on + beta: a body carrying an OpenAI developer turn keeps the full le
   assert.ok(systemTexts(call.body.system).includes("developer note"));
 });
 
-test("flag on + beta: leading text system turn is hoisted, directive-only one relocated", async () => {
+test("opt-in on + beta: leading text system turn is hoisted, directive-only one relocated", async () => {
   setFlag(true);
   const body = buildBody(1);
   body.messages.unshift(
@@ -330,7 +353,7 @@ test("flag on + beta: leading text system turn is hoisted, directive-only one re
   assert.match(msgs.at(-1).content, /<total_tokens>/);
 });
 
-test("flag on + beta: requests without system turns keep their shape and get no extra beta", async () => {
+test("opt-in on + beta: requests without system turns keep their shape and get no extra beta", async () => {
   setFlag(true);
   const body = buildBody(1);
   body.messages = body.messages.filter((m) => m.role !== "system");
@@ -340,7 +363,7 @@ test("flag on + beta: requests without system turns keep their shape and get no 
   assert.ok(!betaTokens(call).includes(MID_SYSTEM_BETA), "no beta without a surviving turn");
 });
 
-test("flag on + beta: the caller's body is not mutated, so retries/combo attempts see the original", async () => {
+test("opt-in on + beta: the caller's body is not mutated, so retries/combo attempts see the original", async () => {
   setFlag(true);
   const body = buildBody(2);
   const snapshot = structuredClone(body);
@@ -371,7 +394,7 @@ test("flag on + beta: the caller's body is not mutated, so retries/combo attempt
   assert.deepEqual(body.system, snapshot.system);
 });
 
-test("policy: scope, client beta and fail-closed flag reader", async () => {
+test("policy: scope and strict per-connection opt-in", async () => {
   const { resolveClaudeMidConversationSystemPolicy } =
     await import("../../open-sse/services/claudeMidConversationSystem.ts");
   const resolve = (extra = {}) =>
@@ -379,24 +402,17 @@ test("policy: scope, client beta and fail-closed flag reader", async () => {
       provider: PROVIDER,
       sourceFormat: "claude",
       targetFormat: "claude",
-      clientAnthropicBeta: `effort-2025-11-24,${MID_SYSTEM_BETA}`,
-      isPassthroughEnabled: () => true,
+      providerSpecificData: { keepMidConversationSystem: true },
       ...extra,
     });
   assert.equal(resolve(), true, "plain anthropic-compatible claude passthrough, opted in");
-  assert.equal(resolve({ isPassthroughEnabled: () => false }), false, "flag off");
-  assert.equal(resolve({ isPassthroughEnabled: undefined }), false, "no reader = off");
+  assert.equal(resolve({ providerSpecificData: {} }), false, "opt-in absent");
+  assert.equal(resolve({ providerSpecificData: undefined }), false, "no providerSpecificData");
   assert.equal(
-    resolve({
-      isPassthroughEnabled: () => {
-        throw new Error("db down");
-      },
-    }),
+    resolve({ providerSpecificData: { keepMidConversationSystem: "true" } }),
     false,
-    "a failing flag read keeps the legacy hoist"
+    "only a real boolean opts in"
   );
-  assert.equal(resolve({ clientAnthropicBeta: null }), false, "client did not negotiate");
-  assert.equal(resolve({ clientAnthropicBeta: "effort-2025-11-24" }), false);
   assert.equal(resolve({ targetFormat: "openai" }), false);
   assert.equal(resolve({ provider: "claude" }), false, "native path keeps its own policy");
   assert.equal(
@@ -404,13 +420,28 @@ test("policy: scope, client beta and fail-closed flag reader", async () => {
     false,
     "CC bridge builds its own body"
   );
-  let flagReads = 0;
-  resolve({
-    provider: "openai",
-    isPassthroughEnabled: () => {
-      flagReads++;
-      return true;
-    },
-  });
-  assert.equal(flagReads, 0, "the flag is not read for providers outside the scope");
+  assert.equal(resolve({ provider: "openai" }), false);
+});
+
+test("keepMidConversationSystem: validated and normalized as a strict boolean", async () => {
+  const { validateProviderSpecificData } =
+    await import("../../src/shared/validation/providerSpecificData.ts");
+  const { normalizeProviderSpecificData } =
+    await import("../../src/lib/providers/requestDefaults.ts");
+  const issues = [];
+  const ctx = { addIssue: (issue) => issues.push(issue) };
+  validateProviderSpecificData({ keepMidConversationSystem: true }, ctx);
+  assert.equal(issues.length, 0);
+  validateProviderSpecificData({ keepMidConversationSystem: "yes" }, ctx);
+  assert.equal(issues.length, 1);
+  assert.equal(
+    normalizeProviderSpecificData(PROVIDER, { keepMidConversationSystem: true })
+      .keepMidConversationSystem,
+    true
+  );
+  assert.equal(
+    "keepMidConversationSystem" in
+      normalizeProviderSpecificData(PROVIDER, { keepMidConversationSystem: 1, baseUrl: "x" }),
+    false
+  );
 });

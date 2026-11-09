@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Tile } from "@omniroute/ui-kit/tile";
 
 interface HistoryEntry {
   query: string;
@@ -49,20 +50,19 @@ export default function SearchHistory({ onReplay }: SearchHistoryProps) {
         {t("searchHistory")}
       </span>
       <div className="mt-2 space-y-1.5">
-        {entries.map((entry, i) => (
-          <button
+        {entries.map((entry) => (
+          // Kit Tile (a plain action): the query names it; provider and age describe it.
+          <Tile
             key={`${entry.timestamp}:${entry.provider}:${entry.query}`}
             onClick={() => onReplay(entry)}
-            className="w-full text-left p-2 bg-surface border border-border rounded-lg hover:border-primary/30 transition-colors"
-          >
-            <div className="text-xs text-text-main truncate">{entry.query}</div>
-            <div className="flex justify-between mt-0.5">
-              <span className="text-[10px] text-text-muted">{entry.provider}</span>
-              <span className="text-[10px] text-text-muted">
-                {timeAgo(entry.timestamp, locale)}
+            className="p-2"
+            title={<span className="block truncate text-xs font-normal">{entry.query}</span>}
+            description={
+              <span className="flex justify-between gap-2 text-[10px]">
+                <span>{entry.provider}</span> <span>{timeAgo(entry.timestamp, locale)}</span>
               </span>
-            </div>
-          </button>
+            }
+          />
         ))}
       </div>
     </div>

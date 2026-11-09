@@ -76,6 +76,16 @@ export function getStatusPresentation(
     };
   }
 
+  if (connection.prefixShadowed?.code === "prefix_shadowed") {
+    return {
+      statusVariant: "warning",
+      statusLabel: t("statusRuntimeIssue"),
+      errorType: "prefix_shadowed",
+      errorBadge: null,
+      errorTextClass: "text-warning",
+    };
+  }
+
   if (effectiveStatus === "active" || effectiveStatus === "success") {
     return {
       statusVariant: "success",
@@ -95,7 +105,7 @@ export function getStatusPresentation(
       statusLabel: t("statusRuntimeIssue"),
       errorType,
       errorBadge,
-      errorTextClass: "text-yellow-600 dark:text-yellow-400",
+      errorTextClass: "text-warning",
     };
   }
 
@@ -105,7 +115,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusDeactivated", "Deactivated"),
       errorType,
       errorBadge,
-      errorTextClass: "text-red-600 font-bold",
+      errorTextClass: "text-error font-bold",
     };
   }
 
@@ -120,7 +130,7 @@ export function getStatusPresentation(
       statusLabel: t("statusAuthFailed"),
       errorType,
       errorBadge,
-      errorTextClass: "text-red-500",
+      errorTextClass: "text-error",
     };
   }
 
@@ -130,7 +140,7 @@ export function getStatusPresentation(
       statusLabel: t("statusRateLimited"),
       errorType,
       errorBadge,
-      errorTextClass: "text-yellow-600 dark:text-yellow-400",
+      errorTextClass: "text-warning",
     };
   }
 
@@ -140,7 +150,7 @@ export function getStatusPresentation(
       statusLabel: t("statusNetworkIssue"),
       errorType,
       errorBadge,
-      errorTextClass: "text-yellow-600 dark:text-yellow-400",
+      errorTextClass: "text-warning",
     };
   }
 
@@ -160,7 +170,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusBanned", "Banned (403)"),
       errorType,
       errorBadge,
-      errorTextClass: "text-red-600 font-bold",
+      errorTextClass: "text-error font-bold",
     };
   }
 
@@ -170,7 +180,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusCreditsExhausted", "Out of Credits"),
       errorType,
       errorBadge,
-      errorTextClass: "text-amber-500",
+      errorTextClass: "text-warning",
     };
   }
 
@@ -185,6 +195,6 @@ export function getStatusPresentation(
     statusLabel: fallbackStatusMap[effectiveStatus ?? ""] || effectiveStatus || t("statusError"),
     errorType,
     errorBadge,
-    errorTextClass: "text-red-500",
+    errorTextClass: "text-error",
   };
 }

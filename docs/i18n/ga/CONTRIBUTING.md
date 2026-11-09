@@ -20,9 +20,14 @@ agus céimeanna réitigh.
 - **Node.js** `>=22.22.2 <23`, nó `>=24.0.0 <27` (molta: 24 LTS)
 - **npm** 10+
 
-> **Úsáideoirí npm v11+ (Node 24+):** Tar éis `npm install`, deimhnigh gur suiteáladh na modúil dhúchasacha:
+> **Windows le Node 24:** bain úsáid as an leagan paiste reatha de 24 LTS (24.20.0 ar a laghad).
+> Is féidir le leaganacha níos luaithe scor tar éis tástálacha rathúla nuair a dhúnann `--test-force-exit` an
+> próiseas. Réitíonn [socrú Windows libuv de chuid Node](https://github.com/nodejs/node/pull/61999) an
+> timpiste rite seo; coinnigh na dearbhuithe tástála agus na seiceálacha scoir den rithitheoir cumasaithe.
+
+> **Úsáideoirí npm v11+ (Node 24+):** Tar éis `npm install`, fíoraigh gur suiteáladh na modúil dhúchasacha:
 > `node -e "require('better-sqlite3')"`. Má theipeann air le `MODULE_NOT_FOUND`,
-> rith `npm approve-scripts better-sqlite3 && npm install`. Féach
+> rith `npm approve-scripts better-sqlite3 && npm install`. Féach ar
 > [Fabhtcheartú](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -48,81 +53,76 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Príomhathróga don fhorbairt:
 
-| Athróg                 | Réamhshocrú Forbartha    | Cur Síos                           |
-| ---------------------- | ------------------------ | ---------------------------------- |
-| `PORT`                 | `20128`                  | Port an fhreastalaí                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Bun-URL don chomhéadan tosaigh     |
-| `JWT_SECRET`           | (gin thuas é)            | Rún sínithe JWT                    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Pasfhocal don chéad logáil isteach |
-| `APP_LOG_LEVEL`        | `info`                   | Leibhéal mionsonraithe na logaí    |
+| Athróg                 | Réamhshocrú Forbartha    | Cur Síos                             |
+| ---------------------- | ------------------------ | ------------------------------------ |
+| `PORT`                 | `20128`                  | Port an fhreastalaí                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | BuntURL don chomhéadan tosaigh       |
+| `JWT_SECRET`           | (gin thuas)              | Rún sínithe JWT                      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Focal faire don chéad logáil isteach |
+| `APP_LOG_LEVEL`        | `info`                   | Leibhéal mionsonraithe na logála     |
 
-### Socruithe na Deaise
+### Socruithe an Phainéil
 
-Soláthraíonn an deais scoránaigh UI do ghnéithe ar féidir iad a chumrú trí athróga timpeallachta freisin:
+Soláthraíonn an painéal scoránna Chomhéadain le haghaidh gnéithe ar féidir iad a chumrú trí athróga timpeallachta freisin:
 
-| Suíomh an tSocraithe   | Scorán                        | Cur Síos                                     |
-| ---------------------- | ----------------------------- | -------------------------------------------- |
-| Socruithe → Casta      | Mód Dífhabhtaithe             | Cumasaigh logaí iarratais dífhabhtaithe (UI) |
-| Socruithe → Ginearálta | Infheictheacht an Taobhbharra | Taispeáin/folaigh rannóga an taobhbharra     |
+| Suíomh an tSocraithe | Scorán                          | Cur Síos                                             |
+| -------------------- | ------------------------------- | ---------------------------------------------------- |
+| Settings → Advanced  | Mód Dífhabhtaithe               | Cumasaigh logaí iarratas dífhabhtaithe (Chomhéadain) |
+| Settings → General   | Infheictheacht an Bharra Taoibh | Taispeáin/folaigh rannóga an bharra taoibh           |
 
-Stóráiltear na socruithe seo sa bhunachar sonraí agus fanann siad ann thar atosuithe, agus sáraíonn siad réamhshocruithe na n-athróg timpeallachta nuair a shocraítear iad.
+Stóráiltear na socruithe seo sa bhunachar sonraí agus maireann siad thar atosuithe, rud a sháraíonn réamhshocruithe na n-athróg timpeallachta nuair a shocraítear iad.
 
-### Rith go Logánta
+### Rith go hÁitiúil
 
 ```bash
-# Mód forbartha (athluchtú te)
+# Mód forbartha (athlódáil te)
 npm run dev
 
-# Tógáil táirgthe
+# Tógáil táirgeachta
 npm run build    # next build → .build/next/ agus ansin assembleStandalone → dist/
 npm run start
 
-# Tiomsú tapa don inneall cúil/API amháin le haghaidh athruithe rannpháirtithe
+# Tiomsú tapa backend/API amháin le haghaidh athruithe rannpháirtithe
 npm run build:contributor
 
-# Tógáil eisiúna (atógáil ghlan + comhartha faire HEAD — riachtanach don imscaradh)
-npm run build:release   # rm -rf .build dist && tógáil + scríobhann sé dist/BUILD_SHA
+# Tógáil eisiúna (atógáil ghlan + comhartha HEAD — riachtanach don imscaradh)
+npm run build:release   # rm -rf .build dist agus build + scríobhann sé dist/BUILD_SHA
 
 # Cumraíocht choitianta poirt
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Déanann tógáil an rannpháirtí bailíochtú tiomsaithe amháin: ní chóimeálann sí an dáileadh
-neamhspleách ná ní thógann sí sócmhainní roghnacha pacáistithe dhúchasaigh. Úsáid an ghnáth-thógáil táirgthe nuair
-is gá duit an beartán inseolta a bhailíochtú.
+Déanann tógáil an rannpháirtí bailíochtú tiomsaithe amháin: ní chóimeálann sí an dáileadh neamhspleách ná ní thógann sí sócmhainní roghnacha pacáistithe dúchasacha. Bain úsáid as an ngnáththógáil táirgeachta nuair is gá duit an beart is féidir a sheoladh a bhailíochtú.
 
 ### Leagan Amach Aschur na Tógála
 
-| Eolaire   | Inneachar                                                                                        | Rianaithe |
-| --------- | ------------------------------------------------------------------------------------------------ | --------- |
-| `src/`    | Foinse an fheidhmchláir (TypeScript / TSX)                                                       | Tá        |
-| `.build/` | Comhaid idirmheánacha — aschur `next build` (á ligean thar ceal ag git, `distDir = .build/next`) | Níl       |
-| `dist/`   | Beartán inseolta — cóimeáilte ag `assembleStandalone` (á ligean thar ceal ag git)                | Níl       |
+| Comhadlann | Ábhar                                                                                   | Rianaithe |
+| ---------- | --------------------------------------------------------------------------------------- | --------- |
+| `src/`     | Foinse an fheidhmchláir (TypeScript / TSX)                                              | Tá        |
+| `.build/`  | Idirmheánacha — aschur `next build` (neamhshuimithe ag git, `distDir = .build/next`)    | Níl       |
+| `dist/`    | Beart is féidir a sheoladh — cóimeáilte ag `assembleStandalone` (neamhshuimithe ag git) | Níl       |
 
-Is aon phas amháin atá sa phíblíne tógála:
+Is pas aonair é píblíne na tógála:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (aschur Next.js)
-  └─ assembleStandalone()                 (cóipeálann sé standalone + static + public + sócmhainní dúchasacha)
-       └─ aschur: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (cóipeálann standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Ina theannta sin, glanann `npm run build:release` an dá eolaire ar dtús agus scríobhann sé
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar chomhartha faire do shláine an imscartha.
+Glanann `npm run build:release` an dá chomhadlann ar dtús freisin agus scríobhann sé
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar chomhartha sláine imscartha.
 
-Úsáideann `npm run build:contributor` próifíl tógála don inneall cúil amháin. Cuireann sí stubanna sealadacha
-in ionad chomhaid UI na deaise le linn na tógála, coimeádann sí láimhseálaithe bealaí API, agus cuireann sí na comhaid bhunaidh ar ais
-tar éis na tógála. Úsáid `npm run build` le haghaidh athruithe a théann i bhfeidhm ar UI na deaise nó le haghaidh
-bailíochtú iomlán eisiúna; ní hionann próifíl an rannpháirtí agus tógáil eisiúna.
+Úsáideann `npm run build:contributor` próifíl tógála backend amháin. Cuireann sé comhaid Chomhéadain an phainéil ina n-ionad go sealadach agus é á thógáil, coinníonn sé láimhseálaithe ródanna API, agus cuireann sé na comhaid bhunaidh ar ais tar éis na tógála. Bain úsáid as `npm run build` le haghaidh athruithe a théann i bhfeidhm ar Chomhéadain an phainéil nó le haghaidh bailíochtú iomlán eisiúna; ní ionadach don tógáil eisiúna é próifíl an rannpháirtí.
 
-> **Nóta faoi imscaradh VPS:** níl aon athrú ar an eolaire íomhá cianda `/usr/lib/node_modules/omniroute/app/`.
-> Déanann na scileanna imscartha inneachar `dist/` a shioncronú isteach ann le rsync.
-> Níor athraíodh ach cosán aschur na tógála laistigh den stór (`app/` → `dist/`).
+> **Nóta maidir le himscaradh VPS:** níl aon athrú ar chomhadlann na híomhá cianda `/usr/lib/node_modules/omniroute/app/`.
+> Déanann na scileanna imscartha inneachar `dist/` a rsync inti.
+> Níor athraíodh ach cosán aschuir na tógála sa stór (`app/` → `dist/`).
 
 URLanna réamhshocraithe:
 
-- **Deais**: `http://localhost:20128/dashboard`
+- **Painéal**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -175,18 +175,18 @@ Scóip (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## Tástálacha a Rith
 
 ```bash
-# Gach tástáil (aonad + vitest + éiceachóras + e2e)
+# Gach tástáil (aonaid + vitest + éiceachóras + e2e)
 npm run test:all
 
-# Comhad tástála amháin (riteoir tástálacha dúchasach Node.js — úsáideann formhór na dtástálacha é seo)
+# Comhad tástála aonair (reathaí tástála dúchasach Node.js — úsáideann formhór na dtástálacha é seo)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Na tástálacha aonaid amháin a ndeachaigh d'athrú i bhfeidhm orthu (an roghnóir TIA céanna le geata CI, #8084)
-npm run test:scoped            # athruithe sa tiomnúchán deireanach (nó sa chrann oibre)
-npm run test:scoped:staged     # athruithe céimnithe amháin — oibríonn sé go maith le rith réamh-thiomnúcháin
-npm run test:scoped:full       # atóg léarscáil na graife iompórtála ar dtús (tar éis comhaid a chur leis/a bhogadh)
-# Ciallaíonn imeacht 1 + "run the full suite" gur athraíodh comhad lárnach (tsconfig, package.json, …) nó
-# foinse neamh-mhapáilte — teipeann an roghnóir go sábháilte, ní scipeálann sé rud ar bith go ciúin riamh.
+# Na tástálacha aonaid amháin a bhfuil tionchar ag d’athrú orthu (an roghnóir TIA céanna le geata CI, #8084)
+npm run test:scoped            # athruithe sa tiomantas is déanaí (nó sa chrann oibre)
+npm run test:scoped:staged     # athruithe céimnithe amháin — oibríonn go maith le rith réamhthiomantais
+npm run test:scoped:full       # atóg an léarscáil ghraif iompórtála ar dtús (tar éis comhaid a chur leis/a bhogadh)
+# Ciallaíonn scor 1 + "rith an tsraith iomlán" gur athraíodh comhad moil (tsconfig, package.json, …) nó foinse
+# neamh-mhapáilte — teipeann an roghnóir go sábháilte, ní scipeálann sé aon rud go ciúin riamh.
 
 # Vitest (freastalaí MCP, autoCombo, taisce)
 npm run test:vitest
@@ -194,13 +194,13 @@ npm run test:vitest
 # Tástálacha E2E (Playwright de dhíth)
 npm run test:e2e
 
-# E2E do chliaint prótacail (iompar MCP, A2A)
+# E2E do chliaint phrótacail (iompar MCP, A2A)
 npm run test:protocols:e2e
 
 # Tástálacha comhoiriúnachta éiceachórais
 npm run test:ecosystem
 
-# Geata cumhdaigh: 60% ráiteas/línte/feidhmeanna/brainsí
+# Geata cumhdaigh: 60% de ráitis/línte/feidhmeanna/brainsí
 npm run test:coverage
 npm run coverage:report
 
@@ -208,48 +208,47 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Tástáil deataigh teaglaim gheataithe le fíorchóras réamhtheachtach (rochtain VPS + creidmheasanna fíorsholáthraí de dhíth)
-# Buaileann sí FÍORSHOLÁTHRAITHE — cosnaíonn sí beagán. NÍ ritheann sí i CI RIAMH. Scipeálann sí go glan gan an geata.
-# De dhíth: rochtain ssh root@192.168.0.15 (faigheann sí gabháil DB inléite amháin ón VPS).
+# Tástáil thobdheataigh teaglama le fíorfhoinsí réamhtheachtacha faoi gheata (rochtain VPS + creidmheasanna fíorsholáthraí de dhíth)
+# Déanann sé teagmháil le FÍORSHOLÁTHRAITHE — cosnaíonn sé beagán. Ní ritheann sé i CI RIAMH. Scipeálann sé go glan gan an geata.
+# De dhíth: rochtain ssh root@192.168.0.15 (faightear seat DB inléite amháin ón VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Tástáil deataigh bheo VPS chéim 3 — gnáthscripteanna Node ESM, a bhuaileann freastalaí beo .15 go díreach.
+# Tástáil thobdheataigh bheo VPS chéim 3 — scripteanna simplí Node ESM, a dhéanann teagmháil dhíreach le freastalaí beo .15.
 # De dhíth: rochtain ssh root@192.168.0.15 (cruthaítear/díchóimeáiltear teaglamaí trí SSH sqlite).
-# Buaileann sí FÍORSHOLÁTHRAITHE (costas beag). Ní chruthaíonn/scriosann sí ach teaglamaí __live_test__*. NÍ ritheann sí i CI RIAMH.
-# Tá REQUIRE_API_KEY=false ar .15, mar sin níl eochair API de dhíth, ach urramaíonn sí COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY má tá siad socraithe.
-npm run test:combo:live:vps              # 7 gcás HTTP (tosaíocht/babhta-roibeaird/ualaithe/costas/comhleá/uathoibríoch + sláinte)
-npm run test:combo:live:vps:failover     # cuireann sé cás fíor-teipaistrithe tras-soláthraí leis (8 san iomlán)
+# Déanann sé teagmháil le FÍORSHOLÁTHRAITHE (costas beag). Ní chruthaíonn/scriosann sé ach teaglamaí __live_test__*. Ní ritheann sé i CI RIAMH.
+# Tá REQUIRE_API_KEY=false ar .15 agus mar sin níl eochair API de dhíth, ach urramaíonn sé COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY má tá siad socraithe.
+npm run test:combo:live:vps              # 7 gcás HTTP (tosaíocht/babhta-i-ndiaidh-babhta/ualaithe/costas/comhleá/uathoibríoch + sláinte)
+npm run test:combo:live:vps:failover     # cuireann sé cás fíor-theipaistrithe tras-soláthraí leis (8 san iomlán)
 ```
 
 Nótaí cumhdaigh:
 
-- Tomhaiseann `npm run test:coverage` cumhdach foinse don phríomhshraith tástálacha aonaid, fágann sé `tests/**` as an áireamh, agus cuireann sé `open-sse/**` san áireamh
-- Ní mór d'iarratais tarraingthe an geata cumhdaigh a choinneáil ag **60%+** do ráitis/línte/feidhmeanna/brainsí
+- Tomhaiseann `npm run test:coverage` cumhdach foinseach don phríomhshraith tástálacha aonaid, fágann sé `tests/**` as an áireamh, agus cuireann sé `open-sse/**` san áireamh
+- Ní mór d’iarratais tarraingthe an geata cumhdaigh a choinneáil ag **60%+** de ráitis/línte/feidhmeanna/brainsí
 - Má athraíonn PR cód táirgthe in `src/`, `open-sse/`, `electron/`, nó `bin/`, ní mór dó tástálacha uathoibrithe a chur leis nó a nuashonrú sa PR céanna
-- Priontálann `npm run coverage:report` an tuairisc mhionsonraithe comhad ar chomhad ón rith cumhdaigh is déanaí
+- Priontálann `npm run coverage:report` an tuairisc mhionsonraithe de réir comhaid ón rith cumhdaigh is déanaí
 - Caomhnaíonn `npm run test:coverage:legacy` an mhéadracht níos sine le haghaidh comparáid stairiúil
-- Féach `docs/ops/COVERAGE_PLAN.md` don treochlár céimnithe chun cumhdach a fheabhsú
+- Féach `docs/ops/COVERAGE_PLAN.md` don treochlár céimnithe um fheabhsú cumhdaigh
 
-### Riachtanais Iarratais Tarraingthe
+### Ceanglais maidir le hIarratas Tarraingthe
 
-Sula n-osclaíonn tú PR, úsáid an
-[Bealach Órga Rannchuidithe](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) chun an lúb spriocdhírithe a rith don
-mhéid a d'athraigh tú. Tá an tsraith iomlán tástálacha aonaid (4 shlat CI), Vitest, an geata
-cumhdaigh **60%+**, agus an tógáil táirgthe faoi chúram CI — ní chuireann a rith go háitiúil aon
-chomhartha leis nach dtabharfaidh seiceálacha an PR duit cheana féin, agus ar mheaisíní níos lú
-d'fhéadfadh sé an t-óstach a sháithiú (#8084):
+Sula n-osclaíonn tú PR, úsáid
+[Bealach Órga na Rannpháirtíochta](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) chun an lúb spriocdhírithe a rith le haghaidh
+an mhéid a d’athraigh tú. Is faoi CI atá an tsraith iomlán tástálacha aonaid (4 sharda CI), Vitest, an geata cumhdaigh **60%+**, agus
+an tógáil táirgthe — ní sholáthraíonn a rith go háitiúil aon fhaisnéis nach dtabharfaidh na seiceálacha PR duit cheana féin, agus ar ríomhairí níos lú féadfaidh sé an t-óstach a sháithiú (#8084):
 
-- Rith na comhaid tástála a chlúdaíonn d'athrú: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Rith na comhaid tástála a chumhdaíonn d’athrú: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Rith `npm run lint`
-- Cuir tástálacha uathoibrithe leis nó nuashonraigh iad sa PR céanna aon uair a athraíonn cód táirgthe
+- Cuir tástálacha uathoibrithe san áireamh nó nuashonraigh iad sa PR céanna aon uair a athraítear cód táirgthe
+- I gcomhaid `node:test`, cuir gach `await` barrleibhéil (amhail `await import(...)`) roimh an gcéad `test()` / `describe()`: faoi `--test-force-exit`, d’fhéadfadh sé nach rithfí go ciúin riamh tástálacha a chláraítear ina dhiaidh (#18045; forfheidhmítear é le `npm run check:test-tla-order`)
 - Cuir na comhaid tástála a athraíodh nó a cuireadh leis i dtuairisc an PR nuair a athraíodh cód táirgthe
 - Seiceáil toradh SonarQube ar an PR nuair atá rúin an tionscadail cumraithe in CI
 
-Stádas reatha na dtástálacha: **122 comhad tástála aonaid** a chlúdaíonn:
+Stádas reatha na dtástálacha: **122 comhad tástála aonaid** a chumhdaíonn:
 
 - Aistritheoirí soláthraithe agus tiontú formáide
 - Teorannú ráta, scoradán ciorcaid, agus athléimneacht
-- Taisce shéimeantach, idéimpitéinseacht, rianú dul chun cinn
+- Taisce shéimeantach, iolrachas sábháilte, rianú dul chun cinn
 - Oibríochtaí bunachair sonraí agus scéimre (21 modúl DB)
 - Sreafaí OAuth agus fíordheimhniú
 - Bailíochtú críochphointí API (Zod v4)

@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents
@@ -31,6 +33,7 @@ For the focused OpenAI-compatible protocol and provider capability matrix, see
 - [WebSocket Streaming](#websocket-streaming)
 - [Quotas & Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
+- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
 - [Dashboard & Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
@@ -401,6 +404,11 @@ return an error rather than an empty success. Model access depends on the ZenMux
 See [ZenMux's Vertex API](https://docs.zenmux.ai/api/vertexai/generate-images) and
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
+A Microsoft 365 Copilot sign-in connection serves `copilot-m365-web/m365-copilot-image`
+through Copilot's built-in image tool: one Copilot turn per image (`n` 1–4), `size` steering
+only the orientation, and images returned inline (`b64_json`, or a data URL for
+`response_format: "url"`). See [Microsoft 365 Copilot](../providers/COPILOT-M365.md#image-generation).
+
 ```bash
 # List all image models
 GET /v1/images/generations
@@ -477,6 +485,48 @@ Authorization: Bearer your-api-key
 
 → Returns all chat, embedding, and image models + combos in OpenAI format
 ```
+
+### Model prices (`pricing`)
+
+An entry carries a `pricing` object when OmniRoute knows the model's price. The price comes
+from the pricing table that cost accounting uses: built-in defaults, synced prices, and
+overrides set through `/api/pricing`. These are list prices, so subscription providers also
+show a per-token price.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Fields                                                          | Unit                          | Notes                                                                                                                                      |
+| --------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD per token, decimal string | OpenRouter-compatible, never in exponent notation. The two cache fields appear only when there is a cache price.                           |
+| `input`, `output`, `cached`, `cache_creation`                   | USD per 1M tokens, number     | Fields from earlier catalog versions, kept for existing clients. `reasoning` and `long_context` also appear when the pricing row has them. |
+
+- **Combos** carry the price of their first visible target. Built-in `auto/*` combos pick a
+  target at request time, so they have no `pricing`.
+- **Free models** show `"0"` (and `0`) when their price is zero. A model with no pricing row
+  also shows `"0"` when the catalog marks it free (`free: true`) or the built-in free-model
+  catalog lists it.
+- **Unknown price:** the entry has no `pricing` key.
+- **Credit-metered providers** (such as Kiro) bill per request rather than per token. Their
+  entries keep the numeric per-1M fields they had before and carry no per-token string fields.
+- **Variants** (reasoning-effort ids, no-thinking aliases, discovery and gateway mirrors)
+  copy the price of the model they route to.
+- The fields carry base rates only. Long-context tiers (the numeric `long_context` field) and
+  service-tier multipliers (for example Codex fast or flex) do not change `prompt` or
+  `completion`.
+- The object is the same for every authentication style, including an Anthropic-style
+  request with `x-api-key` and `anthropic-version` (the response stays `{ "object": "list",
+"data": [...] }`). Implementation: `src/app/api/v1/models/catalogPricing.ts`.
 
 ### Model id prefixes (`?prefix=`)
 
@@ -587,6 +637,82 @@ resolution, executor functions, request headers, and account data.
 
 Use this endpoint when a sidecar runs out-of-process and cannot import
 `open-sse/config/providerPluginManifestRegistry.ts` directly.
+
+---
+
+## ElevenLabs audio generation
+
+Configure an `elevenlabs` provider connection in OmniRoute with your ElevenLabs API key.
+Clients authenticate with their **OmniRoute** key (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+the gateway supplies the stored provider key as `xi-api-key`. Never send an ElevenLabs key
+as the gateway bearer token.
+
+| Method | Path                        | Response                                    | API key endpoint category |
+| ------ | --------------------------- | ------------------------------------------- | ------------------------- |
+| POST   | `/v1/sound-generation`      | Native audio bytes                          | `elevenlabs`              |
+| POST   | `/v1/music`                 | Native audio bytes                          | `music`                   |
+| POST   | `/v1/music/stream`          | Streaming audio bytes                       | `music`                   |
+| POST   | `/v1/music/detailed`        | Native multipart audio and composition plan | `music`                   |
+| POST   | `/v1/music/detailed/stream` | Native SSE metadata and audio chunks        | `music`                   |
+| POST   | `/v1/music/plan`            | JSON composition plan                       | `music`                   |
+
+These endpoints complement the existing `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` and `/v1/speech-to-text` routes. Native JSON fields
+and query parameters such as `output_format` and `enable_logging` are preserved.
+`/v1/music/detailed` responses retain their multipart boundaries; parse them as multipart.
+`/v1/music/detailed/stream` returns `text/event-stream` with composition metadata and
+base64 audio chunks in SSE events. All six routes support CORS preflight.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# A short sound effect. Duration: 0.5 to 30 seconds.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Music duration is expressed in milliseconds: 3000 to 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+Use `/v1/music/stream` with the same JSON body for incremental audio delivery. Composition
+accepts exactly one of `prompt` or `composition_plan`; `/v1/music/plan` requires `prompt`
+and optionally accepts `source_composition_plan`. The native schemas preserve additional
+provider fields so composition-plan versions and fine-tuning options reach ElevenLabs.
+
+The unified `/v1/music/generations` endpoint also accepts `elevenlabs/music_v1`,
+`elevenlabs/music_v2` and `elevenlabs/music_v2_5`. With an active ElevenLabs connection,
+these models are exposed by the music catalog. This endpoint returns
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Its `duration` field is in
+seconds and maps to `music_length_ms`; an explicit `music_length_ms` takes precedence.
+`instrumental` maps to `force_instrumental`, with the native field taking precedence.
+Use the native streaming endpoints for streaming and the native composition endpoint
+for requests driven only by a composition plan.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Endpoint, model, budget and connection restrictions apply before an upstream call. Native
+routes return upstream status codes and error bodies unchanged, including `402` for a plan
+restriction and `429` for a quota limit. The `character-cost`, `song-id`, `request-id` and `retry-after`
+headers are preserved when present. A free credit balance does not guarantee access to every
+music model, output format or API feature: ElevenLabs decides entitlement for each request.
+The unified endpoint preserves error status codes in OmniRoute's normalized error envelope.
+
+Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[music composition](https://elevenlabs.io/docs/api-reference/music/compose) and
+[streaming music details](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
@@ -745,6 +871,17 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Search policy enforced via `enforceApiKeyPolicy`.
 
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs
+first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are
+used only when nothing else is configured. A self-hosted SearXNG counts as configured once its
+connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it
+then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover,
+including when SearXNG answers 400, 401, 403 or 404. A `baseUrl` that is not a valid `http(s)` URL
+or that points at a cloud-metadata address does not count. A SearXNG connection that stores a token
+ranks this way only over `https://` or loopback `http://`. Over remote plain `http://` it is never
+a failover and stays a last resort, used only when no other provider is configured or when
+requested by name, so it does send the token in cleartext in those two cases.
+
 ### Exa and Tavily `provider_options`
 
 Exa and Tavily read provider-specific fields from a namespaced bag:
@@ -755,25 +892,44 @@ and a key with the wrong type is dropped. Any other key is ignored, including au
 `stream` and `outputSchema`. The flat keys used by other providers (`cx`, `depth`, ...) work
 as before.
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                                            |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                 |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
 The generic fields always win: `query`, `max_results`, `filters` (domains), `country` and the
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
 Tavily also accepts `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl search cost is recorded per started block of 10 returned results, at $0.002 (2
+credits) a block and at least one block per call
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 results cost $0.004.
+
 The generic `time_range` now reaches both providers: Exa gets `startPublishedDate` (ISO
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
-Cost accounting is still the flat registry `costPerQuery`. Tavily bills
-`search_depth: "advanced"` at more credits per call, and that difference is not reflected in
-`usage.search_cost_usd`.
+Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
+`deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+whether `depth` comes from `provider_options` or the connection's settings.
+
+Exa `type: "lite"` (Exa 3.0) accepts a smaller set of fields and rejects the whole request
+when any other field is set. For lite, `additionalQueries`, `systemPrompt` and every
+`contents` key except `text` and `highlights` are dropped before the call. The deprecated
+`subpages`, `subpageTarget`, `highlights.numSentences` and `highlights.highlightsPerUrl` are no
+longer forwarded.
+
+Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's
+own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the
+legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per
+returned result when `contents.summary` is set. Tavily is recorded at 1 credit ($0.008) for
+`search_depth` `basic`, `fast` and `ultra-fast`, and 2 credits ($0.016) for `advanced`
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). A call with
+`auto_parameters: true` that Tavily upgrades to advanced is still recorded at 1 credit.
 
 ---
 
@@ -890,7 +1046,30 @@ completion.
 | GET    | `/v1/quotas/check`  | Pre-validate quota for a `provider` + `accountId` before issuing a registered key     |
 | POST   | `/v1/issues/report` | Report a quota/key issuance failure to GitHub (requires `GITHUB_ISSUES_REPO` + token) |
 
-**Auth:** Bearer API key (`isAuthenticated`).
+**Auth:** `/v1/quotas/check` takes a Bearer API key (`isAuthenticated`). `/v1/issues/report` is
+management-only (`requireManagementAuth`), like `/api/v1/registered-keys`: a dashboard session,
+the local CLI token, or an API key with `manage`/`admin` scope; inference-only API keys get `403`.
+
+### Quota session recovery (opt-in)
+
+A non-streaming `POST /v1/chat/completions` or `POST /v1/responses` that fails with a
+terminal quota error (`402`/`429`/`503` whose body says the quota or credits are exhausted)
+can be parked and replayed later instead of returning the error. The caller opts in per
+request with three headers:
+
+| Header                       | Value                                         |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id unique within the session (same rule) |
+
+Only `stream: false` turns with no tools, tool history or `previous_response_id`, and no
+`x-omniroute-connection` pin, are eligible, and `STORAGE_ENCRYPTION_KEY` must be set (the
+request is stored encrypted for up to 24 h). The response is then `202` with
+`recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` while pending, `200` with the
+recovered body when completed) or cancel with `DELETE`. Tickets are visible only to the API
+key that created them. A replay whose outcome is uncertain ends in `needs_confirmation`
+instead of being sent twice. Source: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -918,7 +1097,7 @@ refusal. On success:
 ```jsonc
 {
   "allowed": true,
-  // present only when the key opted into per-key usage limits (daily/weekly USD):
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1063,6 +1242,42 @@ X-OmniRoute-No-Cache: true
 
 ---
 
+## CLIProxyAPI Management Compatibility
+
+OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+management endpoints that usage dashboards call to read Claude and Codex subscription limits
+(for example T3 Code's `cliproxy` usage-limit source). Point the client's base URL at
+OmniRoute and use an API key with the `manage` scope as its management key. The routes are
+served at `/v0/management/*` and at `/api/v0/management/*`.
+
+| Method | Path                         | Description                                                                                                                                    |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                        |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends one allowlisted request with the account's token and returns `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                             |
+
+- `auth_index` is the OmniRoute connection id. `provider` is `claude` or `codex` (OAuth
+  connections only; the `anthropic` API-key provider is not listed). For Codex,
+  `id_token.chatgpt_account_id` is the stored workspace id and `plan_type` the stored plan.
+- `api-call` is not a generic proxy. It accepts only Claude `GET
+https://api.anthropic.com/api/oauth/usage` and Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` and
+  `POST .../wham/rate-limit-reset-credits/consume`, each only for an account of the matching
+  provider. Anything else returns `403` without contacting the upstream. The caller's
+  `Authorization` header (including the `$TOKEN$` placeholder) is ignored: OmniRoute injects
+  the connection's access token, refreshing it first when it is near expiry, and forwards only
+  allowlisted headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). A missing `Chatgpt-Account-Id` defaults to the stored workspace id.
+  Requests time out after 15 seconds and use the connection's proxy.
+- `reset-quota` leaves terminal states (banned, expired, credits_exhausted) alone. An unknown
+  `auth_index` returns `404`.
+
+**Auth:** dashboard session or a `manage`-scoped API key, required even when login is disabled
+(the paths are in `ALWAYS_PROTECTED_API_PATHS`). Inference-only keys get `403`. Source:
+`src/lib/cliproxyCompat/managementApi.ts`.
+
+---
+
 ## Dashboard & Management
 
 Management routes (`/api/*` except public auth/login) are **not** authorized by
@@ -1098,6 +1313,12 @@ clears it to restore the default. `GET /api/provider-models?provider=<provider>`
 values in `modelOutputOverrides`, including models without a custom-model row. The override
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
+
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
 
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
@@ -1143,11 +1364,35 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 | Endpoint              | Method   | Description                   |
 | --------------------- | -------- | ----------------------------- |
+| `/api/models`         | GET/PUT  | Model list / alias update     |
 | `/api/models/alias`   | GET/POST | Model aliases                 |
 | `/api/models/catalog` | GET      | All models by provider + type |
 | `/api/combos*`        | Various  | Combo management              |
 | `/api/keys*`          | Various  | API key management            |
 | `/api/pricing`        | GET      | Model pricing                 |
+
+#### Model limit provenance
+
+`GET /api/models?withLimits=1` (also `true`; `0`/`false` or omitting it keeps the default
+payload unchanged) adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and a `capsSource`
+object to every model row. `capsSource` names the rule that supplied each limit, so a
+surprising limit (for example 128k on a 1M model) can be traced to its origin. The resolved
+values are the same ones routing uses; the flag only adds fields and never changes a value.
+Any other `withLimits` value is rejected with `400`.
+
+| `capsSource` value                           | Origin                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
+| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
+| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
+| `registry:<provider>/<model>`                | Provider registry entry                                                |
+| `spec:<model>`                               | Static model spec                                                      |
+| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
+| `none`                                       | No source declares the limit (value is `null`)                         |
+
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
+and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### Usage & Analytics
 
@@ -1165,36 +1410,37 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 `PATCH /api/keys/{id}` updates an existing key's permissions. Like every `/api/keys*` route it needs management authorization (see [Management Authentication](../guides/MANAGEMENT-AUTH.md)), not an inference key. Send only the fields you want to change; a request with none of them is rejected with `No valid fields to update`. The accepted fields are defined by `updateKeyPermissionsSchema` in `src/shared/validation/schemas/keys.ts`.
 
-| Field                                       | Type                                                                 | Notes                                                                                                                  |
-| ------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | string, 1-200 chars                                                  |                                                                                                                        |
-| `isActive`                                  | boolean                                                              |                                                                                                                        |
-| `isBanned`                                  | boolean                                                              |                                                                                                                        |
-| `expiresAt`                                 | ISO 8601 datetime or `null`                                          | `null` clears the expiry                                                                                               |
-| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` must be empty when the mode is `all`                                                                   |
-| `allowedModels`, `blockedModels`            | array of strings, up to 1000                                         |                                                                                                                        |
-| `allowedCombos`                             | array of strings, up to 500                                          | Gates which combos the key may call; direct models are governed by `modelAccessMode` / `allowedModels`                 |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` must be non-empty when `restricted` and empty when `all`                                          |
-| `allowedConnections`                        | array of UUIDs, up to 100                                            |                                                                                                                        |
-| `allowAutoCombos`                           | boolean                                                              | `false` rejects requests for `auto/*` models with this key; keys that never set it are allowed                         |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                        | What `GET /v1/models` lists for this key (combos only, models only, or both); it does not change what the key may call |
-| `forcedModel`                               | string up to 300 chars, or `null`                                    | Routes chat requests to this model/combo, over `X-Route-Model` and `body.model`; the key's limits still apply          |
-| `noLog`, `autoResolve`                      | boolean                                                              |                                                                                                                        |
-| `throttleDelayMs`                           | integer, 0-300000                                                    |                                                                                                                        |
-| `maxSessions`                               | integer, 0-10000                                                     |                                                                                                                        |
-| `rateLimits`                                | array of `{ limit, window }` (positive integers, up to 50) or `null` | `null` clears the limits                                                                                               |
-| `accessSchedule`                            | schedule object or `null`                                            | `null` clears the schedule                                                                                             |
-| `scopes`                                    | array of strings, up to 32                                           |                                                                                                                        |
-| `allowedEndpoints`                          | array of strings, up to 20                                           |                                                                                                                        |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                        |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | See [Per-key cache bypass](#per-key-cache-bypass)                                                                      |
-| `compressionEnabled`                        | boolean                                                              |                                                                                                                        |
-| `codexServiceMode`                          | one of the Codex service modes                                       |                                                                                                                        |
-| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                        |
-| `allowUsageCommand`                         | boolean                                                              |                                                                                                                        |
-| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                        |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                |                                                                                                                        |
-| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                        |
+| Field                                       | Type                                                                 | Notes                                                                                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 chars                                                  |                                                                                                                                                                                                                                                    |
+| `isActive`                                  | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `isBanned`                                  | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `expiresAt`                                 | ISO 8601 datetime or `null`                                          | `null` clears the expiry                                                                                                                                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                | `allowedModels` must be empty when the mode is `all`                                                                                                                                                                                               |
+| `allowedModels`, `blockedModels`            | array of strings, up to 1000                                         |                                                                                                                                                                                                                                                    |
+| `allowedCombos`                             | array of strings, up to 500                                          | Gates which combos the key may call; direct models are governed by `modelAccessMode` / `allowedModels`                                                                                                                                             |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                | `allowedConnections` must be non-empty when `restricted` and empty when `all`                                                                                                                                                                      |
+| `allowedConnections`                        | array of UUIDs, up to 100                                            |                                                                                                                                                                                                                                                    |
+| `allowAutoCombos`                           | boolean                                                              | `false` rejects requests for `auto/*` models with this key; keys that never set it are allowed                                                                                                                                                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                        | What `GET /v1/models` lists for this key (combos only, models only, or both); it does not change what the key may call                                                                                                                             |
+| `forcedModel`                               | string up to 300 chars, or `null`                                    | Routes chat requests to this model/combo, over `X-Route-Model` and `body.model`; the key's limits still apply                                                                                                                                      |
+| `noLog`, `autoResolve`                      | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `throttleDelayMs`                           | integer, 0-300000                                                    |                                                                                                                                                                                                                                                    |
+| `maxSessions`                               | integer, 0-10000                                                     |                                                                                                                                                                                                                                                    |
+| `rateLimits`                                | array of `{ limit, window }` (positive integers, up to 50) or `null` | `null` clears the limits                                                                                                                                                                                                                           |
+| `accessSchedule`                            | schedule object or `null`                                            | `null` clears the schedule                                                                                                                                                                                                                         |
+| `scopes`                                    | array of strings, up to 32                                           |                                                                                                                                                                                                                                                    |
+| `allowedEndpoints`                          | array of strings, up to 20                                           |                                                                                                                                                                                                                                                    |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                   |                                                                                                                                                                                                                                                    |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                 | See [Per-key cache bypass](#per-key-cache-bypass)                                                                                                                                                                                                  |
+| `compressionEnabled`                        | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `codexServiceMode`                          | one of the Codex service modes                                       |                                                                                                                                                                                                                                                    |
+| `disableNonPublicModels`                    | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `allowUsageCommand`                         | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `usageLimitEnabled`                         | boolean                                                              |                                                                                                                                                                                                                                                    |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                |                                                                                                                                                                                                                                                    |
+| `fiveHourUsageLimitUsd`                     | number >= 0 or `null`                                                | Rolling 5-hour USD budget, enforced like the daily and weekly limits (`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`). `retry-after` is when the oldest spend in the window ages out, which can leave a key far over its limit still blocked. |
+| `chaosModeEnabled`                          | boolean                                                              |                                                                                                                                                                                                                                                    |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1244,6 +1490,34 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/modality-bridge/stats`         | GET        | In-memory `attempts`, successes/`bridged`, failures, cache hits, `totalLatencyMs`, `latencySamples`, sample-denominated `averageLatencyMs`, and last-use time (reset on restart; management auth)                                                                                                                                                                                            |
 | `/api/modality-bridge/video/runtime` | GET        | Strict trusted-loopback check before management auth/probe; sanitized FFmpeg/ffprobe availability and versions (no-store)                                                                                                                                                                                                                                                                    |
 | `/api/modality-bridge/video/extract` | POST       | Internal authenticated trusted-loopback byte broker; 50 MiB input, bounded queue/32 MiB output, `503` capacity, `499` disconnect, `504` deadline; not a public upload API                                                                                                                                                                                                                    |
+
+### Video frame drill-down
+
+`GET /api/v1/video-bridge/drilldown` reads a tenant-bound opaque handle returned in
+`x-omniroute-video-drilldown` after an explicitly consented Video Bridge request.
+Both reads and `DELETE` always require a valid API key and the operator's independent
+`modalityBridgeVideoDrilldownRemoteEnabled` permission. Production retention additionally
+requires `modalityBridgeVideoDrilldownEnabled` and strict per-part `drilldown: true`.
+If the key has a nonempty endpoint allowlist, it must include `video` for both
+GET and DELETE, whether the caller uses `/v1` or `/api/v1`.
+
+GET query: required `handle`; optional `variant` (`preview`, `standard`, `detail`),
+`limit` (1–8; legacy `frames` is accepted but cannot be combined with `limit`),
+zero-based `page`, and `start`/`end` seconds. When both focus bounds
+are supplied, `end` must be greater than `start`. Duplicate/unknown query keys are
+rejected. Successful responses contain `derivation`, `durationSeconds`, `frames`,
+`hasMore`, `page`, `variant`, and optional `focusWindow`; no-store JSON is capped at
+32 MiB including Base64. Oversized output returns 413; request fewer frames.
+
+`DELETE /api/v1/video-bridge/drilldown?handle=...` returns `{ "removed": 0|1 }`.
+Unknown, expired and cross-key GETs are indistinguishable 404 responses; cross-key
+DELETE cannot remove the owner's entry. Disabled access returns 403, missing/invalid
+authentication 401, invalid queries 400, cancellation 499 and temporary errors 503.
+Handles are process-local, expire after ten minutes, and do not survive a restart.
+New handles use `v1.` plus a 32-byte random Base64URL token; only token hashes are
+retained. Legacy 64-hex tokens remain syntactically readable for compatibility.
+See [Video Bridge guardrails](../security/GUARDRAILS.md#video-bridge-videobridgets-videobridgepipelinets)
+for consent, quotas and variant derivation details.
 
 ### Backup & Export/Import
 
@@ -1351,7 +1625,7 @@ These endpoints mirror Gemini's API format for clients that expect native Gemini
 
 | Endpoint                 | Method | Description                                            |
 | ------------------------ | ------ | ------------------------------------------------------ |
-| `/api/init`              | GET    | Application initialization check (used on first run)   |
+| `/api/init`              | GET    | Start background sync services (management auth)       |
 | `/api/tags`              | GET    | Ollama-compatible model tags (for Ollama clients)      |
 | `/api/restart`           | POST   | Trigger graceful server restart                        |
 | `/api/shutdown`          | POST   | Trigger graceful server shutdown                       |
@@ -1460,6 +1734,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` request does **not** use OpenRouter.
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
 
 ---
 
@@ -1642,6 +1924,10 @@ Used by the auto-key management subsystem to issue and rotate API keys against a
 | GET    | `/api/v1/registered-keys/[id]`        | Retrieve a registered key's metadata (no raw material)                                                                                                                                      |
 | DELETE | `/api/v1/registered-keys/[id]`        | Revoke a registered key                                                                                                                                                                     |
 | POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit revoke endpoint (same effect as DELETE)                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Read the provider's issuance caps                                                                                                                                                           |
+| PUT    | `/api/v1/providers/[provider]/limits` | Set the provider's issuance caps — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                            |
+| GET    | `/api/v1/accounts/[id]/limits`        | Read the account's issuance caps                                                                                                                                                            |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Set the account's issuance caps — same body as the provider route                                                                                                                           |
 
 **Auth:** management session/API key (`requireManagementAuth`) — the same guard as `/api/keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope; inference-only API keys get `403`. See also `/v1/quotas/check` and `/v1/issues/report`.
 
