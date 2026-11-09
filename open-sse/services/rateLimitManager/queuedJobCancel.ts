@@ -37,6 +37,8 @@ interface DLList<T = BottleneckJob> {
   _last: DLListNode<T> | null;
   length: number;
   decr?: () => void;
+  push?: (value: T) => unknown;
+  shift?: () => T | undefined;
 }
 
 interface BottleneckJob {
@@ -62,20 +64,75 @@ interface BottleneckInternals {
 
 export const ABANDONED_JOB_DROP_MESSAGE = "rate-limit-queued-job-abandoned";
 
-function findQueuedNode(
-  internals: BottleneckInternals,
-  jobId: string
-): { list: DLList; node: DLListNode } | null {
+// One job id -> the list node that holds it, kept current by wrapping `push`
+// and `shift` of every Bottleneck queue list. Cancelling then costs O(1)
+// instead of a walk over every queued job (quadratic when a burst expires).
+interface IndexedNode {
+  list: DLList<never>;
+  node: DLListNode<never>;
+}
+type JobIndex = Map<string, IndexedNode>;
+
+const jobIndexes = new WeakMap<object, JobIndex | null>();
+
+function indexList<T>(index: JobIndex, list: DLList<T>, idOf: (value: T) => unknown): void {
+  const { push, shift } = list;
+  if (typeof push !== "function" || typeof shift !== "function") return;
+  const add = (node: DLListNode<T>) => {
+    const id = idOf(node.value);
+    if (typeof id === "string") index.set(id, { list, node } as unknown as IndexedNode);
+  };
+  const forget = (node: DLListNode<T>) => {
+    const id = idOf(node.value);
+    if (typeof id === "string" && index.get(id)?.node === (node as unknown)) index.delete(id);
+  };
+  for (let node = list._first; node; node = node.next) add(node);
+  list.push = (value) => {
+    const result = push.call(list, value);
+    if (list._last) add(list._last);
+    return result;
+  };
+  list.shift = () => {
+    const first = list._first;
+    const result = shift.call(list);
+    if (first) forget(first);
+    return result;
+  };
+}
+
+/** Index `limiter` once; returns null when its internals are not the expected shape. */
+function getJobIndex(internals: BottleneckInternals): JobIndex | null {
+  const known = jobIndexes.get(internals);
+  if (known !== undefined) return known;
   const lists = internals._queues?._lists;
-  if (!Array.isArray(lists)) return null;
-  for (const list of lists) {
-    let node = list?._first ?? null;
-    while (node) {
-      if (node.value?.options?.id === jobId) return { list, node };
-      node = node.next;
-    }
+  const submitQueue = internals._submitLock?._queue;
+  if (!Array.isArray(lists) || !submitQueue) {
+    jobIndexes.set(internals, null);
+    return null;
   }
-  return null;
+  const index: JobIndex = new Map();
+  for (const list of lists) indexList(index, list, (job) => job?.options?.id);
+  indexList(index, submitQueue, (submission) => submission?.args?.[0]?.options?.id);
+  jobIndexes.set(internals, index);
+  return index;
+}
+
+function isLinked<T>(list: DLList<T>, node: DLListNode<T>): boolean {
+  return node.prev ? node.prev.next === node : list._first === node;
+}
+
+/** The indexed node for `jobId`, only if it is still linked in `expected` (when given). */
+function findIndexed<T>(
+  index: JobIndex | null,
+  jobId: string,
+  expected?: DLList<T>
+): { list: DLList<T>; node: DLListNode<T> } | null {
+  const found = index?.get(jobId) as unknown as
+    { list: DLList<T>; node: DLListNode<T> } | undefined;
+  if (!found || (expected && found.list !== expected) || !isLinked(found.list, found.node)) {
+    return null;
+  }
+  return found;
 }
 
 function unlink<T>(list: DLList<T>, node: DLListNode<T>): void {
@@ -90,25 +147,22 @@ function unlink<T>(list: DLList<T>, node: DLListNode<T>): void {
 
 function cancelReceivedSubmission(internals: BottleneckInternals, jobId: string): boolean {
   const queue = internals._submitLock?._queue;
-  let node = queue?._first;
-  while (node) {
-    const submission = node.value;
-    const job = submission.args?.[0];
-    if (
-      job?.options?.id === jobId &&
-      typeof job.doDrop === "function" &&
-      typeof submission.resolve === "function"
-    ) {
-      // This task is waiting, NOT the one currently running inside the lock.
-      // No await: Sync cannot shift the node between unlink and settlement.
-      unlink(queue, node);
-      const dropped = job.doDrop({ message: ABANDONED_JOB_DROP_MESSAGE }) === true;
-      submission.resolve(false);
-      return dropped;
-    }
-    node = node.next;
-  }
-  return false;
+  const found = queue && findIndexed(getJobIndex(internals), jobId, queue);
+  if (!queue || !found) return false;
+  const submission = found.node.value;
+  const job = submission.args?.[0];
+  if (typeof job?.doDrop !== "function" || typeof submission.resolve !== "function") return false;
+  // This task is waiting, NOT the one currently running inside the lock.
+  // No await: Sync cannot shift the node between unlink and settlement.
+  unlink(queue, found.node);
+  forgetJob(internals, jobId);
+  const dropped = job.doDrop({ message: ABANDONED_JOB_DROP_MESSAGE }) === true;
+  submission.resolve(false);
+  return dropped;
+}
+
+function forgetJob(internals: BottleneckInternals, jobId: string): void {
+  jobIndexes.get(internals)?.delete(jobId);
 }
 
 /**
@@ -131,10 +185,11 @@ export function cancelQueuedJob(limiter: Bottleneck, jobId: string): Promise<boo
   const removeQueued = () =>
     registerLock.schedule(() => {
       if (limiter.jobStatus(jobId) !== "QUEUED") return false;
-      const found = findQueuedNode(internals, jobId);
+      const found = findIndexed<BottleneckJob>(getJobIndex(internals), jobId);
       // Never unlink a job that could not then be settled: it would vanish.
       if (!found || typeof found.node.value.doDrop !== "function") return false;
       unlink(found.list, found.node);
+      forgetJob(internals, jobId);
       return found.node.value.doDrop({ message: ABANDONED_JOB_DROP_MESSAGE }) === true;
     });
   if (status === "QUEUED") return removeQueued().catch(() => false);
@@ -162,6 +217,8 @@ export function createCancellableJob(
   track: (promise: Promise<boolean>) => unknown
 ): { scheduleOpts: Bottleneck.JobOptions; abandon: () => void } {
   const id = `rl-${++scheduledJobSeq}`;
+  // Index before the first job queues, so later cancels never walk the queue.
+  getJobIndex(limiter as unknown as BottleneckInternals);
   return {
     scheduleOpts: expirationMs && expirationMs > 0 ? { id, expiration: expirationMs } : { id },
     abandon: () => {
