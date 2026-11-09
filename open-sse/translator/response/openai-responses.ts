@@ -714,6 +714,16 @@ function announcedToolOutputIndex(state, tcIdx) {
   );
 }
 
+/**
+ * Tail of the short fragment, not a slice of the grown buffer (a slice pins the old prefix).
+ * A growing snapshot makes the tail shorter than the fragment: copy it so the event does
+ * not keep the whole snapshot alive (prefixing one char forces a flat copy; slice(1) drops it).
+ */
+function newArgumentTail(fragment: string, grown: number): string {
+  const tail = fragment.slice(fragment.length - grown);
+  return grown < fragment.length ? ` ${tail}`.slice(1) : tail;
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
@@ -764,12 +774,7 @@ function emitToolCall(state, emit, tc) {
       state.funcArgsEscapeState[tcIdx]
     );
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
-    // Tail of the short fragment, not a slice of the grown buffer (a slice pins the old prefix).
-    // A growing snapshot makes the tail shorter than `sanitized`: copy it so the event does
-    // not keep the whole snapshot alive (prefixing one char forces a flat copy; slice(1) drops it).
-    const grown = nextArgs.length - existingArgs.length;
-    const tail = sanitized.slice(sanitized.length - grown);
-    const emittedDelta = grown < sanitized.length ? ` ${tail}`.slice(1) : tail;
+    const emittedDelta = newArgumentTail(sanitized, nextArgs.length - existingArgs.length);
     state.funcArgsBuf[tcIdx] = nextArgs;
 
     if (refCallId && emittedDelta && !isCustomTool && state.funcItemAdded[tcIdx]) {
