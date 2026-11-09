@@ -488,7 +488,7 @@ Dan jittratta:
 
 | Fajl                           | Għan                                                         |
 | ------------------------------ | ------------------------------------------------------------ |
-| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 380 fornitur |
+| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 381 fornitur |
 | `providerModels.ts`            | Psewdonimi tal-mudell, mapping tal-format                    |
 | `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                         |
 | `defaultThinkingSignature.ts`  | Default Claude thinking firma                                |

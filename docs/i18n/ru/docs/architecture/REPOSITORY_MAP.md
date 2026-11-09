@@ -191,7 +191,7 @@ src/
 | `memory/`                                | Разговорная память (SQLite FTS5 + sqlite-vec гибрид RRF + Qdrant уровень 2) — см `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                 |
 | `memory/embedding/`                      | Слой внедрения нескольких источников: `index.ts` (резольвер), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (план 21)                                                                                                                                                                       |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 оболочка — KNN грубая сила + гибрид RRF (FTS5 + вектор, k = 60). Lazy-init корректно ухудшает работу, когда sqlite-vec недоступен. (план 21)                                                                                                                                                               |
-| `memory/reindex.ts`                      | `runReindexBatch()` — обрабатывает воспоминания с помощью `needs_reindex=1` в фоновом режиме; вызывается с помощью `POST /api/memory/reindex` и пути отложенной обратной засыпки. (план 21)                                                                                                                                  |
+| `memory/reindex.ts`                      | `runReindexBatch()` — обрабатывает воспоминания с помощью `needs_reindex=1` в фоновом режиме; вызывается с помощью `POST /api/memory/reindex` и пути ленивой обратной засыпки. (план 21)                                                                                                                                     |
 | `monitoring/`                            | Проверки работоспособности, выдача метрик                                                                                                                                                                                                                                                                                    |
 | `oauth/`                                 | потоки OAuth/import для 22 модулей провайдера (agy, antigravity, claude, cline, codebuddy-cn, codex, курсор, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, Зед)                                                    |
 | `plugins/`                               | Реестр плагинов                                                                                                                                                                                                                                                                                                              |
@@ -242,13 +242,13 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент информационной панели API: адаптеры поверх `packages/ui-kit` — см. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена значков, используемые на экранах. → Компоненты Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 провайдеров** с проверкой Zod (источник истины)                                                             |
+| `constants/providers.ts`         | **381 провайдер** с проверкой Zod (источник истины)                                                               |
 | `constants/cliTools.ts`          | Внешний реестр инструментов CLI                                                                                   |
 | `constants/routingStrategies.ts` | **20 стратегий маршрутизации** с приоритетами                                                                     |
 | `constants/publicApiRoutes.ts`   | Маршруты, требующие аутентификации носителя (или управления)                                                      |
 | `constants/upstreamHeaders.ts`   | Список запрещенных заголовков для восходящих запросов                                                             |
 | `validation/schemas.ts`          | ~ 80 схем Zod (единый источник достоверных данных для контрактов API )                                            |
-| `validation/helpers.ts`          | помощники проверки Zod (`validateBody` и т. д.)                                                                   |
+| `validation/helpers.ts`          | помощники проверки Zod (`validateBody` и т. д.)                                                                   |
 | `types/`                         | Общие типы TS                                                                                                     |
 | `contracts/`                     | Публичные контракты API (используемые `files:` в `package.json`)                                                  |
 | `utils/circuitBreaker.ts`        | Автоматический выключатель поставщика (см. `docs/architecture/RESILIENCE_GUIDE.md`)                               |
@@ -395,24 +395,24 @@ open-sse/
 
 ### Руководства высшего уровня
 
-| Док                         | Цель                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность информационной панели                        |
-| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                       |
-| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                       |
-| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)                |
-| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                  |
-| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                    |
-| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                    |
-| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                    |
-| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                   |
-| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                      |
-| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                      |
-| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                         |
-| `UNINSTALL.md`              | Чистые шаги удаления                                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 380 провайдеров (регенерация: `npm run gen:provider-reference`) |
+| Док                         | Цель                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность информационной панели                       |
+| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                      |
+| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                      |
+| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)               |
+| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                 |
+| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                   |
+| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                   |
+| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                       |
+| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                   |
+| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                  |
+| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                     |
+| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                  |
+| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                     |
+| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                        |
+| `UNINSTALL.md`              | Чистые шаги удаления                                                                                  |
+| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 381 провайдера (регенерация: `npm run gen:provider-reference`) |
 
 ### Подробное описание подсистемы
 
@@ -428,7 +428,7 @@ open-sse/
 | `EVALS.md`                                    | Структура оценки (наборы, прогоны, рубрики)                                                |
 | `GUARDRAILS.md`                               | PII Masker, быстрая инъекция, Vision Bridge                                                |
 | `COMPLIANCE.md`                               | Журнал аудита, хранение, отказ от участия noLog                                            |
-| `WEBHOOKS.md`                                 | Доставка вебхука, подписанного HMAC                                                        |
+| `WEBHOOKS.md`                                 | Доставка веб-перехватчика, подписанного HMAC                                               |
 | `REASONING_REPLAY.md`                         | Гибридный кэш memory/SQLite для `reasoning_content`                                        |
 | `AUTHZ_GUIDE.md`                              | Конвейер авторизации (`classify` → `policies` → `enforce`)                                 |
 | `RESILIENCE_GUIDE.md`                         | Автоматический выключатель, время восстановления + блокировка модели +                     |
@@ -440,7 +440,7 @@ open-sse/
 | Док                             | Цель                                            |
 | ------------------------------- | ----------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Обзор режимов сжатия: дорожная карта +          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, контракт на реестр        |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, договор о реестре         |
 | `COMPRESSION_RULES_FORMAT.md`   | Схема JSON пакета правил Caveman                |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Инвентаризация пакетов правил для каждого языка |
 | `RTK_COMPRESSION.md`            | Декларативный конвейер RTK (56 фильтров)        |
