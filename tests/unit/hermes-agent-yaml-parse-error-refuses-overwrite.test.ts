@@ -29,6 +29,7 @@ fs.mkdirSync(process.env.HERMES_HOME, { recursive: true });
 
 const core = await import("../../src/lib/db/core.ts");
 const route = await import("../../src/app/api/cli-tools/hermes-agent-settings/route.ts");
+const generator = await import("../../src/lib/cli-helper/config-generator/index.ts");
 
 const configPath = () => path.join(process.env.HERMES_HOME as string, "config.yaml");
 const envPath = () => path.join(process.env.HERMES_HOME as string, ".env");
@@ -66,6 +67,9 @@ for (const [name, bytes] of [
   ["duplicate mapping key", "model:\n  default: keep-me\nmodel:\n  default: other\n"],
   ["unclosed quote", 'model: "unclosed\n'],
   ["non-mapping document", "- just\n- a\n- list\n"],
+  ["falsy boolean document", "false\n"],
+  ["falsy number document", "0\n"],
+  ["null document", "null\n"],
 ] as const) {
   test(`POST apply with a ${name} config.yaml is refused and the file is untouched`, async () => {
     fs.writeFileSync(configPath(), bytes);
@@ -73,6 +77,22 @@ for (const [name, bytes] of [
     assert.ok(!res.ok, `expected a failure status, got ${res.status}`);
     assert.equal(fs.readFileSync(configPath(), "utf8"), bytes, "config.yaml was overwritten");
     assert.equal(fs.existsSync(envPath()), false, ".env must not be written on refusal");
+  });
+}
+
+// `omniroute config validate|set hermes-agent` go through the generic adapter.
+// It must report the refusal as a failure, not wrap the error object as content.
+for (const bytes of ['model: "unclosed\n', "false\n"]) {
+  test(`generateConfig("hermes-agent") reports a refusal for ${JSON.stringify(bytes)}`, async () => {
+    fs.writeFileSync(configPath(), bytes);
+    const result = await generator.generateConfig("hermes-agent", {
+      baseUrl: "http://localhost:20128/v1",
+      apiKey: "test-key",
+    });
+    assert.equal(result.success, false, "an unparseable config.yaml must not validate");
+    assert.match(String(result.error), /refusing to overwrite/);
+    assert.equal(result.content, undefined, "no content object may leak out as success");
+    assert.equal(fs.readFileSync(configPath(), "utf8"), bytes);
   });
 }
 

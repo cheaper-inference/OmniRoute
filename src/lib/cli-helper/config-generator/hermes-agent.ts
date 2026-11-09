@@ -134,7 +134,7 @@ async function readExistingHermesConfig(): Promise<any | null> {
     const fs = await import("node:fs/promises");
     const raw = await fs.readFile(getConfigPath(), "utf-8");
     // js-yaml 5 throws on an empty document; an empty file is a fresh start.
-    existing = raw.trim() === "" ? {} : yaml.load(raw) || {};
+    existing = raw.trim() === "" ? {} : yaml.load(raw);
   } catch (error) {
     // no existing file — start fresh
     return (error as NodeJS.ErrnoException)?.code === "ENOENT" ? {} : null;
