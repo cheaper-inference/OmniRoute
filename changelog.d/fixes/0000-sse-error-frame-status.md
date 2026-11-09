@@ -1,1 +1,0 @@
-- **fix(chat):** an upstream error sent as an SSE error frame keeps its own 4xx or 5xx status in a non-stream reply, so a 429 inside the frame is no longer reported as a 502.
