@@ -1,0 +1,1 @@
+- **fix(usage):** a request that returned HTTP 200 but ended with `response.incomplete` is now classed as incomplete in the usage ledger summary, not as a success. A new shared `classifyUsageOutcome` helper puts recorded terminal facts ahead of the HTTP status. ([#19463](https://github.com/cheaper-inference/OmniRoute/pull/19463))

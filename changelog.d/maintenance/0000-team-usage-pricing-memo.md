@@ -1,1 +1,0 @@
-- **perf(usage):** The team budget check looks up each model's price once per check instead of once for every distinct token shape in the team's history, so a team with many shapes no longer slows every keyed request.
