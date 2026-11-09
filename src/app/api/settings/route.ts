@@ -417,7 +417,7 @@ export async function PATCH(request: Request) {
     const body: typeof validation.data & { password?: string } = { ...validation.data };
     // The schema strips keys it does not know. Name them in the 200 body so a typo or a stale
     // client never looks like a saved setting.
-    const ignoredKeys = Object.keys(rawBody).filter((key) => !(key in validation.data));
+    const ignoredKeys = Object.keys(rawBody).filter((key) => !Object.hasOwn(validation.data, key));
 
     const operatorOnly = await rejectMachineSecurityPolicyWrite(
       request,

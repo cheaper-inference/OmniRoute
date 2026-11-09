@@ -76,3 +76,16 @@ test("every key getSettings() returns is accepted by PATCH or written by another
     assert.equal(accepted.has(key), false, `${key} is in the schema now: drop it from the list`);
   }
 });
+
+test("PATCH names an ignored key that is also a property of Object.prototype", async () => {
+  // Zod strips these keys. `key in data` still finds them on the prototype of the parsed object.
+  const response = await settingsRoute.PATCH(
+    await makeManagementSessionRequest("http://localhost/api/settings", {
+      method: "PATCH",
+      body: '{"hidePaidModels":true,"constructor":1,"toString":"x"}',
+    })
+  );
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as Record<string, unknown>;
+  assert.deepEqual(body.ignoredKeys, ["constructor", "toString"]);
+});
