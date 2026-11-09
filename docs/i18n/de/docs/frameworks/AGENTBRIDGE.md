@@ -16,11 +16,11 @@ AgentBridge ist der MITM-Proxy (Man-in-the-Middle) von OmniRoute, der HTTPS-Date
 
 ### Was ist AgentBridge?
 
-Wenn ein IDE Agent (z. B. GitHub, Copilot, Cursor, Claude -Code) einen API -Aufruf tätigt, stellt er eine direkte Verbindung zum Upstream AI Anbieter (OpenAI, Anthropic usw.) her. AgentBridge fängt diese Verbindung transparent auf TLS -Ebene — ab, ohne dass eine Änderung der Agentenkonfiguration — erforderlich ist, und schreibt die Anfrage über OmniRoute neu.
+Wenn ein IDE Agent (z. B. GitHub, Copilot, Cursor, Claude -Code) einen API -Aufruf tätigt, stellt er eine direkte Verbindung zum Upstream AI Anbieter (OpenAI, Anthropic usw.) her. AgentBridge fängt diese Verbindung transparent auf der TLS -Ebene — ab, ohne dass eine Änderung der Agentenkonfiguration — erforderlich ist, und schreibt die Anfrage über OmniRoute neu.
 
 Das bedeutet, dass Sie:
 
-- **Leiten Sie jeden Agenten an einen beliebigen Anbieter um** : Copilot redet mit OpenAI? Leiten Sie es an Anthropic Claude, Gemini oder einen der 380 Anbieter von OmniRoute weiter.
+- **Leiten Sie jeden Agenten an einen beliebigen Anbieter um** : Copilot redet mit OpenAI? Leiten Sie es an Anthropic Claude, Gemini oder einen der 381 Anbieter von OmniRoute weiter.
 - **Modellzuordnungen anwenden** : `gemini-3-flash` → `claude-sonnet-4.7` transparent auf Handlerebene.
 - **Beobachten Sie den gesamten Agentenverkehr** : Jede abgefangene Anfrage wird an den [Verkehrsinspektor](./TRAFFIC_INSPECTOR.md) veröffentlicht.
 - **Wenden Sie OmniRoute Resilienz an** : Combo-Routing, Leistungsschalter, Fallbacks und Kostenverfolgung funktionieren auch für IDE -Agentenverkehr.
@@ -37,7 +37,7 @@ Das bedeutet, dass Sie:
 | Zed Industries          |    —    |    ✓     |        —        |             ✓             |
 | Claude -Code            |    —    |    —     |        ✓        |             ✓             |
 | Code öffnen             |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |       🔍 untersucht       |
+| Trae                    |    —    |    —     |        —        |       🔍 ermittelt        |
 | Armaturenbrett UI       |    ✓    |    ✗     |        ✗        |             ✓             |
 | Verkehrsinspektor       |    ✗    |    ✗     |        ✓        |             ✓             |
 | OmniRoute Routing       |    ✗    |    ✗     |        ✗        |             ✓             |

@@ -19,8 +19,9 @@ omniroute --mcp
 或透過 open-sse 傳輸：
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 預設情況下， HTTP傳輸（`sse` / `streamable-http`，由儀表板伺服器在進程中提供服務）處於關閉狀態，之前只能從`/dashboard/mcp`頁面進行切換。從 v3.8.51 開始， CLI具有奇偶校驗：
@@ -142,13 +143,13 @@ curl -i \
 | `omniroute_rtk_discover`            | `read:compression`  | 發現選擇加入RTK輸出樣本中反覆出現的噪音                                               |
 | `omniroute_rtk_learn`               | `read:compression`  | 從選擇加入的樣本產生可審查的RTK過濾器草稿                                             |
 
-CCR條目僅存在於記憶體中，並在重新啟動時消失。每個區塊限制為 2 個MiB，每個主體限制為 16 個MiB，全域儲存限制為 64 個MiB。條目預設為 24 小時TTL （最多 7 天）。完整MCP檢索僅限於 256 KiB；較大的區塊仍可透過 ranged 和 grep 模式使用。儲存、檢索、列出、檢查、刪除和統計由經過驗證的 API 金鑰主體隔離。審計記錄包含哈希值和大小元數據，而不是內容。
+CCR條目使用兩層儲存：在本地非雲端運行時上由持久SQLite層（`ccr_blocks`，預設啟用）支援的熱記憶體層，因此區塊可以在驅逐或重新啟動後繼續存在，直到其TTL用完—但超過 512 個KB和雲端運行時的區塊除外，它們僅保留記憶體。每個區塊限制為 2 MiB，每個主體限制為 16 MiB，全域儲存限制為 64 MiB。條目預設為 24 小時TTL （最長 7 天）。完整的MCP檢索僅限於 256 個KiB；更大的區塊仍然可以透過 ranged 和 grep 模式使用。儲存、檢索、列出、檢查、刪除和統計由經過驗證的 API 金鑰主體隔離。審計記錄包含哈希值和大小元數據，而不是內容。操作員為導向的詳細資料（兩個標記、客戶端先決條件、 `codemode:false`、每個工具範圍、分頁和診斷矩陣）位於[壓縮引擎→先決條件/操作員指南](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)中。
 
 `omniroute_compression_status`在`analytics.mcpDescriptionCompression`下單獨報告MCP描述壓縮。這些值是MCP可列出描述的元資料大小估計（`tools`、 `prompts`、 `resources`和`resourceTemplates`）；它們不是提供者使用收據並標示`source: "mcp_metadata_estimate"`。
 
 ### MCP可訪問性樹過濾器 (v3.8.0)
 
-與上面的壓縮工具不同， OmniRoute包含一個執行後過濾器，用於壓縮**工具結果**MCP browser/accessibility工具在傳回給代理之前。此過濾器本身並不是一個工具—它可以在任何包含詳細可訪問性樹或瀏覽器快照文字（≥ 2000 個字元）的工具結果上透明地運行。
+與上面的壓縮工具不同， OmniRoute包含一個執行後過濾器，用於壓縮**工具結果**MCP browser/accessibility工具在傳回給代理之前。此過濾器本身不是工具—它在包含詳細可訪問性樹或瀏覽器快照文字（≥ 2000 個字元）的任何工具結果上透明地運行。
 
 關鍵行為：
 

@@ -160,6 +160,7 @@ import { novitaProvider } from "./registry/novita/index.ts";
 import { regoloProvider } from "./registry/regolo/index.ts";
 import { devin_desktopProvider } from "./registry/devin-desktop/index.ts";
 import { zcodeProvider } from "./registry/zcode/index.ts";
+import { minimaxCodeProvider } from "./registry/minimax-code/index.ts";
 import { zed_hostedProvider } from "./registry/zed-hosted/index.ts";
 import { nanogptProvider } from "./registry/nanogpt/index.ts";
 import { nanProvider } from "./registry/nan/index.ts";
@@ -294,6 +295,7 @@ import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
 import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
+import { empiriolabsProvider } from "./registry/empiriolabs/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -454,6 +456,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   regolo: regoloProvider,
   "devin-desktop": devin_desktopProvider,
   zcode: zcodeProvider,
+  "minimax-code": minimaxCodeProvider,
   "zed-hosted": zed_hostedProvider,
   nanogpt: nanogptProvider,
   nan: nanProvider,
@@ -592,4 +595,5 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   gisoo: gisooProvider,
   demonroute: demonrouteProvider,
   paraloncloud: paraloncloudProvider,
+  empiriolabs: empiriolabsProvider,
 };

@@ -446,26 +446,26 @@ Roinnte ina fhochomhadlanna dírithe:
 
 ---
 
-## 4. `open-sse/` — spás oibre an innill sruthaithe
+## 4. `open-sse/` — Spás oibre an innill sruthaithe
 
-Spás oibre npm ar leith a fhoilsítear mar `@omniroute/open-sse`. Is leis a
-bhaineann próiseáil iarratas, forghníomhaitheoirí, aistritheoirí, seirbhísí,
-claochladán, agus an freastalaí MCP.
+Spás oibre npm ar leith a fhoilsítear mar `@omniroute/open-sse`. Is leis a bhaineann
+próiseáil iarratas, forghníomhaitheoirí, aistritheoirí, seirbhísí, an claochladán agus an
+freastalaí MCP.
 
 ```
 open-sse/
 ├── index.ts                Easpórtálacha poiblí
-├── package.json            Manifest spáis oibre
+├── package.json            Manifest an spáis oibre
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Clárlanna soláthraithe, próifílí ceanntásca, aitheantas, …
 ├── handlers/               Láimhseálaithe iarratas (comhrá, leabuithe, fuaim, íomhá, …)
-├── executors/              159 modúl forghníomhaitheora soláthraithe (ranganna forghníomhaitheora + cúntóirí in aghaidh an tsoláthraí)
+├── executors/              159 modúl forghníomhaitheoirí soláthraithe (aicmí forghníomhaitheoirí + cúntóirí in aghaidh an tsoláthraí)
 ├── translator/             Tiontú formáide (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Claochladán srutha Responses API ↔ Chat Completions
 ├── services/               Níos mó ná 80 modúl seirbhíse (teaglamaí, cúltaca, cuótaí, aitheantas, …)
-├── utils/                  Cúntóirí sruthaithe, cliant TLS, AWS SigV4, fetch seachfhreastalaí, …
-└── mcp-server/             Freastalaí MCP (3 iompar, 33 scóip, 110 uirlis)
+├── utils/                  Cúntóirí sruthaithe, cliant TLS, AWS SigV4, beir trí sheachfhreastalaí, …
+└── mcp-server/             Freastalaí MCP (3 iompar, 33 raon feidhme, 110 uirlis)
 ```
 
 ### 4.1 `open-sse/handlers/`
@@ -473,76 +473,74 @@ open-sse/
 | Láimhseálaí             | Cuspóir                                                                                         |
 | ----------------------- | ----------------------------------------------------------------------------------------------- |
 | `chatCore.ts`           | Príomhphíblíne comhrá (taisce, teorainn ráta, ródú teaglamaí, seoladh chuig forghníomhaitheoir) |
-| `responsesHandler.ts`   | Pointe iontrála Responses API de chuid OpenAI                                                   |
+| `responsesHandler.ts`   | Pointe iontrála OpenAI Responses API                                                            |
 | `embeddings.ts`         | Leabuithe                                                                                       |
 | `imageGeneration.ts`    | Giniúint íomhánna                                                                               |
 | `audioSpeech.ts`        | Téacs-go-hurlabhra                                                                              |
-| `audioTranscription.ts` | Urlabhra-go-téacs                                                                               |
+| `audioTranscription.ts` | Urlabhra-go-théacs                                                                              |
 | `videoGeneration.ts`    | Giniúint físeáin                                                                                |
 | `musicGeneration.ts`    | Giniúint ceoil                                                                                  |
 | `rerank.ts`             | Athrangú                                                                                        |
-| `moderations.ts`        | Modhnóireacht                                                                                   |
+| `moderations.ts`        | Measarthóireacht                                                                                |
 | `search.ts`             | Cuardach gréasáin                                                                               |
 | `sseParser.ts`          | Parsálaí imeachtaí SSE                                                                          |
-| `usageExtractor.ts`     | Líon na dtoken a bhaint as sruthanna réamhtheachtacha                                           |
-| `responseSanitizer.ts`  | Torann sonrach don soláthraí a bhaint                                                           |
-| `responseTranslator.ts` | Gliú idir freagra an tsoláthraí agus an tsraith aistritheoirí                                   |
+| `usageExtractor.ts`     | Líon na dtócaine a bhaint as sruthanna réamhtheachtacha                                         |
+| `responseSanitizer.ts`  | Torann a bhaineann go sonrach leis an soláthraí a bhaint                                        |
+| `responseTranslator.ts` | Nasc idir freagra an tsoláthraí agus an tsraith aistritheoirí                                   |
 
 ### 4.2 `open-sse/executors/`
 
-159 modúl forghníomhaitheora ardleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus
-tástálacha — is é `npm run check:docs-counts` a thomhaiseann an líon). Síneann gach
-rang forghníomhaitheora `BaseExecutor` (`base.ts`), go díreach nó trí
-`DefaultExecutor` nó forghníomhaitheoir eile; is cúntóirí in aghaidh an tsoláthraí iad
-na modúil atá fágtha (scéimeanna uirlisí, oiriúnaitheoirí fetch/TTS, láimhseálaithe
-saincheisteanna). Áirítear ar na forghníomhaitheoirí:
+159 modúl forghníomhaitheoirí ardleibhéil (`*.ts` lúide `base.ts`, `index.ts` agus tástálacha — déanann
+`npm run check:docs-counts` an comhaireamh a thomhas). Síneann gach aicme forghníomhaitheora
+`BaseExecutor` (`base.ts`), go díreach nó trí `DefaultExecutor` nó forghníomhaitheoir eile;
+is cúntóirí in aghaidh an tsoláthraí iad na modúil eile (scéimeanna uirlisí, cuibheoirí
+fetch/TTS, láimhseálaithe corr-iompair). Áirítear ar na forghníomhaitheoirí:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, chomh maith le
-`claudeIdentity.ts` (cúntóir aitheantais comhroinnte) agus `index.ts` (clárlann).
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, chomh maith le `claudeIdentity.ts`
+(cúntóir aitheantais comhroinnte) agus `index.ts` (clárlann).
 
-> Nóta: freastalaíonn `default.ts` ar sholáthraithe nach bhfuil liostaithe anseo, ag baint
-> úsáide as an bhforghníomhaitheoir cineálach atá comhoiriúnach le OpenAI. Tá catalóg
-> iomlán na soláthraithe (380 soláthraí) in
-> `src/shared/constants/providers.ts`.
+> Nóta: freastalaíonn `default.ts` ar sholáthraithe nach bhfuil liostaithe anseo agus úsáideann sé
+> an forghníomhaitheoir cineálach atá comhoiriúnach le OpenAI. Tá catalóg iomlán na soláthraithe
+> (381 soláthraí) in `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Aistriú mol-agus-labhraí (is é OpenAI an mol).
+Aistriú mol-agus-spóca (is é OpenAI an mol).
 
 - **9 n-aistritheoir iarratas** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 n-aistritheoir freagartha** (`translator/response/`):
+- **9 n-aistritheoir freagra** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
 - **9 gcúntóir** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, chomh maith
-  le tástálacha cúntóirí.
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, chomh maith le
+  tástálacha cúntóirí.
 - **Cúntóirí íomhánna** (`translator/image/sizeMapper.ts`).
-- Ar an leibhéal barr: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- Ardleibhéal: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — tiontaire bunaithe ar `TransformStream` idir Responses API agus Chat
-  Completions (a úsáideann an catch-all don ród `responses/`).
+- `responsesTransformer.ts` — Tiontaire idir Responses API agus Chat
+  Completions atá bunaithe ar `TransformStream` (a úsáideann an bealach catch-all
+  `responses/`).
 
 ### 4.5 `open-sse/services/`
 
 Buaicphointí (tá an liosta iomlán faoi `open-sse/services/`):
 
-| Imní                 | Comhaid                                                                                                                                                                                                                                                  |
+| Ábhar                | Comhaid                                                                                                                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ródú teaglama        | `combo.ts` (20 straitéis), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
+| Ródú teaglamaí       | `combo.ts` (20 straitéis), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
 | Inneall Auto Combo   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Athléimneacht        | `accountFallback.ts` (fuarchosán + glasáil), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                       |
+| Athléimneacht        | `accountFallback.ts` (tréimhse fhuaraithe + glasáil), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                              |
 | Cuótaí               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Taisceadh            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Taisce               | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Faisnéis ródaithe    | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Láimhseáil samhlacha | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | Comhbhrú             | `compression/` — sreangú iomlán an innill chomhbhrúite                                                                                                                                                                                                   |
@@ -554,17 +552,17 @@ Buaicphointí (tá an liosta iomlán faoi `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 uirlis uathúla** sreangaithe in `server.ts` (45 uirlis chanónacha in `schemas/tools.ts` +
-  modúil chuimhne, scileanna, scileanna GitHub, linne, cearrbhachais, breiseán, Notion, Obsidian,
-  corpas áitiúil agus comhbhrú — an t-aontas á chomhaireamh ag `countUniqueMcpTools`).
+- **110 uirlis uathúla** sreangaithe i `server.ts` (45 cinn chanónacha in `schemas/tools.ts` +
+  modúil memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus agus compression — á gcomhaireamh mar aontas le `countUniqueMcpTools`).
 - **3 iompar**: stdio, HTTP Streamable, SSE.
-- **33 scóip** á bhforfheidhmiú ag am rite — an bhunliosta in `src/shared/constants/mcpScopes.ts`, agus is éard atá sa tacar iomlán ná aontas na scóipeanna a dhearbhaíonn gach modúl uirlise.
+- **33 raon feidhme** curtha i bhfeidhm ag am rite — an bhunliosta in `src/shared/constants/mcpScopes.ts`, agus is éard atá sa tacar iomlán aontas na raonta feidhme a dhearbhaíonn gach modúl uirlisí.
 - Tábla iniúchta: `mcp_tool_audit` (líonta ag `audit.ts`).
 - Comhaid: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   chomh maith le tástálacha faoi `__tests__/`.
-- Féach ar [MCP-SERVER.md](../frameworks/MCP-SERVER.md) don chatalóg iomlán uirlisí.
+- Féach ar [MCP-SERVER.md](../frameworks/MCP-SERVER.md) le haghaidh chatalóg iomlán na n-uirlisí.
 
 ### 4.7 `open-sse/config/`
 
@@ -575,14 +573,14 @@ Clárlanna soláthraithe (`providerRegistry.ts`, `providerModels.ts`,
 cúntóirí aitheantais (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-cúntóirí dintiúr (`credentialLoader.ts`, `codexClient.ts`), agus cuibheoirí néil
-(`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+cúntóirí dintiúr (`credentialLoader.ts`, `codexClient.ts`), agus oiriúnóirí
+néil (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Primitives sruthaithe agus cúntóirí soláthraithe: `stream.ts`, `streamHandler.ts`,
+Primitíbí sruthaithe agus cúntóirí soláthraithe: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,

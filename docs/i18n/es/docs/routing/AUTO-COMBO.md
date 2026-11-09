@@ -127,6 +127,27 @@ La puntuación automática selecciona el mejor proveedor/modelo para cada solici
 | `src/sse/handlers/chat.ts`                                | Integración: atajo para el prefijo automático                      |
 | `src/shared/constants/providers.ts`                       | Entrada del sistema `SYSTEM_PROVIDERS.auto`                        |
 
+## Preferencias de cuenta para combos automáticos guardados
+
+El editor automático inteligente ofrece una opción** Preferencias de cuenta** sección. Cada conexión puede ser Preferida, Normal (la predeterminada), Reserva o Excluida. Varias conexiones pueden compartir un nivel. Selecciona automáticamente dentro del primer nivel elegible y conserva su comportamiento scoring/router allí; Los intentos fallidos pasan a las cuentas concretas restantes, preferidas antes que lo normal antes que la reserva. Este combo nunca utiliza conexiones excluidas.
+
+La configuración se almacena como `config.accountPreferences`, codificada por la conexión ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Un mapa omitido o vacío conserva la ruta existente. Las preferencias no habilitan conexiones deshabilitadas, no otorgan acceso a claves API, restauran candidatos bloqueados por cuotas ni eluden verificaciones presupuestarias. Cada intento está restringido a su conexión concreta, por lo que la cuenta alternativa no puede saltar niveles detrás del enrutador combinado. La afinidad de sesión existente puede conservar una cuenta elegible; excluir la cuenta vinculada a un turno nativo detiene ese turno en lugar de cambiar de cuenta silenciosamente.
+
+Las preferencias configuradas utilizan la ruta automática con reconocimiento de cuenta: los accesos directos de caché de contexto independiente, canalización inteligente, caos y sombra no se distribuyen. La cobertura especulativa está deshabilitada para estas solicitudes, por lo que las cuentas de reserva no pueden competir con las preferidas. Otras estrategias combinadas no interpretan esta configuración. Cambiar un combo fuera de Auto mantiene las preferencias guardadas para un cambio posterior.
+
 ## Nombres de combos que coinciden con un ID de modelo real
 
 Un combo cuyo `name` es idéntico a un ID de modelo sin prefijo (p. ej., un combo llamado
