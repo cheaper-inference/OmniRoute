@@ -10,7 +10,7 @@ lastUpdated: 2026-11-09
 > Regenerate with: `npm run gen:provider-reference`
 > **Last generated:** 2026-11-09
 
-Total providers: **383**. See category breakdown below.
+Total providers: **384**. See category breakdown below.
 
 ## Categories
 
@@ -124,7 +124,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (257)
+## API Key Providers (paid / paid-with-free-credits) (258)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
