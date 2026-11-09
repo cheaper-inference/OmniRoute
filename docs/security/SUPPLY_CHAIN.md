@@ -37,13 +37,12 @@ When osv or Trivy go red due to a newly disclosed CVE, the remedy is:
 
 1. **Bump the affected dep** (preferred) — upgrade to the patched version via `package.json`
    `overrides` (transitive deps) or rebuild the image on a patched base.
-2. **If there is no upstream fix:**
-   - **osv:** re-baseline `metrics.vulnCount` in `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` does not cover dedicated gates — edit the value by
-     hand, `direction:down`) with a justification note + tracking issue.
-   - **Trivy:** add an entry in `.trivyignore` (CVE-ID per line) with a justification
-     comment + tracking issue. `ignore-unfixed: true` already covers CVEs without
-     patches automatically.
+2. **If a remediation is unavailable:** retain the measured finding and track the
+   affected dependency or image. Do not raise the vulnerability baseline to make a
+   failing candidate pass. Trivy's `ignore-unfixed: true` already excludes image
+   vulnerabilities without an upstream patch. Any exception requires a reviewed
+   vulnerability ID, exact package path, expiry and tracking issue in the policy;
+   it is not an automatic consequence of a failed scan.
 
 Required OSV executions (`check:vuln-ratchet -- --ratchet`) fail closed with
 `INCOMPLETE` and exit 2 when the scanner, report or baseline cannot be validated.
@@ -51,6 +50,19 @@ A measured regression exits 1. Advisory execution can still report `SKIP` with
 exit 0, which does not establish that dependencies passed the scan. The blocking
 Trivy step also requires a successful measurement: unavailable tools, failed jobs
 and missing image evidence cannot certify an image as clean.
+
+## Image scan policy
+
+The current `.trivyignore.yaml` contains no vulnerability exceptions.
+`npm run check:trivy-ignore-policy` validates the structured policy in local scan
+profiles, CI and Quality. Unknown IDs, broader paths, duplicate entries and expired
+exceptions are rejected; the legacy `.trivyignore` is not an input to the migrated scans.
+
+Docker checks out policy tooling from `github.workflow_sha` and the image source
+policy with the same source selector as the build. The policy selector rejects
+incompatible scopes and prepares one file for both Trivy scans. A historical source
+without a structured policy receives no exceptions. Both scans pin Trivy `v0.70.0`.
+Policy validation proves configuration consistency; the image still needs a successful scan.
 
 ## Retired dependency risk
 

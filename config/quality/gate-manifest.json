@@ -802,6 +802,11 @@
       "name": "check:ui-kit-upstream",
       "command": "node scripts/check/check-ui-kit-upstream.mjs",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:trivy-ignore-policy",
+      "command": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {
@@ -832,7 +837,8 @@
         "check:test-masking",
         "check:duplication",
         "check:cycles:ratchet",
-        "check:boundary:ratchet"
+        "check:boundary:ratchet",
+        "check:trivy-ignore-policy"
       ]
     },
     "quality-scan-fast": {
@@ -859,7 +865,8 @@
         "check:route-guard-membership",
         "check:test-discovery",
         "check:test-tla-order",
-        "check:test-masking"
+        "check:test-masking",
+        "check:trivy-ignore-policy"
       ]
     }
   }

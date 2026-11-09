@@ -30,13 +30,7 @@ Mgbe osv ma ọ bụ Trivy ghọrọ uhie n’ihi CVE ekpughere ọhụrụ, ihe
 
 1. **Bulie ụdị ndabere emetụtara** (nke ka mma) — kwalite gaa na ụdị e doziri site na `package.json`
    `overrides` (ndabere transitive) ma ọ bụ wughachi image ahụ n’elu base e doziri.
-2. **Ọ bụrụ na enweghị ndozi sitere upstream:**
-   - **osv:** hazie ntọala mbụ `metrics.vulnCount` ọzọ n’ime `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` anaghị ekpuchi ọnụ ụzọ pụrụ iche — jiri aka dezie uru ahụ,
-     `direction:down`) tinyere ndetu ihe kpatara ya + tracking issue.
-   - **Trivy:** tinye ntinye n’ime `.trivyignore` (CVE-ID otu n’ahịrị ọ bụla) tinyere comment
-     na-akọwa ihe kpatara ya + tracking issue. `ignore-unfixed: true` ekpuchilarị CVE ndị na-enweghị
-     patches na-akpaghị aka.
+2. **Ọ bụrụ na mmezi adịghị:** jigide nchoputa a tụrụ wee soro ndabere ma ọ bụ onyonyo emetụtara. Ewelitela usoro adịghị ike iji mee ka onye ndoro-ndoro ochichi dara ada gafere. Trivy's `ignore-unfixed: true` ewepụlarị adịghị ike onyonyo na-enweghị patch dị elu. Ewepụghị ihe ọ bụla chọrọ elele ID adịghị ike , ụzọ ngwugwu kpọmkwem, njedebe na nsochi okwu na amụma; ọ bụghị akpaghị aka nsonaazụ nyocha dara ada.
 
 Mmezu OSV ndị a chọrọ (`check:vuln-ratchet -- --ratchet`) na-emechi ma daa site na
 `INCOMPLETE` na exit 2 mgbe enweghị ike ịkwado scanner, report, ma ọ bụ baseline.
@@ -44,6 +38,12 @@ Ndaghachi azụ a tụrụ na-eji exit 1. Mmezu advisory ka nwere ike ịkọ `S
 exit 0, nke na-adịghị egosi na ndabere gafere scan ahụ. Nzọụkwụ Trivy na-egbochi
 chọkwara nha gara nke ọma: tools ndị adịghị, jobs dara ada, na enweghị ihe akaebe image
 enweghị ike ikwenye na image ahụ dị ọcha.
+
+## Iwu nyocha onyonyo
+
+`.trivyignore.yaml` dị ugbu a enweghị ihe ewepụrụ adịghị ike. `npm run check:trivy-ignore-policy` kwadoro amụma ahaziri na profaịlụ nyocha mpaghara, CI na Ogo. IDs amaghi ama, ụzọ sara mbara, ndenye oyiri na ewepu mebie ajụ; ihe nketa `.trivyignore` abụghị ntinye na nyocha ndị akwagara.
+
+Docker na-enyocha ngwá ọrụ amụma site na `github.workflow_sha` yana amụma isi mmalite ihe oyiyi yana otu onye na-ahọrọ isi mmalite dị ka ihe nrụpụta. Onye na-ahọpụta amụma jụrụ obosara na-adakọghị ma na-akwado otu faịlụ maka nyocha Trivy abụọ ahụ. Isi mmalite akụkọ ihe mere eme na-enweghị amụma ahaziri ahazi anaghị enweta ihe ọ bụla. Abụọ nyochara pin Trivy `v0.70.0`. Nkwenye iwu kwadoro nhazi nhazi; onyonyo ka chọrọ nyocha nke ọma.
 
 ## Ihe egwu ndabere ezumike nka
 

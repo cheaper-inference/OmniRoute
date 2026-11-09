@@ -333,7 +333,8 @@
     "gen:icon-map": "node scripts/dev/gen-icon-map.mjs",
     "docs:sync-counts": "node --import tsx/esm scripts/docs/sync-counts.mjs",
     "docs:readme-hero": "node --import tsx/esm scripts/docs/gen-readme-hero.mjs",
-    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs"
+    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs",
+    "check:trivy-ignore-policy": "node scripts/check/check-trivy-ignore-policy.mjs .trivyignore.yaml"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",

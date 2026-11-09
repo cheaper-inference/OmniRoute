@@ -35,13 +35,7 @@ Wenn osv oder Trivy aufgrund einer neu veröffentlichten CVE fehlschlagen, ist w
 
 1. **Betroffene Abhängigkeit aktualisieren** (bevorzugt) — Upgrade auf die gepatchte Version über
    `overrides` in `package.json` (transitive Abhängigkeiten) oder Neuerstellung des Images auf einer gepatchten Basis.
-2. **Wenn es keinen Upstream-Fix gibt:**
-   - **osv:** `metrics.vulnCount` in `config/quality/quality-baseline.json` neu als Baseline festlegen
-     (`npm run quality:ratchet -- --update` deckt dedizierte Prüfungen nicht ab — den Wert
-     manuell mit `direction:down` bearbeiten), einschließlich Begründung und Tracking-Issue.
-   - **Trivy:** Einen Eintrag in `.trivyignore` hinzufügen (eine CVE-ID pro Zeile), einschließlich eines
-     Begründungskommentars und eines Tracking-Issues. `ignore-unfixed: true` deckt CVEs ohne
-     Patches bereits automatisch ab.
+2. **Wenn keine Abhilfe möglich ist:** Behalten Sie den gemessenen Befund bei und verfolgen Sie die betroffene Abhängigkeit oder das betroffene Bild. Erhöhen Sie nicht die Schwachstellen-Basislinie, damit ein fehlgeschlagener Kandidat besteht. Trivys `ignore-unfixed: true` schließt Image-Schwachstellen bereits ohne einen Upstream-Patch aus. Jede Ausnahme erfordert eine überprüfte Schwachstelle ID, einen genauen Paketpfad, einen Ablauf und ein Tracking-Problem in der Richtlinie. Dies ist keine automatische Folge eines fehlgeschlagenen Scans.
 
 Erforderliche OSV-Ausführungen (`check:vuln-ratchet -- --ratchet`) schlagen nach dem Fail-Closed-Prinzip mit
 `INCOMPLETE` und Exit-Code 2 fehl, wenn Scanner, Bericht oder Baseline nicht validiert werden können.
@@ -49,6 +43,12 @@ Eine gemessene Regression führt zu Exit-Code 1. Eine beratende Ausführung kann
 Exit-Code 0 melden; dies weist jedoch nicht nach, dass die Abhängigkeiten den Scan bestanden haben. Auch der blockierende
 Trivy-Schritt erfordert eine erfolgreiche Messung: Nicht verfügbare Tools, fehlgeschlagene Jobs
 und fehlende Image-Nachweise können nicht bestätigen, dass ein Image frei von Schwachstellen ist.
+
+## Richtlinie zum Scannen von Bildern
+
+Die aktuelle `.trivyignore.yaml` enthält keine Schwachstellenausnahmen. `npm run check:trivy-ignore-policy` validiert die strukturierte Richtlinie in lokalen Scanprofilen, CI und Qualität. Unbekannte IDs, breitere Pfade, doppelte Einträge und abgelaufene Ausnahmen werden abgelehnt; Das alte `.trivyignore` ist keine Eingabe für die migrierten Scans.
+
+Docker prüft die Richtlinientools von `github.workflow_sha` und die Bildquellenrichtlinie mit demselben Quellenselektor wie der Build. Der Richtlinienselektor lehnt inkompatible Bereiche ab und bereitet eine Datei für beide Trivy-Scans vor. Eine historische Quelle ohne strukturierte Richtlinie erhält keine Ausnahmen. Both scans pin Trivy `v0.70.0`. Die Richtlinienvalidierung beweist die Konfigurationskonsistenz. the image still needs a successful scan.
 
 ## Abhängigkeitsrisiko im Ruhestand
 

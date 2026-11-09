@@ -25,11 +25,15 @@ osv və Trivy asılılıqları **davamlı olaraq genişlənən** CVE verilənlə
 Yeni açıqlanmış CVE səbəbindən osv və ya Trivy uğursuz olduqda həll yolu belədir:
 
 1. **Təsirə məruz qalan asılılığın versiyasını artırın** (üstünlük verilən variant) — `package.json` faylındakı `overrides` vasitəsilə düzəliş edilmiş versiyaya yüksəldin (tranzitiv asılılıqlar üçün) və ya obrazı düzəliş edilmiş baza əsasında yenidən yaradın.
-2. **Əgər yuxarı axında düzəliş yoxdursa:**
-   - **osv:** `config/quality/quality-baseline.json` faylındakı `metrics.vulnCount` üçün ilkin göstəricini yenidən təyin edin (`npm run quality:ratchet -- --update` xüsusi keçidləri əhatə etmir — əsaslandırma qeydi və izləmə məsələsi əlavə edərək dəyəri əl ilə redaktə edin, `direction:down`).
-   - **Trivy:** `.trivyignore` faylına əsaslandırma şərhi və izləmə məsələsi ilə birlikdə qeyd əlavə edin (hər sətirdə bir CVE-ID). `ignore-unfixed: true` artıq yamağı olmayan CVE-ləri avtomatik olaraq əhatə edir.
+2. **Əgər təmir mümkün deyilsə:** ölçülmüş tapıntını saxlamaq və təsirə məruz qalan asılılığı və ya təsviri izləmək. Uğursuz namizədin keçidini təmin etmək üçün zəifliyin baza səviyyəsini yüksəltməyin. Trivy's `ignore-unfixed: true` artıq yuxarı yama olmadan görüntü zəifliklərini istisna edir. İstənilən istisna nəzərdən keçirilmiş zəiflik ID, dəqiq paket yolu, istifadə müddəti və siyasətdə izləmə problemi tələb edir; uğursuz taramanın avtomatik nəticəsi deyil.
 
 Tələb olunan OSV icraları (`check:vuln-ratchet -- --ratchet`) skaner, hesabat və ya ilkin göstərici doğrulana bilmədikdə `INCOMPLETE` statusu və 2 çıxış kodu ilə qapalı şəkildə uğursuz olur. Ölçülmüş reqressiya 1 çıxış kodu ilə nəticələnir. Məsləhət xarakterli icra yenə də 0 çıxış kodu ilə `SKIP` bildirə bilər, lakin bu, asılılıqların skandan uğurla keçdiyini təsdiqləmir. Bloklayıcı Trivy addımı da uğurlu ölçmə tələb edir: əlçatan olmayan alətlər, uğursuz tapşırıqlar və çatışmayan obraz sübutları obrazın təmiz olduğunu təsdiqləyə bilməz.
+
+## Şəkil skan siyasəti
+
+Cari `.trivyignore.yaml` zəiflik istisnalarını ehtiva etmir. `npm run check:trivy-ignore-policy` yerli skan profillərində, CI və Keyfiyyətdə strukturlaşdırılmış siyasəti təsdiqləyir. Naməlum IDs, daha geniş yollar, dublikat girişlər və vaxtı keçmiş istisnalar rədd edilir; köhnə `.trivyignore` köçürülmüş skanlara giriş deyil.
+
+Docker `github.workflow_sha` -dən siyasət alətlərini və quruluşla eyni mənbə seçicisi ilə şəkil mənbəyi siyasətini yoxlayır. Siyasət seçicisi uyğun olmayan əhatə dairələrini rədd edir və hər iki Trivy skanı üçün bir fayl hazırlayır. Strukturlaşdırılmış siyasəti olmayan tarixi mənbə heç bir istisna qəbul etmir. Hər iki skan Trivy `v0.70.0` ni bağlayır. Siyasət doğrulaması konfiqurasiyanın ardıcıllığını sübut edir; şəkil hələ də uğurlu skan tələb edir.
 
 ## Təqaüdə çıxmış asılılıq riski
 

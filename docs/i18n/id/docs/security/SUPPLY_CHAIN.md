@@ -30,13 +30,7 @@ Ketika osv atau Trivy menjadi merah akibat CVE yang baru diungkapkan, solusinya 
 
 1. **Naikkan versi dependensi yang terdampak** (lebih disarankan) — lakukan upgrade ke versi yang telah ditambal melalui `package.json`
    `overrides` (dependensi transitif) atau build ulang image menggunakan base yang telah ditambal.
-2. **Jika belum ada perbaikan dari upstream:**
-   - **osv:** tetapkan ulang baseline `metrics.vulnCount` dalam `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` tidak mencakup gate khusus — edit nilainya secara
-     manual, `direction:down`) dengan catatan justifikasi + issue pelacakan.
-   - **Trivy:** tambahkan entri dalam `.trivyignore` (CVE-ID per baris) dengan komentar
-     justifikasi + issue pelacakan. `ignore-unfixed: true` sudah secara otomatis mencakup CVE tanpa
-     patch.
+2. **Jika remediasi tidak tersedia:** menyimpan temuan terukur dan melacak ketergantungan atau gambar yang terpengaruh. Jangan menaikkan garis dasar kerentanan untuk membuat kandidat yang gagal lolos. `ignore-unfixed: true` Trivy sudah mengecualikan kerentanan gambar tanpa patch upstream. Pengecualian apa pun memerlukan peninjauan kerentanan ID, jalur paket yang tepat, masa berlaku dan masalah pelacakan dalam kebijakan; ini bukan akibat otomatis dari pemindaian yang gagal.
 
 Eksekusi OSV yang diwajibkan (`check:vuln-ratchet -- --ratchet`) akan gagal secara tertutup dengan
 `INCOMPLETE` dan kode keluar 2 ketika pemindai, laporan, atau baseline tidak dapat divalidasi.
@@ -44,6 +38,12 @@ Regresi yang terukur menghasilkan kode keluar 1. Eksekusi advisori masih dapat m
 kode keluar 0, yang tidak membuktikan bahwa dependensi telah lolos pemindaian. Langkah Trivy yang
 memblokir juga memerlukan pengukuran yang berhasil: alat yang tidak tersedia, pekerjaan yang gagal,
 dan bukti image yang tidak ada tidak dapat menyatakan bahwa image tersebut bersih.
+
+## Kebijakan pemindaian gambar
+
+`.trivyignore.yaml` saat ini tidak mengandung pengecualian kerentanan. `npm run check:trivy-ignore-policy` memvalidasi kebijakan terstruktur dalam profil pemindaian lokal, CI, dan Kualitas. IDs yang tidak diketahui, jalur yang lebih luas, entri duplikat, dan pengecualian yang kedaluwarsa ditolak; `.trivyignore` lama bukan merupakan masukan untuk pemindaian yang dimigrasi.
+
+Docker memeriksa perkakas kebijakan dari `github.workflow_sha` dan kebijakan sumber gambar dengan pemilih sumber yang sama dengan build. Pemilih kebijakan menolak cakupan yang tidak kompatibel dan menyiapkan satu file untuk kedua pemindaian Trivy. Sumber sejarah tanpa kebijakan terstruktur tidak terkecuali. Kedua pemindaian menyematkan Trivy `v0.70.0`. Validasi kebijakan membuktikan konsistensi konfigurasi; gambar masih memerlukan pemindaian yang berhasil.
 
 ## Risiko ketergantungan pensiunan
 

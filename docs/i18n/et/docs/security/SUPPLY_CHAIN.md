@@ -30,13 +30,7 @@ Kui osv või Trivy muutub äsja avalikustatud CVE tõttu punaseks, tuleb teha j�
 
 1. **Uuenda mõjutatud sõltuvust** (eelistatud) — võta parandatud versioon kasutusele faili `package.json`
    jaotise `overrides` kaudu (transitiivsed sõltuvused) või loo tõmmis uuesti parandatud baastõmmise põhjal.
-2. **Kui ülesvoolus pole parandust:**
-   - **osv:** määra failis `config/quality/quality-baseline.json` väärtusele `metrics.vulnCount` uus lähtetase
-     (`npm run quality:ratchet -- --update` ei hõlma eraldiseisvaid kontrolle — muuda väärtust
-     käsitsi, `direction:down`) ning lisa põhjendus ja jälgimisülesanne.
-   - **Trivy:** lisa faili `.trivyignore` kirje (üks CVE-ID rea kohta) koos põhjendava
-     kommentaari ja jälgimisülesandega. `ignore-unfixed: true` hõlmab juba automaatselt
-     parandusteta CVE-sid.
+2. **Kui parandus pole saadaval:** säilitada mõõdetud leid ja jälgida mõjutatud sõltuvust või kujutist. Ebaõnnestunud kandidaadi sooritamiseks ärge tõstke haavatavuse algtaset. Trivy `ignore-unfixed: true` välistab juba pildi haavatavused ilma ülesvoolu paigata. Iga erand nõuab eeskirjades läbivaadatud haavatavust ID, täpset paketi teed, aegumist ja jälgimisprobleemi; see ei ole ebaõnnestunud skannimise automaatne tagajärg.
 
 Nõutavad OSV käivitused (`check:vuln-ratchet -- --ratchet`) nurjuvad turvaliselt
 olekuga `INCOMPLETE` ja väljumiskoodiga 2, kui skannerit, aruannet või lähtetaset ei saa valideerida.
@@ -44,6 +38,12 @@ Mõõdetud regressiooni korral on väljumiskood 1. Nõuandev käivitus võib end
 ja lõppeda väljumiskoodiga 0, kuid see ei kinnita, et sõltuvused läbisid skannimise. Blokeeriv
 Trivy etapp nõuab samuti edukat mõõtmist: kättesaamatud tööriistad, nurjunud tööd
 ja puuduvad tõmmise tõendid ei võimalda tõendada, et tõmmis on puhas.
+
+## Pildi skannimise poliitika
+
+Praegune `.trivyignore.yaml` ei sisalda haavatavuse erandeid. `npm run check:trivy-ignore-policy` kinnitab struktureeritud poliitikat kohalikes skannimisprofiilides, CI ja kvaliteedis. Tundmatu IDs, laiemad teed, korduvad kirjed ja aegunud erandid lükatakse tagasi; pärand `.trivyignore` ei ole migreeritud skannimiste sisend.
+
+Docker kontrollib `github.workflow_sha` poliitikatööriistu ja pildiallika poliitikat sama allika valijaga nagu järg. Reeglivalija lükkab kokku sobimatud ulatused ja valmistab ette ühe faili mõlema Trivy-skannimise jaoks. Ajalooallikale, millel pole struktureeritud poliitikat, ei tehta erandeid. Mõlemad skannivad kinnitavad Trivy `v0.70.0`. Poliitika valideerimine tõestab konfiguratsiooni järjepidevust; pilt vajab siiski edukat skannimist.
 
 ## Pensionile jäämise oht
 

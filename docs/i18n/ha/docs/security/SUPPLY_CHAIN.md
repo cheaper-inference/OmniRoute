@@ -37,13 +37,7 @@ Lokacin da osv ko Trivy suka koma ja saboda sabon CVE da aka bayyana, mafita ita
 
 1. **Ɗaga sigar dependency da abin ya shafa** (an fi so) — haɓaka zuwa sigar da aka gyara ta hanyar `package.json`
    `overrides` (dependencies na kaikaice) ko sake gina image ɗin bisa patched base.
-2. **Idan babu gyara daga upstream:**
-   - **osv:** sake saita baseline na `metrics.vulnCount` a cikin `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` ba ya rufe keɓaɓɓun ƙofofi — gyara ƙimar da
-     hannu, `direction:down`) tare da bayanin dalili + tracking issue.
-   - **Trivy:** ƙara entry a cikin `.trivyignore` (CVE-ID ɗaya a kowane layi) tare da comment na
-     dalili + tracking issue. `ignore-unfixed: true` tuni yana rufe CVEs marasa
-     patches kai tsaye.
+2. **Idan babu gyara:** riƙe binciken da aka auna kuma bi diddigin dogaro ko hoto da abin ya shafa. Kar a ɗaga tushen rashin lahani don sa ɗan takara ya gaza wucewa. Trivy's `ignore-unfixed: true` ya riga ya keɓance raunin hoto ba tare da facin sama ba. Duk wani banda yana buƙatar sake dubawa ID rauni, ainihin hanyar kunshin, ƙarewa da batun bin diddigi a cikin manufofin; ba sakamakon binciken da ya gaza ba ne ta atomatik.
 
 Aiwatarwar OSV da ake buƙata (`check:vuln-ratchet -- --ratchet`) tana gazawa a rufe tare da
 `INCOMPLETE` da exit 2 lokacin da ba za a iya tabbatar da ingancin scanner, report ko baseline ba.
@@ -51,6 +45,12 @@ Koma-bayan da aka auna yana bayar da exit 1. Aiwatarwar shawara har yanzu tana i
 exit 0, wanda ba ya tabbatar da cewa dependencies sun wuce scan ɗin. Matakin Trivy
 mai toshewa kuma yana buƙatar auna sakamako cikin nasara: tools da ba su samuwa, jobs da suka gaza
 da rashin shaidar image ba za su iya tabbatar da cewa image ɗin ba shi da matsala ba.
+
+## Manufar duba hoto
+
+`.trivyignore.yaml` na yanzu ba ya ƙunshi keɓanta rashin lahani. `npm run check:trivy-ignore-policy` yana tabbatar da ƙayyadaddun manufofin a cikin bayanan sikanin gida, CI da inganci. IDs da ba a sani ba, manyan hanyoyi, shigarwar kwafi da keɓantattun abubuwan da suka ƙare an ƙi; `.trivyignore` da aka gada ba ta shiga cikin binciken da aka yi hijira ba.
+
+Docker yana duba kayan aikin manufofin daga `github.workflow_sha` da manufar tushen hoto tare da mai zaɓin tushe iri ɗaya kamar ginin. Mai zaɓin manufofin ya ƙi iyawar da ba ta dace ba kuma yana shirya fayil ɗaya don duka binciken Trivy. Tushen tarihi ba tare da tsari mai tsari ba yana karɓar keɓantacce. Dukansu suna duban Trivy `v0.70.0`. Tabbatar da manufofin yana tabbatar da daidaiton tsari; hoton har yanzu yana buƙatar dubawa mai nasara.
 
 ## Hadarin dogaro mai ritaya
 

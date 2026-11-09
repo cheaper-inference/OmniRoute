@@ -37,13 +37,7 @@ När osv eller Trivy blir röda på grund av en nyligen offentliggjord CVE är �
 
 1. **Uppgradera det berörda beroendet** (föredras) — uppgradera till den korrigerade versionen via `package.json`
    `overrides` (transitiva beroenden) eller bygg om avbildningen med en korrigerad basavbildning.
-2. **Om det inte finns någon korrigering uppströms:**
-   - **osv:** uppdatera baslinjen för `metrics.vulnCount` i `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` omfattar inte dedikerade kontroller — redigera värdet
-     manuellt, `direction:down`) med en motiverande kommentar + ett spårningsärende.
-   - **Trivy:** lägg till en post i `.trivyignore` (CVE-ID per rad) med en motiverande
-     kommentar + ett spårningsärende. `ignore-unfixed: true` omfattar redan automatiskt CVE:er utan
-     korrigeringar.
+2. **Om en åtgärd inte är tillgänglig:** behålla det uppmätta fyndet och spåra det påverkade beroendet eller bilden. Höj inte sårbarhetens baslinje för att klara ett misslyckat kandidat. Trivys `ignore-unfixed: true` utesluter redan bildsårbarheter utan en uppströms patch. Alla undantag kräver en granskad sårbarhet ID, exakt paketsökväg, utgång och spårningsproblem i policyn; det är inte en automatisk konsekvens av en misslyckad skanning.
 
 Obligatoriska OSV-körningar (`check:vuln-ratchet -- --ratchet`) misslyckas på ett säkert sätt med
 `INCOMPLETE` och avslutningskod 2 när skannern, rapporten eller baslinjen inte kan valideras.
@@ -51,6 +45,12 @@ En uppmätt regression ger avslutningskod 1. En rådgivande körning kan fortfar
 avslutningskod 0, vilket inte fastställer att beroendena klarade skanningen. Det blockerande
 Trivy-steget kräver också en lyckad mätning: otillgängliga verktyg, misslyckade jobb
 och saknade belägg för avbildningen kan inte intyga att en avbildning är ren.
+
+## Policy för bildskanning
+
+Den nuvarande `.trivyignore.yaml` innehåller inga sårbarhetsundantag. `npm run check:trivy-ignore-policy` validerar den strukturerade policyn i lokala skanningsprofiler, CI och Quality. Okänd IDs, bredare sökvägar, dubbletter av poster och utgångna undantag avvisas; den äldre `.trivyignore` är inte en indata till de migrerade skanningarna.
+
+Docker checkar ut policyverktyg från `github.workflow_sha` och bildkällans policy med samma källväljare som builden. Policyväljaren avvisar inkompatibla omfattningar och förbereder en fil för båda Trivy-skanningarna. En historisk källa utan en strukturerad policy får inga undantag. Båda skanningarna stift Trivy `v0.70.0`. Policyvalidering bevisar konfigurationskonsistens; bilden behöver fortfarande en framgångsrik skanning.
 
 ## Pensionerad beroenderisk
 

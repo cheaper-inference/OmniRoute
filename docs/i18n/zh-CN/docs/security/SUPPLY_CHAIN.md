@@ -30,11 +30,15 @@ osv 和 Trivy 会将依赖项与**持续增长**的 CVE 数据库进行比较。
 当 osv 或 Trivy 因新披露的 CVE 而变红时，处理方法如下：
 
 1. **升级受影响的依赖项**（首选）— 通过 `package.json` 中的 `overrides`（传递依赖项）升级到已修补版本，或基于已修补的基础镜像重新构建镜像。
-2. **如果上游尚无修复：**
-   - **osv：**在 `config/quality/quality-baseline.json` 中重新设定 `metrics.vulnCount` 基线（`npm run quality:ratchet -- --update` 不涵盖专用门禁——请手动编辑该值，并设置 `direction:down`），同时附上理由说明和跟踪议题。
-   - **Trivy：**在 `.trivyignore` 中添加条目（每行一个 CVE-ID），并附上理由注释和跟踪议题。`ignore-unfixed: true` 已自动涵盖没有补丁的 CVE。
+2. **如果补救措施不可用：**保留测量结果并跟踪受影响的依赖性或图像。不要提高漏洞基线来让失败的候选者通过。 Trivy 的`ignore-unfixed: true`已经在没有上游补丁的情况下排除了图像漏洞。任何例外情况都需要在策略中审查漏洞ID、确切的包路径、过期和跟踪问题；这不是扫描失败的自动结果。
 
 必需的 OSV 执行（`check:vuln-ratchet -- --ratchet`）采用失败关闭策略：当无法验证扫描器、报告或基线时，将返回 `INCOMPLETE` 并以退出码 2 结束。检测到指标回归时以退出码 1 结束。建议性执行仍可能返回 `SKIP` 并以退出码 0 结束，但这并不能证明依赖项已通过扫描。阻断式 Trivy 步骤同样要求成功完成检测：工具不可用、作业失败以及缺少镜像证据时，都无法证明镜像是干净的。
+
+## 图像扫描政策
+
+目前的`.trivyignore.yaml`不包含任何漏洞例外。 `npm run check:trivy-ignore-policy`验证本地扫描配置文件、 CI和质量中的结构化策略。未知的IDs、更宽的路径、重复的条目和过期的例外都会被拒绝；旧版`.trivyignore`不是迁移扫描的输入。
+
+Docker使用与构建相同的源选择器检查来自`github.workflow_sha`策略工具和镜像源策略。策略选择器拒绝不兼容的范围，并为两次 Trivy 扫描准备一个文件。没有结构化政策的历史来源也不例外。两次扫描均固定 Trivy `v0.70.0`。策略验证证明配置一致性；图像仍需要成功扫描。
 
 ## 退休依赖风险
 

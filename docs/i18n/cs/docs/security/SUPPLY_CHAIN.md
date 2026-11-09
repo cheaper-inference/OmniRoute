@@ -30,13 +30,7 @@ Když osv nebo Trivy začnou selhávat kvůli nově zveřejněné CVE, postupujt
 
 1. **Aktualizujte dotčenou závislost** (preferováno) — upgradujte na opravenou verzi prostřednictvím
    `overrides` v `package.json` (tranzitivní závislosti) nebo znovu sestavte obraz nad opraveným základním obrazem.
-2. **Pokud upstream oprava neexistuje:**
-   - **osv:** znovu nastavte výchozí hodnotu `metrics.vulnCount` v `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` se na vyhrazené kontroly nevztahuje — upravte hodnotu
-     ručně, `direction:down`) a přidejte zdůvodnění + odkaz na sledovací issue.
-   - **Trivy:** přidejte záznam do `.trivyignore` (jedno CVE-ID na řádek) se zdůvodňujícím
-     komentářem + odkazem na sledovací issue. Nastavení `ignore-unfixed: true` již automaticky pokrývá CVE
-     bez dostupných oprav.
+2. **Pokud náprava není k dispozici:** uchovejte naměřený nález a sledujte ovlivněnou závislost nebo obraz. Nezvyšujte základní linii zranitelnosti, aby neúspěšný kandidát prošel. Trivy's `ignore-unfixed: true` již vylučuje zranitelnost obrazu bez upstream patche. Jakákoli výjimka vyžaduje zkontrolovanou zranitelnost ID, přesnou cestu k balíčku, expiraci a problém se sledováním v zásadách; není to automatický důsledek neúspěšného skenování.
 
 Povinná spuštění OSV (`check:vuln-ratchet -- --ratchet`) se při nemožnosti ověřit
 skener, report nebo výchozí hodnotu ukončí bezpečným selháním se stavem
@@ -44,6 +38,12 @@ skener, report nebo výchozí hodnotu ukončí bezpečným selháním se stavem
 s návratovým kódem 0, což nepotvrzuje, že závislosti kontrolou prošly. Blokující
 krok Trivy rovněž vyžaduje úspěšné měření: nedostupné nástroje, neúspěšné úlohy
 a chybějící důkazy o obrazu nemohou potvrdit, že obraz neobsahuje zranitelnosti.
+
+## Zásady skenování obrázků
+
+Aktuální `.trivyignore.yaml` neobsahuje žádné výjimky z chyb zabezpečení. `npm run check:trivy-ignore-policy` ověřuje strukturovanou politiku v lokálních skenovacích profilech, CI a Quality. Neznámé IDs, širší cesty, duplicitní záznamy a výjimky, jejichž platnost vypršela, jsou odmítnuty; starší verze `.trivyignore` není vstupem do migrovaných skenů.
+
+Docker kontroluje nástroje zásad ze `github.workflow_sha` a zásady zdroje obrázků se stejným selektorem zdroje jako sestavení. Selektor zásad odmítne nekompatibilní rozsahy a připraví jeden soubor pro obě kontroly Trivy. Historický zdroj bez strukturované politiky nedostává žádné výjimky. Oba skeny pin Trivy `v0.70.0`. Ověření zásad prokazuje konzistenci konfigurace; obrázek ještě potřebuje úspěšné skenování.
 
 ## Riziko závislosti v důchodu
 

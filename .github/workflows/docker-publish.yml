@@ -598,6 +598,43 @@ jobs:
           # Manifests, smoke test and scans read no git history.
           fetch-depth: 1
 
+      - name: Checkout reviewed Trivy policy tooling
+        if: needs.prepare.outputs.version != 'main'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .ci-trivy-policy
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.trivyignore.yaml
+            /scripts/check/check-trivy-ignore-policy.mjs
+            /scripts/ci/prepare-trivy-scan-policy.mjs
+
+      - name: Checkout image source policy
+        if: needs.prepare.outputs.version != 'main'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || github.sha }}
+          path: .ci-trivy-candidate
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.trivyignore.yaml
+
+      - name: Set up Node for Trivy policy validation
+        if: needs.prepare.outputs.version != 'main'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          package-manager-cache: false
+          node-version: "24.22.1"
+
+      - name: Prepare Trivy exception policy before scans
+        if: needs.prepare.outputs.version != 'main'
+        run: node .ci-trivy-policy/scripts/ci/prepare-trivy-scan-policy.mjs .ci-trivy-policy/.trivyignore.yaml .ci-trivy-candidate/.trivyignore.yaml .ci-trivy-policy/effective.trivyignore.yaml
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
@@ -881,20 +918,21 @@ jobs:
       # on a patched base or bumping the dep. Without it the advisory upload floods the
       # tab with unfixable base-image OS CVEs (Debian trixie packages with no upstream
       # patch yet, overwhelmingly local-only and not reachable from the proxy request
-      # surface), which is noise an operator cannot act on. trivyignores points at the
-      # repo-root .trivyignore so accepted-risk fixable CVEs have one auditable home.
+      # surface), which is noise an operator cannot act on. both scans consume the
+      # prepared policy; historical sources without a policy receive no exceptions.
       # See docs/security/SUPPLY_CHAIN.md.
       - name: Trivy image scan (SARIF, advisory)
         if: needs.prepare.outputs.version != 'main'
         continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: v0.70.0
           image-ref: ${{ env.GHCR_IMAGE_NAME }}:${{ env.VERSION }}
           format: sarif
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
           ignore-unfixed: true
-          trivyignores: .trivyignore
+          trivyignores: .ci-trivy-policy/effective.trivyignore.yaml
           exit-code: "0"
 
       # BLOCKING gate (v3.8.27 cycle-end): fail the release on a CRITICAL CVE in the
@@ -904,12 +942,13 @@ jobs:
       # a fixable CRITICAL still blocks. Per docs/security/SUPPLY_CHAIN.md. NB: Trivy
       # scans against a CVE DB that grows continuously — a newly-disclosed CRITICAL on
       # an unchanged base image can red this gate; the fix is to rebuild on a patched
-      # base, bump the dep, or add a justified .trivyignore entry (see the CVE-variance
+      # base, bump the dep, or review a scoped .trivyignore.yaml entry (see the CVE-variance
       # note in docs/security/SUPPLY_CHAIN.md).
       - name: Trivy CRITICAL gate (blocking)
         if: needs.prepare.outputs.version != 'main'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          version: v0.70.0
           image-ref: ${{ env.GHCR_IMAGE_NAME }}:${{ env.VERSION }}
           format: table
           severity: CRITICAL
@@ -917,7 +956,7 @@ jobs:
           exit-code: "1"
           # Explicit: the advisory scan above already points at it, and the blocking
           # gate must honour the same accepted-risk list (#12084).
-          trivyignores: .trivyignore
+          trivyignores: .ci-trivy-policy/effective.trivyignore.yaml
 
       - name: Upload Trivy SARIF to Security tab
         if: needs.prepare.outputs.version != 'main'

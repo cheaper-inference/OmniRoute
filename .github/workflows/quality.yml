@@ -249,6 +249,7 @@ jobs:
         run: |
           set -uo pipefail
           gates=(
+            trivy-ignore-policy
             provider-consistency provider-asset-provenance fetch-targets deps file-size error-helper
             migration-numbering public-creds db-rules known-symbols
             route-guard-membership test-discovery test-runner-api

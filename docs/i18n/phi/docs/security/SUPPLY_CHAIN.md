@@ -26,11 +26,15 @@ Inihahambing ng osv at Trivy ang mga dependency sa mga database ng CVE na **patu
 Kapag pumalya ang osv o Trivy dahil sa isang bagong isiniwalat na CVE, ang solusyon ay:
 
 1. **I-update ang apektadong dependency** (inirerekomenda) — mag-upgrade sa na-patch na bersyon sa pamamagitan ng `package.json` `overrides` (mga transitive dependency) o muling buuin ang image gamit ang na-patch na base.
-2. **Kung walang upstream na pag-aayos:**
-   - **osv:** muling itakda ang baseline ng `metrics.vulnCount` sa `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ay hindi sumasaklaw sa mga nakalaang gate — manu-manong i-edit ang value, `direction:down`) kasama ang tala ng katwiran + tracking issue.
-   - **Trivy:** magdagdag ng entry sa `.trivyignore` (isang CVE-ID bawat linya) kasama ang komentong nagpapaliwanag ng katwiran + tracking issue. Awtomatikong sinasaklaw na ng `ignore-unfixed: true` ang mga CVE na walang mga patch.
+2. **Kung hindi available ang remediation:** panatilihin ang sinusukat na paghahanap at subaybayan ang apektadong dependency o imahe. Huwag itaas ang baseline ng kahinaan upang maipasa ang isang nabigong kandidato. Ibinubukod na ng `ignore-unfixed: true` ng Trivy ang mga kahinaan sa larawan nang walang upstream na patch. Ang anumang pagbubukod ay nangangailangan ng nasuri na kahinaan ID, eksaktong landas ng package, isyu sa pag-expire at pagsubaybay sa patakaran; ito ay hindi isang awtomatikong kahihinatnan ng isang nabigong pag-scan.
 
 Ang mga kinakailangang pagpapatakbo ng OSV (`check:vuln-ratchet -- --ratchet`) ay pumapalya nang sarado gamit ang `INCOMPLETE` at exit 2 kapag hindi ma-validate ang scanner, ulat, o baseline. Ang nasukat na regression ay nagbabalik ng exit 1. Maaari pa ring mag-ulat ang advisory na pagpapatakbo ng `SKIP` na may exit 0, ngunit hindi nito pinatutunayang nakapasa ang mga dependency sa pag-scan. Nangangailangan din ang humaharang na hakbang ng Trivy ng matagumpay na pagsukat: hindi mapatutunayang malinis ang isang image kapag hindi available ang mga tool, pumalya ang mga job, o nawawala ang ebidensya ng image.
+
+## Patakaran sa pag-scan ng larawan
+
+Ang kasalukuyang `.trivyignore.yaml` ay walang mga pagbubukod sa kahinaan. Pinapatunayan ng `npm run check:trivy-ignore-policy` ang nakabalangkas na patakaran sa mga lokal na profile ng pag-scan, CI at Kalidad. Hindi kilalang IDs, mas malawak na mga landas, mga duplicate na entry at mga nag-expire na exception ay tinatanggihan; ang legacy `.trivyignore` ay hindi isang input sa mga inilipat na pag-scan.
+
+Tinitingnan Docker ang policy tooling mula sa `github.workflow_sha` at ang patakaran sa source ng imahe na may parehong source selector bilang build. Tinatanggihan ng tagapili ng patakaran ang mga hindi tugmang saklaw at naghahanda ng isang file para sa parehong pag-scan ng Trivy. Ang isang makasaysayang mapagkukunan na walang nakabalangkas na patakaran ay hindi tumatanggap ng mga pagbubukod. Parehong pag-scan ang pin Trivy `v0.70.0`. Ang pagpapatunay ng patakaran ay nagpapatunay ng pagkakapare-pareho ng pagsasaayos; ang imahe ay nangangailangan pa rin ng matagumpay na pag-scan.
 
 ## Panganib sa retiradong dependency
 

@@ -30,13 +30,7 @@ Meta osv jew Trivy isiru ħomor minħabba CVE li jkun għadu kif ġie żvelat, i
 
 1. **Aġġorna d-dipendenza affettwata** (preferut) — aġġorna għall-verżjoni kkoreġuta permezz ta’
    `overrides` f’`package.json` (għad-dipendenzi tranżittivi) jew erġa’ ibni l-immaġni fuq bażi kkoreġuta.
-2. **Jekk ma jkun hemm l-ebda soluzzjoni upstream:**
-   - **osv:** stabbilixxi mill-ġdid il-linja bażi ta’ `metrics.vulnCount` f’`config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` ma jkoprix il-kontrolli ddedikati — editja l-valur
-     manwalment, `direction:down`) b’nota ta’ ġustifikazzjoni + kwistjoni ta’ traċċar.
-   - **Trivy:** żid entrata f’`.trivyignore` (CVE-ID wieħed għal kull linja) b’kumment ta’
-     ġustifikazzjoni + kwistjoni ta’ traċċar. `ignore-unfixed: true` diġà jkopri awtomatikament
-     is-CVEs mingħajr soluzzjonijiet.
+2. **Jekk rimedju ma jkunx disponibbli:** iżomm is-sejba mkejla u ssegwi d-dipendenza jew l-immaġni affettwata. Tgħollix il-linja bażi tal-vulnerabbiltà biex tgħaddi kandidat li jonqos. Trivy's `ignore-unfixed: true` diġà teskludi vulnerabbiltajiet immaġini mingħajr garża upstream. Kwalunkwe eċċezzjoni teħtieġ vulnerabbiltà riveduta ID, mogħdija eżatta tal-pakkett, skadenza u kwistjoni ta 'traċċar fil-politika; mhijiex konsegwenza awtomatika ta' skan fallut.
 
 L-eżekuzzjonijiet OSV meħtieġa (`check:vuln-ratchet -- --ratchet`) ifallu b’mod magħluq bi
 `INCOMPLETE` u joħorġu b’2 meta l-iskaner, ir-rapport jew il-linja bażi ma jkunux jistgħu jiġu vvalidati.
@@ -44,6 +38,12 @@ Rigressjoni mkejla toħroġ b’1. Eżekuzzjoni konsultattiva xorta tista’ tir
 ħruġ 0, iżda dan ma jistabbilixxix li d-dipendenzi għaddew mill-iskannjar. Il-pass Trivy
 li jimblokka jeħtieġ ukoll kejl li jirnexxi: għodod mhux disponibbli, kompiti li fallew
 u evidenza nieqsa tal-immaġni ma jistgħux jiċċertifikaw immaġni bħala nadifa.
+
+## Politika tal-iskannjar tal-immaġni
+
+`.trivyignore.yaml` attwali ma fih l-ebda eċċezzjoni ta' vulnerabbiltà. `npm run check:trivy-ignore-policy` jivvalida l-politika strutturata fil-profili tal-iskannjar lokali, CI u Kwalità. IDs mhux magħruf, mogħdijiet usa', entrati duplikati u eċċezzjonijiet skaduti huma miċħuda; il-legat `.trivyignore` mhuwiex input għall-iskans emigrati.
+
+Docker jiċċekkja l-għodda tal-politika minn `github.workflow_sha` u l-politika tas-sors tal-immaġni bl-istess selettur tas-sors bħall-bini. Is-selettur tal-politika jirrifjuta ambiti inkompatibbli u jipprepara fajl wieħed għaż-żewġ skanijiet Trivy. Sors storiku mingħajr politika strutturata ma jirċievi l-ebda eċċezzjoni. Iż-żewġ skans pin Trivy `v0.70.0`. Il-validazzjoni tal-politika tagħti prova tal-konsistenza tal-konfigurazzjoni; l-immaġni għadha teħtieġ skan ta 'suċċess.
 
 ## Riskju ta' dipendenza rtirati
 

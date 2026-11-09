@@ -30,13 +30,7 @@ Kada osv ili Trivy postanu crveni zbog novootkrivenog CVE-a, rješenje je:
 
 1. **Ažurirajte pogođenu zavisnost** (preporučeno) — nadogradite je na ispravljenu verziju putem
    `overrides` u `package.json` (tranzitivne zavisnosti) ili ponovo izgradite sliku koristeći ispravljenu osnovu.
-2. **Ako ne postoji ispravka iz izvornog projekta:**
-   - **osv:** ponovo postavite početnu vrijednost za `metrics.vulnCount` u `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` ne obuhvata namjenske provjere — ručno uredite vrijednost,
-     `direction:down`) uz bilješku s obrazloženjem + problem za praćenje.
-   - **Trivy:** dodajte unos u `.trivyignore` (CVE-ID po redu) uz komentar
-     s obrazloženjem + problem za praćenje. `ignore-unfixed: true` već automatski obuhvata CVE-ove bez
-     zakrpa.
+2. **Ako sanacija nije dostupna:** zadržati izmjereni nalaz i pratiti zahvaćenu zavisnost ili sliku. Ne povećavajte osnovnu liniju ranjivosti kako biste neuspjeli kandidat prošli. Trivyjev `ignore-unfixed: true` već isključuje ranjivosti slika bez upstream zakrpe. Svaki izuzetak zahtijeva revidiranu ranjivost ID, tačnu putanju paketa, istek i problem praćenja u politici; to nije automatska posljedica neuspjelog skeniranja.
 
 Obavezna OSV izvršavanja (`check:vuln-ratchet -- --ratchet`) završavaju neuspješno
 s `INCOMPLETE` i izlaznim kodom 2 kada nije moguće potvrditi valjanost skenera, izvještaja ili početne vrijednosti.
@@ -44,6 +38,12 @@ Izmjerena regresija vraća izlazni kod 1. Savjetodavno izvršavanje i dalje mož
 izlaznim kodom 0, što ne potvrđuje da su zavisnosti prošle skeniranje. Blokirajući
 Trivy korak također zahtijeva uspješno mjerenje: nedostupni alati, neuspjeli poslovi
 i nedostajući dokazi o slici ne mogu potvrditi da je slika čista.
+
+## Politika skeniranja slike
+
+Trenutni `.trivyignore.yaml` ne sadrži izuzetke ranjivosti. `npm run check:trivy-ignore-policy` potvrđuje strukturiranu politiku u lokalnim profilima skeniranja, CI i kvaliteti. Nepoznati IDs, šire staze, dupli unosi i istekli izuzeci se odbijaju; naslijeđeni `.trivyignore` nije ulaz za migrirana skeniranja.
+
+Docker provjerava alate politike iz `github.workflow_sha` a i politiku izvora slike s istim selektorom izvora kao i build. Birač pravila odbija nekompatibilne opsege i priprema jednu datoteku za oba Trivy skeniranja. Istorijski izvor bez strukturirane politike nema izuzetaka. Oba skeniranja pin Trivy `v0.70.0`. Validacija politike dokazuje konzistentnost konfiguracije; slika i dalje treba uspješno skeniranje.
 
 ## Rizik zavisnosti od penzije
 
