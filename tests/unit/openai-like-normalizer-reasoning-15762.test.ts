@@ -26,6 +26,7 @@ test("normalizeOpenAiLikeModelsResponse keeps reasoning effort declarations (#15
   ]);
   assert.equal(out[0].owned_by, "owner");
   assert.equal("context_length" in out[0], false);
-  assert.equal("pricing" in out[0], false);
+  // Positive pricing must survive discovery so free-only import retains its paid veto.
+  assert.deepEqual(out[0].pricing, { prompt: "1" });
   assert.deepEqual(Object.keys(out[1]).sort(), ["id", "name", "owned_by"]);
 });
