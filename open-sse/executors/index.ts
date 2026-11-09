@@ -1,5 +1,6 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
 import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -241,6 +242,15 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
   }
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
     throw new SearchProviderChatError(provider);
+  }
+  // #14498 — decisions-only providers (TypeSafe Jev) register for credentials,
+  // pricing and discovery but have no chat shape; dispatch is POST /v1/systemone.
+  if (isDecisionsOnlyProvider(provider)) {
+    const err = new Error(
+      `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
+    );
+    (err as Error & { status?: number }).status = 400;
+    throw err;
   }
   return getDefaultExecutor(provider);
 }
