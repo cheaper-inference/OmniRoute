@@ -42,6 +42,7 @@
       "tests/unit/combo-multimodal-input-routing.test.ts",
       "tests/unit/claude-model-scoped-429-headroom-18296.test.ts",
       "tests/unit/combo/codex-paid-credits-routing.test.ts",
+      "tests/unit/direct-path-stream-terminated-no-cooldown.test.ts",
       "tests/unit/qoder-model-scoped-throttle-real-path.test.ts",
       "tests/unit/qoder-model-scoped-throttle.test.ts",
       "tests/unit/upstream-response-decoded-byte-cap.test.ts",
