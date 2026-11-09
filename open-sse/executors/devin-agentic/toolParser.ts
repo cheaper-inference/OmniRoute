@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { asRecord, DevinAgenticBridgeError, type AnthropicTool, type JsonRecord } from "./types.ts";
 import { findTagBlocks } from "../../utils/tagBlocks.ts";
+import { validateSchema } from "../../utils/toolArgumentSchema.ts";
 
 function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`;
@@ -11,60 +12,6 @@ function stableJson(value: unknown): string {
       .join(",")}}`;
   }
   return JSON.stringify(value);
-}
-
-function typeOf(value: unknown): string {
-  if (Array.isArray(value)) return "array";
-  if (value === null) return "null";
-  return typeof value;
-}
-
-function validateSchema(value: unknown, schema: JsonRecord, path: string): string[] {
-  const errors: string[] = [];
-  const expectedType = schema.type;
-  if (typeof expectedType === "string") {
-    const actual = typeOf(value);
-    if (expectedType === "integer") {
-      if (!Number.isInteger(value)) errors.push(`${path} must be integer`);
-    } else if (actual !== expectedType) {
-      errors.push(`${path} must be ${expectedType}, got ${actual}`);
-    }
-  }
-
-  if (Array.isArray(schema.enum) && !schema.enum.some((item) => item === value)) {
-    errors.push(
-      `${path} must be one of ${schema.enum.map((item) => JSON.stringify(item)).join(", ")}`
-    );
-  }
-
-  if (schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value))) {
-    const record = asRecord(value);
-    const required = Array.isArray(schema.required) ? schema.required.map(String) : [];
-    for (const key of required) {
-      if (!(key in record)) errors.push(`${path}.${key} is required`);
-    }
-
-    const properties = asRecord(schema.properties);
-    for (const [key, propSchema] of Object.entries(properties)) {
-      if (key in record)
-        errors.push(...validateSchema(record[key], asRecord(propSchema), `${path}.${key}`));
-    }
-
-    if (schema.additionalProperties === false) {
-      for (const key of Object.keys(record)) {
-        if (!(key in properties)) errors.push(`${path}.${key} is not allowed`);
-      }
-    }
-  }
-
-  if (Array.isArray(value) && schema.items) {
-    const itemSchema = asRecord(schema.items);
-    value.forEach((item, index) =>
-      errors.push(...validateSchema(item, itemSchema, `${path}[${index}]`))
-    );
-  }
-
-  return errors;
 }
 
 const SUMMARY_OPEN = "<summary>";

@@ -13,7 +13,7 @@ test.after(() => {
   else process.env[FLAG] = previousFlag;
 });
 
-test("#16929: public /v1/models does not advertise unsupported Gemini audio", () => {
+test("#16929: public /v1/models hides unsupported Gemini audio but lists its music", () => {
   assert.equal(
     isUnifiedChatSourceModelSelectable("gemini", {
       id: "gemini-3.5-transcribe",
@@ -22,13 +22,15 @@ test("#16929: public /v1/models does not advertise unsupported Gemini audio", ()
     }),
     false
   );
+  // Lyria is music-only on AI Studio and now has its own handler
+  // (open-sse/handlers/mediaGeneration/geminiMusic.ts), so the gate lets it through.
   assert.equal(
     isUnifiedChatSourceModelSelectable("gemini", {
       id: "lyria-exp",
       supportedEndpoints: ["music"],
       endpointCapabilitySource: "inferred",
     }),
-    false
+    true
   );
 });
 

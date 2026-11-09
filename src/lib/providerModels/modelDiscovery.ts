@@ -10,6 +10,7 @@ import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardizatio
 import { isObsoleteKiroModelAlias } from "@omniroute/open-sse/services/kiroModels.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
+import { isCompatibleFreeImportProvider } from "@/shared/utils/freeModels";
 import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
 type JsonRecord = Record<string, unknown>;
@@ -716,7 +717,11 @@ export function normalizeDiscoveredModels(
     const supportsVision = detectVisionInput(record);
     // Persist only evidence present in this discovery payload. Static catalog
     // membership is intentionally not evidence about this connection's economics.
-    const explicitlyPaid = providerId === "siliconflow" && hasPayloadPaidEvidence(record);
+    const explicitlyPaid =
+      hasPayloadPaidEvidence(record) ||
+      (isCompatibleFreeImportProvider(providerId) &&
+        typeof record.tier === "string" &&
+        record.tier.trim().toLowerCase() === "paid");
     const isFree = !explicitlyPaid && hasPayloadFreeEvidence({ ...record, id });
 
     deduped.set(id, {
@@ -761,8 +766,8 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean"
         ? { supportsTools: record.supportsTools }
-        : providerId === "mistral" && caps.function_calling === true
-          ? { supportsTools: true }
+        : providerId === "mistral" && typeof caps.function_calling === "boolean"
+          ? { supportsTools: caps.function_calling }
           : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
       // Keep a paid verdict through the cache round trip: dropping false would
