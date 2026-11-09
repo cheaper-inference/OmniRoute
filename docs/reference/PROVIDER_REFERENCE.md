@@ -304,6 +304,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `opper` | `opper` | Opper | API key, aggregator | [link](https://opper.ai) | — |
 | `orcarouter` | `orcarouter` | OrcaRouter | API key | [link](https://www.orcarouter.ai) | — |
 | `ovhcloud` | `ovh` | OVHcloud AI | API key | [link](https://www.ovhcloud.com) | — |
+| `paraloncloud` | `paralon` | ParalonCloud | API key | [link](https://paraloncloud.com) | — |
 | `perplexity` | `pplx` | Perplexity | API key | [link](https://www.perplexity.ai) | — |
 | `perplexity-agent` | `pplx-agent` | Perplexity Agent | API key | [link](https://www.perplexity.ai) | Use your Perplexity API key. OmniRoute routes Agent API model IDs through Perplexity's Responses-compatible endpoint. |
 | `piapi` | `pi` | PiAPI | API key, aggregator | [link](https://piapi.ai) | — |
