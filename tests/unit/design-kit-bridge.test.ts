@@ -268,9 +268,17 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   const engine = read("src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx");
   const edges = read("src/shared/components/flow/edgeStyles.ts");
   const badge = read("src/shared/components/TokenHealthBadge.tsx");
-  for (const [name, src] of Object.entries({ combo, engine, edges })) {
+  for (const [name, src] of Object.entries({ engine, edges })) {
     assert.ok(src.includes("var(--orch-status-"), `${name} reads the status tokens`);
   }
+  // The Combo Studio run outcome is a kit Stat: its state colour is the Stat tone (kit status
+  // tokens), mapped per outcome, never a literal.
+  assert.match(
+    combo,
+    /tone=\{OUTCOME_TONE\[run\.outcome\]\}/,
+    "combo maps the outcome to a Stat tone"
+  );
+  assert.doesNotMatch(combo, /#[0-9a-fA-F]{6}\b/, "combo has no fixed hex");
   // TokenHealthBadge moved onto the kit (KEA-7886, lote 10): its state reads the same kit
   // status tokens through the semantic utilities (--color-success/warning/error → --ci-*).
   for (const tone of ["text-success", "text-warning", "text-error"]) {
@@ -325,9 +333,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Combo live studio: active/error provider pills + the run outcome tri-state.
   assert.ok(combo.includes("FLOW_EDGE_COLORS.active"), "combo active pill uses the flow palette");
   assert.ok(combo.includes("FLOW_EDGE_COLORS.error"), "combo error pill uses the flow palette");
-  assert.ok(combo.includes('"var(--orch-status-success)"'), "combo succeeded = success token");
-  assert.ok(combo.includes('"var(--orch-status-error)"'), "combo exhausted = error token");
-  assert.ok(combo.includes('"var(--orch-status-warning)"'), "combo pending = warning token");
+  // The run outcome is a kit Stat; its tone carries the kit status token (the kit Stat has no
+  // warning tone, so a running run stays neutral).
+  assert.match(combo, /succeeded: "positive"/, "combo succeeded = positive (success) tone");
+  assert.match(combo, /exhausted: "critical"/, "combo exhausted = critical (error) tone");
+  assert.match(combo, /running: "default"/, "combo running = neutral tone");
   assert.ok(!combo.includes('"#ef4444"'), "combo studio hardcodes no error hex");
   assert.ok(!combo.includes('"#f59e0b"'), "combo studio hardcodes no warning hex");
 
