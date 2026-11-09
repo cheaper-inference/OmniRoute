@@ -1,1 +1,0 @@
-- **perf(sse):** A stream no longer deep-copies every chunk into an event list that normal completion throws away, so each live stream holds less heap and spends less time per chunk. Logged summaries, event counts and the `_truncated` marker are unchanged.
