@@ -1,0 +1,1 @@
+- **fix(cli-tools):** Apply and `omniroute config set` keep unrelated settings in existing Claude, Cline, Kilo and Continue config files instead of replacing the whole file.
