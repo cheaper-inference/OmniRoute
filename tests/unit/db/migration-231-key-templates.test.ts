@@ -28,7 +28,7 @@ test("key-template migration creates an idempotent table and unique case-insensi
   db.close();
 });
 
-test("key-template migration preserves an upgraded key and its five-hour budget", () => {
+test("template storage upgrades alongside existing five-hour key data", () => {
   const db = new DatabaseSync(":memory:");
   db.exec("CREATE TABLE api_keys (id TEXT PRIMARY KEY)");
   db.exec(

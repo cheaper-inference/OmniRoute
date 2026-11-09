@@ -469,32 +469,6 @@ export function insertKeyPolicyRows(
   }
 }
 
-/**
- * Key duplication: exact policy copy (lifecycle included, as before) with a fresh
- * identity, in one transaction. Returns false when the source does not exist.
- */
-export function copyKeyPolicy(db: PolicyDb, sourceId: string, identity: NewKeyIdentity): boolean {
-  return runImmediate(db, () => {
-    const rows = readKeyPolicyRows(db, sourceId);
-    if (!rows) return false;
-    // SSO credentials are controlled by the identity lifecycle, not a manual copy.
-    if (rows.source !== "manual") throw new Error("SSO key cannot be duplicated");
-    // A weighted allocation cannot be copied without changing other keys' shares.
-    if (rows.excluded.weightedAllocations > 0) {
-      throw new Error("Weighted quota allocation requires explicit allocation planning");
-    }
-    if (rows.unclassified.length > 0) {
-      throw new KeyPolicyPersistenceError(
-        `Unclassified key fields hold values: ${rows.unclassified
-          .map((f) => `${f.table}.${f.column}`)
-          .join(", ")}`
-      );
-    }
-    insertKeyPolicyRows(db, identity, rows);
-    return true;
-  });
-}
-
 // ──────────────── Raw rows → typed template policy ────────────────
 
 function warn(

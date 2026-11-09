@@ -280,8 +280,6 @@ export function decomposeTtlSeconds(ttlSeconds: number | undefined): {
   return { value: String(sec), unit: "seconds" };
 }
 
-export const decomposeRelativeTtlSeconds = decomposeTtlSeconds;
-
 export function composeTtlSeconds(
   valueStr: string,
   unit: "seconds" | "minutes" | "hours" | "days"
@@ -292,8 +290,6 @@ export function composeTtlSeconds(
     unit === "days" ? 86400 : unit === "hours" ? 3600 : unit === "minutes" ? 60 : 1;
   return Math.max(1, Math.round(num * multiplier));
 }
-
-export const composeRelativeTtlSeconds = composeTtlSeconds;
 
 function numberToInputString(val: number | null | undefined): string {
   return typeof val === "number" && Number.isFinite(val) && val > 0 ? String(val) : "";

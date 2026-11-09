@@ -289,27 +289,6 @@ export interface UnreadableKeyTemplate {
   code: KeyTemplateErrorCode;
 }
 
-export interface CreateKeyTemplateResponse {
-  template: KeyTemplate;
-  warnings: TemplateWarning[];
-}
-
-export interface GetKeyTemplateResponse {
-  template: KeyTemplate;
-  referenceIssues: TemplateReferenceIssue[];
-}
-
-export interface UpdateKeyTemplateResponse {
-  template: KeyTemplate;
-}
-
-/** `GET /api/keys/[id]/template-policy` — secret-free preview for "Save as template". */
-export interface KeyTemplatePolicyPreviewResponse {
-  policy: KeyTemplatePolicy;
-  warnings: TemplateWarning[];
-  referenceIssues: TemplateReferenceIssue[];
-}
-
 export type KeyTemplateRefStatus = "current" | "stale" | "missing";
 
 /** One-time response: `key` is the only time the new secret is returned. */

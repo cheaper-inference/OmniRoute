@@ -5,10 +5,10 @@ import { join } from "node:path";
 import {
   KEY_TEMPLATE_ALL_COMBOS_RULE,
   KEY_TEMPLATE_SCHEMA_VERSION,
-  composeRelativeTtlSeconds,
+  composeTtlSeconds,
   createDefaultKeyTemplatePolicy,
   createDefaultPolicyEditorFormState,
-  decomposeRelativeTtlSeconds,
+  decomposeTtlSeconds,
   editorFormStateToPolicy,
   policyToEditorFormState,
   resolveActiveReferenceIssues,
@@ -193,24 +193,24 @@ test("empty-list semantics are preserved for restricted models, combos, connecti
 });
 
 test("relative TTL decomposition, composition, and validation enforce positive bounds", () => {
-  assert.deepEqual(decomposeRelativeTtlSeconds(86400 * 14), {
+  assert.deepEqual(decomposeTtlSeconds(86400 * 14), {
     value: "14",
     unit: "days",
   });
-  assert.deepEqual(decomposeRelativeTtlSeconds(3600 * 6), {
+  assert.deepEqual(decomposeTtlSeconds(3600 * 6), {
     value: "6",
     unit: "hours",
   });
-  assert.deepEqual(decomposeRelativeTtlSeconds(60 * 45), {
+  assert.deepEqual(decomposeTtlSeconds(60 * 45), {
     value: "45",
     unit: "minutes",
   });
 
-  assert.equal(composeRelativeTtlSeconds("30", "days"), 30 * 86400);
-  assert.equal(composeRelativeTtlSeconds("12", "hours"), 12 * 3600);
-  assert.equal(composeRelativeTtlSeconds("15", "minutes"), 15 * 60);
-  assert.equal(composeRelativeTtlSeconds("0", "days"), null);
-  assert.equal(composeRelativeTtlSeconds("-5", "hours"), null);
+  assert.equal(composeTtlSeconds("30", "days"), 30 * 86400);
+  assert.equal(composeTtlSeconds("12", "hours"), 12 * 3600);
+  assert.equal(composeTtlSeconds("15", "minutes"), 15 * 60);
+  assert.equal(composeTtlSeconds("0", "days"), null);
+  assert.equal(composeTtlSeconds("-5", "hours"), null);
 
   const invalidForm = {
     ...createDefaultPolicyEditorFormState(),
