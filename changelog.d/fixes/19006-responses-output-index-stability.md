@@ -1,0 +1,1 @@
+- **fix(sse):** Chat-to-Responses streams keep one stable `output_index` per item: text after a tool call now goes into one new message item (not one item per chunk), and a tool call keeps the same `output_index` from `output_item.added` to `output_item.done` when text starts after it. ([#19006](https://github.com/cheaper-inference/OmniRoute/pull/19006))

@@ -5,6 +5,7 @@ import { getBodySizeLimit, readRequestBodyWithLimit } from "@/shared/middleware/
 import * as log from "@/sse/utils/logger";
 
 export interface EditInput {
+  options?: Record<string, unknown>;
   prompt: string;
   model: string | null;
   size: string | null;
@@ -27,7 +28,41 @@ const ImageEditJsonSchema = z
   })
   .passthrough();
 
+async function readMultipartOptions(formData: FormData): Promise<Record<string, unknown>> {
+  const options: Record<string, unknown> = {};
+  for (const [key, value] of formData.entries()) {
+    if (key === "image" || key === "image[]") continue;
+    if (typeof value === "string") {
+      if (
+        [
+          "n",
+          "num_images",
+          "seed",
+          "sync_mode",
+          "enable_thinking",
+          "enable_safety_checker",
+          "output_compression",
+          "frame_count",
+          "frame_duration_ms",
+          "fal_input",
+          "image_size",
+        ].includes(key)
+      ) {
+        try {
+          options[key] = JSON.parse(value);
+        } catch {
+          options[key] = value;
+        }
+      } else options[key] = value;
+    } else if (key === "mask") {
+      options.mask = `data:${value.type || "image/png"};base64,${Buffer.from(await value.arrayBuffer()).toString("base64")}`;
+    }
+  }
+  return options;
+}
+
 async function readMultipartImage(formData: FormData): Promise<EditInput> {
+  const options = await readMultipartOptions(formData);
   const promptRaw = formData.get("prompt");
   const prompt = typeof promptRaw === "string" ? promptRaw.trim() : "";
   const modelRaw = formData.get("model");
@@ -50,6 +85,7 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
   }
   const firstImage = images[0] ?? null;
   return {
+    options,
     prompt,
     model,
     size,
@@ -93,10 +129,14 @@ export async function readEditInput(request: Request): Promise<EditInput | null>
         log.warn("IMAGE", "Invalid JSON edit body shape");
         return null;
       }
-      return {
-        ...extractImageEditInputFromJson(parsed.data),
-        hasMask: Object.hasOwn(parsed.data, "mask") || Object.hasOwn(parsed.data, "mask_url"),
-      };
+      const extracted = extractImageEditInputFromJson(parsed.data);
+      return extracted
+        ? {
+            ...extracted,
+            options: parsed.data,
+            hasMask: Object.hasOwn(parsed.data, "mask") || Object.hasOwn(parsed.data, "mask_url"),
+          }
+        : null;
     } catch {
       log.warn("IMAGE", "Invalid JSON edit body");
       return null;
