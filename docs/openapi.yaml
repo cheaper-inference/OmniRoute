@@ -15312,16 +15312,36 @@ paths:
       tags:
         - V1 Accounts
       summary: "GET accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Accounts
       summary: "PUT accounts › <id> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/agents/credentials:
     get:
       tags:
@@ -15569,9 +15589,19 @@ paths:
       tags:
         - V1 Issues
       summary: "POST issues › report"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/management/proxies:
     delete:
       tags:
@@ -15676,16 +15706,36 @@ paths:
       tags:
         - V1 Providers
       summary: "GET providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
     put:
       tags:
         - V1 Providers
       summary: "PUT providers › <provider> › limits"
+      description: >
+        Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI
+        token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/v1/quota-recoveries/{id}:
     parameters:
       - name: id
