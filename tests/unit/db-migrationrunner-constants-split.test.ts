@@ -184,19 +184,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-5), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-4), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-3), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-2), {
@@ -208,18 +208,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-1), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "228",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
-    // Builds pushed before the release filled 223–227 shipped the settings table as 229.
+    // Builds pushed before 228_purge_orphaned_provider_catalogs landed shipped the settings
+    // table as 228.
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.find(
-        (e) => e.fromVersion === "229" && e.fromName === "api_key_self_service_settings"
+        (e) => e.fromVersion === "228" && e.fromName === "api_key_self_service_settings"
       ),
       {
-        fromVersion: "229",
+        fromVersion: "228",
         fromName: "api_key_self_service_settings",
-        toVersion: "228",
+        toVersion: "229",
         toName: "api_key_self_service_settings",
       }
     );
