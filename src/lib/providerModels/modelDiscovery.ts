@@ -766,8 +766,8 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean"
         ? { supportsTools: record.supportsTools }
-        : providerId === "mistral" && caps.function_calling === true
-          ? { supportsTools: true }
+        : providerId === "mistral" && typeof caps.function_calling === "boolean"
+          ? { supportsTools: caps.function_calling }
           : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
       // Keep a paid verdict through the cache round trip: dropping false would
