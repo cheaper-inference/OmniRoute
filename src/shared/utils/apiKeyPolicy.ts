@@ -113,6 +113,7 @@ export interface ApiKeyMetadata {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
@@ -560,6 +561,7 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       usageLimitEnabled: apiKeyInfo.usageLimitEnabled,
       dailyUsageLimitUsd: apiKeyInfo.dailyUsageLimitUsd,
       weeklyUsageLimitUsd: apiKeyInfo.weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd: apiKeyInfo.fiveHourUsageLimitUsd,
     });
     return rejection;
   } catch (error) {

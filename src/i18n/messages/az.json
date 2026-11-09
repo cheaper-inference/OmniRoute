@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Hesab tərcihləri",
+    "description": "Bu marşrutlaşdırma konfiqurasiyası üçün bir neçə hesaba üstünlük verin və ya onları ehtiyatda saxlayın. Avtomatik marşrutlaşdırma hər səviyyədə hesabları sıralayır. Siyahıda olmayan hesablar adi hesab olunur. İcazələr, kvota limitləri və mövcud növbə bağlantıları yenə də tətbiq edilir.",
+    "preferred": "Üstünlük verilən",
+    "normal": "Adi",
+    "reserve": "Ehtiyat",
+    "excluded": "İstisna edilən",
+    "loading": "Hesablar yüklənir…",
+    "error": "Hesabları yükləmək mümkün olmadı. Yenidən cəhd etmək üçün redaktoru yenidən açın.",
+    "missing": "Əlçatan olmayan hesab ({id})"
+  },
   "teamCosts": {
     "title": "Komanda xərcləri",
     "subtitle": "Paylaşılan yumşaq büdcələri və kataloq xərc təxminlərini idarə edin.",
@@ -7174,6 +7185,31 @@
     "fallbackRetryBackendTitle": "Əvəzleyici təkrar cəhd backendi"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Bu prosesdə trafikin bir hissəsi yadda saxlanıla bilmədi. Saxlanmış yekunlar natamamdır; server diaqnostikasını yoxlayın.",
+      "title": "OmniRoute faydalı yük trafiki",
+      "description": "Göndərilməyə təqdim edilmiş yükləmə gövdələri və OmniRoute-un oxuduğu endirmə baytları. Şəbəkə/xətt trafiki və ya xidmət təminatçısının hesablaması deyil. Ümumi yekuna ayrıca işarələnmiş birbaşa və aidiyyəti müəyyən edilməmiş trafik daxildir.",
+      "coverageNote": "Ölçmə başladıqdan bəri yığılmış yekunlar. Ölçüsü bilinməyən yükləmələr (axınlar, FormData, Request gövdələri) bayt yekunlarına daxil deyil. Oxunmamış və ya bitməmiş endirmələr natamamdır; uğursuz göndərişlər yükləmənin çatdırıldığını sübut etmir. Nəqliyyat qatının daxili yönləndirmələri/təkrar cəhdləri və ölçmə yolundan kənar nəqliyyatlar ayrıca ölçülmür.",
+      "refresh": "Yenilə",
+      "overall": "Ümumi (müşahidə edilən bütün marşrutlar)",
+      "proxied": "Proksi üzrə ara yekun (birbaşa/aidiyyətsiz trafik olmadan)",
+      "direct": "Birbaşa (proksisiz)",
+      "unattributed": "Aidiyyəti müəyyən edilməmiş dispetçer",
+      "removed": "Silinmiş proksi ({id})",
+      "legacy": "Köhnə/mühitdən təyin edilmiş proksi ({id})",
+      "route": "Marşrut",
+      "upload": "Göndərilməyə təqdim edilmiş yükləmə",
+      "download": "Oxunmuş endirmə",
+      "attempts": "Cəhdlər",
+      "knownUpload": "Ölçüsü məlum yükləmələr / cəhdlər",
+      "completed": "Tam endirmələr / cəhdlər",
+      "failed": "Göndərmə uğursuzluqları",
+      "cancelled": "Ləğv edilmiş endirmələr",
+      "errored": "Endirmə xətaları",
+      "loading": "Faydalı yük trafiki yüklənir…",
+      "empty": "Hələ faydalı yük trafiki ölçülməyib.",
+      "error": "Faydalı yük trafiki yüklənə bilmədi. Yeniləməyə çalışın."
+    },
     "title": "Parametrlər",
     "general": "Ümumi",
     "security": "Təhlükəsizlik",
@@ -14713,6 +14749,8 @@
     "usdUsageQuotaDescription": "Lokal USD xərci konfiqurasiya edilmiş gündəlik və ya həftəlik kvotaya çatdıqdan sonra bu açarı 400 API xətası ilə bloklayır.",
     "dailyQuotaUsd": "Gündəlik kvota (USD)",
     "weeklyQuotaUsd": "Həftəlik kvota (USD)",
+    "fiveHourQuotaUsd": "5 saatlıq kvota (USD)",
+    "fiveHourQuotaHint": "Sürüşən pəncərə: hər sorğunun xərci 5 saat hesablanır, sonra azad olur.",
     "quotaWindowDescription": "Həftəlik kvota mövcud olduqda keşlənmiş Claude həftəlik sıfırlanmasını izləyir; əks halda, 7 günlük sürüşən pəncərəyə keçir. Gündəlik kvota Fortaleza təqvim günündən istifadə edir.",
     "apiKeyUsdQuota": "API açarı USD kvotası",
     "apiKeyUsdQuotaDescription": "Aktiv olduqda, @@om-usage gündəlik kvota, həftəlik kvota, gündəlik xərc və həftəlik xərci USD ilə qaytarır. Həftəlik mövcud olduqda keşlənmiş Claude sıfırlanmasını izləyir.",

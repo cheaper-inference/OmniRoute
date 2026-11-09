@@ -128,6 +128,27 @@ Roghnaíonn uathscóráil an soláthraí/tsamhail is fearr do gach iarratas
 | `src/sse/handlers/chat.ts`                                | Comhtháthú: gearrchiorcad don réimír auto                   |
 | `src/shared/constants/providers.ts`                       | Iontráil chórais `SYSTEM_PROVIDERS.auto`                    |
 
+## Sainroghanna cuntais le haghaidh combos uathoibríoch sábháilte
+
+Tugann an t-eagarthóir Chliste Auto roghnach** Sainroghanna cuntais** alt. Is féidir le gach nasc a bheith Roghnaithe, Gnáth (an réamhshocrú), Cúlchiste, nó Eisiata. Is féidir le naisc iolracha sraith a roinnt. Roghnaíonn Auto laistigh den chéad chiseal incháilithe, ag coinneáil a iompraíocht scoring/router ann; Titeann iarrachtaí ar theip orthu go dtí na cuntais nithiúla atá fágtha, tosaíocht roimh an ngnáth roimh an gcúlchiste. Ní úsáideann an teaglama seo naisc eisiata riamh.
+
+Stóráiltear an socrú mar `config.accountPreferences`, eochairaithe ag ceangal ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Coinníonn léarscáil fágtha ar lár nó léarscáil folamh an ródú atá ann cheana féin. Ní chumasaíonn sainroghanna naisc dhíchumasaithe, ní thugann siad rochtain ar eochair-API, iarrthóirí a bhfuil bac ar chuóta acu a athbhunú, ná seiceálacha buiséid a sheachbhóthar. Tá gach iarracht teoranta dá nasc nithiúil, mar sin ní féidir le cúltaca cuntais na sraitheanna a léim taobh thiar den ródaire teaglama. Féadfaidh cleamhnas seisiúin atá ann cheana cuntas incháilithe a choinneáil; gan an cuntas atá ceangailte le cas dúchais a áireamh, stopann sé sin seachas cuntais a athrú go ciúin.
+
+Úsáideann sainroghanna cumraithe an chonair Uathoibríoch atá feasach ar an gcuntas: ní sheoltar aicearraí comhthéacs-thaisce, píblíne chliste, caos agus scáthanna neamhcheangailte. Tá fálú amhantrach díchumasaithe le haghaidh na n-iarratas seo agus mar sin ní féidir leis na cuntais chúlchiste na cinn is fearr a leanúint. Ní léirmhíníonn straitéisí teaglama eile an socrú seo. Má dhéantar teaglama a athrú ó Auto coinnítear na sainroghanna sábháilte le haghaidh athrú ar ais níos déanaí.
+
 ## Ainmneacha Combo a Mheaitseálann le Fíor-Aitheantas Múnla
 
 Is **phatrún intentional, tacaíochta** é combo a bhfuil a `name` mar an gcéanna le bare aitheantas múnla (m.sh. combo dar ainm `gpt-5.5`), ní fabht: is é an meicníocht é le haghaidh tacaíocht soláthraí in aghaidh an aitheantas múnla, mar atá cur síos air in [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Toisc go ndéantar seiceáil ar réiteach combo roimh réiteach bare aitheantas múnla (`getComboForModel()` in `src/sse/services/model.ts`), tá iarratas ar an bare aitheantas `gpt-5.5` á ródú trí spriocanna an combo (m.sh. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5)` in ionad dul díreach chuig soláthraí amháin — athúsáidtear an tosaíocht combo-roimh-athscríobh a tógadh le haghaidh [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) agus tá sé á thástáil aisghníomhaíochta ag `tests/unit/responses-combo-resolution-3227.test.ts` agus `tests/unit/combo-name-codex-responses-rewrite.test.ts`.

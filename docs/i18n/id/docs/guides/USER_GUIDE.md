@@ -353,28 +353,28 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Penerapan
+## Penerapan 🚀
 
-### Instalasi npm global (Disarankan)
+### Pemasangan npm global (Disarankan)
 
 ```bash
 npm install -g omniroute
 
-# Buat direktori konfigurasi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Buat file .env (lihat .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Mulai server
+# Start server
 omniroute
-# Atau dengan port khusus:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`.
+CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar pendek kunci yang diizinkan (port, `REQUIRE_API_KEY`, pengaturan lokal dan warna); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Mode baki sistem
+### Modus baki
 
 Mulai OmniRoute di baki sistem:
 
@@ -382,51 +382,51 @@ Mulai OmniRoute di baki sistem:
 omniroute serve --tray
 ```
 
-Perintah akan selesai setelah server dan baki sistem siap.
+Perintah kembali setelah server dan baki siap.
 
-Server terus berjalan tanpa terminal.
+Server melanjutkan tanpa terminal.
 
-Mode baki sistem mendukung macOS, Windows, dan sesi Linux grafis. Mode baki sistem tidak membuka dasbor secara otomatis.
+Mode baki mendukung sesi macOS, Windows, dan grafis Linux. Mode baki tidak membuka dashboard secara otomatis.
 
-Gunakan menu baki sistem untuk tindakan berikut:
+Gunakan menu baki untuk tindakan berikut:
 
 - Buka dasbor.
 - Buka `/dashboard/logs`.
 - Ubah mulai otomatis.
 - Hentikan OmniRoute.
 
-Jangan gabungkan `--tray` dengan opsi berikut:
+Jangan gabungkan `--tray` dengan opsi ini:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Mode-mode ini memerlukan kepemilikan proses yang berbeda.
+Mode ini memerlukan kepemilikan proses yang berbeda.
 
-Aktifkan saat mesin masuk log berikutnya:
+Aktifkan startup pada login mesin berikutnya:
 
 ```bash
 omniroute autostart enable
 ```
 
-Mulai otomatis menggunakan mode baki sistem di macOS, Windows, dan sesi Linux grafis. Linux tanpa antarmuka grafis menggunakan layanan pengguna systemd yang sudah ada.
+Mulai otomatis menggunakan mode baki pada sesi macOS, Windows, dan grafis Linux. Linux tanpa kepala menggunakan layanan pengguna systemd yang ada.
 
-Nonaktifkan saat masuk log:
+Nonaktifkan startup saat login:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Menghapus Instalasi
+### Menghapus instalasi
 
-Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untuk penghapusan yang bersih:
+Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untuk penghapusan bersih:
 
-| Perintah                 | Tindakan                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Menghapus aplikasi sistem tetapi **mempertahankan DB dan konfigurasi Anda** di `~/.omniroute`. |
-| `npm run uninstall:full` | Menghapus aplikasi DAN secara permanen **menghapus semua konfigurasi, kunci, dan basis data**. |
+| Memerintah               | Tindakan                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Menghapus aplikasi sistem tapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.       |
+| `npm run uninstall:full` | Menghapus aplikasi AND secara permanen** menghapus semua konfigurasi, kunci, dan database** . |
 
-> Catatan: Untuk menjalankan perintah ini, buka folder proyek OmniRoute (jika Anda mengkloningnya), lalu jalankan perintah tersebut. Sebagai alternatif, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.
+> Catatan: Untuk menjalankan perintah ini, navigasikan ke folder proyek OmniRoute (jika Anda mengkloningnya) dan jalankan. Alternatifnya, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.
 
 ### Penerapan VPS
 
@@ -444,7 +444,7 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Atau: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### Penerapan PM2 (Memori Rendah)
@@ -452,13 +452,13 @@ npm run start
 Untuk server dengan RAM terbatas, gunakan opsi batas memori:
 
 ```bash
-# Dengan batas 512MB (bawaan)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Atau dengan batas memori khusus
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Atau menggunakan ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -487,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Bangun image (bawaan = runner-cli dengan codex/claude/droid yang telah diinstal)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mode portabel (disarankan)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Untuk mode yang terintegrasi dengan host beserta biner CLI, lihat bagian Docker dalam dokumentasi utama.
+Untuk mode terintegrasi host dengan binari CLI, lihat bagian Docker di dokumen utama.
 
-### Void Linux (xbps-src)
+### Batalkan Linux (xbps-src)
 
-Pengguna Void Linux dapat mengemas dan menginstal OmniRoute secara native menggunakan framework kompilasi silang `xbps-src`. Framework ini mengotomatiskan build mandiri Node.js beserta binding native `better-sqlite3` yang diperlukan.
+Pengguna Void Linux dapat mengemas dan menginstal OmniRoute secara asli menggunakan kerangka kompilasi silang `xbps-src`. Ini mengotomatiskan pembuatan Node.js mandiri bersama dengan pengikatan asli `better-sqlite3` yang diperlukan.
 
 <details>
 <summary><b>Lihat templat xbps-src</b></summary>
 
 ```bash
-# Berkas templat untuk 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -525,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Tentukan arsitektur CPU target untuk node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -534,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Instal semua dependensi – lewati skrip
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Build bundel mandiri Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Salin aset statis ke dalam bundel mandiri
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompilasi binding native better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Tempatkan binding yang telah dikompilasi ke dalam bundel mandiri
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Hapus bundel sharp khusus arsitektur
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Salin dependensi runtime pino yang diabaikan oleh analisis statis Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -570,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Cegah penghapusan direktori router aplikasi Next.js yang kosong oleh hook pascainstalasi
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,30 +598,30 @@ post_install() {
 
 ### Variabel Lingkungan
 
-| Variabel                                | Default                              | Deskripsi                                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Rahasia penandatanganan JWT (**ubah di lingkungan produksi**)                                                                   |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Kata sandi untuk login pertama                                                                                                  |
-| `DATA_DIR`                              | `~/.omniroute`                       | Direktori data (db, penggunaan, log)                                                                                            |
-| `PORT`                                  | default framework                    | Port layanan (`20128` dalam contoh)                                                                                             |
-| `HOSTNAME`                              | default framework                    | Host pengikatan (Docker secara default menggunakan `0.0.0.0`)                                                                   |
-| `NODE_ENV`                              | default runtime                      | Atur ke `production` untuk deployment                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL dasar publik yang ditampilkan di dasbor dan diekspos ke server (menggantikan `BASE_URL` lama)                               |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL dasar endpoint sinkronisasi cloud (menggantikan `CLOUD_URL` lama)                                                           |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Rahasia HMAC untuk kunci API yang dihasilkan                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Wajibkan kunci API Bearer pada `/v1/*`                                                                                          |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Izinkan pengguna dasbor yang terautentikasi untuk menampilkan nilai lengkap kunci API yang tersimpan sesuai permintaan          |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Interval penyegaran sisi server untuk data Provider Limits yang di-cache; tombol penyegaran UI tetap memicu sinkronisasi manual |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Nonaktifkan snapshot SQLite otomatis sebelum penulisan/impor/pemulihan; pencadangan manual tetap berfungsi                      |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktifkan keluaran log aplikasi dan audit ke disk                                                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Paksa cookie autentikasi `Secure` (di belakang reverse proxy HTTPS)                                                             |
-| `CLOUDFLARED_BIN`                       | tidak diatur                         | Gunakan binary `cloudflared` yang sudah ada alih-alih unduhan terkelola                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transportasi untuk Quick Tunnels terkelola (`http2`, `quic`, atau `auto`)                                                       |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Batas heap Node.js dalam MB                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Jumlah maksimum entri cache prompt                                                                                              |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Jumlah maksimum entri cache semantik                                                                                            |
+| Variabel                                | Bawaan                     | Keterangan                                                                                                                                                                              |
+| --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(dibuat secara otomatis)_ | rahasia penandatanganan JWT — dibuat secara otomatis saat pertama kali dijalankan dan dipertahankan hingga `server.env`; atur secara eksplisit ketika direktori data bersifat sementara |
+| `INITIAL_PASSWORD`                      | _(tidak disetel)_          | Kata sandi masuk pertama. pemasangan npm/source dimulai dengan `CHANGEME`: ganti. Tidak disetel: wizard orientasi                                                                       |
+| `DATA_DIR`                              | `~/.omniroute`             | Direktori data (db, penggunaan, log)                                                                                                                                                    |
+| `PORT`                                  | kerangka default           | Port layanan (`20128` dalam contoh)                                                                                                                                                     |
+| `HOSTNAME`                              | kerangka default           | Ikat host (Docker default ke `0.0.0.0`)                                                                                                                                                 |
+| `NODE_ENV`                              | default waktu proses       | Tetapkan `production` untuk diterapkan                                                                                                                                                  |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | Basis publik URL muncul ke dasbor dan diekspos ke server (menggantikan `BASE_URL` lama)                                                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | Basis titik akhir sinkronisasi cloud URL (menggantikan `CLOUD_URL` lama)                                                                                                                |
+| `API_KEY_SECRET`                        | _(dibuat secara otomatis)_ | rahasia HMAC untuk kunci API yang dihasilkan — dibuat secara otomatis saat pertama kali dijalankan dan dipertahankan hingga `server.env`                                                |
+| `REQUIRE_API_KEY`                       | `false`                    | Terapkan kunci pembawa API di `/v1/*`                                                                                                                                                   |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Izinkan pengguna dasbor yang diautentikasi untuk mengungkapkan seluruh nilai kunci API yang tersimpan sesuai permintaan                                                                 |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Irama penyegaran sisi server untuk data Batas Penyedia yang di-cache; tombol penyegaran UI masih memicu sinkronisasi manual                                                             |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Nonaktifkan snapshot SQLite otomatis sebelum writes/import/restore; pencadangan manual masih berfungsi                                                                                  |
+| `APP_LOG_TO_FILE`                       | `true`                     | Mengaktifkan keluaran log aplikasi dan audit ke disk                                                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | Paksa cookie autentikasi `Secure` (di belakang proksi terbalik HTTPS )                                                                                                                  |
+| `CLOUDFLARED_BIN`                       | tidak disetel              | Gunakan biner `cloudflared` yang ada alih-alih unduhan terkelola                                                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | Transportasi untuk Terowongan Cepat yang dikelola (`http2`, `quic`, atau `auto`)                                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | batas tumpukan Node.js di MB                                                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | Entri cache prompt maksimal                                                                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | Entri cache semantik maksimal                                                                                                                                                           |
 
-Untuk referensi lengkap variabel lingkungan, lihat [README](../README.md).
+Untuk referensi variabel lingkungan selengkapnya, lihat [README](../README.md).
 
 ---
 

@@ -127,6 +127,27 @@ Automatisk scoring vælger den bedste udbyder/model pr. anmodning
 | `src/sse/handlers/chat.ts`                                | Integration: kortslutning for auto-præfiks    |
 | `src/shared/constants/providers.ts`                       | Systemposten `SYSTEM_PROVIDERS.auto`          |
 
+## Kontopræferencer for gemte automatiske kombinationer
+
+Den intelligente automatiske editor tilbyder en valgfri** Kontopræferencer** afsnit. Hver forbindelse kan være Foretrukken, Normal (standard), Reserve eller Ekskluderet. Flere forbindelser kan dele et niveau. Auto vælger inden for det første kvalificerede niveau og bevarer sin scoring/router adfærd der; mislykkede forsøg falder igennem til de resterende konkrete konti, foretrækkes før normal før reserve. Udelukkede forbindelser bruges aldrig af denne kombination.
+
+Indstillingen er gemt som `config.accountPreferences`, indtastet af forbindelsen ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Et udeladt eller tomt kort bevarer eksisterende routing. Præferencer aktiverer ikke deaktiverede forbindelser, giver ikke API-nøgleadgang, gendanner ikke kvoteblokerede kandidater eller omgår budgettjek. Hvert forsøg er begrænset til dens konkrete forbindelse, så konto fallback kan ikke springe niveauer bag combo-routeren. Eksisterende sessionsaffinitet kan beholde en kvalificeret konto; ekskludering af kontoen, der er bundet til en indfødt tur, stopper den vending i stedet for lydløst at skifte konto.
+
+Konfigurerede præferencer bruger den kontobevidste Auto-sti: ubundet kontekst-cache, smart-pipeline, kaos og skyggegenveje sendes ikke. Spekulativ afdækning er deaktiveret for disse anmodninger, så reservekonti kan ikke konkurrere med foretrukne. Andre kombinationsstrategier fortolker ikke denne indstilling. Ændring af en kombination væk fra Auto bevarer de gemte præferencer for et senere skifte tilbage.
+
 ## Kombinationsnavne, der matcher et reelt model-id
 
 En kombination, hvis `name` er identisk med et model-id uden præfiks (f.eks. en kombination med navnet `gpt-5.5`), er et **tilsigtet og understøttet mønster**, ikke en fejl: Det er mekanismen til reserveudbydere pr. model-id, som er dokumenteret i [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Da kombinationsopslag udføres før opslag af model-id'er uden præfiks (`getComboForModel()` i `src/sse/services/model.ts`), dirigeres en anmodning om id'et `gpt-5.5` uden præfiks gennem kombinationens destinationer (f.eks. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) i stedet for direkte til en enkelt udbyder — dette genbruger prioriteten af kombinationer før omskrivning, som blev udviklet til [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), og regressionstestes af `tests/unit/responses-combo-resolution-3227.test.ts` og `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
