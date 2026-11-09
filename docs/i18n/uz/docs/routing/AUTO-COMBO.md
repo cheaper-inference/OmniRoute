@@ -127,6 +127,27 @@ Avtomatik baholash har bir soʻrov uchun eng yaxshi provayder/modelni tanlaydi
 | `src/sse/handlers/chat.ts`                                | Integratsiya: auto prefiks uchun qisqa tutashuv        |
 | `src/shared/constants/providers.ts`                       | `SYSTEM_PROVIDERS.auto` tizim yozuvi                   |
 
+## Saqlangan avtomatik kombinatsiyalar uchun hisob sozlamalari
+
+Intelligent Auto muharriri ixtiyoriy taklif qiladi** Hisob sozlamalari** bo'limi. Har bir ulanish Afzal, Oddiy (standart), Zaxira yoki Cheklangan bo'lishi mumkin. Bir nechta ulanishlar bir darajani ulashishi mumkin. Avtomatik birinchi mos daraja ichida scoring/router xatti-harakatini saqlab qoladi; Muvaffaqiyatsiz urinishlar qolgan aniq hisoblarga to'g'ri keladi, zaxiradan oldin odatdagidan afzalroqdir. Cheklangan ulanishlar bu kombinatsiya tomonidan hech qachon ishlatilmaydi.
+
+Sozlama `config.accountPreferences` sifatida saqlanadi, ID ulanishi bilan kalitlanadi:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+O'tkazib yuborilgan yoki bo'sh xarita mavjud marshrutni saqlab qoladi. Afzalliklar oʻchirilgan ulanishlarni yoqmaydi, API kalitiga ruxsat bermaydi, kvota boʻyicha bloklangan nomzodlarni tiklamaydi yoki byudjet tekshiruvlarini chetlab oʻtmaydi. Har bir urinish o'zining aniq ulanishi bilan cheklangan, shuning uchun hisobni qayta tiklash kombinatsiyalangan router orqasida bir darajaga o'ta olmaydi. Mavjud seans yaqinligi tegishli hisobni saqlab qolishi mumkin; hisoblarni jimgina o'zgartirish o'rniga aylanuvchi to'xtash joyiga bog'langan hisob bundan mustasno.
+
+Sozlangan afzalliklar hisob qaydnomasidan xabardor avtomatik yo'ldan foydalanadi: bog'lanmagan kontekst-kesh, smart-pipeline, tartibsizlik va soya yorliqlari yuborilmaydi. Bu soʻrovlar uchun spekulyativ xedjlash oʻchirib qoʻyilgan, shuning uchun zaxira hisoblar afzal qilinganlar bilan raqobatlasha olmaydi. Boshqa kombinatsiyalangan strategiyalar bu sozlamani izohlamaydi. Komboni Avtomatikdan uzoqroqqa o'zgartirish, keyinroq orqaga o'tish uchun saqlangan afzalliklarni saqlab qoladi.
+
 ## Haqiqiy Model Idʼiga Mos Keladigan Combo Nomlari
 
 `name` maydoni oddiy model idʼi bilan bir xil bo‘lgan combo (masalan,

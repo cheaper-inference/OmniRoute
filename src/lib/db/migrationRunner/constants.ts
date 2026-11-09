@@ -166,6 +166,159 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // Vacate feature slot 215 before Team history is rehomed there.
+  {
+    // Published cache reporting used slots now owned by canonical release migrations.
+    fromVersion: "206",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "213",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "214",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "215",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "217",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "218",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "223",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "224",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "225",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "226",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "228",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    fromVersion: "229",
+    fromName: "daily_cached_input",
+    toVersion: "231",
+    toName: "daily_cached_input",
+  },
+  {
+    // Earlier traffic candidates occupied slots now owned by release migrations.
+    fromVersion: "206",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "207",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "213",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "214",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "215",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "217",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "218",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "223",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "224",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "225",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "226",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "228",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "229",
+    fromName: "proxy_payload_traffic",
+    toVersion: "232",
+    toName: "proxy_payload_traffic",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.
