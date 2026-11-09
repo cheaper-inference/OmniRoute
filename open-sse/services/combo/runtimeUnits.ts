@@ -83,7 +83,8 @@ function shuffleUnits(units: ResolvedComboUnit[]): ResolvedComboUnit[] {
 
 function selectWeightedUnit(units: ResolvedComboUnit[]): ResolvedComboUnit | null {
   const total = units.reduce((sum, unit) => sum + Math.max(0, Number(unit.weight) || 0), 0);
-  if (total <= 0) return units[0] || null;
+  // Zero total weight: every unit counts the same, so spread requests instead of pinning the first.
+  if (total <= 0) return units[Math.floor(Math.random() * units.length)] || null;
   let draw = Math.random() * total;
   for (const unit of units) {
     draw -= Math.max(0, Number(unit.weight) || 0);
