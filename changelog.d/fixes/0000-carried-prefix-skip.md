@@ -1,0 +1,1 @@
+- **fix(responses):** a request that sends `previous_response_id` together with the history it already carries no longer gets the stored history added a second time.

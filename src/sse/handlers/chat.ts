@@ -1,6 +1,7 @@
 import { hasQoderCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { randomUUID } from "crypto";
+import { isDeepStrictEqual } from "node:util";
 import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
 import * as chatAdmission from "./chatAdmission.ts";
@@ -368,6 +369,21 @@ const managedComboRejection = () =>
   );
 
 const comboPromoteDeps = { updateCombo, info: log.info, warn: log.warn };
+
+/**
+ * True when a continuation request already starts with the stored history, so
+ * appending it again would show the upstream every turn twice. Equal text alone
+ * proves nothing (a user may repeat a sentence): every stored item must match in
+ * order AND the stored output region must carry an id or call_id.
+ */
+function carriesStoredPrefix(delta: unknown[], prefix: unknown[], output: unknown[]): boolean {
+  if (prefix.length === 0 || delta.length < prefix.length) return false;
+  const hasId = output.some((item) => {
+    const record = item as { id?: unknown; call_id?: unknown } | null;
+    return typeof record?.id === "string" || typeof record?.call_id === "string";
+  });
+  return hasId && isDeepStrictEqual(delta.slice(0, prefix.length), prefix);
+}
 
 // The provider breaker lives in the process-wide registry and getCircuitBreaker() replaces its
 // callbacks on every call. A callback created inside the request handler shares that handler's
@@ -820,7 +836,13 @@ async function handleChatImplementation(
     const deltaInput = Array.isArray((body as { input?: unknown }).input)
       ? (body as { input: unknown[] }).input
       : [];
-    body = { ...body, input: [...stored.input, ...stored.output, ...deltaInput] };
+    const storedPrefix = [...stored.input, ...stored.output];
+    body = {
+      ...body,
+      input: carriesStoredPrefix(deltaInput, storedPrefix, stored.output)
+        ? deltaInput
+        : [...storedPrefix, ...deltaInput],
+    };
     delete (body as { previous_response_id?: unknown }).previous_response_id;
     // resume flag for the attempt store in handleChatCore (inherited downstream via body).
     (body as { _omniroutePreviousResponseResumed?: boolean })._omniroutePreviousResponseResumed =
@@ -2567,10 +2589,7 @@ async function handleSingleModelChat(
           // Retry spent and nothing emitted yet: one hop to a sibling (routing only, no mark).
           log.warn("STREAM", `${provider}/${model} early-EOF retry exhausted — trying one sibling`);
           noteAccountFallback("stream_early_eof", credentials.connectionId);
-          earlyEofOriginal = withRoutingTelemetry(
-            result.response,
-            credentials.connectionId
-          );
+          earlyEofOriginal = withRoutingTelemetry(result.response, credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           continue;
         }
