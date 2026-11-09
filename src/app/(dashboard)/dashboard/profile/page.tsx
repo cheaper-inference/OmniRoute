@@ -280,6 +280,13 @@ export default function ProfilePage() {
               const isHiddenAndLocked = Boolean(badge.hidden) && !isEarned;
               const earnedInfo = earnedBadges.find((b) => b.badgeId === badge.id);
               const rarityColor = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
+              // Rarity tints the earned glyph; a locked glyph is dimmed (its text keeps full ink).
+              const glyphTone = isEarned ? rarityColor : "opacity-50 grayscale";
+              const glyph = (
+                <span className={glyphTone}>
+                  <BadgeIcon icon={isHiddenAndLocked ? null : badge.icon} earned={isEarned} />
+                </span>
+              );
 
               return (
                 <Tile
@@ -296,11 +303,7 @@ export default function ProfilePage() {
                     isHiddenAndLocked && "cursor-default opacity-100"
                   )}
                   data-locked={isEarned ? undefined : "true"}
-                  icon={
-                    <span className={isEarned ? rarityColor : "opacity-50 grayscale"}>
-                      <BadgeIcon icon={isHiddenAndLocked ? null : badge.icon} earned={isEarned} />
-                    </span>
-                  }
+                  icon={glyph}
                   title={
                     <span className="block truncate font-semibold">
                       {badge.hidden && !isEarned ? "???" : translateBadge(badge, "name")}
