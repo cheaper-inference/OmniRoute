@@ -195,6 +195,7 @@ test("POST /v1/images/edits routes a leonardo model to the Leonardo edit instead
       body: JSON.stringify({
         model: "leonardo/phoenix",
         prompt: "make the apple green",
+        size: "576x1024",
         images: [`data:image/png;base64,${REFERENCE.toString("base64")}`],
       }),
     })
@@ -204,4 +205,7 @@ test("POST /v1/images/edits routes a leonardo model to the Leonardo edit instead
   assert.equal(response.status, 200, JSON.stringify(body));
   assert.equal(body.data?.[0]?.b64_json, Buffer.from([7, 7]).toString("base64"));
   assert.equal(seen.generationBody?.init_image_id, "init-1");
+  // The request size reaches Leonardo as width/height, as it does on /v1/images/generations.
+  assert.equal(seen.generationBody?.width, 576);
+  assert.equal(seen.generationBody?.height, 1024);
 });
