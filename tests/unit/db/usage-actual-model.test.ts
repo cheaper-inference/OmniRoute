@@ -88,6 +88,6 @@ test("a fresh install ends up with the actual/requested model indexes", () => {
     .all("connection_notes_model_map", "usage_actual_model") as { version: string }[];
   assert.deepEqual(
     applied.map((row) => row.version),
-    ["232", "233"]
+    ["233", "234"]
   );
 });
