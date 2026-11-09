@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferensi akun",
+    "description": "Jadikan beberapa akun sebagai pilihan utama atau simpan sebagai cadangan untuk combo ini. Perutean otomatis mengurutkan akun di setiap tingkatan. Akun yang tidak tercantum berstatus normal. Izin, batas kuota, dan pengikatan giliran yang sudah ada tetap berlaku.",
+    "preferred": "Pilihan utama",
+    "normal": "Normal",
+    "reserve": "Cadangan",
+    "excluded": "Dikecualikan",
+    "loading": "Memuat akun…",
+    "error": "Tidak dapat memuat akun. Buka kembali editor untuk mencoba lagi.",
+    "missing": "Akun tidak tersedia ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode layanan Codex untuk kunci API ini",
     "description": "Berlaku untuk permintaan Codex, termasuk model Codex di dalam kombinasi. Mode yang dipaksakan mengesampingkan pengaturan klien, pengaturan global, dan default koneksi. Penyedia lain tetap tidak berubah.",
