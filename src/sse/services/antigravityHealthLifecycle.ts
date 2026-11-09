@@ -42,18 +42,14 @@ function scheduleHealthProbeIdle(
   );
 }
 
-export function holdAntigravityHealthThroughResponse(
-  response: Response,
+type HealthOutcome = Parameters<AntigravityHealthAttempt["finish"]>[0];
+
+/** Settlement state shared by the wrapped stream: one finish, one idle timer. */
+function createHealthStreamSettlement(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
   attempt: AntigravityHealthAttempt,
-  probeIdleTimeoutMs = ANTIGRAVITY_PROBE_STREAM_IDLE_TIMEOUT_MS
-): Response {
-  if (!response.body) {
-    attempt.finish("success");
-    return response;
-  }
-  const reader = response.body.getReader();
-  const watcher = createStreamContentWatcher();
-  const decoder = new TextDecoder();
+  probeIdleTimeoutMs: number
+) {
   let settled = false;
   let expired = false;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -63,7 +59,7 @@ export function holdAntigravityHealthThroughResponse(
     if (idleTimer !== null) clearTimeout(idleTimer);
     idleTimer = null;
   };
-  const finish = (outcome: Parameters<AntigravityHealthAttempt["finish"]>[0]) => {
+  const finish = (outcome: HealthOutcome) => {
     if (settled) return;
     settled = true;
     clearIdle();
@@ -96,41 +92,65 @@ export function holdAntigravityHealthThroughResponse(
       releaseReader
     );
   };
+  return {
+    finish,
+    releaseReader,
+    armProbeIdle,
+    isExpired: () => expired,
+    attach(controller: ReadableStreamDefaultController<Uint8Array>) {
+      streamController = controller;
+    },
+  };
+}
+
+export function holdAntigravityHealthThroughResponse(
+  response: Response,
+  attempt: AntigravityHealthAttempt,
+  probeIdleTimeoutMs = ANTIGRAVITY_PROBE_STREAM_IDLE_TIMEOUT_MS
+): Response {
+  if (!response.body) {
+    attempt.finish("success");
+    return response;
+  }
+  const reader = response.body.getReader();
+  const watcher = createStreamContentWatcher();
+  const decoder = new TextDecoder();
+  const state = createHealthStreamSettlement(reader, attempt, probeIdleTimeoutMs);
   const body = new ReadableStream<Uint8Array>({
     start(controller) {
-      streamController = controller;
-      armProbeIdle();
+      state.attach(controller);
+      state.armProbeIdle();
     },
     async pull(controller) {
-      if (expired) return;
+      if (state.isExpired()) return;
       try {
         const chunk = await reader.read();
-        if (expired) return;
+        if (state.isExpired()) return;
         if (chunk.done) {
           watcher.note(decoder.decode());
           watcher.finish();
-          finish(watcher.sawContent() && !watcher.sawError() ? "success" : "ignored");
+          state.finish(watcher.sawContent() && !watcher.sawError() ? "success" : "ignored");
           controller.close();
-          releaseReader();
+          state.releaseReader();
         } else {
-          armProbeIdle();
+          state.armProbeIdle();
           watcher.note(decoder.decode(chunk.value, { stream: true }));
           controller.enqueue(chunk.value);
         }
       } catch (error) {
-        if (expired) return;
-        finish("ignored");
+        if (state.isExpired()) return;
+        state.finish("ignored");
         controller.error(error);
-        releaseReader();
+        state.releaseReader();
       }
     },
     async cancel(reason) {
-      if (expired) return;
-      finish("ignored");
+      if (state.isExpired()) return;
+      state.finish("ignored");
       try {
         await reader.cancel(reason);
       } finally {
-        releaseReader();
+        state.releaseReader();
       }
     },
   });
