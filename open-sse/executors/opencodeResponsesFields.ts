@@ -55,6 +55,7 @@ export function normalizeResponsesTokenFields(body: Record<string, unknown>): vo
  * object, in place. Extracted from sanitizeResponsesBody (see above).
  */
 export function normalizeResponsesReasoningField(body: Record<string, unknown>): void {
+  normalizeOpencodeThinking(body, "openai-responses");
   if (body.reasoning_effort !== undefined && body.reasoning === undefined) {
     body.reasoning = { effort: body.reasoning_effort, summary: "auto" };
   }
@@ -63,4 +64,24 @@ export function normalizeResponsesReasoningField(body: Record<string, unknown>):
     if (!r.summary) r.summary = "auto";
   }
   delete body.reasoning_effort;
+}
+
+/**
+ * OpenCode Console rejects raw `thinking` on non-Claude formats (#19315).
+ * Fold or remove any Claude/adaptive `thinking` field for non-Claude formats.
+ */
+export function normalizeOpencodeThinking(
+  body: Record<string, unknown>,
+  format: string | undefined
+): void {
+  if (format === "claude" || !body.thinking) return;
+  const thinking = body.thinking as Record<string, unknown> | undefined;
+  if (format === "openai-responses") {
+    if (thinking?.type !== "disabled" && body.reasoning === undefined) {
+      body.reasoning = { effort: "medium", summary: "auto" };
+    }
+  } else if (body.reasoning_effort === undefined) {
+    body.reasoning_effort = thinking?.type === "disabled" ? "none" : "medium";
+  }
+  delete body.thinking;
 }

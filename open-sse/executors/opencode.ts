@@ -99,6 +99,7 @@ import {
   clampResponsesCallId,
   coerceResponsesArguments,
   coerceResponsesOutput,
+  normalizeOpencodeThinking,
   normalizeResponsesReasoningField,
   normalizeResponsesTokenFields,
 } from "./opencodeResponsesFields.ts";
@@ -1604,12 +1605,17 @@ export class OpencodeExecutor extends BaseExecutor {
     );
 
     if (key) {
-      if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
+      if (this._requestFormat === "claude") {
         headers["x-api-key"] = key;
       } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
         headers["x-goog-api-key"] = key;
+      } else if (gatedScope && this.usesZenApiKeyAuth()) {
+        headers["x-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
+        if (this.usesZenApiKeyAuth()) {
+          headers["x-api-key"] = key;
+        }
       }
     }
 
@@ -1793,6 +1799,7 @@ export class OpencodeExecutor extends BaseExecutor {
 
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
+      normalizeOpencodeThinking(mb, format);
       if (format !== "openai" || mb.stream !== true) {
         delete mb.stream_options;
       }
