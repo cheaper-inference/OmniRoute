@@ -1,0 +1,1 @@
+- **perf(models):** `/v1/models` no longer rebuilds the full model-lockout list on every request to compute the Copilot rejection version.

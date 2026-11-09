@@ -608,6 +608,14 @@ export async function getRuntimeProviderProfile(provider: string | null | undefi
 const modelLockouts = new Map<string, ModelLockoutEntry>();
 const modelFailureState = new Map<string, ModelFailureState>();
 
+// Bumps on every deliberate write to modelLockouts (set, replace, clear). Expiry is time-driven
+// and is not counted. Lets a caller cache a value derived from the lock set (see
+// copilotModelRejections.ts) instead of re-walking every lock on each read.
+let modelLockRevision = 0;
+export function getModelLockRevision(): number {
+  return modelLockRevision;
+}
+
 // Aliases (e.g. "cx" → "codex") must share lockout state with their canonical
 // provider, otherwise a model locked via one spelling stays routable via the other.
 // Bounded LRU: resolveProviderId is a pure catalog lookup, so evicting an entry
@@ -796,6 +804,7 @@ export function lockModel(
 ): void {
   if (!model) return; // No model → skip model-level locking
   ensureCleanupTimer();
+  modelLockRevision++;
   const key = getModelLockKey(provider, connectionId, model, reason);
   cleanupModelLockKey(key);
   const newUntil = Date.now() + cooldownMs;
@@ -824,12 +833,16 @@ export function lockModel(
 }
 
 // Lock only this exact provider/account/model tuple, never a quota family — see exactModelLock.ts.
-export const lockExactModel = exactModelLock.createLockExactModel(
+const lockExactModelUncounted = exactModelLock.createLockExactModel(
   modelLockouts,
   ensureCleanupTimer,
   cleanupModelLockKey,
   getCanonicalLockProvider
 );
+export const lockExactModel: typeof lockExactModelUncounted = (...args) => {
+  modelLockRevision++;
+  return lockExactModelUncounted(...args);
+};
 
 /**
  * Pick the `exactCooldownMs` to apply to a model lockout (#1308).
@@ -947,6 +960,7 @@ export function clearModelLock(
   model: string | null | undefined
 ): boolean {
   if (!model) return false;
+  modelLockRevision++;
   return exactModelLock.clearMultiKeyLock(
     modelLockouts,
     modelFailureState,
@@ -1100,6 +1114,7 @@ export function decayModelFailureCount(
  * Clear all in-memory model lockouts and failure state (for tests / full reset).
  */
 export function clearAllModelLockouts(): void {
+  modelLockRevision++;
   modelLockouts.clear();
   modelFailureState.clear();
 }
