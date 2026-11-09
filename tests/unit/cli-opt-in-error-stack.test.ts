@@ -19,4 +19,5 @@ test("CLI error formatting tolerates non-Error thrown values", () => {
   assert.equal(formatCliError("unexpected failure", true), "unexpected failure");
   assert.equal(formatCliError({ message: "custom error" }, true), "custom error");
   assert.equal(formatCliError(undefined, false), "undefined");
+  assert.equal(formatCliError(null, true), "null");
 });
