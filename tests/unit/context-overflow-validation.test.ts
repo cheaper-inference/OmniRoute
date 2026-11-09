@@ -36,3 +36,14 @@ test("context overflow bodies that name a token field and a param keep matching"
   assert.equal(isContextOverflowText(vllm), true);
   assert.equal(isContextOverflow400(vllm), true);
 });
+
+test("an explicit overflow message keeps matching when the error code is invalid_value", () => {
+  const explicit = [
+    '{"error":{"code":"invalid_value","message":"input too long"}}',
+    '{"error":{"code":"invalid_value","message":"input is too long for this model"}}',
+  ];
+  for (const error of explicit) {
+    assert.equal(isContextOverflowText(error), true, error);
+    assert.equal(isContextOverflow400(error), true, error);
+  }
+});

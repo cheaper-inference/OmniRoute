@@ -341,7 +341,7 @@ export function isTokenRateLimitWording(errorText: string | null | undefined): b
 
 // Phrases that only a real context overflow uses; they outrank the validation exclusion below.
 const STRONG_CONTEXT_OVERFLOW_RE =
-  /\b(?:maximum context|context (?:length|window))\b|context_length_exceeded|\b(?:prompt|input) is too long\b/i;
+  /\b(?:maximum context|context (?:length|window))\b|context_length_exceeded|\b(?:prompt is |input (?:is )?)too long\b/i;
 
 /** Shared context-overflow text match with TPM/RPM and parameter-validation exclusions. */
 export function isContextOverflowText(errorText: string | null | undefined): boolean {
