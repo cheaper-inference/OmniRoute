@@ -1231,7 +1231,9 @@ async function main() {
     process.stderr.write(`\n──── full-ci explicit static gates (${gates.length}) ────\n`);
     for (const g of gates) {
       const prior = results.find((result) => result.id === curatedEquivalentId(g.id));
-      if (prior) prior.kind = g.kind;
+      // A declared required gate upgrades an old curated drift bucket; it never downgrades a
+      // curated hard result (for example incomplete workflow-audit evidence).
+      if (prior && g.kind === "hard") prior.kind = "hard";
       // Skip a gate the curated pass already ran with the same id (avoid double-running lint).
       if (already.has(g.id)) continue;
       const collectsMetrics = g.args[1] === "quality:collect";
