@@ -71,6 +71,36 @@ describe("Analytics token cards", () => {
     );
   });
 
+  it("keeps card labels and descriptions distinct and retains a measured zero request count", () => {
+    renderCards({ ...summary, totalRequests: 0 });
+    const groups = screen.getAllByRole("group");
+    const labelIds = groups.map((group) => group.getAttribute("aria-labelledby"));
+    expect(new Set(labelIds).size).toBe(5);
+    for (const group of groups) {
+      const label = document.getElementById(group.getAttribute("aria-labelledby")!);
+      expect(group.contains(label)).toBe(true);
+      const descriptionId = group.querySelector("dd")!.getAttribute("aria-describedby");
+      if (descriptionId) expect(group.contains(document.getElementById(descriptionId))).toBe(true);
+    }
+    expect(screen.getAllByText(`0 ${en.analytics.chartRequests}`)).toHaveLength(1);
+    expect(
+      within(screen.getByRole("group", { name: "Total Tokens" })).getByText(
+        `0 ${en.analytics.chartRequests}`
+      )
+    ).toBeTruthy();
+    expect(
+      screen
+        .getByRole("group", { name: "Output Tokens" })
+        .querySelector("dd")!
+        .hasAttribute("aria-describedby")
+    ).toBe(false);
+  });
+
+  it.each([null, undefined])("omits an unknown request count (%s)", (totalRequests) => {
+    renderCards({ ...summary, totalRequests });
+    expect(screen.queryByText(new RegExp(en.analytics.chartRequests))).toBeNull();
+  });
+
   it("retains exact accessible counts and keyboard tooltip triggers in compact mode", () => {
     renderCards(summary, "compact");
     const input = count("Input Tokens", "4,000");
