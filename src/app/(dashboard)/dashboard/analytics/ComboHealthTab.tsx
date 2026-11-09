@@ -107,8 +107,8 @@ function MetricBlock({
   return (
     <div className="rounded-lg border border-border bg-surface-2 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
-        <Icon name={icon} size={16} />
-        {label}
+        <Icon name={icon} size={16} className="shrink-0" />
+        <span className="truncate">{label}</span>
       </div>
       <div className="mt-2 text-2xl font-semibold text-text-main">{value}</div>
       {subValue ? <div className="mt-1 text-xs text-text-muted">{subValue}</div> : null}
@@ -288,7 +288,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
           </div>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthAutopilotDescription")}</p>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-90">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2 lg:min-w-90 2xl:grid-cols-4">
           <MetricBlock
             icon="monitor_heart"
             label={t("comboHealthIssues")}

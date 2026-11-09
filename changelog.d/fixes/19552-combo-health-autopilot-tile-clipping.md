@@ -1,0 +1,1 @@
+- **dashboard:** The Combo Health Autopilot metric grid uses 2 columns instead of 4 at the `lg` breakpoint to prevent tile labels from clipping when the panel header switches to row layout.
