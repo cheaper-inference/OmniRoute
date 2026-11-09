@@ -24,11 +24,18 @@ const dailyCounts = new Map<string, DailyCount>();
 
 // ── RPM (sliding 60s window) state ───────────────────────────────────────────
 
-const minuteWindows = new Map<string, number[]>();
+// A window is an append-only array plus a `head` index: expiring an entry moves `head`
+// instead of copying the array, so each request costs O(1) amortised, not O(window).
+interface SlidingWindow {
+  entries: number[];
+  head: number;
+}
+
+const minuteWindows = new Map<string, SlidingWindow>();
 
 // ── TPM (sliding 60s token window) state ─────────────────────────────────────
 
-const tokenWindows = new Map<string, number[]>();
+const tokenWindows = new Map<string, SlidingWindow>();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,45 +105,40 @@ export function getModelRpm(modelId: string): number {
   return lookupValue(modelId, "rpm");
 }
 
-/** Prune timestamps older than 60 seconds from a model's window. */
-function pruneMinuteWindow(key: string): void {
-  const now = Date.now();
-  const cutoff = now - 60_000;
-  const timestamps = minuteWindows.get(key);
-  if (!timestamps) return;
-  let i = 0;
-  while (i < timestamps.length && timestamps[i] < cutoff) i++;
-  if (i > 0) {
-    minuteWindows.set(key, timestamps.slice(i));
+/** Drop entries older than 60s from a window; `stride` is the slots per entry. Deletes the key when empty. */
+function pruneWindow(map: Map<string, SlidingWindow>, key: string, stride: number): void {
+  const win = map.get(key);
+  if (!win) return;
+  const cutoff = Date.now() - 60_000;
+  const { entries } = win;
+  while (win.head < entries.length && entries[win.head] < cutoff) win.head += stride;
+  if (win.head >= entries.length) {
+    map.delete(key);
+  } else if (win.head >= 1024 && win.head * 2 >= entries.length) {
+    win.entries = entries.slice(win.head); // compact rarely: cost is amortised over `head` expiries
+    win.head = 0;
   }
 }
 
-function pruneTokenWindow(key: string): void {
-  const now = Date.now();
-  const cutoff = now - 60_000;
-  const entries = tokenWindows.get(key);
-  if (!entries) return;
-  let i = 0;
-  while (i < entries.length && entries[i] < cutoff) i += 2;
-  if (i > 0) {
-    tokenWindows.set(key, entries.slice(i));
-  }
+function pushEntry(map: Map<string, SlidingWindow>, key: string, ...values: number[]): void {
+  const win = map.get(key);
+  if (win) win.entries.push(...values);
+  else map.set(key, { entries: values, head: 0 });
 }
 
 export function incrementMinuteRequestCount(modelId: string): void {
   if (!modelId) return;
   const key = stripModelPrefix(modelId);
-  pruneMinuteWindow(key);
-  const timestamps = minuteWindows.get(key) ?? [];
-  timestamps.push(Date.now());
-  minuteWindows.set(key, timestamps);
+  pruneWindow(minuteWindows, key, 1);
+  pushEntry(minuteWindows, key, Date.now());
 }
 
 export function getMinuteRequestCount(modelId: string): number {
   if (!modelId) return 0;
   const key = stripModelPrefix(modelId);
-  pruneMinuteWindow(key);
-  return minuteWindows.get(key)?.length ?? 0;
+  pruneWindow(minuteWindows, key, 1);
+  const win = minuteWindows.get(key);
+  return win ? win.entries.length - win.head : 0;
 }
 
 export function isRpmExhausted(modelId: string): boolean {
@@ -158,21 +160,19 @@ export function getModelTpm(modelId: string): number {
 export function incrementTokenUsage(modelId: string, promptTokens: number): void {
   if (!modelId || !Number.isFinite(promptTokens) || promptTokens <= 0) return;
   const key = stripModelPrefix(modelId);
-  pruneTokenWindow(key);
-  const entries = tokenWindows.get(key) ?? [];
-  entries.push(Date.now(), promptTokens);
-  tokenWindows.set(key, entries);
+  pruneWindow(tokenWindows, key, 2);
+  pushEntry(tokenWindows, key, Date.now(), promptTokens);
 }
 
 export function getMinuteTokenCount(modelId: string): number {
   if (!modelId) return 0;
   const key = stripModelPrefix(modelId);
-  pruneTokenWindow(key);
-  const entries = tokenWindows.get(key);
-  if (!entries) return 0;
+  pruneWindow(tokenWindows, key, 2);
+  const win = tokenWindows.get(key);
+  if (!win) return 0;
   let total = 0;
-  for (let i = 1; i < entries.length; i += 2) {
-    total += entries[i];
+  for (let i = win.head + 1; i < win.entries.length; i += 2) {
+    total += win.entries[i];
   }
   return total;
 }
