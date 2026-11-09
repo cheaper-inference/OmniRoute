@@ -33,10 +33,11 @@ type ThinkingBudgetConfig = {
 import {
   capThinkingBudget,
   getDefaultThinkingBudget,
+  getNativeGeminiThinkingSpec,
   getResolvedModelCapabilities,
   supportsReasoning,
+  type GeminiThinkingLevel,
 } from "@/lib/modelCapabilities";
-import { getModelSpec, type GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
 import {
   jsonLengthStrippingBase64DataUris,
   rawLengthStrippingBase64DataUris,
@@ -152,7 +153,7 @@ const NATIVE_GEMINI_EFFORT_LEVELS: ReadonlyMap<string, GeminiThinkingLevel> = ne
 ]);
 
 function nativeGeminiLevels(model: string): readonly GeminiThinkingLevel[] {
-  return getModelSpec(model)?.geminiThinkingLevels ?? [];
+  return getNativeGeminiThinkingSpec(model).levels;
 }
 
 function nativeGeminiEffort(
@@ -250,7 +251,7 @@ export function resolveNativeGeminiThinking(
   return nativeGeminiRequestControls(
     body,
     supported,
-    getModelSpec(model)?.defaultGeminiThinkingLevel
+    getNativeGeminiThinkingSpec(model).defaultLevel
   );
 }
 
