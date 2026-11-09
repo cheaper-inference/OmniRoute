@@ -291,6 +291,95 @@ Ngwakọta mkpakọ bụ profaịlụ mkpakọ akpọrọ aha enwere ike itinye 
 
 Ebe ngosi Dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Ntuziaka ndị achọrọ / onye ọrụ (CCR & session-dedup)
+
+CCR (`ccr`) na `session-dedup` dochie ma ọ bụ wepụ ederede wee hapụ a** akara** n'azụ. Nkebi a bụ nrụtụ aka nke onye na-arụ ọrụ maka ijikọ onye ahịa elu, na-agụ akara abụọ, na iweghachite ma ọ bụ chọpụta ọdịnaya ekpuchirila. A na-ekpuchi ígwè ọrụ nke injin ọ bụla n'elu; Nke a bụ oyi akwa "kedu ka m ga-esi agba ya".
+
+### Ụgbọ njem & ebe njedebe
+
+Enwere ike iru ihe nkesa MCP nke na-ekpughe ngwá ọrụ CCR n'ụzọ atọ. URL ndabere ndabere bụ `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Ụgbọ njem                                      | URL /iwu                                | Ihe ndetu                                                                                                                            |
+| ---------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP nwere ike ịgbagharị (onye ahịa, akwadoro) | `http://localhost:20128/api/mcp/stream` | Ndị ahịa MCP na-akparịta ụka.                                                                                                        |
+| Legacy SSE singleton                           | `http://localhost:20128/api/mcp/sse`    | Ụgbọ njem singleton ochie. Ọ** na-emechi** streamable sessions; jiri `streamable-http` ahịa megide `/api/mcp/stream`, ọ bụghị nke a. |
+| stdio                                          | `omniroute --mcp`                       | Maka IDE MCP nhazi nke na-emepụta usoro ahụ. Enweghị ọkọlọtọ `--dev` ; `omniroute --mcp` bụ ebe ntinye stdio.                        |
+
+### Nkwakọba ọkwa (ihe na-adị ndụ ma malitegharịa)
+
+CCR bu a** okpukpu abụọ** ụlọ ahịa, ọ bụghị naanị na ebe nchekwa:
+
+- **Ọkwa ebe nchekwa dị ọkụ** — kwa ngọngọ okpu 2 MiB, kwa onye isi 16 MiB, zuru ụwa ọnụ 64 MiB. Ndenye ndabara na 24 h TTL (oke ụbọchị 7). Mweghachi MCP zuru ezu site na ebe nchekwa na-ekpuchi na 256 KiB; A ka na-enweta ihe ọ bụla buru ibu site na ụdịdị grep/grep.
+- **Tier SQLite na-adịgide adịgide** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, na ndabara) — na-akwado ọkwa in-ncheta ka ngọngọ na-adị ndụ LRU nchụpụ, ịmalitegharịa, ma ọ bụ weghachite ọdịda na oge ọzọ. Ahịrị ahụ na-edobe TTL ngọngọ ahụ, yabụ ngọngọ gafere TTL ya pụọ na ọkwa abụọ ahụ.
+
+Ndị nche atọ na-edobe ọkwa na-adịgide adịgide — ihe mgbochi na-edobe ebe nchekwa-naanị mgbe:
+
+1. ihe mgbochi ahụ agwụla** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. oge ịgba ọsọ bụ oge ịgba ọsọ ígwé ojii (enweghị diski mpaghara);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Ya mere, "ngbochi ahụ kwụsịrị" abụghị akụkọ mmalite mmalite: ihe mgbochi sub-512 KB na mpaghara, oge na-adịghị na ígwé ojii na-adị ndụ ma malitegharịa site na ọkwa na-adịgide adịgide ruo mgbe TTL ya ga-agwụ. Lee [ntụaka gburugburu](../reference/ENVIRONMENT.md) maka mgbanwe.
+
+### Ihe nrịbama abụọ ahụ
+
+| Ihe nrịbama                           | Pụtara                                                                                                                                | Ihe nlereanya kwesịrị ime                                                                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | A na-echekwa ọdịnaya nke nnukwu ngọngọ.                                                                                               | Kpọọ `omniroute_ccr_retrieve` na ya** 24-hex hash depụtaghachiri verbatim** iji nwetaghachi ederede izizi.                                                                                        |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided ederede ezigarala n'oge mbụ nke otu nnọkọ ahụ. Nke a bụ ihe** ụma ele anya azụ** , ọ bụghị mfu ma ọ bụ njehie. | Mee** ọ bụghị** kpọọ ngwá ọrụ ọ bụla ma mee** ọ bụghị** gbalịa 'ịrụgharịa' ya. Ihe omume mbụ nke ederede bụ akwụkwọ edemede; A naghị edegharị ntụgharị nke ugbu a, a na-ewepụ ya na ntụgharị ọzọ. |
+
+The `[dedup:ref]` anya-azụ bụ a kpachaara anya protocol mkpebi — ọ dịghị tupu ezipụ nwughari. Were ya dị ka "edemede a adịlarị na waya na mbụ na nnọkọ a."
+
+### Ihe ndị ahịa chọrọ
+
+- **Igodo (stdio):** onye na-akpọ stdio anaghị eburu njirimara onye ọ bụla, yabụ ọ na-eji `OMNIROUTE_API_KEY` gosi ya (nke edobere na `env` nkesa MCP ). Na-enweghị ya, onye na-akpọ oku enweghị aha yana ngwaọrụ ndị chọrọ onye isi ụlọ akwụkwọ nwere ike weda ya ala.
+- **`tools[]` bụ ntụ ntụ ntụ.** A na-agbaba ntuziaka CCR eweghachi-protocol (#8033).** naanị** mgbe `tools[]` kpọsara arịrịọ ahụ gosipụtara na onye ahịa nwere ike iru `omniroute_ccr_retrieve` n'ezie. Egwuregwu a bụ egwuregwu nzọ ụkwụ nke onye nkewa ga-eke (`__`, `.`, `/`, `:`) — enwebeghị eriri obere — nke mere na aha enweghị aha dịka `mcp__gateway__omniroute_ccr_retrieve` ka na-agụ. `tools[]` na-anọghị ma ọ bụ nke na-adakọghị pụtara na agbanyeghị ntuziaka _not_, site na imewe.
+- **`codemode:false` (ndị ahịa OpenCode ).** OpenCode na-adabara na Usoro Koodu, nke na-akpọsa naanị ngwa ala ya na ihe nlereanya yana** adịghị** tinye ngwa MCP na ndepụta `tools[]` nke ala. Tọọ `codemode: false` na ntinye nkesa MCP ka akpọsa ngwá ọrụ `omniroute_ccr_*`. Nke a bụ a** onye ahịa** ntọala, ọ bụghị otu OmniRoute. Ọ nwetaghị ntụziaka CCR ahụ: OpenCode na-akpọ ngwá ọrụ `<server>_<tool>`, ya mere sava a na-akpọ `omniroute` na-ekpughe `omniroute_omniroute_ccr_retrieve`, na `_` abụghị otu n'ime ndị na-ekewapụta ya.
+- **Ndị isi.** Nchekwa na iweghachi dịpụrụ adịpụ maka onye isi ụlọ akwụkwọ (kwa igodo API ). Igodo na-ahụ naanị ngọngọ nke ya.
+
+### Mpaghara kwa ngwá ọrụ
+
+Mmanye oke na-adị mgbe niile maka ndị na-akpọ HTTP/SSE dị warara. Ngwa `omniroute_` CCR chọrọ:
+
+| Ngwá ọrụ                 | Oke                 |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Oghere efu na-eweghachite otu**MCP ngwaọrụ njehie nsonaazụ** (`isError: true`, ọ bụghị ihe HTTP 403 — na `403 LOCAL_ONLY` bụ iche iche loopback ụzọ-eche nche auth): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Obere igodo dịpụrụ adịpụ nwere ike ijide `mcp:connect` (na-enye ikike `/api/mcp/` mpaghara-naanị arụpụta ihe) gbakwunyere kpọmkwem read/write scope ọ chọrọ.
+
+### Matriks ndị ahịa
+
+| Onye ahịa         | Ụgbọ njem                             | Config iji                                                                                                                                                                                                                                      | `tools[]` kpọsara? (ntụziaka → CCR agbanyere)                                                                                                                                       |
+| ----------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| koodu Claude      | streamable-http                       | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                               | Ee — MCP-nwere ike; igba ogwu.                                                                                                                                                      |
+| Cursor / Cline    | `stdio`** ma ọ bụ** `streamable-http` | stdio: `omniroute --mcp` nwere `OMNIROUTE_API_KEY` na `env`; ma ọ bụ ntinye MCP dịpụrụ adịpụ na-atụ aka na `http://localhost:20128/api/mcp/stream` (lee [Nhazi Nhazi → MCP Nhazi ndị ahịa](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ee — kpọsaa ngwá ọrụ `omniroute_ccr_*`.                                                                                                                                             |
+| OpenCode          | streamable-http                       | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, gbakwunyere `codemode: false`                                                                                                                                         | Ngwa ndị ejiri `codemode: false` kpọsa ozi; A ka etinyeghị ntuziaka ahụ, n'ihi na `omniroute_omniroute_ccr_retrieve` adabaghị (lee [prerequisites Client](#client-prerequisites) ). |
+| Mepee AI-dakọtara | OpenAI dakọtara HTTP (mmecha nkata)   | Ọkọlọtọ nkata-emecha ahịa megide ebe njedebe dakọtara OpenAI                                                                                                                                                                                    | **Ọ dịghị mgbe** — a naghị agwa onye na-akpọ OpenAI dakọtara ka ọ kpọọ ngwá ọrụ ahụ, a naghị agbanye ntụziaka ahụ.                                                                  |
+
+### Oke iweghachi & pagination
+
+A na-ebibiri nsonaazụ ederede MCP gburugburu `mcpAccessibility.maxTextChars` ( `50000` ndabara). Mweghachi `full` nke ngọngọ bụ 256 KiB —** enweghị oke iweghachite n'uju** . Mgbe `chars=N` ngọngọ buru ibu, depụta ya kama ịdọrọ ihe niile:
+
+- Iwu nke isi mkpịsị aka:**`chars > 40000` → jiri a `mode`** , ọ dịghị mgbe iferi juru.
+- `mode:"grep"` — regex `pattern` dabara n'ahịrị n'ahịrị, ruo 1,000 ahịrị dakọtara (`unique: true` drops repeats), dị ọnụ ala maka "chọta otu ahịrị m chọrọ."
+- `mode:"lines"` — akara ahịrị 1-indexed; chọrọ ma `start` na `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` ahịrị.
+- `mode:"stats"` — ahịrị, agwa, na byte na-agụta na-enweghị ahụ.
+
+Jiri `mode:"lines"` jiri `start`/`end` gaa ije ogologo ngọngọ na ibe kama ịrịọ ihe niile ozugbo.
+
+### Ịkpọ aha ngwá ọrụ
+
+A na-akpọ ngwá ọrụ eweghachite ugbu a `omniroute_ccr_retrieve` (ngọnarị `omniroute_` bụ ihe arụrụ arụ ụbọchị maka ndakọrịta aha ihe nkesa). Aha ngwa suffix nwere oke dị ọcha yana ndozi maka nsonaazụ MCP JSON mkpirisi etiti eriri ka a na-esochi ihe nleba anya elu; ibe a na-edekọ omume ugbu a, naanị mbupu.
+
+### okirikiri ndụ nke oge
+
+Streamable-HTTP sessions na-abaghị uru ma ihe nkesa na-aghọrọ ha; Window na-abaghị uru bụ `MCP_SESSION_IDLE_MS` na-adịgide adịgide (nke a na-akpọ aha, ọ bụghị uru nwere koodu siri ike, ya mere ibe a anaghị agbagharị mgbe ọ gbanwere). Ihe mgbaàmà nke nnọkọ a na-eweghị ihe ubi bụ HTTP 404 nwere `Unknown Mcp-Session-Id` — ọgwụgwọ bụ ijikọ ma ọ bụ malitegharịa nnọkọ ahụ,** ọ bụghị** ka ịtụgharị igodo, gbanwee oghere, ma ọ bụ nyegharịa ngwaọrụ aha.
+
 ## Ebe API
 
 | Ụzọ                                    | Ebumnuche                                                     |
@@ -339,9 +428,9 @@ Mkpakọ na-egosipụta ngwa MCP ise:
 - **Ngwugwu asụsụ Caveman `de` / `fr` / `ja` ezughị ezu.** Ha na-ebufe iwu `context` + `filler` + `structural` mana enweghị ngwugwu `dedup` / `ultra`, ya mere ike `ultra` adịghị ike karịa `full` maka asụsụ ndị ahụ (ha na-eji naanị iwu nke ha — enweghị ndabere na-agbachi nkịtị na iwu `dedup`/`ultra` Bekee, nke ga-emebi ederede mba ọzọ). `en` / `es` / `id` / `pt-BR` zuru ezu. A na-anabata onyinye nke `dedup.json` + `ultra.json` maka ngwugwu ndị ezughị ezu.
 - **Telemetry agbakọtara na-edepụta naanị injin ndị ejikọtara.** Nzọụkwụ pipeline agbakọtara nke injin ya gbara ọsọ mana o mepụtara nchekwa 0 % na-eweghachi `stats:null` ma yabụ na ọ pụtaghị na `engineBreakdown` — enweghị ike ịmata ya na nzọụkwụ a wụpụrụ. Ịmata ọdịiche dị n'etiti "gbaa ọsọ, 0 %" na "wụpụrụ" ga-achọ mgbanwe ụdị nbibi ma yigharịrị ya.
 
-## Nkwenye
+## nkwado
 
-Ọnụ ụzọ ndị a na-elekwasị anya maka mpaghara a bụ:
+Ọnụ ụzọ elekwasị anya maka mpaghara a bụ:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

@@ -120,16 +120,16 @@ Accès via : WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Configuration des fournisseurs
 
-Pour ajouter en masse des connexions par clé API à partir d’un fichier CSV ou JSON, utilisez **Tableau de bord → Fournisseurs → Importer depuis un fichier**. Les colonnes sont positionnelles (`provider,name,apiKey,baseUrl,priority`) ; `provider` doit déjà exister en tant que fournisseur géré ou nœud compatible. Consultez [Importer des fournisseurs depuis un fichier CSV ou JSON](../providers/CSV-IMPORT.md).
+Pour ajouter en masse des connexions avec clé API depuis un fichier CSV ou JSON, utilisez **Tableau de bord → Fournisseurs → Importer depuis un fichier**. Les colonnes sont positionnelles (`provider,name,apiKey,baseUrl,priority`) ; `provider` doit déjà exister en tant que fournisseur géré ou nœud compatible. Consultez [Importer des fournisseurs depuis un fichier CSV ou JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Fournisseurs par abonnement
+### 🔐 Fournisseurs d’abonnement
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Tableau de bord → Fournisseurs → Connecter Claude Code
 → Connexion OAuth → Actualisation automatique du jeton
-→ Suivi des quotas sur 5 heures et hebdomadaires
+→ Suivi des quotas de 5 heures et hebdomadaires
 
 Modèles :
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Modèles :
   cc/claude-haiku-4-5-20251001
 ```
 
-**Conseil de pro :** utilisez Opus pour les tâches complexes et Sonnet pour la rapidité. OmniRoute suit le quota par modèle !
+**Conseil :** utilisez Opus pour les tâches complexes et Sonnet pour la rapidité. OmniRoute suit le quota par modèle !
 
-Aucun navigateur sur l’hôte OmniRoute ? Exécutez `claude setup-token` partout où Claude Code est connecté, puis collez le jeton valable un an dans l’onglet **Jeton de configuration**. Consultez [Claude Code avec un jeton de configuration](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Pas de navigateur sur l’hôte OmniRoute ? Exécutez `claude setup-token` depuis n’importe quel endroit où Claude Code est connecté, puis collez le jeton valable un an dans l’onglet **Jeton de configuration**. Consultez [Claude Code avec un jeton de configuration](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Les routes compatibles avec Claude et Claude Code conservent l’effort de réflexion `max` pour les modèles Opus et Sonnet. Les modèles Haiku n’acceptent pas le niveau d’effort `max` ; OmniRoute abaisse donc cette requête à un budget de réflexion élevé avant de l’envoyer au fournisseur en amont.
+Les routes compatibles avec Claude et Claude Code préservent le niveau d’effort de réflexion `max` pour les
+modèles Opus et Sonnet. Les modèles Haiku n’acceptent pas le niveau d’effort `max`, donc OmniRoute
+réduit cette requête à un budget de réflexion élevé avant de l’envoyer au service en amont.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Tableau de bord → Fournisseurs → Connecter Codex
 → Connexion OAuth (port 1455)
-→ Réinitialisation toutes les 5 heures et hebdomadaire
+→ Réinitialisation toutes les 5 heures et chaque semaine
 
 Modèles :
   cx/gpt-5.5
@@ -172,42 +174,58 @@ Modèles :
   gh/gemini-3.1-pro-preview
 ```
 
+**Crédits IA (facturation basée sur les jetons).** Lorsque GitHub indique `credits_used` pour le
+compte, la carte des limites du fournisseur affiche une ligne **Crédits IA** avec les crédits
+consommés pendant la période de facturation actuelle, y compris pour les forfaits d’organisation
+illimités.
+
+**Limite locale des crédits IA.** Modifiez une connexion GitHub et définissez **Limite de crédits IA par
+période de facturation** (`providerSpecificData.githubCreditLimit`). Une valeur vide la désactive ; `0`
+ignore toujours la connexion. Lorsque la dernière mesure d’utilisation est supérieure ou égale à la limite,
+la sélection du compte ignore cette connexion et le routage bascule vers vos autres connexions, comme
+avec une coupure liée à une politique de quota. Le contrôle lit les données d’utilisation que
+l’actualisation périodique des quotas collecte déjà — il n’appelle jamais GitHub pendant le traitement de
+la requête — et adopte une stratégie de tolérance aux erreurs : une mesure manquante ou obsolète (datant
+de plus de 15 minutes ou provenant d’une période de facturation déjà réinitialisée) ne bloque pas la
+connexion. Il s’agit d’une protection locale, **et non d’un plafond de dépenses garanti** : les retards de
+rapport de GitHub, l’intervalle d’actualisation, les requêtes en cours et l’utilisation en dehors
+d’OmniRoute peuvent le dépasser. Utilisez les contrôles de dépenses propres à GitHub pour appliquer un
+plafond strict.
+
 ### 💰 Fournisseurs économiques
 
-#### GLM-4.7 (Réinitialisation quotidienne, 0,6 $/1M)
+#### GLM-4.7 (réinitialisation quotidienne, 0,6 $/1M)
 
 1. Inscrivez-vous : [Zhipu AI](https://open.bigmodel.cn)
 2. Obtenez une clé API depuis Coding Plan
 3. Tableau de bord → Ajouter une clé API : Fournisseur : `glm`, Clé API : `your-key`
 
-**Utilisation :** `glm/glm-4.7` — **Conseil de pro :** Coding Plan offre un quota 3× supérieur pour 1/7 du coût ! Réinitialisation quotidienne à 10 h 00.
+**Utilisation :** `glm/glm-4.7` — **Conseil :** Coding Plan offre 3× plus de quota pour 1/7 du coût ! Réinitialisation quotidienne à 10 h 00.
 
-#### MiniMax M2.1 (Réinitialisation toutes les 5 h, 0,20 $/1M)
+#### MiniMax M2.1 (réinitialisation toutes les 5 h, 0,20 $/1M)
 
 1. Inscrivez-vous : [MiniMax](https://www.minimax.io)
 2. Obtenez une clé API → Tableau de bord → Ajouter une clé API
 
-**Utilisation :** `minimax/MiniMax-M2.1` — **Conseil de pro :** l’option la moins chère pour les contextes longs (1M de jetons) !
+**Utilisation :** `minimax/MiniMax-M2.1` — **Conseil :** l’option la moins chère pour un long contexte (1M de jetons) !
 
-#### Kimi K2 (Forfait fixe de 9 $/mois)
+#### Kimi K2 (9 $/mois fixe)
 
 1. Abonnez-vous : [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Obtenez une clé API → Tableau de bord → Ajouter une clé API
 
-**Utilisation :** `kimi/kimi-k2.5` — **Conseil de pro :** un forfait fixe de 9 $/mois pour 10M de jetons, soit un coût effectif de 0,90 $/1M !
+**Utilisation :** `kimi/kimi-k2.5` — **Conseil :** 9 $/mois fixes pour 10M de jetons = coût effectif de 0,90 $/1M !
 
 #### Baidu Qianfan / ERNIE
 
 1. Inscrivez-vous : [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Créez une clé API Qianfan → Tableau de bord → Ajouter une clé API : Fournisseur : `qianfan`
 
-**Utilisation :** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou un autre identifiant de modèle Qianfan compatible avec OpenAI.
+**Utilisation :** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ou un autre identifiant de modèle compatible avec l’API OpenAI de Qianfan.
 
 ### 🆓 Fournisseurs GRATUITS
 
-Les fournisseurs gratuits sans authentification disposent d’un interrupteur à côté de **Aucune authentification requise** sur leur page.
-Sa désactivation désactive ce fournisseur, le retire des vues configurée/compacte des fournisseurs et
-retire ses modèles de `/v1/models`.
+Les fournisseurs gratuits sans authentification possèdent un interrupteur à côté de **Aucune authentification requise** sur leur page. Le désactiver désactive ce fournisseur, le supprime des vues Fournisseurs configurés/compactes et supprime ses modèles de `/v1/models`.
 
 #### Qoder (9 modèles GRATUITS)
 
@@ -220,7 +238,7 @@ Modèles : if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, 
 #### Kiro (Claude GRATUIT)
 
 ```bash
-Tableau de bord → Connecter Kiro → AWS Builder ID ou Google/GitHub → Environ 50 crédits/mois
+Tableau de bord → Connecter Kiro → AWS Builder ID ou Google/GitHub → environ 50 crédits/mois
 
 Modèles : kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -335,65 +353,65 @@ Modèle : cc/claude-opus-4-7
 
 ---
 
-## 🚀 Déploiement
+## Déploiement 🚀
 
-### Installation globale avec npm (recommandée)
+### Installation globale de npm (recommandé)
 
 ```bash
 npm install -g omniroute
 
-# Créer le répertoire de configuration
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Créer le fichier .env (voir .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Démarrer le serveur
+# Start server
 omniroute
-# Ou avec un port personnalisé :
+# Or with custom port:
 omniroute --port 3000
 ```
 
-La CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`.
+Le CLI charge automatiquement `.env` depuis `~/.omniroute/.env` ou `./.env`. Un `./.env` dans le répertoire de travail ne peut définir qu'une courte liste autorisée de clés (ports, `REQUIRE_API_KEY`, paramètres régionaux et paramètres de couleur) ; mettez tout le reste dans `~/.omniroute/.env`. Voir [les contrats de lancement CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Mode barre d’état système
+### Mode bac
 
-Démarrez OmniRoute dans la barre d’état système :
+Démarrez OmniRoute dans la barre d'état système :
 
 ```bash
 omniroute serve --tray
 ```
 
-La commande se termine une fois que le serveur et l’icône de la barre d’état système sont prêts.
+La commande revient une fois que le serveur et le plateau sont prêts.
 
-Le serveur continue de fonctionner sans le terminal.
+Le serveur continue sans le terminal.
 
-Le mode barre d’état système prend en charge macOS, Windows et les sessions Linux graphiques. Il n’ouvre pas automatiquement le tableau de bord.
+Le mode Tray prend en charge les sessions macOS, Windows et graphiques Linux. Le mode barre d’état n’ouvre pas automatiquement le tableau de bord.
 
-Utilisez le menu de la barre d’état système pour effectuer les actions suivantes :
+Utilisez le menu de la barre d'état pour ces actions :
 
-- Ouvrir le tableau de bord.
-- Ouvrir `/dashboard/logs`.
-- Modifier le démarrage automatique.
-- Arrêter OmniRoute.
+- Ouvrez le tableau de bord.
+- Ouvrez `/dashboard/logs`.
+- Changer le démarrage automatique.
+- Arrêtez OmniRoute.
 
-Ne combinez pas `--tray` avec les options suivantes :
+Ne combinez pas `--tray` avec ces options :
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Ces modes nécessitent une gestion différente des processus.
+Ces modes nécessitent une appropriation des processus différente.
 
-Activez le démarrage lors de la prochaine connexion à la machine :
+Activer le démarrage à la prochaine connexion de la machine :
 
 ```bash
 omniroute autostart enable
 ```
 
-Le démarrage automatique utilise le mode barre d’état système sur macOS, Windows et les sessions Linux graphiques. Sous Linux sans interface graphique, il utilise le service utilisateur systemd existant.
+Le démarrage automatique utilise le mode barre d'état sur les sessions macOS, Windows et graphique Linux. Headless Linux utilise le service utilisateur systemd existant.
 
-Désactivez le démarrage à la connexion :
+Désactivez le démarrage à la connexion :
 
 ```bash
 omniroute autostart disable
@@ -401,16 +419,16 @@ omniroute autostart disable
 
 ### Désinstallation
 
-Lorsque vous n’avez plus besoin d’OmniRoute, nous proposons deux scripts rapides pour une suppression propre :
+Lorsque vous n'avez plus besoin OmniRoute, nous fournissons deux scripts rapides pour une suppression propre :
 
-| Commande                 | Action                                                                                                                |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Supprime l’application du système, mais **conserve votre base de données et vos configurations** dans `~/.omniroute`. |
-| `npm run uninstall:full` | Supprime l’application ET **efface définitivement toutes les configurations, clés et bases de données**.              |
+| Commande                 | Action                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Supprime l'application système mais** conserve votre DB et vos configurations** en `~/.omniroute`.         |
+| `npm run uninstall:full` | Supprime définitivement l'application AND** efface toutes les configurations, clés et bases de données** . |
 
-> Remarque : pour exécuter ces commandes, accédez au dossier du projet OmniRoute (si vous l’avez cloné), puis lancez-les. Si OmniRoute est installé globalement, vous pouvez également exécuter simplement `npm uninstall -g omniroute`.
+> Remarque : Pour exécuter ces commandes, accédez au dossier du projet OmniRoute (si vous l'avez cloné) et exécutez-les. Alternativement, s'il est installé globalement, vous pouvez simplement exécuter `npm uninstall -g omniroute`.
 
-### Déploiement sur un VPS
+### Déploiement VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -426,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Ou : pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Déploiement avec PM2 (faible consommation de mémoire)
+### Déploiement PM2 (mémoire faible)
 
-Pour les serveurs disposant de peu de RAM, utilisez l’option de limitation de la mémoire :
+Pour les serveurs avec RAM limité, utilisez l'option de limite de mémoire :
 
 ```bash
-# Avec une limite de 512 Mo (valeur par défaut)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Ou avec une limite de mémoire personnalisée
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Ou en utilisant ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Créez `ecosystem.config.js` :
+Créer `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -469,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Construire l’image (valeur par défaut = runner-cli avec codex/claude/droid préinstallés)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mode portable (recommandé)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Pour le mode intégré à l’hôte avec les exécutables CLI, consultez la section Docker de la documentation principale.
+Pour le mode intégré à l'hôte avec les binaires CLI, consultez la section Docker dans la documentation principale.
 
-### Void Linux (xbps-src)
+### Annuler Linux (xbps-src)
 
-Les utilisateurs de Void Linux peuvent empaqueter et installer OmniRoute nativement à l’aide du framework de compilation croisée `xbps-src`. Celui-ci automatise la construction de la version autonome de Node.js ainsi que celle des liaisons natives `better-sqlite3` requises.
+Les utilisateurs de Void Linux peuvent empaqueter et installer OmniRoute de manière native à l'aide du framework de compilation croisée `xbps-src`. Cela automatise la construction autonome Node.js ainsi que les liaisons natives `better-sqlite3` requises.
 
 <details>
 <summary><b>Afficher le modèle xbps-src</b></summary>
 
 ```bash
-# Fichier de modèle pour « omniroute »
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -507,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Déterminer l’architecture du processeur cible pour node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Installer toutes les dépendances – ignorer les scripts
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Construire le paquet autonome Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Copier les ressources statiques dans le paquet autonome
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Compiler la liaison native better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Placer la liaison compilée dans le paquet autonome
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Supprimer les paquets sharp propres à chaque architecture
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Copier les dépendances d’exécution de pino omises par l’analyse statique de Next.js :
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Empêcher la suppression des répertoires vides du routeur d’application Next.js par le hook de post-installation
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -578,59 +596,59 @@ post_install() {
 
 </details>
 
-### Variables d’environnement
+### Variables d'environnement
 
-| Variable                                | Valeur par défaut                    | Description                                                                                                                                                         |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Secret de signature JWT (**à modifier en production**)                                                                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Mot de passe de la première connexion                                                                                                                               |
-| `DATA_DIR`                              | `~/.omniroute`                       | Répertoire des données (base de données, utilisation, journaux)                                                                                                     |
-| `PORT`                                  | valeur par défaut du framework       | Port du service (`20128` dans les exemples)                                                                                                                         |
-| `HOSTNAME`                              | valeur par défaut du framework       | Hôte d'écoute (Docker utilise `0.0.0.0` par défaut)                                                                                                                 |
-| `NODE_ENV`                              | valeur par défaut de l'environnement | Définissez `production` pour le déploiement                                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL de base publique affichée dans le tableau de bord et accessible au serveur (remplace l'ancienne variable `BASE_URL`)                                            |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL de base du point de terminaison de synchronisation cloud (remplace l'ancienne variable `CLOUD_URL`)                                                             |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Secret HMAC pour les clés API générées                                                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Imposer une clé API Bearer sur `/v1/*`                                                                                                                              |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Autoriser les utilisateurs authentifiés du tableau de bord à afficher à la demande les valeurs complètes des clés API enregistrées                                  |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Fréquence d'actualisation côté serveur des données mises en cache de Provider Limits ; les boutons de l'interface déclenchent toujours une synchronisation manuelle |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Désactiver les instantanés SQLite automatiques avant les écritures, importations et restaurations ; les sauvegardes manuelles restent disponibles                   |
-| `APP_LOG_TO_FILE`                       | `true`                               | Active l'enregistrement sur disque des journaux d'application et d'audit                                                                                            |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Forcer l'attribut `Secure` du cookie d'authentification (derrière un proxy inverse HTTPS)                                                                           |
-| `CLOUDFLARED_BIN`                       | non défini                           | Utiliser un binaire `cloudflared` existant au lieu du téléchargement géré                                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport pour les Quick Tunnels gérés (`http2`, `quic` ou `auto`)                                                                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Limite du tas Node.js en Mo                                                                                                                                         |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Nombre maximal d'entrées dans le cache des prompts                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Nombre maximal d'entrées dans le cache sémantique                                                                                                                   |
+| Variable                                | Défaut                        | Description                                                                                                                                                                             |
+| --------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(généré automatiquement)_    | secret de signature JWT — généré automatiquement lors de la première exécution et conservé dans `server.env`; définissez-le explicitement lorsque le répertoire de données est éphémère |
+| `INITIAL_PASSWORD`                      | _(non défini)_                | Mot de passe de première connexion. Les installations npm/source commencent par `CHANGEME`: remplacez-le. Désactivé : assistant d'intégration                                           |
+| `DATA_DIR`                              | `~/.omniroute`                | Répertoire de données (base de données, utilisation, journaux)                                                                                                                          |
+| `PORT`                                  | cadre par défaut              | Port de service (`20128` dans les exemples)                                                                                                                                             |
+| `HOSTNAME`                              | cadre par défaut              | Lier l'hôte (Docker par défaut à `0.0.0.0`)                                                                                                                                             |
+| `NODE_ENV`                              | valeur par défaut d'exécution | Définir `production` pour le déploiement                                                                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`      | La base publique URL est apparue sur le tableau de bord et exposée au serveur (remplace l'ancien `BASE_URL`)                                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`       | Base de point de terminaison de synchronisation dans le cloud URL (remplace l'ancien `CLOUD_URL`)                                                                                       |
+| `API_KEY_SECRET`                        | _(généré automatiquement)_    | secret HMAC pour les clés API générées — généré automatiquement lors de la première exécution et conservé dans `server.env`                                                             |
+| `REQUIRE_API_KEY`                       | `false`                       | Appliquer la clé API du porteur sur `/v1/*`                                                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                       | Autoriser les utilisateurs authentifiés du tableau de bord à révéler à la demande les valeurs clés API entièrement stockées                                                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                          | Cadence d'actualisation côté serveur pour les données de limites du fournisseur mises en cache ; Les boutons d'actualisation UI déclenchent toujours la synchronisation manuelle        |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                       | Désactivez les instantanés automatiques SQLite avant writes/import/restore; les sauvegardes manuelles fonctionnent toujours                                                             |
+| `APP_LOG_TO_FILE`                       | `true`                        | Permet la sortie des journaux d'application et d'audit sur le disque                                                                                                                    |
+| `AUTH_COOKIE_SECURE`                    | `false`                       | Forcer le cookie d'authentification `Secure` (derrière le proxy inverse HTTPS )                                                                                                         |
+| `CLOUDFLARED_BIN`                       | désarmé                       | Utilisez un binaire `cloudflared` existant au lieu d'un téléchargement géré                                                                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                       | Transport pour les tunnels rapides gérés (`http2`, `quic` ou `auto`)                                                                                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                         | limite de tas Node.js dans MB                                                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                          | Nombre maximal d'entrées dans le cache d'invite                                                                                                                                         |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                         | Nombre maximal d'entrées dans le cache sémantique                                                                                                                                       |
 
-Pour obtenir la liste complète des variables d'environnement, consultez le [README](../README.md).
+Pour la référence complète des variables d'environnement, consultez le [README](../README.md).
 
 ---
 
 ## 📊 Modèles disponibles
 
 <details>
-<summary><b>Voir tous les modèles disponibles</b></summary>
+<summary><b>Afficher tous les modèles disponibles</b></summary>
 
 > La liste ci-dessous est extraite de `open-sse/config/providerRegistry.ts` pour la v3.8.0. Les catalogues cloud (Gemini, OpenRouter, etc.) sont synchronisés dynamiquement — pour consulter le catalogue complet en temps réel, ouvrez **Tableau de bord → Fournisseurs → [fournisseur] → Modèles disponibles** ou appelez `GET /api/models/catalog`.
 >
-> Si la liste intégrée d'un fournisseur a dérivé, utilisez **Importer depuis /models** sur cette page (ou activez **Synchronisation automatique**) pour récupérer le catalogue amont en temps réel. Cela a été vérifié dans la v3.8.50 pour LLM7.io (`gemini-3.1-flash-lite`) et UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ; l'accès anonyme de Pollinations est resté limité côté amont lors de la même série de tests.
+> Si la liste intégrée d’un fournisseur n’est plus à jour, utilisez **Importer depuis /models** sur cette page (ou activez la **Synchronisation automatique**) pour récupérer le catalogue en amont. Cela a été vérifié dans la v3.8.50 pour LLM7.io (`gemini-3.1-flash-lite`) et UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ; l’accès anonyme à Pollinations est resté limité par le service en amont lors de la même série de tests.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max : `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro : `cx/gpt-5.5` (+ niveaux d'effort : `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro : `cx/gpt-5.5` (+ niveaux d’effort : `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth : `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth GRATUIT : utilisez le catalogue en temps réel affiché sous **Tableau de bord → Fournisseurs → Kiro → Modèles disponibles**. La disponibilité dépend du compte et de l'offre.
+**Kiro (`kr/`)** — OAuth GRATUIT : utilisez le catalogue en temps réel affiché sous **Tableau de bord → Fournisseurs → Kiro → Modèles disponibles**. La disponibilité dépend du compte et du forfait.
 
 **Qoder (`if/`)** — OAuth GRATUIT : `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M : `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2 à 0,6 $/1 M : `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M : `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1 M : `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/mois en forfait ou à l'usage : `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/mois au forfait ou à l’utilisation : `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Clé API : `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,29 +656,29 @@ Pour obtenir la liste complète des variables d'environnement, consultez le [REA
 
 **xAI (`xai/`)** — Grok natif : `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Hébergé dans l'UE : `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Hébergé dans l’UE : `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Augmenté par la recherche : `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Enrichi par la recherche : `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open source : `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inférence rapide : `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale : `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — À l’échelle de la tranche : `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Axé RAG : `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Axé sur le RAG : `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Entreprise : `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Entreprise : `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE : `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)** : Synchronisé en temps réel par clé API depuis Google — pas de liste statique. Connectez une clé dans **Tableau de bord → Fournisseurs** puis utilisez **Modèles disponibles** pour importer le catalogue actuel (par ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)** : synchronisé en temps réel par clé API depuis Google — aucune liste statique. Connectez une clé dans **Tableau de bord → Fournisseurs**, puis utilisez **Modèles disponibles** pour importer le catalogue actuel (par ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Autres fournisseurs compatibles** (sélection) : `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (catalogue en passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Chacun maintient sa propre liste de modèles dans `providerRegistry.ts` et peut être synchronisé automatiquement lorsque le fournisseur expose un endpoint `/models`.
+**Autres fournisseurs compatibles** (sélection) : `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (catalogue transmis tel quel), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Chacun gère sa propre liste de modèles dans `providerRegistry.ts` et peut être synchronisé automatiquement lorsque le fournisseur expose un point de terminaison `/models`.
 
-**Remarque sur les ID de modèles :** OmniRoute utilise les ID natifs des fournisseurs (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Certains ID incluent des versions avec points car c'est ainsi que l'API amont les attend. Si un modèle n'est pas listé ci-dessus, exécutez `omniroute models --search <term>` ou appelez `GET /api/models/catalog` pour confirmer sa disponibilité.
+**Remarque concernant les ID de modèles :** OmniRoute utilise les ID natifs des fournisseurs (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Certains ID incluent des versions avec des points, car c’est le format attendu par l’API en amont. Si un modèle ne figure pas dans la liste ci-dessus, exécutez `omniroute models --search <term>` ou appelez `GET /api/models/catalog` pour confirmer sa disponibilité.
 
 </details>
 

@@ -32,18 +32,24 @@
  */
 
 import { recordEarlyKeepaliveBytes } from "./earlyKeepaliveByteBuffer.ts";
-import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
+import { classifyProviderSafetyError } from "./providerSafety.ts";
+import {
+  SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
+  buildSyntheticResponsesFailedEvent,
+  buildSyntheticResponsesFailureId,
+} from "./responsesSequence.ts";
 import { withUpstreamErrorDetail } from "./upstreamErrorDetail.ts";
 import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
 
 const ENCODER = new TextEncoder();
 const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
-// OpenAI-compatible keepalive: a syntactically valid empty streaming chunk.
+// OpenAI-compatible keepalive: a JSON chunk without an application choice.
 // Some OpenAI-compatible clients parse every non-empty SSE line as JSON and
 // reject legal SSE comments before their first provider chunk arrives.
-// id/model stay brand-neutral — these frames go to the client, not upstream.
+// An empty delta before the assistant role creates an untyped LangChain message
+// and drops later tool calls (#18410). No choices also avoids claiming its ID.
 export const OPENAI_KEEPALIVE_FRAME = ENCODER.encode(
-  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n'
+  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[]}\n\n'
 );
 // The first slow-path frame must be a valid OpenAI chunk without creating
 // visible reasoning that clients persist into the conversation.
@@ -174,6 +180,31 @@ function buildResponsesErrorDataLine(
     parsed && typeof parsed.diagnostics === "object" && parsed.diagnostics !== null
       ? { diagnostics: parsed.diagnostics }
       : {};
+  // PROVIDER_SAFETY_STOPS_TERMINAL (#17049): a provider safety stop is terminal, and Codex
+  // reads its fatal policy code only from `response.failed`; a bare `error` frame is a
+  // disconnect to it, so it reconnects and replays the stopped conversation.
+  const safety = classifyProviderSafetyError({
+    status: meta.status,
+    code: errorObj?.code,
+    type: errorObj?.type,
+    message: errorObj?.message,
+  });
+  if (safety) {
+    return JSON.stringify(
+      buildSyntheticResponsesFailedEvent({
+        id: buildSyntheticResponsesFailureId(),
+        object: "response",
+        status: "failed",
+        error: {
+          type: "invalid_request_error",
+          code: safety.code,
+          message,
+          param,
+          status_code: safety.status,
+        },
+      })
+    );
+  }
   return JSON.stringify({
     type: "error",
     code,
@@ -330,16 +361,11 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
  *
  * The wrapped request MUST be the one the route hands downstream (admission,
  * body parse, `handleChat`): the handler snapshots `request.signal` after
- * admission, so wrapping after that point would not propagate. Rebuilt
- * field-by-field (`new Request(request.url, { method, headers, body, signal,
- * duplex: "half" })`) — NOT via `new Request(request, …)`: under the Next.js
- * App Router the inbound request is a Proxy, and passing it as the
- * constructor input makes undici read `#state` on the proxy receiver, which
- * ECMAScript mandates to throw. Field reads below go through the proxy get
- * trap and are safe. Note: unlike the constructor-input form, the original
- * request's `bodyUsed` stays `false` here; its stream is still transferred,
- * so reading it afterwards fails regardless — do not reuse the input object
- * after wrapping.
+ * admission, so wrapping after that point would not propagate. Rebuild from
+ * URL + public request fields instead of passing `request` as the Request
+ * constructor input: packaged Next can hand us a Request branded by a different
+ * Undici/realm instance, and `new Request(request, ...)` then trips that class's
+ * private `#state` brand check. The body stream itself is safe to transfer.
  *
  * Controller recovery downstream (`getDeadlineController`) is two-layered:
  * the combined signal object (fast path — same object when nothing rebuilds),
@@ -363,28 +389,16 @@ export function withDeadlineSignal(request: Request): {
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  // Build the wrapped request field-by-field. Passing the incoming request
-  // object itself as the constructor input is NOT safe under the Next.js App
-  // Router runtime: for `dynamic: "auto"` routes Next hands handlers a Proxy
-  // around the real request (app-route runtime), and the undici constructor
-  // reads `input.#state` with that proxy as the receiver. ECMAScript gives a
-  // Proxy no [[PrivateFieldValues]], so the access throws
-  // "TypeError: Cannot read private member #state from an object whose class
-  // did not declare it" (observed 2026-09-26 as every request on the
-  // /v1/chat/completions, /v1/messages and /v1/responses routes answering
-  // HTTP 500 after #14808 wired this wrapper into those routes). Property
-  // reads (url/method/body/headers) go through the proxy get trap with
-  // receiver = target and are safe; only the constructor's private-field
-  // path breaks. Do not "simplify" back to `new Request(request, ...)`.
-  const wrappedReq = new Request(request.url, {
+  const requestInit: RequestInit & { duplex?: "half" } = {
     method: request.method,
     headers,
-    body: request.body,
     signal: combined,
-    // `duplex` is an undici extension absent from the DOM-lib RequestInit;
-    // it is required whenever `body` is a ReadableStream.
-    duplex: "half",
-  } as RequestInit & { duplex: "half" });
+  };
+  if (request.method !== "GET" && request.method !== "HEAD" && request.body !== null) {
+    requestInit.body = request.body;
+    requestInit.duplex = "half";
+  }
+  const wrappedReq = new Request(request.url, requestInit);
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);
@@ -555,9 +569,7 @@ export async function withEarlyStreamKeepalive(
       let nextApplicationKeepaliveAt = applicationKeepalive
         ? performance.now() + applicationKeepalive.intervalMs
         : Number.POSITIVE_INFINITY;
-      let keepaliveInterval: ReturnType<typeof setInterval> | null = null;
-
-      keepaliveInterval = setInterval(() => {
+      const interval = setInterval(() => {
         if (stopped) return;
         try {
           const now = performance.now();
@@ -570,15 +582,11 @@ export async function withEarlyStreamKeepalive(
           recordClientBytes(frame);
         } catch {
           stopped = true;
-          if (keepaliveInterval) clearInterval(keepaliveInterval);
+          clearInterval(interval);
         }
       }, intervalMs);
-      if (
-        typeof keepaliveInterval === "object" &&
-        keepaliveInterval !== null &&
-        "unref" in keepaliveInterval
-      ) {
-        keepaliveInterval.unref?.();
+      if (typeof interval === "object" && interval !== null && "unref" in interval) {
+        interval.unref?.();
       }
       // First frame immediately on commit so the client sees a byte right away.
       // An SSE comment here would be ignored by Anthropic clients' watchdog on a
@@ -590,15 +598,10 @@ export async function withEarlyStreamKeepalive(
         /* consumer already gone */
       }
 
-      const clearKeepalive = () => {
+      stopKeepalive = () => {
         stopped = true;
-        if (keepaliveInterval) {
-          clearInterval(keepaliveInterval);
-          keepaliveInterval = null;
-        }
+        clearInterval(interval);
       };
-
-      stopKeepalive = clearKeepalive;
 
       const onAbort = () => {
         if (aborted) return;
@@ -610,12 +613,6 @@ export async function withEarlyStreamKeepalive(
           return;
         }
         aborted = true;
-        // P1 FIX: Explicitly abort the deadline controller to propagate abort downstream
-        try {
-          deadlineController?.abort();
-        } catch {
-          /* abort must never throw */
-        }
         stopDeadline();
         stopKeepalive();
         upstreamReader?.cancel().catch(() => {});
@@ -701,24 +698,49 @@ export async function withEarlyStreamKeepalive(
             // Real SSE stream — forward it verbatim.
             upstreamReader = response.body.getReader();
             let bytesForwarded = 0;
+            // Last four forwarded bytes. A finished SSE event ends in \n\n (or \r\n\r\n).
+            const tail = [0, 0, 0, 0];
+            const noteTail = (value: Uint8Array) => {
+              for (let i = 0; i < value.byteLength; i++) {
+                tail.copyWithin(0, 1);
+                tail[3] = value[i];
+              }
+            };
+            const endedOnEventBoundary = () => {
+              if (bytesForwarded >= 2 && tail[2] === 0x0a && tail[3] === 0x0a) return true;
+              return (
+                bytesForwarded >= 4 &&
+                tail[0] === 0x0d &&
+                tail[1] === 0x0a &&
+                tail[2] === 0x0d &&
+                tail[3] === 0x0a
+              );
+            };
             try {
               while (true) {
                 const { done, value } = await upstreamReader.read();
                 if (done) break;
-                if (value) {
+                if (value && value.byteLength > 0) {
                   controller.enqueue(value);
                   bytesForwarded += value.byteLength;
+                  noteTail(value);
                 }
               }
             } catch {
               if (aborted) return;
-              if (bytesForwarded === 0) {
+              if (bytesForwarded === 0 || endedOnEventBoundary()) {
+                // Nothing forwarded yet, or the last forwarded bytes finished an
+                // SSE event: append one generic terminal error event and close
+                // cleanly. controller.error() here is what Claude Code reports as
+                // "The response stream was malformed" after it has already shown
+                // the text (#18773), and a quiet close would pass a failed turn
+                // off as complete.
                 controller.enqueue(errorFrame);
                 recordClientBytes(errorFrame);
               } else {
-                // The last forwarded bytes may end inside an SSE frame. Fail the
-                // transport instead of appending invalid SSE or reporting clean EOF.
-                // Never expose the upstream exception, its stack, or its cause.
+                // The client already holds a cut frame. Reject the transport so
+                // that half line is not a clean EOF, and do not append another
+                // frame or the upstream's own message.
                 streamErrored = true;
                 controller.error(new Error("Upstream stream failed before completion."));
               }
@@ -775,13 +797,7 @@ export async function withEarlyStreamKeepalive(
       aborted = true;
       stopDeadline();
       stopKeepalive();
-      // P2 FIX: Wrap upstreamReader.cancel() with timeout to prevent hanging
-      if (upstreamReader) {
-        Promise.race([
-          upstreamReader.cancel().catch(() => undefined),
-          new Promise<void>((resolve) => setTimeout(resolve, 2000)),
-        ]).catch(() => undefined);
-      }
+      upstreamReader?.cancel().catch(() => {});
     },
   });
 
@@ -791,6 +807,11 @@ export async function withEarlyStreamKeepalive(
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      // This early-keepalive response IS the response the client receives while
+      // the real turn is still prefilling — the worst possible stream for a
+      // buffering reverse proxy to sit on. Same no-buffering instruction the
+      // central header path already sets.
+      "X-Accel-Buffering": "no",
       ...extraHeaders,
     },
   });

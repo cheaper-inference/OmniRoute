@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { applyEdits, modify, parse, printParseErrorCode } from "jsonc-parser";
 import { printHeading, printInfo, printSuccess, printError } from "../io.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 
 const ENV_KEY_REF = "{env:OMNIROUTE_API_KEY}";
@@ -48,7 +48,7 @@ export function resolveOpencodeTarget(opts = {}) {
   if (!apiKey) {
     try {
       const c = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      apiKey = c?.accessToken || c?.apiKey || "";
+      apiKey = contextCredentialFor(c, baseUrl) || "";
     } catch {
       /* no context auth */
     }

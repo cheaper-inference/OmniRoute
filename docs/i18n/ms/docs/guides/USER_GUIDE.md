@@ -120,15 +120,15 @@ Akses melalui: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Persediaan Penyedia
 
-Untuk menambah sambungan kunci API secara pukal daripada fail CSV atau JSON, gunakan **Papan Pemuka → Penyedia → Import daripada fail**. Lajur disusun mengikut kedudukan (`provider,name,apiKey,baseUrl,priority`); `provider` mesti sudah wujud sebagai penyedia terurus atau nod yang serasi. Lihat [Import penyedia daripada fail CSV atau JSON](../providers/CSV-IMPORT.md).
+Untuk menambah sambungan kunci API secara pukal daripada fail CSV atau JSON, gunakan **Dashboard → Providers → Import from file**. Lajur adalah berdasarkan kedudukan (`provider,name,apiKey,baseUrl,priority`); `provider` mestilah sudah wujud sebagai penyedia terurus atau nod yang serasi. Lihat [Import penyedia daripada fail CSV atau JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Penyedia Langganan
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Papan Pemuka → Penyedia → Sambungkan Claude Code
-→ Log masuk OAuth → Penyegaran token automatik
+Dashboard → Providers → Connect Claude Code
+→ Log masuk OAuth → Segar semula token secara automatik
 → Penjejakan kuota 5 jam + mingguan
 
 Model:
@@ -137,16 +137,18 @@ Model:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Petua Pro:** Gunakan Opus untuk tugas kompleks dan Sonnet untuk kepantasan. OmniRoute menjejaki kuota bagi setiap model!
+**Petua Pro:** Gunakan Opus untuk tugasan kompleks, Sonnet untuk kelajuan. OmniRoute menjejaki kuota bagi setiap model!
 
-Tiada pelayar pada hos OmniRoute? Jalankan `claude setup-token` di mana-mana sahaja Claude Code telah dilog masuk dan tampalkan token setahun itu ke dalam tab **Setup Token**. Lihat [Claude Code dengan token persediaan](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Tiada pelayar pada hos OmniRoute? Jalankan `claude setup-token` di mana-mana sahaja Claude Code telah dilog masuk dan tampalkan token setahun ke dalam tab **Setup Token**. Lihat [Claude Code dengan token persediaan](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Laluan yang serasi dengan Claude dan Claude Code mengekalkan usaha pemikiran `max` untuk model Opus dan Sonnet. Model Haiku tidak menerima tahap usaha `max`, jadi OmniRoute menurunkan permintaan tersebut kepada belanjawan pemikiran tinggi sebelum menghantarnya kepada penyedia huluan.
+Laluan yang serasi dengan Claude dan Claude Code mengekalkan usaha pemikiran `max` untuk
+model Opus dan Sonnet. Model Haiku tidak menerima tahap usaha `max`, jadi OmniRoute menurunkan
+permintaan tersebut kepada belanjawan pemikiran tinggi sebelum menghantarnya ke hulu.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Papan Pemuka → Penyedia → Sambungkan Codex
+Dashboard → Providers → Connect Codex
 → Log masuk OAuth (port 1455)
 → Tetapan semula 5 jam + mingguan
 
@@ -160,7 +162,7 @@ Model:
 #### GitHub Copilot
 
 ```bash
-Papan Pemuka → Penyedia → Sambungkan GitHub
+Dashboard → Providers → Connect GitHub
 → OAuth melalui GitHub
 → Tetapan semula bulanan (hari pertama setiap bulan)
 
@@ -172,45 +174,60 @@ Model:
   gh/gemini-3.1-pro-preview
 ```
 
+**Kredit AI (pengebilan berasaskan token).** Apabila GitHub melaporkan `credits_used` untuk akaun tersebut, kad Provider Limits memaparkan baris **AI Credits** dengan kredit yang digunakan dalam tempoh pengebilan semasa, termasuk pada pelan organisasi tanpa had.
+
+**Had Kredit AI tempatan.** Edit sambungan GitHub dan tetapkan **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Kosong akan menyahdayakannya; `0`
+akan sentiasa melangkau sambungan tersebut. Apabila bacaan penggunaan terakhir berada pada atau melebihi had,
+pemilihan akaun akan melangkau sambungan itu dan penghalaan akan kembali kepada sambungan
+lain, sama seperti pemotongan dasar kuota. Semakan ini membaca penggunaan yang telah dikumpulkan oleh
+segaraan kuota berkala — ia tidak pernah memanggil GitHub pada laluan permintaan — dan ia gagal terbuka:
+bacaan yang tiada atau lapuk (lebih lama daripada 15 minit, atau daripada tempoh pengebilan yang telah
+ditetapkan semula) tidak menyekat sambungan. Ini ialah perlindungan tempatan, **bukan siling perbelanjaan yang
+dijamin**: kelewatan pelaporan GitHub, selang segaraan, permintaan yang sedang berjalan dan penggunaan di luar
+OmniRoute boleh melebihinya. Gunakan kawalan perbelanjaan GitHub sendiri untuk had keras.
+
 ### 💰 Penyedia Murah
 
-#### GLM-4.7 (Tetapan semula harian, $0.6/1M)
+#### GLM-4.7 (tetapan semula harian, $0.6/1M)
 
 1. Daftar: [Zhipu AI](https://open.bigmodel.cn)
 2. Dapatkan kunci API daripada Coding Plan
-3. Papan Pemuka → Tambah Kunci API: Penyedia: `glm`, Kunci API: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**Gunakan:** `glm/glm-4.7` — **Petua Pro:** Coding Plan menawarkan kuota 3× ganda pada 1/7 kos! Ditetapkan semula setiap hari pada pukul 10:00 pagi.
+**Gunakan:** `glm/glm-4.7` — **Petua Pro:** Coding Plan menawarkan kuota 3× pada kos 1/7! Tetapan semula setiap hari pada 10:00 pagi.
 
-#### MiniMax M2.1 (Tetapan semula 5 jam, $0.20/1M)
+#### MiniMax M2.1 (tetapan semula 5 jam, $0.20/1M)
 
 1. Daftar: [MiniMax](https://www.minimax.io)
-2. Dapatkan kunci API → Papan Pemuka → Tambah Kunci API
+2. Dapatkan kunci API → Dashboard → Add API Key
 
-**Gunakan:** `minimax/MiniMax-M2.1` — **Petua Pro:** Pilihan termurah untuk konteks panjang (1 juta token)!
+**Gunakan:** `minimax/MiniMax-M2.1` — **Petua Pro:** Pilihan termurah untuk konteks panjang (1M token)!
 
 #### Kimi K2 ($9/bulan kadar tetap)
 
 1. Langgan: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Dapatkan kunci API → Papan Pemuka → Tambah Kunci API
+2. Dapatkan kunci API → Dashboard → Add API Key
 
-**Gunakan:** `kimi/kimi-k2.5` — **Petua Pro:** Kadar tetap $9/bulan untuk 10 juta token = kos efektif $0.90/1M!
+**Gunakan:** `kimi/kimi-k2.5` — **Petua Pro:** $9/bulan tetap untuk 10M token = kos efektif $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Daftar: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Cipta kunci API Qianfan → Papan Pemuka → Tambah Kunci API: Penyedia: `qianfan`
+2. Cipta kunci API Qianfan → Dashboard → Add API Key: Provider: `qianfan`
 
 **Gunakan:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, atau ID model serasi OpenAI Qianfan yang lain.
 
 ### 🆓 Penyedia PERCUMA
 
-Penyedia percuma tanpa pengesahan mempunyai suis di sebelah **Tiada pengesahan diperlukan** pada halaman penyedia masing-masing. Mematikannya akan menyahdayakan penyedia tersebut, mengalih keluarnya daripada paparan penyedia yang dikonfigurasikan/padat, dan mengalih keluar modelnya daripada `/v1/models`.
+Penyedia percuma tanpa pengesahan mempunyai suis di sebelah **No authentication required** pada halaman penyedia mereka.
+Mematikannya akan menyahdayakan penyedia tersebut, mengalih keluarnya daripada paparan Providers configured/compact, dan
+mengalih keluar modelnya daripada `/v1/models`.
 
 #### Qoder (9 model PERCUMA)
 
 ```bash
-Papan Pemuka → Sambungkan Qoder → Log masuk OAuth → Akses tertakluk pada had penyedia semasa
+Dashboard → Connect Qoder → Log masuk OAuth → Akses tertakluk pada had penyedia semasa
 
 Model: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -218,7 +235,7 @@ Model: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/k
 #### Kiro (Claude PERCUMA)
 
 ```bash
-Papan Pemuka → Sambungkan Kiro → AWS Builder ID atau Google/GitHub → ~50 kredit/bulan
+Dashboard → Connect Kiro → AWS Builder ID atau Google/GitHub → ~50 kredit/bulan
 
 Model: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -333,26 +350,26 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Pelaksanaan
+## 🚀 Deployment
 
 ### Pemasangan npm global (Disyorkan)
 
 ```bash
 npm install -g omniroute
 
-# Cipta direktori konfigurasi
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Cipta fail .env (lihat .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Mulakan pelayan
+# Start server
 omniroute
-# Atau dengan port tersuai:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI memuatkan `.env` secara automatik daripada `~/.omniroute/.env` atau `./.env`.
+CLI secara automatik memuatkan `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` dalam direktori kerja hanya boleh menetapkan senarai kekunci yang dibenarkan (port, `REQUIRE_API_KEY`, tempat dan tetapan warna); letak semua yang lain dalam `~/.omniroute/.env`. Lihat [kontrak pelancaran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Mod dulang
 
@@ -362,20 +379,20 @@ Mulakan OmniRoute dalam dulang sistem:
 omniroute serve --tray
 ```
 
-Perintah tersebut tamat selepas pelayan dan dulang sedia digunakan.
+Arahan kembali selepas pelayan dan dulang sedia.
 
-Pelayan terus berjalan tanpa terminal.
+Pelayan diteruskan tanpa terminal.
 
-Mod dulang menyokong macOS, Windows dan sesi Linux bergrafik. Mod dulang tidak membuka papan pemuka secara automatik.
+Mod dulang menyokong sesi macOS, Windows dan Linux grafik. Mod dulang tidak membuka papan pemuka secara automatik.
 
-Gunakan menu dulang untuk tindakan berikut:
+Gunakan menu dulang untuk tindakan ini:
 
 - Buka papan pemuka.
 - Buka `/dashboard/logs`.
-- Ubah permulaan automatik.
-- Hentikan OmniRoute.
+- Tukar automula.
+- Berhenti OmniRoute.
 
-Jangan gabungkan `--tray` dengan pilihan berikut:
+Jangan gabungkan `--tray` dengan pilihan ini:
 
 - `--daemon`
 - `--log`
@@ -383,15 +400,15 @@ Jangan gabungkan `--tray` dengan pilihan berikut:
 
 Mod ini memerlukan pemilikan proses yang berbeza.
 
-Dayakan permulaan pada log masuk mesin yang seterusnya:
+Dayakan permulaan pada log masuk mesin seterusnya:
 
 ```bash
 omniroute autostart enable
 ```
 
-Permulaan automatik menggunakan mod dulang pada macOS, Windows dan sesi Linux bergrafik. Linux tanpa paparan menggunakan perkhidmatan pengguna systemd yang sedia ada.
+Automula menggunakan mod dulang pada sesi macOS, Windows dan Linux grafik. Linux tanpa kepala menggunakan perkhidmatan pengguna systemd sedia ada.
 
-Nyahdayakan permulaan semasa log masuk:
+Lumpuhkan permulaan semasa log masuk:
 
 ```bash
 omniroute autostart disable
@@ -399,16 +416,16 @@ omniroute autostart disable
 
 ### Menyahpasang
 
-Apabila anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip pantas untuk penyingkiran yang bersih:
+Apabila anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip pantas untuk penyingkiran bersih:
 
-| Perintah                 | Tindakan                                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Mengalih keluar aplikasi sistem tetapi **mengekalkan DB dan konfigurasi anda** dalam `~/.omniroute`.  |
-| `npm run uninstall:full` | Mengalih keluar aplikasi DAN **memadamkan semua konfigurasi, kunci dan pangkalan data secara kekal**. |
+| Perintah                 | Tindakan                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Mengalih keluar apl sistem tetapi** mengekalkan DB dan konfigurasi anda** dalam `~/.omniroute`. |
+| `npm run uninstall:full` | Mengalih keluar apl AND secara kekal** memadam semua konfigurasi, kunci dan pangkalan data** .  |
 
-> Nota: Untuk menjalankan perintah ini, pergi ke folder projek OmniRoute (jika anda mengklonkannya) dan jalankan perintah tersebut. Sebagai alternatif, jika dipasang secara global, anda hanya perlu menjalankan `npm uninstall -g omniroute`.
+> Nota: Untuk menjalankan arahan ini, navigasi ke folder projek OmniRoute (jika anda mengklonkannya) dan jalankannya. Sebagai alternatif, jika dipasang secara global, anda boleh menjalankan `npm uninstall -g omniroute`.
 
-### Pelaksanaan VPS
+### VPS Deployment
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -424,25 +441,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Atau: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Pelaksanaan PM2 (Memori Rendah)
+### PM2 Deployment (Memori Rendah)
 
 Untuk pelayan dengan RAM terhad, gunakan pilihan had memori:
 
 ```bash
-# Dengan had 512MB (lalai)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Atau dengan had memori tersuai
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Atau menggunakan ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Cipta `ecosystem.config.js`:
+Buat `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -467,24 +484,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Bina imej (lalai = runner-cli dengan codex/claude/droid diprapasang)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Mod mudah alih (disyorkan)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Untuk mod bersepadu dengan hos yang mempunyai binari CLI, lihat bahagian Docker dalam dokumentasi utama.
+Untuk mod bersepadu hos dengan binari CLI, lihat bahagian Docker dalam dokumen utama.
 
-### Void Linux (xbps-src)
+### Linux (xbps-src)
 
-Pengguna Void Linux boleh membungkus dan memasang OmniRoute secara natif menggunakan rangka kerja kompilasi silang `xbps-src`. Ini mengautomatikkan binaan kendiri Node.js bersama pengikatan natif `better-sqlite3` yang diperlukan.
+Pengguna Linux tidak sah boleh membungkus dan memasang OmniRoute secara asli menggunakan rangka kerja kompilasi silang `xbps-src`. Ini mengautomasikan binaan kendiri Node.js bersama-sama dengan pengikatan asli `better-sqlite3` yang diperlukan.
 
 <details>
 <summary><b>Lihat templat xbps-src</b></summary>
 
 ```bash
-# Fail templat untuk 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -505,7 +522,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Tentukan seni bina CPU sasaran untuk node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -514,29 +531,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Pasang semua kebergantungan – langkau skrip
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bina berkas kendiri Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Salin aset statik ke dalam berkas kendiri
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Kompil pengikatan natif better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Letakkan pengikatan yang dikompil ke dalam berkas kendiri
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Alih keluar berkas sharp khusus seni bina
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Salin kebergantungan masa jalan pino yang diabaikan oleh analisis statik Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -550,7 +567,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Cegah penyingkiran direktori penghala aplikasi Next.js yang kosong oleh cangkuk pascapemasangan
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -576,51 +593,51 @@ post_install() {
 
 </details>
 
-### Pemboleh Ubah Persekitaran
+### Pembolehubah Persekitaran
 
-| Pemboleh ubah                           | Lalai                                | Penerangan                                                                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Rahsia penandatanganan JWT (**ubah dalam persekitaran produksi**)                                                                    |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Kata laluan log masuk pertama                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                       | Direktori data (pangkalan data, penggunaan, log)                                                                                     |
-| `PORT`                                  | lalai rangka kerja                   | Port perkhidmatan (`20128` dalam contoh)                                                                                             |
-| `HOSTNAME`                              | lalai rangka kerja                   | Hos pengikatan (Docker menggunakan `0.0.0.0` secara lalai)                                                                           |
-| `NODE_ENV`                              | lalai masa jalan                     | Tetapkan kepada `production` untuk pengerahan                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL asas awam yang dipaparkan pada papan pemuka dan didedahkan kepada pelayan (menggantikan `BASE_URL` lama)                         |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL asas titik akhir penyegerakan awan (menggantikan `CLOUD_URL` lama)                                                               |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Rahsia HMAC untuk kunci API yang dijana                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Wajibkan kunci API Bearer pada `/v1/*`                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Benarkan pengguna papan pemuka yang disahkan untuk mendedahkan nilai penuh kunci API yang disimpan apabila diminta                   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Kekerapan penyegaran sisi pelayan untuk data Had Penyedia yang dicache; butang segar semula UI masih mencetuskan penyegerakan manual |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Lumpuhkan petikan SQLite automatik sebelum penulisan/import/pemulihan; sandaran manual masih berfungsi                               |
-| `APP_LOG_TO_FILE`                       | `true`                               | Dayakan output log aplikasi dan audit ke cakera                                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Paksa kuki pengesahan `Secure` (di belakang proksi songsang HTTPS)                                                                   |
-| `CLOUDFLARED_BIN`                       | tidak ditetapkan                     | Gunakan binari `cloudflared` sedia ada dan bukannya muat turun terurus                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Pengangkutan untuk Quick Tunnels terurus (`http2`, `quic`, atau `auto`)                                                              |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Had timbunan Node.js dalam MB                                                                                                        |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Bilangan maksimum entri cache gesaan                                                                                                 |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Bilangan maksimum entri cache semantik                                                                                               |
+| Pembolehubah                            | Lalai                       | Penerangan                                                                                                                                                                     |
+| --------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(dijana secara automatik)_ | JWT menandatangani rahsia — dijana secara automatik pada larian pertama dan berterusan ke `server.env`; tetapkannya secara eksplisit apabila direktori data bersifat sementara |
+| `INITIAL_PASSWORD`                      | _(tidak ditetapkan)_        | Kata laluan log masuk pertama. pemasangan npm/source bermula dengan `CHANGEME`: gantikannya. Tidak ditetapkan: wizard onboarding                                               |
+| `DATA_DIR`                              | `~/.omniroute`              | Direktori data (db, penggunaan, log)                                                                                                                                           |
+| `PORT`                                  | lalai rangka kerja          | Port perkhidmatan (`20128` dalam contoh)                                                                                                                                       |
+| `HOSTNAME`                              | lalai rangka kerja          | Ikat hos (Docker lalai kepada `0.0.0.0`)                                                                                                                                       |
+| `NODE_ENV`                              | lalai masa jalan            | Tetapkan `production` untuk digunakan                                                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`    | URL pangkalan awam muncul ke papan pemuka dan terdedah kepada pelayan (menggantikan `BASE_URL` warisan )                                                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`     | URL asas titik akhir penyegerakan awan (menggantikan `CLOUD_URL` lama )                                                                                                        |
+| `API_KEY_SECRET`                        | _(dijana secara automatik)_ | rahsia HMAC untuk kunci API yang dijana — dijana secara automatik pada jalan pertama dan berterusan ke `server.env`                                                            |
+| `REQUIRE_API_KEY`                       | `false`                     | Kuatkuasakan kunci API Pembawa pada `/v1/*`                                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                     | Benarkan pengguna papan pemuka yang disahkan untuk mendedahkan nilai kunci API yang disimpan penuh apabila diminta                                                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                        | Irama penyegaran sisi pelayan untuk data Had Penyedia yang dicache; butang muat semula UI masih mencetuskan penyegerakan manual                                                |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                     | Lumpuhkan syot kilat SQLite automatik sebelum writes/import/restore; sandaran manual masih berfungsi                                                                           |
+| `APP_LOG_TO_FILE`                       | `true`                      | Mendayakan output log aplikasi dan audit ke cakera                                                                                                                             |
+| `AUTH_COOKIE_SECURE`                    | `false`                     | Paksa kuki pengesahan `Secure` (di belakang proksi terbalik HTTPS )                                                                                                            |
+| `CLOUDFLARED_BIN`                       | tidak ditetapkan            | Gunakan binari `cloudflared` sedia ada dan bukannya muat turun terurus                                                                                                         |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                     | Pengangkutan untuk Terowong Pantas terurus (`http2`, `quic` atau `auto`)                                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                       | had timbunan Node.js dalam MB                                                                                                                                                  |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                        | Kemasukan cache gesaan maksimum                                                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                       | Entri cache semantik maksimum                                                                                                                                                  |
 
-Untuk rujukan lengkap pemboleh ubah persekitaran, lihat [README](../README.md).
+Untuk rujukan pembolehubah persekitaran penuh, lihat [README](../README.md).
 
 ---
 
 ## 📊 Model Tersedia
 
 <details>
-<summary><b>Lihat semua model tersedia</b></summary>
+<summary><b>Lihat semua model yang tersedia</b></summary>
 
-> Senarai di bawah disusun daripada `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog awan (Gemini, OpenRouter, dll.) disegerakkan secara dinamik — untuk katalog langsung penuh, buka **Papan Pemuka → Pembekal → [provider] → Model Tersedia** atau panggil `GET /api/models/catalog`.
+> Senarai di bawah dipilih daripada `open-sse/config/providerRegistry.ts` untuk v3.8.0. Katalog awan (Gemini, OpenRouter, dll.) disegerakkan secara dinamik — untuk katalog langsung penuh, buka **Papan Pemuka → Penyedia → [penyedia] → Model Tersedia** atau panggil `GET /api/models/catalog`.
 >
-> Jika senarai terbina dalam sesebuah pembekal telah menyimpang, gunakan **Import daripada /models** pada halaman tersebut (atau aktifkan **Auto-Sync**) untuk menarik katalog hulu langsung. Ini telah disahkan dalam v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses tanpa nama Pollinations kekal terhad di hulu semasa pusingan ujian yang sama.
+> Jika senarai terbina dalam penyedia telah berbeza, gunakan **Import from /models** pada halaman tersebut (atau dayakan **Auto-Sync**) untuk mendapatkan katalog huluan langsung. Ini telah disahkan dalam v3.8.50 untuk LLM7.io (`gemini-3.1-flash-lite`) dan UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); akses tanpa nama Pollinations kekal terhad oleh huluan sepanjang ujian yang sama.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ tahap effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ peringkat usaha: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth PERCUMA: gunakan katalog langsung yang dipaparkan di bawah **Papan Pemuka → Pembekal → Kiro → Model Tersedia**. Ketersediaan bergantung pada akaun dan pelan.
+**Kiro (`kr/`)** — OAuth PERCUMA: gunakan katalog langsung yang dipaparkan di bawah **Papan Pemuka → Penyedia → Kiro → Model Tersedia**. Ketersediaan bergantung pada akaun dan pelan.
 
 **Qoder (`if/`)** — OAuth PERCUMA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -628,37 +645,37 @@ Untuk rujukan lengkap pemboleh ubah persekitaran, lihat [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/bulan rata atau mengikut penggunaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/bulan kadar rata atau mengikut penggunaan: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Kunci API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra pantas: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Sangat pantas: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok natif: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Dihoskan di EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Dihoskan di EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Diperkukuh carian: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Dipertingkat dengan carian: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Sumber terbuka: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (percuma), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inferens pantas: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Skala wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Berskala wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Berfokus RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Berfokus pada RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Perusahaan: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Disegerakkan langsung mengikut kunci API daripada Google — tiada senarai statik. Sambungkan kunci dalam **Papan Pemuka → Pembekal** kemudian gunakan **Model Tersedia** untuk mengimport katalog semasa (cth. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Disegerakkan secara langsung mengikut kunci API daripada Google — tiada senarai statik. Sambungkan kunci di **Papan Pemuka → Penyedia**, kemudian gunakan **Model Tersedia** untuk mengimport katalog semasa (contohnya `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Pembekal serasi lain** (pilihan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (melalui `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Setiap satu mengekalkan senarai modelnya sendiri dalam `providerRegistry.ts` dan boleh disegerakkan secara automatik apabila pembekal mendedahkan endpoint `/models`.
+**Penyedia lain yang serasi** (terpilih): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (melalui `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Setiap satunya mengekalkan senarai model sendiri dalam `providerRegistry.ts` dan boleh disegerakkan secara automatik apabila penyedia mendedahkan titik akhir `/models`.
 
-**Nota mengenai ID model:** OmniRoute menggunakan ID asli pembekal (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sesetengah ID mengandungi versi bertitik kerana itulah format yang dijangkakan oleh API hulu. Jika sesuatu model tidak disenaraikan di atas, jalankan `omniroute models --search <term>` atau panggil `GET /api/models/catalog` untuk mengesahkan ketersediaan.
+**Nota tentang ID model:** OmniRoute menggunakan ID natif penyedia (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sesetengah ID mengandungi versi bertitik kerana itulah format yang dijangkakan oleh API huluan. Jika model tidak disenaraikan di atas, jalankan `omniroute models --search <term>` atau akses `GET /api/models/catalog` untuk mengesahkan ketersediaan.
 
 </details>
 

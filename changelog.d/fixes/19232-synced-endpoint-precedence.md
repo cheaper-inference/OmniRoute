@@ -1,0 +1,1 @@
+- **fix(catalog):** prevent defaulted custom model endpoint overlays (`["chat"]` with `defaulted` provenance) from masking discovered endpoints (such as `embeddings`, `ocr`, and audio endpoints on Mistral / Voxtral models) in the `/v1/models` catalog and downstream capability resolution ([#19232](https://github.com/cheaper-inference/OmniRoute/pull/19232)) — thanks @RayJW

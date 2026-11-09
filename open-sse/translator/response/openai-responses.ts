@@ -12,6 +12,7 @@ import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalSta
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
+import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 import {
   isInternalReasoningPlaceholder,
@@ -215,33 +216,26 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     };
   }
 
+  // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
+  // Handle the top-level error before choices so no accompanying delta becomes output.
+  if (chunk.error && typeof chunk.error === "object") {
+    const rawCode = chunk.error.code;
+    const status = typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
+    state.upstreamError = {
+      status,
+      type: status === 429 ? "rate_limit_error" : "server_error",
+      code:
+        typeof chunk.error.metadata?.error_type === "string"
+          ? chunk.error.metadata.error_type
+          : status === 429
+            ? "rate_limit_exceeded"
+            : "bad_gateway",
+      message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
+    };
+    return [];
+  }
+
   if (!chunk.choices?.length) {
-    // Mid-stream aggregator error: OpenRouter (and similar OpenAI-compatible
-    // aggregators) can send an HTTP 200 SSE stream whose body carries a chunk with
-    // empty `choices` and a top-level `error` object instead of any delta — e.g. the
-    // underlying provider hitting its own capacity limit mid-request. Without this
-    // branch the chunk has no choices, so it falls into the awaitingTrailingUsage/
-    // no-op path below and the stream silently ends with a false "completed, empty
-    // output" response, masking the failure and skipping combo fallback. Surface it
-    // as state.upstreamError so stream.ts errors the stream out (mirrors the
-    // Gemini-to-OpenAI translator's #4177 fix).
-    if (chunk.error && typeof chunk.error === "object") {
-      const rawCode = chunk.error.code;
-      const status =
-        typeof rawCode === "number" && rawCode >= 400 && rawCode <= 599 ? rawCode : 502;
-      state.upstreamError = {
-        status,
-        type: status === 429 ? "rate_limit_error" : "server_error",
-        code:
-          typeof chunk.error.metadata?.error_type === "string"
-            ? chunk.error.metadata.error_type
-            : status === 429
-              ? "rate_limit_exceeded"
-              : "bad_gateway",
-        message: typeof chunk.error.message === "string" ? chunk.error.message : "Upstream failure",
-      };
-      return [];
-    }
     // #6906: a deferred finish_reason (awaitingTrailingUsage, see below) completes here —
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
@@ -369,7 +363,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
       closeReasoning(state, emit);
     }
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-    closeMessage(state, emit, msgIdx);
+    // A post-tool-call message lives at its relocated index (msgIndexAlias);
+    // close it there, or later text would append to it across this call.
+    closeMessage(state, emit, aliasedMessageIndex(state, msgIdx));
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }
@@ -510,10 +506,30 @@ function nextFreeMessageIndex(state, requestedIdx) {
   return candidate;
 }
 
-function emitTextContent(state, emit, idx, content) {
-  if (state.msgItemDone[idx]) {
+// The requested index and the index the message item actually lives at can
+// differ: post-tool-call text is re-homed (below), and a tool call may already
+// hold the requested index. Remember the relocation per requested index so
+// later deltas for the SAME logical message reuse it — without the alias every
+// delta re-ran the relocation scan and opened yet another message item.
+function resolveMessageIndex(state, requestedIdx) {
+  let idx = aliasedMessageIndex(state, requestedIdx);
+  if (
+    state.msgItemDone[idx] ||
+    (!state.msgItemAdded[idx] && state.funcAllocatedOutputIndexes?.[idx])
+  ) {
     idx = nextFreeMessageIndex(state, idx);
+    (state.msgIndexAlias ??= {})[requestedIdx] = idx;
   }
+  return idx;
+}
+
+// Where the message requested at `requestedIdx` actually lives (see above).
+function aliasedMessageIndex(state, requestedIdx) {
+  return state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
+}
+
+function emitTextContent(state, emit, idx, content) {
+  idx = resolveMessageIndex(state, idx);
   if (!state.msgItemAdded[idx]) {
     state.msgItemAdded[idx] = true;
     const msgId = `msg_${state.responseId}_${idx}`;
@@ -673,10 +689,35 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
   }
 }
 
+// Allocate a tool call's output_index ONCE per upstream index and reuse it for
+// the whole lifecycle. The base is recomputed from live message state, so a
+// message opened or relocated after the call's first delta used to shift the
+// close-time index away from the added-time index (clients keying items by
+// output_index see the identity change mid-flight). Also never land on an
+// index a message item already holds.
+function allocateToolOutputIndex(state, tcIdx) {
+  if (!state.funcOutputIndex) state.funcOutputIndex = {};
+  if (state.funcOutputIndex[tcIdx] === undefined) {
+    let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+    while (state.msgItemAdded[candidate]) candidate += 1;
+    state.funcOutputIndex[tcIdx] = candidate;
+  }
+  return state.funcOutputIndex[tcIdx];
+}
+
+// Reuse the index the call was announced at (allocateToolOutputIndex); the
+// fallback covers states built before any emitToolCall ran.
+function announcedToolOutputIndex(state, tcIdx) {
+  return (
+    state.funcOutputIndex?.[tcIdx] ??
+    toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx)
+  );
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
   // Record every allocated tool-call output_index so a post-close text
   // relocation (nextFreeMessageIndex) can never collide with it.
   if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
@@ -740,7 +781,7 @@ function emitToolCall(state, emit, tc) {
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
-    const normalizedIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, idx);
+    const normalizedIndex = announcedToolOutputIndex(state, idx);
     const args = state.funcArgsBuf[idx] || "{}";
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
@@ -870,7 +911,8 @@ function sendCompleted(state, emit) {
     }
 
     if (state.usage) {
-      response.usage = state.usage;
+      // Preserve upstream accounting in state; expose the full context only to Responses clients.
+      response.usage = normalizeResponsesContextUsage(state.usage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);

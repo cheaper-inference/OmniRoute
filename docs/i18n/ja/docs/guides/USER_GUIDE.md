@@ -120,16 +120,16 @@
 
 ## 📖 プロバイダーのセットアップ
 
-CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって決まります（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして既に存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
+CSV または JSON ファイルから API キー接続を一括追加するには、**ダッシュボード → プロバイダー → ファイルからインポート**を使用します。列は位置によって解釈されます（`provider,name,apiKey,baseUrl,priority`）。`provider` は、管理対象プロバイダーまたは互換性のあるノードとして、あらかじめ存在している必要があります。[CSV または JSON ファイルからプロバイダーをインポートする](../providers/CSV-IMPORT.md)を参照してください。
 
 ### 🔐 サブスクリプションプロバイダー
 
 #### Claude Code（Pro/Max）
 
 ```bash
-ダッシュボード → プロバイダー → Claude Code に接続
-→ OAuth ログイン → トークンの自動更新
-→ 5時間および週間クォータの追跡
+ダッシュボード → プロバイダー → Claude Code を接続
+→ OAuth ログイン → トークンを自動更新
+→ 5 時間および週間クォータの追跡
 
 モデル:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ CSV または JSON ファイルから API キー接続を一括追加するに�
   cc/claude-haiku-4-5-20251001
 ```
 
-**ヒント:** 複雑なタスクには Opus、速度を重視する場合は Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します！
+**ヒント:** 複雑なタスクには Opus、速度重視なら Sonnet を使用してください。OmniRoute はモデルごとにクォータを追跡します。
 
-OmniRoute ホストにブラウザーがありませんか？Claude Code にログインしている任意の環境で `claude setup-token` を実行し、1年間有効なトークンを **Setup Token** タブに貼り付けてください。[セットアップトークンを使用する Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
+OmniRoute ホストでブラウザーを使用できない場合は、Claude Code にログイン済みの任意の環境で `claude setup-token` を実行し、1 年間有効なトークンを **セットアップトークン** タブに貼り付けます。[セットアップトークンを使用した Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)を参照してください。
 
-Claude および Claude Code 互換ルートでは、Opus および Sonnet モデルの `max` 思考強度が維持されます。Haiku モデルは `max` 強度レベルを受け付けないため、OmniRoute はそのリクエストをアップストリームに送信する前に、高い思考バジェットへダウングレードします。
+Claude および Claude Code 互換ルートでは、Opus と Sonnet
+モデルの `max` 思考エフォートが維持されます。Haiku モデルは `max` エフォート階層を受け付けないため、OmniRoute はその
+リクエストを高い思考予算に引き下げてから上流へ送信します。
 
 #### OpenAI Codex（Plus/Pro）
 
 ```bash
-ダッシュボード → プロバイダー → Codex に接続
+ダッシュボード → プロバイダー → Codex を接続
 → OAuth ログイン（ポート 1455）
-→ 5時間ごとおよび週間リセット
+→ 5 時間ごとおよび週間リセット
 
 モデル:
   cx/gpt-5.5
@@ -160,9 +162,9 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 #### GitHub Copilot
 
 ```bash
-ダッシュボード → プロバイダー → GitHub に接続
+ダッシュボード → プロバイダー → GitHub を接続
 → GitHub 経由の OAuth
-→ 毎月リセット（毎月1日）
+→ 毎月リセット（毎月 1 日）
 
 モデル:
   gh/gpt-5.5
@@ -172,7 +174,12 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 低価格プロバイダー
+**AI クレジット（トークンベースの課金）。** GitHub がアカウントの
+`credits_used` を報告すると、Provider Limits カードに、無制限の組織プランの場合も含め、現在の請求期間に消費されたクレジットを示す **AI クレジット** 行が表示されます。
+
+**ローカル AI クレジット制限。** GitHub 接続を編集し、**請求期間ごとの AI クレジット制限**（`providerSpecificData.githubCreditLimit`）を設定します。空欄にすると無効になり、`0` にすると常にその接続がスキップされます。最後に読み取られた使用量が制限以上の場合、アカウント選択時にその接続がスキップされ、クォータポリシーのカットオフと同様に、ルーティングは他の接続へフォールバックします。このチェックは、定期的なクォータ更新ですでに収集されている使用量を読み取るため、リクエスト処理中に GitHub を呼び出すことはありません。また、フェイルオープン方式です。読み取り値がない場合や古い場合（15 分を超えている場合、またはすでにリセットされた請求期間のものである場合）は、接続をブロックしません。これはローカルの安全策であり、**支出上限を保証するものではありません**。GitHub の報告遅延、更新間隔、処理中のリクエスト、OmniRoute 外での使用により、制限を超える可能性があります。厳格な上限には、GitHub 独自の支出管理機能を使用してください。
+
+### 💰 安価なプロバイダー
 
 #### GLM-4.7（毎日リセット、$0.6/1M）
 
@@ -180,21 +187,21 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 2. Coding Plan から API キーを取得
 3. ダッシュボード → API キーを追加: プロバイダー: `glm`、API キー: `your-key`
 
-**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、7分の1のコストで3倍のクォータを利用できます！毎日午前10時にリセットされます。
+**使用方法:** `glm/glm-4.7` — **ヒント:** Coding Plan では、料金 1/7 でクォータが 3 倍になります。毎日午前 10:00 にリセットされます。
 
-#### MiniMax M2.1（5時間ごとにリセット、$0.20/1M）
+#### MiniMax M2.1（5 時間ごとにリセット、$0.20/1M）
 
 1. 登録: [MiniMax](https://www.minimax.io)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100万トークン）向けの最安オプションです！
+**使用方法:** `minimax/MiniMax-M2.1` — **ヒント:** 長いコンテキスト（100 万トークン）に最も安価な選択肢です。
 
-#### Kimi K2（月額 $9 の定額制）
+#### Kimi K2（定額 $9/月）
 
-1. サブスクライブ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. 購読: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. API キーを取得 → ダッシュボード → API キーを追加
 
-**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000万トークンを月額固定 $9 で利用でき、実質コストは $0.90/1M です！
+**使用方法:** `kimi/kimi-k2.5` — **ヒント:** 1,000 万トークンで固定 $9/月、実質コストは $0.90/1M です。
 
 #### Baidu Qianfan / ERNIE
 
@@ -205,20 +212,20 @@ Claude および Claude Code 互換ルートでは、Opus および Sonnet モ�
 
 ### 🆓 無料プロバイダー
 
-認証不要の無料プロバイダーには、そのプロバイダーページの **認証不要** の横にスイッチがあります。オフにすると、そのプロバイダーが無効になり、プロバイダーの設定済みビューおよびコンパクトビューから削除され、そのモデルも `/v1/models` から削除されます。
+認証不要の無料プロバイダーには、プロバイダーページの **認証は不要** の横にスイッチがあります。これをオフにすると、そのプロバイダーが無効になり、「設定済みプロバイダー」/コンパクトビューから削除され、`/v1/models` からもそのモデルが削除されます。
 
-#### Qoder（無料モデル9種）
+#### Qoder（無料モデル 9 種類）
 
 ```bash
-ダッシュボード → Qoder に接続 → OAuth ログイン → アクセスには現在のプロバイダー制限が適用されます
+ダッシュボード → Qoder を接続 → OAuth ログイン → 利用は現在のプロバイダー制限の対象です
 
 モデル: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro（Claude を無料で利用）
+#### Kiro（Claude 無料版）
 
 ```bash
-ダッシュボード → Kiro に接続 → AWS Builder ID または Google/GitHub → 月間約50クレジット
+ダッシュボード → Kiro を接続 → AWS Builder ID または Google/GitHub → 月約 50 クレジット
 
 モデル: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -333,82 +340,82 @@ API キー: [ダッシュボードから取得]
 
 ---
 
-## 🚀 デプロイ
+## 🚀展開
 
-### グローバル npm インストール（推奨）
+### グローバル npm インストール (推奨)
 
 ```bash
 npm install -g omniroute
 
-# 設定ディレクトリを作成
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ファイルを作成（.env.example を参照）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# サーバーを起動
+# Start server
 omniroute
-# またはカスタムポートを指定:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI は `~/.omniroute/.env` または `./.env` から `.env` を自動的に読み込みます。
+CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (ポート、 `REQUIRE_API_KEY`、ロケール、および色の設定) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
 
 ### トレイモード
 
-OmniRoute をシステムトレイで起動します:
+システム トレイでOmniRoute起動します。
 
 ```bash
 omniroute serve --tray
 ```
 
-このコマンドは、サーバーとトレイの準備が完了すると終了します。
+サーバーとトレイの準備が完了すると、コマンドが返されます。
 
-サーバーはターミナルなしで動作を継続します。
+サーバーは端末なしでも継続します。
 
-トレイモードは macOS、Windows、およびグラフィカルな Linux セッションをサポートします。トレイモードではダッシュボードは自動的に開きません。
+トレイ モードはmacOS、 Windows、およびグラフィカルLinuxセッションをサポートします。トレイ モードでは、ダッシュボードが自動的に開きません。
 
-トレイメニューから次の操作を実行できます:
+次の操作にはトレイ メニューを使用します。
 
-- ダッシュボードを開く。
-- `/dashboard/logs` を開く。
-- 自動起動の設定を変更する。
-- OmniRoute を停止する。
+- ダッシュボードを開きます。
+- `/dashboard/logs`を開きます。
+- 自動起動を変更します。
+- OmniRouteを停止します。
 
-`--tray` を次のオプションと併用しないでください:
+`--tray`次のオプションと組み合わせないでください。
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-これらのモードでは、異なるプロセス所有方式が必要です。
+これらのモードでは、異なるプロセス所有権が必要です。
 
-次回のマシンへのログイン時に起動するよう有効化します:
+次回のマシンログイン時の起動を有効にします。
 
 ```bash
 omniroute autostart enable
 ```
 
-自動起動では、macOS、Windows、およびグラフィカルな Linux セッションでトレイモードが使用されます。ヘッドレス Linux では、既存の systemd ユーザーサービスが使用されます。
+自動開始はmacOS、 Windows、およびグラフィカルLinuxセッションでトレイ モードを使用します。ヘッドレスLinuxは既存の systemd ユーザー サービスを使用します。
 
-ログイン時の起動を無効化します:
+ログイン時の起動を無効にします。
 
 ```bash
 omniroute autostart disable
 ```
 
-### アンインストール
+### アンインストールする
 
-OmniRoute が不要になった場合、クリーンに削除するための簡単なスクリプトを 2 つ用意しています:
+OmniRouteが必要なくなった場合は、クリーンに削除するための 2 つの簡単なスクリプトが提供されています。
 
-| コマンド                 | 操作                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | システムアプリを削除しますが、`~/.omniroute` 内の**データベースと設定は保持します**。 |
-| `npm run uninstall:full` | アプリを削除し、さらに**すべての設定、キー、データベースを完全に消去します**。        |
+| 指示                     | アクション                                                                  |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `npm run uninstall`      | システムアプリを削除しますが、** DBと設定を保持します**`~/.omniroute`で。   |
+| `npm run uninstall:full` | アプリAND完全に削除します**すべての設定、キー、データベースを消去します**。 |
 
-> 注: これらのコマンドを実行するには、OmniRoute プロジェクトフォルダー（クローンした場合）に移動してから実行してください。または、グローバルにインストールした場合は、`npm uninstall -g omniroute` を実行するだけです。
+> 注: これらのコマンドを実行するには、 OmniRouteプロジェクト フォルダー (クローンを作成した場合) に移動して実行します。あるいは、グローバルにインストールされている場合は、単に`npm uninstall -g omniroute`を実行することもできます。
 
-### VPS デプロイ
+### VPS展開
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -424,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# または: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 デプロイ（低メモリ）
+### PM2デプロイメント (低メモリ)
 
-RAM が限られているサーバーでは、メモリ制限オプションを使用してください:
+RAMが制限されているサーバーの場合は、メモリ制限オプションを使用します。
 
 ```bash
-# 512MB の制限を指定（デフォルト）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# またはカスタムメモリ制限を指定
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# または ecosystem.config.js を使用
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` を作成します:
+`ecosystem.config.js`を作成します。
 
 ```javascript
 module.exports = {
@@ -467,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# イメージをビルド（デフォルト = codex/claude/droid がプリインストールされた runner-cli）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ポータブルモード（推奨）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI バイナリを使用するホスト統合モードについては、メインドキュメントの Docker セクションを参照してください。
+CLIバイナリを使用したホスト統合モードについては、メイン ドキュメントのDockerセクションを参照してください。
 
-### Void Linux (xbps-src)
+### ボイドLinux (xbps-src)
 
-Void Linux ユーザーは、`xbps-src` クロスコンパイルフレームワークを使用して、OmniRoute をネイティブにパッケージ化してインストールできます。これにより、Node.js のスタンドアロンビルドと、必要な `better-sqlite3` ネイティブバインディングが自動的に処理されます。
+Void Linuxユーザーは、 `xbps-src`クロスコンパイル フレームワークを使用して、 OmniRouteネイティブにパッケージ化してインストールできます。これにより、必要な`better-sqlite3`ネイティブ バインディングとともにNode.jsスタンドアロン ビルドが自動化されます。
 
 <details>
-<summary><b>xbps-src テンプレートを表示</b></summary>
+<summary><b>xbps-src テンプレートを表示する</b></summary>
 
 ```bash
-# 'omniroute' 用テンプレートファイル
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -505,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp のターゲット CPU アーキテクチャを判定
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -514,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) すべての依存関係をインストール – スクリプトはスキップ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js スタンドアロンバンドルをビルド
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 静的アセットをスタンドアロンにコピー
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 ネイティブバインディングをコンパイル
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) コンパイル済みバインディングをスタンドアロンバンドルに配置
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) アーキテクチャ固有の sharp バンドルを削除
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js の静的解析で省略された pino のランタイム依存関係をコピー:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -550,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# インストール後フックによって空の Next.js App Router ディレクトリが削除されるのを防止
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -578,57 +585,57 @@ post_install() {
 
 ### 環境変数
 
-| 変数                                    | デフォルト                           | 説明                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 署名用シークレット（**本番環境では変更してください**）                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 初回ログイン用パスワード                                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | データディレクトリ（データベース、使用状況、ログ）                                                          |
-| `PORT`                                  | フレームワークのデフォルト           | サービスポート（例では `20128`）                                                                            |
-| `HOSTNAME`                              | フレームワークのデフォルト           | バインド先ホスト（Docker のデフォルトは `0.0.0.0`）                                                         |
-| `NODE_ENV`                              | ランタイムのデフォルト               | デプロイ時には `production` に設定                                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ダッシュボードに表示され、サーバーにも公開される公開ベース URL（従来の `BASE_URL` を置き換え）              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | クラウド同期エンドポイントのベース URL（従来の `CLOUD_URL` を置き換え）                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 生成される API キー用の HMAC シークレット                                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` で Bearer API キーを必須にする                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 認証済みのダッシュボードユーザーが、保存されている API キーの完全な値をオンデマンドで表示できるようにする   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | キャッシュされたプロバイダー制限データのサーバー側更新間隔。UI の更新ボタンでは引き続き手動同期が実行される |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 書き込み、インポート、復元前の SQLite 自動スナップショットを無効化する。手動バックアップは引き続き利用可能  |
-| `APP_LOG_TO_FILE`                       | `true`                               | アプリケーションログと監査ログのディスクへの出力を有効にする                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 認証 Cookie を強制する（HTTPS リバースプロキシの背後で使用）                                       |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 管理対象としてダウンロードする代わりに、既存の `cloudflared` バイナリを使用する                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 管理対象の Quick Tunnels 用トランスポート（`http2`、`quic`、または `auto`）                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js のヒープ上限（MB）                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | プロンプトキャッシュの最大エントリ数                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | セマンティックキャッシュの最大エントリ数                                                                    |
+| 変数                                    | デフォルト                 | 説明                                                                                                                              |
+| --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(自動生成)_               | JWT署名シークレット—最初の実行時に自動生成され、 `server.env`に保持されます。データディレクトリが一時的な場合は明示的に設定します |
+| `INITIAL_PASSWORD`                      | _(未設定)_                 | 初回ログインパスワード。 npm/sourceインストールは`CHANGEME`で始まります。それを置き換えます。未設定: オンボーディング ウィザード  |
+| `DATA_DIR`                              | `~/.omniroute`             | データディレクトリ (データベース、使用状況、ログ)                                                                                 |
+| `PORT`                                  | フレームワークのデフォルト | サービスポート (例では`20128` )                                                                                                   |
+| `HOSTNAME`                              | フレームワークのデフォルト | バインドホスト (Dockerデフォルトは`0.0.0.0`)                                                                                      |
+| `NODE_ENV`                              | 実行時のデフォルト         | デプロイ用に`production`を設定する                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | パブリックベースURLダッシュボードに表示され、サーバーに公開されます (従来の`BASE_URL`を置き換えます)                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | クラウド同期エンドポイント ベースURL (従来の`CLOUD_URL`を置き換える)                                                              |
+| `API_KEY_SECRET`                        | _(自動生成)_               | 生成されたAPIキーのHMACシークレット—最初の実行時に自動生成され、 `server.env`に保持されます                                       |
+| `REQUIRE_API_KEY`                       | `false`                    | `/v1/*`に Bearer APIキーを強制する                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | 認証されたダッシュボード ユーザーが、保存されている完全なAPIキー値をオンデマンドで公開できるようにする                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | キャッシュされたプロバイダー制限データのサーバー側の更新頻度。 UI更新ボタンは依然として手動同期をトリガーします                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | writes/import/restoreの前に自動SQLiteスナップショットを無効にします。手動バックアップは引き続き機能します                         |
+| `APP_LOG_TO_FILE`                       | `true`                     | アプリケーションと監査ログのディスクへの出力を有効にします。                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | `Secure`認証 Cookie を強制する ( HTTPSリバース プロキシの背後)                                                                    |
+| `CLOUDFLARED_BIN`                       | 設定を解除する             | 管理されたダウンロードの代わりに既存の`cloudflared`バイナリを使用する                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | 管理されたクイック トンネルのトランスポート (`http2`、 `quic`、または`auto`)                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | MBのNode.jsヒープ制限                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | プロンプト キャッシュ エントリの最大数                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | セマンティック キャッシュ エントリの最大数                                                                                        |
 
-環境変数の完全なリファレンスについては、[README](../README.md) を参照してください。
+環境変数の完全なリファレンスについては、 [README](../README.md)参照してください。
 
 ---
 
 ## 📊 利用可能なモデル
 
 <details>
-<summary><b>利用可能な全モデルを表示</b></summary>
+<summary><b>利用可能なすべてのモデルを表示</b></summary>
 
-> 以下のリストは v3.8.0 時点の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます — 最新の完全なカタログは **Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
+> 以下のリストは、v3.8.0 の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます。最新のライブカタログ全体を確認するには、**Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
 >
-> プロバイダーの組み込みリストが古くなっている場合は、そのページの **Import from /models** を使用する（または **Auto-Sync** を有効にする）ことで、最新の上流カタログを取得できます。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテスト工程で、Pollinations の匿名アクセスは上流側の制限により制約されたままでした。
+> プロバイダーの組み込みリストにずれがある場合は、そのページで **Import from /models** を使用するか、**Auto-Sync** を有効にして、アップストリームのライブカタログを取得してください。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテストでは、Pollinations の匿名アクセスは引き続きアップストリームによる制限を受けていました。
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ effort ティア: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ 推論レベル: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 無料 OAuth: **Dashboard → Providers → Kiro → Available Models** に表示される最新カタログを使用してください。利用可能なモデルはアカウントとプランによって異なります。
+**Kiro (`kr/`)** — 無料の OAuth: **Dashboard → Providers → Kiro → Available Models** に表示されるライブカタログを使用してください。利用可能かどうかはアカウントとプランによって異なります。
 
-**Qoder (`if/`)** — 無料 OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 無料の OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2〜0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
 **MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 月額 $9 定額または従量課金: `kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 月額 $9 または従量制: `kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API キー: `ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
@@ -636,7 +643,7 @@ post_install() {
 
 **xAI (`xai/`)** — Grok ネイティブ: `xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — 検索拡張: `pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
@@ -646,19 +653,19 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — ウェハースケール: `cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG 特化: `cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG に特化: `cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — エンタープライズ: `nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — エンタープライズ: `nvidia/google/gemma-4-31b-it`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`、`nvidia/nvidia/nemotron-3-ultra-550b-a55b`、`nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API キーごとに Google からリアルタイムで同期されます — 静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使って最新のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
+**Gemini (Google Cloud `gemini/`)**: Google から API キーごとにライブ同期されます。静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使用して現在のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**その他の互換プロバイダー**（抜粋）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期が可能です。
+**その他の互換プロバイダー**（一部）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。それぞれが `providerRegistry.ts` に独自のモデルリストを保持しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期できます。
 
-**モデル ID に関する注意:** OmniRoute はプロバイダーネイティブの ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、上流の API がその形式を要求するためです。上記に記載されていないモデルがある場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
+**モデル ID に関する注意:** OmniRoute はプロバイダー固有の ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、アップストリーム API がその形式を要求するためです。上記にモデルが記載されていない場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可能かどうかを確認してください。
 
 </details>
 

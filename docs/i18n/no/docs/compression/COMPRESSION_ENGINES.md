@@ -304,6 +304,95 @@ Komprimeringskombinasjoner er navngitte komprimeringsprofiler som kan tilordnes 
 
 Plassering i kontrollpanelet: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Forutsetninger / operatørveiledning (CCR & session-dedup)
+
+CCR (`ccr`) og `session-dedup` erstatter eller fjerner tekst og la a** markør** bak. Denne delen er operatørreferansen for å koble en klient opp, lese de to markørene og hente eller diagnostisere det eliderte innholdet. Mekanikken til hver motor er dekket ovenfor; dette er "hvordan kjører jeg det"-laget.
+
+### Transporter og endepunkter
+
+MCP serveren som avslører CCR verktøyene kan nås på tre måter. Standardbasen URL er `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transportere                      | URL / kommando                          | Notater                                                                                                                        |
+| --------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Streambar HTTP (klient, anbefalt) | `http://localhost:20128/api/mcp/stream` | Endepunktet gjeldende MCP klienter snakker med.                                                                                |
+| Legacy SSE singleton              | `http://localhost:20128/api/mcp/sse`    | Eldre singleton transport. Den** lukkes** streambare økter; bruk `streamable-http` klienter mot `/api/mcp/stream`, ikke denne. |
+| stdio                             | `omniroute --mcp`                       | For IDE MCP config som skaper prosessen. Det er ikke noe `--dev` flagg; `omniroute --mcp` er inngangspunktet for stdio.        |
+
+### Lagringsnivåer (det som overlever en omstart)
+
+CCR er en** to-lags** butikk, ikke bare i minnet:
+
+- **Varmt nivå i minnet** — per-blokk cap 2 MiB, per-principal 16 MiB, global 64 MiB. Oppføringer er som standard en 24 timers TTL (maksimalt 7 dager). Full MCP henting fra minnet er begrenset til 256 KiB; noe større er fortsatt tilgjengelig gjennom ranged / grep-modusene.
+- **Slitesterk SQLite -lag** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, på som standard) — støtter minnenivået slik at en blokk overlever LRU utkastelse, en omstart eller en gjenoppretting som lander på en annen instans. Raden beholder blokkens TTL, så en blokk forbi TTL er borte fra begge nivåene.
+
+Tre vakter holder det holdbare nivået avgrenset — en blokk forblir bare minnet når:
+
+1. blokken er over** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. kjøretiden er en skykjøring (ingen lokal disk);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Så "blokken forsvant" er ikke en generell omstartshistorie: en sub-512 KB blokk på en lokal, ikke-sky-kjøretid overlever en omstart via det varige nivået til dens TTL går tom. Se [miljøreferanse](../reference/ENVIRONMENT.md) for variabelen.
+
+### De to markørene
+
+| Markør                                | Betydning                                                                                                                                     | Hva modellen skal gjøre                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | En stor blokk ble lagret innholdsadressert.                                                                                                   | Ring `omniroute_ccr_retrieve` med** 24-hex hash kopiert ordrett** for å få tilbake den opprinnelige teksten.                                                                                                            |
+| `[dedup:ref sha=…]`                   | `session-dedup` elided tekst allerede sendt i en tidligere tur i samme økt. Dette er en** bevisst tilbakeblikk** , ikke et tap eller en feil. | Gjøre** ikke** ring ethvert verktøy og gjør det** ikke** prøv å "rekonstruere" det. Den første forekomsten av teksten er den kanoniske kopien; den gjeldende svingen skrives aldri om, den dedupes ved en senere sving. |
+
+`[dedup:ref]` -tilbakeblikket er en bevisst protokollavgjørelse — det er ingen rekonstruksjon før sending. Behandle det som "denne nøyaktige teksten var allerede på ledningen tidligere i denne økten."
+
+### Kundens forutsetninger
+
+- **Nøkkel (stdio):** en stdio-anroper har ingen identitet per forespørsel, så den autentiserer med `OMNIROUTE_API_KEY` (sett i MCP -serverens `env`). Uten den er innringeren anonym og verktøy som krever en rektor kan forringes.
+- **`tools[]` er injeksjonsforutsetningen.** CCR -hentingsprotokollinstruksjonen (#8033) injiseres** bare** når forespørselens annonserte `tools[]` beviser at klienten faktisk kan nå `omniroute_ccr_retrieve`. Matchen er en etterfølgende segmentmatch avgrenset av en separator (`__`, `.`, `/`, `:`) — aldri en bare delstreng — så et navn med navn som `mcp__gateway__omniroute_ccr_retrieve` teller fortsatt. En fraværende eller ikke-matchende `tools[]` betyr at instruksjonen er _ikke_ injisert, etter design.
+- **`codemode:false` (OpenCode klienter).** OpenCode er som standard kodemodus, som kun annonserer de opprinnelige verktøyene til modellen og** ikke** legg MCP verktøy på den opprinnelige `tools[]` listen. Sett `codemode: false` på MCP -serveroppføringen slik at `omniroute_ccr_*` verktøyene blir annonsert. Dette er en** klient** innstilling, ikke en OmniRoute. Den får ikke CCR instruksjonen injisert ennå: OpenCode navngir et verktøy `<server>_<tool>`, så en server kalt `omniroute` eksponerer `omniroute_omniroute_ccr_retrieve`, og `_` er ikke en av de matchende skilletegnene.
+- **Rektorer.** Lagring og henting er isolert per autentisert hovedperson (per API nøkkel). En nøkkel ser bare sine egne blokker.
+
+### Omfang per verktøy
+
+Omfangshåndhevelse er alltid på for HTTP/SSE -anropere med smale områder. `omniroute_` CCR verktøyene krever:
+
+| Verktøy                  | Omfang              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Et manglende omfang returnerer en**MCP verktøy feil resultat** (`isError: true`, ikke en HTTP 403 — `403 LOCAL_ONLY` er den separate loopback-rutevakt-authoriseringen): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` En minimal fjernnøkkel kan inneholde `mcp:connect` (autoriserer `/api/mcp/` local-only carve-out) pluss det spesifikke read/write omfanget den trenger.
+
+### Klientmatrise
+
+| Klient            | Transportere                              | Konfigurasjon å bruke                                                                                                                                                                                                                                        | `tools[]` annonsert? (→ CCR instruksjon injisert)                                                                                                                                                       |
+| ----------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kode       | streambar-http                            | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                            | Ja — MCP-kompatible; injisert.                                                                                                                                                                          |
+| Cursor / Cline    | `stdio`** eller** `streamable-http`       | stdio: `omniroute --mcp` med `OMNIROUTE_API_KEY` i `env`; eller en ekstern MCP -oppføring som peker på `http://localhost:20128/api/mcp/stream` (se [Installasjonsveiledning → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ja — annonsere `omniroute_ccr_*` verktøyene.                                                                                                                                                            |
+| OpenCode          | streambar-http                            | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` pluss `codemode: false`                                                                                                                                                             | Verktøy som kun annonseres med `codemode: false`; instruksjonen er fortsatt ikke injisert, fordi `omniroute_omniroute_ccr_retrieve` ikke samsvarer (se [Klientforutsetninger](#client-prerequisites) ). |
+| OpenAI-kompatibel | OpenAI-kompatibel HTTP (chatfullføringer) | standard chat-fullføringsklient mot det OpenAI-kompatible endepunktet                                                                                                                                                                                        | **Aldri** — en vanlig OpenAI-kompatibel oppringer blir aldri bedt om å ringe verktøyet, og instruksjonen blir ikke injisert.                                                                            |
+
+### Hentingsgrenser og paginering
+
+MCP -verktøytekstresultater klippes rundt `mcpAccessibility.maxTextChars` (standard `50000`). En `full` henting av en blokk er begrenset til 256 KiB —** det er ingen ubegrenset full gjenfinning** . Når `chars=N` til en blokk er stor, kan du bladre den i stedet for å trekke hele greia:
+
+- Tommelfingerregel:**`chars > 40000` → bruk en `mode`** , aldri bare full.
+- `mode:"grep"` — regex `pattern` matchet linje for linje, opptil 1000 matchende linjer (`unique: true` dropper gjentakelser), billigste for "finn den ene linjen jeg trenger."
+- `mode:"lines"` — et 1-indeksert linjeområde; trenger både `start` og `end`.
+- `mode:"head"` / `mode:"tail"` — first/last `n` linjer.
+- `mode:"stats"` — linje, tegn og byte teller uten kroppen.
+
+Bruk `mode:"lines"` med `start`/`end` for å gå en lang blokk i sider i stedet for å be om hele på en gang.
+
+### Navn på verktøy
+
+Gjenopprettingsverktøyet heter for øyeblikket `omniroute_ccr_retrieve` ( `omniroute_` prefikset er en datert løsning for navnekollisjoner på tvers av servere). Et renere avgrenset suffiksverktøynavn og en rettelse for MCP JSON resultater avkortet midtstreng spores som oppstrøms oppfølginger; denne siden dokumenterer kun gjeldende, sendt oppførsel.
+
+### Øktens livssyklus
+
+Streambare HTTP-økter går på tomgang og serveren høster dem; det inaktive vinduet er `MCP_SESSION_IDLE_MS` konstanten (referert til ved navn, ikke en hardkodet verdi, så denne siden driver ikke når den endres). Symptomet på en inaktiv økt er en HTTP 404 med `Unknown Mcp-Session-Id` — løsningen er å koble til på nytt eller starte økten på nytt,** ikke** for å rotere en nøkkel, endre et omfang eller gi nytt navn til et verktøy.
+
 ## API-grensesnitt
 
 | Rute                                   | Formål                                                                     |

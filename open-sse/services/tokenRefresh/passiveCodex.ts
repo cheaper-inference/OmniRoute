@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import { parseTokenExpiryMs } from "../../utils/tokenExpiry.ts";
 
 export const PASSIVE_CODEX_IDS = ["codex", "cx"] as const;
@@ -29,7 +29,7 @@ const rejectedFingerprints = Symbol("passiveCodexRejectedFingerprints");
 type CredentialSnapshot = Partial<Record<"connectionId" | "id" | "accessToken", string>> & {
   [rejectedFingerprints]?: string[];
 };
-const fingerprint = (token: string) => createHash("sha256").update(token).digest("hex");
+const fingerprint = (token: string) => opaqueTokenFingerprint(token);
 /** Request-owned fingerprints only: no token material, registry, timers or cleanup. */
 export function getRejectedTokenFingerprints(credentials: CredentialSnapshot): string[] {
   return [...(credentials[rejectedFingerprints] || [])];

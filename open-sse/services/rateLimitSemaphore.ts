@@ -8,10 +8,11 @@
  * All state is in-memory — resets on server restart (by design, since rate-limit
  * windows are typically short-lived).
  */
+
 interface QueueItem {
   resolve: (release: () => void) => void;
   reject: (error: Error) => void;
-  timer: NodeJS.Timeout;
+  timer: ReturnType<typeof setTimeout>;
 }
 
 interface ModelGate {
@@ -20,7 +21,7 @@ interface ModelGate {
   queue: QueueItem[];
   rateLimitedUntil: number | null;
   /** Tracked timeouts for cooldown drain to allow cleanup on shutdown. */
-  cooldownTimers?: NodeJS.Timeout[];
+  cooldownTimers?: ReturnType<typeof setTimeout>[];
 }
 
 interface AcquireOptions {

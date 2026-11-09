@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,11 +487,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 টপ-লেভেল এক্সিকিউটর মডিউল (`*.ts` বিয়োগ `base.ts`, `index.ts` এবং পরীক্ষা - গণনা `npm run check:docs-counts` পরিমাপ)। প্রতিটি নির্বাহক শ্রেণী সরাসরি বা `DefaultExecutor` বা অন্য নির্বাহকের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে; অবশিষ্ট মডিউলগুলি প্রতি-প্রদানকারী সাহায্যকারী (টুল স্কিমা, fetch/TTS অ্যাডাপ্টার, কুইর্ক হ্যান্ডলার)। নির্বাহকদের অন্তর্ভুক্ত:
+159 টপ-লেভেল এক্সিকিউটর মডিউল (`*.ts` বিয়োগ `base.ts`, `index.ts` এবং পরীক্ষা — গণনা `npm run check:docs-counts` পরিমাপ)। প্রতিটি নির্বাহক শ্রেণী সরাসরি বা `DefaultExecutor` বা অন্য নির্বাহকের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে; অবশিষ্ট মডিউলগুলি প্রতি-প্রদানকারী সাহায্যকারী (টুল স্কিমা, fetch/TTS অ্যাডাপ্টার, কুইর্ক হ্যান্ডলার)। নির্বাহকদের অন্তর্ভুক্ত:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop` প্লাস `claudeIdentity.ts` (শেয়ারড আইডেন্টিটি হেল্পার) এবং `index.ts` (রেজিস্ট্রি)।
 
-> দ্রষ্টব্য: এখানে তালিকাভুক্ত নয় এমন প্রদানকারীরা জেনেরিক OpenAI- সামঞ্জস্যপূর্ণ নির্বাহক ব্যবহার করে `default.ts` দ্বারা পরিবেশিত হয়। সম্পূর্ণ প্রদানকারীর ক্যাটালগ (377 প্রদানকারী) `src/shared/constants/providers.ts` তে থাকে।
+> দ্রষ্টব্য: এখানে তালিকাভুক্ত নয় এমন প্রদানকারীরা জেনেরিক OpenAI- সামঞ্জস্যপূর্ণ নির্বাহক ব্যবহার করে `default.ts` দ্বারা পরিবেশিত হয়। সম্পূর্ণ প্রদানকারীর ক্যাটালগ (381 প্রদানকারী) `src/shared/constants/providers.ts` এ থাকে।
 
 ### 4.3 `open-sse/translator/`
 
@@ -520,7 +520,7 @@ open-sse/
 | ক্যাশিং            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | রাউটিং বুদ্ধিমত্তা | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | মডেল হ্যান্ডলিং    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| কম্প্রেশন          | `compression/` — সম্পূর্ণ কম্প্রেশন ইঞ্জিন ওয়্যারিং                                                                                                                                                                                                     |
+| কম্প্রেশন          | `compression/` — ফুল কম্প্রেশন ইঞ্জিন ওয়্যারিং                                                                                                                                                                                                          |
 | টোকেন + সেশন       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | স্তর/প্রকাশ        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP /নেটওয়ার্ক     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -531,7 +531,7 @@ open-sse/
 
 - **110টি অনন্য টুল** `server.ts` তে তারযুক্ত ( `schemas/tools.ts` + মেমরিতে 45 ক্যানোনিকাল, দক্ষতা, গিটহাব-স্কিল, পুল, গ্যামিফিকেশন, প্লাগইন, Notion, Obsidian, স্থানীয়-কর্পাস এবং কম্প্রেশন মডিউল — ইউনিয়ন `countUniqueMcpTools` দ্বারা গণনা করা হয়েছে)।
 - **3টি পরিবহন** : stdio, HTTP স্ট্রিমেবল, SSE।
-- **33 স্কোপ** রানটাইমে প্রয়োগ করা হয় — `src/shared/constants/mcpScopes.ts` তে ভিত্তি তালিকা, সম্পূর্ণ সেট হল প্রতিটি টুল মডিউল দ্বারা ঘোষিত স্কোপের মিলন।
+- **33 স্কোপ** `src/shared/constants/mcpScopes.ts` এ রানটাইম — বেস তালিকায় প্রয়োগ করা হয়, পূর্ণ সেট হল প্রতিটি টুল মডিউল দ্বারা ঘোষিত স্কোপের মিলন।
 - অডিট টেবিল: `mcp_tool_audit` ( `audit.ts` দ্বারা জনবহুল)।
 - ফাইল: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, প্লাস `__tests__/` এর অধীনে পরীক্ষা।
 - সম্পূর্ণ টুল ক্যাটালগের জন্য [MCP-SERVER.md](../frameworks/MCP-SERVER.md) দেখুন।

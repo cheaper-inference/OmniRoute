@@ -38,71 +38,61 @@ Bu rəqəm təxmini olduğuna görə:
 
 ---
 
-## Xərclər necə təxmin edilir
+## Xərclər necə qiymətləndirilir
 
 ### Qiymət mənbəyi
 
-Xərclər aşağıdakı üstünlük sırasına əsasən müəyyən edilən qiymət cədvəlindən götürülür
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Xərclər [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) -da birləşdirilmiş qiymət cədvəlindən gəlir, bu prioritet qaydada (** ən yüksək birinci** ):
 
-1. **İstifadəçi əvəzləmələri** — idarə panelində / `PATCH /api/pricing` vasitəsilə təyin
-   etdiyiniz qiymətlər.
-2. **Sinxronlaşdırılmış xarici qiymətlər** — sinxronizasiya aktiv olduqda LiteLLM-in açıq
-   `model_prices_and_context_window.json` faylından əldə edilir (əvəzləmələrinizi heç vaxt
-   dəyişdirməməsi üçün ayrıca `pricing_synced` ad fəzasında saxlanılır).
-3. **Sərt kodlaşdırılmış standart dəyərlər** — OmniRoute ilə birlikdə təqdim olunur.
+1. **İstifadəçi ləğv edir** — qiymətləri tablosunda və ya `PATCH /api/pricing` ( `pricing` ad sahəsi) vasitəsilə təyin olunur.
+2. **models.dev sinxronizasiyası** — qiymətləri `https://models.dev/api.json` dən ( `models_dev_pricing` ad sahəsi) götürülüb.
+3. **LiteLLM sinxronizasiyası** — qiymətləri LiteLLM-nin ictimai `model_prices_and_context_window.json` dən ( `pricing_synced` ad sahəsi) götürülüb.
+4. **Hardcoded default** — dərəcələri [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) ilə göndərilir.
 
-Xarici qiymət sinxronizasiyası **seçim əsasında aktivləşdirilir** və standart olaraq
-deaktivdir. Müvafiq mühit dəyişənləri
-([`.env.example`](../../.env.example) faylına baxın):
+Eyni provider/model üçün daha yüksək prioritet təbəqələrdən olan dəyərlər aşağı təbəqələrdə uyğun sahələrin üzərinə yazır; yuxarı təbəqədə olmayan sahələr hələ də aşağı təbəqədən gələ bilər. Sifariş hətta hər iki müstəqil sinxronizasiya işi eyni vaxtda işləyərkən də müəyyən edilir. `GET /api/pricing?includeSources=1` hər model etiketləri (`user`, `modelsDev`, `litellm`, `default`) həmin modeli ehtiva edən ən yüksək prioritet təbəqəni müəyyən edən `pricing` və `sourceMap` qaytarır.
 
-| Mühit dəyişəni          | Standart  | Məqsəd                                                                   |
-| ----------------------- | --------- | ------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Başlanğıcda LiteLLM qiymət sinxronizasiyasını fonda aktivləşdirir.       |
-| `PRICING_SYNC_INTERVAL` | `86400`   | **Saniyə** ilə sinxronizasiya intervalı (standart olaraq gündəlik).      |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Vergüllə ayrılmış mənbə siyahısı (hazırda yalnız `litellm` dəstəklənir). |
+**LiteLLM sinxronizasiyası** qoşulur, defolt olaraq qeyri-aktivdir. Onun mühit dəyişənləri (bax [`.env.example`](../../.env.example) ) bunlardır:
+
+| Env var                 | Defolt    | Məqsəd                                                                            |
+| ----------------------- | --------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fon LiteLLM qiymət sinxronizasiyasını aktivləşdirin.                              |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Saniyədə sinxronizasiya intervalı (gündəlik).                                     |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Yalnız bu sinxronizasiya üçün mənbə seçimi; hazırda yalnız `litellm` dəstəklənir. |
+
+**models.dev sinxronizasiyası** LiteLLM sinxronizasiyasından ayrıdır və defolt olaraq deaktivdir. Onu Parametrlərdə aktivləşdirin (models.dev sync) və ya bu dəyişənlərdən istifadə edin:
+
+| Env var                    | Defolt          | Məqsəd                                                                                                                                               |
+| -------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmadı)_ | Ayarlanmadan çıxarılır Parametrlər keçidindən sonra; `1/true/on/yes` gücləri işə salır və `0/false/off/no` sönür (Parametrlər bunu aktiv etsə belə). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Defolt models.dev sinxronizasiya intervalı saniyələrlə (gündəlik).                                                                                   |
+
+`PRICING_SYNC_SOURCES` edir** yox** models.dev-i aktivləşdirin; yalnız LiteLLM sinxronizasiyasına nəzarət edir. İstifadəçinin ləğv edilməsinin silinməsi nə sinxronlaşdırılmış ad məkanını silmir; növbəti mövcud qiymət təbəqəsi qüvvəyə minir. Qiymətsiz bir model üçün əl ilə ləğv etmədən əvvəl həm sinxronizasiya parametrlərini, həm də `sourceMap` yoxlayın.
 
 ### Xərc düsturu
 
-Xərc hər sorğu üçün token saylarından və bir milyon token üzrə tariflərdən istifadə etməklə
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) faylında
-(`computeCostFromPricing` / `calculateCost`) hesablanır:
+Xərc [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) ilə token saymalarından və milyon başına token dərəcələrindən sorğuya görə hesablanır:
 
-- **Giriş tokenləri** (keş oxumaları və keş yaratma tokenləri çıxılmaqla) × `input` tarifi.
-- **Keşdən oxunan tokenlər** × `cached` tarifi (olmadıqda giriş tarifindən istifadə edilir).
-- **Keş yaratma tokenləri** × `cache_creation` tarifi (olmadıqda giriş tarifindən istifadə edilir).
-- **Çıxış tokenləri** × `output` tarifi.
-- **Mühakimə tokenləri** × `reasoning` tarifi (olmadıqda çıxış tarifindən istifadə edilir).
+- **Giriş nişanları** (minus keş oxu və keş yaratma nişanları) × `input` dərəcəsi.
+- **Keş oxunan tokenlər** × `cached` dərəcəsi (giriş sürətinə qayıdır).
+- **Keş yaratma nişanları** × `cache_creation` dərəcəsi (giriş sürətinə qayıdır).
+- **Çıxış nişanları** × `output` dərəcəsi.
+- **Məntiqi işarələr** × `reasoning` dərəcəsi (çıxış dərəcəsinə qayıdır).
 
-Bütün tariflər 1.000.000 token üçün USD kimi şərh olunur. Codex «fast»/«priority» və ya
-«flex» xidmət səviyyəsi xərc əmsalı (`getCodexFastCostMultiplier`) tətbiq edir — məsələn,
-flex tokenlərə 50% endirimlə hesablanır və idarə panelində **flex qənaəti** kimi göstərilir.
+Bütün dərəcələr 1.000.000 token üçün USD kimi şərh olunur. Codex "sürətli"/"prioritet" və ya "çevik" xidmət səviyyəsi xərc çarpanını (`getCodexFastCostMultiplier`) tətbiq edir — məsələn, çeviklik 50% token endirimi ilə hesablanır.** çevik qənaət** tablosunda.
 
-Əvvəlcə model adları normallaşdırılır (məsələn, `openai/` və ya
-`accounts/fireworks/models/` kimi provayder yolu prefiksləri silinir) ki, tarixi sətirlər
-hələ də qiymətlə uyğunlaşdırıla bilsin.
+Model adları əvvəlcə normallaşdırılır ( `openai/` və ya `accounts/fireworks/models/` kimi provayder yolu prefiksləri silinir), buna görə də tarixi sətirlər hələ də qiymətə uyğun gəlir.
 
-### Xərclər necə qeydə alınır
+### Xərcləmə necə qeydə alınır
 
-- Hər sorğu üzrə xərc cavabdan sonra hesablanır və müştəri üçün heç bir gecikmə
-  yaratmaması məqsədilə nəticə gözlənilmədən qeydə alınır. Paylaşılan kvotanın istifadəsi
-  növbəti hadisə dövrü addımında
-  [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə
-  planlaşdırılır.
-- API açarı üzrə xərclər buferlənir və
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tərəfindən paketlərlə yazılır
-  (standart yazma intervalı 60 saniyə, bufer ölçüsü 1.000 qeyd). Aşağıdakılar vasitəsilə
-  tənzimlənə bilər:
+- Hər sorğunun dəyəri cavabdan sonra hesablanır və qeyd olunur ki, o, heç vaxt müştəriyə gecikmə əlavə etmir. Paylaşılan kvota istehlakı [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) vasitəsilə növbəti hadisə dövriyyəsi işarəsində planlaşdırılır.
+- API-açarının xərclənməsi [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (defolt 60-ların yuyulma intervalı, 1000 giriş buferi) tərəfindən buferlənir və partiyalar şəklində təmizlənir. Bunun vasitəsilə tənzimlənə bilər:
 
-  | Mühit dəyişəni                      | Standart | Məqsəd                                       |
-  | ----------------------------------- | -------- | -------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Millisaniyə ilə buferi yazma intervalı.      |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Yazmadan əvvəl buferdəki maksimum qeyd sayı. |
+  | Env var                             | Defolt  | Məqsəd                                             |
+  | ----------------------------------- | ------- | -------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Yuma intervalı millisaniyələrdə.                   |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Təmizləmədən əvvəl maksimum tamponlanmış girişlər. |
 
-İdarə panelindəki xərc rəqəmləri hər sətir üçün saxlanılmış dollar məbləğindən **oxunmur** —
-analitika son nöqtəsi hər dəfə işlədikdə onlar token sayları və cari qiymət cədvəli
-əsasında yenidən hesablanır. Bu o deməkdir ki, səhv qiymətin düzəldilməsi (və yenidən
-sinxronlaşdırılması) tarixi xərc təxminlərini geriyə dönük olaraq yeniləyir.
+Tablosunun qiymət rəqəmləri bunlardır** yox** Saxlanılan sətir başına dollar məbləğindən oxuyun — onlar analitikanın son nöqtəsi hər dəfə işlədiyi zaman token saylarından və cari qiymət cədvəlindən dərhal yenidən hesablanır. Bu, yanlış qiymətin düzəldilməsi (və yenidən sinxronizasiya) tarixi xərc təxminlərini geriyə doğru yeniləmək deməkdir.
 
 ---
 
@@ -150,50 +140,48 @@ Xərclər bölməsinə həmçinin aşağıdakılar daxildir (hamısı `/dashboar
 
 ## API son nöqtələri
 
-Qeyd edilmədiyi halda, bunların hamısı idarəetmə autentifikasiyası tələb edir (loopback/JWT, `requireManagementAuth` vasitəsilə).
+Bütün bunlar qeyd edilmədiyi təqdirdə idarəetmə auth (loopback/JWT, via `requireManagementAuth`) tələb edir.
 
 ### İstifadə və xərc analitikası
 
-| Metod | Son nöqtə                | Məqsəd                                                                                                                                                                    |
-| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Tam xərc/istifadə analitikası: xülasə, gündəlik tendensiya, provayder/model/API açarı/hesab/səviyyə üzrə. Sorğu: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Zaman ərzində hər provayder üzrə kvota istifadəsi. Sorğu: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                    |
-| `GET` | `/api/usage/history`     | Xam istifadə tarixçəsi sətirləri.                                                                                                                                         |
-| `GET` | `/api/usage/call-logs`   | Hər sorğu üzrə çağırış jurnalları (model, tokenlər, xərc, gecikmə, status).                                                                                               |
-| `GET` | `/api/usage/quota`       | Provayder kvotasının statusu.                                                                                                                                             |
-| `GET` | `/api/usage/proxy-logs`  | Proksi sorğularının jurnalları.                                                                                                                                           |
+| Metod | Son nöqtə                | Məqsəd                                                                                                                                                              |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/usage/analytics`   | Tam cost/usage analitikası: xülasə, gündəlik trend, provider/model/API key/account/tier. tərəfindən Sorğu: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Zamanla provayder başına kvota istifadəsi. Sorğu: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                      |
+| `GET` | `/api/usage/history`     | Raw istifadə tarixçəsi sıraları.                                                                                                                                    |
+| `GET` | `/api/usage/call-logs`   | Hər sorğu üçün zəng qeydləri (model, nişanlar, qiymət, gecikmə, status).                                                                                            |
+| `GET` | `/api/usage/quota`       | Provayder kvotası statusu.                                                                                                                                          |
+| `GET` | `/api/usage/proxy-logs`  | Proksi sorğu qeydləri.                                                                                                                                              |
 
 ### Büdcələr
 
 | Metod  | Son nöqtə                | Məqsəd                                                                                        |
 | ------ | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Bir API açarı üçün xərc xülasəsi + büdcə yoxlaması (`apiKeyId` sorğu parametri tələb olunur). |
-| `POST` | `/api/usage/budget`      | API açarı üçün gündəlik/həftəlik/aylıq USD limitlərini və xəbərdarlıq həddini təyin edin.     |
-| `GET`  | `/api/usage/budget/bulk` | API açarları üzrə toplu büdcə xülasələri.                                                     |
+| `GET`  | `/api/usage/budget`      | Bir API açarı üçün xərc xülasəsi + büdcə yoxlanışı (`apiKeyId` sorğu parametri tələb olunur). |
+| `POST` | `/api/usage/budget`      | Bir API açarı üçün daily/weekly/monthly USD limitləri + xəbərdarlıq həddi təyin edin.         |
+| `GET`  | `/api/usage/budget/bulk` | API düymələri üzrə toplu büdcə xülasələri.                                                    |
 
-> Büdcə API-si hər **API açarı** (`apiKeyId`) üzrə əhatə dairəsinə malikdir.
-> `GET /api/usage/budget` tərəfindən qaytarılan limitlərə `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` və cari cəmlər (`totalCostToday`, `totalCostMonth`, …) daxildir.
+> Büdcə API başına əhatə olunur**API açarı** (`apiKeyId`). `GET /api/usage/budget` ilə qaytarılan limitlərə `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` və çalışan cəmlər (`totalCostToday`, `totalCostMonth`, …) daxildir.
 
-### Qiymətqoyma
+### Qiymətləndirmə
 
-| Metod    | Son nöqtə               | Məqsəd                                                                                                                             |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Cari birləşdirilmiş qiymətlər (istifadəçi + sinxronlaşdırılmış + standart). Hər qeyd üzrə mənbəni görmək üçün `?includeSources=1`. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` üçün qiymətləri əvəz edin.                                                 |
-| `DELETE` | `/api/pricing`          | Qiymətləri standart dəyərlərə sıfırlayın (istəyə görə `?provider=&model=` ilə məhdudlaşdırıla bilər).                              |
-| `GET`    | `/api/pricing/defaults` | Hər 1M üzrə standart ehtiyat tariflərini göstərin.                                                                                 |
-| `GET`    | `/api/pricing/models`   | Model üzrə indekslənmiş qiymətlər.                                                                                                 |
-| `POST`   | `/api/pricing/sync`     | Xarici mənbələrdən (LiteLLM) əl ilə sinxronlaşdırmanı başladın.                                                                    |
-| `GET`    | `/api/pricing/sync`     | Cari sinxronlaşdırma statusu.                                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Bütün sinxronlaşdırılmış qiymət məlumatlarını silin.                                                                               |
+| Metod    | Son nöqtə               | Məqsəd                                                                                                                                                                            |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Birləşdirilmiş dörd qatlı qiymətlər (istifadəçi, models.dev, LiteLLM, defolt). `?includeSources=1` `pricing` + `sourceMap`.                                                       |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` üçün qiymətləri ləğv edin.                                                                                                |
+| `DELETE` | `/api/pricing`          | İstifadəçi qiymətlərinin ləğv edilməsini silin (istəyə görə `?provider=&model=` tərəfindən əhatə olunur); sinxronlaşdırılmış dərəcələr və ya daxili defoltlar ehtiyat kimi qalır. |
+| `GET`    | `/api/pricing/defaults` | Defolt per-1M ehtiyat dərəcələrini göstərin.                                                                                                                                      |
+| `GET`    | `/api/pricing/models`   | Qiymət modelə görə təyin olunur.                                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Xarici mənbələrdən əl ilə sinxronizasiyanı işə salın (LiteLLM).                                                                                                                   |
+| `GET`    | `/api/pricing/sync`     | Cari sinxronizasiya vəziyyəti.                                                                                                                                                    |
+| `DELETE` | `/api/pricing/sync`     | Yalnız LiteLLM ilə sinxronlaşdırılmış qiymətləri silin (`pricing_synced`); models.dev məlumatları ayrıdır.                                                                        |
 
-### Xərclərlə əlaqəli digər son nöqtələr
+### Xərclə bağlı digər son nöqtələr
 
-| Metod | Son nöqtə                     | Məqsəd                                                                       |
-| ----- | ----------------------------- | ---------------------------------------------------------------------------- |
-| `GET` | `/api/free-tier/summary`      | Pulsuz model tokenlərinin cəmi, bu ay istifadə edilən və qalan pulsuz limit. |
-| `GET` | `/api/quota/pools/[id]/usage` | Ortaq kvota hovuzu üçün istifadə göstəriciləri.                              |
+| Metod | Son nöqtə                     | Məqsəd                                                                    |
+| ----- | ----------------------------- | ------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Pulsuz model token cəmi, bu ay istifadə edilmiş və qalan pulsuz müavinət. |
+| `GET` | `/api/quota/pools/[id]/usage` | Paylaşılan kvota hovuzu üçün istifadə.                                    |
 
 ---
 

@@ -36,12 +36,85 @@ import { resolveRequestToolIdentity } from "../../translator/response/openai-res
 import { matchesCustomToolDeclaration } from "../../utils/toolCallName.ts";
 import { plaintextCollaborationFields } from "../../translator/response/openai-responses/collaborationPlaintextMarker.ts";
 import { finalizeResponsesTerminalStatus } from "../../translator/helpers/responsesTerminalStatus.ts";
+import { restoreResponsesToolNames } from "../../translator/helpers/responsesToolNameRestore.ts";
 import {
   canonicalizeDeclaredToolName,
   collectDeclaredToolNames,
   mergeDeclaredToolNames,
   toolNameSideChannelNames,
 } from "../../translator/response/openai-responses/declaredToolName.ts";
+
+type ResponsesToolIdentity = { namespace: string; name: string };
+type ToolSchemaMap = Map<string, Record<string, unknown>>;
+
+function toResponsesToolIdentity(value: unknown): ResponsesToolIdentity | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const identity = value as Record<string, unknown>;
+  return typeof identity.namespace === "string" &&
+    typeof identity.name === "string" &&
+    identity.name.length > 0
+    ? { namespace: identity.namespace, name: identity.name }
+    : null;
+}
+
+function runtimeLedger(value: unknown): ReadonlyMap<unknown, unknown> | null {
+  return value instanceof Map ? value : null;
+}
+
+function addFlatAliasNames(
+  names: Set<string>,
+  aliasLedger: ReadonlyMap<unknown, unknown>,
+  identityLedger: ReadonlyMap<unknown, unknown> | null
+): void {
+  for (const [wireName, alias] of aliasLedger) {
+    if (typeof wireName !== "string" || typeof alias !== "string" || !alias) continue;
+    const identity = toResponsesToolIdentity(identityLedger?.get(wireName));
+    if (!identity || identity.namespace === "") names.add(identity?.name ?? alias);
+  }
+}
+
+function addFlatIdentityNames(
+  names: Set<string>,
+  identityLedger: ReadonlyMap<unknown, unknown>
+): void {
+  for (const [wireName, value] of identityLedger) {
+    if (typeof wireName !== "string") continue;
+    const identity = toResponsesToolIdentity(value);
+    if (identity?.namespace === "") names.add(identity.name);
+  }
+}
+
+function collectExplicitFlatResponsesToolNames(
+  schemas: ToolSchemaMap | null,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): Set<string> {
+  const names = new Set(schemas?.keys() ?? []);
+  const aliasLedger = runtimeLedger(aliases);
+  const identityLedger = runtimeLedger(identities);
+
+  if (aliasLedger) addFlatAliasNames(names, aliasLedger, identityLedger);
+  if (identityLedger) addFlatIdentityNames(names, identityLedger);
+  return names;
+}
+
+function addRestoredResponsesToolSchemas(
+  schemas: ToolSchemaMap | null,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, unknown> | null
+): ToolSchemaMap | null {
+  if (!schemas) return null;
+  const aliasLedger = runtimeLedger(aliases);
+  const identityLedger = runtimeLedger(identities);
+
+  for (const [wireName, schema] of [...schemas]) {
+    const identity = toResponsesToolIdentity(identityLedger?.get(wireName));
+    const alias = aliasLedger?.get(wireName);
+    const restoredName = identity?.name ?? (typeof alias === "string" && alias ? alias : null);
+    if (restoredName && !schemas.has(restoredName)) schemas.set(restoredName, schema);
+  }
+  return schemas;
+}
 
 export type { NonStreamingClientTranslateInput, NonStreamingClientTranslateResult };
 
@@ -75,10 +148,30 @@ export function translateNonStreamingClientResponse(
 
   // ── Extract tool schemas for schema-aware translation ──────────────────────
   const finalBody = requestBody as Record<string, unknown> | null;
-  const responseToolSchemas =
-    (clientResponseFormat === FORMATS.CLAUDE
+  let responseToolSchemas =
+    (clientResponseFormat === FORMATS.CLAUDE || clientResponseFormat === FORMATS.OPENAI
       ? extractToolSchemaMap(input.clientRequestBody)
       : null) ?? extractToolSchemaMap(finalBody || responseBody);
+  const restoresNativeResponses = responsePayloadFormat === FORMATS.OPENAI_RESPONSES;
+  // Capture flat declarations before schema aliases are added: a namespaced leaf
+  // needs its schema for argument cleanup but must not masquerade as a flat tool.
+  const explicitFlatToolNames = collectExplicitFlatResponsesToolNames(
+    responseToolSchemas,
+    restoresNativeResponses ? responseToolNameMap : null,
+    restoresNativeResponses ? requestToolIdentityMap : null
+  );
+
+  // Native Responses passthrough and Responses -> Chat/Claude conversion both
+  // consume this body below. Restore provider wire aliases first, while the
+  // independent alias and namespace-identity ledgers are still available.
+  if (restoresNativeResponses) {
+    responseToolSchemas = addRestoredResponsesToolSchemas(
+      responseToolSchemas,
+      responseToolNameMap,
+      requestToolIdentityMap
+    );
+    restoreResponsesToolNames(responseBody, responseToolNameMap, requestToolIdentityMap);
+  }
 
   // ── Claude signed-thinking continuity ─────────────────────────────────────
   // A non-Claude client never holds the signed thinking blocks of this tool turn;
@@ -90,7 +183,11 @@ export function translateNonStreamingClientResponse(
     !input.videoTranscriptSensitive
   ) {
     try {
-      storeClaudeThinkingFromResponse(responseBody, { provider, model });
+      storeClaudeThinkingFromResponse(responseBody, {
+        provider,
+        model,
+        connectionId: input.connectionId,
+      });
     } catch {
       // Continuity capture is best-effort — never block the response
     }
@@ -169,7 +266,12 @@ export function translateNonStreamingClientResponse(
       );
       for (const item of sanitizedOutput) {
         if (item?.type !== "function_call" || typeof item.name !== "string") continue;
-        if (resolveRequestToolIdentity(requestToolIdentityMap, item.name)) continue;
+        if (
+          resolveRequestToolIdentity(requestToolIdentityMap, item.name, {
+            explicitNames: explicitFlatToolNames,
+          })
+        )
+          continue;
         item.name = canonicalizeDeclaredToolName(item.name, declaredToolNames).name;
       }
     }
@@ -179,12 +281,12 @@ export function translateNonStreamingClientResponse(
         // unique-bare (`exec`) spellings so a provider that dropped the namespace
         // prefix still yields a custom_tool_call with raw input instead of a
         // function_call with JSON arguments. A flat declaration of the same bare
-        // name keeps its own identity (responseToolSchemas guard).
+        // name keeps its own identity (explicit-flat declaration guard).
         if (
           item?.type !== "function_call" ||
           !matchesCustomToolDeclaration({
             customToolNames,
-            declaredFunctionSchemas: responseToolSchemas,
+            declaredFunctionSchemas: explicitFlatToolNames,
             toolName: item.name,
           })
         )
@@ -233,7 +335,9 @@ export function translateNonStreamingClientResponse(
         // function_call with no name and cannot dispatch it. resolveRequestToolIdentity()
         // returns only values that carry the full {namespace, name} shape, so the
         // alias table can no longer reach the restore below.
-        const identity = resolveRequestToolIdentity(requestToolIdentityMap, item.name);
+        const identity = resolveRequestToolIdentity(requestToolIdentityMap, item.name, {
+          explicitNames: explicitFlatToolNames,
+        });
         if (identity) {
           item.namespace = identity.namespace;
           item.name = identity.name;

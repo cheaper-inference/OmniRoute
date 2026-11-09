@@ -444,7 +444,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - ஸ்ட்ரீமிங் என்ஜின் பணியிடம்
+## 4. `open-sse/` — ஸ்ட்ரீமிங் என்ஜின் பணியிடம்
 
 தனி npm பணியிடம் `@omniroute/open-sse` ஆக வெளியிடப்பட்டது. கோரிக்கை செயலாக்கம், நிறைவேற்றுபவர்கள், மொழிபெயர்ப்பாளர்கள், சேவைகள், மின்மாற்றி மற்றும் MCP சேவையகத்திற்குச் சொந்தமானது.
 
@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              159 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 உயர்மட்ட எக்ஸிகியூட்டர் தொகுதிகள் (`*.ts` கழித்தல் `base.ts`, `index.ts` மற்றும் சோதனைகள் - எண்ணிக்கை `npm run check:docs-counts` அளவீடுகள்). ஒவ்வொரு எக்ஸிகியூட்டர் கிளாஸும் `BaseExecutor` (`base.ts`), நேரடியாகவோ அல்லது `DefaultExecutor` மூலமாகவோ அல்லது மற்றொரு செயல்படுத்துபவர் மூலமாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் ஒவ்வொரு வழங்குநருக்கும் உதவியாளர்கள் (கருவி திட்டங்கள், fetch/TTS அடாப்டர்கள், க்விர்க் ஹேண்ட்லர்கள்). நிறைவேற்றுபவர்கள் அடங்குவர்:
+159 உயர்மட்ட எக்ஸிகியூட்டர் தொகுதிகள் (`*.ts` கழித்தல் `base.ts`, `index.ts` மற்றும் சோதனைகள் — எண்ணிக்கை `npm run check:docs-counts` அளவீடுகள்). ஒவ்வொரு எக்ஸிகியூட்டர் கிளாஸும் `BaseExecutor` (`base.ts`) ஐ நேரடியாகவோ அல்லது `DefaultExecutor` மூலமாகவோ அல்லது மற்றொரு செயல்படுத்துபவர் மூலமாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் ஒவ்வொரு வழங்குநருக்கும் உதவியாளர்கள் (கருவி திட்டங்கள், fetch/TTS அடாப்டர்கள், க்விர்க் ஹேண்ட்லர்கள்). நிறைவேற்றுபவர்கள் அடங்குவர்:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `vertex` `commandCode` `cursor` `default` `devin-cli` `muse-spark-web` `opencode` `nlpcloud` `perplexity-web` `petals` `pollinations` `qoder` `devin-desktop` `claudeIdentity.ts` பதிவு) `index.ts`
 
-> குறிப்பு: இங்கே பட்டியலிடப்படாத வழங்குநர்கள் பொதுவான OpenAI-இணக்கமான செயல்பாட்டாளரைப் பயன்படுத்தி `default.ts` ஆல் வழங்கப்படுகிறார்கள். முழு வழங்குநர் பட்டியல் (377 வழங்குநர்கள்) `src/shared/constants/providers.ts` இல் உள்ளது.
+> குறிப்பு: இங்கே பட்டியலிடப்படாத வழங்குநர்கள் பொதுவான OpenAI-இணக்கமான செயல்பாட்டாளரைப் பயன்படுத்தி `default.ts` ஆல் வழங்கப்படுகிறார்கள். முழு வழங்குநர் பட்டியல் (381 வழங்குநர்கள்) `src/shared/constants/providers.ts` இல் உள்ளது.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Chat Completions converter ( `responses/` route catch-all மூலம் பயன்படுத்தப்படுகிறது).
+- `responsesTransformer.ts` — `TransformStream` -based பதில்கள் API ↔ Chat Completions converter ( `responses/` route catch-all மூலம் பயன்படுத்தப்படுகிறது).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ open-sse/
 | கேச்சிங்                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ரூட்டிங் நுண்ணறிவு       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | மாதிரி கையாளுதல்         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| சுருக்கம்                | `compression/` - முழு சுருக்க இயந்திர வயரிங்                                                                                                                                                                                                             |
+| சுருக்கம்                | `compression/` — முழு சுருக்க இயந்திர வயரிங்                                                                                                                                                                                                             |
 | டோக்கன் + அமர்வு         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | அடுக்கு / வெளிப்படையானது | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / நெட்வொர்க்          | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 தனிப்பட்ட கருவிகள்** `server.ts` இல் கம்பி ( `schemas/tools.ts` + நினைவகம், திறன்கள், கிட்ஹப்-திறன்கள், பூல், கேமிஃபிகேஷன், செருகுநிரல், Notion, Obsidian, லோக்கல்-கார்பஸ் மற்றும் சுருக்க தொகுதிகள் — யூனியன் `countUniqueMcpTools` ஆல் கணக்கிடப்பட்டது)
+- **110 தனிப்பட்ட கருவிகள்** `server.ts` இல் கம்பி ( `schemas/tools.ts` + நினைவகம், திறன்கள், கிட்ஹப்-திறன்கள், பூல், கேமிஃபிகேஷன், செருகுநிரல், Notion, Obsidian, லோக்கல்-கார்பஸ் மற்றும் சுருக்க தொகுதிகள் — யூனியன் `countUniqueMcpTools` ஆல் கணக்கிடப்பட்ட 45 நியமனங்கள்).
 - **3 போக்குவரத்து** : stdio, HTTP ஸ்ட்ரீமபிள், SSE.
-- **33 நோக்கங்கள்** இயக்க நேரத்தில் செயல்படுத்தப்படுகிறது - `src/shared/constants/mcpScopes.ts` இல் அடிப்படை பட்டியல், முழு தொகுப்பு என்பது ஒவ்வொரு கருவி தொகுதியாலும் அறிவிக்கப்பட்ட ஸ்கோப்களின் ஒன்றியமாகும்.
+- **33 நோக்கங்கள்** `src/shared/constants/mcpScopes.ts` இல் இயக்க நேர — அடிப்படை பட்டியலில் செயல்படுத்தப்பட்டது, முழு தொகுப்பு என்பது ஒவ்வொரு கருவி தொகுதியாலும் அறிவிக்கப்பட்ட ஸ்கோப்களின் ஒன்றியமாகும்.
 - தணிக்கை அட்டவணை: `mcp_tool_audit` ( `audit.ts` ஆல் மக்கள் தொகை கொண்டது).
 - கோப்புகள்: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, மேலும் `__tests__/` இன் கீழ் சோதனைகள்.
 - முழு கருவி அட்டவணைக்கு [MCP-SERVER.md](../frameworks/MCP-SERVER.md) பார்க்கவும்.

@@ -181,26 +181,12 @@ export class FairCostQueue<T> {
     return undefined;
   }
 
-  /**
-   * Drain all entries in the queue, yielding to the event loop between batches
-   * to prevent blocking the event loop with large queues.
-   * Returns all drained entries.
-   */
-  async drain(batchSize = 50): Promise<QueueEntry<T>[]> {
+  drain(): QueueEntry<T>[] {
     const out: QueueEntry<T>[] = [];
     while (true) {
-      const batch: QueueEntry<T>[] = [];
-      for (let i = 0; i < batchSize; i++) {
-        const e = this.dequeue();
-        if (!e) break;
-        batch.push(e);
-      }
-      if (batch.length === 0) break;
-      out.push(...batch);
-      // Yield to event loop if there might be more entries
-      if (this.count > 0) {
-        await new Promise((resolve) => setImmediate(resolve));
-      }
+      const e = this.dequeue();
+      if (!e) break;
+      out.push(e);
     }
     this.cursor = 0;
     return out;

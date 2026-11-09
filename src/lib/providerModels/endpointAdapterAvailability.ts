@@ -23,7 +23,21 @@ import {
 export type EndpointAdapterStatus = "available" | "unavailable" | "unknown";
 export type EndpointAdapterStatuses = Record<string, EndpointAdapterStatus>;
 
-export function getRegisteredEndpointAdapterStatuses(provider: string): EndpointAdapterStatuses {
+/**
+ * A model-scoped adapter (see `AudioProvider.modelScoped`) only counts as present
+ * for the models it lists; without a model id it is not a provider-wide adapter.
+ */
+function hasTranscriptionAdapter(provider: string, modelId?: string): boolean {
+  const config = getTranscriptionProvider(provider);
+  if (!config) return false;
+  if (!config.modelScoped) return true;
+  return Boolean(modelId) && config.models.some((model) => model.id === modelId);
+}
+
+export function getRegisteredEndpointAdapterStatuses(
+  provider: string,
+  modelId?: string
+): EndpointAdapterStatuses {
   const hasChatRegistry = Boolean(getRegistryEntry(provider));
   const status = (present: boolean, knownAbsent = false): EndpointAdapterStatus =>
     present ? "available" : knownAbsent ? "unavailable" : "unknown";
@@ -38,7 +52,7 @@ export function getRegisteredEndpointAdapterStatuses(provider: string): Endpoint
     videos: status(Boolean(getVideoProvider(provider))),
     music: status(Boolean(getMusicProvider(provider)), hasChatRegistry),
     "audio-speech": status(Boolean(getSpeechProvider(provider)), audioMissing),
-    "audio-transcriptions": status(Boolean(getTranscriptionProvider(provider)), audioMissing),
+    "audio-transcriptions": status(hasTranscriptionAdapter(provider, modelId), audioMissing),
   };
 }
 
@@ -50,7 +64,7 @@ export function getRegisteredEndpointAdapterStatuses(provider: string): Endpoint
 export function hasNoRunnableEndpointAdapter(
   provider: string,
   model:
-    | { supportedEndpoints?: readonly string[]; endpointCapabilitySource?: unknown }
+    | { id?: string; supportedEndpoints?: readonly string[]; endpointCapabilitySource?: unknown }
     | null
     | undefined
 ): boolean {
@@ -58,6 +72,6 @@ export function hasNoRunnableEndpointAdapter(
   if (!isTrustedEndpointCapabilitySource(model.endpointCapabilitySource)) return false;
   const endpoints = normalizeModelSupportedEndpoints(model.supportedEndpoints);
   if (endpoints.length === 0) return false;
-  const adapters = getRegisteredEndpointAdapterStatuses(provider);
+  const adapters = getRegisteredEndpointAdapterStatuses(provider, model.id);
   return endpoints.every((endpoint) => adapters[endpoint] === "unavailable");
 }

@@ -24,23 +24,27 @@ omniroute launch --profile glm52  # OmniRoute မှတစ်ဆင့် glm/gl
 
 ---
 
-## Claude Code က gateway သို့ ချိတ်ဆက်ပုံ
+## Claude Code သည် ဂိတ်ဝသို့ မည်ကဲ့သို့ ချိတ်ဆက်သနည်း။
 
-Claude Code သည် **Anthropic Messages API** နှင့် ဆက်သွယ်ပြီး environment variable များဖြင့် စိတ်ကြိုက် endpoint တစ်ခုသို့ ညွှန်ပေးရသည် (`--base-url` flag မရှိပါ):
+Claude Code က ဆွေးနွေးထားပါတယ်။**Anthropic မက်ဆေ့ခ်ျများ API** နှင့် ပတ်ဝန်းကျင် ကိန်းရှင်များပါရှိသော စိတ်ကြိုက် အဆုံးမှတ်ကို ညွှန်ပြသည် (၎င်းတွင် `--base-url` အလံ မရှိပါ)။
 
-| Variable                                     | ရည်ရွယ်ချက်                                                                                                      |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude Code က `/v1/messages` ကို နောက်တွင် ထည့်ပေးသည်)။ **`/v1` suffix မပါရပါ။**               |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` အဖြစ် ပေးပို့သည် — သင့် OmniRoute access token / API key ကို အသုံးပြုပါ                |
-| `ANTHROPIC_API_KEY`                          | အခြားရွေးချယ်စရာ: `x-api-key` အဖြစ် ပေးပို့သည်။ နှစ်ခုစလုံး သတ်မှတ်ထားပါက `ANTHROPIC_AUTH_TOKEN` ကို ဦးစားပေးသည် |
-| `ANTHROPIC_MODEL`                            | သီးခြား model တစ်ခုကို မဖြစ်မနေ အသုံးပြုစေသည် (`/model` picker ၏ မူလရွေးချယ်မှုကို အစားထိုးသည်)                  |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → မူရင်း `/model` picker သည် `/v1/models` မှ `claude*`/`anthropic*` model များကို စာရင်းပြုစုဖော်ပြသည်       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Response တစ်ခုချင်းစီ၏ output token အရေအတွက်ကို ကန့်သတ်သည် (ဥပမာ `65536`)                                        |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | အလိုအလျောက် compact လုပ်ရန် token threshold                                                                      |
+| ပြောင်းလဲနိုင်သော                            | ရည်ရွယ်ချက်                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude Code သည် `/v1/messages`) တွင်ထည့်သွင်းထားသည်။** `/v1` နောက်ဆက်တွဲမရှိပါ။**     |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — အဖြစ် ပို့ပြီး သင်၏ OmniRoute ဝင်ရောက်ခွင့် တိုကင် / API ကီးကို အသုံးပြုပါ။ |
+| `ANTHROPIC_API_KEY`                          | အစားထိုး- `x-api-key` အဖြစ် ပို့သည်။ နှစ်ခုလုံးသတ်မှတ်ပါက `ANTHROPIC_AUTH_TOKEN` အနိုင်ရသည်။            |
+| `ANTHROPIC_MODEL`                            | သတ်သတ်မှတ်မှတ်ပုံစံတစ်ခုကို အတင်းအကြပ်လုပ်ပါ ( `/model` ရွေးချယ်မှုမူရင်းကို လွှမ်းမိုးသည်)             |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ဇာတိ `/model` ရွေးသူသည် `claude*`/`anthropic*` မော်ဒယ်များကို `/v1/models` မှ စာရင်းပြုစုသည်။     |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | တုံ့ပြန်မှုအလိုက် အထွက်တိုကင်များ ထုပ်ပါ (ဥပမာ `65536`)                                                 |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | အလိုအလျောက်ချုံ့ခြင်းအတွက် တိုကင်အဆင့်                                                                  |
 
-> Env var များကို **စတင်ချိန်တွင် တစ်ကြိမ်သာ** ဖတ်သည် — ၎င်းတို့ကို ပြောင်းလဲပြီးနောက် Claude Code ကို ပြန်လည်စတင်ပါ။
+> Env vars များကိုဖတ်သည်။** startup မှာတစ်ကြိမ်** — ၎င်းတို့ကိုပြောင်းလဲပြီးနောက် Claude Code ကိုပြန်လည်စတင်ပါ။
 
-`omniroute launch` က ဤအရာအားလုံးကို သင့်အတွက် သတ်မှတ်ပေးသည်: active context မှ base URL + token ကို ဖြေရှင်းရယူပေးသည် (ထို့ကြောင့် `omniroute connect <vps>` ပြီးနောက် `omniroute launch` သည် ချက်ချင်းအလုပ်လုပ်သည်)၊ server ကို health-check လုပ်ပြီး `claude` ကို exec လုပ်သည်။
+ပုံသေစာကြောင်းများအစား လှည့်ပတ်သည့်အထောက်အထားအတွက်၊ `~/.claude/settings.json` တွင် `apiKeyHelper` လက်ရှိ credential ကို stdout သို့ ပရင့်ထုတ်သည့် command တစ်ခုအဖြစ် သတ်မှတ်ပါ။ Claude Code သည် ၎င်း၏အထွက်ကို မူရင်းအတိုင်း ငါးမိနစ်ကြာ သိမ်းဆည်းထားမည် (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ၎င်းကို အစားထိုးသည်) နှင့် တန်ဖိုးကို `Authorization: Bearer` နှင့် `x-api-key` နှစ်မျိုးလုံးတွင် ပေးပို့သည်။ ဇာတ်ညွှန်းသည် အထောက်အထားကို ပရင့်ထုတ်ရမည်ဖြစ်ပြီး အခြားမည်သည့်အရာမှ — ဆိုင်းဘုတ်တစ်ခုသည် v2.1.227 + တွင် အထောက်အကူမဖြစ်ပါ။
+
+ဤသည်မှာ Entra ID SSO အလုပ်လုပ်ပုံဖြစ်သည်- `scripts/cli/omniroute-sso.mjs token` API သော့အစား OmniRoute အတည်ပြုသည့် ခဏတာ Entra ဝင်ရောက်ခွင့်တိုကင်ကို ပရင့်ထုတ်သည်။ [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ကြည့်ပါ။
+
+`omniroute launch` ဤအရာအားလုံးကို သင့်အတွက် သတ်မှတ်ပေးသည်- ၎င်းသည် တက်ကြွသောအကြောင်းအရာမှ အခြေခံ URL + တိုကင်ကို ဖြေရှင်းပေးသည် (ထို့ကြောင့် `omniroute connect <vps>` ထို့နောက် `omniroute launch` သာ အလုပ်လုပ်သည်)၊ ဆာဗာကို ကျန်းမာရေးစစ်ဆေးပြီး `claude` ကို execs ပေးသည်။
 
 ---
 

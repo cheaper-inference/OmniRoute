@@ -16,7 +16,7 @@ const block = (selector: string) => {
 test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    '@import "../../packages/ui-kit/src/ci-ui.css";',
+    '@import "../../packages/ui-kit/src/ci-styles.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
     order.every((i) => i >= 0),
@@ -30,9 +30,10 @@ test("globals.css loads the vendored kit CSS right after Tailwind, and the kit s
   // Since kit 0.0.66 the UI and display roles are Switzer, declared by the kit itself:
   // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. Instrument Serif and IBM Plex
   // Mono are gone; Inter comes back ONLY as the per-script fallback after Switzer (Switzer has no
-  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face.
+  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face. Vazirmatn is the Arabic-script
+  // fallback, named only under html[dir="rtl"] (tests/unit/rtl-font-stack.test.ts).
   const fontsourceImports = [...css.matchAll(/@import "@fontsource\/([^/"]+)\//g)].map((m) => m[1]);
-  assert.deepEqual([...new Set(fontsourceImports)], ["inter"]);
+  assert.deepEqual([...new Set(fontsourceImports)], ["inter", "vazirmatn"]);
   assert.doesNotMatch(css, /--font-(sans|display):\s*"Inter"/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   const tokens = read("packages/ui-kit/src/ci-tokens.css");
@@ -87,6 +88,24 @@ test("the OmniRoute color tokens are aliases of kit tokens (no hex left in :root
   assert.match(dark, /color-scheme:\s*dark/);
 });
 
+test("the coral/indigo rgba() leftovers and the orphan legacy blocks are gone (#19066)", () => {
+  // The hex check above missed the same colours written as rgba() (coral 229,77,94 and
+  // indigo 99,102,241): the ::selection fallback, `border-glow` and the route progress glow.
+  const legacyRgba = /rgba\(\s*(?:229,\s*77,\s*94|99,\s*102,\s*241)\b/;
+  assert.doesNotMatch(css, legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), /rgba?\(/);
+  // Blocks with no consumer anywhere in src/: an old coral glow, a macOS vibrancy panel and the
+  // antd table (antd is not a dependency).
+  for (const orphan of [/border-glow/, /\.bg-vibrancy\b/, /\.ant-table\b/]) {
+    assert.doesNotMatch(css, orphan);
+  }
+  assert.match(
+    css,
+    /::selection \{\s*background-color: color-mix\(in srgb, var\(--color-primary\) 22%, transparent\);/
+  );
+});
+
 test("the graph-paper grid, the coral/indigo palette and the macOS font stack are gone", () => {
   assert.doesNotMatch(css, /body::before/);
   assert.doesNotMatch(css, /--grid-line|--grid-size|--section-alt/);
@@ -110,9 +129,33 @@ test("the graph-paper grid, the coral/indigo palette and the macOS font stack ar
     "--color-info-bg",
     "--color-chart-1",
     "--color-chart-5",
+    "--color-chart-8",
+    "--color-chart-3-ink",
+    "--color-chart-2-subtle",
   ]) {
     assert.ok(theme.includes(`${t}:`), `@theme inline exposes ${t}`);
   }
+});
+
+test("all eight kit chart tokens, their -ink and -subtle are bridged in :root and @theme (#19066)", () => {
+  const root = block(":root {\n  --desktop-safe-top");
+  const theme = block("@theme inline {");
+  const dark = block(".dark {");
+  for (let n = 1; n <= 8; n++) {
+    for (const suffix of ["", "-ink", "-subtle"]) {
+      const name = `--color-chart-${n}${suffix}`;
+      assert.ok(
+        root.includes(`${name}: var(--ci-chart-${n}${suffix});`),
+        `:root maps ${name} → var(--ci-chart-${n}${suffix})`
+      );
+      // Tailwind utilities (bg-chart-6, text-chart-3-ink, bg-chart-2-subtle) need the @theme entry.
+      assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+      // The kit flips --ci-chart-* per theme/edition; OmniRoute never re-declares them per theme.
+      assert.ok(!dark.includes(`${name}:`), `.dark does not redefine ${name}`);
+    }
+  }
+  assert.ok(!root.includes("--color-chart-9"), "the kit has exactly eight chart tokens");
+  assert.doesNotMatch(root, /--color-chart-[\w-]+:\s*#/, "chart bridge carries no hex");
 });
 
 test("focus ring lives in @layer base so kit controls keep their own focus styles", () => {
@@ -147,10 +190,13 @@ test("phone-only heading/button rules leave kit elements alone (spike conflicts 
   assert.doesNotMatch(css, /main :is\(h1, h2\) \{/);
 });
 
-test("adapter extension classes exist for the Button warning variant and Badge tones", () => {
-  assert.match(css, /\.ci-button--warning \{/);
-  for (const tone of ["success", "warning", "danger", "info", "primary"]) {
-    assert.match(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `badge tone ${tone}`);
+test("the Button warning variant and Badge tones come from the kit, with no local extension", () => {
+  const kit = read("packages/ui-kit/src/ci-ui.css");
+  assert.match(kit, /\.ci-button--warning \{/);
+  assert.doesNotMatch(css, /\.ci-button--warning|\.ci-select-native/);
+  for (const tone of ["success", "warning", "danger", "info", "accent"]) {
+    assert.match(kit, new RegExp(`\\.ci-badge--tone-${tone} \\{`), `badge tone ${tone}`);
+    assert.doesNotMatch(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `local ${tone}`);
   }
 });
 
@@ -434,6 +480,65 @@ test("text-primary resolves to a readable primary ink; lime stays on bg/border/r
   assert.match(css, /::selection \{[^}]*\n\s*color: var\(--color-primary-ink\);/);
 });
 
+test("Editions (default palette): text-primary reads the kit's accent-active, AA in light and dark", () => {
+  // The Classic ink (lime-800 / lime) would be wrong on the copper palette, so Editions bridges
+  // --color-primary-ink to --ci-color-accent-active, which ci-editions.css flips per theme.
+  const editionsRoot = block('html:root[data-ci-appearance="editions"] {');
+  assert.match(editionsRoot, /--color-primary-ink:\s*var\(--ci-color-accent-active\);/);
+  assert.doesNotMatch(editionsRoot, /#[0-9a-fA-F]{3,6}\b/, "the Editions bridge carries no hex");
+  // It must outrank the Classic dark rule (:root[data-theme="dark"], specificity 0,2,0).
+  assert.ok(
+    css.indexOf('html:root[data-ci-appearance="editions"] {') >
+      css.indexOf(':root[data-theme="dark"] {'),
+    "the Editions ink comes after the Classic dark ink"
+  );
+
+  const editions = read("packages/ui-kit/src/ci-editions.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const blockOf = (startsWith: string) => {
+    const start = editions.indexOf(startsWith);
+    assert.ok(start >= 0, `ci-editions.css has the block ${startsWith}`);
+    const body = editions.slice(editions.indexOf("{", start) + 1, editions.indexOf("}", start));
+    return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  };
+  const light = blockOf(':is(html:root:has([data-ci-appearance="editions"])');
+  const dark = blockOf(':is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"])');
+  const lookup = (token: string, scopes: Map<string, string>[]) => {
+    const value = scopes.map((scope) => scope.get(token)).find((v) => v !== undefined);
+    assert.ok(value, `${token} is declared in ci-editions.css`);
+    assert.match(value, /^#[0-9a-f]{6}$/i, `${token} is a literal hex in ci-editions.css`);
+    return value;
+  };
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5]
+      .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: string, b: string) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const [name, scopes] of [
+    ["light", [light]],
+    ["dark", [dark, light]],
+  ] as const) {
+    const ink = lookup("--ci-color-accent-active", [...scopes]);
+    for (const surface of ["--ci-color-background", "--ci-color-surface"]) {
+      const ratio = contrast(ink, lookup(surface, [...scopes]));
+      assert.ok(ratio >= 4.5, `${name} ink ${ink} on ${surface}: ${ratio.toFixed(2)}:1`);
+    }
+    // Sanity: the copper accent itself is unreadable as text on light — the reason for the ink.
+    if (name === "light") {
+      const accent = lookup("--ci-color-accent", [...scopes]);
+      assert.ok(contrast(accent, lookup("--ci-color-background", [...scopes])) < 4.5);
+    }
+    // The accent surface still carries its own dark foreground at AA.
+    const fg = lookup("--ci-color-accent-foreground", [...scopes]);
+    const accent = lookup("--ci-color-accent", [...scopes]);
+    assert.ok(contrast(fg, accent) >= 4.5, `${name} accent foreground on the accent`);
+  }
+});
+
 test("token aliases with no consumer are gone (KEA-7886 F4)", () => {
   for (const token of [
     "--grad-brand",
@@ -451,16 +556,13 @@ test("token aliases with no consumer are gone (KEA-7886 F4)", () => {
   assert.doesNotMatch(css, /\.traffic-lights?\b/, "the unused .traffic-light(s) chrome is gone");
 });
 
-test("the primary Badge tone keeps dark ink in light and takes the lime ink in dark (F4)", () => {
-  // Light: near-black ink on lime-100. Dark: the kit keeps --ci-color-accent-foreground near-black
-  // while the surface becomes a 14 % lime tint over the dark background, so the "8 features"
-  // translator badge read near-black on near-black. Dark flips the ink to the lime itself.
+test("the primary Badge tone uses the kit accent ink in every look (F4)", () => {
+  // The near-black accent foreground vanished on the dark accent tint ("8 features" on the
+  // translator). The kit tone draws its own ink, which holds AA in all four looks.
+  const kit = read("packages/ui-kit/src/ci-ui.css");
   assert.match(
-    css,
-    /\.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent-foreground\);\s*background: var\(--ci-color-accent-surface-strong\);/
+    kit,
+    /\.ci-badge--tone-accent \{[^}]*color: var\(--ci-badge-accent-ink\);[^}]*background: var\(--ci-color-accent-surface-strong\);/
   );
-  assert.match(
-    css,
-    /:root\[data-theme="dark"\] \.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent\);/
-  );
+  assert.doesNotMatch(css, /\.ci-badge\[data-tone="primary"\]/);
 });

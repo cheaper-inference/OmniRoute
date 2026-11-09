@@ -1,5 +1,7 @@
 // OpenAI helper functions for translator
 
+import { geminiFunctionParameters } from "./geminiFunctionParameters.ts";
+
 // Valid OpenAI content block types
 // `input_audio` / `audio_url` ported from upstream decolua/9router#913 so audio
 // parts survive `filterToOpenAIFormat()` on OpenAI-target passthrough routes.
@@ -59,6 +61,8 @@ export interface FilterToOpenAIFormatOptions {
   preservePromptCacheBreakpoint?: boolean;
   /** Keep Moonshot's non-standard `video_url` content block. */
   preserveVideoUrl?: boolean;
+  /** CI resolves HTTPS PDF links before supplier dispatch. */
+  normalizeFileUrls?: boolean;
   /** Keep `reasoning_content` on tool-call assistant turns (reasoning-replay providers). */
   preserveReasoningContent?: boolean;
   /** Keep the `developer` role (targets that accept it); otherwise it is lowered to `system`. */
@@ -69,6 +73,7 @@ function hasToolCalls(msg: { tool_calls?: unknown }): boolean {
   return Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
 }
 
+/** Normalize cross-provider history while preserving supported OpenAI media parts. */
 export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {}) {
   // #2069 — when the routed provider honors OpenAI-format cache_control
   // breakpoints (DashScope/alibaba, Xiaomi MiMo, etc.) and preservation was
@@ -159,6 +164,37 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
       let thinkingText = null;
 
       for (const block of msg.content) {
+        if (opts.normalizeFileUrls && block.type === "file_url") {
+          const raw = block.file_url;
+          const url = typeof raw === "string" ? raw : raw?.url;
+          filteredContent.push({
+            type: "file",
+            file: {
+              file_data: typeof url === "string" ? url : "",
+              filename: block.filename ?? "attachment.pdf",
+            },
+          });
+          continue;
+        }
+        if (
+          opts.normalizeFileUrls &&
+          block.type === "file" &&
+          block.file?.file_url &&
+          !block.file.file_data
+        ) {
+          const { file_url, ...file } = block.file;
+          filteredContent.push({ type: "file", file: { ...file, file_data: file_url } });
+          continue;
+        }
+        if (preserveVideoUrl && block.type === "input_video") {
+          const raw = block.video_url ?? block.input_video ?? block.url;
+          const url = typeof raw === "string" ? raw : raw?.url;
+          filteredContent.push({
+            type: "video_url",
+            video_url: { url: typeof url === "string" ? url : "" },
+          });
+          continue;
+        }
         // Extract thinking blocks as reasoning_content (OpenAI extended thinking)
         if (block.type === "thinking") {
           thinkingText = block.thinking || block.text || "";
@@ -317,14 +353,14 @@ export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {
           };
         }
 
-        // Gemini format: {functionDeclarations: [{name, description, parameters}]}
+        // Gemini format: {functionDeclarations: [{name, description, parameters | parametersJsonSchema}]}
         if (tool.functionDeclarations && Array.isArray(tool.functionDeclarations)) {
           return tool.functionDeclarations.map((fn) => ({
             type: "function",
             function: {
               name: fn.name,
               description: String(fn.description ?? ""),
-              parameters: fn.parameters || { type: "object", properties: {} },
+              parameters: geminiFunctionParameters(fn) || { type: "object", properties: {} },
             },
           }));
         }
