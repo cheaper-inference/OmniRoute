@@ -946,32 +946,28 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 셀프 서비스 사용량 (`/api/usage/om-usage`)
+## 셀프 서비스 사용량(`/api/usage/om-usage`)
 
-모든 API 키는 관리 인증 없이 **자신의** 사용량과 할당량을 읽을 수 있습니다. 이 엔드포인트는
-클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 사용 금액을 표시할 때 사용합니다.
+모든 API 키는 읽을 수 있습니다.** 그 자체의** 사용량 및 할당량 — 관리 인증 없음. 이는 클라이언트(CLI, OmniCopilot 패널)가 키 보유자에게 지출 내역을 표시하는 데 사용하는 엔드포인트입니다.
 
 ```bash
-# 텍스트 형식 (기존 계약 — 터미널용 일반 텍스트)
+# Text form (the historical contract — plain text for a terminal)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# 구조화된 형식 — UI가 사용하는 형식
+# Structured form — what a UI consumes
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-키에는 **`allowUsageCommand`**가 활성화되어 있어야 합니다(기본값은 비활성화되어 있으며
-대시보드의 API 키 관리자가 키별로 전환함). 활성화되지 않은 경우 엔드포인트는 `403`으로
-응답합니다.
+키에는 다음이 있어야 합니다.**`allowUsageCommand`** 활성화됩니다(기본적으로 꺼짐 — 대시보드의 API 키 관리자는 키별로 토글합니다). 이것이 없으면 엔드포인트는 `403` 응답합니다.
 
-`?format=json`은 호출자가 거부 응답에서 데이터 필드를 읽지 않도록 판별 가능한 형태를
-반환합니다. 성공 시:
+`?format=json` 구별된 모양을 반환하므로 호출자는 거부 시 데이터 필드를 읽지 않습니다. 성공 시:
 
 ```jsonc
 {
   "allowed": true,
-  // 키가 키별 사용량 제한(일일/주간 USD)을 선택한 경우에만 존재:
+  // present only when the key opted into per-key usage limits (daily/weekly/5-hour USD):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -980,9 +976,9 @@ curl -H "Authorization: Bearer <your-api-key>" \
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // 선택된 제공자의 할당량 스냅샷. 아직 캐시된 값이 없으면 null:
+  // the selected provider quota snapshot, or null when nothing is cached yet:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // 모든 연결의 스냅샷. UI에서 여러 제공자를 나란히 렌더링할 수 있음:
+  // every connection's snapshot, so a UI can render several providers side by side:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -990,65 +986,49 @@ curl -H "Authorization: Bearer <your-api-key>" \
 }
 ```
 
-거부 시(`401` 잘못된 키 / `403` 허용되지 않음) 동일한 경로가
-`{ "allowed": false, "error": { "message": "…" } }`를 반환합니다. 값이 있지만 비어 있는
-`personal`/`provider`(키는 허용되었으나 아직 확인된 정보가 없음)는 거부와 다른 상태이며,
-두 상태를 구분할 수 있는 것은 JSON 형식뿐입니다.
+거부 시(`401` 잘못된 키 / `403` 허용되지 않음) 동일한 경로는 `{ "allowed": false, "error": { "message": "…" } }` — 를 반환하지만 현재는 비어 있지만 `personal`/`provider` (키는 허용되지만 아직 학습된 것은 없음)는 거부와 다른 상태이며 JSON 형식만이 이를 구별합니다.
 
-**인증:** `isValidApiKey`로 검증된 호출자 자신의 Bearer API 키를 사용합니다. 이는
-`requireManagementAuth` 뒤에 유지되는 관리 영역(`/api/keys/…`)이 **아닙니다**.
+**인증:** `isValidApiKey` — 로 검증된 호출자 자신의 Bearer API 키는 `requireManagementAuth` 뒤에 있는 관리 표면(`/api/keys/…`)이 _아닙니다_.
 
-### 원시 할당량 백분율과 기준선 조정 할당량 백분율
+### 원시 대 컷오프 조정 할당량 비율
 
-`/api/usage/om-usage`를 사용할 때 호출자는 **일반 텍스트 출력**과 구조화된
-**JSON 출력**에 표시되는 백분율의 차이를 확인해야 합니다.
+`/api/usage/om-usage` 사용할 때 호출자는 다음에 의해 표시되는 백분율 간의 차이에 유의해야 합니다.** 일반 텍스트 출력** 그리고 구조화된**JSON 출력** :
 
-| Aspect            | 일반 텍스트 형식 (`/api/usage/om-usage` / `@@om-usage`)                               | JSON 형식 (`?format=json`)                                |
-| :---------------- | :------------------------------------------------------------------------------------ | :-------------------------------------------------------- |
-| **출력 필드**     | `NN% left` (예: `20% left`)                                                           | `provider.quotas` / `providers[].quotas`                  |
-| **측정값**        | **기준선 조정 사용 가능 허용량**: 기준선 임계값을 초과하여 남은 용량                  | **원시 업스트림 할당량**: 조정되지 않은 제공자 측정값     |
-| **기준선 조정**   | `effectiveRemainingPercent()`를 통해 조정되므로 보호된 예약 용량은 `0% left`로 표시됨 | 없음 (제공자가 보고한 원시 스냅샷 값)                     |
-| **임계값 데이터** | 표시되는 백분율에 반영됨                                                              | 연결별 `quotaWindowThresholds`(또는 서버 기본값)에 저장됨 |
-| **주요 소비자**   | 대화형 CLI, 터미널 프롬프트, 운영자                                                   | 프로그래밍 방식 통합, 대시보드, 분석, 결제 추적기         |
+| 측면                | 일반 텍스트 형식(`/api/usage/om-usage` / `@@om-usage`)                          | JSON 형식(`?format=json`)                                  |
+| :------------------ | :------------------------------------------------------------------------------ | :--------------------------------------------------------- |
+| **출력 필드**       | `NN% left` (예: `20% left`)                                                     | `provider.quotas` / `providers[].quotas`                   |
+| **측정**            | **컷오프 조정된 사용 가능 허용량** : 컷오프 임계값을 초과하는 남은 용량         | **원시 업스트림 할당량** : 조정되지 않은 공급자 측정       |
+| **컷오프 스케일링** | 보호된 예비가 `0% left` 로 읽혀지도록 `effectiveRemainingPercent()` 통해 확장됨 | 없음(공급자가 보고한 원시 스냅샷 값)                       |
+| **임계값 데이터**   | 표시된 백분율에 포함됩니다.                                                     | 연결당 `quotaWindowThresholds` 에 저장됨(또는 서버 기본값) |
+| **1차 소비자**      | 대화형 CLIs, 터미널 프롬프트, 인간 운영자                                       | 프로그래밍 방식 통합, 대시보드, 분석, 청구 추적기          |
 
-#### 기준선 조정 공식
+#### 컷오프 조정 공식
 
-OmniRoute는 업스트림 소진을 방지하기 위한 사전 예방적 할당량 기준선을 지원합니다(연결의
-`quotaWindowThresholds`, 제공자 기본값 또는 전역 복원력 설정으로 구성). 할당량 윈도우에
-기준선 임계값(예: `cutoff = 25%`)이 활성화되면 텍스트 렌더러는 다음과 같이 남은 허용량을
-계산합니다.
+OmniRoute 업스트림 고갈을 방지하기 위해 사전 할당량 차단을 지원합니다( `quotaWindowThresholds` 연결, 공급자 기본값 또는 전역 복원력 설정을 통해 구성됨). 할당량 창에서 컷오프 임계값(예: `cutoff = 25%`)이 활성화되면 텍스트 렌더러는 남은 허용량을 다음과 같이 계산합니다.
 
-- `remaining <= cutoff`인 경우: `0%`를 반환합니다.
-- `remaining > cutoff`인 경우: `((remaining - cutoff) / (100 - cutoff)) * 100`을 반환합니다.
+- `remaining <= cutoff` 인 경우: `0%` 반환합니다.
+- `remaining > cutoff` 인 경우: `((remaining - cutoff) / (100 - cutoff)) * 100` 반환합니다.
 
-형식이 지정된 텍스트 출력은 이를 가장 가까운 정수로 반올림합니다(`Math.round(...)`).
+형식화된 텍스트 출력은 이를 가장 가까운 정수(`Math.round(...)`)로 반올림합니다.
 
-#### 예시
+#### 예시적인 예
 
-제공업체 윈도우의 **원시 사용량이 60%**(따라서 **원시 잔여 할당량은 40%**)이고, 구성된
-**잔여 할당량 컷오프** 임계값이 **25%**라고 가정합니다:
+공급자 창을 고려하십시오.** 60% 원시 사용량** (따라서** 원시 남은 할당량 40%** ) 및 구성된** 25% 남은 할당량 컷오프** 한계점:
 
-| 표현                           | 계산                                               | 잔여량  |            암시된 사용량            |
-| :----------------------------- | :------------------------------------------------- | :-----: | :---------------------------------: |
-| **원시 JSON (`?format=json`)** | 업스트림 스냅샷 (`quotas[window]`)                 | **40%** |               **60%**               |
-| **텍스트 형식 (`NN% left`)**   | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (계산 시 `100 - remaining`) |
+| 대표                           | 계산                                               |  남은   |             묵시적으로 사용됨              |
+| :----------------------------- | :------------------------------------------------- | :-----: | :----------------------------------------: |
+| **원시 JSON (`?format=json`)** | 업스트림 스냅샷(`quotas[window]`)                  | **40%** |                  **60%**                   |
+| **텍스트 형식(`NN% left`)**    | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** ( `100 - remaining` 계산하는 경우) |
 
-- **텍스트에 20%가 남은 것으로 표시되는 이유:** 계정에 물리적으로 남아 있는 할당량 40% 중 25%는
-  컷오프 정책에 의해 예약됩니다. 라우터가 이 연결로의 라우팅을 중지하기 전까지 호출자가 사용할 수 있는
-  여유 공간은 75% 중 15%뿐입니다. 이 스케일링을 적용하면 라우팅이 중단되는 시점에 연결이 정확히
-  소진 상태(`0% left`)를 표시합니다.
-- **JSON이 원시 값을 유지하는 이유:** JSON 페이로드는 정확한 제공업체 스냅샷(`UsageSnapshot`)을
-  반환하므로, 외부 도구는 서버 측의 손실 스케일링 없이 실제 업스트림 사용량과 연결 수준의
-  `quotaWindowThresholds`에 액세스할 수 있습니다.
+- **텍스트에 20% 남음이 표시되는 이유:** 계정에 남아 있는 물리적 할당량 40% 중 25%는 컷오프 정책에 따라 예약되어 있습니다. 라우터가 이 연결에 대한 라우팅을 중지하기 전에 호출자에게는 사용 가능한 헤드룸 75% 중 15%만 남아 있습니다. 스케일링은 라우팅이 중단될 때 정확하게 연결 신호 소진(`0% left`)을 보장합니다.
+- **JSON 원시 값을 유지하는 이유:** JSON 페이로드는 정확한 공급자 스냅샷(`UsageSnapshot`)을 반환하므로 외부 도구는 서버 측 손실 확장 없이 실제 업스트림 활용도와 연결 수준 `quotaWindowThresholds` 에 액세스할 수 있습니다.
 
 #### 소비자 마이그레이션 지침
 
-외부 통합(예: 편집기 플러그인 또는 에이전트 확장)이 이전에 텍스트 엔드포인트
-(`NN% left`)를 스크랩하고 사용률을 `100 - NN`으로 계산했다면, `?format=json`으로 마이그레이션할 때:
+외부 통합(예: 편집기 플러그인 또는 에이전트 확장)이 이전에 텍스트 엔드포인트(`NN% left`)를 스크랩하고 사용된 비율을 `100 - NN` 로 계산한 경우 `?format=json` 로 마이그레이션하는 것은 다음을 의미합니다.
 
-- 원시 JSON 값을 읽으면 **실제 업스트림 사용량**(위 예시에서는 사용량 60%)이 반영됩니다.
-- 통합에서 텍스트 엔드포인트의 사용 가능한 허용량 의미 체계를 유지하려는 경우, 연결 수준 오버라이드에
-  `quotaWindowThresholds`를 사용하여 유효 잔여량 공식을 클라이언트 측에서 계산할 수 있습니다.
+- 원시 JSON 값을 읽으면 반영됩니다.** 실제 업스트림 소비** (위 예에서는 60%가 사용됨)
+- 통합이 텍스트 끝점의 사용 가능 허용 의미를 보존하려는 경우 연결 수준 재정의를 위해 `quotaWindowThresholds` 사용하여 클라이언트 측에서 유효한 나머지 수식을 평가할 수 있습니다.
 
 ---
 
@@ -1234,36 +1214,37 @@ Claude 코드 자동 모드 분류자는 명시적 추론 제어가 포함되지
 
 `PATCH /api/keys/{id}` 기존 키의 권한을 업데이트합니다. 모든 `/api/keys*` 경로와 마찬가지로 추론 키가 아닌 관리 인증( [관리 인증](../guides/MANAGEMENT-AUTH.md) 참조)이 필요합니다. 변경하려는 필드만 보냅니다. 그 중 아무것도 없는 요청은 `No valid fields to update` 로 거부됩니다. 허용되는 필드는 `src/shared/validation/schemas/keys.ts` 의 `updateKeyPermissionsSchema` 에 의해 정의됩니다.
 
-| 필드                                        | 유형                                                      | 메모                                                                                                               |
-| ------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | 문자열, 1-200자                                           |                                                                                                                    |
-| `isActive`                                  | 부울                                                      |                                                                                                                    |
-| `isBanned`                                  | 부울                                                      |                                                                                                                    |
-| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                            | `null` 만료일을 지웁니다                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                     | 모드가 `all` 인 경우 `allowedModels` 비어 있어야 합니다.                                                           |
-| `allowedModels`, `blockedModels`            | 문자열 배열(최대 1000개)                                  |                                                                                                                    |
-| `allowedCombos`                             | 문자열 배열, 최대 500개                                   | 키를 조합하여 호출할 수 있는 게이트; 직접 모델은 `modelAccessMode` / `allowedModels` 에 의해 관리됩니다.           |
-| `connectionAccessMode`                      | `all` \| `restricted`                                     | `allowedConnections` `restricted` 인 경우 비어 있지 않아야 하고 `all` 인 경우 비어 있어야 합니다.                  |
-| `allowedConnections`                        | UUIDs 배열, 최대 100개                                    |                                                                                                                    |
-| `allowAutoCombos`                           | 부울                                                      | `false` 이 키가 있는 `auto/*` 모델에 대한 요청을 거부합니다. 설정하지 않은 키는 허용됩니다.                        |
-| `catalogScope`                              | `all` \| `combos` \| `models`                             | 이 키에 대해 `GET /v1/models` 나열하는 것(콤보만, 모델만 또는 둘 다) 키가 호출할 수 있는 내용은 변경되지 않습니다. |
-| `forcedModel`                               | 최대 300자 문자열 또는 `null`                             | `X-Route-Model` 및 `body.model` 통해 채팅 요청을 이 model/combo 로 라우팅합니다. 키 제한은 여전히 적용됩니다.      |
-| `noLog`, `autoResolve`                      | 부울                                                      |                                                                                                                    |
-| `throttleDelayMs`                           | 정수, 0-300000                                            |                                                                                                                    |
-| `maxSessions`                               | 정수, 0-10000                                             |                                                                                                                    |
-| `rateLimits`                                | `{ limit, window }` (양의 정수, 최대 50) 또는 `null` 배열 | `null` 한계를 뛰어넘는다                                                                                           |
-| `accessSchedule`                            | 일정 개체 또는 `null`                                     | `null` 일정을 지웠어                                                                                               |
-| `scopes`                                    | 문자열 배열, 최대 32개                                    |                                                                                                                    |
-| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                    |                                                                                                                    |
-| `streamDefaultMode`                         | `legacy` \| `json`                                        |                                                                                                                    |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                      | [키별 캐시 우회를](#per-key-cache-bypass) 참조하세요.                                                              |
-| `compressionEnabled`                        | 부울                                                      |                                                                                                                    |
-| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                 |                                                                                                                    |
-| `disableNonPublicModels`                    | 부울                                                      |                                                                                                                    |
-| `allowUsageCommand`                         | 부울                                                      |                                                                                                                    |
-| `usageLimitEnabled`                         | 부울                                                      |                                                                                                                    |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 숫자 >= 0 또는 `null`                                     |                                                                                                                    |
-| `chaosModeEnabled`                          | 부울                                                      |                                                                                                                    |
+| 필드                                        | 유형                                                      | 메모                                                                                                                                                                                                                            |
+| ------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | 문자열, 1-200자                                           |                                                                                                                                                                                                                                 |
+| `isActive`                                  | 부울                                                      |                                                                                                                                                                                                                                 |
+| `isBanned`                                  | 부울                                                      |                                                                                                                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 날짜/시간 또는 `null`                            | `null` 만료일을 지웁니다                                                                                                                                                                                                        |
+| `modelAccessMode`                           | `all` \| `restricted`                                     | 모드가 `all` 인 경우 `allowedModels` 비어 있어야 합니다.                                                                                                                                                                        |
+| `allowedModels`, `blockedModels`            | 문자열 배열(최대 1000개)                                  |                                                                                                                                                                                                                                 |
+| `allowedCombos`                             | 문자열 배열, 최대 500개                                   | 키를 조합하여 호출할 수 있는 게이트; 직접 모델은 `modelAccessMode` / `allowedModels` 에 의해 관리됩니다.                                                                                                                        |
+| `connectionAccessMode`                      | `all` \| `restricted`                                     | `allowedConnections` `restricted` 인 경우 비어 있지 않아야 하고 `all` 인 경우 비어 있어야 합니다.                                                                                                                               |
+| `allowedConnections`                        | UUIDs 배열, 최대 100개                                    |                                                                                                                                                                                                                                 |
+| `allowAutoCombos`                           | 부울                                                      | `false` 이 키가 있는 `auto/*` 모델에 대한 요청을 거부합니다. 설정하지 않은 키는 허용됩니다.                                                                                                                                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                             | 이 키에 대해 `GET /v1/models` 나열하는 것(콤보만, 모델만 또는 둘 다) 키가 호출할 수 있는 내용은 변경되지 않습니다.                                                                                                              |
+| `forcedModel`                               | 최대 300자 문자열 또는 `null`                             | `X-Route-Model` 및 `body.model` 통해 채팅 요청을 이 model/combo 로 라우팅합니다. 키 제한은 여전히 적용됩니다.                                                                                                                   |
+| `noLog`, `autoResolve`                      | 부울                                                      |                                                                                                                                                                                                                                 |
+| `throttleDelayMs`                           | 정수, 0-300000                                            |                                                                                                                                                                                                                                 |
+| `maxSessions`                               | 정수, 0-10000                                             |                                                                                                                                                                                                                                 |
+| `rateLimits`                                | `{ limit, window }` (양의 정수, 최대 50) 또는 `null` 배열 | `null` 한계를 뛰어넘는다                                                                                                                                                                                                        |
+| `accessSchedule`                            | 일정 개체 또는 `null`                                     | `null` 일정을 지웠어                                                                                                                                                                                                            |
+| `scopes`                                    | 문자열 배열, 최대 32개                                    |                                                                                                                                                                                                                                 |
+| `allowedEndpoints`                          | 문자열 배열, 최대 20개                                    |                                                                                                                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                        |                                                                                                                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                      | [키별 캐시 우회를](#per-key-cache-bypass) 참조하세요.                                                                                                                                                                           |
+| `compressionEnabled`                        | 부울                                                      |                                                                                                                                                                                                                                 |
+| `codexServiceMode`                          | Codex 서비스 모드 중 하나                                 |                                                                                                                                                                                                                                 |
+| `disableNonPublicModels`                    | 부울                                                      |                                                                                                                                                                                                                                 |
+| `allowUsageCommand`                         | 부울                                                      |                                                                                                                                                                                                                                 |
+| `usageLimitEnabled`                         | 부울                                                      |                                                                                                                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 숫자 >= 0 또는 `null`                                     |                                                                                                                                                                                                                                 |
+| `fiveHourUsageLimitUsd`                     | 숫자 >= 0 또는 `null`                                     | 5시간 롤링 USD 예산은 일일 및 주간 한도(`usageLimitEnabled`, `UNPRICED_USAGE_BUDGET_POLICY`)처럼 적용됩니다. `retry-after` 는 창에서 가장 오래된 지출이 만료되는 경우이며, 한도를 훨씬 초과하는 키는 여전히 차단될 수 있습니다. |
+| `chaosModeEnabled`                          | 부울                                                      |                                                                                                                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \

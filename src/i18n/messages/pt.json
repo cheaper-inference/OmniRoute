@@ -3413,12 +3413,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilize o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
     "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute no models.json para que os seus outros providers e definições permaneçam intactos.",
+    "removeMapping": "Remover mapeamento",
     "customUrl": "URL personalizado",
     "customEndpointAria": "Endpoint personalizado",
     "useDefaultKey": "Usar a chave predefinida do OmniRoute",
     "mainModelAria": "Modelo principal",
-    "manualConfigTitle": "Configuração manual do Grok Build",
-    "removeMapping": "Remover mapeamento"
+    "manualConfigTitle": "Configuração manual do Grok Build"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -3665,7 +3665,6 @@
     "more": "+{count} mais",
     "reqs": "requisitos",
     "success": "sucesso",
-    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma",
     "proxyConfigured": "Proxy configurado",
     "copyComboName": "Copiar nome do combo",
     "enableCombo": "Ativar combinação",
@@ -4235,7 +4234,8 @@
     "duplicateAutoComboSnapshotMsg": "Isto irá capturar os fornecedores/modelos atualmente ligados que correspondem a este modelo numa combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma"
   },
   "costs": {
     "title": "Custos",
@@ -6415,6 +6415,15 @@
     "failedUpdateCodexPaidCredits": "Falha ao atualizar a política de créditos pagos do Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos pagos do Codex",
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Atualizar quota atual",
+    "quotaRefreshCurrentHint": "Consulta a quota atual desta conta sem gastar créditos de reposição.",
+    "quotaRefreshing": "A consultar quota…",
+    "quotaRefreshFresh": "Quota consultada. O servidor determina a disponibilidade da conta.",
+    "quotaRefreshFailed": "Não foi possível consultar a quota. Os dados anteriores foram mantidos.",
+    "quotaRefreshStale": "O servidor devolveu dados antigos de quota. Esta não é uma observação nova.",
+    "quotaRefreshPartial": "Apenas parte dos dados de quota está disponível.",
+    "quotaWindowUnavailable": "Quota de {window} indisponível",
+    "quotaConnectionRefreshFailed": "A consulta de quota terminou, mas não foi possível atualizar a lista de contas.",
     "disableCoolingDescription": "Ignorar o cooldown transitório para que esta ligação permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado continuam a aplicar-se).",
     "disableCoolingLabel": "Desativar cooldown para esta ligação",
     "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de as mover para o prompt de nível superior do sistema, para que a cache de prompts continue a atingir os turnos. Active apenas se este upstream aceitar a função \"system\" dentro das mensagens (caso contrário, responderá 400).",
@@ -7055,15 +7064,6 @@
     "codexPoolUsed": "usou",
     "codexPoolUntil": "Até {value}",
     "quotaNoData": "Ainda não há dados de utilização",
-    "quotaRefreshCurrent": "Atualizar quota atual",
-    "quotaRefreshCurrentHint": "Consulta a quota atual desta conta sem gastar créditos de reposição.",
-    "quotaRefreshing": "A consultar quota…",
-    "quotaRefreshFresh": "Quota consultada. O servidor determina a disponibilidade da conta.",
-    "quotaRefreshFailed": "Não foi possível consultar a quota. Os dados anteriores foram mantidos.",
-    "quotaRefreshStale": "O servidor devolveu dados antigos de quota. Esta não é uma observação nova.",
-    "quotaRefreshPartial": "Apenas parte dos dados de quota está disponível.",
-    "quotaWindowUnavailable": "Quota de {window} indisponível",
-    "quotaConnectionRefreshFailed": "A consulta de quota terminou, mas não foi possível atualizar a lista de contas.",
     "quotaRefresh": "Atualizar utilização",
     "quotaCredits": "{count} créditos",
     "quotaUnlimited": "ilimitado",
@@ -7185,6 +7185,31 @@
     "fallbackRetryBackendTitle": "Back-end de nova tentativa de recurso"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Não foi possível guardar parte do tráfego neste processo. Os totais persistidos estão incompletos; consulte os diagnósticos do servidor.",
+      "title": "Tráfego de dados úteis do OmniRoute",
+      "description": "Corpos de carregamento entregues para envio e bytes de transferência lidos pelo OmniRoute. Não é tráfego de rede na ligação nem faturação do fornecedor. O total inclui tráfego direto e não atribuído, identificados separadamente.",
+      "coverageNote": "Totais acumulados desde o início da medição. Os carregamentos de tamanho desconhecido (fluxos, FormData, corpos de Request) são excluídos dos totais de bytes. As transferências não lidas ou inacabadas estão incompletas; os envios falhados não comprovam a entrega do carregamento. Os redirecionamentos/repetições internos do transporte e os transportes que contornam a medição não são medidos separadamente.",
+      "refresh": "Atualizar",
+      "overall": "Total (todas as rotas observadas)",
+      "proxied": "Subtotal dos proxies (sem tráfego direto/não atribuído)",
+      "direct": "Direto (sem proxy)",
+      "unattributed": "Distribuidor não atribuído",
+      "removed": "Proxy removido ({id})",
+      "legacy": "Proxy antigo/do ambiente ({id})",
+      "route": "Rota",
+      "upload": "Carregamento entregue para envio",
+      "download": "Transferência lida",
+      "attempts": "Tentativas",
+      "knownUpload": "Carregamentos de tamanho conhecido / tentativas",
+      "completed": "Transferências completas / tentativas",
+      "failed": "Envios falhados",
+      "cancelled": "Transferências canceladas",
+      "errored": "Erros de transferência",
+      "loading": "A carregar tráfego de dados úteis…",
+      "empty": "Ainda não foi medido tráfego de dados úteis.",
+      "error": "Não foi possível carregar o tráfego de dados úteis. Tente atualizar."
+    },
     "title": "Definições",
     "general": "Geral",
     "security": "Segurança",
@@ -9086,11 +9111,6 @@
     "modalityBridgeAudioTestNoop": "Audio Bridge não ativou (o destino pode suportar áudio, nenhum fornecedor de STT está ligado ou a ponte está desativada)",
     "modalityBridgeAudioTestError": "Teste de áudio falhou: {message}",
     "modalityBridgeVideoTitle": "Ponte de Vídeo",
-    "modalityBridgeVideoDrilldownEnabled": "Reter fotogramas derivados de vídeo",
-    "modalityBridgeVideoDrilldownUsage": "JPEG retidos / bytes",
-    "modalityBridgeVideoDrilldownEnabledDesc": "Permitir a retenção temporária de JPEG apenas quando o pedido autenticado também define drilldown: true. Os vídeos originais nunca são retidos.",
-    "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir a análise detalhada de fotogramas autenticada",
-    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que as chaves de API leiam e eliminem apenas os seus próprios identificadores opacos. Sem acesso anónimo ou entre chaves.",
     "modalityBridgeVideoDesc": "Amostra de quadros de vídeo, descreva-os com um modelo de visão e continue com o modelo de texto escolhido.",
     "modalityBridgeVideoRuntimeReady": "Tempo de execução pronto",
     "modalityBridgeVideoRuntimeChecking": "A verificar o runtime…",
@@ -9319,9 +9339,9 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
+        "full": "Completo",
         "gdpr": "RGPD (UE)",
-        "popia": "POPIA (África do Sul)",
-        "full": "Completo"
+        "popia": "POPIA (África do Sul)"
       },
       "builtinTypes": "Tipos incorporados",
       "types": {
@@ -9365,7 +9385,12 @@
       "statsTitle": "Deteções desde o reinício",
       "statsEmpty": "Ainda sem deteções.",
       "statsRequest": "Pedidos"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Reter fotogramas derivados de vídeo",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Permitir a retenção temporária de JPEG apenas quando o pedido autenticado também define drilldown: true. Os vídeos originais nunca são retidos.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Permitir a análise detalhada de fotogramas autenticada",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Permitir que as chaves de API leiam e eliminem apenas os seus próprios identificadores opacos. Sem acesso anónimo ou entre chaves.",
+    "modalityBridgeVideoDrilldownUsage": "JPEG retidos / bytes"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -10257,10 +10282,6 @@
     "healthExtraUsageBypass": "Quota esgotada; a utilização adicional é permitida, pelo que o serviço continua.",
     "healthPaidCreditsBypass": "Quota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Quota esgotada; a filtragem local de quotas está desativada, pelo que o serviço continua.",
-    "codexPaidCreditsLabel": "Créditos pagos do Codex",
-    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
-    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Ilimitado",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de Uso Extra",
     "grokAutoTopUp": "Recarregamento Automático",
@@ -10718,6 +10739,10 @@
     "confirmRedeemClaudeResetCredit": "O resgate repõe imediatamente os limites de utilização elegíveis do Claude e consome permanentemente este crédito.",
     "claudeResetCreditsModalTitle": "Créditos de reposição do Claude",
     "claudeResetCreditsModalExplainer": "Créditos de reposição do Claude disponíveis e reposições semanais de sessão para esta conta.",
+    "codexPaidCreditsLabel": "Créditos pagos do Codex",
+    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
+    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
+    "codexPaidCreditsUnlimited": "Ilimitado",
     "healthAccountHint": "Com base nas observações recentes, não num teste em direto. Selecione uma conta para ver detalhes.",
     "healthRecovery": "Recuperação prevista",
     "healthAvailable": "Disponível",
@@ -12396,10 +12421,6 @@
     "messageInputAria": "Mensagem"
   },
   "requestLogger": {
-    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-    "upstreamStatus": "Servidor a montante {status}",
-    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-    "transportError": "Erro de transporte",
     "recording": "A gravar",
     "paused": "Em pausa",
     "pipelineLogsOn": "Registos de pipeline ligados",
@@ -12483,8 +12504,6 @@
       "increase": "Aumentar intervalo"
     },
     "status": {
-      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
-      "latestOutcomeFailed": "O resultado mais recente do pedido falhou",
       "inProgress": "Em progresso",
       "recoveredByRetry": "Recuperado por nova tentativa",
       "goToParent": "Ir para o pedido pai",
@@ -12493,13 +12512,12 @@
       "failedTitle": "Todas as {count} tentativas falharam",
       "failed": "falhou",
       "pinnedTitle": "Modelo selecionado através do fixador de sessão do cache de contexto",
-      "pinned": "fixado"
+      "pinned": "fixado",
+      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente do pedido falhou"
     },
     "attempts": "tentativas",
     "detail": {
-      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-      "transportError": "Erro de transporte",
       "collapse": "Colapsar {title}",
       "expand": "Expandir {title}",
       "copyTitle": "Copiar {title}",
@@ -12598,13 +12616,20 @@
       "continuesFromParent": "continua a partir do elemento principal",
       "continuesFrom": "Continua a partir de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}"
+      "openConversation": "Abrir conversa {id}",
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+      "transportError": "Erro de transporte"
     },
     "tableLabel": "Registos de pedidos",
     "throughputPostFirstToken": "Após o primeiro token",
     "throughputEndToEnd": "Ponta a ponta",
     "throughputRate": "{value} tokens/s",
-    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida."
+    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida.",
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor a montante {status}",
+    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+    "transportError": "Erro de transporte"
   },
   "proxyLogger": {
     "filterAll": "Todos",

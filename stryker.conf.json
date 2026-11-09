@@ -47,6 +47,7 @@
       "tests/unit/upstream-response-decoded-byte-cap.test.ts",
       "tests/unit/vision-bridge-model-lockout-18268.test.ts",
       "tests/unit/antigravity-headers-budget.test.ts",
+      "tests/unit/internal-upstream-start-timeout.test.ts",
       "tests/unit/antigravity-timing-hot-settings.test.ts",
       "tests/unit/log-truncation-image-ref.test.ts",
       "tests/unit/m365-native-recovery.test.ts",
@@ -466,6 +467,7 @@
       "tests/unit/per-key-ceiling-skips-neighbor-cooldown.test.ts",
       "tests/unit/management-auth-hardening.test.ts",
       "tests/unit/mark-account-unavailable-numeric-epoch-guard.test.ts",
+      "tests/unit/masked-200-content-exhaustion-fallback-19278.test.ts",
       "tests/unit/masked-200-exhaustion-fallback-6427.test.ts",
       "tests/unit/mcp-connect-scope.test.ts",
       "tests/unit/memory-embedding-remote.test.ts",
@@ -770,7 +772,8 @@
       "tests/unit/upstream-http-edge-selection.test.ts",
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
       "tests/unit/issue-18600-muse-followup-isolation.test.ts",
-      "tests/unit/universal-handoff-api-key-scope.test.ts"
+      "tests/unit/universal-handoff-api-key-scope.test.ts",
+      "tests/unit/combo-avoid-stalled-account.test.ts"
     ],
     "nodeArgs": [
       "--import",
