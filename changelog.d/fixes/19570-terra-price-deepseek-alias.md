@@ -1,0 +1,1 @@
+- **fix(pricing):** usage for GPT-6.1 Terra on Codex is now priced instead of counted as $0, and `deepseek-v4-1-flash` now routes to DeepSeek V4.1 Flash like its dotted spellings. ([#19570](https://github.com/cheaper-inference/OmniRoute/pull/19570))
