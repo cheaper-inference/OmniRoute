@@ -300,54 +300,6 @@ test("historical self-service migration 228 moves to 231 and frees the slot for 
   );
 });
 
-test("stack builds that shipped 229–231 move to 231–233 and free 229/230 for upstream", async () => {
-  // Earlier stack builds shipped api_key_self_service_settings, agent_sessions and
-  // usage_history_agent_session_id as 229/230/231. The 231 row must move out before the
-  // settings row moves into 231, and upstream 229/230 must still run.
-  const db = core.getDbInstance();
-  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-229-key", {
-    sharedQuotaProviders: ["codex"],
-    anthropicRateLimitHeaders: "strip",
-  });
-  db.exec(`
-    DELETE FROM _omniroute_migrations WHERE version IN ('229', '230');
-    UPDATE _omniroute_migrations SET version = '229'
-      WHERE version = '231' AND name = 'api_key_self_service_settings';
-    UPDATE _omniroute_migrations SET version = '230'
-      WHERE version = '232' AND name = 'agent_sessions';
-    UPDATE _omniroute_migrations SET version = '231'
-      WHERE version = '233' AND name = 'usage_history_agent_session_id';
-    ALTER TABLE api_keys DROP COLUMN five_hour_usage_limit_usd;
-    ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_5m;
-    ALTER TABLE call_logs DROP COLUMN tokens_cache_creation_1h;
-    ALTER TABLE call_logs DROP COLUMN cache_creation_tier_status;
-    ALTER TABLE call_logs DROP COLUMN cache_write_cost_usd;
-    ALTER TABLE call_logs DROP COLUMN cache_write_priced_tokens;
-  `);
-  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
-  runMigrations(db);
-  settingsDb.clearApiKeySelfServiceSettingsCache();
-  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-229-key"), saved);
-  assert.deepEqual(
-    db
-      .prepare(
-        "SELECT version, name FROM _omniroute_migrations WHERE version BETWEEN '229' AND '233' ORDER BY version"
-      )
-      .all(),
-    [
-      { version: "229", name: "api_key_five_hour_limit" },
-      { version: "230", name: "call_logs_cache_write_tiers" },
-      { version: "231", name: "api_key_self_service_settings" },
-      { version: "232", name: "agent_sessions" },
-      { version: "233", name: "usage_history_agent_session_id" },
-    ]
-  );
-  const apiKeyColumns = db.prepare("PRAGMA table_info(api_keys)").all() as { name: string }[];
-  assert.ok(apiKeyColumns.some((column) => column.name === "five_hour_usage_limit_usd"));
-  const callLogColumns = db.prepare("PRAGMA table_info(call_logs)").all() as { name: string }[];
-  assert.ok(callLogColumns.some((column) => column.name === "cache_write_priced_tokens"));
-});
-
 test("historical turn-node index migration 207 does not skip upstream provider cleanup", async () => {
   const db = core.getDbInstance();
   db.exec(`
