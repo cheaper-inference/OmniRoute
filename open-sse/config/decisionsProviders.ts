@@ -1,10 +1,11 @@
 /**
  * Decisions-only providers (#13987, #14498).
  *
- * These providers hold a credential and a registry entry but have no chat shape:
- * their only dispatch surface is POST /v1/systemone. Without a guard, getExecutor()
- * hands the provider key to the DefaultExecutor, which falls back to the OpenAI
- * endpoint. The guard itself is opt-in (SYSTEMONE_CHAT_GUARD_ENABLED).
+ * These providers hold a credential and a registry entry (models, pricing,
+ * discovery) but have no chat shape: their only dispatch surface is
+ * POST /v1/systemone. Chat routing, chat catalogs and combos must never select
+ * them — without the guard, getExecutor() would hand the provider key to the
+ * DefaultExecutor and post a chat body to the decisions endpoint.
  */
 import { TYPESAFE_SYSTEMONE_PROVIDER_ID } from "./systemOneRegistry.ts";
 

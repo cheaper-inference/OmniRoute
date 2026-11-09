@@ -519,6 +519,9 @@ export function openaiToOpenAIResponsesRequest(
           parameters: fn.parameters,
           // Omitted strict is non-strict on Chat but strict-normalized on Responses.
           strict: chatStrictForResponses(fn),
+          ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"
+            ? { defer_loading: fn.defer_loading }
+            : {}),
         };
       }
       return toolValue;
@@ -579,6 +582,11 @@ export function openaiToOpenAIResponsesRequest(
       ];
     }
   }
+  // Only Codex accepts this Responses extension; direct Zed translation shares this helper.
+  const summaryDelivery = toRecord(root.stream_options).reasoning_summary_delivery;
+  if (credentialRecord._provider === "codex" && summaryDelivery !== undefined) {
+    result.stream_options = { reasoning_summary_delivery: summaryDelivery };
+  }
   if (root.service_tier !== undefined) result.service_tier = root.service_tier;
   if (root.temperature !== undefined) result.temperature = root.temperature;
   // Translate max_tokens / max_completion_tokens → max_output_tokens for Responses API.
@@ -620,6 +628,10 @@ export function openaiToOpenAIResponsesRequest(
         // Responses clients never carry this marker, so they keep their
         // encrypted-reasoning continuity.
         result[REASONING_SUMMARY_OPT_OUT_MARKER] = true;
+      } else if (credentialRecord._provider === "mistral") {
+        // Effort is all the chat client asked for, and the defaults below are
+        // OpenAI extras that nothing shows Mistral's preview endpoint accepts.
+        result.reasoning = { effort };
       } else {
         result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
         defaultedReasoningSummary = true;

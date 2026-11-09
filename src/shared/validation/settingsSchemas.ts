@@ -344,6 +344,24 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
+  // master switch (default false in src/lib/db/settings.ts); `connections` narrows
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
+  // `horizonHours` sets how close to expiry a credit must be to be spendable.
+  codexSpendExpiringResetCredits: z
+    .object({
+      enabled: z.boolean().optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
+      maxPerDay: z.number().int().min(1).max(50).optional(),
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
   // #8848: opt-in per-connection Claude proactive warmup. `connections` maps a
   // provider_connections id -> enabled; default is an empty map (off for everyone)
   // until the operator flips a specific OAuth connection on from the settings UI.
@@ -450,6 +468,12 @@ export const updateSettingsSchema = z.object({
   quotaVisibility: z
     .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
     .optional(),
+  /**
+   * Per-operator provider group order on the Quota Tracker (drag-to-reorder).
+   * Display-only — never feeds routing priority. Ported from upstream
+   * decolua/9router#4920.
+   */
+  quotaProviderOrder: z.array(z.string().trim().min(1).max(64)).max(200).optional(),
   requestRetry: z.number().int().min(0).max(10).optional(),
   maxRetryIntervalSec: z.number().int().min(0).max(300).optional(),
   maxBodySizeMb: z

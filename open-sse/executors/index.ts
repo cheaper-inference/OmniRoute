@@ -1,7 +1,6 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
-import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
-import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -101,6 +100,8 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   "zed-hosted": () => import("./zed-hosted.ts").then((m) => new m.ZedHostedExecutor()),
   "devin-cli": () => import("./devin-cli.ts").then((m) => new m.DevinCliExecutor()),
   zcode: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()),
+  "minimax-code": () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()),
+  mmcode: () => import("./minimax-code.ts").then((m) => new m.MinimaxCodeExecutor()), // Alias
   zc: () => import("./zcode.ts").then((m) => new m.ZcodeExecutor()), // Alias
   "devin-cli-agentic": () =>
     import("./devin-cli-agentic.ts").then((m) => new m.DevinCliAgenticExecutor()),
@@ -226,21 +227,6 @@ const CHAT_UNSUPPORTED_CLOUD_AGENT_PROVIDERS = new Set(["jules"]);
 // providers must be executed through /v1/search, never the chat-completions path.
 const CHAT_UNSUPPORTED_SEARCH_PROVIDERS = new Set(Object.keys(SEARCH_PROVIDERS));
 
-/**
- * #14498: a decisions-only provider (TypeSafe Jev) has no chat shape; with
- * SYSTEMONE_CHAT_GUARD_ENABLED on, chat dispatch is refused instead of letting the
- * DefaultExecutor post the provider key to the OpenAI fallback endpoint. The flag is
- * read through the registered resolver (no open-sse → src import).
- */
-function assertDecisionsProviderChatAllowed(provider: string): void {
-  if (!isRegisteredFeatureFlagEnabled("SYSTEMONE_CHAT_GUARD_ENABLED")) return;
-  const err = new Error(
-    `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
-  );
-  (err as Error & { status?: number }).status = 400;
-  throw err;
-}
-
 export async function getExecutor(provider: string): Promise<BaseExecutor> {
   assertMicrosoftDesignerWebProviderAvailable(provider);
   assertRuntimeProviderAvailable(provider);
@@ -257,7 +243,15 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
     throw new SearchProviderChatError(provider);
   }
-  if (isDecisionsOnlyProvider(provider)) assertDecisionsProviderChatAllowed(provider);
+  // #14498 — decisions-only providers (TypeSafe Jev) register for credentials,
+  // pricing and discovery but have no chat shape; dispatch is POST /v1/systemone.
+  if (isDecisionsOnlyProvider(provider)) {
+    const err = new Error(
+      `Provider "${provider}" is a System One decisions provider and does not support chat completions; use the /v1/systemone endpoint instead.`
+    );
+    (err as Error & { status?: number }).status = 400;
+    throw err;
+  }
   return getDefaultExecutor(provider);
 }
 

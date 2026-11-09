@@ -308,6 +308,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/providers/volcenginePlanBinding.ts": 1,
     "src/lib/proxyEgress.ts": 1,
     "src/lib/quota/connectionRecovery.ts": 2,
+    // #18630: the opt-in reset-credit auto-spend sweep lists the active Codex OAuth
+    // connections only to hand each id to spendExpiringResetCredits() in
+    // codexResetCredits.ts, whose loadCodexConnection() carries the auxiliary-lease
+    // fence (class B there). The listing itself never selects or dispatches (class C).
+    "src/lib/services/codexResetCreditAutospend.ts": 1,
     "src/lib/sync/bundle.ts": 1,
     // #11495: verify-only sweep queries oauth + cookie connections
     // #13874: the health check re-reads the row inside the refresh lane to see whether

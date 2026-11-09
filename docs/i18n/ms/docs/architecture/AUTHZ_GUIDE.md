@@ -156,15 +156,31 @@ menghidupkannya (`src/server/auth/dashboardMfa.ts`).
 
 ## Kelas Laluan
 
-`src/server/authz/types.ts` mentakrifkan tiga kelas; mana-mana laluan yang tidak dapat diklasifikasikan secara deterministik akan jatuh balik kepada `MANAGEMENT`.
+`src/server/authz/types.ts` mentakrifkan tiga kelas; sebarang laluan yang tidak boleh dikelaskan secara deterministik akan kembali kepada `MANAGEMENT`.
 
-| Kelas        | Penerangan                                                                                                                                              | Pengesahan diperlukan                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `PUBLIC`     | Laluan yang secara eksplisit selamat — log masuk, log keluar, status, inisialisasi, kesihatan dan bootstrap pendaftaran.                                | Tiada                                                                        |
-| `CLIENT_API` | Titik akhir penyajian model — `/api/v1/*`, `/api/v1beta/*`, serta alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci Bearer apabila bendera ciri `REQUIRE_API_KEY` yang berkesan diaktifkan |
-| `MANAGEMENT` | Halaman papan pemuka, tetapan, pembekal, kunci, serta titik akhir pentadbiran dan diagnostik.                                                           | Sesi papan pemuka ATAU Bearer dengan skop `manage`                           |
+| Kelas        | Perihalan                                                                                                                                                | Pengesahan diperlukan                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `PUBLIC`     | Laluan yang dinyatakan selamat secara jelas — log masuk, log keluar, status, kesihatan, bootstrap onboarding.                                            | Tiada                                                                            |
+| `CLIENT_API` | Titik akhir penyediaan model — `/api/v1/*`, `/api/v1beta/*`, serta alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Kunci Bearer apabila bendera ciri `REQUIRE_API_KEY` yang berkuat kuasa didayakan |
+| `MANAGEMENT` | Halaman papan pemuka, tetapan, penyedia, kunci, titik akhir pentadbir dan diagnostik.                                                                    | Sesi papan pemuka ATAU Bearer dengan skop `manage`                               |
 
-Beberapa tindakan `MANAGEMENT` adalah **khusus operator**: kunci `manage` tidak mencukupi. Mengeksport kelayakan tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan sandaran ke atas data langsung (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan mengikut id, `POST /api/settings/import-json`), dan memusnahkan titik pemulihan (`DELETE /api/db-backups` pembersihan, dan `PATCH /api/db-backups` kerana pengekalannya memacu pemangkasan automatik selepas setiap sandaran) memerlukan sesi papan pemuka, subjek CLI tempatan, atau log masuk yang dilumpuhkan. Mengeluarkan token penyegerakan (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi papan pemuka atau subjek CLI tempatan dalam setiap mod log masuk. Kunci API bagi mana-mana skop dan token akses `oma_` bukan kelayakan operator: ia menerima `403` setiap kali salah satu diperlukan. Semakannya terdapat dalam `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Menukar tetapan log masuk juga khusus operator: `POST /api/settings/require-login` (menetapkan kata laluan pengurusan / menukar `requireLogin`) hanya menerima kelayakan tersebut selepas kata laluan wujud — tetingkap bootstrap permulaan (belum ada kata laluan) kekal tidak berubah — dan sesi papan pemuka mesti menghantar `currentPassword` untuk menggantikan kata laluan (`403` jika tiada atau salah, diaudit sebagai `settings.update_failed`). CLI tempatan dan contoh yang log masuknya dilumpuhkan mengekalkan laluan pemulihan dan boleh menetapkan kata laluan tanpanya, kerana kedua-duanya terikat pada hos yang memiliki direktori data.
+Beberapa tindakan `MANAGEMENT` adalah **khas operator**: kunci `manage` sahaja tidak mencukupi. Mengeksport
+kelayakan yang disimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), memulihkan sandaran ke atas data langsung
+(`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan mengikut id,
+`POST /api/settings/import-json`), memusnahkan titik pemulihan (`DELETE /api/db-backups` pembersihan,
+dan `PATCH /api/db-backups` kerana pengekalan yang disimpannya mengawal pemangkasan automatik selepas
+setiap sandaran) memerlukan sesi papan pemuka, subjek CLI setempat, atau log masuk dilumpuhkan. Mengeluarkan
+token penyegerakan (`POST /api/sync/tokens`) dan mencipta token akses CLI `admin`
+(`POST /api/cli/tokens`) memerlukan sesi papan pemuka atau subjek CLI setempat dalam setiap mod log masuk.
+Kunci API daripada sebarang skop dan token akses `oma_` bukan kelayakan operator: token tersebut menerima `403`
+apabila kelayakan sedemikian diperlukan. Pemeriksaan ini
+berada dalam `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`). Mengubah tetapan log masuk juga hanya untuk operator:
+`POST /api/settings/require-login` (menetapkan kata laluan pengurusan / menogol `requireLogin`) hanya menerima
+kelayakan tersebut setelah kata laluan wujud — tetingkap bootstrap kali pertama (belum ada kata laluan)
+kekal tidak berubah — dan sesi papan pemuka mesti menghantar `currentPassword` untuk menggantikan kata laluan
+(`403` apabila tiada atau salah, diaudit sebagai `settings.update_failed`). CLI setempat dan tika dengan log masuk dilumpuhkan mengekalkan laluan pemulihan dan boleh menetapkan kata laluan tanpanya, kerana kedua-duanya terikat pada hos yang memiliki direktori data.
 
 ## Saluran paip
 
@@ -197,29 +213,28 @@ Polisi yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_ke
 
 ## Senarai Laluan Awam
 
-`src/shared/constants/publicApiRoutes.ts` ialah senarai benarkan yang eksplisit:
+`src/shared/constants/publicApiRoutes.ts` ialah senarai benarkan eksplisit:
 
-Senarai ini dibahagikan mengikut **bentuk**, dan pembahagian ini penting untuk operasi (GHSA-74g9-q8f6-793h): awalan dipadankan dengan `startsWith()`, jadi ia turut sepadan dengan setiap laluan bersebelahan yang berkongsi aksara pendahulunya.
-`/api/usage/om-usage` sebagai awalan yang ditandai `/api/usage/om-usage<anything>` PUBLIC, dan Next menyelesaikannya kepada `/api/usage/[connectionId]` — pengendali tanpa pengesahan tersendiri.
+Senarai ini dibahagikan mengikut **bentuk**, dan pembahagian ini penting untuk keselamatan (GHSA-74g9-q8f6-793h): awalan dipadankan dengan `startsWith()`, jadi ia turut sepadan dengan setiap laluan bersebelahan yang berkongsi aksara pendahulunya.
+`/api/usage/om-usage` sebagai awalan menandakan `/api/usage/om-usage<anything>` sebagai PUBLIC, dan Next menyelesaikannya kepada `/api/usage/[connectionId]` — pengendali tanpa pengesahan sendiri.
 
 ```ts
 // Subpepohon sebenar. Setiap entri MESTI berakhir dengan "/" (disahkan oleh ujian unit).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // dianggap sebagai CLIENT_API dalam classify, bukan "public tanpa pengesahan"
+  "/api/v1/", // dianggap sebagai CLIENT_API dalam classify, bukan "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Laluan tunggal, dipadankan TEPAT (dengan atau tanpa garis miring di hujung).
+// Laluan tunggal, dipadankan SECARA TEPAT (dengan atau tanpa garis condong di hujung).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
   "/api/auth/mfa/verify", // langkah log masuk 2 untuk TOTP pilihan; memerlukan kuki MFA-pending
-  "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
@@ -239,7 +254,7 @@ PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Laluan baca sahaja adalah awam **hanya** untuk kaedah yang selamat. Nota: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` daripada laluan terjatuh PUBLIC — laluan tersebut sentiasa `CLIENT_API`, jadi dasar kunci Bearer tetap terpakai.
+Laluan baca sahaja adalah awam **hanya** untuk kaedah selamat. Nota: `classifyRoute()` mengecualikan `/api/v1/*` dan `/api/v1beta/*` daripada laluan sandaran PUBLIC — laluan tersebut sentiasa `CLIENT_API`, jadi dasar kunci Bearer masih terpakai.
 
 ## Menambah Laluan Baharu
 
@@ -316,15 +331,29 @@ Ia kekal tidak aktif melainkan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya terpakai pada
 kelayakan token akses. Lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
 
-## Suis Pengesahan Diperlukan
+## Togol Keperluan Pengesahan
 
 `isAuthRequired()` dalam `src/shared/utils/apiAuth.ts` menentukan sama ada **sebarang** pengesahan dikuatkuasakan untuk sesuatu permintaan:
 
-- `settings.requireLogin === false` → pengesahan dilumpuhkan secara global, kecuali bagi peringkat yang sentiasa dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang menyerahkan kelayakan yang diterimanya, yang memerlukan kelayakan yang sama seperti apabila log masuk dihidupkan: mengeluarkan token penyegerakan, mencetak token akses CLI pada mana-mana skop, dan mencipta kunci API dengan skop `manage`/`admin`, memberikan skop tersebut kepada kunci, atau menjana semula atau mendedahkan kunci sedemikian (`requireCredentialForManagementScopedKey()` dalam `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferens kekal terbuka.
-- Tiada kata laluan dikonfigurasi **dan** tiada pembolehubah persekitaran `INITIAL_PASSWORD` → mod bootstrap: wizard pendaftaran dan permintaan loopback dibenarkan, tetapi permintaan rangkaian luaran masih memerlukan kelayakan.
-- Sebarang ralat DB → gagal tertutup (selamat secara lalai).
+- `settings.requireLogin === false` → pengesahan dinyahdayakan secara global, kecuali untuk
+  tingkat yang sentiasa dilindungi (lihat [Tingkat Pengawal Laluan](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang mengeluarkan
+  kelayakan yang diterimanya, yang memerlukan kelayakan yang sama seperti apabila log masuk
+  didayakan: mengeluarkan token penyegerakan, menjana token akses CLI pada sebarang skop, dan
+  mencipta kunci API dengan skop `manage`/`admin`, memberikan skop tersebut kepada kunci, atau
+  menjana semula atau mendedahkan kunci sedemikian
+  (`requireCredentialForManagementScopedKey()` dalam `src/lib/api/requireManagementAuth.ts`).
+  Kunci inferens sahaja kekal terbuka. Penulisan bendera ciri yang dilindungi (`REQUIRE_API_KEY`,
+  bendera Security yang lain, serta bendera SSRF / TLS / skop MCP / sandbox yang disenaraikan dalam
+  [Bendera Ciri](../reference/FEATURE_FLAGS.md#rest-api)) dan penyimpanan tetapan penyamaran PII
+  (`PUT /api/settings/pii`) juga terus memerlukan kelayakan.
+- Tiada kata laluan dikonfigurasikan **dan** tiada pemboleh ubah persekitaran `INITIAL_PASSWORD` → mod
+  bootstrap membenarkan wizard onboarding dan permintaan loopback, tetapi permintaan rangkaian yang
+  terdedah masih memerlukan kelayakan. Pengecualian: penulisan bendera ciri yang dilindungi dan
+  penyimpanan tetapan penyamaran PII (`PUT /api/settings/pii`) memerlukan kelayakan walaupun dari
+  loopback, jadi loopback sahaja tidak mencukupi untuknya.
+- Sebarang ralat DB → gagal secara tertutup (selamat secara lalai).
 
-Penguatkuasaan kunci API klien menggunakan `isRequireApiKeyEnabled()` dalam `src/shared/utils/featureFlags.ts`, bukan bacaan langsung `process.env.REQUIRE_API_KEY`. Ini penting bagi contoh yang dideploy: menukar `REQUIRE_API_KEY` dalam Papan Pemuka → Feature Flags menyimpan override DB dan segera memberi kesan kepada `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` dan semakan pengesahan API klien lain yang berkongsi pembantu ini. Jika stor feature flag tidak dapat dibaca, pengesahan API klien gagal tertutup dan memerlukan kunci.
+Penguatkuasaan kunci API klien menggunakan `isRequireApiKeyEnabled()` dalam `src/shared/utils/featureFlags.ts`, bukan bacaan langsung `process.env.REQUIRE_API_KEY`. Hal ini penting untuk instans yang digunakan: menogol `REQUIRE_API_KEY` dalam Papan Pemuka → Bendera Ciri menyimpan penggantian DB dan serta-merta mempengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, serta semakan pengesahan API klien lain yang berkongsi pembantu ini. Jika stor bendera ciri tidak dapat dibaca, pengesahan API klien gagal secara tertutup dan memerlukan kunci.
 
 ## Perubahan Pecah Keserasian — v3.8.0
 

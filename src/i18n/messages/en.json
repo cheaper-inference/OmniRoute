@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Account preferences",
+    "description": "Prefer multiple accounts or keep them in reserve for this combo. Auto routing ranks accounts within each tier. Unlisted accounts are normal. Permissions, quota limits and existing turn bindings still apply.",
+    "preferred": "Preferred",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Excluded",
+    "loading": "Loading accounts…",
+    "error": "Could not load accounts. Reopen the editor to retry.",
+    "missing": "Unavailable account ({id})"
+  },
   "teamCosts": {
     "title": "Team costs",
     "subtitle": "Manage shared soft budgets and catalog cost estimates.",
@@ -5809,6 +5820,7 @@
     "filterError": "Error",
     "filterBanned": "Banned",
     "filterCreditsExhausted": "Credits Exhausted",
+    "filterVerificationRequired": "Needs verification",
     "accountSearchPlaceholder": "Search accounts…",
     "noFilteredConnections": "No connections match the current filter.",
     "failedSetAlias": "Failed to set alias",
@@ -7183,6 +7195,31 @@
     "fallbackRetryBackendTitle": "Fallback retry backend"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Some traffic could not be saved in this process. Persisted totals are incomplete; check server diagnostics.",
+      "title": "OmniRoute payload traffic",
+      "description": "Submitted upload bodies and downloaded bytes consumed by OmniRoute. Not network/wire traffic or vendor billing. Overall includes separately labeled direct and unattributed traffic.",
+      "coverageNote": "Lifetime totals since metering began. Unknown uploads (streams, FormData, Request bodies) are excluded from byte totals. Unread or unfinished downloads are incomplete; failed sends do not prove upload delivery. Internal transport redirects/retries and bypass transports are not separately measured.",
+      "refresh": "Refresh",
+      "overall": "Overall (all observed routes)",
+      "proxied": "Proxy subtotal (no direct/unattributed)",
+      "direct": "Direct (not proxied)",
+      "unattributed": "Unattributed dispatcher",
+      "removed": "Removed proxy ({id})",
+      "legacy": "Legacy/environment proxy ({id})",
+      "route": "Route",
+      "upload": "Submitted upload",
+      "download": "Consumed download",
+      "attempts": "Attempts",
+      "knownUpload": "Known uploads / attempts",
+      "completed": "Complete downloads / attempts",
+      "failed": "Send failures",
+      "cancelled": "Cancelled downloads",
+      "errored": "Download errors",
+      "loading": "Loading payload traffic…",
+      "empty": "No payload traffic measured yet.",
+      "error": "Could not load payload traffic. Try refreshing."
+    },
     "title": "Settings",
     "general": "General",
     "security": "Security",
@@ -11880,7 +11917,10 @@
     "copilotPolicyAcknowledge": "I understand — Connect",
     "tabPasteSetupToken": "Setup Token",
     "claudeSetupTokenDescription": "Run `claude setup-token` in a terminal and paste the token it prints. It is valid for one year and has no refresh token. OmniRoute sends one test request to Anthropic before saving it.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Refresh Token",
+    "antigravityRefreshTokenDescription": "Paste your Google OAuth refresh token for Antigravity. OmniRoute validates and exchanges it before saving.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor",
@@ -14720,6 +14760,8 @@
     "usdUsageQuotaDescription": "Blocks this key with a 400 API error after its local USD spend reaches the configured daily or weekly quota.",
     "dailyQuotaUsd": "Daily quota (USD)",
     "weeklyQuotaUsd": "Weekly quota (USD)",
+    "fiveHourQuotaUsd": "5-hour quota (USD)",
+    "fiveHourQuotaHint": "Rolling window: each request's spend counts for 5 hours, then frees up.",
     "quotaWindowDescription": "Weekly quota follows the cached Claude weekly reset when available; otherwise it falls back to a rolling 7 day window. Daily quota uses the Fortaleza calendar day.",
     "apiKeyUsdQuota": "API key USD quota",
     "apiKeyUsdQuotaDescription": "When enabled, @@om-usage returns daily quota, weekly quota, daily spend, and weekly spend in USD. Weekly follows the cached Claude reset when available.",
