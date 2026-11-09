@@ -25,10 +25,15 @@ process.env.OMNIROUTE_PLUGINS_DIR = path.join(fixtureDir, "plugins");
 process.env.OMNIROUTE_MIGRATIONS_DIR = fixtureDir;
 
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/228_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/229_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixtureDir, "228_proxy_payload_traffic.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixtureDir, "229_proxy_payload_traffic.sql"), sql, "utf8");
+fs.writeFileSync(
+  path.join(fixtureDir, "228_purge_orphaned_provider_catalogs.sql"),
+  "CREATE TABLE incoming_228 (id INTEGER PRIMARY KEY);",
+  "utf8"
+);
 fs.writeFileSync(
   path.join(fixtureDir, "206_codex_wakeup_tasks.sql"),
   "CREATE TABLE incoming_206 (id INTEGER PRIMARY KEY);",
@@ -201,7 +206,7 @@ test(
         { version: "213", name: "proxy_payload_traffic", path: "unused.sql" },
         { version: "207", name: "remove_opencode_free_provider", path: "unused.sql" },
         { version: "225", name: "token_ledger_balance_indexes", path: "unused.sql" },
-        { version: "228", name: "proxy_payload_traffic", path: "unused.sql" },
+        { version: "229", name: "proxy_payload_traffic", path: "unused.sql" },
       ];
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
       assert.equal(hasLedgerRepairCandidates(db, files), false);
@@ -263,7 +268,7 @@ test(
         );
         createTokenLedger(db);
         createCanonicalLedgerTables(db);
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 13 : 14);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 14 : 15);
         assertCanonicalTokenIndexes(db);
         assertCanonicalLedgerIndexes(db);
         assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
@@ -285,7 +290,8 @@ test(
             { version: "225", name: "token_ledger_balance_indexes" },
             { version: "226", name: "request_cost_ledger_read_indexes" },
             { version: "227", name: "quota_recovery_due_cover" },
-            { version: "228", name: "proxy_payload_traffic" },
+            { version: "228", name: "purge_orphaned_provider_catalogs" },
+            { version: "229", name: "proxy_payload_traffic" },
           ],
           `canonical ledger after ${versions.join(",") || "fresh"} startup`
         );
@@ -310,7 +316,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '228'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '229'")
                 .get() as {
                 applied_at: string;
               }
@@ -318,7 +324,18 @@ test(
             "fixture-applied"
           );
         }
-        for (const version of ["206", "207", "213", "214", "215", "216", "217", "218", "223"]) {
+        for (const version of [
+          "206",
+          "207",
+          "213",
+          "214",
+          "215",
+          "216",
+          "217",
+          "218",
+          "223",
+          "228",
+        ]) {
           assert.ok(
             db
               .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
@@ -330,6 +347,59 @@ test(
       } finally {
         db.close();
       }
+    }
+  }
+);
+
+test(
+  "traffic history recorded at 228 moves to 229 before the canonical 228 cleanup runs",
+  { timeout: 5000 },
+  () => {
+    const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
+    try {
+      db.exec(sql);
+      db.exec(`CREATE TABLE _omniroute_migrations (
+      version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT INTO _omniroute_migrations VALUES ('228', 'proxy_payload_traffic', 'traffic-228-applied');
+    INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
+      VALUES ('direct', 'direct', 7, 'start', 'update');
+    CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);`);
+      createTokenLedger(db);
+      createCanonicalLedgerTables(db);
+      assert.equal(runMigrations(db, { isNewDb: true }), 14);
+      assert.deepEqual(
+        db
+          .prepare(
+            "SELECT version, name FROM _omniroute_migrations WHERE version >= '228' ORDER BY version"
+          )
+          .all(),
+        [
+          { version: "228", name: "purge_orphaned_provider_catalogs" },
+          { version: "229", name: "proxy_payload_traffic" },
+        ]
+      );
+      assert.equal(
+        (
+          db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='229'").get() as {
+            applied_at: string;
+          }
+        ).applied_at,
+        "traffic-228-applied"
+      );
+      assert.ok(
+        db
+          .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='incoming_228'")
+          .get(),
+        "the canonical 228 migration must execute after the traffic ledger moves to 229"
+      );
+      assert.deepEqual(
+        db.prepare("SELECT attempts, started_at, updated_at FROM proxy_payload_traffic").get(),
+        { attempts: 7, started_at: "start", updated_at: "update" }
+      );
+      assert.equal(runMigrations(db, { isNewDb: true }), 0, "repeated startup must be a no-op");
+    } finally {
+      db.close();
     }
   }
 );
@@ -363,7 +433,7 @@ test("traffic migration preserves the previously published higher slot", { timeo
     );
     assert.equal(
       (
-        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='228'").get() as {
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='229'").get() as {
           applied_at: string;
         }
       ).applied_at,
@@ -383,7 +453,7 @@ test("traffic migration preserves the previously published higher slot", { timeo
   }
 });
 
-test("traffic migration preserves canonical 225/226/227 and existing 228 ledger timestamps", () => {
+test("traffic migration preserves canonical 225/226/227 and existing 229 ledger timestamps", () => {
   const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
   try {
     db.exec(sql);
@@ -401,15 +471,19 @@ test("traffic migration preserves canonical 225/226/227 and existing 228 ledger 
       ('225', 'token_ledger_balance_indexes', 'canonical-applied'),
       ('226', 'request_cost_ledger_read_indexes', 'canonical-226-applied'),
       ('227', 'quota_recovery_due_cover', 'canonical-227-applied'),
-      ('228', 'proxy_payload_traffic', 'traffic-applied');
+      ('229', 'proxy_payload_traffic', 'traffic-applied');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');
     CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);`);
-    assert.equal(runMigrations(db, { isNewDb: true }), 10);
+    assert.equal(runMigrations(db, { isNewDb: true }), 11);
+    assert.deepEqual(
+      db.prepare("SELECT name FROM _omniroute_migrations WHERE version = '228'").get(),
+      { name: "purge_orphaned_provider_catalogs" }
+    );
     assert.deepEqual(
       db
         .prepare(
-          "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version >= '225' ORDER BY version"
+          "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version >= '225' AND version <> '228' ORDER BY version"
         )
         .all(),
       [
@@ -420,7 +494,7 @@ test("traffic migration preserves canonical 225/226/227 and existing 228 ledger 
           applied_at: "canonical-226-applied",
         },
         { version: "227", name: "quota_recovery_due_cover", applied_at: "canonical-227-applied" },
-        { version: "228", name: "proxy_payload_traffic", applied_at: "traffic-applied" },
+        { version: "229", name: "proxy_payload_traffic", applied_at: "traffic-applied" },
       ]
     );
     assert.deepEqual(
@@ -446,11 +520,11 @@ test(
       version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT INTO _omniroute_migrations (version, name) VALUES
-      ('228', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
+      ('229', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 228 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 229 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before
@@ -466,7 +540,7 @@ test(
   }
 );
 
-test("old 226 and duplicate 228 traffic history retain the destination timestamp", () => {
+test("old 226 and duplicate 229 traffic history retain the destination timestamp", () => {
   const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
   try {
     db.exec(sql);
@@ -477,13 +551,13 @@ test("old 226 and duplicate 228 traffic history retain the destination timestamp
     );
     INSERT INTO _omniroute_migrations VALUES
       ('226', 'proxy_payload_traffic', 'old-traffic-applied'),
-      ('228', 'proxy_payload_traffic', 'destination-applied');
+      ('229', 'proxy_payload_traffic', 'destination-applied');
     CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
-    assert.equal(runMigrations(db, { isNewDb: true }), 13);
+    assert.equal(runMigrations(db, { isNewDb: true }), 14);
     assert.deepEqual(
-      db.prepare("SELECT name, applied_at FROM _omniroute_migrations WHERE version='228'").get(),
+      db.prepare("SELECT name, applied_at FROM _omniroute_migrations WHERE version='229'").get(),
       {
         name: "proxy_payload_traffic",
         applied_at: "destination-applied",
