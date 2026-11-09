@@ -23,6 +23,11 @@ export class CerebriumExecutor extends DefaultExecutor {
     );
   }
 
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason A configured deployment delegates to the base recovery loop unchanged; only a connection without a Base URL is refused up front with a 400, before any payload is built or sent, so no recovery kind of the base loop can apply to it.
+   * @executorRecoveryTest tests/unit/executor-replicate.test.ts
+   */
   async execute(input: ExecuteInput) {
     if (resolveDeploymentUrl(input.credentials)) return super.execute(input);
 

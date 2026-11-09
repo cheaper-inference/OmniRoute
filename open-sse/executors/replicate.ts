@@ -700,6 +700,11 @@ export class ReplicateExecutor extends BaseExecutor {
     return finishedResponse(prediction, request);
   }
 
+  /**
+   * @executorRecovery custom
+   * @executorRecoveryReason Owns its own dispatch: the chat request is rebuilt as a Replicate prediction input (prompt, system prompt, max_tokens, temperature, one image), created on the predictions API and then relayed from its native stream or polled until it finishes. None of the three recovery kinds of the base loop applies to that payload — it carries no reasoning enum, no field the base recovery knows how to repair, and no Gemini budget — and upstream refusals keep their own status and Retry-After.
+   * @executorRecoveryTest tests/unit/executor-replicate.test.ts
+   */
   async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
     const url = this.buildUrl(model, stream, 0, credentials);
     const headers = this.buildHeaders(credentials, stream);
