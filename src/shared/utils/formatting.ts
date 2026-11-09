@@ -134,6 +134,17 @@ export function formatCost(usd: number | null | undefined): string {
 export const fmtCost = formatCost;
 
 /**
+ * Format bytes to human readable format (B, KB, MB, GB).
+ */
+export function formatBytes(bytes: number | null | undefined): string {
+  if (bytes == null || !Number.isFinite(bytes) || bytes <= 0) return "—";
+  if (bytes >= 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${bytes} B`;
+}
+
+/**
  * Truncate a URL for compact display.
  * @param {string} url - Full URL
  * @param {number} max - Maximum characters (default: 50)
