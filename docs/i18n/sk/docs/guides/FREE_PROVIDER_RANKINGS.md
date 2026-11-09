@@ -13,7 +13,7 @@
 
 ## Čo to je
 
-OmniRoute eviduje 382 poskytovateľov, z toho 155 katalógových záznamov označených**free/no-auth** (no-auth, free-tier OAuth alebo free-tier API key — pozri [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) a celý [adresár Free Tiers](../reference/FREE_TIERS.md) ). Háčik: bezplatní poskytovatelia sa veľmi líšia v kvalite modelu. Poskytovateľ bez autorizácie, ktorý poskytuje hraničný model, je oveľa užitočnejší ako ten, ktorý poskytuje malý starý model.
+OmniRoute eviduje 384 poskytovateľov, z toho 155 katalógových záznamov označených**free/no-auth** (no-auth, free-tier OAuth alebo free-tier API key — pozri [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) a celý [adresár Free Tiers](../reference/FREE_TIERS.md) ). Háčik: bezplatní poskytovatelia sa veľmi líšia v kvalite modelu. Poskytovateľ bez autorizácie, ktorý poskytuje hraničný model, je oveľa užitočnejší ako ten, ktorý poskytuje malý starý model.
 
 **Bezplatné hodnotenie poskytovateľov** odpovede"** ktorý bezplatný poskytovateľ mi ponúka najlepší model?** “ pripojením sa do katalógu každého bezplatného poskytovateľa s** davové skóre kvality** z** Rebríček Arena AI** (ľudské preferencie ELO, rovnaká myšlienka za arénou chatbotov LMArena ). Poskytovatelia sú potom zoradení podľa sily ich** najlepší bezplatný model** .
 

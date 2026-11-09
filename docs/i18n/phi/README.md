@@ -15,7 +15,7 @@
 
 **Nilikha ni [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                                |          v3.8.50          | **v3.8.51** |         `v3.8.54+`         |
 | ------------------------------ | :-----------------------: | :---------: | :------------------------: |
-| Mga Tagapagbigay 🌐            |            352            |   **358**   |            382             |
-| 🧠 Natatanging chat model IDs  |           1320            |  **1374**   |            1524            |
+| Mga Tagapagbigay 🌐            |            352            |   **358**   |            384             |
+| 🧠 Natatanging chat model IDs  |           1320            |  **1374**   |            1525            |
 | 🖼️ Modality Bridge             | 🆕 vision + audio + video |      ✓      |             ✓              |
 | Libreng katalogo ng 📡 Radar   |         🆕 opt-in         |      ✓      |             ✓              |
 | ⚖️ Quota-aware na pag-iskedyul |      🆕 Quota-Share       |      ✓      |             ✓              |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Lahat ng **20** diskarte — paghalu-haluin at pagtugmain sa bawat hakbang ng co
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ano ang nagpapatingkad sa OmniRoute — isang lumang snapshot ng mga tampok kumpara sa 9router, OpenRouter, CLIProxyAPI at LiteLLM sa 13 kakayahan. OmniRoute: 382 provider, 150+ libreng tier na built-in, 20 routing strategy, 12-engine token compression, built-in MCP server na may 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA at 67 i18n UI locale. Ang OmniRoute ay MIT-licensed at maaaring i-self-host. Maaaring magbago ang kakayahan at bilang ng mga kakumpitensya; tingnan ang naka-link na metodolohiya."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ano ang nagpapatingkad sa OmniRoute — isang lumang snapshot ng mga tampok kumpara sa 9router, OpenRouter, CLIProxyAPI at LiteLLM sa 13 kakayahan. OmniRoute: 384 provider, 150+ libreng tier na built-in, 20 routing strategy, 12-engine token compression, built-in MCP server na may 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA at 67 i18n UI locale. Ang OmniRoute ay MIT-licensed at maaaring i-self-host. Maaaring magbago ang kakayahan at bilang ng mga kakumpitensya; tingnan ang naka-link na metodolohiya."/>
 
 <sub>📊 Buong metodolohiya &amp; detalye kada tampok kumpara sa 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Ang Radar ay opt-in at GET-only. Hindi nag-a-upload ang OmniRoute client ng mga 
 - **🖼️ Mga bagong endpoint** — `/v1/ocr` (Mistral OCR) at `/v1/audio/translations` (Whisper-style) na bilugan ang ibabaw ng media. → [API Sanggunian](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — one API para sa media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, at speech provider gaya ng ElevenLabs. → [API Sanggunian](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment at ops** — reverse-proxy `basePath`, browser-language auto-detect, per-key device tracking, root-less MITM trust, zh-TW localization. [Kapaligiran](docs/reference/ENVIRONMENT.md) →
-- **🤝 Mas maraming provider at ahente** Mga ahente ng cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) na may browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, agnes AI…**382-catalog ng provider** . [Mga Tagapagbigay](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Mas maraming provider at ahente** Mga ahente ng cloud — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) na may browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, agnes AI…**384-catalog ng provider** . [Mga Tagapagbigay](docs/reference/PROVIDER_REFERENCE.md) →
 - **Transparency ng pagruruta ng 📡** Ang bawat tugon — ay may `X-OmniRoute-Decision` header na pinangalanan ang strategy/provider/latency na nagsilbi dito, isang bagong `cache-optimized` combo strategy + Auto-Combo `cacheAffinity` factor route repeat requests pabalik sa koneksyon na may hawak na naka-cache na prefix, at isang read-only na `/v1/auto-combo/{channel}/candidates` endpoint ang naglalantad sa live candidate pool ng isang `auto/*` channel. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokal na pagganap at infra** — one-click local Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux bilang pinangangasiwaang naka-embed na serbisyo. [Mga Serbisyong Naka-embed](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Gayundin sa kahon** — plugin framework + marketplace, Omni/Agent/GitHub skills frameworks, Obsidian vault integration (22 MCP tools), OpenAI-compatible Batch & Files APIs, semantic response cache, gamification na may mga leaderboard, ACP agent discovery (15 built-in na ahente), Telegram -iskedyul na log-export sa BigQuery, `auto/chaos` parallel fanKout tagapamahala ng bersyon at mga ranggo ng libreng provider ng LMArena-ELO. → [Docs](docs/README.md)
@@ -678,11 +678,11 @@ mula sa iyong shell history. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 382 AI Provider — 156 na Minarkahan ng Catalog na Libre
+## 🌐 384 AI Provider — 156 na Minarkahan ng Catalog na Libre
 
 </div>
 
-> **382 rehistradong provider** sa buong canonical chat, media, paghahanap, lokal, cloud-agent at mga koleksyon ng system, kasama ang **156 na nagdadala ng metadata ng pagtuklas `hasFree: true`** . Sinasaklaw ng rehistro ng modelo ng chat **243 provider / 3,155 natatanging provider-model pairs / 1,524 raw na modelong IDs** ; ang hiwalay na katalogo ng libreng badyet ay mayroon **466 bawat modelong hilera** ,**34 na paulit-ulit na pool** at **52 recurring/keyless libreng-magpakailanman provider** . Ito ay iba't ibang denominator ayon sa disenyo; mga kahulugan at mga kalkulasyon na na-deduup ng pool ay nakatira sa [Reference ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
+> **384 rehistradong provider** sa buong canonical chat, media, paghahanap, lokal, cloud-agent at mga koleksyon ng system, kasama ang **156 na nagdadala ng metadata ng pagtuklas `hasFree: true`** . Sinasaklaw ng rehistro ng modelo ng chat **244 provider / 3,157 natatanging provider-model pairs / 1,525 raw na modelong IDs** ; ang hiwalay na katalogo ng libreng badyet ay mayroon **466 bawat modelong hilera** ,**34 na paulit-ulit na pool** at **52 recurring/keyless libreng-magpakailanman provider** . Ito ay iba't ibang denominator ayon sa disenyo; mga kahulugan at mga kalkulasyon na na-deduup ng pool ay nakatira sa [Reference ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 module ng domain, 230 migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (legacy na JSON) — 147 module ng domain, 232 migration</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>Mga Schema</b></td><td>Zod 4 — validation ng I/O ng MCP tool + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

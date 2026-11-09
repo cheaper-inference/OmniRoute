@@ -52,6 +52,53 @@ ga-arụ ọrụ ozugbo), na-enyocha ahụike sava, ma na-eme exec nke `claude`.
 
 ---
 
+## Njirimara ojiji: sessions na oru ngo
+
+OmniRoute na-achịkọta arịrịọ igodo API ọ bụla n'ime **nnọkọ ndị nnọchi anya** na ndekọ nke **oru ngo** nnọkọ ọ bụla na-arụ ọrụ na (tebụl `agent_sessions` ), yabụ enwere ike ịkọ ojiji na ọnụ ahịa onye otu otu, kwa oru ngo na kwa nnọkọ.
+
+Ihe edere na-enweghị nhazi onye ahịa ọ bụla:
+
+| Ubi         | Isi mmalite                                                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Oge         | `x-claude-code-session-id` nkụnye eji isi mee (otu uru dị ka `metadata.user_id.session_id`), kwụsiri ike kwa nnọkọ                                           |
+| Ihe oru ngo | Usoro `Primary working directory:` ahịrị Claude na-eziga na ozi gburugburu ya; folda worktree n'okpuru `.claude/worktrees/` kpebisiri ike na aha ebe nchekwa |
+| Alaka       | `Current branch:` sitere na ọnọdụ git koodu Claude na-eziga na ozi mbụ                                                                                       |
+| Onye ahịa   | `user-agent` (`claude-cli/<version>`)                                                                                                                        |
+
+A na-amata Codex (`<environment_context><cwd>`) na OpenCode (`x-opencode-session`) otu ụzọ ahụ. Igodo nwere **enweghị ndekọ** enyere gị aka idowe naanị id nnọkọ yana ubi oru ngo nyere nkụnye eji isi mee; ọ dịghị ihe a na-agụ site na ngwa ngwa (ụzọ, alaka ụlọ ọrụ) echekwara.
+
+### Ịkpọ aha ọrụ ahụ n'ụzọ doro anya (atụ aro)
+
+Akwụkwọ ndekọ na-arụ ọrụ dị iche n'etiti igwe, ya mere otu ebe nchekwa ahụ nwere ike igosi n'okpuru ụzọ dị iche iche. Zipu oru ngo a nke oma kama: Koodu Claude na-agbakwunye nkụnye eji isi mee ọ bụla edepụtara na `ANTHROPIC_CUSTOM_HEADERS` na arịrịọ ụdị ọ bụla, OmniRoute gụrụ abụọ n'ime ha:
+
+| nkụnye eji isi mee         | Uru                                                              |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | Aha oru ngo, dịka `omniroute`                                    |
+| `x-omniroute-project-repo` | Remote emebere nke ọma, dịka `github.com/diegosouzapw/OmniRoute` |
+
+A na-agụ ha abụọ naanị maka njirimara; A naghị ebugharị ha na ndị na-eweta elu.
+
+A na-agụ `ANTHROPIC_CUSTOM_HEADERS` otu ugboro na mmalite, faịlụ ntọala na-echekwa ụkpụrụ nkịtị, yabụ gbakọọ ya mgbe koodu Claude malitere. Tinye nke a na `~/.zshrc` ma ọ bụ `~/.bashrc` wee malite `claude` site na folda ọrụ:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Okwu `sed` na-ewepụ nzere ọ bụla agbakwunyere na URL dịpụrụ adịpụ. Mgbakwunye IDE na-ebupụta koodu Claude na-enweghị shei gị, yabụ nnọkọ ha na-adaghachi na ndekọ ọrụ.
+
+---
+
 ## Aha nnọchi nchọpụta — ịme ka models ndị na-abụghị nke Claude pụta na `/model` picker
 
 Nchọpụta model gateway nke Claude Code na-edepụta naanị ids ndị na-amalite na `claude`

@@ -15,7 +15,7 @@ Fornisce un singolo endpoint compatibile con OpenAI (`/v1/*`) e instrada il traf
 
 Funzionalità principali:
 
-- Superficie API compatibile con OpenAI per CLI/strumenti (382 provider, 159 moduli executor)
+- Superficie API compatibile con OpenAI per CLI/strumenti (384 provider, 159 moduli executor)
 - Traduzione di richieste/risposte tra i formati dei provider
 - Fallback tramite combinazioni di modelli (sequenza multi-modello)
 - Passaggi di combinazione strutturati (`provider + model + connection`) con ordinamento in fase di esecuzione tramite `compositeTiers`

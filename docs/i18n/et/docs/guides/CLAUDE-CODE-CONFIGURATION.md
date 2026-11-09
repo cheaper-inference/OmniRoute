@@ -52,6 +52,53 @@ põhjal baas-URL-i ja tõendi (seega pärast `omniroute connect <vps>` käsku
 
 ---
 
+## Kasutamise omistamine: seansid ja projektid
+
+OmniRoute rühmitab iga API võtme taotlused **agentide istungid** ja salvestab, mis **projekt** iga seansi kallal töötati (`agent_sessions` tabel), nii et kasutust ja kulusid saab esitada meeskonnaliikme, projekti ja seansi kohta.
+
+Mis salvestatakse ilma kliendi seadistamiseta:
+
+| Väli    | Allikas                                                                                                                                        |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seanss  | `x-claude-code-session-id` päis (sama väärtus kui `metadata.user_id.session_id`), stabiilne seansi kohta                                       |
+| Projekt | `Primary working directory:` rida Claude kood saadab oma keskkonnateate; `.claude/worktrees/` all olevad tööpuu kaustad lahendavad hoidla nime |
+| Filiaal | `Current branch:` git-olekust Claude -kood saadab esimese sõnumiga                                                                             |
+| Klient  | `user-agent` (`claude-cli/<version>`)                                                                                                          |
+
+Codex (`<environment_context><cwd>`) ja OpenCode (`x-opencode-session`) tuvastatakse samal viisil. Võtmed koos **no-log** lubatud säilitab ainult seansi ID ja päisega antud projektiväljad; midagi viipast loetut (tee, haru) ei salvestata.
+
+### Projekti selgesõnaline nimetamine (soovitatav)
+
+Töökataloog erineb masinate vahel, seega võib sama hoidla kuvada erinevatel teedel. Selle asemel saatke projekt selgesõnaliselt: Claude kood lisab igale mudelipäringule kõik `ANTHROPIC_CUSTOM_HEADERS` loetletud päised ja OmniRoute loeb neist kaks:
+
+| Päis                       | Väärtus                                                                  |
+| -------------------------- | ------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Projekti nimi, nt `omniroute`                                            |
+| `x-omniroute-project-repo` | Normaliseeritud kaugjuhtimispult, nt `github.com/diegosouzapw/OmniRoute` |
+
+Mõlemat loetakse ainult omistamiseks; neid ei edastata kunagi ülesvoolu pakkujale.
+
+`ANTHROPIC_CUSTOM_HEADERS` loetakse käivitamisel üks kord ja seadete failid salvestavad sõnasõnalisi väärtusi, nii et arvutage see Claude -koodi käivitamisel. Lisage see `~/.zshrc` sse või `~/.bashrc` ja jätkake `claude` käivitamist projekti kaustast:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` avaldis eemaldab kõik kaug URL sse manustatud mandaadid. IDE laiendused käivitavad Claude koodi ilma teie kestata, nii et nende seansid langevad tagasi töökataloogi.
+
+---
+
 ## Avastusaliased — mitte-Claude'i mudelite kuvamine `/model`-valijas
 
 Claude Code'i lüüsi mudeliavastus loetleb ainult ID-sid, mis algavad eesliitega `claude`

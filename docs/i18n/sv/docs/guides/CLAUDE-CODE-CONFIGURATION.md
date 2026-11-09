@@ -52,6 +52,53 @@ fungerar direkt), hälsokontrollerar servern och kör `claude` via exec.
 
 ---
 
+## Användningsattribution: sessioner och projekt
+
+OmniRoute grupperar varje API -nyckels förfrågningar i **agentsessioner** och registrerar vilka **projekt** varje session arbetade på (`agent_sessions` tabell), så användning och kostnad kan rapporteras per teammedlem, per projekt och per session.
+
+Vad som spelas in utan klientinställning:
+
+| Fält    | Källa                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Session | `x-claude-code-session-id` header (samma värde som `metadata.user_id.session_id`), stabil per session                                                        |
+| Projekt | `Primary working directory:` -radens Claude -kod skickar in sitt miljömeddelande; arbetsträdsmappar under `.claude/worktrees/` löser sig till förvarets namn |
+| Gren    | `Current branch:` från git-statusen Claude Code skickar med det första meddelandet                                                                           |
+| Klient  | `user-agent` (`claude-cli/<version>`)                                                                                                                        |
+
+Codex (`<environment_context><cwd>`) och OpenCode (`x-opencode-session`) känns igen på samma sätt. Nycklar med **ingen logg** aktiverat behåll endast sessions-id och projektfält som tillhandahålls i huvudet; ingenting som läses från prompten (sökväg, gren) lagras.
+
+### Namnge projektet explicit (rekommenderas)
+
+Arbetskatalogen skiljer sig mellan maskiner, så samma arkiv kan dyka upp under olika sökvägar. Skicka projektet uttryckligen istället: Claude Code lägger till alla rubriker som anges i `ANTHROPIC_CUSTOM_HEADERS` till varje modellbegäran, och OmniRoute läser två av dem:
+
+| Rubrik                     | Värde                                                                 |
+| -------------------------- | --------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projektnamn, t.ex. `omniroute`                                        |
+| `x-omniroute-project-repo` | Normaliserad fjärrkontroll, t.ex. `github.com/diegosouzapw/OmniRoute` |
+
+Båda läses endast för tillskrivning; de vidarebefordras aldrig till uppströmsleverantören.
+
+`ANTHROPIC_CUSTOM_HEADERS` läses en gång vid start, och inställningsfiler lagrar bokstavliga värden, så beräkna det när Claude koden startar. Lägg till detta till `~/.zshrc` eller `~/.bashrc` och fortsätt starta `claude` från projektmappen:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` uttrycket tar bort alla inloggningsuppgifter som är inbäddade i fjärrkontrollen URL. IDE tillägg lanserar Claude -kod utan ditt skal, så deras sessioner faller tillbaka till arbetskatalogen.
+
+---
+
 ## Discovery-aliaser — visa icke-Claude-modeller i `/model`-väljaren
 
 Claude Codes modellupptäckt via gateway listar endast id:n som börjar med `claude`

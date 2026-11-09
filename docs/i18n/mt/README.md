@@ -15,7 +15,7 @@
 
 **Maħluq minn [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                              |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :------------------------: | :---------: | :-------------------: |
-| Fornituri 🌐                 |            352             |   **358**   |          382          |
-| 🧠 Mudell uniku ta' chat IDs |            1320            |  **1374**   |         1524          |
+| Fornituri 🌐                 |            352             |   **358**   |          384          |
+| 🧠 Mudell uniku ta' chat IDs |            1320            |  **1374**   |         1525          |
 | Pont tal-Modalità 🖼️         | 🆕 viżjoni + awdjo + video |      ✓      |           ✓           |
 | 📡 Radar katalgu bla ħlas    |         🆕 opt-in          |      ✓      |           ✓           |
 | Skedar ⚖️ konxju tal-kwoti   |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ L-**20** strateġija kollha — ħallat u qabbel f’kull pass tal-combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jagħmel lil OmniRoute differenti — snapshot ta' karatteristiċi skaduti kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM fuq 13-il kapaċità. OmniRoute: 382 providers, 150+ free tiers mibnija ġewwa, 20 strateġija ta' routing, 12-engine token compression, MCP server mibni ġewwa b'110 għodda, protokoll agent A2A, memorja persistenti, guardrails, agents fuq il-cloud, stealth TLS fingerprint, Desktop/Termux/PWA u 67 lokalità UI għal i18n. OmniRoute hija liċenzjata MIT u tista' tospita waħdek. Il-kapaċitajiet u n-numri tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="X'jagħmel lil OmniRoute differenti — snapshot ta' karatteristiċi skaduti kontra 9router, OpenRouter, CLIProxyAPI u LiteLLM fuq 13-il kapaċità. OmniRoute: 384 providers, 150+ free tiers mibnija ġewwa, 20 strateġija ta' routing, 12-engine token compression, MCP server mibni ġewwa b'110 għodda, protokoll agent A2A, memorja persistenti, guardrails, agents fuq il-cloud, stealth TLS fingerprint, Desktop/Termux/PWA u 67 lokalità UI għal i18n. OmniRoute hija liċenzjata MIT u tista' tospita waħdek. Il-kapaċitajiet u n-numri tal-kompetituri jistgħu jinbidlu; ara l-metodoloġija marbuta."/>
 
 <sub>📊 Metodoloġija sħiħa &amp; dettalji għal kull karatteristika kontra 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar huwa fakultattiv u juża GET biss. Il-klijent OmniRoute ma jtellax prompts
 - **🖼️ Punti finali ġodda** — `/v1/ocr` (Mistral OCR) u `/v1/audio/translations` (Whisper-style) arrotonda l-wiċċ tal-midja. → [API Referenza](docs/reference/API_REFERENCE.md)
 - **🎨 Ġenerazzjoni ta 'immaġni / vidjo / awdjo** — wieħed API għall-midja: xAI Grok Immaġina & Novita AI vidjo, ComfyUI, Magnific, Adobe Firefly, Segmind, u fornituri tad-diskors bħal ElevenLabs. → [API Referenza](docs/reference/API_REFERENCE.md)
 - **Skjerament 🌍 & ops** — reverse-proxy `basePath`, skoperta awtomatika bil-lingwa tal-browser, traċċar ta 'apparat għal kull ċavetta, fiduċja MITM mingħajr għerq, lokalizzazzjoni zh-TW. → [Ambjent](docs/reference/ENVIRONMENT.md)
-- **🤝 Aktar fornituri u aġenti** Aġenti tas-sħab — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) bil-login tal-browser + OAuth, Ollama karta tal-ewwel klassi, Claude Opus 5 & Sonnet 5, Kimi sħubija uffiċjali (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes ZQo, u Agnes AI...**382-katalgu tal-fornitur** . [Fornituri](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Aktar fornituri u aġenti** Aġenti tas-sħab — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) bil-login tal-browser + OAuth, Ollama karta tal-ewwel klassi, Claude Opus 5 & Sonnet 5, Kimi sħubija uffiċjali (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes ZQo, u Agnes AI...**384-katalgu tal-fornitur** . [Fornituri](docs/reference/PROVIDER_REFERENCE.md) →
 - **📡 Trasparenza tar-rotot** — kull rispons iġorr header `X-OmniRoute-Decision` li jsemmi l- strategy/provider/latency li servaha, strateġija ġdida `cache-optimized` combo + Auto-Combo `cacheAffinity` fattur rotta talbiet ripetuti lura lill-konnessjoni li żżomm il-prefiss cached, u endpoint `/v1/auto-combo/{channel}/candidates` ta 'qari biss jesponi pool ta' kandidati ħajjin ta 'kanal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Local performance & infra** — klikk waħda Redis lokali, Ħaddiema Cloudflare / Deno Deploy relay deployers, Bifrost & Mux bħala servizzi integrati sorveljati. [Servizzi Inkorporati](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Ukoll fil-kaxxa** Qafas tal-plugin — Suq +, oqfsa tal-ħiliet Omni/Agent/GitHub, integrazzjoni tal-kaxxa-forti Obsidian (22 għodda MCP ), Batch & Files APIs kompatibbli mal-OpenAI , cache ta’ rispons semantiku, gamification b’leaderboards, skoperta tal-aġent ACP (15-il aġent integrat), esportazzjoni ta’ log skedata lejn BigQuery, verżjoni `auto/chaos` parallel multi-app, maniġer tal-fann u Telegram Klassifiki tal-fornituri bla ħlas LMArena-ELO. → [Docs](docs/README.md)
@@ -678,11 +678,11 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 <div align="center">
 
-## 🌐 382 AI Providers — 156 Catalog-Marked Free
+## 🌐 384 AI Providers — 156 Catalog-Marked Free
 
 </div>
 
-> **382 fornitur irreġistrat** madwar iċ-chat kanoniku, il-midja, it-tfittxija, il-kollezzjonijiet lokali, tal-aġent tal-cloud u tas-sistema, inkluż **156 li jġorru metadata ta' skoperta `hasFree: true`** . Ir-reġistru tal-mudell taċ-chat ikopri **243 fornitur / 3,155 par distinti fornitur-mudell / 1,524 mudell mhux maħdum IDs** ; il-katalgu separat tal-baġit ħieles għandu **466 ringieli għal kull mudell** ,**34 pool rikorrenti** u **52 recurring/keyless fornitur bla ħlas għal dejjem** . Dawn huma denominaturi differenti skond id-disinn; id-definizzjonijiet u l-kalkoli deduppjati bil-pool jgħixu fil-Livelli [ta' Referenza tal-Fornitur](docs/reference/PROVIDER_REFERENCE.md) u [Ħieles](docs/reference/FREE_TIERS.md).
+> **384 fornitur irreġistrat** madwar iċ-chat kanoniku, il-midja, it-tfittxija, il-kollezzjonijiet lokali, tal-aġent tal-cloud u tas-sistema, inkluż **156 li jġorru metadata ta' skoperta `hasFree: true`** . Ir-reġistru tal-mudell taċ-chat ikopri **244 fornitur / 3,157 par distinti fornitur-mudell / 1,525 mudell mhux maħdum IDs** ; il-katalgu separat tal-baġit ħieles għandu **466 ringieli għal kull mudell** ,**34 pool rikorrenti** u **52 recurring/keyless fornitur bla ħlas għal dejjem** . Dawn huma denominaturi differenti skond id-disinn; id-definizzjonijiet u l-kalkoli deduppjati bil-pool jgħixu fil-Livelli [ta' Referenza tal-Fornitur](docs/reference/PROVIDER_REFERENCE.md) u [Ħieles](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> madwar <code>src/</code> u <code>open-sse/</code> (<code>any</code> żero fil-qalba minn v2.0)</td></tr>
   <tr><td nowrap><b>Qafas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legat) — 147-il modulu tad-dominju, 230 migrazzjoni</td></tr>
+  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legat) — 147-il modulu tad-dominju, 232 migrazzjoni</td></tr>
   <tr><td nowrap><b>Memorja</b></td><td>FTS5 ta' SQLite għal test sħiħ + embeddings vettorjali kwantizzati b'int8, tħassir ittajpjat</td></tr>
   <tr><td nowrap><b>Skemi</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

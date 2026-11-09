@@ -62,6 +62,19 @@ export default defineConfig({
       // resolves to undefined instead of failing loudly — which silently made
       // every provider look credentialed in the free-tier card tests.
       "@omniroute/open-sse": path.resolve(__dirname, "./open-sse"),
+      // Package exports whose file name differs from the subpath (packages/ui-kit/package.json
+      // "exports"). They must precede the prefix entry below: the first matching alias wins,
+      // and the prefix would send `@omniroute/ui-kit/styles.css` to a src/styles.css that does
+      // not exist (#18079).
+      "@omniroute/ui-kit/styles.css": path.resolve(
+        __dirname,
+        "./packages/ui-kit/src/ci-styles.css"
+      ),
+      "@omniroute/ui-kit/tokens.css": path.resolve(
+        __dirname,
+        "./packages/ui-kit/src/ci-tokens.css"
+      ),
+      "@omniroute/ui-kit/brand": path.resolve(__dirname, "./packages/ui-kit/src/keak-brand.tsx"),
       "@omniroute/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
     },
   },

@@ -15,7 +15,7 @@ Jis suteikia vieną su „OpenAI“ suderinamą galinį tašką (`/v1/*`) ir nuk
 
 Pagrindinės galimybės:
 
-- Su „OpenAI“ suderinama API sąsaja, skirta CLI ir įrankiams (382 paslaugų teikėjai, 159 vykdymo moduliai)
+- Su „OpenAI“ suderinama API sąsaja, skirta CLI ir įrankiams (384 paslaugų teikėjai, 159 vykdymo moduliai)
 - Užklausų ir atsakymų konvertavimas tarp paslaugų teikėjų formatų
 - Modelių derinio atsarginis perjungimas (kelių modelių seka)
 - Struktūrizuoti derinio žingsniai (`provider + model + connection`) su vykdymo metu nustatoma tvarka pagal `compositeTiers`

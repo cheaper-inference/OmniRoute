@@ -1,4 +1,4 @@
-# Claude Code CLI — Konfiguracija sa OmniRoute (Bosanski)
+# Claude Code CLI — Configuration with OmniRoute (Bosanski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
 
@@ -45,6 +45,53 @@ Za pristupni podatak koji se rotira umjesto fiksnog niza, postavite `apiKeyHelpe
 Tako radi Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto API ključa. Pogledajte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
 
 `omniroute launch` postavlja sve ovo za vas: razrješava base URL + token iz aktivnog konteksta (tako da `omniroute connect <vps>` pa `omniroute launch` jednostavno radi), provjerava zdravlje servera i izvršava `claude`.
+
+---
+
+## Atribucija upotrebe: sesije i projekti
+
+OmniRoute grupiše zahtjeve svakog API ključa u **agent sesije** i evidencije koje **projekat** svaka sesija na kojoj se radi (`agent_sessions` tabela), tako da se upotreba i troškovi mogu prijaviti po članu tima, po projektu i po sesiji.
+
+Šta se snima bez ikakvog podešavanja klijenta:
+
+| Polje    | Izvor                                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sjednica | `x-claude-code-session-id` zaglavlje (ista vrijednost kao `metadata.user_id.session_id`), stabilno po sesiji                                           |
+| Projekt  | `Primary working directory:` linija Claude kod šalje u svom okruženju poruku; fascikle radnog stabla pod `.claude/worktrees/` rešavaju u ime spremišta |
+| Filijala | `Current branch:` iz git statusa Claude kod šalje s prvom porukom                                                                                      |
+| Klijent  | `user-agent` (`claude-cli/<version>`)                                                                                                                  |
+
+Codex (`<environment_context><cwd>`) i OpenCode (`x-opencode-session`) se prepoznaju na isti način. Ključevi sa **no-log** omogućeno da zadrži samo ID sesije i polja projekta koja su dostavljena u zaglavlju; ništa pročitano iz prompta (putanja, grana) se ne pohranjuje.
+
+### Eksplicitno imenovanje projekta (preporučeno)
+
+Radni direktorij se razlikuje između strojeva, tako da se isto spremište može pojaviti pod različitim stazama. Umjesto toga pošaljite projekt eksplicitno: Claude Code dodaje sva zaglavlja navedena u `ANTHROPIC_CUSTOM_HEADERS` svakom zahtjevu modela, a OmniRoute čita dva od njih:
+
+| Zaglavlje                  | Vrijednost                                                        |
+| -------------------------- | ----------------------------------------------------------------- |
+| `x-omniroute-project`      | Naziv projekta, npr. `omniroute`                                  |
+| `x-omniroute-project-repo` | Normalizovani daljinski, npr. `github.com/diegosouzapw/OmniRoute` |
+
+Oba se čitaju samo radi atribucije; nikada se ne prosljeđuju upstream provajderu.
+
+`ANTHROPIC_CUSTOM_HEADERS` se čita jednom prilikom pokretanja, a datoteke postavki pohranjuju literalne vrijednosti, pa ga izračunajte kada se Claude Code pokrene. Dodajte ovo u `~/.zshrc` ili `~/.bashrc` i nastavite pokretati `claude` iz mape projekta:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` izraz uklanja sve vjerodajnice ugrađene u udaljeni URL. IDE ekstenzije pokreću Claude kod bez vaše ljuske, tako da se njihove sesije vraćaju u radni direktorij.
 
 ---
 

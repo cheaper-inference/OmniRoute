@@ -52,6 +52,53 @@ Entra ID SSO 正是这样工作的：`scripts/cli/omniroute-sso.mjs token` 输�
 
 ---
 
+## 使用归因：会话和项目
+
+OmniRoute将每个API密钥的请求分组为**代理会话**并记录哪些**项目**每个会话都进行（`agent_sessions`表），因此可以报告每个团队成员、每个项目和每个会话的使用情况和成本。
+
+无需任何客户端设置即可记录的内容：
+
+| 场地 | 来源                                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------- |
+| 会议 | `x-claude-code-session-id`标头（与`metadata.user_id.session_id`相同的值），每个会话稳定                             |
+| 项目 | `Primary working directory:`线路Claude代码在其环境消息中发送； `.claude/worktrees/`下的工作树文件夹解析为存储库名称 |
+| 分支 | 来自 git status Claude代码的`Current branch:`与第一条消息一起发送                                                   |
+| 客户 | `user-agent` (`claude-cli/<version>`)                                                                               |
+
+Codex （`<environment_context><cwd>`）和OpenCode （`x-opencode-session`）的识别方式相同。按键与**无日志**启用仅保留会话 ID 和标头提供的项目字段；不会存储从提示符（路径、分支）读取的任何内容。
+
+### 明确命名项目（推荐）
+
+机器之间的工作目录不同，因此相同的存储库可以显示在不同的路径下。显式发送项目： Claude代码将`ANTHROPIC_CUSTOM_HEADERS`中列出的任何标头添加到每个模型请求中， OmniRoute读取其中两个：
+
+| 标头                       | 价值                                                |
+| -------------------------- | --------------------------------------------------- |
+| `x-omniroute-project`      | 项目名称，例如`omniroute`                           |
+| `x-omniroute-project-repo` | 标准化远程，例如`github.com/diegosouzapw/OmniRoute` |
+
+两者都只是为了归属而阅读；它们永远不会转发给上游提供者。
+
+`ANTHROPIC_CUSTOM_HEADERS`在启动时读取一次，设置文件存储文字值，因此在Claude Code 启动时计算它。将其添加到`~/.zshrc`或`~/.bashrc`并继续从项目文件夹启动`claude` ：
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed`表达式会删除远程URL中嵌入的所有凭据。 IDE扩展无需您的 shell 即可启动Claude代码，因此它们的会话会回退到工作目录。
+
+---
+
 ## 发现别名 —— 在 `/model` 选择器中显示非 Claude 模型
 
 Claude Code 的网关模型发现功能只会列出以 `claude` 或 `anthropic` 开头的 id，因此在启用 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` 时，原生 `/model` 选择器通常**只**显示 OmniRoute 的 Claude/Anthropic 模型 —— 像 `kimi/kimi-k2.6` 或 `glm/glm-5.2` 这样的模型永远不会出现，即使它们可以正常路由。

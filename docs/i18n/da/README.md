@@ -15,7 +15,7 @@
 
 **Skabt af [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                              |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 udbydere                  |            352            |   **358**   |          382          |
-| 🧠 Unik chatmodel IDs        |           1320            |  **1374**   |         1524          |
+| 🌐 udbydere                  |            352            |   **358**   |          384          |
+| 🧠 Unik chatmodel IDs        |           1320            |  **1374**   |         1525          |
 | 🖼️ Modality Bridge           | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar gratis katalog      |         🆕 opt-in         |      ✓      |           ✓           |
 | ⚖️ Kvote-bevidst planlægning |      🆕 -kvoteandel       |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Alle **20** strategier — kombinér frit for hvert trin i en combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hvad adskiller OmniRoute — et øjebliksbillede af funktioner sammenlignet med 9router, OpenRouter, CLIProxyAPI og LiteLLM på tværs af 13 funktioner. OmniRoute: 382 udbydere, 150+ gratis niveauer indbygget, 20 routingstrategier, 12-engine tokenkomprimering, indbygget MCP-server med 110 værktøjer, A2A-agentprotokol, vedvarende hukommelse, sikkerhedsforanstaltninger, cloud-agenter, TLS-fingeraftryksmaskering, Desktop/Termux/PWA og 67 i18n UI-sprog. OmniRoute er MIT-licenseret og kan selv-hostes. Konkurrenters funktioner og antal kan ændre sig; se den linkede metodebeskrivelse."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hvad adskiller OmniRoute — et øjebliksbillede af funktioner sammenlignet med 9router, OpenRouter, CLIProxyAPI og LiteLLM på tværs af 13 funktioner. OmniRoute: 384 udbydere, 150+ gratis niveauer indbygget, 20 routingstrategier, 12-engine tokenkomprimering, indbygget MCP-server med 110 værktøjer, A2A-agentprotokol, vedvarende hukommelse, sikkerhedsforanstaltninger, cloud-agenter, TLS-fingeraftryksmaskering, Desktop/Termux/PWA og 67 i18n UI-sprog. OmniRoute er MIT-licenseret og kan selv-hostes. Konkurrenters funktioner og antal kan ændre sig; se den linkede metodebeskrivelse."/>
 
 <sub>📊 Fuld metodebeskrivelse &amp; detaljer pr. funktion vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ adgangskrav og det aktuelle katalog på **[radar.omniroute.online/planos](https:
 - **🖼️ Nye endepunkter** — `/v1/ocr` (Mistral OCR) og `/v1/audio/translations` (Whisper-style) runder medieoverfladen ud. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Billed-/video-/lydgenerering** — one API til medier: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind og taleudbydere såsom ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 -implementering og ops** — reverse-proxy `basePath`, browser-sprog auto-detektering, per-key enhed sporing, root-less MITM trust, zh-TW lokalisering. → [miljø](docs/reference/ENVIRONMENT.md)
-- **🤝 Flere udbydere og agenter** — cloud-agenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med browser + OAuth login, Ollama førsteklasses kort, Claude Opus 5 & Sonnet 5, Kimi officielt partnerskab (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes AI...**382-udbyderkatalog** . → [udbydere](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Flere udbydere og agenter** — cloud-agenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med browser + OAuth login, Ollama førsteklasses kort, Claude Opus 5 & Sonnet 5, Kimi officielt partnerskab (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes AI...**384-udbyderkatalog** . → [udbydere](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing gennemsigtighed** Hvert — svar bærer en `X-OmniRoute-Decision` header, der navngiver den strategy/provider/latency, der tjente den, en ny `cache-optimized` kombinationsstrategi + Auto-Combo `cacheAffinity` -faktor-rute-gentagelsesanmodninger tilbage til forbindelsen, der indeholder det cachelagrede præfiks, og et skrivebeskyttet `/v1/auto-combo/{channel}/candidates` slutpunkt afslører en `auto/*` kanals live-kandidatpulje. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokal ydeevne og infra** — et-klik lokale Redis, Cloudflare Workers / Deno Implementer relæ-deployere, Bifrost & Mux som overvågede indlejrede tjenester. → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Også i æsken** — plugin framework + markedsplads, Omni/Agent/GitHub skills frameworks, Obsidian vault integration (22 MCP værktøjer), OpenAI-kompatible Batch & Files APIs, semantisk respons cache, gamification med leaderboards, ACP agent discovery (15 indbyggede agenter), planlagt log eksport til BigQuery, `auto/chaos` bot-app in-model-manager, Telegram out-multi-model-manager LMArena-ELO rangeringer af gratis udbydere. → [Docs](docs/README.md)
@@ -687,11 +687,11 @@ af din shell-historik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 382 AI -udbydere — 156 Katalog-mærket gratis
+## 🌐 384 AI -udbydere — 156 Katalog-mærket gratis
 
 </div>
 
-> **382 registrerede udbydere** på tværs af kanoniske chat-, medier-, søgnings-, lokal-, cloud-agent- og systemsamlinger, herunder **156 med `hasFree: true` -opdagelsesmetadata** . Chatmodelregistret dækker **243 udbydere / 3.155 forskellige udbyder-modelpar / 1.524 rå model IDs** ; det separate gratis-budgetkatalog har **466 rækker pr. model** ,**34 tilbagevendende puljer** og **52 recurring/keyless gratis-for evigt udbydere** . Disse er forskellige nævnere af design; definitioner og pool-dedupede beregninger findes i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) og [Free Tiers](docs/reference/FREE_TIERS.md).
+> **384 registrerede udbydere** på tværs af kanoniske chat-, medier-, søgnings-, lokal-, cloud-agent- og systemsamlinger, herunder **156 med `hasFree: true` -opdagelsesmetadata** . Chatmodelregistret dækker **244 udbydere / 3.157 forskellige udbyder-modelpar / 1.525 rå model IDs** ; det separate gratis-budgetkatalog har **466 rækker pr. model** ,**34 tilbagevendende puljer** og **52 recurring/keyless gratis-for evigt udbydere** . Disse er forskellige nævnere af design; definitioner og pool-dedupede beregninger findes i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) og [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1303,7 +1303,7 @@ Kanoniske målinger pr. 2026-10-18: **1.976 unikke videoer** · **20.220.289 ken
   <tr><td nowrap><b>Kørselstid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Sprog</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> på tværs af <code>src/</code> og <code>open-sse/</code> (ingen <code>any</code> i kernen siden v2.0)</td></tr>
   <tr><td nowrap><b>Rammeværk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (ældre JSON) — 147 domænemoduler, 230 migreringer</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (ældre JSON) — 147 domænemoduler, 232 migreringer</td></tr>
   <tr><td nowrap><b>Hukommelse</b></td><td>SQLite FTS5-fuldtekst + int8-kvantiserede vektorembeddings, typebaseret henfald</td></tr>
   <tr><td nowrap><b>Skemaer</b></td><td>Zod 4 — MCP-værktøjs-I/O-validering + API-kontrakter</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

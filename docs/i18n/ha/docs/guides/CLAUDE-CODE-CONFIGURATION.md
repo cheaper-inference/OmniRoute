@@ -52,6 +52,53 @@ kawai zai yi aiki), yana duba lafiyar sabar, sannan yana aiwatar da `claude`.
 
 ---
 
+## Siffar amfani: zaman da ayyuka
+
+Rukunin OmniRoute kowane buƙatun maɓalli na API cikin **zaman wakilai** da records wanda **aikin** kowane zaman da aka yi aiki akan (Table `agent_sessions` ), don haka ana iya ba da rahoton amfani da farashi ga kowane memba na ƙungiyar, kowane aiki da kowane lokaci.
+
+Abin da aka yi rikodin ba tare da saitin abokin ciniki ba:
+
+| Filin         | Source                                                                                                                                                                           |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zama          | Shugaban `x-claude-code-session-id` (daraja ɗaya da `metadata.user_id.session_id`), barga a kowane zama                                                                          |
+| Aikin         | Layin `Primary working directory:` Claude Code yana aikawa cikin saƙon muhallinsa; manyan fayilolin worktree a ƙarƙashin `.claude/worktrees/` sun warware zuwa sunan wurin ajiya |
+| Reshe         | `Current branch:` daga matsayin git lambar Claude tana aikawa tare da saƙon farko                                                                                                |
+| Abokin ciniki | `user-agent` (`claude-cli/<version>`)                                                                                                                                            |
+
+Codex (`<environment_context><cwd>`) da OpenCode (`x-opencode-session`) ana gane su iri ɗaya. Maɓallai tare da **no-log** an ba da damar kiyaye id zaman kawai da filayen aikin da aka kawo; babu abin da aka karanta daga hanzari (hanyar, reshe) da aka adana.
+
+### Sanya sunan aikin a bayyane (an shawarta)
+
+Littafin jagorar aiki ya bambanta tsakanin injuna, don haka ma'aji guda ɗaya na iya nunawa a ƙarƙashin hanyoyi daban-daban. Aika aikin a sarari maimakon: Lambar Claude tana ƙara kowane rubutun da aka jera a cikin `ANTHROPIC_CUSTOM_HEADERS` ga kowane buƙatun ƙirar, kuma OmniRoute ta karanta biyu daga cikinsu:
+
+| Kai                        | Daraja                                                      |
+| -------------------------- | ----------------------------------------------------------- |
+| `x-omniroute-project`      | Sunan aikin, misali `omniroute`                             |
+| `x-omniroute-project-repo` | Nau'i na al'ada, misali `github.com/diegosouzapw/OmniRoute` |
+
+Dukansu ana karanta su kawai don sifa; ba a taɓa tura su zuwa ga mai samarwa na sama ba.
+
+Ana karanta `ANTHROPIC_CUSTOM_HEADERS` sau ɗaya a farawa, kuma fayilolin saitunan suna adana ƙimar gaske, don haka ƙididdige shi lokacin ƙaddamar da lambar Claude. Ƙara wannan zuwa `~/.zshrc` ko `~/.bashrc` kuma ci gaba da farawa `claude` daga babban fayil ɗin aikin:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Maganar `sed` tana cire duk wani takaddun shaida da aka saka a cikin URL mai nisa. Ƙwayoyin IDE suna ƙaddamar da lambar Claude ba tare da harsashin ku ba, don haka zaman su ya koma kan kundin aiki.
+
+---
+
 ## Laƙabin gano — nuna samfuran da ba Claude ba a cikin zaɓin `/model`
 
 Binciken samfurin ƙofa (gateway) na Claude Code yana lissafa kawai ids waɗanda ke farawa da `claude` ko `anthropic`, don haka tare da `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` zaɓin `/model` na asali yawanci yana nuna **kawai** samfuran Claude/Anthropic na OmniRoute — `kimi/kimi-k2.6` ko `glm/glm-5.2` bai taɓa bayyana, ko da yake yana tura buƙatu da kyau.

@@ -52,6 +52,53 @@ să funcționeze direct), verifică starea serverului și execută `claude`.
 
 ---
 
+## Atribuire utilizare: sesiuni și proiecte
+
+OmniRoute grupează cererile fiecărei chei API în **sesiuni de agent** şi înregistrează care **proiect** fiecare sesiune a lucrat (tabel `agent_sessions` ), astfel încât utilizarea și costul pot fi raportate pe membru al echipei, pe proiect și pe sesiune.
+
+Ce se înregistrează fără nicio configurare client:
+
+| Domeniu | Sursă                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sesiune | Antet `x-claude-code-session-id` (aceeași valoare ca și `metadata.user_id.session_id`), stabil pe sesiune                                                    |
+| Proiect | Codul Claude de linie `Primary working directory:` trimite în mediul său mesaj; folderele worktree din `.claude/worktrees/` se rezolvă la numele depozitului |
+| Ramura  | `Current branch:` din statusul git Codul Claude se trimite cu primul mesaj                                                                                   |
+| Client  | `user-agent` (`claude-cli/<version>`)                                                                                                                        |
+
+Codex (`<environment_context><cwd>`) și OpenCode (`x-opencode-session`) sunt recunoscute în același mod. Chei cu **fără jurnal** activat păstrează numai ID-ul sesiunii și câmpurile de proiect furnizate de antet; nimic citit din prompt (cale, ramură) nu este stocat.
+
+### Denumirea explicită a proiectului (recomandat)
+
+Directorul de lucru diferă între mașini, astfel încât același depozit poate apărea pe căi diferite. Trimiteți proiectul în mod explicit: Codul Claude adaugă toate anteturile listate în `ANTHROPIC_CUSTOM_HEADERS` la fiecare cerere de model, iar OmniRoute citește două dintre ele:
+
+| Antet                      | Valoare                                                                 |
+| -------------------------- | ----------------------------------------------------------------------- |
+| `x-omniroute-project`      | Numele proiectului, de exemplu `omniroute`                              |
+| `x-omniroute-project-repo` | Telecomanda normalizată, de exemplu `github.com/diegosouzapw/OmniRoute` |
+
+Ambele sunt citite doar pentru atribuire; nu sunt niciodată redirecționate către furnizorul din amonte.
+
+`ANTHROPIC_CUSTOM_HEADERS` este citit o dată la pornire, iar fișierele de setări stochează valori literale, așa că calculați-l când se lansează codul Claude. Adăugați acest lucru la `~/.zshrc` sau `~/.bashrc` și continuați să porniți `claude` din folderul proiectului:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Expresia `sed` elimină orice acreditări încorporate în URL la distanță. Extensiile IDE lansează codul Claude fără shell-ul dvs., astfel încât sesiunile lor revin în directorul de lucru.
+
+---
+
 ## Aliasuri de descoperire — afișarea modelelor non-Claude în selectorul `/model`
 
 Descoperirea modelelor prin gateway din Claude Code listează doar id-urile care încep cu `claude` sau `anthropic`, așa că, cu `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, selectorul nativ `/model` afișează în mod normal **doar** modelele Claude/Anthropic din OmniRoute — un `kimi/kimi-k2.6` sau un `glm/glm-5.2` nu apare niciodată, chiar dacă rutarea funcționează corect.

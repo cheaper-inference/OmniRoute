@@ -12916,6 +12916,7 @@
     "systemActor": "система",
     "ipAccessControl": "IP-контроль доступа",
     "ipAccessControlDesc": "Блокировать или разрешать определенные IP-адреса",
+    "ipAccessMode": "Режим доступа",
     "ipModeDisabled": "Отключено",
     "ipModeBlacklist": "Черный список",
     "ipModeWhitelist": "Белый список",

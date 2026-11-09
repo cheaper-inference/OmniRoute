@@ -12916,6 +12916,7 @@
     "systemActor": "rendszer",
     "ipAccessControl": "IP-alapú hozzáférés-vezérlés",
     "ipAccessControlDesc": "Adott IP-címek letiltása vagy engedélyezése",
+    "ipAccessMode": "Hozzáférési mód",
     "ipModeDisabled": "Letiltva",
     "ipModeBlacklist": "Feketelista",
     "ipModeWhitelist": "Fehérlista",

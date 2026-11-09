@@ -52,6 +52,53 @@ Entra ID SSO ක්‍රියා කරන්නේ මේ ආකාරයට�
 
 ---
 
+## භාවිත ආරෝපණය: සැසි සහ ව්‍යාපෘති
+
+OmniRoute සෑම API යතුරකම ඉල්ලීම් සමූහ කරයි**නියෝජිත සැසි** සහ වාර්තා කරන **ව්යාපෘතිය** සෑම සැසියක්ම (`agent_sessions` වගුව) මත ක්‍රියා කර ඇත, එබැවින් කණ්ඩායම් සාමාජිකයෙකුට, ව්‍යාපෘතියකට සහ සැසියකට භාවිතය සහ පිරිවැය වාර්තා කළ හැක.
+
+කිසිදු සේවාදායක සැකසුමකින් තොරව වාර්තා කර ඇති දේ:
+
+| ක්ෂේත්රය   | මූලාශ්රය                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| සැසිය      | `x-claude-code-session-id` ශීර්ෂකය ( `metadata.user_id.session_id` ට සමාන අගයක් ), සැසියකට ස්ථාවර                                         |
+| ව්යාපෘතිය  | `Primary working directory:` රේඛාව Claude කේතය එහි පාරිසරික පණිවිඩය යවයි; `.claude/worktrees/` යටතේ ඇති worktree ෆෝල්ඩර නිධි නාමයට විසඳයි |
+| ශාඛාව      | `Current branch:` git තත්ත්වයෙන් Claude කේතය පළමු පණිවිඩය සමඟ යවයි                                                                        |
+| සේවාදායකයා | `user-agent` (`claude-cli/<version>`)                                                                                                     |
+
+Codex (`<environment_context><cwd>`) සහ OpenCode (`x-opencode-session`) එකම ආකාරයකින් හඳුනා ගැනේ. සමඟ යතුරු**no-log** සැසි හැඳුනුම්පත සහ ශීර්ෂය සපයන ව්‍යාපෘති ක්ෂේත්‍ර පමණක් තබා ගැනීමට සක්‍රීය කර ඇත; විමසුමෙන් කියවන කිසිවක් (මාර්ගය, ශාඛාව) ගබඩා නොවේ.
+
+### ව්‍යාපෘතිය පැහැදිලිව නම් කිරීම (නිර්දේශිතයි)
+
+වැඩ කරන නාමාවලිය යන්ත්‍ර අතර වෙනස් වේ, එබැවින් එකම ගබඩාව විවිධ මාර්ග යටතේ පෙන්විය හැක. ඒ වෙනුවට ව්‍යාපෘතිය පැහැදිලිව යවන්න: Claude කේතය සෑම ආදර්ශ ඉල්ලීමකටම `ANTHROPIC_CUSTOM_HEADERS` හි ලැයිස්තුගත කර ඇති ඕනෑම ශීර්ෂයක් එක් කරයි, සහ OmniRoute ඒවායින් දෙකක් කියවයි:
+
+| ශීර්ෂකය                    | වටිනාකම                                                          |
+| -------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-project`      | ව්‍යාපෘතියේ නම, උදා: `omniroute`                                 |
+| `x-omniroute-project-repo` | සාමාන්‍යකරණය කළ දුරස්ථය, උදා `github.com/diegosouzapw/OmniRoute` |
+
+දෙකම කියවන්නේ ආරෝපණය සඳහා පමණි; ඒවා කිසිවිටෙක උඩුගං බලා සපයන්නා වෙත යොමු නොකෙරේ.
+
+`ANTHROPIC_CUSTOM_HEADERS` ආරම්භයේදී වරක් කියවන අතර, සැකසුම් ගොනු වචනාර්ථ අගයන් ගබඩා කරයි, එබැවින් Claude කේතය දියත් කරන විට එය ගණනය කරන්න. මෙය `~/.zshrc` හෝ `~/.bashrc` වෙත එකතු කර ව්‍යාපෘති ෆෝල්ඩරයෙන් `claude` ආරම්භ කරන්න:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ප්‍රකාශනය දුරස්ථ URL හි තැන්පත් කර ඇති අක්තපත්‍ර ඉවත් කරයි. IDE දිගු ඔබේ කවචය නොමැතිව Claude කේතය දියත් කරයි, එබැවින් ඒවායේ සැසි නැවත වැඩ කරන නාමාවලියට වැටේ.
+
+---
+
 ## සොයාගැනීමේ අන්වර්ථ (Discovery aliases) — `/model` picker එකේ Claude නොවන මොඩල් නිරාවරණය කරන්න
 
 Claude Code හි gateway මොඩල් සොයාගැනීම `claude` හෝ `anthropic` ලෙස ආරම්භ වන ids පමණක් ලැයිස්තුගත කරයි. එබැවින් `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` සමඟ ස්වදේශීය `/model` picker එක සාමාන්යයෙන් පෙන්වන්නේ OmniRoute හි Claude/Anthropic මොඩල් **පමණි** — `kimi/kimi-k2.6` හෝ `glm/glm-5.2` කිසිවිටෙක නොපෙන්වයි, එය හරියටම route වුවද.

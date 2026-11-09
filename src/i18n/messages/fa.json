@@ -12916,6 +12916,7 @@
     "systemActor": "سیستم",
     "ipAccessControl": "کنترل دسترسی IP",
     "ipAccessControlDesc": "مسدود یا مجاز کردن آدرسهای IP مشخص",
+    "ipAccessMode": "حالت دسترسی",
     "ipModeDisabled": "غیرفعال",
     "ipModeBlacklist": "فهرست سیاه",
     "ipModeWhitelist": "فهرست سفید",

@@ -52,6 +52,53 @@ hufanya kazi moja kwa moja), hukagua afya ya seva, na hutekeleza `claude`.
 
 ---
 
+## Maelezo ya matumizi: vikao na miradi
+
+OmniRoute inaweka ombi la kila ufunguo wa API**vikao vya wakala** na kumbukumbu ambazo **mradi** kila kikao kilifanya kazi ( jedwali la `agent_sessions` ), kwa hivyo matumizi na gharama zinaweza kuripotiwa kwa kila mshiriki wa timu, kwa kila mradi na kwa kipindi.
+
+Ni nini kinachorekodiwa bila usanidi wowote wa mteja:
+
+| Shamba | Chanzo                                                                                                                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kikao  | Kichwa cha `x-claude-code-session-id` (thamani sawa na `metadata.user_id.session_id`), thabiti kwa kila kipindi                                                     |
+| Mradi  | Laini ya `Primary working directory:` Claude Code inatuma ujumbe wake wa mazingira; folda za worktree chini ya `.claude/worktrees/` zinaamua kwa jina la kumbukumbu |
+| Tawi   | `Current branch:` kutoka kwa hali ya git Msimbo wa Claude hutuma na ujumbe wa kwanza                                                                                |
+| Mteja  | `user-agent` (`claude-cli/<version>`)                                                                                                                               |
+
+Codex (`<environment_context><cwd>`) na OpenCode (`x-opencode-session`) zinatambulika kwa njia sawa. Funguo na **hakuna-logi** kuwezeshwa weka kitambulisho cha kipindi pekee na sehemu za mradi zinazotolewa na kichwa; hakuna kitu kinachosomwa kutoka kwa haraka (njia, tawi) huhifadhiwa.
+
+### Kutaja mradi kwa uwazi (inapendekezwa)
+
+Saraka ya kufanya kazi inatofautiana kati ya mashine, kwa hivyo hazina hiyo hiyo inaweza kuonekana chini ya njia tofauti. Tuma mradi kwa uwazi badala yake: Msimbo wa Claude huongeza vichwa vyovyote vilivyoorodheshwa katika `ANTHROPIC_CUSTOM_HEADERS` kwa kila ombi la mfano, na OmniRoute inasoma viwili kati yake:
+
+| Kijajuu                    | Thamani                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Jina la mradi, kwa mfano `omniroute`                                           |
+| `x-omniroute-project-repo` | Kidhibiti cha mbali cha kawaida, kwa mfano `github.com/diegosouzapw/OmniRoute` |
+
+Zote mbili zinasomwa tu kwa maelezo; kamwe hazitumiwi kwa mtoaji huduma za juu.
+
+`ANTHROPIC_CUSTOM_HEADERS` inasomwa mara moja wakati wa kuanza, na faili za mipangilio huhifadhi maadili halisi, kwa hivyo ihesabu wakati Msimbo wa Claude unapozinduliwa. Ongeza hii kwa `~/.zshrc` au `~/.bashrc` na uendelee kuanza `claude` kutoka kwa folda ya mradi:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Usemi wa `sed` huondoa kitambulisho chochote kilichopachikwa kwenye URL ya mbali. Viendelezi vya IDE huzindua Msimbo wa Claude bila ganda lako, kwa hivyo vipindi vyao vinarudi kwenye saraka ya kufanya kazi.
+
+---
+
 ## Majina mbadala ya ugunduzi — kuonyesha modeli zisizo za Claude katika kichaguzi cha `/model`
 
 Ugunduzi wa modeli wa lango la Claude Code huorodhesha tu vitambulisho vinavyoanza na `claude`

@@ -488,7 +488,7 @@ Ez a következőket kezeli:
 
 | Fájl                                | Cél                                                                    |
 | ----------------------------------- | ---------------------------------------------------------------------- |
-| `providerRegistry.ts`               | Csevegésmodell-nyilvántartás a 382-es szolgáltatókatalóguson keresztül |
+| `providerRegistry.ts`               | Csevegésmodell-nyilvántartás a 384-es szolgáltatókatalóguson keresztül |
 | `providerModels.ts`                 | Modell álnevek, formátumleképezés                                      |
 | `constants.ts`                      | Időtúllépések, korlátok, állapotkódok                                  |
 | `defaultThinkingSignature.ts`       | Alapértelmezett Claude gondolkodó aláírás                              |

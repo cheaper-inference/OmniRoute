@@ -15,7 +15,7 @@
 
 **[Diego Souza](https://github.com/diegosouzapw) kere ya**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                               |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :----------------------: | :---------: | :-------------------: |
-| Ndị na-enye 🌐                |           352            |   **358**   |          382          |
-| Ụdị nkata 🧠 pụrụ iche IDs    |           1320           |  **1374**   |         1524          |
+| Ndị na-enye 🌐                |           352            |   **358**   |          384          |
+| Ụdị nkata 🧠 pụrụ iche IDs    |           1320           |  **1374**   |         1525          |
 | 🖼️ Modality Bridge            | 🆕 ọhụụ + ọdịyo + vidiyo |      ✓      |           ✓           |
 | 📡 Rada katalọgụ efu          |        Nbanye 🆕         |      ✓      |           ✓           |
 | ⚖️ Quota-nhazi nhazi oge      |       🆕 oke-Share       |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Usoro **20** niile — gwakọta ma dakọtara ha na nzọụkwụ combo ọ b�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme ka OmniRoute dị iche — otu foto nke atụmatụ dị iche iche n'oge gara aga megide 9router, OpenRouter, CLIProxyAPI na LiteLLM n’ihe ruru ikike 13. OmniRoute: ndị na-eweta 382, ihe karịrị 150 free tiers wuru n'ime ya, usoro ntuziaka 20, token compression engine 12, MCP sava wuru n'ime ya nwere ngwaọrụ 110, A2A agent protocol, ncheta na-adịgide adịgide, guardrails, ndị nnọchi anya igwe ojii, TLS fingerprint stealth, Desktop/Termux/PWA na asụsụ UI 67 i18n. OmniRoute nwere ikike MIT na enwere ike ịwụnye onwe gị. Ikike na ọnụ ọgụgụ ndị asọmpi nwere ike ịgbanwe; lee usoro e si mee ya n'ịntanetị."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ihe na-eme ka OmniRoute dị iche — otu foto nke atụmatụ dị iche iche n'oge gara aga megide 9router, OpenRouter, CLIProxyAPI na LiteLLM n’ihe ruru ikike 13. OmniRoute: ndị na-eweta 384, ihe karịrị 150 free tiers wuru n'ime ya, usoro ntuziaka 20, token compression engine 12, MCP sava wuru n'ime ya nwere ngwaọrụ 110, A2A agent protocol, ncheta na-adịgide adịgide, guardrails, ndị nnọchi anya igwe ojii, TLS fingerprint stealth, Desktop/Termux/PWA na asụsụ UI 67 i18n. OmniRoute nwere ikike MIT na enwere ike ịwụnye onwe gị. Ikike na ọnụ ọgụgụ ndị asọmpi nwere ike ịgbanwe; lee usoro e si mee ya n'ịntanetị."/>
 
 <sub>📊 Usoro zuru ezu & nkọwa kwa atụmatụ megide 9router, OpenRouter, CLIProxyAPI & LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ A na-ahọrọ iji Radar n'onwe gị, ọ na-ejikwa naanị GET. Klayentị Omni
 - **🖼️ Ọhụrụ njedebe** — `/v1/ocr` (Mistral OCR) na `/v1/audio/translations` (ụdị ịhịa aka n'ahụ) gbachie elu mgbasa ozi. → [API Ntụaka](docs/reference/API_REFERENCE.md)
 - **🎨 Ọgbọ onyonyo / vidiyo / ọdịyo** — otu API maka mgbasa ozi: xAI Grok Cheedị echiche & Novita AI vidiyo, ComfyUI, Magnific, Adobe Firefly, Segmind, na ndị na-enye okwu dị ka ElevenLabs. → [API Ntụaka](docs/reference/API_REFERENCE.md)
 - **Nkwanye 🌍 & ops** — reverse-proxy `basePath`, achọpụta akpaaka asụsụ ihe nchọgharị, nchọta ngwaọrụ ọ bụla, ntụkwasị obi MITM na-enweghị mgbọrọgwụ, nhazi zh-TW. [Gburugburu ebe obibi](docs/reference/ENVIRONMENT.md) →
-- **🤝 Ndị na-eweta na ndị nnọchite anya** — igwe ojii (Codex Igwe ojii, Cursor, Devin, Jules), Grok wuo (xAI) na ihe nchọgharị + OAuth banye, Ollama kaadị klaasị mbụ, Claude Opus 5 & Sonnet 5, Kimi mmekorita nke gọọmentị (Code/Web/Moonshot), Zed, Arịrịọ, SenseNova, Yuanbao, Agnes AI… na ume ọhụrụ **382-ndị na-eweta katalọgụ**. → [Ndị na-enye ihe](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Ndị na-eweta na ndị nnọchite anya** — igwe ojii (Codex Igwe ojii, Cursor, Devin, Jules), Grok wuo (xAI) na ihe nchọgharị + OAuth banye, Ollama kaadị klaasị mbụ, Claude Opus 5 & Sonnet 5, Kimi mmekorita nke gọọmentị (Code/Web/Moonshot), Zed, Arịrịọ, SenseNova, Yuanbao, Agnes AI… na ume ọhụrụ **384-ndị na-eweta katalọgụ**. → [Ndị na-enye ihe](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ụzọ nghọta** — nzaghachi ọ bụla na-ebu isi okwu `X-OmniRoute-Decision` na-akpọ strategy/provider/latency nke jere ozi ya, usoro ọhụrụ `cache-optimized` combo atụmatụ + Auto-Combo `cacheAffinity` factor ụzọ na-ekpeghachi arịrịọ azụ na njikọ ahụ na-ejide prefix ahụ, na njedebe `/v1/auto-combo/{channel}/candidates` na-agụ naanị na-ekpughe ọdọ mmiri onye na-achọ ụzọ `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **Ọrụ mpaghara ⚡ & infra** — otu-pịa mpaghara Redis, Ndị ọrụ Cloudflare / Deno Deploy relay deployers, Bifrost & Mux dị ka ọrụ agbakwunyere na-elekọta. [Ọrụ agbakwunyere](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Ọzọkwa na igbe** — plugin framework + ahịa, Omni/Agent/GitHub nkà frameworks, Obsidian vault mbanye (22 MCP ngwaọrụ), OpenAI-dakọtara Batch & Faịlụ APIs, semantic nzaghachi cache, gamification na leaderboards, ACP nnọchiteanya chọpụtara (15 arụnyere n'ụlọnga), ndokwa mbupụ log na BigQuery, `auto/chaos` parallel - a multi-app parallel. njikwa Telegram na ọkwa LMArena-ELO nke ndị na-eweta ihe n'efu. [Akwụkwọ](docs/README.md) →
@@ -678,11 +678,11 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
 
 <div align="center">
 
-## Ndị na-enye 🌐 382 AI — 156 Katalọgụ-akara n'efu
+## Ndị na-enye 🌐 384 AI — 156 Katalọgụ-akara n'efu
 
 </div>
 
-> **Ndị na-eweta 382 edebanyere aha** gafee nkata canonical, mgbasa ozi, ọchụchọ, mpaghara, igwe ojii na mkpokọta sistemụ, gụnyere **156 na-ebu metadata nchọpụta `hasFree: true`** . Ndekọ ụdị nkata na-ekpuchi **Ndị na-enye 243 / 3,155 ụzọ abụọ na-eweta ihe atụ / 1,524 raw model IDs** ; katalọgụ n'efu nwere **466 ahịrị ụdị ọ bụla** ,**ọdọ mmiri 34 ugboro ugboro** na **52 recurring/keyless na-enye ndị na-enye ohere ebighi ebi** . Ndị a bụ ihe dị iche iche site na imewe; nkọwa na ngụkọ ọdọ mmiri na-adị ndụ na [Ntuziaka Onye na-enye](docs/reference/PROVIDER_REFERENCE.md) na [Tiers efu](docs/reference/FREE_TIERS.md).
+> **Ndị na-eweta 384 edebanyere aha** gafee nkata canonical, mgbasa ozi, ọchụchọ, mpaghara, igwe ojii na mkpokọta sistemụ, gụnyere **156 na-ebu metadata nchọpụta `hasFree: true`** . Ndekọ ụdị nkata na-ekpuchi **Ndị na-enye 244 / 3,157 ụzọ abụọ na-eweta ihe atụ / 1,525 raw model IDs** ; katalọgụ n'efu nwere **466 ahịrị ụdị ọ bụla** ,**ọdọ mmiri 34 ugboro ugboro** na **52 recurring/keyless na-enye ndị na-enye ohere ebighi ebi** . Ndị a bụ ihe dị iche iche site na imewe; nkọwa na ngụkọ ọdọ mmiri na-adị ndụ na [Ntuziaka Onye na-enye](docs/reference/PROVIDER_REFERENCE.md) na [Tiers efu](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b>Oge ịrụ ọrụ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n'ofe <code>src/</code> na <code>open-sse/</code> (<code>any</code> efu na isi sistemụ kemgbe v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON nke ochie) — modul ngalaba 147, migrations 230</td></tr>
+  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON nke ochie) — modul ngalaba 147, migrations 232</td></tr>
   <tr><td nowrap><b>Ncheta</b></td><td>SQLite FTS5 maka ọchụchọ ederede zuru ezu + embeddings vector nke int8-quantized, mbelata nwere ụdị</td></tr>
   <tr><td nowrap><b>Atụmatụ</b></td><td>Zod 4 — nkwado I/O nke ngwaọrụ MCP + nkwekọrịta API</td></tr>
   <tr><td nowrap><b>Usoro nkwukọrịta</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

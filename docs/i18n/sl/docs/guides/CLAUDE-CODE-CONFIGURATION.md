@@ -52,6 +52,53 @@ razreši iz aktivnega konteksta (zato po `omniroute connect <vps>` ukaz
 
 ---
 
+## Dodeljevanje uporabe: seje in projekti
+
+OmniRoute združuje vsake zahteve ključa API v **agentske seje** in zapisi, ki **projekt** vsaka delana seja (tabela `agent_sessions` ), tako da je mogoče poročati o uporabi in stroških na člana ekipe, na projekt in na sejo.
+
+Kaj se posname brez nastavitve odjemalca:
+
+| Polje      | Vir                                                                                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Seja       | Glava `x-claude-code-session-id` (enaka vrednost kot `metadata.user_id.session_id`), stabilna na sejo                                                              |
+| Projekt    | Koda Claude vrstice `Primary working directory:` pošlje v svojem okolju sporočilo; mape delovnega drevesa pod `.claude/worktrees/` se razrešijo v ime repozitorija |
+| Podružnica | `Current branch:` iz stanja git Claude koda pošlje s prvim sporočilom                                                                                              |
+| Stranka    | `user-agent` (`claude-cli/<version>`)                                                                                                                              |
+
+Codex (`<environment_context><cwd>`) in OpenCode (`x-opencode-session`) sta prepoznana na enak način. Ključi z **brez dnevnika** omogočeno obdrži samo ID seje in projektna polja, dobavljena z glavo; nič prebranega iz poziva (pot, veja) ni shranjeno.
+
+### Eksplicitno poimenovanje projekta (priporočeno)
+
+Delovni imenik se med stroji razlikuje, zato se lahko isti repozitorij prikaže pod različnimi potmi. Namesto tega pošljite projekt eksplicitno: Koda Claude vsaki zahtevi po modelu doda vse glave, navedene v `ANTHROPIC_CUSTOM_HEADERS`, OmniRoute pa prebere dve izmed njih:
+
+| Glava                      | Vrednost                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Ime projekta, npr. `omniroute`                                                |
+| `x-omniroute-project-repo` | Normaliziran daljinski upravljalnik, npr. `github.com/diegosouzapw/OmniRoute` |
+
+Oboje se bere samo zaradi pripisa; nikoli niso posredovani višjemu ponudniku.
+
+`ANTHROPIC_CUSTOM_HEADERS` se prebere enkrat ob zagonu, nastavitvene datoteke pa shranijo dobesedne vrednosti, zato jih izračunajte, ko se zažene koda Claude. Dodajte to v `~/.zshrc` ali `~/.bashrc` in nadaljujte z zagonom `claude` iz mape projekta:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Izraz `sed` odstrani vse poverilnice, vdelane v oddaljeni URL. Razširitve IDE zaženejo kodo Claude brez vaše lupine, zato se njihove seje vrnejo v delovni imenik.
+
+---
+
 ## Vzdevki za odkrivanje — prikaz modelov, ki niso Claude, v izbirniku `/model`
 
 Odkrivanje modelov prek prehoda v Claude Code izpiše samo ID-je, ki se začnejo s

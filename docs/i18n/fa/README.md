@@ -15,7 +15,7 @@
 
 **ایجاد شده توسط [دیگو سوزا](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                            |      نسخه 3.8.50       | **نسخه 3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :--------------------: | :-------------: | :-------------------: |
-| ارائه دهندگان 🌐           |          352           |     **358**     |          382          |
-| 🧠 چت یونیک مدل IDs        |          1320          |    **1374**     |         1524          |
+| ارائه دهندگان 🌐           |          352           |     **358**     |          384          |
+| 🧠 چت یونیک مدل IDs        |          1320          |    **1374**     |         1525          |
 | پل مدالیتی 🖼️              | ویدیو 🆕 ویژن + صوتی + |        ✓        |           ✓           |
 | کاتالوگ رایگان رادار 📡    |           🆕           |        ✓        |           ✓           |
 | زمانبندی آگاهی از سهمیه ⚖️ |     🆕 Quota-Share     |        ✓        |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 382 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="What sets OmniRoute apart — a dated feature snapshot vs 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities. OmniRoute: 384 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA and 67 i18n UI locales. OmniRoute is MIT-licensed and self-hostable. Competitor capabilities and counts may change; see the linked methodology."/>
 
 <sub>📊 روش کامل &amp; جزئیات هر ویژگی در مقابل 9 روتر، OpenRouter، CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ OmniRoute دارای مجوز MIT است و بهصورت عمومی نگهدار
 - **🖼️ نقاط پایانی جدید** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (به سبک Whisper) سطح رسانه را گرد کنید. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **🎨 تولید تصویر / ویدیو / صدا** — یکی API برای رسانه ها: xAI Grok Imagine & Novita AI ویدئو، ComfyUI، Magnific، Adobe Firefly، Segmind و ارائه دهندگان گفتار مانند ElevenLabs. → [API مرجع](docs/reference/API_REFERENCE.md)
 - **استقرار و عملیات 🌍** — معکوس پروکسی `basePath`، تشخیص خودکار به زبان مرورگر، ردیابی هر کلید دستگاه، اعتماد MITM بدون ریشه، محلیسازی zh-TW. [محیط زیست](docs/reference/ENVIRONMENT.md) →
-- **🤝 ارائه دهندگان و نمایندگان بیشتر** — عوامل ابری (Codex ابر، Cursor, Devin, Jules), Grok ساخت (xAI) با مرورگر + OAuth ورود به سیستم، Ollama کارت درجه یک، Claude اپوس 5 و غزل 5، Kimi مشارکت رسمی (Code/Web/Moonshot), Zed، درخواست ، SenseNova، یوانبائو، اگنس AI... و تازه شده **کاتالوگ 382 ارائه دهنده**. → [ارائه دهندگان](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 ارائه دهندگان و نمایندگان بیشتر** — عوامل ابری (Codex ابر، Cursor, Devin, Jules), Grok ساخت (xAI) با مرورگر + OAuth ورود به سیستم، Ollama کارت درجه یک، Claude اپوس 5 و غزل 5، Kimi مشارکت رسمی (Code/Web/Moonshot), Zed، درخواست ، SenseNova، یوانبائو، اگنس AI... و تازه شده **کاتالوگ 384 ارائه دهنده**. → [ارائه دهندگان](docs/reference/PROVIDER_REFERENCE.md)
 - **شفافیت مسیریابی 📡** هر پاسخ — دارای یک هدر `X-OmniRoute-Decision` است که strategy/provider/latency را ارائه میکند، یک استراتژی ترکیبی `cache-optimized` جدید + Auto-Combo `cacheAffinity` فاکتور درخواستهای تکرار مسیر را به اتصال نگهدارنده پیشوند حافظه پنهان دارد، و یک نقطه پایانی `/v1/auto-combo/{channel}/candidates` فقط خواندنی استخر نامزد زنده یک کانال `auto/*` را نشان میدهد. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **عملکرد محلی ⚡ و زیرساخت** — با یک کلیک Redis محلی، Cloudflare Workers / Deno Deploy relay deployers، Bifrost & Mux به عنوان سرویسهای تعبیهشده تحت نظارت. [خدمات جاسازی شده](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 همچنین در جعبه** چارچوب پلاگین — بازار + ، چارچوبهای مهارتهای Omni/Agent/GitHub ، ادغام Obsidian vault (22 ابزار MCP )، Batch & Files APIs سازگار با OpenAI، حافظه پنهان پاسخ معنایی، گیمیفیکیشن با تابلوهای امتیازات، کشف عامل ACP (15 عامل داخلی)، خروجی برنامهریزیشده، صادرات چندگانه به BigQuery-Fan به `auto/chaos` Fan. Telegram bridge، یک مدیر نسخه درون برنامه ای و رتبه بندی ارائه دهندگان رایگان LMARena-ELO. [اسناد](docs/README.md) →
@@ -678,11 +678,11 @@ omniroute configure codex          # همچنین: claude opencode qwen aider go
 
 <div align="center">
 
-## ارائه دهندگان 🌐 382 AI — 156 کاتالوگ رایگان
+## ارائه دهندگان 🌐 384 AI — 156 کاتالوگ رایگان
 
 </div>
 
-> **382 ارائه دهنده ثبت شده** در سراسر چت متعارف، رسانه، جستجو، محلی، عامل ابری و مجموعه های سیستمی، از جمله **156 حامل ابرداده های کشف `hasFree: true`** . رجیستری مدل چت را پوشش می دهد **243 ارائه دهنده / 3155 جفت ارائه دهنده-مدل مجزا / 1524 مدل خام IDs** ; کاتالوگ مجزا با بودجه آزاد دارد **466 ردیف در هر مدل** ،**34 استخر تکراری** و **52 ارائه دهنده رایگان recurring/keyless برای همیشه** . اینها مخرج های مختلفی از نظر طراحی هستند. تعاریف و محاسبات حذف شده توسط استخر در [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) و [ردیف های رایگان](docs/reference/FREE_TIERS.md) وجود دارد.
+> **384 ارائه دهنده ثبت شده** در سراسر چت متعارف، رسانه، جستجو، محلی، عامل ابری و مجموعه های سیستمی، از جمله **156 حامل ابرداده های کشف `hasFree: true`** . رجیستری مدل چت را پوشش می دهد **244 ارائه دهنده / 3157 جفت ارائه دهنده-مدل مجزا / 1525 مدل خام IDs** ; کاتالوگ مجزا با بودجه آزاد دارد **466 ردیف در هر مدل** ،**34 استخر تکراری** و **52 ارائه دهنده رایگان recurring/keyless برای همیشه** . اینها مخرج های مختلفی از نظر طراحی هستند. تعاریف و محاسبات حذف شده توسط استخر در [مرجع ارائه دهنده](docs/reference/PROVIDER_REFERENCE.md) و [ردیف های رایگان](docs/reference/FREE_TIERS.md) وجود دارد.
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # مقدار CI=1 نیز
   <tr><td nowrap><b>زمان اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (صفر <code>any</code> در هسته از نسخه 2.0)</td></tr>
   <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، WAL journaling) + LowDB (میراث JSON ) — 147 ماژول دامنه، 230 مهاجرت</td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، WAL journaling) + LowDB (میراث JSON ) — 147 ماژول دامنه، 232 مهاجرت</td></tr>
   <tr><td nowrap><b>حافظه</b></td><td>SQLite FTS5 متن کامل + int8-quantized embeddings vector, typed cay</td></tr>
   <tr><td nowrap><b>طرحواره ها</b></td><td>Zod 4 — MCP ابزار I/O اعتبار سنجی قراردادهای + API</td></tr>
   <tr><td nowrap><b>پروتکل ها</b></td><td>MCP (stdio / HTTP / SSE) + A2A 0.3 (JSON-RPC 2.0 + SSE)</td></tr>

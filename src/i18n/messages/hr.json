@@ -12916,6 +12916,7 @@
     "systemActor": "sustav",
     "ipAccessControl": "Kontrola pristupa po IP-u",
     "ipAccessControlDesc": "Blokiraj ili dopusti određene IP adrese",
+    "ipAccessMode": "Način pristupa",
     "ipModeDisabled": "Onemogućeno",
     "ipModeBlacklist": "Crna lista",
     "ipModeWhitelist": "Popis dopuštenih",

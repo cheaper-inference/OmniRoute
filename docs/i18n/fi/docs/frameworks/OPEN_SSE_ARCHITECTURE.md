@@ -488,7 +488,7 @@ Se käsittelee seuraavat:
 
 | Tiedosto                      | Tarkoitus                                                  |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-mallirekisteri 382-palveluntarjoajan luettelon kautta |
+| `providerRegistry.ts`         | Chat-mallirekisteri 384-palveluntarjoajan luettelon kautta |
 | `providerModels.ts`           | Mallialiakset, muotojen kartoitus                          |
 | `constants.ts`                | Aikakatkaisut, rajat, tilakoodit                           |
 | `defaultThinkingSignature.ts` | Oletusarvoinen Claude ajatteleva allekirjoitus             |

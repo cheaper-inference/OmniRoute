@@ -52,6 +52,53 @@ Claude Code מתקשר באמצעות **Anthropic Messages API** ומופנה א
 
 ---
 
+## ייחוס שימוש: הפעלות ופרויקטים
+
+OmniRoute מקבץ את הבקשות של כל מפתח API לתוך **מפגשי סוכנים** ומתעד אילו **פּרוֹיֶקט** כל מפגש שעבד עליו (טבלת `agent_sessions` ), כך שניתן לדווח על שימוש ועלות לכל חבר צוות, לפרויקט ולכל מפגש.
+
+מה מוקלט ללא כל הגדרת לקוח:
+
+| שָׂדֶה    | מָקוֹר                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| מוֹשָׁב   | כותרת `x-claude-code-session-id` (ערך זהה לזה של `metadata.user_id.session_id`), יציבה לכל הפעלה                                |
+| פּרוֹיֶקט | שורת `Primary working directory:` Claude Code שולחת בסביבה שלו הודעה; תיקיות worktree תחת `.claude/worktrees/` נפתרות לשם המאגר |
+| עָנָף     | `Current branch:` מהסטטוס git Claude Code שולח עם ההודעה הראשונה                                                                |
+| לָקוּחַ   | `user-agent` (`claude-cli/<version>`)                                                                                           |
+
+Codex (`<environment_context><cwd>`) ו- OpenCode (`x-opencode-session`) מוכרים באותו אופן. מפתחות עם **ללא יומן** מופעל לשמור רק את מזהה ההפעלה ואת שדות הפרויקט שסופקו בכותרת; שום דבר שנקרא מההנחיה (נתיב, ענף) לא מאוחסן.
+
+### מתן שם מפורש לפרויקט (מומלץ)
+
+ספריית העבודה שונה בין מחשבים, כך שאותו מאגר יכול להופיע תחת נתיבים שונים. שלח את הפרויקט במפורש במקום זאת: קוד Claude מוסיף את כל הכותרות הרשומות ב- `ANTHROPIC_CUSTOM_HEADERS` לכל בקשת דגם, ו- OmniRoute קורא שתיים מהן:
+
+| כּוֹתֶרֶת                  | עֵרֶך                                                |
+| -------------------------- | ---------------------------------------------------- |
+| `x-omniroute-project`      | שם הפרויקט, למשל `omniroute`                         |
+| `x-omniroute-project-repo` | שלט מנורמל, למשל `github.com/diegosouzapw/OmniRoute` |
+
+שניהם נקראים רק לצורך ייחוס; הם לעולם לא מועברים לספק במעלה הזרם.
+
+`ANTHROPIC_CUSTOM_HEADERS` נקרא פעם אחת באתחול, וקובצי ההגדרות מאחסנים ערכים מילוליים, אז חשב אותו כאשר קוד Claude מופעל. הוסף את זה ל- `~/.zshrc` או `~/.bashrc` והמשיך להפעיל `claude` מתיקיית הפרויקט:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+הביטוי `sed` מסיר את כל האישורים המוטמעים ב- URL המרוחק. הרחבות IDE משיקות קוד Claude ללא המעטפת שלך, כך שההפעלות שלהן נופלות חזרה לספריית העבודה.
+
+---
+
 ## כינויי גילוי — חשיפת מודלים שאינם Claude בבורר ה-`/model`
 
 מנגנון גילוי המודלים של ה-gateway של Claude Code מציג רק מזהים שמתחילים ב-`claude`

@@ -12916,6 +12916,7 @@
     "systemActor": "tsari",
     "ipAccessControl": "Sarrafa Samun Dama ta IP",
     "ipAccessControlDesc": "Toshe ko ba wa takamaiman adiresoshin IP izini",
+    "ipAccessMode": "Yanayin shiga",
     "ipModeDisabled": "A kashe",
     "ipModeBlacklist": "Jerin Toshewa",
     "ipModeWhitelist": "Jerin Izini",

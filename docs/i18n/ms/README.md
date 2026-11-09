@@ -15,7 +15,7 @@
 
 **Dicipta oleh [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                            |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :-----------------------: | :---------: | :-------------------: |
-| Pembekal 🌐                |            352            |   **358**   |          382          |
-| 🧠 Model sembang unik IDs  |           1320            |  **1374**   |         1524          |
+| Pembekal 🌐                |            352            |   **358**   |          384          |
+| 🧠 Model sembang unik IDs  |           1320            |  **1374**   |         1525          |
 | Jambatan Modaliti 🖼️       | 🆕 vision + audio + video |      ✓      |           ✓           |
 | Katalog percuma Radar 📡   |       🆕 ikut serta       |      ✓      |           ✓           |
 | Penjadualan sedar Kuota ⚖️ |   Perkongsian Kuota 🆕    |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Kesemua **20** strategi — campur & padankan bagi setiap langkah kombo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 382 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membezakan OmniRoute — gambaran ciri bertarikh vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM merentasi 13 keupayaan. OmniRoute: 384 penyedia, lebih 150 pelan percuma terbina dalam, 20 strategi penghalaan, pemampatan token 12-enjin, pelayan MCP terbina dalam dengan 110 alat, protokol ejen A2A, memori berterusan, pagar keselamatan, ejen awan, penyamaran cap jari TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute dilesenkan MIT dan boleh dihoskan sendiri. Keupayaan dan bilangan pesaing mungkin berubah; lihat metodologi yang dipautkan."/>
 
 <sub>📊 Metodologi penuh &amp; perincian setiap ciri berbanding 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar adalah secara ikut serta dan GET sahaja. Klien OmniRoute tidak memuat naik
 - **🖼️ Titik akhir baharu** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (gaya berbisik) bulatkan permukaan media. → [API Rujukan](docs/reference/API_REFERENCE.md)
 - **🎨 Penjanaan imej / video / audio** — satu API untuk media: xAI Grok Bayangkan & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, dan penyedia pertuturan seperti ElevenLabs. → [API Rujukan](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** — proksi terbalik `basePath`, pengesanan automatik bahasa penyemak imbas, penjejakan peranti setiap kekunci, kepercayaan MITM tanpa akar, penyetempatan zh-TW. [Persekitaran](docs/reference/ENVIRONMENT.md) →
-- **🤝 Lebih banyak pembekal & ejen** Ejen awan — ( Awan Codex, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk + OAuth penyemak imbas, kad kelas pertama Ollama, Claude Opus 5 & Sonnet 5, perkongsian rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao yang disegarkan semula, AI, Yuanbao ...**382-katalog pembekal** . [Pembekal](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Lebih banyak pembekal & ejen** Ejen awan — ( Awan Codex, Cursor, Devin, Jules), Grok Build (xAI) dengan log masuk + OAuth penyemak imbas, kad kelas pertama Ollama, Claude Opus 5 & Sonnet 5, perkongsian rasmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao yang disegarkan semula, AI, Yuanbao ...**384-katalog pembekal** . [Pembekal](docs/reference/PROVIDER_REFERENCE.md) →
 - **Ketelusan penghalaan 📡** Setiap respons — membawa pengepala `X-OmniRoute-Decision` yang menamakan strategy/provider/latency yang menyediakannya, strategi kombo `cache-optimized` baharu + Auto-Kombo laluan faktor `cacheAffinity` meminta kembali kepada sambungan yang memegang awalan cache dan titik akhir `/v1/auto-combo/{channel}/candidates` baca sahaja mendedahkan kumpulan calon langsung saluran `auto/*`. [Kombo Auto](docs/routing/AUTO-COMBO.md) →
 - **⚡ Prestasi & infra** — satu klik Redis tempatan , Pekerja Cloudflare / Penyedia geganti Deno Deploy, Bifrost & Mux sebagai perkhidmatan terbenam yang diselia. [Perkhidmatan Terbenam](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Juga di dalam kotak** Rangka kerja pemalam — Pasaran +, rangka kerja kemahiran Omni/Agent/GitHub, penyepaduan bilik kebal Obsidian (22 alatan MCP ), Batch & Fail APIs yang serasi OpenAI , cache respons semantik, gamifikasi dengan papan pendahulu, penemuan ejen ACP (15 ejen terbina dalam), eksport log berjadual ke BigQuery, `auto/chaos` fan-appel Telegram model pengurus versi dan kedudukan penyedia percuma LMArena-ELO. [Dokumen](docs/README.md) →
@@ -678,11 +678,11 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## Pembekal 🌐 382 AI — 156 Percuma Bertanda Katalog
+## Pembekal 🌐 384 AI — 156 Percuma Bertanda Katalog
 
 </div>
 
-> **382 pembekal berdaftar** merentasi sembang kanonik, media, carian, tempatan, ejen awan dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Pendaftaran model sembang meliputi **243 pembekal / 3,155 pasangan model pembekal berbeza / 1,524 model mentah IDs** ; katalog belanjawan percuma yang berasingan mempunyai **466 baris setiap model** ,**34 kolam berulang** dan **52 recurring/keyless pembekal percuma selamanya** . Ini adalah penyebut yang berbeza mengikut reka bentuk; takrifan dan pengiraan yang didepositkan oleh kumpulan hidup dalam [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
+> **384 pembekal berdaftar** merentasi sembang kanonik, media, carian, tempatan, ejen awan dan koleksi sistem, termasuk **156 membawa metadata penemuan `hasFree: true`** . Pendaftaran model sembang meliputi **244 pembekal / 3,157 pasangan model pembekal berbeza / 1,525 model mentah IDs** ; katalog belanjawan percuma yang berasingan mempunyai **466 baris setiap model** ,**34 kolam berulang** dan **52 recurring/keyless pembekal percuma selamanya** . Ini adalah penyebut yang berbeza mengikut reka bentuk; takrifan dan pengiraan yang didepositkan oleh kumpulan hidup dalam [Rujukan Pembekal](docs/reference/PROVIDER_REFERENCE.md) dan [Peringkat Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 230 migrasi</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 232 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 teks penuh + pembenaman vektor terkuantum int8, pereputan bertype</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

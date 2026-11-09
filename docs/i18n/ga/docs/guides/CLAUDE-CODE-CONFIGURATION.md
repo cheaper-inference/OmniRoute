@@ -53,6 +53,53 @@ bhfreastalaí, agus ritheann sé `claude` trí exec.
 
 ---
 
+## Sannadh úsáide: seisiúin agus tionscadail
+
+Grúpaíonn OmniRoute iarratais gach eochair API isteach **seisiúin gníomhaire** agus taifid a **tionscadal** oibríodh ar gach seisiún ( tábla `agent_sessions` ), ionas gur féidir úsáid agus costas a thuairisciú in aghaidh gach ball foirne, in aghaidh an tionscadail agus in aghaidh an tseisiúin.
+
+Cad atá taifeadta gan aon socrú cliant:
+
+| Réimse     | Foinse                                                                                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seisiún    | Ceanntásc `x-claude-code-session-id` (luach céanna le `metadata.user_id.session_id`), cobhsaí in aghaidh an tseisiúin                                                     |
+| Tionscadal | Cuireann Cód `Primary working directory:` líne Claude a theachtaireacht timpeallachta isteach; fillteáin crann oibre faoi `.claude/worktrees/` réiteach leis an ainm stór |
+| Brainse    | Cuireann `Current branch:` ón stádas git Cód Claude leis an gcéad teachtaireacht                                                                                          |
+| Cliant     | `user-agent` (`claude-cli/<version>`)                                                                                                                                     |
+
+Aithnítear Codex (`<environment_context><cwd>`) agus OpenCode (`x-opencode-session`) ar an mbealach céanna. Eochracha le **gan logáil** cumasaithe gan ach aitheantas an tseisiúin agus réimsí an tionscadail a sholáthair ceanntásc; ní stóráiltear aon rud a léitear ón leid (cosán, brainse).
+
+### An tionscadal a ainmniú go sainráite (molta)
+
+Tá difríocht idir an t-eolaire oibre idir meaisíní, agus mar sin is féidir an stór céanna a thaispeáint faoi chosáin éagsúla. Seol an tionscadal go sainráite ina ionad sin: cuireann Cód Claude aon cheanntásca atá liostaithe i `ANTHROPIC_CUSTOM_HEADERS` le gach iarratas samhail, agus léann OmniRoute dhá cheann acu:
+
+| Ceanntásc                  | Luach                                                              |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | Ainm an tionscadail, m.sh. `omniroute`                             |
+| `x-omniroute-project-repo` | cianrialtán normalaithe, m.sh. `github.com/diegosouzapw/OmniRoute` |
+
+Ní léitear an dá rud ach le haghaidh sannadh; ní chuirtear ar aghaidh chuig an soláthraí réamhtheachtacha iad choíche.
+
+Léitear `ANTHROPIC_CUSTOM_HEADERS` uair amháin ag am tosaithe, agus stórálann comhaid socruithe luachanna litriúla, mar sin ríomh é nuair a sheoltar Cód Claude. Cuir é seo le `~/.zshrc` nó `~/.bashrc` agus lean ort ag tosú `claude` ón bhfillteán tionscadail:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Stiallaíonn slonn `sed` aon dintiúir atá leabaithe sa chian URL. Seolann síntí IDE Cód Claude gan do bhlaosc, mar sin titeann a seisiúin ar ais go dtí an eolaire oibre.
+
+---
+
 ## Ailiasanna fionnachtana — nocht samhlacha neamh-Claude sa roghnóir `/model`
 
 Ní liostaíonn fionnachtain samhail gheata Claude Code ach aitheantais a thosaíonn le `claude` nó `anthropic`, mar sin le `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ní thaispeánann an roghnóir dúchais `/model` de ghnáth samhlacha Claude/Anthropic OmniRoute **amháin** — ní thagann `kimi/kimi-k2.6` ná `glm/glm-5.2` chun cinn riamh, cé go ródófar iad gan aon fhadhb.

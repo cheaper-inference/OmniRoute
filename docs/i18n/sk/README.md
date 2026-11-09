@@ -15,7 +15,7 @@
 
 **Vytvoril [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 382 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 382 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Never stop coding. Every AI tool → 384 providers — 150+ free — through one endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini with auto-fallback. RTK + Caveman stacked compression saves 15–95% tokens (~89% avg) — never hit limits. 384 AI providers · 150+ free tiers · ~1.62B free tokens/mo · 20 routing strategies · $0 to start."/>
 
 </div>
 
@@ -67,8 +67,8 @@
 
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| Poskytovatelia 🌐                |           352            |   **358**   |          382          |
-| 🧠 Unikátny chatovací model IDs  |           1320           |  **1374**   |         1524          |
+| Poskytovatelia 🌐                |           352            |   **358**   |          384          |
+| 🧠 Unikátny chatovací model IDs  |           1320           |  **1374**   |         1525          |
 | 🖼️ Modality Bridge               | 🆕 vízia + audio + video |      ✓      |           ✓           |
 | Bezplatný katalóg radarov 📡     |      Prihlásenie 🆕      |      ✓      |           ✓           |
 | ⚖️ plánovanie s ohľadom na kvóty |    🆕 kvóta-Zdieľanie    |      ✓      |           ✓           |
@@ -103,7 +103,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-382-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-384-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 382 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 382 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="The Promise — One endpoint and 384 providers. Automatic fallback keeps routing while another healthy target is available. Six pillars: resilient fallback across 384 providers · up to 95% token savings on eligible workloads · $0 to start with 150+ free tiers and 52 recurring/keyless free-forever providers · 39 CLI/agent integrations through one config · OpenAI, Claude, Gemini and Responses API compatibility at /v1 · production controls including circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals and 56,000+ static test declarations across 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -499,7 +499,7 @@ Všetkých **20** stratégií — kombinujte ich podľa potreby v jednotlivých 
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím sa OmniRoute odlišuje — zastaraný prehľad funkcií v porovnaní s 9router, OpenRouter, CLIProxyAPI a LiteLLM v rámci 13 schopností. OmniRoute: 382 poskytovateľov, 150+ zabudovaných bezplatných úrovní, 20 smerovacích stratégií, 12-motorová kompresia tokenov, zabudovaný MCP server so 110 nástrojmi, protokol A2A agentov, perzistentná pamäť, ochranné opatrenia, cloudoví agenti, utajenie TLS odtlačku, Desktop/Termux/PWA a 67 jazykových lokalizácií UI. OmniRoute má MIT licenciu a je možné ho hostovať samostatne. Schopnosti a počty konkurentov sa môžu meniť; pozrite si prepojenú metodológiu."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím sa OmniRoute odlišuje — zastaraný prehľad funkcií v porovnaní s 9router, OpenRouter, CLIProxyAPI a LiteLLM v rámci 13 schopností. OmniRoute: 384 poskytovateľov, 150+ zabudovaných bezplatných úrovní, 20 smerovacích stratégií, 12-motorová kompresia tokenov, zabudovaný MCP server so 110 nástrojmi, protokol A2A agentov, perzistentná pamäť, ochranné opatrenia, cloudoví agenti, utajenie TLS odtlačku, Desktop/Termux/PWA a 67 jazykových lokalizácií UI. OmniRoute má MIT licenciu a je možné ho hostovať samostatne. Schopnosti a počty konkurentov sa môžu meniť; pozrite si prepojenú metodológiu."/>
 
 <sub>📊 Kompletná metodológia &amp; detailné porovnanie funkcií s 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -594,7 +594,7 @@ Radar je voliteľný a používa iba požiadavky GET. Klient OmniRoute neodosiel
 - **🖼️ Nové koncové body** — `/v1/ocr` (Mistral OCR) a `/v1/audio/translations` (Štýl šepotu) zaoblite povrch média. → [API Odkaz](docs/reference/API_REFERENCE.md)
 - **🎨 Generovanie obrazu / videa / zvuku** — jeden API pre médiá: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind a poskytovatelia reči ako napr ElevenLabs. → [API Odkaz](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** Reverzný proxy — `basePath`, automatická detekcia jazyka prehliadača, sledovanie zariadení podľa kľúča, dôveryhodnosť MITM bez koreňového adresára, lokalizácia zh-TW. [Prostredie](docs/reference/ENVIRONMENT.md) →
-- **🤝 Viac poskytovateľov a agentov** Cloud agenti — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prihlásením + OAuth do prehliadača, prvotriedna karta Ollama, Claude Opus 5 & Sonnet 5, oficiálne partnerstvo Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes a AI**Katalóg 382 poskytovateľov** . [Poskytovatelia](docs/reference/PROVIDER_REFERENCE.md) →
+- **🤝 Viac poskytovateľov a agentov** Cloud agenti — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prihlásením + OAuth do prehliadača, prvotriedna karta Ollama, Claude Opus 5 & Sonnet 5, oficiálne partnerstvo Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Agnes a AI**Katalóg 384 poskytovateľov** . [Poskytovatelia](docs/reference/PROVIDER_REFERENCE.md) →
 - **Transparentnosť smerovania 📡** Každá odpoveď — nesie hlavičku `X-OmniRoute-Decision` s názvom strategy/provider/latency, ktorý ju obslúžil, novú kombinovanú stratégiu `cache-optimized` + Auto-Combo požiadavky na opakovanie faktora `cacheAffinity` späť k pripojeniu, ktoré obsahuje predponu uloženú vo vyrovnávacej pamäti, a koncový bod `/v1/auto-combo/{channel}/candidates` len na čítanie odhaľuje aktívnu skupinu kandidátov kanála `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokálny výkon a infra** — na jedno kliknutie lokálneho Redis, Cloudflare Workers / Deno Deploy relé nasadenia, Bifrost & Mux ako dohliadané vstavané služby. [Vstavané služby](docs/frameworks/EMBEDDED-SERVICES.md) →
 - **🧩 Tiež v krabici** Rámec zásuvných modulov — Trhovisko +, rámce zručností Omni/Agent/GitHub, integrácia trezoru Obsidian (22 nástrojov MCP ), Batch & Files APIs kompatibilná s OpenAI, vyrovnávacia pamäť sémantickej odpovede, gamifikácia s tabuľkami výsledkov, zisťovanie agentov ACP (15 vstavaných agentov), plánovaný export denníka do BigQuery, správca paralelnej aplikácie LMAKEL pre viacero modelov a verzia `auto/chaos`, verzia Telegram rebríčky bezplatných poskytovateľov. [Dokumenty](docs/README.md) →
@@ -678,11 +678,11 @@ histórie vášho shellu. → [CLI Integrácie](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 382 Poskytovatelia AI — 156 s katalógovým označením zadarmo
+## 🌐 384 Poskytovatelia AI — 156 s katalógovým označením zadarmo
 
 </div>
 
-> **382 registrovaných poskytovateľov** cez kanonický chat, médiá, vyhľadávanie, lokálne, cloud-agent a systémové kolekcie, vrátane **156 nesúci metadáta objavu `hasFree: true`** . Register modelov chatu pokrýva **243 poskytovateľov / 3 155 rôznych párov poskytovateľ-model / 1 524 nespracovaných modelov IDs** ; samostatný katalóg s voľným rozpočtom **466 riadkov na model** ,**34 opakujúcich sa bazénov** a **52 bezplatných poskytovateľov recurring/keyless** . Ide o odlišných menovateľov podľa návrhu; definície a výpočty zbavené duplicitných zdrojov sú dostupné v [referenčných](docs/reference/PROVIDER_REFERENCE.md) a [bezplatných vrstvách](docs/reference/FREE_TIERS.md) poskytovateľa.
+> **384 registrovaných poskytovateľov** cez kanonický chat, médiá, vyhľadávanie, lokálne, cloud-agent a systémové kolekcie, vrátane **156 nesúci metadáta objavu `hasFree: true`** . Register modelov chatu pokrýva **244 poskytovateľov / 3 157 rôznych párov poskytovateľ-model / 1 525 nespracovaných modelov IDs** ; samostatný katalóg s voľným rozpočtom **466 riadkov na model** ,**34 opakujúcich sa bazénov** a **52 bezplatných poskytovateľov recurring/keyless** . Ide o odlišných menovateľov podľa návrhu; definície a výpočty zbavené duplicitných zdrojov sú dostupné v [referenčných](docs/reference/PROVIDER_REFERENCE.md) a [bezplatných vrstvách](docs/reference/FREE_TIERS.md) poskytovateľa.
 
 <div align="center">
 
@@ -1294,7 +1294,7 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (v jadre od v2.0 žiadne <code>any</code>)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší JSON) — 147 doménových modulov, 230 migrácií</td></tr>
+  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší JSON) — 147 doménových modulov, 232 migrácií</td></tr>
   <tr><td nowrap><b>Pamäť</b></td><td>Fulltextové vyhľadávanie SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlm</td></tr>
   <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — validácia I/O nástrojov MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -12916,6 +12916,7 @@
     "systemActor": "စနစ်",
     "ipAccessControl": "IP ဝင်ရောက်ခွင့် ထိန်းချုပ်မှု",
     "ipAccessControlDesc": "သတ်မှတ်ထားသော IP လိပ်စာများကို ပိတ်ဆို့ပါ သို့မဟုတ် ခွင့်ပြုပါ",
+    "ipAccessMode": "ဝင်ရောက်ခွင့် မုဒ်",
     "ipModeDisabled": "ပိတ်ထားသည်",
     "ipModeBlacklist": "အမည်ပျက်စာရင်း",
     "ipModeWhitelist": "ခွင့်ပြုစာရင်း",

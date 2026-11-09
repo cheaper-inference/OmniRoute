@@ -52,6 +52,53 @@ faol kontekstdan aniqlaydi (shuning uchun `omniroute connect <vps>`, undan so‘
 
 ---
 
+## Foydalanish atributi: sessiyalar va loyihalar
+
+OmniRoute har bir API kalit so'rovlarini guruhlarga ajratadi **agent seanslari** va qaysini qayd etadi **loyiha** ustida ishlagan har bir seans (`agent_sessions` jadvali), shuning uchun foydalanish va xarajat har bir guruh a'zosi, har bir loyiha va har bir sessiya uchun hisobot berilishi mumkin.
+
+Mijoz sozlamalarisiz nima qayd etiladi:
+
+| Maydon  | Manba                                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessiya | `x-claude-code-session-id` sarlavhasi ( `metadata.user_id.session_id` bilan bir xil qiymat), har bir sessiya uchun barqaror                                    |
+| Loyiha  | `Primary working directory:` liniyasi Claude Code o'zining muhit xabarini yuboradi; `.claude/worktrees/` ostidagi ishchi daraxti papkalari ombor nomiga o'tadi |
+| Filial  | Git holatidan `Current branch:` Claude kodi birinchi xabar bilan yuboriladi                                                                                    |
+| Mijoz   | `user-agent` (`claude-cli/<version>`)                                                                                                                          |
+
+Codex (`<environment_context><cwd>`) va OpenCode (`x-opencode-session`) xuddi shunday tan olinadi. bilan kalitlar **jurnalsiz** yoqilgan, faqat sessiya identifikatori va sarlavha bilan ta'minlangan loyiha maydonlarini saqlash; so'rovdan o'qilgan hech narsa (yo'l, filial) saqlanmaydi.
+
+### Loyihani aniq nomlash (tavsiya etiladi)
+
+Ishchi katalog mashinalar orasida farq qiladi, shuning uchun bir xil ombor turli yo'llar ostida ko'rinishi mumkin. Buning o'rniga loyihani aniq yuboring: Claude Code har bir model so'roviga `ANTHROPIC_CUSTOM_HEADERS` ro'yxatidagi har qanday sarlavhalarni qo'shadi va OmniRoute ulardan ikkitasini o'qiydi:
+
+| Sarlavha                   | Qiymat                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Loyiha nomi, masalan `omniroute`                                                           |
+| `x-omniroute-project-repo` | Normallashtirilgan masofadan boshqarish pulti, masalan `github.com/diegosouzapw/OmniRoute` |
+
+Ikkalasi ham faqat atribut uchun o'qiladi; ular hech qachon yuqori oqim provayderiga yuborilmaydi.
+
+`ANTHROPIC_CUSTOM_HEADERS` ishga tushirilganda bir marta o'qiladi va sozlamalar fayllari harfiy qiymatlarni saqlaydi, shuning uchun Claude kodi ishga tushganda uni hisoblang. Buni `~/.zshrc` yoki `~/.bashrc` ga qo'shing va `claude` loyiha jildidan boshlashda davom eting:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ifodasi masofaviy URL ichiga o'rnatilgan barcha hisobga olish ma'lumotlarini yo'q qiladi. IDE kengaytmalari Claude kodini qobiqsiz ishga tushiradi, shuning uchun ularning seanslari ishchi katalogga qaytadi.
+
+---
+
 ## Kashfiyot taxalluslari — Claude-ga tegishli bo'lmagan modellarni `/model` tanlovchisida ko'rsatish
 
 Claude Code ning shluz model kashfiyoti faqat `claude` yoki `anthropic` bilan boshlanadigan id-larni ro'yxatga oladi, shuning uchun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yoqilganda asl `/model` tanlovchisi odatda **faqat** OmniRoute ning Claude/Anthropic modellarini ko'rsatadi — `kimi/kimi-k2.6` yoki `glm/glm-5.2` hech qachon paydo bo'lmaydi, garchi u bemalol marshrutlansa ham.

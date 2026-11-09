@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API pentru componentele tabloului de bord: adaptoare peste `packages/ui-kit` — consultați `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: numele pictogramelor utilizate de ecrane → componente Lucide (`<Icon>`)                                            |
-| `constants/providers.ts`         | **382 de furnizori** cu validare Zod (sursa adevărului)                                                                        |
+| `constants/providers.ts`         | **384 de furnizori** cu validare Zod (sursa adevărului)                                                                        |
 | `constants/cliTools.ts`          | Registrul instrumentelor CLI externe                                                                                           |
 | `constants/routingStrategies.ts` | **20 de strategii de rutare** cu priorități                                                                                    |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (față de autentificarea pentru administrare)                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrări CLI externe + CLI-ul intern OmniRoute                                                |
 | `I18N.md`                   | Arhitectura i18n, adăugarea unei limbi, 67 de localizări                                       |
 | `UNINSTALL.md`              | Pași pentru dezinstalare curată                                                                |
-| `PROVIDER_REFERENCE.md`     | Catalog **generat automat** cu 382 de furnizori (regenerare: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catalog **generat automat** cu 384 de furnizori (regenerare: `npm run gen:provider-reference`) |
 
 ### Analize detaliate ale subsistemelor
 

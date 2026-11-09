@@ -294,6 +294,7 @@ import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
+import { paraloncloudProvider } from "./registry/paraloncloud/index.ts";
 import { empiriolabsProvider } from "./registry/empiriolabs/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
@@ -593,5 +594,6 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   daoxe: daoxeProvider,
   gisoo: gisooProvider,
   demonroute: demonrouteProvider,
+  paraloncloud: paraloncloudProvider,
   empiriolabs: empiriolabsProvider,
 };

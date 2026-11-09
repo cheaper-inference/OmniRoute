@@ -495,7 +495,7 @@ open-sse/
 (trình hỗ trợ danh tính dùng chung) và `index.ts` (registry).
 
 > Lưu ý: các nhà cung cấp không được liệt kê tại đây được phục vụ bởi `default.ts` bằng executor
-> tương thích OpenAI dùng chung. Danh mục nhà cung cấp đầy đủ (382 nhà cung cấp) nằm trong
+> tương thích OpenAI dùng chung. Danh mục nhà cung cấp đầy đủ (384 nhà cung cấp) nằm trong
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

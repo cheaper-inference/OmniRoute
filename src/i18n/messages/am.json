@@ -12916,6 +12916,7 @@
     "systemActor": "ስርዓት",
     "ipAccessControl": "የIP መዳረሻ ቁጥጥር",
     "ipAccessControlDesc": "የተወሰኑ IP አድራሻዎችን አግድ ወይም ፍቀድ",
+    "ipAccessMode": "የመዳረሻ ሁነታ",
     "ipModeDisabled": "ተሰናክሏል",
     "ipModeBlacklist": "ጥቁር ዝርዝር",
     "ipModeWhitelist": "የተፈቀዱ ዝርዝር",

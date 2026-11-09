@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API ng component ng dashboard: mga adapter sa `packages/ui-kit` — tingnan ang `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → mga component ng Lucide (`<Icon>`)                   |
-| `constants/providers.ts`         | **382 provider** na may Zod validation (pangunahing sanggunian)                                                    |
+| `constants/providers.ts`         | **384 provider** na may Zod validation (pangunahing sanggunian)                                                    |
 | `constants/cliTools.ts`          | Registry ng mga external na CLI tool                                                                               |
 | `constants/routingStrategies.ts` | **20 diskarte sa pagruruta** na may mga priyoridad                                                                 |
 | `constants/publicApiRoutes.ts`   | Mga route na nangangailangan ng Bearer auth (kumpara sa management auth)                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Mga panlabas na CLI integration + Panloob na OmniRoute CLI                               |
 | `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locale                                      |
 | `UNINSTALL.md`              | Mga hakbang sa malinis na pag-uninstall                                                  |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** na katalogo ng 382 provider (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** na katalogo ng 384 provider (regen: `npm run gen:provider-reference`) |
 
 ### Mga malalim na pagsusuri ng subsystem
 

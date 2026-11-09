@@ -48,6 +48,53 @@ Entra ID SSO ଏଭଳି କାମ କରେ: `scripts/cli/omniroute-sso.mjs to
 
 ---
 
+## ବ୍ୟବହାର ଗୁଣ: ଅଧିବେଶନ ଏବଂ ପ୍ରକଳ୍ପଗୁଡ଼ିକ।
+
+OmniRoute ପ୍ରତ୍ୟେକ API କି ର ଅନୁରୋଧକୁ ଗୋଷ୍ଠୀଭୁକ୍ତ କରେ।**ଏଜେଣ୍ଟ ଅଧିବେଶନ।** ଏବଂ ରେକର୍ଡଗୁଡିକ **ପ୍ରକଳ୍ପ** ପ୍ରତ୍ୟେକ ଅଧିବେଶନ (`agent_sessions` ଟେବୁଲ୍) ଉପରେ କାମ କଲା, ତେଣୁ ବ୍ୟବହାର ଏବଂ ମୂଲ୍ୟ ପ୍ରତ୍ୟେକ ଦଳର ସଦସ୍ୟ, ପ୍ରତି ପ୍ରୋଜେକ୍ଟ ଏବଂ ଅଧିବେଶନରେ ରିପୋର୍ଟ କରାଯାଇପାରିବ।
+
+କ client ଣସି କ୍ଲାଏଣ୍ଟ ସେଟଅପ୍ ବିନା ଯାହା ରେକର୍ଡ ହୋଇଛି:
+
+| କ୍ଷେତ୍ର  | ଉତ୍ସ                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ଅଧିବେଶନ  | `x-claude-code-session-id` ହେଡର୍ ( `metadata.user_id.session_id` ସହିତ ସମାନ ମୂଲ୍ୟ), ପ୍ରତି ଅଧିବେଶନରେ ସ୍ଥିର।                                              |
+| ପ୍ରକଳ୍ପ  | `Primary working directory:` ଲାଇନ Claude କୋଡ୍ ଏହାର ପରିବେଶ ବାର୍ତ୍ତା ପଠାଏ। `.claude/worktrees/` ଅଧୀନରେ ୱର୍କଟ୍ରି ଫୋଲ୍ଡରଗୁଡ଼ିକ ସଂଗ୍ରହାଳୟ ନାମକୁ ସମାଧାନ କରେ। |
+| ଶାଖା     | Claude ସ୍ଥିତିରୁ`Current branch:` ପ୍ରଥମ ବାର୍ତ୍ତା ସହିତ ପଠାଏ।                                                                                             |
+| କ୍ଲାଏଣ୍ଟ | `user-agent` (`claude-cli/<version>`)                                                                                                                  |
+
+Codex (`<environment_context><cwd>`) ଏବଂ OpenCode (`x-opencode-session`) ସମାନ ଭାବରେ ସ୍ୱୀକୃତିପ୍ରାପ୍ତ। ସହିତ କିଗୁଡ଼ିକ **ନା-ଲଗ୍।** କେବଳ ଅଧିବେଶନ id ଏବଂ ହେଡର୍-ଯୋଗାଣ ପ୍ରୋଜେକ୍ଟ ଫିଲ୍ଡ ରଖିବାକୁ ସକ୍ଷମ; ପ୍ରମ୍ପ୍ଟ (ପଥ୍, ଶାଖା) ରୁ କିଛି ପ read ାଯାଇ ନାହିଁ।
+
+### ପ୍ରକଳ୍ପର ନାମକରଣ ସ୍ପଷ୍ଟ ଭାବରେ (ପରାମର୍ଶିତ)
+
+ୱାର୍କିଂ ଡିରେକ୍ଟୋରୀ ମେସିନ୍ ମଧ୍ୟରେ ଭିନ୍ନ, ତେଣୁ ସମାନ ସଂଗ୍ରହାଳୟ ବିଭିନ୍ନ ପଥରେ ଦେଖାଇପାରେ। ଏହା ବଦଳରେ ସ୍ପଷ୍ଟ ଭାବରେ ପ୍ରକଳ୍ପ ପଠାନ୍ତୁ: Claude କୋଡ୍ ପ୍ରତ୍ୟେକ ମଡେଲ ଅନୁରୋଧରେ `ANTHROPIC_CUSTOM_HEADERS` ରେ ତାଲିକାଭୁକ୍ତ ଯେକ any ଣସି ହେଡର୍ ଯୋଡିଥାଏ, ଏବଂ OmniRoute ସେଗୁଡ଼ିକ ମଧ୍ୟରୁ ଦୁଇଟି ପ read ିଥାଏ:
+
+| ଶୀର୍ଷଲେଖ                   | ମୂଲ୍ୟ                                                 |
+| -------------------------- | ----------------------------------------------------- |
+| `x-omniroute-project`      | ପ୍ରକଳ୍ପ ନାମ, ଯଥା `omniroute`                          |
+| `x-omniroute-project-repo` | ସାଧାରଣ ସୁଦୂର, ଯଥା `github.com/diegosouzapw/OmniRoute` |
+
+ଉଭୟ କେବଳ ଗୁଣ ପାଇଁ ପ read ାଯାଏ; ସେଗୁଡିକ ଅପଷ୍ଟ୍ରିମ ପ୍ରଦାନକାରୀଙ୍କୁ କଦାପି ପଠାଯାଏ ନାହିଁ।
+
+`ANTHROPIC_CUSTOM_HEADERS` ପ୍ରାରମ୍ଭରେ ଥରେ ପ read ାଯାଏ, ଏବଂ ସେଟିଂସମୂହ ଫାଇଲଗୁଡ଼ିକ ଆକ୍ଷରିକ ମୂଲ୍ୟ ସଂରକ୍ଷଣ କରେ, ତେଣୁ Claude କୋଡ୍ ଲଞ୍ଚ ହେବାବେଳେ ଏହାକୁ ଗଣନା କର। ଏହାକୁ `~/.zshrc` କିମ୍ବା `~/.bashrc` ରେ ଯୋଡନ୍ତୁ ଏବଂ ପ୍ରୋଜେକ୍ଟ ଫୋଲ୍ଡରରୁ `claude` ଆରମ୍ଭ କରନ୍ତୁ:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ଅଭିବ୍ୟକ୍ତି ସୁଦୂର URL ରେ ସନ୍ନିବେଶିତ ଯେକ any ଣସି ପ୍ରମାଣପତ୍ରକୁ ଛଡ଼ାଇଥାଏ। IDE ଏକ୍ସଟେନ୍ସନ୍ ଆପଣଙ୍କ ସେଲ ବିନା Claude କୋଡ୍ ଲ launch ୍ଚ କରେ, ତେଣୁ ସେମାନଙ୍କର ଅଧିବେଶନଗୁଡ଼ିକ କାର୍ଯ୍ୟ ଡିରେକ୍ଟୋରୀକୁ ଫେରିଯାଏ।
+
+---
+
 ## ଡିସ୍କଭରୀ alias ଗୁଡ଼ିକ — `/model` picker ରେ non-Claude model ଗୁଡ଼ିକୁ ଦେଖାନ୍ତୁ
 
 Claude Code ର gateway model ଡିସ୍କଭରୀ କେବଳ `claude` କିମ୍ବା `anthropic` ରେ ଆରମ୍ଭ ହେଉଥିବା id ଗୁଡ଼ିକୁ ତାଲିକାଭୁକ୍ତ କରେ, ତେଣୁ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ସହିତ native `/model` picker ସାଧାରଣତଃ **କେବଳ** OmniRoute ର Claude/Anthropic model ଗୁଡ଼ିକୁ ଦେଖାଏ — `kimi/kimi-k2.6` କିମ୍ବା `glm/glm-5.2` କେବେବି ଦେଖାଯାଏ ନାହିଁ, ଯଦିଓ ଏହା ଠିକ୍ ଭାବରେ route ହୁଏ।

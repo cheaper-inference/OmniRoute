@@ -52,6 +52,53 @@ Entra ID SSO የሚሰራው እንዲህ ነው፦ `scripts/cli/omniroute-sso.m
 
 ---
 
+## የአጠቃቀም ባህሪ: ክፍለ-ጊዜዎች እና ፕሮጀክቶች
+
+OmniRoute የእያንዳንዱን API ቁልፍ ጥያቄዎች ወደ ውስጥ ይሰበሰባል።**ወኪል ክፍለ ጊዜዎች** እና መዝገቦች የትኛው **ፕሮጀክት** እያንዳንዱ ክፍለ ጊዜ በ (`agent_sessions` ሰንጠረዥ) ላይ ሰርቷል፣ ስለዚህ አጠቃቀም እና ወጪ በእያንዳንዱ የቡድን አባል፣ በፕሮጀክት እና በአንድ ክፍለ ጊዜ ሪፖርት ሊደረግ ይችላል።
+
+ያለ ደንበኛ ማዋቀር የሚቀዳው፡-
+
+| መስክ    | ምንጭ                                                                                                                                 |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| ክፍለ ጊዜ | `x-claude-code-session-id` ራስጌ (ከ `metadata.user_id.session_id` ጋር ተመሳሳይ እሴት)፣ በክፍለ-ጊዜ የተረጋጋ                                        |
+| ፕሮጀክት  | የ `Primary working directory:` መስመር Claude ኮድ በአካባቢ መልእክቱ ውስጥ ይልካል; በ `.claude/worktrees/` ስር ያሉ የ worktree አቃፊዎች ወደ ማከማቻው ስም ይወስዳሉ |
+| ቅርንጫፍ  | `Current branch:` ከ git ሁኔታ Claude ኮድ ከመጀመሪያው መልእክት ጋር ይልካል                                                                         |
+| ደንበኛ   | `user-agent` (`claude-cli/<version>`)                                                                                               |
+
+Codex (`<environment_context><cwd>`) እና OpenCode (`x-opencode-session`) በተመሳሳይ መንገድ ይታወቃሉ። ቁልፎች በ **ምንም-ምዝግብ ማስታወሻ** የነቃ ክፍለ ጊዜ መታወቂያ እና ራስጌ-የሚቀርቡ የፕሮጀክት መስኮችን ብቻ ማስቀመጥ; ከጥያቄው (መንገድ ፣ ቅርንጫፍ) የተነበበ ምንም ነገር አይከማችም።
+
+### ፕሮጀክቱን በግልፅ መሰየም (የሚመከር)
+
+የስራ ማውጫው በማሽኖች መካከል ይለያያል, ስለዚህ ተመሳሳይ ማከማቻ በተለያዩ መንገዶች ስር ሊታይ ይችላል. በምትኩ ፕሮጀክቱን በግልፅ ይላኩ Claude ኮድ በ `ANTHROPIC_CUSTOM_HEADERS` ውስጥ የተዘረዘሩትን ማንኛውንም አርዕስት ለእያንዳንዱ የሞዴል ጥያቄ ያክላል፣ እና OmniRoute ሁለቱን ያነባል፡-
+
+| ራስጌ                        | ዋጋ                                                         |
+| -------------------------- | ---------------------------------------------------------- |
+| `x-omniroute-project`      | የፕሮጀክት ስም፣ ለምሳሌ `omniroute`                                |
+| `x-omniroute-project-repo` | መደበኛ የርቀት መቆጣጠሪያ፣ ለምሳሌ `github.com/diegosouzapw/OmniRoute` |
+
+ሁለቱም የሚነበቡት ለባለቤትነት ብቻ ነው; ወደ ላይኛው ዥረት አቅራቢ በጭራሽ አይተላለፉም።
+
+`ANTHROPIC_CUSTOM_HEADERS` ሲጀመር አንድ ጊዜ ይነበባል፣ እና የቅንብሮች ፋይሎች ትክክለኛ እሴቶችን ያከማቻሉ፣ ስለዚህ Claude ኮድ ሲጀምር ያሰሉት። ይህንን ወደ `~/.zshrc` ወይም `~/.bashrc` ያክሉ እና `claude` ከፕሮጀክት አቃፊው ማስጀመርዎን ይቀጥሉ።
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+የ `sed` አገላለጽ በሩቅ URL ውስጥ የተካተቱ ማንኛቸውም ምስክርነቶችን ይቆርጣል። IDE ቅጥያዎች Claude ኮድን ያለእርስዎ ሼል ያስጀምራሉ፣ ስለዚህ ክፍለ ጊዜዎቻቸው ወደ የስራ ማውጫው ይመለሳሉ።
+
+---
+
 ## የማግኘት ምትክ-ስሞች (discovery aliases) — በ `/model` መራጭ ውስጥ Claude ያልሆኑ ሞዴሎችን ማሳየት
 
 የ Claude Code የጌትዌይ ሞዴል ማግኘት `claude` ወይም `anthropic` በሚጀምሩ መታወቂያዎችን ብቻ ይዘረዝራል፣ ስለዚህ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ሲሆን አገናዊው `/model` መራጭ **ብቻ** የ OmniRoute Claude/Anthropic ሞዴሎችን ያሳያል — `kimi/kimi-k2.6` ወይም `glm/glm-5.2` በፍጹም አይታይም፣ ምንም እንኳን ራውቲንግ በደንብ ቢሰራም።

@@ -52,6 +52,53 @@ direct werkt), voert een statuscontrole op de server uit en start `claude` via e
 
 ---
 
+## Gebruiksattributie: sessies en projecten
+
+OmniRoute groepeert de verzoeken van elke API sleutel in **sessies van agenten** en registreert welke **project** Aan elke sessie is gewerkt (`agent_sessions` tabel), zodat verbruik en kosten per teamlid, per project en per sessie kunnen worden gerapporteerd.
+
+Wat wordt opgenomen zonder enige clientconfiguratie:
+
+| Veld    | Bron                                                                                                                                                                   |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sessie  | `x-claude-code-session-id` header (dezelfde waarde als `metadata.user_id.session_id`), stabiel per sessie                                                              |
+| Project | De `Primary working directory:` lijn Claude code verzendt een omgevingsbericht; worktree-mappen onder `.claude/worktrees/` worden omgezet in de naam van de repository |
+| Tak     | `Current branch:` vanuit de git-status Claude Code verzendt met het eerste bericht                                                                                     |
+| Cliënt  | `user-agent` (`claude-cli/<version>`)                                                                                                                                  |
+
+Codex (`<environment_context><cwd>`) en OpenCode (`x-opencode-session`) worden op dezelfde manier herkend. Sleutels met **geen log** ingeschakeld: bewaar alleen de sessie-ID en de door de header opgegeven projectvelden; niets dat vanaf de prompt wordt gelezen (pad, vertakking) wordt opgeslagen.
+
+### Het project expliciet een naam geven (aanbevolen)
+
+De werkmap verschilt per machine, dus dezelfde repository kan onder verschillende paden verschijnen. Stuur het project in plaats daarvan expliciet: Claude Code voegt alle headers uit `ANTHROPIC_CUSTOM_HEADERS` toe aan elk modelverzoek, en OmniRoute leest er twee:
+
+| Koptekst                   | Waarde                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `x-omniroute-project`      | Projectnaam, bijvoorbeeld `omniroute`                                        |
+| `x-omniroute-project-repo` | Genormaliseerde afstandsbediening, bijv. `github.com/diegosouzapw/OmniRoute` |
+
+Beide worden alleen gelezen ter attributie; ze worden nooit doorgestuurd naar de upstreamprovider.
+
+`ANTHROPIC_CUSTOM_HEADERS` wordt één keer gelezen bij het opstarten, en instellingenbestanden slaan letterlijke waarden op, dus bereken dit wanneer Claude Code wordt gestart. Voeg dit toe aan `~/.zshrc` of `~/.bashrc` en blijf `claude` starten vanuit de projectmap:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    name=$(basename "$(dirname "$common")")  # repository name, also inside worktrees
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s#\.git$##')
+  else
+    name=$(basename "$PWD")                  # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+De `sed` expressie verwijdert alle inloggegevens die zijn ingebed in de externe URL. IDE extensies starten Claude code zonder uw shell, zodat hun sessies terugvallen naar de werkmap.
+
+---
+
 ## Discovery-aliassen — niet-Claude-modellen tonen in de `/model`-kiezer
 
 De gateway-modeldetectie van Claude Code toont alleen id's die beginnen met `claude`
