@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Kontoinnstillinger",
+    "description": "Foretrekk flere kontoer eller hold dem i reserve for denne rutingskonfigurasjonen. Automatisk ruting rangerer kontoer innenfor hvert nivå. Kontoer som ikke er oppført, er normale. Tillatelser, kvotegrenser og eksisterende turtilknytninger gjelder fortsatt.",
+    "preferred": "Foretrukket",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Utelatt",
+    "loading": "Laster kontoer…",
+    "error": "Kunne ikke laste kontoer. Åpne redigeringsprogrammet på nytt for å prøve igjen.",
+    "missing": "Utilgjengelig konto ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-tjenestemodus for denne API-nøkkelen",
     "description": "Gjelder Codex-forespørsler, inkludert Codex-modeller i kombinasjoner. Tvungne moduser overstyrer klienten, globale innstillinger og standardinnstillinger for tilkoblingen. Andre leverandører forblir uendret.",
