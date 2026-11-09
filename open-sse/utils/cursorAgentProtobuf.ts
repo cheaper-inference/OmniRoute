@@ -565,10 +565,18 @@ export function openAIToolsToMcpDefs(tools: OpenAITool[]): McpToolDefinition[] {
 export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const conversationId = input.conversationId || crypto.randomUUID();
   const messageId = input.messageId || crypto.randomUUID();
-  const { modelId, parameters } = applyCursorReasoningEffort(
+  const { modelId, parameters: resolvedParameters } = applyCursorReasoningEffort(
     resolveRequestedModel(input.modelId, { liveCatalogIds: input.liveCatalogIds }),
     input.reasoningEffort
   );
+
+  // Cursor records this variant as Fast when the legacy model envelope is also set.
+  const useStandardGrok = modelId === "grok-4.7" && input.modelId === "cursor-grok-4.7-high-256k";
+  const parameters = useStandardGrok
+    ? resolvedParameters.map((parameter) =>
+        parameter.id === "effort" ? { ...parameter, id: "reasoning_effort" } : parameter
+      )
+    : resolvedParameters;
 
   // UserMessage { text, message_id, selected_context, mode=1 }.
   // selected_context is normally an empty placeholder (required by the server
@@ -649,7 +657,7 @@ export function encodeAgentRunRequest(input: AgentRunInput): Buffer {
   const agentRunRequest = [
     conversationState,
     action,
-    modelDetails,
+    ...(useStandardGrok ? [] : [modelDetails]),
     mcpToolsBlock,
     encodeString(ARR_CONVERSATION_ID, conversationId),
     requestedModel,
