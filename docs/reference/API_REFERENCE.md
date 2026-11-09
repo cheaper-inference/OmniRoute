@@ -735,6 +735,7 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
 | POST   | `/v1/moderations`                         | OpenAI Moderations                 |
 | GET    | `/v1/models`                              | OpenAI                             |
+| GET    | `/v1/systemone/models`                    | System One decisions model list    |
 | POST   | `/v1/models/query`                        | Filtered model shortlist           |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                          |
 | GET    | `/v1beta/models`                          | Gemini                             |
@@ -763,6 +764,12 @@ POST /v1/segment     { "content": "...", "return_chunks": true }
 
 # Jina search (s.jina.ai; provider aliases: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
+
+# System One decisions models: live catalog of the ids POST /v1/systemone accepts
+# (`typesafe/<model>` from the TypeSafe connection, `openrouter/<vendor>/<model>` from the
+# OpenRouter catalog filtered by output_modalities=decisions). Never cached; the API key's
+# model and connection rules narrow it. X-OmniRoute-Catalog-Status: complete | partial | unconfigured.
+GET  /v1/systemone/models
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
