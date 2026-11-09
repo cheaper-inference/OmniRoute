@@ -346,7 +346,7 @@ describe("MonitorTab", () => {
   });
 
   // ── 4. Auto-refresh toggle ───────────────────────────────────────────────────
-  it("toggle auto-refresh button is present with aria-label and shows live state text", async () => {
+  it("toggle auto-refresh button is named by its visible live-state text (label-in-name, #18074)", async () => {
     mockFetchEmpty();
     const { default: MonitorTab } =
       await import("@/app/(dashboard)/dashboard/translator/components/MonitorTab");
@@ -359,9 +359,11 @@ describe("MonitorTab", () => {
     expect(toggleBtn).toBeTruthy();
 
     // Initial state: auto-refresh is ON — translateOrFallback detects key === translation → uses fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Atualizando ao vivo");
-    // aria-label should be set
-    expect(toggleBtn?.getAttribute("aria-label")).toBeTruthy();
+    expect(toggleBtn?.textContent?.trim()).toContain("Live — Auto-refreshing");
+    // WCAG 2.5.3: no aria-label overriding the visible text, so the accessible name IS the
+    // visible text; the action ("Pause auto-refresh") is the description (title).
+    expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
+    expect(toggleBtn?.getAttribute("title")).toBe("Pause auto-refresh");
   });
 
   it("clicking toggle changes button text from live to paused", async () => {
@@ -382,7 +384,9 @@ describe("MonitorTab", () => {
     });
 
     // After pause: button text should switch to the "paused" fallback
-    expect(toggleBtn?.textContent?.trim()).toContain("Pausado");
+    expect(toggleBtn?.textContent?.trim()).toContain("Paused");
+    expect(toggleBtn?.hasAttribute("aria-label")).toBe(false);
+    expect(toggleBtn?.getAttribute("title")).toBe("Resume auto-refresh");
   });
 
   it("auto-refresh polling fires fetch again after 3 seconds", async () => {

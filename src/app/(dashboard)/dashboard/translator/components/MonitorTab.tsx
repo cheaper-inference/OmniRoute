@@ -219,7 +219,9 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               variant="ghost"
               size="sm"
               onClick={() => setAutoRefresh((prev) => !prev)}
-              aria-label={
+              // The visible state text is the accessible name (WCAG 2.5.3 label-in-name);
+              // the action it performs is the description.
+              title={
                 autoRefresh
                   ? translateOrFallback("pauseAutoRefresh", "Pause auto-refresh")
                   : translateOrFallback("resumeAutoRefresh", "Resume auto-refresh")
@@ -227,8 +229,8 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
               data-testid="auto-refresh-toggle"
             >
               {autoRefresh
-                ? translateOrFallback("liveAutoRefreshing", "Atualizando ao vivo")
-                : translateOrFallback("paused", "Pausado")}
+                ? translateOrFallback("liveAutoRefreshing", "Live — Auto-refreshing")
+                : translateOrFallback("paused", "Paused")}
             </Button>
           </div>
           <div className="flex items-center gap-2">
