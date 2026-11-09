@@ -1,0 +1,1 @@
+- **fix(antigravity):** update Antigravity CLI fallback version from 1.3.4 to 1.5.3, matching Google's latest supported release and ensuring Argon and Claude 5.5 discovery and streaming requests succeed without deprecation notices.
