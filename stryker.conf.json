@@ -170,6 +170,7 @@
       "tests/unit/account-fallback-cf1010-no-retry-8775.test.ts",
       "tests/unit/account-fallback-lockout-eviction.test.ts",
       "tests/unit/account-fallback-retry-after-json.test.ts",
+      "tests/unit/account-fallback-unmatched-4xx-no-cooldown.test.ts",
       "tests/unit/account-fallback-route-restriction-403.test.ts",
       "tests/unit/account-fallback-service.test.ts",
       "tests/unit/18633-credit-exhaustion-parks-connection.test.ts",
