@@ -1,6 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import { translateUsageOrFallback } from "./i18nFallback";
 
 /**
@@ -74,38 +82,59 @@ export default function CursorModelUsageTable({ rows }: { rows: unknown }) {
         </span>
         <span className="italic">{tr("cursorModelUsageBilledHint", "Billed by Cursor")}</span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-[10px] tabular-nums">
-          <thead>
-            <tr className="text-left text-text-muted">
-              <th className="px-1 py-0.5 font-medium">{tr("cursorModelUsageModel", "Model")}</th>
-              <th className={`${CELL} font-medium`}>{tr("cursorModelUsageInput", "In")}</th>
-              <th className={`${CELL} font-medium`}>{tr("cursorModelUsageOutput", "Out")}</th>
-              <th className={`${CELL} font-medium`}>
-                {tr("cursorModelUsageCacheRead", "Cache R")}
-              </th>
-              <th className={`${CELL} font-medium`}>
-                {tr("cursorModelUsageCacheWrite", "Cache W")}
-              </th>
-              <th className={`${CELL} font-medium`}>{tr("cursorModelUsageCost", "Cost")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {modelUsage.map((row) => (
-              <tr key={row.model} className="border-t border-border/40 text-text-main">
-                <td className="max-w-[8rem] truncate px-1 py-0.5 font-medium" title={row.model}>
-                  {row.model}
-                </td>
-                <td className={`${CELL} text-text-muted`}>{formatTokens(row.inputTokens)}</td>
-                <td className={`${CELL} text-text-muted`}>{formatTokens(row.outputTokens)}</td>
-                <td className={`${CELL} text-text-muted`}>{formatTokens(row.cacheReadTokens)}</td>
-                <td className={`${CELL} text-text-muted`}>{formatTokens(row.cacheWriteTokens)}</td>
-                <td className={`${CELL} font-medium`}>{formatCost(row.costUsd)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        containerClassName="overflow-x-auto"
+        className="w-full border-collapse text-[10px] tabular-nums"
+        persistentScrollbars={false}
+      >
+        <TableHeader>
+          <TableRow className="text-left text-text-muted">
+            <TableHead className="px-1 py-0.5 font-medium">
+              {tr("cursorModelUsageModel", "Model")}
+            </TableHead>
+            <TableHead className={`${CELL} font-medium`}>
+              {tr("cursorModelUsageInput", "In")}
+            </TableHead>
+            <TableHead className={`${CELL} font-medium`}>
+              {tr("cursorModelUsageOutput", "Out")}
+            </TableHead>
+            <TableHead className={`${CELL} font-medium`}>
+              {tr("cursorModelUsageCacheRead", "Cache R")}
+            </TableHead>
+            <TableHead className={`${CELL} font-medium`}>
+              {tr("cursorModelUsageCacheWrite", "Cache W")}
+            </TableHead>
+            <TableHead className={`${CELL} font-medium`}>
+              {tr("cursorModelUsageCost", "Cost")}
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {modelUsage.map((row) => (
+            <TableRow key={row.model} className="border-t border-border/40 text-text-main">
+              <TableCell
+                className="max-w-[8rem] truncate px-1 py-0.5 font-medium"
+                title={row.model}
+              >
+                {row.model}
+              </TableCell>
+              <TableCell className={`${CELL} text-text-muted`}>
+                {formatTokens(row.inputTokens)}
+              </TableCell>
+              <TableCell className={`${CELL} text-text-muted`}>
+                {formatTokens(row.outputTokens)}
+              </TableCell>
+              <TableCell className={`${CELL} text-text-muted`}>
+                {formatTokens(row.cacheReadTokens)}
+              </TableCell>
+              <TableCell className={`${CELL} text-text-muted`}>
+                {formatTokens(row.cacheWriteTokens)}
+              </TableCell>
+              <TableCell className={`${CELL} font-medium`}>{formatCost(row.costUsd)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
