@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "കാഷിൽ സൂക്ഷിച്ച ഇൻപുട്ട് ടോക്കണുകൾ",
+    "inputTokensHint": "കാഷിൽ നിന്നുള്ള വായനകൾ ഉൾപ്പെടില്ല. കാഷിലേക്കുള്ള എഴുത്തുകൾ ഇൻപുട്ട് ടോക്കണുകളായി തന്നെ കണക്കാക്കും.",
+    "inputSplitUnavailable": "കാഷ് വായനയുടെ ഡാറ്റ അപൂർണ്ണമോ പൊരുത്തമില്ലാത്തതോ ആയതിനാൽ ഇൻപുട്ട് വിഭജനം ലഭ്യമല്ല.",
+    "cachedInputTokensHint": "റിപ്പോർട്ട് ചെയ്ത കാഷ് വായനകൾ മാത്രം; ഇവ മൊത്തം ഇൻപുട്ടിൽ ഇതിനകം ഉൾപ്പെട്ടിട്ടുണ്ട്.",
     "title": "വിശകലനം",
     "usageAnalyticsTitle": "ഉപയോഗ വിശകലനം",
     "tokenDisplayCompact": "സംക്ഷിപ്തം",

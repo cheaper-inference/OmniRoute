@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Vstupní tokeny z mezipaměti",
+    "inputTokensHint": "Nezahrnuje čtení z mezipaměti. Zápisy do mezipaměti se stále počítají jako vstupní tokeny.",
+    "inputSplitUnavailable": "Rozdělení vstupu není dostupné, protože údaje o čtení z mezipaměti jsou neúplné nebo nekonzistentní.",
+    "cachedInputTokensHint": "Pouze nahlášená čtení z mezipaměti, již zahrnutá v celkovém vstupu.",
     "title": "Analytika",
     "usageAnalyticsTitle": "Analytika využití",
     "tokenDisplayCompact": "Kompaktní",

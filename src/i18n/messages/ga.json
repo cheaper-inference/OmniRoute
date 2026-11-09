@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Comharthaí ionchuir sa taisce",
+    "inputTokensHint": "Ní áirítear léamha ón taisce. Áirítear scríobhanna chuig an taisce fós mar chomharthaí ionchuir.",
+    "inputSplitUnavailable": "Níl miondealú an ionchuir ar fáil toisc go bhfuil sonraí léamh na taisce neamhiomlán nó neamhréireach.",
+    "cachedInputTokensHint": "Léamha ón taisce a tuairiscíodh amháin, atá san áireamh san ionchur iomlán cheana féin.",
     "title": "Anailísíocht",
     "usageAnalyticsTitle": "Anailísíocht Úsáide",
     "tokenDisplayCompact": "Dlúth",

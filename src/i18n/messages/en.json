@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Cached Input Tokens",
+    "inputTokensHint": "Excludes cache reads. Cache writes remain input tokens.",
+    "inputSplitUnavailable": "The input split is unavailable because cache-read data is incomplete or inconsistent.",
+    "cachedInputTokensHint": "Reported cache reads only, already included in total input.",
     "title": "Analytics",
     "usageAnalyticsTitle": "Usage Analytics",
     "tokenDisplayCompact": "Compact",

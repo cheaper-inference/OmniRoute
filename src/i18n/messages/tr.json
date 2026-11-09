@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Önbellekteki giriş tokenları",
+    "inputTokensHint": "Önbellek okumalarını içermez. Önbellek yazmaları giriş tokenı olarak sayılmaya devam eder.",
+    "inputSplitUnavailable": "Önbellek okuma verileri eksik veya tutarsız olduğundan giriş dağılımı kullanılamıyor.",
+    "cachedInputTokensHint": "Yalnızca bildirilen önbellek okumalarıdır; toplam girişe zaten dahildir.",
     "title": "Analitik",
     "usageAnalyticsTitle": "Kullanım Analitiği",
     "tokenDisplayCompact": "Kısa",

@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "कैश किए गए इनपुट टोकन",
+    "inputTokensHint": "कैश से पढ़े गए टोकन शामिल नहीं हैं। कैश में लिखे गए टोकन इनपुट टोकन ही रहते हैं।",
+    "inputSplitUnavailable": "इनपुट का विभाजन उपलब्ध नहीं है क्योंकि कैश से पढ़ने का डेटा अधूरा या असंगत है।",
+    "cachedInputTokensHint": "केवल रिपोर्ट किए गए कैश रीड, जो कुल इनपुट में पहले से शामिल हैं।",
     "title": "विश्लेषिकी",
     "usageAnalyticsTitle": "उपयोग विश्लेषण",
     "tokenDisplayCompact": "संक्षिप्त",

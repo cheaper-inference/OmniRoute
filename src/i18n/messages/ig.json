@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / ikpo)"
   },
   "analytics": {
+    "cachedInputTokens": "Token ntinye echekwara na nchekwa nwa oge",
+    "inputTokensHint": "Ọ naghị agụnye ịgụ site na nchekwa nwa oge. Ide na nchekwa nwa oge ka na-agụ dị ka token ntinye.",
+    "inputSplitUnavailable": "Nkewa ntinye adịghị n'ihi na data ịgụ nchekwa nwa oge ezughị ezu ma ọ bụ adabaghị.",
+    "cachedInputTokensHint": "Naanị ọgụgụ nchekwa nwa oge a kọrọ, nke etinyelarị na ngụkọta ntinye.",
     "title": "Nnyocha Data",
     "usageAnalyticsTitle": "Nnyocha Ojiji",
     "tokenDisplayCompact": "Nkenke",

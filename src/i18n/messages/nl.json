@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Invoertokens uit de cache",
+    "inputTokensHint": "Exclusief het lezen uit de cache. Schrijfacties naar de cache blijven invoertokens.",
+    "inputSplitUnavailable": "De uitsplitsing van de invoer is niet beschikbaar omdat de gegevens over het lezen uit de cache onvolledig of inconsistent zijn.",
+    "cachedInputTokensHint": "Alleen gerapporteerde leesacties uit de cache, al opgenomen in de totale invoer.",
     "title": "Analyses",
     "usageAnalyticsTitle": "Gebruiksanalyses",
     "tokenDisplayCompact": "Compact",

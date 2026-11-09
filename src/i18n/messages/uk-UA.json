@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Вхідні токени з кешу",
+    "inputTokensHint": "Не враховує читання з кешу. Записи до кешу й надалі враховуються як вхідні токени.",
+    "inputSplitUnavailable": "Розподіл вхідних даних недоступний, оскільки дані про читання з кешу неповні або суперечливі.",
+    "cachedInputTokensHint": "Лише зареєстровані читання з кешу, уже включені до загального обсягу вхідних даних.",
     "title": "Аналітика",
     "usageAnalyticsTitle": "Аналітика використання",
     "tokenDisplayCompact": "Компактно",

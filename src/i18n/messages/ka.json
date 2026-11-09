@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "ქეშირებული შეყვანის ტოკენები",
+    "inputTokensHint": "არ მოიცავს ქეშიდან წაკითხვებს. ქეშში ჩაწერები კვლავ შეყვანის ტოკენებად ითვლება.",
+    "inputSplitUnavailable": "შეყვანის განაწილება მიუწვდომელია, რადგან ქეშიდან წაკითხვის მონაცემები არასრული ან შეუსაბამოა.",
+    "cachedInputTokensHint": "მხოლოდ დაფიქსირებული ქეშიდან წაკითხვები, რომლებიც უკვე შედის მთლიან შეყვანაში.",
     "title": "ანალიტიკა",
     "usageAnalyticsTitle": "გამოყენების ანალიტიკა",
     "tokenDisplayCompact": "კომპაქტური",

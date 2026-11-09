@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "رموز الإدخال المخزنة مؤقتًا",
+    "inputTokensHint": "يستثني قراءات ذاكرة التخزين المؤقت. تظل عمليات الكتابة فيها محسوبة ضمن رموز الإدخال.",
+    "inputSplitUnavailable": "تفصيل الإدخال غير متاح لأن بيانات قراءة ذاكرة التخزين المؤقت غير مكتملة أو غير متسقة.",
+    "cachedInputTokensHint": "قراءات ذاكرة التخزين المؤقت المبلّغ عنها فقط، وهي مدرجة بالفعل في إجمالي الإدخال.",
     "title": "التحليلات",
     "usageAnalyticsTitle": "تحليلات الاستخدام",
     "tokenDisplayCompact": "مختصر",

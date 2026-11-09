@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "โทเค็นอินพุตที่แคชไว้",
+    "inputTokensHint": "ไม่รวมการอ่านจากแคช การเขียนลงแคชยังคงนับเป็นโทเค็นอินพุต",
+    "inputSplitUnavailable": "ไม่สามารถแสดงรายละเอียดแยกของอินพุตได้ เนื่องจากข้อมูลการอ่านแคชไม่ครบถ้วนหรือไม่สอดคล้องกัน",
+    "cachedInputTokensHint": "เฉพาะการอ่านแคชที่รายงาน ซึ่งรวมอยู่ในอินพุตทั้งหมดแล้ว",
     "title": "การวิเคราะห์",
     "usageAnalyticsTitle": "การวิเคราะห์การใช้งาน",
     "tokenDisplayCompact": "แบบย่อ",

@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Keshdagi kirish tokenlari",
+    "inputTokensHint": "Keshdan o‘qishlar hisobga olinmaydi. Keshga yozishlar kirish tokenlari sifatida hisoblanishda davom etadi.",
+    "inputSplitUnavailable": "Keshdan o‘qish ma’lumotlari to‘liq emas yoki nomuvofiq bo‘lgani uchun kirish taqsimoti mavjud emas.",
+    "cachedInputTokensHint": "Faqat xabar qilingan keshdan o‘qishlar; ular umumiy kirishga allaqachon kiritilgan.",
     "title": "Tahlil",
     "usageAnalyticsTitle": "Foydalanish tahlili",
     "tokenDisplayCompact": "Ixcham",

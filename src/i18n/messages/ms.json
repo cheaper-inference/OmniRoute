@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Token Input dalam Cache",
+    "inputTokensHint": "Tidak termasuk bacaan cache. Penulisan cache masih dikira sebagai token input.",
+    "inputSplitUnavailable": "Pecahan input tidak tersedia kerana data bacaan cache tidak lengkap atau tidak konsisten.",
+    "cachedInputTokensHint": "Hanya bacaan cache yang dilaporkan, sudah termasuk dalam jumlah input.",
     "title": "Analitis",
     "usageAnalyticsTitle": "Analitis Penggunaan",
     "tokenDisplayCompact": "Ringkas",

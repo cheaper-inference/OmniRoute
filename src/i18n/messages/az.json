@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Keşdəki giriş tokenləri",
+    "inputTokensHint": "Keşdən oxumalar daxil deyil. Keşə yazmalar giriş tokenləri kimi sayılmağa davam edir.",
+    "inputSplitUnavailable": "Keşdən oxuma məlumatları natamam və ya uyğunsuz olduğundan giriş bölgüsü mövcud deyil.",
+    "cachedInputTokensHint": "Yalnız bildirilmiş keşdən oxumalar; artıq ümumi girişə daxildir.",
     "title": "Analitika",
     "usageAnalyticsTitle": "İstifadə analitikası",
     "tokenDisplayCompact": "Yığcam",

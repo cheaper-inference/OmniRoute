@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "キャッシュ済み入力トークン",
+    "inputTokensHint": "キャッシュからの読み取りを除きます。キャッシュへの書き込みは引き続き入力トークンとして計上されます。",
+    "inputSplitUnavailable": "キャッシュ読み取りデータが不完全または不整合のため、入力の内訳を表示できません。",
+    "cachedInputTokensHint": "報告されたキャッシュ読み取りのみで、入力合計にすでに含まれています。",
     "title": "分析",
     "usageAnalyticsTitle": "使用状況分析",
     "tokenDisplayCompact": "コンパクト",

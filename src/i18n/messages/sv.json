@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Cachelagrade indatatoken",
+    "inputTokensHint": "Utesluter läsningar från cachen. Skrivningar till cachen räknas fortfarande som indatatoken.",
+    "inputSplitUnavailable": "Uppdelningen av indata är inte tillgänglig eftersom data om cacheläsningar är ofullständiga eller inkonsekventa.",
+    "cachedInputTokensHint": "Endast rapporterade cacheläsningar, som redan ingår i totala indata.",
     "title": "Analys",
     "usageAnalyticsTitle": "Användningsanalys",
     "tokenDisplayCompact": "Kompakt",

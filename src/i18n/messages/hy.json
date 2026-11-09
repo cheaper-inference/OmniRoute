@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Քեշավորված մուտքային թոքեններ",
+    "inputTokensHint": "Չի ներառում քեշից ընթերցումները։ Քեշում գրառումները շարունակում են հաշվվել որպես մուտքային թոքեններ։",
+    "inputSplitUnavailable": "Մուտքի բաժանումը հասանելի չէ, քանի որ քեշից ընթերցման տվյալները թերի են կամ անհամապատասխան։",
+    "cachedInputTokensHint": "Միայն հաղորդված քեշից ընթերցումները, որոնք արդեն ներառված են ընդհանուր մուտքի մեջ։",
     "title": "Վերլուծություն",
     "usageAnalyticsTitle": "Օգտագործման վերլուծություն",
     "tokenDisplayCompact": "Սեղմ",

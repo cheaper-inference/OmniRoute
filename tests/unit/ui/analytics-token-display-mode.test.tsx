@@ -48,6 +48,8 @@ const mockAnalyticsData = {
   summary: {
     totalTokens: 3712481200,
     promptTokens: 3700000000,
+    cachedInputTokens: 2000000000,
+    cachedInputTokensComplete: true,
     completionTokens: 12481200,
     totalCost: 1180.27,
     totalRequests: 19433,
@@ -156,7 +158,9 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     const kpiValues = container.querySelectorAll(".text-2xl.font-bold");
     expect(kpiValues[0]?.textContent).toBe("3.7B");
     expect(kpiValues[1]?.textContent).toBe("3.7B");
-    expect(kpiValues[2]?.textContent).toBe("12.5M");
+    expect(kpiValues[2]?.textContent).toBe("1.7B");
+    expect(kpiValues[3]?.textContent).toBe("2.0B");
+    expect(kpiValues[4]?.textContent).toBe("12.5M");
 
     // Click "Exact" toggle
     const exactBtn = container.querySelector(
@@ -173,10 +177,25 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     // Now values should be formatted with full precision
     expect(kpiValues[0]?.textContent).toBe(fmtFull(3712481200));
     expect(kpiValues[1]?.textContent).toBe(fmtFull(3700000000));
-    expect(kpiValues[2]?.textContent).toBe(fmtFull(12481200));
+    expect(kpiValues[2]?.textContent).toBe(fmtFull(1700000000));
+    expect(kpiValues[3]?.textContent).toBe(fmtFull(2000000000));
+    expect(kpiValues[4]?.textContent).toBe(fmtFull(12481200));
 
     // Check localStorage was persisted
     expect(localStorage.getItem("omniroute:analytics-token-display-mode")).toBe("exact");
+    const compactBtn = container.querySelector(
+      'button[role="radio"][title="Compact"]'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      compactBtn.click();
+      compactBtn.click();
+    });
+    expect(kpiValues[2]?.textContent).toBe("1.7B");
+    expect(kpiValues[3]?.textContent).toBe("2.0B");
+    await act(async () => {
+      exactBtn.click();
+    });
+    expect(kpiValues[2]?.textContent).toBe(fmtFull(1700000000));
   });
 
   it("hydrates saved 'exact' preference from localStorage on mount", async () => {

@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Välimuistissa olevat syötetokenit",
+    "inputTokensHint": "Ei sisällä välimuistista luettuja tokeneita. Välimuistiin kirjoitetut tokenit lasketaan edelleen syötetokeneiksi.",
+    "inputSplitUnavailable": "Syötteen erittely ei ole saatavilla, koska välimuistin lukutiedot ovat puutteellisia tai ristiriitaisia.",
+    "cachedInputTokensHint": "Vain ilmoitetut välimuistin luvut, jotka sisältyvät jo kokonaissyötteeseen.",
     "title": "Analytiikka",
     "usageAnalyticsTitle": "Käyttöanalytiikka",
     "tokenDisplayCompact": "Tiivis",

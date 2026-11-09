@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "کیش میں محفوظ ان پٹ ٹوکنز",
+    "inputTokensHint": "کیش سے پڑھنے کو شامل نہیں کرتا۔ کیش میں لکھنے کو اب بھی ان پٹ ٹوکنز میں شمار کیا جاتا ہے۔",
+    "inputSplitUnavailable": "ان پٹ کی تقسیم دستیاب نہیں کیونکہ کیش سے پڑھنے کا ڈیٹا نامکمل یا غیر مطابقت رکھتا ہے۔",
+    "cachedInputTokensHint": "صرف رپورٹ کردہ کیش ریڈز، جو پہلے ہی کل ان پٹ میں شامل ہیں۔",
     "title": "تجزیات",
     "usageAnalyticsTitle": "استعمال کے تجزیات",
     "tokenDisplayCompact": "مختصر",

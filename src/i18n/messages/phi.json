@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Mga Input Token na Naka-cache",
+    "inputTokensHint": "Hindi kasama ang mga pagbasa mula sa cache. Binibilang pa rin bilang mga input token ang mga pagsulat sa cache.",
+    "inputSplitUnavailable": "Hindi available ang paghahati ng input dahil kulang o hindi tugma ang data ng pagbasa sa cache.",
+    "cachedInputTokensHint": "Mga naiulat na pagbasa sa cache lamang, na kasama na sa kabuuang input.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analytics ng Paggamit",
     "tokenDisplayCompact": "Siksik",

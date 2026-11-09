@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Tokeny wejściowe z pamięci podręcznej",
+    "inputTokensHint": "Nie obejmuje odczytów z pamięci podręcznej. Zapisy do pamięci podręcznej nadal liczą się jako tokeny wejściowe.",
+    "inputSplitUnavailable": "Podział danych wejściowych jest niedostępny, ponieważ dane odczytów z pamięci podręcznej są niepełne lub niespójne.",
+    "cachedInputTokensHint": "Tylko zgłoszone odczyty z pamięci podręcznej, już uwzględnione w całkowitych danych wejściowych.",
     "title": "Analityka",
     "usageAnalyticsTitle": "Analityka użycia",
     "tokenDisplayCompact": "Kompaktowy",

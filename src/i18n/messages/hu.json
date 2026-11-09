@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Gyorsítótárazott bemeneti tokenek",
+    "inputTokensHint": "Nem tartalmazza a gyorsítótárból való olvasásokat. A gyorsítótárba írások továbbra is bemeneti tokennek számítanak.",
+    "inputSplitUnavailable": "A bemenet felbontása nem érhető el, mert a gyorsítótár olvasási adatai hiányosak vagy ellentmondásosak.",
+    "cachedInputTokensHint": "Csak a jelentett gyorsítótár-olvasások, amelyek már szerepelnek a teljes bemenetben.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Használati elemzések",
     "tokenDisplayCompact": "Tömör",

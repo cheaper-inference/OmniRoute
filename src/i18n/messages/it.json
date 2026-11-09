@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Token di input in cache",
+    "inputTokensHint": "Esclude le letture dalla cache. Le scritture nella cache restano token di input.",
+    "inputSplitUnavailable": "La suddivisione dell’input non è disponibile perché i dati di lettura della cache sono incompleti o incoerenti.",
+    "cachedInputTokensHint": "Solo letture della cache segnalate, già incluse nell’input totale.",
     "title": "Analitica",
     "usageAnalyticsTitle": "Analisi dell'utilizzo",
     "tokenDisplayCompact": "Compatto",

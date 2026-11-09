@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "કૅશમાં સંગ્રહિત ઇનપુટ ટોકન",
+    "inputTokensHint": "કૅશમાંથી વાંચેલા ટોકન સામેલ નથી. કૅશમાં લખેલા ટોકન ઇનપુટ ટોકન તરીકે જ ગણાય છે.",
+    "inputSplitUnavailable": "ઇનપુટનું વિભાજન ઉપલબ્ધ નથી કારણ કે કૅશમાંથી વાંચવાનો ડેટા અધૂરો અથવા અસંગત છે.",
+    "cachedInputTokensHint": "માત્ર નોંધાયેલા કૅશ વાંચનો, જે કુલ ઇનપુટમાં પહેલેથી સામેલ છે.",
     "title": "વિશ્લેષણ",
     "usageAnalyticsTitle": "વપરાશ એનાલિટિક્સ",
     "tokenDisplayCompact": "સંક્ષિપ્ત",

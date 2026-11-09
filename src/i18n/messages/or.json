@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "କ୍ୟାଶ୍‌ରେ ସଂରକ୍ଷିତ ଇନପୁଟ୍ ଟୋକେନ୍",
+    "inputTokensHint": "କ୍ୟାଶ୍‌ରୁ ପଢ଼ାଯାଇଥିବା ଟୋକେନ୍ ବାଦ ଦିଏ। କ୍ୟାଶ୍‌ରେ ଲେଖାଯାଇଥିବା ଟୋକେନ୍ ଇନପୁଟ୍ ଟୋକେନ୍ ଭାବରେ ଗଣାଯାଏ।",
+    "inputSplitUnavailable": "କ୍ୟାଶ୍ ପଠନ ତଥ୍ୟ ଅସମ୍ପୂର୍ଣ୍ଣ କିମ୍ବା ଅସଙ୍ଗତ ଥିବାରୁ ଇନପୁଟ୍ ବିଭାଜନ ଉପଲବ୍ଧ ନାହିଁ।",
+    "cachedInputTokensHint": "କେବଳ ରିପୋର୍ଟ ହୋଇଥିବା କ୍ୟାଶ୍ ପଠନ, ଯାହା ମୋଟ ଇନପୁଟ୍‌ରେ ପୂର୍ବରୁ ଅନ୍ତର୍ଭୁକ୍ତ।",
     "title": "ବିଶ୍ଳେଷଣ",
     "usageAnalyticsTitle": "ବ୍ୟବହାର ବିଶ୍ଳେଷଣ",
     "tokenDisplayCompact": "ସଂକ୍ଷିପ୍ତ",

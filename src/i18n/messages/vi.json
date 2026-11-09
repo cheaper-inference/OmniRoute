@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Token đầu vào được lưu đệm",
+    "inputTokensHint": "Không bao gồm lượt đọc bộ nhớ đệm. Lượt ghi vào bộ nhớ đệm vẫn được tính là token đầu vào.",
+    "inputSplitUnavailable": "Không có số liệu phân tách đầu vào vì dữ liệu đọc bộ nhớ đệm không đầy đủ hoặc không nhất quán.",
+    "cachedInputTokensHint": "Chỉ các lượt đọc bộ nhớ đệm được báo cáo, đã được tính trong tổng đầu vào.",
     "title": "Phân tích",
     "usageAnalyticsTitle": "Phân tích mức sử dụng",
     "tokenDisplayCompact": "Rút gọn",

@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Tokenuri de intrare din cache",
+    "inputTokensHint": "Exclude citirile din cache. Scrierile în cache rămân tokenuri de intrare.",
+    "inputSplitUnavailable": "Defalcarea intrării nu este disponibilă deoarece datele despre citirile din cache sunt incomplete sau inconsecvente.",
+    "cachedInputTokensHint": "Doar citirile din cache raportate, deja incluse în intrarea totală.",
     "title": "Analiză",
     "usageAnalyticsTitle": "Analiza utilizării",
     "tokenDisplayCompact": "Compact",

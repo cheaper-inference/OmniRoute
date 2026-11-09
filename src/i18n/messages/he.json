@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "אסימוני קלט מהמטמון",
+    "inputTokensHint": "לא כולל קריאות מהמטמון. כתיבות למטמון עדיין נספרות כאסימוני קלט.",
+    "inputSplitUnavailable": "פילוח הקלט אינו זמין מכיוון שנתוני הקריאה מהמטמון אינם שלמים או אינם עקביים.",
+    "cachedInputTokensHint": "רק קריאות מדווחות מהמטמון, שכבר נכללות בסך הקלט.",
     "title": "אנליטיקס",
     "usageAnalyticsTitle": "ניתוח נתוני שימוש",
     "tokenDisplayCompact": "מקוצר",

@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Vstupné tokeny z vyrovnávacej pamäte",
+    "inputTokensHint": "Nezahŕňa čítania z vyrovnávacej pamäte. Zápisy do vyrovnávacej pamäte sa naďalej počítajú ako vstupné tokeny.",
+    "inputSplitUnavailable": "Rozdelenie vstupu nie je dostupné, pretože údaje o čítaní z vyrovnávacej pamäte sú neúplné alebo nekonzistentné.",
+    "cachedInputTokensHint": "Iba nahlásené čítania z vyrovnávacej pamäte, už zahrnuté v celkovom vstupe.",
     "title": "Analytika",
     "usageAnalyticsTitle": "Analytika využitia",
     "tokenDisplayCompact": "Kompaktné",

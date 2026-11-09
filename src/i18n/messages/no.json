@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Bufrede inndatatokener",
+    "inputTokensHint": "Utelater lesinger fra hurtigbufferen. Skrivinger til hurtigbufferen regnes fortsatt som inndatatokener.",
+    "inputSplitUnavailable": "Fordelingen av inndata er utilgjengelig fordi data om hurtigbufferlesinger er ufullstendige eller inkonsistente.",
+    "cachedInputTokensHint": "Bare rapporterte hurtigbufferlesinger, allerede inkludert i samlede inndata.",
     "title": "Analyse",
     "usageAnalyticsTitle": "Bruksanalyse",
     "tokenDisplayCompact": "Kompakt",

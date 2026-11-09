@@ -2046,6 +2046,10 @@
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
+    "cachedInputTokens": "Vhodni žetoni iz predpomnilnika",
+    "inputTokensHint": "Izključuje branja iz predpomnilnika. Zapisi v predpomnilnik se še vedno štejejo kot vhodni žetoni.",
+    "inputSplitUnavailable": "Razčlenitev vhoda ni na voljo, ker so podatki o branju predpomnilnika nepopolni ali neskladni.",
+    "cachedInputTokensHint": "Samo sporočena branja iz predpomnilnika, ki so že vključena v skupni vhod.",
     "title": "Analitika",
     "usageAnalyticsTitle": "Analitika uporabe",
     "tokenDisplayCompact": "Strnjeno",
