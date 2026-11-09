@@ -1,0 +1,1 @@
+- **fix(combos):** `POST /api/combos/reorder` now accepts the order `revision` returned by `GET /api/combos/reorder` and answers 409 with the current revision when the order changed in between, so two concurrent reorders no longer overwrite each other silently; requests without a revision work as before.
