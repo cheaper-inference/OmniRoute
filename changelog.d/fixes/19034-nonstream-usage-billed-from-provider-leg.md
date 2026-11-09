@@ -1,0 +1,1 @@
+- **fix(sse):** non-streaming requests to Claude-Code-compatible providers no longer bill the client context buffer (default 2000 input tokens) or a usage estimate as real provider usage in usage history, API-key token quotas, cost and the call log. ([#19034](https://github.com/cheaper-inference/OmniRoute/pull/19034))
