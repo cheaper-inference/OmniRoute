@@ -1,0 +1,1 @@
+- **perf(usage):** the fallback input-token estimate for responses without provider usage counts in one pass, so a 3 MiB request no longer allocates tens of MiB of temporary arrays.
