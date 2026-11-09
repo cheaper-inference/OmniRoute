@@ -173,12 +173,11 @@ jobs:
           # stale per-file verdicts, which is exactly how 215 pre-existing errors stayed
           # invisible for a whole cycle. Exact key or a cold full lint (~13 min) — never a
           # partial cache from another configuration.
-      # Security scanners — same hardened install as ci.yml quality-extended
+      # Other security scanners use the same install as ci.yml quality-extended.
       # (gh release download = authenticated, 5000 req/hr; curl to api.github.com
       # is rate-limited to 60/hr and silently no-ops when throttled). The blocking
-      # gates below SKIP (exit 0) when their binary is absent — only a measured
-      # regression vs config/quality/quality-baseline.json blocks.
-      - name: Install security scanners (gitleaks/osv/actionlint/zizmor/oasdiff)
+      # workflow audit has its own required, verified installation below.
+      - name: Install security scanners (gitleaks/osv/oasdiff)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -190,8 +189,6 @@ jobs:
           # red (or green) caused by whatever "latest" served that morning.
           GITLEAKS_VERSION=v8.30.1
           OSV_SCANNER_VERSION=v2.3.8
-          ACTIONLINT_VERSION=v1.7.12
-          ZIZMOR_VERSION=1.25.2
           OASDIFF_VERSION=v1.19.1
           # gitleaks — pinned linux x64 tarball via gh (authed), extract binary
           rm -rf /tmp/gl && mkdir -p /tmp/gl
@@ -201,10 +198,6 @@ jobs:
           rm -rf /tmp/osv && mkdir -p /tmp/osv
           gh release download "$OSV_SCANNER_VERSION" --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # actionlint — official installer from a pinned release tag (never main)
-          bash <(curl -fsSL "https://raw.githubusercontent.com/rhysd/actionlint/${ACTIONLINT_VERSION}/scripts/download-actionlint.bash") "${ACTIONLINT_VERSION#v}" "$HOME/.local/bin"
-          # zizmor — pinned PyPI package (same version as ci.yml quality-extended)
-          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
           # oasdiff — pinned linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
           gh release download "$OASDIFF_VERSION" --repo Tufin/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
@@ -212,10 +205,14 @@ jobs:
           # ALWAYS export the bin dir (even if any step above failed)
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/gitleaks" version || true
-          "$HOME/.local/bin/actionlint" -version || true
           "$HOME/.local/bin/osv-scanner" --version || true
           "$HOME/.local/bin/oasdiff" --version || true
-          zizmor --version || true
+      # Required auditors use verified, pinned artifacts in a fresh PATH directory.
+      # Installation failure is INCOMPLETE, never a skipped or zero-finding audit.
+      - name: Prepare pinned workflow scanners
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci/install-workflow-scanners.sh
       - name: Forgotten sibling tests (advisory)
         env:
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}

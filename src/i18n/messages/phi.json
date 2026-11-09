@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mga kagustuhan sa account",
+    "description": "Unahin o itabi bilang reserba ang maraming account para sa routing configuration na ito. Niraranggo ng awtomatikong routing ang mga account sa loob ng bawat tier. Mananatiling normal ang mga account na hindi nakalista. Nalalapat pa rin ang mga pahintulot, limitasyon ng quota, at kasalukuyang mga binding ng turn.",
+    "preferred": "Pangunahin",
+    "normal": "Normal",
+    "reserve": "Reserba",
+    "excluded": "Hindi isasama",
+    "loading": "Nilo-load ang mga account…",
+    "error": "Hindi ma-load ang mga account. Buksan muli ang editor para subukan ulit.",
+    "missing": "Hindi available na account ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode ng serbisyo ng Codex para sa API key na ito",
     "description": "Nalalapat sa mga kahilingan sa Codex, kabilang ang mga modelo ng Codex sa loob ng mga combo. Ino-override ng mga sapilitang mode ang client, mga pandaigdigang setting, at mga default ng koneksyon. Hindi magbabago ang ibang provider.",
@@ -7097,6 +7108,31 @@
     "fallbackRetryBackendTitle": "Fallback na backend ng pag-uulit"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Hindi na-save ang ilang trapiko sa prosesong ito. Hindi kumpleto ang mga naka-save na kabuuan; suriin ang mga diagnostic ng server.",
+      "title": "Trapiko ng nilalamang datos ng OmniRoute",
+      "description": "Mga katawan ng upload na isinumite para ipadala at mga byte ng download na binasa ng OmniRoute. Hindi ito trapiko ng network sa koneksiyon o pagsingil ng provider. Kasama sa kabuuan ang direktang trapiko at trapikong walang pagtatalaga, na may magkahiwalay na label.",
+      "coverageNote": "Mga naipong kabuuan mula nang magsimula ang pagsukat. Hindi kasama sa kabuuang byte ang mga upload na hindi alam ang laki (mga stream, FormData, katawan ng Request). Hindi kumpleto ang mga download na hindi binasa o hindi natapos; hindi patunay ng paghahatid ng upload ang nabigong pagpapadala. Hindi hiwalay na sinusukat ang mga panloob na pag-redirect/muling pagsubok ng transport at mga transport na lumalampas sa pagsukat.",
+      "refresh": "I-refresh",
+      "overall": "Kabuuan (lahat ng naobserbahang ruta)",
+      "proxied": "Subtotal ng mga proxy (walang direkta/hindi naitalagang trapiko)",
+      "direct": "Direkta (walang proxy)",
+      "unattributed": "Dispatcher na walang pagtatalaga",
+      "removed": "Inalis na proxy ({id})",
+      "legacy": "Lumang proxy/proxy mula sa environment ({id})",
+      "route": "Ruta",
+      "upload": "Upload na isinumite para ipadala",
+      "download": "Binasa na download",
+      "attempts": "Mga pagsubok",
+      "knownUpload": "Mga upload na alam ang laki / mga pagsubok",
+      "completed": "Mga kumpletong download / mga pagsubok",
+      "failed": "Mga nabigong pagpapadala",
+      "cancelled": "Mga kinanselang download",
+      "errored": "Mga error sa download",
+      "loading": "Nilo-load ang trapiko ng nilalamang datos…",
+      "empty": "Wala pang nasusukat na trapiko ng nilalamang datos.",
+      "error": "Hindi ma-load ang trapiko ng nilalamang datos. Subukang i-refresh."
+    },
     "title": "Mga setting",
     "general": "Heneral",
     "security": "Seguridad",
@@ -14636,6 +14672,8 @@
     "usdUsageQuotaDescription": "Bina-block ang key na ito gamit ang isang 400 API error pagkatapos maabot ng lokal na nagastos nitong USD ang na-configure na pang-araw-araw o lingguhang quota.",
     "dailyQuotaUsd": "Pang-araw-araw na quota (USD)",
     "weeklyQuotaUsd": "Lingguhang quota (USD)",
+    "fiveHourQuotaUsd": "5-oras na quota (USD)",
+    "fiveHourQuotaHint": "Rolling window: binibilang ang gastos ng bawat request nang 5 oras, saka ito napapalaya.",
     "quotaWindowDescription": "Sumusunod ang lingguhang quota sa naka-cache na lingguhang pag-reset ng Claude kapag available; kung hindi, babalik ito sa isang rolling na 7 araw na window. Ginagamit ng pang-araw-araw na quota ang araw ng kalendaryo ng Fortaleza.",
     "apiKeyUsdQuota": "Quota sa USD ng API key",
     "apiKeyUsdQuotaDescription": "Kapag pinagana, ibinabalik ng @@om-usage ang pang-araw-araw na quota, lingguhang quota, pang-araw-araw na nagastos, at lingguhang nagastos sa USD. Sumusunod ang lingguhan sa naka-cache na pag-reset ng Claude kapag available.",
