@@ -57,6 +57,49 @@ async function readUpstreamError(response: Response): Promise<string> {
 const nonEmptyString = (value: unknown): string | null =>
   typeof value === "string" && value.trim().length > 0 ? value : null;
 
+/** Map a parsed Keenable payload to a WebFetchResult (content capped, metadata optional). */
+function buildFetchResult(
+  url: string,
+  payload: Record<string, unknown>,
+  includeMetadata: boolean
+): WebFetchResult {
+  const raw = typeof payload.content === "string" ? payload.content : "";
+  if (!raw.trim()) return fail(502, "Keenable returned no extractable content");
+
+  const truncated = raw.length > KEENABLE_FETCH_MAX_CHARACTERS;
+  const content = truncated ? raw.slice(0, KEENABLE_FETCH_MAX_CHARACTERS) : raw;
+
+  return {
+    success: true,
+    data: {
+      provider: "keenable-search",
+      url,
+      content,
+      links: [],
+      metadata: includeMetadata
+        ? {
+            title: nonEmptyString(payload.title),
+            description: nonEmptyString(payload.description),
+            ...(truncated ? { truncated: true } : {}),
+          }
+        : null,
+      screenshot_url: null,
+    },
+  };
+}
+
+/** Map a thrown fetch error: timeouts and aborts to 504, everything else to 502. */
+function mapFetchError(err: unknown): WebFetchResult {
+  // The abort reason set by keenableFetch is named "TimeoutError"; an external abort
+  // surfaces as "AbortError". Both must reach the 504 branch.
+  if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+    return fail(504, "Keenable request timed out");
+  }
+  const msg =
+    err instanceof Error ? sanitizeErrorMessage(err.message) : sanitizeErrorMessage(String(err));
+  return fail(502, msg);
+}
+
 /**
  * Execute a Keenable fetch request. Works without credentials (keyless tier).
  */
@@ -98,38 +141,9 @@ export async function keenableFetch(opts: KeenableFetchOptions): Promise<WebFetc
     }
 
     const payload = ((await response.json()) ?? {}) as Record<string, unknown>;
-    const raw = typeof payload.content === "string" ? payload.content : "";
-    if (!raw.trim()) return fail(502, "Keenable returned no extractable content");
-
-    const truncated = raw.length > KEENABLE_FETCH_MAX_CHARACTERS;
-    const content = truncated ? raw.slice(0, KEENABLE_FETCH_MAX_CHARACTERS) : raw;
-
-    return {
-      success: true,
-      data: {
-        provider: "keenable-search",
-        url,
-        content,
-        links: [],
-        metadata: includeMetadata
-          ? {
-              title: nonEmptyString(payload.title),
-              description: nonEmptyString(payload.description),
-              ...(truncated ? { truncated: true } : {}),
-            }
-          : null,
-        screenshot_url: null,
-      },
-    };
+    return buildFetchResult(url, payload, includeMetadata);
   } catch (err: unknown) {
-    // The abort reason above is named "TimeoutError"; an external abort surfaces as
-    // "AbortError". Both must reach the 504 branch.
-    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
-      return fail(504, "Keenable request timed out");
-    }
-    const msg =
-      err instanceof Error ? sanitizeErrorMessage(err.message) : sanitizeErrorMessage(String(err));
-    return fail(502, msg);
+    return mapFetchError(err);
   } finally {
     clearTimeout(timeoutId);
   }
