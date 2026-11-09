@@ -121,26 +121,31 @@ describe("migrationRunner/constants — large-table integrity", () => {
     }
   });
 
-  it("moves the published 228–230 and 229–231 stack rows to 231–233, freeing 231 first", () => {
+  it("moves the published 228–230 and 229–231 stack rows to 233–235", () => {
     const keys = RENAMED_MIGRATION_COMPATIBILITY.map(
       (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
     );
     const block = [
-      "231_usage_history_agent_session_id->233_usage_history_agent_session_id",
-      "230_agent_sessions->232_agent_sessions",
-      "229_api_key_self_service_settings->231_api_key_self_service_settings",
-      "228_api_key_self_service_settings->231_api_key_self_service_settings",
-      "229_agent_sessions->232_agent_sessions",
-      "230_usage_history_agent_session_id->233_usage_history_agent_session_id",
+      "231_usage_history_agent_session_id->235_usage_history_agent_session_id",
+      "230_agent_sessions->234_agent_sessions",
+      "229_api_key_self_service_settings->233_api_key_self_service_settings",
+      "228_api_key_self_service_settings->233_api_key_self_service_settings",
+      "229_agent_sessions->234_agent_sessions",
+      "230_usage_history_agent_session_id->235_usage_history_agent_session_id",
     ];
     const start = keys.indexOf(block[0]);
     assert.ok(start >= 0);
     assert.deepEqual(keys.slice(start, start + block.length), block);
-    // The 231 row of a 229–231 build must leave before any entry moves a row into 231.
-    const firstInto231 = RENAMED_MIGRATION_COMPATIBILITY.findIndex(
-      (e) => e.toVersion === "231" && e.fromVersion !== "218"
-    );
-    assert.ok(firstInto231 > start, "an entry moves a row into 231 before 231 is freed");
+    // No compatibility row may move anything into a slot a published stack build still holds.
+    const stackSlots = new Set(["228", "229", "230", "231"]);
+    const stackNames = new Set([
+      "api_key_self_service_settings",
+      "agent_sessions",
+      "usage_history_agent_session_id",
+    ]);
+    for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
+      if (stackNames.has(e.toName)) assert.ok(!stackSlots.has(e.toVersion), JSON.stringify(e));
+    }
   });
 
   it("RENAMED_MIGRATION_COMPATIBILITY spot-checks the boundary renames", () => {
@@ -240,19 +245,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-15), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "231",
+      toVersion: "233",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-14), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "231",
+      toVersion: "233",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-13), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "231",
+      toVersion: "233",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-12), {
@@ -264,25 +269,25 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-11), {
       fromVersion: "213",
       fromName: "api_key_self_service_settings",
-      toVersion: "231",
+      toVersion: "233",
       toName: "api_key_self_service_settings",
     });
-    // #14833 agent-session builds (190/191 through 214/215) now live at 232/233
+    // #14833 agent-session builds (190/191 through 214/215) now live at 234/235
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.slice(-10).map(
         (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
       ),
       [
-        "190_agent_sessions->232_agent_sessions",
-        "191_usage_history_agent_session_id->233_usage_history_agent_session_id",
-        "197_agent_sessions->232_agent_sessions",
-        "198_usage_history_agent_session_id->233_usage_history_agent_session_id",
-        "198_agent_sessions->232_agent_sessions",
-        "199_usage_history_agent_session_id->233_usage_history_agent_session_id",
-        "208_agent_sessions->232_agent_sessions",
-        "209_usage_history_agent_session_id->233_usage_history_agent_session_id",
-        "214_agent_sessions->232_agent_sessions",
-        "215_usage_history_agent_session_id->233_usage_history_agent_session_id",
+        "190_agent_sessions->234_agent_sessions",
+        "191_usage_history_agent_session_id->235_usage_history_agent_session_id",
+        "197_agent_sessions->234_agent_sessions",
+        "198_usage_history_agent_session_id->235_usage_history_agent_session_id",
+        "198_agent_sessions->234_agent_sessions",
+        "199_usage_history_agent_session_id->235_usage_history_agent_session_id",
+        "208_agent_sessions->234_agent_sessions",
+        "209_usage_history_agent_session_id->235_usage_history_agent_session_id",
+        "214_agent_sessions->234_agent_sessions",
+        "215_usage_history_agent_session_id->235_usage_history_agent_session_id",
       ]
     );
   });

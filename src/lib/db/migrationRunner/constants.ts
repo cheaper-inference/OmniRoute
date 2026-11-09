@@ -362,7 +362,7 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // A later pushed #14771 build used the upstream mirror-URL slot.
     fromVersion: "218",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
@@ -373,43 +373,43 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "recreate_turn_nodes_content_hash_index",
   },
   // The stack builds (#14771, #14833, #14860) shipped 229–231 and later 228–230 before the
-  // release claimed 228–230 (purge_orphaned_provider_catalogs, api_key_five_hour_limit,
-  // call_logs_cache_write_tiers). They now live at 231–233. The 231 row of the 229–231
-  // builds moves first so its slot is free before api_key_self_service_settings moves in.
+  // release claimed 228–232 (purge_orphaned_provider_catalogs, api_key_five_hour_limit,
+  // call_logs_cache_write_tiers, daily_cached_input, proxy_payload_traffic). They now live
+  // at 233–235, past every slot a published stack build used.
   {
     fromVersion: "231",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "230",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "229",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     fromVersion: "228",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     fromVersion: "229",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "230",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
@@ -473,21 +473,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
@@ -502,70 +502,70 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
     fromVersion: "213",
     fromName: "api_key_self_service_settings",
-    toVersion: "231",
+    toVersion: "233",
     toName: "api_key_self_service_settings",
   },
   {
     // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
     // as 190/191, then 197/198, 198/199, 208/209 and 214/215. Upstream owns all of those
-    // slots (call_logs_content_provenance … team_cost_centers); they now live at 232/233.
+    // slots (call_logs_content_provenance … team_cost_centers); they now live at 234/235.
     fromVersion: "190",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "191",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "197",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "198",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "198",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "199",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "208",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "209",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "214",
     fromName: "agent_sessions",
-    toVersion: "232",
+    toVersion: "234",
     toName: "agent_sessions",
   },
   {
     fromVersion: "215",
     fromName: "usage_history_agent_session_id",
-    toVersion: "233",
+    toVersion: "235",
     toName: "usage_history_agent_session_id",
   },
 ] as const;
