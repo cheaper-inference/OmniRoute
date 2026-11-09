@@ -38,6 +38,7 @@ import {
   resolveAvalancheSettings,
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
+import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
@@ -1797,6 +1798,7 @@ async function handleSingleModelChat(
   let earlyEofOriginal: Response | null = null;
   const sameAccountTransportRetries = new Map<string, number>();
   let accountFallbacks = 0;
+  let selectedConnectionPlan: string | null = null;
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
@@ -1808,6 +1810,7 @@ async function handleSingleModelChat(
   };
   const routingTelemetry = () => ({
     accountFallbacks,
+    selectedConnectionPlan,
     accountFallbackReasons,
     sameAccountRetries,
     routingWaitMs,
@@ -2068,6 +2071,10 @@ async function handleSingleModelChat(
         }
         pendingStreamRetryConnectionId = null;
       }
+      // Refresh on every selected credential so fallback never reports a stale plan.
+      selectedConnectionPlan = provider === "codex"
+        ? getCodexPlanType(credentials.providerSpecificData)
+        : null;
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
