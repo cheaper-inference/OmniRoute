@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.54
-lastUpdated: 2026-11-08
+lastUpdated: 2026-11-09
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-08
+> **Last generated:** 2026-11-09
 
-Total providers: **381**. See category breakdown below.
+Total providers: **383**. See category breakdown below.
 
 ## Categories
 
@@ -124,7 +124,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (255)
+## API Key Providers (paid / paid-with-free-credits) (257)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -183,6 +183,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `daoxe` | `daoxe` | DaoXE | API key, aggregator | [link](https://daoxe.com) | — |
 | `databricks` | `databricks` | Databricks | API key, enterprise | [link](https://www.databricks.com) | — |
 | `datarobot` | `datarobot` | DataRobot | API key, enterprise | [link](https://docs.datarobot.com) | Use your DataRobot API token. Optional Base URL can be the account root (for LLM Gateway) or a deployment URL under /api/v2/deployments/<id>. |
+| `deapi` | `deapi` | deAPI | API key, image, video | [link](https://deapi.ai) | Use your deAPI API key (sk-dp-<id>-<secret>) from deapi.ai. OmniRoute sends it as Authorization: Bearer <key>. |
 | `deepai` | `deepai` | DeepAI | API key, image | [link](https://deepai.org) | Use your DeepAI API key. Get one at deepai.org — requires a Pro subscription ($9.99/mo). |
 | `deepinfra` | `deepinfra` | DeepInfra | API key | [link](https://deepinfra.com) | Free signup credits for API testing and model exploration |
 | `deepseek` | `ds` | DeepSeek | API key | [link](https://platform.deepseek.com) | 5M free tokens on signup - no credit card required |
@@ -194,6 +195,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `doubao` | `doubao` | Doubao | API key | [link](https://doubao.com) | Get API key at console.volcengine.com |
 | `dxnt` | `dxnt` | DXNT / DX Token | API key, aggregator | [link](https://www.dxnt.com) | Free accounts are documented at 100 calls/day; the quota may increase through invitations and can vary by account. |
 | `electronhub` | `electronhub` | Electron Hub | API key, aggregator | [link](https://www.electronhub.ai) | Free plan: 5 RPM, $0.25 weekly credits and 10 Neutrinos/day for :free models; family budgets also apply. |
+| `empiriolabs` | `empiriolabs` | EmpirioLabs AI | API key | [link](https://empiriolabs.ai) | Create an API key at https://platform.empiriolabs.ai/dashboard/api-keys, then paste it here. |
 | `empower` | `empower` | Empower | API key, aggregator | [link](https://docs.empower.dev) | Bearer API key for the Empower OpenAI-compatible endpoint. |
 | `eurouter` | `eurouter` | EURouter | API key, aggregator | [link](https://eurouter.ai) | — |
 | `factory` | `factory` | Factory | API key | [link](https://factory.ai) | Bearer API key for the Factory OpenAI-compatible gateway. |
@@ -469,7 +471,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (171 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (172 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
