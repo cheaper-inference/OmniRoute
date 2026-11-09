@@ -1,4 +1,5 @@
 type CacheWriteDetails = {
+  cache_creation_input_tokens?: number;
   cache_creation_tokens?: number;
   cache_write_tokens?: number;
   cache_creation_in_prompt?: boolean;
@@ -35,6 +36,8 @@ export function pickCacheCreationTokens(usage: CacheWriteUsageSource | null | un
     usage.cache_creation_input_tokens ??
     promptDetails?.cache_creation_tokens ??
     inputDetails?.cache_creation_tokens ??
+    promptDetails?.cache_creation_input_tokens ??
+    inputDetails?.cache_creation_input_tokens ??
     promptDetails?.cache_write_tokens ??
     inputDetails?.cache_write_tokens ??
     usage.cache_write_tokens
@@ -61,6 +64,8 @@ export function isTopLevelCacheWriteOnly(usage: CacheWriteUsageSource | null | u
     usage.cache_creation_input_tokens === undefined &&
     promptDetails?.cache_creation_tokens === undefined &&
     inputDetails?.cache_creation_tokens === undefined &&
+    promptDetails?.cache_creation_input_tokens === undefined &&
+    inputDetails?.cache_creation_input_tokens === undefined &&
     promptDetails?.cache_write_tokens === undefined &&
     inputDetails?.cache_write_tokens === undefined
   );
@@ -77,7 +82,9 @@ export function resolveCacheCreationInPrompt(
   const namedWrite =
     usage.cache_creation_input_tokens ??
     promptDetails?.cache_creation_tokens ??
-    inputDetails?.cache_creation_tokens;
+    inputDetails?.cache_creation_tokens ??
+    promptDetails?.cache_creation_input_tokens ??
+    inputDetails?.cache_creation_input_tokens;
   if (namedWrite !== undefined) return undefined;
   const nestedAliasWrite = promptDetails?.cache_write_tokens ?? inputDetails?.cache_write_tokens;
   return nestedAliasWrite ? true : undefined;

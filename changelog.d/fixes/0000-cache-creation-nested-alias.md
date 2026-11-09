@@ -1,0 +1,1 @@
+- **fix(usage):** Cache-write tokens that a gateway reports as `prompt_tokens_details.cache_creation_input_tokens` now count as cache writes, not as plain input.
