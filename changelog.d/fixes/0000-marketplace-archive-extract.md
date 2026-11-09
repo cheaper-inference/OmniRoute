@@ -1,0 +1,1 @@
+- **fix(plugins):** installing a plugin from the marketplace now unpacks its `.tar.gz` archive (with path, duplicate-name, link and size checks) before installing it, instead of failing with "No valid plugin found".
