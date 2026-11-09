@@ -1,1 +1,0 @@
-- **fix(translator):** when Claude Code changes reasoning effort mid-conversation, a Claude request sent to an OpenAI-format provider now uses the latest effort instead of the cached top-level value.
