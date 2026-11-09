@@ -72,6 +72,20 @@ test("a non-OK settings or connections response leaves the Configured filter una
   assert.equal(hasPricingConfiguration(bundle), false);
 });
 
+test("a 2xx settings or connections response that is not a JSON object does not fail the load", async () => {
+  const notJson = async () =>
+    new Response("<html>proxy error</html>", { headers: { "content-type": "text/html" } });
+  for (const path of ["/api/settings", "/api/providers"]) {
+    for (const body of [notJson, async () => json(null)]) {
+      stubPricingFetch({ [path]: body });
+      const bundle = await fetchPricingBundle();
+      assert.deepEqual(bundle.catalog, CATALOG, path);
+      assert.deepEqual(bundle.pricing, { openai: {} }, path);
+      assert.equal(hasPricingConfiguration(bundle), false, path);
+    }
+  }
+});
+
 const PROVIDERS = [
   { id: "bluesminds", alias: "bluesminds", models: [{ id: "gpt-4o", name: "GPT-4o" }] },
   { id: "openai", alias: "openai", models: [{ id: "gpt-4o", name: "GPT-4o" }] },

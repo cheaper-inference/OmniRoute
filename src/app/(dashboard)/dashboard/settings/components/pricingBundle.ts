@@ -37,10 +37,21 @@ export type PricingBundle = {
   blockedProviders?: string[];
 };
 
+/** The JSON object of an optional response, or null when it failed or is not an object. */
+async function optionalJsonObject(res: Response | null): Promise<Record<string, unknown> | null> {
+  if (!res?.ok) return null;
+  try {
+    const body: unknown = await res.json();
+    return body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Loads Costs > Pricing. The connections and settings requests only feed the Configured
- * filter, so a request that fails outright is read as "not loaded" instead of failing the
- * whole tab.
+ * filter, so a request that fails outright, or answers with something other than a JSON
+ * object, is read as "not loaded" instead of failing the whole tab.
  */
 export async function fetchPricingBundle(): Promise<PricingBundle> {
   const [catalogRes, pricingRes, syncRes, connectionsRes, settingsRes] = await Promise.all([
@@ -65,14 +76,16 @@ export async function fetchPricingBundle(): Promise<PricingBundle> {
   if (syncRes.ok) {
     bundle.sync = (await syncRes.json()) as SyncStatus;
   }
-  if (connectionsRes?.ok) {
-    const { connections } = (await connectionsRes.json()) as { connections?: unknown };
+  const connectionsBody = await optionalJsonObject(connectionsRes);
+  if (connectionsBody) {
+    const { connections } = connectionsBody;
     bundle.connectedProviderIds = collectConnectedProviderIds(
       Array.isArray(connections) ? connections : []
     );
   }
-  if (settingsRes?.ok) {
-    const { blockedProviders } = (await settingsRes.json()) as { blockedProviders?: unknown };
+  const settingsBody = await optionalJsonObject(settingsRes);
+  if (settingsBody) {
+    const { blockedProviders } = settingsBody;
     bundle.blockedProviders = Array.isArray(blockedProviders) ? blockedProviders : [];
   }
   return bundle;
