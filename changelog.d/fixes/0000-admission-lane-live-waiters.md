@@ -1,1 +1,0 @@
-- **fix(admission):** A request waiting in a per-tenant virtual lane is no longer rejected as "lane evicted" after 60 seconds. It now fails only at its own wait deadline.
