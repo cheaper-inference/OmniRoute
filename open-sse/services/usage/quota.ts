@@ -36,11 +36,14 @@ export type UsageQuota = {
   quotaSource?:
     "retrieveUserQuota" | "retrieveUserQuotaSummary" | "fetchAvailableModels" | "localUsageHistory";
   displayName?: string;
+  isPercentageOnly?: boolean;
   details?: Array<{
     name: string;
     used: number;
   }>;
   currency?: string;
+  /** GitHub Copilot AI Credits consumed in the billing period (`credits_used`). */
+  creditsUsed?: number;
   grantedBalance?: number;
   toppedUpBalance?: number;
   claudeQuota?: ClaudeQuotaMetadata;

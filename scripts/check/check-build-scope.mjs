@@ -22,7 +22,11 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const args = process.argv.slice(2);
-const MAX = Number(args[args.indexOf("--max") + 1]) || 12000;
+// Ceiling raised 12000 → 13500 on 2026-10-28 (#17219): the in-scope count reached 12267 from
+// legitimate test growth (tests/ went 7841 → 8296 files between 10-21 and 10-28), not a leak.
+// A leaked worktree or vendored checkout adds roughly a full tree (~12k files), so 13500 still
+// catches it while leaving about a month of organic headroom at the current rate.
+const MAX = Number(args[args.indexOf("--max") + 1]) || 13500;
 const JSON_OUT = args.includes("--json");
 
 const EXT = new Set([".ts", ".tsx", ".js", ".jsx"]);

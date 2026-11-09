@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Saadaolevad oskused
+## Olemasolevad oskused
 
-OmniRoute pakub 6 A2A-oskust, mis on seotud kohas `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
+OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuste moodul asub `src/lib/a2a/skills/`.
 
-| Oskus              | ID                   | Kirjeldus                                                                                                                                                  | Sildid                     | Näited                                     |
-| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------- |
-| Smart Routing      | `smart-routing`      | Marsruudib prompti optimaalse pakkuya/kombo kaudu, kasutades OmniRoute'i kombo-mootorit ja skoorimist                                                      | routing, providers         | "Marsruudi see prompt parima mudeli kaudu" |
-| Quota Management   | `quota-management`   | Annab ülevaate pakkujapõhisest kvoodiseisundist ja aitab kutsujal otsustada, millal piirata või vahetada                                                   | quota, providers           | "Kontrolli anthropic'i kvooti"             |
-| Provider Discovery | `provider-discovery` | Loetleb installitud pakkujad koos võimekuste, tasuta taseme lippude ja OAuth-i olekuga                                                                     | providers, discovery       | "Millised pakkujad on saadaval?"           |
-| Cost Analysis      | `cost-analysis`      | Hindab päringu/vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | cost, usage                | "Hinda selle vestluse maksumust"           |
-| Health Report      | `health-report`      | Koondab pakkujapõhiselt circuit-breakeri, cooldowni ja lockouti oleku                                                                                      | health, resilience         | "Näita kõigi pakkujate terviseolekut"      |
-| List Capabilities  | `list-capabilities`  | Tagastab täieliku 45-kirjelise Agent Skillsi kataloogi (23 API + 21 CLI + 1 config) markdown-tabelina koos toorete SKILL.md URL-idega konteksti lisamiseks | catalog, discovery, skills | "Loetle kõik OmniRoute'i võimekused"       |
+| Oskus                 | ID                   | Kirjeldus                                                                                                                                                                            | Sildid                     | Näited                                          |
+| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------------- |
+| Nutikas marsruutimine | `smart-routing`      | Suunab viipa läbi optimaalse provider/combo, kasutades OmniRoute kombineeritud mootori + hindamist                                                                                   | marsruutimine, pakkujad    | "Route this prompt through the best model"      |
+| Kvoodi haldamine      | `quota-management`   | Teatab teenusepakkuja kvoodi olekust, aitab helistajatel otsustada, millal throttle/switch                                                                                           | kvoot, pakkujad            | "Check quot for anthropic"                      |
+| Pakkuja avastamine    | `provider-discovery` | Loetleb installitud pakkujad, millel on võimalused, vaba taseme lipud ja OAuth olek                                                                                                  | pakkujad, avastus          | "Millised pakkujad on saadaval?"                |
+| Kulude analüüs        | `cost-analysis`      | Hinnanguline request/conversation maksumus, võttes arvesse kataloogi + hiljutist kasutamist                                                                                          | kulu, kasutus              | "Selle vestluse hinnanguline maksumus"          |
+| Tervisearuanne        | `health-report`      | Agregeerib kaitselülitit, jahtumist, lukustuse olekut pakkuja kohta                                                                                                                  | tervis, vastupidavus       | "Kuva kõigi teenuseosutajate tervislik seisund" |
+| Loetlege võimalused   | `list-capabilities`  | Tagastab täieliku 45 kirjest koosneva agendioskuste kataloogi (23 API + 21 CLI + 1 konfiguratsioon) allahindluste tabelina koos töötlemata SKILL.md URLs iga konteksti sisestamiseks | kataloog, avastus, oskused | "Loetlege kõik OmniRoute võimalused"            |
 
-> Agent Card tuleks hoida kooskõlas reaalajas 375 pakkujaga kataloogiga; pakkujate arv ning tasuta/autentimisvabad metaandmed pärinevad käitusaja registrist.
+> Agendikaarti tuleks hoida vastavuses reaalajas 381-pakkujakataloogiga; pakkujate arv ja free/no-auth metaandmed pärinevad käitusaja registrist.
 
-### `list-capabilities` oskuse üksikasjad
+### `list-capabilities` oskuste üksikasjad
 
-Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kõnede tegemist selgitama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefaktina:
+`list-capabilities` oskus on eriti kasulik välisagentidele, kes peavad enne API -kõnede saatmist avastama, mida OmniRoute paljastab. See tagastab struktureeritud allahindluste tabeli artefakti:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,60 +176,68 @@ Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enn
 ...
 ```
 
-Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe hankida kogu SKILL.md sisu. Väli `metadata.totalSkills` peegeldab kataloogi suurust (täna 45). Implementatsioon: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe kogu SKILL.md laadida. `metadata.totalSkills` väli peegeldab kataloogi suurust (täna 45). Rakendamine: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## REST API (abiseadmed)
+## REST API (abi)
 
-JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud REST lõpp-punktid pakuvad lisapääsu juhtpaneelidele ja välistööriistadele:
+JSON-RPC lõpp-punkt `/a2a` on kanooniline A2A sisendpunkt. Allolevad REST lõpp-punktid pakuvad lisajuurdepääsu armatuurlaudadele ja välistele tööriistadele.
 
-| Lõpp-punkt                   | Meetod | Kirjeldus                                                            | Autentimine                                  |
-| :--------------------------- | :----- | :------------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET    | Serveri staatus, registreeritud oskused                              | (avalik)                                     |
-| `/api/a2a/tasks`             | GET    | Tegevuste loend filtritega                                           | haldus                                       |
-| `/api/a2a/tasks/[id]`        | GET    | Tegevuse saamine ID järgi                                            | haldus                                       |
-| `/api/a2a/tasks/[id]/cancel` | POST   | Töötava tegevuse tühistamine                                         | haldus                                       |
-| `/.well-known/agent.json`    | GET    | Agent Card (A2A avastus)                                             | (avalik, vahemälu 3600s)                     |
-| `/api/a2a/tasks`             | POST   | Sisenev delegeerimine OmniConductor laevastikule (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Lõpp-punkt                   | meetod | Kirjeldus                                                             | Aut                                                                                                                   |
+| :--------------------------- | :----- | :-------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | Serveri staatus, registreeritud oskused                               | (avalik)                                                                                                              |
+| `/api/a2a/tasks`             | GET    | Loetlege ülesanded filtritega                                         | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/api/a2a/tasks/[id]`        | GET    | Hangi ülesanne ID kaudu                                               | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Tühista tööülesanne                                                   | juhtimine või API klahv (vt allpool)                                                                                  |
+| `/.well-known/agent.json`    | GET    | Agendikaart (A2A discovery)                                           | (avalik, vahemällu salvestatud 3600)                                                                                  |
+| `/api/a2a/tasks`             | POST   | Sissetulev delegatsioon OmniConductor laevastikule (dirigent PRD RF5) | sama mis `GET`, pluss `OMNIROUTE_API_KEY` kui see on määratud, kui `REQUIRE_API_KEY` on välja lülitatud; `a2aEnabled` |
 
-**Sisenev Conductor delegeerimine (`POST /api/a2a/tasks`):** välised A2A agendid delegeerivad programmeerimistööd OmniConductor laevastikule OmniRoute'i kaudu. Sisu: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — ainult Conductor laevastiku oskused (need, mis on teatatud Agent Cardis) on delegeeritavad; `metadata.conductor.repo.url` on kohustuslik (laevastik töötab git-hoidlatest). Marsruut tõlgitakse keskuse `POST /v1/tasks` kasutades serveripoolset `CONDUCTOR_ORCHESTRATOR_TOKEN` (tagasivõte `CONDUCTOR_HUB_TOKEN`) ja tagastab `201 { conductor_task_id, state: "submitted" }`; tegevuste olekud edastatakse tagasi läbi SSE→A2A peegelduse (RF1) ja on nähtavad `GET /api/a2a/tasks?skill=conductor` abil.
+Kes pääseb `/api/a2a/tasks*` marsruutidele, sõltub sisselogimise ja API-võtme seadetest:
+
+- `requireLogin=true` (vaikimisi): vahevara lubab ainult haldusmandaate (armatuurlaua seanss, `manage` -scope API võti, `oma_` juurdepääsuluba) ja `OMNIROUTE_API_KEY`. Lihtne järeldusvõti saab `403`. `Authorization` päises võtab vahevara ainult `OMNIROUTE_API_KEY` kui `Bearer <key>`; tühi klahv või tabeldusmärk pärast `Bearer` saab `401`.
+- `requireLogin=false` või loopback aken enne liitumist: `REQUIRE_API_KEY=true` ga aktsepteeritakse mis tahes kehtivat OmniRoute API -võtit või haldusmandaati ja anonüümsed helistajad saavad `401`; `REQUIRE_API_KEY` ga väljas marsruudid on avatud.
+- `POST /api/a2a/tasks` nõuab lisaks `OMNIROUTE_API_KEY` `Authorization` päises, kui see muutuja on määratud ja `REQUIRE_API_KEY` on välja lülitatud. Muud päised, näiteks `x-api-key`, ei lähe sinna arvesse. Kui sisselogimine on välja lülitatud või enne pardale sisenemist, läheb võti `Bearer` -prefiksiga või ilma; sisselogimisel pääseb vahevarast mööda ainult `Bearer <key>`.
+
+Kui mandaati on vaja, töötab `read` -scope `oma_` luba ainult `GET` puhul.
+
+**Sissetulevate juhtide delegatsioon (`POST /api/a2a/tasks`):** välised A2A agendid delegeerivad kodeerimistööd OmniConductor laevastikule OmniRoute kaudu. Keha: ainult `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — Dirigendipargi oskused (need, mis on märgitud agendikaardil) on delegeeritavad; `metadata.conductor.repo.url` on nõutav (parkett töötab git repos). Marsruut teisendub jaoturi `POST /v1/tasks`, kasutades serveripoolset `CONDUCTOR_ORCHESTRATOR_TOKEN` (varumine `CONDUCTOR_HUB_TOKEN`) ja tagastab `201 { conductor_task_id, state: "submitted" }`; ülesande olekud voolavad tagasi läbi SSE→A2A peegli (RF1) ja on nähtavad `GET /api/a2a/tasks?skill=conductor` kaudu .
 
 ---
 
 ## Uue oskuse lisamine
 
-1. **Loo oskuse fail:** `src/lib/a2a/skills/<teie-oskus>.ts`
+1. **Loo oskuste fail:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspordi asünkroonne funktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgi olemasolevate oskuste struktuuri, nagu `smartRouting.ts`.
+   Eksportige asünkroonimisfunktsioon `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Järgige olemasolevate oskuste, näiteks `smartRouting.ts` kuju. Kui oskus kutsub tagasi OmniRoute -sse HTTP kaudu, looge päised `buildSelfLoopHeaders(caller)` -ga `src/lib/a2a/selfLoopAuth.ts` -st, nii et kõne käiks A2A -helistaja võtmega, mitte `OMNIROUTE_API_KEY`, ja edastage `redirect: "error"` `fetch` -le, nii et ümbersuunamine ei saaks kunagi võtit. Abimees koostab ainult päised; iga oskus määrab ümbersuunamispoliitika ise. Kui lahendatud põhi- URL on väljaspool privaatvõrku tavaline http (loopback, konteineri või teenuse nimi ja privaatsed aadressid on korras) viskab pigem `UnsafeSelfLoopTargetError` kui lisab võtme, kui tal on volitused, nii et tagasilükatud kõnesid neelav oskus peab selle vea uuesti viskama.
 
-2. **Registreeri käitleja:** `src/lib/a2a/taskExecution.ts` failis lisa kanne `A2A_SKILL_HANDLERS` objekti:
+2. **Registrihaldur:** `src/lib/a2a/taskExecution.ts` s lisage `A2A_SKILL_HANDLERS`-sse kirje:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...olemasolevad oskused
-     "teie-oskus": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Näita Agent Card-is:** `src/app/.well-known/agent.json/route.ts` failis lisa `skills` massiivi lõppu:
+3. **Esitage agendikaardil:** `src/lib/a2a/agentCardMetadata.ts` (jagavad `/.well-known/agent.json` ja `/.well-known/agent-card.json`) lisage `skills` massiivi:
 
    ```json
    {
-     "id": "teie-oskus",
-     "name": "Teie Oskus",
-     "description": "Lühike, kavatsusele keskendunud kirjeldus",
-     "tags": ["marsruutimine", "kvooot"],
-     "examples": "Näidisloomuliku keele kutsed"]
+     "id": "your-skill",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Kirjuta testid:** `tests/unit/a2a-<teie-oskus>.test.ts`. Katke edukas + vigane tee.
+4. **Kirjutage teste:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + error path.
 
-5. **Dokumenteeri** uus oskus selle faili `Saadaolevad oskused` tabelis.
+5. **Dokument** uus oskus selle faili `Available Skills` tabelis.
 
 ---
 
@@ -266,9 +274,9 @@ esitatud → töös → valmis
 
 ---
 
-## Integratsiooninäited
+## Integratsiooni näited
 
-### Python (requests)
+### Python (päringud)
 
 ```python
 import requests
@@ -287,7 +295,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (tooma)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

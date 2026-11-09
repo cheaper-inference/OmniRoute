@@ -29,22 +29,22 @@ Intervalo:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## O Que Ele Comprime
 
-Atualmente, o catálogo integrado inclui 49 filtros nestas categorias:
+O catálogo integrado atualmente inclui 56 filtros distribuídos nestas categorias:
 
-| Categoria | Exemplos                                                       |
-| --------- | -------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`              |
-| `test`    | Vitest, Jest, Pytest, Playwright, testes Go, testes Cargo      |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx  |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler  |
-| `shell`   | `ls`, `find`, `grep`, logs genéricos do shell                  |
-| `docker`  | `docker ps`, logs do Docker                                    |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                        |
-| `generic` | saída JSON, rastreamentos de pilha, fallback de saída genérica |
+| Categoria | Exemplos                                                      |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testes Cargo   |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, logs genéricos de shell                 |
+| `docker`  | `docker ps`, logs do Docker                                   |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | Saída JSON, stack traces, fallback de saída genérica          |
 
 O detector em `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica a saída
-antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou expressão regular da saída quando uma classe de
-comando não é suficiente.
+antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou regex de saída quando uma
+classe de comando não é suficiente.
 
 ## Resolução de Filtros
 
@@ -353,14 +353,14 @@ node --import tsx/esm --test \
 
 ## Níveis de Intensidade (v3.8.16+)
 
-O RTK oferece **3 níveis de intensidade** que equilibram a **agressividade da compactação** e a **segurança**. O nível é definido por meio de `config.intensity` na configuração do mecanismo.
+O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de compressão** e **segurança**. O nível é definido via `config.intensity` na configuração do motor.
 
 ### Os 3 Níveis
 
-| Nível               | Limite de truncamento | Economia de tokens | Risco       | Mais adequado para              |
+| Nível               | Limite de truncamento | Economia de tokens | Risco       | Melhor para                     |
 | ------------------- | --------------------- | ------------------ | ----------- | ------------------------------- |
 | `minimal`           | 24 linhas por seção   | ~20-40%            | Muito baixo | Produção com contexto crítico   |
-| `standard` (padrão) | 24 linhas por seção   | ~50-70%            | Baixo       | Sessões diárias de programação  |
+| `standard` (padrão) | 24 linhas por seção   | ~50-70%            | Baixo       | Sessões diárias de codificação  |
 | `aggressive`        | 16 linhas por seção   | ~70-90%            | Médio       | Sessões longas, economia máxima |
 
 ### Onde Ocorre o Truncamento
@@ -373,39 +373,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tanto o **início** quanto o **fim** de cada seção são preservados; o conteúdo intermediário é descartado quando o truncamento entra em ação.
+Tanto o **início** quanto o **final** de cada seção são preservados; o conteúdo intermediário é descartado quando o truncamento entra em ação.
 
-### O Que Permanece e o Que É Cortado
+### O Que Permanece vs. O Que É Cortado
 
-| Conteúdo                       | minimal        | standard       | aggressive     |
-| ------------------------------ | -------------- | -------------- | -------------- |
-| Erros / rastreamentos de pilha | ✅ preservados | ✅ preservados | ✅ preservados |
-| Falhas em testes               | ✅ preservadas | ✅ preservadas | ✅ preservadas |
-| Erros de build                 | ✅ preservados | ✅ preservados | ✅ preservados |
-| Testes aprovados (detalhados)  | ✅ preservados | 🟡 condensados | 🟡 condensados |
-| Saída rotineira (logs de info) | 🟡 condensada  | 🟡 condensada  | ❌ descartada  |
-| Barras de progresso            | 🟡 condensadas | ❌ descartadas | ❌ descartadas |
-| Banner / arte ASCII            | 🟡 condensados | ❌ descartados | ❌ descartados |
+| Conteúdo                       | minimal       | standard      | aggressive    |
+| ------------------------------ | ------------- | ------------- | ------------- |
+| Erros / stack traces           | ✅ preservado | ✅ preservado | ✅ preservado |
+| Falhas de teste                | ✅ preservado | ✅ preservado | ✅ preservado |
+| Erros de build                 | ✅ preservado | ✅ preservado | ✅ preservado |
+| Testes aprovados (verbose)     | ✅ preservado | 🟡 recolhido  | 🟡 recolhido  |
+| Saída de rotina (logs de info) | 🟡 recolhido  | 🟡 recolhido  | ❌ descartado |
+| Barras de progresso            | 🟡 recolhido  | ❌ descartado | ❌ descartado |
+| Banner / arte ASCII            | 🟡 recolhido  | ❌ descartado | ❌ descartado |
 
-### Escolhendo a Intensidade Correta
+### Escolhendo a Intensidade Certa
 
 ```
-                  Perder contexto seria catastrófico?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    SIM          NÃO       NÃO SEI
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Quão crítico    Tente `standard` primeiro
-      │      é o desempenho? (funciona em 80% dos
-      │           │          casos)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    BAIXO      ALTO
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -431,8 +431,8 @@ Tanto o **início** quanto o **fim** de cada seção são preservados; o conteú
 **Programaticamente**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
-`CompressionEngine` e não possui um método `updateConfig`. Em vez disso, atualize a configuração
-de um mecanismo por meio do helper do registro:
+`CompressionEngine` e não possui o método `updateConfig`. Atualize a configuração
+de um motor por meio do helper do registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,14 +442,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificando o Efeito
 
-Use o **Gate de Verificação** (veja abaixo) para confirmar que seu filtro é seguro na intensidade escolhida:
+Use o **Verify Gate** (veja abaixo) para confirmar que seu filtro é seguro na intensidade escolhida:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Os filtros falharam na intensidade agressiva");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

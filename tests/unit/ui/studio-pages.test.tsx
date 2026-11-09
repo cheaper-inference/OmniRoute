@@ -21,13 +21,13 @@ beforeAll(() => {
   } as unknown as typeof WebSocket;
 });
 
-const containers: HTMLElement[] = [];
+const mounted: Array<{ container: HTMLElement; root: ReturnType<typeof createRoot> }> = [];
 
 function mount(ui: React.ReactElement): HTMLElement {
   const container = document.createElement("div");
   document.body.appendChild(container);
-  containers.push(container);
   const root = createRoot(container);
+  mounted.push({ container, root });
   act(() => {
     root.render(ui);
   });
@@ -41,7 +41,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  while (containers.length > 0) containers.pop()?.remove();
+  while (mounted.length > 0) {
+    const { container, root } = mounted.pop()!;
+    try {
+      act(() => root.unmount());
+    } finally {
+      container.remove();
+    }
+  }
   document.body.innerHTML = "";
 });
 

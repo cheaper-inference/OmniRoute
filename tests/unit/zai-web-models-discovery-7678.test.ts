@@ -94,9 +94,12 @@ test("zai-web exposes only its curated public models without remote discovery", 
     assert.equal(response.status, 200);
     const body = await response.json();
     assert.equal(body.source, "local_catalog");
+    // #18018 made operator-added custom models listable on curated providers, so the
+    // manual row now joins the curated lineup. The synced rows and the custom row a
+    // discovery sync imported (glm-4-air-250414) are still left out (#8451).
     assert.deepEqual(
       body.models.map((model: { id: string }) => model.id),
-      CURATED_ZAI_WEB_MODEL_IDS
+      [...CURATED_ZAI_WEB_MODEL_IDS, "manual-test-model"]
     );
     assert.equal(fetchCalls, 0);
   } finally {

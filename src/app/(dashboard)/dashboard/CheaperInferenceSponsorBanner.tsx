@@ -2,19 +2,18 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import { Button as KitButton } from "@omniroute/ui-kit/button";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { CHEAPERINFERENCE_BRAND_COLOR } from "./providers/featuredProviders";
 
 // The URL in README.md's Open Source Friends section. This used to go through
 // our own link.omniroute.online shortener for click metrics, but that domain no
 // longer resolves (every slug 404s) after the move to omniskill.online, so the
 // CTA points straight at the destination again.
 const CHEAPER_INFERENCE_URL = "https://cheaperinference.com/?utm_source=omniroute";
-
-// Cheaper Inference brand green (#31f889). White text on it fails contrast, so
-// the CTA pairs it with the dark ink from the provider's color token (colors.ts:
-// cheaperinference.text = #04170d). Hex values stay in sync with that token.
 
 const DISMISS_STORAGE_KEY = "omniroute-cheaperinference-sponsor-banner-dismissed-v1";
 // Same-tab signal for the dismiss button, since writing localStorage doesn't
@@ -64,15 +63,19 @@ export default function CheaperInferenceSponsorBanner() {
     window.dispatchEvent(new Event(DISMISS_EVENT));
   };
 
-  // Partner identity colour (#31f889) — brand, not a semantic status tone; kept as-is.
+  // The partner brand is the Card's tint, never the text or the CTA fill: the kit derives an AA
+  // ink and border for it in every look. The note under the CTA uses full-strength text-muted at
+  // 12px (9px at 70% failed AA, P7).
   return (
-    <div
+    <Card
+      padding="none"
+      brandColor={CHEAPERINFERENCE_BRAND_COLOR}
       role="complementary"
       aria-label={t("title")}
-      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#31f889]/30 bg-[#31f889]/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#31f889]/10">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface">
           <ProviderIcon providerId="cheaperinference" size={24} type="color" />
         </div>
         <div className="min-w-0">
@@ -83,17 +86,19 @@ export default function CheaperInferenceSponsorBanner() {
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
         <div className="flex flex-col items-end gap-0.5">
-          <a
-            href={CHEAPER_INFERENCE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t("partnerLinkNote")}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#31f889] px-3 py-1.5 text-xs font-semibold text-[#04170d] transition-colors hover:brightness-110"
-          >
-            {t("cta")}
-            <Icon name="open_in_new" size={14} />
-          </a>
-          <span className="text-[9px] text-text-muted/70">{t("partnerLinkNote")}</span>
+          <KitButton asChild size="sm">
+            <a
+              href={CHEAPER_INFERENCE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t("partnerLinkNote")}
+              className="whitespace-nowrap"
+            >
+              {t("cta")}
+              <Icon name="open_in_new" size={14} />
+            </a>
+          </KitButton>
+          <span className="text-xs text-text-muted">{t("partnerLinkNote")}</span>
         </div>
         <Button
           variant="ghost"
@@ -104,6 +109,6 @@ export default function CheaperInferenceSponsorBanner() {
           className="text-text-muted hover:text-text-main"
         />
       </div>
-    </div>
+    </Card>
   );
 }

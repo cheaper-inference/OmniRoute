@@ -157,11 +157,22 @@ test("Kiro registry exposes the current CLI model lineup with context windows", 
   assert.equal(byId.has("claude-haiku-4-5"), false);
 });
 
-test("Claude max effort support excludes Haiku family and non-Claude IDs", () => {
+test("Claude max effort support follows the Anthropic effort docs and excludes non-Claude IDs", () => {
   assert.equal(supportsClaudeMaxEffort("claude-opus-4-7"), true);
   assert.equal(supportsClaudeMaxEffort("claude-opus-4-6"), true);
   assert.equal(supportsClaudeMaxEffort("claude-sonnet-4-6"), true);
-  assert.equal(supportsClaudeMaxEffort("claude-sonnet-4-5-20250929"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-sonnet-4-5-20250929"), false);
+  assert.equal(supportsClaudeMaxEffort("claude-opus-4-5-20251101"), false);
+  assert.equal(supportsClaudeMaxEffort("claude-opus-4-20250514"), false);
+  assert.equal(supportsClaudeMaxEffort("claude-sonnet-5-5"), false);
+  assert.equal(supportsClaudeMaxEffort("claude-sonnet-5.5"), false);
+  assert.equal(supportsClaudeMaxEffort("claude-sonnet-5"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-haiku-5-5"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-haiku-5.5"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-fable-5-1"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-mythos-5"), true);
+  assert.equal(supportsClaudeMaxEffort("claude-mythos-preview"), true);
+  assert.equal(supportsClaudeMaxEffort("cc/claude-opus-4.6"), true);
   assert.equal(supportsClaudeMaxEffort("claude-haiku-4-5-20251001"), false);
   assert.equal(supportsClaudeMaxEffort("claude-3-5-haiku-20241022"), false);
   assert.equal(supportsClaudeMaxEffort("anthropic/claude-haiku-4.5"), false);

@@ -13,6 +13,8 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { compareTr } from "@/shared/utils/turkishText";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
 import ProviderHealthAutopilotCard from "./ProviderHealthAutopilotCard";
@@ -83,6 +85,7 @@ function HealthSnapshot() {
   const tc = useTranslations("common");
   const tp = useTranslations("providers");
   const nodeMap = useProviderNodeMap();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [data, setData] = useState(null);
   const [dbHealth, setDbHealth] = useState(null);
   const [dbHealthError, setDbHealthError] = useState(null);
@@ -137,24 +140,17 @@ function HealthSnapshot() {
   }, []);
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => {
-      void fetchHealth();
-      void fetchExtras();
-      void fetchDbHealth();
-    }, 0);
-    const interval = setInterval(() => {
+    // Skips ticks while the tab is hidden and catches up on return: these
+    // three endpoints hit the same process that serves the LLM proxy.
+    return startVisiblePolling(() => {
       void fetchHealth();
       void fetchExtras();
       void fetchDbHealth();
     }, 15000);
-    return () => {
-      clearTimeout(initialFetch);
-      clearInterval(interval);
-    };
   }, [fetchHealth, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {
-    if (!confirm(t("resetConfirm"))) return;
+    if (!(await requestConfirm(t("resetConfirm")))) return;
     setResetting(true);
     try {
       const res = await fetch("/api/monitoring/health", { method: "DELETE" });
@@ -1183,6 +1179,7 @@ function HealthSnapshot() {
           </div>
         </Card>
       )}
+      {confirmDialog}
     </HealthLayout>
   );
 }

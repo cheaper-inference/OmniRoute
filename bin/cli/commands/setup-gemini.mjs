@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { createPrompt, printError, printHeading, printInfo, printSuccess } from "../io.mjs";
 import { writePrivateFileAtomic } from "../private-file.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
@@ -83,8 +83,7 @@ export function resolveGeminiTarget(opts = {}) {
   const apiKey =
     opts.apiKey ??
     opts["api-key"] ??
-    context?.accessToken ??
-    context?.apiKey ??
+    contextCredentialFor(context, baseUrl) ??
     process.env.OMNIROUTE_API_KEY ??
     "omniroute-no-auth";
   return { baseUrl: validateGeminiEndpoint(baseUrl), apiKey };

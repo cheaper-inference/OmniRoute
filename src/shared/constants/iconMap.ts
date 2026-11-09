@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   AlarmClockPlus,
+  Anchor,
   AppWindow,
   Archive,
   ArrowDown,
@@ -139,7 +140,6 @@ import {
   ListChevronsDownUp,
   ListChevronsUpDown,
   ListFilter,
-  ListOrdered,
   ListX,
   LoaderCircle,
   LocateFixed,
@@ -282,6 +282,7 @@ import {
   ListEnd,
   ListPlus,
   SkipForward,
+  Tally1,
   Tally2,
   Tally3,
   Target,
@@ -357,6 +358,7 @@ import { ArrowBigUpDash, Blend } from "lucide-react";
  */
 export const ICON_MAP: Record<string, LucideIcon> = {
   // ── shell + primitives ──
+  anchor: Anchor,
   home: House,
   settings: Settings,
   search: Search,
@@ -640,7 +642,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   lock_person: UserLock,
   login: LogIn,
   looks_3: Tally3,
-  looks_one: ListOrdered,
+  looks_one: Tally1,
   looks_two: Tally2,
   low_priority: ListEnd,
   manage_accounts: UserCog,

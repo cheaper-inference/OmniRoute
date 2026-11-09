@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useId } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -279,8 +280,8 @@ export default function KiloToolCard({
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-border">
           {checkingKilo && (
-            <div className="flex items-center gap-2 text-text-muted text-sm">
-              <Icon name="progress_activity" size={16} className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted text-sm">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Kilo Code" })}</span>
             </div>
           )}

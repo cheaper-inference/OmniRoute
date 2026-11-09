@@ -45,10 +45,18 @@ export type CopilotIdentityFallbackResult = {
  */
 export function createCopilotIdentityFallback(provider: string, log?: ExecutorLog | null) {
   let retried = false;
+  let switched = false;
 
-  return async function applyCopilotIdentityFallback(
-    args: CopilotIdentityFallbackArgs
-  ): Promise<CopilotIdentityFallbackResult> {
+  /** After a successful switch, keep copilot-chat on every later request of this call. */
+  function pin(headers: Record<string, string>): void {
+    if (!switched) return;
+    for (const key of Object.keys(headers)) {
+      if (key.toLowerCase() === "copilot-integration-id") delete headers[key];
+    }
+    headers["copilot-integration-id"] = GITHUB_COPILOT_CHAT_INTEGRATION_ID;
+  }
+
+  async function apply(args: CopilotIdentityFallbackArgs): Promise<CopilotIdentityFallbackResult> {
     const { response, url, fetchOptions, clientHeaders, fetchWithStartTimeout } = args;
     const finalHeaders = fetchOptions.headers as Record<string, string>;
 
@@ -104,6 +112,10 @@ export function createCopilotIdentityFallback(provider: string, log?: ExecutorLo
       headers: retryHeaders,
     });
 
+    // Pin copilot-chat only when it was not denied too (then nothing was proven).
+    switched = retryResponse.status !== HTTP_STATUS.FORBIDDEN;
     return { response: retryResponse, finalHeaders: retryHeaders };
-  };
+  }
+
+  return { apply, pin };
 }

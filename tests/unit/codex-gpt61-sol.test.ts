@@ -18,7 +18,7 @@ const SOL_UNSUPPORTED_MESSAGE =
   "The 'gpt-6.1-sol' model is not supported when using Codex with a ChatGPT account.";
 
 test("Codex client version supports GPT-6.1 Sol", () => {
-  assert.equal(DEFAULT_CODEX_CLIENT_VERSION, "0.159.2");
+  assert.equal(DEFAULT_CODEX_CLIENT_VERSION, "0.165.0");
   assert.equal(semver.gte(DEFAULT_CODEX_CLIENT_VERSION, "0.159.0"), true);
 });
 

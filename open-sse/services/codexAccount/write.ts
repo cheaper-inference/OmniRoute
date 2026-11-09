@@ -1,5 +1,10 @@
 import { getCodexModelScope, type CodexQuotaScope } from "../../config/codexQuotaScopes.ts";
-import { updateCodexScopeCooldown } from "@/lib/db/providers";
+import { getProviderConnectionById, updateCodexScopeCooldown } from "@/lib/db/providers";
+
+// Single seam to the connection table for Codex engine code: the passive refresh reread
+// (tokenRefresh/passiveCodex.ts) loads this lazily instead of importing src/ itself
+// (open-sse → src boundary ratchet, quality-baseline.json).
+export { getProviderConnectionById };
 
 export interface PersistCodexChildCooldownResult {
   readonly scope: CodexQuotaScope;

@@ -323,8 +323,18 @@ describe("ApiKeyAccessEditorClient", () => {
     expect(screen.getByDisplayValue("Saved Key Name")).toBeDefined();
   });
 
+  // #19066: the guard asks through the kit confirm dialog, not the native confirm(). The
+  // click is always held; the link is followed (router.push) only after Confirm.
+  const leaveDialog = () => screen.queryByText(messages.apiManager.unsavedChangesWarning);
+  const leaveDialogButton = (name: string) =>
+    within(screen.getByRole("alertdialog", { name: messages.common.confirmTitle })).getByRole(
+      "button",
+      {
+        name,
+      }
+    );
+
   it("asks for confirmation before following an in-app link while dirty", async () => {
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     await renderLoaded();
 
     const backLink = screen.getByRole("link", { name: /api key management/i });
@@ -332,17 +342,26 @@ describe("ApiKeyAccessEditorClient", () => {
 
     backLink.addEventListener("click", swallowNavigation);
     fireEvent.click(backLink);
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(leaveDialog()).toBeNull();
     backLink.removeEventListener("click", swallowNavigation);
 
     await makeDirty();
     const notCancelled = fireEvent.click(backLink);
-    expect(confirmSpy).toHaveBeenCalledWith(messages.apiManager.unsavedChangesWarning);
     expect(notCancelled).toBe(false);
+    expect(leaveDialog()).not.toBeNull();
+
+    // Cancel keeps the user on the page.
+    fireEvent.click(leaveDialogButton(messages.common.cancel));
+    await waitFor(() => expect(leaveDialog()).toBeNull());
+    expect(mockRouter.push).not.toHaveBeenCalled();
+
+    // Confirm follows the held link.
+    fireEvent.click(backLink);
+    fireEvent.click(leaveDialogButton(messages.common.confirmAction));
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/dashboard/api-manager"));
   });
 
   it("does not intercept modified clicks, middle clicks or links opening a new tab", async () => {
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     await renderLoaded();
     await makeDirty();
 
@@ -364,16 +383,15 @@ describe("ApiKeyAccessEditorClient", () => {
     fireEvent.click(backLink, { button: 1 });
     fireEvent.click(newTabLink);
 
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(leaveDialog()).toBeNull();
 
-    // The guard is still armed: a plain click on the same link asks once.
+    // The guard is still armed: a plain click on the same link asks.
     fireEvent.click(backLink);
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(leaveDialog()).not.toBeNull();
     newTabLink.remove();
   });
 
   it("does not prompt for same-page hash links", async () => {
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     await renderLoaded();
     await makeDirty();
 
@@ -392,10 +410,10 @@ describe("ApiKeyAccessEditorClient", () => {
     otherPageHashLink.addEventListener("click", swallowNavigation);
 
     fireEvent.click(hashLink);
-    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(leaveDialog()).toBeNull();
 
     fireEvent.click(otherPageHashLink);
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(leaveDialog()).not.toBeNull();
 
     hashLink.remove();
     otherPageHashLink.remove();
@@ -420,6 +438,8 @@ describe("ApiKeyAccessEditorClient", () => {
       blockedModels: [],
       allowedCombos: [],
       allowedConnections: [],
+      // #13102: the ordered per-key connection preference is always part of the PATCH.
+      preferredConnections: [],
       noLog: false,
       autoResolve: false,
       isActive: true,
@@ -434,12 +454,14 @@ describe("ApiKeyAccessEditorClient", () => {
       streamDefaultMode: "legacy",
       compressionEnabled: true,
       allowAutoCombos: true,
+      allowCcDiscoveryAliases: true,
       catalogScope: "all",
       disableNonPublicModels: false,
       allowUsageCommand: false,
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       forcedModel: null,
     });

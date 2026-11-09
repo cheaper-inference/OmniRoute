@@ -50,6 +50,8 @@ async function fixture(
       apiKey: "fixture-only",
       model: "fixture",
       timeoutMs: 5000,
+      // Exercise the LLM retry path itself; the Google fallback has its own tests.
+      googleFallback: false,
     },
   };
 }

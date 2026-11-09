@@ -22,6 +22,8 @@ export const DropdownMenuTrigger = forwardRef<HTMLButtonElement, DropdownMenuTri
 
 export interface DropdownMenuContentProps extends ComponentProps<typeof DropdownMenuPrimitive.Content> {
   portalContainer?: HTMLElement | null;
+  /** Bound long menus to the available viewport while retaining keyboard navigation. */
+  scrollable?: boolean;
 }
 
 export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuContentProps>(function DropdownMenuContent({
@@ -32,6 +34,7 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
   collisionPadding = 8,
   portalContainer,
   forceMount,
+  scrollable = false,
   ...props
 }, ref) {
   return (
@@ -44,7 +47,7 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
         side={side}
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
-        className={cn("ci-menu", className)}
+        className={cn("ci-menu", scrollable && "ci-menu--scrollable", className)}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>

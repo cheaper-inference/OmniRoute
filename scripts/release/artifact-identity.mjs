@@ -30,6 +30,10 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  getEffectiveBuildMemoryBytes,
+  resolveNextBuildBundlerFlag,
+} from "../build/build-next-isolated.mjs";
 
 export const BUILD_POLICY_VERSION = "preview-artifact/1";
 
@@ -45,9 +49,13 @@ export function hashLockfile(content) {
   return sha256(content);
 }
 
-/** Bundler `npm run build` uses (scripts/build/build-next-isolated.mjs). */
-export function resolveBundler(env = process.env) {
-  return env.OMNIROUTE_USE_TURBOPACK === "0" ? "webpack" : "turbopack";
+/**
+ * Bundler `npm run build` uses. Delegates to the build script's own resolver so the
+ * stamped `bundler` can never disagree with the build: since #18184 an unset
+ * OMNIROUTE_USE_TURBOPACK picks webpack on hosts with <= 16 GiB of effective RAM.
+ */
+export function resolveBundler(env = process.env, memoryBytes = getEffectiveBuildMemoryBytes()) {
+  return resolveNextBuildBundlerFlag(env, memoryBytes) === "--webpack" ? "webpack" : "turbopack";
 }
 
 function requireSha(name, value) {

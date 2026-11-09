@@ -2,6 +2,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
+import { geminiFunctionParameters } from "../helpers/geminiFunctionParameters.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import { normalizeEffort } from "@/shared/reasoning/effortStandardization";
 
@@ -38,7 +39,7 @@ export function antigravityToOpenAIRequest(model, body, stream) {
     const config = req.generationConfig;
     if (config.maxOutputTokens) {
       const tempBody = { max_tokens: config.maxOutputTokens, tools: req.tools };
-      result.max_tokens = adjustMaxTokens(tempBody);
+      result.max_tokens = adjustMaxTokens(tempBody, { honorExplicitCap: true });
     }
     if (config.temperature !== undefined) {
       result.temperature = config.temperature;
@@ -108,7 +109,7 @@ export function antigravityToOpenAIRequest(model, body, stream) {
             function: {
               name: func.name,
               description: func.description || "",
-              parameters: cleanSchemaPreservingRequired(func.parameters) || {
+              parameters: cleanSchemaPreservingRequired(geminiFunctionParameters(func)) || {
                 type: "object",
                 properties: {},
               },

@@ -143,24 +143,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Elérhető készségek
+## Rendelkezésre álló készségek
 
-Az OmniRoute 6 A2A-készséget tesz elérhetővé, amelyek a `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` helyen vannak bekötve. Minden készségmodul a `src/lib/a2a/skills/` könyvtárban található.
+OmniRoute 6 A2A képességet tesz közzé `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ben. Minden készségmodul `src/lib/a2a/skills/` ben található.
 
-| Készség                 | ID                   | Leírás                                                                                                                                                                          | Címkék                           | Példák                                                  |
-| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------- | :------------------------------------------------------ |
-| Intelligens útválasztás | `smart-routing`      | Az OmniRoute kombinációs motorja és pontozási rendszere segítségével az optimális szolgáltatón/kombináción keresztül irányítja a promptot                                       | útválasztás, szolgáltatók        | "Irányítsd ezt a promptot a legjobb modellen keresztül" |
-| Kvótakezelés            | `quota-management`   | Szolgáltatónként jelenti a kvótaállapotot, és segít a hívóknak eldönteni, mikor kell korlátozni vagy váltani                                                                    | kvóta, szolgáltatók              | "Ellenőrizd az anthropic kvótáját"                      |
-| Szolgáltató-felfedezés  | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességeikkel, ingyenes csomag jelzőikkel és OAuth-állapotukkal                                                                         | szolgáltatók, felfedezés         | "Milyen szolgáltatók érhetők el?"                       |
-| Költségelemzés          | `cost-analysis`      | A katalógus és a közelmúltbeli használat alapján megbecsüli egy kérés/beszélgetés költségét                                                                                     | költség, használat               | "Becsüld meg ennek a beszélgetésnek a költségét"        |
-| Állapotjelentés         | `health-report`      | Szolgáltatónként összesíti a circuit breaker, a cooldown és a lockout állapotát                                                                                                 | állapot, hibatűrés               | "Mutasd az összes szolgáltató állapotát"                |
-| Képességek listázása    | `list-capabilities`  | A teljes, 45 bejegyzésből álló Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció) markdown-táblázatként adja vissza, nyers SKILL.md URL-ekkel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "Sorold fel az összes OmniRoute-képességet"             |
+| Ügyesség                | ID                   | Leírás                                                                                                                                                                           | Címkék                           | Példák                                                   |
+| :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------- |
+| Intelligens útválasztás | `smart-routing`      | A prompt az optimális provider/combo keresztül irányítja OmniRoute kombinált motorjának + pontozását                                                                             | útválasztás, szolgáltatók        | "Route this prompt via the best model"                   |
+| Kvótakezelés            | `quota-management`   | Szolgáltatónkénti kvótaállapotot jelent, segít a hívóknak eldönteni, hogy mikor kell throttle/switch tenni                                                                       | kvóta, szolgáltatók              | "Check quot for anthropic"                               |
+| Szolgáltató felfedezése | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességekkel, szabadszintű jelzőkkel és OAuth állapottal                                                                                 | szolgáltatók, felfedezés         | – Milyen szolgáltatók érhetők el?                        |
+| Költségelemzés          | `cost-analysis`      | Egy request/conversation becsült költsége a + katalógus legutóbbi használatának függvényében                                                                                     | költség, használat               | "A beszélgetés becsült költsége"                         |
+| Egészségügyi jelentés   | `health-report`      | Aggregálja a megszakítót, a lehűlést, a lezárási állapotot szolgáltatónként                                                                                                      | egészség, rugalmasság            | "Minden szolgáltató egészségi állapotának megjelenítése" |
+| Képességek listázása    | `list-capabilities`  | Visszaadja a teljes, 45 bejegyzésből álló Agent Skills katalógust (23 API + 21 CLI + 1 konfiguráció) leértékelési táblázatként nyers SKILL.md URLs vel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "List all OmniRoute képességek"                          |
 
-> Az Agent Cardot naprakészen kell tartani az élő, 375 szolgáltatót tartalmazó katalógushoz igazítva; a szolgáltatók száma és az ingyenes/hitelesítés nélküli metaadatok a futásidejű regiszterből származnak.
+> Az ügynökkártyát összhangban kell tartani az élő 381-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
 
-### A `list-capabilities` készség részletei
+### `list-capabilities` Skill Detail
 
-A `list-capabilities` készség különösen hasznos olyan külső ágensek számára, amelyeknek API-hívások küldése előtt fel kell ismerniük, mit kínál az OmniRoute. Strukturált markdown-táblázat artefaktumot ad vissza:
+A `list-capabilities` készség különösen hasznos a külső ügynökök számára, akiknek fel kell fedezniük, hogy OmniRoute mit tesz közzé API hívások küldése előtt. Strukturált leértékelési táblázatot ad vissza:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -169,46 +169,54 @@ A `list-capabilities` készség különösen hasznos olyan külső ágensek szá
 ...
 ```
 
-Minden sor tartalmazza a `rawUrl` oszlopot, így az ágensek azonnal lekérhetik a teljes SKILL.md-t. A `metadata.totalSkills` mező a katalógus méretét tükrözi (jelenleg 45). Implementáció: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md. A `metadata.totalSkills` mező tükrözi a katalógus méretet (ma 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
 ## REST API (kiegészítő)
 
-A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-végpontok kiegészítő hozzáférést biztosítanak az irányítópultok és külső eszközök számára:
+A `/a2a` JSON-RPC végpont a kanonikus A2A belépési pont. Az alábbi REST végpontok kiegészítő hozzáférést biztosítanak a műszerfalakhoz és a külső szerszámokhoz:
 
-| Végpont                      | Metódus | Leírás                                                          | Hitelesítés                                   |
-| :--------------------------- | :------ | :-------------------------------------------------------------- | :-------------------------------------------- |
-| `/api/a2a/status`            | GET     | Kiszolgáló állapota, regisztrált képességek                     | (nyilvános)                                   |
-| `/api/a2a/tasks`             | GET     | Feladatok listázása szűrőkkel                                   | felügyeleti                                   |
-| `/api/a2a/tasks/[id]`        | GET     | Feladat lekérése azonosító alapján                              | felügyeleti                                   |
-| `/api/a2a/tasks/[id]/cancel` | POST    | Futó feladat megszakítása                                       | felügyeleti                                   |
-| `/.well-known/agent.json`    | GET     | Ügynökkártya (A2A-felderítés)                                   | (nyilvános, 3600 másodpercig gyorsítótárazva) |
-| `/api/a2a/tasks`             | POST    | Bejövő delegálás az OmniConductor flottának (Conductor PRD RF5) | Bearer és `OMNIROUTE_API_KEY` + `a2aEnabled`  |
+| Végpont                      | Módszer | Leírás                                                         | Auth                                                                                                                   |
+| :--------------------------- | :------ | :------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET     | Szerver állapot, regisztrált készségek                         | (nyilvános)                                                                                                            |
+| `/api/a2a/tasks`             | GET     | Feladatok listázása szűrőkkel                                  | menedzsment vagy API kulcs (lásd lent)                                                                                 |
+| `/api/a2a/tasks/[id]`        | GET     | Feladat letöltése ID-val                                       | menedzsment vagy API kulcs (lásd lent)                                                                                 |
+| `/api/a2a/tasks/[id]/cancel` | POST    | Futó feladat megszakítása                                      | menedzsment vagy API kulcs (lásd lent)                                                                                 |
+| `/.well-known/agent.json`    | GET     | Ügynökkártya (A2A Discovery)                                   | (nyilvános, gyorsítótárazott 3600-as évek)                                                                             |
+| `/api/a2a/tasks`             | POST    | Bejövő delegáció a OmniConductor flottához (Conductor PRD RF5) | ugyanaz, mint `GET`, plusz `OMNIROUTE_API_KEY` ha `REQUIRE_API_KEY` kikapcsolt állapotában van beállítva; `a2aEnabled` |
 
-**Bejövő Conductor-delegálás (`POST /api/a2a/tasks`):** a külső A2A-ügynökök az OmniRoute-on keresztül delegálják a kódolási munkát az OmniConductor flottának. Törzs: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — csak a Conductor-flotta képességei (az Ügynökkártyán közzétettek) delegálhatók; a `metadata.conductor.repo.url` megadása kötelező (a flotta git-tárolókon dolgozik). Az útvonal a központ `POST /v1/tasks` kérésére fordítja le a hívást a kiszolgálóoldali `CONDUCTOR_ORCHESTRATOR_TOKEN` használatával (tartalék: `CONDUCTOR_HUB_TOKEN`), és `201 { conductor_task_id, state: "submitted" }` választ ad vissza; a feladatállapotok az SSE→A2A tükrözésen (RF1) keresztül jutnak vissza, és a `GET /api/a2a/tasks?skill=conductor` végponton tekinthetők meg.
+Az, hogy ki jut el a `/api/a2a/tasks*` útvonalakra, a bejelentkezési és az API-kulcs beállításaitól függ:
+
+- `requireLogin=true` (alapértelmezett): a köztes szoftver csak a felügyeleti hitelesítő adatokat (műszerfali munkamenet, `manage` -scope API kulcs, `oma_` hozzáférési jogkivonat) és `OMNIROUTE_API_KEY` engedélyezi. Egy egyszerű következtetési kulcs `403` kap. A `Authorization` fejlécben a köztes szoftver csak `OMNIROUTE_API_KEY` `Bearer <key>` ként veszi fel; egy csupasz billentyű vagy egy tabulátor `Bearer` után `401` kap.
+- `requireLogin=false`, vagy a visszacsatolási ablak a csatlakozás előtt: `REQUIRE_API_KEY=true` vel bármely érvényes OmniRoute API kulcs vagy felügyeleti hitelesítő adat elfogadásra kerül, és a névtelen hívók megkapják `401`; `REQUIRE_API_KEY` off az útvonalak nyitva.
+- `POST /api/a2a/tasks` emellett megköveteli `OMNIROUTE_API_KEY` a `Authorization` fejlécben, ha ez a változó be van állítva, és `REQUIRE_API_KEY` ki van kapcsolva. Más fejlécek, mint például `x-api-key`, nem számítanak oda. Kijelentkezéskor vagy belépés előtt a kulcs `Bearer` előtaggal vagy anélkül; bejelentkezéskor csak `Bearer <key>` jut túl a köztes szoftveren.
+
+Ahol hitelesítő adatokra van szükség, a `read` -scope `oma_` token csak `GET` esetén működik.
+
+**Bejövő karmester-delegáció (`POST /api/a2a/tasks`):** külső A2A ügynökök OmniRoute keresztül delegálják a kódolási munkát a OmniConductor flottára. Test: csak `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — A karmesteri flotta készségek (az ügynökkártyán feltüntetettek) átruházhatók; `metadata.conductor.repo.url` szükséges (a flotta git repokon működik). Az útvonal lefordítja a hub `POST /v1/tasks` ját a kiszolgálóoldali `CONDUCTOR_ORCHESTRATOR_TOKEN` (tartalék `CONDUCTOR_HUB_TOKEN`) használatával, és `201 { conductor_task_id, state: "submitted" }` értéket adja vissza; A feladatállapotok a SSE→A2A tükörön (RF1) keresztül áramlanak vissza, és `GET /api/a2a/tasks?skill=conductor` keresztül láthatók.
 
 ---
 
-## Új képesség hozzáadása
+## Új készség hozzáadása
 
-1. **Képességfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Készségfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportáljon egy `(task: A2ATask) => Promise<{ artifacts, metadata }>` aszinkron függvényt. Kövesse a meglévő képességek, például a `smartRouting.ts` felépítését.
+   `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` aszinkron függvény exportálása. Kövesse a meglévő készségek, például `smartRouting.ts` alakját. Ha a készség visszahívja OmniRoute -t HTTP keresztül, a fejléceket `buildSelfLoopHeaders(caller)` vel állítsa össze `src/lib/a2a/selfLoopAuth.ts` ből, így a hívás a A2A hívó kulcsával fut, nem pedig `OMNIROUTE_API_KEY`, és adja át `redirect: "error"` `fetch` -nek, így az átirányítás soha nem kapja meg a kulcsot. A segítő csak fejléceket készít; minden képesség magát az átirányítási szabályzatot állítja be. Kulcs csatolása helyett `UnsafeSelfLoopTargetError` dob, ha a feloldott alap- URL sima http a magánhálózaton kívül (visszacsatolás, egy konténer vagy szolgáltatásnév, és a privát címek rendben vannak), vagy rendelkezik hitelesítő adatokkal, tehát az elutasított hívásokat lenyelő képességnek újra el kell dobnia ezt a hibát.
 
-2. **Kezelő regisztrálása:** a `src/lib/a2a/taskExecution.ts` fájlban adjon hozzá egy bejegyzést az `A2A_SKILL_HANDLERS` objektumhoz:
+2. **Regisztrációs kezelő:** `src/lib/a2a/taskExecution.ts` nyelven adjon hozzá egy bejegyzést `A2A_SKILL_HANDLERS` hez:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...meglévő képességek
-     "your-skill": async (task) => {
+     // ...existing skills
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Közzététel az Ügynökkártyán:** a `src/app/.well-known/agent.json/route.ts` fájlban fűzze hozzá a következőt a `skills` tömbhöz:
+3. **Tedd ki az ügynökkártyán:** `src/lib/a2a/agentCardMetadata.ts` ban ( `/.well-known/agent.json` és `/.well-known/agent-card.json` osztja meg), fűzze hozzá a `skills` tömbhöz:
 
    ```json
    {
@@ -220,9 +228,9 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    }
    ```
 
-4. **Tesztek írása:** `tests/unit/a2a-<your-skill>.test.ts`. Fedje le a sikeres végrehajtási és a hibakezelési útvonalat.
+4. **Írj teszteket:** `tests/unit/a2a-<your-skill>.test.ts`. Borító boldog út + hibaútvonal.
 
-5. **Dokumentálja** az új képességet e fájl `Available Skills` táblázatában.
+5. **Dokumentum** az új készség ennek a fájlnak `Available Skills` táblázatában.
 
 ---
 
@@ -261,7 +269,7 @@ beküldve → folyamatban → befejezve
 
 ## Integrációs példák
 
-### Python (requests)
+### Python (kérések)
 
 ```python
 import requests
@@ -280,7 +288,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (elhozni)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

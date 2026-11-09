@@ -4,117 +4,88 @@
 
 ---
 
-> **状态：**仪表板基于 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）构建，并以工作区
-> `packages/ui-kit`（`@omniroute/ui-kit`）的形式内置于仓库中；上游快照固定在
-> `packages/ui-kit/UPSTREAM.md` 中，并通过 `npm run check:ui-kit-snapshot` 进行保护。浅色是规范
-> 主题；默认偏好为 `system`。强调色为 Keak 青柠色（`--ci-color-accent`）。Inter
-> （字间距为 0，`--ci-letter-spacing-ui`）是 UI 字体，Instrument Serif 仅用于稀疏的大号
-> 展示文本（`.ci-dashboard-display`），IBM Plex Mono 用于代码——这些字体均通过
-> `src/app/globals.css` 顶部的 `@fontsource/*` 导入进行自托管。所有图标均为 Lucide 字形。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。默认调色板是套件的**版本**外观（暖色纸质和铜色`#e5ac82`、 `packages/ui-kit/src/ci-editions.css`）；设置→外观→调色板提供**经典的**，该套件的带有石灰口音的基本标记。 Switzer 是UI的单一系列，显示和编码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它），由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。瑞士脚本缺乏逐个字形的下降（`src/app/globals.css`）：Inter 用于西里尔文、希腊文和越南文，仅在`html[dir="rtl"]`下，Vazirmatn 用于阿拉伯文脚本。每个图标都是 Lucide 字形。
 
-## 1. 内容所在位置
+## 1. 事物存在的地方
 
-- **组件库。** `packages/ui-kit/src` 是上游提交中 `src/` 的逐字节副本，该提交固定记录在
-  `packages/ui-kit/UPSTREAM.md` 中（其中还记录了许可证授权）；`PATCHES.md` 列出了本地
-  补丁（目前没有）。它直接以源码形式使用，无需构建：`next.config.mjs` 会对其进行转译，而
-  `tsconfig.json` 将 `@omniroute/ui-kit` → `packages/ui-kit/src`、`@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*`（`vitest.config.ts` 和 `vitest.mcp.config.ts` 也包含相同的别名）。应通过子路径导入
-  组件库组件（`@omniroute/ui-kit/table`、`@omniroute/ui-kit/page-header`……），切勿通过
-  `@omniroute/ui-kit` 的桶文件导入：该桶文件会将所有组件（包括日期选择器）引入每个导入方。
-  组件库样式表通过 `src/app/globals.css`
-  引入（`@import "../../packages/ui-kit/src/ci-ui.css"`）。
-- **令牌。** `packages/ui-kit/src/ci-tokens.css` 声明 `--ci-*` 令牌；`src/app/globals.css`
-  将它们桥接到旧版 OmniRoute 名称（`--color-*`、`--radius-*`、`--font-sans`/`--font-mono`、
-  `--table-*`、`--orch-status-*`、`--color-fd-*`），使现有的 `var(--color-*)` 引用和 Tailwind
-  工具类继续正常工作。新代码使用 Tailwind 工具类（`bg-surface`、`text-text-muted`、
-  `border-border`、`text-success`、`bg-success-bg`、`bg-chart-1`……）或组件库类——绝不使用十六进制值
-  （`tests/unit/design-kit-bridge.test.ts` 会强制检查该桥接）。`text-primary` 通过
-  `--text-color-primary` 解析为 `--color-primary-ink`（浅色模式下为 lime-800，深色模式下为青柠强调色），因此
-  主要文本可保持良好的可读性，而 `bg-primary`/`border-primary` 则继续使用青柠色表面。图表系列使用
-  `--color-chart-1` … `--color-chart-5`。
-- **主题。** `<html className="ci-theme">`（`src/app/layout.tsx`）使文档启用组件库主题。
-  偏好设置可为 `light`、`dark` 或 `system`（`src/shared/constants/appConfig.ts` 中的
-  `THEME_CONFIG.defaultTheme = "system"`；`system` 跟随 `prefers-color-scheme`）。`src/store/themeStore.ts`
-  中的 `applyTheme()`（`src/app/layout.tsx` 中的内联引导脚本也实现了相同逻辑，并在 hydration
-  之前运行）会设置 `data-theme="dark"|"light"`，同时切换 `<html>` 上的 `.dark` 类。
-  组件库的深色令牌集以 `data-theme="dark"` 为条件（`packages/ui-kit/src/ci-tokens.css`）；
-  OmniRoute 自身的深色覆盖规则（`globals.css` 中的 `.dark` 块）和旧版 Tailwind `dark:`
-  工具类则以 `.dark` 类为条件。不存在强调色预设：强调色始终来自组件库，而旧版本中持久化的预设会在存储加载时被丢弃。
-- **组件（适配器）。** `src/shared/components/index.tsx` 保留 OmniRoute 组件 API（相同的
-  名称、默认导出和属性），其背后的基础组件是组件库的适配器：表单
-  （`Button`、`Input`、`Textarea`、`Checkbox`、`Select`、`Toggle`、`Badge`、`Card`）、浮层与反馈
-  （`Modal`/`ConfirmModal`、`Tooltip`/`InfoTooltip`、`NotificationToast`、`EmptyState`、`Loading`）、
-  结构（`Collapsible`、`CollapsibleSection`、`SegmentedControl`、`Breadcrumbs`、`Avatar`）和表格
-  （`DataTable`、`FilterBar`、`ColumnToggle`、`FilterPills`、`PresetSlider`）。适配器通过子路径导入组件库
-  组件，并将旧版属性映射到该组件——例如，`Button variant="primary"` 是组件库的
-  `default` 按钮（`--ci-button-primary-*`：浅色模式下使用反转表面，深色模式下使用强调色及其
-  `--ci-color-accent-foreground` 前景色），`danger` 对应 `destructive`，而 `warning` 对应 `outline` 并加上
-  `.ci-button--warning` 扩展。`globals.css` 末尾（`@layer components`）的
-  `.ci-button--warning` 和 `.ci-badge[data-tone]` 规则是 OmniRoute 在组件库类之上添加的扩展。
-  `tests/unit/ui/adapters/*.test.tsx` 固定验证每个适配器。
-- **外壳。** `src/app/(dashboard)/layout.tsx` 渲染 `DashboardLayout`，后者会渲染
-  `src/shared/components/layouts/DashboardShell.tsx`：其中使用组件库的 `SidebarProvider` / `Sidebar` /
-  `SidebarInset`（`packages/ui-kit/src/sidebar.tsx`），而 OmniRoute 的导航逻辑位于
-  `src/shared/components/Sidebar.tsx`。指向 `#main-content` 的“跳转到内容”链接是第一个可聚焦
-  元素。`src/shared/components/Header.tsx` 包含组件库的 `SidebarTrigger`（外壳中唯一的侧边栏
-  切换器）、Keak `ProductSwitcher` 和命令面板打开器；仅当 `#main-content` 中未挂载组件库
-  `PageHeader`（`.ci-page-header`）时，它才显示路由标题，因此拥有自身 `PageHeader` 的页面只会有一个
-  `h1`。`src/shared/components/CommandPalette.tsx` 是组件库的 `Dialog`。
-- **图标。** `<Icon name="material_name">`（`src/shared/components/Icon.tsx`）通过
-  `ICON_MAP`（`src/shared/constants/iconMap.ts`）将名称（界面所使用的 Material Symbols 词汇表）解析为
-  Lucide 图形。Material Symbols 字体和包已移除：映射中缺失的名称会渲染一个
-  中性占位图形（`data-icon-missing="true"`），并在非生产环境中向控制台输出警告。
-  `npm run gen:icon-map` 会输出当前使用但映射中缺失的名称
-  （`tests/unit/icon-map-coverage.test.ts` 会在任何名称没有对应 Lucide 图标时失败；
-  `tests/unit/icon-map-object-values.test.ts` 覆盖存储在查找对象中的名称）；
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` 会将字面量
-  `<span className="material-symbols-outlined">` 元素重写为 `<Icon>`。
-- **品牌。** `src/shared/components/OmniRouteLogo.tsx` 对组件库进行了封装：默认导出的
-  `OmniRouteLogo` 渲染 `ProductIcon product="omniroute" variant="glyph"`（内联 SVG，兼容
-  `basePath`），而 `OmniRouteLockup` 渲染 `ProductLockup product="omniroute"`（无障碍名称为
-  “Keak OmniRoute”），对于白标运营商则渲染其自己的 `name`/`logoSrc`。产品切换器的目标地址位于
-  `src/shared/constants/keakProducts.ts`（`KEAK_PRODUCT_LINKS`、`KEAK_ACTIVE_PRODUCT`）。独立
-  页面——`src/app/login/page.tsx`、`src/app/status/page.tsx`、`src/app/maintenance/page.tsx`、
-  `src/app/offline/page.tsx`、`src/app/not-found.tsx` 和 `src/shared/components/ErrorPageScaffold.tsx`
-  ——会显示品牌组合标识；`tests/unit/brand-pages-static.test.ts` 会对此进行防护。
+- **成套工具。** `packages/ui-kit/src`是`packages/ui-kit/UPSTREAM.md`中固定的提交处上游`src/`的逐字节副本（也记录许可证授权）； `PATCHES.md`列出本地补丁（无）。它作为源使用，无需构建： `next.config.mjs`对其进行转译， `tsconfig.json`映射`@omniroute/ui-kit` → `packages/ui-kit/src`和`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` （`vitest.config.ts`和`vitest.mcp.config.ts`具有相同的别名）。通过其子路径（`@omniroute/ui-kit/table`、 `@omniroute/ui-kit/page-header`...）导入套件组件，而不是通过`@omniroute/ui-kit`桶：桶将每个组件（包括日期选择器）拉入每个导入器。套件样式表通过`src/app/globals.css` （`@import "../../packages/ui-kit/src/ci-styles.css"`，完整的表：核心`ci-ui.css`加上每个模式系列）进入。
+- **代币。** `packages/ui-kit/src/ci-tokens.css`声明`--ci-*`代币； `src/app/globals.css`将它们桥接到旧的OmniRoute名称（`--color-*`、 `--radius-*`、 `--font-sans`/`--font-mono`、 `--table-*`、 `--orch-status-*`、 `--color-fd-*`），因此现有的`var(--color-*)`读取和Tailwind实用程序继续工作。新代码使用Tailwind实用程序（`bg-surface`、 `text-text-muted`、 `border-border`、 `text-success`、 `bg-success-bg`、 `bg-chart-1`…）或套件类—从不使用十六进制值（`tests/unit/design-kit-bridge.test.ts`强制桥接）。 `text-primary`通过`--text-color-primary`解析为`--color-primary-ink` ，因此主要文本保持可读，而`bg-primary`/`border-primary`保留重音表面：在版本下，它是套件的`--ci-color-accent-active` （浅色深铜`#99562f` ，深色铜重音）；在经典下， lime-800在浅色下，石灰口音在深色下。图表系列使用`--color-chart-1`... `--color-chart-8`，每个都有一个文本安全的`--color-chart-N-ink`和一个不透明的`--color-chart-N-subtle`芯片色调，按套件系列顺序（`ciChartSeriesOrder`）分配。
+- **主题。** `<html className="ci-theme">` (`src/app/layout.tsx`) 将文档选择为套件主题。优选的是`light`、 `dark`或`system` （`THEME_CONFIG.defaultTheme = "system"`位于`src/shared/constants/appConfig.ts`中； `system`跟随`prefers-color-scheme`）。 `src/store/themeStore.ts`中的`applyTheme()` （由`THEME_BOOT_SCRIPT`镜像，内联在`src/app/layout.tsx`中，在水合之前运行）设置`data-theme="dark"|"light"`并一起切换`<html>`上的`.dark`类。该套件的暗令牌集以`data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) 为密钥； OmniRoute自己的暗覆盖（ `globals.css`中的`.dark`块）和`.dark`类上的旧Tailwind `dark:`实用程序键。没有强调色预设：强调色始终来自套件，并且在商店加载时会删除旧版本中保留的预设。
+- **调色板。**两个，均来自套件 (`src/shared/constants/appearancePalette.ts`)：默认值`editions`和`classic`。 Editions 是`<html>`上套件的`data-ci-appearance="editions"`属性， `ci-editions.css` （由`ci-ui.css`导入）与`data-theme`组合；经典就是该属性的缺失。根布局服务器渲染属性，因此没有存储任何内容（或没有JS）的访问者在每个表面—仪表板、登录、 `/status`、错误页面、 `/docs`和PWA上获得版本。该选择将保留在同一个`theme`存储中的主题旁边（`palette`、 `setPalette()`、 `src/store/themeStore.ts`中的`applyPalette()` ），并在`THEME_BOOT_SCRIPT`绘制之前应用（`src/shared/utils/themeBootScript.ts`，内联在布局的`<head>`中），仅当存储的调色板为`"classic"`时才会删除该属性； `src/app/global-error.tsx`位于根布局之外，从同一存储应用它。不要将`data-ci-appearance`放在任何其他元素上：该套件将其与`html:root:has([data-ci-appearance="editions"])`匹配，因此一个后代将切换整个文档。 Editions `data-ci-editions-variant="landing"`变体适用于营销页面，而不是仪表板。浏览器 chrome：服务器在`viewport.themeColor`中呈现默认版本（每个`prefers-color-scheme`一个标签），并在`src/shared/constants/pwaThemeColors.ts`中呈现 Web 清单— `PWA_THEME_COLORS` ，这是版本`--ci-color-background` (`#f3f1e9` / `#11120f`) 的一个镜像，由`tests/unit/pwa-theme-colors.test.ts`固定到`ci-editions.css` 。然后，实时`<meta name="theme-color">`遵循存储的调色板和模式： `THEME_BOOT_SCRIPT`在绘制之前重写标签，主题商店的操作在每次更改时执行此操作（ `src/shared/utils/themeColorMeta.ts`中的`resolveThemeColor()` / `applyThemeColor()` ，其中`CLASSIC_PAGE_BACKGROUND`从套件的`ciTokens`读取）。明确的light/dark主题将每个标签设置为该模式； `system`为每个方案保留一种颜色。清单保留版本：每次安装都会获取一次，没有首选项。摩纳哥从探针（`monacoKitTheme.ts`）读取颜色；在版本下，探针读取会翻转一次同步传递的根`data-theme` ，因为该套件从根解析版本light/dark 。
+- **组件（适配器）。** `src/shared/components/index.tsx`保留OmniRoute组件API （相同的名称、默认导出和 props），其背后的原语是套件上的适配器：表单（`Button`、 `Input`、 `Textarea`、 `Checkbox`、 `Select`、 `Toggle`、 `Badge`、 `Card`）、覆盖和反馈（`Modal`/`ConfirmModal`、 `Tooltip`/`InfoTooltip`、 `NotificationToast`、 `EmptyState`、 `Loading`），结构（`Collapsible`、 `CollapsibleSection`、 `SegmentedControl`、 `Breadcrumbs`、 `Avatar`）和表（`DataTable`、 `FilterBar`、 `ColumnToggle`、 `FilterPills`、 `PresetSlider`）。适配器通过子路径导入 kit 组件，并将旧版 props 映射到它—上，例如`Button variant="primary"`是 kit `default`按钮（`--ci-button-primary-*`：亮色下的反面，暗色下带有`--ci-color-accent-foreground`墨水的重音）， `danger`是`destructive`， `warning`是 kit `warning`按钮。 `Badge`状态变体是套件音调，带有`<option>`子项的`Select`呈现套件`NativeSelect`。 `tests/unit/ui/adapters/*.test.tsx`固定每个适配器。
+- **壳。** `src/app/(dashboard)/layout.tsx`呈现`DashboardLayout`，后者呈现`src/shared/components/layouts/DashboardShell.tsx`：套件`SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)， OmniRoute的导航逻辑位于`src/shared/components/Sidebar.tsx`中。指向`#main-content` “跳到内容”链接是第一个可聚焦元素。 `src/shared/components/Header.tsx`包含`SidebarTrigger`套件（shell 唯一的侧边栏切换开关）、Keak `ProductSwitcher`和命令面板打开器；它仅在`#main-content`内没有安装套件`PageHeader` (`.ci-page-header`) 时显示路由标题，因此具有自己的`PageHeader`页面有一个`h1`。 `src/shared/components/CommandPalette.tsx`是`Dialog`一个套件。
+- **图标。** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) 通过`ICON_MAP` (`src/shared/constants/iconMap.ts`) 将名称（屏幕使用的材质符号词汇表）解析为 Lucide 字形。材质符号字体和包消失了：地图中缺少的名称会呈现中性占位符字形 (`data-icon-missing="true"`) 并在生产之外记录控制台警告。 `npm run gen:icon-map`打印地图中缺少的正在使用的名称（`tests/unit/icon-map-coverage.test.ts`在没有 Lucide 图标的任何名称上失败； `tests/unit/icon-map-object-values.test.ts`涵盖存储在查找对象中的名称）； `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`将文字`<span className="material-symbols-outlined">` spans 重写为`<Icon>`。
+- **品牌。** `src/shared/components/OmniRouteLogo.tsx`包装套件：默认导出`OmniRouteLogo`呈现`ProductIcon product="omniroute" variant="glyph"` （内联SVG、 `basePath` -safe）， `OmniRouteLockup`呈现`ProductLockup product="omniroute"` （可访问名称“Keak OmniRoute”），或者，对于白标签运营商，他们自己的`name`/`logoSrc`。产品切换器目标位于`src/shared/constants/keakProducts.ts` （`KEAK_PRODUCT_LINKS`、 `KEAK_ACTIVE_PRODUCT`）中。独立屏幕— `src/app/login/page.tsx`、 `src/app/status/page.tsx`、 `src/app/maintenance/page.tsx`、 `src/app/offline/page.tsx`、 `src/app/not-found.tsx`和`src/shared/components/ErrorPageScaffold.tsx` —显示锁定； `tests/unit/brand-pages-static.test.ts`守护着它。
 
 ## 2. 规则
 
-1. 使用设计令牌，绝不使用字面值。有意保留的例外：始终使用深色的控制台终端、通过 `STATUS_HEX`（`src/shared/constants/statusColors.ts`）设置的 ReactFlow SVG 描边，以及分类调色板 `STRATEGY_COLORS`（`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`）和 `LAYER_COLORS`（`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`）。
-2. 绝不要手动修改 `packages/ui-kit/src`：使用 `scripts/dev/sync-ui-kit.sh <commit>` 进行同步；提交前检查 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）会在任何字节与固定的上游提交不同时失败（当上游克隆、`UI_KIT_CLONE` 或 `_references/cheaper-inference-ui-kit` 不存在时，它会显示警告并跳过）。当组件库缺少某项功能时，请在适配器或页面中规避，并向上游提出需求。
-3. 组件库的文本默认值为英语（`label = "Loading"`、`loadingLabel = "Loading table"`……）——只要组件库中的组件会渲染文本，就应从 `useTranslations(...)` 传入翻译后的字符串。
-4. Tailwind 工具类优先于组件库的组件类（组件库声明了 `@layer theme, base, components, utilities`，其规则位于 `components` 中）——使用工具类设置间距和布局，而不要用它们为组件库中的组件重新着色。
-5. 标题：页面和章节标题使用 `.ci-heading`（Inter，无字距）；`.ci-dashboard-display`（Instrument Serif）仅用于错误页面状态码等尺寸较大且布局疏朗的展示文本。
-6. `tests/unit/dashboard-kit-sweep.test.ts` 用于守护组件库的采用情况：`src/app` 或 `src/shared/components` 下不得存在 Material 连字 span；仪表板目录树（`src/app/(dashboard)` 和 `src/shared/components`）中不得出现原始 `<select>`、`<textarea>` 或 `<table>`，也不得在列出的例外（`Select` 适配器的原生分支、`RequestLoggerDetail`）之外手动实现 `role="dialog"`；其中每个原始 `<button>` 或 `<input>` 都必须带有包含 `kit-exception:`（并说明原因）的注释，且该注释必须在其上方最多 3 行处结束；调色板色相和 `dark:` 变体只能出现在测试所列出的文件中。
-7. 在提交 PR 前验证两种主题和 390 px 视口（提供截图）；`tests/e2e/a11y.spec.ts` 会运行 axe。
+1. 令牌，绝不是字面意思。特意保留的例外：始终黑暗的控制台终端和`STATUS_HEX` (`src/shared/constants/statusColors.ts`)，工具包状态调色板的解析十六进制镜像，供需要文字十六进制的调用者使用。分类调色板不再例外：它们依赖于套件的八个图表标记（`--color-chart-1..8`，加上`-ink`/`-subtle`），按照套件系列顺序，通过`src/shared/utils/categoricalPalette.ts` ，以及用于路由策略的`src/app/(dashboard)/dashboard/combos/strategyPalette.ts`； ReactFlow边缘和编排画布读取主题感知的`--orch-status-*`变量 (`src/shared/components/flow/edgeStyles.ts`)。
+2. 切勿手动修补`packages/ui-kit/src` ：与`scripts/dev/sync-ui-kit.sh <commit>`同步；预提交门`npm run check:ui-kit-snapshot` (`.husky/pre-commit`) 在与固定的上游提交不同的任何字节上失败（当上游克隆`UI_KIT_CLONE`或`_references/cheaper-inference-ui-kit`不存在时，它会跳过并发出警告）。当套件缺少某些内容时，请在适配器或屏幕中解决它并向上游询问。
+3. 套件文本默认为英语（`label = "Loading"`、 `loadingLabel = "Loading table"`...） 每当套件组件呈现文本时， —都会传递来自`useTranslations(...)`的翻译字符串。
+4. Tailwind实用程序胜过套件组件类（套件声明`@layer theme, base, components, utilities`及其规则位于`components`中） —使用实用程序进行间距和布局，而不是重新着色套件组件。
+5. 标题： `.ci-heading`用于页面和章节标题； `.ci-dashboard-display`仅适用于大而稀疏的显示文本，例如错误页面状态代码。两者都使用瑞士语。
+6. `tests/unit/dashboard-kit-sweep.test.ts`保护套件采用： `src/app`或`src/shared/components`下没有材料结扎跨度；在仪表板树（`src/app/(dashboard)`和`src/shared/components`）中，没有原始`<select>`、 `<textarea>`或`<table>` ，并且在列出的例外之外没有手工制作的`role="dialog"` （ `Select`适配器的本机分支`RequestLoggerDetail`）；每个原始`<button>`或`<input>`都需要一个包含`kit-exception:` （带有原因）的注释，最多在其上方 3 行结束；调色板色调和`dark:`变体仅在测试列出的文件中。
+7. 在PR之前验证两个主题和 390 px 视口（屏幕截图）； `tests/e2e/a11y.spec.ts`运行斧头。
 
 ## 3. 添加页面
 
-1. 使用组件库的 `PageHeader`（`@omniroute/ui-kit/page-header`）作为页面开头（在仪表板内使用 `compact`）——包含标题、描述和 `actions`。随后，外壳标题栏会移除其自身的标题。
-2. 使用 `@/shared/components` 中的组件（适配器）构建控件；没有适配器时，通过子路径使用组件库组件（`Table`/`TableScrollArea`/`DataTableShell`、`Field`、`Alert`、`Tabs`、`RadioGroup`、`Slider`……）。
-3. 图标：使用 `<Icon name="…" />`。新增名称时，将语义匹配的 Lucide 组件加入 `ICON_MAP`；`npm run gen:icon-map` 会列出仍缺失的名称。
-4. 颜色：使用语义化工具类（`text-success`、`bg-warning-bg`、`border-border`……），图表系列使用 `var(--color-chart-N)`；不得使用十六进制值，也不得使用仅重复某种颜色的 `dark:` 变体。
-5. 文本：每个字符串，包括传递给组件库组件的标签，都必须来自 `useTranslations`。新键应添加到 `src/i18n/messages/en.json`、`pt-BR.json` 和 `vi.json` 中（越南语一致性测试会固定检查每个英语键）；其他语言区域由 i18n 同步填充。
-6. 在提交 PR 前运行守护检查：`tests/unit/dashboard-kit-sweep.test.ts`、`tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、`npm run check:dashboard-typecheck`（这是唯一能捕获 `iconMap.ts` 中重复导入的检查）、`npm run check:ui-icu`，以及该页面自身的测试。
+1. 页面以 kit 的 `PageHeader`（`@omniroute/ui-kit/page-header`，在
+   dashboard 内使用 `compact`）开头——包含标题、描述和 `actions`。这样外壳（shell）头部就会去掉它自己的标题。
+2. 使用 `@/shared/components`（适配器）构建控件；在没有适配器的地方，通过子路径使用 kit
+   组件（`Table`/`TableScrollArea`/`DataTableShell`、`Field`、`Alert`、`Tabs`、`RadioGroup`、
+   `Slider`……）。
+3. 图标：`<Icon name="…" />`。新名称要加入 `ICON_MAP`，并配上语义匹配的 Lucide
+   组件；`npm run gen:icon-map` 会列出仍缺失的名称。
+4. 颜色：使用语义化工具类（`text-success`、`bg-warning-bg`、`border-border`……），图表系列使用
+   `var(--color-chart-N)`；不使用 hex 值，也不使用只是重复同一颜色的 `dark:` 变体。
+5. 文本：所有字符串，包括传给 kit 组件的标签，都来自 `useTranslations`。新
+   键要加入 `src/i18n/messages/en.json`、`pt-BR.json` 和 `vi.json`（越南语一致性测试会锁定
+   每一个英文键）；其他语言由 i18n 同步填充。
+6. 在提交 PR 前运行这些守护检查：`tests/unit/dashboard-kit-sweep.test.ts`、
+   `tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、
+   `npm run check:dashboard-typecheck`（唯一能捕获 `iconMap.ts` 中重复导入的检查）、
+   `npm run check:ui-icu`，以及页面自身的测试。
 
-## 4. 添加或更改适配器
+## 4. 添加或修改适配器
 
-1. 保持 `src/shared/components/index.tsx` 的公共 API 不变：导出名称、默认导出和接受的 props 均应相同。在适配器内部将旧版 props 映射到套件（参见 `Button.tsx`：`VARIANT_TO_KIT`、`SIZE_TO_KIT`）。
-2. 通过子路径导入套件（`@omniroute/ui-kit/<component>`）。
-3. 针对套件缺失功能的变通方案应放在适配器中（如果修复涉及样式，则放在 `globals.css` 的 `@layer components` 中），绝不能放在 `packages/ui-kit/src` 中。
-4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方较多的适配器，请比较更改前后渲染的标记——内边距或包装器的更改会影响每个页面。
+1. 保持 `src/shared/components/index.tsx` 的公共 API 不变：相同的导出名、默认导出以及所接收的 props。在适配器内部将旧版 props 映射到 kit 上（参见 `Button.tsx`：`VARIANT_TO_KIT`、`SIZE_TO_KIT`）。
+2. 通过子路径导入 kit（`@omniroute/ui-kit/<component>`）。
+3. 针对 kit 缺陷的变通方案放在适配器中（如果修复的是样式，则放在 `globals.css` 的 `@layer components` 中），绝不放在 `packages/ui-kit/src` 中。
+4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方众多的适配器，要比较变更前后渲染出的标记——内边距或包裹元素的变化会扩散到每个界面。
 
 ## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 会将在该提交处的上游 `src/` 复制到 `packages/ui-kit/src`，并应用唯一允许的转换（从相对导入中移除 `.js` 后缀）。然后：审查 `git diff packages/ui-kit`，在两种主题下对提供程序、设置、组合、用量和端点进行视觉检查，运行 `npm run check:ui-kit-snapshot` 和 `npm run test:vitest:ui`，并在创建 PR 时附上上游变更日志。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。
 
-## 6. 参考索引
+每日`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查。当 pin 位于后面时， `scripts/ci/ui-kit-sync-pr.sh`会在滚动分支`chore/ui-kit-sync-latest`上针对最高`release/vX.Y.Z`分支保持一个同步PR打开。它永远不会合并：每个套件版本仍然需要对本地VPS进行目视检查。当新版本发布时，分支会被重建，否则就不会发生。手动提交的开放PR不会被覆盖，并且维护者关闭未合并的版本的PR将保持关闭状态，直到新版本发布。
 
-- `src/app/globals.css` — 令牌桥接、`.dark` 覆盖、OmniRoute `@layer components` 扩展
-- `packages/ui-kit/UPSTREAM.md` — 固定的上游提交和许可证授权；`packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`、`packages/ui-kit/src/ci-ui.css`、`packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` 及其旁边的适配器；`src/shared/components/layouts/DashboardShell.tsx`、`src/shared/components/Sidebar.tsx`、`src/shared/components/Header.tsx`、`src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`、`src/shared/constants/iconMap.ts`、`scripts/dev/gen-icon-map.mjs`、`scripts/dev/codemod-material-icons.mjs`
-- `src/shared/components/OmniRouteLogo.tsx`、`src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`、`src/shared/constants/appConfig.ts`、`src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`、`tests/unit/dashboard-kit-sweep.test.ts`、`tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、`tests/unit/brand-pages-static.test.ts`、`tests/unit/ui/adapters/*.test.tsx`
+当无法打开PR时（目标版本被冻结、 PR已手动提交、 PR已关闭或未设置PR令牌），工作流会保持一个跟踪问题处于打开状态，并说明原因。
+
+该工作流程使用两个秘密：
+
+- `secrets.UI_KIT_READ_TOKEN`：私有上游存储库的只读令牌。当工作流无法读取上游（没有令牌、令牌停止工作或GitHub无法访问）时，运行将保持绿色，但会写入一条警告并保持一个单独的问题处于打开状态，一旦稍后的运行可以再次读取上游，该问题就会自行关闭。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此存储库上的细粒度令牌，具有内容和拉取请求写入权限。默认的`GITHUB_TOKEN`不能在这里创建PRs ，并且它打开的PR不会触发CI。如果没有此令牌，工作流只会推送分支。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
+
+## README图
+
+根`README.md`嵌入的 12 个图表 (`docs/diagrams/*.svg`) 是应用于静态图像的套件，它们是生成的，而不是手工绘制的： `scripts/docs/gen-readme-*.mjs`上的 13 个生成器文件（12 个图表加上`gen-readme-diagrams.mjs`驱动程序）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 个过时测试，每个图表一个，每个字节将提交的文件与其生成器的输出（作业`test-unit`）进行比较。
+
+- **代币。** `scripts/docs/readme-diagram-theme.mjs` copies the Editions palette (the default look) from `packages/ui-kit/src/ci-editions.css` (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`, which also checks WCAG AA for every text colour on every surface in both schemes; the one exception, light `warn`, is the kit warning darkened 10 % because the kit value is 4.46:1 on the canvas) and defines the text roles on the kit's type scale (`ci-tokens.css`): Switzer at the kit's weights (400/500/600, display at 500) and tracking for everything, except the code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), which are IBM Plex Mono and are only for commands, URLs, identifiers and terminal screens.文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
+- **字体。** GitHub Markdown 不携带CSS ，并且迷彩代理会阻止每个外部获取，因此套件类型必须在文件内传输。 `scripts/docs/readme-outline.mjs`是每个生成器的最后一步，它使用HarfBuzz塑造 Switzer 角色，并将它们绘制为矢量轮廓（`<defs>`路径和`<use>`），并使用 Switzer 缺乏的根据其自己的度量绘制的箭头和几何符号。轮廓，绝不是嵌入字体：Switzer 的许可证 (`packages/ui-kit/src/fonts/FFL.txt`) 禁止在未经书面同意的情况下进行子集化和格式转换，并允许矢量图形，因此不要重新引入 Switzer `@font-face`或`data:` URI。文件中留下的一种字体是OFL IBM Plex Mono 子集，用于保留真实代码文本 (`scripts/docs/readme-fonts.mjs`)，由这些字符构建；任何不能嵌入的字形都会抛出异常。
+- **再生。** `npm run docs:readme-diagrams`按README顺序重写所有 12 个文件，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因为它的数据来自`open-sse/config/freeModelCatalog.ts`中的实时目录加载器；目录更改的CI结果位于`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。将生成器和SVG一起提交。
+- **证明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服务的方式渲染文件（ `<img>`标签、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕获浅色和深色框架并报告页面发出的外部字体请求（必须为 0）。
+- **预算。**每个文件低于 200 个KB （每个过时测试都断言这一点）； 500 KB是任何README镜像的硬上限（ SVG studio 验证器的规则）。
+- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本也是大纲步骤的输入。规范图形保留在`<text>`节点中（轮廓一旦勾勒就不可见， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试—修复门读取的源，而不是生成器中的数字。
+
+## 七、参考指标
+
+- `src/app/globals.css` —令牌桥、 `.dark`覆盖、 OmniRoute `@layer components`扩展
+- `packages/ui-kit/UPSTREAM.md` —固定上游提交和许可证授权； `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx`及其旁边的适配器； , , , , , `src/shared/components/Header.tsx` `src/shared/components/Sidebar.tsx` `src/shared/components/layouts/DashboardShell.tsx`, , , , , `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

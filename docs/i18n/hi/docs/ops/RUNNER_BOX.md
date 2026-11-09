@@ -21,19 +21,18 @@ webpack बिल्ड और lint जॉब एक साथ चलते ह�
 
 2026-10-18 को मापा गया:
 
-| संसाधन    | मान                        | शेड्यूलिंग के लिए इसका अर्थ                                                                                                                                                                                                                                                                                                                                                   |
-| --------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| RAM / CPU | **78 GB / 32 कोर**         | बिना सीमा वाले Turbopack production बिल्ड का अधिकतम उपयोग 49 GB था (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 पर केवल compile चरण ही ~40 GB बनाए रखता है (`next-build` में 36 GB RSS और 3 GB वाले 17 loader workers, 2026-10-18 को मापा गया); webpack बिल्ड का उपयोग ~14–16 GB था। एक Turbopack + एक webpack बिल्ड साथ चल सकते हैं; दो Turbopack बिल्ड नहीं |
-| swap      | 16 GB                      | `omniroute-113-5` swap बंद (`MemorySwapMax=0`) रखकर चलता है, ताकि अनियंत्रित बिल्ड मशीन को swap में धकेलने के बजाय अपनी सीमा पर समाप्त कर दिया जाए                                                                                                                                                                                                                            |
-| `/tmp`    | **12 GB tmpfs = RAM**      | यहाँ रखी गई कोई भी चीज़ मेमोरी का उपयोग करती है; बची हुई फ़ाइलें 3 घंटे बाद हटा दी जाती हैं                                                                                                                                                                                                                                                                                   |
-| CPU       | 32 कोर पर load 60 देखा गया | quotas से पहले, इसी मशीन पर एक Turbopack बिल्ड (~1166 % CPU) और coverage suite ने अन्य listeners के heartbeats को संसाधनों से वंचित कर दिया था (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                          |
-| रनर       | **6 listeners**            | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` अक्षम हैं (`systemctl enable --now` किसी एक को फिर से सक्रिय कर देता है)                                                                                                                                                                                                                                      |
+| संसाधन    | मान                          | शेड्यूलिंग के लिए इसका अर्थ                                                                                                                                                                                                                                                                                                                                                   |
+| --------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU | **78 GB / 32 कोर**           | बिना सीमा वाले Turbopack production बिल्ड का अधिकतम उपयोग 49 GB था (`tests/unit/ci-build-bundler-webpack.test.ts`); Next 16.3.8 पर केवल compile चरण ही ~40 GB बनाए रखता है (`next-build` में 36 GB RSS और 3 GB वाले 17 loader workers, 2026-10-18 को मापा गया); webpack बिल्ड का उपयोग ~14–16 GB था। एक Turbopack + एक webpack बिल्ड साथ चल सकते हैं; दो Turbopack बिल्ड नहीं |
+| swap      | 16 GB                        | `omniroute-113-5` swap बंद (`MemorySwapMax=0`) रखकर चलता है, ताकि अनियंत्रित बिल्ड मशीन को swap में धकेलने के बजाय अपनी सीमा पर समाप्त कर दिया जाए                                                                                                                                                                                                                            |
+| `/tmp`    | **12 GB tmpfs = RAM**        | यहाँ रखी गई कोई भी चीज़ मेमोरी का उपयोग करती है; बची हुई फ़ाइलें 3 घंटे बाद हटा दी जाती हैं                                                                                                                                                                                                                                                                                   |
+| CPU       | 32 कोर पर load 60 देखा गया   | quotas से पहले, इसी मशीन पर एक Turbopack बिल्ड (~1166 % CPU) और coverage suite ने अन्य listeners के heartbeats को संसाधनों से वंचित कर दिया था (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                          |
+| रनर       | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` पर `omni-build` भी है; `omniroute-113-3/-4/-8` को रिपॉज़िटरी से हटा दिया गया (2026-10-28)                                                                                                                                                                                                                              |
 
 सीमाएँ प्रत्येक unit की `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` में हैं
 (पिछले मान `override.conf.bak-20261018` के रूप में रखे गए हैं) और उन्हें
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` के साथ लाइव लागू किया गया था—कोई restart नहीं हुआ, इसलिए किसी
-चल रहे जॉब पर प्रभाव नहीं पड़ा। लेबल runners API के माध्यम से बदले जाते हैं
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+चल रहे जॉब पर प्रभाव नहीं पड़ा। लेबल runners API के माध्यम से बदले जाते हैं (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), और यह भी लाइव होता है।
 
 ## जनिटर इंस्टॉल करें (एक बार, मशीन पर)
@@ -42,7 +41,7 @@ webpack बिल्ड और lint जॉब एक साथ चलते ह�
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): हर 30 मिनट में, लॉग /var/log/runner-janitor.log में
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` आवश्यक है: जनिटर किसी पथ को हटाने से पहले खुली फ़ाइलों के एक snapshot से यह साबित करता है कि वह निष्क्रिय है, और इस टूल के बिना वह कुछ भी नहीं हटाता तथा इसकी सूचना देता है (exit 1)। किसी भी बदलाव को पहले `--dry-run` के साथ आज़माएँ — यह ठीक वही प्रिंट करता है जो वह करेगा और किसी चीज़ को छूता नहीं है।
@@ -93,8 +92,16 @@ ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get i
   पर 2026-10-18 तक `MemoryHigh=4G` था — promptfoo बिल्ड वहाँ 54 मिनट तक reclaim करते हुए आगे बढ़ता रहा;
   8 GB throttling समाप्त कर देता है।
 - **जानबूझकर कम listeners।** 2026-08-29 को चार OmniRoute units अक्षम किए गए थे — प्रत्येक अतिरिक्त
-  listener ऊपर दिए गए memory budget का एक और tenant है। janitor की अधिकतम सीमा 6 है (cron में `MAX_ACTIVE_RUNNERS=6`): यह
-  मशीन पर प्रत्येक `Runner.Listener` की गणना करता है, और हमारे चार के अतिरिक्त OmniHeuris + OmniMind दो और जोड़ते हैं।
+  listener ऊपर दिए गए memory budget का एक और tenant है। janitor की अधिकतम सीमा 8 है (cron में `MAX_ACTIVE_RUNNERS=8`): यह
+  मशीन पर प्रत्येक `Runner.Listener` की गणना करता है, और हमारे पाँच के अतिरिक्त OmniHeuris + OmniMind दो और जोड़ते हैं।
+- **Unit और Vitest जॉब होस्टेड ही रहते हैं।** `ci.yml` अपने unit shards और Vitest जॉब को
+  `[self-hosted, omni-ci]` पर केवल तभी भेजता है जब रिपॉज़िटरी वेरिएबल `vars.USE_VPS_TEST_RUNNER`
+  `true` हो, और तब भी केवल उसी रिपॉज़िटरी के `pull_request` रन के लिए; forks, `merge_group` और पुश
+  `ubuntu-latest` पर ही रहते हैं (`tests/unit/vps-runner-variable-scope.test.ts`)। वेरिएबल
+  `false` है। 2026-10-28 को तीन 4-कोर `omni-ci` listeners ने `npm ci` में 250–270 s लिए और हर
+  unit shard 30-मिनट की जॉब सीमा तक पहुँच गया, जबकि होस्टेड shard में ~634 s लगते हैं; उस समय मशीन का load
+  17–24 था। listeners हटा दिए गए। unit shard के अनुरूप आकार वाले listeners के बिना वेरिएबल को
+  फिर से चालू न करें।
 - **किसी भी runner के व्यस्त रहने के दौरान `/tmp` या `_work` को कभी हाथ से साफ़ न करें।**
   जाँच और deletion के बीच अंतराल वाले check-then-delete के कारण 2026-08-27 को एक सक्रिय Build जॉब ने अपना
   `_work` खो दिया था। janitor जाँच और removal को एक ही चरण में करता है;
@@ -108,8 +115,10 @@ ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get i
 
 ## होस्टेड लेन (GitHub-होस्टेड रनर)
 
-खाता **Pro** प्लान पर है: **40 समवर्ती होस्टेड जॉब**, जो प्रत्येक PR जाँच,
-प्रत्येक पुश-ट्रिगर वर्कफ़्लो और CodeQL के डिफ़ॉल्ट सेटअप द्वारा साझा किए जाते हैं। 2026-10-18 को
+रिपॉज़िटरी `cheaper-inference` संगठन की है, जो **Team** प्लान पर है: **60
+समवर्ती होस्टेड जॉब**, जो संगठन की प्रत्येक रिपॉज़िटरी, प्रत्येक PR जाँच,
+प्रत्येक पुश-ट्रिगर वर्कफ़्लो और CodeQL के डिफ़ॉल्ट सेटअप द्वारा साझा किए जाते हैं। नीचे दिए गए आँकड़े
+**Pro** प्लान (40 समवर्ती होस्टेड जॉब) पर मापे गए थे। 2026-10-18 को
 एक मर्ज अभियान के दौरान मापा गया (~10 मर्ज/घंटा, `release/v3.8.52` पर): **24 घंटे में
 2,500 वर्कफ़्लो रन बनाए गए**, 6 घंटे में ब्रांच पर 44 पुश, **106 होस्टेड जॉब कतार में थे**, जबकि PR जाँचों ने
 घंटों तक प्रतीक्षा की और PR उनके बिना ही मर्ज कर दिए गए। ब्रांच पर प्रत्येक पुश के साथ नौ वर्कफ़्लो चले:
