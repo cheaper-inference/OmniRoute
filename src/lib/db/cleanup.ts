@@ -30,6 +30,8 @@ import {
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { getBudgetWindow } from "@/domain/costRules";
+import { loadAllBudgets } from "./domainState";
 import {
   pruneDbBackupsOutsideMigrationWindow,
   resolveReusedPreMigrationSha,
@@ -358,11 +360,19 @@ export async function cleanupDomainCostHistory(): Promise<CleanupResult> {
   const retention = getRetentionSettings();
 
   const retentionDays = retention.domainCostHistory;
-  const cutoffEpoch = Date.now() - retentionDays * 86_400_000;
+  let cutoffEpoch = Date.now() - retentionDays * 86_400_000;
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
+    // Budgets sum this table from the start of their current window. Never delete
+    // inside a window: a 31-day month outlives the 30-day default.
+    // shortcut: one floor for all keys, so keys without a budget keep rows up to
+    // one window longer; split the DELETE per key if that ever matters.
+    for (const budget of Object.values(loadAllBudgets())) {
+      const { periodStartAt } = getBudgetWindow(budget.resetInterval, budget.resetTime);
+      cutoffEpoch = Math.min(cutoffEpoch, periodStartAt);
+    }
     const stmt = db.prepare("DELETE FROM domain_cost_history WHERE timestamp < ?");
     const runResult = stmt.run(cutoffEpoch);
     result.deleted = runResult.changes;

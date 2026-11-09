@@ -1,0 +1,1 @@
+- **fix(db):** Retention cleanup no longer deletes spend that an active daily, weekly or monthly API-key budget window still counts, so a 31-day month cannot reopen its used allowance.
