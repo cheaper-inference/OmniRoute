@@ -62,6 +62,11 @@ function writeTokenDisplayMode(mode: TokenDisplayMode): void {
   for (const listener of tokenDisplayListeners) listener();
 }
 
+/**
+ * Render usage analytics for the selected date range and API keys.
+ * Fetch the corresponding usage summary and breakdowns while preserving the user's
+ * compact or exact token-display preference across filter changes.
+ */
 export default function UsageAnalytics() {
   const locale = useLocale();
   const t = useTranslations("analytics");

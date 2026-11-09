@@ -8,11 +8,17 @@ export interface AnalyticsTokenSummary {
   cachedInputTokensComplete?: boolean;
 }
 
+/** Return a non-negative safe integer, or null for missing or invalid measurements. */
 function tokenCount(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }
 
-/** Presentation only: never change the provider usage or billing counters. */
+/**
+ * Derive display-only token totals from normalized, cache-inclusive input.
+ * Cache reads are subtracted only when coverage is complete and counts are consistent;
+ * otherwise the noncached input remains unknown. Cache writes stay in input.
+ * This does not mutate provider usage or billing counters.
+ */
 export function getAnalyticsTokenBreakdown(summary: AnalyticsTokenSummary) {
   const totalInputTokens = tokenCount(summary.promptTokens);
   const outputTokens = tokenCount(summary.completionTokens);

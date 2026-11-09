@@ -12,6 +12,11 @@ import {
   type AnalyticsTokenSummary,
 } from "@/shared/utils/analyticsTokenBreakdown";
 
+/**
+ * Render inclusive totals alongside cache-read and non-cache-read input categories.
+ * Unknown and partial measurements remain explicit; exact accessible counts and
+ * keyboard tooltips stay available independently of the selected display format.
+ */
 export default function TokenBreakdownCards({
   summary,
   displayMode,

@@ -21,6 +21,7 @@ const summary = {
   cachedInputTokensComplete: true,
 };
 
+/** Mount real token cards with the requested locale and Analytics route messages. */
 function renderCards(
   value: AnalyticsTokenSummary,
   displayMode: "compact" | "exact" = "exact",
@@ -40,6 +41,7 @@ function renderCards(
   );
 }
 
+/** Find a card value by its translated group label and exact accessible count. */
 function count(label: string, value: string) {
   const group = screen.getByRole("group", { name: label });
   return within(group).getByLabelText(value);
