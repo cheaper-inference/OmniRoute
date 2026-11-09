@@ -10,6 +10,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-antigravity-executor";
 
 const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+const { translateRequest } = await import("../../open-sse/translator/index.ts");
+const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const { setCliCompatProviders } = await import("../../open-sse/config/cliFingerprints.ts");
 const { scrubProxyAndFingerprintHeaders } =
   await import("../../open-sse/services/antigravityHeaderScrub.ts");
@@ -869,6 +871,56 @@ test("AntigravityExecutor.refreshCredentials skips discovery when access_token i
 // The non-streaming passthrough drain test ("auto-retries short 429 responses and
 // collects SSE for non-stream clients") lives in
 // tests/unit/antigravity-streaming-passthrough.test.ts with the other passthrough tests.
+
+for (const [model, effort] of [
+  ["claude-opus-5-5-high", "high"],
+  ["claude-opus-5-5-medium", "medium"],
+]) {
+  test(`AntigravityExecutor sends ${model} without an implicit output cap or thinkingConfig`, async (t) => {
+    seedAntigravityIdeVersionCache("2.1.1");
+    const credentials = { accessToken: "test-token", projectId: "test-project" };
+    const body = translateRequest(
+      FORMATS.OPENAI,
+      FORMATS.ANTIGRAVITY,
+      model,
+      { messages: [{ role: "user", content: "Hello" }], reasoning_effort: effort },
+      true,
+      credentials,
+      "antigravity"
+    );
+    const sends: Array<{
+      project: string;
+      model: string;
+      request: { generationConfig: Record<string, unknown> };
+    }> = [];
+    t.mock.method(globalThis, "fetch", async (url: string | URL | Request, init?: RequestInit) => {
+      assert.match(String(url), /\/v1internal:streamGenerateContent\?alt=sse$/);
+      assert.equal(typeof init?.body, "string");
+      sends.push(JSON.parse(init.body as string));
+      return new Response(
+        'data: {"response":{"candidates":[{"content":{"parts":[{"text":"ok"}]},"finishReason":"STOP"}]}}\n\n',
+        { status: 200, headers: { "Content-Type": "text/event-stream" } }
+      );
+    });
+
+    const result = await new AntigravityExecutor().execute({
+      model,
+      body,
+      stream: true,
+      credentials,
+      log: { debug() {}, warn() {} },
+    });
+    assert.equal(result.response.status, 200);
+    await result.response.text();
+    assert.equal(sends.length, 1);
+    assert.equal(sends[0].project, credentials.projectId);
+    assert.equal(sends[0].model, model);
+    const generationConfig = sends[0].request.generationConfig;
+    assert.ok(generationConfig);
+    assert.equal(Object.hasOwn(generationConfig, "maxOutputTokens"), false);
+    assert.equal(Object.hasOwn(generationConfig, "thinkingConfig"), false);
+  });
+}
 
 test("AntigravityExecutor.execute embeds retryAfterMs when the upstream asks for a long wait", async () => {
   const executor = new AntigravityExecutor();
