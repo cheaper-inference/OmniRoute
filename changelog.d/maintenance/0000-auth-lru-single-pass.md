@@ -1,0 +1,1 @@
+- **perf(auth):** picking the least-recently-used account (round-robin, least-used) now scans the pool once and parses each last-used time once, instead of sorting a copy of the whole pool with a date parse in every compare.

@@ -486,6 +486,35 @@ function getP2CConnectionScore(
 
   return { score, quotaHeadroomPercent };
 }
+/**
+ * The connection `[...list].sort(order)[0]` would return, found in one pass with each
+ * `lastUsedAt` parsed once. Oldest-first order: lower backoff, never-used, oldest, then priority
+ * among never-used. `newestFirst` is the sticky-window order: most recent first, never-used last.
+ * Ties keep the earlier list entry, like the stable sort did.
+ */
+function pickByLastUsed<
+  T extends { backoffLevel?: number | null; lastUsedAt?: string | null; priority?: number | null },
+>(list: T[], newestFirst = false): T {
+  const usedMs = (c: T) => (c.lastUsedAt ? new Date(c.lastUsedAt).getTime() : null);
+  const before = (a: T, aMs: number | null, b: T, bMs: number | null): boolean => {
+    if (!newestFirst && (a.backoffLevel || 0) !== (b.backoffLevel || 0)) {
+      return (a.backoffLevel || 0) < (b.backoffLevel || 0);
+    }
+    if (aMs === null && bMs === null) return (a.priority || 999) < (b.priority || 999);
+    if (aMs === null || bMs === null) return (aMs === null) !== newestFirst;
+    return newestFirst ? aMs > bMs : aMs < bMs;
+  };
+  let best = list[0];
+  let bestMs = usedMs(best);
+  for (let i = 1; i < list.length; i++) {
+    const ms = usedMs(list[i]);
+    if (before(list[i], ms, best, bestMs)) {
+      best = list[i];
+      bestMs = ms;
+    }
+  }
+  return best;
+}
 function compareP2CConnections(
   provider: string,
   a: ProviderConnectionView,
@@ -1877,15 +1906,8 @@ export async function getProviderCredentials(
       const isFallbackScenario = excludeConnectionId !== null || excludedConnectionIds.size > 0;
 
       if (!isFallbackScenario) {
-        // Sort by lastUsed (most recent first) to find current candidate
-        const byRecency = [...orderedConnections].sort((a: any, b: any) => {
-          if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-          if (!a.lastUsedAt) return 1;
-          if (!b.lastUsedAt) return -1;
-          return new Date(b.lastUsedAt).getTime() - new Date(a.lastUsedAt).getTime();
-        });
-
-        const current = byRecency[0];
+        // Most recently used account is the sticky candidate
+        const current = pickByLastUsed(orderedConnections, true);
         const currentCount = current?.consecutiveUseCount || 0;
 
         if (current && current.lastUsedAt && currentCount < stickyLimit) {
@@ -1904,18 +1926,7 @@ export async function getProviderCredentials(
           // Pick the least recently used (excluding current if possible)
           // Also penalize accounts with high backoffLevel (previously rate-limited)
           // so they don't get immediately re-selected after cooldown (#340)
-          const sortedByOldest = [...orderedConnections].sort((a: any, b: any) => {
-            // Penalize previously rate-limited accounts (backoffLevel > 0)
-            const aBackoff = a.backoffLevel || 0;
-            const bBackoff = b.backoffLevel || 0;
-            if (aBackoff !== bBackoff) return aBackoff - bBackoff; // lower backoff first
-            if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-            if (!a.lastUsedAt) return -1;
-            if (!b.lastUsedAt) return 1;
-            return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-          });
-
-          connection = sortedByOldest[0];
+          connection = pickByLastUsed(orderedConnections);
           log.debug(
             "AUTH",
             `${provider} round-robin: switching to LRU ${connection.id?.slice(0, 8)}... (current count=${currentCount} >= limit=${stickyLimit} or no lastUsedAt)`
@@ -1930,17 +1941,7 @@ export async function getProviderCredentials(
         // Fallback scenario: excluded an account due to failure
         // Always pick the least recently used to ensure proper cycling
         // Also penalize accounts with high backoffLevel (#340)
-        const sortedByOldest = [...orderedConnections].sort((a: any, b: any) => {
-          const aBackoff = a.backoffLevel || 0;
-          const bBackoff = b.backoffLevel || 0;
-          if (aBackoff !== bBackoff) return aBackoff - bBackoff;
-          if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-          if (!a.lastUsedAt) return -1;
-          if (!b.lastUsedAt) return 1;
-          return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-        });
-
-        connection = sortedByOldest[0];
+        connection = pickByLastUsed(orderedConnections);
         log.info(
           "AUTH",
           `${provider} round-robin: FALLBACK MODE - excluded_count=${excludedConnectionIds.size} excluded=${formatConnectionPrefixesForLog(excludedConnectionIds)} picked_lru=${connection.id?.slice(0, 8)}...`
@@ -1984,16 +1985,7 @@ export async function getProviderCredentials(
       // round-robin fallback branch applies. Without it the oldest lastUsedAt
       // could belong to an account that just 429'd, so a failover landed on it
       // for one request before the next call settled on a healthy account.
-      const sorted = [...orderedConnections].sort((a, b) => {
-        const aBackoff = a.backoffLevel || 0;
-        const bBackoff = b.backoffLevel || 0;
-        if (aBackoff !== bBackoff) return aBackoff - bBackoff; // lower backoff first
-        if (!a.lastUsedAt && !b.lastUsedAt) return (a.priority || 999) - (b.priority || 999);
-        if (!a.lastUsedAt) return -1;
-        if (!b.lastUsedAt) return 1;
-        return new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime();
-      });
-      connection = sorted[0];
+      connection = pickByLastUsed(orderedConnections);
       // expiry-first (#14533) ranks by the quota closest to being lost; see its leaf module.
       if (strategy === "expiry-first")
         connection = pickExpiryFirstConnection(orderedConnections, settings, {
