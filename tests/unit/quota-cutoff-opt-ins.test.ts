@@ -95,4 +95,44 @@ test("the full Codex quota-filtering opt-out takes precedence over the paid-cred
     evaluateQuotaCutoff(null, undefined, { ...scope, providerSpecificData: preflightOnlyOff }),
     { proceed: false, reason: "quota_unavailable" }
   );
+  // When quota telemetry IS available and paid credits are exhausted, cutoff blocks.
+  assert.equal(
+    evaluateQuotaCutoff(
+      {
+        used: 100,
+        total: 100,
+        percentUsed: 1,
+        paidCredits: {
+          hasCredits: false,
+          unlimited: false,
+          overageLimitReached: false,
+          balance: 0,
+        },
+        windows: { session: { percentUsed: 1, resetAt: "2026-11-04T12:00:00.000Z" } },
+      },
+      undefined,
+      { ...scope, providerSpecificData: preflightOnlyOff }
+    ).proceed,
+    false
+  );
+  // When quota telemetry IS available and paid credits are present, cutoff proceeds.
+  assert.equal(
+    evaluateQuotaCutoff(
+      {
+        used: 100,
+        total: 100,
+        percentUsed: 1,
+        paidCredits: {
+          hasCredits: true,
+          unlimited: false,
+          overageLimitReached: false,
+          balance: 500,
+        },
+        windows: { session: { percentUsed: 1, resetAt: "2026-11-04T12:00:00.000Z" } },
+      },
+      undefined,
+      { ...scope, providerSpecificData: preflightOnlyOff }
+    ).proceed,
+    true
+  );
 });

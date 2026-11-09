@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   CHATGPT_WEB_CODEX_CONNECTOR_NAME,
@@ -118,6 +119,18 @@ export function detectChromeExecutable(explicit?: string): string | undefined {
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    // Windows default install locations, the same set resolveChatGptWebChromeExecutable
+    // (utils/chatgptWebExecutorAdapter.ts) accepts; without them Chrome was never found on
+    // Windows and the connection could not be added (#18850).
+    ...(process.env.PROGRAMFILES
+      ? [join(process.env.PROGRAMFILES, "Google", "Chrome", "Application", "chrome.exe")]
+      : []),
+    ...(process.env["PROGRAMFILES(X86)"]
+      ? [join(process.env["PROGRAMFILES(X86)"], "Google", "Chrome", "Application", "chrome.exe")]
+      : []),
+    ...(process.env.LOCALAPPDATA
+      ? [join(process.env.LOCALAPPDATA, "Google", "Chrome", "Application", "chrome.exe")]
+      : []),
   ].filter((candidate): candidate is string => Boolean(candidate?.trim()));
   const preferred = explicit?.trim();
   const candidates =
