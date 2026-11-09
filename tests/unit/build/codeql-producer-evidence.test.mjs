@@ -339,6 +339,51 @@ test("observer admits only exact completed producer uploads and preserves all sh
   );
 });
 
+test("manual candidate observer rechecks the admitted target before and after scanner evidence", () => {
+  for (const moveBase of [false, true]) {
+    const data = fixture();
+    data.context = {
+      repository: "owner/repo",
+      event: "workflow_dispatch",
+      ref: "refs/heads/fix/recovery",
+      sha: "a".repeat(40),
+      targetBranch: data.policy.targetBranches[1],
+      base: "c".repeat(40),
+    };
+    for (const receipt of data.receipts) {
+      receipt.context = data.context;
+      receipt.workflowRef = `owner/repo/.github/workflows/ci.yml@${data.context.ref}`;
+    }
+    for (const analysis of Object.values(data.analysesByUpload).flat()) {
+      analysis.ref = data.context.ref;
+    }
+    const targetEndpoint = `/git/ref/heads/${data.context.targetBranch}`;
+    const api = apiFixture(data, (endpoint, calls) => {
+      if (endpoint.endsWith("/git/ref/heads/fix/recovery")) {
+        return { ref: data.context.ref, object: { sha: data.context.sha } };
+      }
+      if (endpoint.endsWith(targetEndpoint)) {
+        const moved = moveBase && calls.filter((item) => item.endsWith(targetEndpoint)).length > 1;
+        return {
+          ref: `refs/heads/${data.context.targetBranch}`,
+          object: { sha: moved ? "f".repeat(40) : data.context.base },
+        };
+      }
+    });
+    const observe = () =>
+      observeCodeqlCandidate({
+        context: data.context,
+        policy: data.policy,
+        baseline: 6,
+        producer: data,
+        readJson: api.readJson,
+      });
+    if (moveBase) assert.throws(observe, /CONTEXT_DISPATCH_BASE_MOVED/);
+    else assert.equal(observe().verdict, "PASS");
+    assert.equal(api.calls.filter((item) => item.endsWith(targetEndpoint)).length, 2);
+  }
+});
+
 test("observer rejects unavailable upload, incomplete analysis, changed branch and moved upload metadata", () => {
   for (const change of [
     (data) => (data.uploads["sarif-1"].processing_status = "pending"),

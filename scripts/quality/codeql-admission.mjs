@@ -10,6 +10,7 @@ const REPOSITORY = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 import { CodeqlEvidenceError } from "./codeql-evidence-error.mjs";
 import {
   assertCodeqlTarget,
+  resolveCodeqlDispatchTarget,
   readProducerReceipts,
   selectProducerReceipts,
   selectCompletedUploadAnalyses,
@@ -56,7 +57,7 @@ export function resolveCodeqlContext(env, event, { allowForks = false } = {}) {
   }
   requireEvidence(ref.startsWith("refs/heads/"), "CONTEXT_BRANCH_INVALID");
   if (context.event === "push") requireEvidence(event.after === sha, "CONTEXT_PUSH_SHA_INVALID");
-  return context;
+  return { ...context, ...resolveCodeqlDispatchTarget(env, event) };
 }
 
 export function assertCurrentContext(context, current) {
@@ -74,6 +75,13 @@ export function assertCurrentContext(context, current) {
     );
   } else {
     requireEvidence(current?.object?.sha === context.sha, "CONTEXT_REF_MOVED");
+    if (context.targetBranch) {
+      requireEvidence(
+        current?.targetBase?.ref === `refs/heads/${context.targetBranch}` &&
+          current.targetBase.object?.sha === context.base,
+        "CONTEXT_DISPATCH_BASE_MOVED"
+      );
+    }
   }
 }
 
@@ -324,7 +332,12 @@ function readGithubJson(endpoint, accept) {
 
 function currentIdentity(readJson, context) {
   const endpoint = context.pr ? `pulls/${context.pr}` : `git/ref/${context.ref.slice(5)}`;
-  return readJson(`/repos/${context.repository}/${endpoint}`);
+  const current = readJson(`/repos/${context.repository}/${endpoint}`);
+  if (!context.targetBranch) return current;
+  return {
+    ...current,
+    targetBase: readJson(`/repos/${context.repository}/git/ref/heads/${context.targetBranch}`),
+  };
 }
 
 export function observeCodeqlCandidate({

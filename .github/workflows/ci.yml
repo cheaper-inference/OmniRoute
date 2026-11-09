@@ -19,6 +19,10 @@ on:
         description: "Optional immutable base commit for the differential UI i18n gates"
         required: false
         type: string
+      candidate_base_branch:
+        description: "Manual candidate target for CodeQL; requires its current tip in i18n_base_sha"
+        required: false
+        type: string
 
 concurrency:
   # A metadata edit must not evict a pending candidate from GitHub's single slot.

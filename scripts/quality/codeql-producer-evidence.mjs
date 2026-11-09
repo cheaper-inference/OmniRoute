@@ -172,16 +172,41 @@ export function readProducerReceipts(directory) {
   return receipts;
 }
 
+export function resolveCodeqlDispatchTarget(env, event) {
+  if (env.GITHUB_EVENT_NAME !== "workflow_dispatch") return null;
+  const targetBranch = event?.inputs?.candidate_base_branch;
+  if (targetBranch === undefined || targetBranch === "") return null;
+  requireEvidence(
+    typeof targetBranch === "string" &&
+      /^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(targetBranch) &&
+      !targetBranch.startsWith("refs/") &&
+      !targetBranch.includes("..") &&
+      !targetBranch.includes("//") &&
+      !targetBranch.endsWith("/") &&
+      !targetBranch.endsWith(".") &&
+      !targetBranch.split("/").some((part) => part.endsWith(".lock")),
+    "CONTEXT_DISPATCH_TARGET_INVALID"
+  );
+  const base = event.inputs.i18n_base_sha;
+  requireEvidence(
+    typeof base === "string" && /^[a-f0-9]{40}$/.test(base) && base !== env.GITHUB_SHA,
+    "CONTEXT_DISPATCH_BASE_INVALID"
+  );
+  return { targetBranch, base };
+}
+
 export function assertCodeqlTarget(env, event, policy) {
   requireEvidence(
     Array.isArray(policy.targetBranches) && policy.targetBranches.length > 0,
     "SCAN_TARGET_POLICY_MISSING"
   );
+  const dispatch = resolveCodeqlDispatchTarget(env, event);
   const target =
-    env.GITHUB_EVENT_NAME === "pull_request"
+    dispatch?.targetBranch ??
+    (env.GITHUB_EVENT_NAME === "pull_request"
       ? event.pull_request?.base?.ref
       : env.GITHUB_EVENT_NAME === "merge_group"
         ? event.merge_group?.base_ref?.replace(/^refs\/heads\//, "")
-        : env.GITHUB_REF?.replace(/^refs\/heads\//, "");
+        : env.GITHUB_REF?.replace(/^refs\/heads\//, ""));
   requireEvidence(policy.targetBranches.includes(target), "SCAN_BRANCH_NOT_ONBOARDED");
 }
