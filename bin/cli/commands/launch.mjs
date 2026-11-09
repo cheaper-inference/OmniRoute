@@ -2,7 +2,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { join } from "node:path";
 import os from "node:os";
 import { t } from "../i18n.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 
@@ -83,7 +83,7 @@ export function resolveLaunchTarget(opts = {}) {
   if (!authToken) {
     try {
       const ctx = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      authToken = ctx?.accessToken || ctx?.apiKey || undefined;
+      authToken = contextCredentialFor(ctx, baseUrl);
     } catch {
       /* no context auth */
     }

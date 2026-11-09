@@ -13,6 +13,7 @@ import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { getProviderDisplayName } from "@/lib/display/names";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { compareTr } from "@/shared/utils/turkishText";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useLocale, useTranslations } from "next-intl";
 import TelemetryCard from "./TelemetryCard";
@@ -139,20 +140,13 @@ function HealthSnapshot() {
   }, []);
 
   useEffect(() => {
-    const initialFetch = setTimeout(() => {
-      void fetchHealth();
-      void fetchExtras();
-      void fetchDbHealth();
-    }, 0);
-    const interval = setInterval(() => {
+    // Skips ticks while the tab is hidden and catches up on return: these
+    // three endpoints hit the same process that serves the LLM proxy.
+    return startVisiblePolling(() => {
       void fetchHealth();
       void fetchExtras();
       void fetchDbHealth();
     }, 15000);
-    return () => {
-      clearTimeout(initialFetch);
-      clearInterval(interval);
-    };
   }, [fetchHealth, fetchExtras, fetchDbHealth]);
 
   const handleResetHealth = async () => {

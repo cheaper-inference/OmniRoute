@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -352,7 +353,7 @@ const KIRO_IMPROPERLY_FORMED_MESSAGE = "Improperly formed request";
 async function isBrandedGatewayProfileArnRejection(response: Response): Promise<boolean> {
   if (response.status !== 400) return false;
   try {
-    const text = await response.clone().text();
+    const text = await readResponseTextWithinCap(response.clone());
     return (
       text.includes(KIRO_PROFILE_ARN_REQUIRED_MESSAGE) ||
       text.includes(KIRO_IMPROPERLY_FORMED_MESSAGE)

@@ -1,3 +1,4 @@
+import { copyCodexRequestForMutation } from "./codex/requestCopy.ts";
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
 import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
@@ -1349,12 +1350,9 @@ export class CodexExecutor extends BaseExecutor {
     credentials: ProviderCredentials
   ) {
     void stream;
-    // Do not mutate the caller's payload in place. Combo quality checks and
-    // other post-execute paths still inspect the original request body.
-    const body: Record<string, unknown> =
-      bodyInput && typeof bodyInput === "object"
-        ? structuredClone(bodyInput as Record<string, unknown>)
-        : {};
+    // Preserve caller-owned inputs while avoiding a deep clone of large histories.
+    // normalizeCodexResponsesInput below makes fresh input items before mutation.
+    const body = copyCodexRequestForMutation(bodyInput);
 
     const nativeCodexPassthrough = body?._nativeCodexPassthrough === true;
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
