@@ -16,6 +16,8 @@ const proxyHealthV1Route = await import("../../src/app/api/v1/management/proxies
 const proxyBulkAssignV1Route =
   await import("../../src/app/api/v1/management/proxies/bulk-assign/route.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
+const settingsAssignmentsRoute =
+  await import("../../src/app/api/settings/proxies/assignments/route.ts");
 const settingsBulkAssignRoute =
   await import("../../src/app/api/settings/proxies/bulk-assign/route.ts");
 
@@ -826,9 +828,6 @@ test("v1 assignments route resolves connection proxies and bulk assignment cover
   assert.equal(globalPayload.requested, 1);
   assert.equal(globalPayload.updated, 1);
 });
-
-const settingsAssignmentsRoute =
-  await import("../../src/app/api/settings/proxies/assignments/route.ts");
 
 test("both assignment write endpoints validate bodies before changing state", async () => {
   for (const handler of [settingsAssignmentsRoute.PUT, proxyAssignmentsV1Route.PUT]) {

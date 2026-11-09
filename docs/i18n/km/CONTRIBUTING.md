@@ -13,15 +13,21 @@ UI/UX, i18n, CLI, មូលដ្ឋានទិន្នន័យ និង bui
 
 ---
 
-## ការរៀបចំសម្រាប់ការអភិវឌ្ឍ
+## ការរៀបចំបរិស្ថានអភិវឌ្ឍន៍
 
 ### តម្រូវការជាមុន
 
-- **Node.js** `>=22.22.2 <23` ឬ `>=24.0.0 <27` (បានណែនាំ៖ 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ឬ `>=24.0.0 <27` (ណែនាំ៖ 24 LTS)
 - **npm** 10+
 
-> **សម្រាប់អ្នកប្រើ npm v11+ (Node 24+):** បន្ទាប់ពី `npm install` សូមផ្ទៀងផ្ទាត់ថាម៉ូឌុល native ត្រូវបានដំឡើង៖
-> `node -e "require('better-sqlite3')"`។ ប្រសិនបើវាបរាជ័យដោយមាន `MODULE_NOT_FOUND`សូមដំណើរការ`npm approve-scripts better-sqlite3 && npm install`។ សូមមើល
+> **Windows ជាមួយ Node 24៖** ប្រើ patch release បច្ចុប្បន្នរបស់ 24 LTS (យ៉ាងហោចណាស់ 24.20.0)។
+> Release ចាស់ៗអាចបញ្ឈប់ដំណើរការបន្ទាប់ពីការធ្វើតេស្តជោគជ័យ នៅពេល `--test-force-exit` បិទ
+> process។ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) របស់ Node ដោះស្រាយ
+> runtime crash នេះ។ សូមរក្សាការអះអាងក្នុងការធ្វើតេស្ត និងការត្រួតពិនិត្យការចាកចេញរបស់ runner ឱ្យបានបើកដំណើរការ។
+
+> **អ្នកប្រើប្រាស់ npm v11+ (Node 24+)៖** បន្ទាប់ពី `npm install` សូមផ្ទៀងផ្ទាត់ថា native modules ត្រូវបានដំឡើង៖
+> `node -e "require('better-sqlite3')"`. ប្រសិនបើវាបរាជ័យដោយមាន `MODULE_NOT_FOUND`,
+> ដំណើរការ `npm approve-scripts better-sqlite3 && npm install`។ សូមមើល
 > [ការដោះស្រាយបញ្ហា](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)។
 
 - **Git**
@@ -40,84 +46,84 @@ npm install
 # បង្កើត .env របស់អ្នកពីគំរូ
 cp .env.example .env
 
-# បង្កើត secret ដែលត្រូវការ
+# បង្កើត secrets ដែលត្រូវការ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-អថេរសំខាន់ៗសម្រាប់ការអភិវឌ្ឍ៖
+អថេរសំខាន់ៗសម្រាប់ការអភិវឌ្ឍន៍៖
 
-| អថេរ                   | តម្លៃលំនាំដើមសម្រាប់ការអភិវឌ្ឍ | ការពិពណ៌នា                       |
-| ---------------------- | ------------------------------ | -------------------------------- |
-| `PORT`                 | `20128`                        | ច្រកម៉ាស៊ីនមេ                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | URL មូលដ្ឋានសម្រាប់ frontend     |
-| `JWT_SECRET`           | (បង្កើតខាងលើ)                  | secret សម្រាប់ចុះហត្ថលេខា JWT    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                     | ពាក្យសម្ងាត់ចូលប្រើដំបូង         |
-| `APP_LOG_LEVEL`        | `info`                         | កម្រិតព័ត៌មានលម្អិតរបស់កំណត់ហេតុ |
+| អថេរ                   | តម្លៃលំនាំដើមសម្រាប់ការអភិវឌ្ឍន៍ | សេចក្ដីពិពណ៌នា                 |
+| ---------------------- | -------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                          | ច្រក server                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | URL មូលដ្ឋានសម្រាប់ frontend   |
+| `JWT_SECRET`           | (បង្កើតខាងលើ)                    | secret សម្រាប់ចុះហត្ថលេខា JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | ពាក្យសម្ងាត់សម្រាប់ការចូលដំបូង |
+| `APP_LOG_LEVEL`        | `info`                           | កម្រិតលម្អិតនៃ log             |
 
 ### ការកំណត់ផ្ទាំងគ្រប់គ្រង
 
-ផ្ទាំងគ្រប់គ្រងផ្តល់នូវប៊ូតុងបិទ/បើកក្នុង UI សម្រាប់មុខងារដែលអាចកំណត់រចនាសម្ព័ន្ធតាមរយៈអថេរបរិស្ថានផងដែរ៖
+ផ្ទាំងគ្រប់គ្រងផ្ដល់ toggle ក្នុង UI សម្រាប់មុខងារដែលអាចកំណត់តាមរយៈអថេរបរិស្ថានផងដែរ៖
 
-| ទីតាំងការកំណត់         | ប៊ូតុងបិទ/បើក      | ការពិពណ៌នា                              |
-| ---------------------- | ------------------ | --------------------------------------- |
-| ការកំណត់ → កម្រិតខ្ពស់ | របៀបបំបាត់កំហុស    | បើកកំណត់ហេតុសំណើសម្រាប់បំបាត់កំហុស (UI) |
-| ការកំណត់ → ទូទៅ        | ភាពមើលឃើញរបារចំហៀង | បង្ហាញ/លាក់ផ្នែកនានានៃរបារចំហៀង         |
+| ទីតាំងការកំណត់      | Toggle             | សេចក្ដីពិពណ៌នា              |
+| ------------------- | ------------------ | --------------------------- |
+| Settings → Advanced | Debug Mode         | បើក debug request logs (UI) |
+| Settings → General  | Sidebar Visibility | បង្ហាញ/លាក់ផ្នែក sidebar    |
 
-ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុងមូលដ្ឋានទិន្នន័យ ហើយនៅតែមានបន្ទាប់ពីការចាប់ផ្តើមឡើងវិញ ដោយជំនួសតម្លៃលំនាំដើមរបស់អថេរបរិស្ថាននៅពេលកំណត់រួច។
+ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុង database ហើយនៅតែមានបន្ទាប់ពីចាប់ផ្ដើមឡើងវិញ ដោយបដិសេធតម្លៃលំនាំដើមរបស់ env var នៅពេលបានកំណត់។
 
-### ការដំណើរការនៅលើម៉ាស៊ីនមូលដ្ឋាន
+### ដំណើរការក្នុងមូលដ្ឋាន
 
 ```bash
-# របៀបអភិវឌ្ឍ (ផ្ទុកឡើងវិញដោយស្វ័យប្រវត្តិ)
+# របៀបអភិវឌ្ឍន៍ (ផ្ទុកឡើងវិញដោយស្វ័យប្រវត្តិ)
 npm run dev
 
-# ការ build សម្រាប់ production
+# បង្កើត production
 npm run build    # next build → .build/next/ បន្ទាប់មក assembleStandalone → dist/
 npm run start
 
-# compile រហ័សសម្រាប់តែ backend/API សម្រាប់ការផ្លាស់ប្តូររបស់អ្នករួមចំណែក
+# Compile លឿនសម្រាប់ backend/API តែប៉ុណ្ណោះ សម្រាប់ការផ្លាស់ប្ដូររបស់អ្នកចូលរួម
 npm run build:contributor
 
-# ការ build សម្រាប់ release (build ឡើងវិញដោយសម្អាត + HEAD sentinel — តម្រូវឱ្យមានសម្រាប់ deploy)
-npm run build:release   # rm -rf .build dist && build + សរសេរ dist/BUILD_SHA
+# បង្កើត release (បង្កើតឡើងវិញស្អាត + HEAD sentinel — តម្រូវសម្រាប់ deploy)
+npm run build:release   # rm -rf .build dist ហើយ build + សរសេរ dist/BUILD_SHA
 
-# ការកំណត់ច្រកដែលប្រើជាទូទៅ
+# ការកំណត់ច្រកទូទៅ
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ការ build សម្រាប់អ្នករួមចំណែកធ្វើការផ្ទៀងផ្ទាត់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិនរៀបចំការចែកចាយ standalone
-ឬ build ធនធាន native packaging ស្រេចចិត្តទេ។ ប្រើការ build សម្រាប់ production ធម្មតា នៅពេល
-អ្នកត្រូវការផ្ទៀងផ្ទាត់ bundle ដែលអាចចែកចាយបាន។
+Contributor build ធ្វើការផ្ទៀងផ្ទាត់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិន assemble standalone
+distribution ឬ build optional native packaging assets ទេ។ ប្រើ production build ធម្មតា នៅពេលអ្នក
+ត្រូវការផ្ទៀងផ្ទាត់ shippable bundle។
 
-### ប្លង់លទ្ធផលនៃការ Build
+### ប្លង់លទ្ធផល Build
 
-| ថតឯកសារ   | ខ្លឹមសារ                                                                  | ត្រូវបានតាមដាន |
-| --------- | ------------------------------------------------------------------------- | -------------- |
-| `src/`    | កូដប្រភពកម្មវិធី (TypeScript / TSX)                                       | បាទ            |
-| `.build/` | ឯកសារអន្តរកាល — លទ្ធផល `next build` (gitignored, `distDir = .build/next`) | ទេ             |
-| `dist/`   | bundle ដែលអាចចែកចាយបាន — រៀបចំដោយ `assembleStandalone` (gitignored)       | ទេ             |
+| ថត        | មាតិកា                                                                     | បានតាមដាន |
+| --------- | -------------------------------------------------------------------------- | --------- |
+| `src/`    | ប្រភពកម្មវិធី (TypeScript / TSX)                                           | បាទ/ចាស   |
+| `.build/` | ឯកសារកណ្ដាល — លទ្ធផល `next build` (gitignored, `distDir = .build/next`)    | ទេ        |
+| `dist/`   | bundle ដែលអាចដឹកជញ្ជូនបាន — assemble ដោយ `assembleStandalone` (gitignored) | ទេ        |
 
-ដំណើរការ build គឺជាការដំណើរការតែមួយជុំ៖
+បំពង់ Build ដំណើរការតែមួយជំហាន៖
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (លទ្ធផល Next.js)
-  └─ assembleStandalone()                 (ចម្លង standalone + static + public + ធនធាន native)
+  └─ assembleStandalone()                 (ចម្លង standalone + static + public + native assets)
        └─ លទ្ធផល៖ dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ក៏សម្អាតថតទាំងពីរជាមុន ហើយសរសេរ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជា sentinel សម្រាប់ផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវនៃការ deploy។
+`npm run build:release` នឹងសម្អាតថតទាំងពីរជាមុនសិន ហើយសរសេរ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជា deploy integrity sentinel។
 
-`npm run build:contributor` ប្រើប្រូហ្វាល់ build សម្រាប់តែ backend។ វាបង្កើត stub ជាបណ្តោះអាសន្នសម្រាប់
-ឯកសារ UI របស់ផ្ទាំងគ្រប់គ្រងខណៈពេល build រក្សាទុក API route handlers និងស្ដារឯកសារដើមឡើងវិញ
-បន្ទាប់ពីការ build។ ប្រើ `npm run build` សម្រាប់ការផ្លាស់ប្តូរដែលប៉ះពាល់ដល់ UI របស់ផ្ទាំងគ្រប់គ្រង ឬសម្រាប់
-ការផ្ទៀងផ្ទាត់ release ពេញលេញ។ ប្រូហ្វាល់សម្រាប់អ្នករួមចំណែកមិនមែនជាការជំនួសការ build សម្រាប់ release ទេ។
+`npm run build:contributor` ប្រើ backend-only build profile។ វាប្ដូរ dashboard UI files ជាបណ្ដោះអាសន្ន
+ខណៈពេលកំពុង build រក្សាទុក API route handlers ហើយស្ដារឯកសារដើមឡើងវិញបន្ទាប់ពី build។ ប្រើ `npm run build`
+សម្រាប់ការផ្លាស់ប្ដូរដែលប៉ះពាល់ដល់ dashboard UI ឬសម្រាប់ full release validation; contributor profile
+មិនមែនជាការជំនួស release build ទេ។
 
-> **កំណត់ចំណាំអំពីការ deploy លើ VPS:** ថត image ពីចម្ងាយ `/usr/lib/node_modules/omniroute/app/`
-> មិនត្រូវបានផ្លាស់ប្តូរទេ។ ជំនាញ deploy ប្រើ rsync ដើម្បីចម្លងខ្លឹមសាររបស់ `dist/` ទៅក្នុងវា។
-> មានតែផ្លូវលទ្ធផល build នៅក្នុង repository ប៉ុណ្ណោះដែលបានផ្លាស់ប្តូរ (`app/` → `dist/`)។
+> **ចំណាំអំពី VPS deploy៖** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> មិនត្រូវបានផ្លាស់ប្ដូរទេ។ deploy skills ធ្វើ rsync មាតិកានៃ `dist/` ទៅក្នុងវា។
+> មានតែ build output path ក្នុង repository ប៉ុណ្ណោះដែលបានផ្លាស់ទី (`app/` → `dist/`)។
 
 URL លំនាំដើម៖
 
@@ -180,26 +186,26 @@ npm run test:all
 # ឯកសារតេស្តតែមួយ (កម្មវិធីដំណើរការតេស្តដើមរបស់ Node.js — តេស្តភាគច្រើនប្រើវា)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# តែ unit tests ដែលរងផលប៉ះពាល់ដោយការផ្លាស់ប្ដូររបស់អ្នកប៉ុណ្ណោះ (ប្រើ TIA selector ដូចគ្នានឹង CI gate, #8084)
-npm run test:scoped            # ការផ្លាស់ប្ដូរនៅក្នុង commit ចុងក្រោយ (ឬ working tree)
-npm run test:scoped:staged     # តែការផ្លាស់ប្ដូរដែលបាន staged — ដំណើរការល្អជាមួយ pre-commit
+# ដំណើរការតែ unit tests ដែលរងផលប៉ះពាល់ពីការផ្លាស់ប្តូររបស់អ្នក (ប្រើកម្មវិធីជ្រើសរើស TIA ដូចគ្នានឹងច្រកត្រួតពិនិត្យ CI, #8084)
+npm run test:scoped            # ការផ្លាស់ប្តូរនៅក្នុង commit ចុងក្រោយ (ឬ working tree)
+npm run test:scoped:staged     # តែការផ្លាស់ប្តូរដែលបាន staged ប៉ុណ្ណោះ — សមស្របសម្រាប់ប្រើជាមួយការដំណើរការ pre-commit
 npm run test:scoped:full       # បង្កើតផែនទី import-graph ឡើងវិញជាមុន (បន្ទាប់ពីបន្ថែម/ផ្លាស់ទីឯកសារ)
-# Exit 1 + "run the full suite" មានន័យថា hub file មួយ (tsconfig, package.json, …) ឬ
-# source ដែលមិនបានផ្គូផ្គងត្រូវបានផ្លាស់ប្ដូរ — selector បរាជ័យដោយសុវត្ថិភាព ហើយវាមិនដែលរំលងដោយស្ងៀមស្ងាត់ឡើយ។
+# Exit 1 + "ដំណើរការ suite ពេញលេញ" មានន័យថាឯកសារមជ្ឈមណ្ឌលមួយ (tsconfig, package.json, …) ឬប្រភព
+# ដែលមិនទាន់បានផ្គូផ្គងបានផ្លាស់ប្តូរ — កម្មវិធីជ្រើសរើសបរាជ័យដោយសុវត្ថិភាព ហើយវាមិនដែលរំលងដោយស្ងាត់ៗទេ។
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (ម៉ាស៊ីនមេ MCP, autoCombo, cache)
 npm run test:vitest
 
 # តេស្ត E2E (តម្រូវឱ្យមាន Playwright)
 npm run test:e2e
 
-# E2E របស់ protocol clients (MCP transports, A2A)
+# តេស្ត E2E សម្រាប់ protocol clients (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# តេស្តភាពត្រូវគ្នានៃ ecosystem
+# តេស្តភាពឆបគ្នានៃ ecosystem
 npm run test:ecosystem
 
-# Coverage gate៖ 60% សម្រាប់ statements/lines/functions/branches
+# ច្រកត្រួតពិនិត្យ coverage៖ 60% សម្រាប់ statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
@@ -207,51 +213,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# ការធ្វើ combo smoke ជាមួយ upstream ពិតដែលមាន gate (តម្រូវឱ្យចូលប្រើ VPS + មាន credits ពិតរបស់ provider)
-# វាហៅទៅកាន់ providers ពិត — ចំណាយបន្តិចបន្តួច។ មិនដែលដំណើរការនៅក្នុង CI ឡើយ។ រំលងដោយត្រឹមត្រូវបើគ្មាន gate។
-# តម្រូវការ៖ សិទ្ធិចូលប្រើ ssh root@192.168.0.15 (ទាញប្រភព DB snapshot ដែលបានតែអានពី VPS)។
+# តេស្ត smoke សម្រាប់ combo ជាមួយ upstream ពិតដែលមានច្រកត្រួតពិនិត្យ (តម្រូវឱ្យមានសិទ្ធិចូលប្រើ VPS + credits ពិតរបស់ provider)
+# ភ្ជាប់ទៅ provider ពិត — មានការចំណាយបន្តិចបន្តួច។ មិនដំណើរការក្នុង CI ជាដាច់ខាត។ រំលងដោយគ្មានបញ្ហា ប្រសិនបើគ្មានច្រកត្រួតពិនិត្យ។
+# តម្រូវឱ្យ៖ មានសិទ្ធិចូលប្រើ ssh root@192.168.0.15 (ទាញយក snapshot នៃ DB ដែលបានតែអានពី VPS)។
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — scripts ជា Node ESM ធម្មតា ដែលហៅទៅកាន់ live .15 server ដោយផ្ទាល់។
-# តម្រូវការ៖ សិទ្ធិចូលប្រើ ssh root@192.168.0.15 (combos ត្រូវបានបង្កើត/លុបតាមរយៈ SSH sqlite)។
-# វាហៅទៅកាន់ providers ពិត (ចំណាយតិចតួច)។ បង្កើត/លុបតែ combos ដែលមានឈ្មោះ __live_test__* ប៉ុណ្ណោះ។ មិនដែលដំណើរការនៅក្នុង CI ឡើយ។
-# REQUIRE_API_KEY=false នៅលើ .15 ដូច្នេះមិនត្រូវការ API key ទេ ប៉ុន្តែគោរព COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ប្រសិនបើបានកំណត់។
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # បន្ថែម cross-provider failover scenario ពិតមួយ (សរុប 8)
+# តេស្ត smoke ផ្ទាល់លើ VPS ដំណាក់កាលទី 3 — ស្គ្រីប Node ESM ធម្មតា ដែលភ្ជាប់ដោយផ្ទាល់ទៅម៉ាស៊ីនមេ .15 ដែលកំពុងដំណើរការ។
+# តម្រូវឱ្យ៖ មានសិទ្ធិចូលប្រើ ssh root@192.168.0.15 (combo ត្រូវបានបង្កើត/លុបចោលតាមរយៈ SSH sqlite)។
+# ភ្ជាប់ទៅ provider ពិត (ចំណាយតិចតួច)។ បង្កើត/លុបតែ combo ដែលមានឈ្មោះ __live_test__* ប៉ុណ្ណោះ។ មិនដំណើរការក្នុង CI ជាដាច់ខាត។
+# REQUIRE_API_KEY=false នៅលើ .15 ដូច្នេះមិនត្រូវការ API key ទេ ប៉ុន្តែគោរពតាម COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ប្រសិនបើបានកំណត់។
+npm run test:combo:live:vps              # សេណារីយ៉ូ HTTP ចំនួន 7 (អាទិភាព/ប្តូរវេន/ទម្ងន់/តម្លៃ/បញ្ចូលគ្នា/ស្វ័យប្រវត្តិ + ស្ថានភាព)
+npm run test:combo:live:vps:failover     # បន្ថែមសេណារីយ៉ូ failover ឆ្លង provider ពិតមួយ (សរុប 8)
 ```
 
-កំណត់ចំណាំអំពី coverage៖
+កំណត់សម្គាល់អំពី coverage៖
 
-- `npm run test:coverage` វាស់ source coverage សម្រាប់ unit test suite ចម្បង មិនរាប់បញ្ចូល `tests/**` និងរាប់បញ្ចូល `open-sse/**`
-- Pull requests ត្រូវរក្សា coverage gate ឱ្យនៅ **60%+** សម្រាប់ statements/lines/functions/branches
-- ប្រសិនបើ PR ផ្លាស់ប្ដូរ production code នៅក្នុង `src/`, `open-sse/`, `electron/`, ឬ `bin/` វាត្រូវបន្ថែម ឬធ្វើបច្ចុប្បន្នភាព automated tests នៅក្នុង PR ដូចគ្នា
+- `npm run test:coverage` វាស់ source coverage សម្រាប់ suite នៃ unit test ចម្បង ដោយមិនរាប់បញ្ចូល `tests/**` និងរាប់បញ្ចូល `open-sse/**`
+- Pull request ត្រូវតែរក្សាច្រកត្រួតពិនិត្យ coverage ឱ្យបាន **60%+** សម្រាប់ statements/lines/functions/branches
+- ប្រសិនបើ PR ផ្លាស់ប្តូរកូដ production ក្នុង `src/`, `open-sse/`, `electron/`, ឬ `bin/` វាត្រូវតែបន្ថែម ឬធ្វើបច្ចុប្បន្នភាពតេស្តស្វ័យប្រវត្តិនៅក្នុង PR ដូចគ្នា
 - `npm run coverage:report` បង្ហាញរបាយការណ៍លម្អិតតាមឯកសារនីមួយៗពីការដំណើរការ coverage ចុងក្រោយ
-- `npm run test:coverage:legacy` រក្សាទុករង្វាស់ចាស់សម្រាប់ការប្រៀបធៀបប្រវត្តិសាស្ត្រ
-- សូមមើល `docs/ops/COVERAGE_PLAN.md` សម្រាប់ផែនការកែលម្អ coverage ជាដំណាក់កាល
+- `npm run test:coverage:legacy` រក្សាទុកមាត្រដ្ឋានចាស់សម្រាប់ការប្រៀបធៀបជាប្រវត្តិសាស្ត្រ
+- សូមមើល `docs/ops/COVERAGE_PLAN.md` សម្រាប់ផែនការអភិវឌ្ឍការកែលម្អ coverage ជាដំណាក់កាល
 
-### តម្រូវការរបស់ Pull Request
+### តម្រូវការសម្រាប់ Pull Request
 
 មុនពេលបើក PR សូមប្រើ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ដើម្បីដំណើរការ focused loop សម្រាប់
-អ្វីដែលអ្នកបានផ្លាស់ប្ដូរ។ unit suite ពេញលេញ (4 CI shards), Vitest, coverage gate **60%+** និង
-production build គឺជាការទទួលខុសត្រូវរបស់ CI — ការដំណើរការពួកវានៅ local មិនផ្ដល់ព័ត៌មានបន្ថែមដែលការត្រួតពិនិត្យ
-PR មិនបានផ្ដល់ឱ្យអ្នករួចហើយទេ ហើយនៅលើម៉ាស៊ីនតូចៗ វាអាចប្រើធនធាន host រហូតដល់អតិបរមា (#8084)៖
+[មាគ៌ាស្តង់ដារសម្រាប់ការរួមចំណែក](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ដើម្បីដំណើរការវដ្តដែលផ្តោតលើ
+អ្វីដែលអ្នកបានផ្លាស់ប្តូរ។ unit suite ពេញលេញ (CI ចំនួន 4 shards), Vitest, ច្រកត្រួតពិនិត្យ coverage **60%+** និង
+production build គឺជាការទទួលខុសត្រូវរបស់ CI — ការដំណើរការពួកវានៅមូលដ្ឋានមិនផ្តល់ព័ត៌មានបន្ថែមដែលការត្រួតពិនិត្យ PR
+មិនបានផ្តល់ឱ្យរួចហើយទេ ហើយនៅលើម៉ាស៊ីនតូចៗ វាអាចប្រើប្រាស់ធនធានម៉ាស៊ីនរហូតដល់ពេញ (#8084)៖
 
-- ដំណើរការឯកសារតេស្តដែលគ្របដណ្ដប់ការផ្លាស់ប្ដូររបស់អ្នក៖ `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ដំណើរការឯកសារតេស្តដែលគ្របដណ្តប់ការផ្លាស់ប្តូររបស់អ្នក៖ `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - ដំណើរការ `npm run lint`
-- បន្ថែម ឬធ្វើបច្ចុប្បន្នភាព automated tests នៅក្នុង PR ដូចគ្នា រាល់ពេល production code ផ្លាស់ប្ដូរ
-- រាយបញ្ចូលឯកសារតេស្តដែលបានផ្លាស់ប្ដូរ ឬបន្ថែមនៅក្នុងការពិពណ៌នា PR នៅពេល production code បានផ្លាស់ប្ដូរ
-- ពិនិត្យលទ្ធផល SonarQube នៅលើ PR នៅពេល project secrets ត្រូវបានកំណត់នៅក្នុង CI
+- បន្ថែម ឬធ្វើបច្ចុប្បន្នភាពតេស្តស្វ័យប្រវត្តិនៅក្នុង PR ដូចគ្នា រាល់ពេលដែលកូដ production ផ្លាស់ប្តូរ
+- ក្នុងឯកសារ `node:test` ដាក់ `await` កម្រិតកំពូលទាំងអស់ (ដូចជា `await import(...)`) មុន `test()` / `describe()` ដំបូង៖ នៅក្រោម `--test-force-exit` តេស្តដែលបានចុះឈ្មោះបន្ទាប់ពីវា អាចមិនដំណើរការដោយស្ងាត់ៗ (#18045; អនុវត្តដោយ `npm run check:test-tla-order`)
+- បញ្ចូលឯកសារតេស្តដែលបានផ្លាស់ប្តូរ ឬបន្ថែមទៅក្នុងសេចក្តីពិពណ៌នា PR នៅពេលកូដ production បានផ្លាស់ប្តូរ
+- ពិនិត្យលទ្ធផល SonarQube នៅលើ PR នៅពេលដែល project secrets ត្រូវបានកំណត់រចនាសម្ព័ន្ធក្នុង CI
 
-ស្ថានភាពតេស្តបច្ចុប្បន្ន៖ **122 ឯកសារ unit test** ដែលគ្របដណ្ដប់លើ៖
+ស្ថានភាពតេស្តបច្ចុប្បន្ន៖ **ឯកសារ unit test ចំនួន 122** ដែលគ្របដណ្តប់លើ៖
 
-- Provider translators និងការបម្លែង format
-- Rate limiting, circuit breaker និង resilience
-- Semantic cache, idempotency និង progress tracking
-- ប្រតិបត្តិការ database និង schema (21 DB modules)
-- OAuth flows និង authentication
+- កម្មវិធីបកប្រែរបស់ provider និងការបម្លែង format
+- ការកំណត់អត្រា circuit breaker និងភាពធន់
+- Semantic cache, idempotency និងការតាមដានវឌ្ឍនភាព
+- ប្រតិបត្តិការ database និង schema (ម៉ូឌុល DB ចំនួន 21)
+- លំហូរ OAuth និងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
 - ការផ្ទៀងផ្ទាត់ API endpoint (Zod v4)
-- ឧបករណ៍ MCP server និងការអនុវត្ត scope
+- ឧបករណ៍ម៉ាស៊ីនមេ MCP និងការអនុវត្តដែនសិទ្ធិ
 - ប្រព័ន្ធ Memory និង Skills
 
 ---

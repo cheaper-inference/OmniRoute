@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import Modal from "@/shared/components/Modal";
@@ -247,7 +248,7 @@ export default function FileDetailModal({
               aria-label={t("loading")}
               className="absolute inset-0 flex items-center justify-center bg-bg/50 rounded-lg"
             >
-              <Icon name="progress_activity" size={32} className="animate-spin text-accent" />
+              <Spinner decorative size="lg" className="text-accent" />
             </div>
           ) : contents ? (
             <div className="h-full flex flex-col">

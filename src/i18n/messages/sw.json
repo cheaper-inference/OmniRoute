@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mapendeleo ya akaunti",
+    "description": "Pendelea akaunti nyingi au uziweke kama akiba kwa usanidi huu. Uelekezaji otomatiki hupanga akaunti ndani ya kila ngazi. Akaunti ambazo hazijaorodheshwa ni za kawaida. Ruhusa, vikomo vya mgao na uhusishaji wa zamu uliopo bado vinatumika.",
+    "preferred": "Inayopendelewa",
+    "normal": "Ya kawaida",
+    "reserve": "Akiba",
+    "excluded": "Zilizotengwa",
+    "loading": "Inapakia akaunti…",
+    "error": "Imeshindwa kupakia akaunti. Fungua tena kihariri ili ujaribu tena.",
+    "missing": "Akaunti isiyopatikana ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Hali ya huduma ya Codex kwa ufunguo huu wa API",
     "description": "Inatumika kwa maombi ya Codex, ikijumuisha miundo ya Codex iliyo ndani ya michanganyiko. Hali zilizolazimishwa hubatilisha mipangilio ya mteja, mipangilio ya jumla na chaguo-msingi za muunganisho. Watoa huduma wengine hawabadiliki.",
@@ -25,8 +36,10 @@
     "confirm": "Una uhakika?",
     "refresh": "Onyesha upya",
     "close": "Funga",
+    "dialogTitleFallback": "Kisanduku cha mazungumzo",
     "previousPage": "Ukurasa uliopita",
     "nextPage": "Ukurasa unaofuata",
+    "pagination": "Ugawaji wa kurasa",
     "capsLockOn": "Caps Lock imewashwa",
     "dismissNotification": "Ondoa arifa",
     "toggleColumns": "Geuza safu wima",
@@ -182,6 +195,7 @@
     "combos": "Michanganyiko",
     "noModelsFound": "Hakuna miundo iliyopatikana",
     "clear": "Futa",
+    "clearFilters": "Futa vichujio",
     "done": "Imekamilika",
     "selectAll": "Chagua zote",
     "unselectAll": "Ondoa uteuzi",
@@ -781,6 +795,13 @@
     "batchDetailWindow": "Dirisha",
     "batchDetailCreated": "Imeundwa",
     "providerTopologyEmpty": "Bado hakuna watoa huduma waliounganishwa",
+    "topologyModels": "Miundo",
+    "topologyModelsOn": "Washa",
+    "topologyModelsOnHint": "Onyesha miundo yenye maombi ya moja kwa moja au ya hivi karibuni",
+    "topologyModelsAuto": "Otomatiki",
+    "topologyModelsAutoHint": "Onyesha miundo yenye ombi linaloendelea pekee",
+    "topologyModelsOff": "Zima",
+    "topologyModelsOffHint": "Ficha vifundo vya miundo",
     "badgeToastUnlocked": "Beji Imefunguliwa!",
     "batchListSearchPlaceholder": "Tafuta kwa kitambulisho, sehemu ya mwisho, muundo...",
     "batchListDeleteAllCompletedTitle": "Futa makundi yote yaliyokamilishwa",
@@ -913,6 +934,8 @@
     "batchListTitle": "Makundi",
     "batchListCount": "Makundi {count}",
     "batchListRemovingCompleted": "Inaondoa…",
+    "batchListRemoveCompletedPartial": "Idadi kubwa ya makundi imeondolewa. Bofya tena ili kufuta yaliyosalia.",
+    "batchListRemoveCompletedFailed": "Hitilafu imetokea wakati wa kuondoa makundi.",
     "batchListRemoveCompleted": "Ondoa zilizokamilika",
     "batchListTableStatus": "Hali",
     "batchListTableId": "Kitambulisho",
@@ -951,6 +974,12 @@
     "batchListRefreshing": "Inaonyesha upya…",
     "batchListRefresh": "Onyesha upya",
     "uploadFileModalRemove": "Ondoa",
+    "fileInputChoose": "Chagua faili",
+    "fileInputChooseMultiple": "Chagua faili",
+    "fileInputEmpty": "Hakuna faili lililochaguliwa",
+    "fileInputSelectedCount": "{count, plural, one {Faili # limechaguliwa} other {Faili # zimechaguliwa}}",
+    "fileDropLabel": "Dondosha faili hapa au uchague moja",
+    "fileDropLabelMultiple": "Dondosha faili hapa au uchague faili",
     "uploadFileModalUploading": "Inapakia…",
     "wizardInputReading": "Inasoma faili…",
     "wizardInputReady": "Tayari",
@@ -998,7 +1027,10 @@
     "batchFileUsedByCount": "Inatumika na {count, plural, one {# kundi} other {# makundi}}",
     "batchFilePreview": "Muonekano",
     "batchFilePreviewTruncated": "Kuonyesha mistari ya kwanza {shown} ({total} jumla ya mistari)",
-    "batchFileDownloadFull": "Pakua Faili Kamili"
+    "batchFileDownloadFull": "Pakua Faili Kamili",
+    "tokensPageTitle": "Tokeni",
+    "tokensPageDescription": "Tuma tokeni kati ya funguo za API, shiriki misimbo ya mwaliko na uunganishe seva za jumuiya.",
+    "tokensServerUrlLabel": "URL ya seva"
   },
   "disabled": "Imezimwa",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Elekeza maombi yaliyomaliza bajeti kwenye mtoa huduma/muundo wa dharura wa akiba usiolipiwa.",
@@ -1022,7 +1054,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Tuma alama ya utambulisho ya kiteja cha OpenCode v2 CLI kwenye maombi ya OpenCode Zen/Go: User-Agent ya opencode/latest/<2.x>/cli na x-opencode-client cli, na kwenye maombi ya kiwango cha bure, vichwa vya kipindi vya v2, miundo ya zana za read/shell za v2 CLI, na bila tool_choice \"none\". Imezimwa kwa chaguo-msingi: kila ombi la OpenCode huhifadhi utambulisho, vichwa na mwili wa sasa bila kubadilishwa.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Wakati kundi la wagombea la mchanganyiko otomatiki tayari ni tupu kabla ya kichujio cha awali cha uitaji wa zana kuendeshwa (kila lengwa limerukwa kwa sababu ya vipindi vya kusubiri, vizuizi au kuishiwa), rudisha 503 no_eligible_targets badala ya jibu la zamani la 400 \"Hakuna lengwa linalotumia uitaji wa zana\" capability_mismatch. Huzimwa kwa chaguo-msingi: kundi tupu huendelea kutumia jibu la zamani la 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Tekeleza lebo zinazoaminika za endpointi za modeli (zilizotangazwa na katalogi ya mtoa huduma, zilizobainishwa kutokana na kitambulisho cha modeli maalum, au zilizowekwa na mwendeshaji): kataa kwa HTTP 400 kabla ya kutuma ombi lililotumwa kwa endpointi ambayo modeli haihudumii kwenye /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations na /v1/audio/*; ficha modeli ambazo endpointi zake zilizo na lebo hazina adapta ya OmniRoute kutoka /v1/models; na ujibu jaribio la modeli la dashibodi kwa 422 kwa modeli kama hizo. Hali hii imezimwa kwa chaguo-msingi: lebo za endpointi hubaki za taarifa na maombi hutumwa kama hapo awali.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Kwenye relays za kawaida zinazooana na anthropic, weka ujumbe wa mfumo wa katikati ya mazungumzo ndani ya orodha ya ujumbe badala ya kuuhamishia kwenye kidokezo cha mfumo cha kiwango cha juu, ili kiambishi awali cha kidokezo kilichohifadhiwa kwenye akiba kisibadilike kati ya zamu. Hii inatumika tu wakati mteja mwenyewe ametuma beta ya mid-conversation-system-2026-04-07. Hali hii imezimwa kwa chaguo-msingi: kila ujumbe wa mfumo huhamishwa hadi kwenye kidokezo cha mfumo kama ilivyokuwa awali, kwa sababu relays zisizo na beta hiyo hukataa ujumbe wa mfumo ulio kwenye orodha ya ujumbe.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Tumia viwango vya juhudi za kufikiri vinavyochapishwa na models.dev wakati ambapo hakuna ubatilishaji wa opereta wala sajili ya mtoa huduma inayovitaja, ukihifadhi viwango vya juhudi vinavyojulikana pekee, na uchukulie orodha tupu ya viwango vilivyotajwa kama \"hakuna viwango\". Imezimwa kwa chaguo-msingi: katalogi ya modeli na viwango vya juhudi vilivyobainishwa hubaki kama vilivyokuwa awali.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Huruhusu maombi ya auto/* kujenga kundi la wagombea kwa kutumia uwezo wa modeli uliotatuliwa (maono, hoja, kufikiri) na alama za ubora zilizoonekana, zinazosomwa kwa usomaji mmoja wa jumla. Imezimwa kwa chaguo-msingi: uzito wa wagombea wakati wa ombi unabaki kama ulivyokuwa hapo awali. Ikiwashwa: ishara hizo huingia kwenye uzito wa picha ya papo hapo, hivyo uzito wa wagombea na uteuzi unaweza kubadilika.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Ruhusu ukaguzi wa afya ya vitambulisho ujaribu upya miunganisho ambayo lango lilizima lenyewe (angalau mara moja tu kila baada ya saa 6 kwa kila muunganisho, miunganisho 5 kwa kila ukaguzi) na uiwashe tena inapofaulu jaribio hilo. Hali hii imezimwa kwa chaguo-msingi: miunganisho hiyo husalia imezimwa hadi opereta achukue hatua. Miunganisho iliyozimwa na opereta na iliyopigwa marufuku kabisa haijaribiwi tena kamwe.",
@@ -1085,17 +1116,8 @@
     "serverDisconnectedMsg": "Seva ya proksi imesimamishwa au inaanza upya.",
     "expandSidebar": "Panua utepe wa pembeni",
     "collapseSidebar": "Kunja utepe wa pembeni",
-    "themes": "Mandhari",
-    "presetColors": "Rangi maarufu",
     "createTheme": "Unda mandhari",
     "chooseColor": "Chagua rangi moja",
-    "themeCoral": "Matumbawe",
-    "themeBlue": "Bluu",
-    "themeRed": "Nyekundu",
-    "themeGreen": "Kijani",
-    "themeViolet": "Urujuani",
-    "themeOrange": "Machungwa",
-    "themeCyan": "Samawati-kijani",
     "cliToolsShort": "Zana",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1125,10 @@
     "themeSystem": "Mfumo wa Mandhari",
     "whitelabelingDesc": "Maelezo ya Uwekaji Chapa Maalum",
     "switchThemes": "Badilisha Mandhari",
-    "themeAccentDesc": "Maelezo ya Rangi ya Msisitizo ya Mandhari",
     "uploadFavicon": "Pakia Favicon",
     "themeDark": "Mandhari Nyeusi",
     "customLogoDesc": "Maelezo ya Nembo Maalum",
     "sidebarVisibilityToggle": "Kitufe cha Kuonyesha au Kuficha Utepe wa Pembeni",
-    "themeAccent": "Rangi ya Msisitizo ya Mandhari",
     "resetFavicon": "Weka Upya Favicon",
     "whitelabeling": "Uwekaji Chapa Maalum",
     "darkMode": "Hali ya Giza",
@@ -1122,10 +1142,8 @@
     "customLogo": "Nembo Maalum",
     "appearance": "Mwonekano",
     "themeSelectionAria": "Aria ya Uchaguzi wa Mandhari",
-    "themeCreate": "Unda Mandhari",
     "customFaviconDesc": "Maelezo ya Favicon Maalum",
     "logoPreview": "Onyesho la Awali la Nembo",
-    "themeCustom": "Mandhari Maalum",
     "hideHealthLogsDesc": "Maelezo ya Kuficha Kumbukumbu za Afya",
     "faviconPreview": "Onyesho la Awali la Favicon",
     "changelog": "Kumbukumbu ya Mabadiliko",
@@ -1352,7 +1370,9 @@
       "open": "fungua",
       "close": "funga"
     },
-    "noResults": "Hakuna matokeo"
+    "noResults": "Hakuna matokeo",
+    "costsTeams": "Timu",
+    "costsTeamsSubtitle": "Vituo vya gharama vya timu"
   },
   "webhooks": {
     "title": "Viboko vya mtandao",
@@ -1485,7 +1505,11 @@
       "chatIdPlaceholder": "-100123456789 au @channelname",
       "chatIdHint": "Kitambulisho cha kipekee cha nambari au jina la mtumiaji la umma la soga/chaneli.",
       "tutorial": "Jinsi ya kusanidi webhook ya Telegram:"
-    }
+    },
+    "copy": "Nakili",
+    "copied": "Imenakiliwa!",
+    "expandDetails": "Onyesha maelezo",
+    "collapseDetails": "Ficha maelezo"
   },
   "compliance": {
     "auditTitle": "Ukaguzi",
@@ -1597,22 +1621,16 @@
     "mcpMetricCalls24h": "Mawasiliano (24h)",
     "mcpMetricSuccessRate": "Kiwango cha mafanikio",
     "mcpMetricAvgDuration": "Muda wa wastani",
-    "mcpMetricTopTool": "Zana Bora"
-  },
-  "themesPage": {
-    "title": "Mandhari",
-    "description": "Chagua mandhari iliyowekwa tayari au uunde yako mwenyewe kwa kutumia rangi moja",
-    "presetColors": "Rangi maarufu",
-    "customTheme": "Mandhari maalum",
-    "customThemeDesc": "Bofya unda mandhari na uchague rangi moja",
-    "createTheme": "Unda mandhari",
-    "activePreset": "Mandhari inayotumika"
+    "mcpMetricTopTool": "Zana Bora",
+    "dismissError": "Ondoa hitilafu"
   },
   "header": {
     "logout": "Ondoka",
     "quickNavigation": "Urambazaji wa haraka",
     "quickNavigationTitle": "Urambazaji wa haraka (⌘K / Ctrl+K)",
     "openQuickNavigation": "Fungua urambazaji wa haraka",
+    "openMenu": "Fungua menyu",
+    "products": "Bidhaa za Keak",
     "switchToLightMode": "Badilisha hadi modi ya mwanga",
     "switchToDarkMode": "Badilisha hadi modi ya giza",
     "language": "Lugha",
@@ -1640,8 +1658,6 @@
     "anthropicCompatible": "Inayooana na Anthropic",
     "media": "Midia",
     "mediaDescription": "Tengeneza picha, video na muziki",
-    "themes": "Mandhari",
-    "themesDescription": "Chagua mandhari ya rangi kwa paneli nzima ya dashibodi",
     "costsDescription": "Fuatilia matumizi ya fedha, changanua mienendo na udhibiti bajeti yako ya AI kwa watoa huduma wote",
     "cacheDescription": "Fuatilia ufanisi wa akiba ya vidokezo vya mtoa huduma na utumiaji tena wa majibu ya kisemantiki ya ndani.",
     "limitsDescription": "Sanidi vikomo vya kasi na mgao kwa kila ufunguo wa API na mtoa huduma",
@@ -1713,7 +1729,8 @@
     "settingsAdvancedDescription": "Kanuni za kina za payload, vikomo vya maombi, na mipangilio ya API ya proksi",
     "mitmProxyDescription": "Sanidi mipangilio ya proksi ya MITM kwa ukaguzi wa trafiki na utatuzi wa hitilafu",
     "oneProxyDescription": "Sanidi mipangilio ya 1Proxy kwa uunganishaji wa kina wa proksi",
-    "omniSkillsDescription": "Sakinisha na udhibiti ujuzi wa sandbox kwa ajili ya utekelezaji wa kiotomatiki wa vidokezo na zana"
+    "omniSkillsDescription": "Sakinisha na udhibiti ujuzi wa sandbox kwa ajili ya utekelezaji wa kiotomatiki wa vidokezo na zana",
+    "teamsDescription": "Makadirio ya gharama za timu na bajeti laini zinazoshirikiwa"
   },
   "cloudSyncStatus": {
     "synced": "Imesawazishwa",
@@ -1933,7 +1950,23 @@
     "readinessStep3": "Nakili endpoint yako",
     "readinessStep4": "Tuma ombi la majaribio",
     "readinessContinue": "Endelea na usanidi",
-    "readinessDismiss": "Ficha kwa sasa"
+    "readinessDismiss": "Ficha kwa sasa",
+    "unpricedUsageTitle": "{count, plural, one {# modeli iliyotumika hivi karibuni lakini haina bei iliyowekwa} other {# modeli zilizotumika hivi karibuni lakini hazina bei zilizowekwa}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# ufunguo wa API wenye kikomo cha matumizi umetumia modeli hizi katika siku 8 zilizopita. Wakati matumizi hayo yako ndani ya dirisha la kila ufunguo la kila siku au la kila wiki, ufunguo unachukuliwa kuwa umevuka kikomo na maombi yake yamezuiliwa (UNPRICED_USAGE_BUDGET_POLICY=fail_closed)} other {# funguo za API zenye kikomo cha matumizi zimetumia modeli hizi katika siku 8 zilizopita. Wakati matumizi hayo yako ndani ya dirisha la kila ufunguo la kila siku au la kila wiki, funguo hizo zinachukuliwa kuwa zimevuka kikomo na maombi yao yamezuiliwa (UNPRICED_USAGE_BUDGET_POLICY=fail_closed)}}",
+    "unpricedUsageCountAsZero": "Matumizi haya yamehesabiwa kama $0 kwa ajili ya vikwazo vya matumizi vya kila ufunguo (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ombi} other {# maombi}}, {keys, plural, one {# ufunguo lenye kikomo} other {# funguo zenye kikomo}}",
+    "unpricedUsageMore": "…na {count} zaidi",
+    "unpricedUsageConfigure": "Sanidi bei",
+    "unpricedUsageDismiss": "Puuza",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Uchanganuzi",
@@ -2495,7 +2528,12 @@
     "onlySelectedConnections": "Miunganisho iliyochaguliwa pekee",
     "selectAtLeastOneConnection": "Chagua angalau muunganisho mmoja au uchague Miunganisho yote.",
     "allConnectionsDesc": "Ufunguo huu unaweza kutumia muunganisho wowote ulio amilifu.",
-    "restrictedToConnections": "Imezuiliwa kwa {count, plural, one {# muunganisho} other {# miunganisho}}."
+    "restrictedToConnections": "Imezuiliwa kwa {count, plural, one {# muunganisho} other {# miunganisho}}.",
+    "preferredConnections": "Miunganisho inayopendelewa",
+    "preferredConnectionsDesc": "Mpangilio wa kipaumbele kwa kila ufunguo. Ikiwa muunganisho unaopendelewa haupatikani, uelekezaji huhamia kwenye unaofuata unaostahiki.",
+    "preferredConnectionsNone": "Hakuna mapendeleo yaliyowekwa — mkakati chaguomsingi wa uelekezaji unatumika.",
+    "preferredConnectionsClear": "Futa",
+    "removeSelection": "Ondoa {name}"
   },
   "auditLog": {
     "title": "Kumbukumbu ya Ukaguzi",
@@ -2607,7 +2645,9 @@
     "imageToTextBridgeCta": "Sanitize daraja la Picha→Maandishi katika mipangilio ya Daraja la Modality",
     "sttBridgeCta": "Sanidi daraja la Hotuba→Maandishi katika mipangilio ya Daraja la Modality",
     "existingConnection": "Muunganisho uliopo",
-    "openrouterSttDescription": "Moduli ya sauti hadi maandiko ya OpenRouter yanatumia muunganisho wako wa OpenRouter ulio sanidiwa. Hakuna hati tofauti inayohitajika."
+    "openrouterSttDescription": "Moduli ya sauti hadi maandiko ya OpenRouter yanatumia muunganisho wako wa OpenRouter ulio sanidiwa. Hakuna hati tofauti inayohitajika.",
+    "modalityTabsAria": "Aina ya midia",
+    "serviceKindsAria": "Aina ya huduma"
   },
   "search": {
     "searchQuery": "Hoja ya Utafutaji",
@@ -2963,6 +3003,14 @@
     "openClawManualConfiguration": "Open Claw - Usanidi wa Kujiwekea",
     "clineManualConfiguration": "Usanidi wa Kujiwekea wa Cline",
     "kiloManualConfiguration": "Usanidi wa Kujiwekea wa Kilo Code",
+    "piManualConfiguration": "Pi - Usanidi wa Mwongozo",
+    "piConfigInvalidTitle": "Pi models.json haisomeki",
+    "piOmnirouteConfigured": "OmniRoute imesanidiwa kama mtoaji maalum wa Pi",
+    "piModelHelp": "Pi haigundui kiotomatiki miundo ya vidokezo maalum — muundo unaochagua umeandikwa models.json kwa uwazi.",
+    "piManualConfigTitle": "Au hariri ~/.pi/agent/models.json kwa mikono",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Kisha anza Pi na uchague mtoaji omniroute. Weka PI_CODING_AGENT_DIR kusogeza saraka nzima ya wakala.",
+    "piUnownedNote": "Ingizo hili liliongezwa nje ya OmniRoute (km miisho maalum ya pi-gui). Kuomba kutaidhinisha; Weka upya huondoa tu maingizo yaliyoandikwa na OmniRoute.",
     "whenToUseLabel": "Wakati wa kutumia",
     "openToolDocs": "Fungua nyaraka za zana",
     "toolUseCases": {
@@ -2982,6 +3030,7 @@
       "amp": "Tumia unapotaka mitiririko ya kazi ya mkato ya Amp lakini bado unahitaji kuhakikisha matumizi ya lakabu na kanuni za uelekezaji za OmniRoute.",
       "hermes": "Tumia unapohitaji msaidizi mwepesi wa AI unaotegemea terminali kwa kazi za haraka.",
       "hermes-agent": "Tumia unapohitaji Hermes Agent (kutoka Nousresearch) ikiwa na modeli za chaguo-msingi, ugawaji majukumu, uoni na modeli saidizi zilizoelekezwa kupitia OmniRoute.",
+      "whycodes": "Tumia unapotaka WhyCodes kama wakala wa CLI anayejitegemea wa matumizi mengi (TUI, mawakala wenye majina, kumbukumbu, swarm) aliyeelekezwa kwa OmniRoute.",
       "custom": "Tumia kwa utekelezaji maalum wa zana au usanidi wa jumla unaooana na OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3040,7 @@
       "grok-build": "Wakala wa uandishi wa kodi wa xAI Grok Build TUI mwenye usaidizi wa mtoa huduma maalum",
       "droid": "Msaidizi wa AI wa Factory Droid",
       "openclaw": "Msaidizi wa AI wa Open Claw",
+      "openclaude": "CLI ya wakala wa uandishi wa kodi OpenClaude yenye usaidizi wa mtoa huduma anayeoana na OpenAI",
       "cline": "CLI ya Msaidizi wa Uandishi wa Msimbo wa AI wa Cline",
       "kilo": "CLI ya Msaidizi wa AI wa Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3072,7 @@
       "warp": "Terminal ya Warp AI yenye usaidizi wa mtoa huduma maalum",
       "agent-deck": "Mratibu wa mawakala wengi wa Agent Deck",
       "5dive": "5dive — kundi la mawakala wa uandishi wa msimbo unaojipangisha; wasifu mmoja wa auth huwaelekeza wote kwa OmniRoute",
+      "whycodes": "Wakala wa CLI anayejitegemea wa WhyCodes mwenye base URL inayooana na OpenAI",
       "zed": "Kihariri cha msimbo cha Zed — wakala aliyejengewa ndani kupitia mtoa huduma anayeendana na OpenAI"
     },
     "guides": {
@@ -3278,7 +3329,19 @@
     "cliproxyapiUnknown": "Haijulikani",
     "cliproxyapiUpdate": "Sasisha",
     "cliproxyapiUpdateAvailable": "Sasisho linapatikana: v{current} → v{latest}",
-    "cliproxyapiVersion": "Toleo"
+    "cliproxyapiVersion": "Toleo",
+    "piInstallTitle": "Sakinisha Wakala wa Usimbaji wa Pi",
+    "piInstallInstructions": "Sakinisha Pi CLI, kisha urudi hapa ili kuiunganisha kwa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Tumia URL inayoweza kufikiwa kutoka kwa mashine inayoendesha Pi. Mwisho unaoendana na OpenAI /v1 huongezwa kiotomatiki.",
+    "piManualMergeHint": "Hakiki pekee. Unganisha ingizo hili la providers.omniroute kwenye models.json ili watoa huduma wako wengine na mipangilio ibaki sawa.",
+    "removeMapping": "Ondoa uunganishaji",
+    "customUrl": "URL maalum",
+    "customEndpointAria": "Mwisho maalum",
+    "useDefaultKey": "Tumia kiungo chasi ya chaguo-msingi cha OmniRoute",
+    "mainModelAria": "Model mkuu",
+    "manualConfigTitle": "Mwongozo wa muundo wa Grok manual config"
   },
   "modelCatalog": {
     "title": "Miundo na Michanganyiko",
@@ -3342,6 +3405,18 @@
     "maxMembersPlaceholder": "k.m. 10",
     "testSelected": "Jaribu zilizochaguliwa ({count})",
     "testAllFiltered": "Jaribu zote zilizochujwa ({count})",
+    "visibility": "Mwonekano",
+    "allVisibility": "Zinazoonekana na zilizofichwa",
+    "visibleOnly": "Zinazoonekana",
+    "hiddenOnly": "Zilizofichwa",
+    "visibleColumn": "Inaonekana",
+    "hideModel": "Ficha {name} kutoka /v1/models",
+    "showModel": "Onyesha {name} katika /v1/models",
+    "hiddenBadge": "Imefichwa",
+    "hideFiltered": "Ficha zilizochujwa ({count})",
+    "showFiltered": "Onyesha zilizochujwa ({count})",
+    "visibilityCounts": "{visible} zinaonekana · {hidden} zimefichwa · {total} jumla",
+    "visibilityUpdateFailed": "Imeshindwa kusasisha mwonekano wa modeli",
     "cancel": "Ghairi",
     "clearResults": "Futa matokeo",
     "testing": "Inajaribu...",
@@ -3397,16 +3472,53 @@
     "httpError": "Ombi limeshindwa likiwa na HTTP {status}",
     "testFailedNoDetail": "Jaribio limeshindwa bila ujumbe wa hitilafu",
     "additionalCapabilities": "Uwezo wa ziada: {list}",
-    "comboRefMember": "Mchanganyiko → {name}"
+    "comboRefMember": "Mchanganyiko → {name}",
+    "keyAccessButton": "Ufikiaji wa ufunguo wa API",
+    "allowedInKeys": "Inaruhusiwa katika: {count, plural, one {ufunguo #} other {funguo #}}",
+    "keysLoading": "Inapakia funguo za API…",
+    "keysRetry": "Jaribu tena kupakia funguo",
+    "accessViaPattern": "kupitia {pattern}",
+    "accessBlocked": "Imezuiwa na {pattern}",
+    "editKeyAccess": "Hariri ufikiaji wa ufunguo",
+    "toggleKeyAccess": "Ruhusu {item} kwenye {name}",
+    "resultNetworkError": "Ugawaji umeshindwa",
+    "resultWouldEmptyModels": "Itaacha ufunguo huu bila miundo yoyote inayoruhusiwa — badala yake hariri ufikiaji wa ufunguo",
+    "resultWouldEmptyCombos": "Itaacha ufunguo huu bila combo zozote zinazoruhusiwa — badala yake hariri ufikiaji wa ufunguo",
+    "keyUpdatePending": "{name} bado inasasishwa. Jaribu tena baada ya muda mfupi.",
+    "assignToKeys": "Gawia funguo za API…",
+    "assignApply": "Tekeleza mabadiliko",
+    "assignComplete": "Ufikiaji wa ufunguo wa API umesasishwa",
+    "assignFailed": "Baadhi ya masasisho ya ufunguo wa API yameshindwa",
+    "assignNoChanges": "Hakuna ufikiaji wa ufunguo wa API uliobadilishwa",
+    "selectedAccessItems": "Vipengee vilivyochaguliwa: {count}",
+    "assignExcludedCombos": "{count, plural, one {safu # ya combo iliyochaguliwa si muundo na itarukwa hapa} other {safu # za combo zilizochaguliwa si miundo na zitarukwa hapa}}. Panga combo kutoka kwenye kichupo cha Combos.",
+    "assignActionAdd": "Ongeza",
+    "assignActionRemove": "Ondoa",
+    "searchKeys": "Tafuta funguo za API",
+    "selectApiKey": "Chagua ufunguo wa API {name}",
+    "allModelsAccess": "Miundo yote",
+    "allCombosAccess": "Mchanganyiko yote",
+    "modelAccessCount": "Miundo: {count}",
+    "comboAccessCount": "Mchanganyiko: {count}",
+    "keyInactive": "Isiyo amilifu",
+    "keyBanned": "Iliyopigwa marufuku",
+    "keyRevoked": "Imebatilishwa",
+    "switchRestrictedConfirm": "Badilisha ufunguo huu kuwa na ufikiaji uliowekewa vikwazo: vipengee vilivyochaguliwa pekee ndivyo vitakavyoruhusiwa",
+    "removeNoChangeHint": "Ufunguo huu unaruhusu kila kitu; kuondoa vipengee vilivyochaguliwa hakutaleta mabadiliko yoyote",
+    "removeStaysAllowedHint": "Bado inaruhusiwa kwenye ufunguo huu kupitia {patterns}",
+    "resultChanged": "Imebadilishwa",
+    "resultUnchanged": "Hakuna mabadiliko",
+    "resultSkipped": "Imerukwa",
+    "resultNeedsSwitch": "Inahitaji kubadilishwa kuwa yenye vikwazo"
   },
   "combos": {
-    "autoTosIncludeLabel": "Jumuisha watoa huduma wenye alama ToS: avoid katika auto",
-    "autoTosDescription": "Imezimwa kwa chaguo-msingi. Inatumika kwa michanganyiko yote ya auto, si akaunti moja tu. Kuunganisha mtoa huduma hakuwezeshi chaguo hili.",
-    "autoTosSaveError": "Imeshindikana kuhifadhi sera ya ToS. Mpangilio wa awali bado unaonyeshwa. Jaribu tena.",
-    "autoTosLoadError": "Imeshindikana kupakia sera ya ToS. Jaribu tena kabla ya kuibadilisha.",
     "title": "Mikusanyiko",
     "description": "Unda mikusanyiko ya modeli yenye uelekezaji wenye uzani na usaidizi wa kutumia mbadala",
     "autoCatalogTitle": "Katalogi ya uelekezaji kiotomatiki",
+    "autoTosLoadError": "Imeshindikana kupakia sera ya ToS. Jaribu tena kabla ya kuibadilisha.",
+    "autoTosSaveError": "Imeshindikana kuhifadhi sera ya ToS. Mpangilio wa awali bado unaonyeshwa. Jaribu tena.",
+    "autoTosIncludeLabel": "Jumuisha watoa huduma wenye alama ToS: avoid katika auto",
+    "autoTosDescription": "Imezimwa kwa chaguo-msingi. Inatumika kwa michanganyiko yote ya auto, si akaunti moja tu. Kuunganisha mtoa huduma hakuwezeshi chaguo hili.",
     "autoCatalogTemplateCount": "{count} violezo",
     "autoCatalogDescription": "Michanganyiko ya kiotomatiki/* iliyojengewa ndani imetatuliwa kutoka kwa watoa huduma waliounganishwa. Tumia kitambulisho chochote kati ya hivi kama sehemu ya kielelezo - hakuna usanidi unaohitajika.",
     "autoCatalogExpand": "Panua katalogi ya uelekezaji kiotomatiki",
@@ -3421,6 +3533,19 @@
     "autoComboTestTruncated": "Imepimwa {tested} kati ya {total} wagombea hai (uzito mkubwa kwanza).",
     "controlCenter": "Kituo cha Udhibiti",
     "createCombo": "Unda Mkusanyiko",
+    "exportCombos": "Hamisha",
+    "exportCombosFailed": "Imeshindwa kuhamisha mikusanyiko",
+    "importCombos": "Leta",
+    "importCombosTitle": "Leta mikusanyiko",
+    "importCombosInvalidFile": "Faili hili si uhamishaji halali wa mikusanyiko.",
+    "importCombosSummary": "Mikusanyiko kwenye faili: {total} ({fresh} mipya, {conflicting} yenye jina ambalo tayari lipo).",
+    "importCombosMergeHint": "Unganisha huhifadhi mikusanyiko yote iliyopo na kuruka ile ambayo jina lake tayari lipo. Miunganisho na vitambulisho haviletwi kamwe.",
+    "importCombosReplaceHint": "Badilisha zote hufuta mikusanyiko yako iliyopo ({current}) na kuleta faili badala yake. Hili haliwezi kutenduliwa.",
+    "importCombosMerge": "Unganisha",
+    "importCombosReplace": "Badilisha zote",
+    "importCombosDone": "Mikusanyiko iliyoletwa: {created}. Iliyorukwa: {skipped}.",
+    "importCombosFailed": "Imeshindwa kuleta mikusanyiko",
+    "importCombosWarnings": "Imeletwa pamoja na maonyo",
     "editCombo": "Hariri Mkusanyiko",
     "deleteCombo": "Futa Mkusanyiko",
     "noModels": "Hakuna modeli",
@@ -3451,6 +3576,12 @@
     "errorUpdating": "Hitilafu wakati wa kusasisha mchanganyiko",
     "errorDeleting": "Hitilafu wakati wa kufuta mchanganyiko",
     "testFailed": "Ombi la majaribio limeshindwa",
+    "removeErrorModels": "Futa miundo {count} iliyoshindwa",
+    "removingErrorModels": "Inaondoa…",
+    "errorModelsRemoved": "Miundo {count} iliyoshindwa imeondolewa kwenye mchanganyiko",
+    "noErrorModelsFound": "Hakuna miundo iliyoshindwa iliyopatikana katika hatua za mchanganyiko huu",
+    "cannotRemoveAllModels": "Haiwezekani kuondoa miundo yote kwenye mchanganyiko",
+    "removeErrorModelsConfirm": "Ondoa miundo {count} iliyoshindwa kutoka “{name}”? Muda kuisha na vikomo vya kasi havihesabiwi.",
     "failedToggle": "Imeshindikana kubadilisha hali ya mchanganyiko",
     "testResults": "Matokeo ya Jaribio — {name}",
     "resolvedBy": "Imetatuliwa na:",
@@ -3518,7 +3649,12 @@
     "moveUp": "Sogeza juu",
     "moveDown": "Sogeza chini",
     "removeModel": "Ondoa",
+    "testStep": "Jaribu modeli hii",
+    "testStepRunning": "Inajaribiwa…",
+    "testStepNotTestable": "Ni hatua za modeli moja tu zinazoweza kujaribiwa",
     "saving": "Inahifadhi...",
+    "liveAccountLabel": "sheria: {id}",
+    "liveAccountTooltip": "Akaunti: {id}",
     "liveNoProviders": "Hakuna watoa huduma walioonekana bado.",
     "liveFleetDataHint": "Data ya kundi inafika kupitia matukio ya combo ya moja kwa moja.",
     "liveActiveCount": "Amilifu ({count})",
@@ -3559,6 +3695,7 @@
     "playgroundNoCombosYet": "Hakuna mchanganyiko uliosanidiwa bado.",
     "playgroundCreateFirst": "Unda mmoja kwanza",
     "weighted": "Yenye Uzani",
+    "weightPercent": "Uzito (%)",
     "leastUsed": "Yenye Matumizi Madogo Zaidi",
     "costOpt": "Uboreshaji wa Gharama",
     "strategyGuideTitle": "Jinsi ya kutumia mkakati huu",
@@ -3720,6 +3857,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akaunti} other {# akaunti}}",
     "builderGlobalAdded": "Imeongezwa",
     "builderGlobalAdd": "Ongeza",
+    "clearSearch": "Futa utafutaji",
     "manualModel": "Modeli ya mwongozo",
     "manualModelInvalid": "Weka modeli kama provider/model.",
     "manualModelUnknownProvider": "Kiambishi awali cha mtoa huduma kisichojulikana.",
@@ -3936,6 +4074,7 @@
     "builderComboRefStep": "Ongeza rejeleo la kombo",
     "builderPinnedAccount": "Akaunti Iliyobandikwa",
     "builderLegacyEntry": "Ingizo la zamani",
+    "builderStaleModel": "Haipo kwenye katalogi hai",
     "reviewName": "Jina",
     "reviewStrategy": "Mkakati",
     "reviewSteps": "Hatua",
@@ -3973,6 +4112,10 @@
     "responseValidationMinLength": "Urefu wa chini wa maudhui (herufi)",
     "responseValidationJsonPaths": "Ukaguzi wa JSON-path",
     "responseValidationAddCheck": "+ Ongeza ukaguzi",
+    "responseValidationRemoveCheck": "Ondoa ukaguzi",
+    "responseValidationPath": "Njia ya JSON",
+    "responseValidationCondition": "Sharti",
+    "responseValidationValue": "Thamani inayotarajiwa",
     "agentFeaturesSystemMessageOverride": "Batilisha ujumbe wa mfumo",
     "agentFeaturesSystemMessagePlaceholder": "Wewe ni msaidizi mtaalamu...",
     "agentFeaturesSystemMessageHint": "Ubatilishaji wa ujumbe wa mfumo kwa ajenti",
@@ -4014,7 +4157,8 @@
     "duplicateAutoComboSnapshotMsg": "Hii itachukua picha ya watoa huduma/watolei sambazwa sasa yanayolingana na kioo hiki katika combo inayoedit.",
     "duplicateAutoComboFailedPrefix": "Imeshindwa kuiga combo ya otomatiki:",
     "duplicateAutoComboUnknownError": "Hitilafai isiyojulikana",
-    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}"
+    "duplicateAutoComboTitle": "Tengeneza combo thabiti kutoka {name}",
+    "fallbackSummary": "{rate}% ya maombi yalitembea, ~{skips} lengo zilizopitishwa kila moja"
   },
   "costs": {
     "title": "Gharama",
@@ -4792,7 +4936,15 @@
     },
     "totalEntries": "Jumla ya Maingizo",
     "type": "Aina",
-    "memoryEnabled": "Kumbukumbu imewezeshwa"
+    "memoryEnabled": "Kumbukumbu imewezeshwa",
+    "qdrantTutorialTitle": "Somo la haraka: kumbukumbu na Qdrant",
+    "qdrantTutorialIntro": "Qdrant inahifadhi vekta na maelezo ya ziada ya kumbukumbu ili muktadha wa uhusiano uweze kupatikana. Haishushii tokens moja kwa moja; faida ni za ukweli, kwa kuepuka muktadha usiowezekana na ombi.",
+    "qdrantTutorialStep1": "Linda seva na HTTPS na kiungo cha API kabla ya matumizi ya uzalishaji.",
+    "qdrantTutorialStep2": "Ingiza mwendeshaji, kiwango, mkusanyiko, na modeli ya mfano wa provider/model wenye neno la kufaa.",
+    "qdrantTutorialStep3": "Upana wa mkusanyiko lazima ulingane na upana oundwa na modeli. Mkusanyiko wa upeo 2048 unaendelea haiakili embeddings ya upeo 1536.",
+    "qdrantTutorialStep4": "Hifadhi, jaribu uwasilishaji, na fanya jaribio la utafutaji. Kisha tu washa Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Sadi kwa: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Ujuzi",
@@ -5191,6 +5343,10 @@
       "disableAutoScroll": "Zima kusogeza kiotomatiki",
       "enableAutoScroll": "Washa kusogeza kiotomatiki",
       "autoScroll": "Kusogeza kiotomatiki",
+      "pauseLogs": "Sitisha masasisho",
+      "resumeLogs": "Endelea kusasisha",
+      "paused": "Imesitishwa",
+      "scanLimited": "Kikomo cha kuchanganua kimefikiwa",
       "entryCount": "{count, plural, one {# ingizo} other {# maingizo}}",
       "lastHour": "Saa 1 iliyopita",
       "updatedAt": "Imesasishwa {time}",
@@ -5288,7 +5444,8 @@
         "skipped": "tayari imewekwa",
         "failed": "imefeli"
       }
-    }
+    },
+    "stepProgress": "Maendeleo ya usanidi"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Mtoa huduma huyu ameondolewa kwenye auto kwa chaguo-msingi",
@@ -5329,6 +5486,27 @@
     "importFromFileDownloadTemplate": "Pakua kiolezo cha CSV",
     "importFromFileMoreErrors": "+{count} zaidi",
     "importFromFileSchemaHint": "Safu wima za CSV zinategemea mpangilio: provider, name, apiKey, baseUrl (si lazima), priority (si lazima). Safu wima ya provider lazima iwe kitambulisho cha mtoa huduma anayesimamiwa ambacho tayari kipo au kitambulisho cha nodi inayooana na OpenAI/Anthropic ambacho tayari kimesajiliwa — uingizaji huu hauundi nodi mpya za endpoint.",
+    "importOAuthExport": "Leta uhamishaji wa OAuth",
+    "oauthExportTitle": "Leta uhamishaji wa kidhibiti akaunti",
+    "oauthExportDescription": "Pakia uhamishaji wa maandishi wazi kutoka kwa kidhibiti akaunti (k.m. uhamishaji wa cloud-accounts wa Antigravity Manager). Tokeni huonyeshwa upya kwenye seva na kila akaunti inakuwa muunganisho wa OAuth — nakala rudufu huonyeshwa upya pale pale.",
+    "oauthExportProviderLabel": "Mtoa huduma",
+    "oauthExportChoose": "Chagua faili",
+    "oauthExportFileAria": "Faili ya JSON ya uhamishaji wa akaunti",
+    "oauthExportSchemaHint": "Inakubalika: hati yenye safu ya \"accounts\", safu pekee, au rekodi moja. Tokeni zinaweza kuwa ndani ya kipengee cha token kilichowekwa ndani au moja kwa moja kwenye rekodi.",
+    "oauthExportDetected": "Akaunti {count} zimegunduliwa",
+    "oauthExportSelectAll": "Chagua akaunti zote",
+    "oauthExportSelectAccount": "Chagua akaunti {index}",
+    "oauthExportColEmail": "Barua pepe",
+    "oauthExportColProvider": "Mtoa huduma",
+    "oauthExportColRefresh": "Tokeni ya kuonyesha upya",
+    "oauthExportNoEmail": "(hakuna barua pepe)",
+    "oauthExportYes": "ndiyo",
+    "oauthExportNo": "hapana",
+    "oauthExportImporting": "Inaingiza…",
+    "oauthExportImport": "Leta akaunti {count}",
+    "oauthExportResult": "Zimeletwa {imported}/{total} — {failed} zimeshindwa",
+    "oauthExportParseError": "Haikuweza kusoma akaunti yoyote kutoka kwenye faili hii.",
+    "oauthExportUnknownError": "hitilafu isiyojulikana",
     "adaptaTutorial": {
       "title": "Jinsi ya kuunganisha Adapta Web",
       "introPrefix": "Adapta inathibitisha kupitia Clerk. Tokeni hiyo",
@@ -5555,6 +5733,7 @@
     "filterError": "Hitilafu",
     "filterBanned": "Imepigwa marufuku",
     "filterCreditsExhausted": "Salio limeisha",
+    "filterVerificationRequired": "Inahitaji uthibitishaji",
     "accountSearchPlaceholder": "Tafuta akaunti…",
     "noFilteredConnections": "Hakuna miunganisho inayolingana na chuujio cha sasa.",
     "failedSetAlias": "Imeshindikana kuweka jina mbadala",
@@ -5579,6 +5758,7 @@
     "allModelsAlreadyImported": "Modeli zote tayari zimeingizwa",
     "noNewModelsToImport": "Hakuna modeli mpya za kuingiza — modeli zote tayari ziko kwenye sajili au orodha ya modeli maalum",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Kugundua mfano kumeshindwa {time}",
     "skippingExistingModels": "Inapuuza modeli {count} zilizopo",
     "autoSync": "Usawazishaji Otomatiki",
     "autoSyncShort": "Sawazisha",
@@ -5839,6 +6019,25 @@
     "ccAliasAddModelButton": "Ongeza ubatilishaji",
     "ccAliasLoadError": "Imeshindwa kupakia mipangilio ya lakabu za ugunduzi: {error}",
     "ccAliasSaveError": "Imeshindwa kuhifadhi mpangilio wa lakabu ya ugunduzi: {error}",
+    "cliVersionSectionTitle": "Toleo la mteja CLI lililotangazwa",
+    "cliVersionEffectiveLabel": "Inatangazwa kwa sasa",
+    "cliVersionSourceLabel": "Imetatuliwa kutoka: {source}",
+    "cliVersionPinnedLabel": "Chaguomsingi iliyonaswa: {pinned}",
+    "cliVersionSourceSettings": "ubatilishaji wa dashibodi",
+    "cliVersionSourceEnv": "kutofautiana kwa mazingira",
+    "cliVersionSourceDiscovered": "toleo la hivi punde lililogunduliwa kiotomatiki",
+    "cliVersionSourceDefault": "chaguomsingi iliyokamatwa",
+    "cliVersionInputLabel": "Batilisha toleo",
+    "cliVersionInputPlaceholder": "Batilisha toleo; wazi wazi",
+    "cliVersionSaveButton": "Hifadhi",
+    "cliVersionResetButton": "Weka upya kwa chaguomsingi",
+    "cliVersionLoadError": "Imeshindwa kupakia mipangilio ya toleo la CLI : {error}",
+    "cliVersionSaveError": "Imeshindwa kuhifadhi toleo la CLI : {error}",
+    "cliVersionLoadFailed": "Haikuweza kupakia mipangilio ya toleo CLI ya sasa.",
+    "cliVersionHintClaude": "Anthropic huweka modeli mpya za Claude kwenye toleo la mteja la Msimbo wa Claude inaloona. Hili ndilo toleo OmniRoute hutangaza kwa kila ombi la Anthropic.",
+    "cliVersionCaveatClaude": "Tahadhari ya bili: toleo la bili ni '<version>'.'<build-revision>', na marekebisho ya kujenga ni tofauti iliyotekwa mara kwa mara. Advertising 2.1.260 inaripoti 2.1.260.1e2, ambayo sio ile binary 2.1.260 halisi hutuma.",
+    "cliVersionHintCodex": "OpenAI huweka miundo mipya zaidi kwenye toleo la mteja wa Codex inaloona, kwa mfano hitilafu: Muundo wa 'gpt-6-astra' unahitaji toleo jipya zaidi la Codex.",
+    "cliVersionCaveatCodex": "Tahadhari ya hitimisho: toleo ambalo ripoti za mpigaji simu bado linashinda CODEX_CLIENT_VERSION env var, lakini ubatilishaji huu unashinda zote mbili, kwa sababu ni dhamira ya opereta.",
     "compatUpstreamHeadersLabel": "Vichwa vya ziada vya upstream",
     "compatUpstreamHeadersHint": "Mpangilio wenye upendeleo wa juu — una kiwango sawa cha uaminifu na kuhariri vitambulisho vya API vya mtoa huduma; wasimamizi wanaoaminika pekee ndio wanaopaswa kuutumia. Huunganishwa baada ya OmniRoute kuongeza uthibitishaji kutoka kwenye ufunguo wa API wa mtoa huduma. Ikiwa kichwa maalum kinatumia jina sawa na kichwa kilichopo (k.m. Authorization), thamani yako itachukua nafasi kikamilifu ya kichwa kilichozalishwa kiotomatiki (ikiwemo tokeni ya Bearer) — upstream itaona tu ulichoandika, si ufunguo uliopo kwenye mipangilio. Usanidi usio sahihi unaweza kusababisha 401 au kuharibu uthibitishaji wa upstream. Safu mlalo moja kwa kila kichwa (k.m. Authentication ya ziada kwa baadhi ya malango). Elekeza kipanya juu ya thamani au uiangazie ili kuona onyesho la kukagua. Mabadiliko huhifadhiwa uangaziaji unapoondolewa, unapobofya nje, au unapofunga paneli hii.",
     "compatUpstreamHeaderName": "Jina la kichwa",
@@ -5850,6 +6049,7 @@
     "perModelQuotaDescription": "Ikiwashwa, hitilafu za 429/404 huzuia modeli mahususi pekee, si muunganisho mzima. Tumia kwa watoa huduma wenye vikomo vya kiwango cha matumizi kwa kila modeli (k.m., ModelScope).",
     "importFreeModelsOnlyLabel": "Ingiza mifano ya bure pekee",
     "importFreeModelsOnlyHint": "Inapowezeshwa, ni mifano ya bure tu ya mtoa huduma huyu inayoingizwa. Mifano ya kulipia inarukwa.",
+    "importFreeModelsOnlyCompatibleHint": "Ikiwashwa, ni modeli tu ambazo orodha ya /models ya endpoint hii inaziweka alama kuwa za bure ndizo zinazoingizwa (id ya :free, alama ya bure au bei sifuri). Modeli za kulipia na modeli zisizo na data ya bei zinarukwa.",
     "perModelQuotaToggle": "Kigeuzi cha Kikomo kwa Kila Modeli",
     "modelId": "Kitambulisho cha Modeli",
     "customModelPlaceholder": "k.m. gpt-4.5-turbo",
@@ -5908,6 +6108,53 @@
     "applyClaudeAuthLocal": "Tumia uthibitishaji",
     "exportClaudeAuthFile": "Hamisha auth",
     "importClaudeAuth": "Ingiza uthibitisho",
+    "importAgyAuth": "Ingiza uthibitisho",
+    "agyImportTitle": "Unganisha Antigravity (Google Cloud Code)",
+    "agyImportTabLocal": "1-Bofya CLI ya Ndani",
+    "agyImportTabSingle": "Faili / Bandika Tokeni",
+    "agyImportTabBulk": "Ingiza Wingi",
+    "agyImportLocalHeading": "Gundua kiotomatiki kipindi kinachotumika",
+    "agyImportLocalIntro": "Hugundua kuingia kwa Google Cloud Code / Antigravity CLI kutoka:",
+    "agyImportLocalSourceEnv": "Faili ya ishara iliyopewa jina na utofauti wa mazingira AGY_TOKEN_FILE",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / keyring (service=gemini, user=antigravity)",
+    "agyImportLocalSourceCli": "Profaili za tokeni CLI za ndani (~/.gemini/antigravity-cli/)",
+    "agyImportLocalNote": "Hakuna kuingia kwa kivinjari, ibukizi au nakala ya msimbo OAuth inayohitajika. Ishara hukaa OmniRoute hata ukitoka CLI.",
+    "agyImportLocalOverwrite": "Badilisha / onyesha upya muunganisho uliopo ikiwa tayari umeingizwa",
+    "agyImportLocalSubmit": "Ingiza kutoka Antigravity ya ndani",
+    "agyImportLocalNotFound": "Hakuna kuingia kwa Antigravity CLI ya ndani kumegunduliwa.",
+    "agyImportLocalCreated": "Antigravity akaunti iliyounganishwa kutoka kwa kikao cha ndani.",
+    "agyImportLocalRefreshed": "Muunganisho wa Antigravity wa ndani umeonyeshwa upya.",
+    "agyImportLocalFailed": "Imeshindwa kuunganisha kipindi cha Antigravity cha ndani",
+    "agyImportInvalidToken": "Umbizo la tokeni si sahihi ( access_token au refresh_token haipo)",
+    "agyImportParseFileFailed": "Haikuweza kuchanganua faili kama JSON",
+    "agyImportParsePasteFailed": "Haikuweza kuchanganua maudhui yaliyobandikwa kama JSON",
+    "agyImportDuplicate": "Akaunti tayari ipo. Angalia \"Badilisha iliyopo\" ili kuibatilisha.",
+    "agyImportFailed": "Imeshindwa kuleta vitambulisho vya Antigravity",
+    "agyImportSuccess": "Antigravity akaunti imeingizwa.",
+    "agyImportInvalidJson": "JSON batili",
+    "agyImportAccountN": "Akaunti #{index}",
+    "agyImportNoValidEntries": "Hakuna maingizo halali ya kuleta",
+    "agyImportBulkFailed": "Imeshindwa kuleta kwa wingi",
+    "agyImportBulkSuccess": "Antigravity akaunti zilizoingizwa: {count}",
+    "agyImportBulkRunFailed": "Imeshindwa kutekeleza uletaji mwingi",
+    "agyImportUploadFile": "Pakia faili",
+    "agyImportPasteJson": "Bandika JSON",
+    "agyImportFileHint": "Chagua faili antigravity-oauth-token au tokeni iliyosafirishwa ya faili JSON",
+    "agyImportValidToken": "Tokeni halali imegunduliwa:",
+    "agyImportConnectionName": "Jina la muunganisho (si lazima)",
+    "agyImportConnectionNamePlaceholder": "mfano Akaunti ya kazi",
+    "agyImportEmailLabel": "Barua pepe (hiari kubatilisha)",
+    "agyImportReplaceSingle": "Badilisha muunganisho uliopo ikiwa barua pepe tayari ipo",
+    "agyImportSubmitSingle": "Ingiza akaunti",
+    "agyImportUploadFiles": "Pakia faili",
+    "agyImportPasteJsonArray": "Bandika safu JSON",
+    "agyImportBulkFileHint": "Chagua faili moja au zaidi ya tokeni JSON",
+    "agyImportStaged": "Faili zilizopangwa: {count}",
+    "agyImportValid": "Halali",
+    "agyImportResults": "Ingiza matokeo:",
+    "agyImportResultsSummary": "Imefaulu: {success} · Imeshindwa: {failed} · Jumla: {total}",
+    "agyImportReplaceBulk": "Badilisha miunganisho iliyopo kwenye barua pepe zinazolingana",
+    "agyImportSubmitBulk": "Ingiza zote",
     "claudeApplyModalTitle": "Omba kwa Msimbo wa Claude wa Karibu",
     "claudeApplyTargetLabel": "Njia inayolengwa",
     "claudeApplyBackupLabel": "Hifadhi rudufu",
@@ -6045,6 +6292,10 @@
     "hideEmails": "Ficha barua pepe zote",
     "a": "A",
     "accountConcurrencyCapHint": "Account Concurrency Cap Hint",
+    "aiCreditsLimit": "Kikomo cha AI Credits kwa kila kipindi cha malipo",
+    "aiCreditsLimitPlaceholder": "Hakuna kikomo cha ndani",
+    "aiCreditsLimitHint": "Huruka muunganisho huu wakati AI Credits zilizoripotiwa na GitHub zinapofikia thamani hii, ili uelekezaji urudi kwenye miunganisho yako mingine. Tupu huizima; 0 huiruka kila mara. Usomaji wa matumizi unaokosekana au uliopitwa na wakati hauzuii kamwe — hiki si kikomo cha matumizi kilichohakikishwa.",
+    "aiCreditsLimitInvalid": "Kikomo cha AI Credits lazima kiwe nambari isiyo hasi, au tupu ili kukizima.",
     "accountConcurrencyCapLabel": "Account Concurrency Cap Label",
     "accountIdHint": "Account Id Hint",
     "accountIdLabel": "Account Id Label",
@@ -6056,10 +6307,10 @@
     "apiFormatLabel": "Lebo ya Umbizo la API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Eneo la API la China",
-    "apiRegionHint": "Kidokezo cha Eneo la API",
-    "apiRegionInternational": "Eneo la Kimataifa la API",
-    "apiRegionLabel": "Lebo ya Eneo la API",
+    "apiRegionChina": "China Bara",
+    "apiRegionHint": "Chagua eneo la endpoint linalotumika kwa ufikiaji wa API na ufuatiliaji wa mgawo.",
+    "apiRegionInternational": "Kimataifa",
+    "apiRegionLabel": "Eneo la API",
     "apikey": "Ufunguo wa API",
     "audio": "Sauti",
     "audioProvidersHeading": "Kichwa cha Watoa Huduma za Sauti",
@@ -6080,8 +6331,28 @@
     "claudeLowPriorityModeDescription": "Akaunti hii inapofikia kikomo chake cha matumizi cha saa 5 na Anthropic ikatoa njia yenye kipaumbele cha chini, OmniRoute huikubali na kuendelea kutuma maombi yenye anthropic-usage-limit: slow hadi kipindi kiwekwe upya, badala ya kusitisha muunganisho kwa muda. Kikomo cha kila wiki bado kinatumika na huenda majibu yakasubiri hadi nafasi ya ziada ipatikane.",
     "claudeAutoLimitResetLabel": "Weka upya kikomo cha kipindi kiotomatiki (mara moja kwa wiki)",
     "claudeAutoLimitResetDescription": "Akaunti hii inapofikia kikomo chake cha matumizi cha saa 5 na uwekaji upya wa kikomo cha kipindi unapatikana, OmniRoute huutumia kiotomatiki na kujaribu tena kwa kasi kamili. Hii hutumia uwekaji upya wa akaunti wa mara moja kwa wiki na bado huhesabiwa katika kikomo cha kila wiki.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "quotaRefreshCurrent": "Sasisha mgao wa sasa",
+    "quotaRefreshCurrentHint": "Hukagua mgao wa sasa wa akaunti hii bila kutumia salio la kuweka upya.",
+    "quotaRefreshing": "Inakagua mgao…",
+    "quotaRefreshFresh": "Mgao umekaguliwa. Seva huamua upatikanaji wa akaunti.",
+    "quotaRefreshFailed": "Ukaguzi wa mgao umeshindikana. Data ya awali haijabadilika.",
+    "quotaRefreshStale": "Seva imerudisha data ya zamani ya mgao. Huu si uchunguzi mpya.",
+    "quotaRefreshPartial": "Sehemu tu ya data ya mgao inapatikana.",
+    "quotaWindowUnavailable": "Mgao wa {window} haupatikani",
+    "quotaConnectionRefreshFailed": "Ukaguzi wa mgao umekamilika, lakini orodha ya akaunti haikuweza kusasishwa.",
     "disableCoolingDescription": "Ruka muda wa utulivu wa mpito ili muunganisho huu uendelee kustahiki hata baada ya hitilafu zinazoweza kurekebishwa (hali za mwisho kama vile zilizopigwa marufuku/zilizopitwa na wakati bado zinatumika).",
     "disableCoolingLabel": "Zima muda wa utulivu kwa muunganisho huu",
+    "keepMidConversationSystemDescription": "Acha ujumbe wa mfumo uliotumwa katikati ya mazungumzo ndani ya orodha ya ujumbe badala ya kuwahamisha hadi kwenye kidokezo cha mfumo wa kiwango cha juu, kwa hivyo akiba ya papo hapo inaendelea kupiga zamu. Washa tu ikiwa mkondo huu wa juu unakubali jukumu la \"mfumo\" ndani ya ujumbe (vinginevyo hujibu 400).",
+    "keepMidConversationSystemLabel": "Weka ujumbe wa mfumo wa mazungumzo katikati",
+    "requireUserLastMessageDescription": "Kwa mitiririko ya juu inayokataa ujazaji awali wa mratibu: dondosha zamu za msaidizi (hakuna_use) kabla ya kutuma. Mfano unaweza kuunda tena jibu lake la hapo awali.",
+    "requireUserLastMessageLabel": "Inahitaji mazungumzo ili kumalizika kwa ujumbe wa mtumiaji",
     "bulkPasteAdded": "{count, plural, one {Ufunguo 1 umeongezwa} other {Funguo # zimeongezwa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Nakala rudufu 1 imerukwa} other {Nakala rudufu # zimerukwa}}",
     "bulkPasteHint": "Bandika ufunguo mmoja wa API kwa kila mstari. Mistari tupu hupuuzwa na funguo zilizorudiwa hurukwa.",
@@ -6118,6 +6389,8 @@
     "newApiUserIdLabel": "Kitambulisho cha mtumiaji cha New-API",
     "newApiUserIdPlaceholder": "k.m. 12345",
     "newApiUserIdHint": "Thamani ya kichwa cha AgentRouter New-Api-User, inayotumiwa pamoja na ufunguo wa API wa dashibodi kupata salio la kikomo.",
+    "tokenrouterManagementKeyLabel": "Ufunguo wa usimamizi (si lazima)",
+    "tokenrouterManagementKeyHint": "Ufunguo wa akaunti kutoka dashibodi ya TokenRouter (Settings → Management Key). Hutumika tu kusoma kiwango na salio, kamwe si kwa maombi. Ufunguo uliohifadhiwa hauonyeshwi; acha tupu ili kuubakiza.",
     "newApiAggregatorToggleLabel": "Mlango wa Mkusanyiko",
     "newApiAggregatorToggleHint": "wezesha kugundua salio kwa nodi za mkusanyiko wa New-API / One-API / Sub2API. Dashibodi itaonyesha alama ya salio na upitaji wa quota-preflight utaepuka akaunti zilizokamilika.",
     "newApiAggregatorConsoleApiKeyHint": "Token ya Ufikiaji wa Mfumo kwa kiungo cha /api/user/self cha mkusanyiko. Si funguo ya API ya usafirishaji.",
@@ -6131,6 +6404,8 @@
     "customUserAgentLabel": "Lebo ya User Agent maalum",
     "huggingfaceBillToHint": "Si lazima. Kitambulisho cha akaunti yako ya bili ya Hugging Face, kinachotumwa kama kichwa cha X-HF-Bill-To kwa ajili ya kuhusisha gharama.",
     "huggingfaceBillToLabel": "Akaunti ya Hugging Face Bill-To",
+    "commandCodeZdrLabel": "Hitaji uhifadhi sifuri wa data (ZDR)",
+    "commandCodeZdrHint": "Hutuma x-cmd-zdr: 1 pamoja na kila ombi linalofanywa kwa ufunguo huu wa API. Miundo isiyo na upstream ya ZDR huenda isipatikane.",
     "databricksBaseUrlHint": "Kidokezo cha URL ya msingi ya Databricks",
     "defaultThinkingStrengthHint": "Hutumika wakati ombi halibainishi kiwango cha juhudi za kufikiri.",
     "defaultThinkingStrengthLabel": "Kiwango chaguomsingi cha uwezo wa kufikiri",
@@ -6177,6 +6452,9 @@
     "localProviders": "Watoa Huduma wa Ndani",
     "maxConcurrentWholeNumberError": "Hitilafu ya nambari nzima ya kiwango cha juu cha miunganisho sambamba",
     "m365TierLabel": "Kiwango cha Copilot",
+    "m365RefreshTokenLabel": "Onyesha upya tokeni (si lazima)",
+    "m365RefreshTokenHint": "Inatumika kuonyesha upya tokeni ya ufikiaji Microsoft 365 kiotomatiki.",
+    "m365RefreshTokenEditHint": "Acha wazi ili kuweka tokeni iliyopo. Bandika tokeni mpya ili kuibadilisha.",
     "m365TierHint": "Chagua ni kiolesura gani cha Microsoft 365 Copilot ambacho muunganisho huu unatumia. Binafsi ndiyo BizChat ya kawaida ya mtumiaji; Elimu na Biashara (kazi) huchagua violesura vya wapangaji wao.",
     "m365TierIndividualOption": "Binafsi (chaguo-msingi)",
     "m365TierEduOption": "Elimu",
@@ -6533,6 +6811,7 @@
       "monsterapi": "Pata ufunguo wa API kwenye monsterapi.ai",
       "moonshot": "Unganisha Moonshot AI kwa kutumia ufunguo wa API.",
       "morph": "Kiwango cha bure: salio 250K/mwezi, $0",
+      "apmix": "Unganisha Apmix kwa funguo ya API kutoka apmix.ai/dashboard — usajili mmoja, modeli nyingi.",
       "nanogpt": "Unganisha NanoGPT kwa kutumia ufunguo wa API.",
       "nebius": "Salio la majaribio la ~$1 unapojisajili kwa ajili ya majaribio ya API",
       "nlpcloud": "NLP Cloud hutumia API ya chatbot ya umiliki badala ya OpenAI chat/completions. OmniRoute hurekebisha ujumbe wa OpenAI kulingana na input/context/history na kuweka wazi orodha ya ndani ya modeli za chatbot zinazotumika.",
@@ -6621,7 +6900,7 @@
       "claude": "Unganisha Claude Code kwa mtiririko uliopo wa OAuth.",
       "cline": "Unganisha Cline kwa mtiririko uliopo wa OAuth.",
       "cursor": "Unganisha Cursor IDE kwa mtiririko uliopo wa OAuth.",
-      "cursor-api": "Unganisha Cursor kwa kutumia API key ya mtumiaji (crsr_...) kutoka cursor.com/dashboard/api; kipindi cha IDE hakihitajiki.",
+      "cursor-api": "Unganisha Cursor kwa ufunguo wa API wa mtumiaji (crsr_... au grok_...) kutoka cursor.com/dashboard/api; hakuna kipindi cha IDE kinachohitajika.",
       "github": "Unganisha GitHub Copilot kwa mtiririko uliopo wa OAuth.",
       "gitlab-duo": "Programu ya OAuth yenye upeo wa ai_features + read_user. Sanidi GITLAB_DUO_OAUTH_CLIENT_ID na kwa hiari GITLAB_DUO_OAUTH_CLIENT_SECRET kwenye instansi hii ya OmniRoute.",
       "kilocode": "Unganisha Kilo Code kwa mtiririko uliopo wa OAuth.",
@@ -6629,8 +6908,7 @@
       "kiro": "Kiwango cha bure: mikopo 50/mwezi (~tokeni 25K–100K). ⚠️ Kiro ToS inakataza matumizi ya proksi/harness ya wahusika wengine.",
       "codex": "Unganisha OpenAI Codex na mtiririko uliopo wa OAuth.",
       "qwen": "Unganisha Qwen Code na mtiririko uliopo wa OAuth.",
-      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens",
-      "apmix": "Unganisha Apmix kwa funguo ya API kutoka apmix.ai/dashboard — usajili mmoja, modeli nyingi."
+      "github-models": "Unda PAT ya GitHub yenye upeo wa 'models: read' kwenye github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} inakubali vitambulisho vya asili vya mtoa huduma. Ingiza kutoka /miundo au ongeza vitambulisho maalum vya kuelekeza.",
     "bedrockModelsDescription": "Mitindo ya Amazon Bedrock inatolewa na eneo la AWS. Ingiza kutoka /miundo au ongeza vitambulisho vya muundo wa Bedrock vilivyowezeshwa katika eneo lililochaguliwa.",
@@ -6723,6 +7001,11 @@
     "anonymousFallbackEnabled": "Fallback isiyojulikana imewezeshwa kwa {provider}",
     "anonymousFallbackDisabled": "Fallback ya kutotambulika imezimwa kwa {provider} — muunganisho uliochoka utaepuka mtoa huduma huyu",
     "anonymousFallbackUpdateFailed": "Imeshindikana kuboresha mipangilio ya kurudi nyuma isiyo na jina",
+    "retryDelayTitle": "Muda wa kusubiri kujaribu tena",
+    "retryDelayDesc": "Muda ambao muunganisho hupumzika baada ya hitilafu ya kikomo cha kasi wakati mtoa huduma hasemi lini ujaribu tena. Hali ya kiotomatiki hutumia ucheleweshaji uliojengewa ndani; muda wa kuweka upya uliotumwa na mtoa huduma hupewa kipaumbele kila wakati.",
+    "retryDelayAuto": "Kiotomatiki",
+    "retryDelaySaved": "Muda wa kusubiri kujaribu tena umehifadhiwa",
+    "retryDelayUpdateFailed": "Imeshindwa kusasisha muda wa kusubiri kujaribu tena",
     "batchDeleteFailed": "Kuondoa kundi kumeshindikana",
     "batchDeleteNetworkError": "Kosa la mtandao wakati wa kufuta kundi",
     "batchUpdateFailed": "Sasisho la kundi limefeli",
@@ -6803,15 +7086,53 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Inatumika katika michanganyiko {count}: {combos}",
+    "openComboTooltip": "Fungua Michanganyiko — inatumiwa na {combo}",
+    "claudeCodeRoutingTitle": "Usafirishaji wa mgenyeshaji wa juu kwa trafiki ya Claude Code",
+    "routingNative": "Asili",
+    "routingFallback": "Utenganisho",
+    "rerank": "Kusambulia upya",
+    "video": "Video",
+    "markFreeTierTitle": "Hakiwa kama wa kiwango cha bure (unaonekana hata wakati vifaa vya malipo vinapofichwa)",
+    "codexTunnelTitle": "Uwasilishaji wa zana ya Codex",
+    "codexTunnelDescription": "Tani hubakiwa mtindo wa kutuma tu. Zana za ndani bado zinazichuliwa na Codex tu, chini ya gesingiza na sera yake ya idhini.",
+    "tunnelIdLabel": "Kitambulisho cha tani",
+    "tunnelRuntimeKeyLabel": "Ukiu wa kimashine wa tani",
+    "tunnelRuntimeKeyPlaceholder": "Ukiu wa kimashine",
+    "tunnelRuntimeKeyHint": "Inahifadhiwa kwa siri pamoja na kuki na haiandikwi kwenye kumbukumbu.",
+    "tunnelRuntimeKeyNewLabel": "Ukiu mpya wa kimashine wa tani",
+    "tunnelRuntimeKeyNewHint": "Weka tu pamoja na kuki mpya. Thamani inahifadhiwa kwa siri.",
+    "chatgptConnectorLabel": "Muunganishaji maalum wa ChatGPT",
+    "doctorChecking": "Inathibitisha hali…",
+    "doctorCheck": "Thibitisha hali ya mwanga",
+    "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji"
   },
   "settings": {
+    "proxyTraffic": {
+      "persistenceIncomplete": "Baadhi ya trafiki haikuweza kuhifadhiwa katika mchakato huu. Jumla zilizohifadhiwa hazijakamilika; angalia taarifa za uchunguzi wa seva.",
+      "title": "Trafiki ya data halisi ya OmniRoute",
+      "description": "Miili ya upakiaji iliyowasilishwa kutumwa na baiti za upakuaji zilizosomwa na OmniRoute. Si trafiki ya mtandao kwenye kiungo wala utozaji wa mtoa huduma. Jumla inajumuisha trafiki ya moja kwa moja na isiyohusishwa na njia, zilizopewa lebo tofauti.",
+      "coverageNote": "Jumla zilizokusanywa tangu kipimo kuanza. Upakiaji wenye ukubwa usiojulikana (mitiririko, FormData, miili ya Request) haujumuishwi katika jumla ya baiti. Upakuaji ambao haujasomwa au haujamalizika haujakamilika; kutuma kulikoshindwa hakuthibitishi kuwa upakiaji umefika. Uelekezaji/majaribio ya kurudia ya ndani ya safu ya usafirishaji na usafirishaji unaopita kando ya kipimo haupimwi kando.",
+      "refresh": "Onyesha upya",
+      "overall": "Jumla (njia zote zilizozingatiwa)",
+      "proxied": "Jumla ndogo ya proksi (bila trafiki ya moja kwa moja/isiyohusishwa)",
+      "direct": "Moja kwa moja (bila proksi)",
+      "unattributed": "Msambazaji asiyehusishwa",
+      "removed": "Proksi iliyoondolewa ({id})",
+      "legacy": "Proksi ya zamani/kutoka mazingira ({id})",
+      "route": "Njia",
+      "upload": "Upakiaji uliowasilishwa kutumwa",
+      "download": "Upakuaji uliosomwa",
+      "attempts": "Majaribio",
+      "knownUpload": "Upakiaji wa ukubwa unaojulikana / majaribio",
+      "completed": "Upakuaji uliokamilika / majaribio",
+      "failed": "Utumaji ulioshindwa",
+      "cancelled": "Upakuaji ulioghairiwa",
+      "errored": "Hitilafu za upakuaji",
+      "loading": "Inapakia trafiki ya data halisi…",
+      "empty": "Hakuna trafiki ya data halisi iliyopimwa bado.",
+      "error": "Haikuweza kupakia trafiki ya data halisi. Jaribu kuonyesha upya."
+    },
     "title": "Mipangilio",
     "general": "Jumla",
     "security": "Usalama",
@@ -6893,6 +7214,7 @@
     "proxySubTabsAria": "Sehemu za proksi",
     "requestBodyLimitTitle": "Kikomo cha Mwili wa Ombi",
     "requestBodyLimitDescription": "Ukubwa wa juu zaidi wa data ya API unaokubaliwa kabla ya mwili wa ombi kuchanganuliwa. Njia maalum za upakiaji huhifadhi angalau kikomo chao cha ndani cha MB 100.",
+    "requestBodyLimitChatHint": "Chat Completions na Responses zinakubali hadi 50 MB hadi utakapohifadhi kikomo hapa. Kikomo kilichohifadhiwa kinatumika pia kwao, kiwe cha chini au cha juu zaidi.",
     "requestBodyLimitInputLabel": "Kikomo cha mwili wa ombi kwa MB",
     "requestBodyLimitEmptyError": "Weka kikomo kwa MB",
     "requestBodyLimitWholeNumberError": "Tumia nambari kamili",
@@ -7043,6 +7365,8 @@
     "enableThinking": "Washa Kufikiri",
     "maxThinkingTokens": "Idadi ya Juu ya Tokeni za Kufikiri",
     "enableProxy": "Washa Proksi",
+    "defaultNewConnectionProxyEnabled": "Washa proksi kwa chaguomsingi kwa miunganisho mipya",
+    "defaultNewConnectionProxyEnabledDesc": "Huweka hali ya awali ya proksi ya akaunti mpya za watoa huduma isipokuwa chaguo tofauti limebainishwa wazi. Miunganisho iliyopo haibadiliki. Uelekezaji bado unategemea mipangilio ya jumla na usanidi wa proksi. Kila akaunti inaweza kubadilishwa baadaye.",
     "perKeyProxyEnabled": "Wezesha ugawaji wa seva mbadala kwa kila ufunguo",
     "perKeyProxyEnabledDesc": "Ikiwezeshwa, kila muunganisho wa mtoa huduma unaweza kutumia ugawaji wake wa seva mbadala",
     "proxyUrl": "URL ya Proksi",
@@ -7078,6 +7402,13 @@
     "themeLight": "Angavu",
     "themeDark": "Nyeusi",
     "themeSystem": "Mfumo",
+    "paletteTitle": "Paleti ya rangi",
+    "paletteDesc": "Editions ndio mwonekano chaguo-msingi. Classic hurejesha rangi ya msisitizo ya kijani-limau ya awali.",
+    "paletteSelectionAria": "Uteuzi wa paleti ya rangi",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Rangi zisizoegemea upande wowote zenye joto pamoja na rangi ya msisitizo ya shaba",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Rangi zisizoegemea upande wowote zenye ubaridi pamoja na rangi ya msisitizo ya kijani-limau",
     "endpointTunnelVisibility": "Mwonekano wa njia ya mwisho",
     "endpointTunnelVisibilityDesc": "Ficha vidhibiti vya handaki kutoka kwa ukurasa wa Mwisho bila kubadilisha hali ya handaki.",
     "showCloudflareTunnel": "Cloudflare Quick Tunnel",
@@ -7105,16 +7436,6 @@
     "settingsSidebarDesc": "Chagua vipengee vya upau wa pembeni vya kuonyesha. Hali ya Muhimu huacha zana za Kina zikitafutika.",
     "hideHealthLogs": "Ficha Kumbukumbu za Ukaguzi wa Afya",
     "hideHealthLogsDesc": "Ikiwa IMEWASHWA, zuia ujumbe wa [HealthCheck] kwenye konsoli ya seva",
-    "themeAccent": "Rangi ya mandhari",
-    "themeAccentDesc": "Chagua rangi iliyowekwa tayari au unda mandhari yako kwa kutumia rangi moja",
-    "themeCreate": "Unda mandhari",
-    "themeCustom": "Mandhari maalum",
-    "themeBlue": "Bluu",
-    "themeRed": "Nyekundu",
-    "themeGreen": "Kijani",
-    "themeViolet": "Urujuani",
-    "themeOrange": "Rangi ya machungwa",
-    "themeCyan": "Samawati",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Binafsisha jina na nembo ya programu",
     "appName": "Jina la Programu",
@@ -7266,7 +7587,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Njia ya kiunzi cha msingi",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Hiari: huthibitisha faili iliyozalishwa kwa kiunzi cha msingi kabla ya kubadilisha faili iliyotumika. IACHE wazi ili kuendelea kuandika iliyo karibu nayo. Faili la husika hufunguliwa likitokuwepo."
+      "coreBinaryPathHelp": "Hiari: huthibitisha faili iliyozalishwa kwa kiunzi cha msingi kabla ya kubadilisha faili iliyotumika. IACHE wazi ili kuendelea kuandika iliyo karibu nayo. Faili la husika hufunguliwa likitokuwepo.",
+      "urlFeedlessHint": "Acha wazi kwa usajili wa kichaguzi pekee: weka URL ya udhibiti hapa chini, hakuna feed inayopakuliwa, kusasishwa, au kufungwa."
     },
     "bulkHealthcheck": "Ukaguzi wa Afya kwa Wingi",
     "bulkHealthcheckDesc": "Jaribu proksi zote zilizosanidiwa dhidi ya URL lengwa ili kubaini zinazofanya kazi.",
@@ -7700,6 +8022,11 @@
     "pricingShowingProviders": "Inaonyesha {visible} kati ya {total}",
     "pricingFilteredFrom": "(imechujwa kutoka {count})",
     "pricingShowMoreProviders": "Onyesha {count} zaidi ({remaining} zimesalia)",
+    "pricingView": "Tazama",
+    "pricingViewByProvider": "Kulingana na mtoa huduma",
+    "pricingViewCompare": "Linganisha modeli",
+    "pricingUnpriced": "Bila bei",
+    "pricingCompareEmpty": "Hakuna modeli inayotolewa na zaidi ya mmoja wa watoa huduma hawa. Tafuta modeli ili kuona ofa moja.",
     "modelOverridesTitle": "Ubatilishaji wa Modeli",
     "modelOverridesDesc": "Batilisha uwezo wa mtoa huduma/modeli unaotumiwa na uelekezaji na uundaji wa ombi. Malengo yanatumia mfumo sawa wa mtoa huduma/modeli kama michanganyiko.",
     "searchModelOverrideTargets": "Tafuta mtoa huduma/modeli...",
@@ -7707,6 +8034,7 @@
     "configured": "imesanidiwa",
     "none": "Hakuna",
     "modelOverrideValuePlaceholder": "Thamani ya nambari",
+    "modelOverrideKey": "Ufunguo wa kubatilisha",
     "modelOverrideReasoningEffortsPlaceholder": "Kwa Kiingereza, zikitenganishwa kwa koma, k.m. low, medium, high",
     "addKeyValue": "Ongeza thamani ya ufunguo",
     "noModelOverrides": "Hakuna ubatilishaji uliosanidiwa kwa modeli hii.",
@@ -7755,7 +8083,6 @@
     "customPricingNote": "Unaweza kubadilisha bei chaguomsingi kwa modeli mahususi. Mabadiliko maalum yana kipaumbele kuliko bei zilizogunduliwa kiotomatiki.",
     "editPricing": "Hariri Bei",
     "viewFullDetails": "Tazama Maelezo Kamili",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Uelekezaji Unaobadilika Kulingana na Kiasi",
     "adaptiveVolumeRoutingDesc": "Ongeza au punguza miunganisho kiotomatiki kulingana na kiasi cha payload na shinikizo la kiwango cha upitishaji.",
     "lkgpToggleTitle": "Mtoa Huduma wa Mwisho Aliyejulikana Kufanya Kazi (LKGP)",
@@ -7850,6 +8177,8 @@
     "compressionDesc": "Punguza matumizi ya tokeni kwa kufinyaza maagizo kabla ya kuyatuma kwa watoa huduma",
     "autoCombosTitle": "Mijumuisho Otomatiki",
     "autoCombosDesc": "Ruhusu ufunguo huu kutumia mijumuisho iliyojengewa ndani ya auto/*, ambayo huchagua modeli kiotomatiki kutoka kwa kila mtoa huduma aliyesanidiwa",
+    "ccDiscoveryAliasesTitle": "Majina bandia ya ugunduzi wa Claude Code",
+    "ccDiscoveryAliasesDesc": "Tangaza vioo vya utangamano vya claude/... kwa miundo na michanganyiko ambayo ufunguo huu tayari unaweza kufikia",
     "compressionGuidanceFullGuideLink": "Mwongozo kamili wa mgandamizo",
     "compressionGuidanceShow": "Maelezo",
     "compressionGuidanceHide": "Ficha maelezo",
@@ -8223,6 +8552,7 @@
     "compressionAdaptivePolicyPercentage": "Asilimia ya dirisha",
     "compressionAdaptivePolicyAbsolute": "Bajeti isiyobadilika ya tokeni",
     "compressionOutputStylesDescription": "Ingiza maagizo ya kuunda majibu bila kuandika upya matokeo ya mtoa huduma. Changanya kwa uhuru.",
+    "compressionOutputStylesPreviewNote": "Ombi huingiza lugha moja pekee: lugha iliyotambuliwa, vinginevyo pakiti ya kwanza. Vitalu hapo juu ni lahaja za kila pakiti, sio sindano iliyojumuishwa.",
     "mcpAccessibilityDescription": "Inaweka mipaka ya matokeo ya zana ya MCP (hifadhi tofauti).",
     "compressionStylesTileSummary": "{tokens, number} tokeni zimehifadhiwa · {runs, plural, one {# umewekewa mtindo} other {# imewekewa mtindo}}",
     "compressionStylesTileEmpty": "Hakuna uendeshaji uliowekewa mtindo bado.",
@@ -8800,6 +9130,8 @@
     "qdrantHost": "Mwenyeji",
     "qdrantCollection": "Mkusanyiko",
     "catalogVisibilityHint": "Vitambulisho vya miundo vilivyofichwa bado vinaweza kuitwa kwa ruhusa zilezile za ufikiaji.",
+    "exposeCombosOnly": "Orodhesha mijumuisho pekee katika /v1/models",
+    "exposeCombosOnlyDesc": "Wateja wanaogundua miundo kiotomatiki wataona mijumuisho yako (na auto/* isipokuwa imefichwa) badala ya miundo ghafi ya watoa huduma. Vitambulisho dhahiri vya provider/model vinaendelea kuelekezwa.",
     "catalogScopeTitle": "Orodha ya API ya Models",
     "catalogScopeDesc": "Kile ambacho GET /v1/models hutangaza kwa ufunguo huu. Kupunguza orodha hakubadilishi kamwe kile ambacho ufunguo unaweza kuita.",
     "catalogScopeAll": "Zote mbili",
@@ -8907,6 +9239,17 @@
     "resilienceTokenRefreshScopeConnection": "Muunganisho (kila akaunti ina kipochi chake cha kuzima)",
     "resilienceTokenRefreshThreshold": "Kushindwa kabla ya kusimamisha",
     "resilienceTokenRefreshCooldown": "Mapumziko baada ya kuamilishwa",
+    "mfaTitle": "Uthibitishaji wa hatua mbili",
+    "mfaDesc": "Hitaji msimbo kutoka kwenye programu ya uthibitishaji, pamoja na nenosiri, ili kuingia kwenye dashibodi au kuunganisha CLI.",
+    "mfaScanQr": "Changanua msimbo huu wa QR kwa programu yako ya uthibitishaji (au weka ufunguo wa kusanidi wewe mwenyewe), kisha andika msimbo wa tarakimu 6 unaoonyeshwa.",
+    "mfaManualKey": "Ufunguo wa kusanidi",
+    "mfaCodeLabel": "Msimbo wa uthibitisho",
+    "mfaBackupCodesTitle": "Hifadhi misimbo yako ya urejeshaji",
+    "mfaBackupCodesDesc": "Kila msimbo unakuingiza mara moja ukipoteza ufikiaji wa programu yako ya uthibitishaji. Haitaonyeshwa tena.",
+    "mfaBackupCodesRemaining": "Misimbo ya urejeshaji iliyobaki: {count}",
+    "mfaDisableDesc": "Weka nenosiri lako na msimbo wa sasa (au msimbo wa urejeshaji) ili kuzima uthibitishaji wa hatua mbili.",
+    "mfaRecoveryHint": "Urejeshaji wa kifaa kilichopotea: anzisha seva ukiwa na OMNIROUTE_DISABLE_MFA=true kisha uingie kutoka kwenye seva pangishi yenyewe.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA imewekwa: kuingia kutoka kwenye seva pangishi hii kunaruka hatua ya pili. Iondoe mara utakapoingia tena.",
     "piiMasking": {
       "title": "Kuficha data binafsi",
       "description": "Chagua aina zipi za data binafsi zifichwe na uongeze ruwaza zako mwenyewe. Kuficha kunabaki kumezimwa hadi uwashe bendera za vipengele zilizoonyeshwa hapa chini.",
@@ -8919,7 +9262,9 @@
         "financial": "Kifedha",
         "brazilian": "Kibrazili",
         "usa": "Marekani",
-        "full": "Kamili"
+        "full": "Kamili",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika Kusini)"
       },
       "builtinTypes": "Aina zilizojengwa ndani",
       "types": {
@@ -8933,7 +9278,19 @@
         "ip_address": "Anwani za IPv4",
         "ipv6_address": "Anwani za IPv6",
         "aws_key": "Funguo za ufikiaji za AWS",
-        "api_key_generic": "Funguo za API na tokeni"
+        "api_key_generic": "Funguo za API na tokeni",
+        "iban": "IBAN nambari za akaunti ya benki",
+        "eu_vat": "nambari EU VAT",
+        "es_dni_nie": "Kihispania DNI / NIE",
+        "it_codice_fiscale": "Ufadhili wa Codice wa Italia",
+        "pl_pesel": "PESEL ya Kipolishi",
+        "nl_bsn": "Kiholanzi BSN",
+        "de_steuer_id": "Kijerumani Steuer-ID",
+        "se_personnummer": "Mtu wa Kiswidi",
+        "za_id": "Nambari za ID Afrika Kusini",
+        "za_phone": "Nambari za simu za Afrika Kusini",
+        "za_vat": "Nambari za VAT Afrika Kusini",
+        "za_tax_ref": "Marejeleo ya ushuru ya Afrika Kusini"
       },
       "customPatterns": "Ruwaza maalum",
       "customPatternsDesc": "Zinazolingana hubadilishwa na [CUSTOM_REDACTED]. Hadi ruwaza {max}. Ruwaza zenye hatari ya urudishaji nyuma wa maafa hukataliwa.",
@@ -8951,7 +9308,12 @@
       "statsTitle": "Ugunduzi tangu kuanzishwa upya",
       "statsEmpty": "Bado hakuna ugunduzi.",
       "statsRequest": "Maombi"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "Hifadhi fremu zilizotolewa kwenye video",
+    "modalityBridgeVideoDrilldownEnabledDesc": "Ruhusu uhifadhi wa muda wa JPEG pale tu ambapo ombi lililothibitishwa pia linaweka drilldown: true. Video ghafi hazihifadhiwi kamwe.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "Ruhusu uchunguzi wa kina wa fremu uliothibitishwa",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "Ruhusu funguo za API kusoma na kufuta vishikio vyao fiche pekee. Hakuna ufikiaji bila uthibitishaji au kwa kutumia ufunguo mwingine.",
+    "modalityBridgeVideoDrilldownUsage": "JPEG zilizohifadhiwa / baiti"
   },
   "contextRtk": {
     "title": "Injini ya RTK",
@@ -9035,7 +9397,8 @@
     "tomlTestPassed": "Imefaulu",
     "tomlTestFailed": "Imefeli",
     "tomlImportError": "Imeshindwa kuchakata faili la RTK TOML.",
-    "tomlFileReadError": "Imeshindwa kusoma faili la TOML lililochaguliwa."
+    "tomlFileReadError": "Imeshindwa kusoma faili la TOML lililochaguliwa.",
+    "viewMode": "Hali ya mwonekano"
   },
   "compressionEngineConfig": {
     "loading": "Inapakia…",
@@ -9257,7 +9620,8 @@
     "languagePacksList": "Vifurushi vya lugha: {packs}",
     "dragToReorder": "Buruta ili kupanga upya hatua",
     "engine": "Injini",
-    "intensity": "Ukali"
+    "intensity": "Ukali",
+    "compressionOverride": "Ubatilishaji wa ubanaji"
   },
   "compressionStudio": {
     "noRun": "Hakuna uendeshaji wa mbano unaopatikana.",
@@ -9317,7 +9681,8 @@
     "encoderWinner": "mshindi: {winner}",
     "encoder": "enkoda",
     "bytes": "baiti",
-    "tokensCl100k": "tokeni (cl100k)"
+    "tokensCl100k": "tokeni (cl100k)",
+    "studioViews": "Mionekano ya Studio"
   },
   "omniglyph": {
     "preview": "Hakiki",
@@ -9523,7 +9888,9 @@
     "tooltipMinLength": "Ujumbe mfupi kuliko huu haujabanwa. Chini = compression zaidi.",
     "tooltipMinSavings": "Finyaza tu ikiwa itaokoa angalau ishara hizi nyingi.",
     "ultraSettings": "Mipangilio ya Juu",
-    "ultraSettingsDesc": "Mfinyazo wa kisemantiki unaoendeshwa na SLM"
+    "ultraSettingsDesc": "Mfinyazo wa kisemantiki unaoendeshwa na SLM",
+    "defaultLanguage": "Lugha chaguomsingi",
+    "viewMode": "Hali ya mwonekano"
   },
   "translator": {
     "title": "Mtafsiri",
@@ -9835,6 +10202,9 @@
     "streamTransformFailed": "Imeshindwa kubadilisha mtiririko"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kiwango kimeisha; matumizi ya ziada yanaruhusiwa, hivyo huduma inaendelea.",
+    "healthPaidCreditsBypass": "Kiwango kimeisha; salio la kulipia linalopatikana linaruhusu huduma kuendelea.",
+    "healthFilteringBypass": "Kiwango kimeisha; uchujaji wa kiwango wa ndani umezimwa, hivyo huduma inaendelea.",
     "title": "Matumizi",
     "grokExtraUsageCredits": "Mikopo Ya Ziada",
     "grokAutoTopUp": "Kuongeza Otomatikia",
@@ -9998,6 +10368,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Vikomo vya Watoa Huduma",
     "noProviders": "Hakuna Watoa Huduma Waliounganishwa",
+    "quotaAuthRequired": "Uthibitishaji unahitajika - ingia kwenye dashibodi",
+    "quotaAuthRequiredHint": "Miunganisho ya watoa huduma haikuweza kupakiwa kwa sababu kipindi cha dashibodi hakipo au muda wake umeisha. Ingia na uonyeshe upya ili kuona vikomo vyako vya matumizi.",
     "connectProvidersForQuota": "Unganisha na watoa huduma kupitia OAuth ili kufuatilia vikomo vya mgao na matumizi ya API yako.",
     "accountsCount": "{count, plural, one {akaunti #} other {akaunti #}}",
     "filteredFromCount": "(zimechujwa kati ya {count})",
@@ -10047,9 +10419,6 @@
     "tierLite": "Nyepesi",
     "tierUnknown": "Haijulikani",
     "statTotal": "Jumla",
-    "statCritical": "Mahututi",
-    "statAlert": "Tahadhari",
-    "statHealthy": "Yenye afya",
     "filterPurchaseTypeLabel": "Aina",
     "filterTierLabel": "Kiwango",
     "purchaseAll": "Zote",
@@ -10057,6 +10426,7 @@
     "purchaseOauthFree": "OAuth Bila Malipo",
     "purchaseApiKey": "Ufunguo wa API",
     "creditsLabel": "Krediti",
+    "aiCreditsUsed": "AI Credits {count} zimetumika",
     "creditBalanceHint": "Salio lililosalia",
     "unlimitedLabel": "Bila kikomo",
     "refreshing": "Inaburudisha",
@@ -10288,10 +10658,64 @@
     "lastRefreshed": "Ilihuishwa mara ya mwisho",
     "providerQuota": "Kiwango cha Mtoa Huduma",
     "providerQuotaHomeHint": "Hali ya moja kwa moja kwenye akaunti zilizounganishwa",
+    "claudeResetCreditDefaultTitle": "Uwekaji upya wa kikomo cha Claude",
+    "confirmRedeemClaudeResetCredit": "Kukomboa kunaweka upya mara moja vikomo vinavyostahiki vya matumizi ya Claude na kutumia salio hili kabisa.",
+    "claudeResetCreditsModalTitle": "Masalio ya kuweka upya ya Claude",
+    "claudeResetCreditsModalExplainer": "Masalio ya kuweka upya ya Claude yanayopatikana na uwekaji upya wa vipindi vya kila wiki kwa akaunti hii.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Kulingana na uchunguzi wa hivi karibuni, si jaribio la moja kwa moja. Chagua akaunti kwa maelezo.",
+    "healthRecovery": "Muda unaotarajiwa wa kurejea",
+    "healthAvailable": "Inapatikana",
+    "healthRestricted": "Imezuiliwa kwa sehemu",
+    "healthUnavailable": "Haipatikani",
+    "healthPeakHourProtection": "Ulinzi wakati wa matumizi mengi",
+    "healthCooldown": "Muda wa kusubiri",
+    "healthQuotaExhausted": "Mgao umeisha",
+    "healthOverview": "Muhtasari",
+    "layoutFull": "Kamili",
+    "layoutCompact": "Fupi",
+    "healthQuotaError": "Imeshindwa kusoma mgao",
+    "healthNoRuntime": "Hali ya uendeshaji haipatikani",
+    "healthPreviousSnapshot": "Uonyeshaji upya wa mwisho umeshindwa; inaonyesha matokeo ya awali",
+    "healthPreviousFailure": "Ombi la mwisho limeshindwa; muda wa kusubiri umeisha",
+    "healthAwaitingSync": "Muda wa kuweka upya umepita; inasubiri usawazishaji",
+    "healthVerdictUnavailable": "Matokeo ya ukaguzi wa upatikanaji hayapatikani; viwango vya mgao pekee vinaonyeshwa",
+    "healthSummaryFailed": "Imeshindwa kusoma muhtasari wa hali; taarifa za kufungwa kwa modeli zinaweza kukosekana",
+    "healthRuntimeObserved": "Hali imesasishwa {time}",
+    "healthQuotaObserved": "Mgao umeangaliwa {time}",
+    "healthOldestQuota": "Picha ya mgao ya zamani zaidi: {time}",
+    "healthRecoveryUnknown": "Muda wa kurejea haujulikani",
+    "healthDetailsHint": "Bofya kuona maelezo na vitendo",
+    "healthFiveHour": "Saa 5",
+    "healthOverall": "Jumla",
+    "healthAction": "Hatua inahitajika",
+    "healthTitle": "Upatikanaji wa akaunti",
+    "healthDrag": "Buruta kupanga watoa huduma",
+    "healthDragPosition": "{provider}, {count, plural, one {nafasi ya {position, number} kati ya #} other {nafasi ya {position, number} kati ya #}}",
+    "healthResetOrder": "Rejesha mpangilio chaguomsingi",
+    "healthPool": "Kundi la {name}",
+    "healthOtherPool": "Akaunti ileile · {pool}: {status} (imebaki {remaining})",
+    "healthIncluded": "{count, plural, one {Inajumuisha akaunti # iliyowekewa mipaka kwa sehemu} other {Inajumuisha akaunti # zilizowekewa mipaka kwa sehemu}}",
+    "healthBannerUnavailable": "{count, plural, one {Akaunti # haipatikani kwa muda} other {Akaunti # hazipatikani kwa muda}}",
+    "healthBannerAvailable": "{count, plural, one {Akaunti # inapatikana} other {Akaunti zote # zinapatikana}}",
+    "healthLegendHide": "Ficha maelezo ya alama",
+    "healthLegendShow": "Onyesha maelezo ya alama",
+    "healthLegendOk": "Imara = mgao uliobaki; inayopenyeza mwanga = uliotumika.",
+    "healthLegendCooldown": "Mgao wa {window} umeisha. Imara = muda uliosubiriwa; inayopenyeza mwanga = muda wa kusubiri uliobaki.",
+    "healthLegendAction": "Idhini imeisha au akaunti imezuiwa; kusubiri hakutatatua.",
+    "healthLegendPartial": "Bado inatumika. Kilele cha njano = modeli au kundi limewekewa mipaka.",
+    "healthWaited": "Imesubiriwa {percent}",
+    "healthWait": "Bado {duration} (itarejea saa {time})",
+    "healthFastest": "Marejesho ya mapema baada ya {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} inapatikana} other {# / {active, number} zinapatikana}}",
+    "healthCd5": "Saa 5 · Muda wa kusubiri",
+    "healthCdw": "Kila Wiki · Muda wa kusubiri",
+    "healthRecentSuccessBypass": "Uelekezaji unaruhusu akaunti hii kwa sababu ombi limefaulu hivi karibuni.",
+    "healthPurchasedBalanceBypass": "Salio lililonunuliwa huruhusu matumizi kuendelea baada ya mgao uliojumuishwa kuisha.",
+    "healthCutoffAtRequest": "Viwango vya mgao wa moja kwa moja hukaguliwa wakati wa kuelekeza ombi."
   },
   "modals": {
     "waitingAuth": "Inasubiri Uidhinishaji",
@@ -10516,7 +10940,11 @@
     "deleteAndRelaunch": "Futa",
     "settingsJson": "settings.json",
     "fromDataDir": "kutoka kwenye saraka ya data",
-    "relaunchApp": "Anzisha upya programu ya desktop ya OmniRoute"
+    "relaunchApp": "Anzisha upya programu ya desktop ya OmniRoute",
+    "mfaPrompt": "Weka msimbo kutoka kwenye programu yako ya uthibitishaji",
+    "mfaCodeLabel": "Msimbo wa uthibitisho",
+    "mfaCodePlaceholder": "Msimbo wa tarakimu 6 au msimbo wa urejeshaji",
+    "mfaBackupCodeHint": "Umepoteza kifaa chako? Badala yake weka mojawapo ya misimbo yako ya urejeshaji."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -11078,7 +11506,8 @@
       "message": "Ujumbe",
       "error": "Hitilafu",
       "completion": "Ukamilishaji"
-    }
+    },
+    "statusFilter": "Hali"
   },
   "templateNames": {
     "simple-chat": "Gumzo Rahisi",
@@ -11259,7 +11688,8 @@
     "minutesAgo": "{minutes}m zilizopita",
     "hoursAgo": "{hours}h zilizopita",
     "daysAgo": "{days}d zilizopita",
-    "entries": "Maingizo"
+    "entries": "Maingizo",
+    "viewSwitcherAria": "Mwonekano wa kache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Ya Jumla",
@@ -11372,9 +11802,37 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth haijasanidiwa. Jisajili programu ya OAuth kwenye {applicationsUrl} na URI ya kurejea {redirectUri} na mipango \"{scopes}\", kisha weka {clientIdEnv} (na hiari {clientSecretEnv}) na uanzishe upya.",
     "gitlabDuoSetupDescription": "Baada ya programu kuandikishwa na vigezo vya mazingira kuwekwa kwenye mfano huu wa OmniRoute, bonyeza Endelea kuanza kuingia kwa OAuth.",
     "continue": "Endelea",
+    "copilotPolicyTitle": "Mtoa huduma wa majaribio: hali ya sera haina utata",
+    "copilotPolicyLine1": "OmniRoute inaunganisha kupitia api.githubcopilot.com, ambayo GitHub haijachapisha kama makisio ya jumla ya mtu wa tatu API. Ujumuishaji huu ni wa majaribio na unaweza kubadilika bila taarifa.",
+    "copilotPolicyLine2": "Ni akaunti yako GitHub pekee ndiyo inaweza kuunganishwa. Kamwe usishiriki kitambulisho, akaunti pamoja, au kujaribu kuvuka mipaka ya mpango wako.",
+    "copilotPolicyLine3": "Watumiaji wa mpango bila malipo na Wanafunzi hupokea uteuzi wa kiotomatiki wa muundo pekee. Masharti yako ya mpango wa Copilot na vikomo vya matumizi vinasalia kuwa jukumu lako.",
+    "copilotPolicyAcknowledge": "Ninaelewa, unganisha",
     "tabPasteSetupToken": "Tokeni ya usanidi",
     "claudeSetupTokenDescription": "Endesha `claude setup-token` kwenye terminal na ubandike tokeni inayochapisha. Ni halali kwa mwaka mmoja na haina tokeni ya kuonyesha upya. OmniRoute hutuma ombi moja la majaribio kwa Anthropic kabla ya kuihifadhi.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Onyesha upya Tokeni",
+    "antigravityRefreshTokenDescription": "Bandika tokeni yako ya kuonyesha upya Google OAuth kwa Antigravity. OmniRoute inaithibitisha na kuibadilisha kabla ya kuhifadhi.",
+    "antigravityRefreshTokenPlaceholder": "1//...",
+    "m365Title": "Kuingia kwenye Microsoft 365 Copilot",
+    "m365UrlExpiredHint": "Anza jaribio jipya ikiwa muda wake utaisha kabla hujamaliza.",
+    "m365UrlExpires": "Muda wa URL hii ya uidhinishaji unaisha saa",
+    "m365AuthUrlCopyHint": "Chagua URL nzima ya uidhinishaji na uinakili kwa Ctrl+C (Command+C kwenye Mac), au tumia chaguo la Nakili kwenye menyu ya kivinjari chako. Ibandike kwenye kichupo tupu baada tu ya kuwezesha Preserve log.",
+    "m365AuthUrlLabel": "URL ya uidhinishaji (nakili kwenye kichupo kilichoandaliwa)",
+    "m365StepNavigate": "Nakili URL ya uidhinishaji iliyo hapa chini na uibandike kwenye upau wa anwani wa kichupo kilichoandaliwa, kisha bonyeza Enter ili kuingia.",
+    "m365StepPrepare": "Andaa kuingia kwenye Microsoft ili kuunda jaribio jipya.",
+    "m365StepOpen": "Fungua kichupo tupu kwenye kivinjari chako mwenyewe kwa kutumia kiungo kilicho hapa chini. Usiende kwenye Microsoft bado.",
+    "m365StepNetwork": "Kwenye kichupo hicho tupu, fungua DevTools → Network na uwezeshe Preserve log kabla ya kwenda kwenye ukurasa. Acha DevTools ikiwa wazi.",
+    "m365StepCopy": "Baada ya kuingia, tafuta ombi la https://login.microsoftonline.com/common/oauth2/nativeclient kwenye Network na unakili Request URL yake nzima. Usinakili URL ya mwisho yenye wrongplace kutoka kwenye upau wa anwani.",
+    "m365PrivateUrlHint": "URL ya ombi ina kitambulisho cha kuingia cha matumizi ya mara moja. Ibandike hapa tu; usiishiriki kamwe wala kuiweka kwenye kumbukumbu za matukio.",
+    "m365Prepare": "Andaa kuingia kwenye Microsoft",
+    "m365Preparing": "Inaandaa kuingia…",
+    "m365OpenSignIn": "Fungua kichupo tupu",
+    "m365CallbackLabel": "Request URL nzima ya nativeclient",
+    "m365Connecting": "Inaunganisha…",
+    "m365NewAttempt": "Anza jaribio jipya",
+    "m365PrepareError": "Imeshindwa kuandaa kuingia kwenye Microsoft. Jaribu tena.",
+    "m365ExchangeError": "Imeshindwa kukamilisha kuingia kwenye Microsoft. Anza jaribio jipya.",
+    "m365InvalidCallback": "Bandika Request URL nzima ya nativeclient yenye kigezo kimoja cha code na kigezo cha state kinacholingana kutoka kwenye jaribio hili. Misimbo pekee na URL zenye wrongplace hazikubaliwi."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",
@@ -11447,6 +11905,7 @@
     "tableHealth": "Afya (saa 24)",
     "tableUsage": "Matumizi",
     "tableActions": "Vitendo",
+    "moreActions": "Vitendo zaidi",
     "test": "Jaribu",
     "edit": "Hariri",
     "delete": "Futa",
@@ -11587,6 +12046,7 @@
     "poolSetAsideKindIpQuota429": "kikomo cha kasi cha IP (429)",
     "poolSetAsideKindSlow": "majibu polepole",
     "poolSetAsideKindGeoBlocked": "kuzuiliwa kwa mkoa (403/451)",
+    "poolSetAsideKindOperatorReported": "kukatika kwa umeme kumeripotiwa na mtendaji",
     "poolSetAsideUntil": "Kurudi kwenye mzunguko {endsAt}",
     "poolSetAsideRepeat": "Imewekwa kando {count, plural, one {# mara} other {# mara}}",
     "poolUnknownAddress": "Anwani isiyojulikana",
@@ -11696,7 +12156,6 @@
     "exportCodeTitle": "Hamisha Msimbo",
     "exportShort": "Hamisha",
     "noStateToExport": "Hakuna hali ya uwanja wa majaribio inayopatikana ili kuhamishwa.",
-    "closeExportModal": "Funga kidirisha cha kuhamisha",
     "close": "Funga",
     "exportRealKeyWarning": "Onyo la usalama: uhamishaji umezuiwa — ufunguo halisi wa API umegunduliwa kwenye matokeo. Tafadhali weka upya ufunguo wako wa API na ujaribu tena.",
     "placeholderHintPrefix": "Badilisha",
@@ -11809,7 +12268,8 @@
       "nextButton": "Inayofuata",
       "runButton": "Endesha",
       "promptPlaceholder": "Ingiza ujumbe wako… (Enter kutuma, Shift+Enter kwa mstari mpya)"
-    }
+    },
+    "playgroundTabs": "Hali za Playground"
   },
   "miniPlayground": {
     "endpoint": "Kituo cha mwisho",
@@ -11880,7 +12340,8 @@
     "assistant": "Msaidizi",
     "errorLabel": "Hitilafu",
     "requestFailed": "Ombi limeshindwa",
-    "stop": "Sitisha"
+    "stop": "Sitisha",
+    "messageInputAria": "Ujumbe"
   },
   "requestLogger": {
     "recording": "Inarekodi",
@@ -11974,7 +12435,9 @@
       "failedTitle": "Jaribio zote {count} zimefeli",
       "failed": "imeshindwa",
       "pinnedTitle": "Mfano umechaguliwa kupitia upanuzi wa muktadha wa kikao",
-      "pinned": "imefungwa"
+      "pinned": "imefungwa",
+      "recoveredAttemptsTitle": "Ombi limerejeshwa baada ya majaribio {count}",
+      "latestOutcomeFailed": "Matokeo ya ombi la mwisho yameshindwa"
     },
     "attempts": "jaribio",
     "detail": {
@@ -12067,8 +12530,29 @@
       "resilienceRotations": "Mizunguko {count} ya akaunti",
       "resilienceRetried": "Zamu tupu imejaribiwa tena",
       "resilienceContinued": "Imeendelea katikati ya mtiririko",
-      "resilienceRecovered": "Imerejeshwa na hatua ya ustahimilivu"
-    }
+      "resilienceRecovered": "Imerejeshwa na hatua ya ustahimilivu",
+      "conversationContext": "Muktadha wa Mazungumzo",
+      "goToBottom": "Nenda chini kabisa",
+      "liveRefreshOn": "Uonyeshaji upya wa moja kwa moja: umewashwa",
+      "liveRefreshOff": "Uonyeshaji upya wa moja kwa moja: umezimwa",
+      "liveRefresh": "Uonyeshaji upya wa moja kwa moja",
+      "continuesFromParent": "inaendelea kutoka kwa mzazi",
+      "continuesFrom": "Inaendelea kutoka {id}",
+      "viewConversation": "tazama mazungumzo",
+      "openConversation": "Fungua mazungumzo {id}",
+      "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+      "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+      "transportError": "Hitilafu ya usafirishaji"
+    },
+    "tableLabel": "Kumbukumbu za maombi",
+    "throughputPostFirstToken": "Baada ya tokeni ya kwanza",
+    "throughputEndToEnd": "Mwanzo hadi mwisho",
+    "throughputRate": "{value} tokeni/sek",
+    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi.",
+    "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+    "upstreamStatus": "Seva ya juu {status}",
+    "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+    "transportError": "Hitilafu ya usafirishaji"
   },
   "proxyLogger": {
     "filterAll": "Zote",
@@ -12113,7 +12597,9 @@
     "colServedBy": "Inatolewa na",
     "filterTraffic": "Mzunguko",
     "filterTests": "Majaribio",
-    "filterSource": "Chanzo"
+    "filterSource": "Chanzo",
+    "tableLabel": "Kumbukumbu za proksi",
+    "sortLogs": "Panga kumbukumbu"
   },
   "endpointOptions": {
     "speech": "Usemi",
@@ -12198,7 +12684,8 @@
     "statusExhausted": "KIMEISHA",
     "statusAlerting": "INATOA TAHADHARI",
     "statusError": "HITILAFU",
-    "moreSuffix": "+{count} zaidi"
+    "moreSuffix": "+{count} zaidi",
+    "feedFilterLabel": "Chuja matukio"
   },
   "quotaShare": {
     "weightPercent": "Uzito %",
@@ -12365,7 +12852,10 @@
     "ungroupedTitle": "Bila kikundi",
     "ungroupedHint": "Madimbwi haya hayajagawiwa kwa kikundi kinachojulikana. Hariri dimbwi ili kulihamishia kwenye kikundi halisi.",
     "removeFailed": "Haikuwezekana kuondoa hifadhi hii.",
-    "dismiss": "Funga"
+    "dismiss": "Funga",
+    "allocationsHeading": "Ugawaji",
+    "wizardRemoveDimension": "Ondoa kipimo",
+    "wizardRemoveKey": "Ondoa ufunguo"
   },
   "plugins": {
     "title": "Programu-jalizi",
@@ -12523,7 +13013,8 @@
       "settingsUpdateFailed": "Usasishaji wa mipangilio umeshindwa",
       "serviceRevealApiKey": "{actor} amefichua ufunguo wa API wa {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Funga hitilafu"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +13147,21 @@
       "goNow": "Nenda sasa",
       "message": "MITM Proxy sasa inapatikana chini ya AgentBridge.",
       "title": "Ukurasa huu umehamishwa"
-    }
+    },
+    "dnsOn": "DNS imewashwa",
+    "dnsOff": "DNS imezimwa",
+    "showServerSettings": "Onyesha mipangilio ya seva",
+    "hideServerSettings": "Ficha mipangilio ya seva",
+    "upstreamCaTesting": "Inajaribiwa…",
+    "removeMapping": "Ondoa ulinganishaji",
+    "mappingSourcePlaceholder": "k.m., gemini-3.6-flash-medium, au * kwa zote ambazo hazijalinganishwa",
+    "mappingWildcardHint": "Tumia * kama chanzo ili kuelekeza kila modeli isiyo na ulinganishaji bayana kupitia OmniRoute hadi kwenye lengo lililochaguliwa. Ulinganifu kamili wa chanzo daima una kipaumbele kuliko *.",
+    "wizardDetectingModels": "Inatambua modeli kutoka kwenye trafiki iliyonaswa...",
+    "wizardDetectedModels": "Imepata {count, plural, one {modeli #} other {modeli #}} kwenye trafiki iliyonaswa. Chagua unazotaka kuongeza:",
+    "wizardSelectedModels": "{count, plural, one {modeli #} other {modeli #}} zimechaguliwa. Utazilinganisha na modeli za OmniRoute kwenye skrini inayofuata.",
+    "wizardAddModels": "Ongeza {count, plural, one {modeli #} other {modeli #}}",
+    "wizardNoModelsDetected": "Bado hakuna modeli zilizotambuliwa. Tumia {agent} kutuma ombi, kisha endesha mchawi huu tena ili kutambua modeli kiotomatiki kutoka kwenye trafiki.",
+    "wizardNoModelsHint": "Au funga mchawi huu na uongeze ulinganishaji wewe mwenyewe kwenye kadi ya ajenti."
   },
   "providerStats": {
     "unknownError": "Hitilafu isiyojulikana",
@@ -12686,7 +13191,12 @@
     "avgTtft": "Wastani wa TTFT",
     "avgTotal": "Wastani wa Jumla",
     "requestTelemetry": "Telemetri ya Maombi",
-    "requestTelemetryDescription": "Mchanganuo wa mchakato wa awamu 7 (dakika 5 zilizopita)"
+    "requestTelemetryDescription": "Mchanganuo wa mchakato wa awamu 7 (dakika 5 zilizopita)",
+    "title": "Takwimu za mtoa huduma",
+    "description": "Trafiki, muda wa kusubiri na viwango vya mafanikio kwa kila mtoa huduma na kila modeli",
+    "combo": "Mchanganyiko",
+    "toggleModels": "Onyesha modeli za {provider}",
+    "windowSince": "Tangu {date}"
   },
   "relay": {
     "title": "Proksi za Relay Zisizo na Seva",
@@ -12847,7 +13357,18 @@
     "noRequestBody": "Hakuna kiwiliwili cha ombi.",
     "noResponseBody": "Hakuna kiwiliwili cha jibu.",
     "formatted": "Iliyofomatiwa",
-    "raw": "Ghafi"
+    "raw": "Ghafi",
+    "requestCount": "{count, plural, one {ombi #} other {maombi #}}",
+    "expandList": "Panua orodha",
+    "collapseList": "Kunja orodha",
+    "snippetLanguage": "Lugha ya kipande cha msimbo",
+    "headersTable": "Vichwa",
+    "showSecrets": "Onyesha siri",
+    "maskSecrets": "Ficha siri",
+    "llmNotAvailable": "Metadata ya LLM haipatikani kwa ombi hili.",
+    "llmStreamYes": "ndiyo (SSE)",
+    "llmStreamNo": "hapana",
+    "llmTotalTokens": "Jumla: tokeni {count}"
   },
   "cliCommon": {
     "companion": {
@@ -12952,7 +13473,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "Misimbo ya CLI",
     "pageSubtitle": "Zana za msimbo zinazoelekeza kwenye OmniRoute",
     "searchPlaceholder": "Tafuta CLI…",
     "filterDetectionLabel": "Utambuzi",
@@ -12962,7 +13482,8 @@
     "detectionNotFound": "Hazikupatikana",
     "baseUrlAll": "Zote",
     "baseUrlFull": "Kamili",
-    "baseUrlPartial": "Kiasi"
+    "baseUrlPartial": "Kiasi",
+    "title": "Msimbo wa CLI"
   },
   "cliAgents": {
     "pageTitle": "Mawakala wa CLI",
@@ -13306,7 +13827,8 @@
     "colReliabilityHelp": "Sehemu ya miito ambayo mtoa huduma huyu alijibu katika saa 24 zilizopita. Kistari kinamaanisha kuwa alihudumia trafiki ndogo mno kiasi cha kutoweza kubainisha kiwango.",
     "reliabilitySample": "Miito {successes} kati ya {requests} ilifanikiwa katika saa {hours} zilizopita",
     "reliabilityTooFew": "Miito {requests} pekee katika saa {hours} zilizopita — ni michache mno kiasi cha kutoweza kubainisha kiwango",
-    "reliabilityNoTraffic": "Hakuna miito iliyorekodiwa katika saa 24 zilizopita"
+    "reliabilityNoTraffic": "Hakuna miito iliyorekodiwa katika saa 24 zilizopita",
+    "categoryFilter": "Aina ya kazi"
   },
   "discovery": {
     "title": "Ugunduzi wa Mtoa Huduma",
@@ -13331,7 +13853,11 @@
     "method": "Mbinu",
     "auth": "Uthibitishaji",
     "feasibility": "Uwezekano",
-    "models": "Miundo"
+    "models": "Miundo",
+    "provider": "Mtoa huduma",
+    "status": "Hali",
+    "endpoint": "Endpointi",
+    "actions": "Vitendo"
   },
   "noAuthProvider": {
     "title": "Hakuna uthibitishaji unaohitajika",
@@ -13380,7 +13906,8 @@
     "ownProxy": "Proksi yako",
     "freeTierPause": "Modeli {model} imesimamishwa (429), itarudi {time}",
     "freeTierPauseProvider": "Imesisitishwa (429), itarudi saa {time}",
-    "freeTierPauseNote": "Susamisho la mchakato katika mfano huu"
+    "freeTierPauseNote": "Susamisho la mchakato katika mfano huu",
+    "proxyType": "Aina ya proksi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +14080,10 @@
         "description": "Mafanikio yaliyofichwa yanakungoja...",
         "criteria": "Kamilisha mafanikio yaliyofichwa ili kufichua beji hii."
       }
-    }
+    },
+    "leaderboardTitle": "Ubao wa vinara",
+    "leaderboardDescription": "Viwango na mafanikio katika funguo zako za API",
+    "badgeLocked": "Imefungwa"
   },
   "featureFlags": {
     "title": "Bendera za Vipengele",
@@ -13611,7 +14141,9 @@
       "disabled": "Imezimwa",
       "dual": "Mbili",
       "alias": "Lakabu",
-      "canonical": "Kanuni"
+      "canonical": "Kanuni",
+      "fail_closed": "Zuia (fail_closed)",
+      "count_as_zero": "Hesabu kama $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13758,6 +14290,290 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Kusimamishwa kwa Miundombinu ya Kipaumbele Kilicholindwa kama 502",
         "description": "Jibu 502 badala ya 503 wakati lengo la kipaumbele lenye mbadala wa mgawo pekee linaposimamisha mseto kwa sababu ambayo kwa hakika si mgawo: kivunja saketi cha mtoa huduma kilicho wazi au urukaji unaotabiriwa kutokana na muda wa kusubiri."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Rejeshi wa ID za Akaunti",
+        "description": "Taja awali ya akaunti kwenye mistari ya logi ya AUTH (mfano: \"Inatumia akaunti ya '<provider>': abc12345...\"). Imezimwa kwa chaguo-msingi ili vichujio vya akaunti vifichwe kutoka kwenye logi za ushirikiano/akili nyingi. Inaitiliana na Hali ya Uchunguzi; kubadilisha Hali ya Uchunguzi haionyeshi hii."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Zuia Utumiaji wa Gesingeniya ya Kisimbuzi kwa OIDC",
+        "description": "OIDC ikiwa imewashwa, zima kuingia kwa nenosiri ili watumiaji waweze kuthibitisha kupitia OIDC Single Sign-On pekee. Ikiwa imezimwa (chaguo-msingi), kuingia kwa nenosiri na OIDC vyote vinapatikana."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Nodi za Msimulizi wa Sikia wa Mbali",
+        "description": "Ruhusu njia za /v1/audio/* kutumia nodi za msaada zinazofanana na OpenAI zilizowekwa nje ya localhost. Imezimwa kwa chaguo-msingi — kutuma sauti kwenda mwanga wa nje hubadilisha kimu cha msimulizi na lazima iweamuzi muhimu wa wasimamizi. Nodi za loopback husubiriwa kwa daima na hazitajidiriwa."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Nodi za Msimulizi wa Rerank wa Mbali",
+        "description": "Ruhusu POST /v1/rerank (na hatua ya rerank ya injini ya kumbukumbu, inayoitia kwa loopback) kutumia nodi za msaada zinazofanana na OpenAI zilizowekwa nje ya localhost — kompyuta ya LAN au mshirika wa Tailscale inayotumia TEI, Infinity, vLLM, n.k. Imezimwa kwa chaguo-msingi — kutumia mwanga wa nje hubadilisha kimu cha msimulizi na lazima iweamuzi muhimu wa wasimamizi. Nodi za loopback husubiriwa kwa daima na hazitajidiriwa. Nodi za mbali lazima zikubalie sera ya URL ya nje ya msaada pia."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Kisimulizi cha Nje ya Mtandao wa Kusimbua-Common",
+        "description": "Wakati wa shida ya mtandao (timeout, kukataa/mgeuko wa mtandao) kwa mkazi wa usimulizi wa akaunti nyingi, ikiwa akaunti iliyoshindwa haipaki na proxy maalum, tumia kupumzika kwa muda mfupi na kuzima akaunti nyingine zisizo na proxy kwa sehemu zikuu za ombi badala ya kurudia kila moja. Imewashwa kwa chaguo-msingi (salama: hakuna ubadiliko wa IP ya nje, inapunguza tu hatari ya latensi/kupumzika kwa akaunti za pamoza). Zui ili kurudisha utangazaji wa mara kwa mara kwenye kifo la kwanza lisilo na proxy."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Ruka Proxies Ziliokosa Hivi Karibuni",
+        "description": "Matuta ya proxy na mzunguko wa kila akaunti wa opencode hamaendelea kutumia tena proxy iliyokosa mara tu (uchunguzi wa TCP ulikataliwa, au 429 ilitokea nayo) kwa kipindi cha kila mzunguko ambacho huzidi mara mbili kwa kila mara inayoweza, hadi kipimo cha juu. Hali ya proxy haikandikwi; ikilenga kila chaguo, chaguo hubaki sawa. Imewashwa kwa chaguo-msingi: mpangilio wa uteuzo ni sawaswa na mzunguko safi iliyo na PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Mpangilio wa Kitanda cha Sogoro Shirikishi",
+        "description": "Kwa waangalizi ambao kiwango chao kinapatikana kwa maelezo ya anwani ya sogoro, weka alama kwa mtu anayeshiriki alama ya anwani ya sogoro aliyotajwa mara ndogo zilizokataliwa tu ndani ya mwanasayansi. Mpangilio tu, usikutolii. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa ishara ya ukatili wanayoelekeza kuisoma. Imezimwa kwa chaguo-msingi: mpangilio wa uteuzo ni sawaswa na mzunguko safi."
+      },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kukataliwa kwa mgao wa modeli",
+        "description": "Tumia mgawo wa opencode 429 pekee kwa mfano ulioipiga, kwa hivyo njia hiyo hiyo inaendelea kutumikia mifano mingine, na kuifuta tu wakati mtindo huo unafaulu. Wateja ambao hawana muundo (mzunguko wa bwawa, bustani na kucheza tena, mwonekano wa msimamizi, kichochezi cha kuchagua, kufagia afya) bado wanaiona. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa kukataa. Imezimwa kwa chaguo-msingi: mgawo wa modeli 429 huweka kando kwa kila modeli."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Uletaji wa wakala: kucheza tena kwa POST",
+        "description": "Kwa ombi lisilo la msingi (POST, PUT, PATCH, DELETE), tuma tena baada ya hitilafu ya usafiri (soketi safi, mbadala mbadala, urejeshaji asilia) pale tu hitilafu inapothibitisha kuwa hakuna kitu kilitumwa: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH au muda wa kuunganisha. Hitilafu ya soketi baada ya kuandika inaweza kumaanisha mkondo wa juu ulikubali ombi, kwa hivyo kutuma tena kunaweza kutoa na kulitoza mara mbili. Imezimwa kwa chaguo-msingi: mwili unaoweza kucheza tena hutupwa tena mara moja kwenye hitilafu yoyote ya usafiri, ambayo pia hurejesha soketi iliyochakaa iliyounganishwa."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Kurekodi ya Marefu ya Mzunguko",
+        "description": "Mzunguko wa opencode unrekodi akaunti ambayo ilitumwa au ilirukaa (alama za masiki tu, kamwe alama kamili za akaunti) na linakiangusisha rekodi za proxy na ombi la ombi, ili msimamizi anaweze kutofautisha akaunti zilizorukaa na zile zisizotumwa. Imezimwa kwa chaguo-msingi: hakuna mistari ya ziada ya ukandisi, hakuna mizunguko ya ziada ya mwandiko."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Uchunguzi wa Sogoro la Kitanda cha Proxy",
+        "description": "Onesha, chini ya kitanda cha proxy kwenye dashibodi, idadi ya anwani za sogoro zilizochunguzwa zilitumia mwanangu wa mwanangu tangu saa 24 zilizopita, idadi ya mwingiliano zilizotumia na zilizonaona zaidi nyuma ya anwani moja. Kuandaa tu, haijulikani kutoka kwenye ukandisi wa proxy, kamwe haiandikani kwa marefu. Imezimwa kwa chaguo-msingi: mratuli wa kitanda haubadiliki na njia ya uchunguzi inajibu null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Sogoro ya Msimamizi wa Proxy",
+        "description": "Kubali alama za tarehe zilizochunguzwa zilizotumwa na msimamizi kwa kila angoi wa kitanda na kuungana nazo na mkakushuo wa kusoma kwa ongoza na mpangilio wa kitanda. Imezimwa kwa chaguo-msingi: njia ya kutuma inajibu 404 na kusoma kwa kitanda hufanana na ilivyokuwa."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Mzunguko wa Ushindili wa Majibu ya OpenCode",
+        "description": "Kwa mteja wa kutekeleza wa OpenCode, angalia baiti ya kwanza ya mwili wa majibu ya Responses ya streaming (dirisho: RESPONSES_FIRST_BYTE_TIMEOUT_MS, chaguo-msingi 15000). Mtiririko wa Responses wa 2xx unaobaki polepole zaidi ya dirisho huo huchukuliwa kuwa umeganda: akaunti hupunguzwa na ombi linatungwa kwenda kwenye akaunti ifuatiloyoung; kuganda kwa pili linashindwa haraka. Imezimwa kwa chaguo-msingi: mitiririko iliyoungaa huruhusu sasa kuangukia mpaka uchelewusho wa ulinidi wa mtiririko."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Mzunguko wa user_blocked wa OpenCode",
+        "description": "Kwa mteja wa kutekeleza wa OpenCode, ukati upstream anajibu kwa 403 au 451 akibeba ukatajuwa la user_blocked (si ukatili wa eneo, siji ya Cloudflare fingerprint rejection), punguza akaunti iliyokatiliwa na tunga kwenye akaunti ifuatiloyoung mara moja tu kwa ombi; ukatajuwa la pili linarudishwa kama yalivyo bila alama ya kufanikiwa. Imezimwa kwa chaguo-msingi: kutuma trafiki kuzunguka ukatajuwa la upstream user block linaweza kuonekana kama kutoroka na kusambaanga alama kwenye jeshi la akaunti, hivyo ukatajuwa huarudishwa isiibadilishwa isipokuwa mtendaji anakubali."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Kupunguzwa kwa Kushindwa kwa Muda wa OpenCode",
+        "description": "Kwa mzunguko wa akaunti nyingi wa OpenCode, simamisha kabla ya kutuma kwenye akaunti ifuatiloyoung baada ya majaribio mawili ya mfululizo ya kushindwa na kosa la muda la upstream (5xx au ukatajuwa tupu la 400). Simamisho huanza kwa sekunde 1.5, huongezeka mara mbili kwa kila kushindwa la mfululizo zaidi, linaukatazwa kwa sekunde 6 kwa kila simamisho na sekunde 10 kwa kila ombi, linakataliwa ukati mteja anavutana, na mwili wa majibu ya kushindwa hurekwa kabla ya kusubiri. Imezimwa kwa chaguo-msingi: failover inabaki yako wazi."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Jaribio Tena la Kufuta Zunguko Tupu",
+        "description": "Kwa zunguko za streaming zilizotafsiriwa, ukati zunguko la upstream halibaki na maudhi yanayotumika (kamilisho la mawazo tu au vipande vilivyo na thamani sifuri), tuma majaribio tena yaliyokatazwa kupitia njia ya kawaida ya ushuhuda (hadhi ya `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) kabla ya chochote kuashiria kwenye mteja. Imezimwa kwa chaguo-msingi: zunguko tupu huruhusu tabia ya sasa (200 tupu au 502 isiyo na maudhi)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Ukombozi wa Mdogwa wa Mtiririko Tupu",
+        "description": "Claude/Codex streaming: baada ya tukio la kwanza la utiivu, ukisisi (hadi sekunde 1 / KiB 64) kwa output inayotumika; mtiririko unaokwisha isiio na maudhi hujifungua kuwa kushindwa la empty_content linatumia jaribio lenye kikomo lilelo already kwa mzunguko nyingine ya ahadi (isiyo na kupungua, isiyo na kufungwa kwa model), na michanganyiko ya round-robin hushuka kurudia tena baada ya mteja kuvutana. Pia huchukua ukatajuwa, pause_turn na model_context_window_exceeded kama mimali halali ya kumalizia tupu ndani ya ukebuli. Imezimwa kwa chaguo-msingi: ulinidi, usimamizi wa maudhi tupu na majaribio ya michanganyiko hubaki sawa na yale ya zamani."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Tatua Kipokezo cha Mto chache cha Mto",
+        "description": "Kipokezo cha mto cha utupu wa matokeo: baada ya chunuki 64 za kwanza zilizohifadhiwa, endelea kuchuja chunuki moja kati ya 16 kwa matupu ya kwanza yanayoonekana, hivyo matupu yanayofanikiwa baadae bado yanaweza kufaa mto kutu matupu. 5xx pekee baada ya hatua hiyo ingesimbirika kuwa ya maombi badala ya kurekodi mgongo wa modeli pekee, na firstOutputMs inatazama kuanzia chunuki ya matokeo ya kwanza ya sakini za sasa. Imezimwa kwa chaguo-msingi: tu chunuki 64 za kwanza za mto zinaweza kuchujwa, haswa kama awali."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "Ombi la OpenCode la Kiasi cha 429 la Mwisho wa Mapema",
+        "description": "Kwa mzunguko wa multi-account wa OpenCode, sima wimbo wa akaunti kwenye 429 ya kwanza iliyoainishwa kwa kiwango cha halisi (kichwa cha Retry-After kinachobashwa, au mwili unaotaja mpaka wa kutumia/mwafaka), na rudisha 429 ya juu hiyo isikubadilike (hali, mwili, Retry-After na vichwa vya quota), badala ya kujaribu akaunti zote zilizobaki. 429 isiyoainishwa huendelea kuzunguka. Imezimwa kwa chaguo-msingi: daraja la bure limemo imo kwa IP ya kutoja (#9611), hivyo 429 yoyote huzunguka kwenda akaunti ifuatayo, na wimbo uliomatwa hurudisha 429 ya juu ya mwisho."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "Ombi la OpenCode la 429 la Kulinda na Kuendelea",
+        "description": "Kwa mzunguko wa multi-account wa OpenCode, shikilia ombi baada ya 429 za kudumu (au alama mpya ya mwigo wa mabega wa mabega) na miale ya simu, kisha ulikisha sehemu moja yenye mpaka wa akaunti 3 za mfululizo badala ya kueneza jeshi zima. Imezimwa kwa chaguo-msingi: 429 yoyote huzunguka kwenda akaunti ifuatayo haswa kama awali."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Tatua Kipokezi cha Mto wa Kufuata tena",
+        "description": "Kwa maombi ya mawasiliano ya mto, wakati mwili wa juu wa kwanza unakataa kuanza kutengeneza tukio linalotumika, teka jaribio la pili linalomo kwa njia ileile ya urambuzi na bajeti ileile ya kufaa bila adhabu ya akaunti. Imezimwa kwa chaguo-msingi: mwili wa kwanza uliola hubadilisha ombi bila kuchoka tena."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "Ombi la OpenCode la 429 la Kuchagua Upya Mzigo",
+        "description": "Kwa mzunguko wa multi-account wa OpenCode, baada ya 429 kutoka kwa muuguzi wa egress-bucketed kwenye akaunti isiyo na proxy chini ya mazingira ya mzigo, ombi mzigo wa mahusiano mwanahati naye kwa jaribio likifanya kile badala ya kurudia anwango la egress zilele. Utaratibu, haihitimu kabisa: mzigo umechoka huondoa mtazamo wa sasa. Imezimwa kwa chaguo-msingi: 429 yoyote huzunguka kwenda akaunti ifuatayo haswa kama awali."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Uchunguzi wa Egress wa Kiwango Huria",
+        "description": "Kwa mtekelezaji wa OpenCode, wakati ombi la wakala linapojibiwa 403 au 451 FreeTierError na zana zinazozingatiwa hazijafaulu au hazikutumika, tuma ombi hilo mara moja kupitia seva mbadala tofauti (wakala mwingine wa akaunti au mwanachama mwingine wa kikundi, kamwe muunganisho wa moja kwa moja). Wakati uchunguzi huo unajibu 200 tu ndipo njia ya kwanza iliyowekwa kando katika kumbukumbu ya kukataa wakala na majibu ya uchunguzi yanatolewa; wakati wote wanakataa, kukataa asili kunarejeshwa na hakuna kitu kinachorekodiwa. Maandishi yale yale ya kukataa yanafunika IP iliyotiwa alama na umbo la ombi lililokataliwa, kwa hivyo uchunguzi unawatofautisha kwa ushahidi. Imezimwa kwa chaguo-msingi: kukataa kunarudishwa bila kubadilika."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Joho la Client ya OpenCode v2",
+        "description": "Tuma alama ya kifaa ya mteja wa CLI ya OpenCode v2 kwenye ombi la OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli na x-opencode-client cli, User-Agent ya mteja iliyohifadhiwa tu inapoonekana kuwa mteja wa OpenCode wa 2.x, na kwenye ombi la kadi ya bure lisilo linganishwa hakuna x-opencode-request, usesi unaoonekana kwenye x-opencode-session-id/x-session-affinity/x-session-id, mifano ya kujitokeza ya kujitokeza na shell ya v2 CLI inayohusishwa na vipengele vya chombo vya nafasi, na tool_choice ya \"none\" inakataliwa. Imezimwa kwa chaguo-msingi: kila ombi la OpenCode linahifadhi usawa, vipengele na mwili kwa baibu kwa baibu."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Zama-IP Kizuizishwa",
+        "description": "Ongeza OpenCode Zen (opencode-zen) kwenye ulinzi wa msingi wa egress-IP, ili 429 mtandaoni mmoja wa Zen pia utasimamisha mtandao wote wa Zen unaoshiriki IP yake ya egress. Haijumuishwi kwa chaguo-msingi: Zen inatambuliwa kwa utambulisho na mtandaoni mmoja mtu anaelewa mwenyewe, kwa usawa tulivyokuwa. Thamani ya dhaifu ya OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS daima inafetula kwa bendera hii."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Sheria za Hitilafu za Maandishi Kamili za OpenCode",
+        "description": "Ruhusu kanuni za kosa za ndani za OpenCode (opencode-zen, opencode-go, opencode-cli) kufanana na maandishi ya kosa ya juu ya mtiririko kwa mkusanyiko, ili alama za kiini kama organization_quota_exceeded au \"monthly usage limit reached\" yakiweka kiasi cha 429 kama kutumika kwa upau na kufunga kwa kiasi cha muunganisho. Imezimwa kwa chaguo-msingi: kanuni hizo haziona msimbo wa kosa wa mpangilio na kiasi cha 429 huwa ukomo mfupi wa kiwango, kama ilivyo awali."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Maelezo ya Kamili ya Kosa kwa Cloudflare Workers AI",
+        "description": "Ruhusu sheria ya kosa la AI la wazi ya Cloudflare Workers iliyo na misingi kufafanua kosa kamili cha mwenendo, ili matokeo ya 429 \"mgawo wa bure wa siku\" yasambae kama ushamba wa kuota badala ya ukizuizi wa hatua. Imezimwa kwa chaguo-msingi: sheria inazua tu kodi ya kosa iliyoratibiwa, kama ilivyokuwa."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Chujio wa Uwezo",
+        "description": "Kataa makombi kabla ya kutuma ikiwa modeli lengwa haina uwezo unaohitajika (mvumo, zana, matokeo ya muundo, sanduku la muktadha). Linasimamia mabaisi ya moja kwa moja kwa mtoaji mmoja yanayopita kiti cha usahihi cha combo-layer."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Teka Matumizi ya Zinazoongeweza Zididi za USD",
+        "description": "Hesabu matumizi ya vipimo ambavyo haina bei kama $0 katika zididi za matumizi ya USD kwa kichupo kila mmoja badala ya kutaja kwamba zididi limekamilika. Zimezimwa kwa chaguo-msingi: kipimo au aliasi ya uraishi bila bei inaweza kuweka matumizi halisi chini ya mbele, hivyo zididi hufungwa kwa usalama."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Washa moduli ya OmniRoute Radar (masimu ya chumba na muunganiko). Imezimwa kwa chaguo-msingi; kuwasha kunahitaji kuongeza tu UI — muunganiko wa data bado ni chaguo tofauti."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Nida ya Uwezo ya Mwisho wa Kipimo",
+        "description": "Tumia alama za mishua ya vipelele ambazo vinavutiwa (zilizoelekezwa na katalia ya mtoaji, zilizotambuliwa kutoka kwa id ya kipimo maalum, au zilizowekwa na mtendaji): kutaka ombi zilizotumwa kwenye mwisho ambao kipimo kinasilika kazi ikiwa kina HTTP 400 kabla ya kutuma kwenye /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations na /v1/audio/*; ficha vipimo visivyo na alama za misha wenye usafirishaji wa OmniRoute kutoka kwenye /v1/models; na kujibu jaribio la kipimo la dashibodi kwa 422 kwa vipimo kama hivyo. Zimezimwa kwa chaguo-msingi: alama za misha zinarudi kwa habari tu na miamko hutumwa kama ilivyokuwa ilivyo."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Uhamisho wa Muktamizi wa Kila Panga",
+        "description": "Tengeneza na kunukia mifano ya mazungumzo wakati kiti cha kugawia hurasa kinaunganya vipimo. Zima ili kutumia uungano wa vipimo kama vitu tofauti na kuzuia ombi za mhanduko ya uhamisho kwa mifano yote ya sasa na zilizotokezwa baadaye."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Kucheza upya maoni",
+        "description": "Hifadhi na kucheza upya maoni ya vipimo katika mazungumzo ya mizungumko mingi. Zima kusimamia kuhifadhi na kuanza tena maoni."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Usafirishaji wa App-Server wa Codex",
+        "description": "Ruhusu Codex kutumia usafirishaji wa WebSocket JSON-RPC wa app-server wa ndani (codexTransport=app-server). Mara inapozimwa, muunganisho ulioweka chaguo la app-server hurudi kwenye usafirishaji wengine wa Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Aliasi za Ugunduzi wa Claude Code",
+        "description": "Tangaza miti ya claude/'<provider>'/'<model>' kwenye /v1/models ili ugunduzi wa modeli za gwani Claude Code ulistee modeli zisizo za Claude. Onyo: inazidisha rekodi za orodha kwa wateja wote inapowashwa kwa ujumla."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Aliasi za Modeli Bila Kufikiri",
+        "description": "Chaguzi kuu kwa aliasi za gwani za no-think/'<provider>'/'<model>'. Imewashwa (chaguo-msingi): /v1/models inatangaza tofauti isiyo ya kufikiri kwa kila modeli ya Claude inayoweza kufikiri, na id ya no-think/ inayotumwa kwenye ombi inaelekezwa tena kwenye modeli halisi ikiwa uthibitishaji umekatwa. Zimezimwa: hakuna tofauti zinatangazwa na id ya no-think/ inachukuliwa kama id yoyote isiyojulikana ya modeli. Kumbukulia/Kutorudi kwa ModelSpec.noThinkingAlias kwa kila modeli bado inatumika wakati hii imewashwa."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Zima Tofauti za Kiwango cha Kufikiri",
+        "description": "Zima utengenezaji wa tofauti za kiwango cha kufikiri (k.m. -low, -medium, -high) kwenye orodha ya /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Nyumba za Kuingia Virtuali Inazohamishika kwa Mwendo",
+        "description": "Washa nyumba za kuingia virtuali zinazohamishika kwa mwendo kwa kila mteja kwa usambazaji wa mtoa (9654): mchezo mmoja wa mteja sio unatoka 503 kwa mteja mwingine. Kigezo cha mazingira cha OMNIROUTE_CHAT_VIRTUAL_LANES kinashinda kinyume cha dashboard hii; mabadiliko yanachukua hatua kwenye anza-upya wa seva."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Vichura Ghurumeshi ya Kazi",
+        "description": "Wasilisha vichwa vya oja '<gateway-alias>'/'<model>' kwenye /v1/models kwa mifano ambayo mmiliki mkuu hawana shahada hai, lakini gurumeshi ya kupitishwa iliyosambazwa yenye shahada hai huwalenga. Onyo: huongeza vingilio vya orodha kwa wateja wote ikiwa imewasha kwa jumla."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Wakubaliani wa New-API Kuna",
+        "description": "Washa ugunduzi wa kuna kwa vifaa vya kukubaliana na New-API / One-API / Sub2API. Ikiwa imewashwa, vifaa vyenye alama ya kukubaliana zitaboresha kuna zake kwenye dashibodi na maelekezo ya kutambua ushawishi kwa awali."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Ficha Viungo vya Utafutaji Vilivyo Futwa",
+        "description": "Takwimu za utafutaji na tafiti za hivi karibuni hazihesabu watozaji wenye muunganisho hai pekee (watozaji usio na ki cha kufungua kama duckduckgo-free hulihesabwa daima). Ikiwa imezimwa, kila mstari wa utafutaji uliosindikwa unabadilishwa na kina matozaji id."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Lipa ya Haraka ya Mali",
+        "description": "Kurasa za watozaji kwenye dashibodi: ona lipa ya Haraka pekee kwenye ishara ambazo watozaji anazikubali — hutenga kanuni ya jina la onyesho, maudhui ya haraka ya kila moja na ishara ya :free kwenye watozaji waliosajiliwa wasio na utaratibu wa haraka ulioandikwa. Ikiwa imezimwa, kanuni ya lipa ya zamani hujitokea."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Jenga Otomatiki: Majibu ya Hukumu 503",
+        "description": "Muda wa majibu ya jengo otomatiki linafifia kabla ya kusanywa kwa awali cha vifaa-hati kinachofaa (kila lengo limetengwa kwa mabishano ya kuputana, kufungwa au ukomishaji), jibu la 503 no_eligible_targets badala ya 400 la zamani \"No target supports tool calling\" capability_mismatch. Imezimwa kwa chaguo-msingi: majibu ya hili ya zamani yatashika 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Ambiguous 401 Soft Lockout",
+        "description": "Mistral 401 asilimia mbili ('{\"detail\":\"Unauthorized\"}', isho la uwazi la utambulisho halijopo) ni sawa kikubwa kwa ukiukaji wa kiungo na kwa matumizi ya mipaka. Ikichaguliwa, 401 kama hicho hupunguza uwasilishaji badala ya kuikaa kama imeisha, hadi mara 3 ndani ya saa moja; mara ifuatayo bado hupunguza uwasilishaji kama imeisha, hivyo ukiukaji wa kiungo hufanana. Imezimwa kwa chaguo-msingi: kila 401 asilimia mbili ya Mistral hupunguza uwasilishaji kama imeisha, kama ilivyotoka."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Usafishaji Otomatiki wa Batch na Faili",
+        "description": "Ruhusu safu ya usafishaji otomatiki kufuta kazi za Batch API zilizomalizika (zilizomalizika/zilishindwa/zilijivunja/imeisha) zilizozidi umri wa OMNIROUTE_BATCH_RETENTION_DAYS, pamoja na makabla ya mstari kila mmoja, na kufuta maudishi ya BLOB ya faili zilizoponyezwa zilizopita siku ya mashindano yao. Imezimwa kwa chaguo-msingi: usakinishaji wa kila mchakato unaokaribia hujaza data hii kwa usahihi kama ilivyokuwa hadi mkuu wa mfumo anayechaguliwa. Njia ya DELETE /api/v1/batches/delete-completed inayotangazwa na mkuu wa mfumo haiathiriwa kwa njia yoyote — ni contract ya API ya ummma tofauti, isiyo na masharti."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Kira cha Hesabu ya Antigravity",
+        "description": "Kamata hesabu iliachwa ya Antigravity kwa mzunguko wa mtiririko wa ombi lililolijua, ili mjaribio wa shirikishi au uhamishaji wa ushuhuda usilazimike kuchagua tena hesabu iliyojitangaza tayari kwa mtiririko unaondoka. Ukamata huo unakabiliwa na (mwingiliano, modeli ya juu ya kutelewa), hivyo hesabu moja bado inaweza kuteleza modeli mbili tofauti kwa wakati mmoja. Ikumbuka kwamba hesabu zote zinazosababisha zimesababishwa kwa modeli hiyo, ombi linarudi 503 ya POOL_BUSY yenye muundo na Retry-After yenye mipaka badala ya kujikuta kwenye hesabu mbaya. Imezimwa kwa chaguo-msingi: uchaguzi wa hesabu hufikiri kama ilivyotoka, na hakuna uchangi."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Kughairi Otomatiki Hatua za Mchanganyiko za Kale",
+        "description": "Baada ya ushirikiano wa kubadilishana watekelezaji wenye utulivu dhidi ya katalogi hai ya ushahi, ondoa hatua za mchanganyiko zilizoanzishwa kwenye modeli ambazo katalogi hazijalijenge tena, na kundi la utafutaji moja kwa kila hatua ya kughairi. Sio kwa ushirikiano ushindi, upungufu, au kwa mfano tu; na sio kufanya mchanganyiko uwe mchanganyiko. Imezimwa kwa chaguo-msingi: hatua za kale hutajwa tu."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth Inayokumbuka Mawazo",
+        "description": "Ruhusu ombi la Claude OAuth ambalo linauliza mawazo yanayoweza kusomeka (thinking.display \"summarized\") kuondoa beta ya Anthropic ya redact-thinking-2026-02-12, ambayo ingawa huleta Anthropic kurudi na maeneo ya matatizo matukio tu tu. Imezimwa kwa chaguo-msingi: beta hiyo ni sehemu ya kiti cha kilele cha Claude Code OAuth, hivyo ombi la OAuth halinakumbuki. Ombi la Claude ya API key tayari hurekebisha mawazo ya mwanachambuzi bila bendera hii; OMNIROUTE_REDACT_THINKING=false inaafiki kwa OAuth tu ikumbuka kwamba bendera hii imewezeshwa."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Uchukuzi wa Mfumo wa Kiro",
+        "description": "Kipindi mpangilio wa msaada wa Kiro wa mtiririko unatoka na gamba la tool_call lisiloandikwa kwa usahihi (kinakosa input.name au input.arguments) kabla ya matokeo yoyote yanayoonekana, unakataa na kutuma tena ombi mara moja na maelekezo ya marekebisho badala ya kumaliza mzunguko na invalid_kiro_tool_call. Jaribio lina gharama ya ombi moja za Kiro; kushindwa kwa pili kunamaliza mzunguko na kiro_tool_call_repair_retry_failed. Imewashwa kwa chaguo-msingi. Weka false ili kushindwa mzunguko kwenye gamba la kwanza lisiloandikwa kwa usahihi."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Vijiti vya Nguvu za models.dev",
+        "description": "Tumia vijiti vya nguvu za mantiki ambavyo models.dev vinachapishwa (vimewasilishwa hadi sarufu inayojulikana ya nguvu) wakati chaguo za operator na rejista ya muuzidhivu hazijawahi kuunda chochote, na uchague orodha iliyowekwa tu ya kiotu kama \"hakuna vijiti\" katika /v1/models effort_tiers na kukusanyika kwa mchanganyiko wa kioti. Imezimwa kwa chaguo-msingi: effort_tiers na yanayodhibitishwa ya supportedThinkingEfforts hufanya kamili kama ilivyokuwa."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Telemetria ya Arena ya Kuunda cx",
+        "description": "Weka gumba la muundo wa mzunguko wa mwenendo wa mteja wa programu (thamani arena.ai yenyewe inayotuma kwa ukurasa usiohifadhiwa kwa mwingiliano) kwa kila ombi la kuunda-tathmini ya Arena (lmarena) lisilo na providerSpecificData.cx lililowekwa na operator. Imezimwa kwa chaguo-msingi: uga wa cx ni ishara ya Arena ya kuzuia uundishaji wa kiotomatiki, hivyo OmniRoute inatuma tu thamani iliyoanguka na operator kutoka kwa kipindi halisi cha wavuti (providerSpecificData.cx) na vinginevyo hautumi cx yoyote. Manufaa ya juu ya ndani hayajaonyeshwa; washa tu ikiwa Arena inatoka kukataa ombi bila cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Uchakataaji wa Codex wa Majibu",
+        "description": "Ruhusu mzunguko wa majibu (mpaka) na ushindiko wa kwanza wa uchakataaji wa muktadha pia kuandika tena mifumo ya kupita-mwili ya kienyeji ya Codex (POST /v1/responses kwa muuzidhivu wa codex) iki inapotea bajeti ya muktadha, kutumia adapter ya Responses input[]. Imezimwa kwa chaguo-msingi: mifumo ya kienyeji ya Codex ni ya mteja wa Codex na haiwezi kuandikwa tena na uchakataaji; ombi kubwa kushindwa kwenye ukaguzi wa bajeti ya muktadha kama ilivyokuwa. Inahitaji uchakataaji wa kienyeji kuwa na modeli isikiwe zilizowekwa tu."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kifaa cha Mzigo: Kuuzia Utunzaji Imewekwa",
+        "description": "Ruhusu serikali ya mzigo wa kila kifaa (vitalu vya session/iliyotumika kwa uchaguzi wa akaunti) kuzingatia utunzaji wa kuumiza kwa mipaka: baada ya muda wa utunzaji uliowekwa kuzidiwa, au uga wa mzigo uliohitimishwa uma na utunzaji wa mipaka, kifaa kinaachana kuzuia akaunti hadi kukusanywa mzigo mpya. Imezimwa kwa chaguo-msingi: kifaa kilichohifadhiwa kinaendelea kuzuia kwa asilili ya mwisho iliyoreportwa hadi muda wake wa kujipanga tena."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Uzalishaji wa Picha: Kazi Nyumbani",
+        "description": "Kwa utengenezaji wa picha zinazolingana na OpenAI: tumia muda usiokamilika wa muunganisho (providerSpecificData.timeoutMs), usiwezeko wa kupokea ya juu ya kituo (FETCH_TIMEOUT_MS, kisha REQUEST_TIMEOUT_MS, chaguo-msingi s 600) badala ya bajeti ya picha isiyobadilika ya s 120; tamisha ombi alilolizima mtumiaji kwa 499; na ruguza uwanja uipokee kazi za picha ndefu kama mtiririko wa SSE wenye mitambo ya moyo. Imezimwa kwa chaguo-msingi: bajeti isiyobadilika inatumika na ulizimia wa mtumiaji haifanikiki. Suala linalofunika kusoma mwili wa jibu linadumu daima."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Usongo wa Miradia ya Kihifadhi",
+        "description": "Hasisha ukaguzi wa claude/ na nyufa za functional-gateway kwenye /v1/models. Imezimwa kwa chaguo-msingi: kila mzunguko wa nyufa hufanya kazi taratibu kama ilivyo zamani. Imewashwa: ukaguzi wa claude/ unasambayisha pia vigezo vilivyoorodheshwa vya mchakato wa mawezani (-low/-medium/-high/-xhigh), inaruka idhi za auto/* ndani ambazo njia ya ombi haitawezi kuzitengeneza na inaruka alia iliyoorodheshwa taya; nyufa za functional-gateway ziruka mchanganyiko na idhi za OmniRoute-zilizotengenezwa (claude/, no-think/), zinachukua mwenyeji kutoka owned_by, kamwe hazitumi mwenyeji kama nyufa yake mwenyewe, zinaruka nyufa zimezimwa kwenye blockedProviders na modeli nje ya kumbukumbu hai ya ndani ya nyufa."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Afya ya Mwakilishi: Kurudisha Aisi inapunguza Mnyakato wa Mvutano",
+        "description": "Katika ukaguzi wa afya ya kikabidhi, acha upimaji ambio lengo lilikataa (401/403/429: kikabidhi kilichukiza, lengo lilikataa IP hii ya kutoka) lirishe mfululizo wa ushindo wa kikabidhi, kama upimaji uliowezeshwa. Imezimwa kwa chaguo-msingi: ukanurufu unabaki wastani na unahifadhi mfulululizo (#10654). 5xx hubaki isio na maana kwa mfumo wowote, na ukanurufu hakuna kikabidhi kinachokuondolwa, kufutwa au kutengwa tena."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Picha za Usajili wa Grok",
+        "description": "Andili mifumo ya uwasilishaji wa picha za xai-oauth (xao) na grok-cli na kushikilia uga wa ubora wa OpenAI wa high/hd kuenda xAI medium. Imezimwa kwa chaguo-msingi: njia ya picha za xAI inayotumia kiungo cha API-ya hai inabaki kwenye ombi la kawaida la OpenAI-inayolingana, na mifumo ya ushirikiano haimeandikwa."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Utafitaji wa Models Hai kwa Kupitisha Oauth ya xAI",
+        "description": "Fetch the live xAI model catalog for xai-oauth connections from https://api.x.ai/v1/models using the OAuth bearer token, instead of the frozen static seed. On by default. Set the flag to false to keep serving the static seed. HTTP failures fall back to the seed in the discovery route; the flag getter itself does not issue HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Mabadiliko ya System katikati ya Mawasiliano Iliyofanana na Anthropic",
+        "description": "Kwenye relay zenye anthropic-compatible-* (claude → claude passthrough), boresha mzunguko wa role:system katikati ya mawasiliano ndani ya messages[] badala ya kuwaweka kwenye parameter ya system ya kiwango cha juu, ili ili prefix ya prompt iliyobaki kuacha iwe imara kila mzunguko. Hii inatumika tu ikiwa mteja mwenyewe alituma anthropic-beta ya mid-conversation-system-2026-04-07 (inayotumwa juu kama inavyo). Imezimwa kwa chaguo-msingi: kila mzunguko wa system unasongwa hadi kiwango cha juu kama ilivyokuwa awali, kwa sababu relay zisizo na betti hujiridhisha maelezo ya role:system kwa makosa 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Kichunguza wa Afya ya DB: Kushikiza Ukaguzi wa Anza",
+        "description": "Tuma ukaguzi wa usahihi/afya wa DB wa anza baada ya seva kutangaza kuwa inapokea ombi (kupitia setImmediate) badala ya kuzuia mchakato wa mwanzo hadi ukaguzi ukamilike. Imezimwa kwa chaguo-msingi: mwanzo unashikwa kwenye ukaguzi kama ilivyo kabla ya #13717, hivyo DB iliovunjika bado inachunguzwa kabla ya ombi la kwanza kusambazwa. Imewashwa: mwanzo unarudi mara moja na ukaguzi (sasa umezingishwa na kupagwa na, kwa DB ya faili ya kweli, umepelekwa katika mchakato wa mtoto unaorekajika) unafanyika mara tu baada yake."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Mzunguko wa Katalogi Iliyopachikwa ya OpenCode",
+        "description": "Ruhusu modeli za OpenCode Zen na OpenCode Go ambazo hazina chanzo cha registry cha wazi kuchukua uso la ombi (Responses kwa @ai-sdk/openai, Messages kwa @ai-sdk/anthropic) kutoka katalogi ya modeli.zilizopachikwa opencode.ai, inayosomwa kwa mandhari kila saa 6. Imezimwa kwa chaguo-msingi: chanzo kinatoka kutoka heuristics za registry kama ilivyokuwa awali na katalogi haiwasi kushiriki. Wazi: ishara hizo huchangia uzito wa snapshot, hivyo uzito wa wachaguzi, na hivyo uchaguzi, unaweza kubadilika."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Ombi Otomatiki: Uzito wa Uwezo Imara",
+        "description": "Ruhusu ombi la auto/* (resolveModelOrError na wrapper ya mzunguko wa auto) kujenga mkusanyiko wa wachaguzi na uwezo wa modeli imara (vision, reasoning, thinking) na alama ya ubora zilizotajwa, zikiwa somwa kwa hatua moja kwa kupitia katalogi ya /v1/models. Imezimwa kwa chaguo-msingi: uzito wa snapshot ya wakati wa ombi unabaki kama awali (uwezo hutafutwa kwa onyeshao na haiachani uzito). Imewashwa: ishara hizo huchangia uzito wa snapshot, hivyo uzito wa wachaguzi, na hivyo uchaguzi, unaweza kubadilika."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Milango ya Usafirishaji Isiyo na Ufunguo",
+        "description": "Rudisha wadau isiyo na ufunguo (no-auth) ambao usafirishaji wao unahitaji kivinjari cha ndani (browserBacked) au CLI iliyowekwa ndani (isLocalCli) kutoka kwa mkusanyiko wa wachaguzi wa auto/*, ili mwanachama anayeshikama asishikilishe ombi la auto hadi wakati wa kufungwa kwa kila lengo (#17036). Imezimwa kwa chaguo-msingi: kila mwanachama ambaye hana ufunguo wenye simulia ya zana anaachwa ndani ya mkusanyiko kama awali. Unguzi la moja kwa moja la '<alias>'/'<model>' linafanyika kwa njia zote mbili."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Mchezo Upya wa Mchango wa Kichujio",
+        "description": "Kwa michoro ya kichujio ya codebuddy-cn (famili za DeepSeek-V4 / Kimi-K2 zinazohitaji mchezo upya wa mchango wa kichujio), weka kila 'reasoning_content' ya msaidizi iliyoshutuliwa kama kituonekani cha '<thought>' block sehemu ya awali ya mwenendo wa ujumbe, ili liendee kupitisha mwingiliano unaoziba uwepo wa reasoning_content field (#13632). Imezimwa kwa chaguo-msingi: ombi za codebuddy-cn zinatumwa bila kubadilishwa; reasoning_content field yenyewe imeachwa kama ya mwenendo."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Mizani ya Uzalishaji: Kwa Kutoka Kwa Upeketi",
+        "description": "Kamata muongo wa salama maalum wa mwingiliano (misalignment_policy_violation, content_policy_violation, au ukatali wa legacy uliowekwa kwa 'blocked by our safety systems' wa kuwa provider_safety_rejection) kama upeketi wa ombi: mabao yake huhifadhiwa kupitia HTTP, Responses, WebSocket na mapotezi ya mwanga ya mwanga, na mwingiliano unachochoka naye bado hupiga mwingiliano nyingine, anaisha ndege (#17049). Imezimwa kwa chaguo-msingi: makosa haya yanasimama kwa usindikaji wa awali na upeketi wa mwingiliano hupimwa kama ya awali."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Afya ya Vifaa: Upimaji Mpya wa Uunganishaji Umepo",
+        "description": "Kamata safu ya afya ya vifaa ili impima upya uunganishaji ambao mwingiliano umeziba wenyewe (wameandikwa autoDisabledAt; kama mara moja kwa saa 6 na 5 kwa safu) na wacheze uunganishaji wamudunuliwa tangu mwingiliano unapoziba upe (#16190). Imezimwa kwa chaguo-msingi: uunganishaji wa kutoka huikala hadi mmiliki aende kwa upya au impia upya, kama ya awali. Uunganishaji wa kuziba na uunganishaji wa kuwa wa ziba baada ya zibani ya kudumu hatamuduniwa upya."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Kizuizi cha Vifaa: Uteja Mtandao Tu",
+        "description": "Punguza mwingiliano wa vifaa ili kosa la kosa la vifaa lisimamie uunganishaji tu tangu utambuzi wao unashuhudisha vifaa vilivyo dhahabu (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Kosa lisilosimamiza (wakati wa kurasa, kikomo cha mwingiliano, ukosefu wa huduma, vifaa vinavyokubaliwa na makosa ya kuziba ya kuziba) yanapimwa kama hayajulikani na uunganishaji unapokabidhi mwenendo. Imezimwa kwa chaguo-msingi: kosa lolote la vifaa katika hifadhiu linasimamisha uunganishaji kwa mfululizo wa hifadhiu (dakika 5)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Mzingamano: Kumuisha kwa Kukataa kwa Sera ya Mwenendo",
+        "description": "Tangu mzingamano wa awali wa kutoka amwajibu kukataa kwa sera ya mwenendo tu (mabao au aina cyber_policy / content_policy_violation), mzingamano anamwisha na kurejea kukataa kwa hata tangu awali wa mzingamano ni michoro tofauti, badala ya kwenda kwa mzingamano unaofuata. Imezimwa kwa chaguo-msingi: kukataa haina kufuruputa akaunti au kutosha mwingiliano, na mzingamano anakwenda kwa mzingamano unaofuata kama ya awali."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Majibu: weka hai kwenye usafiri pekee",
+        "description": "Tuma kumbukumbu za Majibu kama mstari tupu badala ya tukio response.in_progress, ili picha ya muhtasari ya syntetisk haiwezi kamwe kuchukua nafasi ya jibu halisi katika SDK rasmi. Laini tupu haitumi tukio la SSE, kwa hivyo shirika la ulinzi la mteja ambalo linaweka upya matukio pekee halitawekwa upya wakati wa awamu ya kimya ya muda mrefu. Imezimwa kwa chaguo-msingi: vipima muda hutuma tukio sahihi response.in_progress."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Jaribio Tena la Kupumzika: Kuzima Ukwilizaji wa 403/410",
+        "description": "Kitambaa kama akaunti zote zipo katika muda wa kupumzika na muda wa kupumzika unaomalizika kwanza ulisababishwa na 403 (ufikaji ukikata tamaa) au 410 (imeondoka), kurudi uasi huo mara moja badala ya kusubiri kupumzika kunakamilika na kutuma tena ombi; kuota ya mwingiliano wa agentrouter inayohakikisha 403 ya mpango wa mwingiliano inahifadhiwa na errorCode 429 ili ibaki iwezekan kufanya upya. Imezimwa kwa chaguo-msingi: 401 pekee ndio inayozima usubiri, na uasi wote unahifadhiwa na hali aliyoingia nayo."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Sera ya bajeti ya matumizi isiyo na bei",
+        "description": "Jinsi vikwazo vya USD vya kila ufunguo vya kila siku/kila wiki vinavyoshughulikia matumizi yaliyofanikiwa ambayo muuzaji/modeli hana safu ya bei. fail_closed (chaguo-msingi) inaweka dirisha kuwa limevuka, kwa hivyo gharama isiyojulikana haiwezi kupita kikomo thabiti. count_as_zero inahesabu matumizi hayo kama $0 na inaendelea kutekeleza matumizi yenye bei. Modeli zisizo na bei zinaorodheshwa kwenye ukurasa wa nyumbani wa dashibodi kwa njia yoyote."
       }
     }
   },
@@ -13794,6 +14610,7 @@
     "latency": "Ucheleweshaji",
     "quota": "Kiwango",
     "rangeWindow": "Dirisha la {range}",
+    "timeRange": "Kipindi cha muda",
     "runtimeHealthBlend": "mchanganyiko wa muda wa utekelezaji/afya",
     "averageResponseTime": "wastani wa muda wa kujibu",
     "worstQuota": "Kiwango kibaya zaidi",
@@ -13855,6 +14672,8 @@
     "usdUsageQuotaDescription": "Huzuia ufunguo huu kwa kosa la API la 400 baada ya matumizi yake ya ndani ya USD kufikia kiwango kilichosanidiwa cha kila siku au kila wiki.",
     "dailyQuotaUsd": "Kiwango cha kila siku (USD)",
     "weeklyQuotaUsd": "Kiwango cha kila wiki (USD)",
+    "fiveHourQuotaUsd": "Kiwango cha saa 5 (USD)",
+    "fiveHourQuotaHint": "Dirisha linalosonga: matumizi ya kila ombi yanahesabiwa kwa saa 5, kisha yanaachiliwa.",
     "quotaWindowDescription": "Kiwango cha kila wiki hufuata uwekaji upya wa kila wiki wa Claude uliohifadhiwa kwenye kache unapopatikana; vinginevyo hurudi kwenye kipindi cha siku 7 kinachoendelea. Kiwango cha kila siku kinatumia siku ya kalenda ya Fortaleza.",
     "apiKeyUsdQuota": "Kiwango cha USD cha ufunguo wa API",
     "apiKeyUsdQuotaDescription": "Inapowezeshwa, @@om-usage inarudisha kiwango cha kila siku, kiwango cha kila wiki, matumizi ya kila siku, na matumizi ya kila wiki katika USD. Kila wiki hufuata uwekaji upya wa Claude uliohifadhiwa kwenye kache unapopatikana.",
@@ -13924,7 +14743,11 @@
       "ok": "Inaruhusu kwa ujumla"
     },
     "allProviders": "Watoa wote",
-    "noApiKeyRequired": "Hakuna funguo ya API inayohitajika"
+    "noApiKeyRequired": "Hakuna funguo ya API inayohitajika",
+    "searchPlaceholder": "Tafuta modeli, mkuja…",
+    "searchAria": "Tafuta modeli huria",
+    "filterProviderAria": "Chuja kulingana na mkuja",
+    "keylessOnly": "Hakuna kiongozi tu"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot ya Afya ya Mtoa Huduma",
@@ -13995,7 +14818,11 @@
     "learnMore": "Jifunze zaidi",
     "changelogLoadFailed": "Imeshindwa kupakia kumbukumbu ya mabadiliko. Tafadhali jaribu tena baadaye.",
     "retry": "Jaribu tena",
-    "viewFullHistory": "Angalia historia kamili kwenye GitHub"
+    "viewFullHistory": "Angalia historia kamili kwenye GitHub",
+    "title": "Habari na kumbukumbu ya mabadiliko",
+    "description": "Matangazo kutoka kwa timu ya OmniRoute na vidokezo vya matoleo ya hivi karibuni",
+    "viewLabel": "Tazama",
+    "loadingNews": "Inapakia matangazo..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14450,6 +15277,63 @@
       "saved": "Sheria za muda wa kupumzika zimehifadhiwa",
       "saveFailed": "Haikuweza kuhifadhi sheria za muda wa kupumzika"
     },
+    "errorRules": {
+      "title": "Sheria za muda wa kupumzika kwa hitilafu",
+      "subtitle": "Tambua hitilafu za mtoa huduma kwa hali ya HTTP, maandishi ya hitilafu, au yote mawili, kisha uchague kitakachositishwa na kwa muda gani. Sheria hizi hutekelezwa kabla ya zile zilizojengwa ndani.",
+      "rulesHeading": "Sheria",
+      "rulesEmpty": "Bado hakuna sheria.",
+      "addRule": "Ongeza sheria",
+      "provider": "Mtoa huduma",
+      "providerPlaceholder": "mf. openai",
+      "status": "Hali ya HTTP",
+      "statusPlaceholder": "Yoyote",
+      "match": "Maandishi ya hitilafu yana",
+      "matchPlaceholder": "Maandishi yoyote",
+      "matchHint": "Sheria ya kwanza inayolingana ndiyo hutumika. Maandishi ya hitilafu ni maandishi ya kawaida yasiyojali herufi kubwa au ndogo, si usemi wa kawaida (regex). Sehemu tupu inalingana na chochote.",
+      "scope": "Sitisha",
+      "scopes": {
+        "connection": "Muunganisho huu",
+        "model": "Muundo huu pekee",
+        "provider": "Mtoa huduma wote"
+      },
+      "reason": "Sababu",
+      "reasonAuto": "Kiotomatiki",
+      "reasons": {
+        "quota_exhausted": "Kiwango kimeisha",
+        "rate_limit_exceeded": "Kikomo cha kasi kimezidiwa",
+        "auth_error": "Hitilafu ya uthibitishaji",
+        "model_capacity": "Muundo umejaa",
+        "server_error": "Hitilafu ya seva",
+        "unknown": "Nyingine"
+      },
+      "duration": "Muda",
+      "durations": {
+        "auto": "Chaguomsingi",
+        "30m": "Dakika 30",
+        "1h": "Saa 1",
+        "5h": "Saa 5",
+        "24h": "Saa 24",
+        "custom": "Maalum"
+      },
+      "customMinutes": "Dakika (1 hadi 43200)",
+      "remove": "Ondoa",
+      "defaultsHeading": "Chaguomsingi kwa hitilafu zisizo na sheria",
+      "defaultsHint": "Si lazima, kwa kila mtoa huduma. Hutumika tu wakati hakuna sheria inayolingana na hitilafu ya 402, 403, 408, 429 au 5xx. Hitilafu za ombi kama 400 haziathiriwi kamwe.",
+      "defaultsEmpty": "Hakuna chaguomsingi kilichowekwa. Hitilafu zisizo na sheria hubaki na tabia iliyojengwa ndani.",
+      "addDefault": "Ongeza chaguomsingi",
+      "errors": {
+        "provider": "Weka mtoa huduma.",
+        "condition": "Weka hali ya HTTP, maandishi ya hitilafu, au yote mawili.",
+        "status": "Tumia hali kati ya 100 na 599.",
+        "duration": "Weka dakika 1 hadi 43200.",
+        "duplicateDefault": "Mtoa huduma huyu tayari ana chaguomsingi.",
+        "tooMany": "Sheria 50 kwa upeo."
+      },
+      "save": "Hifadhi sheria za hitilafu",
+      "saved": "Sheria za hitilafu zimehifadhiwa",
+      "saveFailed": "Imeshindwa kuhifadhi sheria za hitilafu",
+      "loadFailed": "Imeshindwa kupakia sheria za hitilafu"
+    },
     "list": {
       "title": "Miunganisho iliyo nje ya uelekezaji",
       "subtitle": "Vipindi vya kupumzika na uzuiaji wa modeli humalizika vyenyewe. Viondoe ili kurudisha muunganisho kwenye uelekezaji sasa.",
@@ -14546,7 +15430,9 @@
       "circuitBreakerState": "Hali ya Kivunja Mzunguko wa Mtoa Huduma",
       "lastUpdate": "Sasisho la mwisho: {timestamp}",
       "uptimeMinutes": "dak {minutes}",
-      "uptimeHoursMinutes": "saa {hours} dak {minutes}"
+      "uptimeHoursMinutes": "saa {hours} dak {minutes}",
+      "breakerClosed": "Imefungwa",
+      "breakerNotClosed": "Wazi au nusu wazi"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +15507,9 @@
         "primaryAction": "Maelezo ya Matengenezo",
         "secondaryAction": "Hali ya Mfumo"
       }
+    },
+    "miniapp": {
+      "askAnything": "Uliza chochote…"
     }
   },
   "kiroAuthModal": {
@@ -14778,6 +15667,7 @@
     "upstreamStatus": "Hali ya mwelekeo",
     "noResponse": "Hakuna jibu",
     "egressIp": "IP ya Kutoka",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Vichwa baada",
     "firstChunkAfter": "Kipande cha kwanza baada",
     "servedBy": "Inatolewa na",
@@ -14811,7 +15701,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} zinaonekana / jumla {total}",
+    "modeLabel": "Hali ya mwonekano",
+    "jumpToNow": "Rukia wakati wa sasa, mstari wa SASA utawekwa upya kwenye nafasi ya {position}%",
+    "laneReuse": "Kutumia tena mstari",
+    "laneReuseLabel": "Kipindi cha kutumia tena mstari (dakika)",
+    "laneReuseHint": "Maombi yanayotumia kitambulisho sawa cha mazungumzo hubaki kwenye safu mlalo sawa ya rekodi ya matukio mradi pengo kati yake liwe chini ya idadi hii ya dakika.",
+    "laneReuseUnit": "dak",
+    "autoRefresh": "Onyesha upya kiotomatiki",
+    "autoRefreshLabel": "Muda wa kuonyesha upya kiotomatiki (sekunde)",
+    "autoRefreshHint": "Mara ambazo rekodi ya matukio huchukua tena orodha ya maombi kutoka kwenye seva.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Punguza ukuzaji",
+    "zoomIn": "Ongeza ukuzaji"
   },
   "metadata": {
     "compressionTitle": "Kufinya",
@@ -15015,6 +15918,83 @@
     "dismissAriaLabel": "Funga"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Zima uundaji wa vibadala vya kiwango cha kufikiri (k.m. -low, -medium, -high) katika katalogi ya /v1/models.",
+  "teamCosts": {
+    "title": "Gharama za timu",
+    "subtitle": "Simamia bajeti laini zinazoshirikiwa na makadirio ya gharama ya katalogi.",
+    "refresh": "Onyesha upya",
+    "create": "Unda timu",
+    "edit": "Hariri timu",
+    "archive": "Hifadhi kumbukumbu",
+    "selectTeam": "Timu",
+    "searchTeams": "Tafuta timu",
+    "statusFilter": "Hali ya timu",
+    "active": "Inatumika",
+    "archived": "Imehifadhiwa kumbukumbu · kusoma tu",
+    "allTeams": "Timu zote",
+    "noTeams": "Hakuna timu zinazolingana.",
+    "selectHint": "Unda au chagua timu ili kuona gharama.",
+    "loading": "Inapakia gharama za timu…",
+    "budgetTitle": "Bajeti laini ya sasa",
+    "budgetSubtitle": "Matumizi yaliyofanikiwa yaliyorekodiwa · dirisha linaloteleza · bila kutegemea tarehe za ripoti",
+    "archivedBudget": "Imehifadhiwa kumbukumbu: utekelezaji wa bajeti haufanyi kazi. Ripoti za kihistoria zinabaki zinapatikana.",
+    "unlimited": "Bila kikomo — hakuna bajeti laini inayoshirikiwa iliyosanidiwa.",
+    "budgetUnavailable": "Hali ya bajeti haipatikani. Onyesha upya ili ujaribu tena.",
+    "used": "Matumizi yaliyofanikiwa",
+    "maximum": "Kiwango cha juu cha bajeti",
+    "remaining": "Salio linalojulikana",
+    "resets": "Huwekwa upya",
+    "unpricedBudget": "Sehemu ya matumizi yaliyofanikiwa ina bei isiyojulikana. Jumla inayojulikana haijakamilika; utekelezaji wa bajeti huchukulia dirisha hili kuwa limezidi.",
+    "overBudget": "Bajeti imefikiwa au imezidi · {amount} zaidi",
+    "reportTitle": "Ripoti ya matumizi",
+    "reportSubtitle": "Majaribio yote · makadirio ya katalogi kwa USD, si ankara · tarehe kamili za UTC",
+    "reportPeriod": "Kipindi cha ripoti",
+    "day1": "Siku 1",
+    "day7": "Siku 7",
+    "day30": "Siku 30",
+    "allTime": "Wakati wote",
+    "reportSpend": "Makadirio ya matumizi ya ripoti",
+    "requests": "Maombi",
+    "assignedKeys": "Funguo zilizokabidhiwa",
+    "unpricedReport": "Ripoti hii ina bei zisizojulikana. Makadirio ya matumizi hayajakamilika.",
+    "breakdown": "Gharama kwa kila ufunguo wa API",
+    "noUsage": "Hakuna matumizi katika kipindi hiki cha ripoti.",
+    "keyName": "Jina la ufunguo wa API",
+    "tokens": "Tokeni za ingizo + towe",
+    "unnamedKey": "Ufunguo usio na jina au uliofutwa",
+    "unpriced": "Bei isiyojulikana",
+    "members": "Uanachama",
+    "memberSubtitle": "Kubadilisha uanachama kunaacha matumizi ya kihistoria kwenye timu asili.",
+    "searchKeys": "Tafuta funguo au wamiliki wa sasa",
+    "chooseKey": "Chagua ufunguo wa API",
+    "unassigned": "Haijakabidhiwa",
+    "ownership": "Timu ya sasa ya malipo: {team}",
+    "assign": "Kabidhi",
+    "remove": "Ondoa",
+    "noMembers": "Hakuna wanachama wa sasa. Matumizi ya kihistoria bado yanaweza kuhesabiwa kwenye bajeti.",
+    "assignedAt": "Imekabidhiwa {date} (UTC)",
+    "name": "Jina la timu",
+    "description": "Maelezo",
+    "enableBudget": "Washa bajeti laini inayoshirikiwa",
+    "amount": "Kiasi cha bajeti (USD)",
+    "duration": "Dirisha la bajeti linaloteleza",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "confirm": "Thibitisha",
+    "transferTitle": "Thibitisha uhamishaji wa ufunguo",
+    "transferMessage": "Hamisha ufunguo huu kutoka “{source}” hadi “{destination}”? Matumizi ya kihistoria yanabaki kwenye timu asili.",
+    "removeTitle": "Ondoa ukabidhi wa ufunguo",
+    "removeMessage": "Ondoa ufunguo huu kutoka “{team}”? Matumizi ya kihistoria yanabaki kwenye timu hii.",
+    "archiveTitle": "Hifadhi timu kumbukumbu",
+    "archiveMessage": "Hifadhi “{team}” kumbukumbu? Viunganisho vyote vya sasa hufungwa na utekelezaji wa bajeti husimama. Ripoti za kihistoria zinabaki zinapatikana.",
+    "invalidName": "Weka jina (herufi 1–200) na maelezo yasiyozidi herufi 2,000.",
+    "invalidAmount": "Weka kiasi cha bajeti kilicho na kikomo kikubwa kuliko sifuri.",
+    "unauthorized": "Ingia kwenye dashibodi ya usimamizi ili kuendelea.",
+    "forbidden": "Huna ruhusa ya kusimamia timu. Ulichoingiza kimehifadhiwa.",
+    "notFound": "Timu hii au ukabidhi huu haupo tena.",
+    "conflict": "Ukabidhi au timu imebadilika. Onyesha upya na uthibitishe umiliki wa sasa kabla ya kujaribu tena.",
+    "failed": "Ombi limeshindwa. Ulichoingiza kimehifadhiwa; tafadhali jaribu tena.",
+    "partialBudget": "Baadhi ya vikapu vya kila siku vilivyohifadhiwa vinaingiliana na mpaka wa dirisha na haviwezi kugawanywa kwa usahihi. Matumizi yanayoonyeshwa hayajakamilika; posho iliyobaki haipatikani. Sera iliyopo ya bajeti laini haijabadilika."
+  },
   "connectionTest": {
     "title": "Ujumbe wa majaribio",
     "description": "Tuma ombi moja halisi kupitia akaunti hii. Hii hutumia kiasi kidogo cha mgao na inaweza kuanzisha kipindi cha matumizi, kulingana na mtoa huduma.",
@@ -15074,5 +16054,141 @@
     "importButton": "Leta",
     "importFailed": "Kuleta kumeshindwa.",
     "importSuccess": "Akaunti {connections} na nodi {nodes} za watoa huduma zimeletwa; {skipped} zimerukwa."
+  },
+  "conversations": {
+    "title": "Mazungumzo",
+    "countSummary": "{total, plural, one {# mazungumzo} other {# mazungumzo}} yenye zaidi ya mada mbili",
+    "autoRefreshTitle": "Maradipi ya orodha hii kutoka kwa seva.",
+    "autoRefresh": "Usawa wa otomatiki",
+    "loading": "Inapakia mazungumzo...",
+    "colConversation": "mazungumzo",
+    "colTurns": "Zunguko",
+    "colContinuation": "Uendeleo",
+    "colLastModel": "Modeli ya mwisho",
+    "colProvider": "Mtoa huduma",
+    "colStatus": "Hali",
+    "colLastSeen": "Ilionekana mwisho",
+    "drawerTitle": "Mazungumzo",
+    "prevConversation": "Mazungumzo ya awali",
+    "nextConversation": "Mazungumzo yajayo",
+    "gotoLatestRequest": "Tembea kwenye ombi la hivi karibuni",
+    "goToBottom": "Nenda chini",
+    "statusInProgress": "In progress",
+    "continuationGenuineTitle": "Kipindi cha hivi kariboni kime tumia previous_response_id na kilithibitishwa kwenye seva",
+    "continuationBadge": "endelezi",
+    "stalledTitle": "Mzunguko wa hivi sasa haujumii na hakuna kilichofuata kwa dakika 5+",
+    "stalledBadge": "hushikishi",
+    "noTurns": "Hakuna mizunguko iliyokodwa kwa mazungumzo haya."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Anza kutoka nafasi ya sasa (ruka kumbukumbu zilizopo)",
+    "pageTitle": "Kutoa Rekodi",
+    "pageSubtitle": "Tuma vichwa vya wingi vya orodha ya call logs kutoka kwenye kichwa cha Logs kwenda kwenye duka la nje la uchanganuzi.",
+    "addDestination": "Ongeza cheti cha kuingiza",
+    "scheduleTitle": "Usara",
+    "cronLabel": "Cron",
+    "notScheduled": "husai usara",
+    "lastScheduledRun": "Usara mmoja wa mwisho",
+    "lastRunSummary": "{startedAt} — {status}, mstari wa {rows}",
+    "never": "hawezi",
+    "highWaterMark": "Alama ya kiwango cha juu cha kumbukumbu za maombi (call logs)",
+    "rowPrefix": "mstari {id}",
+    "noDestinations": "Hakuna malipo ya maisha ya uwekaji",
+    "noDestinationsHint": "Ongeza uwekaji ili uanze kutuma rekodi za simu kulingana na mpangilio wa kila saa.",
+    "errLoadStatus": "Imeshindwa kuzima hali ya uwekaji",
+    "errSaveDestination": "Imeshindwa kuhifadhi uwekaji",
+    "msgDestinationSaved": "Uwekaji umehifadhiwa.",
+    "errConnectionTest": "Jaribio la mwingiliano limefeli",
+    "msgRunInFlight": "Mzunguko wa uwekaji huu tayari umeendelea; hakuna kilichotumwa mara mbili.",
+    "errExportRun": "Mzunguko wa uwekaji umefeli",
+    "errUpdateDestination": "Imeshindwa kukusanya uwekaji",
+    "errDeleteDestination": "Imeshindwa kufuta uwekaji",
+    "deleteTitle": "Futa eneo la kuketi",
+    "deleteConfirm": "Utegemea \"{name}\"? Kikonyo cha utanishaji kidoondoa pia, hivyo wao kurejeshi haifari kuanza na logi ya kumbukuzi ya call iliyoonekana kwa ajili ya kumbukuzi.",
+    "statusDisabled": "Imewezeshwa",
+    "statusFailing": "Inashindwa",
+    "statusHealthy": "Iko salama",
+    "statusNotRunYet": "Hajajirudi bado",
+    "typeNotInstalled": "Aina haifai na imeandikishwa",
+    "metaLine": "Ukifaa {lastRun} · ilitanisha {exported} safu · {pending} zinakusubiria · kikonyo {cursor}",
+    "btnTest": "Jaribio",
+    "btnRunNow": "Fanya sasa",
+    "btnDisable": "Zima",
+    "btnEnable": "Washa",
+    "btnEdit": "Hariri",
+    "btnDelete": "Futa"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Akaunti za CLIProxyAPI",
+    "cardSubtitle": "Hali ya tu-kusoma kutoka kwa API ya usimamizi iliyothibitishwa",
+    "btnRefresh": "Sasisha",
+    "listAria": "Afya ya akaunti za CLIProxyAPI",
+    "noAccounts": "Hakuna akaunti za CLIProxyAPI zilizopo.",
+    "loading": "Inapakia afya ya akaunti…",
+    "stateReady": "Hali ya hesabu",
+    "stateDisabled": "CLIProxyAPI haikuwekwa",
+    "stateMissingKey": "Ufunguo wa usimamizi haumbikaji",
+    "stateUnreachable": "API ya usimamizi haifiki",
+    "stateUnauthorized": "Ufunguo wa usimamizi ulikataliwa",
+    "stateUnsupported": "Toleo hili la CLIProxyAPI halionyesha hali ya hesabu",
+    "stateInvalidResponse": "API ya usimamizi ilirudisha jibu lisilotumika"
+  },
+  "darioPanel": {
+    "title": "Hesabu za Claude",
+    "description": "Ingiza Dario kwa kutumia usajili wako wa Claude Pro/Max. Matumizi yatakadirwa kwenye kipindi cha usajili wako. Hesabu angalau moja inahitajika kabla Dario iweze kuelekeza ombi (kufikia hapo, /health itaonyesha hali ya dhaifu).",
+    "noAccounts": "Hakuna hesabu zilizowekwa bado.",
+    "importTitle": "Ingiza kutoka OmniRoute",
+    "importDescription": "Rudia ishara za OAuth za muunganisho wa OmniRoute Claude uliopo badala ya kuingia upya — hupita hatua ya idhini ya kivinjari kabisa.",
+    "importPendingTooltip": "Itakuwa hai wa muunganisho wa Claude umeweza OmniRoute.",
+    "btnImport": "Ingiza",
+    "btnImporting": "Inaongeza…",
+    "aliasPlaceholder": "jina la kufanana (si lazimi)",
+    "btnStartLogin": "Anza Kuingia",
+    "btnStarting": "Inaanza…",
+    "btnCompleteLogin": "Maliza Kuingia",
+    "btnCompleting": "Inamaliza…",
+    "codePlaceholder": "msimbo#hali au msimbo msaliti",
+    "noticeImported": "Imewasilishwa kama akaunti \"{alias}\" — Dario ameanzisha upya ili kuitambua.",
+    "noticeAdded": "Akaunti \"{alias}\" imeongezwa.",
+    "expiresInHours": "inaisha baada ya takriban {hours}h",
+    "expiresInMinutes": "inaisha baada ya takriban {minutes}m",
+    "expiresAt": "inaisha {date}",
+    "scopes": "{count, plural, one {# hatua} other {# hatua}}",
+    "btnRemove": "Ondoa",
+    "btnRefresh": "Sasisha",
+    "loginStep1": "1. Fungua URL hii kwenye kivinjari chako na idhinisha upatikanaji kwa akaunti <mono>{alias}</mono>:",
+    "pendingExpires": "Muda wa kuingia unaondoka {time}",
+    "loginStep2": "2. Nanga msimbo unaotoa Anthropic:"
+  },
+  "miniapp": {
+    "title": "Programu Ndegu ya OmniRoute",
+    "errTelegramOnly": "Ukurasa huu lazima ufitiwe ndani ya Programu Ndegu ya Telegram.",
+    "greeting": "👋 Habari {name}! Tuma ujumbe kwa kuongea kupitia lango la OmniRoute lako.",
+    "greetingFallbackName": "hapa",
+    "errNoReply": "⚠️ Hakuna jibu kutoka kwa lango.",
+    "btnSend": "Tuma"
+  },
+  "falNative": {
+    "title": "Modeli asilia za Fal",
+    "description": "Tafuta kituo cha mwisho, pakia skima yake, na ukiendeshe kwa kutumia ingizo lililoelezwa kwenye nyaraka. Hali ya foleni na utiririshaji asilia hubaki tofauti.",
+    "connectionRequired": "Kwanza ongeza muunganisho wenye ufunguo wa API wa Fal.",
+    "category": "Kategoria",
+    "endpoint": "ID ya kituo cha mwisho",
+    "reasoning": "Udhibiti wa kufikiri kimantiki",
+    "input": "Ingizo la JSON katika umbizo asilia (safu huhifadhi mpangilio wake)",
+    "transport": "Njia ya usafirishaji",
+    "run": "Endesha modeli",
+    "job": "ID ya kazi iliyohifadhiwa",
+    "register": "Sajili kituo cha mwisho au skima mbadala",
+    "schema": "Skima ya OpenAPI 3",
+    "download": "Pakua faili la matokeo",
+    "newGeneration": "__MISSING__",
+    "submissionUnknown": "__MISSING__",
+    "recover": "__MISSING__",
+    "recoveryRecord": "__MISSING__",
+    "recoveryMismatch": "__MISSING__",
+    "recoveryHelp": "__MISSING__",
+    "streamIncomplete": "__MISSING__",
+    "streamError": "__MISSING__"
   }
 }

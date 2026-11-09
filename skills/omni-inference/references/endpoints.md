@@ -38,6 +38,12 @@
 - [`GET /api/v1/voices`](#get-apiv1voices)
 - [`POST /api/v1/speech-to-text`](#post-apiv1speech-to-text)
 - [`POST /api/v1/text-to-speech/{voiceId}`](#post-apiv1text-to-speechvoiceid)
+- [`POST /api/v1/sound-generation`](#post-apiv1sound-generation)
+- [`POST /api/v1/music`](#post-apiv1music)
+- [`POST /api/v1/music/stream`](#post-apiv1musicstream)
+- [`POST /api/v1/music/detailed`](#post-apiv1musicdetailed)
+- [`POST /api/v1/music/detailed/stream`](#post-apiv1musicdetailedstream)
+- [`POST /api/v1/music/plan`](#post-apiv1musicplan)
 - [`GET /api/v1/explain/routing`](#get-apiv1explainrouting)
 - [`GET /api/v1/providers/suggested-models`](#get-apiv1providerssuggested-models)
 - [`GET /api/v1/provider-plugin-manifest`](#get-apiv1provider-plugin-manifest)
@@ -92,6 +98,8 @@
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
 - [`GET /api/v1/providers/{provider}/limits`](#get-apiv1providersproviderlimits)
 - [`PUT /api/v1/providers/{provider}/limits`](#put-apiv1providersproviderlimits)
+- [`GET /api/v1/quota-recoveries/{id}`](#get-apiv1quota-recoveriesid)
+- [`DELETE /api/v1/quota-recoveries/{id}`](#delete-apiv1quota-recoveriesid)
 - [`GET /api/v1/quotas/check`](#get-apiv1quotascheck)
 - [`GET /api/v1/registered-keys`](#get-apiv1registered-keys)
 - [`POST /api/v1/registered-keys`](#post-apiv1registered-keys)
@@ -103,6 +111,8 @@
 - [`POST /api/v1/responses/{path}`](#post-apiv1responsespath)
 - [`GET /api/v1/search/analytics`](#get-apiv1searchanalytics)
 - [`POST /api/v1/segment`](#post-apiv1segment)
+- [`GET /api/v1/systemone`](#get-apiv1systemone)
+- [`POST /api/v1/systemone`](#post-apiv1systemone)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -548,6 +558,84 @@ curl -X POST http://localhost:20128/api/v1/text-to-speech/{voiceId} \
   -d '{}'
 ```
 
+### POST /api/v1/sound-generation
+
+Create an ElevenLabs sound effect
+
+Proxies POST /v1/sound-generation using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/sound-generation \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music
+
+Compose ElevenLabs music
+
+Proxies POST /v1/music using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/stream
+
+Stream ElevenLabs music
+
+Proxies POST /v1/music/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/stream \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/detailed
+
+Compose ElevenLabs music with its composition plan
+
+Proxies POST /v1/music/detailed using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/detailed \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/detailed/stream
+
+Stream ElevenLabs music and metadata as SSE
+
+Proxies POST /v1/music/detailed/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/detailed/stream \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/plan
+
+Create an ElevenLabs music composition plan
+
+Proxies POST /v1/music/plan using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/plan \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### GET /api/v1/explain/routing
 
 Routing explainability snapshot
@@ -636,6 +724,9 @@ curl -X DELETE http://localhost:20128/api/v1/{omnirouteCatchAll} \
 
 GET accounts › <id> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/accounts/{id}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -644,6 +735,9 @@ curl http://localhost:20128/api/v1/accounts/{id}/limits \
 ### PUT /api/v1/accounts/{id}/limits
 
 PUT accounts › <id> › limits
+
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
 
 ```bash
 curl -X PUT http://localhost:20128/api/v1/accounts/{id}/limits \
@@ -941,6 +1035,9 @@ curl http://localhost:20128/api/v1/media/{id} \
 
 POST issues › report
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl -X POST http://localhost:20128/api/v1/issues/report \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
@@ -1070,6 +1167,9 @@ curl -X POST http://localhost:20128/api/v1/music/generations \
 
 GET providers › <provider> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
@@ -1079,11 +1179,34 @@ curl http://localhost:20128/api/v1/providers/{provider}/limits \
 
 PUT providers › <provider> › limits
 
+Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.
+
+
 ```bash
 curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/v1/quota-recoveries/{id}
+
+Poll a quota recovery ticket
+
+Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or `POST /api/v1/responses` turn that failed with a terminal quota error. A request opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for up to 24 h). Instead of the quota error the caller then receives `202` with `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+
+```bash
+curl http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### DELETE /api/v1/quota-recoveries/{id}
+
+Cancel a quota recovery ticket
+
+```bash
+curl -X DELETE http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### GET /api/v1/quotas/check
@@ -1212,22 +1335,56 @@ curl -X POST http://localhost:20128/api/v1/segment \
   -d '{}'
 ```
 
-### GET /api/v1/video-bridge/drilldown
+### GET /api/v1/systemone
 
-GET video bridge › drilldown
+List decisions-capable models
+
+Decisions entries from the unified model catalog.
 
 ```bash
-curl http://localhost:20128/api/v1/video-bridge/drilldown \
+curl http://localhost:20128/api/v1/systemone \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/systemone
+
+System One typed decisions
+
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/video-bridge/drilldown
+
+Read authenticated tenant-bound video frame variants
+
+Requires explicit remote drill-down operator consent and an authenticated API key. A nonempty API-key endpoint allowlist must include video. Resolves an opaque handle from the x-omniroute-video-drilldown chat response header; never accepts a client principal, raw video or session ID. JSON including Base64 is limited to 32 MiB. Unknown, expired and cross-key handles return indistinguishable 404 responses. Handles are process-local and expire after ten minutes or a restart.
+
+```bash
+# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's
+# x-omniroute-video-drilldown header, obtained with the same API key.
+curl --get http://localhost:20128/api/v1/video-bridge/drilldown \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"
 ```
 
 ### DELETE /api/v1/video-bridge/drilldown
 
-DELETE video bridge › drilldown
+Delete an authenticated owner's video drill-down handle
+
+Idempotent; unknown, expired or cross-key handles remove zero entries. Releases retained frames and accounting for the owner only. Remote operator consent and a valid API key are always required. A nonempty API-key endpoint allowlist must include video.
 
 ```bash
-curl -X DELETE http://localhost:20128/api/v1/video-bridge/drilldown \
-  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's
+# x-omniroute-video-drilldown header, obtained with the same API key.
+curl --get -X DELETE http://localhost:20128/api/v1/video-bridge/drilldown \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"
 ```
 
 ### GET /api/v1/videos/generations

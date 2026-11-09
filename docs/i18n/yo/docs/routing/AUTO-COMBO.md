@@ -127,6 +127,27 @@ handleComboChat (ẹ́ńjìnnì kan náà bí àwọn combo tí a ti tọ́jú)
 | `src/sse/handlers/chat.ts`                                | Ìṣọ̀kan: ọ̀nà-kúkúrú ìṣáájú aifọwọ́yí          |
 | `src/shared/constants/providers.ts`                       | Àkọsílẹ̀ ètò `SYSTEM_PROVIDERS.auto`         |
 
+## Awọn ayanfẹ akọọlẹ fun awọn akojọpọ aifọwọyi
+
+Olootu Aifọwọyi ni oye nfunni ni iyan** Awọn ayanfẹ akọọlẹ** apakan. Asopọ kọọkan le jẹ Ti o fẹ, Deede (aiyipada), Ifipamọ, tabi Yasọtọ. Ọpọ awọn isopọ le pin ipele kan. Aifọwọyi yan laarin ipele akọkọ ti o yẹ, ni idaduro ihuwasi scoring/router rẹ nibẹ; awọn igbiyanju ti kuna lati ṣubu si awọn akọọlẹ nja ti o ku, ti o fẹ ṣaaju deede ṣaaju ifiṣura. Awọn asopọ ti o yọkuro ko jẹ lilo nipasẹ konbo yii rara.
+
+Eto naa wa ni ipamọ bi `config.accountPreferences`, ti a fi bọtini pamọ nipasẹ asopọ ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Maapu ti a yọkuro tabi ofo ni idaduro ipa ọna ti o wa tẹlẹ. Awọn ayanfẹ ko mu awọn asopọ alaabo ṣiṣẹ, funni ni iraye si bọtini API, mu pada awọn oludije idinamọ ipin, tabi awọn sọwedowo isuna fori. Igbiyanju kọọkan jẹ ihamọ si asopọ nja rẹ, nitorinaa idapada akọọlẹ ko le fo awọn ipele lẹhin olulana konbo. Ibaṣepọ igba ti o wa tẹlẹ le ṣe idaduro akọọlẹ ti o yẹ; laisi iwe apamọ ti o so mọ ibi titan abinibi ti o duro ti o yipada dipo ipalọlọ yiyipada awọn akọọlẹ.
+
+Awọn ayanfẹ ti a tunto lo ipa ọna aifọwọyi-mọ akọọlẹ: kaṣe ọrọ-ọrọ ti a ko sopọ, opo gigun ti epo, rudurudu ati awọn ọna abuja ojiji ko firanṣẹ. Hejii akiyesi jẹ alaabo fun awọn ibeere wọnyi nitorinaa awọn akọọlẹ ifipamọ ko le di awọn ti o fẹ. Awọn ilana konbo miiran ko tumọ eto yii. Yiyipada konbo kuro ni Aifọwọyi ntọju awọn ayanfẹ ti o fipamọ fun iyipada nigbamii.
+
 ## Àwọn Orúkọ Combo Tó Bá Ìdánimọ̀ Àwòṣe Gidi Mu
 
 Combo kan tí `name` rẹ̀ bá ìdánimọ̀ àwòṣe lásán mu pátápátá (fún àpẹẹrẹ, combo tí orúkọ rẹ̀ jẹ́
@@ -279,70 +300,53 @@ curl -sS http://localhost:20128/v1/chat/completions \
 `config.budgetFallback` tó ti wà tẹ́lẹ̀ nínú ẹ́ńjìnnì náà. `config.budgetFallback` tí a tọ́jú fún àkójọpọ̀ kan ("strict" |
 "cheapest") ló ń ṣètò ìlànà tó máa ń bá a lọ; akọlé náà máa ń fagi lé e fún ìbéèrè kan ṣoṣo.
 
-## Gbogbo Àwọn Ọ̀nà Ìdarí
+## Gbogbo afisona ogbon
 
-Ẹ́ńjìnnì combo OmniRoute ṣe àtìlẹ́yìn fún **ọ̀nà ìdarí 20** (tí a kéde nínú `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Ẹ́ńjìnnì Auto Combo fúnra rẹ̀ wà lábẹ́ ọ̀nà `auto`; àwọn yòókù sì wà fún àwọn combo tí a ti fi pamọ́.
+OmniRoute's konbo engine atilẹyin** 20 afisona ogbon** (ti a kede ni `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). Awọn Auto Combo engine ara ti wa ni fara labẹ `auto` nwon.Mirza; awọn miiran wa fun awọn combos ti o tẹsiwaju.
 
-| Ọ̀nà                 | Àpèjúwe                                                                                                                                                                                             |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | Àtòjọ tí a ṣètò nípa ibi-àfojúsùn àkọ́kọ́ pẹ̀lú ààyò tí a sọ ní kedere                                                                                                                                 |
-| `weighted`          | Yíyan aláìlétò tí a fi ìwọ̀n ṣe gẹ́gẹ́ bí ìwọ̀n ibi-àfojúsùn kọ̀ọ̀kan                                                                                                                                     |
-| `round-robin`       | Yípo la àwọn ibi-àfojúsùn kọjá ní ìtòlẹ́sẹẹsẹ (ní àwọn ìdìpọ̀; wo ìsàlẹ̀)                                                                                                                              |
-| `context-relay`     | Gbé àyíká ọ̀rọ̀ lọ láàárín àwọn ibi-àfojúsùn (àwọn ìjíròrò gígùn)                                                                                                                                     |
-| `fill-first`        | Kún ìpín ibi-àfojúsùn kọ̀ọ̀kan kí o tó lọ sí èyí tó kàn                                                                                                                                               |
-| `p2c`               | Ìpín ẹrù aláìlétò nípa agbára-yíyan-2                                                                                                                                                               |
-| `random`            | Yíyan aláìlétò tó dọ́gba                                                                                                                                                                             |
-| `least-used`        | Yan ibi-àfojúsùn tó ní ẹrù lọ́wọ́lọ́wọ́ tó kéré jù                                                                                                                                                      |
-| `cost-optimized`    | Dín $ fún ìbéèrè kọ̀ọ̀kan kù gẹ́gẹ́ bí ìdíyelé katalọ́ọ̀gù                                                                                                                                                |
-| `reset-aware` ⭐    | Ṣètò ààyò nípa àkókò àtúntò ìpín — àwọn fèrèsé àtúntò kúkúrú ni a gbé ga                                                                                                                            |
-| `reset-window`      | Fẹ́ràn àwọn ibi-àfojúsùn tí fèrèsé ìpín wọn yóò tún bẹ̀rẹ̀ láìpẹ́ jù                                                                                                                                    |
-| `headroom`          | Yan ibi-àfojúsùn tó ní àyè ìpín tó ṣẹ́kù jù                                                                                                                                                          |
-| `quota-weighted`    | Fò àwọn àkọọ́lẹ̀ tí ìpín wọn ti tán kọjá, lẹ́yìn náà yan láàárín àwọn tó ṣẹ́kù ní ìbámu pẹ̀lú ìpín tó ṣẹ́kù tí a pín pẹ̀lú ẹrù tó ń lọ lọ́wọ́; àwọn ìjíròrò tó ti wà yóò dúró ní dídì mọ́ ọn                  |
-| `strict-random`     | Yíyan aláìlétò láìyọ àwọn àtúnṣe kúrò                                                                                                                                                               |
-| `auto`              | Lo ìṣírò àmì Auto Combo (ifosiwewe 16) — **a ṣe àbá rẹ̀**                                                                                                                                            |
-| `lkgp`              | Ọ̀nà Tí A Mọ̀ Pé Ó Ṣiṣẹ́ Kẹ́yìn (ó di mọ́ olùpèsè tó ṣàṣeyọrí kẹ́yìn, lẹ́yìn náà ó padà sí àwọn òfin)                                                                                                      |
-| `context-optimized` | Yan ibi-àfojúsùn tó bá ìwọ̀n àyíká ọ̀rọ̀ lọ́wọ́lọ́wọ́ mu jù                                                                                                                                                |
-| `cache-optimized`   | Tún àwọn ibi-àfojúsùn tò nípa ìbámu pẹ̀lú cache prompt — àsopọ̀ tó ṣeé ṣe jù láti ti ní ìbẹ̀rẹ̀ tí a ti cache fún ìbéèrè yìí ni a kọ́kọ́ dán wò (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Firanṣẹ́ sí àkójọpọ̀ àwọn model ní ìṣọ̀kan, lẹ́yìn náà jẹ́ kí adájọ́ ṣàkópọ̀ wọn sí ìdáhùn kan (wo ìsàlẹ̀)                                                                                                  |
-| `pipeline`          | Ṣiṣe àwọn ibi-àfojúsùn ní tẹ̀lé-tẹ̀lé, nípa fífi àbájáde ìgbésẹ̀ kọ̀ọ̀kan sínú ìwọlé ìgbésẹ̀ tó kàn; ìdáhùn ìkẹyìn nìkan ni a dá padà (#6396)                                                             |
+| Ilana               | Apejuwe                                                                                                                                                                                       |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | Àtòkọ paṣẹ ibi-afẹde akọkọ pẹlu pataki ti o fojuhan                                                                                                                                           |
+| `weighted`          | Iwọn laileto nipasẹ iwuwo ibi-afẹde                                                                                                                                                           |
+| `round-robin`       | Yiyi lọ nipasẹ awọn ibi-afẹde ni tito-to (batched; wo isalẹ)                                                                                                                                  |
+| `context-relay`     | Pa ọrọ-ọrọ kuro lori awọn ibi-afẹde (awọn ibaraẹnisọrọ gigun)                                                                                                                                 |
+| `fill-first`        | Kun kọọkan afojusun ká ipin ṣaaju ki o to gbigbe si tókàn                                                                                                                                     |
+| `p2c`               | Power-of-2-choices fifuye iwontunwosi                                                                                                                                                         |
+| `random`            | Aṣọ ID aṣayan                                                                                                                                                                                 |
+| `least-used`        | Mu ibi-afẹde pẹlu ẹru lọwọlọwọ ti o kere julọ                                                                                                                                                 |
+| `cost-optimized`    | Din $ fun ibeere ti a fun ni idiyele katalogi                                                                                                                                                 |
+| `reset-aware` ⭐    | Ṣe iṣaaju nipasẹ akoko atunto akoko — kukuru atunto awọn window ni ipo ti o ga julọ                                                                                                           |
+| `reset-window`      | Ṣe ayanfẹ awọn ibi-afẹde ti ferese ipin wọn tunto laipẹ                                                                                                                                       |
+| `headroom`          | Yan ibi-afẹde pẹlu yara ori ipin ipin to ku julọ                                                                                                                                              |
+| `quota-weighted`    | Rekọja awọn akọọlẹ ti o rẹwẹsi, lẹhinna yan laarin awọn iyokù ni ibamu si ipin ti o ṣẹku ti a pin nipasẹ ẹru ọkọ ofurufu; awọn ibaraẹnisọrọ to wa tẹlẹ duro pinni                             |
+| `strict-random`     | ID lai deduplication ti ntun                                                                                                                                                                  |
+| `auto`              | Lo idojukọ Konbo igbelewọn (16-ifosiwewe) —** niyanju**                                                                                                                                       |
+| `lkgp`              | Ọna Ti o dara-kẹhin mọ (awọn pinni si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin)                                                                                             |
+| `context-optimized` | Mu ibi-afẹde pẹlu ibamu ti o dara julọ fun iwọn ọrọ-ọrọ lọwọlọwọ                                                                                                                              |
+| `cache-optimized`   | Ṣe atunto awọn ibi-afẹde nipasẹ isunmọ kaṣe-kiakia — asopọ o ṣeeṣe julọ lati mu ami-iṣaaju ipamọ ti ibeere yii ti gbiyanju ni akọkọ (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
+| `fusion` 🧬         | Ṣe afẹfẹ jade si igbimọ ti awọn awoṣe ni afiwe, lẹhinna ṣajọpọ idahun kan nipasẹ adajọ kan (wo isalẹ)                                                                                         |
+| `pipeline`          | Ṣiṣe awọn ibi-afẹde leralera, titọka abajade igbesẹ kọọkan sinu igbewọle igbesẹ ti nbọ; Idahun ikẹhin nikan ni a da pada (#6396)                                                              |
 
-⭐ = Tuntun nínú v3.8.0 · 🧬 = Tuntun nínú v3.8.36
+⭐ = Tuntun ni v3.8.0 · 🧬 = Tuntun ni v3.8.36
 
-### Ìtumọ̀ iṣẹ́ `weighted`
+### `weighted`
 
-`weighted` jẹ́ **yíyan aláìlétò tó ní ìbámu pẹ̀lú ìwọ̀n fún ìbéèrè kọ̀ọ̀kan**
-(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), kì í ṣe ohun tó ń mú wọn dọ́gba:
+`weighted` ni a** iwon ID iyaworan fun ìbéèrè** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`), kii ṣe oluṣatunṣe:
 
-- Ìbéèrè kọ̀ọ̀kan máa ń yan ìgbésẹ̀ **kan** pẹ̀lú iṣeeṣe `weight / totalWeight`; àwọn ìgbésẹ̀ tó ṣẹ́kù
-  ni a ṣètò láti ìwọ̀n gíga sí ìwọ̀n kékeré gẹ́gẹ́ bí pq ìpadà-sẹ́yìn fún ìbéèrè yẹn.
-- Ìgbésẹ̀ tí ìwọ̀n rẹ̀ jẹ́ `0` (tàbí tí kò sí) ni a **kì í yàn láéláé** nígbà tí ìgbésẹ̀ míì bá ní
-  ìwọ̀n > 0 — ó lè ṣiṣẹ́ gẹ́gẹ́ bí ìpadà-sẹ́yìn nìkan lẹ́yìn tí ìgbésẹ̀ tí a yàn bá kùnà. Nígbà tí **gbogbo**
-  ìwọ̀n bá jẹ́ 0 nìkan ni yíyan yóò di èyí tó dọ́gba.
-- Àwọn ìgbésẹ̀ tí gbogbo ibi-àfojúsùn wọn kò sí lárọ̀ọ́wọ́tó — circuit breaker olùpèsè `OPEN`, àkókò
-  ìsinmi àsopọ̀, ìdènà model — ni a yọ kúrò nínú yíyan kí ó tó wáyé
-  (`open-sse/services/combo/targetResolution.ts`), nítorí náà ìgbésẹ̀ kan ṣoṣo tó péye lè máa
-  borí gbogbo ìbéèrè fún ìgbà díẹ̀.
-- `stickyWeightedLimit` (àtòpọ̀ combo, àìpéye `1` = pípa) máa ń di ìgbésẹ̀ tí a yàn mọ́ fún iye
-  àṣeyọrí tẹ̀lé-tẹ̀lé yẹn kí yíyan tuntun tó wáyé.
+- Kọọkan ìbéèrè fa** ọkan** igbese pẹlu iṣeeṣe `weight / totalWeight`; Awọn igbesẹ ti o ku ni a paṣẹ nipasẹ iwuwo ti o sọkalẹ bi ẹwọn fallback fun ibeere yẹn.
+- Igbesẹ ti iwuwo rẹ jẹ `0` (tabi sonu) jẹ** ko kale** nigba ti eyikeyi igbese miiran ni o ni iwuwo > 0 — o le ṣiṣẹ nikan bi ipadabọ lẹhin igbesẹ iyaworan kuna. Nikan nigbati** gbogbo** òṣuwọn ni 0 ṣe yiyan di aṣọ.
+- Awọn igbesẹ ti awọn ibi-afẹde ni gbogbo ko si — olupese Circuit breaker `OPEN`, asopọ cooldown, model lockout — ti wa ni kuro lati iyaworan ṣaaju ki o to ṣẹlẹ (`open-sse/services/combo/targetResolution.ts`), ki kan nikan ni ilera igbese le fun igba die win gbogbo ìbéèrè.
+- `stickyWeightedLimit` (konfigi konbo, aiyipada `1` = pipa) pin igbesẹ ti o fa fun ọpọlọpọ awọn aṣeyọri itẹlera ṣaaju ki o to tun yiya.
 
-Fún yíyí tó muna, lo `round-robin`; fífún `weighted` ní àwọn ìwọ̀n tó dọ́gba ń fúnni ní ìwọ̀ntúnwọ̀nsì oníṣirò — kì í ṣe
-èyí tó muna.
+Fun yiyi to muna lo `round-robin`; òṣuwọn dogba lori `weighted` fun — iṣiro kii ṣe iwọntunwọnsi — ti o muna.
 
-### Ìpo pipeline aláṣojú
+### Ipo opo gigun ti epo
 
-Àkójọpọ̀ `pipeline` kan tó ní ó kéré tán àwọn model méjì lè yan ìdarí planner/executor pẹ̀lú
-`config.agenticOrchestration.enabled`. Target àkọ́kọ́ ló ń ṣètò ètò àti àwọn ìdáhùn ìkẹyìn;
-target kejì ló ń mú àwọn tool call abinibi client jáde. OmniRoute máa ń ṣàwárí àwọn ìtẹ̀síwájú
-tool-result láti inú protocol request, ó máa ń béèrè lọ́wọ́ planner bóyá tool round míì
-ṣì ṣe pàtàkì, ó sì máa ń yan executor tàbí planner ní ìmúdàgba gẹ́gẹ́ bí ìgbésẹ̀ ìkẹyìn
-tí client máa rí.
+Akopọ `pipeline` pẹlu o kere ju awọn awoṣe meji le jade si ọna ọna planner/executor pẹlu `config.agenticOrchestration.enabled`. Ibi-afẹde akọkọ ni eto ati awọn idahun ikẹhin; ibi-afẹde keji njade awọn ipe irinṣẹ abinibi-onibara. OmniRoute ṣe awari awọn itesiwaju esi-irinṣẹ lati ilana ibeere, beere lọwọ oluṣeto boya o nilo iyipo irinṣẹ miiran, ati ni agbara mu boya alaṣẹ tabi oluṣeto ni ipele ikẹhin ti nkọju si alabara.
 
-Àwọn model àfikún lẹ́yìn target kejì ni a tò sí executor backups. HTTP response tó kuna
-tàbí transport exception máa ń mú kí a lọ sí executor tó kàn, pẹ̀lú planner decision
-kan náà àti native tools kan náà, ṣùgbọ́n pẹ̀lú step prompt ti executor náà fúnra rẹ̀ àti
-resolved connection rẹ̀. Response àkọ́kọ́ tó ṣàṣeyọrí ni a máa dá padà láìyípadà, pẹ̀lú
-SSE streaming; àwọn ìkùnà lẹ́yìn tí stream tó ṣàṣeyọrí bá ti bẹ̀rẹ̀ kò ṣeé gbìyànjú lẹ́ẹ̀kan sí i níbí.
-Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Client aborts máa dá dispatch dúró.
+Lori awọn ilọsiwaju esi-irinṣẹ, OmniRoute tun da ipaniyan duro nigbati awọn iyipo meji ti o pari ni itẹlera tun awọn ipe irinṣẹ kanna ṣe pẹlu awọn abajade ti ko yipada, tabi nigbati gbogbo abajade ti o samisi ni gbangba ni awọn iyipo itẹlera meji kuna. Awọn abajade iyipada gba awọn ipe leralera laaye (fun apẹẹrẹ, idibo). Ẹṣọ tunto lori ibeere olumulo titun, awọn ẹgbẹ ti o jọra awọn ipe sinu iyipo kan, ati atilẹyin Anthropic, Iwiregbe Ipari, Awọn idahun ati awọn itan-akọọlẹ Gemini. Alakoso gba idi naa ati pe o ni idahun ikẹhin paapaa ti o ba beere ọpa miiran yika.
+
+Awọn awoṣe afikun lẹhin ibi-afẹde keji ti paṣẹ awọn afẹyinti alaṣẹ. Idahun HTTP ti o kuna tabi awọn ilọsiwaju imukuro gbigbe si olupilẹṣẹ atẹle, ti n gbe ipinnu olupilẹṣẹ kanna ati awọn irinṣẹ abinibi ṣugbọn igbesẹ ti alaṣẹ ti ararẹ ati asopọ ipinnu. Idahun aṣeyọri akọkọ jẹ pada ko yipada, pẹlu ṣiṣan SSE ; awọn ikuna lẹhin ṣiṣan aṣeyọri ti bẹrẹ ko le tun gbiyanju nibi. Ti gbogbo awọn alaṣẹ ba kuna, ikuna ti o kẹhin yoo pada. Onibara aborts da fifiranṣẹ.
 
 ```json
 {
@@ -354,35 +358,17 @@ Tí gbogbo executors bá kuna, ìkùnà tó kẹ́yìn ni a máa dá padà. Clie
 }
 ```
 
-Executor lè mú ọ̀pọ̀ independent calls jáde nínú response kan. Àwọn dependent calls ni a
-máa bójú tó ní àwọn client tool-result turns tó tẹ̀ lé e, nígbà tí planner yóò ṣe àyẹ̀wò gbogbo result.
-Ìye àìròtẹ́lẹ̀ ti `maxToolRounds` jẹ́ `8`, ó sì gba `1`–`32`; nígbà tí a bá dé iye náà, planner gbọ́dọ̀
-mú ìdáhùn ìkẹyìn tó dára jù lọ tó wà jáde. A máa ń fi àwọn internal planner decisions pamọ́ sínú buffer, nígbà tí
-client-facing response tí a yàn máa ń pa streaming preference àkọ́kọ́ mọ́.
+Oluṣeto le gbe awọn ipe ominira lọpọlọpọ jade ni esi kan. Awọn ipe ti o gbẹkẹle ni a mu ni awọn iyipada abajade irinṣẹ alabara nigbamii, pẹlu oluṣeto atunwo gbogbo abajade. `maxToolRounds` aiyipada si `8` ati gba `1`–`32`; ni kete ti o ba de ọdọ, oluṣeto gbọdọ gbejade idahun ikẹhin ti o dara julọ ti o wa. Awọn ipinnu oluṣeto inu inu jẹ ifipamọ, lakoko ti idahun ti nkọju si alabara ti o yan ṣe itọju ayanfẹ ṣiṣanwọle atilẹba.
 
-### `round-robin` sticky batch àti account expansion
+### `round-robin` alalepo ipele ati iroyin imugboroosi
 
-Round-robin ń ṣiṣẹ́ ní batch, kì í ṣe request-kan-fún-step-kan:
+Yika-robin ti wa ni ipele, kii ṣe ibeere-ọkan-ni-igbesẹ:
 
-- `stickyRoundRobinLimit` (combo config, lẹ́yìn náà `comboStickyRoundRobinLimit`, lẹ́yìn náà
-  `settings.stickyRoundRobinLimit`, àìròtẹ́lẹ̀ **3**) máa ń pa target kan náà mọ́ fún iye
-  àwọn àṣeyọrí tó tẹ̀ léra yẹn kí ó tó yí padà. Ṣètò combo override sí `1` fún yíyí
-  request-kan. Combo editor máa ń fi iye tó wúlò hàn àti layer tí ó ti wá.
-- `connectionAwareExpansion` (combo config, lẹ́yìn náà settings, àìròtẹ́lẹ̀ **false**) máa ń fa
-  step kọ̀ọ̀kan ní ipele provider gbòòrò sí àwọn target ti account kọ̀ọ̀kan kí yíyí tó bẹ̀rẹ̀. Àwọn strategy Group-B
-  (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
-  fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) máa ń pa ìríran ipele provider mọ́ títí tí èyí yóò fi wà ní títàn. Combo editor ń pèsè
-  inherit / on / off; inherit máa ń lo global default (off).
-- Ìdarí ìbámu prompt-cache (`promptCacheAffinityEnabled`, àìròtẹ́lẹ̀ **true**) máa ń tún
-  pinned connections tò kí àwọn cache keys tó bá ara wọn mu lè dúró lórí account kan. Ó gba ipò àkọ́kọ́ ju
-  round-robin àti weighted rotation kọjá àwọn pinned per-account steps. Pa á
-  lábẹ́ Settings → Combo defaults tí o bá nílò yíyí tó muna. Kò sí per-combo override.
+- `stickyRoundRobinLimit` (konfigi konbo, lẹhinna `comboStickyRoundRobinLimit`, lẹhinna `settings.stickyRoundRobinLimit`, aiyipada** 3** ) n tọju ibi-afẹde kanna fun ọpọlọpọ awọn aṣeyọri itẹlera ṣaaju yiyi. Ṣeto idojukokoro konbo si `1` fun yiyi-ibeere kan. Olootu konbo fihan iye ti o munadoko ati iru Layer ti o ti wa.
+- `connectionAwareExpansion` (konfigi konbo, lẹhinna awọn eto, aiyipada** eke** ) faagun igbesẹ ipele-olupese kọọkan sinu awọn ibi-apamọ-kọọkan ṣaaju yiyi. Ẹgbẹ-B ogbon ( ayo, iwon, yika-robin, ID, p2c, o kere-lo, iye owo-iṣapeye, lkgp, kun-akọkọ, muna-ID, context-iṣapeye, kaṣe-iṣapeye, context-relay, fusion, pipeline) tọju wiwo ipele olupese titi eyi yoo wa ni titan. Olootu konbo ṣafihan jogun / tan / pipa; jogun nlo aiyipada agbaye (pa).
+- Itọnisọna agbegbe kaṣe-kia (`promptCacheAffinityEnabled`, aiyipada** ooto** ) tun paṣẹ awọn isopọ pinni nitoribẹẹ awọn bọtini kaṣe ti o baamu duro lori akọọlẹ kan. O gba iṣaaju lori iyipo-robin ati yiyi iwuwo kọja awọn igbesẹ ti a pinni fun-iroyin. Pa a labẹ Eto → Konbo aiyipada ti o ba nilo yiyi to muna. Ko si idakokoro-konbo.
 
-Fún yíyí láàárín ọ̀pọ̀ account lórí model kan, yan **one dynamic-account step** (pẹ̀lú
-`connectionId` òfo, gbogbo pool) àti sticky limit `1`, dípò pinned `connectionId` mẹ́ta.
-Pinned steps pẹ̀lú affinity máa ń kó jọ sórí account kan náà àní bí counter RR
-ṣe ń tẹ̀ síwájú.
+Fun yiyi-iroyin olona lori awoṣe kan, fẹ** ọkan ìmúdàgba-iroyin igbese** ( `connectionId` ofo, gbogbo adagun) pẹlu alalepo iye `1`, kii ṣe pinni `connectionId` s mẹta. Awọn igbesẹ ti a fi ṣopọ pẹlu ifaramọ ibalẹ sori akọọlẹ kanna paapaa lakoko ti kika RR n tẹsiwaju.
 
 ## Ìlànà Fusion
 
@@ -482,56 +468,56 @@ Lẹ́yìn náà, pè é bí combo èyíkéyìí: `{"model":"fusion-panel","mess
 
 ## API
 
-**Kò sí endpoint `POST /api/combos/auto` tí a yà sọ́tọ̀** — ọ̀nà méjì ni a fi ń lo Auto-Combo:
+Kò sí **endpoint `POST /api/combos/auto` tí a yà sọ́tọ̀** — ọ̀nà méjì ni a fi ń lo Auto-Combo:
 
-1. **Àìsí-àtòjọ-ẹ̀rọ (a dámọ̀ràn rẹ̀):** Fi ìbéèrè ìparí ìfọ̀rọ̀wérọ̀ èyíkéyìí ránṣẹ́ pẹ̀lú `model: "auto"` tàbí `model: "auto/<variant>"`. Ilé-iṣẹ́ aláfojúṣe náà ń kọ combo náà fún ìbéèrè kọ̀ọ̀kan — kò nílò ìfipamọ́, kò sì nílò àwọn ìpè API.
+1. **Àìní-àtòpọ̀ (a dámọ̀ràn):** Fi ìbéèrè ìparí ìjíròrò èyíkéyìí ránṣẹ́ pẹ̀lú `model: "auto"` tàbí `model: "auto/<variant>"`. Factory aláfojúdi náà máa ń kọ combo náà fún ìbéèrè kọ̀ọ̀kan — kò nílò ìfipamọ́, bẹ́ẹ̀ ni kò nílò ìpè API.
 
-2. **Combo tí a fi pamọ́ pẹ̀lú `strategy: "auto"`:** Ṣẹ̀dá combo déédé kan nípasẹ̀ `POST /api/combos`, kí o sì ṣètò `strategy: "auto"` pẹ̀lú `config.auto.weights` / `config.auto.candidatePool`. Ẹ́ńjìnnì ìṣírò àmì kan náà ni a ń lò; a fi combo náà pamọ́ sínú `combos`, a sì lè tún un lò nípasẹ̀ ID.
+2. **Combo tí a fi pamọ́ pẹ̀lú `strategy: "auto"`:** Ṣẹ̀dá combo déédé kan nípasẹ̀ `POST /api/combos`, kí o sì ṣètò `strategy: "auto"` pẹ̀lú `config.auto.weights` / `config.auto.candidatePool`. Ẹ̀rọ ìṣírò àmì kan náà ni a máa ń lò; a máa fi combo náà pamọ́ sínú `combos`, a sì lè tún lò ó nípasẹ̀ ID.
 
-Fún ìṣàwárí, `GET /api/combos/auto` ń ṣàtòjọ gbogbo variant pẹ̀lú candidate pool tí a ti yanjú rẹ̀ àti `context_length` / `max_output_tokens` — iye MAX láàárín àwọn window candidate pool náà. Àwọn client (fún àpẹẹrẹ, plugin opencode) gbọ́dọ̀ kéde àwọn iye wọ̀nyí dípò `0`: context odo máa pa auto-compaction opencode patapata, èyí sì ń jẹ́ kí àwọn session máa tóbi títí di pé ìparẹ́ history ti gateway bá context jẹ́. Ó bófin mu láti kéde MAX nítorí pé àlẹ̀mọ́ context ti auto-combo ṣáájú ìdarí ń darí àwọn ìbéèrè tí ó tóbi jù lọ sí àwọn candidate tí window wọn tóbi.
+Fún ìṣàwárí, `GET /api/combos/auto` máa ń ṣe àtòjọ gbogbo variant pẹ̀lú àkójọpọ̀ olùdíje rẹ̀ tí a ti yanjú, àti `context_length` / `max_output_tokens` — iye MAX láàrín àwọn window àkójọpọ̀ olùdíje náà. Àwọn client (fún àpẹẹrẹ, plugin opencode) gbọ́dọ̀ polówó àwọn iye wọ̀nyí dípò `0`: context òdo máa ń pa ìṣopọ̀-àdáṣe opencode pátápátá, èyí á jẹ́ kí àwọn session máa dàgbà títí ìparẹ́ ìtàn gateway yóò fi ba context jẹ́. Ó láìléwu láti polówó MAX nítorí pé àlẹ̀mọ́-àkọ́kọ́ context auto-combo máa ń darí àwọn ìbéèrè tí ó tóbi jù lọ sí àwọn olùdíje tí wọ́n ní window ńlá.
 
 ```bash
-# Lílo àìsí-àtòjọ-ẹ̀rọ (láì ṣẹ̀dá combo)
+# Lílò àìní-àtòpọ̀ (kò sí ṣíṣẹ̀dá combo)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo auto tí a fi pamọ́ nípasẹ̀ endpoint combos déédé
+# Combo àdáṣe tí a fi pamọ́ nípasẹ̀ endpoint combo déédé
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Àwọn strategy router auto
+### Àwọn ọ̀nà router àdáṣe
 
 Àwọn combo `strategy: "auto"` tí a fi pamọ́ lè ṣètò `config.routerStrategy` (tàbí ti àtijọ́
 `config.auto.routerStrategy`) sí ọ̀kan lára àwọn wọ̀nyí:
 
-- `rules` — ìṣírò àmì tí a fi ìwọ̀n sí ní àìyẹsẹ̀
-- `score` — ń yan ìṣírò àmì oníwọ̀n tí a ṣètò tí ó ga jù lọ. Bí àmì bá dọ́gba pátápátá, ó ń pa
-  ètò candidate tí a ṣètò mọ́; `explorationRate` tó ti wà ń mú àpẹẹrẹ láti inú gbogbo pool tí a ṣe ní ipò.
-- `cost` / `eco` — provider tí ó ní ìlera tí ó sì din owó jù lọ
-- `latency` / `fast` — latency p95 tí ó kéré jù lọ pẹ̀lú ìjìyà fún àìgbẹ́kẹ̀lé
-- `sla-aware` / `sla` — fẹ́ràn àwọn candidate tí ó bá latency p95, ìwọ̀n àṣìṣe, àti àwọn
-  SLO iye owó àṣàyàn mu
+- `rules` — ìṣírò àmì olùwọ̀n àìyípadà
+- `score` — yan àmì olùwọ̀n tí a ti ṣètò tí ó ga jù lọ. Nígbà tí àmì bá dọ́gba pátápátá, a máa pa
+  ìtòlẹ́sẹẹsẹ olùdíje tí a ti ṣètò mọ́; `explorationRate` tó ti wà máa ń ṣe àyẹ̀wò láti inú gbogbo àkójọpọ̀ tí a ti tò.
+- `cost` / `eco` — provider tó dára jù lọ ní owó pẹ̀lú ìlera tó dára
+- `latency` / `fast` — latency p95 tó kéré jù lọ pẹ̀lú ìjìyà fún àìṣeégbẹ́kẹ̀lé
+- `sla-aware` / `sla` — fi àwọn olùdíje tí ó bá latency p95, ìwọ̀n àṣìṣe, àti àwọn
+  SLO iye owó àṣàyàn mu ṣáájú
 - `lkgp` — provider rere tí a mọ̀ gbẹ̀yìn ni àkọ́kọ́
-- `nadir` — béèrè lọ́wọ́ API ìpinnu ti [Nadir](https://getnadir.com) irú model inú pool tí
-  prompt náà nílò; ó nílò yíyan-láti-lò, ó sì máa ṣí sí `rules` bí ó bá kùnà
+- `nadir` — béèrè lọ́wọ́ API ìpinnu [Nadir](https://getnadir.com) irú model inú àkójọpọ̀ tí
+  prompt náà nílò; a gbọ́dọ̀ kọ́kọ́ yàn án, ó sì máa padà sí `rules` bí ó bá kùnà
 
-### Àwọn strategy router ní ẹ̀kúnrẹ́rẹ́
+### Àlàyé kíkún nípa àwọn ọ̀nà router
 
-Ẹ́ńjìnnì auto-combo ń pèsè àwọn ìmúṣẹ **RouterStrategy** 7 tí a lè so mọ́ ọn, tí
+Ẹ̀rọ auto-combo ń pèsè àwọn ìmúṣẹ **RouterStrategy** méje tí a lè so mọ́ ọn, tí
 o lè pààrọ̀ nípasẹ̀ `config.routerStrategy` (tàbí `config.auto.routerStrategy` ti àtijọ́).
-Strategy kọ̀ọ̀kan ń yan provider kan láti inú candidate pool, nípa lílo `RoutingContext`
-(irú iṣẹ́, àwọn àmì ìtọ́ka tool/vision, àfojúsùn token, policy SLA àṣàyàn, àti provider rere
-tí a mọ̀ gbẹ̀yìn tí ó jẹ́ àṣàyàn).
+Ọ̀nà kọ̀ọ̀kan máa ń yan provider kan láti inú àkójọpọ̀ olùdíje, nígbà tí a bá fún un ní `RoutingContext`
+(irú iṣẹ́, àwọn àmì-ìtọ́kasí tool/vision, ìṣírò token, ìlànà SLA àṣàyàn, àti
+provider rere tí a mọ̀ gbẹ̀yìn tí ó jẹ́ àṣàyàn).
 
-#### 1. `rules` (àìyẹsẹ̀) — ìṣírò àmì oníwọ̀n onífákítọ̀ 16
+#### 1. `rules` (àìyípadà) — ìṣírò àmì olùwọ̀n onífọ́kítà mẹ́rìndínlógún
 
-Ó yí ẹ́ńjìnnì ìṣírò àmì tó ti wà ká. Ó kọ́kọ́ yọ àwọn candidate circuit-breaker
-`OPEN` kúrò, lẹ́yìn náà ó ṣiṣẹ́ `scorePool()` pẹ̀lú irú iṣẹ́ lọ́wọ́lọ́wọ́ àti `getTaskFitness()`,
-ó sì yan provider tí àmì rẹ̀ ga jù lọ.
+Ó yí ẹ̀rọ ìṣírò àmì tó ti wà ká. Ó máa yọ àwọn olùdíje circuit-breaker
+`OPEN` kúrò, lẹ́yìn náà ó máa ṣiṣẹ́ `scorePool()` pẹ̀lú irú iṣẹ́ lọ́wọ́lọ́wọ́ àti `getTaskFitness()`,
+nípa yíyan provider tó ní àmì tó ga jù lọ.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -551,16 +537,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àìyẹsẹ̀. Lò ó nígbà tí o bá fẹ́ ìwọ̀ntúnwọ̀nsì tó dára láàárín gbogbo àwọn àmì.
+**Ìgbà láti lò ó**: Àìyípadà. Lò ó nígbà tí o bá fẹ́ ìwọ̀ntúnwọ̀nsì tó bójú mu láàrín gbogbo àwọn signal.
 
 **Orúkọ mìíràn**: `rules` (kò ní orúkọ mìíràn)
 
 ---
 
-#### 2. `cost` / `eco` — provider tí ó ní ìlera tí ó sì din owó jù lọ
+#### 2. `cost` / `eco` — provider tó dára jù lọ ní owó pẹ̀lú ìlera tó dára
 
-Ó ṣètò candidate pool nípasẹ̀ `costPer1MTokens` (láti kékeré sí ńlá), ó sì yan èyí tí ó din owó jù lọ.
-Ó kọ́kọ́ yọ àwọn candidate `OPEN` kúrò.
+Ó máa ń to àkójọpọ̀ olùdíje gẹ́gẹ́ bí `costPer1MTokens` (láti kékeré sí ńlá), ó sì yan èyí tó din owó jù lọ.
+Ó kọ́kọ́ yọ àwọn olùdíje `OPEN` kúrò.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -575,16 +561,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àwọn workload tí iye owó ṣe pàtàkì fún, batch processing, tàbí àwọn iṣẹ́ abẹ́lẹ̀.
+**Ìgbà láti lò ó**: Àwọn workload tó ṣọ́ra nípa iye owó, ìṣiṣẹ́ batch, tàbí àwọn iṣẹ́ abẹ́lẹ̀.
 
 **Àwọn orúkọ mìíràn**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — latency p95 tí ó kéré jù lọ pẹ̀lú ìjìyà fún àìgbẹ́kẹ̀lé
+#### 3. `latency` / `fast` — latency p95 tó kéré jù lọ pẹ̀lú ìjìyà fún àìṣeégbẹ́kẹ̀lé
 
-Ó ṣètò nípasẹ̀ `p95LatencyMs + (errorRate * 1000)`. Ìjìyà ìwọ̀n àṣìṣe náà ń rí i dájú pé
-a fi àwọn provider tí kò ṣeé gbẹ́kẹ̀lé sí ipò ìsàlẹ̀, kódà bí latency tí a yàn fún wọn bá kéré.
+Ó máa ń to wọ́n gẹ́gẹ́ bí `p95LatencyMs + (errorRate * 1000)`. Ìjìyà fún ìwọ̀n àṣìṣe máa ń rí i dájú pé
+a to àwọn provider tí kò ṣeé gbẹ́kẹ̀lé sí ìsàlẹ̀, bó tilẹ̀ jẹ́ pé latency tí wọ́n sọ pé wọ́n ní kéré.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -601,28 +587,28 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Àkókò láti lò ó**: Àwọn workload tí latency ṣe pàtàkì fún, bí ìfọ̀rọ̀wérọ̀ àkókò-gidi, autocomplete, tàbí
-àwọn olùrànlọ́wọ́ coding alábáṣepọ̀.
+**Ìgbà láti lò ó**: Àwọn workload tó ṣọ́ra nípa latency, bí ìjíròrò àkókò-gidi, autocomplete, tàbí
+àwọn olùrànlọ́wọ́ coding ìbánisọ̀rọ̀.
 
 **Àwọn orúkọ mìíràn**: `latency`, `fast`
 
 ---
 
-#### 4. `sla-aware` / `sla` — ìbámu SLO fún latency/àṣìṣe/iye owó
+#### 4. `sla-aware` / `sla` — ìbámu pẹ̀lú SLO latency/àṣìṣe/iye owó
 
-Ó ń fún candidate kọ̀ọ̀kan ní àmì ní ìbámu pẹ̀lú bí ó ṣe bá policy SLO tí a ṣètò mu tó:
+Ó máa ń fún olùdíje kọ̀ọ̀kan ní àmì gẹ́gẹ́ bí bí ó ṣe bá ìlànà SLO tí a ti ṣètò mu tó:
 
-| Ìfosiwewe       | Ìwọ̀n | Fọ́ọ̀mùlà                                           |
-| --------------- | ---- | ------------------------------------------------- |
-| Iye ìdádúró     | 35%  | `threshold / max(value, ε)`                       |
-| Iye àṣìṣe       | 35%  | `threshold / max(value, ε)`                       |
-| Iye ìlera       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| Iye owó         | 10%  | `threshold / max(value, ε)` tàbí ìṣètò sí òdi     |
-| Iye ìdúróṣinṣin | 5%   | stddev ìdádúró tí a ṣètò sí òdi                   |
+| Ìfosiwewe           | Ìwọ̀n | Àgbékalẹ̀                                            |
+| ------------------- | ---- | --------------------------------------------------- |
+| Iye àmì ìdádúró     | 35%  | `threshold / max(value, ε)`                         |
+| Iye àmì àṣìṣe       | 35%  | `threshold / max(value, ε)`                         |
+| Iye àmì ìlera       | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)   |
+| Iye àmì iye owó     | 10%  | `threshold / max(value, ε)` tàbí ìṣe àṣewọn òdìkejì |
+| Iye àmì ìdúróṣinṣin | 5%   | ìyapa boṣewa ìdádúró tí a ṣe àṣewọn òdìkejì         |
 
-Nígbà tí `hardConstraints: true`, a máa to àwọn olùdíje ní pàtàkì gẹ́gẹ́ bí **iye ìrúfin**
-(bí wọ́n ṣe kọjá SLO èyíkéyìí tó), lẹ́yìn náà nípasẹ̀ àpapọ̀ iye. Bí bẹ́ẹ̀ kọ́, àpapọ̀
-iye nìkan ni a ó lò.
+Nígbà tí `hardConstraints: true`, a máa to àwọn olùdíje ní pàtàkì gẹ́gẹ́ bí **iye àmì ìrúfin**
+(bí wọ́n ṣe kọjá SLO èyíkéyìí tó), lẹ́yìn náà gẹ́gẹ́ bí iye àmì àpapọ̀. Bí bẹ́ẹ̀ kọ́, iye
+àmì àpapọ̀ nìkan ni.
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
@@ -631,12 +617,12 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... ṣe iṣírò iye olùdíje kọ̀ọ̀kan ní ìbámu pẹ̀lú ìlànà: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... ṣe iṣírò iye àmì olùdíje kọ̀ọ̀kan sí ìlànà: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
 
-**Àwọn ààyè SLA** (tí a ṣètò lórí àtòpọ̀ ìṣètò):
+**Àwọn ààyè SLA** (tí a ṣètò lórí àtúnṣe combo):
 
 ```json
 {
@@ -651,17 +637,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Ìgbà láti lò ó**: Àwọn ẹrù iṣẹ́ iṣelọpọ tó ní àwọn ààlà tó muna fún ìdádúró, ìwọ̀n àṣìṣe, tàbí ìnáwó.
+**Ìgbà tí o yẹ kí o lò ó**: Àwọn ẹrù iṣẹ́ production tó ní ìdádúró, ìwọ̀n àṣìṣe, tàbí ìṣúná iye owó tó muna.
 
-**Àwọn orúkọ àfirọ́pò**: `sla-aware`, `sla`
+**Àwọn orúkọ mìíràn**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — olùpèsè rere tí a mọ̀ gbẹ̀yìn ni àkọ́kọ́
+#### 5. `lkgp` — olupèsè rere tí a mọ̀ kẹ́yìn lákọ̀ọ́kọ́
 
-Ó kọ́kọ́ gbìyànjú **olùpèsè rere tí a mọ̀ gbẹ̀yìn** (tí a bá ṣètò rẹ̀), lẹ́yìn náà ó padà
-sí ọ̀nà `rules`. Ó wúlò fún dídúró mọ́ ìjókòó — olùpèsè kan náà ni yóò bójú tó
-àwọn ìbéèrè tó tẹ̀ lé e nínú ìjíròrò.
+Ó kọ́kọ́ gbìyànjú **olùpèsè rere tí a mọ̀ kẹ́yìn** (bí a bá ti ṣètò rẹ̀), lẹ́yìn náà ó yí padà sí
+ọgbọ́n `rules`. Ó wúlò fún dídì mọ́ session — olupèsè kan náà ló ń bójú tó
+àwọn ìbéèrè àfikún nínú ìjíròrò kan.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -682,27 +668,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Padà sí ọ̀nà rules
+    // Yí padà sí ọgbọ́n rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Ìgbà láti lò ó**: Àwọn ìjíròrò alápá-púpọ̀ níbi tí o ti fẹ́ kí olùpèsè kan náà bójú tó
-àwọn ìbéèrè tó tẹ̀ lé e (fún àpẹẹrẹ, fún ìpamọ́ àkókò, ìtẹ̀síwájú àyíká-ọ̀rọ̀, tàbí ìdúróṣinṣin iye owó).
+**Ìgbà tí o yẹ kí o lò ó**: Àwọn ìjíròrò ọlọ́pọ̀ ìpele níbi tí o ti fẹ́ kí olupèsè kan náà bójú tó
+àwọn ìbéèrè àfikún (fún àpẹẹrẹ, fún caching, ìtẹ̀síwájú àyíká ọ̀rọ̀, tàbí ìbáramu iye owó).
 
-**Orúkọ àfirọ́pò**: `lkgp` (kò ní orúkọ àfirọ́pò)
+**Orúkọ mìíràn**: `lkgp` (kò ní orúkọ mìíràn)
 
 ---
 
 #### 6. `nadir` — yíyan model tó mọ prompt nípasẹ̀ Nadir
 
-Gbogbo ọ̀nà tó wà lókè máa ń ṣe ìpele àwọn olùdíje nípasẹ̀ telemetry tiwọn; kò sí èyíkéyìí nínú wọn tó máa ń ka
-ìbéèrè náà. `nadir` máa ń fi ìfiranṣẹ́ oníṣe tó gbẹ̀yìn àti àwọn model ids inú pool ránṣẹ́ sí
-API ìpinnu [Nadir](https://getnadir.com) (`POST /v1/bucket`), ó sì máa ń darí sí model
-tí Nadir yàn láti inú àkójọ yẹn (`simple` → model tó lágbára tó sì din owó jù, `complex` → èyí
-tó jẹ́ frontier). `rules` ṣì ni yóò yan àsopọ̀ tó ń pèsè model náà, kí quota,
-ìlera àti owó lè máa pinnu account tí a ó lò.
+Gbogbo ọgbọ́n tó wà lókè ń ṣe àgbékalẹ̀ àwọn olùdíje pẹ̀lú telemetry tiwọn; kò sí èyíkéyìí nínú wọn tó ń ka
+ìbéèrè náà. `nadir` ń fi ọ̀rọ̀ olumulo tó ṣẹ̀ṣẹ̀ parí àti àwọn ID model inú pool ránṣẹ́ sí
+API ìpinnu [Nadir](https://getnadir.com) (`POST /v1/bucket`), ó sì ń darí sí model
+tí Nadir yàn láti inú àkójọ yẹn (`simple` → model tó din owó jù tó sì lágbára tó, `complex` → model
+frontier náà). `rules` ṣì ni yóò yan ìsopọ̀ tó ń pèsè model yẹn, nítorí náà quota,
+ìlera àti iye owó ṣì ń pinnu account tí a ó lò.
 
 ```json
 {
@@ -718,31 +704,34 @@ tó jẹ́ frontier). `rules` ṣì ni yóò yan àsopọ̀ tó ń pèsè model 
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` àti `OMNIROUTE_NADIR_BASE_URL` jẹ́ àwọn àṣàyàn ìpadà env fún àwọn
-string méjèèjì. `baseUrl` kàn nílò fún Nadir tí a gbàlejò fúnra ẹni (`/v1` ní ìparí jẹ́ ìtẹ́wọ́gbà).
-Àwọn ìpè tí kò ní key máa ń lọ sí ìpele aláìlórúkọ Nadir, èyí tí a fi òpin ìwọ̀n sí fún IP kọ̀ọ̀kan.
+`OMNIROUTE_NADIR_API_KEY` àti `OMNIROUTE_NADIR_BASE_URL` jẹ́ àwọn àṣàyàn env àfidípò fún àwọn
+string méjèèjì. `baseUrl` nílò fún Nadir tí a gbàlejò fúnra ẹni nìkan (a gba `/v1` tó wà ní ìparí).
+Àwọn ìpè tí kò ní key máa ń lọ sí ipele aláìlórúkọ ti Nadir, èyí tí a fi ààlà ìwọ̀n sí fún IP kọ̀ọ̀kan. Pẹ̀lú key kan
+([ṣẹ̀dá ọ̀kan](https://app.getnadir.com/dashboard/api-keys)), a máa ń kọ ìpinnu kọ̀ọ̀kan sínú
+dashboard Nadir rẹ. Fún ìṣètò àti ìjẹ́rìísí ní kíkún:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Ohun tó ń jáde kúrò nínú àpótí: ọ̀rọ̀ inú ìfiranṣẹ́ oníṣe tó gbẹ̀yìn (àwọn lẹ́tà 16k àkọ́kọ́), àwọn
-model ids olùdíje àti àmì channel `source: "omniroute"`. Kò sí system prompt, ìtàn, tools tàbí
+Ohun tí ó jáde kúrò nínú àpótí: ọ̀rọ̀ inú ìfiranṣẹ́ olumulo tó kẹ́yìn (àwọn àmì lẹ́tà 16k àkọ́kọ́), àwọn ID
+model olùdíje àti àmì channel `source: "omniroute"`. Kò sí system prompt, ìtàn, tools tàbí
 headers.
 
-Ìhùwàsí nígbà ìkùnà jẹ́ fail-open: timeout (àìyẹsẹ̀ 2000 ms), non-2xx, host tí kò ṣeé dé,
-ìdáhùn tí ìrísí rẹ̀ kò tọ́ tàbí yíyan tí kò sí nínú pool máa ń yọrí sí ìpinnu `rules`,
-a ó sì fi `NadirStrategy: fallback (…)` sí ìbẹ̀rẹ̀ ìdí náà. Lẹ́yìn ìpè tó kùnà,
-ọ̀nà náà máa fo nẹ́tíwọ́ọ̀kì fún 30 s, nítorí náà ìjáwọ́ máa ná timeout kan ní gbogbo 30 s dípò
-ọ̀kan fún ìbéèrè kọ̀ọ̀kan. Àwọn ìṣẹ̀lẹ̀ ìdarí máa ń jabo `strategy: "nadir"` nígbà tí Nadir bá ṣe
-àyàn náà ní tòótọ́ nìkan.
+Ìhùwàsí nígbà ìkùnà jẹ́ fail-open: timeout kan (àìyípadà jẹ́ 2000 ms), non-2xx kan, host tí a kò lè dé,
+ìdáhùn tí kò bófin mu tàbí yíyan tí kò sí nínú pool yóò yí padà sí ìpinnu `rules`,
+a ó sì fi `NadirStrategy: fallback (…)` sí ìbẹ̀rẹ̀ ìdí náà. Lẹ́yìn ìpè tó kùnà, ọgbọ́n náà
+kò ní lo network fún 30 s, nítorí náà ìdádúró iṣẹ́ yóò ná timeout kan ní gbogbo 30 s dípò
+ọ̀kan fún ìbéèrè kọ̀ọ̀kan. Àwọn ìṣẹ̀lẹ̀ routing máa ń jabo `strategy: "nadir"` nígbà tí Nadir bá ṣe
+ìyàn náà ní ti gidi nìkan.
 
-**Ìgbà láti lò ó**: ìrìnàjò olóríṣìíríṣìí ìpele ìṣòro lórí pool tó ní ọ̀pọ̀ ìpele model (model kékeré kan, ti àárín
-kan àti frontier kan), níbi tí lílo frontier ní gbogbo ìgbà jẹ́ ìnáwó tí o fẹ́ dín kù.
+**Ìgbà tí o yẹ kí o lò ó**: traffic tó ní onírúurú ìpele ìṣòro lórí pool tó ní onírúurú ipele model (model kékeré kan, ti àárín
+kan àti model frontier kan), níbi tí lílo frontier ní gbogbo ìgbà ti jẹ́ iye owó tí o fẹ́ dín kù.
 
-**Orúkọ àfirọ́pò**: `nadir` (kò ní orúkọ àfirọ́pò)
+**Orúkọ mìíràn**: `nadir` (kò ní orúkọ mìíràn)
 
 ---
 
-### Àwọn ọ̀nà router àdáni
+### Àwọn ọgbọ́n router àdáni
 
-O lè forúkọsílẹ̀ ìmúṣẹ `RouterStrategy` tirẹ nípasẹ̀ API gbogbogbò:
+O lè forúkọsílẹ̀ ìmúṣẹ `RouterStrategy` tirẹ nípasẹ̀ API gbogbo ènìyàn:
 
 ```ts
 import {
@@ -755,7 +744,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Lọ́gíìkì ìdarí rẹ wà níbí
+    // Àgbọ́wọlé routing rẹ wà níbí
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -783,18 +772,18 @@ Lẹ́yìn náà, lò ó:
 
 ---
 
-### Ìtọ́sọ́nà yíyan ọ̀nà router
+### Ìtọ́sọ́nà yíyan ọgbọ́n router
 
-| Ìlò                | Ọ̀nà         | Ìdí                                          |
-| ------------------ | ----------- | -------------------------------------------- |
-| Ẹrù iṣẹ́ tó dọ́gba   | `rules`     | Àìyẹsẹ̀ — ó ṣe àgbéyẹ̀wò gbogbo ìfosiwewe      |
-| Dín owó kù         | `cost`      | Ó máa ń yan èyí tó din owó jù ní gbogbo ìgbà |
-| Dín ìdádúró kù     | `latency`   | Ó yan olùpèsè tó yára jù tó sì ṣeé gbẹ́kẹ̀lé   |
-| Àwọn SLO tó muna   | `sla-aware` | Ó ṣe àlẹ̀mọ́ nípasẹ̀ àwọn ààlà p95/àṣìṣe/owó    |
-| Ìjíròrò alápá-púpọ̀ | `lkgp`      | Dídúró mọ́ ìjókòó                             |
-| Ìṣòro adalu        | `nadir`     | Ó yan ìpele model fún prompt kọ̀ọ̀kan          |
+| Ọ̀ràn ìlò              | Ìlànà       | Ìdí                                           |
+| --------------------- | ----------- | --------------------------------------------- |
+| Ẹrù iṣẹ́ tó dọ́gba      | `rules`     | Àìyípadà — ó gbé gbogbo kókó yẹ̀ wò            |
+| Dín ìnáwó kù          | `cost`      | Ó máa ń yan èyí tó din owó jù nígbà gbogbo    |
+| Dín àkókò ìdádúró kù  | `latency`   | Ó yan olùpèsè tó yára jù tí ó sì ṣeé gbẹ́kẹ̀ lé |
+| Àwọn SLO tó muna      | `sla-aware` | Ó ń ṣe àlẹ̀mọ́ nípasẹ̀ àwọn ààlà p95/àṣìṣe/ìnáwó |
+| Ìfọ̀rọ̀wérọ̀ ọlọ́pọ̀-ìpele | `lkgp`      | Dídúró mọ́ olùpèsè kan jálẹ̀ sáà                |
+| Ìṣòro onírúurú        | `nadir`     | Ó yan ìpele awoṣe fún ìbéèrè kọ̀ọ̀kan           |
 
-Àwọn ààyè SLA:
+Àwọn ààyè tó mọ SLA sí:
 
 ```json
 {

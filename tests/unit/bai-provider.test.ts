@@ -9,6 +9,13 @@ const { PROVIDER_ENDPOINTS } = await import("../../src/shared/constants/config.t
 const { REGISTRY: providerRegistry } = await import("../../open-sse/config/providerRegistry.ts");
 const { isValidModel } = await import("../../src/shared/constants/models.ts");
 
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-bai-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
+
+const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
+
 const BAI_CHAT_URL = "https://api.b.ai/v1/chat/completions";
 const BAI_MODELS_URL = "https://api.b.ai/v1/models";
 
@@ -62,13 +69,6 @@ test("b.ai accepts any model id via passthrough models (GPT/Claude/Gemini/Kimi/G
   assert.equal(isValidModel("bai", "gemini-3-pro"), true);
   assert.equal(isValidModel("bai", "kimi-k2.5"), true);
 });
-
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-bai-"));
-process.env.DATA_DIR = TEST_DATA_DIR;
-
-const core = await import("../../src/lib/db/core.ts");
-const providersDb = await import("../../src/lib/db/providers.ts");
-const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();

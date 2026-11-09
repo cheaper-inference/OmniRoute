@@ -4,11 +4,6 @@
 
 ---
 
-title: Konfiguracja CORS i bezpieczeństwo
----
-
-# Konfiguracja CORS i bezpieczeństwo
-
 OmniRoute kontroluje, które **origin przeglądarki** mogą odczytywać odpowiedzi cross-origin
 z jednej, scentralizowanej listy dozwolonych (allowlist). Model jest **fail-closed domyślnie**:
 żaden origin nie jest dozwolony, dopóki go nie dodasz. Ta strona opisuje, jak resolve'owana jest
@@ -61,11 +56,11 @@ z powodu jednego konkretnego faktu implementacyjnego:
 
 Co to oznacza per powierzchnia, nawet przy `CORS_ALLOW_ALL=true`:
 
-| Surface                             | Mechanizm auth              | Efekt wildcard CORS                                                                                                                                                                                                               |
-| ----------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin jest echo'wany, ale **bez `Allow-Credentials`** przeglądarka **blokuje** credentialed read. Złośliwa strona cross-origin **nie może odczytać** uwierzytelnionych odpowiedzi dashboardu, a cookie sesji nie jest ujawnione. |
-| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | Już permisywne **z założenia** (`relaxForTokenAuth`): przeglądarki nigdy nie dołączają automatycznie `Authorization`/`x-api-key`, więc strona atakującego nie może podać Twojego klucza. `CORS_ALLOW_ALL` tego nie poszerza.      |
-| Public read-only (`/api/health`, …) | Brak                        | Niewrażliwe; wildcard jest nieszkodliwy.                                                                                                                                                                                          |
+| Surface                             | Mechanizm auth              | Efekt wildcard CORS                                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Cookie session              | Origin jest echo'wany, ale **bez `Allow-Credentials`** przeglądarka **blokuje** credentialed read. Złośliwa strona cross-origin **nie może odczytać** uwierzytelnionych odpowiedzi dashboardu, a cookie sesji nie jest ujawnione.                                                                                                                                               |
+| Client API `/v1/*`, `/v1beta/*`     | Bearer / `x-api-key` header | Już permisywne **z założenia** (`relaxForTokenAuth`): przeglądarki nigdy nie dołączają automatycznie `Authorization`/`x-api-key`, więc strona atakującego nie może podać Twojego klucza. Echo jest stosowane tylko wtedy, gdy przedstawiony klucz przeszedł walidację; odpowiedzi anonimowe (`REQUIRE_API_KEY=false`) zachowują allowlistę. `CORS_ALLOW_ALL` tego nie poszerza. |
+| Public read-only (`/api/health`, …) | Brak                        | Niewrażliwe; wildcard jest nieszkodliwy.                                                                                                                                                                                                                                                                                                                                        |
 
 Zatem **residualna** ekspozycja `CORS_ALLOW_ALL=true` ogranicza się do: (a)
 nie-credentialed cross-origin **odczytów** już nieuwierzytelnionych danych oraz (b)
@@ -126,11 +121,50 @@ restartu.
 - **Bearer / `x-api-key` (powierzchnia inference `/v1/*`):** przeglądarki nigdy nie dołączają
   ich automatycznie. CORS nie jest tu sensowną barierą — barierą jest klucz API —
   dlatego ta powierzchnia jest celowo permisywna, żeby klienci browser i
-  Electron mogli odczytywać odpowiedzi, do których już są uprawnieni.
+  Electron mogli odczytywać odpowiedzi, do których już są uprawnieni. Złagodzone echo
+  podąża za zwalidowanym kluczem, a nie za samą obecnością nagłówka: gdy
+  `REQUIRE_API_KEY=false` obsługuje żądanie anonimowo, jego udana odpowiedź zachowuje
+  allowlistę fail-closed. Odrzucenia auth (401) pozostają czytelne, aby klienci mogli
+  pokazać unieważniony lub błędnie wpisany klucz (#5242): własne 401 pipeline'u zachowuje
+  echo, a route, który sam odrzuca klucz po tym, jak pipeline obsłużył żądanie jako
+  anonimowe (`/v1/models` i `/v1beta/models` przy skonfigurowanym management auth,
+  ograniczone do właściciela `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
+  oraz route'y kandydatów auto-combo), dodaje echo do tego 401 przez
+  `credentialRejectionHeaders()`. O echo decyduje to, czy żądanie niesie nagłówek z
+  poświadczeniami (`Authorization`, `x-api-key`, `x-goog-api-key` lub cookie
+  `auth_token`), a nie to, który z nich sprawdził route, i nigdy nie jest ono łączone z
+  `Access-Control-Allow-Credentials`; body to stała koperta błędu. Route'y management pod
+  `/api/v1/` chronione przez `requireManagementAuth()` (`/api/v1/management/*`,
+  `/api/v1/registered-keys`) nie dodają echo: przy `REQUIRE_API_KEY=false` ich 401/403 nie
+  jest czytelne cross-origin.
 - **Cookie session (dashboard):** chroniona przez domyślne fail-closed **oraz**
   brak `Access-Control-Allow-Credentials` na wspólnej ścieżce. Trzymaj
   originy management/dashboard poza jakąkolwiek permisywną konfiguracją; muszą pozostać ściśle
   fail-closed.
+
+## Handshake'i WebSocket (`/v1/responses`, `/v1/ws`)
+
+Przeglądarki nie stosują CORS do WebSocket, więc transporty WebSocket zwracające wynik
+inference same sprawdzają `Origin` handshake'u (`src/server/origin/wsOrigin.ts`):
+Responses WebSocket (`/v1/responses`) oraz, gdy OmniRoute działa przez `npm start` /
+`npm run dev`, most `/v1/ws` i `/api/v1/ws`, który streamuje `/v1/chat/completions`,
+`/v1/messages` i `/v1/responses` jako ramki. Most pyta `/api/v1/ws?handshake=1` o
+werdykt i odmawia upgrade'u, jeśli ten route nie wykonał sprawdzenia. Handshake jest
+akceptowany, gdy:
+
+- nie ma nagłówka `Origin` (Codex CLI, SDK i inni klienci spoza przeglądarki);
+- `Origin` jest dopuszczony przez powyższą allowlistę (`CORS_ALLOWED_ORIGINS`,
+  ustawienie `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` jest jednym z własnych publicznych originów OmniRoute (skonfigurowany
+  publiczny bazowy URL, przekazany origin zaufanego proxy albo bezpośredni host
+  loopback/LAN podany jako literał IP lub `localhost` — ci sami kandydaci, których używa
+  sprawdzanie mutacji dashboardu); lub
+- niesie prawidłowy klucz API, tak jak na powierzchni HTTP `/v1/*`.
+
+Wszystko inne dostaje `403 ws_origin_forbidden`. Cookie sesji dashboardu nie zwalnia
+obcego `Origin`, ponieważ przeglądarka dołącza je do socketu każdej strony. `localhost`
+na innym porcie nie jest traktowany jako ten sam origin; dodaj takie originy
+deweloperskie do `CORS_ALLOWED_ORIGINS`.
 
 ## Przykład: odwrotne proxy przed OmniRoute
 
@@ -166,6 +200,7 @@ Security), a nie w proxy.
 | Baner ostrzegawczy w panelu                                | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Pole dozwolonych źródeł CORS                               | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS dla poszczególnych tras Cloud-Agent (wyjątek)         | `src/lib/cloudAgent/api.ts`                                          |
+| Sprawdzanie `Origin` przy handshake'u WebSocket            | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Zobacz też
 

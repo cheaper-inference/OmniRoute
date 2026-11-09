@@ -33,6 +33,24 @@ test("admin-mutation prefixes: GET stays read, mutations become admin", () => {
   assert.equal(inferRequiredScope("POST", "/api/cli-tools/apply"), "admin");
 });
 
+test("resilience inspection is read-only but mutations require operator admin", () => {
+  for (const path of [
+    "/api/resilience",
+    "/api/resilience/cooldowns",
+    "/api/resilience/reset",
+    "/api/resilience/model-cooldowns",
+  ]) {
+    assert.equal(inferRequiredScope("GET", path), "read", path);
+    assert.equal(inferRequiredScope("HEAD", path), "read", path);
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      assert.equal(inferRequiredScope(method, path), "admin", method + " " + path);
+    }
+  }
+  // The inference helper uses path-segment boundaries, not startsWith.
+  assert.equal(inferRequiredScope("PATCH", "/api/resilience-reports"), "write");
+  assert.equal(inferRequiredScope("GET", "/api/resilience-reports"), "read");
+});
+
 test("a brand-new mutating route is write by default (not admin)", () => {
   assert.equal(inferRequiredScope("POST", "/api/some-future-route"), "write");
   assert.equal(inferRequiredScope("GET", "/api/some-future-route"), "read");
@@ -54,4 +72,15 @@ test("API-key management needs admin: a write token cannot mint a manage-scoped 
   assert.equal(inferRequiredScope("GET", "/api/keys"), "read");
   assert.equal(inferRequiredScope("GET", "/api/keys/abc/reveal"), "admin");
   assert.equal(inferRequiredScope("GET", "/api/keys-catalog"), "read");
+});
+
+test("the global system prompt is operator-only: a write token cannot rewrite it", () => {
+  // The prompt is injected into every request through the gateway, for every client.
+  for (const method of ["PUT", "POST", "PATCH", "DELETE"]) {
+    assert.equal(inferRequiredScope(method, "/api/settings/system-prompt"), "admin", method);
+    assert.equal(inferRequiredScope(method, "/api/settings/system-prompt/"), "admin", method);
+  }
+  assert.equal(inferRequiredScope("GET", "/api/settings/system-prompt"), "read");
+  // Exact path only: the other settings sub-routes keep the method-inferred scope.
+  assert.equal(inferRequiredScope("PUT", "/api/settings/combo-defaults"), "write");
 });

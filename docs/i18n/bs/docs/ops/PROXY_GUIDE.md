@@ -82,6 +82,18 @@ unsupported_country_region_territory
 
 ---
 
+## Zadano stanje proxyja za nove račune
+
+U** Postavke → Proxy → Globalna konfiguracija** , koristiti** Omogući proxy prema zadanim postavkama za nove veze** da odaberete početno stanje proxyja novododatih naloga provajdera.
+
+Nova postavka kontrolira početno stanje proxyja novododatih računa provajdera. Ne mijenja postojeće račune niti zamjenjuje globalni proxy prekidač. Njegova početna vrijednost čuva prethodno ponašanje. Isključite ga jednom da kreirate buduće naloge s proxy onemogućenim prema zadanim postavkama.
+
+Preference se pohranjuju kao `defaultNewConnectionProxyEnabled` kroz postojeće postavke API. Podrazumevano je `true` kada se nikada ne sačuva. Čuvanje `false` stupa na snagu za sljedeće nove račune bez ponovnog pokretanja. `POST /api/providers` prihvata opcioni strogi boolean `proxyEnabled`; eksplicitni `true` ili `false` ima prednost nad zadanim za kreiranje. Izostavljanje duplikata naloga ili OAuth ponovno povezivanje čuva pohranjeno stanje tog naloga. Pojedinačni računi se i dalje mogu omogućiti ili onemogućiti nakon toga.
+
+Selektivni prijenosi provajdera koriste zadane postavke odredišne instalacije za nove račune i čuvaju politiku odredišta kada zamjenjuju postojeće račune. Proxy prekidači nisu prenosiva polja za prijenos. Potpuno obnavljanje sigurnosne kopije i historijska migracija JSON/SQL zadržavaju svoju postojeću semantiku vraćanja, uključujući sačuvane vrijednosti naloga i zadane postavke za naslijeđene šeme; potpuno vraćanje postavki također može vratiti ovu preferenciju.
+
+Ova postavka ne dodjeljuje proxy niti utvrđuje da li je on zdrav ili u upotrebi. Stvarno usmjeravanje i dalje ovisi o globalnom proxy prekidaču i primjenjivoj proxy konfiguraciji. Sintetički provajderi bez trajnog naloga, OAuth saobraćaj pre kreiranja naloga, environment/system proksiji i spoljna pozadinska mreža su van njegovog delokruga.
+
 ## Sistem proxy-ja na 4 nivoa
 
 OmniRoute podržava konfiguraciju proxy-ja na **četiri nezavisna opsega**, koji se razrješavaju po prioritetu:

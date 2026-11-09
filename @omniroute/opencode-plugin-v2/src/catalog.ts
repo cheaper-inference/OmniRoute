@@ -36,11 +36,13 @@ import {
   type OmniRouteRawModelEntry,
   applyEnrichment,
   buildCanonicalToAliasMap,
+  buildModelDisplayName,
   canonicalDedupSet,
   countFreeTierMatch,
   createLogger,
   defaultOmniRouteEnrichmentFetcher,
   defaultOmniRouteProvidersFetcher,
+  disambiguateDisplayNames,
   ensureV1Suffix,
   isUsableCombo,
   isUsableRawModelId,
@@ -50,13 +52,17 @@ import {
   usableProviderAliasSet,
 } from "./shared/index.js";
 import {
+  compileModelListFilter,
+  matchesModelFilter,
+  type ModelListFilter,
+} from "./model-filter.js";
+import {
   FRESH_PER_OWNER,
   FRESH_WINDOW_DAYS,
   SHOWCASE_PER_OWNER,
   baseIdOf,
   freshWindowDaysToMs,
   isFlatTierId,
-  matchesSuffix,
   passesWhatServes,
   readEntryStatus,
   selectFreshKeptIds,
@@ -79,8 +85,7 @@ export {
   selectShowcaseIds,
   staysDropped,
 } from "./catalog-freshness.js";
-export type { ModelListFilter } from "./catalog-freshness.js";
-import type { ModelListFilter } from "./catalog-freshness.js";
+export type { ModelListFilter } from "./model-filter.js";
 
 export type ModelsFetcher = OmniRouteModelsFetcher;
 export type CombosFetcher = OmniRouteCombosFetcher;
@@ -104,7 +109,7 @@ export interface ResolvedOptions extends FreeOptions {
   logLevel?: LogLevel;
   startupDebug?: boolean;
   modelCacheTtlMs: number;
-  /** v1 parity: prefix the display name with the upstream provider label. */
+  /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
   displayName?: string;
   apiFormat?: ApiFormatV2;
@@ -112,6 +117,8 @@ export interface ResolvedOptions extends FreeOptions {
   hiddenModels?: string[];
   providersAllow?: string[];
   usableOnly: boolean;
+  /** Hide every combo when false (default true keeps combos). */
+  combos?: boolean;
   /**
    * Combo source. Absent or `"api"` keeps the member-verified `/api/combos`
    * pass; `"models"` opts into the `/v1/models` combo rows when no
@@ -448,31 +455,16 @@ export interface PublishCounts {
   combos: number;
 }
 
-export function compileModelListFilter(list?: string[]): ModelListFilter | undefined {
-  if (!list || list.length === 0) return undefined;
-  const exact = new Set<string>();
-  const suffixes = new Set<string>();
-  for (const id of list) {
-    if (id.includes("/")) {
-      exact.add(id);
-    } else {
-      suffixes.add(id);
-    }
-  }
-  if (exact.size === 0 && suffixes.size === 0) return undefined;
-  return { exact, suffixes };
-}
-
 export function passesModelAllowlist(
   id: string,
   visible?: ModelListFilter,
   hidden?: ModelListFilter
 ): boolean {
   if (hidden) {
-    if (hidden.exact.has(id) || matchesSuffix(id, hidden.suffixes)) return false;
+    if (matchesModelFilter(id, hidden)) return false;
   }
   if (visible) {
-    if (!visible.exact.has(id) && !matchesSuffix(id, visible.suffixes)) return false;
+    if (!matchesModelFilter(id, visible)) return false;
   }
   return true;
 }
@@ -487,7 +479,7 @@ export function passesComboAllowlist(combo: OmniRouteRawCombo, visible?: ModelLi
     const modelId = typeof step?.model === "string" ? step.model : "";
     if (modelId.length === 0) continue;
     sawResolvableMember = true;
-    if (visible.exact.has(modelId) || matchesSuffix(modelId, visible.suffixes)) return true;
+    if (matchesModelFilter(modelId, visible)) return true;
   }
   if (!sawResolvableMember) return true;
   return false;
@@ -717,6 +709,7 @@ async function publishCombos(
         continue;
       }
       const mapped = mapComboToModelV2(combo, memberEntries, X, opts.baseURL, opts.apiFormat);
+      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
       const comboEnrichment = lookupEnrichment(combo.id, enrichment, canonicalToAlias);
       applyEnrichment(mapped, comboEnrichment, {
         isCombo: true,
@@ -936,7 +929,8 @@ export async function collectCatalog(
   // Opt-in `combosSource: "models"`: the user combo rows of /v1/models are
   // the published combos, so they skip the default-view narrowing exactly
   // like the /api/combos pass never narrows a combo.
-  const modelsComboSource = usesModelsComboSource(opts);
+  const combosEnabled = opts.combos !== false;
+  const modelsComboSource = combosEnabled && usesModelsComboSource(opts);
   if (opts.combosSource === "models" && !modelsComboSource) {
     log.debug(
       "[omniroute-v2] combosSource=models needs no member-level filter; a preset, usableOnly, providersAllow or a visible/hidden list is on, so combos keep the /api/combos source."
@@ -945,6 +939,7 @@ export async function collectCatalog(
   let modelsComboCount = 0;
   for (const entry of rawModels) {
     if (!entry.id) continue;
+    if (combosEnabled === false && entry.owned_by === "combo") continue;
     if (canonicalDedup.has(entry.id)) continue;
     if (usable && !isUsableRawModelId(entry.id, usable)) continue;
     if (!passesModelAllowlist(entry.id, visibleFilter, hiddenFilter)) continue;
@@ -967,6 +962,9 @@ export async function collectCatalog(
       baseURL: opts.baseURL,
       apiFormat: opts.apiFormat,
     });
+    if (servedCombo) {
+      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
+    }
     const enrichmentEntry = lookupEnrichment(
       entry.id,
       enrichment,
@@ -974,7 +972,9 @@ export async function collectCatalog(
       entry.owned_by
     );
     applyEnrichment(mapped, enrichmentEntry, {
-      providerTag: opts.providerTag !== false,
+      isCombo: servedCombo,
+      rawModelId: entry.id,
+      providerTag: opts.providerTag,
     });
     const inferred = isInferredFree(entry.id, enrichmentEntry, opts, enrichment, canonicalToAlias);
     if (
@@ -1021,7 +1021,8 @@ export async function collectCatalog(
         entry.owned_by
       );
       applyEnrichment(mapped, restoreEnrichment, {
-        providerTag: opts.providerTag !== false,
+        rawModelId: entry.id,
+        providerTag: opts.providerTag,
       });
       const restoreInferred = isInferredFree(
         entry.id,
@@ -1050,30 +1051,33 @@ export async function collectCatalog(
   }
 
   const cacheKey = `${opts.baseURL}::${opts.providerId}`;
-  const comboResult = modelsComboSource
-    ? { published: modelsComboCount, providerDropped: 0 }
-    : await publishCombos({
-        opts,
-        log,
-        providerId: X,
-        enrichment,
-        rawModelById,
-        collected,
-        publishedKeys,
-        publishedModelIds,
-        visibleFilter,
-        hiddenFilter,
-        usable,
-        canonicalToAlias,
-        providerFilter,
-        providerResolve,
-        providerAllUnknown,
-        combosFetcher,
-        combosTimeout,
-        warnedCombos,
-        cacheKey,
-        isFreeInferred,
-      });
+  const comboResult =
+    combosEnabled === false
+      ? { published: 0, providerDropped: 0 }
+      : modelsComboSource
+        ? { published: modelsComboCount, providerDropped: 0 }
+        : await publishCombos({
+            opts,
+            log,
+            providerId: X,
+            enrichment,
+            rawModelById,
+            collected,
+            publishedKeys,
+            publishedModelIds,
+            visibleFilter,
+            hiddenFilter,
+            usable,
+            canonicalToAlias,
+            providerFilter,
+            providerResolve,
+            providerAllUnknown,
+            combosFetcher,
+            combosTimeout,
+            warnedCombos,
+            cacheKey,
+            isFreeInferred,
+          });
   // One summary line per successful refresh: the stage counters plus the
   // free-tier lines the served catalog never reached. Audible at the
   // default `warn` level so a service install (stdout lost) still reads
@@ -1083,7 +1087,19 @@ export async function collectCatalog(
       `[omniroute-v2] catalog refresh: served=${rawModels.length} default=${afterDefaultView} presets=${afterPresets} published=${published} unmatched-free=${freeUnmatched}`
     );
   };
+  // Same-named entries stay distinguishable: one disambiguation pass over
+  // the published set renames collisions with a route suffix. Local to
+  // this collect call — nothing survives the return.
+  const applyNameDisambiguation = (): void => {
+    const renamed = disambiguateDisplayNames(
+      [...collected].map(([id, entry]) => ({ id, name: entry.name }))
+    );
+    for (const [id, name] of renamed) {
+      collected.get(id)!.name = name;
+    }
+  };
   if (comboResult === undefined) {
+    applyNameDisambiguation();
     emitSummary(collected.size);
     return { entries: collected, counts: { models: modelCount, combos: 0 } };
   }
@@ -1099,6 +1115,7 @@ export async function collectCatalog(
     warnProviderMatchedNothing(providerFilter, warnedCombos, log);
   }
 
+  applyNameDisambiguation();
   emitSummary(collected.size);
   return {
     entries: collected,

@@ -15,9 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, অথবা `>=24.0.0 <27` (প্রস্তাবিত: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ব্যবহারকারী (Node 24+):** `npm install` চালানোর পর, নেটিভ মডিউলগুলো ইনস্টল হয়েছে কি না যাচাই করুন:
-> `node -e "require('better-sqlite3')"`. যদি এটি `MODULE_NOT_FOUND` ত্রুটিসহ ব্যর্থ হয়,
-> তাহলে `npm approve-scripts better-sqlite3 && npm install` চালান। দেখুন
+> **Node 24 সহ Windows:** বর্তমান 24 LTS প্যাচ রিলিজ ব্যবহার করুন (অন্তত 24.20.0)।
+> আগের রিলিজগুলোতে `--test-force-exit` প্রসেস বন্ধ করার পর সফল টেস্টের পরেও অ্যাবর্ট হতে পারে।
+> Node-এর [Windows libuv সংশোধন](https://github.com/nodejs/node/pull/61999) এই রানটাইম ক্র্যাশের সমাধান করে; টেস্ট অ্যাসারশন এবং রানার এক্সিট চেক সক্রিয় রাখুন।
+
+> **npm v11+ ব্যবহারকারী (Node 24+):** `npm install`-এর পরে নেটিভ মডিউলগুলো ইনস্টল হয়েছে কি না যাচাই করুন:
+> `node -e "require('better-sqlite3')"`. এটি `MODULE_NOT_FOUND` দিয়ে ব্যর্থ হলে,
+> `npm approve-scripts better-sqlite3 && npm install` চালান। দেখুন
 > [সমস্যা সমাধান](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
@@ -36,33 +40,33 @@ npm install
 # টেমপ্লেট থেকে আপনার .env তৈরি করুন
 cp .env.example .env
 
-# প্রয়োজনীয় গোপন মান তৈরি করুন
+# প্রয়োজনীয় সিক্রেট তৈরি করুন
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 ডেভেলপমেন্টের জন্য গুরুত্বপূর্ণ ভেরিয়েবল:
 
-| ভেরিয়েবল              | ডেভেলপমেন্ট ডিফল্ট       | বিবরণ                   |
-| ---------------------- | ------------------------ | ----------------------- |
-| `PORT`                 | `20128`                  | সার্ভার পোর্ট           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ফ্রন্টএন্ডের বেস URL    |
-| `JWT_SECRET`           | (উপরে তৈরি করুন)         | JWT স্বাক্ষরের গোপন মান |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | প্রথম লগইনের পাসওয়ার্ড |
-| `APP_LOG_LEVEL`        | `info`                   | লগের বিস্তারিততার স্তর  |
+| Variable               | Development Default                  | Description            |
+| ---------------------- | ------------------------------------ | ---------------------- |
+| `PORT`                 | `20128`                              | সার্ভার পোর্ট          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`             | ফ্রন্টএন্ডের বেস URL   |
+| `JWT_SECRET`           | (উপরের নির্দেশনা অনুযায়ী তৈরি করুন) | JWT সাইনিং সিক্রেট     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                           | প্রথম লগইন পাসওয়ার্ড  |
+| `APP_LOG_LEVEL`        | `info`                               | লগের বিস্তারিততার স্তর |
 
 ### ড্যাশবোর্ড সেটিংস
 
-ড্যাশবোর্ডে এমন ফিচারগুলোর জন্য UI টগল রয়েছে, যেগুলো এনভায়রনমেন্ট ভেরিয়েবলের মাধ্যমেও কনফিগার করা যায়:
+ড্যাশবোর্ডে এমন ফিচারের জন্য UI টগল রয়েছে, যেগুলো এনভায়রনমেন্ট ভেরিয়েবলের মাধ্যমেও কনফিগার করা যায়:
 
-| সেটিংসের অবস্থান | টগল                  | বিবরণ                               |
-| ---------------- | -------------------- | ----------------------------------- |
-| সেটিংস → উন্নত   | ডিবাগ মোড            | ডিবাগ অনুরোধের লগ সক্রিয় করুন (UI) |
-| সেটিংস → সাধারণ  | সাইডবারের দৃশ্যমানতা | সাইডবারের বিভাগগুলো দেখান/লুকান     |
+| Setting Location     | Toggle             | Description                           |
+| -------------------- | ------------------ | ------------------------------------- |
+| সেটিংস → অ্যাডভান্সড | ডিবাগ মোড          | ডিবাগ রিকোয়েস্ট লগ সক্রিয় করুন (UI) |
+| সেটিংস → জেনারেল     | সাইডবার দৃশ্যমানতা | সাইডবারের বিভাগগুলো দেখান/লুকান       |
 
-এই সেটিংসগুলো ডেটাবেজে সংরক্ষিত থাকে এবং পুনরায় চালু করার পরও বজায় থাকে; সেট করা থাকলে এগুলো env var-এর ডিফল্ট মানকে অগ্রাহ্য করে।
+এই সেটিংসগুলো ডেটাবেসে সংরক্ষিত হয় এবং রিস্টার্টের পরেও বজায় থাকে; সেট করা থাকলে এগুলো env var-এর ডিফল্টকে অগ্রাহ্য করে।
 
-### লোকালি চালানো
+### স্থানীয়ভাবে চালানো
 
 ```bash
 # ডেভেলপমেন্ট মোড (হট রিলোড)
@@ -72,47 +76,47 @@ npm run dev
 npm run build    # next build → .build/next/ তারপর assembleStandalone → dist/
 npm run start
 
-# অবদানকারীদের পরিবর্তনের জন্য দ্রুত শুধু-ব্যাকএন্ড/API কম্পাইল
+# কন্ট্রিবিউটরদের পরিবর্তনের জন্য দ্রুত ব্যাকএন্ড/API-শুধু কম্পাইল
 npm run build:contributor
 
-# রিলিজ বিল্ড (পরিষ্কারভাবে পুনর্নির্মাণ + HEAD সেন্টিনেল — ডিপ্লয়ের জন্য আবশ্যক)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA লিখে
+# রিলিজ বিল্ড (পরিষ্কার রিবিল্ড + HEAD সেন্টিনেল — ডেপ্লয়ের জন্য প্রয়োজনীয়)
+npm run build:release   # rm -rf .build dist এবং build + dist/BUILD_SHA লিখে
 
-# প্রচলিত পোর্ট কনফিগারেশন
+# সাধারণ পোর্ট কনফিগারেশন
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-অবদানকারী বিল্ডটি কেবল কম্পাইল-সংক্রান্ত যাচাইকরণ করে: এটি স্বতন্ত্র
-ডিস্ট্রিবিউশন সংযোজন করে না বা ঐচ্ছিক নেটিভ প্যাকেজিং অ্যাসেট তৈরি করে না। সরবরাহযোগ্য বান্ডেল
-যাচাই করার প্রয়োজন হলে নিয়মিত প্রোডাকশন বিল্ড ব্যবহার করুন।
+কন্ট্রিবিউটর বিল্ড শুধু কম্পাইল-ভিত্তিক যাচাই সম্পাদন করে: এটি standalone
+ডিস্ট্রিবিউশন অ্যাসেম্বল করে না বা ঐচ্ছিক নেটিভ প্যাকেজিং অ্যাসেট তৈরি করে না। শিপযোগ্য বান্ডেল
+যাচাই করতে হলে নিয়মিত প্রোডাকশন বিল্ড ব্যবহার করুন।
 
 ### বিল্ড আউটপুটের বিন্যাস
 
-| ডিরেক্টরি | বিষয়বস্তু                                                                 | ট্র্যাক করা হয় |
-| --------- | -------------------------------------------------------------------------- | --------------- |
-| `src/`    | অ্যাপ্লিকেশনের সোর্স (TypeScript / TSX)                                    | হ্যাঁ           |
-| `.build/` | মধ্যবর্তী ফাইল — `next build` আউটপুট (gitignored, `distDir = .build/next`) | না              |
-| `dist/`   | সরবরাহযোগ্য বান্ডেল — `assembleStandalone` দ্বারা সংযোজিত (gitignored)     | না              |
+| Directory | Contents                                                                      | Tracked |
+| --------- | ----------------------------------------------------------------------------- | ------- |
+| `src/`    | অ্যাপ্লিকেশনের সোর্স (TypeScript / TSX)                                       | হ্যাঁ   |
+| `.build/` | মধ্যবর্তী ফাইল — `next build`-এর আউটপুট (gitignored, `distDir = .build/next`) | না      |
+| `dist/`   | শিপযোগ্য বান্ডেল — `assembleStandalone` দ্বারা অ্যাসেম্বল করা (gitignored)    | না      |
 
-বিল্ড পাইপলাইনটি এক ধাপে সম্পন্ন হয়:
+বিল্ড পাইপলাইনটি একটি একক ধাপে সম্পন্ন হয়:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js আউটপুট)
-  └─ assembleStandalone()                 (স্বতন্ত্র ফাইল + স্ট্যাটিক + পাবলিক + নেটিভ অ্যাসেট কপি করে)
+  └─ assembleStandalone()                 (standalone + static + public + native assets কপি করে)
        └─ আউটপুট: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` অতিরিক্তভাবে প্রথমে উভয় ডিরেক্টরি পরিষ্কার করে এবং
-ডিপ্লয়ের অখণ্ডতা যাচাইয়ের সেন্টিনেল হিসেবে `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) লেখে।
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ডেপ্লয়ের অখণ্ডতা যাচাইয়ের সেন্টিনেল হিসেবে লিখে।
 
-`npm run build:contributor` শুধু-ব্যাকএন্ড বিল্ড প্রোফাইল ব্যবহার করে। বিল্ড করার সময় এটি সাময়িকভাবে
-ড্যাশবোর্ড UI ফাইলগুলোকে স্টাব দিয়ে প্রতিস্থাপন করে, API রুট হ্যান্ডলারগুলো বজায় রাখে এবং বিল্ডের
-পর মূল ফাইলগুলো পুনরুদ্ধার করে। ড্যাশবোর্ড UI-কে প্রভাবিত করে এমন পরিবর্তন বা সম্পূর্ণ
-রিলিজ যাচাইকরণের জন্য `npm run build` ব্যবহার করুন; অবদানকারী প্রোফাইল রিলিজ বিল্ডের বিকল্প নয়।
+`npm run build:contributor` ব্যাকএন্ড-শুধু বিল্ড প্রোফাইল ব্যবহার করে। বিল্ড করার সময় এটি সাময়িকভাবে
+ড্যাশবোর্ড UI ফাইলগুলোর স্টাব তৈরি করে, API রুট হ্যান্ডলারগুলো রেখে দেয় এবং বিল্ডের পরে মূল ফাইলগুলো
+পুনরুদ্ধার করে। ড্যাশবোর্ড UI-কে প্রভাবিত করে এমন পরিবর্তনের জন্য বা সম্পূর্ণ রিলিজ যাচাইয়ের জন্য
+`npm run build` ব্যবহার করুন; কন্ট্রিবিউটর প্রোফাইলটি রিলিজ বিল্ডের বিকল্প নয়।
 
-> **VPS ডিপ্লয় সংক্রান্ত নোট:** রিমোট ইমেজ ডিরেক্টরি `/usr/lib/node_modules/omniroute/app/`
-> অপরিবর্তিত রয়েছে। ডিপ্লয় স্কিলগুলো `dist/`-এর বিষয়বস্তু এতে rsync করে।
+> **VPS ডেপ্লয় নোট:** রিমোট ইমেজ ডিরেক্টরি `/usr/lib/node_modules/omniroute/app/`
+> অপরিবর্তিত থাকে। ডেপ্লয় স্কিলগুলো `dist/`-এর বিষয়বস্তু সেখানে rsync করে।
 > শুধু রিপোজিটরির ভেতরের বিল্ড আউটপুট পাথ পরিবর্তিত হয়েছে (`app/` → `dist/`)।
 
 ডিফল্ট URL:
@@ -166,32 +170,32 @@ Scope (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `
 
 ---
 
-## টেস্ট চালানো
+## পরীক্ষা চালানো
 
 ```bash
-# সব টেস্ট (unit + vitest + ecosystem + e2e)
+# সব পরীক্ষা (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# একটি টেস্ট ফাইল (Node.js নেটিভ টেস্ট রানার — অধিকাংশ টেস্ট এটি ব্যবহার করে)
+# একটি পরীক্ষা ফাইল (Node.js নেটিভ টেস্ট রানার — অধিকাংশ পরীক্ষায় এটি ব্যবহৃত হয়)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# শুধুমাত্র আপনার পরিবর্তনে প্রভাবিত unit টেস্টগুলো (CI গেটের মতো একই TIA selector, #8084)
-npm run test:scoped            # সর্বশেষ commit-এর পরিবর্তনগুলো (অথবা working tree)
+# শুধু আপনার পরিবর্তনে প্রভাবিত unit পরীক্ষাগুলো (CI গেটের একই TIA selector, #8084)
+npm run test:scoped            # শেষ commit-এর পরিবর্তনগুলো (অথবা working tree)
 npm run test:scoped:staged     # শুধু staged পরিবর্তন — pre-commit চালানোর সঙ্গে ভালোভাবে কাজ করে
-npm run test:scoped:full       # প্রথমে import-graph map পুনর্নির্মাণ করে (ফাইল যোগ/সরানোর পরে)
-# Exit 1 + "run the full suite"-এর অর্থ হলো কোনো hub ফাইল (tsconfig, package.json, …) অথবা
-# unmapped source পরিবর্তিত হয়েছে — selector নিরাপদভাবে ব্যর্থ হয়, এটি কখনো নীরবে এড়িয়ে যায় না।
+npm run test:scoped:full       # প্রথমে import-graph map পুনর্নির্মাণ করে (ফাইল যোগ/স্থানান্তরের পর)
+# Exit 1 + "সম্পূর্ণ suite চালান" মানে একটি hub ফাইল (tsconfig, package.json, …) অথবা কোনো
+# unmapped source পরিবর্তিত হয়েছে — selector নিরাপদভাবে ব্যর্থ হয়, কখনো নীরবে এড়িয়ে যায় না।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E টেস্ট (Playwright প্রয়োজন)
+# E2E পরীক্ষা (Playwright প্রয়োজন)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# Protocol client E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility টেস্ট
+# Ecosystem compatibility পরীক্ষা
 npm run test:ecosystem
 
 # Coverage gate: statements/lines/functions/branches-এর 60%
@@ -202,24 +206,24 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# গেটযুক্ত real-upstream combo smoke (VPS access + প্রকৃত provider credits প্রয়োজন)
-# এটি REAL providers-এ অনুরোধ পাঠায় — সামান্য খরচ হয়। CI-তে কখনো চলে না। গেট না থাকলে নির্বিঘ্নে এড়িয়ে যায়।
+# গেটযুক্ত বাস্তব upstream combo smoke পরীক্ষা (VPS access + বাস্তব provider credits প্রয়োজন)
+# বাস্তব provider-এ অনুরোধ পাঠায় — সামান্য খরচ হয়। CI-তে কখনো চলে না। গেট না থাকলে নির্বিঘ্নে এড়িয়ে যায়।
 # প্রয়োজন: ssh root@192.168.0.15 access (VPS থেকে একটি read-only DB snapshot source করে)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — সাধারণ Node ESM scripts, সরাসরি live .15 server-এ অনুরোধ পাঠায়।
-# প্রয়োজন: ssh root@192.168.0.15 access (SSH sqlite-এর মাধ্যমে combos তৈরি/অপসারণ করা হয়)।
-# এটি REAL providers-এ অনুরোধ পাঠায় (সামান্য খরচ)। শুধু __live_test__* combos তৈরি/মুছে দেয়। CI-তে কখনো চলে না।
-# .15-এ REQUIRE_API_KEY=false, তাই API key প্রয়োজন নেই; তবে সেট করা থাকলে COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY মানে।
+# Phase-3 VPS live smoke — সাধারণ Node ESM script, সরাসরি live .15 server-এ অনুরোধ পাঠায়।
+# প্রয়োজন: ssh root@192.168.0.15 access (SSH sqlite-এর মাধ্যমে combo তৈরি/মুছে ফেলা হয়)।
+# বাস্তব provider-এ অনুরোধ পাঠায় (সামান্য খরচ)। শুধু __live_test__* combo তৈরি/মুছে ফেলে। CI-তে কখনো চলে না।
+# .15-এ REQUIRE_API_KEY=false, তাই API key প্রয়োজন নেই; তবে সেট করা থাকলে COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY মেনে চলে।
 npm run test:combo:live:vps              # 7টি HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # একটি প্রকৃত cross-provider failover scenario যোগ করে (মোট 8টি)
+npm run test:combo:live:vps:failover     # একটি বাস্তব cross-provider failover scenario যোগ করে (মোট 8টি)
 ```
 
 Coverage সংক্রান্ত নোট:
 
-- `npm run test:coverage` মূল unit test suite-এর source coverage পরিমাপ করে, `tests/**` বাদ দেয় এবং `open-sse/**` অন্তর্ভুক্ত করে
+- `npm run test:coverage` প্রধান unit test suite-এর source coverage পরিমাপ করে, `tests/**` বাদ দেয় এবং `open-sse/**` অন্তর্ভুক্ত করে
 - Pull request-গুলোতে statements/lines/functions/branches-এর coverage gate **60%+** রাখতে হবে
-- কোনো PR যদি `src/`, `open-sse/`, `electron/`, অথবা `bin/`-এর production code পরিবর্তন করে, তাহলে একই PR-এ automated test যোগ বা হালনাগাদ করতে হবে
+- কোনো PR যদি `src/`, `open-sse/`, `electron/`, অথবা `bin/`-এর production code পরিবর্তন করে, তবে একই PR-এ automated test যোগ বা update করতে হবে
 - `npm run coverage:report` সর্বশেষ coverage run থেকে বিস্তারিত file-by-file report দেখায়
 - `npm run test:coverage:legacy` ঐতিহাসিক তুলনার জন্য পুরোনো metric সংরক্ষণ করে
 - পর্যায়ক্রমিক coverage উন্নয়নের roadmap-এর জন্য `docs/ops/COVERAGE_PLAN.md` দেখুন
@@ -228,20 +232,21 @@ Coverage সংক্রান্ত নোট:
 
 PR খোলার আগে, আপনার পরিবর্তনের জন্য focused loop চালাতে
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ব্যবহার করুন। সম্পূর্ণ unit suite (4টি CI shard), Vitest, **60%+** coverage gate এবং
-production build চালানো CI-এর দায়িত্ব — এগুলো স্থানীয়ভাবে চালালে এমন কোনো অতিরিক্ত সংকেত পাওয়া যায় না যা PR
-check-গুলো ইতোমধ্যে দেবে না, এবং ছোট machine-এ এটি host-কে অতিরিক্ত চাপে ফেলতে পারে (#8084):
+production build-এর দায়িত্ব CI-এর — এগুলো স্থানীয়ভাবে চালালে PR
+check-গুলো ইতিমধ্যেই যে signal দেবে তার বাইরে অতিরিক্ত কোনো signal পাওয়া যায় না, এবং ছোট machine-এ এটি host-কে অতিরিক্ত চাপে ফেলতে পারে (#8084):
 
 - আপনার পরিবর্তন cover করে এমন test file-গুলো চালান: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` চালান
-- production code পরিবর্তিত হলে একই PR-এ automated test অন্তর্ভুক্ত বা হালনাগাদ করুন
-- production code পরিবর্তিত হলে PR description-এ পরিবর্তিত বা যোগ করা test file-গুলো উল্লেখ করুন
-- CI-তে project secrets configure করা থাকলে PR-এর SonarQube result পরীক্ষা করুন
+- production code পরিবর্তিত হলে একই PR-এ automated test অন্তর্ভুক্ত বা update করুন
+- `node:test` file-এ প্রতিটি top-level `await` (যেমন `await import(...)`) প্রথম `test()` / `describe()`-এর আগে রাখুন: `--test-force-exit`-এর অধীনে এর পরে register হওয়া test নীরবে কখনোই না চলতে পারে (#18045; `npm run check:test-tla-order` দ্বারা প্রয়োগ করা হয়)
+- production code পরিবর্তিত হলে PR description-এ পরিবর্তিত বা যোগ করা test file-গুলো অন্তর্ভুক্ত করুন
+- CI-তে project secret configure করা থাকলে PR-এর SonarQube result পরীক্ষা করুন
 
-বর্তমান test status: **122টি unit test file**, যা নিম্নলিখিত বিষয় cover করে:
+বর্তমান পরীক্ষার অবস্থা: **122টি unit test file**, যেগুলো cover করে:
 
 - Provider translator এবং format conversion
 - Rate limiting, circuit breaker এবং resilience
-- Semantic cache, idempotency এবং progress tracking
+- Semantic cache, idempotency, progress tracking
 - Database operation এবং schema (21টি DB module)
 - OAuth flow এবং authentication
 - API endpoint validation (Zod v4)

@@ -9,7 +9,7 @@
  */
 
 import { printHeading, printInfo, printSuccess } from "../io.mjs";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { isContainerRuntime } from "../utils/config-home-guard.mjs";
 
 function ensureV1(url) {
@@ -33,7 +33,7 @@ export function resolveCursorTarget(opts = {}) {
   if (!apiKey) {
     try {
       const c = resolveActiveContext(opts.context ?? process.env.OMNIROUTE_CONTEXT);
-      apiKey = c?.accessToken || c?.apiKey;
+      apiKey = contextCredentialFor(c, root);
     } catch {
       /* none */
     }

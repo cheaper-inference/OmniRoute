@@ -42,7 +42,7 @@ omniroute configure codex                # ← リモートカタログからロ
 
 ## 接続
 
-### 管理パスワードを使用する場合（初期設定）
+### 管理パスワードを使用する場合（ブートストラップ）
 
 ```bash
 omniroute connect 192.168.0.15
@@ -50,25 +50,31 @@ omniroute connect 192.168.0.15
 # ✔ http://192.168.0.15:20128 に接続しました — コンテキスト '192.168.0.15'（スコープ: admin）
 ```
 
-パスワードによるフローでは、デフォルトで **admin** トークンが発行されます（パスワードを所有している時点で、すでに完全な制御権限を持っているためです）。`--scope` を使用すると、より狭いスコープを指定できます。
+パスワードフローでは、デフォルトで **admin** トークンが発行されます（パスワードを保持しているため、すでに完全な制御権があります）。`--scope` で権限を絞り込めます。
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-オプション: `--port <p>`（ホストにポートが含まれていない場合）、`--name <ctx>`（コンテキスト名）、
+オプション: `--port <p>`（ホストにポートが指定されていない場合）、`--name <ctx>`（コンテキスト名）、
 `--scope read|write|admin`。完全な URL はそのまま使用されます:
-`omniroute connect https://omni.example.com`。
+`omniroute connect https://omni.example.com`.
+
+サーバーでダッシュボードの二要素認証（設定 →
+セキュリティ）が有効になっている場合、パスワードだけでは拒否されます。その場合、CLI は
+認証アプリのコード（またはリカバリーコード）の入力を求めます。非対話形式で使用する場合は、
+`--totp <code>` であらかじめ渡してください。
 
 ### 事前生成済みトークンを使用する場合
 
-ダッシュボード（または `omniroute tokens create`）でスコープ付きトークンを生成して貼り付けます。パスワードは不要です。
+ダッシュボード（または `omniroute tokens create`）でスコープ付きトークンを生成し、
+それを貼り付けます — パスワードは不要です:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI は `GET /api/cli/whoami` を通じてトークンを検証し、アクティブなコンテキストとして保存します。
+CLI は `GET /api/cli/whoami` でトークンを検証し、アクティブなコンテキストとして保存します。
 
 ---
 
@@ -385,12 +391,12 @@ omniroute contexts remove 192-168-0-15 --yes   # ローカルコンテキスト�
 
 ## API エンドポイント（リファレンス）
 
-| メソッド | ルート                | 認証             | スコープ                            |
-| -------- | --------------------- | ---------------- | ----------------------------------- |
-| POST     | `/api/cli/connect`    | 管理パスワード   | —（公開、パスワードによる制限あり） |
-| GET      | `/api/cli/whoami`     | アクセストークン | 読み取り                            |
-| GET      | `/api/cli/tokens`     | アクセストークン | 管理                                |
-| POST     | `/api/cli/tokens`     | アクセストークン | 管理                                |
-| DELETE   | `/api/cli/tokens/:id` | アクセストークン | 管理                                |
+| Method | Route                 | Auth                | Scope                       |
+| ------ | --------------------- | ------------------- | --------------------------- |
+| POST   | `/api/cli/connect`    | password; 2FA if on | —（public, password-gated） |
+| GET    | `/api/cli/whoami`     | access token        | read                        |
+| GET    | `/api/cli/tokens`     | access token        | admin                       |
+| POST   | `/api/cli/tokens`     | access token        | admin                       |
+| DELETE | `/api/cli/tokens/:id` | access token        | admin                       |
 
 完全なスキーマについては、[openapi.yaml](../openapi.yaml) を参照してください。

@@ -155,6 +155,21 @@ export function claudeEffortLevelsFor(providerId: string, modelId: string): stri
   return extendCodexGpt56EffortValues(providerId, modelId, levels);
 }
 
+function createEffortVariant<T extends CatalogModelEntry>(
+  model: T,
+  qualifiedId: string,
+  bareName: string,
+  level: string
+): T {
+  // The provider-scoped models route uses root verbatim as the unprefixed id.
+  const baseRoot = typeof model.root === "string" && model.root ? model.root : bareName;
+  const variant: T = { ...model, id: `${qualifiedId}-${level}`, root: `${baseRoot}-${level}` };
+  if (typeof model.name === "string" && model.name) {
+    variant.name = `${model.name} (${formatClaudeEffortLabel(level)})`;
+  }
+  return variant;
+}
+
 /**
  * Append reasoning-effort variants for every eligible Claude model. Returns the
  * original array reference unchanged when nothing is eligible (no allocation in the
@@ -178,15 +193,7 @@ export function appendClaudeEffortVariants<T extends CatalogModelEntry>(
     const providerId = slash >= 0 ? qualifiedId.slice(0, slash) : "";
     const bareName = bareModelName(qualifiedId);
     for (const level of claudeEffortLevelsFor(providerId, bareName)) {
-      const variantId = `${qualifiedId}-${level}`;
-      // root stays UNPREFIXED (base root, or the bare model name, plus the suffix):
-      // the provider-scoped models route uses `root` verbatim as the unprefixed id.
-      const baseRoot = typeof model.root === "string" && model.root ? model.root : bareName;
-      const variant: T = { ...model, id: variantId, root: `${baseRoot}-${level}` };
-      if (typeof model.name === "string" && model.name) {
-        variant.name = `${model.name} (${formatClaudeEffortLabel(level)})`;
-      }
-      variants.push(variant);
+      variants.push(createEffortVariant(model, qualifiedId, bareName, level));
     }
   }
   return variants.length > 0 ? [...models, ...variants] : models;

@@ -2,15 +2,20 @@
  * Dispatch seam between chat.ts and executeChatWithBreaker, extracted so the
  * frozen god-file `chat.ts` does not grow (check:file-size).
  *
- * Its only job beyond forwarding the call is the #6219 follow-up: when a combo
- * per-model timeout abandons the account this session is pinned to, drop the
- * pin. See `evictSessionAffinityOnComboTimeout` for why the existing #6219
- * eviction never covers this path.
+ * Beyond forwarding the call it reacts to a combo per-model timeout that
+ * abandons the dispatched account: the #6219 follow-up drops the session pin on
+ * it (see `evictSessionAffinityOnComboTimeout` for why the existing #6219
+ * eviction never covers this path), and the combo request's remaining targets
+ * prefer another account (see chat/comboStalledConnections.ts).
  */
 
 import { executeChatWithBreaker } from "./chatHelpers";
 import { resolveDispatchClientRawRequest } from "./chat/clientRawRequest.ts";
-import { evictSessionAffinityOnComboTimeout } from "../services/sessionAffinityPin";
+import {
+  watchComboTargetStall,
+  type ComboStalledConnections,
+} from "./chat/comboStalledConnections.ts";
+import { evictSessionAffinityOnComboTimeoutAsync as evictSessionAffinityOnComboTimeout } from "../services/sessionAffinityPin";
 
 /** The dispatch arguments chat.ts already assembles, plus what the eviction reads. */
 type DispatchArgs = {
@@ -24,6 +29,7 @@ type DispatchArgs = {
 type DispatchRuntimeOptions = {
   sessionAffinityKey?: string | null;
   modelAbortSignal?: AbortSignal | null;
+  comboStalledConnections?: ComboStalledConnections | null;
 };
 
 /**
@@ -36,6 +42,11 @@ type DispatchRuntimeOptions = {
  * synthetic 524), or as a failed result when an executor catches the abort
  * itself. Both are covered. The eviction is a no-op unless this dispatch was
  * aborted by the per-model timeout specifically.
+ *
+ * The same timeout also marks the account in the combo request's
+ * `comboStalledConnections`, so its remaining targets prefer another account.
+ * A successful dispatch keeps that watch until the combo has the stream's first
+ * output; any other outcome ends it.
  */
 export async function dispatchChatWithAffinityEviction(
   args: DispatchArgs,
@@ -48,6 +59,12 @@ export async function dispatchChatWithAffinityEviction(
       connectionId: args.credentials?.connectionId,
       modelAbortSignal: runtimeOptions.modelAbortSignal,
     });
+  const stopStallWatch = watchComboTargetStall(
+    runtimeOptions.comboStalledConnections,
+    runtimeOptions.modelAbortSignal,
+    args.provider,
+    args.credentials?.connectionId
+  );
 
   let dispatched: Awaited<ReturnType<typeof executeChatWithBreaker>>;
   try {
@@ -59,14 +76,23 @@ export async function dispatchChatWithAffinityEviction(
       ),
     });
   } catch (dispatchErr) {
-    evict();
+    stopStallWatch();
+    const evicted = evict();
+    if (evicted instanceof Promise) await evicted;
     throw dispatchErr;
   }
 
   // A resource-pressure short-circuit (no upstream dispatch happened) is not a
   // combo per-model timeout — never treat it as one.
-  if ("localResourcePressureResult" in dispatched) return dispatched;
+  if ("localResourcePressureResult" in dispatched) {
+    stopStallWatch();
+    return dispatched;
+  }
 
-  if (!dispatched.result?.success) evict();
+  if (!dispatched.result?.success) {
+    stopStallWatch();
+    const evicted = evict();
+    if (evicted instanceof Promise) await evicted;
+  }
   return dispatched;
 }

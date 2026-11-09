@@ -12,8 +12,8 @@
  *   the password-verify only fires ONCE per PATCH.
  * - `oidcEnabled` / `oidcDisablePasswordLogin` / `oidcClientSecret`: who may log
  *   in to the dashboard.
- * - `oidcIssuer` / `oidcClientId` / `oidcAllowedSubjects` / `oidcRedirectPath` /
- *   `oidcScopes`: the OIDC identity config — which IdP's ID tokens are trusted, the
+ * - `oidcIssuer` / `oidcClientId` / `oidcAllowedSubjects` / `oidcAdmissionClaim` /
+ *   `oidcRedirectPath` / `oidcScopes`: the OIDC identity config — which IdP's ID tokens are trusted, the
  *   audience they must carry, where the authorization code is sent and which subjects
  *   may log in. Changing them without re-auth would let a stolen session or management
  *   credential point dashboard login at an attacker-controlled IdP, allowlist the
@@ -23,6 +23,11 @@
  *   API with the operator's cookie, and whether repeated failed logins are throttled.
  *   Loosening either weakens the login defenses, so both need the same re-auth (the Security
  *   tab asks for the current password) and are dropped by the JSON import.
+ * - `entra*`: Entra ID SSO for `/v1/*` (docs/security/ENTRA_SSO.md) — which authority's
+ *   tokens are trusted (`entraAuthorityHost` / `entraTenantId` / `entraClientId` /
+ *   `entraApiAudience`), which key-group policy SSO users land in (`entraGroupMappings` /
+ *   `entraDefaultKeyGroupId`) and the Graph fallback and its secret. Every `entra*` key of
+ *   the settings schema belongs here (pinned by `tests/unit/entra-sso-auth.test.ts`).
  *
  * Every key here is also OPERATOR-ONLY on `PATCH /api/settings`: a manage-scoped API key or an
  * `oma_` access token is refused with 403 even when it knows the password
@@ -44,10 +49,20 @@ export const SECURITY_IMPACTING_SETTINGS_KEYS = [
   "oidcIssuer",
   "oidcClientId",
   "oidcAllowedSubjects",
+  "oidcAdmissionClaim",
   "oidcRedirectPath",
   "oidcScopes",
   "corsOrigins",
   "bruteForceProtection",
+  "entraSsoEnabled",
+  "entraAuthorityHost",
+  "entraTenantId",
+  "entraClientId",
+  "entraApiAudience",
+  "entraGroupMappings",
+  "entraDefaultKeyGroupId",
+  "entraGraphFallbackEnabled",
+  "entraGraphClientSecret",
 ] as const;
 
 /**

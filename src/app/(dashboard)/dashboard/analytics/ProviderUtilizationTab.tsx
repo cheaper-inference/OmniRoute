@@ -6,6 +6,7 @@ import { PROVIDER_COLORS as CHART_PROVIDER_COLORS } from "@/shared/components/an
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { getAccountDisplayName } from "@/lib/display/names";
 import dynamic from "next/dynamic";
@@ -225,8 +226,11 @@ export default function ProviderUtilizationTab() {
         className="overflow-hidden"
       >
         {loading && !hasData ? (
-          <div className="flex min-h-80 items-center justify-center text-sm text-text-muted">
-            <Icon name="progress_activity" size={18} className="mr-2 animate-spin" />
+          <div
+            role="status"
+            className="flex min-h-80 items-center justify-center text-sm text-text-muted"
+          >
+            <Spinner decorative size="sm" className="mr-2" />
             {t("providerUtilizationLoading")}
           </div>
         ) : error ? (

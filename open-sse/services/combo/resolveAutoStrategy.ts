@@ -27,7 +27,10 @@ import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
   providerSupportsEmulatedToolCalling,
+  filterTargetsByRequestCompatibility,
+  deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
+import { hasMediaRequirements } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
   promptCacheTargetIdentity,
@@ -47,6 +50,8 @@ import type {
   ComboLogger,
   ResolvedComboTarget,
 } from "./types.ts";
+import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
+import { firstAccountPreferenceTier, orderAccountPreferences } from "./accountPreferences.ts";
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -58,7 +63,8 @@ type BuildAutoCandidates = (
   comboName: string,
   sessionId?: string | null,
   resetWindowConfig?: ResetWindowConfig,
-  resilienceSettings?: ResilienceSettings | null
+  resilienceSettings?: ResilienceSettings | null,
+  apiKeyAllowedConnections?: string[] | null
 ) => Promise<AutoProviderCandidate[]>;
 
 export interface ResolveAutoStrategyDeps {
@@ -84,6 +90,7 @@ export interface ResolveAutoStrategyDeps {
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -101,6 +108,7 @@ export interface EvaluateAutoCandidatesOptions {
   resilienceSettings?: ResilienceSettings | null;
   manifestHint?: RoutingHint | null;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOptions) {
@@ -109,7 +117,8 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
     options.comboName,
     options.sessionId,
     options.resetWindowConfig,
-    options.resilienceSettings
+    options.resilienceSettings,
+    options.apiKeyAllowedConnections
   );
   const cacheAffinityScores = calculatePromptCacheAffinityScores(
     builtCandidates,
@@ -271,7 +280,37 @@ export async function resolveAutoStrategyOrder(
       );
     }
 
-    eligibleTargets = await expandAutoComboCandidatePool(eligibleTargets, combo);
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  } else if (normalizeAutoConnectionScope(deps.apiKeyAllowedConnections)) {
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  }
+
+  // Full-catalog expansion can add targets after the initial compatibility pass.
+  // Recheck before scoring so unsupported transports cannot consume the retry
+  // budget, and retain this pool even when candidate telemetry is unavailable.
+  if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
+    eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name);
+    if (eligibleTargets.length === 0) {
+      return {
+        earlyResponse: errorResponse(
+          400,
+          "No compatible media transport is available in this Auto pool",
+          {
+            code: "unsupported_media_input",
+            type: "invalid_request_error",
+          }
+        ),
+      };
+    }
+    orderedTargets = eligibleTargets;
   }
 
   const prompt = extractPromptForIntent(body);
@@ -292,6 +331,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    accountPreferences,
   } = parseAutoConfig(combo, eligibleTargets);
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
@@ -361,32 +401,37 @@ export async function resolveAutoStrategyOrder(
     log
   );
 
-  const { sourceCandidates, candidates, routableCandidates, scoredTargets } =
-    await evaluateAutoCandidates({
-      targets: eligibleTargets,
-      comboName: combo.name,
-      body,
-      taskType,
-      weights,
-      sessionId: relayOptions?.sessionId,
-      resetWindowConfig,
-      resilienceSettings: autoCandidateResilienceSettings,
-      manifestHint: autoManifestHint,
-      buildAutoCandidates,
-    });
+  const {
+    sourceCandidates,
+    candidates,
+    routableCandidates: unfilteredCandidates,
+    scoredTargets,
+  } = await evaluateAutoCandidates({
+    targets: eligibleTargets,
+    comboName: combo.name,
+    body,
+    taskType,
+    weights,
+    sessionId: relayOptions?.sessionId,
+    resetWindowConfig,
+    resilienceSettings: autoCandidateResilienceSettings,
+    manifestHint: autoManifestHint,
+    buildAutoCandidates,
+    apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
+  });
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
   }
-  const quotaBlockedCount = candidates.length - routableCandidates.length;
+  const quotaBlockedCount = candidates.length - unfilteredCandidates.length;
   if (quotaBlockedCount > 0) {
     log.info(
       "COMBO",
       `Auto strategy: quota cutoff skipped ${quotaBlockedCount}/${candidates.length} account candidates`
     );
   }
-  // G2: Register candidates so chatCore can mark quotaSoftPenalty via setCandidateQuotaSoftPenalty.
-  _registerExecutionCandidates(routableCandidates);
-  if (candidates.length > 0 && routableCandidates.length === 0) {
+  // Checked before the account-preference filters so an all-quota-blocked pool keeps
+  // its 429 whether or not preferences are configured.
+  if (candidates.length > 0 && unfilteredCandidates.length === 0) {
     return {
       earlyResponse: unavailableResponse(
         429,
@@ -394,6 +439,64 @@ export async function resolveAutoStrategyOrder(
       ),
     };
   }
+  const hasAccountPreferences = Object.keys(accountPreferences).length > 0;
+  let routableCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
+  if (hasAccountPreferences) {
+    const eligibleCandidates = routableCandidates.filter(
+      (candidate) =>
+        candidate.circuitBreakerState !== "OPEN" &&
+        (!candidatePool.length || candidatePool.includes(candidate.provider))
+    );
+    // A soft status penalty (#4540) is last-resort, never an exclusion: penalised
+    // accounts follow every healthy account, each group kept in tier order.
+    routableCandidates = [
+      ...eligibleCandidates.filter((candidate) => !candidate.statusPenalty),
+      ...eligibleCandidates.filter((candidate) => candidate.statusPenalty),
+    ];
+    if (budgetCap && routableCandidates.length) {
+      const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
+      const cost = (candidate: AutoProviderCandidate) =>
+        (candidate.costPer1MTokens * tokens) / 1_000_000;
+      const affordable = routableCandidates.filter((candidate) => cost(candidate) <= budgetCap);
+      if (affordable.length) {
+        routableCandidates = affordable;
+      } else if (budgetFallback === "strict") {
+        return {
+          earlyResponse: errorResponse(
+            402,
+            new BudgetExceededError(budgetCap, Math.min(...routableCandidates.map(cost))).message
+          ),
+        };
+      } else {
+        const cheapest = Math.min(...routableCandidates.map(cost));
+        routableCandidates = routableCandidates.filter((candidate) => cost(candidate) === cheapest);
+      }
+    }
+  }
+  if (hasAccountPreferences && routableCandidates.length === 0) {
+    return {
+      earlyResponse: unavailableResponse(
+        503,
+        "No eligible accounts remain for this combo's account preferences"
+      ),
+    };
+  }
+  const penalisedKeys = new Set(
+    hasAccountPreferences
+      ? routableCandidates
+          .filter((candidate) => candidate.statusPenalty)
+          .map((candidate) => candidate.executionKey)
+      : []
+  );
+  const healthyCandidates = routableCandidates.filter(
+    (candidate) => !penalisedKeys.has(candidate.executionKey)
+  );
+  const selectionCandidates = firstAccountPreferenceTier(
+    healthyCandidates.length > 0 ? healthyCandidates : routableCandidates,
+    accountPreferences
+  );
+  // G2: Register candidates so chatCore can mark quotaSoftPenalty via setCandidateQuotaSoftPenalty.
+  _registerExecutionCandidates(routableCandidates);
   if (routableCandidates.length > 0) {
     let selectedProvider: string | null = null;
     let selectedModel: string | null = null;
@@ -403,7 +506,7 @@ export async function resolveAutoStrategyOrder(
     if (routingStrategy !== "rules") {
       try {
         const decision = await selectWithStrategyAsync(
-          routableCandidates,
+          selectionCandidates,
           {
             taskType,
             requestHasTools,
@@ -418,6 +521,7 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
           },
@@ -451,8 +555,9 @@ export async function resolveAutoStrategyOrder(
             budgetFallback,
             estimatedInputTokens,
             explorationRate,
+            manifestHint: autoManifestHint,
           },
-          routableCandidates,
+          selectionCandidates,
           taskType
         );
       } catch (err) {
@@ -470,17 +575,23 @@ export async function resolveAutoStrategyOrder(
       selectionReason = `score=${selection.score.toFixed(3)}${selection.isExploration ? " (exploration)" : ""}`;
     }
 
-    const rankedTargets = scoredTargets.map((entry) => entry.target);
+    const routableKeys = new Set(routableCandidates.map((candidate) => candidate.executionKey));
+    const rankedTargets = orderAccountPreferences(
+      scoredTargets
+        .filter((entry) => !hasAccountPreferences || routableKeys.has(entry.target.executionKey))
+        .map((entry) => entry.target),
+      accountPreferences
+    );
     const selectedTarget =
-      scoredTargets.find((entry) => {
-        const parsed = parseModel(entry.target.modelStr);
-        const modelId = parsed.model || entry.target.modelStr;
+      rankedTargets.find((target) => {
+        const parsed = parseModel(target.modelStr);
+        const modelId = parsed.model || target.modelStr;
         return (
-          entry.target.provider === selectedProvider &&
+          target.provider === selectedProvider &&
           modelId === selectedModel &&
-          (!selectedConnectionId || entry.target.connectionId === selectedConnectionId)
+          (!selectedConnectionId || target.connectionId === selectedConnectionId)
         );
-      })?.target ||
+      }) ||
       rankedTargets[0] ||
       eligibleTargets[0];
     if (!selectedTarget) {
@@ -503,10 +614,23 @@ export async function resolveAutoStrategyOrder(
       ? restoreIncomingOrder(rankedTargets, eligibleTargets)
       : [selectedTarget, ...rankedTargets];
     orderedTargets = dedupeTargetsByExecutionKey(
-      [...headTargets, ...eligibleTargets].filter(
+      [...headTargets, ...(hasAccountPreferences ? [] : eligibleTargets)].filter(
         (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
       )
     );
+    orderedTargets = orderAccountPreferences(orderedTargets, accountPreferences);
+    if (penalisedKeys.size > 0) {
+      orderedTargets = [
+        ...orderedTargets.filter((target) => !penalisedKeys.has(target.executionKey)),
+        ...orderedTargets.filter((target) => penalisedKeys.has(target.executionKey)),
+      ];
+    }
+    if (hasAccountPreferences) {
+      log.info(
+        "COMBO",
+        `Account preferences: ${orderedTargets.length} concrete targets ordered preferred → normal → reserve; excluded accounts removed`
+      );
+    }
 
     log.info(
       "COMBO",

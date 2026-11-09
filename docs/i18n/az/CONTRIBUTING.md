@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## İnkişaf mühitinin qurulması
+## İnkişaf Mühiti
 
 ### İlkin tələblər
 
-- **Node.js** `>=22.22.2 <23` və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, və ya `>=24.0.0 <27` (tövsiyə olunur: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ istifadəçiləri (Node 24+):** `npm install` əmrindən sonra yerli modulların quraşdırıldığını yoxlayın:
+> **Node 24 ilə Windows:** cari 24 LTS düzəliş buraxılışından istifadə edin (ən azı 24.20.0).
+> Daha əvvəlki buraxılışlar `--test-force-exit` prosesi bağladıqda uğurlu testlərdən sonra
+> prosesi dayandıra bilər. Node-un [Windows libuv düzəlişi](https://github.com/nodejs/node/pull/61999) bu
+> icra mühiti qəzasını aradan qaldırır; test təsdiqləmələrini və runner-in çıxış yoxlamalarını aktiv saxlayın.
+
+> **npm v11+ istifadəçiləri (Node 24+):** `npm install` əmrindən sonra native modulların quraşdırıldığını yoxlayın:
 > `node -e "require('better-sqlite3')"`. Əgər `MODULE_NOT_FOUND` xətası ilə uğursuz olarsa,
 > `npm approve-scripts better-sqlite3 && npm install` əmrini icra edin. Baxın:
 > [Problemlərin aradan qaldırılması](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,88 +41,89 @@ npm install
 # Şablondan .env faylınızı yaradın
 cp .env.example .env
 
-# Tələb olunan məxfi dəyərləri yaradın
+# Tələb olunan məxfi açarları yaradın
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 İnkişaf üçün əsas dəyişənlər:
 
-| Dəyişən                | İnkişaf üçün standart    | Təsvir                      |
-| ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Server portu                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön tərəf üçün əsas URL      |
-| `JWT_SECRET`           | (yuxarıda yaradın)       | JWT imzalama məxfi dəyəri   |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk giriş parolu            |
-| `APP_LOG_LEVEL`        | `info`                   | Jurnal təfərrüatı səviyyəsi |
+| Dəyişən                | İnkişaf üçün standart dəyər | Təsvir                          |
+| ---------------------- | --------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                     | Server portu                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Frontend üçün baza URL-i        |
+| `JWT_SECRET`           | (yuxarıda yaradılır)        | JWT imzalama məxfi açarı        |
+| `INITIAL_PASSWORD`     | `CHANGEME`                  | İlk giriş parolu                |
+| `APP_LOG_LEVEL`        | `info`                      | Jurnal təfərrüatlılıq səviyyəsi |
 
-### İdarəetmə paneli parametrləri
+### İdarə panelinin tənzimləmələri
 
-İdarəetmə paneli, həmçinin mühit dəyişənləri vasitəsilə konfiqurasiya edilə bilən funksiyalar üçün interfeys keçidləri təqdim edir:
+İdarə paneli mühit dəyişənləri vasitəsilə də konfiqurasiya oluna bilən funksiyalar üçün UI keçidləri təqdim edir:
 
-| Parametrin yeri        | Keçid paneli          | Təsvir                                          |
-| ---------------------- | --------------------- | ----------------------------------------------- |
-| Parametrlər → Qabaqcıl | Sazlama rejimi        | Sazlama sorğusu jurnallarını aktivləşdirir (UI) |
-| Parametrlər → Ümumi    | Yan panelin görünməsi | Yan panel bölmələrini göstərir/gizlədir         |
+| Tənzimləmənin yeri       | Keçid                 | Təsvir                                        |
+| ------------------------ | --------------------- | --------------------------------------------- |
+| Tənzimləmələr → Qabaqcıl | Sazlama rejimi        | Sazlama sorğusu jurnallarını aktivləşdir (UI) |
+| Tənzimləmələr → Ümumi    | Yan panelin görünməsi | Yan panel bölmələrini göstər/gizlət           |
 
-Bu parametrlər verilənlər bazasında saxlanılır və yenidən başladılmalar arasında qorunur; təyin edildikdə mühit dəyişənlərinin standart dəyərlərini üstələyir.
+Bu tənzimləmələr verilənlər bazasında saxlanılır və yenidən başladılmadan sonra qorunur; təyin edildikdə mühit dəyişəni standartlarını üstələyir.
 
 ### Lokal olaraq işə salma
 
 ```bash
-# İnkişaf rejimi (avtomatik yenidən yükləmə)
+# İnkişaf rejimi (hot reload)
 npm run dev
 
-# İstehsal yığımı
-npm run build    # next build → .build/next/, sonra assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ sonra assembleStandalone → dist/
 npm run start
 
-# Töhfə verənlərin dəyişiklikləri üçün yalnız arxa tərəf/API üzrə sürətli kompilyasiya
+# Contributor dəyişiklikləri üçün sürətli yalnız backend/API kompilyasiyası
 npm run build:contributor
 
-# Buraxılış yığımı (təmiz yenidən yığım + HEAD nəzarət göstəricisi — yerləşdirmə üçün tələb olunur)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA faylını yazır
+# Release build (təmiz yenidənqurma + HEAD sentinel — deploy üçün tələb olunur)
+npm run build:release   # rm -rf .build dist və build + dist/BUILD_SHA yazır
 
 # Ümumi port konfiqurasiyası
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Töhfə verənlər üçün yığım yalnız kompilyasiya yoxlamasını həyata keçirir: o, müstəqil
-paylanmanı yığmır və ya istəyə bağlı yerli paketləmə resurslarını yaratmır. Paylana bilən paketi
-yoxlamaq lazım olduqda adi istehsal yığımından istifadə edin.
+Contributor build yalnız kompilyasiya yoxlaması həyata keçirir: standalone
+distribusiyasını yığmır və optional native paketləmə aktivlərini build etmir. Göndərilə bilən paketi
+yoxlamaq lazım olduqda adi production build-dən istifadə edin.
 
-### Yığım çıxışının strukturu
+### Build çıxışının quruluşu
 
-| Kataloq   | Məzmun                                                                     | İzlənilir |
-| --------- | -------------------------------------------------------------------------- | --------- |
-| `src/`    | Tətbiqin mənbə kodu (TypeScript / TSX)                                     | Bəli      |
-| `.build/` | Aralıq fayllar — `next build` çıxışı (gitignored, `distDir = .build/next`) | Xeyr      |
-| `dist/`   | Paylana bilən paket — `assembleStandalone` tərəfindən yığılır (gitignored) | Xeyr      |
+| Qovluq    | Məzmun                                                                       | İzlənilir |
+| --------- | ---------------------------------------------------------------------------- | --------- |
+| `src/`    | Tətbiq mənbə kodu (TypeScript / TSX)                                         | Bəli      |
+| `.build/` | Aralıq fayllar — `next build` çıxışı (gitignored, `distDir = .build/next`)   | Xeyr      |
+| `dist/`   | Göndərilə bilən paket — `assembleStandalone` tərəfindən yığılır (gitignored) | Xeyr      |
 
-Yığım konveyeri bir keçiddən ibarətdir:
+Build pipeline tək keçiddən ibarətdir:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js çıxışı)
-  └─ assembleStandalone()                 (standalone + static + public + yerli resursları kopyalayır)
-       └─ çıxış: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native aktivlərini köçürür)
+       └─ çıxış: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` əlavə olaraq əvvəlcə hər iki kataloqu təmizləyir və yerləşdirmə bütövlüyünün
-nəzarət göstəricisi kimi `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylını yazır.
+`npm run build:release` əlavə olaraq əvvəlcə hər iki qovluğu təmizləyir və
+deploy bütövlüyü göstəricisi kimi `dist/BUILD_SHA` faylına
+`git rev-parse --short HEAD` dəyərini yazır.
 
-`npm run build:contributor` yalnız arxa tərəf üçün yığım profilindən istifadə edir. O, yığım zamanı
-idarəetmə panelinin UI fayllarını müvəqqəti əvəz edir, API marşrut emalçılarını saxlayır və yığımdan
-sonra orijinal faylları bərpa edir. İdarəetmə panelinin UI hissəsinə təsir edən dəyişikliklər və ya tam
-buraxılış yoxlaması üçün `npm run build` istifadə edin; töhfə verənlər profili buraxılış yığımını əvəz etmir.
+`npm run build:contributor` yalnız backend üçün build profilindən istifadə edir. Build zamanı
+idarə panelinin UI fayllarını müvəqqəti olaraq stub-larla əvəz edir, API route handler-lərini saxlayır
+və build-dən sonra orijinal faylları bərpa edir. İdarə panelinin UI-sına təsir edən dəyişikliklər və ya
+tam release yoxlaması üçün `npm run build` əmrindən istifadə edin; contributor profili release build-i əvəz etmir.
 
-> **VPS-də yerləşdirmə qeydi:** uzaq təsvir kataloqu `/usr/lib/node_modules/omniroute/app/`
-> dəyişməyib. Yerləşdirmə vasitələri `dist/` məzmununu rsync vasitəsilə ora köçürür.
-> Yalnız repozitoriya daxilindəki yığım çıxışının yolu dəyişib (`app/` → `dist/`).
+> **VPS deploy qeydi:** uzaq image qovluğu `/usr/lib/node_modules/omniroute/app/`
+> dəyişməz qalır. Deploy bacarıqları `dist/` məzmununu həmin qovluğa rsync edir.
+> Yalnız repodaxili build çıxış yolu dəyişib (`app/` → `dist/`).
 
 Standart URL-lər:
 
-- **İdarəetmə paneli**: `http://localhost:20128/dashboard`
+- **İdarə paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -170,18 +176,18 @@ refactor(db): consolidate rate limit tables
 ## Testlərin işə salınması
 
 ```bash
-# Bütün testlər (modul + vitest + ekosistem + e2e)
+# Bütün testlər (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Tək test faylı (Node.js-ün daxili test icraedicisi — testlərin əksəriyyəti bundan istifadə edir)
+# Tək test faylı (Node.js-ın daxili test icraedicisi — əksər testlər bundan istifadə edir)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Yalnız etdiyiniz dəyişiklikdən təsirlənən modul testləri (CI keçidi ilə eyni TIA selektoru, #8084)
-npm run test:scoped            # son commit-dəki (və ya işçi ağacındakı) dəyişikliklər
-npm run test:scoped:staged     # yalnız mərhələlənmiş dəyişikliklər — pre-commit işə salınması ilə yaxşı uyğunlaşır
-npm run test:scoped:full       # əvvəlcə import qrafı xəritəsini yenidən qurur (fayllar əlavə edildikdən/köçürüldükdən sonra)
-# Çıxış 1 + "tam dəsti işə salın" mesajı mərkəzi faylın (tsconfig, package.json, …) və ya
-# xəritələnməmiş mənbənin dəyişdiyini bildirir — selektor təhlükəsiz şəkildə dayanır və heç vaxt səssizcə testləri ötürmür.
+# Yalnız dəyişikliyinizin təsir etdiyi unit testləri (CI keçidi ilə eyni TIA seçicisi, #8084)
+npm run test:scoped            # son commit-dəki (və ya işçi ağacdakı) dəyişikliklər
+npm run test:scoped:staged     # yalnız stage edilmiş dəyişikliklər — pre-commit icrası ilə yaxşı uyğunlaşır
+npm run test:scoped:full       # əvvəlcə import qrafiki xəritəsini yenidən qurur (fayllar əlavə edildikdən/köçürüldükdən sonra)
+# Exit 1 + "run the full suite" o deməkdir ki, mərkəzi fayl (tsconfig, package.json, …) və ya
+# xəritələndirilməmiş mənbə dəyişib — seçici təhlükəsiz şəkildə uğursuz olur, heç vaxt səssizcə ötürmür.
 
 # Vitest (MCP serveri, autoCombo, keş)
 npm run test:vitest
@@ -189,13 +195,13 @@ npm run test:vitest
 # E2E testləri (Playwright tələb edir)
 npm run test:e2e
 
-# Protokol klientlərinin E2E testləri (MCP nəqliyyatları, A2A)
+# Protokol müştərilərinin E2E testləri (MCP nəqletmə mexanizmləri, A2A)
 npm run test:protocols:e2e
 
 # Ekosistem uyğunluğu testləri
 npm run test:ecosystem
 
-# Əhatə keçidi: ifadələrin/sətirlərin/funksiyaların/budaqların 60%-i
+# Örtük keçidi: ifadələrin/sətirlərin/funksiyaların/budaqların 60%-i
 npm run test:coverage
 npm run coverage:report
 
@@ -203,51 +209,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Keçidlə qorunan real yuxarı axın kombinasiya tüstü testi (VPS girişi + real provayder kreditləri tələb edir)
-# REAL provayderlərə sorğu göndərir — kiçik xərc yaradır. CI-də HEÇ VAXT işə salınmır. Keçid olmadan düzgün şəkildə ötürülür.
-# Tələb olunur: ssh root@192.168.0.15 girişi (VPS-dən yalnız oxunan DB şəklini mənbə kimi yükləyir).
+# Keçidlə qorunan real yuxarı axın combo smoke testi (VPS girişi + real provayder kreditləri tələb edir)
+# REAL provayderlərə sorğu göndərir — kiçik xərc yaradır. CI-da HEÇ VAXT işləmir. Keçid olmadan problemsiz ötürülür.
+# Tələb olunur: ssh root@192.168.0.15 girişi (VPS-dən yalnız oxunan DB snapshot-ını mənbə kimi qoşur).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Mərhələ-3 VPS canlı tüstü testi — adi Node ESM skriptləri, birbaşa canlı .15 serverinə sorğu göndərir.
-# Tələb olunur: ssh root@192.168.0.15 girişi (kombinasiyalar SSH sqlite vasitəsilə yaradılır/sökülür).
-# REAL provayderlərə sorğu göndərir (kiçik xərc). Yalnız __live_test__* kombinasiyalarını yaradır/silir. CI-də HEÇ VAXT işə salınmır.
-# .15-də REQUIRE_API_KEY=false olduğundan API açarı lazım deyil, lakin təyin edilibsə COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nəzərə alınır.
-npm run test:combo:live:vps              # 7 HTTP ssenarisi (prioritet/dövri/çəkili/xərc/birləşdirmə/avtomatik + sağlamlıq)
-npm run test:combo:live:vps:failover     # real provayderlərarası ehtiyat keçid ssenarisi əlavə edir (cəmi 8)
+# Mərhələ-3 VPS canlı smoke testi — sadə Node ESM skriptləri, canlı .15 serverinə birbaşa sorğu göndərir.
+# Tələb olunur: ssh root@192.168.0.15 girişi (combo-lar SSH sqlite vasitəsilə yaradılır/silinir).
+# REAL provayderlərə sorğu göndərir (kiçik xərc). Yalnız __live_test__* combo-larını yaradır/silir. CI-da HEÇ VAXT işləmir.
+# .15 üzərində REQUIRE_API_KEY=false olduğuna görə API açarı lazım deyil, lakin təyin edilərsə COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nəzərə alınır.
+npm run test:combo:live:vps              # 7 HTTP ssenarisi (prioritet/dövrü/çəkili/xərc/fusion/auto + sağlamlıq)
+npm run test:combo:live:vps:failover     # real provayderlərarası failover ssenarisi əlavə edir (cəmi 8)
 ```
 
-Əhatə qeydləri:
+Örtüklə bağlı qeydlər:
 
-- `npm run test:coverage` əsas modul test dəsti üçün mənbə kodunun əhatəsini ölçür, `tests/**` qovluğunu istisna edir və `open-sse/**` qovluğunu daxil edir
-- Pull request-lər ifadələr/sətirlər/funksiyalar/budaqlar üzrə əhatə keçidini **60%+** səviyyəsində saxlamalıdır
-- PR `src/`, `open-sse/`, `electron/` və ya `bin/` daxilindəki istehsal kodunu dəyişdirirsə, həmin PR-da avtomatlaşdırılmış testlər əlavə edilməli və ya yenilənməlidir
-- `npm run coverage:report` son əhatə işə salınmasından əldə edilmiş fayl-fayl təfərrüatlı hesabatı çap edir
+- `npm run test:coverage` əsas unit test dəsti üçün mənbə örtüyünü ölçür, `tests/**` qovluğunu istisna edir və `open-sse/**` qovluğunu daxil edir
+- Pull request-lər ifadələr/sətirlər/funksiyalar/budaqlar üçün örtük keçidini **60%+** səviyyəsində saxlamalıdır
+- PR `src/`, `open-sse/`, `electron/` və ya `bin/` daxilindəki istehsal kodunu dəyişirsə, həmin PR-da avtomatlaşdırılmış testlər əlavə edilməli və ya yenilənməlidir
+- `npm run coverage:report` son örtük icrasından əldə edilən fayl-fayl ətraflı hesabatı çap edir
 - `npm run test:coverage:legacy` tarixi müqayisə üçün köhnə metrikanı qoruyur
-- Əhatənin mərhələli şəkildə yaxşılaşdırılması yol xəritəsi üçün `docs/ops/COVERAGE_PLAN.md` faylına baxın
+- Mərhələli örtük təkmilləşdirmə yol xəritəsi üçün `docs/ops/COVERAGE_PLAN.md` sənədinə baxın
 
 ### Pull Request tələbləri
 
-PR açmazdan əvvəl dəyişdirdiyiniz hissə üçün fokuslanmış dövrü işə salmaq məqsədilə
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) sənədindən istifadə edin.
-Tam modul test dəsti (4 CI hissəsi), Vitest, **60%+** əhatə keçidi və istehsal qurulması
-CI-ın məsuliyyətidir — bunları lokal olaraq işə salmaq PR yoxlamalarının sizə onsuz da
-verəcəyi məlumatdan əlavə heç bir məlumat vermir və daha zəif maşınlarda sistemi tam yükləyə bilər (#8084):
+PR açmazdan əvvəl dəyişdirdiyiniz hissə üçün fokuslanmış dövrəni icra etmək məqsədilə
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) təlimatından istifadə edin.
+Tam unit test dəsti (4 CI shard-ı), Vitest, **60%+** örtük keçidi və istehsal build-i CI-ın
+məsuliyyətidir — onları lokal olaraq işə salmaq PR yoxlamalarının onsuz da verməyəcəyi əlavə
+məlumat vermir və daha zəif maşınlarda host-u həddən artıq yükləyə bilər (#8084):
 
 - Dəyişikliyinizi əhatə edən test fayllarını işə salın: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` əmrini işə salın
-- İstehsal kodu dəyişdikdə həmin PR-da avtomatlaşdırılmış testlər əlavə edin və ya yeniləyin
+- İstehsal kodu dəyişdikdə eyni PR-da avtomatlaşdırılmış testlər əlavə edin və ya yeniləyin
+- `node:test` fayllarında hər bir üst səviyyəli `await` ifadəsini (məsələn, `await import(...)`) ilk `test()` / `describe()` çağırışından əvvəl yerləşdirin: `--test-force-exit` altında bundan sonra qeydiyyatdan keçirilən testlər səssizcə heç vaxt işləməyə bilər (#18045; `npm run check:test-tla-order` vasitəsilə məcburi yoxlanılır)
 - İstehsal kodu dəyişdikdə dəyişdirilmiş və ya əlavə edilmiş test fayllarını PR təsvirinə daxil edin
-- Layihə sirləri CI-da konfiqurasiya edildikdə PR-dakı SonarQube nəticəsini yoxlayın
+- Layihə sirləri CI-da konfiqurasiya edilibsə, PR-da SonarQube nəticəsini yoxlayın
 
-Cari test vəziyyəti: aşağıdakıları əhatə edən **122 modul test faylı**:
+Cari test vəziyyəti: aşağıdakıları əhatə edən **122 unit test faylı**:
 
 - Provayder tərcüməçiləri və format çevrilməsi
 - Sürət məhdudlaşdırması, dövrə açarı və dayanıqlılıq
-- Semantik keş, idempotentlik, irəliləyişin izlənməsi
+- Semantik keş, idempotentlik, gedişatın izlənməsi
 - Verilənlər bazası əməliyyatları və sxem (21 DB modulu)
 - OAuth axınları və autentifikasiya
-- API son nöqtələrinin yoxlanması (Zod v4)
-- MCP server alətləri və əhatə dairəsinin məcburi tətbiqi
+- API endpoint validasiyası (Zod v4)
+- MCP server alətləri və scope məhdudiyyətlərinin tətbiqi
 - Yaddaş və Bacarıqlar sistemləri
 
 ---

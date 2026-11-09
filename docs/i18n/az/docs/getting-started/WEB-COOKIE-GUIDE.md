@@ -4,21 +4,21 @@
 
 ---
 
-Web Cookie provayderləri OmniRoute-a API açarı əvəzinə mövcud brauzer sessiyanız vasitəsilə AI xidmətindən istifadə etməyə imkan verir. Onlar veb-saytı vasitəsilə xidmətə artıq girişiniz olduqda və OmniRoute-un eyni autentifikasiya edilmiş sessiyadan istifadə etməsini istədikdə faydalıdır.
+Web Cookie provayderləri OmniRoute-a API açarı əvəzinə mövcud brauzer sessiyanız vasitəsilə AI xidmətindən istifadə etməyə imkan verir. Hər hansı xidmətə artıq onun veb-saytı vasitəsilə girişiniz olduqda və OmniRoute-un eyni autentifikasiya edilmiş sessiyadan istifadə etməsini istədikdə onlar faydalıdır.
 
-API açarı provayderlərindən fərqli olaraq, Web Cookie provayderləri brauzerinizin veb-sayta göndərdiyi giriş məlumatlarından istifadə edərək autentifikasiya həyata keçirir.
+API açarı provayderlərindən fərqli olaraq, Web Cookie provayderləri brauzerinizin veb-sayta göndərdiyi giriş məlumatlarından istifadə edərək autentifikasiya aparır.
 
 ---
 
-# Başlamazdan əvvəl
+# Başlamazdan Əvvəl
 
-> **Vacib:** Giriş məlumatlarını həmişə brauzerinizin cookie yaddaşından deyil, **aktiv şəbəkə sorğusundan** kopyalayın.
+> **Vacib:** Giriş məlumatlarını həmişə brauzerinizin cookie yaddaşından **deyil**, **aktiv şəbəkə sorğusundan** kopyalayın.
 
-Bir çox autentifikasiya problemi cookie-lərin yanlış yerdən kopyalanması səbəbindən baş verir.
+Bir çox autentifikasiya problemi cookie-lərin yanlış yerdən kopyalanmasından qaynaqlanır.
 
-## Cookie yaddaşından kopyalamayın
+## Cookie Yaddaşından Kopyalamayın
 
-Əksər brauzerlər saxlanılan cookie-ləri aşağıdakı bölmədə göstərir:
+Əksər brauzerlər saxlanılan cookie-ləri aşağıdakı bölmə vasitəsilə göstərir:
 
 ```
 DevTools
@@ -26,17 +26,19 @@ DevTools
 → Cookies
 ```
 
-Bu cookie-lər düzgün görünsə də, onlar aşağıdakı kimi ola bilər:
+Bu cookie-lər düzgün görünsə də, onlar:
 
 - köhnəlmiş
 - natamam
-- yalnız autentifikasiya edilmiş sorğular zamanı göndərilən cookie-ləri ehtiva etməyən
+- yalnız autentifikasiya edilmiş sorğular zamanı göndərilən cookie-lərdən məhrum
 
-Bu dəyərlər etibarlı görünsə belə, onlardan istifadə autentifikasiya xətalarına səbəb ola bilər.
+ola bilər.
 
-## Aktiv sorğudan kopyalayın
+Bu dəyərlərdən istifadə, hətta onlar etibarlı görünsə belə, autentifikasiya xətalarına səbəb ola bilər.
 
-Bunun əvəzinə uğurlu sorğudakı cookie-lərdən istifadə edin:
+## Aktiv Sorğudan Kopyalayın
+
+Bunun əvəzinə, uğurlu sorğudakı cookie-lərdən istifadə edin:
 
 ```
 DevTools
@@ -49,24 +51,24 @@ DevTools
 
 `Cookie` sorğu başlığı brauzerinizin uğurla istifadə etdiyi dəqiq autentifikasiya məlumatlarını ehtiva edir.
 
-Əksər Web Cookie provayderləri üçün OmniRoute-a yapışdırılmalı dəyər budur.
+Əksər Web Cookie provayderləri üçün OmniRoute-a daxil edilməli olan dəyər budur.
 
 ---
 
-# Ümumi quraşdırma
+# Ümumi Quraşdırma
 
 Quraşdırma prosesi əksər Web Cookie provayderləri üçün eynidir.
 
 1. Provayderin veb-saytına daxil olun.
 2. Brauzerin Developer Tools bölməsini açın.
-3. **Network** vərəqini açın.
+3. **Network** tabını açın.
 4. Səhifəni yeniləyin.
 5. Autentifikasiya edilmiş söhbət və ya dialoq sorğusunu açın.
 6. Tələb olunan autentifikasiya məlumatlarını kopyalayın.
 7. OmniRoute-u açın.
 8. **Providers → Add Provider** bölməsinə keçin.
 9. Web Cookie provayderinizi seçin.
-10. Giriş məlumatlarını yapışdırın.
+10. Giriş məlumatlarını daxil edin.
 11. **Test Connection** düyməsinə klikləyin.
 12. Provayderi yadda saxlayın.
 
@@ -74,75 +76,75 @@ Tələb olunan dəqiq giriş məlumatları provayderdən asılıdır.
 
 ---
 
-# Provayder giriş məlumatlarının formatları
+# Provayder Giriş Məlumatlarının Formatları
 
 Müxtəlif veb-saytlar autentifikasiya məlumatlarını fərqli şəkildə saxlayır. Bəziləri yalnız cookie-lər tələb edir, digərləri isə əlavə başlıqlar və ya tokenlər tələb edə bilər.
 
-| Provayder                       | Giriş məlumatlarının formatı  | Provayder təlimatı               |
+| Provayder                       | Giriş Məlumatlarının Formatı  | Provayder Təlimatı               |
 | ------------------------------- | ----------------------------- | -------------------------------- |
 | Claude Web                      | Tam Cookie sorğu başlığı      | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Tam Cookie başlığı            | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(yoxlanılmalıdır)_           |                                  |
-| Copilot Web                     | _(yoxlanılmalıdır)_           | `docs/providers/COPILOT-M365.md` |
+| Gemini Web                      | _(yoxlayın)_                  |                                  |
+| Copilot Web                     | _(yoxlayın)_                  | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(yoxlanılmalıdır)_           |                                  |
+| Grok Web                        | _(yoxlayın)_                  |                                  |
 | ...                             | ...                           | ...                              |
 
-> Yeni Web Cookie provayderləri əlavə edildikcə və ya mövcud provayderlərin autentifikasiya tələbləri dəyişdikcə bu cədvəli yeniləyin.
+> Yeni Web Cookie provayderləri əlavə olunduqda və ya mövcud provayderlərin autentifikasiya tələbləri dəyişdikdə bu cədvəli yeniləyin.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) qeydiyyat tələb etməyən pulsuz istehlakçı çat platformasıdır — sessiya ilk ziyarət zamanı anonim şəkildə yaradılır və üç kuki vasitəsilə saxlanılır: `uid`, `si_usr_id` və `si_ses_id`. OmniRoute eyni `/api/dispatch` son nöqtəsini vahid model identifikatoru (`notrack-c`, ləqəbi `ntw`) vasitəsilə proksiləyir.
+NoTrack ([notrack.ai](https://notrack.ai)) qeydiyyat tələb etməyən pulsuz istehlakçı çat platformasıdır — sessiya ilk ziyarət zamanı anonim şəkildə yaradılır və üç kuki vasitəsilə saxlanılır: `uid`, `si_usr_id` və `si_ses_id`. OmniRoute eyni `/api/dispatch` son nöqtəsini vahid model identifikatoru (`notrack-c`, alternativ adı `ntw`) vasitəsilə proksiləyir.
 
 ### Qoşulma addımları
 
 1. Brauzerinizdə [notrack.ai](https://notrack.ai) saytını açın və anonim sessiya kukisinin təyin edilməsinə icazə verin.
-2. **Tərtibatçı Alətləri → Şəbəkə** bölməsini açın, səhifəni yeniləyin və istənilən `/api` sorğusuna klikləyin.
-3. **Sorğu Başlıqları** bölməsində tam `Cookie` başlıq dəyərini kopyalayın.
+2. **Tərtibatçı alətləri → Şəbəkə** bölməsini açın, səhifəni yeniləyin və istənilən `/api` sorğusuna klikləyin.
+3. **Sorğu başlıqları** bölməsində tam `Cookie` başlıq dəyərini kopyalayın.
 4. OmniRoute-da **Provayderlər → Provayder əlavə et → NoTrack Web (Pulsuz)** bölməsinə keçin.
 5. Kuki sətrini `apiKey` sahəsinə yapışdırın və **Yadda saxla** düyməsinə klikləyin.
 
-OmniRoute yapışdırılmış sətirdən `uid`, `si_usr_id` və `si_ses_id` dəyərlərini çıxarır və yalnız həmin cütlüklərdən ibarət təmiz `Cookie` başlığı yaradır — mövcud olduqda buna əlavə olaraq daxil olmuş hesablar üçün təyin edilən `nt_session` (`ntk_…` tokeni) də daxil edilir. Bu üç dəyərdən hər hansı biri çatışmırsa, operatorların alternativ formatlarla təcrübə apara bilməsi üçün yapışdırılmış xam sətir dəyişdirilmədən yönləndirilir.
+OmniRoute yapışdırılmış sətirdən `uid`, `si_usr_id` və `si_ses_id` dəyərlərini çıxarır və yalnız həmin cütlüklərdən ibarət təmiz `Cookie` başlığı yaradır — mövcud olduqda buna `nt_session` (hesaba daxil olmuş istifadəçilər üçün təyin edilən `ntk_…` tokeni) də əlavə olunur. Bu üç dəyərdən hər hansı biri yoxdursa, operatorların alternativ formatları sınaqdan keçirə bilməsi üçün yapışdırılmış xam sətir dəyişdirilmədən ötürülür.
 
 ### Model identifikatorları
 
-| Model identifikatoru | Göstərilən ad | Qeydlər                                                    |
-| -------------------- | ------------- | ---------------------------------------------------------- |
-| `notrack-c`          | NoTrack C     | Defolt — yuxarı axının `C` dispetçer modeli.               |
-| `C`                  | NoTrack C     | `notrack-c` üçün ləqəb (yuxarı axının xam dispetçer kodu). |
-| `notrack`            | NoTrack C     | `notrack-c` üçün ləqəb.                                    |
-| `ntw`                | NoTrack C     | `notrack-c` üçün qısa ləqəb.                               |
+| Model identifikatoru | Ekran adı | Qeydlər                                                              |
+| -------------------- | --------- | -------------------------------------------------------------------- |
+| `notrack-c`          | NoTrack C | Defolt — yuxarı axının `C` yönləndirmə modeli.                       |
+| `C`                  | NoTrack C | `notrack-c` üçün alternativ ad (yuxarı axının xam yönləndirmə kodu). |
+| `notrack`            | NoTrack C | `notrack-c` üçün alternativ ad.                                      |
+| `ntw`                | NoTrack C | `notrack-c` üçün qısa alternativ ad.                                 |
 
-Dörd model identifikatorunun hamısı eyni yuxarı axın dispetçer modelinə (`C`) uyğunlaşdırılır.
+Dörd model identifikatorunun hamısı eyni yuxarı axın yönləndirmə modelinə (`C`) uyğunlaşdırılır.
 
 ### Sorğu seçimləri
 
-İcraçı sorğu gövdəsində aşağıdakı istəyə bağlı sahələri qəbul edir:
+İcraçı sorğu gövdəsində aşağıdakı ixtiyari sahələri qəbul edir:
 
-| Gövdə sahəsi          | Defolt  | Məqsəd                                                                               |
-| --------------------- | ------- | ------------------------------------------------------------------------------------ |
-| `notrack_mode`        | `usual` | Dispetçer rejimi (sərbəst formalı sətir; yuxarı axın `usual`, … qəbul edir)          |
-| `notrack_max_turns`   | `6`     | Yuxarı axının cavab verməzdən əvvəl icra edə biləcəyi daxili gedişlərin sayı.        |
-| `notrack_chat_id`     | `null`  | Mövcud yuxarı axın çatını davam etdirir (yeni çat üçün buraxın).                     |
-| `notrack_attachments` | `[]`    | Yuxarı axın qoşma deskriptorlarının dəyişdirilmədən ötürülən massivi.                |
-| `notrack_regenerate`  | `false` | Əvvəlki gediş üçün yenidən yaradılmış cavab tələb etmək məqsədilə `true` təyin edin. |
+| Gövdə sahəsi          | Defolt  | Məqsəd                                                                                    |
+| --------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual` | Yönləndirmə rejimi (sərbəst formalı sətir; yuxarı axın `usual`, … dəyərlərini qəbul edir) |
+| `notrack_max_turns`   | `6`     | Yuxarı axının cavab verməzdən əvvəl yerinə yetirə biləcəyi daxili növbələrin sayı.        |
+| `notrack_chat_id`     | `null`  | Mövcud yuxarı axın çatını davam etdirir (yeni çat üçün buraxın).                          |
+| `notrack_attachments` | `[]`    | Yuxarı axın qoşma deskriptorlarının dəyişdirilmədən ötürülən massivi.                     |
+| `notrack_regenerate`  | `false` | Əvvəlki növbə üçün yenidən yaradılmış cavab tələb etmək məqsədilə `true` təyin edin.      |
 
 ### İmkanlar
 
 - **Axınlı və axınsız** çat tamamlamaları.
-- **Alət çağırışı** — sorğuda `tools: [...]` təyin edin; icraçı onları alət çağırışı zərfi müqaviləsinə seriallaşdırır və modelin cavablarını yenidən OpenAI `tool_calls` formatına çevirir.
+- **Alət çağırışı** — sorğuda `tools: [...]` təyin edin; icraçı onları alət çağırışı zərfi müqaviləsinə uyğun seriallaşdırır və modelin cavablarını yenidən OpenAI `tool_calls` formatına çevirir.
 - **`response_format`** — `json_object` və `json_schema` dəstəklənir. İcraçı modelin cavabından ilk JSON obyektini çıxarır və qaytarmazdan əvvəl onu sətirə çevirir.
-- **Əsaslandırma göstərişi** — yuxarı axın `thinking` hadisəsi göndərdikdə icraçı `reasoning` deltası yaradır.
+- **Mühakimə göstərişi** — yuxarı axın `thinking` hadisəsi göndərdikdə icraçı `reasoning` deltası yaradır.
 
 ### Məhdudiyyətlər
 
-- Yuxarı axın anonim istifadə kvotaları tətbiq edir — kvota aşıldıqda icraçı anlaşılan mesajla birlikdə 429 xətası qaytarır.
-- Bütün model identifikatorları eyni yuxarı axın dispetçer modelinə yönəlir; model üzrə ayrıca keçid yoxdur.
-- İcraçı yuxarı axının `/api/chats` son nöqtəsini çağırmır, buna görə çat tarixçəsi / sessiyalar avtomatik idarə edilmir. Mövcud yuxarı axın çatını davam etdirmək üçün `notrack_chat_id` istifadə edin.
+- Yuxarı axın anonim istifadə kvotaları tətbiq edir — kvota aşıldıqda icraçı istifadəçi üçün anlaşılan mesajla birlikdə 429 xətası qaytarır.
+- Bütün model identifikatorları eyni yuxarı axın yönləndirmə modelinə uyğunlaşdırılır; modelə görə ayrıca keçid yoxdur.
+- İcraçı yuxarı axının `/api/chats` son nöqtəsini çağırmır, buna görə çat tarixçəsi/sessiyalar avtomatik idarə edilmir. Mövcud yuxarı axın çatını davam etdirmək üçün `notrack_chat_id` istifadə edin.
 
 ---
 
-# Veb Kuki Provayderlərinin Edə Bildikləri və Edə Bilmədikləri
+# Veb Kuki Provayderlərinin Edə və Edə Bilmədikləri
 
 Veb Kuki provayderləri veb-saytın çat interfeysindən təkrar istifadə edir. Onlar rəsmi API-lərlə eyni imkanları **təmin etmir**.
 
@@ -150,7 +152,7 @@ Veb Kuki provayderləri veb-saytın çat interfeysindən təkrar istifadə edir.
 
 - Mövcud brauzer sessiyanızdan istifadə edərək autentifikasiya
 - Hesabınız vasitəsilə əlçatan olan modellərə giriş
-- Çat cavablarının axın şəklində ötürülməsi
+- Söhbət cavablarının axınla ötürülməsi
 - API açarı tələb olunmur
 
 ## Dəstəklənmir
@@ -167,7 +169,7 @@ Alətlərin icrasına, faylların avtomatik redaktəsinə və ya digər agent i�
 
 ---
 
-# Validasiya ilə bağlı qeyd
+# Validasiya ilə bağlı məhdudiyyət
 
 Uğurlu **Test Connection** və ya kuki validasiyası yalnız təqdim edilmiş giriş məlumatlarının gözlənilən formatda olduğunu təsdiqləyir.
 
@@ -181,7 +183,7 @@ Autentifikasiya yenə də uğursuz olarsa, giriş məlumatlarını brauzerin kuk
 
 ## Autentifikasiya uğursuz olur
 
-Giriş məlumatlarının aşağıdakı yerdən köçürüldüyünü yoxlayın:
+Giriş məlumatlarının buradan köçürüldüyünü yoxlayın:
 
 ```
 Network
@@ -189,7 +191,7 @@ Network
 → Cookie
 ```
 
-və aşağıdakı yerdən **köçürülmədiyini** yoxlayın:
+və buradan **deyil**:
 
 ```
 Application
@@ -200,7 +202,7 @@ Application
 
 ## Kuki brauzerdə işləyir, lakin OmniRoute-da işləmir
 
-Bəzi provayderlərə yalnız autentifikasiya edilmiş sorğular zamanı göndərilən kukilər daxildir.
+Bəzi provayderlər yalnız autentifikasiya edilmiş sorğular zamanı göndərilən kukilərdən istifadə edir.
 
 Söhbəti uğurla açdıqdan sonra giriş məlumatlarını yeni şəbəkə sorğusundan yenidən köçürün.
 
@@ -214,21 +216,34 @@ Brauzer sessiyanızın müddəti bitərsə və ya hesabdan çıxsanız, yeni gir
 
 ---
 
-## Test Connection uğurla tamamlanır, lakin sorğular uğursuz olur
+## Test Connection uğurludur, lakin sorğular uğursuz olur
 
-Issue #7857 həll edilənədək validasiyanın uğurla tamamlanması autentifikasiya sorğusunun uğurlu olacağına zəmanət vermir.
+Issue #7857 həll edilənədək validasiyanın uğurla keçməsi autentifikasiya sorğusunun uğurlu olacağına zəmanət vermir.
 
-Problemi əlavə araşdırmazdan əvvəl giriş məlumatlarınızı yeni autentifikasiya edilmiş sorğudan yenidən köçürün.
+Əlavə diaqnostikaya başlamazdan əvvəl giriş məlumatlarınızı yeni autentifikasiya edilmiş sorğudan yenidən köçürün.
+
+---
+
+## ChatGPT Web "Unsupported ChatGPT integrity dependency" xətası ilə uğursuz olur
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Giriş məlumatları düzgündür — bu xəta sessiyadan deyil, körpü modulundan qaynaqlanır. chatgpt.com hər yerləşdirmə üçün modul identifikatorlarını təyin edir və körpü yaratdığı Sentinel köməkçisinin identifikatorunu sabitləyirdi. Buna görə də köməkçinin adını dəyişən chatgpt.com yenidən qurulması, kuki etibarlı qalsa belə, hər sorğunu pozurdu. Bağlantının yenidən avtorizasiya edilməsi bunu düzəldə bilməz.
+
+Modulu səhifənin öz icra mühiti vasitəsilə müəyyən edən yığımlar heç bir identifikatoru sabitləmir və bu problemlə qarşılaşmır. Xətanı görsəniz, OmniRoute-u yeniləyin və bağlantı yoxlamasını yenidən başladın.
 
 ---
 
 # Provayder nümunəsi
 
-Provayderə aid tam addım-addım təlimat üçün baxın:
+Provayderə xas tam addım-addım təlimat üçün baxın:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Claude Web təlimatı Web Cookie provayderinin tam quraşdırma prosesini nümayiş etdirir və istinad reallaşdırması kimi xidmət edir.
+Claude Web təlimatı Web Cookie provayderi üçün tam quraşdırma prosesini nümayiş etdirir və istinad implementasiyası kimi xidmət edir.
 
 ---
 

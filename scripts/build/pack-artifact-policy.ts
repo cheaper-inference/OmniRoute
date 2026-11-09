@@ -6,6 +6,8 @@
  * directories out of the staged dist/ tree and out of the final tarball.
  */
 
+import { isRuntimeDocsMirrorPath } from "./docsMirrorRuntime.mjs";
+
 const STAGING_FORBIDDEN_DIRECTORIES = [
   "app.__qa_backup",
   "coverage",
@@ -97,6 +99,17 @@ export const APP_STAGING_ALLOWED_PATH_PREFIXES: string[] = [
   "src/mitm/",
 ];
 
+/**
+ * Allowed paths that are neither one exact file nor a whole prefix. 2026-11-03 (owner
+ * decision): npm installs serve the translated /docs pages, so dist/ keeps the docs mirrors
+ * the route can read (`docs/i18n/<locale>/docs/<section>/<PAGE>.md`, see docsMirrorRuntime.mjs)
+ * and nothing else under docs/i18n. A prefix would also admit the README, CHANGELOG and agent
+ * guide mirrors and the operator-internal security pages.
+ */
+export const APP_STAGING_ALLOWED_PATH_MATCHERS: Array<(filePath: string) => boolean> = [
+  isRuntimeDocsMirrorPath,
+];
+
 export const PACK_ARTIFACT_ALLOWED_EXACT_PATHS: string[] = APP_STAGING_ALLOWED_EXACT_PATHS.map(
   (filePath: string) => `dist/${filePath}`
 );
@@ -104,6 +117,11 @@ export const PACK_ARTIFACT_ALLOWED_EXACT_PATHS: string[] = APP_STAGING_ALLOWED_E
 export const PACK_ARTIFACT_ALLOWED_PATH_PREFIXES: string[] = APP_STAGING_ALLOWED_PATH_PREFIXES.map(
   (directoryPath: string) => `dist/${directoryPath}`
 );
+
+export const PACK_ARTIFACT_ALLOWED_PATH_MATCHERS: Array<(filePath: string) => boolean> =
+  APP_STAGING_ALLOWED_PATH_MATCHERS.map(
+    (matches) => (filePath: string) => filePath.startsWith("dist/") && matches(filePath.slice(5))
+  );
 
 export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   ".env.example",
@@ -161,7 +179,10 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   // shipped via package.json "files", so it must be allowed in the tarball.
   "open-sse/utils/setupPolyfill.ts",
   "package.json",
+  // OpenCode free-tier Bun relay, spawned by src/lib/opencodeFreeRelay.ts; shipped via package.json "files".
+  "scripts/ops/opencode-free-relay.ts",
   "scripts/build/assembleStandalone.mjs",
+  "scripts/build/publicOpenApi.mjs",
   "scripts/build/backendOnlyPages.mjs",
   "scripts/build/build-tproxy-native.mjs",
   "scripts/build/build-next-isolated.mjs",
@@ -220,6 +241,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "dist/src/lib/usage/callLogArtifactWorker.js",
   "dist/src/lib/logExport/exportChild.js",
   "dist/src/lib/logExport/package.json",
+  // Unbundled destination helper also ships through package.json's src/lib/ prefix.
+  "src/lib/logExport/destinations/otlpRequestHeaders.ts",
   "dist/src/lib/db/healthCheckWorker.js",
   "dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
   "dist/open-sse/services/compression/rules/en/filler.json",
@@ -241,6 +264,10 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // Cleartext h2c upgrade guard (dist/server-ws.mjs import) — same boot-crash class as above.
   "dist/h2c-upgrade-guard.cjs",
   "dist/webdav-handler.mjs",
+  // 2026-11-03: one translated docs mirror, so a packaging change that drops the mirrors
+  // (they only reach dist/ through the standalone docs copy) fails here instead of silently
+  // serving English to every npm install.
+  "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
   "bin/cli/program.mjs",
   // Direct imports of bin/omniroute.mjs — bin/cli/ is only an allowlist PREFIX, so a
   // file vanishing from the tarball never fails the unexpected-paths check; only these
@@ -252,6 +279,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "bin/cli/utils/ensureAndroidCacheDir.mjs",
   "bin/cli/utils/parseEnvValue.mjs",
   "bin/cli/utils/storageKeyProvision.mjs",
+  // The allowlist of keys a working-directory .env may set; read on every CLI boot.
+  "bin/cli/utils/untrustedCwdEnv.mjs",
   "bin/cli/utils/versionFastPath.mjs",
   // #11437 import — `describeVolatileEnvWarning`, called on every CLI boot.
   "bin/cli/utils/volatileEnvPath.mjs",
@@ -379,10 +408,14 @@ export function findUnexpectedArtifactPaths(
     // DB-backed route in packaged boots while /api/monitoring/health stayed green.
     // The PUBLISH gate (validate-pack-artifact) keeps the strict default.
     neverAllowedSegments = PACK_ARTIFACT_NEVER_ALLOWED_SEGMENTS,
+    // Path predicates for allowed sets that are neither exact files nor whole prefixes
+    // (APP_STAGING_ALLOWED_PATH_MATCHERS / PACK_ARTIFACT_ALLOWED_PATH_MATCHERS).
+    pathMatchers = [],
   }: {
     exactPaths?: string[];
     prefixPaths?: string[];
     neverAllowedSegments?: string[];
+    pathMatchers?: Array<(filePath: string) => boolean>;
   } = {}
 ): string[] {
   const normalizedExact = new Set(exactPaths.map(normalizeArtifactPath));
@@ -398,7 +431,8 @@ export function findUnexpectedArtifactPaths(
       (filePath) =>
         hasForbiddenSegment(filePath) ||
         (!normalizedExact.has(filePath) &&
-          !normalizedPrefixes.some((prefix) => filePath.startsWith(prefix)))
+          !normalizedPrefixes.some((prefix) => filePath.startsWith(prefix)) &&
+          !pathMatchers.some((matches) => matches(filePath)))
     )
     .sort();
 }

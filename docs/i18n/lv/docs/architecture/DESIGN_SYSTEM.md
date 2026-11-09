@@ -4,228 +4,89 @@
 
 ---
 
-> **Statuss:** atsauce — šeit aprakstītā standartizācija ir **ieviesta** (1.–6. posms: režģa fons, primitīvi, statusa krāsu centralizācija, mono tokens, DataTable tokenu migrācija, fokusa gredzens → akcents, Checkbox/Textarea primitīvi, `cn()` → tailwind-merge, režģis katrā savrupajā ekrānā, plūstošs 4K satura ietvars, necaurspīdīgas datu tabulas virsmas). Šis dokuments ir kanoniskais informācijas paneļa dizaina tokenu, komponentu un konvenciju apraksts; tālāk norādītais iedalījums posmos ir saglabāts kā katra lēmuma pamatojums.
-> **Tvērums:** OmniRoute informācijas panelim (`src/`) un mārketinga vietnei (`_mono_repo/omnirouteSite/`) ir **vienota vizuālā identitāte** — vienāds rūtiņu papīra režģa fons (32px), vienādi krāsu tokeni un standartizēti komponenti.
->
-> Praktiskas piezīmes uzturētājiem:
->
-> - Vairākas atlikušās kodā tieši norādītās heksadecimālās vērtības ir **apzinātas** (vienmēr tumšais konsoles terminālis, ReactFlow SVG līnijas), un tās **NEDRĪKST** aizstāt ar tokeniem.
-> - „Lielāks” režģis darbojošā instancē norāda uz novecojušu būvējumu, nevis kodu — režģa izmērs ir 32px, identisks vietnei.
-> - Tumšā motīva `--table-*` vērtības baitu līmenī ir identiskas pirms migrācijas kodā tieši norādītajām rgba vērtībām; gaišais motīvs tika izlabots (tas kļūdaini vienmēr bija tumšs neaktīvu `var()` atkāpju dēļ).
+> **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Noklusējuma palete ir komplekta** Izdevumi** izskats (silti papīra neitrāli un vara akcents `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Iestatījumi → Izskats → Krāsu paletes piedāvājumi** Klasika** , komplekta bāzes žetoni ar laima akcentu. Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importējis `ci-tokens.css`). Skripti Switzer trūkst izšķirtspējas pēc glifa (`src/app/globals.css`): Inter kirilicai, grieķu un vjetnamiešu valodai un, tikai zem `html[dir="rtl"]`, Vazirmatn arābu rakstībai. Katra ikona ir Lucide glifs.
 
----
+## 1. Kur lietas dzīvo
 
-## 1. Mērķis
+- **Komplekts.** `packages/ui-kit/src` ir baitu baitiem kopija no augšpuses `src/` pie `packages/ui-kit/UPSTREAM.md` piespraustās saistības (kas arī reģistrē licences autorizāciju); `PATCHES.md` uzskaita vietējos ielāpus (nav). Tas tiek patērēts kā avots, bez uzbūves: `next.config.mjs` to pārsūta, un `tsconfig.json` kartē `@omniroute/ui-kit` → `packages/ui-kit/src` un `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` un `vitest.mcp.config.ts` ir viens un tas pats aizstājvārds). Importējiet komplekta komponentu pēc tā apakšceļa (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nekad caur `@omniroute/ui-kit` stobru: muca ievelk katru komponentu (ieskaitot datuma atlasītāju) katrā importētājā. Komplekta stila lapa tiek ievadīta caur `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, visa lapa: kodols `ci-ui.css` plus katra rakstu saime).
+- **Žetoni.** `packages/ui-kit/src/ci-tokens.css` deklarē `--ci-*` žetonus; `src/app/globals.css` savieno tos ar mantotajiem OmniRoute nosaukumiem (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), tāpēc esošā `var(--color-*)` lasa un Tailwind utilītas turpina darboties. Jaunajā kodā tiek izmantotas Tailwind utilītas (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vai komplektu klases — nekad neizmanto hex vērtību (`tests/unit/design-kit-bridge.test.ts` ievieš tiltu). `text-primary` izšķir `--color-primary-ink` līdz `--text-color-primary`, tāpēc primārais teksts paliek lasāms, kamēr `bg-primary`/`border-primary` saglabā akcenta virsmu: sadaļā Editions tas ir komplekta `--ci-color-accent-active` (dziļais vara `#99562f` gaismā, vara akcents tumsā); zem Classic, lime-800 gaišā un laima akcents tumsā. Diagrammu sērijās tiek izmantots `--color-chart-1` … `--color-chart-8`, katrs ar tekstam drošu `--color-chart-N-ink` un necaurspīdīgu `--color-chart-N-subtle` mikroshēmas nokrāsu, kas piešķirts komplekta sērijas secībā (`ciChartSeriesOrder`).
+- **Tēmas.** `<html className="ci-theme">` (`src/app/layout.tsx`) izvēlas dokumentu komplekta motīvā. Priekšroka ir `light`, `dark` vai `system` (`THEME_CONFIG.defaultTheme = "system"` `src/shared/constants/appConfig.ts`; `system` seko `prefers-color-scheme`). `applyTheme()` in `src/store/themeStore.ts` (atspoguļots ar `THEME_BOOT_SCRIPT`, iekļauts `src/app/layout.tsx`, kas darbojas pirms hidratācijas) kopā iestata `data-theme="dark"|"light"` un pārslēdz `.dark` klasi uz `<html>`. Komplekta tumšā marķiera komplekts ir `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute paša tumšie ignorējumi ( `.dark` bloks `globals.css`) un mantotā Tailwind `dark:` utilītu atslēga `.dark` klasē. Nav akcentu krāsu priekšiestatījumu: akcents vienmēr nāk no komplekta, un saglabātais priekšiestatījums no vecākas versijas tiek atmests, kad veikals tiek ielādēts.
+- **Paletes.** Divi, abi no komplekta (`src/shared/constants/appearancePalette.ts`): `editions`, noklusējuma un `classic`. Izdevumi ir komplekta `data-ci-appearance="editions"` atribūts vietnē `<html>`, ko `ci-editions.css` (importējis `ci-ui.css`) apvieno ar `data-theme`; Klasika ir atribūta trūkums. Saknes izkārtojuma serveris atveido atribūtu, tāpēc apmeklētājs, kuram nekas nav saglabāts (vai nav JS), saņem izdevumus uz katras virsmas — informācijas panelis, pieteikšanās, `/status`, kļūdu lapas, `/docs` un PWA. Izvēle tiek saglabāta blakus tēmai tajā pašā `theme` veikalā (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) un pirms paint tiek lietota ar `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, iekļauta izkārtojuma `<head>`), kas noņem atribūtu tikai tad, ja saglabātā palete ir `"classic"`; `src/app/global-error.tsx` ārpus saknes izkārtojuma lieto to no tā paša veikala. Nenovietojiet `data-ci-appearance` uz cita elementa: komplekts to saskaņo ar `html:root:has([data-ci-appearance="editions"])`, tāpēc viens pēcnācējs pārslēgs visu dokumentu. Editions `data-ci-editions-variant="landing"` variants ir paredzēts mārketinga lapām, nevis informācijas panelim. Pārlūkprogrammas hroms: serveris atveido noklusējuma izdevumus `viewport.themeColor` (viens tags katrā `prefers-color-scheme`) un tīmekļa manifestu — `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts`, kas ir viens Editions `--ci-color-background` spogulis (`#f3f1e9` / `#11120f`), ko `tests/unit/pwa-theme-colors.test.ts` piesprauž `ci-editions.css`. Pēc tam tiešraides `<meta name="theme-color">` seko saglabātajai paletei un režīmam: `THEME_BOOT_SCRIPT` pārraksta atzīmes pirms krāsošanas, un motīvu veikala darbības to veic katrā izmaiņā (`resolveThemeColor()` / `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, ar `CLASSIC_PAGE_BACKGROUND` nolasīšanu no komplekta `ciTokens`). Skaidrs light/dark motīvs iestata katru tagu šajā režīmā; `system` saglabā vienu krāsu katrā shēmā. Manifests paliek Izdevumi: tas tiek ielādēts vienu reizi instalēšanas laikā, bez izvēles. Monako nolasa tās krāsas no zondes (`monacoKitTheme.ts`); sadaļā Izdevumi zondes nolasīšana pārvērš saknes `data-theme` vienai sinhronai caurlaidei, jo komplekts atrisina izdevumus light/dark no saknes.
+- **Sastāvdaļas (adapteri).** `src/shared/components/index.tsx` saglabā OmniRoute komponentu API (vienādi nosaukumi, noklusējuma eksports un rekvizīti), un aiz tā esošie primitīvie ir komplekta adapteri: formas (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), pārklājums (`Modal`/`ConfirmModal` un atgriezeniskā saite) `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState` `Loading`, struktūra (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) un tabulas (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapteris importē komplekta komponentu pa apakšceļu un kartē uz tā mantotos rekvizītus — piemēram, `Button variant="primary"` ir komplekta `default` poga (`--ci-button-primary-*`: apgrieztā virsma gaismā, akcents ar tās `--ci-color-accent-foreground` tinti tumsā), `danger` ir `destructive` un `warning` ir komplekts `warning`. `Badge` statusa varianti ir komplekta toņi, un `Select` ar `<option>` bērniem atveido komplektu `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin katru adapteri.
+- **Apvalks.** `src/app/(dashboard)/layout.tsx` atveido `DashboardLayout`, kas atveido `src/shared/components/layouts/DashboardShell.tsx`: komplektu `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), ar OmniRoute navigācijas loģiku `src/shared/components/Sidebar.tsx`. Saite "pāriet uz saturu" uz `#main-content` ir pirmais fokusējamais elements. `src/shared/components/Header.tsx` satur komplektu `SidebarTrigger` (apvalka vienīgais sānjoslas pārslēgs), Keak `ProductSwitcher` un komandu paletes atvērēju; tas parāda tikai maršruta nosaukumu, kamēr neviens komplekts `PageHeader` (`.ci-page-header`) nav uzstādīts `#main-content` iekšpusē, tāpēc lapai ar savu `PageHeader` ir viens `h1`. `src/shared/components/CommandPalette.tsx` ir `Dialog` komplekts.
+- **Ikonas.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) atrisina nosaukumu (materiālu simbolu vārdnīca, ko izmanto ekrāni) caur `ICON_MAP` (`src/shared/constants/iconMap.ts`) uz Lucide glifu. Materiālu simbolu fonts un pakotne vairs nav: nosaukums, kas trūkst kartē, atveido neitrālu viettura glifu (`data-icon-missing="true"`) un reģistrē konsoles brīdinājumu ārpus ražošanas. `npm run gen:icon-map` izdrukā lietotos nosaukumus, kas trūkst kartē (`tests/unit/icon-map-coverage.test.ts` neizdodas jebkuram nosaukumam bez Lucide ikonas; `tests/unit/icon-map-object-values.test.ts` aptver nosaukumus, kas saglabāti uzmeklēšanas objektos); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` pārraksta burtiskos `<span className="material-symbols-outlined">` spans uz `<Icon>`.
+- **Zīmols.** `src/shared/components/OmniRouteLogo.tsx` iesaiņo komplektu: noklusējuma eksporta `OmniRouteLogo` atveido `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) un `OmniRouteLockup` atveido `ProductLockup product="omniroute"` (pieejams nosaukums "Keak OmniRoute") vai baltās etiķetes operatoriem savu `name`/`logoSrc`. Produktu pārslēgšanas galamērķi atrodas `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Atsevišķie ekrāni — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` un `src/shared/components/ErrorPageScaffold.tsx` — parāda bloķēšanu; `tests/unit/brand-pages-static.test.ts` to sargā.
 
-Mārketinga vietnei (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) un produkta informācijas panelim ir jāizskatās kā **vienam produktam**. Vietne jau ir aizguvusi savu paleti no informācijas paneļa — tās `css/tokens.css` pat ir norādīts _„Palete atspoguļo OmniRoute informācijas paneli (src/app/globals.css)”_. Tādējādi krāsu līmenī abi jau ir saskaņoti par aptuveni 80%. Informācijas panelī vēl trūkst:
+## 2. Noteikumi
 
-1. **Rūtiņu papīra režģa fona**, ko vietne izmanto katrā lapā.
-2. Vairāku **koplietojamu dizaina tokenu**, kas ir vietnē, bet trūkst informācijas panelī (rādiusu skala, zīmola gradients, `surface-2`, vienplatuma fonts).
-3. **Konsekvences komponentu līmenī** — vairāki informācijas paneļa komponenti apiet motīva tokenus, izmantojot kodā tieši norādītas hex/rgba vērtības.
+1. Žetoni, nekad burtiski. Ar nolūku saglabāti izņēmumi: vienmēr tumšs konsoles terminālis un `STATUS_HEX` (`src/shared/constants/statusColors.ts`), komplekta statusa paletes atrisinātais sešskaldņu spogulis zvanītājiem, kuriem nepieciešama burtiska hex. Kategoriskās paletes vairs nav izņēmums: tās darbojas uz komplekta astoņiem diagrammas marķieriem (`--color-chart-1..8`, plus `-ink`/`-subtle`), komplektu sēriju secībā, izmantojot `src/shared/utils/categoricalPalette.ts` un maršrutēšanas stratēģijām `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow malas un orķestrācijas audekls nolasa tēmām atbilstošos `--orch-status-*` mainīgos (`src/shared/components/flow/edgeStyles.ts`).
+2. Nekad nelāpojiet `packages/ui-kit/src` ar roku: sinhronizējiet ar `scripts/dev/sync-ui-kit.sh <commit>`; pirmsapstiprināšanas vārti `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) neizdodas jebkurā baitā, kas atšķiras no piespraustās augšupējas commit (tas tiek izlaists ar brīdinājumu, ja nav augšteces klona `UI_KIT_CLONE` vai `_references/cheaper-inference-ui-kit`). Ja komplektam kaut kā trūkst, apejiet to adapterī vai ekrānā un pieprasiet to pirms straumes.
+3. Komplekta teksta noklusējuma iestatījumi ir angļu valodā (`label = "Loading"`, `loadingLabel = "Loading table"`…) — nodod tulkotās virknes no `useTranslations(...)` ikreiz, kad komplekta komponents renderē tekstu.
+4. Tailwind utilītas pārspēj komplekta komponentu klases (komplekts deklarē `@layer theme, base, components, utilities`, un tā noteikumi darbojas `components`) — izmanto utilītas atstarpēm un izkārtojumam, nevis komplekta komponentu pārkrāsošanai.
+5. Virsraksti: `.ci-heading` lapu un sadaļu nosaukumiem; `.ci-dashboard-display` tikai lielam, retam displeja tekstam, piemēram, kļūdas lapas statusa kodam. Abi izmanto Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` aizsargā komplekta pieņemšanu: nav materiāla ligatūras laiduma zem `src/app` vai `src/shared/components`; informācijas paneļa kokā (`src/app/(dashboard)` un `src/shared/components`) nav neapstrādāta `<select>`, `<textarea>` vai `<table>` un nav ar roku velmēta `role="dialog"` ārpus uzskaitītajiem izņēmumiem ( `Select` adaptera vietējais atzars, `RequestLoggerDetail`); katram neapstrādātam `<button>` vai `<input>` ir nepieciešams komentārs, kas satur `kit-exception:` (ar iemeslu), kas beidzas ne vairāk kā 3 rindiņas virs tā; paletes nokrāsas un `dark:` varianti tikai failos testa sarakstos.
+7. Pirms PR (ekrānuzņēmumiem) pārbaudiet abus motīvus un 390 pikseļu skata logu; `tests/e2e/a11y.spec.ts` skrien cirvi.
 
-Šis dokuments ietver analīzi un plānu.
+## 3. Ekrāna pievienošana
 
----
+1. Atveriet lapu ar kit `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` informācijas paneļa
+   iekšpusē) — virsraksts, apraksts un `actions`. Apvalka galvene tad atmet savu virsrakstu.
+2. Veidojiet vadības elementus no `@/shared/components` (adapteriem) un izmantojiet kit komponentus
+   pa apakšceļu tur, kur adaptera nav (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`,
+   `Tabs`, `RadioGroup`, `Slider`…).
+3. Ikonas: `<Icon name="…" />`. Jauns nosaukums nonāk `ICON_MAP` ar semantiski atbilstošu Lucide
+   komponentu; `npm run gen:icon-map` uzskaita vēl trūkstošos nosaukumus.
+4. Krāsas: semantiskās utilītas (`text-success`, `bg-warning-bg`, `border-border`…) un
+   `var(--color-chart-N)` diagrammu sērijām; nekādas hex vērtības un nekādi `dark:` varianti, kas
+   tikai atkārto krāsu.
+5. Teksts: katra virkne, tostarp etiķetes, ko nododat kit komponentiem, nāk no `useTranslations`.
+   Jaunas atslēgas nonāk `src/i18n/messages/en.json`, `pt-BR.json` un `vi.json` (vjetnamiešu
+   paritātes tests piesprauž katru angļu atslēgu); pārējās lokales aizpilda i18n sinhronizācija.
+6. Pirms PR palaidiet aizsargpārbaudes: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (vienīgā pārbaude, kas noķer dublētu importu `iconMap.ts`),
+   `npm run check:ui-icu` un paša ekrāna testus.
 
-## 2. Principi
+## 4. Adaptera pievienošana vai maiņa
 
-- **Vienīgais patiesības avots = `src/app/globals.css`.** Vietne atspoguļo informācijas paneli, nevis otrādi. Jauni tokeni vispirms tiek pievienoti `globals.css`.
-- **Tokeni, nekad literāļi.** Komponenti izmanto semantiskos tokenus (`bg-surface`, `text-primary`, `border-border`), nevis neapstrādātas `#hex` vērtības.
-- **Neuzkrītoši, nevis skaļi.** Režģis ir viegli pamanāms fons aiz satura — tas nekad nedrīkst samazināt teksta kontrastu vai vizuāli konkurēt ar lietotāja saskarni.
-- **Motīvu atbalsts.** Viss darbojas gan `.dark` (produktam raksturīgajā izskatā), gan gaišajā motīvā.
-- **Pakāpeniska ieviešana.** Vispirms ievieš režģi un tokenus (zems risks, augsta pamanāmība), pēc tam viļņveidīgi sakārto komponentus.
+1. Saglabājiet `src/shared/components/index.tsx` publisko API nemainītu: tie paši eksporta nosaukumi, noklusējuma eksporti un pieņemtie props. Kartējiet mantojuma props uz komplektu adaptera iekšienē (skatiet `Button.tsx`: `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Importējiet komplektu pa apakšceļu (`@omniroute/ui-kit/<component>`).
+3. Komplekta trūkumu apvedrisinājumi atrodas adapterī (vai `globals.css` `@layer components`, ja labojums ir stils), nekad ne `packages/ui-kit/src`.
+4. Pievienojiet vai atjauniniet `tests/unit/ui/adapters/<name>.test.tsx`. Adapteram ar daudziem izsaucējiem salīdziniet renderēto marķējumu pirms un pēc izmaiņas — polsterējuma vai ietinētāja izmaiņas izplatās uz katru ekrānu.
 
----
+## 5. Komplekta atjaunināšana
 
-## 3. Pašreizējais stāvoklis — kas jau ir saskaņots un kas nav
+`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots.
 
-### 3.1 Krāsas — jau vienotas ✅
+Ikdienas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi. Kamēr tapa ir aiz muguras, `scripts/ci/ui-kit-sync-pr.sh` saglabā vienu sinhronizācijas PR atvērtu pret augstāko `release/vX.Y.Z` zaru, uz ritošā zara `chore/ui-kit-sync-latest`. Tas nekad nesaplūst: katram komplekta laidienam joprojām ir nepieciešama vietējā VPS vizuāla pārbaude. Filiāle tiek pārbūvēta, kad tiek izlaista jaunāka versija, un pretējā gadījumā tā tiek atstāta atsevišķi. Atvērts PR ar manuāli nospiestām saistībām netiek pārrakstīts, un PR versijai, kuru uzturētājs aizvērts nesapludināts, paliek aizvērts līdz jaunākam laidienam.
 
-Katra zīmola krāsa un virsma jau **pēc vērtības** atbilst vietnei (atšķiras tikai nosaukumi — informācijas panelī tiek izmantots prefikss `--color-`). Pārbaudīts `src/app/globals.css:30-128`:
+Ja nevar atvērt nevienu PR (mērķa laidiens ir iesaldēts, PR ir nospiests ar roku, PR ir aizvērts vai nav iestatīts PR pilnvaras), darbplūsmā paliek atvērta viena izsekošanas problēma, kurā norādīts, kāpēc.
 
-| Koncepts                        | Vietnes tokens (`tokens.css`)               | Informācijas paneļa tokens (`globals.css`) | Atbilstība     |
-| ------------------------------- | ------------------------------------------- | ------------------------------------------ | -------------- |
-| primārā                         | `--primary #e54d5e`                         | `--color-primary #e54d5e`                  | ✅             |
-| primārā, uzvedot kursoru        | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`            | ✅             |
-| akcents                         | `--accent #6366f1`                          | `--color-accent #6366f1`                   | ✅             |
-| akcents-2                       | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`             | ✅ (pārdēvēts) |
-| akcents-3                       | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`             | ✅ (pārdēvēts) |
-| veiksmīgs / brīdinājums / kļūda | `#22c55e / #f59e0b / #ef4444`               | identiski                                  | ✅             |
-| luksofora indikatori            | `#ff5f56 / #ffbd2e / #27c93f`               | identiski                                  | ✅             |
-| tumšais fons / virsma / apmale  | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identiski                                  | ✅             |
-| gaišais fons / virsma / teksts  | `#f9f9fb / #fff / #1a1a2e`                  | identiski                                  | ✅             |
+Darbplūsmā tiek izmantoti divi noslēpumi:
 
-**Secinājums:** krāsu migrācija nav nepieciešama. Identitāte jau ir kopīga; mēs to _pabeidzam_, nevis veidojam no jauna.
+- `secrets.UI_KIT_READ_TOKEN`: tikai lasāms pilnvaras privātajam augšupējam repo. Ja darbplūsmu nevar nolasīt augšup pa straumi (nav marķiera, marķieris, kas pārtrauca darboties, vai GitHub nav sasniedzams), izpilde paliek zaļa, bet raksta brīdinājumu un paliek atvērta viena atsevišķa problēma, kas pati aizveras, tiklīdz vēlāk palaišana atkal var lasīt augšup.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smalks marķieris šajā repozitorijā ar satura un izvilkšanas pieprasījumiem rakstīšanas piekļuvei. Noklusējuma `GITHUB_TOKEN` nevar izveidot PRs šeit, un PR ko tas atvērts, neizraisītu CI. Bez šī marķiera darbplūsma tikai nospiež filiāli.
 
-### 3.2 Trūkumi — kā vēl nav informācijas panelī
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopē augšupvērsto `src/` šajā apstiprinājumā (`latest` = jaunākais `v*` tags) `packages/ui-kit/src`, lieto vienu atļauto transformāciju (atmet `.js` sufiksu no relatīvā importa) un iestata darbvietas versiju `packages/ui-kit/package.json` un `package-lock.json` uz augšupējo versiju. Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārskatiet pakalpojumu sniedzējus, iestatījumus, kombinācijas, lietojumu un beigu punktu abās tēmās, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un atveriet PR, izmantojot augšējo izmaiņu žurnālu.
 
-| Atšķirība                | Vietnē ir                                                                                | Informācijas panelis                                                    | Darbība               |
-| ------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
-| **Režģa fons**           | `body::before` milimetrpapīra raksts, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ pievienots (1. posms)**                                            | **A daļa**            |
-| **Rādiusu skala**        | `--radius 14px`, `--radius-sm 9px`                                                       | `--radius 14px` pievienots; `-sm` un komponentu pārvirzīšana vēl jāveic | **B daļa / 2. posms** |
-| **Zīmola gradients**     | `--grad-brand 135deg primary→accent-3`                                                   | **✅ marķieris pievienots (1. posms)**; tiks izmantots 2. posmā         | **B daļa**            |
-| **Ligzdota virsma**      | `--surface-2 #1c2230`                                                                    | **✅ pievienots (1. posms)**                                            | **B daļa**            |
-| **Vienplatuma fonts**    | `--font-mono` (ui-monospace kopa)                                                        | vēl jāveic (4. posmā kopā ar izmantotājiem)                             | **B daļa**            |
-| **`text-muted` (tumšs)** | `#8b8b9e`                                                                                | `#a1a1aa` (zinc-400)                                                    | saskaņot — **B daļa** |
+## 6. README diagrammas
 
-### 3.3 Motīvu mehānika (lai neko nesabojātu)
+Divpadsmit diagrammas, ko saknes `README.md` iegulst (`docs/diagrams/*.svg`), ir komplekts, kas tiek lietots statiskam attēlam, un tās tiek ģenerētas, nevis zīmētas ar roku: 13 ģeneratora faili `scripts/docs/gen-readme-*.mjs` (divpadsmit diagrammas plus `gen-readme-diagrams.mjs` draiveris) un 12 novecošanās testi pie `tests/unit/docs/readme-*-svg.test.ts`, viens katrā diagrammā, katrs baitss fails ar izvades `test-unit` ģenerēšanu.
 
-- **Tailwind v4, vispirms CSS** (nav `tailwind.config.*`). Marķieri ir definēti `:root`/`.dark` un padarīti pieejami utilītklasēm, izmantojot `@theme inline` (`globals.css:130-179`).
-- **Tumšais režīms ar `.dark` klasi** elementā `<html>` (`@custom-variant dark` failā `globals.css:22`), ko pārslēdz pielāgota Zustand krātuve (`src/store/themeStore.ts`); noklusējuma motīvs = `system` (`src/shared/constants/appConfig.ts:11`). Vietne tā vietā izmanto `html[data-theme="light"]` — **mehānismi atšķiras, bet nekad nepārklājas** (atsevišķas izcelsmes), tāpēc konflikta nav. Mēs saglabājam informācijas paneļa `.dark` mehānismu.
-- **Pastāv primārās krāsas pārrakstīšana izpildlaikā** (`themeStore.ts:85-97`, sākotnējie iestatījumi sadaļā `COLOR_THEMES`) — lietotāji var nomainīt `--color-primary`. Jebkurš jauns marķieris (gradients utt.), kas atsaucas uz `--color-primary`, automātiski pārmanto šīs pārrakstīšanas. ✅
-- **Tailwind v4 rezervētie rādiusu nosaukumi:** `--radius-sm/md/lg/...` ir `rounded-*` utilītklases pamatā. To pārdefinēšana ar atpakaļejošu spēku maina katru esošo `rounded-*` (piemēram, `rounded-sm` tiek izmantots 12 failos). Tāpēc mazā rādiusa vērtība un komponentu pārvirzīšana ir apzināti atlikta uz 2. posmu, kurā vienlaikus tiks mainīti arī izmantotāji.
+- **Žetoni.** `scripts/docs/readme-diagram-theme.mjs` kopē izdevumu paleti (noklusējuma izskats) no `packages/ui-kit/src/ci-editions.css` (to piesprauž šim failam ar `tests/unit/docs/readme-diagram-theme.test.ts`, kas arī pārbauda WCAG AA katrai teksta krāsai uz katras virsmas abās shēmās; vienīgais izņēmums, gaišais `warn`, ir komplekta brīdinājums, kas ir aptumšots par 10%, jo komplekta vērtība ir 4,46:1 uz audekla teksta)`ci-tokens.css`): Switzer pie komplekta svariem (400/500/600, displejs 500) un izsekošana visam, izņemot koda lomas (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), kas ir IBM Plex Mono un ir paredzētas tikai komandām ers, URLs. Gaismas vērtības atrodas uz `:root`, tumšās vērtības aiz `prefers-color-scheme: dark`, failā, tāpēc katrs attēls atbilst skatītāja shēmai uz GitHub.
+- **Fonti.** GitHub Markdown nav CSS, un Camo starpniekserveris bloķē katru ārējo ielādi, tāpēc komplekta veidam ir jāpārvietojas failā. `scripts/docs/readme-outline.mjs`, katra ģeneratora pēdējais solis, veido Switzer lomas ar HarfBuzz un zīmē tās kā vektoru kontūras (`<defs>` paths un `<use>`), izmantojot bultiņas un ģeometriskos simbolus, kas Šveicei nav uzzīmēti pēc saviem rādītājiem. Kontūras, nekad nav iegults fonts: Šveices licence (`packages/ui-kit/src/fonts/FFL.txt`) aizliedz apakškopas un formāta konvertēšanu bez rakstiskas piekrišanas un atļauj vektoru rasējumus, tāpēc atkārtoti neieviesiet Switzer `@font-face` vai `data:` URI. Viens failā atstātais fonts ir OFL IBM Plex Mono apakškopa, kas paliek reāls koda teksts (`scripts/docs/readme-fonts.mjs`), kas veidots no šīm rakstzīmēm; jebkuru glifu tajā nevar iegult metienus.
+- **Atjaunot.** `npm run docs:readme-diagrams` pārraksta visus divpadsmit README secībā un izdrukā vienu rindiņu katrā failā ar tā lielumu. Viens ģenerators darbojas arī atsevišķi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ir nepieciešams `node --import tsx/esm` jo tā skaitļi nāk no tiešā kataloga ielādētāja `open-sse/config/freeModelCatalog.ts`; kataloga izmaiņu CI sekas ir `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Savienojiet ģeneratoru un SVG kopā.
+- **Pierādījums.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` atveido failu tā, kā GitHub to apkalpo ( `<img>` tags, camo's `Content-Security-Policy`, `image/svg+xml`), tver gaišu un tumšu rāmi un ziņo par ārējo fontu pieprasījumu izveidot lapu (jābūt 0).
+- **Budžets.** Mazāk nekā 200 KB par failu (to apstiprina katrs novecošanās tests); 500 KB ir cietais ierobežojums jebkuram README attēlam ( SVG studio validatora noteikums).
+- **Kopēt nemainītā veidā, skaita no vārtiem.** Zīmola maiņas veids un palete ir mainīti, nevis vārdi: katrs ģenerators pārnēsā savas diagrammas kopiju `*_COPY` konstantē (vai veido to no tiešā kataloga), kas ir gan zīmētais teksts, gan kontūras soļa ievade. Kanoniskās figūras paliek `<text>` mezglos (neredzami, kad tie ir ieskicēti, `fill-opacity:0`), nolasa `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); gate nolasīto diagrammu novecošanās testi arī palaiž savus validētājus ģenerētajā failā, tāpēc skaitlis, kas novirzās no koda, testā neizdodas. — labojiet vārtu nolasīto avotu, nevis numuru ģeneratorā.
 
----
+## 7. Atsauces indekss
 
-## 4. A daļa — rūtiņu papīra režģa fons (galvenā prasība) — ĪSTENOTS (1. posms)
-
-### 4.1 Kas tas ir
-
-Precīzais risinājums no vietnes (`_mono_repo/omnirouteSite/css/base.css`): **fiksēts, visu skata apgabalu aizņemošs pseidoelements**, kas zīmē divus 1px līniju gradientus un atrodas aiz visa satura ar `z-index:-1`.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Kāpēc tas darbojas, lai gan `body` ir necaurspīdīgs `background-color`:** `::before` ar `z-index:-1` tiek zīmēts _virs_ paša elementa fona, bet _zem_ tā parastajā plūsmā esošā satura. Tādējādi `--color-bg` ir pamatkrāsa, režģis tiek uzklāts tai virsū, bet lietotne tiek atveidota virs režģa.
-
-### 4.2 Kodbāzē jau esošs precedents
-
-`src/app/landing/page.tsx:16-26` **jau īsteno šo pašu režģi katras lapas līmenī** — taču ar **sarkanām** līnijām (`#E54D5E`, necaurspīdīgums `0.06`) ik pēc **50px**, kā arī ar animētām lodēm. Tātad šis risinājums produktā jau ir pārbaudīts; šis darbs to pārveido par **globālu, motīvam pielāgotu** fonu.
-
-### 4.3 Pievienotie tokeni (failā `globals.css`)
-
-```css
-:root {
-  /* gaišais motīvs — režģa necaurspīdīgums palielināts no vietnē izmantotā 0.045,
-     lai fons blīvajā informācijas panelī tiešām būtu redzams (kartītes/interfeisa ietvars aizsedz lielāko daļu skata apgabala) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tumšais motīvs — tā paša iemesla dēļ palielināts no 0.035 */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Vienīgais bloķējošais faktors — novērsts
-
-Režģis pēc uzbūves ir globāls (tas vienlaikus aptver paneli, `auth`/`login`, kļūdu lapas — visus maršrutus). Panelī to slēpa tieši **viens** elements:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — ārējais ietvars zīmēja necaurspīdīgu `bg-bg`. Viss zem tā jau ir caurspīdīgs (`<main>`, ritināšanas konteiners, iekšējais `max-w-7xl`), tāpēc **`bg-bg` noņemšana** ļauj ķermeņa režģim būt redzamam satura apgabalā (ķermeņa `--color-bg` joprojām ir pamatkrāsa).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Mijiedarbība ar interfeisa ietvaru (sānjosla / galvene)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) un `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) paliek **necaurspīdīgi** → režģis ir redzams **tikai satura apgabalā**, ko ietver vienkrāsains interfeisa ietvars. Mierīgs noklusējuma risinājums, kas atbilst tam, kā vietnē interfeisa ietvars ir nošķirts no darba virsmas (lēmums D3 = vienkrāsains).
-
-### 4.6 Pieteikšanās / autentifikācijas / kļūdu lapas
-
-Tās tiek atveidotas tieši zem `<body>` (bez paneļa interfeisa ietvara), tāpēc globālajam režģim aiz tām būtu jāparādās automātiski. **5. posms — PABEIGTS:** atsevišķie pilnekrāna ietvari patiešām bija necaurspīdīgi (`min-h-screen … bg-bg`, kur `bg-bg` ir tā pati vienlaidu pamatkrāsa kā elementam `<body>`), un tas paslēpa režģi visos ekrānos ārpus informācijas paneļa — ne tikai pieteikšanās lapā. Tagad tie visi ir caurspīdīgi, lai koplietojamais fons būtu redzams: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` un `ErrorPageScaffold` (aptver `400`/`401`). Tas noslēdz **D4** (paplašināts no tikai pieteikšanās lapas uz visiem atsevišķajiem ekrāniem). To aizsargā `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Sākumlapa
-
-`landing/page.tsx` saglabā savu bagātīgāko animēto fonu (lodes + vinjete) — savu mārketinga ievadekrānu (lēmums D5 = atstāt bez izmaiņām).
-
----
-
-## 5. B daļa — Tokenu vienādošana
-
-1. fāzē tiek pievienoti inerti identitātes tokeni bez kolīzijām (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). 2. fāzē rādiusa skala tiek integrēta Tailwind un komponenti tiek pārvirzīti uz to; 4. fāzē tiek pievienots `--font-mono` un tā patērētāji.
-
-| Tokens                     | Pamatojums                                                              | Fāze                                   |
-| -------------------------- | ----------------------------------------------------------------------- | -------------------------------------- |
-| `--radius` / `--radius-sm` | Viena rādiusa skala (14/9), nevis patvaļīgas 6/8/12 vērtības            | 1 (vērtība) / 2 (integrēt + pārvirzīt) |
-| `--grad-brand`             | Zīmola gradients primārajiem CTA (sarkans→violets), saskaņots ar vietni | 1 (tokens) / 2 (Button)                |
-| `--surface-2`              | Ligzdoti paneļi / tabulu galvenes / ievilktas rindas                    | 1                                      |
-| `--font-mono`              | Koda bloki, terminālis, ID, galapunkti                                  | 4                                      |
-| `--text-muted` saskaņošana | Izvēlēties vienu vērtību vietnei↔panelim (ieteicams `#a1a1aa`)          | 2                                      |
-
-**D2 (text-muted):** vietnē `#8b8b9e`, bet informācijas panelī `#a1a1aa`. Ieteicams saglabāt **informācijas paneļa `#a1a1aa`** un atjaunināt _vietni_, lai vērtības sakristu. Kosmētiska izmaiņa.
-
----
-
-## 6. C daļa — Komponentu standartizācija (2.–4. fāze)
-
-Pielāgoti komponenti (bez shadcn/Radix), Tailwind v4, semantiskie tokeni **lielākoties** ieviesti (195 faili importē koplietoto barrel failu). Uzdevums ir novērst **apiešanas gadījumus**. Atrašanās vieta: `src/shared/components/`.
-
-| #   | Vienums                                     | Fails(-i)                                                                                                                    | Problēma → Mērķis                                                                                                                                    | Fāze |
-| --- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Rādiusu saskaņošana**                     | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                    | dažādi 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                    | 2    |
-| C2  | **Button gradients + `accent` variants**    | `Button.tsx:5-12`                                                                                                            | primārais ir vienlaidus sarkans→sarkans; saskaņot ar `--grad-brand`; pievienot trūkstošo `accent` variantu. ~195 importētāji — visaugstākā redzamība | 2    |
-| C3  | **Tabulas**                                 | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                          | 100% iekļauti, stingri kodēti rgba un neeksistējoši mainīgie; migrēt uz tokeniem, pārtraukt atšķirīgo stilu izmantošanu                              | 3    |
-| C4  | **Statusa krāsu centralizēšana**            | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 palīgmoduļi | 6+ viena un tā paša hex dublikāti → viens modulis, kura pamatā ir `--color-success/warning/error`                                                    | 3    |
-| C5  | **Card apmale**                             | `Card.tsx:39`                                                                                                                | `border-white/5` → zīmola `/8`                                                                                                                       | 2    |
-| C6  | **Fokusa gredzena saskaņošana** ✅ PABEIGTS | `globals.css` `--focus-ring` (accent) pret veidlapu vadīklu `ring-primary/30`                                                | vienādots uz **accent (violets)**, lai atbilstu globālajam gredzenam un to atšķirtu no sarkanā kļūdas gredzena; kļūda paliek sarkana                 | 4    |
-| C7  | **Pievienot `Checkbox` + `Textarea`**       | neapstrādāti `<input>`/`<textarea>` ar iekļautu `accentColor:#6366f1`                                                        | uz tokeniem balstīti primitīvi                                                                                                                       | 4    |
-| C8  | **Stingri kodēto hex vērtību revīzija**     | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal punkti, ~14 diagrammu faili                                     | literāļi → tokeni                                                                                                                                    | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**          | `src/shared/utils/cn.ts`                                                                                                     | konfliktējošas klases pārklājas; nepieciešams C1 pārrakstīšanai                                                                                      | 2    |
-
-**Jau atbilst zīmolam (balstīts uz tokeniem, nepieciešama tikai rādiusa maiņa):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Izlaišanas plāns
-
-- **1. posms — režģis + identitātes marķieri (ŠIS PR).** `globals.css` režģis + `--surface-2`/`--grad-brand`/`--radius` marķieri; `body::before` fona attēls; noņemt `bg-bg` bloķētāju; statisks aizsardzības tests. Zems risks, atsaucams ar vienu komitu.
-- **2. posms — pamatkomponenti (C1, C2, C5) — PABEIGTS šajā PR.** Semantiskās rādiusa utilītklases `rounded-card` (14px) / `rounded-control` (9px) pievienotas, izmantojot `@theme` (pielāgoti nosaukumi, tāpēc noklusējuma `rounded-sm/md/lg/xl` paliek neskarti — nekādu izmaiņu 400 failos); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (sarkans→violets) + jauns `accent` variants; Card apmales → `border-border` marķieris (0.08). **Atlikts:** `cn()`→tailwind-merge (C9) nepieciešamas jaunas atkarības; ad hoc `rounded-lg` pārskatīšana (326 faili) atstāta bez izmaiņām, jo pamatkomponenti aptver lielāko daļu virsmu.
-- **3. posms — statusa krāsas + tabulas (C3, C4) — PABEIGTS šajā PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` kā vienots avots; `flow/edgeStyles.ts` + `TokenHealthBadge` pārvirzīti uz to, precīzi saglabājot tās pašas heksadecimālās vērtības). ✅ **`--font-mono`** marķieris. ✅ **C3 (DataTable)** — visas iekļautās rgba vērtības un neizmantotās `var(--bg-table-header)` / `var(--text-secondary)` atkāpšanās vērtības aizstātas ar `--table-*` marķieru kopu (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), kuras **tumšās vērtības precīzi atbilst iepriekš kodā fiksētajām rgba vērtībām** (tumšajā režīmā identiskas baitu līmenī), bet gaišās vērtības izlabo iepriekš vienmēr tumšo gaišo motīvu. Galvenes apmale → `--color-border`, sekundārais teksts → `--color-text-muted`. **Pirms sapludināšanas nepieciešama vizuāla pārbaude.** (Nav mainīti: `logTableStyles.ts` un mantotie Ant `.ant-table` noteikumi — atsevišķs, zemākas prioritātes uzdevums.)
-- **4. posms — sakopšana (C6, C7, C9 pabeigti; C8 vēl nav pabeigts).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge pievienotas kā atkarības) — izsaucēja `className` tagad pareizi _aizstāj_ pamatkomponenta konfliktējošo klasi, nevis pievienojas tai. ✅ **C7** jauni `Checkbox` + `Textarea` pamatkomponenti (balstīti uz marķieriem, eksportēti no kopējā indeksa; papildinošas izmaiņas — 32 neapstrādāto izvēles rūtiņu / 41 neapstrādātā teksta apgabala pārņemšanu var turpināt pakāpeniski). ✅ **C6** fokusa gredzenu saskaņošana — veidlapu vadīklas (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) fokusā tagad izmanto **akcenta (violeto)** gredzenu, lai atbilstu globālajam `--focus-ring` un vairs nekonfliktētu ar sarkano kļūdas gredzenu; sarkanais kļūdas stāvoklis nav mainīts. ⏳ **C8 heksadecimālo vērtību pārskatīšana NAV akla meklēšana un aizstāšana** — apstiprinātās vietas ir _apzinātas_ un tās jāsaglabā: `ConsoleLogViewer.tsx:240` (vienmēr tumšs terminālis), `TokenHealthBadge` uznirstošais logs, ReactFlow SVG līnijas. Migrēt tikai tās heksadecimālās vērtības, kurām patiešām jāpielāgojas motīvam.
-
-Katrā posmā: `npm run lint` + `npm run typecheck:core` + vizuāla pārbaude.
-
----
-
-## 8. Atvērtie lēmumi (ieteikumi)
-
-- **D1 — Button primary:** saglabāt sarkans→sarkans vai pāriet uz **sarkans→violets `--grad-brand`**? Ieteikums: **sarkans→violets** (2. posms).
-- **D2 — Režģa līniju krāsa:** **neitrāla** (vietnes stils) — izvēlēts — vai zīmola sarkanā. Izmērs **32px** (pēc īpašnieka atsauksmēm samazināts par ~30% no sākotnējiem 46px — 46px šūnas informācijas paneļa izkārtojumā izskatījās pārāk lielas).
-- **D3 — Saskarnes ietvara krāsu intensitāte:** sānjosla/galvene **vienkrāsaina** — izvēlēts.
-- **D4 — Autentifikācijas/pieteikšanās režģis:** ✅ **PABEIGTS (5. posms)** — necaurspīdīgais `bg-bg` noņemts no visiem savrupajiem pilnekrāna ietvariem (ne tikai pieteikšanās), tāpēc režģis ir redzams visos ekrānos. Skatiet §4.6.
-- **D5 — Sākumlapa:** animēto ievadekrānu atstāt bez izmaiņām. Izvēlēts.
-- **D6 — Rādiuss 14/9 visā produktā:** ieteikums: jā (2. posms).
-- **D7 — 1. posms tiek izlaists pirmais:** izvēlēts.
-- **D8 — Izkārtojuma platums (5. posms):** informācijas paneļa satura ietvars bija ierobežots līdz `max-w-7xl` (1280px), lielos monitoros centrējot saturu ar platām, tukšām sānu malām. ✅ **PABEIGTS** — palielināts līdz plūstošam `max-w-[3840px]` (īsts 4K): saturs tagad pielāgojas skata logam līdz ~4K un tiek centrēts tikai lielākā platumā (`DashboardLayout.tsx`). Apzināti šaurās lapas pēc konstrukcijas paliek šauras (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Necaurspīdīgas datu tabulas (6. posms):** tā kā informācijas paneļa satura apgabals tagad ir caurspīdīgs (lai caur to būtu redzams režģa fons, 5. posms), datu tabulās, kuru konteiners _nebija_ necaurspīdīga virsma, režģis spīdēja cauri to caurspīdīgajām pāra rindām / zebras rindām ar zemu alfa vērtību. ✅ **PABEIGTS** — katra tabula bez kartītes tagad izmanto `bg-surface` (vai `<DataTable>` pamatkomponentam — `background: var(--color-surface)` tā ritināšanas konteinerā). Izlaboti: `DataTable` (pamatkomponents), `ProxyLogger`/`RequestLoggerV2` (to `<Card>` `bg-black/5 dark:bg-black/20` tonējums ar tailwind-merge palīdzību guva virsroku pār Card `bg-surface` → ~95% caurspīdīgs), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, kā arī abas CSS režģa „tabulas” kešatmiņas skatos (`bg-surface/35` → `bg-surface`). Tabulas, kas jau atrodas `<Card>`/Modal iekšpusē, tika pārbaudītas kā necaurspīdīgas un apzināti atstātas neskartas (`bg-surface` tur būtu lieka darbība bez efekta). Pašam režģim **nebija nepieciešamas nekādas izmaiņas** — informācijas paneļa `body::before` ir baitu līmenī identisks vietnes variantam (`--grid-size: 32px`); jebkurš „lielāks režģis”, kas redzams palaistā instancē, ir novecojis būvējums pirms `#4143`, nevis pašreizējais kods. To aizsargā `tests/unit/design-grid-background.test.ts` (6. posma bloks).
-
----
-
-## 9. Ārpus tvēruma / riski
-
-- **Bez krāsu paletes izmaiņām** — krāsas jau atbilst; mēs tikai pievienojam trūkstošos tokenus. Produkta pārkrāsošanas risks ir nulle.
-- **Bez motīvu dzinēja izmaiņām** — saglabājam `.dark` + Zustand krātuvi.
-- **Stūru rādiusa maiņa (2. posms) ir plaša** — tā skar katru kartīti/pogu/ievades lauku; pirms apvienošanas vizuāli pārbaudiet noslogotus ekrānus (tabulas, modālos logus).
-- **Tabulām (C3)** ir visvairāk stingri iekodēta stila un visplašākā iespējamo regresiju ietekme — izdaliet tās atsevišķā PR.
-
----
-
-## 10. Atsauču rādītājs
-
-| Apgabals                               | Ceļš                                                                                                                 |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Informācijas paneļa tokeni             | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Motīvu krātuve                         | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Paneļa ietvars (režģis atbloķēts šeit) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Saskarnes ietvars                      | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Režģa precedents                       | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Pamatkomponenti                        | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Statusa krāsu avoti                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` utilīta                           | `src/shared/utils/cn.ts`                                                                                             |
-| 1. posma aizsargtests                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Vietnes atsauce                        | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — pilnvaru tilts, `.dark` ignorēšana, OmniRoute `@layer components` paplašinājumi
+- `packages/ui-kit/UPSTREAM.md` — piesprausta augšpus saistību un licences autorizācija; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` un tai blakus esošie adapteri; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
