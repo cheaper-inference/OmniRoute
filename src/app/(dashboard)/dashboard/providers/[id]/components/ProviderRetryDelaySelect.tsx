@@ -43,6 +43,20 @@ export function computeRetryDelayOverrides(
   return next;
 }
 
+export function computeDefaultConnectionConcurrencyOverrides(
+  current: ProviderQuotaOverrides | null | undefined,
+  providerId: string,
+  value: string
+): ProviderQuotaOverrides {
+  const next: ProviderQuotaOverrides = { ...current };
+  const entry = { ...(next[providerId] || {}) };
+  if (value === RETRY_DELAY_AUTO) delete entry.defaultConnectionConcurrency;
+  else entry.defaultConnectionConcurrency = Number(value);
+  if (Object.keys(entry).length) next[providerId] = entry;
+  else delete next[providerId];
+  return next;
+}
+
 /** Select value for the stored override ("auto" when unset). */
 export function retryDelaySelectValue(
   overrides: ProviderQuotaOverrides | null | undefined,
@@ -109,7 +123,9 @@ function useRetryDelayOverrides(providerId: string) {
   const handleChange = useCallback(
     async (value: string) => {
       const previous = overrides;
-      const next = computeRetryDelayOverrides(previous, providerId, value);
+      const next = value.startsWith("default:")
+        ? computeDefaultConnectionConcurrencyOverrides(previous, providerId, value.slice(8))
+        : computeRetryDelayOverrides(previous, providerId, value);
       const failedText = providerText(t, "retryDelayUpdateFailed", "Failed to update retry delay");
       setOverrides(next);
       setSaving(true);
@@ -135,39 +151,7 @@ function useRetryDelayOverrides(providerId: string) {
     [notify, overrides, providerId, t]
   );
 
-  const handleDefaultConcurrency = useCallback(
-    async (value: string) => {
-      const previous = overrides;
-      const next: ProviderQuotaOverrides = { ...previous };
-      const entry = { ...(next[providerId] || {}) };
-      if (value === RETRY_DELAY_AUTO) delete entry.defaultConnectionConcurrency;
-      else entry.defaultConnectionConcurrency = Number(value);
-      if (Object.keys(entry).length) next[providerId] = entry;
-      else delete next[providerId];
-      setOverrides(next);
-      setSaving(true);
-      try {
-        const response = await fetch("/api/resilience", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ providerQuotaOverrides: next }),
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(patchErrorMessage(data, t("retryDelayUpdateFailed")));
-        if (data?.providerQuotaOverrides)
-          setOverrides(data.providerQuotaOverrides as ProviderQuotaOverrides);
-        notify.success(t("retryDelaySaved"));
-      } catch (error) {
-        setOverrides(previous);
-        notify.error(error instanceof Error ? error.message : t("retryDelayUpdateFailed"));
-      } finally {
-        setSaving(false);
-      }
-    },
-    [notify, overrides, providerId, t]
-  );
-
-  return { overrides, loaded, saving, handleChange, handleDefaultConcurrency };
+  return { overrides, loaded, saving, handleChange };
 }
 
 interface ProviderRetryDelaySelectProps {
@@ -176,8 +160,7 @@ interface ProviderRetryDelaySelectProps {
 
 export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDelaySelectProps) {
   const t = useTranslations("providers");
-  const { overrides, loaded, saving, handleChange, handleDefaultConcurrency } =
-    useRetryDelayOverrides(providerId);
+  const { overrides, loaded, saving, handleChange } = useRetryDelayOverrides(providerId);
 
   const title = providerText(t, "retryDelayTitle", "Retry delay");
   const selected = retryDelaySelectValue(overrides, providerId);
@@ -200,7 +183,7 @@ export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDe
             { value: RETRY_DELAY_AUTO, label: t("retryDelayAuto") },
             ...[1, 2, 4, 6, 8, 12, 16, 24, 32].map((n) => ({ value: String(n), label: String(n) })),
           ]}
-          onChange={(event) => void handleDefaultConcurrency(event.target.value)}
+          onChange={(event) => void handleChange(`default:${event.target.value}`)}
         />
       </div>
       <div className="flex items-center gap-3">
