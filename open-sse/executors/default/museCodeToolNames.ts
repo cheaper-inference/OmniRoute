@@ -33,6 +33,41 @@ function stringOrEmpty(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
+function aliasOf(name: unknown, aliasByOriginal: ReadonlyMap<string, string>): string | undefined {
+  const original = stringOrEmpty(name);
+  return original ? aliasByOriginal.get(original) : undefined;
+}
+
+/** Renames `holder.name` in place when the ledger has an alias for it. */
+function renameInPlace(
+  holder: JsonRecord | null | undefined,
+  aliasByOriginal: ReadonlyMap<string, string>
+): void {
+  if (!holder) return;
+  const aliased = aliasOf(holder.name, aliasByOriginal);
+  if (aliased) holder.name = aliased;
+}
+
+function isReplayedCallItem(record: JsonRecord | null): record is JsonRecord {
+  return !!record && (record.type === "function_call" || record.type === "custom_tool_call");
+}
+
+function aliasChatMessage(message: unknown, aliasByOriginal: ReadonlyMap<string, string>): void {
+  const msg = asRecord(message);
+  if (!msg) return;
+  if (Array.isArray(msg.tool_calls)) {
+    for (const call of msg.tool_calls) {
+      renameInPlace(asRecord(asRecord(call)?.function), aliasByOriginal);
+    }
+  }
+  if (Array.isArray(msg.content)) {
+    for (const block of msg.content) {
+      const part = asRecord(block);
+      if (part?.type === "tool_use") renameInPlace(part, aliasByOriginal);
+    }
+  }
+}
+
 // Coerce the input items a client replays back to the model (function_call /
 // custom_tool_call history in `input`, tool_calls / tool_use in `messages`)
 // to their wire aliases so the next turn still matches the declared tools.
@@ -42,42 +77,75 @@ export function aliasMuseCodeHistoryItems(
   aliasByOriginal: ReadonlyMap<string, string>
 ): void {
   if (aliasByOriginal.size === 0) return;
-  const rename = (name: unknown): string | undefined => {
-    const original = stringOrEmpty(name);
-    return original ? aliasByOriginal.get(original) : undefined;
-  };
   if (Array.isArray(body.input)) {
     for (const item of body.input) {
-      const record = asRecord(item);
-      if (!record || (record.type !== "function_call" && record.type !== "custom_tool_call")) {
-        continue;
-      }
       // A history item's `name` is the leaf, with `namespace` as a sibling
       // field; the alias ledger keys on the leaf either way.
-      const aliased = rename(record.name);
-      if (aliased) record.name = aliased;
+      const record = asRecord(item);
+      if (isReplayedCallItem(record)) renameInPlace(record, aliasByOriginal);
     }
   }
   if (Array.isArray(body.messages)) {
-    for (const message of body.messages) {
-      const msg = asRecord(message);
-      if (!msg) continue;
-      if (Array.isArray(msg.tool_calls)) {
-        for (const call of msg.tool_calls) {
-          const fn = asRecord(asRecord(call)?.function);
-          const aliased = fn ? rename(fn.name) : undefined;
-          if (fn && aliased) fn.name = aliased;
-        }
-      }
-      if (Array.isArray(msg.content)) {
-        for (const block of msg.content) {
-          const part = asRecord(block);
-          if (!part || part.type !== "tool_use") continue;
-          const aliased = rename(part.name);
-          if (aliased) part.name = aliased;
-        }
-      }
+    for (const message of body.messages) aliasChatMessage(message, aliasByOriginal);
+  }
+}
+
+/** Every tool name the client declared, including namespace leaves. */
+function collectDeclaredToolNames(tools: unknown[]): Set<string> {
+  const declared = new Set<string>();
+  const add = (name: string) => {
+    if (name) declared.add(name);
+  };
+  for (const tool of tools) {
+    const entry = asRecord(tool);
+    if (!entry) continue;
+    add(stringOrEmpty(entry.name) || stringOrEmpty(asRecord(entry.function)?.name));
+    if (!Array.isArray(entry.tools)) continue;
+    for (const child of entry.tools) add(stringOrEmpty(asRecord(child)?.name));
+  }
+  return declared;
+}
+
+class MuseAliasLedger {
+  readonly aliasByOriginal = new Map<string, string>();
+  readonly wireToOriginal = new Map<string, string>();
+  constructor(private readonly declared: ReadonlySet<string>) {}
+
+  aliasFor(original: string): string {
+    const existing = this.aliasByOriginal.get(original);
+    if (existing) return existing;
+    let alias = `${MUSE_ALIAS_PREFIX}${original}`;
+    let suffix = 2;
+    while (this.declared.has(alias) || this.wireToOriginal.has(alias)) {
+      alias = `${MUSE_ALIAS_PREFIX}${original}_${suffix}`;
+      suffix += 1;
     }
+    this.aliasByOriginal.set(original, alias);
+    this.wireToOriginal.set(alias, original);
+    return alias;
+  }
+
+  /** Renames a blocked declaration in place; returns whether it changed. */
+  renameDeclared(target: JsonRecord): boolean {
+    const name = stringOrEmpty(target.name);
+    if (!name || !MUSE_CODE_BLOCKED_TOOL_NAMES.has(name)) return false;
+    target.name = this.aliasFor(name);
+    return true;
+  }
+
+  /** Renames a top-level declaration, or the leaves of a namespace group. */
+  renameTool(tool: unknown): boolean {
+    const entry = asRecord(tool);
+    if (!entry) return false;
+    if (entry.type === "namespace" && Array.isArray(entry.tools)) {
+      let changed = false;
+      for (const child of entry.tools) {
+        const leaf = asRecord(child);
+        if (leaf && this.renameDeclared(leaf)) changed = true;
+      }
+      return changed;
+    }
+    return this.renameDeclared(asRecord(entry.function) ?? entry);
   }
 }
 
@@ -93,78 +161,22 @@ export function sanitizeMuseCodeToolNames(body: unknown): Map<string, string> | 
   const record = asRecord(body);
   if (!record || !Array.isArray(record.tools)) return null;
 
-  const declared = new Set<string>();
-  for (const tool of record.tools) {
-    const entry = asRecord(tool);
-    if (!entry) continue;
-    const fn = asRecord(entry.function);
-    const name = stringOrEmpty(entry.name) || stringOrEmpty(fn?.name);
-    if (name) declared.add(name);
-    if (Array.isArray(entry.tools)) {
-      for (const child of entry.tools) {
-        const leaf = asRecord(child);
-        const leafName = leaf ? stringOrEmpty(leaf.name) : "";
-        if (leafName) declared.add(leafName);
-      }
-    }
-  }
+  const declared = collectDeclaredToolNames(record.tools);
   if (declared.size === 0) return null;
 
-  const aliasByOriginal = new Map<string, string>();
-  const aliasLedger = new Map<string, string>();
-  const usedAliases = new Set<string>();
-  const aliasFor = (original: string): string => {
-    const existing = aliasByOriginal.get(original);
-    if (existing) return existing;
-    let alias = `${MUSE_ALIAS_PREFIX}${original}`;
-    let suffix = 2;
-    while (declared.has(alias) || usedAliases.has(alias)) {
-      alias = `${MUSE_ALIAS_PREFIX}${original}_${suffix}`;
-      suffix += 1;
-    }
-    aliasByOriginal.set(original, alias);
-    aliasLedger.set(alias, original);
-    usedAliases.add(alias);
-    return alias;
-  };
-
+  const ledger = new MuseAliasLedger(declared);
   let changed = false;
-  const renameDeclared = (holder: JsonRecord, fn?: JsonRecord | null): void => {
-    const target = fn ?? holder;
-    const name = stringOrEmpty(target.name);
-    if (name && MUSE_CODE_BLOCKED_TOOL_NAMES.has(name)) {
-      target.name = aliasFor(name);
-      changed = true;
-    }
-  };
-
   for (const tool of record.tools) {
-    const entry = asRecord(tool);
-    if (!entry) continue;
-    if (entry.type === "namespace" && Array.isArray(entry.tools)) {
-      for (const child of entry.tools) {
-        const leaf = asRecord(child);
-        if (leaf) renameDeclared(leaf);
-      }
-      continue;
-    }
-    const fn = asRecord(entry.function);
-    if (fn) renameDeclared(entry, fn);
-    else renameDeclared(entry);
+    if (ledger.renameTool(tool)) changed = true;
   }
   if (!changed) return null;
 
   // Client-forced tool references must name the wire alias, not the blocked
   // name the upstream refuses before it can answer.
-  const choice = asRecord(record.tool_choice);
-  if (choice) {
-    const choiceName = stringOrEmpty(choice.name);
-    const aliased = choiceName ? aliasByOriginal.get(choiceName) : undefined;
-    if (aliased) choice.name = aliased;
-  }
+  renameInPlace(asRecord(record.tool_choice), ledger.aliasByOriginal);
 
-  aliasMuseCodeHistoryItems(record, aliasByOriginal);
-  return aliasLedger;
+  aliasMuseCodeHistoryItems(record, ledger.aliasByOriginal);
+  return ledger.wireToOriginal;
 }
 
 /** Attach the alias ledger the same way the Claude cloak path publishes it. */

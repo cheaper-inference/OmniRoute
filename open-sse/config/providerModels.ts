@@ -304,6 +304,17 @@ function effortBaseTargetFormat(alias: string, bareModelId: string): string | nu
   return PROVIDER_MODELS[alias]?.find((m) => m.id === effortStripped)?.targetFormat ?? null;
 }
 
+/**
+ * Providers whose executors only speak the Responses wire, for passthrough ids that
+ * post-date the seed catalog.
+ * - gc: Grok Build — GrokCliExecutor always POSTs to /v1/responses and live discovery
+ *   drops non-`responses` backends (grok-4.7 before a sync otherwise ships a
+ *   chat-completions body, which Grok Build rejects with 400).
+ * - mc / muse-code: Muse Code — the registry base URL is /responses (a new Muse id before
+ *   a sync otherwise gets 400 "unknown parameter `messages`").
+ */
+const RESPONSES_ONLY_PROVIDER_ALIASES = new Set(["gc", "mc", "muse-code"]);
+
 export function getModelTargetFormat(aliasOrId: string, modelId: string): string | null {
   // Accept either the public alias ("cmd") or the raw provider id ("command-code"),
   // mirroring getProviderModels (same pattern as #2798/#3870).
@@ -327,15 +338,9 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor's /codex/i routing, 9router#102). Scoped to the openai alias so other
   // providers shipping *-pro ids keep their own endpoint semantics.
   if (alias === "openai" && /-pro$/i.test(bareModelId)) return "openai-responses";
-  // Grok Build only speaks Responses: GrokCliExecutor always POSTs to /v1/responses and
-  // live discovery drops non-`responses` backends. A passthrough id that post-dates the
-  // seed (e.g. grok-4.7 before a sync) otherwise falls back to the provider's "openai"
-  // format and ships a chat-completions body, which Grok Build rejects with 400.
-  if (alias === "gc") return "openai-responses";
-  // Muse Code speaks only the Responses wire (the registry base URL is /responses).
-  // Passthrough ids that post-date the catalog (muse-wonder-1.0 before a sync) would
-  // otherwise fall back to chat-completions and get 400 "unknown parameter `messages`".
-  if (alias === "mc" || alias === "muse-code") return "openai-responses";
+  // Responses-only providers (see RESPONSES_ONLY_PROVIDER_ALIASES): a passthrough id that
+  // post-dates the seed would otherwise fall back to the provider's chat format and 400.
+  if (RESPONSES_ONLY_PROVIDER_ALIASES.has(alias)) return "openai-responses";
   // Vertex uses three protocol families: Gemini generateContent, Anthropic Messages rawPredict,
   // and OpenAI-shaped Mistral/Open-MaaS requests. Resource names retain enough publisher data to
   // route future dynamically-synced models without adding another pinned prefix here.

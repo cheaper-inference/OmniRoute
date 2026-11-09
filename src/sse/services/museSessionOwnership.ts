@@ -202,6 +202,107 @@ function hasUnadoptableItems(value: unknown): boolean {
   return Object.values(item).some(hasUnadoptableItems);
 }
 
+function hasForbiddenMuseHistory(body: Record<string, unknown>, references: Set<string>): boolean {
+  return (
+    opaqueHashes(body).size > 0 ||
+    [...references].some((id) => id.startsWith("item:")) ||
+    !!body.previous_response_id ||
+    !!body._omniroutePreviousResponseResumed ||
+    hasUnadoptableItems(body)
+  );
+}
+
+function assertKeptOwnerUsable(
+  owner: Owner,
+  current: Connection | null | undefined,
+  forcedId?: string | null
+): void {
+  if (!current || current.unavailable) {
+    throw new MuseOwnershipError(
+      "Muse session owner is unavailable; cross-account continuation is forbidden.",
+      503
+    );
+  }
+  if (forcedId && forcedId !== owner.connectionId) {
+    throw new MuseOwnershipError("Requested Muse account differs from the session owner.");
+  }
+}
+
+/** A never-owned scope may adopt plain tool history only with exactly one usable candidate. */
+function canAdoptPlainHistory(
+  prior: Owner | null,
+  references: Set<string>,
+  hasForbiddenHistory: boolean,
+  candidates: Connection[],
+  forcedId?: string | null
+): boolean {
+  return (
+    !prior &&
+    references.size > 0 &&
+    !hasForbiddenHistory &&
+    candidates.length === 1 &&
+    !candidates[0].unavailable &&
+    (!forcedId || forcedId === candidates[0].id)
+  );
+}
+
+function assignNewOwner(
+  scope: string,
+  candidates: Connection[],
+  forcedId: string | null | undefined,
+  adoptedReferences: Set<string> | null
+): Owner {
+  const ordered = [...candidates].sort((a, b) => a.id.localeCompare(b.id));
+  if (!ordered.length)
+    throw new MuseOwnershipError("No native OAuth Muse account is available.", 503);
+  const cursor = Number(load("cursor") || "0");
+  const rotation = ordered.map((_, index) => ordered[(cursor + index) % ordered.length]);
+  const connection = forcedId
+    ? ordered.find((candidate) => candidate.id === forcedId)
+    : (rotation.find((candidate) => !candidate.unavailable) ?? rotation[0]);
+  if (!connection)
+    throw new MuseOwnershipError("Requested Muse OAuth account is unavailable.", 503);
+  const owner: Owner = adoptedReferences
+    ? {
+        connectionId: connection.id,
+        adopted: true,
+        pendingReferences: [...adoptedReferences].map(digest),
+      }
+    : { connectionId: connection.id };
+  save(`session:${scope}`, JSON.stringify(owner));
+  if (!forcedId) save("cursor", String(cursor + 1));
+  return owner;
+}
+
+function assertOpaqueHistoryIssued(scope: string, owner: Owner, body: Record<string, unknown>) {
+  for (const hash of opaqueHashes(body)) {
+    if (!owner.generation || load(`opaque:${scope}:${hash}`) !== owner.generation) {
+      throw new MuseOwnershipError(
+        "Muse encrypted reasoning was not issued to this session and caller generation."
+      );
+    }
+  }
+}
+
+function verifyContinuationReferences(scope: string, owner: Owner, references: Set<string>) {
+  for (const id of references) {
+    const hash = digest(id);
+    const pendingAdoption = owner.pendingReferences?.includes(hash) && !owner.generation;
+    const issued = !!owner.generation && load(`reference:${scope}:${hash}`) === owner.generation;
+    if (pendingAdoption || issued) continue;
+    // Client threads carry tool items issued under other models or restored by
+    // compaction; record them under the scope's bound generation. Opaque and item:
+    // history stays fail-closed.
+    if (owner.generation && id.startsWith("call:")) {
+      save(`reference:${scope}:${hash}`, owner.generation);
+      continue;
+    }
+    throw new MuseOwnershipError(
+      "Muse tool continuation was not issued to this session and caller generation."
+    );
+  }
+}
+
 /** Atomic session assignment; once output was served, pins never expire or move to another account. */
 export function claimMuseSession(
   scope: string,
@@ -219,84 +320,30 @@ export function claimMuseSession(
     const current = prior && candidates.find((candidate) => candidate.id === prior.connectionId);
     const pinned = load(`served:${scope}`) === "1" || !!prior?.adopted;
     const references = continuationIds(body);
-    const hasForbiddenHistory =
-      opaqueHashes(body).size > 0 ||
-      [...references].some((id) => id.startsWith("item:")) ||
-      !!body.previous_response_id ||
-      !!body._omniroutePreviousResponseResumed ||
-      hasUnadoptableItems(body);
+    const hasForbiddenHistory = hasForbiddenMuseHistory(body, references);
     if (
       prior &&
       (pinned || (current && !current.unavailable && (!forcedId || forcedId === current.id)))
     ) {
       owner = prior;
-      if (!current || current.unavailable) {
-        throw new MuseOwnershipError(
-          "Muse session owner is unavailable; cross-account continuation is forbidden.",
-          503
-        );
-      }
-      if (forcedId && forcedId !== owner.connectionId) {
-        throw new MuseOwnershipError("Requested Muse account differs from the session owner.");
-      }
+      assertKeptOwnerUsable(owner, current, forcedId);
     } else {
-      const adopt =
-        !prior &&
-        references.size > 0 &&
-        !hasForbiddenHistory &&
-        candidates.length === 1 &&
-        !candidates[0].unavailable &&
-        (!forcedId || forcedId === candidates[0].id);
+      const adopt = canAdoptPlainHistory(
+        prior,
+        references,
+        hasForbiddenHistory,
+        candidates,
+        forcedId
+      );
       if (hasForbiddenHistory || (references.size > 0 && !adopt)) {
         throw new MuseOwnershipError(
           "Muse continuation has no recorded owner; start an independent session without imported opaque history."
         );
       }
-      const ordered = [...candidates].sort((a, b) => a.id.localeCompare(b.id));
-      if (!ordered.length)
-        throw new MuseOwnershipError("No native OAuth Muse account is available.", 503);
-      const cursor = Number(load("cursor") || "0");
-      const rotation = ordered.map((_, index) => ordered[(cursor + index) % ordered.length]);
-      const connection = forcedId
-        ? ordered.find((candidate) => candidate.id === forcedId)
-        : (rotation.find((candidate) => !candidate.unavailable) ?? rotation[0]);
-      if (!connection)
-        throw new MuseOwnershipError("Requested Muse OAuth account is unavailable.", 503);
-      owner = adopt
-        ? {
-            connectionId: connection.id,
-            adopted: true,
-            pendingReferences: [...references].map(digest),
-          }
-        : { connectionId: connection.id };
-      save(`session:${scope}`, JSON.stringify(owner));
-      if (!forcedId) save("cursor", String(cursor + 1));
+      owner = assignNewOwner(scope, candidates, forcedId, adopt ? references : null);
     }
-    for (const hash of opaqueHashes(body)) {
-      if (!owner.generation || load(`opaque:${scope}:${hash}`) !== owner.generation) {
-        throw new MuseOwnershipError(
-          "Muse encrypted reasoning was not issued to this session and caller generation."
-        );
-      }
-    }
-    for (const id of references) {
-      const hash = digest(id);
-      if (
-        !(owner.pendingReferences?.includes(hash) && !owner.generation) &&
-        (!owner.generation || load(`reference:${scope}:${hash}`) !== owner.generation)
-      ) {
-        // Client threads carry tool items issued under other models or restored by
-        // compaction; record them under the scope's bound generation. Opaque and item:
-        // history stays fail-closed.
-        if (owner.generation && id.startsWith("call:")) {
-          save(`reference:${scope}:${hash}`, owner.generation);
-          continue;
-        }
-        throw new MuseOwnershipError(
-          "Muse tool continuation was not issued to this session and caller generation."
-        );
-      }
-    }
+    assertOpaqueHistoryIssued(scope, owner, body);
+    verifyContinuationReferences(scope, owner, references);
   });
   return owner;
 }
