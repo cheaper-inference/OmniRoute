@@ -168,9 +168,20 @@ export function backfillResponsesCompletedOutput(
 }
 
 /**
+ * Counters inside the usage details objects, as [field, required, optional]. Codex reads
+ * them as integers: a present details object must carry its required counter, and an
+ * explicit null in any of them fails the whole terminal event (#19320).
+ */
+const RESPONSES_USAGE_DETAIL_COUNTERS: Array<[string, string[], string[]]> = [
+  ["input_tokens_details", ["cached_tokens"], ["cache_write_tokens", "cache_creation_tokens"]],
+  ["output_tokens_details", ["reasoning_tokens"], []],
+];
+
+/**
  * Keep the terminal Responses payload compatible with strict clients such as Codex.
  * Upstreams may expose only input/output counts (or omit usage entirely), while the
- * client deserializer requires all three canonical token fields.
+ * client deserializer requires all three canonical token fields and integer counters
+ * in the details objects.
  */
 export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
@@ -201,11 +212,25 @@ export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
     output_tokens: outputTokens,
   };
   normalized.total_tokens = totalTokens;
-  const changed =
+  let changed =
     !response.usage ||
     current.input_tokens !== inputTokens ||
     current.output_tokens !== outputTokens ||
     current.total_tokens !== totalTokens;
+  for (const [field, required, optional] of RESPONSES_USAGE_DETAIL_COUNTERS) {
+    const details = current[field];
+    if (!details || typeof details !== "object" || Array.isArray(details)) continue;
+    const source = details as JsonRecord;
+    const fixed: JsonRecord = { ...source };
+    for (const key of required) fixed[key] = finiteNumber(source[key]) ?? 0;
+    for (const key of optional) {
+      if (key in source) fixed[key] = finiteNumber(source[key]) ?? 0;
+    }
+    if (Object.keys(fixed).some((key) => fixed[key] !== source[key])) {
+      normalized[field] = fixed;
+      changed = true;
+    }
+  }
   response.usage = normalized;
   return changed;
 }
