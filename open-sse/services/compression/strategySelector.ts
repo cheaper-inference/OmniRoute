@@ -919,6 +919,23 @@ function finalizeStackedResult(
   return applyStackedInflationGuard(originalBody, currentBody, compressed, stats);
 }
 
+/**
+ * Marker-protocol post-pass (#8033), shared by the sync + async stacked runners: after
+ * every engine, the hard budget and the inflation guard, one leading system note
+ * explains any `[CCR retrieve hash=...]` / `[dedup:ref sha=...]` marker left in the
+ * final body (idempotent: a replayed prior note carrying the sentinel suppresses a
+ * second). The note is a protocol explanation, not a compression, so it runs AFTER
+ * `finalizeStackedResult`: its fixed size must never count against the inflation guard
+ * (on a small body the guard would otherwise revert the very compression the note
+ * explains), and the hard budget can never drop it. Stats describe the compression
+ * alone. When the guard reverted, only markers already in the original body are
+ * explained.
+ */
+function withMarkerProtocolNote(result: CompressionResult): CompressionResult {
+  const applied = applyCcrProtocolInstruction(result.body);
+  return applied.injected ? { ...result, body: applied.body } : result;
+}
+
 // ── Shared per-step helpers (used by the sync + async stacked loops; keep them in lockstep) ──
 
 interface StepCommitCtx {
@@ -1043,14 +1060,6 @@ function runStackedCompression(
     if (!bailout?.enabled) reportEngineStep(onStep, stepIdx++, totalSteps, step.engine, result);
   }
 
-  // Marker-protocol post-pass (#8033): after all engines, one leading system note
-  // explains any `[CCR retrieve hash=...]` / `[dedup:ref sha=...]` marker left in the
-  // body (idempotent: a replayed prior note carrying the sentinel suppresses a second).
-  // The note is a protocol explanation, not a compression: it does not set `compressed`,
-  // so on a marker-only request (no real engine advanced) the inflation guard in
-  // finalizeStackedResult stays off and cannot revert the note along with the body.
-  currentBody = applyCcrProtocolInstruction(currentBody).body;
-
   // Hard-budget post-pass (#17): runs after all engines, before finalize.
   if (options?.config?.targetTokens != null || options?.config?.targetRatio != null) {
     const hbResult = applyHardBudget(currentBody, {
@@ -1069,13 +1078,15 @@ function runStackedCompression(
     }
   }
 
-  return finalizeStackedResult(
-    body,
-    currentBody,
-    compressed,
-    acc,
-    start,
-    options?.compressionComboId ?? options?.config?.compressionComboId
+  return withMarkerProtocolNote(
+    finalizeStackedResult(
+      body,
+      currentBody,
+      compressed,
+      acc,
+      start,
+      options?.compressionComboId ?? options?.config?.compressionComboId
+    )
   );
 }
 
@@ -1165,12 +1176,6 @@ async function runStackedCompressionAsync(
     if (!bailout?.enabled) reportEngineStep(onStep, stepIdx++, totalSteps, step.engine, result);
   }
 
-  // Marker-protocol post-pass (#8033): same rule as the sync sibling
-  // `runStackedCompression` — one leading system note for any CCR/dedup marker
-  // left in the body (idempotent; a protocol explanation, not a compression —
-  // see that call site for the full rule).
-  currentBody = applyCcrProtocolInstruction(currentBody).body;
-
   // Hard-budget post-pass (#17): runs after all engines, before finalize.
   if (options?.config?.targetTokens != null || options?.config?.targetRatio != null) {
     const hbResult = applyHardBudget(currentBody, {
@@ -1189,12 +1194,14 @@ async function runStackedCompressionAsync(
     }
   }
 
-  return finalizeStackedResult(
-    body,
-    currentBody,
-    compressed,
-    acc,
-    start,
-    options?.compressionComboId ?? options?.config?.compressionComboId
+  return withMarkerProtocolNote(
+    finalizeStackedResult(
+      body,
+      currentBody,
+      compressed,
+      acc,
+      start,
+      options?.compressionComboId ?? options?.config?.compressionComboId
+    )
   );
 }

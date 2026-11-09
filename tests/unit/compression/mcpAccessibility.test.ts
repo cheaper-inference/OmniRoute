@@ -121,10 +121,59 @@ test("JSON with mode:grep → still valid JSON, truncated, hint preserved", () =
   assert.ok((parsed.content as string).length < 50000, "content bounded");
 });
 
-test("JSON without a content field → returned intact (not filtered)", () => {
+function assertBoundedPreviewEnvelope(input: string, out: string) {
+  const max = DEFAULT_MCP_ACCESSIBILITY_CONFIG.maxTextChars;
+  assert.ok(out.length <= max, `bounded by maxTextChars, got ${out.length}`);
+  const parsed = JSON.parse(out) as Record<string, unknown>;
+  assert.equal(parsed.truncated, true);
+  assert.equal(parsed.hint, MCP_TEXT_TRUNCATION_HINT);
+  assert.equal(parsed.originalChars, input.length);
+  assert.equal(typeof parsed.preview, "string");
+  assert.ok((parsed.preview as string).length > 0, "keeps a non-empty preview");
+  assert.ok(input.startsWith(parsed.preview as string), "preview is the head of the raw JSON");
+}
+
+test("JSON object without a content field over the limit → bounded valid envelope", () => {
   const input = JSON.stringify({ found: false, error: "x".repeat(60000) });
   const out = smartFilterText(input, DEFAULT_MCP_ACCESSIBILITY_CONFIG);
-  assert.equal(out, input, "no truncatable content → the JSON is left untouched");
+  assertBoundedPreviewEnvelope(input, out);
+});
+
+test("large JSON array (>50 000 chars) → bounded valid envelope, never unbounded", () => {
+  const items = Array.from({ length: 6000 }, (_, i) => ({
+    id: `model-${i}`,
+    name: `Model "${i}"\nwith quotes`,
+    owned_by: "provider",
+  }));
+  const input = JSON.stringify(items);
+  assert.ok(input.length > 300000, `array must be large, got ${input.length}`);
+  const out = smartFilterText(input, DEFAULT_MCP_ACCESSIBILITY_CONFIG);
+  assertBoundedPreviewEnvelope(input, out);
+});
+
+test("large JSON object (>50 000 chars) without content → bounded valid envelope", () => {
+  const catalog: Record<string, string> = {};
+  for (let i = 0; i < 6000; i++) catalog[`key-${i}`] = `value ${i} `.repeat(4);
+  const input = JSON.stringify({ catalog });
+  assert.ok(input.length > 200000, `object must be large, got ${input.length}`);
+  const out = smartFilterText(input, DEFAULT_MCP_ACCESSIBILITY_CONFIG);
+  assertBoundedPreviewEnvelope(input, out);
+});
+
+test("JSON with a small content but a huge sibling field → bounded valid envelope", () => {
+  const input = JSON.stringify({ content: "ok", metadata: "m".repeat(80000) });
+  const out = smartFilterText(input, DEFAULT_MCP_ACCESSIBILITY_CONFIG);
+  assertBoundedPreviewEnvelope(input, out);
+});
+
+test("escape-heavy content → re-serialized JSON still fits maxTextChars", () => {
+  const input = JSON.stringify({ found: true, content: 'a"\n'.repeat(30000) });
+  const out = smartFilterText(input, DEFAULT_MCP_ACCESSIBILITY_CONFIG);
+  assert.ok(out.length <= DEFAULT_MCP_ACCESSIBILITY_CONFIG.maxTextChars, `got ${out.length}`);
+  const parsed = JSON.parse(out) as Record<string, unknown>;
+  assert.equal(parsed.truncated, true);
+  assert.equal(typeof parsed.content, "string", "the content shape is kept");
+  assert.ok((parsed.content as string).length > 0, "keeps part of the content");
 });
 
 test("malformed JSON → falls back to the text path with the generic hint", () => {

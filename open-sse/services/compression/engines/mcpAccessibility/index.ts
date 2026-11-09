@@ -110,29 +110,80 @@ function shrinkContentField(clone: JsonRecord, budget: number): boolean {
   return changed;
 }
 
-/**
- * JSON-aware truncation of a tool result: shrink the `content` field (string,
- * or the `text` of every text block) so the RE-SERIALIZED JSON fits
- * `maxTextChars`, set `truncated: true` + the generic `hint` on the object and
- * on each truncated block, and return the new string. Returns `null` when the
- * result has no truncatable `content` (the caller must then leave the JSON
- * untouched) or when nothing needed to be shrunk. The output is always valid
- * JSON — a raw slice of a JSON string is never produced.
- */
-function truncateJsonContent(text: string, config: McpAccessibilityConfig): string | null {
-  const parsed = tryParseMcpJson(text);
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
-  const value = parsed as JsonRecord;
-  if (!hasTruncatableContent(value)) return null;
+/** Re-fit attempts when JSON escaping makes the re-serialized result overshoot the budget. */
+const MAX_JSON_FIT_ATTEMPTS = 8;
 
-  const indented = isIndentedJson(text);
-  const budget = Math.max(0, config.maxTextChars - buildEnvelope(value, indented));
+/**
+ * Serialize `value` with its `content` shrunk to `budget` and the truncation
+ * marks applied. Returns `null` when the content already fits the budget
+ * (nothing to shrink).
+ */
+function serializeShrunk(value: JsonRecord, budget: number, indented: boolean): string | null {
   const clone: JsonRecord = { ...value };
   if (!shrinkContentField(clone, budget)) return null;
   clone[MCP_JSON_TRUNCATED_FIELD] = true;
   clone.hint = MCP_TEXT_TRUNCATION_HINT;
   const serialized = JSON.stringify(clone, null, indented ? 2 : undefined);
   return typeof serialized === "string" ? serialized : null;
+}
+
+/**
+ * JSON-aware truncation of a tool result: shrink the `content` field (string,
+ * or the `text` of every text block) so the RE-SERIALIZED JSON fits
+ * `maxTextChars`, set `truncated: true` + the generic `hint` on the object and
+ * on each truncated block, and return the new string. JSON escaping can make
+ * the re-serialized text longer than the kept chars, so the budget shrinks by
+ * the overshoot until it fits. Returns `null` when the result has no
+ * truncatable `content`, or when shrinking `content` cannot bring it under the
+ * limit (its other fields alone are too large) — the caller then falls back to
+ * the bounded preview envelope. The output is always valid JSON — a raw slice
+ * of a JSON string is never produced.
+ */
+function truncateJsonContent(
+  text: string,
+  parsed: unknown,
+  config: McpAccessibilityConfig
+): string | null {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  const value = parsed as JsonRecord;
+  if (!hasTruncatableContent(value)) return null;
+
+  const indented = isIndentedJson(text);
+  let budget = Math.max(0, config.maxTextChars - buildEnvelope(value, indented));
+  for (let attempt = 0; attempt < MAX_JSON_FIT_ATTEMPTS; attempt++) {
+    const serialized = serializeShrunk(value, budget, indented);
+    if (serialized === null) return null;
+    if (serialized.length <= config.maxTextChars) return serialized;
+    if (budget === 0) return null;
+    budget = Math.max(0, budget - (serialized.length - config.maxTextChars));
+  }
+  return null;
+}
+
+/**
+ * Bounded, valid envelope for an oversized JSON result that cannot be shrunk in
+ * place (no truncatable `content` — e.g. a large array or catalog object — or
+ * sibling fields that alone exceed the limit): `{ truncated, hint,
+ * originalChars, preview }`, where `preview` is the head of the raw JSON text
+ * carried as a string. Stays valid JSON and within `maxTextChars`, so a large
+ * result never reaches the model unbounded.
+ */
+function buildJsonPreviewEnvelope(text: string, config: McpAccessibilityConfig): string {
+  const build = (keep: number) =>
+    JSON.stringify({
+      [MCP_JSON_TRUNCATED_FIELD]: true,
+      hint: MCP_TEXT_TRUNCATION_HINT,
+      originalChars: text.length,
+      preview: text.slice(0, keep),
+    });
+  let keep = Math.max(0, config.maxTextChars - build(0).length);
+  let out = build(keep);
+  // Escaping (quotes, backslashes, newlines) expands the preview: drop the overshoot.
+  while (out.length > config.maxTextChars && keep > 0) {
+    keep = Math.max(0, keep - (out.length - config.maxTextChars));
+    out = build(keep);
+  }
+  return out;
 }
 
 /**
@@ -178,12 +229,14 @@ export function smartFilterText(text: string, config: McpAccessibilityConfig): s
   if (text.length > config.maxTextChars) {
     // JSON-aware path: a valid JSON tool result must stay valid. Parse the RAW
     // text (before the line pipeline — noise/collapse would otherwise corrupt
-    // it), shrink its `content` field, and re-serialize. A JSON result without
-    // a truncatable `content` is left untouched: the filter must never turn a
-    // valid JSON into an unparseable slice.
-    const truncatedJson = truncateJsonContent(text, config);
-    if (truncatedJson !== null) return truncatedJson;
-    if (tryParseMcpJson(text) !== null) return text;
+    // it), shrink its `content` field, and re-serialize. A JSON result that
+    // cannot be shrunk in place gets the bounded preview envelope: the filter
+    // must never turn a valid JSON into an unparseable slice, nor let it through
+    // unbounded.
+    const parsed = tryParseMcpJson(text);
+    if (parsed !== null) {
+      return truncateJsonContent(text, parsed, config) ?? buildJsonPreviewEnvelope(text, config);
+    }
   }
 
   return filterPlainText(text, config);

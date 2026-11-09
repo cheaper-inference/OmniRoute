@@ -238,4 +238,42 @@ describe("stacked pipeline — marker-protocol instruction post-pass", () => {
     assert.equal(systemMessages(messages).length, 1, "one instruction on the async path too");
     assert.equal(messages[0].role, "system", "instruction is leading");
   });
+
+  // A marker that saves fewer tokens than the note costs must not be reverted by the
+  // stacked inflation guard: the note is a protocol explanation, applied after the guard.
+  const SMALL_TEXT =
+    "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho";
+  const fuzzyDedup: CompressionPipelineStep[] = [
+    { engine: "session-dedup", config: { fuzzy: { enabled: true } } },
+  ];
+  const smallFuzzyBody = (): Record<string, unknown> => ({
+    model: "gpt-4",
+    messages: [
+      { role: "user", content: SMALL_TEXT },
+      { role: "user", content: SMALL_TEXT + " sigma" },
+      { role: "assistant", content: "acknowledged" },
+    ],
+    tools: [RETRIEVE_TOOL],
+  });
+
+  for (const [label, run] of [
+    [
+      "sync",
+      (b: Record<string, unknown>) => Promise.resolve(applyStackedCompression(b, fuzzyDedup)),
+    ],
+    ["async", (b: Record<string, unknown>) => applyStackedCompressionAsync(b, fuzzyDedup)],
+  ] as const) {
+    it(`${label}: small marker saving + the note is not reverted by the inflation guard`, async () => {
+      resetCcrStore();
+      const result = await run(smallFuzzyBody());
+      assert.equal(result.compressed, true, "the marker compression must survive the guard");
+      const messages = result.body["messages"] as Array<Msg>;
+      assert.ok(
+        messages.some((m) => typeof m.content === "string" && REAL_CCR_MARKER.test(m.content)),
+        "CCR marker kept"
+      );
+      assert.equal(messages[0].role, "system", "the protocol note still leads");
+      assert.equal(sentinelOccurrences(messages), 1, "exactly one note");
+    });
+  }
 });
