@@ -1,1 +1,0 @@
-- **fix(db):** on an install that never saved a log age, the Data Retention page and the scheduled cleanup now use the same call-log age as request-log rotation (`CALL_LOG_RETENTION_DAYS`, else 7 days) instead of the 90 days that migration 046 seeded, so the page no longer shows 90 days while rotation removes rows after 7. A value saved in the dashboard still wins everywhere.

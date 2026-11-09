@@ -1,1 +1,0 @@
-- **fix(db):** Backup pruning no longer stops for good after a killed upgrade. The scheduled cleanup removes a leftover migration snapshot temp directory once nothing has written to it for an hour, then prunes as usual. A directory with a recent write, foreign files or another owner is left alone and still pauses pruning.
