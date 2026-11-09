@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "@/i18n/messages/en.json";
+import * as entitySearch from "@/shared/utils/entitySearch";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { COMBO_BUILDER_AUTO_CONNECTION } from "@/lib/combos/builderDraft";
 
@@ -181,6 +182,26 @@ describe("Combo form searchable selectors", () => {
     expect(within(dialog).getByTestId("combo-builder-account").getAttribute("data-value")).toBe(
       COMBO_BUILDER_AUTO_CONNECTION
     );
+  });
+
+  it("reuses the model search index when unrelated combo fields change", async () => {
+    const index = vi.spyOn(entitySearch, "indexEntityOptions");
+    try {
+      const { dialog } = await openCreate();
+      await selectModel(dialog);
+      const query = await searchPicker(dialog, "model", "mini");
+      index.mockClear();
+      fireEvent.change(within(dialog).getByTestId("combo-name-input"), {
+        target: { value: "renamed-combo" },
+      });
+      expect(index).not.toHaveBeenCalled();
+      expect((query as HTMLInputElement).value).toBe("mini");
+      fireEvent.change(query, { target: { value: "Mini Display" } });
+      expect(index).not.toHaveBeenCalled();
+      expect(screen.getByRole("option", { name: /Mini Display/ })).toBeTruthy();
+    } finally {
+      index.mockRestore();
+    }
   });
 
   it("reselects current provider and model without resetting pins or restrictions", async () => {

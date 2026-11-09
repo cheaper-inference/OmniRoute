@@ -392,15 +392,41 @@ describe("SearchableSelectField real kit composition", () => {
 });
 
 describe("SearchableSelectField large lists", () => {
-  it("builds the options index before typing and reuses it between keystrokes", () => {
+  it("indexes only when searching and reuses it across queries and reopen", () => {
     const index = vi.spyOn(entitySearch, "indexEntityOptions");
     try {
       const s = setup();
-      expect(index).toHaveBeenCalledTimes(1);
+      expect(index).not.toHaveBeenCalled();
       fireEvent.change(s.search, { target: { value: "ren" } });
       expect(index).toHaveBeenCalledTimes(1);
       fireEvent.change(s.search, { target: { value: "renee" } });
       expect(index).toHaveBeenCalledTimes(1);
+      fireEvent.keyDown(s.search, { key: "Escape" });
+      fireEvent.click(s.trigger);
+      fireEvent.change(s.getByRole("combobox"), { target: { value: "istanbul" } });
+      expect(index).toHaveBeenCalledTimes(1);
+      expect(s.getByRole("option", { name: "Renée" })).toBeTruthy();
+    } finally {
+      index.mockRestore();
+    }
+  });
+
+  it("does not index replacement catalogs while closed and searches the latest catalog", () => {
+    const index = vi.spyOn(entitySearch, "indexEntityOptions");
+    try {
+      const props = { label: "Model", value: "", onValueChange: vi.fn() };
+      const s = render(<SearchableSelectField {...props} options={large} />);
+      const replacement = [{ value: "updated", label: "Updated catalog" }];
+      s.rerender(<SearchableSelectField {...props} options={replacement} />);
+      expect(index).not.toHaveBeenCalled();
+      fireEvent.click(s.getByRole("button", { name: "Model" }));
+      expect(index).not.toHaveBeenCalled();
+      fireEvent.change(s.getByRole("combobox"), { target: { value: "updated" } });
+      expect(index).toHaveBeenCalledExactlyOnceWith(replacement);
+      expect(s.getByRole("option", { name: "Updated catalog" })).toBeTruthy();
+      s.rerender(<SearchableSelectField {...props} options={options} />);
+      expect(index).toHaveBeenCalledTimes(2);
+      expect(s.queryByRole("option", { name: "Updated catalog" })).toBeNull();
     } finally {
       index.mockRestore();
     }

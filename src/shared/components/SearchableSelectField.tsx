@@ -156,10 +156,15 @@ function useSearchableField(props: SearchableSelectFieldProps) {
   const state = usePickerState(props);
   const labels = useFieldLabels(props);
   const searching = state.query.trim() !== "";
-  const index = useMemo(() => indexEntityOptions(props.options), [props.options]);
+  // Normalize only on the first search for this options snapshot, then reuse it
+  // across keystrokes and reopen. New options discard any privacy-sensitive index.
+  const getIndex = useMemo(() => {
+    let index: ReturnType<typeof indexEntityOptions> | undefined;
+    return () => (index ??= indexEntityOptions(props.options));
+  }, [props.options]);
   const matches = useMemo(
-    () => (searching ? filterEntityOptions(index, state.query) : props.options),
-    [index, state.query, searching, props.options]
+    () => (state.open && searching ? filterEntityOptions(getIndex(), state.query) : props.options),
+    [getIndex, state.open, state.query, searching, props.options]
   );
   const active = props.loading
     ? undefined

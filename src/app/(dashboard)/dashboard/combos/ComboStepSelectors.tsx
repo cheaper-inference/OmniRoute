@@ -31,24 +31,28 @@ function useSelectorOptions(props: Props) {
   const models = provider?.models;
   const connections = provider?.connections;
   const providerOptions = useMemo(
-    () =>
-      props.providers.map((item) => ({
+    () => [
+      { value: "", label: t("builderSelectProvider"), alwaysVisible: true },
+      ...props.providers.map((item) => ({
         value: item.providerId,
         label: item.displayName,
         description: t("builderGlobalAccountCount", { count: item.connectionCount }),
         keywords: [item.alias, item.prefix ?? ""],
       })),
+    ],
     [props.providers, t]
   );
   const modelOptions = useMemo(
-    () =>
-      (models ?? []).map((item) => ({
+    () => [
+      { value: "", label: t("builderSelectModel"), alwaysVisible: true },
+      ...(models ?? []).map((item) => ({
         value: item.id,
         label: item.name,
         description: [item.qualifiedModel || item.id, item.source].filter(Boolean).join(" · "),
         keywords: item.sources ?? [],
       })),
-    [models]
+    ],
+    [models, t]
   );
   const accountOptions = useMemo(
     () =>
@@ -60,7 +64,15 @@ function useSelectorOptions(props: Props) {
     [connections, props.emailsVisible]
   );
 
-  return { provider, models, providerOptions, modelOptions, accountOptions };
+  const accountSelectOptions = useMemo(
+    () => [
+      { value: COMBO_BUILDER_AUTO_CONNECTION, label: t("autoSelectAccount"), alwaysVisible: true },
+      ...accountOptions,
+    ],
+    [accountOptions, t]
+  );
+
+  return { provider, models, providerOptions, modelOptions, accountOptions, accountSelectOptions };
 }
 
 /** Projection deliberately excludes raw account objects and credential fields. */
@@ -68,7 +80,7 @@ export default function ComboStepSelectors(props: Props) {
   const t = useTranslations("combos");
   const tc = useTranslations("common");
   const tp = useTranslations("providers");
-  const { provider, models, providerOptions, modelOptions, accountOptions } =
+  const { provider, models, providerOptions, modelOptions, accountOptions, accountSelectOptions } =
     useSelectorOptions(props);
 
   return (
@@ -81,10 +93,7 @@ export default function ComboStepSelectors(props: Props) {
           loading={props.loading}
           error={props.error}
           placeholder={t("builderSelectProvider")}
-          options={[
-            { value: "", label: t("builderSelectProvider"), alwaysVisible: true },
-            ...providerOptions,
-          ]}
+          options={providerOptions}
           data-testid="combo-builder-provider"
         />
         <SearchableSelectField
@@ -94,10 +103,7 @@ export default function ComboStepSelectors(props: Props) {
           disabled={!provider}
           resetKey={props.providerId}
           placeholder={provider ? t("builderSelectModel") : t("builderProviderFirst")}
-          options={[
-            { value: "", label: t("builderSelectModel"), alwaysVisible: true },
-            ...modelOptions,
-          ]}
+          options={modelOptions}
           data-testid="combo-builder-model"
         />
         <SearchableSelectField
@@ -106,14 +112,7 @@ export default function ComboStepSelectors(props: Props) {
           onValueChange={props.onConnectionChange}
           disabled={!models?.some((item) => item.id === props.modelId)}
           resetKey={`${props.providerId}:${props.modelId}:${props.emailsVisible}`}
-          options={[
-            {
-              value: COMBO_BUILDER_AUTO_CONNECTION,
-              label: t("autoSelectAccount"),
-              alwaysVisible: true,
-            },
-            ...accountOptions,
-          ]}
+          options={accountSelectOptions}
           data-testid="combo-builder-account"
         />
       </div>
