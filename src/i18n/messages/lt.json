@@ -7908,6 +7908,7 @@
     "systemActor": "sistema",
     "ipAccessControl": "IP prieigos valdymas",
     "ipAccessControlDesc": "Blokuokite arba leiskite konkrečius IP adresus",
+    "ipAccessMode": "Prieigos režimas",
     "ipModeDisabled": "Išjungta",
     "ipModeBlacklist": "Juodasis sąrašas",
     "ipModeWhitelist": "Baltasis sąrašas",

@@ -21,6 +21,8 @@ import {
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 
+import ProviderOnboardingHeader from "./ProviderOnboardingHeader";
+
 import {
   buildProviderSpecificData,
   filterWizardProviderOptions,
@@ -572,28 +574,16 @@ export default function ProviderOnboardingWizard() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <Link
-            href="/dashboard/providers"
-            className="text-sm text-text-muted hover:text-text-main"
-          >
-            ← {text("backToProviders", "Back to providers")}
-          </Link>
-          <h1 className="mt-2 text-3xl font-bold text-text-main">
-            {text("onboardingWizard", "Provider Onboarding Wizard")}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-text-muted">
-            {text(
-              "onboardingWizardDescription",
-              "Connect API-key, custom compatible, and OAuth providers with validation, persistence, and an immediate connection test."
-            )}
-          </p>
-        </div>
-        <Button variant="ghost" onClick={() => router.push("/dashboard/providers")}>
-          {text("close", "Close")}
-        </Button>
-      </div>
+      <ProviderOnboardingHeader
+        title={text("onboardingWizard", "Provider Onboarding Wizard")}
+        description={text(
+          "onboardingWizardDescription",
+          "Connect API-key, custom compatible, and OAuth providers with validation, persistence, and an immediate connection test."
+        )}
+        backLabel={text("backToProviders", "Back to providers")}
+        closeLabel={text("close", "Close")}
+        onClose={() => router.push("/dashboard/providers")}
+      />
 
       <div className="flex flex-wrap gap-2">
         <StepPill

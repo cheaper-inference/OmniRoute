@@ -7908,6 +7908,7 @@
     "systemActor": "sistem",
     "ipAccessControl": "Kontrol Akses IP",
     "ipAccessControlDesc": "Blokir atau izinkan alamat IP tertentu",
+    "ipAccessMode": "Mode akses",
     "ipModeDisabled": "Dengan disabilitas",
     "ipModeBlacklist": "Daftar Hitam",
     "ipModeWhitelist": "Daftar putih",

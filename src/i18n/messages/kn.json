@@ -7908,6 +7908,7 @@
     "systemActor": "ಸಿಸ್ಟಮ್",
     "ipAccessControl": "IP ಪ್ರವೇಶ ನಿಯಂತ್ರಣ",
     "ipAccessControlDesc": "ನಿರ್ದಿಷ್ಟ IP ವಿಳಾಸಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ ಅಥವಾ ಅನುಮತಿಸಿ",
+    "ipAccessMode": "ಪ್ರವೇಶ ಮೋಡ್",
     "ipModeDisabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
     "ipModeBlacklist": "ಕಪ್ಪುಪಟ್ಟಿ",
     "ipModeWhitelist": "ಬಿಳಿಪಟ್ಟಿ",

@@ -7908,6 +7908,7 @@
     "systemActor": "システム",
     "ipAccessControl": "IPアクセス制御",
     "ipAccessControlDesc": "特定の IP アドレスをブロックまたは許可する",
+    "ipAccessMode": "アクセスモード",
     "ipModeDisabled": "無効",
     "ipModeBlacklist": "ブラックリスト",
     "ipModeWhitelist": "ホワイトリスト",

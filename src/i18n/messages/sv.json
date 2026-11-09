@@ -7908,6 +7908,7 @@
     "systemActor": "systemet",
     "ipAccessControl": "IP-åtkomstkontroll",
     "ipAccessControlDesc": "Blockera eller tillåt specifika IP-adresser",
+    "ipAccessMode": "Åtkomstläge",
     "ipModeDisabled": "Inaktiverad",
     "ipModeBlacklist": "Svartlista",
     "ipModeWhitelist": "Vitlista",
