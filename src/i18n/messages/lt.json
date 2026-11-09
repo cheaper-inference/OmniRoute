@@ -4186,7 +4186,7 @@
     "spend7d": "Išlaidos per 7 d.",
     "avgCostPerRequest": "Vid. išlaidos / užklausa",
     "noCostDataDescription": "Pradėkite siųsti užklausas, kad čia būtų rodomi išlaidų duomenys. Visų teikėjų išlaidos stebimos automatiškai.",
-    "spendToday": "Šiandienos išlaidos",
+    "spendToday": "Išlaidos per 1 d.",
     "overviewLoadFailed": "Nepavyko įkelti išlaidų apžvalgos",
     "overviewDescription": "Visų prijungtų teikėjų ir modelių išlaidų suskirstymas realiuoju laiku",
     "providerShare": "Teikėjo dalis",

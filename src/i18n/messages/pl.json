@@ -4186,7 +4186,7 @@
     "spend7d": "Wydatki 7D",
     "avgCostPerRequest": "Śr. koszt / zapytanie",
     "noCostDataDescription": "Wyślij zapytania, aby zobaczyć dane o kosztach. Koszty są automatycznie śledzone dla wszystkich providers.",
-    "spendToday": "Dzisiejsze wydatki",
+    "spendToday": "Wydatki za 1 dzień",
     "overviewLoadFailed": "Nie udało się załadować przeglądu kosztów",
     "overviewDescription": "Podział wydatków w czasie rzeczywistym dla wszystkich połączonych providers i models",
     "providerShare": "Udział providers",

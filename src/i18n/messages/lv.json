@@ -4186,7 +4186,7 @@
     "spend7d": "Izdevumi 7D",
     "avgCostPerRequest": "Vidējās izmaksas uz pieprasījumu",
     "noCostDataDescription": "Sāciet veikt pieprasījumus, lai šeit parādītos izmaksu dati. Izmaksas tiek automātiski uzskaitītas visiem nodrošinātājiem.",
-    "spendToday": "Izdevumi šodien",
+    "spendToday": "Izdevumi 1 dienā",
     "overviewLoadFailed": "Neizdevās ielādēt izmaksu pārskatu",
     "overviewDescription": "Reāllaika izdevumu sadalījums visiem pieslēgtajiem nodrošinātājiem un modeļiem",
     "providerShare": "Nodrošinātāju īpatsvars",

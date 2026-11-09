@@ -4186,7 +4186,7 @@
     "spend7d": "Chi tiêu 7 ngày",
     "avgCostPerRequest": "Chi phí trung bình / yêu cầu",
     "noCostDataDescription": "Bắt đầu thực hiện các yêu cầu để xem dữ liệu chi phí xuất hiện tại đây. Chi phí được theo dõi tự động cho tất cả các nhà cung cấp.",
-    "spendToday": "Chi tiêu hôm nay",
+    "spendToday": "Chi tiêu trong 1 ngày",
     "overviewLoadFailed": "Không thể tải tổng quan chi phí",
     "overviewDescription": "Phân tích chi tiêu theo thời gian thực trên tất cả các nhà cung cấp và mô hình đã kết nối",
     "providerShare": "Tỷ trọng theo nhà cung cấp",

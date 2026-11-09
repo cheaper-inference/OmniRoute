@@ -4186,7 +4186,7 @@
     "spend7d": "Spend7D",
     "avgCostPerRequest": "Avg Cost Per Request",
     "noCostDataDescription": "요청을 시작하면 여기에 비용 데이터가 표시됩니다. 모든 공급자의 비용이 자동으로 추적됩니다.",
-    "spendToday": "오늘의 지출",
+    "spendToday": "1일 지출",
     "overviewLoadFailed": "비용 개요를 로드하지 못했습니다",
     "overviewDescription": "연결된 모든 공급자 및 모델에 대한 실시간 지출 분석",
     "providerShare": "제공업체 점유율",

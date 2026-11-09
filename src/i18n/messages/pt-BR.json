@@ -4186,7 +4186,7 @@
     "spend7d": "Gasto 7D",
     "avgCostPerRequest": "Custo Médio / Requisição",
     "noCostDataDescription": "Passe tráfego pelo OmniRoute ou sincronize preços para preencher este dashboard.",
-    "spendToday": "Gasto Hoje",
+    "spendToday": "Gasto em 1 dia",
     "overviewLoadFailed": "Falha ao carregar a visão geral de custos",
     "overviewDescription": "Gasto global em todas as API keys, provedores e modelos usando analytics de uso em tempo real.",
     "providerShare": "Gasto por Provedor",

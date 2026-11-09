@@ -4186,7 +4186,7 @@
     "spend7d": "Viimase 7 päeva kulud",
     "avgCostPerRequest": "Keskmine kulu päringu kohta",
     "noCostDataDescription": "Kulude andmete siin kuvamiseks alustage päringute tegemist. Kõigi teenusepakkujate kulusid jälgitakse automaatselt.",
-    "spendToday": "Tänased kulud",
+    "spendToday": "Kulu 1 päev",
     "overviewLoadFailed": "Kulude ülevaate laadimine ebaõnnestus",
     "overviewDescription": "Kõigi ühendatud teenusepakkujate ja mudelite kulude reaalajas jaotus",
     "providerShare": "Teenusepakkujate osakaal",

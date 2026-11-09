@@ -4186,7 +4186,7 @@
     "spend7d": "7 天支出",
     "avgCostPerRequest": "平均每次請求成本",
     "noCostDataDescription": "發起請求後，成本資料會顯示在這裡。",
-    "spendToday": "今日支出",
+    "spendToday": "1 天支出",
     "overviewLoadFailed": "載入成本概覽失敗",
     "overviewDescription": "按提供者、模型和時間段彙總成本。",
     "providerShare": "提供者佔比",

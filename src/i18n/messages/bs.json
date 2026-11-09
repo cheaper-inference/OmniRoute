@@ -4263,7 +4263,7 @@
     "spend7d": "Potrošnja 7D",
     "avgCostPerRequest": "Prosječni trošak / zahtjev",
     "noCostDataDescription": "Počnite slati zahtjeve kako biste vidjeli podatke o troškovima ovdje. Troškovi se automatski prate za sve providere.",
-    "spendToday": "Današnja potrošnja",
+    "spendToday": "Potrošnja za 1 dan",
     "overviewLoadFailed": "Neuspjelo učitavanje pregleda troškova",
     "overviewDescription": "Analiza potrošnje u stvarnom vremenu kroz sve povezane providere i modele",
     "providerShare": "Udio providera",
