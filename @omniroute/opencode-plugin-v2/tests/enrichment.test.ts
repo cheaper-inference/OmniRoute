@@ -72,7 +72,7 @@ describe("catalog enrichment source", () => {
     assert.deepEqual(res, { models: 1, combos: 0 });
     const m = models.get("omniroute/cc/m1");
     assert.ok(m);
-    assert.equal(m?.name, "Model One");
+    assert.equal(m?.name, "cc - Model One");
     assert.equal(m?.cost[0].input, 3);
     assert.equal(m?.cost[0].output, 15);
   });
