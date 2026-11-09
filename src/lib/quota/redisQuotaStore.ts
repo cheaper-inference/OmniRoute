@@ -30,8 +30,6 @@ import { buildPoolUsageSnapshot } from "./poolUsageSnapshot";
 let _redisClient: unknown = null; // typed as unknown; cast via RedisLike below
 
 interface RedisLike {
-  incrbyfloat(key: string, value: number): Promise<string>;
-  expire(key: string, seconds: number): Promise<number>;
   mget(...keys: string[]): Promise<Array<string | null>>;
   eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown>;
   del(...keys: string[]): Promise<number>;
@@ -75,6 +73,15 @@ function bucketKey(apiKeyId: string, dimensionKey: string, bucketIndex: number):
   return `${KEY_PREFIX}:${apiKeyId}:${dimensionKey}:${bucketIndex}`;
 }
 
+// Charge + TTL in one atomic call: a crash between INCRBYFLOAT and EXPIRE can no
+// longer leave a counter without expiry. Returns [current, previous] bucket values.
+const CONSUME_SCRIPT = `
+local curr = redis.call("INCRBYFLOAT", KEYS[1], ARGV[1])
+redis.call("EXPIRE", KEYS[1], ARGV[2])
+redis.call("EXPIRE", KEYS[2], ARGV[2])
+return { curr, redis.call("GET", KEYS[2]) or "0" }
+`;
+
 function ttlSeconds(windowMs: number): number {
   // Keep both current + previous bucket alive → 2 × window
   return Math.ceil((2 * windowMs) / 1000);
@@ -113,7 +120,7 @@ export class RedisQuotaStore implements QuotaStore {
   }
 
   /**
-   * Increment consumption by `cost` using INCRBYFLOAT (atomic) and refresh TTL.
+   * Increment consumption by `cost` and refresh TTL in one atomic Lua call.
    * Returns the new sliding-window effective value.
    */
   async consume(apiKeyId: string, dim: DimensionKey, cost: number): Promise<number> {
@@ -127,16 +134,15 @@ export class RedisQuotaStore implements QuotaStore {
     const prevKey = bucketKey(apiKeyId, dimKey, currentBucket - 1);
     const ttl = ttlSeconds(windowMs);
 
-    // Atomic increment + refresh TTL
-    const newCurrStr = await client.incrbyfloat(currKey, cost);
-    await client.expire(currKey, ttl);
-    // Also ensure prev key TTL is refreshed so it doesn't disappear prematurely
-    await client.expire(prevKey, ttl);
-
+    const [newCurrStr, prevStr] = (await client.eval(
+      CONSUME_SCRIPT,
+      2,
+      currKey,
+      prevKey,
+      cost,
+      ttl
+    )) as [string, string];
     const newCurr = parseFloat(newCurrStr) || 0;
-
-    // Read prev to compute sliding window
-    const [prevStr] = await client.mget(prevKey);
     const prev = parseFloat(prevStr ?? "0") || 0;
 
     return slidingWindowEffective(newCurr, prev, nowMs, windowMs);
