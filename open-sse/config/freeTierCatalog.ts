@@ -7,8 +7,7 @@
  *
  * Deliberately EXCLUDED (rate-limit-only, no published token cap — theoretical,
  * not granted): tencent, siliconflow, nvidia, baidu, publicai, sparkdesk,
- * gemini (no per-model limits published since 2025-12), ollama-cloud (starter
- * credits, no figure).
+ * gemini (no per-model limits published since 2025-12).
  * One-time signup credits and discontinued tiers are excluded (do not recur).
  */
 export type TosVerdict = "ok" | "caution" | "ambiguous" | "avoid" | "unknown";
