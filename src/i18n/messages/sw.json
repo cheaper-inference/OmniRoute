@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mapendeleo ya akaunti",
+    "description": "Pendelea akaunti nyingi au uziweke kama akiba kwa usanidi huu. Uelekezaji otomatiki hupanga akaunti ndani ya kila ngazi. Akaunti ambazo hazijaorodheshwa ni za kawaida. Ruhusa, vikomo vya mgao na uhusishaji wa zamu uliopo bado vinatumika.",
+    "preferred": "Inayopendelewa",
+    "normal": "Ya kawaida",
+    "reserve": "Akiba",
+    "excluded": "Zilizotengwa",
+    "loading": "Inapakia akaunti…",
+    "error": "Imeshindwa kupakia akaunti. Fungua tena kihariri ili ujaribu tena.",
+    "missing": "Akaunti isiyopatikana ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Hali ya huduma ya Codex kwa ufunguo huu wa API",
     "description": "Inatumika kwa maombi ya Codex, ikijumuisha miundo ya Codex iliyo ndani ya michanganyiko. Hali zilizolazimishwa hubatilisha mipangilio ya mteja, mipangilio ya jumla na chaguo-msingi za muunganisho. Watoa huduma wengine hawabadiliki.",
