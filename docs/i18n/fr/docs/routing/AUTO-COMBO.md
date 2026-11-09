@@ -127,6 +127,27 @@ La notation automatique sélectionne le meilleur fournisseur/modèle pour chaque
 | `src/sse/handlers/chat.ts`                                | Intégration : court-circuit du préfixe automatique                  |
 | `src/shared/constants/providers.ts`                       | Entrée système `SYSTEM_PROVIDERS.auto`                              |
 
+## Préférences de compte pour les combos automatiques enregistrés
+
+L'éditeur Intelligent Auto propose en option un** Préférences de compte** section. Chaque connexion peut être Préférée, Normale (par défaut), Réserve ou Exclue. Plusieurs connexions peuvent partager un niveau. Sélection automatique au sein du premier niveau éligible, en y conservant son comportement scoring/router ; les tentatives infructueuses se répercutent sur les comptes concrets restants, préférés avant la normale avant la réserve. Les connexions exclues ne sont jamais utilisées par ce combo.
+
+Le paramètre est stocké sous `config.accountPreferences`, saisi par la connexion ID:
+
+```json
+{
+  "accountPreferences": {
+    "connection-a": "preferred",
+    "connection-b": "preferred",
+    "connection-c": "reserve",
+    "connection-d": "excluded"
+  }
+}
+```
+
+Une carte omise ou vide conserve le routage existant. Les préférences n'activent pas les connexions désactivées, n'accordent pas l'accès aux clés API, ne restaurent pas les candidats bloqués par quota ou ne contournent pas les contrôles budgétaires. Chaque tentative est limitée à sa connexion concrète, de sorte que le compte de secours ne peut pas sauter de niveau derrière le routeur combiné. L'affinité de session existante peut conserver un compte éligible ; l'exclusion du compte lié à un tour natif arrête ce tour au lieu de changer de compte silencieusement.
+
+Les préférences configurées utilisent le chemin automatique prenant en compte le compte : les raccourcis de cache contextuel non lié, de pipeline intelligent, de chaos et d'ombre ne sont pas distribués. La couverture spéculative est désactivée pour ces demandes, de sorte que les comptes de réserve ne peuvent pas rivaliser avec les comptes préférés. Les autres stratégies de combo n'interprètent pas ce paramètre. Changer un combo en dehors de Auto conserve les préférences enregistrées pour un retour ultérieur.
+
 ## Noms de combos correspondant à un identifiant de modèle réel
 
 Un combo dont le `name` est identique à un identifiant de modèle sans préfixe (par exemple, un combo nommé

@@ -194,7 +194,7 @@ src/
 | `memory/reindex.ts`                      | `runReindexBatch()` — procesează amintirile cu `needs_reindex=1` în fundal; numit de `POST /api/memory/reindex` și calea lazy-backfill. (planul 21)                                                                                                                                                                                |
 | `monitoring/`                            | Controale de sănătate, emisii de metrici                                                                                                                                                                                                                                                                                           |
 | `oauth/`                                 | OAuth/import curge pentru 22 de module de furnizor (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qo-host zed)                                                                                 |
-| `plugins/`                               | Registrul pluginurilor                                                                                                                                                                                                                                                                                                             |
+| `plugins/`                               | Registrul pluginului                                                                                                                                                                                                                                                                                                               |
 | `promptCache/`                           | Puncte de întrerupere prompte în cache în stil antropic                                                                                                                                                                                                                                                                            |
 | `skills/`                                | Cadrul de competențe (piața + încorporată + SkillsSH) — vezi `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                           |
 | `playground/`                            | Asistenti partajați Playground Studio: `codeExport.ts` (generator curl/Python/TS ), `promptImprover.ts` (generator meta-prompt), `streamMetrics.ts` ( TTFT/TPS pur), `types.ts` (tabel de prețuri) — vezi `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componenta tabloului de bord API: adaptoare peste `packages/ui-kit` — vezi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nume de pictograme utilizate de ecranele componente → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **380 de furnizori** cu validare Zod (sursa adevărului)                                                         |
+| `constants/providers.ts`         | **381 de furnizori** cu validare Zod (sursa adevărului)                                                         |
 | `constants/cliTools.ts`          | Registrul extern al instrumentului CLI                                                                          |
 | `constants/routingStrategies.ts` | **20 de strategii de rutare** cu prioritati                                                                     |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (vs management)                                                         |
@@ -402,7 +402,7 @@ open-sse/
 | `FEATURES.md`               | Matrice de caracteristici cu evidențieri v3.8                                             |
 | `USER_GUIDE.md`             | Manual pentru utilizatorul final (configurare, modele, combo, CLIs, audio etc.)           |
 | `API_REFERENCE.md`          | referință la punctul final API cu model de autentificare                                  |
-| `openapi.yaml`              | specificații OpenAPI 3.0 (121 de căi)                                                     |
+| `openapi.yaml`              | Specificații OpenAPI 3.0 (121 de căi)                                                     |
 | `SETUP_GUIDE.md`            | Metode de instalare (npm, npx, Docker, Electron, Termux, sursă)                           |
 | `ENVIRONMENT.md`            | Toate variantele de mediu (~ 800 documentate, ~ 3.050 linii `.env.example`)               |
 | `TROUBLESHOOTING.md`        | Erori comune + v3.8.0 probleme cunoscute                                                  |
@@ -412,13 +412,13 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrari externe CLI + Intern OmniRoute CLI                                              |
 | `I18N.md`                   | Arhitectură i18n, adăugarea unei limbi, 67 de locații                                     |
 | `UNINSTALL.md`              | Curățați pașii de dezinstalare                                                            |
-| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog de 380 de furnizori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 381 de furnizori (regen: `npm run gen:provider-reference`) |
 
 ### Subsistem scufundări adânci
 
 | Doc                                         | Scop                                                                                       |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                             | Server MCP : 110 instrumente, 3 transporturi, 33 domenii, puncte finale REST               |
+| `MCP-SERVER.md`                             | Server MCP : 110 instrumente, 3 transporturi, 33 de domenii, puncte finale REST            |
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 abilități, ajutoare REST, card de agent                              |
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Ghid unificat: A2A vs ACP vs Cloud Agents                                                  |
 | `CLOUD_AGENT.md`                            | Orchestrație Codex Cloud / Devin / Jules                                                   |
@@ -432,7 +432,7 @@ open-sse/
 | `REASONING_REPLAY.md`                       | Cache hibrid memory/SQLite pentru `reasoning_content`                                      |
 | `AUTHZ_GUIDE.md`                            | Conductă de autorizare (`classify` → `policies` → `enforce`)                               |
 | `RESILIENCE_GUIDE.md`                       | Întrerupător + cooldown + model lockout                                                    |
-| `docs/security/STEALTH_GUIDE.md` (doar git) | TLS fingerprinting (JA3/JA4), cod Claude CCH, MITM cert                                    |
+| `docs/security/STEALTH_GUIDE.md` (doar git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                                   |
 | `AUTO-COMBO.md`                             | Motor Combo automat (punctare în 16 factori, pachete cu 6 moduri, fabrică virtuală)        |
 
 ### Comprimare
