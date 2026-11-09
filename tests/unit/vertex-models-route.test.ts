@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { isUrlHost } from "../../open-sse/utils/urlHost.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-vertex-model-routes-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -198,7 +199,7 @@ test("Vertex Service Account discovery merges Gemini and all partner transport c
   globalThis.fetch = async (url) => {
     const calledUrl = String(url);
     calledUrls.push(calledUrl);
-    if (calledUrl.includes("generativelanguage.googleapis.com")) {
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
       return Response.json({
         models: [
           {
@@ -291,7 +292,7 @@ test("Vertex Service Account keeps usable xAI results when Gemini listing is blo
   const connection = await seedVertexConnection({ accessToken: "ya29.vertex-xai-only" });
   globalThis.fetch = async (url) => {
     const calledUrl = String(url);
-    if (calledUrl.includes("generativelanguage.googleapis.com")) {
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
       return Response.json({ error: { status: "PERMISSION_DENIED" } }, { status: 403 });
     }
     if (calledUrl.includes("/publishers/xai/models")) {
@@ -322,7 +323,7 @@ test("Vertex Service Account discovery lists publishers on the EU regional host 
   const publisherUrls: string[] = [];
   globalThis.fetch = async (url) => {
     const calledUrl = String(url);
-    if (calledUrl.includes("generativelanguage.googleapis.com")) {
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
       return Response.json({ error: { status: "PERMISSION_DENIED" } }, { status: 403 });
     }
     if (!calledUrl.includes("/v1beta1/publishers/")) return Response.json({});
