@@ -448,26 +448,29 @@ function inlineImageDataUrlMarker(value: string): string | null {
 export function redactInlineImageDataUrls(value: unknown): unknown {
   if (typeof value === "string") return inlineImageDataUrlMarker(value) ?? value;
   if (!value || typeof value !== "object" || isOpaqueBinary(value)) return value;
+  if (Array.isArray(value)) return redactInlineImagesInArray(value);
+  return redactInlineImagesInRecord(value as JsonRecord);
+}
 
-  if (Array.isArray(value)) {
-    let copy: unknown[] | null = null;
-    value.forEach((item, index) => {
-      const next = redactInlineImageDataUrls(item);
-      if (next === item) return;
-      copy ??= value.slice();
-      copy[index] = next;
-    });
-    return copy ?? value;
-  }
+function redactInlineImagesInArray(value: unknown[]): unknown[] {
+  let copy: unknown[] | null = null;
+  value.forEach((item, index) => {
+    const next = redactInlineImageDataUrls(item);
+    if (next === item) return;
+    copy ??= value.slice();
+    copy[index] = next;
+  });
+  return copy ?? value;
+}
 
-  const record = value as JsonRecord;
+function redactInlineImagesInRecord(record: JsonRecord): JsonRecord {
   const mime = record.media_type ?? record.mimeType ?? record.mime_type;
-  const isImageBlob = typeof mime === "string" && mime.startsWith("image/");
+  const imageMime = typeof mime === "string" && mime.startsWith("image/") ? mime : null;
   let copy: JsonRecord | null = null;
   for (const [key, item] of Object.entries(record)) {
     const next =
-      isImageBlob && key === "data" && typeof item === "string" && item.length > 0
-        ? inlineImageMarker(mime, item)
+      imageMime && key === "data" && typeof item === "string" && item.length > 0
+        ? inlineImageMarker(imageMime, item)
         : redactInlineImageDataUrls(item);
     if (next === item) continue;
     copy ??= { ...record };
