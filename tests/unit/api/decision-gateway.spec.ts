@@ -20,11 +20,8 @@ import {
   type DecisionFormat,
   type DecisionCredentials,
 } from "../../../open-sse/handlers/decisionTypes";
-import {
-  readDecisionJson,
-  fetchDecision,
-  DECISION_MAX_BYTES,
-} from "../../../open-sse/handlers/decisionTransport";
+import { readDecisionJson, DECISION_MAX_BYTES } from "../../../open-sse/handlers/decisionTransport";
+import { fetchDecision } from "@/lib/providers/decisionFetch";
 import { validateDecisionRequest } from "../../../open-sse/handlers/decisionValidation";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { applyOllamaShowCapabilities } from "@/lib/providerModels/ollamaCapabilities";

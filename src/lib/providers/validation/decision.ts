@@ -1,6 +1,6 @@
 import { resolveDecisionBackend } from "@omniroute/open-sse/config/decisionRegistry.ts";
 import { discoverDecisionModels } from "@omniroute/open-sse/handlers/decisionDiscovery.ts";
-import { fetchDecision } from "@omniroute/open-sse/handlers/decisionTransport.ts";
+import { fetchDecision } from "@/lib/providers/decisionFetch";
 
 /** Zero-inference check; never send a chat probe to a decision server. */
 export async function validateDecisionProvider(input: {

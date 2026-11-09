@@ -45,10 +45,7 @@ vi.mock("@/app/api/v1/_shared/specialtyCatalog", () => ({
 vi.mock("@omniroute/open-sse/handlers/systemOne.ts", () => ({
   handleSystemOneProxy: vi.fn(async () => Response.json({ legacy: true })),
 }));
-vi.mock("@omniroute/open-sse/handlers/decisionTransport.ts", async (original) => ({
-  ...(await original<Record<string, unknown>>()),
-  fetchDecision: deps.fetch,
-}));
+vi.mock("@/lib/providers/decisionFetch", () => ({ fetchDecision: deps.fetch }));
 vi.mock("@/shared/network/safeOutboundFetch", () => ({ safeOutboundFetch: vi.fn() }));
 vi.mock("@/shared/network/outboundUrlGuardPolicy", () => ({
   getProviderOutboundGuard: () => "public-only",

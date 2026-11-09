@@ -3,7 +3,7 @@ import {
   type DecisionAttempt,
   type DecisionGatewayRuntime,
 } from "@omniroute/open-sse/handlers/decisionGateway.ts";
-import { fetchDecision } from "@omniroute/open-sse/handlers/decisionTransport.ts";
+import { fetchDecision } from "@/lib/providers/decisionFetch";
 import {
   DecisionError,
   type DecisionCredentials,

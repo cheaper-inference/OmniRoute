@@ -15,7 +15,7 @@ import { authorizeDecision } from "../../_shared/decisionRuntime";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { resolveDecisionBackend } from "@omniroute/open-sse/config/decisionRegistry.ts";
 import { discoverDecisionModels } from "@omniroute/open-sse/handlers/decisionDiscovery.ts";
-import { fetchDecision } from "@omniroute/open-sse/handlers/decisionTransport.ts";
+import { fetchDecision } from "@/lib/providers/decisionFetch";
 import {
   record,
   type DecisionCredentials,
