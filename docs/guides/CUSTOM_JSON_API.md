@@ -123,7 +123,7 @@ status (never the upstream body).
 ## Storage
 
 The config is stored in `provider_nodes.custom_json_config_json` (migration
-`233_provider_node_custom_json_config.sql`) and copied into each connection's
+`234_provider_node_custom_json_config.sql`) and copied into each connection's
 `providerSpecificData.customJson`.
 
 Implementation: `open-sse/utils/customJson.ts` (validation and templating),
