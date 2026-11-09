@@ -151,17 +151,35 @@ Settings → Security बाट enroll गरिन्छ; operator ले य�
   4. `OMNIROUTE_DISABLE_MFA` अनसेट गर्नुहोस्, पुनः सुरु गर्नुहोस्, र आवश्यक भएमा
      फेरि नामाङ्कन गर्नुहोस्।
 
-## Route वर्गहरू
+## रुट वर्गहरू
 
-`src/server/authz/types.ts` ले तीन वर्ग परिभाषित गर्छ; निर्धारणात्मक रूपमा वर्गीकरण गर्न नसकिने कुनै पनि route `MANAGEMENT` मा फर्कन्छ।
+`src/server/authz/types.ts` ले तीनवटा वर्ग परिभाषित गर्छ; निश्चित रूपमा वर्गीकरण गर्न नसकिने कुनै पनि रुट अन्ततः `MANAGEMENT` मा पर्छ।
 
-| वर्ग         | विवरण                                                                                                                                              | आवश्यक प्रमाणीकरण                                                |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `PUBLIC`     | स्पष्ट रूपमा सुरक्षित routes — लगइन, लगआउट, status, init, health, onboarding bootstrap।                                                            | कुनै होइन                                                        |
-| `CLIENT_API` | मोडेल-सेवा endpoints — `/api/v1/*`, `/api/v1beta/*`, साथै उपनामहरू `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | प्रभावकारी `REQUIRE_API_KEY` feature flag सक्षम हुँदा Bearer key |
-| `MANAGEMENT` | ड्यासबोर्ड पृष्ठहरू, settings, providers, keys, admin र diagnostics endpoints।                                                                     | ड्यासबोर्ड सत्र वा `manage` scope भएको Bearer                    |
+| वर्ग         | विवरण                                                                                                                                                       | प्रमाणीकरण आवश्यक                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `PUBLIC`     | स्पष्ट रूपमा सुरक्षित रुटहरू — लगइन, लगआउट, स्थिति, स्वास्थ्य, अनबोर्डिङ बुटस्ट्र्याप।                                                                      | कुनै पनि होइन                                                         |
+| `CLIENT_API` | मोडल-सर्भ गर्ने एन्डपोइन्टहरू — `/api/v1/*`, `/api/v1beta/*`, साथै उपनामहरू `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`। | प्रभावकारी `REQUIRE_API_KEY` सुविधा फ्ल्याग सक्षम हुँदा Bearer कुञ्जी |
+| `MANAGEMENT` | ड्यासबोर्ड पृष्ठहरू, सेटिङहरू, प्रदायकहरू, कुञ्जीहरू, एडमिन र डायग्नोस्टिक्स एन्डपोइन्टहरू।                                                                 | ड्यासबोर्ड सेसन वा `manage` स्कोपसहितको Bearer                        |
 
-केही `MANAGEMENT` कार्यहरू **operator-only** हुन्: `manage` key पर्याप्त हुँदैन। भण्डारण गरिएका credentials निर्यात (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), live data माथि backup पुनर्स्थापना (`POST /api/db-backups/import` जसमा `dryRun=true` पनि समावेश छ, `POST /api/db-backups` id द्वारा पुनर्स्थापना, `POST /api/settings/import-json`), र restore points नष्ट गर्ने (`DELETE /api/db-backups` cleanup, र `PATCH /api/db-backups` किनभने यसले सुरक्षित गर्ने retention ले हरेक backup पछिको स्वचालित pruning चलाउँछ) — ले ड्यासबोर्ड सत्र, स्थानीय CLI subject, वा लगइन असक्षम हुनु आवश्यक छ। Sync token जारी गर्ने (`POST /api/sync/tokens`) र `admin` CLI access token बनाउने (`POST /api/cli/tokens`) ले हरेक login मोडमा ड्यासबोर्ड सत्र वा स्थानीय CLI subject चाहिन्छ। कुनै पनि scope का API keys र `oma_` access tokens operator credentials होइनन्: आवश्यक हुँदा तिनीहरूले `403` पाउँछन्। यो जाँच `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) मा छ। लगइन सेटिङ परिवर्तन गर्नु पनि operator-only हो: `POST /api/settings/require-login` (management पासवर्ड सेट गर्ने / `requireLogin` टगल गर्ने) ले पासवर्ड अस्तित्वमा आएपछि मात्र ती credentials स्वीकार गर्छ — पहिलो-रन bootstrap विन्डो (अझै पासवर्ड नभएको) अपरिवर्तित छ — र ड्यासबोर्ड सत्रले पासवर्ड बदल्न `currentPassword` पठाउनुपर्छ (नभए वा गलत भए `403`, `settings.update_failed` मा audit हुन्छ)। स्थानीय CLI र लगइन असक्षम भएको instance ले recovery मार्ग कायम राख्छन् र त्यसमा त्यो नपठाई पासवर्ड सेट गर्न सक्छन्, किनभने दुवै डेटा डाइरेक्टरी रहेको होस्टसँग बाँधिएका छन्।
+केही `MANAGEMENT` कार्यहरू **अपरेटर-मात्र** हुन्: `manage` कुञ्जी मात्र पर्याप्त हुँदैन। भण्डारण गरिएका
+प्रमाणपत्रहरू निर्यात गर्ने (`GET /api/settings/export-json`, `GET /api/db-backups/export`,
+`GET /api/db-backups/exportAll`), सक्रिय डाटामाथि ब्याकअप पुनर्स्थापना गर्ने
+(`POST /api/db-backups/import`, जसमा `dryRun=true` समेत पर्छ, `POST /api/db-backups` ID द्वारा
+पुनर्स्थापना, `POST /api/settings/import-json`), पुनर्स्थापना बिन्दुहरू नष्ट गर्ने (`DELETE /api/db-backups` क्लिनअप,
+र `PATCH /api/db-backups`, किनकि यसले कायम राख्ने नीति भण्डारण गर्छ र प्रत्येक ब्याकअपपछि हुने
+स्वचालित pruning लाई सञ्चालन गर्छ) का लागि ड्यासबोर्ड सेसन, स्थानीय CLI subject, वा लगइन
+निष्क्रिय गरिएको अवस्था आवश्यक हुन्छ। सिङ्क टोकन जारी गर्न (`POST /api/sync/tokens`) र
+`admin` CLI पहुँच टोकन बनाउन (`POST /api/cli/tokens`) हरेक लगइन मोडमा ड्यासबोर्ड सेसन वा स्थानीय CLI subject
+आवश्यक हुन्छ। जुनसुकै स्कोपका API कुञ्जीहरू र `oma_` पहुँच टोकनहरू अपरेटर प्रमाणपत्र होइनन्:
+आवश्यक भएको अवस्थामा तिनीहरूले `403` पाउँछन्। जाँच
+`src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` /
+`requireOperatorCredential()`) मा हुन्छ। लगइन सेटिङहरू परिवर्तन गर्नु पनि अपरेटर-मात्र हो:
+`POST /api/settings/require-login` (व्यवस्थापन पासवर्ड सेट गर्ने / `requireLogin` टगल गर्ने) ले
+पासवर्ड अस्तित्वमा आएपछि ती प्रमाणपत्रहरू मात्र स्वीकार गर्छ — पहिलोपटक चलाउँदाको बुटस्ट्र्याप विन्डो
+(अझै पासवर्ड नभएको अवस्था) अपरिवर्तित रहन्छ — र पासवर्ड प्रतिस्थापन गर्न ड्यासबोर्ड सेसनले
+`currentPassword` पठाउनुपर्छ (`403` जब यो अनुपस्थित वा गलत हुन्छ, र `settings.update_failed` का रूपमा
+अडिट गरिन्छ)। स्थानीय CLI र लगइन निष्क्रिय गरिएको इन्स्ट्यान्सले पुनर्प्राप्ति मार्ग कायम राख्छन् र
+त्यसबिना पासवर्ड सेट गर्न सक्छन्, किनकि दुवै डाटा डाइरेक्टरीको स्वामी होस्टसँग बाँधिएका हुन्छन्।
 
 ## पाइपलाइन
 
@@ -194,15 +212,15 @@ Incoming request → src/proxy.ts
 
 ## सार्वजनिक रुटहरूको सूची
 
-`src/shared/constants/publicApiRoutes.ts` स्पष्ट अनुमति सूची हो:
+`src/shared/constants/publicApiRoutes.ts` स्पष्ट रूपमा अनुमति दिइएका रुटहरूको सूची हो:
 
-सूचीलाई **आकार** अनुसार विभाजन गरिएको छ, र यो विभाजन अत्यन्त महत्त्वपूर्ण छ (GHSA-74g9-q8f6-793h): प्रिफिक्सलाई
-`startsWith()` मार्फत मिलाइन्छ, त्यसैले यसले सुरुका अक्षरहरू साझा गर्ने प्रत्येक छेउछाउको पथलाई पनि मिलाउँछ।
-`/api/usage/om-usage` लाई `/api/usage/om-usage<anything>` PUBLIC का रूपमा चिनाइएको प्रिफिक्स भएकाले, र Next ले
-यसलाई `/api/usage/[connectionId]` मा समाधान गर्छ — आफ्नै प्रमाणीकरण नभएको ह्यान्डलर।
+यो सूची **आकार** अनुसार विभाजित गरिएको छ, र यो विभाजन अत्यन्त महत्त्वपूर्ण छ (GHSA-74g9-q8f6-793h): प्रिफिक्सलाई
+`startsWith()` मार्फत मिलाइन्छ, त्यसैले यसले उही सुरुआती अक्षरहरू साझा गर्ने प्रत्येक नजिकको पथलाई पनि मिलाउँछ।
+`/api/usage/om-usage` लाई प्रिफिक्सका रूपमा `/api/usage/om-usage<anything>` PUBLIC का रूपमा चिन्ह लगाइन्छ, र Next ले
+त्यसलाई `/api/usage/[connectionId]` मा resolve गर्छ — आफ्नै auth नभएको handler।
 
 ```ts
-// वास्तविक सबट्रीहरू। प्रत्येक प्रविष्टि "/" मा अन्त्य हुनैपर्छ (युनिट टेस्टद्वारा पुष्टि गरिएको)।
+// वास्तविक subtrees। प्रत्येक entry "/" मा अनिवार्य रूपमा अन्त्य हुनुपर्छ (unit test द्वारा assert गरिएको)।
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
   "/api/v1/", // classify मा CLIENT_API का रूपमा व्यवहार गरिन्छ, "no-auth public" का रूपमा होइन
@@ -212,33 +230,32 @@ PUBLIC_API_ROUTE_PREFIXES = [
   "/api/cursor-cli/",
 ];
 
-// एकल रुटहरू, ट्रेलिङ स्ल्यास भए वा नभए पनि EXACT रूपमा मिलाइन्छ।
+// एकल रुटहरू, trailing slash भए पनि नभए पनि EXACT रूपमा मिलाइन्छ।
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // opt-in TOTP का लागि लगइन चरण २; MFA-pending cookie आवश्यक हुन्छ
-  "/api/init",
+  "/api/auth/mfa/verify", // opt-in TOTP का लागि login चरण २; MFA-pending cookie आवश्यक हुन्छ
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin relaxation पनि लागू हुने, पढ्न-मात्रका एकल रुटहरू।
+// CORS origin relaxation पनि लागू हुने read-only एकल रुटहरू।
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS relaxation बिना पढ्न-मात्रको एकल रुट।
+// CORS relaxation लागू नहुने read-only एकल रुट।
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-पढ्न-मात्रका रुटहरू सुरक्षित मेथडहरूका लागि मात्र सार्वजनिक हुन्छन्। ध्यान दिनुहोस्: `classifyRoute()` ले PUBLIC fall-through बाट `/api/v1/*` र `/api/v1beta/*` लाई हटाउँछ — ती सधैँ `CLIENT_API` हुन्छन्, त्यसैले Bearer-key नीति लागू भइरहन्छ।
+Read-only रुटहरू सुरक्षित विधिहरूका लागि मात्र सार्वजनिक हुन्छन्। ध्यान दिनुहोस्: `classifyRoute()` ले PUBLIC fall-through बाट `/api/v1/*` र `/api/v1beta/*` लाई हटाउँछ — ती सधैँ `CLIENT_API` हुन्छन्, त्यसैले Bearer-key नीति अझै लागू हुन्छ।
 
 ## नयाँ रुट थप्ने
 
@@ -302,15 +319,19 @@ API कुञ्जीहरूले `scopes` एरे बोक्छन् (
 
 `oma_live_…` टोकनहरूमा `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) द्वारा क्रमबद्ध। यो श्रेणी पहुँच-टोकन प्रमाणिकरणमा मात्र लागू हुन्छ। [व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) हेर्नुहोस्।
 
-## Auth Required टगल
+## प्रमाणीकरण आवश्यक टगल
 
-`src/shared/utils/apiAuth.ts` मा रहेको `isAuthRequired()` ले अनुरोधका लागि **कुनै पनि** प्रमाणीकरण लागू गरिने हो कि होइन भन्ने निर्णय गर्छ:
+`src/shared/utils/apiAuth.ts` मा रहेको `isAuthRequired()` ले अनुरोधका लागि **कुनै पनि प्रमाणीकरण** लागू गरिएको छ कि छैन भन्ने निर्धारण गर्छ:
 
-- `settings.requireLogin === false` → प्रमाणीकरण विश्वव्यापी रूपमा असक्षम हुन्छ, बाहेक always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) र त्यो credential दिने कलहरू, जसलाई लगइन सक्षम हुँदाकै credential चाहिन्छ: sync token जारी गर्ने, कुनै पनि scope मा CLI access token बनाउने, र `manage`/`admin` scope भएको API key बनाउने, त्यो scope key लाई दिने, वा त्यस्तो key पुनः जनरेट वा देखाउने (`src/lib/api/requireManagementAuth.ts` मा `requireCredentialForManagementScopedKey()`)। केवल inference का लागि भएका keys खुला रहन्छन्।
-- कुनै पासवर्ड कन्फिगर नभएको **र** `INITIAL_PASSWORD` env var नभएको → bootstrap मोडले onboarding wizard र loopback अनुरोधहरूलाई अनुमति दिन्छ, तर बाहिरका network अनुरोधहरूलाई अझै credentials चाहिन्छ।
-- कुनै पनि DB त्रुटि → fail closed (secure-by-default)।
+- `settings.requireLogin === false` → सधैँ-सुरक्षित
+  टियर ([रुट गार्ड टियरहरू](../security/ROUTE_GUARD_TIERS.md) हेर्नुहोस्) र यसले स्वीकार गर्ने प्रमाण-पत्र प्रदान गर्ने कलहरूबाहेक, प्रमाणीकरण विश्वव्यापी रूपमा बन्द हुन्छन्। यी कलहरूलाई लगइन सक्रिय हुँदाको जस्तै प्रमाण-पत्र आवश्यक पर्छ: सिंक टोकन जारी गर्ने, जुनसुकै स्कोपमा CLI पहुँच टोकन बनाउने, र `manage`/`admin` स्कोपसहित API key सिर्जना गर्ने, त्यो स्कोप key लाई दिने, वा त्यस्तो key पुनः सिर्जना गर्ने वा देखाउने
+  (`src/lib/api/requireManagementAuth.ts` मा `requireCredentialForManagementScopedKey()`)। अनुमान-मात्रका key हरू खुला नै रहन्छन्। सुरक्षित feature flag लेख्दा (`REQUIRE_API_KEY`, अन्य Security flags, र
+  [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) मा सूचीबद्ध SSRF / TLS / MCP-scope / sandbox flags) र PII masking सेटिङहरू बचत गर्दा
+  (`PUT /api/settings/pii`) पनि प्रमाण-पत्र आवश्यक रहन्छ।
+- पासवर्ड कन्फिगर गरिएको छैन **र** `INITIAL_PASSWORD` env var पनि छैन → bootstrap मोडले onboarding wizard र loopback अनुरोधहरूलाई अनुमति दिन्छ, तर बाह्य नेटवर्क अनुरोधहरूलाई अझै प्रमाण-पत्र आवश्यक पर्छ। अपवाद: सुरक्षित feature flag लेख्दा र PII masking सेटिङहरू बचत गर्दा (`PUT /api/settings/pii`) loopback बाट समेत प्रमाण-पत्र आवश्यक पर्छ, त्यसैले त्यहाँ loopback मात्र पर्याप्त हुँदैन।
+- कुनै पनि DB त्रुटि → सुरक्षितताका लागि पूर्वनिर्धारित रूपमा बन्द हुन्छ।
 
-Client API key लागू गर्न `src/shared/utils/featureFlags.ts` मा रहेको `isRequireApiKeyEnabled()` प्रयोग हुन्छ, सिधै `process.env.REQUIRE_API_KEY` पढिँदैन। यो deployed instances का लागि महत्त्वपूर्ण छ: Dashboard → Feature Flags मा `REQUIRE_API_KEY` टगल गर्दा DB override भण्डारण हुन्छ र तुरुन्तै `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` र यो helper साझा गर्ने अन्य client-API auth जाँचहरूमा असर पार्छ। Feature flag store पढ्न नसकिएमा client API auth fail closed हुन्छ र key माग्छ।
+Client API key प्रवर्तनले `src/shared/utils/featureFlags.ts` मा रहेको `isRequireApiKeyEnabled()` प्रयोग गर्छ, प्रत्यक्ष `process.env.REQUIRE_API_KEY` पढ्दैन। डिप्लोय गरिएका इन्स्ट्यान्सहरूका लागि यो महत्त्वपूर्ण छ: ड्यासबोर्ड → Feature Flags मा `REQUIRE_API_KEY` टगल गर्दा DB override भण्डारण हुन्छ र `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, तथा यही helper साझा गर्ने अन्य client-API प्रमाणीकरण जाँचहरूमा तुरुन्तै प्रभाव पर्छ। Feature flag store पढ्न नसकिएमा client API प्रमाणीकरण सुरक्षितताका लागि बन्द हुन्छ र key आवश्यक पर्छ।
 
 ## ब्रेकिङ परिवर्तन — v3.8.0
 

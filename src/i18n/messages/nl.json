@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Accountvoorkeuren",
+    "description": "Geef meerdere accounts de voorkeur of houd ze achter de hand voor deze routeringsconfiguratie. Automatische routering rangschikt accounts binnen elke categorie. Niet-vermelde accounts zijn normaal. Machtigingen, quot limieten en bestaande beurtkoppelingen blijven van toepassing.",
+    "preferred": "Voorkeur",
+    "normal": "Normaal",
+    "reserve": "Reserve",
+    "excluded": "Uitgesloten",
+    "loading": "Accounts laden…",
+    "error": "Accounts konden niet worden geladen. Open de editor opnieuw om het nog eens te proberen.",
+    "missing": "Niet-beschikbaar account ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-servicemodus voor deze API-sleutel",
     "description": "Van toepassing op Codex-verzoeken, inclusief Codex-modellen in combinaties. Geforceerde modi overschrijven de client, algemene instellingen en standaardinstellingen voor verbindingen. Andere providers blijven ongewijzigd.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Blokkeert deze sleutel met een 400 API-fout nadat de lokale USD-uitgaven het geconfigureerde dagelijkse of wekelijkse quotum bereiken.",
     "dailyQuotaUsd": "Dagelijks quotum (USD)",
     "weeklyQuotaUsd": "Wekelijks quotum (USD)",
+    "fiveHourQuotaUsd": "Quotum per 5 uur (USD)",
+    "fiveHourQuotaHint": "Rollend venster: de kosten van elk verzoek tellen 5 uur mee en komen daarna weer vrij.",
     "quotaWindowDescription": "Wekelijks quotum volgt de gecachte wekelijkse reset van Claude indien beschikbaar; anders valt het terug op een voortschrijdend venster van 7 dagen. Dagelijks quotum gebruikt de kalenderdag van Fortaleza.",
     "apiKeyUsdQuota": "USD-quotum voor API-sleutel",
     "apiKeyUsdQuotaDescription": "Indien ingeschakeld, retourneert @@om-usage het dagelijkse quotum, wekelijkse quotum, de dagelijkse uitgaven en de wekelijkse uitgaven in USD. Wekelijks volgt de gecachte Claude-reset indien beschikbaar.",

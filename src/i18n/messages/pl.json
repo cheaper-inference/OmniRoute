@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferencje kont",
+    "description": "Ustaw wiele kont jako preferowane lub rezerwowe dla tej konfiguracji routingu. Automatyczny routing ustala kolejność kont w ramach każdego poziomu. Konta spoza listy pozostają zwykłe. Nadal obowiązują uprawnienia, limity kwot i istniejące przypisania tur.",
+    "preferred": "Preferowane",
+    "normal": "Zwykłe",
+    "reserve": "Rezerwowe",
+    "excluded": "Wykluczone",
+    "loading": "Ładowanie kont…",
+    "error": "Nie udało się wczytać kont. Otwórz ponownie edytor, aby spróbować jeszcze raz.",
+    "missing": "Niedostępne konto ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Tryb usługi Codex dla tego klucza API",
     "description": "Dotyczy żądań Codex, w tym modeli Codex w kombinacjach. Wymuszone tryby zastępują ustawienia klienta, ustawienia globalne oraz ustawienia domyślne połączenia. Ustawienia innych dostawców pozostają bez zmian.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Blokuje ten klucz błędem API 400, gdy lokalne wydatki w USD osiągną skonfigurowany limit dzienny lub tygodniowy.",
     "dailyQuotaUsd": "Limit dzienny (USD)",
     "weeklyQuotaUsd": "Limit tygodniowy (USD)",
+    "fiveHourQuotaUsd": "Limit 5-godzinny (USD)",
+    "fiveHourQuotaHint": "Okno kroczące: wydatek każdego żądania liczy się przez 5 godzin, a potem się zwalnia.",
     "quotaWindowDescription": "Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej cotygodniowym resetem Claude, jeśli jest dostępny; w przeciwnym razie przełącza się na ruchome okno 7-dniowe. Limit dzienny korzysta z dnia kalendarzowego Fortaleza.",
     "apiKeyUsdQuota": "Limit klucza API w USD",
     "apiKeyUsdQuotaDescription": "Gdy włączone, @@om-usage zwraca limit dzienny, limit tygodniowy, wydatki dzienne oraz wydatki tygodniowe w USD. Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej resetem Claude, jeśli jest dostępny.",

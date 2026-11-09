@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Tùy chọn tài khoản",
+    "description": "Ưu tiên nhiều tài khoản hoặc giữ chúng làm dự phòng cho cấu hình định tuyến này. Định tuyến tự động xếp hạng các tài khoản trong từng nhóm. Các tài khoản không được liệt kê sẽ hoạt động bình thường. Quyền, giới hạn hạn mức và các liên kết tài khoản hiện có với lượt vẫn được áp dụng.",
+    "preferred": "Ưu tiên",
+    "normal": "Thông thường",
+    "reserve": "Dự phòng",
+    "excluded": "Loại trừ",
+    "loading": "Đang tải tài khoản…",
+    "error": "Không thể tải tài khoản. Mở lại trình chỉnh sửa để thử lại.",
+    "missing": "Tài khoản không khả dụng ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Chế độ dịch vụ Codex cho khóa API này",
     "description": "Áp dụng cho các yêu cầu Codex, bao gồm các mô hình Codex bên trong các tổ hợp. Chế độ bắt buộc sẽ ghi đè thiết lập của ứng dụng khách, thiết lập chung và thiết lập mặc định của kết nối. Các nhà cung cấp khác không bị ảnh hưởng.",
@@ -14636,6 +14647,8 @@
     "usdUsageQuotaDescription": "Chặn khóa này bằng lỗi API 400 khi chi tiêu USD cục bộ đạt hạn ngạch ngày hoặc tuần đã cấu hình.",
     "dailyQuotaUsd": "Hạn ngạch ngày (USD)",
     "weeklyQuotaUsd": "Hạn ngạch tuần (USD)",
+    "fiveHourQuotaUsd": "Hạn ngạch 5 giờ (USD)",
+    "fiveHourQuotaHint": "Cửa sổ trượt: chi phí của mỗi yêu cầu được tính trong 5 giờ, sau đó được giải phóng.",
     "quotaWindowDescription": "Hạn ngạch tuần dùng mốc đặt lại Claude đã cache khi có; nếu không sẽ dùng khung trượt 7 ngày. Hạn ngạch ngày dùng ngày theo lịch Fortaleza.",
     "apiKeyUsdQuota": "Hạn ngạch USD của khóa API",
     "apiKeyUsdQuotaDescription": "Khi bật, @@om-usage trả về hạn ngạch ngày, hạn ngạch tuần, chi tiêu ngày và chi tiêu tuần bằng USD. Hạn ngạch tuần dùng mốc đặt lại Claude đã cache khi có.",
