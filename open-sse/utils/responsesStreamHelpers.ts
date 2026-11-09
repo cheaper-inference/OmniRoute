@@ -199,13 +199,49 @@ export function normalizeResponsesCompletedUsage(parsed: unknown): boolean {
     ...current,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
+    total_tokens: totalTokens,
   };
-  normalized.total_tokens = totalTokens;
-  const changed =
+  let changed =
     !response.usage ||
     current.input_tokens !== inputTokens ||
     current.output_tokens !== outputTokens ||
     current.total_tokens !== totalTokens;
+
+  const sanitizeDetails = (detailsKey: string): void => {
+    if (!(detailsKey in current)) return;
+    const val = current[detailsKey];
+    if (val === null || val === undefined) {
+      delete normalized[detailsKey];
+      changed = true;
+      return;
+    }
+    if (typeof val === "object" && !Array.isArray(val)) {
+      const details = val as JsonRecord;
+      const cleaned: JsonRecord = { ...details };
+      let detailsModified = false;
+      for (const [k, v] of Object.entries(details)) {
+        if (v === null || v === undefined) {
+          cleaned[k] = 0;
+          detailsModified = true;
+          continue;
+        }
+        const numeric = Number(v);
+        const num = Number.isFinite(numeric) ? numeric : 0;
+        if (v !== num) {
+          cleaned[k] = num;
+          detailsModified = true;
+        }
+      }
+      if (detailsModified) {
+        normalized[detailsKey] = cleaned;
+        changed = true;
+      }
+    }
+  };
+
+  sanitizeDetails("input_tokens_details");
+  sanitizeDetails("output_tokens_details");
+
   response.usage = normalized;
   return changed;
 }
