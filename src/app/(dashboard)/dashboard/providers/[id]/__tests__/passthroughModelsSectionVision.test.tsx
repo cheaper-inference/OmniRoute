@@ -71,10 +71,26 @@ describe("PassthroughModelsSection vision capabilities", () => {
       );
     });
 
-    const text = container.textContent || "";
-    expect(text).toContain("mistral/pixtral-large-latest");
-    expect(text).toContain("mistral/mistral-large-latest");
-    // Vision badge and editor should be rendered
-    expect(text).toContain("Vision");
+    const rows = Array.from(container.querySelectorAll(".rounded-lg.border"));
+    const pixtralRow = rows.find((r) =>
+      r.querySelector("code")?.textContent?.includes("pixtral-large-latest")
+    );
+    const mistralRow = rows.find((r) =>
+      r.querySelector("code")?.textContent?.includes("mistral-large-latest")
+    );
+
+    expect(pixtralRow).toBeDefined();
+    expect(mistralRow).toBeDefined();
+
+    // Verify vision badge within each row
+    const pixtralVisionBadges = Array.from(pixtralRow?.querySelectorAll(".ci-badge") || []).filter(
+      (el) => el.textContent?.trim() === "Vision"
+    );
+    expect(pixtralVisionBadges.length).toBe(1);
+
+    const mistralVisionBadges = Array.from(mistralRow?.querySelectorAll(".ci-badge") || []).filter(
+      (el) => el.textContent?.trim() === "Vision"
+    );
+    expect(mistralVisionBadges.length).toBe(0);
   });
 });

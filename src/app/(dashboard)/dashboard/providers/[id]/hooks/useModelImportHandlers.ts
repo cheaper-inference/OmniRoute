@@ -290,10 +290,14 @@ export function useModelImportHandlers({
               ? { supportedInputTypes: model.supportedInputTypes }
               : {}),
             ...(typeof model.modelType === "string" ? { modelType: model.modelType } : {}),
-            ...(typeof model.inputTokenLimit === "number" && model.inputTokenLimit > 0
+            ...(typeof model.inputTokenLimit === "number" &&
+            Number.isInteger(model.inputTokenLimit) &&
+            model.inputTokenLimit > 0
               ? { max_input_tokens: model.inputTokenLimit }
               : {}),
-            ...(typeof model.outputTokenLimit === "number" && model.outputTokenLimit > 0
+            ...(typeof model.outputTokenLimit === "number" &&
+            Number.isInteger(model.outputTokenLimit) &&
+            model.outputTokenLimit > 0
               ? { max_output_tokens: model.outputTokenLimit }
               : {}),
             ...(typeof model.targetFormat === "string" ? { targetFormat: model.targetFormat } : {}),

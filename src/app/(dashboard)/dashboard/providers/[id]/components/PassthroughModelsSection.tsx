@@ -522,7 +522,7 @@ export default function PassthroughModelsSection({
                     supportsVision={effectiveVision}
                     visionOverride={visionOverrides.overrides[modelId]}
                     onSaveVisionOverride={visionOverrides.save}
-                    savingVisionOverride={visionOverrides.savingModelId !== null}
+                    savingVisionOverride={visionOverrides.savingModelId === modelId}
                     maxOutputTokenOverride={outputOverrides.overrides[modelId] ?? null}
                     onSaveMaxOutputTokenOverride={outputOverrides.save}
                     savingOutputOverride={outputOverrides.savingModelId === modelId}
