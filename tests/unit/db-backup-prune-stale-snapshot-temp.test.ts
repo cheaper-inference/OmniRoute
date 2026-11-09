@@ -105,3 +105,53 @@ test("an old directory with foreign content is not ours to delete", async () => 
   assert.equal(fs.existsSync(path.join(foreign, "notes.txt")), true);
   assert.equal(listPrimaries(dir).length, 5);
 });
+
+// A killed `VACUUM INTO` leaves `snapshot.sqlite-journal` next to the snapshot file.
+function addJournal(tempDir: string, ageMs: number) {
+  const journal = path.join(tempDir, "snapshot.sqlite-journal");
+  fs.writeFileSync(journal, "journal");
+  const time = new Date(Date.now() - ageMs);
+  fs.utimesSync(journal, time, time);
+  fs.utimesSync(tempDir, time, time);
+  return journal;
+}
+
+test("an idle snapshot temp directory with a leftover journal is removed and pruning resumes", async () => {
+  const dir = backupDir();
+  seedFamilies(dir, 5);
+  const stale = makeSnapshotTemp(dir, "jrN001", 5 * HOUR_MS, 5 * HOUR_MS);
+  addJournal(stale, 5 * HOUR_MS);
+
+  await cleanup.runScheduledCleanupPass("startup");
+
+  assert.equal(fs.existsSync(stale), false, "the dead temp directory and its journal must go");
+  assert.equal(listPrimaries(dir).length, 3, "retention must run again");
+});
+
+test("a recent journal write keeps the snapshot temp directory live", async () => {
+  const dir = backupDir();
+  seedFamilies(dir, 5);
+  const live = makeSnapshotTemp(dir, "jrN002", 5 * HOUR_MS, 5 * HOUR_MS);
+  addJournal(live, 1000);
+
+  await cleanup.runScheduledCleanupPass("startup");
+
+  assert.equal(fs.existsSync(live), true, "a live writer's directory must stay");
+  assert.equal(listPrimaries(dir).length, 5, "pruning stays paused while a snapshot is live");
+});
+
+test("a journal-like name that is not the exact sidecar is still foreign content", async () => {
+  const dir = backupDir();
+  seedFamilies(dir, 5);
+  const foreign = makeSnapshotTemp(dir, "jrN003", 5 * HOUR_MS, 5 * HOUR_MS);
+  const other = path.join(foreign, "other.sqlite-journal");
+  fs.writeFileSync(other, "operator file");
+  const old = new Date(Date.now() - 5 * HOUR_MS);
+  fs.utimesSync(other, old, old);
+  fs.utimesSync(foreign, old, old);
+
+  await cleanup.runScheduledCleanupPass("startup");
+
+  assert.equal(fs.existsSync(other), true);
+  assert.equal(listPrimaries(dir).length, 5);
+});

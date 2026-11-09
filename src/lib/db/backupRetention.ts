@@ -245,13 +245,15 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
 
 const SNAPSHOT_TEMP_PREFIX = ".migration-snapshot-";
 const SNAPSHOT_TEMP_FILE = "snapshot.sqlite";
+// A killed `VACUUM INTO` can leave this rollback journal next to the temp snapshot.
+const SNAPSHOT_TEMP_NAMES = new Set([SNAPSHOT_TEMP_FILE, `${SNAPSHOT_TEMP_FILE}-journal`]);
 /** A live snapshot writer touches its temp file or directory far more often than this. */
 export const STALE_SNAPSHOT_TEMP_MS = 60 * 60 * 1000;
 
 /**
  * Remove `.migration-snapshot-*` temp directories that a killed upgrade left behind, so the
  * scheduled backup prune (which pauses while one exists) can run again. Only a directory this
- * process user owns, that holds nothing but `snapshot.sqlite`, and that nothing wrote to for
+ * process user owns, that holds nothing but `snapshot.sqlite` and its `-journal`, and that nothing wrote to for
  * `maxIdleMs`, is removed. Anything else is left alone. The directory name carries no process
  * id, so write recency is the liveness signal. Returns how many directories were removed.
  */
@@ -280,14 +282,14 @@ export function removeStaleSnapshotTemps(
   return removed;
 }
 
-/** Removes one temp directory when it is ours, holds only the snapshot file, and is idle. */
+/** Removes one temp directory when it is ours, holds only the snapshot file (and its journal), and is idle. */
 function removeStaleSnapshotTemp(dir: string, maxIdleMs: number): boolean {
   const stat = fs.lstatSync(dir);
   if (!stat.isDirectory()) return false;
   if (typeof process.getuid === "function" && stat.uid !== process.getuid()) return false;
 
   const children = fs.readdirSync(dir);
-  if (children.some((child) => child !== SNAPSHOT_TEMP_FILE)) return false;
+  if (children.some((child) => !SNAPSHOT_TEMP_NAMES.has(child))) return false;
   let newestMs = stat.mtimeMs;
   for (const child of children) {
     const childStat = fs.lstatSync(path.join(dir, child));
