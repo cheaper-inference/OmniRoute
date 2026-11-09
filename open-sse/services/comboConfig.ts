@@ -146,6 +146,7 @@ const DEFAULT_COMBO_CONFIG = {
   resetAwareWeeklyWeight: 0.65,
   resetAwareTieBandPercent: 5,
   resetAwareExhaustionGuardPercent: 10,
+  resetAwareNoQuotaFloor: 0.5,
   quotaWeightedFloorPercent: 1,
   // Historical default (predates #2417/#10217) — true. This value feeds TWO
   // independent mechanisms and must stay true-by-default for one of them:
