@@ -53,9 +53,7 @@ export const KNOWN_DUPLICATE_VERSIONS = new Set([
 // #15564 landed 197 and 198. 199 (#15314), 200, and 201 (#15354) also exist.
 // None of 197–201 is a gap.
 // ---------------------------------------------------------------------------
-// #14771 already circulated migration 229; preserve that version rather than
-// creating another ledger rename solely to fill the unused 228 slot (223–227 landed).
-export const KNOWN_GAPS = new Set(["026", "055", "121", "228"]); // 121: número queimado no ciclo v3.8.47 — 122 (#6909) mergeou antes e 121 nunca aterrissou (validação e2e 2026-07-12); 144/145 aterrissaram na release (radar offers/intel cache), 148/149 aterrissaram (provider_quota_state, api_key_combo_access); 197–201 exist on disk and are not gaps
+export const KNOWN_GAPS = new Set(["026", "055", "121"]); // 121: número queimado no ciclo v3.8.47 — 122 (#6909) mergeou antes e 121 nunca aterrissou (validação e2e 2026-07-12); 144/145 aterrissaram na release (radar offers/intel cache), 148/149 aterrissaram (provider_quota_state, api_key_combo_access); 197–201 exist on disk and are not gaps
 
 function pad3(n) {
   return String(n).padStart(3, "0");

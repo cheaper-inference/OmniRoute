@@ -143,15 +143,15 @@ Konfigurowane w Ustawienia → Bezpieczeństwo; wyłączone do czasu włączenia
 
 ## Klasy tras
 
-`src/server/authz/types.ts` definiuje trzy klasy; każda trasa, której nie da się jednoznacznie sklasyfikować, trafia do `MANAGEMENT`.
+`src/server/authz/types.ts` definiuje trzy klasy; każda trasa, której nie można sklasyfikować deterministycznie, wraca do `MANAGEMENT`.
 
-| Klasa        | Opis                                                                                                                                                | Wymagane uwierzytelnienie                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `PUBLIC`     | Jawnie bezpieczne trasy — logowanie, wylogowanie, status, inicjalizacja, health, bootstrap onboardingu.                                             | Brak                                                                      |
-| `CLIENT_API` | Endpointy obsługi modeli — `/api/v1/*`, `/api/v1beta/*` oraz aliasy `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Klucz Bearer, gdy włączona jest efektywna flaga funkcji `REQUIRE_API_KEY` |
-| `MANAGEMENT` | Strony panelu, ustawienia, dostawcy, klucze, endpointy administracyjne i diagnostyczne.                                                             | Sesja panelu LUB Bearer z zakresem `manage`                               |
+| Klasa        | Opis                                                                                                                                                        | Wymagane uwierzytelnienie                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `PUBLIC`     | Wyraźnie bezpieczne trasy — logowanie, wylogowanie, status, stan zdrowia, ładowanie początkowe.                                                             | Nic                                                                           |
+| `CLIENT_API` | Punkty końcowe obsługujące model — `/api/v1/*`, `/api/v1beta/*` oraz aliasy `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Klucz okaziciela, gdy włączona jest efektywna flaga funkcji `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Strony pulpitu nawigacyjnego, ustawienia, dostawcy, klucze, punkty końcowe administracyjne i diagnostyczne.                                                 | Sesja pulpitu nawigacyjnego OR Bearer z zakresem `manage`                     |
 
-Kilka działań `MANAGEMENT` jest **dostępnych wyłącznie dla operatora**: sam klucz `manage` nie wystarcza. Eksport zapisanych poświadczeń (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), przywracanie kopii zapasowej nad żywymi danymi (`POST /api/db-backups/import`, łącznie z `dryRun=true`, `POST /api/db-backups` przywracanie po id, `POST /api/settings/import-json`) oraz niszczenie punktów przywracania (czyszczenie przez `DELETE /api/db-backups` oraz `PATCH /api/db-backups`, ponieważ zapisywana retencja steruje automatycznym przycinaniem po każdym backupie) wymagają sesji panelu, lokalnego podmiotu CLI albo wyłączonego logowania. Wystawienie tokenu synchronizacji (`POST /api/sync/tokens`) i wybicie tokenu dostępu CLI z zakresem `admin` (`POST /api/cli/tokens`) wymagają sesji panelu lub lokalnego podmiotu CLI we wszystkich trybach logowania. Klucze API dowolnego zakresu oraz tokeny dostępu `oma_` nie są poświadczeniami operatora: gdy takie poświadczenie jest wymagane, dostają `403`. Sprawdzenie znajduje się w `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Zmiana ustawień logowania również jest zastrzeżona dla operatora: `POST /api/settings/require-login` (ustawienie hasła zarządzania / przełączenie `requireLogin`) akceptuje wyłącznie te poświadczenia, gdy hasło już istnieje — okno pierwszego uruchomienia (jeszcze bez hasła) pozostaje bez zmian — a sesja panelu musi wysłać `currentPassword`, aby zastąpić hasło (`403`, gdy brakuje go lub jest błędne, audytowane jako `settings.update_failed`). Lokalne CLI oraz instancja z wyłączonym logowaniem zachowują ścieżkę odzyskiwania i mogą ustawić hasło bez tego, ponieważ oba są powiązane z hostem, który posiada katalog danych.
+Kilka działań `MANAGEMENT` to** tylko dla operatora** : klucz `manage` nie wystarczy. Eksportowanie przechowywanych poświadczeń (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), przywracanie kopii zapasowej danych na żywo (`POST /api/db-backups/import` łącznie z `dryRun=true`, `POST /api/db-backups` przywracanie według id, `POST /api/settings/import-json`), niszczenie punktów przywracania ( czyszczenie `DELETE /api/db-backups` i `PATCH /api/db-backups`, ponieważ przechowywanie utrzymuje się, powoduje automatyczne czyszczenie po każdej kopii zapasowej) wymaga sesji pulpitu nawigacyjnego, lokalnego tematu CLI lub wyłączenia logowania. Wydawanie tokena synchronizacji (`POST /api/sync/tokens`) i wybijanie tokena dostępu CLI `admin` `POST /api/cli/tokens`) wymaga sesji dashboardu lub lokalnego podmiotu CLI w każdym trybie logowania. Klucze API o dowolnym zakresie i tokeny dostępu `oma_` nie są poświadczeniami operatora: otrzymują `403` gdy jest to wymagane. Czek żyje w `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Zmiana ustawień logowania jest również dostępna tylko dla operatora: `POST /api/settings/require-login` (ustaw hasło zarządzania / przełącz `requireLogin`) akceptuje tylko te poświadczenia, gdy hasło istnieje — okno ładowania początkowego (jeszcze nie ma jeszcze hasła) pozostaje niezmienione — i sesja pulpitu nawigacyjnego musi wysłać `currentPassword` w celu zastąpienia hasła (`403` w przypadku jego braku lub nieprawidłowego, kontrolowane jako `settings.update_failed`). Lokalne CLI i instancja z wyłączonym logowaniem zachowują ścieżkę odzyskiwania i mogą ustawić hasło bez niej, ponieważ oba są powiązane z hostem będącym właścicielem katalogu danych.
 
 ## Rurociąg
 
@@ -184,51 +184,47 @@ Pomyślna polityka zwraca `AuthSubject` z `kind ∈ { client_api_key, dashboard_
 
 ## Lista tras publicznych
 
-`src/shared/constants/publicApiRoutes.ts` to jawna lista dozwolonych tras:
+`src/shared/constants/publicApiRoutes.ts` jest wyraźną listą dozwolonych:
 
-Lista jest podzielona według **kształtu**, a ten podział ma kluczowe znaczenie (GHSA-74g9-q8f6-793h): prefiks jest
-dopasowywany za pomocą `startsWith()`, więc dopasowuje również każdą sąsiednią ścieżkę zaczynającą się od tych samych znaków.
-`/api/usage/om-usage` jako prefiks oznacza `/api/usage/om-usage<anything>` jako PUBLIC, a Next rozwiązuje
-to do `/api/usage/[connectionId]` — procedury obsługi bez własnego uwierzytelniania.
+Lista jest podzielona według** kształt** , a podział jest nośny (GHSA-74g9-q8f6-793h): przedrostek jest dopasowywany do `startsWith()`, więc pasuje również do każdej sąsiedniej ścieżki, która ma wspólne znaki wiodące. `/api/usage/om-usage` jako przedrostek oznaczony `/api/usage/om-usage<anything>` PUBLIC, a Next rozwiązuje to na `/api/usage/[connectionId]` — moduł obsługi bez własnego uwierzytelnienia.
 
 ```ts
-// Rzeczywiste poddrzewa. Każdy wpis MUSI kończyć się znakiem "/" (sprawdzane przez test jednostkowy).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // traktowane jako CLIENT_API w classify, a nie jako „publiczne bez uwierzytelniania”
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Pojedyncze trasy, dopasowywane DOKŁADNIE (z końcowym ukośnikiem lub bez niego).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // krok 2 logowania dla opcjonalnego TOTP; wymaga pliku cookie oczekującego na MFA
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Pojedyncze trasy tylko do odczytu, które również korzystają z poluzowania ograniczeń źródła CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Pojedyncza trasa tylko do odczytu BEZ poluzowania ograniczeń CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Trasy tylko do odczytu są publiczne **wyłącznie** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z mechanizmu awaryjnego PUBLIC — są one zawsze `CLIENT_API`, więc nadal ma do nich zastosowanie zasada klucza Bearer.
+Trasy tylko do odczytu są publiczne** tylko** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z PUBLIC zastępczego — są to zawsze `CLIENT_API` więc nadal obowiązuje polityka klucza na okaziciela.
 
 ## Dodawanie nowej trasy
 
@@ -292,15 +288,15 @@ Katalog i reguły dopasowania (identyczny ciąg znaków lub przyznany zakres ko�
 
 `read` / `write` / `admin` na tokenach `oma_live_…`, uszeregowane według `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ta ranga dotyczy wyłącznie poświadczeń tokenu dostępu. Zobacz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
 
-## Przełącznik wymogu uwierzytelnienia
+## Wymagane uwierzytelnienie Przełącz
 
-`isAuthRequired()` w `src/shared/utils/apiAuth.ts` decyduje, czy wymuszane jest **jakiekolwiek** uwierzytelnienie dla żądania:
+`isAuthRequired()` w `src/shared/utils/apiAuth.ts` decyduje, czy** każdy** uwierzytelnianie jest wymuszane w przypadku żądania:
 
-- `settings.requireLogin === false` → uwierzytelnianie jest globalnie wyłączone, z wyjątkiem poziomu zawsze chronionego (zobacz [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) oraz wywołań, które wydają poświadczenie, jakie akceptuje — te wymagają tego samego poświadczenia co przy włączonym logowaniu: wystawianie tokenów synchronizacji, wydawanie tokenów dostępu CLI w dowolnym zakresie oraz tworzenie klucza API z zakresem `manage`/`admin`, nadawanie tego zakresu kluczowi, regenerowanie lub ujawnianie takiego klucza (`requireCredentialForManagementScopedKey()` w `src/lib/api/requireManagementAuth.ts`). Klucze służące tylko do inferencji pozostają otwarte.
-- Brak skonfigurowanego hasła **oraz** brak zmiennej środowiskowej `INITIAL_PASSWORD` → tryb bootstrap pozwala na kreator konfiguracji i żądania z loopback, ale żądania z sieci zewnętrznej nadal wymagają poświadczeń.
-- Każdy błąd bazy danych → odmowa dostępu (secure-by-default).
+- `settings.requireLogin === false` → auth jest globalnie wyłączone, z wyjątkiem zawsze chronionego poziomu (patrz [Poziomy strażników tras](../security/ROUTE_GUARD_TIERS.md) ) i wywołań przekazujących akceptowane przez niego poświadczenia, które wymagają tych samych poświadczeń, co przy logowaniu: wydawanie tokenów synchronizacji, tworzenie tokenów dostępu CLI w dowolnym zakresie i tworzenie klucza API z zakresem `manage`/`admin`, przydzielanie tego zakresu kluczowi lub regenerowanie lub ujawnianie takiego klucza (`requireCredentialForManagementScopedKey()` w `src/lib/api/requireManagementAuth.ts`). Klucze służące tylko do wnioskowania pozostają otwarte. Zapisanie flagi chronionej funkcji (`REQUIRE_API_KEY`, inne flagi bezpieczeństwa i flagi SSRF / TLS / MCP-scope / sandbox wymienione w [flagach funkcji](../reference/FEATURE_FLAGS.md#rest-api) ) i zapisanie ustawień maskowania PII (`PUT /api/settings/pii`) również nadal wymaga poświadczeń.
+- Nie skonfigurowano hasła** I** tryb ładowania początkowego no `INITIAL_PASSWORD` env var → umożliwia korzystanie z kreatora dołączania i żądań pętli zwrotnej, ale ujawnione żądania sieciowe nadal wymagają poświadczeń. Wyjątek: napisanie flagi chronionej funkcji i zapisanie ustawień maskowania PII (`PUT /api/settings/pii`) wymaga poświadczeń nawet z pętli zwrotnej, więc sama pętla zwrotna nie wystarczy.
+- Każdy błąd DB → nie zostaje zamknięty (domyślnie bezpieczne).
 
-Egzekwowanie klucza API klienta korzysta z `isRequireApiKeyEnabled()` w `src/shared/utils/featureFlags.ts`, a nie z bezpośredniego odczytu `process.env.REQUIRE_API_KEY`. Ma to znaczenie dla wdrożonych instancji: przełączenie `REQUIRE_API_KEY` w Dashboard → Feature Flags zapisuje nadpisanie w bazie i natychmiast wpływa na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` oraz inne sprawdzenia uwierzytelnienia API klienta, które współdzielą tę funkcję. Jeśli magazynu flag nie da się odczytać, uwierzytelnianie API klienta odmawia dostępu i wymaga klucza.
+Egzekwowanie klucza API klienta używa `isRequireApiKeyEnabled()` w `src/shared/utils/featureFlags.ts`, a nie bezpośredniego odczytu `process.env.REQUIRE_API_KEY`. Ma to znaczenie dla wdrożonych instancji: przełączanie `REQUIRE_API_KEY` w Dashboardzie → Feature Flags przechowuje zastąpienie DB i natychmiast wpływa na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i inne kontrole autoryzacji klienta-API, które korzystają z tego pomocnika. Jeśli nie można odczytać magazynu flag funkcji, uwierzytelnianie klienta API kończy się niepowodzeniem i wymaga klucza.
 
 ## Breaking Change — v3.8.0
 

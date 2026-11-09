@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import AccountPreferencesEditor from "./AccountPreferencesEditor";
 import { Slider } from "@omniroute/ui-kit/slider";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -98,11 +99,13 @@ export default function BuilderIntelligentStep({
   config,
   onChange,
   activeProviders,
+  strategy = "auto",
 }: {
   t: any;
   config: Record<string, unknown>;
   onChange: (nextConfig: Record<string, unknown>) => void;
   activeProviders: any[];
+  strategy?: string;
 }) {
   const normalizedConfig = normalizeIntelligentRoutingConfig(config);
   const isSlaAwareStrategy = ["sla-aware", "sla"].includes(normalizedConfig.routerStrategy);
@@ -125,6 +128,17 @@ export default function BuilderIntelligentStep({
 
   return (
     <div className="flex flex-col gap-3">
+      {strategy === "auto" && (
+        <AccountPreferencesEditor
+          value={config.accountPreferences}
+          providerIds={
+            normalizedConfig.candidatePool.length
+              ? normalizedConfig.candidatePool
+              : providerOptions.map((provider) => provider.id)
+          }
+          onChange={(accountPreferences) => updateConfig({ accountPreferences })}
+        />
+      )}
       <Card.Section>
         <div className="flex items-start justify-between gap-3">
           <div>

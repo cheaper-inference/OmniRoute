@@ -6,9 +6,8 @@ import {
   updateApiKeyPermissions,
 } from "@/lib/db/apiKeys";
 import { getApiKeySelfServiceSettings } from "@/lib/db/apiKeySelfServiceSettings";
-import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
-import { syncToCloud } from "@/lib/cloudSync";
+import { syncKeysToCloudIfEnabled } from "@/lib/api/keyCloudSync";
 import { createKeySchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
@@ -44,6 +43,7 @@ function createPermissionOverrides(data: {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
 }) {
   const overrides = {
@@ -53,6 +53,9 @@ function createPermissionOverrides(data: {
     ...(data.dailyUsageLimitUsd !== undefined && { dailyUsageLimitUsd: data.dailyUsageLimitUsd }),
     ...(data.weeklyUsageLimitUsd !== undefined && {
       weeklyUsageLimitUsd: data.weeklyUsageLimitUsd,
+    }),
+    ...(data.fiveHourUsageLimitUsd !== undefined && {
+      fiveHourUsageLimitUsd: data.fiveHourUsageLimitUsd,
     }),
     ...(data.chaosModeEnabled === true && { chaosModeEnabled: true }),
   };
@@ -112,6 +115,7 @@ export async function POST(request) {
       usageLimitEnabled,
       dailyUsageLimitUsd,
       weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd,
       chaosModeEnabled,
       expiresAt,
     } = validation.data;
@@ -159,6 +163,7 @@ export async function POST(request) {
         usageLimitEnabled: usageLimitEnabled === true,
         dailyUsageLimitUsd: dailyUsageLimitUsd ?? null,
         weeklyUsageLimitUsd: weeklyUsageLimitUsd ?? null,
+        fiveHourUsageLimitUsd: fiveHourUsageLimitUsd ?? null,
         chaosModeEnabled: chaosModeEnabled === true,
         expiresAt: expiresAt ?? null,
         streamDefaultMode: "legacy",
@@ -170,20 +175,5 @@ export async function POST(request) {
   } catch (error) {
     log.error("keys", "Error creating key", error);
     return NextResponse.json({ error: "Failed to create key" }, { status: 500 });
-  }
-}
-
-/**
- * Sync API keys to Cloud if enabled
- */
-async function syncKeysToCloudIfEnabled() {
-  try {
-    const cloudEnabled = await isCloudEnabled();
-    if (!cloudEnabled) return;
-
-    const machineId = await getConsistentMachineId();
-    await syncToCloud(machineId);
-  } catch (error) {
-    log.error("keys", "Error syncing keys to cloud", error);
   }
 }

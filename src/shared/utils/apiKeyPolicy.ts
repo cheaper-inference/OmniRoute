@@ -113,6 +113,7 @@ export interface ApiKeyMetadata {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
@@ -446,6 +447,8 @@ type PolicyValidationStage =
   "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
 
 export interface EnforceApiKeyPolicyOptions {
+  /** Existing fal jobs do not dispatch inference. Authorization still applies after spend limits. */
+  existingFalJob?: boolean;
   /**
    * Where the metered dollar budget is enforced for this request.
    *
@@ -534,8 +537,8 @@ function validateKeyStatus(context: PolicyContext): Response | null {
   return null;
 }
 
-async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
-  const { request, apiKeyInfo } = context;
+function validateKeyAccessSchedule(context: PolicyContext): Response | null {
+  const { apiKeyInfo } = context;
   if (apiKeyInfo.accessSchedule?.enabled && !isWithinSchedule(apiKeyInfo.accessSchedule)) {
     const { from, until, tz } = apiKeyInfo.accessSchedule;
     return errorResponse(
@@ -543,6 +546,13 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       `Access denied outside allowed hours (${from}–${until} ${tz})`
     );
   }
+  return null;
+}
+
+async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
+  const { request, apiKeyInfo } = context;
+  const schedule = validateKeyAccessSchedule(context);
+  if (schedule) return schedule;
   if (apiKeyInfo.usageLimitEnabled !== true) return null;
 
   try {
@@ -551,6 +561,7 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       usageLimitEnabled: apiKeyInfo.usageLimitEnabled,
       dailyUsageLimitUsd: apiKeyInfo.dailyUsageLimitUsd,
       weeklyUsageLimitUsd: apiKeyInfo.weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd: apiKeyInfo.fiveHourUsageLimitUsd,
     });
     return rejection;
   } catch (error) {
@@ -1076,6 +1087,26 @@ async function validateSelfLoopScopedAccess(
   return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
 }
 
+function isFalReceiptRead(request: Request, options?: EnforceApiKeyPolicyOptions): boolean {
+  const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
+  return (
+    options?.existingFalJob === true &&
+    ((["GET", "DELETE"].includes(request.method) &&
+      /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)) ||
+      (request.method === "POST" &&
+        canonicalPath === "/v1/fal/run" &&
+        request.headers.has("idempotency-key")))
+  );
+}
+async function validateFalReceiptPolicy(context: PolicyContext) {
+  return (
+    validateKeyAccessSchedule(context) ??
+    validateEndpointAccess(context) ??
+    (await validateQuotaAccess(context)) ??
+    (await validateModelAccess(context))
+  );
+}
+
 export async function enforceApiKeyPolicy(
   request: Request,
   modelStr: string | null,
@@ -1114,6 +1145,10 @@ export async function enforceApiKeyPolicy(
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
+  if (isFalReceiptRead(request, options)) {
+    // Receipt lookup cannot dispatch; the run route reapplies full policy for new inference.
+    return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
+  }
   if (selfLoopScope.key) {
     return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
   }
