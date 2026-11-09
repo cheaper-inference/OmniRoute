@@ -269,24 +269,8 @@ export function removeStaleSnapshotTemps(
   let removed = 0;
   for (const name of entries) {
     if (!name.startsWith(SNAPSHOT_TEMP_PREFIX)) continue;
-    const dir = path.join(backupDir, name);
     try {
-      const stat = fs.lstatSync(dir);
-      if (!stat.isDirectory()) continue;
-      if (typeof process.getuid === "function" && stat.uid !== process.getuid()) continue;
-
-      const children = fs.readdirSync(dir);
-      if (children.some((child) => child !== SNAPSHOT_TEMP_FILE)) continue;
-      let newestMs = stat.mtimeMs;
-      for (const child of children) {
-        const childStat = fs.lstatSync(path.join(dir, child));
-        if (!childStat.isFile()) throw new Error("not a regular file");
-        newestMs = Math.max(newestMs, childStat.mtimeMs);
-      }
-      if (Date.now() - newestMs < maxIdleMs) continue;
-
-      for (const child of children) fs.unlinkSync(path.join(dir, child));
-      fs.rmdirSync(dir);
+      if (!removeStaleSnapshotTemp(path.join(backupDir, name), maxIdleMs)) continue;
       removed++;
       console.warn(`[Cleanup] Removed stale migration snapshot temp directory: ${name}`);
     } catch (err) {
@@ -294,6 +278,27 @@ export function removeStaleSnapshotTemps(
     }
   }
   return removed;
+}
+
+/** Removes one temp directory when it is ours, holds only the snapshot file, and is idle. */
+function removeStaleSnapshotTemp(dir: string, maxIdleMs: number): boolean {
+  const stat = fs.lstatSync(dir);
+  if (!stat.isDirectory()) return false;
+  if (typeof process.getuid === "function" && stat.uid !== process.getuid()) return false;
+
+  const children = fs.readdirSync(dir);
+  if (children.some((child) => child !== SNAPSHOT_TEMP_FILE)) return false;
+  let newestMs = stat.mtimeMs;
+  for (const child of children) {
+    const childStat = fs.lstatSync(path.join(dir, child));
+    if (!childStat.isFile()) throw new Error("not a regular file");
+    newestMs = Math.max(newestMs, childStat.mtimeMs);
+  }
+  if (Date.now() - newestMs < maxIdleMs) return false;
+
+  for (const child of children) fs.unlinkSync(path.join(dir, child));
+  fs.rmdirSync(dir);
+  return true;
 }
 
 export type PruneResult = {
