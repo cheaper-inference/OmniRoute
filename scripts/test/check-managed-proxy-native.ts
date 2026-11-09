@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { execFileSync } from "node:child_process";
 import {
   sourceOutbound,
@@ -10,10 +9,10 @@ import {
   type ManagedCore,
 } from "../../src/lib/services/managedProxy/config.ts";
 import { installManagedCore } from "../../src/lib/services/managedProxy/install.ts";
+import { createManagedNativeFixture } from "./managed-proxy-native-fixture.ts";
 
 // CI-only official binary check; never serves an upstream or starts a core listener.
-if (process.env.CI !== "true") throw new Error("Native managed-core verification runs only in CI");
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "managed-core-native-"));
+const root = createManagedNativeFixture();
 const UUID = "11111111-1111-4111-8111-111111111111";
 const vmess =
   "vmess://" +

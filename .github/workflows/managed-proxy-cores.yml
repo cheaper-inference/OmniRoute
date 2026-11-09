@@ -21,7 +21,7 @@ on:
       - "tests/_setup/managedProxyHttpBundle.ts"
       - "tests/fixtures/managedProxyChild.mjs"
       - "scripts/test/*managed-proxy*.mjs"
-      - "scripts/test/check-managed-proxy-native.ts"
+      - "scripts/test/*managed-proxy*.ts"
       - ".github/workflows/managed-proxy-cores.yml"
   workflow_dispatch:
 
@@ -46,6 +46,8 @@ jobs:
           node-version: "24"
           cache: npm
       - run: npm ci
+      - name: Check native fixture storage isolation
+        run: node --import tsx/esm --test tests/unit/managed-proxy-native-fixture.test.ts
       - name: Check official core configuration fixtures
         run: node --import tsx/esm scripts/test/check-managed-proxy-native.ts
         env:
