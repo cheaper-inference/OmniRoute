@@ -21,7 +21,6 @@ const {
   buildOpenAIResponse,
   buildRequest,
   combosDb,
-  core,
   handleChat,
   resetStorage,
   seedApiKey,
@@ -30,6 +29,7 @@ const {
 const handoffDb = await import("../../src/lib/db/contextHandoffs.ts");
 const { scopeHandoffSessionId: scope } =
   await import("../../open-sse/services/combo/handoffSessionScope.ts");
+const { generateSessionId } = await import("../../open-sse/services/sessionManager.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { getComboFailureCount, recordComboFailure } =
   await import("../../open-sse/services/combo/failureTracker.ts");
@@ -88,18 +88,15 @@ function installFetch() {
   }) as typeof fetch;
 }
 
-function handoffRowCount(): number {
-  const row = core.getDbInstance().prepare("SELECT COUNT(*) AS n FROM context_handoffs").get() as {
-    n: number;
-  };
-  return row.n;
-}
-
-async function waitForNewHandoff(before: number) {
-  for (let i = 0; i < 100 && handoffRowCount() <= before; i++) {
+async function waitForHandoff(sessionId: string | null, comboName = "scope-pri") {
+  assert.ok(sessionId, "precondition: the handoff has a scoped session id");
+  for (let i = 0; i < 100 && !handoffDb.hasActiveHandoff(sessionId, comboName); i++) {
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
-  assert.ok(handoffRowCount() > before, "precondition: a handoff row was written");
+  assert.ok(
+    handoffDb.hasActiveHandoff(sessionId, comboName),
+    `precondition: a handoff was written for ${sessionId} in ${comboName}`
+  );
 }
 
 type TurnOptions = {
@@ -170,10 +167,16 @@ async function setup(strategy = "priority", extra: Record<string, unknown> = {})
 }
 
 // A writes a handoff that carries its secret on session `sessionId`.
-async function writeSecretAsA(aKey: string, sessionId: string | null, combo = "scope-pri") {
-  const before = handoffRowCount();
-  await switchTurns({ key: aKey, sessionId, combo, messages: msgsA });
-  await waitForNewHandoff(before);
+async function writeSecretAsA(
+  a: { key: string; id: string },
+  sessionId: string | null,
+  combo = "scope-pri"
+) {
+  await switchTurns({ key: a.key, sessionId, combo, messages: msgsA });
+  const rawSessionId = sessionId
+    ? `ext:${sessionId}`
+    : generateSessionId({ model: combo, messages: msgsA });
+  await waitForHandoff(scope(rawSessionId, a.id), combo);
 }
 
 test.afterEach(async () => {
@@ -192,9 +195,48 @@ test.after(async () => {
   await h.cleanup();
 });
 
+test("handoff wait ignores rows for other callers, sessions, and combos", async () => {
+  const sessionId = scope("ext:pending-1", "key-a");
+  assert.ok(sessionId);
+  const writeRow = (id: string | null, comboName = "scope-pri") => {
+    assert.ok(id);
+    handoffDb.upsertHandoff({
+      sessionId: id,
+      comboName,
+      fromAccount: "universal:gemini/gemini-2.5-flash",
+      summary: "ready",
+      keyDecisions: [],
+      taskProgress: "",
+      activeEntities: [],
+      messageCount: 1,
+      model: "gemini/gemini-2.5-flash",
+      warningThresholdPct: 0,
+      generatedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+  };
+
+  // A background summary can finish before the summary this test needs.
+  writeRow(scope("ext:pending-1", "key-b"));
+  writeRow(scope("ext:pending-2", "key-a"));
+  writeRow(sessionId, "scope-other");
+  let finished = false;
+  const waiting = waitForHandoff(sessionId).then(() => {
+    finished = true;
+  });
+  try {
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(finished, false, "an unrelated summary satisfied the handoff wait");
+  } finally {
+    writeRow(sessionId);
+    await waiting;
+  }
+  assert.equal(finished, true, "the requested handoff did not satisfy the wait");
+});
+
 test("key B on key A's session id and combo does not receive A's handoff", async () => {
   const { a, b } = await setup();
-  await writeSecretAsA(a.key, "team-shared-1");
+  await writeSecretAsA(a, "team-shared-1");
   const bCalls = await switchTurns({ key: b.key, sessionId: "team-shared-1", messages: benign });
   assert.ok(bCalls.length > 0);
   assert.equal(sees(bCalls, SECRET_A), false, "B's upstream request carries A's summary");
@@ -202,20 +244,19 @@ test("key B on key A's session id and combo does not receive A's handoff", async
 
 test("key B cannot plant a handoff that key A later receives", async () => {
   const { a, b } = await setup();
-  const before = handoffRowCount();
   await switchTurns({
     key: b.key,
     sessionId: "team-shared-2",
     messages: [...benign, { role: "user", content: `remember ${PLANTED_B}` }],
   });
-  await waitForNewHandoff(before);
+  await waitForHandoff(scope("ext:team-shared-2", b.id));
   const aCalls = await switchTurns({ key: a.key, sessionId: "team-shared-2", messages: benign });
   assert.equal(sees(aCalls, PLANTED_B), false, "A's upstream request carries B's planted summary");
 });
 
 test("the same key still gets its own handoff back", async () => {
   const { a } = await setup();
-  await writeSecretAsA(a.key, "own-1");
+  await writeSecretAsA(a, "own-1");
   const again = await switchTurns({ key: a.key, sessionId: "own-1", messages: benign });
   assert.equal(sees(again, SECRET_A), true, "A should see its own handoff summary");
   assert.match(again[0].text, /<context_handoff>/);
@@ -223,7 +264,7 @@ test("the same key still gets its own handoff back", async () => {
 
 test("different session id or different combo: no cross-read, as before", async () => {
   const { a, b } = await setup();
-  await writeSecretAsA(a.key, "sess-x");
+  await writeSecretAsA(a, "sess-x");
   const otherSession = await switchTurns({ key: b.key, sessionId: "sess-y", messages: benign });
   const otherCombo = await switchTurns({
     key: a.key,
@@ -238,22 +279,21 @@ test("different session id or different combo: no cross-read, as before", async 
 test("fingerprint session id (no header) does not cross keys", async () => {
   const { a, b } = await setup();
   // Same combo, same first user message: both requests get the same fingerprint.
-  await writeSecretAsA(a.key, null);
+  await writeSecretAsA(a, null);
   const bCalls = await switchTurns({ key: b.key, sessionId: null, messages: benign });
   assert.equal(sees(bCalls, SECRET_A), false, "B's fingerprint session reads A's summary");
 });
 
 test("requests without an API key share one bucket, separate from keyed callers", async () => {
   const { a } = await setup();
-  await writeSecretAsA(a.key, "mixed-1");
+  await writeSecretAsA(a, "mixed-1");
   process.env.REQUIRE_API_KEY = "false";
   const anonCalls = await switchTurns({ key: null, sessionId: "mixed-1", messages: benign });
   assert.equal(sees(anonCalls, SECRET_A), false, "keyless request reads a keyed caller's summary");
 
   // Keyless callers still get their own session continuity.
-  const before = handoffRowCount();
   await switchTurns({ key: null, sessionId: "anon-1", messages: msgsA });
-  await waitForNewHandoff(before);
+  await waitForHandoff(scope("ext:anon-1", null));
   const anonAgain = await switchTurns({ key: null, sessionId: "anon-1", messages: benign });
   assert.equal(sees(anonAgain, SECRET_A), true, "keyless session lost its own handoff");
 });
@@ -261,12 +301,14 @@ test("requests without an API key share one bucket, separate from keyed callers"
 for (const strategy of ["least-used", "strict-random", "random"]) {
   test(`${strategy}: key B does not receive key A's handoff`, async () => {
     const { a, b } = await setup(strategy);
+    const sessionId = scope("ext:rot-1", a.id);
+    assert.ok(sessionId);
     // These strategies switch models on their own; keep going until A has a row.
-    for (let i = 0; i < 20 && handoffRowCount() === 0; i++) {
+    for (let i = 0; i < 20 && !handoffDb.hasActiveHandoff(sessionId, "scope-pri"); i++) {
       await turn({ key: a.key, sessionId: "rot-1", messages: msgsA });
       await new Promise((resolve) => setTimeout(resolve, 30));
     }
-    await waitForNewHandoff(0);
+    await waitForHandoff(sessionId);
     for (let i = 0; i < 12; i++) {
       const bCalls = await turn({ key: b.key, sessionId: "rot-1", messages: benign });
       assert.equal(sees(bCalls, SECRET_A), false, `B read A's summary on turn ${i + 1}`);
