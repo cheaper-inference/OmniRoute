@@ -1,0 +1,1 @@
+- **fix(api):** include Anthropic `/v1/messages` in `ROUTE_LIMITS` with the `MAX_BODY_BYTES_LLM_API` floor (50 MB) and saved limit support, ensuring coding agents (Claude Code, Cursor, Cline) are not rejected with `413 Payload Too Large` when sending large prompts or file contexts ([#19276](https://github.com/cheaper-inference/OmniRoute/pull/19276)) — thanks @bufftop25

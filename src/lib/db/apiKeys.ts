@@ -146,6 +146,7 @@ interface ApiKeyMetadata {
   usageLimitEnabled: boolean;
   dailyUsageLimitUsd: number | null;
   weeklyUsageLimitUsd: number | null;
+  fiveHourUsageLimitUsd: number | null;
   chaosModeEnabled: boolean;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
@@ -199,6 +200,8 @@ interface ApiKeyRow extends JsonRecord {
   dailyUsageLimitUsd?: unknown;
   weekly_usage_limit_usd?: unknown;
   weeklyUsageLimitUsd?: unknown;
+  five_hour_usage_limit_usd?: unknown;
+  fiveHourUsageLimitUsd?: unknown;
   chaos_mode_enabled?: unknown;
   chaosModeEnabled?: unknown;
   compression_enabled?: unknown;
@@ -261,6 +264,7 @@ interface ApiKeyView extends JsonRecord {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
@@ -507,7 +511,7 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
       "SELECT id, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key_hash = ?"
     );
     _stmtGetKeyMetadata = db.prepare<ApiKeyRow>(
-      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, allow_cc_discovery_aliases, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
+      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, five_hour_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, allow_cc_discovery_aliases, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
     );
     _stmtInsertKey = db.prepare(
       "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, preferred_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -708,10 +712,13 @@ export async function pickApiKeyForInternalUse(
   }
 }
 
-export async function getApiKeyById(id: string) {
+export async function getApiKeyById(id: string, options: { readOnly?: boolean } = {}) {
   const db = getDbInstance() as ApiKeysDbLike;
-  const stmt = getPreparedStatements(db);
-  const row = stmt.getKeyById.get(id);
+  // Import retries must not trigger the first-use legacy secret backfill (on any row).
+  // The import domain has already ensured the schema before entering its transaction.
+  const row = options.readOnly
+    ? db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?").get(id)
+    : getPreparedStatements(db).getKeyById.get(id);
   if (!row) return null;
   const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
   // Raw secret for the admin reveal route and by-id consumers; stored encrypted.
@@ -960,6 +967,7 @@ export async function updateApiKeyPermissions(
     usageLimitEnabled?: number;
     dailyUsageLimitUsd?: number | null;
     weeklyUsageLimitUsd?: number | null;
+    fiveHourUsageLimitUsd?: number | null;
     chaosModeEnabled?: number;
     compressionEnabled?: number;
     allowAutoCombos?: number;
@@ -1536,6 +1544,7 @@ export async function getApiKeyMetadata(
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       compressionEnabled: true,
       allowAutoCombos: true,

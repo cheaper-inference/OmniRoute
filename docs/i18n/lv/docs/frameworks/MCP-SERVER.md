@@ -8,37 +8,32 @@
 >
 > Patiesības avots: `open-sse/mcp-server/server.ts` aprēķina **110 unikālus rīkus**, izmantojot `countUniqueMcpTools()`: 45 kanoniskās definīcijas (tostarp sešus CCR dzīves cikla rīkus, aģenta prasmju trio, `omniroute_radar_catalog` un `omniroute_x_search`), kā arī atmiņas (3), prasmju (4), GitHub prasmju (3), pūla (6), spēļošanas (8), spraudņu (8), Notion (6), Obsidian (22), lokālā korpusa (3) un divus tikai RTK paredzētus saspiešanas rīkus.
 
-## Instalēšana
+## Uzstādīšana
 
-OmniRoute MCP ir iebūvēts. Palaidiet to ar:
+OmniRoute MCP ir iebūvēts. Sāciet to ar:
 
 ```bash
 omniroute --mcp
 ```
 
-Vai izmantojot open-sse transportu:
+Vai ar atvērto transportu:
 
 ```bash
-# HTTP straumējamais transports (ports 20130)
-omniroute --dev  # MCP tiek automātiski palaists galapunktā /mcp
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transporti (`sse` / `streamable-http`, kurus tajā pašā procesā apkalpo informācijas paneļa serveris) pēc noklusējuma ir
-izslēgti, un iepriekš tos varēja pārslēgt tikai lapā `/dashboard/mcp`. Sākot ar v3.8.51,
-CLI nodrošina līdzvērtīgu funkcionalitāti:
+HTTP transportēšana (`sse` / `streamable-http`, kuru procesā apkalpo informācijas paneļa serveris) pēc noklusējuma ir izslēgta, un iepriekš tos varēja pārslēgt tikai no `/dashboard/mcp` lapas. No v3.8.51 CLI ir paritāte:
 
 ```bash
-omniroute mcp status                                  # iespējots/tiešsaistē, transports, rīku skaits
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # atiestata aktīvās sse/streamable-http sesijas
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` ar PATCH pieprasījumu maina to pašu `mcpEnabled` (un pēc izvēles `mcpTransport`) iestatījumu,
-kuru informācijas panelis pārslēdz, izmantojot `/api/settings`. `mcp restart` izsauc `POST /api/mcp/restart`: tas pārtrauc
-aktīvās `sse`/`streamable-http` sesijas, lai nākamais pieprasījums tās atkārtoti inicializētu tīrā stāvoklī, atgriež
-`409`, ja MCP ir atspējots, un `501` transportam `stdio` (stdio klienti pārvalda savus
-apakšprocesus — nav procesā iebūvēta deskriptora, ko restartēt).
+`mcp enable`/`mcp disable` PATCH tas pats `mcpEnabled` (un pēc izvēles `mcpTransport`), iestatot informācijas paneli, pārslēdzas, izmantojot `/api/settings`. `mcp restart` izsauc `POST /api/mcp/restart`: tas nojauc aktīvās `sse`/`streamable-http` sesijas, tāpēc nākamais pieprasījums tiek tīri inicializēts, atgriež `409`, ja MCP ir atspējots, un `501` `stdio` transportēšanai (stdio klientiem pieder savs apakšprocess — nav procesa roktura, ko restartēt).
 
 ## Transporti
 
@@ -133,54 +128,40 @@ Cursor, Cline un saderīgu MCP klientu iestatīšanu.
 
 ## Saspiešanas rīki (13)
 
-| Rīks                                | Tvērumi             | Apraksts                                                                                                                                   |
-| :---------------------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Saspiešanas iestatījumi, analītikas kopsavilkums un kešatmiņu apzinoša statistika (ietver `analytics.mcpDescriptionCompression` metadatus) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurēt saspiešanas režīmu, slieksni, mērķa attiecību, sistēmas uzvednes saglabāšanu un MCP aprakstu saspiešanas pārslēgu               |
-| `omniroute_set_compression_engine`  | `write:compression` | Izvēlēties aktīvo dzini (off/caveman/rtk/stacked) un Caveman/RTK intensitāti                                                               |
-| `omniroute_list_compression_combos` | `read:compression`  | Uzskaitīt nosauktās saspiešanas kombinācijas un to dzinēju cauruļvadus                                                                     |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analītika, grupēta pēc saspiešanas kombinācijas un dzinēja                                                                                 |
-| `omniroute_ccr_store`               | `write:compression` | Saglabāt izsaucēja izolētu saturu ierobežotā atmiņas CCR krātuvē un atgriezt marķieri ar `ccr://` atsauci                                  |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Iegūt CCR saturu pilnībā vai režīmos head, tail, lines, grep un stats                                                                      |
-| `omniroute_ccr_inspect`             | `read:compression`  | Pārbaudīt izsaucējam piederošus CCR metadatus, neatgriežot saturu                                                                          |
-| `omniroute_ccr_list`                | `read:compression`  | Uzskaitīt lapotos metadatus izsaucējam piederošajiem CCR blokiem                                                                           |
-| `omniroute_ccr_delete`              | `write:compression` | Dzēst izsaucējam piederošu CCR bloku                                                                                                       |
-| `omniroute_ccr_stats`               | `read:compression`  | Ziņot par izsaucēja tvērumam piesaistīto atmiņas lietojumu, dzīves cikla skaitītājiem un krātuves ierobežojumiem                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Atklāt atkārtotu troksni izvēles RTK izvades paraugos                                                                                      |
-| `omniroute_rtk_learn`               | `read:compression`  | Ģenerēt pārskatāmu RTK filtra melnrakstu no izvēles paraugiem                                                                              |
+| Rīks                                | Darbības jomas      | Apraksts                                                                                                                         |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------- |
+| `omniroute_compression_status`      | `read:compression`  | Kompresijas iestatījumi, analīzes kopsavilkums un kešatmiņas statistika (ietver `analytics.mcpDescriptionCompression` metadatus) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurēt saspiešanas režīmu, slieksni, mērķa attiecību, sistēmas uzvednes saglabāšanu, MCP apraksta saspiešanas slēdzi         |
+| `omniroute_set_compression_engine`  | `write:compression` | Izvēlieties aktīvo dzinēju (off/caveman/rtk/stacked) un Caveman/RTK intensitāti                                                  |
+| `omniroute_list_compression_combos` | `read:compression`  | Nosauciet kompresijas kombinācijas un to dzinēju cauruļvadus                                                                     |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analīzes sagrupētas pēc saspiešanas kombinācijas un programmas                                                                   |
+| `omniroute_ccr_store`               | `write:compression` | Saglabājiet zvanītāja izolētu saturu ierobežotajā atmiņā esošajā CCR veikalā un atgrieziet marķieri un `ccr://` atsauci          |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Izgūt CCR saturu pilnībā vai ar galvas, astes, līniju, grep un statistikas režīmiem                                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | Pārbaudiet zvanītājam piederošos CCR metadatus, neatgriežot saturu                                                               |
+| `omniroute_ccr_list`                | `read:compression`  | Norādiet lappušu metadatus zvanītājam piederošajiem CCR blokiem                                                                  |
+| `omniroute_ccr_delete`              | `write:compression` | Zvanītājam piederoša CCR bloka dzēšana                                                                                           |
+| `omniroute_ccr_stats`               | `read:compression`  | Ziņojiet par zvanītāja darbības jomas atmiņas lietojumu, dzīves cikla skaitītājiem un veikalu ierobežojumiem                     |
+| `omniroute_rtk_discover`            | `read:compression`  | Atklājiet atkārtotus trokšņus opt-in RTK izvades paraugos                                                                        |
+| `omniroute_rtk_learn`               | `read:compression`  | Izveidojiet pārskatāmu RTK filtra melnrakstu no izvēlētajiem paraugiem                                                           |
 
-CCR ieraksti pastāv tikai atmiņā un pazūd pēc restartēšanas. Katra bloka lielums ir ierobežots līdz
-2 MiB, katra principāla — līdz 16 MiB, bet globālās krātuves — līdz 64 MiB. Ierakstu noklusējuma
-TTL ir 24 stundas (maksimums — septiņas dienas). Pilna MCP izgūšana ir ierobežota līdz 256 KiB;
-lielāki bloki paliek pieejami, izmantojot diapazona un grep režīmus. Glabāšana, izgūšana, uzskaitīšana,
-pārbaude, dzēšana un statistika ir izolēta pēc autentificētās API atslēgas principāla. Audita ieraksti
-satur jaucējvērtības un lieluma metadatus, bet nekad — saturu.
+CCR ierakstos tiek izmantots divu līmeņu krātuve: karsts atmiņas līmenis, kas tiek nodrošināts lokālajos, ne mākoņainajos izpildlaikos, ar izturīgu SQLite līmeni (`ccr_blocks`, pēc noklusējuma ieslēgts), lai bloks varētu izturēt izlikšanu vai restartēšanu, līdz tā TTL izbeidzas — izņemot blokus, kas pārsniedz 512 atmiņas izpildlaika KB. Katrs bloks ir ierobežots līdz 2 MiB, katrs galvenais — līdz 16 MiB, bet globālais veikals — līdz 64 MiB. Ieraksti pēc noklusējuma ir 24 stundu TTL (maksimums septiņas dienas). Pilna MCP izguve ir ierobežota līdz 256 KiB; lielāki bloki paliek pieejami, izmantojot diapazona un grep režīmus. Glabāšana, izguve, ierakstīšana sarakstā, pārbaude, dzēšana un statistika tiek izolēta ar autentificēto API atslēgas principu. Audita ierakstos ir ietverti jaukšanas un lieluma metadati, nevis saturs. Operatoram paredzēta informācija (divi marķieri, klienta priekšnosacījumi, `codemode:false`, katra rīka tvērumi, lappušu izkārtojums un diagnostikas matrica) ir pieejama [Kompresijas dzinēju → Priekšnosacījumi / operatora rokasgrāmata](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` atsevišķi ziņo par MCP aprakstu saspiešanu sadaļā
-`analytics.mcpDescriptionCompression`. Šīs vērtības ir MCP uzskaitāmo aprakstu
-(`tools`, `prompts`, `resources` un `resourceTemplates`) metadatu lieluma aprēķini; tās nav
-nodrošinātāja lietojuma uzskaites dati, un tās ir marķētas ar `source: "mcp_metadata_estimate"`.
+`omniroute_compression_status` ziņo par MCP apraksta saspiešanu atsevišķi zem `analytics.mcpDescriptionCompression`. Šīs vērtības ir metadatu lieluma aprēķini MCP sarakstu aprakstiem (`tools`, `prompts`, `resources` un `resourceTemplates`); tie nav pakalpojumu sniedzēja lietošanas kvītis un ir apzīmēti ar `source: "mcp_metadata_estimate"`.
 
 ### MCP pieejamības koka filtrs (v3.8.0)
 
-Atsevišķi no iepriekš minētajiem saspiešanas rīkiem OmniRoute ietver pēciekses filtru, kas saspiež
-MCP pārlūkprogrammas/pieejamības rīku **rīku rezultātus**, pirms tie tiek atgriezti aģentam. Šis
-filtrs pats par sevi nav rīks — tas darbojas caurspīdīgi ar jebkuru rīka rezultātu, kas satur
-detalizētu pieejamības koka vai pārlūkprogrammas momentuzņēmuma tekstu (≥2000 rakstzīmju).
+Atsevišķi no iepriekš minētajiem saspiešanas rīkiem OmniRoute ietver pēcizpildes filtru, kas saspiež** rīku rezultāti** MCP browser/accessibility rīkus, pirms tie tiek atgriezti aģentam. Šis filtrs pats par sevi nav rīks — tas darbojas pārskatāmi uz jebkura rīka rezultāta, kas satur detalizētu pieejamības koku vai pārlūkprogrammas momentuzņēmuma tekstu (≥ 2000 rakstzīmes).
 
-Galvenā darbība:
+Galvenās darbības:
 
-- Sakļauj ≥30 secīgas atkārtotas blakus mezglu rindas galvenes + beigu kopsavilkumā
-- Saglabā `[ref=eXX]` enkurus, kas nepieciešami Playwright/datora lietošanai
-- Stingri saīsina pārāk lielu tekstu (>50,000 rakstzīmju), pievienojot navigācijas norādi
-- Paredzamais ietaupījums: **60–80%** pārlūkprogrammas momentuzņēmumu lietderīgajā slodzē
+- Sakļauj ≥ 30 secīgas atkārtotas brāļu rindas galvas + astes kopsavilkumā
+- Saglabā `[ref=eXX]` enkurus, kas nepieciešami Playwright/computer-use
+- Grūti saīsina pārāk lielu tekstu (> 50 000 rakstzīmes) ar navigācijas mājienu
+- Paredzamie ietaupījumi:** 60–80%** pārlūkprogrammas momentuzņēmumu lietderīgās slodzes
 
-Konfigurācija: `compression.mcpAccessibility` globālajos iestatījumos (migrācija 056).
-Implementācija: `open-sse/services/compression/engines/mcpAccessibility/`.
-Pilna dokumentācija: [Saspiešanas dzinēji — MCP pieejamības koka filtrs](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurācija: `compression.mcpAccessibility` globālajos iestatījumos (migrācija 056). Īstenošana: `open-sse/services/compression/engines/mcpAccessibility/`. Pilni dokumenti: [Kompresijas dzinēji — MCP pieejamības koka filtrs](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
-Skatiet [Saspiešanas dzinēji](../compression/COMPRESSION_ENGINES.md) un [RTK saspiešana](../compression/RTK_COMPRESSION.md),
-lai uzzinātu par šo rīku pamatā esošo izpildes laika saspiešanas modeli.
+Skatiet [saspiešanas dzinējus](../compression/COMPRESSION_ENGINES.md) un [RTK kompresiju,](../compression/RTK_COMPRESSION.md) lai uzzinātu par šo rīku izpildlaika saspiešanas modeli.
 
 ## 1Proxy rīki (3)
 

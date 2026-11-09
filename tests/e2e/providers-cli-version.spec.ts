@@ -100,11 +100,9 @@ test.describe("Advertised CLI client version card", () => {
     await gotoDashboardRoute(page, "/dashboard/providers/codex");
 
     await expect(page.getByText("Advertised CLI client version")).toBeVisible({ timeout: 20000 });
-    // The hint's own sentence: the page's model list also shows cx/gpt-6-astra and its
-    // variants, so a bare /gpt-6-astra/ matched 8 elements (strict-mode violation).
-    await expect(
-      page.getByText(/The 'gpt-6-astra' model requires a newer version of Codex/)
-    ).toBeVisible();
+    const versionHint = page.getByText(/OpenAI gates newer models on the Codex client version/);
+    await expect(versionHint).toBeVisible();
+    await expect(versionHint).toContainText("gpt-6-astra");
     await expect(page.getByText(/Inference caveat/)).toBeVisible();
   });
 
@@ -127,12 +125,11 @@ test.describe("Advertised CLI client version card", () => {
     await expect(input).toBeVisible({ timeout: 20000 });
     await input.fill("2.1.260");
 
-    // Scope to this card: the provider page has other Save buttons. The input's parent is the
-    // kit's ci-field wrapper, which holds no button, so `input/..` found nothing.
-    const card = page
-      .locator(".ci-card")
-      .filter({ has: page.getByRole("heading", { name: "Advertised CLI client version" }) });
-    const saveButton = card.getByRole("button", { name: "Save", exact: true });
+    // Scope to this card; the kit Input adds a wrapper inside the editor row.
+    const versionCard = page
+      .getByRole("heading", { name: "Advertised CLI client version", exact: true })
+      .locator("..");
+    const saveButton = versionCard.getByRole("button", { name: "Save", exact: true });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 
