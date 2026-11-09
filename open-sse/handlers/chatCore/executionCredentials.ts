@@ -166,7 +166,9 @@ export function resolveExecutionCredentials(opts: {
 
   // #8969: Poe's native /v1/responses surface — DefaultExecutor.buildUrl("poe")
   // reads this marker so Responses requests do not land on chat/completions.
-  if (targetFormat === FORMATS.OPENAI_RESPONSES && provider === "poe") {
+  // Mistral too: a custom model configured for Responses is not in the static
+  // registry, so buildUrl("mistral") cannot see that opt-in any other way.
+  if (targetFormat === FORMATS.OPENAI_RESPONSES && (provider === "poe" || provider === "mistral")) {
     providerSpecificData._omnirouteForceResponsesUpstream = true;
   }
 

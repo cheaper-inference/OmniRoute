@@ -5722,6 +5722,7 @@
     "filterError": "Грешка",
     "filterBanned": "Забрањено",
     "filterCreditsExhausted": "Кредити исцрпљени",
+    "filterVerificationRequired": "Потребна верификација",
     "accountSearchPlaceholder": "Претражи налоге…",
     "noFilteredConnections": "Нема веза које одговарају тренутном филтеру.",
     "failedSetAlias": "Није успело подешавање алијаса",
